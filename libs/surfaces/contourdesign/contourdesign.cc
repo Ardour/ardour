@@ -574,9 +574,9 @@ ContourDesignControlProtocol::jump_forward (JumpDistance dist)
 {
 	LocateTransportDisposition kr = _keep_rolling ? RollIfAppropriate : MustStop;
 	switch (dist.unit) {
-	case SECONDS: jump_by_seconds (dist.value, kr); break;
-	case BEATS: jump_by_beats (dist.value, kr); break;
-	case BARS: jump_by_bars (dist.value, kr); break;
+	case SECONDS: _controller.jump_by_seconds (dist.value, kr); break;
+	case BEATS: _controller.jump_by_beats (dist.value, kr); break;
+	case BARS: _controller.jump_by_bars (dist.value, kr); break;
 	default: break;
 	}
 }
@@ -607,17 +607,17 @@ ContourDesignControlProtocol::shuttle_event (int position)
 
 	if (position != 0) {
 		if (_shuttle_was_zero) {
-			_was_rolling_before_shuttle = transport_rolling ();
+			_was_rolling_before_shuttle = _controller.transport_rolling ();
 		}
 		const vector<double>& spds = _shuttle_speeds;
 		const double speed = position > 0 ? spds[position-1] : -spds[-position-1];
-		set_transport_speed (speed);
+		_controller.set_transport_speed (speed);
 		_shuttle_was_zero = false;
 	} else {
 		if (_keep_rolling && _was_rolling_before_shuttle) {
-			set_transport_speed (1.0);
+			_controller.set_transport_speed (1.0);
 		} else {
-			transport_stop ();
+			_controller.transport_stop ();
 		}
 		_shuttle_was_zero = true;
 	}

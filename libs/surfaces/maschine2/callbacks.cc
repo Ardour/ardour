@@ -127,7 +127,7 @@ Maschine2::notify_record_state_changed ()
 void
 Maschine2::notify_transport_state_changed ()
 {
-	if (transport_rolling ()) {
+	if (_controller.transport_rolling ()) {
 		_ctrl->button (M2Contols::Play)->set_color (COLOR_WHITE);
 	} else {
 		_ctrl->button (M2Contols::Play)->set_color (0);
@@ -198,23 +198,23 @@ Maschine2::notify_history_changed ()
 void
 Maschine2::button_play ()
 {
-	if (transport_rolling ()) {
-		transport_stop ();
+	if (_controller.transport_rolling ()) {
+		_controller.transport_stop ();
 	} else {
-		transport_play ();
+		_controller.transport_play ();
 	}
 }
 
 void
 Maschine2::button_record ()
 {
-	set_record_enable (!get_record_enabled ());
+	_controller.set_record_enable (!_controller.get_record_enabled ());
 }
 
 void
 Maschine2::button_loop ()
 {
-	loop_toggle ();
+	_controller.loop_toggle ();
 }
 
 void
@@ -226,7 +226,7 @@ Maschine2::button_metronom ()
 void
 Maschine2::button_rewind ()
 {
-	goto_start (transport_rolling ());
+	_controller.goto_start (_controller.transport_rolling ());
 }
 
 void

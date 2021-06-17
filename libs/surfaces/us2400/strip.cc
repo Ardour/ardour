@@ -993,7 +993,7 @@ Strip::notify_metering_state_changed()
 		return;
 	}
 
-	bool transport_is_rolling = (_surface->mcp().get_transport_speed () != 0.0f);
+	bool transport_is_rolling = (_surface->mcp().controller ().get_transport_speed () != 0.0f);
 	bool metering_active = _surface->mcp().metering_active ();
 
 	if ((_transport_is_rolling == transport_is_rolling) && (_metering_active == metering_active)) {

@@ -119,17 +119,17 @@ MIDIFunction::execute ()
 		break;
 
 	case TransportStop:
-		_ui->transport_stop ();
+		_ui->controller().transport_stop ();
 		DEBUG_TRACE (DEBUG::GenericMidi, "Function: transport_stop\n");
 		break;
 
 	case TransportRoll:
-		_ui->transport_play ();
+		_ui->controller().transport_play ();
 		DEBUG_TRACE (DEBUG::GenericMidi, "Function: transport_play\n");
 		break;
 
 	case TransportStart:
-		_ui->goto_start ();
+		_ui->controller().goto_start ();
 		DEBUG_TRACE (DEBUG::GenericMidi, "Function: goto_start\n");
 		break;
 
@@ -139,27 +139,27 @@ MIDIFunction::execute ()
 		break;
 
 	case TransportEnd:
-		_ui->goto_end ();
+		_ui->controller().goto_end ();
 		DEBUG_TRACE (DEBUG::GenericMidi, "Function: goto_end\n");
 		break;
 
 	case TransportLoopToggle:
-		_ui->loop_toggle ();
+		_ui->controller().loop_toggle ();
 		DEBUG_TRACE (DEBUG::GenericMidi, "Function: loop_toggle\n");
 		break;
 
 	case TransportRecordToggle:
-		_ui->rec_enable_toggle ();
+		_ui->controller().rec_enable_toggle ();
 		DEBUG_TRACE (DEBUG::GenericMidi, "Function: toggle_record_enable\n");
 		break;
 
 	case TransportRecordEnable:
-		_ui->set_record_enable (true);
+		_ui->controller().set_record_enable (true);
 		DEBUG_TRACE (DEBUG::GenericMidi, "Function: set_record_enable = true\n");
 		break;
 
 	case TransportRecordDisable:
-		_ui->set_record_enable (false);
+		_ui->controller().set_record_enable (false);
 		DEBUG_TRACE (DEBUG::GenericMidi, "Function: set_record_enable = false\n");
 		break;
 
@@ -168,7 +168,7 @@ MIDIFunction::execute ()
 			uint32_t rid;
 			sscanf (_argument.c_str(), "%d", &rid);
 			// XX fix me ... need to get stripable, not RID
-			//_ui->toggle_selection (rid, ARDOUR::PresentationInfo::Flag (ARDOUR::PresentationInfo::Route|ARDOUR::PresentationInfo::VCA));
+			//_ui->controller().toggle_selection (rid, ARDOUR::PresentationInfo::Flag (ARDOUR::PresentationInfo::Route|ARDOUR::PresentationInfo::VCA));
 			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Function: SetRouteSelection = %1\n", rid));
 		}
 		break;

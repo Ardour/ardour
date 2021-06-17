@@ -25,6 +25,7 @@
 
 #include "ardour/presentation_info.h"
 #include "ardour/types.h"
+#include "control_protocol/session_controller.h"
 #include "control_protocol/visibility.h"
 #include "pbd/signals.h"
 #include "temporal/time.h"
@@ -41,75 +42,37 @@ class LIBCONTROLCP_API BasicUI {
 	BasicUI (Session&);
 	virtual ~BasicUI ();
 
-	void add_marker (const std::string& = std::string());
-	void remove_marker_at_playhead ();
-
 	void register_thread (std::string name);
 
-	/* transport control */
+	/* Access to GUI actions */
 
-	void loop_toggle ();
-	void loop_location (samplepos_t start, samplepos_t end);
-	void access_action ( std::string action_path );
+	void access_action (std::string action_path);
+
 	static PBD::Signal2<void,std::string,std::string> AccessAction;
-	void goto_zero ();
-	void goto_start (bool and_roll = false);
-	void goto_end ();
-	void button_varispeed (bool fwd);
-	void rewind ();
-	void ffwd ();
-	void transport_stop ();
-	void transport_play (bool jump_back = false);
-	void set_transport_speed (double speed);
 
-	double get_transport_speed () const;
-	double transport_rolling () const;
+	/* Undo/Redo */
 
-	void jump_by_seconds (double sec, LocateTransportDisposition ltd = RollIfAppropriate);
-	void jump_by_bars (double bars, LocateTransportDisposition ltd = RollIfAppropriate);
-	void jump_by_beats (double beats, LocateTransportDisposition ltd = RollIfAppropriate);
-
-	samplepos_t transport_sample ();
-	void locate (samplepos_t sample, LocateTransportDisposition ltd);
-	void locate (samplepos_t sample, bool);
-	bool locating ();
-	bool locked ();
-
-	void save_state ();
-	void prev_marker ();
-	void next_marker ();
 	void undo ();
 	void redo ();
-	void toggle_punch_in ();
-	void toggle_punch_out ();
+
+	/* Convenience methods that fire actions */
 
 	void mark_in();
 	void mark_out();
 
-	void toggle_click();
-	void midi_panic();
-
-	void toggle_monitor_mute();
-	void toggle_monitor_dim();
-	void toggle_monitor_mono();
-
-	void cancel_all_solo ();
-
 	void quick_snapshot_stay ();
 	void quick_snapshot_switch ();
-
-	void toggle_roll(bool roll_out_of_bounded_mode=true);  //this provides the same operation as the "spacebar", it's a lot smarter than "play".
-
-	void stop_forget();
 
 	void set_punch_range();
 	void set_loop_range();
 	void set_session_range();
 
-	void set_record_enable (bool yn);
-	bool get_record_enabled ();
+	/* Editor Visibility
 
-	//editor visibility stuff  (why do we have to make explicit numbers here?  because "gui actions" don't accept args
+	   We need to explicitly bake in the "arguments" here, because GUI actions
+	   don't have arguments.
+	*/
+
 	void fit_1_track();
 	void fit_2_tracks();
 	void fit_4_tracks();
@@ -133,15 +96,7 @@ class LIBCONTROLCP_API BasicUI {
 	void scroll_up_1_page();
 	void scroll_dn_1_page();
 
-	void rec_enable_toggle ();
-	void toggle_all_rec_enables ();
-
-	void all_tracks_rec_in ();
-	void all_tracks_rec_out ();
-
-	void goto_nth_marker (int n);
-
-	void timecode_time (samplepos_t where, Timecode::Time&);
+	/* Button state */
 
 	bool stop_button_onoff() const;
 	bool play_button_onoff() const;
@@ -149,8 +104,11 @@ class LIBCONTROLCP_API BasicUI {
 	bool rewind_button_onoff() const;
 	bool loop_button_onoff() const;
 
+	SessionController& controller() { return _controller; }
+
   protected:
 	Session* _session;
+	SessionController _controller;
 };
 
 } // namespace ARDOUR

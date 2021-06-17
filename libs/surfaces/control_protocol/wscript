@@ -10,6 +10,7 @@ controlcp_sources = [
     'basic_ui.cc',
     'control_protocol.cc',
     'midi_byte_array.cc',
+    'session_controller.cc',
 ]
 
 def options(opt):

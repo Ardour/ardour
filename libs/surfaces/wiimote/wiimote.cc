@@ -299,7 +299,7 @@ WiimoteControlProtocol::update_led_state ()
 	}
 
 	// enable LED1 if Ardour is playing
-	if (transport_rolling ()) {
+	if (_controller.transport_rolling ()) {
 		DEBUG_TRACE (DEBUG::WiimoteControl, "WiimoteControlProtocol::update_led_state playing, activate LED1\n");
 		state |= CWIID_LED1_ON;
 	}
@@ -365,12 +365,12 @@ WiimoteControlProtocol::wiimote_callback (int mesg_count, union cwiid_mesg mesg[
 
 			// B + up = move playhead to next marker
 			if (b & CWIID_BTN_UP) {
-				next_marker ();
+				_controller.next_marker ();
 			}
 
 			// B + down = move playhead to prev marker
 			if (b & CWIID_BTN_DOWN) {
-				prev_marker ();
+				_controller.prev_marker ();
 			}
 
 			// B + Home = add marker at playhead
@@ -400,7 +400,7 @@ WiimoteControlProtocol::wiimote_callback (int mesg_count, union cwiid_mesg mesg[
 
 			// 2 = enable recording in general
 			if (b & CWIID_BTN_2) {
-				rec_enable_toggle ();
+				_controller.rec_enable_toggle ();
 			}
 
 			// left = move playhead back a bit

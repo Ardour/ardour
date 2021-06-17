@@ -764,7 +764,7 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 		/* touch strip */
 	case 12:
 		if (ev->velocity < 64) {
-			transport_stop ();
+			_controller.transport_stop ();
 		}
 		break;
 	}

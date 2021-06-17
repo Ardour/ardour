@@ -344,7 +344,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void record_enabled (lo_message msg);
 
 	void add_marker_name(const std::string &markername) {
-		add_marker(markername);
+		_controller.add_marker(markername);
 	}
 
 	// cue
@@ -416,38 +416,50 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		return 0; \
 	}
 
-	PATH_CALLBACK(add_marker);
-	PATH_CALLBACK(loop_toggle);
-	PATH_CALLBACK(goto_start);
-	PATH_CALLBACK(goto_end);
-	PATH_CALLBACK(rewind);
-	PATH_CALLBACK(ffwd);
-	PATH_CALLBACK(transport_stop);
-	PATH_CALLBACK(transport_play);
-	PATH_CALLBACK(save_state);
-	PATH_CALLBACK(prev_marker);
-	PATH_CALLBACK(next_marker);
+#define PATH_CONTROLLER_CALLBACK(name) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data) { \
+		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, msg); \
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg ** argv, int argc, lo_message msg) { \
+		OSC_DEBUG; \
+		check_surface (msg); \
+		if (argc > 0 && !strcmp (types, "f") && argv[0]->f != 1.0) { return 0; } \
+		_controller.name (); \
+		return 0; \
+	}
+
+	PATH_CONTROLLER_CALLBACK(add_marker);
+	PATH_CONTROLLER_CALLBACK(loop_toggle);
+	PATH_CONTROLLER_CALLBACK(goto_start);
+	PATH_CONTROLLER_CALLBACK(goto_end);
+	PATH_CONTROLLER_CALLBACK(rewind);
+	PATH_CONTROLLER_CALLBACK(ffwd);
+	PATH_CONTROLLER_CALLBACK(transport_stop);
+	PATH_CONTROLLER_CALLBACK(transport_play);
+	PATH_CONTROLLER_CALLBACK(save_state);
+	PATH_CONTROLLER_CALLBACK(prev_marker);
+	PATH_CONTROLLER_CALLBACK(next_marker);
 	PATH_CALLBACK(undo);
 	PATH_CALLBACK(redo);
-	PATH_CALLBACK(toggle_punch_in);
-	PATH_CALLBACK(toggle_punch_out);
-	PATH_CALLBACK(rec_enable_toggle);
-	PATH_CALLBACK(toggle_all_rec_enables);
-	PATH_CALLBACK(all_tracks_rec_in);
-	PATH_CALLBACK(all_tracks_rec_out);
+	PATH_CONTROLLER_CALLBACK(toggle_punch_in);
+	PATH_CONTROLLER_CALLBACK(toggle_punch_out);
+	PATH_CONTROLLER_CALLBACK(rec_enable_toggle);
+	PATH_CONTROLLER_CALLBACK(toggle_all_rec_enables);
+	PATH_CONTROLLER_CALLBACK(all_tracks_rec_in);
+	PATH_CONTROLLER_CALLBACK(all_tracks_rec_out);
 	PATH_CALLBACK(cancel_all_solos);
-	PATH_CALLBACK(remove_marker_at_playhead);
+	PATH_CONTROLLER_CALLBACK(remove_marker_at_playhead);
 	PATH_CALLBACK(mark_in);
 	PATH_CALLBACK(mark_out);
-	PATH_CALLBACK(toggle_click);
-	PATH_CALLBACK(midi_panic);
-	PATH_CALLBACK(stop_forget);
+	PATH_CONTROLLER_CALLBACK(toggle_click);
+	PATH_CONTROLLER_CALLBACK(midi_panic);
+	PATH_CONTROLLER_CALLBACK(stop_forget);
 	PATH_CALLBACK(set_punch_range);
 	PATH_CALLBACK(set_loop_range);
 	PATH_CALLBACK(set_session_range);
-	PATH_CALLBACK(toggle_monitor_mute);
-	PATH_CALLBACK(toggle_monitor_dim);
-	PATH_CALLBACK(toggle_monitor_mono);
+	PATH_CONTROLLER_CALLBACK(toggle_monitor_mute);
+	PATH_CONTROLLER_CALLBACK(toggle_monitor_dim);
+	PATH_CONTROLLER_CALLBACK(toggle_monitor_mono);
 	PATH_CALLBACK(quick_snapshot_stay);
 	PATH_CALLBACK(quick_snapshot_switch);
 	PATH_CALLBACK(fit_1_track);
@@ -484,12 +496,25 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		return 0; \
 	}
 
-	PATH_CALLBACK1(set_transport_speed,f,);
+#define PATH_CONTROLLER_CALLBACK1(name,type,optional) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data) { \
+		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, msg); \
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg) { \
+		OSC_DEBUG; \
+		check_surface (msg); \
+		if (argc > 0) { \
+			_controller.name (optional argv[0]->type); \
+		} \
+		return 0; \
+	}
+
+	PATH_CONTROLLER_CALLBACK1(set_transport_speed,f,);
 	PATH_CALLBACK1(add_marker_name,s,&);
 	PATH_CALLBACK1(access_action,s,&);
 
-	PATH_CALLBACK1(jump_by_bars,f,);
-	PATH_CALLBACK1(jump_by_seconds,f,);
+	PATH_CONTROLLER_CALLBACK1(jump_by_bars,f,);
+	PATH_CONTROLLER_CALLBACK1(jump_by_seconds,f,);
 	PATH_CALLBACK1(click_level,f,);
 
 #define PATH_CALLBACK1_MSG(name,arg1type) \
@@ -559,6 +584,19 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		return 0; \
 	}
 
+#define PATH_CONTROLLER_CALLBACK2(name,arg1type,arg2type) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data) { \
+		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, msg); \
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg) { \
+		OSC_DEBUG; \
+		check_surface (msg); \
+		if (argc > 1) { \
+			_controller.name (argv[0]->arg1type, argv[1]->arg2type); \
+		} \
+		return 0; \
+	}
+
 #define PATH_CALLBACK2_MSG(name,arg1type,arg2type) \
 	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, msg); \
@@ -615,8 +653,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(sel_eq_q,i,f);
 	PATH_CALLBACK2_MSG(sel_eq_shape,i,f);
 
-	PATH_CALLBACK2(locate,i,i);
-	PATH_CALLBACK2(loop_location,i,i);
+	PATH_CONTROLLER_CALLBACK2(locate,i,i);
+	PATH_CONTROLLER_CALLBACK2(loop_location,i,i);
 	PATH_CALLBACK3(route_set_send_gain_dB,i,i,f);
 	PATH_CALLBACK3(route_set_send_fader,i,i,f);
 	PATH_CALLBACK3(route_set_send_enable,i,i,f);

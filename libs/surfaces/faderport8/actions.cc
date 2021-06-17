@@ -135,22 +135,22 @@ FaderPort8::setup_actions ()
 void
 FaderPort8::button_play ()
 {
-	if (transport_rolling ()) {
-		if (get_transport_speed() != 1.0) {
+	if (_controller.transport_rolling ()) {
+		if (_controller.get_transport_speed() != 1.0) {
 			_session->request_roll (TRS_UI);
 		} else {
-			transport_stop ();
+			_controller.transport_stop ();
 		}
 	} else {
-		transport_play ();
+		_controller.transport_play ();
 	}
 }
 
 void
 FaderPort8::button_stop ()
 {
-	if (transport_rolling ()) {
-		transport_stop ();
+	if (_controller.transport_rolling ()) {
+		_controller.transport_stop ();
 	} else {
 		AccessAction ("Transport", "GotoStart");
 	}
@@ -159,13 +159,13 @@ FaderPort8::button_stop ()
 void
 FaderPort8::button_record ()
 {
-	set_record_enable (!get_record_enabled ());
+	_controller.set_record_enable (!_controller.get_record_enabled ());
 }
 
 void
 FaderPort8::button_loop ()
 {
-	loop_toggle ();
+	_controller.loop_toggle ();
 }
 
 void
@@ -313,7 +313,7 @@ FaderPort8::button_varispeed (bool ffw)
 		return;
 	}
 
-	BasicUI::button_varispeed (ffw);
+	_controller.button_varispeed (ffw);
 }
 
 #ifdef FP8_MUTESOLO_UNDO
@@ -336,7 +336,7 @@ FaderPort8::button_solo_clear ()
 				_solo_state.push_back (boost::weak_ptr<AutomationControl>(sc));
 			}
 		}
-		cancel_all_solo (); // AccessAction ("Main", "cancel-solo");
+		_controller.cancel_all_solo (); // AccessAction ("Main", "cancel-solo");
 	} else {
 		/* restore solo */
 		boost::shared_ptr<ControlList> cl (new ControlList);
@@ -384,7 +384,7 @@ FaderPort8::button_mute_clear ()
 void
 FaderPort8::button_arm_all ()
 {
-	BasicUI::all_tracks_rec_in ();
+	_controller.all_tracks_rec_in ();
 }
 
 /* access generic action */
@@ -513,9 +513,9 @@ FaderPort8::button_prev_next (bool next)
 			break;
 		case NavMarker:
 			if (next) {
-				next_marker ();
+				_controller.next_marker ();
 			} else {
-				prev_marker ();
+				_controller.prev_marker ();
 			}
 			break;
 	}
@@ -576,7 +576,7 @@ FaderPort8::button_encoder ()
 				}
 
 				_session->locations()->next_available_name (markername,"mark");
-				add_marker (markername);
+				_controller.add_marker (markername);
 			}
 			break;
 	}

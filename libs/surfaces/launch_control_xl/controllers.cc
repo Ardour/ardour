@@ -1030,7 +1030,7 @@ LaunchControlXL::button_solo()
 void
 LaunchControlXL::button_solo_long_press()
 {
-	cancel_all_solo();
+	_controller.cancel_all_solo();
 }
 
 void

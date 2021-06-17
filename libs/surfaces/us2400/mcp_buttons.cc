@@ -380,7 +380,7 @@ US2400Protocol::save_press (Button &)
 	if (main_modifier_state() == MODIFIER_SHIFT) {
 		quick_snapshot_switch();
 	} else {
-		save_state ();
+		_controller.save_state ();
 	}
 
 	return none;
@@ -463,7 +463,7 @@ US2400Protocol::marker_release (Button &)
 	}
 
 	_session->locations()->next_available_name (markername,"mark");
-	add_marker (markername);
+	_controller.add_marker (markername);
 
 	return off;
 }
@@ -475,7 +475,7 @@ US2400Protocol::marker_release (Button &)
 LedState
 US2400Protocol::stop_press (Button &)
 {
-	transport_stop ();
+	_controller.transport_stop ();
 
 	if (main_modifier_state() == MODIFIER_SHIFT) {
 		_session->midi_panic();
@@ -497,7 +497,7 @@ US2400Protocol::play_press (Button &)
 	   again, jump back to where we started last time
 	*/
 
-	transport_play (get_transport_speed() == 1.0);
+	_controller.transport_play (_controller.get_transport_speed() == 1.0);
 	return none;
 }
 
@@ -510,7 +510,7 @@ US2400Protocol::play_release (Button &)
 LedState
 US2400Protocol::record_press (Button &)
 {
-	rec_enable_toggle ();
+	_controller.rec_enable_toggle ();
 	return none;
 }
 
@@ -524,13 +524,13 @@ LedState
 US2400Protocol::rewind_press (Button &)
 {
 	if (modifier_state() & MODIFIER_MARKER) {
-		prev_marker ();
+		_controller.prev_marker ();
 	} else if ( (_modifier_state & MODIFIER_DROP) == MODIFIER_DROP) {
 		access_action ("Common/start-range-from-playhead");
 	} else if (main_modifier_state() & MODIFIER_SHIFT) {
-		goto_start ();
+		_controller.goto_start ();
 	} else {
-		rewind ();
+		_controller.rewind ();
 	}
 	return none;
 }
@@ -545,13 +545,13 @@ LedState
 US2400Protocol::ffwd_press (Button &)
 {
 	if (modifier_state() & MODIFIER_MARKER) {
-		next_marker ();
+		_controller.next_marker ();
 	} else if ( (_modifier_state & MODIFIER_DROP) == MODIFIER_DROP) {
 		access_action ("Common/finish-range-from-playhead");
 	} else if (main_modifier_state() & MODIFIER_SHIFT) {
-		goto_end();
+		_controller.goto_end();
 	} else {
-		ffwd ();
+		_controller.ffwd ();
 	}
 	return none;
 }
@@ -570,7 +570,7 @@ US2400Protocol::loop_press (Button &)
 		return off;
 	} else {
 		bool was_on = _session->get_play_loop();
-		loop_toggle ();
+		_controller.loop_toggle ();
 		return was_on ? off : on;
 	}
 }
@@ -821,7 +821,7 @@ US2400Protocol::cancel_release (Button &)
 LedState
 US2400Protocol::user_a_press (Button &)
 {
-	transport_play (get_transport_speed() == 1.0);
+	_controller.transport_play (_controller.get_transport_speed() == 1.0);
 	return off;
 }
 LedState
@@ -832,7 +832,7 @@ US2400Protocol::user_a_release (Button &)
 LedState
 US2400Protocol::user_b_press (Button &)
 {
-	transport_stop();
+	_controller.transport_stop();
 	return off;
 }
 LedState
@@ -897,7 +897,7 @@ US2400Protocol::clearsolo_press (US2400::Button&)
 {
 	// clears all solos and listens (pfl/afl)
 	if (main_modifier_state() & MODIFIER_OPTION) {
-		cancel_all_solo ();
+		_controller.cancel_all_solo ();
 	}
 
 	return none;
@@ -1082,7 +1082,7 @@ US2400::LedState
 US2400Protocol::replace_press (US2400::Button&)
 {
 	if (main_modifier_state() == MODIFIER_SHIFT) {
-		toggle_punch_out();
+		_controller.toggle_punch_out();
 		return none;
 	} else {
 		access_action ("Common/finish-range-from-playhead");

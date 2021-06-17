@@ -360,7 +360,7 @@ Push2::button_play ()
 	}
 
 	if (_modifier_state & ModShift) {
-		goto_start (_session->transport_rolling());
+		_controller.goto_start (_session->transport_rolling());
 		return;
 	}
 
@@ -376,16 +376,16 @@ Push2::button_play ()
 	}
 
 	if (_session->transport_rolling ()) {
-		transport_stop ();
+		_controller.transport_stop ();
 	} else {
-		transport_play ();
+		_controller.transport_play ();
 	}
 }
 
 void
 Push2::button_recenable ()
 {
-	rec_enable_toggle ();
+	_controller.rec_enable_toggle ();
 }
 
 void
@@ -427,19 +427,19 @@ Push2::button_left ()
 void
 Push2::button_repeat ()
 {
-	loop_toggle ();
+	_controller.loop_toggle ();
 }
 
 void
 Push2::button_metronome ()
 {
-	toggle_click ();
+	_controller.toggle_click ();
 }
 
 void
 Push2::button_solo_long_press ()
 {
-	cancel_all_solo ();
+	_controller.cancel_all_solo ();
 }
 
 void
@@ -527,56 +527,56 @@ void
 Push2::button_fwd32t ()
 {
 	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (0+n);
+	_controller.goto_nth_marker (0+n);
 }
 
 void
 Push2::button_fwd32 ()
 {
 	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (1+n);
+	_controller.goto_nth_marker (1+n);
 }
 
 void
 Push2::button_fwd16t ()
 {
 	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (2+n);
+	_controller.goto_nth_marker (2+n);
 }
 
 void
 Push2::button_fwd16 ()
 {
 	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (3+n);
+	_controller.goto_nth_marker (3+n);
 }
 
 void
 Push2::button_fwd8t ()
 {
 	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (4+n);
+	_controller.goto_nth_marker (4+n);
 }
 
 void
 Push2::button_fwd8 ()
 {
 	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (5+n);
+	_controller.goto_nth_marker (5+n);
 }
 
 void
 Push2::button_fwd4t ()
 {
 	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (6+n);
+	_controller.goto_nth_marker (6+n);
 }
 
 void
 Push2::button_fwd4 ()
 {
 	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (7+n);
+	_controller.goto_nth_marker (7+n);
 }
 
 void

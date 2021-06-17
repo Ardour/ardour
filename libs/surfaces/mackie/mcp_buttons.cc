@@ -370,7 +370,7 @@ LedState
 MackieControlProtocol::undo_press (Button&)
 {
 	if (main_modifier_state() == MODIFIER_SHIFT) {
-		redo();
+		redo ();
 	} else {
 		undo ();
 	}
@@ -387,7 +387,7 @@ LedState
 MackieControlProtocol::drop_press (Button &)
 {
 	if (main_modifier_state() == MODIFIER_SHIFT) {
-		toggle_punch_in();
+		_controller.toggle_punch_in();
 		return none;
 	} else {
 		access_action ("Common/start-range-from-playhead");
@@ -407,7 +407,7 @@ MackieControlProtocol::save_press (Button &)
 	if (main_modifier_state() == MODIFIER_SHIFT) {
 		quick_snapshot_switch();
 	} else {
-		save_state ();
+		_controller.save_state ();
 	}
 
 	return none;
@@ -490,7 +490,7 @@ MackieControlProtocol::marker_release (Button &)
 	}
 
 	_session->locations()->next_available_name (markername,"mark");
-	add_marker (markername);
+	_controller.add_marker (markername);
 
 	return off;
 }
@@ -502,7 +502,7 @@ MackieControlProtocol::marker_release (Button &)
 LedState
 MackieControlProtocol::stop_press (Button &)
 {
-	transport_stop ();
+	_controller.transport_stop ();
 
 	if (main_modifier_state() == MODIFIER_SHIFT) {
 		_session->midi_panic();
@@ -524,7 +524,7 @@ MackieControlProtocol::play_press (Button &)
 	   again, jump back to where we started last time
 	*/
 
-	transport_play (get_transport_speed() == 1.0);
+	_controller.transport_play (_controller.get_transport_speed() == 1.0);
 	return none;
 }
 
@@ -537,7 +537,7 @@ MackieControlProtocol::play_release (Button &)
 LedState
 MackieControlProtocol::record_press (Button &)
 {
-	rec_enable_toggle ();
+	_controller.rec_enable_toggle ();
 	return none;
 }
 
@@ -551,13 +551,13 @@ LedState
 MackieControlProtocol::rewind_press (Button &)
 {
 	if (modifier_state() & MODIFIER_MARKER) {
-		prev_marker ();
+		_controller.prev_marker ();
 	} else if (modifier_state() & MODIFIER_NUDGE) {
 		access_action ("Common/nudge-playhead-backward");
 	} else if (main_modifier_state() & MODIFIER_SHIFT) {
-		goto_start ();
+		_controller.goto_start ();
 	} else {
-		rewind ();
+		_controller.rewind ();
 	}
 	return none;
 }
@@ -572,13 +572,13 @@ LedState
 MackieControlProtocol::ffwd_press (Button &)
 {
 	if (modifier_state() & MODIFIER_MARKER) {
-		next_marker ();
+		_controller.next_marker ();
 	} else if (modifier_state() & MODIFIER_NUDGE) {
 		access_action ("Common/nudge-playhead-forward");
 	} else if (main_modifier_state() & MODIFIER_SHIFT) {
-		goto_end();
+		_controller.goto_end();
 	} else {
-		ffwd ();
+		_controller.ffwd ();
 	}
 	return none;
 }
@@ -597,7 +597,7 @@ MackieControlProtocol::loop_press (Button &)
 		return off;
 	} else {
 		bool was_on = _session->get_play_loop();
-		loop_toggle ();
+		_controller.loop_toggle ();
 		return was_on ? off : on;
 	}
 }
@@ -837,7 +837,7 @@ MackieControlProtocol::cancel_release (Button &)
 LedState
 MackieControlProtocol::user_a_press (Button &)
 {
-	transport_play (get_transport_speed() == 1.0);
+	_controller.transport_play (_controller.get_transport_speed() == 1.0);
 	return off;
 }
 LedState
@@ -848,7 +848,7 @@ MackieControlProtocol::user_a_release (Button &)
 LedState
 MackieControlProtocol::user_b_press (Button &)
 {
-	transport_stop();
+	_controller.transport_stop();
 	return off;
 }
 LedState
@@ -920,7 +920,7 @@ MackieControlProtocol::clearsolo_press (Mackie::Button&)
 		return none;
 	}
 
-	cancel_all_solo ();
+	_controller.cancel_all_solo ();
 	return none;
 }
 
@@ -1109,7 +1109,7 @@ Mackie::LedState
 MackieControlProtocol::replace_press (Mackie::Button&)
 {
 	if (main_modifier_state() == MODIFIER_SHIFT) {
-		toggle_punch_out();
+		_controller.toggle_punch_out();
 		return none;
 	} else {
 		access_action ("Common/finish-range-from-playhead");

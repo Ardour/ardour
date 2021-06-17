@@ -160,15 +160,15 @@ CC121::CC121 (Session& s)
 	get_button (EButton).set_action (boost::bind (&CC121::touch, this), true);
 	get_button (OpenVST).set_action (boost::bind (&CC121::off, this), true);
 
-	get_button (Play).set_action (boost::bind (&BasicUI::transport_play, this, true), true);
-	get_button (ToStart).set_action (boost::bind (&BasicUI::prev_marker, this), true);
-	get_button (ToEnd).set_action (boost::bind (&BasicUI::next_marker, this), true);
-	get_button (RecEnable).set_action (boost::bind (&BasicUI::rec_enable_toggle, this), true);
-	get_button (Stop).set_action (boost::bind (&BasicUI::transport_stop, this), true);
-	get_button (Ffwd).set_action (boost::bind (&BasicUI::ffwd, this), true);
+	get_button (Play).set_action (boost::bind (&SessionController::transport_play, _controller, true), true);
+	get_button (ToStart).set_action (boost::bind (&SessionController::prev_marker, _controller), true);
+	get_button (ToEnd).set_action (boost::bind (&SessionController::next_marker, _controller), true);
+	get_button (RecEnable).set_action (boost::bind (&SessionController::rec_enable_toggle, _controller), true);
+	get_button (Stop).set_action (boost::bind (&SessionController::transport_stop, _controller), true);
+	get_button (Ffwd).set_action (boost::bind (&SessionController::ffwd, _controller), true);
 
-	get_button (Rewind).set_action (boost::bind (&BasicUI::rewind, this), true);
-	get_button (Loop).set_action (boost::bind (&BasicUI::loop_toggle, this), true);
+	get_button (Rewind).set_action (boost::bind (&SessionController::rewind, _controller), true);
+	get_button (Loop).set_action (boost::bind (&SessionController::loop_toggle, _controller), true);
 
 	get_button (Jog).set_action (boost::bind (&CC121::jog, this), true);
 	get_button (Mute).set_action (boost::bind (&CC121::mute, this), true);
@@ -669,7 +669,7 @@ CC121::map_transport_state ()
 {
 	get_button (Loop).set_led_state (_output_port, _session->get_play_loop());
 
-	float ts = get_transport_speed();
+	float ts = _controller.get_transport_speed();
 
 	if (ts == 0) {
 		stop_blinking (Play);

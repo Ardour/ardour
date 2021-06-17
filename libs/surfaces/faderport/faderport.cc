@@ -159,30 +159,30 @@ FaderPort::FaderPort (Session& s)
 	get_button (FP_Touch).set_action (boost::bind (&FaderPort::off, this), false, LongPress);
 	get_button (FP_Off).set_action (boost::bind (&FaderPort::off, this), true);
 
-	get_button (Play).set_action (boost::bind (&BasicUI::transport_play, this, true), true);
-	get_button (RecEnable).set_action (boost::bind (&BasicUI::rec_enable_toggle, this), true);
+	get_button (Play).set_action (boost::bind (&SessionController::transport_play, _controller, true), true);
+	get_button (RecEnable).set_action (boost::bind (&SessionController::rec_enable_toggle, _controller), true);
 	/* Stop is a modifier, so we have to use its own button state to get
 	   the default action (since StopDown will be set when looking for the
 	   action to invoke.
 	*/
-	get_button (Stop).set_action (boost::bind (&BasicUI::transport_stop, this), true, StopDown);
-	get_button (Ffwd).set_action (boost::bind (&BasicUI::ffwd, this), true);
+	get_button (Stop).set_action (boost::bind (&SessionController::transport_stop, _controller), true, StopDown);
+	get_button (Ffwd).set_action (boost::bind (&SessionController::ffwd, _controller), true);
 
 	/* See comments about Stop above .. */
-	get_button (Rewind).set_action (boost::bind (&BasicUI::rewind, this), true, RewindDown);
-	get_button (Rewind).set_action (boost::bind (&BasicUI::goto_zero, this), true, ButtonState (RewindDown|StopDown));
-	get_button (Rewind).set_action (boost::bind (&BasicUI::goto_start, this, false), true, ButtonState (RewindDown|ShiftDown));
+	get_button (Rewind).set_action (boost::bind (&SessionController::rewind, _controller), true, RewindDown);
+	get_button (Rewind).set_action (boost::bind (&SessionController::goto_zero, _controller), true, ButtonState (RewindDown|StopDown));
+	get_button (Rewind).set_action (boost::bind (&SessionController::goto_start, _controller, false), true, ButtonState (RewindDown|ShiftDown));
 
-	get_button (Ffwd).set_action (boost::bind (&BasicUI::ffwd, this), true);
-	get_button (Ffwd).set_action (boost::bind (&BasicUI::goto_end, this), true, ShiftDown);
+	get_button (Ffwd).set_action (boost::bind (&SessionController::ffwd, _controller), true);
+	get_button (Ffwd).set_action (boost::bind (&SessionController::goto_end, _controller), true, ShiftDown);
 
 	get_button (Punch).set_action (boost::bind (&FaderPort::punch, this), true);
 
-	get_button (Loop).set_action (boost::bind (&BasicUI::loop_toggle, this), true);
-	get_button (Loop).set_action (boost::bind (&BasicUI::add_marker, this, string()), true, ShiftDown);
+	get_button (Loop).set_action (boost::bind (&SessionController::loop_toggle, _controller), true);
+	get_button (Loop).set_action (boost::bind (&SessionController::add_marker, _controller, string()), true, ShiftDown);
 
-	get_button (Punch).set_action (boost::bind (&BasicUI::prev_marker, this), true, ShiftDown);
-	get_button (User).set_action (boost::bind (&BasicUI::next_marker, this), true, ShiftDown);
+	get_button (Punch).set_action (boost::bind (&SessionController::prev_marker, _controller), true, ShiftDown);
+	get_button (User).set_action (boost::bind (&SessionController::next_marker, _controller), true, ShiftDown);
 
 	get_button (Mute).set_action (boost::bind (&FaderPort::mute, this), true);
 	get_button (Solo).set_action (boost::bind (&FaderPort::solo, this), true);
@@ -686,7 +686,7 @@ FaderPort::map_transport_state ()
 {
 	get_button (Loop).set_led_state (_output_port, _session->get_play_loop());
 
-	float ts = get_transport_speed();
+	float ts = _controller.get_transport_speed();
 
 	if (ts == 0) {
 		stop_blinking (Play);

@@ -50,7 +50,7 @@ ArdourTransport::time () const
 bool
 ArdourTransport::roll () const
 {
-	return basic_ui ().transport_rolling ();
+	return basic_ui ().controller ().transport_rolling ();
 }
 
 void
@@ -58,7 +58,7 @@ ArdourTransport::set_roll (bool value)
 {
 	if ((value && !roll ()) || (!value && roll ())) {
 		// this call is equivalent to hitting the spacebar
-		basic_ui ().toggle_roll (false);
+		basic_ui ().controller ().toggle_roll (false);
 	}
 }
 
@@ -72,6 +72,6 @@ void
 ArdourTransport::set_record (bool value)
 {
 	if ((value && !record ()) || (!value && record ())) {
-		basic_ui ().rec_enable_toggle ();
+		basic_ui ().controller ().rec_enable_toggle ();
 	}
 }

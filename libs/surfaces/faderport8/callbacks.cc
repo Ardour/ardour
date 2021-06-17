@@ -125,11 +125,11 @@ FaderPort8::notify_parameter_changed (std::string param)
 void
 FaderPort8::notify_transport_state_changed ()
 {
-	_ctrls.button (FP8Controls::BtnPlay).set_active (get_transport_speed()==1.0);
-	_ctrls.button (FP8Controls::BtnStop).set_active (get_transport_speed()==0.0);
+	_ctrls.button (FP8Controls::BtnPlay).set_active (_controller.get_transport_speed()==1.0);
+	_ctrls.button (FP8Controls::BtnStop).set_active (_controller.get_transport_speed()==0.0);
 
 	/* set rewind/fastforward lights */
-	const float ts = get_transport_speed();
+	const float ts = _controller.get_transport_speed();
 	FP8ButtonInterface& b_rew = _ctrls.button (FP8Controls::BtnRewind);
 	FP8ButtonInterface& b_ffw = _ctrls.button (FP8Controls::BtnFastForward);
 

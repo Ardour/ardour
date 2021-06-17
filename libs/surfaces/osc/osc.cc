@@ -1279,7 +1279,7 @@ OSC::osc_toggle_roll (bool ret2strt)
 		return 0;
 	}
 
-	bool rolling = transport_rolling();
+	bool rolling = _controller.transport_rolling();
 
 	if (rolling) {
 		_session->request_stop (ret2strt, true);
@@ -2915,7 +2915,7 @@ void
 OSC::transport_speed (lo_message msg)
 {
 	check_surface (msg);
-	double ts = get_transport_speed();
+	double ts = _controller.get_transport_speed();
 
 	lo_message reply = lo_message_new ();
 	lo_message_add_double (reply, ts);
@@ -2994,7 +2994,7 @@ OSC::jog (float delta, lo_message msg)
 	{
 		case 0:
 			if (delta) {
-				jump_by_seconds (delta / 5);
+				_controller.jump_by_seconds (delta / 5);
 			}
 			break;
 		case 1:
@@ -3009,17 +3009,17 @@ OSC::jog (float delta, lo_message msg)
 			break;
 		case 3:
 			if (delta) {
-				double speed = get_transport_speed ();
-				set_transport_speed (speed + (delta / 8.1));
+				double speed = _controller.get_transport_speed ();
+				_controller.set_transport_speed (speed + (delta / 8.1));
 			} else {
-				set_transport_speed (0);
+				_controller.set_transport_speed (0);
 			}
 			break;
 		case 4:
 			if (delta > 0) {
-				next_marker ();
+				_controller.next_marker ();
 			} else if (delta < 0) {
-				prev_marker ();
+				_controller.prev_marker ();
 			}
 			break;
 		case 5:
@@ -3055,8 +3055,8 @@ int
 OSC::jog_mode (float mode, lo_message msg)
 {
 	OSCSurface *s = get_surface(get_address (msg));
-	if (get_transport_speed () != 1.0) {
-		set_transport_speed (0);
+	if (_controller.get_transport_speed () != 1.0) {
+		_controller.set_transport_speed (0);
 	}
 	s->jogmode = (uint32_t) mode;
 	s->global_obs->jog_mode (mode);
