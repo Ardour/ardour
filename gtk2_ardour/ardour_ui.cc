@@ -1871,111 +1871,19 @@ ARDOUR_UI::transport_rec_count_in ()
 }
 
 void
-ARDOUR_UI::transport_ffwd_rewind (bool fwd)
-{
-	if (!_session) {
-		return;
-	}
-	// incrementally increase speed by semitones
-	// (keypress auto-repeat is 100ms)
-	const float maxspeed = Config->get_shuttle_max_speed();
-	float semitone_ratio = exp2f (1.0f/12.0f);
-	const float octave_down = powf (1.f / semitone_ratio, 12.f);
-	float transport_speed = _session->actual_speed();
-	float speed;
-
-	if (Config->get_rewind_ffwd_like_tape_decks()) {
-
-		if (fwd) {
-			if (transport_speed <= 0) {
-				_session->request_transport_speed (1.0, false);
-				_session->request_roll (TRS_UI);
-				return;
-			}
-		} else {
-			if (transport_speed >= 0) {
-				_session->request_transport_speed (-1.0, false);
-				_session->request_roll (TRS_UI);
-				return;
-			}
-		}
-
-
-	} else {
-
-		if (fabs (transport_speed) <= 0.1) {
-
-			/* close to zero, maybe flip direction */
-
-			if (fwd) {
-				if (transport_speed <= 0) {
-					_session->request_transport_speed (1.0, false);
-					_session->request_roll (TRS_UI);
-				}
-			} else {
-				if (transport_speed >= 0) {
-					_session->request_transport_speed (-1.0, false);
-					_session->request_roll (TRS_UI);
-				}
-			}
-
-			/* either we've just started, or we're moving as slowly as we
-			 * ever should
-			 */
-
-			return;
-		}
-
-		if (fwd) {
-			if (transport_speed < 0.f) {
-				if (fabs (transport_speed) < octave_down) {
-					/* we need to move the speed back towards zero */
-					semitone_ratio = powf (1.f / semitone_ratio, 4.f);
-				} else {
-					semitone_ratio = 1.f / semitone_ratio;
-				}
-			} else {
-				if (fabs (transport_speed) < octave_down) {
-					/* moving very slowly, use 4 semitone steps */
-					semitone_ratio = powf (semitone_ratio, 4.f);
-				}
-			}
-		} else {
-			if (transport_speed > 0.f) {
-				/* we need to move the speed back towards zero */
-
-				if (transport_speed < octave_down) {
-					semitone_ratio = powf (1.f / semitone_ratio, 4.f);
-				} else {
-					semitone_ratio = 1.f / semitone_ratio;
-				}
-			} else {
-				if (fabs (transport_speed) < octave_down) {
-					/* moving very slowly, use 4 semitone steps */
-					semitone_ratio = powf (semitone_ratio, 4.f);
-				}
-			}
-		}
-
-	}
-
-	speed = semitone_ratio * transport_speed;
-	speed = std::max (-maxspeed, std::min (maxspeed, speed));
-	_session->request_transport_speed (speed, false);
-	_session->request_roll (TRS_UI);
-
-}
-
-void
 ARDOUR_UI::transport_rewind ()
 {
-	transport_ffwd_rewind (false);
+	if (_session) {
+		_controller.rewind ();
+	}
 }
 
 void
 ARDOUR_UI::transport_forward ()
 {
-	transport_ffwd_rewind (true);
+	if (_session) {
+		_controller.ffwd ();
+	}
 }
 
 void
