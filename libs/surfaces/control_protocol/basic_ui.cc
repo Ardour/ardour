@@ -367,7 +367,7 @@ void
 BasicUI::rec_enable_toggle ()
 {
 	switch (_session->record_status()) {
-	case Session::Disabled:
+	case (RecordState)Disabled:
 		if (_session->ntracks() == 0) {
 			// string txt = _("Please create 1 or more track\nbefore trying to record.\nCheck the Session menu.");
 			// MessageDialog msg (*editor, txt);
@@ -376,8 +376,8 @@ BasicUI::rec_enable_toggle ()
 		}
 		_session->maybe_enable_record ();
 		break;
-	case Session::Recording:
-	case Session::Enabled:
+	case (RecordState)Recording:
+	case (RecordState)Enabled:
 		_session->disable_record (false, true);
 	}
 }

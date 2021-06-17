@@ -847,6 +847,12 @@ enum LocateTransportDisposition {
 	RollIfAppropriate
 };
 
+enum RecordState {
+	Disabled = 0,
+	Enabled = 1,
+	Recording = 2
+};
+
 typedef std::vector<CaptureInfo*> CaptureInfos;
 
 } // namespace ARDOUR

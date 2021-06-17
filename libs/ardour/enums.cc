@@ -101,7 +101,7 @@ setup_enum_writer ()
 	TransportRequestType _TransportRequestType;
 	ShuttleBehaviour _ShuttleBehaviour;
 	ShuttleUnits _ShuttleUnits;
-	Session::RecordState _Session_RecordState;
+	RecordState _RecordState;
 	SessionEvent::Type _SessionEvent_Type;
 	SessionEvent::Action _SessionEvent_Action;
 	TimecodeFormat _Session_TimecodeFormat;
@@ -442,10 +442,10 @@ setup_enum_writer ()
 	REGISTER_ENUM (Semitones);
 	REGISTER (_ShuttleUnits);
 
-	REGISTER_CLASS_ENUM (Session, Disabled);
-	REGISTER_CLASS_ENUM (Session, Enabled);
-	REGISTER_CLASS_ENUM (Session, Recording);
-	REGISTER (_Session_RecordState);
+	REGISTER_ENUM (Disabled);
+	REGISTER_ENUM (Enabled);
+	REGISTER_ENUM (Recording);
+	REGISTER (_RecordState);
 
 	REGISTER_CLASS_ENUM (SessionEvent, SetTransportSpeed);
 	REGISTER_CLASS_ENUM (SessionEvent, Locate);

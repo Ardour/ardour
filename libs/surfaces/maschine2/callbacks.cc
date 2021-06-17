@@ -109,15 +109,15 @@ void
 Maschine2::notify_record_state_changed ()
 {
 	switch (_session->record_status ()) {
-		case Session::Disabled:
+		case (RecordState)Disabled:
 			_ctrl->button (M2Contols::Rec)->set_color (0);
 			_ctrl->button (M2Contols::Rec)->set_blinking (false);
 			break;
-		case Session::Enabled:
+		case (RecordState)Enabled:
 			_ctrl->button (M2Contols::Rec)->set_color (COLOR_WHITE);
 			_ctrl->button (M2Contols::Rec)->set_blinking (true);
 			break;
-		case Session::Recording:
+		case (RecordState)Recording:
 			_ctrl->button (M2Contols::Rec)->set_color (COLOR_WHITE);
 			_ctrl->button (M2Contols::Rec)->set_blinking (false);
 			break;

@@ -200,7 +200,7 @@ AudioStreamView::setup_rec_box ()
 		// cerr << "\trolling\n";
 
 		if (!rec_active &&
-		    _trackview.session()->record_status() == Session::Recording &&
+		    _trackview.session()->record_status() == (RecordState)Recording &&
 		    _trackview.track()->rec_enable_control()->get_value()) {
 			if (_trackview.audio_track()->mode() == Normal && UIConfiguration::instance().get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
@@ -253,7 +253,7 @@ AudioStreamView::setup_rec_box ()
 			create_rec_box(sample_pos, 0);
 
 		} else if (rec_active &&
-		           (_trackview.session()->record_status() != Session::Recording ||
+		           (_trackview.session()->record_status() != (RecordState)Recording ||
 		            !_trackview.track()->rec_enable_control()->get_value())) {
 			screen_update_connection.disconnect();
 			rec_active = false;

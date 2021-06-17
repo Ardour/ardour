@@ -1398,15 +1398,15 @@ MackieControlProtocol::notify_record_state_changed ()
 			LedState ls;
 
 			switch (_session->record_status()) {
-			case Session::Disabled:
+			case (RecordState)Disabled:
 				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to disabled, LED off\n");
 				ls = off;
 				break;
-			case Session::Recording:
+			case (RecordState)Recording:
 				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to recording, LED on\n");
 				ls = on;
 				break;
-			case Session::Enabled:
+			case (RecordState)Enabled:
 
 				if(_device_info.is_qcon()){
 					// For qcon the rec button is two state only (on/off)
