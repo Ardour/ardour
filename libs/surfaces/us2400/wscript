@@ -28,7 +28,6 @@ def build(bld):
             us2400_control_protocol.cc
             mcp_buttons.cc
             meter.cc
-            midi_byte_array.cc
             pot.cc
             strip.cc
             surface.cc

@@ -66,10 +66,10 @@
 #include "ardour/types.h"
 #include "ardour/audioengine.h"
 #include "ardour/vca_manager.h"
+#include "control_protocol/midi_byte_array.h"
 
 #include "mackie_control_protocol.h"
 
-#include "midi_byte_array.h"
 #include "mackie_control_exception.h"
 #include "device_profile.h"
 #include "subview.h"

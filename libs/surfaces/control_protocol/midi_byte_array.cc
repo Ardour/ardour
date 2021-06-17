@@ -1,5 +1,8 @@
 /*
+ * Copyright (C) 2006-2007 John Anderson
+ * Copyright (C) 2008-2016 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2017 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2018 Térence Clastres <t.clastres@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +18,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "midi_byte_array.h"
+
+#include "control_protocol/midi_byte_array.h"
 
 #include <iostream>
 #include <string>
@@ -94,3 +98,22 @@ MidiByteArray & operator <<  (MidiByteArray & mba, const std::string & st)
 	mba.insert (mba.end(), st.begin(), st.end());
 	return mba;
 }
+
+bool
+MidiByteArray::compare_n (const MidiByteArray& other, MidiByteArray::size_type n) const
+{
+	MidiByteArray::const_iterator us = begin();
+	MidiByteArray::const_iterator them = other.begin();
+
+	while (n && us != end() && them != other.end()) {
+		if ((*us) != (*them)) {
+			return false;
+		}
+		--n;
+		++us;
+		++them;
+	}
+
+	return true;
+}
+	

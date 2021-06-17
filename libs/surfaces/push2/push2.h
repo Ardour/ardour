@@ -36,11 +36,10 @@
 #include "ardour/types.h"
 
 #include "control_protocol/control_protocol.h"
+#include "control_protocol/midi_byte_array.h"
 #include "control_protocol/types.h"
 
 #include "gtkmm2ext/colors.h"
-
-#include "midi_byte_array.h"
 
 namespace Pango {
 	class Layout;

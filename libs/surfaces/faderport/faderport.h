@@ -40,8 +40,6 @@ namespace PBD {
 
 //#include "pbd/signals.h"
 
-
-//#include "midi_byte_array.h"
 #include "types.h"
 
 #include "glibmm/main.h"

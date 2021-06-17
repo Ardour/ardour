@@ -1,5 +1,8 @@
 /*
+ * Copyright (C) 2006-2007 John Anderson
+ * Copyright (C) 2008-2016 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2017 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2018 Térence Clastres <t.clastres@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +54,8 @@ public:
 	MidiByteArray() : std::vector<MIDI::byte>() {}
 
 	MidiByteArray( size_t count, MIDI::byte array[] );
+
+	bool compare_n (const MidiByteArray& other, MidiByteArray::size_type len) const;
 
 	/**
 		Accepts a preceding count, and then a list of bytes

@@ -30,12 +30,12 @@
 #include "pbd/signals.h"
 
 #include "ardour/types.h"
+#include "control_protocol/midi_byte_array.h"
 #include "control_protocol/types.h"
 
 #include "control_group.h"
 #include "types.h"
 #include "mackie_control_protocol.h"
-#include "midi_byte_array.h"
 #include "device_info.h"
 
 namespace ARDOUR {

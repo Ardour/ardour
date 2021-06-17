@@ -9,7 +9,8 @@ out = 'build'
 controlcp_sources = [
     'basic_ui.cc',
     'control_protocol.cc',
-    ]
+    'midi_byte_array.cc',
+]
 
 def options(opt):
     autowaf.set_options(opt)
