@@ -215,7 +215,6 @@ class MackieControlProtocol
 	void update_global_button (int id, Mackie::LedState);
 	void update_global_led (int id, Mackie::LedState);
 
-	ARDOUR::Session & get_session() { return *_session; }
 	samplepos_t transport_sample() const;
 
 	int modifier_state() const { return _modifier_state; }

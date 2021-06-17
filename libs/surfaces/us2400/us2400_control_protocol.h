@@ -198,7 +198,6 @@ class US2400Protocol
 	void update_global_button (int id, US2400::LedState);
 	void update_global_led (int id, US2400::LedState);
 
-	ARDOUR::Session & get_session() { return *_session; }
 	samplepos_t transport_sample() const;
 
 	int modifier_state() const { return _modifier_state; }
