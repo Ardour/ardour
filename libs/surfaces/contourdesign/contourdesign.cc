@@ -555,32 +555,6 @@ ContourDesignControlProtocol::handle_button_release (unsigned short btn)
 	}
 }
 
-
-void
-ContourDesignControlProtocol::prev_marker_keep_rolling ()
-{
-	samplepos_t pos = session->locations()->first_mark_before (session->transport_sample());
-
-	if (pos >= 0) {
-
-		session->request_locate (pos);
-	} else {
-		session->goto_start ();
-	}
-}
-
-void
-ContourDesignControlProtocol::next_marker_keep_rolling ()
-{
-	samplepos_t pos = session->locations()->first_mark_after (session->transport_sample());
-
-	if (pos >= 0) {
-		session->request_locate (pos);
-	} else {
-		session->goto_end();
-	}
-}
-
 void
 ContourDesignControlProtocol::jog_event_backward ()
 {

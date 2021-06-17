@@ -97,9 +97,6 @@ public:
 
 	static const int num_shuttle_speeds = 7;
 
-	void prev_marker_keep_rolling ();
-	void next_marker_keep_rolling ();
-
 	void jump_forward (JumpDistance dist);
 	void jump_backward (JumpDistance dist);
 
