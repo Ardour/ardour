@@ -1285,7 +1285,7 @@ OSC::osc_toggle_roll (bool ret2strt)
 		_session->request_stop (ret2strt, true);
 	} else {
 		if (_session->get_play_loop() && Config->get_loop_is_mode()) {
-			_session->request_locate (_session->locations()->auto_loop_location()->start(), MustRoll);
+			_controller.locate (_session->locations()->auto_loop_location()->start(), MustRoll);
 		} else {
 			_session->request_roll (TRS_UI);
 		}
@@ -3094,7 +3094,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 				for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 					if ((*l)->is_mark ()) {
 						if (strcmp (&argv[0]->s, (*l)->name().c_str()) == 0) {
-							_session->request_locate ((*l)->start (), MustStop);
+							_controller.locate ((*l)->start (), MustStop);
 							return 0;
 						} else if ((*l)->start () == _session->transport_sample()) {
 							cur_mark = (*l);
@@ -3131,7 +3131,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 	std::sort (lm.begin(), lm.end(), location_marker_sort);
 	// go there
 	if (marker < lm.size()) {
-		_session->request_locate (lm[marker].when, MustStop);
+		_controller.locate (lm[marker].when, MustStop);
 		return 0;
 	}
 	// we were unable to deal with things
@@ -5804,7 +5804,7 @@ OSC::periodic (void)
 		if (diff > 120000) {
 			scrub_speed = 0;
 			// locate to the place PH was at last tick
-			_session->request_locate (scrub_place, MustStop);
+			_controller.locate (scrub_place, MustStop);
 		}
 	}
 	for (uint32_t it = 0; it < _surface.size(); it++) {
