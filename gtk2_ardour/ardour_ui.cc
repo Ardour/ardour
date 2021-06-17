@@ -1803,42 +1803,7 @@ ARDOUR_UI::transport_roll ()
 		return;
 	}
 
-	if (_session->is_auditioning()) {
-		return;
-	}
-
-	if (_session->config.get_external_sync()) {
-		switch (TransportMasterManager::instance().current()->type()) {
-		case Engine:
-			break;
-		default:
-			/* transport controlled by the master */
-			return;
-		}
-	}
-
-	bool rolling = _session->transport_rolling();
-
-	if (_session->get_play_loop()) {
-
-		/* If loop playback is not a mode, then we should cancel
-		   it when this action is requested. If it is a mode
-		   we just leave it in place.
-		*/
-
-		if (!Config->get_loop_is_mode()) {
-			/* stop loop playback but keep transport state */
-			_session->request_play_loop (false, false);
-		}
-
-	} else if (_session->get_play_range () ) {
-		/* stop playing a range if we currently are */
-		_session->request_play_range (0, true);
-	}
-
-	if (!rolling) {
-		_session->request_roll ();
-	}
+	_controller.transport_play ();
 }
 
 bool
