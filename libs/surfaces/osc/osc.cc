@@ -2968,15 +2968,15 @@ OSC::scrub (float delta, lo_message msg)
 
 	if (speed > 0) {
 		if (speed == 1) {
-			_session->request_transport_speed (.5);
+			_controller.set_transport_speed (0.5);
 		} else {
-			_session->request_transport_speed (9.9);
+			_controller.set_transport_speed (9.9);
 		}
 	} else if (speed < 0) {
 		if (speed == -1) {
-			_session->request_transport_speed (-.5);
+			_controller.set_transport_speed (-0.5);
 		} else {
-			_session->request_transport_speed (-1);
+			_controller.set_transport_speed (-1.0);
 		}
 	} else {
 		_session->request_stop ();
