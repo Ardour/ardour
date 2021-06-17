@@ -478,7 +478,7 @@ US2400Protocol::stop_press (Button &)
 	_controller.transport_stop ();
 
 	if (main_modifier_state() == MODIFIER_SHIFT) {
-		_session->midi_panic();
+		_controller.midi_panic ();
 	}
 
 	return on;
