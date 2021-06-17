@@ -24,8 +24,8 @@
 #define __ardour_basic_ui_h__
 
 #include "ardour/presentation_info.h"
+#include "ardour/session_controller.h"
 #include "ardour/types.h"
-#include "control_protocol/session_controller.h"
 #include "control_protocol/visibility.h"
 #include "pbd/signals.h"
 #include "temporal/time.h"

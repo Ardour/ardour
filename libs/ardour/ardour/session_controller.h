@@ -23,8 +23,8 @@
 #ifndef __ardour_session_controller_h__
 #define __ardour_session_controller_h__
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
-#include "control_protocol/visibility.h"
 #include "temporal/time.h"
 
 #include <cstdint>
@@ -43,7 +43,7 @@ class Session;
  * This only interacts with Session (and the objects it contains) directly, not
  * with any UI facilities like actions or event loops.
  */
-class LIBCONTROLCP_API SessionController
+class LIBARDOUR_API SessionController
 {
 public:
 	SessionController (Session* s)

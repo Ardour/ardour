@@ -23,7 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "control_protocol/session_controller.h"
+#include "ardour/session_controller.h"
 
 #include "ardour/location.h"
 #include "ardour/session.h"
