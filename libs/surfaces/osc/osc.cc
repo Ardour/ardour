@@ -684,10 +684,6 @@ OSC::current_value_query (const char* path, size_t len, lo_arg **argv, int argc,
 void
 OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg)
 {
-	if (!session) {
-		return;
-	}
-
 	lo_message reply = lo_message_new ();
 	boost::shared_ptr<Route> r;
 	int id;
@@ -1038,9 +1034,6 @@ OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv
 void
 OSC::routes_list (lo_message msg)
 {
-	if (!session) {
-		return;
-	}
 	OSCSurface *sur = get_surface(get_address (msg), true);
 
 	for (int n = 0; n < (int) sur->nstrips; ++n) {
@@ -1206,9 +1199,6 @@ OSC::get_surfaces ()
 int
 OSC::custom_clear (lo_message msg)
 {
-	if (!session) {
-		return 0;
-	}
 	OSCSurface *sur = get_surface(get_address (msg), true);
 	sur->custom_mode = 0;
 	sur->custom_strips.clear ();
@@ -1234,9 +1224,6 @@ OSC::custom_mode (float state, lo_message msg)
 int
 OSC::_custom_mode (uint32_t state, lo_address addr)
 {
-	if (!session) {
-		return 0;
-	}
 	OSCSurface *sur = get_surface(addr, true);
 	LinkSet *set;
 	uint32_t ls = sur->linkset;
@@ -1287,10 +1274,6 @@ OSC::cancel_all_solos ()
 int
 OSC::osc_toggle_roll (bool ret2strt)
 {
-	if (!session) {
-		return 0;
-	}
-
 	if (session->is_auditioning()) {
 		session->cancel_audition ();
 		return 0;
@@ -1301,7 +1284,6 @@ OSC::osc_toggle_roll (bool ret2strt)
 	if (rolling) {
 		session->request_stop (ret2strt, true);
 	} else {
-
 		if (session->get_play_loop() && Config->get_loop_is_mode()) {
 			session->request_locate (session->locations()->auto_loop_location()->start(), MustRoll);
 		} else {
@@ -2013,9 +1995,6 @@ OSC::set_surface_port (uint32_t po, lo_message msg)
 int
 OSC::check_surface (lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
 	get_surface (get_address (msg));
 	return 0;
 }
@@ -2243,9 +2222,6 @@ OSC::set_bank (uint32_t bank_start, lo_message msg)
 int
 OSC::_set_bank (uint32_t bank_start, lo_address addr)
 {
-	if (!session) {
-		return -1;
-	}
 	if (!session->nroutes()) {
 		return -1;
 	}
@@ -2388,9 +2364,6 @@ OSC::bank_up (lo_message msg)
 int
 OSC::bank_delta (float delta, lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
 	// only do deltas of -1 0 or 1
 	if (delta > 0) {
 		delta = 1;
@@ -2433,9 +2406,6 @@ OSC::bank_down (lo_message msg)
 int
 OSC::use_group (float value, lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
 	OSCSurface *s = get_surface(get_address (msg));
 	if (value) {
 		s->usegroup = PBD::Controllable::UseGroup;
@@ -2709,9 +2679,6 @@ OSC::get_send (boost::shared_ptr<Stripable> st, lo_address addr)
 int
 OSC::name_session (char *n, lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
 	string new_name = n;
 	std::string const& illegal = Session::session_name_is_legal (new_name);
 
@@ -2933,9 +2900,6 @@ OSC::_sel_plugin (int id, lo_address addr)
 void
 OSC::transport_sample (lo_message msg)
 {
-	if (!session) {
-		return;
-	}
 	check_surface (msg);
 	samplepos_t pos = session->transport_sample ();
 
@@ -2950,9 +2914,6 @@ OSC::transport_sample (lo_message msg)
 void
 OSC::transport_speed (lo_message msg)
 {
-	if (!session) {
-		return;
-	}
 	check_surface (msg);
 	double ts = get_transport_speed();
 
@@ -2967,9 +2928,6 @@ OSC::transport_speed (lo_message msg)
 void
 OSC::record_enabled (lo_message msg)
 {
-	if (!session) {
-		return;
-	}
 	check_surface (msg);
 	int re = (int)session->get_record_enabled ();
 
@@ -2984,7 +2942,6 @@ OSC::record_enabled (lo_message msg)
 int
 OSC::scrub (float delta, lo_message msg)
 {
-	if (!session) return -1;
 	check_surface (msg);
 
 	scrub_place = session->transport_sample ();
@@ -3031,8 +2988,6 @@ OSC::scrub (float delta, lo_message msg)
 int
 OSC::jog (float delta, lo_message msg)
 {
-	if (!session) return -1;
-
 	OSCSurface *s = get_surface(get_address (msg));
 
 	switch(s->jogmode)
@@ -3099,8 +3054,6 @@ OSC::jog (float delta, lo_message msg)
 int
 OSC::jog_mode (float mode, lo_message msg)
 {
-	if (!session) return -1;
-
 	OSCSurface *s = get_surface(get_address (msg));
 	if (get_transport_speed () != 1.0) {
 		set_transport_speed (0);
@@ -3212,7 +3165,6 @@ OSC::send_group_list (lo_address addr)
 int
 OSC::click_level (float position)
 {
-	if (!session) return -1;
 	if (session->click_gain()->gain_control()) {
 		session->click_gain()->gain_control()->set_value (session->click_gain()->gain_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
 	}
@@ -3220,11 +3172,8 @@ OSC::click_level (float position)
 }
 
 int
-OSC::route_get_sends(lo_message msg) {
-	if (!session) {
-		return -1;
-	}
-
+OSC::route_get_sends(lo_message msg)
+{
 	lo_arg **argv = lo_message_get_argv(msg);
 
 	int rid = argv[0]->i;
@@ -3270,11 +3219,8 @@ OSC::route_get_sends(lo_message msg) {
 }
 
 int
-OSC::route_get_receives(lo_message msg) {
-	if (!session) {
-		return -1;
-	}
-
+OSC::route_get_receives(lo_message msg)
+{
 	lo_arg **argv = lo_message_get_argv(msg);
 
 	uint32_t rid = argv[0]->i;
@@ -3336,7 +3282,6 @@ OSC::route_get_receives(lo_message msg) {
 int
 OSC::master_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
 	int ret = 1;
 	// set sub_path to null string if path is /master
 	const char* sub_path = &path[7];
@@ -3360,7 +3305,6 @@ OSC::master_parse (const char *path, const char* types, lo_arg **argv, int argc,
 int
 OSC::monitor_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
 	int ret = 1;
 	// set sub_path to null string if path is /monitor
 	const char* sub_path = &path[8];
@@ -3412,7 +3356,6 @@ OSC::monitor_parse (const char *path, const char* types, lo_arg **argv, int argc
 int
 OSC::select_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
 	int ret = 1;
 	// set sub_path to null string if path is /select
 	const char* sub_path = &path[7];
@@ -3504,7 +3447,6 @@ OSC::select_parse (const char *path, const char* types, lo_arg **argv, int argc,
 int
 OSC::strip_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
 	int ret = 1;
 	int ssid = 0;
 	int param_1 = 1;
@@ -4229,8 +4171,6 @@ OSC::strip_list (lo_message msg)
 int
 OSC::set_automation (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
-
 	int ret = 1;
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> strp = boost::shared_ptr<Stripable>();
@@ -4355,8 +4295,6 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 int
 OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
-	if (!session) return -1;
-
 	int ret = 1;
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> strp = boost::shared_ptr<Stripable>();
@@ -4493,7 +4431,9 @@ OSC::spill (const char *path, const char* types, lo_arg **argv, int argc, lo_mes
 	 * /select/spill (may have i or f keypress/release)
 	 * /strip/spill i (may have keypress and i may be inline)
 	 */
-	if (!session || argc > 1) return -1;
+	if (argc > 1) {
+		return -1;
+	}
 
 	int ret = 1;
 	OSCSurface *sur = get_surface(get_address (msg));
@@ -4647,9 +4587,6 @@ OSC::sel_new_personal_send (char *foldback, lo_message msg)
 int
 OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 {
-	if (!session) {
-		return -1;
-	}
 	OSCSurface *sur = get_surface(addr, true);
 	return _strip_select2 (s, sur, addr);
 }
@@ -4838,9 +4775,6 @@ OSC::sel_delta (int delta, lo_message msg)
 int
 OSC::route_set_send_gain_dB (int ssid, int id, float val, lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 	OSCSurface *sur = get_surface(get_address (msg));
 	float abs;
@@ -4864,9 +4798,6 @@ OSC::route_set_send_gain_dB (int ssid, int id, float val, lo_message msg)
 int
 OSC::route_set_send_fader (int ssid, int id, float val, lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 	OSCSurface *sur = get_surface(get_address (msg));
 	float abs;
@@ -4948,9 +4879,6 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 int
 OSC::route_set_send_enable (int ssid, int sid, float val, lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 	OSCSurface *sur = get_surface(get_address (msg));
 
@@ -5149,9 +5077,6 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 int
 OSC::sel_plugin_activate (float state, lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
 	OSCSurface *sur = get_surface(get_address (msg));
 	if (sur->plugins.size() > 0) {
 		boost::shared_ptr<Stripable> s = sur->select;
@@ -5179,11 +5104,8 @@ OSC::sel_plugin_activate (float state, lo_message msg)
 }
 
 int
-OSC::route_plugin_list (int ssid, lo_message msg) {
-	if (!session) {
-		return -1;
-	}
-
+OSC::route_plugin_list (int ssid, lo_message msg)
+{
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(get_strip (ssid, get_address (msg)));
 
 	if (!r) {
@@ -5223,11 +5145,8 @@ OSC::route_plugin_list (int ssid, lo_message msg) {
 }
 
 int
-OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
-	if (!session) {
-		return -1;
-	}
-
+OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg)
+{
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(get_strip (ssid, get_address (msg)));
 
 	if (!r) {
@@ -5351,11 +5270,8 @@ OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
 }
 
 int
-OSC::route_plugin_reset (int ssid, int piid, lo_message msg) {
-	if (!session) {
-		return -1;
-	}
-
+OSC::route_plugin_reset (int ssid, int piid, lo_message msg)
+{
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(get_strip (ssid, get_address (msg)));
 
 	if (!r) {
@@ -5385,8 +5301,6 @@ OSC::route_plugin_reset (int ssid, int piid, lo_message msg) {
 int
 OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message msg)
 {
-	if (!session)
-		return -1;
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
@@ -5445,9 +5359,6 @@ OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message 
 int
 OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
@@ -5498,8 +5409,6 @@ OSC::route_plugin_parameter_print (int ssid, int piid, int par, lo_message msg)
 int
 OSC::route_plugin_activate (int ssid, int piid, lo_message msg)
 {
-	if (!session)
-		return -1;
 	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
@@ -5532,8 +5441,6 @@ OSC::route_plugin_activate (int ssid, int piid, lo_message msg)
 int
 OSC::route_plugin_deactivate (int ssid, int piid, lo_message msg)
 {
-	if (!session)
-		return -1;
 	boost::shared_ptr<Stripable> s = get_strip (ssid, lo_message_get_source (msg));
 
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
@@ -6415,8 +6322,6 @@ OSC::cue_get_send (uint32_t id, lo_address addr)
 int
 OSC::cue_aux_fader (float position, lo_message msg)
 {
-	if (!session) return -1;
-
 	OSCSurface *sur = get_surface(get_address (msg), true);
 	if (sur->cue) {
 		if (sur->aux) {
@@ -6437,8 +6342,6 @@ OSC::cue_aux_fader (float position, lo_message msg)
 int
 OSC::cue_aux_mute (float state, lo_message msg)
 {
-	if (!session) return -1;
-
 	OSCSurface *sur = get_surface(get_address (msg), true);
 	if (sur->cue) {
 		if (sur->aux) {
@@ -6458,9 +6361,6 @@ OSC::cue_aux_mute (float state, lo_message msg)
 int
 OSC::cue_send_fader (uint32_t id, float val, lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
 	boost::shared_ptr<Send> s = cue_get_send (id, get_address (msg));
 	if (s) {
 		if (s->gain_control()) {
@@ -6475,8 +6375,6 @@ OSC::cue_send_fader (uint32_t id, float val, lo_message msg)
 int
 OSC::cue_send_enable (uint32_t id, float state, lo_message msg)
 {
-	if (!session)
-		return -1;
 	boost::shared_ptr<Send> s = cue_get_send (id, get_address (msg));
 	if (s) {
 		if (state) {
