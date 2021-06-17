@@ -28,10 +28,9 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 using namespace ArdourCanvas;
 
-Push2Layout::Push2Layout (Push2& p, Session& s, std::string const & name)
+Push2Layout::Push2Layout (Push2& p, std::string const & name)
 	: Container (p.canvas())
 	, p2 (p)
-	, session (s)
 	, _name (name)
 {
 }

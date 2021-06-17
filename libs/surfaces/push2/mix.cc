@@ -75,7 +75,8 @@ using namespace Gtkmm2ext;
 using namespace ArdourCanvas;
 
 MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
-	: Push2Layout (p, s, name)
+	: Push2Layout (p, name)
+	, session (s)
 	, bank_start (0)
 	, vpot_mode (Volume)
 {

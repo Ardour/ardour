@@ -31,10 +31,6 @@ namespace Cairo {
 	class Region;
 }
 
-namespace ARDOUR {
-	class Session;
-}
-
 namespace Cairo {
 	class Context;
 }
@@ -46,7 +42,7 @@ class Push2;
 class Push2Layout : public sigc::trackable, public ArdourCanvas::Container
 {
   public:
-	Push2Layout (Push2& p, ARDOUR::Session& s, std::string const & name);
+	Push2Layout (Push2& p, std::string const & name);
 	virtual ~Push2Layout ();
 
 	int display_width () const;
@@ -75,7 +71,6 @@ class Push2Layout : public sigc::trackable, public ArdourCanvas::Container
 
   protected:
 	Push2& p2;
-	ARDOUR::Session& session;
 	std::string _name;
 };
 
