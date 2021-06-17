@@ -45,11 +45,6 @@ BasicUI::BasicUI (Session& s)
 {
 }
 
-BasicUI::BasicUI ()
-	: session (0)
-{
-}
-
 BasicUI::~BasicUI ()
 {
 
@@ -336,18 +331,6 @@ BasicUI::transport_play (bool from_last_start)
 	if (session->is_auditioning()) {
 		return;
 	}
-
-#if 0
-	if (session->config.get_external_sync()) {
-		switch (TransportMasterManager::instance().current().type()) {
-		case Engine:
-			break;
-		default:
-			/* transport controlled by the master */
-			return;
-		}
-	}
-#endif
 
 	bool rolling = transport_rolling();
 
@@ -739,28 +722,10 @@ BasicUI::locked ()
 	return session->transport_locked ();
 }
 
-ARDOUR::samplecnt_t
-BasicUI::timecode_frames_per_hour ()
-{
-	return session->timecode_frames_per_hour ();
-}
-
 void
 BasicUI::timecode_time (samplepos_t where, Timecode::Time& timecode)
 {
 	session->timecode_time (where, *((Timecode::Time *) &timecode));
-}
-
-void
-BasicUI::timecode_to_sample (Timecode::Time& timecode, samplepos_t & sample, bool use_offset, bool use_subframes) const
-{
-	session->timecode_to_sample (*((Timecode::Time*)&timecode), sample, use_offset, use_subframes);
-}
-
-void
-BasicUI::sample_to_timecode (samplepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const
-{
-	session->sample_to_timecode (sample, *((Timecode::Time*)&timecode), use_offset, use_subframes);
 }
 
 void
@@ -802,98 +767,3 @@ BasicUI::goto_nth_marker (int n)
 	}
 }
 
-#if 0
-this stuff is waiting to go in so that all UIs can offer complex solo/mute functionality
-
-void
-BasicUI::solo_release (boost::shared_ptr<Route> r)
-{
-}
-
-void
-BasicUI::solo_press (boost::shared_ptr<Route> r, bool momentary, bool global, bool exclusive, bool isolate, bool solo_group)
-{
-	if (momentary) {
-		_solo_release = new SoloMuteRelease (_route->soloed());
-	}
-
-	if (global) {
-
-		if (_solo_release) {
-			_solo_release->routes = _session->get_routes ();
-		}
-
-		if (Config->get_solo_control_is_listen_control()) {
-			_session->set_listen (_session->get_routes(), !_route->listening(),  Session::rt_cleanup, true);
-		} else {
-			_session->set_solo (_session->get_routes(), !_route->soloed(),  Session::rt_cleanup, true);
-		}
-
-	} else if (exclusive) {
-
-		if (_solo_release) {
-			_solo_release->exclusive = true;
-
-			boost::shared_ptr<RouteList> routes = _session->get_routes();
-
-			for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-				if ((*i)->soloed ()) {
-					_solo_release->routes_on->push_back (*i);
-				} else {
-					_solo_release->routes_off->push_back (*i);
-				}
-			}
-		}
-
-		if (Config->get_solo_control_is_listen_control()) {
-			/* ??? we need a just_one_listen() method */
-		} else {
-			_session->set_just_one_solo (_route, true);
-		}
-
-	} else if (isolate) {
-
-		// shift-click: toggle solo isolated status
-
-		_route->set_solo_isolated (!_route->solo_isolated(), this);
-		delete _solo_release;
-		_solo_release = 0;
-
-	} else if (solo_group) {
-
-		/* Primary-button1: solo mix group.
-		   NOTE: Primary-button2 is MIDI learn.
-		*/
-
-		if (_route->route_group()) {
-
-			if (_solo_release) {
-				_solo_release->routes = _route->route_group()->route_list();
-			}
-
-			if (Config->get_solo_control_is_listen_control()) {
-				_session->set_listen (_route->route_group()->route_list(), !_route->listening(),  Session::rt_cleanup, true);
-			} else {
-				_session->set_solo (_route->route_group()->route_list(), !_route->soloed(),  Session::rt_cleanup, true);
-			}
-		}
-
-	} else {
-
-		/* click: solo this route */
-
-		boost::shared_ptr<RouteList> rl (new RouteList);
-		rl->push_back (route());
-
-		if (_solo_release) {
-			_solo_release->routes = rl;
-		}
-
-		if (Config->get_solo_control_is_listen_control()) {
-			_session->set_listen (rl, !_route->listening());
-		} else {
-			_session->set_solo (rl, !_route->soloed());
-		}
-	}
-}
-#endif

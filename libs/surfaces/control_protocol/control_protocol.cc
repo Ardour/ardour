@@ -120,15 +120,6 @@ ControlProtocol::set_route_table (uint32_t table_index, boost::shared_ptr<ARDOUR
 bool
 ControlProtocol::set_route_table (uint32_t table_index, uint32_t remote_control_id)
 {
-#if 0 // STRIPABLE
-	boost::shared_ptr<Route> r = session->route_by_remote_id (remote_control_id);
-
-	if (!r) {
-		return false;
-	}
-
-	set_route_table (table_index, r);
-#endif
 	return true;
 }
 

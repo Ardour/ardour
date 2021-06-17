@@ -34,8 +34,6 @@
 
 namespace ARDOUR {
 	class Session;
-	class SessionEvent;
-	class Stripable;
 }
 
 class LIBCONTROLCP_API BasicUI {
@@ -45,9 +43,6 @@ class LIBCONTROLCP_API BasicUI {
 
 	void add_marker (const std::string& = std::string());
 	void remove_marker_at_playhead ();
-
-//	void mark_in();
-//	void mark_out();
 
 	void register_thread (std::string name);
 
@@ -146,11 +141,7 @@ class LIBCONTROLCP_API BasicUI {
 
 	void goto_nth_marker (int n);
 
-	ARDOUR::samplecnt_t timecode_frames_per_hour ();
-
 	void timecode_time (samplepos_t where, Timecode::Time&);
-	void timecode_to_sample (Timecode::Time& timecode, samplepos_t & sample, bool use_offset, bool use_subframes) const;
-	void sample_to_timecode (samplepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 
 	bool stop_button_onoff() const;
 	bool play_button_onoff() const;
@@ -159,7 +150,6 @@ class LIBCONTROLCP_API BasicUI {
 	bool loop_button_onoff() const;
 
   protected:
-	BasicUI ();
 	ARDOUR::Session* session;
 };
 
