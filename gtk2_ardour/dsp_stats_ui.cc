@@ -64,11 +64,17 @@ DspStatisticsGUI::DspStatisticsGUI ()
 	table.attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop], 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
+	Label* right_angle_text1 = manage (new Label ("\xe2\x94\x94", ALIGN_RIGHT, ALIGN_CENTER));
+
 	table.attach (*manage (new Gtk::Label (_("Engine: "), ALIGN_RIGHT, ALIGN_CENTER)), 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*right_angle_text1, 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	table.attach (*labels[AudioEngine::ProcessCallback], 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
+	Label* right_angle_text2 = manage (new Label ("\xe2\x94\x94", ALIGN_RIGHT, ALIGN_CENTER));
+
 	table.attach (*manage (new Gtk::Label (_("Session: "), ALIGN_RIGHT, ALIGN_CENTER)), 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*right_angle_text2, 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	table.attach (*labels[AudioEngine::NTT + Session::OverallProcess], 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
@@ -242,7 +248,7 @@ DspStatisticsGUI::update ()
 		} else {
 			snprintf (buf, sizeof (buf), "average: %7.2f usec %5.2f%% (std dev. %5.2f)", avg, (100.0 * avg) / bufsize_usecs, dev);
 		}
-		
+
 		ArdourWidgets::set_tooltip (labels[AudioEngine::ProcessCallback], buf);
 
 	} else {
