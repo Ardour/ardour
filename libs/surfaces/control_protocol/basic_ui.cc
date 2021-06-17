@@ -41,7 +41,7 @@ using namespace ARDOUR;
 PBD::Signal2<void,std::string,std::string> BasicUI::AccessAction;
 
 BasicUI::BasicUI (Session& s)
-	: session (&s)
+	: _session (&s)
 {
 }
 
@@ -72,21 +72,21 @@ BasicUI::access_action ( std::string action_path )
 void
 BasicUI::loop_toggle ()
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
-	Location * looploc = session->locations()->auto_loop_location();
+	Location * looploc = _session->locations()->auto_loop_location();
 
 	if (!looploc) {
 		return;
 	}
 
-	if (session->get_play_loop()) {
+	if (_session->get_play_loop()) {
 
 		/* looping enabled, our job is to disable it */
 
-		session->request_play_loop (false);
+		_session->request_play_loop (false);
 
 	} else {
 
@@ -97,9 +97,9 @@ BasicUI::loop_toggle ()
 		                        does not start transport.
 		*/
 		if (Config->get_loop_is_mode()) {
-			session->request_play_loop (true, false);
+			_session->request_play_loop (true, false);
 		} else {
-			session->request_play_loop (true, true);
+			_session->request_play_loop (true, true);
 		}
 	}
 
@@ -111,10 +111,10 @@ void
 BasicUI::loop_location (samplepos_t start, samplepos_t end)
 {
 	Location* tll;
-	if ((tll = session->locations()->auto_loop_location()) == 0) {
-		Location* loc = new Location (*session, start, end, _("Loop"),  Location::IsAutoLoop);
-		session->locations()->add (loc, true);
-		session->set_auto_loop_location (loc);
+	if ((tll = _session->locations()->auto_loop_location()) == 0) {
+		Location* loc = new Location (*_session, start, end, _("Loop"),  Location::IsAutoLoop);
+		_session->locations()->add (loc, true);
+		_session->set_auto_loop_location (loc);
 	} else {
 		tll->set_hidden (false, this);
 		tll->set (start, end);
@@ -124,58 +124,58 @@ BasicUI::loop_location (samplepos_t start, samplepos_t end)
 void
 BasicUI::goto_start (bool and_roll)
 {
-	session->goto_start (and_roll);
+	_session->goto_start (and_roll);
 }
 
 void
 BasicUI::goto_zero ()
 {
-	session->request_locate (0);
+	_session->request_locate (0);
 }
 
 void
 BasicUI::goto_end ()
 {
-	session->goto_end ();
+	_session->goto_end ();
 }
 
 void
 BasicUI::add_marker (const std::string& markername)
 {
-	samplepos_t where = session->audible_sample();
-	Location *location = new Location (*session, where, where, markername, Location::IsMark);
-	session->begin_reversible_command (_("add marker"));
-	XMLNode &before = session->locations()->get_state();
-	session->locations()->add (location, true);
-	XMLNode &after = session->locations()->get_state();
-	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
-	session->commit_reversible_command ();
+	samplepos_t where = _session->audible_sample();
+	Location *location = new Location (*_session, where, where, markername, Location::IsMark);
+	_session->begin_reversible_command (_("add marker"));
+	XMLNode &before = _session->locations()->get_state();
+	_session->locations()->add (location, true);
+	XMLNode &after = _session->locations()->get_state();
+	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+	_session->commit_reversible_command ();
 }
 
 void
 BasicUI::remove_marker_at_playhead ()
 {
-	if (session) {
+	if (_session) {
 		//set up for undo
-		XMLNode &before = session->locations()->get_state();
+		XMLNode &before = _session->locations()->get_state();
 		bool removed = false;
 
 		//find location(s) at this time
 		Locations::LocationList locs;
-		session->locations()->find_all_between (session->audible_sample(), session->audible_sample()+1, locs, Location::Flags(0));
+		_session->locations()->find_all_between (_session->audible_sample(), _session->audible_sample()+1, locs, Location::Flags(0));
 		for (Locations::LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
 			if ((*i)->is_mark()) {
-				session->locations()->remove (*i);
+				_session->locations()->remove (*i);
 				removed = true;
 			}
 		}
 
 		//store undo
 		if (removed) {
-			session->begin_reversible_command (_("remove marker"));
-			XMLNode &after = session->locations()->get_state();
-			session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
-			session->commit_reversible_command ();
+			_session->begin_reversible_command (_("remove marker"));
+			XMLNode &after = _session->locations()->get_state();
+			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+			_session->commit_reversible_command ();
 		}
 	}
 }
@@ -195,14 +195,14 @@ BasicUI::button_varispeed (bool fwd)
 
 		if (fwd) {
 			if (transport_speed <= 0) {
-				session->request_transport_speed (1.0, false);
-				session->request_roll (TRS_UI);
+				_session->request_transport_speed (1.0, false);
+				_session->request_roll (TRS_UI);
 				return;
 			}
 		} else {
 			if (transport_speed >= 0) {
-				session->request_transport_speed (-1.0, false);
-				session->request_roll (TRS_UI);
+				_session->request_transport_speed (-1.0, false);
+				_session->request_roll (TRS_UI);
 				return;
 			}
 		}
@@ -216,13 +216,13 @@ BasicUI::button_varispeed (bool fwd)
 
 			if (fwd) {
 				if (transport_speed <= 0) {
-					session->request_transport_speed (1.0, false);
-					session->request_roll (TRS_UI);
+					_session->request_transport_speed (1.0, false);
+					_session->request_roll (TRS_UI);
 				}
 			} else {
 				if (transport_speed >= 0) {
-					session->request_transport_speed (-1.0, false);
-					session->request_roll (TRS_UI);
+					_session->request_transport_speed (-1.0, false);
+					_session->request_roll (TRS_UI);
 				}
 			}
 
@@ -267,8 +267,8 @@ BasicUI::button_varispeed (bool fwd)
 
 	speed = semitone_ratio * transport_speed;
 	speed = std::max (-maxspeed, std::min (maxspeed, speed));
-	session->request_transport_speed (speed, false);
-	session->request_roll (TRS_UI);
+	_session->request_transport_speed (speed, false);
+	_session->request_roll (TRS_UI);
 }
 
 void
@@ -286,13 +286,13 @@ BasicUI::ffwd ()
 void
 BasicUI::transport_stop ()
 {
-	session->request_stop ();
+	_session->request_stop ();
 }
 
 bool
 BasicUI::stop_button_onoff () const
 {
-	return session->transport_stopped_or_stopping ();
+	return _session->transport_stopped_or_stopping ();
 }
 
 bool
@@ -316,7 +316,7 @@ BasicUI::rewind_button_onoff () const
 bool
 BasicUI::loop_button_onoff () const
 {
-	return session->get_play_loop();
+	return _session->get_play_loop();
 }
 
 void
@@ -324,17 +324,17 @@ BasicUI::transport_play (bool from_last_start)
 {
 	/* ::toggle_roll() is smarter and preferred */
 
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
-	if (session->is_auditioning()) {
+	if (_session->is_auditioning()) {
 		return;
 	}
 
 	bool rolling = transport_rolling();
 
-	if (session->get_play_loop()) {
+	if (_session->get_play_loop()) {
 
 		/* If loop playback is not a mode, then we should cancel
 		   it when this action is requested. If it is a mode
@@ -347,99 +347,99 @@ BasicUI::transport_play (bool from_last_start)
 			*/
 			if (rolling) {
 				/* stop loop playback but keep rolling */
-				session->request_play_loop (false, false);
+				_session->request_play_loop (false, false);
 			}
 		}
 
-	} else if (session->get_play_range () ) {
+	} else if (_session->get_play_range () ) {
 		/* stop playing a range if we currently are */
-		session->request_play_range (0, true);
+		_session->request_play_range (0, true);
 	}
 
 	if (rolling) {
-		session->request_transport_speed (1.0, false, TRS_UI);
+		_session->request_transport_speed (1.0, false, TRS_UI);
 	} else {
-		session->request_roll ();
+		_session->request_roll ();
 	}
 }
 
 void
 BasicUI::rec_enable_toggle ()
 {
-	switch (session->record_status()) {
+	switch (_session->record_status()) {
 	case Session::Disabled:
-		if (session->ntracks() == 0) {
+		if (_session->ntracks() == 0) {
 			// string txt = _("Please create 1 or more track\nbefore trying to record.\nCheck the Session menu.");
 			// MessageDialog msg (*editor, txt);
 			// msg.run ();
 			return;
 		}
-		session->maybe_enable_record ();
+		_session->maybe_enable_record ();
 		break;
 	case Session::Recording:
 	case Session::Enabled:
-		session->disable_record (false, true);
+		_session->disable_record (false, true);
 	}
 }
 
 void
 BasicUI::all_tracks_rec_in ()
 {
-	session->set_all_tracks_record_enabled (true);
+	_session->set_all_tracks_record_enabled (true);
 }
 
 void
 BasicUI::all_tracks_rec_out ()
 {
-	session->set_all_tracks_record_enabled (false);
+	_session->set_all_tracks_record_enabled (false);
 }
 
 void
 BasicUI::save_state ()
 {
-	session->save_state ("");
+	_session->save_state ("");
 }
 
 void
 BasicUI::prev_marker ()
 {
-	samplepos_t pos = session->locations()->first_mark_before (session->transport_sample());
+	samplepos_t pos = _session->locations()->first_mark_before (_session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos);
+		_session->request_locate (pos);
 	} else {
-		session->goto_start ();
+		_session->goto_start ();
 	}
 }
 
 void
 BasicUI::next_marker ()
 {
-	samplepos_t pos = session->locations()->first_mark_after (session->transport_sample());
+	samplepos_t pos = _session->locations()->first_mark_after (_session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos);
+		_session->request_locate (pos);
 	} else {
-		session->goto_end();
+		_session->goto_end();
 	}
 }
 
 void
 BasicUI::set_transport_speed (double speed)
 {
-	session->request_transport_speed (speed);
+	_session->request_transport_speed (speed);
 }
 
 double
 BasicUI::get_transport_speed () const
 {
-	return session->actual_speed ();
+	return _session->actual_speed ();
 }
 
 double
 BasicUI::transport_rolling () const
 {
-	return !session->transport_stopped_or_stopping ();
+	return !_session->transport_stopped_or_stopping ();
 }
 
 void
@@ -457,79 +457,79 @@ BasicUI::redo ()
 void
 BasicUI::toggle_all_rec_enables ()
 {
-	if (session->get_record_enabled()) {
-		// session->record_disenable_all ();
+	if (_session->get_record_enabled()) {
+		// _session->record_disenable_all ();
 	} else {
-		// session->record_enable_all ();
+		// _session->record_enable_all ();
 	}
 }
 
 void
 BasicUI::toggle_punch_in ()
 {
-	session->config.set_punch_in (!session->config.get_punch_in());
+	_session->config.set_punch_in (!_session->config.get_punch_in());
 }
 
 void
 BasicUI::toggle_punch_out ()
 {
-	session->config.set_punch_out (!session->config.get_punch_out());
+	_session->config.set_punch_out (!_session->config.get_punch_out());
 }
 
 bool
 BasicUI::get_record_enabled ()
 {
-	return session->get_record_enabled();
+	return _session->get_record_enabled();
 }
 
 void
 BasicUI::set_record_enable (bool yn)
 {
 	if (yn) {
-		session->maybe_enable_record ();
+		_session->maybe_enable_record ();
 	} else {
-		session->disable_record (false, true);
+		_session->disable_record (false, true);
 	}
 }
 
 samplepos_t
 BasicUI::transport_sample ()
 {
-	return session->transport_sample();
+	return _session->transport_sample();
 }
 
 void
 BasicUI::locate (samplepos_t where, LocateTransportDisposition ltd)
 {
-	session->request_locate (where, ltd);
+	_session->request_locate (where, ltd);
 }
 
 void
 BasicUI::locate (samplepos_t where, bool roll)
 {
-	session->request_locate (where, roll ? MustRoll : RollIfAppropriate);
+	_session->request_locate (where, roll ? MustRoll : RollIfAppropriate);
 }
 
 void
 BasicUI::jump_by_seconds (double secs, LocateTransportDisposition ltd)
 {
-	samplepos_t current = session->transport_sample();
-	double s = (double) current / (double) session->nominal_sample_rate();
+	samplepos_t current = _session->transport_sample();
+	double s = (double) current / (double) _session->nominal_sample_rate();
 
 	s+= secs;
 	if (s < 0) {
 		s = 0;
 	}
-	s = s * session->nominal_sample_rate();
+	s = s * _session->nominal_sample_rate();
 
-	session->request_locate (floor(s), ltd);
+	_session->request_locate (floor(s), ltd);
 }
 
 void
 BasicUI::jump_by_bars (double bars, LocateTransportDisposition ltd)
 {
-	TempoMap& tmap (session->tempo_map());
-	Timecode::BBT_Time bbt (tmap.bbt_at_sample (session->transport_sample()));
+	TempoMap& tmap (_session->tempo_map());
+	Timecode::BBT_Time bbt (tmap.bbt_at_sample (_session->transport_sample()));
 
 	bars += bbt.bars;
 	if (bars < 0) {
@@ -540,25 +540,25 @@ BasicUI::jump_by_bars (double bars, LocateTransportDisposition ltd)
 	any.type = AnyTime::BBT;
 	any.bbt.bars = bars;
 
-	session->request_locate (session->convert_to_samples (any), ltd);
+	_session->request_locate (_session->convert_to_samples (any), ltd);
 }
 
 void
 BasicUI::jump_by_beats (double beats, LocateTransportDisposition ltd)
 {
-	TempoMap& tmap (session->tempo_map ());
-	double qn_goal = tmap.quarter_note_at_sample (session->transport_sample ()) + beats;
+	TempoMap& tmap (_session->tempo_map ());
+	double qn_goal = tmap.quarter_note_at_sample (_session->transport_sample ()) + beats;
 	if (qn_goal < 0.0) {
 		qn_goal = 0.0;
 	}
-	session->request_locate (tmap.sample_at_quarter_note (qn_goal), ltd);
+	_session->request_locate (tmap.sample_at_quarter_note (qn_goal), ltd);
 }
 
 void
 BasicUI::toggle_monitor_mute ()
 {
-	if (session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+	if (_session->monitor_out()) {
+		boost::shared_ptr<MonitorProcessor> mon = _session->monitor_out()->monitor_control();
 		if (mon->cut_all ()) {
 			mon->set_cut_all (false);
 		} else {
@@ -570,8 +570,8 @@ BasicUI::toggle_monitor_mute ()
 void
 BasicUI::toggle_monitor_dim ()
 {
-	if (session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+	if (_session->monitor_out()) {
+		boost::shared_ptr<MonitorProcessor> mon = _session->monitor_out()->monitor_control();
 		if (mon->dim_all ()) {
 			mon->set_dim_all (false);
 		} else {
@@ -583,8 +583,8 @@ BasicUI::toggle_monitor_dim ()
 void
 BasicUI::toggle_monitor_mono ()
 {
-	if (session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+	if (_session->monitor_out()) {
+		boost::shared_ptr<MonitorProcessor> mon = _session->monitor_out()->monitor_control();
 		if (mon->mono()) {
 			mon->set_mono (false);
 		} else {
@@ -596,7 +596,7 @@ BasicUI::toggle_monitor_mono ()
 void
 BasicUI::midi_panic ()
 {
-	session->midi_panic ();
+	_session->midi_panic ();
 }
 
 void
@@ -611,16 +611,16 @@ BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
 {
 	/* TO BE KEPT IN SYNC WITH ARDOUR_UI::toggle_roll() */
 
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
-	if (session->is_auditioning()) {
-		session->cancel_audition ();
+	if (_session->is_auditioning()) {
+		_session->cancel_audition ();
 		return;
 	}
 
-	if (session->config.get_external_sync()) {
+	if (_session->config.get_external_sync()) {
 		switch (TransportMasterManager::instance().current()->type()) {
 		case Engine:
 			break;
@@ -637,34 +637,34 @@ BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
 		if (roll_out_of_bounded_mode) {
 			/* drop out of loop/range playback but leave transport rolling */
 
-			if (session->get_play_loop()) {
+			if (_session->get_play_loop()) {
 
-				if (session->actively_recording()) {
+				if (_session->actively_recording()) {
 					/* actually stop transport because
 					   otherwise the captured data will make
 					   no sense.
 					*/
-					session->request_play_loop (false, true);
+					_session->request_play_loop (false, true);
 
 				} else {
-					session->request_play_loop (false, false);
+					_session->request_play_loop (false, false);
 				}
 
-			} else if (session->get_play_range ()) {
+			} else if (_session->get_play_range ()) {
 
-				session->request_cancel_play_range ();
+				_session->request_cancel_play_range ();
 			}
 
 		} else {
-			session->request_stop (true, true);
+			_session->request_stop (true, true);
 		}
 
 	} else { /* not rolling */
 
-		if (session->get_play_loop() && Config->get_loop_is_mode()) {
-			session->request_locate (session->locations()->auto_loop_location()->start(), MustRoll);
+		if (_session->get_play_loop() && Config->get_loop_is_mode()) {
+			_session->request_locate (_session->locations()->auto_loop_location()->start(), MustRoll);
 		} else {
-			session->request_roll (TRS_UI);
+			_session->request_roll (TRS_UI);
 		}
 	}
 }
@@ -672,7 +672,7 @@ BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
 void
 BasicUI::stop_forget ()
 {
-	session->request_stop (true, true);
+	_session->request_stop (true, true);
 }
 
 void BasicUI::mark_in () { access_action("Common/start-range-from-playhead"); }
@@ -713,26 +713,26 @@ void BasicUI::scroll_dn_1_page() { access_action("Editor/scroll-tracks-down"); }
 bool
 BasicUI::locating ()
 {
-	return session->locate_pending();
+	return _session->locate_pending();
 }
 
 bool
 BasicUI::locked ()
 {
-	return session->transport_locked ();
+	return _session->transport_locked ();
 }
 
 void
 BasicUI::timecode_time (samplepos_t where, Timecode::Time& timecode)
 {
-	session->timecode_time (where, *((Timecode::Time *) &timecode));
+	_session->timecode_time (where, *((Timecode::Time *) &timecode));
 }
 
 void
 BasicUI::cancel_all_solo ()
 {
-	if (session) {
-		session->cancel_all_solo ();
+	if (_session) {
+		_session->cancel_all_solo ();
 	}
 }
 
@@ -745,11 +745,11 @@ struct SortLocationsByPosition {
 void
 BasicUI::goto_nth_marker (int n)
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
-	const Locations::LocationList& l (session->locations()->list());
+	const Locations::LocationList& l (_session->locations()->list());
 	Locations::LocationList ordered;
 	ordered = l;
 
@@ -759,7 +759,7 @@ BasicUI::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				session->request_locate ((*i)->start());
+				_session->request_locate ((*i)->start());
 				break;
 			}
 			--n;

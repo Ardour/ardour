@@ -99,16 +99,16 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	_input_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		session->engine().make_port_name_non_relative (inp->name())
+		_session->engine().make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		session->engine().make_port_name_non_relative (outp->name())
+		_session->engine().make_port_name_non_relative (outp->name())
 		);
 
-	session->BundleAddedOrRemoved ();
+	_session->BundleAddedOrRemoved ();
 
 	do_feedback = false;
 	_feedback_interval = 10000; // microseconds
@@ -1006,7 +1006,7 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 
 	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("lookup controllable from \"%1\"\n", str));
 
-	if (!session) {
+	if (!_session) {
 		DEBUG_TRACE (DEBUG::GenericMidi, "no session\n");
 		return c;
 	}
@@ -1109,50 +1109,50 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 
 		switch (type) {
 		case PresentationOrder:
-			s = session->get_remote_nth_stripable (id, PresentationInfo::Route);
+			s = _session->get_remote_nth_stripable (id, PresentationInfo::Route);
 			break;
 		case Named:
 			/* name */
 			name = rest[0];
 
 			if (name == "Master" || name == X_("master")) {
-				s = session->master_out();
+				s = _session->master_out();
 			} else if (name == X_("control") || name == X_("listen") || name == X_("monitor") || name == "Monitor") {
-				s = session->monitor_out();
+				s = _session->monitor_out();
 			} else if (name == X_("auditioner")) {
-				s = session->the_auditioner();
+				s = _session->the_auditioner();
 			} else {
-				s = session->route_by_name (name);
+				s = _session->route_by_name (name);
 			}
 			break;
 
 		case Selection:
-			s = session->route_by_selected_count (id);
+			s = _session->route_by_selected_count (id);
 			break;
 		}
 
 	} else if (path[0] == X_("vca")) {
 
-		s = session->get_remote_nth_stripable (id, PresentationInfo::VCA);
+		s = _session->get_remote_nth_stripable (id, PresentationInfo::VCA);
 
 	} else if (path[0] == X_("bus")) {
 
 		switch (type) {
 		case Named:
-			s = session->route_by_name (name);
+			s = _session->route_by_name (name);
 			break;
 		default:
-			s = session->get_remote_nth_stripable (id, PresentationInfo::Bus);
+			s = _session->get_remote_nth_stripable (id, PresentationInfo::Bus);
 		}
 
 	} else if (path[0] == X_("track")) {
 
 		switch (type) {
 		case Named:
-			s = session->route_by_name (name);
+			s = _session->route_by_name (name);
 			break;
 		default:
-			s = session->get_remote_nth_stripable (id, PresentationInfo::Track);
+			s = _session->get_remote_nth_stripable (id, PresentationInfo::Track);
 		}
 	}
 
@@ -1611,7 +1611,7 @@ GenericMidiControlProtocol::maybe_start_touch (boost::shared_ptr<Controllable> c
 {
 	boost::shared_ptr<AutomationControl> actl = boost::dynamic_pointer_cast<AutomationControl> (controllable);
 	if (actl) {
-		actl->start_touch (session->audible_sample ());
+		actl->start_touch (_session->audible_sample ());
 	}
 }
 
@@ -1657,7 +1657,7 @@ GenericMidiControlProtocol::midi_input_handler (Glib::IOCondition ioc, boost::we
 
 		port->clear ();
 		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
-		samplepos_t now = session->engine().sample_time();
+		samplepos_t now = _session->engine().sample_time();
 		port->parse (now);
 	}
 

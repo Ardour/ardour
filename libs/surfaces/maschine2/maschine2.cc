@@ -254,7 +254,7 @@ Maschine2::start ()
 	read_timeout->attach (main_loop ()->get_context());
 
 #if 1 // TEST
-	tl = new TestLayout (*this, *session, "test");
+	tl = new TestLayout (*this, *_session, "test");
 	tl->get_menu ()->set_control (_ctrl->encoder (1));
 	tl->get_knob ()->set_control (_ctrl->encoder (2));
 #endif

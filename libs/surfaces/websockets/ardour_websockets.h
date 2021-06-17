@@ -63,7 +63,7 @@ public:
 
 	ARDOUR::Session& ardour_session ()
 	{
-		return *session;
+		return *_session;
 	}
 	ArdourMixer& mixer_component ()
 	{

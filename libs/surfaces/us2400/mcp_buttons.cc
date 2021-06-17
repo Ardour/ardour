@@ -456,13 +456,13 @@ US2400Protocol::marker_release (Button &)
 	 * the current position and we're not rolling.
 	 */
 
-	samplepos_t where = session->audible_sample();
+	samplepos_t where = _session->audible_sample();
 
-	if (session->transport_stopped_or_stopping() && session->locations()->mark_at (where, session->sample_rate() / 100.0)) {
+	if (_session->transport_stopped_or_stopping() && _session->locations()->mark_at (where, _session->sample_rate() / 100.0)) {
 		return off;
 	}
 
-	session->locations()->next_available_name (markername,"mark");
+	_session->locations()->next_available_name (markername,"mark");
 	add_marker (markername);
 
 	return off;
@@ -478,7 +478,7 @@ US2400Protocol::stop_press (Button &)
 	transport_stop ();
 
 	if (main_modifier_state() == MODIFIER_SHIFT) {
-		session->midi_panic();
+		_session->midi_panic();
 	}
 
 	return on;
@@ -487,7 +487,7 @@ US2400Protocol::stop_press (Button &)
 LedState
 US2400Protocol::stop_release (Button &)
 {
-	return session->transport_stopped_or_stopping();
+	return _session->transport_stopped_or_stopping();
 }
 
 LedState
@@ -569,7 +569,7 @@ US2400Protocol::loop_press (Button &)
 		access_action ("Editor/set-loop-from-edit-range");
 		return off;
 	} else {
-		bool was_on = session->get_play_loop();
+		bool was_on = _session->get_play_loop();
 		loop_toggle ();
 		return was_on ? off : on;
 	}
@@ -772,7 +772,7 @@ LedState
 US2400Protocol::mstr_press (Button &)
 {
 //	access_action("Mixer/select-none");
-	set_stripable_selection( session->master_out() );
+	set_stripable_selection( _session->master_out() );
 	return on;
 }
 
@@ -906,7 +906,7 @@ US2400Protocol::clearsolo_press (US2400::Button&)
 US2400::LedState
 US2400Protocol::clearsolo_release (US2400::Button&)
 {
-	//return session->soloing();
+	//return _session->soloing();
 	return none;
 }
 

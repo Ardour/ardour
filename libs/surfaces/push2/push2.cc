@@ -108,15 +108,15 @@ Push2::Push2 (ARDOUR::Session& s)
 	fill_color_table ();
 
 	/* master cannot be removed, so no need to connect to going-away signal */
-	master = session->master_out ();
+	master = _session->master_out ();
 
 	/* allocate graphics layouts, even though we're not using them yet */
 
 	_canvas = new Push2Canvas (*this, 960, 160);
-	mix_layout = new MixLayout (*this, *session, "globalmix");
-	scale_layout = new ScaleLayout (*this, *session, "scale");
-	track_mix_layout = new TrackMixLayout (*this, *session, "trackmix");
-	splash_layout = new SplashLayout (*this, *session, "splash");
+	mix_layout = new MixLayout (*this, *_session, "globalmix");
+	scale_layout = new ScaleLayout (*this, *_session, "scale");
+	track_mix_layout = new TrackMixLayout (*this, *_session, "trackmix");
+	splash_layout = new SplashLayout (*this, *_session, "splash");
 
 	run_event_loop ();
 
@@ -266,11 +266,11 @@ Push2::ports_acquire ()
 		_output_bundle->add_channel (
 			shadow_port->name(),
 			ARDOUR::DataType::MIDI,
-			session->engine().make_port_name_non_relative (shadow_port->name())
+			_session->engine().make_port_name_non_relative (shadow_port->name())
 			);
 	}
 
-	session->BundleAddedOrRemoved ();
+	_session->BundleAddedOrRemoved ();
 
 	connect_to_parser ();
 
@@ -862,20 +862,20 @@ void
 Push2::connect_session_signals()
 {
 	// receive routes added
-	//session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_routes_added, this, _1), this);
+	//_session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_routes_added, this, _1), this);
 	// receive VCAs added
-	//session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_vca_added, this, _1), this);
+	//_session->vca_manager().VCAAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_vca_added, this, _1), this);
 
 	// receive record state toggled
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_record_state_changed, this), this);
+	_session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_record_state_changed, this), this);
 	// receive transport state changed
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_loop_state_changed, this), this);
+	_session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_transport_state_changed, this), this);
+	_session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_loop_state_changed, this), this);
 	// receive punch-in and punch-out
 	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_parameter_changed, this, _1), this);
+	_session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_parameter_changed, this, _1), this);
 	// receive rude solo changed
-	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_solo_active_changed, this, _1), this);
+	_session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&Push2::notify_solo_active_changed, this, _1), this);
 }
 
 void
@@ -887,7 +887,7 @@ Push2::notify_record_state_changed ()
 		return;
 	}
 
-	switch (session->record_status ()) {
+	switch (_session->record_status ()) {
 	case Session::Disabled:
 		b->second->set_color (LED::White);
 		b->second->set_state (LED::NoTransition);
@@ -910,7 +910,7 @@ Push2::notify_transport_state_changed ()
 {
 	boost::shared_ptr<Button> b = id_button_map[Play];
 
-	if (session->transport_rolling()) {
+	if (_session->transport_rolling()) {
 		b->set_state (LED::OneShot24th);
 		b->set_color (LED::Green);
 	} else {
@@ -1042,7 +1042,7 @@ Push2::other_vpot (int n, int delta)
 		break;
 	case 1:
 		/* metronome gain control */
-		click_gain = session->click_gain();
+		click_gain = _session->click_gain();
 		if (click_gain) {
 			boost::shared_ptr<AutomationControl> ac = click_gain->gain_control();
 			if (ac) {
@@ -1079,9 +1079,9 @@ Push2::other_vpot_touch (int n, bool touching)
 			boost::shared_ptr<AutomationControl> ac = master->gain_control();
 			if (ac) {
 				if (touching) {
-					ac->start_touch (session->audible_sample());
+					ac->start_touch (_session->audible_sample());
 				} else {
-					ac->stop_touch (session->audible_sample());
+					ac->stop_touch (_session->audible_sample());
 				}
 			}
 		}

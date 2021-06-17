@@ -118,8 +118,8 @@ WiimoteControlProtocol::start ()
 	DEBUG_TRACE (DEBUG::WiimoteControl, "WiimoteControlProtocol::start init\n");
 
 	// update LEDs whenever the transport or recording state changes
-	session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&WiimoteControlProtocol::update_led_state, this), this);
-	session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&WiimoteControlProtocol::update_led_state, this), this);
+	_session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&WiimoteControlProtocol::update_led_state, this), this);
+	_session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&WiimoteControlProtocol::update_led_state, this), this);
 
 	// start the Wiimote control UI; it will run in its own thread context
 	BaseUI::run ();
@@ -305,7 +305,7 @@ WiimoteControlProtocol::update_led_state ()
 	}
 
 	// enable LED4 if Ardour is recording
-	if (session->actively_recording ()) {
+	if (_session->actively_recording ()) {
 		DEBUG_TRACE (DEBUG::WiimoteControl, "WiimoteControlProtocol::update_led_state recording, activate LED4\n");
 		state |= CWIID_LED4_ON;
 	}

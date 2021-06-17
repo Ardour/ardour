@@ -40,13 +40,13 @@ Maschine2::connect_signals ()
 	// TODO: use some convenience macros here
 
 	/* Signals */
-	session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_loop_state_changed, this), this);
-	session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_record_state_changed, this), this);
+	_session->TransportStateChange.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_transport_state_changed, this), this);
+	_session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_loop_state_changed, this), this);
+	_session->RecordStateChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_record_state_changed, this), this);
 	Config->ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_parameter_changed, this, _1), this);
-	session->DirtyChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_session_dirty_changed, this), this);
-	session->history().Changed.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_history_changed, this), this);
+	_session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_parameter_changed, this, _1), this);
+	_session->DirtyChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_session_dirty_changed, this), this);
+	_session->history().Changed.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_history_changed, this), this);
 
 	/* Actions */
 	Glib::RefPtr<Gtk::ToggleAction> tact;
@@ -108,7 +108,7 @@ Maschine2::connect_signals ()
 void
 Maschine2::notify_record_state_changed ()
 {
-	switch (session->record_status ()) {
+	switch (_session->record_status ()) {
 		case Session::Disabled:
 			_ctrl->button (M2Contols::Rec)->set_color (0);
 			_ctrl->button (M2Contols::Rec)->set_blinking (false);
@@ -139,8 +139,8 @@ void
 Maschine2::notify_loop_state_changed ()
 {
 	bool looping = false;
-	Location* looploc = session->locations ()->auto_loop_location ();
-	if (looploc && session->get_play_loop ()) {
+	Location* looploc = _session->locations ()->auto_loop_location ();
+	if (looploc && _session->get_play_loop ()) {
 		looping = true;
 	}
 	_ctrl->button (M2Contols::Loop)->set_color (looping ? COLOR_GRAY : 0);
@@ -182,7 +182,7 @@ Maschine2::notify_snap_change ()
 void
 Maschine2::notify_session_dirty_changed ()
 {
-	bool is_dirty = session->dirty ();
+	bool is_dirty = _session->dirty ();
 	_ctrl->button (M2Contols::Save)->set_color (is_dirty ? COLOR_WHITE : COLOR_BLACK);
 	_ctrl->button (M2Contols::Save)->set_blinking (is_dirty);
 }
@@ -190,8 +190,8 @@ Maschine2::notify_session_dirty_changed ()
 void
 Maschine2::notify_history_changed ()
 {
-	_ctrl->button (M2Contols::Redo)->set_color (session->redo_depth() > 0 ? COLOR_WHITE : COLOR_BLACK);
-	_ctrl->button (M2Contols::Undo)->set_color (session->undo_depth() > 0 ? COLOR_WHITE : COLOR_BLACK);
+	_ctrl->button (M2Contols::Redo)->set_color (_session->redo_depth() > 0 ? COLOR_WHITE : COLOR_BLACK);
+	_ctrl->button (M2Contols::Undo)->set_color (_session->undo_depth() > 0 ? COLOR_WHITE : COLOR_BLACK);
 }
 
 
@@ -362,7 +362,7 @@ Maschine2::encoder_master (int delta)
 			break;
 		case MST_VOLUME:
 			{
-				boost::shared_ptr<Route> master = session->master_out ();
+				boost::shared_ptr<Route> master = _session->master_out ();
 				if (master) {
 					// TODO consider _ctrl->button (M2Contols::EncoderWheel)->is_pressed() for fine grained
 					const double factor = _ctrl->button (M2Contols::BtnShift, M2Contols::ModNone)->active () ? 256. : 32.;

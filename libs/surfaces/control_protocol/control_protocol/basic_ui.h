@@ -150,7 +150,7 @@ class LIBCONTROLCP_API BasicUI {
 	bool loop_button_onoff() const;
 
   protected:
-	ARDOUR::Session* session;
+	ARDOUR::Session* _session;
 };
 
 #endif /* __ardour_basic_ui_h__ */

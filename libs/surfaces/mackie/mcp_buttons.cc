@@ -483,13 +483,13 @@ MackieControlProtocol::marker_release (Button &)
 	 * the current position and we're not rolling.
 	 */
 
-	samplepos_t where = session->audible_sample();
+	samplepos_t where = _session->audible_sample();
 
-	if (session->transport_stopped_or_stopping() && session->locations()->mark_at (where, session->sample_rate() / 100.0)) {
+	if (_session->transport_stopped_or_stopping() && _session->locations()->mark_at (where, _session->sample_rate() / 100.0)) {
 		return off;
 	}
 
-	session->locations()->next_available_name (markername,"mark");
+	_session->locations()->next_available_name (markername,"mark");
 	add_marker (markername);
 
 	return off;
@@ -505,7 +505,7 @@ MackieControlProtocol::stop_press (Button &)
 	transport_stop ();
 
 	if (main_modifier_state() == MODIFIER_SHIFT) {
-		session->midi_panic();
+		_session->midi_panic();
 	}
 
 	return on;
@@ -514,7 +514,7 @@ MackieControlProtocol::stop_press (Button &)
 LedState
 MackieControlProtocol::stop_release (Button &)
 {
-	return session->transport_stopped_or_stopping();
+	return _session->transport_stopped_or_stopping();
 }
 
 LedState
@@ -596,7 +596,7 @@ MackieControlProtocol::loop_press (Button &)
 		access_action ("Editor/set-loop-from-edit-range");
 		return off;
 	} else {
-		bool was_on = session->get_play_loop();
+		bool was_on = _session->get_play_loop();
 		loop_toggle ();
 		return was_on ? off : on;
 	}
@@ -927,7 +927,7 @@ MackieControlProtocol::clearsolo_press (Mackie::Button&)
 Mackie::LedState
 MackieControlProtocol::clearsolo_release (Mackie::Button&)
 {
-	//return session->soloing();
+	//return _session->soloing();
 	return none;
 }
 

@@ -94,7 +94,7 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 	/* we're going to need this */
 
 	/* master cannot be removed, so no need to connect to going-away signal */
-	master = session->master_out ();
+	master = _session->master_out ();
 
 	run_event_loop ();
 
@@ -105,8 +105,8 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::connection_handler, this, _1, _2, _3, _4, _5), this);
 
-	session->RouteAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
-	session->vca_manager().VCAAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
+	_session->RouteAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
+	_session->vca_manager().VCAAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
 }
 
 LaunchControlXL::~LaunchControlXL ()
@@ -214,7 +214,7 @@ LaunchControlXL::ports_acquire ()
 	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
 	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
 
-	session->BundleAddedOrRemoved ();
+	_session->BundleAddedOrRemoved ();
 
 	connect_to_parser ();
 
@@ -695,16 +695,16 @@ void
 LaunchControlXL::connect_session_signals()
 {
 	// receive transport state changed
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::notify_transport_state_changed, this), this);
-	session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::notify_loop_state_changed, this), this);
+	_session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::notify_transport_state_changed, this), this);
+	_session->TransportLooped.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::notify_loop_state_changed, this), this);
 	// receive punch-in and punch-out
 	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::notify_parameter_changed, this, _1), this);
-	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::notify_parameter_changed, this, _1), this);
+	_session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::notify_parameter_changed, this, _1), this);
 
 	// receive rude solo changed
-	//session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::notify_solo_active_changed, this, _1), this);
+	//_session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::notify_solo_active_changed, this, _1), this);
 	// receive record state toggled
-	//session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::notify_record_state_changed, this), this);
+	//_session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::notify_record_state_changed, this), this);
 
 }
 
@@ -714,7 +714,7 @@ LaunchControlXL::notify_transport_state_changed ()
 { /*
 	Button* b = id_button_map[Play];
 
-	if (session->transport_rolling()) {
+	if (_session->transport_rolling()) {
 		b->set_state (LED::OneShot24th);
 		b->set_color (LED::GreenFull);
 	} else {
@@ -1053,7 +1053,7 @@ LaunchControlXL::filter_stripables(StripableList& strips) const
 	}
 
 	StripableList all;
-	session->get_stripables (all);
+	_session->get_stripables (all);
 
 	for (StripableList::const_iterator s = all.begin(); s != all.end(); ++s) {
 		if ((*s)->is_auditioner ()) { continue; }

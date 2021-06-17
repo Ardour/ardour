@@ -162,13 +162,13 @@ FaderPort8::FaderPort8 (Session& s)
 	_input_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		session->engine().make_port_name_non_relative (inp->name())
+		_session->engine().make_port_name_non_relative (inp->name())
 		);
 
 	_output_bundle->add_channel (
 		"",
 		ARDOUR::DataType::MIDI,
-		session->engine().make_port_name_non_relative (outp->name())
+		_session->engine().make_port_name_non_relative (outp->name())
 		);
 
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::connection_handler, this, _2, _4), this);
@@ -264,11 +264,11 @@ FaderPort8::periodic ()
 	 */
 	if (_ctrls.display_timecode () && clock_mode ()) {
 		Timecode::Time TC;
-		session->timecode_time (TC);
+		_session->timecode_time (TC);
 		_timecode = Timecode::timecode_format_time(TC);
 
 		char buf[16];
-		Timecode::BBT_Time BBT = session->tempo_map ().bbt_at_sample (session->transport_sample ());
+		Timecode::BBT_Time BBT = _session->tempo_map ().bbt_at_sample (_session->transport_sample ());
 		snprintf (buf, sizeof (buf),
 				" %02" PRIu32 "|%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32,
 				BBT.bars % 100, BBT.beats %100,
@@ -526,7 +526,7 @@ FaderPort8::midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::A
 #ifdef VERBOSE_DEBUG
 		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
 #endif
-		samplepos_t now = session->engine().sample_time();
+		samplepos_t now = _session->engine().sample_time();
 		port->parse (now);
 	}
 
@@ -985,7 +985,7 @@ FaderPort8::filter_stripables (StripableList& strips) const
 	}
 
 	StripableList all;
-	session->get_stripables (all);
+	_session->get_stripables (all);
 
 	for (StripableList::const_iterator s = all.begin(); s != all.end(); ++s) {
 		if ((*s)->is_auditioner ()) { continue; }
@@ -1792,7 +1792,7 @@ FaderPort8::notify_stripable_added_or_removed ()
 {
 	/* called by
 	 *  - DropReferences
-	 *  - session->RouteAdded
+	 *  - _session->RouteAdded
 	 *  - PresentationInfo::Change
 	 *    - Properties::hidden
 	 *    - Properties::order

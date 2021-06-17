@@ -157,7 +157,7 @@ CC121::mute ()
 		return;
 	}
 
-	if (_current_stripable == session->monitor_out()) {
+	if (_current_stripable == _session->monitor_out()) {
 		boost::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
 		mp->set_cut_all (!mp->cut_all());
 		return;
@@ -194,7 +194,7 @@ CC121::rec_enable ()
 void
 CC121::use_master ()
 {
-	boost::shared_ptr<Stripable> r = session->master_out();
+	boost::shared_ptr<Stripable> r = _session->master_out();
 	if (r) {
 		if (_current_stripable == r) {
 			r = pre_master_stripable.lock();
@@ -202,7 +202,7 @@ CC121::use_master ()
 			get_button(Output).set_led_state (_output_port, false);
 			blinkers.remove (Output);
 		} else {
-			if (_current_stripable != session->master_out() && _current_stripable != session->monitor_out()) {
+			if (_current_stripable != _session->master_out() && _current_stripable != _session->monitor_out()) {
 				pre_master_stripable = boost::weak_ptr<Stripable> (_current_stripable);
 			}
 			set_current_stripable (r);
@@ -215,7 +215,7 @@ CC121::use_master ()
 void
 CC121::use_monitor ()
 {
-	boost::shared_ptr<Stripable> r = session->monitor_out();
+	boost::shared_ptr<Stripable> r = _session->monitor_out();
 
 	if (r) {
 		if (_current_stripable == r) {
@@ -224,7 +224,7 @@ CC121::use_monitor ()
 			get_button(Output).set_led_state (_output_port, false);
 			blinkers.remove (Output);
 		} else {
-			if (_current_stripable != session->master_out() && _current_stripable != session->monitor_out()) {
+			if (_current_stripable != _session->master_out() && _current_stripable != _session->monitor_out()) {
 				pre_monitor_stripable = boost::weak_ptr<Stripable> (_current_stripable);
 			}
 			set_current_stripable (r);
