@@ -52,14 +52,51 @@ public:
 
 	/* Transport Control */
 
+	/** Toggle looping.
+	 *
+	 * If the transport is currently looping, then looping is disabled so that
+	 * playback will continue past the end of the loop.
+	 */
 	void loop_toggle ();
+
+	/** Start looping a specific range.
+	 *
+	 * @param start The position of the first sample in the loop.
+	 * @param end The position one past the last sample in the loop.
+	 */
 	void loop_location (samplepos_t start, samplepos_t end);
 
 	void button_varispeed (bool fwd);
+
+	/** Rewind the transport.
+	 *
+	 * If the transport is already rewinding, then the speed will be further
+	 * increased.
+	 */
 	void rewind ();
+
+	/** Fast-forward the transport.
+	 *
+	 * If the transport is already fast-forwarding, then the speed will be
+	 * further increased.
+	 */
 	void ffwd ();
+
+	/** Stop the transport if possible.
+	 *
+	 * This may not succeed if some other transport master is being followed.
+	 */
 	void transport_stop ();
+
 	void transport_play (bool jump_back = false);
+
+	/** Set a new transport speed.
+	 *
+	 * This should be used by callers who are varying transport speed but don't
+	 * ever want to stop it.  If the speed is zero, then it will be adjusted to
+	 * a very small positive value to prevent the transport from actually
+	 * stopping.
+	 */
 	void set_transport_speed (double speed);
 
 	void toggle_roll (bool with_abort               = true,
@@ -67,20 +104,53 @@ public:
 
 	void stop_forget ();
 
-	double      get_transport_speed () const;
-	bool        transport_rolling () const;
+	/// Return the transport speed as a factor (so 1.0 = normal speed forward)
+	double get_transport_speed () const;
+
+	/// Return true if the transport is currently rolling
+	bool transport_rolling () const;
+
+	/// Return the current transport sample position
 	samplepos_t transport_sample () const;
 
 	/* Markers */
 
-	void add_marker (const std::string& = std::string ());
+	/** Add a marker at the current audible sample with the given name.
+	 *
+	 * Creates one undo step.
+	 */
+	void add_marker (const std::string& name = std::string ());
+
+	/** Remove any marker at the current audible sample.
+	 *
+	 * Creates one undo step if a marker was removed.
+	 */
 	bool remove_marker_at_playhead ();
 
 	/* Locating */
 
+	/** Move the transport to position zero.
+	 *
+	 * This moves to absolute time 0 regardless of the session range.
+	 */
 	void goto_zero ();
+
+	/** Move the transport to the start of the session.
+	 *
+	 * Moves to absolute time 0 if the session range is empty.
+	 */
 	void goto_start (bool and_roll = false);
+
+	/** Move the transport to the end of the session.
+	 *
+	 * Moves to absolute time 0 if the session range is empty.
+	 */
 	void goto_end ();
+
+	/** Move the transport to a particular marker.
+	 *
+	 * Moves to the start of the session if no such marker is found.
+	 */
 	void goto_nth_marker (int n);
 
 	void jump_by_seconds (double                     sec,
@@ -95,10 +165,22 @@ public:
 	void locate (samplepos_t sample, LocateTransportDisposition ltd);
 	void locate (samplepos_t sample, bool);
 
+	/** Move the transport to the first marker before the current position.
+	 *
+	 * Moves to the start of the session if no such marker is found.
+	 */
 	void prev_marker ();
+
+	/** Move the transport to the first marker after the current position.
+	 *
+	 * Moves to the end of the session if no such marker is found.
+	 */
 	void next_marker ();
 
+	/// Return true if the transport is in the process of locating
 	bool locating () const;
+
+	/// Return true if the transport is synced to an external time source
 	bool locked () const;
 
 	/* State */
@@ -128,6 +210,7 @@ public:
 	void all_tracks_rec_in ();
 	void all_tracks_rec_out ();
 
+	/// Return true if recording is currently enabled
 	bool get_record_enabled () const;
 
 	/* Time */
