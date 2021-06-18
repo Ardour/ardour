@@ -1067,7 +1067,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						_drags->add (new RegionSlipContentsDrag (this, item, clicked_regionview, selection->regions.by_layer()));
 					}
 				} else if (ArdourKeyboard::indicates_copy (event->button.state)) {
-					add_region_copy_drag (item, event, clicked_regionview, true);
+					add_region_drag (item, event, clicked_regionview, true);
 				} else if (Keyboard::the_keyboard().key_is_down (GDK_b)) {
 					add_region_brush_drag (item, event, clicked_regionview);
 				} else {
@@ -2579,17 +2579,12 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 		return;
 	}
 
-	switch (Config->get_edit_mode()) {
-	case Lock:
+	if (Config->get_edit_mode() == Lock) {
 		return;
-	case Ripple:
-	case RippleAll:
-		_drags->add (new RegionRippleDrag (this, item, region_view, selection->regions.by_layer(), false));
-		break;
-	default:
-		_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false, copy));
-		break;
 	}
+
+	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), copy));
+
 }
 
 void

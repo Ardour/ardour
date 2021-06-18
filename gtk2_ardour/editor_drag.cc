@@ -840,7 +840,7 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		_ignore_video_lock = true;
 	}
 
-	if (_brushing || _editor->should_ripple()) {
+	if (_editor->should_ripple()) {
 		/* we do not drag across tracks when rippling or brushing */
 		_y_constrained = true;
 	}
@@ -1515,7 +1515,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 void
 RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (first_move && _editor->should_ripple() && !_copy && !_brushing) {
+	if (first_move && _editor->should_ripple() && !_copy) {
 		collect_ripple_views ();
 	}
 
@@ -1835,7 +1835,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	clear_draggingview_list();
 
 	for (PlaylistSet::iterator p = modified_playlists.begin(); p != modified_playlists.end(); ++p) {
-		if (!_brushing && _editor->should_ripple()) {
+		if (_editor->should_ripple()) {
 			(*p)->ripple (extent_min, extent_max - extent_min, &ripple_exclude);
 		}
 		(*p)->rdiff_and_add_command (_editor->session());
