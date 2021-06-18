@@ -86,7 +86,7 @@ using namespace PBD;
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
 #define TFSM_LOCATE(target,ltd,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,loop,force)); }
-#define TFSM_SPEED(speed,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (speed,as_default)); }
+#define TFSM_SPEED(speed) { _transport_fsm->enqueue (new TransportFSM::Event (speed)); }
 
 /* *****************************************************************************
  * REALTIME ACTIONS (to be called on state transitions)
@@ -307,6 +307,16 @@ Session::post_locate ()
 			_last_roll_location = _last_roll_or_reversal_location =  _transport_sample;
 		}
 	}
+}
+
+/** Set the default speed that is used when we respond to a "play" action.
+ *  @param speed New speed
+ */
+void
+Session::set_default_play_speed (double spd, TransportRequestSource origin)
+{
+	_transport_fsm->set_default_speed(spd);
+	TransportStateChange (); /* EMIT SIGNAL */
 }
 
 /** Set the transport speed.
@@ -743,11 +753,11 @@ Session::request_sync_source (boost::shared_ptr<TransportMaster> tm)
 void
 Session::reset_transport_speed (TransportRequestSource origin)
 {
-	request_transport_speed (1.0, true, origin);
+	request_transport_speed (_transport_fsm->default_speed(), origin);
 }
 
 void
-Session::request_transport_speed (double speed, bool as_default, TransportRequestSource origin)
+Session::request_transport_speed (double speed, TransportRequestSource origin)
 {
 	if (synced_to_engine()) {
 		if (speed != 0) {
@@ -769,8 +779,7 @@ Session::request_transport_speed (double speed, bool as_default, TransportReques
 	}
 
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
-	ev->yes_or_no = as_default; // as_default
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1 as default = %2\n", speed, as_default));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1 as default = %2\n", speed));
 	queue_event (ev);
 }
 
@@ -779,13 +788,13 @@ Session::request_transport_speed (double speed, bool as_default, TransportReques
  *  be used by callers who are varying transport speed but don't ever want to stop it.
  */
 void
-Session::request_transport_speed_nonzero (double speed, bool as_default, TransportRequestSource origin)
+Session::request_transport_speed_nonzero (double speed, TransportRequestSource origin)
 {
 	if (speed == 0) {
 		speed = DBL_EPSILON;
 	}
 
-	request_transport_speed (speed, as_default);
+	request_transport_speed (speed);
 }
 
 void
@@ -907,7 +916,7 @@ Session::request_count_in_record ()
 	}
 	maybe_enable_record ();
 	_count_in_once = true;
-	request_transport_speed (1.0, true);
+	request_transport_speed(_transport_fsm->default_speed());
 }
 
 void
