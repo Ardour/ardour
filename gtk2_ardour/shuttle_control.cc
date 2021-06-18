@@ -545,9 +545,9 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 
 	if (_session) {
 		if (zero_ok) {
-			_session->request_transport_speed (speed, Config->get_shuttle_behaviour() == Wheel);
+			_session->request_transport_speed (speed);
 		} else {
-			_session->request_transport_speed_nonzero (speed, Config->get_shuttle_behaviour() == Wheel);
+			_session->request_transport_speed_nonzero (speed);
 		}
 
 		if (speed != 0 && !_session->transport_state_rolling()) {
