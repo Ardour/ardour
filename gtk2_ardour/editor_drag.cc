@@ -825,6 +825,10 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	show_verbose_cursor_time (_last_position.sample);
 	show_view_preview (_last_position.sample + _video_sample_offset);
 
+	if (_editor->should_ripple()) {
+		_earliest_time_limit = _primary->region()->playlist()->find_prev_region_start (_primary->region()->position());
+	}
+
 	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (current_pointer_y ());
 	if (tv.first) {
 		_last_pointer_time_axis_view = find_time_axis_view (tv.first);
