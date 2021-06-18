@@ -2115,7 +2115,7 @@ Editor::scrub (samplepos_t sample, double current_x)
 	if (scrubbing_direction == 0) {
 		/* first move */
 		_session->request_locate (sample, MustStop);
-		_session->request_transport_speed (0.1, false);
+		_session->request_transport_speed (0.1);
 		scrubbing_direction = 1;
 
 	} else {
@@ -2139,7 +2139,7 @@ Editor::scrub (samplepos_t sample, double current_x)
 				scrub_reverse_distance = 0;
 
 				delta = 0.01 * (last_scrub_x - current_x);
-				_session->request_transport_speed_nonzero (_session->actual_speed() - delta, false);
+				_session->request_transport_speed_nonzero (_session->actual_speed() - delta);
 			}
 
 		} else {
@@ -2158,7 +2158,7 @@ Editor::scrub (samplepos_t sample, double current_x)
 				scrub_reverse_distance = 0;
 
 				delta = 0.01 * (current_x - last_scrub_x);
-				_session->request_transport_speed_nonzero (_session->actual_speed() + delta, false);
+				_session->request_transport_speed_nonzero (_session->actual_speed() + delta);
 			}
 		}
 
@@ -2170,11 +2170,11 @@ Editor::scrub (samplepos_t sample, double current_x)
 
 			if (scrubbing_direction > 0) {
 				/* was forwards, go backwards */
-				_session->request_transport_speed (-0.1, false);
+				_session->request_transport_speed (-0.1);
 				scrubbing_direction = -1;
 			} else {
 				/* was backwards, go forwards */
-				_session->request_transport_speed (0.1, false);
+				_session->request_transport_speed (0.1);
 				scrubbing_direction = 1;
 			}
 

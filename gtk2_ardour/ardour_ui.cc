@@ -2013,13 +2013,13 @@ ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 
 		if (fwd) {
 			if (transport_speed <= 0) {
-				_session->request_transport_speed (1.0, false);
+				_session->request_transport_speed (1.0);
 				_session->request_roll (TRS_UI);
 				return;
 			}
 		} else {
 			if (transport_speed >= 0) {
-				_session->request_transport_speed (-1.0, false);
+				_session->request_transport_speed (-1.0);
 				_session->request_roll (TRS_UI);
 				return;
 			}
@@ -2034,12 +2034,12 @@ ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 
 			if (fwd) {
 				if (transport_speed <= 0) {
-					_session->request_transport_speed (1.0, false);
+					_session->request_transport_speed (1.0);
 					_session->request_roll (TRS_UI);
 				}
 			} else {
 				if (transport_speed >= 0) {
-					_session->request_transport_speed (-1.0, false);
+					_session->request_transport_speed (-1.0);
 					_session->request_roll (TRS_UI);
 				}
 			}
@@ -2086,7 +2086,7 @@ ARDOUR_UI::transport_ffwd_rewind (bool fwd)
 
 	speed = semitone_ratio * transport_speed;
 	speed = std::max (-maxspeed, std::min (maxspeed, speed));
-	_session->request_transport_speed (speed, false);
+	_session->request_transport_speed (speed);
 	_session->request_roll (TRS_UI);
 
 }
