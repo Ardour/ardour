@@ -46,28 +46,44 @@ private:
 	void refill ();
 	void on_show ();
 	void selection_changed ();
+	void blacklist_changed (std::string const&);
+	void favorite_changed (std::string const&);
+	void hidden_changed (std::string const&);
 
 	void rescan_all ();
+	void rescan_faulty ();
 	void rescan_selected ();
 	void clear_log ();
+
+	void plugin_status_changed (ARDOUR::PluginType, std::string, ARDOUR::PluginManager::PluginStatusType);
 
 	struct PluginColumns : public Gtk::TreeModel::ColumnRecord {
 		PluginColumns () {
 			add (status);
 			add (blacklisted);
+			add (favorite);
+			add (hidden);
 			add (name);
 			add (creator);
 			add (type);
 			add (path);
 			add (psle);
+			add (plugin);
+			add (can_blacklist);
+			add (can_fav_hide);
 		}
 		Gtk::TreeModelColumn<std::string> status;
 		Gtk::TreeModelColumn<bool> blacklisted;
+		Gtk::TreeModelColumn<bool> favorite;
+		Gtk::TreeModelColumn<bool> hidden;
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> type;
 		Gtk::TreeModelColumn<std::string> creator;
 		Gtk::TreeModelColumn<std::string> path;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::PluginScanLogEntry> > psle;
+		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
+		Gtk::TreeModelColumn<bool> can_blacklist;
+		Gtk::TreeModelColumn<bool> can_fav_hide;
 	};
 
 	PluginColumns                plugin_columns;
@@ -78,12 +94,16 @@ private:
 	Gtk::ScrolledWindow          _log_scroller;
 	ArdourWidgets::VPane         _pane;
 	ArdourWidgets::ArdourButton  _btn_rescan_all;
+	ArdourWidgets::ArdourButton  _btn_rescan_err;
 	ArdourWidgets::ArdourButton  _btn_rescan_sel;
 	ArdourWidgets::ArdourButton  _btn_clear;
+	Gtk::Table                   _tbl_nfo;
 
 	Gtk::Table _top;
 
-	PBD::ScopedConnection _manager_connection;
+	bool _in_row_change;
+
+	PBD::ScopedConnectionList _manager_connections;
 
 };
 
