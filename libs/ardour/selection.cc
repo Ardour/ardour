@@ -79,7 +79,9 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 	/* fetch the current selection so that we can get the most recently selected */
 	StripableAutomationControls selected;
 	get_stripables (selected);
-	boost::shared_ptr<Stripable> last_selected = selected.back().stripable;
+	boost::shared_ptr<Stripable> last_selected =
+	  selected.empty () ? boost::shared_ptr<Stripable> ()
+	                    : selected.back ().stripable;
 
 	/* Get all stripables and sort into the appropriate ordering */
 	StripableList stripables;
