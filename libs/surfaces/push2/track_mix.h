@@ -29,11 +29,11 @@ namespace ARDOUR {
 }
 
 namespace ArdourCanvas {
+	struct Rect;
+
 	class Rectangle;
 	class Text;
 	class Line;
-	class VBox;
-	class Rect;
 }
 
 namespace ArdourSurface {

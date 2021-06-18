@@ -24,10 +24,6 @@
 #include "layout.h"
 #include "push2.h"
 
-namespace ARDOUR {
-	class Stripable;
-}
-
 namespace ArdourSurface {
 
 class SplashLayout : public Push2Layout

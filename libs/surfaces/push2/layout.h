@@ -27,16 +27,8 @@
 
 #include "canvas/container.h"
 
-namespace Cairo {
-	class Region;
-}
-
 namespace ARDOUR {
 	class Session;
-}
-
-namespace Cairo {
-	class Context;
 }
 
 namespace ArdourSurface {

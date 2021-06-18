@@ -32,7 +32,6 @@
 #include <gtkmm/notebook.h>
 
 namespace Gtk {
-	class CellRendererCombo;
 	class ListStore;
 }
 

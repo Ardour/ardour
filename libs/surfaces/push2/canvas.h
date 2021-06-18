@@ -30,6 +30,10 @@ namespace Cairo {
 	class Region;
 }
 
+namespace Pango {
+	class Context;
+}
+
 namespace ArdourSurface {
 
 class Push2;

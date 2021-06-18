@@ -38,7 +38,6 @@ namespace ARDOUR {
 
 namespace Cairo {
 	class Context;
-	class Region;
 }
 
 namespace ArdourSurface {

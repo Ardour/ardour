@@ -23,10 +23,6 @@
 
 #include "layout.h"
 
-namespace ARDOUR {
-	class Stripable;
-}
-
 namespace ArdourCanvas {
 	class Rectangle;
 }

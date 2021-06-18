@@ -24,7 +24,6 @@
 #include "canvas/meter.h"
 
 namespace ARDOUR {
-	class Session;
 	class PeakMeter;
 }
 

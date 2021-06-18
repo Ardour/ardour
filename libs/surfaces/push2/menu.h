@@ -23,7 +23,6 @@
 
 namespace Cairo {
 	class Context;
-	class Region;
 }
 
 #include <pangomm/fontdescription.h>
