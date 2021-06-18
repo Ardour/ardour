@@ -215,21 +215,6 @@ ShuttleControl::build_shuttle_context_menu ()
 	}
 	items.push_back (MenuElem (_("Units"), *units_menu));
 
-	Menu* style_menu = manage (new Menu);
-	MenuList& style_items = style_menu->items();
-	RadioMenuItem::Group style_group;
-
-	style_items.push_back (RadioMenuElem (style_group, _("Sprung"), sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_style), Sprung)));
-	if (Config->get_shuttle_behaviour() == Sprung) {
-		static_cast<RadioMenuItem*>(&style_items.back())->set_active();
-	}
-	style_items.push_back (RadioMenuElem (style_group, _("Wheel"), sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_style), Wheel)));
-	if (Config->get_shuttle_behaviour() == Wheel) {
-		static_cast<RadioMenuItem*>(&style_items.back())->set_active();
-	}
-
-	items.push_back (MenuElem (_("Mode"), *style_menu));
-
 	if (Config->get_shuttle_units() == Percentage) {
 		RadioMenuItem::Group speed_group;
 
@@ -347,14 +332,10 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 			remove_modal_grab ();
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 
-			if (Config->get_shuttle_behaviour() == Sprung) {
-				if (shuttle_speed_on_grab == 0 ) {
-					_session->request_stop ();
-				} else {
-					_session->request_transport_speed (shuttle_speed_on_grab);
-				}
+			if (shuttle_speed_on_grab == 0 ) {
+				_session->request_stop ();
 			} else {
-				mouse_shuttle (ev->x, true);
+				_session->request_transport_speed (shuttle_speed_on_grab);
 			}
 		}
 		return true;
@@ -378,7 +359,7 @@ ShuttleControl::on_query_tooltip (int, int, bool, const Glib::RefPtr<Gtk::Toolti
 bool
 ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 {
-	if (!_session || Config->get_shuttle_behaviour() != Wheel) {
+	if (!_session) {
 		return true;
 	}
 
@@ -664,15 +645,6 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 }
 
 void
-ShuttleControl::set_shuttle_style (ShuttleBehaviour s)
-{
-	if (_ignore_change) {
-		return;
-	}
-	Config->set_shuttle_behaviour (s);
-}
-
-void
 ShuttleControl::set_shuttle_units (ShuttleUnits s)
 {
 	if (_ignore_change) {
@@ -702,34 +674,7 @@ ShuttleControl::ShuttleControllable::get_value () const
 void
 ShuttleControl::parameter_changed (std::string p)
 {
-	if (p == "shuttle-behaviour") {
-		switch (Config->get_shuttle_behaviour ()) {
-		case Sprung:
-			/* back to Sprung - reset to speed = 1.0 if playing
-			 */
-			if (_session) {
-				if (_session->transport_rolling()) {
-					if (_session->actual_speed() == 1.0) {
-						queue_draw ();
-					} else {
-						/* reset current speed and
-						   revert to 1.0 as the default
-						*/
-						_session->reset_transport_speed ();
-						/* redraw when speed changes */
-					}
-				} else {
-					queue_draw ();
-				}
-			}
-			break;
-
-		case Wheel:
-			queue_draw ();
-			break;
-		}
-
-	} else if (p == "shuttle-max-speed") {
+	if (p == "shuttle-max-speed") {
 		shuttle_max_speed = Config->get_shuttle_max_speed ();
 		last_speed_displayed = -99999999;
 		map_transport_state ();
