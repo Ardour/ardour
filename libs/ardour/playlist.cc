@@ -2095,6 +2095,11 @@ Playlist::find_prev_region_start (samplepos_t sample)
 		sampleoffset_t            distance;
 		const samplepos_t         first_sample = r->first_sample ();
 
+		if (first_sample == sample) {
+			/* region at the given position - ignore */
+			continue;
+		}
+
 		if (first_sample < sample) {
 			distance = sample - first_sample;
 
