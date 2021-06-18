@@ -166,7 +166,7 @@ class Push2 : public ARDOUR::ControlProtocol
 
 		virtual MidiByteArray state_msg() const = 0;
 
-	     protected:
+	protected:
 		uint8_t _extra;
 		uint8_t _color_index;
 		State   _state;
@@ -360,14 +360,14 @@ class Push2 : public ARDOUR::ControlProtocol
 	void set_pressure_mode (PressureMode);
 	PBD::Signal1<void,PressureMode> PressureModeChange;
 
-	libusb_device_handle* usb_handle() const { return handle; }
+	libusb_device_handle* usb_handle() const { return _handle; }
 
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
 
   private:
-	libusb_device_handle *handle;
-	bool in_use;
-	ModifierState _modifier_state;
+	libusb_device_handle* _handle;
+	bool                  _in_use;
+	ModifierState         _modifier_state;
 
 	void do_request (Push2Request*);
 
@@ -384,12 +384,12 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	/* map of Buttons by CC */
 	typedef std::map<int,boost::shared_ptr<Button> > CCButtonMap;
-	CCButtonMap cc_button_map;
+	CCButtonMap _cc_button_map;
 	/* map of Buttons by ButtonID */
 	typedef std::map<ButtonID,boost::shared_ptr<Button> > IDButtonMap;
-	IDButtonMap id_button_map;
-	std::set<ButtonID> buttons_down;
-	std::set<ButtonID> consumed;
+	IDButtonMap _id_button_map;
+	std::set<ButtonID> _buttons_down;
+	std::set<ButtonID> _consumed;
 
 	bool button_long_press_timeout (ButtonID id);
 	void start_press_timeout (boost::shared_ptr<Button>, ButtonID);
@@ -401,12 +401,12 @@ class Push2 : public ARDOUR::ControlProtocol
 	 * hardware, not the note number generated if the pad is touched)
 	 */
 	typedef std::map<int,boost::shared_ptr<Pad> > NNPadMap;
-	NNPadMap nn_pad_map;
+	NNPadMap _nn_pad_map;
 
 	/* map of Pads by note number they generate (their "filtered" value)
 	 */
 	typedef std::multimap<int,boost::shared_ptr<Pad> > FNPadMap;
-	FNPadMap fn_pad_map;
+	FNPadMap _fn_pad_map;
 
 	void set_button_color (ButtonID, uint8_t color_index);
 	void set_button_state (ButtonID, LED::State);
@@ -518,13 +518,13 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	/* special Stripable */
 
-	boost::shared_ptr<ARDOUR::Stripable> master;
+	boost::shared_ptr<ARDOUR::Stripable> _master;
 
-	sigc::connection vblank_connection;
+	sigc::connection _vblank_connection;
 	bool vblank ();
 
 	void splash ();
-	PBD::microseconds_t splash_start;
+	PBD::microseconds_t _splash_start;
 
 	/* the canvas */
 
@@ -535,15 +535,15 @@ class Push2 : public ARDOUR::ControlProtocol
 	mutable Glib::Threads::Mutex layout_lock;
 	Push2Layout* _current_layout;
 	Push2Layout* _previous_layout;
-	Push2Layout* mix_layout;
-	Push2Layout* scale_layout;
-	Push2Layout* track_mix_layout;
-	Push2Layout* splash_layout;
+	Push2Layout* _mix_layout;
+	Push2Layout* _scale_layout;
+	Push2Layout* _track_mix_layout;
+	Push2Layout* _splash_layout;
 	void set_current_layout (Push2Layout*);
 
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
 
-	boost::weak_ptr<ARDOUR::MidiTrack> current_pad_target;
+	boost::weak_ptr<ARDOUR::MidiTrack> _current_pad_target;
 
 	void port_registration_handler ();
 
@@ -552,14 +552,15 @@ class Push2 : public ARDOUR::ControlProtocol
 		OutputConnected = 0x2
 	};
 
-	int connection_state;
+	int _connection_state;
+
 	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 	PBD::ScopedConnectionList port_connections;
 	void connected ();
 
 	/* GUI */
 
-	mutable P2GUI* gui;
+	mutable P2GUI* _gui;
 	void build_gui ();
 
 	/* pad mapping */
@@ -567,37 +568,36 @@ class Push2 : public ARDOUR::ControlProtocol
 	void stripable_selection_changed ();
 
 	MusicalMode::Type _mode;
-	int _scale_root;
-	int _root_octave;
-	bool _in_key;
+	int               _scale_root;
+	int               _root_octave;
+	bool              _in_key;
+	int               _octave_shift;
+	bool              _percussion;
 
-	int octave_shift;
-
-	bool percussion;
 	void set_percussive_mode (bool);
 
 	/* color map (device side) */
 
 	typedef std::map<Gtkmm2ext::Color,uint8_t> ColorMap;
 	typedef std::stack<uint8_t> ColorMapFreeList;
-	ColorMap color_map;
-	ColorMapFreeList color_map_free_list;
+	ColorMap _color_map;
+	ColorMapFreeList _color_map_free_list;
 	void build_color_map ();
 
 	/* our own colors */
 
 	typedef std::map<ColorName,Gtkmm2ext::Color> Colors;
-	Colors colors;
+	Colors _colors;
 	void fill_color_table ();
 	void reset_pad_colors ();
 
 	PressureMode _pressure_mode;
 	void request_pressure_mode ();
 
-	uint8_t selection_color;
-	uint8_t contrast_color;
+	uint8_t _selection_color;
+	uint8_t _contrast_color;
 
-	bool in_range_select;
+	bool _in_range_select;
 };
 
 } /* namespace */

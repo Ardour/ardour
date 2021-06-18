@@ -87,17 +87,17 @@ public:
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
 
   private:
-	Push2& p2;
+	Push2&  _p2;
 	Element _elements;
 	Flags   _flags;
 	double  _r;
-	float   _val; // current value [0..1]
+	float   _val;    // current value [0..1]
 	float   _normal; // default value, arc
 
-	Gtkmm2ext::Color text_color;
-	Gtkmm2ext::Color arc_start_color;
-	Gtkmm2ext::Color arc_end_color;
-	ArdourCanvas::Text* text;
+	Gtkmm2ext::Color    _text_color;
+	Gtkmm2ext::Color    _arc_start_color;
+	Gtkmm2ext::Color    _arc_end_color;
+	ArdourCanvas::Text* _text;
 
 	void set_pan_azimuth_text (double);
 	void set_pan_width_text (double);

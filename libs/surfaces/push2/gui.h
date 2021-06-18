@@ -48,17 +48,18 @@ public:
 	~P2GUI ();
 
 private:
-	Push2& p2;
-	PBD::ScopedConnectionList p2_connections;
-	Gtk::HBox hpacker;
-	Gtk::Table table;
-	Gtk::Table action_table;
-	Gtk::ComboBox input_combo;
-	Gtk::ComboBox output_combo;
-	Gtk::Image    image;
+	Push2&                    _p2;
+	PBD::ScopedConnectionList _p2_connections;
+	Gtk::HBox                 _hpacker;
+	Gtk::Table                _table;
+	Gtk::Table                _action_table;
+	Gtk::ComboBox             _input_combo;
+	Gtk::ComboBox             _output_combo;
+	Gtk::Image                _image;
 
 	void update_port_combos ();
 	void connection_handler ();
+
 	PBD::ScopedConnectionList _port_connections;
 
 	struct MidiPortColumns : public Gtk::TreeModel::ColumnRecord {
@@ -70,10 +71,11 @@ private:
 		Gtk::TreeModelColumn<std::string> full_name;
 	};
 
-	MidiPortColumns midi_port_columns;
-	bool ignore_active_change;
+	MidiPortColumns _midi_port_columns;
+	bool            _ignore_active_change;
 
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
+
 	void active_port_changed (Gtk::ComboBox*,bool for_input);
 
 	struct PressureModeColumns : public Gtk::TreeModel::ColumnRecord {
@@ -84,10 +86,11 @@ private:
 		Gtk::TreeModelColumn<Push2::PressureMode>  mode;
 		Gtk::TreeModelColumn<std::string> name;
 	};
-	PressureModeColumns pressure_mode_columns;
+
+	PressureModeColumns _pressure_mode_columns;
 	Glib::RefPtr<Gtk::ListStore> build_pressure_mode_columns ();
-	Gtk::ComboBox pressure_mode_selector;
-	Gtk::Label pressure_mode_label;
+	Gtk::ComboBox _pressure_mode_selector;
+	Gtk::Label _pressure_mode_label;
 
 	void reprogram_pressure_mode ();
 };

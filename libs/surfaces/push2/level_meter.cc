@@ -44,27 +44,27 @@ using namespace ArdourCanvas;
 
 LevelMeter::LevelMeter (Push2& p, Item* parent, int len, Meter::Orientation o)
 	: Container (parent)
-	, p2 (p)
+	, _p2 (p)
 	, _meter (0)
 	, _meter_orientation(o)
-	, regular_meter_width (6)
-	, meter_length (len)
-	, thin_meter_width(2)
-	, max_peak (minus_infinity())
-	, visible_meter_type (MeterType(0))
-	, midi_count (0)
-	, meter_count (0)
-	, max_visible_meters (0)
+	, _regular_meter_width (6)
+	, _meter_length (len)
+	, _thin_meter_width(2)
+	, _max_peak (minus_infinity())
+	, _visible_meter_type (MeterType(0))
+	, _midi_count (0)
+	, _meter_count (0)
+	, _max_visible_meters (0)
 {
-	Config->ParameterChanged.connect (_parameter_connection, invalidator(*this), boost::bind (&LevelMeter::parameter_changed, this, _1), &p2);
+	Config->ParameterChanged.connect (_parameter_connection, invalidator(*this), boost::bind (&LevelMeter::parameter_changed, this, _1), &_p2);
 
 	if (_meter_orientation == Meter::Vertical) {
-		meter_packer = new HBox (_canvas);
+		_meter_packer = new HBox (_canvas);
 	} else {
-		meter_packer = new VBox (_canvas);
+		_meter_packer = new VBox (_canvas);
 	}
 
-	meter_packer->set_collapse_on_hide (true);
+	_meter_packer->set_collapse_on_hide (true);
 }
 
 LevelMeter::~LevelMeter ()
@@ -72,10 +72,10 @@ LevelMeter::~LevelMeter ()
 	_configuration_connection.disconnect();
 	_meter_type_connection.disconnect();
 	_parameter_connection.disconnect();
-	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); i++) {
+	for (vector<MeterInfo>::iterator i = _meters.begin(); i != _meters.end(); i++) {
 		delete (*i).meter;
 	}
-	meters.clear();
+	_meters.clear();
 }
 
 void
@@ -87,11 +87,11 @@ LevelMeter::set_meter (PeakMeter* meter)
 	_meter = meter;
 
 	if (_meter) {
-		_meter->ConfigurationChanged.connect (_configuration_connection, invalidator(*this), boost::bind (&LevelMeter::configuration_changed, this, _1, _2), &p2);
-		_meter->MeterTypeChanged.connect (_meter_type_connection, invalidator (*this), boost::bind (&LevelMeter::meter_type_changed, this, _1), &p2);
+		_meter->ConfigurationChanged.connect (_configuration_connection, invalidator(*this), boost::bind (&LevelMeter::configuration_changed, this, _1, _2), &_p2);
+		_meter->MeterTypeChanged.connect (_meter_type_connection, invalidator (*this), boost::bind (&LevelMeter::meter_type_changed, this, _1), &_p2);
 	}
 
-	setup_meters (meter_length, regular_meter_width, thin_meter_width);
+	setup_meters (_meter_length, _regular_meter_width, _thin_meter_width);
 }
 
 static float meter_lineup_cfg(MeterLineUp lul, float offset) {
@@ -145,7 +145,7 @@ LevelMeter::update_meters ()
 
 	uint32_t nmidi = _meter->input_streams().n_midi();
 
-	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
+	for (n = 0, i = _meters.begin(); i != _meters.end(); ++i, ++n) {
 		if ((*i).packed) {
 			const float mpeak = _meter->meter_level(n, MeterMaxPeak);
 			if (mpeak > (*i).max_peak) {
@@ -153,8 +153,8 @@ LevelMeter::update_meters ()
 				//(*i).meter->set_highlight(mpeak >= UIConfiguration::instance().get_meter_peak());
 				(*i).meter->set_highlight (mpeak >= 2.0);
 			}
-			if (mpeak > max_peak) {
-				max_peak = mpeak;
+			if (mpeak > _max_peak) {
+				_max_peak = mpeak;
 			}
 
 			if (n < nmidi) {
@@ -186,7 +186,8 @@ LevelMeter::update_meters ()
 			}
 		}
 	}
-	return max_peak;
+
+	return _max_peak;
 }
 
 void
@@ -196,22 +197,22 @@ LevelMeter::parameter_changed (string p)
 		vector<MeterInfo>::iterator i;
 		uint32_t n;
 
-		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
+		for (n = 0, i = _meters.begin(); i != _meters.end(); ++i, ++n) {
 			//(*i).meter->set_hold_count ((uint32_t) floor(UIConfiguration::instance().get_meter_hold()));
 			(*i).meter->set_hold_count (20);
 		}
 	}
 	else if (p == "meter-line-up-level") {
-		setup_meters (meter_length, regular_meter_width, thin_meter_width);
+		setup_meters (_meter_length, _regular_meter_width, _thin_meter_width);
 	}
 	else if (p == "meter-style-led") {
-		setup_meters (meter_length, regular_meter_width, thin_meter_width);
+		setup_meters (_meter_length, _regular_meter_width, _thin_meter_width);
 	}
 	else if (p == "meter-peak") {
 		vector<MeterInfo>::iterator i;
 		uint32_t n;
 
-		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
+		for (n = 0, i = _meters.begin(); i != _meters.end(); ++i, ++n) {
 			(*i).max_peak = minus_infinity();
 		}
 	}
@@ -220,35 +221,36 @@ LevelMeter::parameter_changed (string p)
 void
 LevelMeter::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
 {
-	setup_meters (meter_length, regular_meter_width, thin_meter_width);
+	setup_meters (_meter_length, _regular_meter_width, _thin_meter_width);
 }
 
 void
 LevelMeter::meter_type_changed (MeterType t)
 {
-	setup_meters (meter_length, regular_meter_width, thin_meter_width);
+	setup_meters (_meter_length, _regular_meter_width, _thin_meter_width);
 }
 
 void
 LevelMeter::hide_all_meters ()
 {
-	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); ++i) {
+	for (vector<MeterInfo>::iterator i = _meters.begin(); i != _meters.end(); ++i) {
 		if ((*i).packed) {
-			meter_packer->remove ((*i).meter);
+			_meter_packer->remove ((*i).meter);
 			(*i).packed = false;
 		}
 	}
-	meter_count = 0;
+	_meter_count = 0;
 }
 
 void
 LevelMeter::set_max_audio_meter_count (uint32_t cnt)
 {
-	if (cnt == max_visible_meters) {
+	if (cnt == _max_visible_meters) {
 		return;
 	}
-	max_visible_meters = cnt;
-	setup_meters (meter_length, regular_meter_width, thin_meter_width);
+
+	_max_visible_meters = cnt;
+	setup_meters (_meter_length, _regular_meter_width, _thin_meter_width);
 }
 
 void
@@ -263,9 +265,9 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 	MeterType meter_type = _meter->meter_type ();
 	uint32_t nmidi = _meter->input_streams().n_midi();
 	uint32_t nmeters = _meter->input_streams().n_total();
-	regular_meter_width = initial_width;
-	thin_meter_width = thin_width;
-	meter_length = len;
+	_regular_meter_width = initial_width;
+	_thin_meter_width = thin_width;
+	_meter_length = len;
 
 	guint16 width;
 
@@ -275,17 +277,17 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 	}
 
 	if (nmeters <= 2) {
-		width = regular_meter_width;
+		width = _regular_meter_width;
 	} else {
-		width = thin_meter_width;
+		width = _thin_meter_width;
 	}
 
-	if (   meters.size() > 0
-	    && nmidi == midi_count
-	    && nmeters == meter_count
-	    && meters[0].width == width
-	    && meters[0].length == len
-	    && meter_type == visible_meter_type) {
+	if (_meters.size() > 0
+	    && nmidi == _midi_count
+	    && nmeters == _meter_count
+	    && _meters[0].width == width
+	    && _meters[0].length == len
+	    && meter_type == _visible_meter_type) {
 		return;
 	}
 
@@ -301,8 +303,8 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 #endif
 
 	hide_all_meters ();
-	while (meters.size() < nmeters) {
-		meters.push_back (MeterInfo());
+	while (_meters.size() < nmeters) {
+		_meters.push_back (MeterInfo());
 	}
 
 	//cerr << "LevelMeter::setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
@@ -458,39 +460,39 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 		}
 
 #endif
-		if (meters[n].width != width || meters[n].length != len || meter_type != visible_meter_type || nmidi != midi_count) {
-			bool hl = meters[n].meter ? meters[n].meter->get_highlight() : false;
-			meters[n].packed = false;
-			delete meters[n].meter;
-			meters[n].meter = new Meter (this->canvas(), 32, width, _meter_orientation, len);
-			meters[n].meter->set_highlight(hl);
-			meters[n].width = width;
-			meters[n].length = len;
+		if (_meters[n].width != width || _meters[n].length != len || meter_type != _visible_meter_type || nmidi != _midi_count) {
+			bool hl = _meters[n].meter ? _meters[n].meter->get_highlight() : false;
+			_meters[n].packed = false;
+			delete _meters[n].meter;
+			_meters[n].meter = new Meter (this->canvas(), 32, width, _meter_orientation, len);
+			_meters[n].meter->set_highlight(hl);
+			_meters[n].width = width;
+			_meters[n].length = len;
 		}
 
-		meter_packer->add (meters[n].meter);
-		meters[n].packed = true;
-		if (max_visible_meters == 0 || (uint32_t) n < max_visible_meters + nmidi) {
-			meters[n].meter->show ();
+		_meter_packer->add (_meters[n].meter);
+		_meters[n].packed = true;
+		if (_max_visible_meters == 0 || (uint32_t) n < _max_visible_meters + nmidi) {
+			_meters[n].meter->show ();
 		} else {
-			meters[n].meter->hide ();
+			_meters[n].meter->hide ();
 		}
 	}
 
-	visible_meter_type = meter_type;
-	midi_count = nmidi;
-	meter_count = nmeters;
+	_visible_meter_type = meter_type;
+	_midi_count = nmidi;
+	_meter_count = nmeters;
 }
 
 void LevelMeter::clear_meters (bool reset_highlight)
 {
-	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {
+	for (vector<MeterInfo>::iterator i = _meters.begin(); i < _meters.end(); i++) {
 		(*i).meter->clear();
 		(*i).max_peak = minus_infinity();
 		if (reset_highlight)
 			(*i).meter->set_highlight(false);
 	}
-	max_peak = minus_infinity();
+	_max_peak = minus_infinity();
 }
 
 void LevelMeter::hide_meters ()

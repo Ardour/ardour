@@ -38,7 +38,7 @@ class SplashLayout : public Push2Layout
 	void strip_vpot_touch (int, bool) {}
 
   private:
-	Cairo::RefPtr<Cairo::ImageSurface> img;
+	Cairo::RefPtr<Cairo::ImageSurface> _img;
 };
 
 } /* namespace */

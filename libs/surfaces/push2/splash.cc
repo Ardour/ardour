@@ -53,7 +53,7 @@ SplashLayout::SplashLayout (Push2& p, Session& s, std::string const & name)
 		throw failed_constructor();
 	}
 
-	img = Cairo::ImageSurface::create_from_png (splash_file);
+	_img = Cairo::ImageSurface::create_from_png (splash_file);
 }
 
 SplashLayout::~SplashLayout ()
@@ -68,8 +68,8 @@ SplashLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) c
 	int rows = display_height ();
 	int cols = display_width ();
 
-	double x_ratio = (double) img->get_width() / (cols - 20);
-	double y_ratio = (double) img->get_height() / (rows - 20);
+	double x_ratio = (double) _img->get_width() / (cols - 20);
+	double y_ratio = (double) _img->get_height() / (rows - 20);
 	double scale = min (x_ratio, y_ratio);
 
 	/* background */
@@ -82,7 +82,7 @@ SplashLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) c
 	context->save ();
 	context->translate (5, 5);
 	context->scale (scale, scale);
-	context->set_source (img, 0, 0);
+	context->set_source (_img, 0, 0);
 	context->paint ();
 	context->restore ();
 

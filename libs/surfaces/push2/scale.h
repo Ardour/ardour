@@ -50,22 +50,22 @@ class ScaleLayout : public Push2Layout
 	void strip_vpot_touch (int, bool) {}
 
    private:
-	ArdourCanvas::Rectangle* bg;
-	std::vector<ArdourCanvas::Text*> upper_text;
-	std::vector<ArdourCanvas::Text*> lower_text;
-	ArdourCanvas::Text* left_scroll_text;
-	ArdourCanvas::Text* right_scroll_text;
-	ArdourCanvas::Text* inkey_text;
-	ArdourCanvas::Text* chromatic_text;
-	ArdourCanvas::Text* close_text;
-	Push2Menu* scale_menu;
-	int last_vpot;
-	int vpot_delta_cnt;
-	boost::shared_ptr<Push2::Button> root_button;
+	ArdourCanvas::Rectangle* _bg;
+	std::vector<ArdourCanvas::Text*> _upper_text;
+	std::vector<ArdourCanvas::Text*> _lower_text;
+	ArdourCanvas::Text* _left_scroll_text;
+	ArdourCanvas::Text* _right_scroll_text;
+	ArdourCanvas::Text* _inkey_text;
+	ArdourCanvas::Text* _chromatic_text;
+	ArdourCanvas::Text* _close_text;
+	Push2Menu* _scale_menu;
+	int _last_vpot;
+	int _vpot_delta_cnt;
+	boost::shared_ptr<Push2::Button> _root_button;
 
 	void build_scale_menu ();
-	PBD::ScopedConnectionList menu_connections;
-	PBD::ScopedConnectionList p2_connections;
+	PBD::ScopedConnectionList _menu_connections;
+	PBD::ScopedConnectionList _p2_connections;
 	void mode_changed ();
 	void menu_rearranged ();
 	void show_root_state ();

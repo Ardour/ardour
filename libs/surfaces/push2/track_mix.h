@@ -64,23 +64,23 @@ class TrackMixLayout : public Push2Layout
 	void update_meters ();
 	void update_clocks ();
 
-	boost::shared_ptr<ARDOUR::Stripable> current_stripable() const { return stripable; }
+	boost::shared_ptr<ARDOUR::Stripable> current_stripable() const { return _stripable; }
 
    private:
-	boost::shared_ptr<ARDOUR::Stripable> stripable;
-	PBD::ScopedConnectionList stripable_connections;
+	boost::shared_ptr<ARDOUR::Stripable> _stripable;
+	PBD::ScopedConnectionList            _stripable_connections;
 
-	ArdourCanvas::Rectangle* bg;
-	ArdourCanvas::Line* upper_line;
-	std::vector<ArdourCanvas::Text*> upper_text;
-	std::vector<ArdourCanvas::Text*> lower_text;
-	ArdourCanvas::Text* name_text;
-	ArdourCanvas::Text* bbt_text;
-	ArdourCanvas::Text* minsec_text;
-	uint8_t selection_color;
+	ArdourCanvas::Rectangle*         _bg;
+	ArdourCanvas::Line*              _upper_line;
+	std::vector<ArdourCanvas::Text*> _upper_text;
+	std::vector<ArdourCanvas::Text*> _lower_text;
+	ArdourCanvas::Text*              _name_text;
+	ArdourCanvas::Text*              _bbt_text;
+	ArdourCanvas::Text*              _minsec_text;
+	uint8_t                          _selection_color;
 
-	Push2Knob* knobs[8];
-	LevelMeter* meter;
+	Push2Knob*  _knobs[8];
+	LevelMeter* _meter;
 
 	void stripable_property_change (PBD::PropertyChange const& what_changed);
 	void simple_control_change (boost::shared_ptr<ARDOUR::AutomationControl> ac, Push2::ButtonID bid);

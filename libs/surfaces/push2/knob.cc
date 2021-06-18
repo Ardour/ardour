@@ -50,7 +50,7 @@ Push2Knob::Element Push2Knob::default_elements = Push2Knob::Element (Push2Knob::
 
 Push2Knob::Push2Knob (Push2& p, Item* parent, Element e, Flags flags)
 	: Container (parent)
-	, p2 (p)
+	, _p2 (p)
 	, _elements (e)
 	, _flags (flags)
 	, _r (0)
@@ -59,15 +59,15 @@ Push2Knob::Push2Knob (Push2& p, Item* parent, Element e, Flags flags)
 {
 	Pango::FontDescription fd ("Sans 10");
 
-	text = new Text (this);
-	text->set_font_description (fd);
-	text->set_position (Duple (0, -20)); /* changed when radius changes */
+	_text = new Text (this);
+	_text->set_font_description (fd);
+	_text->set_position (Duple (0, -20)); /* changed when radius changes */
 
 	/* typically over-ridden */
 
-	text_color = p2.get_color (Push2::ParameterName);
-	arc_start_color = p2.get_color (Push2::KnobArcStart);
-	arc_end_color = p2.get_color (Push2::KnobArcEnd);
+	_text_color      = _p2.get_color (Push2::ParameterName);
+	_arc_start_color = _p2.get_color (Push2::KnobArcStart);
+	_arc_end_color   = _p2.get_color (Push2::KnobArcEnd);
 }
 
 Push2Knob::~Push2Knob ()
@@ -77,13 +77,14 @@ Push2Knob::~Push2Knob ()
 void
 Push2Knob::set_text_color (Gtkmm2ext::Color c)
 {
-	text->set_color (c);
+	_text->set_color (c);
 }
 
 void
 Push2Knob::set_radius (double r)
 {
 	_r = r;
+
 	text->set_position (Duple (-_r, -_r - 20));
 	set_bbox_dirty ();
 	redraw ();
@@ -137,7 +138,7 @@ Push2Knob::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		float progress_radius = inner_progress_radius + progress_width/2.0;
 
 		//dark arc background
-		set_source_rgb (context, p2.get_color (Push2::KnobArcBackground));
+		set_source_rgb (context, _p2.get_color (Push2::KnobArcBackground));
 		context->set_line_width (progress_width);
 		context->arc (0, 0, progress_radius, start_angle, end_angle);
 		context->stroke ();
@@ -145,8 +146,8 @@ Push2Knob::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		double red_start, green_start, blue_start, astart;
 		double red_end, green_end, blue_end, aend;
 
-		Gtkmm2ext::color_to_rgba (arc_start_color, red_start, green_start, blue_start, astart);
-		Gtkmm2ext::color_to_rgba (arc_end_color, red_end, green_end, blue_end, aend);
+		Gtkmm2ext::color_to_rgba (_arc_start_color, red_start, green_start, blue_start, astart);
+		Gtkmm2ext::color_to_rgba (_arc_end_color, red_end, green_end, blue_end, aend);
 
 		//vary the arc color over the travel of the knob
 		float intensity = fabsf (_val - zero) / std::max(zero, (1.f - zero));
@@ -182,13 +183,13 @@ Push2Knob::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		//knob shadow
 		context->save();
 		context->translate(pointer_thickness+1, pointer_thickness+1 );
-		set_source_rgba (context, p2.get_color (Push2::KnobShadow));
+		set_source_rgba (context, _p2.get_color (Push2::KnobShadow));
 		context->arc (0, 0, center_radius-1, 0, 2.0*G_PI);
 		context->fill ();
 		context->restore();
 
 		//inner circle
-		set_source_rgb (context, p2.get_color (Push2::KnobForeground));
+		set_source_rgb (context, _p2.get_color (Push2::KnobForeground));
 		context->arc (0, 0, center_radius, 0, 2.0*G_PI);
 		context->fill ();
 
@@ -204,7 +205,7 @@ Push2Knob::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 
 	//black knob border
 	context->set_line_width (border_width);
-	set_source_rgba (context, p2.get_color (Push2::KnobBorder));
+	set_source_rgba (context, _p2.get_color (Push2::KnobBorder));
 	context->set_source_rgba (0, 0, 0, 1 );
 	context->arc (0, 0, center_radius, 0, 2.0*G_PI);
 	context->stroke ();
@@ -213,7 +214,7 @@ Push2Knob::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 	if (!flat) {
 		context->save();
 		context->translate(1, 1 );
-		set_source_rgba (context, p2.get_color (Push2::KnobLineShadow));
+		set_source_rgba (context, _p2.get_color (Push2::KnobLineShadow));
 		context->set_line_cap (Cairo::LINE_CAP_ROUND);
 		context->set_line_width (pointer_thickness);
 		context->move_to ((center_radius * value_x), (center_radius * value_y));
@@ -223,7 +224,7 @@ Push2Knob::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 	}
 
 	//line
-	set_source_rgba (context, p2.get_color (Push2::KnobLine));
+	set_source_rgba (context, _p2.get_color (Push2::KnobLine));
 	context->set_line_cap (Cairo::LINE_CAP_ROUND);
 	context->set_line_width (pointer_thickness);
 	context->move_to ((center_radius * value_x), (center_radius * value_y));
@@ -265,7 +266,7 @@ Push2Knob::set_controllable (boost::shared_ptr<AutomationControl> c)
 	}
 
 	_controllable = c;
-	_controllable->Changed.connect (watch_connection, invalidator(*this), boost::bind (&Push2Knob::controllable_changed, this), &p2);
+	_controllable->Changed.connect (watch_connection, invalidator(*this), boost::bind (&Push2Knob::controllable_changed, this), &_p2);
 
 	controllable_changed ();
 }
@@ -283,7 +284,7 @@ Push2Knob::set_pan_azimuth_text (double pos)
 
 	char buf[64];
 	snprintf (buf, sizeof (buf), _("L:%3d R:%3d"), (int) rint (100.0 * (1.0 - pos)), (int) rint (100.0 * pos));
-	text->set (buf);
+	_text->set (buf);
 }
 
 void
@@ -291,7 +292,7 @@ Push2Knob::set_pan_width_text (double val)
 {
 	char buf[16];
 	snprintf (buf, sizeof (buf), "%d%%", (int) floor (val*100));
-	text->set (buf);
+	_text->set (buf);
 }
 
 void
@@ -304,7 +305,7 @@ Push2Knob::set_gain_text (double)
 	*/
 
 	snprintf (buf, sizeof (buf), "%.1f dB", accurate_coefficient_to_dB (_controllable->get_value()));
-	text->set (buf);
+	_text->set (buf);
 }
 
 void
@@ -330,7 +331,7 @@ Push2Knob::controllable_changed ()
 			break;
 
 		default:
-			text->set (std::string());
+			_text->set (std::string());
 		}
 	}
 
@@ -354,13 +355,13 @@ Push2Knob::remove_flag (Flags f)
 void
 Push2Knob::set_arc_start_color (uint32_t c)
 {
-	arc_start_color = c;
+	_arc_start_color = c;
 	redraw ();
 }
 
 void
 Push2Knob::set_arc_end_color (uint32_t c)
 {
-	arc_end_color = c;
+	_arc_end_color = c;
 	redraw ();
 }

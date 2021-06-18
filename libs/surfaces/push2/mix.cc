@@ -76,20 +76,20 @@ using namespace ArdourCanvas;
 
 MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
 	: Push2Layout (p, s, name)
-	, bank_start (0)
-	, vpot_mode (Volume)
+	, _bank_start (0)
+	, _vpot_mode (Volume)
 {
 	/* background */
 
-	bg = new ArdourCanvas::Rectangle (this);
-	bg->set (Rect (0, 0, display_width(), display_height()));
-	bg->set_fill_color (p2.get_color (Push2::DarkBackground));
+	_bg = new ArdourCanvas::Rectangle (this);
+	_bg->set (Rect (0, 0, display_width(), display_height()));
+	_bg->set_fill_color (_p2.get_color (Push2::DarkBackground));
 
 	/* upper line */
 
-	upper_line = new Line (this);
-	upper_line->set (Duple (0, 22.5), Duple (display_width(), 22.5));
-	upper_line->set_outline_color (p2.get_color (Push2::LightBackground));
+	_upper_line = new Line (this);
+	_upper_line->set (Duple (0, 22.5), Duple (display_width(), 22.5));
+	_upper_line->set_outline_color (_p2.get_color (Push2::LightBackground));
 
 	Pango::FontDescription fd2 ("Sans 10");
 
@@ -100,17 +100,17 @@ MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
 		ArdourCanvas::Rectangle* r = new ArdourCanvas::Rectangle (this);
 		Coord x0 = 10 + (n*Push2Canvas::inter_button_spacing()) - 5;
 		r->set (Rect (x0, 2, x0 + Push2Canvas::inter_button_spacing(), 2 + 21));
-		upper_backgrounds.push_back (r);
+		_upper_backgrounds.push_back (r);
 
 		r = new ArdourCanvas::Rectangle (this);
 		r->set (Rect (x0, 137, x0 + Push2Canvas::inter_button_spacing(), 137 + 21));
-		lower_backgrounds.push_back (r);
+		_lower_backgrounds.push_back (r);
 
 		/* text labels for knob function*/
 
 		Text* t = new Text (this);
 		t->set_font_description (fd2);
-		t->set_color (p2.get_color (Push2::ParameterName));
+		t->set_color (_p2.get_color (Push2::ParameterName));
 		t->set_position (Duple (10 + (n*Push2Canvas::inter_button_spacing()), 5));
 
 		string txt;
@@ -141,27 +141,27 @@ MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
 			break;
 		}
 		t->set (txt);
-		upper_text.push_back (t);
+		_upper_text.push_back (t);
 
 		/* GainMeters */
 
-		gain_meter[n] = new GainMeter (this, p2);
+		gain_meter[n] = new GainMeter (this, _p2);
 		gain_meter[n]->set_position (Duple (40 + (n * Push2Canvas::inter_button_spacing()), 95));
 
 		/* stripable names */
 
 		t = new Text (this);
 		t->set_font_description (fd2);
-		t->set_color (p2.get_color (Push2::ParameterName));
+		t->set_color (_p2.get_color (Push2::ParameterName));
 		t->set_position (Duple (10 + (n*Push2Canvas::inter_button_spacing()), 140));
-		lower_text.push_back (t);
+		_lower_text.push_back (t);
 
 	}
 
-	mode_button = p2.button_by_id (Push2::Upper1);
+	_mode_button = _p2.button_by_id (Push2::Upper1);
 
-	session.RouteAdded.connect (session_connections, invalidator(*this), boost::bind (&MixLayout::stripables_added, this), &p2);
-	session.vca_manager().VCAAdded.connect (session_connections, invalidator (*this), boost::bind (&MixLayout::stripables_added, this), &p2);
+	_session.RouteAdded.connect (_session_connections, invalidator(*this), boost::bind (&MixLayout::stripables_added, this), &_p2);
+	_session.vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&MixLayout::stripables_added, this), &_p2);
 }
 
 MixLayout::~MixLayout ()
@@ -177,18 +177,18 @@ MixLayout::show ()
 
 
 	for (size_t n = 0; n < sizeof (upper_buttons) / sizeof (upper_buttons[0]); ++n) {
-		boost::shared_ptr<Push2::Button> b = p2.button_by_id (upper_buttons[n]);
+		boost::shared_ptr<Push2::Button> b = _p2.button_by_id (upper_buttons[n]);
 
-		if (b != mode_button) {
+		if (b != _mode_button) {
 			b->set_color (Push2::LED::DarkGray);
 		} else {
 			b->set_color (Push2::LED::White);
 		}
 		b->set_state (Push2::LED::OneShot24th);
-		p2.write (b->state_msg());
+		_p2.write (b->state_msg());
 	}
 
-	switch_bank (bank_start);
+	switch_bank (_bank_start);
 
 	Container::show ();
 }
@@ -205,46 +205,46 @@ MixLayout::button_upper (uint32_t n)
 	boost::shared_ptr<Push2::Button> b;
 	switch (n) {
 	case 0:
-		vpot_mode = Volume;
-		b = p2.button_by_id (Push2::Upper1);
+		_vpot_mode = Volume;
+		b = _p2.button_by_id (Push2::Upper1);
 		break;
 	case 1:
-		vpot_mode = PanAzimuth;
-		b = p2.button_by_id (Push2::Upper2);
+		_vpot_mode = PanAzimuth;
+		b = _p2.button_by_id (Push2::Upper2);
 		break;
 	case 2:
-		vpot_mode = PanWidth;
-		b = p2.button_by_id (Push2::Upper3);
+		_vpot_mode = PanWidth;
+		b = _p2.button_by_id (Push2::Upper3);
 		break;
 	case 3:
-		vpot_mode = Send1;
-		b = p2.button_by_id (Push2::Upper4);
+		_vpot_mode = Send1;
+		b = _p2.button_by_id (Push2::Upper4);
 		break;
 	case 4:
-		vpot_mode = Send2;
-		b = p2.button_by_id (Push2::Upper5);
+		_vpot_mode = Send2;
+		b = _p2.button_by_id (Push2::Upper5);
 		break;
 	case 5:
-		vpot_mode = Send3;
-		b = p2.button_by_id (Push2::Upper6);
+		_vpot_mode = Send3;
+		b = _p2.button_by_id (Push2::Upper6);
 		break;
 	case 6:
-		vpot_mode = Send4;
-		b = p2.button_by_id (Push2::Upper7);
+		_vpot_mode = Send4;
+		b = _p2.button_by_id (Push2::Upper7);
 		break;
 	case 7:
-		vpot_mode = Send5;
-		b = p2.button_by_id (Push2::Upper8);
+		_vpot_mode = Send5;
+		b = _p2.button_by_id (Push2::Upper8);
 		break;
 	}
 
-	if (b != mode_button) {
-		mode_button->set_color (Push2::LED::Black);
-		mode_button->set_state (Push2::LED::OneShot24th);
-		p2.write (mode_button->state_msg());
+	if (b != _mode_button) {
+		_mode_button->set_color (Push2::LED::Black);
+		_mode_button->set_state (Push2::LED::OneShot24th);
+		_p2.write (_mode_button->state_msg());
 	}
 
-	mode_button = b;
+	_mode_button = b;
 
 	show_vpot_mode ();
 }
@@ -252,24 +252,24 @@ MixLayout::button_upper (uint32_t n)
 void
 MixLayout::show_vpot_mode ()
 {
-	mode_button->set_color (Push2::LED::White);
-	mode_button->set_state (Push2::LED::OneShot24th);
-	p2.write (mode_button->state_msg());
+	_mode_button->set_color (Push2::LED::White);
+	_mode_button->set_state (Push2::LED::OneShot24th);
+	_p2.write (_mode_button->state_msg());
 
 	for (int s = 0; s < 8; ++s) {
-		upper_backgrounds[s]->hide ();
-		upper_text[s]->set_color (p2.get_color (Push2::ParameterName));
+		_upper_backgrounds[s]->hide ();
+		_upper_text[s]->set_color (_p2.get_color (Push2::ParameterName));
 	}
 
 	uint32_t n = 0;
 
 	boost::shared_ptr<AutomationControl> ac;
-	switch (vpot_mode) {
+	switch (_vpot_mode) {
 	case Volume:
 		for (int s = 0; s < 8; ++s) {
-			if (stripable[s]) {
-				gain_meter[s]->knob->set_controllable (stripable[s]->gain_control());
-				boost::shared_ptr<PeakMeter> pm = stripable[s]->peak_meter();
+			if (_stripable[s]) {
+				gain_meter[s]->knob->set_controllable (_stripable[s]->gain_control());
+				boost::shared_ptr<PeakMeter> pm = _stripable[s]->peak_meter();
 				if (pm) {
 					gain_meter[s]->meter->set_meter (pm.get());
 				} else {
@@ -286,8 +286,8 @@ MixLayout::show_vpot_mode ()
 		break;
 	case PanAzimuth:
 		for (int s = 0; s < 8; ++s) {
-			if (stripable[s]) {
-				gain_meter[s]->knob->set_controllable (stripable[s]->pan_azimuth_control());
+			if (_stripable[s]) {
+				gain_meter[s]->knob->set_controllable (_stripable[s]->pan_azimuth_control());
 				gain_meter[s]->knob->add_flag (Push2Knob::ArcToZero);
 			} else {
 				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
@@ -299,11 +299,10 @@ MixLayout::show_vpot_mode ()
 		break;
 	case PanWidth:
 		for (int s = 0; s < 8; ++s) {
-			if (stripable[s]) {
-				gain_meter[s]->knob->set_controllable (stripable[s]->pan_width_control());
+			if (_stripable[s]) {
+				gain_meter[s]->knob->set_controllable (_stripable[s]->pan_width_control());
 			} else {
 				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
-
 			}
 			gain_meter[s]->knob->remove_flag (Push2Knob::ArcToZero);
 			gain_meter[s]->meter->hide ();
@@ -312,8 +311,8 @@ MixLayout::show_vpot_mode ()
 		break;
 	case Send1:
 		for (int s = 0; s < 8; ++s) {
-			if (stripable[s]) {
-				gain_meter[s]->knob->set_controllable (stripable[s]->send_level_controllable (0));
+			if (_stripable[s]) {
+				gain_meter[s]->knob->set_controllable (_stripable[s]->send_level_controllable (0));
 			} else {
 				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
@@ -325,8 +324,8 @@ MixLayout::show_vpot_mode ()
 		break;
 	case Send2:
 		for (int s = 0; s < 8; ++s) {
-			if (stripable[s]) {
-				gain_meter[s]->knob->set_controllable (stripable[s]->send_level_controllable (1));
+			if (_stripable[s]) {
+				gain_meter[s]->knob->set_controllable (_stripable[s]->send_level_controllable (1));
 			} else {
 				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
@@ -338,8 +337,8 @@ MixLayout::show_vpot_mode ()
 		break;
 	case Send3:
 		for (int s = 0; s < 8; ++s) {
-			if (stripable[s]) {
-				gain_meter[s]->knob->set_controllable (stripable[s]->send_level_controllable (2));
+			if (_stripable[s]) {
+				gain_meter[s]->knob->set_controllable (_stripable[s]->send_level_controllable (2));
 			} else {
 				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
@@ -351,8 +350,8 @@ MixLayout::show_vpot_mode ()
 		break;
 	case Send4:
 		for (int s = 0; s < 8; ++s) {
-			if (stripable[s]) {
-				gain_meter[s]->knob->set_controllable (stripable[s]->send_level_controllable (3));
+			if (_stripable[s]) {
+				gain_meter[s]->knob->set_controllable (_stripable[s]->send_level_controllable (3));
 			} else {
 				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
@@ -364,8 +363,8 @@ MixLayout::show_vpot_mode ()
 		break;
 	case Send5:
 		for (int s = 0; s < 8; ++s) {
-			if (stripable[s]) {
-				gain_meter[s]->knob->set_controllable (stripable[s]->send_level_controllable (4));
+			if (_stripable[s]) {
+				gain_meter[s]->knob->set_controllable (_stripable[s]->send_level_controllable (4));
 			} else {
 				gain_meter[s]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 
@@ -379,16 +378,16 @@ MixLayout::show_vpot_mode ()
 		break;
 	}
 
-	upper_backgrounds[n]->set_fill_color (p2.get_color (Push2::ParameterName));
-	upper_backgrounds[n]->set_outline_color (p2.get_color (Push2::ParameterName));
-	upper_backgrounds[n]->show ();
-	upper_text[n]->set_color (contrasting_text_color (p2.get_color (Push2::ParameterName)));
+	_upper_backgrounds[n]->set_fill_color (_p2.get_color (Push2::ParameterName));
+	_upper_backgrounds[n]->set_outline_color (_p2.get_color (Push2::ParameterName));
+	_upper_backgrounds[n]->show ();
+	_upper_text[n]->set_color (contrasting_text_color (_p2.get_color (Push2::ParameterName)));
 }
 
 void
 MixLayout::button_mute ()
 {
-	boost::shared_ptr<Stripable> s = session.selection().first_selected_stripable();
+	boost::shared_ptr<Stripable> s = _session.selection().first_selected_stripable();
 	if (s) {
 		boost::shared_ptr<AutomationControl> ac = s->mute_control();
 		if (ac) {
@@ -400,11 +399,11 @@ MixLayout::button_mute ()
 void
 MixLayout::button_solo ()
 {
-	boost::shared_ptr<Stripable> s = session.selection().first_selected_stripable();
+	boost::shared_ptr<Stripable> s = _session.selection().first_selected_stripable();
 	if (s) {
 		boost::shared_ptr<AutomationControl> ac = s->solo_control();
 		if (ac) {
-			session.set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
+			_session.set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
 		}
 	}
 }
@@ -412,11 +411,11 @@ MixLayout::button_solo ()
 void
 MixLayout::button_lower (uint32_t n)
 {
-	if (!stripable[n]) {
+	if (!_stripable[n]) {
 		return;
 	}
 
-	session.selection().set (stripable[n], boost::shared_ptr<AutomationControl>());
+	_session.selection().set (_stripable[n], boost::shared_ptr<AutomationControl>());
 }
 
 void
@@ -434,10 +433,10 @@ MixLayout::strip_vpot (int n, int delta)
 void
 MixLayout::strip_vpot_touch (int n, bool touching)
 {
-	if (stripable[n]) {
-		boost::shared_ptr<AutomationControl> ac = stripable[n]->gain_control();
+	if (_stripable[n]) {
+		boost::shared_ptr<AutomationControl> ac = _stripable[n]->gain_control();
 		if (ac) {
-			const timepos_t now (session.audible_sample());
+			const timepos_t now (_session.audible_sample());
 			if (touching) {
 				ac->start_touch (now);
 			} else {
@@ -451,28 +450,28 @@ void
 MixLayout::stripable_property_change (PropertyChange const& what_changed, uint32_t which)
 {
 	if (what_changed.contains (Properties::color)) {
-		lower_backgrounds[which]->set_fill_color (stripable[which]->presentation_info().color());
+		_lower_backgrounds[which]->set_fill_color (_stripable[which]->presentation_info().color());
 
-		if (stripable[which]->is_selected()) {
-			lower_text[which]->set_fill_color (contrasting_text_color (stripable[which]->presentation_info().color()));
+		if (_stripable[which]->is_selected()) {
+			_lower_text[which]->set_fill_color (contrasting_text_color (_stripable[which]->presentation_info().color()));
 			/* might not be a MIDI track, in which case this will
 			   do nothing
 			*/
-			p2.update_selection_color ();
+			_p2.update_selection_color ();
 		}
 	}
 
 	if (what_changed.contains (Properties::hidden)) {
-		switch_bank (bank_start);
+		switch_bank (_bank_start);
 	}
 
 	if (what_changed.contains (Properties::selected)) {
 
-		if (!stripable[which]) {
+		if (!_stripable[which]) {
 			return;
 		}
 
-		if (stripable[which]->is_selected()) {
+		if (_stripable[which]->is_selected()) {
 			show_selection (which);
 		} else {
 			hide_selection (which);
@@ -484,17 +483,17 @@ MixLayout::stripable_property_change (PropertyChange const& what_changed, uint32
 void
 MixLayout::show_selection (uint32_t n)
 {
-	lower_backgrounds[n]->show ();
-	lower_backgrounds[n]->set_fill_color (stripable[n]->presentation_info().color());
-	lower_text[n]->set_color (contrasting_text_color (lower_backgrounds[n]->fill_color()));
+	_lower_backgrounds[n]->show ();
+	_lower_backgrounds[n]->set_fill_color (_stripable[n]->presentation_info().color());
+	_lower_text[n]->set_color (contrasting_text_color (_lower_backgrounds[n]->fill_color()));
 }
 
 void
 MixLayout::hide_selection (uint32_t n)
 {
-	lower_backgrounds[n]->hide ();
-	if (stripable[n]) {
-		lower_text[n]->set_color (stripable[n]->presentation_info().color());
+	_lower_backgrounds[n]->hide ();
+	if (_stripable[n]) {
+		_lower_text[n]->set_color (_stripable[n]->presentation_info().color());
 	}
 }
 
@@ -513,15 +512,15 @@ MixLayout::mute_changed (uint32_t n)
 void
 MixLayout::solo_mute_changed (uint32_t n)
 {
-	string shortname = short_version (stripable[n]->name(), 10);
+	string shortname = short_version (_stripable[n]->name(), 10);
 	string text;
 	boost::shared_ptr<AutomationControl> ac;
-	ac = stripable[n]->solo_control();
+	ac = _stripable[n]->solo_control();
 	if (ac && ac->get_value()) {
 		text += "* ";
 	}
 	boost::shared_ptr<MuteControl> mc;
-	mc = stripable[n]->mute_control ();
+	mc = _stripable[n]->mute_control ();
 	if (mc) {
 		if (mc->muted_by_self_or_masters()) {
 			text += "! ";
@@ -530,13 +529,13 @@ MixLayout::solo_mute_changed (uint32_t n)
 		}
 	}
 	text += shortname;
-	lower_text[n]->set (text);
+	_lower_text[n]->set (text);
 }
 
 void
 MixLayout::switch_bank (uint32_t base)
 {
-	stripable_connections.drop_connections ();
+	_stripable_connections.drop_connections ();
 
 	/* work backwards so we can tell if we should actually switch banks */
 
@@ -544,8 +543,8 @@ MixLayout::switch_bank (uint32_t base)
 	uint32_t different = 0;
 
 	for (int n = 0; n < 8; ++n) {
-		s[n] = session.get_remote_nth_stripable (base+n, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
-		if (s[n] != stripable[n]) {
+		s[n] = _session.get_remote_nth_stripable (base+n, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+		if (s[n] != _stripable[n]) {
 			different++;
 		}
 	}
@@ -553,7 +552,7 @@ MixLayout::switch_bank (uint32_t base)
 	if (!s[0]) {
 		/* not even the first stripable exists, do nothing */
 		for (int n = 0; n < 8; ++n) {
-			stripable[n].reset ();
+			_stripable[n].reset ();
 			gain_meter[n]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 			gain_meter[n]->meter->set_meter (0);
 		}
@@ -561,32 +560,32 @@ MixLayout::switch_bank (uint32_t base)
 	}
 
 	for (int n = 0; n < 8; ++n) {
-		stripable[n] = s[n];
+		_stripable[n] = s[n];
 	}
 
 	/* at least one stripable in this bank */
 
-	bank_start = base;
+	_bank_start = base;
 
 	for (int n = 0; n < 8; ++n) {
 
-		if (!stripable[n]) {
-			lower_text[n]->hide ();
+		if (!_stripable[n]) {
+			_lower_text[n]->hide ();
 			hide_selection (n);
 			gain_meter[n]->knob->set_controllable (boost::shared_ptr<AutomationControl>());
 			gain_meter[n]->meter->set_meter (0);
 		} else {
 
-			lower_text[n]->show ();
+			_lower_text[n]->show ();
 
 			/* stripable goes away? refill the bank, starting at the same point */
 
-			stripable[n]->DropReferences.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::switch_bank, this, bank_start), &p2);
-			stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::stripable_property_change, this, _1, n), &p2);
-			stripable[n]->solo_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::solo_changed, this, n), &p2);
-			stripable[n]->mute_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::mute_changed, this, n), &p2);
+			_stripable[n]->DropReferences.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::switch_bank, this, _bank_start), &_p2);
+			_stripable[n]->presentation_info().PropertyChanged.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::stripable_property_change, this, _1, n), &_p2);
+			_stripable[n]->solo_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::solo_changed, this, n), &_p2);
+			_stripable[n]->mute_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&MixLayout::mute_changed, this, n), &_p2);
 
-			if (stripable[n]->is_selected()) {
+			if (_stripable[n]->is_selected()) {
 				show_selection (n);
 			} else {
 				hide_selection (n);
@@ -598,9 +597,9 @@ MixLayout::switch_bank (uint32_t base)
 
 			solo_mute_changed (n);
 
-			gain_meter[n]->knob->set_text_color (stripable[n]->presentation_info().color());
-			gain_meter[n]->knob->set_arc_start_color (stripable[n]->presentation_info().color());
-			gain_meter[n]->knob->set_arc_end_color (stripable[n]->presentation_info().color());
+			gain_meter[n]->knob->set_text_color (_stripable[n]->presentation_info().color());
+			gain_meter[n]->knob->set_arc_start_color (_stripable[n]->presentation_info().color());
+			gain_meter[n]->knob->set_arc_end_color (_stripable[n]->presentation_info().color());
 		}
 
 
@@ -608,39 +607,39 @@ MixLayout::switch_bank (uint32_t base)
 
 		switch (n) {
 		case 0:
-			b = p2.button_by_id (Push2::Lower1);
+			b = _p2.button_by_id (Push2::Lower1);
 			break;
 		case 1:
-			b = p2.button_by_id (Push2::Lower2);
+			b = _p2.button_by_id (Push2::Lower2);
 			break;
 		case 2:
-			b = p2.button_by_id (Push2::Lower3);
+			b = _p2.button_by_id (Push2::Lower3);
 			break;
 		case 3:
-			b = p2.button_by_id (Push2::Lower4);
+			b = _p2.button_by_id (Push2::Lower4);
 			break;
 		case 4:
-			b = p2.button_by_id (Push2::Lower5);
+			b = _p2.button_by_id (Push2::Lower5);
 			break;
 		case 5:
-			b = p2.button_by_id (Push2::Lower6);
+			b = _p2.button_by_id (Push2::Lower6);
 			break;
 		case 6:
-			b = p2.button_by_id (Push2::Lower7);
+			b = _p2.button_by_id (Push2::Lower7);
 			break;
 		case 7:
-			b = p2.button_by_id (Push2::Lower8);
+			b = _p2.button_by_id (Push2::Lower8);
 			break;
 		}
 
-		if (stripable[n]) {
-			b->set_color (p2.get_color_index (stripable[n]->presentation_info().color()));
+		if (_stripable[n]) {
+			b->set_color (_p2.get_color_index (_stripable[n]->presentation_info().color()));
 		} else {
 			b->set_color (Push2::LED::Black);
 		}
 
 		b->set_state (Push2::LED::OneShot24th);
-		p2.write (b->state_msg());
+		_p2.write (b->state_msg());
 	}
 
 	show_vpot_mode ();
@@ -649,13 +648,13 @@ MixLayout::switch_bank (uint32_t base)
 void
 MixLayout::button_right ()
 {
-	switch_bank (max (0, bank_start + 8));
+	switch_bank (max (0, _bank_start + 8));
 }
 
 void
 MixLayout::button_left ()
 {
-	switch_bank (max (0, bank_start - 8));
+	switch_bank (max (0, _bank_start - 8));
 }
 
 
@@ -667,7 +666,7 @@ MixLayout::button_select_press ()
 void
 MixLayout::button_select_release ()
 {
-	if (!(p2.modifier_state() & Push2::ModSelect)) {
+	if (!(_p2.modifier_state() & Push2::ModSelect)) {
 		/* somebody else used us as a modifier */
 		return;
 	}
@@ -675,8 +674,8 @@ MixLayout::button_select_release ()
 	int selected = -1;
 
 	for (int n = 0; n < 8; ++n) {
-		if (stripable[n]) {
-			if (stripable[n]->is_selected()) {
+		if (_stripable[n]) {
+			if (_stripable[n]->is_selected()) {
 					selected = n;
 					break;
 			}
@@ -687,34 +686,34 @@ MixLayout::button_select_release ()
 
 		/* no visible track selected, select first (if any) */
 
-		if (stripable[0]) {
-			session.selection().set (stripable[0], boost::shared_ptr<AutomationControl>());
+		if (_stripable[0]) {
+			_session.selection().set (_stripable[0], boost::shared_ptr<AutomationControl>());
 		}
 
 	} else {
 
-		if (p2.modifier_state() & Push2::ModShift) {
+		if (_p2.modifier_state() & Push2::ModShift) {
 			/* select prev */
 
 			if (selected == 0) {
 				/* current selected is leftmost ... cancel selection,
 				   switch banks by one, and select leftmost
 				*/
-				if (bank_start != 0) {
-					session.selection().clear_stripables ();
-					switch_bank (bank_start-1);
-					if (stripable[0]) {
-						session.selection().set (stripable[0], boost::shared_ptr<AutomationControl>());
+				if (_bank_start != 0) {
+					_session.selection().clear_stripables ();
+					switch_bank (_bank_start - 1);
+					if (_stripable[0]) {
+						_session.selection().set (_stripable[0], boost::shared_ptr<AutomationControl>());
 					}
 				}
 			} else {
 				/* select prev, if any */
 				int n = selected - 1;
-				while (n >= 0 && !stripable[n]) {
+				while (n >= 0 && !_stripable[n]) {
 					--n;
 				}
 				if (n >= 0) {
-					session.selection().set (stripable[n], boost::shared_ptr<AutomationControl>());
+					_session.selection().set (_stripable[n], boost::shared_ptr<AutomationControl>());
 				}
 			}
 
@@ -726,20 +725,20 @@ MixLayout::button_select_release ()
 				/* current selected is rightmost ... cancel selection,
 				   switch banks by one, and select righmost
 				*/
-				session.selection().toggle (stripable[selected], boost::shared_ptr<AutomationControl>());
-				switch_bank (bank_start+1);
-				if (stripable[7]) {
-					session.selection().set (stripable[7], boost::shared_ptr<AutomationControl>());
+				_session.selection().toggle (_stripable[selected], boost::shared_ptr<AutomationControl>());
+				switch_bank (_bank_start + 1);
+				if (_stripable[7]) {
+					_session.selection().set (_stripable[7], boost::shared_ptr<AutomationControl>());
 				}
 			} else {
 				/* select next, if any */
 				int n = selected + 1;
-				while (n < 8 && !stripable[n]) {
+				while (n < 8 && !_stripable[n]) {
 					++n;
 				}
 
 				if (n != 8) {
-					session.selection().set (stripable[n], boost::shared_ptr<AutomationControl>());
+					_session.selection().set (_stripable[n], boost::shared_ptr<AutomationControl>());
 				}
 			}
 		}
@@ -750,25 +749,25 @@ void
 MixLayout::stripables_added ()
 {
 	/* reload current bank */
-	switch_bank (bank_start);
+	switch_bank (_bank_start);
 }
 
 void
 MixLayout::button_down ()
 {
-	p2.scroll_dn_1_track ();
+	_p2.scroll_dn_1_track ();
 }
 
 void
 MixLayout::button_up ()
 {
-	p2.scroll_up_1_track ();
+	_p2.scroll_up_1_track ();
 }
 
 void
 MixLayout::update_meters ()
 {
-	if (vpot_mode != Volume) {
+	if (_vpot_mode != Volume) {
 		return;
 	}
 

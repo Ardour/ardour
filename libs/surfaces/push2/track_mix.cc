@@ -84,13 +84,13 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session & s, std::string const & name)
 {
 	Pango::FontDescription fd ("Sans 10");
 
-	bg = new ArdourCanvas::Rectangle (this);
-	bg->set (Rect (0, 0, display_width(), display_height()));
-	bg->set_fill_color (p2.get_color (Push2::DarkBackground));
+	_bg = new ArdourCanvas::Rectangle (this);
+	_bg->set (Rect (0, 0, display_width(), display_height()));
+	_bg->set_fill_color (_p2.get_color (Push2::DarkBackground));
 
-	upper_line = new Line (this);
-	upper_line->set (Duple (0, 22.5), Duple (display_width(), 22.5));
-	upper_line->set_outline_color (p2.get_color (Push2::LightBackground));
+	_upper_line = new Line (this);
+	_upper_line->set (Duple (0, 22.5), Duple (display_width(), 22.5));
+	_upper_line->set_outline_color (_p2.get_color (Push2::LightBackground));
 
 	for (int n = 0; n < 8; ++n) {
 		Text* t;
@@ -98,77 +98,77 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session & s, std::string const & name)
 		if (n < 4) {
 			t = new Text (this);
 			t->set_font_description (fd);
-			t->set_color (p2.get_color (Push2::ParameterName));
+			t->set_color (_p2.get_color (Push2::ParameterName));
 			t->set_position ( Duple (10 + (n*Push2Canvas::inter_button_spacing()), 2));
-			upper_text.push_back (t);
+			_upper_text.push_back (t);
 		}
 
 		t = new Text (this);
 		t->set_font_description (fd);
-		t->set_color (p2.get_color (Push2::ParameterName));
+		t->set_color (_p2.get_color (Push2::ParameterName));
 		t->set_position (Duple (10 + (n*Push2Canvas::inter_button_spacing()), 140));
 
-		lower_text.push_back (t);
+		_lower_text.push_back (t);
 
 		switch (n) {
 		case 0:
-			upper_text[n]->set (_("Track Volume"));
-			lower_text[n]->set (_("Mute"));
+			_upper_text[n]->set (_("Track Volume"));
+			_lower_text[n]->set (_("Mute"));
 			break;
 		case 1:
-			upper_text[n]->set (_("Track Pan"));
-			lower_text[n]->set (_("Solo"));
+			_upper_text[n]->set (_("Track Pan"));
+			_lower_text[n]->set (_("Solo"));
 			break;
 		case 2:
-			upper_text[n]->set (_("Track Width"));
-			lower_text[n]->set (_("Rec-enable"));
+			_upper_text[n]->set (_("Track Width"));
+			_lower_text[n]->set (_("Rec-enable"));
 			break;
 		case 3:
-			upper_text[n]->set (_("Track Trim"));
-			lower_text[n]->set (_("In"));
+			_upper_text[n]->set (_("Track Trim"));
+			_lower_text[n]->set (_("In"));
 			break;
 		case 4:
-			lower_text[n]->set (_("Disk"));
+			_lower_text[n]->set (_("Disk"));
 			break;
 		case 5:
-			lower_text[n]->set (_("Solo Iso"));
+			_lower_text[n]->set (_("Solo Iso"));
 			break;
 		case 6:
-			lower_text[n]->set (_("Solo Lock"));
+			_lower_text[n]->set (_("Solo Lock"));
 			break;
 		case 7:
-			lower_text[n]->set (_(""));
+			_lower_text[n]->set (_(""));
 			break;
 		}
 
-		knobs[n] = new Push2Knob (p2, this);
-		knobs[n]->set_position (Duple (60 + (Push2Canvas::inter_button_spacing()*n), 95));
-		knobs[n]->set_radius (25);
+		_knobs[n] = new Push2Knob (_p2, this);
+		_knobs[n]->set_position (Duple (60 + (Push2Canvas::inter_button_spacing()*n), 95));
+		_knobs[n]->set_radius (25);
 	}
 
-	name_text = new Text (this);
-	name_text->set_font_description (fd);
-	name_text->set_position (Duple (10 + (4*Push2Canvas::inter_button_spacing()), 2));
+	_name_text = new Text (this);
+	_name_text->set_font_description (fd);
+	_name_text->set_position (Duple (10 + (4*Push2Canvas::inter_button_spacing()), 2));
 
-	meter = new LevelMeter (p2, this, 300, ArdourCanvas::Meter::Horizontal);
-	meter->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 30));
+	_meter = new LevelMeter (_p2, this, 300, ArdourCanvas::Meter::Horizontal);
+	_meter->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 30));
 
 	Pango::FontDescription fd2 ("Sans 18");
-	bbt_text = new Text (this);
-	bbt_text->set_font_description (fd2);
-	bbt_text->set_color (p2.get_color (Push2::LightBackground));
-	bbt_text->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 60));
+	_bbt_text = new Text (this);
+	_bbt_text->set_font_description (fd2);
+	_bbt_text->set_color (_p2.get_color (Push2::LightBackground));
+	_bbt_text->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 60));
 
-	minsec_text = new Text (this);
-	minsec_text->set_font_description (fd2);
-	minsec_text->set_color (p2.get_color (Push2::LightBackground));
-	minsec_text->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 90));
+	_minsec_text = new Text (this);
+	_minsec_text->set_font_description (fd2);
+	_minsec_text->set_color (_p2.get_color (Push2::LightBackground));
+	_minsec_text->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 90));
 }
 
 TrackMixLayout::~TrackMixLayout ()
 {
 	for (int n = 0; n < 8; ++n) {
-		delete knobs[n];
+		delete _knobs[n];
 	}
 }
 
@@ -179,10 +179,10 @@ TrackMixLayout::show ()
 	                                    Push2::Lower5, Push2::Lower6, Push2::Lower7, Push2::Lower8 };
 
 	for (size_t n = 0; n < sizeof (lower_buttons) / sizeof (lower_buttons[0]); ++n) {
-		boost::shared_ptr<Push2::Button> b = p2.button_by_id (lower_buttons[n]);
+		boost::shared_ptr<Push2::Button> b = _p2.button_by_id (lower_buttons[n]);
 		b->set_color (Push2::LED::DarkGray);
 		b->set_state (Push2::LED::OneShot24th);
-		p2.write (b->state_msg());
+		_p2.write (b->state_msg());
 	}
 
 	show_state ();
@@ -210,7 +210,7 @@ TrackMixLayout::button_upper (uint32_t n)
 void
 TrackMixLayout::button_lower (uint32_t n)
 {
-	if (!stripable) {
+	if (!_stripable) {
 		return;
 	}
 
@@ -218,52 +218,52 @@ TrackMixLayout::button_lower (uint32_t n)
 
 	switch (n) {
 	case 0:
-		if (stripable->mute_control()) {
-			stripable->mute_control()->set_value (!stripable->mute_control()->get_value(), PBD::Controllable::UseGroup);
+		if (_stripable->mute_control()) {
+			_stripable->mute_control()->set_value (!_stripable->mute_control()->get_value(), PBD::Controllable::UseGroup);
 		}
 		break;
 	case 1:
-		if (stripable->solo_control()) {
-			session.set_control (stripable->solo_control(), !stripable->solo_control()->self_soloed(), PBD::Controllable::UseGroup);
+		if (_stripable->solo_control()) {
+			_session.set_control (_stripable->solo_control(), !_stripable->solo_control()->self_soloed(), PBD::Controllable::UseGroup);
 		}
 		break;
 	case 2:
-		if (stripable->rec_enable_control()) {
-			stripable->rec_enable_control()->set_value (!stripable->rec_enable_control()->get_value(), PBD::Controllable::UseGroup);
+		if (_stripable->rec_enable_control()) {
+			_stripable->rec_enable_control()->set_value (!_stripable->rec_enable_control()->get_value(), PBD::Controllable::UseGroup);
 		}
 		break;
 	case 3:
-		if (stripable->monitor_control()) {
-			mc = stripable->monitoring_control()->monitoring_choice();
+		if (_stripable->monitor_control()) {
+			mc = _stripable->monitoring_control()->monitoring_choice();
 			switch (mc) {
 			case MonitorInput:
-				stripable->monitoring_control()->set_value (MonitorAuto, PBD::Controllable::UseGroup);
+				_stripable->monitoring_control()->set_value (MonitorAuto, PBD::Controllable::UseGroup);
 				break;
 			default:
-				stripable->monitoring_control()->set_value (MonitorInput, PBD::Controllable::UseGroup);
+				_stripable->monitoring_control()->set_value (MonitorInput, PBD::Controllable::UseGroup);
 				break;
 			}
 		}
 		break;
 	case 4:
-		mc = stripable->monitoring_control()->monitoring_choice();
+		mc = _stripable->monitoring_control()->monitoring_choice();
 		switch (mc) {
 		case MonitorDisk:
-			stripable->monitoring_control()->set_value (MonitorAuto, PBD::Controllable::UseGroup);
+			_stripable->monitoring_control()->set_value (MonitorAuto, PBD::Controllable::UseGroup);
 			break;
 		default:
-			stripable->monitoring_control()->set_value (MonitorDisk, PBD::Controllable::UseGroup);
+			_stripable->monitoring_control()->set_value (MonitorDisk, PBD::Controllable::UseGroup);
 			break;
 		}
 		break;
 	case 5:
-		if (stripable->solo_isolate_control()) {
-			stripable->solo_isolate_control()->set_value (!stripable->solo_isolate_control()->get_value(), PBD::Controllable::UseGroup);
+		if (_stripable->solo_isolate_control()) {
+			_stripable->solo_isolate_control()->set_value (!_stripable->solo_isolate_control()->get_value(), PBD::Controllable::UseGroup);
 		}
 		break;
 	case 6:
-		if (stripable->solo_safe_control()) {
-			stripable->solo_safe_control()->set_value (!stripable->solo_safe_control()->get_value(), PBD::Controllable::UseGroup);
+		if (_stripable->solo_safe_control()) {
+			_stripable->solo_safe_control()->set_value (!_stripable->solo_safe_control()->get_value(), PBD::Controllable::UseGroup);
 		}
 		break;
 	case 7:
@@ -275,13 +275,13 @@ TrackMixLayout::button_lower (uint32_t n)
 void
 TrackMixLayout::button_left ()
 {
-	p2.access_action ("Editor/select-prev-route");
+	_p2.access_action ("Editor/select-prev-route");
 }
 
 void
 TrackMixLayout::button_right ()
 {
-	p2.access_action ("Editor/select-next-route");
+	_p2.access_action ("Editor/select-next-route");
 }
 
 void
@@ -291,39 +291,40 @@ TrackMixLayout::simple_control_change (boost::shared_ptr<AutomationControl> ac, 
 		return;
 	}
 
-	boost::shared_ptr<Push2::Button> b = p2.button_by_id (bid);
+	boost::shared_ptr<Push2::Button> b = _p2.button_by_id (bid);
 
 	if (!b) {
 		return;
 	}
 
 	if (ac->get_value()) {
-		b->set_color (selection_color);
+		b->set_color (_selection_color);
 	} else {
 		b->set_color (Push2::LED::DarkGray);
 	}
+
 	b->set_state (Push2::LED::OneShot24th);
-	p2.write (b->state_msg());
+	_p2.write (b->state_msg());
 }
 
 void
 TrackMixLayout::solo_mute_change ()
 {
-	if (!stripable) {
+	if (!_stripable) {
 		return;
 	}
 
-	boost::shared_ptr<Push2::Button> b = p2.button_by_id (Push2::Lower2);
+	boost::shared_ptr<Push2::Button> b = _p2.button_by_id (Push2::Lower2);
 
 	if (b) {
-		boost::shared_ptr<SoloControl> sc = stripable->solo_control();
+		boost::shared_ptr<SoloControl> sc = _stripable->solo_control();
 
 		if (sc) {
 			if (sc->soloed_by_self_or_masters()) {
-				b->set_color (selection_color);
+				b->set_color (_selection_color);
 				b->set_state (Push2::LED::OneShot24th);
 			} else if (sc->soloed_by_others_upstream() || sc->soloed_by_others_downstream()) {
-				b->set_color (selection_color);
+				b->set_color (_selection_color);
 				b->set_state (Push2::LED::Blinking8th);
 			} else {
 				b->set_color (Push2::LED::DarkGray);
@@ -334,20 +335,20 @@ TrackMixLayout::solo_mute_change ()
 			b->set_state (Push2::LED::OneShot24th);
 		}
 
-		p2.write (b->state_msg());
+		_p2.write (b->state_msg());
 	}
 
-	b = p2.button_by_id (Push2::Lower1);
+	b = _p2.button_by_id (Push2::Lower1);
 
 	if (b) {
-		boost::shared_ptr<MuteControl> mc = stripable->mute_control();
+		boost::shared_ptr<MuteControl> mc = _stripable->mute_control();
 
 		if (mc) {
 			if (mc->muted_by_self_or_masters()) {
-				b->set_color (selection_color);
+				b->set_color (_selection_color);
 				b->set_state (Push2::LED::OneShot24th);
 			} else if (mc->muted_by_others_soloing()) {
-				b->set_color (selection_color);
+				b->set_color (_selection_color);
 				b->set_state (Push2::LED::Blinking8th);
 			} else {
 				b->set_color (Push2::LED::DarkGray);
@@ -359,7 +360,7 @@ TrackMixLayout::solo_mute_change ()
 			b->set_state (Push2::LED::OneShot24th);
 		}
 
-		p2.write (b->state_msg());
+		_p2.write (b->state_msg());
 	}
 
 }
@@ -367,49 +368,49 @@ TrackMixLayout::solo_mute_change ()
 void
 TrackMixLayout::rec_enable_change ()
 {
-	if (!stripable) {
+	if (!_stripable) {
 		return;
 	}
 
-	simple_control_change (stripable->rec_enable_control(), Push2::Lower3);
+	simple_control_change (_stripable->rec_enable_control(), Push2::Lower3);
 }
 
 void
 TrackMixLayout::solo_iso_change ()
 {
-	if (!stripable) {
+	if (!_stripable) {
 		return;
 	}
 
-	simple_control_change (stripable->solo_isolate_control(), Push2::Lower6);
+	simple_control_change (_stripable->solo_isolate_control(), Push2::Lower6);
 }
 void
 TrackMixLayout::solo_safe_change ()
 {
-	if (!stripable) {
+	if (!_stripable) {
 		return;
 	}
 
-	simple_control_change (stripable->solo_safe_control(), Push2::Lower7);
+	simple_control_change (_stripable->solo_safe_control(), Push2::Lower7);
 }
 
 void
 TrackMixLayout::monitoring_change ()
 {
-	if (!stripable) {
+	if (!_stripable) {
 		return;
 	}
 
-	if (!stripable->monitoring_control()) {
+	if (!_stripable->monitoring_control()) {
 		return;
 	}
 
-	boost::shared_ptr<Push2::Button> b1 = p2.button_by_id (Push2::Lower4);
-	boost::shared_ptr<Push2::Button> b2 = p2.button_by_id (Push2::Lower5);
+	boost::shared_ptr<Push2::Button> b1 = _p2.button_by_id (Push2::Lower4);
+	boost::shared_ptr<Push2::Button> b2 = _p2.button_by_id (Push2::Lower5);
 	uint8_t b1_color;
 	uint8_t b2_color;
 
-	MonitorChoice mc = stripable->monitoring_control()->monitoring_choice ();
+	MonitorChoice mc = _stripable->monitoring_control()->monitoring_choice ();
 
 	switch (mc) {
 	case MonitorAuto:
@@ -417,16 +418,16 @@ TrackMixLayout::monitoring_change ()
 		b2_color = Push2::LED::DarkGray;
 		break;
 	case MonitorInput:
-		b1_color = selection_color;
+		b1_color = _selection_color;
 		b2_color = Push2::LED::DarkGray;
 		break;
 	case MonitorDisk:
 		b1_color = Push2::LED::DarkGray;
-		b2_color = selection_color;
+		b2_color = _selection_color;
 		break;
 	case MonitorCue:
-		b1_color = selection_color;
-		b2_color = selection_color;
+		b1_color = _selection_color;
+		b2_color = _selection_color;
 		break;
 	default:
 		return; /* stupid compilers */
@@ -434,11 +435,11 @@ TrackMixLayout::monitoring_change ()
 
 	b1->set_color (b1_color);
 	b1->set_state (Push2::LED::OneShot24th);
-	p2.write (b1->state_msg());
+	_p2.write (b1->state_msg());
 
 	b2->set_color (b2_color);
 	b2->set_state (Push2::LED::OneShot24th);
-	p2.write (b2->state_msg());
+	_p2.write (b2->state_msg());
 }
 
 void
@@ -448,7 +449,7 @@ TrackMixLayout::show_state ()
 		return;
 	}
 
-	if (stripable) {
+	if (_stripable) {
 		name_changed ();
 		color_changed ();
 		solo_mute_change ();
@@ -457,49 +458,49 @@ TrackMixLayout::show_state ()
 		solo_safe_change ();
 		monitoring_change ();
 
-		meter->set_meter (stripable->peak_meter ().get());
+		_meter->set_meter (_stripable->peak_meter ().get());
 	} else {
-		meter->set_meter (0);
+		_meter->set_meter (0);
 	}
 }
 
 void
 TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 {
-	stripable_connections.drop_connections ();
+	_stripable_connections.drop_connections ();
 
-	stripable = s;
+	_stripable = s;
 
-	if (stripable) {
+	if (_stripable) {
 
-		stripable->DropReferences.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::drop_stripable, this), &p2);
+		_stripable->DropReferences.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::drop_stripable, this), &_p2);
 
-		stripable->PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &p2);
-		stripable->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &p2);
+		_stripable->PropertyChanged.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &_p2);
+		_stripable->presentation_info().PropertyChanged.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::stripable_property_change, this, _1), &_p2);
 
-		stripable->solo_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_mute_change, this), &p2);
-		stripable->mute_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_mute_change, this), &p2);
-		stripable->solo_isolate_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_iso_change, this), &p2);
-		stripable->solo_safe_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_safe_change, this), &p2);
+		_stripable->solo_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_mute_change, this), &_p2);
+		_stripable->mute_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_mute_change, this), &_p2);
+		_stripable->solo_isolate_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_iso_change, this), &_p2);
+		_stripable->solo_safe_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::solo_safe_change, this), &_p2);
 
-		if (stripable->rec_enable_control()) {
-			stripable->rec_enable_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::rec_enable_change, this), &p2);
+		if (_stripable->rec_enable_control()) {
+			_stripable->rec_enable_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::rec_enable_change, this), &_p2);
 		}
 
-		if (stripable->monitoring_control()) {
-			stripable->monitoring_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::monitoring_change, this), &p2);
+		if (_stripable->monitoring_control()) {
+			_stripable->monitoring_control()->Changed.connect (_stripable_connections, invalidator (*this), boost::bind (&TrackMixLayout::monitoring_change, this), &_p2);
 		}
 
-		knobs[0]->set_controllable (stripable->gain_control());
-		knobs[1]->set_controllable (stripable->pan_azimuth_control());
-		knobs[1]->add_flag (Push2Knob::ArcToZero);
-		knobs[2]->set_controllable (stripable->pan_width_control());
-		knobs[3]->set_controllable (stripable->trim_control());
-		knobs[3]->add_flag (Push2Knob::ArcToZero);
-		knobs[4]->set_controllable (boost::shared_ptr<AutomationControl>());
-		knobs[5]->set_controllable (boost::shared_ptr<AutomationControl>());
-		knobs[6]->set_controllable (boost::shared_ptr<AutomationControl>());
-		knobs[7]->set_controllable (boost::shared_ptr<AutomationControl>());
+		_knobs[0]->set_controllable (_stripable->gain_control());
+		_knobs[1]->set_controllable (_stripable->pan_azimuth_control());
+		_knobs[1]->add_flag (Push2Knob::ArcToZero);
+		_knobs[2]->set_controllable (_stripable->pan_width_control());
+		_knobs[3]->set_controllable (_stripable->trim_control());
+		_knobs[3]->add_flag (Push2Knob::ArcToZero);
+		_knobs[4]->set_controllable (boost::shared_ptr<AutomationControl>());
+		_knobs[5]->set_controllable (boost::shared_ptr<AutomationControl>());
+		_knobs[6]->set_controllable (boost::shared_ptr<AutomationControl>());
+		_knobs[7]->set_controllable (boost::shared_ptr<AutomationControl>());
 	}
 
 	show_state ();
@@ -508,24 +509,24 @@ TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 void
 TrackMixLayout::drop_stripable ()
 {
-	stripable_connections.drop_connections ();
-	stripable.reset ();
+	_stripable_connections.drop_connections ();
+	_stripable.reset ();
 }
 
 void
 TrackMixLayout::name_changed ()
 {
-	if (stripable) {
+	if (_stripable) {
 
-		name_text->set (stripable->name());
+		_name_text->set (_stripable->name());
 
 		/* right justify */
 
 		Duple pos;
-		pos.y = name_text->position().y;
-		pos.x = display_width() - 10 - name_text->width();
+		pos.y = _name_text->position().y;
+		pos.x = display_width() - 10 - _name_text->width();
 
-		name_text->set_position (pos);
+		_name_text->set_position (pos);
 	}
 }
 
@@ -536,15 +537,15 @@ TrackMixLayout::color_changed ()
 		return;
 	}
 
-	Gtkmm2ext::Color rgba = stripable->presentation_info().color();
-	selection_color = p2.get_color_index (rgba);
+	Gtkmm2ext::Color rgba = _stripable->presentation_info().color();
+	_selection_color = _p2.get_color_index (rgba);
 
-	name_text->set_color (rgba);
+	_name_text->set_color (rgba);
 
 	for (int n = 0; n < 8; ++n) {
-		knobs[n]->set_text_color (rgba);
-		knobs[n]->set_arc_start_color (rgba);
-		knobs[n]->set_arc_end_color (rgba);
+		_knobs[n]->set_text_color (rgba);
+		_knobs[n]->set_arc_start_color (rgba);
+		_knobs[n]->set_arc_end_color (rgba);
 	}
 }
 
@@ -562,7 +563,7 @@ TrackMixLayout::stripable_property_change (PropertyChange const& what_changed)
 void
 TrackMixLayout::strip_vpot (int n, int delta)
 {
-	boost::shared_ptr<Controllable> ac = knobs[n]->controllable();
+	boost::shared_ptr<Controllable> ac = _knobs[n]->controllable();
 
 	if (ac) {
 		ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
@@ -572,9 +573,9 @@ TrackMixLayout::strip_vpot (int n, int delta)
 void
 TrackMixLayout::strip_vpot_touch (int n, bool touching)
 {
-	boost::shared_ptr<AutomationControl> ac = knobs[n]->controllable();
+	boost::shared_ptr<AutomationControl> ac = _knobs[n]->controllable();
 	if (ac) {
-		const timepos_t now (session.audible_sample());
+		const timepos_t now (_session.audible_sample());
 		if (touching) {
 			ac->start_touch (now);
 		} else {
@@ -586,17 +587,17 @@ TrackMixLayout::strip_vpot_touch (int n, bool touching)
 void
 TrackMixLayout::update_meters ()
 {
-	if (!stripable) {
+	if (!_stripable) {
 		return;
 	}
 
-	meter->update_meters ();
+	_meter->update_meters ();
 }
 
 void
 TrackMixLayout::update_clocks ()
 {
-	samplepos_t pos = session.audible_sample();
+	samplepos_t pos = _session.audible_sample();
 	bool negative = false;
 
 	if (pos < 0) {
@@ -617,7 +618,7 @@ TrackMixLayout::update_clocks ()
 			  BBT.bars, BBT.beats, BBT.ticks);
 	}
 
-	bbt_text->set (buf);
+	_bbt_text->set (buf);
 
 	samplecnt_t left;
 	int hrs;
@@ -625,7 +626,7 @@ TrackMixLayout::update_clocks ()
 	int secs;
 	int millisecs;
 
-	const double sample_rate = session.sample_rate ();
+	const double sample_rate = _session.sample_rate ();
 
 	left = pos;
 	hrs = (int) floor (left / (sample_rate * 60.0f * 60.0f));
@@ -642,5 +643,5 @@ TrackMixLayout::update_clocks ()
 		snprintf (buf, sizeof (buf), " %02" PRId32 ":%02" PRId32 ":%02" PRId32 ".%03" PRId32, hrs, mins, secs, millisecs);
 	}
 
-	minsec_text->set (buf);
+	_minsec_text->set (buf);
 }

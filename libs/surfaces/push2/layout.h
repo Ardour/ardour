@@ -66,9 +66,9 @@ class Push2Layout : public sigc::trackable, public ArdourCanvas::Container
 	std::string name() const { return _name; }
 
   protected:
-	Push2& p2;
-	ARDOUR::Session& session;
-	std::string _name;
+	Push2&           _p2;
+	ARDOUR::Session& _session;
+	std::string      _name;
 };
 
 } /* namespace */

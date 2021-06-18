@@ -48,33 +48,33 @@ using namespace ArdourCanvas;
 
 Push2Menu::Push2Menu (Item* parent, vector<string> s)
 	: Container (parent)
-	, baseline (-1)
-	, ncols (0)
-	, nrows (0)
-	, wrap (true)
-	, first (0)
-	, last (0)
+	, _baseline (-1)
+	, _ncols (0)
+	, _nrows (0)
+	, _wrap (true)
+	, _first (0)
+	, _last (0)
 	, _active (0)
 {
 	Pango::FontDescription fd ("Sans 10");
 
-	if (baseline < 0) {
+	if (_baseline < 0) {
 		Push2Canvas* p2c = dynamic_cast<Push2Canvas*> (canvas());
 		Glib::RefPtr<Pango::Layout> throwaway = Pango::Layout::create (p2c->image_context());
 		throwaway->set_font_description (fd);
 		throwaway->set_text (X_("Hg")); /* ascender + descender) */
 		int h, w;
 		throwaway->get_pixel_size (w, h);
-		baseline = h;
+		_baseline = h;
 	}
 
-	active_bg = new ArdourCanvas::Rectangle (this);
+	_active_bg = new ArdourCanvas::Rectangle (this);
 
 	for (vector<string>::iterator si = s.begin(); si != s.end(); ++si) {
 		Text* t = new Text (this);
 		t->set_font_description (fd);
 		t->set (*si);
-		displays.push_back (t);
+		_displays.push_back (t);
 	}
 
 }
@@ -82,8 +82,8 @@ Push2Menu::Push2Menu (Item* parent, vector<string> s)
 void
 Push2Menu::set_layout (int c, int r)
 {
-	ncols = c;
-	nrows = r;
+	_ncols = c;
+	_nrows = r;
 
 	set_active (_active);
 	rearrange (_active);
@@ -92,11 +92,11 @@ Push2Menu::set_layout (int c, int r)
 void
 Push2Menu::rearrange (uint32_t initial_display)
 {
-	if (initial_display >= displays.size()) {
+	if (initial_display >= _displays.size()) {
 		return;
 	}
 
-	vector<Text*>::iterator i = displays.begin();
+	vector<Text*>::iterator i = _displays.begin();
 
 	/* move to first */
 
@@ -110,28 +110,31 @@ Push2Menu::rearrange (uint32_t initial_display)
 	uint32_t row = 0;
 	bool active_shown = false;
 
-	while (i != displays.end()) {
+	while (i != _displays.end()) {
 
 		Coord x = col * Push2Canvas::inter_button_spacing();
-		Coord y = 2 + (row * baseline);
+		Coord y = 2 + (row * _baseline);
 
 		(*i)->set_position (Duple (x, y));
 
 		if (index == _active) {
-			active_bg->set (Rect (x - 1, y - 1,
-			                      x - 1 + Push2Canvas::inter_button_spacing(), y - 1 + baseline));
-			active_bg->show ();
+			_active_bg->set (Rect (x - 1,
+			                       y - 1,
+			                       x - 1 + Push2Canvas::inter_button_spacing (),
+			                       y - 1 + _baseline));
+
+			_active_bg->show ();
 			active_shown = true;
 		}
 
 		(*i)->show ();
-		last = index;
+		_last = index;
 		++i;
 		++index;
 
-		if (++row >= nrows) {
+		if (++row >= _nrows) {
 			row = 0;
-			if (++col >= ncols) {
+			if (++col >= _ncols) {
 				/* no more to display */
 				break;
 			}
@@ -139,16 +142,16 @@ Push2Menu::rearrange (uint32_t initial_display)
 
 	}
 
-	while (i != displays.end()) {
+	while (i != _displays.end()) {
 		(*i)->hide ();
 		++i;
 	}
 
 	if (!active_shown) {
-		active_bg->hide ();
+		_active_bg->hide ();
 	}
 
-	first = initial_display;
+	_first = initial_display;
 
 	Rearranged (); /* EMIT SIGNAL */
 }
@@ -159,8 +162,8 @@ Push2Menu::scroll (Direction dir, bool page)
 	switch (dir) {
 	case DirectionUp:
 		if (_active == 0) {
-			if (wrap) {
-				set_active (displays.size() - 1);
+			if (_wrap) {
+				set_active (_displays.size() - 1);
 			}
 		} else {
 			set_active (_active - 1);
@@ -168,8 +171,8 @@ Push2Menu::scroll (Direction dir, bool page)
 		break;
 
 	case DirectionDown:
-		if (_active == displays.size() - 1) {
-			if (wrap) {
+		if (_active == _displays.size() - 1) {
+			if (_wrap) {
 				set_active (0);
 			}
 		} else {
@@ -179,32 +182,32 @@ Push2Menu::scroll (Direction dir, bool page)
 
 	case DirectionLeft:
 		if (page) {
-			set_active (max (0, (int) (first - (nrows * ncols))));
+			set_active (max (0, (int) (_first - (_nrows * _ncols))));
 		} else {
-			if (_active / nrows == 0) {
+			if (_active / _nrows == 0) {
 				/* in the first column, go to last column, same row */
-				if (wrap) {
-					set_active (displays.size() - 1 - active_row ());
+				if (_wrap) {
+					set_active (_displays.size() - 1 - active_row ());
 				}
 			} else {
 				/* move to same row, previous column */
-				set_active (_active - nrows);
+				set_active (_active - _nrows);
 			}
 		}
 		break;
 
 	case DirectionRight:
 		if (page) {
-			set_active (min ((uint32_t) displays.size(), first + (nrows * ncols)));
+			set_active (min ((uint32_t) _displays.size(), _first + (_nrows * _ncols)));
 		} else {
-			if (_active / nrows == ncols) {
+			if (_active / _nrows == _ncols) {
 				/* in the last column, go to same row in first column */
-				if (wrap) {
-				set_active (active_row());
+				if (_wrap) {
+					set_active (active_row());
 				}
 			} else {
 				/* move to same row, next column */
-				set_active (_active + nrows);
+				set_active (_active + _nrows);
 			}
 		}
 		break;
@@ -224,39 +227,39 @@ Push2Menu::set_active (uint32_t index)
 		return;
 	}
 
-	if (index >= displays.size()) {
-		active_bg->hide ();
+	if (index >= _displays.size()) {
+		_active_bg->hide ();
 		return;
 	}
 
 	/* set text color for old active item, and the new one */
 
-	if (_active < displays.size()) {
-		displays[_active]->set_color (text_color);
+	if (_active < _displays.size()) {
+		_displays[_active]->set_color (_text_color);
 	}
 
-	displays[index]->set_color (contrast_color);
+	_displays[index]->set_color (_contrast_color);
 
-	Duple p = displays[index]->position ();
+	Duple p = _displays[index]->position ();
 
-	active_bg->set (Rect (p.x - 1, p.y - 1, p.x - 1 + Push2Canvas::inter_button_spacing(), p.y - 1 + baseline ));
-	active_bg->show ();
+	_active_bg->set (Rect (p.x - 1, p.y - 1, p.x - 1 + Push2Canvas::inter_button_spacing(), p.y - 1 + _baseline ));
+	_active_bg->show ();
 	_active = index;
 
-	if (_active < first) {
+	if (_active < _first) {
 
 		/* we jumped before current visible range : try to put its column first
 		 */
 
 		rearrange (active_top());
 
-	} else if (_active > last) {
+	} else if (_active > _last) {
 
 		/* we jumped after current visible range : try putting its
 		 * column last
 		 */
 
-		rearrange (active_top() - ((ncols - 1) * nrows));
+		rearrange (active_top() - ((_ncols - 1) * _nrows));
 	}
 
 	ActiveChanged (); /* EMIT SIGNAL */
@@ -265,9 +268,9 @@ Push2Menu::set_active (uint32_t index)
 void
 Push2Menu::set_text_color (Gtkmm2ext::Color c)
 {
-	text_color = c;
+	_text_color = c;
 
-	for (vector<Text*>::iterator t = displays.begin(); t != displays.end(); ++t) {
+	for (vector<Text*>::iterator t = _displays.begin(); t != _displays.end(); ++t) {
 		(*t)->set_color (c);
 	}
 
@@ -276,23 +279,23 @@ Push2Menu::set_text_color (Gtkmm2ext::Color c)
 void
 Push2Menu::set_active_color (Gtkmm2ext::Color c)
 {
-	active_color = c;
-	contrast_color = Gtkmm2ext::contrasting_text_color (active_color);
-	if (active_bg) {
-		active_bg->set_fill_color (c);
+	_active_color = c;
+	_contrast_color = Gtkmm2ext::contrasting_text_color (_active_color);
+	if (_active_bg) {
+		_active_bg->set_fill_color (c);
 	}
 
-	if (_active < displays.size()) {
-		displays[_active]->set_color (contrast_color);
+	if (_active < _displays.size()) {
+		_displays[_active]->set_color (_contrast_color);
 	}
 }
 
 void
 Push2Menu::set_font_description (Pango::FontDescription fd)
 {
-	font_description = fd;
+	_font_description = fd;
 
-	for (vector<Text*>::iterator t = displays.begin(); t != displays.end(); ++t) {
+	for (vector<Text*>::iterator t = _displays.begin(); t != _displays.end(); ++t) {
 		(*t)->set_font_description (fd);
 	}
 }

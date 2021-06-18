@@ -41,32 +41,32 @@ using namespace ArdourCanvas;
 using namespace ArdourSurface;
 using namespace PBD;
 
-const int Push2Canvas::pixels_per_row = 1024;
+const int Push2Canvas::_pixels_per_row = 1024;
 
 Push2Canvas::Push2Canvas (Push2& pr, int c, int r)
-	: p2 (pr)
+	: _p2 (pr)
 	, _cols (c)
 	, _rows (r)
-	, sample_buffer (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _cols, _rows))
+	, _sample_buffer (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _cols, _rows))
 {
-	context = Cairo::Context::create (sample_buffer);
-	expose_region = Cairo::Region::create ();
+	_context = Cairo::Context::create (_sample_buffer);
+	_expose_region = Cairo::Region::create ();
 
-	device_sample_buffer = new uint16_t[pixel_area()];
-	memset (device_sample_buffer, 0, sizeof (uint16_t) * pixel_area());
+	_device_sample_buffer = new uint16_t[pixel_area()];
+	memset (_device_sample_buffer, 0, sizeof (uint16_t) * pixel_area());
 
-	sample_header[0] = 0xef;
-	sample_header[1] = 0xcd;
-	sample_header[2] = 0xab;
-	sample_header[3] = 0x89;
+	_sample_header[0] = 0xef;
+	_sample_header[1] = 0xcd;
+	_sample_header[2] = 0xab;
+	_sample_header[3] = 0x89;
 
-	memset (&sample_header[4], 0, 12);
+	memset (&_sample_header[4], 0, 12);
 }
 
 Push2Canvas::~Push2Canvas ()
 {
-	delete [] device_sample_buffer;
-	device_sample_buffer = 0;
+	delete [] _device_sample_buffer;
+	_device_sample_buffer = 0;
 }
 
 void
@@ -104,11 +104,11 @@ Push2Canvas::vblank ()
 
 	/* transfer to device */
 
-	if ((err = libusb_bulk_transfer (p2.usb_handle(), 0x01, sample_header, sizeof (sample_header), &transferred, timeout_msecs))) {
+	if ((err = libusb_bulk_transfer (_p2.usb_handle(), 0x01, _sample_header, sizeof (_sample_header), &transferred, timeout_msecs))) {
 		return false;
 	}
 
-	if ((err = libusb_bulk_transfer (p2.usb_handle(), 0x01, (uint8_t*) device_sample_buffer, 2 * pixel_area (), &transferred, timeout_msecs))) {
+	if ((err = libusb_bulk_transfer (_p2.usb_handle(), 0x01, (uint8_t*) _device_sample_buffer, 2 * pixel_area (), &transferred, timeout_msecs))) {
 		return false;
 	}
 
@@ -133,7 +133,7 @@ Push2Canvas::request_redraw (Rect const & r)
 
 	// DEBUG_TRACE (DEBUG::Push2, string_compose ("invalidate rect %1\n", r));
 
-	expose_region->do_union (cr);
+	_expose_region->do_union (cr);
 
 	/* next vblank will redraw */
 }
@@ -141,41 +141,41 @@ Push2Canvas::request_redraw (Rect const & r)
 bool
 Push2Canvas::expose ()
 {
-	if (expose_region->empty()) {
+	if (_expose_region->empty()) {
 		return false; /* nothing drawn */
 	}
 
 	/* set up clipping */
 
-	const int nrects = expose_region->get_num_rectangles ();
+	const int nrects = _expose_region->get_num_rectangles ();
 
 	//DEBUG_TRACE (DEBUG::Push2, string_compose ("expose with %1 rects\n", nrects));
 
 	for (int n = 0; n < nrects; ++n) {
-		Cairo::RectangleInt r = expose_region->get_rectangle (n);
-		context->rectangle (r.x, r.y, r.width, r.height);
+		Cairo::RectangleInt r = _expose_region->get_rectangle (n);
+		_context->rectangle (r.x, r.y, r.width, r.height);
 	}
 
-	context->clip ();
+	_context->clip ();
 
-	Push2Layout* layout = p2.current_layout();
+	Push2Layout* layout = _p2.current_layout();
 
 	if (layout) {
 		/* all layouts cover (at least) the full size of the video
 		   display, so we do not need to check if the layout intersects
 		   the bounding box of the full expose region.
 		*/
-		Cairo::RectangleInt r = expose_region->get_extents();
+		Cairo::RectangleInt r = _expose_region->get_extents();
 		Rect rr (r.x, r.y, r.x + r.width, r.y + r.height);
 		//DEBUG_TRACE (DEBUG::Push2, string_compose ("render layout with %1\n", rr));
-		layout->render (Rect (r.x, r.y, r.x + r.width, r.y + r.height), context);
+		layout->render (Rect (r.x, r.y, r.x + r.width, r.y + r.height), _context);
 	}
 
-	context->reset_clip ();
+	_context->reset_clip ();
 
 	/* why is there no "reset()" method for Cairo::Region? */
 
-	expose_region = Cairo::Region::create ();
+	_expose_region = Cairo::Region::create ();
 
 	return true;
 }
@@ -190,14 +190,14 @@ Push2Canvas::blit_to_device_sample_buffer ()
 {
 	/* ensure that all drawing has been done before we fetch pixel data */
 
-	sample_buffer->flush ();
+	_sample_buffer->flush ();
 
-	const int stride = 3840; /* bytes per row for Cairo::FORMAT_ARGB32 */
-	const uint8_t* data = sample_buffer->get_data ();
+	const int      stride = 3840; /* bytes per row for Cairo::FORMAT_ARGB32 */
+	const uint8_t* data   = _sample_buffer->get_data ();
 
 	/* fill sample buffer (320kB) */
 
-	uint16_t* fb = (uint16_t*) device_sample_buffer;
+	uint16_t* fb = (uint16_t*) _device_sample_buffer;
 
 	for (int row = 0; row < _rows; ++row) {
 
@@ -251,7 +251,7 @@ Push2Canvas::visible_area () const
 Glib::RefPtr<Pango::Context>
 Push2Canvas::get_pango_context ()
 {
-	if (!pango_context) {
+	if (!_pango_context) {
 		PangoFontMap* map = pango_cairo_font_map_new ();
 		if (!map) {
 			error << _("Default Cairo font map is null!") << endmsg;
@@ -266,8 +266,8 @@ Push2Canvas::get_pango_context ()
 			return Glib::RefPtr<Pango::Context> ();
 		}
 
-		pango_context = Glib::wrap (context);
+		_pango_context = Glib::wrap (context);
 	}
 
-	return pango_context;
+	return _pango_context;
 }

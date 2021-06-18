@@ -51,7 +51,7 @@ class Push2Canvas : public ArdourCanvas::Canvas
 	void queue_resize ();
 	bool vblank ();
 
-	Cairo::RefPtr<Cairo::Context> image_context() { return context; }
+	Cairo::RefPtr<Cairo::Context> image_context() { return _context; }
 
 	int rows() const { return _rows; }
 	int cols() const { return _cols; }
@@ -76,20 +76,21 @@ class Push2Canvas : public ArdourCanvas::Canvas
 	Glib::RefPtr<Pango::Context> get_pango_context ();
 
   private:
-	Push2& p2;
+	Push2& _p2;
 	int _cols;
 	int _rows;
 
-	static const int pixels_per_row;
-	int pixel_area () const { return _rows * pixels_per_row; }
+	static const int _pixels_per_row;
 
-	uint8_t   sample_header[16];
-	uint16_t* device_sample_buffer;
+	int pixel_area () const { return _rows * _pixels_per_row; }
 
-	Cairo::RefPtr<Cairo::ImageSurface> sample_buffer;
-	Cairo::RefPtr<Cairo::Context> context;
-	Cairo::RefPtr<Cairo::Region> expose_region;
-	Glib::RefPtr<Pango::Context> pango_context;
+	uint8_t   _sample_header[16];
+	uint16_t* _device_sample_buffer;
+
+	Cairo::RefPtr<Cairo::ImageSurface> _sample_buffer;
+	Cairo::RefPtr<Cairo::Context>      _context;
+	Cairo::RefPtr<Cairo::Region>       _expose_region;
+	Glib::RefPtr<Pango::Context>       _pango_context;
 
 	bool expose ();
 	int blit_to_device_sample_buffer ();

@@ -50,18 +50,18 @@ class Push2Menu : public ArdourCanvas::Container
 	void set_active (uint32_t index);
 
 	uint32_t active () const { return _active; }
-	uint32_t items() const { return displays.size(); }
+	uint32_t items() const { return _displays.size(); }
 
-	uint32_t rows() const { return nrows; }
-	uint32_t cols() const { return ncols; }
+	uint32_t rows() const { return _nrows; }
+	uint32_t cols() const { return _ncols; }
 
 	void set_layout (int cols, int rows);
 	void set_font_description (Pango::FontDescription);
 	void set_text_color (Gtkmm2ext::Color);
 	void set_active_color (Gtkmm2ext::Color);
 
-	bool can_scroll_left() const { return first >= nrows; }
-	bool can_scroll_right() const { return last < displays.size() - 1; }
+	bool can_scroll_left() const { return _first >= _nrows; }
+	bool can_scroll_right() const { return _last < _displays.size() - 1; }
 
 	enum Direction { DirectionUp, DirectionDown, DirectionLeft, DirectionRight };
 	void scroll (Direction, bool page = false);
@@ -70,29 +70,29 @@ class Push2Menu : public ArdourCanvas::Container
 	PBD::Signal0<void> Rearranged;
 
    private:
-	std::vector<ArdourCanvas::Text*> displays;
-	ArdourCanvas::Rectangle* active_bg;
+	std::vector<ArdourCanvas::Text*> _displays;
+	ArdourCanvas::Rectangle*         _active_bg;
 
 	void rearrange (uint32_t initial_display);
 
-	double   baseline;
-	int      row_start;
-	int      col_start;
-	uint32_t ncols;
-	uint32_t nrows;
-	bool     wrap;
-	uint32_t first;
-	uint32_t last;
+	double   _baseline;
+	int      _row_start;
+	int      _col_start;
+	uint32_t _ncols;
+	uint32_t _nrows;
+	bool     _wrap;
+	uint32_t _first;
+	uint32_t _last;
 	uint32_t _active;
 
-	Gtkmm2ext::Color text_color;
-	Gtkmm2ext::Color active_color;
-	Gtkmm2ext::Color contrast_color;
-	Pango::FontDescription font_description;
+	Gtkmm2ext::Color       _text_color;
+	Gtkmm2ext::Color       _active_color;
+	Gtkmm2ext::Color       _contrast_color;
+	Pango::FontDescription _font_description;
 
-	inline int active_row () const { return _active % nrows; }
-	inline int active_col () const { return (_active / nrows); }
-	inline int active_top () const { return active_col() * nrows; }
+	inline int active_row () const { return _active % _nrows; }
+	inline int active_col () const { return (_active / _nrows); }
+	inline int active_top () const { return active_col () * _nrows; }
 };
 
 } // namespace

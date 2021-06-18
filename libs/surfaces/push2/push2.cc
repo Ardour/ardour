@@ -80,24 +80,24 @@ using namespace Gtkmm2ext;
 Push2::Push2 (ARDOUR::Session& s)
 	: ControlProtocol (s, string (X_("Ableton Push 2")))
 	, AbstractUI<Push2Request> (name())
-	, handle (0)
-	, in_use (false)
+	, _handle (0)
+	, _in_use (false)
 	, _modifier_state (None)
-	, splash_start (0)
+	, _splash_start (0)
 	, _current_layout (0)
 	, _previous_layout (0)
-	, connection_state (ConnectionState (0))
-	, gui (0)
+	, _connection_state (ConnectionState (0))
+	, _gui (0)
 	, _mode (MusicalMode::IonianMajor)
 	, _scale_root (0)
 	, _root_octave (3)
 	, _in_key (true)
-	, octave_shift (0)
-	, percussion (false)
+	, _octave_shift (0)
+	, _percussion (false)
 	, _pressure_mode (AfterTouch)
-	, selection_color (LED::Green)
-	, contrast_color (LED::Green)
-	, in_range_select (false)
+	, _selection_color (LED::Green)
+	, _contrast_color (LED::Green)
+	, _in_range_select (false)
 {
 	/* we're going to need this */
 
@@ -108,15 +108,15 @@ Push2::Push2 (ARDOUR::Session& s)
 	fill_color_table ();
 
 	/* master cannot be removed, so no need to connect to going-away signal */
-	master = session->master_out ();
+	_master = session->master_out ();
 
 	/* allocate graphics layouts, even though we're not using them yet */
 
 	_canvas = new Push2Canvas (*this, 960, 160);
-	mix_layout = new MixLayout (*this, *session, "globalmix");
-	scale_layout = new ScaleLayout (*this, *session, "scale");
-	track_mix_layout = new TrackMixLayout (*this, *session, "trackmix");
-	splash_layout = new SplashLayout (*this, *session, "splash");
+	_mix_layout = new MixLayout (*this, *session, "globalmix");
+	_scale_layout = new ScaleLayout (*this, *session, "scale");
+	_track_mix_layout = new TrackMixLayout (*this, *session, "trackmix");
+	_splash_layout = new SplashLayout (*this, *session, "splash");
 
 	run_event_loop ();
 
@@ -150,14 +150,14 @@ Push2::~Push2 ()
 		_current_layout = 0;
 	}
 
-	delete mix_layout;
-	mix_layout = 0;
-	delete scale_layout;
-	scale_layout = 0;
-	delete splash_layout;
-	splash_layout = 0;
-	delete track_mix_layout;
-	track_mix_layout = 0;
+	delete _mix_layout;
+	_mix_layout = 0;
+	delete _scale_layout;
+	_scale_layout = 0;
+	delete _splash_layout;
+	_splash_layout = 0;
+	delete _track_mix_layout;
+	_track_mix_layout = 0;
 
 	stop_event_loop ();
 }
@@ -188,7 +188,7 @@ Push2::begin_using_device ()
 	 */
 
 	Glib::RefPtr<Glib::TimeoutSource> vblank_timeout = Glib::TimeoutSource::create (40); // milliseconds
-	vblank_connection = vblank_timeout->connect (sigc::mem_fun (*this, &Push2::vblank));
+	_vblank_connection = vblank_timeout->connect (sigc::mem_fun (*this, &Push2::vblank));
 	vblank_timeout->attach (main_loop()->get_context());
 
 	connect_session_signals ();
@@ -203,7 +203,7 @@ Push2::begin_using_device ()
 
 	request_pressure_mode ();
 
-	in_use = true;
+	_in_use = true;
 
 	return 0;
 }
@@ -213,7 +213,7 @@ Push2::stop_using_device ()
 {
 	DEBUG_TRACE (DEBUG::Push2, "stop using device\n");
 
-	if (!in_use) {
+	if (!_in_use) {
 		DEBUG_TRACE (DEBUG::Push2, "nothing to do, device not in use\n");
 		return 0;
 	}
@@ -221,10 +221,10 @@ Push2::stop_using_device ()
 	init_buttons (false);
 	strip_buttons_off ();
 
-	vblank_connection.disconnect ();
+	_vblank_connection.disconnect ();
 	session_connections.drop_connections ();
 
-	in_use = false;
+	_in_use = false;
 	return 0;
 }
 
@@ -314,21 +314,21 @@ Push2::device_acquire ()
 
 	DEBUG_TRACE (DEBUG::Push2, "acquiring device\n");
 
-	if (handle) {
+	if (_handle) {
 		DEBUG_TRACE (DEBUG::Push2, "open() called with handle already set\n");
 		/* already open */
 		return 0;
 	}
 
-	if ((handle = libusb_open_device_with_vid_pid (NULL, ABLETON, PUSH2)) == 0) {
+	if ((_handle = libusb_open_device_with_vid_pid (NULL, ABLETON, PUSH2)) == 0) {
 		DEBUG_TRACE (DEBUG::Push2, "failed to open USB handle\n");
 		return -1;
 	}
 
-	if ((err = libusb_claim_interface (handle, 0x00))) {
+	if ((err = libusb_claim_interface (_handle, 0x00))) {
 		DEBUG_TRACE (DEBUG::Push2, "failed to claim USB device\n");
-		libusb_close (handle);
-		handle = 0;
+		libusb_close (_handle);
+		_handle = 0;
 		return -1;
 	}
 
@@ -339,10 +339,10 @@ void
 Push2::device_release ()
 {
 	DEBUG_TRACE (DEBUG::Push2, "releasing device\n");
-	if (handle) {
-		libusb_release_interface (handle, 0x00);
-		libusb_close (handle);
-		handle = 0;
+	if (_handle) {
+		libusb_release_interface (_handle, 0x00);
+		libusb_close (_handle);
+		_handle = 0;
 	}
 }
 
@@ -365,7 +365,7 @@ Push2::strip_buttons_off ()
 	                             Lower1, Lower2, Lower3, Lower4, Lower5, Lower6, Lower7, Lower8, };
 
 	for (size_t n = 0; n < sizeof (strip_buttons) / sizeof (strip_buttons[0]); ++n) {
-		boost::shared_ptr<Button> b = id_button_map[strip_buttons[n]];
+		boost::shared_ptr<Button> b = _id_button_map[strip_buttons[n]];
 
 		b->set_color (LED::Black);
 		b->set_state (LED::OneShot24th);
@@ -387,7 +387,7 @@ Push2::init_buttons (bool startup)
 	};
 
 	for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
-		boost::shared_ptr<Button> b = id_button_map[buttons[n]];
+		boost::shared_ptr<Button> b = _id_button_map[buttons[n]];
 
 		if (startup) {
 			b->set_color (LED::White);
@@ -407,7 +407,7 @@ Push2::init_buttons (bool startup)
 		                           Accent, Note };
 
 		for (size_t n = 0; n < sizeof (off_buttons) / sizeof (off_buttons[0]); ++n) {
-			boost::shared_ptr<Button> b = id_button_map[off_buttons[n]];
+			boost::shared_ptr<Button> b = _id_button_map[off_buttons[n]];
 
 			b->set_color (LED::Black);
 			b->set_state (LED::OneShot24th);
@@ -416,7 +416,7 @@ Push2::init_buttons (bool startup)
 	}
 
 	if (!startup) {
-		for (NNPadMap::iterator pi = nn_pad_map.begin(); pi != nn_pad_map.end(); ++pi) {
+		for (NNPadMap::iterator pi = _nn_pad_map.begin(); pi != _nn_pad_map.end(); ++pi) {
 			boost::shared_ptr<Pad> pad = pi->second;
 
 			pad->set_color (LED::Black);
@@ -459,21 +459,21 @@ Push2::do_request (Push2Request * req)
 void
 Push2::splash ()
 {
-	set_current_layout (splash_layout);
-	splash_start = get_microseconds ();
+	set_current_layout (_splash_layout);
+	_splash_start = get_microseconds ();
 }
 
 bool
 Push2::vblank ()
 {
-	if (splash_start) {
+	if (_splash_start) {
 
 		/* display splash for 2 seconds */
 
-		if (get_microseconds() - splash_start > 2000000) {
-			splash_start = 0;
+		if (get_microseconds() - _splash_start > 2000000) {
+			_splash_start = 0;
 			DEBUG_TRACE (DEBUG::Push2, "splash interval ended, switch to mix layout\n");
-			set_current_layout (mix_layout);
+			set_current_layout (_mix_layout);
 		}
 	}
 
@@ -502,7 +502,7 @@ Push2::set_active (bool yn)
 			return -1;
 		}
 
-		if ((connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
+		if ((_connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
 			begin_using_device ();
 		} else {
 			/* begin_using_device () will get called once we're connected */
@@ -560,7 +560,7 @@ Push2::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 		}
 
 		DEBUG_TRACE (DEBUG::Push2, string_compose ("data available on %1\n", port->name()));
-		if (in_use) {
+		if (_in_use) {
 			samplepos_t now = AudioEngine::instance()->sample_time();
 			port->parse (now);
 		}
@@ -624,32 +624,32 @@ Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 {
 	DEBUG_TRACE (DEBUG::Push2, string_compose ("CC %1 (value %2)\n", (int) ev->controller_number, (int) ev->value));
 
-	CCButtonMap::iterator b = cc_button_map.find (ev->controller_number);
+	CCButtonMap::iterator b = _cc_button_map.find (ev->controller_number);
 
 	if (ev->value) {
 		/* any press cancels any pending long press timeouts */
-		for (set<ButtonID>::iterator x = buttons_down.begin(); x != buttons_down.end(); ++x) {
-			boost::shared_ptr<Button> bb = id_button_map[*x];
+		for (set<ButtonID>::iterator x = _buttons_down.begin(); x != _buttons_down.end(); ++x) {
+			boost::shared_ptr<Button> bb = _id_button_map[*x];
 			bb->timeout_connection.disconnect ();
 		}
 	}
 
-	if (b != cc_button_map.end()) {
+	if (b != _cc_button_map.end()) {
 
 		boost::shared_ptr<Button> button = b->second;
 
 		if (ev->value) {
-			buttons_down.insert (button->id);
+			_buttons_down.insert (button->id);
 			start_press_timeout (button, button->id);
 		} else {
-			buttons_down.erase (button->id);
+			_buttons_down.erase (button->id);
 			button->timeout_connection.disconnect ();
 		}
 
 
-		set<ButtonID>::iterator c = consumed.find (button->id);
+		set<ButtonID>::iterator c = _consumed.find (button->id);
 
-		if (c == consumed.end()) {
+		if (c == _consumed.end()) {
 			if (ev->value == 0) {
 				(this->*button->release_method)();
 			} else {
@@ -657,7 +657,7 @@ Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 			}
 		} else {
 			DEBUG_TRACE (DEBUG::Push2, "button was consumed, ignored\n");
-			consumed.erase (c);
+			_consumed.erase (c);
 		}
 
 	} else {
@@ -775,24 +775,24 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 
 	/* Pad illuminations */
 
-	NNPadMap::const_iterator pm = nn_pad_map.find (ev->note_number);
+	NNPadMap::const_iterator pm = _nn_pad_map.find (ev->note_number);
 
-	if (pm == nn_pad_map.end()) {
+	if (pm == _nn_pad_map.end()) {
 		return;
 	}
 
 	boost::shared_ptr<const Pad> pad_pressed = pm->second;
 
-	pair<FNPadMap::iterator,FNPadMap::iterator> pads_with_note = fn_pad_map.equal_range (pad_pressed->filtered);
+	pair<FNPadMap::iterator,FNPadMap::iterator> pads_with_note = _fn_pad_map.equal_range (pad_pressed->filtered);
 
-	if (pads_with_note.first == fn_pad_map.end()) {
+	if (pads_with_note.first == _fn_pad_map.end()) {
 		return;
 	}
 
 	for (FNPadMap::iterator pi = pads_with_note.first; pi != pads_with_note.second; ++pi) {
 		boost::shared_ptr<Pad> pad = pi->second;
 
-		pad->set_color (contrast_color);
+		pad->set_color (_contrast_color);
 		pad->set_state (LED::OneShot24th);
 		write (pad->state_msg());
 	}
@@ -813,17 +813,17 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 
 	/* Pad illuminations */
 
-	NNPadMap::const_iterator pm = nn_pad_map.find (ev->note_number);
+	NNPadMap::const_iterator pm = _nn_pad_map.find (ev->note_number);
 
-	if (pm == nn_pad_map.end()) {
+	if (pm == _nn_pad_map.end()) {
 		return;
 	}
 
 	boost::shared_ptr<const Pad> const pad_pressed = pm->second;
 
-	pair<FNPadMap::iterator,FNPadMap::iterator> pads_with_note = fn_pad_map.equal_range (pad_pressed->filtered);
+	pair<FNPadMap::iterator,FNPadMap::iterator> pads_with_note = _fn_pad_map.equal_range (pad_pressed->filtered);
 
-	if (pads_with_note.first == fn_pad_map.end()) {
+	if (pads_with_note.first == _fn_pad_map.end()) {
 		return;
 	}
 
@@ -881,9 +881,9 @@ Push2::connect_session_signals()
 void
 Push2::notify_record_state_changed ()
 {
-	IDButtonMap::iterator b = id_button_map.find (RecordEnable);
+	IDButtonMap::iterator b = _id_button_map.find (RecordEnable);
 
-	if (b == id_button_map.end()) {
+	if (b == _id_button_map.end()) {
 		return;
 	}
 
@@ -908,7 +908,7 @@ Push2::notify_record_state_changed ()
 void
 Push2::notify_transport_state_changed ()
 {
-	boost::shared_ptr<Button> b = id_button_map[Play];
+	boost::shared_ptr<Button> b = _id_button_map[Play];
 
 	if (session->transport_rolling()) {
 		b->set_state (LED::OneShot24th);
@@ -916,7 +916,7 @@ Push2::notify_transport_state_changed ()
 	} else {
 
 		/* disable any blink on FixedLength from pending edit range op */
-		boost::shared_ptr<Button> fl = id_button_map[FixedLength];
+		boost::shared_ptr<Button> fl = _id_button_map[FixedLength];
 
 		fl->set_color (LED::Black);
 		fl->set_state (LED::NoTransition);
@@ -940,7 +940,7 @@ Push2::notify_parameter_changed (std::string param)
 	IDButtonMap::iterator b;
 
 	if (param == "clicking") {
-		if ((b = id_button_map.find (Metronome)) == id_button_map.end()) {
+		if ((b = _id_button_map.find (Metronome)) == _id_button_map.end()) {
 			return;
 		}
 		if (Config->get_clicking()) {
@@ -957,9 +957,9 @@ Push2::notify_parameter_changed (std::string param)
 void
 Push2::notify_solo_active_changed (bool yn)
 {
-	IDButtonMap::iterator b = id_button_map.find (Solo);
+	IDButtonMap::iterator b = _id_button_map.find (Solo);
 
-	if (b == id_button_map.end()) {
+	if (b == _id_button_map.end()) {
 		return;
 	}
 
@@ -1054,8 +1054,8 @@ Push2::other_vpot (int n, int delta)
 		break;
 	case 2:
 		/* master gain control */
-		if (master) {
-			boost::shared_ptr<AutomationControl> ac = master->gain_control();
+		if (_master) {
+			boost::shared_ptr<AutomationControl> ac = _master->gain_control();
 			if (ac) {
 				ac->set_value (ac->interface_to_internal (
 					               min (ac->upper(), max (ac->lower(), ac->internal_to_interface (ac->get_value()) + (delta/256.0)))),
@@ -1075,8 +1075,8 @@ Push2::other_vpot_touch (int n, bool touching)
 	case 1:
 		break;
 	case 2:
-		if (master) {
-			boost::shared_ptr<AutomationControl> ac = master->gain_control();
+		if (_master) {
+			boost::shared_ptr<AutomationControl> ac = _master->gain_control();
 			if (ac) {
 				const timepos_t now (session->audible_sample());
 				if (touching) {
@@ -1094,7 +1094,7 @@ Push2::start_shift ()
 {
 	cerr << "start shift\n";
 	_modifier_state = ModifierState (_modifier_state | ModShift);
-	boost::shared_ptr<Button> b = id_button_map[Shift];
+	boost::shared_ptr<Button> b = _id_button_map[Shift];
 	b->set_color (LED::White);
 	b->set_state (LED::Blinking16th);
 	write (b->state_msg());
@@ -1106,7 +1106,7 @@ Push2::end_shift ()
 	if (_modifier_state & ModShift) {
 		cerr << "end shift\n";
 		_modifier_state = ModifierState (_modifier_state & ~(ModShift));
-		boost::shared_ptr<Button> b = id_button_map[Shift];
+		boost::shared_ptr<Button> b = _id_button_map[Shift];
 		b->timeout_connection.disconnect ();
 		b->set_color (LED::White);
 		b->set_state (LED::OneShot24th);
@@ -1133,13 +1133,13 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 			if ((*ev).note() > 10 && (*ev).note() != 12) {
 
 				const int n = (*ev).note ();
-				NNPadMap::const_iterator nni = nn_pad_map.find (n);
+				NNPadMap::const_iterator nni = _nn_pad_map.find (n);
 
-				if (nni != nn_pad_map.end()) {
+				if (nni != _nn_pad_map.end()) {
 					boost::shared_ptr<const Pad> pad = nni->second;
 					/* shift for output to the shadow port */
 					if (pad->filtered >= 0) {
-						(*ev).set_note (pad->filtered + (octave_shift*12));
+						(*ev).set_note (pad->filtered + (_octave_shift * 12));
 						out.push_back (*ev);
 						/* shift back so that the pads light correctly  */
 						(*ev).set_note (n);
@@ -1214,15 +1214,15 @@ Push2::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boo
 
 	if (ni == name1 || ni == name2) {
 		if (yn) {
-			connection_state |= InputConnected;
+			_connection_state |= InputConnected;
 		} else {
-			connection_state &= ~InputConnected;
+			_connection_state &= ~InputConnected;
 		}
 	} else if (no == name1 || no == name2) {
 		if (yn) {
-			connection_state |= OutputConnected;
+			_connection_state |= OutputConnected;
 		} else {
-			connection_state &= ~OutputConnected;
+			_connection_state &= ~OutputConnected;
 		}
 	} else {
 		DEBUG_TRACE (DEBUG::Push2, string_compose ("Connections between %1 and %2 changed, but I ignored it\n", name1, name2));
@@ -1233,7 +1233,7 @@ Push2::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boo
 	DEBUG_TRACE (DEBUG::Push2, string_compose ("our ports changed connection state: %1 -> %2 connected ? %3\n",
 	                                           name1, name2, yn));
 
-	if ((connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
+	if ((_connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
 
 		/* XXX this is a horrible hack. Without a short sleep here,
 		   something prevents the device wakeup messages from being
@@ -1278,9 +1278,9 @@ Push2::input_port()
 int
 Push2::pad_note (int row, int col) const
 {
-	NNPadMap::const_iterator nni = nn_pad_map.find (36+(row*8)+col);
+	NNPadMap::const_iterator nni = _nn_pad_map.find (36+(row*8)+col);
 
-	if (nni != nn_pad_map.end()) {
+	if (nni != _nn_pad_map.end()) {
 		return nni->second->filtered;
 	}
 
@@ -1290,14 +1290,14 @@ Push2::pad_note (int row, int col) const
 void
 Push2::update_selection_color ()
 {
-	boost::shared_ptr<MidiTrack> current_midi_track = current_pad_target.lock();
+	boost::shared_ptr<MidiTrack> current_midi_track = _current_pad_target.lock();
 
 	if (!current_midi_track) {
 		return;
 	}
 
-	selection_color = get_color_index (current_midi_track->presentation_info().color());
-	contrast_color = get_color_index (Gtkmm2ext::HSV (current_midi_track->presentation_info().color()).opposite().color());
+	_selection_color = get_color_index (current_midi_track->presentation_info().color());
+	_contrast_color = get_color_index (Gtkmm2ext::HSV (current_midi_track->presentation_info().color()).opposite().color());
 
 	reset_pad_colors ();
 }
@@ -1352,7 +1352,7 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 		}
 	}
 
-	fn_pad_map.clear ();
+	_fn_pad_map.clear ();
 
 	if (inkey) {
 
@@ -1371,18 +1371,18 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 			for (int col = 0; col < 8; ++col) {
 				int index = 36 + (row*8) + col;
-				boost::shared_ptr<Pad> pad = nn_pad_map[index];
+				boost::shared_ptr<Pad> pad = _nn_pad_map[index];
 				int notenum;
 				if (notei != mode_vector.end()) {
 
 					notenum = *notei;
 					pad->filtered = notenum;
 
-					fn_pad_map.insert (make_pair (notenum, pad));
+					_fn_pad_map.insert (make_pair (notenum, pad));
 
 					if ((notenum % 12) == original_root) {
-						pad->set_color (selection_color);
-						pad->perma_color = selection_color;
+						pad->set_color (_selection_color);
+						pad->perma_color = _selection_color;
 					} else {
 						pad->set_color (LED::White);
 						pad->perma_color = LED::White;
@@ -1409,7 +1409,7 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 		for (note = 36; note < 100; ++note) {
 
-			boost::shared_ptr<Pad> pad = nn_pad_map[note];
+			boost::shared_ptr<Pad> pad = _nn_pad_map[note];
 
 			/* Chromatic: all pads play, half-tone steps. Light
 			 * those in the scale, and highlight root notes
@@ -1417,13 +1417,13 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 			pad->filtered = root_start + (note - 36);
 
-			fn_pad_map.insert (make_pair (pad->filtered, pad));
+			_fn_pad_map.insert (make_pair (pad->filtered, pad));
 
 			if (mode_map.find (note) != mode_map.end()) {
 
 				if ((note % 12) == original_root) {
-					pad->set_color (selection_color);
-					pad->perma_color = selection_color;
+					pad->set_color (_selection_color);
+					pad->perma_color = _selection_color;
 				} else {
 					pad->set_color (LED::White);
 					pad->perma_color = LED::White;
@@ -1477,20 +1477,20 @@ Push2::set_percussive_mode (bool yn)
 	if (!yn) {
 		cerr << "back to scale\n";
 		set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
-		percussion = false;
+		_percussion = false;
 		return;
 	}
 
 	int drum_note = 36;
 
-	fn_pad_map.clear ();
+	_fn_pad_map.clear ();
 
 	for (int row = 0; row < 8; ++row) {
 
 		for (int col = 0; col < 4; ++col) {
 
 			int index = 36 + (row*8) + col;
-			boost::shared_ptr<Pad> pad = nn_pad_map[index];
+			boost::shared_ptr<Pad> pad = _nn_pad_map[index];
 
 			pad->filtered = drum_note;
 			drum_note++;
@@ -1502,14 +1502,14 @@ Push2::set_percussive_mode (bool yn)
 		for (int col = 4; col < 8; ++col) {
 
 			int index = 36 + (row*8) + col;
-			boost::shared_ptr<Pad> pad = nn_pad_map[index];
+			boost::shared_ptr<Pad> pad = _nn_pad_map[index];
 
 			pad->filtered = drum_note;
 			drum_note++;
 		}
 	}
 
-	percussion = true;
+	_percussion = true;
 }
 
 Push2Layout*
@@ -1523,7 +1523,7 @@ void
 Push2::stripable_selection_changed ()
 {
 	boost::shared_ptr<MidiPort> pad_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
-	boost::shared_ptr<MidiTrack> current_midi_track = current_pad_target.lock();
+	boost::shared_ptr<MidiTrack> current_midi_track = _current_pad_target.lock();
 	boost::shared_ptr<MidiTrack> new_pad_target;
 	StripableNotificationList const & selected (last_selected());
 
@@ -1568,18 +1568,18 @@ Push2::stripable_selection_changed ()
 
 	if (new_pad_target && pad_port) {
 		new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
-		current_pad_target = new_pad_target;
-		selection_color = get_color_index (new_pad_target->presentation_info().color());
-		contrast_color = get_color_index (Gtkmm2ext::HSV (new_pad_target->presentation_info().color()).opposite().color());
+		_current_pad_target = new_pad_target;
+		_selection_color = get_color_index (new_pad_target->presentation_info().color());
+		_contrast_color = get_color_index (Gtkmm2ext::HSV (new_pad_target->presentation_info().color()).opposite().color());
 	} else {
-		current_pad_target.reset ();
-		selection_color = LED::Green;
-		contrast_color = LED::Green;
+		_current_pad_target.reset ();
+		_selection_color = LED::Green;
+		_contrast_color = LED::Green;
 	}
 
 	reset_pad_colors ();
 
-	TrackMixLayout* tml = dynamic_cast<TrackMixLayout*> (track_mix_layout);
+	TrackMixLayout* tml = dynamic_cast<TrackMixLayout*> (_track_mix_layout);
 	assert (tml);
 	tml->set_stripable (first_selected_stripable());
 }
@@ -1587,15 +1587,15 @@ Push2::stripable_selection_changed ()
 boost::shared_ptr<Push2::Button>
 Push2::button_by_id (ButtonID bid)
 {
-	return id_button_map[bid];
+	return _id_button_map[bid];
 }
 
 uint8_t
 Push2::get_color_index (Color rgba)
 {
-	ColorMap::iterator i = color_map.find (rgba);
+	ColorMap::iterator i = _color_map.find (rgba);
 
-	if (i != color_map.end()) {
+	if (i != _color_map.end()) {
 		return i->second;
 	}
 
@@ -1613,14 +1613,14 @@ Push2::get_color_index (Color rgba)
 
 	uint8_t index;
 
-	if (color_map_free_list.empty()) {
+	if (_color_map_free_list.empty()) {
 		/* random replacement of any entry above zero and below 122 (where the
 		 * Ableton standard colors live)
 		 */
 		index = 1 + (random() % 121);
 	} else {
-		index = color_map_free_list.top();
-		color_map_free_list.pop();
+		index = _color_map_free_list.top();
+		_color_map_free_list.pop();
 	}
 
 	MidiByteArray palette_msg (17,
@@ -1647,7 +1647,7 @@ Push2::get_color_index (Color rgba)
 	MidiByteArray update_pallette_msg (8, 0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x05, 0xF7);
 	write (update_pallette_msg);
 
-	color_map[rgba] = index;
+	_color_map[rgba] = index;
 
 	return index;
 }
@@ -1660,46 +1660,45 @@ Push2::build_color_map ()
 	   colors, we will use the Ableton indices for them.
 	*/
 
-	color_map.insert (make_pair (RGB_TO_UINT (0,0,0), 0));
-	color_map.insert (make_pair (RGB_TO_UINT (204,204,204), 122));
-	color_map.insert (make_pair (RGB_TO_UINT (64,64,64), 123));
-	color_map.insert (make_pair (RGB_TO_UINT (20,20,20), 124));
-	color_map.insert (make_pair (RGB_TO_UINT (0,0,255), 125));
-	color_map.insert (make_pair (RGB_TO_UINT (0,255,0), 126));
-	color_map.insert (make_pair (RGB_TO_UINT (255,0,0), 127));
+	_color_map.insert (make_pair (RGB_TO_UINT (0,0,0), 0));
+	_color_map.insert (make_pair (RGB_TO_UINT (204,204,204), 122));
+	_color_map.insert (make_pair (RGB_TO_UINT (64,64,64), 123));
+	_color_map.insert (make_pair (RGB_TO_UINT (20,20,20), 124));
+	_color_map.insert (make_pair (RGB_TO_UINT (0,0,255), 125));
+	_color_map.insert (make_pair (RGB_TO_UINT (0,255,0), 126));
+	_color_map.insert (make_pair (RGB_TO_UINT (255,0,0), 127));
 
 	for (uint8_t n = 1; n < 122; ++n) {
-		color_map_free_list.push (n);
+		_color_map_free_list.push (n);
 	}
 }
 
 void
 Push2::fill_color_table ()
 {
-	colors.insert (make_pair (DarkBackground, Gtkmm2ext::rgba_to_color (0, 0, 0, 1)));
-	colors.insert (make_pair (LightBackground, Gtkmm2ext::rgba_to_color (0.98, 0.98, 0.98, 1)));
+	_colors.insert (make_pair (DarkBackground, Gtkmm2ext::rgba_to_color (0, 0, 0, 1)));
+	_colors.insert (make_pair (LightBackground, Gtkmm2ext::rgba_to_color (0.98, 0.98, 0.98, 1)));
 
-	colors.insert (make_pair (ParameterName, Gtkmm2ext::rgba_to_color (0.98, 0.98, 0.98, 1)));
+	_colors.insert (make_pair (ParameterName, Gtkmm2ext::rgba_to_color (0.98, 0.98, 0.98, 1)));
 
-	colors.insert (make_pair (KnobArcBackground, Gtkmm2ext::rgba_to_color (0.3, 0.3, 0.3, 1.0)));
-	colors.insert (make_pair (KnobArcStart, Gtkmm2ext::rgba_to_color (1.0, 0.0, 0.0, 1.0)));
-	colors.insert (make_pair (KnobArcEnd, Gtkmm2ext::rgba_to_color (0.0, 1.0, 0.0, 1.0)));
+	_colors.insert (make_pair (KnobArcBackground, Gtkmm2ext::rgba_to_color (0.3, 0.3, 0.3, 1.0)));
+	_colors.insert (make_pair (KnobArcStart, Gtkmm2ext::rgba_to_color (1.0, 0.0, 0.0, 1.0)));
+	_colors.insert (make_pair (KnobArcEnd, Gtkmm2ext::rgba_to_color (0.0, 1.0, 0.0, 1.0)));
 
-	colors.insert (make_pair (KnobLineShadow, Gtkmm2ext::rgba_to_color  (0, 0, 0, 0.3)));
-	colors.insert (make_pair (KnobLine, Gtkmm2ext::rgba_to_color (1, 1, 1, 1)));
+	_colors.insert (make_pair (KnobLineShadow, Gtkmm2ext::rgba_to_color  (0, 0, 0, 0.3)));
+	_colors.insert (make_pair (KnobLine, Gtkmm2ext::rgba_to_color (1, 1, 1, 1)));
 
-	colors.insert (make_pair (KnobForeground, Gtkmm2ext::rgba_to_color (0.2, 0.2, 0.2, 1)));
-	colors.insert (make_pair (KnobBackground, Gtkmm2ext::rgba_to_color (0.2, 0.2, 0.2, 1)));
-	colors.insert (make_pair (KnobShadow, Gtkmm2ext::rgba_to_color (0, 0, 0, 0.1)));
-	colors.insert (make_pair (KnobBorder, Gtkmm2ext::rgba_to_color (0, 0, 0, 1)));
-
+	_colors.insert (make_pair (KnobForeground, Gtkmm2ext::rgba_to_color (0.2, 0.2, 0.2, 1)));
+	_colors.insert (make_pair (KnobBackground, Gtkmm2ext::rgba_to_color (0.2, 0.2, 0.2, 1)));
+	_colors.insert (make_pair (KnobShadow, Gtkmm2ext::rgba_to_color (0, 0, 0, 0.1)));
+	_colors.insert (make_pair (KnobBorder, Gtkmm2ext::rgba_to_color (0, 0, 0, 1)));
 }
 
 Gtkmm2ext::Color
 Push2::get_color (ColorName name)
 {
-	Colors::iterator c = colors.find (name);
-	if (c != colors.end()) {
+	Colors::iterator c = _colors.find (name);
+	if (c != _colors.end()) {
 		return c->second;
 	}
 

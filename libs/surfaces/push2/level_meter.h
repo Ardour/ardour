@@ -55,17 +55,17 @@ class LevelMeter : public ArdourCanvas::Container, public sigc::trackable
 
 
   private:
-	Push2& p2;
-	ARDOUR::PeakMeter* _meter;
+	Push2&                           _p2;
+	ARDOUR::PeakMeter*               _meter;
 	ArdourCanvas::Meter::Orientation _meter_orientation;
-	ArdourCanvas::Box* meter_packer;
+	ArdourCanvas::Box*               _meter_packer;
 
 	struct MeterInfo {
 		ArdourCanvas::Meter* meter;
-		gint16 width;
-		int    length;
-		bool   packed;
-		float  max_peak;
+		gint16               width;
+		int                  length;
+		bool                 packed;
+		float                max_peak;
 
 		MeterInfo() {
 			meter = 0;
@@ -76,15 +76,15 @@ class LevelMeter : public ArdourCanvas::Container, public sigc::trackable
 		}
 	};
 
-	guint16                regular_meter_width;
-	int                    meter_length;
-	guint16                thin_meter_width;
-	std::vector<MeterInfo> meters;
-	float                  max_peak;
-	ARDOUR::MeterType      visible_meter_type;
-	uint32_t               midi_count;
-	uint32_t               meter_count;
-	uint32_t               max_visible_meters;
+	guint16                _regular_meter_width;
+	int                    _meter_length;
+	guint16                _thin_meter_width;
+	std::vector<MeterInfo> _meters;
+	float                  _max_peak;
+	ARDOUR::MeterType      _visible_meter_type;
+	uint32_t               _midi_count;
+	uint32_t               _meter_count;
+	uint32_t               _max_visible_meters;
 
 	PBD::ScopedConnection _configuration_connection;
 	PBD::ScopedConnection _meter_type_connection;
