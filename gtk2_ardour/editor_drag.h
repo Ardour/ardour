@@ -289,6 +289,7 @@ protected:
 	bool _x_constrained; ///< true if x motion is constrained, otherwise false
 	bool _y_constrained; ///< true if y motion is constrained, otherwise false
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
+	ARDOUR::samplepos_t _earliest_time_limit; ///< time we cannot drag before (defaults to 0, indicating no such limit)
 
 private:
 	bool _trackview_only; ///< true if pointer y value should always be relative to the top of the trackview group
@@ -303,7 +304,6 @@ private:
 	ARDOUR::samplepos_t _raw_grab_sample; ///< unsnapped sample that the mouse was at when start_grab was called, or 0
 	ARDOUR::samplepos_t _grab_sample; ///< adjusted_sample that the mouse was at when start_grab was called, or 0
 	ARDOUR::samplepos_t _last_pointer_sample; ///< adjusted_sample the last time a motion occurred
-	ARDOUR::samplepos_t _earliest_time_limit; ///< time we cannot drag before (defaults to 0, indicating no such limit)
 
 	/* difference between some key position's snapped and unsnapped
 	 *  samplepos. used for relative snap.
