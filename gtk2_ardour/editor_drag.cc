@@ -884,6 +884,11 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, MusicSample* pending_
 		*pending_region_position = _last_position;
 	}
 
+	if (pending_region_position->sample <= _earliest_time_limit) {
+		pending_region_position->sample = _earliest_time_limit;
+		return 0.0;
+	}
+
 	double dx = 0;
 
 	bool const x_move_allowed = !_x_constrained;
