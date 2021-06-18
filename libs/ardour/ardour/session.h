@@ -479,9 +479,11 @@ public:
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
 
+	void set_default_play_speed (double spd, TransportRequestSource origin = TRS_UI);
 	void reset_transport_speed (TransportRequestSource origin = TRS_UI);
-	void request_transport_speed (double speed, bool as_default = true, TransportRequestSource origin = TRS_UI);
-	void request_transport_speed_nonzero (double, bool as_default = true, TransportRequestSource origin = TRS_UI);
+
+	void request_transport_speed (double speed, TransportRequestSource origin = TRS_UI);
+	void request_transport_speed_nonzero (double, TransportRequestSource origin = TRS_UI);
 	void request_overwrite_buffer (boost::shared_ptr<Track>, OverwriteReason);
 	void adjust_playback_buffering();
 	void adjust_capture_buffering();
@@ -1390,10 +1392,6 @@ private:
 
 	// varispeed playback -- TODO: move out of session to backend.
 	double                  _engine_speed;
-	double                  _default_transport_speed;
-	double                  _default_engine_speed;
-	double                  _last_transport_speed;
-	double                  _requested_transport_speed;
 	double                  _signalled_varispeed;
 
 	bool                     auto_play_legal;

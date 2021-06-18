@@ -200,13 +200,13 @@ BasicUI::button_varispeed (bool fwd)
 
 		if (fwd) {
 			if (transport_speed <= 0) {
-				session->request_transport_speed (1.0, false);
+				session->request_transport_speed (1.0);
 				session->request_roll (TRS_UI);
 				return;
 			}
 		} else {
 			if (transport_speed >= 0) {
-				session->request_transport_speed (-1.0, false);
+				session->request_transport_speed (-1.0);
 				session->request_roll (TRS_UI);
 				return;
 			}
@@ -221,12 +221,12 @@ BasicUI::button_varispeed (bool fwd)
 
 			if (fwd) {
 				if (transport_speed <= 0) {
-					session->request_transport_speed (1.0, false);
+					session->request_transport_speed (1.0);
 					session->request_roll (TRS_UI);
 				}
 			} else {
 				if (transport_speed >= 0) {
-					session->request_transport_speed (-1.0, false);
+					session->request_transport_speed (-1.0);
 					session->request_roll (TRS_UI);
 				}
 			}
@@ -272,7 +272,7 @@ BasicUI::button_varispeed (bool fwd)
 
 	speed = semitone_ratio * transport_speed;
 	speed = std::max (-maxspeed, std::min (maxspeed, speed));
-	session->request_transport_speed (speed, false);
+	session->request_transport_speed (speed);
 	session->request_roll (TRS_UI);
 }
 
@@ -374,7 +374,7 @@ BasicUI::transport_play (bool from_last_start)
 	}
 
 	if (rolling) {
-		session->request_transport_speed (1.0, false, TRS_UI);
+		session->request_transport_speed (1.0, TRS_UI);
 	} else {
 		session->request_roll ();
 	}
