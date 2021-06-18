@@ -231,6 +231,8 @@ public:
 	bool                          region_is_shuffle_constrained (boost::shared_ptr<Region>);
 	bool                          has_region_at (samplepos_t const) const;
 
+	samplepos_t                   find_prev_region_start (samplepos_t sample);
+
 	bool uses_source (boost::shared_ptr<const Source> src, bool shallow = false) const;
 	void deep_sources (std::set<boost::shared_ptr<Source> >&) const;
 

@@ -2083,6 +2083,32 @@ Playlist::find_next_region (samplepos_t sample, RegionPoint point, int dir)
 }
 
 samplepos_t
+Playlist::find_prev_region_start (samplepos_t sample)
+{
+	RegionReadLock rlock (this);
+
+	samplepos_t closest = max_samplepos;
+	samplepos_t ret     = -1;
+
+	for (RegionList::reverse_iterator i = regions.rbegin (); i != regions.rend (); ++i) {
+		boost::shared_ptr<Region> r = (*i);
+		sampleoffset_t            distance;
+		const samplepos_t         first_sample = r->first_sample ();
+
+		if (first_sample < sample) {
+			distance = sample - first_sample;
+
+			if (distance < closest) {
+				ret     = first_sample;
+				closest = distance;
+			}
+		}
+	}
+
+	return ret;
+}
+
+samplepos_t
 Playlist::find_next_region_boundary (samplepos_t sample, int dir)
 {
 	RegionReadLock rlock (this);
