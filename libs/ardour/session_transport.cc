@@ -309,6 +309,12 @@ Session::post_locate ()
 	}
 }
 
+double
+Session::default_play_speed ()
+{
+	return _transport_fsm->default_speed();
+}
+
 /** Set the default speed that is used when we respond to a "play" action.
  *  @param speed New speed
  */
