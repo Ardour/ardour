@@ -373,11 +373,18 @@ ARDOUR::vst3_cache_file (std::string const& module_path)
 }
 
 string
-ARDOUR::vst3_valid_cache_file (std::string const& module_path, bool verbose)
+ARDOUR::vst3_valid_cache_file (std::string const& module_path, bool verbose, bool* is_new)
 {
 	string const cache_file = ARDOUR::vst3_cache_file (module_path);
 	if (!Glib::file_test (cache_file, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR))) {
+		if (is_new) {
+			*is_new = true;
+		}
 		return "";
+	}
+
+	if (is_new) {
+		*is_new = false;
 	}
 
 	if (verbose) {

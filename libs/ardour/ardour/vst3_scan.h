@@ -72,7 +72,7 @@ LIBARDOUR_API extern std::string
 vst3_cache_file (std::string const& module_path);
 
 LIBARDOUR_API extern std::string
-vst3_valid_cache_file (std::string const& module_path, bool verbose = false);
+vst3_valid_cache_file (std::string const& module_path, bool verbose = false, bool* is_new = NULL);
 
 LIBARDOUR_API extern bool
 vst3_scan_and_cache (std::string const& module_path, std::string const& bundle_path, boost::function<void (std::string const&, VST3Info const&)> cb, bool verbose = false);
