@@ -81,7 +81,6 @@ protected:
 	ArdourWidgets::BindingProxy binding_proxy;
 	float bg_r, bg_g, bg_b;
 	void build_shuttle_context_menu ();
-	void shuttle_style_changed();
 	void set_shuttle_max_speed (float);
 	void reset_speed ();
 
@@ -102,7 +101,6 @@ protected:
 	void parameter_changed (std::string);
 
 	void set_shuttle_units (ARDOUR::ShuttleUnits);
-	void set_shuttle_style (ARDOUR::ShuttleBehaviour);
 
 	int speed_as_semitones (float, bool&);
 	int fract_as_semitones (float, bool&);
