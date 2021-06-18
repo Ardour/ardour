@@ -46,6 +46,7 @@
 
 #include "input_port_monitor.h"
 #include "rec_info_box.h"
+#include "shuttle_control.h"
 #include "transport_control_ui.h"
 
 namespace ARDOUR {

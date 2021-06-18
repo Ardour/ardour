@@ -23,6 +23,9 @@
 #include <algorithm>
 #include <gtkmm/stock.h>
 
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
+
 #include "pbd/string_convert.h"
 
 #include "ardour/audioengine.h"
@@ -66,6 +69,8 @@ using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace std;
+using namespace Menu_Helpers;
+
 
 #define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
@@ -230,6 +235,9 @@ RecorderUI::RecorderUI ()
 	_button_table.attach (_btn_new_plist,       col,     col + 2, 0, 1 , FILL, SHRINK, hpadding, vpadding);
 	_button_table.attach (_btn_new_plist_rec,   col,     col + 2, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	col += 2;
+
+	_button_table.attach (*(manage (new ArdourVSpacer ())),  col,  col + 1, 0, 2, FILL, FILL, spacepad, vpadding);
+	col += 1;
 
 	_toolbar.pack_start (_button_table, false, false);
 	_toolbar.pack_end (_btn_peak_reset, false, false, 4);
