@@ -479,6 +479,7 @@ public:
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
 
+	double default_play_speed ();
 	void set_default_play_speed (double spd, TransportRequestSource origin = TRS_UI);
 	void reset_transport_speed (TransportRequestSource origin = TRS_UI);
 

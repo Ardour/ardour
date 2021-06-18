@@ -2274,11 +2274,6 @@ LuaBindings::common (lua_State* L)
 		.addConst ("ForceSel", ARDOUR::RangeSelectionAfterSplit(ForceSel))
 		.endNamespace ()
 
-		.beginNamespace ("ShuttleBehaviour")
-		.addConst ("Sprung", ARDOUR::ShuttleBehaviour(Sprung))
-		.addConst ("Wheel", ARDOUR::ShuttleBehaviour(Wheel))
-		.endNamespace ()
-
 		.beginNamespace ("ScreenSaverMode")
 		.addConst ("InhibitNever", ARDOUR::ScreenSaverMode(InhibitNever))
 		.addConst ("InhibitWhileRecording", ARDOUR::ScreenSaverMode(InhibitWhileRecording))

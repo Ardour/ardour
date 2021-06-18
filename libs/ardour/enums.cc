@@ -99,7 +99,6 @@ setup_enum_writer ()
 	PluginType _PluginType;
 	SyncSource _SyncSource;
 	TransportRequestType _TransportRequestType;
-	ShuttleBehaviour _ShuttleBehaviour;
 	ShuttleUnits _ShuttleUnits;
 	Session::RecordState _Session_RecordState;
 	SessionEvent::Type _SessionEvent_Type;
@@ -433,10 +432,6 @@ setup_enum_writer ()
 	REGISTER_ENUM (TR_Speed);
 	REGISTER_ENUM (TR_Locate);
 	REGISTER (_TransportRequestType);
-
-	REGISTER_ENUM (Sprung);
-	REGISTER_ENUM (Wheel);
-	REGISTER (_ShuttleBehaviour);
 
 	REGISTER_ENUM (Percentage);
 	REGISTER_ENUM (Semitones);
