@@ -78,6 +78,23 @@ using namespace Gtkmm2ext;
 #define ABLETON 0x2982
 #define PUSH2   0x1967
 
+static int
+row_interval_semitones (const Push2::RowInterval row_interval)
+{
+	switch (row_interval) {
+	case Push2::Third:
+		return 4;
+	case Push2::Fourth:
+		return 5;
+	case Push2::Fifth:
+		return 7;
+	case Push2::Sequential:
+		return 8;
+	}
+
+	return 5;
+}
+
 Push2::Push2 (ARDOUR::Session& s)
 	: ControlProtocol (s, std::string (X_("Ableton Push 2")))
 	, AbstractUI<Push2Request> (name())
@@ -90,6 +107,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, _connection_state (ConnectionState (0))
 	, _gui (0)
 	, _mode (MusicalMode::IonianMajor)
+	, _row_interval (Fourth)
 	, _scale_root (0)
 	, _root_octave (3)
 	, _in_key (true)
@@ -196,7 +214,7 @@ Push2::begin_using_device ()
 
 	init_buttons (true);
 	init_touch_strip ();
-	set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
+	set_pad_scale (_scale_root, _root_octave, _mode, _row_interval, _in_key);
 	splash ();
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
@@ -1306,7 +1324,7 @@ Push2::update_selection_color ()
 void
 Push2::reset_pad_colors ()
 {
-	set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
+	set_pad_scale (_scale_root, _root_octave, _mode, _row_interval, _in_key);
 }
 
 void
@@ -1493,16 +1511,18 @@ void
 Push2::set_pad_scale (const int               scale_root,
                       const int               octave,
                       const MusicalMode::Type mode,
+                      const RowInterval       row_interval,
                       const bool              inkey)
 {
 	// Clear the pad map and call the appropriate method to set them up again
 
 	_fn_pad_map.clear ();
 
+	const int vertical_semitones = row_interval_semitones(row_interval);
 	if (inkey) {
-		set_pad_scale_in_key(scale_root, octave, mode, 5);
+		set_pad_scale_in_key(scale_root, octave, mode, vertical_semitones);
 	} else {
-		set_pad_scale_chromatic(scale_root, octave, mode, 5);
+		set_pad_scale_chromatic(scale_root, octave, mode, vertical_semitones);
 	}
 
 	// Store state
@@ -1525,6 +1545,10 @@ Push2::set_pad_scale (const int               scale_root,
 		_mode = mode;
 		changed = true;
 	}
+	if (_row_interval != row_interval) {
+		_row_interval = row_interval;
+		changed = true;
+	}
 
 	if (changed) {
 		ScaleChange (); /* EMIT SIGNAL */
@@ -1536,7 +1560,7 @@ Push2::set_percussive_mode (bool yn)
 {
 	if (!yn) {
 		cerr << "back to scale\n";
-		set_pad_scale (_scale_root, _root_octave, _mode, _in_key);
+		set_pad_scale (_scale_root, _root_octave, _mode, _row_interval, _in_key);
 		_percussion = false;
 		return;
 	}

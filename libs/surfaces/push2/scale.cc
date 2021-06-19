@@ -42,6 +42,23 @@ using namespace ArdourCanvas;
 
 static double unselected_root_alpha = 0.5;
 
+static const char*
+row_interval_string (const Push2::RowInterval row_interval)
+{
+	switch (row_interval) {
+	case Push2::Third:
+		return _("3rd \u2191");
+	case Push2::Fourth:
+		return _("4th \u2191");
+	case Push2::Fifth:
+		return _("5th \u2191");
+	case Push2::Sequential:
+		return _("Sequential \u21C9");
+	}
+
+	return "";
+}
+
 ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
 	: Push2Layout (p, s, name)
 	, _last_vpot (-1)
@@ -62,7 +79,7 @@ ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
 
 	_close_text = new Text (this);
 	_close_text->set_font_description (fd);
-	_close_text->set_position (Duple (25, 5));
+	_close_text->set_position (Duple (10, 5));
 	_close_text->set_color (_p2.get_color (Push2::LightBackground));
 	_close_text->set (_("Close"));
 
@@ -83,6 +100,12 @@ ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
 	_chromatic_text->set_position (Duple (45, 140));
 	_chromatic_text->set_color (_p2.get_color (Push2::LightBackground));
 	_chromatic_text->set (_("Chromatic"));
+
+	_row_interval_text = new Text (this);
+	_row_interval_text->set_font_description (fd);
+	_row_interval_text->set_position (Duple (10, 70));
+	_row_interval_text->set_color (_p2.get_color (Push2::LightBackground));
+	_row_interval_text->set (row_interval_string (_p2.row_interval ()));
 
 	for (int n = 0; n < 8; ++n) {
 
@@ -215,14 +238,22 @@ ScaleLayout::button_upper (uint32_t n)
 		return;
 	}
 
-	_p2.set_pad_scale (root, _p2.root_octave(), _p2.mode(), _p2.in_key());
+	_p2.set_pad_scale (root,
+	                   _p2.root_octave (),
+	                   _p2.mode (),
+	                   _p2.row_interval (),
+	                   _p2.in_key ());
 }
 
 void
 ScaleLayout::button_lower (uint32_t n)
 {
 	if (n == 0) {
-		_p2.set_pad_scale (_p2.scale_root(), _p2.root_octave(), _p2.mode(), !_p2.in_key());
+		_p2.set_pad_scale (_p2.scale_root (),
+		                   _p2.root_octave (),
+		                   _p2.mode (),
+		                   _p2.row_interval (),
+		                   !_p2.in_key ());
 		return;
 	}
 
@@ -258,7 +289,11 @@ ScaleLayout::button_lower (uint32_t n)
 		return;
 	}
 
-	_p2.set_pad_scale (root, _p2.root_octave(), _p2.mode(), _p2.in_key());
+	_p2.set_pad_scale (root,
+	                   _p2.root_octave (),
+	                   _p2.mode (),
+	                   _p2.row_interval (),
+	                   _p2.in_key ());
 }
 
 void
@@ -328,22 +363,18 @@ ScaleLayout::show ()
 void
 ScaleLayout::strip_vpot (int n, int delta)
 {
-	/* menu starts under the 2nd-from-left vpot */
-
-	if (n == 0) {
-		return;
-	}
-
 	if (_last_vpot != n) {
-		uint32_t effective_column = n - 1;
-		uint32_t active = _scale_menu->active ();
+		if (n > 0) {
+			uint32_t effective_column = n - 1;
+			uint32_t active = _scale_menu->active ();
 
-		if (active / _scale_menu->rows() != effective_column) {
-			/* knob turned is different than the current active column.
-			   Just change that.
-			*/
-			_scale_menu->set_active (effective_column * _scale_menu->rows()); /* top entry of that column */
-			return;
+			if (active / _scale_menu->rows() != effective_column) {
+				/* knob turned is different than the current active column.
+				   Just change that.
+				*/
+				_scale_menu->set_active (effective_column * _scale_menu->rows()); /* top entry of that column */
+				return;
+			}
 		}
 
 		/* new vpot, reset delta cnt */
@@ -365,10 +396,30 @@ ScaleLayout::strip_vpot (int n, int delta)
 
 	const int vpot_slowdown_factor = 4;
 
-	if ((_vpot_delta_cnt < 0) && (_vpot_delta_cnt % vpot_slowdown_factor == 0)) {
-		_scale_menu->scroll (Push2Menu::DirectionUp);
-	} else if (_vpot_delta_cnt % vpot_slowdown_factor == 0) {
-		_scale_menu->scroll (Push2Menu::DirectionDown);
+	const bool moved_enough = _vpot_delta_cnt % vpot_slowdown_factor == 0;
+	if (moved_enough) {
+		if (n == 0) {
+			Push2::RowInterval row_interval = _p2.row_interval();
+			if (_vpot_delta_cnt < 0 && row_interval > Push2::Third) {
+				row_interval = (Push2::RowInterval)(row_interval - 1);
+			} else if (_vpot_delta_cnt > 0 && row_interval < Push2::Sequential) {
+				row_interval = (Push2::RowInterval)(row_interval + 1);
+			}
+
+			_p2.set_pad_scale (_p2.scale_root (),
+			                   _p2.root_octave (),
+			                   _p2.mode (),
+			                   row_interval,
+			                   _p2.in_key ());
+
+			_row_interval_text->set(row_interval_string(row_interval));
+		} else {
+			if (_vpot_delta_cnt < 0) {
+				_scale_menu->scroll (Push2Menu::DirectionUp);
+			} else {
+				_scale_menu->scroll (Push2Menu::DirectionDown);
+			}
+		}
 	}
 }
 
@@ -584,7 +635,7 @@ void
 ScaleLayout::mode_changed ()
 {
 	MusicalMode::Type m = (MusicalMode::Type) _scale_menu->active();
-	_p2.set_pad_scale (_p2.scale_root(), _p2.root_octave(), m, _p2.in_key());
+	_p2.set_pad_scale (_p2.scale_root(), _p2.root_octave(), m, _p2.row_interval(), _p2.in_key());
 }
 
 void

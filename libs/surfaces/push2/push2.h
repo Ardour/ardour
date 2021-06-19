@@ -325,6 +325,19 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void update_selection_color ();
 
+	/** Interval between vertically adjacent note pads ("layout").
+	 *
+	 * The comments describe the ideal interval that is used in chromatic mode.
+	 * For in-scale mode, they may be slightly adjusted, hence the more general
+	 * enumerator names.
+	 */
+	enum RowInterval {
+		Third,      /// Major third or 4 semitones
+		Fourth,     /// Perfect fourth or 5 semitones
+		Fifth,      /// Perfect fifth or 7 semitones
+		Sequential, /// Sequential from the last row, or 8 semitones
+	};
+
 	/// "Kind" of pad that plays a note
 	enum PadNoteKind { RootNote, InScaleNote, OutOfScaleNote };
 
@@ -378,10 +391,16 @@ class Push2 : public ARDOUR::ControlProtocol
 	                              MusicalMode::Type mode,
 	                              int               vertical_semitones);
 
-	void set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey);
+	void set_pad_scale (int               root,
+	                    int               octave,
+	                    MusicalMode::Type mode,
+	                    RowInterval       row_interval,
+	                    bool              inkey);
+
 	PBD::Signal0<void> ScaleChange;
 
 	MusicalMode::Type mode() const { return  _mode; }
+	RowInterval row_interval() const { return _row_interval; }
 	int scale_root() const { return _scale_root; }
 	int root_octave() const { return _root_octave; }
 	bool in_key() const { return _in_key; }
@@ -621,6 +640,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void stripable_selection_changed ();
 
 	MusicalMode::Type _mode;
+	RowInterval       _row_interval;
 	int               _scale_root;
 	int               _root_octave;
 	bool              _in_key;
