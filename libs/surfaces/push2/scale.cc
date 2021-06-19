@@ -523,8 +523,8 @@ ScaleLayout::show_root_state ()
 		break;
 	case 1:
 		highlight_text = 5;
-		none_text_array = &_lower_text;
-		one_text_array = &_upper_text;
+		none_text_array = &_upper_text;
+		one_text_array = &_lower_text;
 		bid = Push2::Lower6;
 		break;
 	case 2:
