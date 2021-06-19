@@ -1342,7 +1342,6 @@ Push2::set_pad_note_kind (Pad& pad, const PadNoteKind kind)
 	}
 
 	pad.set_state (LED::OneShot24th);
-	write (pad.state_msg ());
 }
 
 /** Return a bitset of notes in a musical mode.
@@ -1516,15 +1515,38 @@ Push2::set_pad_scale (const int               scale_root,
                       const RowInterval       row_interval,
                       const bool              inkey)
 {
-	// Clear the pad map and call the appropriate method to set them up again
+	// Clear the pad map and reset all pad state (in memory, not on the device yet)
 
 	_fn_pad_map.clear ();
+	for (int row = 0; row < 8; ++row) {
+		for (int col = 0; col < 8; ++col) {
+			const int                     index = 36 + (row * 8) + col;
+			const boost::shared_ptr<Pad>& pad = _nn_pad_map[index];
+
+			pad->set_color (LED::Black);
+			pad->filtered        = -1;
+			pad->do_when_pressed = Pad::FlashOn;
+		}
+	}
+
+	// Call the appropriate method to set up active pads
 
 	const int vertical_semitones = row_interval_semitones(row_interval);
 	if (inkey) {
 		set_pad_scale_in_key(scale_root, octave, mode, origin, vertical_semitones);
 	} else {
 		set_pad_scale_chromatic(scale_root, octave, mode, origin, vertical_semitones);
+	}
+
+	// Write the state message for every pad
+
+	for (int row = 0; row < 8; ++row) {
+		for (int col = 0; col < 8; ++col) {
+			const int                     index = 36 + (row * 8) + col;
+			const boost::shared_ptr<Pad>& pad   = _nn_pad_map[index];
+
+			write (pad->state_msg ());
+		}
 	}
 
 	// Store state
