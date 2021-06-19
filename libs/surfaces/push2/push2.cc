@@ -17,6 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
+#include <bitset>
+
 #include <stdlib.h>
 #include <pthread.h>
 
@@ -1330,126 +1333,184 @@ Push2::set_pad_note_kind (Pad& pad, const PadNoteKind kind)
 	write (pad.state_msg ());
 }
 
-void
-Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
+/** Return a bitset of notes in a musical mode.
+ *
+ * The returned bitset has a bit for every possible MIDI note number, which is
+ * set if the note is in the mode in any octave.
+ */
+static std::bitset<128>
+mode_notes_bitset (const int               scale_root,
+                   const int               octave,
+                   const MusicalMode::Type mode)
 {
-	MusicalMode m (mode);
-	std::vector<float>::iterator interval;
-	int note;
-	const int original_root = root;
+	std::bitset<128> notes_bitset;
 
-	interval = m.steps.begin();
-	root += (octave*12);
-	note = root;
+	const std::vector<float> mode_steps = MusicalMode (mode).steps;
+	int                      root       = scale_root - 12;
 
-	const int root_start = root;
-
-	std::set<int> mode_map; /* contains only notes in mode, O(logN) lookup */
-	std::vector<int> mode_vector; /* sorted in note order */
-
-	mode_map.insert (note);
-	mode_vector.push_back (note);
-
-	/* build a map of all notes in the mode, from the root to 127 */
-
-	while (note < 128) {
-
-		if (interval == m.steps.end()) {
-
-			/* last distance was the end of the scale,
-			   so wrap, adding the next note at one
-			   octave above the last root.
-			*/
-
-			interval = m.steps.begin();
+	// Repeatedly loop through the intervals in an octave
+	for (std::vector<float>::const_iterator i = mode_steps.begin ();;) {
+		if (i == mode_steps.end ()) {
+			// Reached the end of the scale, continue with the next octave
 			root += 12;
-			mode_map.insert (root);
-			mode_vector.push_back (root);
+			if (root > 127) {
+				break;
+			}
+
+			notes_bitset.set (root);
+			i = mode_steps.begin ();
 
 		} else {
-			note = (int) floor (root + (2.0 * (*interval)));
-			interval++;
-			mode_map.insert (note);
-			mode_vector.push_back (note);
+			const int note = (int)floor (root + (2.0 * (*i)));
+			if (note > 127) {
+				break;
+			}
+
+			if (note > 0) {
+				notes_bitset.set (note);
+			}
+
+			++i;
 		}
 	}
+
+	return notes_bitset;
+}
+
+/** Return a sorted vector of all notes in a musical mode.
+ *
+ * The returned vector has every possible MIDI note number (0 through 127
+ * inclusive) that is in the mode in any octave.
+ */
+static std::vector<int>
+mode_notes_vector (const int               scale_root,
+                   const int               octave,
+                   const MusicalMode::Type mode)
+{
+	std::vector<int> notes_vector;
+
+	const std::vector<float> mode_steps = MusicalMode (mode).steps;
+	int                      root       = scale_root - 12;
+
+	// Repeatedly loop through the intervals in an octave
+	for (std::vector<float>::const_iterator i = mode_steps.begin ();;) {
+		if (i == mode_steps.end ()) {
+			// Reached the end of the scale, continue with the next octave
+			root += 12;
+			if (root > 127) {
+				break;
+			}
+
+			notes_vector.push_back (root);
+			i = mode_steps.begin ();
+
+		} else {
+			const int note = (int)floor (root + (2.0 * (*i)));
+			if (note > 127) {
+				break;
+			}
+
+			if (note > 0) {
+				notes_vector.push_back (note);
+			}
+
+			++i;
+		}
+	}
+
+	return notes_vector;
+}
+
+void
+Push2::set_pad_scale_in_key (const int               scale_root,
+                             const int               octave,
+                             const MusicalMode::Type mode,
+                             const int               ideal_vertical_semitones)
+{
+	const std::vector<int> notes = mode_notes_vector (scale_root, octave, mode);
+
+	for (int row = 0; row < 8; ++row) {
+		// The ideal leftmost note in a row is based only on the "tuning"
+		const int ideal_leftmost_note = 36 + (ideal_vertical_semitones * row);
+
+		// If that's in the scale, use it, otherwise use the closest higher note
+		std::vector<int>::const_iterator n =
+		  std::lower_bound (notes.begin (), notes.end (), ideal_leftmost_note);
+
+		// Set up the the following columns in the row using the scale
+		for (int col = 0; col < 8 && n != notes.end (); ++col) {
+			const int                     note  = *n++;
+			const int                     index = 36 + (row * 8) + col;
+			const boost::shared_ptr<Pad>& pad   = _nn_pad_map[index];
+
+			pad->filtered = note; // Generated note number
+
+			_fn_pad_map.insert (std::make_pair (note, pad));
+
+			if ((note % 12) == scale_root) {
+				set_pad_note_kind (*pad, RootNote);
+			} else {
+				set_pad_note_kind (*pad, InScaleNote);
+			}
+		}
+	}
+}
+
+void
+Push2::set_pad_scale_chromatic (const int               scale_root,
+                                const int               octave,
+                                const MusicalMode::Type mode,
+                                const int               vertical_semitones)
+{
+	const std::bitset<128> notes = mode_notes_bitset (scale_root, octave, mode);
+
+	for (int row = 0; row < 8; ++row) {
+		// The leftmost note in a row is just based only on the "tuning"
+		const int leftmost_note = 36 + (vertical_semitones * row);
+
+		// Set up the the following columns in the row using the scale
+		for (int col = 0; col < 8; ++col) {
+			const int                     note  = leftmost_note + col;
+			const int                     index = 36 + (row * 8) + col;
+			const boost::shared_ptr<Pad>& pad   = _nn_pad_map[index];
+
+			pad->filtered = note; // Generated note number
+
+			_fn_pad_map.insert (std::make_pair (note, pad));
+
+			if (!notes.test (note)) {
+				set_pad_note_kind (*pad, OutOfScaleNote);
+			} else if ((note % 12) == scale_root) {
+				set_pad_note_kind (*pad, RootNote);
+			} else {
+				set_pad_note_kind (*pad, InScaleNote);
+			}
+		}
+	}
+}
+
+void
+Push2::set_pad_scale (const int               scale_root,
+                      const int               octave,
+                      const MusicalMode::Type mode,
+                      const bool              inkey)
+{
+	// Clear the pad map and call the appropriate method to set them up again
 
 	_fn_pad_map.clear ();
 
 	if (inkey) {
-
-		std::vector<int>::iterator notei;
-		int row_offset = 0;
-
-		for (int row = 0; row < 8; ++row) {
-
-			/* Ableton's grid layout wraps the available notes in the scale
-			 * by offsetting 3 notes per row (from the bottom)
-			 */
-
-			notei = mode_vector.begin();
-			notei += row_offset;
-			row_offset += 3;
-
-			for (int col = 0; col < 8; ++col) {
-				int index = 36 + (row*8) + col;
-				boost::shared_ptr<Pad> pad = _nn_pad_map[index];
-				int notenum;
-				if (notei != mode_vector.end()) {
-
-					notenum = *notei;
-					pad->filtered = notenum;
-
-					_fn_pad_map.insert (make_pair (notenum, pad));
-
-					if ((notenum % 12) == original_root) {
-						set_pad_note_kind(*pad, RootNote);
-					} else {
-						set_pad_note_kind(*pad, InScaleNote);
-					}
-
-					notei++;
-
-				} else {
-					pad->filtered = -1;
-					set_pad_note_kind(*pad, OutOfScaleNote);
-				}
-			}
-		}
-
+		set_pad_scale_in_key(scale_root, octave, mode, 5);
 	} else {
-
-		/* chromatic: all notes available, but highlight those in the scale */
-
-		for (note = 36; note < 100; ++note) {
-
-			boost::shared_ptr<Pad> pad = _nn_pad_map[note];
-
-			/* Chromatic: all pads play, half-tone steps. Light
-			 * those in the scale, and highlight root notes
-			 */
-
-			pad->filtered = root_start + (note - 36);
-
-			_fn_pad_map.insert (make_pair (pad->filtered, pad));
-
-			if (mode_map.find (note) == mode_map.end()) {
-				pad->filtered = -1;
-				set_pad_note_kind(*pad, OutOfScaleNote);
-			} else if ((note % 12) == original_root) {
-				set_pad_note_kind(*pad, RootNote);
-			} else {
-				set_pad_note_kind(*pad, InScaleNote);
-			}
-		}
+		set_pad_scale_chromatic(scale_root, octave, mode, 5);
 	}
 
-	/* store state */
+	// Store state
 
 	bool changed = false;
 
-	if (_scale_root != original_root) {
-		_scale_root = original_root;
+	if (_scale_root != scale_root) {
+		_scale_root = scale_root;
 		changed = true;
 	}
 	if (_root_octave != octave) {

@@ -331,6 +331,53 @@ class Push2 : public ARDOUR::ControlProtocol
 	/// Set up a pad to represent a "kind" of note
 	void set_pad_note_kind(Pad& pad, PadNoteKind kind);
 
+	/** Set an "in-key" scale on the pads.
+	 *
+	 * "In-key" mode shows only notes which are in the scale, so every pad is
+	 * in the scale and there are no "spaces".  This provides access to a wide
+	 * range of notes in the scale, but no access to notes outside the scale at
+	 * all.
+	 *
+	 *
+	 * @param root The root note in the lowest octave (at most 11).
+	 *
+	 * @param octave The octave number of the "actual" root (at most 10).
+	 *
+	 * @param mode The active musical mode (scale).
+	 *
+	 * @param ideal_vertical_semitones The ideal interval between rows in
+	 * semitones.  This is an "ideal" because it may not be possible to use
+	 * exactly this interval for every row depending on the scale.  It may be
+	 * bumped up to the next note in the scale if necessary, so with this mode,
+	 * rows are not guaranteed to all have the same vertical interval.
+	 */
+	void set_pad_scale_in_key (int               root,
+	                           int               octave,
+	                           MusicalMode::Type mode,
+	                           int               ideal_vertical_semitones);
+
+	/** Set a "chromatic" scale on the pads.
+	 *
+	 * "Chromatic" mode is chromatic from left to right, and "tuned" to some
+	 * interval from bottom up, like a stringed instrument.  The default
+	 * vertical interval is 5 semitones, or a perfect 4th, like strings on a
+	 * bass guitar.
+	 *
+	 * @param root The root note in the lowest octave (at most 11).
+	 *
+	 * @param octave The octave number of the "actual" root (at most 10).
+	 *
+	 * @param mode The active musical mode (scale).
+	 *
+	 * @param vertical_semitones The interval between rows in semitones.  This
+	 * mode guarantees that the vertical interval for all rows is always
+	 * exactly this.
+	 */
+	void set_pad_scale_chromatic (int               root,
+	                              int               octave,
+	                              MusicalMode::Type mode,
+	                              int               vertical_semitones);
+
 	void set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey);
 	PBD::Signal0<void> ScaleChange;
 
