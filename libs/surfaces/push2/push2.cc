@@ -214,7 +214,7 @@ Push2::begin_using_device ()
 
 	init_buttons (true);
 	init_touch_strip ();
-	set_pad_scale (_scale_root, _root_octave, _mode, _row_interval, _in_key);
+	set_pad_scale (_scale_root, _root_octave, _mode, _note_grid_origin, _row_interval, _in_key);
 	splash ();
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
@@ -1318,7 +1318,7 @@ Push2::update_selection_color ()
 void
 Push2::reset_pad_colors ()
 {
-	set_pad_scale (_scale_root, _root_octave, _mode, _row_interval, _in_key);
+	set_pad_scale (_scale_root, _root_octave, _mode, _note_grid_origin, _row_interval, _in_key);
 }
 
 void
@@ -1437,13 +1437,17 @@ void
 Push2::set_pad_scale_in_key (const int               scale_root,
                              const int               octave,
                              const MusicalMode::Type mode,
+                             const NoteGridOrigin    origin,
                              const int               ideal_vertical_semitones)
 {
 	const std::vector<int> notes = mode_notes_vector (scale_root, octave, mode);
 
+	const int ideal_first_note = origin == Fixed ? 36 : scale_root + (12 * octave);
+
 	for (int row = 0; row < 8; ++row) {
 		// The ideal leftmost note in a row is based only on the "tuning"
-		const int ideal_leftmost_note = 36 + (ideal_vertical_semitones * row);
+		const int ideal_leftmost_note =
+		  ideal_first_note + (ideal_vertical_semitones * row);
 
 		// If that's in the scale, use it, otherwise use the closest higher note
 		std::vector<int>::const_iterator n =
@@ -1472,13 +1476,16 @@ void
 Push2::set_pad_scale_chromatic (const int               scale_root,
                                 const int               octave,
                                 const MusicalMode::Type mode,
+                                const NoteGridOrigin    origin,
                                 const int               vertical_semitones)
 {
 	const std::bitset<128> notes = mode_notes_bitset (scale_root, octave, mode);
 
+	const int first_note = origin == Fixed ? 36 : scale_root + (12 * octave);
+
 	for (int row = 0; row < 8; ++row) {
 		// The leftmost note in a row is just based only on the "tuning"
-		const int leftmost_note = 36 + (vertical_semitones * row);
+		const int leftmost_note = first_note + (vertical_semitones * row);
 
 		// Set up the the following columns in the row using the scale
 		for (int col = 0; col < 8; ++col) {
@@ -1505,6 +1512,7 @@ void
 Push2::set_pad_scale (const int               scale_root,
                       const int               octave,
                       const MusicalMode::Type mode,
+                      const NoteGridOrigin    origin,
                       const RowInterval       row_interval,
                       const bool              inkey)
 {
@@ -1514,9 +1522,9 @@ Push2::set_pad_scale (const int               scale_root,
 
 	const int vertical_semitones = row_interval_semitones(row_interval);
 	if (inkey) {
-		set_pad_scale_in_key(scale_root, octave, mode, vertical_semitones);
+		set_pad_scale_in_key(scale_root, octave, mode, origin, vertical_semitones);
 	} else {
-		set_pad_scale_chromatic(scale_root, octave, mode, vertical_semitones);
+		set_pad_scale_chromatic(scale_root, octave, mode, origin, vertical_semitones);
 	}
 
 	// Store state
@@ -1539,6 +1547,10 @@ Push2::set_pad_scale (const int               scale_root,
 		_mode = mode;
 		changed = true;
 	}
+	if (_note_grid_origin != origin) {
+		_note_grid_origin = origin;
+		changed = true;
+	}
 	if (_row_interval != row_interval) {
 		_row_interval = row_interval;
 		changed = true;
@@ -1553,7 +1565,12 @@ void
 Push2::set_percussive_mode (bool yn)
 {
 	if (!yn) {
-		set_pad_scale (_scale_root, _root_octave, _mode, _row_interval, _in_key);
+		set_pad_scale (_scale_root,
+		               _root_octave,
+		               _mode,
+		               _note_grid_origin,
+		               _row_interval,
+		               _in_key);
 		_percussion = false;
 		return;
 	}

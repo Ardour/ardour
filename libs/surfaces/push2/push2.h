@@ -325,6 +325,17 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void update_selection_color ();
 
+	/** The "origin" or "root" of the note grid.
+	 *
+	 * This controls whether the grid is "fixed" in terms of the notes that it
+	 * plays (so changing the scale is effectively just an overlay), or
+	 * "rooted" so the root note of the scale is in the bottom left.
+	 */
+	enum NoteGridOrigin {
+		Fixed,  ///< Bottom left pad is always C, or as close as possible
+		Rooted, ///< Bottom left pad is the scale root
+	};
+
 	/** Interval between vertically adjacent note pads ("layout").
 	 *
 	 * The comments describe the ideal interval that is used in chromatic mode.
@@ -367,6 +378,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void set_pad_scale_in_key (int               root,
 	                           int               octave,
 	                           MusicalMode::Type mode,
+	                           NoteGridOrigin    origin,
 	                           int               ideal_vertical_semitones);
 
 	/** Set a "chromatic" scale on the pads.
@@ -389,17 +401,20 @@ class Push2 : public ARDOUR::ControlProtocol
 	void set_pad_scale_chromatic (int               root,
 	                              int               octave,
 	                              MusicalMode::Type mode,
+	                              NoteGridOrigin    origin,
 	                              int               vertical_semitones);
 
 	void set_pad_scale (int               root,
 	                    int               octave,
 	                    MusicalMode::Type mode,
+	                    NoteGridOrigin    origin,
 	                    RowInterval       row_interval,
 	                    bool              inkey);
 
 	PBD::Signal0<void> ScaleChange;
 
 	MusicalMode::Type mode() const { return  _mode; }
+	NoteGridOrigin note_grid_origin() { return _note_grid_origin; }
 	RowInterval row_interval() const { return _row_interval; }
 	int scale_root() const { return _scale_root; }
 	int root_octave() const { return _root_octave; }
@@ -640,6 +655,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void stripable_selection_changed ();
 
 	MusicalMode::Type _mode;
+	NoteGridOrigin    _note_grid_origin;
 	RowInterval       _row_interval;
 	int               _scale_root;
 	int               _root_octave;

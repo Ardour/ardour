@@ -101,6 +101,18 @@ ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
 	_chromatic_text->set_color (_p2.get_color (Push2::LightBackground));
 	_chromatic_text->set (_("Chromatic"));
 
+	_fixed_text = new Text (this);
+	_fixed_text->set_font_description (fd2);
+	_fixed_text->set_position (Duple (10 + (7 * Push2Canvas::inter_button_spacing()), 140));
+	_fixed_text->set_color (_p2.get_color (Push2::LightBackground));
+	_fixed_text->set (_("Fixed"));
+
+	_rooted_text = new Text (this);
+	_rooted_text->set_font_description (fd2);
+	_rooted_text->set_position (Duple (45 + (7 * Push2Canvas::inter_button_spacing()), 140));
+	_rooted_text->set_color (_p2.get_color (Push2::LightBackground));
+	_rooted_text->set (_("Rooted"));
+
 	_row_interval_text = new Text (this);
 	_row_interval_text->set_font_description (fd);
 	_row_interval_text->set_position (Duple (10, 70));
@@ -241,6 +253,7 @@ ScaleLayout::button_upper (uint32_t n)
 	_p2.set_pad_scale (root,
 	                   _p2.root_octave (),
 	                   _p2.mode (),
+	                   _p2.note_grid_origin (),
 	                   _p2.row_interval (),
 	                   _p2.in_key ());
 }
@@ -252,12 +265,14 @@ ScaleLayout::button_lower (uint32_t n)
 		_p2.set_pad_scale (_p2.scale_root (),
 		                   _p2.root_octave (),
 		                   _p2.mode (),
+		                   _p2.note_grid_origin (),
 		                   _p2.row_interval (),
 		                   !_p2.in_key ());
 		return;
 	}
 
-	int root = 0;
+	int                   root   = _p2.scale_root();
+	Push2::NoteGridOrigin origin = _p2.note_grid_origin ();
 
 	switch (n) {
 	case 1:
@@ -286,12 +301,14 @@ ScaleLayout::button_lower (uint32_t n)
 		break;
 	case 7:
 		/* fixed mode */
-		return;
+		origin = (origin == Push2::Fixed) ? Push2::Rooted : Push2::Fixed;
+		break;
 	}
 
 	_p2.set_pad_scale (root,
 	                   _p2.root_octave (),
 	                   _p2.mode (),
+	                   origin,
 	                   _p2.row_interval (),
 	                   _p2.in_key ());
 }
@@ -356,6 +373,7 @@ ScaleLayout::show ()
 	}
 
 	show_root_state ();
+	show_fixed_state ();
 
 	Container::show ();
 }
@@ -409,6 +427,7 @@ ScaleLayout::strip_vpot (int n, int delta)
 			_p2.set_pad_scale (_p2.scale_root (),
 			                   _p2.root_octave (),
 			                   _p2.mode (),
+			                   _p2.note_grid_origin (),
 			                   row_interval,
 			                   _p2.in_key ());
 
@@ -629,13 +648,37 @@ ScaleLayout::show_root_state ()
 	}
 
 	_scale_menu->set_active ((uint32_t) _p2.mode ());
+
+	show_fixed_state ();
+}
+
+void
+ScaleLayout::show_fixed_state ()
+{
+	if (!parent()) {
+		/* don't do this stuff if we're not visible */
+		return;
+	}
+
+	if (_p2.note_grid_origin() == Push2::Fixed) {
+		_rooted_text->set_color (change_alpha (_fixed_text->color(), unselected_root_alpha));
+		_fixed_text->set_color (change_alpha (_rooted_text->color(), 1.0));
+	} else {
+		_fixed_text->set_color (change_alpha (_fixed_text->color(), unselected_root_alpha));
+		_rooted_text->set_color (change_alpha (_rooted_text->color(), 1.0));
+	}
 }
 
 void
 ScaleLayout::mode_changed ()
 {
 	MusicalMode::Type m = (MusicalMode::Type) _scale_menu->active();
-	_p2.set_pad_scale (_p2.scale_root(), _p2.root_octave(), m, _p2.row_interval(), _p2.in_key());
+	_p2.set_pad_scale (_p2.scale_root (),
+	                   _p2.root_octave (),
+	                   m,
+	                   _p2.note_grid_origin (),
+	                   _p2.row_interval (),
+	                   _p2.in_key ());
 }
 
 void

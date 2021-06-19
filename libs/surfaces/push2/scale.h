@@ -59,6 +59,8 @@ class ScaleLayout : public Push2Layout
 	ArdourCanvas::Text* _right_scroll_text;
 	ArdourCanvas::Text* _inkey_text;
 	ArdourCanvas::Text* _chromatic_text;
+	ArdourCanvas::Text* _fixed_text;
+	ArdourCanvas::Text* _rooted_text;
 	ArdourCanvas::Text* _row_interval_text;
 	ArdourCanvas::Text* _close_text;
 	Push2Menu* _scale_menu;
@@ -72,6 +74,7 @@ class ScaleLayout : public Push2Layout
 	void mode_changed ();
 	void menu_rearranged ();
 	void show_root_state ();
+	void show_fixed_state ();
 	void update_cursor_buttons ();
 };
 
