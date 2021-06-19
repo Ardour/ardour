@@ -325,6 +325,12 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void update_selection_color ();
 
+	/// "Kind" of pad that plays a note
+	enum PadNoteKind { RootNote, InScaleNote, OutOfScaleNote };
+
+	/// Set up a pad to represent a "kind" of note
+	void set_pad_note_kind(Pad& pad, PadNoteKind kind);
+
 	void set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey);
 	PBD::Signal0<void> ScaleChange;
 

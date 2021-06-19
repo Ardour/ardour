@@ -1307,6 +1307,30 @@ Push2::reset_pad_colors ()
 }
 
 void
+Push2::set_pad_note_kind (Pad& pad, const PadNoteKind kind)
+{
+	switch (kind) {
+	case RootNote:
+		pad.set_color (_selection_color);
+		pad.perma_color     = _selection_color;
+		pad.do_when_pressed = Pad::FlashOff;
+		break;
+	case InScaleNote:
+		pad.set_color (LED::White);
+		pad.perma_color     = LED::White;
+		pad.do_when_pressed = Pad::FlashOff;
+		break;
+	case OutOfScaleNote:
+		pad.set_color (LED::Black);
+		pad.do_when_pressed = Pad::FlashOn;
+		break;
+	}
+
+	pad.set_state (LED::OneShot24th);
+	write (pad.state_msg ());
+}
+
+void
 Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 {
 	MusicalMode m (mode);
@@ -1379,25 +1403,17 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 					_fn_pad_map.insert (make_pair (notenum, pad));
 
 					if ((notenum % 12) == original_root) {
-						pad->set_color (_selection_color);
-						pad->perma_color = _selection_color;
+						set_pad_note_kind(*pad, RootNote);
 					} else {
-						pad->set_color (LED::White);
-						pad->perma_color = LED::White;
+						set_pad_note_kind(*pad, InScaleNote);
 					}
 
-					pad->do_when_pressed = Pad::FlashOff;
 					notei++;
 
 				} else {
-
-					pad->set_color (LED::Black);
-					pad->do_when_pressed = Pad::Nothing;
 					pad->filtered = -1;
+					set_pad_note_kind(*pad, OutOfScaleNote);
 				}
-
-				pad->set_state (LED::OneShot24th);
-				write (pad->state_msg());
 			}
 		}
 
@@ -1417,29 +1433,14 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 			_fn_pad_map.insert (make_pair (pad->filtered, pad));
 
-			if (mode_map.find (note) != mode_map.end()) {
-
-				if ((note % 12) == original_root) {
-					pad->set_color (_selection_color);
-					pad->perma_color = _selection_color;
-				} else {
-					pad->set_color (LED::White);
-					pad->perma_color = LED::White;
-				}
-
-				pad->do_when_pressed = Pad::FlashOff;
-
+			if (mode_map.find (note) == mode_map.end()) {
+				pad->filtered = -1;
+				set_pad_note_kind(*pad, OutOfScaleNote);
+			} else if ((note % 12) == original_root) {
+				set_pad_note_kind(*pad, RootNote);
 			} else {
-
-				/* note is not in mode, turn it off */
-
-				pad->do_when_pressed = Pad::FlashOn;
-				pad->set_color (LED::Black);
-
+				set_pad_note_kind(*pad, InScaleNote);
 			}
-
-			pad->set_state (LED::OneShot24th);
-			write (pad->state_msg());
 		}
 	}
 
