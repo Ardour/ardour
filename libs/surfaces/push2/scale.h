@@ -62,6 +62,7 @@ class ScaleLayout : public Push2Layout
 	ArdourCanvas::Text* _fixed_text;
 	ArdourCanvas::Text* _rooted_text;
 	ArdourCanvas::Text* _row_interval_text;
+	ArdourCanvas::Text* _column_interval_text;
 	ArdourCanvas::Text* _close_text;
 	Push2Menu* _scale_menu;
 	int _last_vpot;

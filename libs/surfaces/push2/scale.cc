@@ -53,10 +53,16 @@ row_interval_string (const Push2::RowInterval row_interval)
 	case Push2::Fifth:
 		return _("5th \u2191");
 	case Push2::Sequential:
-		return _("Sequential \u21C9");
+		return _("Sequential \u2191");
 	}
 
 	return "";
+}
+
+static const char*
+column_interval_string (const bool inkey)
+{
+	return inkey ? _("Scale \u2192") : _("Semitone \u2192");
 }
 
 ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
@@ -93,7 +99,7 @@ ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
 	_inkey_text->set_font_description (fd2);
 	_inkey_text->set_position (Duple (10, 140));
 	_inkey_text->set_color (_p2.get_color (Push2::LightBackground));
-	_inkey_text->set (_("InKey"));
+	_inkey_text->set (_("Scale"));
 
 	_chromatic_text = new Text (this);
 	_chromatic_text->set_font_description (fd2);
@@ -115,9 +121,15 @@ ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
 
 	_row_interval_text = new Text (this);
 	_row_interval_text->set_font_description (fd);
-	_row_interval_text->set_position (Duple (10, 70));
+	_row_interval_text->set_position (Duple (10, 60));
 	_row_interval_text->set_color (_p2.get_color (Push2::LightBackground));
 	_row_interval_text->set (row_interval_string (_p2.row_interval ()));
+
+	_column_interval_text = new Text (this);
+	_column_interval_text->set_font_description (fd);
+	_column_interval_text->set_position (Duple (10, 80));
+	_column_interval_text->set_color (_p2.get_color (Push2::LightBackground));
+	_column_interval_text->set (column_interval_string (false));
 
 	for (int n = 0; n < 8; ++n) {
 
@@ -520,9 +532,11 @@ ScaleLayout::show_root_state ()
 	if (_p2.in_key()) {
 		_chromatic_text->set_color (change_alpha (_chromatic_text->color(), unselected_root_alpha));
 		_inkey_text->set_color (change_alpha (_inkey_text->color(), 1.0));
+		_column_interval_text->set(column_interval_string(true));
 	} else {
 		_inkey_text->set_color (change_alpha (_chromatic_text->color(), unselected_root_alpha));
 		_chromatic_text->set_color (change_alpha (_inkey_text->color(), 1.0));
+		_column_interval_text->set(column_interval_string(false));
 	}
 
 	Pango::FontDescription fd_bold ("Sans Bold 10");
