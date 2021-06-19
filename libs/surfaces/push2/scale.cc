@@ -507,7 +507,7 @@ ScaleLayout::build_scale_menu ()
 	_scale_menu->set_text_color (_p2.get_color (Push2::ParameterName));
 	_scale_menu->set_active_color (_p2.get_color (Push2::LightBackground));
 
-	Pango::FontDescription fd ("Sans Bold 8");
+	Pango::FontDescription fd ("Sans Bold Condensed 8");
 	_scale_menu->set_font_description (fd);
 
 	/* Move menu horizontally so that the leftmost column is in the
