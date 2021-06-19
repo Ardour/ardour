@@ -36,7 +36,6 @@
 
 using namespace ARDOUR;
 using namespace PBD;
-using namespace std;
 using namespace ArdourSurface;
 using namespace ArdourCanvas;
 
@@ -49,7 +48,7 @@ SplashLayout::SplashLayout (Push2& p, Session& s, std::string const & name)
 	rc.add_subdirectory_to_paths ("resources");
 
 	if (!find_file (rc, PROGRAM_NAME "-splash.png", splash_file)) {
-		cerr << "Cannot find splash screen image file\n";
+		std::cerr << "Cannot find splash screen image file\n";
 		throw failed_constructor();
 	}
 
@@ -70,7 +69,7 @@ SplashLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) c
 
 	double x_ratio = (double) _img->get_width() / (cols - 20);
 	double y_ratio = (double) _img->get_height() / (rows - 20);
-	double scale = min (x_ratio, y_ratio);
+	double scale = std::min (x_ratio, y_ratio);
 
 	/* background */
 

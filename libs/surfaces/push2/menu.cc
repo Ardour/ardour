@@ -40,13 +40,12 @@
 #endif
 
 using namespace ARDOUR;
-using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
 using namespace ArdourCanvas;
 
-Push2Menu::Push2Menu (Item* parent, vector<string> s)
+Push2Menu::Push2Menu (Item* parent, std::vector<std::string> s)
 	: Container (parent)
 	, _baseline (-1)
 	, _ncols (0)
@@ -70,7 +69,7 @@ Push2Menu::Push2Menu (Item* parent, vector<string> s)
 
 	_active_bg = new ArdourCanvas::Rectangle (this);
 
-	for (vector<string>::iterator si = s.begin(); si != s.end(); ++si) {
+	for (std::vector<std::string>::iterator si = s.begin(); si != s.end(); ++si) {
 		Text* t = new Text (this);
 		t->set_font_description (fd);
 		t->set (*si);
@@ -96,7 +95,7 @@ Push2Menu::rearrange (uint32_t initial_display)
 		return;
 	}
 
-	vector<Text*>::iterator i = _displays.begin();
+	std::vector<Text*>::iterator i = _displays.begin();
 
 	/* move to first */
 
@@ -182,7 +181,7 @@ Push2Menu::scroll (Direction dir, bool page)
 
 	case DirectionLeft:
 		if (page) {
-			set_active (max (0, (int) (_first - (_nrows * _ncols))));
+			set_active (std::max (0, (int) (_first - (_nrows * _ncols))));
 		} else {
 			if (_active / _nrows == 0) {
 				/* in the first column, go to last column, same row */
@@ -198,7 +197,7 @@ Push2Menu::scroll (Direction dir, bool page)
 
 	case DirectionRight:
 		if (page) {
-			set_active (min ((uint32_t) _displays.size(), _first + (_nrows * _ncols)));
+			set_active (std::min ((uint32_t) _displays.size(), _first + (_nrows * _ncols)));
 		} else {
 			if (_active / _nrows == _ncols) {
 				/* in the last column, go to same row in first column */
@@ -270,7 +269,7 @@ Push2Menu::set_text_color (Gtkmm2ext::Color c)
 {
 	_text_color = c;
 
-	for (vector<Text*>::iterator t = _displays.begin(); t != _displays.end(); ++t) {
+	for (std::vector<Text*>::iterator t = _displays.begin(); t != _displays.end(); ++t) {
 		(*t)->set_color (c);
 	}
 
@@ -295,7 +294,7 @@ Push2Menu::set_font_description (Pango::FontDescription fd)
 {
 	_font_description = fd;
 
-	for (vector<Text*>::iterator t = _displays.begin(); t != _displays.end(); ++t) {
+	for (std::vector<Text*>::iterator t = _displays.begin(); t != _displays.end(); ++t) {
 		(*t)->set_font_description (fd);
 	}
 }

@@ -34,7 +34,6 @@
 #endif
 
 using namespace ARDOUR;
-using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
@@ -376,7 +375,7 @@ ScaleLayout::strip_vpot (int n, int delta)
 void
 ScaleLayout::build_scale_menu ()
 {
-	vector<string> v;
+	std::vector<std::string> v;
 
 	/* must match in which enums are declared in push2.h
 	 */
@@ -460,8 +459,8 @@ ScaleLayout::show_root_state ()
 	Pango::FontDescription fd ("Sans 10");
 
 	uint32_t highlight_text = 0;
-	vector<Text*>* none_text_array = 0;
-	vector<Text*>* one_text_array = 0;
+	std::vector<Text*>* none_text_array = 0;
+	std::vector<Text*>* one_text_array = 0;
 	Push2::ButtonID bid = Push2::Upper2; /* keep compilers quiet */
 
 	switch (_p2.scale_root()) {
@@ -595,14 +594,14 @@ ScaleLayout::menu_rearranged ()
 		_left_scroll_text->set ("<");
 		_close_text->hide ();
 	} else {
-		_left_scroll_text->set (string());
+		_left_scroll_text->set (std::string());
 		_close_text->show ();
 	}
 
 	if (_scale_menu->can_scroll_right()) {
 		_right_scroll_text->set (">");
 	} else {
-		_right_scroll_text->set (string());
+		_right_scroll_text->set (std::string());
 	}
 }
 

@@ -40,7 +40,6 @@
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
-using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
@@ -92,7 +91,7 @@ P2GUI::P2GUI (Push2& p)
 	_table.set_homogeneous (false);
 
 	std::string data_file_path;
-	string name = "push2-small.png";
+	std::string name = "push2-small.png";
 	Searchpath spath(ARDOUR::ardour_data_search_path());
 	spath.add_subdirectory_to_paths ("icons");
 	find_file (spath, name, data_file_path);
@@ -170,8 +169,8 @@ P2GUI::connection_handler ()
 void
 P2GUI::update_port_combos ()
 {
-	vector<string> midi_inputs;
-	vector<string> midi_outputs;
+	std::vector<std::string> midi_inputs;
+	std::vector<std::string> midi_outputs;
 
 	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsTerminal), midi_inputs);
 	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsTerminal), midi_outputs);
@@ -192,7 +191,7 @@ P2GUI::update_port_combos ()
 
 
 	for (n = 1;  i != children.end(); ++i, ++n) {
-		string port_name = (*i)[_midi_port_columns.full_name];
+		std::string port_name = (*i)[_midi_port_columns.full_name];
 		if (_p2.input_port()->connected_to (port_name)) {
 			_input_combo.set_active (n);
 			input_found = true;
@@ -209,7 +208,7 @@ P2GUI::update_port_combos ()
 	++i; /* skip "Disconnected" */
 
 	for (n = 1;  i != children.end(); ++i, ++n) {
-		string port_name = (*i)[_midi_port_columns.full_name];
+		std::string port_name = (*i)[_midi_port_columns.full_name];
 		if (_p2.output_port()->connected_to (port_name)) {
 			_output_combo.set_active (n);
 			output_found = true;
@@ -223,16 +222,16 @@ P2GUI::update_port_combos ()
 }
 
 Glib::RefPtr<Gtk::ListStore>
-P2GUI::build_midi_port_list (vector<string> const & ports, bool for_input)
+P2GUI::build_midi_port_list (std::vector<std::string> const & ports, bool for_input)
 {
 	Glib::RefPtr<Gtk::ListStore> store = ListStore::create (_midi_port_columns);
 	TreeModel::Row row;
 
 	row = *store->append ();
-	row[_midi_port_columns.full_name] = string();
+	row[_midi_port_columns.full_name] = std::string();
 	row[_midi_port_columns.short_name] = _("Disconnected");
 
-	for (vector<string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+	for (std::vector<std::string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
 		row = *store->append ();
 		row[_midi_port_columns.full_name] = *p;
 		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*p);
@@ -253,7 +252,7 @@ P2GUI::active_port_changed (Gtk::ComboBox* combo, bool for_input)
 	}
 
 	TreeModel::iterator active = combo->get_active ();
-	string new_port = (*active)[_midi_port_columns.full_name];
+	std::string new_port = (*active)[_midi_port_columns.full_name];
 
 	if (new_port.empty()) {
 		if (for_input) {
@@ -312,6 +311,6 @@ P2GUI::reprogram_pressure_mode ()
 		pm = Push2::AfterTouch;
 	}
 
-	cerr << "Reprogram pm to " << pm << endl;
+	std::cerr << "Reprogram pm to " << pm << std::endl;
 	_p2.set_pressure_mode (pm);
 }

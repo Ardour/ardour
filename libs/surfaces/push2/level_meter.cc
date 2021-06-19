@@ -38,7 +38,6 @@
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
-using namespace std;
 using namespace ArdourSurface;
 using namespace ArdourCanvas;
 
@@ -72,7 +71,7 @@ LevelMeter::~LevelMeter ()
 	_configuration_connection.disconnect();
 	_meter_type_connection.disconnect();
 	_parameter_connection.disconnect();
-	for (vector<MeterInfo>::iterator i = _meters.begin(); i != _meters.end(); i++) {
+	for (std::vector<MeterInfo>::iterator i = _meters.begin(); i != _meters.end(); ++i) {
 		delete (*i).meter;
 	}
 	_meters.clear();
@@ -136,7 +135,7 @@ static float vu_standard() {
 float
 LevelMeter::update_meters ()
 {
-	vector<MeterInfo>::iterator i;
+	std::vector<MeterInfo>::iterator i;
 	uint32_t n;
 
 	if (!_meter) {
@@ -191,10 +190,10 @@ LevelMeter::update_meters ()
 }
 
 void
-LevelMeter::parameter_changed (string p)
+LevelMeter::parameter_changed (std::string p)
 {
 	if (p == "meter-hold") {
-		vector<MeterInfo>::iterator i;
+		std::vector<MeterInfo>::iterator i;
 		uint32_t n;
 
 		for (n = 0, i = _meters.begin(); i != _meters.end(); ++i, ++n) {
@@ -209,7 +208,7 @@ LevelMeter::parameter_changed (string p)
 		setup_meters (_meter_length, _regular_meter_width, _thin_meter_width);
 	}
 	else if (p == "meter-peak") {
-		vector<MeterInfo>::iterator i;
+		std::vector<MeterInfo>::iterator i;
 		uint32_t n;
 
 		for (n = 0, i = _meters.begin(); i != _meters.end(); ++i, ++n) {
@@ -233,7 +232,7 @@ LevelMeter::meter_type_changed (MeterType t)
 void
 LevelMeter::hide_all_meters ()
 {
-	for (vector<MeterInfo>::iterator i = _meters.begin(); i != _meters.end(); ++i) {
+	for (std::vector<MeterInfo>::iterator i = _meters.begin(); i != _meters.end(); ++i) {
 		if ((*i).packed) {
 			_meter_packer->remove ((*i).meter);
 			(*i).packed = false;
@@ -486,7 +485,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 
 void LevelMeter::clear_meters (bool reset_highlight)
 {
-	for (vector<MeterInfo>::iterator i = _meters.begin(); i < _meters.end(); i++) {
+	for (std::vector<MeterInfo>::iterator i = _meters.begin(); i < _meters.end(); ++i) {
 		(*i).meter->clear();
 		(*i).max_peak = minus_infinity();
 		if (reset_highlight)

@@ -66,7 +66,6 @@
 #endif
 
 using namespace ARDOUR;
-using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
@@ -78,7 +77,7 @@ using namespace Gtkmm2ext;
 #define PUSH2   0x1967
 
 Push2::Push2 (ARDOUR::Session& s)
-	: ControlProtocol (s, string (X_("Ableton Push 2")))
+	: ControlProtocol (s, std::string (X_("Ableton Push 2")))
 	, AbstractUI<Push2Request> (name())
 	, _handle (0)
 	, _in_use (false)
@@ -628,7 +627,7 @@ Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 
 	if (ev->value) {
 		/* any press cancels any pending long press timeouts */
-		for (set<ButtonID>::iterator x = _buttons_down.begin(); x != _buttons_down.end(); ++x) {
+		for (std::set<ButtonID>::iterator x = _buttons_down.begin(); x != _buttons_down.end(); ++x) {
 			boost::shared_ptr<Button> bb = _id_button_map[*x];
 			bb->timeout_connection.disconnect ();
 		}
@@ -647,7 +646,7 @@ Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 		}
 
 
-		set<ButtonID>::iterator c = _consumed.find (button->id);
+		std::set<ButtonID>::iterator c = _consumed.find (button->id);
 
 		if (c == _consumed.end()) {
 			if (ev->value == 0) {
@@ -1177,14 +1176,14 @@ Push2::port_registration_handler ()
 	/* the origin of the numeric magic identifiers is known only to Ableton
 	   and may change in time. This is part of how CoreMIDI works.
 	*/
-	string input_port_name = X_("system:midi_capture_1319078870");
-	string output_port_name = X_("system:midi_playback_3409210341");
+	std::string input_port_name = X_("system:midi_capture_1319078870");
+	std::string output_port_name = X_("system:midi_playback_3409210341");
 #else
-	string input_port_name = X_("Ableton Push 2 MIDI 1 in");
-	string output_port_name = X_("Ableton Push 2 MIDI 1 out");
+	std::string input_port_name = X_("Ableton Push 2 MIDI 1 in");
+	std::string output_port_name = X_("Ableton Push 2 MIDI 1 out");
 #endif
-	vector<string> in;
-	vector<string> out;
+	std::vector<std::string> in;
+	std::vector<std::string> out;
 
 	AudioEngine::instance()->get_ports (string_compose (".*%1", input_port_name), DataType::MIDI, PortFlags (IsPhysical|IsOutput), in);
 	AudioEngine::instance()->get_ports (string_compose (".*%1", output_port_name), DataType::MIDI, PortFlags (IsPhysical|IsInput), out);
@@ -1209,8 +1208,8 @@ Push2::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boo
 		return false;
 	}
 
-	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_in)->name());
-	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_out)->name());
+	std::string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_in)->name());
+	std::string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_out)->name());
 
 	if (ni == name1 || ni == name2) {
 		if (yn) {
@@ -1312,7 +1311,7 @@ void
 Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 {
 	MusicalMode m (mode);
-	vector<float>::iterator interval;
+	std::vector<float>::iterator interval;
 	int note;
 	const int original_root = root;
 
@@ -1322,8 +1321,8 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 	const int root_start = root;
 
-	set<int> mode_map; /* contains only notes in mode, O(logN) lookup */
-	vector<int> mode_vector; /* sorted in note order */
+	std::set<int> mode_map; /* contains only notes in mode, O(logN) lookup */
+	std::vector<int> mode_vector; /* sorted in note order */
 
 	mode_map.insert (note);
 	mode_vector.push_back (note);
@@ -1356,7 +1355,7 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 	if (inkey) {
 
-		vector<int>::iterator notei;
+		std::vector<int>::iterator notei;
 		int row_offset = 0;
 
 		for (int row = 0; row < 8; ++row) {

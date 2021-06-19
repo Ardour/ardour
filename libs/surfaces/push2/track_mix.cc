@@ -73,7 +73,6 @@
 #endif
 
 using namespace ARDOUR;
-using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;

@@ -67,7 +67,6 @@
 #endif
 
 using namespace ARDOUR;
-using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
@@ -113,7 +112,7 @@ MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
 		t->set_color (_p2.get_color (Push2::ParameterName));
 		t->set_position (Duple (10 + (n*Push2Canvas::inter_button_spacing()), 5));
 
-		string txt;
+		std::string txt;
 		switch (n) {
 		case 0:
 			txt = _("Volumes");
@@ -424,9 +423,13 @@ MixLayout::strip_vpot (int n, int delta)
 	boost::shared_ptr<Controllable> ac = gain_meter[n]->knob->controllable();
 
 	if (ac) {
-		ac->set_value (ac->interface_to_internal (
-			               min (ac->upper(), max (ac->lower(), ac->internal_to_interface (ac->get_value()) + (delta/256.0)))),
-		               PBD::Controllable::UseGroup);
+		ac->set_value (
+		  ac->interface_to_internal (
+		    std::min (ac->upper (),
+		              std::max (ac->lower (),
+		                        ac->internal_to_interface (ac->get_value ()) +
+		                          (delta / 256.0)))),
+		  PBD::Controllable::UseGroup);
 	}
 }
 
@@ -512,8 +515,8 @@ MixLayout::mute_changed (uint32_t n)
 void
 MixLayout::solo_mute_changed (uint32_t n)
 {
-	string shortname = short_version (_stripable[n]->name(), 10);
-	string text;
+	std::string shortname = short_version (_stripable[n]->name(), 10);
+	std::string text;
 	boost::shared_ptr<AutomationControl> ac;
 	ac = _stripable[n]->solo_control();
 	if (ac && ac->get_value()) {
@@ -648,13 +651,13 @@ MixLayout::switch_bank (uint32_t base)
 void
 MixLayout::button_right ()
 {
-	switch_bank (max (0, _bank_start + 8));
+	switch_bank (std::max (0, _bank_start + 8));
 }
 
 void
 MixLayout::button_left ()
 {
-	switch_bank (max (0, _bank_start - 8));
+	switch_bank (std::max (0, _bank_start - 8));
 }
 
 

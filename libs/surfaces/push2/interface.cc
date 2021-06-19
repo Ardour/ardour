@@ -27,7 +27,6 @@
 
 using namespace ARDOUR;
 using namespace PBD;
-using namespace std;
 using namespace ArdourSurface;
 
 static ControlProtocol*
@@ -39,7 +38,7 @@ new_push2 (ControlProtocolDescriptor*, Session* s)
 		p2 = new Push2 (*s);
 		/* do not set active here - wait for set_state() */
 	}
-	catch (exception & e) {
+	catch (std::exception & e) {
 		error << "Error instantiating Push2 support: " << e.what() << endmsg;
 		delete p2;
 		p2 = 0;
@@ -55,9 +54,9 @@ delete_push2 (ControlProtocolDescriptor*, ControlProtocol* cp)
 	{
 		delete cp;
 	}
-	catch ( exception & e )
+	catch ( std::exception & e )
 	{
-		cout << "Exception caught trying to finalize Push2 support: " << e.what() << endl;
+		std::cout << "Exception caught trying to finalize Push2 support: " << e.what() << std::endl;
 	}
 }
 
