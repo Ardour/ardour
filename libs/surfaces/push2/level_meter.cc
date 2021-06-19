@@ -306,8 +306,6 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 		_meters.push_back (MeterInfo());
 	}
 
-	//cerr << "LevelMeter::setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
-
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 #if 0
 		uint32_t c[10];

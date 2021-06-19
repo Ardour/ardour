@@ -48,7 +48,6 @@ SplashLayout::SplashLayout (Push2& p, Session& s, std::string const & name)
 	rc.add_subdirectory_to_paths ("resources");
 
 	if (!find_file (rc, PROGRAM_NAME "-splash.png", splash_file)) {
-		std::cerr << "Cannot find splash screen image file\n";
 		throw failed_constructor();
 	}
 

@@ -311,6 +311,5 @@ P2GUI::reprogram_pressure_mode ()
 		pm = Push2::AfterTouch;
 	}
 
-	std::cerr << "Reprogram pm to " << pm << std::endl;
 	_p2.set_pressure_mode (pm);
 }

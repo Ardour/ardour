@@ -628,11 +628,9 @@ Push2::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz)
 		if (msg[7] == 0x0) {
 			_pressure_mode = AfterTouch;
 			PressureModeChange (AfterTouch);
-			cerr << "Pressure mode is after\n";
 		} else {
 			_pressure_mode = PolyPressure;
 			PressureModeChange (PolyPressure);
-			cerr << "Pressure mode is poly\n";
 		}
 		break;
 	}
@@ -1111,7 +1109,6 @@ Push2::other_vpot_touch (int n, bool touching)
 void
 Push2::start_shift ()
 {
-	cerr << "start shift\n";
 	_modifier_state = ModifierState (_modifier_state | ModShift);
 	boost::shared_ptr<Button> b = _id_button_map[Shift];
 	b->set_color (LED::White);
@@ -1123,7 +1120,6 @@ void
 Push2::end_shift ()
 {
 	if (_modifier_state & ModShift) {
-		cerr << "end shift\n";
 		_modifier_state = ModifierState (_modifier_state & ~(ModShift));
 		boost::shared_ptr<Button> b = _id_button_map[Shift];
 		b->timeout_connection.disconnect ();
@@ -1209,8 +1205,6 @@ Push2::port_registration_handler ()
 	AudioEngine::instance()->get_ports (string_compose (".*%1", output_port_name), DataType::MIDI, PortFlags (IsPhysical|IsInput), out);
 
 	if (!in.empty() && !out.empty()) {
-		cerr << "Push2: both ports found\n";
-		cerr << "\tconnecting to " << in.front() <<  " + " << out.front() << endl;
 		if (!_async_in->connected()) {
 			AudioEngine::instance()->connect (_async_in->name(), in.front());
 		}
@@ -1559,7 +1553,6 @@ void
 Push2::set_percussive_mode (bool yn)
 {
 	if (!yn) {
-		cerr << "back to scale\n";
 		set_pad_scale (_scale_root, _root_octave, _mode, _row_interval, _in_key);
 		_percussion = false;
 		return;
@@ -1846,5 +1839,4 @@ Push2::set_pressure_mode (PressureMode pm)
 	}
 
 	write (msg);
-	cerr << "Sent PM message " << msg << endl;
 }

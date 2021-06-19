@@ -30,7 +30,6 @@
 using namespace ArdourSurface;
 using namespace ARDOUR;
 using namespace PBD;
-using std::cerr;
 
 void
 Push2::build_maps ()
@@ -618,7 +617,6 @@ Push2::button_shift_long_press ()
 void
 Push2::button_select_press ()
 {
-	cerr << "start select\n";
 	_modifier_state = ModifierState (_modifier_state | ModSelect);
 	boost::shared_ptr<Button> b = _id_button_map[Select];
 	b->set_color (Push2::LED::White);
@@ -632,7 +630,6 @@ void
 Push2::button_select_release ()
 {
 	if (_modifier_state & ModSelect) {
-		cerr << "end select\n";
 		_modifier_state = ModifierState (_modifier_state & ~(ModSelect));
 		boost::shared_ptr<Button> b = _id_button_map[Select];
 		b->timeout_connection.disconnect ();
