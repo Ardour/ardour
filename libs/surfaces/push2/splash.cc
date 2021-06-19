@@ -73,7 +73,7 @@ SplashLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) c
 
 	/* background */
 
-	context->set_source_rgb (0.764, 0.882, 0.882);
+	context->set_source_rgb (0.0, 0.0, 0.0);
 	context->paint ();
 
 	/* image */
@@ -94,7 +94,7 @@ SplashLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) c
 	some_text->set_text (string_compose ("%1 %2", PROGRAM_NAME, VERSIONSTRING));
 
 	context->move_to (200, 10);
-	context->set_source_rgb (0, 0, 0);
+	context->set_source_rgb (0.764, 0.882, 0.882);
 	some_text->update_from_cairo_context (context);
 	some_text->show_in_cairo_context (context);
 
@@ -103,7 +103,7 @@ SplashLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) c
 	some_text->set_text (_("Ableton Push 2 Support"));
 
 	context->move_to (200, 80);
-	context->set_source_rgb (0, 0, 0);
+	context->set_source_rgb (0.764, 0.882, 0.882);
 	some_text->update_from_cairo_context (context);
 	some_text->show_in_cairo_context (context);
 }
