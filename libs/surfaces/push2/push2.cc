@@ -79,7 +79,7 @@ using namespace Gtkmm2ext;
 #define PUSH2   0x1967
 
 static int
-row_interval_semitones (const Push2::RowInterval row_interval)
+row_interval_semitones (const Push2::RowInterval row_interval, const bool inkey)
 {
 	switch (row_interval) {
 	case Push2::Third:
@@ -89,7 +89,7 @@ row_interval_semitones (const Push2::RowInterval row_interval)
 	case Push2::Fifth:
 		return 7;
 	case Push2::Sequential:
-		return 8;
+		return inkey ? 12 : 8;
 	}
 
 	return 5;
@@ -1531,7 +1531,7 @@ Push2::set_pad_scale (const int               scale_root,
 
 	// Call the appropriate method to set up active pads
 
-	const int vertical_semitones = row_interval_semitones(row_interval);
+	const int vertical_semitones = row_interval_semitones(row_interval, inkey);
 	if (inkey) {
 		set_pad_scale_in_key(scale_root, octave, mode, origin, vertical_semitones);
 	} else {

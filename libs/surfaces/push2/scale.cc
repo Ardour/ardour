@@ -43,7 +43,7 @@ using namespace ArdourCanvas;
 static double unselected_root_alpha = 0.5;
 
 static const char*
-row_interval_string (const Push2::RowInterval row_interval)
+row_interval_string (const Push2::RowInterval row_interval, const bool inkey)
 {
 	switch (row_interval) {
 	case Push2::Third:
@@ -53,7 +53,7 @@ row_interval_string (const Push2::RowInterval row_interval)
 	case Push2::Fifth:
 		return _("5th \u2191");
 	case Push2::Sequential:
-		return _("Sequential \u2191");
+		return inkey ? _("Octave \u2191") : _("Sequential \u2191");
 	}
 
 	return "";
@@ -123,7 +123,7 @@ ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
 	_row_interval_text->set_font_description (fd);
 	_row_interval_text->set_position (Duple (10, 60));
 	_row_interval_text->set_color (_p2.get_color (Push2::LightBackground));
-	_row_interval_text->set (row_interval_string (_p2.row_interval ()));
+	_row_interval_text->set (row_interval_string (_p2.row_interval (), _p2.in_key ()));
 
 	_column_interval_text = new Text (this);
 	_column_interval_text->set_font_description (fd);
@@ -443,7 +443,7 @@ ScaleLayout::strip_vpot (int n, int delta)
 			                   row_interval,
 			                   _p2.in_key ());
 
-			_row_interval_text->set(row_interval_string(row_interval));
+			_row_interval_text->set(row_interval_string(row_interval, _p2.in_key ()));
 		} else {
 			if (_vpot_delta_cnt < 0) {
 				_scale_menu->scroll (Push2Menu::DirectionUp);
@@ -529,14 +529,17 @@ ScaleLayout::show_root_state ()
 		return;
 	}
 
+	_row_interval_text->set (
+	  row_interval_string (_p2.row_interval (), _p2.in_key ()));
+
+	_column_interval_text->set (column_interval_string (_p2.in_key ()));
+
 	if (_p2.in_key()) {
 		_chromatic_text->set_color (change_alpha (_chromatic_text->color(), unselected_root_alpha));
 		_inkey_text->set_color (change_alpha (_inkey_text->color(), 1.0));
-		_column_interval_text->set(column_interval_string(true));
 	} else {
 		_inkey_text->set_color (change_alpha (_chromatic_text->color(), unselected_root_alpha));
 		_chromatic_text->set_color (change_alpha (_inkey_text->color(), 1.0));
-		_column_interval_text->set(column_interval_string(false));
 	}
 
 	Pango::FontDescription fd_bold ("Sans Bold 10");
