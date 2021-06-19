@@ -428,11 +428,11 @@ ScaleLayout::build_scale_menu ()
 	Pango::FontDescription fd ("Sans Bold 8");
 	_scale_menu->set_font_description (fd);
 
-	/* move menu into position so that its leftmost column is in the
-	 * 2nd-from-left column of the display/button layout.
-	 */
+	/* Move menu horizontally so that the leftmost column is in the
+	  2nd-from-left column of the display/button layout.  The Y position is
+	  just what appears centered to me. */
 
-	_scale_menu->set_position (Duple (10 + Push2Canvas::inter_button_spacing(), 40));
+	_scale_menu->set_position (Duple (10 + Push2Canvas::inter_button_spacing(), 32));
 
 	/* listen for changes */
 

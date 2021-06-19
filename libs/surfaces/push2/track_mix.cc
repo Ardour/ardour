@@ -61,7 +61,6 @@
 #include "canvas.h"
 #include "knob.h"
 #include "level_meter.h"
-#include "menu.h"
 #include "push2.h"
 #include "track_mix.h"
 #include "utils.h"

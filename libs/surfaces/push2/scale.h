@@ -29,6 +29,8 @@ namespace ArdourCanvas {
 
 namespace ArdourSurface {
 
+class Push2Menu;
+
 class ScaleLayout : public Push2Layout
 {
    public:

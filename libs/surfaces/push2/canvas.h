@@ -51,8 +51,6 @@ class Push2Canvas : public ArdourCanvas::Canvas
 	void queue_resize ();
 	bool vblank ();
 
-	Cairo::RefPtr<Cairo::Context> image_context() { return _context; }
-
 	int rows() const { return _rows; }
 	int cols() const { return _cols; }
 

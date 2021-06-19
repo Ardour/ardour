@@ -59,7 +59,7 @@ Push2Menu::Push2Menu (Item* parent, std::vector<std::string> s)
 
 	if (_baseline < 0) {
 		Push2Canvas* p2c = dynamic_cast<Push2Canvas*> (canvas());
-		Glib::RefPtr<Pango::Layout> throwaway = Pango::Layout::create (p2c->image_context());
+		Glib::RefPtr<Pango::Layout> throwaway = Pango::Layout::create (p2c->get_pango_context());
 		throwaway->set_font_description (fd);
 		throwaway->set_text (X_("Hg")); /* ascender + descender) */
 		int h, w;
@@ -112,7 +112,7 @@ Push2Menu::rearrange (uint32_t initial_display)
 	while (i != _displays.end()) {
 
 		Coord x = col * Push2Canvas::inter_button_spacing();
-		Coord y = 2 + (row * _baseline);
+		Coord y = row * _baseline;
 
 		(*i)->set_position (Duple (x, y));
 

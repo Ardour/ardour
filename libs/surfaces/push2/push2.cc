@@ -52,7 +52,6 @@
 #include "canvas.h"
 #include "gui.h"
 #include "layout.h"
-#include "menu.h"
 #include "mix.h"
 #include "push2.h"
 #include "scale.h"
