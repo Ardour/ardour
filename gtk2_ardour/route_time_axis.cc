@@ -1170,6 +1170,16 @@ RouteTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& 
 	StripableTimeAxisView::get_inverted_selectables (sel, results);
 }
 
+void
+RouteTimeAxisView::get_regionviews_at_or_after (samplepos_t pos, RegionSelection& regions)
+{
+	if (!_view) {
+		return;
+	}
+
+	_view->get_regionviews_at_or_after (pos, regions);
+}
+
 RouteGroup*
 RouteTimeAxisView::route_group () const
 {

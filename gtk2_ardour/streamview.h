@@ -106,6 +106,7 @@ public:
 	void set_selected_regionviews (RegionSelection&);
 	void get_selectables (ARDOUR::samplepos_t, ARDOUR::samplepos_t, double, double, std::list<Selectable* >&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
+	void get_regionviews_at_or_after (ARDOUR::samplepos_t, RegionSelection&);
 
 	virtual void update_contents_metrics(boost::shared_ptr<ARDOUR::Region>) {}
 

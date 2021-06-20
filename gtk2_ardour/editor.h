@@ -268,6 +268,8 @@ public:
 	bool get_selection_extents (samplepos_t &start, samplepos_t &end) const;  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 
+	void get_regionviews_at_or_after (ARDOUR::samplepos_t, RegionSelection&);
+
 	void set_selection (std::list<Selectable*>, Selection::Operation);
 	void set_selected_midi_region_view (MidiRegionView&);
 

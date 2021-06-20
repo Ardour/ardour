@@ -212,6 +212,7 @@ public:
 
 	virtual void get_selectables (ARDOUR::samplepos_t, ARDOUR::samplepos_t, double, double, std::list<Selectable*>&, bool within = false);
 	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
+	virtual void get_regionviews_at_or_after (ARDOUR::samplepos_t, RegionSelection&) {}
 
 	void add_ghost (RegionView*);
 	void remove_ghost (RegionView*);
