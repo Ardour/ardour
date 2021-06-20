@@ -836,27 +836,32 @@ SystemExec::output_interposer ()
 	for (;fcntl (rfd, F_GETFL) != -1;) {
 		r = read (rfd, buf, BUFSIZ - 1);
 		if (r < 0 && (errno == EINTR || errno == EAGAIN)) {
+again:
 
 			/* wait till ready to read */
 
 			struct pollfd pfd;
 
 			pfd.fd = rfd;
-			pfd.events = POLLIN|POLLERR|POLLHUP;
+			pfd.events = POLLIN|POLLERR|POLLHUP|POLLNVAL;
 
-			int rv = poll (&pfd, 1, -1);
+			int rv = poll (&pfd, 1, 1000);
 
 			if (rv == -1) {
 				break;
 			}
 
-			if (pfd.revents & (POLLERR|POLLHUP)) {
+			if (pfd.revents & (POLLERR|POLLHUP|POLLNVAL)) {
 				break;
 			}
 
 			if (rv == 1 && pfd.revents & POLLIN) {
 				/* back to read(2) call */
 				continue;
+			}
+			if (rv == 0) {
+				/* Timeout, poll again */
+				goto again;
 			}
 		}
 		if (r <= 0) {
