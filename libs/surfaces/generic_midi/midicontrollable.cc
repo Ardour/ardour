@@ -135,7 +135,7 @@ MIDIControllable::set_controllable (boost::shared_ptr<PBD::Controllable> c)
 		return;
 	}
 
-	controllable_death_connections.drop_connections ();
+	controllable_death_connection.disconnect ();
 
 	if (c) {
 		_controllable = c;
@@ -148,9 +148,7 @@ MIDIControllable::set_controllable (boost::shared_ptr<PBD::Controllable> c)
 	last_incoming = 256;
 
 	if (c) {
-		c->DropReferences.connect (controllable_death_connections, MISSING_INVALIDATOR,
-						 boost::bind (&MIDIControllable::drop_controllable, this),
-						 MidiControlUI::instance());
+		c->DropReferences.connect_same_thread (controllable_death_connection, boost::bind (&MIDIControllable::drop_controllable, this));
 	}
 }
 

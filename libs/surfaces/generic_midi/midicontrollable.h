@@ -134,7 +134,7 @@ private:
 	int              midi_msg_id;      /* controller ID or note number */
 	PBD::ScopedConnection midi_sense_connection[2];
 	PBD::ScopedConnection midi_learn_connection;
-	PBD::ScopedConnectionList controllable_death_connections;
+	PBD::ScopedConnection controllable_death_connection;
 	/** the type of MIDI message that is used for this control */
 	MIDI::eventType  control_type;
 	MIDI::byte       control_additional;
