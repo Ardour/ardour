@@ -2217,6 +2217,10 @@ RegionMotionDrag::aborted (bool)
 		rv->move (-_total_x_delta, 0);
 		rv->set_height (rtv->view()->child_height ());
 	}
+
+	for (vector<ArdourMarker*>::iterator m = ripple_markers.begin(); m != ripple_markers.end(); ++m) {
+		(*m)->the_item().move (Duple (-_total_x_delta, 0.));
+	}
 }
 
 /** @param b true to brush, otherwise false.
