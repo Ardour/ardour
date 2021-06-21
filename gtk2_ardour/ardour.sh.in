@@ -48,6 +48,11 @@ export ARDOUR_CONFIG_PATH=@CONFDIR@
 export ARDOUR_DLL_PATH=@LIBDIR@
 
 #
+# disable ubuntu global menu, causes crash in libappmenu-gtk-module.so
+#
+export UBUNTU_MENUPROXY=""
+
+#
 # NSM needs a path to this script
 #
 

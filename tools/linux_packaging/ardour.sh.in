@@ -28,6 +28,7 @@ ETC_DIR=$INSTALL_DIR/etc
 # this triggers code in main() that will reset runtime environment variables
 # to point to directories inside the ardour package
 
+export UBUNTU_MENUPROXY=""
 export ARDOUR_BUNDLED=true
 
 # NSM needs a path to this script
