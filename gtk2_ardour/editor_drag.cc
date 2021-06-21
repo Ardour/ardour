@@ -825,7 +825,11 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	show_verbose_cursor_time (_last_position.sample);
 	show_view_preview (_last_position.sample + _video_sample_offset);
 
-	if (_editor->should_ripple()) {
+	/* this conditional is required because drag-n-drop'ed regions end up
+	 * here, and at this point they are not attached to a playlist.
+	 */
+
+	if (_editor->should_ripple() && _primary && _primary->region() && _primary->region()->playlist()) {
 		_earliest_time_limit = _primary->region()->playlist()->find_prev_region_start (_primary->region()->position());
 	}
 
