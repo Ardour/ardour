@@ -1020,43 +1020,13 @@ struct DraggingViewSorter {
 void
 RegionMotionDrag::collect_ripple_views ()
 {
-	// also add regions before start of selection to exclude, to be consistent with how Mixbus does ripple
 	RegionSelection copy;
-	_editor->selection->regions.by_position (copy); // get selected regions sorted by position into copy
 
-	std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists = copy.playlists();
-	std::set<boost::shared_ptr<ARDOUR::Playlist> >::const_iterator pi;
+	_editor->get_regionviews_at_or_after (_primary->region()->position(), copy);
 
-	for (pi = playlists.begin(); pi != playlists.end(); ++pi) {
-
-		// find ripple start point on each applicable playlist
-
-		RegionView *first_selected_on_this_track = NULL;
-		for (RegionSelection::iterator i = copy.begin(); i != copy.end(); ++i) {
-			if ((*i)->region()->playlist() == (*pi)) {
-				// region is on this playlist - it's the first, because they're sorted
-				first_selected_on_this_track = *i;
-				break;
-			}
-		}
-		assert (first_selected_on_this_track); // we should always find the region in one of the playlists...
-		const samplepos_t where = first_selected_on_this_track->region()->position();
-		TimeAxisView* tav = &first_selected_on_this_track->get_time_axis_view();
-
-		boost::shared_ptr<RegionList> rl = (*pi)->regions_with_start_within (Evoral::Range<samplepos_t>(where, max_samplepos));
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tav);
-		RegionSelection to_ripple;
-
-		for (RegionList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			if ((*i)->position() >= where) {
-				to_ripple.push_back (rtv->view()->find_view(*i));
-			}
-		}
-
-		for (RegionSelection::reverse_iterator i = to_ripple.rbegin(); i != to_ripple.rend(); ++i) {
-			if (!_editor->selection->regions.contains (*i)) {
-				_views.push_back (DraggingView (*i, this, tav));
-			}
+	for (RegionSelection::reverse_iterator i = copy.rbegin(); i != copy.rend(); ++i) {
+		if (!_editor->selection->regions.contains (*i)) {
+			_views.push_back (DraggingView (*i, this, &(*i)->get_time_axis_view()));
 		}
 	}
 }
@@ -1952,7 +1922,7 @@ RegionMoveDrag::finished_no_copy (
 			quarter_note = i->view->region()->quarter_note();
 		}
 
- 		/* compute full extent of regions that we're going to insert */
+		/* compute full extent of regions that we're going to insert */
 
 		if (rv->region()->position() < extent_min) {
 			extent_min = rv->region()->position ();
@@ -2054,7 +2024,7 @@ RegionMoveDrag::finished_no_copy (
 			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
 		}
 
-		ripple_exclude.push_back (i->view->region());
+		// ripple_exclude.push_back (i->view->region());
 
 		if (changed_tracks) {
 
@@ -2091,7 +2061,9 @@ RegionMoveDrag::finished_no_copy (
 		(*p)->thaw();
 	}
 
-	_editor->do_ripple (_primary->region()->playlist(), extent_min, -drag_delta, &ripple_exclude, true);
+	if (Config->get_edit_mode() == RippleAll) {
+		_editor->ripple_marks (_primary->region()->playlist(), extent_min, -drag_delta);
+	}
 
 	/* If we've created new regions either by copying or moving
 	   to a new track, we want to replace the old selection with the new ones
