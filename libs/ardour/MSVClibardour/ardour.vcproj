@@ -568,6 +568,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ffmpegfileimportable.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\ffmpegfilesource.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\file_source.cc"
 				>
 			</File>
@@ -1895,6 +1903,14 @@
 			</File>
 			<File
 				RelativePath="..\ardour\export_timespan.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\ffmpegfileimportable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\ffmpegfilesource.h"
 				>
 			</File>
 			<File
