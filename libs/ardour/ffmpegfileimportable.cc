@@ -25,7 +25,6 @@
 
 #include "ardour/ffmpegfileimportable.h"
 #include "ardour/filesystem_paths.h"
-#include "ardour/system_exec.h"
 
 namespace ARDOUR {
 
@@ -40,7 +39,7 @@ FFMPEGFileImportableSource::FFMPEGFileImportableSource(const std::string &path, 
 	, _buffer (32768)
 	, _ffmpeg_should_terminate (0)
 	, _read_pos (0)
-	, _ffmpeg_exec (nullptr)
+	, _ffmpeg_exec (0)
 {
 	std::string ffprobe_exe, unused;
 	if (!ArdourVideoToolPaths::transcoder_exe (unused, ffprobe_exe)) {
@@ -56,11 +55,12 @@ FFMPEGFileImportableSource::FFMPEGFileImportableSource(const std::string &path, 
 	argp[a++] = strdup ("-of");
 	argp[a++] = strdup ("json");
 
-	auto exec = std::make_unique<ARDOUR::SystemExec>(ffprobe_exe, argp);
+	ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffprobe_exe, argp);
 	PBD::info << "Probe command: { " << exec->to_s () << "}" << endmsg;
 
 	if (exec->start ()) {
 		PBD::error << "FFMPEGFileImportableSource: External decoder (ffprobe) cannot be started." << endmsg;
+		delete exec;
 		throw failed_constructor();
 	}
 
@@ -68,10 +68,9 @@ FFMPEGFileImportableSource::FFMPEGFileImportableSource(const std::string &path, 
 		PBD::ScopedConnection c;
 		std::string ffprobe_output;
 		exec->ReadStdout.connect_same_thread (c, boost::bind (&receive_stdout, &ffprobe_output, _1, _2));
-		while (exec->is_running ()) {
-			// wait for system exec to terminate
-			Glib::usleep (1000);
-		}
+
+		/* wait for ffprobe process to exit */
+		exec->wait();
 
 		namespace pt = boost::property_tree;
 		std::istringstream is (ffprobe_output);
@@ -84,8 +83,10 @@ FFMPEGFileImportableSource::FFMPEGFileImportableSource(const std::string &path, 
 		_samplerate = root.get<int> ("streams..sample_rate");
 		_natural_position = root.get<int64_t> ("streams..start_pts");
 		_format_name = root.get<std::string> ("streams..codec_long_name");
+		delete exec;
 	} catch (...) {
 		PBD::error << "FFMPEGFileImportableSource: Failed to read file metadata" << endmsg;
+		delete exec;
 		throw failed_constructor();
 	}
 
@@ -198,6 +199,7 @@ FFMPEGFileImportableSource::reset ()
 	// TODO: actually signal did_read_data to unblock
 	g_atomic_int_set (&_ffmpeg_should_terminate, 1);
 	delete _ffmpeg_exec;
+	_ffmpeg_exec = 0;
 	_ffmpeg_conn.disconnect ();
 	_buffer.reset ();
 	_read_pos = 0;
