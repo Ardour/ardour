@@ -1029,6 +1029,8 @@ RegionMotionDrag::collect_ripple_views ()
 			_views.push_back (DraggingView (*i, this, &(*i)->get_time_axis_view()));
 		}
 	}
+
+	_editor->get_markers_to_ripple (_primary->region()->playlist(), _primary->region()->position(), ripple_markers);
 }
 
 void
@@ -1253,6 +1255,12 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		printf("Dragging region(s) from %d different track(s), max dist: %d\n", _ntracks, spread);
 #endif
+	}
+
+	if (x_delta) {
+		for (vector<ArdourMarker*>::iterator m = ripple_markers.begin(); m != ripple_markers.end(); ++m) {
+			(*m)->the_item().move (Duple (x_delta, 0.));
+		}
 	}
 
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {

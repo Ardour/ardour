@@ -9280,8 +9280,8 @@ Editor::do_ripple (boost::shared_ptr<Playlist> target_playlist, samplepos_t at, 
 	ripple_marks (target_playlist, at, distance);
 }
 
-void
-Editor::ripple_marks (boost::shared_ptr<Playlist> target_playlist, samplepos_t at, samplecnt_t distance)
+samplepos_t
+Editor::effective_ripple_mark_start (boost::shared_ptr<Playlist> target_playlist, samplepos_t pos)
 {
 	/* in the target playlist, find the region before the target
 	 * (implicitly given by @param at. Allow all markers that occur between
@@ -9294,14 +9294,22 @@ Editor::ripple_marks (boost::shared_ptr<Playlist> target_playlist, samplepos_t a
 
 	for (RegionList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
 		samplepos_t region_end = (*r)->position() + (*r)->length();
-		if (region_end > last_region_end_before_at && region_end < at) {
+		if (region_end > last_region_end_before_at && region_end < pos) {
 			last_region_end_before_at = region_end;
 		}
 	}
 
-	if (last_region_end_before_at < at) {
-		at = last_region_end_before_at + 1;
+	if (last_region_end_before_at < pos) {
+		pos = last_region_end_before_at + 1;
 	}
+
+	return pos;
+}
+
+void
+Editor::ripple_marks (boost::shared_ptr<Playlist> target_playlist, samplepos_t at, samplecnt_t distance)
+{
+	at = effective_ripple_mark_start (target_playlist, at);
 
 	XMLNode& before (_session->locations()->get_state());
 	/* do not move locked markers, do notify */

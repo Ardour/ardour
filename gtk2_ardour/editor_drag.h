@@ -435,6 +435,7 @@ protected:
 	double _total_x_delta;
 	int _last_pointer_time_axis_view;
 	double _last_pointer_layer;
+	std::vector<ArdourMarker*> ripple_markers;
 
 private:
 	uint32_t _ndropzone;
