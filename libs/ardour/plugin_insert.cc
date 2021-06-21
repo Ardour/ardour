@@ -121,6 +121,21 @@ PluginInsert::drop_references ()
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->drop_references ();
 	}
+
+	/* PluginInsert::_plugins must exist until PBD::Controllable
+	 * has emitted drop_references. This is because
+	 * AC::get_value() calls _plugin[0]->get_parameter(..)
+	 *
+	 * Usually ~Automatable, calls drop_references for each
+	 * controllable, but that runs after ~PluginInsert.
+	 */
+	{
+		Glib::Threads::Mutex::Lock lm (_control_lock);
+		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
+			boost::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
+		}
+		_controls.clear ();
+	}
 	Processor::drop_references ();
 }
 
