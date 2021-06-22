@@ -381,6 +381,8 @@ def enoify (major, minor):
             return "\\n\\\"Old Land\\\"" # 1985 Compilation
         elif minor == 6 or minor == 7: # still on the desert island
             return "\\n\\\"Desert Island Selection\\\"" # 1986 Compilation
+        elif minor == 8:
+            return "\\n\\\"After Bach\\\"" # the odd one out
     elif major == 7:
         if minor == 0:
             return "\\n\\\"More Blank Than Frank\\\"" # 1986 Compilation
