@@ -322,6 +322,7 @@ void
 Session::set_default_play_speed (double spd, TransportRequestSource origin)
 {
 	_transport_fsm->set_default_speed(spd);
+	TFSM_SPEED(spd);
 	TransportStateChange (); /* EMIT SIGNAL */
 }
 
