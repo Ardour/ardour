@@ -1255,7 +1255,11 @@ Session::plan_master_strategy (pframes_t nframes, double master_speed, samplepos
 	 */
 
 	if (!config.get_external_sync()) {
-		return actual_speed ();
+		float desired = actual_speed ();
+		if (desired==0.0) {
+			return _transport_fsm->default_speed();
+		}
+		return desired;
 	}
 
 	/* When calling TransportMasterStart, sould aim for
