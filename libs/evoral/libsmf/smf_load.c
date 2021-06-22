@@ -625,7 +625,9 @@ parse_next_event(smf_track_t *track)
 
 	c += len;
 	buffer_length -= len;
-	track->last_status = event->midi_buffer[0];
+	if (!smf_event_is_metadata (event)) {
+		track->last_status = event->midi_buffer[0];
+	}
 	track->next_event_offset += c - start;
 
 	smf_track_add_event_delta_pulses(track, event, etime);
