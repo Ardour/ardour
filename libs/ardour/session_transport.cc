@@ -336,6 +336,8 @@ Session::set_transport_speed (double speed)
 	ENSURE_PROCESS_THREAD;
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %1 Set transport speed to %2 from %3 (es = %4)\n", _transport_sample, speed, _transport_fsm->transport_speed(), _engine_speed));
 
+	double default_speed = _transport_fsm->default_speed();
+
 	assert (speed != 0.0);
 
 	/* the logic:
@@ -352,7 +354,7 @@ Session::set_transport_speed (double speed)
 
 	*/
 
-	if ((_engine_speed != 1) && (_engine_speed == fabs (speed)) && ((speed * _transport_fsm->transport_speed()) > 0)) {
+	if ((_engine_speed != default_speed) && (_engine_speed == fabs (speed)) && ((speed * _transport_fsm->transport_speed()) > 0)) {
 		/* engine speed is not changing and no direction change, do nothing */
 		DEBUG_TRACE (DEBUG::Transport, "no reason to change speed, do nothing\n");
 		return;
@@ -408,7 +410,7 @@ Session::set_transport_speed (double speed)
 
 	if (fabs (_signalled_varispeed - act_speed) > .002
 	    // still, signal hard changes to 1.0 and 0.0:
-	    || (act_speed == 1.0 && _signalled_varispeed != 1.0)
+	    || (act_speed == default_speed && _signalled_varispeed != default_speed)
 	    || (act_speed == 0.0 && _signalled_varispeed != 0.0)
 		)
 	{
@@ -959,7 +961,7 @@ Session::request_play_loop (bool yn, bool change_transport_roll)
 			/* currently stopped */
 			if (yn) {
 				/* start looping at normal speed */
-				target_speed = 1.0;
+				target_speed = _transport_fsm->default_speed();
 			} else {
 				target_speed = 0.0;
 			}
@@ -977,7 +979,7 @@ Session::request_play_loop (bool yn, bool change_transport_roll)
 void
 Session::request_play_range (list<AudioRange>* range, bool leave_rolling)
 {
-	SessionEvent* ev = new SessionEvent (SessionEvent::SetPlayAudioRange, SessionEvent::Add, SessionEvent::Immediate, 0, (leave_rolling ? 1.0 : 0.0));
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetPlayAudioRange, SessionEvent::Add, SessionEvent::Immediate, 0, (leave_rolling ? _transport_fsm->default_speed() : 0.0));
 	if (range) {
 		ev->audio_range = *range;
 	} else {
@@ -1758,7 +1760,7 @@ Session::set_requested_return_sample (samplepos_t return_to)
 void
 Session::request_roll_at_and_return (samplepos_t start, samplepos_t return_to)
 {
-	SessionEvent *ev = new SessionEvent (SessionEvent::LocateRollLocate, SessionEvent::Add, SessionEvent::Immediate, return_to, 1.0);
+	SessionEvent *ev = new SessionEvent (SessionEvent::LocateRollLocate, SessionEvent::Add, SessionEvent::Immediate, return_to, _transport_fsm->default_speed());
 	ev->target2_sample = start;
 	queue_event (ev);
 }
