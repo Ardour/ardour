@@ -986,7 +986,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::SetPlayAudioRange:
-		set_play_range (ev->audio_range, (ev->speed == 1.0f));
+		set_play_range (ev->audio_range, (ev->speed == _transport_fsm->default_speed()));  //an explicit PLAY state would be nicer here
 		break;
 
 	case SessionEvent::CancelPlayAudioRange:
