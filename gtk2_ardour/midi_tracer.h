@@ -97,7 +97,10 @@ private:
 	PBD::ScopedConnection _manager_connection;
 	MIDI::Parser my_parser;
 
+	boost::shared_ptr<ARDOUR::Port>	tracer_port;
 	boost::shared_ptr<ARDOUR::MidiPort> traced_port;
+
+	static unsigned int window_count;
 };
 
 #endif /* __ardour_gtk_midi_tracer_h__ */

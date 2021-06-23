@@ -676,6 +676,10 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	reserved_io_names[_("Master")]              = true;
 	reserved_io_names[X_("auditioner")]         = true; // auditioner.cc  Track (s, "auditioner",...)
 	reserved_io_names[X_("x-virtual-keyboard")] = false;
+	reserved_io_names[X_("MIDI Tracer 1")]      = false;
+	reserved_io_names[X_("MIDI Tracer 2")]      = false;
+	reserved_io_names[X_("MIDI Tracer 3")]      = false;
+	reserved_io_names[X_("MIDI Tracer 4")]      = false;
 
 	/* pure I/O */
 	reserved_io_names[X_("Click")]           = false; // session.cc ClickIO (*this, X_("Click")

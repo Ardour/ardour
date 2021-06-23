@@ -34,10 +34,13 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/midi_port.h"
 #include "ardour/audioengine.h"
+#include "ardour/transport_master_manager.h"
 
 #include "midi_tracer.h"
 #include "gui_thread.h"
 #include "pbd/i18n.h"
+
+unsigned int MidiTracer::window_count = 0;
 
 using namespace Gtk;
 using namespace std;
@@ -61,6 +64,9 @@ MidiTracer::MidiTracer ()
 	, delta_time_button (_("Delta times"))
 {
 	g_atomic_int_set (&_update_queued, 0);
+
+	std::string portname (string_compose(X_("MIDI Tracer %1"), ++window_count));
+	tracer_port = ARDOUR::AudioEngine::instance()->register_input_port (ARDOUR::DataType::MIDI, portname, false, ARDOUR::PortFlags::IsInput);
 
 	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect
 		(_manager_connection, invalidator (*this), boost::bind (&MidiTracer::ports_changed, this), gui_context());
@@ -159,10 +165,14 @@ MidiTracer::port_changed ()
 
 	disconnect ();
 
+	if (_port_combo.get_active_text().empty()) {
+		return;
+	}
+
 	boost::shared_ptr<ARDOUR::Port> p = AudioEngine::instance()->get_port_by_name (_port_combo.get_active_text());
 
 	if (!p) {
-		std::cerr << "port not found\n";
+		std::cerr << "port not found: " << _port_combo.get_active_text() << "\n";
 		return;
 	}
 
