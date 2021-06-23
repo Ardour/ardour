@@ -180,7 +180,8 @@ PluginManager::PluginManager ()
 	, _au_plugin_info(0)
 	, _lua_plugin_info(0)
 	, _cancel_scan(false)
-	, _cancel_timeout(false)
+	, _cancel_scan_timeout(false)
+	, _cancel_all_scan_timeout(false)
 {
 	char* s;
 	string lrdf_path;
@@ -461,6 +462,8 @@ PluginManager::refresh (bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, "PluginManager::refresh\n");
 	_cancel_scan = false;
+	_cancel_scan_timeout = false;
+	_cancel_all_scan_timeout = false;
 
 	BootMessage (_("Scanning LADSPA Plugins"));
 	ladspa_refresh ();
@@ -585,8 +588,8 @@ PluginManager::refresh (bool cache_only)
 	}
 
 	BootMessage (_("Plugin Scan Complete..."));
-	PluginScanMessage(X_("closeme"), "", false);
 	_cancel_scan = false;
+	PluginScanMessage(X_("closeme"), "", false);
 
 	BootMessage (_("Indexing Plugins..."));
 
@@ -637,9 +640,15 @@ PluginManager::cancel_plugin_scan ()
 }
 
 void
-PluginManager::cancel_plugin_timeout ()
+PluginManager::cancel_plugin_scan_timeout ()
 {
-	_cancel_timeout = true;
+	_cancel_scan_timeout = true;
+}
+
+void
+PluginManager::cancel_plugin_all_scan_timeout ()
+{
+	_cancel_all_scan_timeout = true;
 }
 
 void
@@ -749,7 +758,7 @@ PluginManager::ladspa_refresh ()
 	find_files_matching_pattern (ladspa_modules, ladspa_search_path (), "*.dll");
 
 	for (vector<std::string>::iterator i = ladspa_modules.begin(); i != ladspa_modules.end(); ++i) {
-		ARDOUR::PluginScanMessage(_("LADSPA"), *i, false);
+		ARDOUR::PluginScanMessage(_("LADSPA"), *i, !cancelled());
 		ladspa_discover (*i);
 #ifdef MIXBUS
 		if (i->find ("harrison_channelstrip") != std::string::npos) {
@@ -848,6 +857,16 @@ PluginManager::ladspa_discover (string path)
 
 	PSLEPtr psle (scan_log_entry (LADSPA, path));
 	psle->reset ();
+
+#ifdef MIXBUS
+	if (path.find ("harrison_channelstrip") != std::string::npos) {
+		// always scan, even when cancelled
+	} else
+#endif
+	if (cancelled ()) {
+		psle->msg (PluginScanLogEntry::New, "Scan was cancelled.");
+		return -1;
+	}
 
 	Glib::Module module (path);
 	const LADSPA_Descriptor *descriptor;
@@ -1087,7 +1106,9 @@ PluginManager::run_auv2_scanner_app (CAComponentDescription const& desc, AUv2Des
 		}
 
 		ARDOUR::PluginScanTimeout (timeout);
-		--timeout;
+		if (timeout > 0) {
+			--timeout;
+		}
 		Glib::usleep (100000);
 
 		if (cancelled () || (!notime && timeout == 0)) {
@@ -1263,6 +1284,7 @@ PluginManager::au_refresh (bool cache_only)
 
 	for (std::vector<AUv2DescStr>::const_iterator i = audesc.begin (); i != audesc.end (); ++i) {
 		ARDOUR::PluginScanMessage(_("AUv2"), i->to_s(), !cache_only && !cancelled());
+		_cancel_scan_timeout = false;
 		auv2_discover (*i, cache_only);
 	}
 
@@ -1365,7 +1387,9 @@ PluginManager::run_vst2_scanner_app (std::string path, PSLEPtr psle) const
 		}
 
 		ARDOUR::PluginScanTimeout (timeout);
-		--timeout;
+		if (timeout > 0) {
+			--timeout;
+		}
 		Glib::usleep (100000);
 
 		if (cancelled () || (!notime && timeout == 0)) {
@@ -1633,6 +1657,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 		ARDOUR::PluginScanMessage(_("VST"), *x, !cache_only && !cancelled());
+		_cancel_scan_timeout = false;
 		vst2_discover (*x, Windows_VST, cache_only || cancelled());
 	}
 
@@ -1695,6 +1720,7 @@ PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 
 				if (mac_vst_filter (fullpath)) {
 					ARDOUR::PluginScanMessage(_("MacVST"), fullpath, !cache_only && !cancelled());
+					_cancel_scan_timeout = false;
 					vst2_discover (fullpath, MacVST, cache_only || cancelled());
 					continue;
 				}
@@ -1762,6 +1788,7 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 		ARDOUR::PluginScanMessage(_("LXVST"), *x, !cache_only && !cancelled());
+		_cancel_scan_timeout = false;
 		vst2_discover (*x, LXVST, cache_only || cancelled());
 	}
 
@@ -1898,6 +1925,7 @@ PluginManager::vst3_discover_from_path (string const& path, bool cache_only)
 
 	for (vector<string>::iterator i = plugin_objects.begin(); i != plugin_objects.end (); ++i) {
 		ARDOUR::PluginScanMessage(_("VST3"), *i, !(cache_only || cancelled()));
+		_cancel_scan_timeout = false;
 		vst3_discover (*i, cache_only || cancelled ());
 	}
 
@@ -2082,7 +2110,9 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path, PSLEPtr psle) cons
 		}
 
 		ARDOUR::PluginScanTimeout (timeout);
-		--timeout;
+		if (timeout > 0) {
+			--timeout;
+		}
 		Glib::usleep (100000);
 
 		if (cancelled () || (!notime && timeout == 0)) {
