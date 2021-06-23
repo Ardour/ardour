@@ -1012,13 +1012,25 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 }
 
 void
+PluginManager::lv2_plugin (std::string const& uri, PluginScanLogEntry::PluginScanResult sr, std::string const& msg, bool reset)
+{
+	PSLEPtr psle (scan_log_entry (LV2, uri));
+	if (reset) {
+		psle->reset ();
+	}
+	psle->msg (sr, msg);
+}
+
+void
 PluginManager::lv2_refresh ()
 {
 	DEBUG_TRACE (DEBUG::PluginManager, "LV2: refresh\n");
 	delete _lv2_plugin_info;
-	_lv2_plugin_info = LV2PluginInfo::discover();
+	_lv2_plugin_info = LV2PluginInfo::discover (sigc::mem_fun (*this, &PluginManager::lv2_plugin));
 
 	for (PluginInfoList::iterator i = _lv2_plugin_info->begin(); i != _lv2_plugin_info->end(); ++i) {
+		PSLEPtr psle (scan_log_entry (LV2, (*i)->unique_id));
+		psle->add (*i);
 		set_tags ((*i)->type, (*i)->unique_id, (*i)->category, (*i)->name, FromPlug);
 	}
 }

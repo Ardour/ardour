@@ -31,6 +31,7 @@
 #include <boost/enable_shared_from_this.hpp>
 
 #include "ardour/plugin.h"
+#include "ardour/plugin_scan_result.h"
 #include "ardour/uri_map.h"
 #include "ardour/worker.h"
 #include "pbd/ringbuffer.h"
@@ -395,7 +396,7 @@ public:
 	LV2PluginInfo (const char* plugin_uri);
 	~LV2PluginInfo ();
 
-	static PluginInfoList* discover ();
+	static PluginInfoList* discover (boost::function <void (std::string const&, PluginScanLogEntry::PluginScanResult, std::string const&, bool)> cb);
 
 	PluginPtr load (Session& session);
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;

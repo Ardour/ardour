@@ -3536,7 +3536,7 @@ LV2PluginInfo::get_presets (bool /*user_only*/) const
 }
 
 PluginInfoList*
-LV2PluginInfo::discover()
+LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLogEntry::PluginScanResult, std::string const&, bool)> cb)
 {
 	LV2World world;
 	world.load_bundled_plugins();
@@ -3549,20 +3549,21 @@ LV2PluginInfo::discover()
 		const LilvPlugin* p = lilv_plugins_get(plugins, i);
 		const LilvNode* pun = lilv_plugin_get_uri(p);
 		if (!pun) continue;
+		std::string const uri (lilv_node_as_string(pun));
+		cb (uri, PluginScanLogEntry::OK, string_compose (_("URI: %1"), uri), true);
+		cb (uri, PluginScanLogEntry::OK, string_compose (_("Bundle: %1"), lilv_node_as_uri (lilv_plugin_get_bundle_uri (p))), false);
+
 		LV2PluginInfoPtr info(new LV2PluginInfo(lilv_node_as_string(pun)));
 
 		LilvNode* name = lilv_plugin_get_name(p);
 		if (!name || !lilv_plugin_get_port_by_index(p, 0)) {
-			warning << "Ignoring invalid LV2 plugin "
-			        << lilv_node_as_string(lilv_plugin_get_uri(p))
-			        << endmsg;
+			cb (uri, PluginScanLogEntry::Error, _("Ignoring invalid LV2 plugin (missing name, no ports)"), false);
+			lilv_node_free(name);
 			continue;
 		}
 
 		if (lilv_plugin_has_feature(p, world.lv2_inPlaceBroken)) {
-			warning << string_compose(
-			    _("Ignoring LV2 plugin \"%1\" since it cannot do inplace processing."),
-			    lilv_node_as_string(name)) << endmsg;
+			cb (uri, PluginScanLogEntry::Error, _("Ignoring LV2 plugin since it cannot do inplace processing."), false);
 			lilv_node_free(name);
 			continue;
 		}
@@ -3592,9 +3593,7 @@ LV2PluginInfo::discover()
 				if (!strcmp (rf, LV2_BANKPATCH__notify)) { ok = true; }
 #endif
 				if (!ok) {
-					warning << string_compose (
-							_("Unsupported required LV2 feature: '%1' in '%2'."),
-							rf, lilv_node_as_string(name)) << endmsg;
+					cb (uri, PluginScanLogEntry::Error, string_compose (_("Unsupported required LV2 feature: '%1'."), rf), false);
 					err = 1;
 				}
 		}
@@ -3615,9 +3614,7 @@ LV2PluginInfo::discover()
 				if (!strcmp (ro, LV2_BUF_SIZE__maxBlockLength)) { ok = true; }
 				if (!strcmp (ro, LV2_BUF_SIZE__sequenceSize)) { ok = true; }
 				if (!ok) {
-					warning << string_compose (
-							_("Unsupported required LV2 option: '%1' in '%2'."),
-							ro, lilv_node_as_string(name)) << endmsg;
+					cb (uri, PluginScanLogEntry::Error, string_compose (_("Unsupported required LV2 option: '%1'."), ro), false);
 					err = 1;
 				}
 			}
@@ -3636,7 +3633,10 @@ LV2PluginInfo::discover()
 
 		const LilvPluginClass* pclass = lilv_plugin_get_class(p);
 		const LilvNode*        label  = lilv_plugin_class_get_label(pclass);
+
 		info->category = lilv_node_as_string(label);
+
+		cb (uri, PluginScanLogEntry::OK, string_compose (_("LV2 Category: '%1'"), info->category), false);
 
 		/* check main category */
 		const char* pcat = lilv_node_as_uri (lilv_plugin_class_get_uri (pclass));
@@ -3653,6 +3653,7 @@ LV2PluginInfo::discover()
 			info->_is_instrument |= 0 == strcmp (pc, LV2_CORE__InstrumentPlugin);
 			info->_is_utility    |= 0 == strcmp (pc, LV2_CORE__UtilityPlugin);
 			info->_is_analyzer   |= 0 == strcmp (pc, LV2_CORE__AnalyserPlugin);
+			cb (uri, PluginScanLogEntry::OK, string_compose (_("LV2 Class: '%1'"), pc), false);
 		}
 		lilv_plugin_classes_free (classes);
 
@@ -3662,13 +3663,13 @@ LV2PluginInfo::discover()
 
 		info->path = "/NOPATH"; // Meaningless for LV2
 
-		/* count atom-event-ports that feature
-		 * atom:supports <http://lv2plug.in/ns/ext/midi#MidiEvent>
-		 *
-		 * TODO: nicely ask drobilla to make a lilv_ call for that
-		 */
 		int count_midi_out = 0;
-		int count_midi_in = 0;
+		int count_midi_in  = 0;
+		int count_atom_out = 0;
+		int count_atom_in  = 0;
+		int count_ctrl_out = 0;
+		int count_ctrl_in  = 0;
+
 		for (uint32_t i = 0; i < lilv_plugin_get_num_ports(p); ++i) {
 			const LilvPort* port  = lilv_plugin_get_port_by_index(p, i);
 			if (lilv_port_is_a(p, port, world.atom_AtomPort)) {
@@ -3681,14 +3682,36 @@ LV2PluginInfo::discover()
 						&& lilv_nodes_contains(atom_supports, world.midi_MidiEvent)) {
 					if (lilv_port_is_a(p, port, world.lv2_InputPort)) {
 						count_midi_in++;
+						count_atom_in++;
 					}
 					if (lilv_port_is_a(p, port, world.lv2_OutputPort)) {
 						count_midi_out++;
+						count_atom_out++;
+					}
+				} else {
+					if (lilv_port_is_a(p, port, world.lv2_InputPort)) {
+						count_atom_in++;
+					}
+					if (lilv_port_is_a(p, port, world.lv2_OutputPort)) {
+						count_atom_out++;
 					}
 				}
 				lilv_nodes_free(buffer_types);
 				lilv_nodes_free(atom_supports);
 			}
+			else if (lilv_port_is_a(p, port, world.lv2_ControlPort)) {
+				if (lilv_port_is_a(p, port, world.lv2_InputPort)) {
+					count_ctrl_in++;
+				}
+				if (lilv_port_is_a(p, port, world.lv2_OutputPort)) {
+					count_ctrl_out++;
+				}
+			}
+		}
+
+		if (count_atom_out > 1 || count_atom_in > 1) {
+			cb (uri, PluginScanLogEntry::Error, string_compose (_("Multiple Atom ports are not supported. Atom-in: %1, Atom-out: %2."), count_atom_in, count_atom_out), false);
+			continue;
 		}
 
 		info->n_inputs.set_audio(
@@ -3710,6 +3733,12 @@ LV2PluginInfo::discover()
 		info->unique_id = lilv_node_as_uri(lilv_plugin_get_uri(p));
 		info->index     = 0; // Meaningless for LV2
 
+		cb (uri, PluginScanLogEntry::OK, string_compose (
+					_("LV2 Ports: Atom-in: %1, Atom-out: %2, Audio-in: %3 Audio-out: %4 MIDI-in: %5  MIDI-out: %6 Ctrl-in: %7 Ctrl-out: %8"),
+					count_atom_in, count_atom_out,
+					info->n_inputs.n_audio (), info->n_outputs.n_audio (),
+					count_midi_in, count_midi_out,
+					count_ctrl_in, count_ctrl_out), false);
 		plugs->push_back(info);
 	}
 

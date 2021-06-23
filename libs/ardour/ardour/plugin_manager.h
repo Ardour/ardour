@@ -313,6 +313,7 @@ private:
 	bool run_auv2_scanner_app (CAComponentDescription const&, AUv2DescStr const&, PSLEPtr) const;
 #endif
 
+	void lv2_plugin (std::string const&, PluginScanLogEntry::PluginScanResult, std::string const&, bool);
 	void lv2_refresh ();
 
 	int windows_vst_discover_from_path (std::string path, bool cache_only = false);
