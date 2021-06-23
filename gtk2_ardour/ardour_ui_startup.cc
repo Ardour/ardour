@@ -536,7 +536,7 @@ ARDOUR_UI::starting ()
 
 
 		/* allow signals to be handled, ShouldLoad() from flush-pending */
-		Splash::instance()->pop_front();
+		Splash::instance()->exists(); // create splash
 		flush_pending ();
 
 		if (!startup_fsm) {
@@ -811,7 +811,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 		 * 3) no audio/MIDI setup required
 		 */
 
-		Splash::instance()->pop_front();
+		Splash::instance()->exists(); // create splash
 		startup_fsm->start ();
 	}
 }

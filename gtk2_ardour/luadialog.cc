@@ -63,7 +63,7 @@ Message::run ()
 	if (splash_pushed) {
 		spl = Splash::instance();
 		if (spl) {
-			spl->pop_front();
+			spl->pop_front_for (_message_dialog);
 		}
 	}
 

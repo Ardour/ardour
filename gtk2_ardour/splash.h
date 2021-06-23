@@ -21,6 +21,8 @@
 #ifndef __ardour_gtk_splash_h__
 #define __ardour_gtk_splash_h__
 
+#include <set>
+
 #include <gtkmm/window.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/box.h>
@@ -42,7 +44,7 @@ public:
 
 	void display ();
 	void pop_back_for (Gtk::Window&);
-	void pop_front ();
+	void pop_front_for (Gtk::Window&);
 
 	bool expose (GdkEventExpose*);
 	bool on_button_release_event (GdkEventButton*);
@@ -58,6 +60,9 @@ private:
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 	Gtk::DrawingArea darea;
 	Glib::RefPtr<Pango::Layout> layout;
+
+	void pop_front ();
+	std::set<Gtk::Window*> _window_stack;
 
 	void boot_message (std::string);
 	PBD::ScopedConnection msg_connection;

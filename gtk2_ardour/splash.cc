@@ -154,11 +154,26 @@ Splash::pop_back_for (Gtk::Window& win)
 		get_window()->restack (win.get_window(), false);
 	}
 #endif
+	_window_stack.insert (&win);
+}
+
+void
+Splash::pop_front_for (Gtk::Window& win)
+{
+#ifndef NDEBUG
+	assert (1 == _window_stack.erase (&win));
+#else
+	_window_stack.erase (&win);
+#endif
 }
 
 void
 Splash::pop_front ()
 {
+	if (!_window_stack.empty ()) {
+		return;
+	}
+
 	if (get_window()) {
 #if defined  __APPLE__ || defined PLATFORM_WINDOWS
 		show ();

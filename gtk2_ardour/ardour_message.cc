@@ -79,7 +79,7 @@ ArdourMessageDialog::pop_splash ()
 	if (_splash_pushed) {
 		Splash* spl = Splash::exists () ? Splash::instance() : NULL;
 		if (spl) {
-			spl->pop_front();
+			spl->pop_front_for (*this);
 		}
 		_splash_pushed = false;
 	}
