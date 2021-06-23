@@ -45,6 +45,9 @@ PopUp::PopUp (Gtk::WindowPosition pos, unsigned int showfor_msecs, bool doh)
 
 PopUp::~PopUp ()
 {
+	if (popdown_time != 0 && timeout != -1) {
+		g_source_remove (timeout);
+	}
 }
 
 void
@@ -76,6 +79,7 @@ PopUp::remove ()
 
 	if (popdown_time != 0 && timeout != -1) {
 		g_source_remove (timeout);
+		timeout = -1;
 	}
 
 	if (delete_on_hide) {
@@ -137,6 +141,7 @@ PopUp::on_delete_event (GdkEventAny* /*ev*/)
 
 	if (popdown_time != 0 && timeout != -1) {
 		g_source_remove (timeout);
+		timeout = -1;
 	}
 
 	if (delete_on_hide) {
