@@ -456,6 +456,7 @@ class LIBARDOUR_API TransportMasterViaMIDI
 public:
 	virtual ~TransportMasterViaMIDI ();
 
+	MIDI::Parser& transport_parser () { return parser; }
 	boost::shared_ptr<MidiPort> midi_port () const
 	{
 		return _midi_port;

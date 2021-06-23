@@ -677,6 +677,21 @@ TransportMasterManager::master_by_type (SyncSource src) const
 	return boost::shared_ptr<TransportMaster> ();
 }
 
+boost::shared_ptr<TransportMaster>
+TransportMasterManager::master_by_port (boost::shared_ptr<Port> const &p) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
+		if ((*tm)->port() == p) {
+			return *tm;
+		}
+	}
+
+	return boost::shared_ptr<TransportMaster> ();
+
+}
+
 void
 TransportMasterManager::engine_stopped ()
 {
