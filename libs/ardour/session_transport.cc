@@ -365,8 +365,9 @@ Session::set_transport_speed (double speed)
 	clear_clicks ();
 	_engine_speed = new_engine_speed;
 
-	if (!Config->get_auto_return_after_rewind_ffwd() && fabs (speed) != 1.0 && _transport_fsm->default_speed() == 1.0) {
-		/* varispeed of any sort cancels auto-return */
+	if (!Config->get_auto_return_after_rewind_ffwd() && fabs (speed) > 2.0) {
+		/* fast-wind of any sort should cancel auto-return */
+		/* since we don't have an actual ffwd/rew state yet, just trigger on a 'fast' varispeed */
 		_requested_return_sample = -1;
 		_last_roll_location = -1;
 		_last_roll_or_reversal_location = -1;
