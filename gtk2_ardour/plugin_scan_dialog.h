@@ -29,7 +29,7 @@
 class PluginScanDialog : public ArdourDialog
 {
   public:
-	PluginScanDialog (bool cache_only, bool verbose);
+	PluginScanDialog (bool cache_only, bool verbose, Gtk::Window* parent = NULL);
 	void start ();
 
   private:
@@ -37,12 +37,15 @@ class PluginScanDialog : public ArdourDialog
 	Gtk::ProgressBar pbar;
 	Gtk::HBox        tbox;
 	Gtk::Button      timeout_button;
+	Gtk::Button      all_timeout_button;
 	Gtk::Button      cancel_button;
 	bool             cache_only;
 	bool             verbose;
+	bool             delayed_close;
 
 	void cancel_plugin_scan ();
-	void cancel_plugin_timeout ();
+	void cancel_plugin_scan_timeout ();
+	void cancel_plugin_all_scan_timeout ();
 	void plugin_scan_timeout (int timeout);
 	void message_handler (std::string type, std::string plugin, bool can_cancel);
 
