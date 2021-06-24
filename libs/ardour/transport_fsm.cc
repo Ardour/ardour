@@ -505,8 +505,10 @@ TransportFSM::maybe_reset_speed ()
 
 	if (Config->get_reset_default_speed_on_stop()) {
 
-		if (most_recently_requested_speed != 1.0) {
-			state_changed = set_speed (Event (1.0));
+		if (most_recently_requested_speed != 1.0 || default_speed() != 1.0) {
+			set_default_speed(1.0);
+			set_speed (Event (1.0));
+			state_changed = true;
 		}
 
 	} else {
