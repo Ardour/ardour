@@ -751,6 +751,14 @@ PluginManager::ladspa_refresh ()
 	for (vector<std::string>::iterator i = ladspa_modules.begin(); i != ladspa_modules.end(); ++i) {
 		ARDOUR::PluginScanMessage(_("LADSPA"), *i, false);
 		ladspa_discover (*i);
+#ifdef MIXBUS
+		if (i->find ("harrison_channelstrip") != std::string::npos) {
+			PluginScanLog::iterator j = _plugin_scan_log.find (PSLEPtr (new PluginScanLogEntry (LADSPA, *i)));
+			if (j != _plugin_scan_log.end ()) {
+				_plugin_scan_log.erase (j);
+			}
+		}
+#endif
 	}
 }
 
@@ -838,29 +846,32 @@ PluginManager::ladspa_discover (string path)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Checking for LADSPA plugin at %1\n", path));
 
+	PSLEPtr psle (scan_log_entry (LADSPA, path));
+	psle->reset ();
+
 	Glib::Module module (path);
 	const LADSPA_Descriptor *descriptor;
 	LADSPA_Descriptor_Function dfunc;
 	void* func = 0;
 
 	if (!module) {
-		warning << string_compose(_("LADSPA: cannot load module \"%1\" (%2)"),
-			path, Glib::Module::get_last_error()) << endmsg;
+		psle->msg (PluginScanLogEntry::Error, string_compose(_("Cannot load module \"%1\" (%2)"), path, Glib::Module::get_last_error()));
 		return -1;
 	}
 
 
 	if (!module.get_symbol("ladspa_descriptor", func)) {
-		warning << string_compose(_("LADSPA: module \"%1\" has no descriptor function."), path) << endmsg;
-		warning << Glib::Module::get_last_error() << endmsg;
+		psle->msg (PluginScanLogEntry::Error, string_compose(_("LADSPA module \"%1\" has no descriptor function (%2)."), path, Glib::Module::get_last_error()));
 		return -1;
 	}
 
 	dfunc = (LADSPA_Descriptor_Function)func;
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("LADSPA plugin found at %1\n", path));
+	psle->msg (PluginScanLogEntry::OK, string_compose ("LADSPA plugin found at %1\n", path));
 
-	for (uint32_t i = 0; ; ++i) {
+	uint32_t i = 0;
+	for (i = 0; ; ++i) {
 		/* if a ladspa plugin allocates memory here
 		 * it is never free()ed (or plugin-dependent only when unloading).
 		 * For some plugins memory allocated is incremental, we should
@@ -872,6 +883,7 @@ PluginManager::ladspa_discover (string path)
 
 		if (!ladspa_plugin_whitelist.empty()) {
 			if (find (ladspa_plugin_whitelist.begin(), ladspa_plugin_whitelist.end(), descriptor->UniqueID) == ladspa_plugin_whitelist.end()) {
+				psle->msg (PluginScanLogEntry::OK, string_compose(_("LADSPA ignored blacklisted unique-id %1."), descriptor->UniqueID));
 				continue;
 			}
 		}
@@ -919,27 +931,29 @@ PluginManager::ladspa_discover (string path)
 			}
 		}
 
-		if(_ladspa_plugin_info->empty()){
-			_ladspa_plugin_info->push_back (info);
-		}
-
-		//Ensure that the plugin is not already in the plugin list.
-
+		/* Ensure that the plugin is not already in the plugin list. */
 		bool found = false;
-
 		for (PluginInfoList::const_iterator i = _ladspa_plugin_info->begin(); i != _ladspa_plugin_info->end(); ++i) {
 			if(0 == info->unique_id.compare((*i)->unique_id)){
 				found = true;
 			}
 		}
 
-		if(!found){
+		if (!found) {
 			_ladspa_plugin_info->push_back (info);
+			psle->add (info);
 			set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
+			psle->msg (PluginScanLogEntry::OK, string_compose(_("Found LADSPA plugin, id: %1 name: %2, Inputs: %3, Outputs: %4"), info->unique_id, info->name, info->n_inputs, info->n_outputs));
+		} else {
+			psle->msg (PluginScanLogEntry::OK, string_compose(_("LADSPA ignored plugin with dupliucate id %1."), descriptor->UniqueID));
 		}
 
 		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Found LADSPA plugin, id: %1 name: %2, Inputs: %3, Outputs: %4\n",
 					info->unique_id, info->name, info->n_inputs, info->n_outputs));
+	}
+
+	if (i == 0) {
+		psle->msg (PluginScanLogEntry::Error, _("LADSPA no plugins found in module."));
 	}
 
 	return 0;
