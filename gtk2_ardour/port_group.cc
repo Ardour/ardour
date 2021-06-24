@@ -583,7 +583,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	if (ports.size () > 0) {
 
-		for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ) {
+		for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ++s) {
 
 			std::string const p = *s;
 
@@ -603,7 +603,6 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				*/
 
 				if (p.find ("Midi-Through") != string::npos || p.find ("Midi Through") != string::npos) {
-					++s;
 					continue;
 				}
 
@@ -619,7 +618,6 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 				if ((lp.find (monitor) != string::npos) &&
 				    (lp.find (lpn) != string::npos)) {
-					++s;
 					continue;
 				}
 
@@ -642,7 +640,6 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 					PortFlags flags (AudioEngine::instance()->port_engine().get_port_flags (ph));
 
 					if (flags & Hidden ) {
-						++s;
 						continue;
 					} else if (port_has_prefix (p, lpnc)) {
 
@@ -650,7 +647,6 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 						/* Hide scene ports for now */
 						if (p.find (_("Scene ")) != string::npos) {
-							++s;
 							continue;
 						}
 
@@ -665,8 +661,6 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 					}
 				}
 			}
-
-			++s;
 		}
 	}
 
