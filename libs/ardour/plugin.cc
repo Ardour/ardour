@@ -271,6 +271,18 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 	}
 #endif
 
+#ifdef AUDIOUNIT_SUPPORT
+	if (type == ARDOUR::AudioUnit) {
+		/* old versions saved three 32bit (really OSType) integers
+		 * e.g. 112233-445566-778899 (due to stringstream misinterpreting OSType)
+		 * instead of using Apple's UTCreateStringForOSType, which results in
+		 * "aaaa - bbbb - cccc"
+		 */
+		identifier = AUPluginInfo::convert_old_unique_id (identifier);
+		for (i = plugs.begin(); i != plugs.end(); ++i) {
+			if (identifier == (*i)->unique_id){
+				return (*i)->load (session);
+			}
 #ifdef LXVST_SUPPORT
 	/* hmm, we didn't find it. could be because in older versions of Ardour.
 	   we used to store the name of a VST plugin, not its unique ID. so try
@@ -282,6 +294,7 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 			return (*i)->load (session);
 		}
 	}
+
 #endif
 
 	return PluginPtr ();
