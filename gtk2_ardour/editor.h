@@ -456,6 +456,7 @@ public:
 	                ARDOUR::MidiTrackNameSource           mts,
 	                ARDOUR::MidiTempoMapDisposition       mtd,
 	                samplepos_t&                          pos,
+	                std::string                           pgroup_id,
 	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
 	                bool with_markers = false
 		);
@@ -464,6 +465,7 @@ public:
 	               Editing::ImportDisposition            disposition,
 	               Editing::ImportMode                   mode,
 	               samplepos_t&                          pos,
+	               std::string                           pgroup_id,
 	               boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
 	void get_regionview_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);

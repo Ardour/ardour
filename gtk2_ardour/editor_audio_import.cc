@@ -348,6 +348,7 @@ Editor::do_import (vector<string>          paths,
                    MidiTrackNameSource     midi_track_name_source,
                    MidiTempoMapDisposition smf_tempo_disposition,
                    samplepos_t&            pos,
+                   string                  pgroup_id,
                    ARDOUR::PluginInfoPtr   instrument,
                    bool                    with_markers)
 {
@@ -497,11 +498,13 @@ Editor::do_import (vector<string>          paths,
 		}
 	}
 
+	track->playlist()->set_pgroup_id(pgroup_id);
+
 	import_status.all_done = true;
 }
 
 void
-Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode mode, samplepos_t& pos, ARDOUR::PluginInfoPtr instrument)
+Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode mode, samplepos_t& pos, string pgroup_id, ARDOUR::PluginInfoPtr instrument)
 {
 	boost::shared_ptr<Track> track;
 	bool check_sample_rate = true;

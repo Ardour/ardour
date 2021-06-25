@@ -1015,28 +1015,30 @@ void
 EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
                                    int x, int y,
                                    const SelectionData& data,
-                                   guint info, guint time)
+                                   guint info, guint dtime)
 {
 	vector<string> paths;
 
 	if (data.get_target () == "GTK_TREE_MODEL_ROW") {
 		/* something is being dragged over the region list */
 		_editor->_drags->abort ();
-		_display.on_drag_data_received (context, x, y, data, info, time);
+		_display.on_drag_data_received (context, x, y, data, info, dtime);
 		return;
 	}
 
-	if (_editor->convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
+	string gid = Playlist::generate_pgroup_id();
+
+	if (_editor->convert_drop_to_paths (paths, context, x, y, data, info, dtime) == 0) {
 		samplepos_t pos  = 0;
 		bool        copy = ((context->get_actions () & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
 
 		if (UIConfiguration::instance ().get_only_copy_imported_files () || copy) {
 			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion,
-			                    SrcBest, SMFTrackName, SMFTempoIgnore, pos);
+			                    SrcBest, SMFTrackName, SMFTempoIgnore, pos, gid);
 		} else {
-			_editor->do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);
+			_editor->do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos, gid);
 		}
-		context->drag_finish (true, false, time);
+		context->drag_finish (true, false, dtime);
 	}
 }
 

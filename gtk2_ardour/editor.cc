@@ -4343,10 +4343,7 @@ Editor::restore_editing_space ()
 bool
 Editor::stamp_new_playlist (string &name, string &pgroup, bool copy)
 {
-	time_t now;
-	time (&now);
-	Glib::DateTime tm (Glib::DateTime::create_now_local (now));
-	string gid (tm.format ("%F %H.%M.%S"));
+	string gid = Playlist::generate_pgroup_id();
 	pgroup = gid;
 
 	if (name.length()==0) {
