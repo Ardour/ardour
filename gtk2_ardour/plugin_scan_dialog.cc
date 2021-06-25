@@ -151,7 +151,7 @@ PluginScanDialog::cancel_plugin_scan ()
 void
 PluginScanDialog::cancel_plugin_timeout ()
 {
-	PluginManager::instance().cancel_plugin_timeout();
+	//PluginManager::instance().cancel_plugin_scan_timeout();
 	timeout_button.set_sensitive (false);
 }
 
