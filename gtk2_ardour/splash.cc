@@ -165,6 +165,9 @@ Splash::pop_front_for (Gtk::Window& win)
 #else
 	_window_stack.erase (&win);
 #endif
+	if (_window_stack.empty ()) {
+		display ();
+	}
 }
 
 void
@@ -247,7 +250,7 @@ Splash::expose (GdkEventExpose* ev)
 void
 Splash::boot_message (std::string msg)
 {
-	if (!is_visible()) {
+	if (!is_visible() && _window_stack.empty ()) {
 		display ();
 	}
 	message (msg);
@@ -289,8 +292,6 @@ Splash::message (const string& msg)
 	string str ("<b>");
 	str += Gtkmm2ext::markup_escape_text (msg);
 	str += "</b>";
-
-	show ();
 
 	layout->set_markup (str);
 	Glib::RefPtr<Gdk::Window> win = darea.get_window();

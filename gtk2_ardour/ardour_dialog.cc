@@ -118,6 +118,7 @@ void
 ArdourDialog::on_unmap ()
 {
 	Keyboard::the_keyboard().leave_window (0, this);
+	pop_splash ();
 	Dialog::on_unmap ();
 }
 
@@ -131,10 +132,8 @@ ArdourDialog::on_show ()
 	if (Splash::exists()) {
 		Splash* spl = Splash::instance();
 
-		if (spl->is_visible()) {
-			spl->pop_back_for (*this);
-			_splash_pushed = true;
-		}
+		spl->pop_back_for (*this);
+		_splash_pushed = true;
 	}
 
 	_sensitive = true;
