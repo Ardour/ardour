@@ -163,6 +163,7 @@ public:
 	void clear_playlist ();
 
 	void        use_playlist (Gtk::RadioMenuItem* item, boost::weak_ptr<ARDOUR::Playlist> wpl);
+	void        show_playlist_selector ();
 
 	/* used by EditorRoutes */
 	static Gtkmm2ext::ActiveState solo_active_state (boost::shared_ptr<ARDOUR::Stripable>);
@@ -244,7 +245,6 @@ protected:
 	void        build_playlist_menu ();
 	Gtk::Menu*  playlist_action_menu;
 
-	void         show_playlist_selector ();
 	void         show_playlist_copy_selector ();
 	void         show_playlist_share_selector ();
 	void         show_playlist_steal_selector ();

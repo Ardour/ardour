@@ -8669,6 +8669,22 @@ Editor::toggle_layer_display ()
 
 }
 
+void
+Editor::launch_playlist_selector ()
+{
+	TrackViewList & tvl (selection->tracks);
+	TrackViewList::const_iterator t = tvl.begin();
+	if (t == tvl.end()) {
+		return;
+	}
+
+	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*t);
+
+	if (rtav && rtav->is_track()) {
+		rtav->show_playlist_selector ();
+	}
+}
+
 vector<MidiRegionView*>
 Editor::filter_to_unique_midi_region_views (RegionSelection const & ms) const
 {

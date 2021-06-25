@@ -262,6 +262,9 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "toggle-all-existing-automation", _("Toggle All Existing Automation"), sigc::mem_fun (*this, &Editor::toggle_all_existing_automation));
 	reg_sens (editor_actions, "toggle-layer-display", _("Toggle Layer Display"), sigc::mem_fun (*this, &Editor::toggle_layer_display));
 
+	act = reg_sens (editor_actions, "show-plist-selector", _("Show Playlist Selector"), sigc::mem_fun (*this, &Editor::launch_playlist_selector));
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
+
 	/* these "overlap" with Region/nudge-* and also Common/nudge-* but
 	 * provide a single editor-related action that will nudge a region,
 	 * selected marker or playhead

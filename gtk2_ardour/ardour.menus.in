@@ -412,6 +412,8 @@
       <menuitem action='track-solo-toggle'/>
       <menuitem action='track-mute-toggle'/>
       <menu action='TrackPlaylistMenu'>
+        <menuitem action='show-plist-selector'/>
+        <separator/>
         <menuitem action='new-playlists-for-all-tracks'/>
         <menuitem action='new-playlists-for-armed-tracks'/>
         <menuitem action='new-playlists-for-selected-tracks'/>

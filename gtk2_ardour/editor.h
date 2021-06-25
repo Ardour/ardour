@@ -1537,6 +1537,8 @@ private:
 	void toggle_all_existing_automation ();
 	void toggle_layer_display ();
 
+	void launch_playlist_selector ();
+
 	void reverse_selection ();
 	void edit_envelope ();
 
