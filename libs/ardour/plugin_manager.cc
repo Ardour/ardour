@@ -1600,7 +1600,7 @@ PluginManager::vst3_discover_from_path (string const& path, bool cache_only)
 }
 
 void
-PluginManager::vst3_plugin (string const& module_path, VST3Info const& i)
+PluginManager::vst3_plugin (string const& module_path, string const& bundle_path, VST3Info const& i)
 {
 	PluginInfoPtr info (new VST3PluginInfo ());
 
@@ -1709,7 +1709,7 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
 		try {
 			VST3Info nfo (**i);
-			vst3_plugin (module_path, nfo);
+			vst3_plugin (module_path, path, nfo);
 		} catch (...) {
 			error << string_compose (_("Corrupt VST3 cache file '%1' for plugin '%2'"), cache_file, module_path) << endmsg;
 			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot load VST3 at '%1'\n", path));

@@ -304,7 +304,7 @@ private:
 	int vst3_discover_from_path (std::string const& path, bool cache_only = false);
 	int vst3_discover (std::string const& path, bool cache_only = false);
 #ifdef VST3_SUPPORT
-	void vst3_plugin (std::string const& module_path, VST3Info const&);
+	void vst3_plugin (std::string const&, std::string const&, VST3Info const&);
 	bool run_vst3_scanner_app (std::string bundle_path) const;
 #endif
 

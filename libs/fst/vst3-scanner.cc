@@ -82,7 +82,7 @@ protected:
 
 LogReceiver log_receiver;
 
-static void vst3_plugin (string const& module_path, VST3Info const& i)
+static void vst3_plugin (string const&, string const&, VST3Info const& i)
 {
 	info << "Found Plugin: " << i.name << endmsg;
 }

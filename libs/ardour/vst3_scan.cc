@@ -441,7 +441,7 @@ vst3_save_cache_file (std::string const& module_path, XMLNode* root, bool verbos
 }
 
 bool
-ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& bundle_path, boost::function<void (std::string const&, VST3Info const&)> cb, bool verbose)
+ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& bundle_path, boost::function<void (std::string const&, std::string const&, VST3Info const&)> cb, bool verbose)
 {
 	XMLNode* root = new XMLNode ("VST3Cache");
 	root->set_property ("version", 1);
@@ -461,7 +461,7 @@ ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& 
 			return false;
 		}
 		for (std::vector<VST3Info>::const_iterator i = nfo.begin(); i != nfo.end(); ++i) {
-			cb (module_path, *i);
+			cb (module_path, bundle_path, *i);
 			root->add_child_nocopy (i->state ());
 		}
 
