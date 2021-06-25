@@ -110,8 +110,26 @@ public:
 	bool set_name (const std::string& str);
 	void set_region_ownership ();
 
-	std::string pgroup_id()                 { return _pgroup_id; }
-	void set_pgroup_id(std::string pgid)    { _pgroup_id = pgid; PropertyChanged (Properties::name); }
+	/*playlist group IDs (pgroup_id) is a group identifier that is implicitly
+	 * or explicitly assigned to playlists so they can be associated with each other.
+	 *
+	 * For example, when you switch a track's playlist, you can choose to
+	 *  switch other tracks to the same pgroup_id
+	 *
+	 * pgroup_id's should be unique; currently we use a timestamp to avoid duplicates.
+	 * pgroup_id's are human-readable strings; use string comparison to find matches.
+	 *
+	 * To be useful, we want every playlist to be assigned a sensible pgroup_id
+	 * Some examples of pgroup_id's getting assigned *explicitly* include:
+	 *  when the user makes a new playlist for a track or Track Group
+	 *  when the user triggers an action like "new playlist for rec-armed tracks"
+	 * Some examples of pgroup_id's getting assigned *implicitly* include:
+	 *  the user makes the first recording pass ("take") in an empty playlist
+	 *  the user imports tracks.
+	 */
+	static std::string    generate_pgroup_id();
+	std::string           pgroup_id()                     { return _pgroup_id; }
+	void                  set_pgroup_id(std::string pgid) { _pgroup_id = pgid; PropertyChanged (Properties::name); }
 
 	virtual void clear (bool with_signals = true);
 	virtual void dump () const;

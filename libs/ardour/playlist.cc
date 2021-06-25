@@ -30,6 +30,8 @@
 #include <stdint.h>
 #include <string>
 
+#include <glibmm/datetime.h>
+
 #include "pbd/stateful_diff_command.h"
 #include "pbd/strsplit.h"
 #include "pbd/types_convert.h"
@@ -2238,6 +2240,17 @@ Playlist::clear_owned_changes ()
 {
 	RegionReadLock rlock (this);
 	Stateful::clear_owned_changes ();
+}
+
+string
+Playlist::generate_pgroup_id ()
+{
+	time_t now;
+	time (&now);
+	Glib::DateTime tm (Glib::DateTime::create_now_local (now));
+	string gid;
+	gid = (tm.format ("%F %H.%M.%S"));
+	return gid;
 }
 
 void
