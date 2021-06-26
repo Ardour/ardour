@@ -734,6 +734,9 @@ PortAudioBackend::process_callback(const float* input,
                                    const PaStreamCallbackTimeInfo* timeInfo,
                                    PaStreamCallbackFlags statusFlags)
 {
+	WaitTimerRAII tr (dsp_stats[DeviceWait]);
+	TimerRAII tr2 (dsp_stats[RunLoop]);
+
 	_active = true;
 
 	_dsp_calc.set_start_timestamp_us (PBD::get_microseconds());
@@ -1485,7 +1488,10 @@ PortAudioBackend::blocking_process_thread ()
 
 		if (!_freewheel) {
 
-			switch (_pcmio->next_cycle (_samples_per_period)) {
+			dsp_stats[DeviceWait].start();
+			int r = _pcmio->next_cycle (_samples_per_period);
+			dsp_stats[DeviceWait].update();
+			switch (r) {
 			case 0: // OK
 				break;
 			case 1:
@@ -1529,6 +1535,7 @@ bool
 PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
                                         float* interleaved_output_data)
 {
+	PBD::TimerRAII tr (dsp_stats[RunLoop]);
 	uint32_t i = 0;
 	int64_t min_elapsed_us = 1000000;
 	int64_t max_elapsed_us = 0;
