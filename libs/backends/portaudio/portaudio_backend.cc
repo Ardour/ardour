@@ -37,7 +37,6 @@
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/timing.h"
 #include "pbd/windows_timer_utils.h"
 #include "pbd/windows_mmcss.h"
 
@@ -735,8 +734,8 @@ PortAudioBackend::process_callback(const float* input,
                                    const PaStreamCallbackTimeInfo* timeInfo,
                                    PaStreamCallbackFlags statusFlags)
 {
-	WaitTimerRAII tr (dsp_stats[DeviceWait]);
-	TimerRAII tr2 (dsp_stats[RunLoop]);
+	PBD::WaitTimerRAII tr (dsp_stats[DeviceWait]);
+	PBD::TimerRAII tr2 (dsp_stats[RunLoop]);
 
 	_active = true;
 
