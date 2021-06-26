@@ -81,8 +81,8 @@ public:
 			uint32_t sample_rate,
 			uint32_t samples_per_period,
 			int (process_callback (void*, const uint32_t, const uint64_t)),
-			void * process_arg
-			PBD::Timing& dsp_timer,
+			void * process_arg,
+			PBD::TimingStats& dsp_timer
 		);
 
 	void     set_error_callback (
@@ -179,7 +179,7 @@ private:
 	int (* _process_callback) (void*, const uint32_t, const uint64_t);
 	void * _process_arg;
 
-	PBD::Timing* _dsp_timer;
+	PBD::TimingStats* _dsp_timer;
 
 	void (* _error_callback) (void*);
 	void  * _error_arg;

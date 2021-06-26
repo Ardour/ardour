@@ -17,6 +17,7 @@
  */
 
 #include <glibmm.h>
+#include "pbd/timing.h"
 #include "coreaudio_pcmio.h"
 
 using namespace ARDOUR;
@@ -795,7 +796,7 @@ CoreAudioPCM::pcm_start (
 	uint32_t device_id_in, uint32_t device_id_out,
 	uint32_t sample_rate, uint32_t samples_per_period,
 	int (process_callback (void*, const uint32_t, const uint64_t)), void *process_arg,
-	PBD::Timing& dsp_timer)
+	PBD::TimingStats& dsp_timer)
 {
 
 	assert(_device_ids);
