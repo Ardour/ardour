@@ -626,6 +626,11 @@ enum TransportRequestType {
 	TR_Locate    = 0x4
 };
 
+enum ShuttleBehaviour {
+	Sprung,
+	Wheel
+};
+
 enum ShuttleUnits {
 	Percentage,
 	Semitones

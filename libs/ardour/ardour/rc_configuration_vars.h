@@ -174,6 +174,7 @@ CONFIG_VARIABLE (samplecnt_t, preroll, "preroll", 0)
 CONFIG_VARIABLE (samplecnt_t, postroll, "postroll", 0)
 CONFIG_VARIABLE (float, shuttle_speed_factor, "shuttle-speed-factor", 1.0f) // used for MMC shuttle
 CONFIG_VARIABLE (float, shuttle_speed_threshold, "shuttle-speed-threshold", 5.0f) // used for MMC shuttle
+CONFIG_VARIABLE (ShuttleBehaviour, shuttle_behaviour, "shuttle-behaviour", Wheel)
 CONFIG_VARIABLE (ShuttleUnits, shuttle_units, "shuttle-units", Percentage)
 CONFIG_VARIABLE (float, shuttle_max_speed, "shuttle-max-speed", 8.0f)
 CONFIG_VARIABLE (bool, locate_while_waiting_for_sync, "locate-while-waiting-for-sync", false)

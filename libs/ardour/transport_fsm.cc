@@ -505,10 +505,8 @@ TransportFSM::maybe_reset_speed ()
 
 	if (Config->get_reset_default_speed_on_stop()) {
 
-		if (most_recently_requested_speed != 1.0 || default_speed() != 1.0) {
-			set_default_speed(1.0);
-			set_speed (Event (1.0));
-			state_changed = true;
+		if (most_recently_requested_speed != 1.0) {
+			state_changed = set_speed (Event (1.0, false));
 		}
 
 	} else {
@@ -517,11 +515,11 @@ TransportFSM::maybe_reset_speed ()
 		 * speed change from whatever we have been rolling at to
 		 * whatever the current default is. We could have been
 		 * rewinding at -4.5 ... when we restart, we need to play at
-		 * the current _default_speed
+		 * the current _default_transport_speed
 		 */
 
 		if (most_recently_requested_speed != _default_speed) {
-			state_changed = set_speed (Event (_default_speed));
+			state_changed = set_speed (Event (_default_speed, false));
 		}
 	}
 
@@ -803,6 +801,10 @@ TransportFSM::set_speed (Event const & ev)
 	 */
 
 	most_recently_requested_speed = ev.speed;
+
+	if (ev.as_default) {
+		_default_speed = ev.speed;
+	}
 
 	if (must_reverse) {
 

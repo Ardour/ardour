@@ -37,9 +37,6 @@
 #include <iostream>
 #include <cmath>
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
 
@@ -82,7 +79,6 @@ using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace Glib;
 using namespace ARDOUR_UI_UTILS;
-using namespace Menu_Helpers;
 
 void
 ARDOUR_UI::setup_tooltips ()
@@ -101,8 +97,6 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (error_alert_button, _("Show Error Log and acknowledge warnings"));
 
 	set_tip (latency_disable_button, _("Disable all Plugin Delay Compensation. This results in the shortest delay from live input to output, but any paths with delay-causing plugins will sound later than those without."));
-
-	set_tip (_varispeed_pulldown, _("Varispeed: change the default playback and recording speed"));
 
 	synchronize_sync_source_and_video_pullup ();
 
@@ -534,8 +528,8 @@ ARDOUR_UI::setup_transport ()
 	ssbox->set_spacing (PX_SCALE(2));
 	ssbox->pack_start (sync_button, false, false, 0);
 	ssbox->pack_start (shuttle_box, true, true, 0);
-	ssbox->pack_start (_varispeed_pulldown, false, false, 0);
 	ssbox->pack_start (*shuttle_box.info_button(), false, false, 0);
+
 
 	/* and the main table layout */
 	int vpadding = 1;
@@ -635,20 +629,6 @@ ARDOUR_UI::setup_transport ()
 	++col;
 	transport_table.attach (editor_visibility_button,   TCOL,         0, 1 , FILL, SHRINK, hpadding, vpadding);
 	++col;
-
-//	_varispeed_pulldown.set_icon (ArdourIcon::RecButton);
-	_varispeed_pulldown.set_text(_("Vari"));
-//	_varispeed_pulldown.set_icon(record_tape_red);
-	_varispeed_pulldown.AddMenuElem (MenuElem (_("None"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_default_play_spd_from_menu), 1.0)));
-	_varispeed_pulldown.AddMenuElem (SeparatorElem());
-	_varispeed_pulldown.AddMenuElem (MenuElem (_("-10 cents"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_default_play_spd_from_menu), ShuttleControl::cents_as_speed(-10, false))));
-	_varispeed_pulldown.AddMenuElem (MenuElem (_("+10 cents"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_default_play_spd_from_menu), ShuttleControl::cents_as_speed(10, false))));
-	_varispeed_pulldown.AddMenuElem (SeparatorElem());
-	_varispeed_pulldown.AddMenuElem (MenuElem (_("-1 semitone"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_default_play_spd_from_menu), ShuttleControl::semitones_as_speed(-1, false))));
-	_varispeed_pulldown.AddMenuElem (MenuElem (_("+1 semitone"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_default_play_spd_from_menu), ShuttleControl::semitones_as_speed(1, false))));
-	_varispeed_pulldown.AddMenuElem (SeparatorElem());
-	_varispeed_pulldown.AddMenuElem (MenuElem (_("-1 octave"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_default_play_spd_from_menu), ShuttleControl::semitones_as_speed(-12, false))));
-	_varispeed_pulldown.AddMenuElem (MenuElem (_("+1 octave"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_default_play_spd_from_menu), ShuttleControl::semitones_as_speed(12, false))));
 
 	/* initialize */
 	latency_switch_changed ();
@@ -767,12 +747,6 @@ ARDOUR_UI::layered_button_clicked ()
 	if (_session) {
 		_session->config.set_layered_record_mode (!_session->config.get_layered_record_mode ());
 	}
-}
-
-void
-ARDOUR_UI::set_default_play_spd_from_menu (double spd)
-{
-	_session->set_default_play_speed(spd);
 }
 
 void
