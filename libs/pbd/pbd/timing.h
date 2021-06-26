@@ -103,6 +103,8 @@ public:
 		return elapsed;
 	}
 
+	bool started() const { return m_start_val != 0; }
+
 	/// @return Elapsed time in microseconds
 	uint64_t elapsed () const {
 		return m_last_val - m_start_val;
@@ -219,11 +221,29 @@ private:
 	int      _queue_reset;
 };
 
+/** Provides an exception (and return path)-safe method to measure a timer
+ * interval. The timer is started at scope entry, and updated at scope exit
+ * (however that occurs)
+ */
 class LIBPBD_API TimerRAII
 {
   public:
 	TimerRAII (TimingStats& ts) : stats (ts) { stats.start(); }
 	~TimerRAII() { stats.update(); }
+	TimingStats& stats;
+};
+
+/** Reverse semantics from TimerRAII. This starts the timer at scope exit,
+ *  and then updates it (computes interval) at scope entry. This is designed
+ *  for use with a callback API like CoreAudio, where we want to time the
+ *  interval between us being done with our work, and when our callback is
+ *  next executed.
+ */
+class LIBPBD_API WaitTimerRAII
+{
+  public:
+	WaitTimerRAII (TimingStats& ts) : stats (ts) { if (stats.started()) { stats.update(); } }
+	~WaitTimerRAII() { stats.start(); }
 	TimingStats& stats;
 };
 
