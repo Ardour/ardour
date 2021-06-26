@@ -792,9 +792,10 @@ CoreAudioPCM::set_samples_per_period (uint32_t n_samples)
 
 int
 CoreAudioPCM::pcm_start (
-		uint32_t device_id_in, uint32_t device_id_out,
-		uint32_t sample_rate, uint32_t samples_per_period,
-		int (process_callback (void*, const uint32_t, const uint64_t)), void *process_arg)
+	uint32_t device_id_in, uint32_t device_id_out,
+	uint32_t sample_rate, uint32_t samples_per_period,
+	int (process_callback (void*, const uint32_t, const uint64_t)), void *process_arg,
+	PBD::Timing& dsp_timer)
 {
 
 	assert(_device_ids);
@@ -812,6 +813,7 @@ CoreAudioPCM::pcm_start (
 	_process_arg = process_arg;
 	_samples_per_period = samples_per_period;
 	_cur_samples_per_period = 0;
+	_dsp_timer = &dsp_timer;
 	_active_device_id = 0;
 	_capture_channels = 0;
 	_playback_channels = 0;
@@ -1119,6 +1121,7 @@ CoreAudioPCM::render_callback (
 		UInt32 inNumberSamples,
 		AudioBufferList* ioData)
 {
+	PBD::WaitTimerRAII tr (*_dsp_timer);
 	OSStatus retVal = kAudioHardwareNoError;
 
 	if (_samples_per_period < inNumberSamples) {

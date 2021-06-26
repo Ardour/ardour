@@ -548,7 +548,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	_pcmio->set_buffer_size_callback (buffer_size_callback_ptr, this);
 	_pcmio->set_sample_rate_callback (sample_rate_callback_ptr, this);
 
-	_pcmio->pcm_start (device1, device2, _samplerate, _samples_per_period, process_callback_ptr, this);
+	_pcmio->pcm_start (device1, device2, _samplerate, _samples_per_period, process_callback_ptr, this, dsp_stats[AudioBackend::DeviceWait]);
 #ifndef NDEBUG
 	printf("STATE: %d\n", _pcmio->state ());
 #endif
@@ -1366,6 +1366,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 {
 	uint32_t i = 0;
 	uint64_t clock1;
+	PBD::TimerRAII tr (dsp_stats[RunLoop]);
 
 	_active_ca = true;
 
