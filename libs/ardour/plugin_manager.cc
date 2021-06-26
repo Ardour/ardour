@@ -1621,6 +1621,8 @@ PluginManager::vst3_plugin (string const& module_path, string const& bundle_path
 
 	_vst3_plugin_info->push_back (info);
 
+	scan_log_entry (VST3, bundle_path)->add (info);
+
 	if (!info->category.empty ()) {
 		set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 	}
@@ -1631,31 +1633,42 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 {
 	string module_path = module_path_vst3 (path);
 	if (module_path.empty ()) {
+		PSLEPtr psl = PSLEPtr (new PluginScanLogEntry (VST3, path));
+		psl->msg (PluginScanLogEntry::Error, "Invalid Module Path");
+		_plugin_scan_log.erase (psl);
+		_plugin_scan_log.insert (psl);
 		return -1;
 	}
 
+	PSLEPtr psle (scan_log_entry (VST3, path));
+
 	if (vst3_is_blacklisted (module_path)) {
+		psle->msg (PluginScanLogEntry::Blacklisted);
 		return -1;
 	}
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST3: discover %1 (%2)\n", path, module_path));
 
-	if (!cache_only && vst3_scanner_bin_path.empty ()) {
-		/* direct scan in the host's process */
-		vst3_blacklist (module_path);
+	bool run_scan = false;
+	bool is_new   = false;
 
+	string cache_file = vst3_valid_cache_file (module_path, false, &is_new);
+
+	if (!cache_only && vst3_scanner_bin_path.empty () && cache_file.empty ()) {
+		/* scan in host context */
+		psle->reset ();
+		vst3_blacklist (module_path);
+		psle->msg (PluginScanLogEntry::OK, string_compose ("VST3 module-path: '%1' (internal scan)", module_path));
 		if (! vst3_scan_and_cache (module_path, path, sigc::mem_fun (*this, &PluginManager::vst3_plugin))) {
+			psle->msg (PluginScanLogEntry::Error, "Cannot load VST3");
+			psle->msg (PluginScanLogEntry::Blacklisted);
 			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot load VST3 at '%1'\n", path));
 			return -1;
 		}
-
+		psle->msg (PluginScanLogEntry::OK, string_compose (_("Saved VST3 plugin cache to '%1'"), vst3_cache_file (module_path)));
 		vst3_whitelist (module_path);
 		return 0;
 	}
-
-	string cache_file = vst3_valid_cache_file (module_path);
-
-	bool run_scan = false;
 
 	XMLTree tree;
 	if (cache_file.empty ()) {
@@ -1673,19 +1686,24 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 
 	if (!cache_only && run_scan) {
 		/* re/generate cache file */
+		psle->reset ();
 		vst3_blacklist (module_path);
-		if (!run_vst3_scanner_app (path)) {
+		psle->msg (PluginScanLogEntry::OK, string_compose ("VST3 module-path '%1'", module_path));
+		if (!run_vst3_scanner_app (path, psle)) {
 			return -1;
 		}
 
 		cache_file = vst3_valid_cache_file (module_path);
 
 		if (cache_file.empty ()) {
+			psle->msg (PluginScanLogEntry::Blacklisted);
+			psle->msg (PluginScanLogEntry::Error, _("Scan Failed."));
 			return -1;
 		}
 		/* re-read cache file */
 		if (!tree.read (cache_file)) {
-			error << string_compose (_("Cannot parse VST3 cache file '%1' for plugin '%2'"), cache_file, module_path) << endmsg;
+			psle->msg (PluginScanLogEntry::Blacklisted);
+			psle->msg (PluginScanLogEntry::Error, string_compose (_("Cannot parse VST3 cache file '%1' for plugin '%2'"), cache_file, module_path));
 			return -1;
 		}
 		run_scan = false; // mark as scanned
@@ -1695,51 +1713,57 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 		/* cache file does not exist and cache_only == true,
 		 * or cache file is invalid (scan needed)
 		 */
+		psle->msg (is_new ? PluginScanLogEntry::New : PluginScanLogEntry::Updated);
 		return -1;
 	}
 
 	std::string module;
 	if (!tree.root()->get_property ("module", module) || module != module_path) {
-		error << string_compose (_("Invalid VST3 cache file '%1' for plugin '%2'"), cache_file, module_path) << endmsg;
+		psle->msg (PluginScanLogEntry::Error, string_compose (_("Invalid VST3 cache file '%1'"), cache_file));
+		psle->msg (PluginScanLogEntry::Blacklisted);
+		if (!vst3_is_blacklisted (path)) {
+			vst3_blacklist (module_path);
+		}
 		return -1;
 	}
 
 	vst3_whitelist (module_path);
+	psle->set_result (PluginScanLogEntry::OK);
 
 	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
 		try {
 			VST3Info nfo (**i);
 			vst3_plugin (module_path, path, nfo);
 		} catch (...) {
-			error << string_compose (_("Corrupt VST3 cache file '%1' for plugin '%2'"), cache_file, module_path) << endmsg;
-			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot load VST3 at '%1'\n", path));
+			psle->msg (PluginScanLogEntry::Error, string_compose (_("Corrupt VST3 cache file '%1'"), cache_file));
+			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot load VST3 at '%1'\n", module_path));
 			continue;
 		}
 	}
 	return 0;
 }
 
-static void vst3_scanner_log (std::string msg, std::string bundle_path)
+static void vst3_scanner_log (std::string msg, PluginScanLogEntry* psle)
 {
-	PBD::info << string_compose ("VST3<%1>: %2", bundle_path, msg) << endmsg;
+	psle->msg (PluginScanLogEntry::OK, msg);
 }
 
 bool
-PluginManager::run_vst3_scanner_app (std::string bundle_path) const
+PluginManager::run_vst3_scanner_app (std::string bundle_path, PSLEPtr psle) const
 {
 	char **argp= (char**) calloc (5, sizeof (char*));
 	argp[0] = strdup (vst3_scanner_bin_path.c_str ());
-	argp[1] = strdup ("-q");
+	argp[1] = strdup ("-f");
 	argp[2] = strdup ("-f");
 	argp[3] = strdup (bundle_path.c_str ());
 	argp[4] = 0;
 
 	ARDOUR::SystemExec scanner (vst3_scanner_bin_path, argp);
 	PBD::ScopedConnection c;
-	scanner.ReadStdout.connect_same_thread (c, boost::bind (&vst3_scanner_log, _1, bundle_path));
+	scanner.ReadStdout.connect_same_thread (c, boost::bind (&vst3_scanner_log, _1, &(*psle)));
 
 	if (scanner.start (ARDOUR::SystemExec::MergeWithStdin)) {
-		PBD::error << string_compose (_("Cannot launch VST scanner app '%1': %2"), scanner_bin_path, strerror (errno)) << endmsg;
+		psle->msg (PluginScanLogEntry::Error, string_compose (_("Cannot launch VST scanner app '%1': %2"), vst3_scanner_bin_path, strerror (errno)));
 		return false;
 	}
 
@@ -1758,6 +1782,11 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path) const
 
 		if (cancelled () || (!notime && timeout == 0)) {
 			scanner.terminate ();
+			if (cancelled ()) {
+				psle->msg (PluginScanLogEntry::New, "Scan was cancelled.");
+			} else {
+				psle->msg (PluginScanLogEntry::TimeOut, "Scan Timed Out.");
+			}
 			/* may be partially written */
 			std::string module_path = module_path_vst3 (bundle_path);
 			if (!module_path.empty ()) {
