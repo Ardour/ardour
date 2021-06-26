@@ -43,7 +43,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 #define TFSM_ROLL() { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StartTransport)); }
-#define TFSM_SPEED(speed,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (speed,as_default)); }
+#define TFSM_SPEED(speed) { _transport_fsm->enqueue (new TransportFSM::Event (speed)); }
 
 boost::shared_ptr<ExportHandler>
 Session::get_export_handler ()
@@ -308,7 +308,7 @@ Session::process_export_fw (pframes_t nframes)
 			return;
 		}
 
-		TFSM_SPEED (1.0, false);
+		TFSM_SPEED (1.0);
 		TFSM_ROLL ();
 		_butler->schedule_transport_work ();
 

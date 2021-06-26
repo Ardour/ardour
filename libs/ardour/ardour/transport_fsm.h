@@ -54,7 +54,6 @@ struct TransportFSM
 		bool force;
 		/* for SetSpeed */
 		double speed;
-		bool   as_default;
 
 		Event (EventType t)
 			: type (t)
@@ -95,10 +94,9 @@ struct TransportFSM
 		   cast double-to-bool and complains. C++11 would allow "=
 		   delete" as an alternate fix, but this is fine.
 		*/
-		Event (double sp, bool ad)
+		Event (double sp)
 			: type (SetSpeed)
 			, speed (sp)
-			, as_default (ad)
 		{
 		}
 
@@ -147,7 +145,9 @@ struct TransportFSM
 	std::string current_state () const;
 
 	double transport_speed() const { return _transport_speed; }
+
 	double default_speed() const { return _default_speed; }
+	void set_default_speed(double spd) const { _default_speed = spd; }
 
   private:
 	MotionState _motion_state;

@@ -36,6 +36,25 @@ namespace Gtk {
 	class Menu;
 }
 
+class ShuttleInfoButton : public ArdourWidgets::ArdourButton, public ARDOUR::SessionHandlePtr
+{
+public:
+	ShuttleInfoButton ();
+	~ShuttleInfoButton ();
+
+	bool on_button_press_event (GdkEventButton*);
+
+	void set_shuttle_units (ARDOUR::ShuttleUnits s);
+
+private:
+	void parameter_changed (std::string);
+	void build_disp_context_menu ();
+	Gtk::Menu*            disp_context_menu;
+	PBD::ScopedConnection parameter_connection;
+
+	bool _ignore_change;
+};
+
 class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 {
 public:
@@ -46,6 +65,8 @@ public:
 	void set_shuttle_fract (double, bool zero_ok = false);
 	double get_shuttle_fract () const { return shuttle_fract; }
 	void set_session (ARDOUR::Session*);
+
+	void do_blink (bool);
 
 	struct ShuttleControllable : public PBD::Controllable {
 		ShuttleControllable (ShuttleControl&);
@@ -63,6 +84,17 @@ public:
 
 	ArdourWidgets::ArdourButton* info_button () { return &_info_button; }
 
+public:
+	static int speed_as_semitones (float, bool&);
+	static int fract_as_semitones (float, bool&);
+
+	static float semitones_as_speed (int, bool);
+	static float semitones_as_fract (int, bool);
+
+	static int speed_as_cents (float, bool&);
+	static float cents_as_speed (int, bool);
+
+
 protected:
 	bool _hovering;
 	float  shuttle_max_speed;
@@ -76,21 +108,20 @@ protected:
 	cairo_pattern_t* shine_pattern;
 	ARDOUR::microseconds_t last_shuttle_request;
 	PBD::ScopedConnection parameter_connection;
-	ArdourWidgets::ArdourButton _info_button;
+	ShuttleInfoButton _info_button;
 	Gtk::Menu*                  shuttle_context_menu;
 	ArdourWidgets::BindingProxy binding_proxy;
 	float bg_r, bg_g, bg_b;
 	void build_shuttle_context_menu ();
-	void shuttle_style_changed();
 	void set_shuttle_max_speed (float);
-	void reset_speed ();
 
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event(GdkEventButton*);
-	bool on_scroll_event (GdkEventScroll*);
 	bool on_motion_notify_event(GdkEventMotion*);
+
+	bool on_button_press_event_for_display (GdkEventButton*);
 
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 
@@ -102,13 +133,6 @@ protected:
 	void parameter_changed (std::string);
 
 	void set_shuttle_units (ARDOUR::ShuttleUnits);
-	void set_shuttle_style (ARDOUR::ShuttleBehaviour);
-
-	int speed_as_semitones (float, bool&);
-	int fract_as_semitones (float, bool&);
-
-	float semitones_as_speed (int, bool);
-	float semitones_as_fract (int, bool);
 
 	bool _ignore_change;
 };

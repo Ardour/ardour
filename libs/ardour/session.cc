@@ -191,8 +191,6 @@ Session::Session (AudioEngine &eng,
 	, _silent (false)
 	, _remaining_latency_preroll (0)
 	, _engine_speed (1.0)
-	, _last_transport_speed (1.0)
-	, _requested_transport_speed (std::numeric_limits<double>::max())
 	, _signalled_varispeed (0)
 	, auto_play_legal (false)
 	, _requested_return_sample (-1)
