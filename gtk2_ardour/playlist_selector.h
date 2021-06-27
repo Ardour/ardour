@@ -110,6 +110,8 @@ private:
 	Gtk::TreeView tree;
 
 	boost::shared_ptr<ARDOUR::Playlist> current_playlist;
+
+	bool _ignore_selection;
 };
 
 #endif // __ardour_playlist_selector_h__

@@ -77,6 +77,10 @@ PlaylistSelector::PlaylistSelector ()
 
 	Button* ok_btn = add_button (Gtk::Stock::OK, RESPONSE_OK);
 	ok_btn->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::ok_button_click));
+
+	select_connection = tree.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PlaylistSelector::selection_changed));
+
+	_ignore_selection = false;
 }
 
 void PlaylistSelector::prepare(RouteUI* ruix, plMode mode)
@@ -226,7 +230,9 @@ PlaylistSelector::redisplay()
 			}
 		}
 		if (have_selected) {
+			_ignore_selection = true;
 			tree.get_selection()->select (selected_row);
+			_ignore_selection = false;
 		}
 	}
 
@@ -261,13 +267,13 @@ PlaylistSelector::redisplay()
 				}
 
 				if (have_selected) {
+					_ignore_selection = true;
 					tree.get_selection()->select (selected_row);
+					_ignore_selection = false;
 				}
 			}
 		}
 	} //if !plSelect
-	
-	select_connection = tree.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PlaylistSelector::selection_changed));
 }
 
 void
@@ -316,6 +322,11 @@ PlaylistSelector::ok_button_click()
 void
 PlaylistSelector::selection_changed ()
 {
+	if (_ignore_selection) {
+		/* selection came from libardour, not the user's action */
+		return;
+	}
+
 	boost::shared_ptr<Playlist> pl;
 
 	TreeModel::iterator iter = tree.get_selection()->get_selected();
