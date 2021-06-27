@@ -512,7 +512,7 @@ ShuttleControl::fract_as_semitones (float fract, bool& reverse)
 void
 ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 {
-	microseconds_t now = get_microseconds();
+	microseconds_t now = PBD::get_microseconds();
 
 	shuttle_fract = max (-1.0f, shuttle_fract);
 	shuttle_fract = min (1.0f, shuttle_fract);

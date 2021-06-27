@@ -718,7 +718,7 @@ au_cf_timer_callback (CFRunLoopTimerRef timer, void* info)
 void
 AUPluginUI::cf_timer_callback ()
 {
-	int64_t now = ARDOUR::get_microseconds ();
+	int64_t now = PBD::get_microseconds ();
 
 	if (!last_timer || block_plugin_redraws) {
 		last_timer = now;
