@@ -20,21 +20,12 @@
 #include <gtkmm/button.h>
 #include <gtkmm/table.h>
 
-#ifdef PLATFORM_WINDOWS
-#include <pbd/windows_timer_utils.h>
-#endif
+#include "pbd/microseconds.h"
 
 #include "temporal/time.h"
 
 #include "idleometer.h"
 #include "pbd/i18n.h"
-
-static int64_t _x_get_monotonic_usec() {
-#ifdef PLATFORM_WINDOWS
-	return PBD::get_microseconds();
-#endif
-	return g_get_monotonic_time();
-}
 
 using namespace Gtk;
 
@@ -91,7 +82,7 @@ IdleOMeter::~IdleOMeter ()
 bool
 IdleOMeter::idle ()
 {
-	const int64_t now = _x_get_monotonic_usec ();
+	const int64_t now = PBD::get_microseconds ();
 	const int64_t elapsed = now - _last;
 
 	_max = std::max (_max, elapsed);
@@ -141,7 +132,7 @@ IdleOMeter::idle ()
 void
 IdleOMeter::reset ()
 {
-	_last = _x_get_monotonic_usec ();
+	_last = PBD::get_microseconds ();
 	_last_display = _last;
 	_start = _last;
 	_max = 0;
