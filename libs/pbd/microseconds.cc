@@ -88,7 +88,7 @@ PBD::get_microseconds ()
 	LARGE_INTEGER time;
 
 	if (timer_rate_usecs) {
-/		if (QueryPerformanceCounter (&time)) {
+		if (QueryPerformanceCounter (&time)) {
 			return (microseconds_t) (time.QuadPart * timer_rate_usecs);
 		}
 	}
