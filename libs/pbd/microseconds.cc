@@ -24,11 +24,6 @@
 #include <profileapi.h>
 #include <windows.h> // for LARGE_INTEGER
 #endif
-#ifdef __MACH__
-#include <mach/mach_time.h>
-#define CLOCK_REALTIME 0
-#define CLOCK_MONOTONIC 0
-#endif
 
 #include "pbd/error.h"
 #include "pbd/microseconds.h"
@@ -40,10 +35,6 @@ static double timer_rate_usecs = 0.0;
 #ifdef __MACH__
 static mach_timebase_info_data_t timebase;
 #endif
-
-/** Return a monotonic value for the number of microseconds that have elapsed
- * since an arbitrary zero origin.
- */
 
 #ifdef __MACH__
 #include <mach/mach_time.h>
@@ -83,6 +74,9 @@ PBD::microsecond_timer_init ()
 #endif
 }
 
+/** Return a monotonic value for the number of microseconds that have elapsed
+ * since an arbitrary zero origin.
+ */
 PBD::microseconds_t
 PBD::get_microseconds ()
 {
