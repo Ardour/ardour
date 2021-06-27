@@ -131,6 +131,12 @@ MTC_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, boos
 
 	maybe_reset ();
 
+	if (!_midi_port) {
+		_current_delta = 0;
+		DEBUG_TRACE (DEBUG::MTC, "No MTC port registered");
+		return;
+	}
+
 	_midi_port->read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, parser, now);
 
 	if (session_pos) {

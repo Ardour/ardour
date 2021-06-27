@@ -119,6 +119,14 @@ void
 MIDIClock_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, boost::optional<samplepos_t> session_pos)
 {
 	/* Read and parse incoming MIDI */
+	if (!_midi_port) {
+		_bpm = 0.0;
+		_running = false;
+		_current_delta = 0;
+		midi_clock_count = 0;
+		DEBUG_TRACE (DEBUG::MidiClock, "No MIDI Clock port registered");
+		return;
+	}
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("preprocess with lt = %1 @ %2, running ? %3\n", current.timestamp, now, _running));
 
