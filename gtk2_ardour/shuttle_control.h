@@ -32,6 +32,8 @@
 #include "widgets/ardour_button.h"
 #include "widgets/binding_proxy.h"
 
+#include "transpose_dialog.h"
+
 namespace Gtk {
 	class Menu;
 }
@@ -83,6 +85,7 @@ public:
 	void set_colors ();
 
 	ArdourWidgets::ArdourButton* info_button () { return &_info_button; }
+	ArdourWidgets::ArdourButton* vari_button () { return &_vari_button; }
 
 public:
 	static int speed_as_semitones (float, bool&);
@@ -114,6 +117,10 @@ protected:
 	float bg_r, bg_g, bg_b;
 	void build_shuttle_context_menu ();
 	void set_shuttle_max_speed (float);
+
+	VarispeedDialog _vari_dialog;
+	ArdourWidgets::ArdourButton _vari_button;
+	void varispeed_button_clicked ();
 
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);

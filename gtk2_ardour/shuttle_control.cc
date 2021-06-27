@@ -45,6 +45,7 @@
 #include "rgb_macros.h"
 #include "shuttle_control.h"
 #include "timers.h"
+#include "transpose_dialog.h"
 
 #include "pbd/i18n.h"
 
@@ -177,6 +178,13 @@ ShuttleControl::ShuttleControl ()
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ShuttleControl::set_colors));
 	Timers::blink_connect (sigc::mem_fun (*this, &ShuttleControl::do_blink));
 
+	set_tooltip (_vari_button, _("Varispeed: change the default playback and recording speed"));
+
+//	_vari_button.set_icon (ArdourIcon::RecButton);
+	_vari_button.set_name ("vari button");
+	_vari_button.set_text(_("Vari"));
+	_vari_button.signal_clicked.connect (sigc::mem_fun (*this, &ShuttleControl::varispeed_button_clicked));
+
 	/* gtkmm 2.4: the C++ wrapper doesn't work */
 	g_signal_connect ((GObject*) gobj(), "query-tooltip", G_CALLBACK (qt), NULL);
 	// signal_query_tooltip().connect (sigc::mem_fun (*this, &ShuttleControl::on_query_tooltip));
@@ -190,12 +198,27 @@ ShuttleControl::~ShuttleControl ()
 }
 
 void
+ShuttleControl::varispeed_button_clicked ()
+{
+	_vari_dialog.set_session(_session);
+	if (_session->default_play_speed()==1.0) {
+		_vari_dialog.show_all ();
+		_vari_dialog.apply_speed ();
+	} else {
+		_session->set_default_play_speed(1.0);
+		_vari_dialog.hide ();
+	}
+}
+
+void
 ShuttleControl::do_blink (bool onoff)
 {
 	if (!shuttle_grabbed && _session && _session->default_play_speed()!=1.0) {
 		_info_button.set_active(onoff);
+		_vari_button.set_active(onoff);
 	} else {
 		_info_button.set_active(false);
+		_vari_button.set_active(false);
 	}
 }
 
