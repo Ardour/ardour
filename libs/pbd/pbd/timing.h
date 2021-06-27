@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 
+#include "pbd/microseconds.h"
 #include "pbd/libpbd_visibility.h"
 
 #ifdef COMPILER_MSVC
@@ -37,9 +38,9 @@
 
 namespace PBD {
 
-LIBPBD_API bool get_min_max_avg_total (const std::vector<uint64_t>& values, uint64_t& min, uint64_t& max, uint64_t& avg, uint64_t& total);
+LIBPBD_API bool get_min_max_avg_total (const std::vector<microseconds_t>& values, microseconds_t& min, microseconds_t& max, microseconds_t& avg, microseconds_t& total);
 
-LIBPBD_API std::string timing_summary (const std::vector<uint64_t>& values);
+LIBPBD_API std::string timing_summary (const std::vector<microseconds_t>& values);
 
 /**
  * This class allows collecting timing data using two different
@@ -76,14 +77,14 @@ public:
 	}
 
 	void start () {
-		m_start_val = g_get_monotonic_time ();
+		m_start_val = PBD::get_microseconds ();
 		m_last_val = 0;
 	}
 
 	void update () {
-		m_last_val = g_get_monotonic_time ();
+		m_last_val = PBD::get_microseconds ();
 	}
-	void update (uint64_t interval) {
+	void update (microseconds_t interval) {
 		m_start_val = 0;
 		m_last_val = interval;
 	}
@@ -92,8 +93,8 @@ public:
 		m_start_val = m_last_val = 0;
 	}
 
-	uint64_t get_interval () {
-		uint64_t elapsed = 0;
+	microseconds_t get_interval () {
+		microseconds_t elapsed = 0;
 		update ();
 		if (valid()) {
 			elapsed = m_last_val - m_start_val;
@@ -106,19 +107,19 @@ public:
 	bool started() const { return m_start_val != 0; }
 
 	/// @return Elapsed time in microseconds
-	uint64_t elapsed () const {
+	microseconds_t elapsed () const {
 		return m_last_val - m_start_val;
 	}
 
 	/// @return Elapsed time in milliseconds
-	uint64_t elapsed_msecs () const {
+	microseconds_t elapsed_msecs () const {
 		return elapsed () / 1000;
 	}
 
 private:
 
-	uint64_t m_start_val;
-	uint64_t m_last_val;
+	microseconds_t m_start_val;
+	microseconds_t m_last_val;
 
 };
 
@@ -142,7 +143,7 @@ public:
 	}
 
 	/* interval computed externally */
-	void update (uint64_t interval)
+	void update (microseconds_t interval)
 	{
 		if (_queue_reset) {
 			reset ();
@@ -160,7 +161,7 @@ public:
 	{
 		_queue_reset = 0;
 		Timing::reset ();
-		_min = std::numeric_limits<uint64_t>::max();
+		_min = std::numeric_limits<microseconds_t>::max();
 		_max = 0;
 		_cnt = 0;
 		_avg = 0.;
@@ -172,8 +173,8 @@ public:
 		return Timing::valid () && _cnt > 1;
 	}
 
-	bool get_stats (uint64_t& min,
-	                uint64_t& max,
+	bool get_stats (microseconds_t& min,
+	                microseconds_t& max,
 	                double& avg,
 	                double& dev) const
 	{
@@ -190,7 +191,7 @@ public:
 private:
 	void calc ()
 	{
-		const uint64_t diff = elapsed ();
+		const microseconds_t diff = elapsed ();
 
 		_avg += diff;
 
@@ -212,9 +213,9 @@ private:
 		++_cnt;
 	}
 
-	uint64_t _cnt;
-	uint64_t _min;
-	uint64_t _max;
+	microseconds_t _cnt;
+	microseconds_t _min;
+	microseconds_t _max;
 	double   _avg;
 	double   _vm;
 	double   _vs;
@@ -265,7 +266,7 @@ public:
 	}
 
 	void add_interval () {
-		uint64_t interval = m_timing.get_interval ();
+		microseconds_t interval = m_timing.get_interval ();
 		m_elapsed_values.push_back (interval);
 	}
 
@@ -277,10 +278,10 @@ public:
 	std::string summary () const
 	{ return timing_summary (m_elapsed_values); }
 
-	bool get_min_max_avg_total (uint64_t& min,
-	                            uint64_t& max,
-	                            uint64_t& avg,
-	                            uint64_t& total) const
+	bool get_min_max_avg_total (microseconds_t& min,
+	                            microseconds_t& max,
+	                            microseconds_t& avg,
+	                            microseconds_t& total) const
 	{ return PBD::get_min_max_avg_total (m_elapsed_values, min, max, avg, total); }
 
 	void reserve (uint32_t reserve_size)
@@ -295,7 +296,7 @@ private:
 
 	uint32_t m_reserve_size;
 
-	std::vector<uint64_t> m_elapsed_values;
+	std::vector<microseconds_t> m_elapsed_values;
 };
 
 class LIBPBD_API Timed
