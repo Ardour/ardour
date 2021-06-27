@@ -1,0 +1,69 @@
+/*
+ * Copyright (C) 2021 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2013-2015 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2014-2015 John Emmas <john@creativepost.co.uk>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <time.h>
+
+#ifdef PLATFORM_WINDOWS
+#include <profileapi.h>
+#include <windows.h> // for LARGE_INTEGER
+#endif
+
+#include "pbd/microseconds.h"
+
+#ifdef PLATFORM_WINDOWS
+static double timer_rate_usecs = 0.0;
+#endif
+
+void
+PBD::microsecond_timer_init ()
+{
+#ifdef PLATFORM_WINDOWS
+	LARGE_INTEGER freq;
+	if (!QueryPerformanceFrequency(&freq) || freq.QuadPart < 1) {
+		info << X_("Failed to determine frequency of QPC\n") << endmsg;
+		timer_rate_us = 0;
+	} else {
+		timer_rate_us = 1000000.0 / freq.QuadPart;
+	}
+#endif
+}
+
+PBD::microseconds_t
+PBD::get_microseconds ()
+{
+#ifdef PLATFORM_WINDOWS
+	LARGE_INTEGER time;
+
+	if (time_rate_usecs) {
+		if (QueryPerformanceCounter (&time)) {
+			return (microseconds_t) (current_val.QuadPart * timer_rate_us);
+		}
+	}
+
+	return (microseconds_t) 0;
+#else
+	struct timespec ts;
+	if (clock_gettime (CLOCK_MONOTONIC, &ts) != 0) {
+		/* EEEK! */
+		return 0;
+	}
+	return (microseconds_t)ts.tv_sec * 1000000 + (ts.tv_nsec / 1000);
+#endif
+}
