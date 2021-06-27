@@ -83,8 +83,6 @@ namespace ARDOUR {
 	LIBARDOUR_API bool translations_are_enabled ();
 	LIBARDOUR_API bool set_translations_enabled (bool);
 
-	LIBARDOUR_API microseconds_t get_microseconds ();
-
 	LIBARDOUR_API void setup_fpu ();
 	LIBARDOUR_API std::vector<SyncSource> get_available_sync_options();
 

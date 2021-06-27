@@ -47,6 +47,7 @@
 #include "temporal/types.h"
 
 #include "pbd/id.h"
+#include "pbd/microseconds.h"
 
 #include "evoral/Range.h"
 
@@ -77,7 +78,7 @@ typedef float    Sample;
 typedef float    pan_t;
 typedef float    gain_t;
 typedef uint32_t layer_t;
-typedef uint64_t microseconds_t;
+typedef PBD::microseconds_t microseconds_t;
 typedef uint32_t pframes_t;
 
 /* rebind Temporal position types into ARDOUR namespace */
