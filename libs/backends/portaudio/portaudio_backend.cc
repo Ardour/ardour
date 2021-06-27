@@ -37,6 +37,7 @@
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/pthread_utils.h"
+#include "pbd/microseconds.h"
 #include "pbd/windows_timer_utils.h"
 #include "pbd/windows_mmcss.h"
 
