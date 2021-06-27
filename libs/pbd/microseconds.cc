@@ -27,6 +27,7 @@
 
 #include "pbd/error.h"
 #include "pbd/microseconds.h"
+#include "pbd/i18n.h"
 
 #ifdef PLATFORM_WINDOWS
 static double timer_rate_usecs = 0.0;
