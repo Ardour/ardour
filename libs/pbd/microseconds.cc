@@ -40,9 +40,9 @@ PBD::microsecond_timer_init ()
 	LARGE_INTEGER freq;
 	if (!QueryPerformanceFrequency(&freq) || freq.QuadPart < 1) {
 		info << X_("Failed to determine frequency of QPC\n") << endmsg;
-		timer_rate_us = 0;
+		timer_rate_usecs = 0;
 	} else {
-		timer_rate_us = 1000000.0 / freq.QuadPart;
+		timer_rate_usecs = 1000000.0 / freq.QuadPart;
 	}
 #endif
 }
@@ -55,7 +55,7 @@ PBD::get_microseconds ()
 
 	if (timer_rate_usecs) {
 		if (QueryPerformanceCounter (&time)) {
-			return (microseconds_t) (time.QuadPart * timer_rate_us);
+			return (microseconds_t) (time.QuadPart * timer_rate_usecs);
 		}
 	}
 
