@@ -54,7 +54,7 @@ PBD::get_microseconds ()
 
 	if (time_rate_usecs) {
 		if (QueryPerformanceCounter (&time)) {
-			return (microseconds_t) (current_val.QuadPart * timer_rate_us);
+			return (microseconds_t) (time.QuadPart * timer_rate_us);
 		}
 	}
 
