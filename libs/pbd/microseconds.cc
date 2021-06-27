@@ -25,6 +25,7 @@
 #include <windows.h> // for LARGE_INTEGER
 #endif
 
+#include "pbd/error.h"
 #include "pbd/microseconds.h"
 
 #ifdef PLATFORM_WINDOWS
