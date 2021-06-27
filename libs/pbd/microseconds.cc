@@ -21,7 +21,6 @@
 #include <time.h>
 
 #ifdef PLATFORM_WINDOWS
-#include <profileapi.h>
 #include <windows.h> // for LARGE_INTEGER
 #endif
 
