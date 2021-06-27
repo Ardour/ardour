@@ -16,8 +16,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef __ardour_transpose_dialog_h__
+#define __ardour_transpose_dialog_h__
+
 #include <gtkmm/spinbutton.h>
 #include "ardour_dialog.h"
+
+
 
 /** A dialog box to select a transposition to apply to a MIDI region.
  *  It asks for octaves and semitones, with the transposition being
@@ -37,3 +42,28 @@ private:
 	Gtk::SpinButton _octaves_spinner;
 	Gtk::SpinButton _semitones_spinner;
 };
+
+
+/** A dialog box to select a speed change for "varispeed" recording/playback.
+ *  It asks for octaves, semitones, and cents, and sums them to report 'speed'
+ */
+
+class VarispeedDialog : public ArdourDialog
+{
+public:
+	VarispeedDialog ();
+
+	void reset ();
+	void apply_speed ();
+	void on_hide ();
+
+private:
+	Gtk::Adjustment _octaves_adjustment;
+	Gtk::Adjustment _semitones_adjustment;
+	Gtk::Adjustment _cents_adjustment;
+	Gtk::SpinButton _octaves_spinner;
+	Gtk::SpinButton _semitones_spinner;
+	Gtk::SpinButton _cents_spinner;
+};
+
+#endif /* __ardour_transpose_dialog_h__ */

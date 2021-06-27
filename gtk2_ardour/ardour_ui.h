@@ -485,9 +485,6 @@ private:
 	void update_transport_clocks (samplepos_t pos);
 	void record_state_changed ();
 
-	ArdourWidgets::ArdourDropdown _varispeed_pulldown;
-	void set_default_play_spd_from_menu (double spd);
-
 	std::list<MidiTracer*> _midi_tracer_windows;
 
 	/* Transport Control */
