@@ -779,11 +779,11 @@ private:
 	void flush_trash ();
 
 	bool have_configure_timeout;
-	ARDOUR::microseconds_t last_configure_time;
+	PBD::microseconds_t last_configure_time;
 	gint configure_timeout ();
 
-	ARDOUR::microseconds_t last_peak_grab;
-	ARDOUR::microseconds_t last_shuttle_request;
+	PBD::microseconds_t last_peak_grab;
+	PBD::microseconds_t last_shuttle_request;
 
 	bool have_disk_speed_dialog_displayed;
 	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);

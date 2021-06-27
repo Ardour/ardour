@@ -2160,7 +2160,7 @@ private:
 	/* tracking step changes of track height */
 
 	TimeAxisView* current_stepping_trackview;
-	ARDOUR::microseconds_t last_track_height_step_timestamp;
+	PBD::microseconds_t last_track_height_step_timestamp;
 	gint track_height_step_timeout();
 	sigc::connection step_timeout;
 

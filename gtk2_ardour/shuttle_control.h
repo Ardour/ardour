@@ -74,7 +74,7 @@ protected:
 	boost::shared_ptr<ShuttleControllable> _controllable;
 	cairo_pattern_t* pattern;
 	cairo_pattern_t* shine_pattern;
-	ARDOUR::microseconds_t last_shuttle_request;
+	PBD::microseconds_t last_shuttle_request;
 	PBD::ScopedConnection parameter_connection;
 	ArdourWidgets::ArdourButton _info_button;
 	Gtk::Menu*                  shuttle_context_menu;

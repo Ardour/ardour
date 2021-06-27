@@ -143,8 +143,6 @@
 
 #include "temporal/time.h"
 
-typedef uint64_t microseconds_t;
-
 #include "about.h"
 #include "editing.h"
 #include "enums_convert.h"
