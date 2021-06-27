@@ -24,6 +24,11 @@
 #include <profileapi.h>
 #include <windows.h> // for LARGE_INTEGER
 #endif
+#ifdef __MACH__
+#include <mach/mach_time.h>
+#define CLOCK_REALTIME 0
+#define CLOCK_MONOTONIC 0
+#endif
 
 #include "pbd/error.h"
 #include "pbd/microseconds.h"
@@ -31,6 +36,9 @@
 
 #ifdef PLATFORM_WINDOWS
 static double timer_rate_usecs = 0.0;
+#endif
+#ifdef __MACH__
+static mach_timebase_info_data_t timebase;
 #endif
 
 /** Return a monotonic value for the number of microseconds that have elapsed
@@ -47,12 +55,6 @@ static double timer_rate_usecs = 0.0;
 int
 clock_gettime (int /*clk_id*/, struct timespec* t)
 {
-	static bool                      initialized = false;
-	static mach_timebase_info_data_t timebase;
-	if (!initialized) {
-		mach_timebase_info (&timebase);
-		initialized = true;
-	}
 	uint64_t time;
 	time            = mach_absolute_time ();
 	double nseconds = ((double)time * (double)timebase.numer) / ((double)timebase.denom);
@@ -75,6 +77,9 @@ PBD::microsecond_timer_init ()
 	} else {
 		timer_rate_usecs = 1000000.0 / freq.QuadPart;
 	}
+#endif
+#ifdef __MACH__
+	mach_timebase_info (&timebase);
 #endif
 }
 
