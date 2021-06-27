@@ -21,7 +21,7 @@
 #include <time.h>
 
 #ifdef PLATFORM_WINDOWS
-#include <windows.h> // for LARGE_INTEGER
+#include <windows.h>
 #endif
 
 #include "pbd/error.h"
