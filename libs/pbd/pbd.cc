@@ -36,6 +36,7 @@
 #include "pbd/id.h"
 #include "pbd/enumwriter.h"
 #include "pbd/fpu.h"
+#include "pbd/microseconds.h"
 #include "pbd/xml++.h"
 
 #ifdef PLATFORM_WINDOWS
@@ -79,6 +80,8 @@ PBD::init ()
 	if (libpbd_initialized) {
 		return true;
 	}
+
+	microsecond_timer_init ();
 
 #ifdef PLATFORM_WINDOWS
 	// Essential!!  Make sure that any files used by Ardour
