@@ -33,6 +33,35 @@
 static double timer_rate_usecs = 0.0;
 #endif
 
+/** Return a monotonic value for the number of microseconds that have elapsed
+ * since an arbitrary zero origin.
+ */
+
+#ifdef __MACH__
+/* Thanks Apple for not implementing this basic SUSv2, POSIX.1-2001 function
+ */
+#include <mach/mach_time.h>
+#define CLOCK_REALTIME 0
+#define CLOCK_MONOTONIC 0
+int
+clock_gettime (int /*clk_id*/, struct timespec* t)
+{
+	static bool                      initialized = false;
+	static mach_timebase_info_data_t timebase;
+	if (!initialized) {
+		mach_timebase_info (&timebase);
+		initialized = true;
+	}
+	uint64_t time;
+	time            = mach_absolute_time ();
+	double nseconds = ((double)time * (double)timebase.numer) / ((double)timebase.denom);
+	double seconds  = ((double)time * (double)timebase.numer) / ((double)timebase.denom * 1e9);
+	t->tv_sec       = seconds;
+	t->tv_nsec      = nseconds;
+	return 0;
+}
+#endif
+
 void
 PBD::microsecond_timer_init ()
 {
