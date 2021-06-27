@@ -4383,6 +4383,12 @@ Editor::stamp_new_playlist (string &name, string &pgroup, bool copy)
 	return true;
 }
 
+void
+Editor::mapped_clear_playlist (RouteUI& rui)
+{
+	rui.clear_playlist ();
+}
+
 /** Clear the current playlist for a given track and also any others that belong
  *  to the same active route group with the `select' property.
  *  @param v Track.
@@ -4399,15 +4405,15 @@ Editor::clear_grouped_playlists (RouteUI* rui)
 }
 
 void
-Editor::mapped_use_new_playlist (RouteUI& rui, std::string name, string gid, bool copy, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
+Editor::mapped_select_playlist_matching (RouteUI& rui, boost::weak_ptr<ARDOUR::Playlist> pl)
 {
-	rui.use_new_playlist (name, gid, playlists, copy);
+	rui.select_playlist_matching (pl);
 }
 
 void
-Editor::mapped_clear_playlist (RouteUI& rui)
+Editor::mapped_use_new_playlist (RouteUI& rui, std::string name, string gid, bool copy, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
-	rui.clear_playlist ();
+	rui.use_new_playlist (name, gid, playlists, copy);
 }
 
 void

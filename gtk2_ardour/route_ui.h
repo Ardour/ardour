@@ -163,6 +163,7 @@ public:
 	void clear_playlist ();
 
 	void        use_playlist (Gtk::RadioMenuItem* item, boost::weak_ptr<ARDOUR::Playlist> wpl);
+	void        select_playlist_matching (boost::weak_ptr<ARDOUR::Playlist> wpl);
 	void        show_playlist_selector ();
 
 	/* used by EditorRoutes */

@@ -68,10 +68,21 @@ PlaylistSelector::PlaylistSelector ()
 	scroller.add (tree);
 	scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
+	Gtk::RadioButtonGroup scope_group;
+	_scope_all_radio = manage (new RadioButton (scope_group, _("ALL tracks")));
+	_scope_rec_radio = manage (new RadioButton (scope_group, _("Rec-armed tracks")));
+	_scope_grp_radio = manage (new RadioButton (scope_group, _("Only this track/group")));
+
+	_scope_box = manage(new HBox());
+
+	_scope_box->pack_start (*_scope_all_radio,   false, false);
+	_scope_box->pack_start (*_scope_rec_radio,   false, false);
+	_scope_box->pack_start (*_scope_grp_radio,   false, false);
+
 	get_vbox()->set_border_width (6);
 	get_vbox()->set_spacing (12);
-
 	get_vbox()->pack_start (scroller);
+	get_vbox()->pack_start (*_scope_box);
 
 	get_vbox()->show_all();
 
@@ -156,6 +167,12 @@ PlaylistSelector::redisplay()
 	string str;
 
 	set_title (string_compose (_("Playlist for %1"), _rui->route()->name()));
+
+	if (_mode == plSelect) {
+		_scope_box->show();
+	} else {
+		_scope_box->hide();
+	}
 
 	clear_map ();
 	if (model) {
@@ -359,7 +376,13 @@ PlaylistSelector::selection_changed ()
 				_rui->track ()->use_playlist (_rui->is_audio_track () ? DataType::AUDIO : DataType::MIDI, pl); /* share the playlist and set ME as the owner */
 				break;
 			case plSelect:
-				_rui->use_playlist (NULL, pl);  //call route_ui::use_playlist because it is group-aware
+				if (_scope_all_radio->get_active()) {
+					PublicEditor::instance().mapover_all_routes (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::mapped_select_playlist_matching), pl));
+				} else if (_scope_rec_radio->get_active()) {
+					PublicEditor::instance().mapover_armed_routes (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::mapped_select_playlist_matching), pl));
+				} else {
+					PublicEditor::instance().mapover_grouped_routes (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::mapped_select_playlist_matching), pl), _rui, ARDOUR::Properties::group_select.property_id);
+				}
 				break;
 		}
 	}

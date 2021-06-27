@@ -783,6 +783,7 @@ private:
 	void mapover_selected_routes (sigc::slot<void, RouteUI&> sl) const;
 	void mapover_all_routes (sigc::slot<void, RouteUI&> sl) const;
 
+	void mapped_select_playlist_matching (RouteUI&, boost::weak_ptr<ARDOUR::Playlist> pl);
 	void mapped_use_new_playlist (RouteUI&, std::string name, std::string gid, bool copy, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_clear_playlist (RouteUI&);
 

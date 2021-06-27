@@ -2549,10 +2549,19 @@ RouteUI::build_playlist_menu ()
 void
 RouteUI::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> wpl)
 {
-	assert (is_track());
-
 	// exit if we were triggered by deactivating the old playlist
 	if (item && !item->get_active()) {
+		return;
+	}
+
+	select_playlist_matching(wpl);
+}
+
+
+void
+RouteUI::select_playlist_matching (boost::weak_ptr<Playlist> wpl)
+{
+	if (!is_track()) {
 		return;
 	}
 
@@ -2562,77 +2571,42 @@ RouteUI::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> wpl)
 		return;
 	}
 
-	if (track()->playlist() == pl) {
-		// exit when use_playlist is called by the creation of the playlist menu
-		// or the playlist choice is unchanged
+	if (track()->freeze_state() == Track::Frozen) {
+		/* Don't change playlists of frozen tracks */
 		return;
 	}
 
-	track()->use_playlist (track()->data_type(), pl);
-
-	RouteGroup* rg = route_group();
-
-	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::group_select.property_id)) {
-
-		std::string pgrp_id = pl->pgroup_id();
-		if (pgrp_id.length()>0) {  //easy: find other pl's with the same group id
-			boost::shared_ptr<RouteList> rl (rg->route_list());
-			for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
-				if ((*i) == this->route()) {
-					continue;
-				}
-				if ((*i)->route_group() != rg) {
-					continue;
-				}
-				boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(*i);
-				if (!track) {
-					continue;
-				}
-				boost::shared_ptr<Playlist> ipl = session()->playlists()->for_pgroup(pgrp_id, track->id());
-				if (ipl) {
-					track->use_playlist(track->data_type(), ipl);
-				}
-			}
-		} else {  //fallback to prior behavior ... try to find matching names /*DEPRECATED*/
-			std::string take_name = pl->name();
-			std::string group_string = "." + rg->name() + ".";
-
-			std::string::size_type idx = take_name.find(group_string);
-
-			if (idx == std::string::npos)
-				return;
-
-			take_name = take_name.substr(idx + group_string.length()); // find the bit containing the take number / name
-
-			boost::shared_ptr<RouteList> rl (rg->route_list());
-			for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
-				if ((*i) == this->route()) {
-					continue;
-				}
-
-				std::string playlist_name = (*i)->name()+group_string+take_name;
-
-				boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(*i);
-				if (!track) {
-					continue;
-				}
-
-				if (track->freeze_state() == Track::Frozen) {
-					/* Don't change playlists of frozen tracks */
-					continue;
-				}
-
-				boost::shared_ptr<Playlist> ipl = session()->playlists()->by_name(playlist_name);
-				if (!ipl) {
-					// No playlist for this track for this take yet, make it
-					track->use_default_new_playlist();
-					track->playlist()->set_name(playlist_name);
-				} else {
-					track->use_playlist(track->data_type(), ipl);
-				}
-			}
-		} //fallback
+	if (track()->playlist() == pl) {
+		/* already selected; nothing to do */
+		return;
 	}
+
+	std::string pgrp_id = pl->pgroup_id();
+	boost::shared_ptr<Playlist> ipl = session()->playlists()->for_pgroup(pgrp_id, track()->id());
+	if (ipl) {
+		//found a playlist that matches the pgroup_id, use it
+		track()->use_playlist (track()->data_type(), ipl);
+	} else {  //fallback to prior behavior ... try to find matching names /*DEPRECATED*/
+
+		std::string take_name = pl->name();
+		std::string group_name;
+		if (track()->route_group()) {
+			group_name = track()->route_group()->name();
+		}
+		std::string group_string = "." + group_name + ".";
+
+		std::string::size_type idx = take_name.find(group_string);
+
+		if (idx != std::string::npos) {
+			take_name = take_name.substr(idx + group_string.length()); // find the bit containing the take number / name
+			std::string playlist_name = track()->name()+group_string+take_name;
+
+			boost::shared_ptr<Playlist> ipl = session()->playlists()->by_name(playlist_name);
+			if (ipl) {
+				track()->use_playlist(track()->data_type(), ipl);
+			}
+		}
+	} //fallback
 }
 
 void
