@@ -32,17 +32,20 @@
 #ifdef PLATFORM_WINDOWS
 static double timer_rate_usecs = 0.0;
 #endif
-#ifdef __MACH__
-static mach_timebase_info_data_t timebase;
-#endif
 
 #ifdef __MACH__
 #include <mach/mach_time.h>
+
 #ifndef CLOCK_REALTIME
+#define MACH_NEED_MICROSECONDS_TIMEBASE
+
+static mach_timebase_info_data_t timebase;
+
 /* Thanks Apple for not implementing this basic SUSv2, POSIX.1-2001 function
  */
 #define CLOCK_REALTIME 0
 #define CLOCK_MONOTONIC 0
+
 int
 clock_gettime (int /*clk_id*/, struct timespec* t)
 {
@@ -54,8 +57,9 @@ clock_gettime (int /*clk_id*/, struct timespec* t)
 	t->tv_nsec      = nseconds;
 	return 0;
 }
-#endif
-#endif
+
+#endif /* CLOCK_REALTIME */
+#endif /* __MACH__ */
 
 void
 PBD::microsecond_timer_init ()
@@ -69,7 +73,7 @@ PBD::microsecond_timer_init ()
 		timer_rate_usecs = 1000000.0 / freq.QuadPart;
 	}
 #endif
-#ifdef __MACH__
+#ifdef MACH_NEED_MICROSECONDS_TIMEBASE
 	mach_timebase_info (&timebase);
 #endif
 }
@@ -84,7 +88,7 @@ PBD::get_microseconds ()
 	LARGE_INTEGER time;
 
 	if (timer_rate_usecs) {
-		if (QueryPerformanceCounter (&time)) {
+/		if (QueryPerformanceCounter (&time)) {
 			return (microseconds_t) (time.QuadPart * timer_rate_usecs);
 		}
 	}
