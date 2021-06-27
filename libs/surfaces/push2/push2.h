@@ -522,7 +522,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	bool vblank ();
 
 	void splash ();
-	ARDOUR::microseconds_t splash_start;
+	PBD::microseconds_t splash_start;
 
 	/* the canvas */
 

@@ -457,7 +457,7 @@ US2400Protocol::periodic ()
 		initialize();
 	}
 
-	ARDOUR::microseconds_t now_usecs = PBD::get_microseconds ();
+	PBD::microseconds_t now_usecs = PBD::get_microseconds ();
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);

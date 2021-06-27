@@ -155,7 +155,7 @@ private:
 	Surface& _surface;
 	ID  _bid; /* device independent button ID */
 	Led _led;
-	ARDOUR::microseconds_t press_time;
+	PBD::microseconds_t press_time;
 };
 
 } // Mackie namespace

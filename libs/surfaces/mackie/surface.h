@@ -113,8 +113,8 @@ public:
 
 	const MidiByteArray& sysex_hdr() const;
 
-	void periodic (ARDOUR::microseconds_t now_usecs);
-	void redisplay (ARDOUR::microseconds_t now_usecs, bool force);
+	void periodic (PBD::microseconds_t now_usecs);
+	void redisplay (PBD::microseconds_t now_usecs, bool force);
 	void hui_heartbeat ();
 
 	void handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t, uint32_t channel_id);

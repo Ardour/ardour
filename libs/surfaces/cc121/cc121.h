@@ -199,7 +199,7 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 	enum JogMode { scroll=1, zoom=2 };
 	JogMode _jogmode;
 
-	ARDOUR::microseconds_t last_encoder_time;
+	PBD::microseconds_t last_encoder_time;
 	int last_good_encoder_delta;
 	int last_encoder_delta, last_last_encoder_delta;
 

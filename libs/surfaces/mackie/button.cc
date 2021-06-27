@@ -58,7 +58,7 @@ Button::long_press_count ()
 		return -1; /* button is not pressed */
 	}
 
-	const ARDOUR::microseconds_t delta = PBD::get_microseconds () - press_time;
+	const PBD::microseconds_t delta = PBD::get_microseconds () - press_time;
 
 	if (delta < 500000) {
 		return 0;

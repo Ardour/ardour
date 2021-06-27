@@ -88,8 +88,8 @@ public:
 	void handle_fader_touch (Fader&, bool touch_on);
 	void handle_pot (Pot&, float delta);
 
-	void periodic (ARDOUR::microseconds_t now_usecs);
-	void redisplay (ARDOUR::microseconds_t now_usecs, bool force = true);
+	void periodic (PBD::microseconds_t now_usecs);
+	void redisplay (PBD::microseconds_t now_usecs, bool force = true);
 
 	void zero ();
 

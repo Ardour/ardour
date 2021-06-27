@@ -78,7 +78,7 @@ public:
 	boost::shared_ptr<ARDOUR::Port> input_port () const;
 	boost::shared_ptr<ARDOUR::Port> output_port () const;
 
-	void set_feedback_interval (ARDOUR::microseconds_t);
+	void set_feedback_interval (PBD::microseconds_t);
 
 	int set_feedback (bool yn);
 	bool get_feedback () const;
@@ -133,8 +133,8 @@ private:
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
 
-	ARDOUR::microseconds_t _feedback_interval;
-	ARDOUR::microseconds_t last_feedback_time;
+	PBD::microseconds_t _feedback_interval;
+	PBD::microseconds_t last_feedback_time;
 
 	bool  do_feedback;
 	void _send_feedback ();

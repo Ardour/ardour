@@ -597,7 +597,7 @@ Strip::handle_pot (Pot& pot, float delta)
 }
 
 void
-Strip::periodic (ARDOUR::microseconds_t now)
+Strip::periodic (PBD::microseconds_t now)
 {
 
 	update_meter ();
@@ -637,7 +637,7 @@ Strip::periodic (ARDOUR::microseconds_t now)
 }
 
 void
-Strip::redisplay (ARDOUR::microseconds_t now, bool force)
+Strip::redisplay (PBD::microseconds_t now, bool force)
 {
 }
 

@@ -78,7 +78,6 @@ typedef float    Sample;
 typedef float    pan_t;
 typedef float    gain_t;
 typedef uint32_t layer_t;
-typedef PBD::microseconds_t microseconds_t;
 typedef uint32_t pframes_t;
 
 /* rebind Temporal position types into ARDOUR namespace */

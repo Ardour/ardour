@@ -197,7 +197,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	int fader_lsb;
 	bool fader_is_touched;
 
-	ARDOUR::microseconds_t last_encoder_time;
+	PBD::microseconds_t last_encoder_time;
 	int last_good_encoder_delta;
 	int last_encoder_delta, last_last_encoder_delta;
 
