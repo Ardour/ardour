@@ -38,9 +38,10 @@ static double timer_rate_usecs = 0.0;
  */
 
 #ifdef __MACH__
+#include <mach/mach_time.h>
+#ifndef CLOCK_REALTIME
 /* Thanks Apple for not implementing this basic SUSv2, POSIX.1-2001 function
  */
-#include <mach/mach_time.h>
 #define CLOCK_REALTIME 0
 #define CLOCK_MONOTONIC 0
 int
@@ -60,6 +61,7 @@ clock_gettime (int /*clk_id*/, struct timespec* t)
 	t->tv_nsec      = nseconds;
 	return 0;
 }
+#endif
 #endif
 
 void
