@@ -134,6 +134,12 @@ DspStatisticsGUI::update ()
 	double devf;
 	double avgf;
 
+	/* translatable math and unit terms */
+	const char * const str_msec = _("msec");
+	const char * const str_usec = _("usec");
+	const char * const str_average = _("average");
+	const char * const str_std_dev = _("std dev");
+
 	int bufsize = AudioEngine::instance()->samples_per_cycle ();
 	double bufsize_usecs = (bufsize * 1000000.0) / AudioEngine::instance()->sample_rate();
 	double bufsize_msecs = (bufsize * 1000.0) / AudioEngine::instance()->sample_rate();
@@ -150,16 +156,16 @@ DspStatisticsGUI::update ()
 			double minf = min / 1000.0;
 			devf = dev / 1000.0;
 			avgf = avg / 1000.0;
-			snprintf (buf, sizeof (buf), "%7.2f msec %5.2f%%", minf, (100.0 * minf) / bufsize_msecs);
+			snprintf (buf, sizeof (buf), "%7.2f %s %5.2f%%", minf, str_msec, (100.0 * minf) / bufsize_msecs);
 		} else {
-			snprintf (buf, sizeof (buf), "%" PRId64 " usec %5.2f%%", min, (100.0 * min) / bufsize_usecs);
+			snprintf (buf, sizeof (buf), "%" PRId64 " %s %5.2f%%", min, str_usec, (100.0 * min) / bufsize_usecs);
 		}
 		labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (buf);
 
 		if (min > 1000.0) {
-			snprintf (buf, sizeof (buf), "average: %7.2f msec %5.2f%% (std dev. %5.2f)", avgf, (100.0 * avgf) / bufsize_msecs, devf);
+			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avgf, str_msec, (100.0 * avgf) / bufsize_msecs, str_std_dev, devf);
 		} else {
-			snprintf (buf, sizeof (buf), "average: %7.2f usec %5.2f%% (std dev. %5.2f)", avg, (100.0 * avg) / bufsize_usecs, dev);
+			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avg, str_usec, (100.0 * avg) / bufsize_usecs, str_std_dev, dev);
 		}
 
 		ArdourWidgets::set_tooltip (labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait], buf);
@@ -173,9 +179,9 @@ DspStatisticsGUI::update ()
 
 		if (max > 1000.0) {
 			double maxf = max / 1000.0;
-			snprintf (buf, sizeof (buf), "%7.2f msec %5.2f%%", maxf, (100.0 * maxf) / bufsize_msecs);
+			snprintf (buf, sizeof (buf), "%7.2f %s %5.2f%%", maxf, str_msec, (100.0 * maxf) / bufsize_msecs);
 		} else {
-			snprintf (buf, sizeof (buf), "%" PRId64 " usec %5.2f%%", max, (100.0 * max) / bufsize_usecs);
+			snprintf (buf, sizeof (buf), "%" PRId64 " %s %5.2f%%", max, str_usec, (100.0 * max) / bufsize_usecs);
 		}
 		labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop]->set_text (buf);
 
@@ -183,9 +189,9 @@ DspStatisticsGUI::update ()
 		if (min > 1000.0) {
 			devf = dev / 1000.0;
 			avgf = avg / 1000.0;
-			snprintf (buf, sizeof (buf), "average: %7.2f msec %5.2f%% (std dev. %5.2f)", avgf, (100.0 * avgf) / bufsize_msecs, devf);
+			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avgf, str_msec, (100.0 * avgf) / bufsize_msecs, str_std_dev, devf);
 		} else {
-			snprintf (buf, sizeof (buf), "average: %7.2f usec %5.2f%% (std dev. %5.2f)", avg, (100.0 * avg) / bufsize_usecs, dev);
+			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avg, str_usec, (100.0 * avg) / bufsize_usecs, str_std_dev, dev);
 		}
 
 		ArdourWidgets::set_tooltip (labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop], buf);
@@ -208,18 +214,18 @@ DspStatisticsGUI::update ()
 
 		if (smax > 1000.0) {
 			double maxf = smax / 1000.0;
-			snprintf (buf, sizeof (buf), "%7.2f msec %5.2f%%", maxf, (100.0 * maxf) / bufsize_msecs);
+			snprintf (buf, sizeof (buf), "%7.2f %s %5.2f%%", maxf, str_msec, (100.0 * maxf) / bufsize_msecs);
 		} else {
-			snprintf (buf, sizeof (buf), "%" PRId64 " usec %5.2f%%", smax, (100.0 * smax) / bufsize_usecs);
+			snprintf (buf, sizeof (buf), "%" PRId64 " %s %5.2f%%", max, str_usec, (100.0 * max) / bufsize_usecs);
 		}
 		labels[AudioEngine::NTT + Session::OverallProcess]->set_text (buf);
 
 		if (max > 1000.0) {
 			devf = dev / 1000.0;
 			avgf = avg / 1000.0;
-			snprintf (buf, sizeof (buf), "average: %7.2f msec %5.2f%% (std dev. %5.2f)", avgf, (100.0 * avgf) / bufsize_msecs, devf);
+			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avgf, str_msec, (100.0 * avgf) / bufsize_msecs, str_std_dev, devf);
 		} else {
-			snprintf (buf, sizeof (buf), "average: %7.2f usec %5.2f%% (std dev. %5.2f)", avg, (100.0 * avg) / bufsize_usecs, dev);
+			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avg, str_usec, (100.0 * avg) / bufsize_usecs, str_std_dev, dev);
 		}
 
 		ArdourWidgets::set_tooltip (labels[AudioEngine::NTT + Session::OverallProcess], buf);
@@ -235,18 +241,18 @@ DspStatisticsGUI::update ()
 
 		if (max > 1000.0) {
 			double maxf = max / 1000.0;
-			snprintf (buf, sizeof (buf), "%7.2f msec %5.2f%%", maxf, (100.0 * maxf) / bufsize_msecs);
+			snprintf (buf, sizeof (buf), "%7.2f %s %5.2f%%", maxf, str_msec, (100.0 * maxf) / bufsize_msecs);
 		} else {
-			snprintf (buf, sizeof (buf), "%" PRId64 " usec %5.2f%%", max, (100.0 * max) / bufsize_usecs);
+			snprintf (buf, sizeof (buf), "%" PRId64 " %s %5.2f%%", max, str_usec, (100.0 * max) / bufsize_usecs);
 		}
 		labels[AudioEngine::ProcessCallback]->set_text (buf);
 
 		if (max > 1000.0) {
 			devf = dev / 1000.0;
 			avgf = avg / 1000.0;
-			snprintf (buf, sizeof (buf), "average: %7.2f msec %5.2f%% (std dev. %5.2f)", avgf, (100.0 * avgf) / bufsize_msecs, devf);
+			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avgf, str_msec, (100.0 * avgf) / bufsize_msecs, str_std_dev, devf);
 		} else {
-			snprintf (buf, sizeof (buf), "average: %7.2f usec %5.2f%% (std dev. %5.2f)", avg, (100.0 * avg) / bufsize_usecs, dev);
+			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avg, str_usec, (100.0 * avg) / bufsize_usecs, str_std_dev, dev);
 		}
 
 		ArdourWidgets::set_tooltip (labels[AudioEngine::ProcessCallback], buf);
@@ -255,18 +261,18 @@ DspStatisticsGUI::update ()
 
 		if (max > 1000.0) {
 			double maxf = max / 1000.0;
-			snprintf (buf, sizeof (buf), "%7.2f msec %5.2f%%", maxf, (100.0 * maxf) / bufsize_msecs);
+			snprintf (buf, sizeof (buf), "%7.2f %s %5.2f%%", maxf, str_msec, (100.0 * maxf) / bufsize_msecs);
 		} else {
-			snprintf (buf, sizeof (buf), "%" PRId64 " usec %5.2f%%", max, (100.0 * max) / bufsize_usecs);
+			snprintf (buf, sizeof (buf), "%" PRId64 " %s %5.2f%%", max, str_usec, (100.0 * max) / bufsize_usecs);
 		}
 		labels[AudioEngine::ProcessCallback]->set_text (buf);
 
 		if (max > 1000.0) {
 			devf = dev / 1000.0;
 			avgf = avg / 1000.0;
-			snprintf (buf, sizeof (buf), "average: %7.2f msec %5.2f%% (std dev. %5.2f)", avgf, (100.0 * avgf) / bufsize_msecs, devf);
+			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avgf, str_msec, (100.0 * avgf) / bufsize_msecs, str_std_dev, devf);
 		} else {
-			snprintf (buf, sizeof (buf), "average: %7.2f usec %5.2f%% (std dev. %5.2f)", avg, (100.0 * avg) / bufsize_usecs, dev);
+			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avg, str_usec, (100.0 * avg) / bufsize_usecs, str_std_dev, dev);
 		}
 
 		ArdourWidgets::set_tooltip (labels[AudioEngine::ProcessCallback], buf);
