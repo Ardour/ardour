@@ -53,26 +53,7 @@ namespace {
 
 static bool libpbd_initialized = false;
 
-#ifdef PLATFORM_WINDOWS
-static
-void
-test_timers_from_env ()
-{
-	bool set;
-	std::string options;
-
-	options = Glib::getenv ("PBD_TEST_TIMERS", set);
-	if (set) {
-		if (!PBD::QPC::check_timer_valid ()) {
-			PBD::error << X_("Windows QPC Timer source not usable") << endmsg;
-		} else {
-			PBD::info << X_("Windows QPC Timer source usable") << endmsg;
-		}
-	}
 }
-#endif
-
-} // namespace
 
 bool
 PBD::init ()
@@ -97,9 +78,6 @@ PBD::init ()
 		error << X_("Windows socket initialization failed with error: ") << WSAGetLastError() << endmsg;
 		return false;
 	}
-
-	QPC::initialize();
-	test_timers_from_env ();
 
 	if (!PBD::MMCSS::initialize()) {
 		PBD::info << X_("Unable to initialize MMCSS") << endmsg;
