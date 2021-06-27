@@ -2991,7 +2991,7 @@ OSC::scrub (float delta, lo_message msg)
 
 	float speed;
 
-	int64_t now = ARDOUR::get_microseconds ();
+	int64_t now = PBD::get_microseconds ();
 	int64_t diff = now - scrub_time;
 	if (diff > 35000) {
 		// speed 1 (or 0 if jog wheel supports touch)
@@ -5892,7 +5892,7 @@ OSC::periodic (void)
 
 	if (scrub_speed != 0) {
 		// for those jog wheels that don't have 0 on release (touch), time out.
-		int64_t now = ARDOUR::get_microseconds ();
+		int64_t now = PBD::get_microseconds ();
 		int64_t diff = now - scrub_time;
 		if (diff > 120000) {
 			scrub_speed = 0;

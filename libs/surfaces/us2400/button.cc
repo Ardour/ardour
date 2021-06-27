@@ -41,7 +41,7 @@ Button::factory (Surface& surface, Button::ID bid, int id, const std::string& na
 void
 Button::pressed ()
 {
-	press_time = ARDOUR::get_microseconds ();
+	press_time = PBD::get_microseconds ();
 }
 
 void
@@ -57,7 +57,7 @@ Button::long_press_count ()
 		return -1; /* button is not pressed */
 	}
 
-	const ARDOUR::microseconds_t delta = ARDOUR::get_microseconds () - press_time;
+	const ARDOUR::microseconds_t delta = PBD::get_microseconds () - press_time;
 
 	if (delta < 500000) {
 		return 0;

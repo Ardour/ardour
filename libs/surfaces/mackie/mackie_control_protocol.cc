@@ -536,7 +536,7 @@ MackieControlProtocol::periodic ()
 
 	update_timecode_display ();
 
-	ARDOUR::microseconds_t now_usecs = ARDOUR::get_microseconds ();
+	ARDOUR::microseconds_t now_usecs = PBD::get_microseconds ();
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -565,7 +565,7 @@ MackieControlProtocol::redisplay ()
 		initialize();
 	}
 
-	ARDOUR::microseconds_t now = ARDOUR::get_microseconds ();
+	ARDOUR::microseconds_t now = PBD::get_microseconds ();
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);

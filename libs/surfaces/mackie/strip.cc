@@ -1063,13 +1063,13 @@ Strip::flip_mode_changed ()
 void
 Strip::block_screen_display_for (uint32_t msecs)
 {
-	_block_screen_redisplay_until = ARDOUR::get_microseconds() + (msecs * 1000);
+	_block_screen_redisplay_until = PBD::get_microseconds() + (msecs * 1000);
 }
 
 void
 Strip::block_vpot_mode_display_for (uint32_t msecs)
 {
-	return_to_vpot_mode_display_at = ARDOUR::get_microseconds() + (msecs * 1000);
+	return_to_vpot_mode_display_at = PBD::get_microseconds() + (msecs * 1000);
 }
 
 void
