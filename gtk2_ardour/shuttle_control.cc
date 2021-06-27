@@ -512,7 +512,7 @@ ShuttleControl::fract_as_semitones (float fract, bool& reverse)
 void
 ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 {
-	microseconds_t now = PBD::get_microseconds();
+	PBD::microseconds_t now = PBD::get_microseconds();
 
 	shuttle_fract = max (-1.0f, shuttle_fract);
 	shuttle_fract = min (1.0f, shuttle_fract);
@@ -521,7 +521,7 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 	   more than once per process cycle.
 	*/
 
-	if (!force && (last_shuttle_request - now) < (microseconds_t) AudioEngine::instance()->usecs_per_cycle()) {
+	if (!force && (last_shuttle_request - now) < (PBD::microseconds_t) AudioEngine::instance()->usecs_per_cycle()) {
 		return;
 	}
 
