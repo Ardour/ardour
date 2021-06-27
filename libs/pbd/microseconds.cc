@@ -52,7 +52,7 @@ PBD::get_microseconds ()
 #ifdef PLATFORM_WINDOWS
 	LARGE_INTEGER time;
 
-	if (time_rate_usecs) {
+	if (timer_rate_usecs) {
 		if (QueryPerformanceCounter (&time)) {
 			return (microseconds_t) (time.QuadPart * timer_rate_us);
 		}
