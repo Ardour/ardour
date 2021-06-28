@@ -26,7 +26,7 @@
 #include "pbd/libpbd_visibility.h"
 
 namespace PBD {
-	typedef uint64_t microseconds_t;
+	typedef int64_t microseconds_t;
 	LIBPBD_API microseconds_t get_microseconds();
 	void microsecond_timer_init ();
 }

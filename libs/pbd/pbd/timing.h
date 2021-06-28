@@ -116,8 +116,7 @@ public:
 		return elapsed () / 1000;
 	}
 
-private:
-
+  protected:
 	microseconds_t m_start_val;
 	microseconds_t m_last_val;
 
@@ -138,17 +137,18 @@ public:
 			reset ();
 		} else {
 			Timing::update ();
-			calc ();
-		}
-	}
 
-	/* interval computed externally */
-	void update (microseconds_t interval)
-	{
-		if (_queue_reset) {
-			reset ();
-		} else {
-			Timing::update (interval);
+			/* querying the performance counter can fail occasionally (-1).
+			 * Also on some multi-core systems, timers are CPU specific and not
+			 * synchronized. We assume they differ more than a few milliseconds
+			 * (4 * nominal cycle time) and simply ignore cases where the
+			 * execution switches cores.
+			 */
+
+			if (m_start_val < 0 || m_last_val < 0 || m_start_val > m_last_val) {
+				return;
+			}
+
 			calc ();
 		}
 	}

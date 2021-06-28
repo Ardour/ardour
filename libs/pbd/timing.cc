@@ -26,17 +26,17 @@
 namespace PBD {
 
 bool
-get_min_max_avg_total (const std::vector<uint64_t>& values, uint64_t& min, uint64_t& max, uint64_t& avg, uint64_t& total)
+get_min_max_avg_total (const std::vector<microseconds_t>& values, microseconds_t& min, microseconds_t& max, microseconds_t& avg, microseconds_t& total)
 {
 	if (values.empty()) {
 		return false;
 	}
 
 	total = 0;
-	min = std::numeric_limits<uint64_t>::max();
+	min = std::numeric_limits<microseconds_t>::max();
 	max = 0; avg = 0;
 
-	for (std::vector<uint64_t>::const_iterator ci = values.begin(); ci != values.end(); ++ci) {
+	for (std::vector<microseconds_t>::const_iterator ci = values.begin(); ci != values.end(); ++ci) {
 		total += *ci;
 		min = std::min (min, *ci);
 		max = std::max (max, *ci);
@@ -47,11 +47,11 @@ get_min_max_avg_total (const std::vector<uint64_t>& values, uint64_t& min, uint6
 }
 
 std::string
-timing_summary (const std::vector<uint64_t>& values)
+timing_summary (const std::vector<microseconds_t>& values)
 {
 	std::ostringstream oss;
 
-	uint64_t min, max, avg, total;
+	microseconds_t min, max, avg, total;
 
 	if (get_min_max_avg_total (values, min, max, avg, total)) {
 		oss << "Count: " << values.size()

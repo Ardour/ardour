@@ -198,7 +198,7 @@ public:
 	bool load_preset (Plugin::PresetRecord);
 
 	bool provides_stats () const;
-	bool get_stats (uint64_t& min, uint64_t& max, double& avg, double& dev) const;
+	bool get_stats (PBD::microseconds_t& min, PBD::microseconds_t& max, double& avg, double& dev) const;
 	void clear_stats ();
 
 	/** A control that manipulates a plugin parameter (control port). */

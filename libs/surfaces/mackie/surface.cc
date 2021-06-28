@@ -951,7 +951,7 @@ Surface::zero_controls ()
 }
 
 void
-Surface::periodic (uint64_t now_usecs)
+Surface::periodic (PBD::microseconds_t now_usecs)
 {
 	master_gain_changed();
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {

@@ -3383,7 +3383,7 @@ PluginInsert::provides_stats () const
 }
 
 bool
-PluginInsert::get_stats (uint64_t& min, uint64_t& max, double& avg, double& dev) const
+PluginInsert::get_stats (PBD::microseconds_t& min, PBD::microseconds_t& max, double& avg, double& dev) const
 {
 	/* TODO: consider taking a try/lock: Don't run concurrently with
 	 * TimingStats::update, TimingStats::reset.
