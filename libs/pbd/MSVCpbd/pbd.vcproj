@@ -371,6 +371,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\microseconds.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\mountpoint.cc"
 				>
 			</File>
@@ -718,6 +722,10 @@
 			</File>
 			<File
 				RelativePath="..\pbd\memento_command.h"
+				>
+			</File>
+			<File
+				RelativePath="..\pbd\microseconds.h"
 				>
 			</File>
 			<File
