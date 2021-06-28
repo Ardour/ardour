@@ -104,9 +104,9 @@ public:
 	GATOMIC_QUAL gint _suspend_counter;
 
 #ifndef NDEBUG
-	std::vector<uint64_t> rapid_eps_count;
-	std::vector<uint64_t> super_rapid_eps_count;
-	std::vector<uint64_t> fps_eps_count;
+	std::vector<int64_t> rapid_eps_count;
+	std::vector<int64_t> super_rapid_eps_count;
+	std::vector<int64_t> fps_eps_count;
 
 private:
 

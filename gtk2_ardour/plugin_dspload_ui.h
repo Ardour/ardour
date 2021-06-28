@@ -58,7 +58,7 @@ private:
 	ArdourWidgets::ArdourButton _reset_button;
 	Gtk::DrawingArea _darea;
 
-	uint64_t _min, _max;
+	PBD::microseconds_t _min, _max;
 	double   _avg, _dev;
 	bool     _valid;
 };

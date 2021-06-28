@@ -125,8 +125,8 @@ DspStatisticsGUI::stop_updating ()
 void
 DspStatisticsGUI::update ()
 {
-	uint64_t min = 0;
-	uint64_t max = 0;
+	PBD::microseconds_t min = 0;
+	PBD::microseconds_t max = 0;
 	double   avg = 0.;
 	double   dev = 0.;
 	char buf[64];
@@ -205,8 +205,8 @@ DspStatisticsGUI::update ()
 
 	if (_session) {
 
-		uint64_t smin = 0;
-		uint64_t smax = 0;
+		PBD::microseconds_t smin = 0;
+		PBD::microseconds_t smax = 0;
 		double   savg = 0.;
 		double   sdev = 0.;
 
