@@ -4341,7 +4341,7 @@ Editor::restore_editing_space ()
 }
 
 bool
-Editor::stamp_new_playlist (string &name, string &pgroup)
+Editor::stamp_new_playlist (string &name, string &pgroup, bool copy)
 {
 	time_t now;
 	time (&now);
@@ -4357,7 +4357,11 @@ Editor::stamp_new_playlist (string &name, string &pgroup)
 	}
 
 	Prompter prompter (true);
-	prompter.set_title (_("New Playlist"));
+	if (copy) {
+		prompter.set_title (_("Copy Playlist(s)"));
+	} else {
+		prompter.set_title (_("New (Empty) Playlist(s)"));
+	}
 	prompter.set_prompt (_("Name for new playlist:"));
 	prompter.set_initial_text (name);
 	prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
@@ -4413,7 +4417,7 @@ void
 Editor::new_playlists_for_all_tracks (bool copy)
 {
 	string name, gid;
-	stamp_new_playlist(name,gid);
+	stamp_new_playlist(name,gid,copy);
 
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
@@ -4424,7 +4428,7 @@ void
 Editor::new_playlists_for_grouped_tracks (RouteUI* rui, bool copy)
 {
 	string name, gid;
-	stamp_new_playlist(name,gid);
+	stamp_new_playlist(name,gid,copy);
 
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
@@ -4435,7 +4439,7 @@ void
 Editor::new_playlists_for_selected_tracks (bool copy)
 {
 	string name, gid;
-	stamp_new_playlist(name,gid);
+	stamp_new_playlist(name,gid,copy);
 
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
@@ -4446,7 +4450,7 @@ void
 Editor::new_playlists_for_armed_tracks (bool copy)
 {
 	string name, gid;
-	stamp_new_playlist(name,gid);
+	stamp_new_playlist(name,gid,copy);
 
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);

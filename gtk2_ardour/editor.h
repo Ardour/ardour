@@ -1692,7 +1692,7 @@ private:
 
 	/* playlist internal ops */
 
-	bool stamp_new_playlist (std::string &name, std::string &pgroup);
+	bool stamp_new_playlist (std::string &name, std::string &pgroup, bool copy);
 
 	/* display control */
 
