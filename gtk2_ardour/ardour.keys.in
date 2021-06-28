@@ -145,8 +145,8 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/boost-region-gain|<@SECONDARY@>6|increase region gain
 @rop|Region/cut-region-gain|<@SECONDARY@>7|reduce region gain
 @rop|Region/pitch-shift-region|<@SECONDARY@>8|transpose
-@rop|Region/lower-region|<@SECONDARY@>9|lower region layer
-@rop|Region/raise-region|<@SECONDARY@>0|raise region layer
+@rop|Region/rename-region|<@SECONDARY@>9|rename
+@rop|Region/toggle-opaque-region|<@SECONDARY@>0|toggle region opacity
 
 ;; letters
 ;; TOP ROW
@@ -305,9 +305,12 @@ This mode provides many different operations on both regions and control points,
 @gedt|Common/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
 @gedt|Common/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
 
+@edit|Editor/copy-playlists-for-armed-tracks|<@TERTIARY@>quotedbl|copy playlists for Armed tracks
+@edit|Editor/copy-playlists-for-all-tracks|<@TERTIARY@>colon|copy-playlists-for-all-tracks
 @edit|Editor/layer-display-stacked|<@TERTIARY@>less|Display Region Layers: Stacked
 @edit|Editor/layer-display-overlaid|<@TERTIARY@>greater|Display Region Layers: Overlaid
 @edit|Editor/show-plist-selector|<@TERTIARY@>question|show-plist-selector
+
 @gmark|Common/alternate-add-location-from-playhead|KP_Enter|add mark at playhead
 @gmark|Common/alternate-remove-location-from-playhead|<@PRIMARY@>KP_Enter|add mark at playhead
 @wvis|Transport/focus-on-clock|KP_Divide|focus on main clock
