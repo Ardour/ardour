@@ -39,8 +39,6 @@
 
 #include "pbd/i18n.h"
 
-#include <Carbon/Carbon.h>
-
 /*Simple error handler stuff for VSTFX*/
 
 void mac_vst_error (const char *fmt, ...)
@@ -96,7 +94,6 @@ mac_vst_load (const char *path)
 
 	fhandle = mac_vst_handle_new ();
 
-	fhandle->dll = NULL;
 	fhandle->bundleRef = 0;
 
 	CFURLRef url;
@@ -152,10 +149,9 @@ mac_vst_unload (VSTHandle* fhandle)
 
 	if (fhandle->bundleRef)
 	{
-		CFBundleRef* bundleRefPtr = (CFBundleRef*) fhandle->dll;
-		CFBundleCloseBundleResourceMap (*bundleRefPtr, (CFBundleRefNum)fhandle->res_file_id);
-		CFRelease (*bundleRefPtr);
-		fhandle->dll = 0;
+		CFBundleCloseBundleResourceMap (fhandle->bundleRef, fhandle->res_file_id);
+		CFRelease (fhandle->bundleRef);
+		fhandle->bundleRef = 0;
 	}
 
 	if (fhandle->name)
