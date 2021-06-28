@@ -236,29 +236,60 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 		}
 	}
 
-	/* cancel looped playback if transport pos outside of loop range */
+	/* start or cancel looped playback */
+
 	if (get_play_loop ()) {
 
 		Location* al = _locations->auto_loop_location();
 
 		if (al) {
-			if (_transport_sample < al->start() || _transport_sample >= al->end()) {
 
-				// located outside the loop: cancel looping directly, this is called from event handling context
+			if (_transport_sample < al->start()) {
 
 				have_looped = false;
 
-				if (!Config->get_loop_is_mode()) {
-					set_play_loop (false, false);
-				} else {
-					/* this will make the non_realtime_locate() in the butler
-					   which then causes seek() in tracks actually do the right
-					   thing.
-					*/
-					set_track_loop (false);
+				if (Config->get_loop_is_mode()) {
+					/* if the track loop location(s) are not set, we need
+					 * to do that, and then force a locate (to our current
+					 * location) to cause a buffer refill with the looped
+					 * data.
+					 */
+
+					bool loop_is_set = false;
+
+					boost::shared_ptr<RouteList> rl = routes.reader ();
+					for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+						if (*i && !(*i)->is_private_route()) {
+							if ((*i)->loop_set()) {
+								loop_is_set = true;
+								break;
+							}
+						}
+					}
+
+					if (!loop_is_set) {
+
+						/* force tracks to do their thing */
+						set_track_loop (true);
+
+						/* jump to start and then roll from there */
+						force_locate (_transport_sample, MustRoll);
+						return;
+					}
 				}
 
-			} else if (_transport_sample == al->start()) {
+			} else  if ( _transport_sample >= al->end()) {
+
+				// located after the loop: cancel looping directly, this is called from event handling context
+
+				have_looped = false;
+				if (Config->get_loop_is_mode()) {
+					set_track_loop (false);
+				} else {
+					set_play_loop (false, false);
+				}
+
+			} else if (_transport_sample == al->start() && for_loop_end) {
 
 				// located to start of loop - this is looping, basically
 
@@ -273,10 +304,8 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 					}
 				}
 
-				if (for_loop_end) {
-					have_looped = true;
-					TransportLooped(); // EMIT SIGNAL
-				}
+				have_looped = true;
+				TransportLooped(); // EMIT SIGNAL
 			}
 		}
 	}
@@ -420,24 +449,6 @@ Session::start_transport ()
 {
 	ENSURE_PROCESS_THREAD;
 	DEBUG_TRACE (DEBUG::Transport, "start_transport\n");
-
-	if (Config->get_loop_is_mode() && get_play_loop ()) {
-
-		Location *location = _locations->auto_loop_location();
-
-		if (location != 0) {
-			if (_transport_sample != location->start()) {
-
-				/* force tracks to do their thing */
-				set_track_loop (true);
-
-				/* jump to start and then roll from there */
-
-				request_locate (location->start(), MustRoll);
-				return;
-			}
-		}
-	}
 
 	if (Config->get_monitoring_model() == HardwareMonitoring) {
 		set_track_monitor_input_status (!config.get_auto_input());
@@ -1174,34 +1185,6 @@ void
 Session::non_realtime_locate ()
 {
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("locate tracks to %1\n", _transport_sample));
-
-	if (Config->get_loop_is_mode() && get_play_loop()) {
-
-		Location *loc  = _locations->auto_loop_location();
-
-		if (!loc || (_transport_sample < loc->start() || _transport_sample >= loc->end())) {
-			/* jumped out of loop range: stop tracks from looping,
-			   but leave loop (mode) enabled.
-			 */
-			set_track_loop (false);
-
-		} else if (loc && ((loc->start() <= _transport_sample) || (loc->end() > _transport_sample))) {
-
-			/* jumping to start of loop. This  might have been done before but it is
-			 * idempotent and cheap. Doing it here ensures that when we start playback
-			 * outside the loop we still flip tracks into the magic seamless mode
-			 * when needed.
-			 */
-			set_track_loop (true);
-
-		} else if (loc) {
-			set_track_loop (false);
-		}
-
-	} else {
-
-		/* no more looping .. should have been noticed elsewhere */
-	}
 
 	microseconds_t start;
 	uint32_t nt = 0;

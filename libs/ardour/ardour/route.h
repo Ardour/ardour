@@ -161,6 +161,7 @@ public:
 	virtual void realtime_locate (bool) {}
 	virtual void non_realtime_locate (samplepos_t);
 	void set_loop (ARDOUR::Location *);
+	bool loop_set () const { return _loop_location; }
 
 	/* end of vfunc-based API */
 
