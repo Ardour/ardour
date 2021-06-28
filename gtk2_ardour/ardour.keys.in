@@ -305,6 +305,9 @@ This mode provides many different operations on both regions and control points,
 @gedt|Common/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
 @gedt|Common/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
 
+@edit|Editor/layer-display-stacked|<@TERTIARY@>less|Display Region Layers: Stacked
+@edit|Editor/layer-display-overlaid|<@TERTIARY@>greater|Display Region Layers: Overlaid
+@edit|Editor/show-plist-selector|<@TERTIARY@>question|show-plist-selector
 @gmark|Common/alternate-add-location-from-playhead|KP_Enter|add mark at playhead
 @gmark|Common/alternate-remove-location-from-playhead|<@PRIMARY@>KP_Enter|add mark at playhead
 @wvis|Transport/focus-on-clock|KP_Divide|focus on main clock

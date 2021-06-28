@@ -437,7 +437,10 @@
         <menuitem action='track-height-small'/>
       </menu>
       <separator/>
-        <menuitem action='toggle-layer-display'/>
+      <menu name='LayerDisplay' action = 'LayerDisplay'>
+        <menuitem action='layer-display-stacked'/>
+        <menuitem action='layer-display-overlaid'/>
+      </menu>
       <separator/>
       <menuitem action='toggle-track-active'/>
       <menuitem action='remove-track'/>
@@ -449,6 +452,10 @@
       <menuitem action='ToggleMaximalMixer'/>
 
       <separator/>
+      <menu name='LayerDisplay' action = 'LayerDisplay'>
+        <menuitem action='layer-display-stacked'/>
+        <menuitem action='layer-display-overlaid'/>
+      </menu>
 
       <menu action="AutomationMenu">
         <menuitem action="toggle-all-existing-automation"/>
@@ -456,8 +463,6 @@
 
       <separator/>
 
-      <menuitem action="toggle-layer-display"/>
-      
       <menu action="PrimaryClockMenu">
         <menuitem action='focus-on-clock'/>
         <menuitem action="primary-clock-timecode"/>
