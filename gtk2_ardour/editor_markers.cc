@@ -885,8 +885,14 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 		abort(); /*NOTREACHED*/
 	}
 
+	if (marker->type() == ArdourMarker::RegionCue) {
+		/* no context menu for these puppies */
+		return;
+	}
+
 	bool is_start;
 	Location * loc = find_location_from_marker (marker, is_start);
+
 
 	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range ()) {
 
