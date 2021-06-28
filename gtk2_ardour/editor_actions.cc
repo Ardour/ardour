@@ -175,6 +175,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("SyncMenu"), _("Sync"));
 	ActionManager::register_action (editor_menu_actions, X_("TempoMenu"), _("Tempo"));
 	ActionManager::register_action (editor_menu_actions, X_("Timecode"), _("Timecode fps"));
+	ActionManager::register_action (editor_menu_actions, X_("LayerDisplay"), _("Region Layers"));
 
 	act = ActionManager::register_action (editor_menu_actions, X_("TrackHeightMenu"), _("Height"));
 	ActionManager::stripable_selection_sensitive_actions.push_back (act);
@@ -261,6 +262,9 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "toggle-all-existing-automation", _("Toggle All Existing Automation"), sigc::mem_fun (*this, &Editor::toggle_all_existing_automation));
 	reg_sens (editor_actions, "toggle-layer-display", _("Toggle Layer Display"), sigc::mem_fun (*this, &Editor::toggle_layer_display));
+
+	reg_sens (editor_actions, "layer-display-stacked", _("Stacked layer display"), sigc::mem_fun (*this, &Editor::layer_display_stacked));
+	reg_sens (editor_actions, "layer-display-overlaid", _("Overlaid layer display"), sigc::mem_fun (*this, &Editor::layer_display_overlaid));
 
 	act = reg_sens (editor_actions, "show-plist-selector", _("Show Playlist Selector"), sigc::mem_fun (*this, &Editor::launch_playlist_selector));
 	ActionManager::stripable_selection_sensitive_actions.push_back (act);

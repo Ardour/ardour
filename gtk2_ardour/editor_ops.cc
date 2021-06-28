@@ -8670,6 +8670,20 @@ Editor::toggle_layer_display ()
 }
 
 void
+Editor::layer_display_overlaid ()
+{
+	TrackViewList & tvl (selection->tracks.empty() ? track_views : selection->tracks);
+	tvl.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_layer_display, _1, Overlaid));
+}
+
+void
+Editor::layer_display_stacked ()
+{
+	TrackViewList & tvl (selection->tracks.empty() ? track_views : selection->tracks);
+	tvl.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_layer_display, _1, Stacked));
+}
+
+void
 Editor::launch_playlist_selector ()
 {
 	TrackViewList & tvl (selection->tracks);
