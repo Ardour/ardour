@@ -3934,6 +3934,7 @@ MidiRegionView::selection_as_notelist (Notes& selected, bool allow_all_if_none_s
 void
 MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 {
+	assert (_ghost_note);
 	x = std::max(0.0, x);
 
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
@@ -3959,13 +3960,12 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	}
 
 	/* ghost note may have been snapped before region */
-	if (_ghost_note && snapped_beats.to_double() < 0.0) {
+	if (snapped_beats.to_double() < 0.0) {
 		_ghost_note->hide();
 		return;
-
-	} else if (_ghost_note) {
-		_ghost_note->show();
 	}
+
+	_ghost_note->show();
 
 	/* calculate time in beats relative to start of source */
 	const Temporal::Beats length = get_grid_beats(unsnapped_sample + _region->position());
