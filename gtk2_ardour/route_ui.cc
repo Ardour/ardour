@@ -2554,7 +2554,7 @@ RouteUI::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> wpl)
 		return;
 	}
 
-	select_playlist_matching(wpl);
+	PublicEditor::instance().mapover_grouped_routes (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::mapped_select_playlist_matching), wpl), this, ARDOUR::Properties::group_select.property_id);
 }
 
 
