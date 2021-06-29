@@ -143,14 +143,13 @@ public:
 		} else {
 			Timing::update ();
 
-			/* querying the performance counter can fail occasionally (-1).
+			/* On Windows, querying the performance counter can fail occasionally (-1).
 			 * Also on some multi-core systems, timers are CPU specific and not
-			 * synchronized. We assume they differ more than a few milliseconds
-			 * (4 * nominal cycle time) and simply ignore cases where the
-			 * execution switches cores.
+			 * synchronized. The query can also fail, which will
+			 * result in a value of zero, which is essentially impossible.
 			 */
 
-			if (m_start_val < 0 || m_last_val < 0 || m_start_val > m_last_val) {
+			if (m_start_val <= 0 || m_last_val <= 0 || m_start_val > m_last_val) {
 				return;
 			}
 
