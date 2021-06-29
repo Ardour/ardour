@@ -141,7 +141,9 @@ mac_vst_unload (VSTHandle* fhandle)
 {
 	if (fhandle->plugincnt)
 	{
-		/*Still have plugin instances - can't unload the library */
+		/*Still have plugin instances - can't unload the library
+		- actually dlclose keeps an instance count anyway*/
+
 		return -1;
 	}
 
@@ -157,7 +159,6 @@ mac_vst_unload (VSTHandle* fhandle)
 	if (fhandle->name)
 	{
 		free (fhandle->name);
-		fhandle->name = 0;
 	}
 
 	/*Don't need the plugin handle any more*/
@@ -233,20 +234,31 @@ void mac_vst_close (VSTState* mac_vst)
 		mac_vst->plugin->dispatcher (mac_vst->plugin, effClose, 0, 0, 0, 0);
 	}
 
-	if (mac_vst->handle->plugincnt) {
+	if (mac_vst->handle->plugincnt)
 			mac_vst->handle->plugincnt--;
+
+	/*mac_vst_unload will unload the dll if the instance count allows -
+	we need to do this because some plugins keep their own instance count
+	and (JUCE) manages the plugin UI in its own thread.  When the plugins
+	internal instance count reaches zero, JUCE stops the UI thread and won't
+	restart it until the next time the library is loaded.  If we don't unload
+	the lib JUCE will never restart*/
+
+
+	if (mac_vst->handle->plugincnt)
+	{
+		return;
 	}
 
-	/* mac_vst_unload will unload the dll if the instance count allows -
-	 * we need to do this because some plugins keep their own instance count
-	 * and (JUCE) manages the plugin UI in its own thread.  When the plugins
-	 * internal instance count reaches zero, JUCE stops the UI thread and won't
-	 * restart it until the next time the library is loaded. If we don't unload
-	 * the lib JUCE will never restart
-	 */
+	/*Valid plugin loaded - so we can unload it and 0 the pointer
+	to it.  We can't free the handle here because we don't know what else
+	might need it.  It should be / is freed when the plugin is deleted*/
 
-	mac_vst_unload (mac_vst->handle);
-
+	if (mac_vst->handle->dll)
+	{
+		dlclose (mac_vst->handle->dll); //dlclose keeps its own reference count
+		mac_vst->handle->dll = 0;
+	}
 	free (mac_vst);
 }
 
