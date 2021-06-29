@@ -23,7 +23,6 @@
 #include "ardour_dialog.h"
 
 
-
 /** A dialog box to select a transposition to apply to a MIDI region.
  *  It asks for octaves and semitones, with the transposition being
  *  the sum of the two.
@@ -56,6 +55,8 @@ public:
 	void reset ();
 	void apply_speed ();
 	void on_hide ();
+
+	bool on_key_press_event(GdkEventKey*);
 
 private:
 	Gtk::Adjustment _octaves_adjustment;

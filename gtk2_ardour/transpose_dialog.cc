@@ -16,13 +16,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "transpose_dialog.h"
+
 #include <gtkmm/table.h>
 #include <gtkmm/label.h>
 #include <gtkmm/stock.h>
-#include "transpose_dialog.h"
+
 #include "pbd/i18n.h"
 
 #include <ardour/session.h>
+
+#include "ardour_ui.h"
+#include "utils.h"
+
 
 using namespace Gtk;
 
@@ -104,11 +110,22 @@ VarispeedDialog::VarispeedDialog ()
 //	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 //	add_button (_("Transpose"), RESPONSE_ACCEPT);
 
+	_octaves_spinner.set_can_focus(false);
+	_semitones_spinner.set_can_focus(false);
+	_cents_spinner.set_can_focus(false);
+
 	_octaves_spinner.signal_changed().connect (sigc::mem_fun (*this, &VarispeedDialog::apply_speed));
 	_semitones_spinner.signal_changed().connect (sigc::mem_fun (*this, &VarispeedDialog::apply_speed));
 	_cents_spinner.signal_changed().connect (sigc::mem_fun (*this, &VarispeedDialog::apply_speed));
 
 	show_all_children ();
+}
+
+bool
+VarispeedDialog::on_key_press_event (GdkEventKey *ev)
+{
+	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
+	return ARDOUR_UI_UTILS::relay_key_press (ev, &main_window);
 }
 
 void
