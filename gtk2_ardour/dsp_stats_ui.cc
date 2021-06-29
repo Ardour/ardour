@@ -26,8 +26,10 @@
 
 #include "widgets/tooltips.h"
 
+#include "ardour_ui.h"
 #include "dsp_stats_ui.h"
 #include "timers.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -281,4 +283,11 @@ DspStatisticsGUI::update ()
 		labels[AudioEngine::NTT + Session::OverallProcess]->set_text (_("No session loaded"));
 		ArdourWidgets::set_tooltip (labels[AudioEngine::NTT + Session::OverallProcess], "");
 	}
+}
+
+bool
+DspStatisticsGUI::on_key_press_event (GdkEventKey* ev)
+{
+	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
+	return ARDOUR_UI_UTILS::relay_key_press (ev, &main_window);
 }

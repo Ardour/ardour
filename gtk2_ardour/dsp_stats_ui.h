@@ -34,6 +34,9 @@ public:
 	void start_updating ();
 	void stop_updating ();
 
+protected:
+	bool on_key_press_event (GdkEventKey*);
+
 private:
 	void update ();
 
