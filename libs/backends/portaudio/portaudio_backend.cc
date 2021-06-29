@@ -736,7 +736,7 @@ PortAudioBackend::process_callback(const float* input,
                                    PaStreamCallbackFlags statusFlags)
 {
 	PBD::WaitTimerRAII tr (dsp_stats[DeviceWait]);
-	PBD::TimerRAII tr2 (dsp_stats[RunLoop], true);
+	PBD::TimerRAII tr2 (dsp_stats[RunLoop]);
 
 	_active = true;
 

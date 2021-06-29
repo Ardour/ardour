@@ -202,6 +202,7 @@ private:
 
 		if (diff > _max) {
 			_max = diff;
+			std::cerr << "max reset to " << _max << " from " << m_start_val << " .. " << m_last_val << " (diff = " << diff << ")\n";
 		}
 		if (diff < _min) {
 			_min = diff;
