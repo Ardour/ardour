@@ -373,8 +373,6 @@ PlaylistSelector::on_key_press_event (GdkEventKey* ev)
 	switch (ev->keyval) {
 	case GDK_Up:
 	case GDK_Down:
-	case GDK_Return:
-	case GDK_KP_Enter:
 		return ArdourDialog::on_key_press_event (ev);
 	}
 
