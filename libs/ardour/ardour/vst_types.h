@@ -27,19 +27,6 @@
 
 #ifdef MACVST_SUPPORT
 #include <Carbon/Carbon.h>
-
-/* fix up stupid apple macros */
-#undef check
-#undef require
-#undef verify
-
-#ifdef YES
-#undef YES
-#endif
-#ifdef NO
-#undef NO
-#endif
-
 #endif
 
 struct LIBARDOUR_API _VSTKey
