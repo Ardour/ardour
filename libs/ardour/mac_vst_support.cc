@@ -97,33 +97,33 @@ mac_vst_load (const char *path)
 	fhandle = mac_vst_handle_new ();
 
 	fhandle->dll = NULL;
-	fhandle->bundleRef = 0;
 
 	CFURLRef url;
 	if (!(url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*)path, (CFIndex) strlen (path), true))) {
 		return 0;
 	}
 
-	fhandle->bundleRef = CFBundleCreate (kCFAllocatorDefault, url);
+	CFBundleRef bundleRef = CFBundleCreate (kCFAllocatorDefault, url);
 	CFRelease (url);
 
-	if (fhandle->bundleRef == 0) {
+	if (bundleRef == 0) {
 		return 0;
 	}
 
-	if (!CFBundleLoadExecutable (fhandle->bundleRef)) {
-		CFRelease (fhandle->bundleRef);
+	if (!CFBundleLoadExecutable (bundleRef)) {
+		CFRelease (bundleRef);
 		return 0;
 	}
 
 	fhandle->name = strdup (path);
+	fhandle->dll = (void*) &bundleRef;
 
 	fhandle->main_entry = (main_entry_t)
-		CFBundleGetFunctionPointerForName (fhandle->bundleRef, CFSTR("main_macho"));
+		CFBundleGetFunctionPointerForName (bundleRef, CFSTR("main_macho"));
 
 	if (!fhandle->main_entry) {
 		fhandle->main_entry = (main_entry_t)
-			CFBundleGetFunctionPointerForName (fhandle->bundleRef, CFSTR("VSTPluginMain"));
+			CFBundleGetFunctionPointerForName (bundleRef, CFSTR("VSTPluginMain"));
 	}
 
 	if (fhandle->main_entry == 0) {
@@ -131,7 +131,7 @@ mac_vst_load (const char *path)
 		return 0;
 	}
 
-	fhandle->res_file_id = CFBundleOpenBundleResourceMap (fhandle->bundleRef);
+	fhandle->res_file_id = CFBundleOpenBundleResourceMap (bundleRef);
 
 	/*return the handle of the plugin*/
 	return fhandle;
@@ -152,7 +152,7 @@ mac_vst_unload (VSTHandle* fhandle)
 
 	/*Valid plugin loaded?*/
 
-	if (fhandle->bundleRef)
+	if (fhandle->dll)
 	{
 		CFBundleRef* bundleRefPtr = (CFBundleRef*) fhandle->dll;
 		CFBundleCloseBundleResourceMap (*bundleRefPtr, (CFBundleRefNum)fhandle->res_file_id);
