@@ -1004,7 +1004,10 @@ Sequence<Time>::append_note_on_unlocked (const Event<Time>& ev, event_id_t evid)
 	assert (note->end_time() == std::numeric_limits<Temporal::Beats>::max());
 	note->set_id (evid);
 
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("New nascent/active note on %1 channel [%2]\n\n", (int) note->note(), note->channel()));
+	add_note_unlocked (note);
+
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Appending active note on %1 channel %2\n",
+	                                              (unsigned)(uint8_t)note->note(), note->channel()));
 	_write_notes[note->channel()].insert (note);
 
 }
@@ -1044,31 +1047,20 @@ Sequence<Time>::append_note_off_unlocked (const Event<Time>& ev)
 		++tmp;
 
 		NotePtr nn = *n;
-
 		if (ev.note() == nn->note() && nn->channel() == ev.channel()) {
-			if (!resolved) {
-				assert(ev.time() >= nn->time());
+			assert(ev.time() >= nn->time());
 
-				nn->set_length (ev.time() - nn->time());
-				nn->set_off_velocity (ev.velocity());
+			nn->set_length (ev.time() - nn->time());
+			nn->set_off_velocity (ev.velocity());
 
-				add_note_unlocked (nn);
-
-				_write_notes[ev.channel()].erase(n);
-				DEBUG_TRACE (DEBUG::Sequence, string_compose ("resolved note @ %1\n", *nn));
-				resolved = true;
-			} else {
-				/* additional matching nascent notes ... just
-				   delete them.
-				*/
-				DEBUG_TRACE (DEBUG::Sequence, string_compose ("dropping additional nascent note @ %1\n", *nn));
-				_write_notes[ev.channel()].erase(n);
-			}
+			_write_notes[ev.channel()].erase(n);
+			DEBUG_TRACE (DEBUG::Sequence, string_compose ("resolved note @ %2 length: %1\n", nn->length(), nn->time()));
+			resolved = true;
+			break;
 		}
 
 		n = tmp;
 	}
-
 
 	if (!resolved) {
 		cerr << this << " spurious note off chan " << (int)ev.channel()
