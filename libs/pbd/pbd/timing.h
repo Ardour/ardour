@@ -19,6 +19,8 @@
 #ifndef __libpbd_timing_h__
 #define __libpbd_timing_h__
 
+#include <iostream>
+
 #include <glib.h>
 
 #include <stdint.h>
@@ -115,6 +117,9 @@ public:
 	microseconds_t elapsed_msecs () const {
 		return elapsed () / 1000;
 	}
+
+	microseconds_t start_time() const { return m_start_val; }
+	microseconds_t last_time() const { return m_last_val; }
 
   protected:
 	microseconds_t m_start_val;
@@ -229,9 +234,12 @@ private:
 class LIBPBD_API TimerRAII
 {
   public:
-	TimerRAII (TimingStats& ts) : stats (ts) { stats.start(); }
-	~TimerRAII() { stats.update(); }
+  TimerRAII (TimingStats& ts, bool dbg = false) : stats (ts), debug (dbg) { stats.start(); if (debug) std::cout << "Timer @ " << &stats << " start at " << stats.start_time() << std::endl;}
+	~TimerRAII() { stats.update(); if (debug) std::cout << "Timer @ " << &stats << " stamp " << stats.last_time() << std::endl; }
 	TimingStats& stats;
+
+  private:
+	bool debug;
 };
 
 /** Reverse semantics from TimerRAII. This starts the timer at scope exit,
