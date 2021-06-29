@@ -19,8 +19,6 @@
 #ifndef __libpbd_timing_h__
 #define __libpbd_timing_h__
 
-#include <iostream>
-
 #include <glib.h>
 
 #include <stdint.h>
@@ -201,7 +199,6 @@ private:
 
 		if (diff > _max) {
 			_max = diff;
-			std::cerr << "max reset to " << _max << " from " << m_start_val << " .. " << m_last_val << " (diff = " << diff << ")\n";
 		}
 		if (diff < _min) {
 			_min = diff;
@@ -234,12 +231,9 @@ private:
 class LIBPBD_API TimerRAII
 {
   public:
-  TimerRAII (TimingStats& ts, bool dbg = false) : stats (ts), debug (dbg) { stats.start(); if (debug) std::cout << "Timer @ " << &stats << " start at " << stats.start_time() << std::endl;}
-	~TimerRAII() { stats.update(); if (debug) std::cout << "Timer @ " << &stats << " stamp " << stats.last_time() << std::endl; }
+	TimerRAII (TimingStats& ts, bool dbg = false) : stats (ts) { stats.start(); }
+	~TimerRAII() { stats.update(); }
 	TimingStats& stats;
-
-  private:
-	bool debug;
 };
 
 /** Reverse semantics from TimerRAII. This starts the timer at scope exit,
