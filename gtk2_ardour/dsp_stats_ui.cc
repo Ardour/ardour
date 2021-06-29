@@ -152,7 +152,7 @@ DspStatisticsGUI::update ()
 		 * (other timers are max == worst case)
 		 */
 
-		if (min > 1000.0) {
+		if (min > 1000) {
 			double minf = min / 1000.0;
 			devf = dev / 1000.0;
 			avgf = avg / 1000.0;
@@ -162,7 +162,7 @@ DspStatisticsGUI::update ()
 		}
 		labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait]->set_text (buf);
 
-		if (min > 1000.0) {
+		if (min > 1000) {
 			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avgf, str_msec, (100.0 * avgf) / bufsize_msecs, str_std_dev, devf);
 		} else {
 			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avg, str_usec, (100.0 * avg) / bufsize_usecs, str_std_dev, dev);
@@ -177,7 +177,7 @@ DspStatisticsGUI::update ()
 
 	if (AudioEngine::instance()->current_backend()->dsp_stats[AudioBackend::RunLoop].get_stats (min, max, avg, dev)) {
 
-		if (max > 1000.0) {
+		if (max > 1000) {
 			double maxf = max / 1000.0;
 			snprintf (buf, sizeof (buf), "%7.2f %s %5.2f%%", maxf, str_msec, (100.0 * maxf) / bufsize_msecs);
 		} else {
@@ -186,7 +186,7 @@ DspStatisticsGUI::update ()
 		labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop]->set_text (buf);
 
 
-		if (min > 1000.0) {
+		if (min > 1000) {
 			devf = dev / 1000.0;
 			avgf = avg / 1000.0;
 			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avgf, str_msec, (100.0 * avgf) / bufsize_msecs, str_std_dev, devf);
@@ -212,7 +212,7 @@ DspStatisticsGUI::update ()
 
 		_session->dsp_stats[AudioEngine::ProcessCallback].get_stats (smin, smax, savg, sdev);
 
-		if (smax > 1000.0) {
+		if (smax > 1000) {
 			double maxf = smax / 1000.0;
 			snprintf (buf, sizeof (buf), "%7.2f %s %5.2f%%", maxf, str_msec, (100.0 * maxf) / bufsize_msecs);
 		} else {
@@ -220,7 +220,7 @@ DspStatisticsGUI::update ()
 		}
 		labels[AudioEngine::NTT + Session::OverallProcess]->set_text (buf);
 
-		if (max > 1000.0) {
+		if (max > 1000) {
 			devf = dev / 1000.0;
 			avgf = avg / 1000.0;
 			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avgf, str_msec, (100.0 * avgf) / bufsize_msecs, str_std_dev, devf);
@@ -239,7 +239,7 @@ DspStatisticsGUI::update ()
 		avg -= savg;
 		dev -= sdev;
 
-		if (max > 1000.0) {
+		if (max > 1000) {
 			double maxf = max / 1000.0;
 			snprintf (buf, sizeof (buf), "%7.2f %s %5.2f%%", maxf, str_msec, (100.0 * maxf) / bufsize_msecs);
 		} else {
@@ -247,7 +247,7 @@ DspStatisticsGUI::update ()
 		}
 		labels[AudioEngine::ProcessCallback]->set_text (buf);
 
-		if (max > 1000.0) {
+		if (max > 1000) {
 			devf = dev / 1000.0;
 			avgf = avg / 1000.0;
 			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avgf, str_msec, (100.0 * avgf) / bufsize_msecs, str_std_dev, devf);
@@ -259,7 +259,7 @@ DspStatisticsGUI::update ()
 
 	} else {
 
-		if (max > 1000.0) {
+		if (max > 1000) {
 			double maxf = max / 1000.0;
 			snprintf (buf, sizeof (buf), "%7.2f %s %5.2f%%", maxf, str_msec, (100.0 * maxf) / bufsize_msecs);
 		} else {
@@ -267,7 +267,7 @@ DspStatisticsGUI::update ()
 		}
 		labels[AudioEngine::ProcessCallback]->set_text (buf);
 
-		if (max > 1000.0) {
+		if (max > 1000) {
 			devf = dev / 1000.0;
 			avgf = avg / 1000.0;
 			snprintf (buf, sizeof (buf), "%s: %7.2f %s %5.2f%% (%s. %5.2f)", str_average, avgf, str_msec, (100.0 * avgf) / bufsize_msecs, str_std_dev, devf);
