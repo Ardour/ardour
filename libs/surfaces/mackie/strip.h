@@ -138,8 +138,8 @@ private:
 	bool     _metering_active;
 	std::string pending_display[2];
 	std::string current_display[2];
-	uint64_t _block_screen_redisplay_until;
-	uint64_t return_to_vpot_mode_display_at;
+	PBD::microseconds_t _block_screen_redisplay_until;
+	PBD::microseconds_t return_to_vpot_mode_display_at;
 	boost::shared_ptr<ARDOUR::Stripable> _stripable;
 	PBD::ScopedConnectionList stripable_connections;
 
