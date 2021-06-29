@@ -305,8 +305,8 @@ This mode provides many different operations on both regions and control points,
 @gedt|Common/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
 @gedt|Common/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
 
-@edit|Editor/copy-playlists-for-armed-tracks|<@TERTIARY@>quotedbl|copy playlists for Armed tracks
-@edit|Editor/copy-playlists-for-all-tracks|<@TERTIARY@>colon|copy-playlists-for-all-tracks
+@edit|Editor/copy-playlists-for-armed-tracks|<@TERTIARY@>colon|copy playlists for Armed tracks
+@edit|Editor/copy-playlists-for-all-tracks|<@TERTIARY@>quotedbl|copy-playlists-for-all-tracks
 @edit|Editor/layer-display-stacked|<@TERTIARY@>less|Display Region Layers: Stacked
 @edit|Editor/layer-display-overlaid|<@TERTIARY@>greater|Display Region Layers: Overlaid
 @edit|Editor/show-plist-selector|<@TERTIARY@>question|show-plist-selector
