@@ -322,7 +322,7 @@ AlsaAudioBackend::can_change_buffer_size_when_running () const
 int
 AlsaAudioBackend::set_input_device_name (const std::string& d)
 {
-	if (_input_audio_device == d) {
+	if (_input_audio_device == d && _input_audio_device_info.valid) {
 		return 0;
 	}
 	_input_audio_device = d;
@@ -353,7 +353,7 @@ AlsaAudioBackend::set_input_device_name (const std::string& d)
 int
 AlsaAudioBackend::set_output_device_name (const std::string& d)
 {
-	if (_output_audio_device == d) {
+	if (_output_audio_device == d && _output_audio_device_info.valid) {
 		return 0;
 	}
 
