@@ -93,6 +93,7 @@ BaseUI::set_thread_priority () const
 void
 BaseUI::main_thread ()
 {
+	pthread_set_name (string_compose ("UI:%1", event_loop_name ()).c_str ());
 	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: event loop running in thread %2\n", event_loop_name(), pthread_name()));
 	set_event_loop_for_thread (this);
 	thread_init ();

@@ -1366,6 +1366,7 @@ void*
 AlsaAudioBackend::_midi_device_thread (void* arg)
 {
 	AlsaAudioBackend* self = static_cast<AlsaAudioBackend*> (arg);
+	pthread_set_name ("ALSA-MIDI-LIST");
 	self->midi_device_thread ();
 	pthread_exit (0);
 	return 0;

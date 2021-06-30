@@ -38,6 +38,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/file_archive.h"
 #include "pbd/file_utils.h"
+#include "pbd/pthread_utils.h"
 
 using namespace PBD;
 
@@ -59,6 +60,7 @@ write_callback (void* buffer, size_t size, size_t nmemb, void* d)
 static void*
 get_url (void* arg)
 {
+	pthread_set_name ("FileArchiveURL");
 	FileArchive::Request* r = (FileArchive::Request*) arg;
 	CURL* curl;
 
