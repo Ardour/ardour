@@ -227,6 +227,12 @@ Automatable::can_automate (Evoral::Parameter what)
 	_can_automate_list.insert (what);
 }
 
+std::vector<Evoral::Parameter>
+Automatable::all_automatable_params () const
+{
+	return std::vector<Evoral::Parameter> (_can_automate_list.begin (), _can_automate_list.end ());
+}
+
 /** \a legacy_param is used for loading legacy sessions where an object (IO, Panner)
  * had a single automation parameter, with it's type implicit.  Derived objects should
  * pass that type and it will be used for the untyped AutomationList found.

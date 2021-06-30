@@ -101,6 +101,10 @@ public:
 	void protect_automation ();
 
 	const std::set<Evoral::Parameter>& what_can_be_automated() const { return _can_automate_list; }
+
+	/** API for Lua binding */
+	std::vector<Evoral::Parameter> all_automatable_params () const;
+
 	void what_has_existing_automation (std::set<Evoral::Parameter>&) const;
 
 	static const std::string xml_node_name;

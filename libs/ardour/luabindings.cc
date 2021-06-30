@@ -256,6 +256,7 @@ CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Source> >);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Readable> >);
+CLASSKEYS(std::vector<Evoral::Parameter>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::PluginInfo> >); // PluginInfoList
 
 CLASSKEYS(std::list<ArdourMarker*>);
@@ -1410,7 +1411,7 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
 		.addCast<Slavable> ("to_slavable")
 		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
-		//.addFunction ("what_can_be_automated", &Automatable::what_can_be_automated)
+		.addFunction ("all_automatable_params", &Automatable::all_automatable_params)
 		.endClass ()
 
 		.deriveWSPtrClass <AutomatableSequence<Temporal::Beats>, Automatable> ("AutomatableSequence")
@@ -1850,6 +1851,9 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginConstStdCPtrList <Location> ("LocationList")
+		.endClass ()
+
+		.beginConstStdVector <Evoral::Parameter> ("ParameterList")
 		.endClass ()
 
 		// std::list<boost::shared_ptr<AutomationControl> > ControlList
