@@ -65,6 +65,7 @@ public:
 		SetTransportMaster,
 		StartRoll,
 		EndRoll,
+		TransportStateChange,
 
 		/* only one of each of these events can be queued at any one time */
 

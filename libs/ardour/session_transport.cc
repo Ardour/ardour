@@ -893,6 +893,12 @@ Session::request_preroll_record_trim (samplepos_t rec_in, samplecnt_t preroll)
 	maybe_enable_record ();
 	request_locate (pos, MustRoll);
 	set_requested_return_sample (rec_in);
+
+	if (pos < rec_in) {
+		/* Notify GUI to update monitor state display */
+		SessionEvent* ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Add, rec_in, rec_in, 1.0);
+		queue_event (ev);
+	}
 }
 
 void

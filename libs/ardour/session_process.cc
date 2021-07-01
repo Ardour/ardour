@@ -979,6 +979,10 @@ Session::process_event (SessionEvent* ev)
 			overwrite_some_buffers (boost::shared_ptr<Track>(), ev->overwrite);
 		break;
 
+	case SessionEvent::TransportStateChange:
+		TransportStateChange (); /* EMIT SIGNAL */
+		break;
+
 	case SessionEvent::Audition:
 		set_audition (ev->region);
 		// drop reference to region
