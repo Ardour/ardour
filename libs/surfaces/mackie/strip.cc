@@ -321,7 +321,6 @@ Strip::notify_record_enable_changed ()
 void
 Strip::notify_stripable_deleted ()
 {
-	_surface->mcp().notify_stripable_removed ();
 	_surface->mcp().refresh_current_bank();
 }
 

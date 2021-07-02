@@ -182,9 +182,9 @@ class MackieControlProtocol
 	void handle_button_event (Mackie::Surface&, Mackie::Button& button, Mackie::ButtonState);
 
 	void notify_subview_stripable_deleted ();
-	void notify_stripable_removed ();
 	void notify_routes_added (ARDOUR::RouteList &);
 	void notify_vca_added (ARDOUR::VCAList &);
+	void notify_monitor_added_or_removed ();
 
 	void notify_presentation_info_changed(PBD::PropertyChange const &);
 

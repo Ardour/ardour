@@ -732,6 +732,8 @@ MackieControlProtocol::connect_session_signals()
 	// receive rude solo changed
 	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), this);
 
+	session->MonitorBusAddedOrRemoved.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::notify_monitor_added_or_removed, this), this);
+
 	// make sure remote id changed signals reach here
 	// see also notify_stripable_added
 	Sorted sorted = get_sorted_stripables();
@@ -1246,15 +1248,6 @@ void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 }
 
 void
-MackieControlProtocol::notify_stripable_removed ()
-{
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->master_monitor_may_have_changed ();
-	}
-}
-
-void
 MackieControlProtocol::notify_vca_added (ARDOUR::VCAList& vl)
 {
 	refresh_current_bank ();
@@ -1272,21 +1265,21 @@ MackieControlProtocol::notify_routes_added (ARDOUR::RouteList & rl)
 		}
 	}
 
-	/* special case: single route, and it is the monitor or master out */
-
-	if (rl.size() == 1 && (rl.front()->is_monitor() || rl.front()->is_master())) {
-		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-			(*s)->master_monitor_may_have_changed ();
-		}
-	}
-
 	// currently assigned banks are less than the full set of
 	// strips, so activate the new strip now.
 
 	refresh_current_bank();
 
 	// otherwise route added, but current bank needs no updating
+}
+
+void
+MackieControlProtocol::notify_monitor_added_or_removed ()
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->master_monitor_may_have_changed ();
+	}
 }
 
 void
