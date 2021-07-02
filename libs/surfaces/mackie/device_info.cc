@@ -60,6 +60,8 @@ DeviceInfo::DeviceInfo()
 	, _uses_ipmidi (false)
 	, _no_handshake (false)
 	, _is_qcon(false)
+	, _has_qcon_second_lcd(false)
+	, _has_qcon_master_meters(false)
 	, _has_meters (true)
 	, _has_separate_meters (false)
 	, _single_fader_follows_selection (false)
@@ -337,6 +339,18 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		_is_qcon = false;
 	}
 
+	if ((child = node.child ("HasQConSecondLCD")) != 0) {
+		child->get_property ("value", _has_qcon_second_lcd);
+	} else {
+		_has_qcon_second_lcd = false;
+	}
+
+	if ((child = node.child ("HasQConMasterMeters")) != 0) {
+		child->get_property ("value", _has_qcon_master_meters);
+	} else {
+		_has_qcon_master_meters = false;
+	}
+
 	if ((child = node.child ("HasSeparateMeters")) != 0) {
 		child->get_property ("value", _has_separate_meters);
 	} else {
@@ -483,6 +497,18 @@ bool
 DeviceInfo::is_qcon () const
 {
 	return _is_qcon;
+}
+
+bool
+DeviceInfo::has_qcon_second_lcd () const
+{
+	return _has_qcon_second_lcd;
+}
+
+bool
+DeviceInfo::has_qcon_master_meters () const
+{
+	return _has_qcon_master_meters;
 }
 
 bool

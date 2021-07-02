@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MackieProtocolDevice>
-  <Name value="iCON QCon Pro X"/>
+  <Name value="iCON QCon Pro G2 + Pro G2 XS on right"/>
   <Strips value="8"/>
-  <Extenders value="0"/>
-  <MasterPosition value="0"/>
+  <Extenders value="1"/>
+  <MasterPosition value="1"/>
   <MasterFader value="yes"/>
   <TimecodeDisplay value="yes"/>
   <TwoCharacterDisplay value="no"/>
@@ -15,6 +15,4 @@
   <usesIPMIDI value="no"/>
   <NoHandShake value="yes"/>
   <IsQCon value="yes"/>
-  <HasQConSecondLCD value="yes"/>
-  <HasQConMasterMeters value="yes"/>
 </MackieProtocolDevice>

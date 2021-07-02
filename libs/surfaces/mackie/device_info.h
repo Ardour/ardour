@@ -81,6 +81,8 @@ class DeviceInfo
 	bool uses_ipmidi() const;
 	bool no_handshake() const;
 	bool is_qcon() const;
+	bool has_qcon_second_lcd() const;
+	bool has_qcon_master_meters() const;
 	bool has_meters() const;
 	bool has_separate_meters() const;
 	bool single_fader_follows_selection() const;
@@ -112,6 +114,8 @@ class DeviceInfo
 	bool     _uses_ipmidi;
 	bool     _no_handshake;
 	bool     _is_qcon;
+	bool     _has_qcon_second_lcd;
+	bool     _has_qcon_master_meters;
 	bool     _has_meters;
 	bool     _has_separate_meters;
 	bool     _single_fader_follows_selection;

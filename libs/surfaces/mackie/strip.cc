@@ -107,6 +107,8 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _controls_locked (false)
 	, _transport_is_rolling (false)
 	, _metering_active (true)
+	, _lcd2_available (true)
+	, _lcd2_label_pitch (7)
 	, _block_screen_redisplay_until (0)
 	, return_to_vpot_mode_display_at (UINT64_MAX)
 	, _pan_mode (PanAzimuthAutomation)
@@ -120,6 +122,16 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 
 	if (s.mcp().device_info().has_meters()) {
 		_meter = dynamic_cast<Meter*> (Meter::factory (*_surface, index, "meter", *this));
+	}
+
+	if (s.mcp().device_info().has_qcon_second_lcd()) {
+		_lcd2_available = true;
+
+		// The main unit has 9 faders under the second display.
+		// Extenders have 8 faders.
+		if (s.mcp().device_info().has_master_fader()) {
+			_lcd2_label_pitch = 6;
+		}
 	}
 
 	for (map<Button::ID,StripButtonInfo>::const_iterator b = strip_buttons.begin(); b != strip_buttons.end(); ++b) {
@@ -416,6 +428,14 @@ Strip::show_stripable_name ()
 	} else {
 		pending_display[0] = PBD::short_version (fullname, 6);
 	}
+
+	if (_lcd2_available) {
+		if (fullname.length() <= (_lcd2_label_pitch - 1)) {
+			lcd2_pending_display[0] = fullname;
+		} else {
+			lcd2_pending_display[0] = PBD::short_version (fullname, (_lcd2_label_pitch - 1));
+		}
+	}
 }
 
 void
@@ -497,7 +517,7 @@ Strip::select_event (Button&, ButtonState bs)
 
 		if (ms & MackieControlProtocol::MODIFIER_CMDALT) {
 			_controls_locked = !_controls_locked;
-			_surface->write (display (1,_controls_locked ?  "Locked" : "Unlock"));
+			_surface->write (display (0, 1,_controls_locked ?  "Locked" : "Unlock"));
 			block_vpot_mode_display_for (1000);
 			return;
 		}
@@ -850,7 +870,7 @@ Strip::redisplay (PBD::microseconds_t now, bool force)
 	}
 
 	if (force || (current_display[0] != pending_display[0])) {
-		_surface->write (display (0, pending_display[0]));
+		_surface->write (display (0, 0, pending_display[0]));
 		current_display[0] = pending_display[0];
 	}
 
@@ -860,8 +880,19 @@ Strip::redisplay (PBD::microseconds_t now, bool force)
 	}
 
 	if (force || (current_display[1] != pending_display[1])) {
-		_surface->write (display (1, pending_display[1]));
+		_surface->write (display (0, 1, pending_display[1]));
 		current_display[1] = pending_display[1];
+	}
+
+	if (_lcd2_available) {
+		if (force || (lcd2_current_display[0] != lcd2_pending_display[0])) {
+			_surface->write (display (1, 0, lcd2_pending_display[0]));
+			lcd2_current_display[0] = lcd2_pending_display[0];
+		}
+		if (force || (lcd2_current_display[1] != lcd2_pending_display[1])) {
+			_surface->write (display (1, 1, lcd2_pending_display[1]));
+			lcd2_current_display[1] = lcd2_pending_display[1];
+		}
 	}
 }
 
@@ -920,52 +951,102 @@ Strip::zero ()
 		_surface->write ((*it)->zero ());
 	}
 
-	_surface->write (blank_display (0));
-	_surface->write (blank_display (1));
+	_surface->write (blank_display (0, 0));
+	_surface->write (blank_display (0, 1));
 	pending_display[0] = string();
 	pending_display[1] = string();
 	current_display[0] = string();
 	current_display[1] = string();
+
+	if (_lcd2_available) {
+		_surface->write (blank_display (1, 0));
+		_surface->write (blank_display (1, 1));
+		lcd2_pending_display[0] = string();
+		lcd2_pending_display[1] = string();
+		lcd2_current_display[0] = string();
+		lcd2_current_display[1] = string();
+
+	}
 }
 
 MidiByteArray
-Strip::blank_display (uint32_t line_number)
+Strip::blank_display (uint32_t lcd_number, uint32_t line_number)
 {
-	return display (line_number, string());
+	return display (lcd_number, line_number, string());
 }
 
 MidiByteArray
-Strip::display (uint32_t line_number, const std::string& line)
+Strip::display (uint32_t lcd_number, uint32_t line_number, const std::string& line)
 {
 	assert (line_number <= 1);
 
+	bool add_left_pad_char = false;
+	unsigned left_pad_offset = 0;
+	unsigned lcd_label_pitch = 7;
+	unsigned max_char_count = lcd_label_pitch - 1;
 	MidiByteArray retval;
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip_display index: %1, line %2 = %3\n", _index, line_number, line));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip_display lcd: %1, index: %2, line %3 = %4\n"
+                 , lcd_number, _index, line_number, line));
 
-	// sysex header
-	retval << _surface->sysex_hdr();
+	if (lcd_number == 0) {
+		// Standard MCP display
+		retval << _surface->sysex_hdr();
+		// code for display
+		retval << 0x12;
+	}
+	else {
+		/* The second lcd on the Qcon Pro X master unit uses a 6 character label instead of 7.
+		 *  That allows a 9th label for the master fader.
+		 *
+		 *  Format: _6Char#1_6Char#2_6Char#3_6Char#4_6Char#5_6Char#6_6Char#7_6Char#8_6Char#9_
+		 *
+		 *  The _ in the format is a space that is inserted as label display seperators
+		 *
+		 *  The extender unit has 8 faders and uses the standard MCP pitch.
+		 *
+		 *  The second LCD is an extention to the MCP with a different sys ex header.
+		 */
 
-	// code for display
-	retval << 0x12;
+		lcd_label_pitch = _lcd2_label_pitch;
+		max_char_count = lcd_label_pitch - 1;
+
+		retval <<  MidiByteArray (5, MIDI::sysex, 0x0, 0x0, 0x67, 0x15);
+		// code for display
+		retval << 0x13;
+
+		if (lcd_label_pitch == 6) {
+			if (_index == 0) {
+				add_left_pad_char = true;
+			}
+			else {
+				left_pad_offset = 1;
+			}
+		}
+	}
+
 	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line)
-	retval << (_index * 7 + (line_number * 0x38));
+	retval << (_index * lcd_label_pitch + (line_number * 0x38) + left_pad_offset);
+
+	if (add_left_pad_char) {
+		retval << ' ';	// add the left pad space
+	}
 
 	// ascii data to display. @param line is UTF-8
 	string ascii = Glib::convert_with_fallback (line, "UTF-8", "ISO-8859-1", "_");
 	string::size_type len = ascii.length();
-	if (len > 6) {
-		ascii = ascii.substr (0, 6);
-		len = 6;
+	if (len > max_char_count) {
+		ascii = ascii.substr (0, max_char_count);
+		len = max_char_count;
 	}
 	retval << ascii;
-	// pad with " " out to 6 chars
-	for (int i = len; i < 6; ++i) {
+	// pad with " " out to N chars
+	for (unsigned i = len; i < max_char_count; ++i) {
 		retval << ' ';
 	}
 
 	// column spacer, unless it's the right-hand column
-	if (_index < 7) {
+	if (_index < 7 || lcd_number == 1) {
 		retval << ' ';
 	}
 
