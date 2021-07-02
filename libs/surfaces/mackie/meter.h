@@ -42,6 +42,7 @@ public:
 	bool enabled () const { return _enabled; }
 
 	MidiByteArray zero();
+	static std::pair<bool, float> calculate_meter_over_and_deflection (float dB);
 
 	static Control* factory (Surface&, int id, const char*, Group&);
 

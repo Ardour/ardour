@@ -69,9 +69,41 @@ Meter::notify_metering_state_changed(Surface& surface, bool transport_is_rolling
 void
 Meter::send_update (Surface& surface, float dB)
 {
-	float def = 0.0f; /* Meter deflection %age */
+	std::pair<bool,float> result = calculate_meter_over_and_deflection(dB);
 
-	// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Meter ID %1 dB %2\n", id(), dB));
+	MidiByteArray msg;
+
+	if (result.first) {
+		if (!overload_on) {
+			overload_on = true;
+			surface.write (MidiByteArray (2, 0xd0, (id() << 4) | 0xe));
+
+		}
+	} else {
+		if (overload_on) {
+			overload_on = false;
+			surface.write (MidiByteArray (2, 0xd0, (id() << 4) | 0xf));
+		}
+	}
+
+	/* we can use up to 13 segments */
+
+	int segment = lrintf ((result.second/115.0) * 13.0);
+
+	surface.write (MidiByteArray (2, 0xd0, (id()<<4) | segment));
+}
+
+MidiByteArray
+Meter::zero ()
+{
+	return MidiByteArray (2, 0xD0, (id()<<4 | 0));
+}
+
+std::pair<bool, float>
+Meter::calculate_meter_over_and_deflection (float dB) 
+{
+	float def = 0.0f; /* Meter deflection %age */
+	bool over = false;
 
 	if (dB < -70.0f) {
 		def = 0.0f;
@@ -96,30 +128,8 @@ Meter::send_update (Surface& surface, float dB)
 	   endpoint for our scaling.
 	*/
 
-	MidiByteArray msg;
-
 	if (def > 100.0f) {
-		if (!overload_on) {
-			overload_on = true;
-			surface.write (MidiByteArray (2, 0xd0, (id() << 4) | 0xe));
-
-		}
-	} else {
-		if (overload_on) {
-			overload_on = false;
-			surface.write (MidiByteArray (2, 0xd0, (id() << 4) | 0xf));
-		}
+			over = true;
 	}
-
-	/* we can use up to 13 segments */
-
-	int segment = lrintf ((def/115.0) * 13.0);
-
-	surface.write (MidiByteArray (2, 0xd0, (id()<<4) | segment));
-}
-
-MidiByteArray
-Meter::zero ()
-{
-	return MidiByteArray (2, 0xD0, (id()<<4 | 0));
+	return std::make_pair (over, def);
 }
