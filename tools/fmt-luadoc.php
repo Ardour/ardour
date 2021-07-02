@@ -548,8 +548,8 @@ function ctorname ($name) {
 
 function luaname ($name) {
 	# reserved Lua words
-	$name = preg_replace ('/:end/', ':_end', $name);
-	$name = preg_replace ('/:type/', ':_type', $name);
+	$name = preg_replace ('/:end$/', ':_end', $name);
+	$name = preg_replace ('/:type$/', ':_type', $name);
 	return $name;
 }
 
