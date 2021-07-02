@@ -659,6 +659,10 @@ void
 MackieControlProtocol::device_ready ()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device ready init (active=%1)\n", active()));
+	// Clear the surface so that any left over control from other programs are reset.
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->zero_all ();
+	}
 	update_surfaces ();
 	set_subview_mode (Mackie::Subview::None, boost::shared_ptr<Stripable>());
 	set_flip_mode (Normal);
