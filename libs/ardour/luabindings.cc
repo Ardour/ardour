@@ -2312,6 +2312,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("MeteringLineUp15", ARDOUR::MeterLineUp(MeteringLineUp15))
 		.endNamespace ()
 
+		.beginNamespace ("InputMeterLayout")
+		.addConst ("LayoutVertical", ARDOUR::InputMeterLayout(LayoutVertical))
+		.addConst ("LayoutHorizontal", ARDOUR::InputMeterLayout(LayoutHorizontal))
+		.addConst ("LayoutAutomatic", ARDOUR::InputMeterLayout(LayoutAutomatic))
+		.addConst ("MeteringLineUp15", ARDOUR::MeterLineUp(MeteringLineUp15))
+		.endNamespace ()
+
 		.beginNamespace ("VUMeterStandard")
 		.addConst ("MeteringVUfrench", ARDOUR::VUMeterStandard(MeteringVUfrench))
 		.addConst ("MeteringVUamerican", ARDOUR::VUMeterStandard(MeteringVUamerican))
