@@ -104,7 +104,7 @@ public:
 	void blacklist (ARDOUR::PluginType, std::string const&);
 	static std::string cache_file (ARDOUR::PluginType, std::string const&);
 
-	bool rescan_plugin (ARDOUR::PluginType, std::string const&, bool batch = false);
+	bool rescan_plugin (ARDOUR::PluginType, std::string const&, size_t num = 0, size_t den = 1);
 	void rescan_faulty ();
 
 	/* always return LXVST for any VST subtype */
