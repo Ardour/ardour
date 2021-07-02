@@ -52,7 +52,6 @@ PeakMeter::PeakMeter (Session& s, const std::string& name)
 	_pending_active = true;
 	_meter_type     = MeterPeak;
 	_bufcnt         = 0;
-	_combined_peak  = 0;
 
 	g_atomic_int_set (&_reset_dpm, 1);
 	g_atomic_int_set (&_reset_max, 1);
@@ -101,8 +100,6 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 	/* max-peak is set from DPM's peak-buffer, so DPM also needs to be reset in sync */
 	const bool reset_dpm = g_atomic_int_compare_and_exchange (&_reset_dpm, 1, 0) || reset_max;
 
-	_combined_peak = 0;
-
 	const uint32_t n_audio = min (current_meters.n_audio (), bufs.count ().n_audio ());
 	const uint32_t n_midi  = min (current_meters.n_midi (), bufs.count ().n_midi ());
 
@@ -127,11 +124,6 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 				const float this_vel = ev.buffer ()[2] / 127.0;
 				if (this_vel > val) {
 					val = this_vel;
-				}
-				if (val > 0.01) {
-					if (_combined_peak < 0.01) {
-						_combined_peak = 0.01;
-					}
 				}
 			} else {
 				val += 1.0 / bufs.get_midi (n).capacity ();
@@ -158,7 +150,6 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 			_peak_buffer[n]     = compute_peak (bufs.get_audio (i).data (), nframes, _peak_buffer[n]);
 			_peak_buffer[n]     = std::min (_peak_buffer[n], 100.f); // cut off at +40dBFS for falloff.
 			_max_peak_signal[n] = std::max (_peak_buffer[n], _max_peak_signal[n]);
-			_combined_peak      = std::max (_peak_buffer[n], _combined_peak);
 		}
 
 		if (reset_max) {
@@ -200,10 +191,6 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 	for (uint32_t i = n; i < _peak_power.size (); ++i) {
 		_peak_power[i]      = -std::numeric_limits<float>::infinity ();
 		_max_peak_signal[n] = 0;
-	}
-
-	if (reset_dpm) {
-		_combined_peak = 0;
 	}
 
 	if (_bufcnt > zoh) {
@@ -365,7 +352,6 @@ PeakMeter::meter_level (uint32_t n, MeterType type)
 		}
 	}
 
-	float mcptmp;
 	switch (type) {
 		case MeterKrms:
 		case MeterK20:
@@ -411,8 +397,21 @@ PeakMeter::meter_level (uint32_t n, MeterType type)
 			}
 			break;
 		case MeterMCP:
-			mcptmp = _combined_peak;
-			return accurate_coefficient_to_dB (mcptmp);
+			{
+				float mcptmp = -std::numeric_limits<float>::infinity ();
+				/* prefer to report audio only on mixed tracks */
+				if (current_meters.n_audio ()) {
+					for (uint32_t i = current_meters.n_midi (); i < _peak_power.size (); ++i) {
+						mcptmp = std::max (mcptmp, _peak_power[i]);
+					}
+				}
+				else {
+					for (uint32_t i = 0; i < current_meters.n_midi () && i < _peak_power.size (); ++i) {
+						mcptmp = std::max (mcptmp, accurate_coefficient_to_dB (_peak_power[i]));
+					}
+				}
+				return mcptmp;
+			}
 		case MeterMaxSignal:
 			assert (0);
 			break;

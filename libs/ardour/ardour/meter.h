@@ -107,7 +107,6 @@ private:
 	std::vector<float> _peak_buffer;     // internal, integrate
 	std::vector<float> _peak_power;      // includes accurate falloff, hence dB
 	std::vector<float> _max_peak_signal; // dB calculation is done on demand
-	float              _combined_peak;   // Mackie surfaces expect the highest peak of all track channels
 
 	std::vector<Kmeterdsp*>  _kmeter;
 	std::vector<Iec1ppmdsp*> _iec1meter;
