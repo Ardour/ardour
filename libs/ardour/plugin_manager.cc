@@ -1192,7 +1192,7 @@ PluginManager::auv2_discover (AUv2DescStr const& d, bool cache_only)
 		psle->msg (PluginScanLogEntry::OK, string_compose (_("Saved AUV2 plugin cache to %1"), auv2_cache_file (desc)));
 		auv2_whitelist (dstr);
 		return 0;
-	}:
+	}
 
 	XMLTree tree;
 	if (cache_file.empty ()) {
