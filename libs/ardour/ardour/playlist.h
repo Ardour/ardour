@@ -361,10 +361,10 @@ protected:
 	 *  do automation-follows-regions.
 	 */
 
-	std::list<Evoral::RangeMove<samplepos_t> > pending_range_moves;
+	std::list<Temporal::RangeMove> pending_range_moves;
 
 	/** Extra sections added to regions during trims */
-	std::list<Evoral::Range<samplepos_t> > pending_region_extensions;
+	std::list<Temporal::TimeRange> pending_region_extensions;
 
 	uint32_t           in_set_state;
 	bool               in_undo;
