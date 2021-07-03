@@ -2941,7 +2941,7 @@ PluginManager::blacklist (ARDOUR::PluginType type, std::string const& path_uid)
 	if (i != _plugin_scan_log.end ()) {
 		PluginInfoList const& plugs ((*i)->nfo ());
 		for (PluginInfoList::const_iterator j = plugs.begin(); j != plugs.end(); ++j) {
-			PluginInfoList::const_iterator k = std::find (pil->begin(), pil->end(), *j);
+			PluginInfoList::iterator k = std::find (pil->begin(), pil->end(), *j);
 			if (k != pil->end()) {
 				pil->erase (k);
 			}
@@ -3069,7 +3069,7 @@ PluginManager::rescan_plugin (ARDOUR::PluginType type, std::string const& path_u
 	if (i != _plugin_scan_log.end ()) {
 		PluginInfoList const& plugs ((*i)->nfo ());
 		for (PluginInfoList::const_iterator j = plugs.begin(); j != plugs.end(); ++j) {
-			PluginInfoList::const_iterator k = std::find (pil->begin(), pil->end(), *j);
+			PluginInfoList::iterator k = std::find (pil->begin(), pil->end(), *j);
 			if (k != pil->end()) {
 				pil->erase (k);
 			}
