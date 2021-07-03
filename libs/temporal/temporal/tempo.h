@@ -308,6 +308,7 @@ class LIBTEMPORAL_API Meter {
 
 	Meter (XMLNode const &);
 	Meter (int8_t dpb, int8_t nv) : _note_value (nv), _divisions_per_bar (dpb) {}
+	Meter (Meter const & other) : _note_value (other._note_value), _divisions_per_bar (other._divisions_per_bar) {}
 
 	int divisions_per_bar () const { return _divisions_per_bar; }
 	int note_value() const { return _note_value; }
