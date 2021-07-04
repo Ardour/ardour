@@ -1838,11 +1838,11 @@ Region::get_cue_markers (CueMarkers& cues, bool abs) const
 	for (SourceList::const_iterator s = _sources.begin (); s != _sources.end(); ++s) {
 		CueMarkers const& x = (*s)->cue_markers ();
 		for (CueMarkers::const_iterator p = x.begin (); p != x.end (); ++p) {
-			if (p->position() >= _start && p->position() < _start + _length) {
+			if (p->position() >= start() && p->position() < start() + length()) {
 				if (abs) {
 					cues.insert (*p);
 				} else {
-					cues.insert (CueMarker (p->text(), p->position() - _start));
+					cues.insert (CueMarker (p->text(), timepos_t (start().distance (p->position()))));
 				}
 			}
 		}
@@ -1850,10 +1850,10 @@ Region::get_cue_markers (CueMarkers& cues, bool abs) const
 }
 
 void
-Region::move_cue_marker (CueMarker const & cm, samplepos_t region_relative_position)
+Region::move_cue_marker (CueMarker const & cm, timepos_t const & region_relative_position)
 {
 	for (SourceList::const_iterator s = _sources.begin (); s != _sources.end(); ++s) {
-		(*s)->move_cue_marker (cm, start() + region_relative_position);
+		(*s)->move_cue_marker (cm, region_relative_position + start());
 	}
 }
 
