@@ -465,7 +465,8 @@ public:
 	                ARDOUR::MidiTrackNameSource           mts,
 	                ARDOUR::MidiTempoMapDisposition       mtd,
 	                Temporal::timepos_t&                  pos,
-	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
+	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
+	                bool with_markers = false);
 
 	void do_embed (std::vector<std::string>              paths,
 	               Editing::ImportDisposition            disposition,
