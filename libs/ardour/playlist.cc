@@ -1207,14 +1207,14 @@ Playlist::cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(timepos_t const
 boost::shared_ptr<Playlist>
 Playlist::cut (list<TimelineRange>& ranges, bool result_is_hidden)
 {
-	boost::shared_ptr<Playlist> (Playlist::*pmf) (samplepos_t, samplecnt_t, bool) = &Playlist::cut;
+	boost::shared_ptr<Playlist> (Playlist::*pmf) (timepos_t const & , timecnt_t const &, bool) = &Playlist::cut;
 	return cut_copy (pmf, ranges, result_is_hidden);
 }
 
 boost::shared_ptr<Playlist>
 Playlist::copy (list<TimelineRange>& ranges, bool result_is_hidden)
 {
-	boost::shared_ptr<Playlist> (Playlist::*pmf) (samplepos_t, samplecnt_t, bool) = &Playlist::copy;
+	boost::shared_ptr<Playlist> (Playlist::*pmf) (timepos_t const &, timecnt_t const &, bool) = &Playlist::copy;
 	return cut_copy (pmf, ranges, result_is_hidden);
 }
 

@@ -190,6 +190,7 @@ public:
 	boost::shared_ptr<Region> combine (const RegionList&);
 	void uncombine (boost::shared_ptr<Region>);
 	void fade_range (std::list<TimelineRange>&);
+	void remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, boost::function<void (timepos_t, timecnt_t)> gap_callback);
 
 	void shuffle (boost::shared_ptr<Region>, int dir);
 
