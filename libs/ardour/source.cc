@@ -509,6 +509,7 @@ Source::clear_cue_markers ()
 	return true;
 }
 
+bool
 Source::empty () const
 {
 	return _length == timecnt_t();
