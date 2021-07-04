@@ -7321,23 +7321,24 @@ RegionMarkerDrag::start_grab (GdkEvent* ev, Gdk::Cursor* c)
 {
 	Drag::start_grab (ev, c);
 	show_verbose_cursor_time (model.position());
-	setup_snap_delta (MusicSample (model.position(), 0));
+	setup_snap_delta (model.position());
 }
 
 void
 RegionMarkerDrag::motion (GdkEvent* ev, bool first_move)
 {
-	samplepos_t pos = adjusted_current_sample (ev);
+	timepos_t pos = adjusted_current_time (ev);
 
 	if (pos < rv->region()->position() || pos >= (rv->region()->position() + rv->region()->length())) {
 		/* out of bounds */
 		return;
 	}
 
-	dragging_model.set_position (pos - rv->region()->position());
+	timepos_t newpos (rv->region()->position().distance (pos));
+	dragging_model.set_position (newpos);
 	/* view (ArdourMarker) needs a relative position inside the RegionView */
-	view->set_position (pos - rv->region()->position());
-	show_verbose_cursor_time (dragging_model.position() - rv->region()->position()); /* earlier */
+	view->set_position (newpos);
+	show_verbose_cursor_time (newpos);
 }
 
 void
