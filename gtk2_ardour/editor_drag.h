@@ -414,8 +414,8 @@ public:
 	virtual void finished (GdkEvent *, bool);
 	virtual void aborted (bool);
 private:
-	typedef std::set<samplepos_t> SamplePositionSet;
-	SamplePositionSet _already_pasted;
+	typedef std::set<Temporal::timepos_t> TimePositionSet;
+	TimePositionSet _already_pasted;
 };
 
 /** Drags involving region motion from somewhere */
