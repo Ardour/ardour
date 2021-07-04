@@ -7385,6 +7385,6 @@ RegionMarkerDrag::aborted (bool)
 void
 RegionMarkerDrag::setup_pointer_sample_offset ()
 {
-	const samplepos_t model_abs_pos = rv->region()->position() + (model.position() - rv->region()->start()); /* distance */
-	_pointer_sample_offset = raw_grab_sample() - model_abs_pos; /* distance */
+	const timepos_t model_abs_pos = rv->region()->position() + (rv->region()->start().distance (model.position()));
+	_pointer_offset = model_abs_pos.distance (raw_grab_time());
 }
