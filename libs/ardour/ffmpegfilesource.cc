@@ -33,7 +33,7 @@ FFMPEGFileSource::FFMPEGFileSource (Session& s, const std::string& path, int chn
 			Source::Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 	, _ffmpeg (path, chn)
 {
-	_length = _ffmpeg.length ();
+	_length = timecnt_t (_ffmpeg.length ());
 }
 
 FFMPEGFileSource::~FFMPEGFileSource ()
