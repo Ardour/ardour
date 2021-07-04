@@ -3203,10 +3203,6 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 		(pls->original() != id());
 
 
-	const bool need_copies = (boost::dynamic_pointer_cast<PlaylistSource> (pls)->owner() != target->id()) ||
-		(pls->original() != id());
-
-
 	ThawList thawlist;
 
 	for (RegionList::const_iterator i = rl.begin (); i != rl.end (); ++i) {
