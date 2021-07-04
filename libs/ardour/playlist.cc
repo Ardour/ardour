@@ -1270,8 +1270,6 @@ Playlist::paste (boost::shared_ptr<Playlist> other, timepos_t const & position, 
 		layer_t top = top_layer ();
 
 		{
-
-		{
 			RegionWriteLock rl1 (this);
 			while (itimes--) {
 				for (RegionList::iterator i = other->regions.begin (); i != other->regions.end (); ++i) {
