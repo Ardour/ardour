@@ -70,8 +70,8 @@ void ArdourMarker::setup_sizes(const double timebar_height)
 	marker_height = floor (timebar_height) - 2;
 }
 
-ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba, const string& annotation,
-                            Type type, timepos_t const & pos, bool handle_events, RegionView* rc)
+ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rgba, const string& annotation,
+                            Type type, timepos_t const & pos, bool handle_events, RegionView* rv)
 
 	: editor (ed)
 	, _parent (&parent)
