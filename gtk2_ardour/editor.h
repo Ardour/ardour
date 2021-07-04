@@ -585,9 +585,9 @@ public:
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (Temporal::timepos_t const &);
 	void do_remove_gaps ();
-	void remove_gaps (samplecnt_t threshold, samplecnt_t leave, bool markers_too);
+	void remove_gaps (Temporal::timecnt_t const & threshold, Temporal::timecnt_t const & leave, bool markers_too);
 
-	void mouse_brush_insert_region (RegionView*, samplepos_t pos);
+	void mouse_brush_insert_region (RegionView*, Temporal::timepos_t const & pos);
 
 	void mouse_add_new_tempo_event (Temporal::timepos_t where);
 	void mouse_add_new_meter_event (Temporal::timepos_t where);
@@ -2410,7 +2410,7 @@ private:
 	void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
 	void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
 
-	void remove_gap_marker_callback (samplepos_t at, samplecnt_t distance);
+	void remove_gap_marker_callback (Temporal::timepos_t at, Temporal::timecnt_t distance);
 
 	friend class Drag;
 	friend class RegionCutDrag;
