@@ -2197,7 +2197,7 @@ RegionMoveDrag::setup_pointer_offset ()
 }
 
 RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, RouteTimeAxisView* v, timepos_t const & pos)
-	: RegionMotionDrag (e, 0, 0, list<RegionView*> (), false)
+	: RegionMotionDrag (e, 0, 0, list<RegionView*> ())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionInsertDrag\n");
 
