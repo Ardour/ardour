@@ -1229,8 +1229,8 @@ Playlist::cut (timepos_t const & start, timecnt_t const & cnt, bool result_is_hi
 	new_name += '.';
 	new_name += buf;
 
-	if ((the_copy = PlaylistFactory::create (shared_from_this (), start, cnt, new_name, result_is_hidden)) == 0) {
-		return boost::shared_ptr<Playlist> ();
+	if ((the_copy = PlaylistFactory::create (shared_from_this(), start, timepos_t (cnt), new_name, result_is_hidden)) == 0) {
+		return boost::shared_ptr<Playlist>();
 	}
 
 	{
