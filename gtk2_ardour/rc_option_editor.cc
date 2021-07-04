@@ -2857,6 +2857,17 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Appearance/Quirks"), bo);
 
 #ifndef __APPLE__
+
+#ifndef PLATFORM_WINDOWS
+	bo = new BoolOption (
+			"hide-splash-screen",
+			_("Show/Hide splash screen instead of setting z-axis stack order"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_hide_splash_screen),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_hide_splash_screen)
+			);
+	add_option (_("Appearance/Quirks"), bo);
+#endif
+
 	bo = new BoolOption (
 			"all-floating-windows-are-dialogs",
 			_("All floating windows are dialogs"),

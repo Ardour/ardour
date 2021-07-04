@@ -114,6 +114,7 @@ UI_CONFIG_VARIABLE (int32_t, max_plugin_recent, "max-plugin-recent", 10)
 UI_CONFIG_VARIABLE (bool, prefer_inline_over_gui, "prefer-inline-over-gui", true)
 UI_CONFIG_VARIABLE (uint32_t, max_inline_controls, "max-inline-controls", 32) /* per processor */
 UI_CONFIG_VARIABLE (uint32_t, action_table_columns, "action-table-columns", 3)
+UI_CONFIG_VARIABLE (bool, hide_splash_screen, "hide-splash-screen", false)
 UI_CONFIG_VARIABLE (bool, use_wm_visibility, "use-wm-visibility", true)
 UI_CONFIG_VARIABLE (std::string, stripable_color_palette, "stripable-color-palette", "#AA3939:#FFAAAA:#D46A6A:#801515:#550000:#AA8E39:#FFEAAA:#D4BA6A:#806515:#554000:#343477:#8080B3:#565695:#1A1A59:#09093B:#2D882D:#88CC88:#55AA55:#116611:#004400")  /* Gtk::ColorSelection::palette_to_string */
 UI_CONFIG_VARIABLE (bool, use_note_bars_for_velocity, "use-note-bars-for-velocity", true)
