@@ -1235,7 +1235,7 @@ Playlist::cut (timepos_t const & start, timecnt_t const & cnt, bool result_is_hi
 
 	{
 		RegionWriteLock rlock (this);
-		partition_internal (start, start + cnt - 1, true, rlock.thawlist);
+		partition_internal (start, (start+cnt).decrement(), true, rlock.thawlist);
 	}
 
 	return the_copy;
