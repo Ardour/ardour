@@ -5916,7 +5916,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 					} else {
 						ev.set_time(ev.time() + out_pos - position);
 					}
-					(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position());
+					(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position().samples());
 				}
 		}
 		out_pos += this_chunk;
@@ -5935,7 +5935,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 				} else {
 					ev.set_time(ev.time() + out_pos - position);
 				}
-				(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position());
+				(*m)->src->append_event_samples ((*m)->lock, ev, (*m)->src->natural_position().samples());
 			}
 		}
 	}
