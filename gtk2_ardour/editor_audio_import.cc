@@ -350,12 +350,9 @@ Editor::import_smf_markers (Evoral::SMF & smf, timepos_t const & pos)
 		return;
 	}
 
-	/* XXX in nutempo2 just add location using Beats */
-
 	for (Evoral::SMF::Markers::const_iterator m = markers.begin(); m != markers.end(); ++m) {
-		// Temporal::Beats beat_pos (m->time_pulses / (double) smf.ppqn() / 4.0);
 		Beats beats = Beats::from_double (m->time_pulses / (double) smf.ppqn());
-		Location* loc = new Location (*_session, timepos_t (beats), timepos_t (MusicTime), m->text, Location::IsMark, 0);
+		Location* loc = new Location (*_session, timepos_t (beats), timepos_t (Temporal::BeatTime), m->text, Location::IsMark);
 		_session->locations()->add (loc);
 	}
 
