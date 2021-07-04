@@ -1517,7 +1517,7 @@ Locations::range_starts_at (timepos_t const & pos, timecnt_t const & slop, bool 
 }
 
 void
-Locations::ripple (samplepos_t at, samplecnt_t distance, bool include_locked, bool notify)
+Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool include_locked, bool notify)
 {
 	LocationList copy;
 
@@ -1554,10 +1554,10 @@ Locations::ripple (samplepos_t at, samplecnt_t distance, bool include_locked, bo
 		}
 
 		if ((*i)->start() >= at) {
-			(*i)->set_start ((*i)->start() + distance);
+			(*i)->set_start ((*i)->start().earlier (distance));
 
 			if (!(*i)->is_mark()) {
-				(*i)->set_end ((*i)->end() + distance);
+				(*i)->set_end ((*i)->end().earlier (distance));
 			}
 		}
 
