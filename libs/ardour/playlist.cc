@@ -1337,25 +1337,23 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, timepos_t & positio
 {
 	RegionWriteLock rl (this);
 
-	 RegionWriteLock rl (this);
+	while (position + region->length().decrement() < end) {
+		boost::shared_ptr<Region> copy = RegionFactory::create (region, true, false, &rl.thawlist);
+		add_region_internal (copy, position, rl.thawlist);
+		set_layer (copy, DBL_MAX);
+		position += gap;
+	}
+	if (position < end) {
+		timecnt_t length = min (region->length(), position.distance (end));
+		string name;
+		RegionFactory::region_name (name, region->name(), false);
 
-	 while (position + region->length().decrement() < end) {
-		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true, false, &rl.thawlist);
-		 add_region_internal (copy, position, rl.thawlist);
-		 set_layer (copy, DBL_MAX);
-		 position += gap;
-	 }
-	 if (position < end) {
-		 timecnt_t length = min (region->length(), position.distance (end));
-		 string name;
-		 RegionFactory::region_name (name, region->name(), false);
+		{
+			PropertyList plist;
 
-		 {
-			 PropertyList plist;
-
-			 plist.add (Properties::start, region->start());
-			 plist.add (Properties::length, length);
-			 plist.add (Properties::name, name);
+			plist.add (Properties::start, region->start());
+			plist.add (Properties::length, length);
+			plist.add (Properties::name, name);
 
 			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist, false, &rl.thawlist);
 			add_region_internal (sub, position, rl.thawlist);
