@@ -845,7 +845,7 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region, ThawList& th
 }
 
 void
-Playlist::remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap, boost::function<void (samplepos_t, samplecnt_t)> gap_callback)
+Playlist::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, boost::function<void (timepos_t, timecnt_t)> gap_callback)
 {
 	bool closed = false;
 
@@ -867,19 +867,19 @@ Playlist::remove_gaps (samplepos_t gap_threshold, samplepos_t leave_gap, boost::
 				break;
 			}
 
-			samplepos_t end_of_this_region = (*i)->position() + (*i)->length();
+			timepos_t end_of_this_region = (*i)->end();
 
 			if (end_of_this_region >= (*nxt)->position()) {
 				continue;
 			}
 
-			const samplepos_t gap = (*nxt)->position() - end_of_this_region;
+			const timecnt_t gap = end_of_this_region.distance ((*nxt)->position());
 
 			if (gap < gap_threshold) {
 				continue;
 			}
 
-			const samplepos_t shift = gap - leave_gap;
+			const timecnt_t shift = gap - leave_gap;
 
 			(void) ripple_unlocked ((*nxt)->position(), -shift, 0, rlock.thawlist);
 
@@ -1183,11 +1183,11 @@ Playlist::cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(timepos_t const
 		return boost::shared_ptr<Playlist> ();
 	}
 
-	start = ranges.front().start;
+	start = ranges.front().start();
 
-	for (list<AudioRange>::iterator i = ranges.begin(); i != ranges.end(); ++i) {
+	for (list<TimelineRange>::iterator i = ranges.begin(); i != ranges.end(); ++i) {
 
-		pl = (this->*pmf)((*i).start, (*i).length(), result_is_hidden);
+		pl = (this->*pmf)((*i).start(), (*i).length(), result_is_hidden);
 
 		if (i == ranges.begin ()) {
 			ret = pl;
