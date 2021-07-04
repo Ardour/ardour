@@ -1403,7 +1403,6 @@ void
 Playlist::shift (timepos_t const & at, timecnt_t const & distance, bool move_intersected, bool ignore_music_glue)
 {
 	PBD::Unwinder<bool> uw (_playlist_shift_active, true);
-	PBD::Unwinder<bool> uw (_playlist_shift_active, true);
 	RegionWriteLock rlock (this);
 	RegionList copy (regions.rlist());
 	RegionList fixup;
