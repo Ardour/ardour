@@ -418,7 +418,7 @@ public:
 	}
 
 	void get_cue_markers (CueMarkers&, bool abs = false) const;
-	void move_cue_marker (CueMarker const &, samplepos_t region_relative_position);
+	void move_cue_marker (CueMarker const &, timepos_t const & region_relative_position);
 	void rename_cue_marker (CueMarker&, std::string const &);
 
 protected:
