@@ -1088,9 +1088,6 @@ If you still wish to quit, please use the\n\n\
 
 	halt_connection.disconnect ();
 	AudioEngine::instance()->stop ();
-#ifdef WINDOWS_VST_SUPPORT
-	fst_stop_threading();
-#endif
 	quit ();
 }
 
