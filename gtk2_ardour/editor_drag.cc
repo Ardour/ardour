@@ -3785,10 +3785,10 @@ BBTRulerDrag::setup_pointer_offset ()
 
 	_grab_qn = max (Beats(), raw_grab_time().beats());
 
-	const uint32_t divisions = _editor->get_grid_beat_divisions ();
+	uint32_t divisions = _editor->get_grid_beat_divisions ();
 
 	if (divisions == 0) {
-		divisions == 4;
+		divisions = 4;
 	}
 
 	_grab_qn = _grab_qn.round_to_subdivision (divisions, Temporal::RoundDownAlways);
