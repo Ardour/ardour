@@ -545,8 +545,8 @@ RegionView::update_cue_markers ()
 		return;
 	}
 
-	const samplepos_t start = region()->start();
-	const samplepos_t end = region()->start() + region()->length();
+	const timepos_t start = region()->start();
+	const timepos_t end = region()->start() + region()->length();
 	const Gtkmm2ext::SVAModifier alpha = UIConfiguration::instance().modifier (X_("region mark"));
 	const uint32_t color = Gtkmm2ext::HSV (UIConfiguration::instance().color ("region mark")).mod (alpha).color();
 
@@ -596,7 +596,7 @@ RegionView::update_cue_markers ()
 
 			/* Create a new ViewCueMarker */
 
-			ArdourMarker* mark = new ArdourMarker (trackview.editor(), *group, color , c->text(), ArdourMarker::RegionCue, c->position() - start, true, this);
+			ArdourMarker* mark = new ArdourMarker (trackview.editor(), *group, color , c->text(), ArdourMarker::RegionCue, timepos_t (start.distance (c->position())), true, this);
 			mark->set_points_color (color);
 			mark->set_show_line (true);
 			/* make sure the line has a clean end, before the frame
@@ -630,7 +630,7 @@ RegionView::update_cue_markers ()
 				(*existing)->view_marker->hide ();
 			}
 
-			(*existing)->view_marker->set_position (c->position() - start);
+			(*existing)->view_marker->set_position (timepos_t (start.distance (c->position())));
 			(*existing)->view_marker->the_item().raise_to_top ();
 		}
 	}
@@ -1240,7 +1240,7 @@ RegionView::find_model_cue_marker (ArdourMarker* m)
 		}
 	}
 
-	return CueMarker (string(), 0); /* empty string signifies invalid */
+	return CueMarker (string(), timepos_t()); /* empty string signifies invalid */
 }
 
 void
