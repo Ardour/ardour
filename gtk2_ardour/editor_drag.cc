@@ -760,12 +760,11 @@ RegionBrushDrag::motion (GdkEvent* event, bool first_move)
 		_editor->begin_reversible_command (_("Region brush drag"));
 		_already_pasted.insert(_primary->region()->position());
 	} else {
-		MusicSample snapped (0, 0);
-		snapped.sample = adjusted_current_sample(event, false);
+		timepos_t snapped (adjusted_current_time (event, false));
 		_editor->snap_to (snapped, RoundDownAlways, SnapToGrid_Scaled, false);
-		if(_already_pasted.find(snapped.sample) == _already_pasted.end()) {
-			_editor->mouse_brush_insert_region (_primary, snapped.sample);
-			_already_pasted.insert(snapped.sample);
+		if(_already_pasted.find(snapped) == _already_pasted.end()) {
+			_editor->mouse_brush_insert_region (_primary, snapped);
+			_already_pasted.insert(snapped);
 		}
 	}
 }
