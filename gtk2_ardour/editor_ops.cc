@@ -8836,7 +8836,7 @@ Editor::add_region_marker ()
 	   the edit point is "mouse"
 	*/
 	RegionSelection rs = get_regions_from_selection_and_edit_point ();
-	samplepos_t position = get_preferred_edit_position ();
+	timepos_t position = get_preferred_edit_position ();
 
 	cerr << "adding cue marker @ " << position << " in " << rs.size() << endl;
 
@@ -8870,7 +8870,7 @@ Editor::add_region_marker ()
 
 		SourceList & sources = region->sources_for_edit ();
 
-		CueMarker marker (str, region->start() + (position - region->position()));
+		CueMarker marker (str, region->start() + (region->position().distance (position)));
 
 		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
 
@@ -9025,7 +9025,7 @@ Editor::make_region_markers_global (bool as_cd_marker)
 
 			for (CueMarkers::iterator cm = cues.begin(); cm != cues.end(); ++cm) {
 				/* marker position is absolute within source */
-				const samplepos_t absolute_pos = (cm->position() - (*r)->region()->start()) + (*r)->region()->position();
+				const timepos_t absolute_pos = (*r)->region()->position() + (*r)->region()->start().distance (cm->position());
 				Location* loc = new Location (*_session, absolute_pos, absolute_pos, cm->text(), as_cd_marker ? Location::Flags (Location::IsMark|Location::IsCDMarker) : Location::IsMark);
 				_session->locations()->add (loc, false);
 			}
@@ -9119,23 +9119,23 @@ Editor::do_remove_gaps ()
 
 	d.hide ();
 
-	remove_gaps (threshold_samples, leave_samples, markers_too.get_active());
+	remove_gaps (timecnt_t (threshold_samples, AudioTime), timecnt_t (leave_samples, AudioTime), markers_too.get_active());
 }
 
 /* one day, we can use an empty lambda for this */
 static
-void gap_marker_callback_relax (samplepos_t, samplecnt_t)
+void gap_marker_callback_relax (timepos_t, timecnt_t)
 {
 }
 
 void
-Editor::remove_gap_marker_callback (samplepos_t at, samplecnt_t distance)
+Editor::remove_gap_marker_callback (timepos_t at, timecnt_t distance)
 {
 	_session->locations()->ripple (at, -distance, false, false);
 }
 
 void
-Editor::remove_gaps (samplecnt_t gap_threshold, samplecnt_t leave_gap, bool markers_too)
+Editor::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, bool markers_too)
 {
 	bool in_command = false;
 	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
@@ -9183,10 +9183,10 @@ Editor::remove_gaps (samplecnt_t gap_threshold, samplecnt_t leave_gap, bool mark
 		 */
 
 		if (markers_too && (*i == first_selected_playlist)) {
-			boost::function<void (samplepos_t, samplecnt_t)> callback (boost::bind (&Editor::remove_gap_marker_callback, this, _1, _2));
+			boost::function<void (timepos_t, timecnt_t)> callback (boost::bind (&Editor::remove_gap_marker_callback, this, _1, _2));
 			(*i)->remove_gaps (gap_threshold, leave_gap, callback);
 		} else {
-			boost::function<void (samplepos_t, samplecnt_t)> callback (boost::bind (gap_marker_callback_relax, _1, _2));
+			boost::function<void (timepos_t, timecnt_t)> callback (boost::bind (gap_marker_callback_relax, _1, _2));
 			(*i)->remove_gaps (gap_threshold, leave_gap, callback);
 		}
 
