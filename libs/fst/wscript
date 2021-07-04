@@ -63,11 +63,11 @@ def build(bld):
         obj.target = 'ardour-vst-scanner'
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
             bld (features = 'c', name='vstwin', source='vstwin.c', uselib = 'GIOMM', includes  = [ '../pbd/', '../ardour/', '.' ])
-            obj.uselib = ['GIOMM', 'DL', 'GDI32', 'XML']
+            obj.uselib = ['GIOMM', 'DL', 'GDI32', 'ARCHIVE', 'CURL', 'XML']
             obj.linkflags = ['-mwindows']
             obj.use = [ 'libpbd', 'libtemporal', 'libevoral', 'vstwin' ]
         else:
-            obj.uselib = ['GIOMM', 'DL', 'OSX', 'XML' ]
+            obj.uselib = ['GIOMM', 'DL', 'OSX', 'ARCHIVE', 'CURL', 'XML' ]
             obj.use = [ 'libpbd', 'libtemporal', 'libevoral' ]
 
         obj.includes  = [ '../pbd/', '../ardour/', '.' ]
