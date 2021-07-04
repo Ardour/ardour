@@ -3919,11 +3919,8 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 
 	_ghost_note->show();
 
-	/* calculate time in beats relative to start of source */
-	const Temporal::Beats length = get_grid_beats (_region->position() + timepos_t (unsnapped_sample));
-
 	/* calculate time in of a single grid units worth of beats, at the start of source */
-	const Temporal::Beats length = get_grid_beats (_region->source_position() + timepos_t (snapped_beats));
+	const Temporal::Beats length = get_grid_beats (_region->source_position()) + snapped_beats;
 
 	_ghost_note->note()->set_time (snapped_beats);
 	_ghost_note->note()->set_length (length);
