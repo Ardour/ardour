@@ -159,6 +159,7 @@ public:
 	std::string        _captured_for;
 	timecnt_t           _length;
 	XrunPositions      _xruns;
+	CueMarkers         _cue_markers;
 
 	mutable Glib::Threads::Mutex _lock;
 	mutable Glib::Threads::Mutex _analysis_lock;
