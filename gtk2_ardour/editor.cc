@@ -4055,12 +4055,6 @@ Editor::set_show_touched_automation (bool yn)
 	instant_save ();
 }
 
-PlaylistSelector&
-Editor::playlist_selector () const
-{
-	return *_playlist_selector;
-}
-
 Temporal::timecnt_t
 Editor::get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration)
 {
