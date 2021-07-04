@@ -282,7 +282,7 @@ Source::set_cue_state (XMLNode const & cues, int /* version */)
 
 	for (XMLNodeConstIterator citer = cuelist.begin(); citer != cuelist.end(); ++citer) {
 		string text;
-		samplepos_t position;
+		timepos_t position;
 
 		if (!(*citer)->get_property (X_("text"), text) || !(*citer)->get_property (X_("position"), position)) {
 			continue;
