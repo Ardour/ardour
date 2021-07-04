@@ -68,8 +68,8 @@ public:
 	};
 
 
-	ArdourMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Type,
-	              ARDOUR::timepos_t const & position, bool handle_events = true, RegionView* rv = 0);
+	ArdourMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, const std::string& text, Type,
+	              Temporal::timepos_t const & position, bool handle_events = true, RegionView* rv = 0);
 
 	virtual ~ArdourMarker ();
 
