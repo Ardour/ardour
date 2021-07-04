@@ -1253,7 +1253,7 @@ Playlist::copy (timepos_t const & start, timecnt_t const & cnt, bool result_is_h
 
 	// cnt = min (_get_extent().second - start, cnt);  (We need the full range length when copy/pasting in Ripple.  Why was this limit here?  It's not in CUT... )
 
-	return PlaylistFactory::create (shared_from_this (), start, cnt, new_name, result_is_hidden);
+	return PlaylistFactory::create (shared_from_this (), start, timepos_t (cnt), new_name, result_is_hidden);
 }
 
 int
