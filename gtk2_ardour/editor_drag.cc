@@ -710,7 +710,7 @@ RegionSlipContentsDrag::motion (GdkEvent* event, bool first_move)
 	} else {
 		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 			RegionView* rv = i->view;
-			samplecnt_t slippage = (last_pointer_sample() - adjusted_current_sample(event, false));
+			timecnt_t slippage = adjusted_current_time(event, false).distance (last_pointer_time());
 			rv->move_contents (slippage);
 		}
 		show_verbose_cursor_time (_primary->region()->start ());
