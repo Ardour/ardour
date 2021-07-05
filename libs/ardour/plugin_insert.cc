@@ -936,9 +936,13 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 				if (valid) {
 					c.set_value_unchecked(val);
 				}
-#if 0
+
+				if (_plugins.front()->get_info ()->type != ARDOUR::VST3) {
+					continue;
+				}
+
+#if 1
 				/* 2. VST3: events between now and end. */
-				assert (_plugins.front()->requires_fixed_sized_buffers());
 				samplepos_t now = start;
 				while (true) {
 					Evoral::ControlEvent next_event (end, 0.0f);
@@ -955,8 +959,8 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 					}
 				}
 #endif
-#if 0
-				/* 3. set value at cycle-end */
+#if 1
+				/* 3. VST3: set value at cycle-end */
 				val = c.list()->rt_safe_eval (end, valid);
 				if (valid) {
 					for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
@@ -1345,7 +1349,9 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 	/* map start back into loop-range, adjust end */
 	map_loop_range (start, end);
 
-	if (!find_next_event (start, end, next_event) || _plugins.front()->requires_fixed_sized_buffers()) {
+	bool no_split_cycle =_plugins.front()->requires_fixed_sized_buffers () || _plugins.front()->get_info ()->type == ARDOUR::VST3;
+
+	if (no_split_cycle || !find_next_event (start, end, next_event)) {
 
 		/* no events have a time within the relevant range */
 
