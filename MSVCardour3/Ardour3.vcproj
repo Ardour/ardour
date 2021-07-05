@@ -1032,6 +1032,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\plugin_manager_ui.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\plugin_pin_dialog.cc"
 				>
 			</File>
@@ -2199,6 +2203,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\plugin_interest.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\plugin_manager_ui.h"
 				>
 			</File>
 			<File
