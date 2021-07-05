@@ -928,6 +928,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\plugin_scan_result.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\polarity_processor.cc"
 				>
 			</File>
@@ -1504,6 +1508,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\vst2_scan.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\vst3_host.cc"
 				>
 			</File>
@@ -1517,10 +1525,6 @@
 			</File>
 			<File
 				RelativePath="..\vst3_scan.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\vst_info_file.cc"
 				>
 			</File>
 			<File
@@ -2278,6 +2282,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\plugin_scan_result.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\plugin_types.h"
 				>
 			</File>
@@ -2695,6 +2703,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\vca_manager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\vst2_scan.h"
 				>
 			</File>
 			<File
