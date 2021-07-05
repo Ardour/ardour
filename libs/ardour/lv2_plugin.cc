@@ -2246,7 +2246,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.toggled      = lilv_port_has_property(_impl->plugin, port, _world.lv2_toggled);
 	desc.logarithmic  = lilv_port_has_property(_impl->plugin, port, _world.ext_logarithmic);
 	desc.sr_dependent = lilv_port_has_property(_impl->plugin, port, _world.lv2_sampleRate);
-	desc.label        = lilv_node_as_string(lilv_port_get_name(_impl->plugin, port));
+	desc.label        = lilv_node_as_string(lilv_port_get_name(_impl->plugin, port)); // XXX leaks
 	desc.normal       = def ? lilv_node_as_float(def) : 0.0f;
 	desc.lower        = min ? lilv_node_as_float(min) : 0.0f;
 	desc.upper        = max ? lilv_node_as_float(max) : 1.0f;
@@ -2518,10 +2518,7 @@ LV2Plugin::allocate_atom_event_buffers()
 	for (uint32_t i = 0; i < lilv_plugin_get_num_ports(p); ++i) {
 		const LilvPort* port  = lilv_plugin_get_port_by_index(p, i);
 		if (lilv_port_is_a(p, port, _world.atom_AtomPort)) {
-			LilvNodes* buffer_types = lilv_port_get_value(
-				p, port, _world.atom_bufferType);
-			LilvNodes* atom_supports = lilv_port_get_value(
-				p, port, _world.atom_supports);
+			LilvNodes* buffer_types = lilv_port_get_value (p, port, _world.atom_bufferType);
 
 			if (lilv_nodes_contains(buffer_types, _world.atom_Sequence)) {
 				if (lilv_port_is_a(p, port, _world.lv2_InputPort)) {
@@ -2538,7 +2535,6 @@ LV2Plugin::allocate_atom_event_buffers()
 				lilv_nodes_free(min_size_v);
 			}
 			lilv_nodes_free(buffer_types);
-			lilv_nodes_free(atom_supports);
 		}
 	}
 
@@ -2720,6 +2716,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					bufs.ensure_lv2_bufsize((flags & PORT_INPUT), index, _port_minimumSize[port_index]);
 					_ev_buffers[port_index] = bufs.get_lv2_midi(
 						(flags & PORT_INPUT), index);
+				} else {
+					/* Valid pin mapping, but no corresponding port-buffers */
+					valid = false;
 				}
 			} else if ((flags & PORT_POSITION) && (flags & PORT_INPUT)) {
 				lv2_evbuf_reset(_atom_ev_buffers[atom_port_index], true);
@@ -2784,12 +2783,12 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					}
 				}
 			} else if (!valid) {
-				// Nothing we understand or care about, connect to scratch
-				// see note for midi-buffer size above
-				scratch_bufs.ensure_lv2_bufsize((flags & PORT_INPUT),
-						0, _port_minimumSize[port_index]);
-				_ev_buffers[port_index] = scratch_bufs.get_lv2_midi(
-					(flags & PORT_INPUT), 0);
+				/* Nothing we understand or care about, but we have
+				 * to provide valid buffers for DSP/UI communication.
+				 * Note that Atom buffers scratch buffers must not be shared.
+				 */
+				lv2_evbuf_reset (_atom_ev_buffers[atom_port_index], (flags & PORT_INPUT));
+				_ev_buffers[port_index] = _atom_ev_buffers[atom_port_index++];
 			}
 
 			buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
@@ -3673,29 +3672,32 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 		for (uint32_t i = 0; i < lilv_plugin_get_num_ports(p); ++i) {
 			const LilvPort* port  = lilv_plugin_get_port_by_index(p, i);
 			if (lilv_port_is_a(p, port, world.atom_AtomPort)) {
-				LilvNodes* buffer_types = lilv_port_get_value(
-					p, port, world.atom_bufferType);
-				LilvNodes* atom_supports = lilv_port_get_value(
-					p, port, world.atom_supports);
+				LilvNodes* buffer_types  = lilv_port_get_value (p, port, world.atom_bufferType);
+				LilvNodes* atom_supports = lilv_port_get_value (p, port, world.atom_supports);
 
-				if (lilv_nodes_contains(buffer_types, world.atom_Sequence)
-						&& lilv_nodes_contains(atom_supports, world.midi_MidiEvent)) {
+				if (lilv_port_is_a(p, port, world.lv2_InputPort)) {
+					count_atom_in++;
+				} else if (lilv_port_is_a(p, port, world.lv2_OutputPort)) {
+					count_atom_out++;
+				} else {
+					cb (uri, PluginScanLogEntry::Error, _("Found Atom port not marked for input or output."), false);
+					err = 1;
+				}
+
+				if (!lilv_nodes_contains(buffer_types, world.atom_Sequence)) {
+					cb (uri, PluginScanLogEntry::Error, _("Found Atom port without sequence support, ignored"), false);
+					/* ignore non-sequence Atom ports */
+					err = 1;
+				}
+				else if (lilv_nodes_contains(atom_supports, world.midi_MidiEvent)) {
 					if (lilv_port_is_a(p, port, world.lv2_InputPort)) {
 						count_midi_in++;
-						count_atom_in++;
 					}
 					if (lilv_port_is_a(p, port, world.lv2_OutputPort)) {
 						count_midi_out++;
-						count_atom_out++;
-					}
-				} else {
-					if (lilv_port_is_a(p, port, world.lv2_InputPort)) {
-						count_atom_in++;
-					}
-					if (lilv_port_is_a(p, port, world.lv2_OutputPort)) {
-						count_atom_out++;
 					}
 				}
+
 				lilv_nodes_free(buffer_types);
 				lilv_nodes_free(atom_supports);
 			}
@@ -3707,10 +3709,15 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 					count_ctrl_out++;
 				}
 			}
+			else if (!lilv_port_is_a (p, port, world.lv2_AudioPort)) {
+				err = 1;
+				LilvNode* name = lilv_port_get_name(p, port);
+				cb (uri, PluginScanLogEntry::Error, string_compose (_("Port %1 ('%2') has no known data type"), i, lilv_node_as_string (name)), false);
+				lilv_node_free(name);
+			}
 		}
 
-		if (count_atom_out > 1 || count_atom_in > 1) {
-			cb (uri, PluginScanLogEntry::Error, string_compose (_("Multiple Atom ports are not supported. Atom-in: %1, Atom-out: %2."), count_atom_in, count_atom_out), false);
+		if (err) {
 			continue;
 		}
 
