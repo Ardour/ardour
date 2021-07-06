@@ -353,8 +353,7 @@ PluginManager::cache_valid () const
 uint32_t
 PluginManager::cache_version ()
 {
-	/* see ARDOUR::vst3_scan_and_cache  VST3Cache version = +1 */
-	return 1000 * atoi (X_(PROGRAM_VERSION)) + 1;
+	return 1000 * atoi (X_(PROGRAM_VERSION)) + 2;
 }
 
 struct PluginInfoPtrNameSorter {
@@ -2026,7 +2025,9 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 	if (cache_file.empty ()) {
 		run_scan = true;
 	} else if (tree.read (cache_file)) {
-		/* valid cache file was found, now check version */
+		/* valid cache file was found, now check version
+		 * see ARDOUR::vst3_scan_and_cache VST3Cache version
+		 */
 		int cf_version = 0;
 		if (!tree.root()->get_property ("version", cf_version) || cf_version < 1) {
 			run_scan = true;
