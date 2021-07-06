@@ -2,7 +2,7 @@
  * Copyright (C) 2006-2010 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2010-2011 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2014-2016 John Emmas <john@creativepost.co.uk>
- * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2021 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -410,6 +410,7 @@ fst_load (const char *path)
 
 		// See if we can load the plugin DLL
 		if ((fhandle->dll = (HMODULE)fst_load_vst_library (path)) == NULL) {
+			fst_error ("fst_load(): Cannot open plugin dll\n");
 			fst_unload (&fhandle);
 			return NULL;
 		}
@@ -421,6 +422,7 @@ fst_load (const char *path)
 		}
 
 		if (fhandle->main_entry == 0) {
+			fst_error ("fst_load(): Missing entry method in VST2 plugin\n");
 			fst_unload (&fhandle);
 			return NULL;
 		}

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012-2016 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2013-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2021 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,7 +108,7 @@ static void* vstfx_load_vst_library(const char* path)
 	}
 
 	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
-		PBD::error << string_compose (_("Could not open existing LXVST plugin: %1"), dlerror()) << endmsg;
+		PBD::error << string_compose (_("Could not load VST2 plugin '%1': %2"), path, dlerror ()) << endmsg;
 		return 0;
 	}
 
@@ -149,11 +149,11 @@ static void* vstfx_load_vst_library(const char* path)
 
 		/*Try and load the library*/
 
-		if ((dll = dlopen(full_path, RTLD_LOCAL | RTLD_LAZY)) != 0)
-		{
+		if ((dll = dlopen(full_path, RTLD_LOCAL | RTLD_LAZY)) != 0) {
 			/*Succeeded */
 			break;
 		}
+		PBD::error << string_compose (_("Could not load VST2 plugin '%1': %2"), full_path, dlerror ()) << endmsg;
 
 		/*Try again*/
 
@@ -227,6 +227,7 @@ vstfx_load (const char *path)
 
 	if (fhandle->main_entry == 0)
 	{
+		PBD::error << string_compose (_("Missing entry method in VST2 plugin '%1'"), path) << endmsg;
 		/*If it can't be found, unload the plugin and return a 0 handle*/
 
 		vstfx_unload (fhandle);

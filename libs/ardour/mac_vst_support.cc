@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2021 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -125,6 +125,7 @@ mac_vst_load (const char *path)
 	}
 
 	if (fhandle->main_entry == 0) {
+		PBD::error << string_compose (_("Missing entry method in VST2 plugin '%1'"), path) << endmsg;
 		mac_vst_unload (fhandle);
 		return 0;
 	}

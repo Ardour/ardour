@@ -296,7 +296,7 @@ vst2_unload (VSTHandle* h, ARDOUR::PluginType type)
 }
 
 static VSTHandle*
-vstfx_load (const char* dllpath, ARDOUR::PluginType type)
+vst2_load (const char* dllpath, ARDOUR::PluginType type)
 {
 	VSTHandle* h = NULL;
 	switch (type) {
@@ -523,10 +523,10 @@ vstfx_info_from_plugin (VSTHandle* h, VSTState* vstfx, vector<ARDOUR::VST2Info>&
 static bool
 discover_vst2 (std::string const& path, ARDOUR::PluginType type, std::vector<ARDOUR::VST2Info>& rv, bool verbose)
 {
-	VSTHandle* h = vstfx_load (path.c_str (), type);
+	VSTHandle* h = vst2_load (path.c_str (), type);
 
 	if (!h) {
-		PBD::warning << string_compose (_("Cannot get load VST plugin from '%1'"), path) << endmsg;
+		PBD::warning << string_compose (_("Cannot open VST2 module '%1'"), path) << endmsg;
 		return false;
 	}
 
@@ -678,7 +678,7 @@ ARDOUR::vst2_scan_and_cache (std::string const& path, ARDOUR::PluginType type, b
 			return false;
 		}
 		if (nfo.empty ()) {
-			cerr << "No plugins in VST2 plugin: '" << path << "'\n";
+			PBD::warning << string_compose (_("No plugins in VST2 module '%1'"), path) << endmsg;
 			delete root;
 			return false;
 		}
@@ -687,7 +687,7 @@ ARDOUR::vst2_scan_and_cache (std::string const& path, ARDOUR::PluginType type, b
 			root->add_child_nocopy (i->state ());
 		}
 	} catch (...) {
-		cerr << "Cannot load VST2 plugin: '" << path << "'\n";
+		PBD::warning << string_compose (_("Cannot load VST plugin '%1'"), path) << endmsg;
 		delete root;
 		return false;
 	}
