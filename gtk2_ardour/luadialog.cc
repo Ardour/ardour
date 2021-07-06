@@ -51,7 +51,7 @@ Message::run ()
 {
 
 	bool splash_pushed = false;
-	Splash* spl = Splash::instance();
+	Splash* spl = Splash::exists () ? Splash::instance() : NULL;
 	if (spl && spl->is_visible()) {
 		spl->pop_back_for (_message_dialog);
 		splash_pushed = true;
@@ -61,7 +61,7 @@ Message::run ()
 	_message_dialog.hide ();
 
 	if (splash_pushed) {
-		spl = Splash::instance();
+		spl = Splash::exists () ? Splash::instance() : NULL;
 		if (spl) {
 			spl->pop_front_for (_message_dialog);
 		}

@@ -2960,7 +2960,9 @@ what you would like to do.\n"), PROGRAM_NAME));
 	image->show();
 	hbox->show();
 
-	Splash::instance()->hide ();
+	if (Splash::exists ()) {
+		Splash::instance()->hide ();
+	}
 
 	switch (dialog.run ()) {
 	case RESPONSE_ACCEPT:
