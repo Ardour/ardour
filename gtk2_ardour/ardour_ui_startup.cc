@@ -125,7 +125,7 @@ ARDOUR_UI::setup_profile ()
 int
 ARDOUR_UI::missing_file (Session*s, std::string str, DataType type)
 {
-	MissingFileDialog dialog (s, str, type);
+	MissingFileDialog dialog (_main_window, s, str, type);
 
 	dialog.show ();
 	dialog.present ();

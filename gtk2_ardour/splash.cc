@@ -159,7 +159,9 @@ Splash::pop_back_for (Gtk::Window& win)
 		hide ();
 	} else if (is_mapped()) {
 		get_window()->restack (win.get_window(), false);
-		win.set_transient_for (*this);
+		if (0 == win.get_transient_for ()) {
+			win.set_transient_for (*this);
+		}
 	}
 #endif
 	_window_stack.insert (&win);

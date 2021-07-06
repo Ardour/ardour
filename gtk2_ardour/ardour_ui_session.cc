@@ -476,7 +476,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 	{
 		list<string> const u = new_session->missing_filesources (DataType::MIDI);
 		if (!u.empty()) {
-			MissingFileSourceDialog d (_session, u, DataType::MIDI);
+			MissingFileSourceDialog d (_main_window, _session, u, DataType::MIDI);
 			d.run ();
 		}
 	}
@@ -484,7 +484,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		list<string> const u = new_session->unknown_processors ();
 		bool scan_now = false;
 		if (!u.empty()) {
-			MissingPluginDialog d (_session, u, PluginManager::instance ().cache_valid ());
+			MissingPluginDialog d (_main_window, _session, u, PluginManager::instance ().cache_valid ());
 			if (d.run () == RESPONSE_YES) {
 				scan_now = true;
 			}

@@ -34,7 +34,7 @@ namespace ARDOUR {
 class MissingFileSourceDialog : public ArdourDialog
 {
 public:
-	MissingFileSourceDialog (ARDOUR::Session *, std::list<std::string> const &, ARDOUR::DataType);
+	MissingFileSourceDialog (Gtk::Window&, ARDOUR::Session*, std::list<std::string> const &, ARDOUR::DataType);
 };
 
 #endif

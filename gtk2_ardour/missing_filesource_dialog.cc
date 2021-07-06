@@ -29,8 +29,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-MissingFileSourceDialog::MissingFileSourceDialog (Session * s, list<string> const& files, DataType dt)
-	: ArdourDialog (_("Missing Source Files"), true, false)
+MissingFileSourceDialog::MissingFileSourceDialog (Gtk::Window& parent, Session* s, list<string> const& files, DataType dt)
+	: ArdourDialog (parent, _("Missing Source Files"), true, false)
 {
 	/* This dialog is always shown programatically. Center the window.*/
 	set_position (Gtk::WIN_POS_CENTER);

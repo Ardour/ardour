@@ -36,7 +36,7 @@ namespace ARDOUR {
 class MissingFileDialog : public ArdourDialog
 {
 public:
-	MissingFileDialog (ARDOUR::Session*, const std::string& path, ARDOUR::DataType type);
+	MissingFileDialog (Gtk::Window&, ARDOUR::Session*, const std::string& path, ARDOUR::DataType type);
 
 	int get_action();
 

@@ -36,8 +36,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataType type)
-	: ArdourDialog (_("Missing File"), true, false)
+MissingFileDialog::MissingFileDialog (Gtk::Window& parent, Session* s, const std::string& path, DataType type)
+	: ArdourDialog (parent, _("Missing File"), true, false)
 	, filetype (type)
 	, is_absolute_path (Glib::path_is_absolute (path))
 	, chooser (_("Select a folder to search"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
