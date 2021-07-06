@@ -70,6 +70,7 @@
 #include "pbd/i18n.h"
 
 #ifdef PLATFORM_WINDOWS
+#include <windows.h>  // CreateMutex
 #include <fcntl.h> // Needed for '_fmode'
 #include <shellapi.h> // console
 #endif
@@ -336,6 +337,17 @@ int main (int argc, char *argv[])
 		     << _("under certain conditions; see the source for copying conditions.")
 		     << endl;
 	}
+
+#ifdef PLATFORM_WINDOWS
+	CreateMutexA (0, 1, string_compose ("%1%2", PROGRAM_NAME, PROGRAM_VERSION).c_str ());
+	if (GetLastError() == ERROR_ALREADY_EXISTS) {
+		Gtk::Main main (argc, argv);
+		Gtk::MessageDialog msg (string_compose (_("%1 is already running."), PROGRAM_NAME),
+				false, Gtk::MESSAGE_ERROR , Gtk::BUTTONS_OK, true);
+		msg.run ();
+		exit (EXIT_FAILURE);
+	}
+#endif
 
 #ifdef HAVE_DRMINGW
 	/* prevent missing libs popups */
