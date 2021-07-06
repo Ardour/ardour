@@ -2384,6 +2384,27 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_mixer_screenshot)
 		     ));
 
+#if defined PHONE_HOME && !defined MIXBUS
+	add_option (_("General"), new OptionEditorHeading (_("New Version Check")));
+	bo = new BoolOption (
+		     "check-announcements",
+		     _("Check for announcements at application start"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_check_announcements),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_check_announcements)
+		     );
+	bo ->set_note (string_compose (_("An anomized request is performed to query announcements by contacting\n%1"),
+#ifdef __APPLE__
+				Config->get_osx_pingback_url ()
+#elif defined PLATFORM_WINDOWS
+				Config->get_windows_pingback_url ()
+#else
+				Config->get_linux_pingback_url ()
+#endif
+				));
+	add_option (_("General"), bo);
+
+#endif
+
 	/* APPEARANCE ***************************************************************/
 
 	if (!ARDOUR::Profile->get_mixbus()) {

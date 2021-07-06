@@ -73,6 +73,7 @@
 #include "plugin_scan_dialog.h"
 #include "public_editor.h"
 #include "splash.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -504,7 +505,11 @@ ARDOUR_UI::starting ()
 
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::load_from_application_api));
 
-	if (ARDOUR_COMMAND_LINE::check_announcements) {
+	if (ARDOUR_COMMAND_LINE::check_announcements
+#ifndef MIXBUS
+	    && UIConfiguration::instance().get_check_announcements ()
+#endif
+	   ) {
 		check_announcements ();
 	}
 
