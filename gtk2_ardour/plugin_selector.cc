@@ -1237,15 +1237,22 @@ PluginSelector::show_manager ()
 #endif
 				, false, MESSAGE_QUESTION, BUTTONS_YES_NO);
 
+		q.set_title (string_compose (_("Discover %1 Plugins?"),
 #ifdef __APPLE__
-		q.set_title (_("Discover VST/AU Plugins?"));
-    q.set_secondary_text (_("Third party plugins have not yet been indexed. AudioUnit and VST plugins have to be scanned before they can be used. This can also be done manually from Preferences > Plugins. Depending on the number of installed plugins the process can take several minutes."));
-#else
-		q.set_title (_("Discover VST Plugins?"));
-    q.set_secondary_text (_("Third party plugins have not yet been indexed. VST plugins have to be scanned before they can be used. This can also be done manually from Preferences > Plugins. Depending on the number of installed plugins the process can take several minutes."));
+					_("VST/AU")
 #endif
+					_("VST")
+					));
 
-    if (q.run () == RESPONSE_YES) {
+		q.set_secondary_text (string_compose (_("Third party plugins have not yet been indexed. %1 plugins have to be scanned before they can be used. This can also be done manually from Window > Plugin Manager. Depending on the number of installed plugins the process can take several minutes."),
+#ifdef __APPLE__
+					_("AudioUnit and VST")
+#else
+					_("VST")
+#endif
+					));
+
+		if (q.run () == RESPONSE_YES) {
 			scan_now = true;
 		}
 	}

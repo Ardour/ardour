@@ -50,6 +50,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/session_utils.h"
@@ -62,6 +63,7 @@
 #include "missing_filesource_dialog.h"
 #include "missing_plugin_dialog.h"
 #include "opts.h"
+#include "plugin_scan_dialog.h"
 #include "public_editor.h"
 #include "save_as_dialog.h"
 #include "session_dialog.h"
@@ -480,9 +482,17 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 	}
 	{
 		list<string> const u = new_session->unknown_processors ();
+		bool scan_now = false;
 		if (!u.empty()) {
-			MissingPluginDialog d (_session, u);
-			d.run ();
+			MissingPluginDialog d (_session, u, PluginManager::instance ().cache_valid ());
+			if (d.run () == RESPONSE_YES) {
+				scan_now = true;
+			}
+		}
+		if (scan_now) {
+			PluginScanDialog psd (false, true);
+			psd.start ();
+			show_plugin_manager ();
 		}
 	}
 
