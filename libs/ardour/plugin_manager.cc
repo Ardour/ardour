@@ -1841,8 +1841,27 @@ PluginManager::clear_vst3_blacklist ()
 
 #ifdef VST3_SUPPORT
 
+static bool vst3_is_blacklisted (string const& module_path)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST3_BLACKLIST);
+	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		return false;
+	}
+
+	std::string bl;
+	try {
+		bl = Glib::file_get_contents (fn);
+	} catch (Glib::FileError const& err) {
+		return false;
+	}
+	return bl.find (module_path + "\n") != string::npos;
+}
+
 static void vst3_blacklist (string const& module_path)
 {
+	if (module_path.empty () || vst3_is_blacklisted (module_path)) {
+		return;
+	}
 	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST3_BLACKLIST);
 	FILE* f = NULL;
 	if (! (f = g_fopen (fn.c_str (), "a"))) {
@@ -1855,6 +1874,10 @@ static void vst3_blacklist (string const& module_path)
 
 static void vst3_whitelist (string module_path)
 {
+	if (module_path.empty ()) {
+		return;
+	}
+
 	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST3_BLACKLIST);
 	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 		return;
@@ -1877,22 +1900,6 @@ static void vst3_whitelist (string module_path)
 		return;
 	}
 	Glib::file_set_contents (fn, bl);
-}
-
-static bool vst3_is_blacklisted (string const& module_path)
-{
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST3_BLACKLIST);
-	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-		return false;
-	}
-
-	std::string bl;
-	try {
-		bl = Glib::file_get_contents (fn);
-	} catch (Glib::FileError const& err) {
-		return false;
-	}
-	return bl.find (module_path + "\n") != string::npos;
 }
 
 static bool vst3_filter (const string& str, void*)
@@ -2921,7 +2928,7 @@ PluginManager::blacklist (ARDOUR::PluginType type, std::string const& path_uid)
 			break;
 		case VST3:
 #ifdef VST3_SUPPORT
-			vst3_blacklist (path_uid);
+			vst3_blacklist (module_path_vst3 (path_uid));
 			pil = _vst3_plugin_info;
 #endif
 			break;
@@ -2983,7 +2990,7 @@ PluginManager::whitelist (ARDOUR::PluginType type, std::string const& path_uid, 
 			break;
 		case VST3:
 #ifdef VST3_SUPPORT
-			vst3_whitelist (path_uid);
+			vst3_whitelist (module_path_vst3 (path_uid));
 			return true;
 #endif
 			break;
@@ -3016,7 +3023,7 @@ PluginManager::cache_file (ARDOUR::PluginType type, std::string const& path_uid)
 			break;
 		case VST3:
 #ifdef VST3_SUPPORT
-			fn = ARDOUR::vst3_cache_file (path_uid);
+			fn = ARDOUR::vst3_cache_file (module_path_vst3 (path_uid));
 #endif
 			break;
 		default:
@@ -3076,6 +3083,7 @@ PluginManager::rescan_plugin (ARDOUR::PluginType type, std::string const& path_u
 			}
 			erased = true;
 		}
+		_plugin_scan_log.erase (i);
 	}
 
 	if (den < 2) {
@@ -3087,7 +3095,7 @@ PluginManager::rescan_plugin (ARDOUR::PluginType type, std::string const& path_u
 	_cancel_scan_timeout = false;
 
 	/* force re-scan, remove cache file */
-	std::string fn = cache_file ((*i)->type (), (*i)->path ());
+	std::string fn = cache_file (type, path_uid);
 	if (!fn.empty ()) {
 		::g_unlink (fn.c_str ());
 	}
