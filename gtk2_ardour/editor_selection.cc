@@ -600,6 +600,32 @@ Editor::get_equivalent_regions (RegionSelection & basis, PBD::PropertyID prop) c
 }
 
 bool
+Editor::selection_contains_isolated_equivalent_region ()
+{
+	vector<RegionView*> already_seen;
+	
+	for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
+		if (std::find(already_seen.begin(), already_seen.end(), (*r)) != already_seen.end()){
+			continue;
+		}
+		
+		vector<RegionView*> equivalent_regions;
+		get_equivalent_regions ((*r), equivalent_regions, ARDOUR::Properties::group_select.property_id);
+		
+		for (vector<RegionView*>::iterator er = equivalent_regions.begin() ; er != equivalent_regions.end(); ++er){
+			already_seen.push_back((*er));
+			
+			if (!selection->selected((*er))) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+		
+		
+
+bool
 Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 {
 	vector<RegionView*> all_equivalent_regions;
@@ -614,10 +640,10 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 	}
 
 	if (op == Selection::Toggle || op == Selection::Set) {
-
 		switch (op) {
 		case Selection::Toggle:
 			if (selection->selected (clicked_regionview)) {
+
 				if (press) {
 
 					/* whatever was clicked was selected already; do nothing here but allow
@@ -627,11 +653,22 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 					button_release_can_deselect = true;
 
 				} else {
+
 					if (button_release_can_deselect) {
 
-						/* just remove this one region, but only on a permitted button release */
+						if (selection->regions.empty() || selection_contains_isolated_equivalent_region()) {
+							/* just remove this one region, but only on a permitted button release */
+							selection->remove (clicked_regionview);
 
-						selection->remove (clicked_regionview);
+						} else {
+							/* remove all equivalents regions, but only on a permitted button release */
+							get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
+							
+							for (vector<RegionView*>::iterator r = all_equivalent_regions.begin(); r != all_equivalent_regions.end(); ++r ){
+								selection->remove((*r));
+							}
+						}
+
 						commit = true;
 
 						/* no more deselect action on button release till a new press
@@ -646,10 +683,14 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 				if (press) {
 
-					if (selection->selected (clicked_routeview)) {
-						get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
-					} else {
+					if (selection->regions.empty() || selection_contains_isolated_equivalent_region()) {
+
 						all_equivalent_regions.push_back (clicked_regionview);
+
+					} else {
+						
+						get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
+
 					}
 
 					/* add all the equivalent regions, but only on button press */
@@ -665,14 +706,20 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 		case Selection::Set:
 			if (!selection->selected (clicked_regionview)) {
+
 				get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
 				selection->set (all_equivalent_regions);
 				commit = true;
+
 			} else {
 				/* clicked on an already selected region */
+
 				if (press)
+
 					goto out;
+
 				else {
+
 					if (selection->regions.size() > 1) {
 						/* collapse region selection down to just this one region (and its equivalents) */
 						get_equivalent_regions(clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
@@ -898,7 +945,17 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 			RegionView* arv;
 
 			if ((arv = dynamic_cast<RegionView*>(*x)) != 0) {
-				regions.push_back (arv);
+				if (selection_contains_isolated_equivalent_region()) {
+					regions.push_back (arv);
+				} else {
+					get_equivalent_regions(arv, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
+					for (vector<RegionView*>::iterator i=all_equivalent_regions.begin(); i != all_equivalent_regions.end(); ++i){
+						if ( !(std::find(regions.begin(), regions.end(), (*i)) != regions.end()) ) {
+							regions.push_back (*i);
+						}
+					}
+				}
+				
 			}
 		}
 
