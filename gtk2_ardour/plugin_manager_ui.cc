@@ -149,17 +149,17 @@ PluginManagerUI::PluginManagerUI ()
 	b_actions->set_border_width (4);
 
 #if defined LXVST_SUPPORT
-	ArdourWidgets::ArdourButton* btn_lxvst = manage (new ArdourWidgets::ArdourButton (_("Linux VST2 Path")));
+	ArdourWidgets::ArdourButton* btn_lxvst = Gtk::manage (new ArdourWidgets::ArdourButton (_("Linux VST2 Path")));
 	btn_lxvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::edit_vst_path), LXVST));
 	b_paths->pack_start (*btn_lxvst);
 #endif
 #ifdef WINDOWS_VST_SUPPORT
-	ArdourWidgets::ArdourButton* btn_winvst = manage (new ArdourWidgets::ArdourButton (_("Windows VST2 Path")));
+	ArdourWidgets::ArdourButton* btn_winvst = Gtk::manage (new ArdourWidgets::ArdourButton (_("Windows VST2 Path")));
 	btn_winvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::edit_vst_path), Windows_VST));
 	b_paths->pack_start (*btn_winvst);
 #endif
 #ifdef VST3_SUPPORT
-	ArdourWidgets::ArdourButton* btn_vst3 = manage (new ArdourWidgets::ArdourButton (_("VST3 Path")));
+	ArdourWidgets::ArdourButton* btn_vst3 = Gtk::manage (new ArdourWidgets::ArdourButton (_("VST3 Path")));
 	btn_vst3->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::edit_vst_path), VST3));
 	b_paths->pack_start (*btn_vst3);
 #endif
