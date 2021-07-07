@@ -440,7 +440,7 @@ PluginManagerUI::edit_vst_path (ARDOUR::PluginType t)
 			case Windows_VST:
 				rc_option_editor->edit_vst_path (
 						_("Set Windows VST2 Search Path"),
-						PluginManager::instance()..get_default_windows_vst_path (),
+						PluginManager::instance().get_default_windows_vst_path (),
 						sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_vst),
 						sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_vst)
 						);
