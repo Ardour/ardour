@@ -47,6 +47,7 @@ public:
 	XMLNode& get_state ();
 
 	bool on_key_release_event (GdkEventKey*);
+	void edit_vst_path (std::string const& title, std::string const& dflt, sigc::slot<std::string>, sigc::slot<bool, std::string>);
 
 private:
 	void parameter_changed (std::string const &);
@@ -77,7 +78,6 @@ private:
 	void clear_vst3_blacklist ();
 	void clear_au_cache ();
 	void clear_au_blacklist ();
-	void edit_vst_path (std::string const& title, std::string const& dflt, sigc::slot<std::string>, sigc::slot<bool, std::string>);
 };
 
 #endif /* __gtk_ardour_rc_option_editor_h__ */

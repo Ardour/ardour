@@ -54,6 +54,8 @@ private:
 	void rescan_faulty ();
 	void rescan_selected ();
 	void clear_log ();
+	void show_plugin_prefs ();
+	void edit_vst_path (ARDOUR::PluginType);
 
 	void plugin_status_changed (ARDOUR::PluginType, std::string, ARDOUR::PluginManager::PluginStatusType);
 
@@ -97,6 +99,7 @@ private:
 	ArdourWidgets::ArdourButton  _btn_rescan_err;
 	ArdourWidgets::ArdourButton  _btn_rescan_sel;
 	ArdourWidgets::ArdourButton  _btn_clear;
+	ArdourWidgets::ArdourButton  _btn_prefs;
 	Gtk::Table                   _tbl_nfo;
 
 	Gtk::Table _top;

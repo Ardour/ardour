@@ -909,12 +909,22 @@ ARDOUR_UI::show_ui_prefs ()
 		rc_option_editor->set_current_page (_("Appearance"));
 	}
 }
+
 void
 ARDOUR_UI::show_mixer_prefs ()
 {
 	if (rc_option_editor) {
 		show_tabbable (rc_option_editor);
 		rc_option_editor->set_current_page (_("Signal Flow"));
+	}
+}
+
+void
+ARDOUR_UI::show_plugin_prefs ()
+{
+	if (rc_option_editor) {
+		show_tabbable (rc_option_editor);
+		rc_option_editor->set_current_page (_("Plugins"));
 	}
 }
 

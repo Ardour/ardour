@@ -31,7 +31,9 @@
 
 #include "ardour_message.h"
 #include "plugin_manager_ui.h"
+#include "ardour_ui.h"
 #include "plugin_scan_dialog.h"
+#include "rc_option_editor.h"
 
 #include "pbd/i18n.h"
 
@@ -43,6 +45,7 @@ PluginManagerUI::PluginManagerUI ()
 	, _btn_rescan_err (_("Re-scan Faulty"))
 	, _btn_rescan_sel (_("Re-scan Selected"))
 	, _btn_clear (_("Clear Stale Scan Log"))
+	, _btn_prefs (_("Show Plugin Prefs"))
 	, _in_row_change (false)
 {
 	plugin_model = Gtk::ListStore::create (plugin_columns);
@@ -127,11 +130,14 @@ PluginManagerUI::PluginManagerUI ()
 
 	Gtk::Label* lbl = Gtk::manage (new Gtk::Label ("")); // spacer
 	Gtk::Frame* f_info = Gtk::manage (new Gtk::Frame (_("Plugin Count")));
+	Gtk::Frame* f_paths = Gtk::manage (new Gtk::Frame (_("Preferences")));
+	Gtk::VBox*  b_paths = Gtk::manage (new Gtk::VBox ());
 	Gtk::Frame* f_actions = Gtk::manage (new Gtk::Frame (_("Scan Actions")));
 	Gtk::VBox*  b_actions = Gtk::manage (new Gtk::VBox ());
 
 	f_info->add (_tbl_nfo);
 	f_actions->add (*b_actions);
+	f_paths->add (*b_paths);
 
 	_tbl_nfo.set_border_width (4);
 
@@ -142,11 +148,31 @@ PluginManagerUI::PluginManagerUI ()
 	b_actions->set_spacing (4);
 	b_actions->set_border_width (4);
 
+#if defined LXVST_SUPPORT
+	ArdourWidgets::ArdourButton* btn_lxvst = manage (new ArdourWidgets::ArdourButton (_("Linux VST2 Path")));
+	btn_lxvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::edit_vst_path), LXVST));
+	b_paths->pack_start (*btn_lxvst);
+#endif
+#ifdef WINDOWS_VST_SUPPORT
+	ArdourWidgets::ArdourButton* btn_winvst = manage (new ArdourWidgets::ArdourButton (_("Windows VST2 Path")));
+	btn_winvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::edit_vst_path), Windows_VST));
+	b_paths->pack_start (*btn_winvst);
+#endif
+#ifdef VST3_SUPPORT
+	ArdourWidgets::ArdourButton* btn_vst3 = manage (new ArdourWidgets::ArdourButton (_("VST3 Path")));
+	btn_vst3->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::edit_vst_path), VST3));
+	b_paths->pack_start (*btn_vst3);
+#endif
+	b_paths->pack_start (_btn_prefs);
+	b_paths->set_spacing (4);
+	b_paths->set_border_width (4);
+
 	/* top level packing */
 	_top.attach (*lbl,       0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND | Gtk::FILL, 4, 0);
 	_top.attach (*f_info,    0, 1, 1, 2, Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 4, 4);
 	_top.attach (*f_actions, 0, 1, 2, 3, Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 4, 4);
-	_top.attach (_pane,      1, 2, 0, 3, Gtk::EXPAND | Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 4, 0);
+	_top.attach (*f_paths,   0, 1, 3, 4, Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 4, 4);
+	_top.attach (_pane,      1, 2, 0, 4, Gtk::EXPAND | Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 4, 0);
 
 	add (_top);
 	_top.show_all ();
@@ -163,6 +189,7 @@ PluginManagerUI::PluginManagerUI ()
 	_btn_rescan_err.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::rescan_faulty));
 	_btn_rescan_sel.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::rescan_selected));
 	_btn_clear.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::clear_log));
+	_btn_prefs.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::show_plugin_prefs));
 
 	cell_fav->signal_toggled().connect (sigc::mem_fun (*this, &PluginManagerUI::favorite_changed));
 	cell_hidden->signal_toggled().connect (sigc::mem_fun (*this, &PluginManagerUI::hidden_changed));
@@ -393,6 +420,54 @@ PluginManagerUI::blacklist_changed (std::string const& path)
 			PluginManager::instance ().rescan_plugin (psle->type (), psle->path ());
 		} else {
 			PluginManager::instance ().blacklist (psle->type (), psle->path ());
+		}
+	}
+}
+
+void
+PluginManagerUI::show_plugin_prefs ()
+{
+	ARDOUR_UI::instance()->show_plugin_prefs ();
+}
+
+void
+PluginManagerUI::edit_vst_path (ARDOUR::PluginType t)
+{
+	RCOptionEditor* rc_option_editor = ARDOUR_UI::instance()->get_rc_option_editor();
+	if (rc_option_editor) {
+		switch (t) {
+#ifdef WINDOWS_VST_SUPPORT
+			case Windows_VST:
+				rc_option_editor->edit_vst_path (
+						_("Set Windows VST2 Search Path"),
+						PluginManager::instance()..get_default_windows_vst_path (),
+						sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_vst),
+						sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_vst)
+						);
+				break;
+#endif
+#ifdef LXVST_SUPPORT
+			case LXVST:
+				rc_option_editor->edit_vst_path (
+						_("Set Linux VST2 Search Path"),
+						PluginManager::instance().get_default_lxvst_path (),
+						sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_lxvst),
+						sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_lxvst)
+						);
+				break;
+#endif
+#ifdef VST3_SUPPORT
+			case VST3:
+				rc_option_editor->edit_vst_path (
+						_("Set Additional VST3 Search Path"),
+						"", /* default is blank */
+						sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_vst3),
+						sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_vst3)
+						);
+				break;
+#endif
+			default:
+				break;
 		}
 	}
 }

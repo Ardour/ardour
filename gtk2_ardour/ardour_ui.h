@@ -341,6 +341,7 @@ public:
 
 	void show_ui_prefs ();
 	void show_mixer_prefs ();
+	void show_plugin_prefs ();
 
 	bool check_audioengine(Gtk::Window&);
 
