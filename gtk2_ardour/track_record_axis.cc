@@ -672,7 +672,7 @@ TrackRecordAxis::TrackSummary::TrackSummary (boost::shared_ptr<ARDOUR::Route> r)
 	assert (_track);
 
 	_track->PlaylistChanged.connect (_connections, invalidator (*this), boost::bind (&TrackSummary::playlist_changed, this), gui_context ());
-	_track->playlist()->ContentsChanged.connect (_connections, invalidator (*this), boost::bind (&TrackSummary::playlist_changed, this), gui_context ());
+	_track->playlist()->ContentsChanged.connect (_playlist_connections, invalidator (*this), boost::bind (&TrackSummary::playlist_contents_changed, this), gui_context ());
 	_track->presentation_info().PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&TrackSummary::property_changed, this, _1), gui_context ());
 
 	_track->rec_enable_control()->Changed.connect (_connections, invalidator (*this), boost::bind (&TrackSummary::maybe_setup_rec_box, this), gui_context());
@@ -831,6 +831,14 @@ TrackRecordAxis::TrackSummary::playhead_position_changed (samplepos_t p)
 
 void
 TrackRecordAxis::TrackSummary::playlist_changed ()
+{
+	_playlist_connections.disconnect ();
+	_track->playlist()->ContentsChanged.connect (_playlist_connections, invalidator (*this), boost::bind (&TrackSummary::playlist_contents_changed, this), gui_context ());
+	set_dirty ();
+}
+
+void
+TrackRecordAxis::TrackSummary::playlist_contents_changed ()
 {
 	set_dirty ();
 }

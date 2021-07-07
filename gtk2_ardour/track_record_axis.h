@@ -183,6 +183,7 @@ private:
 		private:
 			void render_region (boost::shared_ptr<ARDOUR::Region>, Cairo::RefPtr<Cairo::Context> const&, double);
 			void playlist_changed ();
+			void playlist_contents_changed ();
 			void property_changed (PBD::PropertyChange const&);
 			void maybe_setup_rec_box ();
 			void update_rec_box ();
@@ -201,6 +202,7 @@ private:
 			bool        _rec_active;
 
 			std::vector<RecInfo>      _rec_rects;
+			PBD::ScopedConnection     _playlist_connections;
 			PBD::ScopedConnectionList _connections;
 			sigc::connection          _screen_update_connection;
 	};
