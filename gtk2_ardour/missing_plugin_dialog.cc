@@ -45,14 +45,14 @@ MissingPluginDialog::MissingPluginDialog (Gtk::Window& parent, Session* s, list<
 	for (list<string>::const_iterator i = plugins.begin(); i != plugins.end(); ++i) {
 		t << *i << "\n";
 	}
-	t << _("\nThose plugins will be replaced with inactive stubs.\n");
+	t << _("\nThose plugins will be replaced with inactive stubs until the session is reloaded.\n");
 
 	if (cache_valid) {
 		add_button (_("OK"), RESPONSE_OK);
 		set_default_response (RESPONSE_OK);
 		t << _("It is recommended that you install the missing plugins and re-load the session.\n");
 	} else {
-    t << _("Third party plugins have not yet been indexed.\n");
+		t << _("Third party plugins have not yet been indexed.") << "\n";
 		t << string_compose (_("Scan %1 plugins now?"),
 #ifdef __APPLE__
 				_("AudioUnit and VST")
