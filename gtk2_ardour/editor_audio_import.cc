@@ -498,7 +498,16 @@ Editor::do_import (vector<string>          paths,
 		}
 	}
 
-	track->playlist()->set_pgroup_id(pgroup_id);
+#if 0 // @ben FIXME
+	/* track is only set if a mono file is imported to an existing track.
+	 * track->playlist() crashes.
+	 *
+	 * I guess this should only be called when importing multi-channel
+	 * files to newly created tracks. The new tracks should share
+	 * a group ID. This can however not be done here.
+	 */
+	track->playlist()->set_pgroup_id (pgroup_id);
+#endif
 
 	import_status.all_done = true;
 }
