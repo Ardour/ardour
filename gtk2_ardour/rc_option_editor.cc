@@ -2392,7 +2392,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_check_announcements),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_check_announcements)
 		     );
-	bo ->set_note (string_compose (_("An anomized request is performed to query announcements by contacting\n%1"),
+	bo ->set_note (string_compose (_("An anonymous request is performed to query announcements by contacting\n%1"),
 #ifdef __APPLE__
 				Config->get_osx_pingback_url ()
 #elif defined PLATFORM_WINDOWS
