@@ -1240,8 +1240,9 @@ PluginSelector::show_manager ()
 		q.set_title (string_compose (_("Discover %1 Plugins?"),
 #ifdef __APPLE__
 					_("VST/AU")
-#endif
+#else
 					_("VST")
+#endif
 					));
 
 		q.set_secondary_text (string_compose (_("Third party plugins have not yet been indexed. %1 plugins have to be scanned before they can be used. This can also be done manually from Window > Plugin Manager. Depending on the number of installed plugins the process can take several minutes."),
