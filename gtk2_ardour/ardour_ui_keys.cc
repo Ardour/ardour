@@ -236,7 +236,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		DEBUG_TRACE (DEBUG::Accelerators, "\tnot handled by binding activation, now propagate to window\n");
 
-		if (gtk_window_propagate_key_event (win, ev)) {
+		if (window.get_realized () && (!window.get_focus() || window.get_focus()->get_realized ()) && gtk_window_propagate_key_event (win, ev)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\tpropagate handled\n");
 			return true;
 		}
@@ -247,7 +247,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		DEBUG_TRACE (DEBUG::Accelerators, "\tpropagate, then activate\n");
 
-		if (gtk_window_propagate_key_event (win, ev)) {
+		if (window.get_realized () && (!window.get_focus() || window.get_focus()->get_realized ()) && gtk_window_propagate_key_event (win, ev)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\thandled by propagate\n");
 			return true;
 		}
