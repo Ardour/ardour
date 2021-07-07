@@ -18,9 +18,14 @@ function factory () return function ()
 			local pp = pi:plugin (0)
 			local id = pi:type() .. "-" .. pp:unique_id()
 			local cnt = 0
+			local rns = {}
 			if pi:is_channelstrip () then goto nextproc end
-			if all_plugs[id] then cnt = all_plugs[id]['cnt'] end
-			all_plugs[id] = { name = proc:name(), ["type"] = pi:type(), id = pp:unique_id(), author = pp:get_info().creator, cnt = (cnt + 1) }
+			if all_plugs[id] then
+				cnt = all_plugs[id]['cnt']
+				rns = all_plugs[id]['rns']
+			end
+			rns[#rns+1] = r:name ()
+			all_plugs[id] = { name = proc:name(), ["type"] = pi:type(), id = pp:unique_id(), author = pp:get_info().creator, cnt = (cnt + 1), rns = rns }
 			::nextproc::
 			i = i + 1
 		end
@@ -39,6 +44,9 @@ function factory () return function ()
 
 	for k,v in pairs (all_plugs) do
 		print (string.format ("%2d * %-6s %-30s (%s)", v['cnt'], plugintypestr(v['type']), v['name'], v['id']))
+		for _,n in ipairs (v['rns']) do
+			print ("   -", n)
+		end
 		rv = rv .. "\n<span face=\"mono\">" .. string.format ("%3d * %-6s %s (by %s)", v['cnt'], plugintypestr(v['type']), v['name'], v['author']) .. "</span>"
 	end
 
