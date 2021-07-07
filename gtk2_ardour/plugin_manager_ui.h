@@ -55,7 +55,8 @@ private:
 	void rescan_selected ();
 	void clear_log ();
 	void show_plugin_prefs ();
-	void edit_vst_path (ARDOUR::PluginType);
+	void vst_path_cb (ARDOUR::PluginType);
+	void edit_vst_path (std::string const&, std::string const&, sigc::slot<std::string>, sigc::slot<bool, std::string>);
 
 	void plugin_status_changed (ARDOUR::PluginType, std::string, ARDOUR::PluginManager::PluginStatusType);
 

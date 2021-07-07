@@ -4651,7 +4651,7 @@ void RCOptionEditor::show_transport_masters () {
 
 void RCOptionEditor::plugin_scan_refresh () {
 	/* first argument says discover new plugins, second means be verbose */
-	PluginScanDialog psd (false, true);
+	PluginScanDialog psd (false, true, current_toplevel ());
 	psd.start ();
 }
 
@@ -4683,21 +4683,23 @@ void RCOptionEditor::clear_au_blacklist () {
 	PluginManager::instance().clear_au_blacklist();
 }
 
-void RCOptionEditor::edit_vst_path (std::string const& title, std::string const& dflt, sigc::slot<string> get, sigc::slot<bool, string> set) {
-	PathsDialog *pd = new PathsDialog (*current_toplevel(), title, get (), dflt);
-	ResponseType r = (ResponseType) pd->run ();
-	pd->hide();
-	if (r == RESPONSE_ACCEPT) {
-		set (pd->get_serialized_paths());
-		MessageDialog msg (_("Re-scan Plugins now?"),
-				false /*no markup*/, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true /*modal*/);
-		msg.set_default_response (Gtk::RESPONSE_YES);
-		if (msg.run() == Gtk::RESPONSE_YES) {
-			msg.hide ();
-			plugin_scan_refresh ();
-		}
+void
+RCOptionEditor::edit_vst_path (std::string const& title, std::string const& dflt, sigc::slot<string> get, sigc::slot<bool, string> set)
+{
+	/* see also PluginManagerUI::edit_vst_path */
+	PathsDialog pd (*current_toplevel(), title, get (), dflt);
+	if (pd.run () != Gtk::RESPONSE_ACCEPT) {
+		return;
 	}
-	delete pd;
+	pd.hide();
+	set (pd.get_serialized_paths());
+	MessageDialog msg (_("Re-scan Plugins now?"), false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
+	msg.set_default_response (Gtk::RESPONSE_YES);
+	if (msg.run() != Gtk::RESPONSE_YES) {
+		return;
+	}
+	msg.hide ();
+	plugin_scan_refresh ();
 }
 
 

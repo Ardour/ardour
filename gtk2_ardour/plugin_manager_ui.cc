@@ -28,6 +28,7 @@
 #include "ardour/types_convert.h"
 
 #include "gtkmm2ext/gui_thread.h"
+#include "widgets/paths_dialog.h"
 
 #include "ardour_message.h"
 #include "plugin_manager_ui.h"
@@ -150,17 +151,17 @@ PluginManagerUI::PluginManagerUI ()
 
 #if defined LXVST_SUPPORT
 	ArdourWidgets::ArdourButton* btn_lxvst = Gtk::manage (new ArdourWidgets::ArdourButton (_("Linux VST2 Path")));
-	btn_lxvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::edit_vst_path), LXVST));
+	btn_lxvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::vst_path_cb), LXVST));
 	b_paths->pack_start (*btn_lxvst);
 #endif
 #ifdef WINDOWS_VST_SUPPORT
 	ArdourWidgets::ArdourButton* btn_winvst = Gtk::manage (new ArdourWidgets::ArdourButton (_("Windows VST2 Path")));
-	btn_winvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::edit_vst_path), Windows_VST));
+	btn_winvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::vst_path_cb), Windows_VST));
 	b_paths->pack_start (*btn_winvst);
 #endif
 #ifdef VST3_SUPPORT
 	ArdourWidgets::ArdourButton* btn_vst3 = Gtk::manage (new ArdourWidgets::ArdourButton (_("VST3 Path")));
-	btn_vst3->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::edit_vst_path), VST3));
+	btn_vst3->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::vst_path_cb), VST3));
 	b_paths->pack_start (*btn_vst3);
 #endif
 	b_paths->pack_start (_btn_prefs);
@@ -431,44 +432,62 @@ PluginManagerUI::show_plugin_prefs ()
 }
 
 void
-PluginManagerUI::edit_vst_path (ARDOUR::PluginType t)
+PluginManagerUI::edit_vst_path (std::string const& title, std::string const& dflt, sigc::slot<std::string> get, sigc::slot<bool, std::string> set)
 {
-	RCOptionEditor* rc_option_editor = ARDOUR_UI::instance()->get_rc_option_editor();
-	if (rc_option_editor) {
-		switch (t) {
+	/* see also RCOptionEditor::edit_vst_path */
+	ArdourWidgets::PathsDialog pd (*this, title, get (), dflt);
+	if (pd.run () != Gtk::RESPONSE_ACCEPT) {
+		return;
+	}
+	pd.hide();
+	set (pd.get_serialized_paths ());
+
+	ArdourMessageDialog msg (_("Re-scan Plugins now?"), false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
+	msg.set_default_response (Gtk::RESPONSE_YES);
+	if (msg.run() != Gtk::RESPONSE_YES) {
+		return;
+	}
+	msg.hide ();
+	PluginScanDialog psd (false, true, this);
+	psd.start ();
+}
+
+void
+PluginManagerUI::vst_path_cb (ARDOUR::PluginType t)
+{
+	switch (t) {
 #ifdef WINDOWS_VST_SUPPORT
-			case Windows_VST:
-				rc_option_editor->edit_vst_path (
-						_("Set Windows VST2 Search Path"),
-						PluginManager::instance().get_default_windows_vst_path (),
-						sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_vst),
-						sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_vst)
-						);
-				break;
+		case Windows_VST:
+			edit_vst_path (
+					_("Set Windows VST2 Search Path"),
+					PluginManager::instance().get_default_windows_vst_path (),
+					sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_vst),
+					sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_vst)
+					);
+			break;
 #endif
 #ifdef LXVST_SUPPORT
-			case LXVST:
-				rc_option_editor->edit_vst_path (
-						_("Set Linux VST2 Search Path"),
-						PluginManager::instance().get_default_lxvst_path (),
-						sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_lxvst),
-						sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_lxvst)
-						);
-				break;
+		case LXVST:
+			edit_vst_path (
+					_("Set Linux VST2 Search Path"),
+					PluginManager::instance().get_default_lxvst_path (),
+					sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_lxvst),
+					sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_lxvst)
+					);
+			break;
 #endif
 #ifdef VST3_SUPPORT
-			case VST3:
-				rc_option_editor->edit_vst_path (
-						_("Set Additional VST3 Search Path"),
-						"", /* default is blank */
-						sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_vst3),
-						sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_vst3)
-						);
-				break;
+		case VST3:
+			edit_vst_path (
+					_("Set Additional VST3 Search Path"),
+					"", /* default is blank */
+					sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_vst3),
+					sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_vst3)
+					);
+			break;
 #endif
-			default:
-				break;
-		}
+		default:
+			break;
 	}
 }
 
