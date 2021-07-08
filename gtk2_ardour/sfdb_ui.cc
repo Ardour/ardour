@@ -2098,12 +2098,10 @@ SoundFileOmega::do_something (int action)
 
 	_import_active = true;
 
-	string gid = Playlist::generate_pgroup_id();
-
 	if (copy_files_btn.get_active()) {
-		PublicEditor::instance().do_import (paths, chns, mode, quality, mts, mtd, where, gid, instrument, with_midi_markers);
+		PublicEditor::instance().do_import (paths, chns, mode, quality, mts, mtd, where, instrument, with_midi_markers);
 	} else {
-		PublicEditor::instance().do_embed (paths, chns, mode, where, gid, instrument);
+		PublicEditor::instance().do_embed (paths, chns, mode, where, instrument);
 	}
 
 	_import_active = false;

@@ -348,7 +348,6 @@ Editor::do_import (vector<string>          paths,
                    MidiTrackNameSource     midi_track_name_source,
                    MidiTempoMapDisposition smf_tempo_disposition,
                    samplepos_t&            pos,
-                   string                  pgroup_id,
                    ARDOUR::PluginInfoPtr   instrument,
                    bool                    with_markers)
 {
@@ -356,6 +355,7 @@ Editor::do_import (vector<string>          paths,
 	vector<string> to_import;
 	int nth = 0;
 	bool use_timestamp = (pos == -1);
+	std::string const& pgroup_id = Playlist::generate_pgroup_id ();
 
 	/* XXX nutempo2: we will import markers using music (beat) time, which
 	   will make any imported tempo map irrelevant. Not doing that (in 6.7,
@@ -423,7 +423,7 @@ Editor::do_import (vector<string>          paths,
 
 		if (!cancel) {
 			ipw.show ();
-			import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, false, instrument);
+			import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, pgroup_id, false, instrument);
 			import_status.clear();
 		}
 
@@ -469,7 +469,7 @@ Editor::do_import (vector<string>          paths,
 					track = get_nth_selected_audio_track (nth++);
 				}
 
-				import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, replace, instrument);
+				import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, pgroup_id, replace, instrument);
 				import_status.clear();
 				break;
 
@@ -478,7 +478,7 @@ Editor::do_import (vector<string>          paths,
 				to_import.clear ();
 				to_import.push_back (*a);
 
-				import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, replace, instrument);
+				import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, pgroup_id, replace, instrument);
 				import_status.clear();
 				break;
 
@@ -487,7 +487,7 @@ Editor::do_import (vector<string>          paths,
 				to_import.clear ();
 				to_import.push_back (*a);
 
-				import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, replace, instrument);
+				import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, pgroup_id, replace, instrument);
 				import_status.clear();
 				break;
 
@@ -498,22 +498,15 @@ Editor::do_import (vector<string>          paths,
 		}
 	}
 
-#if 0 // @ben FIXME
-	/* track is only set if a mono file is imported to an existing track.
-	 * track->playlist() crashes.
-	 *
-	 * I guess this should only be called when importing multi-channel
-	 * files to newly created tracks. The new tracks should share
-	 * a group ID. This can however not be done here.
-	 */
-	track->playlist()->set_pgroup_id (pgroup_id);
-#endif
-
 	import_status.all_done = true;
 }
 
 void
-Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode mode, samplepos_t& pos, string pgroup_id, ARDOUR::PluginInfoPtr instrument)
+Editor::do_embed (vector<string> paths,
+                  ImportDisposition import_as,
+                  ImportMode mode,
+                  samplepos_t& pos,
+                  ARDOUR::PluginInfoPtr instrument)
 {
 	boost::shared_ptr<Track> track;
 	bool check_sample_rate = true;
@@ -521,6 +514,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 	bool multi = paths.size() > 1;
 	int nth = 0;
 	bool use_timestamp = (pos == -1);
+	std::string const& pgroup_id = Playlist::generate_pgroup_id ();
 
 	switch (import_as) {
 	case Editing::ImportDistinctFiles:
@@ -538,7 +532,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 				track = get_nth_selected_audio_track (nth++);
 			}
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, -1, track, instrument) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, -1, track, pgroup_id, instrument) < -1) {
 				/* error, bail out */
 				return;
 			}
@@ -556,7 +550,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 			to_embed.clear ();
 			to_embed.push_back (*a);
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, -1, -1, track, instrument) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, -1, -1, track, pgroup_id, instrument) < -1) {
 				/* error, bail out */
 				return;
 			}
@@ -564,7 +558,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 		break;
 
 	case Editing::ImportMergeFiles:
-		if (embed_sndfiles (paths, multi, check_sample_rate, import_as, mode, pos, 1, 1, track, instrument) < -1) {
+		if (embed_sndfiles (paths, multi, check_sample_rate, import_as, mode, pos, 1, 1, track, pgroup_id, instrument) < -1) {
 			/* error, bail out */
 			return;
 		}
@@ -581,7 +575,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 			to_embed.clear ();
 			to_embed.push_back (*a);
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, 1, track, instrument) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, 1, track, pgroup_id, instrument) < -1) {
 				/* error, bail out */
 				return;
 			}
@@ -599,6 +593,7 @@ Editor::import_sndfiles (vector<string>            paths,
                          int                       target_regions,
                          int                       target_tracks,
                          boost::shared_ptr<Track>& track,
+                         std::string const&        pgroup_id,
                          bool                      replace,
                          ARDOUR::PluginInfoPtr     instrument)
 {
@@ -650,7 +645,7 @@ Editor::import_sndfiles (vector<string>            paths,
 			import_status.mode,
 			import_status.target_regions,
 			import_status.target_tracks,
-			track, false, instrument
+			track, pgroup_id, false, instrument
 			);
 
 		/* update position from results */
@@ -671,6 +666,7 @@ Editor::embed_sndfiles (vector<string>            paths,
                         int                       target_regions,
                         int                       target_tracks,
                         boost::shared_ptr<Track>& track,
+                        std::string const&        pgroup_id,
                         ARDOUR::PluginInfoPtr     instrument)
 {
 	boost::shared_ptr<AudioFileSource> source;
@@ -787,7 +783,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 	}
 
 	if (!sources.empty()) {
-		return add_sources (paths, sources, pos, disposition, mode, target_regions, target_tracks, track, true, instrument);
+		return add_sources (paths, sources, pos, disposition, mode, target_regions, target_tracks, track, pgroup_id, true, instrument);
 	}
 
 	return 0;
@@ -802,6 +798,7 @@ Editor::add_sources (vector<string>            paths,
                      int                       target_regions,
                      int                       target_tracks,
                      boost::shared_ptr<Track>& track,
+                     std::string const&        pgroup_id,
                      bool                      /*add_channel_suffix*/,
                      ARDOUR::PluginInfoPtr     instrument)
 {
@@ -998,7 +995,7 @@ Editor::add_sources (vector<string>            paths,
 			}
 		}
 
-		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track, track_names[n], instrument);
+		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track, track_names[n], pgroup_id, instrument);
 
 		rlen = (*r)->length();
 
@@ -1027,10 +1024,11 @@ int
 Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
                                      uint32_t                  in_chans,
                                      uint32_t                  out_chans,
-                                     samplepos_t&               pos,
+                                     samplepos_t&              pos,
                                      ImportMode                mode,
                                      boost::shared_ptr<Track>& existing_track,
-                                     const string&             new_track_name,
+                                     string const&             new_track_name,
+                                     string const&             pgroup_id,
                                      ARDOUR::PluginInfoPtr     instrument)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(region);
@@ -1083,10 +1081,11 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 				if (at.empty()) {
 					return -1;
 				}
-				if (Config->get_strict_io ()) {
-					for (list<boost::shared_ptr<AudioTrack> >::iterator i = at.begin(); i != at.end(); ++i) {
+				for (list<boost::shared_ptr<AudioTrack> >::iterator i = at.begin(); i != at.end(); ++i) {
+					if (Config->get_strict_io ()) {
 						(*i)->set_strict_io (true);
 					}
+					(*i)->playlist()->set_pgroup_id (pgroup_id);
 				}
 
 				existing_track = at.front();
@@ -1105,7 +1104,13 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 					return -1;
 				}
 
-				// TODO set strict_io from preferences
+				for (list<boost::shared_ptr<MidiTrack> >::iterator i = mt.begin(); i != mt.end(); ++i) {
+					if (Config->get_strict_io ()) {
+						(*i)->set_strict_io (true);
+					}
+					(*i)->playlist()->set_pgroup_id (pgroup_id);
+				}
+
 				existing_track = mt.front();
 			}
 

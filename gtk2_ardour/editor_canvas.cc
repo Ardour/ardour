@@ -417,21 +417,19 @@ Editor::drop_paths_part_two (const vector<string>& paths, samplepos_t sample, do
 		}
 	}
 
-	string gid = Playlist::generate_pgroup_id();
-
 	std::pair<TimeAxisView*, int> const tvp = trackview_by_y_position (ypos, false);
 	if (tvp.first == 0) {
 
 		/* drop onto canvas background: create new tracks */
 
 		InstrumentSelector is; // instantiation builds instrument-list and sets default.
-		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, SMFTempoIgnore, sample, gid, is.selected_instrument(), false);
+		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, SMFTempoIgnore, sample, is.selected_instrument(), false);
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack,
-			           SrcBest, SMFTrackName, SMFTempoIgnore, sample, gid);
+			           SrcBest, SMFTrackName, SMFTempoIgnore, sample);
 		} else {
-			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, sample, gid);
+			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, sample);
 		}
 
 	} else if ((tv = dynamic_cast<RouteTimeAxisView*> (tvp.first)) != 0) {
@@ -443,13 +441,13 @@ Editor::drop_paths_part_two (const vector<string>& paths, samplepos_t sample, do
 			selection->set (tv);
 
 			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack,
-				   SrcBest, SMFTrackName, SMFTempoIgnore, sample, gid);
+				   SrcBest, SMFTrackName, SMFTempoIgnore, sample);
 
 			if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack,
-				           SrcBest, SMFTrackName, SMFTempoIgnore, sample, gid, boost::shared_ptr<PluginInfo>(), false);
+				           SrcBest, SMFTrackName, SMFTempoIgnore, sample, boost::shared_ptr<PluginInfo>(), false);
 			} else {
-				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, sample, gid);
+				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, sample);
 			}
 		}
 	}

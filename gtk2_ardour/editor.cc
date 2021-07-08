@@ -4343,8 +4343,7 @@ Editor::restore_editing_space ()
 bool
 Editor::stamp_new_playlist (string &name, string &pgroup, bool copy)
 {
-	string gid = Playlist::generate_pgroup_id();
-	pgroup = gid;
+	pgroup = Playlist::generate_pgroup_id ();
 
 	if (name.length()==0) {
 		name = _("Take.1");

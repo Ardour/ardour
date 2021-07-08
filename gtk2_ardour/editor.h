@@ -456,7 +456,6 @@ public:
 	                ARDOUR::MidiTrackNameSource           mts,
 	                ARDOUR::MidiTempoMapDisposition       mtd,
 	                samplepos_t&                          pos,
-	                std::string                           pgroup_id,
 	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
 	                bool with_markers = false
 		);
@@ -465,7 +464,6 @@ public:
 	               Editing::ImportDisposition            disposition,
 	               Editing::ImportMode                   mode,
 	               samplepos_t&                          pos,
-	               std::string                           pgroup_id,
 	               boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
 	void get_regionview_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
@@ -1395,6 +1393,7 @@ private:
 	                     int                                   target_regions,
 	                     int                                   target_tracks,
 	                     boost::shared_ptr<ARDOUR::Track>&     track,
+	                     std::string const&                    pgroup_id,
 	                     bool                                  replace,
 	                     boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
@@ -1407,6 +1406,7 @@ private:
 	                    int                                   target_regions,
 	                    int                                   target_tracks,
 	                    boost::shared_ptr<ARDOUR::Track>&     track,
+	                    std::string const&                    pgroup_id,
 	                    boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
 	int add_sources (std::vector<std::string>              paths,
@@ -1417,6 +1417,7 @@ private:
 	                 int                                   target_regions,
 	                 int                                   target_tracks,
 	                 boost::shared_ptr<ARDOUR::Track>&     track,
+	                 std::string const&                    pgroup_id,
 	                 bool                                  add_channel_suffix,
 	                 boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
@@ -1426,7 +1427,8 @@ private:
 	                                 samplepos_t&                          pos,
 	                                 Editing::ImportMode                   mode,
 	                                 boost::shared_ptr<ARDOUR::Track>&     existing_track,
-	                                 const std::string&                    new_track_name,
+	                                 std::string const&                    new_track_name,
+	                                 std::string const&                    pgroup_id,
 	                                 boost::shared_ptr<ARDOUR::PluginInfo> instrument);
 
 	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
