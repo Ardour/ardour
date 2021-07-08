@@ -23,6 +23,7 @@
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
+#include <cerrno>
 #include <cstdlib>
 #include <cstdio> /* for snprintf, grrr */
 #include <cstring>
