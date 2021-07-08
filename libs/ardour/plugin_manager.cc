@@ -570,6 +570,17 @@ PluginManager::refresh (bool cache_only)
 		BootMessage (_("Discovering AU Plugins"));
 	}
 	au_refresh (cache_only);
+
+	if (!cache_only) {
+		string fn = Glib::build_filename (ARDOUR::user_cache_directory(), AUV2_BLACKLIST);
+		if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+			try {
+				std::string bl = Glib::file_get_contents (fn);
+				PBD::info << _("Audio Unit Blacklist: ") << "\n" << bl << "-----" << endmsg;
+			} catch (Glib::FileError const& err) {
+			}
+		}
+	}
 #endif
 
 	/* unset concealed plugins */
