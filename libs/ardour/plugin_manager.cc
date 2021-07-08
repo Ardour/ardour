@@ -161,6 +161,8 @@ std::string PluginManager::vst3_scanner_bin_path = "";
 # endif
 #endif
 
+#define AUV2_BLACKLIST  "auv2_blacklist.txt"
+
 PluginManager&
 PluginManager::instance()
 {
@@ -704,7 +706,7 @@ void
 PluginManager::clear_au_blacklist ()
 {
 #ifdef AUDIOUNIT_SUPPORT
-	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), AUV2_BLACKLIST);
 	if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 		::g_unlink(fn.c_str());
 	}
@@ -1075,6 +1077,70 @@ PluginManager::lv2_refresh ()
 }
 
 #ifdef AUDIOUNIT_SUPPORT
+
+static void
+auv2_blacklist (std::string const& id)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), AUV2_BLACKLIST);
+	FILE* f = NULL;
+	if (! (f = g_fopen (fn.c_str (), "a"))) {
+		error << "Cannot append to AU blacklist for '" << id <<"'\n";
+		return;
+	}
+	assert (id.find ("\n") == string::npos);
+	fprintf (f, "%s\n", id.c_str ());
+	::fclose (f);
+}
+
+static void
+auv2_whitelist (std::string id)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), AUV2_BLACKLIST);
+	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		warning << _("Expected AUv2 Blacklist file does not exist.") << endmsg;
+		return;
+	}
+
+	std::string bl;
+	try {
+		bl = Glib::file_get_contents (fn);
+	} catch (Glib::FileError const& err) {
+		return;
+	}
+	::g_unlink (fn.c_str ());
+
+	assert (id.find("\n") == string::npos);
+
+	id += "\n"; // add separator
+	const size_t rpl = bl.find (id);
+	if (rpl != string::npos) {
+		bl.replace (rpl, id.size (), "");
+	}
+
+	if (bl.empty ()) {
+		return;
+	}
+	Glib::file_set_contents (fn, bl);
+}
+
+static bool
+auv2_is_blacklisted (std::string const& id)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), AUV2_BLACKLIST);
+	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		return false;
+	}
+
+	std::string bl;
+	try {
+		bl = Glib::file_get_contents (fn);
+	} catch (Glib::FileError const& err) {
+		return false;
+	}
+	return bl.find (id + "\n") != string::npos;
+}
+
+/* ****************************************************************************/
 
 static void auv2_scanner_log (std::string msg, PluginScanLogEntry* psle)
 {

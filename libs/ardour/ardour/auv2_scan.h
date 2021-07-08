@@ -74,15 +74,6 @@ public:
 	std::string manu;
 };
 
-LIBARDOUR_API extern void
-auv2_blacklist (std::string const&);
-
-LIBARDOUR_API extern void
-auv2_whitelist (std::string);
-
-LIBARDOUR_API extern bool
-auv2_is_blacklisted (std::string const&);
-
 LIBARDOUR_API extern std::string
 auv2_stringify_descriptor (CAComponentDescription const&);
 
