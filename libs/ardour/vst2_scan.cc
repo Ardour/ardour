@@ -626,7 +626,7 @@ ARDOUR::vst2_valid_cache_file (std::string const& path, bool verbose, bool* is_n
 }
 
 static void
-touch_cachefile (std::string const& path, std::string const& cache_file)
+touch_cachefile (std::string const& path, std::string const& cache_file, bool verbose)
 {
 	GStatBuf sb_vst;
 	GStatBuf sb_v2i;
@@ -634,7 +634,22 @@ touch_cachefile (std::string const& path, std::string const& cache_file)
 		struct utimbuf utb;
 		utb.actime = sb_v2i.st_atime;
 		utb.modtime = std::max (sb_vst.st_mtime, sb_v2i.st_mtime);
-		g_utime (cache_file.c_str (), &utb);
+		if (0 != g_utime (cache_file.c_str (), &utb)) {
+			PBD::error << "Could not set cachefile timestamp." << endmsg;
+		} else if (verbose) {
+			char v2itme[128];
+			char vsttme[128];
+			struct tm local_time;
+			localtime_r (&utb.modtime, &local_time);
+			strftime (v2itme, sizeof(v2itme), "%Y-%m-%d %T", &local_time);
+			localtime_r (&sb_vst.st_mtime, &local_time);
+			strftime (vsttme, sizeof(vsttme), "%Y-%m-%d %T", &local_time);
+			PBD::info << "Touch cachefile: set mtime = "
+			          << utb.modtime << " (" << v2itme << "), plugin mtime = "
+			          << sb_vst.st_mtime << " (" << vsttme << ")" << endmsg;
+		}
+	} else {
+		PBD::error << "Could not stat plugin." << endmsg;
 	}
 }
 
@@ -649,7 +664,7 @@ vst2_save_cache_file (std::string const& path, XMLNode* root, bool verbose)
 		PBD::error << "Could not save VST2 plugin cache to: " << cache_file << endmsg;
 		return false;
 	} else {
-		touch_cachefile (path, cache_file);
+		touch_cachefile (path, cache_file, verbose);
 	}
 	if (verbose) {
 		root->dump (std::cout, "\t");
