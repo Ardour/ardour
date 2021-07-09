@@ -73,6 +73,8 @@ setup_enum_writer ()
 	MeterType _MeterType;
 	TrackMode _TrackMode;
 	NoteMode _NoteMode;
+	SignatureRoot _SignatureRoot;
+	SignatureScale _SignatureScale;
 	ChannelMode _ChannelMode;
 	ColorMode _ColorMode;
 	MeterFalloff _MeterFalloff;
@@ -258,6 +260,34 @@ setup_enum_writer ()
 	REGISTER_ENUM (Sustained);
 	REGISTER_ENUM (Percussive);
 	REGISTER (_NoteMode);
+
+	REGISTER_ENUM (NoScale);
+	REGISTER_ENUM (Major);
+	REGISTER_ENUM (MajorPentatonic);
+	REGISTER_ENUM (MinorNatural);
+	REGISTER_ENUM (MinorHarmonic);
+	REGISTER_ENUM (MinorMelodic);
+	REGISTER_ENUM (MinorPentatonic);
+	REGISTER_ENUM (Dorian);
+	REGISTER_ENUM (Phrygian);
+	REGISTER_ENUM (Lydian);
+	REGISTER_ENUM (Mixolydian);
+	REGISTER_ENUM (Locrian);
+	REGISTER (_SignatureScale);
+
+	REGISTER_ENUM (NoteC);
+	REGISTER_ENUM (NoteCs);
+	REGISTER_ENUM (NoteD);
+	REGISTER_ENUM (NoteDs);
+	REGISTER_ENUM (NoteE);
+	REGISTER_ENUM (NoteF);
+	REGISTER_ENUM (NoteFs);
+	REGISTER_ENUM (NoteG);
+	REGISTER_ENUM (NoteGs);
+	REGISTER_ENUM (NoteA);
+	REGISTER_ENUM (NoteAs);
+	REGISTER_ENUM (NoteB);
+	REGISTER (_SignatureRoot);	
 
 	REGISTER_ENUM (AllChannels);
 	REGISTER_ENUM (FilterChannels);

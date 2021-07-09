@@ -98,6 +98,8 @@ public:
 	bool paste (ARDOUR::samplepos_t, const Selection&, PasteContext& ctx, const int32_t sub_num);
 
 	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
+	ARDOUR::SignatureScale signature_scale() const { return _sig_scale; }
+	ARDOUR::SignatureRoot signature_root() const { return _sig_root; }	
 	ARDOUR::ColorMode color_mode() const { return _color_mode; }
 
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
@@ -132,9 +134,11 @@ private:
 	void append_extra_display_menu_items ();
 	void build_automation_action_menu (bool);
 	Gtk::Menu* build_note_mode_menu();
+	Gtk::Menu* build_signature_menu();
 	Gtk::Menu* build_color_mode_menu();
 
 	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
+	void set_signature (ARDOUR::SignatureScale scale, ARDOUR::SignatureRoot root, bool apply_to_selection = false);
 	void set_color_mode (ARDOUR::ColorMode, bool force = false, bool redisplay = true, bool apply_to_selection = false);
 	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
 	void route_active_changed ();
@@ -152,6 +156,8 @@ private:
 	PianoRollHeader*              _piano_roll_header;
 	ARDOUR::NoteMode              _note_mode;
 	Gtk::RadioMenuItem*           _note_mode_item;
+	ARDOUR::SignatureScale		  _sig_scale;
+	ARDOUR::SignatureRoot		  _sig_root;
 	Gtk::RadioMenuItem*           _percussion_mode_item;
 	ARDOUR::ColorMode             _color_mode;
 	Gtk::RadioMenuItem*           _meter_color_mode_item;

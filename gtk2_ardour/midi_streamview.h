@@ -148,6 +148,21 @@ private:
 	ArdourCanvas::LineSet*    _note_lines;
 	/** true if updates to the note lines and regions are currently suspended */
 	bool                      _updates_suspended;
+	MidiTimeAxisView&         _miditimeview;
+	const int8_t	    	  _scale_notes[12][13] = {
+		{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 } /* NoScale */,
+		{ 0, 2, 4, 5, 7, 9, 11, -1, -1, -1, -1, -1, -1 } /* Major */,
+		{ 0, 2, 4, 7, 9, -1, -1, -1, -1, -1, -1, -1, -1 } /* Major Pentatonic*/,
+		{ 0, 2, 3, 5, 7, 8, 10, -1, -1, -1, -1, -1, -1 } /* MinorNatural */,
+		{ 0, 2, 3, 5, 7, 8, 11, -1, -1, -1, -1, -1, -1 } /* MinorHarmonic */,
+		{ 0, 2, 3, 5, 7, 9, 11, -1, -1, -1, -1, -1, -1 } /* MinorMelodic */,
+		{ 0, 3, 5, 7, 10, -1, -1, -1, -1, -1, -1, -1, -1 } /* MinorPentatonic */,
+		{ 0, 2, 3, 5, 7, 9, 10, -1, -1, -1, -1, -1, -1 } /* Dorian */,
+		{ 0, 1, 3, 5, 7, 8, 10, -1, -1, -1, -1, -1, -1 } /* Phrygian */,
+		{ 0, 2, 4, 6, 7, 9, 11, -1, -1, -1, -1, -1, -1 } /* Lydian */,
+		{ 0, 2, 4, 5, 7, 9, 10, -1, -1, -1, -1, -1, -1 } /* Mixolydian */,
+		{ 0, 1, 3, 5, 6, 8, 10, -1, -1, -1, -1, -1, -1 } /* Locrian */
+	};
 };
 
 #endif /* __ardour_midi_streamview_h__ */
