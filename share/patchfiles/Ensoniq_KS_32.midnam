@@ -214,7 +214,7 @@
           <Patch Number="75" Name="Steel Drum" ProgramChange="75"/>
           <Patch Number="76" Name="Classic Bell" ProgramChange="76"/>
           <Patch Number="77" Name="New Bell" ProgramChange="77"/>
-          <Patch Number="78" Name="Accordian" ProgramChange="78"/>
+          <Patch Number="78" Name="Accordion" ProgramChange="78"/>
           <Patch Number="79" Name="Harmonica" ProgramChange="79"/>
         </PatchNameList>
       </PatchBank>

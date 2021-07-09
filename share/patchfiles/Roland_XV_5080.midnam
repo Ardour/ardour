@@ -1483,7 +1483,7 @@
       <Patch Number="GM 0-19" Name="Organ 3" ProgramChange="18"/>
       <Patch Number="GM 0-20" Name="Church Org.1" ProgramChange="19"/>
       <Patch Number="GM 0-21" Name="Reed Organ" ProgramChange="20"/>
-      <Patch Number="GM 0-22" Name="Accordian Fr" ProgramChange="21"/>
+      <Patch Number="GM 0-22" Name="Accordion Fr" ProgramChange="21"/>
       <Patch Number="GM 0-23" Name="Harmonica" ProgramChange="22"/>
       <Patch Number="GM 0-24" Name="Bandneon" ProgramChange="23"/>
       <Patch Number="GM 0-25" Name="Nylon-str.Gt" ProgramChange="24"/>
@@ -1607,7 +1607,7 @@
       <Patch Number="GM 1-18" Name="Chorus Or.2" ProgramChange="17"/>
       <Patch Number="GM 1-20" Name="Church Org.2" ProgramChange="19"/>
       <Patch Number="GM 1-21" Name="Puff Organ" ProgramChange="20"/>
-      <Patch Number="GM 1-22" Name="Accordian It" ProgramChange="21"/>
+      <Patch Number="GM 1-22" Name="Accordion It" ProgramChange="21"/>
       <Patch Number="GM 1-25" Name="Ukulele" ProgramChange="24"/>
       <Patch Number="GM 1-26" Name="12-str.Gt" ProgramChange="25"/>
       <Patch Number="GM 1-27" Name="Pedal Steel" ProgramChange="26"/>

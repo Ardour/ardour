@@ -2437,7 +2437,7 @@
           </Patch>
         </PatchNameList>
       </PatchBank>
-      <PatchBank Name="Accordian">
+      <PatchBank Name="Accordion">
         <PatchNameList>
           <Patch Number="001" Name="Musette">
             <PatchMIDICommands>
@@ -2460,7 +2460,7 @@
               <ProgramChange Number="21"/>
             </PatchMIDICommands>
           </Patch>
-          <Patch Number="004" Name="Accordian">
+          <Patch Number="004" Name="Accordion">
             <PatchMIDICommands>
               <ControlChange Control="0" Value="0"/>
               <ControlChange Control="32" Value="116"/>

@@ -286,7 +286,7 @@
           <Patch Number="62" Name="Brass Section" ProgramChange="62"/>
           <Patch Number="63" Name="Mixed Horns" ProgramChange="63"/>
           <Patch Number="64" Name="Trumpets" ProgramChange="64"/>
-          <Patch Number="74" Name="Accordian" ProgramChange="74"/>
+          <Patch Number="74" Name="Accordion" ProgramChange="74"/>
           <Patch Number="75" Name="Dulcimer" ProgramChange="75"/>
           <Patch Number="76" Name="Koto" ProgramChange="76"/>
           <Patch Number="77" Name="Mbira" ProgramChange="77"/>
@@ -300,7 +300,7 @@
           <Patch Number="85" Name="Bagpipe" ProgramChange="85"/>
           <Patch Number="86" Name="Fiddle" ProgramChange="86"/>
           <Patch Number="87" Name="Shannai" ProgramChange="87"/>
-          <Patch Number="88" Name="Accordian 2" ProgramChange="88"/>
+          <Patch Number="88" Name="Accordion 2" ProgramChange="88"/>
           <Patch Number="94" Name="Glockenspiel" ProgramChange="94"/>
           <Patch Number="95" Name="Music Box" ProgramChange="95"/>
           <Patch Number="96" Name="Tubulaar Bell" ProgramChange="96"/>

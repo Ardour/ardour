@@ -389,7 +389,7 @@
       <Patch Number="A-87" Name="Road Org" ProgramChange="86"/>
       <Patch Number="A-88" Name="60s Org1" ProgramChange="87"/>
       <Patch Number="A-89" Name="Rock Org2" ProgramChange="88"/>
-      <Patch Number="A-90" Name="Accordian" ProgramChange="89"/>
+      <Patch Number="A-90" Name="Accordion" ProgramChange="89"/>
       <Patch Number="A-91" Name="Steel Gtr2" ProgramChange="90"/>
       <Patch Number="A-92" Name="12st Gtr2" ProgramChange="91"/>
       <Patch Number="A-93" Name="18st Gtr" ProgramChange="92"/>
@@ -399,7 +399,7 @@
       <Patch Number="A-97" Name="12Gtr Pad" ProgramChange="96"/>
       <Patch Number="A-98" Name="Stratus" ProgramChange="97"/>
       <Patch Number="A-99" Name="Brite Gtr" ProgramChange="98"/>
-      <Patch Number="A-100" Name="Syn Accordian" ProgramChange="99"/>
+      <Patch Number="A-100" Name="Syn Accordion" ProgramChange="99"/>
       <Patch Number="A-101" Name="Koto" ProgramChange="100"/>
       <Patch Number="A-102" Name="Shamisen" ProgramChange="101"/>
       <Patch Number="A-103" Name="Suntur" ProgramChange="102"/>
@@ -599,7 +599,7 @@
       <Patch Number="GM-19" Name="Organ 3" ProgramChange="18"/>
       <Patch Number="GM-20" Name="Church Org.1" ProgramChange="19"/>
       <Patch Number="GM-21" Name="Reed Organ" ProgramChange="20"/>
-      <Patch Number="GM-22" Name="Accordian Fr" ProgramChange="21"/>
+      <Patch Number="GM-22" Name="Accordion Fr" ProgramChange="21"/>
       <Patch Number="GM-23" Name="Harmonica" ProgramChange="22"/>
       <Patch Number="GM-24" Name="Bandneon" ProgramChange="23"/>
       <Patch Number="GM-25" Name="Nylon-str.Gt" ProgramChange="24"/>

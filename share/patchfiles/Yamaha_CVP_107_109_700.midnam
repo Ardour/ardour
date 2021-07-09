@@ -629,7 +629,7 @@
               <ProgramChange Number="19"/>
             </PatchMIDICommands>
           </Patch>
-          <Patch Number="4" Name="Accordian 1">
+          <Patch Number="4" Name="Accordion 1">
             <PatchMIDICommands>
               <ControlChange Control="0" Value="0"/>
               <ControlChange Control="32" Value="112"/>
@@ -699,7 +699,7 @@
               <ProgramChange Number="23"/>
             </PatchMIDICommands>
           </Patch>
-          <Patch Number="14" Name="Accordian 2">
+          <Patch Number="14" Name="Accordion 2">
             <PatchMIDICommands>
               <ControlChange Control="0" Value="0"/>
               <ControlChange Control="32" Value="114"/>

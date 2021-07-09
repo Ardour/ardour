@@ -937,7 +937,7 @@
           <Patch Number="019" Name="Organ 3" ProgramChange="18"/>
           <Patch Number="020" Name="ChurchOrg 1" ProgramChange="19"/>
           <Patch Number="021" Name="Reed Org. 1" ProgramChange="20"/>
-          <Patch Number="022" Name="AccordianF" ProgramChange="21"/>
+          <Patch Number="022" Name="AccordionF" ProgramChange="21"/>
           <Patch Number="023" Name="Harmonica 1" ProgramChange="22"/>
           <Patch Number="024" Name="Bandneon1" ProgramChange="23"/>
           <Patch Number="025" Name="NylonGtr.1" ProgramChange="24"/>

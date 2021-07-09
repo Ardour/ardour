@@ -617,7 +617,7 @@
           <Patch Number="019" Name="Rock Organ" ProgramChange="18"/>
           <Patch Number="020" Name="Church Organ" ProgramChange="19"/>
           <Patch Number="021" Name="Reed Organ" ProgramChange="20"/>
-          <Patch Number="022" Name="Accordian" ProgramChange="21"/>
+          <Patch Number="022" Name="Accordion" ProgramChange="21"/>
           <Patch Number="023" Name="Harmonica" ProgramChange="22"/>
           <Patch Number="024" Name="TangoAccrd" ProgramChange="23"/>
           <Patch Number="025" Name="Nylon Gt" ProgramChange="24"/>

@@ -259,7 +259,7 @@
           <Patch Number="66" Name="String Pad" ProgramChange="66"/>
           <Patch Number="67" Name="Touchsaw  " ProgramChange="67"/>
           <Patch Number="68" Name="Brush Up  " ProgramChange="68"/>
-          <Patch Number="69" Name="Accordian+" ProgramChange="69"/>
+          <Patch Number="69" Name="Accordion+" ProgramChange="69"/>
           <Patch Number="70" Name="Trem-a-EP " ProgramChange="70"/>
           <Patch Number="71" Name="Wavechime " ProgramChange="71"/>
           <Patch Number="72" Name="SoloBasoon" ProgramChange="72"/>
@@ -616,7 +616,7 @@
           <Patch Number="18" Name="Rock Organ" ProgramChange="18"/>
           <Patch Number="19" Name="Church    " ProgramChange="19"/>
           <Patch Number="20" Name="Reed Organ" ProgramChange="20"/>
-          <Patch Number="21" Name="Accordian " ProgramChange="21"/>
+          <Patch Number="21" Name="Accordion " ProgramChange="21"/>
           <Patch Number="22" Name="Harmonica " ProgramChange="22"/>
           <Patch Number="23" Name="TangoAccrd" ProgramChange="23"/>
           <Patch Number="24" Name="Nylon Gtr " ProgramChange="24"/>

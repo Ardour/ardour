@@ -299,7 +299,7 @@
       <Patch Number="20" Name="GM Church Organ" ProgramChange="19"/>
       <Patch Number="21" Name="GM Reed Organ" ProgramChange="20"/>
       <Patch Number="22" Name="GM Harmonica" ProgramChange="21"/>
-      <Patch Number="23" Name="GM Accordian" ProgramChange="22"/>
+      <Patch Number="23" Name="GM Accordion" ProgramChange="22"/>
       <Patch Number="24" Name="GM tango Accord." ProgramChange="23"/>
       <Patch Number="25" Name="GM Nylon Guitar" ProgramChange="24"/>
       <Patch Number="26" Name="GM Steel Guitar" ProgramChange="25"/>
@@ -480,7 +480,7 @@
       <Patch Number="113" Name="Twinkle" ProgramChange="112"/>
       <Patch Number="115" Name="Steel Drums" ProgramChange="114"/>
       <Patch Number="48" Name="Timpani" ProgramChange="47"/>
-      <Patch Number="22" Name="Musette Accordian" ProgramChange="21"/>
+      <Patch Number="22" Name="Musette Accordion" ProgramChange="21"/>
       <Patch Number="23" Name="Harmonica" ProgramChange="22"/>
       <Patch Number="25" Name="Classical Guitar" ProgramChange="24"/>
       <Patch Number="26" Name="Folk Guitar" ProgramChange="25"/>

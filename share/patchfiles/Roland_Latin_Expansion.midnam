@@ -180,8 +180,8 @@
       <Patch Number="I-58" Name="Accord ff Op" ProgramChange="39"/>
       <Patch Number="I-61" Name="St.Accord Cl" ProgramChange="40"/>
       <Patch Number="I-62" Name="Accordion Cl" ProgramChange="41"/>
-      <Patch Number="I-63" Name="Accordian 4" ProgramChange="42"/>
-      <Patch Number="I-64" Name="Accordian 5" ProgramChange="43"/>
+      <Patch Number="I-63" Name="Accordion 4" ProgramChange="42"/>
+      <Patch Number="I-64" Name="Accordion 5" ProgramChange="43"/>
       <Patch Number="I-65" Name="Squeezers" ProgramChange="44"/>
       <Patch Number="I-66" Name="St.Musette" ProgramChange="45"/>
       <Patch Number="I-67" Name="Musette" ProgramChange="46"/>
@@ -449,8 +449,8 @@
       <Patch Number="i40" Name="Accord ff Op" ProgramChange="39"/>
       <Patch Number="i41" Name="St.Accord Cl" ProgramChange="40"/>
       <Patch Number="i42" Name="Accordion Cl" ProgramChange="41"/>
-      <Patch Number="i43" Name="Accordian 4" ProgramChange="42"/>
-      <Patch Number="i44" Name="Accordian 5" ProgramChange="43"/>
+      <Patch Number="i43" Name="Accordion 4" ProgramChange="42"/>
+      <Patch Number="i44" Name="Accordion 5" ProgramChange="43"/>
       <Patch Number="i45" Name="Squeezers" ProgramChange="44"/>
       <Patch Number="i46" Name="St.Musette" ProgramChange="45"/>
       <Patch Number="i47" Name="Musette" ProgramChange="46"/>
@@ -728,8 +728,8 @@
       <Patch Number="EC58" Name="Accord ff Op" ProgramChange="39"/>
       <Patch Number="EC61" Name="St.Accord Cl" ProgramChange="40"/>
       <Patch Number="EC62" Name="Accordion Cl" ProgramChange="41"/>
-      <Patch Number="EC63" Name="Accordian 4" ProgramChange="42"/>
-      <Patch Number="EC64" Name="Accordian 5" ProgramChange="43"/>
+      <Patch Number="EC63" Name="Accordion 4" ProgramChange="42"/>
+      <Patch Number="EC64" Name="Accordion 5" ProgramChange="43"/>
       <Patch Number="EC65" Name="Squeezers" ProgramChange="44"/>
       <Patch Number="EC66" Name="St.Musette" ProgramChange="45"/>
       <Patch Number="EC67" Name="Musette" ProgramChange="46"/>
@@ -973,12 +973,12 @@
       <Patch Number="182" Name="SlapbackBass" ProgramChange="53"/>
       <Patch Number="183" Name="Stars" ProgramChange="54"/>
       <Patch Number="184" Name="St.Accord Op" ProgramChange="55"/>
-      <Patch Number="185" Name="Accordian Op" ProgramChange="56"/>
+      <Patch Number="185" Name="Accordion Op" ProgramChange="56"/>
       <Patch Number="186" Name="Accord ff Op" ProgramChange="57"/>
       <Patch Number="187" Name="St.Accord Cl" ProgramChange="58"/>
-      <Patch Number="188" Name="Accordian Cl" ProgramChange="59"/>
-      <Patch Number="189" Name="Accordian 4" ProgramChange="60"/>
-      <Patch Number="190" Name="Accordian 5" ProgramChange="61"/>
+      <Patch Number="188" Name="Accordion Cl" ProgramChange="59"/>
+      <Patch Number="189" Name="Accordion 4" ProgramChange="60"/>
+      <Patch Number="190" Name="Accordion 5" ProgramChange="61"/>
       <Patch Number="191" Name="Squeezers" ProgramChange="62"/>
       <Patch Number="192" Name="2 Acdn Split" ProgramChange="63"/>
       <Patch Number="193" Name="Minstrel Jig" ProgramChange="64"/>
