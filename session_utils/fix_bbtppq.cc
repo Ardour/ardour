@@ -94,10 +94,9 @@ ensure_per_region_source (Session* session, boost::shared_ptr<MidiRegion> region
 	*/
 	if (Glib::file_test (newsrc_path, Glib::FILE_TEST_EXISTS)) {
 		Source::Flag flags =  Source::Flag (Source::Writable | Source::CanRename);
-		newsrc = boost::dynamic_pointer_cast<MidiSource>(
-			SourceFactory::createExternal(DataType::MIDI, *session,
-						      newsrc_path, 1, flags));
-		if (!newsrc) {
+		try {
+			newsrc = boost::dynamic_pointer_cast<MidiSource> (SourceFactory::createExternal (DataType::MIDI, *session, newsrc_path, 1, flags));
+		} catch (failed_constructor& err) {
 			cout << UTILNAME << ":" << endl
 			     << " An error occurred creating external source from " << newsrc_path << " exiting." << endl;
 			session_fail (session);
@@ -120,9 +119,9 @@ ensure_per_region_source (Session* session, boost::shared_ptr<MidiRegion> region
 		     << " for region " << region->name() << endl;
 
 	} else {
-		newsrc = boost::dynamic_pointer_cast<MidiSource>(SourceFactory::createWritable(DataType::MIDI, *session, newsrc_path, session->sample_rate()));
-
-		if (!newsrc) {
+		try {
+			newsrc = boost::dynamic_pointer_cast<MidiSource> (SourceFactory::createWritable (DataType::MIDI, *session, newsrc_path, session->sample_rate()));
+		} catch (failed_constructor& err) {
 			cout << UTILNAME << ":" << endl
 			     << " An error occurred creating writeable source " << newsrc_path << " exiting." << endl;
 			session_fail (session);
@@ -157,11 +156,9 @@ ensure_per_source_source (Session* session, boost::shared_ptr<MidiRegion> region
 		/* flags are ignored for external MIDI source */
 		Source::Flag flags =  Source::Flag (Source::Writable | Source::CanRename);
 
-		newsrc = boost::dynamic_pointer_cast<MidiSource>(
-			SourceFactory::createExternal(DataType::MIDI, *session,
-						      newsrc_path, 1, flags));
-
-		if (!newsrc) {
+		try {
+			newsrc = boost::dynamic_pointer_cast<MidiSource> (SourceFactory::createExternal (DataType::MIDI, *session, newsrc_path, 1, flags));
+		} catch (failed_constructor& err) {
 			cout << UTILNAME << ":" << endl
 			     << " An error occurred creating external source from " << newsrc_path << " exiting." << endl;
 			session_fail (session);
@@ -173,9 +170,9 @@ ensure_per_source_source (Session* session, boost::shared_ptr<MidiRegion> region
 		     << " for source " <<  region->midi_source(0)->name() << endl;
 	} else {
 
-		newsrc = boost::dynamic_pointer_cast<MidiSource>(
-			SourceFactory::createWritable(DataType::MIDI, *session, newsrc_path, session->sample_rate()));
-		if (!newsrc) {
+		try {
+			newsrc = boost::dynamic_pointer_cast<MidiSource> (SourceFactory::createWritable (DataType::MIDI, *session, newsrc_path, session->sample_rate()));
+		} catch (failed_constructor& err) {
 			cout << UTILNAME << ":" << endl
 			     <<" An error occurred creating writeable source " << newsrc_path << " exiting." << endl;
 			session_fail (session);
