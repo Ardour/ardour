@@ -167,7 +167,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 				boost::shared_ptr<AudioPlaylistSource> ap (new AudioPlaylistSource (s, node));
 
 				if (setup_peakfile (ap, true)) {
-					return boost::shared_ptr<Source>();
+					throw failed_constructor ();
 				}
 
 				ap->check_for_analysis_data_on_disk ();
@@ -186,7 +186,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 				boost::shared_ptr<Source> ret (src);
 				BOOST_MARK_SOURCE (ret);
 				if (setup_peakfile (ret, defer_peaks)) {
-					return boost::shared_ptr<Source>();
+					throw failed_constructor ();
 				}
 				ret->check_for_analysis_data_on_disk ();
 				SourceCreated (ret);
@@ -200,7 +200,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 				BOOST_MARK_SOURCE (ret);
 
 				if (setup_peakfile (ret, defer_peaks)) {
-					return boost::shared_ptr<Source>();
+					throw failed_constructor ();
 				}
 
 				ret->check_for_analysis_data_on_disk ();
@@ -225,7 +225,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 		}
 	}
 
-	return boost::shared_ptr<Source>();
+	throw failed_constructor ();
 }
 
 boost::shared_ptr<Source>
@@ -239,7 +239,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 			boost::shared_ptr<Source> ret (src);
 			BOOST_MARK_SOURCE (ret);
 			if (setup_peakfile (ret, defer_peaks)) {
-				return boost::shared_ptr<Source>();
+				throw failed_constructor ();
 			}
 			ret->check_for_analysis_data_on_disk ();
 			if (announce) {
@@ -254,7 +254,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 			boost::shared_ptr<Source> ret (src);
 			BOOST_MARK_SOURCE (ret);
 			if (setup_peakfile (ret, defer_peaks)) {
-				return boost::shared_ptr<Source>();
+				throw failed_constructor ();
 			}
 			ret->check_for_analysis_data_on_disk ();
 			if (announce) {
@@ -301,7 +301,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 
 	}
 
-	return boost::shared_ptr<Source>();
+	throw failed_constructor ();
 }
 
 boost::shared_ptr<Source>
@@ -320,7 +320,7 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 		BOOST_MARK_SOURCE (ret);
 
 		if (setup_peakfile (ret, defer_peaks)) {
-			return boost::shared_ptr<Source>();
+			throw failed_constructor ();
 		}
 
 		// no analysis data - this is a new file
@@ -353,7 +353,7 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 		}
 	}
 
-	return boost::shared_ptr<Source> ();
+	throw failed_constructor ();
 }
 
 boost::shared_ptr<Source>
@@ -368,7 +368,7 @@ SourceFactory::createForRecovery (DataType type, Session& s, const std::string& 
 		BOOST_MARK_SOURCE (ret);
 
 		if (setup_peakfile (ret, false)) {
-			return boost::shared_ptr<Source>();
+			throw failed_constructor ();
 		}
 
 		// no analysis data - this is still basically a new file (we
@@ -384,7 +384,7 @@ SourceFactory::createForRecovery (DataType type, Session& s, const std::string& 
 		error << _("Recovery attempted on a MIDI file - not implemented") << endmsg;
 	}
 
-	return boost::shared_ptr<Source> ();
+	throw failed_constructor ();
 }
 
 boost::shared_ptr<Source>
@@ -407,7 +407,7 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 				boost::shared_ptr<Source> ret (src);
 
 				if (setup_peakfile (ret, defer_peaks)) {
-					return boost::shared_ptr<Source>();
+					throw failed_constructor ();
 				}
 
 				ret->check_for_analysis_data_on_disk ();
@@ -447,5 +447,5 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 
 	}
 
-	return boost::shared_ptr<Source>();
+	throw failed_constructor ();
 }
