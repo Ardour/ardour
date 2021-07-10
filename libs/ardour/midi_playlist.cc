@@ -313,6 +313,10 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 			continue;
 		}
 
+		if ((*i)->muted()) {
+			continue;
+		}
+
 		regs.push_back (*i);
 	}
 
