@@ -48,7 +48,6 @@ PBD::Signal0<void> DiskWriter::Overrun;
 
 DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, t, X_("recorder:") + str, f)
-	, _capture_start_sample (0)
 	, _capture_captured (0)
 	, _was_recording (false)
 	, _xrun_flag (false)
@@ -174,7 +173,7 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 			_capture_start_sample = _session.transport_sample ();
 		}
 
-		_first_recordable_sample = _capture_start_sample;
+		_first_recordable_sample = _capture_start_sample.value ();
 
 		if (_alignment_style == ExistingMaterial) {
 			_first_recordable_sample += _capture_offset + _playback_offset;
@@ -198,7 +197,7 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 		                                                      name(),
 		                                                      transport_sample,
 		                                                      _session.transport_sample(),
-																													_capture_start_sample,
+																													_capture_start_sample.value (),
 																													_first_recordable_sample,
 																													_last_recordable_sample,
 		                                                      _input_latency,
@@ -208,8 +207,6 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 		                                                      _session.worst_output_latency(),
 		                                                      _session.worst_input_latency()));
 
-
-		prepare_record_status (_capture_start_sample);
 
 	}
 
@@ -297,10 +294,28 @@ DiskWriter::get_capture_start_sample (uint32_t n) const
 	if (capture_info.size() > n) {
 		/* this is a completed capture */
 		return capture_info[n]->start;
-	} else {
+	} else if (_capture_start_sample) {
 		/* this is the currently in-progress capture */
-		return _capture_start_sample;
+		return _capture_start_sample.value ();
+	} else {
+		/* pre-roll, count-in etc */
+		return _session.transport_sample(); /* mild lie */
 	}
+}
+
+samplepos_t
+DiskWriter::current_capture_start () const
+{
+	if (!_capture_start_sample) {
+		return _session.transport_sample(); /* mild lie */
+	}
+	return _capture_start_sample.value ();
+}
+
+samplepos_t
+DiskWriter::current_capture_end () const
+{
+	return current_capture_start () + _capture_captured;
 }
 
 ARDOUR::samplecnt_t
@@ -365,11 +380,6 @@ DiskWriter::non_realtime_locate (samplepos_t position)
 	DiskIOProcessor::non_realtime_locate (position);
 }
 
-
-void
-DiskWriter::prepare_record_status (samplepos_t _capture_start_sample)
-{
-}
 
 /** Do some record stuff [not described in this comment!]
  *
@@ -485,7 +495,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 
 			if (_midi_write_source) {
-				_midi_write_source->mark_write_starting_now (_capture_start_sample, _capture_captured, loop_length);
+				assert (_capture_start_sample);
+				_midi_write_source->mark_write_starting_now (_capture_start_sample.value (), _capture_captured, loop_length);
 			}
 
 			g_atomic_int_set (&_samples_pending_write, 0);
@@ -501,7 +512,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		 */
 		if (rec_nframes) {
 			_accumulated_capture_offset += rec_offset;
-		} else if (start_sample >= _capture_start_sample) {
+		} else if (_capture_start_sample && start_sample >= _capture_start_sample.value ()) {
 			_accumulated_capture_offset += nframes;
 		}
 
@@ -695,9 +706,10 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 
 	CaptureInfo* ci = new CaptureInfo ();
 
-	ci->start =  _capture_start_sample;
+	assert (_capture_start_sample);
+	ci->start   =  _capture_start_sample.value ();
 	ci->samples = _capture_captured;
-	ci->xruns = _xruns;
+	ci->xruns   = _xruns;
 	_xruns.clear ();
 
 	if (_loop_location) {
@@ -1256,7 +1268,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	}
 
 	capture_info.clear ();
-	_capture_start_sample = 0;
+	_capture_start_sample.reset ();
 }
 
 void

@@ -22,6 +22,7 @@
 
 #include <list>
 #include <vector>
+#include <boost/optional.hpp>
 
 #include "pbd/g_atomic_compat.h"
 
@@ -93,8 +94,9 @@ public:
 	void mark_capture_xrun ();
 
 	/** @return Start position of currently-running capture (in session samples) */
-	samplepos_t current_capture_start () const { return _capture_start_sample; }
-	samplepos_t current_capture_end () const { return _capture_start_sample + _capture_captured; }
+	samplepos_t current_capture_start () const;
+	samplepos_t current_capture_end () const;
+
 	samplepos_t get_capture_start_sample (uint32_t n = 0) const;
 	samplecnt_t get_captured_samples (uint32_t n = 0) const;
 
@@ -145,8 +147,6 @@ protected:
 private:
 	static samplecnt_t _chunk_samples;
 
-	void prepare_record_status (samplepos_t /*capture_start_sample*/);
-
 	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
 
 	void engage_record_enable ();
@@ -169,7 +169,8 @@ private:
 	CaptureInfos                 capture_info;
 	mutable Glib::Threads::Mutex capture_info_lock;
 
-	samplepos_t   _capture_start_sample;
+	boost::optional<samplepos_t> _capture_start_sample;
+
 	samplecnt_t   _capture_captured;
 	bool          _was_recording;
 	bool          _xrun_flag;
