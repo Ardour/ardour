@@ -1435,7 +1435,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 				 * the current position can be calculated as follows:
 				 */
 				// a well placed oofus attack can still throw this off.
-				// likley auto-scroll related, printf() debugging may tell, commented out for now.
+				// likely auto-scroll related, printf() debugging may tell, commented out for now.
 				//assert (current_pointer_time_axis_view == _time_axis_views.size() - dtz + _ddropzone + delta_time_axis_view);
 			}
 		} else {
@@ -2184,7 +2184,7 @@ RegionInsertDrag::finished (GdkEvent * event, bool)
 	if (Config->get_edit_mode() == Ripple) {
 		playlist->ripple (_last_position.sample, _primary->region()->length(), _primary->region());
 
-		/* recusive diff of rippled regions */
+		/* recursive diff of rippled regions */
 		vector<Command*> cmds;
 		playlist->rdiff (cmds);
 		_editor->session()->add_commands (cmds);
@@ -2403,7 +2403,7 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	RegionSelection selected_regions = _editor->selection->regions;
 	selection_length = selected_regions.end_sample() - selected_regions.start();
 
-	// Rippling accross tracks disabled. Rippling on all tracks is the way to go in the future.
+	// Rippling across tracks disabled. Rippling on all tracks is the way to go in the future.
 	allow_moves_across_tracks = false; // (selected_regions.playlists().size() == 1);
 	prev_tav = NULL;
 	prev_amount = 0;
@@ -3492,7 +3492,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	_editor->session()->tempo_map().gui_set_meter_position (_real_section, pf);
 
-	/* fake marker meeds to stay under the mouse, unlike the real one. */
+	/* fake marker needs to stay under the mouse, unlike the real one. */
 	_marker->set_position (adjusted_current_sample (event, false));
 
 	show_verbose_cursor_time (_real_section->sample());

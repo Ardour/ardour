@@ -24,10 +24,10 @@ typedef int (*testfuncOpPtr) (string);
 typedef struct
 {
 	string			switchText;			// ie -option
-	string			swOptionText;       // option arguments for just this swtich.
+	string			swOptionText;       // option arguments for just this switch.
 	string			descriptionText;	// Help Text on what this does
 	string			failureText;		// What to say when this test fails
-	bool			hasOption;			// Set true if this switch has option paramters
+	bool			hasOption;			// Set true if this switch has option parameters
 	testfuncPtr		functionPtr;		// Function to call
 	testfuncOpPtr	opFunctionPtr;		// Function with option string to call
 	string			optionArg;			// Storage used to hold any options passed in by the user

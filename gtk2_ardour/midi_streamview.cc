@@ -496,7 +496,7 @@ MidiStreamView::setup_rec_box ()
 				   must also set length_beats to something non-zero, otherwise the sample length
 				   of 1 causes length_beats to be set to some small quantity << 1.  Then
 				   when the position is set up below, this length_beats is used to recompute
-				   length using BeatsSamplesConverter::to, which is slightly innacurate for small
+				   length using BeatsSamplesConverter::to, which is slightly inaccurate for small
 				   beats values because it converts floating point beats to bars, beats and
 				   integer ticks.  The upshot of which being that length gets set back to 0,
 				   meaning no region view is ever seen, meaning no MIDI notes during record (#3820).

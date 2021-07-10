@@ -48,7 +48,7 @@ local SHMEM_AUDIO = 2
 -- a C memory area.
 -- It needs to be in global scope.
 -- When the variable is set to nil, the allocated memory is free()ed.
--- the memory can be interpeted as float* for use in DSP, or read/write
+-- the memory can be interpreted as float* for use in DSP, or read/write
 -- to a C++ Ringbuffer instance.
 -- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP:DspShm
 local cmem = nil
@@ -70,7 +70,7 @@ function dsp_init (rate)
 	cmem = ARDOUR.DSP.DspShm (8192)
 end
 
--- "dsp_runmap" uses Ardour's internal processor API, eqivalent to
+-- "dsp_runmap" uses Ardour's internal processor API, equivalent to
 -- 'connect_and_run()". There is no overhead (mapping, translating buffers).
 -- The lua implementation is responsible to map all the buffers directly.
 function dsp_runmap (bufs, in_map, out_map, n_samples, offset)

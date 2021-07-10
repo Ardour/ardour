@@ -109,7 +109,7 @@ rsync -auc --info=progress2 \
 
 cd "$ASRC"
 ## 1st: apply patch below, fix up any merge-conflicts and git commit the result.
-## 2nd run (after commiting the new version): re-create the patch to upstream & amend:
+## 2nd run (after committing the new version): re-create the patch to upstream & amend:
 # git diff -R libs/fluidsynth/ > tools/fluid-patches/ardour_fluidsynth.diff
 #exit
 patch -p1 < tools/fluid-patches/ardour_fluidsynth.diff

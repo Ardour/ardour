@@ -73,7 +73,7 @@ libs/
    VAMP plugins for audio analysis and offline processing (uses qm-dsp)
 
  - vamp-pyin
-   VAMP plugins for pitch and note-tracking (uses qm-dsp), offline analyis
+   VAMP plugins for pitch and note-tracking (uses qm-dsp), offline analysis
 
  - vfork
    A exec-wrapper which redirects file-descriptors to be used with vfork(2)
@@ -83,10 +83,10 @@ libs/
    independent (a-fluidsynth uses libfluidsynth).
    Most of them are custom version of existing plugins (zamaudio, x42),
    that have been customized to be bundled with Ardour on all platforms
-   tha ardour runs on.
+   that ardour runs on.
 
  - zita-convolver
-   convolution kernel, so far only avialable to Lua scripts.
+   convolution kernel, so far only available to Lua scripts.
 
  - zita-resampler
    Efficient resampler with variable rate, useful for adaptive resampling.

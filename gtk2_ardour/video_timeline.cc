@@ -329,7 +329,7 @@ VideoTimeLine::update_video_timeline()
 		/* high-zoom: need space between successive video-frames */
 		vtl_dist = rint(apv);
 	} else {
-		/* continous timeline: skip video-frames */
+		/* continuous timeline: skip video-frames */
 		vtl_dist = ceil(display_vframe_width * samples_per_pixel / apv) * apv;
 	}
 

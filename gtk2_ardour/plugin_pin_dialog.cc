@@ -508,7 +508,7 @@ PluginPinWidget::refill_output_presets ()
 
 	PluginOutputConfiguration ppc (_pi->plugin (0)->possible_output ());
 	if (ppc.find (0) != ppc.end ()) {
-		// anyting goes
+		// anything goes
 		ppc.clear ();
 		if (n_audio != 0) {
 			ppc.insert (n_audio);

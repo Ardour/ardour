@@ -24,7 +24,7 @@
 
 #include "ardour/session_handle.h"
 
-/* This is an API implemenetd by AROUR_UI,
+/* This is an API implemented by AROUR_UI,
  * and made available to transport-control-UIs
  */
 class TransportControlProvider

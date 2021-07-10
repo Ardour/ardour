@@ -37,7 +37,7 @@ class Preprocessor:
 
 	def comment_nesting (self):
 		"""
-		Return the currect comment nesting. At the start and end of the file,
+		Return the correct comment nesting. At the start and end of the file,
 		this value should be zero. Inside C comments it should be 1 or
 		(possibly) more.
 		"""

@@ -24,7 +24,7 @@ int system_has_frequencyscaling();
 
 
 /**
- * This function determines wether the CPU has a variable clock speed if frequency
+ * This function determines whether the CPU has a variable clock speed if frequency
  * scaling is available.
  *
  * @returns 0 if system doesn't use frequency scaling at the moment, non-0 otherwise
@@ -32,7 +32,7 @@ int system_has_frequencyscaling();
 int system_uses_frequencyscaling();
 
 /**
- * Tests wether the owner of this process is in the group 'name'.
+ * Tests whether the owner of this process is in the group 'name'.
  *
  * @returns 0 if the owner of this process is not in the group, non-0 otherwise
  **/
@@ -61,7 +61,7 @@ int system_has_audiogroup();
 int system_has_group(const char * name);
 
 /**
- * Tests wether the owner of this process is in the 'audio' group.
+ * Tests whether the owner of this process is in the 'audio' group.
  *
  * @returns 0 if the owner of this process is not in the audio group, non-0 otherwise
  **/
@@ -69,7 +69,7 @@ int system_user_in_audiogroup();
 
 
 /**
- * Determines wether the owner of this process can enable rt priority.
+ * Determines whether the owner of this process can enable rt priority.
  *
  * @returns 0 if this process can not be switched to rt prio, non-0 otherwise
  **/
@@ -80,7 +80,7 @@ long long unsigned int system_memlock_amount();
 
 
 /**
- * Checks wether the memlock limit is unlimited
+ * Checks whether the memlock limit is unlimited
  *
  * @returns 0 if the memlock limit is limited, non-0 otherwise
  **/

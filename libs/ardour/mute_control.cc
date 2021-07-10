@@ -198,7 +198,7 @@ MuteControl::automation_run (samplepos_t start, pframes_t len)
 
 	if (muted_by_masters ()) {
 		/* already muted, no need to check further,
-		 * except we need to up update implicit/explict mute
+		 * except we need to up update implicit/explicit mute
 		 */
 		if (muted_by_self () != mute) {
 			set_value_unchecked (mute ? 1. : 0.);

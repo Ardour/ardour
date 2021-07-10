@@ -164,7 +164,7 @@ EditorSources::EditorSources (Editor* e)
 		{ 0,   _("Name"),         _("Region name") },
 		{ 1,   _("# Ch"),         _("# Channels") },
 		{ 2,   _("Captured For"), _("Original Track this was recorded on") },
-		{ 3,   _("# Xruns"),      _("Number of dropouts that occured during recording") },
+		{ 3,   _("# Xruns"),      _("Number of dropouts that occurred during recording") },
 		{ 4,   _("Tags"),         _("Tags") },
 		{ 5,   _("Take ID"),      _("Take ID") },
 		{ 6,   _("Orig Pos"),     _("Original Position of the file on timeline, when it was recorded") },

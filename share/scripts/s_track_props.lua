@@ -32,7 +32,7 @@ function factory () return function ()
 
 			-- unmute the track, this also examplifies how one could use lists to modify
 			-- multiple controllables at the same time (they should be of the same
-			-- paramater type - e.g. mute_control() of multiple tracks, they'll all
+			-- parameter type - e.g. mute_control() of multiple tracks, they'll all
 			-- change simultaneously in rt-context)
 			local ctrls = ARDOUR.ControlListPtr ()
 			ctrls:push_back (t:mute_control()) -- we could add more controls to change via push_back

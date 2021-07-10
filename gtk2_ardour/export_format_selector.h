@@ -74,7 +74,7 @@ private:
 
 	ARDOUR::ExportProfileManager::FormatStatePtr state;
 
-	/*** GUI componenets ***/
+	/*** GUI components ***/
 
 	struct FormatCols : public Gtk::TreeModelColumnRecord
 	{

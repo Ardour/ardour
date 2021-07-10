@@ -41,7 +41,7 @@ public:
 	/** Get a string from our state.
 	 *  @param id property of Object node to look for.
 	 *  @param prop_name name of the Object property to return.
-	 *  @param empty if non-0, filled in with true if the property is currently non-existant, otherwise false.
+	 *  @param empty if non-0, filled in with true if the property is currently non-existent, otherwise false.
 	 *  @return value of property `prop_name', or empty.
 	 */
 	std::string get_string (const std::string& id, const std::string& prop_name, bool* empty = 0);

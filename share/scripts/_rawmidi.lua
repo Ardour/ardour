@@ -18,7 +18,7 @@ function dsp_configure (ins, outs)
 	n_out = outs
 end
 
--- "dsp_runmap" uses Ardour's internal processor API, eqivalent to
+-- "dsp_runmap" uses Ardour's internal processor API, equivalent to
 -- 'connect_and_run()". There is no overhead (mapping, translating buffers).
 -- The lua implementation is responsible to map all the buffers directly.
 function dsp_runmap (bufs, in_map, out_map, n_samples, offset)

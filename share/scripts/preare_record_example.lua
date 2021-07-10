@@ -14,7 +14,7 @@ following settings have to be ensured.
 * Location markers have to be cleared
 
 So this script automizes away the task and lets the podcast moderator by just one
-action (for example triggerd by a Wiimote) prepare the session for recording.
+action (for example triggered by a Wiimote) prepare the session for recording.
 
 It can be used for example with the python script of the Linux podcasting hacks:
 https://github.com/linux-podcasting-hacks/wiimote-recording-control

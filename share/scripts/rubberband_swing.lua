@@ -75,7 +75,7 @@ function factory () return function ()
 		local beat_map = {}
 		local prev_beat = 0
 
-		-- construct a progress-dialog with cancle button
+		-- construct a progress-dialog with cancel button
 		local pdialog = LuaDialog.ProgressWindow ("Rubberband", true)
 		-- progress dialog callbacks
 		function vamp_callback (_, pos)

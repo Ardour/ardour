@@ -8,7 +8,7 @@ ardour {
 }
 
 -- The number of remapping pairs to allow. Increasing this (at least in theory)
--- decreases performace, so it's set fairly low as a default. The user can
+-- decreases performance, so it's set fairly low as a default. The user can
 -- increase this if they have a need to.
 N_REMAPINGS = 10
 
