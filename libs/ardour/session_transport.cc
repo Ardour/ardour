@@ -932,6 +932,7 @@ Session::request_count_in_record ()
 	maybe_enable_record ();
 	_count_in_once = true;
 	request_transport_speed(_transport_fsm->default_speed());
+	request_roll ();
 }
 
 void
