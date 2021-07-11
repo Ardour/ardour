@@ -37,6 +37,7 @@
 #include "pbd/basename.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/localtime_r.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/vst3_module.h"
