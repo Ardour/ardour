@@ -722,7 +722,7 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 		ci->loop_offset = 0;
 	}
 
-	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("Finish capture, add new CI, %1 + %2\n", ci->start, ci->samples));
+	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("Finish capture, add new CI, %1 + %2 Loop-off %3\n", ci->start, ci->samples, ci->loop_offset));
 
 	/* XXX theoretical race condition here. Need atomic exchange ?
 	   However, the circumstances when this is called right
@@ -1110,11 +1110,9 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 {
 	bool more_work = true;
 	int err = 0;
-	samplecnt_t total_capture;
 	SourceList audio_srcs;
 	SourceList midi_srcs;
 	ChannelList::iterator chan;
-	vector<CaptureInfo*>::iterator ci;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t n = 0;
 	bool mark_write_completed = false;
@@ -1168,10 +1166,6 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 		}
 
 		goto out;
-	}
-
-	for (total_capture = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
-		total_capture += (*ci)->samples;
 	}
 
 	/* figure out the name for this take */
@@ -1240,8 +1234,12 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 		/* set length in beats to entire capture length */
 
-		BeatsSamplesConverter converter (_session.tempo_map(), capture_info.front()->start);
-		const Temporal::Beats total_capture_beats = converter.from (total_capture);
+
+		Temporal::Beats total_capture_beats;
+		for (vector<CaptureInfo*>::iterator ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+			BeatsSamplesConverter converter (_session.tempo_map(), (*ci)->start);
+			total_capture_beats += converter.from ((*ci)->samples);
+		}
 		_midi_write_source->set_length_beats (total_capture_beats);
 
 		/* flush to disk: this step differs from the audio path,
@@ -1263,7 +1261,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
   out:
 	reset_write_sources (mark_write_completed);
 
-	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+	for (vector<CaptureInfo*>::iterator ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 		delete *ci;
 	}
 
