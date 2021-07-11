@@ -1001,7 +1001,9 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 			continue; /* XXX is this OK? */
 		}
 
+#ifndef NDEBUG
 		cerr << "add new region, len = " << (*ci)->samples << " @ " << (*ci)->start << endl;
+#endif
 
 		pl->add_region (midi_region, (*ci)->start + preroll_off, 1, _session.config.get_layered_record_mode ());
 	}
