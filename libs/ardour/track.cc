@@ -415,23 +415,9 @@ Track::set_name (const string& str)
 
 	boost::shared_ptr<Track> me = boost::dynamic_pointer_cast<Track> (shared_from_this ());
 
-	if (_playlists[data_type()]) {
-		if (_playlists[data_type()]->all_regions_empty () && _session.playlists()->playlists_for_track (me).size() == 1) {
-			/* Only rename the diskstream (and therefore the playlist) if
-			   a) the playlist has never had a region added to it and
-			   b) there is only one playlist for this track.
+	_disk_reader->set_name (str);
+	_disk_writer->set_name (str);
 
-			   If (a) is not followed, people can get confused if, say,
-			   they have notes about a playlist with a given name and then
-			   it changes (see mantis #4759).
-
-			   If (b) is not followed, we rename the current playlist and not
-			   the other ones, which is a bit confusing (see mantis #4977).
-			*/
-			_disk_reader->set_name (str);
-			_disk_writer->set_name (str);
-		}
-	}
 
 	/* When creating a track during session-load, do not change playlist's name.
 	 *
@@ -445,7 +431,21 @@ Track::set_name (const string& str)
 	}
 
 	for (uint32_t n = 0; n < DataType::num_types; ++n) {
-		if (_playlists[n]) {
+		if (!_playlists[n]) {
+			continue;
+		}
+		if (_playlists[n]->all_regions_empty () && _session.playlists()->playlists_for_track (me).size() == 1) {
+			/* Only rename the the playlist if
+			 * a) the playlist has never had a region added to it and
+			 * b) there is only one playlist for this track.
+			 *
+			 * If (a) is not followed, people can get confused if, say,
+			 * they have notes about a playlist with a given name and then
+			 * it changes (see mantis #4759).
+			 *
+			 * If (b) is not followed, we rename the current playlist and not
+			 * the other ones, which is a bit confusing (see mantis #4977).
+			 */
 			_playlists[n]->set_name (str);
 		}
 	}
