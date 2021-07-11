@@ -865,7 +865,7 @@ DiskWriter::configuration_changed ()
 }
 
 int
-DiskWriter::seek (samplepos_t sample, bool /*complete_refill*/)
+DiskWriter::seek (samplepos_t /*sample*/, bool /*complete_refill*/)
 {
 	uint32_t n;
 	ChannelList::iterator chan;
@@ -878,10 +878,7 @@ DiskWriter::seek (samplepos_t sample, bool /*complete_refill*/)
 	if (_midi_buf) {
 		_midi_buf->reset ();
 	}
-	g_atomic_int_set(&_samples_read_from_ringbuffer, 0);
-	g_atomic_int_set(&_samples_written_to_ringbuffer, 0);
 
-	playback_sample = sample;
 
 	return 0;
 }

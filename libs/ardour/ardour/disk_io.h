@@ -186,8 +186,6 @@ protected:
 	/* The MIDI stuff */
 
 	MidiRingBuffer<samplepos_t>*  _midi_buf;
-	gint                         _samples_written_to_ringbuffer;
-	gint                         _samples_read_from_ringbuffer;
 
 	static void get_location_times (const Location* location, samplepos_t* start, samplepos_t* end, samplepos_t* length);
 };

@@ -58,8 +58,6 @@ DiskIOProcessor::DiskIOProcessor (Session& s, Track& t, string const & str, Flag
 	, _track (t)
 	, channels (new ChannelList)
 	, _midi_buf (0)
-	, _samples_written_to_ringbuffer (0)
-	, _samples_read_from_ringbuffer (0)
 {
 	set_display_to_user (false);
 }
