@@ -163,6 +163,7 @@ private:
 
 	void check_record_status (samplepos_t transport_sample, double speed, bool can_record);
 	void finish_capture (boost::shared_ptr<ChannelList> c);
+	void reset_capture ();
 
 	void loop (samplepos_t);
 

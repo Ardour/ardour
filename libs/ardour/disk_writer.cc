@@ -146,15 +146,16 @@ DiskWriter::write_source_name () const
 void
 DiskWriter::check_record_status (samplepos_t transport_sample, double speed, bool can_record)
 {
-	int possibly_recording;
-	const int transport_rolling = 0x4;
-	const int track_rec_enabled = 0x2;
-	const int global_rec_enabled = 0x1;
-	const int fully_rec_enabled = (transport_rolling |track_rec_enabled | global_rec_enabled);
+	static const int transport_rolling = 0x4;
+	static const int track_rec_enabled = 0x2;
+	static const int global_rec_enabled = 0x1;
+
+	static const int rec_ready = (track_rec_enabled | global_rec_enabled);
+	static const int fully_rec_enabled = (transport_rolling |track_rec_enabled | global_rec_enabled);
 
 	/* merge together the 3 factors that affect record status, and compute what has changed. */
 
-	possibly_recording = (speed != 0.0f ? 4 : 0)  | (record_enabled() ? 2 : 0) | (can_record ? 1 : 0);
+	int possibly_recording = (speed != 0.0f ? 4 : 0)  | (record_enabled() ? 2 : 0) | (can_record ? 1 : 0);
 
 	if (possibly_recording == _last_possibly_recording) {
 		return;
@@ -171,6 +172,9 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 			_capture_start_sample = loc->start ();
 		} else if (_loop_location) {
 			_capture_start_sample = _loop_location->start ();
+			if (_last_possibly_recording & transport_rolling) {
+				_accumulated_capture_offset = _playback_offset + transport_sample - _session.transport_sample (); // + rec_offset;
+			}
 		} else {
 			_capture_start_sample = _session.transport_sample ();
 		}
@@ -210,6 +214,20 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 		                                                      _session.worst_input_latency()));
 
 
+	} else if  (!_capture_start_sample) {
+		/* set _capture_start_sample early on to calculate MIDI _accumulated_capture_offset */
+		Location* loc;
+		if  (_session.config.get_punch_in () && 0 != (loc = _session.locations()->auto_punch_location ())) {
+			_capture_start_sample = loc->start ();
+		} else if (_loop_location) {
+			_capture_start_sample = _loop_location->start ();
+		} else if ((possibly_recording & rec_ready) == rec_ready) {
+			/* count-in, pre-roll */
+			_capture_start_sample = _session.transport_sample ();
+		} else if (possibly_recording) {
+			/* already rolling, manual punch rec-arm/rec-en */
+			_accumulated_capture_offset = _playback_offset;
+		}
 	}
 
 	_last_possibly_recording = possibly_recording;
@@ -483,6 +501,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				_capture_captured     = start_sample - loop_start + rec_offset;
 				_capture_start_sample = loop_start;
 				_first_recordable_sample = loop_start;
+
 				if (_alignment_style == ExistingMaterial) {
 					_capture_captured  -= _playback_offset + _capture_offset;
 				}
@@ -678,6 +697,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		if (_was_recording) {
 			finish_capture (c);
 			_accumulated_capture_offset = 0;
+			_capture_start_sample.reset ();
+			_last_possibly_recording = 0; // re-init
 		}
 	}
 
@@ -873,6 +894,13 @@ DiskWriter::configuration_changed ()
 int
 DiskWriter::seek (samplepos_t /*sample*/, bool /*complete_refill*/)
 {
+	reset_capture ();
+	return 0;
+}
+
+void
+DiskWriter::reset_capture ()
+{
 	uint32_t n;
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -885,8 +913,8 @@ DiskWriter::seek (samplepos_t /*sample*/, bool /*complete_refill*/)
 		_midi_buf->reset ();
 	}
 
-
-	return 0;
+	_accumulated_capture_offset = 0;
+	_capture_start_sample.reset ();
 }
 
 int
@@ -1272,7 +1300,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	}
 
 	capture_info.clear ();
-	_capture_start_sample.reset ();
+	reset_capture ();
 }
 
 void
