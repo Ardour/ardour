@@ -169,6 +169,8 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 		Location* loc;
 		if  (_session.config.get_punch_in () && 0 != (loc = _session.locations()->auto_punch_location ())) {
 			_capture_start_sample = loc->start ();
+		} else if (_loop_location) {
+			_capture_start_sample = _loop_location->start ();
 		} else {
 			_capture_start_sample = _session.transport_sample ();
 		}
@@ -478,9 +480,13 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				   at the loop start and can handle time wrapping around.
 				   Otherwise, start the source right now as usual.
 				*/
-				_capture_captured     = start_sample - loop_start;
+				_capture_captured     = start_sample - loop_start + rec_offset;
 				_capture_start_sample = loop_start;
 				_first_recordable_sample = loop_start;
+				if (_alignment_style == ExistingMaterial) {
+					_capture_captured  -= _playback_offset + _capture_offset;
+				}
+
 				if (_capture_captured > 0) {
 					/* when enabling record while already looping,
 					 * zero fill region back to loop-start.
