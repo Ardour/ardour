@@ -1142,20 +1142,20 @@ Session::butler_transport_work (bool have_process_lock)
 		}
 	}
 
-	const int butler = g_atomic_int_get (&_butler_seek_counter);
-	const int rtlocates = g_atomic_int_get (&_seek_counter);
-
-	if (butler != rtlocates) {
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("nonrealtime locate invoked from BTW (butler has done %1, rtlocs %2)\n", butler, rtlocates));
-		non_realtime_locate ();
-	}
-
 	if (ptw & PostTransportStop) {
 		non_realtime_stop (ptw & PostTransportAbort, on_entry, finished);
 		if (!finished) {
 			g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 			goto restart;
 		}
+	}
+
+	const int butler = g_atomic_int_get (&_butler_seek_counter);
+	const int rtlocates = g_atomic_int_get (&_seek_counter);
+
+	if (butler != rtlocates) {
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("nonrealtime locate invoked from BTW (butler has done %1, rtlocs %2)\n", butler, rtlocates));
+		non_realtime_locate ();
 	}
 
 	if (ptw & PostTransportOverWrite) {
