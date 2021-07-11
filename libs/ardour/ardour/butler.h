@@ -66,8 +66,6 @@ class LIBARDOUR_API Butler : public SessionHandleRef
 	samplecnt_t audio_playback_buffer_size() const { return _audio_playback_buffer_size; }
 	uint32_t midi_buffer_size()  const { return _midi_buffer_size; }
 
-	bool flush_tracks_to_disk_after_locate (boost::shared_ptr<RouteList>, uint32_t& errors);
-
 	static void* _thread_work(void *arg);
 	void*         thread_work();
 

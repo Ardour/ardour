@@ -1069,43 +1069,6 @@ Session::butler_transport_work (bool have_process_lock)
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = [%1] (0x%3%4%5) at %2\n", enum_2_string (ptw), (before = g_get_monotonic_time()), std::hex, ptw, std::dec));
 
-	if (ptw & PostTransportLocate) {
-
-		if (get_play_loop()) {
-
-			DEBUG_TRACE (DEBUG::Butler, "flush loop recording fragment to disk\n");
-
-			/* this locate might be happening while we are
-			 * loop recording.
-			 *
-			 * Non-seamless looping will require a locate (below) that
-			 * will reset capture buffers and throw away data.
-			 *
-			 * Rather than first find all tracks and see if they
-			 * have outstanding data, just do a flush anyway. It
-			 * may be cheaper this way anyway, and is certainly
-			 * more accurate.
-			 */
-
-			bool more_disk_io_to_do = false;
-			uint32_t errors = 0;
-
-			do {
-				more_disk_io_to_do = _butler->flush_tracks_to_disk_after_locate (r, errors);
-
-				if (errors) {
-					break;
-				}
-
-				if (more_disk_io_to_do) {
-					continue;
-				}
-
-			} while (false);
-
-		}
-	}
-
 	if (ptw & PostTransportAdjustPlaybackBuffering) {
 		/* need to prevent concurrency with ARDOUR::Reader::run(),
 		 * DiskWriter::adjust_buffering() re-allocates the ringbuffer */
