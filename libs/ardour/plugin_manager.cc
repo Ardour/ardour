@@ -558,11 +558,6 @@ PluginManager::refresh (bool cache_only)
 	bool conceal_vst2 = false;
 #endif
 
-	if (!cache_only && !cache_valid ()) {
-		Config->set_plugin_cache_version (cache_version ());
-		Config->save_state();
-	}
-
 #ifdef AUDIOUNIT_SUPPORT
 	if (cache_only) {
 		BootMessage (_("Scanning AU Plugins"));
@@ -597,6 +592,11 @@ PluginManager::refresh (bool cache_only)
 				statuses.erase (j);
 			}
 		}
+	}
+
+	if (!cache_only && !cache_valid () && !cancelled ()) {
+		Config->set_plugin_cache_version (cache_version ());
+		Config->save_state();
 	}
 
 	BootMessage (_("Plugin Scan Complete..."));
