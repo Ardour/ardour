@@ -200,7 +200,6 @@ main (int argc, char **argv)
 	signal (SIGBUS, sig_handler);
 	signal (SIGILL, sig_handler);
 
-#endif
 	bool err = false;
 
 	CFStringRef s_type = CFStringCreateWithCString (kCFAllocatorDefault, argv[optind++], kCFStringEncodingUTF8);
