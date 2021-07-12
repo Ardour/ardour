@@ -508,9 +508,7 @@ MidiStreamView::setup_rec_box ()
 				boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion>
 				                                      (RegionFactory::create (sources, plist, false)));
 				if (region) {
-					region->set_start (_trackview.track()->current_capture_start()
-					                   - _trackview.track()->get_capture_start_sample (0));
-					region->set_position (_trackview.session()->transport_sample());
+					region->set_position (_trackview.track()->current_capture_start ());
 
 					RegionView* rv = add_region_view_internal (region, false, true);
 					MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
