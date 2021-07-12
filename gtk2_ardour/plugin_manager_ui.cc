@@ -184,6 +184,7 @@ PluginManagerUI::PluginManagerUI ()
 	/* connect to signals */
 
 	PluginManager::instance ().PluginListChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::refill, this), gui_context());
+	PluginManager::instance ().PluginScanLogChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::refill, this), gui_context());
 	PluginManager::instance ().PluginStatusChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::plugin_status_changed, this, _1, _2, _3), gui_context());
 
 	_btn_rescan_all.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::rescan_all));
@@ -544,7 +545,6 @@ void
 PluginManagerUI::clear_log ()
 {
 	PluginManager::instance ().clear_stale_log ();
-	refill ();
 }
 
 void
