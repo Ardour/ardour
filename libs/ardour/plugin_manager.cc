@@ -3235,6 +3235,8 @@ PluginManager::rescan_plugin (ARDOUR::PluginType type, std::string const& path_u
 		save_scanlog ();
 		if (erased) {
 			PluginListChanged (); /* EMIT SIGNAL */
+		} else {
+			PluginScanLogChanged (); /* EMIT SIGNAL */
 		}
 		PluginScanMessage(X_("closeme"), "", false);
 		return false;
@@ -3275,6 +3277,7 @@ PluginManager::rescan_faulty ()
 		detect_ambiguities ();
 	} else {
 		save_scanlog ();
+		PluginScanLogChanged ();/* EMIT SIGNAL */
 	}
 }
 
@@ -3290,6 +3293,7 @@ PluginManager::scan_log (std::vector<boost::shared_ptr<PluginScanLogEntry> >& l)
 void
 PluginManager::clear_stale_log ()
 {
+	bool erased = false;
 	for (PluginScanLog::const_iterator i = _plugin_scan_log.begin(); i != _plugin_scan_log.end();) {
 		if (!(*i)->recent()) {
 			whitelist ((*i)->type (), (*i)->path (), true);
@@ -3299,11 +3303,15 @@ PluginManager::clear_stale_log ()
 				::g_unlink (fn.c_str ());
 			}
 			i = _plugin_scan_log.erase (i);
+			erased = true;
 		} else {
 			++i;
 		}
 	}
-	save_scanlog ();
+	if (erased) {
+		save_scanlog ();
+		PluginScanLogChanged ();/* EMIT SIGNAL */
+	}
 }
 
 void
