@@ -21,6 +21,7 @@
 #include <cstdio>
 #include <getopt.h>
 #include <iostream>
+#include <signal.h>
 #include <string>
 #include <strings.h>
 
@@ -28,6 +29,7 @@
 #include "pbd/transmitter.h"
 #include "pbd/receiver.h"
 #include "pbd/pbd.h"
+#include "pbd/stacktrace.h"
 
 using namespace std;
 
@@ -92,6 +94,14 @@ scan_auv2 (CAComponentDescription& desc, bool force, bool verbose)
 	}
 
 	return true;
+}
+
+static void
+sig_handler (int sig)
+{
+	fprintf (stderr, "Error: signal %d\n", sig);
+	PBD::stacktrace (cerr, 15, 2);
+	::exit (EXIT_FAILURE);
 }
 
 static void
@@ -186,6 +196,11 @@ main (int argc, char **argv)
 		verbose = false;
 	}
 
+	signal (SIGSEGV, sig_handler);
+	signal (SIGBUS, sig_handler);
+	signal (SIGILL, sig_handler);
+
+#endif
 	bool err = false;
 
 	CFStringRef s_type = CFStringCreateWithCString (kCFAllocatorDefault, argv[optind++], kCFStringEncodingUTF8);

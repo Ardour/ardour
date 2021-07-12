@@ -22,6 +22,12 @@
 #include <iostream>
 #include <string>
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#else
+#include <signal.h>
+#endif
+
 #ifdef COMPILER_MSVC
 #include <sys/utime.h>
 #else
@@ -32,6 +38,7 @@
 #include "pbd/transmitter.h"
 #include "pbd/receiver.h"
 #include "pbd/pbd.h"
+#include "pbd/stacktrace.h"
 #include "pbd/win_console.h"
 #include "pbd/xml++.h"
 
@@ -109,6 +116,25 @@ scan_vst3 (std::string const& bundle_path, bool force, bool verbose)
 
 	return true;
 }
+
+#ifdef PLATFORM_WINDOWS
+static LONG WINAPI
+crash_handler (EXCEPTION_POINTERS* exception_info)
+{
+	// TODO consider DrMingw if HAVE_DRMINGW
+	fprintf (stderr, "Error: %x\n", exception_info->ExceptionRecord->ExceptionCode);
+	PBD::stacktrace (cerr, 15, 2);
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+#else
+static void
+sig_handler (int sig)
+{
+	fprintf (stderr, "Error: signal %d\n", sig);
+	PBD::stacktrace (cerr, 15, 2);
+	::exit (EXIT_FAILURE);
+}
+#endif
 
 static void
 usage ()
@@ -208,6 +234,14 @@ main (int argc, char **argv)
 	} else {
 		verbose = false;
 	}
+
+#ifdef PLATFORM_WINDOWS
+	::SetUnhandledExceptionFilter (crash_handler);
+#else
+	signal (SIGSEGV, sig_handler);
+	signal (SIGBUS, sig_handler);
+	signal (SIGILL, sig_handler);
+#endif
 
 	bool err = false;
 
