@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <cstdio>
 #include <cstdlib>
+#include <sstream>
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
@@ -1155,7 +1156,7 @@ auv2_is_blacklisted (std::string const& id)
 
 static void auv2_scanner_log (std::string msg, PluginScanLogEntry* psle)
 {
-	psle->msg (PluginScanLogEntry::OK, msg);
+	*ss << msg;
 }
 
 bool
@@ -1170,9 +1171,10 @@ PluginManager::run_auv2_scanner_app (CAComponentDescription const& desc, AUv2Des
 	argp[5] = strdup (d.manu.c_str());
 	argp[6] = 0;
 
+	stringstream scan_log;
 	ARDOUR::SystemExec scanner (auv2_scanner_bin_path, argp);
 	PBD::ScopedConnection c;
-	scanner.ReadStdout.connect_same_thread (c, boost::bind (&auv2_scanner_log, _1, &(*psle)));
+	scanner.ReadStdout.connect_same_thread (c, boost::bind (&auv2_scanner_log, _1, &scan_log));
 
 	if (scanner.start (ARDOUR::SystemExec::MergeWithStdin)) {
 		psle->msg (PluginScanLogEntry::Error, string_compose (_("Cannot launch AU scanner app '%1': %2"), auv2_scanner_bin_path, strerror (errno)));
@@ -1196,6 +1198,7 @@ PluginManager::run_auv2_scanner_app (CAComponentDescription const& desc, AUv2Des
 
 		if (cancelled () || (!notime && timeout == 0)) {
 			scanner.terminate ();
+			psle->msg (PluginScanLogEntry::OK, scan_log.str());
 			if (cancelled ()) {
 				psle->msg (PluginScanLogEntry::New, "Scan was cancelled.");
 			} else {
@@ -1207,6 +1210,7 @@ PluginManager::run_auv2_scanner_app (CAComponentDescription const& desc, AUv2Des
 			return false;
 		}
 	}
+	psle->msg (PluginScanLogEntry::OK, scan_log.str());
 	return true;
 }
 
@@ -1442,9 +1446,9 @@ static bool vst2_is_blacklisted (string const& module_path)
 	return bl.find (module_path + "\n") != string::npos;
 }
 
-static void vst2_scanner_log (std::string msg, PluginScanLogEntry* psle)
+static void vst2_scanner_log (std::string msg, std::stringstream* ss)
 {
-	psle->msg (PluginScanLogEntry::OK, msg);
+	*ss << msg;
 }
 
 bool
@@ -1457,9 +1461,10 @@ PluginManager::run_vst2_scanner_app (std::string path, PSLEPtr psle) const
 	argp[3] = strdup (path.c_str ());
 	argp[4] = 0;
 
+	stringstream scan_log;
 	ARDOUR::SystemExec scanner (vst2_scanner_bin_path, argp);
 	PBD::ScopedConnection c;
-	scanner.ReadStdout.connect_same_thread (c, boost::bind (&vst2_scanner_log, _1, &(*psle)));
+	scanner.ReadStdout.connect_same_thread (c, boost::bind (&vst2_scanner_log, _1, &scan_log));
 
 	if (scanner.start (ARDOUR::SystemExec::MergeWithStdin)) {
 		psle->msg (PluginScanLogEntry::Error, string_compose (_("Cannot launch VST scanner app '%1': %2"), vst2_scanner_bin_path, strerror (errno)));
@@ -1483,6 +1488,7 @@ PluginManager::run_vst2_scanner_app (std::string path, PSLEPtr psle) const
 
 		if (cancelled () || (!notime && timeout == 0)) {
 			scanner.terminate ();
+			psle->msg (PluginScanLogEntry::OK, scan_log.str());
 			if (cancelled ()) {
 				psle->msg (PluginScanLogEntry::New, "Scan was cancelled.");
 			} else {
@@ -1494,6 +1500,7 @@ PluginManager::run_vst2_scanner_app (std::string path, PSLEPtr psle) const
 			return false;
 		}
 	}
+	psle->msg (PluginScanLogEntry::OK, scan_log.str());
 	return true;
 }
 
@@ -2180,9 +2187,9 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 	return 0;
 }
 
-static void vst3_scanner_log (std::string msg, PluginScanLogEntry* psle)
+static void vst3_scanner_log (std::string msg, std::stringstream* ss)
 {
-	psle->msg (PluginScanLogEntry::OK, msg);
+	*ss << msg;
 }
 
 bool
@@ -2195,9 +2202,10 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path, PSLEPtr psle) cons
 	argp[3] = strdup (bundle_path.c_str ());
 	argp[4] = 0;
 
+	stringstream scan_log;
 	ARDOUR::SystemExec scanner (vst3_scanner_bin_path, argp);
 	PBD::ScopedConnection c;
-	scanner.ReadStdout.connect_same_thread (c, boost::bind (&vst3_scanner_log, _1, &(*psle)));
+	scanner.ReadStdout.connect_same_thread (c, boost::bind (&vst3_scanner_log, _1, &scan_log));
 
 	if (scanner.start (ARDOUR::SystemExec::MergeWithStdin)) {
 		psle->msg (PluginScanLogEntry::Error, string_compose (_("Cannot launch VST scanner app '%1': %2"), vst3_scanner_bin_path, strerror (errno)));
@@ -2221,6 +2229,7 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path, PSLEPtr psle) cons
 
 		if (cancelled () || (!notime && timeout == 0)) {
 			scanner.terminate ();
+			psle->msg (PluginScanLogEntry::OK, scan_log.str());
 			if (cancelled ()) {
 				psle->msg (PluginScanLogEntry::New, "Scan was cancelled.");
 			} else {
@@ -2235,11 +2244,11 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path, PSLEPtr psle) cons
 			return false;
 		}
 	}
+	psle->msg (PluginScanLogEntry::OK, scan_log.str());
 	return true;
 }
 
 #endif // VST3_SUPPORT
-
 
 PluginManager::PluginStatusType
 PluginManager::get_status (const PluginInfoPtr& pi) const

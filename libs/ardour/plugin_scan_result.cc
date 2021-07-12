@@ -112,7 +112,7 @@ PluginScanLogEntry::add (PluginInfoPtr info)
 
 static bool invalid_char (unsigned char c)
 {
-    return !isprint (c);
+    return !isprint (c) && c != '\n';
 }
 
 void
