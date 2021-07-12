@@ -99,8 +99,9 @@ scan_auv2 (CAComponentDescription& desc, bool force, bool verbose)
 static void
 sig_handler (int sig)
 {
-	fprintf (stderr, "Error: signal %d\n", sig);
-	PBD::stacktrace (cerr, 15, 2);
+	printf ("Error: signal %d\n ---8<---\n", sig);
+	PBD::stacktrace (std::cout,, 15, 2);
+	printf (" --->8---\n");
 	::exit (EXIT_FAILURE);
 }
 

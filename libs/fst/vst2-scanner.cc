@@ -135,16 +135,18 @@ static LONG WINAPI
 crash_handler (EXCEPTION_POINTERS* exceptioninfo)
 {
 	// TODO consider DrMingw if HAVE_DRMINGW
-	fprintf (stderr, "Error: %x\n", exceptioninfo->ExceptionRecord->ExceptionCode);
-	PBD::stacktrace (cerr, 15, 2);
+	printf ("Error: %x\n ---8<---\n", exceptioninfo->ExceptionRecord->ExceptionCode);
+	PBD::stacktrace (std::cout, 15, 2);
+	printf (" --->8---\n");
 	return EXCEPTION_CONTINUE_SEARCH;
 }
 #else
 static void
 sig_handler (int sig)
 {
-	fprintf (stderr, "Error: signal %d\n", sig);
-	PBD::stacktrace (cerr, 15, 2);
+	printf ("Error: signal %d\n ---8<---\n", sig);
+	PBD::stacktrace (std::cout, 15, 2);
+	printf (" --->8---\n");
 	::exit (EXIT_FAILURE);
 }
 #endif
