@@ -49,7 +49,7 @@ PBD::trace_twb ()
 #include <execinfo.h>
 
 void
-PBD::stacktrace (std::ostream& out, int levels)
+PBD::stacktrace (std::ostream& out, int levels, int start)
 {
 	void *array[200];
 	size_t size;
@@ -63,7 +63,7 @@ PBD::stacktrace (std::ostream& out, int levels)
 
 		if (strings) {
 
-			for (i = 0; i < size && (levels == 0 || i < size_t(levels)); i++) {
+			for (i = start; i < size && (levels == 0 || i < size_t(levels)); i++) {
 				out << "  " << demangle (strings[i]) << std::endl;
 			}
 
@@ -89,7 +89,7 @@ extern "C" {
 #endif
 
 void
-PBD::stacktrace (std::ostream& out, int)
+PBD::stacktrace (std::ostream& out, int levels, int start)
 {
 #ifdef DEBUG
 	const size_t levels = 62; // does not support more then 62 levels of stacktrace
@@ -112,7 +112,7 @@ PBD::stacktrace (std::ostream& out, int)
 	symbol->MaxNameLen   = 255;
 	symbol->SizeOfStruct = sizeof (SYMBOL_INFO);
 
-	for (i = 0; i < frames; ++i) {
+	for (i = start; i < frames && (levels == 0 || i < levels); ++i) {
 		SymFromAddr (process, (DWORD64)(stack[i]), 0, symbol);
 		out << string_compose ("%1: %2 - %3\n", frames - i - 1, symbol->Name, symbol->Address);
 	}

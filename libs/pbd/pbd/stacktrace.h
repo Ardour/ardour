@@ -40,7 +40,7 @@
 
 namespace PBD {
 
-	LIBPBD_API void stacktrace (std::ostream& out, int levels = 0);
+	LIBPBD_API void stacktrace (std::ostream& out, int levels = 0, int start_level = 0);
 	LIBPBD_API void trace_twb();
 
 template<typename T>
