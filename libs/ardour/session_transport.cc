@@ -908,7 +908,7 @@ Session::request_preroll_record_trim (samplepos_t rec_in, samplecnt_t preroll)
 	config.set_punch_out (false);
 
 	samplepos_t pos = std::max ((samplepos_t)0, rec_in - preroll);
-	_preroll_record_trim_len = preroll;
+	_preroll_record_trim_len = rec_in - pos;
 	maybe_enable_record ();
 	request_locate (pos, MustRoll);
 	set_requested_return_sample (rec_in);
