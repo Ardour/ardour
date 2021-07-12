@@ -29,6 +29,7 @@
 
 #include "gtkmm2ext/gui_thread.h"
 #include "widgets/paths_dialog.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_message.h"
 #include "plugin_manager_ui.h"
@@ -52,7 +53,7 @@ PluginManagerUI::PluginManagerUI ()
 	plugin_model = Gtk::ListStore::create (plugin_columns);
 
 	Gtk::CellRendererToggle* cell_blacklist = Gtk::manage (new Gtk::CellRendererToggle ());
-	Gtk::TreeViewColumn* column_blacklist   = Gtk::manage (new Gtk::TreeViewColumn (_("BL"), *cell_blacklist));
+	Gtk::TreeViewColumn* column_blacklist   = Gtk::manage (new Gtk::TreeViewColumn ("", *cell_blacklist));
 
 	cell_blacklist->property_activatable() = true;
 	cell_blacklist->property_radio()       = false;
@@ -60,7 +61,7 @@ PluginManagerUI::PluginManagerUI ()
 	column_blacklist->add_attribute (cell_blacklist->property_activatable (), plugin_columns.can_blacklist);
 
 	Gtk::CellRendererToggle* cell_fav = Gtk::manage (new Gtk::CellRendererToggle ());
-	Gtk::TreeViewColumn* column_fav   = Gtk::manage (new Gtk::TreeViewColumn (_("Fav"), *cell_fav));
+	Gtk::TreeViewColumn* column_fav   = Gtk::manage (new Gtk::TreeViewColumn ("", *cell_fav));
 
 	cell_fav->property_activatable() = true;
 	cell_fav->property_radio() = true;
@@ -68,21 +69,59 @@ PluginManagerUI::PluginManagerUI ()
 	column_fav->add_attribute (cell_fav->property_activatable (), plugin_columns.can_fav_hide);
 
 	Gtk::CellRendererToggle* cell_hidden = Gtk::manage (new Gtk::CellRendererToggle ());
-	Gtk::TreeViewColumn* column_hidden   = Gtk::manage (new Gtk::TreeViewColumn (_("Hide"), *cell_hidden));
+	Gtk::TreeViewColumn* column_hidden   = Gtk::manage (new Gtk::TreeViewColumn ("", *cell_hidden));
 
 	cell_hidden->property_activatable() = true;
 	cell_hidden->property_radio() = true;
 	column_hidden->add_attribute (cell_hidden->property_active (), plugin_columns.hidden);
 	column_hidden->add_attribute (cell_hidden->property_activatable (), plugin_columns.can_fav_hide);
 
-	plugin_display.append_column (_("Status"), plugin_columns.status);
+	plugin_display.append_column ("", plugin_columns.status);
 	plugin_display.append_column (*column_blacklist);
 	plugin_display.append_column (*column_fav);
 	plugin_display.append_column (*column_hidden);
-	plugin_display.append_column (_("Name"), plugin_columns.name);
-	plugin_display.append_column (_("Creator"), plugin_columns.creator);
-	plugin_display.append_column (_("Type"), plugin_columns.type);
-	plugin_display.append_column (_("File/ID"), plugin_columns.path);
+	plugin_display.append_column ("", plugin_columns.name);
+	plugin_display.append_column ("", plugin_columns.creator);
+	plugin_display.append_column ("", plugin_columns.type);
+	plugin_display.append_column ("", plugin_columns.path);
+
+	plugin_display.set_tooltip_column(7); // plugin_columns.tip
+
+	struct ColumnInfo {
+		int                index;
+		int                sort_idx;
+		Gtk::AlignmentEnum al;
+		bool               resizable;
+		const char*        label;
+		const char*        tooltip;
+	} ci[] = {
+		/* clang-format off */
+		{ 0, 0, Gtk::ALIGN_LEFT,   false,  _("Status"),      _("Plugin Scan Result") },
+		{ 1, 1, Gtk::ALIGN_CENTER, false, S_("Ignore|Ign"),  _("Blacklist the plugin-set, ignore all plugins in a bundle.") },
+		{ 2, 2, Gtk::ALIGN_CENTER, false,  _("Fav"),         _("Add this plugin to to the favorite list") },
+		{ 3, 3, Gtk::ALIGN_CENTER, false,  _("Hide"),        _("Hide this plugin in the plugin-selector") },
+		{ 4, 4, Gtk::ALIGN_CENTER, true,   _("Name"),        _("Name of the plugin") },
+		{ 5, 5, Gtk::ALIGN_CENTER, true,   _("Creator"),     _("The plugin's vendor") },
+		{ 6, 6, Gtk::ALIGN_CENTER, false,  _("Type"),        _("Plugin standard") },
+		{ 7, 7, Gtk::ALIGN_LEFT,   false,  _("File/ID"),     _("The plugin file (VST) or unique ID (AU, LV2)") },
+		{-1,-1, Gtk::ALIGN_CENTER, false, 0, 0 } // sentinel
+	};
+	/* clang-format on */
+
+	for (int i = 0; ci[i].index >= 0; ++i) {
+		Gtk::Label* l = Gtk::manage (new Gtk::Label (ci[i].label));
+		l->set_alignment (ci[i].al);
+		l->show ();
+
+		Gtk::TreeViewColumn* col = plugin_display.get_column (ci[i].index);
+		col->set_widget (*l);
+		col->set_alignment (ci[i].al);
+		col->set_expand (false);
+		col->set_sort_column (ci[i].sort_idx);
+		col->set_resizable (ci[i].resizable);
+
+		ArdourWidgets::set_tooltip (*l, ci[i].tooltip);
+	}
 
 	plugin_display.set_model (plugin_model);
 	plugin_display.set_headers_visible (true);
@@ -90,25 +129,9 @@ PluginManagerUI::PluginManagerUI ()
 	plugin_display.set_reorderable (false);
 	plugin_display.set_rules_hint (true);
 	plugin_display.set_enable_search(true);
-
-	plugin_display.get_column (4)->set_resizable (true);
-	plugin_display.get_column (5)->set_resizable (true);
-
-#if 0
-	if (UIConfiguration::instance().get_use_tooltips()) {
-		recent_session_display.set_tooltip_column(1); // plugin_columns.tip
-	}
-#endif
-
-	for (int i = 0; i < 8; ++i) {
-		Gtk::TreeView::Column* column = plugin_display.get_column(i);
-		if (column) {
-			column->set_sort_column(i);
-		}
-	}
+	plugin_display.set_name("PluginSelectorDisplay");
 
 	plugin_model->set_sort_column (plugin_columns.name.index(), Gtk::SORT_ASCENDING);
-	plugin_display.set_name("PluginSelectorDisplay");
 
 	plugin_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	plugin_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginManagerUI::selection_changed));
@@ -151,22 +174,32 @@ PluginManagerUI::PluginManagerUI ()
 
 #if defined LXVST_SUPPORT
 	ArdourWidgets::ArdourButton* btn_lxvst = Gtk::manage (new ArdourWidgets::ArdourButton (_("Linux VST2 Path")));
+	ArdourWidgets::set_tooltip (*btn_lxvst, _("Configure where to look for VST2 plugins."));
 	btn_lxvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::vst_path_cb), LXVST));
 	b_paths->pack_start (*btn_lxvst);
 #endif
 #ifdef WINDOWS_VST_SUPPORT
 	ArdourWidgets::ArdourButton* btn_winvst = Gtk::manage (new ArdourWidgets::ArdourButton (_("Windows VST2 Path")));
+	ArdourWidgets::set_tooltip (*btn_winvst, _("Configure where to look for VST2 plugins."));
 	btn_winvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::vst_path_cb), Windows_VST));
 	b_paths->pack_start (*btn_winvst);
 #endif
 #ifdef VST3_SUPPORT
 	ArdourWidgets::ArdourButton* btn_vst3 = Gtk::manage (new ArdourWidgets::ArdourButton (_("VST3 Path")));
+	ArdourWidgets::set_tooltip (*btn_vst3, _("Configure where to look for VST3 plugins in addition to the default VST3 locations."));
 	btn_vst3->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::vst_path_cb), VST3));
 	b_paths->pack_start (*btn_vst3);
 #endif
 	b_paths->pack_start (_btn_prefs);
 	b_paths->set_spacing (4);
 	b_paths->set_border_width (4);
+
+	/* tooltips */
+	ArdourWidgets::set_tooltip (_btn_rescan_all, _("Scans all plugins, regardless if they have already been susceesfully scaned\n.Depending on the number of plugins installed this can take a long time."));
+	ArdourWidgets::set_tooltip (_btn_rescan_err, _("Scans plugins that have not yet been susccessfully scanned."));
+	ArdourWidgets::set_tooltip (_btn_rescan_sel, _("Scans the selected plugin."));
+	ArdourWidgets::set_tooltip (_btn_clear,      _("Forget about plugins that have been removed from the system."));
+	ArdourWidgets::set_tooltip (_btn_prefs,      _("Open preference window"));
 
 	/* top level packing */
 	_top.attach (*lbl,       0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND | Gtk::FILL, 4, 0);
@@ -364,6 +397,9 @@ PluginManagerUI::refill ()
 			boost::shared_ptr<PluginScanLogEntry> const& srow ((*i)[plugin_columns.psle]);
 			if (*sel == *srow) {
 				plugin_display.get_selection ()->select (*i);
+				Gtk::TreeIter iter = plugin_display.get_selection()->get_selected();
+				assert (iter);
+				plugin_display.scroll_to_row (plugin_model->get_path (iter), 0.5);
 				break;
 			}
 		}
@@ -371,6 +407,7 @@ PluginManagerUI::refill ()
 
 	plugin_display.set_search_column (4); // Name
 
+	/* refill "Plugin Count" */
 	int row = 0;
 	std::list<Gtk::Widget*> children = _tbl_nfo.get_children();
 	for (std::list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
@@ -386,6 +423,7 @@ PluginManagerUI::refill ()
 	}
 	_tbl_nfo.show_all ();
 
+	/* update sensitivity */
 	_btn_clear.set_sensitive (have_stale);
 	_btn_rescan_err.set_sensitive (rescan_err);
 }
@@ -417,7 +455,7 @@ PluginManagerUI::blacklist_changed (std::string const& path)
 	Gtk::TreeIter iter;
 	if ((iter = plugin_model->get_iter (path))) {
 		boost::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
-    if ((*iter)[plugin_columns.blacklisted]) {
+		if ((*iter)[plugin_columns.blacklisted]) {
 			PluginScanDialog psd (false, true, this);
 			PluginManager::instance ().rescan_plugin (psle->type (), psle->path ());
 		} else {
@@ -497,7 +535,7 @@ PluginManagerUI::rescan_all ()
 {
 	ArdourMessageDialog msg (_("Are you sure you want to rescan all plugins?"), false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
 	msg.set_title (_("Rescan Plugins"));
-  msg.set_secondary_text(_("This starts a fresh scan, dropping all cached plugin data and backlists. Depending on the number if plugins installed this can take a long time."));
+	msg.set_secondary_text(_("This starts a fresh scan, dropping all cached plugin data and backlists. Depending on the number if plugins installed this can take a long time."));
 
 	if (msg.run() != Gtk::RESPONSE_YES) {
 		return;
@@ -568,31 +606,31 @@ PluginManagerUI::plugin_status_changed (ARDOUR::PluginType t, std::string uid, A
 void
 PluginManagerUI::favorite_changed (const std::string& path)
 {
-  if (_in_row_change) {
-    return;
-  }
+	if (_in_row_change) {
+		return;
+	}
 
 	PBD::Unwinder<bool> uw (_in_row_change, true);
 
 	Gtk::TreeIter iter;
 	if ((iter = plugin_model->get_iter (path))) {
-    bool favorite = !(*iter)[plugin_columns.favorite];
+		bool favorite = !(*iter)[plugin_columns.favorite];
 
-    PluginManager::PluginStatusType status = (favorite ? PluginManager::Favorite : PluginManager::Normal);
+		PluginManager::PluginStatusType status = (favorite ? PluginManager::Favorite : PluginManager::Normal);
 		PluginInfoPtr pi = (*iter)[plugin_columns.plugin];
 
 		ARDOUR::PluginManager& manager (PluginManager::instance ());
 		manager.set_status (pi->type, pi->unique_id, status);
 		manager.save_statuses ();
-  }
+	}
 }
 
 void
 PluginManagerUI::hidden_changed (const std::string& path)
 {
-  if (_in_row_change) {
-    return;
-  }
+	if (_in_row_change) {
+		return;
+	}
 
 	PBD::Unwinder<bool> uw (_in_row_change, true);
 
@@ -606,5 +644,5 @@ PluginManagerUI::hidden_changed (const std::string& path)
 		ARDOUR::PluginManager& manager (PluginManager::instance ());
 		manager.set_status (pi->type, pi->unique_id, status);
 		manager.save_statuses ();
-  }
+	}
 }
