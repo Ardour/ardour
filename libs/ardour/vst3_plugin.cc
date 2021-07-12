@@ -251,8 +251,9 @@ VST3Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) cons
 	          || (!input && id >= _plug->n_audio_outputs())))
 	    || (dt == DataType::MIDI &&
 	        ((input && id >= _plug->n_midi_inputs())
-	          || (!input && id >= _plug->n_midi_outputs())))
+	          || (!input && id >= _plug->n_midi_outputs()))) {
 		return Plugin::describe_io_port(dt, input, id);
+	}
 
 	return _plug->describe_io_port (dt, input, id);
 }
