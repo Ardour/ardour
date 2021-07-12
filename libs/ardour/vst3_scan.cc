@@ -421,12 +421,13 @@ touch_cachefile (std::string const& module_path, std::string const& cache_file, 
 		if (0 != g_utime (cache_file.c_str (), &utb)) {
 			PBD::error << "Could not set cachefile timestamp." << endmsg;
 		} else if (verbose) {
+			const time_t mtime = sb_vst.st_mtime;
 			char v3itme[128];
 			char vsttme[128];
 			struct tm local_time;
 			localtime_r (&utb.modtime, &local_time);
 			strftime (v3itme, sizeof(v3itme), "%Y-%m-%d %T", &local_time);
-			localtime_r (&sb_vst.st_mtime, &local_time);
+			localtime_r (&mtime, &local_time);
 			strftime (vsttme, sizeof(vsttme), "%Y-%m-%d %T", &local_time);
 			PBD::info << "Touch cachefile: set mtime = "
 			          << utb.modtime << " (" << v3itme << "), plugin mtime = "
