@@ -246,6 +246,14 @@ VST3Plugin::print_parameter (uint32_t port, std::string& rv) const
 Plugin::IOPortDescription
 VST3Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 {
+	if ((dt == DataType::AUDIO &&
+	        ((input && id >= _plug->n_audio_inputs())
+	          || (!input && id >= _plug->n_audio_outputs())))
+	    || (dt == DataType::MIDI &&
+	        ((input && id >= _plug->n_midi_inputs())
+	          || (!input && id >= _plug->n_midi_outputs())))
+		return Plugin::describe_io_port(dt, input, id);
+
 	return _plug->describe_io_port (dt, input, id);
 }
 
