@@ -119,10 +119,10 @@ scan_vst3 (std::string const& bundle_path, bool force, bool verbose)
 
 #ifdef PLATFORM_WINDOWS
 static LONG WINAPI
-crash_handler (EXCEPTION_POINTERS* exception_info)
+crash_handler (EXCEPTION_POINTERS* exceptioninfo)
 {
 	// TODO consider DrMingw if HAVE_DRMINGW
-	fprintf (stderr, "Error: %x\n", exception_info->ExceptionRecord->ExceptionCode);
+	fprintf (stderr, "Error: %x\n", exceptioninfo->ExceptionRecord->ExceptionCode);
 	PBD::stacktrace (cerr, 15, 2);
 	return EXCEPTION_CONTINUE_SEARCH;
 }

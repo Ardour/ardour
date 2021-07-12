@@ -132,10 +132,10 @@ scan_vst2 (std::string const& path, ARDOUR::PluginType type, bool force, bool ve
 
 #ifdef PLATFORM_WINDOWS
 static LONG WINAPI
-crash_handler (EXCEPTION_POINTERS* exception_info)
+crash_handler (EXCEPTION_POINTERS* exceptioninfo)
 {
 	// TODO consider DrMingw if HAVE_DRMINGW
-	fprintf (stderr, "Error: %x\n", exception_info->ExceptionRecord->ExceptionCode);
+	fprintf (stderr, "Error: %x\n", exceptioninfo->ExceptionRecord->ExceptionCode);
 	PBD::stacktrace (cerr, 15, 2);
 	return EXCEPTION_CONTINUE_SEARCH;
 }
