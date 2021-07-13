@@ -84,6 +84,7 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	, _note_mode (Sustained)
 	, _step_editing (false)
 	, _input_active (true)
+	, _restore_pgm_on_load (true)
 {
 	_session.SessionLoaded.connect_same_thread (*this, boost::bind (&MidiTrack::restore_controls, this));
 
@@ -173,6 +174,10 @@ MidiTrack::set_state (const XMLNode& node, int version)
 		set_input_active (yn);
 	}
 
+	if (node.get_property ("restore-pgm", yn)) {
+		set_restore_pgm_on_load (yn);
+	}
+
 	ChannelMode playback_channel_mode = AllChannels;
 	ChannelMode capture_channel_mode = AllChannels;
 
@@ -251,6 +256,7 @@ MidiTrack::state(bool save_template)
 	root.set_property ("note-mode", _note_mode);
 	root.set_property ("step-editing", _step_editing);
 	root.set_property ("input-active", _input_active);
+	root.set_property ("restore-pgm", _restore_pgm_on_load);
 
 	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
 		if (boost::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second)) {
@@ -330,10 +336,22 @@ MidiTrack::set_state_part_two ()
 void
 MidiTrack::restore_controls ()
 {
-	// TODO order events (CC before PGM to set banks)
+	/* first CC (bank select) */
 	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
 		boost::shared_ptr<MidiTrack::MidiControl> mctrl = boost::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second);
-		if (mctrl) {
+		if (mctrl && mctrl->parameter().type () != MidiPgmChangeAutomation) {
+			mctrl->restore_value();
+		}
+	}
+
+	if (!_restore_pgm_on_load) {
+		return;
+	}
+
+	/* then restore PGM */
+	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
+		boost::shared_ptr<MidiTrack::MidiControl> mctrl = boost::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second);
+		if (mctrl && mctrl->parameter().type () == MidiPgmChangeAutomation) {
 			mctrl->restore_value();
 		}
 	}
@@ -664,8 +682,14 @@ MidiTrack::MidiControl::actually_set_value (double val, PBD::Controllable::Group
 		return;
 	}
 
+	if (_session.loading ()) {
+		/* send events later in MidiTrack::restore_controls */
+		AutomationControl::actually_set_value (val, group_override);
+		return;
+	}
+
 	assert(val <= desc.upper);
-	if ( ! _list || ! automation_playback()) {
+	if (!_list || !automation_playback ()) {
 		size_t size = 3;
 		uint8_t ev[3] = { parameter.channel(), uint8_t (val), 0 };
 		switch(parameter.type()) {
@@ -764,6 +788,22 @@ boost::shared_ptr<MidiPlaylist>
 MidiTrack::midi_playlist ()
 {
 	return boost::dynamic_pointer_cast<MidiPlaylist> (_playlists[DataType::MIDI]);
+}
+
+void
+MidiTrack::set_restore_pgm_on_load (bool yn)
+{
+	if (_restore_pgm_on_load == yn) {
+		return;
+	}
+	_restore_pgm_on_load = yn;
+	_session.set_dirty();
+}
+
+bool
+MidiTrack::restore_pgm_on_load () const
+{
+	return _restore_pgm_on_load;
 }
 
 bool

@@ -138,6 +138,9 @@ public:
 	bool input_active () const;
 	PBD::Signal0<void> InputActiveChanged;
 
+	void set_restore_pgm_on_load (bool yn);
+	bool restore_pgm_on_load () const;
+
 	void realtime_handle_transport_stopped ();
 	void region_edited (boost::shared_ptr<Region>);
 
@@ -159,6 +162,7 @@ private:
 	NoteMode                    _note_mode;
 	bool                        _step_editing;
 	bool                        _input_active;
+	bool                        _restore_pgm_on_load;
 	MidiChannelFilter           _playback_filter;
 	MidiChannelFilter           _capture_filter;
 
