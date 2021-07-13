@@ -250,7 +250,7 @@ RecorderUI::RecorderUI ()
 	set_tooltip (_auto_input_button, _("Track Input Monitoring automatically follows transport state"));
 	set_tooltip (_monitor_in_button, _("Force all tracks to monitor Input, unless they are explicitly set to monitor Disk"));
 	set_tooltip (_monitor_disk_button, _("Force all tracks to monitor Disk playback, unless they are explicitly set to Input"));
-	set_tooltip (_btn_new_plist, _("Create a new playlist for all selected tracks"));
+	set_tooltip (_btn_new_plist, _("Create a new playlist for all tracks and switch to it."));
 	set_tooltip (_btn_new_plist_rec, _("Create a new playlist for all rec-armed tracks"));
 	set_tooltip (_xrun_info_box, _("X-runs: Soundcard buffer under- or over-run occurrences in the last recording take"));
 	set_tooltip (_remain_info_box, _("Remaining Time:  Recording time available on the current disk with currently armed tracks"));
