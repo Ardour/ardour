@@ -32,7 +32,7 @@ using namespace PBD;
 MissingFileSourceDialog::MissingFileSourceDialog (Gtk::Window& parent, Session* s, list<string> const& files, DataType dt)
 	: ArdourDialog (parent, _("Missing Source Files"), true, false)
 {
-	/* This dialog is always shown programatically. Center the window.*/
+	/* This dialog is always shown programmatically. Center the window.*/
 	set_position (Gtk::WIN_POS_CENTER);
 
 	set_session (s);

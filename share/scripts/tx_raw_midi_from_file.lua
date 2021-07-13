@@ -27,7 +27,7 @@ function factory () return function ()
 		{ type = "dropdown", key = "port", title = "Target Port", values = portlist () }
 	}
 
-	local rv = LuaDialog.Dialog ("Select Taget", dialog_options):run ()
+	local rv = LuaDialog.Dialog ("Select Target", dialog_options):run ()
 	dialog_options = nil -- drop references (ports, shared ptr)
 	collectgarbage () -- and release the references immediately
 

@@ -13,7 +13,7 @@ ardour {
 -- (e.g. ~/.config/ardour5/templates/Template-Name/template.lua)
 --
 --
----- For use as meta-session (specic session-setup scripts)
+---- For use as meta-session (specific session-setup scripts)
 --
 -- Every Lua script in the script-folder of type "SessionInit"
 -- is listed as implicit template in the new-session dialog.

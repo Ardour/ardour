@@ -210,7 +210,7 @@ Editor::split_regions_at (MusicSample where, RegionSelection& regions)
 
 	if (regions.size() == 1) {
 		/* TODO:  if splitting a single region, and snap-to is using
-		 region boundaries, mabye we shouldn't pay attention to them? */
+		 region boundaries, maybe we shouldn't pay attention to them? */
 	} else {
 		frozen = true;
 		EditorFreeze(); /* Emit Signal */
@@ -2624,7 +2624,7 @@ Editor::insert_source_list_selection (float times)
 	playlist->add_region ((RegionFactory::create (region, true)), get_preferred_edit_position(), times);
 	if (Config->get_edit_mode() == Ripple) {
 		playlist->ripple (get_preferred_edit_position(), region->length() * times, boost::shared_ptr<Region>());
-		/* recusive diff of rippled regions */
+		/* recursive diff of rippled regions */
 		vector<Command*> cmds;
 		playlist->rdiff (cmds);
 		_session->add_commands (cmds);
@@ -7221,7 +7221,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 	while (x != positions.end()) {
 
-		/* deal with positons that are out of scope of present region bounds */
+		/* deal with positions that are out of scope of present region bounds */
 		if (*x <= rstart || *x > rend) {
 			++x;
 			continue;
@@ -7260,7 +7260,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 		// TODO set transients_offset
 
 		boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), plist, false);
-		/* because we set annouce to false, manually add the new region to the
+		/* because we set announce to false, manually add the new region to the
 		 * RegionFactory map
 		 */
 		RegionFactory::map_add (nr);
@@ -7288,7 +7288,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	plist.add (ARDOUR::Properties::layer, 0);
 
 	boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), plist, false);
-	/* because we set annouce to false, manually add the new region to the
+	/* because we set announce to false, manually add the new region to the
 	   RegionFactory map
 	*/
 	RegionFactory::map_add (nr);

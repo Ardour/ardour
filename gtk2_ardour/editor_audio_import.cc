@@ -1062,7 +1062,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 		if (Config->get_edit_mode() == Ripple) {
 			playlist->ripple (pos, copy->length(), copy);
 
-			/* recusive diff of rippled regions */
+			/* recursive diff of rippled regions */
 			vector<Command*> cmds;
 			playlist->rdiff (cmds);
 			_session->add_commands (cmds);

@@ -338,7 +338,7 @@ Editor::mouse_mode_toggled (MouseMode m)
 	instant_save ();
 
 	/* this should generate a new enter event which will
-	   trigger the appropiate cursor.
+	   trigger the appropriate cursor.
 	*/
 
 	if (_track_canvas) {
@@ -2430,7 +2430,7 @@ Editor::point_trim (GdkEvent* event, samplepos_t new_bound)
 {
 	RegionView* rv = clicked_regionview;
 
-	/* Choose action dependant on which button was pressed */
+	/* Choose action dependent on which button was pressed */
 	switch (event->button.button) {
 	case 1:
 		begin_reversible_command (_("start point trim"));

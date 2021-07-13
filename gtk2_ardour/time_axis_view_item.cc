@@ -902,7 +902,7 @@ TimeAxisViewItem::manage_name_text ()
 
 /**
  * Callback used to remove this time axis item during the gtk idle loop.
- * This is used to avoid deleting the obejct while inside the remove_this_item
+ * This is used to avoid deleting the object while inside the remove_this_item
  * method.
  *
  * @param item the TimeAxisViewItem to remove.

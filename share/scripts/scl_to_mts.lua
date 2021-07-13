@@ -74,7 +74,7 @@ function factory () return function ()
 		{ type = "dropdown", key = "tx", title = "MIDI SysEx Target", values = midi_targets () }
 	}
 
-	local rv = LuaDialog.Dialog ("Select Scala File and MIDI Taget", dialog_options):run ()
+	local rv = LuaDialog.Dialog ("Select Scala File and MIDI Target", dialog_options):run ()
 	dialog_options = nil -- drop references (track, plugins, shared ptr)
 	collectgarbage () -- and release the references immediately
 

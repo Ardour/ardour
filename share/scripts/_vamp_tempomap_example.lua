@@ -61,7 +61,7 @@ function factory () return function ()
 
 		-- run the plugin, analyze the first channel of the audio-region
 		vamp:analyze (r:to_readable (), 0, callback)
-		-- get remaining features (end of analyis)
+		-- get remaining features (end of analysis)
 		callback (vamp:plugin ():getRemainingFeatures ())
 		-- reset the plugin (prepare for next iteration)
 		vamp:reset ()

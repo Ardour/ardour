@@ -573,7 +573,7 @@ RegionView::update_cue_markers ()
 	for (CueMarkers::const_iterator c = model_markers.begin(); c != model_markers.end(); ++c) {
 
 		if (c->position() < start || c->position() >= end) {
-			/* not withing this region */
+			/* not within this region */
 			continue;
 		}
 

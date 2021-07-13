@@ -749,7 +749,7 @@ MidiChannelSelectorWindow::capture_mode_changed ()
 		}
 	}
 
-	capture_mask_changed (); // udpate buttons
+	capture_mask_changed (); // update buttons
 
 	last_drawn_capture_mode = mode;
 }

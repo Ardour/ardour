@@ -3872,7 +3872,7 @@ Mixer_UI::screenshot (std::string const& filename)
 	Glib::RefPtr<Gdk::Pixbuf> pb = osw.get_pixbuf ();
 	pb->save (filename, "png");
 
-	/* unpack elements before destorying the Box & OffscreenWindow */
+	/* unpack elements before destroying the Box & OffscreenWindow */
 	list<Gtk::Widget*> children = b.get_children();
 	for (list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
 		b.remove (**child);

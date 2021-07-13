@@ -2,7 +2,7 @@ ardour { ["type"] = "Snippet", name = "Thin Fader Automation" }
 
 -- --TODO--
 -- For a fully fledged EditorAction this script should
--- offer a dropdown to select automation of all paramaters
+-- offer a dropdown to select automation of all parameters
 -- (not just the fader)
 -- see scripts/midi_cc_to_automation.lua and
 -- scripts/mixer_settings_store.lua
@@ -27,7 +27,7 @@ function factory () return function ()
 		local before = al:get_state ()
 
 		-- remove dense events
-		al:thin (50) -- threashold of area below curve
+		al:thin (50) -- threshold of area below curve
 
 		-- save undo
 		local after = al:get_state ()

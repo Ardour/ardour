@@ -303,7 +303,7 @@ VCATimeAxisView::update_track_number_visibility ()
 
 		// see ArdourButton::on_size_request(), we should probably use a global size-group here instead.
 		// except the width of the number label is subtracted from the name-hbox, so we
-		// need to explictly calculate it anyway until the name-label & entry become ArdourWidgets.
+		// need to explicitly calculate it anyway until the name-label & entry become ArdourWidgets.
 
 		int tnw = (2 + std::max(2u, _session->track_number_decimals())) * number_label.char_pixel_width();
 		if (tnw & 1) --tnw;

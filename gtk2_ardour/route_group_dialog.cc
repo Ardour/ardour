@@ -229,7 +229,7 @@ RouteGroupDialog::gain_toggled ()
 	_relative.set_sensitive (_gain.get_active ());
 }
 
-/** @return true if the current group's name is unique accross the session */
+/** @return true if the current group's name is unique across the session */
 bool
 RouteGroupDialog::unique_name (std::string const name) const
 {

@@ -241,7 +241,7 @@ function dsp_run (ins, outs, n_samples)
 				hp[c][ho+1]:run (mem:to_float (off), siz)
 				ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, xfade)
 				-- also run the next biquad because it needs to have the correct state
-				-- in case it start affecting the next chunck of output. Higher order
+				-- in case it start affecting the next chunk of output. Higher order
 				-- ones are guaranteed not to be needed for the next run because the
 				-- interpolated order won't increase more than 0.86 in one step thanks
 				-- to the choice of the value of |lpf|.
@@ -270,7 +270,7 @@ function dsp_run (ins, outs, n_samples)
 				lp[c][lo+1]:run (mem:to_float (off), siz)
 				ARDOUR.DSP.mix_buffers_with_gain (outs[c]:offset (off), mem:to_float (off), siz, xfade)
 				-- also run the next biquad in case it start affecting the next
-				-- chunck of output.
+				-- chunk of output.
 				if lo + 2 <= 4 then lp[c][lo+2]:run (mem:to_float (off), siz) end
 			elseif lo + 1 <= 4 then
 				-- run the next biquad in case it is used next chunk

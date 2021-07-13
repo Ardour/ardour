@@ -1,6 +1,6 @@
 #!/bin/sh
 ## this script should be run from the top-level source dir
-## it remove all fuzzy and obsolte translations and wraps
+## it remove all fuzzy and obsolete translations and wraps
 ## long lines.
 ##
 ## update .po and .pot files:
