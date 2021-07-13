@@ -560,16 +560,23 @@ Port::reconnect ()
 {
 	/* caller must hold process lock; intended to be used only after reestablish() */
 
-	DEBUG_TRACE (DEBUG::Ports, string_compose ("Connect %1 to %2 destinations\n",name(), _connections.size()));
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() Connect %1 to %2 destinations\n",name(), _connections.size()));
 
-	for (std::set<string>::iterator i = _connections.begin(); i != _connections.end(); ++i) {
-		if (connect (*i)) {
-			_connections.clear ();
-			return -1;
+	int count = 0;
+	std::set<string>::iterator i = _connections.begin();
+
+	while (i != _connections.end()) {
+		std::set<string>::iterator current = i++;
+		if (connect (*current)) {
+			DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() failed to connect %1 to %2\n", name(), (*current)));
+			_connections.erase (current);
+		}
+		else {
+			++count;
 		}
 	}
 
-	return 0;
+	return count == 0 ? -1 : 0;
 }
 
 /** @param n Short port name (no port-system client name) */
