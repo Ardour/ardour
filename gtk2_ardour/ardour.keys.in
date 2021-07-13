@@ -462,7 +462,7 @@ This mode provides many different operations on both regions and control points,
 
 @notes|Notes/delete|Backspace|Delete Note Selection
 @notes|Notes/alt-delete|Delete|Delete Note Selection
-@notes|Notes/clear-selection|Escape|Clear selection
+@notes|Main/Escape|Clear selection
 
 @notes|Notes/select-next|Tab|Select next note
 @notes|Notes/select-previous|<@PRIMARY@>Tab|Select previous note
