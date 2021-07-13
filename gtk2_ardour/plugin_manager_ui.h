@@ -49,6 +49,7 @@ private:
 	void blacklist_changed (std::string const&);
 	void favorite_changed (std::string const&);
 	void hidden_changed (std::string const&);
+	void row_activated (Gtk::TreeModel::Path const&, Gtk::TreeViewColumn*);
 
 	void rescan_all ();
 	void rescan_faulty ();

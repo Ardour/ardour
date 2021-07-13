@@ -23,6 +23,7 @@
 #include <cassert>
 #include <gtkmm/frame.h>
 
+#include "pbd/openuri.h"
 #include "pbd/unwind.h"
 
 #include "ardour/types_convert.h"
@@ -135,7 +136,7 @@ PluginManagerUI::PluginManagerUI ()
 
 	plugin_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	plugin_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginManagerUI::selection_changed));
-	//plugin_display.signal_row_activated().connect_notify (sigc::mem_fun(*this, &PluginManagerUI::row_activated));
+	plugin_display.signal_row_activated().connect_notify (sigc::mem_fun(*this, &PluginManagerUI::row_activated));
 
 	_scroller.add (plugin_display);
 	_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -447,6 +448,35 @@ PluginManagerUI::selection_changed ()
 	} else {
 		_btn_rescan_sel.set_sensitive (true);
 	}
+}
+
+void
+PluginManagerUI::row_activated (Gtk::TreeModel::Path const& p, Gtk::TreeViewColumn*)
+{
+#ifndef NDEBUG
+	Gtk::TreeModel::iterator iter = plugin_model->get_iter (p);
+	if (!iter) {
+		return;
+	}
+	boost::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
+
+	switch (psle->type ()) {
+		case Windows_VST:
+		case LXVST:
+		case MacVST:
+		case LADSPA:
+			PBD::open_folder (Glib::path_get_dirname (psle->path ()));
+			break;
+		case VST3:
+			PBD::open_folder (psle->path ());
+			break;
+		case AudioUnit:
+		case LV2:
+		default:
+			printf ("%s\n", psle->path ().c_str());
+			break;
+	}
+#endif
 }
 
 void
