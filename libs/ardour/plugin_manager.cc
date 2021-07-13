@@ -1154,7 +1154,7 @@ auv2_is_blacklisted (std::string const& id)
 
 /* ****************************************************************************/
 
-static void auv2_scanner_log (std::string msg, std::stringstream* psle)
+static void auv2_scanner_log (std::string msg, std::stringstream* ss)
 {
 	*ss << msg;
 }
