@@ -70,13 +70,13 @@ PBD::stacktrace (std::ostream& out, int levels, int start)
 			free (strings);
 		}
 	} else {
-		out << "no stacktrace available!" << std::endl;
+		out << "No stacktrace available!" << std::endl;
 	}
 }
 
 #elif defined (PLATFORM_WINDOWS)
 
-#if defined DEBUG && !defined CaptureStackBackTrace
+#if !defined CaptureStackBackTrace
 #define CaptureStackBackTrace RtlCaptureStackBackTrace
 
 extern "C" {
@@ -91,22 +91,20 @@ extern "C" {
 void
 PBD::stacktrace (std::ostream& out, int levels, int start)
 {
-#ifdef DEBUG
-	const size_t levels = 62; // does not support more then 62 levels of stacktrace
 	unsigned int   i;
-	void         * stack[ levels ];
+	void         * stack[62]; // does not support more then 62 levels of stacktrace
 	unsigned short frames;
 	SYMBOL_INFO  * symbol;
 	HANDLE         process;
 
 	process = GetCurrentProcess();
-	out << "+++++Backtrace process: " <<  DEBUG_THREAD_SELF << std::endl;
+	out << "Backtrace thread: " <<  DEBUG_THREAD_SELF << std::endl;
 
 	SymInitialize (process, NULL, TRUE);
 
-	frames = CaptureStackBackTrace (0, levels, stack, NULL);
+	frames = CaptureStackBackTrace (0, 62, stack, NULL);
 
-	out << "+++++Backtrace frames: " << frames << std::endl;
+	out << "Backtrace frames: " << frames << std::endl;
 
 	symbol               = (SYMBOL_INFO*)calloc (sizeof (SYMBOL_INFO) + 256 * sizeof (char), 1);
 	symbol->MaxNameLen   = 255;
@@ -114,27 +112,20 @@ PBD::stacktrace (std::ostream& out, int levels, int start)
 
 	for (i = start; i < frames && (levels == 0 || i < levels); ++i) {
 		SymFromAddr (process, (DWORD64)(stack[i]), 0, symbol);
-		out << string_compose ("%1: %2 - %3\n", frames - i - 1, symbol->Name, symbol->Address);
+		out << string_compose (" %1: %2 - %3\n", frames - i - 1, symbol->Name, symbol->Address);
 	}
 
 	out.flush ();
 
 	free (symbol);
-#endif
 }
 
 #else
 
 void
-PBD::stacktrace (std::ostream& out, int /*levels*/)
+PBD::stacktrace (std::ostream& out, int, int)
 {
 	out << "stack tracing is not enabled on this platform" << std::endl;
 }
 
-#endif
-
-#if 0 // unused
-extern "C" {
-	void c_stacktrace () { PBD::stacktrace (std::cout); }
-}
 #endif
