@@ -195,8 +195,8 @@ PluginManagerUI::PluginManagerUI ()
 	b_paths->set_border_width (4);
 
 	/* tooltips */
-	ArdourWidgets::set_tooltip (_btn_rescan_all, _("Scans all plugins, regardless if they have already been susceesfully scaned\n.Depending on the number of plugins installed this can take a long time."));
-	ArdourWidgets::set_tooltip (_btn_rescan_err, _("Scans plugins that have not yet been susccessfully scanned."));
+	ArdourWidgets::set_tooltip (_btn_rescan_all, _("Scans all plugins, regardless if they have already been successfully scaned\n.Depending on the number of plugins installed this can take a long time."));
+	ArdourWidgets::set_tooltip (_btn_rescan_err, _("Scans plugins that have not yet been successfully scanned."));
 	ArdourWidgets::set_tooltip (_btn_rescan_sel, _("Scans the selected plugin."));
 	ArdourWidgets::set_tooltip (_btn_clear,      _("Forget about plugins that have been removed from the system."));
 	ArdourWidgets::set_tooltip (_btn_prefs,      _("Open preference window"));
