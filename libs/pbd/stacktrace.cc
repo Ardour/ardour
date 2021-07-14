@@ -91,10 +91,9 @@ extern "C" {
 void
 PBD::stacktrace (std::ostream& out, int levels, int start)
 {
-	unsigned int   i;
-	void         * stack[62]; // does not support more then 62 levels of stacktrace
+	void*          stack[62]; // does not support more then 62 levels of stacktrace
 	unsigned short frames;
-	SYMBOL_INFO  * symbol;
+	SYMBOL_INFO*   symbol;
 	HANDLE         process;
 
 	process = GetCurrentProcess();
@@ -104,13 +103,13 @@ PBD::stacktrace (std::ostream& out, int levels, int start)
 
 	frames = CaptureStackBackTrace (0, 62, stack, NULL);
 
-	out << "Backtrace frames: " << frames << std::endl;
+	out << "Backtrace frames: " << (int) frames << std::endl;
 
 	symbol               = (SYMBOL_INFO*)calloc (sizeof (SYMBOL_INFO) + 256 * sizeof (char), 1);
 	symbol->MaxNameLen   = 255;
 	symbol->SizeOfStruct = sizeof (SYMBOL_INFO);
 
-	for (i = start; i < frames && (levels == 0 || i < levels); ++i) {
+	for (int i = start; i < frames && (levels == 0 || i < levels); ++i) {
 		SymFromAddr (process, (DWORD64)(stack[i]), 0, symbol);
 		out << string_compose (" %1: %2 - %3\n", frames - i - 1, symbol->Name, symbol->Address);
 	}

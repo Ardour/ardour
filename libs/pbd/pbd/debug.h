@@ -30,8 +30,11 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/timing.h"
 
-#if defined(COMPILER_MSVC) && !defined(PTW32_VERSION)
-#include <ardourext/pthread.h> // Gets us 'PTW32_VERSION'
+/* check for PTW32_VERSION */
+#ifdef COMPILER_MSVC
+#include <ardourext/pthread.h>
+#else
+#include <pthread.h>
 #endif
 
 namespace PBD {
