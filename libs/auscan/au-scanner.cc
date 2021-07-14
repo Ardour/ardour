@@ -100,7 +100,7 @@ static void
 sig_handler (int sig)
 {
 	printf ("Error: signal %d\n ---8<---\n", sig);
-	PBD::stacktrace (std::cout,, 15, 2);
+	PBD::stacktrace (std::cout, 15, 2);
 	printf (" --->8---\n");
 	::exit (EXIT_FAILURE);
 }
