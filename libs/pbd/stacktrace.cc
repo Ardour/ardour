@@ -74,7 +74,7 @@ PBD::stacktrace (std::ostream& out, int levels, int start)
 	}
 }
 
-#elif defined (PLATFORM_WINDOWS)
+#elif defined PLATFORM_WINDOWS
 
 #if !defined CaptureStackBackTrace
 #define CaptureStackBackTrace RtlCaptureStackBackTrace
@@ -98,7 +98,7 @@ PBD::stacktrace (std::ostream& out, int levels, int start)
 	HANDLE         process;
 
 	process = GetCurrentProcess();
-	out << "Backtrace thread: " <<  DEBUG_THREAD_SELF << std::endl;
+	out << string_compose ("Backtrace thread: %1", DEBUG_THREAD_SELF) << std::endl;
 
 	SymInitialize (process, NULL, TRUE);
 
