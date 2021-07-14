@@ -330,7 +330,35 @@ PluginManagerUI::refill ()
 	bool rescan_err = false;
 	bool have_stale = false;
 
-	std::map<PluginType, unsigned int> plugin_count;
+	struct PluginCount {
+		PluginCount ()
+			: total (0)
+			, error (0)
+			, stale (0)
+			, ndscn (0)
+		{}
+
+		void set (PluginScanLogEntry const& psle) {
+			++total;
+			if (!psle.recent ()) {
+				++stale;
+				return;
+			}
+			PluginScanLogEntry::PluginScanResult sr = psle.result ();
+			if ((int)sr & (PluginScanLogEntry::TimeOut | PluginScanLogEntry::Updated | PluginScanLogEntry::New)) {
+				++ndscn;
+			} else if (sr != PluginScanLogEntry::OK) {
+				++error;
+			}
+		}
+
+		unsigned int total;
+		unsigned int error;
+		unsigned int stale;
+		unsigned int ndscn;
+	};
+
+	std::map<PluginType, PluginCount> plugin_count;
 
 	std::vector<boost::shared_ptr<PluginScanLogEntry> > psl;
 	PluginManager& manager (PluginManager::instance ());
@@ -363,7 +391,7 @@ PluginManagerUI::refill ()
 			newrow[plugin_columns.hidden] = false;
 			newrow[plugin_columns.can_blacklist] = can_blacklist (**i);
 			newrow[plugin_columns.can_fav_hide] = false;
-			++plugin_count[(*i)->type ()];
+			plugin_count[(*i)->type ()].set (**i);
 		} else {
 			for (PluginInfoList::const_iterator j = plugs.begin(); j != plugs.end(); ++j) {
 				PluginManager::PluginStatusType status = manager.get_status (*j);
@@ -381,8 +409,7 @@ PluginManagerUI::refill ()
 				newrow[plugin_columns.plugin] = *j;
 				newrow[plugin_columns.can_blacklist] = can_blacklist (**i);
 				newrow[plugin_columns.can_fav_hide] = status != PluginManager::Concealed;
-
-				++plugin_count[(*i)->type ()];
+				plugin_count[(*i)->type ()].set (**i);
 			}
 		}
 	}
@@ -416,11 +443,48 @@ PluginManagerUI::refill ()
 		delete *child;
 	}
 
-	for (std::map<PluginType, unsigned int>::const_iterator i = plugin_count.begin (); i != plugin_count.end (); ++i, ++row) {
+	PluginCount pc_max;
+	for (std::map<PluginType, PluginCount>::const_iterator i = plugin_count.begin (); i != plugin_count.end (); ++i) {
+		pc_max.total = std::max (pc_max.total,  i->second.total);
+		pc_max.error = std::max (pc_max.error,  i->second.error);
+		pc_max.stale = std::max (pc_max.stale,  i->second.stale);
+		pc_max.ndscn = std::max (pc_max.ndscn,  i->second.ndscn);
+	}
+
+	Gtk::Label* head_type  = new Gtk::Label (_("Tyoe"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+	Gtk::Label* head_count = new Gtk::Label (_("All"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	_tbl_nfo.attach (*head_type,  0, 1, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+	_tbl_nfo.attach (*head_count, 1, 2, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+	if (pc_max.error > 0) {
+		Gtk::Label* hd = new Gtk::Label (_("Err"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+		_tbl_nfo.attach (*hd, 2, 3, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+	}
+	if (pc_max.stale > 0) {
+		Gtk::Label* hd = new Gtk::Label (_("Mis"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+		_tbl_nfo.attach (*hd, 3, 4, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+	}
+	if (pc_max.ndscn > 0) {
+		Gtk::Label* hd = new Gtk::Label (_("New"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+		_tbl_nfo.attach (*hd, 4, 5, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+	}
+	++row;
+	for (std::map<PluginType, PluginCount>::const_iterator i = plugin_count.begin (); i != plugin_count.end (); ++i, ++row) {
 		Gtk::Label* lbl_type  = new Gtk::Label (plugin_type (i->first), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
-		Gtk::Label* lbl_count = new Gtk::Label (string_compose ("%1", i->second), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+		Gtk::Label* lbl_count = new Gtk::Label (string_compose ("%1", i->second.total), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 		_tbl_nfo.attach (*lbl_type , 0, 1, row, row + 1, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK, 2, 2);
 		_tbl_nfo.attach (*lbl_count, 1, 2, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+		if (pc_max.error > 0) {
+			Gtk::Label* lbl = new Gtk::Label (string_compose ("%1", i->second.error), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+			_tbl_nfo.attach (*lbl, 2, 3, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+		}
+		if (pc_max.stale > 0) {
+			Gtk::Label* lbl = new Gtk::Label (string_compose ("%1", i->second.stale), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+			_tbl_nfo.attach (*lbl, 3, 4, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+		}
+		if (pc_max.ndscn > 0) {
+			Gtk::Label* lbl = new Gtk::Label (string_compose ("%1", i->second.ndscn), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+			_tbl_nfo.attach (*lbl, 4, 5, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+		}
 	}
 	_tbl_nfo.show_all ();
 
