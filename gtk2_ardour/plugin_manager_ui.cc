@@ -240,9 +240,19 @@ PluginManagerUI::~PluginManagerUI ()
 }
 
 void
-PluginManagerUI::on_show ()
+PluginManagerUI::PluginCount::set (PluginScanLogEntry const& psle)
 {
-	ArdourWindow::on_show ();
+	++total;
+	if (!psle.recent ()) {
+		++stale;
+		return;
+	}
+	PluginScanLogEntry::PluginScanResult sr = psle.result ();
+	if ((int)sr & (PluginScanLogEntry::TimeOut | PluginScanLogEntry::Updated | PluginScanLogEntry::New)) {
+		++ndscn;
+	} else if (sr != PluginScanLogEntry::OK) {
+		++error;
+	}
 }
 
 static std::string
@@ -329,35 +339,6 @@ PluginManagerUI::refill ()
 
 	bool rescan_err = false;
 	bool have_stale = false;
-
-	struct PluginCount {
-		PluginCount ()
-			: total (0)
-			, error (0)
-			, stale (0)
-			, ndscn (0)
-		{}
-
-		void set (PluginScanLogEntry const& psle) {
-			++total;
-			if (!psle.recent ()) {
-				++stale;
-				return;
-			}
-			PluginScanLogEntry::PluginScanResult sr = psle.result ();
-			if ((int)sr & (PluginScanLogEntry::TimeOut | PluginScanLogEntry::Updated | PluginScanLogEntry::New)) {
-				++ndscn;
-			} else if (sr != PluginScanLogEntry::OK) {
-				++error;
-			}
-		}
-
-		unsigned int total;
-		unsigned int error;
-		unsigned int stale;
-		unsigned int ndscn;
-	};
-
 	std::map<PluginType, PluginCount> plugin_count;
 
 	std::vector<boost::shared_ptr<PluginScanLogEntry> > psl;

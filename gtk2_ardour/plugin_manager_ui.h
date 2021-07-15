@@ -44,7 +44,6 @@ public:
 
 private:
 	void refill ();
-	void on_show ();
 	void selection_changed ();
 	void blacklist_changed (std::string const&);
 	void favorite_changed (std::string const&);
@@ -60,6 +59,22 @@ private:
 	void edit_vst_path (std::string const&, std::string const&, sigc::slot<std::string>, sigc::slot<bool, std::string>);
 
 	void plugin_status_changed (ARDOUR::PluginType, std::string, ARDOUR::PluginManager::PluginStatusType);
+
+	struct PluginCount {
+		PluginCount ()
+			: total (0)
+			, error (0)
+			, stale (0)
+			, ndscn (0)
+		{}
+
+		void set (ARDOUR::PluginScanLogEntry const& psle);
+
+		unsigned int total;
+		unsigned int error;
+		unsigned int stale;
+		unsigned int ndscn;
+	};
 
 	struct PluginColumns : public Gtk::TreeModel::ColumnRecord {
 		PluginColumns () {
