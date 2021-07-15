@@ -2248,6 +2248,10 @@ Editor::add_location_from_selection ()
 void
 Editor::add_location_mark (samplepos_t where)
 {
+	if (_session->locations()->mark_at (where, 1)) {
+		return;
+	}
+
 	string markername;
 
 	select_new_marker = true;
