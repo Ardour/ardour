@@ -18,32 +18,35 @@
 #ifndef _ardour_system_exec_h_
 #define _ardour_system_exec_h_
 
+#include <glibmm/threads.h>
+
 #include "ardour/libardour_visibility.h"
 #include "pbd/system_exec.h"
 
 namespace ARDOUR {
 
-class LIBARDOUR_API SystemExec
-	: public PBD::SystemExec
+class LIBARDOUR_API SystemExec : public PBD::SystemExec
 {
-
 public:
 	SystemExec (std::string c, std::string a = "");
-	SystemExec (std::string c, char ** a);
+	SystemExec (std::string c, char** a);
 	SystemExec (std::string c, const std::map<char, std::string> subs);
 	~SystemExec ();
 
-	int start (StdErrMode stderr_mode = IgnoreAndClose) {
-		return PBD::SystemExec::start (stderr_mode, _vfork_exec_wrapper);
+	int start (StdErrMode stderr_mode = IgnoreAndClose)
+	{
+		return PBD::SystemExec::start (stderr_mode, _vfork_exec.c_str ());
 	}
 
 private:
-	static char * _vfork_exec_wrapper;
+	static void initialize ();
 
-}; /* end class */
+	static bool                 _initialized;
+	static Glib::Threads::Mutex _init_mutex;
+	static std::string          _vfork_exec;
 
-}; /* end namespace */
+};
+
+}; // namespace ARDOUR
 
 #endif /* _libpbd_system_exec_h_ */
-
-
