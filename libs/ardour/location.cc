@@ -1531,7 +1531,7 @@ Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool includ
 		/* keep session range markers covering entire region if
 		   a ripple "extends" the session.
 		*/
-		if (distance > 0 && (*i)->is_session_range()) {
+		if (distance.positive() && (*i)->is_session_range()) {
 
 			/* Don't move start unless it occurs after the ripple point.
 			 */

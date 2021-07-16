@@ -219,9 +219,9 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 		/* set _capture_start_sample early on to calculate MIDI _accumulated_capture_offset */
 		Location* loc;
 		if  (_session.config.get_punch_in () && 0 != (loc = _session.locations()->auto_punch_location ())) {
-			_capture_start_sample = loc->start ();
+			_capture_start_sample = loc->start_sample ();
 		} else if (_loop_location) {
-			_capture_start_sample = _loop_location->start ();
+			_capture_start_sample = _loop_location->start_sample ();
 		} else if ((possibly_recording & rec_ready) == rec_ready) {
 			/* count-in, pre-roll */
 			_capture_start_sample = _session.transport_sample ();
@@ -533,7 +533,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			if (_midi_write_source) {
 				assert (_capture_start_sample);
 
-				timepos_t start (_capture_start_sample);
+				timepos_t start (_capture_start_sample.get());
 
 				if (time_domain() != Temporal::AudioTime) {
 					start = timepos_t (start.beats());
@@ -1171,7 +1171,6 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 	finish_capture (c);
 
-
 	/* butler is already stopped, but there may be work to do
 	   to flush remaining data to disk.
 	*/
@@ -1288,7 +1287,12 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 		   where all the data is already on disk.
 		*/
 
-		_midi_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, timecnt_t (total_capture, timepos_t (capture_info.front()->start)).beats());
+		timecnt_t total_capture (0, timepos_t (capture_info.front()->start));
+		for (vector<CaptureInfo*>::iterator ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+			total_capture += timecnt_t ((*ci)->samples);
+		}
+
+		_midi_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, total_capture.beats());
 	}
 
 	_last_capture_sources.insert (_last_capture_sources.end(), audio_srcs.begin(), audio_srcs.end());

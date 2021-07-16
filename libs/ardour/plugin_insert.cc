@@ -943,25 +943,27 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 
 #if 1
 				/* 2. VST3: events between now and end. */
-				samplepos_t now = start;
+				timepos_t start_time (start);
+				timepos_t now (start_time);
 				while (true) {
-					Evoral::ControlEvent next_event (end, 0.0f);
-					find_next_ac_event (*ci, now, end, next_event);
-					if (next_event.when >= end) {
+					timepos_t end_time (end);
+					Evoral::ControlEvent next_event (end_time, 0.0f);
+					find_next_ac_event (*ci, now, end_time, next_event);
+					if (next_event.when >= end_time) {
 						break;
 					}
 					now = next_event.when;
 					const float val = c.list()->rt_safe_eval (now, valid);
 					if (valid) {
 						for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-							(*i)->set_parameter (clist->parameter().id(), val, now - start);
+							(*i)->set_parameter (clist->parameter().id(), val, now.samples() - start);
 						}
 					}
 				}
 #endif
 #if 1
 				/* 3. VST3: set value at cycle-end */
-				val = c.list()->rt_safe_eval (end, valid);
+				val = c.list()->rt_safe_eval (timepos_t (end), valid);
 				if (valid) {
 					for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 						(*i)->set_parameter (clist->parameter().id(), val, end - start);

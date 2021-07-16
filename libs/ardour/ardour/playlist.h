@@ -165,9 +165,6 @@ public:
 	std::pair<timepos_t, timepos_t> get_extent_with_endspace() const;
 	layer_t top_layer() const;
 
-	EditMode get_edit_mode() const { return _edit_mode; }
-	void set_edit_mode (EditMode);
-
 	/* Editing operations */
 
 	void add_region (boost::shared_ptr<Region>, timepos_t const & position, float times = 1, bool auto_partition = false);
@@ -235,7 +232,7 @@ public:
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
 	bool                       has_region_at (timepos_t const &) const;
 
-	samplepos_t                   find_prev_region_start (samplepos_t sample);
+	timepos_t                  find_prev_region_start (timepos_t const & sample);
 
 	bool uses_source (boost::shared_ptr<const Source> src, bool shallow = false) const;
 	void deep_sources (std::set<boost::shared_ptr<Source> >&) const;

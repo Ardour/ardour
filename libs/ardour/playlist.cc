@@ -1581,13 +1581,14 @@ Playlist::ripple_unlocked (timepos_t const & at, timecnt_t const & distance, Reg
 
 			thawlist.add (*i);
 			(*i)->set_position (new_pos);
-			changed = true;
 		}
 	}
 
 	_rippling = false;
 
-	return changed;
+	if (notify) {
+		notify_contents_changed ();
+	}
 }
 
 void
@@ -2039,26 +2040,26 @@ Playlist::find_next_region (timepos_t const & pos, RegionPoint point, int dir)
 	return ret;
 }
 
-samplepos_t
-Playlist::find_prev_region_start (samplepos_t sample)
+timepos_t
+Playlist::find_prev_region_start (timepos_t const & at)
 {
 	RegionReadLock rlock (this);
 
-	samplepos_t closest = max_samplepos;
-	samplepos_t ret     = -1;
+	timecnt_t closest = timecnt_t::max (at.time_domain());
+	timepos_t ret     = timepos_t::max (at.time_domain());;
 
 	for (RegionList::reverse_iterator i = regions.rbegin (); i != regions.rend (); ++i) {
 		boost::shared_ptr<Region> r = (*i);
-		sampleoffset_t            distance;
-		const samplepos_t         first_sample = r->first_sample ();
+		timecnt_t       distance;
+		const timepos_t first_sample = r->position();
 
-		if (first_sample == sample) {
+		if (first_sample == at) {
 			/* region at the given position - ignore */
 			continue;
 		}
 
-		if (first_sample < sample) {
-			distance = sample - first_sample;
+		if (first_sample < at) {
+			distance = first_sample.distance (at);
 
 			if (distance < closest) {
 				ret     = first_sample;
