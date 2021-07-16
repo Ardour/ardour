@@ -88,6 +88,12 @@ private:
 
 	plMode _mode;
 
+	ArdourWidgets::ArdourButton  _btn_new_plist;
+	ArdourWidgets::ArdourButton  _btn_copy_plist;
+
+	void new_plist_button_clicked();
+	void copy_plist_button_clicked();
+
 	sigc::connection select_connection;
 	PBD::ScopedConnectionList signal_connections;
 	void pl_property_changed (PBD::PropertyChange const & what_changed);

@@ -57,42 +57,92 @@ PlaylistSelector::PlaylistSelector ()
 	set_name ("PlaylistSelectorWindow");
 	set_modal(false);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-	set_size_request (400, 250);
+	set_size_request (500, 250);
 
 	model = TreeStore::create (columns);
 	tree.set_model (model);
-	tree.append_column (_("Playlists grouped by track"), columns.text);
-	tree.append_column (_("Playlist Group"), columns.pgrp);
-	tree.set_headers_visible (false);
+	int name_column_n = tree.append_column (_("Name"), columns.text);
+	tree.append_column (_("Group ID"), columns.pgrp);
+	tree.set_headers_visible (true);
+
+	TreeViewColumn* name_column = tree.get_column (name_column_n);
+	name_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
+	name_column->set_expand(true);
+	name_column->set_min_width(250);
 
 	scroller.add (tree);
 	scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
+	Gtk::Frame *scroller_frame = manage(new Frame());
+	scroller_frame->add(scroller);
+
+	Gtk::Label *scope_label = manage(new Gtk::Label(_("Scope: ")));
 
 	Gtk::RadioButtonGroup scope_group;
-	_scope_all_radio = manage (new RadioButton (scope_group, _("ALL tracks")));
-	_scope_rec_radio = manage (new RadioButton (scope_group, _("Rec-armed tracks")));
 	_scope_grp_radio = manage (new RadioButton (scope_group, _("Only this track/group")));
+	_scope_rec_radio = manage (new RadioButton (scope_group, _("Rec-armed tracks")));
+	_scope_all_radio = manage (new RadioButton (scope_group, _("ALL tracks")));
 
 	_scope_box = manage(new HBox());
-
-	_scope_box->pack_start (*_scope_all_radio,   false, false);
-	_scope_box->pack_start (*_scope_rec_radio,   false, false);
+	_scope_box->set_spacing(4);
+	_scope_box->set_border_width(2);
 	_scope_box->pack_start (*_scope_grp_radio,   false, false);
+	_scope_box->pack_start (*_scope_rec_radio,   false, false);
+	_scope_box->pack_start (*_scope_all_radio,   false, false);
+	Gtk::Frame *scope_frame = manage(new Frame());
+	scope_frame->add(*_scope_box);
 
-	get_vbox()->set_border_width (6);
-	get_vbox()->set_spacing (12);
-	get_vbox()->pack_start (scroller);
-	get_vbox()->pack_start (*_scope_box);
+	Gtk::HBox *bbox = manage(new Gtk::HBox());
+	bbox->set_spacing(6);
+	bbox->pack_start(_btn_new_plist);
+	bbox->pack_start(_btn_copy_plist);
 
+	Gtk::Table *table = manage(new Gtk::Table());
+	table->set_border_width (6);
+	table->attach (*scroller_frame,  0,2, 0,1, EXPAND|FILL, EXPAND|FILL, 0, 4);
+	table->attach (*scope_label,     0,1, 1,2, EXPAND,      SHRINK,      0, 6);
+	table->attach (*scope_frame,     1,2, 1,2, EXPAND|FILL, SHRINK,      0, 6);
+	table->attach (*bbox,            0,2, 2,3, EXPAND|FILL, SHRINK,      0, 0);
+
+	get_vbox()->pack_start (*table, true, true);
 	get_vbox()->show_all();
 
-	Button* ok_btn = add_button (Gtk::Stock::OK, RESPONSE_OK);
-	ok_btn->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::ok_button_click));
+	_btn_new_plist.set_name ("generic button");
+	_btn_new_plist.set_text ("New Playlist(s)");
+	_btn_new_plist.signal_clicked.connect (sigc::mem_fun (*this, &PlaylistSelector::new_plist_button_clicked));
+
+	_btn_copy_plist.set_name ("generic button");
+	_btn_copy_plist.set_text ("Copy Playlist(s)");
+	_btn_copy_plist.signal_clicked.connect (sigc::mem_fun (*this, &PlaylistSelector::copy_plist_button_clicked));
 
 	select_connection = tree.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PlaylistSelector::selection_changed));
 
+	_scope_grp_radio->set_active(true);
+
 	_ignore_selection = false;
 }
+
+void PlaylistSelector::new_plist_button_clicked()
+{
+	if (_scope_all_radio->get_active()) {
+		PublicEditor::instance().new_playlists_for_all_tracks(false);
+	} else if (_scope_rec_radio->get_active()) {
+		PublicEditor::instance().new_playlists_for_armed_tracks(false);
+	} else {
+		PublicEditor::instance().new_playlists_for_grouped_tracks(_rui, false);
+	}
+}
+
+void PlaylistSelector::copy_plist_button_clicked()
+{
+	if (_scope_all_radio->get_active()) {
+		PublicEditor::instance().new_playlists_for_all_tracks(true);
+	} else if (_scope_rec_radio->get_active()) {
+		PublicEditor::instance().new_playlists_for_armed_tracks(true);
+	} else {
+		PublicEditor::instance().new_playlists_for_grouped_tracks(_rui, true);
+	}
+}
+
 
 void PlaylistSelector::prepare(RouteUI* ruix, plMode mode)
 {
@@ -166,7 +216,7 @@ PlaylistSelector::redisplay()
 	vector<const char*> item;
 	string str;
 
-	set_title (string_compose (_("Playlist for %1"), _rui->route()->name()));
+	set_title (string_compose (_("Playlist for: %1"), _rui->route()->name()));
 
 	if (_mode == plSelect) {
 		_scope_box->show();
