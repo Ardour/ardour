@@ -94,12 +94,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	plugin_model = Gtk::ListStore::create (plugin_columns);
 	plugin_display.set_model (plugin_model);
-	/* XXX translators: try to convert "Fav" into a short term
-	 * related to "favorite" and "Hid" into a short term
-	 * related to "hidden"
-	 */
-	plugin_display.append_column (_("Fav"), plugin_columns.favorite);
-	plugin_display.append_column (_("Hide"), plugin_columns.hidden);
+	plugin_display.append_column (S_("Favorite|Fav"), plugin_columns.favorite);
 	plugin_display.append_column (_("Name"), plugin_columns.name);
 	plugin_display.append_column (_("Tags"), plugin_columns.tags);
 	plugin_display.append_column (_("Creator"), plugin_columns.creator);
@@ -122,13 +117,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	CellRendererToggle* fav_cell = dynamic_cast<CellRendererToggle*>(plugin_display.get_column_cell_renderer (0));
 	fav_cell->property_activatable() = true;
-	fav_cell->property_radio() = true;
 	fav_cell->signal_toggled().connect (sigc::mem_fun (*this, &PluginSelector::favorite_changed));
-
-	CellRendererToggle* hidden_cell = dynamic_cast<CellRendererToggle*>(plugin_display.get_column_cell_renderer (1));
-	hidden_cell->property_activatable() = true;
-	hidden_cell->property_radio() = true;
-	hidden_cell->signal_toggled().connect (sigc::mem_fun (*this, &PluginSelector::hidden_changed));
 
 	scroller.set_border_width(10);
 	scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -553,7 +542,6 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& searc
 
 			PluginManager::PluginStatusType status = manager.get_status (*i);
 			newrow[plugin_columns.favorite] = status == PluginManager::Favorite;
-			newrow[plugin_columns.hidden] = status == PluginManager::Hidden;
 
 			string name = (*i)->name;
 			if (name.length() > 48) {
@@ -869,7 +857,6 @@ PluginSelector::plugin_status_changed (PluginType t, std::string uid, PluginMana
 		PluginInfoPtr pp = (*i)[plugin_columns.plugin];
 		if ((pp->type == t) && (pp->unique_id == uid)) {
 			(*i)[plugin_columns.favorite] = (stat == PluginManager::Favorite) ? true : false;
-			(*i)[plugin_columns.hidden] = (stat == PluginManager::Hidden) ? true : false;
 
 			/* if plug was hidden, remove it from the view */
 			if (stat == PluginManager::Hidden || stat == PluginManager::Concealed) {
@@ -1180,38 +1167,6 @@ PluginSelector::favorite_changed (const std::string& path)
 		/* change state */
 
 		PluginManager::PluginStatusType status = (favorite ? PluginManager::Favorite : PluginManager::Normal);
-
-		/* save new statuses list */
-
-		pi = (*iter)[plugin_columns.plugin];
-
-		manager.set_status (pi->type, pi->unique_id, status);
-
-		_need_status_save = true;
-	}
-	in_row_change = false;
-}
-
-void
-PluginSelector::hidden_changed (const std::string& path)
-{
-	PluginInfoPtr pi;
-
-	if (in_row_change) {
-		return;
-	}
-
-	in_row_change = true;
-
-	TreeModel::iterator iter = plugin_model->get_iter (path);
-
-	if (iter) {
-
-		bool hidden = !(*iter)[plugin_columns.hidden];
-
-		/* change state */
-
-		PluginManager::PluginStatusType status = (hidden ? PluginManager::Hidden : PluginManager::Normal);
 
 		/* save new statuses list */
 
