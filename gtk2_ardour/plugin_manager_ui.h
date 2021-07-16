@@ -52,6 +52,7 @@ private:
 	void hidden_changed (std::string const&);
 	void row_activated (Gtk::TreeModel::Path const&, Gtk::TreeViewColumn*);
 
+	void reindex ();
 	void rescan_all ();
 	void rescan_faulty ();
 	void rescan_selected ();
@@ -121,6 +122,7 @@ private:
 	Gtk::TextView                _log;
 	Gtk::ScrolledWindow          _log_scroller;
 	ArdourWidgets::VPane         _pane;
+	ArdourWidgets::ArdourButton  _btn_reindex;
 	ArdourWidgets::ArdourButton  _btn_rescan_all;
 	ArdourWidgets::ArdourButton  _btn_rescan_err;
 	ArdourWidgets::ArdourButton  _btn_rescan_sel;
