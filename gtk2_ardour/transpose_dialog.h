@@ -59,10 +59,8 @@ public:
 	bool on_key_press_event(GdkEventKey*);
 
 private:
-	Gtk::Adjustment _octaves_adjustment;
 	Gtk::Adjustment _semitones_adjustment;
 	Gtk::Adjustment _cents_adjustment;
-	Gtk::SpinButton _octaves_spinner;
 	Gtk::SpinButton _semitones_spinner;
 	Gtk::SpinButton _cents_spinner;
 };

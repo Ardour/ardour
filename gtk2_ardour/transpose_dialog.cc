@@ -75,10 +75,8 @@ TransposeDialog::semitones () const
 
 VarispeedDialog::VarispeedDialog ()
 	: ArdourDialog (_("Varispeed"))
-	, _octaves_adjustment (0.0, -4.0, 4.0, 1, 2.0)
 	, _semitones_adjustment (0.0, -12.0, 12.0, 1.0, 4.0)
 	, _cents_adjustment (0.0, -100.0, 100.0, 1.0, 10.0)
-	, _octaves_spinner (_octaves_adjustment)
 	, _semitones_spinner (_semitones_adjustment)
 	, _cents_spinner (_cents_adjustment)
 {
@@ -89,12 +87,7 @@ VarispeedDialog::VarispeedDialog ()
 	t->set_col_spacings (6);
 
 	int r = 0;
-	Label* l = manage (new Label (_("Octaves:"), ALIGN_LEFT, ALIGN_CENTER, false));
-	t->attach (*l, 0, 1, r, r + 1, FILL, EXPAND, 0, 0);
-	t->attach (_octaves_spinner, 1, 2, r, r + 1, FILL, EXPAND & FILL, 0, 0);
-	++r;
-
-	l = manage (new Label (_("Semitones:"), ALIGN_LEFT, ALIGN_CENTER, false));
+	Label* l = manage (new Label (_("Semitones:"), ALIGN_LEFT, ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, r, r + 1, FILL, EXPAND, 0, 0);
 	t->attach (_semitones_spinner, 1, 2, r, r + 1, FILL, EXPAND & FILL, 0, 0);
 	++r;
@@ -110,11 +103,9 @@ VarispeedDialog::VarispeedDialog ()
 //	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 //	add_button (_("Transpose"), RESPONSE_ACCEPT);
 
-	_octaves_spinner.set_can_focus(false);
 	_semitones_spinner.set_can_focus(false);
 	_cents_spinner.set_can_focus(false);
 
-	_octaves_spinner.signal_changed().connect (sigc::mem_fun (*this, &VarispeedDialog::apply_speed));
 	_semitones_spinner.signal_changed().connect (sigc::mem_fun (*this, &VarispeedDialog::apply_speed));
 	_cents_spinner.signal_changed().connect (sigc::mem_fun (*this, &VarispeedDialog::apply_speed));
 
@@ -131,7 +122,6 @@ VarispeedDialog::on_key_press_event (GdkEventKey *ev)
 void
 VarispeedDialog::reset ()
 {
-	_octaves_spinner.set_value(0);
 	_semitones_spinner.set_value(0);
 	_cents_spinner.set_value(0);
 }
@@ -139,7 +129,7 @@ VarispeedDialog::reset ()
 void
 VarispeedDialog::apply_speed ()
 {
-	int cents = _octaves_spinner.get_value () * 12 * 100 + _semitones_spinner.get_value () * 100  + _cents_spinner.get_value ();
+	int cents = _semitones_spinner.get_value () * 100  + _cents_spinner.get_value ();
 
 	double speed = pow (2.0, ((double)cents / (double)1200.0));
 
