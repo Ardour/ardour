@@ -1191,7 +1191,7 @@ PluginManager::run_auv2_scanner_app (CAComponentDescription const& desc, AUv2Des
 		}
 
 		ARDOUR::PluginScanTimeout (timeout);
-		if (timeout > 0) {
+		if (timeout > -900) {
 			--timeout;
 		}
 		Glib::usleep (100000);
@@ -1481,7 +1481,7 @@ PluginManager::run_vst2_scanner_app (std::string path, PSLEPtr psle) const
 		}
 
 		ARDOUR::PluginScanTimeout (timeout);
-		if (timeout > 0) {
+		if (timeout > -900) {
 			--timeout;
 		}
 		Glib::usleep (100000);
@@ -2222,7 +2222,7 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path, PSLEPtr psle) cons
 		}
 
 		ARDOUR::PluginScanTimeout (timeout);
-		if (timeout > 0) {
+		if (timeout > -900) {
 			--timeout;
 		}
 		Glib::usleep (100000);
