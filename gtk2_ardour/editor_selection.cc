@@ -2261,7 +2261,7 @@ Editor::select_all_selectables_between (bool within)
 }
 
 void
-Editor::get_regionviews_at_or_after (samplepos_t pos, RegionSelection& regions)
+Editor::get_regionviews_at_or_after (timepos_t const & pos, RegionSelection& regions)
 {
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		(*iter)->get_regionviews_at_or_after (pos, regions);

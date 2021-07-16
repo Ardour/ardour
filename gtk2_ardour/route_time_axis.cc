@@ -1176,7 +1176,7 @@ RouteTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& 
 }
 
 void
-RouteTimeAxisView::get_regionviews_at_or_after (samplepos_t pos, RegionSelection& regions)
+RouteTimeAxisView::get_regionviews_at_or_after (timepos_t const & pos, RegionSelection& regions)
 {
 	if (!_view) {
 		return;

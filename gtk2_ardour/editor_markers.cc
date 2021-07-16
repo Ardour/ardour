@@ -471,17 +471,16 @@ Editor::LocationMarkers::~LocationMarkers ()
 }
 
 void
-Editor::get_markers_to_ripple (boost::shared_ptr<Playlist> target_playlist, samplepos_t pos, std::vector<ArdourMarker*>& markers)
+Editor::get_markers_to_ripple (boost::shared_ptr<Playlist> target_playlist, timepos_t const & pos, std::vector<ArdourMarker*>& markers)
 {
-
-	pos = effective_ripple_mark_start (target_playlist, pos);
+	const timepos_t ripple_start = effective_ripple_mark_start (target_playlist, pos);
 
 	for (LocationMarkerMap::const_iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-		if (i->first->start() >= pos) {
+		if (i->first->start() >= ripple_start) {
 			cerr << "Add markers for " << i->first->name() << endl;
 			markers.push_back (i->second->start);
 		}
-		if (i->first->end() >= pos && i->second->end) {
+		if (i->first->end() >= ripple_start && i->second->end) {
 			markers.push_back (i->second->end);
 		}
 	}

@@ -2253,7 +2253,7 @@ Editor::add_location_from_selection ()
 void
 Editor::add_location_mark (timepos_t const & where)
 {
-	if (_session->locations()->mark_at (where, 1)) {
+	if (_session->locations()->mark_at (where, timecnt_t (1))) {
 		return;
 	}
 
@@ -4822,7 +4822,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 		case Cut:
 			_xx = RegionFactory::create (r, false);
-			npl->add_region (_xx, r->position() - first_position);
+			npl->add_region (_xx, timepos_t (first_position.distance (r->position())));
 			pl->remove_region (r);
 			if (should_ripple()) {
 				do_ripple (pl, r->position(), -r->length(), boost::shared_ptr<Region>(), false);
@@ -9216,7 +9216,7 @@ Editor::should_ripple () const
 }
 
 void
-Editor::do_ripple (boost::shared_ptr<ARDOUR::Playlist> target_playlist, samplepos_t at, samplecnt_t distance, boost::shared_ptr<ARDOUR::Region> exclude, bool add_to_command)
+Editor::do_ripple (boost::shared_ptr<ARDOUR::Playlist> target_playlist, timepos_t const & at, timecnt_t const & distance, boost::shared_ptr<ARDOUR::Region> exclude, bool add_to_command)
 {
 	RegionList el;
 	if (exclude) {
@@ -9226,7 +9226,7 @@ Editor::do_ripple (boost::shared_ptr<ARDOUR::Playlist> target_playlist, samplepo
 }
 
 void
-Editor::do_ripple (boost::shared_ptr<Playlist> target_playlist, samplepos_t at, samplecnt_t distance, RegionList* exclude, bool add_to_command)
+Editor::do_ripple (boost::shared_ptr<Playlist> target_playlist, timepos_t const & at, timecnt_t const & distance, RegionList* exclude, bool add_to_command)
 {
 	typedef std::set<boost::shared_ptr<Playlist> > UniquePlaylists;
 	UniquePlaylists playlists;
@@ -9301,8 +9301,8 @@ Editor::do_ripple (boost::shared_ptr<Playlist> target_playlist, samplepos_t at, 
 	ripple_marks (target_playlist, at, distance);
 }
 
-samplepos_t
-Editor::effective_ripple_mark_start (boost::shared_ptr<Playlist> target_playlist, samplepos_t pos)
+timepos_t
+Editor::effective_ripple_mark_start (boost::shared_ptr<Playlist> target_playlist, timepos_t pos)
 {
 	/* in the target playlist, find the region before the target
 	 * (implicitly given by @param at. Allow all markers that occur between
@@ -9311,24 +9311,24 @@ Editor::effective_ripple_mark_start (boost::shared_ptr<Playlist> target_playlist
 	 */
 
 	boost::shared_ptr<RegionList> rl = target_playlist->region_list();
-	samplepos_t last_region_end_before_at = 0;
+	timepos_t last_region_end_before_at (pos.time_domain());
 
 	for (RegionList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
-		samplepos_t region_end = (*r)->position() + (*r)->length();
+		timepos_t region_end = (*r)->end();
 		if (region_end > last_region_end_before_at && region_end < pos) {
 			last_region_end_before_at = region_end;
 		}
 	}
 
 	if (last_region_end_before_at < pos) {
-		pos = last_region_end_before_at + 1;
+		pos = last_region_end_before_at.increment();
 	}
 
 	return pos;
 }
 
 void
-Editor::ripple_marks (boost::shared_ptr<Playlist> target_playlist, samplepos_t at, samplecnt_t distance)
+Editor::ripple_marks (boost::shared_ptr<Playlist> target_playlist, timepos_t at, timecnt_t const & distance)
 {
 	at = effective_ripple_mark_start (target_playlist, at);
 

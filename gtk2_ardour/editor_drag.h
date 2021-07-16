@@ -302,7 +302,7 @@ protected:
 	bool _x_constrained; ///< true if x motion is constrained, otherwise false
 	bool _y_constrained; ///< true if y motion is constrained, otherwise false
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
-	ARDOUR::samplepos_t _earliest_time_limit; ///< time we cannot drag before (defaults to 0, indicating no such limit)
+	ARDOUR::timepos_t _earliest_time_limit; ///< time we cannot drag before (defaults to 0, indicating no such limit)
 
 private:
 	bool _trackview_only; ///< true if pointer y value should always be relative to the top of the trackview group

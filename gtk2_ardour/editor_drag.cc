@@ -877,8 +877,8 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, Temporal::timepos_t &
 		pending_region_position = _last_position;
 	}
 
-	if (pending_region_position->sample <= _earliest_time_limit) {
-		pending_region_position->sample = _earliest_time_limit;
+	if (!_earliest_time_limit.zero() && pending_region_position <= _earliest_time_limit) {
+		pending_region_position = _earliest_time_limit;
 		return 0.0;
 	}
 
@@ -1708,7 +1708,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	PlaylistSet modified_playlists;
 	RouteTimeAxisView* new_time_axis_view = 0;
 
-	timecnt_t const drag_delta = _last_position.distance (_primary->region()->nt_position());
+	timecnt_t const drag_delta = _last_position.distance (_primary->region()->position());
 	RegionList ripple_exclude;
 
 	/*x_contrained on the same track: this will just make a duplicate region in the same place: abort the operation */
@@ -1722,8 +1722,8 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	PlaylistMapping playlist_mapping;
 
 	/* determine boundaries of dragged regions, across all playlists */
-	samplepos_t extent_min = max_samplepos;
-	samplepos_t extent_max = 0;
+	timepos_t extent_min = timepos_t::max(_primary->region()->position().time_domain());
+	timepos_t extent_max;
 
 	/* insert the regions into their (potentially) new (or existing) playlists */
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
@@ -1744,12 +1744,12 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 
 		/* compute full extent of regions that we're going to insert */
 
-		if (where.sample < extent_min) {
-			extent_min = where.sample;
+		if (where < extent_min) {
+			extent_min = where;
 		}
 
-		if (where.sample + i->view->region()->length() > extent_max) {
-			extent_max = where.sample  + i->view->region()->length();
+		if (where + i->view->region()->length() > extent_max) {
+			extent_max = where + i->view->region()->length();
 		}
 
 		if (i->time_axis_view < 0 || i->time_axis_view >= (int)_time_axis_views.size()) {
@@ -1802,7 +1802,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 
 	for (PlaylistSet::iterator p = modified_playlists.begin(); p != modified_playlists.end(); ++p) {
 		if (_editor->should_ripple()) {
-			(*p)->ripple (extent_min, extent_max - extent_min, &ripple_exclude);
+			(*p)->ripple (extent_min, extent_min.distance (extent_max), &ripple_exclude);
 		}
 		(*p)->rdiff_and_add_command (_editor->session());
 	}
@@ -1810,7 +1810,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	/* Ripple marks & ranges if appropriate */
 
 	if (Config->get_edit_mode() == RippleAll) {
-		_editor->ripple_marks (_primary->region()->playlist(), extent_min, extent_max - extent_min);
+		_editor->ripple_marks (_primary->region()->playlist(), extent_min, extent_min.distance (extent_max));
 	}
 
 	/* If we've created new regions either by copying or moving
@@ -1838,7 +1838,7 @@ RegionMoveDrag::finished_no_copy (
 	set<RouteTimeAxisView*> views_to_update;
 	RouteTimeAxisView* new_time_axis_view = 0;
 
-	timecnt_t const drag_delta = last_position.distance (_primary->region()->nt_position());
+	timecnt_t const drag_delta = last_position.distance (_primary->region()->position());
 	RegionList ripple_exclude;
 
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
@@ -2236,7 +2236,7 @@ RegionInsertDrag::finished (GdkEvent * event, bool)
 	playlist->add_region (_primary->region (), _last_position, 1.0, false);
 
 	if (_editor->should_ripple()) {
-		playlist->ripple (_last_position, _primary->region()->nt_length(), _primary->region());
+		playlist->ripple (_last_position, _primary->region()->length(), _primary->region());
 	} else {
 		playlist->rdiff_and_add_command (_editor->session());
 	}
@@ -2286,8 +2286,8 @@ RegionRippleDrag::add_all_after_to_views(TimeAxisView *tav, timepos_t const & wh
 				(*i)->drag_start();
 				ArdourCanvas::Item* rvg = (*i)->get_canvas_group();
 				Duple rv_canvas_offset = rvg->item_to_canvas (Duple (0,0));
-				Duple dmg_canvas_offset = _editor->_drag_motion_group->canvas_origin ();
-				rvg->reparent (_editor->_drag_motion_group);
+				Duple dmg_canvas_offset = _editor->get_drag_motion_group()->canvas_origin ();
+				rvg->reparent (_editor->get_drag_motion_group());
 
 				// we only need to move in the y direction
 				Duple fudge = rv_canvas_offset - dmg_canvas_offset;
@@ -2309,7 +2309,7 @@ RegionRippleDrag::remove_unselected_from_views(timecnt_t const & amount, bool mo
 		// we added all the regions after the selection
 
 		std::list<DraggingView>::iterator to_erase = i++;
-		if (!_editor->selection->regions.contains (to_erase->view)) {
+		if (!_editor->get_selection().regions.contains (to_erase->view)) {
 			// restore the non-selected regions to their original playlist & positions,
 			// and then ripple them back by the length of the regions that were dragged away
 			// do the same things as RegionMotionDrag::aborted
@@ -2359,7 +2359,7 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionRippleDrag\n");
 	// compute length of selection
-	RegionSelection selected_regions = _editor->selection->regions;
+	RegionSelection selected_regions = _editor->get_selection().regions;
 	selection_length = selected_regions.start_time().distance (selected_regions.end_time());
 
 	// Rippling accross tracks disabled. Rippling on all tracks is the way to go in the future.
@@ -2468,7 +2468,7 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 			tv->playlist()->ripple (where, amount+adjust, exclude);
 
 			// add regions after point where drag entered this track to subsequent ripples
-			add_all_after_to_views (tv, where, _editor->selection->regions, true);
+			add_all_after_to_views (tv, where, _editor->get_selection().regions, true);
 
 		} else {
 			// motion on same track

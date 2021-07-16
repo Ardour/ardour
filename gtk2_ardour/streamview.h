@@ -106,7 +106,7 @@ public:
 	void set_selected_regionviews (RegionSelection&);
 	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<Selectable* >&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
-	void get_regionviews_at_or_after (ARDOUR::samplepos_t, RegionSelection&);
+	void get_regionviews_at_or_after (Temporal::timepos_t const &, RegionSelection&);
 
 	virtual void update_contents_metrics(boost::shared_ptr<ARDOUR::Region>) {}
 

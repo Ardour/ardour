@@ -275,7 +275,7 @@ public:
 	bool get_selection_extents (Temporal::timepos_t &start, Temporal::timepos_t &end) const;  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 
-	void get_regionviews_at_or_after (ARDOUR::samplepos_t, RegionSelection&);
+	void get_regionviews_at_or_after (Temporal::timepos_t const &, RegionSelection&);
 
 	void set_selection (std::list<Selectable*>, Selection::Operation);
 	void set_selected_midi_region_view (MidiRegionView&);
@@ -595,11 +595,11 @@ public:
 	void edit_meter_section (Temporal::MeterPoint&);
 
 	bool should_ripple () const;
-	void do_ripple (boost::shared_ptr<ARDOUR::Playlist>, samplepos_t, samplecnt_t, ARDOUR::RegionList* exclude, bool add_to_command);
-	void do_ripple (boost::shared_ptr<ARDOUR::Playlist>, samplepos_t, samplecnt_t, boost::shared_ptr<ARDOUR::Region> exclude, bool add_to_command);
-	void ripple_marks (boost::shared_ptr<ARDOUR::Playlist> target_playlist, samplepos_t at, samplecnt_t distance);
-	void get_markers_to_ripple (boost::shared_ptr<ARDOUR::Playlist> target_playlist, samplepos_t pos, std::vector<ArdourMarker*>& markers);
-	samplepos_t effective_ripple_mark_start (boost::shared_ptr<ARDOUR::Playlist> target_playlist, samplepos_t pos);
+	void do_ripple (boost::shared_ptr<ARDOUR::Playlist>, Temporal::timepos_t const &, Temporal::timecnt_t const &, ARDOUR::RegionList* exclude, bool add_to_command);
+	void do_ripple (boost::shared_ptr<ARDOUR::Playlist>, Temporal::timepos_t const &, Temporal::timecnt_t const &, boost::shared_ptr<ARDOUR::Region> exclude, bool add_to_command);
+	void ripple_marks (boost::shared_ptr<ARDOUR::Playlist> target_playlist, Temporal::timepos_t at, Temporal::timecnt_t const & distance);
+	void get_markers_to_ripple (boost::shared_ptr<ARDOUR::Playlist> target_playlist, Temporal::timepos_t const & pos, std::vector<ArdourMarker*>& markers);
+	Temporal::timepos_t effective_ripple_mark_start (boost::shared_ptr<ARDOUR::Playlist> target_playlist, Temporal::timepos_t pos);
 
 	void add_region_marker ();
 	void clear_region_markers ();
@@ -2416,6 +2416,7 @@ private:
 	friend class RegionCutDrag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;
+	friend class RegionRippleDrag;
 	friend class TrimDrag;
 	friend class BBTRulerDrag;
 	friend class MeterMarkerDrag;

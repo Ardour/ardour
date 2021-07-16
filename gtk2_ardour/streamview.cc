@@ -602,7 +602,7 @@ StreamView::get_inverted_selectables (Selection& sel, list<Selectable*>& results
 }
 
 void
-StreamView::get_regionviews_at_or_after (samplepos_t pos, RegionSelection& regions)
+StreamView::get_regionviews_at_or_after (timepos_t const & pos, RegionSelection& regions)
 {
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		if ((*i)->region()->position() >= pos) {
