@@ -643,9 +643,9 @@ touch_cachefile (std::string const& path, std::string const& cache_file, bool ve
 			char vsttme[128];
 			struct tm local_time;
 			localtime_r (&utb.modtime, &local_time);
-			strftime (v2itme, sizeof(v2itme), "%Y-%m-%d %T", &local_time);
+			strftime (v2itme, sizeof(v2itme), "%Y-%m-%d %H:%M:%S", &local_time);
 			localtime_r (&mtime, &local_time);
-			strftime (vsttme, sizeof(vsttme), "%Y-%m-%d %T", &local_time);
+			strftime (vsttme, sizeof(vsttme), "%Y-%m-%d %H:%M:%S", &local_time);
 			PBD::info << "Touch cachefile: set mtime = "
 			          << utb.modtime << " (" << v2itme << "), plugin mtime = "
 			          << sb_vst.st_mtime << " (" << vsttme << ")" << endmsg;
