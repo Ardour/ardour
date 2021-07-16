@@ -34,6 +34,7 @@ class PluginScanDialog : public ArdourDialog
 
   private:
 	Gtk::Label       message;
+	Gtk::Label       timeout_info;
 	Gtk::ProgressBar pbar;
 	Gtk::HBox        tbox;
 	Gtk::Button      timeout_button;

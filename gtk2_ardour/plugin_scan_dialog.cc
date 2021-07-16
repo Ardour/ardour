@@ -54,7 +54,12 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	vbox->set_size_request(400,-1);
 
 	message.set_padding (12, 12);
+	timeout_info.set_padding (12, 12);
 	vbox->pack_start (message);
+	vbox->pack_start (timeout_info);
+
+	timeout_info.set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Scan takes a long time, check for popup dialogs.")));
+	timeout_info.set_no_show_all ();
 
 	cancel_button.set_name ("EditorGTKButton");
 	cancel_button.signal_clicked().connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_plugin_scan));
@@ -187,10 +192,14 @@ PluginScanDialog::plugin_scan_timeout (int timeout)
 
 	if (timeout > 0) {
 		pbar.set_sensitive (true);
+		if (timeout < scan_timeout / 2 || (scan_timeout - timeout) > 300) {
+			timeout_info.show ();
+		}
 		if (timeout < scan_timeout) {
 			pbar.set_text(_("Scan Timeout"));
 		} else {
 			pbar.set_text(_("Scanning"));
+			timeout_info.hide ();
 		}
 		timeout_button.set_sensitive (timeout < scan_timeout);
 		all_timeout_button.set_sensitive (timeout < scan_timeout);
@@ -202,11 +211,15 @@ PluginScanDialog::plugin_scan_timeout (int timeout)
 		pbar.pulse ();
 		timeout_button.set_sensitive (false);
 		tbox.show();
+		if (timeout <= -300) {
+			timeout_info.show ();
+		}
 	} else {
 		pbar.set_sensitive (false);
 		timeout_button.set_sensitive (false);
 		all_timeout_button.set_sensitive (false);
 		tbox.hide();
+		timeout_info.hide ();
 	}
 
 	ARDOUR_UI::instance()->gui_idle_handler ();
@@ -216,6 +229,8 @@ void
 PluginScanDialog::message_handler (std::string type, std::string plugin, bool can_cancel)
 {
 	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("plugin scan message: %1 cancel? %2\n"), type, can_cancel));
+
+	timeout_info.hide ();
 
 	if (type == X_("closeme") && !is_mapped()) {
 		return;
