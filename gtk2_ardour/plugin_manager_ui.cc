@@ -34,11 +34,11 @@
 #include "widgets/tooltips.h"
 
 #include "ardour_message.h"
-#include "plugin_manager_ui.h"
 #include "ardour_ui.h"
+#include "plugin_manager_ui.h"
 #include "plugin_scan_dialog.h"
-#include "rc_option_editor.h"
 #include "plugin_utils.h"
+#include "rc_option_editor.h"
 
 #include "pbd/i18n.h"
 
@@ -62,27 +62,27 @@ PluginManagerUI::PluginManagerUI ()
 {
 	plugin_model = ListStore::create (plugin_columns);
 
-	CellRendererToggle* cell_blacklist = manage (new CellRendererToggle ());
-	TreeViewColumn* column_blacklist   = manage (new TreeViewColumn ("", *cell_blacklist));
+	CellRendererToggle* cell_blacklist   = manage (new CellRendererToggle ());
+	TreeViewColumn*     column_blacklist = manage (new TreeViewColumn ("", *cell_blacklist));
 
-	cell_blacklist->property_activatable() = true;
-	cell_blacklist->property_radio()       = false;
+	cell_blacklist->property_activatable () = true;
+	cell_blacklist->property_radio ()       = false;
 	column_blacklist->add_attribute (cell_blacklist->property_active (), plugin_columns.blacklisted);
 	column_blacklist->add_attribute (cell_blacklist->property_activatable (), plugin_columns.can_blacklist);
 
-	CellRendererToggle* cell_fav = manage (new CellRendererToggle ());
-	TreeViewColumn* column_fav   = manage (new TreeViewColumn ("", *cell_fav));
+	CellRendererToggle* cell_fav   = manage (new CellRendererToggle ());
+	TreeViewColumn*     column_fav = manage (new TreeViewColumn ("", *cell_fav));
 
-	cell_fav->property_activatable() = true;
-	cell_fav->property_radio() = true;
+	cell_fav->property_activatable () = true;
+	cell_fav->property_radio ()       = true;
 	column_fav->add_attribute (cell_fav->property_active (), plugin_columns.favorite);
 	column_fav->add_attribute (cell_fav->property_activatable (), plugin_columns.can_fav_hide);
 
-	CellRendererToggle* cell_hidden = manage (new CellRendererToggle ());
-	TreeViewColumn* column_hidden   = manage (new TreeViewColumn ("", *cell_hidden));
+	CellRendererToggle* cell_hidden   = manage (new CellRendererToggle ());
+	TreeViewColumn*     column_hidden = manage (new TreeViewColumn ("", *cell_hidden));
 
-	cell_hidden->property_activatable() = true;
-	cell_hidden->property_radio() = true;
+	cell_hidden->property_activatable () = true;
+	cell_hidden->property_radio ()       = true;
 	column_hidden->add_attribute (cell_hidden->property_active (), plugin_columns.hidden);
 	column_hidden->add_attribute (cell_hidden->property_activatable (), plugin_columns.can_fav_hide);
 
@@ -95,7 +95,7 @@ PluginManagerUI::PluginManagerUI ()
 	plugin_display.append_column ("", plugin_columns.type);
 	plugin_display.append_column ("", plugin_columns.path);
 
-	plugin_display.set_tooltip_column(7); // plugin_columns.tip
+	plugin_display.set_tooltip_column (7); // plugin_columns.tip
 
 	struct ColumnInfo {
 		int           index;
@@ -138,14 +138,14 @@ PluginManagerUI::PluginManagerUI ()
 	plugin_display.set_headers_clickable (true);
 	plugin_display.set_reorderable (false);
 	plugin_display.set_rules_hint (true);
-	plugin_display.set_enable_search(true);
-	plugin_display.set_name("PluginSelectorDisplay");
+	plugin_display.set_enable_search (true);
+	plugin_display.set_name ("PluginSelectorDisplay");
 
-	plugin_model->set_sort_column (plugin_columns.name.index(), SORT_ASCENDING);
+	plugin_model->set_sort_column (plugin_columns.name.index (), SORT_ASCENDING);
 
-	plugin_display.get_selection()->set_mode (SELECTION_SINGLE);
-	plugin_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginManagerUI::selection_changed));
-	plugin_display.signal_row_activated().connect_notify (sigc::mem_fun(*this, &PluginManagerUI::row_activated));
+	plugin_display.get_selection ()->set_mode (SELECTION_SINGLE);
+	plugin_display.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &PluginManagerUI::selection_changed));
+	plugin_display.signal_row_activated ().connect_notify (sigc::mem_fun (*this, &PluginManagerUI::row_activated));
 
 	_scroller.add (plugin_display);
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
@@ -153,8 +153,8 @@ PluginManagerUI::PluginManagerUI ()
 	_log.set_editable (false);
 	_log.set_wrap_mode (WRAP_WORD);
 
-	_log_scroller.set_shadow_type(SHADOW_NONE);
-	_log_scroller.set_border_width(0);
+	_log_scroller.set_shadow_type (SHADOW_NONE);
+	_log_scroller.set_border_width (0);
 	_log_scroller.add (_log);
 	_log_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
@@ -186,25 +186,27 @@ PluginManagerUI::PluginManagerUI ()
 	b_actions->set_border_width (4);
 
 	/* search box */
-	_cb_search_name.set_active(true);
-	_cb_search_type.set_active(false);
-	_cb_search_creator.set_active(true);
-	_cb_search_full_path.set_active(false);
+	_cb_search_name.set_active (true);
+	_cb_search_type.set_active (false);
+	_cb_search_creator.set_active (true);
+	_cb_search_full_path.set_active (false);
 	_cb_search_name.set_name ("pluginlist filter button");
 	_cb_search_type.set_name ("pluginlist filter button");
 	_cb_search_creator.set_name ("pluginlist filter button");
 	_cb_search_full_path.set_name ("pluginlist filter button");
 
 	Widget* w = manage (new Image (Stock::CLEAR, ICON_SIZE_MENU));
-  w->show ();
-  _btn_search_clear.add (*w);
+	w->show ();
+	_btn_search_clear.add (*w);
 
+	/* clang-format off */
 	_tbl_search.attach (_entry_search,        0, 2, 0, 1, FILL | EXPAND, FILL);
 	_tbl_search.attach (_btn_search_clear,    2, 3, 0, 1, FILL, FILL);
 	_tbl_search.attach (_cb_search_name,      0, 1, 1, 2, FILL, FILL, 2, 2);
 	_tbl_search.attach (_cb_search_type,      1, 2, 1, 2, FILL, FILL, 2, 2);
 	_tbl_search.attach (_cb_search_creator,   0, 1, 2, 3, FILL, FILL, 2, 2);
 	_tbl_search.attach (_cb_search_full_path, 1, 2, 2, 3, FILL, FILL, 2, 2);
+	/* clang-format on */
 
 	/* prefs / plugin-paths buttons */
 #if defined LXVST_SUPPORT
@@ -230,19 +232,23 @@ PluginManagerUI::PluginManagerUI ()
 	b_paths->set_border_width (4);
 
 	/* tooltips */
-	ArdourWidgets::set_tooltip (_btn_rescan_all, _("Scans all plugins, regardless if they have already been successfully scaned\n.Depending on the number of plugins installed this can take a long time."));
+	/* clang-format off */
+	ArdourWidgets::set_tooltip (_btn_rescan_all, _("Scans all plugins, regardless if they have already been successfully scanned\n.Depending on the number of plugins installed this can take a long time."));
 	ArdourWidgets::set_tooltip (_btn_rescan_err, _("Scans plugins that have not yet been successfully scanned."));
 	ArdourWidgets::set_tooltip (_btn_rescan_sel, _("Scans the selected plugin."));
 	ArdourWidgets::set_tooltip (_btn_clear,      _("Forget about plugins that have been removed from the system."));
 	ArdourWidgets::set_tooltip (_btn_prefs,      _("Open preference window"));
+	/* clang-format on */
 
 	/* top level packing */
+	/* clang-format off */
 	_top.attach (*f_search,  0, 1, 0, 1, FILL | SHRINK, SHRINK, 4, 0);
 	_top.attach (*lbl,       0, 1, 1, 2, SHRINK, EXPAND | FILL, 4, 0);
 	_top.attach (*f_info,    0, 1, 2, 3, FILL | SHRINK, SHRINK, 4, 4);
 	_top.attach (*f_actions, 0, 1, 3, 4, FILL | SHRINK, SHRINK, 4, 4);
 	_top.attach (*f_paths,   0, 1, 4, 5, FILL | SHRINK, SHRINK, 4, 4);
 	_top.attach (_pane,      1, 2, 0, 5, EXPAND | FILL, EXPAND | FILL, 4, 0);
+	/* clang-format on */
 
 	add (_top);
 	_top.show_all ();
@@ -252,9 +258,9 @@ PluginManagerUI::PluginManagerUI ()
 
 	/* connect to signals */
 
-	PluginManager::instance ().PluginListChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::refill, this), gui_context());
-	PluginManager::instance ().PluginScanLogChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::refill, this), gui_context());
-	PluginManager::instance ().PluginStatusChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::plugin_status_changed, this, _1, _2, _3), gui_context());
+	PluginManager::instance ().PluginListChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::refill, this), gui_context ());
+	PluginManager::instance ().PluginScanLogChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::refill, this), gui_context ());
+	PluginManager::instance ().PluginStatusChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::plugin_status_changed, this, _1, _2, _3), gui_context ());
 
 	_btn_rescan_all.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::rescan_all));
 	_btn_rescan_err.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::rescan_faulty));
@@ -262,11 +268,11 @@ PluginManagerUI::PluginManagerUI ()
 	_btn_clear.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::clear_log));
 	_btn_prefs.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::show_plugin_prefs));
 
-	cell_fav->signal_toggled().connect (sigc::mem_fun (*this, &PluginManagerUI::favorite_changed));
-	cell_hidden->signal_toggled().connect (sigc::mem_fun (*this, &PluginManagerUI::hidden_changed));
-	cell_blacklist->signal_toggled().connect (sigc::mem_fun (*this, &PluginManagerUI::blacklist_changed));
-	_entry_search.signal_changed().connect (sigc::mem_fun (*this, &PluginManagerUI::search_entry_changed));
-	_btn_search_clear.signal_clicked().connect (sigc::mem_fun (*this, &PluginManagerUI::search_clear_button_clicked));
+	cell_fav->signal_toggled ().connect (sigc::mem_fun (*this, &PluginManagerUI::favorite_changed));
+	cell_hidden->signal_toggled ().connect (sigc::mem_fun (*this, &PluginManagerUI::hidden_changed));
+	cell_blacklist->signal_toggled ().connect (sigc::mem_fun (*this, &PluginManagerUI::blacklist_changed));
+	_entry_search.signal_changed ().connect (sigc::mem_fun (*this, &PluginManagerUI::search_entry_changed));
+	_btn_search_clear.signal_clicked ().connect (sigc::mem_fun (*this, &PluginManagerUI::search_clear_button_clicked));
 
 	_cb_search_name.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::maybe_refill));
 	_cb_search_creator.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::maybe_refill));
@@ -334,7 +340,7 @@ status_text (PluginScanLogEntry const& psle, PluginManager::PluginStatusType sta
 static bool
 is_blacklisted (PluginScanLogEntry const& psle)
 {
-	return (int) psle.result () & PluginScanLogEntry::Blacklisted;
+	return (int)psle.result () & PluginScanLogEntry::Blacklisted;
 }
 
 static bool
@@ -343,7 +349,7 @@ can_blacklist (PluginScanLogEntry const& psle)
 	if (psle.type () == LV2 || psle.type () == LADSPA) {
 		return false;
 	}
-	return ((int) psle.result () & ~PluginScanLogEntry::Blacklisted) == PluginScanLogEntry::OK;
+	return ((int)psle.result () & ~PluginScanLogEntry::Blacklisted) == PluginScanLogEntry::OK;
 }
 
 static std::string
@@ -361,9 +367,9 @@ plugin_type (const PluginType t)
 }
 
 bool
-PluginManagerUI::show_this_plugin (boost::shared_ptr <PluginScanLogEntry> psle, PluginInfoPtr pip, const std::string& searchstr)
+PluginManagerUI::show_this_plugin (boost::shared_ptr<PluginScanLogEntry> psle, PluginInfoPtr pip, const std::string& searchstr)
 {
-	if (searchstr.empty()) {
+	if (searchstr.empty ()) {
 		return true;
 	}
 
@@ -374,7 +380,7 @@ PluginManagerUI::show_this_plugin (boost::shared_ptr <PluginScanLogEntry> psle, 
 	}
 
 	if (_cb_search_type.get_active ()) {
-		compstr = plugin_type ((psle)->type ()); 
+		compstr = plugin_type ((psle)->type ());
 		setup_search_string (compstr);
 		if (match_search_strings (compstr, searchstr)) {
 			return true;
@@ -389,7 +395,7 @@ PluginManagerUI::show_this_plugin (boost::shared_ptr <PluginScanLogEntry> psle, 
 		}
 		compstr = pip->creator;
 		setup_search_string (compstr);
-		if (_cb_search_creator.get_active() && match_search_strings (compstr, searchstr)) {
+		if (_cb_search_creator.get_active () && match_search_strings (compstr, searchstr)) {
 			return true;
 		}
 	}
@@ -400,7 +406,7 @@ PluginManagerUI::show_this_plugin (boost::shared_ptr <PluginScanLogEntry> psle, 
 void
 PluginManagerUI::maybe_refill ()
 {
-	if (!_entry_search.get_text().empty()) {
+	if (!_entry_search.get_text ().empty ()) {
 		refill ();
 	}
 }
@@ -409,22 +415,23 @@ void
 PluginManagerUI::refill ()
 {
 	/* save selection and sort-column, clear model to speed-up refill */
-	TreeIter iter = plugin_display.get_selection ()->get_selected ();
+	TreeIter                              iter = plugin_display.get_selection ()->get_selected ();
 	boost::shared_ptr<PluginScanLogEntry> sel;
 	if (iter) {
 		sel = (*iter)[plugin_columns.psle];
 	}
 
-	plugin_display.set_model (Glib::RefPtr<TreeStore>(0));
+	plugin_display.set_model (Glib::RefPtr<TreeStore> (0));
 
-	int sort_col;
+	int      sort_col;
 	SortType sort_type;
-	bool sorted = plugin_model->get_sort_column_id (sort_col, sort_type);
+	bool     sorted = plugin_model->get_sort_column_id (sort_col, sort_type);
 	plugin_model->set_sort_column (-2, SORT_ASCENDING);
 	plugin_model->clear ();
 
 	bool rescan_err = false;
 	bool have_stale = false;
+
 	std::map<PluginType, PluginCount> plugin_count;
 
 	std::vector<boost::shared_ptr<PluginScanLogEntry> > psl;
@@ -434,7 +441,7 @@ PluginManagerUI::refill ()
 	std::string searchstr = _entry_search.get_text ();
 	setup_search_string (searchstr);
 
-	for (std::vector<boost::shared_ptr <PluginScanLogEntry> >::const_iterator i = psl.begin(); i != psl.end(); ++i) {
+	for (std::vector<boost::shared_ptr<PluginScanLogEntry> >::const_iterator i = psl.begin (); i != psl.end (); ++i) {
 		PluginInfoList const& plugs = (*i)->nfo ();
 
 		if (!(*i)->recent ()) {
@@ -450,25 +457,25 @@ PluginManagerUI::refill ()
 		if (plugs.size () == 0) {
 			plugin_count[(*i)->type ()].set (**i);
 
-			if (!show_this_plugin (*i, ARDOUR::PluginInfoPtr(), searchstr)) {
+			if (!show_this_plugin (*i, ARDOUR::PluginInfoPtr (), searchstr)) {
 				continue;
 			}
 
-			TreeModel::Row newrow = *(plugin_model->append());
-			newrow[plugin_columns.path] = Glib::path_get_basename ((*i)->path ());
-			newrow[plugin_columns.type] = plugin_type ((*i)->type ());
-			newrow[plugin_columns.name] = "-";
-			newrow[plugin_columns.creator] = "-";
-			newrow[plugin_columns.status] = status_text (**i, PluginManager::Normal); // XXX
-			newrow[plugin_columns.blacklisted] = is_blacklisted (**i);
-			newrow[plugin_columns.psle] = *i;
-			newrow[plugin_columns.plugin] = ARDOUR::PluginInfoPtr ();
-			newrow[plugin_columns.favorite] = false;
-			newrow[plugin_columns.hidden] = false;
+			TreeModel::Row newrow                = *(plugin_model->append ());
+			newrow[plugin_columns.path]          = Glib::path_get_basename ((*i)->path ());
+			newrow[plugin_columns.type]          = plugin_type ((*i)->type ());
+			newrow[plugin_columns.name]          = "-";
+			newrow[plugin_columns.creator]       = "-";
+			newrow[plugin_columns.status]        = status_text (**i, PluginManager::Normal); // XXX
+			newrow[plugin_columns.blacklisted]   = is_blacklisted (**i);
+			newrow[plugin_columns.psle]          = *i;
+			newrow[plugin_columns.plugin]        = ARDOUR::PluginInfoPtr ();
+			newrow[plugin_columns.favorite]      = false;
+			newrow[plugin_columns.hidden]        = false;
 			newrow[plugin_columns.can_blacklist] = can_blacklist (**i);
-			newrow[plugin_columns.can_fav_hide] = false;
+			newrow[plugin_columns.can_fav_hide]  = false;
 		} else {
-			for (PluginInfoList::const_iterator j = plugs.begin(); j != plugs.end(); ++j) {
+			for (PluginInfoList::const_iterator j = plugs.begin (); j != plugs.end (); ++j) {
 				plugin_count[(*i)->type ()].set (**i);
 
 				if (!show_this_plugin (*i, *j, searchstr)) {
@@ -476,20 +483,20 @@ PluginManagerUI::refill ()
 				}
 
 				PluginManager::PluginStatusType status = manager.get_status (*j);
-				TreeModel::Row newrow = *(plugin_model->append());
 
-				newrow[plugin_columns.favorite] = status == PluginManager::Favorite;
-				newrow[plugin_columns.hidden] = status == PluginManager::Hidden;
-				newrow[plugin_columns.path] = Glib::path_get_basename ((*i)->path ());
-				newrow[plugin_columns.type] = plugin_type ((*i)->type ());
-				newrow[plugin_columns.name] = (*j)->name;
-				newrow[plugin_columns.creator] = (*j)->creator;
-				newrow[plugin_columns.status] = status_text (**i, status);
-				newrow[plugin_columns.blacklisted] = is_blacklisted (**i);
-				newrow[plugin_columns.psle] = *i;
-				newrow[plugin_columns.plugin] = *j;
+				TreeModel::Row newrow                = *(plugin_model->append ());
+				newrow[plugin_columns.favorite]      = status == PluginManager::Favorite;
+				newrow[plugin_columns.hidden]        = status == PluginManager::Hidden;
+				newrow[plugin_columns.path]          = Glib::path_get_basename ((*i)->path ());
+				newrow[plugin_columns.type]          = plugin_type ((*i)->type ());
+				newrow[plugin_columns.name]          = (*j)->name;
+				newrow[plugin_columns.creator]       = (*j)->creator;
+				newrow[plugin_columns.status]        = status_text (**i, status);
+				newrow[plugin_columns.blacklisted]   = is_blacklisted (**i);
+				newrow[plugin_columns.psle]          = *i;
+				newrow[plugin_columns.plugin]        = *j;
 				newrow[plugin_columns.can_blacklist] = can_blacklist (**i);
-				newrow[plugin_columns.can_fav_hide] = status != PluginManager::Concealed;
+				newrow[plugin_columns.can_fav_hide]  = status != PluginManager::Concealed;
 			}
 		}
 	}
@@ -505,7 +512,7 @@ PluginManagerUI::refill ()
 			boost::shared_ptr<PluginScanLogEntry> const& srow ((*i)[plugin_columns.psle]);
 			if (*sel == *srow) {
 				plugin_display.get_selection ()->select (*i);
-				TreeIter iter = plugin_display.get_selection()->get_selected();
+				TreeIter iter = plugin_display.get_selection ()->get_selected ();
 				assert (iter);
 				plugin_display.scroll_to_row (plugin_model->get_path (iter), 0.5);
 				break;
@@ -517,21 +524,22 @@ PluginManagerUI::refill ()
 
 	/* refill "Plugin Count" */
 	int row = 0;
-	std::list<Widget*> children = _tbl_nfo.get_children();
-	for (std::list<Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
+
+	std::list<Widget*> children = _tbl_nfo.get_children ();
+	for (std::list<Widget*>::iterator child = children.begin (); child != children.end (); ++child) {
 		_tbl_nfo.remove (**child);
 		delete *child;
 	}
 
 	PluginCount pc_max;
 	for (std::map<PluginType, PluginCount>::const_iterator i = plugin_count.begin (); i != plugin_count.end (); ++i) {
-		pc_max.total = std::max (pc_max.total,  i->second.total);
-		pc_max.error = std::max (pc_max.error,  i->second.error);
-		pc_max.stale = std::max (pc_max.stale,  i->second.stale);
-		pc_max.ndscn = std::max (pc_max.ndscn,  i->second.ndscn);
+		pc_max.total = std::max (pc_max.total, i->second.total);
+		pc_max.error = std::max (pc_max.error, i->second.error);
+		pc_max.stale = std::max (pc_max.stale, i->second.stale);
+		pc_max.ndscn = std::max (pc_max.ndscn, i->second.ndscn);
 	}
 
-	Label* head_type  = new Label (_("Tyoe"), ALIGN_LEFT, ALIGN_CENTER);
+	Label* head_type  = new Label (_("Type"), ALIGN_LEFT, ALIGN_CENTER);
 	Label* head_count = new Label (_("All"), ALIGN_RIGHT, ALIGN_CENTER);
 	_tbl_nfo.attach (*head_type,  0, 1, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	_tbl_nfo.attach (*head_count, 1, 2, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
@@ -551,7 +559,7 @@ PluginManagerUI::refill ()
 	for (std::map<PluginType, PluginCount>::const_iterator i = plugin_count.begin (); i != plugin_count.end (); ++i, ++row) {
 		Label* lbl_type  = new Label (plugin_type (i->first), ALIGN_LEFT, ALIGN_CENTER);
 		Label* lbl_count = new Label (string_compose ("%1", i->second.total), ALIGN_RIGHT, ALIGN_CENTER);
-		_tbl_nfo.attach (*lbl_type , 0, 1, row, row + 1, EXPAND | FILL, SHRINK, 2, 2);
+		_tbl_nfo.attach (*lbl_type,  0, 1, row, row + 1, EXPAND | FILL, SHRINK, 2, 2);
 		_tbl_nfo.attach (*lbl_count, 1, 2, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 		if (pc_max.error > 0) {
 			Label* lbl = new Label (string_compose ("%1", i->second.error), ALIGN_RIGHT, ALIGN_CENTER);
@@ -576,16 +584,16 @@ PluginManagerUI::refill ()
 void
 PluginManagerUI::selection_changed ()
 {
-	if (plugin_display.get_selection()->count_selected_rows() != 1) {
-		_log.get_buffer()->set_text ("");
+	if (plugin_display.get_selection ()->count_selected_rows () != 1) {
+		_log.get_buffer ()->set_text ("");
 		_btn_rescan_sel.set_sensitive (false);
 		return;
 	}
 
-	TreeIter iter = plugin_display.get_selection ()->get_selected ();
+	TreeIter                                     iter = plugin_display.get_selection ()->get_selected ();
 	boost::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
 
-	_log.get_buffer()->set_text (psle->log ());
+	_log.get_buffer ()->set_text (psle->log ());
 
 	PluginScanLogEntry::PluginScanResult sr = psle->result ();
 	if (sr == PluginScanLogEntry::OK || psle->type () == LV2) {
@@ -618,7 +626,7 @@ PluginManagerUI::row_activated (TreeModel::Path const& p, TreeViewColumn*)
 		case AudioUnit:
 		case LV2:
 		default:
-			printf ("%s\n", psle->path ().c_str());
+			printf ("%s\n", psle->path ().c_str ());
 			break;
 	}
 #endif
@@ -642,7 +650,7 @@ PluginManagerUI::blacklist_changed (std::string const& path)
 void
 PluginManagerUI::show_plugin_prefs ()
 {
-	ARDOUR_UI::instance()->show_plugin_prefs ();
+	ARDOUR_UI::instance ()->show_plugin_prefs ();
 }
 
 void
@@ -653,12 +661,12 @@ PluginManagerUI::edit_vst_path (std::string const& title, std::string const& dfl
 	if (pd.run () != RESPONSE_ACCEPT) {
 		return;
 	}
-	pd.hide();
+	pd.hide ();
 	set (pd.get_serialized_paths ());
 
 	ArdourMessageDialog msg (_("Re-scan Plugins now?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
 	msg.set_default_response (RESPONSE_YES);
-	if (msg.run() != RESPONSE_YES) {
+	if (msg.run () != RESPONSE_YES) {
 		return;
 	}
 	msg.hide ();
@@ -673,31 +681,28 @@ PluginManagerUI::vst_path_cb (ARDOUR::PluginType t)
 #ifdef WINDOWS_VST_SUPPORT
 		case Windows_VST:
 			edit_vst_path (
-					_("Set Windows VST2 Search Path"),
-					PluginManager::instance().get_default_windows_vst_path (),
-					sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_vst),
-					sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_vst)
-					);
+			    _("Set Windows VST2 Search Path"),
+			    PluginManager::instance ().get_default_windows_vst_path (),
+			    sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_vst),
+			    sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_vst));
 			break;
 #endif
 #ifdef LXVST_SUPPORT
 		case LXVST:
 			edit_vst_path (
-					_("Set Linux VST2 Search Path"),
-					PluginManager::instance().get_default_lxvst_path (),
-					sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_lxvst),
-					sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_lxvst)
-					);
+			    _("Set Linux VST2 Search Path"),
+			    PluginManager::instance ().get_default_lxvst_path (),
+			    sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_lxvst),
+			    sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_lxvst));
 			break;
 #endif
 #ifdef VST3_SUPPORT
 		case VST3:
 			edit_vst_path (
-					_("Set Additional VST3 Search Path"),
-					"", /* default is blank */
-					sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_vst3),
-					sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_vst3)
-					);
+			    _("Set Additional VST3 Search Path"),
+			    "", /* default is blank */
+			    sigc::mem_fun (*Config, &RCConfiguration::get_plugin_path_vst3),
+			    sigc::mem_fun (*Config, &RCConfiguration::set_plugin_path_vst3));
 			break;
 #endif
 		default:
@@ -710,13 +715,13 @@ PluginManagerUI::rescan_all ()
 {
 	ArdourMessageDialog msg (_("Are you sure you want to rescan all plugins?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
 	msg.set_title (_("Rescan Plugins"));
-	msg.set_secondary_text(_("This starts a fresh scan, dropping all cached plugin data and backlists. Depending on the number if plugins installed this can take a long time."));
+	msg.set_secondary_text (_("This starts a fresh scan, dropping all cached plugin data and backlists. Depending on the number if plugins installed this can take a long time."));
 
-	if (msg.run() != RESPONSE_YES) {
+	if (msg.run () != RESPONSE_YES) {
 		return;
 	}
 
-	msg.hide();
+	msg.hide ();
 
 	ARDOUR::PluginManager& manager (PluginManager::instance ());
 	if (true) {
@@ -743,11 +748,11 @@ PluginManagerUI::rescan_faulty ()
 void
 PluginManagerUI::rescan_selected ()
 {
-	if (plugin_display.get_selection()->count_selected_rows() != 1) {
+	if (plugin_display.get_selection ()->count_selected_rows () != 1) {
 		return;
 	}
 
-	TreeIter iter = plugin_display.get_selection ()->get_selected ();
+	TreeIter                                     iter = plugin_display.get_selection ()->get_selected ();
 	boost::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
 
 	PluginScanDialog psd (false, true, this);
@@ -763,7 +768,6 @@ PluginManagerUI::clear_log ()
 void
 PluginManagerUI::plugin_status_changed (ARDOUR::PluginType t, std::string uid, ARDOUR::PluginManager::PluginStatusType stat)
 {
-
 	TreeModel::Children rows = plugin_model->children ();
 	for (TreeModel::Children::iterator i = rows.begin (); i != rows.end (); ++i) {
 		PluginInfoPtr pp = (*i)[plugin_columns.plugin];
@@ -772,7 +776,7 @@ PluginManagerUI::plugin_status_changed (ARDOUR::PluginType t, std::string uid, A
 		}
 
 		(*i)[plugin_columns.favorite] = (stat == PluginManager::Favorite) ? true : false;
-		(*i)[plugin_columns.hidden] = (stat == PluginManager::Hidden) ? true : false;
+		(*i)[plugin_columns.hidden]   = (stat == PluginManager::Hidden) ? true : false;
 
 		break;
 	}
@@ -792,7 +796,7 @@ PluginManagerUI::favorite_changed (const std::string& path)
 		bool favorite = !(*iter)[plugin_columns.favorite];
 
 		PluginManager::PluginStatusType status = (favorite ? PluginManager::Favorite : PluginManager::Normal);
-		PluginInfoPtr pi = (*iter)[plugin_columns.plugin];
+		PluginInfoPtr                   pi     = (*iter)[plugin_columns.plugin];
 
 		ARDOUR::PluginManager& manager (PluginManager::instance ());
 		manager.set_status (pi->type, pi->unique_id, status);
@@ -814,7 +818,7 @@ PluginManagerUI::hidden_changed (const std::string& path)
 		bool hidden = !(*iter)[plugin_columns.hidden];
 
 		PluginManager::PluginStatusType status = (hidden ? PluginManager::Hidden : PluginManager::Normal);
-		PluginInfoPtr pi = (*iter)[plugin_columns.plugin];
+		PluginInfoPtr                   pi     = (*iter)[plugin_columns.plugin];
 
 		ARDOUR::PluginManager& manager (PluginManager::instance ());
 		manager.set_status (pi->type, pi->unique_id, status);

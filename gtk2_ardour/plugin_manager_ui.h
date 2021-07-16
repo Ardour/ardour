@@ -62,7 +62,7 @@ private:
 
 	void search_entry_changed ();
 	void search_clear_button_clicked ();
-	bool show_this_plugin (boost::shared_ptr <ARDOUR::PluginScanLogEntry>, ARDOUR::PluginInfoPtr, const std::string&);
+	bool show_this_plugin (boost::shared_ptr<ARDOUR::PluginScanLogEntry>, ARDOUR::PluginInfoPtr, const std::string&);
 
 	void plugin_status_changed (ARDOUR::PluginType, std::string, ARDOUR::PluginManager::PluginStatusType);
 
@@ -83,7 +83,8 @@ private:
 	};
 
 	struct PluginColumns : public Gtk::TreeModel::ColumnRecord {
-		PluginColumns () {
+		PluginColumns ()
+		{
 			add (status);
 			add (blacklisted);
 			add (favorite);
@@ -97,18 +98,18 @@ private:
 			add (can_blacklist);
 			add (can_fav_hide);
 		}
-		Gtk::TreeModelColumn<std::string> status;
-		Gtk::TreeModelColumn<bool> blacklisted;
-		Gtk::TreeModelColumn<bool> favorite;
-		Gtk::TreeModelColumn<bool> hidden;
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> type;
-		Gtk::TreeModelColumn<std::string> creator;
-		Gtk::TreeModelColumn<std::string> path;
+		Gtk::TreeModelColumn<std::string>                                    status;
+		Gtk::TreeModelColumn<bool>                                           blacklisted;
+		Gtk::TreeModelColumn<bool>                                           favorite;
+		Gtk::TreeModelColumn<bool>                                           hidden;
+		Gtk::TreeModelColumn<std::string>                                    name;
+		Gtk::TreeModelColumn<std::string>                                    type;
+		Gtk::TreeModelColumn<std::string>                                    creator;
+		Gtk::TreeModelColumn<std::string>                                    path;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::PluginScanLogEntry> > psle;
-		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
-		Gtk::TreeModelColumn<bool> can_blacklist;
-		Gtk::TreeModelColumn<bool> can_fav_hide;
+		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr>                          plugin;
+		Gtk::TreeModelColumn<bool>                                           can_blacklist;
+		Gtk::TreeModelColumn<bool>                                           can_fav_hide;
 	};
 
 	PluginColumns                plugin_columns;
@@ -125,7 +126,6 @@ private:
 	ArdourWidgets::ArdourButton  _btn_prefs;
 	Gtk::Table                   _tbl_nfo;
 	Gtk::Table                   _tbl_search;
-
 	Gtk::Entry                   _entry_search;
 	Gtk::Button                  _btn_search_clear;
 	ArdourWidgets::ArdourButton  _cb_search_name;
@@ -138,7 +138,6 @@ private:
 	bool _in_row_change;
 
 	PBD::ScopedConnectionList _manager_connections;
-
 };
 
 #endif // _gtkardour_plugin_manager_h_
