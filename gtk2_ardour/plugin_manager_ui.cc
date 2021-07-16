@@ -211,8 +211,8 @@ PluginManagerUI::PluginManagerUI ()
 	_cb_search_type.set_name ("pluginlist filter button");
 	_cb_search_tags.set_name ("pluginlist filter button");
 	_cb_search_creator.set_name ("pluginlist filter button");
-	_cb_search_base_name.set_name ("pluginlist hide button");
-	_cb_search_full_path.set_name ("pluginlist hide button");
+	_cb_search_base_name.set_name ("pluginlist radio button");
+	_cb_search_full_path.set_name ("pluginlist radio button");
 
 	Widget* w = manage (new Image (Stock::CLEAR, ICON_SIZE_MENU));
 	w->show ();

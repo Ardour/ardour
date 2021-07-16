@@ -2,7 +2,7 @@
 <Ardour theme-name="UnaStudia">
   <Colors>
     <Color name="alert:blue" value="4e7e9cff"/>  <!--control point fill,  location range,  page switch button: fill active-->
-    <Color name="alert:cyan" value="81d3f8ff"/>  <!--location cd marker,  pluginlist hide button: led active-->
+    <Color name="alert:cyan" value="81d3f8ff"/>  <!--location cd marker,  pluginlist radio button: led active-->
     <Color name="alert:green" value="3dcc4cff"/>  <!--no-->
     <Color name="alert:orange" value="f68b17ff"/>  <!--midi note selected outline,  stereo panner mono fill,  monitor button: fill active-->
     <Color name="alert:red" value="f10000ff"/>  <!--clipped waveform,  feedback alert: fill active,  plugin bypass button: led active-->
@@ -299,7 +299,7 @@
     <ColorAlias name="plugin automation state button: fill active" alias="alert:orange"/>
     <ColorAlias name="plugin bypass button: led active" alias="alert:red"/>
     <ColorAlias name="pluginlist filter button: fill active" alias="widget:bg"/>
-    <ColorAlias name="pluginlist hide button: led active" alias="alert:cyan"/>
+    <ColorAlias name="pluginlist radio button: led active" alias="alert:cyan"/>
     <ColorAlias name="pluginui toggle: fill" alias="widget:bg"/>
     <ColorAlias name="pluginui toggle: fill active" alias="widget:blue"/>
     <ColorAlias name="processor automation line" alias="theme:bg1"/>

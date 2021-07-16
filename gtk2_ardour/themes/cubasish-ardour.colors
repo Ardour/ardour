@@ -300,7 +300,7 @@
     <ColorAlias name="plugin automation state button: fill active" alias="alert:orange"/>
     <ColorAlias name="plugin bypass button: led active" alias="alert:red"/>
     <ColorAlias name="pluginlist filter button: fill active" alias="widget:bg"/>
-    <ColorAlias name="pluginlist hide button: led active" alias="alert:cyan"/>
+    <ColorAlias name="pluginlist radio button: led active" alias="alert:cyan"/>
     <ColorAlias name="pluginui toggle: fill" alias="widget:bg"/>
     <ColorAlias name="pluginui toggle: fill active" alias="widget:blue"/>
     <ColorAlias name="processor automation line" alias="theme:bg1"/>

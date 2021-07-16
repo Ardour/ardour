@@ -2,7 +2,7 @@
 <Ardour theme-name="Caineville">
   <Colors>
     <Color name="alert:blue" value="2e41e6ff"/>  <!--solo button: fill active,  trim handle,  invert button: fill active-->
-    <Color name="alert:cyan" value="20b2b2ff"/>  <!--location cd marker,  pluginlist hide button: led active-->
+    <Color name="alert:cyan" value="20b2b2ff"/>  <!--location cd marker,  pluginlist radio button: led active-->
     <Color name="alert:green" value="3dcc4cff"/>  <!--gain line,  gtk_solo,  invert button: led active,  transport active option button: fill active-->
     <Color name="alert:greenish" value="459952ff"/>
     <Color name="alert:orange" value="ff4e00ff"/>  <!--gtk_monitor,  monitor button: fill active,  processor fader: led active,  transport clock: text-->
@@ -300,7 +300,7 @@
     <ColorAlias name="plugin automation state button: fill active" alias="alert:orange"/>
     <ColorAlias name="plugin bypass button: led active" alias="alert:red"/>
     <ColorAlias name="pluginlist filter button: fill active" alias="widget:bg"/>
-    <ColorAlias name="pluginlist hide button: led active" alias="alert:cyan"/>
+    <ColorAlias name="pluginlist radio button: led active" alias="alert:cyan"/>
     <ColorAlias name="pluginui toggle: fill" alias="widget:bg"/>
     <ColorAlias name="pluginui toggle: fill active" alias="widget:blue"/>
     <ColorAlias name="processor automation line" alias="theme:bg1"/>

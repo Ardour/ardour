@@ -2,7 +2,7 @@
 <Ardour theme-name="Clear Gray">
   <Colors>
    <Color name="alert:blue" value="2e41e6ff"/>  <!--monitor section mono: fill active,  send alert button: fill active,  trim handle-->
-    <Color name="alert:cyan" value="54a5ffff"/>  <!--location loop,  monitor button: fill active,  pluginlist hide button: led active-->
+    <Color name="alert:cyan" value="54a5ffff"/>  <!--location loop,  monitor button: fill active,  pluginlist radio button: led active-->
     <Color name="alert:green" value="1c7c52ff"/>  <!--rude solo: fill active,  solo button: fill active-->
     <Color name="alert:greenish" value="459952ff"/>  <!--no any-->
     <Color name="alert:orange" value="e53b05ff"/>  <!--monitor section dim: fill active,  page switch button: fill active-->
@@ -300,7 +300,7 @@
     <ColorAlias name="plugin automation state button: fill active" alias="alert:orange"/>
     <ColorAlias name="plugin bypass button: led active" alias="alert:red"/>
     <ColorAlias name="pluginlist filter button: fill active" alias="widget:bg"/>
-    <ColorAlias name="pluginlist hide button: led active" alias="alert:cyan"/>
+    <ColorAlias name="pluginlist radio button: led active" alias="alert:cyan"/>
     <ColorAlias name="pluginui toggle: fill" alias="widget:bg"/>
     <ColorAlias name="pluginui toggle: fill active" alias="alert:red"/>
     <ColorAlias name="processor automation line" alias="theme:bg1"/>
