@@ -130,7 +130,7 @@ ARDOUR_UI::halt_on_xrun_message ()
 void
 ARDOUR_UI::xrun_handler (samplepos_t where)
 {
-	if (!_session) {
+	if (!_session || where < 0) {
 		return;
 	}
 
