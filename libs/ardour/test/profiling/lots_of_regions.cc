@@ -1,3 +1,4 @@
+#include "test_ui.h"
 #include "test_util.h"
 #include "ardour/ardour.h"
 #include "ardour/midi_track.h"
@@ -16,9 +17,13 @@ int
 main (int argc, char* argv[])
 {
 	ARDOUR::init (false, true, localedir);
+	TestUI* test_ui = new TestUI();
+	create_and_start_dummy_backend ();
 	Session* session = load_session ("../libs/ardour/test/profiling/sessions/1region", "1region");
 
 	assert (session->get_routes()->size() == 2);
+
+	{
 
 	/* Find the track */
 	boost::shared_ptr<MidiTrack> track = boost::dynamic_pointer_cast<MidiTrack> (session->get_routes()->back());
@@ -48,4 +53,12 @@ main (int argc, char* argv[])
 	playlist->duplicate (region, region->last_sample() + 1, 1000);
 	session->add_command (new StatefulDiffCommand (playlist));
 	session->commit_reversible_command ();
+
+	}
+
+	delete session;
+	stop_and_destroy_backend ();
+	delete test_ui;
+	ARDOUR::cleanup ();
+	return 0;
 }

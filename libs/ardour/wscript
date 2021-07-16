@@ -660,6 +660,7 @@ def build(bld):
             profilingobj.source = '''
                     test/dummy_lxvst.cc
                     test/test_util.cc
+                    test/test_ui.cc
             '''.split()
 
             profilingobj.source.append('test/profiling/%s.cc' % p)

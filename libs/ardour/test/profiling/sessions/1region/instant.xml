@@ -10,4 +10,5 @@
     <RegionList sort-type="ByEndInFile" sort-ascending="yes" show-all="no" show-automatic-regions="yes"/>
   </Editor>
   <Mixer narrow-strips="no" show-mixer="no"/>
+  <LastUsedSnapshot name="1region.ardour"/>
 </instant>

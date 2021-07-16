@@ -1,3 +1,4 @@
+#include "test_ui.h"
 #include "test_util.h"
 #include "pbd/failed_constructor.h"
 #include "ardour/ardour.h"
@@ -19,6 +20,8 @@ int main (int argc, char* argv[])
 	}
 
 	ARDOUR::init (false, true, localedir);
+	TestUI* test_ui = new TestUI();
+	create_and_start_dummy_backend ();
 
 	Session* s = 0;
 
@@ -41,8 +44,8 @@ int main (int argc, char* argv[])
 	AudioEngine::instance()->remove_session ();
 	delete s;
 	AudioEngine::instance()->stop ();
-
 	AudioEngine::destroy ();
-
+	delete test_ui;
+	ARDOUR::cleanup ();
 	return 0;
 }
