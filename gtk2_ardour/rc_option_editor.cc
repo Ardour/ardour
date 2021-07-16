@@ -4653,6 +4653,7 @@ void RCOptionEditor::plugin_scan_refresh () {
 	/* first argument says discover new plugins, second means be verbose */
 	PluginScanDialog psd (false, true, current_toplevel ());
 	psd.start ();
+	ARDOUR_UI::instance()->show_plugin_manager ();
 }
 
 void RCOptionEditor::plugin_reset_stats () {
