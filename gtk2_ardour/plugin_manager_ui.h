@@ -20,6 +20,7 @@
 #define _gtkardour_plugin_manager_h_
 
 #include <gtkmm/box.h>
+#include <gtkmm/button.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/table.h>
@@ -44,6 +45,7 @@ public:
 
 private:
 	void refill ();
+	void maybe_refill ();
 	void selection_changed ();
 	void blacklist_changed (std::string const&);
 	void favorite_changed (std::string const&);
@@ -57,6 +59,10 @@ private:
 	void show_plugin_prefs ();
 	void vst_path_cb (ARDOUR::PluginType);
 	void edit_vst_path (std::string const&, std::string const&, sigc::slot<std::string>, sigc::slot<bool, std::string>);
+
+	void search_entry_changed ();
+	void search_clear_button_clicked ();
+	bool show_this_plugin (boost::shared_ptr <ARDOUR::PluginScanLogEntry>, ARDOUR::PluginInfoPtr, const std::string&);
 
 	void plugin_status_changed (ARDOUR::PluginType, std::string, ARDOUR::PluginManager::PluginStatusType);
 
@@ -118,6 +124,14 @@ private:
 	ArdourWidgets::ArdourButton  _btn_clear;
 	ArdourWidgets::ArdourButton  _btn_prefs;
 	Gtk::Table                   _tbl_nfo;
+	Gtk::Table                   _tbl_search;
+
+	Gtk::Entry                   _entry_search;
+	Gtk::Button                  _btn_search_clear;
+	ArdourWidgets::ArdourButton  _cb_search_name;
+	ArdourWidgets::ArdourButton  _cb_search_type;
+	ArdourWidgets::ArdourButton  _cb_search_creator;
+	ArdourWidgets::ArdourButton  _cb_search_full_path;
 
 	Gtk::Table _top;
 
