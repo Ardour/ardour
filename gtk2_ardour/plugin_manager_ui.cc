@@ -56,9 +56,12 @@ PluginManagerUI::PluginManagerUI ()
 	, _btn_prefs (_("Show Plugin Prefs"))
 	, _cb_search_name (_("Name"), ArdourButton::led_default_elements, true)
 	, _cb_search_type (_("Type"), ArdourButton::led_default_elements, true)
+	, _cb_search_tags (_("Tags"), ArdourButton::led_default_elements, true)
 	, _cb_search_creator (_("Maker"), ArdourButton::led_default_elements, true)
-	, _cb_search_full_path (_("Full Path"), ArdourButton::led_default_elements, true)
+	, _cb_search_base_name (_("File"), ArdourButton::led_default_elements, true)
+	, _cb_search_full_path (_("Path"), ArdourButton::led_default_elements, true)
 	, _in_row_change (false)
+	, _in_search_change (false)
 {
 	plugin_model = ListStore::create (plugin_columns);
 
@@ -90,48 +93,48 @@ PluginManagerUI::PluginManagerUI ()
 	plugin_display.append_column (*column_blacklist);
 	plugin_display.append_column (*column_fav);
 	plugin_display.append_column (*column_hidden);
-	plugin_display.append_column ("", plugin_columns.name);
-	plugin_display.append_column ("", plugin_columns.creator);
 	plugin_display.append_column ("", plugin_columns.type);
 	plugin_display.append_column ("", plugin_columns.path);
-
-	plugin_display.set_tooltip_column (7); // plugin_columns.tip
+	plugin_display.append_column ("", plugin_columns.name);
+	plugin_display.append_column ("", plugin_columns.creator);
+	plugin_display.append_column ("", plugin_columns.tags);
 
 	struct ColumnInfo {
-		int           index;
-		int           sort_idx;
 		AlignmentEnum al;
 		bool          resizable;
 		const char*   label;
 		const char*   tooltip;
 	} ci[] = {
 		/* clang-format off */
-		{ 0, 0, ALIGN_LEFT,   false,  _("Status"),      _("Plugin Scan Result") },
-		{ 1, 1, ALIGN_CENTER, false, S_("Ignore|Ign"),  _("Blacklist the plugin-set, ignore all plugins in a bundle.") },
-		{ 2, 2, ALIGN_CENTER, false,  _("Fav"),         _("Add this plugin to to the favorite list") },
-		{ 3, 3, ALIGN_CENTER, false,  _("Hide"),        _("Hide this plugin in the plugin-selector") },
-		{ 4, 4, ALIGN_CENTER, true,   _("Name"),        _("Name of the plugin") },
-		{ 5, 5, ALIGN_CENTER, true,   _("Creator"),     _("The plugin's vendor") },
-		{ 6, 6, ALIGN_CENTER, false,  _("Type"),        _("Plugin standard") },
-		{ 7, 7, ALIGN_LEFT,   false,  _("File/ID"),     _("The plugin file (VST) or unique ID (AU, LV2)") },
-		{-1,-1, ALIGN_CENTER, false, 0, 0 } // sentinel
+		{ALIGN_LEFT,   false,  _("Status"),       _("Plugin Scan Result") },
+		{ALIGN_CENTER, false, S_("Ignore|Ign"),   _("Blacklist the plugin-set, ignore all plugins in a bundle.") },
+		{ALIGN_CENTER, false, S_("Favorite|Fav"), _("Add this plugin to to the favorite list") },
+		{ALIGN_CENTER, false,  _("Hide"),         _("Hide this plugin in the plugin-selector") },
+		{ALIGN_CENTER, false,  _("Type"),         _("Plugin standard") },
+		{ALIGN_LEFT,   true,   _("File/ID"),      _("The plugin file (VST) or unique ID (AU, LV2)") },
+		{ALIGN_CENTER, true,   _("Name"),         _("Name of the plugin") },
+		{ALIGN_CENTER, true,   _("Creator"),      _("The plugin's vendor") },
+		{ALIGN_CENTER, true,   _("Tags"),         _("Meta data: category and tags") },
 	};
 	/* clang-format on */
+	printf ("%ld %ld\n", sizeof (ci), sizeof (ColumnInfo));
 
-	for (int i = 0; ci[i].index >= 0; ++i) {
+	for (unsigned int i = 0; i < sizeof (ci) / sizeof (ColumnInfo); ++i) {
 		Label* l = manage (new Label (ci[i].label));
 		l->set_alignment (ci[i].al);
 		l->show ();
 
-		TreeViewColumn* col = plugin_display.get_column (ci[i].index);
+		TreeViewColumn* col = plugin_display.get_column (i);
 		col->set_widget (*l);
 		col->set_alignment (ci[i].al);
 		col->set_expand (false);
-		col->set_sort_column (ci[i].sort_idx);
+		col->set_sort_column (i);
 		col->set_resizable (ci[i].resizable);
 
 		ArdourWidgets::set_tooltip (*l, ci[i].tooltip);
 	}
+
+	plugin_display.set_tooltip_column (5); // plugin_columns.tip
 
 	plugin_display.set_model (plugin_model);
 	plugin_display.set_headers_visible (true);
@@ -176,7 +179,9 @@ PluginManagerUI::PluginManagerUI ()
 	f_search->add (_tbl_search);
 
 	_tbl_nfo.set_border_width (4);
-	_tbl_search.set_border_width (4);
+	_tbl_nfo.set_row_spacings (0);
+	_tbl_nfo.set_col_spacings (3);
+	_tbl_nfo.set_row_spacing (0, 3);
 
 	b_actions->pack_start (_btn_clear);
 	b_actions->pack_start (_btn_rescan_sel);
@@ -185,15 +190,29 @@ PluginManagerUI::PluginManagerUI ()
 	b_actions->set_spacing (4);
 	b_actions->set_border_width (4);
 
-	/* search box */
+	/* search table */
+	_tbl_search.set_border_width (4);
+
 	_cb_search_name.set_active (true);
 	_cb_search_type.set_active (false);
+	_cb_search_tags.set_active (false);
 	_cb_search_creator.set_active (true);
+	_cb_search_base_name.set_active (true);
 	_cb_search_full_path.set_active (false);
+
+	_cb_search_name.set_led_left (true);
+	_cb_search_type.set_led_left (true);
+	_cb_search_tags.set_led_left (true);
+	_cb_search_creator.set_led_left (true);
+	_cb_search_base_name.set_led_left (true);
+	_cb_search_full_path.set_led_left (true);
+
 	_cb_search_name.set_name ("pluginlist filter button");
 	_cb_search_type.set_name ("pluginlist filter button");
+	_cb_search_tags.set_name ("pluginlist filter button");
 	_cb_search_creator.set_name ("pluginlist filter button");
-	_cb_search_full_path.set_name ("pluginlist filter button");
+	_cb_search_base_name.set_name ("pluginlist hide button");
+	_cb_search_full_path.set_name ("pluginlist hide button");
 
 	Widget* w = manage (new Image (Stock::CLEAR, ICON_SIZE_MENU));
 	w->show ();
@@ -201,11 +220,13 @@ PluginManagerUI::PluginManagerUI ()
 
 	/* clang-format off */
 	_tbl_search.attach (_entry_search,        0, 2, 0, 1, FILL | EXPAND, FILL);
-	_tbl_search.attach (_btn_search_clear,    2, 3, 0, 1, FILL, FILL);
-	_tbl_search.attach (_cb_search_name,      0, 1, 1, 2, FILL, FILL, 2, 2);
+	_tbl_search.attach (_btn_search_clear,    2, 3, 0, 1, FILL, FILL, 1, 0);
+	_tbl_search.attach (_cb_search_name,      0, 1, 1, 2, FILL, FILL, 0, 2);
 	_tbl_search.attach (_cb_search_type,      1, 2, 1, 2, FILL, FILL, 2, 2);
-	_tbl_search.attach (_cb_search_creator,   0, 1, 2, 3, FILL, FILL, 2, 2);
-	_tbl_search.attach (_cb_search_full_path, 1, 2, 2, 3, FILL, FILL, 2, 2);
+	_tbl_search.attach (_cb_search_creator,   0, 1, 2, 3, FILL, FILL, 0, 2);
+	_tbl_search.attach (_cb_search_tags,      1, 2, 2, 3, FILL, FILL, 2, 2);
+	_tbl_search.attach (_cb_search_base_name, 0, 1, 3, 4, FILL, FILL, 0, 2);
+	_tbl_search.attach (_cb_search_full_path, 1, 2, 3, 4, FILL, FILL, 2, 2);
 	/* clang-format on */
 
 	/* prefs / plugin-paths buttons */
@@ -238,6 +259,13 @@ PluginManagerUI::PluginManagerUI ()
 	ArdourWidgets::set_tooltip (_btn_rescan_sel, _("Scans the selected plugin."));
 	ArdourWidgets::set_tooltip (_btn_clear,      _("Forget about plugins that have been removed from the system."));
 	ArdourWidgets::set_tooltip (_btn_prefs,      _("Open preference window"));
+
+	ArdourWidgets::set_tooltip (_cb_search_name,       _("Match plugin name"));
+	ArdourWidgets::set_tooltip (_cb_search_type,       _("Match plugin type"));
+	ArdourWidgets::set_tooltip (_cb_search_tags,       _("Match any tag"));
+	ArdourWidgets::set_tooltip (_cb_search_creator,    _("Match plugin vendor"));
+	ArdourWidgets::set_tooltip (_cb_search_base_name,  _("Match File/ID"));
+	ArdourWidgets::set_tooltip (_cb_search_full_path,  _("Match complete file install path on disk"));
 	/* clang-format on */
 
 	/* top level packing */
@@ -274,9 +302,12 @@ PluginManagerUI::PluginManagerUI ()
 	_entry_search.signal_changed ().connect (sigc::mem_fun (*this, &PluginManagerUI::search_entry_changed));
 	_btn_search_clear.signal_clicked ().connect (sigc::mem_fun (*this, &PluginManagerUI::search_clear_button_clicked));
 
-	_cb_search_name.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::maybe_refill));
-	_cb_search_creator.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::maybe_refill));
-	_cb_search_full_path.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::maybe_refill));
+	_cb_search_name.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::maybe_refill), (ArdourButton*)0));
+	_cb_search_tags.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::maybe_refill), (ArdourButton*)0));
+	_cb_search_type.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::maybe_refill), (ArdourButton*)0));
+	_cb_search_creator.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::maybe_refill), (ArdourButton*)0));
+	_cb_search_base_name.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::maybe_refill), &_cb_search_base_name));
+	_cb_search_full_path.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::maybe_refill), &_cb_search_full_path));
 
 	/* populate */
 	refill ();
@@ -387,15 +418,26 @@ PluginManagerUI::show_this_plugin (boost::shared_ptr<PluginScanLogEntry> psle, P
 		}
 	}
 
-	if (pip) {
+	if (pip && _cb_search_name.get_active ()) {
 		compstr = pip->name;
 		setup_search_string (compstr);
-		if (_cb_search_name.get_active () && match_search_strings (compstr, searchstr)) {
+		if (compstr != "-" && match_search_strings (compstr, searchstr)) {
 			return true;
 		}
+	}
+
+	if (pip && _cb_search_creator.get_active ()) {
 		compstr = pip->creator;
 		setup_search_string (compstr);
-		if (_cb_search_creator.get_active () && match_search_strings (compstr, searchstr)) {
+		if (compstr != "-" && match_search_strings (compstr, searchstr)) {
+			return true;
+		}
+	}
+
+	if (pip && _cb_search_tags.get_active ()) {
+		compstr = PluginManager::instance ().get_tags_as_string (pip);
+		setup_search_string (compstr);
+		if (compstr != "-" && match_search_strings (compstr, searchstr)) {
 			return true;
 		}
 	}
@@ -404,8 +446,17 @@ PluginManagerUI::show_this_plugin (boost::shared_ptr<PluginScanLogEntry> psle, P
 }
 
 void
-PluginManagerUI::maybe_refill ()
+PluginManagerUI::maybe_refill (ArdourButton* src)
 {
+	if (_in_search_change) {
+		return;
+	}
+	PBD::Unwinder<bool> uw (_in_search_change, true);
+	if (src == &_cb_search_base_name) {
+		_cb_search_full_path.set_active (!_cb_search_base_name.get_active ());
+	} else if (src == &_cb_search_full_path) {
+		_cb_search_base_name.set_active (!_cb_search_full_path.get_active ());
+	}
 	if (!_entry_search.get_text ().empty ()) {
 		refill ();
 	}
@@ -466,6 +517,7 @@ PluginManagerUI::refill ()
 			newrow[plugin_columns.type]          = plugin_type ((*i)->type ());
 			newrow[plugin_columns.name]          = "-";
 			newrow[plugin_columns.creator]       = "-";
+			newrow[plugin_columns.tags]          = "-";
 			newrow[plugin_columns.status]        = status_text (**i, PluginManager::Normal); // XXX
 			newrow[plugin_columns.blacklisted]   = is_blacklisted (**i);
 			newrow[plugin_columns.psle]          = *i;
@@ -483,6 +535,12 @@ PluginManagerUI::refill ()
 				}
 
 				PluginManager::PluginStatusType status = manager.get_status (*j);
+				std::string                     tags   = manager.get_tags_as_string (*j);
+
+				if (tags.length () > 32) {
+					tags = tags.substr (0, 32);
+					tags.append ("...");
+				}
 
 				TreeModel::Row newrow                = *(plugin_model->append ());
 				newrow[plugin_columns.favorite]      = status == PluginManager::Favorite;
@@ -491,6 +549,7 @@ PluginManagerUI::refill ()
 				newrow[plugin_columns.type]          = plugin_type ((*i)->type ());
 				newrow[plugin_columns.name]          = (*j)->name;
 				newrow[plugin_columns.creator]       = (*j)->creator;
+				newrow[plugin_columns.tags]          = tags;
 				newrow[plugin_columns.status]        = status_text (**i, status);
 				newrow[plugin_columns.blacklisted]   = is_blacklisted (**i);
 				newrow[plugin_columns.psle]          = *i;
@@ -520,7 +579,7 @@ PluginManagerUI::refill ()
 		}
 	}
 
-	plugin_display.set_search_column (4); // Name
+	plugin_display.set_search_column (6); // Name
 
 	/* refill "Plugin Count" */
 	int row = 0;
@@ -743,6 +802,7 @@ PluginManagerUI::rescan_faulty ()
 {
 	PluginScanDialog psd (false, true, this);
 	PluginManager::instance ().rescan_faulty ();
+	_entry_search.set_text ("");
 }
 
 void
@@ -800,7 +860,7 @@ PluginManagerUI::favorite_changed (const std::string& path)
 
 		ARDOUR::PluginManager& manager (PluginManager::instance ());
 		manager.set_status (pi->type, pi->unique_id, status);
-		manager.save_statuses ();
+		manager.save_statuses (); // TODO postpone
 	}
 }
 
@@ -822,7 +882,7 @@ PluginManagerUI::hidden_changed (const std::string& path)
 
 		ARDOUR::PluginManager& manager (PluginManager::instance ());
 		manager.set_status (pi->type, pi->unique_id, status);
-		manager.save_statuses ();
+		manager.save_statuses (); // TODO postpone
 	}
 }
 

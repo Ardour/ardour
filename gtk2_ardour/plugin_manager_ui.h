@@ -45,7 +45,7 @@ public:
 
 private:
 	void refill ();
-	void maybe_refill ();
+	void maybe_refill (ArdourWidgets::ArdourButton*);
 	void selection_changed ();
 	void blacklist_changed (std::string const&);
 	void favorite_changed (std::string const&);
@@ -89,10 +89,11 @@ private:
 			add (blacklisted);
 			add (favorite);
 			add (hidden);
-			add (name);
-			add (creator);
 			add (type);
 			add (path);
+			add (name);
+			add (creator);
+			add (tags);
 			add (psle);
 			add (plugin);
 			add (can_blacklist);
@@ -105,6 +106,7 @@ private:
 		Gtk::TreeModelColumn<std::string>                                    name;
 		Gtk::TreeModelColumn<std::string>                                    type;
 		Gtk::TreeModelColumn<std::string>                                    creator;
+		Gtk::TreeModelColumn<std::string>                                    tags;
 		Gtk::TreeModelColumn<std::string>                                    path;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::PluginScanLogEntry> > psle;
 		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr>                          plugin;
@@ -130,12 +132,15 @@ private:
 	Gtk::Button                  _btn_search_clear;
 	ArdourWidgets::ArdourButton  _cb_search_name;
 	ArdourWidgets::ArdourButton  _cb_search_type;
+	ArdourWidgets::ArdourButton  _cb_search_tags;
 	ArdourWidgets::ArdourButton  _cb_search_creator;
+	ArdourWidgets::ArdourButton  _cb_search_base_name;
 	ArdourWidgets::ArdourButton  _cb_search_full_path;
 
 	Gtk::Table _top;
 
 	bool _in_row_change;
+	bool _in_search_change;
 
 	PBD::ScopedConnectionList _manager_connections;
 };
