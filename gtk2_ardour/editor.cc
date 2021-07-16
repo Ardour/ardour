@@ -4419,44 +4419,44 @@ void
 Editor::new_playlists_for_all_tracks (bool copy)
 {
 	string name, gid;
-	stamp_new_playlist(name,gid,copy);
-
-	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	_session->playlists()->get (playlists);
-	mapover_all_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
+	if (stamp_new_playlist(name,gid,copy)) {
+		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+		_session->playlists()->get (playlists);
+		mapover_all_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
+	}
 }
 
 void
 Editor::new_playlists_for_grouped_tracks (RouteUI* rui, bool copy)
 {
 	string name, gid;
-	stamp_new_playlist(name,gid,copy);
-
-	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	_session->playlists()->get (playlists);
-	mapover_grouped_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists), rui, ARDOUR::Properties::group_select.property_id);
+	if (stamp_new_playlist(name,gid,copy)) {
+		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+		_session->playlists()->get (playlists);
+		mapover_grouped_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists), rui, ARDOUR::Properties::group_select.property_id);
+	}
 }
 
 void
 Editor::new_playlists_for_selected_tracks (bool copy)
 {
 	string name, gid;
-	stamp_new_playlist(name,gid,copy);
-
-	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	_session->playlists()->get (playlists);
-	mapover_selected_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
+	if (stamp_new_playlist(name,gid,copy)) {
+		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+		_session->playlists()->get (playlists);
+		mapover_selected_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
+	}
 }
 
 void
 Editor::new_playlists_for_armed_tracks (bool copy)
 {
 	string name, gid;
-	stamp_new_playlist(name,gid,copy);
-
-	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	_session->playlists()->get (playlists);
-	mapover_armed_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
+	if (stamp_new_playlist(name,gid,copy)) {
+		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+		_session->playlists()->get (playlists);
+		mapover_armed_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
+	}
 }
 
 double
