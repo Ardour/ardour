@@ -43,6 +43,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace Gtk;
 using namespace ArdourWidgets;
 using namespace ARDOUR_PLUGIN_UTILS;
 
@@ -59,26 +60,26 @@ PluginManagerUI::PluginManagerUI ()
 	, _cb_search_full_path (_("Full Path"), ArdourButton::led_default_elements, true)
 	, _in_row_change (false)
 {
-	plugin_model = Gtk::ListStore::create (plugin_columns);
+	plugin_model = ListStore::create (plugin_columns);
 
-	Gtk::CellRendererToggle* cell_blacklist = Gtk::manage (new Gtk::CellRendererToggle ());
-	Gtk::TreeViewColumn* column_blacklist   = Gtk::manage (new Gtk::TreeViewColumn ("", *cell_blacklist));
+	CellRendererToggle* cell_blacklist = manage (new CellRendererToggle ());
+	TreeViewColumn* column_blacklist   = manage (new TreeViewColumn ("", *cell_blacklist));
 
 	cell_blacklist->property_activatable() = true;
 	cell_blacklist->property_radio()       = false;
 	column_blacklist->add_attribute (cell_blacklist->property_active (), plugin_columns.blacklisted);
 	column_blacklist->add_attribute (cell_blacklist->property_activatable (), plugin_columns.can_blacklist);
 
-	Gtk::CellRendererToggle* cell_fav = Gtk::manage (new Gtk::CellRendererToggle ());
-	Gtk::TreeViewColumn* column_fav   = Gtk::manage (new Gtk::TreeViewColumn ("", *cell_fav));
+	CellRendererToggle* cell_fav = manage (new CellRendererToggle ());
+	TreeViewColumn* column_fav   = manage (new TreeViewColumn ("", *cell_fav));
 
 	cell_fav->property_activatable() = true;
 	cell_fav->property_radio() = true;
 	column_fav->add_attribute (cell_fav->property_active (), plugin_columns.favorite);
 	column_fav->add_attribute (cell_fav->property_activatable (), plugin_columns.can_fav_hide);
 
-	Gtk::CellRendererToggle* cell_hidden = Gtk::manage (new Gtk::CellRendererToggle ());
-	Gtk::TreeViewColumn* column_hidden   = Gtk::manage (new Gtk::TreeViewColumn ("", *cell_hidden));
+	CellRendererToggle* cell_hidden = manage (new CellRendererToggle ());
+	TreeViewColumn* column_hidden   = manage (new TreeViewColumn ("", *cell_hidden));
 
 	cell_hidden->property_activatable() = true;
 	cell_hidden->property_radio() = true;
@@ -97,32 +98,32 @@ PluginManagerUI::PluginManagerUI ()
 	plugin_display.set_tooltip_column(7); // plugin_columns.tip
 
 	struct ColumnInfo {
-		int                index;
-		int                sort_idx;
-		Gtk::AlignmentEnum al;
-		bool               resizable;
-		const char*        label;
-		const char*        tooltip;
+		int           index;
+		int           sort_idx;
+		AlignmentEnum al;
+		bool          resizable;
+		const char*   label;
+		const char*   tooltip;
 	} ci[] = {
 		/* clang-format off */
-		{ 0, 0, Gtk::ALIGN_LEFT,   false,  _("Status"),      _("Plugin Scan Result") },
-		{ 1, 1, Gtk::ALIGN_CENTER, false, S_("Ignore|Ign"),  _("Blacklist the plugin-set, ignore all plugins in a bundle.") },
-		{ 2, 2, Gtk::ALIGN_CENTER, false,  _("Fav"),         _("Add this plugin to to the favorite list") },
-		{ 3, 3, Gtk::ALIGN_CENTER, false,  _("Hide"),        _("Hide this plugin in the plugin-selector") },
-		{ 4, 4, Gtk::ALIGN_CENTER, true,   _("Name"),        _("Name of the plugin") },
-		{ 5, 5, Gtk::ALIGN_CENTER, true,   _("Creator"),     _("The plugin's vendor") },
-		{ 6, 6, Gtk::ALIGN_CENTER, false,  _("Type"),        _("Plugin standard") },
-		{ 7, 7, Gtk::ALIGN_LEFT,   false,  _("File/ID"),     _("The plugin file (VST) or unique ID (AU, LV2)") },
-		{-1,-1, Gtk::ALIGN_CENTER, false, 0, 0 } // sentinel
+		{ 0, 0, ALIGN_LEFT,   false,  _("Status"),      _("Plugin Scan Result") },
+		{ 1, 1, ALIGN_CENTER, false, S_("Ignore|Ign"),  _("Blacklist the plugin-set, ignore all plugins in a bundle.") },
+		{ 2, 2, ALIGN_CENTER, false,  _("Fav"),         _("Add this plugin to to the favorite list") },
+		{ 3, 3, ALIGN_CENTER, false,  _("Hide"),        _("Hide this plugin in the plugin-selector") },
+		{ 4, 4, ALIGN_CENTER, true,   _("Name"),        _("Name of the plugin") },
+		{ 5, 5, ALIGN_CENTER, true,   _("Creator"),     _("The plugin's vendor") },
+		{ 6, 6, ALIGN_CENTER, false,  _("Type"),        _("Plugin standard") },
+		{ 7, 7, ALIGN_LEFT,   false,  _("File/ID"),     _("The plugin file (VST) or unique ID (AU, LV2)") },
+		{-1,-1, ALIGN_CENTER, false, 0, 0 } // sentinel
 	};
 	/* clang-format on */
 
 	for (int i = 0; ci[i].index >= 0; ++i) {
-		Gtk::Label* l = Gtk::manage (new Gtk::Label (ci[i].label));
+		Label* l = manage (new Label (ci[i].label));
 		l->set_alignment (ci[i].al);
 		l->show ();
 
-		Gtk::TreeViewColumn* col = plugin_display.get_column (ci[i].index);
+		TreeViewColumn* col = plugin_display.get_column (ci[i].index);
 		col->set_widget (*l);
 		col->set_alignment (ci[i].al);
 		col->set_expand (false);
@@ -140,34 +141,34 @@ PluginManagerUI::PluginManagerUI ()
 	plugin_display.set_enable_search(true);
 	plugin_display.set_name("PluginSelectorDisplay");
 
-	plugin_model->set_sort_column (plugin_columns.name.index(), Gtk::SORT_ASCENDING);
+	plugin_model->set_sort_column (plugin_columns.name.index(), SORT_ASCENDING);
 
-	plugin_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
+	plugin_display.get_selection()->set_mode (SELECTION_SINGLE);
 	plugin_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginManagerUI::selection_changed));
 	plugin_display.signal_row_activated().connect_notify (sigc::mem_fun(*this, &PluginManagerUI::row_activated));
 
 	_scroller.add (plugin_display);
-	_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
 	_log.set_editable (false);
-	_log.set_wrap_mode (Gtk::WRAP_WORD);
+	_log.set_wrap_mode (WRAP_WORD);
 
-	_log_scroller.set_shadow_type(Gtk::SHADOW_NONE);
+	_log_scroller.set_shadow_type(SHADOW_NONE);
 	_log_scroller.set_border_width(0);
 	_log_scroller.add (_log);
-	_log_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	_log_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
 	_pane.add (_scroller);
 	_pane.add (_log_scroller);
 	_pane.set_divider (0, .85);
 
-	Gtk::Label* lbl       = Gtk::manage (new Gtk::Label ("")); // spacer
-	Gtk::Frame* f_info    = Gtk::manage (new Gtk::Frame (_("Plugin Count")));
-	Gtk::Frame* f_paths   = Gtk::manage (new Gtk::Frame (_("Preferences")));
-	Gtk::Frame* f_search  = Gtk::manage (new Gtk::Frame (_("Search")));
-	Gtk::Frame* f_actions = Gtk::manage (new Gtk::Frame (_("Scan Actions")));
-	Gtk::VBox*  b_paths   = Gtk::manage (new Gtk::VBox ());
-	Gtk::VBox*  b_actions = Gtk::manage (new Gtk::VBox ());
+	Label* lbl       = manage (new Label ("")); // spacer
+	Frame* f_info    = manage (new Frame (_("Plugin Count")));
+	Frame* f_paths   = manage (new Frame (_("Preferences")));
+	Frame* f_search  = manage (new Frame (_("Search")));
+	Frame* f_actions = manage (new Frame (_("Scan Actions")));
+	VBox*  b_paths   = manage (new VBox ());
+	VBox*  b_actions = manage (new VBox ());
 
 	f_info->add (_tbl_nfo);
 	f_actions->add (*b_actions);
@@ -194,32 +195,32 @@ PluginManagerUI::PluginManagerUI ()
 	_cb_search_creator.set_name ("pluginlist filter button");
 	_cb_search_full_path.set_name ("pluginlist filter button");
 
-	Gtk::Widget* w = Gtk::manage (new Gtk::Image (Gtk::Stock::CLEAR, Gtk::ICON_SIZE_MENU));
+	Widget* w = manage (new Image (Stock::CLEAR, ICON_SIZE_MENU));
   w->show ();
   _btn_search_clear.add (*w);
 
-	_tbl_search.attach (_entry_search,        0, 2, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL);
-	_tbl_search.attach (_btn_search_clear,    2, 3, 0, 1, Gtk::FILL, Gtk::FILL);
-	_tbl_search.attach (_cb_search_name,      0, 1, 1, 2, Gtk::FILL, Gtk::FILL, 2, 2);
-	_tbl_search.attach (_cb_search_type,      1, 2, 1, 2, Gtk::FILL, Gtk::FILL, 2, 2);
-	_tbl_search.attach (_cb_search_creator,   0, 1, 2, 3, Gtk::FILL, Gtk::FILL, 2, 2);
-	_tbl_search.attach (_cb_search_full_path, 1, 2, 2, 3, Gtk::FILL, Gtk::FILL, 2, 2);
+	_tbl_search.attach (_entry_search,        0, 2, 0, 1, FILL | EXPAND, FILL);
+	_tbl_search.attach (_btn_search_clear,    2, 3, 0, 1, FILL, FILL);
+	_tbl_search.attach (_cb_search_name,      0, 1, 1, 2, FILL, FILL, 2, 2);
+	_tbl_search.attach (_cb_search_type,      1, 2, 1, 2, FILL, FILL, 2, 2);
+	_tbl_search.attach (_cb_search_creator,   0, 1, 2, 3, FILL, FILL, 2, 2);
+	_tbl_search.attach (_cb_search_full_path, 1, 2, 2, 3, FILL, FILL, 2, 2);
 
 	/* prefs / plugin-paths buttons */
 #if defined LXVST_SUPPORT
-	ArdourWidgets::ArdourButton* btn_lxvst = Gtk::manage (new ArdourWidgets::ArdourButton (_("Linux VST2 Path")));
+	ArdourWidgets::ArdourButton* btn_lxvst = manage (new ArdourWidgets::ArdourButton (_("Linux VST2 Path")));
 	ArdourWidgets::set_tooltip (*btn_lxvst, _("Configure where to look for VST2 plugins."));
 	btn_lxvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::vst_path_cb), LXVST));
 	b_paths->pack_start (*btn_lxvst);
 #endif
 #ifdef WINDOWS_VST_SUPPORT
-	ArdourWidgets::ArdourButton* btn_winvst = Gtk::manage (new ArdourWidgets::ArdourButton (_("Windows VST2 Path")));
+	ArdourWidgets::ArdourButton* btn_winvst = manage (new ArdourWidgets::ArdourButton (_("Windows VST2 Path")));
 	ArdourWidgets::set_tooltip (*btn_winvst, _("Configure where to look for VST2 plugins."));
 	btn_winvst->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::vst_path_cb), Windows_VST));
 	b_paths->pack_start (*btn_winvst);
 #endif
 #ifdef VST3_SUPPORT
-	ArdourWidgets::ArdourButton* btn_vst3 = Gtk::manage (new ArdourWidgets::ArdourButton (_("VST3 Path")));
+	ArdourWidgets::ArdourButton* btn_vst3 = manage (new ArdourWidgets::ArdourButton (_("VST3 Path")));
 	ArdourWidgets::set_tooltip (*btn_vst3, _("Configure where to look for VST3 plugins in addition to the default VST3 locations."));
 	btn_vst3->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginManagerUI::vst_path_cb), VST3));
 	b_paths->pack_start (*btn_vst3);
@@ -236,12 +237,12 @@ PluginManagerUI::PluginManagerUI ()
 	ArdourWidgets::set_tooltip (_btn_prefs,      _("Open preference window"));
 
 	/* top level packing */
-	_top.attach (*f_search,  0, 1, 0, 1, Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 4, 0);
-	_top.attach (*lbl,       0, 1, 1, 2, Gtk::SHRINK, Gtk::EXPAND | Gtk::FILL, 4, 0);
-	_top.attach (*f_info,    0, 1, 2, 3, Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 4, 4);
-	_top.attach (*f_actions, 0, 1, 3, 4, Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 4, 4);
-	_top.attach (*f_paths,   0, 1, 4, 5, Gtk::FILL | Gtk::SHRINK, Gtk::SHRINK, 4, 4);
-	_top.attach (_pane,      1, 2, 0, 5, Gtk::EXPAND | Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 4, 0);
+	_top.attach (*f_search,  0, 1, 0, 1, FILL | SHRINK, SHRINK, 4, 0);
+	_top.attach (*lbl,       0, 1, 1, 2, SHRINK, EXPAND | FILL, 4, 0);
+	_top.attach (*f_info,    0, 1, 2, 3, FILL | SHRINK, SHRINK, 4, 4);
+	_top.attach (*f_actions, 0, 1, 3, 4, FILL | SHRINK, SHRINK, 4, 4);
+	_top.attach (*f_paths,   0, 1, 4, 5, FILL | SHRINK, SHRINK, 4, 4);
+	_top.attach (_pane,      1, 2, 0, 5, EXPAND | FILL, EXPAND | FILL, 4, 0);
 
 	add (_top);
 	_top.show_all ();
@@ -408,18 +409,18 @@ void
 PluginManagerUI::refill ()
 {
 	/* save selection and sort-column, clear model to speed-up refill */
-	Gtk::TreeIter iter = plugin_display.get_selection ()->get_selected ();
+	TreeIter iter = plugin_display.get_selection ()->get_selected ();
 	boost::shared_ptr<PluginScanLogEntry> sel;
 	if (iter) {
 		sel = (*iter)[plugin_columns.psle];
 	}
 
-	plugin_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	plugin_display.set_model (Glib::RefPtr<TreeStore>(0));
 
 	int sort_col;
-	Gtk::SortType sort_type;
+	SortType sort_type;
 	bool sorted = plugin_model->get_sort_column_id (sort_col, sort_type);
-	plugin_model->set_sort_column (-2, Gtk::SORT_ASCENDING);
+	plugin_model->set_sort_column (-2, SORT_ASCENDING);
 	plugin_model->clear ();
 
 	bool rescan_err = false;
@@ -453,7 +454,7 @@ PluginManagerUI::refill ()
 				continue;
 			}
 
-			Gtk::TreeModel::Row newrow = *(plugin_model->append());
+			TreeModel::Row newrow = *(plugin_model->append());
 			newrow[plugin_columns.path] = Glib::path_get_basename ((*i)->path ());
 			newrow[plugin_columns.type] = plugin_type ((*i)->type ());
 			newrow[plugin_columns.name] = "-";
@@ -475,7 +476,7 @@ PluginManagerUI::refill ()
 				}
 
 				PluginManager::PluginStatusType status = manager.get_status (*j);
-				Gtk::TreeModel::Row newrow = *(plugin_model->append());
+				TreeModel::Row newrow = *(plugin_model->append());
 
 				newrow[plugin_columns.favorite] = status == PluginManager::Favorite;
 				newrow[plugin_columns.hidden] = status == PluginManager::Hidden;
@@ -499,12 +500,12 @@ PluginManagerUI::refill ()
 	}
 
 	if (sel) {
-		Gtk::TreeModel::Children rows = plugin_model->children ();
-		for (Gtk::TreeModel::Children::iterator i = rows.begin (); i != rows.end (); ++i) {
+		TreeModel::Children rows = plugin_model->children ();
+		for (TreeModel::Children::iterator i = rows.begin (); i != rows.end (); ++i) {
 			boost::shared_ptr<PluginScanLogEntry> const& srow ((*i)[plugin_columns.psle]);
 			if (*sel == *srow) {
 				plugin_display.get_selection ()->select (*i);
-				Gtk::TreeIter iter = plugin_display.get_selection()->get_selected();
+				TreeIter iter = plugin_display.get_selection()->get_selected();
 				assert (iter);
 				plugin_display.scroll_to_row (plugin_model->get_path (iter), 0.5);
 				break;
@@ -516,8 +517,8 @@ PluginManagerUI::refill ()
 
 	/* refill "Plugin Count" */
 	int row = 0;
-	std::list<Gtk::Widget*> children = _tbl_nfo.get_children();
-	for (std::list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
+	std::list<Widget*> children = _tbl_nfo.get_children();
+	for (std::list<Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
 		_tbl_nfo.remove (**child);
 		delete *child;
 	}
@@ -530,39 +531,39 @@ PluginManagerUI::refill ()
 		pc_max.ndscn = std::max (pc_max.ndscn,  i->second.ndscn);
 	}
 
-	Gtk::Label* head_type  = new Gtk::Label (_("Tyoe"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
-	Gtk::Label* head_count = new Gtk::Label (_("All"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	_tbl_nfo.attach (*head_type,  0, 1, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
-	_tbl_nfo.attach (*head_count, 1, 2, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+	Label* head_type  = new Label (_("Tyoe"), ALIGN_LEFT, ALIGN_CENTER);
+	Label* head_count = new Label (_("All"), ALIGN_RIGHT, ALIGN_CENTER);
+	_tbl_nfo.attach (*head_type,  0, 1, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
+	_tbl_nfo.attach (*head_count, 1, 2, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	if (pc_max.error > 0) {
-		Gtk::Label* hd = new Gtk::Label (_("Err"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-		_tbl_nfo.attach (*hd, 2, 3, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+		Label* hd = new Label (_("Err"), ALIGN_RIGHT, ALIGN_CENTER);
+		_tbl_nfo.attach (*hd, 2, 3, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	}
 	if (pc_max.stale > 0) {
-		Gtk::Label* hd = new Gtk::Label (_("Mis"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-		_tbl_nfo.attach (*hd, 3, 4, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+		Label* hd = new Label (_("Mis"), ALIGN_RIGHT, ALIGN_CENTER);
+		_tbl_nfo.attach (*hd, 3, 4, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	}
 	if (pc_max.ndscn > 0) {
-		Gtk::Label* hd = new Gtk::Label (_("New"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-		_tbl_nfo.attach (*hd, 4, 5, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+		Label* hd = new Label (_("New"), ALIGN_RIGHT, ALIGN_CENTER);
+		_tbl_nfo.attach (*hd, 4, 5, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	}
 	++row;
 	for (std::map<PluginType, PluginCount>::const_iterator i = plugin_count.begin (); i != plugin_count.end (); ++i, ++row) {
-		Gtk::Label* lbl_type  = new Gtk::Label (plugin_type (i->first), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
-		Gtk::Label* lbl_count = new Gtk::Label (string_compose ("%1", i->second.total), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-		_tbl_nfo.attach (*lbl_type , 0, 1, row, row + 1, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK, 2, 2);
-		_tbl_nfo.attach (*lbl_count, 1, 2, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+		Label* lbl_type  = new Label (plugin_type (i->first), ALIGN_LEFT, ALIGN_CENTER);
+		Label* lbl_count = new Label (string_compose ("%1", i->second.total), ALIGN_RIGHT, ALIGN_CENTER);
+		_tbl_nfo.attach (*lbl_type , 0, 1, row, row + 1, EXPAND | FILL, SHRINK, 2, 2);
+		_tbl_nfo.attach (*lbl_count, 1, 2, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 		if (pc_max.error > 0) {
-			Gtk::Label* lbl = new Gtk::Label (string_compose ("%1", i->second.error), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-			_tbl_nfo.attach (*lbl, 2, 3, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+			Label* lbl = new Label (string_compose ("%1", i->second.error), ALIGN_RIGHT, ALIGN_CENTER);
+			_tbl_nfo.attach (*lbl, 2, 3, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 		}
 		if (pc_max.stale > 0) {
-			Gtk::Label* lbl = new Gtk::Label (string_compose ("%1", i->second.stale), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-			_tbl_nfo.attach (*lbl, 3, 4, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+			Label* lbl = new Label (string_compose ("%1", i->second.stale), ALIGN_RIGHT, ALIGN_CENTER);
+			_tbl_nfo.attach (*lbl, 3, 4, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 		}
 		if (pc_max.ndscn > 0) {
-			Gtk::Label* lbl = new Gtk::Label (string_compose ("%1", i->second.ndscn), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-			_tbl_nfo.attach (*lbl, 4, 5, row, row + 1, Gtk::SHRINK | Gtk::FILL, Gtk::SHRINK, 2, 2);
+			Label* lbl = new Label (string_compose ("%1", i->second.ndscn), ALIGN_RIGHT, ALIGN_CENTER);
+			_tbl_nfo.attach (*lbl, 4, 5, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 		}
 	}
 	_tbl_nfo.show_all ();
@@ -581,7 +582,7 @@ PluginManagerUI::selection_changed ()
 		return;
 	}
 
-	Gtk::TreeIter iter = plugin_display.get_selection ()->get_selected ();
+	TreeIter iter = plugin_display.get_selection ()->get_selected ();
 	boost::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
 
 	_log.get_buffer()->set_text (psle->log ());
@@ -595,10 +596,10 @@ PluginManagerUI::selection_changed ()
 }
 
 void
-PluginManagerUI::row_activated (Gtk::TreeModel::Path const& p, Gtk::TreeViewColumn*)
+PluginManagerUI::row_activated (TreeModel::Path const& p, TreeViewColumn*)
 {
 #ifndef NDEBUG
-	Gtk::TreeModel::iterator iter = plugin_model->get_iter (p);
+	TreeModel::iterator iter = plugin_model->get_iter (p);
 	if (!iter) {
 		return;
 	}
@@ -626,7 +627,7 @@ PluginManagerUI::row_activated (Gtk::TreeModel::Path const& p, Gtk::TreeViewColu
 void
 PluginManagerUI::blacklist_changed (std::string const& path)
 {
-	Gtk::TreeIter iter;
+	TreeIter iter;
 	if ((iter = plugin_model->get_iter (path))) {
 		boost::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
 		if ((*iter)[plugin_columns.blacklisted]) {
@@ -649,15 +650,15 @@ PluginManagerUI::edit_vst_path (std::string const& title, std::string const& dfl
 {
 	/* see also RCOptionEditor::edit_vst_path */
 	ArdourWidgets::PathsDialog pd (*this, title, get (), dflt);
-	if (pd.run () != Gtk::RESPONSE_ACCEPT) {
+	if (pd.run () != RESPONSE_ACCEPT) {
 		return;
 	}
 	pd.hide();
 	set (pd.get_serialized_paths ());
 
-	ArdourMessageDialog msg (_("Re-scan Plugins now?"), false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
-	msg.set_default_response (Gtk::RESPONSE_YES);
-	if (msg.run() != Gtk::RESPONSE_YES) {
+	ArdourMessageDialog msg (_("Re-scan Plugins now?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
+	msg.set_default_response (RESPONSE_YES);
+	if (msg.run() != RESPONSE_YES) {
 		return;
 	}
 	msg.hide ();
@@ -707,11 +708,11 @@ PluginManagerUI::vst_path_cb (ARDOUR::PluginType t)
 void
 PluginManagerUI::rescan_all ()
 {
-	ArdourMessageDialog msg (_("Are you sure you want to rescan all plugins?"), false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
+	ArdourMessageDialog msg (_("Are you sure you want to rescan all plugins?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
 	msg.set_title (_("Rescan Plugins"));
 	msg.set_secondary_text(_("This starts a fresh scan, dropping all cached plugin data and backlists. Depending on the number if plugins installed this can take a long time."));
 
-	if (msg.run() != Gtk::RESPONSE_YES) {
+	if (msg.run() != RESPONSE_YES) {
 		return;
 	}
 
@@ -746,7 +747,7 @@ PluginManagerUI::rescan_selected ()
 		return;
 	}
 
-	Gtk::TreeIter iter = plugin_display.get_selection ()->get_selected ();
+	TreeIter iter = plugin_display.get_selection ()->get_selected ();
 	boost::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
 
 	PluginScanDialog psd (false, true, this);
@@ -763,8 +764,8 @@ void
 PluginManagerUI::plugin_status_changed (ARDOUR::PluginType t, std::string uid, ARDOUR::PluginManager::PluginStatusType stat)
 {
 
-	Gtk::TreeModel::Children rows = plugin_model->children ();
-	for (Gtk::TreeModel::Children::iterator i = rows.begin (); i != rows.end (); ++i) {
+	TreeModel::Children rows = plugin_model->children ();
+	for (TreeModel::Children::iterator i = rows.begin (); i != rows.end (); ++i) {
 		PluginInfoPtr pp = (*i)[plugin_columns.plugin];
 		if (!pp || pp->type != t || pp->unique_id != uid) {
 			continue;
@@ -786,7 +787,7 @@ PluginManagerUI::favorite_changed (const std::string& path)
 
 	PBD::Unwinder<bool> uw (_in_row_change, true);
 
-	Gtk::TreeIter iter;
+	TreeIter iter;
 	if ((iter = plugin_model->get_iter (path))) {
 		bool favorite = !(*iter)[plugin_columns.favorite];
 
@@ -808,7 +809,7 @@ PluginManagerUI::hidden_changed (const std::string& path)
 
 	PBD::Unwinder<bool> uw (_in_row_change, true);
 
-	Gtk::TreeIter iter;
+	TreeIter iter;
 	if ((iter = plugin_model->get_iter (path))) {
 		bool hidden = !(*iter)[plugin_columns.hidden];
 
