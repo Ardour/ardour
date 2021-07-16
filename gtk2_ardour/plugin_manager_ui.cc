@@ -576,7 +576,8 @@ void
 PluginManagerUI::selection_changed ()
 {
 	if (plugin_display.get_selection()->count_selected_rows() != 1) {
-		_log.get_buffer()->set_text ("-");
+		_log.get_buffer()->set_text ("");
+		_btn_rescan_sel.set_sensitive (false);
 		return;
 	}
 
