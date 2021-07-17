@@ -14,7 +14,7 @@ using std::cerr;
 using std::endl;
 
 TriggerBox::TriggerBox (Session& s, std::string const & name)
-	: Processor (s, name)
+	: Processor (s, name, Temporal::BeatTime)
 	, _trigger_queue (1024)
 {
 	PropertyList plist;
@@ -22,7 +22,7 @@ TriggerBox::TriggerBox (Session& s, std::string const & name)
 	the_source.reset (new SndFileSource (_session, "/usr/share/sounds/alsa/Front_Center.wav", 0, Source::Flag (0)));
 
 	plist.add (Properties::start, 0);
-	plist.add (Properties::length, the_source->length (0));
+	plist.add (Properties::length, the_source->length ());
 	plist.add (Properties::name, string ("bang"));
 	plist.add (Properties::layer, 0);
 	plist.add (Properties::layering_index, 0);
@@ -192,12 +192,13 @@ AudioTrigger::AudioTrigger (boost::shared_ptr<AudioRegion> r)
 
 	cerr << "Trigger needs " << nchans << " channels of " << region->length() << " each\n";
 
+	length = region->length_samples();
+
 	for (uint32_t n = 0; n < nchans; ++n) {
-		data.push_back (new Sample (region->length()));;
-		// region->read (data[n], 0, region->length(), n);
+		data.push_back (new Sample (length));;
+		// region->read (data[n], 0, length, n);
 	}
 
-	length = region->length();
 }
 
 AudioTrigger::~AudioTrigger ()
