@@ -2774,22 +2774,6 @@ Session::new_trigger_track (const ChanCount& input_channels, const ChanCount& ou
 				track->set_strict_io (true);
 			}
 
-			if (ARDOUR::Profile->get_trx ()) {
-				// TRACKS considers it's not a USE CASE, it's
-				// a piece of behavior of the session model:
-				//
-				// Gain for a newly created route depends on
-				// the current output_auto_connect mode:
-				//
-				//  0 for Stereo Out mode
-				//  0 Multi Out mode
-				if (Config->get_output_auto_connect() & AutoConnectMaster) {
-					track->gain_control()->set_value (dB_to_coefficient (0), Controllable::NoGroup);
-				}
-			}
-
-			track->use_new_diskstream();
-
 			BOOST_MARK_TRACK (track);
 
 			{
@@ -2816,9 +2800,6 @@ Session::new_trigger_track (const ChanCount& input_channels, const ChanCount& ou
 				route_group->add (track);
 			}
 
-			track->non_realtime_input_change();
-
-			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
 
 			new_routes.push_back (track);
 			ret.push_back (track);
@@ -2841,11 +2822,7 @@ Session::new_trigger_track (const ChanCount& input_channels, const ChanCount& ou
   failed:
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
-		if (Profile->get_trx()) {
-			add_routes (new_routes, false, false, false, order);
-		} else {
-			add_routes (new_routes, true, true, false, order);
-		}
+		add_routes (new_routes, true, true, order);
 	}
 
 	return ret;

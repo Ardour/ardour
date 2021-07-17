@@ -711,6 +711,8 @@ protected:
 
 	SlavableControlList slavables () const;
 
+	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
+
 private:
 	/* no copy construction */
 	Route (Route const &);
@@ -751,7 +753,6 @@ private:
 	pframes_t latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_t& end_sample);
 
 	void run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, bool gain_automation_ok, bool run_disk_reader);
-	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
 
 	void reset_instrument_info ();
 	void solo_control_changed (bool self, PBD::Controllable::GroupControlDisposition);

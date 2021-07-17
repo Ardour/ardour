@@ -20,7 +20,6 @@
 
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_port.h"
 #include "ardour/audioregion.h"
 #include "ardour/io.h"
@@ -114,14 +113,14 @@ TriggerTrack::queue_trigger (Trigger* trigger)
 }
 
 int
-TriggerTrack::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing)
+TriggerTrack::no_roll (pframes_t nframes, samplepos_t start_frame, samplepos_t end_frame, bool state_changing)
 {
 	bool ignored;
 	return roll (nframes, start_frame, end_frame, state_changing, ignored);
 }
 
 int
-TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
+TriggerTrack::roll (pframes_t nframes, samplepos_t start_frame, samplepos_t end_frame, int declick, bool& need_butler)
 {
 	/* check MIDI port input buffers for triggers */
 
@@ -139,8 +138,8 @@ TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 	/* find offset to next bar * and beat start
 	 */
 
-	framepos_t next_beat = 0;
-	Evoral::Beats beats_now;
+	samplepos_t next_beat = 0;
+	Temporal::Beats beats_now;
 
 	/* if next beat occurs in this process cycle, see if we have any triggers waiting
 	*/
@@ -179,12 +178,9 @@ TriggerTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 
 	need_butler = false;
 
-	uint32_t nchans = _diskstream->n_channels().n_audio();
-	boost::shared_ptr<AudioDiskstream> ads = boost::dynamic_pointer_cast<AudioDiskstream> (_diskstream);
-
-	if (!ads) {
-		return 0;
-	}
+	uint32_t nchans = 1; /* XXX used to get this from the diskstream
+	                      * .. where now?
+	                      */
 
 	bool err = false;
 
@@ -233,30 +229,13 @@ TriggerTrack::realtime_handle_transport_stopped ()
 }
 
 void
-TriggerTrack::realtime_locate ()
+TriggerTrack::realtime_locate (bool)
 {
 }
 
 void
-TriggerTrack::non_realtime_locate (framepos_t)
+TriggerTrack::non_realtime_locate (samplepos_t)
 {
-}
-
-boost::shared_ptr<Diskstream>
-TriggerTrack::create_diskstream ()
-{
-	return boost::shared_ptr<Diskstream> (new AudioDiskstream (_session, name(), AudioDiskstream::Recordable));
-}
-
-void
-TriggerTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
-{
-	Track::set_diskstream (ds);
-	_diskstream->set_track (this);
-	_diskstream->set_record_enabled (false);
-	_diskstream->request_input_monitoring (false);
-
-	DiskstreamChanged (); /* EMIT SIGNAL */
 }
 
 int
@@ -314,19 +293,19 @@ TriggerTrack::unfreeze ()
 }
 
 boost::shared_ptr<Region>
-TriggerTrack::bounce (ARDOUR::InterThreadInfo&)
+TriggerTrack::bounce (ARDOUR::InterThreadInfo&, std::string const &)
 {
 	return boost::shared_ptr<Region> ();
 }
 
 boost::shared_ptr<Region>
-TriggerTrack::bounce_range (framepos_t, framepos_t, ARDOUR::InterThreadInfo&, boost::shared_ptr<Processor>, bool)
+TriggerTrack::bounce_range (samplepos_t, samplepos_t, ARDOUR::InterThreadInfo&, boost::shared_ptr<Processor>, bool, std::string const &)
 {
 	return boost::shared_ptr<Region> ();
 }
 
 int
-TriggerTrack::export_stuff (BufferSet&, framepos_t, framecnt_t, boost::shared_ptr<Processor>, bool, bool, bool)
+TriggerTrack::export_stuff (BufferSet&, samplepos_t, samplecnt_t, boost::shared_ptr<Processor>, bool, bool, bool, MidiStateTracker&)
 {
 	return 0;
 }
@@ -335,13 +314,6 @@ void
 TriggerTrack::set_state_part_two ()
 {
 }
-
-boost::shared_ptr<Diskstream>
-TriggerTrack::diskstream_factory (const XMLNode& node)
-{
-	return boost::shared_ptr<Diskstream> (new AudioDiskstream (_session, node));
-}
-
 
 /*--------------------*/
 
@@ -374,7 +346,7 @@ AudioTrigger::~AudioTrigger ()
 }
 
 void
-AudioTrigger::bang (TriggerTrack& /*track*/, Evoral::Beats bangpos, framepos_t framepos)
+AudioTrigger::bang (TriggerTrack& /*track*/, Temporal::Beats const &, samplepos_t)
 {
 	/* user triggered this, and we need to get things set up for calls to
 	 * run()
@@ -385,7 +357,7 @@ AudioTrigger::bang (TriggerTrack& /*track*/, Evoral::Beats bangpos, framepos_t f
 }
 
 Sample*
-AudioTrigger::run (uint32_t channel, pframes_t& nframes, framepos_t start_frame, framepos_t end_frame, bool& need_butler)
+AudioTrigger::run (uint32_t channel, pframes_t& nframes, samplepos_t start_frame, samplepos_t end_frame, bool& need_butler)
 {
 	if (!running) {
 		return 0;
@@ -399,7 +371,7 @@ AudioTrigger::run (uint32_t channel, pframes_t& nframes, framepos_t start_frame,
 		return 0;
 	}
 
-	nframes = (pframes_t) std::min ((framecnt_t) nframes, (length - read_index));
+	nframes = (pframes_t) std::min ((samplecnt_t) nframes, (length - read_index));
 
 	Sample* ret = data[channel] + read_index;
 

@@ -46,7 +46,7 @@ class LIBARDOUR_API Trigger {
 	Trigger() {}
 	virtual ~Trigger() {}
 
-	virtual void bang (TriggerTrack&, Evoral::Beats, framepos_t) = 0;
+	virtual void bang (TriggerTrack&, Temporal::Beats const &, samplepos_t) = 0;
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
@@ -54,15 +54,15 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	AudioTrigger (boost::shared_ptr<AudioRegion>);
 	~AudioTrigger ();
 
-	void bang (TriggerTrack&, Evoral::Beats, framepos_t);
-	Sample* run (uint32_t channel, pframes_t& nframes, framepos_t start_frame, framepos_t end_frame, bool& need_butler);
+	void bang (TriggerTrack&, Temporal::Beats const & , samplepos_t);
+	Sample* run (uint32_t channel, pframes_t& nframes, samplepos_t start_frame, samplepos_t end_frame, bool& need_butler);
 
   private:
 	boost::shared_ptr<AudioRegion> region;
 	bool running;
 	std::vector<Sample*> data;
-	framecnt_t read_index;
-	framecnt_t length;
+	samplecnt_t read_index;
+	samplecnt_t length;
 };
 
 class LIBARDOUR_API TriggerTrack : public Track
@@ -73,25 +73,21 @@ public:
 
 	int init ();
 
-	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
+	int roll (pframes_t nframes, samplepos_t start_frame, samplepos_t end_frame, int declick, bool& need_butler);
 
 	void realtime_handle_transport_stopped ();
-	void realtime_locate ();
-	void non_realtime_locate (framepos_t);
-
-	boost::shared_ptr<Diskstream> create_diskstream ();
-	void set_diskstream (boost::shared_ptr<Diskstream>);
+	void realtime_locate (bool);
+	void non_realtime_locate (samplepos_t);
 
 	int set_mode (TrackMode m);
 	bool can_use_mode (TrackMode m, bool& bounce_required);
 
 	void freeze_me (ARDOUR::InterThreadInfo&);
 	void unfreeze ();
-	boost::shared_ptr<ARDOUR::Region> bounce (ARDOUR::InterThreadInfo&);
-	boost::shared_ptr<ARDOUR::Region> bounce_range (framepos_t, framepos_t, ARDOUR::InterThreadInfo&, boost::shared_ptr<Processor>, bool);
-	int export_stuff (BufferSet&, framepos_t, framecnt_t, boost::shared_ptr<Processor>, bool, bool, bool);
+	boost::shared_ptr<ARDOUR::Region> bounce (ARDOUR::InterThreadInfo&, std::string const &);
+	boost::shared_ptr<ARDOUR::Region> bounce_range (samplepos_t, samplepos_t, ARDOUR::InterThreadInfo&, boost::shared_ptr<Processor>, bool, std::string const &);
+	int export_stuff (BufferSet&, samplepos_t, samplecnt_t, boost::shared_ptr<Processor>, bool, bool, bool, MidiStateTracker&);
 	void set_state_part_two ();
-	boost::shared_ptr<Diskstream> diskstream_factory (const XMLNode&);
 
 	DataType data_type () const {
 		return DataType::AUDIO;
@@ -110,14 +106,14 @@ protected:
 private:
 	boost::shared_ptr<MidiPort> _midi_port;
 
-	RingBuffer<Trigger*> _trigger_queue;
+	PBD::RingBuffer<Trigger*> _trigger_queue;
 
 	typedef std::vector<Trigger*> Triggers;
 	Triggers active_triggers;
 	Glib::Threads::Mutex trigger_lock;
 	Triggers all_triggers;
 
-	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);
+	int no_roll (pframes_t nframes, samplepos_t start_frame, samplepos_t end_frame, bool state_changing);
 
 	void note_on (int note_number, int velocity);
 	void note_off (int note_number, int velocity);
