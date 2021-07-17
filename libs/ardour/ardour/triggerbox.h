@@ -67,7 +67,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 class LIBARDOUR_API TriggerBox : public Processor
 {
   public:
-	TriggerBox (Session&, std::string const & name);
+	TriggerBox (Session&);
 	~TriggerBox ();
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required);

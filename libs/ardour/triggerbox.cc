@@ -13,8 +13,8 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-TriggerBox::TriggerBox (Session& s, std::string const & name)
-	: Processor (s, name, Temporal::BeatTime)
+TriggerBox::TriggerBox (Session& s)
+	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
 	, _trigger_queue (1024)
 {
 	PropertyList plist;
