@@ -1558,7 +1558,7 @@ PluginManager::vst2_plugin (string const& path, PluginType type, VST2Info const&
 	bool duplicate = false;
 	if (!plist->empty()) {
 		for (PluginInfoList::iterator i =plist->begin(); i != plist->end(); ++i) {
-			if ((info->type == (*i)->type)&&(info->unique_id == (*i)->unique_id)) {
+			if ((info->type == (*i)->type) && (info->unique_id == (*i)->unique_id)) {
 				psle->msg (PluginScanLogEntry::Error, string_compose (_("Ignoring plugin '%1'. VST-ID conflicts with other plugin '%2' files: '%3' vs '%4'"), info->name, (*i)->name, info->path, (*i)->path));
 				duplicate = true;
 				continue;
@@ -1751,6 +1751,9 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 
 	find_files_matching_filter (plugin_objects, path, windows_vst_filter, 0, false, true, true);
 
+	sort (plugin_objects.begin (), plugin_objects.end ());
+	plugin_objects.erase (unique (plugin_objects.begin (), plugin_objects.end ()), plugin_objects.end ());
+
 	size_t n = 1;
 	size_t all_modules = plugin_objects.size ();
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x, ++n) {
@@ -1796,6 +1799,9 @@ static bool mac_vst_filter (const string& str)
 int
 PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 {
+	vector<string> plugin_objects;
+	vector<string>::iterator x;
+
 	if (Session::get_disable_all_loaded_plugins ()) {
 		info << _("Disabled MacVST scan (safe mode)") << endmsg;
 		return -1;
@@ -1817,9 +1823,7 @@ PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 				}
 
 				if (mac_vst_filter (fullpath)) {
-					ARDOUR::PluginScanMessage (_("MacVST"), fullpath, !cache_only && !cancelled());
-					_cancel_scan_timeout = false;
-					vst2_discover (fullpath, MacVST, cache_only || cancelled());
+					plugin_objects.push_back (fullpath);
 					continue;
 				}
 
@@ -1832,6 +1836,17 @@ PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 				mac_vst_discover_from_path (fullpath, cache_only);
 			}
 		} catch (Glib::FileError& err) { }
+	}
+
+	sort (plugin_objects.begin (), plugin_objects.end ());
+	plugin_objects.erase (unique (plugin_objects.begin (), plugin_objects.end ()), plugin_objects.end ());
+
+	size_t n = 1;
+	size_t all_modules = plugin_objects.size ();
+	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x, ++n) {
+		ARDOUR::PluginScanMessage (string_compose (_("VST2 (%1 / %2)"), n, all_modules), *x, !cache_only && !cancelled());
+		_cancel_scan_timeout = false;
+		vst2_discover (*x, MacVST, cache_only || cancelled());
 	}
 
 	return 0;
@@ -1869,7 +1884,6 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 {
 	vector<string> plugin_objects;
 	vector<string>::iterator x;
-	int ret = 0;
 
 	if (Session::get_disable_all_loaded_plugins ()) {
 		info << _("Disabled LinuxVST scan (safe mode)") << endmsg;
@@ -1884,6 +1898,9 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 
 	find_files_matching_filter (plugin_objects, Config->get_plugin_path_lxvst(), lxvst_filter, 0, false, true, true);
 
+	sort (plugin_objects.begin (), plugin_objects.end ());
+	plugin_objects.erase (unique (plugin_objects.begin (), plugin_objects.end ()), plugin_objects.end ());
+
 	size_t n = 1;
 	size_t all_modules = plugin_objects.size ();
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x, ++n) {
@@ -1892,7 +1909,7 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 		vst2_discover (*x, LXVST, cache_only || cancelled());
 	}
 
-	return ret;
+	return 0;
 }
 
 #endif // LXVST_SUPPORT
