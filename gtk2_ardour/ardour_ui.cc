@@ -1525,7 +1525,7 @@ ARDOUR_UI::session_add_midi_route (
 			one_midi_channel.set (DataType::MIDI, 1);
 
 			list<boost::shared_ptr<MidiTrack> > tracks;
-			tracks = _session->new_midi_track (one_midi_channel, one_midi_channel, strict_io, instrument, pset, route_group, how_many, name_template, order, ARDOUR::Normal);
+			tracks = _session->new_midi_track (one_midi_channel, one_midi_channel, strict_io, instrument, pset, route_group, how_many, name_template, order, ARDOUR::Normal, true);
 
 			if (tracks.size() != how_many) {
 				error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;

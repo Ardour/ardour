@@ -1675,7 +1675,7 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 			                                                  Config->get_strict_io () || Profile->get_mixbus (),
 			                                                  boost::shared_ptr<ARDOUR::PluginInfo>(),
 			                                                  (ARDOUR::Plugin::PresetRecord*) 0,
-			                                                  (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order);
+			                                                  (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order, Normal, true);
 			tav = _editor->time_axis_view_from_stripable (midi_tracks.front());
 		}
 

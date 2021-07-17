@@ -1111,7 +1111,10 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 					                          (RouteGroup*) 0,
 					                          1,
 					                          string(),
-					                          PresentationInfo::max_order));
+					                          PresentationInfo::max_order,
+					                          Normal,
+					                          true
+						));
 
 				if (mt.empty()) {
 					return -1;

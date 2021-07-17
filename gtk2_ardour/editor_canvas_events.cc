@@ -1309,7 +1309,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 				                                         Config->get_strict_io () || Profile->get_mixbus (),
 				                                         boost::shared_ptr<ARDOUR::PluginInfo>(),
 				                                         (ARDOUR::Plugin::PresetRecord*) 0,
-				                                         (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order);
+				                                         (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order, Normal, true);
 				rtav = dynamic_cast<RouteTimeAxisView*> (time_axis_view_from_stripable (midi_tracks.front()));
 			} else {
 				return;
