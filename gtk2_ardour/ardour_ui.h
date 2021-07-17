@@ -325,7 +325,7 @@ public:
 
 	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool,
 	                             ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*,
-	                             ARDOUR::PresentationInfo::order_t order);
+	                             ARDOUR::PresentationInfo::order_t order, bool with_triggers);
 
 	void session_add_foldback_bus (int32_t, uint32_t, std::string const &);
 

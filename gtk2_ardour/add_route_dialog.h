@@ -73,6 +73,7 @@ public:
 		MidiBus,
 		VCAMaster,
 		FoldbackBus,
+		TriggerTrack,
 	};
 	TypeWanted type_wanted();
 

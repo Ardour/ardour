@@ -169,6 +169,15 @@ AddRouteDialog::AddRouteDialog ()
 		     "* " + _("The number of busses to add") + "\n" +
 		     "* " + _("A name for the buss(es)")
 		     ));
+
+		builtin_types.push_back (
+		   std::pair<string,string> (_("Trigger Tracks"), std::string () +
+		     _("Use these settings to create one or more trigger tracks.") + "\n\n" +
+		     _("Trigger tracks contain audio/MIDI regions that can be triggered on demand.") + "\n\n" +
+		     _("You may select:") + "\n" +
+		     "* " + _("The number of tracks to add") + "\n" +
+		     "* " + _("A name for the track(s)")
+		     ));
 	}
 
 	insert_at_combo.append_text (_("First"));
@@ -583,6 +592,8 @@ AddRouteDialog::type_wanted()
 		return VCAMaster;
 	} else if (str == _("Foldback Busses")) {
 		return FoldbackBus;
+	} else if (str == _("Trigger Tracks")) {
+		return TriggerTrack;
 	} else {
 		assert (0);
 		return AudioTrack;
