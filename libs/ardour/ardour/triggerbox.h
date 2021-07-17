@@ -76,6 +76,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 	bool queue_trigger (Trigger*);
 	void add_trigger (Trigger*);
 
+	XMLNode& get_state (void);
+	int set_state (const XMLNode&, int version);
+
   private:
 	PBD::RingBuffer<Trigger*> _trigger_queue;
 

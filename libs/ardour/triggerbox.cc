@@ -177,6 +177,19 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 }
 
+XMLNode&
+TriggerBox::get_state (void)
+{
+	return Processor::get_state ();
+}
+
+int
+TriggerBox::set_state (const XMLNode&, int version)
+{
+	return 0;
+}
+
+
 /*--------------------*/
 
 AudioTrigger::AudioTrigger (boost::shared_ptr<AudioRegion> r)
