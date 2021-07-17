@@ -92,6 +92,7 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/polarity_processor.h"
 #include "ardour/presentation_info.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
@@ -120,6 +121,7 @@
 #include "ardour/transport_master.h"
 #include "ardour/transport_master_manager.h"
 #include "ardour/track.h"
+#include "ardour/triggerbox.h"
 #include "ardour/types_convert.h"
 #include "ardour/user_bundle.h"
 #include "ardour/utils.h"
@@ -2452,6 +2454,11 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 				route_group->add (track);
 			}
 
+			if (with_triggers) {
+				boost::shared_ptr<Processor> triggers (new TriggerBox (*this));
+				track->add_processor (triggers, track->polarity());
+			}
+
 			new_routes.push_back (track);
 			ret.push_back (track);
 		}
@@ -2546,7 +2553,6 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 			error << pfe.what() << endmsg;
 			goto failure;
 		}
-
 
 		--how_many;
 	}
