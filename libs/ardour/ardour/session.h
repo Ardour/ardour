@@ -742,7 +742,8 @@ public:
 		RouteGroup* route_group, uint32_t how_many, std::string name_template,
 		PresentationInfo::order_t,
 		TrackMode mode,
-		bool input_auto_connect
+		bool input_auto_connect,
+		bool with_triggers = false
 		);
 
 	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template, PresentationInfo::Flag, PresentationInfo::order_t);
