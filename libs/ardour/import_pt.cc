@@ -452,7 +452,7 @@ no_audio_tracks:
 				1,
 				a->trname,
 				PresentationInfo::max_order,
-				Normal));
+				Normal, true));
 		assert (mt.size () == 1);
 		midi_tracks[a->ptfindex] = mt.front ();
 	}
