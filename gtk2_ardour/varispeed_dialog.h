@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2021 Ben Loftis <ben@harrisonconsoles.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,30 +16,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_transpose_dialog_h__
-#define __ardour_transpose_dialog_h__
+#ifndef _gtkardour_varispeed_dialog_h_
+#define _gtkardour_varispeed_dialog_h_
 
 #include <gtkmm/spinbutton.h>
+
 #include "ardour_dialog.h"
 
-
-/** A dialog box to select a transposition to apply to a MIDI region.
- *  It asks for octaves and semitones, with the transposition being
- *  the sum of the two.
+/** A dialog box to select a speed change for "varispeed" recording/playback.
+ *  It asks for octaves, semitones, and cents, and sums them to report 'speed'
  */
 
-class TransposeDialog : public ArdourDialog
+class VarispeedDialog : public ArdourDialog
 {
 public:
-	TransposeDialog ();
+	VarispeedDialog ();
 
-	int semitones () const;
+	void reset ();
+	void apply_speed ();
+	void on_hide ();
+
+	bool on_key_press_event (GdkEventKey*);
 
 private:
-	Gtk::Adjustment _octaves_adjustment;
 	Gtk::Adjustment _semitones_adjustment;
-	Gtk::SpinButton _octaves_spinner;
+	Gtk::Adjustment _cents_adjustment;
 	Gtk::SpinButton _semitones_spinner;
+	Gtk::SpinButton _cents_spinner;
 };
 
-#endif /* __ardour_transpose_dialog_h__ */
+#endif

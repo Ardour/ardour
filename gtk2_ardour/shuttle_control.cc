@@ -45,7 +45,6 @@
 #include "rgb_macros.h"
 #include "shuttle_control.h"
 #include "timers.h"
-#include "transpose_dialog.h"
 
 #include "pbd/i18n.h"
 

@@ -32,7 +32,7 @@
 #include "widgets/ardour_button.h"
 #include "widgets/binding_proxy.h"
 
-#include "transpose_dialog.h"
+#include "varispeed_dialog.h"
 
 namespace Gtk {
 	class Menu;

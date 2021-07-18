@@ -297,6 +297,7 @@ gtk2_ardour_sources = [
         'transpose_dialog.cc',
         'ui_config.cc',
         'utils.cc',
+        'varispeed_dialog.cc',
         'vca_master_strip.cc',
         'verbose_cursor.cc',
         'virtual_keyboard_window.cc',
