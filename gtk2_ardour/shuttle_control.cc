@@ -199,12 +199,9 @@ ShuttleControl::~ShuttleControl ()
 void
 ShuttleControl::varispeed_button_clicked ()
 {
-	_vari_dialog.set_session(_session);
-	if (_session->default_play_speed()==1.0) {
-		_vari_dialog.show_all ();
-		_vari_dialog.apply_speed ();
+	if (_session->default_play_speed() == 1.0) {
+		_vari_dialog.show ();
 	} else {
-		_session->set_default_play_speed(1.0);
 		_vari_dialog.hide ();
 	}
 }
@@ -226,12 +223,14 @@ void
 ShuttleControl::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
+	_vari_dialog.set_session (_session);
 
 	if (_session) {
 		set_sensitive (true);
 		_session->add_controllable (_controllable);
 		_info_button.set_session (s);
 	} else {
+		_vari_dialog.hide ();
 		set_sensitive (false);
 	}
 }

@@ -28,14 +28,12 @@
 using namespace Gtk;
 
 VarispeedDialog::VarispeedDialog ()
-	: ArdourDialog (_("Varispeed"))
+	: ArdourDialog (_("Varispeed"), false)
 	, _semitones_adjustment (0.0, -12.0, 12.0, 1.0, 4.0)
 	, _cents_adjustment (0.0, -100.0, 100.0, 1.0, 10.0)
 	, _semitones_spinner (_semitones_adjustment)
 	, _cents_spinner (_cents_adjustment)
 {
-	set_modal (false);
-
 	Table* t = manage (new Table (3, 2));
 	t->set_row_spacings (6);
 	t->set_col_spacings (6);
@@ -82,16 +80,26 @@ VarispeedDialog::apply_speed ()
 {
 	int cents = _semitones_spinner.get_value () * 100 + _cents_spinner.get_value ();
 
-	double speed = pow (2.0, ((double)cents / (double)1200.0));
+	double speed = pow (2.0, ((double)cents / 1200.0));
 
-	if (_session) {
+	if (_session && _session->default_play_speed () != speed) {
 		_session->set_default_play_speed (speed);
 	}
 }
 
 void
+VarispeedDialog::on_show ()
+{
+	apply_speed ();
+	ArdourDialog::on_show ();
+	set_position (Gtk::WIN_POS_NONE); // remember position from now on
+}
+
+void
 VarispeedDialog::on_hide ()
 {
-	_session->set_default_play_speed (1.0);
+	if (_session && _session->default_play_speed () != 1.0) {
+		_session->set_default_play_speed (1.0);
+	}
 	ArdourDialog::on_hide ();
 }

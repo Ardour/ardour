@@ -32,13 +32,14 @@ class VarispeedDialog : public ArdourDialog
 public:
 	VarispeedDialog ();
 
-	void reset ();
+private:
 	void apply_speed ();
-	void on_hide ();
+	void reset ();
 
+	void on_show ();
+	void on_hide ();
 	bool on_key_press_event (GdkEventKey*);
 
-private:
 	Gtk::Adjustment _semitones_adjustment;
 	Gtk::Adjustment _cents_adjustment;
 	Gtk::SpinButton _semitones_spinner;
