@@ -2864,7 +2864,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		session_add_midi_route (true, route_group, count, name_template, strict_io, instrument, 0, order, false);
 		break;
 	case AddRouteDialog::TriggerTrack:
-		session_add_midi_route (true, route_group, count, name_template, strict_io, instrument, 0, order, true);
+		session_add_midi_route (true, route_group, count, name_template, strict_io, 0, 0, order, true);
 		break;
 	case AddRouteDialog::MidiBus:
 		session_add_midi_route (false, route_group, count, name_template, strict_io, instrument, 0, order, false);
