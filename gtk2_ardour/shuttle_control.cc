@@ -600,7 +600,7 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 	   more than once per process cycle.
 	*/
 
-	if (!force && (last_shuttle_request - now) < (PBD::microseconds_t) AudioEngine::instance()->usecs_per_cycle()) {
+	if (!force && (now - last_shuttle_request) < (PBD::microseconds_t) AudioEngine::instance()->usecs_per_cycle()) {
 		return;
 	}
 
