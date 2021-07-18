@@ -42,10 +42,14 @@ class TriggerBox;
 
 class LIBARDOUR_API Trigger {
   public:
-	Trigger() {}
+  Trigger() : _running (false) {}
 	virtual ~Trigger() {}
 
 	virtual void bang (TriggerBox&, Temporal::Beats const &, samplepos_t) = 0;
+	bool running() const { return _running; }
+
+  protected:
+	bool _running;
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
@@ -58,9 +62,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
   private:
 	boost::shared_ptr<AudioRegion> region;
-	bool running;
 	std::vector<Sample*> data;
-	samplecnt_t read_index;
+	std::vector<samplecnt_t> read_index;
 	samplecnt_t length;
 };
 
@@ -72,6 +75,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
+	bool configure_io (ChanCount in, ChanCount out);
 
 	bool queue_trigger (Trigger*);
 	void add_trigger (Trigger*);
