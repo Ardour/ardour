@@ -42,14 +42,40 @@ class TriggerBox;
 
 class LIBARDOUR_API Trigger {
   public:
-  Trigger() : _running (false) {}
+	Trigger();
 	virtual ~Trigger() {}
 
 	virtual void bang (TriggerBox&, Temporal::Beats const &, samplepos_t) = 0;
 	bool running() const { return _running; }
 
+	enum LaunchStyle {
+		Loop,  /* runs till stopped, reclick just restarts */
+		Gate,     /* runs till mouse up/note off then to next quantization */
+		Toggle,   /* runs till "clicked" again */
+		Repeat,   /* plays only quantization extent until mouse up/note off */
+	};
+
+	LaunchStyle launch_style() const { return _launch_style; }
+	void set_launch_style (LaunchStyle);
+
+	enum FollowAction {
+		Stop,
+		QueuedTrigger, /* DP-style */
+		NextTrigger,   /* Live-style, and below */
+		PrevTrigger,
+		FirstTrigger,
+		LastTrigger,
+		AnyTrigger,
+		OtherTrigger,
+	};
+
+	FollowAction follow_action() const { return _follow_action; }
+	void set_follow_action (FollowAction);
+
   protected:
 	bool _running;
+	LaunchStyle  _launch_style;
+	FollowAction _follow_action;
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {

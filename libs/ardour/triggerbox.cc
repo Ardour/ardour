@@ -195,6 +195,15 @@ TriggerBox::set_state (const XMLNode&, int version)
 
 /*--------------------*/
 
+Trigger::Trigger ()
+	: _running (false)
+	, _launch_style (Loop)
+	, _follow_action (Stop)
+{
+}
+
+/*--------------------*/
+
 AudioTrigger::AudioTrigger (boost::shared_ptr<AudioRegion> r)
 	: region (r)
 	, data (0)
