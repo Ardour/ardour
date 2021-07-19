@@ -183,6 +183,7 @@ ShuttleControl::ShuttleControl ()
 	_vari_button.set_name ("vari button");
 	_vari_button.set_text(_("Vari"));
 	_vari_button.signal_clicked.connect (sigc::mem_fun (*this, &ShuttleControl::varispeed_button_clicked));
+	_vari_button.signal_scroll_event().connect (sigc::mem_fun (*this, &ShuttleControl::varispeed_button_scroll_event), false);
 
 	/* gtkmm 2.4: the C++ wrapper doesn't work */
 	g_signal_connect ((GObject*) gobj(), "query-tooltip", G_CALLBACK (qt), NULL);
@@ -204,6 +205,34 @@ ShuttleControl::varispeed_button_clicked ()
 	} else {
 		_vari_dialog.hide ();
 	}
+}
+
+bool
+ShuttleControl::varispeed_button_scroll_event (GdkEventScroll* ev)
+{
+	double semi = 1.0;
+
+	if (ev->state & Gtkmm2ext::Keyboard::GainFineScaleModifier) {
+		if (ev->state & Gtkmm2ext::Keyboard::GainExtraFineScaleModifier) {
+			semi = 0.1;
+		} else {
+			semi = 0.5;
+		}
+	}
+
+	switch (ev->direction) {
+		case GDK_SCROLL_UP:
+		case GDK_SCROLL_RIGHT:
+			_vari_dialog.present ();
+			_vari_dialog.adj_semi (semi);
+			break;
+		case GDK_SCROLL_DOWN:
+		case GDK_SCROLL_LEFT:
+			_vari_dialog.present ();
+			_vari_dialog.adj_semi (-semi);
+			break;
+	}
+	return true;
 }
 
 void

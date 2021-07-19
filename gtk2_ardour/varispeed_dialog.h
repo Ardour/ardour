@@ -31,10 +31,10 @@ class VarispeedDialog : public ArdourDialog
 {
 public:
 	VarispeedDialog ();
+	void adj_semi (double delta);
 
 private:
 	void apply_speed ();
-	void reset ();
 
 	void on_show ();
 	void on_hide ();

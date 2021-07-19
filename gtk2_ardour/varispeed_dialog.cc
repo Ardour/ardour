@@ -69,10 +69,13 @@ VarispeedDialog::on_key_press_event (GdkEventKey* ev)
 }
 
 void
-VarispeedDialog::reset ()
+VarispeedDialog::adj_semi (double delta)
 {
-	_semitones_spinner.set_value (0);
-	_cents_spinner.set_value (0);
+	int cents = _semitones_spinner.get_value () * 100 + _cents_spinner.get_value ();
+	cents += 100.0 * delta;
+
+	_semitones_spinner.set_value (cents / 100);
+	_cents_spinner.set_value (cents % 100);
 }
 
 void
@@ -82,6 +85,7 @@ VarispeedDialog::apply_speed ()
 
 	double speed = pow (2.0, ((double)cents / 1200.0));
 
+	printf ("VarispeedDialog::apply_speed\n");
 	if (_session && _session->default_play_speed () != speed) {
 		_session->set_default_play_speed (speed);
 	}

@@ -121,6 +121,7 @@ protected:
 	VarispeedDialog _vari_dialog;
 	ArdourWidgets::ArdourButton _vari_button;
 	void varispeed_button_clicked ();
+	bool varispeed_button_scroll_event (GdkEventScroll*);
 
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
