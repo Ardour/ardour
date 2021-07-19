@@ -386,7 +386,6 @@
     <ColorAlias name="send pan" alias="theme:contrasting alt"/>
     <ColorAlias name="shuttle" alias="widget:bg"/>
     <ColorAlias name="shuttle bg" alias="neutral:backgroundest"/>
-    <ColorAlias name="shuttle text: fill" alias="neutral:foregroundest"/>
     <ColorAlias name="vari button: fill" alias="widget:bg"/>
     <ColorAlias name="vari button: fill active" alias="alert:ruddy"/>
     <ColorAlias name="silence" alias="theme:contrasting alt"/>

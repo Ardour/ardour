@@ -71,7 +71,6 @@ ShuttleInfoButton::ShuttleInfoButton ()
 	set_layout_font (UIConfiguration::instance ().get_NormalFont ());
 	set_sizing_text (S_("LogestShuttle|+00 st"));
 	set_tooltip (*this, _("Speed Display (Context-click for options)"));
-	set_name ("shuttle text");
 	set_visual_state (Gtkmm2ext::NoVisualState);
 	set_elements (ArdourButton::Text);
 
@@ -245,10 +244,8 @@ void
 ShuttleControl::do_blink (bool onoff)
 {
 	if (!shuttle_grabbed && _session && _session->default_play_speed () != 1.0) {
-		_info_button.set_active (onoff);
 		_vari_button.set_active (onoff);
 	} else {
-		_info_button.set_active (false);
 		_vari_button.set_active (false);
 	}
 }
