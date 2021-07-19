@@ -200,8 +200,8 @@ ShuttleControl::~ShuttleControl ()
 void
 ShuttleControl::varispeed_button_clicked ()
 {
-	if (_session->default_play_speed() == 1.0) {
-		_vari_dialog.show ();
+	if (_session->default_play_speed() == 1.0 && !_vari_dialog.is_visible ()) {
+		_vari_dialog.present ();
 	} else {
 		_vari_dialog.hide ();
 	}
