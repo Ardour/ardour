@@ -245,6 +245,10 @@ ShuttleControl::do_blink (bool onoff)
 {
 	if (!shuttle_grabbed && _session && _session->default_play_speed () != 1.0) {
 		_vari_button.set_active (onoff);
+		if (_session->actual_speed () == 0) {
+			/* update info button text */
+			queue_draw ();
+		}
 	} else {
 		_vari_button.set_active (false);
 	}
@@ -298,60 +302,10 @@ void
 ShuttleControl::map_transport_state ()
 {
 	float speed        = 0.0;
-	float actual_speed = 0.0;
-	char  buf[32];
 
 	if (_session) {
-		speed        = _session->actual_speed ();
-		actual_speed = speed;
-		if (shuttle_grabbed) {
-			speed = requested_speed;
-		} else if (_session->default_play_speed () != 1.0) {
-			/*use has selected a varispeed  AND the shuttle widget is not held ... show the varispeed*/
-			actual_speed = _session->default_play_speed ();
-		}
+		speed = _session->actual_speed ();
 	}
-
-	if (actual_speed != 0) {
-		if (_session->default_play_speed () == 1.0) {
-			if (actual_speed == _session->default_play_speed ()) {
-				snprintf (buf, sizeof (buf), "%s", _("Play"));
-			} else if (Config->get_shuttle_units () == Percentage) {
-				{
-					if (actual_speed < 0.0) {
-						snprintf (buf, sizeof (buf), "< %.1f%%", -actual_speed * 100.f);
-					} else {
-						snprintf (buf, sizeof (buf), "> %.1f%%", actual_speed * 100.f);
-					}
-				}
-			} else {
-				bool reversed;
-				int  semi = speed_as_semitones (actual_speed, reversed);
-				if (reversed) {
-					snprintf (buf, sizeof (buf), _("< %+2d st"), semi);
-				} else {
-					snprintf (buf, sizeof (buf), _("> %+2d st"), semi);
-				}
-			}
-		} else { /*default_play_speed (varispeed) is always forward */
-			if (Config->get_shuttle_units () == Percentage) {
-				snprintf (buf, sizeof (buf), "%.1f%%", actual_speed * 100.f);
-			} else {
-				bool reversed;
-				int  semi = speed_as_semitones (actual_speed, reversed);
-				if (abs (semi) < 1) {
-					int cents = speed_as_cents (actual_speed, reversed);
-					snprintf (buf, sizeof (buf), _("%+2d c"), cents);
-				} else {
-					snprintf (buf, sizeof (buf), _("%+2d st"), semi);
-				}
-			}
-		}
-	} else {
-		snprintf (buf, sizeof (buf), "%s", _("Stop"));
-	}
-
-	_info_button.set_text (buf);
 
 	if ((fabsf (speed - last_speed_displayed) < 0.005f) // dead-zone
 	    && !(speed == 1.f && last_speed_displayed != 1.f)
@@ -695,9 +649,15 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	}
 	cairo_stroke (cr);
 
-	float speed = 0.0;
+	float speed         = 0.0;
+	float actual_speed  = 0.0;
+	float default_speed = 1.0;
+	char buf[32];
+
 	if (_session) {
-		speed = _session->actual_speed ();
+		speed         = _session->actual_speed ();
+		actual_speed  = speed;
+		default_speed = _session->default_play_speed ();
 		if (shuttle_grabbed) {
 			speed = requested_speed;
 		}
@@ -725,7 +685,36 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	}
 	cairo_fill (cr);
 
-	last_speed_displayed = speed;
+	/* text */
+	if (actual_speed == 1.0) {
+		snprintf (buf, sizeof (buf), "%s", _("Play"));
+	} else if (actual_speed == 0 && default_speed == 1.0) {
+		snprintf (buf, sizeof (buf), "%s", _("Stop"));
+	} else {
+		if (actual_speed == 0) {
+			/*default_play_speed (varispeed) is always forward */
+			actual_speed = default_speed;
+		}
+		if (Config->get_shuttle_units() == Percentage) {
+			if (actual_speed < 0.0) {
+				snprintf (buf, sizeof (buf), "< %.1f%%", -actual_speed * 100.f);
+			} else {
+				snprintf (buf, sizeof (buf), "> %.1f%%", actual_speed * 100.f);
+			}
+		} else {
+			bool reversed;
+			int semi = speed_as_semitones (actual_speed, reversed);
+			if (reversed) {
+				snprintf (buf, sizeof (buf), _("< %+2d st"), semi);
+			} else {
+				snprintf (buf, sizeof (buf), _("> %+2d st"), semi);
+			}
+		}
+	}
+
+	last_speed_displayed = actual_speed;
+
+	_info_button.set_text (buf);
 
 #if 0
 	if (UIConfiguration::instance().get_widget_prelight()) {
