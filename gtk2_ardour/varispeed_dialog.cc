@@ -85,7 +85,6 @@ VarispeedDialog::apply_speed ()
 
 	double speed = pow (2.0, ((double)cents / 1200.0));
 
-	printf ("VarispeedDialog::apply_speed\n");
 	if (_session && _session->default_play_speed () != speed) {
 		_session->request_default_play_speed (speed);
 	}
