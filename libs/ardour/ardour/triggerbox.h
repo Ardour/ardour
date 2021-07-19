@@ -19,6 +19,7 @@
 #ifndef __ardour_triggerbox_h__
 #define __ardour_triggerbox_h__
 
+#include <map>
 #include <vector>
 #include <string>
 #include <exception>
@@ -42,10 +43,12 @@ class TriggerBox;
 
 class LIBARDOUR_API Trigger {
   public:
-	Trigger();
+	Trigger (boost::shared_ptr<Region>);
 	virtual ~Trigger() {}
 
 	virtual void bang (TriggerBox&, Temporal::Beats const &, samplepos_t) = 0;
+	virtual void unbang (TriggerBox&, Temporal::Beats const &, samplepos_t) = 0;
+
 	bool running() const { return _running; }
 
 	enum LaunchStyle {
@@ -72,10 +75,17 @@ class LIBARDOUR_API Trigger {
 	FollowAction follow_action() const { return _follow_action; }
 	void set_follow_action (FollowAction);
 
+	virtual int set_region (boost::shared_ptr<Region>) = 0;
+	boost::shared_ptr<Region> region() const { return _region; }
+
   protected:
 	bool _running;
+	bool _stop_requested;
 	LaunchStyle  _launch_style;
 	FollowAction _follow_action;
+	boost::shared_ptr<Region> _region;
+
+	void set_region_internal (boost::shared_ptr<Region>);
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
@@ -84,13 +94,19 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	~AudioTrigger ();
 
 	void bang (TriggerBox&, Temporal::Beats const & , samplepos_t);
+	void unbang (TriggerBox&, Temporal::Beats const & , samplepos_t);
+
 	Sample* run (uint32_t channel, pframes_t& nframes, samplepos_t start_frame, samplepos_t end_frame, bool& need_butler);
 
+	int set_region (boost::shared_ptr<Region>);
+
   private:
-	boost::shared_ptr<AudioRegion> region;
 	std::vector<Sample*> data;
 	std::vector<samplecnt_t> read_index;
 	samplecnt_t length;
+
+	void drop_data ();
+	int load_data (boost::shared_ptr<AudioRegion>);
 };
 
 class LIBARDOUR_API TriggerBox : public Processor
@@ -103,6 +119,10 @@ class LIBARDOUR_API TriggerBox : public Processor
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
+	typedef std::vector<Trigger*> Triggers;
+
+	Trigger* trigger (Triggers::size_type);
+
 	bool queue_trigger (Trigger*);
 	void add_trigger (Trigger*);
 
@@ -112,19 +132,18 @@ class LIBARDOUR_API TriggerBox : public Processor
   private:
 	PBD::RingBuffer<Trigger*> _trigger_queue;
 
-	typedef std::vector<Trigger*> Triggers;
 	Triggers active_triggers;
-	Glib::Threads::Mutex trigger_lock;
+	Glib::Threads::RWLock trigger_lock;
 	Triggers all_triggers;
+
+	void drop_triggers ();
+	void process_trigger_requests (Temporal::Beats const &, samplepos_t);
 
 	void note_on (int note_number, int velocity);
 	void note_off (int note_number, int velocity);
 
-	/* XXX for initial testing only */
-
-	boost::shared_ptr<Source> the_source;
-	boost::shared_ptr<AudioRegion> the_region;
-	AudioTrigger* the_trigger;
+	typedef std::map<uint8_t,Triggers::size_type> MidiTriggerMap;
+	MidiTriggerMap midi_trigger_map;
 };
 
 } // namespace ARDOUR
