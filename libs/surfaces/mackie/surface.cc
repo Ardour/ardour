@@ -482,9 +482,9 @@ Surface::master_gain_changed ()
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::MackieControl, "Surface::master_gain_changed: updating surface master fader\n");
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose("Surface::master_gain_changed: val %1, pos %2\n", ac->get_value(), normalized_position));
 
-	_port->write (_master_fader->set_position (normalized_position));
+	write (_master_fader->set_position (normalized_position));
 	_last_master_gain_written = normalized_position;
 }
 
@@ -532,7 +532,7 @@ Surface::master_meter_changed ()
 		/* we can use up to 13 segments */
 
 		segment = lrintf ((result.second/115.0) * 13.0);
-		_port->write (MidiByteArray (2, 0xd1, (i<<4) | segment));
+		write (MidiByteArray (2, 0xd1, (i<<4) | segment));
 	}
 }
 
@@ -715,7 +715,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 			DEBUG_TRACE (DEBUG::MackieControl, "Handling master fader\n");
 			/* master fader */
 			fader->set_value (pos); // alter master gain
-			_port->write (fader->set_position (pos)); // write back value (required for servo)
+			write (fader->set_position (pos)); // write back value (required for servo)
 		}
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, "fader not found\n");
