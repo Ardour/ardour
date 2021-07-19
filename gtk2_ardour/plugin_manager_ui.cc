@@ -118,7 +118,6 @@ PluginManagerUI::PluginManagerUI ()
 		{ALIGN_CENTER, true,   _("Tags"),         _("Meta data: category and tags") },
 	};
 	/* clang-format on */
-	printf ("%ld %ld\n", sizeof (ci), sizeof (ColumnInfo));
 
 	for (unsigned int i = 0; i < sizeof (ci) / sizeof (ColumnInfo); ++i) {
 		Label* l = manage (new Label (ci[i].label));
