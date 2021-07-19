@@ -793,13 +793,13 @@ Session::request_transport_speed (double speed, TransportRequestSource origin)
 }
 
 void
-Session::request_default_transport_speed (double speed, TransportRequestSource origin)
+Session::request_default_play_speed (double speed, TransportRequestSource origin)
 {
 	if (synced_to_engine()) {
 		return;
 	}
 
-	SessionEvent* ev = new SessionEvent (SessionEvent::SetDefaultTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetDefaultPlaySpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request default transport speed = %1 as default = %2\n", speed));
 	queue_event (ev);
 }

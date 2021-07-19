@@ -480,11 +480,10 @@ public:
 	void allow_auto_play (bool yn);
 
 	double default_play_speed ();
-	void set_default_play_speed (double spd);
 	void reset_transport_speed (TransportRequestSource origin = TRS_UI);
 
 	void request_transport_speed (double speed, TransportRequestSource origin = TRS_UI);
-	void request_default_transport_speed (double speed, TransportRequestSource origin = TRS_UI);
+	void request_default_play_speed (double speed, TransportRequestSource origin = TRS_UI);
 	void request_transport_speed_nonzero (double, TransportRequestSource origin = TRS_UI);
 	void request_overwrite_buffer (boost::shared_ptr<Track>, OverwriteReason);
 	void adjust_playback_buffering();
@@ -1358,6 +1357,7 @@ protected:
 	bool should_stop_before_locate () const;
 	samplepos_t position() const { return _transport_sample; }
 	void set_transport_speed (double speed);
+	void set_default_play_speed (double spd);
 	bool need_declick_before_locate () const;
 
 private:

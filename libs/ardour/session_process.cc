@@ -921,7 +921,7 @@ Session::process_event (SessionEvent* ev)
 		TFSM_SPEED (ev->speed);
 		break;
 
-	case SessionEvent::SetDefaultTransportSpeed:
+	case SessionEvent::SetDefaultPlaySpeed:
 		set_default_play_speed (ev->speed);
 		break;
 
