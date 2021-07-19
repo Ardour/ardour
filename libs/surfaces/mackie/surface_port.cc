@@ -167,7 +167,10 @@ void
 SurfacePort::reconnect ()
 {
 	_async_out->reconnect ();
+	_async_out->try_reconnect_missing ();
 	_async_in->reconnect ();
+	_async_in->try_reconnect_missing ();
+
 }
 
 std::string
@@ -197,7 +200,12 @@ SurfacePort::write (const MidiByteArray & mba)
 		return 0;
 	}
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("port %1 write %2\n", output_port().name(), mba));
+#ifndef NDEBUG
+	/* skip meter output since it makes too much output for normal use */
+	if (mba[0] != 0xd0 && mba[0] != 0xd1) {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("port %1 write %2\n", output_port().name(), mba));
+	}
+#endif
 
 	if (mba[0] != 0xf0 && mba.size() > 3) {
 		std::cerr << "TOO LONG WRITE: " << mba << std::endl;
