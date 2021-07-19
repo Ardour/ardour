@@ -27,16 +27,15 @@ std::string
 PBD::demangle_symbol (const std::string& mangled_symbol)
 {
 #if defined(__GLIBCXX__)
-	int status;
 
 	try {
-
+		int status;
 		char* realname = abi::__cxa_demangle (mangled_symbol.c_str(), 0, 0, &status);
 		std::string demangled_symbol (realname);
 		free (realname);
 		return demangled_symbol;
-	} catch (const std::exception&) {
-
+	} catch (...) {
+		/* may happen if realname == NULL */
 	}
 #endif
 
