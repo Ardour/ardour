@@ -18,6 +18,7 @@
 
 
 #include "ardour/analysis_graph.h"
+#include "ardour/progress.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 
@@ -54,7 +55,13 @@ AnalysisGraph::~AnalysisGraph ()
 }
 
 void
-AnalysisGraph::analyze_region (boost::shared_ptr<AudioRegion> region)
+AnalysisGraph::analyze_region (boost::shared_ptr<AudioRegion> region, bool raw)
+{
+	analyze_region (region.get(), raw, (ARDOUR::Progress*)0);
+}
+
+void
+AnalysisGraph::analyze_region (AudioRegion const* region, bool raw, ARDOUR::Progress* p)
 {
 	int n_channels = region->n_channels();
 	if (n_channels == 0 || n_channels > _max_chunksize) {
@@ -81,7 +88,11 @@ AnalysisGraph::analyze_region (boost::shared_ptr<AudioRegion> region)
 		samplecnt_t n = 0;
 		for (unsigned int channel = 0; channel < region->n_channels(); ++channel) {
 			memset (_buf, 0, chunk * sizeof (Sample));
-			n = region->read_at (_buf, _mixbuf, _gainbuf, region->position() + x, chunk, channel);
+			if (raw) {
+				n = region->read_raw_internal (_buf, region->start() + x, chunk, channel);
+			} else {
+				n = region->read_at (_buf, _mixbuf, _gainbuf, region->position() + x, chunk, channel);
+			}
 			ConstProcessContext<Sample> context (_buf, n, 1);
 			if (n < _max_chunksize) {
 				context().set_flag (ProcessContext<Sample>::EndOfInput);
@@ -98,6 +109,12 @@ AnalysisGraph::analyze_region (boost::shared_ptr<AudioRegion> region)
 		Progress (_samples_read, _samples_end);
 		if (_canceled) {
 			return;
+		}
+		if (p) {
+			p->set_progress (_samples_read / (float) _samples_end);
+			if (p->cancelled ()) {
+				return;
+			}
 		}
 	}
 	_results.insert (std::make_pair (region->name(), analyser->result ()));

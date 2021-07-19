@@ -41,6 +41,7 @@
 
 #include "evoral/Curve.h"
 
+#include "ardour/analysis_graph.h"
 #include "ardour/audioregion.h"
 #include "ardour/session.h"
 #include "ardour/dB.h"
@@ -1468,6 +1469,37 @@ AudioRegion::rms (Progress* p) const
 		}
 	}
 	return sqrt (2. * rms / (double)(total * n_chan));
+}
+
+bool
+AudioRegion::loudness (float& tp, float& i, float& s, float& m, Progress* p) const
+{
+	ARDOUR::AnalysisGraph ag (&_session);
+	tp = i = s = m = -200;
+
+	ag.set_total_samples (_length);
+	ag.analyze_region (this, true, p);
+
+	if (p && p->cancelled ()) {
+		return false;
+	}
+
+	AnalysisResults const& ar (ag.results ());
+	if (ar.size() != 1) {
+		return false;
+	}
+	ExportAnalysisPtr eap (ar.begin ()->second);
+
+	if (eap->have_dbtp) {
+		tp = eap->truepeak;
+	}
+	if (eap->have_loudness) {
+		i = eap->integrated_loudness;
+		s = eap->max_loudness_short;
+		m = eap->max_loudness_momentary;
+	}
+
+	return eap->have_dbtp || eap->have_loudness;
 }
 
 /** Normalize using a given maximum amplitude and target, so that region

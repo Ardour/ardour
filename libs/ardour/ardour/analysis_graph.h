@@ -38,12 +38,16 @@ namespace AudioGrapher {
 }
 
 namespace ARDOUR {
+	class Progress;
+
 class LIBARDOUR_API AnalysisGraph {
 	public:
 		AnalysisGraph (ARDOUR::Session*);
 		~AnalysisGraph ();
 
-		void analyze_region (boost::shared_ptr<ARDOUR::AudioRegion>);
+		void analyze_region (ARDOUR::AudioRegion const*, bool raw = false, ARDOUR::Progress* = 0);
+		void analyze_region (boost::shared_ptr<ARDOUR::AudioRegion>, bool raw = false);
+
 		void analyze_range (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::AudioPlaylist>, const std::list<AudioRange>&);
 		const AnalysisResults& results () const { return _results; }
 
