@@ -321,6 +321,15 @@ Session::default_play_speed ()
 void
 Session::set_default_play_speed (double spd)
 {
+	/* see also Port::set_speed_ratio and
+	 * VMResampler::set_rratio() for min/max range.
+	 * speed must be > +/- 100 / 16 %
+	 */
+	if (spd > 0.0) {
+		spd = std::min<double> (Config->get_max_transport_speed(), std::max (0.0625, spd));
+	} else if (spd < 0.0) {
+		spd = std::max<double> (- Config->get_max_transport_speed(), std::min (-0.0625, spd));
+	}
 	_transport_fsm->set_default_speed(spd);
 	TFSM_SPEED(spd);
 	TransportStateChange (); /* EMIT SIGNAL */
