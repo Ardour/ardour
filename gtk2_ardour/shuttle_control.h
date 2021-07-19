@@ -49,8 +49,8 @@ public:
 	void set_shuttle_units (ARDOUR::ShuttleUnits s);
 
 private:
-	void parameter_changed (std::string);
-	void build_disp_context_menu ();
+	void                  parameter_changed (std::string);
+	void                  build_disp_context_menu ();
 	Gtk::Menu*            disp_context_menu;
 	PBD::ScopedConnection parameter_connection;
 
@@ -63,29 +63,42 @@ public:
 	ShuttleControl ();
 	~ShuttleControl ();
 
-	void map_transport_state ();
-	void set_shuttle_fract (double, bool zero_ok = false);
-	double get_shuttle_fract () const { return shuttle_fract; }
+	void   map_transport_state ();
+	void   set_shuttle_fract (double, bool zero_ok = false);
+	double get_shuttle_fract () const
+	{
+		return shuttle_fract;
+	}
 	void set_session (ARDOUR::Session*);
 
 	void do_blink (bool);
+	void set_colors ();
 
 	struct ShuttleControllable : public PBD::Controllable {
 		ShuttleControllable (ShuttleControl&);
-		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+		void   set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 		double get_value (void) const;
 
-		double lower() const { return -1.0; }
-		double upper() const { return  1.0; }
+		double lower () const { return -1.0; }
+		double upper () const { return 1.0; }
 
 		ShuttleControl& sc;
 	};
 
-	boost::shared_ptr<ShuttleControllable> controllable() const { return _controllable; }
-	void set_colors ();
+	boost::shared_ptr<ShuttleControllable> controllable () const
+	{
+		return _controllable;
+	}
 
-	ArdourWidgets::ArdourButton* info_button () { return &_info_button; }
-	ArdourWidgets::ArdourButton* vari_button () { return &_vari_button; }
+	ArdourWidgets::ArdourButton* info_button ()
+	{
+		return &_info_button;
+	}
+
+	ArdourWidgets::ArdourButton* vari_button ()
+	{
+		return &_vari_button;
+	}
 
 public:
 	static int speed_as_semitones (float, bool&);
@@ -94,40 +107,39 @@ public:
 	static float semitones_as_speed (int, bool);
 	static float semitones_as_fract (int, bool);
 
-	static int speed_as_cents (float, bool&);
+	static int   speed_as_cents (float, bool&);
 	static float cents_as_speed (int, bool);
 
-
 protected:
-	bool _hovering;
-	float  shuttle_max_speed;
-	float  last_speed_displayed;
-	bool   shuttle_grabbed;
-	double shuttle_speed_on_grab;
-	double requested_speed;
-	float shuttle_fract;
+	bool                                   _hovering;
+	float                                  shuttle_max_speed;
+	float                                  last_speed_displayed;
+	bool                                   shuttle_grabbed;
+	double                                 shuttle_speed_on_grab;
+	double                                 requested_speed;
+	float                                  shuttle_fract;
 	boost::shared_ptr<ShuttleControllable> _controllable;
-	cairo_pattern_t* pattern;
-	cairo_pattern_t* shine_pattern;
-	PBD::microseconds_t last_shuttle_request;
-	PBD::ScopedConnection parameter_connection;
-	ShuttleInfoButton _info_button;
-	Gtk::Menu*                  shuttle_context_menu;
-	ArdourWidgets::BindingProxy binding_proxy;
-	float bg_r, bg_g, bg_b;
-	void build_shuttle_context_menu ();
-	void set_shuttle_max_speed (float);
+	cairo_pattern_t*                       pattern;
+	cairo_pattern_t*                       shine_pattern;
+	PBD::microseconds_t                    last_shuttle_request;
+	PBD::ScopedConnection                  parameter_connection;
+	ShuttleInfoButton                      _info_button;
+	Gtk::Menu*                             shuttle_context_menu;
+	ArdourWidgets::BindingProxy            binding_proxy;
+	float                                  bg_r, bg_g, bg_b;
+	void                                   build_shuttle_context_menu ();
+	void                                   set_shuttle_max_speed (float);
 
-	VarispeedDialog _vari_dialog;
+	VarispeedDialog             _vari_dialog;
 	ArdourWidgets::ArdourButton _vari_button;
-	void varispeed_button_clicked ();
-	bool varispeed_button_scroll_event (GdkEventScroll*);
+	void                        varispeed_button_clicked ();
+	bool                        varispeed_button_scroll_event (GdkEventScroll*);
 
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
 	bool on_button_press_event (GdkEventButton*);
-	bool on_button_release_event(GdkEventButton*);
-	bool on_motion_notify_event(GdkEventMotion*);
+	bool on_button_release_event (GdkEventButton*);
+	bool on_motion_notify_event (GdkEventMotion*);
 
 	bool on_button_press_event_for_display (GdkEventButton*);
 
