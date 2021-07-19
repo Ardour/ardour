@@ -1404,6 +1404,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\varispeed_dialog.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\vca_master_strip.cc"
 				>
 			</File>
@@ -2619,6 +2623,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\utils_videotl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\varispeed_dialog.h"
 				>
 			</File>
 			<File

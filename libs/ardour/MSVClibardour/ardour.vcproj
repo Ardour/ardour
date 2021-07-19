@@ -2282,6 +2282,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\plugin_region.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\plugin_scan_result.h"
 				>
 			</File>
