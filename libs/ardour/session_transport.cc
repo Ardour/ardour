@@ -321,6 +321,7 @@ Session::default_play_speed ()
 void
 Session::set_default_play_speed (double spd)
 {
+	ENSURE_PROCESS_THREAD;
 	/* see also Port::set_speed_ratio and
 	 * VMResampler::set_rratio() for min/max range.
 	 * speed must be > +/- 100 / 16 %
@@ -568,7 +569,17 @@ Session::start_transport ()
 	}
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC4 with speed = %1\n", transport_speed()));
-	TransportStateChange (); /* EMIT SIGNAL */
+
+	/* emit TransportStateChange signal only when transport is actually rolling */
+	SessionEvent* ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Add, _transport_sample, _transport_sample, 1.0);
+	queue_event (ev);
+
+	samplepos_t roll_pos = _transport_sample + std::max (_count_in_samples, _remaining_latency_preroll) * (_transport_fsm->will_roll_fowards () ? 1 : -1);
+	if (roll_pos > 0 && roll_pos != _transport_sample) {
+		/* and when transport_rolling () == true */
+		SessionEvent* ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Add, roll_pos, roll_pos, 1.0);
+		queue_event (ev);
+	}
 }
 
 bool
