@@ -87,7 +87,7 @@ VarispeedDialog::apply_speed ()
 
 	printf ("VarispeedDialog::apply_speed\n");
 	if (_session && _session->default_play_speed () != speed) {
-		_session->set_default_play_speed (speed);
+		_session->request_default_play_speed (speed);
 	}
 }
 
@@ -103,7 +103,7 @@ void
 VarispeedDialog::on_hide ()
 {
 	if (_session && _session->default_play_speed () != 1.0) {
-		_session->set_default_play_speed (1.0);
+		_session->request_default_play_speed (1.0);
 	}
 	ArdourDialog::on_hide ();
 }
