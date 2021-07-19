@@ -319,7 +319,7 @@ Session::default_play_speed ()
  *  @param speed New speed
  */
 void
-Session::set_default_play_speed (double spd, TransportRequestSource origin)
+Session::set_default_play_speed (double spd)
 {
 	_transport_fsm->set_default_speed(spd);
 	TFSM_SPEED(spd);
@@ -789,6 +789,18 @@ Session::request_transport_speed (double speed, TransportRequestSource origin)
 
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1 as default = %2\n", speed));
+	queue_event (ev);
+}
+
+void
+Session::request_default_transport_speed (double speed, TransportRequestSource origin)
+{
+	if (synced_to_engine()) {
+		return;
+	}
+
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetDefaultTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request default transport speed = %1 as default = %2\n", speed));
 	queue_event (ev);
 }
 
