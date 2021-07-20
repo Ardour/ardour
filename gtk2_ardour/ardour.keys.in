@@ -305,10 +305,21 @@ This mode provides many different operations on both regions and control points,
 @gedt|Common/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
 @gedt|Common/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
 
-@edit|Editor/copy-playlists-for-armed-tracks|<@TERTIARY@>colon|copy playlists for Armed tracks
-@edit|Editor/copy-playlists-for-all-tracks|<@TERTIARY@>quotedbl|copy-playlists-for-all-tracks
-@edit|Editor/layer-display-stacked|<@TERTIARY@>less|Display Region Layers: Stacked
-@edit|Editor/layer-display-overlaid|<@TERTIARY@>greater|Display Region Layers: Overlaid
+@edit|Editor/copy-playlists-for-selected-tracks|<@TERTIARY@>colon|Copy Playlists for Selected tracks
+@edit|Editor/copy-playlists-for-armed-tracks|<@PRIMARY><@TERTIARY@>colon|Copy Playlists for Armed tracks
+@edit|Editor/copy-playlists-for-all-tracks|<@PRIMARY><@SECONDARY><@TERTIARY@>colon|Copy Playlists for ALL tracks
+
+@edit|Editor/new-playlists-for-selected-tracks|<@TERTIARY@>quotedbl|New Playlists for Selected tracks
+@edit|Editor/new-playlists-for-armed-tracks|<@PRIMARY><@TERTIARY@>quotedbl|New Playlists for Armed tracks
+@edit|Editor/new-playlists-for-all-tracks|<@PRIMARY><@SECONDARY><@TERTIARY@>quotedbl|New Playlists for ALL tracks
+
+@edit|Editor/layer-display-overlaid|<@TERTIARY@>braceleft|Display Region Layers: Overlaid
+@edit|Editor/layer-display-stacked|<@TERTIARY@>braceright|Display Region Layers: Stacked
+@edit|Region/raise-region-to-top|<@TERTIARY@>bar|Raise Selected Region to Top Layer
+
+@edit|Transport/RecordPreroll|<@TERTIARY@>less|Transport: Record with Pre-Roll
+@edit|Transport/RecordCountIn|<@TERTIARY@>greater|Transport: Record with Count-In
+
 @edit|Editor/show-plist-selector|<@TERTIARY@>question|show-plist-selector
 
 @gmark|Common/alternate-add-location-from-playhead|KP_Enter|add mark at playhead
