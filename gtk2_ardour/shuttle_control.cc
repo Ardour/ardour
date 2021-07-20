@@ -67,19 +67,18 @@ ShuttleInfoButton::~ShuttleInfoButton ()
 }
 
 ShuttleInfoButton::ShuttleInfoButton ()
+	: disp_context_menu (0)
+	, _ignore_change (false)
 {
 	set_layout_font (UIConfiguration::instance ().get_NormalFont ());
-	set_sizing_text (S_("LogestShuttle|+00 st"));
 	set_tooltip (*this, _("Speed Display (Context-click for options)"));
 	set_visual_state (Gtkmm2ext::NoVisualState);
 	set_elements (ArdourButton::Text);
+	parameter_changed ("shuttle-units");
 
 	Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, boost::bind (&ShuttleInfoButton::parameter_changed, this, _1), gui_context ());
 
 	add_events (Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::POINTER_MOTION_MASK | Gdk::SCROLL_MASK);
-
-	disp_context_menu = 0;
-	_ignore_change    = false;
 }
 
 void
@@ -98,6 +97,11 @@ ShuttleInfoButton::parameter_changed (std::string p)
 	if (p == "shuttle-units") {
 		delete disp_context_menu;
 		disp_context_menu = 0;
+		if (Config->get_shuttle_units() == Percentage) {
+			set_sizing_text (S_("LogestShuttle|> 888.9%"));
+		} else {
+			set_sizing_text (S_("LogestShuttle|+00 st"));
+		}
 	}
 }
 
@@ -186,7 +190,7 @@ ShuttleControl::ShuttleControl ()
 	set_tooltip (_vari_button, _("Varispeed: change the default playback and recording speed"));
 
 	_vari_button.set_name ("vari button");
-	_vari_button.set_text (_("Vari"));
+	_vari_button.set_text (S_("VariSpeed|VS"));
 	_vari_button.signal_clicked.connect (sigc::mem_fun (*this, &ShuttleControl::varispeed_button_clicked));
 	_vari_button.signal_scroll_event ().connect (sigc::mem_fun (*this, &ShuttleControl::varispeed_button_scroll_event), false);
 
