@@ -84,6 +84,7 @@ using namespace Temporal;
 
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
+#define TFSM_ROLL() { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StartTransport)); }
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
 #define TFSM_LOCATE(target,ltd,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,loop,force)); }
 #define TFSM_SPEED(speed) { _transport_fsm->enqueue (new TransportFSM::Event (speed)); }
@@ -441,6 +442,14 @@ Session::stop_transport (bool abort, bool clear_state)
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("time to actually stop with TS @ %1\n", _transport_sample));
 
 	realtime_stop (abort, clear_state);
+}
+
+/** Called from the process thread */
+void
+Session::start_transport_from_processor ()
+{
+	ENSURE_PROCESS_THREAD;
+	TFSM_ROLL();
 }
 
 /** Called from the process thread */

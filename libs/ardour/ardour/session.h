@@ -485,6 +485,7 @@ public:
 	double default_play_speed ();
 	void reset_transport_speed (TransportRequestSource origin = TRS_UI);
 
+	void start_transport_from_processor ();
 	void request_transport_speed (double speed, TransportRequestSource origin = TRS_UI);
 	void request_default_play_speed (double speed, TransportRequestSource origin = TRS_UI);
 	void request_transport_speed_nonzero (double, TransportRequestSource origin = TRS_UI);
