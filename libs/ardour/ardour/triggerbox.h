@@ -78,12 +78,22 @@ class LIBARDOUR_API Trigger {
 	virtual int set_region (boost::shared_ptr<Region>) = 0;
 	boost::shared_ptr<Region> region() const { return _region; }
 
+	Temporal::Beats quantization() const;
+	void set_quantization (Temporal::Beats const &);
+
+	bool stop_requested() const { return _stop_requested; }
+
+	/* Managed by TriggerBox */
+	samplepos_t fire_samples;
+	Temporal::Beats fire_beats;
+
   protected:
 	bool _running;
 	bool _stop_requested;
 	LaunchStyle  _launch_style;
 	FollowAction _follow_action;
 	boost::shared_ptr<Region> _region;
+	Temporal::Beats _quantization;
 
 	void set_region_internal (boost::shared_ptr<Region>);
 };
@@ -96,7 +106,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void bang (TriggerBox&, Temporal::Beats const & , samplepos_t);
 	void unbang (TriggerBox&, Temporal::Beats const & , samplepos_t);
 
-	Sample* run (uint32_t channel, pframes_t& nframes, samplepos_t start_frame, samplepos_t end_frame, bool& need_butler);
+	Sample* run (uint32_t channel, pframes_t& nframes, bool& need_butler);
 
 	int set_region (boost::shared_ptr<Region>);
 
@@ -132,18 +142,25 @@ class LIBARDOUR_API TriggerBox : public Processor
   private:
 	PBD::RingBuffer<Trigger*> _trigger_queue;
 
-	Triggers active_triggers;
-	Glib::Threads::RWLock trigger_lock;
+	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
 
+	/* These three are accessed (read/write) only from process() context */
+	Triggers pending_on_triggers;
+	Triggers pending_off_triggers;
+	Triggers active_triggers;
+
 	void drop_triggers ();
-	void process_trigger_requests (Temporal::Beats const &, samplepos_t);
+	void process_ui_trigger_requests ();
+	void process_midi_trigger_requests (BufferSet&);
 
 	void note_on (int note_number, int velocity);
 	void note_off (int note_number, int velocity);
 
 	typedef std::map<uint8_t,Triggers::size_type> MidiTriggerMap;
 	MidiTriggerMap midi_trigger_map;
+
+	void load_some_samples ();
 };
 
 } // namespace ARDOUR

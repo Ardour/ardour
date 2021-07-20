@@ -6,6 +6,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/region_factory.h"
+#include "ardour/session.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/triggerbox.h"
 
@@ -25,20 +26,68 @@ TriggerBox::TriggerBox (Session& s)
 	all_triggers.resize (16, 0);
 
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (60), 0));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (61), 1));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (62), 2));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (63), 3));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (64), 4));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (65), 5));
 
-	boost::shared_ptr<Source> the_source (new SndFileSource (_session, "/music/misc/La_Voz_Del_Rio.wav", 0, Source::Flag (0)));
 
-	PropertyList plist;
+	load_some_samples ();
+}
 
-	plist.add (Properties::start, 0);
-	plist.add (Properties::length, the_source->length ());
-	plist.add (Properties::name, string ("bang"));
-	plist.add (Properties::layer, 0);
-	plist.add (Properties::layering_index, 0);
+void
+TriggerBox::load_some_samples ()
+{
+	/* XXX TESTING ONLY */
 
-	boost::shared_ptr<Region> the_region (RegionFactory::create (the_source, plist, false));
+	char const * paths[] = {
+		"RAZOR_6-pack_Disco_Bell.wav",
+		"RAZOR_6-pack_Percuvox.wav",
+		"RAZOR_6-pack_GentleWobbler_Up+Down.wav",
+		"RAZOR_6-pack_Rolling_Triplets.wav",
+		"RAZOR_6-pack_Leaky_Chamber.wav",
+		"RAZOR_6-pack_Rubber_Wobbler.wav",
+		0
+	};
 
-	all_triggers[0] = new AudioTrigger (boost::dynamic_pointer_cast<AudioRegion> (the_region));
+	try {
+		for (size_t n = 0; paths[n]; ++n) {
+
+			string dir = "/usr/local/music/samples/Razor_6-pack_RawLoops_128BPM/";
+			string path = dir + paths[n];
+
+
+			SoundFileInfo info;
+			string errmsg;
+			if (!SndFileSource::get_soundfile_info (path, info, errmsg)) {
+				error << string_compose (_("Cannot get info from audio file %1 (%2)"), path, errmsg) << endmsg;
+				continue;
+			}
+
+			SourceList src_list;
+
+			for (uint16_t n = 0; n < info.channels; ++n) {
+				boost::shared_ptr<Source> source (new SndFileSource (_session, path, n, Source::Flag (0)));
+				src_list.push_back (source);
+			}
+
+			PropertyList plist;
+
+			plist.add (Properties::start, 0);
+			plist.add (Properties::length, src_list.front()->length ());
+			plist.add (Properties::name, string ("bang"));
+			plist.add (Properties::layer, 0);
+			plist.add (Properties::layering_index, 0);
+
+
+			boost::shared_ptr<Region> the_region (RegionFactory::create (src_list, plist, false));
+
+			all_triggers[n] = new AudioTrigger (boost::dynamic_pointer_cast<AudioRegion> (the_region));
+		}
+	} catch (std::exception& e) {
+		cerr << "loading samples failed: " << e.what() << endl;
+	}
 }
 
 TriggerBox::~TriggerBox ()
@@ -79,7 +128,6 @@ TriggerBox::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	}
 
 	out = ChanCount::max (out, ChanCount (DataType::AUDIO, 2));
-
 	return true;
 }
 
@@ -103,7 +151,7 @@ TriggerBox::queue_trigger (Trigger* trigger)
 }
 
 void
-TriggerBox::process_trigger_requests (Temporal::Beats const & beats_now, samplepos_t samples_now)
+TriggerBox::process_ui_trigger_requests ()
 {
 		/* if there are any triggers queued, make them active
 	*/
@@ -113,27 +161,20 @@ TriggerBox::process_trigger_requests (Temporal::Beats const & beats_now, samplep
 
 	for (uint32_t n = 0; n < vec.len[0]; ++n) {
 		Trigger* t = vec.buf[0][n];
-		t->bang (*this, beats_now, samples_now);
-		active_triggers.push_back (t);
+		pending_on_triggers.push_back (t);
 	}
 
 	for (uint32_t n = 0; n < vec.len[1]; ++n) {
 		Trigger* t = vec.buf[1][n];
-		t->bang (*this, beats_now, samples_now);
-		active_triggers.push_back (t);
+		pending_on_triggers.push_back (t);
 	}
 
 	_trigger_queue.increment_read_idx (vec.len[0] + vec.len[1]);
 }
 
 void
-TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
+TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 {
-	samplepos_t next_beat = 0;
-	Temporal::Beats beats_now;
-
-	process_trigger_requests (beats_now, start_sample);
-
 	/* check MIDI port input buffers for triggers */
 
 	for (BufferSet::midi_iterator mi = bufs.midi_begin(); mi != bufs.midi_end(); ++mi) {
@@ -161,41 +202,74 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			if ((*ev).is_note_on()) {
 
-				if (!t->running()) {
-					active_triggers.push_back (t);
+				if (!t->running() && find (pending_on_triggers.begin(), pending_on_triggers.end(), t) == pending_on_triggers.end()) {
+					pending_on_triggers.push_back (t);
 				}
 
-				t->bang (*this, beats_now, start_sample);
+				if (!_session.transport_state_rolling()) {
+					_session.start_transport_from_processor ();
+				}
 
 			} else if ((*ev).is_note_off()) {
 
 				if (t->running() && t->launch_style() == Trigger::Gate) {
-					t->unbang (*this, beats_now, start_sample);
+					pending_off_triggers.push_back (t);
 				}
 
 			}
 		}
 	}
+}
 
-	if (active_triggers.empty()) {
+void
+TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
+{
+	if (start_sample < 0) {
+		return;
+	}
+
+	process_ui_trigger_requests ();
+	process_midi_trigger_requests (bufs);
+
+	if (active_triggers.empty() && pending_on_triggers.empty()) {
 		/* nothing to do */
 		return;
 	}
 
-	/* get tempo map */
+	timepos_t start (start_sample);
+	timepos_t end (end_sample);
+	Temporal::Beats start_beats (start.beats());
+	Temporal::Beats end_beats (end.beats());
 
-	/* find offset to next bar * and beat start
-	 */
+	for (Triggers::iterator t = pending_on_triggers.begin(); t != pending_on_triggers.end(); ) {
 
-	/* if next beat occurs in this process cycle, see if we have any triggers waiting
-	*/
+		Temporal::Beats q = (*t)->quantization ();
+		timepos_t fire_at (start_beats.snap_to (q));
 
-	// bool run_beats = false;
-	// bool run_bars = false;
+		if (fire_at >= start_beats && fire_at < end_beats) {
+			(*t)->fire_samples = fire_at.samples();
+			(*t)->fire_beats = fire_at.beats();
+			active_triggers.push_back (*t);
+			t = pending_on_triggers.erase (t);
+		} else {
+			++t;
+		}
+	}
 
-	//if (next_beat >= start_frame && next_beat < end_sample) {
-	//run_beats = true;
-	//}
+	for (Triggers::iterator t = pending_off_triggers.begin(); t != pending_off_triggers.end(); ) {
+
+		Temporal::Beats q = (*t)->quantization ();
+		timepos_t off_at (start_beats.snap_to (q));
+
+		if (off_at >= start_beats && off_at < end_beats) {
+			(*t)->fire_samples = off_at.samples();
+			(*t)->fire_beats = off_at.beats();
+			(*t)->unbang (*this, (*t)->fire_beats, (*t)->fire_samples);
+			t = pending_off_triggers.erase (t);
+		} else {
+			++t;
+		}
+	}
 
 	bool err = false;
 	bool need_butler = false;
@@ -203,13 +277,21 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	for (Triggers::iterator t = active_triggers.begin(); !err && t != active_triggers.end(); ++t) {
 
-		AudioTrigger* at = dynamic_cast<AudioTrigger*> (*t);
+		Trigger* trigger = (*t);
+		sampleoffset_t dest_offset = 0;
+		pframes_t trigger_samples = nframes;
 
-		if (!at) {
-			continue;
+		if (trigger->stop_requested()) {
+			trigger_samples = nframes - (trigger->fire_samples - start_sample);
+		} else if (!trigger->running()) {
+			trigger->bang (*this, trigger->fire_beats, trigger->fire_samples);
+			dest_offset = std::max (samplepos_t (0), trigger->fire_samples - start_sample);
+			trigger_samples = nframes - dest_offset;
 		}
 
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (at->region());
+		AudioTrigger* at = dynamic_cast<AudioTrigger*> (trigger);
+
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (trigger->region());
 		const size_t nchans = ar->n_channels ();
 		max_chans = std::max (max_chans, nchans);
 
@@ -217,8 +299,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			AudioBuffer& buf = bufs.get_audio (chan);
 
-			pframes_t to_copy = nframes;
-			Sample* data = at->run (chan, to_copy, start_sample, end_sample, need_butler);
+			pframes_t to_copy = trigger_samples;
+			Sample* data = at->run (chan, to_copy, need_butler);
 
 			if (!data) {
 				/* XXX need to delete the trigger/put it back in the pool */
@@ -226,9 +308,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				err = true;
 			} else {
 				if (t == active_triggers.begin()) {
-					buf.read_from (data, to_copy);
-					if (to_copy < nframes) {
-						buf.silence (nframes - to_copy, to_copy);
+					buf.read_from (data, to_copy, dest_offset);
+					if ((to_copy + dest_offset) < nframes) {
+						buf.silence (nframes - to_copy, to_copy + dest_offset);
 					}
 				} else {
 					buf.accumulate_from (data, to_copy);
@@ -282,6 +364,16 @@ void
 Trigger::set_region_internal (boost::shared_ptr<Region> r)
 {
 	_region = r;
+}
+
+Temporal::Beats
+Trigger::quantization () const
+{
+	if (_quantization == Temporal::Beats()) {
+		return Temporal::Beats (1, 0);
+	}
+
+	return _quantization;
 }
 
 /*--------------------*/
@@ -376,7 +468,7 @@ AudioTrigger::unbang (TriggerBox& /*proc*/, Temporal::Beats const &, samplepos_t
 }
 
 Sample*
-AudioTrigger::run (uint32_t channel, pframes_t& nframes, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, bool& /* need_butler */)
+AudioTrigger::run (uint32_t channel, pframes_t& nframes, bool& /* need_butler */)
 {
 	if (!_running) {
 		return 0;
