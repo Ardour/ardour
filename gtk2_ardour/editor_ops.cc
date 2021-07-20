@@ -5412,9 +5412,17 @@ Editor::normalize_region ()
 	*/
 	list<double> max_amps;
 	list<double> rms_vals;
-	double max_amp = 0;
-	double max_rms = 0;
-	bool use_rms = dialog.constrain_rms ();
+	list<float>  dbtp_vals;
+	list<float>  lufs_vals;
+
+	double max_amp   = 0;
+	double max_rms   = 0;
+	double max_tp    = 0;
+	float max_lufs_i = -200;
+
+	bool use_rms  = dialog.constrain_rms ();
+	bool use_lufs = dialog.constrain_lufs ();
+	bool use_dbtp = dialog.use_true_peak ();
 
 	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 		AudioRegionView const * arv = dynamic_cast<AudioRegionView const *> (*i);
@@ -5422,6 +5430,7 @@ Editor::normalize_region ()
 			continue;
 		}
 		dialog.descend (1.0 / regions);
+
 		double const a = arv->audio_region()->maximum_amplitude (&dialog);
 		if (use_rms) {
 			double r = arv->audio_region()->rms (&dialog);
@@ -5429,7 +5438,23 @@ Editor::normalize_region ()
 			rms_vals.push_back (r);
 		}
 
-		if (a == -1) {
+		if ((use_dbtp || use_lufs) && !dialog.cancelled ()) {
+			float true_peak, integrated, max_short, max_momentary;
+			arv->audio_region()->loudness (true_peak, integrated, max_short, max_momentary, &dialog);
+			float lufs = integrated;
+			if (lufs == -200) {
+				lufs = max_short;
+			}
+			if (lufs == -200) {
+				lufs = max_momentary;
+			}
+			max_tp     = max<double> (max_tp, true_peak);
+			max_lufs_i = max (max_lufs_i, lufs);
+			dbtp_vals.push_back (true_peak);
+			lufs_vals.push_back (lufs);
+		}
+
+		if (a == -1 || dialog.cancelled ()) {
 			/* the user cancelled the operation */
 			return;
 		}
@@ -5441,7 +5466,11 @@ Editor::normalize_region ()
 
 	list<double>::const_iterator a = max_amps.begin ();
 	list<double>::const_iterator l = rms_vals.begin ();
+	list<float>::const_iterator  t = dbtp_vals.begin ();
+	list<float>::const_iterator  i = lufs_vals.begin ();
 	bool in_command = false;
+
+	max_tp = max (max_tp, max_amp);
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (*r);
@@ -5450,18 +5479,37 @@ Editor::normalize_region ()
 		}
 
 		arv->region()->clear_changes ();
-
-		double amp = dialog.normalize_individually() ? *a : max_amp;
 		double target = dialog.target_peak (); // dB
+
+		double amp;
+		if (use_dbtp) {
+			amp = dialog.normalize_individually() ? *t : max_tp;
+		} else {
+			amp = dialog.normalize_individually() ? *a : max_amp;
+		}
 
 		if (use_rms) {
 			double const amp_rms = dialog.normalize_individually() ? *l : max_rms;
-			const double t_rms = dialog.target_rms ();
+			const double t_rms  = dialog.target_rms ();
 			const gain_t c_peak = dB_to_coefficient (target);
 			const gain_t c_rms  = dB_to_coefficient (t_rms);
+			assert (c_peak >= GAIN_COEFF_SMALL && c_rms > GAIN_COEFF_SMALL);
 			if ((amp_rms / c_rms) > (amp / c_peak)) {
 				amp = amp_rms;
 				target = t_rms;
+			}
+		}
+
+		if (use_lufs) {
+			double const tg_lufs = dialog.target_lufs ();
+			double const db_lufs = dialog.normalize_individually() ? *i : max_lufs_i; // dB
+			const gain_t ct_lufs = dB_to_coefficient (tg_lufs);
+			const gain_t cv_lufs = dB_to_coefficient (db_lufs);
+			const gain_t c_tgt   = dB_to_coefficient (target);
+
+			if (db_lufs > -200 && (cv_lufs / ct_lufs) > (amp / c_tgt)) {
+				amp = cv_lufs;
+				target = tg_lufs;
 			}
 		}
 
@@ -5475,6 +5523,8 @@ Editor::normalize_region ()
 
 		++a;
 		++l;
+		++i;
+		++t;
 	}
 
 	if (in_command) {
