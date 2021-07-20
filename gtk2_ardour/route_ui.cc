@@ -2508,11 +2508,10 @@ RouteUI::build_playlist_menu ()
 		string text = (*i)->name();
 		playlist_items.push_back (RadioMenuElem (playlist_group, text));
 		RadioMenuItem *item = static_cast<RadioMenuItem*>(&playlist_items.back());
-		item->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::use_playlist), item, boost::weak_ptr<Playlist> (*i)));
-
 		if (tr->playlist()->id() == (*i)->id()) {
 			item->set_active();
 		}
+		item->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::use_playlist), item, boost::weak_ptr<Playlist> (*i)));
 	}
 
 	playlist_items.push_back (SeparatorElem());
@@ -2581,6 +2580,13 @@ RouteUI::select_playlist_matching (boost::weak_ptr<Playlist> wpl)
 		return;
 	}
 
+	if (track()->id() == pl->get_orig_track_id()) {
+		/* this playlist is one of this track's own, no need to match by pgroup-id or name */
+		track()->use_playlist(track()->data_type(), pl);
+		return;
+	}
+
+	/* Search for a matching playlist .. either by pgroup_id or name */
 	std::string pgrp_id = pl->pgroup_id();
 	boost::shared_ptr<Playlist> ipl = session()->playlists()->for_pgroup(pgrp_id, track()->id());
 	if (ipl) {

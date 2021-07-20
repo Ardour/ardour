@@ -189,6 +189,11 @@ SessionPlaylists::n_playlists () const
 boost::shared_ptr<Playlist>
 SessionPlaylists::for_pgroup (string pgroup_id, const PBD::ID& id)
 {
+	if(pgroup_id.length()==0) {
+		/*matching empty pgroup-id's would be meaningless*/
+		return boost::shared_ptr<Playlist>();
+	}
+
 	Glib::Threads::Mutex::Lock lm (lock);
 
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
@@ -213,9 +218,14 @@ SessionPlaylists::for_pgroup (string pgroup_id, const PBD::ID& id)
 std::vector<boost::shared_ptr<Playlist> > 
 SessionPlaylists::playlists_for_pgroup (std::string pgroup)
 {
-	Glib::Threads::Mutex::Lock lm (lock);
-
 	vector<boost::shared_ptr<Playlist> > pl_tr;
+
+	if(pgroup.length()==0) {
+		/*matching empty pgroup-id's would be meaningless*/
+		return pl_tr;
+	}
+
+	Glib::Threads::Mutex::Lock lm (lock);
 
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		if ((*i)->pgroup_id().compare(pgroup)==0) {
