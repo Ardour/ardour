@@ -261,11 +261,14 @@ ShuttleControl::set_session (Session* s)
 	_vari_dialog.set_session (_session);
 
 	if (_session) {
-		set_sensitive (true);
 		_session->add_controllable (_controllable);
 		_info_button.set_session (s);
+		_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ShuttleControl::parameter_changed, this, _1), gui_context());
+		/* set sensitivity */
+		parameter_changed ("external-sync");
 	} else {
 		_vari_dialog.hide ();
+		_vari_button.set_sensitive (false);
 		set_sensitive (false);
 	}
 }
@@ -757,6 +760,20 @@ ShuttleControl::parameter_changed (std::string p)
 		use_shuttle_fract (true);
 		delete shuttle_context_menu;
 		shuttle_context_menu = 0;
+	} else if (p == "external-sync") {
+		if (_session->config.get_external_sync()) {
+			_vari_dialog.hide ();
+			_vari_button.set_sensitive (false);
+			if (shuttle_grabbed) {
+				shuttle_grabbed = false;
+				remove_modal_grab ();
+				gdk_pointer_ungrab (GDK_CURRENT_TIME);
+			}
+			set_sensitive (false);
+		} else {
+			_vari_button.set_sensitive (true);
+			set_sensitive (true);
+		}
 	}
 }
 
