@@ -306,12 +306,12 @@ This mode provides many different operations on both regions and control points,
 @gedt|Common/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
 
 @edit|Editor/copy-playlists-for-selected-tracks|<@TERTIARY@>colon|Copy Playlists for Selected tracks
-@edit|Editor/copy-playlists-for-armed-tracks|<@PRIMARY><@TERTIARY@>colon|Copy Playlists for Armed tracks
-@edit|Editor/copy-playlists-for-all-tracks|<@PRIMARY><@SECONDARY><@TERTIARY@>colon|Copy Playlists for ALL tracks
+@edit|Editor/copy-playlists-for-armed-tracks|<@PRIMARY><@SECONDARY><@TERTIARY@>colon|Copy Playlists for Armed tracks
+@edit|Editor/copy-playlists-for-all-tracks|<@PRIMARY><@TERTIARY@>colon|Copy Playlists for ALL tracks
 
 @edit|Editor/new-playlists-for-selected-tracks|<@TERTIARY@>quotedbl|New Playlists for Selected tracks
-@edit|Editor/new-playlists-for-armed-tracks|<@PRIMARY><@TERTIARY@>quotedbl|New Playlists for Armed tracks
-@edit|Editor/new-playlists-for-all-tracks|<@PRIMARY><@SECONDARY><@TERTIARY@>quotedbl|New Playlists for ALL tracks
+@edit|Editor/new-playlists-for-armed-tracks|<@PRIMARY><@SECONDARY><@TERTIARY@>quotedbl|New Playlists for ALL tracks
+@edit|Editor/new-playlists-for-all-tracks|<@PRIMARY><@TERTIARY@>quotedbl|New Playlists for ALL tracks
 
 @edit|Editor/layer-display-overlaid|<@TERTIARY@>braceleft|Display Region Layers: Overlaid
 @edit|Editor/layer-display-stacked|<@TERTIARY@>braceright|Display Region Layers: Stacked
