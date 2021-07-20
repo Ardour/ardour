@@ -2618,7 +2618,7 @@ RouteUI::show_playlist_selector ()
 	}
 
 	_playlist_selector->prepare(this, PlaylistSelector::plSelect);
-	_playlist_selector->show_all ();
+	_playlist_selector->show ();
 }
 
 void
@@ -2630,7 +2630,7 @@ RouteUI::show_playlist_copy_selector ()
 	}
 
 	_playlist_selector->prepare(this, PlaylistSelector::plCopy);
-	_playlist_selector->show_all ();
+	_playlist_selector->show ();
 }
 
 void
@@ -2642,7 +2642,7 @@ RouteUI::show_playlist_share_selector ()
 	}
 
 	_playlist_selector->prepare(this, PlaylistSelector::plShare);
-	_playlist_selector->show_all ();
+	_playlist_selector->show ();
 }
 
 void
@@ -2654,7 +2654,7 @@ RouteUI::show_playlist_steal_selector ()
 	}
 
 	_playlist_selector->prepare(this, PlaylistSelector::plSteal);
-	_playlist_selector->show_all ();
+	_playlist_selector->show ();
 }
 
 void

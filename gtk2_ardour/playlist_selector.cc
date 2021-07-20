@@ -91,17 +91,18 @@ PlaylistSelector::PlaylistSelector ()
 	Gtk::Frame *scope_frame = manage(new Frame());
 	scope_frame->add(*_scope_box);
 
-	Gtk::HBox *bbox = manage(new Gtk::HBox());
-	bbox->set_spacing(6);
-	bbox->pack_start(_btn_new_plist);
-	bbox->pack_start(_btn_copy_plist);
+	_button_box.set_spacing(6);
+	_button_box.pack_start(_btn_new_plist);
+	_button_box.pack_start(_btn_copy_plist);
+
+	_scope_container.pack_start(*scope_label);
+	_scope_container.pack_start(*scope_frame);
 
 	Gtk::Table *table = manage(new Gtk::Table());
 	table->set_border_width (6);
 	table->attach (*scroller_frame,  0,2, 0,1, EXPAND|FILL, EXPAND|FILL, 0, 4);
-	table->attach (*scope_label,     0,1, 1,2, EXPAND,      SHRINK,      0, 6);
-	table->attach (*scope_frame,     1,2, 1,2, EXPAND|FILL, SHRINK,      0, 6);
-	table->attach (*bbox,            0,2, 2,3, EXPAND|FILL, SHRINK,      0, 0);
+	table->attach (_scope_container, 0,2, 1,2, EXPAND|FILL, SHRINK,      0, 6);
+	table->attach (_button_box,      0,2, 2,3, EXPAND|FILL, SHRINK,      0, 0);
 
 	get_vbox()->pack_start (*table, true, true);
 	get_vbox()->show_all();
@@ -148,37 +149,35 @@ void PlaylistSelector::prepare(RouteUI* ruix, plMode mode)
 {
 	_mode = mode;
 	
-	if (_rui == ruix) {
-		return;
+	if (_rui != ruix) {
+		_rui = ruix;
+
+		boost::shared_ptr<Track> this_track = _rui->track();
+
+		if (this_track) {
+			this_track->PlaylistChanged.connect(
+				signal_connections,
+				invalidator(*this),
+				boost::bind(&PlaylistSelector::redisplay, this),
+				gui_context()
+			);
+
+			this_track->PlaylistAdded.connect(
+				signal_connections,
+				invalidator(*this),
+				boost::bind(&PlaylistSelector::redisplay, this),
+				gui_context()
+			);
+
+			this_track->DropReferences.connect(
+				signal_connections,
+				invalidator(*this),
+				boost::bind(&PlaylistSelector::ok_button_click, this),
+				gui_context()
+			);
+		}
 	}
-
-	_rui = ruix;
-
-	boost::shared_ptr<Track> this_track = _rui->track();
-
-	if (this_track) {
-		this_track->PlaylistChanged.connect(
-			signal_connections,
-			invalidator(*this),
-			boost::bind(&PlaylistSelector::redisplay, this),
-			gui_context()
-		);
-
-		this_track->PlaylistAdded.connect(
-			signal_connections,
-			invalidator(*this),
-			boost::bind(&PlaylistSelector::redisplay, this),
-			gui_context()
-		);
-
-		this_track->DropReferences.connect(
-			signal_connections,
-			invalidator(*this),
-			boost::bind(&PlaylistSelector::ok_button_click, this),
-			gui_context()
-		);
-	}
-
+	
 	redisplay();
 }
 
@@ -216,12 +215,20 @@ PlaylistSelector::redisplay()
 	vector<const char*> item;
 	string str;
 
-	set_title (string_compose (_("Playlist for: %1"), _rui->route()->name()));
-
 	if (_mode == plSelect) {
-		_scope_box->show();
+		set_title (string_compose (_("Select a Playlist for: %1"), _rui->route()->name()));
+		_scope_container.show();
+		_button_box.show();
 	} else {
-		_scope_box->hide();
+		_scope_container.hide();
+		_button_box.hide();
+		if (_mode == plCopy) {
+			set_title (string_compose (_("Copy a Playlist for: %1"), _rui->route()->name()));
+		} else if (_mode == plShare) {
+			set_title (string_compose (_("Share a Playlist for: %1"), _rui->route()->name()));
+		} else if (_mode == plSteal) {
+			set_title (string_compose (_("Steal a Playlist for: %1"), _rui->route()->name()));
+		}
 	}
 
 	clear_map ();

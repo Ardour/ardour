@@ -79,10 +79,13 @@ private:
 	Gtk::ScrolledWindow scroller;
 	TrackPlaylistMap trpl_map;
 
+	Gtk::HBox _scope_container;
 	Gtk::HBox *_scope_box;
 	Gtk::RadioButton *_scope_all_radio;
 	Gtk::RadioButton *_scope_rec_radio;
 	Gtk::RadioButton *_scope_grp_radio;
+
+	Gtk::HBox _button_box;
 
 	RouteUI* _rui;
 
