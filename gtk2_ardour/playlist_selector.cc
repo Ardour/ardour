@@ -266,7 +266,7 @@ PlaylistSelector::redisplay()
 		TreePath this_path;
 
 		//make a heading for each other track, if needed
-		if (tr != this_track && _mode != plSelect) {
+		if (_mode != plSelect) {
 			row = *(model->prepend());
 			row[columns.text] = nodename;
 			boost::shared_ptr<Playlist> proxy = row[columns.playlist];
