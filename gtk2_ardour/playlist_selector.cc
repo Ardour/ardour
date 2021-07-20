@@ -288,7 +288,7 @@ PlaylistSelector::redisplay()
 
 			if (tr == this_track && _mode==plSelect) {
 				child_row = *(model->append());
-			} else if (tr != this_track && _mode != plSelect) {
+			} else if (_mode != plSelect) {
 				child_row = *(model->append (row.children()));
 			}
 			
