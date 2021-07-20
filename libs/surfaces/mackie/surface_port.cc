@@ -167,9 +167,7 @@ void
 SurfacePort::reconnect ()
 {
 	_async_out->reconnect ();
-	_async_out->try_reconnect_missing ();
 	_async_in->reconnect ();
-	_async_in->try_reconnect_missing ();
 
 }
 
