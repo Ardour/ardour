@@ -414,6 +414,7 @@
     <ColorAlias name="stretch clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="stretch clock: text" alias="alert:red"/>
     <ColorAlias name="sync mark" alias="theme:contrasting clock"/>
+    <ColorAlias name="region mark" alias="theme:contrasting alt"/>
     <ColorAlias name="tempo bar" alias="neutral:background2"/>
     <ColorAlias name="tempo curve" alias="widget:blue"/>
     <ColorAlias name="tempo marker" alias="widget:orange"/>
@@ -501,5 +502,6 @@
     <Modifier name="transparent region base" modifier="= alpha:0.6"/>
    <Modifier name="time stretch fill" modifier="= alpha:0.5"/>
     <Modifier name="verbose canvas cursor" modifier="= alpha:0.4666"/>
+    <Modifier name="region mark" modifier="= alpha:1.0"/>
   </Modifiers>
 </Ardour>
