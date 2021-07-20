@@ -1733,6 +1733,54 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 
+	{
+		/* ensure each Source has a corresponding whole-file region */
+		SourceMap src_map (sources);
+		const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
+		for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
+			boost::shared_ptr<Region> r = i->second;
+			if (!r->whole_file ()) {
+				continue;
+			}
+			for (uint32_t n = 0; n < r->n_channels (); ++n) {
+				SourceMap::iterator j = src_map.find (r->source(n)->id());
+				if (j != src_map.end ()) {
+					/* found whole-file region for given source */
+					src_map.erase (j);
+				}
+			}
+		}
+		/* TODO try to be smart and combine %L/%R sources into stereo whole-file regions */
+		for (SourceMap::const_iterator i = src_map.begin(); i != src_map.end(); ++i) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
+			if (!afs) {
+				continue;
+			}
+
+			std::string region_name = region_name_from_path (afs->path (), false);
+			while (RegionFactory::region_by_name (region_name)) {
+				region_name = bump_name_once (region_name, '.');
+			}
+
+			PropertyList plist;
+			plist.add (Properties::name, region_name);
+			plist.add (Properties::whole_file, true);
+			plist.add (Properties::automatic, true);
+			plist.add (Properties::start, 0);
+			plist.add (Properties::length, afs->length (0));
+			plist.add (Properties::layer, 0);
+
+			SourceList srcs;
+			srcs.push_back (i->second);
+
+			if (RegionFactory::create (srcs, plist)) {
+				info << string_compose (_("Created region '%1' for source '%2'"), region_name, afs->name ()) << endmsg;
+			} else {
+				warning << string_compose (_("Failed to create region representation for source '%1'"), afs->name ()) << endmsg;
+			}
+		}
+	}
+
 	if ((child = find_named_node (node, "Routes")) == 0) {
 		error << _("Session: XML state has no routes section") << endmsg;
 		goto out;
