@@ -22,10 +22,12 @@
 #include <map>
 
 #include "canvas/box.h"
+#include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 
 namespace ARDOUR {
 	class Trigger;
+	class TriggerBox;
 }
 
 class TriggerEntry : public ArdourCanvas::Rectangle
@@ -35,6 +37,7 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 	~TriggerEntry ();
 
 	ARDOUR::Trigger& trigger() const { return _trigger; }
+	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 
   private:
 	ARDOUR::Trigger& _trigger;
@@ -43,11 +46,23 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 class TriggerBoxUI : public ArdourCanvas::Box
 {
    public:
-	TriggerBoxUI (ArdourCanvas::Item* parent);
+	TriggerBoxUI (ArdourCanvas::Item* parent, ARDOUR::TriggerBox&);
 	~TriggerBoxUI ();
 
    private:
+	ARDOUR::TriggerBox& _triggerbox;
+
+	void build ();
 };
 
+
+class TriggerBoxWidget : public ArdourCanvas::GtkCanvas
+{
+  public:
+	TriggerBoxWidget (ARDOUR::TriggerBox& tb);
+
+  private:
+	TriggerBoxUI* ui;
+};
 
 #endif /* __ardour_gtk_triggerbox_ui_h__ */
