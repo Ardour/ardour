@@ -146,6 +146,31 @@ Box::set_margin (double t, double r, double b, double l)
 }
 
 void
+Box::set_homogenous (bool yn)
+{
+	homogenous = yn;
+}
+
+void
+Box::reset_self ()
+{
+	if (_bounding_box_dirty) {
+		compute_bounding_box ();
+	}
+
+	if (!_bounding_box) {
+		self->hide ();
+		return;
+	}
+
+	Rect r (_bounding_box);
+
+	/* XXX need to shrink by margin */
+
+	self->set (r);
+}
+
+void
 Box::reposition_children ()
 {
 	Duple previous_edge = Duple (left_margin+left_padding, top_margin+top_padding);
