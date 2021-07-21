@@ -163,13 +163,13 @@ PluginScanDialog::start ()
 void
 PluginScanDialog::cancel_plugin_scan ()
 {
-	PluginManager::instance().cancel_plugin_scan();
+	//PluginManager::instance().cancel_plugin_scan();
 }
 
 void
 PluginScanDialog::cancel_plugin_all_scan_timeout ()
 {
-	PluginManager::instance().cancel_plugin_all_scan_timeout ();
+	//PluginManager::instance().cancel_plugin_all_scan_timeout ();
 	all_timeout_button.set_sensitive (false);
 	timeout_button.set_sensitive (false);
 }
@@ -177,7 +177,7 @@ PluginScanDialog::cancel_plugin_all_scan_timeout ()
 void
 PluginScanDialog::cancel_plugin_scan_timeout ()
 {
-	PluginManager::instance().cancel_plugin_scan_timeout ();
+	//PluginManager::instance().cancel_plugin_scan_timeout ();
 	timeout_button.set_sensitive (false);
 }
 
