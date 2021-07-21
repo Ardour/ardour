@@ -51,10 +51,9 @@ CoreAudioSource::CoreAudioSource (Session& s, const XMLNode& node)
 	: Source (s, node)
 	, AudioFileSource (s, node)
 {
-	init_cafile ();
-
-        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 	existence_check ();
+	init_cafile ();
 }
 
 /** Create a new CoreAudioSource from an existing file. Sources created with this
@@ -65,11 +64,11 @@ CoreAudioSource::CoreAudioSource (Session& s, const string& path, int chn, Flag 
 		AudioFileSource (s, path,
 			Source::Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
+	assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	existence_check ();
+
 	_channel = chn;
 	init_cafile ();
-
-        assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
-	existence_check ();
 }
 
 void
