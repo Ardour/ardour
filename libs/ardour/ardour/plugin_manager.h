@@ -81,9 +81,12 @@ public:
 	const ARDOUR::PluginInfoList& vst3_plugin_info ();
 
 	void refresh (bool cache_only = false);
-	void cancel_plugin_scan ();
-	void cancel_plugin_scan_timeout ();
-	void cancel_plugin_all_scan_timeout ();
+
+	void cancel_scan_all ();
+	void cancel_scan_one ();
+	void cancel_scan_timeout_all ();
+	void cancel_scan_timeout_one ();
+
 	void clear_vst_cache ();
 	void clear_vst_blacklist ();
 	void clear_au_cache ();
@@ -115,7 +118,7 @@ public:
 	 */
 	static std::string plugin_type_name (const PluginType, bool short_name = true);
 
-	bool cancelled () const { return _cancel_scan; }
+	bool cancelled () const { return _cancel_scan_all || _cancel_scan_one; }
 
 	void reset_stats ();
 	void stats_use_plugin (PluginInfoPtr const&);
@@ -286,11 +289,14 @@ private:
 	std::string windows_vst_path;
 	std::string lxvst_path;
 
-	bool _cancel_scan;
-	bool _cancel_scan_timeout;
-	bool _cancel_all_scan_timeout;
+	bool _cancel_scan_one;
+	bool _cancel_scan_all;
+	bool _cancel_scan_timeout_one;
+	bool _cancel_scan_timeout_all;
 
-	bool no_timeout () const { return _cancel_scan_timeout || _cancel_all_scan_timeout; }
+	void reset_scan_cancel_state (bool single = false);
+
+	bool no_timeout () const { return _cancel_scan_timeout_one || _cancel_scan_timeout_all; }
 
 	void detect_name_ambiguities (ARDOUR::PluginInfoList*);
 	void detect_type_ambiguities (ARDOUR::PluginInfoList&);

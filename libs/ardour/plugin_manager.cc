@@ -182,9 +182,10 @@ PluginManager::PluginManager ()
 	, _lv2_plugin_info(0)
 	, _au_plugin_info(0)
 	, _lua_plugin_info(0)
-	, _cancel_scan(false)
-	, _cancel_scan_timeout(false)
-	, _cancel_all_scan_timeout(false)
+	, _cancel_scan_one (false)
+	, _cancel_scan_all (false)
+	, _cancel_scan_timeout_one (false)
+	, _cancel_scan_timeout_all (false)
 {
 	char* s;
 	string lrdf_path;
@@ -463,9 +464,7 @@ PluginManager::refresh (bool cache_only)
 	load_scanlog ();
 
 	DEBUG_TRACE (DEBUG::PluginManager, "PluginManager::refresh\n");
-	_cancel_scan = false;
-	_cancel_scan_timeout = false;
-	_cancel_all_scan_timeout = false;
+	reset_scan_cancel_state ();
 
 	BootMessage (_("Scanning LADSPA Plugins"));
 	ladspa_refresh ();
@@ -601,7 +600,8 @@ PluginManager::refresh (bool cache_only)
 	}
 
 	BootMessage (_("Plugin Scan Complete..."));
-	_cancel_scan = false;
+
+	reset_scan_cancel_state ();
 	PluginScanMessage(X_("closeme"), "", false);
 
 	BootMessage (_("Indexing Plugins..."));
@@ -652,21 +652,39 @@ PluginManager::detect_ambiguities ()
 }
 
 void
-PluginManager::cancel_plugin_scan ()
+PluginManager::cancel_scan_all ()
 {
-	_cancel_scan = true;
+	_cancel_scan_all = true;
 }
 
 void
-PluginManager::cancel_plugin_scan_timeout ()
+PluginManager::cancel_scan_one ()
 {
-	_cancel_scan_timeout = true;
+	_cancel_scan_one = true;
 }
 
 void
-PluginManager::cancel_plugin_all_scan_timeout ()
+PluginManager::cancel_scan_timeout_one ()
 {
-	_cancel_all_scan_timeout = true;
+	_cancel_scan_timeout_one = true;
+}
+
+void
+PluginManager::cancel_scan_timeout_all ()
+{
+	_cancel_scan_timeout_all = true;
+}
+
+void
+PluginManager::reset_scan_cancel_state (bool single)
+{
+	_cancel_scan_one         = false;
+	_cancel_scan_timeout_one = false;
+	if (single) {
+		return;
+	}
+	_cancel_scan_all         = false;
+	_cancel_scan_timeout_all = false;
 }
 
 void
@@ -1191,7 +1209,7 @@ PluginManager::run_auv2_scanner_app (CAComponentDescription const& desc, AUv2Des
 		}
 
 		ARDOUR::PluginScanTimeout (timeout);
-		if (timeout > -900) {
+		if (timeout > -864000) {
 			--timeout;
 		}
 		Glib::usleep (100000);
@@ -1377,7 +1395,7 @@ PluginManager::au_refresh (bool cache_only)
 	size_t all_modules = audesc.size ();
 	for (std::vector<AUv2DescStr>::const_iterator i = audesc.begin (); i != audesc.end (); ++i, ++n) {
 		ARDOUR::PluginScanMessage (string_compose (_("AUv2 (%1 / %2)"), n, all_modules), i->to_s(), !cache_only && !cancelled());
-		_cancel_scan_timeout = false;
+		reset_scan_cancel_state (true);
 		auv2_discover (*i, cache_only);
 	}
 
@@ -1481,7 +1499,7 @@ PluginManager::run_vst2_scanner_app (std::string path, PSLEPtr psle) const
 		}
 
 		ARDOUR::PluginScanTimeout (timeout);
-		if (timeout > -900) {
+		if (timeout > -864000) {
 			--timeout;
 		}
 		Glib::usleep (100000);
@@ -1758,7 +1776,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 	size_t all_modules = plugin_objects.size ();
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x, ++n) {
 		ARDOUR::PluginScanMessage (string_compose (_("VST2 (%1 / %2)"), n, all_modules), *x, !cache_only && !cancelled());
-		_cancel_scan_timeout = false;
+		reset_scan_cancel_state (true);
 		vst2_discover (*x, Windows_VST, cache_only || cancelled());
 	}
 
@@ -1845,7 +1863,7 @@ PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 	size_t all_modules = plugin_objects.size ();
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x, ++n) {
 		ARDOUR::PluginScanMessage (string_compose (_("VST2 (%1 / %2)"), n, all_modules), *x, !cache_only && !cancelled());
-		_cancel_scan_timeout = false;
+		reset_scan_cancel_state (true);
 		vst2_discover (*x, MacVST, cache_only || cancelled());
 	}
 
@@ -1905,7 +1923,7 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 	size_t all_modules = plugin_objects.size ();
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x, ++n) {
 		ARDOUR::PluginScanMessage (string_compose (_("VST2 (%1 / %2)"), n, all_modules), *x, !cache_only && !cancelled());
-		_cancel_scan_timeout = false;
+		reset_scan_cancel_state (true);
 		vst2_discover (*x, LXVST, cache_only || cancelled());
 	}
 
@@ -2051,7 +2069,7 @@ PluginManager::vst3_discover_from_path (string const& path, bool cache_only)
 	size_t all_modules = plugin_objects.size ();
 	for (vector<string>::iterator i = plugin_objects.begin(); i != plugin_objects.end (); ++i, ++n) {
 		ARDOUR::PluginScanMessage (string_compose (_("VST3 (%1 / %2)"), n, all_modules), *i, !cache_only && !cancelled());
-		_cancel_scan_timeout = false;
+		reset_scan_cancel_state (true);
 		vst3_discover (*i, cache_only || cancelled ());
 	}
 
@@ -2239,7 +2257,7 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path, PSLEPtr psle) cons
 		}
 
 		ARDOUR::PluginScanTimeout (timeout);
-		if (timeout > -900) {
+		if (timeout > -864000) {
 			--timeout;
 		}
 		Glib::usleep (100000);
@@ -3189,13 +3207,9 @@ PluginManager::rescan_plugin (ARDOUR::PluginType type, std::string const& path_u
 		_plugin_scan_log.erase (i);
 	}
 
-	if (den < 2) {
-		_cancel_scan = false;
-		_cancel_all_scan_timeout = false;
-	}
+	reset_scan_cancel_state (den < 2 ? false : true);
 
 	whitelist (type, path_uid, true);
-	_cancel_scan_timeout = false;
 
 	/* force re-scan, remove cache file */
 	std::string fn = cache_file (type, path_uid);
@@ -3256,7 +3270,8 @@ PluginManager::rescan_plugin (ARDOUR::PluginType type, std::string const& path_u
 		return (rv >= 0 || erased);
 	}
 
-	_cancel_scan = false;
+	reset_scan_cancel_state ();
+
 	if (rv < 0) {
 		save_scanlog ();
 		if (erased) {
@@ -3285,8 +3300,7 @@ PluginManager::rescan_faulty ()
 		}
 	}
 
-	_cancel_scan = false;
-	_cancel_all_scan_timeout = false;
+	reset_scan_cancel_state ();
 
 	size_t n = 1;
 	size_t all_modules = psl.size ();
@@ -3296,7 +3310,8 @@ PluginManager::rescan_faulty ()
 			break;
 		}
 	}
-	_cancel_scan = false;
+
+	reset_scan_cancel_state ();
 	PluginScanMessage(X_("closeme"), "", false);
 
 	if (changed) {
