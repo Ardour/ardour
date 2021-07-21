@@ -664,10 +664,10 @@ PulseAudioBackend::stop ()
 
 	_run = false;
 
-	pa_threaded_mainloop_lock (p_mainloop);
 	if (pa_stream_is_corked (p_stream) == 0) {
 		cork_pulse (true);
 	}
+	pa_threaded_mainloop_lock (p_mainloop);
 	sync_pulse (pa_stream_flush (p_stream, stream_operation_cb, this));
 
 	if (pthread_join (_main_thread, &status)) {
