@@ -43,10 +43,10 @@ class TriggerBox;
 
 class LIBARDOUR_API Trigger {
   public:
-	Trigger (boost::shared_ptr<Region>);
+	Trigger (size_t index, boost::shared_ptr<Region>);
 	virtual ~Trigger() {}
 
-	virtual void bang (TriggerBox&, Temporal::Beats const &, samplepos_t) = 0;
+	virtual void bang (TriggerBox&) = 0;
 	virtual void unbang (TriggerBox&, Temporal::Beats const &, samplepos_t) = 0;
 
 	bool running() const { return _running; }
@@ -82,6 +82,9 @@ class LIBARDOUR_API Trigger {
 	void set_quantization (Temporal::Beats const &);
 
 	bool stop_requested() const { return _stop_requested; }
+	virtual void stop();
+
+	size_t index() const { return _index; }
 
 	/* Managed by TriggerBox */
 	samplepos_t fire_samples;
@@ -90,6 +93,7 @@ class LIBARDOUR_API Trigger {
   protected:
 	bool _running;
 	bool _stop_requested;
+	size_t _index;
 	LaunchStyle  _launch_style;
 	FollowAction _follow_action;
 	boost::shared_ptr<Region> _region;
@@ -100,10 +104,10 @@ class LIBARDOUR_API Trigger {
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
   public:
-	AudioTrigger (boost::shared_ptr<AudioRegion>);
+	AudioTrigger (size_t index, boost::shared_ptr<AudioRegion>);
 	~AudioTrigger ();
 
-	void bang (TriggerBox&, Temporal::Beats const & , samplepos_t);
+	void bang (TriggerBox&);
 	void unbang (TriggerBox&, Temporal::Beats const & , samplepos_t);
 
 	Sample* run (uint32_t channel, pframes_t& nframes, bool& need_butler);
@@ -117,6 +121,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
+	void retrigger ();
 };
 
 class LIBARDOUR_API TriggerBox : public Processor

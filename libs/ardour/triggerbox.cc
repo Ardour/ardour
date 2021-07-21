@@ -31,6 +31,10 @@ TriggerBox::TriggerBox (Session& s)
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (63), 3));
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (64), 4));
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (65), 5));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (66), 6));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (67), 7));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (68), 8));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (69), 9));
 
 
 	load_some_samples ();
@@ -42,19 +46,23 @@ TriggerBox::load_some_samples ()
 	/* XXX TESTING ONLY */
 
 	char const * paths[] = {
-		"RAZOR_6-pack_Disco_Bell.wav",
-		"RAZOR_6-pack_Percuvox.wav",
-		"RAZOR_6-pack_GentleWobbler_Up+Down.wav",
-		"RAZOR_6-pack_Rolling_Triplets.wav",
-		"RAZOR_6-pack_Leaky_Chamber.wav",
-		"RAZOR_6-pack_Rubber_Wobbler.wav",
+		"AS_AP_Perc_Loop_01_125bpm.wav",
+		"AS_AP_Perc_Loop_05_125bpm.wav",
+		"AS_AP_Perc_Loop_09_125bpm.wav",
+		"AS_AP_Perc_Loop_02_125bpm.wav",
+		"AS_AP_Perc_Loop_06_125bpm.wav",
+		"AS_AP_Perc_Loop_10_125bpm.wav",
+		"AS_AP_Perc_Loop_03_125bpm.wav",
+		"AS_AP_Perc_Loop_07_125bpm.wav",
+		"AS_AP_Perc_Loop_04_125bpm.wav",
+		"AS_AP_Perc_Loop_08_125bpm.wav",
 		0
 	};
 
 	try {
 		for (size_t n = 0; paths[n]; ++n) {
 
-			string dir = "/usr/local/music/samples/Razor_6-pack_RawLoops_128BPM/";
+			string dir = "/usr/local/music/samples/Loops\ \(WAV\)/ASHRAM\ Afro\ Percussion\ Loops/";
 			string path = dir + paths[n];
 
 
@@ -83,7 +91,7 @@ TriggerBox::load_some_samples ()
 
 			boost::shared_ptr<Region> the_region (RegionFactory::create (src_list, plist, false));
 
-			all_triggers[n] = new AudioTrigger (boost::dynamic_pointer_cast<AudioRegion> (the_region));
+			all_triggers[n] = new AudioTrigger (n, boost::dynamic_pointer_cast<AudioRegion> (the_region));
 		}
 	} catch (std::exception& e) {
 		cerr << "loading samples failed: " << e.what() << endl;
@@ -202,8 +210,12 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 
 			if ((*ev).is_note_on()) {
 
-				if (!t->running() && find (pending_on_triggers.begin(), pending_on_triggers.end(), t) == pending_on_triggers.end()) {
-					pending_on_triggers.push_back (t);
+				if (!t->running()) {
+					if (find (pending_on_triggers.begin(), pending_on_triggers.end(), t) == pending_on_triggers.end()) {
+						pending_on_triggers.push_back (t);
+					}
+				} else {
+					t->bang (*this);
 				}
 
 				if (!_session.transport_state_rolling()) {
@@ -284,7 +296,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		if (trigger->stop_requested()) {
 			trigger_samples = nframes - (trigger->fire_samples - start_sample);
 		} else if (!trigger->running()) {
-			trigger->bang (*this, trigger->fire_beats, trigger->fire_samples);
+			trigger->bang (*this);
 			dest_offset = std::max (samplepos_t (0), trigger->fire_samples - start_sample);
 			trigger_samples = nframes - dest_offset;
 		}
@@ -339,10 +351,11 @@ TriggerBox::set_state (const XMLNode&, int version)
 
 /*--------------------*/
 
-Trigger::Trigger (boost::shared_ptr<Region> r)
+Trigger::Trigger (size_t n, boost::shared_ptr<Region> r)
 	: _running (false)
 	, _stop_requested (false)
-	, _launch_style (Gate)
+	, _index (n)
+	, _launch_style (Loop)
 	, _follow_action (Stop)
 	, _region (r)
 {
@@ -376,10 +389,16 @@ Trigger::quantization () const
 	return _quantization;
 }
 
+void
+Trigger::stop ()
+{
+	_stop_requested = true;
+}
+
 /*--------------------*/
 
-AudioTrigger::AudioTrigger (boost::shared_ptr<AudioRegion> r)
-	: Trigger (r)
+AudioTrigger::AudioTrigger (size_t n, boost::shared_ptr<AudioRegion> r)
+	: Trigger (n, r)
 	, data (0)
 	, length (0)
 {
@@ -448,14 +467,36 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 }
 
 void
-AudioTrigger::bang (TriggerBox& /*proc*/, Temporal::Beats const &, samplepos_t)
+AudioTrigger::retrigger ()
 {
-	/* user triggered this, and we need to get things set up for calls to
-	 * run()
-	 */
-
 	for (std::vector<samplecnt_t>::iterator ri = read_index.begin(); ri != read_index.end(); ++ri) {
 		(*ri) = 0;
+	}
+}
+
+void
+AudioTrigger::bang (TriggerBox& /*proc*/)
+{
+	/* user "hit" the trigger in a way that means "start" */
+
+
+	switch (_launch_style) {
+	case Loop:
+		retrigger ();
+		break;
+	case Gate:
+		retrigger ();
+		break;
+	case Toggle:
+		if (_running) {
+			_stop_requested = true;
+		} else {
+			retrigger ();
+		}
+		break;
+	case Repeat:
+		retrigger ();
+		break;
 	}
 
 	_running = true;
@@ -464,7 +505,22 @@ AudioTrigger::bang (TriggerBox& /*proc*/, Temporal::Beats const &, samplepos_t)
 void
 AudioTrigger::unbang (TriggerBox& /*proc*/, Temporal::Beats const &, samplepos_t)
 {
-	_stop_requested = true;
+	/* user "hit" the trigger in a way that means "stop" */
+
+	switch (_launch_style) {
+	case Loop:
+		/* do nothing, wait for next "start" */
+		break;
+	case Gate:
+		_stop_requested = true;
+		break;
+	case Toggle:
+		/* do nothing ... wait for next "start" */
+		break;
+	case Repeat:
+		_stop_requested = true;
+		break;
+	}
 }
 
 Sample*
