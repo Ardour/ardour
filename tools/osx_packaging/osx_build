@@ -556,6 +556,10 @@ if test -f "$Frameworks/ardour-vst3-scanner"; then
 	executables="$executables ../lib/ardour-vst3-scanner"
 fi
 
+if test -f "$Frameworks/ardour-su-scanner"; then
+	executables="$executables ../lib/ardour-au-scanner"
+fi
+
 for exe in $executables; do
 	echo "Processing Executable: $exe"
 	EXE=$APPROOT/MacOS/$exe
