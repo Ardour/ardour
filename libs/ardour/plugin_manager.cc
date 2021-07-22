@@ -186,6 +186,7 @@ PluginManager::PluginManager ()
 	, _cancel_scan_all (false)
 	, _cancel_scan_timeout_one (false)
 	, _cancel_scan_timeout_all (false)
+	, _enable_scan_timeout (false)
 {
 	char* s;
 	string lrdf_path;
@@ -652,6 +653,12 @@ PluginManager::detect_ambiguities ()
 }
 
 void
+PluginManager::enable_scan_timeout ()
+{
+	_enable_scan_timeout = true;
+}
+
+void
 PluginManager::cancel_scan_all ()
 {
 	_cancel_scan_all = true;
@@ -685,6 +692,7 @@ PluginManager::reset_scan_cancel_state (bool single)
 	}
 	_cancel_scan_all         = false;
 	_cancel_scan_timeout_all = false;
+	_enable_scan_timeout     = false;
 }
 
 void
@@ -1199,19 +1207,22 @@ PluginManager::run_auv2_scanner_app (CAComponentDescription const& desc, AUv2Des
 		return false;
 	}
 
-	int timeout = Config->get_vst_scan_timeout(); // deciseconds
+	int timeout = _enable_scan_timeout ? 1 + Config->get_plugin_scan_timeout() : 0; /* deciseconds */
 	bool notime = (timeout <= 0);
 
 	while (scanner.is_running () && (notime || timeout > 0)) {
 		if (!notime && no_timeout ()) {
 			notime = true;
 			timeout = -1;
+		} else if (notime && !no_timeout() && _enable_scan_timeout) {
+			notime = false;
+			timeout = 1 + Config->get_plugin_scan_timeout ();
 		}
 
-		ARDOUR::PluginScanTimeout (timeout);
 		if (timeout > -864000) {
 			--timeout;
 		}
+		ARDOUR::PluginScanTimeout (timeout);
 		Glib::usleep (100000);
 
 		if (cancelled () || (!notime && timeout == 0)) {
@@ -1489,19 +1500,22 @@ PluginManager::run_vst2_scanner_app (std::string path, PSLEPtr psle) const
 		return false;
 	}
 
-	int timeout = Config->get_vst_scan_timeout(); // deciseconds
+	int timeout = _enable_scan_timeout ? 1 + Config->get_plugin_scan_timeout() : 0; /* deciseconds */
 	bool notime = (timeout <= 0);
 
 	while (scanner.is_running () && (notime || timeout > 0)) {
 		if (!notime && no_timeout ()) {
 			notime = true;
 			timeout = -1;
+		} else if (notime && !no_timeout() && _enable_scan_timeout) {
+			notime = false;
+			timeout = 1 + Config->get_plugin_scan_timeout ();
 		}
 
-		ARDOUR::PluginScanTimeout (timeout);
 		if (timeout > -864000) {
 			--timeout;
 		}
+		ARDOUR::PluginScanTimeout (timeout);
 		Glib::usleep (100000);
 
 		if (cancelled () || (!notime && timeout == 0)) {
@@ -2247,19 +2261,22 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path, PSLEPtr psle) cons
 		return false;
 	}
 
-	int timeout = Config->get_vst_scan_timeout(); // deciseconds
+	int timeout = _enable_scan_timeout ? 1 + Config->get_plugin_scan_timeout() : 0; /* deciseconds */
 	bool notime = (timeout <= 0);
 
 	while (scanner.is_running () && (notime || timeout > 0)) {
 		if (!notime && no_timeout ()) {
 			notime = true;
 			timeout = -1;
+		} else if (notime && !no_timeout() && _enable_scan_timeout) {
+			notime = false;
+			timeout = 1 + Config->get_plugin_scan_timeout ();
 		}
 
-		ARDOUR::PluginScanTimeout (timeout);
 		if (timeout > -864000) {
 			--timeout;
 		}
+		ARDOUR::PluginScanTimeout (timeout);
 		Glib::usleep (100000);
 
 		if (cancelled () || (!notime && timeout == 0)) {

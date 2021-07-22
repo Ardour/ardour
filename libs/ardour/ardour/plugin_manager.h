@@ -86,6 +86,7 @@ public:
 	void cancel_scan_one ();
 	void cancel_scan_timeout_all ();
 	void cancel_scan_timeout_one ();
+	void enable_scan_timeout ();
 
 	void clear_vst_cache ();
 	void clear_vst_blacklist ();
@@ -293,6 +294,7 @@ private:
 	bool _cancel_scan_all;
 	bool _cancel_scan_timeout_one;
 	bool _cancel_scan_timeout_all;
+	bool _enable_scan_timeout;
 
 	void reset_scan_cancel_state (bool single = false);
 
