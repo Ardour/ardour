@@ -518,15 +518,11 @@ PluginManager::refresh (bool cache_only)
 	}
 #endif //Native Mac VST SUPPORT
 
-#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT)
+#if !defined NDEBUG & (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT)
 	if (!cache_only) {
 		string fn = Glib::build_filename (ARDOUR::user_cache_directory(), VST2_BLACKLIST);
 		if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-			try {
-				std::string bl = Glib::file_get_contents (fn);
-				PBD::info << _("VST 2 Blacklist: ") << "\n" << bl << "-----" << endmsg;
-			} catch (Glib::FileError const& err) {
-			}
+			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST 2 Blacklist: %1\n", fn));
 		}
 	}
 #endif
@@ -539,16 +535,15 @@ PluginManager::refresh (bool cache_only)
 	}
 	vst3_refresh (cache_only);
 
+#ifndef NDEBUG
 	if (!cache_only) {
 		string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST3_BLACKLIST);
 		if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-			try {
-				std::string bl = Glib::file_get_contents (fn);
-				PBD::info << _("VST 3 Blacklist: ") << "\n" << bl << "-----" << endmsg;
-			} catch (Glib::FileError const& err) {
-			}
+			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST3 Blacklist: %1\n", fn));
 		}
 	}
+#endif
+
 	bool conceal_vst2 = Config->get_conceal_vst2_if_vst3_exists();
 	if (conceal_vst2) {
 		conceal_duplicates (_windows_vst_plugin_info, _vst3_plugin_info);
@@ -567,16 +562,14 @@ PluginManager::refresh (bool cache_only)
 	}
 	au_refresh (cache_only);
 
+#ifndef NDEBUG
 	if (!cache_only) {
 		string fn = Glib::build_filename (ARDOUR::user_cache_directory(), AUV2_BLACKLIST);
 		if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-			try {
-				std::string bl = Glib::file_get_contents (fn);
-				PBD::info << _("Audio Unit Blacklist: ") << "\n" << bl << "-----" << endmsg;
-			} catch (Glib::FileError const& err) {
-			}
+			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("AUv2 Blacklist: %1\n", fn));
 		}
 	}
+#endif
 #endif
 
 	/* unset concealed plugins */
