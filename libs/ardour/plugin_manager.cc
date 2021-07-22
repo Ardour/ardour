@@ -797,7 +797,7 @@ PluginManager::ladspa_refresh ()
 	size_t n = 1;
 	size_t all_modules = ladspa_modules.size ();
 	for (vector<std::string>::iterator i = ladspa_modules.begin(); i != ladspa_modules.end(); ++i, ++n) {
-		ARDOUR::PluginScanMessage (string_compose (_("LADSPA (%1 / %2)"), n, all_modules), *i, !cancelled());
+		ARDOUR::PluginScanMessage (string_compose (_("LADSPA (%1 / %2)"), n, all_modules), *i, false);
 		ladspa_discover (*i);
 #ifdef MIXBUS
 		if (i->find ("harrison_channelstrip") != std::string::npos) {
@@ -1398,8 +1398,8 @@ PluginManager::au_refresh (bool cache_only)
 	size_t n = 1;
 	size_t all_modules = audesc.size ();
 	for (std::vector<AUv2DescStr>::const_iterator i = audesc.begin (); i != audesc.end (); ++i, ++n) {
-		ARDOUR::PluginScanMessage (string_compose (_("AUv2 (%1 / %2)"), n, all_modules), i->to_s(), !cache_only && !cancelled());
 		reset_scan_cancel_state (true);
+		ARDOUR::PluginScanMessage (string_compose (_("AUv2 (%1 / %2)"), n, all_modules), i->to_s(), !cache_only && !cancelled());
 		auv2_discover (*i, cache_only);
 	}
 
@@ -1782,8 +1782,8 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 	size_t n = 1;
 	size_t all_modules = plugin_objects.size ();
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x, ++n) {
-		ARDOUR::PluginScanMessage (string_compose (_("VST2 (%1 / %2)"), n, all_modules), *x, !cache_only && !cancelled());
 		reset_scan_cancel_state (true);
+		ARDOUR::PluginScanMessage (string_compose (_("VST2 (%1 / %2)"), n, all_modules), *x, !cache_only && !cancelled());
 		vst2_discover (*x, Windows_VST, cache_only || cancelled());
 	}
 
@@ -1869,8 +1869,8 @@ PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 	size_t n = 1;
 	size_t all_modules = plugin_objects.size ();
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x, ++n) {
-		ARDOUR::PluginScanMessage (string_compose (_("VST2 (%1 / %2)"), n, all_modules), *x, !cache_only && !cancelled());
 		reset_scan_cancel_state (true);
+		ARDOUR::PluginScanMessage (string_compose (_("VST2 (%1 / %2)"), n, all_modules), *x, !cache_only && !cancelled());
 		vst2_discover (*x, MacVST, cache_only || cancelled());
 	}
 
@@ -1929,8 +1929,8 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 	size_t n = 1;
 	size_t all_modules = plugin_objects.size ();
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x, ++n) {
-		ARDOUR::PluginScanMessage (string_compose (_("VST2 (%1 / %2)"), n, all_modules), *x, !cache_only && !cancelled());
 		reset_scan_cancel_state (true);
+		ARDOUR::PluginScanMessage (string_compose (_("VST2 (%1 / %2)"), n, all_modules), *x, !cache_only && !cancelled());
 		vst2_discover (*x, LXVST, cache_only || cancelled());
 	}
 
@@ -2075,8 +2075,8 @@ PluginManager::vst3_discover_from_path (string const& path, bool cache_only)
 	size_t n = 1;
 	size_t all_modules = plugin_objects.size ();
 	for (vector<string>::iterator i = plugin_objects.begin(); i != plugin_objects.end (); ++i, ++n) {
-		ARDOUR::PluginScanMessage (string_compose (_("VST3 (%1 / %2)"), n, all_modules), *i, !cache_only && !cancelled());
 		reset_scan_cancel_state (true);
+		ARDOUR::PluginScanMessage (string_compose (_("VST3 (%1 / %2)"), n, all_modules), *i, !cache_only && !cancelled());
 		vst3_discover (*i, cache_only || cancelled ());
 	}
 
@@ -3316,7 +3316,7 @@ PluginManager::rescan_faulty ()
 	size_t all_modules = psl.size ();
 	for (PluginScanLog::const_iterator i = psl.begin(); i != psl.end(); ++i, ++n) {
 		changed |= rescan_plugin ((*i)->type (), (*i)->path (), n, all_modules);
-		if (cancelled ()) {
+		if (_cancel_scan_all) {
 			break;
 		}
 	}
