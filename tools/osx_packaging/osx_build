@@ -393,6 +393,9 @@ if test -d $BUILD_ROOT/libs/fst ; then
 	cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/ || true
 	cp $BUILD_ROOT/libs/fst/ardour-vst3-scanner* $Frameworks/ || true
 fi
+if test -d $BUILD_ROOT/libs/auscan ; then
+	cp $BUILD_ROOT/libs/auscan/ardour-au-scanner* $Frameworks/ || true
+fi
 
 # vfork wrapper
 if test -f $BUILD_ROOT/libs/vfork/ardour-exec-wrapper ; then
