@@ -41,7 +41,6 @@ private:
 	Gtk::Label                   timeout_info;
 	Gtk::ProgressBar             pbar;
 	ArdourWidgets::ArdourButton  btn_timeout_enable;
-	ArdourWidgets::ArdourButton  btn_timeout_one;
 	ArdourWidgets::ArdourButton  btn_cancel_all;
 	ArdourWidgets::ArdourButton  btn_cancel_one;
 	Glib::RefPtr<Gtk::SizeGroup> btn_size_group;
@@ -55,8 +54,6 @@ private:
 	void cancel_scan_all ();
 	void cancel_scan_one ();
 	void enable_scan_timeout ();
-	void cancel_scan_timeout_one ();
-
 	void disable_per_plugin_interaction ();
 
 	void plugin_scan_timeout (int timeout);

@@ -46,7 +46,6 @@ using namespace std;
 PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* parent)
 	: ArdourDialog (_("Scanning for plugins"))
 	, btn_timeout_enable (_("Quick Scan"))
-	, btn_timeout_one (_("Wait indefinitely for this plugin"))
 	, btn_cancel_all (_("Abort scanning (for all plugins)"))
 	, btn_cancel_one (_("Skip this plugin"))
 	, btn_size_group (SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
@@ -64,15 +63,8 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 
 	if (cache_only) {
 		pbar.set_no_show_all ();
-		btn_timeout_one.set_no_show_all ();
-
 		btn_timeout_enable.set_no_show_all ();
 		btn_cancel_one.set_no_show_all ();
-#if 0 /* hide hide Pbar until timeout is enabled */
-	} else {
-		pbar.set_no_show_all ();
-		btn_timeout_one.set_no_show_all ();
-#endif
 	}
 
 	btn_size_group->add_widget (btn_timeout_enable);
@@ -112,13 +104,11 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 
 	btn_cancel_all.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_all));
 	btn_cancel_one.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_one));
-	btn_timeout_one.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_timeout_one));
 	btn_timeout_enable.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::enable_scan_timeout));
 
 	/* set tooltips */
 	ArdourWidgets::set_tooltip (btn_cancel_all, _("Cancel Scanning all plugins, and close this dialog.  Your plugin list might be incomplete."));
 	ArdourWidgets::set_tooltip (btn_cancel_one, _("Cancel Scanning this plugin.  It will be Ignored in the plugin list."));
-	ArdourWidgets::set_tooltip (btn_timeout_one, _("Click this button to puase scanning while you handle any dialogs that the plugin requires."));
 	ArdourWidgets::set_tooltip (btn_timeout_enable, _("When enabled, scan will ignore plugins that take a long time to scan."));
 
 	/* window stacking */
@@ -210,14 +200,6 @@ PluginScanDialog::enable_scan_timeout ()
 	PluginManager::instance ().enable_scan_timeout ();
 	btn_timeout_enable.set_sensitive (false);
 	pbar.show ();
-	btn_timeout_one.show ();
-}
-
-void
-PluginScanDialog::cancel_scan_timeout_one ()
-{
-	PluginManager::instance ().cancel_scan_timeout_one ();
-	btn_timeout_one.set_sensitive (false);
 }
 
 void
@@ -227,7 +209,6 @@ PluginScanDialog::disable_per_plugin_interaction ()
 	pbar.set_text ("");
 	pbar.set_fraction (0);
 	btn_cancel_one.set_sensitive (false);
-	btn_timeout_one.set_sensitive (false);
 }
 
 static void
@@ -272,7 +253,6 @@ PluginScanDialog::plugin_scan_timeout (int timeout)
 			pbar.set_text (_("Scanning"));
 			timeout_info.hide ();
 		}
-		btn_timeout_one.set_sensitive (timeout < scan_timeout);
 		pbar.set_sensitive (true);
 		pbar.set_fraction ((float)timeout / (float)scan_timeout);
 	} else if (timeout < 0) {
@@ -281,7 +261,6 @@ PluginScanDialog::plugin_scan_timeout (int timeout)
 		pbar.set_sensitive (true);
 		pbar.set_text (string_compose (_("Scanning since %1"), buf));
 		pbar.pulse ();
-		btn_timeout_one.set_sensitive (false);
 		if (timeout <= -300) {
 			timeout_info.show ();
 		}
@@ -338,10 +317,6 @@ PluginScanDialog::message_handler (std::string type, std::string plugin, bool ca
 		format_frame.set_label (type);
 		message.set_text (_("Scanning: ") + PBD::basename_nosuffix (plugin));
 		show ();
-	}
-
-	if (!can_cancel || !cancelled) {
-		btn_timeout_one.set_sensitive (false);
 	}
 
 	btn_cancel_one.set_sensitive (can_cancel && !cancelled);
