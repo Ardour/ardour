@@ -1139,24 +1139,18 @@ class FontScalingOptions : public HSliderOption
 	}
 };
 
-class VstTimeOutSliderOption : public HSliderOption
+class PluginScanTimeOutSliderOption : public HSliderOption
 {
 public:
-	VstTimeOutSliderOption (RCConfiguration* c)
+	PluginScanTimeOutSliderOption (RCConfiguration* c)
 		: HSliderOption ("vst-scan-timeout", _("Scan Time Out"),
-				sigc::mem_fun (*c, &RCConfiguration::get_vst_scan_timeout),
-				sigc::mem_fun (*c, &RCConfiguration::set_vst_scan_timeout),
-				0, 3000, 50, 50)
+				sigc::mem_fun (*c, &RCConfiguration::get_plugin_scan_timeout),
+				sigc::mem_fun (*c, &RCConfiguration::set_plugin_scan_timeout),
+				1, 3000, 50, 50)
 	{
 		_label.set_alignment (1.0, 0.5); // match buttons below
 		_hscale.set_digits (0);
 		_hscale.set_draw_value(false);
-#ifdef COMPILER_MSVC
-		std::wstring infin = L"\u221e";  // infinity
-		_hscale.add_mark(   0,  Gtk::POS_TOP, g_utf16_to_utf8(reinterpret_cast<gunichar2 const*>(infin.c_str()), -1, NULL, NULL, NULL));
-#else
-		_hscale.add_mark(   0,  Gtk::POS_TOP, _("\u221e")); // infinity
-#endif
 		_hscale.add_mark( 300,  Gtk::POS_TOP, _("30 sec"));
 		_hscale.add_mark( 600,  Gtk::POS_TOP, _("1 min"));
 		_hscale.add_mark(1200,  Gtk::POS_TOP, _("2 mins"));
@@ -3680,11 +3674,13 @@ These settings will only take effect after %1 is restarted.\n\
 			new RcActionButton (_("Scan for Plugins"),
 				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
 
+	add_option (_("Plugins"), new PluginScanTimeOutSliderOption (_rc_config));
 #endif
 
 	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined VST3_SUPPORT)
+
 	bo = new BoolOption (
 			"show-plugin-scan-window",
 			_("Always Display Plugin Scan Progress"),
@@ -3746,8 +3742,6 @@ These settings will only take effect after %1 is restarted.\n\
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> additional information for every plugin is added to the Log Window."));
 #endif
-
-	add_option (_("Plugins/VST"), new VstTimeOutSliderOption (_rc_config));
 
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST 2.x")));
