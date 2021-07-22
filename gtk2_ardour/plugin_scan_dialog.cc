@@ -45,7 +45,7 @@ using namespace std;
 
 PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* parent)
 	: ArdourDialog (_("Scanning for plugins"))
-	, btn_timeout_enable (_("Enable scan timeout"))
+	, btn_timeout_enable (_("Quick Scan"))
 	, btn_timeout_one (_("Wait indefinitely for this plugin"))
 	, btn_cancel_all (_("Abort scanning (for all plugins)"))
 	, btn_cancel_one (_("Skip this plugin"))
@@ -76,7 +76,7 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	}
 
 	btn_size_group->add_widget (btn_timeout_enable);
-	btn_size_group->add_widget (btn_cancel_one);
+	btn_size_group->add_widget (btn_cancel_all);
 
 	int         row = 0;
 	Gtk::Table* tbl = manage (new Table (4, 2, false));
@@ -84,8 +84,6 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	tbl->attach (message,            0, 2, row, row + 1, EXPAND | FILL, EXPAND | FILL, 0, 8); ++row;
 	tbl->attach (timeout_info,       0, 2, row, row + 1, EXPAND | FILL, SHRINK,        0, 8); ++row;
 	tbl->attach (pbar,               0, 1, row, row + 1, EXPAND | FILL, SHRINK,        4, 2);
-	tbl->attach (btn_timeout_one,    1, 2, row, row + 1, FILL,          SHRINK,        4, 2); ++row;
-	tbl->attach (btn_timeout_enable, 0, 1, row, row + 1, FILL,          SHRINK,        4, 2);
 	tbl->attach (btn_cancel_one,     1, 2, row, row + 1, FILL,          SHRINK,        4, 4); ++row;
 	tbl->show_all ();
 	/* clang-format on */
@@ -96,9 +94,9 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	format_frame.set_border_width (4);
 	format_frame.set_shadow_type (Gtk::SHADOW_ETCHED_IN);
 
-	Gtk::HBox* cancel_all_padder = manage (new HBox ());
-	cancel_all_padder->set_border_width (4);
-	cancel_all_padder->pack_start (btn_cancel_all);
+	Gtk::HBox* cancel_all_padder = manage (new HBox (true));
+	cancel_all_padder->pack_start (btn_timeout_enable, true, true, 4);
+	cancel_all_padder->pack_start (btn_cancel_all, true, true, 4);
 
 	/* Top level packaging */
 	VBox* vbox = get_vbox ();
