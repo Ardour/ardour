@@ -3854,14 +3854,12 @@ These settings will only take effect after %1 is restarted.\n\
 #endif
 
 	bo = new BoolOption (
-			"discover-audio-units",
-			_("Scan for [new] AudioUnit Plugins on Application Start"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_audio_units),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_audio_units)
+			"use-audio-units",
+			_("Enable Autio Unit support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_audio_units),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_audio_units)
 			);
 	add_option (_("Plugins/Audio Unit"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    _("<b>When enabled</b> Audio Unit Plugins are discovered on application start. When disabled AU plugins will only be available after triggering a 'Scan' manually. The first successful scan will enable AU auto-scan, Any crash during plugin discovery will disable it."));
 
 	add_option (_("Plugins/Audio Unit"),
 			new RcActionButton (_("Clear"),
