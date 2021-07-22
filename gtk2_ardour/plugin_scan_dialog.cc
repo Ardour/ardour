@@ -45,10 +45,11 @@ using namespace std;
 
 PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* parent)
 	: ArdourDialog (_("Scanning for plugins"))
-	, btn_timeout_all (_("Extend plugin timeouts indefinitely"))
+	, btn_timeout_enable (_("Enable scan timeout"))
 	, btn_timeout_one (_("Wait indefinitely for this plugin"))
 	, btn_cancel_all (_("Abort scanning (for all plugins)"))
 	, btn_cancel_one (_("Skip this plugin"))
+	, btn_size_group (SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, cache_only (just_cached)
 	, verbose (v)
 	, delayed_close (false)
@@ -61,18 +62,26 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	pbar.set_orientation (Gtk::PROGRESS_RIGHT_TO_LEFT);
 	pbar.set_pulse_step (0.1);
 
+#if 0 // hide Pbar until timeout is enabled
+	pbar.set_no_show_all ();
+	btn_timeout_one.set_no_show_all ();
+#endif
+
+	btn_size_group->add_widget (btn_timeout_enable);
+	btn_size_group->add_widget (btn_cancel_one);
+
 	int         row = 0;
-	Gtk::Table* tbl = manage (new Table (3, 2, false));
+	Gtk::Table* tbl = manage (new Table (4, 2, false));
 	/* clang-format off */
-	tbl->attach (message,         0, 2, row, row + 1, EXPAND | FILL, EXPAND | FILL, 0, 4); ++row;
-	tbl->attach (timeout_info,    0, 2, row, row + 1, EXPAND | FILL, SHRINK,        0, 4); ++row;
-	tbl->attach (pbar,            0, 1, row, row + 1, EXPAND | FILL, SHRINK,        2, 2);
-	tbl->attach (btn_timeout_one, 1, 2, row, row + 1, FILL,          SHRINK,        2, 2); ++row;
-	tbl->attach (btn_cancel_one,  0, 2, row, row + 1, FILL,          SHRINK,        2, 2); ++row;
+	tbl->attach (message,            0, 2, row, row + 1, EXPAND | FILL, EXPAND | FILL, 0, 8); ++row;
+	tbl->attach (timeout_info,       0, 2, row, row + 1, EXPAND | FILL, SHRINK,        0, 8); ++row;
+	tbl->attach (pbar,               0, 1, row, row + 1, EXPAND | FILL, SHRINK,        4, 2);
+	tbl->attach (btn_timeout_one,    1, 2, row, row + 1, FILL,          SHRINK,        4, 2); ++row;
+	tbl->attach (btn_timeout_enable, 0, 1, row, row + 1, FILL,          SHRINK,        4, 2);
+	tbl->attach (btn_cancel_one,     1, 2, row, row + 1, FILL,          SHRINK,        4, 4); ++row;
 	tbl->show_all ();
 	/* clang-format on */
 
-	tbl->set_spacings (8);
 	tbl->set_border_width (8);
 
 	format_frame.add (*tbl);
@@ -83,15 +92,10 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	cancel_all_padder->set_border_width (4);
 	cancel_all_padder->pack_start (btn_cancel_all);
 
-	Gtk::HBox* timeout_all_padder = manage (new HBox ());
-	timeout_all_padder->set_border_width (4);
-	timeout_all_padder->pack_start (btn_timeout_all);
-
 	/* Top level packaging */
 	VBox* vbox = get_vbox ();
 	vbox->set_size_request (400, -1);
 
-	vbox->pack_start (*timeout_all_padder, false, false);
 	vbox->pack_start (format_frame, true, true);
 	vbox->pack_start (*cancel_all_padder, false, false);
 	vbox->show_all ();
@@ -103,13 +107,13 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	btn_cancel_all.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_all));
 	btn_cancel_one.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_one));
 	btn_timeout_one.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_timeout_one));
-	btn_timeout_all.signal_toggled ().connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_timeout_all));
+	btn_timeout_enable.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::enable_scan_timeout));
 
 	/* set tooltips */
 	ArdourWidgets::set_tooltip (btn_cancel_all, _("Cancel Scanning all plugins, and close this dialog.  Your plugin list might be incomplete."));
 	ArdourWidgets::set_tooltip (btn_cancel_one, _("Cancel Scanning this plugin.  It will be Ignored in the plugin list."));
 	ArdourWidgets::set_tooltip (btn_timeout_one, _("Click this button to puase scanning while you handle any dialogs that the plugin requires."));
-	ArdourWidgets::set_tooltip (btn_timeout_all, _("When enabled, scan progress will pause indefinitely for plugin dialogs."));
+	ArdourWidgets::set_tooltip (btn_timeout_enable, _("When enabled, scan will ignore plugins that take a long time to scan."));
 
 	/* window stacking */
 	if (parent) {
@@ -184,7 +188,7 @@ void
 PluginScanDialog::cancel_scan_all ()
 {
 	PluginManager::instance ().cancel_scan_all ();
-	btn_timeout_all.set_sensitive (false);
+	btn_timeout_enable.set_sensitive (false);
 }
 
 void
@@ -195,13 +199,12 @@ PluginScanDialog::cancel_scan_one ()
 }
 
 void
-PluginScanDialog::cancel_scan_timeout_all ()
+PluginScanDialog::enable_scan_timeout ()
 {
-	if (btn_timeout_all.get_active ()) {
-		PluginManager::instance ().cancel_scan_timeout_all ();
-		btn_timeout_all.set_sensitive (false);
-		btn_timeout_one.set_sensitive (false);
-	}
+	PluginManager::instance ().enable_scan_timeout ();
+	btn_timeout_enable.set_sensitive (false);
+	pbar.show ();
+	btn_timeout_one.show ();
 }
 
 void
@@ -248,9 +251,9 @@ PluginScanDialog::plugin_scan_timeout (int timeout)
 		return;
 	}
 
-	int scan_timeout = Config->get_vst_scan_timeout ();
 
 	if (timeout > 0) {
+		int scan_timeout = Config->get_plugin_scan_timeout ();
 		pbar.set_sensitive (true);
 		if (timeout < scan_timeout / 2 || (scan_timeout - timeout) > 300) {
 			timeout_info.show ();
@@ -258,7 +261,7 @@ PluginScanDialog::plugin_scan_timeout (int timeout)
 		if (timeout < scan_timeout) {
 			char buf[128];
 			format_time (buf, sizeof (buf), timeout);
-			pbar.set_text (string_compose (_("Scan Timeout %1"), buf));
+			pbar.set_text (string_compose (_("Scan timeout %1"), buf));
 		} else {
 			pbar.set_text (_("Scanning"));
 			timeout_info.hide ();
@@ -318,7 +321,7 @@ PluginScanDialog::message_handler (std::string type, std::string plugin, bool ca
 		disable_per_plugin_interaction ();
 		connections.drop_connections ();
 		btn_cancel_all.set_sensitive (false);
-		btn_timeout_all.set_sensitive (false);
+		btn_timeout_enable.set_sensitive (false);
 		queue_draw ();
 		for (int i = 0; delayed_close && i < 30; ++i) { // 1.5 sec delay
 			Glib::usleep (50000);

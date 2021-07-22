@@ -23,6 +23,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/label.h>
 #include <gtkmm/progressbar.h>
+#include <gtkmm/sizegroup.h>
 
 #include "widgets/ardour_button.h"
 
@@ -35,14 +36,15 @@ public:
 	void start ();
 
 private:
-	Gtk::Frame                  format_frame;
-	Gtk::Label                  message;
-	Gtk::Label                  timeout_info;
-	Gtk::ProgressBar            pbar;
-	Gtk::CheckButton            btn_timeout_all;
-	ArdourWidgets::ArdourButton btn_timeout_one;
-	ArdourWidgets::ArdourButton btn_cancel_all;
-	ArdourWidgets::ArdourButton btn_cancel_one;
+	Gtk::Frame                   format_frame;
+	Gtk::Label                   message;
+	Gtk::Label                   timeout_info;
+	Gtk::ProgressBar             pbar;
+	ArdourWidgets::ArdourButton  btn_timeout_enable;
+	ArdourWidgets::ArdourButton  btn_timeout_one;
+	ArdourWidgets::ArdourButton  btn_cancel_all;
+	ArdourWidgets::ArdourButton  btn_cancel_one;
+	Glib::RefPtr<Gtk::SizeGroup> btn_size_group;
 
 	bool cache_only;
 	bool verbose;
@@ -52,7 +54,7 @@ private:
 
 	void cancel_scan_all ();
 	void cancel_scan_one ();
-	void cancel_scan_timeout_all ();
+	void enable_scan_timeout ();
 	void cancel_scan_timeout_one ();
 
 	void disable_per_plugin_interaction ();
