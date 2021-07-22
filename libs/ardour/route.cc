@@ -92,6 +92,7 @@
 #include "ardour/session.h"
 #include "ardour/solo_control.h"
 #include "ardour/solo_isolate_control.h"
+#include "ardour/triggerbox.h"
 #include "ardour/types_convert.h"
 #include "ardour/unknown_processor.h"
 #include "ardour/utils.h"
@@ -1029,6 +1030,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 	// check if there's an instrument to replace or configure
 	for (ProcessorList::const_iterator i = others.begin(); i != others.end(); ++i) {
+
 		boost::shared_ptr<PluginInsert> pi;
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) == 0) {
 			continue;
@@ -1092,6 +1094,11 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		ProcessorState pstate (this);
 
 		for (ProcessorList::const_iterator i = others.begin(); i != others.end(); ++i) {
+
+			boost::shared_ptr<TriggerBox> tb = boost::dynamic_pointer_cast<TriggerBox> (*i);
+			if (tb) {
+				_triggerbox = tb;
+			}
 
 			if (*i == _meter) {
 				continue;
