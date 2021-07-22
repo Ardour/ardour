@@ -58,7 +58,7 @@ PBD::stacktrace (std::ostream& out, int levels, int start)
 
 	size = backtrace (array, 200);
 
-	if (size) {
+	if (size && size >= start) {
 		strings = backtrace_symbols (array, size);
 
 		if (strings) {
