@@ -317,8 +317,8 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/layer-display-stacked|<@TERTIARY@>braceright|Display Region Layers: Stacked
 @edit|Region/raise-region-to-top|<@TERTIARY@>bar|Raise Selected Region to Top Layer
 
-@edit|Transport/RecordPreroll|<@TERTIARY@>less|Transport: Record with Pre-Roll
-@edit|Transport/RecordCountIn|<@TERTIARY@>greater|Transport: Record with Count-In
+@trans|Transport/RecordPreroll|<@TERTIARY@>less|Transport: Record with Pre-Roll
+@trans|Transport/RecordCountIn|<@TERTIARY@>greater|Transport: Record with Count-In
 
 @edit|Editor/show-plist-selector|<@TERTIARY@>question|show-plist-selector
 
