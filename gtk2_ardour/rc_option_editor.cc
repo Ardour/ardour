@@ -1146,17 +1146,17 @@ public:
 		: HSliderOption ("vst-scan-timeout", _("Scan Time Out"),
 				sigc::mem_fun (*c, &RCConfiguration::get_plugin_scan_timeout),
 				sigc::mem_fun (*c, &RCConfiguration::set_plugin_scan_timeout),
-				1, 3000, 50, 50)
+				1, 900, 50, 50)
 	{
 		_label.set_alignment (1.0, 0.5); // match buttons below
 		_hscale.set_digits (0);
 		_hscale.set_draw_value(false);
-		_hscale.add_mark( 300,  Gtk::POS_TOP, _("30 sec"));
-		_hscale.add_mark( 600,  Gtk::POS_TOP, _("1 min"));
-		_hscale.add_mark(1200,  Gtk::POS_TOP, _("2 mins"));
-		_hscale.add_mark(1800,  Gtk::POS_TOP, _("3 mins"));
-		_hscale.add_mark(2400,  Gtk::POS_TOP, _("4 mins"));
-		_hscale.add_mark(3000,  Gtk::POS_TOP, _("5 mins"));
+		_hscale.add_mark ( 10,  Gtk::POS_TOP, _("1 sec"));
+		_hscale.add_mark (150,  Gtk::POS_TOP, _("15 sec"));
+		_hscale.add_mark (300,  Gtk::POS_TOP, _("30 sec"));
+		_hscale.add_mark (450,  Gtk::POS_TOP, _("45 sec"));
+		_hscale.add_mark (600,  Gtk::POS_TOP, _("1 min"));
+		_hscale.add_mark (900,  Gtk::POS_TOP, _("1'30\""));
 
 		Gtkmm2ext::UI::instance()->set_tip(_hscale,
 			 _("Specify the default timeout for plugin instantiation. Plugins that require more time to load will be ignored. A value of 0 disables the timeout."));
