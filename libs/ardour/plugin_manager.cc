@@ -1374,13 +1374,13 @@ PluginManager::au_refresh (bool cache_only)
 	delete _au_plugin_info;
 	_au_plugin_info = new ARDOUR::PluginInfoList();
 
-	if (!Config->get_discover_audio_units ()) { // TODO rename: enable AU
+	if (!Config->get_use_audio_units ()) {
 		return;
 	}
 
 	ARDOUR::PluginScanMessage(_("AUv2"), _("Indexing"), false);
 	/* disable AU in case indexing crashes */
-	Config->set_discover_audio_units (false);
+	Config->set_use_audio_units (false);
 	Config->save_state();
 
 	string aucrsh = Glib::build_filename (ARDOUR::user_cache_directory(), "au_crash");
@@ -1390,7 +1390,7 @@ PluginManager::au_refresh (bool cache_only)
 	auv2_list_plugins (audesc);
 
 	/* successful, re-enabled AU support */
-	Config->set_discover_audio_units (true);
+	Config->set_use_audio_units (true);
 	Config->save_state();
 
 	::g_unlink (aucrsh.c_str());
