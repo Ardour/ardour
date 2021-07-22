@@ -25,6 +25,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/tearoff.h"
+#include "widgets/ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -70,7 +71,16 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 
 	own_window.add_events (KEY_PRESS_MASK|KEY_RELEASE_MASK|BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|POINTER_MOTION_MASK|POINTER_MOTION_HINT_MASK);
 	own_window.set_resizable (allow_resize);
-	own_window.set_type_hint (WINDOW_TYPE_HINT_UTILITY);
+
+#ifdef __APPLE__
+	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+#else
+	if (UIConfigurationBase::instance().get_all_floating_windows_are_dialogs ()) {
+		own_window.set_type_hint (WINDOW_TYPE_HINT_DIALOG);
+	} else {
+		own_window.set_type_hint (WINDOW_TYPE_HINT_UTILITY);
+	}
+#endif
 
 	own_window.add (window_box);
 

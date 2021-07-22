@@ -41,6 +41,7 @@ public:
 	sigc::signal<void>  ColorsChanged;
 
 	virtual float get_ui_scale () = 0;
+	virtual bool get_all_floating_windows_are_dialogs () const = 0;
 	virtual bool get_widget_prelight () const = 0;
 	virtual Gtkmm2ext::Color color (const std::string&, bool* failed = 0) const = 0;
 };
