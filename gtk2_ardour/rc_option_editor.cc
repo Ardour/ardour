@@ -1151,7 +1151,12 @@ public:
 		_label.set_alignment (1.0, 0.5); // match buttons below
 		_hscale.set_digits (0);
 		_hscale.set_draw_value(false);
+#ifdef COMPILER_MSVC
+		std::wstring infin = L"\u221e";  // infinity
+		_hscale.add_mark(   0,  Gtk::POS_TOP, g_utf16_to_utf8(reinterpret_cast<gunichar2 const*>(infin.c_str()), -1, NULL, NULL, NULL));
+#else
 		_hscale.add_mark(   0,  Gtk::POS_TOP, _("\u221e")); // infinity
+#endif
 		_hscale.add_mark( 300,  Gtk::POS_TOP, _("30 sec"));
 		_hscale.add_mark( 600,  Gtk::POS_TOP, _("1 min"));
 		_hscale.add_mark(1200,  Gtk::POS_TOP, _("2 mins"));
