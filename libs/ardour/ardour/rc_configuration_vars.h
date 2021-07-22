@@ -239,7 +239,6 @@ CONFIG_VARIABLE (bool, verbose_plugin_scan, "verbose-plugin-scan", false)
 CONFIG_VARIABLE (bool, conceal_lv1_if_lv2_exists, "conceal-lv1-if-lv2-exists", true)
 CONFIG_VARIABLE (bool, conceal_vst2_if_vst3_exists, "conceal-vst2-if-vst3-exists", true)
 CONFIG_VARIABLE (bool, show_vst3_micro_edit_inline, "show-vst3-micro-edit-inline", true)
-CONFIG_VARIABLE (bool, discover_audio_units, "discover-audio-units", false)
 CONFIG_VARIABLE (bool, ask_replace_instrument, "ask-replace-instrument", true)
 CONFIG_VARIABLE (bool, ask_setup_instrument, "ask-setup-instrument", true)
 CONFIG_VARIABLE (uint32_t, plugin_scan_timeout, "plugin-scan-timeout", 450) /* deci-seconds */
