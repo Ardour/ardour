@@ -108,7 +108,7 @@ PluginManagerUI::PluginManagerUI ()
 	} ci[] = {
 		/* clang-format off */
 		{ALIGN_LEFT,   false,  _("Status"),       _("Plugin Scan Result") },
-		{ALIGN_CENTER, false, S_("Ignore|Ign"),   _("Blacklist the plugin-set, ignore all plugins in a bundle.") },
+		{ALIGN_CENTER, false, S_("Ignore|Ign"),   _("Ignore this plugin (and others that are loaded in the same file)") },
 		{ALIGN_CENTER, false, S_("Favorite|Fav"), _("Add this plugin to to the favorite list") },
 		{ALIGN_CENTER, false,  _("Hide"),         _("Hide this plugin in the plugin-selector") },
 		{ALIGN_CENTER, false,  _("Type"),         _("Plugin standard") },

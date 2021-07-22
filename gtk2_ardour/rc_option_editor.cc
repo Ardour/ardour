@@ -1165,7 +1165,7 @@ public:
 		_hscale.add_mark(3000,  Gtk::POS_TOP, _("5 mins"));
 
 		Gtkmm2ext::UI::instance()->set_tip(_hscale,
-			 _("Specify the default timeout for plugin instantiation. Plugins that require more time to load will be blacklisted. A value of 0 disables the timeout."));
+			 _("Specify the default timeout for plugin instantiation. Plugins that require more time to load will be ignored. A value of 0 disables the timeout."));
 	}
 };
 
@@ -3760,7 +3760,7 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Clear"),
 				sigc::mem_fun (*this, &RCOptionEditor::clear_vst2_blacklist),
-				_("VST 2 Blacklist:")));
+				_("VST 2 Ignorelist:")));
 #endif
 #endif
 
@@ -3812,7 +3812,7 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Plugins/VST"),
 			new RcActionButton (_("Clear"),
 				sigc::mem_fun (*this, &RCOptionEditor::clear_vst3_blacklist),
-				_("VST 3 Blacklist:")));
+				_("VST 3 Ignorelist:")));
 
 	RcActionButton* vst3_path =
 			new RcActionButton (_("Edit"),
@@ -3877,7 +3877,7 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Plugins/Audio Unit"),
 			new RcActionButton (_("Clear"),
 				sigc::mem_fun (*this, &RCOptionEditor::clear_au_blacklist),
-				_("AU Blacklist:")));
+				_("AU Ignorelist:")));
 #endif
 
 	add_option (_("Plugins"), new OptionEditorHeading (_("LV1/LV2")));
