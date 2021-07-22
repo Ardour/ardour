@@ -261,7 +261,7 @@ PluginScanDialog::plugin_scan_timeout (int timeout)
 	if (timeout > 0) {
 		int scan_timeout = Config->get_plugin_scan_timeout ();
 		pbar.set_sensitive (true);
-		if (timeout < scan_timeout / 2 || (scan_timeout - timeout) > 300) {
+		if (scan_timeout > 400 && (scan_timeout - timeout) > 300) {
 			timeout_info.show ();
 		}
 		if (timeout < scan_timeout) {
