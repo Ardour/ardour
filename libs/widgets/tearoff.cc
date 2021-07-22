@@ -73,7 +73,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	own_window.set_resizable (allow_resize);
 
 #ifdef __APPLE__
-	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	own_window.set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 #else
 	if (UIConfigurationBase::instance().get_all_floating_windows_are_dialogs ()) {
 		own_window.set_type_hint (WINDOW_TYPE_HINT_DIALOG);
