@@ -21,6 +21,7 @@
 #include <getopt.h>
 #include <iostream>
 #include <string>
+#include <unistd.h>
 
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
@@ -134,7 +135,9 @@ sig_handler (int sig)
 	printf ("Error: signal %d\n ---8<---\n", sig);
 	PBD::stacktrace (std::cout, 15, 2);
 	printf (" --->8---\n");
-	::exit (EXIT_FAILURE);
+	fflush(stdout);
+	fflush(stderr);
+	_exit (EXIT_FAILURE);
 }
 #endif
 
@@ -243,6 +246,7 @@ main (int argc, char **argv)
 	signal (SIGSEGV, sig_handler);
 	signal (SIGBUS, sig_handler);
 	signal (SIGILL, sig_handler);
+	signal (SIGABRT, sig_handler);
 #endif
 
 	bool err = false;

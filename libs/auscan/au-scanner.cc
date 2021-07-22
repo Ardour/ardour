@@ -24,6 +24,7 @@
 #include <signal.h>
 #include <string>
 #include <strings.h>
+#include <unistd.h>
 
 #include "pbd/error.h"
 #include "pbd/transmitter.h"
@@ -102,7 +103,9 @@ sig_handler (int sig)
 	printf ("Error: signal %d\n ---8<---\n", sig);
 	PBD::stacktrace (std::cout, 15, 2);
 	printf (" --->8---\n");
-	::exit (EXIT_FAILURE);
+	fflush(stdout);
+	fflush(stderr);
+	_exit (EXIT_FAILURE);
 }
 
 static void
@@ -200,6 +203,7 @@ main (int argc, char **argv)
 	signal (SIGSEGV, sig_handler);
 	signal (SIGBUS, sig_handler);
 	signal (SIGILL, sig_handler);
+	signal (SIGABRT, sig_handler);
 
 	bool err = false;
 
