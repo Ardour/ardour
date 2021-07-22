@@ -29,6 +29,7 @@
 #include "ardour_ui.h"
 #include "keyboard.h"
 #include "splash.h"
+#include "ui_config.h"
 #include "utils.h"
 #include "window_manager.h"
 
@@ -151,7 +152,16 @@ ArdourDialog::init ()
 {
 	set_border_width (10);
 	add_events (Gdk::FOCUS_CHANGE_MASK);
+
+#ifdef __APPLE__
 	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+#else
+	if (UIConfiguration::instance().get_all_floating_windows_are_dialogs () || get_modal ()) {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	} else {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	}
+#endif
 
 	Gtk::Window* parent = WM::Manager::instance().transient_parent();
 
