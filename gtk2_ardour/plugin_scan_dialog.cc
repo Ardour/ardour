@@ -53,45 +53,16 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	, verbose (v)
 	, delayed_close (false)
 {
-	VBox* vbox = get_vbox ();
-	vbox->set_size_request (400, -1);
-
-	Gtk::Table* tbl = manage (new Table (3, 2, false));
-
-	timeout_info.set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Scan is taking a long time.  Please check for popup dialogs.")));
-	timeout_info.set_padding (12, 12);
-
-	btn_cancel_all.set_name ("EditorGTKButton");
-	btn_cancel_all.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_all));
-	ArdourWidgets::set_tooltip(btn_cancel_all, _("Cancel Scanning all plugins, and close this dialog.  Your plugin list might be incomplete."));
-
-	btn_cancel_one.set_name ("EditorGTKButton");
-	btn_cancel_one.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_one));
-	ArdourWidgets::set_tooltip(btn_cancel_one, _("Cancel Scanning this plugin.  It will be Ignored in the plugin list."));
-
-	btn_timeout_one.set_name ("EditorGTKButton");
-	btn_timeout_one.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_timeout_one));
-	ArdourWidgets::set_tooltip(btn_timeout_one, _("Click this button to puase scanning while you handle any dialogs that the plugin requires."));
-
-	btn_timeout_all.set_name ("EditorGTKButton");
-	btn_timeout_all.signal_toggled().connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_timeout_all));
-	ArdourWidgets::set_tooltip(btn_timeout_all, _("When enabled, scan progress will pause indefinitely for plugin dialogs."));
+	message.set_alignment (0.0, 0.5);
+	timeout_info.set_alignment (0.5, 0.5);
+	timeout_info.set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Scan is taking a long time.\nPlease check for popup dialogs.")));
+	timeout_info.set_justify (JUSTIFY_CENTER);
 
 	pbar.set_orientation (Gtk::PROGRESS_RIGHT_TO_LEFT);
 	pbar.set_pulse_step (0.1);
-	pbar.set_text (_("Plugin Scan Timeout"));
 
-	message.set_alignment(0.0, 0.5);
-
-	/* Note when changing the layout that, the following widgets are not always visible:
-	 *  - timeout_info
-	 *  - pbar
-	 *  - btn_cancel_one
-	 *  - btn_timeout_all
-	 *  - btn_timeout_one
-	 */
-
-	int row = 0;
+	int         row = 0;
+	Gtk::Table* tbl = manage (new Table (3, 2, false));
 	/* clang-format off */
 	tbl->attach (message,         0, 2, row, row + 1, EXPAND | FILL, EXPAND | FILL, 0, 4); ++row;
 	tbl->attach (timeout_info,    0, 2, row, row + 1, EXPAND | FILL, SHRINK,        0, 4); ++row;
@@ -101,30 +72,46 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	tbl->show_all ();
 	/* clang-format on */
 
-	tbl->set_spacings(8);
-	tbl->set_border_width(8);
+	tbl->set_spacings (8);
+	tbl->set_border_width (8);
 
-	format_frame.add(*tbl);
-	format_frame.set_border_width(4);
-	format_frame.set_shadow_type(Gtk::SHADOW_ETCHED_IN);
+	format_frame.add (*tbl);
+	format_frame.set_border_width (4);
+	format_frame.set_shadow_type (Gtk::SHADOW_ETCHED_IN);
 
 	Gtk::HBox* cancel_all_padder = manage (new HBox ());
-	cancel_all_padder->set_border_width(4);
-	cancel_all_padder->pack_start(btn_cancel_all);
+	cancel_all_padder->set_border_width (4);
+	cancel_all_padder->pack_start (btn_cancel_all);
 
 	Gtk::HBox* timeout_all_padder = manage (new HBox ());
-	timeout_all_padder->set_border_width(4);
-	timeout_all_padder->pack_start(btn_timeout_all);
+	timeout_all_padder->set_border_width (4);
+	timeout_all_padder->pack_start (btn_timeout_all);
 
-	vbox->pack_start (*timeout_all_padder, 0, 10);
-	vbox->pack_start (format_frame, 0, 6);
-	vbox->pack_start (*cancel_all_padder, 0, 6);
+	/* Top level packaging */
+	VBox* vbox = get_vbox ();
+	vbox->set_size_request (400, -1);
 
+	vbox->pack_start (*timeout_all_padder, false, false);
+	vbox->pack_start (format_frame, true, true);
+	vbox->pack_start (*cancel_all_padder, false, false);
+	vbox->show_all ();
+
+	/* connect to signals */
 	ARDOUR::PluginScanMessage.connect (connections, MISSING_INVALIDATOR, boost::bind (&PluginScanDialog::message_handler, this, _1, _2, _3), gui_context ());
 	ARDOUR::PluginScanTimeout.connect (connections, MISSING_INVALIDATOR, boost::bind (&PluginScanDialog::plugin_scan_timeout, this, _1), gui_context ());
 
-	vbox->show_all ();
+	btn_cancel_all.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_all));
+	btn_cancel_one.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_one));
+	btn_timeout_one.signal_clicked.connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_timeout_one));
+	btn_timeout_all.signal_toggled ().connect (sigc::mem_fun (*this, &PluginScanDialog::cancel_scan_timeout_all));
 
+	/* set tooltips */
+	ArdourWidgets::set_tooltip (btn_cancel_all, _("Cancel Scanning all plugins, and close this dialog.  Your plugin list might be incomplete."));
+	ArdourWidgets::set_tooltip (btn_cancel_one, _("Cancel Scanning this plugin.  It will be Ignored in the plugin list."));
+	ArdourWidgets::set_tooltip (btn_timeout_one, _("Click this button to puase scanning while you handle any dialogs that the plugin requires."));
+	ArdourWidgets::set_tooltip (btn_timeout_all, _("When enabled, scan progress will pause indefinitely for plugin dialogs."));
+
+	/* window stacking */
 	if (parent) {
 		set_transient_for (*parent);
 		set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
@@ -197,6 +184,7 @@ void
 PluginScanDialog::cancel_scan_all ()
 {
 	PluginManager::instance ().cancel_scan_all ();
+	btn_timeout_all.set_sensitive (false);
 }
 
 void
@@ -209,7 +197,7 @@ PluginScanDialog::cancel_scan_one ()
 void
 PluginScanDialog::cancel_scan_timeout_all ()
 {
-	if (btn_timeout_all.get_active()) {
+	if (btn_timeout_all.get_active ()) {
 		PluginManager::instance ().cancel_scan_timeout_all ();
 		btn_timeout_all.set_sensitive (false);
 		btn_timeout_one.set_sensitive (false);
@@ -224,17 +212,13 @@ PluginScanDialog::cancel_scan_timeout_one ()
 }
 
 void
-PluginScanDialog::show_interactive_ctrls (bool show)
+PluginScanDialog::disable_per_plugin_interaction ()
 {
-	if (show) {
-		pbar.set_sensitive (true);
-		btn_cancel_one.set_sensitive (true);
-		btn_timeout_one.set_sensitive (true);
-	} else {
-		pbar.set_sensitive (false);
-		btn_cancel_one.set_sensitive (false);
-		btn_timeout_one.set_sensitive (false);
-	}
+	pbar.set_sensitive (false);
+	pbar.set_text ("");
+	pbar.set_fraction (0);
+	btn_cancel_one.set_sensitive (false);
+	btn_timeout_one.set_sensitive (false);
 }
 
 static void
@@ -280,8 +264,8 @@ PluginScanDialog::plugin_scan_timeout (int timeout)
 			timeout_info.hide ();
 		}
 		btn_timeout_one.set_sensitive (timeout < scan_timeout);
+		pbar.set_sensitive (true);
 		pbar.set_fraction ((float)timeout / (float)scan_timeout);
-		show_interactive_ctrls ();
 	} else if (timeout < 0) {
 		char buf[128];
 		format_time (buf, sizeof (buf), -timeout);
@@ -289,15 +273,11 @@ PluginScanDialog::plugin_scan_timeout (int timeout)
 		pbar.set_text (string_compose (_("Scanning since %1"), buf));
 		pbar.pulse ();
 		btn_timeout_one.set_sensitive (false);
-		show_interactive_ctrls ();
 		if (timeout <= -300) {
 			timeout_info.show ();
 		}
 	} else {
-		pbar.set_sensitive (false);
-		btn_timeout_one.set_sensitive (false);
-		btn_cancel_one.set_sensitive (false);
-		show_interactive_ctrls (false);
+		disable_per_plugin_interaction ();
 		timeout_info.hide ();
 	}
 
@@ -335,10 +315,10 @@ PluginScanDialog::message_handler (std::string type, std::string plugin, bool ca
 	}
 
 	if (type == X_("closeme")) {
-		show_interactive_ctrls (false);
+		disable_per_plugin_interaction ();
 		connections.drop_connections ();
-		btn_cancel_one.set_sensitive (false);
 		btn_cancel_all.set_sensitive (false);
+		btn_timeout_all.set_sensitive (false);
 		queue_draw ();
 		for (int i = 0; delayed_close && i < 30; ++i) { // 1.5 sec delay
 			Glib::usleep (50000);
@@ -346,7 +326,7 @@ PluginScanDialog::message_handler (std::string type, std::string plugin, bool ca
 		}
 		hide ();
 	} else {
-		format_frame.set_label(type);
+		format_frame.set_label (type);
 		message.set_text (_("Scanning: ") + PBD::basename_nosuffix (plugin));
 		show ();
 	}

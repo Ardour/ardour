@@ -35,17 +35,18 @@ public:
 	void start ();
 
 private:
-	Gtk::Frame       format_frame;
-	Gtk::Label       message;
-	Gtk::Label       timeout_info;
-	Gtk::ProgressBar pbar;
-	Gtk::CheckButton btn_timeout_all;
-	ArdourWidgets::ArdourButton      btn_timeout_one;
-	ArdourWidgets::ArdourButton      btn_cancel_all;
-	ArdourWidgets::ArdourButton      btn_cancel_one;
-	bool             cache_only;
-	bool             verbose;
-	bool             delayed_close;
+	Gtk::Frame                  format_frame;
+	Gtk::Label                  message;
+	Gtk::Label                  timeout_info;
+	Gtk::ProgressBar            pbar;
+	Gtk::CheckButton            btn_timeout_all;
+	ArdourWidgets::ArdourButton btn_timeout_one;
+	ArdourWidgets::ArdourButton btn_cancel_all;
+	ArdourWidgets::ArdourButton btn_cancel_one;
+
+	bool cache_only;
+	bool verbose;
+	bool delayed_close;
 
 	void on_hide ();
 
@@ -54,7 +55,7 @@ private:
 	void cancel_scan_timeout_all ();
 	void cancel_scan_timeout_one ();
 
-	void show_interactive_ctrls (bool show = true);
+	void disable_per_plugin_interaction ();
 
 	void plugin_scan_timeout (int timeout);
 	void message_handler (std::string type, std::string plugin, bool can_cancel);
