@@ -62,10 +62,18 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 	pbar.set_orientation (Gtk::PROGRESS_RIGHT_TO_LEFT);
 	pbar.set_pulse_step (0.1);
 
-#if 0 // hide Pbar until timeout is enabled
-	pbar.set_no_show_all ();
-	btn_timeout_one.set_no_show_all ();
+	if (cache_only) {
+		pbar.set_no_show_all ();
+		btn_timeout_one.set_no_show_all ();
+
+		btn_timeout_enable.set_no_show_all ();
+		btn_cancel_one.set_no_show_all ();
+#if 0 /* hide hide Pbar until timeout is enabled */
+	} else {
+		pbar.set_no_show_all ();
+		btn_timeout_one.set_no_show_all ();
 #endif
+	}
 
 	btn_size_group->add_widget (btn_timeout_enable);
 	btn_size_group->add_widget (btn_cancel_one);
