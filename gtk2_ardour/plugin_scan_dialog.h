@@ -24,6 +24,8 @@
 #include <gtkmm/label.h>
 #include <gtkmm/progressbar.h>
 
+#include "widgets/ardour_button.h"
+
 #include "ardour_dialog.h"
 
 class PluginScanDialog : public ArdourDialog
@@ -33,13 +35,14 @@ public:
 	void start ();
 
 private:
+	Gtk::Frame       format_frame;
 	Gtk::Label       message;
 	Gtk::Label       timeout_info;
 	Gtk::ProgressBar pbar;
-	Gtk::Button      btn_timeout_one;
-	Gtk::Button      btn_timeout_all;
-	Gtk::Button      btn_cancel_all;
-	Gtk::Button      btn_cancel_one;
+	Gtk::CheckButton btn_timeout_all;
+	ArdourWidgets::ArdourButton      btn_timeout_one;
+	ArdourWidgets::ArdourButton      btn_cancel_all;
+	ArdourWidgets::ArdourButton      btn_cancel_one;
 	bool             cache_only;
 	bool             verbose;
 	bool             delayed_close;
