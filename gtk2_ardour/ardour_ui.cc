@@ -206,6 +206,7 @@
 #include "time_info_box.h"
 #include "timers.h"
 #include "transport_masters_dialog.h"
+#include "triggerbox_ui.h"
 #include "utils.h"
 #include "utils_videotl.h"
 #include "video_server_dialog.h"
@@ -1532,6 +1533,15 @@ ARDOUR_UI::session_add_midi_route (
 				error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;
 			}
 
+			boost::shared_ptr<TriggerBox> tb (tracks.front()->triggerbox());
+			if (tb) {
+				TriggerBoxWindow* tbw = new TriggerBoxWindow (*(tb.get()));
+				tbw->present ();
+				cerr << " window presented\n";
+			} else {
+				cerr << "no trigger box\n";
+			}
+
 		} else {
 
 			RouteList routes;
@@ -1573,6 +1583,15 @@ ARDOUR_UI::session_add_audio_route (
 			if (tracks.size() != how_many) {
 				error << string_compose (P_("could not create %1 new audio track", "could not create %1 new audio tracks", how_many), how_many)
 				      << endmsg;
+			}
+
+			boost::shared_ptr<TriggerBox> tb (tracks.front()->triggerbox());
+			if (tb) {
+				TriggerBoxWindow* tbw = new TriggerBoxWindow (*(tb.get()));
+				tbw->present ();
+				cerr << " window presented\n";
+			} else {
+				cerr << "no trigger box\n";
 			}
 
 		} else {
