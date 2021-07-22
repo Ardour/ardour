@@ -242,6 +242,7 @@ CONFIG_VARIABLE (int, vst_scan_timeout, "vst-scan-timeout", 1200) /* deciseconds
 CONFIG_VARIABLE (bool, discover_audio_units, "discover-audio-units", false)
 CONFIG_VARIABLE (bool, ask_replace_instrument, "ask-replace-instrument", true)
 CONFIG_VARIABLE (bool, ask_setup_instrument, "ask-setup-instrument", true)
+CONFIG_VARIABLE (uint32_t, plugin_scan_timeout, "plugin-scan-timeout", 450) /* deci-seconds */
 CONFIG_VARIABLE (uint32_t, limit_n_automatables, "limit-n-automatables", 512)
 CONFIG_VARIABLE (uint32_t, plugin_cache_version, "plugin-cache-version", 0)
 
