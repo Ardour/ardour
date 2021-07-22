@@ -241,7 +241,7 @@ CONFIG_VARIABLE (bool, conceal_vst2_if_vst3_exists, "conceal-vst2-if-vst3-exists
 CONFIG_VARIABLE (bool, show_vst3_micro_edit_inline, "show-vst3-micro-edit-inline", true)
 CONFIG_VARIABLE (bool, ask_replace_instrument, "ask-replace-instrument", true)
 CONFIG_VARIABLE (bool, ask_setup_instrument, "ask-setup-instrument", true)
-CONFIG_VARIABLE (uint32_t, plugin_scan_timeout, "plugin-scan-timeout", 450) /* deci-seconds */
+CONFIG_VARIABLE (uint32_t, plugin_scan_timeout, "plugin-scan-timeout", 150) /* deci-seconds */
 CONFIG_VARIABLE (uint32_t, limit_n_automatables, "limit-n-automatables", 512)
 CONFIG_VARIABLE (uint32_t, plugin_cache_version, "plugin-cache-version", 0)
 
