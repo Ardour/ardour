@@ -62,7 +62,7 @@ TriggerBox::load_some_samples ()
 	try {
 		for (size_t n = 0; paths[n]; ++n) {
 
-			string dir = "/usr/local/music/samples/Loops\ \(WAV\)/ASHRAM\ Afro\ Percussion\ Loops/";
+			string dir = "/usr/local/music/samples/Loops (WAV)/ASHRAM Afro Percussion Loops/";
 			string path = dir + paths[n];
 
 
