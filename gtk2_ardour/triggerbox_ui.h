@@ -21,6 +21,8 @@
 
 #include <map>
 
+#include <gtkmm/window.h>
+
 #include "canvas/box.h"
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
@@ -63,6 +65,14 @@ class TriggerBoxWidget : public ArdourCanvas::GtkCanvas
 
   private:
 	TriggerBoxUI* ui;
+};
+
+/* XXX probably for testing only */
+
+class TriggerBoxWindow : public Gtk::Window
+{
+    public:
+	TriggerBoxWindow (ARDOUR::TriggerBox&);
 };
 
 #endif /* __ardour_gtk_triggerbox_ui_h__ */

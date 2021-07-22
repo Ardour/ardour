@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/i18n.h"
 #include "ardour/triggerbox.h"
 
 #include "gtkmm2ext/utils.h"
@@ -74,14 +75,14 @@ TriggerBoxUI::build ()
 	Trigger* t;
 	size_t n = 0;
 
-	clear_items (true);
+	// clear_items (true);
 
 	while (true) {
 		t = _triggerbox.trigger (n);
 		if (!t) {
 			break;
 		}
-
+		std::cerr << "NEW TE for trigger " << n << std::endl;
 		(void) new TriggerEntry (this, *t);
 	}
 }
@@ -91,4 +92,15 @@ TriggerBoxUI::build ()
 TriggerBoxWidget::TriggerBoxWidget (TriggerBox& tb)
 {
 	ui = new TriggerBoxUI (root(), tb);
+}
+
+/* ------------ */
+
+TriggerBoxWindow::TriggerBoxWindow (TriggerBox& tb)
+{
+	TriggerBoxWidget* tbw = manage (new TriggerBoxWidget (tb));
+	set_title (_("TriggerBox for XXXX"));
+	set_default_size (100, 100);
+	add (*tbw);
+	tbw->show ();
 }
