@@ -233,7 +233,7 @@ timecnt_t::string_to (std::string const & str)
 		ss >> sm;
 		_distance = int62_t (false, samples_to_superclock (sm, TEMPORAL_SAMPLE_RATE));
 		_position = timepos_t (AudioTime);
-		std::cerr << "deserialized timecnt from older " << str << " as " << *this << std::endl;
+		// std::cerr << "deserialized timecnt from older " << str << " as " << *this << std::endl;
 		return true;
 	}
 
@@ -861,7 +861,7 @@ timepos_t::string_to (std::string const & str)
 		std::stringstream ss (str);
 		ss >> sm;
 		v = build (false, samples_to_superclock (sm, TEMPORAL_SAMPLE_RATE));
-		cerr << "deserialized timepos from older " << str << " as " << *this << " with sm = " << sm << " and sr = " << TEMPORAL_SAMPLE_RATE << " s2sc " << endl;
+		// cerr << "deserialized timepos from older " << str << " as " << *this << " with sm = " << sm << " and sr = " << TEMPORAL_SAMPLE_RATE << " s2sc " << endl;
 		return true;
 	}
 
@@ -871,12 +871,12 @@ timepos_t::string_to (std::string const & str)
 	case 'a':
 		ss >> s;
 		v = build (false, s);
-		cerr << "deserialized timepos from " << str << " as " << *this << endl;
+		// cerr << "deserialized timepos from " << str << " as " << *this << endl;
 		return true;
 	case 'b':
 		ss >> ticks;
 		v = build (true, ticks);
-		cerr << "deserialized timepos from " << str << " as " << *this << endl;
+		// cerr << "deserialized timepos from " << str << " as " << *this << endl;
 		return true;
 	}
 
