@@ -45,7 +45,7 @@ using namespace std;
 
 PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* parent)
 	: ArdourDialog (_("Scanning for plugins"))
-	, btn_timeout_enable (_("Quick Scan"))
+	, btn_timeout_enable (_("Auto skip unresponsive plugins"))
 	, btn_cancel_all (_("Abort scanning (for all plugins)"))
 	, btn_cancel_one (_("Skip this plugin"))
 	, btn_size_group (SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
