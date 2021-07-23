@@ -22,7 +22,6 @@
 #include <getopt.h>
 #include <iostream>
 #include <string>
-#include <unistd.h>
 
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
