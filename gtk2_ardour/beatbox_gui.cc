@@ -25,7 +25,9 @@
 #include "pbd/compose.h"
 #include "pbd/i18n.h"
 
+#ifdef HAVE_BEATBOX
 #include "ardour/beatbox.h"
+#endif
 #include "ardour/parameter_descriptor.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"

@@ -52,7 +52,9 @@
 #include "ardour/audio_track.h"
 #include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
+#ifdef HAVE_BEATBOX
 #include "ardour/beatbox.h"
+#endif
 #include "ardour/boost_debug.h"
 #include "ardour/buffer.h"
 #include "ardour/buffer_set.h"
@@ -3083,9 +3085,11 @@ Route::set_processor_state (const XMLNode& node, int version)
 			assert (is_master ());
 			_volume->set_state (**niter, version);
 			new_order.push_back (_volume);
+#ifdef HAVE_BEATBOX
 		} else if (prop->value() == "beatbox" && _beatbox) {
 			_beatbox->set_state (**niter, Stateful::current_state_version);
 			new_order.push_back (_beatbox);
+#endif
 		} else if (prop->value() == "meter") {
 			_meter->set_state (**niter, version);
 			new_order.push_back (_meter);
@@ -5016,11 +5020,12 @@ Route::setup_invisible_processors ()
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<Send> auxsnd = boost::dynamic_pointer_cast<Send> ((*i));
 
+#ifdef HAVE_BEATBOX
 		/* XXX temporary hack while we decide on visibility */
 		if (boost::dynamic_pointer_cast<BeatBox> (*i)) {
 			continue;
 		}
-
+#endif
 		if ((*i)->display_to_user ()) {
 			new_processors.push_back (*i);
 		}
@@ -5130,6 +5135,7 @@ Route::setup_invisible_processors ()
 		trim = new_processors.begin();
 	}
 
+#ifdef HAVE_BEATBOX
 	/* BEATBOX (for MIDI) */
 
 	if (_beatbox) {
@@ -5137,7 +5143,7 @@ Route::setup_invisible_processors ()
 		++insert_pos;
 		new_processors.insert (insert_pos, _beatbox);
 	}
-
+#endif
 	/* INTERNAL RETURN */
 
 	/* doing this here means that any monitor control will come after

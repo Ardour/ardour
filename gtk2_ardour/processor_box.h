@@ -57,7 +57,9 @@
 #include "widgets/ardour_fader.h"
 #include "widgets/slider_controller.h"
 
+#ifdef HAVE_BEATBOX
 #include "beatbox_gui.h"
+#endif
 #include "plugin_interest.h"
 #include "plugin_display.h"
 #include "io_selector.h"

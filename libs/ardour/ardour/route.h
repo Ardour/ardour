@@ -641,8 +641,9 @@ protected:
 	boost::shared_ptr<Pannable>         _pannable;
 	boost::shared_ptr<DiskReader>       _disk_reader;
 	boost::shared_ptr<DiskWriter>       _disk_writer;
+#ifdef HAVE_BEATBOX
 	boost::shared_ptr<BeatBox>       _beatbox;
-
+#endif
 	boost::shared_ptr<MonitorControl>   _monitoring_control;
 
 	DiskIOPoint _disk_io_point;

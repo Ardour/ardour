@@ -256,6 +256,7 @@ public:
 		_beats = B._beats;
 		_ticks = B._ticks;
 		return *this;
+	}
 
 	Beats operator/ (Beats const & other) const {
 		return Beats::ticks (int_div_round (to_ticks(), other.to_ticks()));

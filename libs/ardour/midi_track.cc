@@ -40,7 +40,9 @@
 #include "evoral/midi_util.h"
 
 #include "ardour/amp.h"
+#ifdef HAVE_BEATBOX
 #include "ardour/beatbox.h"
+#endif
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
@@ -110,8 +112,10 @@ MidiTrack::init ()
 
 	_disk_writer->DataRecorded.connect_same_thread (*this, boost::bind (&MidiTrack::data_recorded, this, _1));
 
+#ifdef HAVE_BEATBOX
 	_beatbox.reset (new BeatBox (_session));
 	add_processor (_beatbox, PostFader);
+#endif
 
 	return 0;
 }
