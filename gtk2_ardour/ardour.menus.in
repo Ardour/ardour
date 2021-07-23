@@ -363,7 +363,7 @@
       <menu action='RegionMenuMarkers'>
         <menuitem action='add-region-cue-marker'/>
         <menuitem action='clear-region-cue-markers'/>
-	<separator/>
+        <separator/>
         <menuitem action='make-region-markers-cd'/>
         <menuitem action='make-region-markers-global'/>
       </menu>
@@ -407,9 +407,9 @@
       <menuitem action='addExistingAudioFiles'/>
       <menu action='MixTools'>
           <menuitem action='lua-store-mixer-settings'/>
-	      <menuitem action='lua-recall-mixer-settings'/>
-	      <menuitem action='lua-reset-mixer'/>
-	      <menuitem action='lua-manage-tracks'/>
+              <menuitem action='lua-recall-mixer-settings'/>
+              <menuitem action='lua-reset-mixer'/>
+              <menuitem action='lua-manage-tracks'/>
       </menu>
 #endif
       <menuitem action='duplicate-routes'/>
@@ -615,46 +615,54 @@
         <menuitem action='attach-preferences'/>
         <menuitem action='detach-preferences'/>
       </menu>
+      <!-- Common Ardour Widows (all toggle) !-->
       <menuitem action='toggle-meterbridge'/>
       <menuitem action='toggle-locations'/>
       <menuitem action='toggle-big-clock'/>
       <menuitem action='toggle-big-transport'/>
       <menuitem action='toggle-virtual-keyboard'/>
+
+      <separator/><!-- Video Monitor !-->
       <menuitem action='ToggleJadeo'/>
+
+      <separator/><!-- Connection dialogs !-->
+      <menuitem action='toggle-audio-connection-manager'/>
+      <menuitem action='toggle-midi-connection-manager'/>
+
 #ifndef MIXBUS
-      <separator/>
+      <separator/><!-- Ardour specific connection customization !-->
       <menuitem action='toggle-inspector'/>
       <menuitem action='toggle-bundle-manager'/>
-#endif
 #if 0
       <menuitem action='toggle-speaker-config'/>
 #endif
-      <separator/>
+#endif
+
+      <separator/><!-- Plugin Related !-->
       <menuitem action='toggle-plugin-manager'/>
-      <menuitem action='toggle-plugin-dsp-load'/>
-
-      <separator/>
-
-      <menuitem action='toggle-audio-connection-manager'/>
-      <menuitem action='toggle-midi-connection-manager'/>
-      <separator/>
-      <menuitem action='toggle-transport-masters'/>
-      <menuitem action='toggle-luawindow'/>
-      <menuitem action='ManageTemplates'/>
-      <menuitem action='toggle-key-editor'/>
 #ifdef MIXBUS
       <separator/>
       <menuitem action='license-manager'/>
 #endif
-      <separator/>
+
+      <separator/><!-- Misc Configuration !-->
+      <menuitem action='toggle-luawindow'/>
+      <menuitem action='ManageTemplates'/>
+      <menuitem action='toggle-transport-masters'/>
+      <menuitem action='toggle-key-editor'/>
+
+      <separator/><!-- Performance measurement !-->
+      <menuitem action='toggle-plugin-dsp-load'/>
+      <menuitem action='toggle-dsp-statistics'/>
 #if 0
       <menuitem action='toggle-idle-o-meter'/>
 #endif
-      <menuitem action='toggle-dsp-statistics'/>
+
+      <separator/><!-- Logging !-->
       <menuitem action='NewMIDITracer'/>
       <menuitem action='toggle-log-window'/>
-      <separator/>
     </menu>
+
     <menu name='Help' action='Help'>
 #ifndef __APPLE__
       <menuitem action='toggle-about'/>
