@@ -602,7 +602,7 @@ PluginManagerUI::refill ()
 	}
 
 	Label* head_type  = new Label (_("Type"), ALIGN_LEFT, ALIGN_CENTER);
-	Label* head_count = new Label (_("All"), ALIGN_RIGHT, ALIGN_CENTER);
+	Label* head_count = new Label (_("Total"), ALIGN_RIGHT, ALIGN_CENTER);
 	_tbl_nfo.attach (*head_type,  0, 1, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	_tbl_nfo.attach (*head_count, 1, 2, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	if (pc_max.error > 0) {
