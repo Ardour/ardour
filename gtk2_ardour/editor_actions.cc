@@ -162,7 +162,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("RegionEditOps"), _("Region operations"));
 	ActionManager::register_action (editor_menu_actions, X_("RegionGainMenu"), _("Gain"));
 	ActionManager::register_action (editor_menu_actions, X_("RulerMenu"), _("Rulers"));
-	ActionManager::register_action (editor_menu_actions, X_("SavedViewMenu"), _("Views"));
+	ActionManager::register_action (editor_menu_actions, X_("SavedViewMenu"), _("Editor Views"));
 	ActionManager::register_action (editor_menu_actions, X_("ScrollMenu"), _("Scroll"));
 	ActionManager::register_action (editor_menu_actions, X_("SecondaryClockMenu"), _("Secondary Clock"));
 	ActionManager::register_action (editor_menu_actions, X_("Select"), _("Select"));
