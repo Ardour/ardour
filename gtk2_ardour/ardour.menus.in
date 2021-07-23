@@ -405,6 +405,12 @@
       <menuitem action='AddTrackBus'/>
 #ifdef MIXBUS
       <menuitem action='addExistingAudioFiles'/>
+      <menu action='MixTools'>
+          <menuitem action='lua-store-mixer-settings'/>
+	      <menuitem action='lua-recall-mixer-settings'/>
+	      <menuitem action='lua-reset-mixer'/>
+	      <menuitem action='lua-manage-tracks'/>
+      </menu>
 #endif
       <menuitem action='duplicate-routes'/>
       <separator/>
@@ -426,6 +432,7 @@
       <menuitem action='insert-time'/>
       <menuitem action='remove-time'/>
       <menuitem action='remove-gaps'/>
+      <separator/>
       <menuitem action="move-selected-tracks-up"/>
       <menuitem action="move-selected-tracks-down"/>
       <menu action='TrackHeightMenu'>
@@ -435,11 +442,6 @@
         <menuitem action='track-height-large'/>
         <menuitem action='track-height-normal'/>
         <menuitem action='track-height-small'/>
-      </menu>
-      <separator/>
-      <menu name='LayerDisplay' action = 'LayerDisplay'>
-        <menuitem action='layer-display-stacked'/>
-        <menuitem action='layer-display-overlaid'/>
       </menu>
       <separator/>
       <menuitem action='toggle-track-active'/>
@@ -476,9 +478,22 @@
         <menuitem action="secondary-clock-minsec"/>
         <menuitem action="secondary-clock-samples"/>
       </menu>
-
+      <menu action="RulerMenu">
+        <menuitem action="toggle-minsec-ruler"/>
+        <menuitem action="toggle-timecode-ruler"/>
+        <menuitem action="toggle-samples-ruler"/>
+        <menuitem action="toggle-bbt-ruler"/>
+        <separator/>
+        <menuitem action="toggle-meter-ruler"/>
+        <menuitem action="toggle-tempo-ruler"/>
+        <menuitem action="toggle-range-ruler"/>
+        <menuitem action="toggle-loop-punch-ruler"/>
+        <menuitem action="toggle-cd-marker-ruler"/>
+        <menuitem action="toggle-marker-ruler"/>
+        <separator/>
+        <menuitem action="toggle-video-ruler"/>
+      </menu>
       <separator/>
-
       <menu action="ZoomMenu">
         <menuitem action='temporal-zoom-in'/>
         <menuitem action='temporal-zoom-out'/>
@@ -500,22 +515,13 @@
         <menuitem action='zoom-focus-edit'/>
         <menuitem action='cycle-zoom-focus'/>
       </menu>
-
-      <menu action="RulerMenu">
-        <menuitem action="toggle-minsec-ruler"/>
-        <menuitem action="toggle-timecode-ruler"/>
-        <menuitem action="toggle-samples-ruler"/>
-        <menuitem action="toggle-bbt-ruler"/>
-        <separator/>
-        <menuitem action="toggle-meter-ruler"/>
-        <menuitem action="toggle-tempo-ruler"/>
-        <menuitem action="toggle-range-ruler"/>
-        <menuitem action="toggle-loop-punch-ruler"/>
-        <menuitem action="toggle-cd-marker-ruler"/>
-        <menuitem action="toggle-marker-ruler"/>
-        <separator/>
-        <menuitem action="toggle-video-ruler"/>
+      <menu action="ScrollMenu">
+        <menuitem action='scroll-tracks-down'/>
+        <menuitem action='scroll-tracks-up'/>
+        <menuitem action='scroll-forward'/>
+        <menuitem action='scroll-backward'/>
       </menu>
+      <separator/>
       <menu action="VideoMonitorMenu">
         <menuitem action="zoom-vmon-100"/>
         <menuitem action="toggle-vmon-letterbox"/>
@@ -527,12 +533,7 @@
         <menuitem action="toggle-vmon-frame"/>
         <menuitem action="toggle-vmon-osdbg"/>
       </menu>
-      <menu action="ScrollMenu">
-        <menuitem action='scroll-tracks-down'/>
-        <menuitem action='scroll-tracks-up'/>
-        <menuitem action='scroll-forward'/>
-        <menuitem action='scroll-backward'/>
-      </menu>
+      <separator/>
       <menu action="SavedViewMenu">
         <menuitem action='save-visual-state-1'/>
         <menuitem action='goto-visual-state-1'/>
@@ -577,6 +578,14 @@
       <menuitem action='ToggleVCAPane'/>
       <menuitem action='ToggleMonitorSection'/>
       <menuitem action='ToggleFoldbackStrip'/>
+#ifdef MIXBUS
+      <separator/>
+      <menuitem action='ToggleStripCtrls'/>
+#ifdef MIXBUS32C
+      <menuitem action='ToggleStripEQ'/>
+      <menuitem action='ToggleStripBus'/>
+#endif
+#endif
 
     </menu>
     <menu action = 'WindowMenu'>
@@ -607,39 +616,41 @@
         <menuitem action='detach-preferences'/>
       </menu>
       <menuitem action='toggle-meterbridge'/>
-      <separator/>
-#ifndef MIXBUS
-      <menuitem action='toggle-inspector'/>
-#endif
       <menuitem action='toggle-locations'/>
-#ifndef MIXBUS
-      <menuitem action='toggle-bundle-manager'/>
-#endif
       <menuitem action='toggle-big-clock'/>
       <menuitem action='toggle-big-transport'/>
-      <menuitem action='toggle-transport-masters'/>
+      <menuitem action='toggle-virtual-keyboard'/>
+      <menuitem action='ToggleJadeo'/>
+#ifndef MIXBUS
+      <separator/>
+      <menuitem action='toggle-inspector'/>
+      <menuitem action='toggle-bundle-manager'/>
+#endif
 #if 0
       <menuitem action='toggle-speaker-config'/>
 #endif
+      <separator/>
       <menuitem action='toggle-plugin-manager'/>
       <menuitem action='toggle-plugin-dsp-load'/>
-      <menuitem action='toggle-dsp-statistics'/>
-#if 0
-      <menuitem action='toggle-idle-o-meter'/>
-#endif
 
-      <separator/>
-      <menuitem action='ToggleJadeo'/>
       <separator/>
 
       <menuitem action='toggle-audio-connection-manager'/>
       <menuitem action='toggle-midi-connection-manager'/>
       <separator/>
+      <menuitem action='toggle-transport-masters'/>
       <menuitem action='toggle-luawindow'/>
       <menuitem action='ManageTemplates'/>
       <menuitem action='toggle-key-editor'/>
+#ifdef MIXBUS
       <separator/>
-      <menuitem action='toggle-virtual-keyboard'/>
+      <menuitem action='license-manager'/>
+#endif
+      <separator/>
+#if 0
+      <menuitem action='toggle-idle-o-meter'/>
+#endif
+      <menuitem action='toggle-dsp-statistics'/>
       <menuitem action='NewMIDITracer'/>
       <menuitem action='toggle-log-window'/>
       <separator/>
@@ -723,11 +734,13 @@
     <menuitem action='controls'/>
     <menuitem action='send_options'/>
     <separator/>
+#ifndef MIXBUS
     <menu action="disk-io-menu">
       <menuitem action='disk-io-prefader'/>
       <menuitem action='disk-io-postfader'/>
       <menuitem action='disk-io-custom'/>
     </menu>
+#endif
     <menuitem action='custom-volume-pos'/>
     <separator/>
     <menuitem action='clear'/>
