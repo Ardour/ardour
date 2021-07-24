@@ -1112,7 +1112,7 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 
 	FUnknownPtr<Vst::IEditController2> controller2 (_controller);
 	if (controller2) {
-		controller2->setKnobMode (Vst::kRelativCircularMode);
+		controller2->setKnobMode (Vst::kLinearMode);
 	}
 
 	int32 n_params = _controller->getParameterCount ();
