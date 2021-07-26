@@ -1025,7 +1025,7 @@ Session::process_event (SessionEvent* ev)
 	};
 
 	if (remove) {
-		del = del && !_remove_event (ev);
+		del = (del && !_remove_event (ev));
 	}
 
 	if (del) {
