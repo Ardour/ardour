@@ -4415,7 +4415,7 @@ void
 Editor::new_playlists_for_all_tracks (bool copy)
 {
 	string name, gid;
-	if (stamp_new_playlist( _("New Playlist for ALL Tracks"), name,gid,copy)) {
+	if (stamp_new_playlist(  copy ?  _("Copy Playlist for ALL Tracks") : _("New Playlist for ALL Tracks"), name,gid,copy)) {
 		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 		_session->playlists()->get (playlists);
 		mapover_all_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
@@ -4426,7 +4426,7 @@ void
 Editor::new_playlists_for_grouped_tracks (RouteUI* rui, bool copy)
 {
 	string name, gid;
-	if (stamp_new_playlist( _("New Playlist for this track/group"), name,gid,copy)) {
+	if (stamp_new_playlist(  copy ?  _("Copy Playlist for this track/group") : _("New Playlist for this track/group"), name,gid,copy)) {
 		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 		_session->playlists()->get (playlists);
 		mapover_grouped_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists), rui, ARDOUR::Properties::group_select.property_id);
@@ -4437,7 +4437,7 @@ void
 Editor::new_playlists_for_selected_tracks (bool copy)
 {
 	string name, gid;
-	if (stamp_new_playlist( _("New Playlist for Selected Tracks"), name,gid,copy)) {
+	if (stamp_new_playlist(  copy ?  _("Copy Playlist for Selected Tracks") : _("New Playlist for Selected Tracks"), name,gid,copy)) {
 		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 		_session->playlists()->get (playlists);
 		mapover_selected_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
@@ -4448,7 +4448,7 @@ void
 Editor::new_playlists_for_armed_tracks (bool copy)
 {
 	string name, gid;
-	if (stamp_new_playlist( _("New Playlist for Armed Tracks"), name,gid,copy)) {
+	if (stamp_new_playlist( copy ?  _("Copy Playlist for Armed Tracks") : _("New Playlist for Armed Tracks"), name,gid,copy)) {
 		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 		_session->playlists()->get (playlists);
 		mapover_armed_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
