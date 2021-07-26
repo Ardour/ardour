@@ -446,7 +446,7 @@ Session::stop_transport (bool abort, bool clear_state)
 
 /** Called from the process thread */
 void
-Session::start_transport ()
+Session::start_transport (bool after_loop)
 {
 	ENSURE_PROCESS_THREAD;
 	DEBUG_TRACE (DEBUG::Transport, "start_transport\n");
@@ -570,15 +570,19 @@ Session::start_transport ()
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC4 with speed = %1\n", transport_speed()));
 
-	/* emit TransportStateChange signal only when transport is actually rolling */
-	SessionEvent* ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Add, _transport_sample, _transport_sample, 1.0);
-	queue_event (ev);
-
-	samplepos_t roll_pos = _transport_sample + std::max (_count_in_samples, _remaining_latency_preroll) * (_transport_fsm->will_roll_fowards () ? 1 : -1);
-	if (roll_pos > 0 && roll_pos != _transport_sample) {
-		/* and when transport_rolling () == true */
-		SessionEvent* ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Add, roll_pos, roll_pos, 1.0);
+	if (!after_loop) {
+		/* emit TransportStateChange signal only when transport is actually rolling */
+		SessionEvent* ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Add, _transport_sample, _transport_sample, 1.0);
+		cerr << "queueing TSC1 @ " << _transport_sample << endl;
 		queue_event (ev);
+
+		samplepos_t roll_pos = _transport_sample + std::max (_count_in_samples, _remaining_latency_preroll) * (_transport_fsm->will_roll_fowards () ? 1 : -1);
+		if (roll_pos > 0 && roll_pos != _transport_sample) {
+			/* and when transport_rolling () == true */
+			SessionEvent* ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Add, roll_pos, roll_pos, 1.0);
+			cerr << "queueing TSC2 @ " << roll_pos << endl;
+			queue_event (ev);
+		}
 	}
 }
 

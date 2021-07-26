@@ -484,7 +484,7 @@ TransportFSM::start_playback ()
 		api->set_transport_speed (most_recently_requested_speed);
 	}
 
-	api->start_transport();
+	api->start_transport (false);
 }
 
 void
@@ -688,7 +688,8 @@ TransportFSM::should_roll_after_locate () const
 void
 TransportFSM::roll_after_locate () const
 {
-	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("rolling after locate, was for_loop ? %1\n", _last_locate.for_loop_end));
+	bool for_loop = _last_locate.for_loop_end;
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("rolling after locate, was for_loop ? %1\n", for_loop));
 	current_roll_after_locate_status = boost::none;
 
 	if (most_recently_requested_speed == std::numeric_limits<double>::max()) {
@@ -699,7 +700,7 @@ TransportFSM::roll_after_locate () const
 	}
 
 	api->set_transport_speed (most_recently_requested_speed);
-	api->start_transport ();
+	api->start_transport (for_loop);
 }
 
 void

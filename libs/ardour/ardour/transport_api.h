@@ -37,7 +37,7 @@ class LIBARDOUR_API TransportAPI
 	virtual void locate (samplepos_t, bool with_loop=false, bool force=false, bool with_mmc=true) = 0;
 	virtual bool should_stop_before_locate () const = 0;
 	virtual void stop_transport (bool abort = false, bool clear_state = false) = 0;
-	virtual void start_transport () = 0;
+	virtual void start_transport (bool after_loop) = 0;
 	virtual void butler_completed_transport_work () = 0;
 	virtual void schedule_butler_for_transport_work () = 0;
 	virtual bool should_roll_after_locate () const = 0;
