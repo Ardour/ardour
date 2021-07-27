@@ -943,7 +943,7 @@ Item::prepare_for_render_children (Rect const & area) const
 void
 Item::add_child_bounding_boxes (bool include_hidden) const
 {
-Rect self;
+	Rect self;
 	Rect bbox;
 	bool have_one = false;
 
