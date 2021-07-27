@@ -34,8 +34,8 @@ class Editor;
 class EditorCursor
 {
 public:
-	EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
-	EditorCursor (Editor&);
+	EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*), std::string const &);
+	EditorCursor (Editor&, std::string const &);
 	~EditorCursor ();
 
 	void set_position (samplepos_t);

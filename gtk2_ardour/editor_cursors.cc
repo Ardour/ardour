@@ -35,11 +35,11 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
+EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*), std::string const & name)
 	: _editor (ed)
 	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_cursor_scroll_group()))
 {
-	CANVAS_DEBUG_NAME (_track_canvas_item, "track canvas editor cursor");
+	CANVAS_DEBUG_NAME (_track_canvas_item, string_compose ("track canvas editor cursor <%1>", name));
 
 	_track_canvas_item->set_show_head (0, true);
 	_track_canvas_item->set_head_height (0, 9);
@@ -57,11 +57,11 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 	_current_sample = 1; /* force redraw at 0 */
 }
 
-EditorCursor::EditorCursor (Editor& ed)
+EditorCursor::EditorCursor (Editor& ed, std::string const & name)
 	: _editor (ed)
 	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_hscroll_group()))
 {
-	CANVAS_DEBUG_NAME (_track_canvas_item, "track canvas cursor");
+	CANVAS_DEBUG_NAME (_track_canvas_item, string_compose ("track canvas cursor <%1>", name));
 
 	_track_canvas_item->set_show_head (0, false);
 	_track_canvas_item->set_show_head (1, false);

@@ -223,9 +223,9 @@ Editor::initialize_canvas ()
 	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
 	transport_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
 
-	_playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
+	_playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
 
-	_snapped_cursor = new EditorCursor (*this);
+	_snapped_cursor = new EditorCursor (*this, X_("snapped"));
 
 	_canvas_drop_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
 	/* this thing is transparent */
