@@ -448,7 +448,6 @@ Item::reparent (Item* new_parent, bool already_added)
 	assert (_canvas == new_parent->canvas());
 
 	if (_parent) {
-		cerr << "remove " << whatami() << '/' << name << " from " << _parent->whatami() << '/' << _parent->name << endl;
 		_parent->remove (this);
 	}
 
