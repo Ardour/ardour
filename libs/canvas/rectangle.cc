@@ -311,3 +311,10 @@ Rectangle::set_corner_radius (double r)
 	end_change ();
 }
 
+void
+Rectangle::dump (std::ostream & o) const
+{
+	Item::dump (o);
+
+	o << _canvas->indent() << " outline: w " << outline_width() << " color " << outline_color() << " what 0x" << std::hex << _outline_what << std::dec << endl;
+}
