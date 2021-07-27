@@ -797,10 +797,12 @@ Item::covers (Duple const & point) const
 	Duple p = window_to_item (point);
 
 	if (_bounding_box_dirty) {
-		compute_bounding_box ();
+		(void) bounding_box ();
 	}
 
 	Rect r = bounding_box();
+
+	/* bounding box uses item coordinates, with _position as the origin */
 
 	if (!r) {
 		return false;
