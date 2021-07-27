@@ -71,7 +71,7 @@ LineSet::compute_bounding_box () const
 		}
 	}
 
-	_bounding_box_dirty = false;
+	bb_clean ();
 }
 
 void

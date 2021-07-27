@@ -143,5 +143,5 @@ Widget::compute_bounding_box () const
 
 	_widget.size_allocate (alloc);
 
-	_bounding_box_dirty = false;
+	bb_clean ();
 }

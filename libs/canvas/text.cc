@@ -239,7 +239,7 @@ Text::compute_bounding_box () const
 {
 	if (!_canvas || _text.empty()) {
 		_bounding_box = Rect ();
-		_bounding_box_dirty = false;
+		bb_clean ();
 		return;
 	}
 
@@ -253,7 +253,7 @@ Text::compute_bounding_box () const
 			_redraw ();
 		}
 		_bounding_box = Rect (0, 0, min (_clamped_width, (double) _image->get_width() * retina_factor), _image->get_height() * retina_factor);
-		_bounding_box_dirty = false;
+		bb_clean ();
 	}
 }
 

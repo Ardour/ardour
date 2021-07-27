@@ -64,7 +64,7 @@ Arc::compute_bounding_box () const
 	bbox = bbox.expand (0.5 + (_outline_width / 2));
 
 	_bounding_box = bbox;
-	_bounding_box_dirty = false;
+	bb_clean ();
 }
 
 void

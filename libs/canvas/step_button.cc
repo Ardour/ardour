@@ -69,7 +69,7 @@ StepButton::compute_bounding_box () const
 
 	add_child_bounding_boxes ();
 
-	_bounding_box_dirty = false;
+	bb_clean ();
 }
 
 #define CORNER_RADIUS 5

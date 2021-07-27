@@ -159,7 +159,10 @@ public:
 	virtual Duple intrinsic_size() const { return Duple (_intrinsic_width, _intrinsic_height); }
 	virtual void set_intrinsic_size (Distance, Distance);
 
-	/** bounding box is the public API to get the size of the item.
+	/** bounding box is the public API to get the area covered by the item
+	 * (which may differ from its allocation). The returned Rect is in item
+	 * coordinates (i.e. x0,y0 = 0,0 mean that the upper left corner of the
+	 * bounding box is at the item's _position).
 	 */
 	Rect bounding_box () const;
 
@@ -326,6 +329,9 @@ public:
 	mutable Rect _bounding_box;
 	/** true if _bounding_box might be out of date, false if its definitely not */
 	mutable bool _bounding_box_dirty;
+
+	void bb_clean () const;
+
 	Rect _allocation;
 	bool _layout_sensitive;
 	Distance _intrinsic_width;

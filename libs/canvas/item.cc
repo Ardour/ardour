@@ -1316,3 +1316,10 @@ Item::set_layout_sensitive (bool yn)
 {
 	_layout_sensitive = yn;
 }
+
+void
+Item::bb_clean () const
+{
+	_bounding_box_dirty = false;
+}
+

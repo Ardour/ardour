@@ -92,7 +92,7 @@ void
 ConstraintPacker::compute_bounding_box () const
 {
 	_bounding_box = _allocation;
-	_bounding_box_dirty = false;
+	bb_clean ();
 }
 
 void
