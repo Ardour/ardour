@@ -964,11 +964,12 @@ Item::add_child_bounding_boxes (bool include_hidden) const
 			continue;
 		}
 
-		Rect group_bbox = (*i)->item_to_parent (item_bbox);
+		Rect child_bbox = (*i)->item_to_parent (item_bbox);
+
 		if (have_one) {
-			bbox = bbox.extend (group_bbox);
+			bbox = bbox.extend (child_bbox);
 		} else {
-			bbox = group_bbox;
+			bbox = child_bbox;
 			have_one = true;
 		}
 	}
