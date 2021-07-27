@@ -296,7 +296,7 @@ Item::set_position (Duple p)
 		_canvas->item_moved (this, pre_change_parent_bounding_box);
 
 		if (_parent) {
-			_parent->child_changed (false);
+			_parent->child_changed (true);
 		}
 	}
 }
