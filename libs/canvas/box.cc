@@ -256,7 +256,7 @@ Box::layout ()
 
 	if (yes_do_it) {
 		reposition_children ();
-		compute_bounding_box ();
+		(void) bounding_box ();
 
 		const double w = std::max (requested_width, _bounding_box.width());
 		const double h = std::max (requested_height, _bounding_box.height());

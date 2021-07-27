@@ -162,7 +162,7 @@ void
 Grid::reset_bg ()
 {
 	if (_bounding_box_dirty) {
-		compute_bounding_box ();
+		(void) bounding_box ();
 	}
 
 	if (!_bounding_box) {
