@@ -158,7 +158,7 @@ Maschine2Knob::compute_bounding_box () const
 		_bounding_box_dirty = false;
 	}
 
-	add_child_bounding_boxes ();
+	/* Item::bounding_box() will add children */
 }
 
 void

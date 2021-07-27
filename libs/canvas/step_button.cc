@@ -67,7 +67,7 @@ StepButton::compute_bounding_box () const
 {
 	_bounding_box = Rect (0, 0, width, height);
 
-	add_child_bounding_boxes ();
+	/* Item::bounding_box() will add children */
 
 	bb_clean ();
 }
