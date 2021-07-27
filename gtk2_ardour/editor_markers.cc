@@ -619,7 +619,7 @@ Editor::LocationMarkers::set_position (timepos_t const & startt,
 				       timepos_t const & endt)
 {
 	start->set_position (startt);
-	if (!endt.zero()) {
+	if (end && !endt.zero()) {
 		end->set_position (endt);
 	}
 }
