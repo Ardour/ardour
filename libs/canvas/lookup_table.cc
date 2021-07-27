@@ -72,7 +72,6 @@ DumbLookupTable::items_at_point (Duple const & point) const
 	for (list<Item *>::const_iterator i = items.begin(); i != items.end(); ++i) {
 
 		if ((*i)->covers (point)) {
-			// std::cerr << "\t\t" << (*i)->whatami() << '/' << (*i)->name << " covers " << point << std::endl;
 			vitems.push_back (*i);
 		}
 	}
