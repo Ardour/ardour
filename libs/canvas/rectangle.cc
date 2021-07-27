@@ -124,7 +124,7 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 			std::cerr << "Render selection frame on " << self << std::endl;
 		}
 
-		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
+		if (_outline_what == ALL) {
 
 			if (_corner_radius) {
 				Gtkmm2ext::rounded_rectangle (context, self.x0, self.y0, self.width() - _outline_width, self.height() - _outline_width, _corner_radius);
