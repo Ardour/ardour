@@ -1152,7 +1152,10 @@ void
 Item::child_changed (bool bbox_changed)
 {
 	invalidate_lut ();
-	_bounding_box_dirty = bbox_changed;
+
+	if (bbox_changed) {
+		_bounding_box_dirty = true;
+	}
 
 	if (_parent) {
 		_parent->child_changed (bbox_changed);
