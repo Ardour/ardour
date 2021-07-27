@@ -461,7 +461,7 @@ timepos_t::set_time_domain (TimeDomain td)
 	}
 
 	if (td == AudioTime) {
-		v = build (false, superclock_to_samples (_superclocks(), TEMPORAL_SAMPLE_RATE));
+		v = build (false, _superclocks());
 	} else {
 		v = build (true, _beats().to_ticks());
 	}
