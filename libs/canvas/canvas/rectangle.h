@@ -92,6 +92,8 @@ public:
 
 	void size_request (double& w, double& h) const;
 
+	void dump (std::ostream&) const;
+
   private:
 	/** Our rectangle; note that x0 may not always be less than x1
 	 *  and likewise with y0 and y1.
