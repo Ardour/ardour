@@ -675,13 +675,15 @@ Editor::mouse_add_new_marker (timepos_t where, bool is_cd)
 	string markername;
 	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
 
+	cerr << "adding new marker @ " << where << endl;
+
 	if (_session) {
 		_session->locations()->next_available_name(markername, _("mark"));
 		if (!choose_new_marker_name(markername)) {
 			return;
 		}
 
-		Location *location = new Location (*_session, timepos_t (where), timepos_t (where), markername, (Location::Flags) flags);
+		Location *location = new Location (*_session, where, where, markername, (Location::Flags) flags);
 		begin_reversible_command (_("add marker"));
 
 		XMLNode &before = _session->locations()->get_state();
@@ -748,7 +750,7 @@ Editor::mouse_add_new_range (timepos_t where)
 
 	string name;
 	_session->locations()->next_available_name (name, _("range"));
-	Location* loc = new Location (*_session, timepos_t (where), timepos_t (end), name, Location::IsRangeMarker);
+	Location* loc = new Location (*_session, where, end, name, Location::IsRangeMarker);
 
 	begin_reversible_command (_("new range marker"));
 	XMLNode& before = _session->locations()->get_state ();
