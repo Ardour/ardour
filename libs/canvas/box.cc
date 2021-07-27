@@ -59,16 +59,7 @@ Box::Box (Item* parent, Duple const & p, Orientation o)
 	, ignore_child_changes (false)
 {
 	set_position (p);
-}
-
-void
-Box::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
-{
-	if (_fill || _outline) {
-		Rectangle::render (area, context);
-	}
-
-	Item::render_children (area, context);
+	set_outline_width (3);
 }
 
 void

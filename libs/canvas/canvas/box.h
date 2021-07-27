@@ -67,7 +67,6 @@ public:
 	void set_homogenous (bool);
 
 	void compute_bounding_box () const;
-	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
   protected:
 	Orientation orientation;
