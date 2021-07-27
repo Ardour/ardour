@@ -31,9 +31,11 @@ TriggerEntry::TriggerEntry (Item* parent, ARDOUR::Trigger& t)
 	: Rectangle (parent)
 	, _trigger (t)
 {
-	Rect r (0, 0, 25, 12);
+	Rect r (0, 0, 150, 20);
 	set (r);
 	set_outline_all ();
+	set_fill_color (Gtkmm2ext::random_color());
+	set_outline_color (Gtkmm2ext::random_color());
 }
 
 TriggerEntry::~TriggerEntry ()
@@ -45,8 +47,10 @@ TriggerEntry::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) 
 {
 	/* convert expose area back to item coordinate space */
 
+	Rect self (item_to_window (get()));
+
 	setup_outline_context (context);
-	rounded_rectangle (context, x0(), y0(), x1(), y1());
+	rounded_rectangle (context, self.x0, self.y0, self.width(), self.height());
 	context->stroke_preserve ();
 	setup_fill_context (context);
 	context->fill ();
@@ -59,8 +63,9 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	, _triggerbox (tb)
 {
 	set_homogenous (true);
-	set_spacing (6);
-	set_padding (6);
+	set_spacing (16);
+	set_padding (16);
+	set_fill (false);
 
 	build ();
 }
@@ -84,6 +89,7 @@ TriggerBoxUI::build ()
 		}
 		std::cerr << "NEW TE for trigger " << n << std::endl;
 		(void) new TriggerEntry (this, *t);
+		++n;
 	}
 }
 
