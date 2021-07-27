@@ -172,6 +172,8 @@ Box::reposition_children ()
 		uniform_size = Rect (0, 0, largest_width, largest_height);
 	}
 
+	Rect r;
+
 	{
 
 		PBD::Unwinder<bool> uw (ignore_child_changes, true);
@@ -188,6 +190,8 @@ Box::reposition_children ()
 			double height;
 
 			(*i)->size_request (width, height);
+
+			r = r.extend (Rect (previous_edge.x, previous_edge.y, previous_edge.x + width, previous_edge.y + height));
 
 			if (orientation == Vertical) {
 
@@ -222,7 +226,11 @@ Box::reposition_children ()
 		}
 	}
 
-	_bounding_box_dirty = true;
+	/* left and top margins+padding already reflected in child bboxes */
+
+	r = r.expand (0, right_margin + right_padding, bottom_margin + bottom_padding, 0);
+
+	set (r);
 }
 
 void
@@ -256,14 +264,6 @@ Box::layout ()
 
 	if (yes_do_it) {
 		reposition_children ();
-		(void) bounding_box ();
-
-		const double w = std::max (requested_width, _bounding_box.width());
-		const double h = std::max (requested_height, _bounding_box.height());
-
-		set (Rect (get().x0, get().y0, get().x0 + w, get().y0 + h));
-
-		std::cerr << name << " box layed out, reset to " << get() << std::endl;
 	}
 }
 
