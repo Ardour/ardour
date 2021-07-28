@@ -155,7 +155,7 @@ TriggerBox::add_trigger (Trigger* trigger)
 bool
 TriggerBox::queue_trigger (Trigger* trigger)
 {
-	return _trigger_queue.write (&trigger, 1) == 1;
+	return  _trigger_queue.write (&trigger, 1) == 1;
 }
 
 void
@@ -175,6 +175,13 @@ TriggerBox::process_ui_trigger_requests ()
 	for (uint32_t n = 0; n < vec.len[1]; ++n) {
 		Trigger* t = vec.buf[1][n];
 		pending_on_triggers.push_back (t);
+	}
+
+	if (vec.len[0] || vec.len[1]) {
+
+		if (!_session.transport_state_rolling()) {
+			_session.start_transport_from_processor ();
+		}
 	}
 
 	_trigger_queue.increment_read_idx (vec.len[0] + vec.len[1]);
