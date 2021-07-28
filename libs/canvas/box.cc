@@ -225,6 +225,20 @@ Box::reposition_children ()
 }
 
 void
+Box::size_request (double& w, double& h) const
+{
+	w = width();
+	h = height();
+}
+
+void
+Box::size_allocate_children (Rect const & r)
+{
+	std::cerr << "Box allocated " << r << std::endl;
+	Item::size_allocate_children (r);
+}
+
+void
 Box::add (Item* i)
 {
 	if (!i) {

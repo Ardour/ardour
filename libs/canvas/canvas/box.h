@@ -67,6 +67,8 @@ public:
 	void set_homogenous (bool);
 
 	void compute_bounding_box () const;
+	void size_request (double& w, double& h) const;
+	void size_allocate_children (Rect const & r);
 
   protected:
 	Orientation orientation;
