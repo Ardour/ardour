@@ -18,7 +18,9 @@
 
 #include "pbd/i18n.h"
 #include "pbd/compose.h"
+#include "pbd/convert.h"
 
+#include "ardour/region.h"
 #include "ardour/triggerbox.h"
 
 #include "canvas/polygon.h"
@@ -27,16 +29,22 @@
 #include "gtkmm2ext/utils.h"
 
 #include "triggerbox_ui.h"
+#include "ui_config.h"
 
 using namespace ARDOUR;
 using namespace ArdourCanvas;
 using namespace Gtkmm2ext;
+using namespace PBD;
 
 TriggerEntry::TriggerEntry (Item* parent, ARDOUR::Trigger& t)
 	: Rectangle (parent)
 	, _trigger (t)
 {
-	Rect r (0, 0, 150, 20);
+	const double scale = UIConfiguration::instance().get_ui_scale();
+	const double width = 150. * scale;
+	const double height = 20. * scale;
+
+	Rect r (0, 0, width, height);
 	set (r);
 	set_outline_all ();
 	set_fill_color (Gtkmm2ext::random_color());
@@ -46,21 +54,22 @@ TriggerEntry::TriggerEntry (Item* parent, ARDOUR::Trigger& t)
 	play_button = new Polygon (this);
 
 	Points p;
-	p.push_back (Duple (0, 0));
-	p.push_back (Duple (0, 10));
-	p.push_back (Duple (10, 5));
+	const double triangle_size = height - (8. * scale);
+	p.push_back (Duple (0., 0.));
+	p.push_back (Duple (0., triangle_size));
+	p.push_back (Duple (triangle_size, triangle_size / 2.));
 
 	play_button->set (p);
 	play_button->set_fill_color (Gtkmm2ext::random_color());
 	play_button->set_outline (false);
 
-	play_button->set_position (Duple (10, 2));
+	play_button->set_position (Duple (10. * scale, 4. * scale));
 
 	name_text = new Text (this);
-	name_text->set_font_description (Pango::FontDescription ("Sans 10"));
-	name_text->set ("Bang Crash");
-	name_text->set_color (Gtkmm2ext::random_color());
-	name_text->set_position (Duple (50, name_text->height() / 2));
+	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
+	name_text->set (short_version (_trigger.region()->name(), 20));
+	name_text->set_color (Gtkmm2ext::contrasting_text_color (fill_color()));
+	name_text->set_position (Duple (50, 4. * scale));
 }
 
 TriggerEntry::~TriggerEntry ()
@@ -134,13 +143,25 @@ TriggerBoxWidget::TriggerBoxWidget (TriggerBox& tb)
 	ui = new TriggerBoxUI (root(), tb);
 }
 
+void
+TriggerBoxWidget::size_request (double& w, double& h) const
+{
+	ui->size_request (w, h);
+}
+
 /* ------------ */
 
 TriggerBoxWindow::TriggerBoxWindow (TriggerBox& tb)
 {
 	TriggerBoxWidget* tbw = manage (new TriggerBoxWidget (tb));
 	set_title (_("TriggerBox for XXXX"));
-	set_default_size (100, 100);
+
+	double w;
+	double h;
+
+	tbw->size_request (w, h);
+
+	set_default_size (w, h);
 	add (*tbw);
 	tbw->show ();
 }

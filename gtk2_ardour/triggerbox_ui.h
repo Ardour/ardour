@@ -72,6 +72,7 @@ class TriggerBoxWidget : public ArdourCanvas::GtkCanvas
 {
   public:
 	TriggerBoxWidget (ARDOUR::TriggerBox& tb);
+	void size_request (double& w, double& h) const;
 
   private:
 	TriggerBoxUI* ui;
