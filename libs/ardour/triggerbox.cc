@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "pbd/basename.h"
 #include "pbd/failed_constructor.h"
 
 #include "ardour/audioregion.h"
@@ -84,7 +85,7 @@ TriggerBox::load_some_samples ()
 
 			plist.add (Properties::start, 0);
 			plist.add (Properties::length, src_list.front()->length ());
-			plist.add (Properties::name, string ("bang"));
+			plist.add (Properties::name, basename_nosuffix (path));
 			plist.add (Properties::layer, 0);
 			plist.add (Properties::layering_index, 0);
 
