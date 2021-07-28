@@ -125,9 +125,9 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 #ifdef CANVAS_DEBUG
 	if (debug_render || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 		cerr << this << " RENDER: " << area << endl;
-		//cerr << "CANVAS @ " << this << endl;
-		//dump (cerr);
-		//cerr << "-------------------------\n";
+		// cerr << "CANVAS @ " << this << endl;
+		// dump (cerr);
+		// cerr << "-------------------------\n";
 	}
 #endif
 
