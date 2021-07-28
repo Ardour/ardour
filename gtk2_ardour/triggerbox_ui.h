@@ -32,6 +32,11 @@ namespace ARDOUR {
 	class TriggerBox;
 }
 
+namespace ArdourCanvas {
+	class Text;
+	class Polygon;
+};
+
 class TriggerEntry : public ArdourCanvas::Rectangle
 {
   public:
@@ -39,7 +44,9 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 	~TriggerEntry ();
 
 	ARDOUR::Trigger& trigger() const { return _trigger; }
-	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
+
+	ArdourCanvas::Polygon* play_button;
+	ArdourCanvas::Text*    name_text;
 
   private:
 	ARDOUR::Trigger& _trigger;
@@ -53,7 +60,10 @@ class TriggerBoxUI : public ArdourCanvas::Box
 
    private:
 	ARDOUR::TriggerBox& _triggerbox;
+	typedef std::vector<TriggerEntry*> Slots;
+	Slots _slots;
 
+	bool bang (GdkEvent*, size_t);
 	void build ();
 };
 

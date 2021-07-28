@@ -17,7 +17,12 @@
  */
 
 #include "pbd/i18n.h"
+#include "pbd/compose.h"
+
 #include "ardour/triggerbox.h"
+
+#include "canvas/polygon.h"
+#include "canvas/text.h"
 
 #include "gtkmm2ext/utils.h"
 
@@ -36,24 +41,30 @@ TriggerEntry::TriggerEntry (Item* parent, ARDOUR::Trigger& t)
 	set_outline_all ();
 	set_fill_color (Gtkmm2ext::random_color());
 	set_outline_color (Gtkmm2ext::random_color());
+	name = string_compose ("trigger %1", _trigger.index());
+
+	play_button = new Polygon (this);
+
+	Points p;
+	p.push_back (Duple (0, 0));
+	p.push_back (Duple (0, 10));
+	p.push_back (Duple (10, 5));
+
+	play_button->set (p);
+	play_button->set_fill_color (Gtkmm2ext::random_color());
+	play_button->set_outline (false);
+
+	play_button->set_position (Duple (10, 2));
+
+	name_text = new Text (this);
+	name_text->set_font_description (Pango::FontDescription ("Sans 10"));
+	name_text->set ("Bang Crash");
+	name_text->set_color (Gtkmm2ext::random_color());
+	name_text->set_position (Duple (50, name_text->height() / 2));
 }
 
 TriggerEntry::~TriggerEntry ()
 {
-}
-
-void
-TriggerEntry::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
-{
-	/* convert expose area back to item coordinate space */
-
-	Rect self (item_to_window (get()));
-
-	setup_outline_context (context);
-	rounded_rectangle (context, self.x0, self.y0, self.width(), self.height());
-	context->stroke_preserve ();
-	setup_fill_context (context);
-	context->fill ();
 }
 
 /* ---------------------------- */
@@ -82,15 +93,38 @@ TriggerBoxUI::build ()
 
 	// clear_items (true);
 
+	_slots.clear ();
+
 	while (true) {
 		t = _triggerbox.trigger (n);
 		if (!t) {
 			break;
 		}
 		std::cerr << "NEW TE for trigger " << n << std::endl;
-		(void) new TriggerEntry (this, *t);
+		TriggerEntry* te = new TriggerEntry (this, *t);
+
+		_slots.push_back (te);
+
+		te->play_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::bang), n));
+
 		++n;
 	}
+}
+
+bool
+TriggerBoxUI::bang (GdkEvent *ev, size_t n)
+{
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		if (ev->button.button == 1) {
+			_triggerbox.queue_trigger (&_slots[n]->trigger());
+			return true;
+		}
+		break;
+	default:
+		break;
+	}
+	return false;
 }
 
 /* ------------ */
