@@ -1327,3 +1327,9 @@ Item::bb_clean () const
 	_bounding_box_dirty = false;
 }
 
+void
+Item::set_pack_options (PackOptions po)
+{
+	/* must be called before adding/packing Item in a Container */
+	_pack_options = po;
+}
