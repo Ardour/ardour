@@ -40,7 +40,7 @@ namespace ArdourCanvas {
 class TriggerEntry : public ArdourCanvas::Rectangle
 {
   public:
-	TriggerEntry (ArdourCanvas::Item* parent, ARDOUR::Trigger&);
+	TriggerEntry (ArdourCanvas::Canvas* canvas, ARDOUR::Trigger&);
 	~TriggerEntry ();
 
 	ARDOUR::Trigger& trigger() const { return _trigger; }

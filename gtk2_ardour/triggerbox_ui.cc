@@ -36,8 +36,8 @@ using namespace ArdourCanvas;
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-TriggerEntry::TriggerEntry (Item* parent, ARDOUR::Trigger& t)
-	: Rectangle (parent)
+TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
+	: Rectangle (canvas)
 	, _trigger (t)
 {
 	const double scale = UIConfiguration::instance().get_ui_scale();
@@ -110,7 +110,9 @@ TriggerBoxUI::build ()
 			break;
 		}
 		std::cerr << "NEW TE for trigger " << n << std::endl;
-		TriggerEntry* te = new TriggerEntry (this, *t);
+		TriggerEntry* te = new TriggerEntry (canvas(), *t);
+		te->set_pack_options (PackOptions (PackFill|PackExpand));
+		add (te);
 
 		_slots.push_back (te);
 
