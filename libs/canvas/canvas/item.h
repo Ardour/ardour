@@ -236,6 +236,9 @@ public:
 	void lower_child_to_bottom (Item *);
 	virtual void child_changed (bool bbox_changed);
 
+	PackOptions pack_options () const { return _pack_options; }
+	void set_pack_options (PackOptions);
+
 	static int default_items_per_cell;
 
 
@@ -330,6 +333,7 @@ public:
 	mutable Rect _bounding_box;
 	/** true if _bounding_box might be out of date, false if its definitely not */
 	mutable bool _bounding_box_dirty;
+	PackOptions _pack_options;
 
 	void bb_clean () const;
 

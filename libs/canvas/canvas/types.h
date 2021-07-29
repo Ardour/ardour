@@ -195,10 +195,14 @@ struct LIBCANVAS_API Rect
 };
 
 enum PackOptions {
-	PackExpand = 0x1,
-	PackFill = 0x2,
-	PackFromStart = 0x4,
-	PackFromEnd = 0x8
+	PackExpand = 0x1, /* use all available space ... */
+	PackFill = 0x2,   /* if PackExpand set, this means actually
+	                     expand size of Item; if PackExpand not
+	                     set, this does nothing.
+	                  */
+	PackShrink = 0x4, /* allow Item to be smaller than its natural size */
+	PackFromStart = 0x8,
+	PackFromEnd = 0x10
 };
 
 extern LIBCANVAS_API std::ostream & operator<< (std::ostream &, Rect const &);
