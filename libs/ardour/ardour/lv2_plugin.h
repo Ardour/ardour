@@ -138,8 +138,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void set_state_dir (const std::string& d = "");
 
 	int      set_state (const XMLNode& node, int version);
-	bool     save_preset (std::string uri);
-	void     remove_preset (std::string uri);
 	bool     load_preset (PresetRecord);
 	std::string current_preset () const;
 
