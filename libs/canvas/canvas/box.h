@@ -68,7 +68,7 @@ public:
 
 	void compute_bounding_box () const;
 	void size_request (double& w, double& h) const;
-	void size_allocate_children (Rect const & r);
+	void size_allocate (Rect const & r);
 
   protected:
 	Orientation orientation;
@@ -80,9 +80,9 @@ public:
   private:
 	bool collapse_on_hide;
 	bool homogenous;
-	bool ignore_child_changes;
+	mutable bool ignore_child_changes;
 
-	void reposition_children ();
+	void reposition_children (Distance width, Distance height);
 };
 
 class LIBCANVAS_API VBox : public Box

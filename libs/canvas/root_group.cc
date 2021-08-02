@@ -34,16 +34,16 @@ Root::Root (Canvas* canvas)
 }
 
 void
-Root::preferred_size (Duple& min, Duple& natural) const
+Root::size_request (Distance& w, Distance& h) const
 {
 	if (_items.size() == 1) {
 		cerr << "Call prefsize on " << _items.front()->whoami() << endl;
-		_items.front()->preferred_size (min, natural);
+		_items.front()->size_request (w, h);
 		return;
 	}
 
 	cerr << "use regular prefsize for root\n";
 
-	Item::preferred_size (min, natural);
+	Item::size_request (w, h);
 }
 

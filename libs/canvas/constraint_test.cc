@@ -50,9 +50,9 @@ main (int argc, char* argv[])
 	r2->name = "r2";
 	r3->name = "r3";
 
-	//r1->set_intrinsic_size (20, 20);
-	//r2->set_intrinsic_size (30, 30);
-	//r3->set_intrinsic_size (40, 40);
+	//r1->set_size_request (20, 20);
+	//r2->set_size_request (30, 30);
+	//r3->set_size_request (40, 40);
 
 	ConstraintPacker* vbox = new ConstraintPacker (c->root(), Vertical);
 	vbox->name = "vbox";

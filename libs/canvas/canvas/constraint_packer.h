@@ -62,8 +62,8 @@ public:
 
 	void compute_bounding_box () const;
 
-	void  preferred_size (Duple& mininum, Duple& natural) const;
 	void size_allocate (Rect const &);
+	void size_request (Distance& w, Distance& h) const;
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
@@ -98,7 +98,7 @@ public:
 
 	void add_constraints (kiwi::Solver&, ConstrainedItem*) const;
 
-	void non_const_preferred_size (Duple& mininum, Duple& natural);
+	void non_const_size_request (Distance& w, Distance& h);
 	virtual void update_constraints ();
 
 	void add_vertical_box_constraints (kiwi::Solver& solver, BoxConstrainedItem* ci, BoxConstrainedItem* prev, double main_dimenion, double second_dimension, kiwi::Variable& alloc_var);
@@ -109,7 +109,7 @@ public:
 	BoxPackedItems packed;
 
 	BoxConstrainedItem* pack (Item*, PackOptions primary_axis_packing, PackOptions secondary_axis_packing);
-	void box_preferred_size (Duple& mininum, Duple& natural) const;
+	void box_size_request (Distance& w, Distance& h) const;
 };
 
 }

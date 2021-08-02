@@ -108,7 +108,8 @@ ConstraintPacker::child_changed (bool bbox_changed)
 
 	for (ConstrainedItemMap::iterator x = constrained_map.begin(); x != constrained_map.end(); ++x) {
 
-		Duple i = x->first->intrinsic_size();
+		Duple i;
+		x->first->size_request (i.x, i.y);
 
 		if (r) {
 
@@ -156,14 +157,7 @@ ConstraintPacker::constrain (kiwi::Constraint const &c)
 }
 
 void
-ConstraintPacker::preferred_size (Duple& minimum, Duple& natural) const
-{
-	const_cast<ConstraintPacker*>(this)->non_const_preferred_size (minimum, natural);
-}
-
-
-void
-ConstraintPacker::box_preferred_size (Duple& min, Duple& natural) const
+ConstraintPacker::box_size_request (Distance& w, Distance& h) const
 {
 	BoxPackedItems::size_type n_expanding = 0;
 	BoxPackedItems::size_type n_nonexpanding = 0;
@@ -171,11 +165,12 @@ ConstraintPacker::box_preferred_size (Duple& min, Duple& natural) const
 	Distance non_expanding_used = 0;
 	Distance largest = 0;
 	Distance largest_opposite = 0;
-	Duple i_min, i_natural;
+	Distance width;
+	Distance height;
 
 	for (BoxPackedItems::const_iterator o = packed.begin(); o != packed.end(); ++o) {
 
-		(*o)->item().preferred_size (i_min, i_natural);
+		(*o)->item().size_request (width, height);
 
 		// cerr << '\t' << (*o)->item().whoami() << " min " << i_min << " nat " << i_natural << endl;
 
@@ -183,15 +178,15 @@ ConstraintPacker::box_preferred_size (Duple& min, Duple& natural) const
 			n_expanding++;
 
 			if (_orientation == Vertical) {
-				if (i_natural.height() > largest) {
-					largest = i_natural.height();
+				if (height > largest) {
+					largest = height;
 				}
 			} else {
-				if (i_natural.width() > largest) {
-					largest = i_natural.width();
+				if (width > largest) {
+					largest = width;;
 				}
-				if (i_natural.height() > largest) {
-					largest_opposite = i_natural.height();
+				if (height > largest) {
+					largest_opposite = height;
 				}
 			}
 
@@ -199,9 +194,9 @@ ConstraintPacker::box_preferred_size (Duple& min, Duple& natural) const
 			n_nonexpanding++;
 
 			if (_orientation == Vertical) {
-				non_expanding_used += i_natural.height();
+				non_expanding_used += height;
 			} else {
-				non_expanding_used += i_natural.width();
+				non_expanding_used += width;
 			}
 		}
 
@@ -210,12 +205,12 @@ ConstraintPacker::box_preferred_size (Duple& min, Duple& natural) const
 		 */
 
 		if (_orientation == Vertical) {
-			if (i_natural.width() > largest_opposite) {
-				largest_opposite = i_natural.width();
+			if (width > largest_opposite) {
+				largest_opposite = width;
 			}
 		} else {
-			if (i_natural.height() > largest_opposite) {
-				largest_opposite = i_natural.height();
+			if (height > largest_opposite) {
+				largest_opposite = height;
 			}
 		}
 
@@ -226,27 +221,29 @@ ConstraintPacker::box_preferred_size (Duple& min, Duple& natural) const
 
 	if (_orientation == Vertical) {
 		// cerr << "+++ vertical box, neu = " << non_expanding_used << " neuo " << non_expanding_used_opposite << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
-		min.y = non_expanding_used + (n_expanding * largest) + _top_margin + _bottom_margin + ((total - 1) * _spacing);
-		min.x = largest_opposite + _left_margin + _right_margin;
+		height = non_expanding_used + (n_expanding * largest) + _top_margin + _bottom_margin + ((total - 1) * _spacing);
+		width= largest_opposite + _left_margin + _right_margin;
 	} else {
 		// cerr << "+++ horiz box, neu = " << non_expanding_used << " neuo " << non_expanding_used_opposite << " largest = " << largest << " opp " << largest_opposite << " total " << total << endl;
-		min.x = non_expanding_used + (n_expanding * largest) + _left_margin + _right_margin + ((total - 1) * _spacing);
-		min.y = largest_opposite + _top_margin + _bottom_margin;
+		width = non_expanding_used + (n_expanding * largest) + _left_margin + _right_margin + ((total - 1) * _spacing);
+		height = largest_opposite + _top_margin + _bottom_margin;
 
 	}
-
-	// cerr << whoami() << " preferred-size = " << min << endl;
-
-	natural = min;
 }
 
 void
-ConstraintPacker::non_const_preferred_size (Duple& minimum, Duple& natural)
+ConstraintPacker::size_request (Distance& w, Distance& h) const
+{
+	const_cast<ConstraintPacker*>(this)->non_const_size_request (w, h);
+}
+
+void
+ConstraintPacker::non_const_size_request (Distance& w, Distance& h)
 {
 	/* our parent wants to know how big we are.
 
 	   We may have some intrinsic size (i.e. "everything in this constraint
-	   layout should fit into WxH". Just up two constraints on our width
+	   layout should fit into WxH". Just add two constraints on our width
 	   and height, and solve.
 
 	   We may have one intrinsic dimension (i.e. "everything in this
@@ -259,16 +256,13 @@ ConstraintPacker::non_const_preferred_size (Duple& minimum, Duple& natural)
 
 	if (packed.size() == constrained_map.size()) {
 		/* All child items were packed using ::pack() */
-		Duple m, n;
-		box_preferred_size (m, n);
-		natural = Duple (std::min (100.0, n.x), std::min (100.0, n.y));
-		minimum = natural;
+		box_size_request (w, h);
 		return;
 	}
 
-	if (_intrinsic_width == 0 && _intrinsic_height == 0) {
-		natural = Duple (100.0, 100.0);
-		minimum = natural;
+	if (_requested_width < 0 && _requested_height < 0) {
+		w = 100;
+		h = 100;
 		return;
 	}
 
@@ -276,10 +270,10 @@ ConstraintPacker::non_const_preferred_size (Duple& minimum, Duple& natural)
 		const_cast<ConstraintPacker*>(this)->update_constraints ();
 	}
 
-	if (_intrinsic_width > 0) {
-		_solver.suggestValue (width, _intrinsic_width);
-	} else if (_intrinsic_height > 0) {
-		_solver.suggestValue (height, _intrinsic_height);
+	if (_requested_width > 0) {
+		_solver.suggestValue (width, _requested_width);
+	} else if (_requested_height > 0) {
+		_solver.suggestValue (height, _requested_height);
 	}
 
 	_solver.updateVariables ();
@@ -287,13 +281,8 @@ ConstraintPacker::non_const_preferred_size (Duple& minimum, Duple& natural)
 
 	Rect bb (bounding_box());
 
-	Duple ret;
-
-	natural.x = std::max (bb.width(), _intrinsic_width);
-	natural.y = std::max (bb.height(), _intrinsic_width);
-
-	minimum.x = std::min (bb.width(), _intrinsic_width);
-	minimum.y = std::min (bb.height(), _intrinsic_width);
+	w = std::max (bb.width(), _requested_width);
+	h = std::max (bb.height(), _requested_width);
 
 	/* put solver back to default state */
 
@@ -325,14 +314,14 @@ ConstraintPacker::size_allocate (Rect const & r)
 			} else {
 				n_nonexpanding++;
 
-				Duple min, natural;
+				Distance w, h;
 
-				(*o)->item().preferred_size (min, natural);
+				(*o)->item().size_request (w, h);
 
 				if (_orientation == Vertical) {
-					non_expanding_used += natural.height();
+					non_expanding_used += h;
 				} else {
-					non_expanding_used += natural.width();
+					non_expanding_used += w;
 				}
 
 			}
@@ -360,9 +349,9 @@ ConstraintPacker::size_allocate (Rect const & r)
 	_solver.updateVariables ();
 
 #if 0
-	PBD::stacktrace (cerr, 100);
-	// _canvas->dump (cerr);
-	// _solver.dump (cerr);
+	// PBD::stacktrace (cerr, 100);
+	_canvas->dump (cerr);
+	_solver.dump (cerr);
 
 	for (ConstrainedItemMap::const_iterator o = constrained_map.begin(); o != constrained_map.end(); ++o) {
 		o->second->dump (cerr);
@@ -481,14 +470,14 @@ ConstraintPacker::update_constraints ()
 
 		for (BoxPackedItems::iterator o = packed.begin(); o != packed.end(); ++o) {
 
-			Duple min, natural;
+			Distance w, h;
 
-			(*o)->item().preferred_size (min, natural);
+			(*o)->item().size_request (w,h);
 
 			if (_orientation == Vertical) {
-				add_vertical_box_constraints (_solver, *o, prev == packed.end() ? 0 : *prev, natural.height(), natural.width(), width);
+				add_vertical_box_constraints (_solver, *o, prev == packed.end() ? 0 : *prev, h, w, width);
 			} else {
-				add_horizontal_box_constraints (_solver, *o, prev == packed.end() ? 0 : *prev, natural.width(), natural.height(), height);
+				add_horizontal_box_constraints (_solver, *o, prev == packed.end() ? 0 : *prev, w, h, height);
 			}
 
 			prev = o;
@@ -503,15 +492,13 @@ ConstraintPacker::update_constraints ()
 				continue;
 			}
 
-			Duple min, natural;
+			Distance w, h;
 			ConstrainedItem* ci = x->second;
 
-			x->first->preferred_size (min, natural);
+			x->first->size_request (w, h);
 
-			_solver.addConstraint ((ci->width() >= min.width()) | kiwi::strength::required);
-			_solver.addConstraint ((ci->height() >= min.height()) | kiwi::strength::required);
-			_solver.addConstraint ((ci->width() == natural.width()) | kiwi::strength::medium);
-			_solver.addConstraint ((ci->height() == natural.width()) | kiwi::strength::medium);
+			_solver.addConstraint ((ci->width() == w) | kiwi::strength::medium);
+			_solver.addConstraint ((ci->height() == h) | kiwi::strength::medium);
 
 			add_constraints (_solver, ci);
 		}

@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include "pbd/unwind.h"
+#include "pbd/stacktrace.h"
 
 #include "canvas/box.h"
 #include "canvas/rectangle.h"
@@ -35,6 +36,7 @@ Box::Box (Canvas* canvas, Orientation o)
 	, homogenous (false)
 	, ignore_child_changes (false)
 {
+	set_layout_sensitive (true);
 }
 
 Box::Box (Item* parent, Orientation o)
@@ -46,6 +48,7 @@ Box::Box (Item* parent, Orientation o)
 	, homogenous (false)
 	, ignore_child_changes (false)
 {
+	set_layout_sensitive (true);
 }
 
 
@@ -58,6 +61,7 @@ Box::Box (Item* parent, Duple const & p, Orientation o)
 	, homogenous (false)
 	, ignore_child_changes (false)
 {
+	set_layout_sensitive (true);
 	set_position (p);
 	set_outline_width (3);
 }
@@ -143,7 +147,16 @@ Box::set_homogenous (bool yn)
 }
 
 void
-Box::reposition_children ()
+Box::size_allocate (Rect const & alloc)
+{
+	_position = Duple (alloc.x0, alloc.y0);
+	_allocation = alloc;
+
+	reposition_children (alloc.width(), alloc.height());
+}
+
+void
+Box::size_request (Distance& w, Distance& h) const
 {
 	Duple previous_edge = Duple (left_margin+left_padding, top_margin+top_padding);
 	Distance largest_width = 0;
@@ -152,7 +165,7 @@ Box::reposition_children ()
 
 	if (homogenous) {
 
-		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+		for (std::list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
 			Rect bb = (*i)->bounding_box();
 			if (bb) {
 				largest_height = std::max (largest_height, bb.height());
@@ -166,21 +179,36 @@ Box::reposition_children ()
 	Rect r;
 
 	{
-
 		PBD::Unwinder<bool> uw (ignore_child_changes, true);
 
-		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
-
-			(*i)->set_position (previous_edge);
-
-			if (homogenous) {
-				(*i)->size_allocate (uniform_size);
-			}
+		for (std::list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
 
 			double width;
 			double height;
+			Rect isize;
 
 			(*i)->size_request (width, height);
+
+			if (homogenous) {
+				if (((*i)->pack_options() & PackOptions (PackExpand|PackFill)) == PackOptions (PackExpand|PackFill)) {
+					if (orientation == Vertical) {
+						/* use the item's own height and our computed width */
+						isize = Rect (previous_edge.x, previous_edge.y, previous_edge.x + uniform_size.width(), previous_edge.y + height);
+					} else {
+						/* use the item's own width and our computed height */
+						isize = Rect (previous_edge.x, previous_edge.y, previous_edge.x + width, previous_edge.y + uniform_size.height());
+					}
+				} else {
+					isize = Rect (previous_edge.x, previous_edge.y, previous_edge.x + width, previous_edge.y + height);
+				}
+			} else {
+				isize = Rect (previous_edge.x, previous_edge.y, previous_edge.x + width, previous_edge.y + height);
+			}
+
+			std::cerr << "\tset " << (*i)->whoami() << " to " << isize << std::endl;
+
+			width = isize.width();
+			height = isize.height();
 
 			r = r.extend (Rect (previous_edge.x, previous_edge.y, previous_edge.x + width, previous_edge.y + height));
 
@@ -221,21 +249,125 @@ Box::reposition_children ()
 
 	r = r.expand (0, right_margin + right_padding, bottom_margin + bottom_padding, 0);
 
-	set (r);
+	w = r.width();
+	h = r.height();
 }
 
 void
-Box::size_request (double& w, double& h) const
+Box::reposition_children (Distance width, Distance height)
 {
-	w = width();
-	h = height();
-}
 
-void
-Box::size_allocate_children (Rect const & r)
-{
-	std::cerr << "Box allocated " << r << std::endl;
-	Item::size_allocate_children (r);
+	Duple previous_edge = Duple (left_margin+left_padding, top_margin+top_padding);
+	Distance largest_width = 0;
+	Distance largest_height = 0;
+	Rect uniform_size;
+
+	std::cerr << "\n\n\n\n\nREPO C WITHIN " << width << " x " << height << std::endl;
+	PBD::stacktrace (std::cerr, 20);
+
+	if (homogenous) {
+
+		for (std::list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
+			Rect bb = (*i)->bounding_box();
+			if (bb) {
+				largest_height = std::max (largest_height, bb.height());
+				largest_width = std::max (largest_width, bb.width());
+			}
+		}
+
+		const Distance contents_width = width - (left_margin + left_padding + right_margin + right_padding);
+		const Distance contents_height = height - (top_margin + top_padding + bottom_margin + bottom_padding);
+		const Distance item_width = (contents_width - ((_items.size() - 1) * spacing)) / _items.size();
+		const Distance item_height = (contents_height - ((_items.size() - 1) * spacing)) / _items.size();
+
+		if (orientation == Vertical && (largest_width < item_width)) {
+			largest_width = item_width;
+			std::cerr << "Vertbox, use width " << width << " for largest (iw " << item_width << ")\n";
+		}
+
+		if (orientation == Horizontal && (largest_height < item_height)) {
+			largest_height = item_height;
+			std::cerr <<  "Hozbox, use height " << height << " for largest (ih " << item_height << ")\n";
+		}
+
+		uniform_size = Rect (0, 0, largest_width, largest_height);
+		std::cerr << "\tuniform size: " << uniform_size << std::endl;
+	}
+
+	Rect r;
+
+	{
+		PBD::Unwinder<bool> uw (ignore_child_changes, true);
+
+		for (std::list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
+
+			double width;
+			double height;
+			Rect isize;
+
+			(*i)->size_request (width, height);
+
+			if (homogenous) {
+				if (((*i)->pack_options() & PackOptions (PackExpand|PackFill)) == PackOptions (PackExpand|PackFill)) {
+					if (orientation == Vertical) {
+						/* use the item's own height and our computed width */
+						isize = Rect (previous_edge.x, previous_edge.y, previous_edge.x + uniform_size.width(), previous_edge.y + height);
+					} else {
+						/* use the item's own width and our computed height */
+						isize = Rect (previous_edge.x, previous_edge.y, previous_edge.x + width, previous_edge.y + uniform_size.height());
+					}
+				} else {
+					isize = Rect (previous_edge.x, previous_edge.y, previous_edge.x + width, previous_edge.y + height);
+				}
+			} else {
+				isize = Rect (previous_edge.x, previous_edge.y, previous_edge.x + width, previous_edge.y + height);
+			}
+
+			std::cerr << "\tset " << (*i)->whoami() << " to " << isize << std::endl;
+
+			(*i)->size_allocate (isize);
+
+			width = isize.width();
+			height = isize.height();
+
+			r = r.extend (Rect (previous_edge.x, previous_edge.y, previous_edge.x + width, previous_edge.y + height));
+
+			if (orientation == Vertical) {
+
+				Distance shift = 0;
+
+				if (!(*i)->visible()) {
+					/* invisible child */
+					if (!collapse_on_hide) {
+						/* still add in its size */
+						shift += height;
+					}
+				} else {
+					shift += height;
+				}
+
+				previous_edge = previous_edge.translate (Duple (0, spacing + shift));
+
+			} else {
+
+				Distance shift = 0;
+
+				if (!(*i)->visible()) {
+					if (!collapse_on_hide) {
+						shift += width;
+					}
+				} else {
+					shift += width;
+				}
+
+				previous_edge = previous_edge.translate (Duple (spacing + shift, 0));
+			}
+		}
+	}
+
+	/* left and top margins+padding already reflected in child bboxes */
+
+	r = r.expand (0, right_margin + right_padding, bottom_margin + bottom_padding, 0);
 }
 
 void
@@ -268,7 +400,8 @@ Box::layout ()
 	Item::layout ();
 
 	if (yes_do_it) {
-		reposition_children ();
+		std::cerr  << "LAYOUT with " << _allocation << std::endl;
+		reposition_children (_allocation.width(), _allocation.height());
 	}
 }
 
@@ -283,7 +416,7 @@ Box::child_changed (bool bbox_changed)
 
 	Item::child_changed (bbox_changed);
 
-	reposition_children ();
+	reposition_children (_allocation.width(), _allocation.height());
 }
 
 void
@@ -291,7 +424,7 @@ Box::set_collapse_on_hide (bool yn)
 {
 	if (collapse_on_hide != yn) {
 		collapse_on_hide = yn;
-		reposition_children ();
+		reposition_children (_allocation.width(), _allocation.height());
 	}
 }
 

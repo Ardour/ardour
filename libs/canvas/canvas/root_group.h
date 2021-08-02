@@ -28,7 +28,7 @@ namespace ArdourCanvas {
 class LIBCANVAS_API Root : public Container
 {
   public:
-	void preferred_size (Duple&, Duple&) const;
+	void size_request (Distance& w, Distance& h) const;
 
   private:
 	friend class Canvas;

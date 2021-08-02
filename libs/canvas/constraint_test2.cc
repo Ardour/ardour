@@ -34,7 +34,7 @@ using std::endl;
 		for (int i = 0; i < SQUARED; ++i) {
 			rects[i] = new Rectangle (c);
 			rects[i]->name = string_compose ("r%1-%2", number, i);
-			rects[i]->set_intrinsic_size (8, 12);
+			rects[i]->set_size_request (8, 12);
 			rects[i]->set_outline_color (0xff0000ff);
 			rects[i]->set_fill_color (Gtkmm2ext::random_color());
 

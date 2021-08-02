@@ -151,14 +151,11 @@ public:
 	virtual void size_request (double& w, double& h) const;
 	void set_size_request (double w, double h);
 
-	virtual void preferred_size (Duple& minimum, Duple& natural) const;
 	virtual void size_allocate (Rect const&);
 	virtual void size_allocate_children (Rect const & r);
 	Rect allocation() const { return _allocation; }
 	void set_layout_sensitive (bool);
 	bool layout_sensitive () const { return _layout_sensitive; }
-	virtual Duple intrinsic_size() const { return Duple (_intrinsic_width, _intrinsic_height); }
-	virtual void set_intrinsic_size (Distance, Distance);
 
 	/** bounding box is the public API to get the area covered by the item
 	 * (which may differ from its allocation). The returned Rect is in item
@@ -339,8 +336,6 @@ public:
 
 	Rect _allocation;
 	bool _layout_sensitive;
-	Distance _intrinsic_width;
-	Distance _intrinsic_height;
 
 	/* XXX: this is a bit grubby */
 	std::map<std::string, void *> _data;
@@ -364,8 +359,8 @@ public:
 	Duple position_offset() const;
 
 	bool _resize_queued;
-	double requested_width;
-	double requested_height;
+	double _requested_width;
+	double _requested_height;
 
 private:
 	void init ();

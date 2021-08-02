@@ -292,11 +292,12 @@ Rectangle::size_allocate (Rect const & r)
 	Item::size_allocate (r);
 
 	if (_layout_sensitive) {
-		/* Item::size_allocate() will have set _position, and then set
+		/* Set _position use the upper left of the Rect, and then set
 		   the _rect member with values that use _position as the
 		   origin.
 		*/
 		Rect r2 (0, 0, r.x1 - r.x0, r.y1 - r.y0);
+		// std::cerr << "rectangle " << whoami() << " set to "; dump (std::cerr); std::cerr << '\n';
 		set (r2);
 	}
 }

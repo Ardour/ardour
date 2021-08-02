@@ -45,12 +45,10 @@ Item::Item (Canvas* canvas)
 	, _bounding_box_dirty (true)
 	, _pack_options (PackOptions (0))
 	, _layout_sensitive (false)
-	, _intrinsic_width (-1.)
-	, _intrinsic_height(-1.)
 	, _lut (0)
 	, _resize_queued (false)
-	, requested_width (-1)
-	, requested_height (-1)
+	, _requested_width (-1)
+	, _requested_height (-1)
 	, _ignore_events (false)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
@@ -66,12 +64,10 @@ Item::Item (Item* parent)
 	, _bounding_box_dirty (true)
 	, _pack_options (PackOptions (0))
 	, _layout_sensitive (false)
-	, _intrinsic_width (-1.)
-	, _intrinsic_height(-1.)
 	, _lut (0)
 	, _resize_queued (false)
-	, requested_width (-1)
-	, requested_height (-1)
+	, _requested_width (-1)
+	, _requested_height (-1)
 	, _ignore_events (false)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
@@ -94,8 +90,8 @@ Item::Item (Item* parent, Duple const& p)
 	, _bounding_box_dirty (true)
 	, _pack_options (PackOptions (0))
 	, _layout_sensitive (false)
-	, _intrinsic_width (-1.)
-	, _intrinsic_height(-1.)
+	, _requested_width (-1.)
+	, _requested_height(-1.)
 	, _lut (0)
 	, _resize_queued (false)
 	, _ignore_events (false)
@@ -607,11 +603,7 @@ Item::grab_focus ()
 void
 Item::size_allocate (Rect const & r)
 {
-	if (_layout_sensitive) {
-		_position = Duple (r.x0, r.y0);
-		_allocation = r;
-	}
-
+	_position = Duple (r.x0, r.y0);
 	size_allocate_children (r);
 }
 
@@ -639,8 +631,8 @@ Item::size_request (double& w, double& h) const
 {
 	Rect r (bounding_box());
 
-	w = std::max (requested_width, r.width());
-	h = std::max (requested_height, r.height());
+	w = _requested_width < 0 ? r.width()  : _requested_width;
+	h = _requested_width < 0 ? r.height() : _requested_height;
 }
 
 void
@@ -649,8 +641,8 @@ Item::set_size_request (double w, double h)
 	/* allow reset to zero or require that both are positive */
 
 	begin_change ();
-	requested_width = w;
-	requested_height = h;
+	_requested_width = w;
+	_requested_height = h;
 	_bounding_box_dirty = true;
 	end_change ();
 }
@@ -1275,50 +1267,13 @@ ArdourCanvas::operator<< (ostream& o, const Item& i)
 }
 
 void
-Item::set_intrinsic_size (Distance w, Distance h)
-{
-	_intrinsic_width = w;
-	_intrinsic_height = h;
-}
-
-void
-Item::preferred_size (Duple& minimum, Duple& natural) const
-{
-	/* this is the default mechanism to get a preferred size. It assumes
-	 * items whose dimensions are essentially fixed externally by calling
-	 * various methods that set the limits, and those same limits are used
-	 * when computing the bounding box. So ... just get the bounding box,
-	 * and use the dimensions it specifies.
-	 *
-	 * Note that items that fit this assumption also cannot have their size
-	 * adjusted by a container that they are placed in, so their miniumum
-	 * and natural sizes are the same.
-	 */
-
-	if (_intrinsic_height < 0 && _intrinsic_width < 0) {
-
-		/* intrinsic size untouched ... fall back on
-		   arbitrary default (small) sizes.
-		*/
-
-		natural.x = 2;
-		natural.y = 2;
-
-	} else {
-
-		natural.x = _intrinsic_width;
-		natural.y = _intrinsic_height;
-
-	}
-
-	minimum.x = 1;
-	minimum.y = 1;
-}
-
-void
 Item::set_layout_sensitive (bool yn)
 {
 	_layout_sensitive = yn;
+
+	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
+		(*i)->set_layout_sensitive (yn);
+	}
 }
 
 void

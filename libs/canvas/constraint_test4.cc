@@ -50,9 +50,9 @@ main (int argc, char* argv[])
 	r2->name = "R";
 	r3->name = "C";
 
-	r1->set_intrinsic_size (20, 20);
-	r2->set_intrinsic_size (30, 30);
-	r3->set_intrinsic_size (40, 40);
+	r1->set_size_request (20, 20);
+	r2->set_size_request (30, 30);
+	r3->set_size_request (40, 40);
 
 	Text* txt = new Text (c);
 	txt->name = "text";
@@ -74,7 +74,7 @@ main (int argc, char* argv[])
 
 	/* give it a minimum size */
 
-	packer->set_intrinsic_size (100, 100);
+	packer->set_size_request (100, 100);
 
 	/* add stuff */
 
