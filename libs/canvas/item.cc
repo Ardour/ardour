@@ -603,8 +603,10 @@ Item::grab_focus ()
 void
 Item::size_allocate (Rect const & r)
 {
-	_position = Duple (r.x0, r.y0);
-	size_allocate_children (r);
+	if (_layout_sensitive) {
+		_position = Duple (r.x0, r.y0);
+		size_allocate_children (r);
+	}
 }
 
 void
