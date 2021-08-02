@@ -4319,13 +4319,25 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 				/* set capture latency */
 				snd->output ()->set_private_port_latencies (capt_lat_in + l_in, false);
 				/* take send-target's playback latency into account */
-				snd->set_delay_out (snd->output ()->connected_latency (true));
-				/* InternalReturn::set_playback_offset() below, also calls set_delay_out() */
+				const samplecnt_t snd_lat = snd->output ()->connected_latency (true);
+				if (apply_to_delayline) {
+					/* DelayLine::set_delay requires process-lock */
+					snd->set_delay_out (snd_lat);
+				} else if (delayline_update_needed && snd->get_delay_out () != snd_lat) {
+					*delayline_update_needed = true;
+				}
 			}
+		} else if (!apply_to_delayline && boost::dynamic_pointer_cast<InternalReturn> (*i)) {
+			/* InternalReturn::set_playback_offset() calls set_delay_out(), requires process lock */
+			const samplecnt_t poff = _signal_latency + _output_latency;
+			if (delayline_update_needed && (*i)->playback_offset () != poff) {
+				*delayline_update_needed = true;
+			}
+		} else {
+			(*i)->set_playback_offset (_signal_latency + _output_latency);
 		}
 
 		(*i)->set_input_latency (l_in);
-		(*i)->set_playback_offset (_signal_latency + _output_latency);
 		(*i)->set_capture_offset (in_latency);
 		if ((*i)->active ()) {
 			l_in += (*i)->effective_latency ();
