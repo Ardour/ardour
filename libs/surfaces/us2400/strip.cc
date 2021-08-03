@@ -610,8 +610,16 @@ Strip::periodic (PBD::microseconds_t now)
 			_surface->write (_fader->set_position(0.0));
 		}
 
+		bool showing_pan = false;
+		if (_pan_mode >= PanAzimuthAutomation && _pan_mode <= PanLFEAutomation) {
+			showing_pan = true;
+		}
+		if (_pan_mode == SendAzimuthAutomation) {
+			showing_pan = true;
+		}
+
 		if ( _vpot->control() ) {
-			_surface->write (_vpot->set (_vpot->control()->internal_to_interface (_vpot->control()->get_value ()), true));
+			_surface->write (_vpot->set (_vpot->control()->internal_to_interface (_vpot->control()->get_value (), showing_pan ? true: false), true));
 		} else {
 			_surface->write (_vpot->set(0.0, false));
 		}
