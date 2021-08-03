@@ -3104,9 +3104,9 @@ Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
 				setup_search_string (compstr);
 				maybe_show |= match_search_strings (compstr, searchstr);
 				/* check tags */
-				manager.get_tags_as_string (*i);
-				setup_search_string (compstr);
-				maybe_show |= match_search_strings (compstr, searchstr);
+				std::string tags = manager.get_tags_as_string (*i);
+				setup_search_string (tags);
+				maybe_show |= match_search_strings (tags, searchstr);
 			}
 		} else {
 			int64_t lru;
