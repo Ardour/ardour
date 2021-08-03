@@ -29,6 +29,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/automation_control.h"
+#include "ardour/dB.h"
 #include "ardour/debug.h"
 #include "ardour/route.h"
 #include "ardour/panner.h"
@@ -627,11 +628,11 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 			if (r && r->is_input_strip()) {
 				boost::shared_ptr<AutomationControl> pc = r->send_level_controllable (10);
 				if (pc) {
-					pc->set_value (-db_value , PBD::Controllable::NoGroup);
+					pc->set_value (dB_to_coefficient(-db_value) , PBD::Controllable::NoGroup);
 				}
 				pc = r->send_level_controllable (11);
 				if (pc) {
-					pc->set_value (-inv_db, PBD::Controllable::NoGroup);
+					pc->set_value (dB_to_coefficient(-inv_db), PBD::Controllable::NoGroup);
 				}
 			}
 		}
