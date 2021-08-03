@@ -8946,12 +8946,30 @@ Editor::clear_region_markers ()
 	bool in_command = false;
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+
+		CueMarkers rcm;
+
+		(*r)->region()->get_cue_markers (rcm, true);
+
+		if (rcm.empty()) {
+			continue;
+		}
+
 		SourceList & sources = (*r)->region()->sources_for_edit ();
+
 		for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
 
 			XMLNode* before_cues = (*s)->get_state().child (X_("Cues"));
+			bool failed = false;
 
-			if (!(*s)->clear_cue_markers ()) {
+			for (CueMarkers::iterator c = rcm.begin(); c != rcm.end(); ++c) {
+				if (!(*s)->remove_cue_marker (*c)) {
+					failed = true;
+					break;
+				}
+			}
+
+			if (failed) {
 				delete before_cues;
 				continue;
 			}
