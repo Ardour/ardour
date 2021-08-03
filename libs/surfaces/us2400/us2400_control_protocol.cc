@@ -216,6 +216,7 @@ US2400Protocol::stripable_is_locked_to_strip (boost::shared_ptr<Stripable> r) co
 	return false;
 }
 
+#ifdef MIXBUS
 struct StripableByMixbusOrder
 {
 	bool operator () (const boost::shared_ptr<Stripable> & a, const boost::shared_ptr<Stripable> & b) const
@@ -233,6 +234,7 @@ struct StripableByMixbusOrder
 		return a->mixbus() < b->mixbus();
 	}
 };
+#endif
 
 // predicate for sort call in get_sorted_stripables
 struct StripableByPresentationOrder
@@ -305,11 +307,15 @@ US2400Protocol::get_sorted_stripables()
 		}
 	}
 
+#ifdef MIXBUS
 	if (_view_mode == Busses) {
 		sort (sorted.begin(), sorted.end(), StripableByMixbusOrder());
 	} else {
 		sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
 	}
+#else
+	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
+#endif
 	return sorted;
 }
 
