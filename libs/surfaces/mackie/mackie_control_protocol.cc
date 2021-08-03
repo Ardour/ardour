@@ -610,7 +610,7 @@ MackieControlProtocol::update_global_button (int id, LedState ls)
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-		if (surfaces.empty()) {
+		if (!_master_surface) {
 			return;
 		}
 
@@ -691,6 +691,10 @@ MackieControlProtocol::initialize()
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
 		if (surfaces.empty()) {
+			return;
+		}
+
+		if (!_master_surface) {
 			return;
 		}
 
