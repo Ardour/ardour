@@ -1,0 +1,55 @@
+# Korean translation of appdata.
+# This file is distributed under the same license as the ardour package.
+#
+# 이정희 <daemul72@gmail.com>, 2021.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2021-03-17 15:41+0200\n"
+"PO-Revision-Date: 2021-08-04 14:02+0900\n"
+"Last-Translator: 이정희 <daemul72@gmail.com>\n"
+"Language-Team: Korean <kde-i18n-doc@kde.org>\n"
+"Language: ko\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Lokalize 21.04.3\n"
+
+# Intentionally left untranslated.
+#. (itstool) path: component/name
+#: gtk2_ardour/ardour.appdata.xml.in.in:6
+msgid "Ardour"
+msgstr "Ardour"
+
+#. (itstool) path: component/summary
+#: gtk2_ardour/ardour.appdata.xml.in.in:10
+msgid "Digital Audio Workstation"
+msgstr "디지털 오디오 워크스테이션"
+
+#. (itstool) path: description/p
+#: gtk2_ardour/ardour.appdata.xml.in.in:12
+msgid ""
+"Ardour is a multi-channel digital audio workstation, allowing you to record, "
+"edit, mix and master audio and MIDI projects."
+msgstr ""
+"Ardor는 오디오 및 MIDI 프로젝트를 녹음, 편집, 믹싱 및 마스터할 수 있는 다중 "
+"채널 디지털 오디오 워크스테이션입니다."
+
+#. (itstool) path: description/p
+#: gtk2_ardour/ardour.appdata.xml.in.in:16
+msgid ""
+"It is targeted at audio engineers, musicians, soundtrack editors and "
+"composers."
+msgstr "오디오 엔지니어, 음악가, 사운드트랙 편집자 및 작곡가를 대상으로 합니다."
+
+#. (itstool) path: screenshot/caption
+#: gtk2_ardour/ardour.appdata.xml.in.in:25
+msgid ""
+"The Editor window where you can arrange audio and MIDI data along a timeline"
+msgstr "오디오 및 MIDI 데이터를 타임라인을 따라 정렬할 수 있는 편집기 창"
+
+#. (itstool) path: screenshot/caption
+#: gtk2_ardour/ardour.appdata.xml.in.in:29
+msgid "The Mixer window which includes channel strips for each track and bus"
+msgstr "각 트랙 및 버스에 대한 채널 스트립이 포함된 믹서 창"
