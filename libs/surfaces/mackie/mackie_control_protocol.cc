@@ -210,8 +210,11 @@ MackieControlProtocol::ping_devices ()
 	 * malfunction if it is.
 	 */
 
-	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-		(*si)->connected ();
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+			(*si)->connected ();
+		}
 	}
 }
 
@@ -237,9 +240,12 @@ MackieControlProtocol::next_track()
 bool
 MackieControlProtocol::stripable_is_locked_to_strip (boost::shared_ptr<Stripable> r) const
 {
-	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-		if ((*si)->stripable_is_locked_to_strip (r)) {
-			return true;
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+			if ((*si)->stripable_is_locked_to_strip (r)) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -361,8 +367,11 @@ MackieControlProtocol::n_strips (bool with_locked_strips) const
 {
 	uint32_t strip_count = 0;
 
-	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-		strip_count += (*si)->n_strips (with_locked_strips);
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+			strip_count += (*si)->n_strips (with_locked_strips);
+		}
 	}
 
 	return strip_count;
@@ -413,29 +422,35 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 		Sorted::iterator r = sorted.begin() + _current_initial_bank;
 
-		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-			vector<boost::shared_ptr<Stripable> > stripables;
-			uint32_t added = 0;
+		{
+			Glib::Threads::Mutex::Lock lm (surfaces_lock);
+			for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+				vector<boost::shared_ptr<Stripable> > stripables;
+				uint32_t added = 0;
 
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface has %1 unlocked strips\n", (*si)->n_strips (false)));
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface has %1 unlocked strips\n", (*si)->n_strips (false)));
 
-			for (; r != sorted.end() && added < (*si)->n_strips (false); ++r, ++added) {
-				stripables.push_back (*r);
+				for (; r != sorted.end() && added < (*si)->n_strips (false); ++r, ++added) {
+					stripables.push_back (*r);
+				}
+
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("give surface %1 stripables\n", stripables.size()));
+
+				(*si)->map_stripables (stripables);
 			}
-
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("give surface %1 stripables\n", stripables.size()));
-
-			(*si)->map_stripables (stripables);
 		}
 
 	} else {
 		/* all strips need to be reset */
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("clear all strips, bank target %1  is outside route range %2\n",
 		                                                   _current_initial_bank, sorted.size()));
-		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-			vector<boost::shared_ptr<Stripable> > stripables;
-			/* pass in an empty stripables list, so that all strips will be reset */
-			(*si)->map_stripables (stripables);
+		{
+			Glib::Threads::Mutex::Lock lm (surfaces_lock);
+			for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+				vector<boost::shared_ptr<Stripable> > stripables;
+				/* pass in an empty stripables list, so that all strips will be reset */
+				(*si)->map_stripables (stripables);
+			}
 		}
 		return -1;
 	}
@@ -660,8 +675,11 @@ MackieControlProtocol::device_ready ()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device ready init (active=%1)\n", active()));
 	// Clear the surface so that any left over control from other programs are reset.
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->zero_all ();
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			(*s)->zero_all ();
+		}
 	}
 	update_surfaces ();
 	set_subview_mode (Mackie::Subview::None, boost::shared_ptr<Stripable>());
@@ -2308,8 +2326,11 @@ void
 MackieControlProtocol::stripable_selection_changed ()
 {
 	//this function is called after the stripable selection is "stable", so this is the place to check surface selection state
-	for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-		(*si)->update_strip_selection ();
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+			(*si)->update_strip_selection ();
+		}
 	}
 
 	/* if we are following the Gui, find the selected strips and map them here */
@@ -2317,18 +2338,21 @@ MackieControlProtocol::stripable_selection_changed ()
 
 		Sorted sorted = get_sorted_stripables();
 
-		Sorted::iterator r = sorted.begin();
-		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-			vector<boost::shared_ptr<Stripable> > stripables;
-			uint32_t added = 0;
+		{
+			Glib::Threads::Mutex::Lock lm (surfaces_lock);
+			Sorted::iterator r = sorted.begin();
+			for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+				vector<boost::shared_ptr<Stripable> > stripables;
+				uint32_t added = 0;
 
-			for (; r != sorted.end() && added < (*si)->n_strips (false); ++r, ++added) {
-				if ((*r)->is_selected()) {
-					stripables.push_back (*r);
+				for (; r != sorted.end() && added < (*si)->n_strips (false); ++r, ++added) {
+					if ((*r)->is_selected()) {
+						stripables.push_back (*r);
+					}
 				}
-			}
 
-			(*si)->map_stripables (stripables);
+				(*si)->map_stripables (stripables);
+			}
 		}
 		return;
 	}
