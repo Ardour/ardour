@@ -574,12 +574,7 @@ RegionView::update_cue_markers ()
 	 * timestamps and some of them may be outside the Region.
 	 */
 
-	for (CueMarkers::const_iterator c = model_markers.begin(); c != model_markers.end(); ++c) {
-
-		if (c->position() < start || c->position() >= end) {
-			/* not withing this region */
-			continue;
-		}
+	for (CueMarkers::iterator c = model_markers.begin(); c != model_markers.end(); c++) {
 
 		ViewCueMarkers::iterator existing = _cue_markers.end();
 
@@ -591,6 +586,11 @@ RegionView::update_cue_markers ()
 		}
 
 		if (existing == _cue_markers.end()) {
+
+			if (c->position() < start || c->position() >= end) {
+				/* not withing this region */
+				continue;
+			}
 
 			/* Create a new ViewCueMarker */
 
@@ -612,6 +612,13 @@ RegionView::update_cue_markers ()
 			_cue_markers.push_back (new ViewCueMarker (mark, *c));
 
 		} else {
+
+			if (c->position() < start || c->position() >= end) {
+				/* not withing this region */
+				delete (*existing);
+				_cue_markers.erase (existing);
+				continue;
+			}
 
 			/* Move and control visibility for an existing ViewCueMarker */
 
