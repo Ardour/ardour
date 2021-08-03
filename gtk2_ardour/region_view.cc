@@ -268,6 +268,10 @@ RegionView::~RegionView ()
 		delete ((*i).second);
 	}
 
+	for (ViewCueMarkers::iterator c = _cue_markers.begin(); c != _cue_markers.end(); ++c) {
+		delete (*c);
+	}
+
 	drop_silent_frames ();
 
 	delete editor;
