@@ -1,0 +1,162 @@
+# Korean TRANSLATION FOR ARDOUR 6
+# Copyright (C) YEAR "Paul Davis"
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Jung Hee Lee <daemul72@gmail.com>, 2021.
+msgid ""
+msgstr ""
+"Project-Id-Version: Ardour 6.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-05-20 14:36-0600\n"
+"PO-Revision-Date: 2021-08-03 17:34+0900\n"
+"Last-Translator: 이정희 <daemul72@gmail.com>\n"
+"Language-Team: Korean <kde-i18n-doc@kde.org>\n"
+"Language: ko\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Lokalize 21.04.3\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Poedit-Bookmarks: 0,-1,-1,-1,-1,-1,-1,-1,-1,-1\n"
+
+#: actions.cc:215
+msgid "Unknown action name: %1/%2"
+msgstr "알 수 없는 작업 이름: %1/%2"
+
+#: action_model.cc:56 action_model.cc:171
+msgid "Disabled"
+msgstr "비활성화됨"
+
+#: action_model.cc:83
+msgid "Main_menu"
+msgstr "기본_메뉴"
+
+#: action_model.cc:85
+msgid "JACK"
+msgstr "JACK"
+
+#: action_model.cc:87
+msgid "redirectmenu"
+msgstr "리디렉트메뉴"
+
+#: action_model.cc:89
+msgid "Editor_menus"
+msgstr "편집기_메뉴"
+
+#: action_model.cc:91
+msgid "RegionList"
+msgstr "영역목록"
+
+#: action_model.cc:93
+msgid "ProcessorMenu"
+msgstr "프로세서메뉴"
+
+#: bindings.cc:840 bindings.cc:842
+msgid "Window"
+msgstr "창"
+
+#: bindings.cc:840
+msgid " (Categorized)"
+msgstr " (분류됨)"
+
+#: bindings.cc:842
+msgid " (Alphabetical)"
+msgstr " (알파벳순)"
+
+#: bindings.cc:858
+msgid "Uncategorized"
+msgstr "분류되지 않음"
+
+#: cursors.cc:81
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr "커서 핫스팟 정보 파일 %1의 %2 라인에 오류가 있습니다"
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+#: gtk_ui.cc:126
+msgid "Log"
+msgstr "로그"
+
+#: gtk_ui.cc:395
+msgid ""
+"\n"
+"\n"
+"Shortcut: "
+msgstr ""
+"\n"
+"\n"
+"단축키: "
+
+#: gtk_ui.cc:694
+msgid "Press To Exit"
+msgstr "종료하려면 누르세요"
+
+#: gtk_ui.cc:730
+msgid "I'm sorry %1, I can't do that"
+msgstr "%1 죄송합니다. 그렇게는 할 수 없습니다"
+
+#: keyboard.cc:75
+msgid "Command"
+msgstr "명령"
+
+#: keyboard.cc:76 keyboard.cc:98
+msgid "Control"
+msgstr "컨트롤"
+
+#: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
+msgid "Key|Shift"
+msgstr "Shift"
+
+#: keyboard.cc:78
+msgid "Option"
+msgstr "옵션"
+
+#: keyboard.cc:80
+msgid "Cmd"
+msgstr "Cmd"
+
+#: keyboard.cc:81 keyboard.cc:103
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#: keyboard.cc:83
+msgid "Opt"
+msgstr "Opt"
+
+#: keyboard.cc:99 keyboard.cc:104
+msgid "Alt"
+msgstr "Alt"
+
+#: keyboard.cc:101
+msgid "Windows"
+msgstr "Windows"
+
+#: keyboard.cc:106
+msgid "Win"
+msgstr "Win"
+
+#: keyboard.cc:159 keyboard.cc:605
+msgid "Unknown"
+msgstr "알 수 없음"
+
+#: keyboard.cc:616
+msgid "key bindings file not found at \"%2\" or contains errors."
+msgstr "\"%2\"에서 키 바인딩 파일을 찾을 수 없거나 오류가 있습니다."
+
+#: keyboard.cc:642
+msgid "Keyboard binding found without a name"
+msgstr "이름이 없는 키보드 바인딩을 찾았습니다"
+
+#: keyboard.cc:674
+msgid "Cannot save key bindings to %1"
+msgstr "%1에 키 바인딩을 저장할 수 없습니다"
+
+#: keyboard.cc:690
+msgid "Cannot rename your own keybinding file (%1)"
+msgstr "자신의 키바인딩 파일(%1)의 이름을 바꿀 수 없습니다"
+
+#: textviewer.cc:32
+msgid "Close"
+msgstr "닫기"
