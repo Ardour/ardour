@@ -873,10 +873,6 @@ MackieControlProtocol::create_surfaces ()
 			return -1;
 		}
 
-		if (is_master) {
-			_master_surface = surface;
-		}
-
 		if (configuration_state) {
 			XMLNode* this_device = 0;
 			XMLNodeList const& devices = configuration_state->children();
@@ -897,6 +893,9 @@ MackieControlProtocol::create_surfaces ()
 
 		{
 			Glib::Threads::Mutex::Lock lm (surfaces_lock);
+			if (is_master) {
+				_master_surface = surface;
+			}
 			surfaces.push_back (surface);
 		}
 
