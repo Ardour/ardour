@@ -237,6 +237,7 @@ static const char* translators[] = {
 	N_("Norwegian:\n\t Eivind Ødegård\n"),
 	N_("Chinese:\n\t Rui-huai Zhang <zrhzrh@mail.ustc.edu.cn>\n"),
 	N_("Japanese:\n\t Hiroki Inagaki <hiroki.ingk@gmail.com>\n"),
+	N_("Korean:\n\t Junghee Lee <daemul72@gmail.com>\n"),
 	0
 };
 
