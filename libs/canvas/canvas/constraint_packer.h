@@ -62,7 +62,7 @@ public:
 
 	void compute_bounding_box () const;
 
-	void size_allocate (Rect const &);
+	void _size_allocate (Rect const &);
 	void size_request (Distance& w, Distance& h) const;
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;

@@ -125,9 +125,9 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 #ifdef CANVAS_DEBUG
 	if (debug_render || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 		cerr << this << " RENDER: " << area << endl;
-		// cerr << "CANVAS @ " << this << endl;
-		// dump (cerr);
-		// cerr << "-------------------------\n";
+		 cerr << "CANVAS @ " << this << endl;
+		 dump (cerr);
+		 cerr << "-------------------------\n";
 	}
 #endif
 
@@ -557,9 +557,9 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasEnterLeave)) {
 		for (vector<Item const*>::const_iterator it = items.begin(); it != items.end(); ++it) {
 #ifdef CANVAS_DEBUG
-			std::cerr << "\tItem " << (*it)->whatami() << '/' << (*it)->name << " ignore events ? " << (*it)->ignore_events() << " vis ? " << (*it)->visible() << std::endl;
+			// std::cerr << "\tItem " << (*it)->whatami() << '/' << (*it)->name << " ignore events ? " << (*it)->ignore_events() << " vis ? " << (*it)->visible() << std::endl;
 #else
-			std::cerr << "\tItem " << (*it)->whatami() << '/' << " ignore events ? " << (*it)->ignore_events() << " vis ? " << (*it)->visible() << std::endl;
+			// std::cerr << "\tItem " << (*it)->whatami() << '/' << " ignore events ? " << (*it)->ignore_events() << " vis ? " << (*it)->visible() << std::endl;
 #endif
 		}
 	}
@@ -897,6 +897,7 @@ GtkCanvas::on_realize ()
 void
 GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 {
+	std::cerr << "GtkCanvas::size_allocate (" << a.get_width() << " x " << a.get_height() << ")\n";
 	EventBox::on_size_allocate (a);
 
 	if (_use_image_surface) {
@@ -1133,7 +1134,6 @@ GtkCanvas::get_mouse_position (Duple& winpos) const
 	Glib::RefPtr<Gdk::Window> self = Glib::RefPtr<Gdk::Window>::cast_const (get_window ());
 
 	if (!self) {
-		std::cerr << " no self window\n";
 		winpos = Duple (0, 0);
 		return false;
 	}

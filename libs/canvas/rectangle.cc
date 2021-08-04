@@ -91,7 +91,6 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		return;
 	}
 
-
 	if (_corner_radius) {
 		context->save ();
 		Gtkmm2ext::rounded_rectangle (context, self.x0, self.y0, self.width(), self.height(), _corner_radius);
@@ -119,10 +118,6 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 
 		const double shift = _outline_width * 0.5;
 		self = self.translate (Duple (shift, shift));
-
-		if (name == "selection frame") {
-			std::cerr << "Render selection frame on " << self << std::endl;
-		}
 
 		if (_outline_what == ALL) {
 
@@ -287,9 +282,9 @@ Rectangle::vertical_fraction (double y) const
 }
 
 void
-Rectangle::size_allocate (Rect const & r)
+Rectangle::_size_allocate (Rect const & r)
 {
-	Item::size_allocate (r);
+	Item::_size_allocate (r);
 
 	if (_layout_sensitive) {
 		/* Set _position use the upper left of the Rect, and then set
@@ -297,7 +292,6 @@ Rectangle::size_allocate (Rect const & r)
 		   origin.
 		*/
 		Rect r2 (0, 0, r.x1 - r.x0, r.y1 - r.y0);
-		// std::cerr << "rectangle " << whoami() << " set to "; dump (std::cerr); std::cerr << '\n';
 		set (r2);
 	}
 }

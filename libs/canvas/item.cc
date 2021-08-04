@@ -603,10 +603,23 @@ Item::grab_focus ()
 void
 Item::size_allocate (Rect const & r)
 {
+	begin_change ();
+	_size_allocate (r);
+	_bounding_box_dirty = true;
+	end_change ();
+}
+
+void
+Item::_size_allocate (Rect const & r)
+{
 	if (_layout_sensitive) {
+		/* this definitely affects the item */
 		_position = Duple (r.x0, r.y0);
-		size_allocate_children (r);
+		/* this may have no effect on the item */
+		_allocation = r;
 	}
+
+	size_allocate_children (r);
 }
 
 void
@@ -962,7 +975,6 @@ Item::add_child_bounding_boxes (bool include_hidden) const
 		}
 
 		Rect child_bbox = (*i)->item_to_parent (item_bbox);
-
 		if (have_one) {
 			bbox = bbox.extend (child_bbox);
 		} else {

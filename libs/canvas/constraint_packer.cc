@@ -291,7 +291,7 @@ ConstraintPacker::non_const_size_request (Distance& w, Distance& h)
 }
 
 void
-ConstraintPacker::size_allocate (Rect const & r)
+ConstraintPacker::_size_allocate (Rect const & r)
 {
 	PBD::Unwinder<bool> uw (in_alloc, true);
 	double expanded_size;

@@ -151,7 +151,8 @@ public:
 	virtual void size_request (double& w, double& h) const;
 	void set_size_request (double w, double h);
 
-	virtual void size_allocate (Rect const&);
+	void size_allocate (Rect const&);
+	virtual void _size_allocate (Rect const&);
 	virtual void size_allocate_children (Rect const & r);
 	Rect allocation() const { return _allocation; }
 	void set_layout_sensitive (bool);

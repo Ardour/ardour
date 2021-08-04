@@ -152,11 +152,9 @@ Arc::covers (Duple const & point) const
 }
 
 void
-Arc::size_allocate (Rect const & r)
+Arc::_size_allocate (Rect const & r)
 {
-	begin_change ();
-
-	Item::size_allocate (r);
+	Item::_size_allocate (r);
 
 	/* This is an arc - some section of a circle, so any difference between
 	 * height and width cannot change what is drawn. Pick width arbitrarily
@@ -167,6 +165,4 @@ Arc::size_allocate (Rect const & r)
 	_center = Duple ((r.width()/2.), (r.height() /2.));
 
 	_bounding_box_dirty = true;
-
-	end_change ();
 }

@@ -78,7 +78,6 @@ Widget::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	//std::cerr << "Render widget " << name << " @ " << position() << endl;
 
 	if (!_bounding_box) {
-		std::cerr << "no bbox\n";
 		return;
 	}
 
@@ -86,7 +85,6 @@ Widget::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	Rect r = self.intersection (area);
 
 	if (!r) {
-		std::cerr << "no intersection\n";
 		return;
 	}
 
@@ -110,9 +108,9 @@ Widget::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 }
 
 void
-Widget::size_allocate (Rect const & r)
+Widget::_size_allocate (Rect const & r)
 {
-	Item::size_allocate (r);
+	Item::_size_allocate (r);
 	Gtk::Allocation alloc;
 	alloc.set_x (0);
 	alloc.set_y (0);
@@ -124,14 +122,10 @@ Widget::size_allocate (Rect const & r)
 void
 Widget::compute_bounding_box () const
 {
-	std::cerr << "cbbox for widget\n";
-
 	GtkRequisition req = { 0, 0 };
 	Gtk::Allocation alloc;
 
 	_widget.size_request (req);
-
-	std::cerr << "widget wants " << req.width << " x " << req.height << "\n";
 
 	_bounding_box = Rect (0, 0, req.width, req.height);
 
