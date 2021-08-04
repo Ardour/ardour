@@ -739,7 +739,8 @@ PortManager::reestablish_ports ()
 
 
 	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance()->current_backend_name() == X_("JACK")) {
-		port_engine().register_port (X_("physical_input_monitor_enable"), DataType::AUDIO, ARDOUR::PortFlags (IsInput|IsTerminal|Hidden));
+		port_engine().register_port (X_("physical_audio_input_monitor_enable"), DataType::AUDIO, ARDOUR::PortFlags (IsInput|IsTerminal|Hidden));
+		port_engine().register_port (X_("physical_midi_input_monitor_enable"), DataType::MIDI, ARDOUR::PortFlags (IsInput|IsTerminal|Hidden));
 	}
 
 	update_input_ports (true);
@@ -783,7 +784,7 @@ PortManager::reconnect_ports ()
 	}
 
 	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance()->current_backend_name() == X_("JACK")) {
-		std::string const our_name = AudioEngine::instance()->make_port_name_non_relative (X_("physical_input_monitor_enable"));
+		std::string const our_name = AudioEngine::instance()->make_port_name_non_relative (X_("physical_audio_input_monitor_enable"));
 		std::vector<std::string> audio_ports;
 		get_physical_inputs (DataType::AUDIO, audio_ports);
 		for (std::vector<std::string>::iterator p = audio_ports.begin(); p != audio_ports.end(); ++p) {
@@ -949,6 +950,11 @@ PortManager::update_input_ports (bool clear)
 			}
 #endif
 			mpw->insert (make_pair (*p, MIDIInputPort (32)));
+
+			if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance()->current_backend_name() == X_("JACK")) {
+				std::string const our_name = AudioEngine::instance()->make_port_name_non_relative (X_("physical_midi_input_monitor_enable"));
+				port_engine().connect (*p, our_name);
+			}
 		}
 	}
 
