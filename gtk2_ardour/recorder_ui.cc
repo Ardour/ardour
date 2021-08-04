@@ -583,6 +583,10 @@ RecorderUI::start_updating ()
 
 	/* MIDI */
 	for (PortManager::MIDIInputPorts::const_iterator i = mip.begin (); i != mip.end (); ++i) {
+		string pn = AudioEngine::instance()->get_pretty_name_by_name (i->first);
+		if (PortManager::port_is_control_only (pn)) {
+			continue;
+		}
 		_input_ports[i->first] = boost::shared_ptr<RecorderUI::InputPort> (new InputPort (i->first, DataType::MIDI, this, _vertical));
 		set_connections (i->first);
 	}
@@ -631,6 +635,10 @@ RecorderUI::add_or_remove_io (DataType dt, vector<string> ports, bool add)
 
 	if (add) {
 		for (vector<string>::const_iterator i = ports.begin (); i != ports.end (); ++i) {
+			string pn = AudioEngine::instance()->get_pretty_name_by_name (*i);
+			if (dt==DataType::MIDI && PortManager::port_is_control_only (pn)) {
+				continue;
+			}
 			_input_ports[*i] = boost::shared_ptr<RecorderUI::InputPort> (new InputPort (*i, dt, this, _vertical));
 			set_connections (*i);
 		}
@@ -705,8 +713,10 @@ RecorderUI::update_meters ()
 	PortManager::MIDIInputPorts const mip (AudioEngine::instance ()->midi_input_ports ());
 	for (PortManager::MIDIInputPorts::const_iterator i = mip.begin (); i != mip.end (); ++i) {
 		InputPortMap::iterator im = _input_ports.find (i->first);
-		im->second->update ((float const*)i->second.meter->chn_active);
-		im->second->update (*(i->second.monitor));
+		if (im != _input_ports.end()) {
+			im->second->update ((float const*)i->second.meter->chn_active);
+			im->second->update (*(i->second.monitor));
+		}
 	}
 
 	for (list<TrackRecordAxis*>::const_iterator i = _recorders.begin (); i != _recorders.end (); ++i) {
