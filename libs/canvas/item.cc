@@ -625,19 +625,13 @@ Item::_size_allocate (Rect const & r)
 void
 Item::size_allocate_children (Rect const & r)
 {
-	bool have_constraint_container = false;
+	/* this does nothing by default. Containers like Box or
+	 * ConstraintPacker can override it to do "smart" layout based on this
+	 * Item's allocation.
+	 */
 
-	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
-
-		(*i)->size_allocate (r);
-
-		if (dynamic_cast<ConstraintPacker*> (*i)) {
-			have_constraint_container = true;
-		}
-	}
-
-	if (have_constraint_container) {
-		_bounding_box_dirty = true;
+	if (_items.size() == 1 && _items.front()->layout_sensitive()) {
+		_items.front()->size_allocate (r);
 	}
 }
 
