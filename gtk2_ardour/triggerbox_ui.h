@@ -23,6 +23,8 @@
 
 #include <gtkmm/window.h>
 
+#include "pbd/properties.h"
+
 #include "ardour/triggerbox.h"
 
 #include "canvas/box.h"
@@ -56,6 +58,9 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 
   private:
 	ARDOUR::Trigger& _trigger;
+
+	PBD::ScopedConnection trigger_prop_connection;
+	void prop_change (PBD::PropertyChange const & change);
 };
 
 class TriggerBoxUI : public ArdourCanvas::Box

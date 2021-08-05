@@ -34,6 +34,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "ardour_ui.h"
+#include "gui_thread.h"
 #include "triggerbox_ui.h"
 #include "public_editor.h"
 #include "ui_config.h"
@@ -75,19 +76,33 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 
 	name_text = new Text (this);
 	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
-	if (_trigger.region()) {
-		name_text->set (short_version (_trigger.region()->name(), 20));
-	} else {
-		/* we need some spaces to have something to click on */
-		name_text->set (X_("     "));
-	}
 	name_text->set_color (Gtkmm2ext::contrasting_text_color (fill_color()));
 	name_text->set_position (Duple (50, 4. * scale));
+
+	_trigger.PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context());
+
+	prop_change (PropertyChange (ARDOUR::Properties::name));
 }
+
 
 TriggerEntry::~TriggerEntry ()
 {
 }
+
+void
+TriggerEntry::prop_change (PropertyChange const & change)
+{
+	if (change.contains (ARDOUR::Properties::name)) {
+		if (_trigger.region()) {
+			name_text->set (short_version (_trigger.region()->name(), 20));
+		} else {
+			/* we need some spaces to have something to click on */
+			name_text->set (X_("     "));
+		}
+	}
+}
+
+		
 
 /* ---------------------------- */
 
@@ -358,7 +373,6 @@ TriggerBoxUI::sample_chosen (int response, size_t n)
 	std::string path = file_chooser->get_filename ();
 
 	_triggerbox.set_from_path (n, path);
-
 }
 
 /* ------------ */
