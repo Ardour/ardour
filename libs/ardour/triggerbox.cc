@@ -3,6 +3,8 @@
 #include "pbd/basename.h"
 #include "pbd/failed_constructor.h"
 
+#include "temporal/tempo.h"
+
 #include "ardour/audioregion.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/midi_buffer.h"
@@ -19,7 +21,8 @@ using std::endl;
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
-	, _trigger_queue (1024)
+	, _bang_queue (1024)
+	, _unbang_queue (1024)
 	, _data_type (dt)
 {
 
@@ -172,19 +175,24 @@ TriggerBox::add_trigger (Trigger* trigger)
 }
 
 bool
-TriggerBox::queue_trigger (Trigger* trigger)
+TriggerBox::bang_trigger (Trigger* trigger)
 {
-	return  _trigger_queue.write (&trigger, 1) == 1;
+	return  _bang_queue.write (&trigger, 1) == 1;
+}
+
+bool
+TriggerBox::unbang_trigger (Trigger* trigger)
+{
+	return  _unbang_queue.write (&trigger, 1) == 1;
 }
 
 void
 TriggerBox::process_ui_trigger_requests ()
 {
-		/* if there are any triggers queued, make them active
-	*/
+	/* bangs */
 
 	RingBuffer<Trigger*>::rw_vector vec;
-	_trigger_queue.get_read_vector (&vec);
+	_bang_queue.get_read_vector (&vec);
 
 	for (uint32_t n = 0; n < vec.len[0]; ++n) {
 		Trigger* t = vec.buf[0][n];
@@ -203,7 +211,23 @@ TriggerBox::process_ui_trigger_requests ()
 		}
 	}
 
-	_trigger_queue.increment_read_idx (vec.len[0] + vec.len[1]);
+	_bang_queue.increment_read_idx (vec.len[0] + vec.len[1]);
+
+	/* unbangs */
+
+	_unbang_queue.get_read_vector (&vec);
+
+	for (uint32_t n = 0; n < vec.len[0]; ++n) {
+		Trigger* t = vec.buf[0][n];
+		pending_off_triggers.push_back (t);
+	}
+
+	for (uint32_t n = 0; n < vec.len[1]; ++n) {
+		Trigger* t = vec.buf[1][n];
+		pending_off_triggers.push_back (t);
+	}
+
+	_unbang_queue.increment_read_idx (vec.len[0] + vec.len[1]);
 }
 
 void
@@ -278,17 +302,35 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	timepos_t end (end_sample);
 	Temporal::Beats start_beats (start.beats());
 	Temporal::Beats end_beats (end.beats());
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 
 	for (Triggers::iterator t = pending_on_triggers.begin(); t != pending_on_triggers.end(); ) {
 
-		Temporal::Beats q = (*t)->quantization ();
-		timepos_t fire_at (start_beats.snap_to (q));
+		Temporal::BBT_Offset q = (*t)->quantization ();
+		timepos_t fire_at (Temporal::BeatTime);
 
-		if (fire_at >= start_beats && fire_at < end_beats) {
+		if (q.bars == 0) {
+			fire_at = timepos_t (start_beats.snap_to (Temporal::Beats (q.beats, q.ticks)));
+		} else {
+			/* XXX not yet handled */
+		}
+
+		if ((*t)->running()) {
+
+			if (fire_at >= start_beats && fire_at < end_beats) {
+				(*t)->bang (*this);
+				t = pending_on_triggers.erase (t);
+			} else {
+				++t;
+			}
+
+		} else if (fire_at >= start_beats && fire_at < end_beats) {
+
 			(*t)->fire_samples = fire_at.samples();
 			(*t)->fire_beats = fire_at.beats();
 			active_triggers.push_back (*t);
 			t = pending_on_triggers.erase (t);
+
 		} else {
 			++t;
 		}
@@ -296,8 +338,14 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	for (Triggers::iterator t = pending_off_triggers.begin(); t != pending_off_triggers.end(); ) {
 
-		Temporal::Beats q = (*t)->quantization ();
-		timepos_t off_at (start_beats.snap_to (q));
+		Temporal::BBT_Offset q = (*t)->quantization ();
+		timepos_t off_at (Temporal::BeatTime);
+
+		if (q.bars == 0) {
+			off_at = timepos_t (start_beats.snap_to (Temporal::Beats (q.beats, q.ticks)));
+		} else {
+			/* XXX not yet handled */
+		}
 
 		if (off_at >= start_beats && off_at < end_beats) {
 			(*t)->fire_samples = off_at.samples();
@@ -383,6 +431,7 @@ Trigger::Trigger (size_t n)
 	, _index (n)
 	, _launch_style (Loop)
 	, _follow_action (Stop)
+	, _quantization (Temporal::BBT_Offset (0, 1, 0))
 {
 }
 
@@ -399,18 +448,20 @@ Trigger::set_launch_style (LaunchStyle l)
 }
 
 void
+Trigger::set_quantization (Temporal::BBT_Offset const & q)
+{
+	_quantization = q;
+}
+
+void
 Trigger::set_region_internal (boost::shared_ptr<Region> r)
 {
 	_region = r;
 }
 
-Temporal::Beats
+Temporal::BBT_Offset
 Trigger::quantization () const
 {
-	if (_quantization == Temporal::Beats()) {
-		return Temporal::Beats (1, 0);
-	}
-
 	return _quantization;
 }
 
@@ -498,7 +549,6 @@ void
 AudioTrigger::bang (TriggerBox& /*proc*/)
 {
 	/* user "hit" the trigger in a way that means "start" */
-
 
 	switch (_launch_style) {
 	case Loop:

@@ -29,6 +29,8 @@
 #include "pbd/ringbuffer.h"
 
 #include "temporal/beats.h"
+#include "temporal/bbt_time.h"
+#include "temporal/tempo.h"
 
 #include "ardour/processor.h"
 #include "ardour/libardour_visibility.h"
@@ -78,8 +80,8 @@ class LIBARDOUR_API Trigger {
 	virtual int set_region (boost::shared_ptr<Region>) = 0;
 	boost::shared_ptr<Region> region() const { return _region; }
 
-	Temporal::Beats quantization() const;
-	void set_quantization (Temporal::Beats const &);
+	Temporal::BBT_Offset quantization() const;
+	void set_quantization (Temporal::BBT_Offset const &);
 
 	bool stop_requested() const { return _stop_requested; }
 	virtual void stop();
@@ -97,7 +99,7 @@ class LIBARDOUR_API Trigger {
 	LaunchStyle  _launch_style;
 	FollowAction _follow_action;
 	boost::shared_ptr<Region> _region;
-	Temporal::Beats _quantization;
+	Temporal::BBT_Offset _quantization;
 
 	void set_region_internal (boost::shared_ptr<Region>);
 };
@@ -138,7 +140,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	Trigger* trigger (Triggers::size_type);
 
-	bool queue_trigger (Trigger*);
+	bool bang_trigger (Trigger*);
+	bool unbang_trigger (Trigger*);
 	void add_trigger (Trigger*);
 
 	XMLNode& get_state (void);
@@ -149,7 +152,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	DataType data_type() const { return _data_type; }
 
   private:
-	PBD::RingBuffer<Trigger*> _trigger_queue;
+	PBD::RingBuffer<Trigger*> _bang_queue;
+	PBD::RingBuffer<Trigger*> _unbang_queue;
 	DataType _data_type;
 
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
