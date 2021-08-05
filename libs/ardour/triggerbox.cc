@@ -10,6 +10,7 @@
 #include "ardour/midi_buffer.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
+#include "ardour/session_object.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/triggerbox.h"
 
@@ -439,6 +440,18 @@ Trigger::set_launch_style (LaunchStyle l)
 	_launch_style = l;
 }
 
+XMLNode&
+Trigger::get_state (void)
+{
+	XMLNode* node = new XMLNode (X_("Trigger"));
+	return *node;
+}
+
+int
+Trigger::set_state (const XMLNode&, int version)
+{
+	return 0;
+}
 void
 Trigger::set_quantization (Temporal::BBT_Offset const & q)
 {
@@ -493,6 +506,8 @@ AudioTrigger::set_region (boost::shared_ptr<Region> r)
 	if (load_data (ar)) {
 		return -1;
 	}
+
+	PropertyChanged (ARDOUR::Properties::name);
 
 	return 0;
 }

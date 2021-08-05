@@ -26,6 +26,7 @@
 
 #include <glibmm/threads.h>
 
+#include "pbd/stateful.h"
 #include "pbd/ringbuffer.h"
 
 #include "temporal/beats.h"
@@ -43,7 +44,7 @@ class Session;
 class AudioRegion;
 class TriggerBox;
 
-class LIBARDOUR_API Trigger {
+class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
 	Trigger (size_t index);
 	virtual ~Trigger() {}
@@ -92,6 +93,9 @@ class LIBARDOUR_API Trigger {
 	/* Managed by TriggerBox */
 	samplepos_t fire_samples;
 	Temporal::Beats fire_beats;
+
+	XMLNode& get_state (void);
+	int set_state (const XMLNode&, int version);
 
   protected:
 	bool _running;
