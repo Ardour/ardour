@@ -140,18 +140,6 @@ TriggerBoxUI::build ()
 bool
 TriggerBoxUI::text_event (GdkEvent *ev, size_t n)
 {
-	switch (ev->type) {
-	case GDK_2BUTTON_PRESS:
-		/* double click */
-		choose_sample (n);
-		return true;
-		break;
-	case GDK_BUTTON_PRESS:
-		break;
-	default:
-		break;
-	}
-
 	return false;
 }
 
@@ -159,6 +147,9 @@ bool
 TriggerBoxUI::event (GdkEvent* ev, size_t n)
 {
 	switch (ev->type) {
+	case GDK_2BUTTON_PRESS:
+		choose_sample (n);
+		return true;
 	case GDK_BUTTON_RELEASE:
 		switch (ev->button.button) {
 		case 3:
