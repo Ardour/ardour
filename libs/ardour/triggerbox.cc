@@ -17,14 +17,19 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-TriggerBox::TriggerBox (Session& s)
+TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
 	, _trigger_queue (1024)
+	, _data_type (dt)
 {
 
 	/* default number of possible triggers. call ::add_trigger() to increase */
 
-	all_triggers.resize (16, 0);
+	if (_data_type == DataType::AUDIO) {
+		for (size_t n = 0; n < 16; ++n) {
+			all_triggers.push_back (new AudioTrigger (n));
+		}
+	}
 
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (60), 0));
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (61), 1));
@@ -39,6 +44,49 @@ TriggerBox::TriggerBox (Session& s)
 
 
 	load_some_samples ();
+}
+
+int
+TriggerBox::set_from_path (size_t slot, std::string const & path)
+{
+	assert (slot < all_triggers.size());
+
+	try {
+		SoundFileInfo info;
+		string errmsg;
+
+		if (!SndFileSource::get_soundfile_info (path, info, errmsg)) {
+			error << string_compose (_("Cannot get info from audio file %1 (%2)"), path, errmsg) << endmsg;
+			return -1;
+		}
+
+		SourceList src_list;
+
+		for (uint16_t n = 0; n < info.channels; ++n) {
+			boost::shared_ptr<Source> source (new SndFileSource (_session, path, n, Source::Flag (0)));
+			src_list.push_back (source);
+		}
+
+		PropertyList plist;
+
+		plist.add (Properties::start, 0);
+		plist.add (Properties::length, src_list.front()->length ());
+		plist.add (Properties::name, basename_nosuffix (path));
+		plist.add (Properties::layer, 0);
+		plist.add (Properties::layering_index, 0);
+
+		boost::shared_ptr<Region> the_region (RegionFactory::create (src_list, plist, false));
+
+		all_triggers[slot]->set_region (the_region);
+
+		/* XXX catch region going away */
+
+	} catch (std::exception& e) {
+		cerr << "loading sample from " << path << " failed: " << e.what() << endl;
+		return -1;
+	}
+
+	return 0;
 }
 
 void
@@ -60,42 +108,12 @@ TriggerBox::load_some_samples ()
 		0
 	};
 
-	try {
-		for (size_t n = 0; paths[n]; ++n) {
+	for (size_t n = 0; paths[n]; ++n) {
 
-			string dir = "/usr/local/music/samples/Loops (WAV)/ASHRAM Afro Percussion Loops/";
-			string path = dir + paths[n];
+		string dir = "/usr/local/music/samples/Loops (WAV)/ASHRAM Afro Percussion Loops/";
+		string path = dir + paths[n];
 
-
-			SoundFileInfo info;
-			string errmsg;
-			if (!SndFileSource::get_soundfile_info (path, info, errmsg)) {
-				error << string_compose (_("Cannot get info from audio file %1 (%2)"), path, errmsg) << endmsg;
-				continue;
-			}
-
-			SourceList src_list;
-
-			for (uint16_t n = 0; n < info.channels; ++n) {
-				boost::shared_ptr<Source> source (new SndFileSource (_session, path, n, Source::Flag (0)));
-				src_list.push_back (source);
-			}
-
-			PropertyList plist;
-
-			plist.add (Properties::start, 0);
-			plist.add (Properties::length, src_list.front()->length ());
-			plist.add (Properties::name, basename_nosuffix (path));
-			plist.add (Properties::layer, 0);
-			plist.add (Properties::layering_index, 0);
-
-
-			boost::shared_ptr<Region> the_region (RegionFactory::create (src_list, plist, false));
-
-			all_triggers[n] = new AudioTrigger (n, boost::dynamic_pointer_cast<AudioRegion> (the_region));
-		}
-	} catch (std::exception& e) {
-		cerr << "loading samples failed: " << e.what() << endl;
+		set_from_path (n, path);
 	}
 }
 
@@ -359,13 +377,12 @@ TriggerBox::set_state (const XMLNode&, int version)
 
 /*--------------------*/
 
-Trigger::Trigger (size_t n, boost::shared_ptr<Region> r)
+Trigger::Trigger (size_t n)
 	: _running (false)
 	, _stop_requested (false)
 	, _index (n)
 	, _launch_style (Loop)
 	, _follow_action (Stop)
-	, _region (r)
 {
 }
 
@@ -405,16 +422,11 @@ Trigger::stop ()
 
 /*--------------------*/
 
-AudioTrigger::AudioTrigger (size_t n, boost::shared_ptr<AudioRegion> r)
-	: Trigger (n, r)
+AudioTrigger::AudioTrigger (size_t n)
+	: Trigger (n)
 	, data (0)
 	, length (0)
 {
-	/* XXX catch region going away */
-
-	if (load_data (r)) {
-		throw failed_constructor ();
-	}
 }
 
 AudioTrigger::~AudioTrigger ()

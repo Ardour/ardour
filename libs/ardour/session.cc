@@ -2455,7 +2455,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 			}
 
 			if (with_triggers) {
-				boost::shared_ptr<Processor> triggers (new TriggerBox (*this));
+				boost::shared_ptr<Processor> triggers (new TriggerBox (*this, DataType::AUDIO));
 				track->add_processor (triggers, track->polarity());
 			}
 

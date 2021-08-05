@@ -43,7 +43,7 @@ class TriggerBox;
 
 class LIBARDOUR_API Trigger {
   public:
-	Trigger (size_t index, boost::shared_ptr<Region>);
+	Trigger (size_t index);
 	virtual ~Trigger() {}
 
 	virtual void bang (TriggerBox&) = 0;
@@ -104,7 +104,7 @@ class LIBARDOUR_API Trigger {
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
   public:
-	AudioTrigger (size_t index, boost::shared_ptr<AudioRegion>);
+	AudioTrigger (size_t index);
 	~AudioTrigger ();
 
 	void bang (TriggerBox&);
@@ -127,7 +127,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 class LIBARDOUR_API TriggerBox : public Processor
 {
   public:
-	TriggerBox (Session&);
+	TriggerBox (Session&, DataType dt);
 	~TriggerBox ();
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required);
@@ -144,8 +144,13 @@ class LIBARDOUR_API TriggerBox : public Processor
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
+	int set_from_path (size_t slot, std::string const & path);
+
+	DataType data_type() const { return _data_type; }
+
   private:
 	PBD::RingBuffer<Trigger*> _trigger_queue;
+	DataType _data_type;
 
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
