@@ -27,6 +27,10 @@
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 
+namespace Gtk {
+class FileChooserDialog;
+}
+
 namespace ARDOUR {
 	class Trigger;
 	class TriggerBox;
@@ -62,8 +66,15 @@ class TriggerBoxUI : public ArdourCanvas::Box
 	ARDOUR::TriggerBox& _triggerbox;
 	typedef std::vector<TriggerEntry*> Slots;
 	Slots _slots;
+	Gtk::FileChooserDialog* file_chooser;
+	sigc::connection file_chooser_connection;
 
 	bool bang (GdkEvent*, size_t);
+	bool text_event (GdkEvent*, size_t);
+
+	void choose_sample (size_t n);
+	void sample_chosen (int r, size_t n);
+
 	void build ();
 };
 

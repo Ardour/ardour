@@ -16,6 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/stock.h>
+
 #include "pbd/i18n.h"
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -67,7 +70,12 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 
 	name_text = new Text (this);
 	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
-	name_text->set (short_version (_trigger.region()->name(), 20));
+	if (_trigger.region()) {
+		name_text->set (short_version (_trigger.region()->name(), 20));
+	} else {
+		/* we need some spaces to have something to click on */
+		name_text->set (X_("     "));
+	}
 	name_text->set_color (Gtkmm2ext::contrasting_text_color (fill_color()));
 	name_text->set_position (Duple (50, 4. * scale));
 }
@@ -81,6 +89,7 @@ TriggerEntry::~TriggerEntry ()
 TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	: Box (parent, Box::Vertical)
 	, _triggerbox (tb)
+	, file_chooser (0)
 {
 	set_homogenous (true);
 	set_spacing (16);
@@ -109,7 +118,6 @@ TriggerBoxUI::build ()
 		if (!t) {
 			break;
 		}
-		std::cerr << "NEW TE for trigger " << n << std::endl;
 		TriggerEntry* te = new TriggerEntry (canvas(), *t);
 		te->set_pack_options (PackOptions (PackFill|PackExpand));
 		add (te);
@@ -117,9 +125,28 @@ TriggerBoxUI::build ()
 		_slots.push_back (te);
 
 		te->play_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::bang), n));
+		te->name_text->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::text_event), n));
 
 		++n;
 	}
+}
+
+bool
+TriggerBoxUI::text_event (GdkEvent *ev, size_t n)
+{
+	switch (ev->type) {
+	case GDK_2BUTTON_PRESS:
+		/* double click */
+		choose_sample (n);
+		return true;
+		break;
+	case GDK_BUTTON_PRESS:
+		break;
+	default:
+		break;
+	}
+
+	return false;
 }
 
 bool
@@ -136,6 +163,39 @@ TriggerBoxUI::bang (GdkEvent *ev, size_t n)
 		break;
 	}
 	return false;
+}
+
+void
+TriggerBoxUI::choose_sample (size_t n)
+{
+	if (!file_chooser) {
+		file_chooser = new Gtk::FileChooserDialog (_("Select sample"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+		file_chooser->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+		file_chooser->add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	}
+
+	file_chooser_connection.disconnect ();
+	file_chooser_connection = file_chooser->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::sample_chosen), n));
+
+	file_chooser->present ();
+}
+
+void
+TriggerBoxUI::sample_chosen (int response, size_t n)
+{
+	file_chooser->hide ();
+
+	switch (response) {
+	case Gtk::RESPONSE_OK:
+		break;
+	default:
+		return;
+	}
+
+	std::string path = file_chooser->get_filename ();
+
+	_triggerbox.set_from_path (n, path);
+
 }
 
 /* ------------ */
