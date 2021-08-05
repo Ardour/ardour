@@ -4169,6 +4169,7 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 		}
 		break;
 	default:
+#warning NUTEMPO need to implement all other subdivs
 		success = false;
 		break;
 	}

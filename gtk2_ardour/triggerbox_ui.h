@@ -23,17 +23,19 @@
 
 #include <gtkmm/window.h>
 
+#include "ardour/triggerbox.h"
+
 #include "canvas/box.h"
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 
 namespace Gtk {
 class FileChooserDialog;
+class Menu;
 }
 
-namespace ARDOUR {
-	class Trigger;
-	class TriggerBox;
+namespace Temporal {
+	struct BBT_Offset;
 }
 
 namespace ArdourCanvas {
@@ -68,12 +70,18 @@ class TriggerBoxUI : public ArdourCanvas::Box
 	Slots _slots;
 	Gtk::FileChooserDialog* file_chooser;
 	sigc::connection file_chooser_connection;
+	Gtk::Menu* _context_menu;
 
 	bool bang (GdkEvent*, size_t);
 	bool text_event (GdkEvent*, size_t);
+	bool event (GdkEvent*, size_t);
 
 	void choose_sample (size_t n);
 	void sample_chosen (int r, size_t n);
+	void context_menu (size_t n);
+	void set_follow_action (size_t slot, ARDOUR::Trigger::FollowAction);
+	void set_launch_style (size_t slot, ARDOUR::Trigger::LaunchStyle);
+	void set_quantization (size_t slot, Temporal::BBT_Offset const &);
 
 	void build ();
 };
@@ -95,6 +103,9 @@ class TriggerBoxWindow : public Gtk::Window
 {
     public:
 	TriggerBoxWindow (ARDOUR::TriggerBox&);
+
+	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
 };
 
 #endif /* __ardour_gtk_triggerbox_ui_h__ */
