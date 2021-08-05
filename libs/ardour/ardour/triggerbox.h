@@ -173,8 +173,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	typedef std::map<uint8_t,Triggers::size_type> MidiTriggerMap;
 	MidiTriggerMap midi_trigger_map;
-
-	void load_some_samples ();
 };
 
 } // namespace ARDOUR

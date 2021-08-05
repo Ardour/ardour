@@ -44,9 +44,6 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (67), 7));
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (68), 8));
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (69), 9));
-
-
-	load_some_samples ();
 }
 
 int
@@ -90,34 +87,6 @@ TriggerBox::set_from_path (size_t slot, std::string const & path)
 	}
 
 	return 0;
-}
-
-void
-TriggerBox::load_some_samples ()
-{
-	/* XXX TESTING ONLY */
-
-	char const * paths[] = {
-		"AS_AP_Perc_Loop_01_125bpm.wav",
-		"AS_AP_Perc_Loop_05_125bpm.wav",
-		"AS_AP_Perc_Loop_09_125bpm.wav",
-		"AS_AP_Perc_Loop_02_125bpm.wav",
-		"AS_AP_Perc_Loop_06_125bpm.wav",
-		"AS_AP_Perc_Loop_10_125bpm.wav",
-		"AS_AP_Perc_Loop_03_125bpm.wav",
-		"AS_AP_Perc_Loop_07_125bpm.wav",
-		"AS_AP_Perc_Loop_04_125bpm.wav",
-		"AS_AP_Perc_Loop_08_125bpm.wav",
-		0
-	};
-
-	for (size_t n = 0; paths[n]; ++n) {
-
-		string dir = "/usr/local/music/samples/Loops (WAV)/ASHRAM Afro Percussion Loops/";
-		string path = dir + paths[n];
-
-		set_from_path (n, path);
-	}
 }
 
 TriggerBox::~TriggerBox ()
