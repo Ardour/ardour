@@ -326,13 +326,19 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
-	bool err = false;
 	bool need_butler = false;
 	size_t max_chans = 0;
 
-	for (Triggers::iterator t = active_triggers.begin(); !err && t != active_triggers.end(); ++t) {
+	for (Triggers::iterator t = active_triggers.begin(); t != active_triggers.end(); ) {
 
 		Trigger* trigger = (*t);
+		boost::shared_ptr<Region> r = trigger->region();
+
+		if (!r) {
+			t = active_triggers.erase (t);
+			continue;
+		}
+
 		sampleoffset_t dest_offset = 0;
 		pframes_t trigger_samples = nframes;
 
@@ -346,11 +352,12 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		AudioTrigger* at = dynamic_cast<AudioTrigger*> (trigger);
 
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (trigger->region());
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 		const size_t nchans = ar->n_channels ();
 		max_chans = std::max (max_chans, nchans);
 
-		for (uint32_t chan = 0; !err && chan < nchans; ++chan) {
+		bool at_end = false;
+		for (uint32_t chan = 0; !at_end && chan < nchans; ++chan) {
 
 			AudioBuffer& buf = bufs.get_audio (chan);
 
@@ -358,9 +365,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			Sample* data = at->run (chan, to_copy, need_butler);
 
 			if (!data) {
-				/* XXX need to delete the trigger/put it back in the pool */
-				t = active_triggers.erase (t);
-				err = true;
+				at_end = true;
+				break;
 			} else {
 				if (t == active_triggers.begin()) {
 					buf.read_from (data, to_copy, dest_offset);
@@ -372,6 +378,23 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				}
 			}
 
+		}
+		if (at_end) {
+
+			switch (trigger->launch_style()) {
+			case Trigger::Loop:
+				trigger->retrigger();
+				++t;
+				break;
+			case Trigger::Gate:
+			case Trigger::Toggle:
+			case Trigger::Repeat:
+				t = active_triggers.erase (t);
+				break;
+			}
+
+		} else {
+			++t;
 		}
 	}
 

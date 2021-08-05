@@ -85,6 +85,7 @@ class LIBARDOUR_API Trigger {
 
 	bool stop_requested() const { return _stop_requested; }
 	virtual void stop();
+	virtual void retrigger () {}
 
 	size_t index() const { return _index; }
 
@@ -115,6 +116,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	Sample* run (uint32_t channel, pframes_t& nframes, bool& need_butler);
 
 	int set_region (boost::shared_ptr<Region>);
+	void retrigger ();
 
   private:
 	std::vector<Sample*> data;
@@ -123,7 +125,6 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
-	void retrigger ();
 };
 
 class LIBARDOUR_API TriggerBox : public Processor
