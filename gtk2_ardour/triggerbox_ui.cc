@@ -102,7 +102,7 @@ TriggerEntry::prop_change (PropertyChange const & change)
 	}
 }
 
-		
+
 
 /* ---------------------------- */
 
@@ -292,8 +292,8 @@ TriggerBoxUI::context_menu (size_t n)
 	if (success) {
 		b = BBT_Offset (0, grid_beats.get_beats(), grid_beats.get_ticks());
 		qitems.push_back (CheckMenuElem (_("Main Grid"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
-		/* can't mark this active because the actual setting just a
-		 * precise setting below */
+		/* can't mark this active because the current trigger quant setting may just a specific setting below */
+		/* XXX HOW TO GET THIS TO FOLLOW GRID CHANGES (which are GUI only) */
 	}
 
 	b = BBT_Offset (1, 0, 0);
@@ -302,6 +302,16 @@ TriggerBoxUI::context_menu (size_t n)
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
 
+	b = BBT_Offset (0, 4, 0);
+	qitems.push_back (CheckMenuElem (_("Whole"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
+	if (_triggerbox.trigger (n)->quantization() == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+	b = BBT_Offset (0, 2, 0);
+	qitems.push_back (CheckMenuElem (_("Half"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
+	if (_triggerbox.trigger (n)->quantization() == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
 	b = BBT_Offset (0, 1, 0);
 	qitems.push_back (CheckMenuElem (_("Quarters"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
 	if (_triggerbox.trigger (n)->quantization() == b) {
@@ -418,4 +428,3 @@ TriggerBoxWindow::on_key_release_event (GdkEventKey* ev)
 	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
 	return ARDOUR_UI_UTILS::relay_key_press (ev, &main_window);
 }
-
