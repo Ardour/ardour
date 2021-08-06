@@ -711,6 +711,8 @@ RegionSlipContentsDrag::motion (GdkEvent* event, bool first_move)
 		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 			RegionView* rv = i->view;
 			rv->region()->clear_changes ();
+
+			rv->drag_start ();  //this allows the region to draw itself 'transparently' while we drag it
 		}
 
 	} else {
@@ -731,10 +733,11 @@ RegionSlipContentsDrag::finished (GdkEvent *, bool movement_occurred)
 		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 			RegionView* rv = i->view;
 			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
+
+			rv->drag_end ();
 		}
 		_editor->commit_reversible_command ();
 	}
-
 }
 
 void
