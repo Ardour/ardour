@@ -522,7 +522,7 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 
 	const uint32_t nchans = ar->n_channels();
 
-	RubberBandStretcher::Options options = RubberBandStretcher::Option (RubberBandStretcher::OptionProcessRealTime|RubberBandStretcher::OptionStretchPrecise);
+	RubberBandStretcher::Options options = RubberBandStretcher::Option (RubberBandStretcher::OptionProcessOffline|RubberBandStretcher::OptionStretchPrecise);
 	RubberBandStretcher stretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
 
 	/* Compute stretch ratio */
