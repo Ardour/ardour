@@ -501,7 +501,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 
 	TreeModel::Row row;
 	DeviceProfile dp (_cp.device_profile());
-	DeviceInfo di;
+	DeviceInfo di (_cp.device_info());
 
 	for (int n = 0; n < Mackie::Button::FinalGlobalButton; ++n) {
 
@@ -734,6 +734,8 @@ MackieControlProtocolGUI::device_changed ()
 	_device_dependent_widget->show_all ();
 
 	table.attach (*_device_dependent_widget, 0, 12, device_dependent_row, device_dependent_row+1, AttachOptions(0), AttachOptions(0), 0, 0);
+
+	refresh_function_key_editor ();
 }
 
 void
