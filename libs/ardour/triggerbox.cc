@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <rubberband/RubberBandStretcher.h>
+
 #include "pbd/basename.h"
 #include "pbd/failed_constructor.h"
 
@@ -31,7 +33,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 
 	if (_data_type == DataType::AUDIO) {
 		for (size_t n = 0; n < 16; ++n) {
-			all_triggers.push_back (new AudioTrigger (n));
+			all_triggers.push_back (new AudioTrigger (n, *this));
 		}
 	}
 
@@ -418,8 +420,9 @@ TriggerBox::set_state (const XMLNode&, int version)
 
 /*--------------------*/
 
-Trigger::Trigger (size_t n)
-	: _running (false)
+Trigger::Trigger (size_t n, TriggerBox& b)
+	: _box (b)
+	, _running (false)
 	, _stop_requested (false)
 	, _index (n)
 	, _launch_style (Loop)
@@ -478,10 +481,10 @@ Trigger::stop ()
 
 /*--------------------*/
 
-AudioTrigger::AudioTrigger (size_t n)
-	: Trigger (n)
+AudioTrigger::AudioTrigger (size_t n, TriggerBox& b)
+	: Trigger (n, b)
 	, data (0)
-	, length (0)
+	, data_length (0)
 {
 }
 
@@ -490,6 +493,110 @@ AudioTrigger::~AudioTrigger ()
 	for (std::vector<Sample*>::iterator d = data.begin(); d != data.end(); ++d) {
 		delete *d;
 	}
+}
+
+void
+AudioTrigger::set_length (timecnt_t const & newlen)
+{
+	using namespace RubberBand;
+	using namespace Temporal;
+
+	if (!_region) {
+		return;
+	}
+
+	boost::shared_ptr<AudioRegion> ar (boost::dynamic_pointer_cast<AudioRegion> (_region));
+
+	/* load raw data */
+
+	load_data (ar);
+
+	if (newlen == _region->length()) {
+		/* no stretch required */
+		return;
+	}
+
+	/* offline stretch */
+
+	/* study */
+
+	const uint32_t nchans = ar->n_channels();
+
+	RubberBandStretcher::Options options = RubberBandStretcher::Option (RubberBandStretcher::OptionProcessRealTime|RubberBandStretcher::OptionStretchPrecise);
+	RubberBandStretcher stretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
+
+	/* Compute stretch ratio */
+
+	double new_ratio;
+
+	if (newlen.time_domain() == AudioTime) {
+		new_ratio = (double) newlen.samples() / data_length;
+	} else {
+		/* XXX what to use for position ??? */
+		const timecnt_t dur = TempoMap::use()->convert_duration (newlen, timepos_t (0), AudioTime);
+		new_ratio = (double) dur.samples() / data_length;
+	}
+
+	stretcher.setTimeRatio (new_ratio);
+
+	/* RB expects array-of-ptr-to-Sample, so set one up */
+
+	Sample* pdata[nchans];
+	for (uint32_t n = 0; n < nchans; ++n) {
+		pdata[n] = data[n];
+	}
+
+	/* study, then process */
+
+	stretcher.setMaxProcessSize (data_length);
+	stretcher.setExpectedInputDuration (data_length);
+	stretcher.study (pdata, _region->length_samples(), true);
+	stretcher.process (pdata, _region->length_samples(), true);
+
+	/* how many samples did we end up with? */
+
+	samplecnt_t plen = stretcher.available();
+
+	/* allocate new data buffers */
+
+	drop_data ();
+
+	for (uint32_t n = 0; n < nchans; ++n) {
+		data.push_back (new Sample[plen]);
+	}
+
+	/* reset pdata to point to newly allocated buffers */
+
+	for (uint32_t n = 0; n < nchans; ++n) {
+		pdata[n] = data[n];
+	}
+
+	/* fetch it all */
+
+	stretcher.retrieve (pdata, plen);
+
+	/* store length */
+
+	data_length = plen;
+
+}
+
+timecnt_t
+AudioTrigger::current_length() const
+{
+	if (_region) {
+		return timecnt_t (data_length);
+	}
+	return timecnt_t (Temporal::BeatTime);
+}
+
+timecnt_t
+AudioTrigger::natural_length() const
+{
+	if (_region) {
+		return _region->length();
+	}
+	return timecnt_t (Temporal::BeatTime);
 }
 
 int
@@ -503,9 +610,9 @@ AudioTrigger::set_region (boost::shared_ptr<Region> r)
 
 	set_region_internal (r);
 
-	if (load_data (ar)) {
-		return -1;
-	}
+	/* this will load data, but won't stretch it for now */
+
+	set_length (r->length ());
 
 	PropertyChanged (ARDOUR::Properties::name);
 
@@ -526,15 +633,15 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 {
 	const uint32_t nchans = ar->n_channels();
 
-	length = ar->length_samples();
+	data_length = ar->length_samples();
 
 	drop_data ();
 
 	try {
 		for (uint32_t n = 0; n < nchans; ++n) {
-			data.push_back (new Sample[length]);
+			data.push_back (new Sample[data_length]);
 			read_index.push_back (0);
-			ar->read (data[n], 0, length, n);
+			ar->read (data[n], 0, data_length, n);
 		}
 	} catch (...) {
 		drop_data ();
@@ -607,7 +714,7 @@ AudioTrigger::run (uint32_t channel, pframes_t& nframes, bool& /* need_butler */
 		return 0;
 	}
 
-	if (read_index[channel] >= length) {
+	if (read_index[channel] >= data_length) {
 		_running = false;
 		return 0;
 	}
@@ -621,7 +728,7 @@ AudioTrigger::run (uint32_t channel, pframes_t& nframes, bool& /* need_butler */
 
 	channel %= data.size();
 
-	nframes = (pframes_t) std::min ((samplecnt_t) nframes, (length - read_index[channel]));
+	nframes = (pframes_t) std::min ((samplecnt_t) nframes, (data_length - read_index[channel]));
 	read_index[channel] += nframes;
 
 	return data[channel] + read_index[channel];

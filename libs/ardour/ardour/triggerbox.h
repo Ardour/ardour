@@ -46,7 +46,7 @@ class TriggerBox;
 
 class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
-	Trigger (size_t index);
+	Trigger (size_t index, TriggerBox&);
 	virtual ~Trigger() {}
 
 	virtual void bang (TriggerBox&) = 0;
@@ -84,6 +84,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	Temporal::BBT_Offset quantization() const;
 	void set_quantization (Temporal::BBT_Offset const &);
 
+	virtual void set_length (timecnt_t const &) = 0;
+	virtual timecnt_t current_length() const = 0;
+	virtual timecnt_t natural_length() const = 0;
+
 	bool stop_requested() const { return _stop_requested; }
 	virtual void stop();
 	virtual void retrigger () {}
@@ -98,6 +102,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	int set_state (const XMLNode&, int version);
 
   protected:
+	TriggerBox& _box;
 	bool _running;
 	bool _stop_requested;
 	size_t _index;
@@ -111,7 +116,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
   public:
-	AudioTrigger (size_t index);
+	AudioTrigger (size_t index, TriggerBox&);
 	~AudioTrigger ();
 
 	void bang (TriggerBox&);
@@ -119,13 +124,17 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	Sample* run (uint32_t channel, pframes_t& nframes, bool& need_butler);
 
+	void set_length (timecnt_t const &);
+	timecnt_t current_length() const;
+	timecnt_t natural_length() const;
+
 	int set_region (boost::shared_ptr<Region>);
 	void retrigger ();
 
   private:
 	std::vector<Sample*> data;
 	std::vector<samplecnt_t> read_index;
-	samplecnt_t length;
+	samplecnt_t data_length;
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
