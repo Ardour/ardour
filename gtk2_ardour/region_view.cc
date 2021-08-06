@@ -574,7 +574,7 @@ RegionView::update_cue_markers ()
 	 * timestamps and some of them may be outside the Region.
 	 */
 
-	for (CueMarkers::iterator c = model_markers.begin(); c != model_markers.end(); c++) {
+	for (CueMarkers::const_iterator c = model_markers.begin(); c != model_markers.end(); c++) {
 
 		ViewCueMarkers::iterator existing = _cue_markers.end();
 
