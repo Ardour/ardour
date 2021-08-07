@@ -782,14 +782,8 @@ AudioTrigger::unbang (TriggerBox& /*proc*/, Temporal::Beats const &, samplepos_t
 Trigger::RunResult
 AudioTrigger::run (AudioBuffer& buf, uint32_t channel, pframes_t& nframes, pframes_t dest_offset, bool first)
 {
-	if (!_running) {
-		return RemoveTrigger;
-	}
-
-	if (read_index[channel] >= data_length) {
-		_running = false;
-		return RemoveTrigger;
-	}
+	assert (!_running);
+	assert (read_index[channel] < data_length);
 
 	if (_stop_requested) {
 		/* XXX need fade out machinery instead of immediate stop */
@@ -811,10 +805,9 @@ AudioTrigger::run (AudioBuffer& buf, uint32_t channel, pframes_t& nframes, pfram
 
 	read_index[channel] += nf;
 
-	nframes -= nf;
-
-	if (nframes != 0) {
+	if ((nframes - nf) != 0) {
 		/* did not get all samples, must have reached the end, figure out what do to */
+		nframes = nf;
 		return at_end ();
 	}
 
@@ -827,32 +820,14 @@ AudioTrigger::at_end ()
 	switch (launch_style()) {
 	case Trigger::Loop:
 		retrigger();
-		return ReadMore; /* means keep reading */
-
-	case Trigger::Gate:
-	case Trigger::Toggle:
-	case Trigger::Repeat:
+		return ReadMore;
+	default:
 		break;
 	}
 
-	switch (follow_action()) {
-	case Stop:
+	if (follow_action() == Stop) {
 		return RunResult (RemoveTrigger|FillSilence);
-	case QueuedTrigger:
-		break;
-	case NextTrigger:
-		break;
-	case PrevTrigger:
-		break;
-	case FirstTrigger:
-		break;
-	case LastTrigger:
-		break;
-	case AnyTrigger:
-		break;
-	case OtherTrigger:
-		break;
 	}
 
-	return ChangeTriggers;
+	return RunResult (ChangeTriggers|FillSilence);
 }
