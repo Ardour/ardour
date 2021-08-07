@@ -24,6 +24,19 @@ using std::string;
 using std::cerr;
 using std::endl;
 
+namespace ARDOUR {
+	namespace Properties {
+		PBD::PropertyDescriptor<bool> running;
+	}
+}
+
+void
+Trigger::make_property_quarks ()
+{
+	Properties::muted.property_id = g_quark_from_static_string (X_("running"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for running = %1\n", Properties::running.property_id));
+}
+
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
 	, _bang_queue (1024)

@@ -126,6 +126,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/transport_fsm.h"
 #include "ardour/transport_master_manager.h"
+#include "ardour/triggerbox.h"
 #include "ardour/uri_map.h"
 
 #include "audiographer/routines.h"
@@ -560,6 +561,7 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	AudioPlaylist::make_property_quarks ();
 	PresentationInfo::make_property_quarks ();
 	TransportMaster::make_property_quarks ();
+	Trigger::make_property_quarks ();
 
 	/* this is a useful ready to use PropertyChange that many
 	   things need to check. This avoids having to compose

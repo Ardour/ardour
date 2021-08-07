@@ -39,6 +39,12 @@
 class XMLNode;
 
 namespace ARDOUR {
+	namespace Properties {
+		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> running;
+	}
+}
+
+namespace ARDOUR {
 
 class Session;
 class AudioRegion;
@@ -48,6 +54,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
 	Trigger (size_t index, TriggerBox&);
 	virtual ~Trigger() {}
+
+	static void make_property_quarks ();
 
 	virtual void bang (TriggerBox&) = 0;
 	virtual void unbang (TriggerBox&, Temporal::Beats const &, samplepos_t) = 0;
