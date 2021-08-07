@@ -62,13 +62,6 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 
 	play_button = new Polygon (this);
 
-	Points p;
-	const double triangle_size = height - (8. * scale);
-	p.push_back (Duple (0., 0.));
-	p.push_back (Duple (0., triangle_size));
-	p.push_back (Duple (triangle_size, triangle_size / 2.));
-
-	play_button->set (p);
 	play_button->set_fill_color (Gtkmm2ext::random_color());
 	play_button->set_outline (false);
 
@@ -92,12 +85,34 @@ TriggerEntry::~TriggerEntry ()
 void
 TriggerEntry::prop_change (PropertyChange const & change)
 {
+	const double scale = UIConfiguration::instance().get_ui_scale();
+
 	if (change.contains (ARDOUR::Properties::name)) {
 		if (_trigger.region()) {
 			name_text->set (short_version (_trigger.region()->name(), 20));
+
+
+			Points p;
+			const double triangle_size = height() - (8. * scale);
+			p.push_back (Duple (0., 0.));
+			p.push_back (Duple (0., triangle_size));
+			p.push_back (Duple (triangle_size, triangle_size / 2.));
+
+			play_button->set (p);
+
+
 		} else {
 			/* we need some spaces to have something to click on */
 			name_text->set (X_("     "));
+
+			Points p;
+			const double square_size = height() - (8. * scale);
+			p.push_back (Duple (0., 0.));
+			p.push_back (Duple (0., square_size));
+			p.push_back (Duple (square_size, square_size));
+			p.push_back (Duple (square_size, 0));
+
+			play_button->set (p);
 		}
 	}
 }
@@ -185,6 +200,21 @@ TriggerBoxUI::event (GdkEvent* ev, size_t n)
 bool
 TriggerBoxUI::bang (GdkEvent *ev, size_t n)
 {
+	if (!_triggerbox.trigger (n)->region()) {
+		/* this is a stop button */
+		switch (ev->type) {
+		case GDK_BUTTON_PRESS:
+			if (ev->button.button == 1) {
+				_triggerbox.stop_all ();
+				return true;
+			}
+		default:
+			break;
+		}
+
+		return false;
+	}
+
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		switch (ev->button.button) {
@@ -383,6 +413,7 @@ TriggerBoxUI::sample_chosen (int response, size_t n)
 	std::string path = file_chooser->get_filename ();
 
 	_triggerbox.set_from_path (n, path);
+	// _triggerbox.trigger (n)->set_length (timecnt_t (Temporal::Beats (4, 0)));
 }
 
 /* ------------ */
