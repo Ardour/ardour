@@ -125,6 +125,7 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	: Box (parent, Box::Vertical)
 	, _triggerbox (tb)
 	, file_chooser (0)
+	, _context_menu (0)
 {
 	set_homogenous (true);
 	set_spacing (16);
