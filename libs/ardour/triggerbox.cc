@@ -741,7 +741,7 @@ AudioTrigger::retrigger ()
 		(*ri) = 0;
 	}
 
-	_running = true;
+	PropertyChanged (Properties::running);
 }
 
 void
@@ -769,6 +769,7 @@ AudioTrigger::bang (TriggerBox& /*proc*/)
 	}
 
 	_running = true;
+	PropertyChanged (Properties::running);
 }
 
 void
@@ -801,6 +802,7 @@ AudioTrigger::run (AudioBuffer& buf, uint32_t channel, pframes_t& nframes, pfram
 	if (_stop_requested) {
 		/* XXX need fade out machinery instead of immediate stop */
 		_running = false;
+		PropertyChanged (Properties::running);
 		_stop_requested = false;
 		return RemoveTrigger;
 	}
