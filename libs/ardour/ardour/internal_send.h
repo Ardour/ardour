@@ -83,6 +83,7 @@ private:
 	void init_gain ();
 	int  use_target (boost::shared_ptr<Route>, bool update_name = true);
 	void target_io_changed ();
+	void ensure_mixbufs ();
 
 	void propagate_solo ();
 };

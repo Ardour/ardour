@@ -159,7 +159,7 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto, bool update_name)
 
 	_send_to->add_send_to_internal_return (this);
 
-	mixbufs.ensure_buffers (_send_to->internal_return ()->input_streams (), _session.get_block_size ());
+	ensure_mixbufs ();
 	mixbufs.set_count (_send_to->internal_return ()->input_streams ());
 
 	_meter->configure_io (ChanCount (DataType::AUDIO, pan_outs ()), ChanCount (DataType::AUDIO, pan_outs ()));
@@ -186,7 +186,7 @@ void
 InternalSend::target_io_changed ()
 {
 	assert (_send_to);
-	mixbufs.ensure_buffers (_send_to->internal_return ()->input_streams (), _session.get_block_size ());
+	ensure_mixbufs ();
 	mixbufs.set_count (_send_to->internal_return ()->input_streams ());
 	reset_panner ();
 }
@@ -344,11 +344,20 @@ out:
 	_active = _pending_active;
 }
 
+void
+InternalSend::ensure_mixbufs ()
+{
+	for (DataType::iterator t = DataType::begin (); t != DataType::end (); ++t) {
+		size_t size = (*t == DataType::MIDI) ? _session.engine ().raw_buffer_size (*t) : _session.get_block_size ();
+		mixbufs.ensure_buffers (*t, _send_to->internal_return ()->input_streams ().get (*t), size);
+	}
+}
+
 int
-InternalSend::set_block_size (pframes_t nframes)
+InternalSend::set_block_size (pframes_t)
 {
 	if (_send_to) {
-		mixbufs.ensure_buffers (_send_to->internal_return ()->input_streams (), nframes);
+		ensure_mixbufs ();
 	}
 
 	return 0;
