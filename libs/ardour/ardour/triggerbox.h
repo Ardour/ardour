@@ -101,6 +101,14 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
+	enum RunResult {
+		Relax = 0,
+		RemoveTrigger = 0x1,
+		ReadMore = 0x2,
+		FillSilence = 0x4,
+		ChangeTriggers = 0x8
+	};
+
   protected:
 	TriggerBox& _box;
 	bool _running;
@@ -122,7 +130,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void bang (TriggerBox&);
 	void unbang (TriggerBox&, Temporal::Beats const & , samplepos_t);
 
-	int run (AudioBuffer&, uint32_t channel, pframes_t nframes, pframes_t offset, bool first);
+	RunResult run (AudioBuffer&, uint32_t channel, pframes_t& nframes, pframes_t offset, bool first);
 
 	void set_length (timecnt_t const &);
 	timecnt_t current_length() const;
@@ -138,6 +146,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
+	RunResult at_end ();
 };
 
 class LIBARDOUR_API TriggerBox : public Processor

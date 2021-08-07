@@ -346,6 +346,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 
 	size_t max_chans = 0;
+	Trigger::RunResult rr;
 
 	for (Triggers::iterator t = active_triggers.begin(); t != active_triggers.end(); ) {
 
@@ -376,33 +377,57 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 
 		AudioTrigger* at = dynamic_cast<AudioTrigger*> (trigger);
-		bool err = false;
 
 		if (at) {
 			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 			const bool first = (t == active_triggers.begin());
 			const size_t nchans = ar->n_channels ();
+			pframes_t nf = trigger_samples;
 
 			max_chans = std::max (max_chans, nchans);
 
+		  read_more:
 			for (uint32_t chan = 0; chan < nchans; ++chan) {
 
-				if (at->run (bufs.get_audio (chan), chan, trigger_samples, dest_offset, first)) {
-					err = true;
-					break;
+				/* we assume the result will be the same for all channels */
+
+				AudioBuffer& buf (bufs.get_audio (chan));
+
+				rr = at->run (buf, chan, nf, dest_offset, first);
+
+				/* nf is now the number of samples that were
+				 * actually processed/generated/written
+				 */
+
+				if (rr & Trigger::FillSilence) {
+					buf.silence (trigger_samples - nf, nf + dest_offset);
 				}
 			}
+
+			if (rr == Trigger::ReadMore) {
+				trigger_samples -= nf;
+				goto read_more;
+			}
+
 		} else {
 
-			/* XXX to be written */
+			/* XXX MIDI triggers to be implemented */
 
 		}
 
-		if (err) {
+		if (rr & Trigger::RemoveTrigger) {
 			t = active_triggers.erase (t);
-		} else {
-			++t;
+			continue;
 		}
+
+		++t;
+
+		if (rr & Trigger::ChangeTriggers) {
+			/* XXX do this! */
+			std::cerr << "Should change triggers!\n";
+		}
+
+
 	}
 
 	ChanCount cc (DataType::AUDIO, max_chans);
@@ -560,7 +585,7 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 
 	/* study, then process */
 
-	const samplecnt_t block_size = 8192;
+	const samplecnt_t block_size = 16384;
 	samplecnt_t read = 0;
 
 	stretcher.setDebugLevel (0);
@@ -754,58 +779,80 @@ AudioTrigger::unbang (TriggerBox& /*proc*/, Temporal::Beats const &, samplepos_t
 	}
 }
 
-int
-AudioTrigger::run (AudioBuffer& buf, uint32_t channel, pframes_t nframes, pframes_t dest_offset, bool first)
+Trigger::RunResult
+AudioTrigger::run (AudioBuffer& buf, uint32_t channel, pframes_t& nframes, pframes_t dest_offset, bool first)
 {
 	if (!_running) {
-		return -1;
+		return RemoveTrigger;
 	}
 
 	if (read_index[channel] >= data_length) {
 		_running = false;
-		return -1;
+		return RemoveTrigger;
 	}
 
 	if (_stop_requested) {
-		/* XXX need fade out machinery */
+		/* XXX need fade out machinery instead of immediate stop */
 		_running = false;
 		_stop_requested = false;
-		return 0;
+		return RemoveTrigger;
 	}
 
 	channel %= data.size();
 
-  read_more:
 	pframes_t nf = (pframes_t) std::min ((samplecnt_t) nframes, (data_length - read_index[channel]));
 	Sample* src = data[channel] + read_index[channel];
 
 	if (first) {
 		buf.read_from (src, nf, dest_offset);
-		if ((nf + dest_offset) < nframes) {
-			buf.silence (nframes - nf, nf + dest_offset);
-		}
 	} else {
 		buf.accumulate_from (src, nf);
 	}
 
 	read_index[channel] += nf;
 
-	if (nf < nframes) {
+	nframes -= nf;
 
-		nframes -= nf;
-
-		switch (launch_style()) {
-		case Trigger::Loop:
-			retrigger();
-			goto read_more;
-			break;
-		case Trigger::Gate:
-		case Trigger::Toggle:
-		case Trigger::Repeat:
-			return -1;
-			break;
-		}
+	if (nframes != 0) {
+		/* did not get all samples, must have reached the end, figure out what do to */
+		return at_end ();
 	}
 
-	return 0;
+	return Relax;
+}
+
+Trigger::RunResult
+AudioTrigger::at_end ()
+{
+	switch (launch_style()) {
+	case Trigger::Loop:
+		retrigger();
+		return ReadMore; /* means keep reading */
+
+	case Trigger::Gate:
+	case Trigger::Toggle:
+	case Trigger::Repeat:
+		break;
+	}
+
+	switch (follow_action()) {
+	case Stop:
+		return RunResult (RemoveTrigger|FillSilence);
+	case QueuedTrigger:
+		break;
+	case NextTrigger:
+		break;
+	case PrevTrigger:
+		break;
+	case FirstTrigger:
+		break;
+	case LastTrigger:
+		break;
+	case AnyTrigger:
+		break;
+	case OtherTrigger:
+		break;
+	}
+
+	return ChangeTriggers;
 }
