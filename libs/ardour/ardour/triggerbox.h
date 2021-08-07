@@ -95,8 +95,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	size_t index() const { return _index; }
 
 	/* Managed by TriggerBox */
-	samplepos_t fire_samples;
-	Temporal::Beats fire_beats;
+	samplepos_t bang_samples;
+	Temporal::Beats bang_beats;
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
@@ -122,7 +122,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void bang (TriggerBox&);
 	void unbang (TriggerBox&, Temporal::Beats const & , samplepos_t);
 
-	Sample* run (uint32_t channel, pframes_t& nframes, bool& need_butler);
+	int run (AudioBuffer&, uint32_t channel, pframes_t nframes, pframes_t offset, bool first);
 
 	void set_length (timecnt_t const &);
 	timecnt_t current_length() const;
@@ -164,6 +164,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int set_from_path (size_t slot, std::string const & path);
 
 	DataType data_type() const { return _data_type; }
+
+	void stop_all ();
 
   private:
 	PBD::RingBuffer<Trigger*> _bang_queue;

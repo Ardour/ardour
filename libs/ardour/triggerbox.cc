@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <glibmm.h>
+
 #include <rubberband/RubberBandStretcher.h>
 
 #include "pbd/basename.h"
@@ -95,6 +97,16 @@ TriggerBox::set_from_path (size_t slot, std::string const & path)
 TriggerBox::~TriggerBox ()
 {
 	drop_triggers ();
+}
+
+void
+TriggerBox::stop_all ()
+{
+	/* XXX needs to be done with mutex or via thread-safe queue */
+
+	for (Triggers::iterator t = active_triggers.begin(); t != active_triggers.end(); ++t) {
+		(*t)->stop ();
+	}
 }
 
 void
@@ -258,6 +270,10 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 void
 TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
 {
+	static int64_t rcnt = 0;
+
+	rcnt++;
+
 	if (start_sample < 0) {
 		return;
 	}
@@ -298,8 +314,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		} else if (fire_at >= start_beats && fire_at < end_beats) {
 
-			(*t)->fire_samples = fire_at.samples();
-			(*t)->fire_beats = fire_at.beats();
+			(*t)->bang_samples = fire_at.samples();
+			(*t)->bang_beats = fire_at.beats();
 			active_triggers.push_back (*t);
 			t = pending_on_triggers.erase (t);
 
@@ -320,16 +336,15 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 
 		if (off_at >= start_beats && off_at < end_beats) {
-			(*t)->fire_samples = off_at.samples();
-			(*t)->fire_beats = off_at.beats();
-			(*t)->unbang (*this, (*t)->fire_beats, (*t)->fire_samples);
+			(*t)->bang_samples = off_at.samples();
+			(*t)->bang_beats = off_at.beats();
+			(*t)->unbang (*this, (*t)->bang_beats, (*t)->bang_samples);
 			t = pending_off_triggers.erase (t);
 		} else {
 			++t;
 		}
 	}
 
-	bool need_butler = false;
 	size_t max_chans = 0;
 
 	for (Triggers::iterator t = active_triggers.begin(); t != active_triggers.end(); ) {
@@ -346,56 +361,45 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		pframes_t trigger_samples = nframes;
 
 		if (trigger->stop_requested()) {
-			trigger_samples = nframes - (trigger->fire_samples - start_sample);
+
+			/* bang_samples says when to stop, so compute an offset
+			 *into the nframes we've been asked to provide.
+			 */
+
+			trigger_samples = nframes - (trigger->bang_samples - start_sample);
+
 		} else if (!trigger->running()) {
+
 			trigger->bang (*this);
-			dest_offset = std::max (samplepos_t (0), trigger->fire_samples - start_sample);
+			dest_offset = std::max (samplepos_t (0), trigger->bang_samples - start_sample);
 			trigger_samples = nframes - dest_offset;
 		}
 
 		AudioTrigger* at = dynamic_cast<AudioTrigger*> (trigger);
+		bool err = false;
 
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
-		const size_t nchans = ar->n_channels ();
-		max_chans = std::max (max_chans, nchans);
+		if (at) {
+			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
+			const bool first = (t == active_triggers.begin());
+			const size_t nchans = ar->n_channels ();
 
-		bool at_end = false;
-		for (uint32_t chan = 0; !at_end && chan < nchans; ++chan) {
+			max_chans = std::max (max_chans, nchans);
 
-			AudioBuffer& buf = bufs.get_audio (chan);
+			for (uint32_t chan = 0; chan < nchans; ++chan) {
 
-			pframes_t to_copy = trigger_samples;
-			Sample* data = at->run (chan, to_copy, need_butler);
-
-			if (!data) {
-				at_end = true;
-				break;
-			} else {
-				if (t == active_triggers.begin()) {
-					buf.read_from (data, to_copy, dest_offset);
-					if ((to_copy + dest_offset) < nframes) {
-						buf.silence (nframes - to_copy, to_copy + dest_offset);
-					}
-				} else {
-					buf.accumulate_from (data, to_copy);
+				if (at->run (bufs.get_audio (chan), chan, trigger_samples, dest_offset, first)) {
+					err = true;
+					break;
 				}
 			}
+		} else {
+
+			/* XXX to be written */
 
 		}
-		if (at_end) {
 
-			switch (trigger->launch_style()) {
-			case Trigger::Loop:
-				trigger->retrigger();
-				++t;
-				break;
-			case Trigger::Gate:
-			case Trigger::Toggle:
-			case Trigger::Repeat:
-				t = active_triggers.erase (t);
-				break;
-			}
-
+		if (err) {
+			t = active_triggers.erase (t);
 		} else {
 			++t;
 		}
@@ -516,6 +520,8 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 		return;
 	}
 
+	std::cerr << " sl to " << newlen << " from " << _region->length() << endl;
+
 	/* offline stretch */
 
 	/* study */
@@ -534,51 +540,90 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 	} else {
 		/* XXX what to use for position ??? */
 		const timecnt_t dur = TempoMap::use()->convert_duration (newlen, timepos_t (0), AudioTime);
+		std::cerr << "new dur = " << dur << " S " << dur.samples() << " vs " << data_length << endl;
 		new_ratio = (double) dur.samples() / data_length;
 	}
 
 	stretcher.setTimeRatio (new_ratio);
 
+	const samplecnt_t expected_length = ceil (data_length * new_ratio) + 16; /* extra space for safety */
+	std::vector<Sample*> stretched;
+
+	for (uint32_t n = 0; n < nchans; ++n) {
+		stretched.push_back (new Sample[expected_length]);
+	}
+
 	/* RB expects array-of-ptr-to-Sample, so set one up */
 
-	Sample* pdata[nchans];
-	for (uint32_t n = 0; n < nchans; ++n) {
-		pdata[n] = data[n];
-	}
+	Sample* raw[nchans];
+	Sample* results[nchans];
 
 	/* study, then process */
 
-	stretcher.setMaxProcessSize (data_length);
+	const samplecnt_t block_size = 8192;
+	samplecnt_t read = 0;
+
+	stretcher.setDebugLevel (0);
+	stretcher.setMaxProcessSize (block_size);
 	stretcher.setExpectedInputDuration (data_length);
-	stretcher.study (pdata, _region->length_samples(), true);
-	stretcher.process (pdata, _region->length_samples(), true);
 
-	/* how many samples did we end up with? */
+	while (read < data_length) {
 
-	samplecnt_t plen = stretcher.available();
+		for (uint32_t n = 0; n < nchans; ++n) {
+			raw[n] = data[n] + read;
+		}
+
+		samplecnt_t to_read = std::min (block_size, data_length - read);
+		read += to_read;
+
+		stretcher.study (raw, to_read, (read >= data_length));
+	}
+
+	read = 0;
+
+	samplecnt_t processed = 0;
+	samplecnt_t avail;
+
+	while (read < data_length) {
+
+		for (uint32_t n = 0; n < nchans; ++n) {
+			raw[n] = data[n] + read;
+		}
+
+		samplecnt_t to_read = std::min (block_size, data_length - read);
+		read += to_read;
+
+		stretcher.process (raw, to_read, (read >= data_length));
+
+		while ((avail = stretcher.available()) > 0) {
+
+			for (uint32_t n = 0; n < nchans; ++n) {
+				results[n] = stretched[n] + processed;
+			}
+
+			processed += stretcher.retrieve (results, avail);
+		}
+	}
+
+	while ((avail = stretcher.available()) >= 0) {
+
+		if (avail == 0) {
+			Glib::usleep (10000);
+			continue;
+		}
+
+		for (uint32_t n = 0; n < nchans; ++n) {
+			results[n] = stretched[n] + processed;
+		}
+
+		processed += stretcher.retrieve (results, avail);
+	}
 
 	/* allocate new data buffers */
 
 	drop_data ();
-
-	for (uint32_t n = 0; n < nchans; ++n) {
-		data.push_back (new Sample[plen]);
-	}
-
-	/* reset pdata to point to newly allocated buffers */
-
-	for (uint32_t n = 0; n < nchans; ++n) {
-		pdata[n] = data[n];
-	}
-
-	/* fetch it all */
-
-	stretcher.retrieve (pdata, plen);
-
-	/* store length */
-
-	data_length = plen;
-
+	data = stretched;
+	data_length = processed;
 }
 
 timecnt_t
@@ -657,6 +702,8 @@ AudioTrigger::retrigger ()
 	for (std::vector<samplecnt_t>::iterator ri = read_index.begin(); ri != read_index.end(); ++ri) {
 		(*ri) = 0;
 	}
+
+	_running = true;
 }
 
 void
@@ -707,16 +754,16 @@ AudioTrigger::unbang (TriggerBox& /*proc*/, Temporal::Beats const &, samplepos_t
 	}
 }
 
-Sample*
-AudioTrigger::run (uint32_t channel, pframes_t& nframes, bool& /* need_butler */)
+int
+AudioTrigger::run (AudioBuffer& buf, uint32_t channel, pframes_t nframes, pframes_t dest_offset, bool first)
 {
 	if (!_running) {
-		return 0;
+		return -1;
 	}
 
 	if (read_index[channel] >= data_length) {
 		_running = false;
-		return 0;
+		return -1;
 	}
 
 	if (_stop_requested) {
@@ -728,8 +775,37 @@ AudioTrigger::run (uint32_t channel, pframes_t& nframes, bool& /* need_butler */
 
 	channel %= data.size();
 
-	nframes = (pframes_t) std::min ((samplecnt_t) nframes, (data_length - read_index[channel]));
-	read_index[channel] += nframes;
+  read_more:
+	pframes_t nf = (pframes_t) std::min ((samplecnt_t) nframes, (data_length - read_index[channel]));
+	Sample* src = data[channel] + read_index[channel];
 
-	return data[channel] + read_index[channel];
+	if (first) {
+		buf.read_from (src, nf, dest_offset);
+		if ((nf + dest_offset) < nframes) {
+			buf.silence (nframes - nf, nf + dest_offset);
+		}
+	} else {
+		buf.accumulate_from (src, nf);
+	}
+
+	read_index[channel] += nf;
+
+	if (nf < nframes) {
+
+		nframes -= nf;
+
+		switch (launch_style()) {
+		case Trigger::Loop:
+			retrigger();
+			goto read_more;
+			break;
+		case Trigger::Gate:
+		case Trigger::Toggle:
+		case Trigger::Repeat:
+			return -1;
+			break;
+		}
+	}
+
+	return 0;
 }
