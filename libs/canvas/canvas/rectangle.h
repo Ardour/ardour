@@ -59,6 +59,14 @@ public:
 		return _rect.y1;
 	}
 
+	Distance height() const {
+		return _rect.height();
+	}
+
+	Distance width() const {
+		return _rect.height();
+	}
+
 	void set (Rect const &);
 	void set_x0 (Coord);
 	void set_y0 (Coord);
