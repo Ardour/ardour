@@ -847,5 +847,5 @@ AudioTrigger::at_end ()
 		return RunResult (RemoveTrigger|FillSilence);
 	}
 
-	return RunResult (ChangeTriggers|FillSilence);
+	return RunResult (RemoveTrigger|ChangeTriggers|FillSilence);
 }
