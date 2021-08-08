@@ -1400,7 +1400,7 @@ PluginManager::au_refresh (bool cache_only)
 	for (std::vector<AUv2DescStr>::const_iterator i = audesc.begin (); i != audesc.end (); ++i, ++n) {
 		reset_scan_cancel_state (true);
 		ARDOUR::PluginScanMessage (string_compose (_("AUv2 (%1 / %2)"), n, all_modules), i->to_s(), !cache_only && !cancelled());
-		auv2_discover (*i, cache_only);
+		auv2_discover (*i, cache_only || cancelled ());
 	}
 
 	for (PluginInfoList::iterator i = _au_plugin_info->begin(); i != _au_plugin_info->end(); ++i) {
