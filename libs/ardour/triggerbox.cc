@@ -796,8 +796,11 @@ AudioTrigger::unbang (TriggerBox& /*proc*/, Temporal::Beats const &, samplepos_t
 Trigger::RunResult
 AudioTrigger::run (AudioBuffer& buf, uint32_t channel, pframes_t& nframes, pframes_t dest_offset, bool first)
 {
-	assert (!_running);
 	assert (read_index[channel] < data_length);
+
+	if (!_running) {
+		return RemoveTrigger;
+	}
 
 	if (_stop_requested) {
 		/* XXX need fade out machinery instead of immediate stop */
