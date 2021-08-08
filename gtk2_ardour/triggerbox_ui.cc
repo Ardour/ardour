@@ -53,6 +53,9 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	const double width = 150. * scale;
 	const double height = 20. * scale;
 
+	poly_margin = 2. * scale;
+	poly_size = height - (poly_margin * 2.);
+
 	Rect r (0, 0, width, height);
 	set (r);
 	set_outline_all ();
@@ -60,21 +63,29 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	set_outline_color (Gtkmm2ext::random_color());
 	name = string_compose ("trigger %1", _trigger.index());
 
-	play_button = new Polygon (this);
-
-	play_button->set_fill_color (Gtkmm2ext::random_color());
+	play_button = new Rectangle (this);
+	play_button->set (Rect (0., 0., poly_size + (poly_margin * 2.), height));
 	play_button->set_outline (false);
+	play_button->set_fill_color (0x000000ff);
+	play_button->name = string_compose ("playbutton %1", _trigger.index());
 
-	play_button->set_position (Duple (10. * scale, 4. * scale));
+	play_shape = new Polygon (play_button);
+	play_shape->set_fill_color (Gtkmm2ext::random_color());
+	play_shape->set_outline (false);
+	play_shape->name = string_compose ("playshape %1", _trigger.index());
 
 	name_text = new Text (this);
 	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
 	name_text->set_color (Gtkmm2ext::contrasting_text_color (fill_color()));
-	name_text->set_position (Duple (50, 4. * scale));
+	name_text->set_position (Duple (play_button->get().width() + (2. * scale), poly_margin));
 
 	_trigger.PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context());
 
-	prop_change (PropertyChange (ARDOUR::Properties::name));
+	PropertyChange changed;
+	changed.add (ARDOUR::Properties::name);
+	changed.add (ARDOUR::Properties::running);
+
+	prop_change (changed);
 }
 
 
@@ -83,37 +94,54 @@ TriggerEntry::~TriggerEntry ()
 }
 
 void
+TriggerEntry::draw_play_button ()
+{
+	Points p;
+
+	if (_trigger.region()) {
+		/* stopped: triangle */
+		p.push_back (Duple (poly_margin, poly_margin));
+		p.push_back (Duple (poly_margin, poly_size));
+		p.push_back (Duple (poly_size, poly_size / 2.));
+	} else {
+		/* stopped: square */
+		p.push_back (Duple (poly_margin, poly_margin));
+		p.push_back (Duple (poly_margin, poly_size));
+		p.push_back (Duple (poly_size, poly_size));
+		p.push_back (Duple (poly_size, poly_margin));
+	}
+
+	play_shape->set (p);
+
+	if (_trigger.running()) {
+		play_button->set_fill (true);
+	} else {
+		play_button->set_fill (false);
+	}
+}
+
+void
 TriggerEntry::prop_change (PropertyChange const & change)
 {
-	const double scale = UIConfiguration::instance().get_ui_scale();
+	bool need_pb = false;
 
 	if (change.contains (ARDOUR::Properties::name)) {
 		if (_trigger.region()) {
 			name_text->set (short_version (_trigger.region()->name(), 20));
-
-
-			Points p;
-			const double triangle_size = height() - (8. * scale);
-			p.push_back (Duple (0., 0.));
-			p.push_back (Duple (0., triangle_size));
-			p.push_back (Duple (triangle_size, triangle_size / 2.));
-
-			play_button->set (p);
-
-
 		} else {
 			/* we need some spaces to have something to click on */
-			name_text->set (X_("     "));
-
-			Points p;
-			const double square_size = height() - (8. * scale);
-			p.push_back (Duple (0., 0.));
-			p.push_back (Duple (0., square_size));
-			p.push_back (Duple (square_size, square_size));
-			p.push_back (Duple (square_size, 0));
-
-			play_button->set (p);
+			name_text->set ("");
 		}
+
+		need_pb = true;
+	}
+
+	if (change.contains (ARDOUR::Properties::running)) {
+		need_pb = true;
+	}
+
+	if (need_pb) {
+		draw_play_button ();
 	}
 }
 

@@ -53,14 +53,18 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 
 	ARDOUR::Trigger& trigger() const { return _trigger; }
 
-	ArdourCanvas::Polygon* play_button;
+	ArdourCanvas::Rectangle* play_button;
+	ArdourCanvas::Polygon* play_shape;
 	ArdourCanvas::Text*    name_text;
 
   private:
 	ARDOUR::Trigger& _trigger;
+	double poly_size;
+	double poly_margin;
 
 	PBD::ScopedConnection trigger_prop_connection;
 	void prop_change (PBD::PropertyChange const & change);
+	void draw_play_button ();
 };
 
 class TriggerBoxUI : public ArdourCanvas::Box
