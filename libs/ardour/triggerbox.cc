@@ -377,7 +377,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		if (trigger->stop_requested()) {
 
 			/* bang_samples says when to stop, so compute an offset
-			 *into the nframes we've been asked to provide.
+			 * into the nframes we've been asked to provide.
 			 */
 
 			trigger_samples = nframes - (trigger->bang_samples - start_sample);
