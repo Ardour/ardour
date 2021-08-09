@@ -113,7 +113,7 @@ TriggerEntry::draw_play_button ()
 
 	play_shape->set (p);
 
-	if (_trigger.running()) {
+	if (_trigger.active()) {
 		play_button->set_fill (true);
 	} else {
 		play_button->set_fill (false);
@@ -248,7 +248,7 @@ TriggerBoxUI::bang (GdkEvent *ev, size_t n)
 	case GDK_BUTTON_PRESS:
 		switch (ev->button.button) {
 		case 1:
-			_triggerbox.bang_trigger (&_slots[n]->trigger());
+			_slots[n]->trigger().bang ();
 			return true;
 		default:
 			break;
@@ -257,8 +257,8 @@ TriggerBoxUI::bang (GdkEvent *ev, size_t n)
 	case GDK_BUTTON_RELEASE:
 		switch (ev->button.button) {
 		case 1:
-			if (_triggerbox.trigger (n)->launch_style() == Trigger::Gate) {
-				_triggerbox.unbang_trigger (&_slots[n]->trigger());
+			if (_slots[n]->trigger().launch_style() == Trigger::Gate) {
+				_slots[n]->trigger().unbang ();
 			}
 			break;
 		default:
