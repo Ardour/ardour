@@ -47,6 +47,7 @@
 #include "ardour/track.h"
 #include "ardour/transport_fsm.h"
 #include "ardour/transport_master.h"
+#include "ardour/triggerbox.h"
 #include "ardour/types.h"
 
 using namespace std;
@@ -154,7 +155,8 @@ setup_enum_writer ()
 	LoopFadeChoice _LoopFadeChooice;
 	TransportState _TransportState;
 	LocateTransportDisposition _LocateTransportDisposition;
-
+	Trigger::State _TriggerState;
+	
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -836,6 +838,14 @@ setup_enum_writer ()
 	REGISTER_ENUM (MustRoll);
 	REGISTER_ENUM (RollIfAppropriate);
 	REGISTER (_LocateTransportDisposition);
+
+	REGISTER_CLASS_ENUM (Trigger, None);
+	REGISTER_CLASS_ENUM (Trigger, Stopped);
+	REGISTER_CLASS_ENUM (Trigger, WaitingToStart);
+	REGISTER_CLASS_ENUM (Trigger, Running);
+	REGISTER_CLASS_ENUM (Trigger, WaitingToStop);
+	REGISTER_CLASS_ENUM (Trigger, Stopping);
+	REGISTER (_TriggerState);
 }
 
 } /* namespace ARDOUR */

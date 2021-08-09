@@ -19,6 +19,7 @@
 #ifndef __ardour_triggerbox_h__
 #define __ardour_triggerbox_h__
 
+#include <atomic>
 #include <map>
 #include <vector>
 #include <string>
@@ -52,15 +53,32 @@ class TriggerBox;
 
 class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
+	enum State {
+		None = 0, /* mostly for _requested_state */
+		Stopped = 1,
+		WaitingToStart = 2,
+		Running = 3,
+		WaitingToStop = 4,
+		Stopping = 5
+	};
+
 	Trigger (size_t index, TriggerBox&);
 	virtual ~Trigger() {}
 
 	static void make_property_quarks ();
 
-	virtual void bang (TriggerBox&) = 0;
-	virtual void unbang (TriggerBox&, Temporal::Beats const &, samplepos_t) = 0;
+	/* semantics of "bang" depend on the trigger */
+	void bang ();
+	void unbang ();
+	/* explicitly call for the trigger to stop */
+	virtual void stop();
+	/* explicitly call for the trigger to start */
+	virtual void start();
 
-	bool running() const { return _running; }
+	void process_state_requests ();
+
+	bool active() const { return _state >= Running; }
+	State state() const { return _state; }
 
 	enum LaunchStyle {
 		Loop,  /* runs till stopped, reclick just restarts */
@@ -96,10 +114,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual timecnt_t current_length() const = 0;
 	virtual timecnt_t natural_length() const = 0;
 
-	bool stop_requested() const { return _stop_requested; }
-	virtual void stop();
-	virtual void retrigger () {}
-
 	size_t index() const { return _index; }
 
 	/* Managed by TriggerBox */
@@ -117,10 +131,14 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		ChangeTriggers = 0x8
 	};
 
+	bool maybe_compute_start_or_stop (Temporal::Beats const & start, Temporal::Beats const & end);
+
   protected:
 	TriggerBox& _box;
-	bool _running;
-	bool _stop_requested;
+	State _state;
+	std::atomic<State> _requested_state;
+	std::atomic<int> _bang;
+	std::atomic<int> _unbang;
 	size_t _index;
 	LaunchStyle  _launch_style;
 	FollowAction _follow_action;
@@ -128,15 +146,14 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	Temporal::BBT_Offset _quantization;
 
 	void set_region_internal (boost::shared_ptr<Region>);
+	void request_state (State s);
+	virtual void retrigger() = 0;
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
   public:
 	AudioTrigger (size_t index, TriggerBox&);
 	~AudioTrigger ();
-
-	void bang (TriggerBox&);
-	void unbang (TriggerBox&, Temporal::Beats const & , samplepos_t);
 
 	RunResult run (AudioBuffer&, uint32_t channel, pframes_t& nframes, pframes_t offset, bool first);
 
@@ -145,6 +162,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	timecnt_t natural_length() const;
 
 	int set_region (boost::shared_ptr<Region>);
+
+  protected:
 	void retrigger ();
 
   private:
