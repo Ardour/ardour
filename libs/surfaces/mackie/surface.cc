@@ -1191,7 +1191,7 @@ translate_seven_segment (char achar)
 	} else if  (achar >= 0x20 && achar <= 0x3f) {
 		return achar;
 	} else {
-		return 0x00;
+		return 0x20;
 	}
 }
 
