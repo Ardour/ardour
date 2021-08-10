@@ -1186,14 +1186,19 @@ static void auv2_scanner_log (std::string msg, std::stringstream* ss)
 bool
 PluginManager::run_auv2_scanner_app (CAComponentDescription const& desc, AUv2DescStr const& d, PSLEPtr psle) const
 {
-	char **argp= (char**) calloc (7, sizeof (char*));
+	char **argp= (char**) calloc (8, sizeof (char*));
 	argp[0] = strdup (auv2_scanner_bin_path.c_str ());
 	argp[1] = strdup ("-f");
-	argp[2] = strdup ("--");
-	argp[3] = strdup (d.type.c_str());
-	argp[4] = strdup (d.subt.c_str());
-	argp[5] = strdup (d.manu.c_str());
-	argp[6] = 0;
+	if (Config->get_verbose_plugin_scan()) {
+		argp[2] = strdup ("-v");
+	} else {
+		argp[2] = strdup ("-f");
+	}
+	argp[3] = strdup ("--");
+	argp[4] = strdup (d.type.c_str());
+	argp[5] = strdup (d.subt.c_str());
+	argp[6] = strdup (d.manu.c_str());
+	argp[7] = 0;
 
 	stringstream scan_log;
 	ARDOUR::SystemExec scanner (auv2_scanner_bin_path, argp);
@@ -1482,7 +1487,11 @@ PluginManager::run_vst2_scanner_app (std::string path, PSLEPtr psle) const
 	char **argp= (char**) calloc (5, sizeof (char*));
 	argp[0] = strdup (vst2_scanner_bin_path.c_str ());
 	argp[1] = strdup ("-f");
-	argp[2] = strdup ("-f"); // -v
+	if (Config->get_verbose_plugin_scan()) {
+		argp[2] = strdup ("-v");
+	} else {
+		argp[2] = strdup ("-f");
+	}
 	argp[3] = strdup (path.c_str ());
 	argp[4] = 0;
 
@@ -1773,10 +1782,6 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 		return -1;
 	}
 
-	if (Config->get_verbose_plugin_scan()) {
-		info << string_compose (_("--- Windows VST plugins Scan: %1"), path) << endmsg;
-	}
-
 	find_files_matching_filter (plugin_objects, path, windows_vst_filter, 0, false, true, true);
 
 	sort (plugin_objects.begin (), plugin_objects.end ());
@@ -1788,10 +1793,6 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 		reset_scan_cancel_state (true);
 		ARDOUR::PluginScanMessage (string_compose (_("VST2 (%1 / %2)"), n, all_modules), *x, !cache_only && !cancelled());
 		vst2_discover (*x, Windows_VST, cache_only || cancelled());
-	}
-
-	if (Config->get_verbose_plugin_scan()) {
-		info << _("--- Windows VST plugins Scan Done") << endmsg;
 	}
 
 	return ret;
@@ -2243,7 +2244,11 @@ PluginManager::run_vst3_scanner_app (std::string bundle_path, PSLEPtr psle) cons
 	char **argp= (char**) calloc (5, sizeof (char*));
 	argp[0] = strdup (vst3_scanner_bin_path.c_str ());
 	argp[1] = strdup ("-f");
-	argp[2] = strdup ("-f");
+	if (Config->get_verbose_plugin_scan()) {
+		argp[2] = strdup ("-v");
+	} else {
+		argp[2] = strdup ("-f");
+	}
 	argp[3] = strdup (bundle_path.c_str ());
 	argp[4] = 0;
 
