@@ -26,6 +26,31 @@
 using namespace std;
 using namespace ARDOUR;
 
+static std::string
+proc_type_map (std::string const& str)
+{
+	/* compare to PluginInsert::set_state */
+	if (str == X_("ladspa") || str == X_("Ladspa")) { /* handle old school sessions */
+		return "LV1";
+	} else if (str == X_("lv2")) {
+		return "LV2";
+	} else if (str == X_("windows-vst")) {
+		return "VST2";
+	} else if (str == X_("lxvst")) {
+		return "VST2";
+	} else if (str == X_("mac-vst")) {
+		return "VST2";
+	} else if (str == X_("audiounit")) {
+		return "AU";
+	} else if (str == X_("luaproc")) {
+		return "Lua";
+	} else if (str == X_("vst3")) {
+		return "VST3";
+	} else {
+		return str;
+  }
+}
+
 UnknownProcessor::UnknownProcessor (Session& s, XMLNode const & state)
 	: Processor (s, "")
 	, _state (state)
@@ -33,9 +58,14 @@ UnknownProcessor::UnknownProcessor (Session& s, XMLNode const & state)
 	, saved_input (0)
 	, saved_output (0)
 {
-	XMLProperty const * prop = state.property (X_("name"));
-	if (prop) {
-		set_name (prop->value ());
+	XMLProperty const* pname = state.property (X_("name"));
+	if (pname) {
+		XMLProperty const* ptype = state.property (X_("type"));
+		if (ptype) {
+			set_name (string_compose ("%1 (%2)", pname->value (), proc_type_map (ptype->value ())));
+		} else {
+			set_name (pname->value ());
+		}
 		_display_to_user = true;
 	}
 
