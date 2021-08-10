@@ -121,6 +121,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	: ControlProtocol (session, X_("Mackie"))
 	, AbstractUI<MackieControlUIRequest> (name())
 	, _current_initial_bank (0)
+	, _timecode_last (10, '\0')
 	, _sample_last (0)
 	, _timecode_type (ARDOUR::AnyTime::BBT)
 	, _gui (0)
@@ -1211,14 +1212,15 @@ MackieControlProtocol::update_timecode_display()
 		return;
 	}
 
+	string timecode;
+
 	// do assignment here so current_sample is fixed
 	samplepos_t current_sample = session->transport_sample();
-	string timecode;
 	// For large jumps in play head possition do full reset
 	int moved = (current_sample - _sample_last) / session->sample_rate ();
 	if (moved) {
 		DEBUG_TRACE (DEBUG::MackieControl, "Timecode reset\n");
-		_timecode_last = string (10, ' ');
+		_timecode_last = string (10, '\0');
 	}
 	_sample_last = current_sample;
 
@@ -1375,7 +1377,7 @@ MackieControlProtocol::notify_transport_state_changed()
 	update_global_button (Button::Ffwd, ffwd_button_onoff ());
 
 	// sometimes a return to start leaves time code at old time
-	_timecode_last = string (10, ' ');
+	_timecode_last = string (10, '\0');
 
 	notify_metering_state_changed ();
 }
