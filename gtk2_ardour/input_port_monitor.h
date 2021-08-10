@@ -64,6 +64,7 @@ private:
 		void on_size_allocate (Gtk::Allocation&);
 
 	private:
+		void dpi_reset ();
 
 		int                 _pos;
 		ARDOUR::samplecnt_t _rate;

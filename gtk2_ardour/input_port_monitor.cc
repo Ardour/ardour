@@ -241,6 +241,15 @@ InputPortMonitor::InputScope::InputScope (samplecnt_t rate, int l, int g, Orient
 	parameter_changed ("waveform-clip-level");
 	parameter_changed ("show-waveform-clipping");
 	parameter_changed ("waveform-scale");
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &InputPortMonitor::InputScope::dpi_reset));
+}
+
+void
+InputPortMonitor::InputScope::dpi_reset ()
+{
+	if (is_realized ()) {
+		queue_resize ();
+	}
 }
 
 void
@@ -282,7 +291,7 @@ InputPortMonitor::InputScope::on_size_allocate (Gtk::Allocation& a)
 	}
 
 	if (a.get_width () != w || a.get_height () != h) {
-		_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, a.get_width () - 2, a.get_height () - 2);
+		_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, std::max (1, a.get_width () - 2), std::max (1, a.get_height () - 2));
 	}
 }
 
@@ -444,7 +453,9 @@ InputPortMonitor::EventMeter::dpi_reset ()
 	_layout->get_pixel_size (_length, _extent);
 	_extent += 2;
 	_length += 2;
-	queue_resize ();
+	if (is_realized ()) {
+		queue_resize ();
+	}
 }
 
 void
@@ -551,7 +562,9 @@ InputPortMonitor::EventMonitor::dpi_reset ()
 	_layout->get_pixel_size (_width, _height);
 	_width += 2;
 	_height += 2;
-	queue_resize ();
+	if (is_realized ()) {
+		queue_resize ();
+	}
 }
 
 void
