@@ -149,7 +149,7 @@ print_help ()
 int
 main (int argc, char* argv[])
 {
-	const char* optstring = "vhBdD:c:VOU:P";
+	const char* optstring = "vhBdD:c:OU:P";
 
 	/* clang-format off */
 	const struct option longopts[] = {
@@ -159,14 +159,12 @@ main (int argc, char* argv[])
 		{ "disable-plugins",     no_argument,       0, 'd' },
 		{ "debug",               required_argument, 0, 'D' },
 		{ "name",                required_argument, 0, 'c' },
-		{ "novst",               no_argument,       0, 'V' },
 		{ "no-hw-optimizations", no_argument,       0, 'O' },
 		{ "no-connect-ports",    no_argument,       0, 'P' },
 		{ 0, 0, 0, 0 }
 	};
 	/* clang-format on */
 
-	bool use_vst             = true;
 	bool try_hw_optimization = true;
 
 	backend_client_name = PBD::downcase (std::string (PROGRAM_NAME));
@@ -213,12 +211,6 @@ main (int argc, char* argv[])
 				ARDOUR::Port::set_connecting_blocked (true);
 				break;
 
-			case 'V':
-#ifdef WINDOWS_VST_SUPPORT
-				use_vst = false;
-#endif /* WINDOWS_VST_SUPPORT */
-				break;
-
 			default:
 				print_help ();
 				exit (EXIT_FAILURE);
@@ -230,7 +222,7 @@ main (int argc, char* argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	if (!ARDOUR::init (use_vst, try_hw_optimization, localedir)) {
+	if (!ARDOUR::init (try_hw_optimization, localedir)) {
 		cerr << "Ardour failed to initialize\n"
 		     << endl;
 		exit (EXIT_FAILURE);

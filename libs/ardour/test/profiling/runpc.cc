@@ -21,7 +21,7 @@ main (int argc, char* argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	ARDOUR::init (false, true, localedir);
+	ARDOUR::init (true, localedir);
 	TestUI* test_ui = new TestUI();
 	create_and_start_dummy_backend ();
 

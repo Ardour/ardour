@@ -518,7 +518,7 @@ ARDOUR::handle_old_configuration_files (boost::function<bool(std::string const&,
 }
 
 bool
-ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir, bool with_gui)
+ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 {
 	if (libardour_initialized) {
 		return true;
@@ -591,11 +591,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	if (Config->load_state ()) {
 		return false;
 	}
-
-	Config->set_use_windows_vst (use_windows_vst);
-#ifdef LXVST_SUPPORT
-	Config->set_use_lxvst (true);
-#endif
 
 	Profile = new RuntimeProfile;
 

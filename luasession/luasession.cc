@@ -144,7 +144,7 @@ static MyEventLoop* event_loop = NULL;
 static void
 init ()
 {
-	if (!ARDOUR::init (false, true, localedir)) {
+	if (!ARDOUR::init (true, localedir)) {
 		cerr << "Ardour failed to initialize\n" << endl;
 		console_madness_end ();
 		::exit (EXIT_FAILURE);

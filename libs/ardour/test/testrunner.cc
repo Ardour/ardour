@@ -49,7 +49,7 @@ main(int argc, char* argv[])
 		}
 	}
 
-	CPPUNIT_ASSERT (ARDOUR::init (false, true, localedir));
+	CPPUNIT_ASSERT (ARDOUR::init (true, localedir));
 
 	TestUI* test_ui = new TestUI();
 

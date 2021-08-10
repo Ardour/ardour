@@ -114,7 +114,7 @@ static MyEventLoop *event_loop;
 void
 SessionUtils::init (bool print_log)
 {
-	if (!ARDOUR::init (false, true, localedir)) {
+	if (!ARDOUR::init (true, localedir)) {
 		cerr << "Ardour failed to initialize\n" << endl;
 		::exit (EXIT_FAILURE);
 	}

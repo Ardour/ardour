@@ -267,7 +267,7 @@ int main (int argc, char **argv)
 	// TODO setlocale..
 #endif
 
-	if (!ARDOUR::init (false, true, localedir)) {
+	if (!ARDOUR::init (true, localedir)) {
 		cerr << "Ardour failed to initialize\n" << endl;
 		::exit (EXIT_FAILURE);
 	}

@@ -16,7 +16,7 @@ static const char* localedir = LOCALEDIR;
 int
 main (int argc, char* argv[])
 {
-	ARDOUR::init (false, true, localedir);
+	ARDOUR::init (true, localedir);
 	TestUI* test_ui = new TestUI();
 	create_and_start_dummy_backend ();
 	Session* session = load_session ("../libs/ardour/test/profiling/sessions/1region", "1region");

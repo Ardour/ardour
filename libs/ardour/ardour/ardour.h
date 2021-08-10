@@ -59,7 +59,6 @@ namespace ARDOUR {
 	extern LIBARDOUR_API std::map<std::string, bool> reserved_io_names;
 
 	/**
-	 * @param with_vst true to enable VST Support
 	 * @param try_optimization true to enable hardware optimized routines
 	 * for mixing, finding peak values etc.
 	 * @param localedir Directory to look for localisation files
@@ -68,7 +67,7 @@ namespace ARDOUR {
 	 *
 	 * @return true if Ardour library was successfully initialized
 	 */
-	LIBARDOUR_API bool init (bool with_vst, bool try_optimization, const char* localedir, bool with_gui = false);
+	LIBARDOUR_API bool init (bool try_optimization, const char* localedir, bool with_gui = false);
 	LIBARDOUR_API void init_post_engine (uint32_t);
 	LIBARDOUR_API void cleanup ();
 	LIBARDOUR_API bool no_auto_connect ();

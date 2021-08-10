@@ -44,7 +44,7 @@ int main (int argc, char* argv[])
 
 	PBD::Timing ardour_init_timing;
 
-	ARDOUR::init (false, true, localedir);
+	ARDOUR::init (true, localedir);
 	ardour_init_timing.update();
 
 	TestUI* test_ui = new TestUI();
