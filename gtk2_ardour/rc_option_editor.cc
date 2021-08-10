@@ -3732,13 +3732,47 @@ These settings will only take effect after %1 is restarted.\n\
 
 #if (defined AUDIOUNIT_SUPPORT && defined MACVST_SUPPORT)
 	bo = new BoolOption (
-			"",
-			_("Enable Mac VST support (requires restart or re-scan)"),
+			"use-macvst",
+			_("Enable Mac VST2 support (requires restart or re-scan)"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_macvst),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_macvst)
 			);
 	add_option (_("Plugins/VST"), bo);
 #endif
+
+#ifndef MIXBUS
+
+#ifdef WINDOWS_VST_SUPPORT
+	bo = new BoolOption (
+			"use-windows-vst",
+			_("Enable Windows VST2 support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_windows_vst),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_windows_vst)
+			);
+	add_option (_("Plugins/VST"), bo);
+#endif
+
+#ifdef LXVST_SUPPORT
+	bo = new BoolOption (
+			"use-lxvst",
+			_("Enable Linux VST2 support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_lxvst),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_lxvst)
+			);
+	add_option (_("Plugins/VST"), bo);
+#endif
+
+#ifdef VST3_SUPPORT
+	bo = new BoolOption (
+			"use-vst3",
+			_("Enable VST3 support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_vst3),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_vst3)
+			);
+	add_option (_("Plugins/VST"), bo);
+#endif
+
+#endif // !Mixbus
 
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST 2.x")));
