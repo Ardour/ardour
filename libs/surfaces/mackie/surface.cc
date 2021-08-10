@@ -1330,11 +1330,6 @@ Surface::update_view_mode_display (bool with_helpful_text)
 		id = Button::MidiTracks;
 		text = _("MIDI Tracks");
 		break;
-	case MackieControlProtocol::Plugins:
-		show_two_char_display ("PL");
-		id = Button::Plugin;
-		text = _("Plugins");
-		break;
 	case MackieControlProtocol::Busses:
 		show_two_char_display ("BS");
 		id = Button::Busses;
@@ -1349,7 +1344,7 @@ Surface::update_view_mode_display (bool with_helpful_text)
 		id = Button::Aux;
 		text = _("Auxes");
 		break;
-	case MackieControlProtocol::Hidden:
+	case MackieControlProtocol::Outputs:
 		show_two_char_display ("HI");
 		id = Button::Outputs;
 		text = _("Hidden Tracks");
@@ -1372,6 +1367,9 @@ Surface::update_view_mode_display (bool with_helpful_text)
 	view_mode_buttons.push_back (Button::Aux);
 	view_mode_buttons.push_back (Button::Outputs);
 	view_mode_buttons.push_back (Button::User);
+	view_mode_buttons.push_back (Button::Inputs);
+	view_mode_buttons.push_back (Button::AudioInstruments);
+	view_mode_buttons.push_back (Button::Outputs);
 
 	if (id >= 0) {
 

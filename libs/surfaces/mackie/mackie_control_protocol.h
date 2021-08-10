@@ -92,13 +92,14 @@ class MackieControlProtocol
 
 	enum ViewMode {
 		Mixer,
-		AudioTracks,
 		MidiTracks,
-		Busses,
+		Inputs,
+		AudioTracks,
+		AudioInstr,
 		Auxes,
+		Busses,
+		Outputs,
 		Selected,
-		Hidden,
-		Plugins,
 	};
 
 	enum FlipMode {
