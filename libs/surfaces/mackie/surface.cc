@@ -1186,9 +1186,9 @@ translate_seven_segment (char achar)
 {
 	achar = toupper (achar);
 
-	if  (achar >= 0x40 && achar <= 0x60) {
+	if  (achar >= 0x40 && achar <= 0x5f) {
 		return achar - 0x40;
-	} else if  (achar >= 0x21 && achar <= 0x3f) {
+	} else if  (achar >= 0x20 && achar <= 0x3f) {
 		return achar;
 	} else {
 		return 0x00;
