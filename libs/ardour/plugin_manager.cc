@@ -437,7 +437,7 @@ PluginManager::detect_type_ambiguities (PluginInfoList& pil)
 void
 PluginManager::conceal_duplicates (ARDOUR::PluginInfoList* old, ARDOUR::PluginInfoList* nu)
 {
-	if (!old) {
+	if (!old || !nu) {
 		return;
 	}
 	for (PluginInfoList::const_iterator i = old->begin(); i != old->end(); ++i) {
@@ -528,12 +528,14 @@ PluginManager::refresh (bool cache_only)
 #endif
 
 #ifdef VST3_SUPPORT
-	if (cache_only) {
-		BootMessage (_("Scanning VST3 Plugins"));
-	} else {
-		BootMessage (_("Discovering VST3 Plugins"));
+	if(Config->get_use_vst3 ()) {
+		if (cache_only) {
+			BootMessage (_("Scanning VST3 Plugins"));
+		} else {
+			BootMessage (_("Discovering VST3 Plugins"));
+		}
+		vst3_refresh (cache_only);
 	}
-	vst3_refresh (cache_only);
 
 #ifndef NDEBUG
 	if (!cache_only) {
@@ -555,12 +557,15 @@ PluginManager::refresh (bool cache_only)
 #endif
 
 #ifdef AUDIOUNIT_SUPPORT
-	if (cache_only) {
-		BootMessage (_("Scanning AU Plugins"));
-	} else {
-		BootMessage (_("Discovering AU Plugins"));
+
+	if (Config->get_use_audio_units ()) {
+		if (cache_only) {
+			BootMessage (_("Scanning AU Plugins"));
+		} else {
+			BootMessage (_("Discovering AU Plugins"));
+		}
+		au_refresh (cache_only);
 	}
-	au_refresh (cache_only);
 
 #ifndef NDEBUG
 	if (!cache_only) {
@@ -1370,13 +1375,11 @@ PluginManager::auv2_discover (AUv2DescStr const& d, bool cache_only)
 void
 PluginManager::au_refresh (bool cache_only)
 {
+	assert (Config->get_use_audio_units ());
+
 	DEBUG_TRACE (DEBUG::PluginManager, "AU: refresh\n");
 	delete _au_plugin_info;
 	_au_plugin_info = new ARDOUR::PluginInfoList();
-
-	if (!Config->get_use_audio_units ()) {
-		return;
-	}
 
 	ARDOUR::PluginScanMessage(_("AUv2"), _("Indexing"), false);
 	/* disable AU in case indexing crashes */
@@ -2946,40 +2949,37 @@ PluginManager::get_all_tags (TagFilter tag_filter) const
 	return ret;
 }
 
-
 const ARDOUR::PluginInfoList&
 PluginManager::windows_vst_plugin_info ()
 {
 #ifdef WINDOWS_VST_SUPPORT
-	if (!_windows_vst_plugin_info) {
-		windows_vst_refresh ();
+	if (_windows_vst_plugin_info) {
+		return *_windows_vst_plugin_info;
 	}
-	return *_windows_vst_plugin_info;
-#else
-	return _empty_plugin_info;
 #endif
+	return _empty_plugin_info;
 }
 
 const ARDOUR::PluginInfoList&
 PluginManager::mac_vst_plugin_info ()
 {
 #ifdef MACVST_SUPPORT
-	assert(_mac_vst_plugin_info);
-	return *_mac_vst_plugin_info;
-#else
-	return _empty_plugin_info;
+	if (_mac_vst_plugin_info) {
+		return *_mac_vst_plugin_info;
+	}
 #endif
+	return _empty_plugin_info;
 }
 
 const ARDOUR::PluginInfoList&
 PluginManager::lxvst_plugin_info ()
 {
 #ifdef LXVST_SUPPORT
-	assert(_lxvst_plugin_info);
-	return *_lxvst_plugin_info;
-#else
-	return _empty_plugin_info;
+	if(_lxvst_plugin_info) {
+		return *_lxvst_plugin_info;
+	}
 #endif
+	return _empty_plugin_info;
 }
 
 const ARDOUR::PluginInfoList&
