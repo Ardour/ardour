@@ -3682,6 +3682,16 @@ These settings will only take effect after %1 is restarted.\n\
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined VST3_SUPPORT)
 
 	bo = new BoolOption (
+			"discover-plugins-on-start",
+			_("Scan for [new] Plugins on Application Start"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_plugins_on_start),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_plugins_on_start)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> new plugins are searched, tested and added to the cache index on application start. When disabled new plugins will only be available after triggering a 'Scan' manually"));
+
+	bo = new BoolOption (
 			"show-plugin-scan-window",
 			_("Always Display Plugin Scan Progress"),
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_plugin_scan_window),
@@ -3690,6 +3700,16 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Plugins"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 			_("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
+
+	bo = new BoolOption (
+			"verbose-plugin-scan",
+			_("Verbose Plugin Scan"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_verbose_plugin_scan),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_verbose_plugin_scan)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> additional information for every plugin is shown to the Plugin Manager Log."));
 #endif
 
 	bo = new BoolOption (
@@ -3720,29 +3740,6 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Plugins/VST"), bo);
 #endif
 
-	bo = new BoolOption (
-			"discover-vst-on-start",
-			_("Scan for [new] VST Plugins on Application Start"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_vst_on_start),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_vst_on_start)
-			);
-	add_option (_("Plugins/VST"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    _("<b>When enabled</b> new VST plugins are searched, tested and added to the cache index on application start. When disabled new plugins will only be available after triggering a 'Scan' manually"));
-
-#ifdef WINDOWS_VST_SUPPORT
-	// currently verbose logging is only implemented for Windows VST.
-	bo = new BoolOption (
-			"verbose-plugin-scan",
-			_("Verbose Plugin Scan"),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_verbose_plugin_scan),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_verbose_plugin_scan)
-			);
-	add_option (_("Plugins/VST"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    _("<b>When enabled</b> additional information for every plugin is added to the Log Window."));
-#endif
-
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST 2.x")));
 
@@ -3755,7 +3752,6 @@ These settings will only take effect after %1 is restarted.\n\
 			new RcActionButton (_("Clear"),
 				sigc::mem_fun (*this, &RCOptionEditor::clear_vst2_blacklist),
 				_("VST 2 Ignorelist:")));
-#endif
 #endif
 
 #ifdef LXVST_SUPPORT
@@ -3842,7 +3838,8 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_conceal_vst2_if_vst3_exists)
 		     ));
 #endif
-#endif
+#endif // VST3
+#endif // Any VST (2 or 3)
 
 #ifdef AUDIOUNIT_SUPPORT
 

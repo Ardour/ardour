@@ -385,11 +385,10 @@ StartupFSM::show_plugin_scan_dialog ()
 {
 	set_state (WaitingForPlugins);
 
-	/* if the user does not ask to discover VSTs at startup, or if this is Mixbus, then the plugin scan
-	   that we run here, during startup, should only use the existing plugin cache (if any).
-	*/
-
-	const bool cache_only = (!Config->get_discover_vst_on_start() || Profile->get_mixbus());
+	/* if the user does not ask to discover AU/VSTs at startup, or if this is Mixbus, then the plugin scan
+	 * that we run here, during startup, should only use the existing plugin cache (if any).
+	 */
+	const bool cache_only = (!Config->get_discover_plugins_on_start () || Profile->get_mixbus ());
 	const bool verbose = new_user;
 
 	plugin_scan_dialog = new PluginScanDialog (cache_only, verbose);
@@ -401,7 +400,7 @@ StartupFSM::show_plugin_scan_dialog ()
 	 * See also comments in PluginScanDialog::start() to understand the absurd complexities behind this call.
 	 */
 
-	DEBUG_TRACE (DEBUG::GuiStartup, string_compose ("starting plugin dialog, cache only ? %1\n", !Config->get_discover_vst_on_start()));
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose ("starting plugin dialog, cache only ? %1\n", cache_only));
 	plugin_scan_dialog->start();
 	DEBUG_TRACE (DEBUG::GuiStartup, "plugin dialog done\n");
 }
