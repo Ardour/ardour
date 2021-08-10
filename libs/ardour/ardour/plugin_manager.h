@@ -319,10 +319,10 @@ private:
 	void ladspa_refresh ();
 	void lua_refresh ();
 	void lua_refresh_cb ();
-	void windows_vst_refresh (bool cache_only = false);
-	void mac_vst_refresh (bool cache_only = false);
-	void lxvst_refresh (bool cache_only = false);
-	void vst3_refresh (bool cache_only = false);
+	void windows_vst_refresh (bool cache_only);
+	void mac_vst_refresh (bool cache_only);
+	void lxvst_refresh (bool cache_only);
+	void vst3_refresh (bool cache_only);
 
 	void add_lrdf_data (const std::string &path);
 	void add_ladspa_presets ();
