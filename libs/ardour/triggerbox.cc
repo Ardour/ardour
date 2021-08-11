@@ -189,8 +189,17 @@ Trigger::process_state_requests ()
 
 		_unbang.fetch_sub (1);
 
-		if (active() && launch_style() == Trigger::Gate) {
-			_state = WaitingToStop;
+		if (launch_style() == Trigger::Gate) {
+			switch (_state) {
+			case Running:
+				_state = WaitingToStop;
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, now in WaitingToStop\n", index()));
+				break;
+			default:
+				/* didn't even get started */
+				_state = Stopped;
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, never started, now stopped\n", index()));
+			}
 		}
 	}
 }
@@ -238,7 +247,7 @@ Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal:
 			return RunAll;
 		}
 	} else {
-		if (_state == WaitingForRetrigger) {
+		if (_state == WaitingForRetrigger || _state == WaitingToStop) {
 			/* retrigger time has not been reached, just continue
 			   to play normally until then.
 			*/
@@ -479,6 +488,7 @@ int
 AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bool first)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
+	const bool long_enough_to_fade = (nframes >= 64);
 
 	assert (ar);
 	assert (active());
@@ -487,11 +497,14 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 		pframes_t this_read = (pframes_t) std::min ((samplecnt_t) nframes, (data_length - read_index));
 
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 grab %2 @ %3 dest offset %4\n", index(), this_read, read_index, dest_offset));
+
 		for (size_t chn = 0; chn < ar->n_channels(); ++chn) {
 
 			size_t channel = chn %  data.size();
 			Sample* src = data[channel] + read_index;
 			AudioBuffer& buf (bufs.get_audio (chn));
+
 
 			if (first) {
 				buf.read_from (src, this_read, dest_offset);
@@ -532,6 +545,11 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 		}
 
 		nframes -= this_read;
+	}
+
+	if (_state == Stopping && long_enough_to_fade) {
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
+		_state = Stopped;
 	}
 
 	return 0;
