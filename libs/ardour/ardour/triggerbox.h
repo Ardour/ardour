@@ -58,8 +58,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		Stopped = 1,
 		WaitingToStart = 2,
 		Running = 3,
-		WaitingToStop = 4,
-		Stopping = 5
+		WaitingForRetrigger = 4,
+		WaitingToStop = 5,
+		Stopping = 6
 	};
 
 	Trigger (size_t index, TriggerBox&);
@@ -131,7 +132,17 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		ChangeTriggers = 0x8
 	};
 
-	bool maybe_compute_start_or_stop (Temporal::Beats const & start, Temporal::Beats const & end);
+	enum RunType {
+		RunEnd,
+		RunStart,
+		RunAll,
+		RunNone,
+	};
+
+	RunType maybe_compute_next_transition (Temporal::Beats const & start, Temporal::Beats const & end);
+
+	void set_next_trigger (int n);
+	int next_trigger() const { return _next_trigger; }
 
   protected:
 	TriggerBox& _box;
@@ -140,6 +151,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	std::atomic<int> _bang;
 	std::atomic<int> _unbang;
 	size_t _index;
+	int    _next_trigger;
 	LaunchStyle  _launch_style;
 	FollowAction _follow_action;
 	boost::shared_ptr<Region> _region;
@@ -155,7 +167,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	AudioTrigger (size_t index, TriggerBox&);
 	~AudioTrigger ();
 
-	RunResult run (AudioBuffer&, uint32_t channel, pframes_t& nframes, pframes_t offset, bool first);
+	int run (BufferSet&, pframes_t nframes, pframes_t offset, bool first);
 
 	void set_length (timecnt_t const &);
 	timecnt_t current_length() const;
@@ -168,7 +180,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
   private:
 	std::vector<Sample*> data;
-	std::vector<samplecnt_t> read_index;
+	samplecnt_t read_index;
 	samplecnt_t data_length;
 
 	void drop_data ();
@@ -212,13 +224,11 @@ class LIBARDOUR_API TriggerBox : public Processor
 	Triggers all_triggers;
 
 	/* These three are accessed (read/write) only from process() context */
-	Triggers pending_on_triggers;
-	Triggers pending_off_triggers;
-	Triggers active_triggers;
 
 	void drop_triggers ();
 	void process_ui_trigger_requests ();
 	void process_midi_trigger_requests (BufferSet&);
+	void set_next_trigger (size_t n);
 
 	void note_on (int note_number, int velocity);
 	void note_off (int note_number, int velocity);
