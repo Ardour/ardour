@@ -288,39 +288,39 @@ TriggerBoxUI::context_menu (size_t n)
 	MenuList& fitems = follow_menu->items();
 
 	fitems.push_back (CheckMenuElem (_("Stop"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::Stop)));
-	if (_triggerbox.trigger (n)->follow_action() == Trigger::Stop) {
+	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::Stop) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 	fitems.push_back (CheckMenuElem (_("Again"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::Again)));
-	if (_triggerbox.trigger (n)->follow_action() == Trigger::Again) {
+	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::Again) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 	fitems.push_back (CheckMenuElem (_("Queued"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::QueuedTrigger)));
-	if (_triggerbox.trigger (n)->follow_action() == Trigger::QueuedTrigger) {
+	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::QueuedTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 	fitems.push_back (CheckMenuElem (_("Next"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::NextTrigger)));
-	if (_triggerbox.trigger (n)->follow_action() == Trigger::NextTrigger) {
+	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::NextTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 	fitems.push_back (CheckMenuElem (_("Previous"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::PrevTrigger)));
-	if (_triggerbox.trigger (n)->follow_action() == Trigger::PrevTrigger) {
+	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::PrevTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 	fitems.push_back (CheckMenuElem (_("First"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::FirstTrigger)));
-	if (_triggerbox.trigger (n)->follow_action() == Trigger::FirstTrigger) {
+	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::FirstTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 	fitems.push_back (CheckMenuElem (_("Last"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::LastTrigger)));
-	if (_triggerbox.trigger (n)->follow_action() == Trigger::LastTrigger) {
+	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::LastTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 	fitems.push_back (CheckMenuElem (_("Any"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::AnyTrigger)));
-	if (_triggerbox.trigger (n)->follow_action() == Trigger::AnyTrigger) {
+	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::AnyTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 	fitems.push_back (CheckMenuElem (_("Other"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::OtherTrigger)));
-	if (_triggerbox.trigger (n)->follow_action() == Trigger::OtherTrigger) {
+	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::OtherTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 
@@ -401,7 +401,7 @@ TriggerBoxUI::context_menu (size_t n)
 void
 TriggerBoxUI::set_follow_action (size_t n, Trigger::FollowAction fa)
 {
-	_triggerbox.trigger (n)->set_follow_action (fa);
+	_triggerbox.trigger (n)->set_follow_action (fa, 0);
 }
 
 void
