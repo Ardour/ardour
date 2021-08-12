@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-11 11:43+0200\n"
-"PO-Revision-Date: 2021-08-12 11:22+0200\n"
+"PO-Revision-Date: 2021-08-12 15:35+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -4545,35 +4545,35 @@ msgstr "Wiedergabelisten zurücksetzen"
 
 #: editor.cc:4418
 msgid "Copy Playlist for ALL Tracks"
-msgstr "Playliste für ALLE Spuren kopieren"
+msgstr "Wiedegabeliste für ALLE Spuren kopieren"
 
 #: editor.cc:4418
 msgid "New Playlist for ALL Tracks"
-msgstr "Neue Playliste für ALLE Spuren"
+msgstr "Neue Wiedegabeliste für ALLE Spuren"
 
 #: editor.cc:4429
 msgid "Copy Playlist for this track/group"
-msgstr "Playliste für diese Spur/Gruppe kopieren"
+msgstr "Wiedegabeliste für diese Spur/Gruppe kopieren"
 
 #: editor.cc:4429
 msgid "New Playlist for this track/group"
-msgstr "Neue Playliste für diese Spur/Gruppe"
+msgstr "Neue Wiedegabeliste für diese Spur/Gruppe"
 
 #: editor.cc:4440
 msgid "Copy Playlist for Selected Tracks"
-msgstr "Playliste für selektierte Spuren kopieren"
+msgstr "Wiedegabeliste für selektierte Spuren kopieren"
 
 #: editor.cc:4440
 msgid "New Playlist for Selected Tracks"
-msgstr "Neue Playliste für selektierte Spuren"
+msgstr "Neue Wiedegabeliste für selektierte Spuren"
 
 #: editor.cc:4451
 msgid "Copy Playlist for Armed Tracks"
-msgstr "Playliste für aufnahmebereite Spuren kopieren"
+msgstr "Wiedegabeliste für aufnahmebereite Spuren kopieren"
 
 #: editor.cc:4451
 msgid "New Playlist for Armed Tracks"
-msgstr "Neue Playliste für aufnahmebereite Spuren"
+msgstr "Neue Wiedegabeliste für aufnahmebereite Spuren"
 
 #: editor.cc:5221
 msgid "Please wait while %1 loads visual data."
@@ -5211,27 +5211,27 @@ msgstr "Lücken entfernen"
 
 #: editor_actions.cc:471
 msgid "New Playlist For Rec-Armed Tracks"
-msgstr "Neue Playliste für aufnahmebereite Spuren"
+msgstr "Neue Wiedegabeliste für aufnahmebereite Spuren"
 
 #: editor_actions.cc:472
 msgid "New Playlist For All Tracks"
-msgstr "Neue Playliste für alle Spuren"
+msgstr "Neue Wiedegabeliste für alle Spuren"
 
 #: editor_actions.cc:473
 msgid "New Playlist For Selected Tracks"
-msgstr "Neue Playliste für selektierte Spuren"
+msgstr "Neue Wiedegabeliste für selektierte Spuren"
 
 #: editor_actions.cc:476
 msgid "Copy Playlist For Rec-Armed Tracks"
-msgstr "Playliste für aufnahmebereite Spuren kopieren"
+msgstr "Wiedegabeliste für aufnahmebereite Spuren kopieren"
 
 #: editor_actions.cc:477
 msgid "Copy Playlist For All Tracks"
-msgstr "Playliste für alle Spuren kopieren"
+msgstr "Wiedegabeliste für alle Spuren kopieren"
 
 #: editor_actions.cc:478
 msgid "Copy Playlist For Selected Tracks"
-msgstr "Playliste für selektierte Spuren kopieren"
+msgstr "Wiedegabeliste für selektierte Spuren kopieren"
 
 #: editor_actions.cc:481
 msgid "Toggle Active"
@@ -6048,7 +6048,7 @@ msgstr "Inhalte rutschen"
 
 #: editor_drag.cc:768
 msgid "Region brush drag"
-msgstr ""
+msgstr "Regionen \"Anstreich\"-Ziehen"
 
 #: editor_drag.cc:1530
 msgid "fixed time region drag"
@@ -11816,19 +11816,19 @@ msgstr "ALLE Spuren"
 
 #: playlist_selector.cc:215
 msgid "Select a Playlist for: %1"
-msgstr "Wähle eine Playliste für: %1"
+msgstr "Wähle eine Wiedegabeliste für: %1"
 
 #: playlist_selector.cc:218
 msgid "Copy a Playlist for: %1"
-msgstr "Kopiere eine Playliste für: %1"
+msgstr "Kopiere eine Wiedegabeliste für: %1"
 
 #: playlist_selector.cc:221
 msgid "Share a Playlist for: %1"
-msgstr "Teile eine Playliste für: %1"
+msgstr "Teile eine Wiedegabeliste für: %1"
 
 #: playlist_selector.cc:224
 msgid "Steal a Playlist for: %1"
-msgstr "Stehle eine Playliste für: %1"
+msgstr "Stehle eine Wiedegabeliste für: %1"
 
 #: playlist_selector.cc:250
 msgid "unassigned"
@@ -14954,19 +14954,19 @@ msgstr "Plugins/VST"
 
 #: rc_option_editor.cc:3736
 msgid "Enable Mac VST2 support (requires restart or re-scan)"
-msgstr ""
+msgstr "Aktiviere Mac VST2 Unterstützung (benötigt Neustart oder Rescan)"
 
 #: rc_option_editor.cc:3748
 msgid "Enable Windows VST2 support (requires restart or re-scan)"
-msgstr ""
+msgstr "Aktiviere Windows VST2 Unterstützung (benötigt Neustart oder Rescan)"
 
 #: rc_option_editor.cc:3758
 msgid "Enable Linux VST2 support (requires restart or re-scan)"
-msgstr ""
+msgstr "Aktiviere Linux VST2 Unterstützung (benötigt Neustart oder Rescan)"
 
 #: rc_option_editor.cc:3768
 msgid "Enable VST3 support (requires restart or re-scan)"
-msgstr ""
+msgstr "Aktiviere VST3 Unterstützung (benötigt Neustart oder Rescan)"
 
 #: rc_option_editor.cc:3778
 msgid "VST 2.x"
@@ -15044,7 +15044,7 @@ msgstr "Audio Unit"
 
 #: rc_option_editor.cc:3889
 msgid "Enable Autio Unit support (requires restart or re-scan)"
-msgstr ""
+msgstr "Aktiviere AudioUnits Unterstützung (benötigt Neustart oder Rescan)"
 
 #: rc_option_editor.cc:3898
 msgid "AU Cache:"
@@ -15497,7 +15497,7 @@ msgstr "Diese Einstellung wird erst nach einem Neustart von %1 wirksam."
 
 #: rc_option_editor.cc:4435
 msgid "Power Management, CPU DMA latency:"
-msgstr ""
+msgstr "Energieverwaltung, CPU DMA Latenz:"
 
 #: rc_option_editor.cc:4466
 msgid "Lowest (prevent CPU sleep states)"
@@ -15639,11 +15639,11 @@ msgstr "Spitzenwert zurücksetzen"
 
 #: recorder_ui.cc:86
 msgid "New Playlist for All Tracks"
-msgstr ""
+msgstr "Neue Wiedegabeliste für alle Spuren"
 
 #: recorder_ui.cc:87
 msgid "New Playlist for Rec-Armed"
-msgstr ""
+msgstr "Neue Wiedegabeliste für aufnahmebereite"
 
 #: recorder_ui.cc:88
 msgid "Auto-Input"
@@ -15687,11 +15687,11 @@ msgstr ""
 
 #: recorder_ui.cc:253
 msgid "Create a new playlist for all tracks and switch to it."
-msgstr ""
+msgstr "Erzeuge eine neue Wiedegabeliste für alle Spuren und wechsle zu ihr."
 
 #: recorder_ui.cc:254
 msgid "Create a new playlist for all rec-armed tracks"
-msgstr ""
+msgstr "Erzeuge eine neue Wiedegabeliste für aufnahmebereite Spuren"
 
 #: recorder_ui.cc:255
 msgid ""
@@ -16147,7 +16147,7 @@ msgstr "Programmierfehler: "
 
 #: route_time_axis.cc:1966 route_time_axis.cc:1993
 msgid "Parameters %1 - %2"
-msgstr ""
+msgstr "Parameter %1 - %2"
 
 #: route_time_axis.cc:2313
 msgid "Underlays"
@@ -16323,23 +16323,23 @@ msgstr ""
 
 #: route_ui.cc:2518
 msgid "Select ..."
-msgstr ""
+msgstr "Wähle..."
 
 #: route_ui.cc:2525
 msgid "New Playlist..."
-msgstr ""
+msgstr "Neue Wiedegabeliste"
 
 #: route_ui.cc:2526
 msgid "Copy Playlist..."
-msgstr ""
+msgstr "Kopiere Wiedergabeliste..."
 
 #: route_ui.cc:2528
 msgid "New Playlist (for group)"
-msgstr ""
+msgstr "Neue Wiedergabeliste (für Gruppe)"
 
 #: route_ui.cc:2529
 msgid "Copy Playlist (for group)"
-msgstr ""
+msgstr "Kopiere Wiedergabeliste( für Gruppe)"
 
 #: route_ui.cc:2534
 msgid "Clear Current"
@@ -16347,23 +16347,23 @@ msgstr "Aktuelle löschen"
 
 #: route_ui.cc:2536
 msgid "Clear Current (for group)"
-msgstr ""
+msgstr "Leere Wiedergabeliste (für Gruppe)"
 
 #: route_ui.cc:2542
 msgid "Copy from ..."
-msgstr ""
+msgstr "Kopiere von ..."
 
 #: route_ui.cc:2543
 msgid "Share with ..."
-msgstr ""
+msgstr "Teile mit ..."
 
 #: route_ui.cc:2544
 msgid "Steal from ..."
-msgstr ""
+msgstr "Stehle von ..."
 
 #: route_ui.cc:2545
 msgid "Advanced"
-msgstr ""
+msgstr "Erweitert"
 
 #: route_ui.cc:2682
 msgid "Rename Playlist"
