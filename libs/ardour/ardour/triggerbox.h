@@ -182,6 +182,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	std::vector<Sample*> data;
 	samplecnt_t read_index;
 	samplecnt_t data_length;
+	samplepos_t start_offset;
+	samplecnt_t usable_length;
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);

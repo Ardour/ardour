@@ -273,6 +273,8 @@ AudioTrigger::AudioTrigger (size_t n, TriggerBox& b)
 	, data (0)
 	, read_index (0)
 	, data_length (0)
+	, start_offset (0)
+	, usable_length (0)
 {
 }
 
@@ -407,6 +409,9 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 	drop_data ();
 	data = stretched;
 	data_length = processed;
+	if (!usable_length || usable_length > data_length) {
+		usable_length = data_length;
+	}
 }
 
 timecnt_t
@@ -463,6 +468,11 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 
 	data_length = ar->length_samples();
 
+	/* if usable length was already set, only adjust it if it is too large */
+	if (!usable_length || usable_length > data_length) {
+		usable_length = data_length;
+	}
+
 	drop_data ();
 
 	try {
@@ -495,7 +505,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 	while (nframes) {
 
-		pframes_t this_read = (pframes_t) std::min ((samplecnt_t) nframes, (data_length - read_index));
+		pframes_t this_read = (pframes_t) std::min ((samplecnt_t) nframes, (usable_length - read_index));
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 grab %2 @ %3 dest offset %4\n", index(), this_read, read_index, dest_offset));
 
@@ -515,7 +525,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 		read_index += this_read;
 
-		if (read_index >= data_length) {
+		if (read_index >= usable_length) {
 
 			/* We reached the end */
 
