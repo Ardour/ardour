@@ -103,8 +103,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		OtherTrigger,
 	};
 
-	FollowAction follow_action() const { return _follow_action; }
-	void set_follow_action (FollowAction);
+	FollowAction follow_action (size_t n) const { assert (n < 2); return _follow_action[n]; }
+	void set_follow_action (FollowAction, size_t n);
 
 	virtual int set_region (boost::shared_ptr<Region>) = 0;
 	boost::shared_ptr<Region> region() const { return _region; }
@@ -154,7 +154,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	size_t _index;
 	int    _next_trigger;
 	LaunchStyle  _launch_style;
-	FollowAction _follow_action;
+	FollowAction _follow_action[2];
 	boost::shared_ptr<Region> _region;
 	Temporal::BBT_Offset _quantization;
 
