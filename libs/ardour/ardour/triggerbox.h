@@ -145,6 +145,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_next_trigger (int n);
 	int next_trigger() const { return _next_trigger; }
 
+	void set_follow_action_probability (int zero_to_a_hundred);
+	int  follow_action_probability() const { return _follow_action_probability; }
+
   protected:
 	TriggerBox& _box;
 	State _state;
@@ -155,6 +158,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	int    _next_trigger;
 	LaunchStyle  _launch_style;
 	FollowAction _follow_action[2];
+	int _follow_action_probability;
 	boost::shared_ptr<Region> _region;
 	Temporal::BBT_Offset _quantization;
 

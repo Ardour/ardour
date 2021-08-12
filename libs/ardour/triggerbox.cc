@@ -559,7 +559,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 			/* We reached the end */
 
-			if (_follow_action[0] == Again) {
+			if (_next_trigger > 0 && (size_t) _next_trigger == _index) { /* self repeat */
 				nframes -= this_read;
 				dest_offset += this_read;
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was reached end, but set to loop, so retrigger\n", index()));
@@ -917,7 +917,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		if (trigger.state() == Trigger::Stopped) {
 
-			if (trigger.follow_action(0) != Trigger::Stop) {
+			if (trigger.next_trigger() != -1) {
 
 				int nxt = trigger.next_trigger();
 
@@ -950,9 +950,21 @@ TriggerBox::set_next_trigger (size_t current)
 		}
 	}
 
-	switch (all_triggers[current]->follow_action(0)) {
+	int which_follow_action;
+	int r = random() % 100;
+
+	if (r <= all_triggers[current]->follow_action_probability()) {
+		which_follow_action = 0;
+	} else {
+		which_follow_action = 1;
+	}
+
+	switch (all_triggers[current]->follow_action (which_follow_action)) {
+
 	case Trigger::Stop:
+		all_triggers[current]->set_next_trigger (-1);
 		return;
+
 	case Trigger::QueuedTrigger:
 		/* XXX implement me */
 		return;
@@ -963,7 +975,7 @@ TriggerBox::set_next_trigger (size_t current)
 		}
 	}
 
-	switch (all_triggers[current]->follow_action(0)) {
+	switch (all_triggers[current]->follow_action (which_follow_action)) {
 
 	case Trigger::Again:
 		all_triggers[current]->set_next_trigger (current);
