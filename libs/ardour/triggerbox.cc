@@ -69,6 +69,8 @@ void
 Trigger::set_launch_style (LaunchStyle l)
 {
 	_launch_style = l;
+
+	set_usable_length ();
 }
 
 XMLNode&
@@ -87,6 +89,7 @@ void
 Trigger::set_quantization (Temporal::BBT_Offset const & q)
 {
 	_quantization = q;
+	set_usable_length ();
 }
 
 void
@@ -412,6 +415,32 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 	if (!usable_length || usable_length > data_length) {
 		usable_length = data_length;
 	}
+}
+
+void
+AudioTrigger::set_usable_length ()
+{
+	if (!_region) {
+		return;
+	}
+
+	switch (_launch_style) {
+	case Repeat:
+		break;
+	default:
+		usable_length = data_length;
+		return;
+	}
+
+	if (_quantization == Temporal::BBT_Offset ()) {
+		usable_length = data_length;
+		return;
+	}
+
+	/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
+
+	timecnt_t len (Temporal::Beats (_quantization.beats, _quantization.ticks), timepos_t (Temporal::Beats()));
+	usable_length = len.samples();
 }
 
 timecnt_t

@@ -160,6 +160,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_region_internal (boost::shared_ptr<Region>);
 	void request_state (State s);
 	virtual void retrigger() = 0;
+	virtual void set_usable_length () = 0;
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
@@ -177,6 +178,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
   protected:
 	void retrigger ();
+	void set_usable_length ();
 
   private:
 	std::vector<Sample*> data;
