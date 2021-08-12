@@ -86,6 +86,16 @@ Trigger::set_state (const XMLNode&, int version)
 {
 	return 0;
 }
+
+void
+Trigger::set_follow_action_probability (int n)
+{
+	n = std::min (100, n);
+	n = std::max (0, n);
+
+	_follow_action_probability = n;
+}
+
 void
 Trigger::set_quantization (Temporal::BBT_Offset const & q)
 {
