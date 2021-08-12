@@ -203,7 +203,7 @@ Trigger::process_state_requests ()
 
 		_unbang.fetch_sub (1);
 
-		if (launch_style() == Trigger::Gate) {
+		if (_launch_style == Gate || _launch_style == Repeat) {
 			switch (_state) {
 			case Running:
 				_state = WaitingToStop;
@@ -569,10 +569,10 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 			/* We reached the end */
 
-			if (_next_trigger > 0 && (size_t) _next_trigger == _index) { /* self repeat */
+			if ((_launch_style == Repeat) || ((_next_trigger > 0) && (size_t) _next_trigger == _index)) { /* self repeat */
 				nframes -= this_read;
 				dest_offset += this_read;
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was reached end, but set to loop, so retrigger\n", index()));
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, but set to loop, so retrigger\n", index()));
 				retrigger ();
 				/* and go around again */
 				continue;
@@ -589,7 +589,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 					}
 				}
 				_state = Stopped;
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was reached end, now stopped\n", index()));
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped\n", index()));
 				break;
 			}
 		}
