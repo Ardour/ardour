@@ -291,6 +291,10 @@ TriggerBoxUI::context_menu (size_t n)
 	if (_triggerbox.trigger (n)->follow_action() == Trigger::Stop) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
+	fitems.push_back (CheckMenuElem (_("Again"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::Again)));
+	if (_triggerbox.trigger (n)->follow_action() == Trigger::Again) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
 	fitems.push_back (CheckMenuElem (_("Queued"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::QueuedTrigger)));
 	if (_triggerbox.trigger (n)->follow_action() == Trigger::QueuedTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
@@ -323,8 +327,8 @@ TriggerBoxUI::context_menu (size_t n)
 	Menu* launch_menu = manage (new Menu);
 	MenuList& litems = launch_menu->items();
 
-	litems.push_back (CheckMenuElem (_("Loop"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::Loop)));
-	if (_triggerbox.trigger (n)->launch_style() == Trigger::Loop) {
+	litems.push_back (CheckMenuElem (_("One Shot"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::OneShot)));
+	if (_triggerbox.trigger (n)->launch_style() == Trigger::OneShot) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
 	}
 	litems.push_back (CheckMenuElem (_("Gate"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::Gate)));
