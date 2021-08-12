@@ -1737,7 +1737,8 @@ Session::set_state (const XMLNode& node, int version)
 			if (!r->whole_file ()) {
 				continue;
 			}
-			for (uint32_t n = 0; n < r->n_channels (); ++n) {
+			SourceList::size_type sz = r->sources().size();
+			for (uint32_t n = 0; n < sz; ++n) {
 				SourceMap::iterator j = src_map.find (r->source(n)->id());
 				if (j != src_map.end ()) {
 					/* found whole-file region for given source */
@@ -1762,7 +1763,7 @@ Session::set_state (const XMLNode& node, int version)
 			plist.add (Properties::whole_file, true);
 			plist.add (Properties::automatic, true);
 			plist.add (Properties::start, 0);
-			plist.add (Properties::length, afs->length (0));
+			plist.add (Properties::length, afs->length ());
 			plist.add (Properties::layer, 0);
 
 			SourceList srcs;
