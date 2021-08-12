@@ -801,7 +801,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	Temporal::Beats end_beats (end.beats());
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	size_t max_chans = 0;
-	Trigger::RunResult rr;
 	bool first = false;
 
 	/* Now actually run all currently active triggers */
@@ -892,7 +891,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				int nxt = trigger.next_trigger();
 
-				if (nxt >= 0 && nxt < all_triggers.size() && !all_triggers[nxt]->active()) {
+				if (nxt >= 0 && (size_t) nxt < all_triggers.size() && !all_triggers[nxt]->active()) {
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 switching to %2\n", trigger.index(), nxt));
 					/* start it up */
 					all_triggers[nxt]->bang ();
@@ -983,9 +982,9 @@ TriggerBox::set_next_trigger (size_t current)
 		}
 		break;
 	case Trigger::LastTrigger:
-		for (n = all_triggers.size() - 1; n >= 0; --n) {
-			if (all_triggers[n]->region() && !all_triggers[n]->active ()) {
-				all_triggers[current]->set_next_trigger (n);
+		for (int i = all_triggers.size() - 1; i >= 0; --i) {
+			if (all_triggers[i]->region() && !all_triggers[i]->active ()) {
+				all_triggers[current]->set_next_trigger (i);
 				return;
 			}
 		}
