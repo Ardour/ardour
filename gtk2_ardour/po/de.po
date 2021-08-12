@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-11 11:43+0200\n"
-"PO-Revision-Date: 2021-08-11 12:36+0200\n"
+"PO-Revision-Date: 2021-08-12 11:22+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -1764,7 +1764,7 @@ msgid ""
 "\n"
 "To re-attach the window, use the Window > %1 > Attach menu action"
 msgstr ""
-"Ziehen Sie diesen Reiter auf die Arbeitsfläche, um 51 in seinem eigenen "
+"Ziehen Sie diesen Reiter auf die Arbeitsfläche, um %1 in seinem eigenen "
 "Fenster anzuzeigen\n"
 "\n"
 "Um das Fenster wieder anzuheften, benutzen Sie den Menübefehl Fenster > %1 > "
@@ -6180,7 +6180,7 @@ msgstr "Schlag erzeugen"
 
 #: editor_drag.cc:7258
 msgid "Edit Cue Marker Name"
-msgstr ""
+msgstr "Bearbeite Cuemarker-Name"
 
 #: editor_route_groups.cc:101
 msgid "Col"
@@ -6377,7 +6377,7 @@ msgstr "Marker entfernen"
 
 #: editor_markers.cc:794
 msgid "remove region marker"
-msgstr ""
+msgstr "entferne Regionenmarker"
 
 #: editor_markers.cc:954
 msgid "Locate to Here"
@@ -7233,51 +7233,51 @@ msgstr "Verschiebe eingebettete Dateien in den Projektordner"
 
 #: editor_ops.cc:8834
 msgid "New Cue Marker Name"
-msgstr ""
+msgstr "Neuer Cuemarker-Name"
 
 #: editor_ops.cc:8876
 msgid "add cue marker"
-msgstr ""
+msgstr "neuer Cuemarker"
 
 #: editor_ops.cc:8918
 msgid "remove cue marker"
-msgstr ""
+msgstr "entferne Cuemarker"
 
 #: editor_ops.cc:8978
 msgid "clear cue markers"
-msgstr ""
+msgstr "lösche Cuemarker"
 
 #: editor_ops.cc:9030
 msgid "region markers -> global markers"
-msgstr ""
+msgstr "Regionenmarker -> globale Marker"
 
 #: editor_ops.cc:9042
 msgid "Smallest gap size to remove (seconds):"
-msgstr ""
+msgstr "Kleinste zu entfernende Lückengröße (Sekundn):"
 
 #: editor_ops.cc:9051
 msgid "Leave a gap of(seconds):"
-msgstr ""
+msgstr "Belasse eine Lücke von (Sekunden)"
 
 #: editor_ops.cc:9059
 msgid "Shift global markers too"
-msgstr ""
+msgstr "Auch globale Marker bewegen"
 
 #: editor_ops.cc:9082
 msgid "The threshold value you entered is not a number"
-msgstr ""
+msgstr "Der angegebene Schwellwert ist keine Zahl"
 
 #: editor_ops.cc:9088 editor_ops.cc:9104
 msgid "The threshold value must be larger than or equal to zero"
-msgstr ""
+msgstr "Der Schwellwert muss größer oder gleich Null sein"
 
 #: editor_ops.cc:9098
 msgid "The leave-gap value you entered is not a number"
-msgstr ""
+msgstr "Der angegebene Wert für die zu belassende Lücke ist keine Zahl"
 
 #: editor_ops.cc:9168
 msgid "remove gaps"
-msgstr ""
+msgstr "Lücken entfernen"
 
 #: editor_regions.cc:180 editor_sources.cc:164
 msgid "Region name"
@@ -7294,7 +7294,7 @@ msgstr "# Kanäle in der Region"
 #: editor_regions.cc:182 editor_sources.cc:168 plugin_manager_ui.cc:60
 #: plugin_manager_ui.cc:118 plugin_selector.cc:99 plugin_selector.cc:163
 msgid "Tags"
-msgstr "Tags"
+msgstr "Stichworte"
 
 #: editor_regions.cc:183 editor_regions.cc:817 midi_list_editor.cc:106
 #: time_info_box.cc:86
@@ -9950,7 +9950,7 @@ msgstr ""
 
 #: main.cc:345
 msgid "%1 is already running."
-msgstr ""
+msgstr "&1 läuft bereits."
 
 #: main.cc:387
 msgid "could not initialize %1."
@@ -10323,7 +10323,7 @@ msgstr "Patch Auswahl..."
 
 #: midi_time_axis.cc:638
 msgid "Restore Patch"
-msgstr ""
+msgstr "Patch wiederherstellen"
 
 #: midi_time_axis.cc:643
 msgid "Color Mode"
@@ -10596,20 +10596,25 @@ msgid ""
 "Those plugins will be replaced with inactive stubs until the session is "
 "reloaded.\n"
 msgstr ""
+"\n"
+"Diese Plugins werden bis zum Neuladen des Projekts durch inaktive Platzhalter"
+" ersetzt.\n"
 
 #: missing_plugin_dialog.cc:53
 msgid ""
 "It is recommended that you install the missing plugins and re-load the "
 "session.\n"
 msgstr ""
+"Es wird empfohlen, die fehlenden Plugins zu installieren und das Projekt neu"
+" zu laden.\n"
 
 #: missing_plugin_dialog.cc:55
 msgid "Third party plugins have not yet been indexed."
-msgstr ""
+msgstr "Dritthersteller-Plugins sind noch nicht indiziert worden."
 
 #: missing_plugin_dialog.cc:56
 msgid "Scan %1 plugins now?"
-msgstr ""
+msgstr "Jetzt %1 Plugins scannen?"
 
 #: missing_plugin_dialog.cc:58 plugin_selector.cc:1205
 msgid "AudioUnit and VST"
@@ -11574,7 +11579,7 @@ msgstr "Beschränke RMS auf:"
 
 #: normalize_dialog.cc:68
 msgid "Constrain LUFS to:"
-msgstr ""
+msgstr "Begrenze LUFS auf:"
 
 #: normalize_dialog.cc:81
 msgid "Normalize to:"
@@ -11791,39 +11796,39 @@ msgstr "Wähle Patch für \"%1\""
 
 #: playlist_selector.cc:65
 msgid "Group ID"
-msgstr ""
+msgstr "Gruppen ID"
 
 #: playlist_selector.cc:80
 msgid "Scope: "
-msgstr ""
+msgstr "Wirkbereich:"
 
 #: playlist_selector.cc:83
 msgid "Only this track/group"
-msgstr ""
+msgstr "Nur diese Spur/Gruppe"
 
 #: playlist_selector.cc:84
 msgid "Rec-armed tracks"
-msgstr ""
+msgstr "Aufnahmebereite Spuren"
 
 #: playlist_selector.cc:85
 msgid "ALL tracks"
-msgstr ""
+msgstr "ALLE Spuren"
 
 #: playlist_selector.cc:215
 msgid "Select a Playlist for: %1"
-msgstr ""
+msgstr "Wähle eine Playliste für: %1"
 
 #: playlist_selector.cc:218
 msgid "Copy a Playlist for: %1"
-msgstr ""
+msgstr "Kopiere eine Playliste für: %1"
 
 #: playlist_selector.cc:221
 msgid "Share a Playlist for: %1"
-msgstr ""
+msgstr "Teile eine Playliste für: %1"
 
 #: playlist_selector.cc:224
 msgid "Steal a Playlist for: %1"
-msgstr ""
+msgstr "Stehle eine Playliste für: %1"
 
 #: playlist_selector.cc:250
 msgid "unassigned"
@@ -11863,27 +11868,27 @@ msgstr "Zeige Phase"
 
 #: plugin_manager_ui.cc:52
 msgid "Update Index Only"
-msgstr ""
+msgstr "Nur Index aktualisieren"
 
 #: plugin_manager_ui.cc:53
 msgid "Re-scan All"
-msgstr ""
+msgstr "Alle erneut scannen"
 
 #: plugin_manager_ui.cc:54
 msgid "Re-scan Faulty"
-msgstr ""
+msgstr "Fehlerhafte erneut scannen"
 
 #: plugin_manager_ui.cc:55
 msgid "Re-scan Selected"
-msgstr ""
+msgstr "Ausgewählte erneut scannen"
 
 #: plugin_manager_ui.cc:56
 msgid "Clear Stale Scan Log"
-msgstr ""
+msgstr "Lösche veraltetes Scanprotokoll"
 
 #: plugin_manager_ui.cc:57
 msgid "Show Plugin Prefs"
-msgstr ""
+msgstr "Zeige Plugin-Einstellungen"
 
 #: plugin_manager_ui.cc:59 plugin_manager_ui.cc:114 plugin_manager_ui.cc:604
 #: plugin_selector.cc:101 transport_masters_dialog.cc:81
@@ -11893,7 +11898,7 @@ msgstr "Typ"
 
 #: plugin_manager_ui.cc:61
 msgid "Maker"
-msgstr ""
+msgstr "Hersteller"
 
 #: plugin_manager_ui.cc:110
 msgid "Status"
@@ -11901,7 +11906,7 @@ msgstr "Status"
 
 #: plugin_manager_ui.cc:110
 msgid "Plugin Scan Result"
-msgstr ""
+msgstr "Pluginscan-Resultat"
 
 #: plugin_manager_ui.cc:111
 msgid "Ignore|Ign"
@@ -11909,7 +11914,7 @@ msgstr "Ign"
 
 #: plugin_manager_ui.cc:111
 msgid "Ignore this plugin (and others that are loaded in the same file)"
-msgstr ""
+msgstr "Ignoriere dieses Plugin (und andere in der selben Datei)"
 
 #: plugin_manager_ui.cc:112 plugin_selector.cc:97
 msgid "Favorite|Fav"
@@ -11917,27 +11922,27 @@ msgstr "Fav"
 
 #: plugin_manager_ui.cc:112
 msgid "Add this plugin to to the favorite list"
-msgstr ""
+msgstr "Füge dieses Plugin der Favoritenliste hinzu"
 
 #: plugin_manager_ui.cc:113
 msgid "Hide this plugin in the plugin-selector"
-msgstr ""
+msgstr "Verberge dieses Plugin in der Pluginauswahl"
 
 #: plugin_manager_ui.cc:114
 msgid "Plugin standard"
-msgstr ""
+msgstr "Plugin Standard"
 
 #: plugin_manager_ui.cc:115
 msgid "File/ID"
-msgstr ""
+msgstr "Datei/ID"
 
 #: plugin_manager_ui.cc:115
 msgid "The plugin file (VST) or unique ID (AU, LV2)"
-msgstr ""
+msgstr "Die Plugindatei oder eine einzigartige ID (AU, LV2)"
 
 #: plugin_manager_ui.cc:116
 msgid "Name of the plugin"
-msgstr ""
+msgstr "Name des Plugins"
 
 #: plugin_manager_ui.cc:117 plugin_selector.cc:100
 msgid "Creator"
@@ -11945,15 +11950,15 @@ msgstr "Ersteller"
 
 #: plugin_manager_ui.cc:117
 msgid "The plugin's vendor"
-msgstr ""
+msgstr "Plugin-Hersteller"
 
 #: plugin_manager_ui.cc:118
 msgid "Meta data: category and tags"
-msgstr ""
+msgstr "Metadaten: Kategorie und Stichworte"
 
 #: plugin_manager_ui.cc:169
 msgid "Plugin Count"
-msgstr ""
+msgstr "Plugin-Anzahl"
 
 #: plugin_manager_ui.cc:171 plugin_selector.cc:191 sfdb_ui.cc:636
 #: sfdb_ui.cc:638
@@ -11962,33 +11967,35 @@ msgstr "Suchen"
 
 #: plugin_manager_ui.cc:172
 msgid "Scan Actions"
-msgstr ""
+msgstr "Scan-Aktionen"
 
 #: plugin_manager_ui.cc:235
 msgid "Linux VST2 Path"
-msgstr ""
+msgstr "Linux VST-Pfad"
 
 #: plugin_manager_ui.cc:236 plugin_manager_ui.cc:242
 msgid "Configure where to look for VST2 plugins."
-msgstr ""
+msgstr "Konfiguriere Suchpfade für VST2 Plugins."
 
 #: plugin_manager_ui.cc:241
 msgid "Windows VST2 Path"
-msgstr ""
+msgstr "Windows VST-Pfad"
 
 #: plugin_manager_ui.cc:247
 msgid "VST3 Path"
-msgstr ""
+msgstr "VST3-Pfad"
 
 #: plugin_manager_ui.cc:248
 msgid ""
 "Configure where to look for VST3 plugins in addition to the default VST3 "
 "locations."
 msgstr ""
+"Konfiguriere Suchpfade für VST3-Plugins (zusätzlich zu den VST3"
+" Standard-Orten)"
 
 #: plugin_manager_ui.cc:258
 msgid "Only update plugin index, do not discover new plugins."
-msgstr ""
+msgstr "Nur Plugin-Index aktualisieren, keine neuen Plugins entdecken."
 
 #: plugin_manager_ui.cc:259
 msgid ""
@@ -11996,62 +12003,65 @@ msgid ""
 "scanned.\n"
 "Depending on the number of plugins installed this can take a long time."
 msgstr ""
+"Scannt alle Plugins, unabhängig davon, ob sie bereits erfolgreich gescannt"
+" wurden.\n"
+"Abhängig von der Anzahl der installierten Plugins kann das lange dauern."
 
 #: plugin_manager_ui.cc:260
 msgid "Scans plugins that have not yet been successfully scanned."
-msgstr ""
+msgstr "Scannt Plugins, die noch nicht erfolgreich gescannt wurden."
 
 #: plugin_manager_ui.cc:261
 msgid "Scans the selected plugin."
-msgstr ""
+msgstr "Scannt die ausgewählten"
 
 #: plugin_manager_ui.cc:262
 msgid "Forget about plugins that have been removed from the system."
-msgstr ""
+msgstr "Vergisst Plugins, die vom System entfernt wurden."
 
 #: plugin_manager_ui.cc:263
 msgid "Open preference window"
-msgstr ""
+msgstr "Öffne Einstellungsfenster"
 
 #: plugin_manager_ui.cc:265
 msgid "Match plugin name"
-msgstr ""
+msgstr "Übereinstimmender Plugin-Name"
 
 #: plugin_manager_ui.cc:266
 msgid "Match plugin type"
-msgstr ""
+msgstr "Übereinstimmender Plugin-Typ"
 
 #: plugin_manager_ui.cc:267
 msgid "Match any tag"
-msgstr ""
+msgstr "Übereinstimmendes Stichwort"
 
 #: plugin_manager_ui.cc:268
 msgid "Match plugin vendor"
-msgstr ""
+msgstr "Übereinstimmender Plugin-Hersteller"
 
 #: plugin_manager_ui.cc:269
 msgid "Match File/ID"
-msgstr ""
+msgstr "Übereinstimmende Datei/ID"
 
 #: plugin_manager_ui.cc:270
 msgid "Match complete file install path on disk"
-msgstr ""
+msgstr "Übereinstimmender Datei/Installationspfad auf Festplatte"
 
 #: plugin_manager_ui.cc:349
 msgid "Concealed"
-msgstr ""
+msgstr "Verborgen"
 
 #: plugin_manager_ui.cc:362
 msgid "Updated"
-msgstr ""
+msgstr "Aktualisiert"
 
 #: plugin_manager_ui.cc:365
 msgid "Error"
-msgstr ""
+msgstr "Fehler"
 
 #: plugin_manager_ui.cc:368
 msgid "Incompatible"
-msgstr ""
+msgstr "Inkompatibel"
 
 #: plugin_manager_ui.cc:605
 msgid "Total"
@@ -12083,17 +12093,20 @@ msgstr "Zusätzlichen VST3-Pfad angeben"
 
 #: plugin_manager_ui.cc:778
 msgid "Are you sure you want to rescan all plugins?"
-msgstr ""
+msgstr "Sind Sie sicher, dass Sie alle Plugins erneut scannen möchten?"
 
 #: plugin_manager_ui.cc:779
 msgid "Rescan Plugins"
-msgstr ""
+msgstr "Plugins erneut scannen"
 
 #: plugin_manager_ui.cc:780
 msgid ""
 "This starts a fresh scan, dropping all cached plugin data and backlists. "
 "Depending on the number if plugins installed this can take a long time."
 msgstr ""
+"Dies startet einen neuen Scan, und alle Cachedaten und Ignorier-Listen werden"
+" fallengelassen. "
+"Abhängig von der Anzahl der installierten Plugins kann das lange dauern."
 
 #: plugin_pin_dialog.cc:62
 msgid "Manual Config"
@@ -12245,56 +12258,62 @@ msgstr "Suche nach Plugins"
 
 #: plugin_scan_dialog.cc:48
 msgid "Auto skip unresponsive plugins"
-msgstr ""
+msgstr "Überspringe nicht reagierende Plugins automatisch"
 
 #: plugin_scan_dialog.cc:49
 msgid "Abort scanning (for all plugins)"
-msgstr ""
+msgstr "Scannen abbrechen (für alle Plugins)"
 
 #: plugin_scan_dialog.cc:50
 msgid "Skip this plugin"
-msgstr ""
+msgstr "Überspringe dieses Plugin"
 
 #: plugin_scan_dialog.cc:58
 msgid ""
 "Scan is taking a long time.\n"
 "Please check for popup dialogs."
 msgstr ""
+"Der Scan dauert sehr lange.\n "
+"Sehen Sie sich bitte nach Popup-Dialogen um."
 
 #: plugin_scan_dialog.cc:110
 msgid ""
 "Cancel Scanning all plugins, and close this dialog.  Your plugin list might "
 "be incomplete."
 msgstr ""
+"Scan aller Plugins abbrechen, und diesen Dialog schließen. Ihre Plugin-Liste"
+" kann unvollständig sein."
 
 #: plugin_scan_dialog.cc:111
 msgid "Cancel Scanning this plugin.  It will be Ignored in the plugin list."
-msgstr ""
+msgstr "Scan dieses Plugins abbrechen. Es wird in der Plugin-Liste ignoriert."
 
 #: plugin_scan_dialog.cc:112
 msgid "When enabled, scan will ignore plugins that take a long time to scan."
 msgstr ""
+"Wenn aktiviert, werden beim Scannen Plugins, deren Scan lange dauert,"
+" ignoriert."
 
 #: plugin_scan_dialog.cc:220 plugin_scan_dialog.cc:222
 #: plugin_scan_dialog.cc:225
 msgid "seconds|s"
-msgstr ""
+msgstr "s"
 
 #: plugin_scan_dialog.cc:251
 msgid "Scan timeout %1"
-msgstr ""
+msgstr "Scan-Timeout %1"
 
 #: plugin_scan_dialog.cc:253
 msgid "Scanning"
-msgstr ""
+msgstr "Scanne"
 
 #: plugin_scan_dialog.cc:262
 msgid "Scanning since %1"
-msgstr ""
+msgstr "Scanne seit %1"
 
 #: plugin_scan_dialog.cc:318
 msgid "Scanning: "
-msgstr ""
+msgstr "Scanne:"
 
 #: plugin_setup_dialog.cc:32
 msgid "Plugin Setup"
@@ -12396,7 +12415,8 @@ msgstr "Filter"
 #: plugin_selector.cc:273
 msgid "Enter space-separated, one-word Tags for the selected plugin."
 msgstr ""
-"Geben Sie durch Leerzeichen getrennte, aus einem Wort bestehende Tags für "
+"Geben Sie durch Leerzeichen getrennte, aus einem Wort bestehende Stichworte"
+" für "
 "das gewählte Plugin ein."
 
 #: plugin_selector.cc:276
@@ -12406,11 +12426,11 @@ msgstr ""
 
 #: plugin_selector.cc:279
 msgid "Ex: \"dynamic de-esser vocal\" applies 3 Tags."
-msgstr "Z.B.: \"Dynamik De-Esser Vocal\" wendet drei Tags an."
+msgstr "Z.B.: \"Dynamik De-Esser Vocal\" wendet drei Stichworte an."
 
 #: plugin_selector.cc:290
 msgid "Tags for Selected Plugin"
-msgstr "Tags des ausgewählten Plugins"
+msgstr "Stichworte des ausgewählten Plugins"
 
 #: plugin_selector.cc:328
 msgid "Insert Plugin(s)"
@@ -12448,7 +12468,7 @@ msgstr "Nach Urheber"
 
 #: plugin_selector.cc:968
 msgid "By Tags"
-msgstr "Nach Tags"
+msgstr "Nach Stichwort"
 
 #: plugin_selector.cc:1189
 msgid "Scan VST2/3 and AudioUnit plugins now?"
@@ -12460,11 +12480,11 @@ msgstr "Jetzt nach VST2/3 Plugins scannen?"
 
 #: plugin_selector.cc:1195
 msgid "Discover %1 Plugins?"
-msgstr ""
+msgstr "Entdecke %1-Plugins?"
 
 #: plugin_selector.cc:1197
 msgid "VST/AU"
-msgstr ""
+msgstr "VST/AU"
 
 #: plugin_selector.cc:1203
 msgid ""
@@ -13278,11 +13298,11 @@ msgstr "Kopiere Objekte mittels:"
 
 #: rc_option_editor.cc:570
 msgid "<b>Recommended Setting: %1-%2</b>%3"
-msgstr ""
+msgstr "<b>Empfohlene Einstellung: %1-%2</b>%3"
 
 #: rc_option_editor.cc:572
 msgid "Slip Contents using:"
-msgstr ""
+msgstr "Rutsche Inhalte mittels:"
 
 #: rc_option_editor.cc:593
 msgid "Constrain drag using:"
@@ -13354,19 +13374,19 @@ msgstr "Scan-Timeout"
 
 #: rc_option_editor.cc:1154
 msgid "1 sec"
-msgstr ""
+msgstr "1 Sek."
 
 #: rc_option_editor.cc:1155
 msgid "15 sec"
-msgstr ""
+msgstr "15 Sek."
 
 #: rc_option_editor.cc:1157
 msgid "45 sec"
-msgstr ""
+msgstr "45 Sek."
 
 #: rc_option_editor.cc:1159
 msgid "1'30\""
-msgstr ""
+msgstr "1'30\""
 
 #: rc_option_editor.cc:1162
 msgid ""
@@ -13646,17 +13666,20 @@ msgstr "Nach Export einen Screenshot des Mixers speichern"
 
 #: rc_option_editor.cc:2387
 msgid "New Version Check"
-msgstr ""
+msgstr "Prüfe auf neue Version"
 
 #: rc_option_editor.cc:2390
 msgid "Check for announcements at application start"
-msgstr ""
+msgstr "Prüfe bei Programmstart auf Mitteilungen"
 
 #: rc_option_editor.cc:2394
 msgid ""
 "An anonymous request is performed to query announcements by contacting\n"
 "%1"
 msgstr ""
+"Es wird eine anonyme Anfrage nach Verlautbarungen durchgeführt, durch"
+" Kontaktaufnahme zu\n"
+"%1"
 
 #: rc_option_editor.cc:2410
 msgid "GUI Lock"
@@ -13720,7 +13743,7 @@ msgstr "Zeige Tooltips, wenn die Maus über einem Element schwebt"
 
 #: rc_option_editor.cc:2499
 msgid "Update clocks at TC Frame rate"
-msgstr "Uhrdarstellung mit TC-Framerate erneuern"
+msgstr "Uhrdarstellung mit TC-Framerate aktualisieren"
 
 #: rc_option_editor.cc:2504
 msgid ""
@@ -13729,9 +13752,10 @@ msgid ""
 "<b>When disabled</b> clock displays are updated only every 100ms."
 msgstr ""
 "<b>Wenn aktiviert</b> werden die Uhrdarstellungen mit jedem Timecode-Frame "
-"(fps) erneuert.\n"
+"(fps) aktualisiert.\n"
 "\n"
-"<b>Wenn deaktiviert</b> werden die Uhrdarstellungen nur alle 100ms erneuert."
+"<b>Wenn deaktiviert</b> werden die Uhrdarstellungen nur alle 100ms"
+" aktualisiert."
 
 #: rc_option_editor.cc:2512
 msgid "Blink Rec-Arm buttons"
@@ -14033,6 +14057,7 @@ msgstr ""
 #: rc_option_editor.cc:2884
 msgid "Show/Hide splash screen instead of setting z-axis stack order"
 msgstr ""
+"Zeige/Verstecke Splashbildschirm statt Z-Achsen Stapelreihenfolge zu setzen"
 
 #: rc_option_editor.cc:2893
 msgid "All floating windows are dialogs"
@@ -14135,7 +14160,7 @@ msgstr "XRun-marker in Regionen anzeigen"
 
 #: rc_option_editor.cc:2988
 msgid "Show cue markers in regions"
-msgstr ""
+msgstr "Zeige Cuemarker in Regionen"
 
 #: rc_option_editor.cc:2996
 msgid "Show gain envelopes in audio regions"
@@ -14563,7 +14588,7 @@ msgstr ""
 
 #: rc_option_editor.cc:3432
 msgid "Rewind/Fast-forward buttons change direction immediately"
-msgstr ""
+msgstr "Vor/Rückspulknöpfe ändern sofort die Abspielrichtung"
 
 #: rc_option_editor.cc:3437
 msgid ""
@@ -14871,7 +14896,7 @@ msgstr "Scanne nach Plugins"
 
 #: rc_option_editor.cc:3686
 msgid "Scan for [new] Plugins on Application Start"
-msgstr ""
+msgstr "Scanne bei Programmstart nach [neuen] Plugins"
 
 #: rc_option_editor.cc:3692
 msgid ""
