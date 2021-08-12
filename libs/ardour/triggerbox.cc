@@ -162,7 +162,7 @@ Trigger::process_state_requests ()
 
 		case Running:
 			switch (launch_style()) {
-			case Loop:
+			case OneShot:
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 -> %3\n", index(), enum_2_string (Running), enum_2_string (WaitingForRetrigger)));
 				_state = WaitingForRetrigger;
 				break;
@@ -558,7 +558,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 			/* We reached the end */
 
-			if (_launch_style == Loop) {
+			if (_follow_action == Again) {
 				nframes -= this_read;
 				dest_offset += this_read;
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was reached end, but set to loop, so retrigger\n", index()));

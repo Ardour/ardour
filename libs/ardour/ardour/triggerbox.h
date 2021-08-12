@@ -82,9 +82,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	State state() const { return _state; }
 
 	enum LaunchStyle {
-		Loop,  /* runs till stopped, reclick just restarts */
+		OneShot,  /* mouse down/NoteOn starts; mouse up/NoteOff ignored */
 		Gate,     /* runs till mouse up/note off then to next quantization */
-		Toggle,   /* runs till "clicked" again */
+		Toggle,   /* runs till next mouse down/NoteOn */
 		Repeat,   /* plays only quantization extent until mouse up/note off */
 	};
 
@@ -93,6 +93,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	enum FollowAction {
 		Stop,
+		Again,
 		QueuedTrigger, /* DP-style */
 		NextTrigger,   /* Live-style, and below */
 		PrevTrigger,
