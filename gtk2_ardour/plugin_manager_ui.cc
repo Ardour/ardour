@@ -777,7 +777,7 @@ PluginManagerUI::rescan_all ()
 {
 	ArdourMessageDialog msg (_("Are you sure you want to rescan all plugins?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
 	msg.set_title (_("Rescan Plugins"));
-	msg.set_secondary_text (_("This starts a fresh scan, dropping all cached plugin data and backlists. Depending on the number if plugins installed this can take a long time."));
+	msg.set_secondary_text (_("This starts a fresh scan, dropping all cached plugin data and ignorelist. Depending on the number if plugins installed this can take a long time."));
 
 	if (msg.run () != RESPONSE_YES) {
 		return;
