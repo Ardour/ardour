@@ -231,7 +231,7 @@ CLASSKEYS(ARDOUR::VCAManager);
 
 CLASSKEYS(ARDOUR::timepos_t)
 CLASSKEYS(ARDOUR::timecnt_t)
-CLASSKEYS(ARDOUR::superclock_t
+CLASSKEYS(ARDOUR::superclock_t)
 
 CLASSKEYS(PBD::ID);
 CLASSKEYS(PBD::Configuration);
