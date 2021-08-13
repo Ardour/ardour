@@ -42,7 +42,7 @@ Trigger::Trigger (size_t n, TriggerBox& b)
 	, _index (n)
 	, _next_trigger (-1)
 	, _launch_style (Toggle)
-	, _follow_action { { NextTrigger }, { Stop } }
+	, _follow_action { NextTrigger, Stop }
 	, _follow_action_probability (100)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
 {
