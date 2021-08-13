@@ -16,13 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <iostream>
-
-#include <sys/syscall.h>
-#include <sys/types.h>
-
-#include "pbd/pthread_utils.h"
-
 #include "temporal/superclock.h"
 
 Temporal::superclock_t Temporal::superclock_ticks_per_second = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
