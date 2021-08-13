@@ -1008,7 +1008,7 @@ PluginManager::ladspa_discover (string path)
 			set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 			psle->msg (PluginScanLogEntry::OK, string_compose(_("Found LADSPA plugin, id: %1 name: %2, Inputs: %3, Outputs: %4"), info->unique_id, info->name, info->n_inputs, info->n_outputs));
 		} else {
-			psle->msg (PluginScanLogEntry::OK, string_compose(_("LADSPA ignored plugin with dupliucate id %1."), descriptor->UniqueID));
+			psle->msg (PluginScanLogEntry::OK, string_compose(_("LADSPA ignored plugin with duplicate id %1."), descriptor->UniqueID));
 		}
 
 		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Found LADSPA plugin, id: %1 name: %2, Inputs: %3, Outputs: %4\n",
