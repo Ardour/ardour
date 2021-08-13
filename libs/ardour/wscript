@@ -335,8 +335,8 @@ def configure(conf):
     if conf.is_defined ('HAVE_LV2_1_10_0'):
         conf.define ('LV2_EXTENDED', 1)
 
-    autowaf.check_pkg(conf, 'soundtouch', uselib_store='SOUNDTOUCH',
-                      atleast_version='1.8.0', mandatory=False)
+    #autowaf.check_pkg(conf, 'soundtouch', uselib_store='SOUNDTOUCH',
+    #                  atleast_version='1.8.0', mandatory=False)
     autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT',
                       atleast_version='1.12.0', mandatory=False)
     autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
