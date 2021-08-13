@@ -23,9 +23,6 @@
 #include <cmath>
 #include <stdio.h>
 
-#include <sys/syscall.h>
-#include <sys/types.h>
-
 #include "pbd/compose.h"
 #include "pbd/debug_rt_alloc.h"
 #include "pbd/pthread_utils.h"
