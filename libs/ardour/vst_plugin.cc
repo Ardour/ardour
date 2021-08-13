@@ -526,8 +526,9 @@ VSTPlugin::load_user_preset (PresetRecord r)
 
 					if (!(*j)->get_property (X_("index"), index) ||
 					    !(*j)->get_property (X_("value"), value)) {
-					  // flag error and continue?
 						assert (false);
+						// flag error and continue?
+						continue;
 					}
 
 					set_parameter (index, value, 0);
