@@ -21,6 +21,10 @@ using namespace Gtk;
 using std::cerr;
 using std::endl;
 
+#ifdef PLATFORM_WINDOWS
+#define srandom() srand()
+#endif
+
 #define SQUARED 16
 
  struct Column {
