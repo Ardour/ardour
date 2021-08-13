@@ -62,6 +62,12 @@ Maschine2Canvas::request_redraw ()
 }
 
 void
+Maschine2Canvas::queue_resize ()
+{
+	/* nothing to do here, for now */
+}
+
+void
 Maschine2Canvas::request_redraw (Rect const & r)
 {
 	Cairo::RectangleInt cr;

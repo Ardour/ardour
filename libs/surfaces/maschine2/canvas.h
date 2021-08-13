@@ -45,6 +45,7 @@ class Maschine2Canvas : public ArdourCanvas::Canvas
 
 	void request_redraw ();
 	void request_redraw (ArdourCanvas::Rect const &);
+	void queue_resize ();
 	bool vblank ();
 
 	Cairo::RefPtr<Cairo::Context> image_context() { return context; }
