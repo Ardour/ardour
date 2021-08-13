@@ -32,7 +32,7 @@ main (int argc, char* argv[])
 
 	c->set_background_color (0xffffffff);
 
-	srandom (time ((time_t) 0));
+	srandom (time ((time_t *) 0));
 
 	// cview.set_size_request (100, 100);
 
