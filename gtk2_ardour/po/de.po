@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-11 11:43+0200\n"
-"PO-Revision-Date: 2021-08-12 15:35+0200\n"
+"POT-Creation-Date: 2021-08-13 09:41+0200\n"
+"PO-Revision-Date: 2021-08-13 09:46+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -1155,8 +1155,8 @@ msgid ""
 msgstr ""
 "Indizierung von Audio Unit Plugin fehlgeschlagen.\n"
 "Automatisches Scannen von AU wurde deaktiviert\n"
-"(überprüfen Sie mit 'auval', und reaktivieren Sie danach das Scannen in den"
-" globalen Einstellungen)."
+"(überprüfen Sie mit 'auval', und reaktivieren Sie danach das Scannen in den "
+"globalen Einstellungen)."
 
 #: ardour_ui.cc:697 ardour_ui.cc:774 keyeditor.cc:587
 msgid "Could not open temporary file to print bindings (%1)"
@@ -10597,16 +10597,16 @@ msgid ""
 "reloaded.\n"
 msgstr ""
 "\n"
-"Diese Plugins werden bis zum Neuladen des Projekts durch inaktive Platzhalter"
-" ersetzt.\n"
+"Diese Plugins werden bis zum Neuladen des Projekts durch inaktive "
+"Platzhalter ersetzt.\n"
 
 #: missing_plugin_dialog.cc:53
 msgid ""
 "It is recommended that you install the missing plugins and re-load the "
 "session.\n"
 msgstr ""
-"Es wird empfohlen, die fehlenden Plugins zu installieren und das Projekt neu"
-" zu laden.\n"
+"Es wird empfohlen, die fehlenden Plugins zu installieren und das Projekt neu "
+"zu laden.\n"
 
 #: missing_plugin_dialog.cc:55
 msgid "Third party plugins have not yet been indexed."
@@ -11921,7 +11921,7 @@ msgid "Favorite|Fav"
 msgstr "Fav"
 
 #: plugin_manager_ui.cc:112
-msgid "Add this plugin to to the favorite list"
+msgid "Add this plugin to the favorite list"
 msgstr "Füge dieses Plugin der Favoritenliste hinzu"
 
 #: plugin_manager_ui.cc:113
@@ -11990,8 +11990,8 @@ msgid ""
 "Configure where to look for VST3 plugins in addition to the default VST3 "
 "locations."
 msgstr ""
-"Konfiguriere Suchpfade für VST3-Plugins (zusätzlich zu den VST3"
-" Standard-Orten)"
+"Konfiguriere Suchpfade für VST3-Plugins (zusätzlich zu den VST3 Standard-"
+"Orten)"
 
 #: plugin_manager_ui.cc:258
 msgid "Only update plugin index, do not discover new plugins."
@@ -12003,8 +12003,8 @@ msgid ""
 "scanned.\n"
 "Depending on the number of plugins installed this can take a long time."
 msgstr ""
-"Scannt alle Plugins, unabhängig davon, ob sie bereits erfolgreich gescannt"
-" wurden.\n"
+"Scannt alle Plugins, unabhängig davon, ob sie bereits erfolgreich gescannt "
+"wurden.\n"
 "Abhängig von der Anzahl der installierten Plugins kann das lange dauern."
 
 #: plugin_manager_ui.cc:260
@@ -12101,12 +12101,12 @@ msgstr "Plugins erneut scannen"
 
 #: plugin_manager_ui.cc:780
 msgid ""
-"This starts a fresh scan, dropping all cached plugin data and backlists. "
+"This starts a fresh scan, dropping all cached plugin data and ignorelist. "
 "Depending on the number if plugins installed this can take a long time."
 msgstr ""
-"Dies startet einen neuen Scan, und alle Cachedaten und Ignorier-Listen werden"
-" fallengelassen. "
-"Abhängig von der Anzahl der installierten Plugins kann das lange dauern."
+"Dies startet einen neuen Scan, und alle Cachedaten und Ignorelisten"
+"werden fallengelassen. Abhängig von der Anzahl der installierten Plugins"
+"kann das lange dauern."
 
 #: plugin_pin_dialog.cc:62
 msgid "Manual Config"
@@ -12273,16 +12273,16 @@ msgid ""
 "Scan is taking a long time.\n"
 "Please check for popup dialogs."
 msgstr ""
-"Der Scan dauert sehr lange.\n "
-"Sehen Sie sich bitte nach Popup-Dialogen um."
+"Der Scan dauert sehr lange.\n"
+" Sehen Sie sich bitte nach Popup-Dialogen um."
 
 #: plugin_scan_dialog.cc:110
 msgid ""
 "Cancel Scanning all plugins, and close this dialog.  Your plugin list might "
 "be incomplete."
 msgstr ""
-"Scan aller Plugins abbrechen, und diesen Dialog schließen. Ihre Plugin-Liste"
-" kann unvollständig sein."
+"Scan aller Plugins abbrechen, und diesen Dialog schließen. Ihre Plugin-Liste "
+"kann unvollständig sein."
 
 #: plugin_scan_dialog.cc:111
 msgid "Cancel Scanning this plugin.  It will be Ignored in the plugin list."
@@ -12291,8 +12291,8 @@ msgstr "Scan dieses Plugins abbrechen. Es wird in der Plugin-Liste ignoriert."
 #: plugin_scan_dialog.cc:112
 msgid "When enabled, scan will ignore plugins that take a long time to scan."
 msgstr ""
-"Wenn aktiviert, werden beim Scannen Plugins, deren Scan lange dauert,"
-" ignoriert."
+"Wenn aktiviert, werden beim Scannen Plugins, deren Scan lange dauert, "
+"ignoriert."
 
 #: plugin_scan_dialog.cc:220 plugin_scan_dialog.cc:222
 #: plugin_scan_dialog.cc:225
@@ -12415,9 +12415,8 @@ msgstr "Filter"
 #: plugin_selector.cc:273
 msgid "Enter space-separated, one-word Tags for the selected plugin."
 msgstr ""
-"Geben Sie durch Leerzeichen getrennte, aus einem Wort bestehende Stichworte"
-" für "
-"das gewählte Plugin ein."
+"Geben Sie durch Leerzeichen getrennte, aus einem Wort bestehende Stichworte "
+"für das gewählte Plugin ein."
 
 #: plugin_selector.cc:276
 msgid "You can include dashes, colons or underscores in a Tag."
@@ -12493,6 +12492,10 @@ msgid ""
 "Manager. Depending on the number of installed plugins the process can take "
 "several minutes."
 msgstr ""
+"Dritthersteller-Plugins sind noch nicht indiziert worden. %1 Plugins müssen "
+"gescannt werden, bevor sie benutzbar sind. Dies kann auch manuell über "
+"Fenster > Plugin Manager ausgelöst werden. Abhängig von der Anzahl der "
+"installierten Plugins kann der Prozess etliche Minuten dauern."
 
 #: plugin_ui.cc:141
 msgid "Eh? LADSPA plugins don't have editors!"
@@ -13393,6 +13396,9 @@ msgid ""
 "Specify the default timeout for plugin instantiation. Plugins that require "
 "more time to load will be ignored. A value of 0 disables the timeout."
 msgstr ""
+"Geben Sie die voreingestellte Wartezeit bei der Plugin-Instantiirung an. "
+"Plugins, die länger brauchen, um geladen zu werden, werden ignoriert. Ein "
+"Wert von 0 deaktiviert die Wartezeit."
 
 #: rc_option_editor.cc:1171
 msgid "Waveform Clip Level (dBFS):"
@@ -13677,8 +13683,8 @@ msgid ""
 "An anonymous request is performed to query announcements by contacting\n"
 "%1"
 msgstr ""
-"Es wird eine anonyme Anfrage nach Verlautbarungen durchgeführt, durch"
-" Kontaktaufnahme zu\n"
+"Es wird eine anonyme Anfrage nach Verlautbarungen durchgeführt, durch "
+"Kontaktaufnahme zu\n"
 "%1"
 
 #: rc_option_editor.cc:2410
@@ -13754,8 +13760,8 @@ msgstr ""
 "<b>Wenn aktiviert</b> werden die Uhrdarstellungen mit jedem Timecode-Frame "
 "(fps) aktualisiert.\n"
 "\n"
-"<b>Wenn deaktiviert</b> werden die Uhrdarstellungen nur alle 100ms"
-" aktualisiert."
+"<b>Wenn deaktiviert</b> werden die Uhrdarstellungen nur alle 100ms "
+"aktualisiert."
 
 #: rc_option_editor.cc:2512
 msgid "Blink Rec-Arm buttons"
@@ -14904,6 +14910,9 @@ msgid ""
 "index on application start. When disabled new plugins will only be available "
 "after triggering a 'Scan' manually"
 msgstr ""
+"<b>Wenn aktiviert,</b> werden bei Programmstart neue Plugins gesucht, "
+"getestet und dem Cache-Index hinzugefügt. Wenn deaktiviert, werden neue "
+"Plugins nur nach manuellem \"Scan\" verfügbar."
 
 #: rc_option_editor.cc:3696
 msgid "Always Display Plugin Scan Progress"
@@ -14927,6 +14936,8 @@ msgid ""
 "<b>When enabled</b> additional information for every plugin is shown to the "
 "Plugin Manager Log."
 msgstr ""
+"<b>Wenn aktiviert,</b> werden für jedes Plugin zusätzliche Informationen im "
+"Plugin-Manager Protkoll angezeigt."
 
 #: rc_option_editor.cc:3717
 msgid "Make new plugins active"
@@ -14978,7 +14989,7 @@ msgstr "VST 2 Cache:"
 
 #: rc_option_editor.cc:3788
 msgid "VST 2 Ignorelist:"
-msgstr "VST 2 Ignorelist:"
+msgstr "VST 2 Ignoreliste:"
 
 #: rc_option_editor.cc:3800
 msgid "Linux VST2 Path:"
@@ -15002,7 +15013,7 @@ msgstr "VST 3 Cache:"
 
 #: rc_option_editor.cc:3839
 msgid "VST 3 Ignorelist:"
-msgstr "VST 3 Ignorelist:"
+msgstr "VST 3 Ignoreliste:"
 
 #: rc_option_editor.cc:3849
 msgid "Additional VST3 Path:"
@@ -15052,7 +15063,7 @@ msgstr "AU Cache:"
 
 #: rc_option_editor.cc:3903
 msgid "AU Ignorelist:"
-msgstr "AU Ignorelist:"
+msgstr "AU Ignoreliste:"
 
 #: rc_option_editor.cc:3906
 msgid "LV1/LV2"
@@ -15501,7 +15512,7 @@ msgstr "Energieverwaltung, CPU DMA Latenz:"
 
 #: rc_option_editor.cc:4466
 msgid "Lowest (prevent CPU sleep states)"
-msgstr ""
+msgstr "Niedrigst (verhindere CPU sleep states)"
 
 #: rc_option_editor.cc:4469
 msgid "%1 usec"
@@ -15513,10 +15524,13 @@ msgid ""
 "CPU from entering power-save states which can be beneficial for reliable low "
 "latency."
 msgstr ""
+"Diese Einstellung bestimmt die maximal tolerierbare CPU/DMA-Latenz. Dies "
+"verhindert, dass die CPU Energiespar-Zustände betritt, was für zuverlässig "
+"niedrige Latenz hilfreich sein kann."
 
 #: rc_option_editor.cc:4475
 msgid "This setting requires write access to `/dev/cpu_dma_latency'."
-msgstr ""
+msgstr "Diese Einstellung benötigt Schreibzugriff auf '/dev/cpu_dma_latency'."
 
 #: rc_option_editor.cc:4484
 msgid "CPU/FPU Denormals"
@@ -17503,15 +17517,15 @@ msgstr "Schnellstmöglich"
 
 #: shuttle_control.cc:74
 msgid "Speed Display (Context-click for options)"
-msgstr ""
+msgstr "Geschwindigkeitsanzeige (Kontext-Klick für Optionen)"
 
 #: shuttle_control.cc:101
 msgid "LogestShuttle|> 888.9%"
-msgstr ""
+msgstr "> 888.9%"
 
 #: shuttle_control.cc:103
 msgid "LogestShuttle|+00 st"
-msgstr ""
+msgstr "+00 st"
 
 #: shuttle_control.cc:134 time_fx_dialog.cc:166
 msgid "Percent"
@@ -17524,6 +17538,7 @@ msgstr "Abspielgeschwindigkeit (Rechtsklick für Optionen)"
 #: shuttle_control.cc:190
 msgid "Varispeed: change the default playback and recording speed"
 msgstr ""
+"Varispeed: ändere die voreingestellte Wiedergabe- und Aufnahmegeschwindigkeit"
 
 #: shuttle_control.cc:193
 msgid "VariSpeed|VS"
@@ -18715,11 +18730,11 @@ msgstr "Konfigurationsdatei %1 nicht gespeichert"
 
 #: ui_config.cc:478 ui_config.cc:486
 msgid "Could not remove temporary ui-config file \"%1\" (%2)"
-msgstr ""
+msgstr "Konnte temporäre UI-Konfigurationsdatei \"%1\" nicht entfernen (%2)"
 
 #: ui_config.cc:484
 msgid "could not rename temporary ui-config file %1 to %2 (%3)"
-msgstr ""
+msgstr "konnte temporäre UI-Konfigurationsdatei \"%1\" nicht umbenennen (%2)"
 
 #: ui_config.cc:727
 msgid "Color %1 not found"
