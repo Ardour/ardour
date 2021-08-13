@@ -1,9 +1,6 @@
 #include <iostream>
 #include <cstdlib>
-
-#ifdef PLATFORM_WINDOWS
-#define random() rand()
-#endif
+#include <glib.h>
 
 #include <glibmm.h>
 
@@ -993,7 +990,7 @@ TriggerBox::set_next_trigger (size_t current)
 	}
 
 	int which_follow_action;
-	int r = random() % 100;
+	int r = g_random_int() % 100;
 
 	if (r <= all_triggers[current]->follow_action_probability()) {
 		which_follow_action = 0;
@@ -1081,7 +1078,7 @@ TriggerBox::set_next_trigger (size_t current)
 
 	case Trigger::AnyTrigger:
 		while (true) {
-			n = random() % all_triggers.size();
+			n = g_random_int() % all_triggers.size();
 			if (!all_triggers[n]->region()) {
 				continue;
 			}
@@ -1095,7 +1092,7 @@ TriggerBox::set_next_trigger (size_t current)
 
 	case Trigger::OtherTrigger:
 		while (true) {
-			n = random() % all_triggers.size();
+			n = g_random_int() % all_triggers.size();
 			if ((size_t) n == current) {
 				continue;
 			}
