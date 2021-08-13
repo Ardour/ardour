@@ -1,0 +1,36 @@
+# This is just a fragment, taken from the wscript two levels up in the filesystem (libs/canvas/wscript)
+    constraint_test_src = [ 'constraint_test.cc' ]
+    constraint_test = bld (features = 'cxx cxxprogram')
+    constraint_test.source = constraint_test_src
+    constraint_test.includes = obj.includes + ['../pbd', '../gtkmm2ext']
+    constraint_test.use = [ 'GTKMM', 'libcanvas', 'libgtkmm2ext' ]
+    constraint_test.name         = 'constraint_test'
+    constraint_test.target       = 'constraint_test'
+    constraint_test.install_path = ''
+
+    constraint_test2_src = [ 'constraint_test2.cc' ]
+    constraint_test2 = bld (features = 'cxx cxxprogram')
+    constraint_test2.source = constraint_test2_src
+    constraint_test2.includes = obj.includes + ['../pbd', '../gtkmm2ext']
+    constraint_test2.use = [ 'GTKMM', 'libcanvas', 'libgtkmm2ext' ]
+    constraint_test2.name         = 'constraint_test2'
+    constraint_test2.target       = 'constraint_test2'
+    constraint_test2.install_path = ''
+
+    constraint_test3_src = [ 'constraint_test3.cc' ]
+    constraint_test3 = bld (features = 'cxx cxxprogram')
+    constraint_test3.source = constraint_test3_src
+    constraint_test3.includes = obj.includes + ['../pbd', '../gtkmm2ext']
+    constraint_test3.use = [ 'GTKMM', 'libcanvas', 'libgtkmm2ext' ]
+    constraint_test3.name         = 'constraint_test3'
+    constraint_test3.target       = 'constraint_test3'
+    constraint_test3.install_path = ''
+
+    constraint_test4_src = [ 'constraint_test4.cc' ]
+    constraint_test4 = bld (features = 'cxx cxxprogram')
+    constraint_test4.source = constraint_test4_src
+    constraint_test4.includes = obj.includes + ['../pbd', '../gtkmm2ext']
+    constraint_test4.use = [ 'GTKMM', 'libcanvas', 'libgtkmm2ext' ]
+    constraint_test4.name         = 'constraint_test4'
+    constraint_test4.target       = 'constraint_test4'
+    constraint_test4.install_path = ''
