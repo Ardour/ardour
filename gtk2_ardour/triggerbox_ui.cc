@@ -46,7 +46,7 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 
 TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
-	: Rectangle (canvas)
+	: ArdourCanvas::Rectangle (canvas)
 	, _trigger (t)
 {
 	const double scale = UIConfiguration::instance().get_ui_scale();
@@ -63,13 +63,13 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	set_outline_color (Gtkmm2ext::random_color());
 	name = string_compose ("trigger %1", _trigger.index());
 
-	play_button = new Rectangle (this);
+	play_button = new ArdourCanvas::Rectangle (this);
 	play_button->set (ArdourCanvas::Rect (0., 0., poly_size + (poly_margin * 2.), height));
 	play_button->set_outline (false);
 	play_button->set_fill_color (0x000000ff);
 	play_button->name = string_compose ("playbutton %1", _trigger.index());
 
-	play_shape = new Polygon (play_button);
+	play_shape = new ArdourCanvas::Polygon (play_button);
 	play_shape->set_fill_color (Gtkmm2ext::random_color());
 	play_shape->set_outline (false);
 	play_shape->name = string_compose ("playshape %1", _trigger.index());
