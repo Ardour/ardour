@@ -1,6 +1,10 @@
 #include <iostream>
 #include <cstdlib>
 
+#ifdef PLATFORM_WINDOWS
+#define random() rand()
+#endif
+
 #include <glibmm.h>
 
 #include <rubberband/RubberBandStretcher.h>
