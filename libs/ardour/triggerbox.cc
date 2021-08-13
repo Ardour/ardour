@@ -43,6 +43,7 @@ Trigger::Trigger (size_t n, TriggerBox& b)
 	, _next_trigger (-1)
 	, _launch_style (Toggle)
 	, _follow_action { { NextTrigger }, { Stop } }
+	, _follow_action_probability (100)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
 {
 }
@@ -287,8 +288,9 @@ AudioTrigger::AudioTrigger (size_t n, TriggerBox& b)
 	, data (0)
 	, read_index (0)
 	, data_length (0)
-	, start_offset (0)
+	, _start_offset (0)
 	, usable_length (0)
+	, last_sample (0)
 {
 }
 
@@ -300,7 +302,25 @@ AudioTrigger::~AudioTrigger ()
 }
 
 void
-AudioTrigger::set_length (timecnt_t const & newlen)
+AudioTrigger::set_start (timepos_t s)
+{
+	_start_offset = s.samples ();
+}
+
+void
+AudioTrigger::set_end (timepos_t e)
+{
+	set_length (timepos_t (e.samples() - _start_offset));
+}
+
+timepos_t
+AudioTrigger::end() const
+{
+	return timepos_t (_start_offset + usable_length);
+}
+
+void
+AudioTrigger::set_length (timepos_t const & newlen)
 {
 	using namespace RubberBand;
 	using namespace Temporal;
@@ -315,7 +335,7 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 
 	load_data (ar);
 
-	if (newlen == _region->length()) {
+	if (newlen == timepos_t (_region->length_samples())) {
 		/* no stretch required */
 		return;
 	}
@@ -337,7 +357,8 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 		new_ratio = (double) newlen.samples() / data_length;
 	} else {
 		/* XXX what to use for position ??? */
-		const timecnt_t dur = TempoMap::use()->convert_duration (newlen, timepos_t (0), AudioTime);
+		timecnt_t l (newlen, timepos_t (AudioTime));
+		const timecnt_t dur = TempoMap::use()->convert_duration (l, timepos_t (0), AudioTime);
 		new_ratio = (double) dur.samples() / data_length;
 	}
 
@@ -425,6 +446,7 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 	data_length = processed;
 	if (!usable_length || usable_length > data_length) {
 		usable_length = data_length;
+		last_sample = _start_offset + usable_length;
 	}
 }
 
@@ -440,11 +462,13 @@ AudioTrigger::set_usable_length ()
 		break;
 	default:
 		usable_length = data_length;
+		last_sample = _start_offset + usable_length;
 		return;
 	}
 
 	if (_quantization == Temporal::BBT_Offset ()) {
 		usable_length = data_length;
+		last_sample = _start_offset + usable_length;
 		return;
 	}
 
@@ -452,24 +476,25 @@ AudioTrigger::set_usable_length ()
 
 	timecnt_t len (Temporal::Beats (_quantization.beats, _quantization.ticks), timepos_t (Temporal::Beats()));
 	usable_length = len.samples();
+	last_sample = _start_offset + usable_length;
 }
 
-timecnt_t
+timepos_t
 AudioTrigger::current_length() const
 {
 	if (_region) {
-		return timecnt_t (data_length);
+		return timepos_t (data_length);
 	}
-	return timecnt_t (Temporal::BeatTime);
+	return timepos_t (Temporal::BeatTime);
 }
 
-timecnt_t
+timepos_t
 AudioTrigger::natural_length() const
 {
 	if (_region) {
-		return _region->length();
+		return timepos_t::from_superclock (_region->length().magnitude());
 	}
-	return timecnt_t (Temporal::BeatTime);
+	return timepos_t (Temporal::BeatTime);
 }
 
 int
@@ -485,7 +510,7 @@ AudioTrigger::set_region (boost::shared_ptr<Region> r)
 
 	/* this will load data, but won't stretch it for now */
 
-	set_length (r->length ());
+	set_length (timepos_t::from_superclock (r->length ().magnitude()));
 
 	PropertyChanged (ARDOUR::Properties::name);
 
@@ -511,6 +536,7 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 	/* if usable length was already set, only adjust it if it is too large */
 	if (!usable_length || usable_length > data_length) {
 		usable_length = data_length;
+		last_sample = _start_offset + usable_length;
 	}
 
 	drop_data ();
@@ -531,7 +557,7 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 void
 AudioTrigger::retrigger ()
 {
-	read_index = 0;
+	read_index = _start_offset;
 }
 
 int
@@ -545,7 +571,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 	while (nframes) {
 
-		pframes_t this_read = (pframes_t) std::min ((samplecnt_t) nframes, (usable_length - read_index));
+		pframes_t this_read = (pframes_t) std::min ((samplecnt_t) nframes, (last_sample - read_index));
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 grab %2 @ %3 dest offset %4\n", index(), this_read, read_index, dest_offset));
 
@@ -565,7 +591,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 		read_index += this_read;
 
-		if (read_index >= usable_length) {
+		if (read_index >= last_sample) {
 
 			/* We reached the end */
 
@@ -927,6 +953,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		if (trigger.state() == Trigger::Stopped) {
 
+			cerr << "stopped, check trigger " << trigger.next_trigger() << std::endl;
+
 			if (trigger.next_trigger() != -1) {
 
 				int nxt = trigger.next_trigger();
@@ -1084,7 +1112,6 @@ TriggerBox::set_next_trigger (size_t current)
 		break;
 
 	}
-
 	all_triggers[current]->set_next_trigger (current);
 }
 

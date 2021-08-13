@@ -76,6 +76,16 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	/* explicitly call for the trigger to start */
 	virtual void start();
 
+	virtual void set_start (timepos_t) = 0;
+	virtual void set_end (timepos_t) = 0;
+	/* this accepts timepos_t because the origin is assumed to be the start */
+	virtual void set_length (timepos_t const &) = 0;
+
+	timepos_t start_offset () const; /* offset from start of data */
+	timepos_t end() const;    /* offset from start of data */
+	virtual timepos_t current_length() const = 0; /* offset from start() */
+	virtual timepos_t natural_length() const = 0; /* offset from start() */
+
 	void process_state_requests ();
 
 	bool active() const { return _state >= Running; }
@@ -112,9 +122,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	Temporal::BBT_Offset quantization() const;
 	void set_quantization (Temporal::BBT_Offset const &);
 
-	virtual void set_length (timecnt_t const &) = 0;
-	virtual timecnt_t current_length() const = 0;
-	virtual timecnt_t natural_length() const = 0;
 
 	size_t index() const { return _index; }
 
@@ -175,9 +182,14 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	int run (BufferSet&, pframes_t nframes, pframes_t offset, bool first);
 
-	void set_length (timecnt_t const &);
-	timecnt_t current_length() const;
-	timecnt_t natural_length() const;
+	void set_start (timepos_t);
+	void set_end (timepos_t);
+	/* this accepts timepos_t because the origin is assumed to be the start */
+	void set_length (timepos_t const &);
+	timepos_t start_offset () const { return timepos_t (_start_offset); } /* offset from start of data */
+	timepos_t end() const;            /* offset from start of data */
+	timepos_t current_length() const; /* offset from start of data */
+	timepos_t natural_length() const; /* offset from start of data */
 
 	int set_region (boost::shared_ptr<Region>);
 
@@ -189,8 +201,9 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	std::vector<Sample*> data;
 	samplecnt_t read_index;
 	samplecnt_t data_length;
-	samplepos_t start_offset;
+	samplepos_t _start_offset;
 	samplecnt_t usable_length;
+	samplepos_t last_sample;
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
