@@ -56,7 +56,7 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	poly_margin = 2. * scale;
 	poly_size = height - (poly_margin * 2.);
 
-	Rect r (0, 0, width, height);
+	ArdourCanvas::Rect r (0, 0, width, height);
 	set (r);
 	set_outline_all ();
 	set_fill_color (Gtkmm2ext::random_color());
@@ -64,7 +64,7 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	name = string_compose ("trigger %1", _trigger.index());
 
 	play_button = new Rectangle (this);
-	play_button->set (Rect (0., 0., poly_size + (poly_margin * 2.), height));
+	play_button->set (ArdourCanvas::Rect (0., 0., poly_size + (poly_margin * 2.), height));
 	play_button->set_outline (false);
 	play_button->set_fill_color (0x000000ff);
 	play_button->name = string_compose ("playbutton %1", _trigger.index());
