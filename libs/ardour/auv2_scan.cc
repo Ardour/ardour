@@ -35,6 +35,8 @@
 #include <Carbon/Carbon.h>
 #endif
 
+#undef nil
+
 #ifdef COREAUDIO105
 #define ArdourComponent Component
 #define ArdourDescription ComponentDescription
