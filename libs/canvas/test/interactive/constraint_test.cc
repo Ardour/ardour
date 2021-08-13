@@ -19,10 +19,6 @@ using namespace Gtk;
 using std::cerr;
 using std::endl;
 
-#ifdef PLATFORM_WINDOWS
-#define srandom() srand()
-#endif
-
 int
 main (int argc, char* argv[])
 {
@@ -35,8 +31,6 @@ main (int argc, char* argv[])
 	Canvas* c = cview.canvas ();
 
 	c->set_background_color (0xffffffff);
-
-	srandom (time ((time_t *) 0));
 
 	// cview.set_size_request (100, 100);
 
