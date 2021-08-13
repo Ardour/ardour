@@ -176,7 +176,7 @@ Editor::draw_metric_marks (TempoMap::Metrics const & metrics)
 
 		if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*i)) != 0) {
 
-			if (ms->map().time_domain() == BeatTime) {
+			if (mtp->map().time_domain() == BeatTime) {
 				metric_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker music"), "bar!", *mtp));
 			} else {
 				metric_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker"), "foo!", *mtp));
