@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cstdlib>
-#include <glib.h>
 
 #include <glibmm.h>
 
@@ -9,6 +8,7 @@
 #include "pbd/basename.h"
 #include "pbd/compose.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/pcg_rand.h"
 
 #include "temporal/tempo.h"
 
@@ -990,7 +990,8 @@ TriggerBox::set_next_trigger (size_t current)
 	}
 
 	int which_follow_action;
-	int r = g_random_int() % 100;
+	PCGRand pcg;
+	int r = pcg.rand (0, 101);
 
 	if (r <= all_triggers[current]->follow_action_probability()) {
 		which_follow_action = 0;
@@ -1078,7 +1079,7 @@ TriggerBox::set_next_trigger (size_t current)
 
 	case Trigger::AnyTrigger:
 		while (true) {
-			n = g_random_int() % all_triggers.size();
+			n = pcg.rand (0, all_triggers.size() + 1);
 			if (!all_triggers[n]->region()) {
 				continue;
 			}
@@ -1092,7 +1093,7 @@ TriggerBox::set_next_trigger (size_t current)
 
 	case Trigger::OtherTrigger:
 		while (true) {
-			n = g_random_int() % all_triggers.size();
+			n = pcg.rand (0, all_triggers.size() + 1);
 			if ((size_t) n == current) {
 				continue;
 			}
