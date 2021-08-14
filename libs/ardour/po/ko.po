@@ -1,15 +1,15 @@
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Jung Hee Lee <daemul72@gmail.com>, 2021.
+# 이정희 <daemul72@gamil.com>, 2021.
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: Ardour 6.9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-13 09:42+0200\n"
-"PO-Revision-Date: 2021-08-04 13:38+0900\n"
+"POT-Creation-Date: 2021-08-13 09:41+0200\n"
+"PO-Revision-Date: 2021-08-14 20:53+0900\n"
 "Last-Translator: JungHee Lee <daemul72@gmail.com>\n"
-"Language-Team: JungHee Lee <daemul72@gmail.com>\n"
+"Language-Team: 이정희 <daemul72@gmail.com>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.0\n"
 
-#: analyser.cc:127 audioregion.cc:1782
+#: analyser.cc:127 audioregion.cc:1814
 msgid "Transient Analysis failed for %1."
 msgstr "%1에 대한 일시적인 분석에 실패했습니다."
 
@@ -25,7 +25,7 @@ msgstr "%1에 대한 일시적인 분석에 실패했습니다."
 msgid "Audio File Source"
 msgstr "오디오 파일 소스"
 
-#: analysis_graph.cc:149
+#: analysis_graph.cc:166
 msgid "%1 (%2..%3)"
 msgstr "%1 (%2..%3)"
 
@@ -173,7 +173,7 @@ msgstr "메모리 부족 오류"
 msgid "Could not reconnect to Audio/MIDI engine"
 msgstr "오디오/MIDI 엔진에 다시 연결할 수 없음"
 
-#: audio_backend.cc:107 export_formats.cc:60 session.cc:6897
+#: audio_backend.cc:107 export_formats.cc:60 session.cc:6920
 #: transport_master.cc:481
 msgid "None"
 msgstr "없음"
@@ -228,8 +228,8 @@ msgstr "오디오 재생 목록 (미사용)"
 
 #: audio_playlist_source.cc:156 audiosource.cc:1093 midi_playlist_source.cc:163
 #: midi_playlist_source.cc:171 midi_playlist_source.cc:178 midi_source.cc:410
-#: midi_source.cc:437 plugin_insert.cc:1494 rb_effect.cc:333 session.cc:5252
-#: session.cc:5257 session.cc:5286 session.cc:5291 session.cc:5386
+#: midi_source.cc:437 plugin_insert.cc:1515 rb_effect.cc:333 session.cc:5248
+#: session.cc:5253 session.cc:5282 session.cc:5287 session.cc:5382
 #: session_handle.cc:87 sndfilesource.cc:172
 msgid "programming error: %1"
 msgstr "프로그래밍 오류: %1"
@@ -274,29 +274,29 @@ msgstr "오디오 트랙 %1 가져오는 중 오류"
 msgid "cannot load VAMP plugin \"%1\""
 msgstr "VAMP 플러그인 \"%1\"을(를) 불러올 수 없습니다"
 
-#: audioanalyser.cc:72 lua_api.cc:846
+#: audioanalyser.cc:72 lua_api.cc:875
 msgid "VAMP Plugin \"%1\" could not be loaded"
 msgstr "VAMP 플러그인 \"%1\"을(를) 불러올 수 없습니다"
 
-#: audioengine.cc:887
+#: audioengine.cc:890
 msgid "AudioEngine: cannot load module \"%1\" (%2)"
 msgstr "오디오Engine: 모듈 \"%1\"(%2)을(를) 불러올 수 없습니다."
 
-#: audioengine.cc:893
+#: audioengine.cc:896
 msgid "AudioEngine: backend at \"%1\" has no descriptor function."
 msgstr "오디오Engine: \"%1\"의 백엔드에 설명자 기능이 없습니다."
 
-#: audioengine.cc:987
+#: audioengine.cc:990
 msgid "Could not create backend for %1: %2"
 msgstr "%1에 대한 백엔드를 생성할 수 없음: %2"
 
-#: audioengine.cc:1692
+#: audioengine.cc:1717
 msgid ""
 "programming error: port %1 could not be placed on the pending deletion "
 "queue\n"
 msgstr "프로그래밍 오류: %1 포트를 삭제 대기열에 배치할 수 없음\n"
 
-#: audioregion.cc:1750
+#: audioregion.cc:1782
 msgid ""
 "You have requested an operation that requires audio analysis.\n"
 "\n"
@@ -322,7 +322,7 @@ msgstr ""
 "이 대화 상자는 다시 표시되지 않습니다. 그러나 이 작업과 향후 과도 감지 작업에"
 "서 약간의 지연이 발생할 수 있습니다.\n"
 
-#: audioregion.cc:1782
+#: audioregion.cc:1814
 msgid "Audio Region"
 msgstr "오디오 영역"
 
@@ -431,13 +431,13 @@ msgstr "자동화 노드에 경로 속성이 없습니다"
 
 #: automatable.cc:122
 msgid "cannot open %2 to load automation data (%3)"
-msgstr "자동화 데이터(%3)를 불러올하기 위해 %2을(를) 열 수 없습니다"
+msgstr "자동화 데이터(%3)를 불러오기 위해 %2을(를) 열 수 없습니다"
 
 #: automatable.cc:154
 msgid "cannot load automation data from %2"
 msgstr "%2에서 자동화 데이터를 불러올 수 없습니다"
 
-#: automatable.cc:192 send.cc:103 session.cc:852
+#: automatable.cc:192 send.cc:103 session.cc:850
 msgid "Fader"
 msgstr "페이더"
 
@@ -493,17 +493,17 @@ msgid ""
 msgstr ""
 "자동화 목록: \"자동화목록\"이 아닌, %1이라는 XML 노드를 전달했습니다 - 무시됨"
 
-#: butler.cc:123
+#: butler.cc:136
 msgid "Session: could not create butler thread"
 msgstr "세션: 버틀러 스레드를 만들 수 없습니다"
 
-#: butler.cc:264 butler.cc:265
+#: butler.cc:278 butler.cc:279
 msgid "Butler read ahead failure on dstream %1"
 msgstr "%1 dstream에서 버틀러 읽기 전 실패"
 
-#: butler.cc:354 butler.cc:355 butler.cc:403 butler.cc:404
+#: butler.cc:368 butler.cc:369
 msgid "Butler write-behind failure on dstream %1"
-msgstr "dstream %1에서 버틀러 쓰기 후 실패"
+msgstr "Dstream %1에서 Butler 쓰기 후 실패"
 
 #: control_protocol_manager.cc:133
 msgid "Control protocol %1 was already active."
@@ -573,7 +573,7 @@ msgstr "/proc/cpuinfo에서 CPU MHz를 찾을 수 없습니다"
 msgid "audio"
 msgstr "오디오"
 
-#: data_type.cc:28 session.cc:2391 session.cc:2418
+#: data_type.cc:28 session.cc:2389 session.cc:2416
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -621,27 +621,27 @@ msgstr ""
 msgid "DiskReader %1: when refilling, cannot write %2 into buffer"
 msgstr "DiskReader %1: 다시 채울 때 %2을(를) 버퍼에 쓸 수 없습니다"
 
-#: disk_writer.cc:94
+#: disk_writer.cc:93
 msgid "Recorder"
 msgstr "녹음기"
 
-#: disk_writer.cc:914 disk_writer.cc:933
+#: disk_writer.cc:960 disk_writer.cc:979
 msgid "AudioDiskstream %1: cannot write to disk"
 msgstr "오디오Diskstream %1: 디스크에 쓸 수 없습니다"
 
-#: disk_writer.cc:979
+#: disk_writer.cc:1025
 msgid "MidiDiskstream %1: cannot write to disk"
 msgstr "MidiDiskstream %1: 디스크에 쓸 수 없습니다"
 
-#: disk_writer.cc:1059 disk_writer.cc:1085
+#: disk_writer.cc:1105 disk_writer.cc:1131
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 새 캡처 파일이 올바르게 초기화되지 않았습니다"
 
-#: disk_writer.cc:1071
+#: disk_writer.cc:1117
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "오디오Diskstream: 채널 %1이(가) 범위를 벗어났습니다"
 
-#: disk_writer.cc:1125
+#: disk_writer.cc:1169
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 "오디오Diskstream \"%1\": 캡처한 데이터를 디스크로 플러시할 수 없습니다!"
@@ -785,22 +785,22 @@ msgstr "Vorbis 샘플 형식"
 msgid "No sample format"
 msgstr "샘플 형식 없음"
 
-#: export_handler.cc:492
+#: export_handler.cc:496
 msgid "File %1 uploaded to %2"
-msgstr "파일 %1이(가) %2에 업불러올되었습니다"
+msgstr "파일 %1이(가) %2에 업로드되었습니다"
 
-#: export_handler.cc:498
+#: export_handler.cc:502
 msgid ""
 "upload to Soundcloud failed. Perhaps your email or password are incorrect?\n"
 msgstr ""
-"Soundcloud에 업불러올하지 못했습니다. 이메일이나 비밀번호가 정확하지 않습니"
+"Soundcloud에 업로드하지 못했습니다. 이메일이나 비밀번호가 정확하지 않습니"
 "까?\n"
 
-#: export_handler.cc:636 export_handler.cc:639
+#: export_handler.cc:640 export_handler.cc:643
 msgid "an error occurred while writing a TOC/CUE file: %1"
 msgstr "TOC/CUE 파일을 쓰는 동안 오류가 발생했음: %1"
 
-#: export_handler.cc:929 export_handler.cc:987
+#: export_handler.cc:933 export_handler.cc:991
 msgid "Cannot convert %1 to Latin-1 text"
 msgstr "%1을(를) 라틴어-1 텍스트로 변환할 수 없습니다"
 
@@ -878,7 +878,7 @@ msgid ""
 "configuration"
 msgstr "%1은(는) %2개의 채널만 지원하지만 채널 구성에 %3개의 채널이 있습니다"
 
-#: file_source.cc:200 session_state.cc:3675
+#: file_source.cc:200 session_state.cc:3725
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr "%1과(와) 같은 이름을 가진 파일이 이미 1000개 있습니다; 버전 관리 중단"
@@ -1039,76 +1039,88 @@ msgstr "대상 폴더가 이미 있습니다."
 msgid "Unknown Error"
 msgstr "알 수 없는 오류"
 
-#: globals.cc:301
+#: globals.cc:292
+msgid "Released CPU DMA latency request"
+msgstr "릴리스된 CPU DMA 레이턴시 요청"
+
+#: globals.cc:319 globals.cc:325
+msgid "Could not set CPU DMA latency to %1 usec (%2)"
+msgstr "CPU DMA 레이턴시를 %1 μs (%2)로 설정할 수 없습니다"
+
+#: globals.cc:323
+msgid "Set CPU DMA latency to %1 usec"
+msgstr "CPU DMA 레이턴시를 %1 μs로 설정"
+
+#: globals.cc:355
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr "시스템 열기 파일 제한을 \"무제한\"으로 지정할 수 없습니다"
 
-#: globals.cc:303
+#: globals.cc:357
 msgid "Could not set system open files limit to %1"
 msgstr "시스템 열기 파일 제한을 %1 (으)로 지정할 수 없습니다"
 
-#: globals.cc:307 globals.cc:324
+#: globals.cc:361 globals.cc:378
 msgid "Your system is configured to limit %1 to %2 open files"
 msgstr "시스템이 열린 파일 %1을(를) %2로 제한하도록 구성되어 있습니다"
 
-#: globals.cc:311
+#: globals.cc:365
 msgid "Could not get system open files limit (%1)"
 msgstr "시스템 열기 파일 제한(%1)을 가져올 수 없습니다"
 
-#: globals.cc:326
+#: globals.cc:380
 msgid "Could not set system open files limit. Current limit is %1 open files"
 msgstr ""
 "시스템 열기 파일 제한을 지정할 수 없습니다. 현재 제한은 %1 열린 파일입니다"
 
-#: globals.cc:533
+#: globals.cc:587
 msgid "Loading configuration"
-msgstr "구성 불러올 중"
+msgstr "구성 불러오는 중"
 
-#: globals.cc:613 route.cc:213 session.cc:1024
+#: globals.cc:662 route.cc:213 session.cc:1022
 msgid "Monitor"
 msgstr "모니터"
 
-#: globals.cc:614 session.cc:1279
+#: globals.cc:663 session.cc:1277
 msgid "Master"
 msgstr "마스터"
 
-#: globals.cc:620
+#: globals.cc:673
 msgid "Control"
 msgstr "제어"
 
-#: globals.cc:621
+#: globals.cc:674
 msgid "Mackie"
 msgstr "매키"
 
-#: globals.cc:622
+#: globals.cc:675
 msgid "FaderPort Recv"
 msgstr "페이더포트 수신"
 
-#: globals.cc:623
+#: globals.cc:676
 msgid "FaderPort Send"
 msgstr "페이더포트 전송"
 
-#: globals.cc:624
+#: globals.cc:677
 msgid "FaderPort2 Recv"
 msgstr "페이더포트2 수신"
 
-#: globals.cc:625
+#: globals.cc:678
 msgid "FaderPort2 Send"
 msgstr "페이더포트2 전송"
 
-#: globals.cc:626
+#: globals.cc:679
 msgid "FaderPort8 Recv"
 msgstr "페이더포트8 수신"
 
-#: globals.cc:627
+#: globals.cc:680
 msgid "FaderPort8 Send"
 msgstr "페이더포트8 전송"
 
-#: globals.cc:628
+#: globals.cc:681
 msgid "FaderPort16 Recv"
 msgstr "페이더포트16 수신"
 
-#: globals.cc:629
+#: globals.cc:682
 msgid "FaderPort16 Send"
 msgstr "페이더포트16 전송"
 
@@ -1116,74 +1128,74 @@ msgstr "페이더포트16 전송"
 msgid "Could not graph to file (%1)"
 msgstr "파일(%1)에 그래프를 작성할 수 없습니다"
 
-#: import.cc:163
+#: import.cc:176
 msgid "Cannot find new filename for imported file %1"
 msgstr "가져온 파일 %1의 새 파일 이름을 찾을 수 없습니다"
 
-#: import.cc:183
+#: import.cc:196
 msgid "Could not find a source for %1 even though we are updating this file!"
 msgstr "이 파일을 업데이트하고 있지만 %1의 소스를 찾을 수 없습니다!"
 
-#: import.cc:209
+#: import.cc:222
 msgid "Unable to create file %1 during import"
 msgstr "가져오는 동안 파일% 1을(를) 생성할 수 없습니다"
 
-#: import.cc:235
+#: import.cc:248
 msgid "Resampling %1 from %2kHz to %3kHz"
 msgstr "%2kHz에서 %3kHz로 %1 리샘플링"
 
-#: import.cc:241
+#: import.cc:254
 msgid "Copying %1"
 msgstr "%1 복사 중"
 
-#: import.cc:460
+#: import.cc:473
 msgid "Track %1 of %2 contained no usable MIDI data"
 msgstr "%2의 %1 트랙에는 사용 가능한 MIDI 데이터가 없습니다"
 
-#: import.cc:470
+#: import.cc:483
 msgid "MIDI file could not be written (best guess: %1)"
 msgstr "MIDI 파일을 쓸 수 없습니다 (최상의 추측: %1)"
 
-#: import.cc:518
+#: import.cc:531
 msgid "Import: cannot open input sound file \"%1\""
 msgstr "가져오기: 입력 사운드 파일 \"%1\"을(를) 열 수 없습니다"
 
-#: import.cc:547
+#: import.cc:560
 msgid "Import: error opening MIDI file"
 msgstr "가져오기: MIDI 파일을 여는 동안 오류가 발생했습니다"
 
-#: import.cc:554
+#: import.cc:567
 msgid "Import: file contains no channels."
 msgstr "가져오기: 파일에 채널이 없습니다."
 
-#: import.cc:588
+#: import.cc:601
 msgid "Loading MIDI file %1"
 msgstr "%1 MIDI 파일 불러오는 중"
 
-#: import.cc:649
+#: import.cc:662
 msgid "Failed to remove some files after failed/cancelled import operation"
 msgstr "져오기 작업이 실패/취소된 후 일부 파일을 제거하지 못했습니다"
 
-#: import_pt.cc:231
+#: import_pt.cc:238
 msgid "PT Import : MISSING `%1`, inserting ref to missing source"
 msgstr "PT 가져오기: `%1` 누락, 누락된 소스에 대한 참조 삽입 중"
 
-#: import_pt.cc:233
+#: import_pt.cc:240
 msgid "PT Import : MISSING `%1`, please check Audio Files"
 msgstr "PT 가져오기: `%1` 누락, 오디오 파일을 확인하십시오"
 
-#: import_pt.cc:249
+#: import_pt.cc:256
 msgid "Failed to find any audio for PT import"
 msgstr "PT 가져오기를 위한 오디오를 찾지 못했습니다"
 
-#: import_pt.cc:251
+#: import_pt.cc:258
 msgid ""
 "Failed to load one or more of the audio files for PT import, see above list"
 msgstr ""
-"PT 가져오기를 위한 하나 이상의 오디오 파일을 불러올하지 못했습니다. 위 목록"
-"을 참조하십시오"
+"PT 가져오기를 위한 하나 이상의 오디오 파일을 불러오지 못했습니다. 위 목록을 "
+"참조하십시오"
 
-#: import_pt.cc:253
+#: import_pt.cc:260
 msgid "All audio files found for PT import!"
 msgstr "PT 가져오기를 위한 모든 오디오 파일을 찾았습니다!"
 
@@ -1191,106 +1203,106 @@ msgstr "PT 가져오기를 위한 모든 오디오 파일을 찾았습니다!"
 msgid "Unknown"
 msgstr "알 수 없음"
 
-#: internal_send.cc:445 internal_send.cc:446
+#: internal_send.cc:454 internal_send.cc:455
 msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
 msgstr "%1 - 연결할 ID가 %2인 트랙/버스를 찾을 수 없습니다"
 
-#: io.cc:175
+#: io.cc:173
 msgid "IO: cannot disconnect port %1 from %2"
 msgstr "IO: %2에서 %1 포트의 연결을 끊을 수 없습니다"
 
-#: io.cc:329 io.cc:435
+#: io.cc:327 io.cc:433
 msgid "IO: cannot register input port %1"
 msgstr "O: 입력 포트 %1을(를) 등록할 수 없습니다"
 
-#: io.cc:334 io.cc:440
+#: io.cc:332 io.cc:438
 msgid "IO: cannot register output port %1"
 msgstr "IO: 출력 포트 %1을(를) 등록할 수 없습니다"
 
-#: io.cc:589 io.cc:661
+#: io.cc:596 io.cc:667
 msgid "incorrect XML node \"%1\" passed to IO object"
 msgstr "잘못된 XML 노드 \"%1\"이(가) IO 개체에 전달되었습니다"
 
-#: io.cc:721
+#: io.cc:727
 msgid "in"
-msgstr "입"
+msgstr "입력"
 
-#: io.cc:721
+#: io.cc:727
 msgid "out"
-msgstr "출"
+msgstr "출력"
 
-#: io.cc:722
+#: io.cc:728
 msgid "input"
 msgstr "입력"
 
-#: io.cc:722
+#: io.cc:728
 msgid "output"
 msgstr "출력"
 
-#: io.cc:733
+#: io.cc:739
 msgid "Unknown bundle \"%1\" listed for %2 of %3"
 msgstr "%3/%2에 대해 알 수 없는 번들 \"%1\"이(가) 나열되었습니다"
 
-#: io.cc:794
+#: io.cc:800
 msgid "Bundle %1 was not available - \"%2\" used instead"
 msgstr "번들 %1을(를) 사용할 수 없습니다 - 대신 \"%2\"가 사용되었습니다"
 
-#: io.cc:797
+#: io.cc:803
 msgid "No %1 bundles available as a replacement"
 msgstr "대체 번들로 사용할 수 있는 %1 번들이 없습니다"
 
-#: io.cc:901
+#: io.cc:907
 msgid "%1: cannot create I/O ports"
 msgstr "%1: I/O 포트를 생성할 수 없습니다"
 
-#: io.cc:1029 io.cc:1130
+#: io.cc:1035 io.cc:1136
 msgid "IO: badly formed string in XML node for inputs \"%1\""
 msgstr "IO: 입력 \"%1\"에 대한 XML 노드의 잘못된 형식 문자열"
 
-#: io.cc:1034 io.cc:1135
+#: io.cc:1040 io.cc:1141
 msgid "bad input string in XML node \"%1\""
 msgstr "XML 노드 \"%1\"의 잘못된 입력 문자열"
 
-#: io.cc:1073
+#: io.cc:1079
 msgid "IO: badly formed string in XML node for outputs \"%1\""
 msgstr "IO: 출력 \"%1\"에 대한 XML 노드의 잘못된 형식 문자열"
 
-#: io.cc:1078
+#: io.cc:1084
 msgid "IO: bad output string in XML node \"%1\""
 msgstr "IO: XML 노드 \"%1\"의 잘못된 출력 문자열"
 
-#: io.cc:1243 plugin.cc:326
+#: io.cc:1249 plugin.cc:332
 msgid "Out"
 msgstr "출력"
 
-#: io.cc:1243 plugin.cc:324
+#: io.cc:1249 plugin.cc:330
 msgid "In"
 msgstr "입력"
 
-#: io.cc:1491
+#: io.cc:1497
 #, c-format
 msgid "%s %u"
 msgstr "%s %u"
 
-#: io.cc:1537
+#: io.cc:1543
 #, c-format
 msgid "%s in"
 msgstr "%s 입력"
 
-#: io.cc:1539
+#: io.cc:1545
 #, c-format
 msgid "%s out"
 msgstr "%s 출력"
 
-#: io.cc:1609 session_bundles.cc:158 session_bundles.cc:192
+#: io.cc:1617 session_bundles.cc:158 session_bundles.cc:192
 msgid "mono"
 msgstr "모노"
 
-#: io.cc:1611 session_bundles.cc:171 session_bundles.cc:206
+#: io.cc:1619 session_bundles.cc:171 session_bundles.cc:206
 msgid "L"
 msgstr "L"
 
-#: io.cc:1611 session_bundles.cc:173 session_bundles.cc:208
+#: io.cc:1619 session_bundles.cc:173 session_bundles.cc:208
 msgid "R"
 msgstr "R"
 
@@ -1399,7 +1411,7 @@ msgstr "범위"
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "Locations::set_state에 잘못된 XML 모드가 전달되었습니다"
 
-#: location.cc:1187 session.cc:1613 session_state.cc:1458
+#: location.cc:1187 session.cc:1611 session_state.cc:1458
 msgid "session"
 msgstr "세션"
 
@@ -1471,7 +1483,7 @@ msgstr "LTCFileReader: \"%1\"은(는) 빈 오디오 파일입니다"
 msgid "LTCFileReader:: invalid audio channel selected"
 msgstr "LTCFileReader:: 잘못된 오디오 채널이 선택되었습니다"
 
-#: ltc_slave.cc:651
+#: ltc_slave.cc:656
 msgid "flywheel"
 msgstr "플라이휠"
 
@@ -1519,7 +1531,7 @@ msgstr "LuaProc 사전 설정 디렉토리를 생성할 수 없음"
 msgid "Script '%1' has no valid descriptor."
 msgstr "'%1' 스크립트에 올바른 설명자가 없습니다."
 
-#: meter.cc:83
+#: meter.cc:82
 msgid "Meter"
 msgstr "미터"
 
@@ -1542,12 +1554,12 @@ msgstr "sys-ex 속성 변경에 대한 SysExID를 찾을 수 없음 - 무시됨"
 #: midi_patch_manager.cc:126
 msgid "Loading %1 MIDI patch from %2"
 msgid_plural "Loading %1 MIDI patches from %2"
-msgstr[0] "%2에서 %1개의 MIDI 패치 불러올 중"
+msgstr[0] "%2에서 %1개의 MIDI 패치 불러오는 중"
 
 #: midi_patch_manager.cc:158
 msgid "Unloading %1 MIDI patch from %2"
 msgid_plural "Unloading %1 MIDI patches from %2"
-msgstr[0] "%2에서 %1개의 MIDI 패치 언불러올"
+msgstr[0] "%2에서 %1개의 MIDI 패치 해제 중"
 
 #: midi_patch_manager.cc:175
 msgid "Error parsing MIDI patch file %1"
@@ -1625,7 +1637,7 @@ msgstr "솔로 컨트롤"
 msgid "MPEG Layer %1 (%2 kbps)"
 msgstr "MPEG 레이어 %1 (%2 kbps)"
 
-#: mtc_slave.cc:369
+#: mtc_slave.cc:375
 msgid ""
 "Unknown rate/drop value %1 in incoming MTC stream, session values used "
 "instead"
@@ -1795,11 +1807,11 @@ msgstr "A#"
 msgid "Note|B"
 msgstr "B"
 
-#: playlist.cc:2299
+#: playlist.cc:2341
 msgid "region state node has no ID, ignored"
 msgstr "영역 상태 노드에 ID가 없으므로 무시됨"
 
-#: playlist.cc:2314
+#: playlist.cc:2356
 msgid "Playlist: cannot create region from XML"
 msgstr "재생 목록: XML에서 영역을 만들 수 없습니다"
 
@@ -1827,47 +1839,47 @@ msgstr "이름이 지정된 공장 사전 설정이 이미 존재합니다."
 msgid "Failed to save plugin preset."
 msgstr "플러그인 사전 설정을 저장하지 못했습니다."
 
-#: plugin.cc:314 session.cc:2387
+#: plugin.cc:320 session.cc:2385
 msgid "Audio"
 msgstr "오디오"
 
-#: plugin.cc:317
+#: plugin.cc:323
 msgid "Midi"
 msgstr "MIDI"
 
-#: plugin.cc:320
+#: plugin.cc:326
 msgid "?"
 msgstr "?"
 
-#: plugin_insert.cc:541
+#: plugin_insert.cc:556
 msgid "Plugin Enable"
 msgstr "플러그인 활성화"
 
-#: plugin_insert.cc:743
+#: plugin_insert.cc:758
 msgid "PluginInsert: VST Bypass failed, falling back to host bypass."
 msgstr "플러그인삽입: VST 바이패스가 실패하고 호스트 바이패스로 폴백됩니다"
 
-#: plugin_insert.cc:1373
+#: plugin_insert.cc:1394
 msgid "programming error: "
 msgstr "프로그래밍 오류: "
 
-#: plugin_insert.cc:1940
+#: plugin_insert.cc:1961
 msgid "SC %1"
 msgstr "SC %1"
 
-#: plugin_insert.cc:2629
+#: plugin_insert.cc:2650
 msgid "XML node describing plugin is missing the `type' field"
 msgstr "플러그인을 설명하는 XML 노드에 '유형' 필드가 누락되었습니다"
 
-#: plugin_insert.cc:2650
+#: plugin_insert.cc:2671
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr "플러그인 삽입 상태의 알 수 없는 플러그인 유형 %1"
 
-#: plugin_insert.cc:2673
+#: plugin_insert.cc:2694
 msgid "Plugin has no unique ID field"
 msgstr "플러그인에 고유한 ID 필드가 없습니다"
 
-#: plugin_insert.cc:2728
+#: plugin_insert.cc:2749
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
@@ -1875,307 +1887,324 @@ msgstr ""
 "알 수 없는 플러그인(\"%1\")에 대한 참조를 찾았습니다.\n"
 "아마도 마지막으로 사용한 이후에 제거되거나 이동되었을 것입니다."
 
-#: plugin_insert.cc:2954
+#: plugin_insert.cc:2975
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr "플러그인삽입: 자동: ladspa 포트 번호 없음"
 
-#: plugin_insert.cc:2959
+#: plugin_insert.cc:2980
 msgid "PluginInsert: Auto: port id out of range"
 msgstr "플러그인삽입: 자동: 포트 ID가 범위를 벗어남"
 
-#: plugin_insert.cc:2971
+#: plugin_insert.cc:2992
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr "플러그인삽입: 자동화 가능한 제어 %1을(를) 찾을 수 없음 - 무시됨"
 
-#: plugin_manager.cc:304
+#: plugin_manager.cc:329
 msgid "Discovering Plugins"
 msgstr "플러그인을 찾아보는 중"
 
-#: plugin_manager.cc:444
+#: plugin_manager.cc:470
 msgid "Scanning LADSPA Plugins"
 msgstr "LADSPA 플러그인 스캔하는 중"
 
-#: plugin_manager.cc:446
+#: plugin_manager.cc:472
 msgid "Scanning Lua DSP Processors"
 msgstr "Lua DSP 프로세서 스캔하는 중"
 
-#: plugin_manager.cc:449
+#: plugin_manager.cc:475
 msgid "Scanning LV2 Plugins"
 msgstr "LV2 플러그인 스캔하는 중"
 
-#: plugin_manager.cc:461
+#: plugin_manager.cc:487
 msgid "Scanning Windows VST Plugins"
 msgstr "Windows VST 플러그인 스캔하는 중"
 
-#: plugin_manager.cc:463
+#: plugin_manager.cc:489
 msgid "Discovering Windows VST Plugins"
 msgstr "Windows VST 플러그인 찾아보는 중"
 
-#: plugin_manager.cc:472
+#: plugin_manager.cc:498
 msgid "Scanning Linux VST Plugins"
 msgstr "Linux VST 플러그인 스캔하는 중"
 
-#: plugin_manager.cc:474
+#: plugin_manager.cc:500
 msgid "Discovering Linux VST Plugins"
 msgstr "Linux VST 플러그인 찾아보는 중"
 
-#: plugin_manager.cc:483
+#: plugin_manager.cc:509
 msgid "Scanning Mac VST Plugins"
 msgstr "Mac VST 플러그인 스캔하는 중"
 
-#: plugin_manager.cc:485
+#: plugin_manager.cc:511
 msgid "Discovering Mac VST Plugins"
 msgstr "Mac VST 플러그인 찾아보는 중"
 
-#: plugin_manager.cc:501
-msgid "VST 2 Blacklist: "
-msgstr "VST 2 블랙리스트: "
-
-#: plugin_manager.cc:510
+#: plugin_manager.cc:533
 msgid "Scanning VST3 Plugins"
 msgstr "VST3 플러그인 스캔하는 중"
 
-#: plugin_manager.cc:512
+#: plugin_manager.cc:535
 msgid "Discovering VST3 Plugins"
 msgstr "VST3 플러그인 찾아보는 중"
 
-#: plugin_manager.cc:521
-msgid "VST 3 Blacklist: "
-msgstr "VST 3 블랙리스트: "
-
-#: plugin_manager.cc:543
+#: plugin_manager.cc:563
 msgid "Scanning AU Plugins"
 msgstr "AU 플러그인 스캔하는 중"
 
-#: plugin_manager.cc:545
+#: plugin_manager.cc:565
 msgid "Discovering AU Plugins"
 msgstr "AU 플러그인 찾아보는 중"
 
-#: plugin_manager.cc:566
+#: plugin_manager.cc:601
 msgid "Plugin Scan Complete..."
 msgstr "플러그인 스캔 완료..."
 
-#: plugin_manager.cc:571
+#: plugin_manager.cc:606
 msgid "Indexing Plugins..."
 msgstr "플러그인 색인하는 중..."
 
-#: plugin_manager.cc:724
-msgid "LADSPA"
-msgstr "LADSPA"
+#: plugin_manager.cc:805 plugin_manager.cc:3274
+msgid "LADSPA (%1 / %2)"
+msgstr "LADSPA (%1 / %2)"
 
-#: plugin_manager.cc:782
+#: plugin_manager.cc:871
 msgid "Could not parse rdf file: %1"
 msgstr "rdf 파일을 구문 분석할 수 없음: %1"
 
-#: plugin_manager.cc:819
-msgid "LADSPA: cannot load module \"%1\" (%2)"
-msgstr "LADSPA: 모듈 \"%1\"(%2)을(를) 불러올 수 없습니다"
+#: plugin_manager.cc:921
+msgid "Cannot load module \"%1\" (%2)"
+msgstr "\"%1\" (%2) 모듈을 불러올 수 없습니다"
 
-#: plugin_manager.cc:826
-msgid "LADSPA: module \"%1\" has no descriptor function."
-msgstr "LADSPA: 모듈 \"%1\"에 설명자 기능이 없습니다."
+#: plugin_manager.cc:927
+msgid "LADSPA module \"%1\" has no descriptor function (%2)."
+msgstr "\"%1\" LADSPA 모듈에 설명자 기능(%2)이 없습니다."
 
-#: plugin_manager.cc:1061
-msgid "Disabled WindowsVST scan (safe mode)"
-msgstr "비활성화된 WindowsVST 검사 (안전 모드)"
+#: plugin_manager.cc:949
+msgid "LADSPA ignored blacklisted unique-id %1."
+msgstr "LADSPA가 블랙리스트에 있는 고유 ID %1을(를) 무시했습니다."
 
-#: plugin_manager.cc:1066
-msgid "--- Windows VST plugins Scan: %1"
-msgstr "--- Windows VST 플러그인 스캔: %1"
+#: plugin_manager.cc:1009
+msgid "Found LADSPA plugin, id: %1 name: %2, Inputs: %3, Outputs: %4"
+msgstr "LADSPA 플러그인을 찾았습니다. ID: %1 이름: %2, 입력: %3, 출력: %4"
 
-#: plugin_manager.cc:1072
-msgid "VST"
-msgstr "VST"
+#: plugin_manager.cc:1011
+msgid "LADSPA ignored plugin with duplicate id %1."
+msgstr "LADSPA가 중복 ID가 %1인 플러그인을 무시했습니다."
 
-#: plugin_manager.cc:1077
-msgid "--- Windows VST plugins Scan Done"
-msgstr "--- 윈도우 VST 플러그인 스캔 완료"
+#: plugin_manager.cc:1019
+msgid "LADSPA no plugins found in module."
+msgstr "LADSPA 모듈에서 플러그인을 찾을 수 없습니다."
 
-#: plugin_manager.cc:1092
-msgid "cannot open dll"
-msgstr "dll을 열 수 없음"
+#: plugin_manager.cc:1136
+msgid "Expected AUv2 Blacklist file does not exist."
+msgstr "예상한 AUv2 블랙리스트 파일이 존재하지 않습니다."
 
-#: plugin_manager.cc:1096
-msgid "invalid dll, file too small"
-msgstr "잘못된 dll, 파일이 너무 작음"
+#: plugin_manager.cc:1209
+msgid "Cannot launch AU scanner app '%1': %2"
+msgstr "AU 스캐너 앱 '%1'을(를) 실행할 수 없음: %2"
 
-#: plugin_manager.cc:1100
-msgid "not a dll"
-msgstr "dll이 아님"
+#: plugin_manager.cc:1304
+msgid "Saved AUV2 plugin cache to %1"
+msgstr "AUV2 플러그인 캐시를 %1에 저장했습니다"
 
-#: plugin_manager.cc:1106
-msgid "cannot determine dll type"
-msgstr "dll 유형을 결정할 수 없음"
+#: plugin_manager.cc:1335 plugin_manager.cc:1680 plugin_manager.cc:2190
+msgid "Scan Failed."
+msgstr "스캔 실패."
 
-#: plugin_manager.cc:1110
-msgid "cannot read dll PE header"
-msgstr "dll PE 헤더를 읽을 수 없음"
+#: plugin_manager.cc:1341
+msgid "Cannot parse AUv2 cache file '%1' for plugin '%2'"
+msgstr "플러그인 '%2'에 대한 AUv2 캐시 파일 '%1'을(를) 구문분석할 수 없습니다."
 
-#: plugin_manager.cc:1115
-msgid "invalid dll PE header"
-msgstr "잘못된 dll PE 헤더"
+#: plugin_manager.cc:1365
+msgid "Cache file %1 ID mismatch '%2' vs '%3'"
+msgstr "캐시 파일 %1 ID 불일치 '%2' 대 '%3'"
 
-#: plugin_manager.cc:1122
-msgid "i386 (32-bit)"
-msgstr "i386 (32비트)"
+#: plugin_manager.cc:1372
+msgid "Corrupt AUv2 cache file '%1'"
+msgstr "손상된 AUv2 캐시 파일 '%1'"
 
-#: plugin_manager.cc:1125
-msgid "Itanium"
-msgstr "아이테니엄"
+#: plugin_manager.cc:1389 plugin_manager.cc:3244
+msgid "AUv2"
+msgstr "AUv2"
 
-#: plugin_manager.cc:1128
-msgid "x64 (64-bit)"
-msgstr "x64 (64비트)"
+#: plugin_manager.cc:1389
+msgid "Indexing"
+msgstr "인덱싱"
 
-#: plugin_manager.cc:1131
-msgid "Native Architecture"
-msgstr "네이티브 아키텍처"
+#: plugin_manager.cc:1410 plugin_manager.cc:3242
+msgid "AUv2 (%1 / %2)"
+msgstr "AUv2 (%1 / %2)"
 
-#: plugin_manager.cc:1134
-msgid "Unknown Architecture"
-msgstr "알 수 없는 아키텍처"
+#: plugin_manager.cc:1428
+msgid "Cannot write to VST2 blacklist file '%1'"
+msgstr "VST2 블랙리스트 파일 '%1'에 쓸 수 없습니다."
 
-#: plugin_manager.cc:1150
-msgid " *  %1 (cache only)"
-msgstr " *  %1 (캐시 전용)"
+#: plugin_manager.cc:1440
+msgid "Expected VST Blacklist file does not exist."
+msgstr "예상한 VST 블랙리스트 파일이 존재하지 않습니다."
 
-#: plugin_manager.cc:1152
-msgid " *  %1 - %2"
-msgstr " *  %1 - %2"
-
-#: plugin_manager.cc:1166
-msgid " -> Cannot get Windows VST information, plugin ignored."
-msgstr " -> Windows VST 정보를 가져올 수 없습니다. 플러그인이 무시되었습니다."
-
-#: plugin_manager.cc:1176
-msgid ""
-"VST plugin %1 does not support processReplacing, and cannot be used in %2 at "
-"this time"
-msgstr ""
-"VST 플러그인 %1은(는) processReplacing을 지원하지 않으며 현재 %2에서 사용할 "
-"수 없습니다"
-
-#: plugin_manager.cc:1199
-msgid "Ignoring duplicate Windows VST plugin \"%1\""
-msgstr "중복된 Windows VST 플러그인 \"%1\" 무시하는 중"
-
-#: plugin_manager.cc:1211
-msgid " -> OK (VST Plugin \"%1\" was added)."
-msgstr " -> 확인 (VST 플러그인 \"%1\"이(가) 추가됨)."
-
-#: plugin_manager.cc:1252
-msgid "Disabled MacVST scan (safe mode)"
-msgstr "비활성화된 MacVST 스캔 (안전 모드)"
-
-#: plugin_manager.cc:1272
-msgid "MacVST"
-msgstr "MacVST"
-
-#: plugin_manager.cc:1311
-msgid ""
-"Mac VST plugin %1 does not support processReplacing, and so cannot be used "
-"in %2 at this time"
-msgstr ""
-"Mac VST 플러그인 %1은(는) processReplacing을 지원하지 않으므로 현재 %2에서 사"
-"용할 수 없습니다"
-
-#: plugin_manager.cc:1379
-msgid "Disabled LinuxVST scan (safe mode)"
-msgstr "비활성화된 LinuxVST 스캔 (안전 모드)"
-
-#: plugin_manager.cc:1392
-msgid "LXVST"
-msgstr "LXVST"
-
-#: plugin_manager.cc:1418
-msgid ""
-"linuxVST plugin %1 does not support processReplacing, and so cannot be used "
-"in %2 at this time"
-msgstr ""
-"linuxVST 플러그인 %1은(는) processReplacing을 지원하지 않으므로 현재 %2에서 "
-"사용할 수 없습니다"
-
-#: plugin_manager.cc:1497
-msgid "Cannot write to VST3 blacklist file '%1'"
-msgstr "VST3 블랙리스트 파일 '%1'에 쓸 수 없습니다"
-
-#: plugin_manager.cc:1574
-msgid "Disabled VST3 scan (safe mode)"
-msgstr "비활성화된 VST3 스캔 (안전 모드)"
-
-#: plugin_manager.cc:1591
-msgid "VST3"
-msgstr "VST3"
-
-#: plugin_manager.cc:1684
-msgid "Cannot parse VST3 cache file '%1' for plugin '%2'"
-msgstr "플러그인 '%2'에 대한 VST3 캐시 파일 '%1'을(를) 구문분석할 수 없습니다"
-
-#: plugin_manager.cc:1699
-msgid "Invalid VST3 cache file '%1' for plugin '%2'"
-msgstr "플러그인 '%2'에 대한 잘못된 VST3 캐시 파일 '%1'"
-
-#: plugin_manager.cc:1710
-msgid "Corrupt VST3 cache file '%1' for plugin '%2'"
-msgstr "플러그인 '%2'에 대한 손상된 VST3 캐시 파일 '%1'"
-
-#: plugin_manager.cc:1738
+#: plugin_manager.cc:1504 plugin_manager.cc:2261
 msgid "Cannot launch VST scanner app '%1': %2"
 msgstr "VST 스캐너 앱 '%1'을(를) 실행할 수 없음: %2"
 
-#: plugin_manager.cc:1893
+#: plugin_manager.cc:1550
+msgid ""
+"plugin '%1' does not support processReplacing, and so cannot be used in %2 "
+"at this time"
+msgstr ""
+"플러그인 '%1'은(는) processReplacing을 지원하지 않으므로 현재 %2에서 사용할 "
+"수 없습니다."
+
+#: plugin_manager.cc:1599
+msgid ""
+"Ignoring plugin '%1'. VST-ID conflicts with other plugin '%2' files: '%3' vs "
+"'%4'"
+msgstr ""
+"플러그인 '%1'을(를) 무시합니다. VST-ID가 다른 플러그인 '%2' 파일과 충돌: "
+"'%3' 대 '%4'"
+
+#: plugin_manager.cc:1648
+msgid "Saved VST2 plugin cache to '%1'"
+msgstr "VST2 플러그인 캐시를 '%1'에 저장했습니다."
+
+#: plugin_manager.cc:1686
+msgid "Cannot parse VST2 cache file '%1' for plugin '%2'"
+msgstr "플러그인 '%2'에 대한 VST2 캐시 파일 '%1'을(를) 구문분석할 수 없습니다."
+
+#: plugin_manager.cc:1703
+msgid "Invalid VST2 cache file '%1'"
+msgstr "잘못된 VST2 캐시 파일 '%1'"
+
+#: plugin_manager.cc:1717
+msgid "VST2 architecture mismatches '%1'"
+msgstr "VST2 아키텍처가 '%1'과(와) 일치하지 않습니다"
+
+#: plugin_manager.cc:1735
+msgid "Corrupt VST2 cache file '%1'"
+msgstr "손상된 VST2 캐시 파일 '%1"
+
+#: plugin_manager.cc:1781
+msgid "Disabled WindowsVST scan (safe mode)"
+msgstr "비활성화된 WindowsVST 스캔 (안전 모드)"
+
+#: plugin_manager.cc:1794 plugin_manager.cc:1877 plugin_manager.cc:1937
+#: plugin_manager.cc:3255
+msgid "VST2 (%1 / %2)"
+msgstr "VST2 (%1 / %2)"
+
+#: plugin_manager.cc:1835
+msgid "Disabled MacVST scan (safe mode)"
+msgstr "비활성화된 MacVST 스캔 (안전 모드)"
+
+#: plugin_manager.cc:1918
+msgid "Disabled LinuxVST scan (safe mode)"
+msgstr "비활성화된 LinuxVST 스캔 (안전 모드)"
+
+#: plugin_manager.cc:1998
+msgid "Cannot write to VST3 blacklist file '%1'"
+msgstr "VST3 블랙리스트 파일 '%1'에 쓸 수 없습니다"
+
+#: plugin_manager.cc:2063
+msgid "Disabled VST3 scan (safe mode)"
+msgstr "비활성화된 VST3 스캔 (안전 모드)"
+
+#: plugin_manager.cc:2083 plugin_manager.cc:3265
+msgid "VST3 (%1 / %2)"
+msgstr "VST3 (%1 / %2)"
+
+#: plugin_manager.cc:2156
+msgid "Saved VST3 plugin cache to '%1'"
+msgstr "VST3 플러그인 캐시를 '%1'에 저장했습니다"
+
+#: plugin_manager.cc:2196
+msgid "Cannot parse VST3 cache file '%1' for plugin '%2'"
+msgstr "플러그인 '%2'에 대한 VST3 캐시 파일 '%1'을(를) 구문분석할 수 없습니다"
+
+#: plugin_manager.cc:2212
+msgid "Invalid VST3 cache file '%1'"
+msgstr "잘못된 VST3 캐시 파일 '%1'"
+
+#: plugin_manager.cc:2228
+msgid "Corrupt VST3 cache file '%1'"
+msgstr "손상된 VST3 캐시 파일 '%1'"
+
+#: plugin_manager.cc:2427
 msgid "unknown plugin status type \"%1\" - all entries ignored"
 msgstr "알 수 없는 플러그인 상태 유형 \"%1\" - 모든 항목 무시됨"
 
-#: plugin_manager.cc:1915
+#: plugin_manager.cc:2449
 msgid "unknown plugin type \"%1\" - ignored"
 msgstr "알 수 없는 플러그인 유형 \"%1\" - 무시됨"
 
-#: plugin_manager.cc:1958
+#: plugin_manager.cc:2492
 msgid "Could not save Plugin Statistics to %1"
 msgstr "플러그인 통계를 %1에 저장할 수 없습니다"
 
-#: plugin_manager.cc:1969
+#: plugin_manager.cc:2503
 msgid "Loading plugin statistics file %1"
-msgstr "플러그인 통계 파일 %1을(를) 불러올하는 중"
+msgstr "플러그인 통계 파일 %1을(를) 불러오는 중"
 
-#: plugin_manager.cc:1973
+#: plugin_manager.cc:2507
 msgid "Cannot parse plugin statistics from %1"
 msgstr "%1에서 플러그인 통계를 구문 분석할 수 없습니다"
 
-#: plugin_manager.cc:2158
+#: plugin_manager.cc:2692
 msgid "Loading plugin order file %1"
-msgstr "플러그인 순서 파일 %1을(를) 불러올하는 중"
+msgstr "플러그인 순서 파일 %1을(를) 불러오는 중"
 
-#: plugin_manager.cc:2168
+#: plugin_manager.cc:2702
 msgid "Cannot parse Plugin Order info from %1"
 msgstr "%1에서 플러그인 순서 정보를 구문 분석할 수 없습니다"
 
-#: plugin_manager.cc:2182
+#: plugin_manager.cc:2716
 msgid "Could not save Plugin Order info to %1"
 msgstr "플러그인 주문 정보를 %1에 저장할 수 없습니다"
 
-#: plugin_manager.cc:2219
+#: plugin_manager.cc:2787
 msgid "Could not save Plugin Tags info to %1"
 msgstr "플러그인 태그 정보를 %1에 저장할 수 없습니다"
 
-#: plugin_manager.cc:2232
+#: plugin_manager.cc:2800
 msgid "Loading plugin meta data file %1"
-msgstr "플러그인 메타 데이터 파일 %1을(를) 불러올하는 중"
+msgstr "플러그인 메타 데이터 파일 %1을(를) 불러오는 중"
 
-#: plugin_manager.cc:2239
+#: plugin_manager.cc:2807
 msgid "Cannot parse plugin tag info from %1"
 msgstr "%1에서 플러그인 태그 정보를 구문 분석할 수 없습니다"
 
-#: plugin_manager.cc:2317
+#: plugin_manager.cc:2885
 msgid "PluginManager::sanitize_tag could not tokenize string: "
 msgstr "PluginManager::sanitize_tag가 문자열을 토큰화할 수 없음: "
 
-#: plugin_manager.cc:2367
+#: plugin_manager.cc:2935
 msgid "PluginManager: Could not tokenize string: "
 msgstr "PluginManager: 문자열을 토큰화할 수 없음: "
 
-#: port.cc:550
+#: plugin_manager.cc:3257
+msgid "VST2"
+msgstr "VST2"
+
+#: plugin_manager.cc:3267
+msgid "VST3"
+msgstr "VST3"
+
+#: plugin_manager.cc:3276
+msgid "LADSPA"
+msgstr "LADSPA"
+
+#: plugin_manager.cc:3384
+msgid "Cannot load Plugin Scan Log from '%1'."
+msgstr "'%1'에서 플러그인 스캔 로그를 불러올 수 없습니다."
+
+#: plugin_manager.cc:3392
+msgid "Plugin Scan Log '%1' contains invalid information."
+msgstr "플러그인 스캔 로그 '%1'에 잘못된 정보가 있습니다."
+
+#: plugin_manager.cc:3412
+msgid "Could not save Plugin Scan Log to %1"
+msgstr "플러그인 스캔 로그를 %1에 저장할 수 없습니다"
+
+#: port.cc:545
 msgid "could not reregister %1"
 msgstr "%1을(를) 다시 등록할 수 없습니다"
 
@@ -2342,35 +2371,35 @@ msgstr "오디오Engine: %1 (%2)을(를) %3 (%4)에 연결할 수 없습니다"
 msgid "Re-establising port %1 failed"
 msgstr "포트 %1을(를) 다시 설정하지 못했습니다"
 
-#: port_manager.cc:1509
+#: port_manager.cc:1519
 msgid "Could not save port info to %1"
 msgstr "포트 정보를 %1에 저장할 수 없습니다"
 
-#: port_manager.cc:1525
+#: port_manager.cc:1535
 msgid "Cannot load/convert MIDI port info from '%1'."
-msgstr "'%1'에서 MIDI 포트 정보를 불러올/변환할 수 없습니다."
+msgstr "'%1'에서 MIDI 포트 정보를 불러오기/변환할 수 없습니다."
 
-#: port_manager.cc:1534
+#: port_manager.cc:1544
 msgid ""
 "MIDI port info file '%1' contains invalid port description - please remove "
 "it."
 msgstr ""
 "MIDI 포트 정보 파일 '%1'에 잘못된 포트 설명이 있습니다 - 제거해 주십시오."
 
-#: port_manager.cc:1542
+#: port_manager.cc:1552
 msgid "MIDI port info file '%1' contains invalid meta data - please remove it."
 msgstr ""
 "MIDI 포트 정보 파일 '%1'에 잘못된 메타 데이터가 있습니다 - 제거해 주십시오."
 
-#: port_manager.cc:1555
+#: port_manager.cc:1565
 msgid "Cannot load port info from '%1'."
 msgstr "'%1'에서 포트 정보를 불러올 수 없습니다."
 
-#: port_manager.cc:1565
+#: port_manager.cc:1575
 msgid "port info file '%1' contains invalid information - please remove it."
 msgstr "포트 정보 파일 '%1'에 잘못된 정보가 있습니다 - 제거해 주십시오."
 
-#: port_manager.cc:1685
+#: port_manager.cc:1695
 msgid "Ambiguous latency for port '%1' (%2, %3)"
 msgstr "포트 '%1' (%2, %3)에 대한 모호한 대기 시간"
 
@@ -2384,7 +2413,7 @@ msgstr "활성 속성이 있는 하위 노드가 없습니다"
 
 #: rc_configuration.cc:101
 msgid "Loading system configuration file %1"
-msgstr "시스템 구성 파일 %1을(를) 불러올하는 중"
+msgstr "시스템 구성 파일 %1을(를) 불러오는 중"
 
 #: rc_configuration.cc:105
 msgid "%1: cannot read system configuration file \"%2\""
@@ -2392,7 +2421,7 @@ msgstr "%1: \"%2\" 시스템 구성 파일을 읽을 수 없습니다"
 
 #: rc_configuration.cc:110
 msgid "%1: system configuration file \"%2\" not loaded successfully."
-msgstr "%1: 시스템 구성 파일 \"%2\"이(가) 성공적으로 불러올되지 않았습니다."
+msgstr "%1: 시스템 구성 파일 \"%2\"이(가) 성공적으로 불러오지 못했습니다."
 
 #: rc_configuration.cc:114
 msgid ""
@@ -2404,7 +2433,7 @@ msgstr ""
 
 #: rc_configuration.cc:129
 msgid "Loading user configuration file %1"
-msgstr "사용자 구성 파일 %1을(를) 불러올하는 중"
+msgstr "사용자 구성 파일 %1을(를) 불러오는 중"
 
 #: rc_configuration.cc:133
 msgid "%1: cannot read configuration file \"%2\""
@@ -2412,7 +2441,7 @@ msgstr "%1: \"%2\" 구성 파일을 읽을 수 없습니다"
 
 #: rc_configuration.cc:138
 msgid "%1: user configuration file \"%2\" not loaded successfully."
-msgstr "%1: 사용자 구성 파일 \"%2\"이(가) 성공적으로 불러올되지 않았습니다."
+msgstr "%1: 사용자 구성 파일 \"%2\"이(가) 성공적으로 불러오지 못했습니다."
 
 #: rc_configuration.cc:142
 msgid "your %1 configuration file is empty. This is not normal."
@@ -2458,22 +2487,22 @@ msgstr "최근 세션 파일 %1(%2)을(를) 쓰는 동안 오류가 발생했습
 msgid "Error writing saved template file %1 (%2)"
 msgstr "저장된 템플릿 파일 %1(%2)을(를) 쓰는 동안 오류가 발생했습니다"
 
-#: region_factory.cc:82 region_factory.cc:124 region_factory.cc:166
-#: region_factory.cc:209
+#: region_factory.cc:82 region_factory.cc:123 region_factory.cc:164
+#: region_factory.cc:206
 msgid ""
 "programming error: RegionFactory::create() called with unknown Region type"
 msgstr ""
 "프로그래밍 오류: 알 수 없는 영역 유형으로 RegionFactory::create()가 호출됨"
 
-#: region_factory.cc:565
+#: region_factory.cc:560
 msgid "%1 compound-%2 (%3)"
 msgstr "%1 컴파운드-%2(%3)"
 
-#: region_factory.cc:567
+#: region_factory.cc:562
 msgid "%1 compound-%2.1 (%3)"
 msgstr "%1 컴파운드-%2.1 (%3)"
 
-#: region_factory.cc:625
+#: region_factory.cc:620
 msgid "cannot create new name for region \"%1\""
 msgstr "영역 \"%1\"에 대한 새 이름을 생성할 수 없습니다"
 
@@ -2489,7 +2518,7 @@ msgstr "가져오기: src_new() 실패됨: %1"
 msgid "return %1"
 msgstr "반환 %1"
 
-#: route.cc:965 route.cc:3231 track.cc:868
+#: route.cc:965 route.cc:3231 track.cc:874
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "알 수 없는 프로세서 유형 \"%1\"; 무시됨"
 
@@ -2509,59 +2538,59 @@ msgstr "트랙/버스(%1)의 패너 상태가 일치하지 않습니다."
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
 msgstr "잘못된 솔로 격리 전파: 시작:%1 신규:%2 - 기존:%3 = 델타:%4"
 
-#: route.cc:5006
+#: route.cc:5018
 msgid "Amp/Fader on track/bus '%1' was missing."
 msgstr "트랙/버스 '%1'의 앰프/페이더가 누락되었습니다."
 
-#: route.cc:5850 route.cc:5861
+#: route.cc:5862 route.cc:5873
 msgid "lo"
 msgstr "낮은"
 
-#: route.cc:5851
+#: route.cc:5863
 msgid "mid"
 msgstr "중간"
 
-#: route.cc:5852 route.cc:5864
+#: route.cc:5864 route.cc:5876
 msgid "hi"
 msgstr "높은"
 
-#: route.cc:5862
+#: route.cc:5874
 msgid "lm"
 msgstr "lm"
 
-#: route.cc:5863
+#: route.cc:5875
 msgid "hm"
 msgstr "hm"
 
-#: route.cc:5938
+#: route.cc:5950
 msgid "Leveler"
 msgstr "레벨러"
 
-#: route.cc:5940
+#: route.cc:5952
 msgid "Compressor"
 msgstr "압축기"
 
-#: route.cc:5942 route.cc:5944
+#: route.cc:5954 route.cc:5956
 msgid "Limiter"
 msgstr "제한기"
 
-#: route.cc:5944
+#: route.cc:5956
 msgid "Sidechain"
 msgstr "사이드체인"
 
-#: route.cc:5947 route.cc:5949 route.cc:5966 route.cc:5968
+#: route.cc:5959 route.cc:5961 route.cc:5978 route.cc:5980
 msgid "???"
 msgstr "???"
 
-#: route.cc:5959
+#: route.cc:5971
 msgid "Attk"
 msgstr "Attk"
 
-#: route.cc:5961
+#: route.cc:5973
 msgid "Ratio"
 msgstr "비율"
 
-#: route.cc:5964
+#: route.cc:5976
 msgid "Rels"
 msgstr "Rels"
 
@@ -2604,43 +2633,43 @@ msgstr "폴드백 %1"
 msgid "programming error: send created using role %1"
 msgstr "프로그래밍 오류: %1 역할을 사용하여 만든 전송"
 
-#: session.cc:363
+#: session.cc:361
 msgid "Session initialization failed"
 msgstr "세션 초기화 실패"
 
-#: session.cc:380
+#: session.cc:378
 msgid "Failed to load template/snapshot state"
-msgstr "템플릿/스냅샷 상태를 불러올하지 못했습니다"
+msgstr "템플릿/스냅샷 상태를 불러오지 못했습니다"
 
-#: session.cc:383
+#: session.cc:381
 msgid "Failed to parse template/snapshot state"
 msgstr "템플릿/스냅샷 상태를 구문 분석하지 못했습니다"
 
-#: session.cc:403
+#: session.cc:401
 msgid "Failed to load state"
-msgstr "상태를 불러올하지 못했습니다"
+msgstr "상태를 불러오지 못했습니다"
 
-#: session.cc:414 session.cc:418 session.cc:421 session.cc:424 session.cc:427
+#: session.cc:412 session.cc:416 session.cc:419 session.cc:422 session.cc:425
 msgid "Cannot initialize session/engine: %1"
 msgstr "세션/엔진을 초기화할 수 없음: %1"
 
-#: session.cc:414
+#: session.cc:412
 msgid "Failed to create background threads."
 msgstr "백그라운드 스레드를 생성하지 못했습니다"
 
-#: session.cc:418
+#: session.cc:416
 msgid "Invalid TempoMap in session-file."
 msgstr "세션 파일의 템포맵이 잘못되었습니다."
 
-#: session.cc:421
+#: session.cc:419
 msgid "Invalid or corrupt session state."
 msgstr "유효하지 않거나 손상된 세션 상태입니다."
 
-#: session.cc:424
+#: session.cc:422
 msgid "Port registration failed."
 msgstr "포트 등록에 실패했습니다."
 
-#: session.cc:427
+#: session.cc:425
 msgid ""
 "Unexpected exception during session setup, possibly invalid audio/midi "
 "engine parameters. Please see stdout/stderr for details"
@@ -2648,90 +2677,90 @@ msgstr ""
 "세션 설정 중 예기치 않은 예외가 발생했습니다. 오디오/미디 엔진 매개변수가 잘"
 "못되었을 수 있습니다. 자세한 내용은 stdout/stderr을 참조하십시오"
 
-#: session.cc:477
+#: session.cc:475
 msgid "Connect to engine"
 msgstr "엔진에 연결"
 
-#: session.cc:499
+#: session.cc:497
 msgid "Session loading complete"
 msgstr "세션 로딩 완료"
 
-#: session.cc:558
+#: session.cc:556
 msgid "Set up LTC"
 msgstr "LTC 설정"
 
-#: session.cc:560
+#: session.cc:558
 msgid "Set up Click"
 msgstr "클릭 설정"
 
-#: session.cc:562
+#: session.cc:560
 msgid "Set up standard connections"
 msgstr "표준 연결 설정"
 
-#: session.cc:891
+#: session.cc:889
 msgid "could not setup Click I/O"
 msgstr "I/O 클릭을 설정할 수 없습니다"
 
-#: session.cc:952
+#: session.cc:950
 msgid "cannot connect master output %1 to %2"
 msgstr "마스터 출력 %1에서 %2로 연결할 수 없습니다"
 
-#: session.cc:978
+#: session.cc:976
 msgid "Cannot remove monitor section while the engine is offline."
 msgstr "엔진이 오프라인 상태에서는 모니터 섹션을 제거할 수 없습니다."
 
-#: session.cc:1016
+#: session.cc:1014
 msgid "Cannot create monitor section while the engine is offline."
 msgstr "엔진이 오프라인 상태에서는 모니터 섹션을 만들 수 없습니다."
 
-#: session.cc:1037
+#: session.cc:1035
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
 msgstr ""
 "모니터 섹션을 만들 수 없습니다. '모니터' 포트 이름은 고유하지 않습니다."
 
-#: session.cc:1071 session.cc:1207
+#: session.cc:1069 session.cc:1205
 msgid "cannot connect control input %1 to %2"
 msgstr "제어 입력 %1에서 %2로 연결할 수 없습니다"
 
-#: session.cc:1090 session.cc:1225
+#: session.cc:1088 session.cc:1223
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "모니터 버스(%1)에 대해 선호하는 I/O를 찾을 수 없습니다"
 
-#: session.cc:1121 session.cc:1256
+#: session.cc:1119 session.cc:1254
 msgid "cannot connect control output %1 to %2"
 msgstr "제어 출력 %1에서 %2로 연결할 수 없습니다"
 
-#: session.cc:1321
+#: session.cc:1319
 msgid "cannot create Auditioner: no auditioning of regions possible"
-msgstr "Auditioner를 생성할 수 없음: 지역 오디션 불가"
+msgstr "Auditioner를 생성할 수 없음: 영역 오디션 불가"
 
-#: session.cc:1586
+#: session.cc:1584
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr "세션: 자동 펀치에 해당 위치를 사용할 수 없습니다(시작 <= 끝)."
 
-#: session.cc:1607
+#: session.cc:1605
 msgid "Session: you can't use that location for session start/end)"
 msgstr "세션: 세션에 해당 위치를 사용할 수 없습니다 (시작/종료)"
 
-#: session.cc:1641
+#: session.cc:1639
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
 msgstr "길이가 0이거나 음수이므로 이 위치를 자동 루프에 사용할 수 없습니다"
 
-#: session.cc:1833
+#: session.cc:1831
 msgid "programming error: session range removed!"
 msgstr "프로그래밍 오류: 세션 범위가 제거되었습니다!"
 
-#: session.cc:2122
+#: session.cc:2120
 msgid "feedback loop setup between %1 and %2"
 msgstr "%1과(와) %2 사이의 피드백 루프 설정"
 
-#: session.cc:2460
+#: session.cc:2458
 msgid "Session: could not create new midi track."
 msgstr "세션: 새 미디 트랙을 만들 수 없습니다."
 
-#: session.cc:2466
+#: session.cc:2464
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -2739,105 +2768,105 @@ msgstr ""
 "더 이상 JACK 포트를 사용할 수 없습니다. 이렇게 많은 트랙이 필요한 경우 %1을"
 "(를) 중지하고 더 많은 포트로 JACK을 다시 시작해야 합니다."
 
-#: session.cc:2496 session.cc:2499
+#: session.cc:2494 session.cc:2497
 msgid "Midi Bus"
 msgstr "Midi 버스"
 
-#: session.cc:2521
+#: session.cc:2519
 msgid "cannot configure new midi bus input"
 msgstr "새로운 미디 버스 입력을 구성할 수 없습니다"
 
-#: session.cc:2527
+#: session.cc:2525
 msgid "cannot configure new midi bus output"
 msgstr "새로운 미디 버스 출력을 구성할 수 없습니다"
 
-#: session.cc:2541
+#: session.cc:2539
 msgid "Session: could not create new MIDI bus."
 msgstr "세션: 새 MIDI 버스를 만들 수 없습니다."
 
-#: session.cc:2697 session.cc:2705 session.cc:2779 session.cc:2787
+#: session.cc:2695 session.cc:2703 session.cc:2777 session.cc:2785
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "새 오디오 트랙에 대한 %1 입력/%2 출력 구성을 구성할 수 없습니다"
 
-#: session.cc:2721
+#: session.cc:2719
 msgid "Session: could not create new audio track."
 msgstr "세션: 새 오디오 트랙을 만들 수 없습니다."
 
-#: session.cc:2754 session.cc:2757
+#: session.cc:2752 session.cc:2755
 msgid "Bus"
 msgstr "버스"
 
-#: session.cc:2803
+#: session.cc:2801
 msgid "Session: could not create new audio bus."
 msgstr "세션: 새 오디오 버스를 만들 수 없습니다"
 
-#: session.cc:2882
+#: session.cc:2880
 msgid "Session: Failed to create unique ID for track from template."
 msgstr "세션: 템플릿에서 트랙에 대한 고유 ID를 생성하지 못했습니다."
 
-#: session.cc:2892
+#: session.cc:2890
 msgid "Session: Failed to generate unique name and ID for track from template."
 msgstr "세션: 템플릿에서 트랙에 대한 고유한 이름과 ID를 생성하지 못했습니다."
 
-#: session.cc:3037
+#: session.cc:3035
 msgid "Session: cannot create track/bus from template description"
 msgstr "세션: 템플릿 설명에서 트랙/버스를 생성할 수 없습니다"
 
-#: session.cc:3071
+#: session.cc:3069
 msgid "Session: could not create new track/bus from template"
 msgstr "세션: 템플릿에서 새 트랙/버스를 만들 수 없습니다"
 
-#: session.cc:3121
+#: session.cc:3119
 msgid "Adding new tracks/busses failed"
 msgstr "새 트랙/버스 추가 실패"
 
-#: session.cc:4725
+#: session.cc:4723
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr "포함된 파일 %1 병합하는 중: 이름 충돌 및 md5 해시 충돌!"
 
-#: session.cc:4849
+#: session.cc:4846
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "%2에 대한 %1개의 녹음이 이미 있습니다. 너무 많다고 생각합니다."
 
-#: session.cc:4911
+#: session.cc:4907
 msgid ""
 "There are already many recordings for %1, resulting in a too long file-path "
 "%2."
 msgstr "%1에 대한 녹음이 이미 많이 있으므로 파일 경로 %2이(가) 너무 깁니다."
 
-#: session.cc:5525
+#: session.cc:5521
 msgid "send ID %1 appears to be in use already"
 msgstr "전송 ID %1이(가) 이미 사용 중인 것 같습니다"
 
-#: session.cc:5537
+#: session.cc:5533
 msgid "aux send ID %1 appears to be in use already"
 msgstr "aux 전송 ID %1이(가) 이미 사용 중인 것 같습니다"
 
-#: session.cc:5549
+#: session.cc:5545
 msgid "return ID %1 appears to be in use already"
 msgstr "반환 ID %1이(가) 이미 사용 중인 것 같습니다"
 
-#: session.cc:5561
+#: session.cc:5557
 msgid "insert ID %1 appears to be in use already"
 msgstr "삽입 ID %1이(가) 이미 사용 중인 것 같습니다"
 
-#: session.cc:5709
+#: session.cc:5706
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "끝 <= 시작인 범위를 쓸 수 없습니다 (예: %1 <= %2)"
 
-#: session.cc:5722
+#: session.cc:5719
 msgid "Cannot write a range with no data."
 msgstr "데이터가 없는 범위를 쓸 수 없습니다."
 
-#: session.cc:5768
+#: session.cc:5765
 msgid "cannot create new file \"%1\" for %2"
 msgstr "%2에 대한 새 파일 \"%1\"을(를) 만들 수 없습니다"
 
-#: session.cc:6855
+#: session.cc:6878
 msgid "Control Char"
 msgstr "컨트롤 문자"
 
-#: session.cc:7168 session.cc:7169
+#: session.cc:7191 session.cc:7192
 msgid "Virtual Keyboard"
 msgstr "가상 키보드"
 
@@ -2912,7 +2941,7 @@ msgstr "잘못된 세션 기본 XML 루트입니다."
 
 #: session_configuration.cc:165
 msgid "Loaded custom session defaults."
-msgstr "불러올된 사용자 정의 세션 기본값."
+msgstr "불러온 사용자 지정 세션 기본값."
 
 #: session_configuration.cc:167
 msgid "Found no session defaults in XML file."
@@ -2948,7 +2977,7 @@ msgstr ""
 "'%1'에 둘 이상의 폴더가 있습니다.\n"
 "가능한 파일 이름 모호성을 줄이기 위해 추가 하위 디렉토리를 제거하십시오."
 
-#: session_events.cc:232
+#: session_events.cc:233
 msgid "Session: cannot have two events of type %1 at the same sample (%2)."
 msgstr "세션: 동일한 샘플(%2)에 %1 유형의 이벤트가 두 개 있을 수 없습니다."
 
@@ -2956,11 +2985,11 @@ msgstr "세션: 동일한 샘플(%2)에 %1 유형의 이벤트가 두 개 있을
 msgid "Cannot prepare transport for export"
 msgstr "내보낼 트랜스포트를 준비할 수 없습니다"
 
-#: session_export.cc:174
+#: session_export.cc:175
 msgid "%1: cannot seek to %2 for export"
 msgstr "%1: 내보내기를 위해 %2을(를) 찾을 수 없습니다"
 
-#: session_export.cc:271
+#: session_export.cc:274
 msgid "Export ended unexpectedly: %1"
 msgstr "내보내기가 예기치 않게 종료되었습니다: %1"
 
@@ -2980,15 +3009,15 @@ msgstr "세션: 1/4 프레임 MTC 메시지(%1)를 보낼 수 없습니다"
 msgid "Session State: Unused playlist was listed as used."
 msgstr "세션 상태: 사용되지 않은 재생 목록이 사용된 것으로 나열되었습니다."
 
-#: session_playlists.cc:486 session_playlists.cc:506
+#: session_playlists.cc:535 session_playlists.cc:555
 msgid "Session: cannot create Playlist from XML description."
 msgstr "세션: XML 설명에서 재생 목록을 만들 수 없습니다."
 
-#: session_process.cc:197
+#: session_process.cc:200
 msgid "Session: error in no roll for %1"
 msgstr "세션: %1에 대한 롤 없음 오류"
 
-#: session_process.cc:1008
+#: session_process.cc:1022
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr "프로그래밍 오류: process_event (%1)의 잘못된 이벤트 유형"
 
@@ -3169,7 +3198,7 @@ msgstr "세션: XML 상태에 위치 섹션이 없습니다"
 
 #: session_state.cc:1681
 msgid "Session: XML state has no Regions section"
-msgstr "세션: XML 상태에 지역 섹션이 없습니다"
+msgstr "세션: XML 상태에 영역 섹션이 없습니다"
 
 #: session_state.cc:1688
 msgid "Session: XML state has no playlists section"
@@ -3179,79 +3208,87 @@ msgstr "세션: XML 상태에 재생 목록 섹션이 없습니다"
 msgid "Session: XML state has no bundles section"
 msgstr "세션: XML 상태에 번들 섹션이 없습니다"
 
-#: session_state.cc:1737
+#: session_state.cc:1777
+msgid "Created region '%1' for source '%2'"
+msgstr "소스 '%2'에 대해 '%1' 영역을 만들었습니다"
+
+#: session_state.cc:1779
+msgid "Failed to create region representation for source '%1'"
+msgstr "소스 '%1'에 대한 영역 표현을 작성하지 못했습니다"
+
+#: session_state.cc:1785
 msgid "Session: XML state has no routes section"
 msgstr "세션: XML 상태에 경로 섹션이 없습니다"
 
-#: session_state.cc:1755
+#: session_state.cc:1803
 msgid "Session: XML state has no route groups section"
 msgstr "세션: XML 상태에 경로 그룹 섹션이 없습니다"
 
-#: session_state.cc:1764
+#: session_state.cc:1812
 msgid "Session: XML state has no edit groups section"
 msgstr "세션: XML 상태에 편집 그룹 섹션이 없습니다"
 
-#: session_state.cc:1771
+#: session_state.cc:1819
 msgid "Session: XML state has no mix groups section"
 msgstr "세션: XML 상태에 혼합 그룹 섹션이 없습니다"
 
-#: session_state.cc:1779
+#: session_state.cc:1827
 msgid "Session: XML state has no click section"
 msgstr "세션: XML 상태에 클릭 섹션이 없습니다"
 
-#: session_state.cc:1851
+#: session_state.cc:1899
 msgid "Session: cannot create track/bus from XML description."
 msgstr "세션: XML 설명에서 트랙/버스를 생성할 수 없습니다."
 
-#: session_state.cc:1855
+#: session_state.cc:1903
 msgid "Loaded track/bus %1"
-msgstr "불러올된 트랙/버스 %1"
+msgstr "불러온 트랙/버스 %1"
 
-#: session_state.cc:1860
+#: session_state.cc:1908
 msgid "Tracks/busses loaded;  Adding to Session"
-msgstr "불러올된 트랙/버스;  세션에 추가하는 중"
+msgstr "불러온 트랙/버스;  세션에 추가하는 중"
 
-#: session_state.cc:1874
+#: session_state.cc:1922
 msgid "Finished adding tracks/busses"
 msgstr "트랙/버스 추가 완료됨"
 
-#: session_state.cc:2012
+#: session_state.cc:2060
 msgid "Could not find diskstream for diskstream-id: '%1', playlist: '%2'"
 msgstr ""
 "diskstream-id: '%1', 재생 목록: '%2'에 대한 diskstream을 찾을 수 없습니다"
 
-#: session_state.cc:2069
+#: session_state.cc:2119
 msgid "Session: cannot create Region from XML description."
-msgstr "세션: XML 설명에서 지역을 생성할 수 없습니다."
+msgstr "세션: XML 설명에서 영역을 생성할 수 없습니다."
 
-#: session_state.cc:2073
+#: session_state.cc:2123
 msgid "Can not load state for region '%1'"
 msgstr "'%1' 영역의 상태를 불러올 수 없습니다"
 
-#: session_state.cc:2109
+#: session_state.cc:2159
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
 msgstr "컴파운드 설명의 영역을 찾을 수 없음(ID의 %1 및 %2): 무시됨"
 
-#: session_state.cc:2137
+#: session_state.cc:2187
 msgid "Nested source has no ID info in session file! (ignored)"
 msgstr "중첩된 소스의 세션 파일에 ID 정보가 없습니다! (무시됨)"
 
-#: session_state.cc:2149
+#: session_state.cc:2199
 msgid "Cannot reconstruct nested source for region %1"
 msgstr "%1 영역에 대해 중첩된 소스를 재구성할 수 없습니다"
 
-#: session_state.cc:2209
+#: session_state.cc:2259
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr "세션: 오디오Region을 설명하는 XMLNode가 불완전합니다(소스 없음)"
 
-#: session_state.cc:2217 session_state.cc:2238 session_state.cc:2258
+#: session_state.cc:2267 session_state.cc:2288 session_state.cc:2308
 msgid ""
 "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
 msgstr ""
 "세션: 오디오Region을 설명하는 XMLNode가 알 수 없는 소스 ID =%1을(를) 참조합니"
 "다"
 
-#: session_state.cc:2223 session_state.cc:2244 session_state.cc:2264
+#: session_state.cc:2273 session_state.cc:2294 session_state.cc:2314
 msgid ""
 "Session: XMLNode describing a AudioRegion references a non-audio source id ="
 "%1"
@@ -3259,35 +3296,35 @@ msgstr ""
 "세션: 오디오Region을 설명하는 XMLNode가 오디오가 아닌 소스 ID =%1을(를) 참조"
 "합니다"
 
-#: session_state.cc:2287
+#: session_state.cc:2337
 msgid ""
 "Session: XMLNode describing an AudioRegion is missing some master sources; "
 "ignored"
 msgstr ""
 "세션: 오디오Region을 설명하는 XMLNode에 일부 마스터 소스가 없습니다; 무시됨"
 
-#: session_state.cc:2321
+#: session_state.cc:2371
 msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
 msgstr "세션: MidiRegion을 설명하는 XMLNode가 불완전합니다(소스 없음)"
 
-#: session_state.cc:2329
+#: session_state.cc:2379
 msgid ""
 "Session: XMLNode describing a MidiRegion references an unknown source id =%1"
 msgstr ""
 "세션: MidiRegion을 설명하는 XMLNode가 알 수 없는 소스 ID =%1을(를) 참조합니다"
 
-#: session_state.cc:2335
+#: session_state.cc:2385
 msgid ""
 "Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
 msgstr ""
 "세션: MidiRegion을 설명하는 XMLNode가 미디가 아닌 소스 ID =%1을(를) 참조합니"
 "다"
 
-#: session_state.cc:2421
+#: session_state.cc:2471
 msgid "Session: cannot create Source from XML description."
 msgstr "세션: XML 설명에서 소스를 생성할 수 없습니다."
 
-#: session_state.cc:2450
+#: session_state.cc:2500
 msgid ""
 "An external MIDI file is missing. %1 cannot currently recover from missing "
 "external MIDI files"
@@ -3295,40 +3332,40 @@ msgstr ""
 "외부 MIDI 파일이 없습니다. %1 현재 누락된 외부 MIDI 파일에서 복구할 수 없습니"
 "다"
 
-#: session_state.cc:2543
+#: session_state.cc:2593
 msgid "Found a sound file that cannot be used by %1. Talk to the programmers."
 msgstr ""
 "%1에서 사용할 수 없는 사운드 파일을 찾았습니다. 프로그래머와 대화하십시오."
 
-#: session_state.cc:2564
+#: session_state.cc:2614
 msgid "Could not create templates directory \"%1\" (%2)"
 msgstr "템플릿 디렉터리 \"%1\" (%2)을(를) 만들 수 없습니다"
 
-#: session_state.cc:2575
+#: session_state.cc:2625
 msgid "Template \"%1\" already exists - new version not created"
 msgstr "템플릿 \"%1\"이(가) 이미 존재합니다. 새 버전이 생성되지 않았습니다"
 
-#: session_state.cc:2581
+#: session_state.cc:2631
 msgid "Could not create directory for Session template\"%1\" (%2)"
 msgstr "세션 템플릿 \"%1\" (%2)에 대한 디렉터리를 생성할 수 없습니다"
 
-#: session_state.cc:2617
+#: session_state.cc:2667
 msgid "template not saved"
 msgstr "템플릿이 저장되지 않았습니다"
 
-#: session_state.cc:2864
+#: session_state.cc:2914
 msgid "Unknown node \"%1\" found in Bundles list from session file"
 msgstr "세션 파일의 번들 목록에서 알 수 없는 노드 \"%1\"을(를) 찾았습니다"
 
-#: session_state.cc:3356
+#: session_state.cc:3406
 msgid "Cannot cleanup peak-files for read-only session."
 msgstr "읽기 전용 세션에 대한 피크 파일을 정리할 수 없습니다."
 
-#: session_state.cc:3360
+#: session_state.cc:3410
 msgid "Cannot cleanup peak-files while recording"
 msgstr "녹음하는 동안 피크 파일을 정리할 수 없습니다"
 
-#: session_state.cc:3383
+#: session_state.cc:3433
 msgid ""
 "Timeout waiting for peak-file creation to terminate before cleanup, please "
 "try again later."
@@ -3336,81 +3373,81 @@ msgstr ""
 "정리 전에 최대 파일 생성이 종료되기를 기다리는 시간이 초과되었습니다. 나중에 "
 "다시 시도하십시오."
 
-#: session_state.cc:3652
+#: session_state.cc:3702
 msgid "Session: cannot create dead file folder \"%1\" (%2)"
 msgstr "세션: 죽은 파일 폴더 \"%1\" (%2)을(를) 만들 수 없습니다"
 
-#: session_state.cc:3685
+#: session_state.cc:3735
 msgid "cannot rename unused file source from %1 to %2 (%3)"
 msgstr "사용하지 않는 파일 소스의 이름을 %1에서 %2(%3)(으)로 바꿀 수 없습니다"
 
-#: session_state.cc:3701
+#: session_state.cc:3751
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr "%2(%3)에 대한 피크 파일 %1을(를) 제거할 수 없습니다"
 
-#: session_state.cc:3880
+#: session_state.cc:3930
 msgid "could not backup old history file, current history not saved"
 msgstr "이전 기록 파일을 백업할 수 없습니다. 현재 기록이 저장되지 않았습니다"
 
-#: session_state.cc:3894
+#: session_state.cc:3944
 msgid "history could not be saved to %1"
 msgstr "내역을 %1에 저장할 수 없습니다"
 
-#: session_state.cc:3897
+#: session_state.cc:3947
 msgid "Could not remove history file at path \"%1\" (%2)"
 msgstr "경로 \"%1\"(%2)에서 기록 파일을 제거할 수 없습니다"
 
-#: session_state.cc:3901
+#: session_state.cc:3951
 msgid "could not restore history file from backup %1 (%2)"
 msgstr "백업 %1(%2)에서 기록 파일을 복원할 수 없습니다"
 
-#: session_state.cc:3926
+#: session_state.cc:3976
 msgid "%1: no history file \"%2\" for this session."
 msgstr "%1: 이 세션에 대한 기록 파일 \"%2\"이(가) 없습니다."
 
-#: session_state.cc:3932
+#: session_state.cc:3982
 msgid "Could not understand session history file \"%1\""
 msgstr "세션 기록 파일 \"%1\"을(를) 이해할 수 없습니다"
 
-#: session_state.cc:3982
+#: session_state.cc:4032
 msgid "Failed to downcast MidiSource for NoteDiffCommand"
 msgstr "NoteDiffCommand에 대한 Midi소스를 다운캐스트하지 못했습니다"
 
-#: session_state.cc:3993
+#: session_state.cc:4043
 msgid "Failed to downcast MidiSource for SysExDiffCommand"
 msgstr "SysExDiffCommand용 Midi소스를 다운캐스트하지 못했습니다"
 
-#: session_state.cc:4004
+#: session_state.cc:4054
 msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
 msgstr "PatchChangeDiffCommand에 대한 Midi소스를 다운캐스트하지 못했습니다"
 
-#: session_state.cc:4012
+#: session_state.cc:4062
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr "%1 XML 노드로 명령을 만드는 방법을 알 수 없습니다."
 
-#: session_state.cc:4365
+#: session_state.cc:4415
 msgid "Cannot rename read-only session."
 msgstr "읽기 전용 세션의 이름을 바꿀 수 없습니다."
 
-#: session_state.cc:4369
+#: session_state.cc:4419
 msgid "Cannot rename session while recording"
 msgstr "녹음하는 동안 세션 이름을 바꿀 수 없습니다"
 
-#: session_state.cc:4454 session_state.cc:4455 session_state.cc:4497
-#: session_state.cc:4501
+#: session_state.cc:4504 session_state.cc:4505 session_state.cc:4547
+#: session_state.cc:4551
 msgid "renaming %s as %2 failed (%3)"
 msgstr "%s의 이름을 %2(으)로 바꾸지 못했습니다  (%3)"
 
-#: session_state.cc:4517 session_state.cc:4518 session_state.cc:4532
-#: session_state.cc:4533
+#: session_state.cc:4567 session_state.cc:4568 session_state.cc:4582
+#: session_state.cc:4583
 msgid "renaming %1 as %2 failed (%3)"
 msgstr "%1의 이름을 %2(으)로 바꾸지 못했습니다 (%3)"
 
-#: session_state.cc:4932
+#: session_state.cc:4982
 msgid "Cannot create new session folder %1"
 msgstr "%1 새 세션 폴더를 만들 수 없습니다"
 
-#: session_state.cc:4994 session_state.cc:5069
+#: session_state.cc:5044 session_state.cc:5119
 msgid ""
 "\n"
 "copying \"%1\" failed !"
@@ -3418,11 +3455,11 @@ msgstr ""
 "\n"
 "\"%1\"을(를) 복사하지 못했습니다!"
 
-#: session_state.cc:5284
+#: session_state.cc:5334
 msgid "unknown reason"
 msgstr "알 수 없는 이유"
 
-#: session_state.cc:5346
+#: session_state.cc:5396
 msgid "Could not make tmpdir: %1"
 msgstr "tmpdir을 만들 수 없음: %1"
 
@@ -3434,7 +3471,7 @@ msgstr "동기화 콜백에서 알 수 없는 트랜스포트 상태 %1"
 msgid "Locate called for negative sample position - ignored"
 msgstr "음수 샘플 위치에 대해 호출된 위치찾기 - 무시됨"
 
-#: session_transport.cc:359
+#: session_transport.cc:388
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
@@ -3442,11 +3479,11 @@ msgstr ""
 "%1이(가) JACK 트랜스포트 제어에 연결되어 있는 동안 전역 가변 속도를 지원할 "
 "수 없습니다"
 
-#: session_transport.cc:926
+#: session_transport.cc:986
 msgid "Cannot loop - no loop range defined"
 msgstr "루프할 수 없음 - 루프 범위가 정의되지 않았습니다"
 
-#: session_transport.cc:1537
+#: session_transport.cc:1560
 msgid ""
 "Looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
@@ -3599,63 +3636,63 @@ msgstr ""
 msgid "Cannot mark RF64 audio file for automatic downgrade to WAV: %1"
 msgstr "WAV로 자동 다운그레이드할 RF64 오디오 파일을 표시할 수 없음: %1"
 
-#: sndfilesource.cc:444 sndfilesource.cc:692
+#: sndfilesource.cc:461 sndfilesource.cc:709
 msgid ""
 "cannot set broadcast info for audio file %1 (%2); dropping broadcast info "
 "for this file"
 msgstr ""
 "오디오 파일 %1 (%2)에 대한 방송 정보를 설정할 수 없습니다; 이 파일에 대한 브"
-"불러올캐스트 정보 삭제"
+"로드캐스트 정보 삭제"
 
-#: sndfilesource.cc:486
+#: sndfilesource.cc:503
 msgid "could not open file %1 for reading."
 msgstr "읽기 위한 %1 파일을 열 수 없습니다."
 
-#: sndfilesource.cc:521
+#: sndfilesource.cc:538
 msgid "SndFileSource: could not seek to sample %1 within %2 (%3)"
 msgstr "Snd파일소스: %2 (%3) 내에서 샘플 %1을(를) 찾을 수 없습니다"
 
-#: sndfilesource.cc:530
+#: sndfilesource.cc:547
 msgid ""
 "SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"
 msgstr ""
 "Snd파일소스: @ %1은(는) % 3(%4) 내에서 %2를 읽을 수 없습니다 (len = %5, ret "
 "= %6)"
 
-#: sndfilesource.cc:580
+#: sndfilesource.cc:597
 msgid "attempt to write a non-writable audio file source (%1)"
 msgstr "쓸 수 없는 오디오 파일 소스(%1)를 쓰려고 시도합니다"
 
-#: sndfilesource.cc:585 utils.cc:516 utils.cc:544
+#: sndfilesource.cc:602 utils.cc:516 utils.cc:544
 msgid "programming error: %1 %2"
 msgstr "프로그래밍 오류: %1 %2"
 
-#: sndfilesource.cc:623 sndfilesource.cc:641
+#: sndfilesource.cc:640 sndfilesource.cc:658
 msgid "attempt to flush a non-writable audio file source (%1)"
 msgstr "쓸 수 없는 오디오 파일 소스(%1)를 플러시하려고 합니다"
 
-#: sndfilesource.cc:628
+#: sndfilesource.cc:645
 msgid "could not allocate file %1 to write header"
 msgstr "%1 파일을 쓰기 헤더에 할당할 수 없습니다"
 
-#: sndfilesource.cc:646
+#: sndfilesource.cc:663
 msgid "could not allocate file %1 to flush contents"
 msgstr "%1 파일을 내용을 플러시에 할당할 수 없습니다"
 
-#: sndfilesource.cc:658
+#: sndfilesource.cc:675
 msgid ""
 "attempt to store broadcast info in a non-writable audio file source (%1)"
 msgstr "쓰기 불가능한 오디오 파일 소스(%1)에 방송 정보를 저장하려고 합니다"
 
-#: sndfilesource.cc:663
+#: sndfilesource.cc:680
 msgid "attempt to set BWF info for an un-opened audio file source (%1)"
 msgstr "열리지 않은 오디오 파일 소스(%1)에 대한 BWF 정보를 지정하려고 합니다"
 
-#: sndfilesource.cc:710
+#: sndfilesource.cc:727
 msgid "%1: cannot seek to %2 (libsndfile error: %3)"
 msgstr "%1: %2을(를) 찾을 수 없습니다(libsndfile 오류: %3)"
 
-#: sndfilesource.cc:747
+#: sndfilesource.cc:764
 msgid "SndFileSource: cannot open file \"%1\" for reading"
 msgstr "Snd파일소스: 읽기 위한 \"%1\" 파일을 열 수 없습니다"
 
@@ -3675,10 +3712,10 @@ msgstr "지워진 다운스트림 솔로: %1 아래:%2\n"
 msgid ""
 "Upload to Soundcloud failed.  Perhaps your email or password are incorrect?\n"
 msgstr ""
-"Soundcloud에 업불러올하지 못했습니다. 이메일이나 비밀번호가 정확하지 않습니"
+"Soundcloud에 업로드하지 못했습니다. 이메일이나 비밀번호가 정확하지 않습니"
 "까?\n"
 
-#: source_factory.cc:375
+#: source_factory.cc:384
 msgid "Recovery attempted on a MIDI file - not implemented"
 msgstr "MIDI 파일에 대한 복구 시도 - 구현되지 않음"
 
@@ -3831,23 +3868,23 @@ msgstr ""
 msgid "DiskIOProcessor: \"%1\" isn't an playlist"
 msgstr "DiskIOProcessor: \"%1\"은(는) 재생 목록이 아닙니다"
 
-#: track.cc:704
+#: track.cc:706
 msgid "DiskIOProcessor %1: there is no existing playlist to make a copy of!"
 msgstr "DiskIOProcessor %1: 복사할 기존 재생 목록이 없습니다!"
 
-#: track.cc:947
+#: track.cc:953
 msgid "%1: could not create region for complete midi file"
 msgstr "%1: 완전한 미디 파일에 대한 영역을 생성할 수 없습니다"
 
-#: track.cc:994
+#: track.cc:1000
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr "MidiDiskstream: 캡처된 midi에 대한 영역을 만들 수 없습니다!"
 
-#: track.cc:1047
+#: track.cc:1055
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: 완전한 오디오 파일에 대한 영역을 생성할 수 없습니다"
 
-#: track.cc:1084
+#: track.cc:1099
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr "오디오Diskstream: 캡처한 오디오에 대한 영역을 만들 수 없습니다!"
 
@@ -3903,15 +3940,15 @@ msgstr "트렌스포트 마스터가 %1에서 %2(으)로 프레임 속도를 조
 msgid "There is already a transport master named \"%1\" - not duplicated"
 msgstr "이름이 \"%1\"인 트랜스포트 마스터가 이미 있습니다 - 중복되지 않음"
 
-#: transport_master_manager.cc:722
+#: transport_master_manager.cc:737
 msgid "Cannot initialize transport master manager"
 msgstr "트랜스포트 마스터 관리자를 초기화할 수 없습니다"
 
-#: unknown_processor.cc:87
+#: unknown_processor.cc:117
 msgid "Using plugin-stub with unknown i/o configuration for: "
 msgstr "다음에 대해 알 수 없는 i/o 구성과 함께 플러그인 스텁 사용: "
 
-#: unknown_processor.cc:108
+#: unknown_processor.cc:138
 msgid "Using plugin-stub with mismatching i/o configuration for: "
 msgstr "다음에 대한 I/O 구성이 일치하지 않는 플러그인 스텁 사용: "
 
