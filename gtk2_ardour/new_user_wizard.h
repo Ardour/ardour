@@ -50,6 +50,14 @@ public:
 
 	sigc::signal1<void,int>& signal_response() { return _signal_response; }
 
+protected:
+	void on_show ();
+	void on_unmap ();
+	void pop_splash ();
+	void push_splash ();
+
+	bool _splash_pushed;
+
 private:
 	bool config_modified;
 	bool new_user;

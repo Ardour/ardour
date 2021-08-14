@@ -57,6 +57,7 @@
 
 #include "new_user_wizard.h"
 #include "opts.h"
+#include "splash.h"
 #include "ui_config.h"
 #include "pbd/i18n.h"
 #include "utils.h"
@@ -70,7 +71,8 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
 NewUserWizard::NewUserWizard ()
-	: config_modified (false)
+	: _splash_pushed (false)
+	, config_modified (false)
 	, default_dir_chooser (0)
 	, monitor_via_hardware_button (string_compose (_("Use an external mixer or the hardware mixer of your audio interface.\n"
 							 "%1 will play NO role in monitoring"), PROGRAM_NAME))
@@ -116,6 +118,7 @@ NewUserWizard::NewUserWizard ()
 
 NewUserWizard::~NewUserWizard ()
 {
+	pop_splash ();
 }
 
 bool
@@ -525,4 +528,43 @@ void
 NewUserWizard::move_along_now ()
 {
 	on_apply ();
+}
+
+void
+NewUserWizard::on_show ()
+{
+	Gtk::Assistant::on_show ();
+	push_splash ();
+}
+
+void
+NewUserWizard::on_unmap ()
+{
+	pop_splash ();
+	Gtk::Assistant::on_unmap ();
+}
+
+void
+NewUserWizard::pop_splash ()
+{
+	if (_splash_pushed) {
+		Splash* spl = Splash::exists () ? Splash::instance() : NULL;
+		if (spl) {
+			spl->pop_front_for (*this);
+		}
+		_splash_pushed = false;
+	}
+}
+
+
+void
+NewUserWizard::push_splash ()
+{
+	if (Splash::exists()) {
+		Splash* spl = Splash::instance();
+		if (spl->is_visible()) {
+			spl->pop_back_for (*this);
+			_splash_pushed = true;
+		}
+	}
 }
