@@ -19,76 +19,43 @@
 #ifndef _pbd_pcg_rand_
 #define _pbd_pcg_rand_
 
-#include <assert.h>
 #include <stdint.h>
-#include <time.h>
 
-namespace PBD {
-
+namespace PBD
+{
 /**
  * *Really* minimal PCG32 code / (c) 2014 M.E. O'Neill / pcg-random.org
  *
  * To be used in cases where an efficient and realtime-safe random
  * generator is needed.
  */
-class PCGRand {
+class PCGRand
+{
 public:
-  PCGRand ()
-  {
-    int foo = 0;
-    uint64_t initseq = (intptr_t)&foo;
-    _state = 0;
-    _inc = (initseq << 1) | 1;
-    rand_u32 ();
-    _state += time (NULL) ^ (intptr_t)this;
-    rand_u32 ();
-  }
+	PCGRand ();
 
-  /* unsigned float [0..1] */
-  float rand_uf ()
-  {
-    return rand_u32 () / 4294967295.f;
-  }
+	/* 32bit (0 .. 4294967295) */
+	uint32_t rand_u32 ();
 
-  /* signed float [-1..+1] */
-  float rand_sf ()
-  {
-    return (rand_u32 () / 2147483647.5f) - 1.f;
-  }
+	/* uniform integer min <= rand < max */
+	int rand (int max, int min = 0);
 
-  /* uniform integer min <= rand <= max */
-	int rand (int min, int max)
+	/* unsigned float [0..1] */
+	float rand_uf ()
 	{
-		int range;
-		if (min > max) {
-			range = 1 + min - max;
-			min = max;
-		} else {
-			range = 1 + max - min;
-		}
-
-		assert (range < 4294967296);
-
-		while (true) {
-			uint32_t value = rand_u32 ();
-			if (value < 4294967296 - 4294967296 % range) {
-				return min + value % range;
-			}
-		}
+		return rand_u32 () / 4294967295.f;
 	}
 
-  uint32_t rand_u32 ()
-  {
-    uint64_t oldstate = _state;
-    _state = oldstate * 6364136223846793005ULL + _inc;
-    uint32_t xorshifted = ((oldstate >> 18u) ^ oldstate) >> 27u;
-    uint32_t rot = oldstate >> 59u;
-    return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
-  }
+	/* signed float [-1..+1] */
+	float rand_sf ()
+	{
+		return (rand_u32 () / 2147483647.5f) - 1.f;
+	}
 
 private:
-  uint64_t _state;
-  uint64_t _inc;
+	uint64_t _state;
+	uint64_t _inc;
+	int      _foo;
 };
 
 } // namespace PBD
