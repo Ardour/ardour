@@ -27,6 +27,7 @@
 
 #include <glibmm/threads.h>
 
+#include "pbd/pcg_rand.h"
 #include "pbd/stateful.h"
 #include "pbd/ringbuffer.h"
 
@@ -244,6 +245,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
+
+	PBD::PCGRand _pcg;
 
 	/* These three are accessed (read/write) only from process() context */
 
