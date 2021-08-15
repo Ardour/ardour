@@ -989,7 +989,7 @@ TriggerBox::set_next_trigger (size_t current)
 	}
 
 	int which_follow_action;
-	int r = _pcg.rand (0, 101);
+	int r = _pcg.rand (100); // 0 .. 99
 
 	if (r <= all_triggers[current]->follow_action_probability()) {
 		which_follow_action = 0;
@@ -1077,7 +1077,7 @@ TriggerBox::set_next_trigger (size_t current)
 
 	case Trigger::AnyTrigger:
 		while (true) {
-			n = _pcg.rand (0, all_triggers.size() + 1);
+			n = _pcg.rand (all_triggers.size());
 			if (!all_triggers[n]->region()) {
 				continue;
 			}
@@ -1091,7 +1091,7 @@ TriggerBox::set_next_trigger (size_t current)
 
 	case Trigger::OtherTrigger:
 		while (true) {
-			n = _pcg.rand (0, all_triggers.size() + 1);
+			n = _pcg.rand (all_triggers.size());
 			if ((size_t) n == current) {
 				continue;
 			}
