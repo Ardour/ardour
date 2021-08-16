@@ -4290,7 +4290,13 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 	samplecnt_t capt_lat_in  = _input->connected_latency (false);
 	samplecnt_t play_lat_out = _output->connected_latency (true);
 	samplecnt_t in_latency   = _input->latency ();
-	_output_latency          = _output->latency ();
+
+	/* When the track's output is not connected, align it to master-out.
+	 * Effectively we want to configure all latent-sends to not introduce any latency.
+	 * Since the output is not used, Send::_thru_delay is not relevant, and
+	 * Send->effective_latency () should return zero.
+	 */
+	_output_latency = _output->connected () ? _output->latency () : (_session.master_out() ? _session.master_out()->output ()->latency () : 0);
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
