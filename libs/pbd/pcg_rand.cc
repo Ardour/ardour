@@ -25,11 +25,12 @@
 using namespace PBD;
 
 PCGRand::PCGRand ()
+	: _state (0)
+	, _foo (0)
 {
-	int      foo     = 0;
-	uint64_t initseq = (intptr_t)&foo;
-	_state           = 0;
+	uint64_t initseq = (intptr_t)&_foo;
 	_inc             = (initseq << 1) | 1;
+
 	rand_u32 ();
 	_state += time (NULL) ^ (intptr_t)this;
 	rand_u32 ();
