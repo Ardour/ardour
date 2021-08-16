@@ -1,0 +1,5 @@
+* fix per-plugin get-grid calls
+* check grid with ramps
+* cache for music<->audio time lookups
+
+* region drags use total_x_delta in samples (and x_delta in general)
