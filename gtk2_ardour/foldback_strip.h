@@ -83,6 +83,7 @@ public:
 
 private:
 	void led_clicked (GdkEventButton*);
+	bool pan_knob_press (GdkEventButton*);
 	bool button_press (GdkEventButton*);
 	bool button_release (GdkEventButton*);
 	void set_gain (float new_gain);
@@ -91,6 +92,7 @@ private:
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_changed ();
 	void send_state_changed ();
+	void send_pan_changed ();
 	void level_adjusted ();
 	void level_changed ();
 	void set_tooltip ();

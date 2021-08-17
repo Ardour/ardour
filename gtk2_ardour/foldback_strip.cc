@@ -95,16 +95,14 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, boost::shared_ptr<ARDOU
 
 	if (_foldback_route->input ()->n_ports ().n_audio () == 2) {
 		_button.set_layout_ellipsize_width (PX_SCALE (_width - 19) * PANGO_SCALE);
-		boost::shared_ptr<Pannable>          pannable = _send_del->panner ()->pannable ();
-		boost::shared_ptr<AutomationControl> ac;
-		ac = pannable->pan_azimuth_control;
+		boost::shared_ptr<Pannable> pannable = _send->panner ()->pannable ();
 		_pan_control.set_size_request (PX_SCALE (19), PX_SCALE (19));
 		_pan_control.set_tooltip_prefix (_("Pan: "));
-		_pan_control.set_name ("trim knob");
 		_pan_control.set_no_show_all (true);
 		snd_but_pan->pack_start (_pan_control, false, false);
 		_pan_control.show ();
-		_pan_control.set_controllable (ac);
+		_pan_control.set_controllable (pannable->pan_azimuth_control);
+		_pan_control.set_name (_send->panner_linked_to_route () ? "trim knob" : "pan knob");
 	}
 	boost::shared_ptr<AutomationControl> lc;
 	lc = _send->gain_control ();
@@ -123,7 +121,9 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, boost::shared_ptr<ARDOU
 	_send_proc->ActiveChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::send_state_changed, this), gui_context ());
 	_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &FoldbackSend::button_press));
 	_button.signal_button_release_event ().connect (sigc::mem_fun (*this, &FoldbackSend::button_release));
+	_pan_control.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackSend::pan_knob_press));
 	_send_route->PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::route_property_changed, this, _1), gui_context ());
+	_send->panner_shell()->PannableChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::send_pan_changed, this), gui_context ());
 
 	show ();
 }
@@ -170,6 +170,17 @@ FoldbackSend::led_clicked (GdkEventButton* ev)
 }
 
 bool
+FoldbackSend::pan_knob_press (GdkEventButton* ev)
+{
+	if (Keyboard::is_context_menu_event (ev)) {
+		_send->set_panner_linked_to_route (!_send->panner_linked_to_route ());
+		_pan_control.set_name (_send->panner_linked_to_route () ? "trim knob" : "pan knob");
+		return true;
+	}
+	return false;
+}
+
+bool
 FoldbackSend::button_press (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
@@ -205,6 +216,13 @@ void
 FoldbackSend::send_state_changed ()
 {
 	_button.set_active (_send_proc->enabled ());
+}
+
+void
+FoldbackSend::send_pan_changed ()
+{
+	boost::shared_ptr<Pannable>  pannable = _send->panner ()->pannable ();
+	_pan_control.set_controllable (pannable->pan_azimuth_control);
 }
 
 void

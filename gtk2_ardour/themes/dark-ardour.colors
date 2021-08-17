@@ -458,6 +458,9 @@
     <ColorAlias name="trim knob" alias="widget:bg"/>
     <ColorAlias name="trim knob: arc end" alias="widget:blue"/>
     <ColorAlias name="trim knob: arc start" alias="widget:blue"/>
+    <ColorAlias name="pan knob" alias="widget:bg"/>
+    <ColorAlias name="pan knob: arc end" alias="widget:orange"/>
+    <ColorAlias name="pan knob: arc start" alias="widget:orange"/>
     <ColorAlias name="vca assign button: fill" alias="widget:bg"/>
     <ColorAlias name="verbose canvas cursor" alias="theme:contrasting clock"/>
     <ColorAlias name="video timeline bar" alias="neutral:background2"/>
