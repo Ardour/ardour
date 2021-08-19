@@ -466,6 +466,9 @@ Send::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 bool
 Send::configure_io (ChanCount in, ChanCount out)
 {
+	ChanCount send_count = in;
+	send_count.set(DataType::AUDIO, pan_outs());
+
 	if (!_amp->configure_io (in, out)) {
 		return false;
 	}
@@ -474,7 +477,7 @@ Send::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	if (!_meter->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()))) {
+	if (!_meter->configure_io (send_count, send_count)) {
 		return false;
 	}
 
@@ -482,7 +485,7 @@ Send::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	if (!_send_delay->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()))) {
+	if (!_send_delay->configure_io (send_count, send_count)) {
 		return false;
 	}
 

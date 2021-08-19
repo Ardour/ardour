@@ -162,9 +162,9 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto, bool update_name)
 	ensure_mixbufs ();
 	mixbufs.set_count (_send_to->internal_return ()->input_streams ());
 
-	_meter->configure_io (ChanCount (DataType::AUDIO, pan_outs ()), ChanCount (DataType::AUDIO, pan_outs ()));
+	_meter->configure_io (_send_to->internal_return ()->input_streams (), _send_to->internal_return ()->input_streams ());
 
-	_send_delay->configure_io (ChanCount (DataType::AUDIO, pan_outs ()), ChanCount (DataType::AUDIO, pan_outs ()));
+	_send_delay->configure_io (_send_to->internal_return ()->input_streams (), _send_to->internal_return ()->input_streams ());
 
 	reset_panner ();
 
