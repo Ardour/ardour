@@ -527,7 +527,7 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 
 	if (!actually_ramped()) {
 
-		assert (sc >= _sclock);
+		// assert (sc >= _sclock);
 		superclock_t sc_delta = sc - _sclock;
 
 		/* convert sc into superbeats, given that sc represents some number of seconds */
@@ -543,6 +543,10 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 		int32_t t;
 
 		Tempo::superbeats_to_beats_ticks (superbeats, b, t);
+
+		if (sc < _sclock) {
+			std::cout << string_compose ("%8 => \nsc %1 delta %9 = %2 secs rem = %3 rem snotes %4 sbeats = %5 => %6 : %7\n", sc, whole_seconds, remainder, supernotes, superbeats, b , t, *this, sc_delta);
+		}
 
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%8 => \nsc %1 delta %9 = %2 secs rem = %3 rem snotes %4 sbeats = %5 => %6 : %7\n", sc, whole_seconds, remainder, supernotes, superbeats, b , t, *this, sc_delta));
 
