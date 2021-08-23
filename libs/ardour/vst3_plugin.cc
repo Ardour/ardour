@@ -731,6 +731,16 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 
 	/* handle outgoing MIDI events */
 	if (_plug->n_midi_outputs () > 0 && bufs.count ().n_midi () > 0) {
+		/* clear valid in-place MIDI buffers (forward MIDI otherwise) */
+		in_index = 0;
+		for (int32_t i = 0; i < (int32_t)_plug->n_midi_inputs (); ++i) {
+			bool     valid = false;
+			uint32_t index = in_map.get (DataType::MIDI, in_index++, &valid);
+			if (valid && bufs.count ().n_midi () > index) {
+				bufs.get_midi (index).clear ();
+			}
+		}
+
 		_plug->vst3_to_midi_buffers (bufs, out_map);
 	}
 
