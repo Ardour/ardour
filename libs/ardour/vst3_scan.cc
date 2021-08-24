@@ -309,7 +309,7 @@ ARDOUR::module_path_vst3 (string const& path)
 		std::string p1 = Glib::path_get_dirname (path);
 		std::string p2 = Glib::path_get_dirname (p1);
 		std::string p3 = Glib::path_get_dirname (p2);
-		if (   Glib::path_get_basename (p1) == vst3_bindir ()
+		if (  (Glib::path_get_basename (p1) == "x86_64-win" || Glib::path_get_basename (p1) == "x86-win")
 		    && Glib::path_get_basename (p2) == "Contents"
 		    && Glib::path_get_basename (p3) == Glib::path_get_basename (path)
 		   ) {
