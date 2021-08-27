@@ -764,8 +764,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, timepos_t const
 	RegionSortByPosition cmp;
 
 	if (!first_set_state) {
-		boost::shared_ptr<Playlist> foo (shared_from_this ());
-		region->set_playlist (boost::weak_ptr<Playlist> (foo));
+		region->set_playlist (boost::weak_ptr<Playlist> (shared_from_this()));
 	}
 
 	region->set_position (position);
