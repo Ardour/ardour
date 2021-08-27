@@ -2173,6 +2173,9 @@ Session::resort_routes ()
 	*/
 
 	if (inital_connect_or_deletion_in_progress ()) {
+		/* drop any references during delete */
+		GraphEdges edges;
+		_current_route_graph = edges;
 		return;
 	}
 
