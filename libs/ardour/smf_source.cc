@@ -82,17 +82,18 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 
 	_flags = Source::Flag (_flags | Empty);
 
-	/* file is not opened until write */
-
-	if (flags & Writable) {
-		return;
+	if (_flags & Writable) {
+		if (open_for_write ()) {
+			throw failed_constructor ();
+		}
+		/* no fd left open here */
+	} else {
+		if (open (_path)) {
+			throw failed_constructor ();
+		}
+		_open = true;
 	}
 
-	if (open (_path)) {
-		throw failed_constructor ();
-	}
-
-	_open = true;
 }
 
 /** Constructor used for external-to-session files.  File must exist. */
@@ -112,11 +113,6 @@ SMFSource::SMFSource (Session& s, const string& path)
 
         assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 	existence_check ();
-
-	if (_flags & Writable) {
-		/* file is not opened until write */
-		return;
-	}
 
 	if (open (_path)) {
 		throw failed_constructor ();
@@ -172,17 +168,18 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	if (!(_flags & Source::Empty)) {
 		assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 		existence_check ();
+		if (open (_path)) {
+			throw failed_constructor ();
+		}
+		_open = true;
 	} else {
 		assert (_flags & Source::Writable);
-		/* file will be opened on write */
-		return;
+		if (open_for_write ()) {
+			throw failed_constructor ();
+		}
+		/* no fd left open here */
 	}
 
-	if (open (_path)) {
-		throw failed_constructor ();
-	}
-
-	_open = true;
 }
 
 SMFSource::~SMFSource ()
