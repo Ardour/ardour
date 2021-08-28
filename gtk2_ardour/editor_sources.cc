@@ -495,8 +495,15 @@ EditorSources::add_source (boost::shared_ptr<ARDOUR::Region> region)
 	 * if there's some other kind of source, we ignore it (for now)
 	 */
 	boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (region->source());
-	if (!fs || fs->empty()) {
+	if (!fs) {
 		return;
+	}
+
+	if (fs->empty()) {
+		/* MIDI sources are allowed to be empty */
+		if (!boost::dynamic_pointer_cast<MidiSource> (region->source())) {
+			return;
+		}
 	}
 
 	region->DropReferences.connect (remove_region_connections, MISSING_INVALIDATOR, boost::bind (&EditorSources::remove_weak_region, this, boost::weak_ptr<Region> (region)), gui_context());
