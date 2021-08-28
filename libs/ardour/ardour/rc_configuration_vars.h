@@ -260,13 +260,13 @@ CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalFTZDAZ
 
 /* web addresses used in the program */
 
-CONFIG_VARIABLE (std::string, osx_pingback_url, "osx-pingback-url", "http://community.ardour.org/pingback/osx/")
-CONFIG_VARIABLE (std::string, linux_pingback_url, "linux-pingback-url", "http://community.ardour.org/pingback/linux/")
-CONFIG_VARIABLE (std::string, windows_pingback_url, "windows-pingback-url", "http://community.ardour.org/pingback/windows/")
-CONFIG_VARIABLE (std::string, tutorial_manual_url, "tutorial-manual-url", "http://ardour.org/tutorial")
-CONFIG_VARIABLE (std::string, reference_manual_url, "reference-manual-url", "http://manual.ardour.org/")
-CONFIG_VARIABLE (std::string, updates_url, "updates-url", "http://ardour.org/whatsnew.html")
-CONFIG_VARIABLE (std::string, donate_url, "donate-url", "http://ardour.org/donate")
+CONFIG_VARIABLE (std::string, osx_pingback_url, "osx-pingback-url", "https://community.ardour.org/pingback/osx/")
+CONFIG_VARIABLE (std::string, linux_pingback_url, "linux-pingback-url", "https://community.ardour.org/pingback/linux/")
+CONFIG_VARIABLE (std::string, windows_pingback_url, "windows-pingback-url", "https://community.ardour.org/pingback/windows/")
+CONFIG_VARIABLE (std::string, tutorial_manual_url, "tutorial-manual-url", "https://ardour.org/tutorial")
+CONFIG_VARIABLE (std::string, reference_manual_url, "reference-manual-url", "https://manual.ardour.org/")
+CONFIG_VARIABLE (std::string, updates_url, "updates-url", "https://ardour.org/whatsnew.html")
+CONFIG_VARIABLE (std::string, donate_url, "donate-url", "https://ardour.org/donate")
 
 /* video timeline configuration */
 CONFIG_VARIABLE (std::string, xjadeo_binary, "xjadeo-binary", "")
