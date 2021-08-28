@@ -1653,15 +1653,38 @@ MidiTimeAxisView::add_region (timepos_t const & f, timecnt_t const & length, boo
 	real_editor->snap_to (pos, Temporal::RoundNearest);
 
 	boost::shared_ptr<Source> src = _session->create_midi_source_by_stealing_name (view()->trackview().track());
-	PropertyList plist;
 
 	const Temporal::timecnt_t start (Temporal::BeatTime); /* zero beats */
 
-	plist.add (ARDOUR::Properties::start, start);
-	plist.add (ARDOUR::Properties::length, length);
-	plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
+	boost::shared_ptr<Region> region;
 
-	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
+	/* Create the (empty) whole-file region that will show up in the source
+	 * list. This is NOT used in any playlists.
+	 */
+
+	{
+		PropertyList plist;
+
+		plist.add (ARDOUR::Properties::start, start);
+		plist.add (ARDOUR::Properties::length, length);
+		plist.add (ARDOUR::Properties::automatic, true);
+		plist.add (ARDOUR::Properties::whole_file, true);
+		plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
+
+		region = (RegionFactory::create (src, plist, true));
+	}
+
+	/* Now create the region that we will actually use within the playlist */
+
+	{
+		PropertyList plist;
+
+		plist.add (ARDOUR::Properties::start, start);
+		plist.add (ARDOUR::Properties::length, length);
+		plist.add (ARDOUR::Properties::name, region->name());
+
+		region = RegionFactory::create (region, plist, false);
+	}
 
 	region->set_position (pos);
 	playlist()->add_region (region, pos, 1.0, false);
