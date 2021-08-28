@@ -508,8 +508,10 @@ EditorSources::add_source (boost::shared_ptr<ARDOUR::Region> region)
 
 	region->DropReferences.connect (remove_region_connections, MISSING_INVALIDATOR, boost::bind (&EditorSources::remove_weak_region, this, boost::weak_ptr<Region> (region)), gui_context());
 
-	TreeModel::Row row = *(_model->append());
-	populate_row (row, region);
+	PropertyChange pc;
+	boost::shared_ptr<RegionList> rl (new RegionList);
+	rl->push_back (region);
+	regions_changed (rl, pc);
 }
 
 void
@@ -519,6 +521,7 @@ EditorSources::regions_changed (boost::shared_ptr<ARDOUR::RegionList> rl, PBD::P
 	if (freeze) {
 		freeze_tree_model ();
 	}
+
 	for (RegionList::const_iterator r = rl->begin (); r != rl->end(); ++r) {
 		boost::shared_ptr<Region> region = *r;
 
@@ -537,7 +540,13 @@ EditorSources::regions_changed (boost::shared_ptr<ARDOUR::RegionList> rl, PBD::P
 				break;
 			}
 		}
+
+		if (i == rows.end()) {
+			TreeModel::Row row = *(_model->append());
+			populate_row (row, region);
+		}
 	}
+
 	if (freeze) {
 		thaw_tree_model ();
 	}
