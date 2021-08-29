@@ -373,8 +373,8 @@ AudioTrigger::set_length (timepos_t const & newlen)
 
 	/* RB expects array-of-ptr-to-Sample, so set one up */
 
-	Sample* raw[nchans];
-	Sample* results[nchans];
+	std::vector<Sample*> raw(nchans);
+	std::vector<Sample*> results(nchans);
 
 	/* study, then process */
 
@@ -394,7 +394,7 @@ AudioTrigger::set_length (timepos_t const & newlen)
 		samplecnt_t to_read = std::min (block_size, data_length - read);
 		read += to_read;
 
-		stretcher.study (raw, to_read, (read >= data_length));
+		stretcher.study (&raw[0], to_read, (read >= data_length));
 	}
 
 	read = 0;
@@ -411,7 +411,7 @@ AudioTrigger::set_length (timepos_t const & newlen)
 		samplecnt_t to_read = std::min (block_size, data_length - read);
 		read += to_read;
 
-		stretcher.process (raw, to_read, (read >= data_length));
+		stretcher.process (&raw[0], to_read, (read >= data_length));
 
 		while ((avail = stretcher.available()) > 0) {
 
@@ -419,7 +419,7 @@ AudioTrigger::set_length (timepos_t const & newlen)
 				results[n] = stretched[n] + processed;
 			}
 
-			processed += stretcher.retrieve (results, avail);
+			processed += stretcher.retrieve (&results[0], avail);
 		}
 	}
 
@@ -436,7 +436,7 @@ AudioTrigger::set_length (timepos_t const & newlen)
 			results[n] = stretched[n] + processed;
 		}
 
-		processed += stretcher.retrieve (results, avail);
+		processed += stretcher.retrieve (&results[0], avail);
 	}
 
 	/* allocate new data buffers */
