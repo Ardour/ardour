@@ -26,9 +26,15 @@
 
 #include "pbd/integer_division.h"
 
+#include "temporal/visibility.h"
+
 namespace Temporal {
 
-extern void init ();
+#ifdef COMPILER_MSVC
+	LIBTEMPORAL_API void init ();
+#else
+	extern void init ();
+#endif
 
 /* Any position measured in audio samples.
    Assumed to be non-negative but not enforced.

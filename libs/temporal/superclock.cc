@@ -18,7 +18,9 @@
 
 #include "temporal/superclock.h"
 
+#ifndef COMPILER_MSVC
 Temporal::superclock_t Temporal::superclock_ticks_per_second = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
+#endif
 
 int (*Temporal::sample_rate_callback)() = 0;
 

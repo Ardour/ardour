@@ -23,18 +23,24 @@
 
 #include "pbd/integer_division.h"
 
+#include "temporal/visibility.h"
+
 namespace Temporal {
 
 typedef int64_t superclock_t;
 
-extern superclock_t superclock_ticks_per_second;
+#ifndef COMPILER_MSVC
+	extern superclock_t superclock_ticks_per_second;
+#else
+	static superclock_t superclock_ticks_per_second = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
+#endif
 
 static inline superclock_t superclock_to_samples (superclock_t s, int sr) { return int_div_round (s * sr, superclock_ticks_per_second); }
 static inline superclock_t samples_to_superclock (int64_t samples, int sr) { return int_div_round (samples * superclock_ticks_per_second, superclock_t (sr)); }
 
 extern int (*sample_rate_callback)();
 
-void set_sample_rate_callback (int (*function)());
+LIBTEMPORAL_API void set_sample_rate_callback (int (*function)());
 
 }
 

@@ -130,7 +130,7 @@ template<typename T>
 	return coverage_inclusive_ends (sa, eaE.decrement(), sb, ebE.decrement());
 }
 
-template<>  /*LIBTEMPORAL_API*/ OverlapType coverage_exclusive_ends<int64_t> (int64_t sa, int64_t eaE, int64_t sb, int64_t ebE);
+template<> LIBTEMPORAL_TEMPLATE_API OverlapType coverage_exclusive_ends<int64_t> (int64_t sa, int64_t eaE, int64_t sb, int64_t ebE);
 
 
 class RangeList;

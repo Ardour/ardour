@@ -298,10 +298,10 @@ BBT_Time::operator!= (const BBT_Offset& other) const
 
 namespace std {
 
-std::ostream& operator<< (std::ostream& o, Temporal::BBT_Time const & bbt);
-std::ostream& operator<< (std::ostream& o, Temporal::BBT_Offset const & bbt);
-std::istream& operator>> (std::istream& i, Temporal::BBT_Time& bbt);
-std::istream& operator>> (std::istream& i, Temporal::BBT_Offset& bbt);
+LIBTEMPORAL_API std::ostream& operator<< (std::ostream& o, Temporal::BBT_Time const & bbt);
+LIBTEMPORAL_API std::ostream& operator<< (std::ostream& o, Temporal::BBT_Offset const & bbt);
+LIBTEMPORAL_API std::istream& operator>> (std::istream& i, Temporal::BBT_Time& bbt);
+LIBTEMPORAL_API std::istream& operator>> (std::istream& i, Temporal::BBT_Offset& bbt);
 
 template<>
 struct numeric_limits<Temporal::BBT_Time> {

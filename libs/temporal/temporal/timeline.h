@@ -434,10 +434,10 @@ class LIBTEMPORAL_API timecnt_t {
 } /* end namespace Temporal */
 
 namespace std {
-std::ostream&  operator<< (std::ostream & o, Temporal::timecnt_t const & tc);
-std::istream&  operator>> (std::istream & o, Temporal::timecnt_t & tc);
-std::ostream&  operator<< (std::ostream & o, Temporal::timepos_t const & tp);
-std::istream&  operator>> (std::istream & o, Temporal::timepos_t & tp);
+LIBTEMPORAL_API std::ostream&  operator<< (std::ostream & o, Temporal::timecnt_t const & tc);
+LIBTEMPORAL_API std::istream&  operator>> (std::istream & o, Temporal::timecnt_t & tc);
+LIBTEMPORAL_API std::ostream&  operator<< (std::ostream & o, Temporal::timepos_t const & tp);
+LIBTEMPORAL_API std::istream&  operator>> (std::istream & o, Temporal::timepos_t & tp);
 }
 
 #if 0

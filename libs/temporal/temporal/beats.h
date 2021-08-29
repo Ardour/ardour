@@ -313,8 +313,8 @@ class DoubleableBeats : public Beats
   virtual-method-in-a-template will bite you.
 */
 
-std::ostream& operator<<(std::ostream& ostream, const Temporal::Beats& t);
-std::istream& operator>>(std::istream& istream, Temporal::Beats& b);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& ostream, const Temporal::Beats& t);
+LIBTEMPORAL_API std::istream& operator>>(std::istream& istream, Temporal::Beats& b);
 
 } // namespace Temporal
 
