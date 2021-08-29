@@ -124,7 +124,7 @@ struct LIBTEMPORAL_API BBT_Time
 	BBT_Time next_bar () const { return (bars == -1) ? BBT_Time (1, 1, 0) : BBT_Time (bars+1, 1, 0); }
 	BBT_Time prev_bar () const { return (bars == 1)  ? BBT_Time (-1, 1, 0) : BBT_Time (bars-1, 1, 0); }
 
-	void print_padded (std::ostream& o) {
+	void print_padded (std::ostream& o) const {
 		o << std::setfill ('0') << std::right
 		  << std::setw (3) << bars << "|"
 		  << std::setw (2) << beats << "|"
