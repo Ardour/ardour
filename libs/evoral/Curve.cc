@@ -111,7 +111,7 @@ Curve::solve () const
 
 				/* first segment */
 
-				fplast = ((3 * (y[1] - y[0]) / (2 * (xi - xim1))) - (fpone * 0.5));
+				fplast = ((3 * (y[1] - y[0]) / (2 * (x[1].val() - x[0].val()))) - (fpone * 0.5));
 
 				/* we don't store coefficients for i = 0 */
 
