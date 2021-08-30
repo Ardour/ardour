@@ -27,6 +27,9 @@
 
 using namespace ArdourCanvas;
 
+using std::cerr;
+using std::endl;
+
 Box::Box (Canvas* canvas, Orientation o)
 	: Rectangle (canvas)
 	, orientation (o)
@@ -284,19 +287,24 @@ Box::reposition_children (Distance width, Distance height, bool shrink_width, bo
 
 		const Distance contents_width = width - (left_margin + left_padding + right_margin + right_padding);
 		const Distance contents_height = height - (top_margin + top_padding + bottom_margin + bottom_padding);
-		const Distance item_width = (contents_width - ((_items.size() - 1) * spacing));
-		const Distance item_height = (contents_height - ((_items.size() - 1) * spacing));;
+
+		Distance item_width;
+		Distance item_height;
 
 		if (orientation == Vertical) {
-			if ((largest_width < item_width)) {
-				largest_width = item_width;
-			}
+			item_width = contents_width;
+			item_height = (contents_height - ((_items.size() - 1) * spacing));;
+		} else {
+			item_width = (contents_width - ((_items.size() - 1) * spacing));
+			item_height = contents_height;
+		}
+
+		if (orientation == Vertical) {
+			largest_width = std::max (largest_width, item_width);
 		}
 
 		if (orientation == Horizontal) {
-			if ((largest_height < item_height)) {
-				largest_height = item_height;
-			}
+			largest_height = std::max (largest_height, item_height);
 		}
 
 		uniform_size = Rect (0, 0, largest_width, largest_height);
