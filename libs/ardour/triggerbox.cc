@@ -121,6 +121,7 @@ Trigger::quantization () const
 void
 Trigger::stop ()
 {
+	_next_trigger = -1;
 	request_state (Stopped);
 }
 
