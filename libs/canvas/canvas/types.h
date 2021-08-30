@@ -168,6 +168,15 @@ struct LIBCANVAS_API Rect
 			     x1 - amount, y1 - amount);
 	}
 
+	Rect shrink (Distance top, Distance right, Distance bottom, Distance left) const throw () {
+		/* This isn't the equivalent of expand (-distance) because
+		   of the peculiarities of canvas_safe_add() with negative values.
+		   Maybe.
+		*/
+		return Rect (canvas_safe_add (x0, left), canvas_safe_add (y0, top),
+			     x1 - right, y1 - bottom);
+	}
+
 	bool contains (Duple const & point) const throw () {
 		return point.x >= x0 && point.x < x1 && point.y >= y0 && point.y < y1;
 	}
