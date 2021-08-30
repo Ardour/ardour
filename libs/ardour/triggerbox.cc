@@ -52,12 +52,14 @@ void
 Trigger::bang ()
 {
 	_bang.fetch_add (1);
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("bang on %1\n", _index));
 }
 
 void
 Trigger::unbang ()
 {
 	_unbang.fetch_add (1);
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("un-bang on %1\n", _index));
 }
 
 void
