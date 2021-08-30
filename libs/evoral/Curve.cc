@@ -468,7 +468,11 @@ Curve::multipoint_eval (Temporal::timepos_t const & x) const
 					 */
 
 					double x2 = x.val() * x.val();
-					return ev->coeff[0] + (ev->coeff[1] * x.val()) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x.val());
+					double r = ev->coeff[0] + (ev->coeff[1] * x.val()) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x.val());
+					if (r > 15.0) {
+						abort ();
+					}
+					return r;
 				}
 				/* fallthrough */
 			case ControlList::Linear:
