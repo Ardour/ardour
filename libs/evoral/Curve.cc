@@ -90,22 +90,7 @@ Curve::solve () const
 
 		for (i = 0, xx = _list.events().begin(); xx != _list.events().end(); ++xx, ++i) {
 
-			double xdelta;   /* gcc is wrong about possible uninitialized use */
-			double xdelta2;  /* ditto */
-			double ydelta;   /* ditto */
-			double fppL, fppR;
-			double fpi;
 			double xi = x[i].val();
-			double xim1;
-
-			if (i > 0) {
-				xim1 = x[i-1].val();
-				xdelta = xi - xim1;
-				xdelta2 = xdelta * xdelta;
-				ydelta = y[i] - y[i-1];
-			}
-
-			/* compute (constrained) first derivatives */
 
 			if (i == 0) {
 
@@ -116,8 +101,23 @@ Curve::solve () const
 				/* we don't store coefficients for i = 0 */
 
 				continue;
+			}
 
-			} else if (i == npoints - 1) {
+			double xdelta;   /* gcc is wrong about possible uninitialized use */
+			double xdelta2;  /* ditto */
+			double ydelta;   /* ditto */
+			double fppL, fppR;
+			double fpi;
+			double xim1;
+
+			xim1 = x[i-1].val();
+			xdelta = xi - xim1;
+			xdelta2 = xdelta * xdelta;
+			ydelta = y[i] - y[i-1];
+
+			/* compute (constrained) first derivatives */
+
+			if (i == npoints - 1) {
 
 				/* last segment */
 
@@ -127,9 +127,7 @@ Curve::solve () const
 
 				/* all other segments */
 
-				double xip1 = x[i+1].val();
-
-				double slope_before = (xip1 - xi) / (y[i+1] - y[i]);
+				double slope_before = (x[i+1].val() - xi) / (y[i+1] - y[i]);
 				double slope_after = (xdelta / ydelta);
 
 				if (slope_after * slope_before < 0.0) {
@@ -159,9 +157,9 @@ Curve::solve () const
 			double xi2, xi3;
 
 			xim12 = xim1 * xim1;  /* "x[i-1] squared" */
-			xim13 = xim12 * xim1;   /* "x[i-1] cubed" */
+			xim13 = xim12 * xim1; /* "x[i-1] cubed" */
 			xi2 = xi * xi;        /* "x[i] squared" */
-			xi3 = xi2 * xi;         /* "x[i] cubed" */
+			xi3 = xi2 * xi;       /* "x[i] cubed" */
 
 			b = (ydelta - (c * (xi2 - xim12)) - (d * (xi3 - xim13))) / xdelta;
 
@@ -464,15 +462,14 @@ Curve::multipoint_eval (Temporal::timepos_t const & x) const
 					 * This means that x is a relatively
 					 * small value (an offset into the
 					 * fade) amd we do not need to worry
-					 * about the square overflowing.
+					 * about the square or cube overflowing
+					 * a double type. They can overflow an
+					 * int64_t by around 6 seconds.
 					 */
 
-					double x2 = x.val() * x.val();
-					double r = ev->coeff[0] + (ev->coeff[1] * x.val()) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x.val());
-					if (r > 15.0) {
-						abort ();
-					}
-					return r;
+					const double xv = x.val();
+					double xv2 = xv * xv;
+					return ev->coeff[0] + (ev->coeff[1] * xv) + (ev->coeff[2] * xv2) + (ev->coeff[3] * xv2 * xv);
 				}
 				/* fallthrough */
 			case ControlList::Linear:
