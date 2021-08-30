@@ -980,7 +980,7 @@ void
 TriggerBox::set_next_trigger (size_t current)
 {
 	size_t n;
-	size_t runnable;
+	size_t runnable = 0;
 
 	for (size_t n = 0; n < all_triggers.size(); ++n) {
 		if (all_triggers[n]->region()) {
