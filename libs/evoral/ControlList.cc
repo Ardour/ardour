@@ -432,6 +432,7 @@ ControlList::fast_simple_add (timepos_t const & time, double value)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 	/* to be used only for loading pre-sorted data from saved state */
+	assert (time.time_domain() == _time_domain);
 	_events.insert (_events.end(), new ControlEvent (time, value));
 
 	mark_dirty ();
@@ -532,6 +533,9 @@ ControlList::set_in_write_pass (bool yn, bool add_point, timepos_t when)
 void
 ControlList::add_guard_point (timepos_t const & time, timecnt_t const & offset)
 {
+	assert (time.time_domain() == _time_domain);
+	assert (offset.time_domain() == _time_domain);
+
 	timepos_t when = time;
 
 	// caller needs to hold writer-lock
@@ -749,6 +753,8 @@ ControlList::erase_from_iterator_to (iterator iter, timepos_t const & time)
 void
 ControlList::add (timepos_t const & time, double value, bool with_guards, bool with_initial)
 {
+	assert (time.time_domain() == _time_domain);
+
 	timepos_t when = time;
 
 	/* clamp new value to allowed range */
