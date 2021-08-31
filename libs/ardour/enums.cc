@@ -156,7 +156,9 @@ setup_enum_writer ()
 	TransportState _TransportState;
 	LocateTransportDisposition _LocateTransportDisposition;
 	Trigger::State _TriggerState;
-	
+	Trigger::LaunchStyle _TriggerLaunchStyle;
+	Trigger::FollowAction _TriggerFollowAction;
+
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -847,6 +849,25 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Trigger, WaitingToStop);
 	REGISTER_CLASS_ENUM (Trigger, Stopping);
 	REGISTER (_TriggerState);
+
+	REGISTER_CLASS_ENUM (Trigger, None);
+	REGISTER_CLASS_ENUM (Trigger, Stop);
+	REGISTER_CLASS_ENUM (Trigger, Again);
+	REGISTER_CLASS_ENUM (Trigger, QueuedTrigger);
+	REGISTER_CLASS_ENUM (Trigger, NextTrigger);
+	REGISTER_CLASS_ENUM (Trigger, PrevTrigger);
+	REGISTER_CLASS_ENUM (Trigger, FirstTrigger);
+	REGISTER_CLASS_ENUM (Trigger, LastTrigger);
+	REGISTER_CLASS_ENUM (Trigger, AnyTrigger);
+	REGISTER_CLASS_ENUM (Trigger, OtherTrigger);
+	REGISTER (_TriggerFollowAction);
+
+	REGISTER_CLASS_ENUM (Trigger, OneShot);
+	REGISTER_CLASS_ENUM (Trigger, Gate);
+	REGISTER_CLASS_ENUM (Trigger, Toggle);
+	REGISTER_CLASS_ENUM (Trigger, Repeat);
+	REGISTER (_TriggerLaunchStyle);
+
 }
 
 } /* namespace ARDOUR */
