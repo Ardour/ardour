@@ -69,6 +69,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	static void make_property_quarks ();
 
+	void set_name (std::string const &);
+	std::string name() const { return _name; }
+
 	/* semantics of "bang" depend on the trigger */
 	void bang ();
 	void unbang ();
@@ -77,8 +80,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	/* explicitly call for the trigger to start */
 	virtual void start();
 
-	virtual void set_start (timepos_t) = 0;
-	virtual void set_end (timepos_t) = 0;
+	virtual void set_start (timepos_t const &) = 0;
+	virtual void set_end (timepos_t const &) = 0;
 	/* this accepts timepos_t because the origin is assumed to be the start */
 	virtual void set_length (timepos_t const &) = 0;
 
@@ -156,6 +159,11 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_follow_action_probability (int zero_to_a_hundred);
 	int  follow_action_probability() const { return _follow_action_probability; }
 
+	virtual void set_legato_offset (timepos_t const & offset) = 0;
+	virtual timepos_t current_pos() const = 0;
+	void set_legato (bool yn);
+	bool legato () const { return _legato; }
+
   protected:
 	TriggerBox& _box;
 	State _state;
@@ -169,6 +177,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	int _follow_action_probability;
 	boost::shared_ptr<Region> _region;
 	Temporal::BBT_Offset _quantization;
+	bool _legato;
+	std::string _name;
 
 	void set_region_internal (boost::shared_ptr<Region>);
 	void request_state (State s);
@@ -183,8 +193,10 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	int run (BufferSet&, pframes_t nframes, pframes_t offset, bool first);
 
-	void set_start (timepos_t);
-	void set_end (timepos_t);
+	void set_start (timepos_t const &);
+	void set_end (timepos_t const &);
+	void set_legato_offset (timepos_t const &);
+	timepos_t current_pos() const;
 	/* this accepts timepos_t because the origin is assumed to be the start */
 	void set_length (timepos_t const &);
 	timepos_t start_offset () const { return timepos_t (_start_offset); } /* offset from start of data */
@@ -203,6 +215,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	samplecnt_t read_index;
 	samplecnt_t data_length;
 	samplepos_t _start_offset;
+	samplepos_t _legato_offset;
 	samplecnt_t usable_length;
 	samplepos_t last_sample;
 
@@ -260,6 +273,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	typedef std::map<uint8_t,Triggers::size_type> MidiTriggerMap;
 	MidiTriggerMap midi_trigger_map;
+
+	static const size_t default_triggers_per_box;
 };
 
 } // namespace ARDOUR

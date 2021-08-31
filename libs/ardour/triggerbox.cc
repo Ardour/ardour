@@ -45,7 +45,14 @@ Trigger::Trigger (size_t n, TriggerBox& b)
 	, _follow_action { NextTrigger, Stop }
 	, _follow_action_probability (100)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
+	, _legato (false)
 {
+}
+
+void
+Trigger::set_name (std::string const & str)
+{
+	_name = str;
 }
 
 void
@@ -150,10 +157,12 @@ Trigger::process_state_requests ()
 		case Stopped:
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 -> %3\n", index(), enum_2_string (_state), enum_2_string (WaitingToStop)));
 			_state = WaitingToStop;
+			PropertyChanged (ARDOUR::Properties::running);
 			break;
 		case Running:
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 -> %3\n", index(), enum_2_string (_state), enum_2_string (WaitingToStart)));
 			_state = WaitingToStart;
+			PropertyChanged (ARDOUR::Properties::running);
 			break;
 		default:
 			break;
@@ -180,18 +189,21 @@ Trigger::process_state_requests ()
 			case OneShot:
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 -> %3\n", index(), enum_2_string (Running), enum_2_string (WaitingForRetrigger)));
 				_state = WaitingForRetrigger;
+				PropertyChanged (ARDOUR::Properties::running);
 				break;
 			case Gate:
 			case Toggle:
 			case Repeat:
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 -> %3\n", index(), enum_2_string (Running), enum_2_string (Stopped)));
 				_state = WaitingToStop;
+				PropertyChanged (ARDOUR::Properties::running);
 			}
 			break;
 
 		case Stopped:
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 -> %3\n", index(), enum_2_string (Stopped), enum_2_string (WaitingToStart)));
 			_state = WaitingToStart;
+			PropertyChanged (ARDOUR::Properties::running);
 			break;
 
 		case WaitingToStart:
@@ -211,11 +223,13 @@ Trigger::process_state_requests ()
 			switch (_state) {
 			case Running:
 				_state = WaitingToStop;
+				PropertyChanged (ARDOUR::Properties::running);
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, now in WaitingToStop\n", index()));
 				break;
 			default:
 				/* didn't even get started */
 				_state = Stopped;
+				PropertyChanged (ARDOUR::Properties::running);
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, never started, now stopped\n", index()));
 			}
 		}
@@ -254,14 +268,17 @@ Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal:
 
 		if (_state == WaitingToStop) {
 			_state = Stopping;
+			PropertyChanged (ARDOUR::Properties::running);
 			return RunEnd;
 		} else if (_state == WaitingToStart) {
 			retrigger ();
 			_state = Running;
+			PropertyChanged (ARDOUR::Properties::running);
 			return RunStart;
 		} else if (_state == WaitingForRetrigger) {
 			retrigger ();
 			_state = Running;
+			PropertyChanged (ARDOUR::Properties::running);
 			return RunAll;
 		}
 	} else {
@@ -292,6 +309,7 @@ AudioTrigger::AudioTrigger (size_t n, TriggerBox& b)
 	, read_index (0)
 	, data_length (0)
 	, _start_offset (0)
+	, _legato_offset (0)
 	, usable_length (0)
 	, last_sample (0)
 {
@@ -305,15 +323,27 @@ AudioTrigger::~AudioTrigger ()
 }
 
 void
-AudioTrigger::set_start (timepos_t s)
+AudioTrigger::set_start (timepos_t const & s)
 {
 	_start_offset = s.samples ();
 }
 
 void
-AudioTrigger::set_end (timepos_t e)
+AudioTrigger::set_end (timepos_t const & e)
 {
 	set_length (timepos_t (e.samples() - _start_offset));
+}
+
+void
+AudioTrigger::set_legato_offset (timepos_t const & offset)
+{
+	_legato_offset = offset.samples();
+}
+
+timepos_t
+AudioTrigger::current_pos() const
+{
+	return timepos_t (read_index);
 }
 
 timepos_t
@@ -549,6 +579,9 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 			data.push_back (new Sample[data_length]);
 			ar->read (data[n], 0, data_length, n);
 		}
+
+		set_name (ar->name());
+
 	} catch (...) {
 		drop_data ();
 		return -1;
@@ -560,7 +593,7 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 void
 AudioTrigger::retrigger ()
 {
-	read_index = _start_offset;
+	read_index = _start_offset + _legato_offset;
 }
 
 int
@@ -618,6 +651,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 					}
 				}
 				_state = Stopped;
+				PropertyChanged (ARDOUR::Properties::running);
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped\n", index()));
 				break;
 			}
@@ -629,6 +663,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 	if (_state == Stopping && long_enough_to_fade) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
 		_state = Stopped;
+		PropertyChanged (ARDOUR::Properties::running);
 	}
 
 	return 0;
@@ -643,6 +678,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for running = %1\n", Properties::running.property_id));
 }
 
+const size_t TriggerBox::default_triggers_per_box = 8;
+
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
 	, _bang_queue (1024)
@@ -653,7 +690,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	/* default number of possible triggers. call ::add_trigger() to increase */
 
 	if (_data_type == DataType::AUDIO) {
-		for (size_t n = 0; n < 16; ++n) {
+		for (size_t n = 0; n < default_triggers_per_box; ++n) {
 			all_triggers.push_back (new AudioTrigger (n, *this));
 		}
 	}
@@ -964,6 +1001,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				if (nxt >= 0 && (size_t) nxt < all_triggers.size() && !all_triggers[nxt]->active()) {
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 switching to %2\n", trigger.index(), nxt));
+					if (all_triggers[nxt]->legato()) {
+						all_triggers[nxt]->set_legato_offset (trigger.current_pos());
+					}
 					/* start it up */
 					all_triggers[nxt]->bang ();
 					all_triggers[nxt]->process_state_requests ();
