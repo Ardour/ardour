@@ -8,6 +8,7 @@
 #include "pbd/basename.h"
 #include "pbd/compose.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/types_convert.h"
 
 #include "temporal/tempo.h"
 
@@ -88,6 +89,19 @@ XMLNode&
 Trigger::get_state (void)
 {
 	XMLNode* node = new XMLNode (X_("Trigger"));
+
+	node->set_property (X_("legato"), _legato);
+	node->set_property (X_("launch-style"), enum_2_string (_launch_style));
+	node->set_property (X_("follow-action-0"), enum_2_string (_follow_action[0]));
+	node->set_property (X_("follow-action-1"), enum_2_string (_follow_action[1]));
+	node->set_property (X_("quantization"), _quantization);
+	node->set_property (X_("name"), _name);
+	node->set_property (X_("index"), _index);
+
+	if (_region) {
+		node->set_property (X_("region"), _region->id());
+	}
+
 	return *node;
 }
 
@@ -320,6 +334,23 @@ AudioTrigger::~AudioTrigger ()
 	for (std::vector<Sample*>::iterator d = data.begin(); d != data.end(); ++d) {
 		delete *d;
 	}
+}
+
+XMLNode&
+AudioTrigger::get_state (void)
+{
+	XMLNode& node (Trigger::get_state());
+
+	node.set_property (X_("start"), timepos_t (_start_offset));
+	node.set_property (X_("length"), timepos_t (usable_length));
+
+	return node;
+}
+
+int
+AudioTrigger::set_state (const XMLNode&, int version)
+{
+	return 0;
 }
 
 void
@@ -1161,7 +1192,23 @@ TriggerBox::set_next_trigger (size_t current)
 XMLNode&
 TriggerBox::get_state (void)
 {
-	return Processor::get_state ();
+	XMLNode& node (Processor::get_state ());
+
+	node.set_property (X_("data-type"), _data_type.to_string());
+
+	XMLNode* trigger_child (new XMLNode (X_("Triggers")));
+
+	{
+		Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
+		for (Triggers::iterator t = all_triggers.begin(); t != all_triggers.end(); ++t) {
+			trigger_child->add_child_nocopy ((*t)->get_state());
+		}
+	}
+
+
+	node.add_child_nocopy (*trigger_child);
+
+	return node;
 }
 
 int

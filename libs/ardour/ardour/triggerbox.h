@@ -206,11 +206,15 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	int set_region (boost::shared_ptr<Region>);
 
+	XMLNode& get_state (void);
+	int set_state (const XMLNode&, int version);
+
   protected:
 	void retrigger ();
 	void set_usable_length ();
 
   private:
+	PBD::ID data_source;
 	std::vector<Sample*> data;
 	samplecnt_t read_index;
 	samplecnt_t data_length;
