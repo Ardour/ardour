@@ -84,14 +84,10 @@ Box::compute_bounding_box () const
 	if (_bounding_box) {
 		Rect r = _bounding_box;
 
-		/* left and top margin and padding is already built into the
-		 * position of children
-		 */
-
-		_bounding_box = r.expand (0.0,
+		_bounding_box = r.expand (top_padding + outline_width() + top_margin,
 		                          right_padding + outline_width() + right_margin,
 		                          bottom_padding + outline_width() + bottom_margin,
-		                          0.0);
+		                          left_padding + outline_width() + left_margin);
 	}
 
 	bb_clean ();
