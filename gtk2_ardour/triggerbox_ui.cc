@@ -59,18 +59,18 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	ArdourCanvas::Rect r (0, 0, width, height);
 	set (r);
 	set_outline_all ();
-	set_fill_color (Gtkmm2ext::random_color());
-	set_outline_color (Gtkmm2ext::random_color());
+	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
+	set_outline_color (UIConfiguration::instance().color (X_("neutral:foreground")));
 	name = string_compose ("trigger %1", _trigger.index());
 
 	play_button = new ArdourCanvas::Rectangle (this);
-	play_button->set (ArdourCanvas::Rect (0., 0., poly_size + (poly_margin * 2.), height));
+	play_button->set (ArdourCanvas::Rect (poly_margin/2., poly_margin/2., poly_size + ((poly_margin/2.) * 2.), height - ((poly_margin/2.) * 2.)));
 	play_button->set_outline (false);
-	play_button->set_fill_color (0x000000ff);
+	play_button->set_fill_color (outline_color());
 	play_button->name = string_compose ("playbutton %1", _trigger.index());
 
 	play_shape = new ArdourCanvas::Polygon (play_button);
-	play_shape->set_fill_color (Gtkmm2ext::random_color());
+	play_shape->set_fill_color (UIConfiguration::instance().color (X_("theme:contrasting selection")));
 	play_shape->set_outline (false);
 	play_shape->name = string_compose ("playshape %1", _trigger.index());
 
@@ -98,17 +98,17 @@ TriggerEntry::draw_play_button ()
 {
 	Points p;
 
-	if (_trigger.region()) {
-		/* stopped: triangle */
-		p.push_back (Duple (poly_margin, poly_margin));
-		p.push_back (Duple (poly_margin, poly_size));
-		p.push_back (Duple (poly_size, poly_size / 2.));
-	} else {
-		/* stopped: square */
+	if (!_trigger.region()) {
+		/* no region, so must be a stop button, drawn as a square */
 		p.push_back (Duple (poly_margin, poly_margin));
 		p.push_back (Duple (poly_margin, poly_size));
 		p.push_back (Duple (poly_size, poly_size));
 		p.push_back (Duple (poly_size, poly_margin));
+	} else {
+		/* region exists; draw triangle to show that we can trigger */
+		p.push_back (Duple (poly_margin, poly_margin));
+		p.push_back (Duple (poly_margin, poly_size));
+		p.push_back (Duple (poly_size, poly_size / 2.));
 	}
 
 	play_shape->set (p);
@@ -127,7 +127,7 @@ TriggerEntry::prop_change (PropertyChange const & change)
 
 	if (change.contains (ARDOUR::Properties::name)) {
 		if (_trigger.region()) {
-			name_text->set (short_version (_trigger.region()->name(), 20));
+			name_text->set (short_version (_trigger.name(), 16));
 		} else {
 			/* we need some spaces to have something to click on */
 			name_text->set ("");
@@ -156,9 +156,10 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	, _context_menu (0)
 {
 	set_homogenous (true);
-	set_spacing (16);
-	set_padding (16);
-	set_fill (false);
+	set_spacing (4);
+	set_padding (4);
+	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
+	set_fill (true);
 
 	build ();
 }
@@ -454,6 +455,7 @@ TriggerBoxUI::sample_chosen (int response, size_t n)
 TriggerBoxWidget::TriggerBoxWidget (TriggerBox& tb)
 {
 	ui = new TriggerBoxUI (root(), tb);
+	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
 }
 
 void
