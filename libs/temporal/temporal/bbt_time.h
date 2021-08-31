@@ -358,6 +358,23 @@ inline bool string_to (std::string const & str, Temporal::BBT_Time & val)
 	return (bool) istr;
 }
 
+template<>
+inline bool to_string (Temporal::BBT_Offset val, std::string & str)
+{
+	std::ostringstream ostr;
+	ostr << val;
+	str = ostr.str();
+	return true;
+}
+
+template<>
+inline bool string_to (std::string const & str, Temporal::BBT_Offset & val)
+{
+	std::istringstream istr (str);
+	istr >> val;
+	return (bool) istr;
+}
+
 } /* end namespace PBD */
 
 #endif /* __libtemporal_bbt_time_h__ */
