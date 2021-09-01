@@ -283,4 +283,10 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 } // namespace ARDOUR
 
+namespace PBD {
+DEFINE_ENUM_CONVERT(ARDOUR::Trigger::FollowAction);
+DEFINE_ENUM_CONVERT(ARDOUR::Trigger::LaunchStyle);
+} /* namespace PBD */
+
+
 #endif /* __ardour_triggerbox_h__ */

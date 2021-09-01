@@ -106,8 +106,16 @@ Trigger::get_state (void)
 }
 
 int
-Trigger::set_state (const XMLNode&, int version)
+Trigger::set_state (const XMLNode& node, int version)
 {
+	node.get_property (X_("legato"), _legato);
+	node.get_property (X_("launch-style"), _launch_style);
+	node.get_property (X_("follow-action-0"), _follow_action[0]);
+	node.get_property (X_("follow-action-1"), _follow_action[1]);
+	node.get_property (X_("quantization"), _quantization);
+	node.get_property (X_("name"), _name);
+	node.get_property (X_("index"), _index);
+
 	return 0;
 }
 
@@ -348,8 +356,17 @@ AudioTrigger::get_state (void)
 }
 
 int
-AudioTrigger::set_state (const XMLNode&, int version)
+AudioTrigger::set_state (const XMLNode& node, int version)
 {
+	timepos_t t;
+
+	node.get_property (X_("start"), t);
+	_start_offset = t.samples();
+
+	node.get_property (X_("length"), t);
+	usable_length = t.samples();
+	last_sample = _start_offset + usable_length;
+
 	return 0;
 }
 
