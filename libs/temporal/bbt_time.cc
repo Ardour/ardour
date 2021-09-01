@@ -63,7 +63,7 @@ std::operator>>(std::istream& i, Temporal::BBT_Offset& bbt)
 	i >> skip_pipe_char;
 	i >> t;
 
-	bbt = Temporal::BBT_Time (B, b, t);
+	bbt = Temporal::BBT_Offset (B, b, t);
 
 	return i;
 }
