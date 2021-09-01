@@ -824,6 +824,8 @@ TriggerBox::drop_triggers ()
 			(*t) = 0;
 		}
 	}
+
+	all_triggers.clear ();
 }
 
 Trigger*
@@ -1211,6 +1213,7 @@ TriggerBox::get_state (void)
 {
 	XMLNode& node (Processor::get_state ());
 
+	node.set_property (X_("type"), X_("triggerbox"));
 	node.set_property (X_("data-type"), _data_type.to_string());
 
 	XMLNode* trigger_child (new XMLNode (X_("Triggers")));
@@ -1229,8 +1232,33 @@ TriggerBox::get_state (void)
 }
 
 int
-TriggerBox::set_state (const XMLNode&, int version)
+TriggerBox::set_state (const XMLNode& node, int version)
 {
+	node.get_property (X_("data-type"), _data_type);
+
+	XMLNode* tnode (node.child (X_("Triggers")));
+	assert (tnode);
+
+	XMLNodeList const & tchildren (tnode->children());
+
+	drop_triggers ();
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (trigger_lock);
+
+		for (XMLNodeList::const_iterator t = tchildren.begin(); t != tchildren.end(); ++t) {
+			Trigger* trig;
+
+			if (_data_type == DataType::AUDIO) {
+				trig = new AudioTrigger (all_triggers.size(), *this);
+				all_triggers.push_back (trig);
+				trig->set_state (**t, version);
+			} else {
+
+			}
+		}
+	}
+
 	return 0;
 }
 

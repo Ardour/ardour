@@ -3133,6 +3133,13 @@ Route::set_processor_state (const XMLNode& node, int version)
 		} else if (prop->value() == "diskwriter" && _disk_writer) {
 			_disk_writer->set_state (**niter, version);
 			new_order.push_back (_disk_writer);
+		} else if (prop->value() == "triggerbox") {
+			cerr << "Seen triggerbox!\n";
+			if (!_triggerbox) {
+				_triggerbox.reset (new TriggerBox (_session, _default_type));
+			}
+			_triggerbox->set_state (**niter, version);
+			new_order.push_back (_triggerbox);
 		} else {
 			set_processor_state (**niter, version, prop, new_order, must_configure);
 		}
