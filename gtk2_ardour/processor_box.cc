@@ -98,6 +98,7 @@
 #include "script_selector.h"
 #include "send_ui.h"
 #include "timers.h"
+#include "triggerbox_ui.h"
 #include "new_plugin_preset_dialog.h"
 
 #include "pbd/i18n.h"
@@ -2926,19 +2927,18 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 
 	if (boost::dynamic_pointer_cast<PluginInsert> (p)) {
 		have_ui = true;
-	}
-	else if (boost::dynamic_pointer_cast<PortInsert> (p)) {
+	} else if (boost::dynamic_pointer_cast<PortInsert> (p)) {
 		have_ui = true;
-	}
-	else if (boost::dynamic_pointer_cast<Send> (p)) {
+	} else if (boost::dynamic_pointer_cast<Send> (p)) {
 		if (!boost::dynamic_pointer_cast<InternalSend> (p)) {
 			have_ui = true;
 		}
-	}
-	else if (boost::dynamic_pointer_cast<Return> (p)) {
+	} else if (boost::dynamic_pointer_cast<Return> (p)) {
 		if (!boost::dynamic_pointer_cast<InternalReturn> (p)) {
 			have_ui = true;
 		}
+	} else if (boost::dynamic_pointer_cast<TriggerBox> (p)) {
+		have_ui = true;
 	}
 #ifdef HAVE_BEATBOX
 	else if (boost::dynamic_pointer_cast<BeatBox> (p)) {
@@ -3014,6 +3014,7 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 
 	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
 	boost::shared_ptr<PortInsert> ext = boost::dynamic_pointer_cast<PortInsert> (processor);
+	boost::shared_ptr<TriggerBox> tb = boost::dynamic_pointer_cast<TriggerBox> (processor);
 #ifdef HAVE_BEATBOX
 	boost::shared_ptr<BeatBox> bb = boost::dynamic_pointer_cast<BeatBox> (processor);
 #endif
@@ -3022,9 +3023,9 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	//faders and meters are not deletable, copy/paste-able, so they shouldn't be selectable
 
 #ifdef HAVE_BEATBOX
-	if (!send && !plugin_insert && !ext && !stub && !bb) {
+	if (!send && !plugin_insert && !ext && !stub && !bb && !tb) {
 #else
-	if (!send && !plugin_insert && !ext && !stub) {
+	if (!send && !plugin_insert && !ext && !stub && !tb) {
 #endif
 		e->set_selectable(false);
 	}
@@ -3787,7 +3788,8 @@ ProcessorBox::processor_can_be_edited (boost::shared_ptr<Processor> processor)
 	if (boost::dynamic_pointer_cast<Send> (processor) ||
 	    boost::dynamic_pointer_cast<Return> (processor) ||
 	    boost::dynamic_pointer_cast<PluginInsert> (processor) ||
-	    boost::dynamic_pointer_cast<PortInsert> (processor)
+	    boost::dynamic_pointer_cast<PortInsert> (processor) ||
+	    boost::dynamic_pointer_cast<TriggerBox> (processor)
 #ifdef HAVE_BEATBOX
 	    || boost::dynamic_pointer_cast<BeatBox> (processor)
 #endif
@@ -3818,6 +3820,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 	boost::shared_ptr<Return> retrn;
 	boost::shared_ptr<PluginInsert> plugin_insert;
 	boost::shared_ptr<PortInsert> port_insert;
+	boost::shared_ptr<TriggerBox> triggerbox;
 #ifdef HAVE_BEATBOX
 	boost::shared_ptr<BeatBox> beatbox;
 #endif
@@ -3905,6 +3908,26 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 		}
 
 		gidget = plugin_ui;
+
+	} else if ((triggerbox = boost::dynamic_pointer_cast<TriggerBox> (processor)) != 0) {
+
+		if (!ARDOUR_UI_UTILS::engine_is_running ()) {
+			return 0;
+		}
+
+		TriggerBoxWindow* tw;
+
+		Window* w = get_processor_ui (triggerbox);
+
+		if (w == 0) {
+			tw = new TriggerBoxWindow (*(triggerbox.get())); /* XXX fix me to use shared ptr */
+			set_processor_ui (triggerbox, tw);
+
+		} else {
+			tw = dynamic_cast<TriggerBoxWindow *> (w);
+		}
+
+		gidget = tw;
 
 	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (processor)) != 0) {
 
