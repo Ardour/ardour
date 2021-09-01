@@ -3030,7 +3030,6 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 		e->set_selectable(false);
 	}
 
-	bool mark_send_visible = false;
 	if (send && _parent_strip) {
 		/* show controls of new sends by default */
 		GUIObjectState& st = _parent_strip->gui_object_state ();
