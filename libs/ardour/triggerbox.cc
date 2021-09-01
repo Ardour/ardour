@@ -19,6 +19,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_object.h"
+#include "ardour/source_factory.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/triggerbox.h"
 
@@ -115,6 +116,16 @@ Trigger::set_state (const XMLNode& node, int version)
 	node.get_property (X_("quantization"), _quantization);
 	node.get_property (X_("name"), _name);
 	node.get_property (X_("index"), _index);
+
+	PBD::ID rid;
+
+	node.get_property (X_("region"), rid);
+
+	boost::shared_ptr<Region> r = RegionFactory::region_by_id (rid);
+
+	if (r) {
+		set_region (r);
+	}
 
 	return 0;
 }
@@ -359,6 +370,10 @@ int
 AudioTrigger::set_state (const XMLNode& node, int version)
 {
 	timepos_t t;
+
+	if (!Trigger::set_state (node, version)) {
+		return -1;
+	}
 
 	node.get_property (X_("start"), t);
 	_start_offset = t.samples();
@@ -772,7 +787,12 @@ TriggerBox::set_from_path (size_t slot, std::string const & path)
 		SourceList src_list;
 
 		for (uint16_t n = 0; n < info.channels; ++n) {
-			boost::shared_ptr<Source> source (new SndFileSource (_session, path, n, Source::Flag (0)));
+			boost::shared_ptr<Source> source (SourceFactory::createExternal (DataType::AUDIO, _session, path, n, Source::Flag (0), true));
+			if (!source) {
+				error << string_compose (_("Cannot create source from %1"), path) << endmsg;
+				src_list.clear ();
+				return -1;
+			}
 			src_list.push_back (source);
 		}
 
@@ -784,7 +804,7 @@ TriggerBox::set_from_path (size_t slot, std::string const & path)
 		plist.add (Properties::layer, 0);
 		plist.add (Properties::layering_index, 0);
 
-		boost::shared_ptr<Region> the_region (RegionFactory::create (src_list, plist, false));
+		boost::shared_ptr<Region> the_region (RegionFactory::create (src_list, plist, true));
 
 		all_triggers[slot]->set_region (the_region);
 
