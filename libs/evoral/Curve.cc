@@ -140,11 +140,11 @@ Curve::solve () const
 
 			/* compute second derivative for either side of control point `i' */
 
-			fppL = (((-2 * (fpi + (2 * fplast))) / (xdelta))) +
-				((6 * ydelta) / xdelta2);
+			fppL = -2 * (fpi + 2 * fplast) / xdelta +
+				6 * ydelta / xdelta2;
 
-			fppR = (2 * ((2 * fpi) + fplast) / xdelta) -
-				((6 * ydelta) / xdelta2);
+			fppR = 2 * (2 * fpi + fplast) / xdelta -
+				6 * ydelta / xdelta2;
 
 			/* compute polynomial coefficients */
 
