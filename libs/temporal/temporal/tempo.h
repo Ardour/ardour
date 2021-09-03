@@ -612,7 +612,7 @@ class LIBTEMPORAL_API TempoMapPoint : public Point, public TempoMetric
 
 typedef std::list<TempoMapPoint> TempoMapPoints;
 
-class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
+class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 {
 	/* Any given thread must be able to carry out tempo-related arithmetic
 	 * and time domain conversions using a consistent version of a
@@ -657,59 +657,59 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 	static thread_local SharedPtr _tempo_map_p;
 	static SerializedRCUManager<TempoMap> _map_mgr;
   public:
-	static void init ();
+	LIBTEMPORAL_API static void init ();
 
-	static void update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
-	static SharedPtr use() { assert (_tempo_map_p); return _tempo_map_p; }
-	static SharedPtr fetch() { update_thread_tempo_map(); return use(); }
+	LIBTEMPORAL_API static void update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
+	LIBTEMPORAL_API static SharedPtr use() { assert (_tempo_map_p); return _tempo_map_p; }
+	LIBTEMPORAL_API static SharedPtr fetch() { update_thread_tempo_map(); return use(); }
 
-	static SharedPtr write_copy();
-	static void fetch_writable() { _tempo_map_p = write_copy(); }
-	static int  update (SharedPtr m);
-	static void abort_update ();
+	LIBTEMPORAL_API static SharedPtr write_copy();
+	LIBTEMPORAL_API static void fetch_writable() { _tempo_map_p = write_copy(); }
+	LIBTEMPORAL_API static int  update (SharedPtr m);
+	LIBTEMPORAL_API static void abort_update ();
 
 	/* and now on with the rest of the show ... */
 
-   public:
-	TempoMap (Tempo const & initial_tempo, Meter const & initial_meter);
-	TempoMap (TempoMap const &);
-	TempoMap (XMLNode const &, int version);
-	~TempoMap();
+  public:
+	LIBTEMPORAL_API TempoMap (Tempo const& initial_tempo, Meter const& initial_meter);
+	LIBTEMPORAL_API TempoMap (TempoMap const&);
+	LIBTEMPORAL_API TempoMap (XMLNode const&, int version);
+	LIBTEMPORAL_API ~TempoMap();
+	
+	LIBTEMPORAL_API TempoMap& operator= (TempoMap const&);
 
-	TempoMap& operator= (TempoMap const &);
-
-	void sample_rate_changed (samplecnt_t new_sr);
+	LIBTEMPORAL_API void sample_rate_changed (samplecnt_t new_sr);
 
 	/* methods which modify the map. These must all be called using
 	 * RCU-style semantics: get a writable copy, modify it, then update via
 	 * the RCU manager.
 	 */
 
-	void set_ramped (TempoPoint&, bool);
+	LIBTEMPORAL_API void set_ramped (TempoPoint&, bool);
 
-	void insert_time (timepos_t const & pos, timecnt_t const & duration);
-	bool remove_time (timepos_t const & pos, timecnt_t const & duration);
+	LIBTEMPORAL_API void insert_time (timepos_t const & pos, timecnt_t const & duration);
+	LIBTEMPORAL_API bool remove_time (timepos_t const & pos, timecnt_t const & duration);
 
-	void change_tempo (TempoPoint&, Tempo const &);
+	LIBTEMPORAL_API	void change_tempo (TempoPoint&, Tempo const&);
 
-	MusicTimePoint & set_bartime (BBT_Time const &, timepos_t const &);
-	void remove_bartime (MusicTimePoint const & tp);
+	LIBTEMPORAL_API MusicTimePoint& set_bartime (BBT_Time const &, timepos_t const &);
+	LIBTEMPORAL_API void remove_bartime (MusicTimePoint const & tp);
 
-	TempoPoint & set_tempo (Tempo const &, BBT_Time const &);
-	TempoPoint & set_tempo (Tempo const &, timepos_t const &);
+	LIBTEMPORAL_API TempoPoint& set_tempo (Tempo const &, BBT_Time const &);
+	LIBTEMPORAL_API	TempoPoint& set_tempo (Tempo const &, timepos_t const &);
 
-	MeterPoint & set_meter (Meter const &, BBT_Time const &);
-	MeterPoint & set_meter (Meter const &, timepos_t const &);
+	LIBTEMPORAL_API	MeterPoint& set_meter (Meter const &, BBT_Time const &);
+	LIBTEMPORAL_API	MeterPoint& set_meter (Meter const &, timepos_t const &);
 
-	void remove_tempo (TempoPoint const &);
-	void remove_meter (MeterPoint const &);
+	LIBTEMPORAL_API void remove_tempo (TempoPoint const &);
+	LIBTEMPORAL_API void remove_meter (MeterPoint const &);
 
 	/* these are a convenience method that just wrap some odd semantics */
-	bool move_tempo (TempoPoint const & point, timepos_t const & destination, bool push = false);
-	bool move_meter (MeterPoint const & point, timepos_t const & destination, bool push = false);
+	LIBTEMPORAL_API bool move_tempo (TempoPoint const & point, timepos_t const & destination, bool push = false);
+	LIBTEMPORAL_API bool move_meter (MeterPoint const & point, timepos_t const & destination, bool push = false);
 
-	void set_time_domain (TimeDomain td);
-	int set_state (XMLNode const&, int version);
+	LIBTEMPORAL_API void set_time_domain (TimeDomain td);
+	LIBTEMPORAL_API int set_state (XMLNode const&, int version);
 
 	/* END OF MODIFYING METHODS */
 
@@ -727,90 +727,90 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 		}
 	}
 
-	bool can_remove (TempoPoint const &) const;
-	bool can_remove (MeterPoint const &) const;
+	LIBTEMPORAL_API	bool can_remove (TempoPoint const &) const;
+	LIBTEMPORAL_API	bool can_remove (MeterPoint const &) const;
 
-	bool is_initial (TempoPoint const &) const;
-	bool is_initial (MeterPoint const &) const;
+	LIBTEMPORAL_API	bool is_initial (TempoPoint const &) const;
+	LIBTEMPORAL_API	bool is_initial (MeterPoint const &) const;
 
-	uint32_t n_meters() const;
-	uint32_t n_tempos() const;
+	LIBTEMPORAL_API	uint32_t n_meters() const;
+	LIBTEMPORAL_API	uint32_t n_tempos() const;
 
-	Tempo const * next_tempo (Tempo const &) const;
-	Meter const * next_meter (Meter const &) const;
+	LIBTEMPORAL_API Tempo const* next_tempo (Tempo const &) const;
+	LIBTEMPORAL_API Meter const* next_meter (Meter const &) const;
 
-	TempoMetric metric_at (timepos_t const &) const;
+	LIBTEMPORAL_API	TempoMetric metric_at (timepos_t const &) const;
 
 	/* These return the TempoMetric in effect at the given time. If
 	   can_match is true, then the TempoMetric may refer to a Tempo or
 	   Meter at the given time. If can_match is false, the TempoMetric will
 	   only refer to the Tempo or Metric preceding the given time.
 	*/
-	TempoMetric metric_at (superclock_t, bool can_match = true) const;
-	TempoMetric metric_at (Beats const &, bool can_match = true) const;
-	TempoMetric metric_at (BBT_Time const &, bool can_match = true) const;
+	LIBTEMPORAL_API	TempoMetric metric_at (superclock_t, bool can_match = true) const;
+	LIBTEMPORAL_API	TempoMetric metric_at (Beats const &, bool can_match = true) const;
+	LIBTEMPORAL_API	TempoMetric metric_at (BBT_Time const &, bool can_match = true) const;
 
 	/* essentially convenience methods */
 
-	MeterPoint const & meter_at (timepos_t const & p) const { return metric_at (p).meter(); }
-	MeterPoint const & meter_at (superclock_t sc) const { return metric_at (sc).meter(); }
-	MeterPoint const & meter_at (Beats const &b) const { return metric_at (b).meter(); }
-	MeterPoint const & meter_at (BBT_Time const & bbt) const { return metric_at (bbt).meter(); }
+	LIBTEMPORAL_API	MeterPoint const& meter_at (timepos_t const & p) const { return metric_at (p).meter(); }
+	LIBTEMPORAL_API	MeterPoint const& meter_at (superclock_t sc) const { return metric_at (sc).meter(); }
+	LIBTEMPORAL_API	MeterPoint const& meter_at (Beats const & b) const { return metric_at (b).meter(); }
+	LIBTEMPORAL_API	MeterPoint const& meter_at (BBT_Time const & bbt) const { return metric_at (bbt).meter(); }
 
-	TempoPoint const & tempo_at (timepos_t const & p) const { return metric_at (p).tempo(); }
-	TempoPoint const & tempo_at (superclock_t sc) const { return metric_at (sc).tempo(); }
-	TempoPoint const & tempo_at (Beats const &b) const { return metric_at (b).tempo(); }
-	TempoPoint const & tempo_at (BBT_Time const & bbt) const { return metric_at (bbt).tempo(); }
+	LIBTEMPORAL_API	TempoPoint const& tempo_at (timepos_t const & p) const { return metric_at (p).tempo(); }
+	LIBTEMPORAL_API	TempoPoint const& tempo_at (superclock_t sc) const { return metric_at (sc).tempo(); }
+	LIBTEMPORAL_API	TempoPoint const& tempo_at (Beats const & b) const { return metric_at (b).tempo(); }
+	LIBTEMPORAL_API TempoPoint const& tempo_at (BBT_Time const & bbt) const { return metric_at (bbt).tempo(); }
 
-	TempoPoint const * previous_tempo (TempoPoint const &) const;
+	LIBTEMPORAL_API TempoPoint const* previous_tempo (TempoPoint const &) const;
 
 	/* convenience function */
-	BBT_Time round_to_bar (BBT_Time const & bbt) const {
+	LIBTEMPORAL_API BBT_Time round_to_bar (BBT_Time const & bbt) const {
 		return metric_at (bbt).meter().round_to_bar (bbt);
 	}
 
-	BBT_Time bbt_at (timepos_t const &) const;
+	LIBTEMPORAL_API BBT_Time bbt_at (timepos_t const &) const;
 
-	Beats quarters_at (BBT_Time const &) const;
-	Beats quarters_at (timepos_t const &) const;
+	LIBTEMPORAL_API	Beats quarters_at (BBT_Time const &) const;
+	LIBTEMPORAL_API	Beats quarters_at (timepos_t const &) const;
 
-	superclock_t superclock_at (Beats const &) const;
-	superclock_t superclock_at (BBT_Time const &) const;
-	superclock_t superclock_at (timepos_t const &) const;
+	LIBTEMPORAL_API	superclock_t superclock_at (Beats const &) const;
+	LIBTEMPORAL_API	superclock_t superclock_at (BBT_Time const &) const;
+	LIBTEMPORAL_API	superclock_t superclock_at (timepos_t const &) const;
 
-	samplepos_t sample_at (Beats const & b, samplecnt_t sr) const { return superclock_to_samples (superclock_at (b), sr); }
-	samplepos_t sample_at (BBT_Time const & b, samplecnt_t sr) const { return superclock_to_samples (superclock_at (b), sr); }
-	samplepos_t sample_at (timepos_t const & t, samplecnt_t sr) const { return superclock_to_samples (superclock_at (t), sr); }
+	LIBTEMPORAL_API	samplepos_t sample_at (Beats const & b, samplecnt_t sr) const { return superclock_to_samples (superclock_at (b), sr); }
+	LIBTEMPORAL_API	samplepos_t sample_at (BBT_Time const & b, samplecnt_t sr) const { return superclock_to_samples (superclock_at (b), sr); }
+	LIBTEMPORAL_API	samplepos_t sample_at (timepos_t const & t, samplecnt_t sr) const { return superclock_to_samples (superclock_at (t), sr); }
 
 	/* ways to walk along the tempo map, measure distance between points,
 	 * etc.
 	 */
 
-	Beats scwalk_to_quarters (superclock_t pos, superclock_t distance) const;
-	Beats scwalk_to_quarters (Beats const & pos, superclock_t distance) const;
+	LIBTEMPORAL_API Beats scwalk_to_quarters (superclock_t pos, superclock_t distance) const;
+	LIBTEMPORAL_API Beats scwalk_to_quarters (Beats const & pos, superclock_t distance) const;
 
-	timecnt_t bbt_duration_at (timepos_t const & pos, BBT_Offset const & bbt) const;
-	Beats bbtwalk_to_quarters (Beats const & start, BBT_Offset const & distance) const;
+	LIBTEMPORAL_API	timecnt_t bbt_duration_at (timepos_t const & pos, BBT_Offset const & bbt) const;
+	LIBTEMPORAL_API	Beats bbtwalk_to_quarters (Beats const & start, BBT_Offset const & distance) const;
 
-	Temporal::timecnt_t convert_duration (Temporal::timecnt_t const & duration, Temporal::timepos_t const &, Temporal::TimeDomain domain) const;
+	LIBTEMPORAL_API	Temporal::timecnt_t convert_duration (Temporal::timecnt_t const & duration, Temporal::timepos_t const &, Temporal::TimeDomain domain) const;
 
-	BBT_Time bbt_walk (BBT_Time const &, BBT_Offset const &) const;
+	LIBTEMPORAL_API	BBT_Time bbt_walk (BBT_Time const &, BBT_Offset const &) const;
 
-	void get_grid (TempoMapPoints& points, superclock_t start, superclock_t end, uint32_t bar_mod = 0);
-	uint32_t count_bars (Beats const & start, Beats const & end);
+	LIBTEMPORAL_API	void get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0);
+	LIBTEMPORAL_API	uint32_t count_bars (Beats const & start, Beats const & end);
 
 	struct EmptyTempoMapException : public std::exception {
 		virtual const char* what() const throw() { return "TempoMap is empty"; }
 	};
 
-	void dump (std::ostream&) const;
+	LIBTEMPORAL_API void dump (std::ostream&) const;
 
 	static PBD::Signal0<void> MapChanged;
 
-	XMLNode& get_state();
+	LIBTEMPORAL_API XMLNode& get_state();
 
-	class MementoBinder : public MementoCommandBinder<TempoMap> {
-          public:
+	LIBTEMPORAL_API class MementoBinder : public MementoCommandBinder<TempoMap> {
+  public:
 		MementoBinder () {}
 		void set_state (XMLNode const & node, int version) const;
 		XMLNode& get_state () const { return TempoMap::use()->get_state(); }
@@ -818,22 +818,22 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 		void add_state (XMLNode*) {}
 	};
 
-	typedef boost::intrusive::member_hook<TempoPoint,boost::intrusive::list_member_hook<>, &TempoPoint::_tempo_hook> TempoHookOption;
-	typedef boost::intrusive::member_hook<MeterPoint,boost::intrusive::list_member_hook<>, &MeterPoint::_meter_hook> MeterHookOption;
-	typedef boost::intrusive::member_hook<MusicTimePoint,boost::intrusive::list_member_hook<>, &MusicTimePoint::_bartime_hook> BarTimeHookOption;
-	typedef boost::intrusive::member_hook<Point,boost::intrusive::list_member_hook<>, &Point::_point_hook> PointHookOption;
+	typedef boost::intrusive::member_hook<TempoPoint, boost::intrusive::list_member_hook<>, &TempoPoint::_tempo_hook> TempoHookOption;
+	typedef boost::intrusive::member_hook<MeterPoint, boost::intrusive::list_member_hook<>, &MeterPoint::_meter_hook> MeterHookOption;
+	typedef boost::intrusive::member_hook<MusicTimePoint, boost::intrusive::list_member_hook<>, &MusicTimePoint::_bartime_hook> BarTimeHookOption;
+	typedef boost::intrusive::member_hook<Point, boost::intrusive::list_member_hook<>, &Point::_point_hook> PointHookOption;
 
-	typedef boost::intrusive::list<TempoPoint,TempoHookOption> Tempos;
-	typedef boost::intrusive::list<MeterPoint,MeterHookOption> Meters;
-	typedef boost::intrusive::list<MusicTimePoint,BarTimeHookOption> MusicTimes;
-	typedef boost::intrusive::list<Point,PointHookOption> Points;
+	typedef boost::intrusive::list<TempoPoint, TempoHookOption> Tempos;
+	typedef boost::intrusive::list<MeterPoint, MeterHookOption> Meters;
+	typedef boost::intrusive::list<MusicTimePoint, BarTimeHookOption> MusicTimes;
+	typedef boost::intrusive::list<Point, PointHookOption> Points;
 
-	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
-	Beats quarters_at_superclock (superclock_t sc) const;
+	LIBTEMPORAL_API	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
+	LIBTEMPORAL_API	Beats quarters_at_superclock (superclock_t sc) const;
 
-	void midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_pos, uint32_t& clk_beat);
+	LIBTEMPORAL_API	void midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_pos, uint32_t& clk_beat);
 
-   private:
+  private:
 	Tempos       _tempos;
 	Meters       _meters;
 	MusicTimes   _bartimes;
@@ -938,7 +938,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 		   will all be the non-const versions of these methods.
 		*/
 
-		return _get_tempo_and_meter<non_const_traits<superclock_t,superclock_t> > (t, m, &Point::sclock, sc, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
+		return _get_tempo_and_meter<non_const_traits<superclock_t, superclock_t> > (t, m, &Point::sclock, sc, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
 	}
 
 	/* fetch const tempo/meter pairs and iterator (used in metric_at() and
@@ -960,7 +960,7 @@ class LIBTEMPORAL_API TempoMap : public PBD::StatefulDestructible
 		return _get_tempo_and_meter<const_traits<BBT_Time const  &, BBT_Time> > (t, m, &Point::bbt, bbt, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
 	}
 	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, superclock_t sc, bool can_match, bool ret_iterator_after_not_at) const {
-		return _get_tempo_and_meter<const_traits<superclock_t,superclock_t> > (t, m, &Point::sclock, sc, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
+		return _get_tempo_and_meter<const_traits<superclock_t, superclock_t> > (t, m, &Point::sclock, sc, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
 	}
 	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, Beats const & b, bool can_match, bool ret_iterator_after_not_at) const {
 		return _get_tempo_and_meter<const_traits<Beats const &, Beats> > (t, m, &Point::beats, b, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
