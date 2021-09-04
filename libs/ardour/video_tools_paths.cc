@@ -145,10 +145,14 @@ bool
 ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffprobe_exe)
 {
 	static bool _cached = false;
+	static bool _success = false;
 	static std::string _ffmpeg_exe;
 	static std::string _ffprobe_exe;
 
 	if (_cached) {
+		if (!_success)
+			return false;
+
 		ffmpeg_exe  = _ffmpeg_exe;
 		ffprobe_exe = _ffprobe_exe;
 		return true;
@@ -214,10 +218,13 @@ ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffpr
 #endif
 
 	if (_ffmpeg_exe.empty() || _ffprobe_exe.empty()) {
+		_cached      = true;
+		_success     = false;
 		return false;
 	}
 
 	_cached      = true;
+	_success     = true;
 	ffmpeg_exe  = _ffmpeg_exe;
 	ffprobe_exe = _ffprobe_exe;
 
