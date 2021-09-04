@@ -184,7 +184,7 @@ public:
 		return Beats (_beats+1, 0);
 	}
 
-	Beats round_to_subdivision (int subdivision, RoundMode dir) const;
+	LIBTEMPORAL_API Beats round_to_subdivision (int subdivision, RoundMode dir) const;
 
 	Beats abs () const {
 		return Beats (::abs (_beats), ::abs (_ticks));

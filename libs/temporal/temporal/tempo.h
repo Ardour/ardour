@@ -805,17 +805,17 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API void dump (std::ostream&) const;
 
-	static PBD::Signal0<void> MapChanged;
+	LIBTEMPORAL_API static PBD::Signal0<void> MapChanged;
 
 	LIBTEMPORAL_API XMLNode& get_state();
 
-	LIBTEMPORAL_API class MementoBinder : public MementoCommandBinder<TempoMap> {
+	class MementoBinder : public MementoCommandBinder<TempoMap> {
   public:
-		MementoBinder () {}
-		void set_state (XMLNode const & node, int version) const;
-		XMLNode& get_state () const { return TempoMap::use()->get_state(); }
-		std::string type_name() const { return X_("Temporal::TempoMap"); }
-		void add_state (XMLNode*) {}
+		LIBTEMPORAL_API MementoBinder () {}
+		LIBTEMPORAL_API void set_state (XMLNode const & node, int version) const;
+		LIBTEMPORAL_API XMLNode& get_state () const { return TempoMap::use()->get_state(); }
+		LIBTEMPORAL_API std::string type_name() const { return X_("Temporal::TempoMap"); }
+		LIBTEMPORAL_API void add_state (XMLNode*) {}
 	};
 
 	typedef boost::intrusive::member_hook<TempoPoint, boost::intrusive::list_member_hook<>, &TempoPoint::_tempo_hook> TempoHookOption;
@@ -1005,14 +1005,14 @@ DEFINE_ENUM_CONVERT(Temporal::TimeDomain);
 
 
 namespace std {
-std::ostream& operator<<(std::ostream& str, Temporal::TempoMapPoint const &);
-std::ostream& operator<<(std::ostream& str, Temporal::Tempo const &);
-std::ostream& operator<<(std::ostream& str, Temporal::Meter const &);
-std::ostream& operator<<(std::ostream& str, Temporal::Point const &);
-std::ostream& operator<<(std::ostream& str, Temporal::TempoPoint const &);
-std::ostream& operator<<(std::ostream& str, Temporal::MeterPoint const &);
-std::ostream& operator<<(std::ostream& str, Temporal::MusicTimePoint const &);
-std::ostream& operator<<(std::ostream& str, Temporal::TempoMetric const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoMapPoint const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::Tempo const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::Meter const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::Point const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoPoint const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MeterPoint const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::MusicTimePoint const &);
+LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoMetric const &);
 }
 
 #endif /* __temporal_tempo_h__ */
