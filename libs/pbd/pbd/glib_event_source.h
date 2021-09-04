@@ -5,7 +5,7 @@
 
 #include <glibmm/main.h>
 
-class GlibEventLoopSource : public Glib::Source
+class LIBPBD_API GlibEventLoopSource : public Glib::Source
 {
   public:
 	GlibEventLoopSource () {};
@@ -16,7 +16,7 @@ class GlibEventLoopSource : public Glib::Source
 };
 
 
-class GlibEventLoopCallback : public GlibEventLoopSource
+class LIBPBD_API GlibEventLoopCallback : public GlibEventLoopSource
 {
   public:
 	GlibEventLoopCallback (boost::function<void()> callback) : _callback (callback) {}

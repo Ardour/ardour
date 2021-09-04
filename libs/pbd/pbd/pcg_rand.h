@@ -20,6 +20,7 @@
 #define _pbd_pcg_rand_
 
 #include <stdint.h>
+#include "pbd/libpbd_visibility.h"
 
 namespace PBD
 {
@@ -29,7 +30,7 @@ namespace PBD
  * To be used in cases where an efficient and realtime-safe random
  * generator is needed.
  */
-class PCGRand
+class LIBPBD_API PCGRand
 {
 public:
 	PCGRand ();
