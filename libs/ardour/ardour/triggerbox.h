@@ -76,9 +76,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void bang ();
 	void unbang ();
 	/* explicitly call for the trigger to stop */
-	virtual void stop();
-	/* explicitly call for the trigger to start */
-	virtual void start();
+	virtual void stop (int next_to_run);
 
 	virtual void set_start (timepos_t const &) = 0;
 	virtual void set_end (timepos_t const &) = 0;
@@ -164,6 +162,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_legato (bool yn);
 	bool legato () const { return _legato; }
 
+	void startup ();
+
   protected:
 	TriggerBox& _box;
 	State _state;
@@ -184,6 +184,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void request_state (State s);
 	virtual void retrigger() = 0;
 	virtual void set_usable_length () = 0;
+	void maybe_startup ();
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
@@ -255,22 +256,33 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void stop_all ();
 
+	/* only valid when called by Triggers from within ::process_state_requests() */
+	size_t currently_running() const { return actually_running; }
+	void set_next (size_t which);
+
+	void queue_explict (Trigger*);
+	void queue_implicit (Trigger*);
+	Trigger* get_next_trigger ();
+	void prepare_next (size_t current);
+
   private:
 	PBD::RingBuffer<Trigger*> _bang_queue;
 	PBD::RingBuffer<Trigger*> _unbang_queue;
 	DataType _data_type;
-
+	size_t actually_running;
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
+	PBD::RingBuffer<Trigger*> explicit_queue; /* user queued triggers */
+	PBD::RingBuffer<Trigger*> implicit_queue; /* follow-action queued triggers */
 
 	PBD::PCGRand _pcg;
 
-	/* These three are accessed (read/write) only from process() context */
+	/* These four are accessed (read/write) only from process() context */
 
 	void drop_triggers ();
 	void process_ui_trigger_requests ();
 	void process_midi_trigger_requests (BufferSet&);
-	void set_next_trigger (size_t n);
+	int determine_next_trigger (size_t n);
 
 	void note_on (int note_number, int velocity);
 	void note_off (int note_number, int velocity);
