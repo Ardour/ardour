@@ -726,6 +726,12 @@ PlugUIBase::add_plugin_setting ()
 {
 	NewPluginPresetDialog d (plugin, _("New Preset"));
 
+	Window* win = dynamic_cast<Window*> (_bypass_button.get_toplevel ());
+	d.set_keep_above (true);
+	if (win) {
+		d.set_transient_for (*win);
+	}
+
 	switch (d.run ()) {
 	case Gtk::RESPONSE_ACCEPT:
 		if (d.name().empty()) {
