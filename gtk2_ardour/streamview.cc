@@ -122,7 +122,7 @@ StreamView::set_height (double h)
 {
 	/* limit the values to something sane-ish */
 
-	if (h < 10.0 || h > 1000.0) {
+	if (h < 10.0 || h > 2500.0) {
 		return -1;
 	}
 
