@@ -235,7 +235,7 @@ TriggerBoxUI::bang (GdkEvent *ev, size_t n)
 		switch (ev->type) {
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button == 1) {
-				_triggerbox.stop_all ();
+				_triggerbox.request_stop_all ();
 				return true;
 			}
 		default:
