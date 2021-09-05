@@ -32,6 +32,7 @@ using std::endl;
 namespace ARDOUR {
 	namespace Properties {
 		PBD::PropertyDescriptor<bool> running;
+		PBD::PropertyDescriptor<bool> legato;
 	}
 }
 
@@ -130,6 +131,13 @@ Trigger::set_state (const XMLNode& node, int version)
 }
 
 void
+Trigger::set_legato (bool yn)
+{
+	_legato = yn;
+	PropertyChanged (Properties::legato);
+}
+
+void
 Trigger::set_follow_action_probability (int n)
 {
 	n = std::min (100, n);
@@ -177,6 +185,26 @@ Trigger::startup()
 }
 
 void
+Trigger::jump_start()
+{
+	/* this is used when we start a new trigger in legato mode. We do not
+	   wait for quantization.
+	*/
+	_state = Running;
+	PropertyChanged (ARDOUR::Properties::running);
+}
+
+void
+Trigger::jump_stop()
+{
+	/* this is used when we start a new trigger in legato mode. We do not
+	   wait for quantization.
+	*/
+	_state = Stopped;
+	PropertyChanged (ARDOUR::Properties::running);
+}
+
+void
 Trigger::process_state_requests ()
 {
 	State new_state = _requested_state.exchange (None);
@@ -188,7 +216,7 @@ Trigger::process_state_requests ()
 		switch (new_state) {
 		case Stopped:
 			if (_state != WaitingToStop) {
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 -> %3\n", index(), enum_2_string (_state), enum_2_string (WaitingToStop)));
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 => %3\n", index(), enum_2_string (_state), enum_2_string (WaitingToStop)));
 				_state = WaitingToStop;
 				PropertyChanged (ARDOUR::Properties::running);
 			}
@@ -219,21 +247,22 @@ Trigger::process_state_requests ()
 		case Running:
 			switch (launch_style()) {
 			case OneShot:
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 -> %3\n", index(), enum_2_string (Running), enum_2_string (WaitingForRetrigger)));
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 oneshot %2 => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingForRetrigger)));
 				_state = WaitingForRetrigger;
 				PropertyChanged (ARDOUR::Properties::running);
 				break;
 			case Gate:
 			case Toggle:
 			case Repeat:
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 -> %3\n", index(), enum_2_string (Running), enum_2_string (Stopped)));
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 gate/toggle/repeat => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingToStop)));
 				_state = WaitingToStop;
+				_box.clear_implicit ();
 				PropertyChanged (ARDOUR::Properties::running);
 			}
 			break;
 
 		case Stopped:
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 -> %3\n", index(), enum_2_string (Stopped), enum_2_string (WaitingToStart)));
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 stopped => %3\n", index(), enum_2_string (Stopped), enum_2_string (WaitingToStart)));
 			_box.queue_explict (this);
 			break;
 
@@ -350,6 +379,20 @@ void
 AudioTrigger::startup ()
 {
 	Trigger::startup ();
+	retrigger ();
+}
+
+void
+AudioTrigger::jump_start ()
+{
+	Trigger::jump_start ();
+	retrigger ();
+}
+
+void
+AudioTrigger::jump_stop ()
+{
+	Trigger::jump_stop ();
 	retrigger ();
 }
 
@@ -655,6 +698,7 @@ void
 AudioTrigger::retrigger ()
 {
 	read_index = _start_offset + _legato_offset;
+	_legato_offset = 0; /* used one time only */
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, read_index));
 }
 
@@ -691,7 +735,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 			/* We reached the end */
 
-			if ((_launch_style == Repeat) || (_box.peak_next_trigger() == this)) { /* self repeat */
+			if ((_launch_style == Repeat) || (_box.peek_next_trigger() == this)) { /* self repeat */
 				nframes -= this_read;
 				dest_offset += this_read;
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, but set to loop, so retrigger\n", index()));
@@ -772,6 +816,12 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 }
 
 void
+TriggerBox::clear_implicit ()
+{
+	implicit_queue.reset ();
+}
+
+void
 TriggerBox::queue_explict (Trigger* t)
 {
 	assert (t);
@@ -796,8 +846,12 @@ TriggerBox::queue_implicit (Trigger* t)
 }
 
 Trigger*
-TriggerBox::peak_next_trigger ()
+TriggerBox::peek_next_trigger ()
 {
+	/* allows us to check if there's a next trigger queued, without
+	 * actually reading it from either of the queues.
+	 */
+
 	RingBuffer<Trigger*>::rw_vector rwv;
 
 	explicit_queue.get_read_vector (&rwv);
@@ -1015,6 +1069,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		all_triggers[n]->process_state_requests ();
 	}
 
+	Trigger* nxt = 0;
+
 	if (!currently_playing) {
 		if ((currently_playing = get_next_trigger ()) != 0) {
 			currently_playing->startup ();
@@ -1031,11 +1087,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		_session.start_transport_from_processor ();
 	}
 
-	if (_stop_all) {
-		stop_all ();
-		_stop_all = false;
-	}
-
 	timepos_t start (start_sample);
 	timepos_t end (end_sample);
 	Temporal::Beats start_beats (start.beats());
@@ -1043,6 +1094,47 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	size_t max_chans = 0;
 	bool first = false;
+
+	/* see if there's another trigger explicitly queued that has legato set. */
+
+	RingBuffer<Trigger*>::rw_vector rwv;
+	explicit_queue.get_read_vector (&rwv);
+
+	if (rwv.len[0] > 0) {
+
+		/* actually fetch it (guaranteed to pull from the explicit queue */
+
+		nxt = get_next_trigger ();
+
+		/* if user triggered same clip, with legato set, then there is
+		 * nothing to do
+		 */
+
+		if (nxt != currently_playing) {
+
+			if (nxt->legato()) {
+				/* We want to start this trigger immediately, without
+				 * waiting for quantization points, and it should start
+				 * playing at the same internal offset as the current
+				 * trigger.
+				 */
+
+				nxt->set_legato_offset (currently_playing->current_pos());
+				nxt->jump_start ();
+				currently_playing->jump_stop ();
+				prepare_next (nxt->index());
+				/* and switch */
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 => %2 switched to in legato mode\n", currently_playing->index(), nxt->index()));
+				currently_playing = nxt;
+
+			}
+		}
+	}
+
+	if (_stop_all) {
+		stop_all ();
+		_stop_all = false;
+	}
 
 	while (currently_playing) {
 
@@ -1164,6 +1256,8 @@ TriggerBox::prepare_next (size_t current)
 {
 	int nxt = determine_next_trigger (current);
 
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("nxt for %1 = %2\n", current, nxt));
+
 	if (nxt >= 0) {
 		queue_implicit (all_triggers[nxt]);
 	}
@@ -1234,6 +1328,7 @@ TriggerBox::determine_next_trigger (size_t current)
 			}
 
 			if (n == current) {
+				cerr << "outa here\n";
 				break;
 			}
 
@@ -1370,5 +1465,3 @@ TriggerBox::set_state (const XMLNode& node, int version)
 
 	return 0;
 }
-
-/*--------------------*/

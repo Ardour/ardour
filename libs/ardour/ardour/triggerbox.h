@@ -43,6 +43,7 @@ class XMLNode;
 namespace ARDOUR {
 	namespace Properties {
 		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> running;
+		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> legato;
 	}
 }
 
@@ -163,6 +164,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	bool legato () const { return _legato; }
 
 	virtual void startup ();
+	virtual void jump_start ();
+	virtual void jump_stop ();
 
   protected:
 	TriggerBox& _box;
@@ -184,7 +187,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void request_state (State s);
 	virtual void retrigger() = 0;
 	virtual void set_usable_length () = 0;
-	void maybe_startup ();
 };
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
@@ -207,6 +209,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	int set_region (boost::shared_ptr<Region>);
 	void startup ();
+	void jump_start ();
+	void jump_stop ();
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
@@ -263,8 +267,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void queue_explict (Trigger*);
 	void queue_implicit (Trigger*);
+	void clear_implicit ();
 	Trigger* get_next_trigger ();
-	Trigger* peak_next_trigger ();
+	Trigger* peek_next_trigger ();
 	void prepare_next (size_t current);
 
   private:
