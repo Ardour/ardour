@@ -162,7 +162,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_legato (bool yn);
 	bool legato () const { return _legato; }
 
-	void startup ();
+	virtual void startup ();
 
   protected:
 	TriggerBox& _box;
@@ -206,6 +206,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	timepos_t natural_length() const; /* offset from start of data */
 
 	int set_region (boost::shared_ptr<Region>);
+	void startup ();
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
@@ -254,26 +255,28 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	DataType data_type() const { return _data_type; }
 
-	void stop_all ();
+	void request_stop_all ();
 
 	/* only valid when called by Triggers from within ::process_state_requests() */
-	size_t currently_running() const { return actually_running; }
+	bool currently_running() const { return currently_playing; }
 	void set_next (size_t which);
 
 	void queue_explict (Trigger*);
 	void queue_implicit (Trigger*);
 	Trigger* get_next_trigger ();
+	Trigger* peak_next_trigger ();
 	void prepare_next (size_t current);
 
   private:
 	PBD::RingBuffer<Trigger*> _bang_queue;
 	PBD::RingBuffer<Trigger*> _unbang_queue;
 	DataType _data_type;
-	size_t actually_running;
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
 	PBD::RingBuffer<Trigger*> explicit_queue; /* user queued triggers */
 	PBD::RingBuffer<Trigger*> implicit_queue; /* follow-action queued triggers */
+	Trigger* currently_playing;
+	std::atomic<bool> _stop_all;
 
 	PBD::PCGRand _pcg;
 
@@ -283,6 +286,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void process_ui_trigger_requests ();
 	void process_midi_trigger_requests (BufferSet&);
 	int determine_next_trigger (size_t n);
+	void stop_all ();
 
 	void note_on (int note_number, int velocity);
 	void note_off (int note_number, int velocity);
