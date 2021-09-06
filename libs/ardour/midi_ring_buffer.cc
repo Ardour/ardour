@@ -58,16 +58,21 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, sa
 		uint8_t peekbuf[prefix_size];
 
 		/* this cannot fail, because we've already verified that there
-		   is prefix_space to read
-		*/
+		 * is prefix_space to read
+		 */
 		this->peek (peekbuf, prefix_size);
 
 		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
 		ev_type = *(reinterpret_cast<Evoral::EventType*>((uintptr_t)(peekbuf + sizeof(T))));
 		ev_size = *(reinterpret_cast<uint32_t*>((uintptr_t)(peekbuf + sizeof(T) + sizeof (Evoral::EventType))));
 
-		if (this->read_space() < ev_size) {
-			break;;
+		/* check that we have both the prefix and the full event
+		 *  present in the buffer before continuing. If not, we can't do
+		 *  anything (and since we have only peek'ed at the buffer, it
+		 * remains in the same state for the next read() call.
+		 */
+		if (this->read_space() < prefix_size + ev_size) {
+			break;
 		}
 
 		if (ev_time >= end) {
@@ -96,12 +101,16 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, sa
 		 */
 		uint8_t* write_loc = dst.reserve (ev_time, ev_type, ev_size);
 		if (write_loc == 0) {
+			/* nowhere to write to; we've already consumed the
+			 * prefix for this event (and cannot backup). Consume the
+			 * rest of the event (advances read pointer to next event)
+			 */
+			this->increment_read_ptr (ev_size);
 			if (stop_on_overflow_in_dst) {
 				DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events\n", count));
 				break;
 			}
 			error << "MRB: Unable to reserve space in buffer, event skipped" << endmsg;
-			this->increment_read_ptr (ev_size); // Advance read pointer to next event
 			continue;
 		}
 
