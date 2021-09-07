@@ -45,11 +45,20 @@ using namespace ArdourCanvas;
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-
 TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	: Box (parent, Box::Vertical)
 	, trigger (t)
 {
+	follow_label = new Box (canvas(), Horizontal);
+	follow_label->set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
+	follow_label->set_outline_color (UIConfiguration::instance().color (X_("neutral:foreground")));
+
+	follow_text = new Text (canvas());
+	follow_text->set (X_("Follow Action"));
+	follow_text->set_color (Gtkmm2ext::contrasting_text_color (follow_label->fill_color()));
+
+	follow_label->add (follow_text);
+	add (follow_label);
 }
 
 TriggerUI::~TriggerUI ()

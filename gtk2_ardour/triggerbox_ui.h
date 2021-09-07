@@ -73,6 +73,8 @@ class TriggerBoxUI : public ArdourCanvas::Box
 	TriggerBoxUI (ArdourCanvas::Item* parent, ARDOUR::TriggerBox&);
 	~TriggerBoxUI ();
 
+	void edit_trigger (size_t n);
+
    private:
 	ARDOUR::TriggerBox& _triggerbox;
 	typedef std::vector<TriggerEntry*> Slots;

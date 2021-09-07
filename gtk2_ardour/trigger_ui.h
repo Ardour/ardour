@@ -39,7 +39,7 @@ class TriggerUI : public ArdourCanvas::Box
   private:
 	ARDOUR::Trigger& trigger;
 
-	ArdourCanvas::Rectangle*  follow_label;
+	ArdourCanvas::Box*  follow_label;
 	ArdourCanvas::Text*  follow_text;
 
 	ArdourCanvas::Rectangle* follow_left;

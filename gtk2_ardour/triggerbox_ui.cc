@@ -36,6 +36,7 @@
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "triggerbox_ui.h"
+#include "trigger_ui.h"
 #include "public_editor.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -392,11 +393,19 @@ TriggerBoxUI::context_menu (size_t n)
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
 
+	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::edit_trigger), n)));
 	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
 	items.push_back (MenuElem (_("Launch Style..."), *launch_menu));
 	items.push_back (MenuElem (_("Quantization..."), *quant_menu));
 
 	_context_menu->popup (1, gtk_get_current_event_time());
+}
+
+void
+TriggerBoxUI::edit_trigger (size_t n)
+{
+	TriggerWindow* tw = new TriggerWindow (*_triggerbox.trigger (n));
+	tw->present ();
 }
 
 void
