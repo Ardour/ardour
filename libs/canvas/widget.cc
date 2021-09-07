@@ -26,6 +26,8 @@
 #include "canvas/widget.h"
 #include "canvas/debug.h"
 
+#include "gtkmm2ext/cairo_widget.h"
+
 using namespace std;
 using namespace ArdourCanvas;
 

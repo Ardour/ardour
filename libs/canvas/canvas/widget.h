@@ -24,7 +24,7 @@
 #include "canvas/visibility.h"
 #include "canvas/item.h"
 
-#include "gtkmm2ext/cairo_widget.h"
+class CairoWidget; /* should really be in Gtkmm2ext namespace */
 
 namespace ArdourCanvas
 {
