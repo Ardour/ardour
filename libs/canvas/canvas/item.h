@@ -150,6 +150,7 @@ public:
 
 	virtual void size_request (double& w, double& h) const;
 	void set_size_request (double w, double h);
+	void set_size_request_to_display_given_text (const std::vector<std::string>& strings, gint hpadding, gint vpadding);
 
 	void size_allocate (Rect const&);
 	virtual void _size_allocate (Rect const&);

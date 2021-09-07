@@ -656,6 +656,46 @@ Item::set_size_request (double w, double h)
 	end_change ();
 }
 
+void
+Item::set_size_request_to_display_given_text (const std::vector<std::string>& strings, gint hpadding, gint vpadding)
+{
+	Glib::RefPtr<Pango::Context> context = _canvas->get_pango_context();
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
+
+	int width, height;
+	int width_max = 0;
+	int height_max = 0;
+
+	vector<string> copy;
+	const vector<string>* to_use;
+	vector<string>::const_iterator i;
+
+	for (i = strings.begin(); i != strings.end(); ++i) {
+		if ((*i).find_first_of ("gy") != string::npos) {
+			/* contains a descender */
+			break;
+		}
+	}
+
+	if (i == strings.end()) {
+		/* make a copy of the strings then add one that has a descender */
+		copy = strings;
+		copy.push_back ("g");
+		to_use = &copy;
+	} else {
+		to_use = &strings;
+	}
+
+	for (vector<string>::const_iterator i = to_use->begin(); i != to_use->end(); ++i) {
+		layout->set_text (*i);
+		layout->get_pixel_size (width, height);
+		width_max = max (width_max,width);
+		height_max = max (height_max, height);
+	}
+
+	set_size_request (width_max + hpadding, height_max + vpadding);
+}
+
 /** @return Bounding box in this item's coordinates */
 ArdourCanvas::Rect
 Item::bounding_box () const
