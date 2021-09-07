@@ -32,6 +32,8 @@ namespace PBD {
 		LIBCANVAS_API extern DebugBits CanvasEvents;
 		LIBCANVAS_API extern DebugBits CanvasRender;
 		LIBCANVAS_API extern DebugBits CanvasEnterLeave;
+		LIBCANVAS_API extern DebugBits CanvasBox;
+		LIBCANVAS_API extern DebugBits CanvasSizeAllocate;
 	}
 }
 
