@@ -783,12 +783,7 @@ PortMatrix::remove_channel (ARDOUR::BundleChannel b)
 	}
 
 	if (!errmsg.empty ()) {
-		ArdourDialog d (_("Port removal not allowed"));
-		Label l (errmsg);
-		d.get_vbox()->pack_start (l);
-		d.add_button (Stock::OK, RESPONSE_ACCEPT);
-		d.set_modal (true);
-		d.show_all ();
+		ArdourMessageDialog d (_("Port removal not allowed"));
 		d.run ();
 	}
 }
