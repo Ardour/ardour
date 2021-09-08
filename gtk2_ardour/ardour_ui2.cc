@@ -678,7 +678,7 @@ ARDOUR_UI::session_latency_updated (bool for_playback)
 		io_latency_value.set_text ("--");
 	} else {
 		samplecnt_t wrl = _session->worst_route_latency ();
-		samplecnt_t wpl = _session->worst_latency_preroll ();
+		samplecnt_t iol = _session->io_latency ();
 		float rate      = _session->nominal_sample_rate ();
 
 		route_latency_value.set_text (samples_as_time_string (wrl, rate));
@@ -688,7 +688,7 @@ ARDOUR_UI::session_latency_updated (bool for_playback)
 			io_latency_value.set_markup ("<span background=\"red\" foreground=\"white\">ambiguous</span>");
 		} else {
 			_ambiguous_latency = false;
-			io_latency_value.set_text (samples_as_time_string (wpl, rate));
+			io_latency_value.set_text (samples_as_time_string (iol, rate));
 		}
 	}
 }
