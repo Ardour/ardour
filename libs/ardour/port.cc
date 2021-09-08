@@ -367,7 +367,7 @@ Port::set_public_latency_range (LatencyRange const& range, bool playback) const
 
 	if (_port_handle) {
 		LatencyRange r (range);
-		if (externally_connected () && 0 == (_flags & TransportSyncPort)) {
+		if (externally_connected () && 0 == (_flags & TransportSyncPort) && sends_output () == playback) {
 #if 0
 			r.min *= _speed_ratio;
 			r.max *= _speed_ratio;
@@ -399,10 +399,6 @@ Port::set_private_latency_range (LatencyRange& range, bool playback)
 			             _private_capture_latency.min,
 			             _private_capture_latency.max));
 	}
-
-	/* push to public (port system) location so that everyone else can see it */
-
-	set_public_latency_range (range, playback);
 }
 
 const LatencyRange&
@@ -426,14 +422,14 @@ Port::private_latency_range (bool playback) const
 }
 
 LatencyRange
-Port::public_latency_range (bool /*playback*/) const
+Port::public_latency_range (bool playback) const
 {
 	/*Note: this method is no longer used. It exists purely for debugging reasons */
 	LatencyRange r;
 
 	if (_port_handle) {
-		r = port_engine.get_latency_range (_port_handle, sends_output() ? true : false);
-		if (externally_connected () && 0 == (_flags & TransportSyncPort)) {
+		r = port_engine.get_latency_range (_port_handle, playback);
+		if (externally_connected () && 0 == (_flags & TransportSyncPort) && sends_output () == playback) {
 #if 0
 			r.min /= _speed_ratio;
 			r.max /= _speed_ratio;
@@ -450,7 +446,7 @@ Port::public_latency_range (bool /*playback*/) const
 		DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 				     "GET PORT %1: %4 PUBLIC latency range %2 .. %3\n",
 				     name(), r.min, r.max,
-				     sends_output() ? "PLAYBACK" : "CAPTURE"));
+				     playback ? "PLAYBACK" : "CAPTURE"));
 	}
 
 	return r;
@@ -487,7 +483,7 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 
 				if (remote_port) {
 					lr = port_engine.get_latency_range (remote_port, playback);
-					if (externally_connected () && 0 == (_flags & TransportSyncPort)) {
+					if (externally_connected () && 0 == (_flags & TransportSyncPort) && sends_output () == playback) {
 #if 0
 						lr.min /= _speed_ratio;
 						lr.max /= _speed_ratio;

@@ -6676,6 +6676,21 @@ restart:
 }
 
 void
+Session::set_owned_port_public_latency (bool playback)
+{
+	/* special routes or IO or ports owned by the session */
+	if (auditioner) {
+		samplecnt_t latency = auditioner->set_private_port_latencies (playback);
+		auditioner->set_public_port_latencies (latency, playback, true);
+	}
+	_click_io->set_public_port_latencies (_click_io->connected_latency (playback), playback);
+
+	if (_midi_ports) {
+		_midi_ports->set_public_latency (playback);
+	}
+}
+
+void
 Session::update_latency (bool playback)
 {
 	/* called only from AudioEngine::latency_callback.
@@ -6744,9 +6759,17 @@ Session::update_latency (bool playback)
 		reverse (r->begin(), r->end());
 	}
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		/* private port latency includes plugin and I/O delay,
+		 * but no latency compensation delaylines.
+		 */
 		samplecnt_t latency = (*i)->set_private_port_latencies (playback);
-		(*i)->set_public_port_latencies (latency, playback);
+		/* However we also need to reset the latency of connected external
+		 * ports, since those includes latency compensation delaylines.
+		 */
+		(*i)->set_public_port_latencies (latency, playback, false);
 	}
+
+	set_owned_port_public_latency (playback);
 
 	if (playback) {
 		/* Processing needs to be blocked while re-configuring delaylines.
@@ -6772,6 +6795,18 @@ Session::update_latency (bool playback)
 		set_worst_input_latency ();
 		update_route_latency (false, false, NULL);
 	}
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		/* Publish port latency. This includes latency-compensation
+		 * delaylines in the direction of signal flow.
+		 */
+		samplecnt_t latency = (*i)->set_private_port_latencies (playback);
+		(*i)->set_public_port_latencies (latency, playback, true);
+	}
+
+	/* now handle non-route ports that we are responsible for */
+	set_owned_port_public_latency (playback);
+
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "Engine latency callback: DONE\n");
 	LatencyUpdated (playback); /* EMIT SIGNAL */

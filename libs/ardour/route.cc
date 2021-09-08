@@ -4412,7 +4412,12 @@ Route::apply_latency_compensation ()
 	cout << "ROUTE " << name() << " delay for " << latcomp << " (c: " << latcomp_capt << ")" << endl;
 #endif
 
-	_delayline->set_delay (latcomp > 0 ? latcomp : 0);
+	if (_delayline->set_delay (latcomp > 0 ? latcomp : 0)) {
+		DEBUG_TRACE (DEBUG::LatencyRoute, string_compose ("%1: delay changed to %2\n", _name, latcomp));
+		/* public port latency update is needed,
+		 * Session::update_latency() calls this->set_public_port_latencies()
+		 */
+	}
 }
 
 void
@@ -4975,7 +4980,7 @@ Route::set_private_port_latencies (bool playback) const
 }
 
 void
-Route::set_public_port_latencies (samplecnt_t value, bool playback) const
+Route::set_public_port_latencies (samplecnt_t value, bool playback, bool with_latcomp) const
 {
 	/* publish private latencies */
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
@@ -4985,9 +4990,10 @@ Route::set_public_port_latencies (samplecnt_t value, bool playback) const
 			continue;
 		}
 		if (iop->input ()) {
+			assert (iop->input () != _input); // no delivery for Input
 			iop->input ()->set_public_port_latencies (iop->input()->latency(), true);
 		}
-		if (iop->output ()) {
+		if (iop->output () && iop->output () != _output) {
 			iop->output ()->set_public_port_latencies (iop->output()->latency(), false);
 		}
 	}
@@ -4995,8 +5001,20 @@ Route::set_public_port_latencies (samplecnt_t value, bool playback) const
 	/* this is called to set the JACK-visible port latencies, which take
 	 * latency compensation into account.
 	 */
-	_input->set_public_port_latencies (value, playback);
-	_output->set_public_port_latencies (value, playback);
+	if (playback) {
+		_output->set_public_port_latencies (_output->latency (), playback);
+		if (_delayline && with_latcomp) {
+			value += _delayline->delay ();
+		}
+		_input->set_public_port_latencies (value, playback);
+	} else {
+		_input->set_public_port_latencies (_input->latency(), playback);
+		if (_delayline && with_latcomp) {
+			value += _delayline->delay ();
+		}
+		_output->set_public_port_latencies (value, playback);
+	}
+
 }
 
 /** Put the invisible processors in the right place in _processors.
