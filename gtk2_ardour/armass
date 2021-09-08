@@ -7,7 +7,7 @@ TOP=`dirname "$0"`/..
 export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
 exec valgrind --tool=massif \
 	$MASSIF_OPTIONS \
-	$TOP/$EXECUTABLE --novst "$@"
+	$TOP/$EXECUTABLE "$@"
 
 # analyse output with
 #   ms_print massif.out.<PID>

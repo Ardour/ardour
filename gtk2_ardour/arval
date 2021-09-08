@@ -17,4 +17,4 @@ exec valgrind --tool=memcheck \
 	--track-origins=yes \
 	--suppressions=${TOP}/tools/valgrind.supp \
 	$OBJSUPP \
-	$TOP/$EXECUTABLE --novst "$@"
+	$TOP/$EXECUTABLE "$@"

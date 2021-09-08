@@ -9,4 +9,4 @@ export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
 exec valgrind --tool=helgrind \
 	--error-limit=no --num-callers=50 \
 	$HELGRIND_OPTIONS \
-	$TOP/$EXECUTABLE --novst "$@"
+	$TOP/$EXECUTABLE "$@"
