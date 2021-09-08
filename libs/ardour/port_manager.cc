@@ -1680,7 +1680,8 @@ PortManager::check_for_ambiguous_latency (bool log) const
 	boost::shared_ptr<Ports> plist = _ports.reader();
 	for (Ports::iterator pi = plist->begin(); pi != plist->end(); ++pi) {
 		boost::shared_ptr<Port> const& p (pi->second);
-		if (! p->sends_output () || (p->flags () & IsTerminal)) {
+		/* check one to many connections on the receiving side */
+		if (p->sends_output () || (p->flags () & IsTerminal)) {
 			continue;
 		}
 		if (boost::dynamic_pointer_cast<AsyncMIDIPort>(p)) {
@@ -1688,11 +1689,51 @@ PortManager::check_for_ambiguous_latency (bool log) const
 		}
 		assert (port_is_mine (p->name ()));
 
-		LatencyRange range;
-		p->get_connected_latency_range (range, true);
-		if (range.min != range.max) {
+		LatencyRange rangeA;
+		p->get_connected_latency_range (rangeA, true);
+
+		if (rangeA.min == rangeA.max) {
+			continue;
+		}
+
+		/* check if latency-range of connected ports matches our own */
+
+		vector<string> connections;
+		p->get_connections (connections);
+
+		assert (!connections.empty());
+
+		for (vector<string>::const_iterator c = connections.begin(); c != connections.end(); ++c) {
+			LatencyRange rangeB;
+
+			if (!AudioEngine::instance()->port_is_mine (*c)) {
+				PortEngine::PortHandle ph = _backend->get_port_by_name (*c);
+				if (!ph) {
+					continue;
+				}
+				rangeB = _backend->get_latency_range (ph, true);
+			} else {
+				Ports::iterator x = plist->find (make_port_name_relative (*c));
+				if (x == plist->end()) {
+					continue;
+				}
+				boost::shared_ptr<Port> const& pb (x->second);
+				if (pb->flags () & (IsTerminal | Hidden | TransportSyncPort)) {
+					continue;
+				}
+				pb->get_connected_latency_range (rangeB, true);
+			}
+
+			if (rangeA == rangeB) {
+				continue;
+			}
 			if (log) {
-				warning << string_compose(_("Ambiguous latency for port '%1' (%2, %3)"), p->name(), range.min, range.max) << endmsg;
+				warning << string_compose(
+						_("Ambiguous latency for input '%1' (%2, %3),"
+							"receiving from port '%4' (%5, %6)"),
+						p->name(), rangeA.min, rangeA.max,
+						*c, rangeB.min, rangeB.max)
+					<< endmsg;
 				rv = true;
 			} else {
 				return true;
