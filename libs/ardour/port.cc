@@ -419,8 +419,8 @@ Port::private_latency_range (bool playback) const
 		DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 			             "GET PORT %1 capture PRIVATE latency now [%2 - %3]\n",
 			             name(),
-			             _private_playback_latency.min,
-			             _private_playback_latency.max));
+			             _private_capture_latency.min,
+			             _private_capture_latency.max));
 		return _private_capture_latency;
 	}
 }
@@ -468,7 +468,9 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 		range.min = ~((pframes_t) 0);
 		range.max = 0;
 
-		DEBUG_TRACE (DEBUG::LatencyIO, string_compose ("%1: %2 connections to check for latency range\n", name(), connections.size()));
+		DEBUG_TRACE (DEBUG::LatencyIO, string_compose ("%1: %2 connections to check for %3 latency range\n",
+		                                               name(), connections.size(),
+		                                               playback ? "PLAYBACK" : "CAPTURE"));
 
 		for (vector<string>::const_iterator c = connections.begin();
 				c != connections.end(); ++c) {
@@ -515,9 +517,9 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 
 				boost::shared_ptr<Port> remote_port = AudioEngine::instance()->get_port_by_name (*c);
 				if (remote_port) {
-					lr = remote_port->private_latency_range ((playback ? true : false));
+					lr = remote_port->private_latency_range (playback);
 					DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
-								"\t%1 <-LOCAL-> %2 : latter has latency range %3 .. %4\n",
+								"\t%1 <-LOCAL-> %2 : latter has private latency range %3 .. %4\n",
 								name(), *c, lr.min, lr.max));
 
 					range.min = min (range.min, lr.min);
