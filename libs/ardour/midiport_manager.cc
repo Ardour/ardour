@@ -139,3 +139,27 @@ MidiPortManager::vkbd_output_port () const
 {
 	return boost::dynamic_pointer_cast<AsyncMIDIPort> (_vkbd_out);
 }
+
+void
+MidiPortManager::set_public_latency (bool playback)
+{
+	typedef std::list<boost::shared_ptr<Port> > PortList;
+	PortList pl;
+
+	pl.push_back (_mtc_output_port);
+	pl.push_back (_midi_clock_output_port);
+	pl.push_back (_mmc_in);
+	pl.push_back (_mmc_out);
+	pl.push_back (_vkbd_out);
+	pl.push_back (_scene_out);
+	pl.push_back (_scene_in);
+
+	for (PortList::const_iterator p = pl.begin(); p != pl.end(); ++p) {
+		LatencyRange range;
+		(*p)->get_connected_latency_range (range, playback);
+		/* Ports always align to worst-case latency */
+		range.min = range.max;
+		(*p)->set_private_latency_range (range, playback);
+		(*p)->set_public_latency_range (range, playback);
+	}
+}

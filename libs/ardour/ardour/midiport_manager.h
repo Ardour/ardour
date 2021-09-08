@@ -91,7 +91,7 @@ public:
 	void                set_midi_port_states (const XMLNodeList&);
 	std::list<XMLNode*> get_midi_port_states () const;
 
-	PBD::Signal0<void> PortsChanged;
+	void set_public_latency (bool playback);
 
 protected:
 	/* asynchronously handled ports: ARDOUR::AsyncMIDIPort */
