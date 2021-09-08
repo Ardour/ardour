@@ -201,6 +201,7 @@ Session::Session (AudioEngine &eng,
 	, _worst_output_latency (0)
 	, _worst_input_latency (0)
 	, _worst_route_latency (0)
+	, _io_latency (0)
 	, _send_latency_changes (0)
 	, _have_captured (false)
 	, _capture_duration (0)
@@ -6820,6 +6821,7 @@ Session::set_worst_output_latency ()
 	}
 
 	_worst_output_latency = 0;
+	_io_latency = 0;
 
 	if (!_engine.running()) {
 		return;
@@ -6829,6 +6831,7 @@ Session::set_worst_output_latency ()
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		_worst_output_latency = max (_worst_output_latency, (*i)->output()->latency());
+		_io_latency = max (_io_latency, (*i)->output()->latency() + (*i)->input()->latency());
 	}
 
 	_worst_output_latency = max (_worst_output_latency, _click_io->latency());

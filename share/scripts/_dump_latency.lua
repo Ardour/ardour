@@ -12,6 +12,7 @@ function factory () return function ()
 	print ("Worst Input Latency:   ", Session:worst_input_latency ())
 	print ("Worst Track Latency:   ", Session:worst_route_latency ())
 	print ("Worst Latency Preroll: ", Session:worst_latency_preroll ())
+	print ("I/O Latency:           ", Session:io_latency ())
 
 	print (" -- Routes --")
 	for t in Session:get_routes ():iter () do

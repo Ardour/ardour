@@ -542,6 +542,7 @@ public:
 	samplecnt_t worst_output_latency () const { return _worst_output_latency; }
 	samplecnt_t worst_input_latency () const  { return _worst_input_latency; }
 	samplecnt_t worst_route_latency () const  { return _worst_route_latency; }
+	samplecnt_t io_latency () const           { return _io_latency; }
 	samplecnt_t worst_latency_preroll () const;
 	samplecnt_t worst_latency_preroll_buffer_size_ceil () const;
 
@@ -1409,6 +1410,7 @@ private:
 	samplecnt_t             _worst_output_latency;
 	samplecnt_t             _worst_input_latency;
 	samplecnt_t             _worst_route_latency;
+	samplecnt_t             _io_latency;
 	uint32_t                _send_latency_changes;
 	bool                    _have_captured;
 	samplecnt_t             _capture_duration;
