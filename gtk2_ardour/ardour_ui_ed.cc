@@ -971,7 +971,7 @@ ARDOUR_UI::save_ardour_state ()
 		if (virtual_keyboard_window) {
 			XMLNode& vkstate (virtual_keyboard_window->get_state());
 			vkstate.add_child_nocopy (virtual_keyboard_window.get_state ());
-			_session->add_instant_xml (vkstate);
+			Config->add_instant_xml (vkstate);
 		}
 	}
 
