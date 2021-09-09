@@ -123,9 +123,9 @@ gui_jack_error ()
 static void ardour_g_log (const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data) {
 	switch (log_level) {
 		case G_LOG_FLAG_FATAL:
-		case G_LOG_LEVEL_CRITICAL:
 			fatal << "g_log: " << message << endmsg;
 			break;
+		case G_LOG_LEVEL_CRITICAL:
 		case G_LOG_LEVEL_ERROR:
 			error << "g_log: " << message << endmsg;
 			break;
