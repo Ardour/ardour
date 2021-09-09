@@ -48,9 +48,6 @@
 #include "pbd/boost_debug.h"
 #endif
 
-#include "temporal/superclock.h"
-#include "temporal/tempo.h"
-
 #include "ardour/revision.h"
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
