@@ -50,6 +50,7 @@ using namespace ARDOUR_PLUGIN_UTILS;
 PluginManagerUI::PluginManagerUI ()
 	: ArdourWindow (_("Plugin Manager"))
 	, _btn_reindex (_("Update Index Only"))
+	, _btn_discover (_("Disover New/Updated"))
 	, _btn_rescan_all (_("Re-scan All"))
 	, _btn_rescan_err (_("Re-scan Faulty"))
 	, _btn_rescan_sel (_("Re-scan Selected"))
@@ -183,11 +184,12 @@ PluginManagerUI::PluginManagerUI ()
 	_tbl_nfo.set_col_spacings (3);
 	_tbl_nfo.set_row_spacing (0, 3);
 
-	b_actions->pack_start (_btn_clear);
+	b_actions->pack_start (_btn_discover);
+	b_actions->pack_start (_btn_reindex);
 	b_actions->pack_start (_btn_rescan_sel);
 	b_actions->pack_start (_btn_rescan_err);
 	b_actions->pack_start (_btn_rescan_all);
-	b_actions->pack_start (_btn_reindex);
+	b_actions->pack_start (_btn_clear);
 	b_actions->set_spacing (4);
 	b_actions->set_border_width (4);
 
@@ -256,6 +258,7 @@ PluginManagerUI::PluginManagerUI ()
 	/* tooltips */
 	/* clang-format off */
 	ArdourWidgets::set_tooltip (_btn_reindex,    _("Only update plugin index, do not discover new plugins."));
+	ArdourWidgets::set_tooltip (_btn_discover,   _("Update Index and scan newly installed or updated plugins."));
 	ArdourWidgets::set_tooltip (_btn_rescan_all, _("Scans all plugins, regardless if they have already been successfully scanned.\nDepending on the number of plugins installed this can take a long time."));
 	ArdourWidgets::set_tooltip (_btn_rescan_err, _("Scans plugins that have not yet been successfully scanned."));
 	ArdourWidgets::set_tooltip (_btn_rescan_sel, _("Scans the selected plugin."));
@@ -293,6 +296,7 @@ PluginManagerUI::PluginManagerUI ()
 	PluginManager::instance ().PluginStatusChanged.connect (_manager_connections, invalidator (*this), boost::bind (&PluginManagerUI::plugin_status_changed, this, _1, _2, _3), gui_context ());
 
 	_btn_reindex.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::reindex));
+	_btn_discover.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::discover));
 	_btn_rescan_all.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::rescan_all));
 	_btn_rescan_err.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::rescan_faulty));
 	_btn_rescan_sel.signal_clicked.connect (sigc::mem_fun (*this, &PluginManagerUI::rescan_selected));
@@ -812,6 +816,13 @@ void
 PluginManagerUI::reindex()
 {
 	PluginScanDialog psd (true, true, this);
+	psd.start ();
+}
+
+void
+PluginManagerUI::discover()
+{
+	PluginScanDialog psd (false, true, this);
 	psd.start ();
 }
 
