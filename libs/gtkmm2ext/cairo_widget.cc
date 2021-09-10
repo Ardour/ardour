@@ -107,7 +107,7 @@ CairoWidget::use_image_surface (bool yn)
 int
 CairoWidget::get_width () const
 {
-	if (_canvas_widget) {
+	if (_canvas_widget && (_allocation.get_width() || _allocation.get_height())) {
 		return _allocation.get_width ();
 	}
 	return Gtk::EventBox::get_width ();
@@ -116,7 +116,7 @@ CairoWidget::get_width () const
 int
 CairoWidget::get_height () const
 {
-	if (_canvas_widget) {
+	if (_canvas_widget && (_allocation.get_width() || _allocation.get_height())) {
 		return _allocation.get_height ();
 	}
 	return Gtk::EventBox::get_height ();
