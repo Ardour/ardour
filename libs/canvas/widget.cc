@@ -124,20 +124,13 @@ Widget::_size_allocate (Rect const & r)
 void
 Widget::compute_bounding_box () const
 {
-	GtkRequisition req = { 0, 0 };
-	Gtk::Allocation alloc;
-
-	_widget.size_request (req);
-
-	_bounding_box = Rect (0, 0, req.width, req.height);
-
-	/* make sure the widget knows that it got what it asked for */
-	alloc.set_x (0);
-	alloc.set_y (0);
-	alloc.set_width (req.width);
-	alloc.set_height (req.height);
-
-	_widget.size_allocate (alloc);
+	if (_allocation) {
+		_bounding_box = Rect (0, 0, _allocation.width(), _allocation.height());
+	} else {
+		GtkRequisition req = { 0, 0 };
+		_widget.size_request (req);
+		_bounding_box = Rect (0., 0., req.width, req.height);
+	}
 
 	bb_clean ();
 }
