@@ -65,7 +65,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		Stopping = 6
 	};
 
-	Trigger (size_t index, TriggerBox&);
+	Trigger (uint64_t index, TriggerBox&);
 	virtual ~Trigger() {}
 
 	static void make_property_quarks ();
@@ -116,8 +116,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		OtherTrigger,
 	};
 
-	FollowAction follow_action (size_t n) const { assert (n < 2); return _follow_action[n]; }
-	void set_follow_action (FollowAction, size_t n);
+	FollowAction follow_action (uint64_t n) const { assert (n < 2); return _follow_action[n]; }
+	void set_follow_action (FollowAction, uint64_t n);
 
 	virtual int set_region (boost::shared_ptr<Region>) = 0;
 	boost::shared_ptr<Region> region() const { return _region; }
@@ -126,7 +126,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_quantization (Temporal::BBT_Offset const &);
 
 
-	size_t index() const { return _index; }
+	uint64_t index() const { return _index; }
 
 	/* Managed by TriggerBox */
 	samplepos_t bang_samples;
@@ -176,7 +176,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	std::atomic<State> _requested_state;
 	std::atomic<int> _bang;
 	std::atomic<int> _unbang;
-	size_t _index;
+	uint64_t _index;
 	int    _next_trigger;
 	LaunchStyle  _launch_style;
 	FollowAction _follow_action[2];
@@ -195,7 +195,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
   public:
-	AudioTrigger (size_t index, TriggerBox&);
+	AudioTrigger (uint64_t index, TriggerBox&);
 	~AudioTrigger ();
 
 	int run (BufferSet&, pframes_t nframes, pframes_t offset, bool first);
@@ -259,7 +259,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
-	int set_from_path (size_t slot, std::string const & path);
+	int set_from_path (uint64_t slot, std::string const & path);
 
 	DataType data_type() const { return _data_type; }
 
@@ -267,14 +267,14 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	/* only valid when called by Triggers from within ::process_state_requests() */
 	bool currently_running() const { return currently_playing; }
-	void set_next (size_t which);
+	void set_next (uint64_t which);
 
 	void queue_explict (Trigger*);
 	void queue_implicit (Trigger*);
 	void clear_implicit ();
 	Trigger* get_next_trigger ();
 	Trigger* peek_next_trigger ();
-	void prepare_next (size_t current);
+	void prepare_next (uint64_t current);
 
   private:
 	PBD::RingBuffer<Trigger*> _bang_queue;
@@ -294,7 +294,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void drop_triggers ();
 	void process_ui_trigger_requests ();
 	void process_midi_trigger_requests (BufferSet&);
-	int determine_next_trigger (size_t n);
+	int determine_next_trigger (uint64_t n);
 	void stop_all ();
 
 	void note_on (int note_number, int velocity);
@@ -303,7 +303,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	typedef std::map<uint8_t,Triggers::size_type> MidiTriggerMap;
 	MidiTriggerMap midi_trigger_map;
 
-	static const size_t default_triggers_per_box;
+	static const uint64_t default_triggers_per_box;
 };
 
 } // namespace ARDOUR

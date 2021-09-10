@@ -36,7 +36,7 @@ namespace ARDOUR {
 	}
 }
 
-Trigger::Trigger (size_t n, TriggerBox& b)
+Trigger::Trigger (uint64_t n, TriggerBox& b)
 	: _box (b)
 	, _state (Stopped)
 	, _requested_state (None)
@@ -79,7 +79,7 @@ Trigger::unbang ()
 }
 
 void
-Trigger::set_follow_action (FollowAction f, size_t n)
+Trigger::set_follow_action (FollowAction f, uint64_t n)
 {
 	assert (n < 2);
 	_follow_action[n] = f;
@@ -363,7 +363,7 @@ Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal:
 
 /*--------------------*/
 
-AudioTrigger::AudioTrigger (size_t n, TriggerBox& b)
+AudioTrigger::AudioTrigger (uint64_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, data (0)
 	, read_index (0)
@@ -722,9 +722,9 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 		pframes_t this_read = (pframes_t) std::min ((samplecnt_t) nframes, (last_sample - read_index));
 
-		for (size_t chn = 0; chn < ar->n_channels(); ++chn) {
+		for (uint64_t chn = 0; chn < ar->n_channels(); ++chn) {
 
-			size_t channel = chn %  data.size();
+			uint64_t channel = chn %  data.size();
 			Sample* src = data[channel] + read_index;
 			AudioBuffer& buf (bufs.get_audio (chn));
 
@@ -754,8 +754,8 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 				if (this_read < nframes) {
 
-					for (size_t chn = 0; chn < ar->n_channels(); ++chn) {
-						size_t channel = chn %  data.size();
+					for (uint64_t chn = 0; chn < ar->n_channels(); ++chn) {
+						uint64_t channel = chn %  data.size();
 						AudioBuffer& buf (bufs.get_audio (channel));
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 short fill, ri %2 vs ls %3, do silent fill\n", index(), read_index, last_sample));
 						buf.silence (nframes - this_read, dest_offset + this_read);
@@ -789,7 +789,7 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for running = %1\n", Properties::running.property_id));
 }
 
-const size_t TriggerBox::default_triggers_per_box = 8;
+const uint64_t TriggerBox::default_triggers_per_box = 8;
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
@@ -805,7 +805,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	/* default number of possible triggers. call ::add_trigger() to increase */
 
 	if (_data_type == DataType::AUDIO) {
-		for (size_t n = 0; n < default_triggers_per_box; ++n) {
+		for (uint64_t n = 0; n < default_triggers_per_box; ++n) {
 			all_triggers.push_back (new AudioTrigger (n, *this));
 		}
 	}
@@ -893,7 +893,7 @@ TriggerBox::get_next_trigger ()
 }
 
 int
-TriggerBox::set_from_path (size_t slot, std::string const & path)
+TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 {
 	assert (slot < all_triggers.size());
 
@@ -956,7 +956,7 @@ TriggerBox::stop_all ()
 {
 	/* XXX needs to be done with mutex or via thread-safe queue */
 
-	for (size_t n = 0; n < all_triggers.size(); ++n) {
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
 		all_triggers[n]->stop (-1);
 	}
 
@@ -1070,9 +1070,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	/* now let each trigger handle any state changes */
 
-	std::vector<size_t> to_run;
+	std::vector<uint64_t> to_run;
 
-	for (size_t n = 0; n < all_triggers.size(); ++n) {
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
 		all_triggers[n]->process_state_requests ();
 	}
 
@@ -1099,7 +1099,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	Temporal::Beats start_beats (start.beats());
 	Temporal::Beats end_beats (end.beats());
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	size_t max_chans = 0;
+	uint64_t max_chans = 0;
 	bool first = false;
 
 	/* see if there's another trigger explicitly queued that has legato set. */
@@ -1213,7 +1213,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		if (at) {
 
 			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
-			const size_t nchans = ar->n_channels ();
+			const uint64_t nchans = ar->n_channels ();
 
 			max_chans = std::max (max_chans, nchans);
 
@@ -1259,7 +1259,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 }
 
 void
-TriggerBox::prepare_next (size_t current)
+TriggerBox::prepare_next (uint64_t current)
 {
 	int nxt = determine_next_trigger (current);
 
@@ -1271,14 +1271,14 @@ TriggerBox::prepare_next (size_t current)
 }
 
 int
-TriggerBox::determine_next_trigger (size_t current)
+TriggerBox::determine_next_trigger (uint64_t current)
 {
-	size_t n;
-	size_t runnable = 0;
+	uint64_t n;
+	uint64_t runnable = 0;
 
 	/* count number of triggers that can actually be run (i.e. they have a region) */
 
-	for (size_t n = 0; n < all_triggers.size(); ++n) {
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
 		if (all_triggers[n]->region()) {
 			runnable++;
 		}
@@ -1395,7 +1395,7 @@ TriggerBox::determine_next_trigger (size_t current)
 	case Trigger::OtherTrigger:
 		while (true) {
 			n = _pcg.rand (all_triggers.size());
-			if ((size_t) n == current) {
+			if ((uint64_t) n == current) {
 				continue;
 			}
 			if (!all_triggers[n]->region()) {
