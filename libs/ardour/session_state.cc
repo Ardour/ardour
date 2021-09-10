@@ -3983,83 +3983,88 @@ Session::restore_history (string snapshot_name)
 	// replace history
 	_history.clear();
 
-	for (XMLNodeConstIterator it  = tree.root()->children().begin(); it != tree.root()->children().end(); ++it) {
+	try {
+		for (XMLNodeConstIterator it  = tree.root()->children().begin(); it != tree.root()->children().end(); ++it) {
 
-		XMLNode *t = *it;
+			XMLNode *t = *it;
 
-		std::string name;
-		int64_t tv_sec;
-		int64_t tv_usec;
+			std::string name;
+			int64_t tv_sec;
+			int64_t tv_usec;
 
-		if (!t->get_property ("name", name) || !t->get_property ("tv-sec", tv_sec) ||
-		    !t->get_property ("tv-usec", tv_usec)) {
-			continue;
-		}
-
-		UndoTransaction* ut = new UndoTransaction ();
-		ut->set_name (name);
-
-		struct timeval tv;
-		tv.tv_sec = tv_sec;
-		tv.tv_usec = tv_usec;
-		ut->set_timestamp(tv);
-
-		for (XMLNodeConstIterator child_it  = t->children().begin();
-				child_it != t->children().end(); child_it++)
-		{
-			XMLNode *n = *child_it;
-			Command *c;
-
-			if (n->name() == "MementoCommand" ||
-					n->name() == "MementoUndoCommand" ||
-					n->name() == "MementoRedoCommand") {
-
-				if ((c = memento_command_factory(n))) {
-					ut->add_command(c);
-				}
-
-			} else if (n->name() == "NoteDiffCommand") {
-				PBD::ID id (n->property("midi-source")->value());
-				boost::shared_ptr<MidiSource> midi_source =
-					boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
-				if (midi_source) {
-					ut->add_command (new MidiModel::NoteDiffCommand(midi_source->model(), *n));
-				} else {
-					error << _("Failed to downcast MidiSource for NoteDiffCommand") << endmsg;
-				}
-
-			} else if (n->name() == "SysExDiffCommand") {
-
-				PBD::ID id (n->property("midi-source")->value());
-				boost::shared_ptr<MidiSource> midi_source =
-					boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
-				if (midi_source) {
-					ut->add_command (new MidiModel::SysExDiffCommand (midi_source->model(), *n));
-				} else {
-					error << _("Failed to downcast MidiSource for SysExDiffCommand") << endmsg;
-				}
-
-			} else if (n->name() == "PatchChangeDiffCommand") {
-
-				PBD::ID id (n->property("midi-source")->value());
-				boost::shared_ptr<MidiSource> midi_source =
-					boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
-				if (midi_source) {
-					ut->add_command (new MidiModel::PatchChangeDiffCommand (midi_source->model(), *n));
-				} else {
-					error << _("Failed to downcast MidiSource for PatchChangeDiffCommand") << endmsg;
-				}
-
-			} else if (n->name() == "StatefulDiffCommand") {
-				if ((c = stateful_diff_command_factory (n))) {
-					ut->add_command (c);
-				}
-			} else {
-				error << string_compose(_("Couldn't figure out how to make a Command out of a %1 XMLNode."), n->name()) << endmsg;
+			if (!t->get_property ("name", name) || !t->get_property ("tv-sec", tv_sec) ||
+			    !t->get_property ("tv-usec", tv_usec)) {
+				continue;
 			}
+
+			UndoTransaction* ut = new UndoTransaction ();
+			ut->set_name (name);
+
+			struct timeval tv;
+			tv.tv_sec = tv_sec;
+			tv.tv_usec = tv_usec;
+			ut->set_timestamp(tv);
+
+			for (XMLNodeConstIterator child_it  = t->children().begin();
+			     child_it != t->children().end(); child_it++)
+			{
+				XMLNode *n = *child_it;
+				Command *c;
+
+				if (n->name() == "MementoCommand" ||
+				    n->name() == "MementoUndoCommand" ||
+				    n->name() == "MementoRedoCommand") {
+
+					if ((c = memento_command_factory(n))) {
+						ut->add_command(c);
+					}
+
+				} else if (n->name() == "NoteDiffCommand") {
+					PBD::ID id (n->property("midi-source")->value());
+					boost::shared_ptr<MidiSource> midi_source =
+						boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
+					if (midi_source) {
+						ut->add_command (new MidiModel::NoteDiffCommand(midi_source->model(), *n));
+					} else {
+						error << _("Failed to downcast MidiSource for NoteDiffCommand") << endmsg;
+					}
+
+				} else if (n->name() == "SysExDiffCommand") {
+
+					PBD::ID id (n->property("midi-source")->value());
+					boost::shared_ptr<MidiSource> midi_source =
+						boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
+					if (midi_source) {
+						ut->add_command (new MidiModel::SysExDiffCommand (midi_source->model(), *n));
+					} else {
+						error << _("Failed to downcast MidiSource for SysExDiffCommand") << endmsg;
+					}
+
+				} else if (n->name() == "PatchChangeDiffCommand") {
+
+					PBD::ID id (n->property("midi-source")->value());
+					boost::shared_ptr<MidiSource> midi_source =
+						boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
+					if (midi_source) {
+						ut->add_command (new MidiModel::PatchChangeDiffCommand (midi_source->model(), *n));
+					} else {
+						error << _("Failed to downcast MidiSource for PatchChangeDiffCommand") << endmsg;
+					}
+
+				} else if (n->name() == "StatefulDiffCommand") {
+					if ((c = stateful_diff_command_factory (n))) {
+						ut->add_command (c);
+					}
+				} else {
+					error << string_compose(_("Couldn't figure out how to make a Command out of a %1 XMLNode."), n->name()) << endmsg;
+				}
+			}
+
+			_history.add (ut);
 		}
 
-		_history.add (ut);
+	} catch (std::exception const & e) {
+		error << string_compose (_("Error during loading undo history (%1). Undo history will be ignored"), e.what()) << endmsg;
 	}
 
 	return 0;
