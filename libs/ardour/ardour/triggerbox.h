@@ -167,6 +167,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void jump_start ();
 	virtual void jump_stop ();
 
+	void set_ui (void*);
+	void* ui () const { return _ui; }
+
   protected:
 	TriggerBox& _box;
 	State _state;
@@ -182,6 +185,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	Temporal::BBT_Offset _quantization;
 	bool _legato;
 	std::string _name;
+	void* _ui;
 
 	void set_region_internal (boost::shared_ptr<Region>);
 	void request_state (State s);

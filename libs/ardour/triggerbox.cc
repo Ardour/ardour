@@ -48,6 +48,7 @@ Trigger::Trigger (size_t n, TriggerBox& b)
 	, _follow_action_probability (100)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
 	, _legato (true)
+	, _ui (0)
 {
 }
 
@@ -55,6 +56,12 @@ void
 Trigger::set_name (std::string const & str)
 {
 	_name = str;
+}
+
+void
+Trigger::set_ui (void* p)
+{
+	_ui = p;
 }
 
 void
