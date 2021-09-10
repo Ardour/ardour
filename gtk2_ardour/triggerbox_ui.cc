@@ -173,7 +173,7 @@ void
 TriggerBoxUI::build ()
 {
 	Trigger* t;
-	size_t n = 0;
+	uint64_t n = 0;
 
 	// clear_items (true);
 
@@ -199,13 +199,13 @@ TriggerBoxUI::build ()
 }
 
 bool
-TriggerBoxUI::text_event (GdkEvent *ev, size_t n)
+TriggerBoxUI::text_event (GdkEvent *ev, uint64_t n)
 {
 	return false;
 }
 
 bool
-TriggerBoxUI::event (GdkEvent* ev, size_t n)
+TriggerBoxUI::event (GdkEvent* ev, uint64_t n)
 {
 	switch (ev->type) {
 	case GDK_2BUTTON_PRESS:
@@ -229,7 +229,7 @@ TriggerBoxUI::event (GdkEvent* ev, size_t n)
 
 
 bool
-TriggerBoxUI::bang (GdkEvent *ev, size_t n)
+TriggerBoxUI::bang (GdkEvent *ev, uint64_t n)
 {
 	if (!_triggerbox.trigger (n)->region()) {
 		/* this is a stop button */
@@ -274,7 +274,7 @@ TriggerBoxUI::bang (GdkEvent *ev, size_t n)
 }
 
 void
-TriggerBoxUI::context_menu (size_t n)
+TriggerBoxUI::context_menu (uint64_t n)
 {
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
@@ -402,7 +402,7 @@ TriggerBoxUI::context_menu (size_t n)
 }
 
 void
-TriggerBoxUI::edit_trigger (size_t n)
+TriggerBoxUI::edit_trigger (uint64_t n)
 {
 	Trigger* trigger = _triggerbox.trigger (n);
 	TriggerWindow* tw = static_cast<TriggerWindow*> (trigger->ui());
@@ -416,25 +416,25 @@ TriggerBoxUI::edit_trigger (size_t n)
 }
 
 void
-TriggerBoxUI::set_follow_action (size_t n, Trigger::FollowAction fa)
+TriggerBoxUI::set_follow_action (uint64_t n, Trigger::FollowAction fa)
 {
 	_triggerbox.trigger (n)->set_follow_action (fa, 0);
 }
 
 void
-TriggerBoxUI::set_launch_style (size_t n, Trigger::LaunchStyle ls)
+TriggerBoxUI::set_launch_style (uint64_t n, Trigger::LaunchStyle ls)
 {
 	_triggerbox.trigger (n)->set_launch_style (ls);
 }
 
 void
-TriggerBoxUI::set_quantization (size_t n, Temporal::BBT_Offset const & q)
+TriggerBoxUI::set_quantization (uint64_t n, Temporal::BBT_Offset const & q)
 {
 	_triggerbox.trigger (n)->set_quantization (q);
 }
 
 void
-TriggerBoxUI::choose_sample (size_t n)
+TriggerBoxUI::choose_sample (uint64_t n)
 {
 	if (!file_chooser) {
 		file_chooser = new Gtk::FileChooserDialog (_("Select sample"), Gtk::FILE_CHOOSER_ACTION_OPEN);
@@ -449,7 +449,7 @@ TriggerBoxUI::choose_sample (size_t n)
 }
 
 void
-TriggerBoxUI::sample_chosen (int response, size_t n)
+TriggerBoxUI::sample_chosen (int response, uint64_t n)
 {
 	file_chooser->hide ();
 

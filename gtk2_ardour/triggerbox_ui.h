@@ -73,7 +73,7 @@ class TriggerBoxUI : public ArdourCanvas::Box
 	TriggerBoxUI (ArdourCanvas::Item* parent, ARDOUR::TriggerBox&);
 	~TriggerBoxUI ();
 
-	void edit_trigger (size_t n);
+	void edit_trigger (uint64_t n);
 
    private:
 	ARDOUR::TriggerBox& _triggerbox;
@@ -83,16 +83,16 @@ class TriggerBoxUI : public ArdourCanvas::Box
 	sigc::connection file_chooser_connection;
 	Gtk::Menu* _context_menu;
 
-	bool bang (GdkEvent*, size_t);
-	bool text_event (GdkEvent*, size_t);
-	bool event (GdkEvent*, size_t);
+	bool bang (GdkEvent*, uint64_t);
+	bool text_event (GdkEvent*, uint64_t);
+	bool event (GdkEvent*, uint64_t);
 
-	void choose_sample (size_t n);
-	void sample_chosen (int r, size_t n);
-	void context_menu (size_t n);
-	void set_follow_action (size_t slot, ARDOUR::Trigger::FollowAction);
-	void set_launch_style (size_t slot, ARDOUR::Trigger::LaunchStyle);
-	void set_quantization (size_t slot, Temporal::BBT_Offset const &);
+	void choose_sample (uint64_t n);
+	void sample_chosen (int r, uint64_t n);
+	void context_menu (uint64_t n);
+	void set_follow_action (uint64_t slot, ARDOUR::Trigger::FollowAction);
+	void set_launch_style (uint64_t slot, ARDOUR::Trigger::LaunchStyle);
+	void set_quantization (uint64_t slot, Temporal::BBT_Offset const &);
 
 	void build ();
 };
