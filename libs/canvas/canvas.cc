@@ -1541,7 +1541,6 @@ GtkCanvasViewport::on_size_request (Gtk::Requisition* req)
 	Distance height;
 
 	_canvas.root()->size_request (width, height);
-	cerr << "OSR size canvas to " << width << " x " << height << endl;
 	_canvas.request_size (Duple (width, height));
 
 	req->width = width;
