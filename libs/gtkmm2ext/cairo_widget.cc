@@ -51,14 +51,14 @@ CairoWidget::CairoWidget ()
 	, _current_parent (0)
 	, _canvas_widget (false)
 	, _nsglview (0)
+#ifdef USE_CAIRO_IMAGE_SURFACE
+	, _use_image_surface (true)
+#else
+	, _use_image_surface (NULL != getenv("ARDOUR_IMAGE_SURFACE"))
+#endif
 	, _widget_name ("")
 {
 	_name_proxy.connect (sigc::mem_fun (*this, &CairoWidget::on_widget_name_changed));
-#ifdef USE_CAIRO_IMAGE_SURFACE
-	_use_image_surface = true;
-#else
-	_use_image_surface = NULL != getenv("ARDOUR_IMAGE_SURFACE");
-#endif
 }
 
 CairoWidget::~CairoWidget ()
