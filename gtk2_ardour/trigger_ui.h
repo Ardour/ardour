@@ -23,14 +23,20 @@
 
 #include "canvas/box.h"
 #include "canvas/canvas.h"
-#include "canvas/rectangle.h"
+#include "canvas/constraint_packer.h"
+
+namespace ArdourWidgets {
+	class ArdourButton;
+}
 
 namespace ArdourCanvas {
 	class Text;
 	class Polygon;
+	class Widget;
+	class Rectangle;
 };
 
-class TriggerUI : public ArdourCanvas::Box
+class TriggerUI : public ArdourCanvas::ConstraintPacker
 {
   public:
 	TriggerUI (ArdourCanvas::Item* parent, ARDOUR::Trigger&);
@@ -39,18 +45,21 @@ class TriggerUI : public ArdourCanvas::Box
   private:
 	ARDOUR::Trigger& trigger;
 
-	ArdourCanvas::Box*  follow_label;
-	ArdourCanvas::Text*  follow_text;
+	ArdourWidgets::ArdourButton* _follow_action_button;
+	ArdourCanvas::Widget* follow_action_button;
 
-	ArdourCanvas::Rectangle* follow_left;
-	ArdourCanvas::Text* follow_left_text;
-	ArdourCanvas::Rectangle* follow_left_percentage;
-	ArdourCanvas::Text* follow_left_percentage_text;
 
-	ArdourCanvas::Rectangle* follow_right;
-	ArdourCanvas::Text* follow_right_text;
-	ArdourCanvas::Rectangle* follow_right_percentage;
-	ArdourCanvas::Text* follow_right_percentage_text;
+	ArdourWidgets::ArdourDropdown* _follow_left;
+	ArdourCanvas::Widget* follow_left;
+	ArdourWidgets::ArdourButton* _follow_left_percentage;
+	ArdourCanvas::Widget* follow_left_percentage;
+
+	ArdourWidgets::ArdourDropdown* _follow_right;
+	ArdourCanvas::Widget* follow_right;
+	ArdourWidgets::ArdourButton* _follow_right_percentage;
+	ArdourCanvas::Widget* follow_right_percentage;
+
+	ArdourCanvas::ConstraintPacker* follow_upper_box;
 
 	ArdourCanvas::Rectangle* percentage_slider;
 
@@ -65,6 +74,11 @@ class TriggerUI : public ArdourCanvas::Box
 
 	ArdourCanvas::Rectangle* velocity;
 	ArdourCanvas::Rectangle* velocity_text;
+
+	void trigger_changed ();
+
+	static std::string follow_action_to_string (ARDOUR::Trigger::FollowAction);
+	static ARDOUR::Trigger::FollowAction  string_to_follow_action (std::string const &);
 };
 
 class TriggerWidget : public ArdourCanvas::GtkCanvas

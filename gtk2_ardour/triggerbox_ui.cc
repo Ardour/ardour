@@ -404,7 +404,14 @@ TriggerBoxUI::context_menu (size_t n)
 void
 TriggerBoxUI::edit_trigger (size_t n)
 {
-	TriggerWindow* tw = new TriggerWindow (*_triggerbox.trigger (n));
+	Trigger* trigger = _triggerbox.trigger (n);
+	TriggerWindow* tw = static_cast<TriggerWindow*> (trigger->ui());
+
+	if (!tw) {
+		tw = new TriggerWindow (*_triggerbox.trigger (n));
+		trigger->set_ui (tw);
+	}
+
 	tw->present ();
 }
 
