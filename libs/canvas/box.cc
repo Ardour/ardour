@@ -268,6 +268,12 @@ Box::reposition_children (Distance width, Distance height, bool shrink_width, bo
 	Distance largest_height = 0;
 	Rect uniform_size;
 
+	if (width == 0 && height == 0) {
+		return;
+	}
+
+	DEBUG_TRACE (DEBUG::CanvasBox|DEBUG::CanvasSizeAllocate, string_compose ("allocating children within %1 x %2, shrink/w %3 shrink/h %4\n", width, height, shrink_width, shrink_height));
+
 	if (homogenous) {
 
 		for (std::list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
