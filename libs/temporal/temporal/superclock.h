@@ -35,7 +35,7 @@ typedef int64_t superclock_t;
 	static superclock_t superclock_ticks_per_second = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
 #endif
 
-static inline superclock_t superclock_to_samples (superclock_t s, int sr) { return int_div_round (s * sr, superclock_ticks_per_second); }
+static inline superclock_t superclock_to_samples (superclock_t s, int sr) { return sr == 0 ? 0 : int_div_round (s * sr, superclock_ticks_per_second); }
 static inline superclock_t samples_to_superclock (int64_t samples, int sr) { return int_div_round (samples * superclock_ticks_per_second, superclock_t (sr)); }
 
 extern int (*sample_rate_callback)();
