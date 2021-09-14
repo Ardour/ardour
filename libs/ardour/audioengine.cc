@@ -308,11 +308,11 @@ AudioEngine::process_callback (pframes_t nframes)
 		}
 		if (lp || lc) {
 			tm.release ();
-			if (lp) {
-				_session->update_latency (true);
-			}
 			if (lc) {
 				_session->update_latency (false);
+			}
+			if (lp) {
+				_session->update_latency (true);
 			}
 			tm.acquire ();
 		}
