@@ -5002,17 +5002,17 @@ Route::set_public_port_latencies (samplecnt_t value, bool playback, bool with_la
 	 * latency compensation into account.
 	 */
 	if (playback) {
-		_output->set_public_port_latencies (_output->latency (), playback);
+		_output->set_public_port_latency_from_connections ();
 		if (_delayline && with_latcomp) {
 			value += _delayline->delay ();
 		}
-		_input->set_public_port_latencies (value, playback);
+		_input->set_public_port_latencies (value, true);
 	} else {
-		_input->set_public_port_latencies (_input->latency(), playback);
+		_input->set_public_port_latency_from_connections ();
 		if (_delayline && with_latcomp) {
 			value += _delayline->delay ();
 		}
-		_output->set_public_port_latencies (value, playback);
+		_output->set_public_port_latencies (value, false);
 	}
 
 }

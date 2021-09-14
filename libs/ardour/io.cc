@@ -1262,6 +1262,33 @@ IO::set_private_port_latencies (samplecnt_t value, bool playback)
 }
 
 void
+IO::set_public_port_latency_from_connections () const
+{
+	/* get min/max of connected up/downstream ports */
+	bool connected = false;
+	bool playback = _direction == Output;
+	LatencyRange lr;
+	lr.min = ~((pframes_t) 0);
+	lr.max = 0;
+
+	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		if (i->connected()) {
+			connected = true;
+		}
+		i->collect_latency_from_backend (lr, playback);
+	}
+
+	if (!connected) {
+		/* if output is not connected to anything, use private latency */
+		lr.min = lr.max = latency ();
+	}
+
+	for (PortSet::const_iterator i = _ports.begin (); i != _ports.end(); ++i) {
+		 i->set_public_latency_range (lr, playback);
+	}
+}
+
+void
 IO::set_public_port_latencies (samplecnt_t value, bool playback) const
 {
 	LatencyRange lat;
