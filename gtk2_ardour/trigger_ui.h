@@ -23,7 +23,7 @@
 
 #include "canvas/box.h"
 #include "canvas/canvas.h"
-#include "canvas/constraint_packer.h"
+#include "canvas/table.h"
 
 namespace ArdourWidgets {
 	class ArdourButton;
@@ -36,7 +36,7 @@ namespace ArdourCanvas {
 	class Rectangle;
 };
 
-class TriggerUI : public ArdourCanvas::ConstraintPacker
+class TriggerUI : public ArdourCanvas::Table
 {
   public:
 	TriggerUI (ArdourCanvas::Item* parent, ARDOUR::Trigger&);
@@ -58,8 +58,6 @@ class TriggerUI : public ArdourCanvas::ConstraintPacker
 	ArdourCanvas::Widget* follow_right;
 	ArdourWidgets::ArdourButton* _follow_right_percentage;
 	ArdourCanvas::Widget* follow_right_percentage;
-
-	ArdourCanvas::ConstraintPacker* follow_upper_box;
 
 	ArdourCanvas::Rectangle* percentage_slider;
 

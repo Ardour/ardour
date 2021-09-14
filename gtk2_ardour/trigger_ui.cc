@@ -54,7 +54,7 @@ static std::vector<std::string> follow_strings;
 static std::string longest_follow;
 
 TriggerUI::TriggerUI (Item* parent, Trigger& t)
-	: ConstraintPacker (parent)
+	: Table (parent)
 	, trigger (t)
 {
 	if (follow_strings.empty()) {
@@ -103,29 +103,12 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	follow_right = new Widget (canvas(), *_follow_right);
 	follow_right->name = "FollowRight";
 
-	ConstrainedItem* cfa = add_constrained (follow_action_button);
-	ConstrainedItem* cfl = add_constrained (follow_left);
-	ConstrainedItem* cfr = add_constrained (follow_right);
-
-	/* sizing */
-
 	const double scale = UIConfiguration::instance().get_ui_scale();
 	const Distance spacing = 12. * scale;
 
-	constrain (this->width == cfa->width() + (2. * spacing));
-	constrain (cfa->top() == spacing);
-	constrain (cfa->left() == spacing);
-	constrain (cfa->height() == 26); /* XXX fix me */
-
-	cfl->below (*cfa, spacing);
-	cfl->same_size_as (*cfr);
-	cfl->left_aligned_with (*cfa);
-	cfl->same_height_as (*cfa);
-	cfl->top_aligned_with (*cfr);
-
-	cfr->below (*cfa, spacing);
-	cfr->right_aligned_with (*cfa);
-	cfr->right_of (*cfl, spacing);
+	attach (follow_action_button, { 0, 0 }, { 2, 1 });
+	attach (follow_left, { 0, 1 }, { 1, 1 });
+	attach (follow_right, { 0, 1 }, { 2, 1 });
 
 	trigger_changed ();
 }
