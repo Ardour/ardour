@@ -453,6 +453,44 @@ Port::public_latency_range (bool playback) const
 }
 
 void
+Port::collect_latency_from_backend (LatencyRange& range, bool playback) const
+{
+	vector<string> connections;
+	get_connections (connections);
+
+	DEBUG_TRACE (DEBUG::LatencyIO, string_compose ("%1: %2 connections to check for real %3 latency range\n",
+	                                               name(), connections.size(),
+	                                               playback ? "PLAYBACK" : "CAPTURE"));
+
+	for (vector<string>::const_iterator c = connections.begin(); c != connections.end(); ++c) {
+		PortEngine::PortHandle ph = port_engine.get_port_by_name (*c);
+		if (!ph) {
+			continue;
+		}
+
+		LatencyRange lr = port_engine.get_latency_range (ph, playback);
+
+		if (!AudioEngine::instance()->port_is_mine (*c)) {
+			if (externally_connected () && 0 == (_flags & TransportSyncPort) && sends_output () == playback) {
+				if (type () == DataType::AUDIO) {
+					lr.min += (_resampler_quality - 1);
+					lr.max += (_resampler_quality - 1);
+				}
+			}
+		}
+
+		DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
+					"\t%1 <-> %2 : latter has latency range %3 .. %4\n",
+					name(), *c, lr.min, lr.max));
+
+		range.min = min (range.min, lr.min);
+		range.max = max (range.max, lr.max);
+	}
+
+	DEBUG_TRACE (DEBUG::LatencyIO, string_compose ("%1: real latency range now [ %2 .. %3 ] \n", name(), range.min, range.max));
+}
+
+void
 Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 {
 	vector<string> connections;

@@ -107,6 +107,8 @@ public:
 
 	void get_connected_latency_range (LatencyRange& range, bool playback) const;
 
+	void collect_latency_from_backend (LatencyRange& range, bool playback) const;
+
 	void set_private_latency_range (LatencyRange& range, bool playback);
 	const LatencyRange&  private_latency_range (bool playback) const;
 
