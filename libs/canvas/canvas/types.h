@@ -214,6 +214,30 @@ enum PackOptions {
 	PackFromEnd = 0x10
 };
 
+struct FourDimensions {
+	Distance up;
+	Distance right;
+	Distance down;
+	Distance left;
+
+	FourDimensions (Distance u, Distance r = 0., Distance d = 0., Distance l = 0.) {
+
+		/* CSS style defaults: if only 1 value is givem, set all 4 to
+		 * that value; if 2 values are supplied, up uses the first,
+		 * other 3 use the second; if 3 values are supplied, up uses
+		 * the first, right uses the second, other 2 use the
+		 * third. etc.
+		 */
+
+		Distance last = u;
+
+		up = u;
+		if (r >= 0) { last = r; }  right = last;
+		if (d >= 0) { last = d; }  down = last;
+		if (l >= 0) { last = l; }  left = last;
+	}
+};
+
 extern LIBCANVAS_API std::ostream & operator<< (std::ostream &, Rect const &);
 
 typedef std::vector<Duple> Points;
