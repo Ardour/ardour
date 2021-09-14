@@ -63,7 +63,15 @@ public:
 		uint32_t y;
 	};
 
-	void attach (Index upper_left, Index lower_right, Item*, PackOptions row_options = PackOptions (0), PackOptions col_options = PackOptions (0));
+	void add (Item *);
+	void add_front (Item *);
+	void remove (Item *);
+
+	void attach (Item*, Index const & upper_left, Index const & lower_right, PackOptions row_options = PackOptions (0), PackOptions col_options = PackOptions (0), FourDimensions padding = FourDimensions (0.));
+	void dettach (Item*);
+
+	void set_row_size (uint32_t row, Distance);
+	void set_col_size (uint32_t row, Distance);
 
   protected:
 	void child_changed (bool bbox_changed);
@@ -87,16 +95,20 @@ public:
 		Item* content;
 		PackOptions row_options;
 		PackOptions col_options;
-		Rect  cell;
+		Index upper_left;
+		Index lower_right;
 		Duple natural_size;
 		Duple allocate_size;
 		Duple full_size;
+		FourDimensions padding;
 
-		CellInfo (Item* i, PackOptions ro, PackOptions co, Rect c)
+		CellInfo (Item* i, PackOptions ro, PackOptions co, Index const & ul, Index const & lr, FourDimensions const & p)
 		          : content (i)
 		          , row_options (ro)
 		          , col_options (co)
-		          , cell (c)
+		          , upper_left (ul)
+		          , lower_right (lr)
+		          , padding (p)
 		          {}
 	};
 
@@ -119,15 +131,34 @@ public:
 		Distance natural_size;
 		Distance expand;
 		Distance shrink;
+		Distance user_size;
+		bool     occupied;
+		Distance spacing;
 
-		AxisInfo() : expanders (0), shrinkers (0), natural_size (0) {}
+		AxisInfo() : expanders (0), shrinkers (0), natural_size (0), expand (0), shrink (0), user_size (0), occupied (false), spacing (0) {}
+
+		void reset () {
+			expanders = 0;
+			shrinkers = 0;
+			natural_size = 0;
+			expand = 0;
+			shrink = 0;
+			/* leave user size alone */
+			occupied = false;
+			spacing = 0;
+		}
 	};
 
 	typedef std::vector<AxisInfo> AxisInfos;
 	AxisInfos row_info;
 	AxisInfos col_info;
 
+	void _add (Item *);
+	void _add_front (Item *);
+	void _remove (Item *);
+
 	void layout ();
+	Duple compute (Rect const &);
 };
 
 } /* namespace */
