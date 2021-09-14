@@ -32,6 +32,7 @@ PBD::DebugBits PBD::DEBUG::CanvasRender = PBD::new_debug_bit ("canvasrender");
 PBD::DebugBits PBD::DEBUG::CanvasEnterLeave = PBD::new_debug_bit ("canvasenterleave");
 PBD::DebugBits PBD::DEBUG::CanvasBox = PBD::new_debug_bit ("canvasbox");
 PBD::DebugBits PBD::DEBUG::CanvasSizeAllocate = PBD::new_debug_bit ("canvassizeallocate");
+PBD::DebugBits PBD::DEBUG::CanvasTable = PBD::new_debug_bit ("canvastable");
 
 struct timeval ArdourCanvas::epoch;
 map<string, struct timeval> ArdourCanvas::last_time;
