@@ -98,7 +98,7 @@ public:
 		Index lower_right;
 		Duple natural_size;
 		Duple allocate_size;
-		Duple full_size;
+		Rect  full_size;
 		FourDimensions padding;
 
 		CellInfo (Item* i, PackOptions ro, PackOptions co, Index const & ul, Index const & lr, FourDimensions const & p)

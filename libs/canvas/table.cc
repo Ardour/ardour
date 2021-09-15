@@ -85,17 +85,12 @@ Table::compute_bounding_box() const
 		return;
 	}
 
-	add_child_bounding_boxes (!collapse_on_hide);
-
-	if (_bounding_box) {
-#if 0
-		Rect r = _bounding_box;
-
-		_bounding_box = r.expand (top_padding + outline_width() + top_margin,
-		                          right_padding + outline_width() + right_margin,
-		                          bottom_padding + outline_width() + bottom_margin,
-		                          left_padding + outline_width() + left_margin);
-#endif
+	for (auto const & cell : cells) {
+		if (_bounding_box) {
+			_bounding_box = _bounding_box.extend (cell.second.full_size);
+		} else {
+			_bounding_box = cell.second.full_size;
+		}
 	}
 
 	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("bounding box computed as %1\n", _bounding_box));
@@ -441,6 +436,7 @@ Table::compute (Rect const & within)
 				                                                 rect));
 
 				ci->second.content->size_allocate (rect);
+				ci->second.full_size = rect;
 
 				hdistance += rect.width() + ci->second.padding.right;
 				hdistance += col_info[c].spacing;
