@@ -16,9 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/debug.h"
 #include "pbd/error.h"
 #include "pbd/i18n.h"
+#include "pbd/unwind.h"
 
+#include "canvas/debug.h"
 #include "canvas/table.h"
 
 using namespace ArdourCanvas;
@@ -57,6 +60,8 @@ Table::attach (Item* item, Table::Index const & upper_left, Table::Index const &
 
 	if (cells.insert ({ Index (upper_left.x, upper_left.y), CellInfo (item, row_options, col_options, upper_left, lower_right, pad) }).second) {
 		_add (item);
+	} else {
+		cerr << "Failed to attach at " << upper_left.x << ", " << upper_left.y << " " << lower_right.x << ", " << lower_right.y << endl;
 	}
 }
 
@@ -92,6 +97,8 @@ Table::compute_bounding_box() const
 		                          left_padding + outline_width() + left_margin);
 #endif
 	}
+
+	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("bounding box computed as %1\n", _bounding_box));
 
 	bb_clean ();
 
@@ -164,14 +171,9 @@ Table::size_request (Distance& w, Distance& h) const
 }
 
 void
-Table::_size_allocate (Rect const & r)
-{
-	/* nothing to do here */
-}
-
-void
 Table::layout ()
 {
+	cerr << "\n\nLAYOUT\n\n";
 	size_allocate_children (_allocation);
 }
 
@@ -184,6 +186,8 @@ Table::size_allocate_children (Rect const & within)
 Duple
 Table::compute (Rect const & within)
 {
+	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("\n\nCompute table within rect: %1\n", within));
+
 	/* step 1: traverse all current cells and determine how many rows and
 	 * columns we need. While doing that, get the current natural size of
 	 * each cell.
@@ -192,29 +196,23 @@ Table::compute (Rect const & within)
 	uint32_t rowmax = 0;
 	uint32_t colmax = 0;
 
-	for (auto& ci : cells) {
-		CellInfo const & c (ci.second);
-		if (c.lower_right.x > rowmax) {
-			rowmax = c.lower_right.x;
-		}
-		if (c.lower_right.y > colmax) {
-			colmax = c.lower_right.y;
-		}
-	}
-
 	row_info.clear ();
 	col_info.clear ();
 
-	row_info.resize (rowmax);
-	col_info.resize (colmax);
-
-	for (auto & ai : row_info) {
-		ai.reset ();
+	for (auto& ci : cells) {
+		CellInfo const & c (ci.second);
+		if (c.lower_right.x > colmax) {
+			colmax = c.lower_right.x;
+		}
+		if (c.lower_right.y > rowmax) {
+			rowmax = c.lower_right.y;
+		}
 	}
 
-	for (auto & ai : col_info) {
-		ai.reset ();
-	}
+	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("cell coordinates indicate rowmax %1 colmax %2 from %3 cells\n", rowmax, colmax, cells.size()));
+
+	row_info.resize (rowmax+1);
+	col_info.resize (colmax+1);
 
 	for (auto& ci : cells) {
 
@@ -261,12 +259,33 @@ Table::compute (Rect const & within)
 
 	}
 
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::CanvasTable)) {
+		DEBUG_STR_DECL(a);
+		int n = 0;
+		for (auto& ai : row_info) {
+			DEBUG_STR_APPEND(a, string_compose ("row %1: nwidth %2\n", n+1, ai.natural_size));
+			++n;
+		}
+		DEBUG_TRACE (DEBUG::CanvasTable, DEBUG_STR(a).str());
+
+		DEBUG_STR_DECL(b);
+		n = 0;
+		for (auto& ai : col_info) {
+
+			DEBUG_STR_APPEND(b, string_compose ("col %1: nheight %2\n", n, ai.natural_size));
+			++n;
+		}
+		DEBUG_TRACE (DEBUG::CanvasTable, DEBUG_STR(b).str());
+	}
+#endif
+
 	/* rows with nothing in them are still counted as existing. This is a
 	 * design decision, not a logic inevitability.
 	 */
 
-	const uint32_t rows = rowmax;
-	const uint32_t cols = colmax;
+	const uint32_t rows = rowmax + 1;
+	const uint32_t cols = colmax + 1;
 
 	/* Find the tallest column and widest row. This will give us our
 	 * "natural size"
@@ -282,10 +301,18 @@ Table::compute (Rect const & within)
 		natural_col_height = std::max (natural_col_height, ai->natural_size);
 	}
 
+	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("natural width x height = %1 x %2\n", natural_row_width, natural_col_height));
+
 	if (!within) {
 		/* within is empty, so this is just for a size request */
 		return Duple (natural_row_width, natural_col_height);
 	}
+
+	/* actually doing allocation, so prevent endless loop between here and
+	 * ::child_changed()
+	 */
+
+	PBD::Unwinder<bool> uw (ignore_child_changes, true);
 
 	/* step two: compare the natural size to the size we've been given
 	 *
@@ -305,8 +332,10 @@ Table::compute (Rect const & within)
 
 	if (homogenous) {
 
-		Distance per_cell_width = within.width() / cols;
-		Distance per_cell_height = within.height() / rows;
+		Distance per_cell_width = within.width() / cols - 1;
+		Distance per_cell_height = within.height() / rows - 1;
+
+		DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("per-cell: %1 x %2 from %3 and %4/%5\n", per_cell_width, per_cell_height, within, cols, rows));
 
 		/* compute total expansion or contraction that will be
 		 * distributed across all rows & cols marked for expand/shrink
@@ -360,11 +389,14 @@ Table::compute (Rect const & within)
 				h = vspan * per_cell_height;
 			}
 
-			w -= c.padding.left + c.padding.right;
-			w -= col.spacing;
+			// w -= c.padding.left + c.padding.right;
+			// w -= col.spacing;
 
-			h -= c.padding.up + c.padding.down;
-			h -= row.spacing;
+			// h -= c.padding.up + c.padding.down;
+			// h -= row.spacing;
+
+			DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("Cell @ %1,%2 - %3,%4 (hspan %7 vspan %8) allocated %5 x %6\n",
+			                                                 ci.first.x, ci.first.y, ci.second.lower_right.x, ci.second.lower_right.y, w, h, hspan, vspan));
 
 			c.allocate_size = Duple (w, h);
 		}
@@ -387,10 +419,12 @@ Table::compute (Rect const & within)
 	for (uint32_t r = 0; r < rows; ++r) {
 
 		Distance vshift = 0;
+		hdistance = 0;
 
 		for (uint32_t c = 0; c < cols; ++c) {
 
-			Index idx (r, c);
+			Index idx (c, r);
+
 			Cells::iterator ci = cells.find (idx);
 
 			if (ci != cells.end()) {
@@ -398,11 +432,18 @@ Table::compute (Rect const & within)
 				hdistance += ci->second.padding.left;
 
 				Rect rect = Rect (hdistance, vdistance + ci->second.padding.up, hdistance + ci->second.allocate_size.x, vdistance + ci->second.allocate_size.y);
+
+				DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("Item @ %1,%2 - %3,%4 size-allocate %5\n",
+				                                                 ci->second.upper_left.x,
+				                                                 ci->second.upper_left.y,
+				                                                 ci->second.lower_right.x,
+				                                                 ci->second.lower_right.y,
+				                                                 rect));
+
 				ci->second.content->size_allocate (rect);
 
 				hdistance += rect.width() + ci->second.padding.right;
 				hdistance += col_info[c].spacing;
-
 
 				const Distance total_cell_height = rect.height() + ci->second.padding.up + ci->second.padding.down;
 				vshift = std::max (vshift, total_cell_height);
@@ -412,7 +453,6 @@ Table::compute (Rect const & within)
 			}
 
 		}
-
 		vshift += row_info[r].spacing;
 		vdistance += vshift;
 	}

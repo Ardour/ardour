@@ -50,7 +50,6 @@ public:
 	void compute_bounding_box () const;
 	void size_request (double& w, double& h) const;
 	void size_allocate_children (Rect const & r);
-	void _size_allocate (Rect const & r);
 
 	struct Index {
 		Index (uint32_t xv, uint32_t yv) : x (xv), y (yv) {}
