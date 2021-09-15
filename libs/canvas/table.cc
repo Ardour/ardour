@@ -211,8 +211,8 @@ Table::compute (Rect const & within)
 
 	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("cell coordinates indicate rowmax %1 colmax %2 from %3 cells\n", rowmax, colmax, cells.size()));
 
-	row_info.resize (rowmax+1);
-	col_info.resize (colmax+1);
+	row_info.resize (rowmax);
+	col_info.resize (colmax);
 
 	for (auto& ci : cells) {
 
@@ -284,8 +284,8 @@ Table::compute (Rect const & within)
 	 * design decision, not a logic inevitability.
 	 */
 
-	const uint32_t rows = rowmax + 1;
-	const uint32_t cols = colmax + 1;
+	const uint32_t rows = rowmax;
+	const uint32_t cols = colmax;
 
 	/* Find the tallest column and widest row. This will give us our
 	 * "natural size"
@@ -332,8 +332,8 @@ Table::compute (Rect const & within)
 
 	if (homogenous) {
 
-		Distance per_cell_width = within.width() / cols - 1;
-		Distance per_cell_height = within.height() / rows - 1;
+		Distance per_cell_width = within.width() / cols;
+		Distance per_cell_height = within.height() / rows;
 
 		DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("per-cell: %1 x %2 from %3 and %4/%5\n", per_cell_width, per_cell_height, within, cols, rows));
 
@@ -389,11 +389,11 @@ Table::compute (Rect const & within)
 				h = vspan * per_cell_height;
 			}
 
-			// w -= c.padding.left + c.padding.right;
-			// w -= col.spacing;
+			w -= c.padding.left + c.padding.right;
+			w -= col.spacing;
 
-			// h -= c.padding.up + c.padding.down;
-			// h -= row.spacing;
+			h -= c.padding.up + c.padding.down;
+			h -= row.spacing;
 
 			DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("Cell @ %1,%2 - %3,%4 (hspan %7 vspan %8) allocated %5 x %6\n",
 			                                                 ci.first.x, ci.first.y, ci.second.lower_right.x, ci.second.lower_right.y, w, h, hspan, vspan));
