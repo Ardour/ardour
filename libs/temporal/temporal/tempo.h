@@ -67,7 +67,8 @@ class TempoMap;
  * its superclock and beat time defined and no translation between them is possible.
  */
 
-class LIBTEMPORAL_API Point {
+typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct point_tag>> point_hook;
+class LIBTEMPORAL_API Point : public point_hook {
   public:
 	Point (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt) : _sclock (sc), _quarters (b), _bbt (bbt), _map (&map) {}
 	Point (TempoMap const & map, XMLNode const &);
@@ -118,8 +119,6 @@ class LIBTEMPORAL_API Point {
 	inline bool operator!= (Point const & other) const { return _sclock != other._sclock; }
 
 	TempoMap const & map() const { return *_map; }
-
-	boost::intrusive::list_member_hook<> _point_hook;
 
   protected:
 	superclock_t     _sclock;
@@ -349,7 +348,8 @@ class LIBTEMPORAL_API Meter {
 
 /* A MeterPoint is literally just the combination of a Meter with a Point
  */
-class LIBTEMPORAL_API MeterPoint : public Meter, public virtual Point
+typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct meterpoint_tag>> meter_hook;
+class LIBTEMPORAL_API MeterPoint : public Meter, public meter_hook, public virtual Point
 {
   public:
 	MeterPoint (TempoMap const & map, Meter const & m, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Meter (m) {}
@@ -366,8 +366,6 @@ class LIBTEMPORAL_API MeterPoint : public Meter, public virtual Point
 		return Meter::operator!= (other) || Point::operator!= (other);
 	}
 
-	boost::intrusive::list_member_hook<> _meter_hook;
-
 	XMLNode& get_state () const;
 };
 
@@ -377,7 +375,8 @@ class LIBTEMPORAL_API MeterPoint : public Meter, public virtual Point
  * time-at-quarter-note on demand.
  */
 
-class LIBTEMPORAL_API TempoPoint : public Tempo, public virtual Point
+typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct tempo_tag>> tempo_hook;
+class LIBTEMPORAL_API TempoPoint : public Tempo, public tempo_hook, public virtual Point
 {
   public:
 	TempoPoint (TempoMap const & map, Tempo const & t, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Tempo (t), _omega (0.0) {}
@@ -423,8 +422,6 @@ class LIBTEMPORAL_API TempoPoint : public Tempo, public virtual Point
 	bool operator!= (TempoPoint const & other) const {
 		return Tempo::operator!= (other) || Point::operator!= (other);
 	}
-
-	boost::intrusive::list_member_hook<> _tempo_hook;
 
 	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
 	Beats quarters_at_superclock (superclock_t sc) const;
@@ -524,14 +521,13 @@ class LIBTEMPORAL_API TempoMetric {
  * position is given by a Point that might use superclock or Beats, and the
  * Point's BBT time member is overwritten.
  */
-class LIBTEMPORAL_API MusicTimePoint : public virtual TempoPoint, public virtual MeterPoint
+typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct bartime_tag>> bartime_hook;
+class LIBTEMPORAL_API MusicTimePoint :  public bartime_hook, public virtual TempoPoint, public virtual MeterPoint
 {
   public:
 	MusicTimePoint (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt, Tempo const & t, Meter const & m) : Point (map, sc, b, bbt), TempoPoint (t, *this), MeterPoint (m, *this)  {}
 	// MusicTimePoint (BBT_Time const & bbt_time, Point const & p) : Point (p), TempoPoint (p.map().tempo_at (p.sclock()), p), MeterPoint (p.map().meter_at (p.sclock()), p) { _bbt = bbt_time; }
 	MusicTimePoint (TempoMap const & map, XMLNode const &);
-
-	boost::intrusive::list_member_hook<> _bartime_hook;
 
 	bool operator== (MusicTimePoint const & other) const {
 		return TempoPoint::operator== (other) && MeterPoint::operator== (other);
@@ -818,15 +814,10 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 		LIBTEMPORAL_API void add_state (XMLNode*) {}
 	};
 
-	typedef boost::intrusive::member_hook<TempoPoint, boost::intrusive::list_member_hook<>, &TempoPoint::_tempo_hook> TempoHookOption;
-	typedef boost::intrusive::member_hook<MeterPoint, boost::intrusive::list_member_hook<>, &MeterPoint::_meter_hook> MeterHookOption;
-	typedef boost::intrusive::member_hook<MusicTimePoint, boost::intrusive::list_member_hook<>, &MusicTimePoint::_bartime_hook> BarTimeHookOption;
-	typedef boost::intrusive::member_hook<Point, boost::intrusive::list_member_hook<>, &Point::_point_hook> PointHookOption;
-
-	typedef boost::intrusive::list<TempoPoint, TempoHookOption> Tempos;
-	typedef boost::intrusive::list<MeterPoint, MeterHookOption> Meters;
-	typedef boost::intrusive::list<MusicTimePoint, BarTimeHookOption> MusicTimes;
-	typedef boost::intrusive::list<Point, PointHookOption> Points;
+	typedef boost::intrusive::list<TempoPoint, boost::intrusive::base_hook<tempo_hook>> Tempos;
+	typedef boost::intrusive::list<MeterPoint, boost::intrusive::base_hook<meter_hook>> Meters;
+	typedef boost::intrusive::list<MusicTimePoint, boost::intrusive::base_hook<bartime_hook>> MusicTimes;
+	typedef boost::intrusive::list<Point, boost::intrusive::base_hook<point_hook>> Points;
 
 	LIBTEMPORAL_API	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
 	LIBTEMPORAL_API	Beats quarters_at_superclock (superclock_t sc) const;
