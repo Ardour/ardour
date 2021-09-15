@@ -32,10 +32,6 @@
 template<typename T>
 T int_div_round (T x, T y)
 {
-	if (y == 0) {
-		/* usually `y' is sample-rate, or beats/bar */
-		return (x == 0) ? 0 : 1;
-	}
 	/* essentially ((x + (y/2)) / y) but handles signed/negative values correcvtly */
 	return (x + PBD_IDIV_ROUNDING(x,y)) / y ;
 }
