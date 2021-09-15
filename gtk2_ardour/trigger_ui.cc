@@ -107,8 +107,8 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	const Distance spacing = 12. * scale;
 
 	attach (follow_action_button, { 0, 0 }, { 2, 1 });
-	attach (follow_left, { 0, 1 }, { 1, 1 });
-	attach (follow_right, { 0, 1 }, { 2, 1 });
+	attach (follow_left, { 0, 1 }, { 1, 2 });
+	attach (follow_right, { 1, 1 }, { 2, 2 });
 
 	trigger_changed ();
 }
