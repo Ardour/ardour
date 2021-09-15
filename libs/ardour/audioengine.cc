@@ -1230,6 +1230,9 @@ samplecnt_t
 AudioEngine::sample_rate () const
 {
 	if (!_backend) {
+		if (_session) {
+			return _session->nominal_sample_rate ();
+		}
 		return 0;
 	}
 	return _backend->sample_rate ();
