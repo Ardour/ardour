@@ -220,7 +220,7 @@ struct FourDimensions {
 	Distance down;
 	Distance left;
 
-	FourDimensions (Distance u, Distance r = 0., Distance d = 0., Distance l = 0.) {
+	FourDimensions (Distance u, Distance r = -1., Distance d = -1., Distance l = -1.) {
 
 		/* CSS style defaults: if only 1 value is givem, set all 4 to
 		 * that value; if 2 values are supplied, up uses the first,
