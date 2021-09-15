@@ -110,6 +110,9 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	attach (follow_left, 0, 1, 1, 2,  PackExpand, PackExpand, { 10 });
 	attach (follow_right, 1, 1, 2, 2,  PackExpand, PackExpand, { 10 });
 
+	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
+	name = "triggerUI-table";
+
 	trigger_changed ();
 }
 
