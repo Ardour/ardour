@@ -188,30 +188,30 @@ Table::compute (Rect const & within)
 	 * each cell.
 	 */
 
-	uint32_t rowmax = 0;
-	uint32_t colmax = 0;
+	uint32_t rows = 0;
+	uint32_t cols = 0;
 
 	row_info.clear ();
 	col_info.clear ();
 
-	for (auto& ci : cells) {
+	for (auto const & ci : cells) {
 		CellInfo const & c (ci.second);
-		if (c.lower_right.x > colmax) {
-			colmax = c.lower_right.x;
+		if (c.lower_right.x > cols) {
+			cols = c.lower_right.x;
 		}
-		if (c.lower_right.y > rowmax) {
-			rowmax = c.lower_right.y;
+		if (c.lower_right.y > rows) {
+			rows = c.lower_right.y;
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("cell coordinates indicate rowmax %1 colmax %2 from %3 cells\n", rowmax, colmax, cells.size()));
+	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("cell coordinates indicate rows %1 cols %2 from %3 cells\n", rows, cols, cells.size()));
 
-	row_info.resize (rowmax);
-	col_info.resize (colmax);
+	row_info.resize (rows);
+	col_info.resize (cols);
 
-	for (auto& ci : cells) {
+	for (auto & ci : cells) {
 
-		CellInfo & c (ci.second);
+		CellInfo c (ci.second);
 
 		c.content->size_request (c.natural_size.x, c.natural_size.y);
 
@@ -279,28 +279,25 @@ Table::compute (Rect const & within)
 	 * design decision, not a logic inevitability.
 	 */
 
-	const uint32_t rows = rowmax;
-	const uint32_t cols = colmax;
-
 	/* Find the tallest column and widest row. This will give us our
 	 * "natural size"
 	 */
 
-	Distance natural_row_width = 0.;
-	Distance natural_col_height = 0.;
+	Distance natural_width = 0.;
+	Distance natural_height = 0.;
 
-	for (AxisInfos::iterator ai = row_info.begin(); ai != row_info.end(); ++ai) {
-		natural_row_width = std::max (natural_row_width, ai->natural_size);
+	for (auto const & ai : row_info) {
+		natural_width = std::max (natural_width, ai.natural_size);
 	}
-	for (AxisInfos::iterator ai = col_info.begin(); ai != col_info.end(); ++ai) {
-		natural_col_height = std::max (natural_col_height, ai->natural_size);
+	for (auto const & ai : col_info) {
+		natural_height = std::max (natural_height, ai.natural_size);
 	}
 
-	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("natural width x height = %1 x %2\n", natural_row_width, natural_col_height));
+	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("natural width x height = %1 x %2\n", natural_width, natural_height));
 
 	if (!within) {
 		/* within is empty, so this is just for a size request */
-		return Duple (natural_row_width, natural_col_height);
+		return Duple (natural_width, natural_height);
 	}
 
 	/* actually doing allocation, so prevent endless loop between here and
@@ -337,26 +334,26 @@ Table::compute (Rect const & within)
 		 */
 
 		for (auto & ai : row_info) {
-			if (natural_row_width < within.width() && ai.expanders) {
-				Distance delta = within.width() - natural_row_width;
+			if (natural_width < within.width() && ai.expanders) {
+				Distance delta = within.width() - natural_width;
 				ai.expand = delta / ai.expanders;
-			} else if (natural_row_width > within.width() && ai.shrinkers) {
-				Distance delta = within.width() - natural_row_width;
+			} else if (natural_width > within.width() && ai.shrinkers) {
+				Distance delta = within.width() - natural_width;
 				ai.shrink = delta / ai.shrinkers;
 			}
 		}
 
 		for (auto & ai : col_info) {
-			if (natural_col_height < within.height() && ai.expanders) {
-				Distance delta = within.height() - natural_col_height;
+			if (natural_height < within.height() && ai.expanders) {
+				Distance delta = within.height() - natural_height;
 				ai.expand = delta / ai.expanders;
-			} else if (natural_col_height > within.height() && ai.shrinkers) {
-				Distance delta = within.height() - natural_col_height;
+			} else if (natural_height > within.height() && ai.shrinkers) {
+				Distance delta = within.height() - natural_height;
 				ai.shrink = delta / ai.shrinkers;
 			}
 		}
 
-		for (auto& ci : cells) {
+		for (auto & ci : cells) {
 
 			CellInfo & c (ci.second);
 
