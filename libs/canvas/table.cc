@@ -52,16 +52,16 @@ Table::Table (Item* item)
 }
 
 void
-Table::attach (Item* item, Table::Index const & upper_left, Table::Index const & lower_right, PackOptions row_options, PackOptions col_options, FourDimensions pad)
+Table::attach (Item* item, Coord ulx, Coord uly, Coord lrx, Coord lry, PackOptions row_options, PackOptions col_options, FourDimensions pad)
 {
 	/* XXX maybe use z-axis to stack elements if the insert fails? Would
 	 * involve making Index 3D and using an actual hash function
 	 */
 
-	if (cells.insert ({ Index (upper_left.x, upper_left.y), CellInfo (item, row_options, col_options, upper_left, lower_right, pad) }).second) {
+	if (cells.insert ({ Index (ulx, uly), CellInfo (item, row_options, col_options, Index (ulx, uly), Index (lrx, lry), pad) }).second) {
 		_add (item);
 	} else {
-		cerr << "Failed to attach at " << upper_left.x << ", " << upper_left.y << " " << lower_right.x << ", " << lower_right.y << endl;
+		cerr << "Failed to attach at " << ulx << ", " << uly << " " << lrx << ", " << lry << endl;
 	}
 }
 

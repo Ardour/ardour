@@ -66,7 +66,7 @@ public:
 	void add_front (Item *);
 	void remove (Item *);
 
-	void attach (Item*, Index const & upper_left, Index const & lower_right, PackOptions row_options = PackOptions (0), PackOptions col_options = PackOptions (0), FourDimensions padding = FourDimensions (0.));
+	void attach (Item*, Coord upper_left_x, Coord upper_left_y, Coord lower_right_x, Coord lower_right_y, PackOptions row_options = PackOptions (0), PackOptions col_options = PackOptions (0), FourDimensions padding = FourDimensions (0.));
 	void dettach (Item*);
 
 	void set_row_size (uint32_t row, Distance);
