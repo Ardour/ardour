@@ -225,15 +225,16 @@ struct FourDimensions {
 		/* CSS style defaults: see https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties
 		 */
 
-		std::vector<Distance> args;
+		Distance args[4];
+		uint32_t nargs = 1;
 
-		args.push_back (u);
+		args[0] = u;
 
-		if (r >= 0) { args.push_back (r); }
-		if (d >= 0) { args.push_back (d); }
-		if (l >= 0) { args.push_back (l); }
+		if (r >= 0) { args[1] = r; ++nargs; }
+		if (d >= 0) { args[2] = d; ++nargs; }
+		if (l >= 0) { args[3] = l; ++nargs; }
 
-		switch (args.size()) {
+		switch (nargs) {
 		case 1:
 			up = right = down = left = args[0];
 			break;
