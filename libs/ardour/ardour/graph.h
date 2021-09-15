@@ -74,6 +74,7 @@ public:
 	void process_one_route (Route* route);
 
 	void clear_other_chain ();
+	void swap_process_chain ();
 
 	bool in_process_thread () const;
 
@@ -85,7 +86,7 @@ private:
 	void drop_threads ();
 	void run_one ();
 	void main_thread ();
-	void prep ();
+	void prep (bool check_pending_chain = true);
 	void dump (int chain) const;
 
 	node_list_t _nodes_rt[2];

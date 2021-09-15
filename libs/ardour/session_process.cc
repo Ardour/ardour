@@ -730,6 +730,10 @@ Session::process_audition (pframes_t nframes)
 		}
 	}
 
+	if (_process_graph) {
+		_process_graph->swap_process_chain ();
+	}
+
 	/* run the auditioner, and if it says we need butler service, ask for it */
 
 	if (auditioner->play_audition (nframes) > 0) {

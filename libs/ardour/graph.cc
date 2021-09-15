@@ -227,9 +227,37 @@ Graph::clear_other_chain ()
 }
 
 void
-Graph::prep ()
+Graph::swap_process_chain ()
 {
+	/* Intended to be called Session::process_audition.
+	 * Must not be called while the graph is processing.
+	 */
+	bool need_prep = false;
 	if (_swap_mutex.trylock ()) {
+		/* swap mutex acquired */
+		if (_current_chain != _pending_chain) {
+			/* use new chain */
+			_setup_chain   = _current_chain;
+			_current_chain = _pending_chain;
+			_trigger_queue.clear ();
+			/* ensure that all nodes can be queued */
+			_trigger_queue.reserve (_nodes_rt[_current_chain].size ());
+			g_atomic_int_set (&_trigger_queue_size, 0);
+			_cleanup_cond.signal ();
+			need_prep = true;
+		}
+		_swap_mutex.unlock ();
+	}
+
+	if (need_prep) {
+		prep (false);
+	}
+}
+
+void
+Graph::prep (bool check_pending_chain)
+{
+	if (check_pending_chain && _swap_mutex.trylock ()) {
 		/* swap mutex acquired */
 		if (_current_chain != _pending_chain) {
 			/* use new chain */
