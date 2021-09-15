@@ -222,19 +222,37 @@ struct FourDimensions {
 
 	FourDimensions (Distance u, Distance r = -1., Distance d = -1., Distance l = -1.) {
 
-		/* CSS style defaults: if only 1 value is givem, set all 4 to
-		 * that value; if 2 values are supplied, up uses the first,
-		 * other 3 use the second; if 3 values are supplied, up uses
-		 * the first, right uses the second, other 2 use the
-		 * third. etc.
+		/* CSS style defaults: see https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties
 		 */
 
-		Distance last = u;
+		std::vector<Distance> args;
 
-		up = u;
-		if (r >= 0) { last = r; }  right = last;
-		if (d >= 0) { last = d; }  down = last;
-		if (l >= 0) { last = l; }  left = last;
+		args.push_back (u);
+
+		if (r >= 0) { args.push_back (r); }
+		if (d >= 0) { args.push_back (d); }
+		if (l >= 0) { args.push_back (l); }
+
+		switch (args.size()) {
+		case 1:
+			up = right = down = left = args[0];
+			break;
+		case 2:
+			up = down = args[0];
+			left = right = args[1];
+			break;
+		case 3:
+			up = args[0];
+			left = right = args[1];
+			down = args[2];
+			break;
+		case 4:
+			up = args[0];
+			right = args[1];
+			down = args[2];
+			left = args[3];
+			break;
+		}
 	}
 };
 
