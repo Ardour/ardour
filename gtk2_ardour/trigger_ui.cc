@@ -106,9 +106,9 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	const double scale = UIConfiguration::instance().get_ui_scale();
 	const Distance spacing = 12. * scale;
 
-	attach (follow_action_button, { 0, 0 }, { 2, 1 }, PackExpand, PackExpand);
-	attach (follow_left, { 0, 1 }, { 1, 2 }, PackExpand, PackExpand);
-	attach (follow_right, { 1, 1 }, { 2, 2 }, PackExpand, PackExpand);
+	attach (follow_action_button, { 0, 0 }, { 2, 1 }, PackExpand, PackExpand, { 10 });
+	attach (follow_left, { 0, 1 }, { 1, 2 }, PackExpand, PackExpand, { 10 });
+	attach (follow_right, { 1, 1 }, { 2, 2 }, PackExpand, PackExpand, { 10 });
 
 	trigger_changed ();
 }
