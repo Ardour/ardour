@@ -33,6 +33,8 @@ using std::endl;
 
 Table::Table (Canvas* canvas)
 	: Rectangle (canvas)
+	, rows (0)
+	, cols (0)
 	, collapse_on_hide (false)
 	, homogenous (true)
 	, draw_hgrid (false)
@@ -43,6 +45,8 @@ Table::Table (Canvas* canvas)
 
 Table::Table (Item* item)
 	: Rectangle (item)
+	, rows (0)
+	, cols (0)
 	, collapse_on_hide (false)
 	, homogenous (true)
 	, draw_hgrid (false)
@@ -58,10 +62,23 @@ Table::attach (Item* item, Coord ulx, Coord uly, Coord lrx, Coord lry, PackOptio
 	 * involve making Index 3D and using an actual hash function
 	 */
 
-	if (cells.insert ({ Index (ulx, uly), CellInfo (item, row_options, col_options, Index (ulx, uly), Index (lrx, lry), pad) }).second) {
-		_add (item);
-	} else {
+	std::pair<Cells::iterator,bool> res = cells.insert ({ Index (ulx, uly), CellInfo (item, row_options, col_options, Index (ulx, uly), Index (lrx, lry), pad) });
+
+	if (!res.second) {
 		cerr << "Failed to attach at " << ulx << ", " << uly << " " << lrx << ", " << lry << endl;
+	}
+
+	_add (item);
+	item->size_request (res.first->second.natural_size.x, res.first->second.natural_size.y);
+
+	if (lrx > cols) {
+		cols = lrx;
+		col_info.resize (cols);
+	}
+
+	if (lry > rows) {
+		rows = lry;
+		row_info.resize (rows);
 	}
 }
 
@@ -85,11 +102,19 @@ Table::compute_bounding_box() const
 		return;
 	}
 
-	for (auto const & cell : cells) {
-		if (_bounding_box) {
-			_bounding_box = _bounding_box.extend (cell.second.full_size);
-		} else {
-			_bounding_box = cell.second.full_size;
+	if ((*cells.begin()).second.natural_size == Duple()) {
+		/* force basic computation of natural size */
+		Duple ns = const_cast<Table*>(this)->compute (Rect());
+		_bounding_box = Rect (0, 0, ns.x, ns.y);
+
+	} else {
+
+		for (auto const & cell : cells) {
+			if (_bounding_box) {
+				_bounding_box = _bounding_box.extend (cell.second.full_size);
+			} else {
+				_bounding_box = cell.second.full_size;
+			}
 		}
 	}
 
@@ -183,59 +208,36 @@ Table::compute (Rect const & within)
 {
 	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("\n\nCompute table within rect: %1\n", within));
 
-	/* step 1: traverse all current cells and determine how many rows and
-	 * columns we need. While doing that, get the current natural size of
-	 * each cell.
-	 */
+	for (auto & ai : row_info) {
+		ai.reset ();
+	}
 
-	uint32_t rows = 0;
-	uint32_t cols = 0;
-
-	row_info.clear ();
-	col_info.clear ();
-
-	for (auto const & ci : cells) {
-		CellInfo const & c (ci.second);
-		if (c.lower_right.x > cols) {
-			cols = c.lower_right.x;
-		}
-		if (c.lower_right.y > rows) {
-			rows = c.lower_right.y;
-		}
+	for (auto & ai : col_info) {
+		ai.reset ();
 	}
 
 	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("cell coordinates indicate rows %1 cols %2 from %3 cells\n", rows, cols, cells.size()));
-
-	row_info.resize (rows);
-	col_info.resize (cols);
 
 	for (auto & ci : cells) {
 
 		CellInfo c (ci.second);
 
-		c.content->size_request (c.natural_size.x, c.natural_size.y);
+		DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("for cell %1,%2 - %3,%4, contents natural size = %5\n",
+		                                                 c.upper_left.x,
+		                                                 c.upper_left.y,
+		                                                 c.lower_right.x,
+		                                                 c.lower_right.y,
+		                                                 c.natural_size));
 
 		const float hspan = c.lower_right.x - c.upper_left.x;
 		const float vspan = c.lower_right.y - c.upper_left.y;
 
-		for (uint32_t row = c.upper_left.x; row != c.lower_right.x; ++row) {
+		/* for every col that this cell occupies, count the number of
+		 * expanding/shrinking items, and compute the largest width
+		 * for the column (cells)
+		 */
 
-			if (c.row_options & PackExpand) {
-				row_info[row].expanders++;
-			}
-
-			if (c.row_options & PackShrink) {
-				row_info[row].shrinkers++;
-			}
-
-			row_info[row].natural_size += c.natural_size.x / hspan;
-			col_info[row].natural_size += c.padding.left + c.padding.right;
-			col_info[row].natural_size += col_info[row].spacing;
-
-			row_info[row].occupied = true;
-		}
-
-		for (uint32_t col = c.upper_left.y; col != c.lower_right.y; ++col) {
+		for (uint32_t col = c.upper_left.x; col != c.lower_right.x; ++col) {
 
 			if (c.col_options & PackExpand) {
 				col_info[col].expanders++;
@@ -245,35 +247,38 @@ Table::compute (Rect const & within)
 				col_info[col].shrinkers++;
 			}
 
-			col_info[col].natural_size += c.natural_size.y / vspan;
-			col_info[col].natural_size += c.padding.up + c.padding.down;
-			col_info[col].natural_size += col_info[c.lower_right.y].spacing;
+			/* columns have a natural width */
 
+			Distance total_width = (c.natural_size.x / hspan) + c.padding.left + c.padding.right;
+
+			col_info[col].natural_size = std::max (col_info[col].natural_size, total_width);
 			col_info[col].occupied = true;
 		}
 
-	}
+		/* for every row that this cell occupies, count the number of
+		 * expanding/shrinking items, and compute the largest height
+		 * for the row (cells)
+		 */
 
-#ifndef NDEBUG
-	if (DEBUG_ENABLED(DEBUG::CanvasTable)) {
-		DEBUG_STR_DECL(a);
-		int n = 0;
-		for (auto& ai : row_info) {
-			DEBUG_STR_APPEND(a, string_compose ("row %1: nwidth %2\n", n+1, ai.natural_size));
-			++n;
+		for (uint32_t row = c.upper_left.y; row != c.lower_right.y; ++row) {
+
+			/* rows have a natural height */
+
+			Distance total_height = (c.natural_size.y / vspan) + c.padding.up + c.padding.down;
+
+			row_info[row].natural_size = std::max (row_info[row].natural_size, total_height);
+			row_info[row].occupied = true;
+
+			if (c.row_options & PackExpand) {
+				row_info[row].expanders++;
+			}
+
+			if (c.row_options & PackShrink) {
+				row_info[row].shrinkers++;
+			}
 		}
-		DEBUG_TRACE (DEBUG::CanvasTable, DEBUG_STR(a).str());
 
-		DEBUG_STR_DECL(b);
-		n = 0;
-		for (auto& ai : col_info) {
-
-			DEBUG_STR_APPEND(b, string_compose ("col %1: nheight %2\n", n, ai.natural_size));
-			++n;
-		}
-		DEBUG_TRACE (DEBUG::CanvasTable, DEBUG_STR(b).str());
 	}
-#endif
 
 	/* rows with nothing in them are still counted as existing. This is a
 	 * design decision, not a logic inevitability.
@@ -285,13 +290,67 @@ Table::compute (Rect const & within)
 
 	Distance natural_width = 0.;
 	Distance natural_height = 0.;
+	Distance fixed_width = 0;
+	Distance fixed_height = 0;
+	uint32_t total_width_expanders = 0;
+	uint32_t total_height_expanders = 0;
+	uint32_t fixed_size_rows = 0;
+	uint32_t fixed_size_cols = 0;
 
-	for (auto const & ai : row_info) {
-		natural_width = std::max (natural_width, ai.natural_size);
+	for (auto & ai : row_info) {
+
+		if (ai.expanders) {
+			total_height_expanders++;
+		}
+
+		ai.natural_size += ai.spacing;
+
+		if (ai.user_size) {
+			natural_height = std::max (natural_height, ai.user_size);
+			fixed_height += ai.user_size;
+			fixed_size_cols++;
+		} else {
+			natural_height = std::max (natural_height, ai.natural_size);
+		}
 	}
-	for (auto const & ai : col_info) {
-		natural_height = std::max (natural_height, ai.natural_size);
+
+	for (auto & ai : col_info) {
+
+		if (ai.expanders) {
+			total_width_expanders++;
+		}
+
+		ai.natural_size += ai.spacing;
+
+		if (ai.user_size) {
+			natural_width = std::max (natural_width, ai.user_size);
+			fixed_width += ai.user_size;
+			fixed_size_cols++;
+		} else {
+			natural_width = std::max (natural_width, ai.natural_size);
+		}
 	}
+
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::CanvasTable)) {
+		DEBUG_STR_DECL(a);
+		int n = 0;
+		for (auto& ai : row_info) {
+			DEBUG_STR_APPEND(a, string_compose ("row %1: height %2\n", n+1, ai.natural_size));
+			++n;
+		}
+		DEBUG_TRACE (DEBUG::CanvasTable, DEBUG_STR(a).str());
+
+		DEBUG_STR_DECL(b);
+		n = 0;
+		for (auto& ai : col_info) {
+
+			DEBUG_STR_APPEND(b, string_compose ("col %1: width %2\n", n, ai.natural_size));
+			++n;
+		}
+		DEBUG_TRACE (DEBUG::CanvasTable, DEBUG_STR(b).str());
+	}
+#endif
 
 	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("natural width x height = %1 x %2\n", natural_width, natural_height));
 
@@ -322,83 +381,66 @@ Table::compute (Rect const & within)
 	 *
 	 */
 
-	if (homogenous) {
 
-		Distance per_cell_width = within.width() / cols;
-		Distance per_cell_height = within.height() / rows;
+	uint32_t variable_size_rows = rows - fixed_size_rows;
+	uint32_t variable_size_cols = rows - fixed_size_cols;
+	Distance variable_col_width = 0;
+	Distance variable_row_height = 0;
 
-		DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("per-cell: %1 x %2 from %3 and %4/%5\n", per_cell_width, per_cell_height, within, cols, rows));
-
-		/* compute total expansion or contraction that will be
-		 * distributed across all rows & cols marked for expand/shrink
-		 */
-
-		for (auto & ai : row_info) {
-			if (natural_width < within.width() && ai.expanders) {
-				Distance delta = within.width() - natural_width;
-				ai.expand = delta / ai.expanders;
-			} else if (natural_width > within.width() && ai.shrinkers) {
-				Distance delta = within.width() - natural_width;
-				ai.shrink = delta / ai.shrinkers;
-			}
-		}
-
-		for (auto & ai : col_info) {
-			if (natural_height < within.height() && ai.expanders) {
-				Distance delta = within.height() - natural_height;
-				ai.expand = delta / ai.expanders;
-			} else if (natural_height > within.height() && ai.shrinkers) {
-				Distance delta = within.height() - natural_height;
-				ai.shrink = delta / ai.shrinkers;
-			}
-		}
-
-		for (auto & ci : cells) {
-
-			CellInfo & c (ci.second);
-
-			const float hspan = c.lower_right.x - c.upper_left.x;
-			const float vspan = c.lower_right.y - c.upper_left.y;
-
-			Distance w;
-			Distance h;
-			AxisInfo& col (col_info[c.upper_left.y]);
-			AxisInfo& row (col_info[c.upper_left.x]);
-
-			if (c.row_options & PackExpand) {
-				w = hspan * (per_cell_width + row.expand);
-			} else if (c.row_options & PackShrink) {
-				w = hspan * (per_cell_width + row.shrink); /* note: row_shrink is negative */
-			} else {
-				w = hspan * per_cell_width;
-			}
-
-			if (c.col_options & PackExpand) {
-				h = vspan * (per_cell_height + col.expand);
-			} else if (c.col_options & PackShrink) {
-				h = vspan * (per_cell_height + col.shrink); /* note: col_shrink is negative */
-			} else {
-				h = vspan * per_cell_height;
-			}
-
-			w -= c.padding.left + c.padding.right;
-			w -= col.spacing;
-
-			h -= c.padding.up + c.padding.down;
-			h -= row.spacing;
-
-			DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("Cell @ %1,%2 - %3,%4 (hspan %7 vspan %8) allocated %5 x %6\n",
-			                                                 ci.first.x, ci.first.y, ci.second.lower_right.x, ci.second.lower_right.y, w, h, hspan, vspan));
-
-			c.allocate_size = Duple (w, h);
-		}
-
-	} else {
-
-		/* not homogenous */
-
+	if (variable_size_cols) {
+		variable_col_width = (within.width() - fixed_width) / variable_size_cols;
 	}
 
+	if (variable_size_rows) {
+		variable_row_height = (within.height() - fixed_height) / variable_size_rows;
+	}
+
+	for (auto & ci : cells) {
+
+		CellInfo & c (ci.second);
+
+		const float hspan = c.lower_right.x - c.upper_left.x;
+		const float vspan = c.lower_right.y - c.upper_left.y;
+
+		AxisInfo& col (col_info[c.upper_left.y]);
+		AxisInfo& row (col_info[c.upper_left.x]);
+
+		Distance w;
+		Distance h;
+
+		if (col.user_size) {
+			w = col.user_size;
+		} else if (c.row_options & PackExpand) {
+			w = hspan * variable_col_width;
+		} else if (c.row_options & PackShrink) {
+			w = hspan * variable_col_width;
+		} else {
+			/* normal col, not expanding or shrinking */
+			w = c.natural_size.x;
+		}
+
+		if (row.user_size) {
+			h = col.user_size;
+		} else if (c.row_options & PackExpand) {
+			h = vspan * variable_row_height;
+		} else if (c.row_options & PackShrink) {
+			h = vspan * variable_row_height;
+		} else {
+			/* normal row, not expanding or shrinking */
+			h = c.natural_size.y;
+		}
+
+		w -= c.padding.left + c.padding.right;
+		w -= col.spacing;
+
+		h -= c.padding.up + c.padding.down;
+		h -= row.spacing;
+
+		DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("Cell @ %1,%2 - %3,%4 (hspan %7 vspan %8) allocated %5 x %6\n",
+		                                                 ci.first.x, ci.first.y, ci.second.lower_right.x, ci.second.lower_right.y, w, h, hspan, vspan));
+
+		c.allocate_size = Duple (w, h);
+	}
 
 	/* final pass: actually allocate position for each cell. Do this in a
 	 * row,col order so that we can set up position based on all cells
