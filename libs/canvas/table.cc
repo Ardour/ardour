@@ -163,6 +163,10 @@ Table::compute (Rect const & within)
 {
 	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("\n\nCompute table within rect: %1\n", within));
 
+	if (cells.empty()) {
+		return Duple (0, 0);
+	}
+
 	uint32_t rows = row_info.size();
 	uint32_t cols = col_info.size();
 
