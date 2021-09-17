@@ -82,8 +82,6 @@ public:
 	Distance left_margin;
 	Distance row_spacing;
 	Distance col_spacing;
-	uint32_t rows;
-	uint32_t cols;
 	bool collapse_on_hide;
 	bool homogenous;
 	bool draw_hgrid;

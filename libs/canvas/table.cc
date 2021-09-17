@@ -33,8 +33,6 @@ using std::endl;
 
 Table::Table (Canvas* canvas)
 	: Rectangle (canvas)
-	, rows (0)
-	, cols (0)
 	, collapse_on_hide (false)
 	, homogenous (true)
 	, draw_hgrid (false)
@@ -45,8 +43,6 @@ Table::Table (Canvas* canvas)
 
 Table::Table (Item* item)
 	: Rectangle (item)
-	, rows (0)
-	, cols (0)
 	, collapse_on_hide (false)
 	, homogenous (true)
 	, draw_hgrid (false)
@@ -71,14 +67,12 @@ Table::attach (Item* item, Coord ulx, Coord uly, Coord lrx, Coord lry, PackOptio
 	_add (item);
 	item->size_request (res.first->second.natural_size.x, res.first->second.natural_size.y);
 
-	if (lrx > cols) {
-		cols = lrx;
-		col_info.resize (cols);
+	if (lrx > col_info.size()) {
+		col_info.resize (lrx);
 	}
 
-	if (lry > rows) {
-		rows = lry;
-		row_info.resize (rows);
+	if (lry > row_info.size()) {
+		row_info.resize (lry);
 	}
 }
 
@@ -145,49 +139,10 @@ Table::set_col_size (uint32_t col, Distance size)
 void
 Table::size_request (Distance& w, Distance& h) const
 {
-	uint32_t rowmax = 0;
-	uint32_t colmax = 0;
+	Duple d = const_cast<Table*>(this)->compute (Rect());
 
-	for (auto& ci : cells) {
-		CellInfo const & c (ci.second);
-
-		if (c.lower_right.x > rowmax) {
-			rowmax = c.lower_right.x;
-		}
-
-		if (c.lower_right.y > colmax) {
-			colmax = c.lower_right.y;
-		}
-	}
-
-	AxisInfos rinfo;
-	AxisInfos cinfo;
-
-	rinfo.resize (rowmax+1);
-	cinfo.resize (colmax+1);
-
-	for (auto& ci : cells) {
-
-		Distance cw;
-		Distance ch;
-
-		CellInfo const & c (ci.second);
-		c.content->size_request (cw, ch);
-
-		rinfo[c.upper_left.x].natural_size += cw;
-		cinfo[c.upper_left.y].natural_size += ch;
-	}
-
-	w = 0;
-	h = 0;
-
-	for (auto& ai : rinfo) {
-		w = std::max (w, ai.natural_size);
-	}
-
-	for (auto& ai : cinfo) {
-		h = std::max (h, ai.natural_size);
-	}
+	w = d.x;
+	h = d.y;
 }
 
 void
@@ -207,6 +162,9 @@ Duple
 Table::compute (Rect const & within)
 {
 	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("\n\nCompute table within rect: %1\n", within));
+
+	uint32_t rows = row_info.size();
+	uint32_t cols = col_info.size();
 
 	for (auto & ai : row_info) {
 		ai.reset ();
