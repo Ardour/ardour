@@ -211,9 +211,9 @@ Table::compute (Rect const & within)
 
 			/* columns have a natural width */
 
-			Distance total_width = (c.natural_size.x / hspan) + c.padding.left + c.padding.right;
+			const Distance total_cell_width = (c.natural_size.x / hspan) + c.padding.left + c.padding.right;
 
-			col_info[col].natural_size = std::max (col_info[col].natural_size, total_width);
+			col_info[col].natural_size = std::max (col_info[col].natural_size, total_cell_width);
 			col_info[col].occupied = true;
 		}
 
@@ -226,9 +226,9 @@ Table::compute (Rect const & within)
 
 			/* rows have a natural height */
 
-			Distance total_height = (c.natural_size.y / vspan) + c.padding.up + c.padding.down;
+			const Distance total_cell_height = (c.natural_size.y / vspan) + c.padding.up + c.padding.down;
 
-			row_info[row].natural_size = std::max (row_info[row].natural_size, total_height);
+			row_info[row].natural_size = std::max (row_info[row].natural_size, total_cell_height);
 			row_info[row].occupied = true;
 
 			if (c.row_options & PackExpand) {
@@ -254,16 +254,10 @@ Table::compute (Rect const & within)
 	Distance natural_height = 0.;
 	Distance fixed_width = 0;
 	Distance fixed_height = 0;
-	uint32_t total_width_expanders = 0;
-	uint32_t total_height_expanders = 0;
 	uint32_t fixed_size_rows = 0;
 	uint32_t fixed_size_cols = 0;
 
 	for (auto & ai : row_info) {
-
-		if (ai.expanders) {
-			total_height_expanders++;
-		}
 
 		ai.natural_size += ai.spacing;
 
@@ -277,10 +271,6 @@ Table::compute (Rect const & within)
 	}
 
 	for (auto & ai : col_info) {
-
-		if (ai.expanders) {
-			total_width_expanders++;
-		}
 
 		ai.natural_size += ai.spacing;
 
