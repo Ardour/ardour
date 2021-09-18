@@ -68,45 +68,45 @@ class TempoMap;
  */
 
 typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct point_tag>> point_hook;
-class LIBTEMPORAL_API Point : public point_hook {
+class /*LIBTEMPORAL_API*/ Point : public point_hook {
   public:
-	Point (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt) : _sclock (sc), _quarters (b), _bbt (bbt), _map (&map) {}
-	Point (TempoMap const & map, XMLNode const &);
+	LIBTEMPORAL_API Point (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt) : _sclock (sc), _quarters (b), _bbt (bbt), _map (&map) {}
+	LIBTEMPORAL_API Point (TempoMap const & map, XMLNode const &);
 
-	virtual ~Point() {}
+	LIBTEMPORAL_API virtual ~Point() {}
 
-	virtual void set (superclock_t sc, Beats const & b, BBT_Time const & bbt) {
+	LIBTEMPORAL_API virtual void set (superclock_t sc, Beats const & b, BBT_Time const & bbt) {
 		_sclock = sc;
 		_quarters = b;
 		_bbt = bbt;
 	}
 
-	superclock_t sclock() const  { return _sclock; }
-	Beats const & beats() const  { return _quarters; }
-	BBT_Time const & bbt() const { return _bbt; }
-	samplepos_t sample(samplecnt_t sr) const { return superclock_to_samples (sclock(), sr); }
+	LIBTEMPORAL_API superclock_t sclock() const  { return _sclock; }
+	LIBTEMPORAL_API Beats const & beats() const  { return _quarters; }
+	LIBTEMPORAL_API BBT_Time const & bbt() const { return _bbt; }
+	LIBTEMPORAL_API samplepos_t sample(samplecnt_t sr) const { return superclock_to_samples (sclock(), sr); }
 
-	timepos_t time() const;
+	LIBTEMPORAL_API timepos_t time() const;
 
-	struct sclock_comparator {
+	struct LIBTEMPORAL_API sclock_comparator {
 		bool operator() (Point const & a, Point const & b) const {
 			return a.sclock() < b.sclock();
 		}
 	};
 
-	struct ptr_sclock_comparator {
+	struct LIBTEMPORAL_API ptr_sclock_comparator {
 		bool operator() (Point const * a, Point const * b) const {
 			return a->sclock() < b->sclock();
 		}
 	};
 
-	struct beat_comparator {
+	struct LIBTEMPORAL_API beat_comparator {
 		bool operator() (Point const & a, Point const & b) const {
 			return a.beats() < b.beats();
 		}
 	};
 
-	struct bbt_comparator {
+	struct LIBTEMPORAL_API bbt_comparator {
 		bool operator() (Point const & a, Point const & b) const {
 			return a.bbt() < b.bbt();
 		}
@@ -115,10 +115,10 @@ class LIBTEMPORAL_API Point : public point_hook {
 	/* all time members are supposed to be synced at all times, so we need
 	   test only one.
 	*/
-	inline bool operator== (Point const & other) const { return _sclock == other._sclock; }
-	inline bool operator!= (Point const & other) const { return _sclock != other._sclock; }
+	LIBTEMPORAL_API inline bool operator== (Point const & other) const { return _sclock == other._sclock; }
+	LIBTEMPORAL_API inline bool operator!= (Point const & other) const { return _sclock != other._sclock; }
 
-	TempoMap const & map() const { return *_map; }
+	LIBTEMPORAL_API TempoMap const & map() const { return *_map; }
 
   protected:
 	superclock_t     _sclock;
@@ -349,24 +349,24 @@ class LIBTEMPORAL_API Meter {
 /* A MeterPoint is literally just the combination of a Meter with a Point
  */
 typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct meterpoint_tag>> meter_hook;
-class LIBTEMPORAL_API MeterPoint : public Meter, public meter_hook, public virtual Point
+class /*LIBTEMPORAL_API*/ MeterPoint : public Meter, public meter_hook, public virtual Point
 {
   public:
-	MeterPoint (TempoMap const & map, Meter const & m, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Meter (m) {}
-	MeterPoint (TempoMap const & map, XMLNode const &);
-	MeterPoint (Meter const & m, Point const & p) : Point (p), Meter (m) {}
+	LIBTEMPORAL_API MeterPoint (TempoMap const & map, Meter const & m, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Meter (m) {}
+	LIBTEMPORAL_API MeterPoint (TempoMap const & map, XMLNode const &);
+	LIBTEMPORAL_API MeterPoint (Meter const & m, Point const & p) : Point (p), Meter (m) {}
 
-	Beats quarters_at (BBT_Time const & bbt) const;
-	BBT_Time bbt_at (Beats const & beats) const;
+	LIBTEMPORAL_API Beats quarters_at (BBT_Time const & bbt) const;
+	LIBTEMPORAL_API BBT_Time bbt_at (Beats const & beats) const;
 
-	bool operator== (MeterPoint const & other) const {
+	LIBTEMPORAL_API bool operator== (MeterPoint const & other) const {
 		return Meter::operator== (other) && Point::operator== (other);
 	}
-	bool operator!= (MeterPoint const & other) const {
+	LIBTEMPORAL_API bool operator!= (MeterPoint const & other) const {
 		return Meter::operator!= (other) || Point::operator!= (other);
 	}
 
-	XMLNode& get_state () const;
+	LIBTEMPORAL_API XMLNode& get_state () const;
 };
 
 /* A TempoPoint is a combination of a Tempo with a Point. However, if the temp
@@ -376,15 +376,15 @@ class LIBTEMPORAL_API MeterPoint : public Meter, public meter_hook, public virtu
  */
 
 typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct tempo_tag>> tempo_hook;
-class LIBTEMPORAL_API TempoPoint : public Tempo, public tempo_hook, public virtual Point
+class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public virtual Point
 {
   public:
-	TempoPoint (TempoMap const & map, Tempo const & t, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Tempo (t), _omega (0.0) {}
-	TempoPoint (Tempo const & t, Point const & p) : Point (p), Tempo (t), _omega (0) {}
-	TempoPoint (TempoMap const & map, XMLNode const &);
+	LIBTEMPORAL_API TempoPoint (TempoMap const & map, Tempo const & t, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Tempo (t), _omega (0.0) {}
+	LIBTEMPORAL_API TempoPoint (Tempo const & t, Point const & p) : Point (p), Tempo (t), _omega (0) {}
+	LIBTEMPORAL_API TempoPoint (TempoMap const & map, XMLNode const &);
 
 	/* just change the tempo component, without moving */
-	TempoPoint& operator=(Tempo const & t) {
+	LIBTEMPORAL_API TempoPoint& operator=(Tempo const & t) {
 		*((Tempo*)this) = t;
 		return *this;
 	}
@@ -396,35 +396,35 @@ class LIBTEMPORAL_API TempoPoint : public Tempo, public tempo_hook, public virtu
 	 * information about the tempo at that time.
 	 */
 
-	superclock_t superclock_at (Beats const & qn) const;
-	samplepos_t  sample_at (Beats const & qn) const { return Temporal::superclock_to_samples (superclock_at (qn), TEMPORAL_SAMPLE_RATE); }
-	superclock_t superclocks_per_note_type_at (timepos_t const &) const;
+	LIBTEMPORAL_API superclock_t superclock_at (Beats const & qn) const;
+	LIBTEMPORAL_API samplepos_t  sample_at (Beats const & qn) const { return Temporal::superclock_to_samples (superclock_at (qn), TEMPORAL_SAMPLE_RATE); }
+	LIBTEMPORAL_API superclock_t superclocks_per_note_type_at (timepos_t const &) const;
 
 	/* This method should be used only for display purposes, and even
 	 * then, only when absolutely necessary. It returns a double
 	 * representation of the tempo, and we do not want to be using such
 	 * representations ever, if we could.
 	 */
-	double note_types_per_minute_at_DOUBLE (timepos_t const & pos) const {
+	LIBTEMPORAL_API double note_types_per_minute_at_DOUBLE (timepos_t const & pos) const {
 		return (superclock_ticks_per_second * 60.0) / superclocks_per_note_type_at (pos);
 	}
 
-	double omega() const { return _omega; }
-	void compute_omega (TempoPoint const & next);
-	bool actually_ramped () const { return Tempo::ramped() && (_omega != 0); }
+	LIBTEMPORAL_API double omega() const { return _omega; }
+	LIBTEMPORAL_API void compute_omega (TempoPoint const & next);
+	LIBTEMPORAL_API bool actually_ramped () const { return Tempo::ramped() && (_omega != 0); }
 
-	XMLNode& get_state () const;
-	int set_state (XMLNode const&, int version);
+	LIBTEMPORAL_API XMLNode& get_state () const;
+	LIBTEMPORAL_API int set_state (XMLNode const&, int version);
 
-	bool operator== (TempoPoint const & other) const {
+	LIBTEMPORAL_API bool operator== (TempoPoint const & other) const {
 		return Tempo::operator== (other) && Point::operator== (other);
 	}
-	bool operator!= (TempoPoint const & other) const {
+	LIBTEMPORAL_API bool operator!= (TempoPoint const & other) const {
 		return Tempo::operator!= (other) || Point::operator!= (other);
 	}
 
-	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
-	Beats quarters_at_superclock (superclock_t sc) const;
+	LIBTEMPORAL_API Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
+	LIBTEMPORAL_API Beats quarters_at_superclock (superclock_t sc) const;
 
   private:
 	double _omega;
@@ -522,18 +522,18 @@ class LIBTEMPORAL_API TempoMetric {
  * Point's BBT time member is overwritten.
  */
 typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct bartime_tag>> bartime_hook;
-class LIBTEMPORAL_API MusicTimePoint :  public bartime_hook, public virtual TempoPoint, public virtual MeterPoint
+class /*LIBTEMPORAL_API*/ MusicTimePoint :  public bartime_hook, public virtual TempoPoint, public virtual MeterPoint
 {
   public:
-	MusicTimePoint (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt, Tempo const & t, Meter const & m) : Point (map, sc, b, bbt), TempoPoint (t, *this), MeterPoint (m, *this)  {}
+	LIBTEMPORAL_API MusicTimePoint (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt, Tempo const & t, Meter const & m) : Point (map, sc, b, bbt), TempoPoint (t, *this), MeterPoint (m, *this)  {}
 	// MusicTimePoint (BBT_Time const & bbt_time, Point const & p) : Point (p), TempoPoint (p.map().tempo_at (p.sclock()), p), MeterPoint (p.map().meter_at (p.sclock()), p) { _bbt = bbt_time; }
-	MusicTimePoint (TempoMap const & map, XMLNode const &);
+	LIBTEMPORAL_API MusicTimePoint (TempoMap const & map, XMLNode const &);
 
-	bool operator== (MusicTimePoint const & other) const {
+	LIBTEMPORAL_API bool operator== (MusicTimePoint const & other) const {
 		return TempoPoint::operator== (other) && MeterPoint::operator== (other);
 	}
 
-	XMLNode & get_state () const;
+	LIBTEMPORAL_API XMLNode & get_state () const;
 };
 
 /** Tempo Map - mapping of timecode to musical time.
@@ -709,7 +709,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	/* END OF MODIFYING METHODS */
 
-	TimeDomain time_domain() const { return _time_domain; }
+	LIBTEMPORAL_API TimeDomain time_domain() const { return _time_domain; }
 
 	/* rather than giving direct access to the intrusive list members,
 	 * offer one that uses an STL container instead.
