@@ -174,7 +174,7 @@ def build(bld):
     obj.name         = 'libpbd'
     obj.target       = 'pbd'
     obj.use          = 'pbdsignals'
-    obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM ARCHIVE CURL XML'
+    obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM ARCHIVE CURL'
     if sys.platform == 'darwin':
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
         if 'cocoa_open_uri.mm' not in obj.source:
