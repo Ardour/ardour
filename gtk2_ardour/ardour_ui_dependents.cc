@@ -109,7 +109,6 @@ ARDOUR_UI::we_have_dependents ()
 
 	Gtkmm2ext::Bindings::associate_all ();
 
-	editor->setup_tooltips ();
 	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 
 	/* all actions are defined */
