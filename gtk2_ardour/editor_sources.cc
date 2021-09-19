@@ -330,6 +330,9 @@ EditorSources::set_session (ARDOUR::Session* s)
 		redisplay();
 
 	} else {
+		source_property_connection.disconnect ();
+		add_source_connection.disconnect ();
+		remove_source_connection.disconnect ();
 		clear();
 	}
 }
