@@ -390,13 +390,16 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 	}
 
 	if (action) {
-		Bindings* bindings = (Bindings*) w->get_data ("ardour-bindings");
-		if (!bindings) {
-			Gtk::Window* win = (Gtk::Window*) w->get_toplevel();
-			if (win) {
-				bindings = (Bindings*) win->get_data ("ardour-bindings");
+		/* get_bindings_from_widget_heirarchy */
+		Widget* ww = w;
+		Bindings* bindings = NULL;
+		do {
+			bindings = (Bindings*) ww->get_data ("ardour-bindings");
+			if (bindings) {
+				break;
 			}
-		}
+			ww = ww->get_parent ();
+		} while (ww);
 
 		if (!bindings) {
 			bindings = global_bindings;
