@@ -99,7 +99,9 @@ def build(bld):
     obj.defines      += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
 
     # interactive (non-automated, non-cppunit) canvas tests
-    if True : # bld.env['BUILD_TESTS']:
+    # fails to link when cross-compiling (lacks libpbd dependencies
+    # uselib = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM ARCHIVE CURL'
+    if False : # bld.env['BUILD_TESTS']:
         constraint_test_src = [ 'test/interactive/constraint_test.cc' ]
         constraint_test = bld (features = 'cxx cxxprogram')
         constraint_test.source = constraint_test_src
