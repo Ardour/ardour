@@ -133,7 +133,6 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	mixer->set_session (s);
 	recorder->set_session (s);
 	meterbridge->set_session (s);
-	luawindow->set_session (s);
 
 	/* its safe to do this now */
 
@@ -270,11 +269,6 @@ ARDOUR_UI::setup_windows ()
 
 	if (create_meterbridge ()) {
 		error << _("UI: cannot setup meterbridge") << endmsg;
-		return -1;
-	}
-
-	if (create_luawindow ()) {
-		error << _("UI: cannot setup luawindow") << endmsg;
 		return -1;
 	}
 

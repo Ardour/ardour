@@ -153,7 +153,6 @@ ARDOUR_UI::set_session (Session *s)
 	secondary_clock->set_session (s);
 	big_clock->set_session (s);
 	video_timeline->set_session (s);
-	lua_script_window->set_session (s);
 	rc_option_editor->set_session (s);
 
 	roll_controllable->set_session (s);
@@ -879,28 +878,6 @@ ARDOUR_UI::toggle_meterbridge ()
 }
 
 void
-ARDOUR_UI::toggle_luawindow ()
-{
-	assert (editor && luawindow);
-
-	bool show = false;
-
-	if (luawindow->not_visible ()) {
-		show = true;
-	}
-	// TODO check overlap
-
-	if (show) {
-		luawindow->show_window ();
-		luawindow->present ();
-		luawindow->raise ();
-	} else {
-		luawindow->hide_window (NULL);
-	}
-}
-
-
-void
 ARDOUR_UI::new_midi_tracer_window ()
 {
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("NewMIDITracer"));
@@ -972,6 +949,13 @@ ARDOUR_UI::create_virtual_keyboard_window ()
 {
 	VirtualKeyboardWindow* vkbd = new VirtualKeyboardWindow ();
 	return vkbd;
+}
+
+LuaWindow*
+ARDOUR_UI::create_luawindow ()
+{
+	LuaWindow* luawindow = LuaWindow::instance ();
+	return luawindow;
 }
 
 void

@@ -88,8 +88,7 @@ LuaWindow::instance ()
 }
 
 LuaWindow::LuaWindow ()
-	: Window (Gtk::WINDOW_TOPLEVEL)
-	, VisibilityTracker (*((Gtk::Window*) this))
+	: ArdourWindow ("Lua")
 	, lua (0)
 	, _visible (false)
 	, _menu_scratch (0)
@@ -107,17 +106,7 @@ LuaWindow::LuaWindow ()
 
 	reinit_lua ();
 	update_title ();
-	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
-
-#ifdef __APPLE__
-	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
-#else
-	if (UIConfiguration::instance().get_all_floating_windows_are_dialogs()) {
-		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
-	} else {
-		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
-	}
-#endif
+	set_wmclass (X_("ardour_lua"), PROGRAM_NAME);
 
 	script_select.disable_scrolling ();
 
@@ -220,10 +209,13 @@ void LuaWindow::reinit_lua ()
 
 void LuaWindow::set_session (Session* s)
 {
-	SessionHandlePtr::set_session (s);
-	if (!_session) {
+	if (!s) {
 		return;
 	}
+	/* only call SessionHandlePtr::set_session if session is not NULL,
+	 * otherwise LuaWindow::session_going_away will never be invoked.
+	 */
+	ArdourWindow::set_session (s);
 
 	update_title ();
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&LuaWindow::update_title, this), gui_context());
@@ -238,7 +230,7 @@ LuaWindow::session_going_away ()
 	ENSURE_GUI_THREAD (*this, &LuaWindow::session_going_away);
 	reinit_lua (); // drop state (all variables, session references)
 
-	SessionHandlePtr::session_going_away ();
+	ArdourWindow::session_going_away ();
 	_session = 0;
 	update_title ();
 

@@ -109,20 +109,6 @@ ARDOUR_UI::create_editor ()
 }
 
 int
-ARDOUR_UI::create_luawindow ()
-
-{
-	try {
-		luawindow = LuaWindow::instance ();
-	}
-	catch (failed_constructor& err) {
-		return -1;
-	}
-
-	return 0;
-}
-
-int
 ARDOUR_UI::create_recorder ()
 {
 	try {
@@ -278,7 +264,6 @@ ARDOUR_UI::install_actions ()
 		ActionManager::register_action (common_actions, X_("show-ui-prefs"), _("Show more UI preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_ui_prefs));
 	}
 
-	ActionManager::register_action (common_actions, X_("toggle-luawindow"), S_("Window|Scripting"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_luawindow));
 	ActionManager::register_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
 
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));

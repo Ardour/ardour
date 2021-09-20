@@ -42,10 +42,8 @@
 #include "widgets/ardour_dropdown.h"
 
 class LuaWindow :
-	public Gtk::Window,
-	public PBD::ScopedConnectionList,
-	public ARDOUR::SessionHandlePtr,
-	public Gtkmm2ext::VisibilityTracker
+	public ArdourWindow,
+	public PBD::ScopedConnectionList
 {
 public:
 	static LuaWindow* instance();

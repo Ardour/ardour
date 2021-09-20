@@ -112,6 +112,7 @@
 #include "keyeditor.h"
 #include "location_ui.h"
 #include "lua_script_manager.h"
+#include "luawindow.h"
 #include "plugin_dspload_window.h"
 #include "plugin_manager_ui.h"
 #include "rc_option_editor.h"
@@ -133,6 +134,7 @@ class ExportVideoDialog;
 class KeyEditor;
 class LocationUIWindow;
 class LuaScriptManager;
+class LuaWindow;
 class RCOptionEditor;
 class RouteParams_UI;
 class SessionOptionEditor;
@@ -437,7 +439,6 @@ private:
 	void tabbable_state_change (ArdourWidgets::Tabbable&);
 
 	void toggle_meterbridge ();
-	void toggle_luawindow ();
 
 	int  setup_windows ();
 	void setup_transport ();
@@ -710,12 +711,10 @@ private:
 	int         create_mixer ();
 	int         create_editor ();
 	int         create_meterbridge ();
-	int         create_luawindow ();
 	int         create_masters ();
 	int         create_recorder ();
 
 	Meterbridge  *meterbridge;
-	LuaWindow    *luawindow;
 
 	/* Dialogs that can be created via new<T> */
 
@@ -747,6 +746,7 @@ private:
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
 	WM::ProxyWithConstructor<KeyEditor> key_editor;
+	WM::ProxyWithConstructor<LuaWindow> luawindow;
 
 	/* creator methods */
 
@@ -758,6 +758,7 @@ private:
 	VirtualKeyboardWindow*  create_virtual_keyboard_window();
 	GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 	KeyEditor*              create_key_editor ();
+	LuaWindow*              create_luawindow ();
 
 	ARDOUR::SystemExec *video_server_process;
 

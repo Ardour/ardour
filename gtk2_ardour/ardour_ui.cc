@@ -328,7 +328,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, last_key_press_time (0)
 	, save_as_dialog (0)
 	, meterbridge (0)
-	, luawindow (0)
 	, rc_option_editor (0)
 	, speaker_config_window (X_("speaker-config"), _("Speaker Configuration"))
 	, add_route_dialog (X_("add-routes"), _("Add Tracks/Busses"))
@@ -352,6 +351,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
 	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
 	, key_editor (X_("key-editor"), _("Keyboard Shortcuts"), boost::bind (&ARDOUR_UI::create_key_editor, this))
+	, luawindow (X_("luawindow"), S_("Window|Scripting"), boost::bind (&ARDOUR_UI::create_luawindow, this))
 	, video_server_process (0)
 	, have_configure_timeout (false)
 	, last_configure_time (0)
@@ -507,6 +507,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		virtual_keyboard_window.set_state (*ui_xml, 0);
 		audio_port_matrix.set_state (*ui_xml, 0);
 		midi_port_matrix.set_state (*ui_xml, 0);
+		luawindow.set_state (*ui_xml, 0);
 		export_video_dialog.set_state (*ui_xml, 0);
 		lua_script_window.set_state (*ui_xml, 0);
 		idleometer.set_state (*ui_xml, 0);
@@ -538,6 +539,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&virtual_keyboard_window);
 	WM::Manager::instance().register_window (&audio_port_matrix);
 	WM::Manager::instance().register_window (&midi_port_matrix);
+	WM::Manager::instance().register_window (&luawindow);
 	WM::Manager::instance().register_window (&idleometer);
 	WM::Manager::instance().register_window (&plugin_manager_ui);
 	WM::Manager::instance().register_window (&plugin_dsp_load_window);
@@ -858,7 +860,6 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete _process_thread; _process_thread = 0;
 		delete time_info_box; time_info_box = 0;
 		delete meterbridge; meterbridge = 0;
-		delete luawindow; luawindow = 0;
 		delete recorder; recorder = 0;
 		delete editor; editor = 0;
 		delete mixer; mixer = 0;
