@@ -625,6 +625,9 @@ AddRouteDialog::maybe_update_name_template_entry ()
 	case VCAMaster:
 		name_template_entry.set_text (VCA::default_name_template());
 		break;
+	case TriggerTrack:
+		name_template_entry.set_text (_("Trigger"));
+		break;
 	}
 	/* ignore programatic change, restore false */
 	reset_name_edited ();
@@ -759,6 +762,26 @@ AddRouteDialog::track_type_chosen ()
 		insert_label.set_sensitive (false);
 		insert_at_combo.set_sensitive (false);
 
+		break;
+	case TriggerTrack:
+
+		configuration_label.set_sensitive (true);
+		channel_combo.set_sensitive (true);
+
+		mode_label.set_sensitive (false);
+		mode_combo.set_sensitive (false);
+
+		instrument_label.set_sensitive (false);
+		instrument_combo.set_sensitive (false);
+
+		group_label.set_sensitive (false);
+		route_group_combo.set_sensitive (false);
+
+		strict_io_label.set_sensitive (false);
+		strict_io_combo.set_sensitive (false);
+
+		insert_label.set_sensitive (false);
+		insert_at_combo.set_sensitive (false);
 		break;
 	}
 
