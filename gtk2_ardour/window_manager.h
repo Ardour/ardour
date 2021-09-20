@@ -153,7 +153,12 @@ public:
 		ARDOUR::SessionHandlePtr* sp = session_handle ();
 		if (sp) {
 			sp->set_session (s);
-			dynamic_cast<T*>(_window)->set_session(s);
+		}
+		ARDOUR::SessionHandlePtr* wsp = dynamic_cast<T*>(_window);
+		if (wsp && wsp != sp) {
+			/* can this happen ? */
+			assert (0);
+			wsp->set_session(s);
 		}
 	}
 
@@ -201,7 +206,12 @@ public:
 		ARDOUR::SessionHandlePtr* sp = session_handle ();
 		if (sp) {
 			sp->set_session (s);
-			dynamic_cast<T*>(_window)->set_session(s);
+		}
+		ARDOUR::SessionHandlePtr* wsp = dynamic_cast<T*>(_window);
+		if (wsp && wsp != sp) {
+			/* can this happen ? */
+			assert (0);
+			wsp->set_session(s);
 		}
 	}
 

@@ -116,14 +116,6 @@ ARDOUR_UI::set_session (Session *s)
 
 	transport_ctrl.set_session (s);
 
-	if (big_transport_window) {
-		big_transport_window->set_session (s);
-	}
-
-	if (virtual_keyboard_window) {
-		virtual_keyboard_window->set_session (s);
-	}
-
 	update_path_label ();
 
 	if (!_session) {
@@ -162,10 +154,6 @@ ARDOUR_UI::set_session (Session *s)
 	big_clock->set_session (s);
 	video_timeline->set_session (s);
 	lua_script_window->set_session (s);
-	plugin_manager_ui->set_session (s);
-	plugin_dsp_load_window->set_session (s);
-	dsp_statistics_window->set_session (s);
-	transport_masters_window->set_session (s);
 	rc_option_editor->set_session (s);
 
 	roll_controllable->set_session (s);
@@ -976,7 +964,6 @@ BigTransportWindow*
 ARDOUR_UI::create_big_transport_window ()
 {
 	BigTransportWindow* btw = new BigTransportWindow ();
-	btw->set_session (_session);
 	return btw;
 }
 
@@ -984,7 +971,6 @@ VirtualKeyboardWindow*
 ARDOUR_UI::create_virtual_keyboard_window ()
 {
 	VirtualKeyboardWindow* vkbd = new VirtualKeyboardWindow ();
-	vkbd->set_session (_session);
 	return vkbd;
 }
 

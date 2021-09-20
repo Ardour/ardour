@@ -142,6 +142,7 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 	}
 
 	if (sess) {
+		assert (_session);
 		init ();
 	}
 }

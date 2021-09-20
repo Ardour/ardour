@@ -140,7 +140,6 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 {
 	mtr_vbox.set_spacing (PX_SCALE(2, 2));
 	nfo_vbox.set_spacing (PX_SCALE(2, 2));
-	SessionHandlePtr::set_session (sess);
 	RouteUI::init ();
 	RouteUI::set_route (rt);
 
