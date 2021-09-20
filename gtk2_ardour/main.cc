@@ -121,6 +121,9 @@ gui_jack_error ()
 
 #ifndef NDEBUG
 static void ardour_g_log (const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data) {
+
+	g_log_default_handler (log_domain, log_level, message, NULL);
+
 	switch (log_level) {
 		case G_LOG_FLAG_FATAL:
 			fatal << "g_log: " << message << endmsg;
@@ -414,9 +417,6 @@ int main (int argc, char *argv[])
 	}
 
 #ifndef NDEBUG
-	g_log_set_handler (NULL,
-			GLogLevelFlags (G_LOG_LEVEL_WARNING | G_LOG_FLAG_FATAL |  G_LOG_LEVEL_CRITICAL | G_LOG_FLAG_RECURSION),
-			&ardour_g_log, NULL);
 	g_log_set_default_handler (&ardour_g_log, NULL);
 #endif
 

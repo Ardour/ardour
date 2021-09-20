@@ -666,7 +666,7 @@ ARDOUR_UI::post_engine ()
 	AudioEngine::instance()->BecameSilent.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::audioengine_became_silent, this), gui_context());
 
 	if (setup_windows ()) {
-		throw failed_constructor ();
+		throw failed_constructor (); // TODO catch me if you can
 	}
 
 	transport_ctrl.map_actions ();
