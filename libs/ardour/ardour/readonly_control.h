@@ -20,6 +20,10 @@
 #define __ardour_readonly_control_h__
 
 #include <boost/weak_ptr.hpp>
+
+#include "pbd/destructible.h"
+
+#include "ardour/libardour_visibility.h"
 #include "ardour/parameter_descriptor.h"
 
 namespace ARDOUR {
