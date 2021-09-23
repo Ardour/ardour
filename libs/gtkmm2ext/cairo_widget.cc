@@ -360,6 +360,10 @@ CairoWidget::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
 void
 CairoWidget::on_realize ()
 {
+	if (_canvas_widget) {
+		/* do not need a realized event box */
+		return;
+	}
 	Gtk::EventBox::on_realize();
 #ifdef __APPLE__
 	if (_nsglview) {
