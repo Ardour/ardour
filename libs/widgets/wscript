@@ -26,6 +26,7 @@ top = '.'
 out = 'build'
 
 widgets_sources = [
+        'ardour_ctrl_base.cc',
         'ardour_button.cc',
         'ardour_display.cc',
         'ardour_dropdown.cc',
