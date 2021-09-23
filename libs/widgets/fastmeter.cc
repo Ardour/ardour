@@ -848,7 +848,7 @@ FastMeter::queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>& win, float 
 	GdkRegion* region = 0;
 	bool queue = false;
 
-	if (rect.height != 0) {
+	if (rect.width != 0) {
 
 		/* ok, first region to draw ... */
 
