@@ -183,7 +183,6 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 		cr->set_source_rgb (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
 		cr->fill ();
 	} else {
-		std::cerr << get_name() << " skipped bg fill\n";
 		cr->clip ();
 	}
 
