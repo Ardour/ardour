@@ -107,7 +107,7 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	const Distance spacing = 12. * scale;
 
 	attach (follow_action_button, 0, 0, 2, 1, PackExpand, PackExpand, { 10 });
-	attach (follow_left, 0, 1, 1, 2,  PackExpand, PackExpand, { 10 });
+	attach (follow_left, 0, 1, 1, 2, PackExpand, PackExpand, { 10 });
 	attach (follow_right, 1, 1, 2, 2,  PackExpand, PackExpand, { 10 });
 
 	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
@@ -181,6 +181,7 @@ TriggerWindow::TriggerWindow (Trigger& t)
 	tw->show ();
 	tw->size_request (w, h);
 	set_default_size (w, h);
+	std::cerr << "TW: set default win size to " << w << " x " << h << std::endl;
 	add (*tw);
 }
 
