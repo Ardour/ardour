@@ -368,14 +368,15 @@ Drag::end_grab (GdkEvent* event)
 timepos_t
 Drag::adjusted_time (timepos_t const & f, GdkEvent const * event, bool snap) const
 {
-	timepos_t pos (f);
+	timepos_t pos (f.time_domain()); /* zero */
 
 	if (f > _pointer_offset) {
-		pos.shift_earlier (_pointer_offset);
+		pos = timepos_t (_pointer_offset).distance (f);
 	}
 
 	if (snap) {
 		_editor->snap_to_with_modifier (pos, event);
+		cerr << pos << endl;
 	}
 
 	return pos;
