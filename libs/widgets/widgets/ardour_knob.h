@@ -56,6 +56,9 @@ protected:
 
 private:
 	Element _elements;
+	int     _extra_height;
+
+	Cairo::RefPtr<Cairo::ImageSurface> _bg;
 };
 
 } // namespace ArdourWidgets

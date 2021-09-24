@@ -39,7 +39,109 @@ ArdourKnob::Element ArdourKnob::default_elements = ArdourKnob::Element (ArdourKn
 ArdourKnob::ArdourKnob (Element e, Flags flags)
 	: ArdourCtrlBase (flags)
 	, _elements (e)
+	, _extra_height (0)
 {
+}
+
+void
+ArdourKnob::gen_faceplate (Pango::FontDescription const& font,
+                           std::string const&            lbl_left,
+                           std::string const&            lbl_right,
+                           std::string const&            caption)
+{
+	_bg.clear ();
+	if (lbl_left.empty () && lbl_right.empty () && caption.empty ()) {
+		_extra_height = 0;
+		queue_resize ();
+		return;
+	}
+
+	Gtk::Requisition req;
+	on_size_request (&req);
+
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (get_pango_context ());
+	layout->set_font_description (font);
+
+	int extra_width  = 0;
+	int extra_height = 0;
+	int lbl_pos      = req.width * .2; // ~65 deg
+	int lbl_max      = req.width * .4;
+
+	int lbl_left_x  = req.width * .2;
+	int lbl_right_x = req.width * .8;
+	int lbl_lr_y    = req.height * .9;
+
+	if (!lbl_left.empty ()) {
+		int w, h;
+		layout->set_text (lbl_left);
+		layout->get_pixel_size (w, h);
+		extra_height = std::max (extra_height, h - req.height / 4);
+		if (2 * w > lbl_max) {
+			/* label is too long to center */
+			extra_width = std::max (extra_width, w - lbl_max);
+			// TODO set lbl_left_x, right-align text
+		} else {
+			extra_width = std::max (extra_width, w / 2 - lbl_pos);
+		}
+	}
+
+	if (!lbl_right.empty ()) {
+		int w, h;
+		layout->set_text (lbl_right);
+		layout->get_pixel_size (w, h);
+		extra_height = std::max (extra_height, h - 1);
+		if (2 * w > lbl_max) {
+			/* label is too long to center */
+			extra_width = std::max (extra_width, w - lbl_max);
+			//TODO set lbl_right_x, left-align text
+		} else {
+			extra_width = std::max (extra_width, w / 2 - lbl_pos);
+		}
+	}
+
+	if (!caption.empty ()) {
+		int w, h;
+		layout->set_text (caption);
+		layout->get_pixel_size (w, h);
+		extra_height += h;
+		extra_width = std::max (extra_width, w - req.width);
+	}
+
+	req.width += extra_width;
+	req.height += extra_height;
+
+	_bg = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, req.width, req.height);
+	Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (_bg);
+
+	Gtkmm2ext::Color txt_color = UIConfigurationBase::instance ().color ("gtk_foreground");
+	Gtkmm2ext::set_source_rgba (cr, txt_color);
+
+	if (!lbl_left.empty ()) {
+		int w, h;
+		layout->set_text (lbl_left);
+		layout->get_pixel_size (w, h);
+		cr->move_to (lbl_left_x - w * .5, lbl_lr_y);
+		layout->show_in_cairo_context (cr);
+	}
+
+	if (!lbl_right.empty ()) {
+		int w, h;
+		layout->set_text (lbl_right);
+		layout->get_pixel_size (w, h);
+		cr->move_to (lbl_right_x - w * .5, lbl_lr_y);
+		layout->show_in_cairo_context (cr);
+	}
+
+	if (!caption.empty ()) {
+		int w, h;
+		layout->set_text (caption);
+		layout->get_pixel_size (w, h);
+		cr->move_to ((req.width - w) * .5, req.height - h - 2);
+		layout->show_in_cairo_context (cr);
+	}
+	_extra_height = extra_height;
+	_bg->flush ();
+	queue_resize ();
 }
 
 void
@@ -49,6 +151,13 @@ ArdourKnob::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 
 	float width  = get_width ();
 	float height = get_height ();
+
+	if (_bg) {
+		cairo_set_source_surface (cr, _bg->cobj (), 0, 0);
+		cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+		cairo_paint (cr);
+		height -= _extra_height;
+	}
 
 	const float scale             = std::min (width, height);
 	const float pointer_thickness = 3.0 * (scale / 80); // if the knob is 80 pixels wide, we want a 3-pix line on it
@@ -265,6 +374,11 @@ ArdourKnob::on_size_request (Gtk::Requisition* req)
 	/* knob is square */
 	req->width  = std::max (req->width, req->height);
 	req->height = std::max (req->width, req->height);
+
+	if (_bg) {
+		req->width  = std::max (req->width, _bg->get_width ());
+		req->height = std::max (req->height, _bg->get_height ());
+	}
 }
 
 void
