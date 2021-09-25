@@ -356,7 +356,7 @@ Region::Region (boost::shared_ptr<const Region> other, timecnt_t const & offset)
 	use_sources (other->_sources);
 	set_master_sources (other->_master_sources);
 
-	_length.call().set_position (other->position() + offset);
+	_length = timecnt_t (_length.val().distance(), other->position() + offset);
 	_start = other->_start.val() + offset;
 
 	/* if the other region had a distinct sync point
@@ -564,7 +564,7 @@ Region::special_set_position (timepos_t const & pos)
 	 * a way to store its "natural" or "captured" position.
 	 */
 
-	_length.call().set_position (pos);
+	_length = timecnt_t (_length.val().distance(), pos);
 }
 
 void
@@ -572,7 +572,14 @@ Region::set_position_time_domain (Temporal::TimeDomain td)
 {
 	if (_length.val().time_domain() != td) {
 
-		_length.call().set_time_domain (td);
+		/* _length is a property so we cannot directly call
+		 * ::set_time_domain() on it. Create a temporary timecnt_t,
+		 * change it's time domain, and then assign to _length
+		 */
+
+		timecnt_t t (_length.val());
+		t.set_time_domain (td);
+		_length = t;
 
 		send_change (Properties::time_domain);
 	}
@@ -699,7 +706,7 @@ Region::set_initial_position (timepos_t const & pos)
 
 	if (position() != pos) {
 
-		_length.call().set_position (pos);
+		_length = timecnt_t (_length.val().distance(), pos);
 
 		/* check that the new _position wouldn't make the current
 		 * length impossible - if so, change the length.

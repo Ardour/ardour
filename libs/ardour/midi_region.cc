@@ -490,7 +490,11 @@ MidiRegion::model_shifted (timecnt_t distance)
 
 	if (!_ignore_shift) {
 		PropertyChange what_changed;
-		_start.call().operator+= (distance);
+		/* _start is a Property, so we cannot call timepos_t methods on
+		   it directly. ::val() only provides a const, so use
+		   operator+() rather than operator+=()
+		*/
+		_start = _start.val() + distance;
 		what_changed.add (Properties::start);
 		what_changed.add (Properties::contents);
 		send_change (what_changed);
