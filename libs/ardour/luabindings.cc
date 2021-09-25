@@ -824,7 +824,6 @@ LuaBindings::common (lua_State* L)
 		//   ardour/region.h
 		.addConst ("Start", &ARDOUR::Properties::start)
 		.addConst ("Length", &ARDOUR::Properties::length)
-		.addConst ("Position", &ARDOUR::Properties::position)
 		.endNamespace ()
 
 		.beginClass <PBD::PropertyChange> ("PropertyChange")

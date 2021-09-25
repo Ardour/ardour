@@ -114,8 +114,7 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 		PBD::PropertyList plist;
 		boost::shared_ptr<AudioRegion> copy;
 
-		plist.add (Properties::length, timecnt_t (i->second - i->first));
-		plist.add (Properties::position, timepos_t (r->position_sample() + (i->first - r->start_sample())));
+		plist.add (Properties::length, timecnt_t (i->second - i->first, timepos_t (r->position_sample() + (i->first - r->start_sample()))));
 
 		copy = boost::dynamic_pointer_cast<AudioRegion> (
 			RegionFactory::create (region, timecnt_t (i->first - r->start_sample(), timepos_t::zero (false)), plist)

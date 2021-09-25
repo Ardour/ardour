@@ -125,8 +125,6 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length = %1\n", Properties::length.property_id));
 	Properties::beat.property_id = g_quark_from_static_string (X_("beat"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for beat = %1\n", Properties::beat.property_id));
-	Properties::position.property_id = g_quark_from_static_string (X_("position"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position = %1\n", Properties::position.property_id));
 	Properties::sync_position.property_id = g_quark_from_static_string (X_("sync-position"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync-position = %1\n", Properties::sync_position.property_id));
 	Properties::layer.property_id = g_quark_from_static_string (X_("layer"));
@@ -628,7 +626,6 @@ Region::update_after_tempo_map_change (bool send)
 
 	what_changed.add (Properties::start);
 	what_changed.add (Properties::length);
-	what_changed.add (Properties::position);
 
 	/* do this even if the position is the same. this helps out
 	 * a GUI that has moved its representation already.
@@ -644,34 +641,19 @@ Region::set_position (timepos_t const & pos)
 		return;
 	}
 
+	set_position_internal (pos);
+
 	/* do this even if the position is the same. this helps out
 	 * a GUI that has moved its representation already.
 	 */
-	PropertyChange p_and_l;
-
-	p_and_l.add (Properties::position);
-
-	set_position_internal (pos);
-
-	/* if locked to beats or bbt, changing position can potentially change
-	 * the length, because the tempo map may differ at the two different
-	 * positions. Theoretically we could check this, but the cost of
-	 * notifying about a (potential) length change is not that expensive
-	 * given that we already are notifying about position change.
-	 */
-
-	if (position_time_domain() != Temporal::AudioTime) {
-		p_and_l.add (Properties::length);
-	}
-
-	send_change (p_and_l);
+	send_change (Properties::length);
 
 }
 
 void
 Region::set_position_internal (timepos_t const & pos)
 {
-	/* We emit a change of Properties::position even if the position hasn't changed
+	/* We emit a change of Properties::length even if the position hasn't changed
 	 * (see Region::set_position), so we must always set this up so that
 	 * e.g. Playlist::notify_region_moved doesn't use an out-of-date last_position.
 	 */
@@ -728,7 +710,7 @@ Region::set_initial_position (timepos_t const & pos)
 	/* do this even if the position is the same. this helps out
 	 * a GUI that has moved its representation already.
 	 */
-	send_change (Properties::position);
+	send_change (Properties::length);
 }
 
 void
@@ -761,7 +743,7 @@ Region::nudge_position (timecnt_t const & n)
 	/* assumes non-musical nudge */
 	set_position_internal (new_position);
 
-	send_change (Properties::position);
+	send_change (Properties::length);
 }
 
 void
@@ -810,7 +792,7 @@ Region::move_start (timecnt_t const & distance)
 
 	timepos_t new_start (_start);
 	timepos_t current_start (_start);
-	
+
 	if (distance.positive()) {
 
 		if (current_start > timepos_t::max (current_start.time_domain()).earlier (distance)) {
@@ -1008,7 +990,7 @@ Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
 			_last_length.set_position (position());
 		}
 		set_position_internal (pos);
-		what_changed.add (Properties::position);
+		what_changed.add (Properties::length);
 	}
 
 	if (length() != nl) {
@@ -1397,9 +1379,7 @@ void
 Region::mid_thaw (const PropertyChange& what_changed)
 {
 	if (what_changed.contains (Properties::length)) {
-		if (what_changed.contains (Properties::position)) {
-			recompute_at_start ();
-		}
+		recompute_at_start ();
 		recompute_at_end ();
 	}
 }
@@ -1421,7 +1401,7 @@ Region::send_change (const PropertyChange& what_changed)
 
 		try {
 			boost::shared_ptr<Region> rptr = shared_from_this();
-			if (_changemap) { 
+			if (_changemap) {
 				(*_changemap)[what_changed].push_back (rptr);
 			} else {
 				boost::shared_ptr<RegionList> rl (new RegionList);
