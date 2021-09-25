@@ -678,7 +678,7 @@ Region::set_position_internal (timepos_t const & pos)
 	_last_length.set_position (position());
 
 	if (position() != pos) {
-		_length.call().set_position (pos);
+		_length = timecnt_t (_length.val().distance(), pos);
 
 		/* check that the new _position wouldn't make the current
 		 * length impossible - if so, change the length.
