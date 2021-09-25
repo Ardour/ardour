@@ -389,8 +389,8 @@ class LIBTEMPORAL_API timecnt_t {
 		return *this;
 	}
 
-	bool operator!= (timecnt_t const & other) const { return _distance != other.distance(); }
-	bool operator== (timecnt_t const & other) const { return _distance == other.distance(); }
+	bool operator!= (timecnt_t const & other) const { return _distance != other.distance() || _position != other.position(); }
+	bool operator== (timecnt_t const & other) const { return _distance == other.distance() && _position == other.position(); }
 
 	/* test for numerical equivalence with a timepos_T. This tests ONLY the
 	   duration in the given domain, NOT position.
