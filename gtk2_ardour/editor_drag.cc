@@ -371,7 +371,8 @@ Drag::adjusted_time (timepos_t const & f, GdkEvent const * event, bool snap) con
 	timepos_t pos (f.time_domain()); /* zero */
 
 	if (f > _pointer_offset) {
-		pos = timepos_t (_pointer_offset).distance (f);
+		pos = f;
+		pos.shift_earlier (_pointer_offset);
 	}
 
 	if (snap) {
