@@ -150,7 +150,7 @@ public:
 	virtual PropertyBase* clone () const = 0;
 
 	/** Set this property's current state from another */
-	virtual void apply_changes (PropertyBase const *) = 0;
+	virtual void apply_change (PropertyBase const *) = 0;
 
 	const gchar* property_name () const { return g_quark_to_string (_property_id); }
 	PropertyID   property_id () const   { return _property_id; }

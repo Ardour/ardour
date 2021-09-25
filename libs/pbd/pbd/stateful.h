@@ -54,7 +54,7 @@ class LIBPBD_API Stateful {
 	virtual XMLNode& get_state (void) = 0;
 	virtual int set_state (const XMLNode&, int version) = 0;
 
-	virtual bool apply_changes (PropertyBase const &);
+	virtual bool apply_change (PropertyBase const &);
 	PropertyChange apply_changes (PropertyList const &);
 
 	const OwnedPropertyList& properties() const { return *_properties; }

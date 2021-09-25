@@ -139,7 +139,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 		_changes.removed.clear ();
 	}
 
-	void apply_changes (PropertyBase const * p) {
+	void apply_change (PropertyBase const * p) {
 		const ChangeRecord& change (dynamic_cast<const SequenceProperty*> (p)->changes ());
 		update (change);
 	}
