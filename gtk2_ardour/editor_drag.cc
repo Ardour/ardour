@@ -2962,7 +2962,7 @@ VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 			rv->region()->suspend_property_changes();
 		}
 		rv->region()->set_position(timepos_t (i->initial_position + dt));
-		rv->region_changed(ARDOUR::Properties::position);
+		rv->region_changed (ARDOUR::Properties::length);
 	}
 
 	const samplepos_t offset = ARDOUR_UI::instance()->video_timeline->get_offset();

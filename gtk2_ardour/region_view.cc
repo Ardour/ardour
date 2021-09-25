@@ -472,7 +472,9 @@ RegionView::region_resized (const PropertyChange& what_changed)
 {
 	double unit_length;
 
-	if (what_changed.contains (ARDOUR::Properties::position)) {
+	/* position is stored in length */
+
+	if (what_changed.contains (ARDOUR::Properties::length)) {
 		set_position (_region->position(), 0);
 	}
 

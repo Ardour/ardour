@@ -839,7 +839,7 @@ void
 RecorderUI::regions_changed (boost::shared_ptr<ARDOUR::RegionList>, PBD::PropertyChange const& what_changed)
 {
 	PBD::PropertyChange interests;
-	interests.add (ARDOUR::Properties::position);
+
 	interests.add (ARDOUR::Properties::length);
 	if (what_changed.contains (interests)) {
 		gui_extents_changed ();

@@ -586,7 +586,6 @@ EditorRegions::clock_format_changed ()
 	PropertyChange change;
 	change.add (ARDOUR::Properties::start);
 	change.add (ARDOUR::Properties::length);
-	change.add (ARDOUR::Properties::position);
 	change.add (ARDOUR::Properties::sync_position);
 	change.add (ARDOUR::Properties::fade_in);
 	change.add (ARDOUR::Properties::fade_out);
@@ -678,9 +677,9 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 	/* the grid is most interested in the regions that are *visible* in the editor.
 	 * this is a convenient place to flag changes to the grid cache, on a visible region */
 	PropertyChange grid_interests;
-	grid_interests.add (ARDOUR::Properties::position);
 	grid_interests.add (ARDOUR::Properties::length);
 	grid_interests.add (ARDOUR::Properties::sync_position);
+
 	if (what_changed.contains (grid_interests)) {
 		_editor->mark_region_boundary_cache_dirty ();
 	}
@@ -701,7 +700,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 	PropertyChange c;
 	const bool     all = what_changed == c;
 
-	if (all || what_changed.contains (Properties::position)) {
+	if (all || what_changed.contains (Properties::length)) {
 		populate_row_position (region, row);
 	}
 	if (all || what_changed.contains (Properties::start) || what_changed.contains (Properties::sync_position)) {

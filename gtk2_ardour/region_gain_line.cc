@@ -115,7 +115,7 @@ AudioRegionGainLine::region_changed (const PropertyChange& what_changed)
 	PropertyChange interesting_stuff;
 
 	interesting_stuff.add (ARDOUR::Properties::start);
-	interesting_stuff.add (ARDOUR::Properties::position);
+	interesting_stuff.add (ARDOUR::Properties::length);
 
 	if (what_changed.contains (interesting_stuff)) {
 		reset ();

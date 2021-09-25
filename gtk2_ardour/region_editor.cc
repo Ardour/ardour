@@ -191,7 +191,6 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 
 	change.add (ARDOUR::Properties::start);
 	change.add (ARDOUR::Properties::length);
-	change.add (ARDOUR::Properties::position);
 	change.add (ARDOUR::Properties::sync_position);
 
 	bounds_changed (change);
@@ -223,7 +222,6 @@ RegionEditor::region_changed (const PBD::PropertyChange& what_changed)
 
 	PropertyChange interesting_stuff;
 
-	interesting_stuff.add (ARDOUR::Properties::position);
 	interesting_stuff.add (ARDOUR::Properties::length);
 	interesting_stuff.add (ARDOUR::Properties::start);
 	interesting_stuff.add (ARDOUR::Properties::sync_position);
@@ -368,19 +366,13 @@ RegionEditor::name_changed ()
 void
 RegionEditor::bounds_changed (const PropertyChange& what_changed)
 {
-	if (what_changed.contains (ARDOUR::Properties::position) && what_changed.contains (ARDOUR::Properties::length)) {
+	if (what_changed.contains (ARDOUR::Properties::length)) {
 		position_clock.set (_region->position(), true);
-		end_clock.set (_region->nt_last(), true);
-		length_clock.set_duration (_region->length(), true);
-	} else if (what_changed.contains (ARDOUR::Properties::position)) {
-		position_clock.set (_region->position(), true);
-		end_clock.set (_region->nt_last(), true);
-	} else if (what_changed.contains (ARDOUR::Properties::length)) {
 		end_clock.set (_region->nt_last(), true);
 		length_clock.set_duration (_region->length(), true);
 	}
 
-	if (what_changed.contains (ARDOUR::Properties::sync_position) || what_changed.contains (ARDOUR::Properties::position)) {
+	if (what_changed.contains (ARDOUR::Properties::sync_position) || what_changed.contains (ARDOUR::Properties::length)) {
 		int dir;
 		timecnt_t off = _region->sync_offset (dir);
 		if (dir == -1) {
@@ -454,7 +446,6 @@ RegionEditor::on_delete_event (GdkEventAny*)
 
 	change.add (ARDOUR::Properties::start);
 	change.add (ARDOUR::Properties::length);
-	change.add (ARDOUR::Properties::position);
 	change.add (ARDOUR::Properties::sync_position);
 
 	bounds_changed (change);
