@@ -21,7 +21,6 @@
 #include <gtkmm/menuitem.h>
 #include <gtkmm/stock.h>
 
-#include "pbd/i18n.h"
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 
@@ -43,6 +42,8 @@
 #include "public_editor.h"
 #include "ui_config.h"
 #include "utils.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace ArdourCanvas;

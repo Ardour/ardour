@@ -16,11 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "pbd/i18n.h"
-
 #include <gtkmm/stock.h>
 
 #include "bbt_marker_dialog.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
