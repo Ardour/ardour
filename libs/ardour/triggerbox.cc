@@ -22,6 +22,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/triggerbox.h"
+#include "ardour/types_convert.h"
 
 using namespace PBD;
 using namespace ARDOUR;
@@ -31,6 +32,7 @@ using std::endl;
 
 namespace ARDOUR {
 	namespace Properties {
+		PBD::PropertyDescriptor<bool> use_follow;
 		PBD::PropertyDescriptor<bool> running;
 		PBD::PropertyDescriptor<bool> legato;
 	}
@@ -44,12 +46,22 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _unbang (0)
 	, _index (n)
 	, _launch_style (Toggle)
+	, _use_follow (Properties::use_follow, true)
 	, _follow_action { NextTrigger, Stop }
 	, _follow_action_probability (100)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
-	, _legato (true)
+	, _legato (Properties::legato, true)
 	, _ui (0)
 {
+	add_property (_legato);
+	add_property (_use_follow);
+}
+
+void
+Trigger::set_use_follow (bool yn)
+{
+	_use_follow = yn;
+	PropertyChanged (Properties::legato);
 }
 
 void
@@ -98,7 +110,10 @@ Trigger::get_state (void)
 {
 	XMLNode* node = new XMLNode (X_("Trigger"));
 
-	node->set_property (X_("legato"), _legato);
+	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
+		i->second->get_value (*node);
+	}
+
 	node->set_property (X_("launch-style"), enum_2_string (_launch_style));
 	node->set_property (X_("follow-action-0"), enum_2_string (_follow_action[0]));
 	node->set_property (X_("follow-action-1"), enum_2_string (_follow_action[1]));
@@ -116,7 +131,10 @@ Trigger::get_state (void)
 int
 Trigger::set_state (const XMLNode& node, int version)
 {
-	node.get_property (X_("legato"), _legato);
+	PropertyChange what_changed;
+
+	what_changed = set_values (node);
+
 	node.get_property (X_("launch-style"), _launch_style);
 	node.get_property (X_("follow-action-0"), _follow_action[0]);
 	node.get_property (X_("follow-action-1"), _follow_action[1]);

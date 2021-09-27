@@ -28,8 +28,9 @@
 #include <glibmm/threads.h>
 
 #include "pbd/pcg_rand.h"
-#include "pbd/stateful.h"
+#include "pbd/properties.h"
 #include "pbd/ringbuffer.h"
+#include "pbd/stateful.h"
 
 #include "temporal/beats.h"
 #include "temporal/bbt_time.h"
@@ -42,6 +43,7 @@ class XMLNode;
 
 namespace ARDOUR {
 	namespace Properties {
+		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> use_follow;
 		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> running;
 		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> legato;
 	}
@@ -83,6 +85,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void set_end (timepos_t const &) = 0;
 	/* this accepts timepos_t because the origin is assumed to be the start */
 	virtual void set_length (timepos_t const &) = 0;
+
+	void set_use_follow (bool yn);
+	bool use_follow() const { return _use_follow; }
 
 	timepos_t start_offset () const; /* offset from start of data */
 	timepos_t end() const;    /* offset from start of data */
@@ -179,11 +184,12 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	uint64_t _index;
 	int    _next_trigger;
 	LaunchStyle  _launch_style;
+	PBD::Property<bool>  _use_follow;
 	FollowAction _follow_action[2];
 	int _follow_action_probability;
 	boost::shared_ptr<Region> _region;
 	Temporal::BBT_Offset _quantization;
-	bool _legato;
+	PBD::Property<bool> _legato;
 	std::string _name;
 	void* _ui;
 
