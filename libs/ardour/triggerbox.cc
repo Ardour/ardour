@@ -24,6 +24,8 @@
 #include "ardour/triggerbox.h"
 #include "ardour/types_convert.h"
 
+#include "pbd/i18n.h"
+
 using namespace PBD;
 using namespace ARDOUR;
 using std::string;

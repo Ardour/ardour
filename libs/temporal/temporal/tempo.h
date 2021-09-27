@@ -30,7 +30,6 @@
 #include <glibmm/threads.h>
 
 #include "pbd/enum_convert.h"
-#include "pbd/i18n.h"
 #include "pbd/integer_division.h"
 #include "pbd/memento_command.h"
 #include "pbd/rcu.h"
@@ -810,7 +809,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 		LIBTEMPORAL_API MementoBinder () {}
 		LIBTEMPORAL_API void set_state (XMLNode const & node, int version) const;
 		LIBTEMPORAL_API XMLNode& get_state () const { return TempoMap::use()->get_state(); }
-		LIBTEMPORAL_API std::string type_name() const { return X_("Temporal::TempoMap"); }
+		LIBTEMPORAL_API std::string type_name() const { return "Temporal::TempoMap"; }
 		LIBTEMPORAL_API void add_state (XMLNode*) {}
 	};
 

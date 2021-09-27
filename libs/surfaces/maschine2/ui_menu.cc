@@ -21,8 +21,6 @@
 #include <cairomm/region.h>
 #include <pangomm/layout.h>
 
-#include "pbd/i18n.h"
-
 #include "gtkmm2ext/colors.h"
 
 #include "canvas/text.h"
@@ -34,6 +32,8 @@
 
 #include "canvas.h"
 #include "ui_menu.h"
+
+#include "pbd/i18n.h"
 
 #ifdef __APPLE__
 #define Rect ArdourCanvas::Rect

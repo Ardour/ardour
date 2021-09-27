@@ -25,8 +25,6 @@
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
-#include "pbd/i18n.h"
-#include "pbd/abstract_ui.cc" // instantiate template
 
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
@@ -43,6 +41,8 @@
 #include "m2_map_mikro.h"
 
 #include "canvas.h"
+
+#include "pbd/abstract_ui.cc" // instantiate template, includes i18n
 
 using namespace ARDOUR;
 using namespace PBD;

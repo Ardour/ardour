@@ -22,7 +22,6 @@
 #include <inttypes.h>
 
 #include "pbd/error.h"
-#include "pbd/i18n.h"
 #include "pbd/compose.h"
 #include "pbd/enumwriter.h"
 #include "pbd/failed_constructor.h"
@@ -30,6 +29,8 @@
 
 #include "temporal/debug.h"
 #include "temporal/tempo.h"
+
+#include "pbd/i18n.h"
 
 using namespace PBD;
 using namespace Temporal;

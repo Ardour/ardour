@@ -24,13 +24,14 @@
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
-#include "pbd/i18n.h"
 
 #include "canvas.h"
 #include "layout.h"
 
 #include "maschine2.h"
 #include "m2device.h"
+
+#include "pbd/i18n.h"
 
 #ifdef __APPLE__
 #define Rect ArdourCanvas::Rect

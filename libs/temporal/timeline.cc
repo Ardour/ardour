@@ -24,11 +24,12 @@
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/compose.h"
-#include "pbd/i18n.h"
 
 #include "temporal/debug.h"
 #include "temporal/timeline.h"
 #include "temporal/tempo.h"
+
+#include "pbd/i18n.h"
 
 using namespace PBD;
 using namespace Temporal;
