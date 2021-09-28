@@ -63,7 +63,7 @@ void
 Trigger::set_use_follow (bool yn)
 {
 	_use_follow = yn;
-	PropertyChanged (Properties::legato);
+	PropertyChanged (Properties::use_follow);
 }
 
 void
@@ -807,6 +807,10 @@ Trigger::make_property_quarks ()
 {
 	Properties::muted.property_id = g_quark_from_static_string (X_("running"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for running = %1\n", Properties::running.property_id));
+	Properties::legato.property_id = g_quark_from_static_string (X_("legato"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for legato = %1\n", Properties::legato.property_id));
+	Properties::use_follow.property_id = g_quark_from_static_string (X_("use-follow"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for use-follow = %1\n", Properties::use_follow.property_id));
 }
 
 const uint64_t TriggerBox::default_triggers_per_box = 8;
