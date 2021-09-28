@@ -83,6 +83,7 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 
 	follow_action_button = new ArdourCanvas::Widget (canvas(), *_follow_action_button);
 	follow_action_button->name = "FollowAction";
+	_follow_action_button->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
 
 	_follow_left = new ArdourDropdown;
 	_follow_left->append_text_item (_("None"));
@@ -114,11 +115,33 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
 	name = "triggerUI-table";
 
-	trigger_changed ();
+	PropertyChange pc;
+
+	pc.add (Properties::use_follow);
+	pc.add (Properties::legato);
+
+	trigger_changed (pc);
+
+	trigger.PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
 }
 
 TriggerUI::~TriggerUI ()
 {
+}
+
+bool
+TriggerUI::follow_action_button_event (GdkEvent* ev)
+{
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		trigger.set_use_follow (!trigger.use_follow());
+		return true;
+
+	default:
+		break;
+	}
+
+	return false;
 }
 
 std::string
@@ -149,8 +172,11 @@ TriggerUI::follow_action_to_string (Trigger::FollowAction fa)
 }
 
 void
-TriggerUI::trigger_changed ()
+TriggerUI::trigger_changed (PropertyChange pc)
 {
+	if (pc.contains (Properties::use_follow)) {
+		_follow_action_button->set_active_state (trigger.use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	}
 	_follow_right->set_text (follow_action_to_string (trigger.follow_action (0)));
 	_follow_left->set_text (follow_action_to_string (trigger.follow_action (1)));
 }

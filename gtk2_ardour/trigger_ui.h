@@ -36,7 +36,7 @@ namespace ArdourCanvas {
 	class Rectangle;
 };
 
-class TriggerUI : public ArdourCanvas::Table
+class TriggerUI : public ArdourCanvas::Table, public sigc::trackable
 {
   public:
 	TriggerUI (ArdourCanvas::Item* parent, ARDOUR::Trigger&);
@@ -73,7 +73,11 @@ class TriggerUI : public ArdourCanvas::Table
 	ArdourCanvas::Rectangle* velocity;
 	ArdourCanvas::Rectangle* velocity_text;
 
-	void trigger_changed ();
+	void trigger_changed (PBD::PropertyChange);
+
+	bool follow_action_button_event (GdkEvent*);
+
+	PBD::ScopedConnectionList trigger_connections;
 
 	static std::string follow_action_to_string (ARDOUR::Trigger::FollowAction);
 	static ARDOUR::Trigger::FollowAction  string_to_follow_action (std::string const &);
