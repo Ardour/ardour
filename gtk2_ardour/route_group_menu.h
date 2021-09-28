@@ -38,6 +38,7 @@ public:
   private:
 	void add_item (ARDOUR::RouteGroup *, std::set<ARDOUR::RouteGroup*> const &, Gtk::RadioMenuItem::Group*);
 	void new_group ();
+	void edit_group (ARDOUR::RouteGroup *);
 	void set_group (Gtk::RadioMenuItem*, ARDOUR::RouteGroup *);
 	void new_group_dialog_finished (int, RouteGroupDialog*);
 

@@ -84,6 +84,9 @@ RouteGroupMenu::build (WeakRouteList const & s)
 	MenuList& items = _menu->items ();
 
 	items.push_back (MenuElem (_("New Group..."), sigc::mem_fun (*this, &RouteGroupMenu::new_group)));
+	if (groups.size() == 1 && *groups.begin() != 0) {
+		items.push_back (MenuElem (_("Edit Group..."), sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::edit_group), *groups.begin ())));
+	}
 	items.push_back (SeparatorElem ());
 
 	RadioMenuItem::Group group;
@@ -183,6 +186,14 @@ RouteGroupMenu::new_group_dialog_finished (int r, RouteGroupDialog* d)
 	}
 
 	delete_when_idle (d);
+}
+
+void
+RouteGroupMenu::edit_group (ARDOUR::RouteGroup* g)
+{
+	RouteGroupDialog* d = new RouteGroupDialog (g, false);
+	d->signal_response().connect (sigc::hide (sigc::bind (sigc::ptr_fun (&delete_when_idle<RouteGroupDialog>), d)));
+	d->present ();
 }
 
 Gtk::Menu *
