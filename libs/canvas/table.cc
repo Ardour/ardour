@@ -472,7 +472,12 @@ Table::compute (Rect const & within)
 				vshift = std::max (vshift, total_cell_height);
 
 			} else {
-				/* this cell (r, c) has no item starting within it */
+				/* cell is empty, just adjust horizontal &
+				   vertical shift values to get to the next
+				   cell
+				*/
+				hdistance = variable_col_width * (c + 1);
+				vshift = std::max (vshift, variable_row_height);
 			}
 
 		}
