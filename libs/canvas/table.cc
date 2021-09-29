@@ -356,7 +356,7 @@ Table::compute (Rect const & within)
 
 
 	uint32_t variable_size_rows = rows - inelastic_rows;
-	uint32_t variable_size_cols = rows - inelastic_cols;
+	uint32_t variable_size_cols = cols - inelastic_cols;
 	Distance variable_col_width = 0;
 	Distance variable_row_height = 0;
 
