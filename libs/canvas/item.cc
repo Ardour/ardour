@@ -630,8 +630,15 @@ Item::size_allocate_children (Rect const & r)
 	 * Item's allocation.
 	 */
 
+	/* parent was told "you get width x height @ x,y""
+	 *
+	 * x must be 0 and y must be 0 in parent-relatve coordinates
+	 */
+
+	Rect parent_relative = r.translate (-_position);
+
 	if (_items.size() == 1 && _items.front()->layout_sensitive()) {
-		_items.front()->size_allocate (r);
+		_items.front()->size_allocate (parent_relative);
 	}
 }
 
