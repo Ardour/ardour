@@ -50,9 +50,12 @@ using namespace ArdourCanvas;
 using namespace ArdourWidgets;
 using namespace Gtkmm2ext;
 using namespace PBD;
+using namespace Temporal;
 
 static std::vector<std::string> follow_strings;
 static std::string longest_follow;
+static std::vector<std::string> quantize_strings;
+static std::string longest_quantize;
 
 TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	: Table (parent)
@@ -72,6 +75,21 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 		for (std::vector<std::string>::const_iterator i = follow_strings.begin(); i != follow_strings.end(); ++i) {
 			if (i->length() > longest_follow.length()) {
 				longest_follow = *i;
+			}
+		}
+
+		quantize_strings.push_back (_("Global"));
+		quantize_strings.push_back (quantize_length_to_string (Beats (1, 0)));
+		quantize_strings.push_back (quantize_length_to_string (Beats (2, 0)));
+		quantize_strings.push_back (quantize_length_to_string (Beats (4, 0)));
+		quantize_strings.push_back (quantize_length_to_string (Beats (0, Temporal::ticks_per_beat/2)));
+		quantize_strings.push_back (quantize_length_to_string (Beats (0, Temporal::ticks_per_beat/4)));
+		quantize_strings.push_back (quantize_length_to_string (Beats (0, Temporal::ticks_per_beat/8)));
+		quantize_strings.push_back (quantize_length_to_string (Beats (0, Temporal::ticks_per_beat/16)));
+
+		for (std::vector<std::string>::const_iterator i = quantize_strings.begin(); i != quantize_strings.end(); ++i) {
+			if (i->length() > longest_quantize.length()) {
+				longest_quantize = *i;
 			}
 		}
 	}
@@ -105,12 +123,26 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	follow_right = new Widget (canvas(), *_follow_right);
 	follow_right->name = "FollowRight";
 
+	_legato_button = new ArdourButton();
+	_legato_button->set_text (_("Legato"));
+	legato_button = new ArdourCanvas::Widget (canvas(), *_legato_button);
+
+	_quantize_button = new ArdourDropdown;
+	for (std::vector<std::string>::const_iterator s = quantize_strings.begin(); s != quantize_strings.end(); ++s) {
+		_quantize_button->append_text_item (*s);
+	}
+	quantize_button = new Widget (canvas(), *_quantize_button);
+	quantize_button->name = "quantize";
+
 	const double scale = UIConfiguration::instance().get_ui_scale();
 	const Distance spacing = 12. * scale;
 
 	attach (follow_action_button, 0, 0, 2, 1, PackExpand, PackExpand, { 10 });
 	attach (follow_left, 0, 1, 1, 2, PackExpand, PackExpand, { 10 });
 	attach (follow_right, 1, 1, 2, 2,  PackExpand, PackExpand, { 10 });
+
+	attach (quantize_button, 0, 2, 1, 3, PackExpand, PackExpand, { 10 });
+	attach (legato_button, 1, 2, 2, 3, PackExpand, PackExpand, { 10 });
 
 	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
 	name = "triggerUI-table";
@@ -142,6 +174,28 @@ TriggerUI::follow_action_button_event (GdkEvent* ev)
 	}
 
 	return false;
+}
+
+std::string
+TriggerUI::quantize_length_to_string (Beats const & ql)
+{
+	if (ql == Beats (1, 0)) {
+		return _("1/4");
+	} else if (ql == Beats (2, 0)) {
+		return _("1/2");
+	} else if (ql == Beats (4, 0)) {
+		return _("Whole");
+	} else if (ql == Beats (0,Temporal::ticks_per_beat/2)) {
+		return _("1/8");
+	} else if (ql == Beats (0,Temporal::ticks_per_beat/4)) {
+		return _("1/16");
+	} else if (ql == Beats (0,Temporal::ticks_per_beat/8)) {
+		return _("1/32");
+	} else if (ql == Beats (0,Temporal::ticks_per_beat/16)) {
+		return _("1/64");
+	} else {
+		return "???";
+	}
 }
 
 std::string

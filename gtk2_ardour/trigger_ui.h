@@ -64,14 +64,14 @@ class TriggerUI : public ArdourCanvas::Table, public sigc::trackable
 	ArdourCanvas::Rectangle* follow_count;
 	ArdourCanvas::Text* follow_count_text;
 
-	ArdourCanvas::Rectangle* legato;
-	ArdourCanvas::Rectangle* legato_text;
+	ArdourWidgets::ArdourButton* _legato_button;
+	ArdourCanvas::Widget* legato_button;
 
-	ArdourCanvas::Rectangle* quantize;
-	ArdourCanvas::Rectangle* quantize_text;
+	ArdourWidgets::ArdourDropdown* _quantize_button;
+	ArdourCanvas::Widget* quantize_button;
 
 	ArdourCanvas::Rectangle* velocity;
-	ArdourCanvas::Rectangle* velocity_text;
+	ArdourCanvas::Text* velocity_text;
 
 	void trigger_changed (PBD::PropertyChange);
 
@@ -81,6 +81,8 @@ class TriggerUI : public ArdourCanvas::Table, public sigc::trackable
 
 	static std::string follow_action_to_string (ARDOUR::Trigger::FollowAction);
 	static ARDOUR::Trigger::FollowAction  string_to_follow_action (std::string const &);
+
+	static std::string quantize_length_to_string (Temporal::Beats const &);
 };
 
 class TriggerWidget : public ArdourCanvas::GtkCanvas
