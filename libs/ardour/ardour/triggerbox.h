@@ -46,6 +46,7 @@ namespace ARDOUR {
 		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> use_follow;
 		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> running;
 		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> legato;
+		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> quantization;
 	}
 }
 

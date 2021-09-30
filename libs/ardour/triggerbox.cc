@@ -37,6 +37,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> use_follow;
 		PBD::PropertyDescriptor<bool> running;
 		PBD::PropertyDescriptor<bool> legato;
+		PBD::PropertyDescriptor<bool> quantization;
 	}
 }
 
@@ -178,6 +179,7 @@ Trigger::set_quantization (Temporal::BBT_Offset const & q)
 {
 	_quantization = q;
 	set_usable_length ();
+	PropertyChanged (Properties::quantization);
 }
 
 void
@@ -811,6 +813,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for legato = %1\n", Properties::legato.property_id));
 	Properties::use_follow.property_id = g_quark_from_static_string (X_("use-follow"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for use-follow = %1\n", Properties::use_follow.property_id));
+	Properties::quantization.property_id = g_quark_from_static_string (X_("quantization"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for quantization = %1\n", Properties::quantization.property_id));
 }
 
 const uint64_t TriggerBox::default_triggers_per_box = 8;
