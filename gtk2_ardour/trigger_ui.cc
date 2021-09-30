@@ -61,6 +61,8 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	: Table (parent)
 	, trigger (t)
 {
+	using namespace Gtk::Menu_Helpers;
+
 	if (follow_strings.empty()) {
 		follow_strings.push_back (follow_action_to_string (Trigger::Stop));
 		follow_strings.push_back (follow_action_to_string (Trigger::Again));
@@ -78,20 +80,6 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 			}
 		}
 
-		quantize_strings.push_back (_("Global"));
-		quantize_strings.push_back (quantize_length_to_string (Beats (1, 0)));
-		quantize_strings.push_back (quantize_length_to_string (Beats (2, 0)));
-		quantize_strings.push_back (quantize_length_to_string (Beats (4, 0)));
-		quantize_strings.push_back (quantize_length_to_string (Beats (0, Temporal::ticks_per_beat/2)));
-		quantize_strings.push_back (quantize_length_to_string (Beats (0, Temporal::ticks_per_beat/4)));
-		quantize_strings.push_back (quantize_length_to_string (Beats (0, Temporal::ticks_per_beat/8)));
-		quantize_strings.push_back (quantize_length_to_string (Beats (0, Temporal::ticks_per_beat/16)));
-
-		for (std::vector<std::string>::const_iterator i = quantize_strings.begin(); i != quantize_strings.end(); ++i) {
-			if (i->length() > longest_quantize.length()) {
-				longest_quantize = *i;
-			}
-		}
 	}
 
 	name = "TriggerUI-CP";
@@ -128,9 +116,28 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	legato_button = new ArdourCanvas::Widget (canvas(), *_legato_button);
 
 	_quantize_button = new ArdourDropdown;
-	for (std::vector<std::string>::const_iterator s = quantize_strings.begin(); s != quantize_strings.end(); ++s) {
-		_quantize_button->append_text_item (*s);
+
+
+#define quantize_item(b) _quantize_button->AddMenuElem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_quantize), b)));
+
+	quantize_item (BBT_Offset (0, 0, 0));
+	quantize_item (BBT_Offset (0, 1, 0));
+	quantize_item (BBT_Offset (0, 2, 0));
+	quantize_item (BBT_Offset (0, 4, 0));
+	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/2));
+	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/4));
+	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/8));
+	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/16));
+
+	for (std::vector<std::string>::const_iterator i = quantize_strings.begin(); i != quantize_strings.end(); ++i) {
+		if (i->length() > longest_quantize.length()) {
+			longest_quantize = *i;
+		}
 	}
+	_quantize_button->set_sizing_text (longest_quantize);
+
+#undef quantize_item
+
 	quantize_button = new Widget (canvas(), *_quantize_button);
 	quantize_button->name = "quantize";
 
@@ -151,6 +158,7 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 
 	pc.add (Properties::use_follow);
 	pc.add (Properties::legato);
+	pc.add (Properties::quantization);
 
 	trigger_changed (pc);
 
@@ -159,6 +167,17 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 
 TriggerUI::~TriggerUI ()
 {
+}
+
+void
+TriggerUI::set_quantize (BBT_Offset bbo)
+{
+	if (bbo == BBT_Offset (0, 0, 0)) {
+		/* use grid */
+		bbo = BBT_Offset (1, 2, 3); /* XXX get grid from editor */
+	}
+
+	trigger.set_quantization (bbo);
 }
 
 bool
@@ -177,21 +196,21 @@ TriggerUI::follow_action_button_event (GdkEvent* ev)
 }
 
 std::string
-TriggerUI::quantize_length_to_string (Beats const & ql)
+TriggerUI::quantize_length_to_string (BBT_Offset const & ql)
 {
-	if (ql == Beats (1, 0)) {
+	if (ql == BBT_Offset (0, 1, 0)) {
 		return _("1/4");
-	} else if (ql == Beats (2, 0)) {
+	} else if (ql == BBT_Offset (0, 2, 0)) {
 		return _("1/2");
-	} else if (ql == Beats (4, 0)) {
+	} else if (ql == BBT_Offset (0, 4, 0)) {
 		return _("Whole");
-	} else if (ql == Beats (0,Temporal::ticks_per_beat/2)) {
+	} else if (ql == BBT_Offset (0, 0,Temporal::ticks_per_beat/2)) {
 		return _("1/8");
-	} else if (ql == Beats (0,Temporal::ticks_per_beat/4)) {
+	} else if (ql == BBT_Offset (0, 0,Temporal::ticks_per_beat/4)) {
 		return _("1/16");
-	} else if (ql == Beats (0,Temporal::ticks_per_beat/8)) {
+	} else if (ql == BBT_Offset (0, 0,Temporal::ticks_per_beat/8)) {
 		return _("1/32");
-	} else if (ql == Beats (0,Temporal::ticks_per_beat/16)) {
+	} else if (ql == BBT_Offset (0, 0,Temporal::ticks_per_beat/16)) {
 		return _("1/64");
 	} else {
 		return "???";
@@ -228,6 +247,12 @@ TriggerUI::follow_action_to_string (Trigger::FollowAction fa)
 void
 TriggerUI::trigger_changed (PropertyChange pc)
 {
+	if (pc.contains (Properties::quantization)) {
+		BBT_Offset bbo (trigger.quantization());
+		std::cerr << "trig quant changed to " << bbo << std::endl;
+		_quantize_button->set_active (quantize_length_to_string (bbo));
+	}
+
 	if (pc.contains (Properties::use_follow)) {
 		_follow_action_button->set_active_state (trigger.use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
