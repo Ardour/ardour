@@ -118,14 +118,7 @@ Table::compute_bounding_box() const
 		_bounding_box = Rect (0, 0, ns.x, ns.y);
 
 	} else {
-
-		for (auto const & cell : cells) {
-			if (_bounding_box) {
-				_bounding_box = _bounding_box.extend (cell.second.full_size);
-			} else {
-				_bounding_box = cell.second.full_size;
-			}
-		}
+		/* bounding box was computed in compute() */
 	}
 
 	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("bounding box computed as %1\n", _bounding_box));
@@ -617,6 +610,12 @@ Table::compute (Rect const & within)
 	 */
 
 	hpos += padding.right;
+
+	/* set bounding box so that we don't have to do it again in ::compute_bounding_box() */
+
+	_bounding_box = Rect (0, 0, hpos, vpos);
+
+	/* return our size */
 
 	return Duple (hpos, vpos);
 }
