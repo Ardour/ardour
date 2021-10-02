@@ -56,6 +56,8 @@ static std::vector<std::string> follow_strings;
 static std::string longest_follow;
 static std::vector<std::string> quantize_strings;
 static std::string longest_quantize;
+static std::vector<std::string> launch_strings;
+static std::string longest_launch;
 
 TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	: Table (parent)
@@ -80,9 +82,24 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 			}
 		}
 
+		launch_strings.push_back (launch_style_to_string (Trigger::OneShot));
+		launch_strings.push_back (launch_style_to_string (Trigger::Gate));
+		launch_strings.push_back (launch_style_to_string (Trigger::Toggle));
+		launch_strings.push_back (launch_style_to_string (Trigger::Repeat));
+
+		for (std::vector<std::string>::const_iterator i = launch_strings.begin(); i != launch_strings.end(); ++i) {
+			if (i->length() > longest_launch.length()) {
+				longest_launch = *i;
+			}
+		}
 	}
 
-	name = "TriggerUI-CP";
+	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
+	name = "triggerUI-table";
+	set_row_spacing (10);
+	set_col_spacing (10);
+	set_padding ({10});
+	set_homogenous (false);
 
 	_follow_action_button = new ArdourButton ();
 	_follow_action_button->set_text (_("Follow Action"));
@@ -111,12 +128,33 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	follow_right = new Widget (canvas(), *_follow_right);
 	follow_right->name = "FollowRight";
 
+	launch_text = new Text (canvas());
+	launch_text->set (_("Launch"));
+	launch_text->name = "LaunchText";
+	launch_text->set_outline_color (UIConfiguration::instance().color (X_("normal:foreground")));
+
+	_launch_style_button = new ArdourDropdown();
+	_launch_style_button->set_sizing_text (longest_launch);
+
+	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::OneShot)));
+	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Gate)));
+	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Toggle)));
+	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Repeat)));
+
+	launch_style_button = new Widget (canvas(), *_launch_style_button);
+	launch_style_button->name = "LaunchButton";
+
 	_legato_button = new ArdourButton();
 	_legato_button->set_text (_("Legato"));
 	legato_button = new ArdourCanvas::Widget (canvas(), *_legato_button);
+	legato_button->name = "Legato";
+
+	quantize_text = new Text (canvas());
+	quantize_text->set (_("Quantize"));
+	quantize_text->name = "QuantizeText";
+	quantize_text->set_outline_color (Gtkmm2ext::contrasting_text_color (UIConfiguration::instance().color (X_("theme:bg"))));
 
 	_quantize_button = new ArdourDropdown;
-
 
 #define quantize_item(b) _quantize_button->AddMenuElem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_quantize), b)));
 
@@ -141,24 +179,61 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	quantize_button = new Widget (canvas(), *_quantize_button);
 	quantize_button->name = "quantize";
 
+	velocity = new Rectangle (canvas());
+	velocity->name = "VelocityRect";
+	velocity->set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
+	velocity->set_outline_color (UIConfiguration::instance().color (X_("normal:foreground")));
+
+	velocity_text = new Text (velocity);
+	velocity_text->set (_("100 %"));
+	velocity_text->name = "VelocityText";
+	velocity_text->set_outline_color (velocity->fill_color());
+	velocity_text->set_font_description (UIConfiguration::instance ().get_NormalFont ());
+
+	velocity_label = new Text (canvas());
+	velocity_label->set (_("Velocity"));
+	velocity_label->name = "VelocityLabel";
+	velocity_label->set_outline_color (Gtkmm2ext::contrasting_text_color (UIConfiguration::instance().color (X_("theme:bg"))));
+
 	const double scale = UIConfiguration::instance().get_ui_scale();
 	const Distance spacing = 12. * scale;
 
-	attach (follow_action_button, 0, 0, 2, 1, PackExpand, PackExpand, { 10 });
-	attach (follow_left, 0, 1, 1, 2, PackExpand, PackExpand, { 10 });
-	attach (follow_right, 1, 1, 2, 2,  PackExpand, PackExpand, { 10 });
+	/* Row 0 */
 
-	attach (quantize_button, 0, 2, 1, 3, PackExpand, PackExpand, { 10 });
-	attach (legato_button, 1, 2, 2, 3, PackExpand, PackExpand, { 10 });
+	attach (follow_action_button, 0, 0, 2, 1, PackExpand, PackExpand);
 
-	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
-	name = "triggerUI-table";
+	/* Row 1 */
+
+	attach (follow_left, 0, 1, 1, 2, PackExpand, PackExpand);
+	attach (follow_right, 1, 1, 2, 2,  PackExpand, PackExpand);
+
+	/* Row 2 */
+
+	attach (launch_text, 0, 2, 1, 3);
+
+	/* Row 3 */
+
+	attach (launch_style_button, 0, 3, 1, 4, PackExpand, PackExpand);
+	attach (legato_button, 1, 3, 2, 4, PackExpand, PackExpand);
+
+	/* Row 4 */
+
+	attach (quantize_text, 0, 4, 1, 5);
+	attach (velocity_label, 1, 4, 2, 5);
+
+	/* Row 5 */
+
+	attach (quantize_button, 0, 5, 1, 6, PackExpand, PackExpand);
+	attach (velocity, 1, 5, 2, 6, PackExpand, PackExpand);
 
 	PropertyChange pc;
 
 	pc.add (Properties::use_follow);
 	pc.add (Properties::legato);
 	pc.add (Properties::quantization);
+	pc.add (Properties::launch_style);
+	pc.add (Properties::follow_action0);
+	pc.add (Properties::follow_action1);
 
 	trigger_changed (pc);
 
@@ -193,6 +268,29 @@ TriggerUI::follow_action_button_event (GdkEvent* ev)
 	}
 
 	return false;
+}
+
+void
+TriggerUI::set_launch_style (Trigger::LaunchStyle ls)
+{
+	trigger.set_launch_style (ls);
+}
+
+std::string
+TriggerUI::launch_style_to_string (Trigger::LaunchStyle ls)
+{
+	switch (ls) {
+	case Trigger::OneShot:
+		return _("One Shot");
+	case Trigger::Gate:
+		return _("Gate");
+	case Trigger::Toggle:
+		return _("Toggle");
+	case Trigger::Repeat:
+		return _("Repeat");
+	}
+	/*NOTREACHED*/
+	return std::string();
 }
 
 std::string
@@ -249,15 +347,25 @@ TriggerUI::trigger_changed (PropertyChange pc)
 {
 	if (pc.contains (Properties::quantization)) {
 		BBT_Offset bbo (trigger.quantization());
-		std::cerr << "trig quant changed to " << bbo << std::endl;
 		_quantize_button->set_active (quantize_length_to_string (bbo));
+		std::cerr << "\n\n !!! quantize is " << quantize_length_to_string (bbo) << std::endl << std::endl;
 	}
 
 	if (pc.contains (Properties::use_follow)) {
 		_follow_action_button->set_active_state (trigger.use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
-	_follow_right->set_text (follow_action_to_string (trigger.follow_action (0)));
-	_follow_left->set_text (follow_action_to_string (trigger.follow_action (1)));
+
+	if (pc.contains (Properties::launch_style)) {
+		_launch_style_button->set_active (launch_style_to_string (trigger.launch_style()));
+	}
+
+	if (pc.contains (Properties::follow_action0)) {
+		_follow_right->set_text (follow_action_to_string (trigger.follow_action (0)));
+	}
+
+	if (pc.contains (Properties::follow_action1)) {
+		_follow_left->set_text (follow_action_to_string (trigger.follow_action (1)));
+	}
 }
 
 /* ------------ */

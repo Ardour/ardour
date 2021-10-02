@@ -69,11 +69,19 @@ class TriggerUI : public ArdourCanvas::Table, public sigc::trackable
 
 	ArdourWidgets::ArdourDropdown* _quantize_button;
 	ArdourCanvas::Widget* quantize_button;
+	ArdourCanvas::Text* quantize_text;
+
+	ArdourWidgets::ArdourDropdown* _launch_style_button;
+	ArdourCanvas::Widget* launch_style_button;
+	ArdourCanvas::Text* launch_text;
 
 	ArdourCanvas::Rectangle* velocity;
 	ArdourCanvas::Text* velocity_text;
+	ArdourCanvas::Text* velocity_label;
 
 	void set_quantize (Temporal::BBT_Offset);
+	void set_launch_style (ARDOUR::Trigger::LaunchStyle);
+
 	void trigger_changed (PBD::PropertyChange);
 
 	bool follow_action_button_event (GdkEvent*);
@@ -82,8 +90,8 @@ class TriggerUI : public ArdourCanvas::Table, public sigc::trackable
 
 	static std::string follow_action_to_string (ARDOUR::Trigger::FollowAction);
 	static ARDOUR::Trigger::FollowAction  string_to_follow_action (std::string const &);
-
 	static std::string quantize_length_to_string (Temporal::BBT_Offset const &);
+	static std::string launch_style_to_string (ARDOUR::Trigger::LaunchStyle);
 };
 
 class TriggerWidget : public ArdourCanvas::GtkCanvas
