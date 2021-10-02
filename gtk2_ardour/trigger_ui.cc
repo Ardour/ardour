@@ -200,31 +200,31 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 
 	/* Row 0 */
 
-	attach (follow_action_button, 0, 0, 2, 1, PackExpand, PackExpand);
+	attach_with_span (follow_action_button, 0, 0, 2, 1, PackExpand, PackExpand);
 
 	/* Row 1 */
 
-	attach (follow_left, 0, 1, 1, 2, PackExpand, PackExpand);
-	attach (follow_right, 1, 1, 2, 2,  PackExpand, PackExpand);
+	attach (follow_left, 0, 1, PackExpand, PackExpand);
+	attach (follow_right, 1, 1,  PackExpand, PackExpand);
 
 	/* Row 2 */
 
-	attach (launch_text, 0, 2, 1, 3);
+	attach (launch_text, 0, 2);
 
 	/* Row 3 */
 
-	attach (launch_style_button, 0, 3, 1, 4, PackExpand, PackExpand);
-	attach (legato_button, 1, 3, 2, 4, PackExpand, PackExpand);
+	attach (launch_style_button, 0, 3, PackExpand, PackExpand);
+	attach (legato_button, 1, 3, PackExpand, PackExpand);
 
 	/* Row 4 */
 
-	attach (quantize_text, 0, 4, 1, 5);
-	attach (velocity_label, 1, 4, 2, 5);
+	attach (quantize_text, 0, 4);
+	attach (velocity_label, 1, 4);
 
 	/* Row 5 */
 
-	attach (quantize_button, 0, 5, 1, 6, PackExpand, PackExpand);
-	attach (velocity, 1, 5, 2, 6, PackExpand, PackExpand);
+	attach (quantize_button, 0, 5, PackExpand, PackExpand);
+	attach (velocity, 1, 5, PackExpand, PackExpand);
 
 	PropertyChange pc;
 
