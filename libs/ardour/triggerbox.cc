@@ -38,6 +38,9 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> running;
 		PBD::PropertyDescriptor<bool> legato;
 		PBD::PropertyDescriptor<bool> quantization;
+		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
+		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
+		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
 	}
 }
 
@@ -98,6 +101,11 @@ Trigger::set_follow_action (FollowAction f, uint64_t n)
 {
 	assert (n < 2);
 	_follow_action[n] = f;
+	if (n == 0) {
+		PropertyChanged (Properties::follow_action0);
+	} else {
+		PropertyChanged (Properties::follow_action1);
+	}
 }
 
 void
@@ -106,6 +114,7 @@ Trigger::set_launch_style (LaunchStyle l)
 	_launch_style = l;
 
 	set_usable_length ();
+	PropertyChanged (Properties::launch_style);
 }
 
 XMLNode&
@@ -815,6 +824,12 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for use-follow = %1\n", Properties::use_follow.property_id));
 	Properties::quantization.property_id = g_quark_from_static_string (X_("quantization"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for quantization = %1\n", Properties::quantization.property_id));
+	Properties::launch_style.property_id = g_quark_from_static_string (X_("launch-style"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for quantization = %1\n", Properties::launch_style.property_id));
+	Properties::follow_action0.property_id = g_quark_from_static_string (X_("follow-action-0"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow-action-0 = %1\n", Properties::follow_action0.property_id));
+	Properties::follow_action1.property_id = g_quark_from_static_string (X_("follow-action-1"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow-action-1 = %1\n", Properties::follow_action1.property_id));
 }
 
 const uint64_t TriggerBox::default_triggers_per_box = 8;

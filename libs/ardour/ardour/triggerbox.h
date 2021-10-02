@@ -41,14 +41,6 @@
 
 class XMLNode;
 
-namespace ARDOUR {
-	namespace Properties {
-		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> use_follow;
-		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> running;
-		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> legato;
-		LIBARDOUR_API extern PBD::PropertyDescriptor<bool> quantization;
-	}
-}
 
 namespace ARDOUR {
 
@@ -312,6 +304,17 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	static const uint64_t default_triggers_per_box;
 };
+
+namespace Properties {
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> use_follow;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> running;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> legato;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> quantization;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
+}
+
 
 } // namespace ARDOUR
 
