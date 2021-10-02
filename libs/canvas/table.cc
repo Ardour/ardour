@@ -36,7 +36,8 @@ Table::Table (Canvas* canvas)
 	, padding ({ 0 })
 	, margin ({ 0 })
 	, collapse_on_hide (false)
-	, homogenous (true)
+	, row_homogenous (true)
+	, col_homogenous (true)
 	, draw_hgrid (false)
 	, draw_vgrid (false)
 {
@@ -48,7 +49,8 @@ Table::Table (Item* item)
 	, padding ({ 0 })
 	, margin ({ 0 })
 	, collapse_on_hide (false)
-	, homogenous (true)
+	, row_homogenous (true)
+	, col_homogenous (true)
 	, draw_hgrid (false)
 	, draw_vgrid (false)
 {
@@ -295,7 +297,7 @@ Table::compute (Rect const & within)
 			highest_row_height = std::max (highest_row_height, ai.user_size);
 			inelastic_height += ai.user_size;
 			inelastic_cols++;
-			if (!homogenous) {
+			if (!row_homogenous) {
 				total_natural_height += ai.user_size;
 			}
 		} else {
@@ -305,7 +307,7 @@ Table::compute (Rect const & within)
 			}
 			highest_row_height = std::max (highest_row_height, ai.natural_size);
 
-			if (!homogenous) {
+			if (!row_homogenous) {
 				total_natural_height += ai.natural_size;
 			}
 		}
@@ -320,7 +322,7 @@ Table::compute (Rect const & within)
 			widest_column_width = std::max (widest_column_width, ai.user_size);
 			inelastic_width += ai.user_size;
 			inelastic_cols++;
-			if (!homogenous) {
+			if (!col_homogenous) {
 				total_natural_width += ai.user_size;
 			}
 
@@ -331,19 +333,22 @@ Table::compute (Rect const & within)
 			}
 			widest_column_width = std::max (widest_column_width, ai.natural_size);
 
-			if (!homogenous) {
+			if (!col_homogenous) {
 				total_natural_width += ai.natural_size;
 			}
 		}
 	}
 
-	if (homogenous) {
+	if (col_homogenous) {
 		/* reset total width & height using the widest & heighest,
 		   multiplied by the number of cols/rows, since they wll all be
 		   the same height. the values before we do this are
 		   cumulative, and do not (necessarily) reflect homogeneity
 		*/
 		total_natural_width = widest_column_width * cols;
+	}
+
+	if (row_homogenous) {
 		total_natural_height = highest_row_height * rows;
 	}
 
@@ -411,24 +416,25 @@ Table::compute (Rect const & within)
 
 	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("vr,vc %1 x %2\n", elastic_rows, elastic_cols));
 
-	if (homogenous) {
+	if (row_homogenous) {
 
 		/* all columns must have the same width and height */
-
-		elastic_col_width = (within.width() - ((cols - 1) * col_spacing) - padding.left - padding.right) / cols;
 		elastic_row_height = (within.height() - ((rows - 1) * row_spacing) - padding.up - padding.down) / rows;
-
 	} else {
+		if (elastic_rows) {
+			const Distance elastic_non_spacing_non_padding_height = within.height() - inelastic_height - ((rows - 1) * row_spacing) - padding.up - padding.down;
+			elastic_row_height = elastic_non_spacing_non_padding_height / elastic_rows;
+		}
+	}
 
+	if (col_homogenous) {
+		elastic_col_width = (within.width() - ((cols - 1) * col_spacing) - padding.left - padding.right) / cols;
+	} else {
 		if (elastic_cols) {
 			const Distance elastic_non_spacing_non_padding_width = within.width() - inelastic_width - ((cols - 1) * col_spacing) - padding.left - padding.right;
 			elastic_col_width =  elastic_non_spacing_non_padding_width / elastic_cols;
 		}
 
-		if (elastic_rows) {
-			const Distance elastic_non_spacing_non_padding_height = within.height() - inelastic_height - ((rows - 1) * row_spacing) - padding.up - padding.down;
-			elastic_row_height = elastic_non_spacing_non_padding_height / elastic_rows;
-		}
 	}
 
 	for (auto & ci : cells) {
@@ -533,7 +539,7 @@ Table::compute (Rect const & within)
 				ci->second.content->size_allocate (rect);
 				ci->second.full_size = rect;
 
-				if (homogenous || (ci->second.col_options & PackOptions (PackExpand|PackShrink))) {
+				if (col_homogenous || (ci->second.col_options & PackOptions (PackExpand|PackShrink))) {
 					/* homogenous forces all col widths to
 					   the same value, and/or the cell
 					   is allowed to expand/shrink to the
@@ -556,7 +562,7 @@ Table::compute (Rect const & within)
 					hpos = std::max (rect.x1 + ci->second.padding.right, padding.left + (elastic_col_width * (c + 1)));
 				}
 
-				if (homogenous || (ci->second.row_options & PackOptions (PackExpand|PackShrink))) {
+				if (row_homogenous || (ci->second.row_options & PackOptions (PackExpand|PackShrink))) {
 					/* homogenous forces all row heights to
 					   the same value, and/or the cell
 					   is allowed to expand/shrink to the
@@ -579,11 +585,15 @@ Table::compute (Rect const & within)
 				   cell
 
 				*/
-				if (homogenous) {
+				if (col_homogenous) {
 					hpos = elastic_col_width * (c + 1);
-					vshift = std::max (vshift, elastic_row_height);
 				} else {
 					hpos += col_info[c].natural_size;
+				}
+
+				if (row_homogenous) {
+					vshift = std::max (vshift, elastic_row_height);
+				} else {
 					vshift = std::max (vshift, row_info[r].natural_size);
 				}
 			}
@@ -687,7 +697,22 @@ Table::set_col_spacing (Distance d)
 void
 Table::set_homogenous (bool yn)
 {
-	homogenous = yn;
+	row_homogenous = yn;
+	col_homogenous = yn;
+	queue_resize ();
+}
+
+void
+Table::set_row_homogenous (bool yn)
+{
+	row_homogenous = yn;
+	queue_resize ();
+}
+
+void
+Table::set_col_homogenous (bool yn)
+{
+	col_homogenous = yn;
 	queue_resize ();
 }
 

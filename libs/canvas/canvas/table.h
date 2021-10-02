@@ -50,6 +50,8 @@ public:
 
 #endif
 	void set_homogenous (bool);
+	void set_row_homogenous (bool);
+	void set_col_homogenous (bool);
 	void compute_bounding_box () const;
 	void size_request (double& w, double& h) const;
 	void size_allocate_children (Rect const & r);
@@ -93,7 +95,8 @@ public:
 	Distance row_spacing;
 	Distance col_spacing;
 	bool collapse_on_hide;
-	bool homogenous;
+	bool row_homogenous;
+	bool col_homogenous;
 	bool draw_hgrid;
 	bool draw_vgrid;
 
