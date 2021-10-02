@@ -557,8 +557,12 @@ Table::compute (Rect const & within)
 					   probably too small/too large.
 
 					   So... where is the start of the next
-					   column.
+					   column. Well, it's at the greater of
+					   (a) right edge of this cell's
+					   natural box OR (b) wherever the nth
+					   elastic column would be.
 					*/
+
 					/* rect already includes padding.left */
 					hpos = std::max (rect.x1 + ci->second.padding.right, padding.left + (elastic_col_width * (c + 1)));
 				}
