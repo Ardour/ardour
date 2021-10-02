@@ -33,6 +33,8 @@ using std::endl;
 
 Table::Table (Canvas* canvas)
 	: Rectangle (canvas)
+	, padding ({ 0 })
+	, margin ({ 0 })
 	, collapse_on_hide (false)
 	, homogenous (true)
 	, draw_hgrid (false)
@@ -43,6 +45,8 @@ Table::Table (Canvas* canvas)
 
 Table::Table (Item* item)
 	: Rectangle (item)
+	, padding ({ 0 })
+	, margin ({ 0 })
 	, collapse_on_hide (false)
 	, homogenous (true)
 	, draw_hgrid (false)
@@ -148,8 +152,7 @@ Table::size_request (Distance& w, Distance& h) const
 void
 Table::layout ()
 {
-	cerr << "\n\nLAYOUT\n\n";
-	size_allocate_children (_allocation);
+	(void) compute (_allocation);
 }
 
 void
@@ -187,13 +190,17 @@ Table::compute (Rect const & within)
 		const float hspan = c.lower_right.x - c.upper_left.x;
 		const float vspan = c.lower_right.y - c.upper_left.y;
 
-		DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("for cell %1,%2 - %3,%4, contents natural size = %5 hspan %6 vspan %7\n",
+		uint32_t covered_c_spacings = hspan - 1;
+		uint32_t covered_r_spacings = vspan - 1;
+
+		DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("for cell %8 %1,%2 - %3,%4, contents natural size = %5 hspan %6 vspan %7\n",
 		                                                 c.upper_left.x,
 		                                                 c.upper_left.y,
 		                                                 c.lower_right.x,
 		                                                 c.lower_right.y,
 		                                                 c.natural_size,
-		                                                 hspan, vspan));
+		                                                 hspan, vspan,
+		                                                 c.content->whoami()));
 
 		/* for every col that this cell occupies, count the number of
 		 * expanding/shrinking items, and compute the largest width
@@ -215,10 +222,11 @@ Table::compute (Rect const & within)
 			 * The natural width of the item is divided across
 			 * hspan cols, and then we add the padding and spacing
 			 */
-			const Distance total_cell_width = (c.natural_size.x / hspan) + c.padding.left + c.padding.right + col_info[col].spacing;
 
-			/* column width must be large enough to hold the
-			 * largest cell
+			const Distance total_cell_width = (c.natural_size.x / hspan) + c.padding.left + c.padding.right + col_info[col].spacing + (covered_c_spacings * col_spacing);
+
+			/* the col's natural size (width) is the maximum
+			 * width of any of the cells within it.
 			 */
 
 			col_info[col].natural_size = std::max (col_info[col].natural_size, total_cell_width);
@@ -246,7 +254,11 @@ Table::compute (Rect const & within)
 			 * vspan rows, and then we add the padding and spacing
 			 */
 
-			const Distance total_cell_height = (c.natural_size.y / vspan) + c.padding.up + c.padding.down  + row_info[row].spacing;
+			const Distance total_cell_height = (c.natural_size.y / vspan) + c.padding.up + c.padding.down  + row_info[row].spacing * (covered_r_spacings * row_spacing);
+
+			/* the row's natural size (height) is the maximum
+			 * height of any of the cells within it.
+			 */
 
 			row_info[row].natural_size = std::max (row_info[row].natural_size, total_cell_height);
 			row_info[row].occupied = true;
@@ -261,28 +273,38 @@ Table::compute (Rect const & within)
 	 * "natural size"
 	 */
 
-	Distance col_natural_width = 0.;
-	Distance row_natural_height = 0.;
+	Distance widest_column_width = 0.;
+	Distance highest_row_height = 0.;
 	Distance inelastic_width = 0;
 	Distance inelastic_height = 0;
 	uint32_t inelastic_rows = 0;
 	uint32_t inelastic_cols = 0;
+	Distance total_natural_width = 0;
+	Distance total_natural_height = 0;
 
 	for (auto & ai : row_info) {
 
 		ai.natural_size += ai.spacing;
 
-		if (ai.user_size) {
-			row_natural_height = std::max (row_natural_height, ai.user_size);
+ 		if (ai.user_size) {
+			highest_row_height = std::max (highest_row_height, ai.user_size);
 			inelastic_height += ai.user_size;
 			inelastic_cols++;
+			if (!homogenous) {
+				total_natural_height += ai.user_size;
+			}
 		} else {
 			if (ai.expanders == 0 && ai.shrinkers == 0) {
 				inelastic_rows++;
 				inelastic_height += ai.natural_size;
 			}
-			row_natural_height = std::max (row_natural_height, ai.natural_size);
+			highest_row_height = std::max (highest_row_height, ai.natural_size);
+
+			if (!homogenous) {
+				total_natural_height += ai.natural_size;
+			}
 		}
+
 	}
 
 	for (auto & ai : col_info) {
@@ -290,17 +312,34 @@ Table::compute (Rect const & within)
 		ai.natural_size += ai.spacing;
 
 		if (ai.user_size) {
-			col_natural_width = std::max (col_natural_width, ai.user_size);
+			widest_column_width = std::max (widest_column_width, ai.user_size);
 			inelastic_width += ai.user_size;
 			inelastic_cols++;
+			if (!homogenous) {
+				total_natural_width += ai.user_size;
+			}
+
 		} else {
 			if (ai.expanders == 0 && ai.shrinkers == 0) {
 				inelastic_cols++;
 				inelastic_width += ai.natural_size;
 			}
-			col_natural_width = std::max (col_natural_width, ai.natural_size);
-		}
+			widest_column_width = std::max (widest_column_width, ai.natural_size);
 
+			if (!homogenous) {
+				total_natural_width += ai.natural_size;
+			}
+		}
+	}
+
+	if (homogenous) {
+		/* reset total width & height using the widest & heighest,
+		   multiplied by the number of cols/rows, since they wll all be
+		   the same height. the values before we do this are
+		   cumulative, and do not (necessarily) reflect homogeneity
+		*/
+		total_natural_width = widest_column_width * cols;
+		total_natural_height = highest_row_height * rows;
 	}
 
 #ifndef NDEBUG
@@ -324,12 +363,18 @@ Table::compute (Rect const & within)
 	}
 #endif
 
-	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("natural width x height = %1 x %2, inelastic: %3 x %4 ir x ic %5 x %6\n", col_natural_width, row_natural_height, inelastic_width, inelastic_height,
+	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("widest col width x highest row height = %1 x %2, inelastic: %3 x %4 ir x ic %5 x %6\n", widest_column_width, highest_row_height, inelastic_width, inelastic_height,
 	                                                 inelastic_rows, inelastic_cols));
 
 	if (!within) {
 		/* within is empty, so this is just for a size request */
-		return Duple (col_natural_width * cols, row_natural_height * rows);
+
+		DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("total natural width x height = %1 x %2 + %3 , %4\n", total_natural_width, total_natural_height,
+		                                                 ((cols - 1) * col_spacing) + padding.left + padding.right,
+		                                                 ((rows - 1) * col_spacing) + padding.up + padding.down));
+
+		return Duple (total_natural_width + ((cols - 1) * col_spacing) + padding.left + padding.right,
+		              total_natural_height + ((rows - 1) * col_spacing) + padding.up + padding.down);
 	}
 
 	/* actually doing allocation, so prevent endless loop between here and
@@ -354,20 +399,31 @@ Table::compute (Rect const & within)
 	 *
 	 */
 
+	const uint32_t elastic_rows = rows - inelastic_rows;
+	const uint32_t elastic_cols = cols - inelastic_cols;
+	Distance elastic_col_width = 0;
+	Distance elastic_row_height = 0;
 
-	uint32_t variable_size_rows = rows - inelastic_rows;
-	uint32_t variable_size_cols = cols - inelastic_cols;
-	Distance variable_col_width = 0;
-	Distance variable_row_height = 0;
+	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("vr,vc %1 x %2\n", elastic_rows, elastic_cols));
 
-	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("vr,vc %1 x %2\n", variable_size_rows, variable_size_cols));
+	if (homogenous) {
 
-	if (variable_size_cols) {
-		variable_col_width = (within.width() - inelastic_width) / variable_size_cols;
-	}
+		/* all columns must have the same width and height */
 
-	if (variable_size_rows) {
-		variable_row_height = (within.height() - inelastic_height) / variable_size_rows;
+		elastic_col_width = (within.width() - ((cols - 1) * col_spacing) - padding.left - padding.right) / cols;
+		elastic_row_height = (within.height() - ((rows - 1) * row_spacing) - padding.up - padding.down) / rows;
+
+	} else {
+
+		if (elastic_cols) {
+			const Distance elastic_non_spacing_non_padding_width = within.width() - inelastic_width - ((cols - 1) * col_spacing) - padding.left - padding.right;
+			elastic_col_width =  elastic_non_spacing_non_padding_width / elastic_cols;
+		}
+
+		if (elastic_rows) {
+			const Distance elastic_non_spacing_non_padding_height = within.height() - inelastic_height - ((rows - 1) * row_spacing) - padding.up - padding.down;
+			elastic_row_height = elastic_non_spacing_non_padding_height / elastic_rows;
+		}
 	}
 
 	for (auto & ci : cells) {
@@ -377,8 +433,8 @@ Table::compute (Rect const & within)
 		const float hspan = c.lower_right.x - c.upper_left.x;
 		const float vspan = c.lower_right.y - c.upper_left.y;
 
-		AxisInfo& col (col_info[c.upper_left.y]);
-		AxisInfo& row (col_info[c.upper_left.x]);
+		AxisInfo& col (col_info[c.upper_left.x]);
+		AxisInfo& row (row_info[c.upper_left.y]);
 
 		Distance w;
 		Distance h;
@@ -386,9 +442,9 @@ Table::compute (Rect const & within)
 		if (col.user_size) {
 			w = col.user_size;
 		} else if (c.row_options & PackExpand) {
-			w = hspan * variable_col_width;
+			w = hspan * elastic_col_width + ((hspan - 1) * col_spacing);
 		} else if (c.row_options & PackShrink) {
-			w = hspan * variable_col_width;
+			w = hspan * elastic_col_width + ((hspan - 1) * col_spacing);
 		} else {
 			/* normal col, not expanding or shrinking */
 			w = c.natural_size.x;
@@ -397,13 +453,20 @@ Table::compute (Rect const & within)
 		if (row.user_size) {
 			h = col.user_size;
 		} else if (c.row_options & PackExpand) {
-			h = vspan * variable_row_height;
+			h = vspan * elastic_row_height + ((vspan - 1) * row_spacing);
 		} else if (c.row_options & PackShrink) {
-			h = vspan * variable_row_height;
+			h = vspan * elastic_row_height + ((vspan - 1) * row_spacing);
 		} else {
 			/* normal row, not expanding or shrinking */
 			h = c.natural_size.y;
 		}
+
+		/* Reduce the allocate width x height to account for cell
+		 * padding and individual column/row spacing. Do not adjust for
+		 * global padding or global column/row spacing, since that was
+		 * already accounted for when we computed
+		 * elastic_{row_height,col_width}
+		 */
 
 		w -= c.padding.left + c.padding.right;
 		w -= col.spacing;
@@ -411,8 +474,18 @@ Table::compute (Rect const & within)
 		h -= c.padding.up + c.padding.down;
 		h -= row.spacing;
 
-		DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("Cell @ %1,%2 - %3,%4 (hspan %7 vspan %8) allocated %5 x %6\n",
-		                                                 ci.first.x, ci.first.y, ci.second.lower_right.x, ci.second.lower_right.y, w, h, hspan, vspan));
+		if (w < 0 || w > within.width()) {
+			/* can't do anything */
+			return Duple (within.width(), within.height());
+		}
+
+		if (h < 0 || h > within.height()) {
+			/* can't do anything */
+			return Duple (within.width(), within.height());
+		}
+
+		DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("Cell %9 @ %1,%2 - %3,%4 (hspan %7 vspan %8) allocated %5 x %6\n",
+		                                                 ci.first.x, ci.first.y, ci.second.lower_right.x, ci.second.lower_right.y, w, h, hspan, vspan, ci.second.content->whoami()));
 
 		c.allocate_size = Duple (w, h);
 	}
@@ -422,13 +495,13 @@ Table::compute (Rect const & within)
 	 * above and left of whichever one we are working on.
 	 */
 
-	Distance hdistance = 0.;
-	Distance vdistance = 0.;
+	Distance vpos = padding.up;
+	Distance hpos;
 
 	for (uint32_t r = 0; r < rows; ++r) {
 
+		hpos = padding.left;
 		Distance vshift = 0;
-		hdistance = 0;
 
 		for (uint32_t c = 0; c < cols; ++c) {
 
@@ -438,54 +511,102 @@ Table::compute (Rect const & within)
 
 			if (ci != cells.end()) {
 
-				hdistance += ci->second.padding.left;
+				Rect rect = Rect (hpos + ci->second.padding.left,                              /* x0 */
+				                  vpos + ci->second.padding.up,                                /* y0 */
+				                  hpos + ci->second.padding.left + ci->second.allocate_size.x, /* x1 */
+				                  vpos + ci->second.padding.up + ci->second.allocate_size.y);  /* y1 */
 
-				Rect rect = Rect (hdistance, vdistance + ci->second.padding.up, hdistance + ci->second.allocate_size.x, vdistance + ci->second.padding.up + ci->second.allocate_size.y);
-
-				DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("Item @ %1,%2 - %3,%4 size-allocate %5 vs %6\n",
+				DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("Item %7 @ %1,%2 - %3,%4 size-allocate %5 vs %6\n",
 				                                                 ci->second.upper_left.x,
 				                                                 ci->second.upper_left.y,
 				                                                 ci->second.lower_right.x,
 				                                                 ci->second.lower_right.y,
-				                                                 rect, ci->second.allocate_size));
+				                                                 rect, ci->second.allocate_size,
+				                                                 ci->second.content->whoami()));
 
 
 				ci->second.content->size_allocate (rect);
 				ci->second.full_size = rect;
 
-				if (homogenous) {
-					hdistance = variable_col_width * (c + 1);
+				if (homogenous || (ci->second.col_options & PackOptions (PackExpand|PackShrink))) {
+					/* homogenous forces all col widths to
+					   the same value, and/or the cell
+					   is allowed to expand/shrink to the
+					   allotted variable column width.
+					*/
+					hpos = padding.left + (elastic_col_width * (c + 1));
 				} else {
-					hdistance += rect.width() + ci->second.padding.right;
-					hdistance += col_info[c].spacing;
+					/* not homogeneous, and no
+					   expand/shrink being applied to
+					   contents. We need to skip over to
+					   the start of the next column here.
+					   But ... we can't just use the
+					   allocation rect, since that is
+					   probably too small/too large.
+
+					   So... where is the start of the next
+					   column.
+					*/
+					/* rect already includes padding.left */
+					hpos = std::max (rect.x1 + ci->second.padding.right, padding.left + (elastic_col_width * (c + 1)));
 				}
 
-				Distance total_cell_height;
-
-				if (homogenous) {
-					total_cell_height = variable_row_height;
+				if (homogenous || (ci->second.row_options & PackOptions (PackExpand|PackShrink))) {
+					/* homogenous forces all row heights to
+					   the same value, and/or the cell
+					   is allowed to expand/shrink to the
+					   allotted variable row height.
+					*/
+					vshift = std::max (vshift, elastic_row_height);
 				} else {
 					/* rect already includes padding.up */
-					total_cell_height = rect.height() + ci->second.padding.down;
+					vshift = std::max (vshift, rect.height() + ci->second.padding.down);
 				}
 
-				vshift = std::max (vshift, total_cell_height);
+				/* when this row is done, we'll shift down by
+				   the largest cell height so far for this row.
+				*/
 
 			} else {
+
 				/* cell is empty, just adjust horizontal &
 				   vertical shift values to get to the next
 				   cell
+
 				*/
-				hdistance = variable_col_width * (c + 1);
-				vshift = std::max (vshift, variable_row_height);
+				if (homogenous) {
+					hpos = elastic_col_width * (c + 1);
+					vshift = std::max (vshift, elastic_row_height);
+				} else {
+					hpos += col_info[c].natural_size;
+					vshift = std::max (vshift, row_info[r].natural_size);
+				}
 			}
 
-		}
+			if (c < (cols - 1)) {
+				hpos += col_info[c].spacing;
+				hpos += col_spacing;
+			}
+
+		} /* end of a row */
+
+		/* typically, hpos is about to be reset to zero as we start a
+		 * new row, but we want this set correctly if we exit the loop
+		 * on the next iteration
+		 */
+
+		hpos += padding.right;
+
+		/* only add per-row and global row-spacing to the vertical
+		   shift when we reach the end of the row.
+		*/
+
 		vshift += row_info[r].spacing;
-		vdistance += vshift;
+		vshift += row_spacing;
+		vpos += vshift;
 	}
 
-	return Duple (hdistance, vdistance);
+	return Duple (hpos, vpos);
 }
 
 void
@@ -535,5 +656,33 @@ Table::_remove (Item* i)
 		return;
 	}
 	Item::remove (i);
+	queue_resize ();
+}
+
+void
+Table::set_row_spacing (Distance d)
+{
+	row_spacing = d;
+	queue_resize ();
+}
+
+void
+Table::set_col_spacing (Distance d)
+{
+	col_spacing = d;
+	queue_resize ();
+}
+
+void
+Table::set_homogenous (bool yn)
+{
+	homogenous = yn;
+	queue_resize ();
+}
+
+void
+Table::set_padding (FourDimensions const & p)
+{
+	padding = p;
 	queue_resize ();
 }

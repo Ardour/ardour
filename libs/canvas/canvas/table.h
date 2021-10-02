@@ -34,9 +34,12 @@ public:
 	Table (Canvas *);
 	Table (Item *);
 
+	void set_row_spacing (Distance s);
+	void set_col_spacing (Distance s);
+
+	void set_padding (FourDimensions const & padding);
+
 #if 0
-	void set_spacing (double s);
-	void set_padding (double top, double right = -1.0, double bottom = -1.0, double left = -1.0);
 	void set_margin (double top, double right = -1.0, double bottom = -1.0, double left = -1.0);
 
 	/* aliases so that CSS box model terms work */
@@ -44,9 +47,9 @@ public:
 	void set_border_color (Gtkmm2ext::Color c)  { set_outline_color (c); }
 
 	void set_collapse_on_hide (bool);
-	void set_homogenous (bool);
-#endif
 
+#endif
+	void set_homogenous (bool);
 	void compute_bounding_box () const;
 	void size_request (double& w, double& h) const;
 	void size_allocate_children (Rect const & r);
@@ -76,10 +79,8 @@ public:
 	void child_changed (bool bbox_changed);
 
   private:
-	Distance top_margin;
-	Distance right_margin;
-	Distance bottom_margin;
-	Distance left_margin;
+	FourDimensions padding;
+	FourDimensions margin;
 	Distance row_spacing;
 	Distance col_spacing;
 	bool collapse_on_hide;
