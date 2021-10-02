@@ -56,7 +56,19 @@ Table::Table (Item* item)
 }
 
 void
-Table::attach (Item* item, Coord ulx, Coord uly, Coord lrx, Coord lry, PackOptions row_options, PackOptions col_options, FourDimensions pad)
+Table::attach (Item* item, uint32_t ulx, uint32_t uly, PackOptions row_options, PackOptions col_options, FourDimensions pad)
+{
+	attach (item, ulx, uly, ulx + 1, uly + 1, row_options, col_options, pad);
+}
+
+void
+Table::attach_with_span (Item* item, uint32_t ulx, uint32_t uly, uint32_t w, uint32_t h, PackOptions row_options, PackOptions col_options, FourDimensions pad)
+{
+	attach (item, ulx, uly, ulx + w, uly + h, row_options, col_options, pad);
+}
+
+void
+Table::attach (Item* item, uint32_t ulx, uint32_t uly, uint32_t lrx, uint32_t lry, PackOptions row_options, PackOptions col_options, FourDimensions pad)
 {
 	/* XXX maybe use z-axis to stack elements if the insert fails? Would
 	 * involve making Index 3D and using an actual hash function
@@ -286,7 +298,7 @@ Table::compute (Rect const & within)
 
 		ai.natural_size += ai.spacing;
 
- 		if (ai.user_size) {
+		if (ai.user_size) {
 			highest_row_height = std::max (highest_row_height, ai.user_size);
 			inelastic_height += ai.user_size;
 			inelastic_cols++;
@@ -590,14 +602,8 @@ Table::compute (Rect const & within)
 
 		} /* end of a row */
 
-		/* typically, hpos is about to be reset to zero as we start a
-		 * new row, but we want this set correctly if we exit the loop
-		 * on the next iteration
-		 */
 
-		hpos += padding.right;
-
-		/* only add per-row and global row-spacing to the vertical
+		/* add per-row and global row-spacing to the vertical
 		   shift when we reach the end of the row.
 		*/
 
@@ -605,6 +611,12 @@ Table::compute (Rect const & within)
 		vshift += row_spacing;
 		vpos += vshift;
 	}
+
+	/* We never take padding.right into account for layout, and  hpos is reset to zero as we start a
+	 * new row, but we want this set correctly as we exit the loop
+	 */
+
+	hpos += padding.right;
 
 	return Duple (hpos, vpos);
 }

@@ -65,11 +65,20 @@ public:
 		uint32_t y;
 	};
 
+	/* These three functions cannot be used with Table, and will cause a
+	   fatal error if called.
+	*/
 	void add (Item *);
 	void add_front (Item *);
 	void remove (Item *);
 
-	void attach (Item*, Coord upper_left_x, Coord upper_left_y, Coord lower_right_x, Coord lower_right_y, PackOptions row_options = PackOptions (0), PackOptions col_options = PackOptions (0), FourDimensions padding = FourDimensions (0.));
+	/* How to place an item in a table
+	 */
+
+	void attach (Item*, uint32_t upper_left_x, uint32_t upper_left_y, uint32_t lower_right_x, uint32_t lower_right_y, PackOptions row_options = PackOptions (0), PackOptions col_options = PackOptions (0), FourDimensions padding = FourDimensions (0.));
+	void attach (Item*, uint32_t upper_left_x, uint32_t upper_right_y, PackOptions row_options = PackOptions (0), PackOptions col_options = PackOptions (0), FourDimensions padding = FourDimensions (0.));
+	void attach_with_span (Item*, uint32_t upper_left_x, uint32_t upper_left_y, uint32_t hspan, uint32_t vspan, PackOptions row_options = PackOptions (0), PackOptions col_options = PackOptions (0), FourDimensions padding = FourDimensions (0.));
+
 	void dettach (Item*);
 
 	void set_row_size (uint32_t row, Distance);
