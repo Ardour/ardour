@@ -340,15 +340,20 @@ Table::compute (Rect const & within)
 	}
 
 	if (col_homogenous) {
-		/* reset total width & height using the widest & heighest,
-		   multiplied by the number of cols/rows, since they wll all be
-		   the same height. the values before we do this are
-		   cumulative, and do not (necessarily) reflect homogeneity
+		/* reset total width using the widest, multiplied by the number
+		   of cols, since they wll all be the same height. the values
+		   before we do this are cumulative, and do not (necessarily)
+		   reflect homogeneity
 		*/
 		total_natural_width = widest_column_width * cols;
 	}
 
 	if (row_homogenous) {
+		/* reset total height using the heighest, multiplied by the
+		   number of rows, since they wll all be the same height. the
+		   values before we do this are cumulative, and do not
+		   (necessarily) reflect homogeneity
+		*/
 		total_natural_height = highest_row_height * rows;
 	}
 
