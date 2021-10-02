@@ -289,52 +289,48 @@ Table::compute (Rect const & within)
 	Distance total_natural_width = 0;
 	Distance total_natural_height = 0;
 
-	for (auto & ai : row_info) {
+	for (auto & row : row_info) {
 
-		ai.natural_size += ai.spacing;
-
-		if (ai.user_size) {
-			highest_row_height = std::max (highest_row_height, ai.user_size);
-			inelastic_height += ai.user_size;
+		if (row.user_size) {
+			highest_row_height = std::max (highest_row_height, row.user_size);
+			inelastic_height += row.user_size;
 			inelastic_cols++;
 			if (!row_homogenous) {
-				total_natural_height += ai.user_size;
+				total_natural_height += row.user_size;
 			}
 		} else {
-			if (ai.expanders == 0 && ai.shrinkers == 0) {
+			if (row.expanders == 0 && row.shrinkers == 0) {
 				inelastic_rows++;
-				inelastic_height += ai.natural_size;
+				inelastic_height += row.natural_size;
 			}
-			highest_row_height = std::max (highest_row_height, ai.natural_size);
+			highest_row_height = std::max (highest_row_height, row.natural_size);
 
 			if (!row_homogenous) {
-				total_natural_height += ai.natural_size;
+				total_natural_height += row.natural_size;
 			}
 		}
 
 	}
 
-	for (auto & ai : col_info) {
+	for (auto & col : col_info) {
 
-		ai.natural_size += ai.spacing;
-
-		if (ai.user_size) {
-			widest_column_width = std::max (widest_column_width, ai.user_size);
-			inelastic_width += ai.user_size;
+		if (col.user_size) {
+			widest_column_width = std::max (widest_column_width, col.user_size);
+			inelastic_width += col.user_size;
 			inelastic_cols++;
 			if (!col_homogenous) {
-				total_natural_width += ai.user_size;
+				total_natural_width += col.user_size;
 			}
 
 		} else {
-			if (ai.expanders == 0 && ai.shrinkers == 0) {
+			if (col.expanders == 0 && col.shrinkers == 0) {
 				inelastic_cols++;
-				inelastic_width += ai.natural_size;
+				inelastic_width += col.natural_size;
 			}
-			widest_column_width = std::max (widest_column_width, ai.natural_size);
+			widest_column_width = std::max (widest_column_width, col.natural_size);
 
 			if (!col_homogenous) {
-				total_natural_width += ai.natural_size;
+				total_natural_width += col.natural_size;
 			}
 		}
 	}
@@ -361,17 +357,17 @@ Table::compute (Rect const & within)
 	if (DEBUG_ENABLED(DEBUG::CanvasTable)) {
 		DEBUG_STR_DECL(a);
 		int n = 0;
-		for (auto& ai : row_info) {
-			DEBUG_STR_APPEND(a, string_compose ("row %1: height %2\n", n+1, ai.natural_size));
+		for (auto const & row : row_info) {
+			DEBUG_STR_APPEND(a, string_compose ("row %1: height %2\n", n+1, row.natural_size));
 			++n;
 		}
 		DEBUG_TRACE (DEBUG::CanvasTable, DEBUG_STR(a).str());
 
 		DEBUG_STR_DECL(b);
 		n = 0;
-		for (auto& ai : col_info) {
+		for (auto const & col : col_info) {
 
-			DEBUG_STR_APPEND(b, string_compose ("col %1: width %2\n", n, ai.natural_size));
+			DEBUG_STR_APPEND(b, string_compose ("col %1: width %2\n", n, col.natural_size));
 			++n;
 		}
 		DEBUG_TRACE (DEBUG::CanvasTable, DEBUG_STR(b).str());
