@@ -27,7 +27,7 @@
 
 #include "ardour/triggerbox.h"
 
-#include "canvas/box.h"
+#include "canvas/table.h"
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 
@@ -57,6 +57,8 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 	ArdourCanvas::Polygon* play_shape;
 	ArdourCanvas::Text*    name_text;
 
+	void _size_allocate (ArdourCanvas::Rect const &);
+
   private:
 	ARDOUR::Trigger& _trigger;
 	double poly_size;
@@ -64,10 +66,10 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 
 	PBD::ScopedConnection trigger_prop_connection;
 	void prop_change (PBD::PropertyChange const & change);
-	void draw_play_button ();
+	void shape_play_button ();
 };
 
-class TriggerBoxUI : public ArdourCanvas::Box
+class TriggerBoxUI : public ArdourCanvas::Table
 {
    public:
 	TriggerBoxUI (ArdourCanvas::Item* parent, ARDOUR::TriggerBox&);

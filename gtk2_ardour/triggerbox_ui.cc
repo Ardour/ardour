@@ -96,7 +96,24 @@ TriggerEntry::~TriggerEntry ()
 }
 
 void
-TriggerEntry::draw_play_button ()
+TriggerEntry::_size_allocate (Rect const & alloc)
+{
+	const double scale = UIConfiguration::instance().get_ui_scale();
+
+	Rectangle::_size_allocate (alloc);
+
+	const Distance height = get().height();
+
+	poly_size = height - (poly_margin * 2.);
+
+	shape_play_button ();
+	play_button->set (ArdourCanvas::Rect (poly_margin/2., poly_margin/2., poly_size + ((poly_margin/2.) * 2.), height - ((poly_margin/2.) * 2.)));
+
+	name_text->set_position (Duple (play_button->get().width() + (2. * scale), poly_margin));
+}
+
+void
+TriggerEntry::shape_play_button ()
 {
 	Points p;
 
@@ -143,7 +160,7 @@ TriggerEntry::prop_change (PropertyChange const & change)
 	}
 
 	if (need_pb) {
-		draw_play_button ();
+		shape_play_button ();
 	}
 }
 
@@ -152,14 +169,13 @@ TriggerEntry::prop_change (PropertyChange const & change)
 /* ---------------------------- */
 
 TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
-	: Box (parent, Box::Vertical)
+	: Table (parent)
 	, _triggerbox (tb)
 	, file_chooser (0)
 	, _context_menu (0)
 {
 	set_homogenous (true);
-	set_spacing (4);
-	set_padding (4);
+	set_row_spacing (4);
 	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
 	set_fill (true);
 
@@ -175,6 +191,7 @@ TriggerBoxUI::build ()
 {
 	Trigger* t;
 	uint64_t n = 0;
+	uint32_t row = 0;
 
 	// clear_items (true);
 
@@ -186,8 +203,7 @@ TriggerBoxUI::build ()
 			break;
 		}
 		TriggerEntry* te = new TriggerEntry (canvas(), *t);
-		te->set_pack_options (PackOptions (PackFill|PackExpand));
-		add (te);
+		attach (te, 0, row++, PackExpand, PackExpand);
 
 		_slots.push_back (te);
 
