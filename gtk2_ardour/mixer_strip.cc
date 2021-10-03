@@ -87,6 +87,7 @@
 #include "route_group_menu.h"
 #include "meter_patterns.h"
 #include "ui_config.h"
+#include "triggerbox_ui.h"
 
 #include "pbd/i18n.h"
 
@@ -179,6 +180,7 @@ MixerStrip::init ()
 	group_menu = 0;
 	route_ops_menu = 0;
 	_width_owner = 0;
+	trigger_display = 0;
 
 	/* the length of this string determines the width of the mixer strip when it is set to `wide' */
 	longest_label = "longest label";
@@ -2094,5 +2096,23 @@ MixerStrip::hide_master_spacer (bool yn)
 		spacer.show();
 	} else {
 		spacer.hide();
+	}
+}
+
+void
+MixerStrip::toggle_trigger_display ()
+{
+	if (!trigger_display) {
+		return;
+	}
+
+	if (trigger_display->get_parent() == &global_vpacker) {
+		global_vpacker.remove (*trigger_display);
+		global_vpacker.pack_start (processor_box, true, true);
+		global_vpacker.reorder_child (processor_box, 4);
+	} else {
+		global_vpacker.remove (processor_box);
+		global_vpacker.pack_start (*trigger_display, true, true);
+		global_vpacker.reorder_child (*trigger_display, 4);
 	}
 }

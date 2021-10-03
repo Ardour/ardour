@@ -81,6 +81,7 @@ class MotionController;
 class RouteGroupMenu;
 class ArdourWindow;
 class AutomationController;
+class TriggerBoxWidget;
 
 class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 {
@@ -151,6 +152,8 @@ public:
 
 	void set_selected (bool yn);
 
+	void toggle_trigger_display ();
+
 	static MixerStrip* entered_mixer_strip() { return _entered_mixer_strip; }
 
 protected:
@@ -186,6 +189,7 @@ private:
 	ProcessorBox processor_box;
 	GainMeter    gpm;
 	PannerUI     panners;
+	TriggerBoxWidget* trigger_display;
 
 	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
 
