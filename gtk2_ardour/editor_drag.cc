@@ -2332,7 +2332,7 @@ RegionRippleDrag::remove_unselected_from_views(timecnt_t const & amount, bool mo
 				rv->region()->set_position (rv->region()->position() + amount);
 			} else {
 				// restore the view to match the underlying region's original position
-#pragma GCC warning("NUTEMPO ALERT paul test this code in 5.x") /* how can this work ... amount used to be in samples but ::move() expect pixels */
+#warning NUTEMPO ALERT paul test this code in 5.x /* how can this work ... amount used to be in samples but ::move() expect pixels */
 				//rv->move(-amount, 0);	// second parameter is y delta - seems 0 is OK
 			}
 
@@ -3640,7 +3640,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 			_marker->reset_tempo (map->set_tempo (tempo, pos));
 
-#pragma GCC warning("paul, need a return status from set_tempo")
+#warning paul, need a return status from set_tempo
 #if 0
 			if (!) {
 				aborted (true);
@@ -3819,7 +3819,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 		/* adjust previous tempo to match pointer sample */
-#pragma GCC warning("NUTEMPO need to implement this")
+#warning NUTEMPO need to implement this
 		// _editor->session()->tempo_map().gui_stretch_tempo (_tempo, map.sample_at (_grab_qn), pf, _grab_qn, map.quarters_at_sample (pf));
 	}
 
@@ -3902,7 +3902,7 @@ BBTRulerDrag::aborted (bool moved)
 	TempoMap::abort_update ();
 }
 
-#pragma GCC warning("NUTEMPO fixme no tempo twist drag for now")
+#warning NUTEMPO fixme no tempo twist drag for now
 #if 0
 
 TempoTwistDrag::TempoTwistDrag (Editor* e, ArdourCanvas::Item* i)
@@ -4102,7 +4102,7 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	timepos_t const pos = adjusted_current_time (event, false);
-#pragma GCC warning("NUTEMPO implement this")
+#warning NUTEMPO implement this
 	// map->gui_stretch_tempo_end (&map->tempo_section_at_sample (_tempo->sample() - 1), map.sample_at_quarter_note (_grab_qn), pf);
 
 	ostringstream sstr;
@@ -5598,7 +5598,7 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 
 #ifndef USE_RUBBERBAND
 		// Soundtouch uses fraction / 100 instead of normal (/ 1)
-#pragma GCC warning("NUTEMPO timefx request now uses a rational type so this needs revisiting")
+#warning NUTEMPO timefx request now uses a rational type so this needs revisiting
 		if (_primary->region()->data_type() == DataType::AUDIO) {
 			ratio = ((newlen - _primary->region()->length()) / newlen) * 100;
 		}
