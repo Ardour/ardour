@@ -70,6 +70,7 @@ namespace ARDOUR {
 	class PortInsert;
 	class Bundle;
 	class Plugin;
+	class TriggerBox;
 }
 namespace Gtk {
 	class Window;
@@ -153,6 +154,7 @@ public:
 	void set_selected (bool yn);
 
 	void toggle_trigger_display ();
+	void create_trigger_display (boost::shared_ptr<ARDOUR::TriggerBox>);
 
 	static MixerStrip* entered_mixer_strip() { return _entered_mixer_strip; }
 

@@ -2100,6 +2100,14 @@ MixerStrip::hide_master_spacer (bool yn)
 }
 
 void
+MixerStrip::create_trigger_display (boost::shared_ptr<TriggerBox> tb)
+{
+	if (!trigger_display) {
+		trigger_display = new TriggerBoxWidget (*(tb.get())); /* XXX fix to use shared ptr */
+	}
+}
+
+void
 MixerStrip::toggle_trigger_display ()
 {
 	if (!trigger_display) {
@@ -2108,11 +2116,9 @@ MixerStrip::toggle_trigger_display ()
 
 	if (trigger_display->get_parent() == &global_vpacker) {
 		global_vpacker.remove (*trigger_display);
-		global_vpacker.pack_start (processor_box, true, true);
-		global_vpacker.reorder_child (processor_box, 4);
 	} else {
-		global_vpacker.remove (processor_box);
 		global_vpacker.pack_start (*trigger_display, true, true);
+		trigger_display->show ();
 		global_vpacker.reorder_child (*trigger_display, 4);
 	}
 }

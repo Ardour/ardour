@@ -3808,7 +3808,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 	boost::shared_ptr<Return> retrn;
 	boost::shared_ptr<PluginInsert> plugin_insert;
 	boost::shared_ptr<PortInsert> port_insert;
-	boost::shared_ptr<TriggerBox> triggerbox;
+
 #ifdef HAVE_BEATBOX
 	boost::shared_ptr<BeatBox> beatbox;
 #endif
@@ -3896,26 +3896,6 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 		}
 
 		gidget = plugin_ui;
-
-	} else if ((triggerbox = boost::dynamic_pointer_cast<TriggerBox> (processor)) != 0) {
-
-		if (!ARDOUR_UI_UTILS::engine_is_running ()) {
-			return 0;
-		}
-
-		TriggerBoxWindow* tw;
-
-		Window* w = get_processor_ui (triggerbox);
-
-		if (w == 0) {
-			tw = new TriggerBoxWindow (*(triggerbox.get())); /* XXX fix me to use shared ptr */
-			set_processor_ui (triggerbox, tw);
-
-		} else {
-			tw = dynamic_cast<TriggerBoxWindow *> (w);
-		}
-
-		gidget = tw;
 
 	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (processor)) != 0) {
 
@@ -4311,6 +4291,23 @@ ProcessorBox::edit_aux_send (boost::shared_ptr<Processor> processor)
 	return true;
 }
 
+bool
+ProcessorBox::edit_triggerbox (boost::shared_ptr<Processor> processor)
+{
+	boost::shared_ptr<TriggerBox> tb;
+
+	if ((tb = boost::dynamic_pointer_cast<TriggerBox> (processor)) == 0) {
+		return false;
+	}
+
+	if (_parent_strip) {
+		_parent_strip->create_trigger_display (tb);
+		_parent_strip->toggle_trigger_display ();
+	}
+
+	return true;
+}
+
 void
 ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 {
@@ -4318,6 +4315,9 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		return;
 	}
 	if (edit_aux_send (processor)) {
+		return;
+	}
+	if (edit_triggerbox (processor)) {
 		return;
 	}
 	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
