@@ -108,8 +108,8 @@ Table::child_changed (bool bbox_changed)
 void
 Table::compute_bounding_box() const
 {
-	_bounding_box = Rect();
 	if (cells.empty()) {
+		_bounding_box = Rect();
 		bb_clean ();
 		return;
 	}
@@ -629,6 +629,8 @@ Table::compute (Rect const & within)
 	/* set bounding box so that we don't have to do it again in ::compute_bounding_box() */
 
 	_bounding_box = Rect (0, 0, hpos, vpos);
+
+	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("table bbox in compute() %1\n", _bounding_box));
 
 	/* return our size */
 
