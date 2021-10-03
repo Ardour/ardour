@@ -85,6 +85,7 @@ class TriggerUI : public ArdourCanvas::Table, public sigc::trackable
 	void trigger_changed (PBD::PropertyChange);
 
 	bool follow_action_button_event (GdkEvent*);
+	bool legato_button_event (GdkEvent*);
 
 	PBD::ScopedConnectionList trigger_connections;
 

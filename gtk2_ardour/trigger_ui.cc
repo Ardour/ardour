@@ -103,7 +103,8 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 
 	_follow_action_button = new ArdourButton ();
 	_follow_action_button->set_text (_("Follow Action"));
-
+	_follow_action_button->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
+	
 	follow_action_button = new ArdourCanvas::Widget (canvas(), *_follow_action_button);
 	follow_action_button->name = "FollowAction";
 	_follow_action_button->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
@@ -131,7 +132,8 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	launch_text = new Text (canvas());
 	launch_text->set (_("Launch"));
 	launch_text->name = "LaunchText";
-	launch_text->set_outline_color (UIConfiguration::instance().color (X_("normal:foreground")));
+	launch_text->set_color (Gtkmm2ext::contrasting_text_color (UIConfiguration::instance().color (X_("theme:bg"))));
+	launch_text->set_font_description (UIConfiguration::instance ().get_NormalBoldFont ());
 
 	_launch_style_button = new ArdourDropdown();
 	_launch_style_button->set_sizing_text (longest_launch);
@@ -146,13 +148,17 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 
 	_legato_button = new ArdourButton();
 	_legato_button->set_text (_("Legato"));
+	_legato_button->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
+	_legato_button->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::legato_button_event)));
+
 	legato_button = new ArdourCanvas::Widget (canvas(), *_legato_button);
 	legato_button->name = "Legato";
 
 	quantize_text = new Text (canvas());
 	quantize_text->set (_("Quantize"));
 	quantize_text->name = "QuantizeText";
-	quantize_text->set_outline_color (Gtkmm2ext::contrasting_text_color (UIConfiguration::instance().color (X_("theme:bg"))));
+	quantize_text->set_color (launch_text->color());
+	quantize_text->set_font_description (UIConfiguration::instance ().get_NormalBoldFont ());
 
 	_quantize_button = new ArdourDropdown;
 
@@ -182,18 +188,19 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	velocity = new Rectangle (canvas());
 	velocity->name = "VelocityRect";
 	velocity->set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
-	velocity->set_outline_color (UIConfiguration::instance().color (X_("normal:foreground")));
+	velocity->set_outline_color (UIConfiguration::instance().color (X_("neutral:foreground")));
 
 	velocity_text = new Text (velocity);
 	velocity_text->set (_("100 %"));
 	velocity_text->name = "VelocityText";
-	velocity_text->set_outline_color (velocity->fill_color());
+	velocity_text->set_color (quantize_text->color());
 	velocity_text->set_font_description (UIConfiguration::instance ().get_NormalFont ());
 
 	velocity_label = new Text (canvas());
 	velocity_label->set (_("Velocity"));
 	velocity_label->name = "VelocityLabel";
-	velocity_label->set_outline_color (Gtkmm2ext::contrasting_text_color (UIConfiguration::instance().color (X_("theme:bg"))));
+	velocity_label->set_color (quantize_text->color());
+	velocity_label->set_font_description (UIConfiguration::instance ().get_NormalBoldFont ());
 
 	const double scale = UIConfiguration::instance().get_ui_scale();
 	const Distance spacing = 12. * scale;
@@ -261,6 +268,21 @@ TriggerUI::follow_action_button_event (GdkEvent* ev)
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		trigger.set_use_follow (!trigger.use_follow());
+		return true;
+
+	default:
+		break;
+	}
+
+	return false;
+}
+
+bool
+TriggerUI::legato_button_event (GdkEvent* ev)
+{
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		trigger.set_legato (!trigger.legato());
 		return true;
 
 	default:
@@ -353,6 +375,10 @@ TriggerUI::trigger_changed (PropertyChange pc)
 
 	if (pc.contains (Properties::use_follow)) {
 		_follow_action_button->set_active_state (trigger.use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	}
+
+	if (pc.contains (Properties::legato)) {
+		_legato_button->set_active_state (trigger.legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::launch_style)) {
