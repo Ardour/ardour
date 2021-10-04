@@ -916,7 +916,11 @@ GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 	}
 #endif
 
-	Rect r (a.get_x(), a.get_y(), a.get_width(), a.get_height());
+	/* x, y in a are relative to the parent. When passing this down to the
+	   root group, this origin is effectively 0,0
+	*/
+
+	Rect r (0., 0., a.get_width(), a.get_height());
 	_root.size_allocate (r);
 }
 
