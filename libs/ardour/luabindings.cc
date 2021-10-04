@@ -607,6 +607,7 @@ LuaBindings::common (lua_State* L)
 		.addData ("normal", &Evoral::ParameterDescriptor::normal)
 		.addData ("toggled", &Evoral::ParameterDescriptor::toggled)
 		.addData ("logarithmic", &Evoral::ParameterDescriptor::logarithmic)
+		.addData ("rangesteps", &Evoral::ParameterDescriptor::rangesteps)
 		.endClass ()
 
 		.beginClass <Temporal::Range> ("Range")
