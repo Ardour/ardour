@@ -1631,7 +1631,7 @@ VST3PI::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) cons
 	desc.normal       = _controller->normalizedParamToPlain (id, p.normal);
 	desc.toggled      = 1 == p.steps;
 	desc.logarithmic  = false;
-	desc.integer_step = p.steps > 1 ? p.steps : 0;
+	desc.integer_step = p.steps > 1 && (desc.upper - desc.lower) == p.steps;
 	desc.sr_dependent = false;
 	desc.enumeration  = p.is_enum;
 	desc.label        = p.label;
@@ -1639,6 +1639,9 @@ VST3PI::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) cons
 		desc.unit = ARDOUR::ParameterDescriptor::DB;
 	} else if (p.unit == "Hz") {
 		desc.unit = ARDOUR::ParameterDescriptor::HZ;
+	}
+	if (p.steps > 1) {
+		desc.rangesteps = 1 + p.steps;
 	}
 
 	FUnknownPtr<IEditControllerExtra> extra_ctrl (_controller);
