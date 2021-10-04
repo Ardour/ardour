@@ -776,20 +776,41 @@ timepos_t::operator+= (Temporal::BBT_Offset const & offset)
 timepos_t
 timepos_t::operator+(timecnt_t const & d) const
 {
-	if (d.time_domain() == AudioTime) {
-		return operator+ (timepos_t::from_superclock (d.superclocks()));
+	if (d.time_domain() == time_domain()) {
+		if (time_domain() == AudioTime) {
+			return operator+ (timepos_t::from_superclock (d.superclocks()));
+		} else {
+			return operator+ (timepos_t::from_ticks (d.ticks()));
+		}
 	}
 
-	return operator+ (timepos_t::from_ticks (d.ticks()));
+	TempoMap::SharedPtr tm (TempoMap::use());
+
+	timecnt_t dur_at_this = tm->convert_duration (d, *this, time_domain());
+
+	assert (dur_at_this.time_domain() == time_domain());
+
+	return operator+ (dur_at_this);
 }
 
 timepos_t &
 timepos_t::operator+=(timecnt_t const & d)
 {
-	if (d.time_domain() == AudioTime) {
-		return operator+= (timepos_t::from_superclock (d.superclocks()));
+	if (d.time_domain() == time_domain()) {
+		if (time_domain() == AudioTime) {
+			return operator+= (timepos_t::from_superclock (d.superclocks()));
+		} else {
+			return operator+= (timepos_t::from_ticks (d.ticks()));
+		}
 	}
-	return operator+= (timepos_t::from_ticks (d.ticks()));
+
+	TempoMap::SharedPtr tm (TempoMap::use());
+
+	timecnt_t dur_at_this = tm->convert_duration (d, *this, time_domain());
+
+	assert (dur_at_this.time_domain() == time_domain());
+
+	return operator+= (dur_at_this);
 }
 
 /* */
