@@ -210,6 +210,7 @@ AudioEngine::sample_rate_change (pframes_t nframes)
 int
 AudioEngine::buffer_size_change (pframes_t bufsiz)
 {
+	Glib::Threads::Mutex::Lock pl (_process_lock);
 	set_port_buffer_sizes (bufsiz);
 
 	if (_session) {
