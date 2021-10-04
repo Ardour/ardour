@@ -567,7 +567,7 @@ TriggerBoxWidget::on_map ()
 void
 TriggerBoxWidget::on_unmap ()
 {
-	GtkCanvas::on_map ();
+	GtkCanvas::on_unmap ();
 	ui->stop_updating ();
 }
 
