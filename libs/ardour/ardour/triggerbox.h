@@ -79,6 +79,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	/* this accepts timepos_t because the origin is assumed to be the start */
 	virtual void set_length (timepos_t const &) = 0;
 
+	virtual double position_as_fraction() const = 0;
+
 	void set_use_follow (bool yn);
 	bool use_follow() const { return _use_follow; }
 
@@ -209,6 +211,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	timepos_t end() const;            /* offset from start of data */
 	timepos_t current_length() const; /* offset from start of data */
 	timepos_t natural_length() const; /* offset from start of data */
+
+	double position_as_fraction() const;
 
 	int set_region (boost::shared_ptr<Region>);
 	void startup ();

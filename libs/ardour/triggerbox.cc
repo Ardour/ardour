@@ -434,6 +434,16 @@ AudioTrigger::jump_stop ()
 	retrigger ();
 }
 
+double
+AudioTrigger::position_as_fraction () const
+{
+	if (!active()) {
+		return 0.0;
+	}
+
+	return read_index / (double) usable_length;
+}
+
 XMLNode&
 AudioTrigger::get_state (void)
 {
