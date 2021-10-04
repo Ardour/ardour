@@ -37,6 +37,7 @@
 #include "triggerbox_ui.h"
 #include "trigger_ui.h"
 #include "public_editor.h"
+#include "timers.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -50,6 +51,7 @@ using namespace PBD;
 TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	: ArdourCanvas::Rectangle (canvas)
 	, _trigger (t)
+	, active_bar_width (0.)
 {
 	const double scale = UIConfiguration::instance().get_ui_scale();
 	const double width = 150. * scale;
@@ -93,6 +95,41 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 
 TriggerEntry::~TriggerEntry ()
 {
+}
+
+void
+TriggerEntry::render (Rect const & area, Cairo::RefPtr<Cairo::Context> ctxt) const
+{
+	Rectangle::render (area, ctxt);
+
+	if (active_bar_width) {
+		Rect r (get());
+		Rect active (r.x0 + 1, r.y0 + 1, r.x0 + active_bar_width - 1, r.y1 - 1);
+		Rect self (item_to_window (active));
+		const Rect draw = self.intersection (area);
+		ctxt->save ();
+		Gtkmm2ext::set_source_rgba (ctxt, 0xff000088);
+		ctxt->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
+		ctxt->fill ();
+		ctxt->restore ();
+	}
+}
+
+void
+TriggerEntry::maybe_update ()
+{
+	double nbw;
+
+	if (!_trigger.active()) {
+		nbw = 0;
+	} else {
+		nbw = _trigger.position_as_fraction () * _allocation.width();
+	}
+
+	if (nbw != active_bar_width) {
+		active_bar_width = nbw;
+		redraw ();
+	}
 }
 
 void
@@ -483,6 +520,29 @@ TriggerBoxUI::sample_chosen (int response, uint64_t n)
 	// _triggerbox.trigger (n)->set_length (timecnt_t (Temporal::Beats (4, 0)));
 }
 
+void
+TriggerBoxUI::start_updating ()
+{
+	std::cerr << "start updaring\n";
+	update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &TriggerBoxUI::rapid_update));
+}
+
+void
+TriggerBoxUI::stop_updating ()
+{
+	std::cerr << "stop updaring\n";
+	update_connection.disconnect ();
+}
+
+void
+TriggerBoxUI::rapid_update ()
+{
+	for (Slots::iterator s = _slots.begin(); s != _slots.end(); ++s) {
+		(*s)->maybe_update ();
+	}
+}
+
+
 /* ------------ */
 
 TriggerBoxWidget::TriggerBoxWidget (TriggerBox& tb)
@@ -496,6 +556,21 @@ TriggerBoxWidget::size_request (double& w, double& h) const
 {
 	ui->size_request (w, h);
 }
+
+void
+TriggerBoxWidget::on_map ()
+{
+	GtkCanvas::on_map ();
+	ui->start_updating ();
+}
+
+void
+TriggerBoxWidget::on_unmap ()
+{
+	GtkCanvas::on_map ();
+	ui->stop_updating ();
+}
+
 
 /* ------------ */
 

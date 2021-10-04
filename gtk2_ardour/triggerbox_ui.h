@@ -58,11 +58,14 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 	ArdourCanvas::Text*    name_text;
 
 	void _size_allocate (ArdourCanvas::Rect const &);
+	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
+	void maybe_update ();
 
   private:
 	ARDOUR::Trigger& _trigger;
 	double poly_size;
 	double poly_margin;
+	double active_bar_width;
 
 	PBD::ScopedConnection trigger_prop_connection;
 	void prop_change (PBD::PropertyChange const & change);
@@ -76,6 +79,8 @@ class TriggerBoxUI : public ArdourCanvas::Table
 	~TriggerBoxUI ();
 
 	void edit_trigger (uint64_t n);
+	void start_updating ();
+	void stop_updating ();
 
    private:
 	ARDOUR::TriggerBox& _triggerbox;
@@ -97,6 +102,9 @@ class TriggerBoxUI : public ArdourCanvas::Table
 	void set_quantization (uint64_t slot, Temporal::BBT_Offset const &);
 
 	void build ();
+	void rapid_update ();
+
+	sigc::connection update_connection;
 };
 
 
@@ -105,6 +113,9 @@ class TriggerBoxWidget : public ArdourCanvas::GtkCanvas
   public:
 	TriggerBoxWidget (ARDOUR::TriggerBox& tb);
 	void size_request (double& w, double& h) const;
+
+	void on_map ();
+	void on_unmap ();
 
   private:
 	TriggerBoxUI* ui;
