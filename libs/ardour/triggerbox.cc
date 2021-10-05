@@ -483,7 +483,7 @@ AudioTrigger::set_start (timepos_t const & s)
 void
 AudioTrigger::set_end (timepos_t const & e)
 {
-	set_length (timepos_t (e.samples() - _start_offset));
+	set_length (timecnt_t (e.samples() - _start_offset, timepos_t (_start_offset)));
 }
 
 void
@@ -505,7 +505,7 @@ AudioTrigger::end() const
 }
 
 void
-AudioTrigger::set_length (timepos_t const & newlen)
+AudioTrigger::set_length (timecnt_t const & newlen)
 {
 	using namespace RubberBand;
 	using namespace Temporal;
@@ -520,7 +520,7 @@ AudioTrigger::set_length (timepos_t const & newlen)
 
 	load_data (ar);
 
-	if (newlen == timepos_t (_region->length_samples())) {
+	if (newlen == _region->length()) {
 		/* no stretch required */
 		return;
 	}
@@ -540,12 +540,15 @@ AudioTrigger::set_length (timepos_t const & newlen)
 
 	if (newlen.time_domain() == AudioTime) {
 		new_ratio = (double) newlen.samples() / data_length;
+		cerr << "gonna stretch, ratio is " << new_ratio << endl;
 	} else {
 		/* XXX what to use for position ??? */
 		timecnt_t l (newlen, timepos_t (AudioTime));
 		const timecnt_t dur = TempoMap::use()->convert_duration (l, timepos_t (0), AudioTime);
 		new_ratio = (double) dur.samples() / data_length;
 	}
+
+
 
 	stretcher.setTimeRatio (new_ratio);
 
@@ -685,6 +688,8 @@ AudioTrigger::natural_length() const
 int
 AudioTrigger::set_region (boost::shared_ptr<Region> r)
 {
+	using namespace Temporal;
+
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
 	if (!ar) {
@@ -695,7 +700,10 @@ AudioTrigger::set_region (boost::shared_ptr<Region> r)
 
 	/* this will load data, but won't stretch it for now */
 
-	set_length (timepos_t::from_superclock (r->length ().magnitude()));
+	TempoMap::SharedPtr tm (TempoMap::use());
+	timecnt_t two_bars = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (4, 0, 0));
+
+	set_length (two_bars);
 
 	PropertyChanged (ARDOUR::Properties::name);
 
