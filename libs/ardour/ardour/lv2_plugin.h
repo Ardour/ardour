@@ -30,6 +30,8 @@
 #include <vector>
 #include <boost/enable_shared_from_this.hpp>
 
+#include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
+
 #include "ardour/plugin.h"
 #include "ardour/plugin_scan_result.h"
 #include "ardour/uri_map.h"
@@ -171,6 +173,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	const ParameterDescriptor& get_property_descriptor(uint32_t id) const;
 	Variant                    get_property_value (uint32_t) const;
 	void                       announce_property_values();
+
+	static PBD::Signal4<void, boost::weak_ptr<PluginInsert>, LV2_URID, LV2_URID, LV2_Feature const* const*> Request;
 
 	/* LV2 Option Options */
 	static void set_global_ui_background_color (uint32_t c) {
@@ -337,6 +341,17 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature    _queue_draw_feature;
 	LV2_Feature    _midnam_feature;
 	LV2_Feature    _bankpatch_feature;
+#endif
+
+#ifdef HAVE_LV2_1_17_2
+	LV2UI_Request_Value _lv2ui_request_value;
+	LV2_Feature         _lv2ui_request_feature;
+
+	static LV2UI_Request_Value_Status
+	request_value(void*                     handle,
+	              LV2_URID                  key,
+	              LV2_URID                  type,
+	              const LV2_Feature* const* features);
 #endif
 
 	// Options passed to plugin

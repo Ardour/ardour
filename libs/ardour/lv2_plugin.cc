@@ -64,6 +64,7 @@
 #include "ardour/debug.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/midi_patch_manager.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
@@ -137,6 +138,8 @@ uint32_t      LV2Plugin::_ui_foreground_color  = 0xffffffff; // RGBA
 uint32_t      LV2Plugin::_ui_contrasting_color = 0x33ff33ff; // RGBA
 float         LV2Plugin::_ui_scale_factor      = 1.0;
 unsigned long LV2Plugin::_ui_transient_win_id  = 0;
+
+PBD::Signal4<void, boost::weak_ptr<PluginInsert>, LV2_URID, LV2_URID, LV2_Feature const* const*> LV2Plugin::Request;
 
 class LV2World : boost::noncopyable {
 public:
@@ -270,6 +273,19 @@ set_port_value(const char* port_symbol,
 		self->PresetPortSetValue (port_index, *(const float*)value); /* EMIT SIGNAL */
 	}
 }
+
+#ifdef HAVE_LV2_1_17_2
+LV2UI_Request_Value_Status
+LV2Plugin::request_value(void*                     handle,
+                         LV2_URID                  key,
+                         LV2_URID                  type,
+                         const LV2_Feature* const* features)
+{
+	LV2Plugin* plugin = (LV2Plugin*)handle;
+	Request (plugin->plugin_insert ()->weak_ptr (), key, type, features); /* EMIT SIGNAL */
+	return LV2UI_REQUEST_VALUE_SUCCESS;
+}
+#endif
 
 #ifdef LV2_EXTENDED
 /* inline display extension */
@@ -495,7 +511,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	lilv_node_free(state_uri);
 	lilv_node_free(state_iface_uri);
 
-	_features    = (LV2_Feature**)calloc(14, sizeof(LV2_Feature*));
+	_features    = (LV2_Feature**)calloc(15, sizeof(LV2_Feature*));
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_make_path_feature;
@@ -508,6 +524,14 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 
 	lv2_atom_forge_init(&_impl->forge, _uri_map.urid_map());
 	lv2_atom_forge_init(&_impl->ui_forge, _uri_map.urid_map());
+
+#ifdef HAVE_LV2_1_17_2
+	_lv2ui_request_value.handle  = this;
+	_lv2ui_request_value.request = LV2Plugin::request_value;
+	_lv2ui_request_feature.URI   = LV2_UI__requestValue;
+	_lv2ui_request_feature.data  = &_lv2ui_request_value;
+	_features[n_features++] = &_lv2ui_request_feature;
+#endif
 
 #ifdef LV2_EXTENDED
 	_impl->queue_draw = (LV2_Inline_Display*)
@@ -3623,6 +3647,9 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 				if (!strcmp (rf, LV2_BUF_SIZE__boundedBlockLength)) { ok = true; }
 				if (!strcmp (rf, "http://lv2plug.in/ns/ext/buf-size#coarseBlockLength" /*LV2_BUF_SIZE__coarseBlockLength*/)) { ok = true; }
 				if (!strcmp (rf, LV2_OPTIONS__options)) { ok = true; }
+#ifdef HAVE_LV2_1_17_2
+				if (!strcmp (rf, LV2_UI__requestValue)) { ok = true; }
+#endif
 #ifdef LV2_EXTENDED
 				if (!strcmp (rf, LV2_INLINEDISPLAY__queue_draw)) { ok = true; }
 				if (!strcmp (rf, LV2_MIDNAM__update)) { ok = true; }
