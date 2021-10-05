@@ -3385,7 +3385,6 @@ TempoMap::set_state_3x (const XMLNode& node)
 			}
 
 			Meter m (lms.divisions_per_bar, lms.note_type);
-			cerr << "Add meter @ sample " << lms.sample << endl;
 			set_meter (m, timepos_t (lms.sample));
 		}
 	}
