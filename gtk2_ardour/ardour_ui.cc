@@ -89,6 +89,7 @@
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
@@ -108,6 +109,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/ltc_file_reader.h"
+#include "ardour/lv2_plugin.h"
 #include "ardour/monitor_control.h"
 #include "ardour/midi_track.h"
 #include "ardour/port.h"
@@ -174,6 +176,7 @@
 #include "location_ui.h"
 #include "lua_script_manager.h"
 #include "luawindow.h"
+#include "lv2_plugin_ui.h"
 #include "main_clock.h"
 #include "missing_file_dialog.h"
 #include "missing_plugin_dialog.h"
@@ -436,6 +439,11 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	/* handle dialog requests */
 
 	ARDOUR::Session::Dialog.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_dialog, this, _1), gui_context());
+
+#ifdef HAVE_LV2_1_17_2
+	ARDOUR::LV2Plugin::Request.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::lv2_plugin_request, this, _1, _2, _3, _4), gui_context());
+	LV2PluginUI::CatchDeletion.connect_same_thread (forever_connections, boost::bind (&delete_when_idle<LV2PluginUI>, _1));
+#endif
 
 	/* handle pending state with a dialog (PROBLEM: needs to return a value and thus cannot be x-thread) */
 

@@ -66,6 +66,16 @@ public:
 	int package (Gtk::Window&);
 	void grab_focus ();
 
+#ifdef HAVE_LV2_1_17_2
+	static LV2UI_Request_Value_Status
+	request_value(void*                     handle,
+	              LV2_URID                  key,
+	              LV2_URID                  type,
+	              const LV2_Feature* const* features);
+
+	static PBD::Signal1<void, LV2PluginUI*> CatchDeletion;
+#endif
+
 private:
 
 	void control_changed (uint32_t);
@@ -88,6 +98,7 @@ private:
 #ifdef HAVE_LV2_1_17_2
 	LV2UI_Request_Value                  _lv2ui_request_value;
 	LV2_Feature                          _lv2ui_request_feature;
+	std::set<uint32_t>                   _active_parameter_requests;
 #endif
 	struct lv2_external_ui*              _external_ui_ptr;
 	LV2_Feature                          _parent_feature;
@@ -115,18 +126,14 @@ private:
 	                  uint32_t port_index,
 	                  bool     grabbed);
 
+	void set_path_property (const uint32_t key, ARDOUR::Variant const&);
+
 #ifdef HAVE_LV2_1_17_2
-	static LV2UI_Request_Value_Status
-	request_value(void*                     handle,
-	              LV2_URID                  key,
-	              LV2_URID                  type,
-	              const LV2_Feature* const* features);
+	void request_response (int,
+	                       ARDOUR::ParameterDescriptor const&,
+	                       Gtk::Widget*);
 #endif
 
-	void set_path_property (int,
-	                        const ARDOUR::ParameterDescriptor&,
-	                        Gtk::FileChooserDialog*);
-	std::set<uint32_t> active_parameter_requests;
 
 	void update_timeout();
 

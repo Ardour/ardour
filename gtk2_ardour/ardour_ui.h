@@ -72,6 +72,9 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
+#include "lv2/lv2plug.in/ns/lv2core/lv2.h"
+#include "lv2/lv2plug.in/ns/ext/urid/urid.h"
+
 #include "ardour/ardour.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
@@ -177,6 +180,7 @@ namespace ARDOUR {
 	class Route;
 	class RouteGroup;
 	class Location;
+	class PluginInsert;
 	class ProcessThread;
 }
 
@@ -235,6 +239,8 @@ public:
 	void build_session_from_dialog (SessionDialog&, std::string const& session_name, std::string const& session_path, std::string const& session_template);
 	bool ask_about_loading_existing_session (const std::string& session_path);
 	int load_session_from_startup_fsm ();
+
+	void lv2_plugin_request (boost::weak_ptr<ARDOUR::PluginInsert>, LV2_URID, LV2_URID, LV2_Feature const* const*);
 
 	/// @return true if session was successfully unloaded.
 	int unload_session (bool hide_stuff = false);

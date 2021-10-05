@@ -40,6 +40,8 @@
 #include "ardour/audioengine.h"
 #include "ardour/automation_watch.h"
 #include "ardour/control_protocol_manager.h"
+#include "ardour/lv2_plugin.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
 
@@ -63,6 +65,7 @@
 #include "location_ui.h"
 #include "lua_script_manager.h"
 #include "luawindow.h"
+#include "lv2_plugin_ui.h"
 #include "main_clock.h"
 #include "meterbridge.h"
 #include "meter_patterns.h"
@@ -1032,6 +1035,25 @@ ARDOUR_UI::show_plugin_manager ()
 {
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-plugin-manager");
 	tact->set_active();
+}
+
+void
+ARDOUR_UI::lv2_plugin_request (boost::weak_ptr<PluginInsert> wi, LV2_URID key, LV2_URID type, LV2_Feature const* const* features)
+{
+#ifdef HAVE_LV2_1_17_2
+	boost::shared_ptr<PluginInsert> insert = wi.lock ();
+	if (!insert) {
+		return;
+	}
+	boost::shared_ptr<LV2Plugin> vp = boost::dynamic_pointer_cast<LV2Plugin> (insert->plugin());
+	if (!vp) {
+		return;
+	}
+	LV2PluginUI* lpu = new LV2PluginUI (insert, vp);
+	if (LV2PluginUI::request_value (lpu, key, type, features) != LV2UI_REQUEST_VALUE_SUCCESS) {
+		delete lpu;
+	}
+#endif
 }
 
 bool

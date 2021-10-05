@@ -25,17 +25,18 @@
 
 #include <gtkmm/stock.h>
 
+#include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
+
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
 #include "pbd/error.h"
 
+#include "gtkmm2ext/utils.h"
+
 #include "gui_thread.h"
 #include "lv2_plugin_ui.h"
 #include "timers.h"
-
-#include "gtkmm2ext/utils.h"
-
-#include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
+#include "ardour_message.h"
 
 #include <lilv/lilv.h>
 #include <suil/suil.h>
@@ -47,6 +48,10 @@ using namespace Gtk;
 using namespace PBD;
 
 #define NS_UI "http://lv2plug.in/ns/extensions/ui#"
+
+#ifdef HAVE_LV2_1_17_2
+PBD::Signal1<void, LV2PluginUI*> LV2PluginUI::CatchDeletion;
+#endif
 
 static SuilHost* ui_host = NULL;
 
@@ -121,24 +126,31 @@ LV2PluginUI::touch(void*    controller,
 	}
 }
 
+#ifdef HAVE_LV2_1_17_2
+
 void
-LV2PluginUI::set_path_property (int response,
-                                const ParameterDescriptor& desc,
-                                Gtk::FileChooserDialog*    widget)
+LV2PluginUI::request_response (int                        response,
+                               const ParameterDescriptor& desc,
+                               Gtk::Widget*               widget)
 {
-	if (response == Gtk::RESPONSE_ACCEPT) {
-		plugin->set_property (desc.key, Variant (Variant::PATH, widget->get_filename()));
+	switch (desc.datatype) {
+		case Variant::PATH:
+			if (response == Gtk::RESPONSE_ACCEPT) {
+				set_path_property (desc.key, Variant (Variant::PATH, dynamic_cast<Gtk::FileChooserDialog*> (widget)->get_filename ()));
+			}
+			break;
+		case Variant::BOOL:
+			set_path_property (desc.key, Variant (Variant::BOOL, response == Gtk::RESPONSE_YES));
+			break;
+		default:
+			break;
 	}
-#if 0
-	widget->hide ();
-	delete_when_idle (widget);
-#else
+
 	delete widget;
-#endif
-	active_parameter_requests.erase (desc.key);
+	_active_parameter_requests.erase (desc.key);
+	CatchDeletion (this); /* EMIT SIGNAL */
 }
 
-#ifdef HAVE_LV2_1_17_2
 LV2UI_Request_Value_Status
 LV2PluginUI::request_value(void*                     handle,
                            LV2_URID                  key,
@@ -150,38 +162,61 @@ LV2PluginUI::request_value(void*                     handle,
 	const ParameterDescriptor& desc (me->_lv2->get_property_descriptor(key));
 	if (desc.key == (uint32_t)-1) {
 		return LV2UI_REQUEST_VALUE_ERR_UNKNOWN;
-	} else if (desc.datatype != Variant::PATH) {
-		return LV2UI_REQUEST_VALUE_ERR_UNSUPPORTED;
-	} else if (me->active_parameter_requests.count (key)) {
+	} else if (me->_active_parameter_requests.count (key)) {
 		return LV2UI_REQUEST_VALUE_BUSY;
 	}
-	me->active_parameter_requests.insert (key);
 
-	Gtk::FileChooserDialog* lv2ui_file_dialog = new Gtk::FileChooserDialog(desc.label, FILE_CHOOSER_ACTION_OPEN);
-	Gtkmm2ext::add_volume_shortcuts (*lv2ui_file_dialog);
-	lv2ui_file_dialog->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	lv2ui_file_dialog->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
-	lv2ui_file_dialog->set_default_response(Gtk::RESPONSE_ACCEPT);
+	me->_active_parameter_requests.insert (key);
 
-	/* this assumes  announce_property_values() was called, or
-	 * the plugin has previously sent a patch:Set */
-	const Variant& value = me->_lv2->get_property_value (desc.key);
-	if (value.type() == Variant::PATH) {
-		lv2ui_file_dialog->set_filename (value.get_path());
-	}
+	switch (desc.datatype) {
+		case Variant::PATH:
+			{
+				Gtk::FileChooserDialog* lv2ui_file_dialog = new Gtk::FileChooserDialog(desc.label, FILE_CHOOSER_ACTION_OPEN);
+				Gtkmm2ext::add_volume_shortcuts (*lv2ui_file_dialog);
+				lv2ui_file_dialog->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+				lv2ui_file_dialog->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
+				lv2ui_file_dialog->set_default_response(Gtk::RESPONSE_ACCEPT);
+
+				/* this assumes  announce_property_values() was called, or
+				 * the plugin has previously sent a patch:Set */
+				const Variant& value = me->_lv2->get_property_value (desc.key);
+				if (value.type() == Variant::PATH) {
+					lv2ui_file_dialog->set_filename (value.get_path());
+				}
 
 #if 0 // TODO mime-type, file-extension filter, get from LV2 Parameter Property
-	FileFilter file_ext_filter;
-	file_ext_filter.add_pattern ("*.foo");
-	file_ext_filter.set_name ("Foo File");
-	lv2ui_file_dialog.add_filter (file_ext_filter);
+				FileFilter file_ext_filter;
+				file_ext_filter.add_pattern ("*.foo");
+				file_ext_filter.set_name ("Foo File");
+				lv2ui_file_dialog.add_filter (file_ext_filter);
 #endif
+				lv2ui_file_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*me, &LV2PluginUI::request_response), desc, lv2ui_file_dialog));
+				lv2ui_file_dialog->present();
+			}
+			break;
 
-	lv2ui_file_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*me, &LV2PluginUI::set_path_property), desc, lv2ui_file_dialog));
-	lv2ui_file_dialog->present();
+		case Variant::BOOL:
+			{
+				ArdourMessageDialog* msg = new ArdourMessageDialog (desc.label, false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, false);
+				msg->signal_response().connect (sigc::bind (sigc::mem_fun (*me, &LV2PluginUI::request_response), desc, msg));
+				msg->present();
+			}
+			break;
+
+		default:
+			me->_active_parameter_requests.erase (key);
+			return LV2UI_REQUEST_VALUE_ERR_UNSUPPORTED;
+	}
+
 	return LV2UI_REQUEST_VALUE_SUCCESS;
 }
 #endif
+
+void
+LV2PluginUI::set_path_property (const uint32_t key, ARDOUR::Variant const& val)
+{
+	plugin->set_property (key, val);
+}
 
 void
 LV2PluginUI::update_timeout()
