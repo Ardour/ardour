@@ -3269,7 +3269,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 					*/
 					i->view->trim_front_ending ();
 				}
-				if (_preserve_fade_anchor) {
+				if (_preserve_fade_anchor && i->anchored_fade_length) {
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
 					if (arv) {
 						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
@@ -3284,7 +3284,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 		} else if (_operation == EndTrim) {
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				if (_preserve_fade_anchor) {
+				if (_preserve_fade_anchor && i->anchored_fade_length) {
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
 					if (arv) {
 						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
@@ -6791,6 +6791,7 @@ AutomationRangeDrag::aborted (bool)
 DraggingView::DraggingView (RegionView* v, RegionDrag* parent, TimeAxisView* itav)
 	: view (v)
 	, initial_time_axis_view (itav)
+	, anchored_fade_length (0)
 {
 	TimeAxisView* tav = &v->get_time_axis_view();
 	if (tav) {
