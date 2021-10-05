@@ -3276,23 +3276,21 @@ TempoMap::set_state_3x (const XMLNode& node)
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 
-	_tempos.clear ();
-	_meters.clear ();
-	_points.clear ();
-
 	nlist = node.children();
 
 	/* Need initial tempo & meter points, because subsequent ones will use
 	 * set_tempo() and set_meter() which require pre-existing data
 	 */
 
-	bool have_initial_tempo = false;
-	bool have_initial_meter = false;
+	int32_t initial_tempo_index = -1;
+	int32_t initial_meter_index = -1;
+	int32_t index;
+	bool need_points_clear = true;
 
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+	for (niter = nlist.begin(), index = 0; niter != nlist.end(); ++niter, ++index) {
 		XMLNode* child = *niter;
 
-		if (!have_initial_tempo && (child->name() == Tempo::xml_node_name)) {
+		if ((initial_tempo_index < 0) && (child->name() == Tempo::xml_node_name)) {
 
 			LegacyTempoState lts;
 
@@ -3305,13 +3303,18 @@ TempoMap::set_state_3x (const XMLNode& node)
 			         lts.end_note_types_per_minute,
 			         lts.note_type);
 			TempoPoint* tp = new TempoPoint (*this, t, samples_to_superclock (0, TEMPORAL_SAMPLE_RATE), Beats(), BBT_Time());
+			_tempos.clear ();
+			if (need_points_clear) {
+				_points.clear ();
+				need_points_clear = false;
+			}
 			_tempos.push_back (*tp);
 			_points.push_back (*tp);
-			have_initial_tempo = true;
+			initial_tempo_index = index;
 
 		}
 
-		if (!have_initial_meter && (child->name() == Meter::xml_node_name)) {
+		if ((initial_meter_index < 0) && (child->name() == Meter::xml_node_name)) {
 
 			LegacyMeterState lms;
 
@@ -3322,22 +3325,29 @@ TempoMap::set_state_3x (const XMLNode& node)
 
 			Meter m (lms.divisions_per_bar, lms.note_type);
 			MeterPoint *mp = new MeterPoint (*this, m, 0, Beats(), BBT_Time());
+			_meters.clear();
+			if (need_points_clear) {
+				_points.clear ();
+				need_points_clear = false;
+			}
 			_meters.push_back (*mp);
 			_points.push_back (*mp);
-			have_initial_meter = true;
+			initial_meter_index = index;
 		}
 
-		if (have_initial_meter && have_initial_tempo) {
+		if (initial_tempo_index >= 0 && initial_meter_index >= 0) {
+			cerr << "Post initial tempo & meter:";
+			dump (cerr);
 			break;
 		}
 	}
 
-	if (!have_initial_meter || !have_initial_tempo) {
+	if (initial_tempo_index >= 0 && initial_meter_index >= 0) {
 		error << _("Old tempo map information is missing either tempo or meter information - ignored") << endmsg;
 		return -1;
 	}
 
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+	for (niter = nlist.begin(), index = 0; niter != nlist.end(); ++niter, ++index) {
 		XMLNode* child = *niter;
 
 		if (child->name() == Tempo::xml_node_name) {
@@ -3349,9 +3359,15 @@ TempoMap::set_state_3x (const XMLNode& node)
 				break;
 			}
 
+			if (index == initial_tempo_index) {
+				/* already added */
+				continue;
+			}
+
 			Tempo t (lts.note_types_per_minute,
 			         lts.end_note_types_per_minute,
 			         lts.note_type);
+
 			set_tempo (t, timepos_t (lts.sample));
 
 		} else if (child->name() == Meter::xml_node_name) {
@@ -3363,7 +3379,13 @@ TempoMap::set_state_3x (const XMLNode& node)
 				break;
 			}
 
+			if (index == initial_meter_index) {
+				/* already added */
+				continue;
+			}
+
 			Meter m (lms.divisions_per_bar, lms.note_type);
+			cerr << "Add meter @ sample " << lms.sample << endl;
 			set_meter (m, timepos_t (lms.sample));
 		}
 	}
