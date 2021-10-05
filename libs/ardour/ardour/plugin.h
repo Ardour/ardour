@@ -24,6 +24,7 @@
 #define __ardour_plugin_h__
 
 #include <boost/shared_ptr.hpp>
+
 #include <set>
 #include <string>
 
@@ -82,6 +83,14 @@ public:
 
 	virtual void set_insert_id (PBD::ID id) {}
 	virtual void set_state_dir (const std::string& d = "") {}
+
+	void set_insert (PluginInsert* pi, uint32_t num) {
+		_pi = pi;
+		_num = num;
+	}
+
+	PluginInsert* plugin_insert () const { return _pi; }
+	uint32_t plugin_number () const { return _num; }
 
 	virtual std::string unique_id () const                   = 0;
 	virtual const char* label () const                       = 0;
@@ -410,6 +419,9 @@ private:
 
 	void invalidate_preset_cache (std::string const&, Plugin*, bool);
 	void resolve_midi ();
+
+	PluginInsert* _pi;
+	uint32_t      _num;
 };
 
 struct PluginPreset {

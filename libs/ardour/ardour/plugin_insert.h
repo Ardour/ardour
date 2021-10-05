@@ -28,6 +28,7 @@
 #include <string>
 
 #include <boost/weak_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include "pbd/stack_allocator.h"
 #include "pbd/timing.h"
@@ -56,13 +57,17 @@ class Plugin;
 
 /** Plugin inserts: send data through a plugin
  */
-class LIBARDOUR_API PluginInsert : public Processor
+class LIBARDOUR_API PluginInsert : public Processor, public boost::enable_shared_from_this <PluginInsert>
 {
 public:
 	PluginInsert (Session&, Temporal::TimeDomain td, boost::shared_ptr<Plugin> = boost::shared_ptr<Plugin>());
 	~PluginInsert ();
 
 	void drop_references ();
+
+	boost::weak_ptr<PluginInsert> weak_ptr () {
+		return shared_from_this();
+	}
 
 	static const std::string port_automation_node_name;
 

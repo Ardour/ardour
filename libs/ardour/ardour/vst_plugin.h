@@ -98,9 +98,6 @@ public:
 
 	int first_user_preset_index () const;
 
-	void set_insert (PluginInsert* pi, uint32_t num) { _pi = pi; _num = num; }
-	PluginInsert* plugin_insert () const { return _pi; }
-	uint32_t plugin_number () const { return _num; }
 	VstTimeInfo* timeinfo () { return &_timeInfo; }
 	samplepos_t transport_sample () const { return _transport_sample; }
 	float transport_speed () const { return _transport_speed; }
@@ -125,8 +122,6 @@ protected:
 	VSTHandle* _handle;
 	VSTState*  _state;
 	AEffect*   _plugin;
-	PluginInsert* _pi;
-	uint32_t      _num;
 
 	MidiBuffer* _midi_out_buf;
 	VstTimeInfo _timeInfo;
