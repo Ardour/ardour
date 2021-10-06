@@ -79,7 +79,7 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	play_shape->name = string_compose ("playshape %1", _trigger.index());
 
 	name_text = new Text (this);
-	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
+	name_text->set_font_description (UIConfiguration::instance().get_SmallerFont());
 	name_text->set_color (Gtkmm2ext::contrasting_text_color (fill_color()));
 	name_text->set_position (Duple (play_button->get().width() + (2. * scale), poly_margin));
 
