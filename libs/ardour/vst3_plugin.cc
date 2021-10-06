@@ -1056,21 +1056,27 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 		throw failed_constructor ();
 	}
 
-	if (_component->initialize (HostApplication::getHostContext ()) != kResultOk) {
+	if (!_component || _component->initialize (HostApplication::getHostContext ()) != kResultOk) {
 		throw failed_constructor ();
 	}
 
 	_controller = FUnknownPtr<Vst::IEditController> (_component);
+
 	if (!_controller) {
 		TUID controllerCID;
 		if (_component->getControllerClassId (controllerCID) == kResultTrue) {
 			if (factory->createInstance (controllerCID, Vst::IEditController::iid, (void**)&_controller) != kResultTrue) {
-				throw failed_constructor ();
-			}
-			if (_controller && (_controller->initialize (HostApplication::getHostContext ()) != kResultOk)) {
+				_component->terminate ();
+				_component->release ();
 				throw failed_constructor ();
 			}
 		}
+	}
+
+	if (_controller && (_controller->initialize (HostApplication::getHostContext ()) != kResultOk)) {
+		_component->terminate ();
+		_component->release ();
+		throw failed_constructor ();
 	}
 
 	if (!_controller) {
