@@ -140,7 +140,9 @@ LV2PluginUI::request_response (int                        response,
 			}
 			break;
 		case Variant::BOOL:
-			set_path_property (desc.key, Variant (Variant::BOOL, response == Gtk::RESPONSE_YES));
+			if (response != Gtk::BUTTONS_OK) {
+				set_path_property (desc.key, Variant (Variant::BOOL, response == Gtk::RESPONSE_YES));
+			}
 			break;
 		default:
 			break;
@@ -197,7 +199,27 @@ LV2PluginUI::request_value(void*                     handle,
 
 		case Variant::BOOL:
 			{
-				ArdourMessageDialog* msg = new ArdourMessageDialog (desc.label, false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, false);
+				std::string      message = desc.label;
+				Gtk::MessageType type    = Gtk::MESSAGE_QUESTION;
+				Gtk::ButtonsType buttons = Gtk::BUTTONS_YES_NO;
+
+#ifdef LV2_EXTENDED
+				for (int i = 0; features && features[i]; ++i) {
+					if (!strcmp (features[i]->URI, LV2_DIALOGMESSAGE_URI)) {
+						LV2_Dialog_Message* mt = NULL;
+						mt = (LV2_Dialog_Message*) features[i]->data;
+						if (mt->msg) {
+							message = mt->msg;
+							mt->free_msg (mt->msg);
+						}
+						if (!mt->requires_return) {
+							type    = Gtk::MESSAGE_INFO;
+							buttons = Gtk::BUTTONS_OK;
+						}
+					}
+				}
+#endif
+				ArdourMessageDialog* msg = new ArdourMessageDialog (message, false, type, buttons, false);
 				msg->signal_response().connect (sigc::bind (sigc::mem_fun (*me, &LV2PluginUI::request_response), desc, msg));
 				msg->present();
 			}

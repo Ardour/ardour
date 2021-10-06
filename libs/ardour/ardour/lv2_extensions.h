@@ -279,4 +279,29 @@ typedef struct {
 /**
    @}
 */
+
+/**
+   @defgroup LV2_Dialog_Message
+
+	 LV2 extension to allow a plugin to ask a host to display
+	 a dedicated dialog message when requesting a value
+
+   @{
+*/
+
+
+#define LV2_DIALOGMESSAGE_URI "http://ardour.org/lv2/dialog_message"
+
+/** a LV2 Feature provided by the Plugin, passed as optional feature to LV2_UI__requestValue */
+typedef struct {
+	void (*free_msg)(char const* msg);
+
+	char const* msg;
+	bool requires_return;
+
+} LV2_Dialog_Message;
+
+/**
+   @}
+*/
 #endif
