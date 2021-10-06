@@ -232,7 +232,6 @@ VST3PluginModule::factory ()
 		GetFactoryProc fp = (GetFactoryProc)fn_ptr ("GetPluginFactory");
 		if (fp) {
 			_factory = fp ();
-			_factory->addRef ();
 		}
 	}
 	return _factory;
