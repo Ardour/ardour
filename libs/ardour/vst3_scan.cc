@@ -139,7 +139,7 @@ discover_vst3 (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::vector<ARDOUR
 		PBD::info << "FactoryInfo: '" << fi.vendor << "' '" << fi.url << "' '" << fi.email << "'" << endmsg;
 	}
 
-	IPluginFactory2* factory2 = FUnknownPtr<IPluginFactory2> (factory);
+	IPtr<IPluginFactory2> factory2 = FUnknownPtr<IPluginFactory2> (factory);
 
 	int32 class_cnt = factory->countClasses ();
 	if (verbose) {
@@ -203,7 +203,7 @@ discover_vst3 (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::vector<ARDOUR
 				continue;
 			}
 
-			FUnknownPtr<Vst::IAudioProcessor> processor;
+			IPtr<Vst::IAudioProcessor> processor;
 			if (!(processor = FUnknownPtr<Vst::IAudioProcessor> (component))) {
 				cerr << "VST3: No valid processor";
 				component->terminate ();

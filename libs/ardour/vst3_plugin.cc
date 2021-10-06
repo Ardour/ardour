@@ -855,7 +855,7 @@ VST3Plugin::find_presets ()
 	_preset_uri_map.clear ();
 
 	/* read vst3UnitPrograms */
-	Vst::IUnitInfo* nfo = _plug->unit_info ();
+	IPtr<Vst::IUnitInfo> nfo = _plug->unit_info ();
 	if (nfo && _plug->program_change_port ().id != Vst::kNoParamId) {
 		Vst::UnitID program_unit_id = _plug->program_change_port ().unitId;
 
@@ -1053,14 +1053,16 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 #endif
 
 	if (factory->createInstance (_fuid.toTUID (), Vst::IComponent::iid, (void**)&_component) != kResultTrue) {
+		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI create instance failed\n");
 		throw failed_constructor ();
 	}
 
 	if (!_component || _component->initialize (HostApplication::getHostContext ()) != kResultOk) {
+		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI component initialize failed\n");
 		throw failed_constructor ();
 	}
 
-	_controller = FUnknownPtr<Vst::IEditController> (_component);
+	_controller = FUnknownPtr<Vst::IEditController> (_component).take ();
 
 	if (!_controller) {
 		TUID controllerCID;
@@ -1073,29 +1075,43 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 		}
 	}
 
-	if (_controller && (_controller->initialize (HostApplication::getHostContext ()) != kResultOk)) {
+	if (!_controller) {
+		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI no controller was found\n");
 		_component->terminate ();
 		_component->release ();
 		throw failed_constructor ();
 	}
 
-	if (!_controller) {
-		_component->terminate ();
-		_component->release ();
-		throw failed_constructor ();
-	}
+	/* The official Steinberg SDK's source/vst/hosting/plugprovider.cpp
+	 * only initializes the controller if it is separate of the component.
+	 *
+	 * However some plugins expect and unconditional call and other
+	 * hosts incl. JUCE based one initialize a controller separately because
+	 * FUnknownPtr<> cast may return a new obeject.
+	 *
+	 * So do not check for errors.
+	 * if Vst::IEditController is-a Vst::IComponent the Controller
+	 * may or may not already be initialized.
+	 */
+	_controller->initialize (HostApplication::getHostContext ());
 
 	if (_controller->setComponentHandler (this) != kResultOk) {
+		_controller->terminate ();
+		_controller->release ();
 		_component->terminate ();
 		_component->release ();
 		throw failed_constructor ();
 	}
 
-	if (!(_processor = FUnknownPtr<Vst::IAudioProcessor> (_component))) {
+	if (!(_processor = FUnknownPtr<Vst::IAudioProcessor> (_component).take ())) {
+		_controller->terminate ();
+		_controller->release ();
 		_component->terminate ();
 		_component->release ();
 		throw failed_constructor ();
 	}
+
+	_processor->addRef ();
 
 	/* prepare process context */
 	memset (&_context, 0, sizeof (Vst::ProcessContext));
@@ -1195,10 +1211,10 @@ VST3PI::~VST3PI ()
 	terminate ();
 }
 
-Vst::IUnitInfo*
+IPtr<Vst::IUnitInfo>
 VST3PI::unit_info ()
 {
-	Vst::IUnitInfo* nfo = FUnknownPtr<Vst::IUnitInfo> (_component);
+	IPtr<Vst::IUnitInfo> nfo = FUnknownPtr<Vst::IUnitInfo> (_component);
 	if (nfo) {
 		return nfo;
 	}
@@ -1206,7 +1222,7 @@ VST3PI::unit_info ()
 }
 
 #if 0
-Vst::IUnitData*
+IPtr<Vst::IUnitData>
 VST3PI::unit_data ()
 {
 	Vst::IUnitData* iud = FUnknownPtr<Vst::IUnitData> (_component);
@@ -1226,26 +1242,19 @@ VST3PI::terminate ()
 
 	deactivate ();
 
+	_processor->release ();
 	_processor = 0;
 
 	disconnect_components ();
 
-	bool controller_is_component = false;
-	if (_component) {
-		controller_is_component = FUnknownPtr<Vst::IEditController> (_component) != 0;
-		_component->terminate ();
-	}
-
 	if (_controller) {
 		_controller->setComponentHandler (0);
-	}
-
-	if (_controller && controller_is_component == false) {
 		_controller->terminate ();
 		_controller->release ();
 	}
 
 	if (_component) {
+		_component->terminate ();
 		_component->release ();
 	}
 
@@ -2934,7 +2943,7 @@ VST3PI::try_create_view () const
 		view = _controller->createView (0);
 	}
 	if (!view) {
-		view = FUnknownPtr<IPlugView> (_controller);
+		view = FUnknownPtr<IPlugView> (_controller).take ();
 		if (view) {
 			view->addRef ();
 		}

@@ -108,7 +108,7 @@ public:
 	FUID const& fuid () const { return _fuid; }
 
 	/* Ardour Preset Helpers */
-	Vst::IUnitInfo* unit_info ();
+	IPtr<Vst::IUnitInfo> unit_info ();
 	Vst::ParameterInfo const& program_change_port () const { return _program_change_port; }
 
 	void set_n_factory_presets (size_t n) { _n_factory_presets = n; }
