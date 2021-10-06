@@ -57,6 +57,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _follow_action_probability (100)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
 	, _legato (Properties::legato, true)
+	, _stretch (1.0)
 	, _ui (0)
 {
 	add_property (_legato);
@@ -132,6 +133,7 @@ Trigger::get_state (void)
 	node->set_property (X_("quantization"), _quantization);
 	node->set_property (X_("name"), _name);
 	node->set_property (X_("index"), _index);
+	node->set_property (X_("stretch"), _stretch);
 
 	if (_region) {
 		node->set_property (X_("region"), _region->id());
@@ -536,23 +538,19 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 
 	/* Compute stretch ratio */
 
-	double new_ratio;
-
 	if (newlen.time_domain() == AudioTime) {
-		new_ratio = (double) newlen.samples() / data_length;
-		cerr << "gonna stretch, ratio is " << new_ratio << endl;
+		_stretch = (double) newlen.samples() / data_length;
+		cerr << "gonna stretch, ratio is " << _stretch << endl;
 	} else {
 		/* XXX what to use for position ??? */
 		timecnt_t l (newlen, timepos_t (AudioTime));
 		const timecnt_t dur = TempoMap::use()->convert_duration (l, timepos_t (0), AudioTime);
-		new_ratio = (double) dur.samples() / data_length;
+		_stretch = (double) dur.samples() / data_length;
 	}
 
+	stretcher.setTimeRatio (_stretch);
 
-
-	stretcher.setTimeRatio (new_ratio);
-
-	const samplecnt_t expected_length = ceil (data_length * new_ratio) + 16; /* extra space for safety */
+	const samplecnt_t expected_length = ceil (data_length * _stretch) + 16; /* extra space for safety */
 	std::vector<Sample*> stretched;
 
 	for (uint32_t n = 0; n < nchans; ++n) {
@@ -698,10 +696,14 @@ AudioTrigger::set_region (boost::shared_ptr<Region> r)
 
 	set_region_internal (r);
 
-	/* this will load data, but won't stretch it for now */
+	/* now potentially stretch it to match our tempo.
+	 *
+	 * We do not handle tempo changes at present, and should probably issue
+	 * a warming about this.
+	 */
 
 	TempoMap::SharedPtr tm (TempoMap::use());
-	timecnt_t two_bars = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (4, 0, 0));
+	timecnt_t two_bars = tm->bbt_duration_at (timepos_t (AudioTime), TriggerBox::assumed_trigger_duration());
 
 	set_length (two_bars);
 
@@ -851,6 +853,7 @@ Trigger::make_property_quarks ()
 }
 
 const uint64_t TriggerBox::default_triggers_per_box = 8;
+Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::BeatTime)

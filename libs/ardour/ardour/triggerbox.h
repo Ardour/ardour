@@ -186,6 +186,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	Temporal::BBT_Offset _quantization;
 	PBD::Property<bool> _legato;
 	std::string _name;
+	double _stretch;
 	void* _ui;
 
 	void set_region_internal (boost::shared_ptr<Region>);
@@ -279,7 +280,12 @@ class LIBARDOUR_API TriggerBox : public Processor
 	Trigger* peek_next_trigger ();
 	void prepare_next (uint64_t current);
 
+	static Temporal::BBT_Offset assumed_trigger_duration () { return _assumed_trigger_duration; }
+	static void set_assumed_trigger_duration (Temporal::BBT_Offset const &);
+
   private:
+	static Temporal::BBT_Offset _assumed_trigger_duration;
+
 	PBD::RingBuffer<Trigger*> _bang_queue;
 	PBD::RingBuffer<Trigger*> _unbang_queue;
 	DataType _data_type;
