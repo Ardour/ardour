@@ -16,6 +16,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/minibpm.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_object.h"
@@ -485,6 +486,7 @@ AudioTrigger::set_start (timepos_t const & s)
 void
 AudioTrigger::set_end (timepos_t const & e)
 {
+	assert (!data.empty());
 	set_length (timecnt_t (e.samples() - _start_offset, timepos_t (_start_offset)));
 }
 
@@ -518,10 +520,6 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 
 	boost::shared_ptr<AudioRegion> ar (boost::dynamic_pointer_cast<AudioRegion> (_region));
 
-	/* load raw data */
-
-	load_data (ar);
-
 	if (newlen == _region->length()) {
 		/* no stretch required */
 		return;
@@ -540,7 +538,7 @@ AudioTrigger::set_length (timecnt_t const & newlen)
 
 	if (newlen.time_domain() == AudioTime) {
 		_stretch = (double) newlen.samples() / data_length;
-		cerr << "gonna stretch, ratio is " << _stretch << endl;
+		cerr << "gonna stretch, ratio is " << _stretch << " from " << newlen.samples() << " vs. " << data_length << endl;
 	} else {
 		/* XXX what to use for position ??? */
 		timecnt_t l (newlen, timepos_t (AudioTime));
@@ -696,6 +694,10 @@ AudioTrigger::set_region (boost::shared_ptr<Region> r)
 
 	set_region_internal (r);
 
+	/* load raw data */
+
+	load_data (ar);
+
 	/* now potentially stretch it to match our tempo.
 	 *
 	 * We do not handle tempo changes at present, and should probably issue
@@ -703,9 +705,25 @@ AudioTrigger::set_region (boost::shared_ptr<Region> r)
 	 */
 
 	TempoMap::SharedPtr tm (TempoMap::use());
-	timecnt_t two_bars = tm->bbt_duration_at (timepos_t (AudioTime), TriggerBox::assumed_trigger_duration());
+	TempoMetric const & metric (tm->metric_at (timepos_t (AudioTime)));
 
-	set_length (two_bars);
+	double barcnt;
+
+	{
+		breakfastquay::MiniBPM mbpm (_box.session().sample_rate());
+
+		mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
+		double bpm = mbpm.estimateTempoOfSamples (data[0], data_length);
+		const double seconds = (double) data_length  / _box.session().sample_rate();
+		const double quarters = (seconds / 60.) * bpm;
+		barcnt = quarters / metric.meter().divisions_per_bar();
+	}
+
+	/* use initial tempo in map (assumed for now to be the only one */
+
+	samplecnt_t one_bar = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (1, 0, 0)).samples();
+
+	set_length (timecnt_t ((samplecnt_t) round (barcnt) * one_bar));
 
 	PropertyChanged (ARDOUR::Properties::name);
 
