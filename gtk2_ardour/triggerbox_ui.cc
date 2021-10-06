@@ -103,10 +103,16 @@ TriggerEntry::render (Rect const & area, Cairo::RefPtr<Cairo::Context> ctxt) con
 	Rectangle::render (area, ctxt);
 
 	if (active_bar_width) {
+		const double scale = UIConfiguration::instance().get_ui_scale();
 		Rect r (get());
-		Rect active (r.x0 + 1, r.y0 + 1, r.x0 + active_bar_width - 1, r.y1 - 1);
+
+		Rect active (r.height() * scale,
+		             (r.y0 + 1) * scale,
+		             (r.height() + active_bar_width - 1) * scale,
+		             (r.y0 + 4) * scale);
 		Rect self (item_to_window (active));
 		const Rect draw = self.intersection (area);
+
 		ctxt->save ();
 		Gtkmm2ext::set_source_rgba (ctxt, 0xff000088);
 		ctxt->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
@@ -123,7 +129,7 @@ TriggerEntry::maybe_update ()
 	if (!_trigger.active()) {
 		nbw = 0;
 	} else {
-		nbw = _trigger.position_as_fraction () * _allocation.width();
+		nbw = _trigger.position_as_fraction () * (_allocation.width() - _allocation.height());
 	}
 
 	if (nbw != active_bar_width) {
