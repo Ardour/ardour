@@ -56,6 +56,8 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _use_follow (Properties::use_follow, true)
 	, _follow_action { NextTrigger, Stop }
 	, _follow_action_probability (100)
+	, _follow_cnt (0)
+	, _follow_count (1)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
 	, _legato (Properties::legato, true)
 	, _stretch (1.0)
@@ -96,6 +98,13 @@ Trigger::unbang ()
 {
 	_unbang.fetch_add (1);
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("un-bang on %1\n", _index));
+}
+
+
+void
+Trigger::set_follow_count (uint32_t n)
+{
+	_follow_count = n;
 }
 
 void
@@ -222,6 +231,7 @@ void
 Trigger::startup()
 {
 	_state = WaitingToStart;
+	_follow_cnt = _follow_count;
 	PropertyChanged (ARDOUR::Properties::running);
 }
 
@@ -811,7 +821,9 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 			/* We reached the end */
 
-			if ((_launch_style == Repeat) || (_box.peek_next_trigger() == this)) { /* self repeat */
+			_follow_cnt--;
+
+			if ((_follow_cnt != 0) || (_launch_style == Repeat) || (_box.peek_next_trigger() == this)) { /* self repeat */
 				nframes -= this_read;
 				dest_offset += this_read;
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, but set to loop, so retrigger\n", index()));

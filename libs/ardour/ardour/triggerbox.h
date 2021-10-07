@@ -167,6 +167,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void jump_start ();
 	virtual void jump_stop ();
 
+	uint32_t follow_count() const { return _follow_count; }
+	void set_follow_count (uint32_t n);
+	
 	void set_ui (void*);
 	void* ui () const { return _ui; }
 
@@ -182,6 +185,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<bool>  _use_follow;
 	FollowAction _follow_action[2];
 	int _follow_action_probability;
+	uint32_t _follow_cnt;
+	uint32_t _follow_count;
 	boost::shared_ptr<Region> _region;
 	Temporal::BBT_Offset _quantization;
 	PBD::Property<bool> _legato;
