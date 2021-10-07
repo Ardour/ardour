@@ -97,21 +97,40 @@ TriggerEntry::~TriggerEntry ()
 {
 }
 
+bool
+TriggerEntry::event_handler (GdkEvent* ev)
+{
+	std::cerr << "trigUI event\n";
+
+	switch (ev->type) {
+	case GDK_ENTER_NOTIFY:
+		std::cerr << "in!\n";
+		break;
+	case GDK_LEAVE_NOTIFY:
+		std::cerr << "out!\n";
+		break;
+	default:
+		break;
+	}
+
+	return false;
+}
+
 void
-TriggerEntry::render (Rect const & area, Cairo::RefPtr<Cairo::Context> ctxt) const
+TriggerEntry::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> ctxt) const
 {
 	Rectangle::render (area, ctxt);
 
 	if (active_bar_width) {
 		const double scale = UIConfiguration::instance().get_ui_scale();
-		Rect r (get());
+		ArdourCanvas::Rect r (get());
 
-		Rect active (r.height() * scale,
+		ArdourCanvas::Rect active (r.height() * scale,
 		             (r.y0 + 1) * scale,
 		             (r.height() + active_bar_width - 1) * scale,
 		             (r.y0 + 4) * scale);
-		Rect self (item_to_window (active));
-		const Rect draw = self.intersection (area);
+		ArdourCanvas::Rect self (item_to_window (active));
+		const ArdourCanvas::Rect draw = self.intersection (area);
 
 		ctxt->save ();
 		Gtkmm2ext::set_source_rgba (ctxt, 0xff000088);
@@ -139,7 +158,7 @@ TriggerEntry::maybe_update ()
 }
 
 void
-TriggerEntry::_size_allocate (Rect const & alloc)
+TriggerEntry::_size_allocate (ArdourCanvas::Rect const & alloc)
 {
 	const double scale = UIConfiguration::instance().get_ui_scale();
 
