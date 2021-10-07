@@ -78,6 +78,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void set_end (timepos_t const &) = 0;
 	/* this accepts timepos_t because the origin is assumed to be the start */
 	virtual void set_length (timecnt_t const &) = 0;
+	virtual void tempo_map_change () = 0;
 
 	virtual double position_as_fraction() const = 0;
 
@@ -192,6 +193,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<bool> _legato;
 	std::string _name;
 	double _stretch;
+	double _barcnt; /* our estimate of the number of bars in the region */
 	void* _ui;
 
 	void set_region_internal (boost::shared_ptr<Region>);
@@ -228,6 +230,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
+	void tempo_map_change ();
+
   protected:
 	void retrigger ();
 	void set_usable_length ();
@@ -245,6 +249,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
 	RunResult at_end ();
+	void compute_and_set_length ();
 };
 
 class LIBARDOUR_API TriggerBox : public Processor
@@ -310,6 +315,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void process_midi_trigger_requests (BufferSet&);
 	int determine_next_trigger (uint64_t n);
 	void stop_all ();
+
+	void tempo_map_change ();
+	PBD::ScopedConnection tempo_map_connection;
 
 	void note_on (int note_number, int velocity);
 	void note_off (int note_number, int velocity);

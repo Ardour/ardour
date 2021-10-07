@@ -61,6 +61,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
 	, _legato (Properties::legato, true)
 	, _stretch (1.0)
+	, _barcnt (0.)
 	, _ui (0)
 {
 	add_property (_legato);
@@ -694,8 +695,6 @@ AudioTrigger::natural_length() const
 int
 AudioTrigger::set_region (boost::shared_ptr<Region> r)
 {
-	using namespace Temporal;
-
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
 	if (!ar) {
@@ -703,10 +702,18 @@ AudioTrigger::set_region (boost::shared_ptr<Region> r)
 	}
 
 	set_region_internal (r);
-
-	/* load raw data */
-
 	load_data (ar);
+	compute_and_set_length ();
+
+	PropertyChanged (ARDOUR::Properties::name);
+
+	return 0;
+}
+
+void
+AudioTrigger::compute_and_set_length ()
+{
+	using namespace Temporal;
 
 	/* now potentially stretch it to match our tempo.
 	 *
@@ -715,29 +722,40 @@ AudioTrigger::set_region (boost::shared_ptr<Region> r)
 	 */
 
 	TempoMap::SharedPtr tm (TempoMap::use());
-	TempoMetric const & metric (tm->metric_at (timepos_t (AudioTime)));
 
-	double barcnt;
+	if (_barcnt == 0) {
 
-	{
+		TempoMetric const & metric (tm->metric_at (timepos_t (AudioTime)));
 		breakfastquay::MiniBPM mbpm (_box.session().sample_rate());
 
 		mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
 		double bpm = mbpm.estimateTempoOfSamples (data[0], data_length);
+
 		const double seconds = (double) data_length  / _box.session().sample_rate();
 		const double quarters = (seconds / 60.) * bpm;
-		barcnt = quarters / metric.meter().divisions_per_bar();
+		_barcnt = quarters / metric.meter().divisions_per_bar();
 	}
 
 	/* use initial tempo in map (assumed for now to be the only one */
 
-	samplecnt_t one_bar = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (1, 0, 0)).samples();
+	const samplecnt_t one_bar = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (1, 0, 0)).samples();
 
-	set_length (timecnt_t ((samplecnt_t) round (barcnt) * one_bar));
+	cerr << "one bar in samples: " << one_bar << endl;
+	cerr << "barcnt = " << round (_barcnt) << endl;
 
-	PropertyChanged (ARDOUR::Properties::name);
+	set_length (timecnt_t ((samplecnt_t) round (_barcnt) * one_bar));
+}
 
-	return 0;
+void
+AudioTrigger::tempo_map_change ()
+{
+	if (!_region) {
+		return;
+	}
+
+	drop_data ();
+	load_data (boost::dynamic_pointer_cast<AudioRegion> (_region));
+	compute_and_set_length ();
 }
 
 void
@@ -914,6 +932,8 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (67), 7));
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (68), 8));
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (69), 9));
+
+	Temporal::TempoMap::MapChanged.connect_same_thread (tempo_map_connection, boost::bind (&TriggerBox::tempo_map_change, this));
 }
 
 void
@@ -1565,4 +1585,13 @@ TriggerBox::set_state (const XMLNode& node, int version)
 	}
 
 	return 0;
+}
+
+void
+TriggerBox::tempo_map_change ()
+{
+	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
+	for (auto & t : all_triggers) {
+		t->tempo_map_change ();
+	}
 }

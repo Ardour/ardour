@@ -104,7 +104,7 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	_follow_action_button = new ArdourButton ();
 	_follow_action_button->set_text (_("Follow Action"));
 	_follow_action_button->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
-	
+
 	follow_action_button = new ArdourCanvas::Widget (canvas(), *_follow_action_button);
 	follow_action_button->name = "FollowAction";
 	_follow_action_button->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
