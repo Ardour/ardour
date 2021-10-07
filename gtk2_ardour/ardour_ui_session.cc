@@ -493,7 +493,9 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 			PluginScanDialog psd (false, true);
 			psd.start ();
 		}
-		show_plugin_manager ();
+		if (!u.empty()) {
+			show_plugin_manager ();
+		}
 	}
 
 	if (!new_session->writable()) {
