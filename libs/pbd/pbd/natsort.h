@@ -114,8 +114,8 @@ numerically_less (const char* a, const char* b)
 	return false; // equal
 }
 
-inline bool
-naturally_less (const char* a, const char* b)
+inline int
+natcmp (const char* a, const char* b)
 {
 	const char* d_a = NULL;
 	const char* d_b = NULL;
@@ -129,7 +129,7 @@ naturally_less (const char* a, const char* b)
 			const int ia = atoi (d_a);
 			const int ib = atoi (d_b);
 			if (ia != ib) {
-				return ia < ib;
+				return ia < ib ? -1 : 1;
 			}
 		}
 		d_a = d_b = NULL;
@@ -146,25 +146,34 @@ naturally_less (const char* a, const char* b)
 			continue;
 		}
 		if (*a == '_') {
-			return ' ' < *b;
+			return ' ' < *b ? -1 : 1;
 		} else if (*b == '_') {
-			return *a < ' ';
+			return *a < ' ' ? -1 : 1;
 		} else
 #endif
-		return *a < *b;
+		return *a < *b ?  -1 : 1;
 	}
 
 	if (d_a) {
-		return atoi (d_a) < atoi (d_b);
+		const int ia = atoi (d_a);
+		const int ib = atoi (d_b);
+		if (ia != ib) {
+			return ia < ib ? -1 : 1;
+		}
 	}
 
 	/* if we reach here, either strings are same length and equal
 	 * or one is longer than the other.
 	 */
+	if (*a) { return 1; }
+	if (*b) { return -1; }
+	return 0;
+}
 
-	if (*a) { return false; }
-	if (*b) { return true; }
-	return false; // equal
+inline bool
+naturally_less (const char* a, const char* b)
+{
+	return natcmp (a, b) < 0;
 }
 
 } // namespace PBD
