@@ -57,6 +57,8 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	const double width = 150. * scale;
 	const double height = 20. * scale;
 
+	Event.connect (sigc::mem_fun (*this, &TriggerEntry::event_handler));
+
 	poly_margin = 2. * scale;
 	poly_size = height - (poly_margin * 2.);
 
@@ -82,6 +84,7 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	name_text->set_font_description (UIConfiguration::instance().get_SmallerFont());
 	name_text->set_color (Gtkmm2ext::contrasting_text_color (fill_color()));
 	name_text->set_position (Duple (play_button->get().width() + (2. * scale), poly_margin));
+	name_text->set_ignore_events (true);
 
 	_trigger.PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context());
 
