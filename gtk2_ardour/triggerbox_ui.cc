@@ -107,13 +107,17 @@ TriggerEntry::event_handler (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
-		play_button->show ();
-		play_shape->show ();
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			play_button->show ();
+			play_shape->show ();
+		}
 		redraw ();
 		break;
 	case GDK_LEAVE_NOTIFY:
-		play_button->hide ();
-		play_shape->hide ();
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			play_button->hide ();
+			play_shape->hide ();
+		}
 		redraw ();
 		break;
 	default:
