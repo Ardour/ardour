@@ -552,7 +552,7 @@ SessionPlaylists::load_unused (Session& session, const XMLNode& node)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((playlist = XMLPlaylistFactory (session, **niter)) == 0) {
-			error << _("Session: cannot create Playlist from XML description.") << endmsg;
+			error << _("Session: cannot create Unused Playlist from XML description.") << endmsg;
 			continue;
 		}
 
