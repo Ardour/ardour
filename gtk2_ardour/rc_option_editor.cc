@@ -1515,6 +1515,83 @@ public:
 
 };
 
+class TriggerPortSelectOption : public PortSelectOption
+{
+public:
+	TriggerPortSelectOption (RCConfiguration* c, SessionHandlePtr* shp)
+		: PortSelectOption (c, shp,
+		                    _("TriggerBoxes will be connected to this port when it is set."),
+		                    X_("default-trigger-input-port"),
+		                    _("Default trigger input:"),
+		                    ARDOUR::DataType::MIDI,
+		                    ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsTerminal)) {
+		/* cannot call from parent due to the method being pure virtual */
+		update_port_combo ();
+	}
+
+	void port_changed ()
+	{
+		if (_ignore_change) {
+			return;
+		}
+		TreeModel::iterator active = _combo.get_active ();
+		string new_port = (*active)[_port_columns.full_name];
+		_rc_config->set_default_trigger_input_port (new_port);
+
+		/* TriggerBox::reconnect_default (); // EMIT SIGNAL */
+
+	}
+
+	void update_selection ()
+	{
+		int n;
+		Gtk::TreeModel::Children children = _store->children();
+		Gtk::TreeModel::Children::iterator i = children.begin();
+		++i; /* skip "Disconnected" */
+
+		std::string const& pn = _rc_config->get_default_trigger_input_port ();
+		boost::shared_ptr<Port> port;
+
+		PBD::Unwinder<bool> uw (_ignore_change, true);
+
+		/* try match preference with available port-names */
+		for (n = 1;  i != children.end(); ++i, ++n) {
+			string port_name = (*i)[_port_columns.full_name];
+			if (port_name == pn) {
+				_combo.set_active (n);
+				return;
+			}
+		}
+#if 0
+		/* Set preference to current port connection
+		 * (LTC is auto-connected at session load).
+		 */
+		if (ltc_port) {
+			i = children.begin();
+			++i; /* skip "Disconnected" */
+			for (n = 1;  i != children.end(); ++i, ++n) {
+				string port_name = (*i)[_port_columns.full_name];
+				if (ltc_port->connected_to (port_name)) {
+					_combo.set_active (n);
+					return;
+				}
+			}
+		}
+
+		if (pn.empty ()) {
+			_combo.set_active (0); /* disconnected */
+		} else {
+			/* The port is currently not available, retain preference */
+			TreeModel::Row row = *_store->append ();
+			row[_port_columns.full_name] = pn;
+			row[_port_columns.short_name] = (pn).substr ((pn).find (':') + 1);
+			_combo.set_active (n);
+		}
+#endif
+	}
+
+};
+
 class ControlSurfacesOptions : public OptionEditorMiniPage
 {
 	public:
@@ -4615,6 +4692,19 @@ These settings will only take effect after %1 is restarted.\n\
 	/* VIDEO Timeline */
 	add_option (_("Video"), new OptionEditorHeading (_("Video Server")));
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
+
+	/* trigger launcing */
+
+	add_option (_("Triggering"), new OptionEditorHeading (_("Triggering")));
+
+	TriggerPortSelectOption* dtip  = new TriggerPortSelectOption (_rc_config, this);
+
+	set_tooltip (dtip->tip_widget(), _("If set, the identifies the input MIDI port that will be automatically connected to trigger boxes.\n\n"
+	                                   "It is intended to be either an NxN pad device such as the Ableton Push 2 or Novation Launchpad\n"
+	                                   "or a regular MIDI device capable of sending sequential note numbers (like a typical keyboard)"));
+	add_option (_("Triggering"), dtip);
+
+	/* END OF SECTIONS/OPTIONS etc */
 
 	Widget::show_all ();
 
