@@ -1306,26 +1306,25 @@ class BufferingOptions : public OptionEditorComponent
 		ComboBoxText  _buffering_presets_combo;
 };
 
-class LTCPortSelectOption : public OptionEditorComponent, public sigc::trackable
-{
+class PortSelectOption : public OptionEditorComponent, public sigc::trackable {
 public:
-	LTCPortSelectOption (RCConfiguration* c, SessionHandlePtr* shp)
-			: _rc_config (c)
-			, _shp (shp)
-			, _label (_("LTC Output Port:"))
-			, _ignore_change (false)
+	PortSelectOption (RCConfiguration* c, SessionHandlePtr* shp, std::string const & tooltip, std::string const & parameter_name, std::string const & label, DataType dt, PortFlags pf)
+		: _rc_config (c)
+                , _shp (shp)
+                , _label (label)
+                , _ignore_change (false)
+                , data_type (dt)
+                , port_flags (pf)
 	{
 		_store = ListStore::create (_port_columns);
 		_combo.set_model (_store);
 		_combo.pack_start (_port_columns.short_name);
 
-		set_tooltip (_combo, _("The LTC generator output will be auto-connected to this port when a session is loaded."));
+		set_tooltip (_combo, tooltip);
 
-		update_port_combo ();
-
-		_combo.signal_map ().connect (sigc::mem_fun (*this, &LTCPortSelectOption::on_map));
-		_combo.signal_unmap ().connect (sigc::mem_fun (*this, &LTCPortSelectOption::on_unmap));
-		_combo.signal_changed ().connect (sigc::mem_fun (*this, &LTCPortSelectOption::port_changed));
+		_combo.signal_map ().connect (sigc::mem_fun (*this, &PortSelectOption::on_map));
+		_combo.signal_unmap ().connect (sigc::mem_fun (*this, &PortSelectOption::on_unmap));
+		_combo.signal_changed ().connect (sigc::mem_fun (*this, &PortSelectOption::port_changed));
 	}
 
 	void add_to_page (OptionEditorPage* p)
@@ -1340,17 +1339,17 @@ public:
 
 	void parameter_changed (string const & p)
 	{
-		if (p == "ltc-output-port") {
+		if (p == parameter_name) {
 			update_selection ();
 		}
 	}
 
 	void set_state_from_config ()
 	{
-		parameter_changed ("ltc-output-port");
+		parameter_changed (parameter_name);
 	}
 
-private:
+protected:
 	struct PortColumns : public Gtk::TreeModel::ColumnRecord {
 		PortColumns() {
 			add (short_name);
@@ -1365,6 +1364,9 @@ private:
 	Label             _label;
 	Gtk::ComboBox     _combo;
 	bool              _ignore_change;
+	std::string        parameter_name;
+	ARDOUR::DataType   data_type;
+	ARDOUR::PortFlags  port_flags;
 	PortColumns       _port_columns;
 
 	Glib::RefPtr<Gtk::ListStore> _store;
@@ -1375,19 +1377,64 @@ private:
 		AudioEngine::instance()->PortRegisteredOrUnregistered.connect (
 				_engine_connection,
 				invalidator (*this),
-				boost::bind (&LTCPortSelectOption::update_port_combo, this),
+				boost::bind (&PortSelectOption::update_port_combo, this),
 				gui_context());
 
 		AudioEngine::instance()->PortPrettyNameChanged.connect (
 				_engine_connection,
 				invalidator (*this),
-				boost::bind (&LTCPortSelectOption::update_port_combo, this),
+				boost::bind (&PortSelectOption::update_port_combo, this),
 				gui_context());
 	}
 
 	void on_unmap ()
 	{
 		_engine_connection.drop_connections ();
+	}
+
+
+	void update_port_combo ()
+	{
+		vector<string> ports;
+		ARDOUR::AudioEngine::instance()->get_ports ("", data_type, port_flags, ports);
+
+		PBD::Unwinder<bool> uw (_ignore_change, true);
+		_store->clear ();
+
+		TreeModel::Row row;
+		row = *_store->append ();
+		row[_port_columns.full_name] = string();
+		row[_port_columns.short_name] = _("Disconnected");
+
+		for (vector<string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+			row = *_store->append ();
+			row[_port_columns.full_name] = *p;
+			std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*p);
+			if (pn.empty ()) {
+				pn = (*p).substr ((*p).find (':') + 1);
+			}
+			row[_port_columns.short_name] = pn;
+		}
+
+		update_selection ();
+	}
+
+	virtual void update_selection() = 0;
+	virtual void port_changed () = 0;
+};
+
+class LTCPortSelectOption : public PortSelectOption
+{
+public:
+	LTCPortSelectOption (RCConfiguration* c, SessionHandlePtr* shp)
+		: PortSelectOption (c, shp,
+		                       _("The LTC generator output will be auto-connected to this port when a session is loaded."),
+		                       X_("ltc-output-port"),
+		                       _("LTC Output Port:"),
+		                       ARDOUR::DataType::AUDIO,
+		                       ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsTerminal)) {
+		/* cannot call from parent due to the method being pure virtual */
+		update_port_combo ();
 	}
 
 	void port_changed ()
@@ -1414,32 +1461,6 @@ private:
 		if (!new_port.empty()) {
 			ltc_port->connect (new_port);
 		}
-	}
-
-	void update_port_combo ()
-	{
-		vector<string> ports;
-		ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::AUDIO, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsTerminal), ports);
-
-		PBD::Unwinder<bool> uw (_ignore_change, true);
-		_store->clear ();
-
-		TreeModel::Row row;
-		row = *_store->append ();
-		row[_port_columns.full_name] = string();
-		row[_port_columns.short_name] = _("Disconnected");
-
-		for (vector<string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
-			row = *_store->append ();
-			row[_port_columns.full_name] = *p;
-			std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*p);
-			if (pn.empty ()) {
-				pn = (*p).substr ((*p).find (':') + 1);
-			}
-			row[_port_columns.short_name] = pn;
-		}
-
-		update_selection ();
 	}
 
 	void update_selection ()
@@ -1491,6 +1512,7 @@ private:
 			_combo.set_active (n);
 		}
 	}
+
 };
 
 class ControlSurfacesOptions : public OptionEditorMiniPage
