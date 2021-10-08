@@ -4810,9 +4810,8 @@ Route::has_io_processor_named (const string& name)
 	ProcessorList::iterator i;
 
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
-		if (boost::dynamic_pointer_cast<Send> (*i) ||
-		    boost::dynamic_pointer_cast<PortInsert> (*i)) {
-			if ((*i)->name() == name) {
+		if (boost::dynamic_pointer_cast<IOProcessor> (*i)) {
+			if (0 == PBD::natcmp ((*i)->name().c_str(), name.c_str())) {
 				return true;
 			}
 		}
