@@ -1040,6 +1040,12 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		if (!pi->plugin ()->get_info ()->is_instrument ()) {
 			continue;
 		}
+		if (boost::dynamic_pointer_cast<TriggerBox>(*i)) {
+			/* triggerbox looks a lot like an instrument, but it
+			   isn't a replacement for an instrument
+			*/
+			continue;
+		}
 		boost::shared_ptr<Processor> instrument = the_instrument ();
 		ChanCount in (DataType::MIDI, 1);
 		ChanCount out (DataType::AUDIO, 2); // XXX route's out?!

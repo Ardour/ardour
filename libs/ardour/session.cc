@@ -2459,7 +2459,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 			}
 
 			if (with_triggers) {
-				boost::shared_ptr<Processor> triggers (new TriggerBox (*this, DataType::AUDIO));
+				boost::shared_ptr<Processor> triggers (new TriggerBox (*this, DataType::MIDI));
 				track->add_processor (triggers, track->polarity());
 			}
 
@@ -2666,7 +2666,8 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
 list< boost::shared_ptr<AudioTrack> >
 Session::new_audio_track (int input_channels, int output_channels, RouteGroup* route_group,
                           uint32_t how_many, string name_template, PresentationInfo::order_t order,
-                          TrackMode mode, bool input_auto_connect)
+                          TrackMode mode, bool input_auto_connect,
+                          bool with_triggers)
 {
 	string track_name;
 	uint32_t track_id = 0;
@@ -2721,6 +2722,16 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
 
 			if (route_group) {
 				route_group->add (track);
+			}
+
+			if (with_triggers) {
+				boost::shared_ptr<TriggerBox> tb (new TriggerBox (*this, DataType::AUDIO));
+				track->add_processor (tb, track->polarity());
+				/* if placing this in a route where the default
+				 * data type is AUDIO, the triggerbox will need
+				 * a sidehcain MIDI input to be able to be MIDI controlled
+				 */
+				tb->add_midi_sidechain ();
 			}
 
 			new_routes.push_back (track);

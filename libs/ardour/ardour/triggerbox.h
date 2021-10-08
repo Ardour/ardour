@@ -47,6 +47,7 @@ namespace ARDOUR {
 class Session;
 class AudioRegion;
 class TriggerBox;
+class SideChain;
 
 class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
@@ -170,7 +171,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	uint32_t follow_count() const { return _follow_count; }
 	void set_follow_count (uint32_t n);
-	
+
 	void set_ui (void*);
 	void* ui () const { return _ui; }
 
@@ -290,6 +291,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	Trigger* peek_next_trigger ();
 	void prepare_next (uint64_t current);
 
+	void add_midi_sidechain ();
+
 	static Temporal::BBT_Offset assumed_trigger_duration () { return _assumed_trigger_duration; }
 	static void set_assumed_trigger_duration (Temporal::BBT_Offset const &);
 
@@ -305,6 +308,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	PBD::RingBuffer<Trigger*> implicit_queue; /* follow-action queued triggers */
 	Trigger* currently_playing;
 	std::atomic<bool> _stop_all;
+
+	boost::shared_ptr<SideChain> _sidechain;
 
 	PBD::PCGRand _pcg;
 

@@ -734,7 +734,8 @@ public:
 		std::string name_template,
 		PresentationInfo::order_t order,
 		TrackMode mode = Normal,
-		bool input_auto_connect = true
+		bool input_auto_connect = true,
+		bool with_triggers = false
 		);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (

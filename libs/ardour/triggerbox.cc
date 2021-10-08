@@ -20,6 +20,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_object.h"
+#include "ardour/sidechain.h"
 #include "ardour/source_factory.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/triggerbox.h"
@@ -90,6 +91,9 @@ Trigger::set_ui (void* p)
 void
 Trigger::bang ()
 {
+	if (!_region) {
+		return;
+	}
 	_bang.fetch_add (1);
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("bang on %1\n", _index));
 }
@@ -97,6 +101,9 @@ Trigger::bang ()
 void
 Trigger::unbang ()
 {
+	if (!_region) {
+		return;
+	}
 	_unbang.fetch_add (1);
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("un-bang on %1\n", _index));
 }
@@ -1105,20 +1112,32 @@ TriggerBox::trigger (Triggers::size_type n)
 	return all_triggers[n];
 }
 
+void
+TriggerBox::add_midi_sidechain ()
+{
+	if (!_sidechain) {
+		_sidechain.reset (new SideChain (_session, "trigger-side"));
+		_sidechain->activate ();
+		_sidechain->input()->add_port ("", owner(), DataType::MIDI); // add a port, don't connect.
+	}
+}
+
 bool
 TriggerBox::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
-	if (in.get(DataType::MIDI) < 1) {
-		return false;
+	out.set_audio (std::max (out.n_audio(), 2U)); /* for now, enforce stereo output */
+	if (_sidechain) {
+		out.set_midi (std::max (out.n_midi(), 1U));
 	}
-
-	out = ChanCount::max (out, ChanCount (DataType::AUDIO, 2));
 	return true;
 }
 
 bool
 TriggerBox::configure_io (ChanCount in, ChanCount out)
 {
+	if (_sidechain) {
+		_sidechain->configure_io (in, out);
+	}
 	return Processor::configure_io (in, out);
 }
 
@@ -1148,6 +1167,9 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 
 			if (mt != midi_trigger_map.end()) {
 
+				if (mt->second >= all_triggers.size()) {
+					cerr << "target slot " << mt->second << endl;
+				}
 				assert (mt->second < all_triggers.size());
 
 				t = all_triggers[mt->second];
@@ -1155,15 +1177,17 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 				if (!t) {
 					continue;
 				}
-			}
 
-			if ((*ev).is_note_on()) {
+				cerr << "note " << int ((*ev).note()) << " to trigger " << t << endl;
 
-				t->bang ();
+				if ((*ev).is_note_on()) {
 
-			} else if ((*ev).is_note_off()) {
+					t->bang ();
 
-				t->unbang ();
+				} else if ((*ev).is_note_off()) {
+
+					t->unbang ();
+				}
 			}
 		}
 	}
@@ -1179,8 +1203,11 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		return;
 	}
 
-	process_midi_trigger_requests (bufs);
+	if (_sidechain) {
+		_sidechain->run (bufs, start_sample, end_sample, speed, nframes, true);
+	}
 
+	process_midi_trigger_requests (bufs);
 
 	/* now let each trigger handle any state changes */
 
@@ -1550,8 +1577,13 @@ TriggerBox::get_state (void)
 		}
 	}
 
-
 	node.add_child_nocopy (*trigger_child);
+
+	if (_sidechain) {
+		XMLNode* scnode = new XMLNode (X_("Sidechain"));
+		scnode->add_child_nocopy (_sidechain->get_state());
+		node.add_child_nocopy (*scnode);
+	}
 
 	return node;
 }
@@ -1582,6 +1614,14 @@ TriggerBox::set_state (const XMLNode& node, int version)
 
 			}
 		}
+	}
+
+	XMLNode* scnode = node.child (X_("Sidechain"));
+
+	if (scnode) {
+		add_midi_sidechain ();
+		assert (_sidechain);
+		_sidechain->set_state (*scnode->children().front(), version);
 	}
 
 	return 0;
