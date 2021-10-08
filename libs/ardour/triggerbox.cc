@@ -922,16 +922,16 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 		}
 	}
 
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (60), 0));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (61), 1));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (62), 2));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (63), 3));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (64), 4));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (65), 5));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (66), 6));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (67), 7));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (68), 8));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (69), 9));
+	/* MIDI note numbers from Ableton Push2 in chromatic mode */
+
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (92), 0));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (84), 1));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (76), 2));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (68), 3));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (60), 4));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (52), 5));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (44), 6));
+	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (36), 7));
 
 	Temporal::TempoMap::MapChanged.connect_same_thread (tempo_map_connection, boost::bind (&TriggerBox::tempo_map_change, this));
 }
