@@ -74,11 +74,13 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	play_button->set_outline (false);
 	play_button->set_fill_color (outline_color());
 	play_button->name = string_compose ("playbutton %1", _trigger.index());
+	play_button->hide ();
 
 	play_shape = new ArdourCanvas::Polygon (play_button);
 	play_shape->set_fill_color (UIConfiguration::instance().color (X_("theme:contrasting selection")));
 	play_shape->set_outline (false);
 	play_shape->name = string_compose ("playshape %1", _trigger.index());
+	play_shape->hide ();
 
 	name_text = new Text (this);
 	name_text->set_font_description (UIConfiguration::instance().get_SmallerFont());
@@ -103,14 +105,16 @@ TriggerEntry::~TriggerEntry ()
 bool
 TriggerEntry::event_handler (GdkEvent* ev)
 {
-	std::cerr << "trigUI event\n";
-
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
-		std::cerr << "in!\n";
+		play_button->show ();
+		play_shape->show ();
+		redraw ();
 		break;
 	case GDK_LEAVE_NOTIFY:
-		std::cerr << "out!\n";
+		play_button->hide ();
+		play_shape->hide ();
+		redraw ();
 		break;
 	default:
 		break;

@@ -80,6 +80,7 @@ AddRouteDialog::AddRouteDialog ()
 	, strict_io_label (_("Pin Mode:"))
 	, mode_label (_("Record Mode:"))
 	, instrument_label (_("Instrument:"))
+	, with_triggers_label (_("Add TriggerBox:"))
 	, last_route_count (1)
 	, route_count_set_by_template (false)
 	, name_edited_by_user (false)
@@ -168,15 +169,6 @@ AddRouteDialog::AddRouteDialog ()
 		     _("You may select:") + "\n" +
 		     "* " + _("The number of busses to add") + "\n" +
 		     "* " + _("A name for the buss(es)")
-		     ));
-
-		builtin_types.push_back (
-		   std::pair<string,string> (_("Trigger Tracks"), std::string () +
-		     _("Use these settings to create one or more trigger tracks.") + "\n\n" +
-		     _("Trigger tracks contain audio/MIDI regions that can be triggered on demand.") + "\n\n" +
-		     _("You may select:") + "\n" +
-		     "* " + _("The number of tracks to add") + "\n" +
-		     "* " + _("A name for the track(s)")
 		     ));
 	}
 
@@ -318,6 +310,12 @@ AddRouteDialog::AddRouteDialog ()
 
 		++n;
 	}
+
+	with_triggers_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	settings_table->attach (with_triggers_label, 4, 5, n, n+1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	settings_table->attach (with_triggers, 5, 6, n, n+1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+
+	++n;
 
 	HBox* outer_box = manage (new HBox);
 	outer_box->set_spacing (4);
@@ -592,8 +590,6 @@ AddRouteDialog::type_wanted()
 		return VCAMaster;
 	} else if (str == _("Foldback Busses")) {
 		return FoldbackBus;
-	} else if (str == _("Trigger Tracks")) {
-		return TriggerTrack;
 	} else {
 		assert (0);
 		return AudioTrack;
@@ -624,9 +620,6 @@ AddRouteDialog::maybe_update_name_template_entry ()
 		break;
 	case VCAMaster:
 		name_template_entry.set_text (VCA::default_name_template());
-		break;
-	case TriggerTrack:
-		name_template_entry.set_text (_("Trigger"));
 		break;
 	}
 	/* ignore programatic change, restore false */
@@ -762,26 +755,6 @@ AddRouteDialog::track_type_chosen ()
 		insert_label.set_sensitive (false);
 		insert_at_combo.set_sensitive (false);
 
-		break;
-	case TriggerTrack:
-
-		configuration_label.set_sensitive (true);
-		channel_combo.set_sensitive (true);
-
-		mode_label.set_sensitive (false);
-		mode_combo.set_sensitive (false);
-
-		instrument_label.set_sensitive (false);
-		instrument_combo.set_sensitive (false);
-
-		group_label.set_sensitive (false);
-		route_group_combo.set_sensitive (false);
-
-		strict_io_label.set_sensitive (false);
-		strict_io_combo.set_sensitive (false);
-
-		insert_label.set_sensitive (false);
-		insert_at_combo.set_sensitive (false);
 		break;
 	}
 
@@ -1032,6 +1005,12 @@ AddRouteDialog::route_group ()
 	}
 
 	return _session->route_group_by_name (route_group_combo.get_active_text());
+}
+
+
+bool
+AddRouteDialog::use_triggers() {
+	return with_triggers.get_active();
 }
 
 bool

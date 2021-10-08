@@ -323,7 +323,7 @@ public:
 	void export_video (bool range = false);
 
 	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *,
-	                              uint32_t, std::string const &, bool, ARDOUR::PresentationInfo::order_t order);
+	                              uint32_t, std::string const &, bool, ARDOUR::PresentationInfo::order_t order, bool with_triggers);
 
 	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool,
 	                             ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*,

@@ -1534,15 +1534,6 @@ ARDOUR_UI::session_add_midi_route (
 				error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;
 			}
 
-			boost::shared_ptr<TriggerBox> tb (tracks.front()->triggerbox());
-			if (tb) {
-				TriggerBoxWindow* tbw = new TriggerBoxWindow (*(tb.get()));
-				tbw->present ();
-				cerr << " window presented\n";
-			} else {
-				cerr << "no trigger box\n";
-			}
-
 		} else {
 
 			RouteList routes;
@@ -1570,7 +1561,8 @@ ARDOUR_UI::session_add_audio_route (
 	uint32_t how_many,
 	string const & name_template,
 	bool strict_io,
-	ARDOUR::PresentationInfo::order_t order)
+	ARDOUR::PresentationInfo::order_t order,
+	bool with_triggers)
 {
 	list<boost::shared_ptr<AudioTrack> > tracks;
 	RouteList routes;
@@ -1579,7 +1571,7 @@ ARDOUR_UI::session_add_audio_route (
 
 	try {
 		if (track) {
-			tracks = _session->new_audio_track (input_channels, output_channels, route_group, how_many, name_template, order, mode);
+			tracks = _session->new_audio_track (input_channels, output_channels, route_group, how_many, name_template, order, mode, true, with_triggers);
 
 			if (tracks.size() != how_many) {
 				error << string_compose (P_("could not create %1 new audio track", "could not create %1 new audio tracks", how_many), how_many)
@@ -2861,6 +2853,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 	RouteGroup* route_group = add_route_dialog->route_group ();
 	AutoConnectOption oac = Config->get_output_auto_connect();
 	bool strict_io = add_route_dialog->use_strict_io ();
+	bool with_triggers = add_route_dialog->use_triggers ();
 
 	if (oac & AutoConnectMaster) {
 		output_chan.set (DataType::AUDIO, (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan.n_audio()));
@@ -2875,16 +2868,13 @@ ARDOUR_UI::add_route_dialog_response (int r)
 
 	switch (add_route_dialog->type_wanted()) {
 	case AddRouteDialog::AudioTrack:
-		session_add_audio_route (true, input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template, strict_io, order);
+		session_add_audio_route (true, input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template, strict_io, order, with_triggers);
 		break;
 	case AddRouteDialog::AudioBus:
-		session_add_audio_route (false, input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, route_group, count, name_template, strict_io, order);
+		session_add_audio_route (false, input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, route_group, count, name_template, strict_io, order, false);
 		break;
 	case AddRouteDialog::MidiTrack:
-		session_add_midi_route (true, route_group, count, name_template, strict_io, instrument, 0, order, false);
-		break;
-	case AddRouteDialog::TriggerTrack:
-		session_add_midi_route (true, route_group, count, name_template, strict_io, 0, 0, order, true);
+		session_add_midi_route (true, route_group, count, name_template, strict_io, instrument, 0, order, with_triggers);
 		break;
 	case AddRouteDialog::MidiBus:
 		session_add_midi_route (false, route_group, count, name_template, strict_io, instrument, 0, order, false);
