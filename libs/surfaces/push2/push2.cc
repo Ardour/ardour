@@ -404,7 +404,7 @@ Push2::init_buttons (bool startup)
 
 		ButtonID off_buttons[] = { TapTempo, Setup, User, Stop, Convert, New, FixedLength,
 		                           Fwd32ndT, Fwd32nd, Fwd16thT, Fwd16th, Fwd8thT, Fwd8th, Fwd4trT, Fwd4tr,
-		                           Accent, Note, Session,  };
+		                           Accent, Note };
 
 		for (size_t n = 0; n < sizeof (off_buttons) / sizeof (off_buttons[0]); ++n) {
 			boost::shared_ptr<Button> b = id_button_map[off_buttons[n]];
