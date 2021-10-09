@@ -944,6 +944,8 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (36), 7));
 
 	Temporal::TempoMap::MapChanged.connect_same_thread (tempo_map_connection, boost::bind (&TriggerBox::tempo_map_change, this));
+
+	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
 }
 
 void
@@ -1677,4 +1679,23 @@ TriggerBox::tempo_map_change ()
 	for (auto & t : all_triggers) {
 		t->tempo_map_change ();
 	}
+}
+
+void
+TriggerBox::parameter_changed (std::string const & param)
+{
+	if (param == X_("default-trigger-input-port")) {
+		reconnect_to_default ();
+	}
+}
+
+void
+TriggerBox::reconnect_to_default ()
+{
+	if (!_sidechain) {
+		return;
+	}
+
+	_sidechain->input()->nth (0)->disconnect_all ();
+	_sidechain->input()->nth (0)->connect (Config->get_default_trigger_input_port());
 }

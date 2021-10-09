@@ -832,8 +832,6 @@ public:
 	bool loop_is_possible () const;
 	PBD::Signal0<void> PunchLoopConstraintChange;
 
-	// Temporal::TempoMap&       tempo_map()       { *Temporal::TempoMap::fetch(); }
-	// const Temporal::TempoMap& tempo_map() const { return *Temporal::TempoMap::fetch(); }
 	void maybe_update_tempo_from_midiclock_tempo (float bpm);
 
 	unsigned int    get_xrun_count () const {return _xrun_count; }

@@ -341,6 +341,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void note_on (int note_number, int velocity);
 	void note_off (int note_number, int velocity);
 
+	void reconnect_to_default ();
+	void parameter_changed (std::string const &);
+
 	typedef std::map<uint8_t,Triggers::size_type> MidiTriggerMap;
 	MidiTriggerMap midi_trigger_map;
 
