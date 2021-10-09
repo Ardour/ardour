@@ -1537,9 +1537,7 @@ public:
 		TreeModel::iterator active = _combo.get_active ();
 		string new_port = (*active)[_port_columns.full_name];
 		_rc_config->set_default_trigger_input_port (new_port);
-
-		/* TriggerBox::reconnect_default (); // EMIT SIGNAL */
-
+		/* everything that needs it will pick up the new port via ParameterChanged */
 	}
 
 	void update_selection ()
@@ -1562,21 +1560,6 @@ public:
 				return;
 			}
 		}
-#if 0
-		/* Set preference to current port connection
-		 * (LTC is auto-connected at session load).
-		 */
-		if (ltc_port) {
-			i = children.begin();
-			++i; /* skip "Disconnected" */
-			for (n = 1;  i != children.end(); ++i, ++n) {
-				string port_name = (*i)[_port_columns.full_name];
-				if (ltc_port->connected_to (port_name)) {
-					_combo.set_active (n);
-					return;
-				}
-			}
-		}
 
 		if (pn.empty ()) {
 			_combo.set_active (0); /* disconnected */
@@ -1587,7 +1570,6 @@ public:
 			row[_port_columns.short_name] = (pn).substr ((pn).find (':') + 1);
 			_combo.set_active (n);
 		}
-#endif
 	}
 
 };
