@@ -17,6 +17,7 @@
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/minibpm.h"
+#include "ardour/port.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_object.h"
@@ -909,6 +910,8 @@ Trigger::make_property_quarks ()
 
 const uint64_t TriggerBox::default_triggers_per_box = 8;
 Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
+TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::AbletonPush);
+int TriggerBox::_first_midi_note = 60;
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
@@ -1119,6 +1122,7 @@ TriggerBox::add_midi_sidechain ()
 		_sidechain.reset (new SideChain (_session, "trigger-side"));
 		_sidechain->activate ();
 		_sidechain->input()->add_port ("", owner(), DataType::MIDI); // add a port, don't connect.
+		_sidechain->input()->nth (0)->connect (Config->get_default_trigger_input_port());
 	}
 }
 
@@ -1149,6 +1153,47 @@ TriggerBox::add_trigger (Trigger* trigger)
 }
 
 void
+TriggerBox::set_midi_map_mode (TriggerMidiMapMode m)
+{
+	_midi_map_mode = m;
+}
+
+void
+TriggerBox::set_first_midi_note (int n)
+{
+	_first_midi_note = n;
+}
+
+int
+TriggerBox::note_to_trigger (int midi_note, int channel)
+{
+	Stripable* s = dynamic_cast<Stripable*> (owner());
+	const int column = s->presentation_info().order();
+	int first_note;
+
+	switch (_midi_map_mode) {
+
+	case AbletonPush:
+		first_note = 92 + column;
+		return (midi_note - first_note) / 8; /* gives row index */
+
+	case SequentialNote:
+		first_note = _first_midi_note - (column * all_triggers.size());
+		return midi_note - first_note; /* direct access to row */
+
+	case ByMidiChannel:
+		first_note = 3;
+		break;
+
+	default:
+		break;
+
+	}
+
+	return midi_note;
+}
+
+void
 TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 {
 	/* check MIDI port input buffers for triggers */
@@ -1162,32 +1207,30 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 				continue;
 			}
 
-			MidiTriggerMap::iterator mt = midi_trigger_map.find ((*ev).note());
-			Trigger* t = 0;
+			int trigger_number = note_to_trigger ((*ev).note(), (*ev).channel());
 
-			if (mt != midi_trigger_map.end()) {
+			if (trigger_number < 0) {
+				/* not for us */
+				continue;
+			}
 
-				if (mt->second >= all_triggers.size()) {
-					cerr << "target slot " << mt->second << endl;
-				}
-				assert (mt->second < all_triggers.size());
+			if (trigger_number > (int) all_triggers.size()) {
+				continue;
+			}
 
-				t = all_triggers[mt->second];
+			Trigger* t = all_triggers[trigger_number];
 
-				if (!t) {
-					continue;
-				}
+			if (!t) {
+				continue;
+			}
 
-				cerr << "note " << int ((*ev).note()) << " to trigger " << t << endl;
+			if ((*ev).is_note_on()) {
 
-				if ((*ev).is_note_on()) {
+				t->bang ();
 
-					t->bang ();
+			} else if ((*ev).is_note_off()) {
 
-				} else if ((*ev).is_note_off()) {
-
-					t->unbang ();
-				}
+				t->unbang ();
 			}
 		}
 	}

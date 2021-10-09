@@ -293,8 +293,20 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void add_midi_sidechain ();
 
+	enum TriggerMidiMapMode {
+		AbletonPush,
+		SequentialNote,
+		ByMidiChannel
+	};
+
 	static Temporal::BBT_Offset assumed_trigger_duration () { return _assumed_trigger_duration; }
 	static void set_assumed_trigger_duration (Temporal::BBT_Offset const &);
+
+	static TriggerMidiMapMode midi_map_mode () { return _midi_map_mode; }
+	static void set_midi_map_mode (TriggerMidiMapMode m);
+
+	static int first_midi_note() { return _first_midi_note; }
+	static void set_first_midi_note (int n);
 
   private:
 	static Temporal::BBT_Offset _assumed_trigger_duration;
@@ -321,6 +333,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int determine_next_trigger (uint64_t n);
 	void stop_all ();
 
+	int note_to_trigger (int node, int channel);
+
 	void tempo_map_change ();
 	PBD::ScopedConnection tempo_map_connection;
 
@@ -331,6 +345,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	MidiTriggerMap midi_trigger_map;
 
 	static const uint64_t default_triggers_per_box;
+	static int _first_midi_note;
+	static TriggerMidiMapMode _midi_map_mode;
 };
 
 namespace Properties {
