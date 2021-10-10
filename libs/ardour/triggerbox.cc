@@ -739,6 +739,8 @@ AudioTrigger::compute_and_set_length ()
 		mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
 		double bpm = mbpm.estimateTempoOfSamples (data[0], data_length);
 
+		cerr << name() << " Estimated bpm " << bpm << " from " << (double) data_length / _box.session().sample_rate() << " seconds\n";
+
 		const double seconds = (double) data_length  / _box.session().sample_rate();
 		const double quarters = (seconds / 60.) * bpm;
 		_barcnt = quarters / metric.meter().divisions_per_bar();
@@ -1123,13 +1125,19 @@ TriggerBox::trigger (Triggers::size_type n)
 }
 
 void
-TriggerBox::add_midi_sidechain ()
+TriggerBox::add_midi_sidechain (std::string const & name)
 {
 	if (!_sidechain) {
-		_sidechain.reset (new SideChain (_session, "trigger-side"));
+		_sidechain.reset (new SideChain (_session, name + "-trig"));
 		_sidechain->activate ();
 		_sidechain->input()->add_port ("", owner(), DataType::MIDI); // add a port, don't connect.
-		_sidechain->input()->nth (0)->connect (Config->get_default_trigger_input_port());
+		boost::shared_ptr<Port> p = _sidechain->input()->nth (0);
+
+		if (p) {
+			p->connect (Config->get_default_trigger_input_port());
+		} else {
+			error << _("Could not create port for trigger side-chain") << endmsg;
+		}
 	}
 }
 
@@ -1631,6 +1639,9 @@ TriggerBox::get_state (void)
 
 	if (_sidechain) {
 		XMLNode* scnode = new XMLNode (X_("Sidechain"));
+		std::string port_name = _sidechain->input()->nth (0)->name();
+		port_name = port_name.substr (0, port_name.find ('-'));
+		scnode->set_property (X_("name"), port_name);
 		scnode->add_child_nocopy (_sidechain->get_state());
 		node.add_child_nocopy (*scnode);
 	}
@@ -1669,7 +1680,9 @@ TriggerBox::set_state (const XMLNode& node, int version)
 	XMLNode* scnode = node.child (X_("Sidechain"));
 
 	if (scnode) {
-		add_midi_sidechain ();
+		std::string name;
+		scnode->get_property (X_("name"), name);
+		add_midi_sidechain (name);
 		assert (_sidechain);
 		_sidechain->set_state (*scnode->children().front(), version);
 	}

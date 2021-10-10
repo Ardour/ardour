@@ -291,7 +291,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	Trigger* peek_next_trigger ();
 	void prepare_next (uint64_t current);
 
-	void add_midi_sidechain ();
+	void add_midi_sidechain (std::string const & name);
 
 	enum TriggerMidiMapMode {
 		AbletonPush,
