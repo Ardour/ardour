@@ -823,13 +823,16 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 	assert (ar);
 	assert (active());
 
-	const size_t chns = std::max (bufs.count().n_audio(), ar->n_channels());
-
 	while (nframes) {
 
 		pframes_t this_read = (pframes_t) std::min ((samplecnt_t) nframes, (last_sample - read_index));
 
-		for (uint64_t chn = 0; chn < chns; ++chn) {
+		/* Fill all buffers (so mono region will fill all channels),
+		 * and discard extra channels. This models what we do in the
+		 * timeline.
+		 */
+
+		for (uint64_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
 
 			uint64_t channel = chn %  data.size();
 			Sample* src = data[channel] + read_index;
