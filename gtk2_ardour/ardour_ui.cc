@@ -1578,15 +1578,6 @@ ARDOUR_UI::session_add_audio_route (
 				      << endmsg;
 			}
 
-			boost::shared_ptr<TriggerBox> tb (tracks.front()->triggerbox());
-			if (tb) {
-				TriggerBoxWindow* tbw = new TriggerBoxWindow (*(tb.get()));
-				tbw->present ();
-				cerr << " window presented\n";
-			} else {
-				cerr << "no trigger box\n";
-			}
-
 		} else {
 
 			routes = _session->new_audio_route (input_channels, output_channels, route_group, how_many, name_template, PresentationInfo::AudioBus, order);
