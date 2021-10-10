@@ -823,11 +823,13 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 	assert (ar);
 	assert (active());
 
+	const size_t chns = std::max (bufs.count().n_audio(), ar->n_channels());
+
 	while (nframes) {
 
 		pframes_t this_read = (pframes_t) std::min ((samplecnt_t) nframes, (last_sample - read_index));
 
-		for (uint64_t chn = 0; chn < ar->n_channels(); ++chn) {
+		for (uint64_t chn = 0; chn < chns; ++chn) {
 
 			uint64_t channel = chn %  data.size();
 			Sample* src = data[channel] + read_index;
