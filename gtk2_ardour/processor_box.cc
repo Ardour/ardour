@@ -4302,10 +4302,7 @@ ProcessorBox::edit_triggerbox (boost::shared_ptr<Processor> processor)
 		return false;
 	}
 
-	if (_parent_strip) {
-		_parent_strip->create_trigger_display (tb);
-		_parent_strip->toggle_trigger_display ();
-	}
+	UIConfiguration::instance().set_show_triggers_inline (!UIConfiguration::instance().get_show_triggers_inline());
 
 	return true;
 }

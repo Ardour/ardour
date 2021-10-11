@@ -535,6 +535,17 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		bottom_button_table.remove (group_button);
 	}
 
+	if (rt != route()) {
+		if (rt && route()) {
+			std::cerr << "switching from " << rt->name() << " to " << route()->name() << std::endl;
+		}
+		if (trigger_display && trigger_display->get_parent() == &global_vpacker) {
+			global_vpacker.remove (*trigger_display);
+			delete trigger_display;
+			trigger_display = 0;
+		}
+	}
+
 	RouteUI::set_route (rt);
 
 	control_slave_ui.set_stripable (boost::dynamic_pointer_cast<Stripable> (rt));
@@ -1643,6 +1654,19 @@ MixerStrip::revert_to_default_display ()
 	}
 
 	reset_strip_style ();
+
+	if (_route->triggerbox() && UIConfiguration::instance().get_show_triggers_inline()) {
+		create_trigger_display (_route->triggerbox());
+		if (trigger_display->get_parent() != &global_vpacker) {
+			global_vpacker.pack_start (*trigger_display, true, true);
+			trigger_display->show ();
+			global_vpacker.reorder_child (*trigger_display, 4);
+		}
+	} else {
+		if (trigger_display && (trigger_display->get_parent() == &global_vpacker)) {
+			global_vpacker.remove (*trigger_display);
+		}
+	}
 }
 
 void
@@ -1793,6 +1817,12 @@ MixerStrip::parameter_changed (string p)
 			} else {
 				master_volume_table.hide ();
 			}
+		}
+	} else if (p == "show-triggers-inline") {
+		boost::shared_ptr<TriggerBox> tb = route()->triggerbox();
+		if (tb) {
+			create_trigger_display (tb);
+			toggle_trigger_display ();
 		}
 	}
 }

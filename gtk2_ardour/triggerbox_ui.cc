@@ -257,6 +257,7 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 
 TriggerBoxUI::~TriggerBoxUI ()
 {
+	update_connection.disconnect ();
 }
 
 void
@@ -299,7 +300,7 @@ TriggerBoxUI::event (GdkEvent* ev, uint64_t n)
 {
 	switch (ev->type) {
 	case GDK_2BUTTON_PRESS:
-		choose_sample (n);
+		edit_trigger (n);
 		return true;
 	case GDK_BUTTON_RELEASE:
 		switch (ev->button.button) {
@@ -483,6 +484,7 @@ TriggerBoxUI::context_menu (uint64_t n)
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
 
+	items.push_back (MenuElem (_("Load..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::choose_sample), n)));
 	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::edit_trigger), n)));
 	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
 	items.push_back (MenuElem (_("Launch Style..."), *launch_menu));
@@ -530,6 +532,7 @@ TriggerBoxUI::choose_sample (uint64_t n)
 		file_chooser = new Gtk::FileChooserDialog (_("Select sample"), Gtk::FILE_CHOOSER_ACTION_OPEN);
 		file_chooser->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 		file_chooser->add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+		file_chooser->set_select_multiple (true);
 	}
 
 	file_chooser_connection.disconnect ();
@@ -550,10 +553,13 @@ TriggerBoxUI::sample_chosen (int response, uint64_t n)
 		return;
 	}
 
-	std::string path = file_chooser->get_filename ();
+	std::list<std::string> paths = file_chooser->get_filenames ();
 
-	_triggerbox.set_from_path (n, path);
-	// _triggerbox.trigger (n)->set_length (timecnt_t (Temporal::Beats (4, 0)));
+	for (std::list<std::string>::iterator s = paths.begin(); s != paths.end(); ++s) {
+		/* this will do nothing if n is too large */
+		_triggerbox.set_from_path (n, *s);
+		++n;
+	}
 }
 
 void
