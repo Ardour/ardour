@@ -176,7 +176,3 @@ BaseUI::attach_request_source ()
 	request_channel.attach (m_context);
 }
 
-void
-BaseUI::event_loop_precall ()
-{
-}

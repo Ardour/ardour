@@ -75,12 +75,6 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	 */
 	void quit ();
 
-	/* derived classes can override this in order to call code once per
-	   main loop iteration (i.e. before any event dispatching is done
-	   within the main loop)
-	*/
-	virtual void event_loop_precall ();
-
   protected:
 	bool _ok;
 

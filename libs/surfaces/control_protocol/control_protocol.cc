@@ -380,9 +380,3 @@ ControlProtocol::notify_stripable_selection_changed (StripableNotificationListPt
 	_last_selected = *sp;
 }
 
-void
-ControlProtocol::event_loop_precall ()
-{
-	Temporal::TempoMap::fetch ();
-}
-
