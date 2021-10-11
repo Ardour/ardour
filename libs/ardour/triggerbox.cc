@@ -739,6 +739,10 @@ AudioTrigger::compute_and_set_length ()
 		mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
 		double bpm = mbpm.estimateTempoOfSamples (data[0], data_length);
 
+		if (bpm == 0.0) {
+			/* no apparent tempo, just return since we'll use it as-is */
+			return;
+		}
 		cerr << name() << " Estimated bpm " << bpm << " from " << (double) data_length / _box.session().sample_rate() << " seconds\n";
 
 		const double seconds = (double) data_length  / _box.session().sample_rate();
