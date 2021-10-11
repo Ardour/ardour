@@ -1260,8 +1260,21 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 void
 TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
 {
-	if (!_active) {
-		return;
+	/* XXX a test to check if we have no usable slots would be good
+	   here. if so, we can just return.
+	*/
+
+	if (_active) {
+		if (!_pending_active) {
+			_active = false;
+			return;
+		}
+	} else {
+		if (_pending_active) {
+			_active = true;
+		} else {
+			return;
+		}
 	}
 
 	if (start_sample < 0) {
