@@ -1032,7 +1032,9 @@ TriggerBox::get_next_trigger ()
 int
 TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 {
-	assert (slot < all_triggers.size());
+	if (slot >= all_triggers.size()) {
+		return 0;
+	}
 
 	try {
 		SoundFileInfo info;
