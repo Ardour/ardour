@@ -19,7 +19,6 @@
 
 #include <shlobj.h>
 #include <winreg.h>
-#include <shlobj.h>
 #include <glibmm.h>
 
 #include "pbd/windows_special_dirs.h"
@@ -55,32 +54,35 @@ PBD::windows_query_registry (const char *regkey, const char *regval, std::string
 	DWORD size = PATH_MAX;
 	char tmp[PATH_MAX+1];
 
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (root, regkey, 0, KEY_READ, &key))
-			&& (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-		 )
-	{
-		rv = Glib::locale_to_utf8 (tmp);
-		return true;
+	if (ERROR_SUCCESS == RegOpenKeyExA (root, regkey, 0, KEY_READ, &key)) {
+		if (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size)) {
+			rv = Glib::locale_to_utf8 (tmp);
+			RegCloseKey (key);
+			return true;
+		}
+		RegCloseKey (key);
 	}
 
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (root, regkey, 0, KEY_READ | KEY_WOW64_32KEY, &key))
-			&& (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-		 )
-	{
-		rv = Glib::locale_to_utf8 (tmp);
-		return true;
+	if (ERROR_SUCCESS == RegOpenKeyExA (root, regkey, 0, KEY_READ | KEY_WOW64_32KEY, &key)) {
+		if (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size)) {
+			rv = Glib::locale_to_utf8 (tmp);
+			RegCloseKey (key);
+			return true;
+		}
+		RegCloseKey (key);
 	}
 
 #ifndef _WIN64
 	// If this is a 32-bit build (but we're running in Win64) the above
 	// code will only search Win32 registry keys. So if we got this far
 	// without finding anything, force Windows to search Win64 keys too
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (root, regkey, 0, KEY_READ | KEY_WOW64_64KEY, &key))
-			&& (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-		 )
-	{
-		rv = Glib::locale_to_utf8 (tmp);
-		return true;
+	if (ERROR_SUCCESS == RegOpenKeyExA (root, regkey, 0, KEY_READ | KEY_WOW64_64KEY, &key)) {
+		if (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size)) {
+			rv = Glib::locale_to_utf8 (tmp);
+			RegCloseKey (key);
+			return true;
+		}
+		RegCloseKey (key);
 	}
 #endif
 
