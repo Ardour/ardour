@@ -1254,6 +1254,10 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 void
 TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
 {
+	if (!_active) {
+		return;
+	}
+
 	if (start_sample < 0) {
 		/* we can't do anything under these conditions (related to
 		   latency compensation
