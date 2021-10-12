@@ -27,7 +27,7 @@ using namespace Temporal;
 double
 ArdourTransport::tempo () const
 {
-	const Tempo& tempo (TempoMap::use()->metric_at (0).tempo());
+	const Tempo& tempo (TempoMap::fetch()->metric_at (0).tempo());
 	return tempo.note_types_per_minute ();
 }
 
