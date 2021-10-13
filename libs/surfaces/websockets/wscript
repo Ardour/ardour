@@ -41,5 +41,8 @@ def build(bld):
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
+    if bld.env['build_target'] == 'mingw':
+        obj.defines+= [ '_WIN32_WINNT=0x0601', 'WINVER=0x0601' ]
+
 def shutdown():
     autowaf.shutdown()
