@@ -263,6 +263,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
+	int32_t order() const { return _order; }
+	void set_order(int32_t n);
+
 	typedef std::vector<Trigger*> Triggers;
 
 	Trigger* trigger (Triggers::size_type);
@@ -314,6 +317,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	PBD::RingBuffer<Trigger*> _bang_queue;
 	PBD::RingBuffer<Trigger*> _unbang_queue;
 	DataType _data_type;
+	int32_t _order;
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
 	PBD::RingBuffer<Trigger*> explicit_queue; /* user queued triggers */

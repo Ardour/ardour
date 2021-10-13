@@ -929,6 +929,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _bang_queue (1024)
 	, _unbang_queue (1024)
 	, _data_type (dt)
+	, _order (-1)
 	, explicit_queue (64)
 	, implicit_queue (64)
 	, currently_playing (0)
@@ -963,6 +964,12 @@ void
 TriggerBox::clear_implicit ()
 {
 	implicit_queue.reset ();
+}
+
+void
+TriggerBox::set_order (int32_t n)
+{
+	_order = n;
 }
 
 void
@@ -1188,15 +1195,24 @@ TriggerBox::set_first_midi_note (int n)
 int
 TriggerBox::note_to_trigger (int midi_note, int channel)
 {
-	Stripable* s = dynamic_cast<Stripable*> (owner());
-	const int column = s->presentation_info().order();
+	const int column = _order;
 	int first_note;
+	int top;
 
 	switch (_midi_map_mode) {
 
 	case AbletonPush:
-		first_note = 92 + column;
-		return (midi_note - first_note) / 8; /* gives row index */
+		/* the top row of pads generate MIDI note 92, 93, 94 and so on.
+		   Each lower row generates notes 8 below the one above it.
+		*/
+		top = 92 + column;
+		for (int row = 0; row < 8; ++row) {
+			if (midi_note == top - (row * 8)) {
+				return row;
+			}
+		}
+		return -1;
+		break;
 
 	case SequentialNote:
 		first_note = _first_midi_note - (column * all_triggers.size());
@@ -1229,6 +1245,8 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 			}
 
 			int trigger_number = note_to_trigger ((*ev).note(), (*ev).channel());
+
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("note %1 received on %2, translated to trigger num %3\n", (int) (*ev).note(), (int) (*ev).channel(), trigger_number));
 
 			if (trigger_number < 0) {
 				/* not for us */
@@ -1648,6 +1666,7 @@ TriggerBox::get_state (void)
 
 	node.set_property (X_("type"), X_("triggerbox"));
 	node.set_property (X_("data-type"), _data_type.to_string());
+	node.set_property (X_("order"), _order);
 
 	XMLNode* trigger_child (new XMLNode (X_("Triggers")));
 
@@ -1676,6 +1695,7 @@ int
 TriggerBox::set_state (const XMLNode& node, int version)
 {
 	node.get_property (X_("data-type"), _data_type);
+	node.get_property (X_("order"), _order);
 
 	XMLNode* tnode (node.child (X_("Triggers")));
 	assert (tnode);

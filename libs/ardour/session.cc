@@ -4214,6 +4214,7 @@ Session::reassign_track_numbers ()
 {
 	int64_t tn = 0;
 	int64_t bn = 0;
+	uint32_t trigger_order = 0;
 	RouteList r (*(routes.reader ()));
 	r.sort (Stripable::Sorter());
 
@@ -4223,9 +4224,14 @@ Session::reassign_track_numbers ()
 		assert (!(*i)->is_auditioner());
 		if (boost::dynamic_pointer_cast<Track> (*i)) {
 			(*i)->set_track_number(++tn);
-		}
-		else if (!(*i)->is_master() && !(*i)->is_monitor()) {
+		} else if (!(*i)->is_master() && !(*i)->is_monitor()) {
 			(*i)->set_track_number(--bn);
+		}
+
+		boost::shared_ptr<TriggerBox> tb = (*i)->triggerbox();
+		if (tb) {
+			tb->set_order (trigger_order);
+			trigger_order++;
 		}
 	}
 	const uint32_t decimals = ceilf (log10f (tn + 1));
