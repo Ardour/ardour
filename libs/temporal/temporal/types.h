@@ -22,8 +22,6 @@
 #include <cstdlib>
 #include <stdint.h>
 
-#include <boost/rational.hpp>
-
 #include "pbd/integer_division.h"
 
 #include "temporal/visibility.h"
