@@ -27,6 +27,7 @@
 
 #include <iostream>
 #include <limits>
+#include <sstream>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/integer_division.h"
