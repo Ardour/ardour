@@ -44,7 +44,7 @@ public:
 
 	timepos_t natural_position() const { return _source->natural_position() * _ratio;}
 	samplecnt_t readable_length_samples() const { return _source->length_samples () * _ratio; }
-	samplecnt_t length (samplepos_t /*pos*/) const { return _source->length_samples () * _ratio; }
+	timecnt_t length () const { return timecnt_t ((samplecnt_t) (_source->length_samples () * _ratio)); }
 
 	bool can_be_analysed() const { return false; }
 	bool clamped_at_unity() const { return false; }

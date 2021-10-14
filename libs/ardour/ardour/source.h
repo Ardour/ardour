@@ -74,7 +74,7 @@ public:
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
 
-	timecnt_t length() const { return _length; }
+	virtual timecnt_t length() const { return _length; }
 	samplecnt_t length_samples () const { return _length.samples(); };
 
 	virtual bool        empty () const;
