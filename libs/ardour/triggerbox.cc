@@ -374,6 +374,8 @@ Trigger::process_state_requests ()
 Trigger::RunType
 Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal::Beats const & end)
 {
+	using namespace Temporal;
+
 	/* In these states, we are not waiting for a transition */
 
 	switch (_state) {
@@ -387,13 +389,17 @@ Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal:
 		break;
 	}
 
-	timepos_t ev_time (Temporal::BeatTime);
+	timepos_t ev_time (BeatTime);
 
 	if (_quantization.bars == 0) {
 		ev_time = timepos_t (start.snap_to (Temporal::Beats (_quantization.beats, _quantization.ticks)));
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 start at %2, sb %3 eb %4\n", index(), ev_time.beats(), start, end, _quantization));
 	} else {
-		/* XXX not yet handled */
+		TempoMap::SharedPtr tmap (TempoMap::use());
+		BBT_Time bbt = tmap->bbt_at (timepos_t (start));
+		bbt = bbt.round_up_to_bar ();
+		bbt.bars = (bbt.bars / _quantization.bars) * _quantization.bars;
+		ev_time = timepos_t (tmap->quarters_at (bbt));
 	}
 
 	if (ev_time.beats() >= start && ev_time < end) {
