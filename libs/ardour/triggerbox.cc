@@ -251,16 +251,32 @@ Trigger::jump_start()
 	   wait for quantization.
 	*/
 	_state = Running;
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
 	PropertyChanged (ARDOUR::Properties::running);
 }
 
 void
+
+
+
 Trigger::jump_stop()
 {
 	/* this is used when we start a new trigger in legato mode. We do not
 	   wait for quantization.
 	*/
 	_state = Stopped;
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
+	PropertyChanged (ARDOUR::Properties::running);
+}
+
+void
+Trigger::start_stop()
+{
+	/* this is used when we start a tell a currently playing trigger to
+	   stop, but wait for quantization first.
+	*/
+	_state = WaitingToStop;
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
 	PropertyChanged (ARDOUR::Properties::running);
 }
 
@@ -1374,6 +1390,10 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 => %2 switched to in legato mode\n", currently_playing->index(), nxt->index()));
 				currently_playing = nxt;
 
+			} else {
+				currently_playing->start_stop ();
+				queue_implicit (all_triggers[nxt->index()]);
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("start stop for %1 before switching to %2\n", currently_playing->index(), nxt->index()));
 			}
 		}
 	}
