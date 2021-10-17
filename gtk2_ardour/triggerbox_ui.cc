@@ -509,6 +509,18 @@ TriggerBoxUI::context_menu (uint64_t n)
 	if (_triggerbox.trigger (n)->quantization() == b) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
+	b = BBT_Offset (0, 0, ticks_per_beat/8);
+	qitems.push_back (RadioMenuElem (qgroup, _("Thirty-Seconds"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
+	if (_triggerbox.trigger (n)->quantization() == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+	b = BBT_Offset (0, 0, ticks_per_beat/16);
+	qitems.push_back (RadioMenuElem (qgroup, _("Sixty-Fourths"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
+	if (_triggerbox.trigger (n)->quantization() == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+
+
 
 	items.push_back (MenuElem (_("Load..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::choose_sample), n)));
 	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::edit_trigger), n)));
