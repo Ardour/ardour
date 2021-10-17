@@ -176,6 +176,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_ui (void*);
 	void* ui () const { return _ui; }
 
+	TriggerBox const & box() const { return _box; }
+
   protected:
 	TriggerBox& _box;
 	State _state;
