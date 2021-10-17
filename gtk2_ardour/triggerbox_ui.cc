@@ -380,39 +380,43 @@ TriggerBoxUI::context_menu (uint64_t n)
 	Menu* follow_menu = manage (new Menu);
 	MenuList& fitems = follow_menu->items();
 
-	fitems.push_back (CheckMenuElem (_("Stop"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::Stop)));
+	RadioMenuItem::Group fagroup;
+	RadioMenuItem::Group lagroup;
+	RadioMenuItem::Group qgroup;
+
+	fitems.push_back (RadioMenuElem (fagroup, _("Stop"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::Stop)));
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::Stop) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
-	fitems.push_back (CheckMenuElem (_("Again"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::Again)));
+	fitems.push_back (RadioMenuElem (fagroup, _("Again"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::Again)));
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::Again) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
-	fitems.push_back (CheckMenuElem (_("Queued"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::QueuedTrigger)));
+	fitems.push_back (RadioMenuElem (fagroup, _("Queued"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::QueuedTrigger)));
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::QueuedTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
-	fitems.push_back (CheckMenuElem (_("Next"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::NextTrigger)));
+	fitems.push_back (RadioMenuElem (fagroup, _("Next"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::NextTrigger)));
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::NextTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
-	fitems.push_back (CheckMenuElem (_("Previous"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::PrevTrigger)));
+	fitems.push_back (RadioMenuElem (fagroup, _("Previous"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::PrevTrigger)));
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::PrevTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
-	fitems.push_back (CheckMenuElem (_("First"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::FirstTrigger)));
+	fitems.push_back (RadioMenuElem (fagroup, _("First"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::FirstTrigger)));
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::FirstTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
-	fitems.push_back (CheckMenuElem (_("Last"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::LastTrigger)));
+	fitems.push_back (RadioMenuElem (fagroup, _("Last"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::LastTrigger)));
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::LastTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
-	fitems.push_back (CheckMenuElem (_("Any"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::AnyTrigger)));
+	fitems.push_back (RadioMenuElem (fagroup, _("Any"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::AnyTrigger)));
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::AnyTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
-	fitems.push_back (CheckMenuElem (_("Other"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::OtherTrigger)));
+	fitems.push_back (RadioMenuElem (fagroup, _("Other"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::OtherTrigger)));
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::OtherTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
@@ -420,19 +424,19 @@ TriggerBoxUI::context_menu (uint64_t n)
 	Menu* launch_menu = manage (new Menu);
 	MenuList& litems = launch_menu->items();
 
-	litems.push_back (CheckMenuElem (_("One Shot"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::OneShot)));
+	litems.push_back (RadioMenuElem (lagroup, _("One Shot"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::OneShot)));
 	if (_triggerbox.trigger (n)->launch_style() == Trigger::OneShot) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
 	}
-	litems.push_back (CheckMenuElem (_("Gate"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::Gate)));
+	litems.push_back (RadioMenuElem (lagroup, _("Gate"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::Gate)));
 	if (_triggerbox.trigger (n)->launch_style() == Trigger::Gate) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
 	}
-	litems.push_back (CheckMenuElem (_("Toggle"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::Toggle)));
+	litems.push_back (RadioMenuElem (lagroup, _("Toggle"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::Toggle)));
 	if (_triggerbox.trigger (n)->launch_style() == Trigger::Toggle) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
 	}
-	litems.push_back (CheckMenuElem (_("Repeat"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::Repeat)));
+	litems.push_back (RadioMenuElem (lagroup, _("Repeat"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::Repeat)));
 	if (_triggerbox.trigger (n)->launch_style() == Trigger::Repeat) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
 	}
@@ -447,39 +451,39 @@ TriggerBoxUI::context_menu (uint64_t n)
 
 	if (success) {
 		b = BBT_Offset (0, grid_beats.get_beats(), grid_beats.get_ticks());
-		qitems.push_back (CheckMenuElem (_("Main Grid"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
+		qitems.push_back (RadioMenuElem (fagroup, _("Main Grid"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
 		/* can't mark this active because the current trigger quant setting may just a specific setting below */
 		/* XXX HOW TO GET THIS TO FOLLOW GRID CHANGES (which are GUI only) */
 	}
 
 	b = BBT_Offset (1, 0, 0);
-	qitems.push_back (CheckMenuElem (_("Bars"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
+	qitems.push_back (RadioMenuElem (qgroup, _("Bars"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
 	if (_triggerbox.trigger (n)->quantization() == b) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
 
 	b = BBT_Offset (0, 4, 0);
-	qitems.push_back (CheckMenuElem (_("Whole"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
+	qitems.push_back (RadioMenuElem (qgroup, _("Whole"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
 	if (_triggerbox.trigger (n)->quantization() == b) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
 	b = BBT_Offset (0, 2, 0);
-	qitems.push_back (CheckMenuElem (_("Half"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
+	qitems.push_back (RadioMenuElem (qgroup, _("Half"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
 	if (_triggerbox.trigger (n)->quantization() == b) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
 	b = BBT_Offset (0, 1, 0);
-	qitems.push_back (CheckMenuElem (_("Quarters"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
+	qitems.push_back (RadioMenuElem (qgroup, _("Quarters"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
 	if (_triggerbox.trigger (n)->quantization() == b) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
 	b = BBT_Offset (0, 0, ticks_per_beat/2);
-	qitems.push_back (CheckMenuElem (_("Eighths"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
+	qitems.push_back (RadioMenuElem (qgroup, _("Eighths"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
 	if (_triggerbox.trigger (n)->quantization() == b) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
 	b = BBT_Offset (0, 0, ticks_per_beat/4);
-	qitems.push_back (CheckMenuElem (_("Sixteenths"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
+	qitems.push_back (RadioMenuElem (qgroup, _("Sixteenths"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
 	if (_triggerbox.trigger (n)->quantization() == b) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
