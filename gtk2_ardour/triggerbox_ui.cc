@@ -30,6 +30,7 @@
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/utils.h"
 
 #include "ardour_ui.h"
@@ -65,8 +66,9 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	ArdourCanvas::Rect r (0, 0, width, height);
 	set (r);
 	set_outline_all ();
-	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
-	set_outline_color (UIConfiguration::instance().color (X_("neutral:foreground")));
+
+	owner_color_changed ();
+
 	name = string_compose ("trigger %1", _trigger.index());
 
 	play_button = new ArdourCanvas::Rectangle (this);
@@ -77,18 +79,19 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	play_button->hide ();
 
 	play_shape = new ArdourCanvas::Polygon (play_button);
-	play_shape->set_fill_color (UIConfiguration::instance().color (X_("theme:contrasting selection")));
+	play_shape->set_fill_color (outline_color());
 	play_shape->set_outline (false);
 	play_shape->name = string_compose ("playshape %1", _trigger.index());
 	play_shape->hide ();
 
 	name_text = new Text (this);
-	name_text->set_font_description (UIConfiguration::instance().get_SmallerFont());
+	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
 	name_text->set_color (Gtkmm2ext::contrasting_text_color (fill_color()));
 	name_text->set_position (Duple (play_button->get().width() + (2. * scale), poly_margin));
 	name_text->set_ignore_events (true);
 
 	_trigger.PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context());
+	dynamic_cast<Stripable*> (_trigger.box().owner())->presentation_info().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context());
 
 	PropertyChange changed;
 	changed.add (ARDOUR::Properties::name);
@@ -100,6 +103,21 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 
 TriggerEntry::~TriggerEntry ()
 {
+}
+
+void
+TriggerEntry::owner_prop_change (PropertyChange const & pc)
+{
+	if (pc.contains (Properties::color)) {
+		owner_color_changed ();
+	}
+}
+
+void
+TriggerEntry::owner_color_changed ()
+{
+	set_fill_color (dynamic_cast<Stripable*> (_trigger.box().owner())->presentation_info().color());
+	set_outline_color (HSV (fill_color()).opposite().color());
 }
 
 bool
@@ -144,7 +162,7 @@ TriggerEntry::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Cont
 		const ArdourCanvas::Rect draw = self.intersection (area);
 
 		ctxt->save ();
-		Gtkmm2ext::set_source_rgba (ctxt, 0xff000088);
+		Gtkmm2ext::set_source_rgba (ctxt, outline_color());
 		ctxt->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
 		ctxt->fill ();
 		ctxt->restore ();

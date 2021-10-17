@@ -71,6 +71,10 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 	PBD::ScopedConnection trigger_prop_connection;
 	void prop_change (PBD::PropertyChange const & change);
 	void shape_play_button ();
+
+	PBD::ScopedConnection owner_prop_connection;
+	void owner_prop_change (PBD::PropertyChange const &);
+	void owner_color_changed ();
 };
 
 class TriggerBoxUI : public ArdourCanvas::Table
