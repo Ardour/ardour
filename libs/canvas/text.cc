@@ -24,6 +24,8 @@
 #include <gtkmm/window.h>
 #include <gtkmm/label.h>
 
+#include "pbd/i18n.h"
+
 #include "canvas/text.h"
 #include "canvas/canvas.h"
 #include "gtkmm2ext/colors.h"
@@ -31,6 +33,7 @@
 using namespace std;
 using namespace ArdourCanvas;
 
+Text::FontSizeMap Text::font_size_map;
 
 Text::Text (Canvas* c)
 	: Item (c)
@@ -326,3 +329,74 @@ Text::text_width() const
     return _width;
 }
 
+double
+Text::text_height() const
+{
+    if (_need_redraw) {
+        redraw ();
+    }
+
+    return _height;
+}
+
+void
+Text::_size_allocate (Rect const & r)
+{
+	Item::_size_allocate (r);
+
+	if (!layout_sensitive()) {
+		/* not doing this */
+		return;
+	}
+
+	int font_size = font_size_for_height (r.height(), _canvas->get_pango_context());
+
+	if (font_size) {
+		char font_name[32];
+		std::string family = "Sans"; // UIConfiguration::instance().get_ui_font_family();
+		snprintf (font_name, sizeof (font_name), "%s %d", family.c_str(), font_size);
+		Pango::FontDescription pfd (font_name);
+		set_font_description (pfd);
+	}
+}
+
+int
+Text::font_size_for_height (Distance height, Glib::RefPtr<Pango::Context> const & ctxt)
+{
+	FontSizeMap::iterator fsm = font_size_map.find (height);
+
+	if (fsm != font_size_map.end()) {
+		return fsm->second;
+	}
+
+	std::string family = "Sans"; // UIConfiguration::instance().get_ui_font_family();
+	Glib::RefPtr<Pango::Layout> l (Pango::Layout::create (ctxt));
+	int font_size = 0;
+	char font_name[32];
+
+	/* Translators: Xg is a nonsense string that should include the
+	   highest glyph and a glyph with the lowest descender
+	*/
+
+	l->set_text (_("Xg"));
+
+	for (uint32_t pt = 5; pt < 24; ++pt) {
+
+		snprintf (font_name, sizeof (font_name), "%s %d", family.c_str(), pt);
+		Pango::FontDescription pfd (font_name);
+		l->set_font_description (pfd);
+
+		int w, h;
+		l->get_pixel_size (w, h);
+		if (h > height) {
+			font_size = pt - 1;
+			break;
+		}
+	}
+
+	if (font_size) {
+		font_size_map[height] = font_size;
+	}
+
+	return font_size;
+}

@@ -21,6 +21,8 @@
 #ifndef __ardour_canvas_text_h__
 #define __ardour_canvas_text_h__
 
+#include <map>
+
 #include <pangomm/fontdescription.h>
 #include <pangomm/layout.h>
 
@@ -38,6 +40,7 @@ public:
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
+	void _size_allocate (Rect const&);
 
 	Gtkmm2ext::Color color () const { return _color; }
 	void set_color (Gtkmm2ext::Color);
@@ -56,6 +59,10 @@ public:
 
 	std::string text() const { return _text; }
 	double text_width() const;
+	double text_height() const;
+
+	static int font_size_for_height (Distance height, Glib::RefPtr<Pango::Context> const &);
+	typedef std::map<Distance,int> FontSizeMap;
 
 private:
 	std::string             _text;
@@ -69,8 +76,11 @@ private:
 	mutable bool            _need_redraw;
 	mutable double          _width_correction;
 	double                  _clamped_width;
+	std::string             _font_family;
 
 	void _redraw () const;
+
+	static FontSizeMap font_size_map;
 };
 
 }
