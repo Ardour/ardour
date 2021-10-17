@@ -200,7 +200,11 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const & alloc)
 	shape_play_button ();
 	play_button->set (ArdourCanvas::Rect (poly_margin/2., poly_margin/2., poly_size + ((poly_margin/2.) * 2.), height - ((poly_margin/2.) * 2.)));
 
-	name_text->set_position (Duple (play_button->get().width() + (2. * scale), poly_margin));
+	const Distance lhs = play_button->get().width() + (2. * poly_margin * scale);
+	ArdourCanvas::Rect text_alloc (lhs, poly_margin, alloc.width() - lhs - (poly_margin * scale), alloc.height() - (2. * poly_margin));
+	name_text->size_allocate (text_alloc);
+
+	name_text->set_position (Duple (lhs, poly_margin));
 }
 
 void
