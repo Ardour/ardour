@@ -603,14 +603,12 @@ TriggerBoxUI::sample_chosen (int response, uint64_t n)
 void
 TriggerBoxUI::start_updating ()
 {
-	std::cerr << "start updaring\n";
 	update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &TriggerBoxUI::rapid_update));
 }
 
 void
 TriggerBoxUI::stop_updating ()
 {
-	std::cerr << "stop updaring\n";
 	update_connection.disconnect ();
 }
 
