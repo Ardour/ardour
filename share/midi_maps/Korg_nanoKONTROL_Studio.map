@@ -110,12 +110,12 @@ AH8A//8QADwAfwD//xAAPQB/AP///////////////////////wAEAlJTVVYAf///////////////
 <!-- Select unassigned														-->
 <!-- Rotary encoder assigned to Master Pan Width (easy to audition in mono!)-->
 <!-- Fader assigned to Master Gain 											-->
-	<Binding channel="1" ctl="21" uri="/bus/mute master"/>
+	<Binding channel="1" ctl="21" uri="/bus/mute Master"/>
 	<Binding channel="1" ctl="29" function="transport-start"/>
 	<Binding channel="1" ctl="38" function="transport-end"/>	
 	<Binding channel="1" ctl="46" action="Transport/RecordCountIn"/>
-	<Binding channel="1" ctl="13" uri="/bus/panwidth master"/>
-	<Binding channel="1" ctl="2" uri="/bus/gain master"/>
+	<Binding channel="1" ctl="13" uri="/bus/panwidth Master"/>
+	<Binding channel="1" ctl="2" uri="/bus/gain Master"/>
 
 <!-- Strip 2 : Selected track -->
 <!-- Mute assigned to Mute							                        -->

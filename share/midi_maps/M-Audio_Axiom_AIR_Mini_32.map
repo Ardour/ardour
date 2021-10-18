@@ -54,7 +54,7 @@
 -->
 
   <!-- Knob, mapped to gain faders -->
-  <Binding channel="1" ctl="1" uri="/bus/gain master"/>
+  <Binding channel="1" ctl="1" uri="/bus/gain Master"/>
   <Binding channel="1" ctl="2" uri="/route/gain 1"/>
   <Binding channel="1" ctl="3" uri="/route/gain 2"/>
   <Binding channel="1" ctl="4" uri="/route/gain 3"/>

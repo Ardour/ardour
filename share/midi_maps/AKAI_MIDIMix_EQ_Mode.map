@@ -105,5 +105,5 @@
 
   <Binding channel="1" note="25" function="prev-bank"/>
   <Binding channel="1" note="26" function="next-bank"/>
-  <Binding channel="1" ctl="62"   uri="/bus/gain master"/>
+  <Binding channel="1" ctl="62"   uri="/bus/gain Master"/>
  </ArdourMIDIBindings>

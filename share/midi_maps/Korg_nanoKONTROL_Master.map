@@ -88,10 +88,10 @@
   <Binding channel="1" ctl="12" uri="/route/gain B8"/>
 
 <!-- Strip 9 : Master -->
-  <Binding channel="1" ctl="22" uri="/bus/panwidth master"/>
+  <Binding channel="1" ctl="22" uri="/bus/panwidth Master"/>
   <Binding channel="1" ctl="31" action="Common/toggle-mixer-on-top"/>
-  <Binding channel="1" ctl="41" uri="/bus/mute master"/>
-  <Binding channel="1" ctl="13" uri="/bus/gain master"/>
+  <Binding channel="1" ctl="41" uri="/bus/mute Master"/>
+  <Binding channel="1" ctl="13" uri="/bus/gain Master"/>
 
 
 </ArdourMIDIBindings>

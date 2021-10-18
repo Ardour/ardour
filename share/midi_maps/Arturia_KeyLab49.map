@@ -13,7 +13,7 @@
   <Binding channel="1" ctl="81" uri="/route/gain B6"/>
   <Binding channel="1" ctl="82" uri="/route/gain B7"/>
   <Binding channel="1" ctl="83" uri="/route/gain B8"/>
-  <Binding channel="1" ctl="85" uri="/bus/gain master"/>
+  <Binding channel="1" ctl="85" uri="/bus/gain Master"/>
 
 <!-- Pan controls. All encoders except the 2 on the right are mapped to pan direction. -->
   <Binding channel="1" enc-b="74" uri="/route/pandirection B1"/>

@@ -14,7 +14,7 @@
   <Binding channel="1" ctl="72" uri="/route/gain 6"/>
   <Binding channel="1" ctl="5" uri="/route/gain 7"/>
   <Binding channel="1" ctl="84" uri="/route/gain 8"/>
-  <Binding channel="1" ctl="7" uri="/bus/gain master"/>
+  <Binding channel="1" ctl="7" uri="/bus/gain Master"/>
 
 <!-- Zone/Group buttons, below the faders -->
 <!-- these toggle Mute for the corresponding tracks (1-8) and Master -->
@@ -27,7 +27,7 @@
   <Binding channel="1" pgm="5" uri="/route/mute 6"/>
   <Binding channel="1" pgm="6" uri="/route/mute 7"/>
   <Binding channel="1" pgm="7" uri="/route/mute 8"/>
-  <Binding channel="1" pgm="8" uri="/bus/mute master"/>"
+  <Binding channel="1" pgm="8" uri="/bus/mute Master"/>"
 
 <!-- Encoders, mapped to pan direction. -->
 

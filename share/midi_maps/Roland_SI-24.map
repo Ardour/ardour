@@ -18,7 +18,7 @@
 	<Binding channel="1" ctl="9" uri="/route/gain B10"/>
 	<Binding channel="1" ctl="10" uri="/route/gain B11"/>
 	<Binding channel="1" ctl="11" uri="/route/gain B12"/>
-	<Binding channel="1" ctl="12" uri="/bus/gain master"/>
+	<Binding channel="1" ctl="12" uri="/bus/gain Master"/>
 
 <!--	<Binding channel="1" ctl="13" uri=""/>		SURROUND PAN left/right (0 through 127, respectively)	-->
 <!--	<Binding channel="1" ctl="14" uri=""/>		SURROUND PAN up/down (127 through 0, respectively)	-->

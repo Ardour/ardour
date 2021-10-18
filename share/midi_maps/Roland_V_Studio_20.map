@@ -35,6 +35,6 @@
 <Binding channel="8" pb="0"   uri="/route/gain B8"/>
 
 <!-- Gain controls -->
-<Binding channel="9" pb="0" uri="/bus/gain master"/>
+<Binding channel="9" pb="0" uri="/bus/gain Master"/>
 
 </ArdourMIDIBindings>

@@ -40,7 +40,7 @@
   <Binding channel="1" ctl="104" uri="/route/gain 23"/>
 
 <!-- Last Fader Binding On Control Bank C reserved for Master Bus  -->
-  <Binding channel="1" ctl="105" uri="/bus/gain master"/>
+  <Binding channel="1" ctl="105" uri="/bus/gain Master"/>
 
 <!-- Encoder Knob bindings to Pan Direction -->
 
@@ -80,7 +80,7 @@
 <!-- Last Encoder Knob Binding On Control Bank C reserved for Master Bus  -->
 <!-- *Note Pan Direction doesn't work on Master Bus, mapped anyway for consistency  -->
 
-  <Binding channel="1" ctl="91" uri="/bus/pandirection master"/>
+  <Binding channel="1" ctl="91" uri="/bus/pandirection Master"/>
 
 
 <!-- MPK61 Solo Buttons mapped to Ardour track Solo -->
@@ -123,7 +123,7 @@
 <!-- Last Button Binding On Control Bank C reserved for Master Bus  -->
 <!-- This binding will mute the Master Bus since it has no Solo Function  -->
 
-  <Binding channel="1" ctl="113" uri="/bus/mute master"/>
+  <Binding channel="1" ctl="113" uri="/bus/mute Master"/>
 
 
 </ArdourMIDIBindings>

@@ -16,7 +16,7 @@
   <Binding channel="1" ctl="45" uri="/route/gain B6"/>
   <Binding channel="1" ctl="46" uri="/route/gain B7"/>
   <Binding channel="1" ctl="47" uri="/route/gain B8"/>
-  <Binding channel="1" ctl="3" uri="/bus/gain master"/>
+  <Binding channel="1" ctl="3" uri="/bus/gain Master"/>
 
 <!-- Buttons below the faders mapped to Mute-->
   <Binding channel="1" ctl="56" uri="/route/mute B1" momentary="yes"/>

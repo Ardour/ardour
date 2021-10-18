@@ -29,11 +29,11 @@ NOTE:	I have assumed that the top row knobs are mapped to midi
 <!--
 	Xboard data entry slider / master vol  #!! or FF/REV? bank select?
 -->
-	<!--Binding sysex="f0 7f 7f 4 1 75 2b f7" uri="/bus/gain master" /-->
+	<!--Binding sysex="f0 7f 7f 4 1 75 2b f7" uri="/bus/gain Master" /-->
 
 <!-- 
 -->
-	<Binding channel="1" ctl="1" uri="/bus/gain master" />
+	<Binding channel="1" ctl="1" uri="/bus/gain Master" />
 
 <!-- 
 	Xboard knobs 1-8 top row

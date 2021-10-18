@@ -87,7 +87,7 @@
 
 <!-- Master bus controlled by the "MAIN" fader on the DDX3216 -->
 
-  <Binding channel="1"  ctl="61"  uri="/bus/gain master"  />
+  <Binding channel="1"  ctl="61"  uri="/bus/gain Master"  />
 
 <!-- Pan commented out for now - the 16 Busses have no pan controls on ddx3216 -->
 

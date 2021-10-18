@@ -22,7 +22,7 @@
   <Binding channel="1" ctl="114" uri="/route/gain 6"/>
   <Binding channel="1" ctl="115" uri="/route/gain 7"/>
   <Binding channel="1" ctl="116" uri="/route/gain 8"/>
-  <Binding channel="1" ctl="117" uri="/bus/gain master"/>
+  <Binding channel="1" ctl="117" uri="/bus/gain Master"/>
 
 <!-- Pan controls. Encoders are mapped to pan direction. -->
 <!-- There doesn't seem to be a way to map encoders to pan width. -->

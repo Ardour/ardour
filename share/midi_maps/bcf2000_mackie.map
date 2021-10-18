@@ -94,7 +94,7 @@
 <Binding channel="1"  note="39"                  uri="/route/recenable B8"/>
 
 <!-- expression pedal to master bus gain -->
-<!-- <Binding channel="11" ctl="7"                    uri="/bus/gain master"/> -->
+<!-- <Binding channel="11" ctl="7"                    uri="/bus/gain Master"/> -->
 <!-- footswitch pedal to rec-enable; this will work for punch-in, but not punch-out -->
 <!-- <Binding sysex="f0 7f 7f 6 6 f7"                 function="rec-enable"/> -->
 

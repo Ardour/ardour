@@ -20,7 +20,7 @@
   <Binding channel="16" ctl="118" function="rec-disable"/>
 
   <!-- Set master volume fader, this is far right most fader labelled C9 and is master volume on all banks by default -->
-  <Binding channel="16" ctl="41" uri="/bus/gain master"/>
+  <Binding channel="16" ctl="41" uri="/bus/gain Master"/>
 
   <!-- Set faders 1-8 to corresponding banks -->
   <Binding channel="16" ctl="33" uri="/route/gain 1"/>
@@ -43,7 +43,7 @@
   <Binding channel="16" ctl="24" uri="/route/plugin/parameter B1 1 8"/>
  
   <!-- Set master mute button -->
-  <Binding channel="16" ctl="57" uri="/bus/mute master"/>
+  <Binding channel="16" ctl="57" uri="/bus/mute Master"/>
 
   <!-- Set mute buttons beneath faders to correspond to banks --> 
   <Binding channel="16" ctl="49" uri="/route/mute B1"/>    

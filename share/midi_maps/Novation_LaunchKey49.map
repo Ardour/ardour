@@ -25,7 +25,7 @@
 <Binding channel="1" ctl="46" uri="/route/gain B6"/>
 <Binding channel="1" ctl="47" uri="/route/gain B7"/>
 <Binding channel="1" ctl="48" uri="/route/gain B8"/>
-<Binding channel="1" ctl="7" uri="/bus/gain master"/>
+<Binding channel="1" ctl="7" uri="/bus/gain Master"/>
 
 <!-- Pan controls. Encoders are mapped to pan direction. -->
 <!-- There doesn't seem to be a way to map encoders to pan width. -->
@@ -54,7 +54,7 @@
 <Binding channel="1" ctl="56" uri="/route/solo B6"/>
 <Binding channel="1" ctl="57" uri="/route/solo B7"/>
 <Binding channel="1" ctl="58" uri="/route/solo B8"/>
-<Binding channel="1" ctl="59" uri="/bus/mute master"/>"
+<Binding channel="1" ctl="59" uri="/bus/mute Master"/>"
 
 <!-- Bank Control -->
 
