@@ -33,7 +33,7 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Text::FontSizeMap Text::font_size_map;
+Text::FontSizeMaps Text::font_size_maps;
 
 Text::Text (Canvas* c)
 	: Item (c)
@@ -45,6 +45,7 @@ Text::Text (Canvas* c)
 	, _need_redraw (false)
         , _width_correction (-1)
 	, _clamped_width (COORD_MAX)
+	, _height_based_on_allocation (false)
 {
 	_outline = false;
 }
@@ -59,6 +60,7 @@ Text::Text (Item* parent)
 	, _need_redraw (false)
         , _width_correction (-1)
 	, _clamped_width (COORD_MAX)
+	, _height_based_on_allocation (false)
 {
 	_outline = false;
 }
@@ -66,6 +68,16 @@ Text::Text (Item* parent)
 Text::~Text ()
 {
 	delete _font_description;
+}
+
+void
+Text::set_height_based_on_allocation (bool yn)
+{
+	/* assumed to be set during construction, so we do not schedule a
+	 * redraw after changing this.
+	 */
+
+	_height_based_on_allocation = yn;
 }
 
 void
@@ -349,7 +361,12 @@ Text::_size_allocate (Rect const & r)
 		return;
 	}
 
-	int font_size = font_size_for_height (r.height(), _canvas->get_pango_context());
+	if (!_height_based_on_allocation) {
+		/* non-resizable text */
+		return;
+	}
+
+	int font_size = font_size_for_height (r.height(), _font_description->get_family(), _canvas->get_pango_context());
 
 	if (font_size) {
 		char font_name[32];
@@ -357,19 +374,27 @@ Text::_size_allocate (Rect const & r)
 		snprintf (font_name, sizeof (font_name), "%s %d", family.c_str(), font_size);
 		Pango::FontDescription pfd (font_name);
 		set_font_description (pfd);
+		show ();
+	} else {
+		hide ();
 	}
 }
 
 int
-Text::font_size_for_height (Distance height, Glib::RefPtr<Pango::Context> const & ctxt)
+Text::font_size_for_height (Distance height, std::string const & font_family, Glib::RefPtr<Pango::Context> const & ctxt)
 {
-	FontSizeMap::iterator fsm = font_size_map.find (height);
+	FontSizeMaps::iterator fsM = font_size_maps.find (font_family);  /* map of maps */
 
-	if (fsm != font_size_map.end()) {
+	if (fsM == font_size_maps.end()) {
+		fsM = font_size_maps.insert (make_pair (font_family, FontSizeMap())).first;
+	}
+
+	FontSizeMap::iterator fsm = fsM->second.find (height); /* map of point size -> pixel height */
+
+	if (fsm != fsM->second.end()) {
 		return fsm->second;
 	}
 
-	std::string family = "Sans"; // UIConfiguration::instance().get_ui_font_family();
 	Glib::RefPtr<Pango::Layout> l (Pango::Layout::create (ctxt));
 	int font_size = 0;
 	char font_name[32];
@@ -382,7 +407,7 @@ Text::font_size_for_height (Distance height, Glib::RefPtr<Pango::Context> const 
 
 	for (uint32_t pt = 5; pt < 24; ++pt) {
 
-		snprintf (font_name, sizeof (font_name), "%s %d", family.c_str(), pt);
+		snprintf (font_name, sizeof (font_name), "%s %d", font_family.c_str(), pt);
 		Pango::FontDescription pfd (font_name);
 		l->set_font_description (pfd);
 
@@ -395,8 +420,14 @@ Text::font_size_for_height (Distance height, Glib::RefPtr<Pango::Context> const 
 	}
 
 	if (font_size) {
-		font_size_map[height] = font_size;
+		fsM->second.insert (make_pair (height, font_size));
 	}
 
 	return font_size;
+}
+
+void
+Text::drop_height_maps ()
+{
+	font_size_maps.clear ();
 }

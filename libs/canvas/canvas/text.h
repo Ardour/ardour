@@ -61,8 +61,10 @@ public:
 	double text_width() const;
 	double text_height() const;
 
-	static int font_size_for_height (Distance height, Glib::RefPtr<Pango::Context> const &);
-	typedef std::map<Distance,int> FontSizeMap;
+	void set_height_based_on_allocation (bool yn);
+
+	static int font_size_for_height (Distance height, std::string const & font_family, Glib::RefPtr<Pango::Context> const &);
+	static void drop_height_maps ();
 
 private:
 	std::string             _text;
@@ -76,11 +78,14 @@ private:
 	mutable bool            _need_redraw;
 	mutable double          _width_correction;
 	double                  _clamped_width;
-	std::string             _font_family;
+	bool                    _height_based_on_allocation;
 
 	void _redraw () const;
 
-	static FontSizeMap font_size_map;
+	typedef std::map<Distance,int> FontSizeMap;
+	typedef std::map<std::string,FontSizeMap> FontSizeMaps;
+
+	static FontSizeMaps font_size_maps;
 };
 
 }
