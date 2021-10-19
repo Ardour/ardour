@@ -57,6 +57,8 @@
 #include "gtkmm2ext/rgb_macros.h"
 #include "gtkmm2ext/gtk_ui.h"
 
+#include "canvas/text.h"
+
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -133,6 +135,8 @@ UIConfiguration::parameter_changed (string param)
 		load_rc_file (true);
 	} else if (param == "color-file") {
 		load_color_theme (true);
+	} else if (param == "font-scale") {
+		ArdourCanvas::Text::drop_height_maps ();
 	}
 
 	save_state ();
