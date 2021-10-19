@@ -1720,6 +1720,8 @@ TriggerBox::get_state (void)
 int
 TriggerBox::set_state (const XMLNode& node, int version)
 {
+	Processor::set_state (node, version);
+
 	node.get_property (X_("data-type"), _data_type);
 	node.get_property (X_("order"), _order);
 
