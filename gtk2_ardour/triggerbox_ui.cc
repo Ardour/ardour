@@ -86,6 +86,7 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 
 	name_text = new Text (this);
 	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
+	name_text->set_height_based_on_allocation (true);
 	name_text->set_color (Gtkmm2ext::contrasting_text_color (fill_color()));
 	name_text->set_position (Duple (play_button->get().width() + (2. * scale), poly_margin));
 	name_text->set_ignore_events (true);
