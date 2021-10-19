@@ -54,6 +54,7 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 	ARDOUR::Trigger& trigger() const { return _trigger; }
 
 	ArdourCanvas::Rectangle* play_button;
+	ArdourCanvas::Rectangle* active_bar;
 	ArdourCanvas::Polygon* play_shape;
 	ArdourCanvas::Text*    name_text;
 
@@ -66,7 +67,6 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 	ARDOUR::Trigger& _trigger;
 	double poly_size;
 	double poly_margin;
-	double active_bar_width;
 
 	PBD::ScopedConnection trigger_prop_connection;
 	void prop_change (PBD::PropertyChange const & change);

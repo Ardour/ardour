@@ -52,11 +52,12 @@ using namespace PBD;
 TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	: ArdourCanvas::Rectangle (canvas)
 	, _trigger (t)
-	, active_bar_width (0.)
 {
 	const double scale = UIConfiguration::instance().get_ui_scale();
 	const double width = 150. * scale;
 	const double height = 20. * scale;
+
+	name = string_compose ("trigger %1", _trigger.index());
 
 	Event.connect (sigc::mem_fun (*this, &TriggerEntry::event_handler));
 
@@ -67,9 +68,10 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	set (r);
 	set_outline_all ();
 
-	owner_color_changed ();
+	active_bar = new ArdourCanvas::Rectangle (this);
+	active_bar->set_outline (false);
 
-	name = string_compose ("trigger %1", _trigger.index());
+	owner_color_changed ();
 
 	play_button = new ArdourCanvas::Rectangle (this);
 	play_button->set (ArdourCanvas::Rect (poly_margin/2., poly_margin/2., poly_size + ((poly_margin/2.) * 2.), height - ((poly_margin/2.) * 2.)));
@@ -119,6 +121,7 @@ TriggerEntry::owner_color_changed ()
 {
 	set_fill_color (dynamic_cast<Stripable*> (_trigger.box().owner())->presentation_info().color());
 	set_outline_color (HSV (fill_color()).opposite().color());
+	active_bar->set_fill_color (HSV (fill_color()).darker(0.3).color ());
 }
 
 bool
@@ -150,24 +153,6 @@ void
 TriggerEntry::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> ctxt) const
 {
 	Rectangle::render (area, ctxt);
-
-	if (active_bar_width) {
-		const double scale = UIConfiguration::instance().get_ui_scale();
-		ArdourCanvas::Rect r (get());
-
-		ArdourCanvas::Rect active (r.height() * scale,
-		             (r.y0 + 1) * scale,
-		             (r.height() + active_bar_width - 1) * scale,
-		             (r.y0 + 4) * scale);
-		ArdourCanvas::Rect self (item_to_window (active));
-		const ArdourCanvas::Rect draw = self.intersection (area);
-
-		ctxt->save ();
-		Gtkmm2ext::set_source_rgba (ctxt, outline_color());
-		ctxt->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
-		ctxt->fill ();
-		ctxt->restore ();
-	}
 }
 
 void
@@ -181,9 +166,17 @@ TriggerEntry::maybe_update ()
 		nbw = _trigger.position_as_fraction () * (_allocation.width() - _allocation.height());
 	}
 
-	if (nbw != active_bar_width) {
-		active_bar_width = nbw;
-		redraw ();
+	if (nbw) {
+		const double scale = UIConfiguration::instance().get_ui_scale();
+		ArdourCanvas::Rect r (get());
+
+		active_bar->set (ArdourCanvas::Rect (r.height() * scale,
+		                                     (r.y0 + 1) * scale,
+		                                     (r.height() + nbw - 1) * scale,
+		                                     (r.y1 - 1) * scale));
+		active_bar->show ();
+	} else {
+		active_bar->hide ();
 	}
 }
 
