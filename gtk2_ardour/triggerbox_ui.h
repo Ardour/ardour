@@ -59,7 +59,6 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 	ArdourCanvas::Text*    name_text;
 
 	void _size_allocate (ArdourCanvas::Rect const &);
-	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void maybe_update ();
 	bool event_handler (GdkEvent*);
 

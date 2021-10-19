@@ -150,12 +150,6 @@ TriggerEntry::event_handler (GdkEvent* ev)
 }
 
 void
-TriggerEntry::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> ctxt) const
-{
-	Rectangle::render (area, ctxt);
-}
-
-void
 TriggerEntry::maybe_update ()
 {
 	double nbw;
