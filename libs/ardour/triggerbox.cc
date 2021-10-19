@@ -65,6 +65,9 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _stretch (1.0)
 	, _barcnt (0.)
 	, _ui (0)
+	, _gain (1.0)
+	, _pending_gain (1.0)
+	, _midi_velocity_effect (0.)
 {
 	add_property (_legato);
 	add_property (_use_follow);
@@ -109,6 +112,17 @@ Trigger::unbang ()
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("un-bang on %1\n", _index));
 }
 
+void
+Trigger::set_gain (gain_t g)
+{
+	_pending_gain = g;
+}
+
+void
+Trigger::set_midi_velocity_effect (float mve)
+{
+	_midi_velocity_effect = std::min (1.f, std::max (0.f, mve));
+}
 
 void
 Trigger::set_follow_count (uint32_t n)
@@ -240,7 +254,16 @@ void
 Trigger::startup()
 {
 	_state = WaitingToStart;
+	_gain = _pending_gain;
 	_follow_cnt = _follow_count;
+	PropertyChanged (ARDOUR::Properties::running);
+}
+
+void
+Trigger::shutdown ()
+{
+	_state = Stopped;
+	_gain = 1.0;
 	PropertyChanged (ARDOUR::Properties::running);
 }
 
@@ -256,15 +279,12 @@ Trigger::jump_start()
 }
 
 void
-
-
-
 Trigger::jump_stop()
 {
 	/* this is used when we start a new trigger in legato mode. We do not
 	   wait for quantization.
 	*/
-	_state = Stopped;
+	shutdown ();
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
 	PropertyChanged (ARDOUR::Properties::running);
 }
@@ -363,8 +383,7 @@ Trigger::process_state_requests ()
 				break;
 			default:
 				/* didn't even get started */
-				_state = Stopped;
-				PropertyChanged (ARDOUR::Properties::running);
+				shutdown ();
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, never started, now stopped\n", index()));
 			}
 		}
@@ -869,8 +888,15 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 			if (first) {
 				buf.read_from (src, this_read, dest_offset);
+				if (_gain != 1.0) {
+					buf.apply_gain (_gain, this_read);
+				}
 			} else {
-				buf.accumulate_from (src, this_read, dest_offset);
+				if (_gain != 1.0) {
+					buf.accumulate_with_gain_from (src, this_read, _gain, dest_offset);
+				} else {
+					buf.accumulate_with_gain_from (src, this_read, _gain, dest_offset);
+				}
 			}
 		}
 
@@ -901,8 +927,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 						buf.silence (nframes - this_read, dest_offset + this_read);
 					}
 				}
-				_state = Stopped;
-				PropertyChanged (ARDOUR::Properties::running);
+				shutdown ();
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped\n", index()));
 				break;
 			}
@@ -913,8 +938,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 	if (_state == Stopping && long_enough_to_fade) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
-		_state = Stopped;
-		PropertyChanged (ARDOUR::Properties::running);
+		shutdown ();
 	}
 
 	return 0;
@@ -943,7 +967,8 @@ Trigger::make_property_quarks ()
 
 const uint64_t TriggerBox::default_triggers_per_box = 8;
 Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
-TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::AbletonPush);
+//TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::AbletonPush);
+TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::SequentialNote);
 int TriggerBox::_first_midi_note = 60;
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
@@ -1237,7 +1262,7 @@ TriggerBox::note_to_trigger (int midi_note, int channel)
 		break;
 
 	case SequentialNote:
-		first_note = _first_midi_note - (column * all_triggers.size());
+		first_note = _first_midi_note + (column * all_triggers.size());
 		return midi_note - first_note; /* direct access to row */
 
 	case ByMidiChannel:
@@ -1287,6 +1312,15 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 
 			if ((*ev).is_note_on()) {
 
+				if (t->midi_velocity_effect() != 0.0) {
+					/* if MVE is zero, MIDI velocity has no
+					   impact on gain. If it is small, it
+					   has a small effect on gain. As it
+					   approaches 1.0, it has full control
+					   over the trigger gain.
+				*/
+					t->set_gain (1.0 - (t->midi_velocity_effect() * (*ev).velocity() / 127.f));
+				}
 				t->bang ();
 
 			} else if ((*ev).is_note_off()) {

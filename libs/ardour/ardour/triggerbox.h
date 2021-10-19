@@ -166,6 +166,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	bool legato () const { return _legato; }
 
 	virtual void startup ();
+	virtual void shutdown ();
 	virtual void jump_start ();
 	virtual void jump_stop ();
 	virtual void start_stop ();
@@ -177,6 +178,12 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void* ui () const { return _ui; }
 
 	TriggerBox const & box() const { return _box; }
+
+	gain_t gain() const { return _pending_gain; }
+	void set_gain (gain_t);
+
+	float midi_velocity_effect() const { return _midi_velocity_effect; }
+	void set_midi_velocity_effect (float);
 
   protected:
 	TriggerBox& _box;
@@ -199,6 +206,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	double _stretch;
 	double _barcnt; /* our estimate of the number of bars in the region */
 	void* _ui;
+	gain_t _gain;
+	gain_t _pending_gain;
+	float _midi_velocity_effect;
 
 	void set_region_internal (boost::shared_ptr<Region>);
 	void request_state (State s);
