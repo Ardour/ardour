@@ -416,9 +416,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void reconnect_to_default ();
 	void parameter_changed (std::string const &);
 
-	typedef std::map<uint8_t,Triggers::size_type> MidiTriggerMap;
-	MidiTriggerMap midi_trigger_map;
-
 	static const uint64_t default_triggers_per_box;
 	static int _first_midi_note;
 	static TriggerMidiMapMode _midi_map_mode;

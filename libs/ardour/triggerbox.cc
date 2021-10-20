@@ -1217,17 +1217,6 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 		}
 	}
 
-	/* MIDI note numbers from Ableton Push2 in chromatic mode */
-
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (92), 0));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (84), 1));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (76), 2));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (68), 3));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (60), 4));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (52), 5));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (44), 6));
-	midi_trigger_map.insert (midi_trigger_map.end(), std::make_pair (uint8_t (36), 7));
-
 	Temporal::TempoMap::MapChanged.connect_same_thread (tempo_map_connection, boost::bind (&TriggerBox::tempo_map_change, this));
 
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
