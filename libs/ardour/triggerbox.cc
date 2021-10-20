@@ -16,6 +16,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/midi_region.h"
 #include "ardour/minibpm.h"
 #include "ardour/port.h"
 #include "ardour/region_factory.h"
@@ -941,6 +942,227 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 		shutdown ();
 	}
 
+	return 0;
+}
+
+
+/*--------------------*/
+
+MIDITrigger::MIDITrigger (uint64_t n, TriggerBox& b)
+	: Trigger (n, b)
+	, data (0)
+	, last_read (0, 0)
+	, data_length (0, 0)
+	, _start_offset (0, 0, 0)
+	, _legato_offset (0, 0, 0)
+	, usable_length (0, 0)
+	, last (0, 0)
+{
+}
+
+MIDITrigger::~MIDITrigger ()
+{
+	delete data;
+}
+
+void
+MIDITrigger::startup ()
+{
+	Trigger::startup ();
+	retrigger ();
+}
+
+void
+MIDITrigger::jump_start ()
+{
+	Trigger::jump_start ();
+	retrigger ();
+}
+
+void
+MIDITrigger::jump_stop ()
+{
+	Trigger::jump_stop ();
+	retrigger ();
+}
+
+double
+MIDITrigger::position_as_fraction () const
+{
+	if (!active()) {
+		return 0.0;
+	}
+
+	Temporal::DoubleableBeats lr (last_read);
+	Temporal::DoubleableBeats ul (usable_length);
+
+	return lr.to_double() / ul.to_double();
+}
+
+XMLNode&
+MIDITrigger::get_state (void)
+{
+	XMLNode& node (Trigger::get_state());
+
+	node.set_property (X_("start"), start_offset());
+	node.set_property (X_("length"), timepos_t (usable_length));
+
+	return node;
+}
+
+int
+MIDITrigger::set_state (const XMLNode& node, int version)
+{
+	timepos_t t;
+
+	if (!Trigger::set_state (node, version)) {
+		return -1;
+	}
+
+	node.get_property (X_("start"), t);
+	Temporal::Beats b (t.beats());
+	/* XXX need to deal with bar offsets */
+	_start_offset = Temporal::BBT_Offset (0, b.get_beats(), b.get_ticks());
+
+	node.get_property (X_("length"), t);
+	usable_length = t.beats();
+
+	return 0;
+}
+
+void
+MIDITrigger::set_start (timepos_t const & s)
+{
+	/* XXX need to handle bar offsets */
+	Temporal::Beats b (s.beats());
+	_start_offset = Temporal::BBT_Offset (0, b.get_beats(), b.get_ticks());
+}
+
+void
+MIDITrigger::set_end (timepos_t const & e)
+{
+	/* XXX need to handle bar offsets */
+	set_length (timecnt_t (e.beats() - Temporal::Beats (_start_offset.beats, _start_offset.ticks), start_offset()));
+}
+
+void
+MIDITrigger::set_legato_offset (timepos_t const & offset)
+{
+	/* XXX need to handle bar offsets */
+	Temporal::Beats b (offset.beats());
+	_legato_offset = Temporal::BBT_Offset (0, b.get_beats(), b.get_ticks());
+}
+
+timepos_t
+MIDITrigger::current_pos() const
+{
+	return timepos_t (last_read);
+}
+
+timepos_t
+MIDITrigger::end() const
+{
+	/* XXX need to handle bar offsets */
+	return timepos_t (Temporal::Beats (_start_offset.beats, _start_offset.ticks) + usable_length);
+}
+
+void
+MIDITrigger::set_length (timecnt_t const & newlen)
+{
+}
+
+void
+MIDITrigger::set_usable_length ()
+{
+	if (!_region) {
+		return;
+	}
+
+	switch (_launch_style) {
+	case Repeat:
+		break;
+	default:
+		usable_length = data_length;
+		return;
+	}
+
+	if (_quantization == Temporal::BBT_Offset ()) {
+		usable_length = data_length;
+		return;
+	}
+
+	/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
+
+	timecnt_t len (Temporal::Beats (_quantization.beats, _quantization.ticks), timepos_t (Temporal::Beats()));
+	usable_length = len.beats();
+}
+
+timepos_t
+MIDITrigger::current_length() const
+{
+	if (_region) {
+		return timepos_t (data_length);
+	}
+	return timepos_t (Temporal::BeatTime);
+}
+
+timepos_t
+MIDITrigger::natural_length() const
+{
+	if (_region) {
+		return timepos_t::from_ticks (_region->length().magnitude());
+	}
+	return timepos_t (Temporal::BeatTime);
+}
+
+int
+MIDITrigger::set_region (boost::shared_ptr<Region> r)
+{
+	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion> (r);
+
+	if (!mr) {
+		return -1;
+	}
+
+	set_region_internal (r);
+	load_data (mr);
+	set_length (mr->length());
+
+	PropertyChanged (ARDOUR::Properties::name);
+
+	return 0;
+}
+
+void
+MIDITrigger::tempo_map_change ()
+{
+}
+
+void
+MIDITrigger::drop_data ()
+{
+	delete data;
+}
+
+int
+MIDITrigger::load_data (boost::shared_ptr<MidiRegion> mr)
+{
+	return 0;
+}
+
+void
+MIDITrigger::retrigger ()
+{
+	/* XXX need to deal with bar offsets */
+	const Temporal::BBT_Offset o = _start_offset + _legato_offset;
+	last_read = Temporal::Beats (o.beats, o.ticks);
+	_legato_offset = Temporal::BBT_Offset ();
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, last_read));
+}
+
+int
+MIDITrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bool first)
+{
 	return 0;
 }
 

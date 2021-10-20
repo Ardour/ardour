@@ -37,6 +37,8 @@
 #include "temporal/tempo.h"
 
 #include "ardour/processor.h"
+#include "ardour/rt_midibuffer.h"
+
 #include "ardour/libardour_visibility.h"
 
 class XMLNode;
@@ -46,6 +48,7 @@ namespace ARDOUR {
 
 class Session;
 class AudioRegion;
+class MidiRegion;
 class TriggerBox;
 class SideChain;
 
@@ -265,6 +268,58 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	RunResult at_end ();
 	void compute_and_set_length ();
 };
+
+
+class LIBARDOUR_API MIDITrigger : public Trigger {
+  public:
+	MIDITrigger (uint64_t index, TriggerBox&);
+	~MIDITrigger ();
+
+	int run (BufferSet&, pframes_t nframes, pframes_t offset, bool first);
+
+	void set_start (timepos_t const &);
+	void set_end (timepos_t const &);
+	void set_legato_offset (timepos_t const &);
+	timepos_t current_pos() const;
+	/* this accepts timepos_t because the origin is assumed to be the start */
+	void set_length (timecnt_t const &);
+	timepos_t start_offset () const;
+	timepos_t end() const;            /* offset from start of data */
+	timepos_t current_length() const; /* offset from start of data */
+	timepos_t natural_length() const; /* offset from start of data */
+
+	double position_as_fraction() const;
+
+	int set_region (boost::shared_ptr<Region>);
+	void startup ();
+	void jump_start ();
+	void jump_stop ();
+
+	XMLNode& get_state (void);
+	int set_state (const XMLNode&, int version);
+
+	void tempo_map_change ();
+
+  protected:
+	void retrigger ();
+	void set_usable_length ();
+
+  private:
+	PBD::ID data_source;
+	RTMidiBuffer* data;
+	Temporal::Beats last_read;
+	Temporal::Beats data_length;
+	Temporal::BBT_Offset _start_offset;
+	Temporal::BBT_Offset _legato_offset;
+	Temporal::Beats usable_length;
+	Temporal::Beats  last;
+
+	void drop_data ();
+	int load_data (boost::shared_ptr<MidiRegion>);
+	RunResult at_end ();
+	void compute_and_set_length ();
+};
+
 
 class LIBARDOUR_API TriggerBox : public Processor
 {
