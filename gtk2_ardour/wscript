@@ -882,7 +882,7 @@ def build(bld):
         obj.source       = 'ardour-mime-info.xml'
         obj.target       = 'ardour.xml'
         obj.chmod        = Utils.O644
-        bld.install_files (os.path.join (bld.env['PREFIX'], 'share/mime/application'), 'ardour' + '.xml')
+        bld.install_files (os.path.join (bld.env['PREFIX'], 'share/mime/packages'), obj.target)
 
         # build appdata with translations
         appdata_i18n_mo(bld)
