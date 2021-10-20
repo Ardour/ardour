@@ -334,7 +334,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
 	PBD::RingBuffer<Trigger*> explicit_queue; /* user queued triggers */
-	PBD::RingBuffer<Trigger*> implicit_queue; /* follow-action queued triggers */
+	Trigger* up_next;
 	Trigger* currently_playing;
 	std::atomic<bool> _stop_all;
 

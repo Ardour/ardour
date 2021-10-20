@@ -978,7 +978,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _data_type (dt)
 	, _order (-1)
 	, explicit_queue (64)
-	, implicit_queue (64)
+	, up_next (0)
 	, currently_playing (0)
 	, _stop_all (false)
 {
@@ -1010,7 +1010,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 void
 TriggerBox::clear_implicit ()
 {
-	implicit_queue.reset ();
+	up_next = 0;
 }
 
 void
@@ -1023,23 +1023,12 @@ void
 TriggerBox::queue_explict (Trigger* t)
 {
 	assert (t);
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue %1\n", t->index()));
 	explicit_queue.write (&t, 1);
-	implicit_queue.reset ();
+	clear_implicit ();
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue %1, EQ = %2\n", t->index(), explicit_queue.read_space()));
 
 	if (currently_playing) {
 		currently_playing->unbang ();
-	}
-}
-
-void
-TriggerBox::queue_implicit (Trigger* t)
-{
-	assert (t);
-
-	if (explicit_queue.read_space() == 0) {
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("implicit queue %1\n", t->index()));
-		implicit_queue.write (&t, 1);
 	}
 }
 
@@ -1053,16 +1042,12 @@ TriggerBox::peek_next_trigger ()
 	RingBuffer<Trigger*>::rw_vector rwv;
 
 	explicit_queue.get_read_vector (&rwv);
+
 	if (rwv.len[0] > 0) {
 		return *(rwv.buf[0]);
 	}
 
-	implicit_queue.get_read_vector (&rwv);
-	if (rwv.len[0] > 0) {
-		return *(rwv.buf[0]);
-	}
-
-	return 0;
+	return up_next;
 }
 
 Trigger*
@@ -1075,7 +1060,9 @@ TriggerBox::get_next_trigger ()
 		return r;
 	}
 
-	if (implicit_queue.read (&r, 1) == 1) {
+	if (up_next) {
+		r = up_next;
+		up_next = 0;
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("next trigger from implicit queue = %1\n", r->index()));
 		return r;
 	}
@@ -1153,7 +1140,7 @@ TriggerBox::stop_all ()
 		all_triggers[n]->stop (-1);
 	}
 
-	implicit_queue.reset ();
+	clear_implicit ();
 	explicit_queue.reset ();
 }
 
@@ -1405,6 +1392,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (rwv.len[0] > 0) {
 
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue rvec %1 + 2%\n", rwv.len[0], rwv.len[1]));
+
 		/* actually fetch it (guaranteed to pull from the explicit queue */
 
 		nxt = get_next_trigger ();
@@ -1431,8 +1420,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				currently_playing = nxt;
 
 			} else {
+
 				currently_playing->start_stop ();
-				queue_implicit (all_triggers[nxt->index()]);
+				up_next = all_triggers[nxt->index()];
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("start stop for %1 before switching to %2\n", currently_playing->index(), nxt->index()));
 			}
 		}
@@ -1566,7 +1556,7 @@ TriggerBox::prepare_next (uint64_t current)
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("nxt for %1 = %2\n", current, nxt));
 
 	if (nxt >= 0) {
-		queue_implicit (all_triggers[nxt]);
+		up_next = all_triggers[nxt];
 	}
 }
 
