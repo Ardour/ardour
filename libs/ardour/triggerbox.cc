@@ -1211,6 +1211,10 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 		for (uint64_t n = 0; n < default_triggers_per_box; ++n) {
 			all_triggers.push_back (new AudioTrigger (n, *this));
 		}
+	} else {
+		for (uint64_t n = 0; n < default_triggers_per_box; ++n) {
+			all_triggers.push_back (new MIDITrigger (n, *this));
+		}
 	}
 
 	/* MIDI note numbers from Ableton Push2 in chromatic mode */
