@@ -295,7 +295,7 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 	}
 
 
-	/* dump pulls from zero to infinity ... */
+	/* render() pulls from zero to infinity ... */
 
 	if (!position().zero()) {
 		/* we are starting the read from before the start of the region */
