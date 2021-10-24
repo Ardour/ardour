@@ -1286,6 +1286,16 @@ TriggerBox::get_next_trigger ()
 }
 
 int
+TriggerBox::set_from_selection (uint64_t slot, boost::shared_ptr<Region> region)
+{
+	if (slot >= all_triggers.size()) {
+		return 0;
+	}
+
+	return all_triggers[slot]->set_region (region);
+}
+
+int
 TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 {
 	if (slot >= all_triggers.size()) {

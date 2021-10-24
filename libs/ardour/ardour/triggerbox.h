@@ -346,6 +346,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int set_state (const XMLNode&, int version);
 
 	int set_from_path (uint64_t slot, std::string const & path);
+	int set_from_selection (uint64_t slot, boost::shared_ptr<Region>);
 
 	DataType data_type() const { return _data_type; }
 
