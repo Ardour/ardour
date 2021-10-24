@@ -104,6 +104,7 @@ class TriggerBoxUI : public ArdourCanvas::Table
 	void set_follow_action (uint64_t slot, ARDOUR::Trigger::FollowAction);
 	void set_launch_style (uint64_t slot, ARDOUR::Trigger::LaunchStyle);
 	void set_quantization (uint64_t slot, Temporal::BBT_Offset const &);
+	void set_from_selection (uint64_t slot);
 
 	void build ();
 	void rapid_update ();

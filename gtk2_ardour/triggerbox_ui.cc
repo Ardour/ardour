@@ -38,6 +38,8 @@
 #include "triggerbox_ui.h"
 #include "trigger_ui.h"
 #include "public_editor.h"
+#include "region_view.h"
+#include "selection.h"
 #include "timers.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -508,9 +510,13 @@ TriggerBoxUI::context_menu (uint64_t n)
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
 
+	Menu* load_menu = manage (new Menu);
+	MenuList& loitems (load_menu->items());
 
+	loitems.push_back (MenuElem (_("from file"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::choose_sample), n)));
+	loitems.push_back (MenuElem (_("from selection"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_from_selection), n)));
 
-	items.push_back (MenuElem (_("Load..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::choose_sample), n)));
+	items.push_back (MenuElem (_("Load..."), *load_menu));
 	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::edit_trigger), n)));
 	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
 	items.push_back (MenuElem (_("Launch Style..."), *launch_menu));
@@ -584,6 +590,23 @@ TriggerBoxUI::sample_chosen (int response, uint64_t n)
 	for (std::list<std::string>::iterator s = paths.begin(); s != paths.end(); ++s) {
 		/* this will do nothing if n is too large */
 		_triggerbox.set_from_path (n, *s);
+		++n;
+	}
+}
+
+void
+TriggerBoxUI::set_from_selection (uint64_t n)
+{
+	Selection& selection (PublicEditor::instance().get_selection());
+	RegionSelection rselection (selection.regions);
+
+	if (rselection.empty()) {
+		/* XXX possible message about no selection ? */
+		return;
+	}
+
+	for (RegionSelection::iterator r = rselection.begin(); r != rselection.end(); ++r) {
+		_triggerbox.set_from_selection (n, (*r)->region());
 		++n;
 	}
 }
