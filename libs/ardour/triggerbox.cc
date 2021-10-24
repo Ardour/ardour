@@ -563,12 +563,6 @@ AudioTrigger::current_pos() const
 	return timepos_t (read_index);
 }
 
-timepos_t
-AudioTrigger::end() const
-{
-	return timepos_t (_start_offset + usable_length);
-}
-
 void
 AudioTrigger::set_length (timecnt_t const & newlen)
 {
@@ -948,21 +942,47 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 /*--------------------*/
 
+/* Design notes:
+
+   for the ::run() call, where we are in process() context, we will use an
+   RTMidiBuffer as the data structure holding our MIDI. The events here form a
+   simple array of sample-timestamped MIDI events (though with the extra
+   complication of having to handle 2/3 byte messages *slightly* differently
+   from larger messages).
+
+   This allows us to actually use a simple integer array index to record where
+   we are during playback and know when we've reached the end.
+
+   However, attributes of the trigger like start_offset are kept in BBT_Offsets
+   or Beats as appropriate, because those are the correct temporal
+   semantics. This means that we need to refer back to the Region for some
+   things, since it will be the place where we can look at MIDI events with
+   musical time stamps (unlike the sample timestamps in the RTMidiBuffer).
+
+   To keep things simple, this means that we will only render the actual clip
+   into the RTMidiBuffer - if start_offset/length reduce the clip from the
+   Region bounds, we will not place the "excess" in the RTMidiBuffer.
+
+   However, if we do any UI display of the clip, we will use the Region for
+   that, partly because it has music time timestamps and partly because we
+   already have GUI objects that can operate on MIDIRegions.
+
+ */
+
 MIDITrigger::MIDITrigger (uint64_t n, TriggerBox& b)
 	: Trigger (n, b)
-	, data (0)
-	, last_read (0, 0)
-	, data_length (0, 0)
+	, read_index (0)
+	, start_run_sample (0)
+	, end_run_sample (0)
+	, data_length (0)
+	, usable_length (0)
 	, _start_offset (0, 0, 0)
 	, _legato_offset (0, 0, 0)
-	, usable_length (0, 0)
-	, last (0, 0)
 {
 }
 
 MIDITrigger::~MIDITrigger ()
 {
-	delete data;
 }
 
 void
@@ -993,10 +1013,13 @@ MIDITrigger::position_as_fraction () const
 		return 0.0;
 	}
 
-	Temporal::DoubleableBeats lr (last_read);
-	Temporal::DoubleableBeats ul (usable_length);
+	if (data.size() == 0) {
+		return 0.0;
+	}
 
-	return lr.to_double() / ul.to_double();
+	const samplepos_t l = data[read_index].timestamp;
+
+	return l / (double) usable_length;
 }
 
 XMLNode&
@@ -1025,7 +1048,7 @@ MIDITrigger::set_state (const XMLNode& node, int version)
 	_start_offset = Temporal::BBT_Offset (0, b.get_beats(), b.get_ticks());
 
 	node.get_property (X_("length"), t);
-	usable_length = t.beats();
+	usable_length = t.samples();
 
 	return 0;
 }
@@ -1054,21 +1077,24 @@ MIDITrigger::set_legato_offset (timepos_t const & offset)
 }
 
 timepos_t
-MIDITrigger::current_pos() const
+MIDITrigger::start_offset () const
 {
-	return timepos_t (last_read);
+	/* XXX single meter assumption */
+
+	Temporal::Meter const &m = Temporal::TempoMap::use()->meter_at (Temporal::Beats (0, 0));
+	return timepos_t (m.to_quarters (_start_offset));
 }
 
 timepos_t
-MIDITrigger::end() const
+MIDITrigger::current_pos() const
 {
-	/* XXX need to handle bar offsets */
-	return timepos_t (Temporal::Beats (_start_offset.beats, _start_offset.ticks) + usable_length);
+	return timepos_t (data[read_index].timestamp);
 }
 
 void
 MIDITrigger::set_length (timecnt_t const & newlen)
 {
+
 }
 
 void
@@ -1094,7 +1120,7 @@ MIDITrigger::set_usable_length ()
 	/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
 
 	timecnt_t len (Temporal::Beats (_quantization.beats, _quantization.ticks), timepos_t (Temporal::Beats()));
-	usable_length = len.beats();
+	usable_length = len.samples ();
 }
 
 timepos_t
@@ -1141,12 +1167,15 @@ MIDITrigger::tempo_map_change ()
 void
 MIDITrigger::drop_data ()
 {
-	delete data;
+	data.clear ();
 }
 
 int
 MIDITrigger::load_data (boost::shared_ptr<MidiRegion> mr)
 {
+	drop_data ();
+	mr->render (data, 0, Sustained, 0);
+	data_length = data.span();
 	return 0;
 }
 
@@ -1154,15 +1183,40 @@ void
 MIDITrigger::retrigger ()
 {
 	/* XXX need to deal with bar offsets */
-	const Temporal::BBT_Offset o = _start_offset + _legato_offset;
-	last_read = Temporal::Beats (o.beats, o.ticks);
+	// const Temporal::BBT_Offset o = _start_offset + _legato_offset;
+	read_index = 0;
+	end_run_sample = 0;
 	_legato_offset = Temporal::BBT_Offset ();
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, last_read));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, read_index));
 }
 
 int
 MIDITrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bool first)
 {
+	MidiBuffer& mb (bufs.get_midi (0));
+
+	end_run_sample += nframes;
+
+	while (read_index < data.size()) {
+
+		RTMidiBuffer::Item const & item (data[read_index]);
+		samplepos_t effective_time = start_run_sample + item.timestamp;
+
+		if (effective_time >= end_run_sample) {
+			break;
+		}
+
+		uint32_t sz;
+		uint8_t const * bytes = data.bytes (item, sz);
+
+		const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, item.timestamp, sz, const_cast<uint8_t*>(bytes), false);
+		mb.insert_event (ev);
+
+		// _tracker.track (bytes);
+
+		read_index++;
+	}
+
 	return 0;
 }
 

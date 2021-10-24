@@ -294,7 +294,6 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 		return 0; /* read nothing */
 	}
 
-
 	/* render() pulls from zero to infinity ... */
 
 	if (!position().zero()) {

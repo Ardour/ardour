@@ -80,7 +80,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	virtual void set_start (timepos_t const &) = 0;
 	virtual void set_end (timepos_t const &) = 0;
-	/* this accepts timepos_t because the origin is assumed to be the start */
 	virtual void set_length (timecnt_t const &) = 0;
 	virtual void tempo_map_change () = 0;
 
@@ -90,7 +89,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	bool use_follow() const { return _use_follow; }
 
 	timepos_t start_offset () const; /* offset from start of data */
-	timepos_t end() const;    /* offset from start of data */
 	virtual timepos_t current_length() const = 0; /* offset from start() */
 	virtual timepos_t natural_length() const = 0; /* offset from start() */
 
@@ -230,10 +228,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void set_end (timepos_t const &);
 	void set_legato_offset (timepos_t const &);
 	timepos_t current_pos() const;
-	/* this accepts timepos_t because the origin is assumed to be the start */
 	void set_length (timecnt_t const &);
 	timepos_t start_offset () const { return timepos_t (_start_offset); } /* offset from start of data */
-	timepos_t end() const;            /* offset from start of data */
 	timepos_t current_length() const; /* offset from start of data */
 	timepos_t natural_length() const; /* offset from start of data */
 
@@ -281,7 +277,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void set_end (timepos_t const &);
 	void set_legato_offset (timepos_t const &);
 	timepos_t current_pos() const;
-	/* this accepts timepos_t because the origin is assumed to be the start */
 	void set_length (timecnt_t const &);
 	timepos_t start_offset () const;
 	timepos_t end() const;            /* offset from start of data */
@@ -306,13 +301,16 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
   private:
 	PBD::ID data_source;
-	RTMidiBuffer* data;
-	Temporal::Beats last_read;
-	Temporal::Beats data_length;
+	RTMidiBuffer data;
+
+	size_t read_index;          /* index into data */
+	samplepos_t start_run_sample;
+	samplepos_t end_run_sample;
+	samplecnt_t data_length;   /* using timestamps from data */
+	samplecnt_t usable_length; /* using timestamps from data */
+
 	Temporal::BBT_Offset _start_offset;
 	Temporal::BBT_Offset _legato_offset;
-	Temporal::Beats usable_length;
-	Temporal::Beats  last;
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<MidiRegion>);
