@@ -24,8 +24,6 @@
 #include "pbd/error.h"
 #include "pbd/debug.h"
 
-#include "evoral/midi_util.h"
-
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_state_tracker.h"
@@ -194,8 +192,12 @@ RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, c
 {
 	/* This buffer stores only MIDI, we don't care about the value of "type" */
 
-	if (_size == _capacity) {
-		resize (_capacity + 1024); // XXX 1024 is completely arbitrary
+	if (_size + size >= _capacity) {
+		if (size > 1024) {
+			resize (_capacity + size + 1024); // XXX 1024 is completely arbitrary
+		} else {
+			resize (_capacity + 1024); // XXX 1024 is completely arbitrary
+		}
 	}
 
 	_data[_size].timestamp = time;
@@ -232,13 +234,15 @@ RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, c
 	return size;
 }
 
-/* These (non-matching) comparison arguments weren't supported prior to C99 !!!
+/* requires C++20 to be usable */
+/*
 static
 bool
-item_timestamp_earlier (ARDOUR::RTMidiBuffer::Item const & item, samplepos_t time)
+item_timestamp_earlier (ARDOUR::RTMidiBuffer::Item const & item, samplepos_t const & time)
 {
 	return item.timestamp < time;
-}*/
+}
+*/
 
 static
 bool
@@ -260,9 +264,8 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 	Item foo;
 	Item* iend;
 	Item* item;
-
-	uint32_t count = 0;
 	foo.timestamp = start;
+	uint32_t count = 0;
 
 	if (start < end) {
 		iend = _data+_size;
@@ -271,7 +274,7 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 	} else {
 		iend = _data;
 		--iend; /* yes, this is technically "illegal" but we will never indirect */
-		Item* uend = _data+_size;
+		Item* uend = _data + _size;
 		item = upper_bound (_data, uend, foo, item_item_earlier);
 
 		if (item == uend) {
@@ -412,3 +415,17 @@ RTMidiBuffer::clear ()
 	/* rendering new data .. it will not be reversed */
 	_reversed = false;
 }
+
+samplecnt_t
+RTMidiBuffer::span() const
+{
+	if (_size == 0 || _size == 1) {
+		return 0;
+	}
+
+	const Item* last = &_data[_size-1];
+	const Item* first = &_data[0];
+
+	return last->timestamp - first->timestamp;
+}
+
