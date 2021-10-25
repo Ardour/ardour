@@ -109,6 +109,13 @@ class LIBARDOUR_API MidiRegion : public Region
 	            NoteMode                        mode,
 	            MidiChannelFilter*              filter) const;
 
+	int render_range (Evoral::EventSink<samplepos_t>& dst,
+	                  uint32_t                        chan_n,
+	                  NoteMode                        mode,
+	                  timepos_t const &               read_start,
+	                  timecnt_t const &               read_length,
+	                  MidiChannelFilter*              filter) const;
+
   protected:
 
 	virtual bool can_trim_start_before_source_start () const {
