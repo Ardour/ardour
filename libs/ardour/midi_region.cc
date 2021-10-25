@@ -294,29 +294,11 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
                           timecnt_t const &               read_length,
                           MidiChannelFilter*              filter) const
 {
-	timecnt_t internal_offset;
-
 	/* precondition: caller has verified that we cover the desired section */
 
 	assert(chan_n == 0);
 
 	if (muted()) {
-		return 0; /* read nothing */
-	}
-
-	/* render() pulls from zero to infinity ... */
-
-	if (!position().zero()) {
-		/* we are starting the read from before the start of the region */
-		internal_offset = timecnt_t (Temporal::BeatTime);
-	} else {
-		/* we are starting the read from after the start of the region */
-		internal_offset = timecnt_t (-position());
-	}
-
-	cerr << "RENDER , iffoset " << internal_offset << endl;
-
-	if (internal_offset >= _length) {
 		return 0; /* read nothing */
 	}
 
@@ -330,11 +312,9 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 	cerr << "MR " << name () << " render "
 	     << " _position = " << _position
 	     << " _start = " << _start
-	     << " intoffset = " << internal_offset
 	     << " quarter_note = " << quarter_note()
 	     << " start_beat = " << _start_beats
 	     << " a1 " << _position - _start
-	     << " a2 " << _start + internal_offset
 	     << " a3 " << _length
 	     << endl;
 #endif
@@ -348,7 +328,7 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 		lm, // source lock
 		dst, // destination buffer
 		this->source_position(), // start position of the source in session samples
-		read_start + internal_offset,
+		read_start,
 		read_length,
 		0,
 		cursor,
@@ -360,7 +340,7 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 	 * Note-Off's get inserted at the end of the region
 	 */
 
-	const timepos_t end = source_position() + read_start + internal_offset + read_length;
+	const timepos_t end = source_position() + read_start + read_length;
 	tracker.resolve_notes (dst, end.samples());
 
 	return 0;
