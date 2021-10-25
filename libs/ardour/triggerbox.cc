@@ -409,23 +409,25 @@ Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal:
 		break;
 	}
 
-	timepos_t ev_time (BeatTime);
+	timepos_t transition_time (BeatTime);
+
+	/* XXX need to use global grid here is quantization == zero */
 
 	if (_quantization.bars == 0) {
-		ev_time = timepos_t (start.snap_to (Temporal::Beats (_quantization.beats, _quantization.ticks)));
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 start at %2, sb %3 eb %4\n", index(), ev_time.beats(), start, end, _quantization));
+		transition_time = timepos_t (start.snap_to (Temporal::Beats (_quantization.beats, _quantization.ticks)));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 start at %2, sb %3 eb %4\n", index(), transition_time.beats(), start, end, _quantization));
 	} else {
 		TempoMap::SharedPtr tmap (TempoMap::use());
 		BBT_Time bbt = tmap->bbt_at (timepos_t (start));
 		bbt = bbt.round_up_to_bar ();
 		bbt.bars = (bbt.bars / _quantization.bars) * _quantization.bars;
-		ev_time = timepos_t (tmap->quarters_at (bbt));
+		transition_time = timepos_t (tmap->quarters_at (bbt));
 	}
 
-	if (ev_time.beats() >= start && ev_time < end) {
+	if (transition_time.beats() >= start && transition_time < end) {
 
-		bang_samples = ev_time.samples();
-		bang_beats = ev_time.beats ();
+		transition_samples = transition_time.samples();
+		transition_beats = transition_time.beats ();
 
 		if (_state == WaitingToStop) {
 			_state = Stopping;
@@ -1747,7 +1749,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			 * should generate.
 			 */
 
-			trigger_samples = nframes - (currently_playing->bang_samples - start_sample);
+			trigger_samples = nframes - (currently_playing->transition_samples - start_sample);
 			dest_offset = 0;
 
 		} else if (rt == Trigger::RunStart) {
@@ -1757,7 +1759,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			 * should end up, and the number of samples it should generate.
 			 */
 
-			dest_offset = std::max (samplepos_t (0), currently_playing->bang_samples - start_sample);
+			dest_offset = std::max (samplepos_t (0), currently_playing->transition_samples - start_sample);
 			trigger_samples = nframes - dest_offset;
 
 		} else if (rt == Trigger::RunAll) {

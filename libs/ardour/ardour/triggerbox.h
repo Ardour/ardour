@@ -131,9 +131,12 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	uint64_t index() const { return _index; }
 
-	/* Managed by TriggerBox */
-	samplepos_t bang_samples;
-	Temporal::Beats bang_beats;
+	/* Managed by TriggerBox, these record the time that the trigger is
+	 * scheduled to start or stop at. Computed in
+	 * Trigger::maybe_compute_next_transition().
+	 */
+	samplepos_t transition_samples;
+	Temporal::Beats transition_beats;
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
