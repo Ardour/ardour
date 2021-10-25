@@ -1187,7 +1187,7 @@ MIDITrigger::retrigger ()
 	/* XXX need to deal with bar offsets */
 	// const Temporal::BBT_Offset o = _start_offset + _legato_offset;
 	read_index = 0;
-	end_run_sample = 0;
+	end_run_sample = transition_samples;
 	_legato_offset = Temporal::BBT_Offset ();
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, read_index));
 }
@@ -1199,24 +1199,60 @@ MIDITrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, boo
 
 	end_run_sample += nframes;
 
-	while (read_index < data.size()) {
+	while (true) {
 
 		RTMidiBuffer::Item const & item (data[read_index]);
-		samplepos_t effective_time = start_run_sample + item.timestamp;
+		/* timestamps inside the RTMidiBuffer are relative to
+		   zero. Offset them to give us process/timeline timestamps.
+		*/
+		const samplepos_t effective_time = transition_samples + item.timestamp;
 
-		if (effective_time >= end_run_sample) {
-			break;
+		if (effective_time < end_run_sample) {
+
+			uint32_t sz;
+			uint8_t const * bytes = data.bytes (item, sz);
+
+			const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, item.timestamp, sz, const_cast<uint8_t*>(bytes), false);
+			mb.insert_event (ev);
+
+			// _tracker.track (bytes);
+
+			read_index++;
+
+		} else {
+
+			/* We reached the end */
+
+			// _tracker.resolve_notes (mb);
+
+			_follow_cnt--;
+
+			if ((_follow_cnt != 0) || (_launch_style == Repeat) || (_box.peek_next_trigger() == this)) { /* self repeat */
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, but set to loop, so retrigger\n", index()));
+
+				/* We need to preserve end_run_sample across
+				 * this retrigger, since we're just continuing
+				 * to "run()" the trigger without a break.
+				 */
+				samplepos_t old_ers = end_run_sample;
+				retrigger ();
+				end_run_sample = old_ers;
+				/* and go around again */
+				continue;
+
+			} else {
+
+				shutdown ();
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped\n", index()));
+				break;
+			}
+
 		}
+	}
 
-		uint32_t sz;
-		uint8_t const * bytes = data.bytes (item, sz);
-
-		const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, item.timestamp, sz, const_cast<uint8_t*>(bytes), false);
-		mb.insert_event (ev);
-
-		// _tracker.track (bytes);
-
-		read_index++;
+	if (_state == Stopping) {
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
+		shutdown ();
 	}
 
 	return 0;
