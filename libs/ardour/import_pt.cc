@@ -188,7 +188,6 @@ Session::import_pt_sources (PTFFormat& ptf, ImportStatus& status)
 	bool ok = false;
 	bool onefailed = false;
 	timepos_t pos = timepos_t::max (Temporal::AudioTime);
-	uint32_t srate = sample_rate ();
 
 	vector<PTFFormat::wav_t>::const_iterator w;
 	uint32_t wth = 0;
