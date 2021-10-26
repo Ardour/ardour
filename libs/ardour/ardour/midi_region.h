@@ -114,6 +114,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	                  NoteMode                        mode,
 	                  timepos_t const &               read_start,
 	                  timecnt_t const &               read_length,
+	                  timepos_t const &               source_position,
 	                  MidiChannelFilter*              filter) const;
 
   protected:
