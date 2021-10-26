@@ -201,7 +201,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<bool>  _use_follow;
 	FollowAction _follow_action[2];
 	int _follow_action_probability;
-	uint32_t _follow_cnt;
+	uint32_t _loop_cnt;
 	uint32_t _follow_count;
 	boost::shared_ptr<Region> _region;
 	Temporal::BBT_Offset _quantization;
@@ -274,7 +274,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	MIDITrigger (uint64_t index, TriggerBox&);
 	~MIDITrigger ();
 
-	int run (BufferSet&, pframes_t nframes, pframes_t offset, bool first);
+	int run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, pframes_t offset, bool first);
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);

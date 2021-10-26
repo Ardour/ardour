@@ -59,7 +59,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _use_follow (Properties::use_follow, true)
 	, _follow_action { NextTrigger, Stop }
 	, _follow_action_probability (100)
-	, _follow_cnt (0)
+	, _loop_cnt (0)
 	, _follow_count (1)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
 	, _legato (Properties::legato, false)
@@ -256,7 +256,8 @@ Trigger::startup()
 {
 	_state = WaitingToStart;
 	_gain = _pending_gain;
-	_follow_cnt = _follow_count;
+	_loop_cnt = 0;
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 starts up\n", name()));
 	PropertyChanged (ARDOUR::Properties::running);
 }
 
@@ -265,6 +266,7 @@ Trigger::shutdown ()
 {
 	_state = Stopped;
 	_gain = 1.0;
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
 	PropertyChanged (ARDOUR::Properties::running);
 }
 
@@ -428,6 +430,8 @@ Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal:
 
 		transition_samples = transition_time.samples();
 		transition_beats = transition_time.beats ();
+
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 in range, should start/stop at %2 aka %3\n", index(), transition_samples, transition_beats));
 
 		if (_state == WaitingToStop) {
 			_state = Stopping;
@@ -820,6 +824,7 @@ AudioTrigger::drop_data ()
 }
 
 int
+
 AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 {
 	const uint32_t nchans = ar->n_channels();
@@ -903,9 +908,9 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 			/* We reached the end */
 
-			_follow_cnt--;
+			_loop_cnt++;
 
-			if ((_follow_cnt != 0) || (_launch_style == Repeat) || (_box.peek_next_trigger() == this)) { /* self repeat */
+			if ((_loop_cnt == _follow_count) || (_launch_style == Repeat) || (_box.peek_next_trigger() == this)) { /* self repeat */
 				nframes -= this_read;
 				dest_offset += this_read;
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, but set to loop, so retrigger\n", index()));
@@ -1176,8 +1181,10 @@ int
 MIDITrigger::load_data (boost::shared_ptr<MidiRegion> mr)
 {
 	drop_data ();
-	mr->render (data, 0, Sustained, 0);
+	mr->render_range (data, 0, Sustained, mr->start(), mr->length(), timepos_t (Temporal::BeatTime), 0);
+	set_name (mr->name());
 	data_length = data.span();
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
 	return 0;
 }
 
@@ -1189,15 +1196,13 @@ MIDITrigger::retrigger ()
 	read_index = 0;
 	end_run_sample = transition_samples;
 	_legato_offset = Temporal::BBT_Offset ();
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, read_index));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2, ts = %3\n", _index, read_index, transition_samples));
 }
 
 int
-MIDITrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bool first)
+MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, pframes_t dest_offset, bool first)
 {
 	MidiBuffer& mb (bufs.get_midi (0));
-
-	end_run_sample += nframes;
 
 	while (true) {
 
@@ -1205,14 +1210,20 @@ MIDITrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, boo
 		/* timestamps inside the RTMidiBuffer are relative to
 		   zero. Offset them to give us process/timeline timestamps.
 		*/
-		const samplepos_t effective_time = transition_samples + item.timestamp;
 
-		if (effective_time < end_run_sample) {
+		const samplepos_t effective_time = transition_samples + item.timestamp + (_loop_cnt * data_length); /* XXX handle multiple loops */
+
+		// cerr << "Item " << read_index << " @ " << item.timestamp << " + " << transition_samples << " = " << effective_time << endl;
+
+		if (effective_time < end_sample) {
 
 			uint32_t sz;
 			uint8_t const * bytes = data.bytes (item, sz);
 
-			const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, item.timestamp, sz, const_cast<uint8_t*>(bytes), false);
+			samplepos_t process_relative_timestamp = effective_time - start_sample;
+
+			const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, process_relative_timestamp, sz, const_cast<uint8_t*>(bytes), false);
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("inserting %1\n", ev));
 			mb.insert_event (ev);
 
 			// _tracker.track (bytes);
@@ -1220,14 +1231,18 @@ MIDITrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, boo
 			read_index++;
 
 		} else {
+			break;
+		}
+
+		if (read_index >= data.size()) {
 
 			/* We reached the end */
 
 			// _tracker.resolve_notes (mb);
 
-			_follow_cnt--;
+			_loop_cnt++;
 
-			if ((_follow_cnt != 0) || (_launch_style == Repeat) || (_box.peek_next_trigger() == this)) { /* self repeat */
+			if ((_loop_cnt == _follow_count) || (_launch_style == Repeat) || (_box.peek_next_trigger() == this)) { /* self repeat */
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, but set to loop, so retrigger\n", index()));
 
 				/* We need to preserve end_run_sample across
@@ -1380,6 +1395,8 @@ TriggerBox::get_next_trigger ()
 int
 TriggerBox::set_from_selection (uint64_t slot, boost::shared_ptr<Region> region)
 {
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("load %1 into %2\n", region->name(), slot));
+
 	if (slot >= all_triggers.size()) {
 		return 0;
 	}
@@ -1760,6 +1777,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		case Trigger::WaitingToStop:
 		case Trigger::WaitingToStart:
 		case Trigger::WaitingForRetrigger:
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 in state %2, recompute next transition\n", currently_playing->name(), currently_playing->state()));
 			rt = currently_playing->maybe_compute_next_transition (start_beats, end_beats);
 			break;
 		default:
@@ -1829,8 +1847,12 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			first = false;
 
 		} else {
+			MIDITrigger* mt = dynamic_cast<MIDITrigger*> (currently_playing);
 
-			/* XXX MIDI triggers to be implemented */
+			if (mt) {
+				mt->run (bufs, start_sample, end_sample, trigger_samples, dest_offset, first);
+				first = false;
+			}
 
 		}
 
