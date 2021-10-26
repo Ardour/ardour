@@ -83,9 +83,9 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 	}
 
 	uint8_t const * bytes (Item const & item, uint32_t& size) {
-		if (item.bytes[0]) {
+		if (!item.bytes[0]) {
 			size = Evoral::midi_event_size (item.bytes[1]);
-			return item.bytes;
+			return &item.bytes[1];
 		} else {
 			uint32_t offset = item.offset & ~(1<<(CHAR_BIT-1));
 			Blob* blob = reinterpret_cast<Blob*> (&_pool[offset]);
