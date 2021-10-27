@@ -283,7 +283,7 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
                     NoteMode                        mode,
                     MidiChannelFilter*              filter) const
 {
-	return render_range (dst, chan_n, mode, this->start(), _length, source_position(), filter);
+	return render_range (dst, chan_n, mode, this->start(), _length, filter);
 }
 
 int
@@ -292,7 +292,6 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
                           NoteMode                        mode,
                           timepos_t const &               read_start,
                           timecnt_t const &               read_length,
-                          timepos_t const &               source_position,
                           MidiChannelFilter*              filter) const
 {
 	/* precondition: caller has verified that we cover the desired section */
@@ -328,7 +327,7 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 	src->midi_read (
 		lm, // source lock
 		dst, // destination buffer
-		source_position, // start position of the source in session samples
+		source_position(), // start position of the source in session samples
 		read_start,
 		read_length,
 		0,
@@ -341,7 +340,7 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 	 * Note-Off's get inserted at the end of the region
 	 */
 
-	const timepos_t end = source_position + read_start + read_length;
+	const timepos_t end = source_position() + read_start + read_length;
 	tracker.resolve_notes (dst, end.samples());
 
 	return 0;

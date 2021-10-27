@@ -1181,7 +1181,8 @@ int
 MIDITrigger::load_data (boost::shared_ptr<MidiRegion> mr)
 {
 	drop_data ();
-	mr->render_range (data, 0, Sustained, mr->start(), mr->length(), timepos_t (Temporal::BeatTime), 0);
+
+	mr->render_range (data, 0, Sustained, mr->start(), mr->length(), 0);
 	set_name (mr->name());
 	data_length = data.span();
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
