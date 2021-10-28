@@ -95,6 +95,15 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 		}
 	}
 
+	void shift (sampleoffset_t distance) {
+		if (_size == 0) {
+			return;
+		}
+		for (size_t n = 0; n < _size; ++n) {
+			_data[n].timestamp += distance;
+		}
+	}
+
   private:
 	friend struct WriteProtectRender;
 
