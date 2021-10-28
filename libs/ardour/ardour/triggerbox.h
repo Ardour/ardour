@@ -36,6 +36,7 @@
 #include "temporal/bbt_time.h"
 #include "temporal/tempo.h"
 
+#include "ardour/midi_state_tracker.h"
 #include "ardour/processor.h"
 #include "ardour/rt_midibuffer.h"
 
@@ -305,6 +306,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
   private:
 	PBD::ID data_source;
 	RTMidiBuffer data;
+	MidiStateTracker tracker;
 
 	size_t read_index;          /* index into data */
 	samplecnt_t data_length;   /* using timestamps from data */

@@ -1180,10 +1180,19 @@ MIDITrigger::load_data (boost::shared_ptr<MidiRegion> mr)
 {
 	drop_data ();
 
+	/* this generates timestamps in session time. We want trigger-relative
+	 * time (so the beginning of the region/trigger is zero).
+	 */
+
 	mr->render_range (data, 0, Sustained, mr->start(), mr->length(), 0);
+	const sampleoffset_t shift = mr->position().samples();
+	data.shift (-shift);
+
 	set_name (mr->name());
 	data_length = data.span();
+
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
+
 	return 0;
 }
 
@@ -1209,7 +1218,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		   zero. Offset them to give us process/timeline timestamps.
 		*/
 
-		const samplepos_t effective_time = transition_samples + item.timestamp + (_loop_cnt * data_length); /* XXX handle multiple loops */
+		const samplepos_t effective_time = transition_samples + item.timestamp + (_loop_cnt * data_length);
 
 		// cerr << "Item " << read_index << " @ " << item.timestamp << " + " << transition_samples << " = " << effective_time << endl;
 
@@ -1224,8 +1233,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("inserting %1\n", ev));
 			mb.insert_event (ev);
 
-			// _tracker.track (bytes);
-
+			tracker.track (bytes);
 			read_index++;
 
 		} else {
@@ -1236,18 +1244,17 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 			/* We reached the end */
 
-			// _tracker.resolve_notes (mb);
+			cerr << "reached end of data\n";
 
 			_loop_cnt++;
 
 			if ((_loop_cnt == _follow_count) || (_launch_style == Repeat) || (_box.peek_next_trigger() == this)) { /* self repeat */
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, but set to loop, so retrigger\n", index()));
 
-				/* We need to preserve end_run_sample across
-				 * this retrigger, since we're just continuing
-				 * to "run()" the trigger without a break.
-				 */
-				samplepos_t old_ers = end_run_sample;
+				/* we will "restart" at the beginning of the
+				   next iteration of the trigger.
+				*/
+				transition_samples = _loop_cnt * data_length;
 				retrigger ();
 				/* and go around again */
 				continue;
@@ -1264,6 +1271,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 	if (_state == Stopping) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
+		tracker.resolve_notes (mb, end_sample);
 		shutdown ();
 	}
 
