@@ -979,8 +979,6 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 MIDITrigger::MIDITrigger (uint64_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, read_index (0)
-	, start_run_sample (0)
-	, end_run_sample (0)
 	, data_length (0)
 	, usable_length (0)
 	, _start_offset (0, 0, 0)
@@ -1195,7 +1193,6 @@ MIDITrigger::retrigger ()
 	/* XXX need to deal with bar offsets */
 	// const Temporal::BBT_Offset o = _start_offset + _legato_offset;
 	read_index = 0;
-	end_run_sample = transition_samples;
 	_legato_offset = Temporal::BBT_Offset ();
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2, ts = %3\n", _index, read_index, transition_samples));
 }
@@ -1252,7 +1249,6 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 				 */
 				samplepos_t old_ers = end_run_sample;
 				retrigger ();
-				end_run_sample = old_ers;
 				/* and go around again */
 				continue;
 

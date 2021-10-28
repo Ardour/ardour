@@ -307,8 +307,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	RTMidiBuffer data;
 
 	size_t read_index;          /* index into data */
-	samplepos_t start_run_sample;
-	samplepos_t end_run_sample;
 	samplecnt_t data_length;   /* using timestamps from data */
 	samplecnt_t usable_length; /* using timestamps from data */
 
