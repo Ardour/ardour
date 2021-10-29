@@ -825,9 +825,6 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region, ThawList& th
 	for (i = regions.begin (); i != regions.end (); ++i) {
 		if (*i == region) {
 
-			timepos_t pos = (*i)->position();
-			timecnt_t distance = (*i)->length();
-
 			regions.erase (i);
 
 			if (!holding_state ()) {
