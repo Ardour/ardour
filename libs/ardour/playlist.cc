@@ -1617,16 +1617,6 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
 
 	if (what_changed.contains (Properties::position) || what_changed.contains (Properties::length)) {
 
-		timecnt_t delta;
-
-		if (what_changed.contains (Properties::position)) {
-			delta = region->last_position().distance (region->position());
-		}
-
-		if (what_changed.contains (Properties::length)) {
-			delta += region->length() - region->last_length();
-		}
-
 		if (holding_state ()) {
 			pending_bounds.push_back (region);
 		} else {
