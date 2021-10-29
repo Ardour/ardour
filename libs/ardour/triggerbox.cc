@@ -1022,6 +1022,10 @@ MIDITrigger::position_as_fraction () const
 		return 0.0;
 	}
 
+	if (read_index >= data.size()) {
+		return 1.0;
+	}
+
 	const samplepos_t l = data[read_index].timestamp;
 
 	return l / (double) usable_length;
@@ -1189,7 +1193,13 @@ MIDITrigger::load_data (boost::shared_ptr<MidiRegion> mr)
 	data.shift (-shift);
 
 	set_name (mr->name());
-	data_length = data.span();
+
+	/* There may not be a MIDI event at the end of the region, but we use
+	 * the region size to define how long this trigger is. This allows for
+	 * space at the end of the region to be a part of the timing.
+	 */
+
+	data_length = mr->length().samples();
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
 
@@ -1213,38 +1223,46 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 	while (true) {
 
-		RTMidiBuffer::Item const & item (data[read_index]);
-		/* timestamps inside the RTMidiBuffer are relative to
-		   zero. Offset them to give us process/timeline timestamps.
-		*/
+		if (read_index < data.size()) {
 
-		const samplepos_t effective_time = transition_samples + item.timestamp + (_loop_cnt * data_length);
+			RTMidiBuffer::Item const & item (data[read_index]);
 
-		// cerr << "Item " << read_index << " @ " << item.timestamp << " + " << transition_samples << " = " << effective_time << endl;
+			/* timestamps inside the RTMidiBuffer are relative to
+			   the start of the region.
 
-		if (effective_time < end_sample) {
+			   Offset them to give us process/timeline timestamps.
+			*/
 
-			uint32_t sz;
-			uint8_t const * bytes = data.bytes (item, sz);
+			const samplepos_t effective_time = transition_samples + item.timestamp;
 
-			samplepos_t process_relative_timestamp = effective_time - start_sample;
+			cerr << start_sample << " .. " << end_sample << " Item " << read_index << " @ " << item.timestamp << " + " << transition_samples << " = " << effective_time << endl;
 
-			const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, process_relative_timestamp, sz, const_cast<uint8_t*>(bytes), false);
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("inserting %1\n", ev));
-			mb.insert_event (ev);
+			if (effective_time >= start_sample && effective_time < end_sample) {
 
-			tracker.track (bytes);
-			read_index++;
+				uint32_t sz;
+				uint8_t const * bytes = data.bytes (item, sz);
 
-		} else {
-			break;
+				samplepos_t process_relative_timestamp = effective_time - start_sample;
+
+				const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, process_relative_timestamp, sz, const_cast<uint8_t*>(bytes), false);
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("inserting %1\n", ev));
+				mb.insert_event (ev);
+
+				tracker.track (bytes);
+				read_index++;
+
+			} else {
+				break;
+			}
 		}
 
-		if (read_index >= data.size()) {
+		const samplepos_t region_end = transition_samples + data_length;
+
+		if (read_index >= data.size() || (_state == Running && region_end >= start_sample && region_end <= end_sample)) {
 
 			/* We reached the end */
 
-			cerr << "reached end of data\n";
+			cerr << "reached end, ri " << read_index << " rend " << transition_samples + data_length << " vs end @ " << end_sample << endl;
 
 			_loop_cnt++;
 
@@ -1254,7 +1272,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 				/* we will "restart" at the beginning of the
 				   next iteration of the trigger.
 				*/
-				transition_samples = _loop_cnt * data_length;
+				transition_samples = transition_samples + data_length;
 				retrigger ();
 				/* and go around again */
 				continue;
@@ -1271,7 +1289,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 	if (_state == Stopping) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
-		tracker.resolve_notes (mb, end_sample);
+		tracker.resolve_notes (mb, nframes);
 		shutdown ();
 	}
 
@@ -2110,8 +2128,10 @@ TriggerBox::set_state (const XMLNode& node, int version)
 				trig = new AudioTrigger (all_triggers.size(), *this);
 				all_triggers.push_back (trig);
 				trig->set_state (**t, version);
-			} else {
-
+			} else if (_data_type == DataType::MIDI) {
+				trig = new MIDITrigger (all_triggers.size(), *this);
+				all_triggers.push_back (trig);
+				trig->set_state (**t, version);
 			}
 		}
 	}
