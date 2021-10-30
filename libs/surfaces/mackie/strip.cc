@@ -682,7 +682,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 }
 
 std::string
-Strip::format_paramater_for_display(
+Strip::format_parameter_for_display(
 		ARDOUR::ParameterDescriptor const& desc,
 		float val,
 		boost::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation,
@@ -736,7 +736,7 @@ Strip::format_paramater_for_display(
 void
 Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val, bool screen_hold)
 {
-	pending_display[1] = format_paramater_for_display(desc, val, _stripable, screen_hold);
+	pending_display[1] = format_parameter_for_display(desc, val, _stripable, screen_hold);
 
 	if (screen_hold) {
 		/* we just queued up a parameter to be displayed.

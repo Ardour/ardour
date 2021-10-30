@@ -225,7 +225,7 @@ Subview::retrieve_pointers(Strip** strip, Pot** vpot, std::string** pending_disp
 
 void Subview::do_parameter_display(std::string& display, const ParameterDescriptor& pd, float param_val, Strip* strip, bool screen_hold)
 {
-	display = Strip::format_paramater_for_display(
+	display = Strip::format_parameter_for_display(
 			pd,
 			param_val,
 			strip->stripable(),
