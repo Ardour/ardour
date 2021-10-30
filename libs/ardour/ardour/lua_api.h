@@ -158,7 +158,7 @@ namespace ARDOUR { namespace LuaAPI {
 	float get_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, bool &ok);
 
 	/**
-	 * A convenience function to get a Automation Lists and ParamaterDescriptor
+	 * A convenience function to get a Automation Lists and ParameterDescriptor
 	 * for a given plugin control.
 	 *
 	 * This is equivalent to the following lua code
@@ -179,12 +179,12 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @code
 	 * local al, cl, pd = ARDOUR.LuaAPI.plugin_automation (route:nth_plugin (0), 3)
 	 * @endcode
-	 * @returns 3 parameters: AutomationList, ControlList, ParamaterDescriptor
+	 * @returns 3 parameters: AutomationList, ControlList, ParameterDescriptor
 	 */
 	int plugin_automation (lua_State *lua);
 
 	/*
-	 * A convenience function to get a scale-points from a ParamaterDescriptor
+	 * A convenience function to get a scale-points from a ParameterDescriptor
 	 * @param p a ParameterDescriptor
 	 * @returns Lua Table with "name" -> value pairs
 	 */
