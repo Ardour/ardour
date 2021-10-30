@@ -407,7 +407,7 @@ PluginEqGui::run_impulse_analysis ()
 	/* run at most at session's block size chunks.
 	 *
 	 * This is important since VSTs may call audioMasterGetBlockSize
-	 * or access various other /real/ session paramaters using the
+	 * or access various other /real/ session parameters using the
 	 * audioMasterCallback
 	 */
 	samplecnt_t block_size = ARDOUR_UI::instance()->the_session()->get_block_size();
