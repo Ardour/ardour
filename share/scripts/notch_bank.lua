@@ -4,7 +4,7 @@ ardour {
 	category    = "Filter",
 	license     = "MIT",
 	author      = "Ardour Community",
-	description = [[Notch Filter Bank; useful to remove noise with a harmonic spectum (e.g, mains hum, GSM signals, charge-pump noise, etc).
+	description = [[Notch Filter Bank; useful to remove noise with a harmonic spectrum (e.g, mains hum, GSM signals, charge-pump noise, etc).
 Note: this plugin is not suitable to be automated, it is intended for static noise only.]]
 }
 

@@ -122,7 +122,7 @@ PluginSetupDialog::setup_output_presets ()
 	_out_presets.AddMenuElem (MenuElem (_("Automatic"), sigc::bind (sigc::mem_fun (*this, &PluginSetupDialog::select_output_preset), 0)));
 
 	if (ppc.find (0) != ppc.end ()) {
-		// anyting goes
+		// anything goes
 		ppc.clear ();
 		ppc.insert (1);
 		ppc.insert (2);

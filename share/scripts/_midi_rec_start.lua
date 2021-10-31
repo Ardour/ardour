@@ -24,7 +24,7 @@ function factory ()
 				if (e:buffer():array()[1] & 0xf0) == 0x90 then -- note on
 					Session:maybe_enable_record (true) -- global record-enable from rt-context
 					-- maybe-enable may fail if there are no tracks or step-entry is active
-					-- roll transport if record-enable suceeded:
+					-- roll transport if record-enable succeeded:
 					if ARDOUR.Session.RecordState.Enabled == Session:record_status() then
 						Session:request_roll (ARDOUR.TransportRequestSource.TRS_UI) -- ...and go.
 					end

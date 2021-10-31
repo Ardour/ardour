@@ -503,7 +503,7 @@ NewUserWizard::on_apply ()
 				continue;
 			}
 			/* skip sessions that are already in 'recent'.
-			 * eg. a new user changed <session-default-dir> shorly after installation
+			 * eg. a new user changed <session-default-dir> shortly after installation
 			 */
 			for (ARDOUR::RecentSessions::iterator r = rs.begin(); r != rs.end(); ++r) {
 				if ((*r).first == name) {

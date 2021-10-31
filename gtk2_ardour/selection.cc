@@ -536,7 +536,7 @@ Selection::add (boost::shared_ptr<Evoral::ControlList> cl)
 
 	/* The original may change so we must store a copy (not a pointer) here.
 	 * e.g AutomationLine rewrites the list with gain mapping.
-	 * the downside is that we can't perfom duplicate checks.
+	 * the downside is that we can't perform duplicate checks.
 	 * This code was changed in response to #6842
 	 */
 	lines.push_back (boost::shared_ptr<ARDOUR::AutomationList> (new ARDOUR::AutomationList(*al)));
@@ -1509,7 +1509,7 @@ Selection::set (const TrackViewList& track_list)
 
 	CoreSelection& selection (editor->session()->selection());
 
-#if 1 // crazy optmization hack
+#if 1 // crazy optimization hack
 	/* check is the selection actually changed, ignore NO-OPs
 	 *
 	 * There are excessive calls from EditorRoutes::selection_changed():

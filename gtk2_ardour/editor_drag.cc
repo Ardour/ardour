@@ -1479,7 +1479,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 				 * the current position can be calculated as follows:
 				 */
 				// a well placed oofus attack can still throw this off.
-				// likley auto-scroll related, printf() debugging may tell, commented out for now.
+				// likely auto-scroll related, printf() debugging may tell, commented out for now.
 				//assert (current_pointer_time_axis_view == _time_axis_views.size() - dtz + _ddropzone + delta_time_axis_view);
 			}
 		} else {
@@ -2377,7 +2377,7 @@ RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	RegionSelection selected_regions = _editor->get_selection().regions;
 	selection_length = selected_regions.start_time().distance (selected_regions.end_time());
 
-	// Rippling accross tracks disabled. Rippling on all tracks is the way to go in the future.
+	// Rippling across tracks disabled. Rippling on all tracks is the way to go in the future.
 	allow_moves_across_tracks = false; // (selected_regions.playlists().size() == 1);
 	prev_tav = NULL;
 

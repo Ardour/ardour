@@ -269,7 +269,7 @@ IOButton::button_press (GdkEventButton* ev)
 			}
 		}
 
-		/* then all other bundles, including physical outs or other sofware */
+		/* then all other bundles, including physical outs or other software */
 		for (ARDOUR::BundleList::iterator i = b->begin (); i != b->end (); ++i) {
 			if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
 				maybe_add_bundle_to_menu (*i, current, intended_type);

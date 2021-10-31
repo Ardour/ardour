@@ -617,7 +617,7 @@ AddRouteDialog::maybe_update_name_template_entry ()
 		name_template_entry.set_text (VCA::default_name_template());
 		break;
 	}
-	/* ignore programatic change, restore false */
+	/* ignore programmatic change, restore false */
 	reset_name_edited ();
 }
 

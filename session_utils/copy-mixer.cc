@@ -265,7 +265,7 @@ static void usage () {
 This utility copies mixer-settings from the src-session to the dst-session.\n\
 Both <src> and <dst> are paths to .ardour session files.\n\
 If --snapshot is not given, the <dst> session file is overwritten.\n\
-When --snapshot is set, a new snaphot in the <dst> session is created.\n\
+When --snapshot is set, a new snapshot in the <dst> session is created.\n\
 \n");
 
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"

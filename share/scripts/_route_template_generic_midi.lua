@@ -27,7 +27,7 @@ function route_setup ()
 end
 
 -- The Script can be used as EditorAction in which case it can
--- optionally provide instantiation parmaters
+-- optionally provide instantiation parameters
 function action_params ()
 	return
 	{

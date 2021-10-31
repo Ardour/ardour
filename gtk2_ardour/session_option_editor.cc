@@ -182,7 +182,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_native_file_data_format)
 		);
 	add_option (_("Media"), _sf);
-	/* refill available sample-formats, depening on file-format */
+	/* refill available sample-formats, depending on file-format */
 	parameter_changed ("native-file-header-format");
 
 	ComboOption<HeaderFormat>* hf = new ComboOption<HeaderFormat> (

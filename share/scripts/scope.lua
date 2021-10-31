@@ -42,7 +42,7 @@ function dsp_configure (ins, outs)
 	-- store configuration in global variable
 	audio_ins = ins:n_audio ()
 	-- allocate shared memory area
-	-- this is used to speed up DSP computaton (using a C array)
+	-- this is used to speed up DSP computation (using a C array)
 	-- and to share data with the GUI
 	self:shmem ():allocate (4 + bufsiz * audio_ins)
 	self:shmem ():clear ()

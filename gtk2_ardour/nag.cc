@@ -167,7 +167,7 @@ NagScreen::is_subscribed (bool& really)
 	really = false;
 
 	/* what we'd really like here is a way to query paypal
-	   for someone's subscription status. thats a bit complicated
+	   for someone's subscription status. that's a bit complicated
 	   so for now, just see if they ever told us they were
 	   subscribed. we try to trust our users :)
 	*/

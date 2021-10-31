@@ -41,7 +41,7 @@ class PublicEditor;
  *
  *  The video-timeline can be displayed in a canvas-group. Given a filename
  *  it queries the video-server about file-information and
- *  creates \ref VideoImageFrame as neccesary (which
+ *  creates \ref VideoImageFrame as necessary (which
  *  query the server for image-data).
  *
  *  This class contains the algorithm to position the single frames
@@ -49,7 +49,7 @@ class PublicEditor;
  *  attributes. see \ref update_video_timeline()
  *
  *  The VideoTimeLine class includes functionality to launch a video-monitor
- *  corresponding to its currently diplayed file.
+ *  corresponding to its currently displayed file.
  */
 class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList, public PBD::StatefulDestructible
 {

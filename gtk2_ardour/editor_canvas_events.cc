@@ -876,7 +876,7 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
 		break;
 	case GDK_MOTION_NOTIFY:
 		motion_handler (item, event);
-		ret = true; // force this to avoid progagating the event into the regionview
+		ret = true; // force this to avoid propagating the event into the regionview
 		break;
 	case GDK_ENTER_NOTIFY:
 		ret = enter_handler (item, event, RegionViewNameHighlight);

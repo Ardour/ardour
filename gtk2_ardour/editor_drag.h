@@ -1224,7 +1224,7 @@ private:
 	MidiRegionView* _region_view;
 };
 
-/** A RubberbandSelectDrag for selecting MIDI notes but with no horizonal component */
+/** A RubberbandSelectDrag for selecting MIDI notes but with no horizontal component */
 class MidiVerticalSelectDrag : public RubberbandSelectDrag
 {
 public:

@@ -283,7 +283,7 @@ public:
 	 */
 	virtual bool  connected_to (PortHandle port, const std::string& name, bool process_callback_safe = true) = 0;
 
-	/** Test if given \p port is is connected to physical I/O ports.
+	/** Test if given \p port is connected to physical I/O ports.
 	 *
 	 * @param port \ref PortHandle of source port to test
 	 * @param process_callback_safe true if this method is not called from rt-context of backend callbacks
