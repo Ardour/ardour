@@ -784,11 +784,17 @@ PortManager::reconnect_ports ()
 	}
 
 	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance()->current_backend_name() == X_("JACK")) {
-		std::string const our_name = AudioEngine::instance()->make_port_name_non_relative (X_("physical_audio_input_monitor_enable"));
+		std::string const audio_port = AudioEngine::instance()->make_port_name_non_relative (X_("physical_audio_input_monitor_enable"));
+		std::string const midi_port = AudioEngine::instance()->make_port_name_non_relative (X_("physical_midi_input_monitor_enable"));
 		std::vector<std::string> audio_ports;
+		std::vector<std::string> midi_ports;
 		get_physical_inputs (DataType::AUDIO, audio_ports);
+		get_physical_inputs (DataType::MIDI, midi_ports);
 		for (std::vector<std::string>::iterator p = audio_ports.begin(); p != audio_ports.end(); ++p) {
-			port_engine().connect (*p, our_name);
+			port_engine().connect (*p, audio_port);
+		}
+		for (std::vector<std::string>::iterator p = midi_ports.begin(); p != midi_ports.end(); ++p) {
+			port_engine().connect (*p, midi_port);
 		}
 	}
 
@@ -848,6 +854,26 @@ PortManager::registration_callback ()
 	update_input_ports (false);
 
 	PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
+}
+
+struct MIDIConnectCall {
+	MIDIConnectCall (std::vector<std::string> const& pl)
+		: port_list (pl)
+	{}
+	std::vector<std::string> port_list;
+};
+
+static void*
+_midi_connect (void *arg)
+{
+	MIDIConnectCall* mcl = static_cast<MIDIConnectCall*> (arg);
+	std::string const our_name = AudioEngine::instance()->make_port_name_non_relative (X_("physical_midi_input_monitor_enable"));
+
+	for (vector<string>::const_iterator p = mcl->port_list.begin (); p != mcl->port_list.end (); ++p) {
+		 AudioEngine::instance()->connect (*p, our_name);
+	}
+	delete mcl;
+	return 0;
 }
 
 void
@@ -930,6 +956,8 @@ PortManager::update_input_ports (bool clear)
 		}
 	}
 
+	std::vector<std::string> physical_midi_connection_list;
+
 	if (!new_midi.empty () || !old_midi.empty () || clear) {
 		RCUWriter<MIDIInputPorts> mpwr (_midi_input_ports);
 		boost::shared_ptr<MIDIInputPorts> mpw = mpwr.get_copy ();
@@ -952,15 +980,29 @@ PortManager::update_input_ports (bool clear)
 			mpw->insert (make_pair (*p, MIDIInputPort (32)));
 
 			if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance()->current_backend_name() == X_("JACK")) {
-				std::string const our_name = AudioEngine::instance()->make_port_name_non_relative (X_("physical_midi_input_monitor_enable"));
-				port_engine().connect (*p, our_name);
+				physical_midi_connection_list.push_back (*p);
 			}
 		}
 	}
 
 	if (clear) {
-		/* don't send notifcation for initial setup */
+		/* don't send notifcation for initial setup.
+		 * Physical I/O is initially connected in
+		 * reconnect_ports(), it is too early to
+		 * do this when called from ::reestablish_ports()
+		 * "JACK: Cannot connect ports owned by inactive clients"
+		 */
 		return;
+	}
+
+	if (!physical_midi_connection_list.empty ()) {
+		/* handle hotplug, connect in bg thread, because
+		 * "JACK: Cannot callback the server in notification thread!"
+		 */
+		pthread_t thread;
+		MIDIConnectCall* mcl = new MIDIConnectCall (physical_midi_connection_list);
+		pthread_create_and_store ("midi-connect", &thread, _midi_connect, mcl);
+		pthread_detach (thread);
 	}
 
 	if (!old_audio.empty ()) {
@@ -1843,7 +1885,7 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		assert (!port_is_mine (p->first));
 
 		PortEngine::PortHandle ph = _backend->get_port_by_name (p->first);
-		if (!ph) {
+		if (!ph || !_backend->connected (ph)) {
 			continue;
 		}
 
