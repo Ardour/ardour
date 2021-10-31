@@ -157,6 +157,7 @@ public:
 
 	static bool port_is_virtual_piano (std::string const&);
 	static bool port_is_control_only (std::string const&);
+	static bool port_is_physical_input_monitor_enable (std::string const&);
 
 	/* other Port management */
 

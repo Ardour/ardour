@@ -1289,16 +1289,34 @@ PortManager::port_is_control_only (std::string const& name)
 	return regexec (&compiled_pattern, name.c_str(), 0, 0, 0) == 0;
 }
 
+static bool ends_with (std::string const& str, std::string const& end)
+{
+	const size_t str_size = str.size ();
+	const size_t end_size = end.size();
+	if (str_size < end_size) {
+		return false;
+	}
+	return 0 == str.compare (str_size - end_size, end_size, end);
+}
+
 bool
 PortManager::port_is_virtual_piano (std::string const& name)
 {
-	static const std::string vkbd (":x-virtual-keyboard");
-	static const size_t vkbd_size = vkbd.size ();
-	size_t name_size              = name.size();
-	if (vkbd_size > name_size) {
-		return false;
+	return ends_with (name, X_(":x-virtual-keyboard"));
+}
+
+bool
+PortManager::port_is_physical_input_monitor_enable (std::string const& name)
+{
+	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance()->current_backend_name() == X_("JACK")) {
+		if (ends_with (name, X_(":physical_midi_input_monitor_enable"))) {
+			return true;
+		}
+		if (ends_with (name, X_(":physical_audio_input_monitor_enable"))) {
+			return true;
+		}
 	}
-	return (0 == name.compare (name_size - vkbd_size, vkbd_size, vkbd));
+	return false;
 }
 
 MidiPortFlags
