@@ -2271,6 +2271,7 @@ private:
 	void midi_track_presentation_info_changed (PBD::PropertyChange const &, boost::weak_ptr<MidiTrack>);
 	void rewire_selected_midi (boost::shared_ptr<MidiTrack>);
 	void rewire_midi_selection_ports ();
+	void disconnect_port_for_rewire (std::string const& port) const;
 	boost::weak_ptr<MidiTrack> current_midi_target;
 
 	StripableList _soloSelection;  //the items that are soloe'd during a solo-selection operation; need to unsolo after the roll

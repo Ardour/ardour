@@ -722,6 +722,36 @@ Session::midi_track_presentation_info_changed (PropertyChange const& what_change
 	}
 }
 
+
+void
+Session::disconnect_port_for_rewire (std::string const& port) const
+{
+	MidiPortFlags mpf = AudioEngine::instance()->midi_port_metadata (port);
+
+	/* if a port is marked for control data, do not
+	 * disconnect it from everything since it may also be
+	 * used via a control surface or some other
+	 * functionality.
+	 */
+	bool keep_ctrl = mpf & MidiPortControl;
+
+	vector<string> port_connections;
+	AudioEngine::instance()->get_connections (port, port_connections);
+	for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
+
+		/* test if (*i) is a control-surface input port */
+		if (keep_ctrl && AudioEngine::instance()->port_is_control_only (*i)) {
+			continue;
+		}
+		/* retain connection to "physical_midi_input_monitor_enable" */
+		if (AudioEngine::instance()->port_is_physical_input_monitor_enable (*i)) {
+			continue;
+		}
+
+		AudioEngine::instance()->disconnect (port, *i);
+	}
+}
+
 void
 Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
 {
@@ -739,31 +769,9 @@ Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
 	AudioEngine::instance()->get_midi_selection_ports (msp);
 
 	if (!msp.empty()) {
-
 		for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
-			MidiPortFlags mpf = AudioEngine::instance()->midi_port_metadata (*p);
-
-			/* if a port is marked for control data, do not
-			 * disconnect it from everything since it may also be
-			 * used via a control surface or some other
-			 * functionality.
-			 */
-
-			if (0 == (mpf & MidiPortControl)) {
-				/* disconnect the port from everything */
-				AudioEngine::instance()->disconnect (*p);
-			} else {
-				/* only disconnect from non-control ports */
-				vector<string> port_connections;
-				AudioEngine::instance()->get_connections (*p, port_connections);
-				for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
-					/* test if (*i) is a control-surface input port */
-					if (AudioEngine::instance()->port_is_control_only (*i)) {
-						continue;
-					}
-					AudioEngine::instance()->disconnect (*p, *i);
-				}
-			}
+			/* disconnect port */
+			disconnect_port_for_rewire (*p);
 			/* connect it to the new target */
 			new_midi_target->input()->connect (new_midi_target->input()->nth(0), (*p), this);
 		}
@@ -795,7 +803,7 @@ Session::rewire_midi_selection_ports ()
 	target->input()->disconnect (this);
 
 	for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
-		AudioEngine::instance()->disconnect (*p);
+		disconnect_port_for_rewire (*p);
 		target->input()->connect (target->input()->nth (0), (*p), this);
 	}
 }
