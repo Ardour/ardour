@@ -1599,7 +1599,7 @@ Editor::marker_menu_remove ()
 	}
 }
 
-/* actally just resets the ts to constant using initial tempo */
+/* actually just resets the ts to constant using initial tempo */
 void
 Editor::toggle_tempo_type ()
 {

@@ -441,7 +441,7 @@ PlaylistSelector::on_key_press_event (GdkEventKey* ev)
 			break;
 	}
 
-	/* Don't just forward the key press ... make it act as if it occured in
+	/* Don't just forward the key press ... make it act as if it occurred in
 	 * whatever the main window currently is.
 	 */
 	Gtk::Window& main_window (ARDOUR_UI::instance ()->main_window ());

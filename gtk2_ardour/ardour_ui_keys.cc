@@ -194,7 +194,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		KeyboardKey k (ev->state, ev->keyval);
 
-		/* Check heirarchy from current focus widget upwards */
+		/* Check hierarchy from current focus widget upwards */
 
 		while (focus) {
 

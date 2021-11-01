@@ -87,7 +87,7 @@ struct lv2_external_ui_host
   /**
    * Callback that plugin UI will call
    * when UI (GUI window) is closed by user.
-   * This callback will; be called during execution of lv2_external_ui::run()
+   * This callback will be called during execution of lv2_external_ui::run()
    * (i.e. not from background thread).
    *
    * After this callback is called, UI is defunct. Host must call
