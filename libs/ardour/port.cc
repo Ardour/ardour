@@ -596,6 +596,10 @@ Port::reconnect ()
 {
 	/* caller must hold process lock; intended to be used only after reestablish() */
 
+	if (_connections.empty ()) {
+		return 0; /* OK */
+	}
+
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() Connect %1 to %2 destinations\n",name(), _connections.size()));
 
 	int count = 0;
