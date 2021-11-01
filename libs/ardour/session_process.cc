@@ -52,6 +52,7 @@
 #include "ardour/transport_master.h"
 #include "ardour/transport_master_manager.h"
 #include "ardour/ticker.h"
+#include "ardour/triggerbox.h"
 #include "ardour/types.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
@@ -387,6 +388,8 @@ Session::process_with_events (pframes_t nframes)
 
 	// DEBUG_TRACE (DEBUG::Transport, string_compose ("Running count in/latency preroll of %1 & %2\n", _count_in_samples, _remaining_latency_preroll));
 
+	TriggerBox::maybe_find_scene_bang ();
+
 	while (_count_in_samples > 0 || _remaining_latency_preroll > 0) {
 		samplecnt_t ns;
 
@@ -627,6 +630,8 @@ Session::process_with_events (pframes_t nframes)
 
 	} /* implicit release of route lock */
 
+	TriggerBox::clear_scene_bang ();
+
 	if (session_needs_butler) {
 		DEBUG_TRACE (DEBUG::Butler, "p-with-events: session needs butler, call it\n");
 		_butler->summon ();
@@ -690,10 +695,14 @@ Session::process_without_events (pframes_t nframes)
 
 	click (_transport_sample, nframes);
 
+	TriggerBox::maybe_find_scene_bang ();
+
 	if (process_routes (nframes, session_needs_butler)) {
 		fail_roll (nframes);
 		return;
 	}
+
+	TriggerBox::clear_scene_bang ();
 
 	get_track_statistics ();
 
