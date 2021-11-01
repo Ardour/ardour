@@ -1322,6 +1322,8 @@ Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
 //TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::AbletonPush);
 TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::SequentialNote);
 int TriggerBox::_first_midi_note = 60;
+std::atomic<int32_t> TriggerBox::_pending_scene (-1);
+std::atomic<int32_t> TriggerBox::_active_scene (-1);
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
@@ -1350,6 +1352,33 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	Temporal::TempoMap::MapChanged.connect_same_thread (tempo_map_connection, boost::bind (&TriggerBox::tempo_map_change, this));
 
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
+}
+
+void
+TriggerBox::scene_bang (uint32_t n)
+{
+	_pending_scene = n;
+}
+
+void
+TriggerBox::scene_unbang (uint32_t n)
+{
+}
+
+void
+TriggerBox::maybe_find_scene_bang ()
+{
+	uint32_t pending = _pending_scene.exchange (-1);
+
+	if (pending >= 0) {
+		_active_scene = pending;
+	}
+}
+
+void
+TriggerBox::clear_scene_bang ()
+{
+	(void) _active_scene.exchange (-1);
 }
 
 void
