@@ -1,0 +1,5 @@
+<Bindings name="Triggers">
+  <Press>
+     <Binding key="F1" action="Triggers/trigger-scene-1"/>
+  </Press>
+</Bindings>
