@@ -1357,6 +1357,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 void
 TriggerBox::scene_bang (uint32_t n)
 {
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("scene bang on %1 for %2\n", n));
 	_pending_scene = n;
 }
 
@@ -1736,6 +1737,13 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 
 	process_midi_trigger_requests (bufs);
+
+	if (_active_scene >= 0) {
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("tb noticed active scene %1\n", _active_scene));
+		if (_active_scene < all_triggers.size()) {
+			all_triggers[_active_scene]->bang ();
+		}
+	}
 
 	/* now let each trigger handle any state changes */
 
