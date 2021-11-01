@@ -617,7 +617,11 @@ int
 JACKAudioBackend::connect (PortHandle port, const std::string& other)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
-	return jack_connect (_priv_jack, jack_port_name (boost::dynamic_pointer_cast<JackPort>(port)->jack_ptr), other.c_str());
+	int r = jack_connect (_priv_jack, jack_port_name (boost::dynamic_pointer_cast<JackPort>(port)->jack_ptr), other.c_str());
+	if (r == 0 || r == EEXIST) {
+		return 0;
+	}
+	return r;
 }
 int
 JACKAudioBackend::connect (const std::string& src, const std::string& dst)
@@ -625,6 +629,9 @@ JACKAudioBackend::connect (const std::string& src, const std::string& dst)
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
 	int r = jack_connect (_priv_jack, src.c_str(), dst.c_str());
+	if (r == 0 || r == EEXIST) {
+		return 0;
+	}
 	return r;
 }
 

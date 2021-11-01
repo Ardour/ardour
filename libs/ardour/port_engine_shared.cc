@@ -81,7 +81,7 @@ BackendPort::connect (BackendPortHandle port, BackendPortHandle self)
 			<< " (" << name () << ") -> (" << port->name () << ")"
 			<< endmsg;
 #endif
-		return -1;
+		return 0;
 	}
 
 	store_connection (port);
