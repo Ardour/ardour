@@ -912,7 +912,7 @@ def build(bld):
     for b in [ 'ardour' ] :
         obj = bld(
             target = b + '.keys',
-            source = [ b + '.keys.in', 'mixer.bindings', 'processor_box.bindings', 'step_editing.bindings', 'monitor.bindings' ],
+            source = [ b + '.keys.in', 'mixer.bindings', 'processor_box.bindings', 'step_editing.bindings', 'monitor.bindings', 'trigger.bindings' ],
             rule = a_rule
             )
         obj.install_path = bld.env['CONFDIR']

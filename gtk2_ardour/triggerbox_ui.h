@@ -86,6 +86,11 @@ class TriggerBoxUI : public ArdourCanvas::Table
 	void start_updating ();
 	void stop_updating ();
 
+	static Glib::RefPtr<Gtk::ActionGroup> trigger_actions;
+	static void setup_actions_and_bindings ();
+
+	static void trigger_scene (int32_t);
+
    private:
 	ARDOUR::TriggerBox& _triggerbox;
 	typedef std::vector<TriggerEntry*> Slots;
@@ -93,6 +98,10 @@ class TriggerBoxUI : public ArdourCanvas::Table
 	Gtk::FileChooserDialog* file_chooser;
 	sigc::connection file_chooser_connection;
 	Gtk::Menu* _context_menu;
+
+	static Gtkmm2ext::Bindings* bindings;
+	static void load_bindings ();
+	static void register_actions ();
 
 	bool bang (GdkEvent*, uint64_t);
 	bool text_event (GdkEvent*, uint64_t);

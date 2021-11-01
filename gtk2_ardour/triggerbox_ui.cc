@@ -30,6 +30,7 @@
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 
+#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/utils.h"
 
@@ -253,6 +254,9 @@ TriggerEntry::prop_change (PropertyChange const & change)
 
 /* ---------------------------- */
 
+Gtkmm2ext::Bindings* TriggerBoxUI::bindings = 0;
+Glib::RefPtr<Gtk::ActionGroup> TriggerBoxUI::trigger_actions;
+
 TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	: Table (parent)
 	, _triggerbox (tb)
@@ -270,6 +274,33 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 TriggerBoxUI::~TriggerBoxUI ()
 {
 	update_connection.disconnect ();
+}
+
+void
+TriggerBoxUI::setup_actions_and_bindings ()
+{
+	load_bindings ();
+	register_actions ();
+}
+
+void
+TriggerBoxUI::load_bindings ()
+{
+	bindings = Bindings::get_bindings (X_("Triggers"));
+}
+
+void
+TriggerBoxUI::register_actions ()
+{
+	trigger_actions = ActionManager::create_action_group (bindings, X_("Triggers"));
+
+	ActionManager::register_toggle_action (trigger_actions, "trigger-scene-1", _("Scene 1"), sigc::bind (sigc::ptr_fun (TriggerBoxUI::trigger_scene), 1));
+}
+
+void
+TriggerBoxUI::trigger_scene (int32_t n)
+{
+	TriggerBox::scene_bang (n);
 }
 
 void

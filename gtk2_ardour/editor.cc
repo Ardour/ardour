@@ -1118,6 +1118,7 @@ Editor::access_action (const std::string& action_group, const std::string& actio
 	try {
 		act = ActionManager::get_action (action_group.c_str(), action_item.c_str());
 		if (act) {
+			cerr << "firing up " << action_item << endl;
 			act->activate();
 		}
 	} catch ( ActionManager::MissingActionException const& e) {

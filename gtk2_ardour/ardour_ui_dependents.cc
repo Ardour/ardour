@@ -54,6 +54,7 @@
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
 #include "time_info_box.h"
+#include "triggerbox_ui.h"
 #include "step_entry.h"
 #include "opts.h"
 #include "utils.h"
@@ -89,6 +90,7 @@ ARDOUR_UI::we_have_dependents ()
 	 */
 	ProcessorBox::register_actions ();
 	StepEntry::setup_actions_and_bindings ();
+	TriggerBoxUI::setup_actions_and_bindings ();
 
 	/* Global, editor, mixer, processor box actions are defined now. Link
 	   them with any bindings, so that GTK does not get a chance to define
