@@ -421,12 +421,13 @@ InternalSend::set_state (const XMLNode& node, int version)
 		 * exist.
 		 */
 
-		if (!IO::connecting_legal) {
-			IO::ConnectingLegal.connect_same_thread (connect_c, boost::bind (&InternalSend::connect_when_legal, this));
+		if (_session.loading()) {
+			Session::AfterConnect.connect_same_thread (connect_c, boost::bind (&InternalSend::after_connect, this));
 		} else {
-			connect_when_legal ();
+			after_connect ();
 		}
 	}
+
 	allow_pan_reset ();
 
 	if (!is_foldback ()) {
@@ -439,7 +440,7 @@ InternalSend::set_state (const XMLNode& node, int version)
 }
 
 int
-InternalSend::connect_when_legal ()
+InternalSend::after_connect ()
 {
 	connect_c.disconnect ();
 
