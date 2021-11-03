@@ -214,7 +214,6 @@ Session::pre_engine_init (string fullpath)
 	/* stop IO objects from doing stuff until we're ready for them */
 
 	Delivery::disable_panners ();
-	IO::disable_connecting ();
 }
 
 int
@@ -1627,8 +1626,6 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "MIDIPorts")) != 0) {
 		_midi_ports->set_midi_port_states (child->children());
 	}
-
-	IO::disable_connecting ();
 
 	Stateful::save_extra_xml (node);
 

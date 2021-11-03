@@ -183,23 +183,10 @@ public:
 	 */
 	PBD::Signal1<bool, ChanCount, BoolCombiner> PortCountChanging;
 
-	static int disable_connecting ();
-	static int enable_connecting ();
-
 	static PBD::Signal1<void, ChanCount> PortCountChanged; // emitted when the number of ports changes
 
 	static std::string name_from_state (const XMLNode&);
 	static void set_name_in_state (XMLNode&, const std::string&);
-
-	/* we have to defer/order port connection. this is how we do it.
-	*/
-
-	static PBD::Signal0<int> ConnectingLegal;
-	static bool              connecting_legal;
-
-	XMLNode *pending_state_node;
-	int pending_state_node_version;
-	bool pending_state_node_in;
 
 	/* three utility functions - this just seems to be simplest place to put them */
 
@@ -222,9 +209,6 @@ private:
 	mutable Glib::Threads::Mutex io_lock;
 	PortSet   _ports;
 
-	int connecting_became_legal ();
-	PBD::ScopedConnection connection_legal_c;
-
 	void reestablish_port_subscriptions ();
 	PBD::ScopedConnectionList _port_connections;
 
@@ -242,12 +226,11 @@ private:
 	int ensure_ports (ChanCount, bool clear, void *src);
 
 	void bundle_changed (Bundle::Change);
+	int set_port_state_2X (const XMLNode& node, int version, bool in);
 
 	int get_port_counts (const XMLNode& node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c);
 	int get_port_counts_2X (const XMLNode& node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c);
 	int create_ports (const XMLNode&, int version);
-	int make_connections (const XMLNode&, int, bool);
-	int make_connections_2X (const XMLNode &, int, bool);
 
 	boost::shared_ptr<Bundle> find_possible_bundle (const std::string &desired_name);
 

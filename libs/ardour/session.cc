@@ -1331,12 +1331,7 @@ Session::hookup_io ()
 		delete _bundle_xml_node;
 	}
 
-	/* Tell all IO objects to connect themselves together */
-
-	IO::enable_connecting ();
-
-	/* Now tell all "floating" ports to connect to whatever
-	   they should be connected to.
+	/* Get everything connected
 	*/
 
 	AudioEngine::instance()->reconnect_ports ();
@@ -2871,7 +2866,6 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 	   values by Stateful.
 	*/
 	Stateful::ForceIDRegeneration force_ids;
-	IO::disable_connecting ();
 
 	/* New v6 templates do have a version in the Route-Template,
 	 * we assume that all older, unversioned templates are
@@ -3100,7 +3094,6 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 		}
 
 		catch (...) {
-			IO::enable_connecting ();
 			throw;
 		}
 
@@ -3111,8 +3104,6 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 	if (!ret.empty()) {
 		add_routes (ret, true, true, insert_at);
 	}
-
-	IO::enable_connecting ();
 
 	if (!ret.empty()) {
 		/* set/unset monitor-send */
@@ -3184,7 +3175,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		 * we will resort when done.
 		 */
 
-		if (!_monitor_out && IO::connecting_legal) {
+		if (!_monitor_out && !loading()) {
 			resort_routes_using (r);
 		}
 	}
@@ -3279,7 +3270,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		ensure_stripable_sort_order ();
 	}
 
-	if (_monitor_out && IO::connecting_legal) {
+	if (_monitor_out && !loading()) {
 		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
@@ -7087,7 +7078,7 @@ Session::auto_connect (const AutoConnectRequest& ar)
 
 	if (!route) { return; }
 
-	if (!IO::connecting_legal) {
+	if (loading()) {
 		return;
 	}
 
