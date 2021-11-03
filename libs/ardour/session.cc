@@ -1341,6 +1341,7 @@ Session::hookup_io ()
 
 	AudioEngine::instance()->reconnect_ports ();
 	TransportMasterManager::instance().reconnect_ports ();
+	AfterConnect (); /* EMIT SIGNAL */
 
 	/* Anyone who cares about input state, wake up and do something */
 

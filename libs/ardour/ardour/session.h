@@ -891,6 +891,13 @@ public:
 	 */
 	static PBD::Signal0<int> AskAboutPendingState;
 
+	/** after loading a session, once all ports have been created and connected
+	 * signal is emitted to let objects that need to do some housekeeping
+	 * post-connect.
+	 */
+
+	static PBD::Signal0<void> AfterConnect;
+
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (
 		size_t, std::string const &, uint32_t);
 
