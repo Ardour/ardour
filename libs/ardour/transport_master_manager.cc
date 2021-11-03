@@ -741,19 +741,6 @@ TransportMasterManager::restart ()
 }
 
 void
-TransportMasterManager::reconnect_ports ()
-{
-	DEBUG_TRACE (DEBUG::Slave, "reconnecting all transport master ports\n");
-	{
-		Glib::Threads::RWLock::ReaderLock lm (lock);
-
-		for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
-			(*tm)->connect_port_using_state ();
-		}
-	}
-}
-
-void
 TransportMasterManager::block_disk_output ()
 {
 	if (!disk_output_blocked) {
