@@ -67,6 +67,7 @@ public:
 		StartRoll,
 		EndRoll,
 		TransportStateChange,
+		TriggerSceneChange,
 
 		/* only one of each of these events can be queued at any one time */
 
@@ -90,6 +91,7 @@ public:
 		bool             yes_or_no;
 		samplepos_t      target2_sample;
 		OverwriteReason  overwrite;
+		int32_t          scene;
 	};
 
 	boost::weak_ptr<Track> track;

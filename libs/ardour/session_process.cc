@@ -965,6 +965,10 @@ Session::process_event (SessionEvent* ev)
 		}
 		break;
 
+	case SessionEvent::TriggerSceneChange:
+		TriggerBox::scene_bang (ev->scene);
+		break;
+
 	case SessionEvent::PunchIn:
 		// cerr << "PunchIN at " << transport_sample() << endl;
 		if (config.get_punch_in() && record_status() == Enabled) {

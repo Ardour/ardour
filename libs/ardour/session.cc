@@ -786,20 +786,22 @@ Session::destroy ()
 		bool remove = true;
 		bool del = true;
 		switch (ev->type) {
-			case SessionEvent::AutoLoop:
-			case SessionEvent::Skip:
-			case SessionEvent::PunchIn:
-			case SessionEvent::PunchOut:
-			case SessionEvent::RangeStop:
-			case SessionEvent::RangeLocate:
-				remove = false;
-				del = false;
-				break;
-			case SessionEvent::RealTimeOperation:
-				process_rtop (ev);
-				del = false;
-			default:
-				break;
+		case SessionEvent::AutoLoop:
+		case SessionEvent::Skip:
+		case SessionEvent::PunchIn:
+		case SessionEvent::PunchOut:
+		case SessionEvent::RangeStop:
+		case SessionEvent::RangeLocate:
+		case SessionEvent::TriggerSceneChange:
+			remove = false;
+			del = false;
+			break;
+		case SessionEvent::RealTimeOperation:
+			process_rtop (ev);
+			del = false;
+			break;
+		default:
+			break;
 		}
 		if (remove) {
 			del = del && !_remove_event (ev);
