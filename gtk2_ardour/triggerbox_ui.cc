@@ -294,7 +294,12 @@ TriggerBoxUI::register_actions ()
 {
 	trigger_actions = ActionManager::create_action_group (bindings, X_("Triggers"));
 
-	ActionManager::register_toggle_action (trigger_actions, "trigger-scene-1", _("Scene 1"), sigc::bind (sigc::ptr_fun (TriggerBoxUI::trigger_scene), 1));
+	for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
+		const std::string action_name = string_compose ("trigger-scene-%1", n);
+		const std::string display_name = string_compose (_("Scene %1"), n);
+
+		ActionManager::register_toggle_action (trigger_actions, action_name.c_str(), display_name.c_str(), sigc::bind (sigc::ptr_fun (TriggerBoxUI::trigger_scene), n));
+	}
 }
 
 void
