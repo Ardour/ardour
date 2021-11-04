@@ -28,6 +28,7 @@
 #include <glibmm/threads.h>
 
 #include "pbd/pcg_rand.h"
+#include "pbd/pool.h"
 #include "pbd/properties.h"
 #include "pbd/ringbuffer.h"
 #include "pbd/stateful.h"
@@ -366,6 +367,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void add_midi_sidechain (std::string const & name);
 
+	void request_reload (int32_t slot);
+	void request_use (int32_t slot, Trigger&);
+
 	enum TriggerMidiMapMode {
 		AbletonPush,
 		SequentialNote,
@@ -385,6 +389,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void clear_scene_bang ();
 	static void scene_bang (uint32_t scene_number);
 	static void scene_unbang (uint32_t scene_number);
+
+	static void init_pool();
 
 	static const int32_t default_triggers_per_box;
 
@@ -441,10 +447,25 @@ class LIBARDOUR_API TriggerBox : public Processor
 		union {
 			Trigger* trigger;
 		};
+
+		union {
+			int32_t slot;
+		};
+
+		Request (Type t) : type (t) {}
+
+		static MultiAllocSingleReleasePool* pool;
+		static void init_pool();
+
+		void* operator new (size_t);
+		void  operator delete (void* ptr, size_t);
 	};
 
-	typedef PBD::RingBuffer<Request> RequestBuffer;
+	typedef PBD::RingBuffer<Request*> RequestBuffer;
 	RequestBuffer requests;
+
+	void process_requests ();
+	void process_request (Request*);
 
 };
 

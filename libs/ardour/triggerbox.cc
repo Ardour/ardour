@@ -2214,3 +2214,73 @@ TriggerBox::reconnect_to_default ()
 	_sidechain->input()->nth (0)->disconnect_all ();
 	_sidechain->input()->nth (0)->connect (Config->get_default_trigger_input_port());
 }
+
+MultiAllocSingleReleasePool* TriggerBox::Request::pool;
+
+void
+TriggerBox::init_pool ()
+{
+	/* "indirection" is because the Request struct is private, and so
+	   nobody else can call its ::init_pool() static method.
+	*/
+
+	Request::init_pool ();
+}
+
+void
+TriggerBox::Request::init_pool ()
+{
+	pool = new MultiAllocSingleReleasePool (X_("TriggerBoxRequests"), sizeof (TriggerBox::Request), 1024);
+}
+
+void*
+TriggerBox::Request::operator new (size_t)
+{
+	return pool->alloc();
+ }
+
+void
+TriggerBox::Request::operator delete (void *ptr, size_t /*size*/)
+{
+	return pool->release (ptr);
+}
+
+void
+TriggerBox::request_reload (int32_t slot)
+{
+	Request* r = new Request (Request::Use);
+	r->slot = slot;
+	requests.write (&r, 1);
+}
+
+void
+TriggerBox::request_use (int32_t slot, Trigger& t)
+{
+	Request* r = new Request (Request::Use);
+	r->slot = slot;
+	r->trigger = &t;
+	requests.write (&r, 1);
+}
+
+void
+TriggerBox::process_requests ()
+{
+	Request* r;
+
+	while (requests.read (&r, 1) == 1) {
+		process_request (r);
+	}
+}
+
+void
+TriggerBox::process_request (Request* req)
+{
+	switch (req->type) {
+	case Request::Use:
+		break;
+	case Request::Reload:
+		break;
+	}
+
+	delete req; /* back to the pool, RT-safe */
+}
