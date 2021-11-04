@@ -202,7 +202,6 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	velocity_label->set_font_description (UIConfiguration::instance ().get_NormalBoldFont ());
 
 	const double scale = UIConfiguration::instance().get_ui_scale();
-	const Distance spacing = 12. * scale;
 
 	/* Row 0 */
 
