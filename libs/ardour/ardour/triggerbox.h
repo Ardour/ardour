@@ -84,6 +84,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void set_end (timepos_t const &) = 0;
 	virtual void set_length (timecnt_t const &) = 0;
 	virtual void tempo_map_change () = 0;
+	virtual void reload (BufferSet&, void*) = 0;
 
 	virtual double position_as_fraction() const = 0;
 
@@ -237,6 +238,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	timepos_t start_offset () const { return timepos_t (_start_offset); } /* offset from start of data */
 	timepos_t current_length() const; /* offset from start of data */
 	timepos_t natural_length() const; /* offset from start of data */
+	void reload (BufferSet&, void*);
 
 	double position_as_fraction() const;
 
@@ -287,6 +289,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	timepos_t end() const;            /* offset from start of data */
 	timepos_t current_length() const; /* offset from start of data */
 	timepos_t natural_length() const; /* offset from start of data */
+	void reload (BufferSet&, void*);
 
 	double position_as_fraction() const;
 
@@ -306,8 +309,9 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
   private:
 	PBD::ID data_source;
-	RTMidiBuffer data;
+	RTMidiBuffer* data;
 	MidiStateTracker tracker;
+	PBD::ScopedConnection content_connection;
 
 	size_t read_index;          /* index into data */
 	samplecnt_t data_length;   /* using timestamps from data */
@@ -320,6 +324,9 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	int load_data (boost::shared_ptr<MidiRegion>);
 	RunResult at_end ();
 	void compute_and_set_length ();
+
+	void render (RTMidiBuffer&);
+	void re_render ();
 };
 
 
@@ -367,7 +374,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void add_midi_sidechain (std::string const & name);
 
-	void request_reload (int32_t slot);
+	void request_reload (int32_t slot, void*);
 	void request_use (int32_t slot, Trigger&);
 
 	enum TriggerMidiMapMode {
@@ -446,6 +453,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 		union {
 			Trigger* trigger;
+			void* ptr;
 		};
 
 		union {
@@ -464,9 +472,10 @@ class LIBARDOUR_API TriggerBox : public Processor
 	typedef PBD::RingBuffer<Request*> RequestBuffer;
 	RequestBuffer requests;
 
-	void process_requests ();
-	void process_request (Request*);
+	void process_requests (BufferSet&);
+	void process_request (BufferSet&, Request*);
 
+	void reload (BufferSet& bufs, int32_t slot, void* ptr);
 };
 
 namespace Properties {

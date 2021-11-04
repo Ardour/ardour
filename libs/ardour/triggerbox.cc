@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <cstdlib>
 
@@ -16,6 +17,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
 #include "ardour/minibpm.h"
 #include "ardour/port.h"
@@ -946,6 +948,10 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 	return 0;
 }
 
+void
+AudioTrigger::reload (BufferSet&, void*)
+{
+}
 
 /*--------------------*/
 
@@ -978,6 +984,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 MIDITrigger::MIDITrigger (uint64_t n, TriggerBox& b)
 	: Trigger (n, b)
+	, data (0)
 	, read_index (0)
 	, data_length (0)
 	, usable_length (0)
@@ -988,6 +995,7 @@ MIDITrigger::MIDITrigger (uint64_t n, TriggerBox& b)
 
 MIDITrigger::~MIDITrigger ()
 {
+	drop_data ();
 }
 
 void
@@ -1018,15 +1026,15 @@ MIDITrigger::position_as_fraction () const
 		return 0.0;
 	}
 
-	if (data.size() == 0) {
+	if (data->size() == 0) {
 		return 0.0;
 	}
 
-	if (read_index >= data.size()) {
+	if (read_index >= data->size()) {
 		return 1.0;
 	}
 
-	const samplepos_t l = data[read_index].timestamp;
+	const samplepos_t l = (*data)[read_index].timestamp;
 
 	return l / (double) usable_length;
 }
@@ -1097,7 +1105,7 @@ MIDITrigger::start_offset () const
 timepos_t
 MIDITrigger::current_pos() const
 {
-	return timepos_t (data[read_index].timestamp);
+	return timepos_t ((*data)[read_index].timestamp);
 }
 
 void
@@ -1163,9 +1171,52 @@ MIDITrigger::set_region (boost::shared_ptr<Region> r)
 	load_data (mr);
 	set_length (mr->length());
 
+	mr->model()->ContentsChanged.connect_same_thread (content_connection, boost::bind (&MIDITrigger::re_render, this));
+	mr->PropertyChanged.connect_same_thread (content_connection, boost::bind (&MIDITrigger::re_render, this));
+
 	PropertyChanged (ARDOUR::Properties::name);
 
 	return 0;
+}
+
+void
+MIDITrigger::render (RTMidiBuffer& rtmb)
+{
+	/* this generates timestamps in session time. We want trigger-relative
+	 * time (so the beginning of the region/trigger is zero).
+	 */
+
+	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion> (_region);
+	assert (mr);
+
+	mr->render_range (rtmb, 0, Sustained, mr->start(), mr->length(), 0);
+	const sampleoffset_t shift = mr->position().samples();
+	rtmb.shift (-shift);
+}
+
+void
+MIDITrigger::reload (BufferSet& bufs, void* ptr)
+{
+	MidiBuffer& mb (bufs.get_midi (0));
+
+	tracker.resolve_notes (mb, 0);
+
+	RTMidiBuffer* rtmb = reinterpret_cast<RTMidiBuffer*> (ptr);
+
+	std::swap (data, rtmb);
+
+	delete rtmb;
+
+	std::cerr << _index << " data now " << data << std::endl;
+}
+
+void
+MIDITrigger::re_render ()
+{
+	RTMidiBuffer* new_data = new RTMidiBuffer;
+	std::cerr << "will re-render " << _region->name() << " into " << new_data << std::endl;
+	render (*new_data);
+	_box.request_reload (_index, new_data);
 }
 
 void
@@ -1176,7 +1227,8 @@ MIDITrigger::tempo_map_change ()
 void
 MIDITrigger::drop_data ()
 {
-	data.clear ();
+	delete data;
+	data = 0;
 }
 
 int
@@ -1184,13 +1236,9 @@ MIDITrigger::load_data (boost::shared_ptr<MidiRegion> mr)
 {
 	drop_data ();
 
-	/* this generates timestamps in session time. We want trigger-relative
-	 * time (so the beginning of the region/trigger is zero).
-	 */
+	data = new RTMidiBuffer;
 
-	mr->render_range (data, 0, Sustained, mr->start(), mr->length(), 0);
-	const sampleoffset_t shift = mr->position().samples();
-	data.shift (-shift);
+	render (*data);
 
 	set_name (mr->name());
 
@@ -1223,9 +1271,9 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 	while (true) {
 
-		if (read_index < data.size()) {
+		if (read_index < data->size()) {
 
-			RTMidiBuffer::Item const & item (data[read_index]);
+			RTMidiBuffer::Item const & item ((*data)[read_index]);
 
 			/* timestamps inside the RTMidiBuffer are relative to
 			   the start of the region.
@@ -1235,12 +1283,12 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 			const samplepos_t effective_time = transition_samples + item.timestamp;
 
-			cerr << start_sample << " .. " << end_sample << " Item " << read_index << " @ " << item.timestamp << " + " << transition_samples << " = " << effective_time << endl;
+			// cerr << start_sample << " .. " << end_sample << " Item " << read_index << " @ " << item.timestamp << " + " << transition_samples << " = " << effective_time << endl;
 
 			if (effective_time >= start_sample && effective_time < end_sample) {
 
 				uint32_t sz;
-				uint8_t const * bytes = data.bytes (item, sz);
+				uint8_t const * bytes = data->bytes (item, sz);
 
 				samplepos_t process_relative_timestamp = effective_time - start_sample;
 
@@ -1258,7 +1306,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 		const samplepos_t region_end = transition_samples + data_length;
 
-		if (read_index >= data.size() || (_state == Running && region_end >= start_sample && region_end <= end_sample)) {
+		if (read_index >= data->size() || (_state == Running && region_end >= start_sample && region_end <= end_sample)) {
 
 			/* We reached the end */
 
@@ -1736,6 +1784,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (_sidechain) {
 		_sidechain->run (bufs, start_sample, end_sample, speed, nframes, true);
 	}
+
+	process_requests (bufs);
 
 	process_midi_trigger_requests (bufs);
 
@@ -2246,10 +2296,11 @@ TriggerBox::Request::operator delete (void *ptr, size_t /*size*/)
 }
 
 void
-TriggerBox::request_reload (int32_t slot)
+TriggerBox::request_reload (int32_t slot, void* ptr)
 {
-	Request* r = new Request (Request::Use);
+	Request* r = new Request (Request::Reload);
 	r->slot = slot;
+	r->ptr = ptr;
 	requests.write (&r, 1);
 }
 
@@ -2263,24 +2314,38 @@ TriggerBox::request_use (int32_t slot, Trigger& t)
 }
 
 void
-TriggerBox::process_requests ()
+TriggerBox::process_requests (BufferSet& bufs)
 {
 	Request* r;
 
 	while (requests.read (&r, 1) == 1) {
-		process_request (r);
+		process_request (bufs, r);
 	}
 }
 
 void
-TriggerBox::process_request (Request* req)
+TriggerBox::process_request (BufferSet& bufs, Request* req)
 {
 	switch (req->type) {
 	case Request::Use:
+		std::cerr << "Use for " << req->slot << std::endl;
 		break;
 	case Request::Reload:
+		std::cerr << "Reload for " << req->slot << std::endl;
+		reload (bufs, req->slot, req->ptr);
 		break;
 	}
 
 	delete req; /* back to the pool, RT-safe */
 }
+
+void
+TriggerBox::reload (BufferSet& bufs, int32_t slot, void* ptr)
+{
+	if (slot >= all_triggers.size()) {
+		return;
+	}
+	std::cerr << "reload slot " << slot << std::endl;
+	all_triggers[slot]->reload (bufs, ptr);
+}
+
