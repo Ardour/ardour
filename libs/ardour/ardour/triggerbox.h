@@ -429,6 +429,23 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static TriggerMidiMapMode _midi_map_mode;
 	static std::atomic<int32_t> _pending_scene;
 	static std::atomic<int32_t> _active_scene;
+
+	struct Request {
+		enum Type {
+			Use,
+			Reload,
+		};
+
+		Type type;
+
+		union {
+			Trigger* trigger;
+		};
+	};
+
+	typedef PBD::RingBuffer<Request> RequestBuffer;
+	RequestBuffer requests;
+
 };
 
 namespace Properties {

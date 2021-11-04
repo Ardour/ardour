@@ -1335,6 +1335,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, up_next (0)
 	, currently_playing (0)
 	, _stop_all (false)
+	, requests (1024)
 {
 
 	/* default number of possible triggers. call ::add_trigger() to increase */
