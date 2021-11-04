@@ -386,6 +386,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void scene_bang (uint32_t scene_number);
 	static void scene_unbang (uint32_t scene_number);
 
+	static const int32_t default_triggers_per_box;
+
   private:
 	static Temporal::BBT_Offset _assumed_trigger_duration;
 
@@ -423,7 +425,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void reconnect_to_default ();
 	void parameter_changed (std::string const &);
 
-	static const uint64_t default_triggers_per_box;
 	static int _first_midi_note;
 	static TriggerMidiMapMode _midi_map_mode;
 	static std::atomic<int32_t> _pending_scene;

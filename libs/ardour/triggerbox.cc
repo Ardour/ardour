@@ -1317,7 +1317,7 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow-action-1 = %1\n", Properties::follow_action1.property_id));
 }
 
-const uint64_t TriggerBox::default_triggers_per_box = 8;
+const int32_t TriggerBox::default_triggers_per_box = 8;
 Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
 //TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::AbletonPush);
 TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::SequentialNote);
@@ -1369,7 +1369,7 @@ TriggerBox::scene_unbang (uint32_t n)
 void
 TriggerBox::maybe_find_scene_bang ()
 {
-	uint32_t pending = _pending_scene.exchange (-1);
+	int32_t pending = _pending_scene.exchange (-1);
 
 	if (pending >= 0) {
 		_active_scene = pending;
@@ -1740,7 +1740,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (_active_scene >= 0) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("tb noticed active scene %1\n", _active_scene));
-		if (_active_scene < all_triggers.size()) {
+		if (_active_scene < (int32_t) all_triggers.size()) {
 			all_triggers[_active_scene]->bang ();
 		}
 	}
