@@ -27,7 +27,6 @@
 #include "ardour/region.h"
 #include "ardour/triggerbox.h"
 
-#include "canvas/constrained_item.h"
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 #include "canvas/widget.h"
