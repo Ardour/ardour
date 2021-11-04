@@ -24,7 +24,6 @@
 #include "pbd/convert.h"
 
 #include "canvas/canvas.h"
-#include "canvas/constraint_packer.h"
 #include "canvas/debug.h"
 #include "canvas/item.h"
 #include "canvas/scroll_group.h"
