@@ -671,7 +671,7 @@ public:
 
 private:
 	double y_to_region (double) const;
-	Temporal::Beats grid_aligned_beats (Temporal::timepos_t const & pos, GdkEvent const * event) const;
+	Temporal::Beats round_down_to_grid (Temporal::timepos_t const & pos, GdkEvent const * event) const;
 
 	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
 	std::pair<Temporal::timecnt_t,int> move_threshold () const {

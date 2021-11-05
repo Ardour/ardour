@@ -6962,9 +6962,9 @@ NoteCreateDrag::~NoteCreateDrag ()
 }
 
 Temporal::Beats
-NoteCreateDrag::grid_aligned_beats (timepos_t const & pos, GdkEvent const * event) const
+NoteCreateDrag::round_down_to_grid (timepos_t const & pos, GdkEvent const * event) const
 {
-	return _editor->snap_to_bbt (pos, RoundNearest, SnapToGrid_Unscaled).beats ();
+	return _editor->snap_to_bbt (pos, RoundDownMaybe, SnapToGrid_Unscaled).beats ();
 }
 
 void
@@ -6975,12 +6975,12 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_drag_rect = new ArdourCanvas::Rectangle (_region_view->get_canvas_group ());
 
 	const timepos_t pos = _drags->current_pointer_time ();
-	timepos_t aligned_start (grid_aligned_beats (pos, event));
-	const timepos_t grid_beats (_region_view->get_grid_beats (aligned_start));
+	Temporal::Beats aligned_beats (round_down_to_grid (pos, event));
+	const Temporal::Beats grid_beats (_region_view->get_grid_beats (pos));
 
-	_note[0] = aligned_start;
+	_note[0] = timepos_t (aligned_beats);
 	/* minimum initial length is grid beats */
-	_note[1] = _note[0] + grid_beats;
+	_note[1] = _note[0] + timepos_t (grid_beats);
 
 	/* the note positions we've just computed are in absolute beats, but
 	 * the drag rect is a member of the region view group, so we need
@@ -7004,25 +7004,7 @@ void
 NoteCreateDrag::motion (GdkEvent* event, bool)
 {
 	const timepos_t pos = _drags->current_pointer_time ();
-	Temporal::Beats aligned_beats = grid_aligned_beats (pos, event);
-
-	if (_editor->snap_mode() != SnapOff) {
-
-		const Temporal::Beats grid_beats = _region_view->get_grid_beats (pos);
-		const Temporal::Beats unaligned_beats = pos.beats ();
-
-		/* Hack so that we always snap to the note that we are over, instead of snapping
-		   to the next one if we're more than halfway through the one we're over.
-		*/
-
-		const Temporal::Beats rem = aligned_beats - unaligned_beats;
-
-		if (rem >= std::numeric_limits<Temporal::Beats>::lowest()) {
-			aligned_beats -= grid_beats;
-		}
-
-		aligned_beats += grid_beats;
-	}
+	Temporal::Beats aligned_beats = round_down_to_grid (pos, event);
 
 	_note[1] = timepos_t (max (Temporal::Beats(), aligned_beats));
 
