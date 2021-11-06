@@ -446,6 +446,10 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/move-starts-earlier-fine|<@SECONDARY@>comma|Move Note Starts Earlier (Fine)
 @notes|Notes/move-ends-later|period|Move Note Ends Later
 @notes|Notes/move-ends-later-fine|<@SECONDARY@>period|Move Note Ends Later (Fine)
+@notes|Notes/move-starts-later|<@PRIMARY@>comma|Move Note Starts Later
+@notes|Notes/move-starts-later-fine|<@PRIMARY@><@SECONDARY@>comma|Move Note Starts Later (Fine)
+@notes|Notes/move-ends-earlier|<@PRIMARY@>period|Move Note Ends Earlier
+@notes|Notes/move-ends-earlier-fine|<@PRIMARY@><@SECONDARY@>period|Move Note Ends Earlier (Fine)
 @notes|Notes/nudge-later|Right|Nudge Notes Later
 @notes|Notes/nudge-later-fine|<@SECONDARY@>Right|Nudge Notes Later (fine)
 @notes|Notes/nudge-earlier|Left|Nudge Notes Earlier
