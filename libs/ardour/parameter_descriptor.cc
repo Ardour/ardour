@@ -252,7 +252,7 @@ ParameterDescriptor::update_steps()
 }
 
 std::string
-ParameterDescriptor::midi_note_name (const uint8_t b, bool translate)
+ParameterDescriptor::midi_note_name (const uint8_t b, bool translate, bool with_octave)
 {
 	char buf[16];
 	if (b > 127) {
@@ -279,9 +279,14 @@ ParameterDescriptor::midi_note_name (const uint8_t b, bool translate)
 		S_("Note|B")
 	};
 
-	/* MIDI note 0 is in octave -1 (in scientific pitch notation) */
-	const int octave = b / 12 - 1;
 	const size_t p = b % 12;
+
+	/* MIDI note 0 is in octave -1 (in scientific pitch notation) */
+	if (!with_octave) {
+		return translate ? notes[p] : en_notes[p];
+	}
+
+	const int octave = b / 12 - 1;
 	snprintf (buf, sizeof (buf), "%s%d", translate ? notes[p] : en_notes[p], octave);
 	return buf;
 }

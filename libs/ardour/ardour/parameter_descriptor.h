@@ -50,7 +50,7 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 		HZ,         ///< Frequency in Hertz
 	};
 
-	static std::string midi_note_name (uint8_t, bool translate=true);
+	static std::string midi_note_name (uint8_t, bool translate = true, bool with_octave = true);
 
 	/** Dual of midi_note_name, convert a note name into its midi note number. */
 	typedef std::map<std::string, uint8_t> NameNumMap;
