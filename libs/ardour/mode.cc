@@ -19,6 +19,7 @@
 #include "ardour/mode.h"
 
 MusicalMode::MusicalMode (MusicalMode::Type t)
+	: _type (t)
 {
 	fill (*this, t);
 }

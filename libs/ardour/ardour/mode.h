@@ -68,9 +68,11 @@ class MusicalMode
 	~MusicalMode ();
 
 	std::vector<float> steps;
+	Type type() const { return _type; }
 
   private:
 	static void fill (MusicalMode&, Type);
+	Type _type;
 };
 
 #endif /* __ardour_mode_h__ */

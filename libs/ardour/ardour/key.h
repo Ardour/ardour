@@ -21,7 +21,7 @@
 
 #include "ardour/mode.h"
 
-class MusicalKey : MusicalMode
+class MusicalKey : public MusicalMode
 {
   public:
 	MusicalKey (Type t, int root) : MusicalMode (t), _root (root) {}
