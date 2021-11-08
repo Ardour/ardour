@@ -123,6 +123,24 @@ MidiTrack::init ()
 }
 
 void
+MidiTrack::set_enforce_key (bool yn)
+{
+	_enforce_key = yn;
+}
+
+bool
+MidiTrack::enforce_key () const
+{
+	return _enforce_key;
+}
+
+void
+MidiTrack::set_key (MusicalKey const & k)
+{
+	_key = k;
+}
+
+void
 MidiTrack::data_recorded (boost::weak_ptr<MidiSource> src)
 {
 	DataRecorded (src); /* EMIT SIGNAL */

@@ -148,7 +148,7 @@ public:
 	MusicalKey const & key() const { return _key; }
 	void set_key (MusicalKey const & key);
 
-	bool enforce_key ();
+	bool enforce_key () const;
 	void set_enforce_key (bool yn);
 
 protected:
