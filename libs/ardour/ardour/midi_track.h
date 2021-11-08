@@ -30,6 +30,11 @@
 namespace ARDOUR
 {
 
+namespace Properties {
+	LIBARDOUR_API extern PBD::PropertyDescriptor<MusicalKey::Type> musical_mode;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<int> musical_root;
+}
+
 class InterThreadInfo;
 class MidiPlaylist;
 class RouteGroup;
@@ -43,6 +48,8 @@ public:
 	~MidiTrack ();
 
 	int init ();
+
+	static void make_property_quarks ();
 
 	void realtime_locate (bool);
 	void non_realtime_locate (samplepos_t);

@@ -72,11 +72,26 @@ class InterThreadInfo;
 class MidiSource;
 class Region;
 class SMFSource;
+
+
+namespace Properties {
+	PBD::PropertyDescriptor<MusicalMode::Type> musical_mode;
+	PBD::PropertyDescriptor<int> musical_root;
+}
 }
 
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+
+void
+MidiTrack::make_property_quarks ()
+{
+	Properties::musical_mode.property_id = g_quark_from_static_string (X_("musical-mode"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for musical-mode = %1\n", Properties::musical_mode.property_id));
+	Properties::musical_root.property_id = g_quark_from_static_string (X_("musical-root"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for musical-root = %1\n", Properties::musical_root.property_id));
+}
 
 MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	: Track (sess, name, PresentationInfo::MidiTrack, mode, DataType::MIDI)
@@ -138,6 +153,13 @@ void
 MidiTrack::set_key (MusicalKey const & k)
 {
 	_key = k;
+
+	PropertyChange pc;
+
+	pc.add (Properties::musical_mode);
+	pc.add (Properties::musical_root);
+
+	PropertyChanged (pc); /* EMIT SIGNAL */
 }
 
 void
