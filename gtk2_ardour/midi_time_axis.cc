@@ -640,6 +640,13 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	cmi->set_active (midi_track ()->restore_pgm_on_load ());
 	cmi->signal_activate().connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_restore_pgm_on_load));
 
+	items.push_back (MenuElem (_("Mode (Scale)"), *build_musical_mode_menu ()));
+	items.push_back (MenuElem (_("Root"), *build_musical_root_menu ()));
+	items.push_back (CheckMenuElem (_("Enforce Key")));
+	Gtk::CheckMenuItem* eki = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+	eki->set_active (midi_track ()->enforce_key ());
+	// eki->signal_activate().connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_enforce_musical_key));
+
 	items.push_back (MenuElem (_("Color Mode"), *build_color_mode_menu ()));
 
 	items.push_back (SeparatorElem ());
@@ -1115,6 +1122,317 @@ MidiTimeAxisView::build_note_mode_menu()
 	_percussion_mode_item->set_active(_note_mode == Percussive);
 
 	return mode_menu;
+}
+
+Gtk::Menu*
+MidiTimeAxisView::build_musical_root_menu ()
+{
+	using namespace Menu_Helpers;
+
+	Menu* root_menu = manage (new Menu);
+	MenuList& items = root_menu->items();
+	root_menu->set_name ("ArdourContextMenu");
+
+	RadioMenuItem::Group root_group;
+	RadioMenuItem* last_item;
+
+	int r = midi_track()->key().root();
+
+	for (int n = 0; n < 12; ++n) {
+		items.push_back (RadioMenuElem (root_group, ParameterDescriptor::midi_note_name (n, true, false), sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_root), n)));
+		last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+		last_item->set_active (r == n);
+	}
+
+	return root_menu;
+}
+
+void
+MidiTimeAxisView::set_musical_root (int r)
+{
+	midi_track()->set_key (MusicalKey (midi_track()->key().type(), r));
+}
+
+Gtk::Menu*
+MidiTimeAxisView::build_musical_mode_menu()
+{
+	using namespace Menu_Helpers;
+
+	Menu* mode_menu = manage (new Menu);
+	MenuList& items = mode_menu->items();
+	mode_menu->set_name ("ArdourContextMenu");
+
+	RadioMenuItem::Group mode_group;
+	RadioMenuItem* last_item;
+
+	MusicalMode::Type t = midi_track()->key().type();
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Chromatic"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Chromatic)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Chromatic);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Ionian/Major"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::IonianMajor)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::IonianMajor);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Aeolian/Minor"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::AeolianMinor)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::AeolianMinor);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Dorian"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Dorian)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Dorian);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("HarmonicMinor"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::HarmonicMinor)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == 30);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("MelodicMinorAscending"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::MelodicMinorAscending)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::MelodicMinorAscending);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("MelodicMinorDescending"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::MelodicMinorDescending)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::MelodicMinorDescending);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Phrygian"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Phrygian)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Phrygian);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Lydian"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Lydian)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Lydian);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Mixolydian"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Mixolydian)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Mixolydian);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Locrian"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Locrian)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Locrian);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("PentatonicMajor"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::PentatonicMajor)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::PentatonicMajor);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("PentatonicMinor"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::PentatonicMinor)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::PentatonicMinor);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("BluesScale"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::BluesScale)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::BluesScale);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("NeapolitanMinor"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::NeapolitanMinor)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::NeapolitanMinor);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("NeapolitanMajor"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::NeapolitanMajor)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::NeapolitanMajor);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Oriental"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Oriental)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Oriental);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("DoubleHarmonic"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::DoubleHarmonic)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::DoubleHarmonic);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Enigmatic"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Enigmatic)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Enigmatic);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Hirajoshi"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Hirajoshi)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Hirajoshi);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("HungarianMinor"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::HungarianMinor)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::HungarianMinor);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("HungarianMajor"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::HungarianMajor)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::HungarianMajor);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Kumoi"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Kumoi)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Kumoi);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Iwato"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Iwato)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Iwato);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Hindu"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Hindu)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Hindu);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Spanish8Tone"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Spanish8Tone)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Spanish8Tone);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Pelog"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Pelog)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Pelog);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("HungarianGypsy"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::HungarianGypsy)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::HungarianGypsy);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Overtone"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Overtone)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Overtone);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("LeadingWholeTone"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::LeadingWholeTone)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::LeadingWholeTone);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Arabian"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Arabian)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Arabian);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Balinese"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Balinese)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Balinese);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Gypsy"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Gypsy)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Gypsy);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Mohammedan"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Mohammedan)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Mohammedan);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Javanese"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Javanese)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Javanese);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Persian"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Persian)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Persian);
+
+	items.push_back (
+		RadioMenuElem (mode_group, _("Algerian"),
+		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
+		                                         MusicalMode::Algerian)));
+	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_item->set_active (t == MusicalMode::Algerian);
+
+	return mode_menu;
+}
+
+void
+MidiTimeAxisView::set_musical_mode (MusicalMode::Type mode_type)
+{
+	midi_track()->set_key (MusicalKey (mode_type, midi_track()->key().root()));
 }
 
 Gtk::Menu*

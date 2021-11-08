@@ -133,7 +133,11 @@ private:
 	void build_automation_action_menu (bool);
 	Gtk::Menu* build_note_mode_menu();
 	Gtk::Menu* build_color_mode_menu();
+	Gtk::Menu* build_musical_mode_menu ();
+	Gtk::Menu* build_musical_root_menu ();
 
+	void set_musical_mode (MusicalMode::Type);
+	void set_musical_root (int note);
 	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
 	void set_color_mode (ARDOUR::ColorMode, bool force = false, bool redisplay = true, bool apply_to_selection = false);
 	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
@@ -198,5 +202,6 @@ private:
 
 	StepEditor* _step_editor;
 };
+
 
 #endif /* __ardour_midi_time_axis_h__ */
