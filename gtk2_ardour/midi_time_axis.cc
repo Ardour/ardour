@@ -1175,14 +1175,14 @@ MidiTimeAxisView::build_musical_mode_menu()
 	last_item->set_active (t == MusicalMode::Chromatic);
 
 	items.push_back (
-		RadioMenuElem (mode_group, _("Ionian/Major"),
+		RadioMenuElem (mode_group, _("Major (Ionian)"),
 		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
 		                                         MusicalMode::IonianMajor)));
 	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	last_item->set_active (t == MusicalMode::IonianMajor);
 
 	items.push_back (
-		RadioMenuElem (mode_group, _("Aeolian/Minor"),
+		RadioMenuElem (mode_group, _("Minor (Aeolian)"),
 		                             sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_musical_mode),
 		                                         MusicalMode::AeolianMinor)));
 	last_item = dynamic_cast<RadioMenuItem*>(&items.back());
