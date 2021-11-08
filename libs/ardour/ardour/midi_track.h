@@ -24,6 +24,7 @@
 
 #include "ardour/midi_channel_filter.h"
 #include "ardour/midi_ring_buffer.h"
+#include "ardour/key.h"
 #include "ardour/track.h"
 
 namespace ARDOUR
@@ -144,6 +145,12 @@ public:
 	void realtime_handle_transport_stopped ();
 	void region_edited (boost::shared_ptr<Region>);
 
+	MusicalKey const & key() const { return _key; }
+	void set_key (MusicalKey const & key);
+
+	bool enforce_key ();
+	void set_enforce_key (bool yn);
+
 protected:
 
 	XMLNode& state (bool save_template);
@@ -165,6 +172,9 @@ private:
 	bool                        _restore_pgm_on_load;
 	MidiChannelFilter           _playback_filter;
 	MidiChannelFilter           _capture_filter;
+
+	MusicalKey                  _key;
+	bool                        _enforce_key;
 
 	void set_state_part_two ();
 	void set_state_part_three ();

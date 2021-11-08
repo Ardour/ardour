@@ -87,6 +87,8 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	, _step_editing (false)
 	, _input_active (true)
 	, _restore_pgm_on_load (true)
+	, _key (MusicalKey (MusicalMode::IonianMajor, 0))
+	, _enforce_key (false)
 {
 	_session.SessionLoaded.connect_same_thread (*this, boost::bind (&MidiTrack::restore_controls, this));
 
