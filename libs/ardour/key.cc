@@ -18,15 +18,37 @@
 
 #include "ardour/key.h"
 
+MusicalKey::~MusicalKey ()
+{
+}
+
 void
 MusicalKey::set_root (int r)
 {
-	_root = r;
+	/* force root into lowest octave. Yes, 12 tone for now */
+	_root = (r % 12);
 }
 
 bool
 MusicalKey::in_key (int note) const
 {
-	return true;
-}
+	/* currently 12 tone based */
 
+	note = note % 12;
+
+	/* we should speed this us. Probably a bitset */
+
+	if (note == _root) {
+		return true;
+	}
+
+	for (std::vector<float>::const_iterator i = steps.begin(); i != steps.end(); ++i) {
+		int ii = (int) ((*i) * 2.0);
+
+		if (note == _root + ii) {
+			return true;
+		}
+	}
+
+	return false;
+}
