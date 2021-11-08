@@ -16,23 +16,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_scale_h__
-#define __ardour_scale_h__
+#ifndef __ardour_key_h__
+#define __ardour_key_h__
 
 #include "ardour/mode.h"
 
-class MusicalScale : MusicalMode
+class MusicalKey : MusicalMode
 {
   public:
-	MusicalScale (Type t, int root) : MusicalMode (t), _root (root) {}
-	~MusicalScale ();
+	MusicalKey (Type t, int root) : MusicalMode (t), _root (root) {}
+	~MusicalKey ();
 
 	int root () const { return _root; }
 	void set_root (int);
+
+	bool in_key (int note) const;
 
   private:
 	int _root;
 
 };
 
-#endif /* __ardour_scale_h__ */
+#endif /* __ardour_key_h__ */

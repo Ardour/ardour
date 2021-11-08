@@ -16,11 +16,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ardour/scale.h"
+#include "ardour/key.h"
 
 void
-MusicalScale::set_root (int r)
+MusicalKey::set_root (int r)
 {
 	_root = r;
+}
+
+bool
+MusicalKey::in_key (int note) const
+{
+	return true;
 }
 
