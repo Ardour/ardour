@@ -117,6 +117,7 @@ protected:
 	void start_step_editing ();
 	void stop_step_editing ();
 	void processors_changed (ARDOUR::RouteProcessorChange);
+	void route_property_changed (const PBD::PropertyChange&);
 
 private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;

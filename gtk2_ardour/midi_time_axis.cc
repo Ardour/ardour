@@ -2099,3 +2099,13 @@ MidiTimeAxisView::get_regions_with_selected_data (RegionSelection& rs)
 {
 	midi_view()->get_regions_with_selected_data (rs);
 }
+
+void
+MidiTimeAxisView::route_property_changed (const PBD::PropertyChange& pc)
+{
+	RouteTimeAxisView::route_property_changed (pc);
+	
+	if (pc.contains (Properties::musical_mode) || pc.contains (Properties::musical_root)) {
+		_view->redisplay_track ();
+	}
+}
