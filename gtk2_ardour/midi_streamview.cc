@@ -349,18 +349,33 @@ MidiStreamView::draw_note_lines()
 		 * height of this note.
 		 */
 
+		std::string color_mod_name;
+		std::string color_name;
+
 		switch (i % 12) {
 		case 1:
 		case 3:
 		case 6:
 		case 8:
 		case 10:
-			color = UIConfiguration::instance().color_mod ("piano roll black", "piano roll black");
+			if (boost::dynamic_pointer_cast<MidiTrack>(_trackview.track())->key().in_key (i)) {
+				color_name = X_("piano roll black");
+			} else {
+				color_name = X_("piano roll offkey");
+			}
+			color_mod_name = X_("piano roll black");
 			break;
 		default:
-			color = UIConfiguration::instance().color_mod ("piano roll white", "piano roll white");
+			if (boost::dynamic_pointer_cast<MidiTrack>(_trackview.track())->key().in_key (i)) {
+				color_name = X_("piano roll white");
+			} else {
+				color_name = X_("piano roll offkey");
+			}
+			color_mod_name = X_("piano roll white");
 			break;
 		}
+
+		color = UIConfiguration::instance().color_mod (color_name, color_mod_name);
 
 		double h = y - prev_y;
 		double mid = y + (h/2.0);
