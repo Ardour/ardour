@@ -404,7 +404,7 @@ Item::propagate_show_hide ()
 	/* bounding box may have changed while we were hidden */
 
 	if (_parent) {
-		_parent->child_changed (false);
+		_parent->child_changed (true);
 	}
 
 	_canvas->item_shown_or_hidden (this);
