@@ -610,6 +610,12 @@
         <menuitem action='attach-recorder'/>
         <menuitem action='detach-recorder'/>
       </menu>
+      <menu action='TriggerMenu'>
+        <menuitem action='show-trigger'/>
+        <menuitem action='hide-trigger'/>
+        <menuitem action='attach-trigger'/>
+        <menuitem action='detach-trigger'/>
+      </menu>
       <menu action='PrefsMenu'>
         <menuitem action='show-preferences'/>
         <menuitem action='hide-preferences'/>

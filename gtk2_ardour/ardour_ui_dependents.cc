@@ -48,6 +48,7 @@
 #include "luawindow.h"
 #include "mixer_ui.h"
 #include "recorder_ui.h"
+#include "trigger_page.h"
 #include "keyboard.h"
 #include "keyeditor.h"
 #include "splash.h"
@@ -134,6 +135,7 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	BootMessage (_("Setup Mixer"));
 	mixer->set_session (s);
 	recorder->set_session (s);
+	trigger_page->set_session (s);
 	meterbridge->set_session (s);
 
 	/* its safe to do this now */
@@ -178,6 +180,8 @@ ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 		tabbable = rc_option_editor;
 	} else if (w == GTK_WIDGET(recorder->contents().gobj())) {
 		tabbable = recorder;
+	} else if (w == GTK_WIDGET(trigger_page->contents().gobj())) {
+		tabbable = trigger_page;
 	} else {
 		return 0;
 	}
@@ -269,6 +273,12 @@ ARDOUR_UI::setup_windows ()
 		return -1;
 	}
 
+	if (create_trigger_page ()) {
+		error << _("UI: cannot setup recorder") << endmsg;
+		return -1;
+	}
+
+
 	if (create_meterbridge ()) {
 		error << _("UI: cannot setup meterbridge") << endmsg;
 		return -1;
@@ -285,6 +295,7 @@ ARDOUR_UI::setup_windows ()
 	mixer->add_to_notebook (_tabs);
 	editor->add_to_notebook (_tabs);
 	recorder->add_to_notebook (_tabs);
+	trigger_page->add_to_notebook (_tabs);
 
 	top_packer.pack_start (menu_bar_base, false, false);
 
@@ -381,6 +392,8 @@ ARDOUR_UI::setup_windows ()
 			_tabs.set_current_page (_tabs.page_num (rc_option_editor->contents()));
 		} else if (recorder && current_tab == "recorder") {
 			_tabs.set_current_page (_tabs.page_num (recorder->contents()));
+		} else if (recorder && current_tab == "trigger") {
+			_tabs.set_current_page (_tabs.page_num (trigger_page->contents()));
 		} else if (editor) {
 			_tabs.set_current_page (_tabs.page_num (editor->contents()));
 		}
