@@ -339,35 +339,44 @@ class LIBARDOUR_API TriggerBoxThread
 	TriggerBoxThread ();
 	~TriggerBoxThread();
 
+	static void init_request_pool() { Request::init_pool(); }
+
+	enum RequestType {
+		Quit,
+		SetRegion
+	};
+
+	void set_region (int32_t slot, boost::shared_ptr<Region>);
+
 	void summon();
 	void stop();
 	void wait_until_finished();
 
+  private:
 	static void* _thread_work(void *arg);
 	void*         thread_work();
 
 	struct Request {
-		enum Type {
-			Run,
-			Pause,
-			Quit
-		};
+
+		Request (RequestType t) : type (t) {}
+
+		RequestType type;
+		/* for set region */
+		int32_t slot;
+		boost::shared_ptr<Region> region;
+
+		void* operator new (size_t);
+		void  operator delete (void* ptr, size_t);
+
+		static MultiAllocSingleReleasePool* pool;
+		static void init_pool ();
 	};
 
 	pthread_t thread;
-
-	Glib::Threads::Mutex      request_lock;
-	Glib::Threads::Cond       paused;
-	bool                      should_run;
-
-  private:
-
-	/**
-	 * Add request to thread request queue
-	 */
-	void queue_request (Request::Type r);
+	PBD::RingBuffer<Request*>  requests;
 
 	CrossThreadChannel _xthread;
+	void queue_request (Request*);
 };
 
 
@@ -518,10 +527,10 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void reload (BufferSet& bufs, int32_t slot, void* ptr);
 
-	
 
 
-	
+
+
 };
 
 namespace Properties {

@@ -2352,8 +2352,11 @@ TriggerBox::reload (BufferSet& bufs, int32_t slot, void* ptr)
 
 /* Thread */
 
+MultiAllocSingleReleasePool* TriggerBoxThread::Request::pool = 0;
+
 TriggerBoxThread::TriggerBoxThread ()
-	: _xthread (true)
+	: requests (1024)
+	, _xthread (true)
 {
 	if (pthread_create_and_store ("triggerbox thread", &thread, _thread_work, this)) {
 		error << _("Session: could not create triggerbox thread") << endmsg;
@@ -2364,7 +2367,8 @@ TriggerBoxThread::TriggerBoxThread ()
 TriggerBoxThread::~TriggerBoxThread()
 {
 	void* status;
-	queue_request (Request::Quit);
+	Request* q = new Request (Quit);
+	queue_request (q);
 	pthread_join (thread, &status);
 }
 
@@ -2379,22 +2383,44 @@ TriggerBoxThread::_thread_work (void* arg)
 void *
 TriggerBoxThread::thread_work ()
 {
-	uint32_t err = 0;
-
-	bool disk_work_outstanding = false;
-	RouteList::iterator i;
-
 	while (true) {
+
+		char msg;
+
+		if (_xthread.receive (msg, true) >= 0) {
+			RequestType req = (RequestType) msg;
+			switch (req) {
+			case Quit:
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: tbthread asked to quit @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+				return 0;
+				abort(); /*NOTREACHED*/
+				break;
+
+			default:
+				/* something woke us up. We'll check the
+				   ringbuffer to see what needs doing
+				*/
+				break;
+			}
+
+		}
+
 		Temporal::TempoMap::fetch ();
 	}
 
-	return (0);
+	return (void *) 0;
 }
 
 void
-TriggerBoxThread::queue_request (Request::Type r)
+TriggerBoxThread::queue_request (Request* req)
 {
-	char c = r;
+	char c = req->type;
+
+	if (req->type != Quit) {
+		if (requests.write (&req, 1) != 1) {
+			return;
+		}
+	}
 	if (_xthread.deliver (c) != 1) {
 		/* the x-thread channel is non-blocking
 		 * write may fail, but we really don't want to wait
@@ -2410,29 +2436,20 @@ TriggerBoxThread::queue_request (Request::Type r)
 	}
 }
 
-void
-TriggerBoxThread::summon ()
+void*
+TriggerBoxThread::Request::operator new (size_t)
 {
-	// DEBUG_TRACE (DEBUG::TriggerBoxThread, string_compose ("%1: summon tbthread to run @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
-	queue_request (Request::Run);
+	return pool->alloc ();
 }
 
 void
-TriggerBoxThread::stop ()
+TriggerBoxThread::Request::operator delete (void* ptr, size_t)
 {
-	Glib::Threads::Mutex::Lock lm (request_lock);
-	// DEBUG_TRACE (DEBUG::TriggerBoxThread, string_compose ("%1: asking tbthread to stop @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
-	queue_request (Request::Pause);
-	paused.wait(request_lock);
+	pool->release (ptr);
 }
 
 void
-TriggerBoxThread::wait_until_finished ()
+TriggerBoxThread::Request::init_pool ()
 {
-	Glib::Threads::Mutex::Lock lm (request_lock);
-	// DEBUG_TRACE (DEBUG::TriggerBoxThread, string_compose ("%1: waiting for tbthread to finish @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
-	queue_request (Request::Pause);
-	paused.wait(request_lock);
+	pool = new MultiAllocSingleReleasePool (X_("TriggerBoxThreadRequests"), sizeof (TriggerBoxThread::Request), 1024);
 }
-
-
