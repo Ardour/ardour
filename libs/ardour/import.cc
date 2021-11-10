@@ -460,7 +460,6 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 				/* we wrote something */
 
-				const samplepos_t     pos          = 0;
 				const Temporal::Beats  length_beats = Temporal::Beats::ticks_at_rate(t, source->ppqn());
 				smfs->update_length (timecnt_t (length_beats.round_up_to_beat(), timepos_t(Temporal::BeatTime)));
 				smfs->mark_streaming_write_completed (source_lock);
