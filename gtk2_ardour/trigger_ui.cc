@@ -201,8 +201,6 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 	velocity_label->set_color (quantize_text->color());
 	velocity_label->set_font_description (UIConfiguration::instance ().get_NormalBoldFont ());
 
-	const double scale = UIConfiguration::instance().get_ui_scale();
-
 	/* Row 0 */
 
 	attach_with_span (follow_action_button, 0, 0, 2, 1, PackExpand, PackExpand);
