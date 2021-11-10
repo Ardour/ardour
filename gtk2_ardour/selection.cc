@@ -394,6 +394,7 @@ Selection::add (vector<RegionView*>& v)
 	if (changed) {
 		clear_time(); // enforce object/range exclusivity
 		clear_tracks(); // enforce object/track exclusivity
+		clear_triggers ();
 		RegionsChanged ();
 	}
 }
@@ -415,6 +416,7 @@ Selection::add (const RegionSelection& rs)
 	if (changed) {
 		clear_time(); // enforce object/range exclusivity
 		clear_tracks(); // enforce object/track exclusivity
+		clear_triggers ();
 		RegionsChanged ();
 	}
 }
@@ -427,6 +429,7 @@ Selection::add (RegionView* r)
 		if (changed) {
 			clear_time(); // enforce object/range exclusivity
 			clear_tracks(); // enforce object/track exclusivity
+			clear_triggers ();
 			RegionsChanged ();
 		}
 	}
@@ -1647,3 +1650,57 @@ Selection::midi_regions ()
 
 	return ms;
 }
+
+bool
+Selection::selected (TriggerEntry* te) const
+{
+	return find (triggers.begin(), triggers.end(), te) != triggers.end();
+}
+
+void
+Selection::set (TriggerEntry* te)
+{
+	clear_triggers ();
+	add (te);
+}
+
+void
+Selection::add (TriggerEntry* te)
+{
+	triggers.push_back (te);
+	TriggersChanged ();
+}
+
+void
+Selection::remove (TriggerEntry* te)
+{
+	TriggerSelection::iterator e = find (triggers.begin(), triggers.end(), te);
+
+	if (e != triggers.end()) {
+		triggers.erase (e);
+		TriggersChanged ();
+	}
+}
+
+void
+Selection::toggle (TriggerEntry* te)
+{
+	TriggerSelection::iterator e;
+
+	if ((e = find (triggers.begin(), triggers.end(), te)) != triggers.end()) {
+		add (te);
+	} else {
+		triggers.erase (e);
+	}
+	TriggersChanged ();
+}
+
+void
+Selection::clear_triggers ()
+{
+	if (!triggers.empty()) {
+		triggers.clear ();
+		TriggersChanged ();
+	}
+}
+

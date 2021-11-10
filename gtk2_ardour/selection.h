@@ -42,6 +42,7 @@
 #include "point_selection.h"
 #include "marker_selection.h"
 #include "midi_selection.h"
+#include "trigger_selection.h"
 
 class TimeAxisView;
 class RegionView;
@@ -90,6 +91,7 @@ public:
 	PlaylistSelection    playlists;
 	PointSelection       points;
 	MarkerSelection      markers;
+	TriggerSelection     triggers;
 
 	/** only used when this class is used as a cut buffer */
 	MidiNoteSelection    midi_notes;
@@ -111,6 +113,7 @@ public:
 	sigc::signal<void> PointsChanged;
 	sigc::signal<void> MarkersChanged;
 	sigc::signal<void> MidiNotesChanged;
+	sigc::signal<void> TriggersChanged;
 
 	void clear ();
 
@@ -126,6 +129,7 @@ public:
 	bool selected (RegionView*) const;
 	bool selected (ArdourMarker*) const;
 	bool selected (ControlPoint*) const;
+	bool selected (TriggerEntry*) const;
 
 	void set (std::list<Selectable*> const &);
 	void add (std::list<Selectable*> const &);
@@ -144,6 +148,7 @@ public:
 	void set (ControlPoint *);
 	void set (ArdourMarker*);
 	void set (const RegionSelection&);
+	void set (TriggerEntry*);
 
 	void toggle (TimeAxisView*);
 	void toggle (const TrackViewList&);
@@ -158,6 +163,7 @@ public:
 	void toggle (ControlPoint *);
 	void toggle (std::vector<ControlPoint*> const &);
 	void toggle (ArdourMarker*);
+	void toggle (TriggerEntry*);
 
 	void add (TimeAxisView*);
 	void add (const TrackViewList&);
@@ -175,6 +181,8 @@ public:
 	void add (const std::list<ArdourMarker*>&);
 	void add (const RegionSelection&);
 	void add (const PointSelection&);
+	void add (TriggerEntry*);
+
 	void remove (TimeAxisView*);
 	void remove (const TrackViewList&);
 	void remove (const MidiNoteSelection&);
@@ -189,6 +197,7 @@ public:
 	void remove (const std::list<Selectable*>&);
 	void remove (ArdourMarker*);
 	void remove (ControlPoint *);
+	void remove (TriggerEntry*);
 
 	void remove_regions (TimeAxisView *);
 
@@ -219,6 +228,9 @@ public:
 	void clear_points (bool with_signal = true);
 	void clear_markers (bool with_signal = true);
 	void clear_midi_notes (bool with_signal = true);
+
+	/* triggers are only mutually exclusive with regions */
+	void clear_triggers ();
 
 	void foreach_region (void (ARDOUR::Region::*method)(void));
 	void foreach_regionview (void (RegionView::*method)(void));
