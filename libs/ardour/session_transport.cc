@@ -58,10 +58,11 @@
 #include "ardour/profile.h"
 #include "ardour/scene_changer.h"
 #include "ardour/session.h"
+#include "ardour/tempo.h"
 #include "ardour/transport_fsm.h"
 #include "ardour/transport_master.h"
 #include "ardour/transport_master_manager.h"
-#include "ardour/tempo.h"
+#include "ardour/triggerbox.h"
 #include "ardour/operations.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
@@ -446,10 +447,19 @@ Session::stop_transport (bool abort, bool clear_state)
 
 /** Called from the process thread */
 void
-Session::start_transport_from_processor ()
+Session::start_transport_from_trigger ()
 {
+	transport_started_by_trigger = true;
 	ENSURE_PROCESS_THREAD;
 	TFSM_ROLL();
+}
+
+/** Called from the process thread */
+void
+Session::stop_transport_from_trigger ()
+{
+	ENSURE_PROCESS_THREAD;
+	TFSM_STOP (false, false);
 }
 
 /** Called from the process thread */

@@ -215,6 +215,7 @@ Session::Session (AudioEngine &eng,
 	, _writable (false)
 	, _under_nsm_control (false)
 	, _xrun_count (0)
+	, transport_started_by_trigger (false)
 	, master_wait_end (0)
 	, post_export_sync (false)
 	, post_export_position (0)

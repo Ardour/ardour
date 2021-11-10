@@ -1379,7 +1379,9 @@ TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::Sequentia
 int TriggerBox::_first_midi_note = 60;
 std::atomic<int32_t> TriggerBox::_pending_scene (-1);
 std::atomic<int32_t> TriggerBox::_active_scene (-1);
+std::atomic<int> TriggerBox::active_trigger_boxes (0);
 TriggerBoxThread* TriggerBox::worker = 0;
+PBD::Signal0<void> TriggerBox::StopAllTriggers;
 
 void
 TriggerBox::init ()
@@ -1387,6 +1389,16 @@ TriggerBox::init ()
 	worker = new TriggerBoxThread;
 	TriggerBoxThread::init_request_pool ();
 	init_pool ();
+}
+
+void
+TriggerBox::start_transport_stop (Session& s)
+{
+	if (active_trigger_boxes.load ()) {
+		StopAllTriggers(); /* EMIT SIGNAL */
+	} else {
+		s.stop_transport_from_trigger ();
+	}
 }
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
@@ -1417,6 +1429,8 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	Temporal::TempoMap::MapChanged.connect_same_thread (tempo_map_connection, boost::bind (&TriggerBox::tempo_map_change, this));
 
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
+
+	StopAllTriggers.connect_same_thread (stop_all_connection, boost::bind (&TriggerBox::request_stop_all, this));
 }
 
 void
@@ -1592,6 +1606,8 @@ TriggerBox::stop_all ()
 
 	clear_implicit ();
 	explicit_queue.reset ();
+
+	_stop_all = false;
 }
 
 void
@@ -1823,7 +1839,12 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (!currently_playing) {
 		if ((currently_playing = get_next_trigger ()) != 0) {
 			currently_playing->startup ();
+			active_trigger_boxes.fetch_add (1);
 		}
+	}
+
+	if (_stop_all) {
+		stop_all ();
 	}
 
 	if (!currently_playing) {
@@ -1833,7 +1854,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	/* transport must be active for triggers */
 
 	if (!_session.transport_state_rolling()) {
-		_session.start_transport_from_processor ();
+		_session.start_transport_from_trigger ();
 	}
 
 	timepos_t start (start_sample);
@@ -1885,11 +1906,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("start stop for %1 before switching to %2\n", currently_playing->index(), nxt->index()));
 			}
 		}
-	}
-
-	if (_stop_all) {
-		stop_all ();
-		_stop_all = false;
 	}
 
 	while (currently_playing) {
@@ -1999,6 +2015,10 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			} else {
 				currently_playing = 0;
+				if (active_trigger_boxes.fetch_sub (1) == 1) {
+					/* last active trigger box */
+					_session.stop_transport_from_trigger ();
+				}
 			}
 
 		} else {

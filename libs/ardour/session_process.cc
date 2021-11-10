@@ -262,6 +262,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 			bool b = false;
 
 			if ((ret = (*i)->roll (nframes, start_sample, end_sample, b)) < 0) {
+				cerr << "ERR1 STOP\n";
 				TFSM_STOP (false, false);
 				return -1;
 			}
@@ -953,7 +954,11 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::EndRoll:
-		TFSM_STOP (ev->yes_or_no, ev->second_yes_or_no);
+		if (transport_started_by_trigger) {
+			TriggerBox::start_transport_stop (*this);
+		} else {
+			TFSM_STOP (ev->yes_or_no, ev->second_yes_or_no);
+		}
 		break;
 
 	case SessionEvent::SetTransportMaster:
@@ -988,6 +993,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::RangeStop:
+		cerr << "RANGE STOP\n";
 		TFSM_STOP (ev->yes_or_no, false);
 		remove = false;
 		del = false;
@@ -1571,6 +1577,7 @@ Session::implement_master_strategy ()
 		TFSM_EVENT (TransportFSM::StartTransport);
 		break;
 	case TransportMasterStop:
+		cerr << "MASTER STOP\n";
 		TFSM_STOP (false, false);
 		break;
 	}

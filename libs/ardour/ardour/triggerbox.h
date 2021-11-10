@@ -454,6 +454,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	static TriggerBoxThread* worker;
 
+	static void start_transport_stop (Session&);
+
   private:
 	static Temporal::BBT_Offset _assumed_trigger_duration;
 
@@ -530,7 +532,12 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void reload (BufferSet& bufs, int32_t slot, void* ptr);
 
+	PBD::ScopedConnection stop_all_connection;
+
 	static void init_pool();
+
+	static std::atomic<int> active_trigger_boxes;
+	static PBD::Signal0<void> StopAllTriggers;
 };
 
 namespace Properties {
