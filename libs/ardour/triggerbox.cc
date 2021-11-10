@@ -9,6 +9,7 @@
 #include "pbd/basename.h"
 #include "pbd/compose.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/types_convert.h"
 
 #include "temporal/tempo.h"
@@ -2342,10 +2343,96 @@ TriggerBox::process_request (BufferSet& bufs, Request* req)
 void
 TriggerBox::reload (BufferSet& bufs, int32_t slot, void* ptr)
 {
-	if (slot >= all_triggers.size()) {
+	if (slot >= (int32_t) all_triggers.size()) {
 		return;
 	}
 	std::cerr << "reload slot " << slot << std::endl;
 	all_triggers[slot]->reload (bufs, ptr);
 }
+
+/* Thread */
+
+TriggerBoxThread::TriggerBoxThread ()
+	: _xthread (true)
+{
+	if (pthread_create_and_store ("triggerbox thread", &thread, _thread_work, this)) {
+		error << _("Session: could not create triggerbox thread") << endmsg;
+		throw failed_constructor ();
+	}
+}
+
+TriggerBoxThread::~TriggerBoxThread()
+{
+	void* status;
+	queue_request (Request::Quit);
+	pthread_join (thread, &status);
+}
+
+void *
+TriggerBoxThread::_thread_work (void* arg)
+{
+	SessionEvent::create_per_thread_pool ("tbthread events", 4096);
+	pthread_set_name (X_("tbthread"));
+	return ((TriggerBoxThread *) arg)->thread_work ();
+}
+
+void *
+TriggerBoxThread::thread_work ()
+{
+	uint32_t err = 0;
+
+	bool disk_work_outstanding = false;
+	RouteList::iterator i;
+
+	while (true) {
+		Temporal::TempoMap::fetch ();
+	}
+
+	return (0);
+}
+
+void
+TriggerBoxThread::queue_request (Request::Type r)
+{
+	char c = r;
+	if (_xthread.deliver (c) != 1) {
+		/* the x-thread channel is non-blocking
+		 * write may fail, but we really don't want to wait
+		 * under normal circumstances.
+		 *
+		 * a lost "run" requests under normal RT operation
+		 * is mostly harmless.
+		 *
+		 * TODO if ardour is freehweeling, wait & retry.
+		 * ditto for Request::Type Quit
+		 */
+		assert(1); // we're screwd
+	}
+}
+
+void
+TriggerBoxThread::summon ()
+{
+	// DEBUG_TRACE (DEBUG::TriggerBoxThread, string_compose ("%1: summon tbthread to run @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+	queue_request (Request::Run);
+}
+
+void
+TriggerBoxThread::stop ()
+{
+	Glib::Threads::Mutex::Lock lm (request_lock);
+	// DEBUG_TRACE (DEBUG::TriggerBoxThread, string_compose ("%1: asking tbthread to stop @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+	queue_request (Request::Pause);
+	paused.wait(request_lock);
+}
+
+void
+TriggerBoxThread::wait_until_finished ()
+{
+	Glib::Threads::Mutex::Lock lm (request_lock);
+	// DEBUG_TRACE (DEBUG::TriggerBoxThread, string_compose ("%1: waiting for tbthread to finish @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+	queue_request (Request::Pause);
+	paused.wait(request_lock);
+}
+
 

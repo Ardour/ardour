@@ -19,6 +19,8 @@
 #ifndef __ardour_triggerbox_h__
 #define __ardour_triggerbox_h__
 
+#include <pthread.h>
+
 #include <atomic>
 #include <map>
 #include <vector>
@@ -27,6 +29,7 @@
 
 #include <glibmm/threads.h>
 
+#include "pbd/crossthread.h"
 #include "pbd/pcg_rand.h"
 #include "pbd/pool.h"
 #include "pbd/properties.h"
@@ -330,6 +333,44 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 };
 
 
+class LIBARDOUR_API TriggerBoxThread
+{
+  public:
+	TriggerBoxThread ();
+	~TriggerBoxThread();
+
+	void summon();
+	void stop();
+	void wait_until_finished();
+
+	static void* _thread_work(void *arg);
+	void*         thread_work();
+
+	struct Request {
+		enum Type {
+			Run,
+			Pause,
+			Quit
+		};
+	};
+
+	pthread_t thread;
+
+	Glib::Threads::Mutex      request_lock;
+	Glib::Threads::Cond       paused;
+	bool                      should_run;
+
+  private:
+
+	/**
+	 * Add request to thread request queue
+	 */
+	void queue_request (Request::Type r);
+
+	CrossThreadChannel _xthread;
+};
+
+
 class LIBARDOUR_API TriggerBox : public Processor
 {
   public:
@@ -476,6 +517,11 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void process_request (BufferSet&, Request*);
 
 	void reload (BufferSet& bufs, int32_t slot, void* ptr);
+
+	
+
+
+	
 };
 
 namespace Properties {
