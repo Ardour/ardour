@@ -128,7 +128,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	FollowAction follow_action (uint64_t n) const { assert (n < 2); return _follow_action[n]; }
 	void set_follow_action (FollowAction, uint64_t n);
 
-	virtual int set_region (boost::shared_ptr<Region>) = 0;
+	void set_region (boost::shared_ptr<Region>);
+	virtual int set_region_threaded (boost::shared_ptr<Region>) = 0;
 	boost::shared_ptr<Region> region() const { return _region; }
 
 	Temporal::BBT_Offset quantization() const;
@@ -245,7 +246,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	double position_as_fraction() const;
 
-	int set_region (boost::shared_ptr<Region>);
+	int set_region_threaded (boost::shared_ptr<Region>);
 	void startup ();
 	void jump_start ();
 	void jump_stop ();
@@ -296,7 +297,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
 	double position_as_fraction() const;
 
-	int set_region (boost::shared_ptr<Region>);
+	int set_region_threaded (boost::shared_ptr<Region>);
 	void startup ();
 	void jump_start ();
 	void jump_stop ();
@@ -341,12 +342,7 @@ class LIBARDOUR_API TriggerBoxThread
 
 	static void init_request_pool() { Request::init_pool(); }
 
-	enum RequestType {
-		Quit,
-		SetRegion
-	};
-
-	void set_region (int32_t slot, boost::shared_ptr<Region>);
+	void set_region (Trigger*, boost::shared_ptr<Region>);
 
 	void summon();
 	void stop();
@@ -356,13 +352,18 @@ class LIBARDOUR_API TriggerBoxThread
 	static void* _thread_work(void *arg);
 	void*         thread_work();
 
+	enum RequestType {
+		Quit,
+		SetRegion
+	};
+
 	struct Request {
 
 		Request (RequestType t) : type (t) {}
 
 		RequestType type;
 		/* for set region */
-		int32_t slot;
+		Trigger* trig; /* XXX lifetime mgmt issues */
 		boost::shared_ptr<Region> region;
 
 		void* operator new (size_t);
@@ -404,8 +405,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
-	int set_from_path (uint64_t slot, std::string const & path);
-	int set_from_selection (uint64_t slot, boost::shared_ptr<Region>);
+	void set_from_path (uint64_t slot, std::string const & path);
+	void set_from_selection (uint64_t slot, boost::shared_ptr<Region>);
 
 	DataType data_type() const { return _data_type; }
 
@@ -447,9 +448,11 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void scene_bang (uint32_t scene_number);
 	static void scene_unbang (uint32_t scene_number);
 
-	static void init_pool();
+	static void init ();
 
 	static const int32_t default_triggers_per_box;
+
+	static TriggerBoxThread* worker;
 
   private:
 	static Temporal::BBT_Offset _assumed_trigger_duration;
@@ -527,10 +530,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void reload (BufferSet& bufs, int32_t slot, void* ptr);
 
-
-
-
-
+	static void init_pool();
 };
 
 namespace Properties {

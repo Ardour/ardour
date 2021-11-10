@@ -551,8 +551,7 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 
 	SessionEvent::init_event_pool ();
 	TransportFSM::Event::init_pool ();
-	TriggerBox::init_pool ();
-	TriggerBoxThread::init_request_pool ();
+	TriggerBox::init ();
 
 	Operations::make_operations_quarks ();
 	SessionObject::make_property_quarks ();

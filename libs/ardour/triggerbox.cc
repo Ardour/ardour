@@ -231,6 +231,12 @@ Trigger::set_quantization (Temporal::BBT_Offset const & q)
 }
 
 void
+Trigger::set_region (boost::shared_ptr<Region> r)
+{
+	TriggerBox::worker->set_region (this, r);
+}
+
+void
 Trigger::set_region_internal (boost::shared_ptr<Region> r)
 {
 	_region = r;
@@ -746,7 +752,7 @@ AudioTrigger::natural_length() const
 }
 
 int
-AudioTrigger::set_region (boost::shared_ptr<Region> r)
+AudioTrigger::set_region_threaded (boost::shared_ptr<Region> r)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
@@ -1160,7 +1166,7 @@ MIDITrigger::natural_length() const
 }
 
 int
-MIDITrigger::set_region (boost::shared_ptr<Region> r)
+MIDITrigger::set_region_threaded (boost::shared_ptr<Region> r)
 {
 	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion> (r);
 
@@ -1373,6 +1379,15 @@ TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::Sequentia
 int TriggerBox::_first_midi_note = 60;
 std::atomic<int32_t> TriggerBox::_pending_scene (-1);
 std::atomic<int32_t> TriggerBox::_active_scene (-1);
+TriggerBoxThread* TriggerBox::worker = 0;
+
+void
+TriggerBox::init ()
+{
+	worker = new TriggerBoxThread;
+	TriggerBoxThread::init_request_pool ();
+	init_pool ();
+}
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
@@ -1495,23 +1510,23 @@ TriggerBox::get_next_trigger ()
 	return 0;
 }
 
-int
+void
 TriggerBox::set_from_selection (uint64_t slot, boost::shared_ptr<Region> region)
 {
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("load %1 into %2\n", region->name(), slot));
 
 	if (slot >= all_triggers.size()) {
-		return 0;
+		return;
 	}
 
-	return all_triggers[slot]->set_region (region);
+	all_triggers[slot]->set_region (region);
 }
 
-int
+void
 TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 {
 	if (slot >= all_triggers.size()) {
-		return 0;
+		return;
 	}
 
 	try {
@@ -1520,7 +1535,7 @@ TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 
 		if (!SndFileSource::get_soundfile_info (path, info, errmsg)) {
 			error << string_compose (_("Cannot get info from audio file %1 (%2)"), path, errmsg) << endmsg;
-			return -1;
+			return;
 		}
 
 		SourceList src_list;
@@ -1530,7 +1545,7 @@ TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 			if (!source) {
 				error << string_compose (_("Cannot create source from %1"), path) << endmsg;
 				src_list.clear ();
-				return -1;
+				return;
 			}
 			src_list.push_back (source);
 		}
@@ -1551,10 +1566,8 @@ TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 
 	} catch (std::exception& e) {
 		cerr << "loading sample from " << path << " failed: " << e.what() << endl;
-		return -1;
+		return;
 	}
-
-	return 0;
 }
 
 TriggerBox::~TriggerBox ()
@@ -2367,8 +2380,8 @@ TriggerBoxThread::TriggerBoxThread ()
 TriggerBoxThread::~TriggerBoxThread()
 {
 	void* status;
-	Request* q = new Request (Quit);
-	queue_request (q);
+	char msg = (char) Quit;
+	_xthread.deliver (msg);
 	pthread_join (thread, &status);
 }
 
@@ -2388,24 +2401,27 @@ TriggerBoxThread::thread_work ()
 		char msg;
 
 		if (_xthread.receive (msg, true) >= 0) {
-			RequestType req = (RequestType) msg;
-			switch (req) {
-			case Quit:
-				DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: tbthread asked to quit @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
-				return 0;
-				abort(); /*NOTREACHED*/
-				break;
 
-			default:
-				/* something woke us up. We'll check the
-				   ringbuffer to see what needs doing
-				*/
-				break;
+			if (msg == (char) Quit) {
+				return (void *) 0;
+				abort(); /*NOTREACHED*/
 			}
 
-		}
+			Temporal::TempoMap::fetch ();
 
-		Temporal::TempoMap::fetch ();
+			Request* req;
+
+			while (requests.read (&req, 1) == 1) {
+				switch (req->type) {
+				case SetRegion:
+					req->trig->set_region_threaded (req->region);
+					break;
+				default:
+					break;
+				}
+				delete req; /* back to pool */
+			}
+		}
 	}
 
 	return (void *) 0;
@@ -2452,4 +2468,15 @@ void
 TriggerBoxThread::Request::init_pool ()
 {
 	pool = new MultiAllocSingleReleasePool (X_("TriggerBoxThreadRequests"), sizeof (TriggerBoxThread::Request), 1024);
+}
+
+void
+TriggerBoxThread::set_region (Trigger* t, boost::shared_ptr<Region> r)
+{
+	TriggerBoxThread::Request* req = new TriggerBoxThread::Request (TriggerBoxThread::SetRegion);
+
+	req->trig = t;
+	req->region = r;
+
+	queue_request (req);
 }
