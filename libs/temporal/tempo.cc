@@ -2774,6 +2774,47 @@ TempoMap::previous_tempo (TempoPoint const & point) const
 	return 0;
 }
 
+TempoPoint const &
+TempoMap::tempo_at (timepos_t const & pos) const
+{
+	if (pos.is_beats()) {
+		return tempo_at (pos.beats());
+	}
+
+	return tempo_at (pos.superclocks());
+}
+
+TempoPoint const &
+TempoMap::tempo_at (superclock_t sc) const
+{
+	assert (!_tempos.empty());
+	Point::sclock_comparator cmp;
+	Tempos::const_iterator t = std::lower_bound (_tempos.begin(), _tempos.end(), sc, cmp);
+	assert (t != _tempos.end());
+	return *t;
+}
+
+
+TempoPoint const &
+TempoMap::tempo_at (Beats const & b) const
+{
+	assert (!_tempos.empty());
+	Point::beat_comparator cmp;
+	Tempos::const_iterator t = std::lower_bound (_tempos.begin(), _tempos.end(), b, cmp);
+	assert (t != _tempos.end());
+	return *t;
+}
+
+TempoPoint const &
+TempoMap::tempo_at (BBT_Time const & bbt) const
+{
+	assert (!_tempos.empty());
+	Point::bbt_comparator cmp;
+	Tempos::const_iterator t = std::lower_bound (_tempos.begin(), _tempos.end(), bbt, cmp);
+	assert (t != _tempos.end());
+	return *t;
+}
+
 TempoMetric
 TempoMap::metric_at (timepos_t const & pos) const
 {

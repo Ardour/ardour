@@ -91,6 +91,9 @@ class /*LIBTEMPORAL_API*/ Point : public point_hook {
 		bool operator() (Point const & a, Point const & b) const {
 			return a.sclock() < b.sclock();
 		}
+		bool operator() (Point const & a, superclock_t sc) const {
+			return a.sclock() < sc;
+		}
 	};
 
 	struct LIBTEMPORAL_API ptr_sclock_comparator {
@@ -103,11 +106,17 @@ class /*LIBTEMPORAL_API*/ Point : public point_hook {
 		bool operator() (Point const & a, Point const & b) const {
 			return a.beats() < b.beats();
 		}
+		bool operator() (Point const & a, Beats const & beats) const {
+			return a.beats() < beats;
+		}
 	};
 
 	struct LIBTEMPORAL_API bbt_comparator {
 		bool operator() (Point const & a, Point const & b) const {
 			return a.bbt() < b.bbt();
+		}
+		bool operator() (Point const & a, BBT_Time const & bbt) const {
+			return a.bbt() < bbt;
 		}
 	};
 
@@ -752,10 +761,10 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	MeterPoint const& meter_at (Beats const & b) const { return metric_at (b).meter(); }
 	LIBTEMPORAL_API	MeterPoint const& meter_at (BBT_Time const & bbt) const { return metric_at (bbt).meter(); }
 
-	LIBTEMPORAL_API	TempoPoint const& tempo_at (timepos_t const & p) const { return metric_at (p).tempo(); }
-	LIBTEMPORAL_API	TempoPoint const& tempo_at (superclock_t sc) const { return metric_at (sc).tempo(); }
-	LIBTEMPORAL_API	TempoPoint const& tempo_at (Beats const & b) const { return metric_at (b).tempo(); }
-	LIBTEMPORAL_API TempoPoint const& tempo_at (BBT_Time const & bbt) const { return metric_at (bbt).tempo(); }
+	LIBTEMPORAL_API	TempoPoint const& tempo_at (timepos_t const & p) const;
+	LIBTEMPORAL_API	TempoPoint const& tempo_at (superclock_t sc) const;
+	LIBTEMPORAL_API	TempoPoint const& tempo_at (Beats const & b) const;
+	LIBTEMPORAL_API TempoPoint const& tempo_at (BBT_Time const & bbt) const;
 
 	LIBTEMPORAL_API TempoPoint const* previous_tempo (TempoPoint const &) const;
 
