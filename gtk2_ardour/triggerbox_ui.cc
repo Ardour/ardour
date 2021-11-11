@@ -466,10 +466,12 @@ TriggerBoxUI::context_menu (uint64_t n)
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::Again) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
+#if QUEUED_SLOTS_IMPLEMENTED
 	fitems.push_back (RadioMenuElem (fagroup, _("Queued"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::QueuedTrigger)));
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::QueuedTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
+#endif
 	fitems.push_back (RadioMenuElem (fagroup, _("Next"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::NextTrigger)));
 	if (_triggerbox.trigger (n)->follow_action(0) == Trigger::NextTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
