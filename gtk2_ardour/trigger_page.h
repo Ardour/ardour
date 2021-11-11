@@ -29,6 +29,8 @@
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
 
+class TriggerStrip;
+
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
 public:
@@ -38,7 +40,7 @@ public:
 	void set_session (ARDOUR::Session*);
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&, int /* version */);
+	int      set_state (const XMLNode&, int /* version */);
 
 	Gtk::Window* use_own_window (bool and_fill_it);
 
@@ -49,8 +51,33 @@ private:
 	void session_going_away ();
 	void parameter_changed (std::string const&);
 
-	Gtkmm2ext::Bindings*  bindings;
+	void initial_track_display ();
+	void add_routes (ARDOUR::RouteList&);
+	void remove_route (TriggerStrip*);
+
+	void redisplay_track_list ();
+	void pi_property_changed (PBD::PropertyChange const&);
+	void stripable_property_changed (PBD::PropertyChange const&, boost::weak_ptr<ARDOUR::Stripable>);
+
+	gint start_updating ();
+	gint stop_updating ();
+	void fast_update_strips ();
+
+	Gtkmm2ext::Bindings* bindings;
 	Gtk::VBox            _content;
+
+	ArdourWidgets::VPane _pane;
+	ArdourWidgets::HPane _pane_upper;
+	Gtk::HBox            _strip_group_box;
+	Gtk::ScrolledWindow  _strip_scroller;
+	Gtk::HBox            _strip_packer;
+	Gtk::EventBox        _no_strips;
+	Gtk::VBox            _slot_area_box;
+	Gtk::VBox            _browser_box;
+	Gtk::HBox            _parameter_box;
+
+	std::list<TriggerStrip*> _strips;
+	sigc::connection         _fast_screen_update_connection;
 };
 
 #endif /* __gtk_ardour_trigger_page_h__ */
