@@ -48,6 +48,9 @@
 
 class XMLNode;
 
+namespace RubberBand {
+	class RubberBandStretcher;
+}
 
 namespace ARDOUR {
 
@@ -86,7 +89,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void set_start (timepos_t const &) = 0;
 	virtual void set_end (timepos_t const &) = 0;
 	virtual void set_length (timecnt_t const &) = 0;
-	virtual void tempo_map_change () = 0;
 	virtual void reload (BufferSet&, void*) = 0;
 
 	virtual double position_as_fraction() const = 0;
@@ -196,30 +198,33 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	float midi_velocity_effect() const { return _midi_velocity_effect; }
 	void set_midi_velocity_effect (float);
 
+	double apparent_tempo() const { return _apparent_tempo; }
+	double set_tempo (double t);
+
   protected:
-	TriggerBox& _box;
-	State _state;
-	std::atomic<State> _requested_state;
-	std::atomic<int> _bang;
-	std::atomic<int> _unbang;
-	uint64_t _index;
-	int    _next_trigger;
-	LaunchStyle  _launch_style;
-	PBD::Property<bool>  _use_follow;
-	FollowAction _follow_action[2];
-	int _follow_action_probability;
-	uint32_t _loop_cnt;
-	uint32_t _follow_count;
 	boost::shared_ptr<Region> _region;
-	Temporal::BBT_Offset _quantization;
-	PBD::Property<bool> _legato;
-	std::string _name;
-	double _stretch;
-	double _barcnt; /* our estimate of the number of bars in the region */
-	void* _ui;
-	gain_t _gain;
-	gain_t _pending_gain;
-	float _midi_velocity_effect;
+	TriggerBox&               _box;
+	State                     _state;
+	std::atomic<State>        _requested_state;
+	std::atomic<int>          _bang;
+	std::atomic<int>          _unbang;
+	uint64_t                  _index;
+	int                       _next_trigger;
+	LaunchStyle               _launch_style;
+	PBD::Property<bool>       _use_follow;
+	FollowAction              _follow_action[2];
+	int                       _follow_action_probability;
+	uint32_t                  _loop_cnt; /* how many times in a row has this played */
+	uint32_t                  _follow_count;
+	Temporal::BBT_Offset      _quantization;
+	PBD::Property<bool>       _legato;
+	std::string               _name;
+	double                    _barcnt; /* our estimate of the number of bars in the region */
+	double                    _apparent_tempo;
+	gain_t                    _gain;
+	gain_t                    _pending_gain;
+	float                     _midi_velocity_effect;
+	void*                     _ui;
 
 	void set_region_internal (boost::shared_ptr<Region>);
 	void request_state (State s);
@@ -232,7 +237,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	AudioTrigger (uint64_t index, TriggerBox&);
 	~AudioTrigger ();
 
-	int run (BufferSet&, pframes_t nframes, pframes_t offset, bool first);
+	int run (BufferSet&, pframes_t nframes, pframes_t offset, bool first, double bpm);
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
@@ -254,7 +259,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
-	void tempo_map_change ();
+	RubberBand::RubberBandStretcher* stretcher() { return (_stretcher); }
 
   protected:
 	void retrigger ();
@@ -270,10 +275,13 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	samplecnt_t usable_length;
 	samplepos_t last_sample;
 
+	RubberBand::RubberBandStretcher*  _stretcher;
+
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
 	RunResult at_end ();
-	void compute_and_set_length ();
+	void determine_tempo ();
+	void setup_stretcher ();
 };
 
 
@@ -282,7 +290,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	MIDITrigger (uint64_t index, TriggerBox&);
 	~MIDITrigger ();
 
-	int run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, pframes_t offset, bool first);
+	int run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, pframes_t offset, bool first, double bpm);
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
@@ -304,8 +312,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
-
-	void tempo_map_change ();
 
   protected:
 	void retrigger ();
@@ -483,9 +489,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void stop_all ();
 
 	int note_to_trigger (int node, int channel);
-
-	void tempo_map_change ();
-	PBD::ScopedConnection tempo_map_connection;
 
 	void note_on (int note_number, int velocity);
 	void note_off (int note_number, int velocity);

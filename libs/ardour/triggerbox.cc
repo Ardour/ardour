@@ -14,6 +14,7 @@
 
 #include "temporal/tempo.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/debug.h"
@@ -66,12 +67,12 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _follow_count (1)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
 	, _legato (Properties::legato, false)
-	, _stretch (1.0)
 	, _barcnt (0.)
-	, _ui (0)
+	, _apparent_tempo (0.)
 	, _gain (1.0)
 	, _pending_gain (1.0)
 	, _midi_velocity_effect (0.)
+	, _ui (0)
 {
 	add_property (_legato);
 	add_property (_use_follow);
@@ -170,7 +171,8 @@ Trigger::get_state (void)
 	node->set_property (X_("quantization"), _quantization);
 	node->set_property (X_("name"), _name);
 	node->set_property (X_("index"), _index);
-	node->set_property (X_("stretch"), _stretch);
+	node->set_property (X_("apparent-tempo"), _apparent_tempo);
+	node->set_property (X_("barcnt"), _barcnt);
 
 	if (_region) {
 		node->set_property (X_("region"), _region->id());
@@ -482,6 +484,7 @@ AudioTrigger::AudioTrigger (uint64_t n, TriggerBox& b)
 	, _legato_offset (0)
 	, usable_length (0)
 	, last_sample (0)
+	, _stretcher (0)
 {
 }
 
@@ -490,6 +493,8 @@ AudioTrigger::~AudioTrigger ()
 	for (std::vector<Sample*>::iterator d = data.begin(); d != data.end(); ++d) {
 		delete *d;
 	}
+
+	delete _stretcher;
 }
 
 void
@@ -579,132 +584,6 @@ AudioTrigger::current_pos() const
 }
 
 void
-AudioTrigger::set_length (timecnt_t const & newlen)
-{
-	using namespace RubberBand;
-	using namespace Temporal;
-
-	if (!_region) {
-		return;
-	}
-
-	boost::shared_ptr<AudioRegion> ar (boost::dynamic_pointer_cast<AudioRegion> (_region));
-
-	if (newlen == _region->length()) {
-		/* no stretch required */
-		return;
-	}
-
-	/* offline stretch */
-
-	/* study */
-
-	const uint32_t nchans = ar->n_channels();
-
-	RubberBandStretcher::Options options = RubberBandStretcher::Option (RubberBandStretcher::OptionProcessOffline|RubberBandStretcher::OptionStretchPrecise);
-	RubberBandStretcher stretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
-
-	/* Compute stretch ratio */
-
-	if (newlen.time_domain() == AudioTime) {
-		_stretch = (double) newlen.samples() / data_length;
-		cerr << "gonna stretch, ratio is " << _stretch << " from " << newlen.samples() << " vs. " << data_length << endl;
-	} else {
-		/* XXX what to use for position ??? */
-		timecnt_t l (newlen, timepos_t (AudioTime));
-		const timecnt_t dur = TempoMap::use()->convert_duration (l, timepos_t (0), AudioTime);
-		_stretch = (double) dur.samples() / data_length;
-	}
-
-	stretcher.setTimeRatio (_stretch);
-
-	const samplecnt_t expected_length = ceil (data_length * _stretch) + 16; /* extra space for safety */
-	std::vector<Sample*> stretched;
-
-	for (uint32_t n = 0; n < nchans; ++n) {
-		stretched.push_back (new Sample[expected_length]);
-	}
-
-	/* RB expects array-of-ptr-to-Sample, so set one up */
-
-	std::vector<Sample*> raw(nchans);
-	std::vector<Sample*> results(nchans);
-
-	/* study, then process */
-
-	const samplecnt_t block_size = 16384;
-	samplecnt_t read = 0;
-
-	stretcher.setDebugLevel (0);
-	stretcher.setMaxProcessSize (block_size);
-	stretcher.setExpectedInputDuration (data_length);
-
-	while (read < data_length) {
-
-		for (uint32_t n = 0; n < nchans; ++n) {
-			raw[n] = data[n] + read;
-		}
-
-		samplecnt_t to_read = std::min (block_size, data_length - read);
-		read += to_read;
-
-		stretcher.study (&raw[0], to_read, (read >= data_length));
-	}
-
-	read = 0;
-
-	samplecnt_t processed = 0;
-	samplecnt_t avail;
-
-	while (read < data_length) {
-
-		for (uint32_t n = 0; n < nchans; ++n) {
-			raw[n] = data[n] + read;
-		}
-
-		samplecnt_t to_read = std::min (block_size, data_length - read);
-		read += to_read;
-
-		stretcher.process (&raw[0], to_read, (read >= data_length));
-
-		while ((avail = stretcher.available()) > 0) {
-
-			for (uint32_t n = 0; n < nchans; ++n) {
-				results[n] = stretched[n] + processed;
-			}
-
-			processed += stretcher.retrieve (&results[0], avail);
-		}
-	}
-
-	/* collect final chunk of data, possible delayed by thread activity in stretcher */
-
-	while ((avail = stretcher.available()) >= 0) {
-
-		if (avail == 0) {
-			Glib::usleep (10000);
-			continue;
-		}
-
-		for (uint32_t n = 0; n < nchans; ++n) {
-			results[n] = stretched[n] + processed;
-		}
-
-		processed += stretcher.retrieve (&results[0], avail);
-	}
-
-	/* allocate new data buffers */
-
-	drop_data ();
-	data = stretched;
-	data_length = processed;
-	if (!usable_length || usable_length > data_length) {
-		usable_length = data_length;
-		last_sample = _start_offset + usable_length;
-	}
-}
-
-void
 AudioTrigger::set_usable_length ()
 {
 	if (!_region) {
@@ -733,6 +612,12 @@ AudioTrigger::set_usable_length ()
 	last_sample = _start_offset + usable_length;
 }
 
+void
+AudioTrigger::set_length (timecnt_t const & newlen)
+{
+	/* XXX what? */
+}
+
 timepos_t
 AudioTrigger::current_length() const
 {
@@ -754,6 +639,8 @@ AudioTrigger::natural_length() const
 int
 AudioTrigger::set_region_threaded (boost::shared_ptr<Region> r)
 {
+	using namespace RubberBand;
+
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
 	if (!ar) {
@@ -762,7 +649,8 @@ AudioTrigger::set_region_threaded (boost::shared_ptr<Region> r)
 
 	set_region_internal (r);
 	load_data (ar);
-	compute_and_set_length ();
+	determine_tempo ();
+	setup_stretcher ();
 
 	PropertyChanged (ARDOUR::Properties::name);
 
@@ -770,7 +658,7 @@ AudioTrigger::set_region_threaded (boost::shared_ptr<Region> r)
 }
 
 void
-AudioTrigger::compute_and_set_length ()
+AudioTrigger::determine_tempo ()
 {
 	using namespace Temporal;
 
@@ -788,16 +676,18 @@ AudioTrigger::compute_and_set_length ()
 		breakfastquay::MiniBPM mbpm (_box.session().sample_rate());
 
 		mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
-		double bpm = mbpm.estimateTempoOfSamples (data[0], data_length);
 
-		if (bpm == 0.0) {
+		_apparent_tempo = mbpm.estimateTempoOfSamples (data[0], data_length);
+
+		if (_apparent_tempo == 0.0) {
 			/* no apparent tempo, just return since we'll use it as-is */
 			return;
 		}
-		cerr << name() << " Estimated bpm " << bpm << " from " << (double) data_length / _box.session().sample_rate() << " seconds\n";
+
+		cerr << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data_length / _box.session().sample_rate() << " seconds\n";
 
 		const double seconds = (double) data_length  / _box.session().sample_rate();
-		const double quarters = (seconds / 60.) * bpm;
+		const double quarters = (seconds / 60.) * _apparent_tempo;
 		_barcnt = quarters / metric.meter().divisions_per_bar();
 	}
 
@@ -807,20 +697,36 @@ AudioTrigger::compute_and_set_length ()
 
 	cerr << "one bar in samples: " << one_bar << endl;
 	cerr << "barcnt = " << round (_barcnt) << endl;
-
-	set_length (timecnt_t ((samplecnt_t) round (_barcnt) * one_bar));
 }
 
 void
-AudioTrigger::tempo_map_change ()
+AudioTrigger::setup_stretcher ()
 {
+	using namespace RubberBand;
+	using namespace Temporal;
+
 	if (!_region) {
 		return;
 	}
 
-	drop_data ();
-	load_data (boost::dynamic_pointer_cast<AudioRegion> (_region));
-	compute_and_set_length ();
+	boost::shared_ptr<AudioRegion> ar (boost::dynamic_pointer_cast<AudioRegion> (_region));
+	const uint32_t nchans = ar->n_channels();
+
+	/* XXX maybe get some of these options from region properties (when/if we have them) ? */
+
+	RubberBandStretcher::Options options = RubberBandStretcher::Option (RubberBandStretcher::OptionProcessRealTime |
+	                                                                    RubberBandStretcher::OptionTransientsCrisp |
+	                                                                    RubberBandStretcher::OptionPhaseIndependent);
+
+	if (!_stretcher) {
+		_stretcher = new RubberBandStretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
+	} else {
+		_stretcher->reset ();
+	}
+
+	/* XXX this needs to change if the engine buffer size changes */
+
+	_stretcher->setMaxProcessSize (AudioEngine::instance()->raw_buffer_size (DataType::AUDIO));
 }
 
 void
@@ -869,33 +775,94 @@ AudioTrigger::retrigger ()
 {
 	read_index = _start_offset + _legato_offset;
 	_legato_offset = 0; /* used one time only */
+	_stretcher->reset ();
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, read_index));
 }
 
 int
-AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bool first)
+AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bool first, double bpm)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
+	const uint32_t nchans = ar->n_channels();
 	const bool long_enough_to_fade = (nframes >= 64);
 
 	assert (ar);
 	assert (active());
 
+	/* tell the stretcher what we are doing for this ::run() call */
+
+	if (_apparent_tempo == 0.) {
+		/* XXX just use data directly */
+		return 0;
+	}
+
+	const double stretch = _apparent_tempo / bpm;
+	_stretcher->setTimeRatio (stretch);
+
+	cerr << "apparent " << _apparent_tempo << " bpm " << bpm << " TR " << std::setprecision (4) << stretch << endl;
+
+	int avail = _stretcher->available();
+
+	if (avail < 0) {
+		error << _("Could not configure rubberband stretcher") << endmsg;
+		return -1;
+	}
+
 	while (nframes) {
 
-		pframes_t this_read = (pframes_t) std::min ((samplecnt_t) nframes, (last_sample - read_index));
+		pframes_t this_read;
 
-		/* Fill all buffers (so mono region will fill all channels),
-		 * and discard extra channels. This models what we do in the
-		 * timeline.
-		 */
+		if (read_index < last_sample) {
 
-		for (uint64_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
+			/* still have data to push into the stretcher */
+
+			this_read = (pframes_t) std::min ((samplecnt_t) nframes, (last_sample - read_index));
+			const bool at_end = (this_read < nframes);
+
+			while ((pframes_t) avail < this_read && (read_index < last_sample)) {
+				/* keep feeding the stretcher in chunks of "this_read",
+				 * until there's nframes of data available, or we reach
+				 * the end of the region
+				 */
+
+
+				Sample* in[nchans];
+
+				for (uint32_t chn = 0; chn < nchans; ++chn) {
+					in[chn] = data[chn] + read_index;
+				}
+
+				_stretcher->process (in, this_read, at_end);
+				read_index += this_read;
+
+				avail = _stretcher->available ();
+			}
+		} else {
+			/* finished reading data, but have not yet delivered it all */
+			avail = _stretcher->available ();
+			this_read = (pframes_t) std::min ((pframes_t) nframes, (pframes_t) avail);
+		}
+
+		/* Set up buffers for RB to write into */
+
+		Sample* out[nchans];
+		BufferSet& scratch (_box.session().get_scratch_buffers (ChanCount (DataType::AUDIO, nchans)));
+
+		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
+			out[chn] = scratch.get_audio (chn).data();
+		}
+
+		/* fetch the stretch */
+
+		_stretcher->retrieve (out, this_read);
+
+		/* deliver to buffers */
+
+		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
 
 			uint64_t channel = chn %  data.size();
-			Sample* src = data[channel] + read_index;
 			AudioBuffer& buf (bufs.get_audio (chn));
-
+			Sample* src = out[channel];
 
 			if (first) {
 				buf.read_from (src, this_read, dest_offset);
@@ -911,9 +878,9 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 			}
 		}
 
-		read_index += this_read;
+		avail = _stretcher->available ();
 
-		if (read_index >= last_sample) {
+		if (read_index >= last_sample && avail <= 0) {
 
 			/* We reached the end */
 
@@ -1213,8 +1180,6 @@ MIDITrigger::reload (BufferSet& bufs, void* ptr)
 	std::swap (data, rtmb);
 
 	delete rtmb;
-
-	std::cerr << _index << " data now " << data << std::endl;
 }
 
 void
@@ -1224,11 +1189,6 @@ MIDITrigger::re_render ()
 	std::cerr << "will re-render " << _region->name() << " into " << new_data << std::endl;
 	render (*new_data);
 	_box.request_reload (_index, new_data);
-}
-
-void
-MIDITrigger::tempo_map_change ()
-{
 }
 
 void
@@ -1272,7 +1232,7 @@ MIDITrigger::retrigger ()
 }
 
 int
-MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, pframes_t dest_offset, bool first)
+MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, pframes_t dest_offset, bool first, double bpm)
 {
 	MidiBuffer& mb (bufs.get_midi (0));
 
@@ -1425,8 +1385,6 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 			all_triggers.push_back (new MIDITrigger (n, *this));
 		}
 	}
-
-	Temporal::TempoMap::MapChanged.connect_same_thread (tempo_map_connection, boost::bind (&TriggerBox::tempo_map_change, this));
 
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
 
@@ -1862,6 +1820,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	Temporal::Beats start_beats (start.beats());
 	Temporal::Beats end_beats (end.beats());
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	Temporal::TempoPoint const & tempo (tmap->tempo_at (start));
+	const double bpm = tempo.quarter_notes_per_minute ();
 	uint64_t max_chans = 0;
 	bool first = false;
 
@@ -1983,7 +1943,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			max_chans = std::max (max_chans, nchans);
 
-			at->run (bufs, trigger_samples, dest_offset, first);
+			at->run (bufs, trigger_samples, dest_offset, first, bpm);
 
 			first = false;
 
@@ -1991,7 +1951,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			MIDITrigger* mt = dynamic_cast<MIDITrigger*> (currently_playing);
 
 			if (mt) {
-				mt->run (bufs, start_sample, end_sample, trigger_samples, dest_offset, first);
+				mt->run (bufs, start_sample, end_sample, trigger_samples, dest_offset, first, bpm);
 				first = false;
 			}
 
@@ -2269,15 +2229,6 @@ TriggerBox::set_state (const XMLNode& node, int version)
 	}
 
 	return 0;
-}
-
-void
-TriggerBox::tempo_map_change ()
-{
-	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
-	for (auto & t : all_triggers) {
-		t->tempo_map_change ();
-	}
 }
 
 void
