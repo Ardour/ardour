@@ -106,7 +106,6 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	prop_change (changed);
 }
 
-
 TriggerEntry::~TriggerEntry ()
 {
 }
@@ -123,14 +122,28 @@ void
 TriggerEntry::owner_color_changed ()
 {
 	set_fill_color (dynamic_cast<Stripable*> (_trigger.box().owner())->presentation_info().color());
-	set_outline_color (HSV (fill_color()).opposite().color());
+	selection_change ();
 	active_bar->set_fill_color (HSV (fill_color()).darker(0.3).color ());
+}
+
+void
+TriggerEntry::selection_change ()
+{
+	if (PublicEditor::instance().get_selection().selected (this)) {
+		set_outline_color (UIConfiguration::instance().color ("selection"));
+	} else {
+		set_outline_color (HSV (fill_color()).opposite().color());
+	}
+
 }
 
 bool
 TriggerEntry::event_handler (GdkEvent* ev)
 {
 	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		PublicEditor::instance().get_selection().set (this);
+		break;
 	case GDK_ENTER_NOTIFY:
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
 			play_button->show ();
@@ -269,11 +282,22 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	set_fill (true);
 
 	build ();
+
+	selection_connection = PublicEditor::instance().get_selection().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerBoxUI::selection_changed));
 }
 
 TriggerBoxUI::~TriggerBoxUI ()
 {
 	update_connection.disconnect ();
+	selection_connection.disconnect ();
+}
+
+void
+TriggerBoxUI::selection_changed ()
+{
+	for (auto & slot : _slots) {
+		slot->selection_change ();
+	}
 }
 
 void
@@ -347,6 +371,8 @@ bool
 TriggerBoxUI::event (GdkEvent* ev, uint64_t n)
 {
 	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		break;
 	case GDK_2BUTTON_PRESS:
 		edit_trigger (n);
 		return true;
@@ -662,8 +688,8 @@ TriggerBoxUI::stop_updating ()
 void
 TriggerBoxUI::rapid_update ()
 {
-	for (Slots::iterator s = _slots.begin(); s != _slots.end(); ++s) {
-		(*s)->maybe_update ();
+	for (auto & slot : _slots) {
+		slot->maybe_update ();
 	}
 }
 

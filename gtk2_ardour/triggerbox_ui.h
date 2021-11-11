@@ -61,6 +61,7 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 	void _size_allocate (ArdourCanvas::Rect const &);
 	void maybe_update ();
 	bool event_handler (GdkEvent*);
+	void selection_change ();
 
   private:
 	ARDOUR::Trigger& _trigger;
@@ -118,9 +119,11 @@ class TriggerBoxUI : public ArdourCanvas::Table
 	void build ();
 	void rapid_update ();
 
-	sigc::connection update_connection;
-};
+	void selection_changed ();
 
+	sigc::connection update_connection;
+	sigc::connection selection_connection;
+};
 
 class TriggerBoxWidget : public ArdourCanvas::GtkCanvas
 {
