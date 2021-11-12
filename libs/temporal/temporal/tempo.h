@@ -772,10 +772,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	/* convenience function that hides some complexities behind fetching
 	 * the bpm at position
 	 */
-	LIBTEMPORAL_API double quarters_per_minute_at (timepos_t const & pos) const {
-		TempoPoint const & tp (tempo_at (pos));
-		return tp.note_types_per_minute_at_DOUBLE (pos) * (4.0 / tp.note_type());
-	}
+	LIBTEMPORAL_API double quarters_per_minute_at (timepos_t const & pos) const;
 
 	/* convenience function */
 	LIBTEMPORAL_API BBT_Time round_to_bar (BBT_Time const & bbt) const {

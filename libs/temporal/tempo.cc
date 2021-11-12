@@ -2774,14 +2774,20 @@ TempoMap::previous_tempo (TempoPoint const & point) const
 	return 0;
 }
 
+double
+TempoMap::quarters_per_minute_at (timepos_t const & pos) const
+{
+	TempoPoint const & tp (tempo_at (pos));
+	const double val = tp.note_types_per_minute_at_DOUBLE (pos) * (4.0 / tp.note_type());
+	std::cerr << "qpm @ " << pos << " using " << tp << " = " << val << std::endl;
+	return val;
+}
+
+
 TempoPoint const &
 TempoMap::tempo_at (timepos_t const & pos) const
 {
-	if (pos.is_beats()) {
-		return tempo_at (pos.beats());
-	}
-
-	return tempo_at (pos.superclocks());
+	return pos.is_beats() ? tempo_at (pos.beats()) : tempo_at (pos.superclocks());
 }
 
 TempoPoint const &
