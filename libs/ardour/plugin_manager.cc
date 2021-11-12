@@ -1133,7 +1133,6 @@ auv2_whitelist (std::string id)
 {
 	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), AUV2_BLACKLIST);
 	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-		warning << _("Expected AUv2 Blacklist file does not exist.") << endmsg;
 		return;
 	}
 
