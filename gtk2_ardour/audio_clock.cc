@@ -101,6 +101,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, corner_radius (4)
 	, font_size (10240)
 	, editing (false)
+	, bbt_reference_time (timepos_t::from_superclock (-1)) /* needs to be some negative value but SR may not be available at init */
 	, last_pdelta (0)
 	, last_sdelta (0)
 	, dragging (false)
