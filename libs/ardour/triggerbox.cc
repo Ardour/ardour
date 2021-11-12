@@ -1820,8 +1820,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	Temporal::Beats start_beats (start.beats());
 	Temporal::Beats end_beats (end.beats());
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	Temporal::TempoPoint const & tempo (tmap->tempo_at (start));
-	const double bpm = tempo.quarter_notes_per_minute ();
+	const double bpm = tmap->quarters_per_minute_at (start);
 	uint64_t max_chans = 0;
 	bool first = false;
 
