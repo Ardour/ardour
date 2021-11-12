@@ -2795,9 +2795,19 @@ TempoMap::tempo_at (superclock_t sc) const
 {
 	assert (!_tempos.empty());
 	Point::sclock_comparator cmp;
-	Tempos::const_iterator t = std::lower_bound (_tempos.begin(), _tempos.end(), sc, cmp);
-	assert (t != _tempos.end());
-	return *t;
+
+	Tempos::const_iterator prev = _tempos.end();
+	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
+		if (cmp (*t, sc)) {
+			prev = t;
+		} else {
+			break;
+		}
+	}
+	if (prev == _tempos.end()) {
+		return _tempos.front();
+	}
+	return *prev;
 }
 
 
@@ -2806,8 +2816,25 @@ TempoMap::tempo_at (Beats const & b) const
 {
 	assert (!_tempos.empty());
 	Point::beat_comparator cmp;
+
+	Tempos::const_iterator prev = _tempos.end();
+	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
+		if (cmp (*t, b)) {
+			prev = t;
+		} else {
+			break;
+		}
+	}
+	if (prev == _tempos.end()) {
+		return _tempos.front();
+	}
+	return *prev;
+
+
 	Tempos::const_iterator t = std::lower_bound (_tempos.begin(), _tempos.end(), b, cmp);
-	assert (t != _tempos.end());
+	if (t == _tempos.end()) {
+		return _tempos.front();
+	}
 	return *t;
 }
 
@@ -2816,9 +2843,19 @@ TempoMap::tempo_at (BBT_Time const & bbt) const
 {
 	assert (!_tempos.empty());
 	Point::bbt_comparator cmp;
-	Tempos::const_iterator t = std::lower_bound (_tempos.begin(), _tempos.end(), bbt, cmp);
-	assert (t != _tempos.end());
-	return *t;
+
+	Tempos::const_iterator prev = _tempos.end();
+	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
+		if (cmp (*t, bbt)) {
+			prev = t;
+		} else {
+			break;
+		}
+	}
+	if (prev == _tempos.end()) {
+		return _tempos.front();
+	}
+	return *prev;
 }
 
 TempoMetric
