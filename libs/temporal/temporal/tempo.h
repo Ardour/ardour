@@ -408,11 +408,12 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
 	LIBTEMPORAL_API samplepos_t  sample_at (Beats const & qn) const { return Temporal::superclock_to_samples (superclock_at (qn), TEMPORAL_SAMPLE_RATE); }
 	LIBTEMPORAL_API superclock_t superclocks_per_note_type_at (timepos_t const &) const;
 
-	/* This method should be used only for display purposes, and even
-	 * then, only when absolutely necessary. It returns a double
-	 * representation of the tempo, and we do not want to be using such
-	 * representations ever, if we could.
+	/* XXX at some point, we have had discussions about representing tempo
+	 * as a rational number rather than a double. We have not reached that
+	 * point yet (Nov 2021), and so at this point, this method is the
+	 * canonical way to get "bpm at position" from  a TempoPoint object.
 	 */
+
 	LIBTEMPORAL_API double note_types_per_minute_at_DOUBLE (timepos_t const & pos) const {
 		return (superclock_ticks_per_second * 60.0) / superclocks_per_note_type_at (pos);
 	}
@@ -767,6 +768,14 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API TempoPoint const& tempo_at (BBT_Time const & bbt) const;
 
 	LIBTEMPORAL_API TempoPoint const* previous_tempo (TempoPoint const &) const;
+
+	/* convenience function that hides some complexities behind fetching
+	 * the bpm at position
+	 */
+	LIBTEMPORAL_API double quarters_per_minute_at (timepos_t const & pos) const {
+		TempoPoint const & tp (tempo_at (pos));
+		return tp.note_types_per_minute_at_DOUBLE (pos) * (4.0 / tp.note_type());
+	}
 
 	/* convenience function */
 	LIBTEMPORAL_API BBT_Time round_to_bar (BBT_Time const & bbt) const {
