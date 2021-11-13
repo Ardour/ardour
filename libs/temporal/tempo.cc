@@ -943,7 +943,7 @@ TempoMap::remove_tempo (TempoPoint const & tp)
 		return;
 	}
 	_tempos.erase (t);
-	remove_point (tp);
+	remove_point (*t);
 	reset_starting_at (sc);
 }
 
@@ -1018,7 +1018,7 @@ TempoMap::remove_bartime (MusicTimePoint const & tp)
 	}
 
 	_bartimes.erase (m);
-	remove_point (tp);
+	remove_point (*m);
 	reset_starting_at (sc);
 }
 
@@ -1484,7 +1484,7 @@ TempoMap::remove_meter (MeterPoint const & mp)
 		return;
 	}
 	_meters.erase (m);
-	remove_point (mp);
+	remove_point (*m);
 	reset_starting_at (sc);
 }
 
