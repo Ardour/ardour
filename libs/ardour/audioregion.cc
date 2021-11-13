@@ -1280,7 +1280,18 @@ AudioRegion::set_default_envelope ()
 	_envelope->freeze ();
 	_envelope->clear ();
 	_envelope->fast_simple_add (timepos_t (Temporal::AudioTime), GAIN_COEFF_UNITY);
-	_envelope->fast_simple_add (timepos_t (_length), GAIN_COEFF_UNITY);
+
+	/* Force length into audio time domain. If we don't do this, the
+	 * envelope (which uses the AudioTime domain) will have problems when
+	 * we call its fast_simple_add() mechanism and it discovers that the
+	 * time is not AudioTime.
+	 *
+	 * XXX this needs some thought 
+	 */
+
+	timepos_t alen (length().samples());
+
+	_envelope->fast_simple_add (alen, GAIN_COEFF_UNITY);
 	_envelope->thaw ();
 }
 
