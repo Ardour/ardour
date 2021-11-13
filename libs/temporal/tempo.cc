@@ -2855,24 +2855,10 @@ TempoMap::tempo_at (timepos_t const & pos) const
 	return pos.is_beats() ? tempo_at (pos.beats()) : tempo_at (pos.superclocks());
 }
 
-template<typename TimeType, typename Comparator>
-TempoPoint const &
-TempoMap::_tempo_at (TimeType when, Comparator cmp) const
+MeterPoint const &
+TempoMap::meter_at (timepos_t const & pos) const
 {
-	assert (!_tempos.empty());
-
-	Tempos::const_iterator prev = _tempos.end();
-	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
-		if (cmp (*t, when)) {
-			prev = t;
-		} else {
-			break;
-		}
-	}
-	if (prev == _tempos.end()) {
-		return _tempos.front();
-	}
-	return *prev;
+	return pos.is_beats() ? meter_at (pos.beats()) : meter_at (pos.superclocks());
 }
 
 TempoMetric
