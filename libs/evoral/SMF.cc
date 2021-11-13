@@ -534,7 +534,9 @@ SMF::track_names(vector<string>& names) const
 			if (trk->name) {
 				names.push_back (trk->name);
 			} else {
-				names.push_back (string());
+				char buf[32];
+				sprintf(buf, "t%d", n+1);
+				names.push_back (buf);
 			}
 		}
 	}
@@ -559,7 +561,9 @@ SMF::instrument_names(vector<string>& names) const
 			if (trk->instrument) {
 				names.push_back (trk->instrument);
 			} else {
-				names.push_back (string());
+				char buf[32];
+				sprintf(buf, "i%d", n+1);
+				names.push_back (buf);
 			}
 		}
 	}
