@@ -678,6 +678,7 @@ AudioTrigger::determine_tempo ()
 		mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
 
 		_apparent_tempo = mbpm.estimateTempoOfSamples (data[0], data_length);
+		_apparent_tempo = 120.0;
 
 		if (_apparent_tempo == 0.0) {
 			/* no apparent tempo, just return since we'll use it as-is */
@@ -812,6 +813,8 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 		pframes_t this_read;
 
+#if 1
+
 		if (read_index < last_sample) {
 
 			/* still have data to push into the stretcher */
@@ -855,6 +858,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 		/* fetch the stretch */
 
 		_stretcher->retrieve (out, this_read);
+#endif
 
 		/* deliver to buffers */
 
@@ -862,7 +866,8 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 			uint64_t channel = chn %  data.size();
 			AudioBuffer& buf (bufs.get_audio (chn));
-			Sample* src = out[channel];
+			//Sample* src = out[channel];
+			Sample* src = data[channel] + read_index;
 
 			if (first) {
 				buf.read_from (src, this_read, dest_offset);

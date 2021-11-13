@@ -266,7 +266,7 @@ timecnt_t::string_to (std::string const & str)
 }
 
 std::string
-timecnt_t::to_string () const
+timecnt_t::str () const
 {
 	std::stringstream ss;
 
@@ -284,7 +284,7 @@ timecnt_t::to_string () const
 	*/
 
 	ss << '@';
-	ss << _position.to_string();
+	ss << _position.str();
 
 	return ss.str();
 }
@@ -429,7 +429,7 @@ timecnt_t::expensive_gte (timecnt_t const & other) const
 std::ostream&
 std::operator<< (std::ostream & o, timecnt_t const & tc)
 {
-	return o << tc.to_string();
+	return o << tc.str();
 }
 
 std::istream&
@@ -839,7 +839,7 @@ timepos_t::operator+=(timepos_t const & d)
 std::ostream&
 std::operator<< (std::ostream & o, timepos_t const & tp)
 {
-	return o << tp.to_string();
+	return o << tp.str();
 }
 
 std::istream&
@@ -852,7 +852,7 @@ std::operator>> (std::istream & o, timepos_t & tp)
 }
 
 std::string
-timepos_t::to_string () const
+timepos_t::str () const
 {
 	if (is_beats()) {
 		return string_compose ("b%1", val());

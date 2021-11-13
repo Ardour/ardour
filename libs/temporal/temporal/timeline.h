@@ -209,7 +209,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	bool operator!= (Temporal::Beats const & b) { return beats() != b; }
 
 	bool string_to (std::string const & str);
-	std::string to_string () const;
+	std::string str () const;
 
 	/* note that the value returned if the time domain is audio is larger
 	   than can be represented in musical time (for any realistic tempos).
@@ -414,7 +414,7 @@ class LIBTEMPORAL_API timecnt_t {
 	timecnt_t & operator%=(timecnt_t const &);
 
 	bool string_to (std::string const & str);
-	std::string to_string () const;
+	std::string str () const;
 
   private:
 	int62_t   _distance; /* aka "duration" */

@@ -81,7 +81,7 @@ DEFINE_ENUM_CONVERT(MusicalMode::Type)
 template <>
 inline std::string to_string (ARDOUR::timepos_t val)
 {
-	return val.to_string ();
+	return val.str ();
 }
 
 template <>
@@ -95,7 +95,7 @@ inline ARDOUR::timepos_t string_to (std::string const & str)
 template <>
 inline bool to_string (ARDOUR::timepos_t val, std::string & str)
 {
-	str = val.to_string ();
+	str = val.str ();
 	return true;
 }
 
@@ -109,7 +109,7 @@ inline bool string_to (std::string const & str, ARDOUR::timepos_t & val)
 template <>
 inline std::string to_string (ARDOUR::timecnt_t val)
 {
-	return val.to_string ();
+	return val.str ();
 }
 
 template <>
@@ -123,7 +123,7 @@ inline ARDOUR::timecnt_t string_to (std::string const & str)
 template <>
 inline bool to_string (ARDOUR::timecnt_t val, std::string & str)
 {
-	str = val.to_string ();
+	str = val.str ();
 	return true;
 }
 
