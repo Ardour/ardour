@@ -937,13 +937,32 @@ TempoMap::remove_tempo (TempoPoint const & tp)
 {
 	superclock_t sc (tp.sclock());
 	Tempos::iterator t;
+
+	/* the argument is likely to be a Point-derived object that doesn't
+	 * actually exist in this TempoMap, since the caller called
+	 * TempoMap::write_copy() in order to perform an RCU operation, but
+	 * will be removing an element known from the original map.
+	 *
+	 * However, since we do not allow points of the same type (Tempo,
+	 * Meter, BarTime) at the same time, we can effectively search here
+	 * using what is effectively a duple of (type,time) for the
+	 * comparison.
+	 *
+	 * Once/if found, we will have a pointer to the actual Point-derived
+	 * object in this TempoMap, and we can then remove that from the
+	 * _points list.
+	 */
+
 	for (t = _tempos.begin(); t != _tempos.end() && t->sclock() < tp.sclock(); ++t);
+
 	if (t->sclock() != tp.sclock()) {
 		/* error ... no tempo point at the time of tp */
 		return;
 	}
+
 	_tempos.erase (t);
 	remove_point (*t);
+
 	reset_starting_at (sc);
 }
 
@@ -1010,6 +1029,22 @@ TempoMap::remove_bartime (MusicTimePoint const & tp)
 {
 	superclock_t sc (tp.sclock());
 	MusicTimes::iterator m;
+
+	/* the argument is likely to be a Point-derived object that doesn't
+	 * actually exist in this TempoMap, since the caller called
+	 * TempoMap::write_copy() in order to perform an RCU operation, but
+	 * will be removing an element known from the original map.
+	 *
+	 * However, since we do not allow points of the same type (Tempo,
+	 * Meter, BarTime) at the same time, we can effectively search here
+	 * using what is effectively a duple of (type,time) for the
+	 * comparison.
+	 *
+	 * Once/if found, we will have a pointer to the actual Point-derived
+	 * object in this TempoMap, and we can then remove that from the
+	 * _points list.
+	 */
+
 	for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < tp.sclock(); ++m);
 
 	if (m->sclock() != tp.sclock()) {
@@ -1027,6 +1062,14 @@ TempoMap::remove_point (Point const & point)
 {
 	Points::iterator p;
 	Point const * tpp (&point);
+
+	/* note that the point passed here must be an element of the _points
+	 * list, which is not true for the point passed to the callees
+	 * (remove_tempo(), remove_meter(), remove_bartime().
+	 *
+	 * in those methods, we effectively search for a match on a duple of
+	 * (type, time), but here we are comparing pointer addresses.
+	 */
 
 	for (p = _points.begin(); p != _points.end(); ++p) {
 		if (&(*p) == tpp) {
@@ -1478,11 +1521,29 @@ void
 TempoMap::remove_meter (MeterPoint const & mp)
 {
 	superclock_t sc = mp.sclock();
+
+	/* the argument is likely to be a Point-derived object that doesn't
+	 * actually exist in this TempoMap, since the caller called
+	 * TempoMap::write_copy() in order to perform an RCU operation, but
+	 * will be removing an element known from the original map.
+	 *
+	 * However, since we do not allow points of the same type (Tempo,
+	 * Meter, BarTime) at the same time, we can effectively search here
+	 * using what is effectively a duple of (type,time) for the
+	 * comparison.
+	 *
+	 * Once/if found, we will have a pointer to the actual Point-derived
+	 * object in this TempoMap, and we can then remove that from the
+	 * _points list.
+	 */
+
 	Meters::iterator m = std::upper_bound (_meters.begin(), _meters.end(), mp, Point::sclock_comparator());
+
 	if (m->sclock() != mp.sclock()) {
 		/* error ... no meter point at the time of mp */
 		return;
 	}
+
 	_meters.erase (m);
 	remove_point (*m);
 	reset_starting_at (sc);
