@@ -763,9 +763,9 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	MeterPoint const& meter_at (BBT_Time const & bbt) const { return metric_at (bbt).meter(); }
 
 	LIBTEMPORAL_API	TempoPoint const& tempo_at (timepos_t const & p) const;
-	LIBTEMPORAL_API	TempoPoint const& tempo_at (superclock_t sc) const;
-	LIBTEMPORAL_API	TempoPoint const& tempo_at (Beats const & b) const;
-	LIBTEMPORAL_API TempoPoint const& tempo_at (BBT_Time const & bbt) const;
+	LIBTEMPORAL_API	TempoPoint const& tempo_at (superclock_t sc) const { return _tempo_at (sc, Point::sclock_comparator()); }
+	LIBTEMPORAL_API	TempoPoint const& tempo_at (Beats const & b) const { return _tempo_at (b, Point::beat_comparator()); }
+	LIBTEMPORAL_API TempoPoint const& tempo_at (BBT_Time const & bbt) const { return _tempo_at (bbt, Point::bbt_comparator()); }
 
 	LIBTEMPORAL_API TempoPoint const* previous_tempo (TempoPoint const &) const;
 
@@ -867,6 +867,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	BBT_Time bbt_at (Beats const &) const;
 	BBT_Time bbt_at (superclock_t sc) const;
+
+	template<typename TimeType, typename Comparator> TempoPoint const & _tempo_at (TimeType when, Comparator cmp) const;
 
 	template<typename T, typename T1> struct const_traits {
 		typedef Points::const_iterator iterator_type;

@@ -2855,63 +2855,15 @@ TempoMap::tempo_at (timepos_t const & pos) const
 	return pos.is_beats() ? tempo_at (pos.beats()) : tempo_at (pos.superclocks());
 }
 
+template<typename TimeType, typename Comparator>
 TempoPoint const &
-TempoMap::tempo_at (superclock_t sc) const
+TempoMap::_tempo_at (TimeType when, Comparator cmp) const
 {
 	assert (!_tempos.empty());
-	Point::sclock_comparator cmp;
 
 	Tempos::const_iterator prev = _tempos.end();
 	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
-		if (cmp (*t, sc)) {
-			prev = t;
-		} else {
-			break;
-		}
-	}
-	if (prev == _tempos.end()) {
-		return _tempos.front();
-	}
-	return *prev;
-}
-
-
-TempoPoint const &
-TempoMap::tempo_at (Beats const & b) const
-{
-	assert (!_tempos.empty());
-	Point::beat_comparator cmp;
-
-	Tempos::const_iterator prev = _tempos.end();
-	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
-		if (cmp (*t, b)) {
-			prev = t;
-		} else {
-			break;
-		}
-	}
-	if (prev == _tempos.end()) {
-		return _tempos.front();
-	}
-	return *prev;
-
-
-	Tempos::const_iterator t = std::lower_bound (_tempos.begin(), _tempos.end(), b, cmp);
-	if (t == _tempos.end()) {
-		return _tempos.front();
-	}
-	return *t;
-}
-
-TempoPoint const &
-TempoMap::tempo_at (BBT_Time const & bbt) const
-{
-	assert (!_tempos.empty());
-	Point::bbt_comparator cmp;
-
-	Tempos::const_iterator prev = _tempos.end();
-	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
-		if (cmp (*t, bbt)) {
+		if (cmp (*t, when)) {
 			prev = t;
 		} else {
 			break;
