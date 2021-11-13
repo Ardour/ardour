@@ -46,12 +46,17 @@ SMF::SMF()
 	: _smf (0)
 	, _smf_track (0)
 	, _empty (true)
-	, _type0 (false)
 	{};
 
 SMF::~SMF()
 {
 	close ();
+}
+
+int
+SMF::smf_format () const
+{
+	return _smf ? _smf->format : 0;
 }
 
 uint16_t
@@ -120,8 +125,7 @@ SMF::open(const std::string& path, int track)
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 
-	_type0 = false;
-	_type0channels.clear ();
+	_num_channels = 0;
 
 	assert(track >= 1);
 	if (_smf) {
@@ -150,31 +154,44 @@ SMF::open(const std::string& path, int track)
 
 	fclose(f);
 
+	bool type0 = _smf->format==0;
+
 	lm.release ();
-	if (_smf->format == 0 && _smf->number_of_tracks == 1 && !_empty) {
-		// type-0 file: scan file for # of used channels.
-		int ret;
-		uint32_t delta_t = 0;
-		uint32_t size    = 0;
-		uint8_t* buf     = NULL;
-		event_id_t event_id = 0;
-		seek_to_start();
-		while ((ret = read_event (&delta_t, &size, &buf, &event_id)) >= 0) {
-			if (ret == 0) {
-				continue;
+	if (!_empty) {
+
+		for (int i = 1; i <= _smf->number_of_tracks; ++i) {
+
+			// scan file for used channels.
+			int ret;
+			uint32_t delta_t = 0;
+			uint32_t size    = 0;
+			uint8_t* buf     = NULL;
+			event_id_t event_id = 0;
+
+			if (type0) {
+				seek_to_start ();  //type0 files have no 'track' concept, just seek_to_start
+			} else {
+				seek_to_track (i);
 			}
-			if (size == 0) {
-				break;
+
+			std::set<uint8_t> used;
+			while ((ret = read_event (&delta_t, &size, &buf, &event_id)) >= 0) {
+				if (ret == 0) {
+					continue;
+				}
+				if (size == 0) {
+					break;
+				}
+				uint8_t type = buf[0] & 0xf0;
+				uint8_t chan = buf[0] & 0x0f;
+				if (type >= 0x80 && type <= 0xE0) {
+					used.insert(chan);
+				}
 			}
-			uint8_t type = buf[0] & 0xf0;
-			uint8_t chan = buf[0] & 0x0f;
-			if (type < 0x80 || type > 0xE0) {
-				continue;
-			}
-			_type0channels.insert(chan);
+			_num_channels += used.size();
+			free (buf);
 		}
-		free (buf);
-		_type0 = true;
+
 		seek_to_start();
 	}
 	return 0;
@@ -237,8 +254,7 @@ SMF::create(const std::string& path, int track, uint16_t ppqn)
 	}
 
 	_empty = true;
-	_type0 = false;
-	_type0channels.clear ();
+	_num_channels = 0;
 
 	return 0;
 }
@@ -252,8 +268,7 @@ SMF::close()
 		smf_delete(_smf);
 		_smf = 0;
 		_smf_track = 0;
-		_type0 = false;
-		_type0channels.clear ();
+		_num_channels = 0;
 	}
 }
 

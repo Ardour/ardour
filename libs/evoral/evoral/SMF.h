@@ -86,8 +86,8 @@ public:
 
 	double round_to_file_precision (double val) const;
 
-	bool is_type0 () const { return _type0; }
-	std::set<uint8_t> channels () const { return _type0channels; }
+	int smf_format () const;
+	int num_channels () const { return _num_channels; }
 	void track_names (std::vector<std::string>&) const;
 	void instrument_names (std::vector<std::string>&) const;
 
@@ -135,8 +135,7 @@ public:
 	bool         _empty; ///< true iff file contains(non-empty) events
 	mutable Glib::Threads::Mutex _smf_lock;
 
-	bool              _type0;
-	std::set<uint8_t> _type0channels;
+	int _num_channels;
 
 	mutable Markers _markers;
 };
