@@ -195,19 +195,21 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	table.set_homogeneous (false);
 	table.set_row_spacings (6);
 
-	table.attach (channels, 0, 1, 0, 1, FILL, FILL);
-	table.attach (samplerate, 0, 1, 1, 2, FILL, FILL);
-	table.attach (format, 0, 1, 2, 4, FILL, FILL);
-	table.attach (length, 0, 1, 4, 5, FILL, FILL);
-	table.attach (timecode, 0, 1, 5, 6, FILL, FILL);
-	table.attach (tempomap, 0, 1, 6, 7, FILL, FILL);
+	int row = 0;
+	table.attach (format,     0, 1, row, row+2, FILL, FILL);  row+=2;
+	table.attach (channels,   0, 1, row, row+1, FILL, FILL);  row+=1;
+	table.attach (samplerate, 0, 1, row, row+1, FILL, FILL);  row+=1;
+	table.attach (length,     0, 1, row, row+1, FILL, FILL);  row+=1;
+	table.attach (timecode,   0, 1, row, row+1, FILL, FILL);  row+=1;
+	table.attach (tempomap,   0, 1, row, row+1, FILL, FILL);
 
-	table.attach (channels_value, 1, 2, 0, 1, FILL, FILL);
-	table.attach (samplerate_value, 1, 2, 1, 2, FILL, FILL);
-	table.attach (format_text, 1, 2, 2, 4, FILL, FILL);
-	table.attach (length_clock, 1, 2, 4, 5, FILL, FILL);
-	table.attach (timecode_clock, 1, 2, 5, 6, FILL, FILL);
-	table.attach (tempomap_value, 1, 2, 6, 7, FILL, FILL);
+	row = 0;
+	table.attach (format_text,     1, 2, row, row+2, FILL, FILL);  row+=2;
+	table.attach (channels_value,  1, 2, row, row+1, FILL, FILL);  row+=1;
+	table.attach (samplerate_value,1, 2, row, row+1, FILL, FILL);  row+=1;
+	table.attach (length_clock,    1, 2, row, row+1, FILL, FILL);  row+=1;
+	table.attach (timecode_clock,  1, 2, row, row+1, FILL, FILL);  row+=1;
+	table.attach (tempomap_value,  1, 2, row, row+1, FILL, FILL);  row+=1;
 
 	length_clock.set_is_duration (true, timepos_t());
 	length_clock.set_mode (ARDOUR_UI::instance()->primary_clock->mode());
@@ -340,22 +342,18 @@ SoundFileBox::setup_labels (const string& filename)
 
 		preview_label.set_markup (_("<b>Midi File Information</b>"));
 
-		format_text.set_text ("MIDI");
 		samplerate_value.set_text ("-");
 		tags_entry.get_buffer()->set_text ("");
 		timecode_clock.set (timepos_t ());
 		tags_entry.set_sensitive (false);
 
 		if (ms) {
-			if (ms->is_type0()) {
-				channels_value.set_text (to_string<uint32_t>(ms->channels().size()));
+			if (ms->smf_format()==0) {
+				format_text.set_text ("MIDI Type 0");
 			} else {
-				if (ms->num_tracks() > 1) {
-					channels_value.set_text (to_string(ms->num_tracks()) + _("(Tracks)"));
-				} else {
-					channels_value.set_text (to_string(ms->num_tracks()));
-				}
+				format_text.set_text (string_compose("%1 (%2 Tracks)", ms->smf_format()==2 ? "MIDI Type 2" : "MIDI Type 1", ms->num_tracks()));
 			}
+			channels_value.set_text (to_string<uint32_t>(ms->num_channels()));
 			length_clock.set_duration (timecnt_t (0));
 			switch (ms->num_tempos()) {
 			case 0:
@@ -1671,17 +1669,8 @@ SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& 
 			if (reader.open (*i)) {
 				err = true;
 			} else {
-				if (reader.is_type0 ()) {
-					if (reader.channels().size() > 1) {
-						/* for type-0 files, we can split
-						 * "one track per channel"
-						 */
-						multichannel = true;
-					}
-				} else {
-					if (reader.num_tracks() > 1) {
-						multichannel = true;
-					}
+				if (reader.num_channels() > 1) {
+					multichannel = true;
 				}
 			}
 
