@@ -256,7 +256,7 @@ void
 Editor::tempo_map_changed ()
 {
 	TempoMap::Metrics metrics;
-	TempoMap::use()->get_metrics (metrics);
+	TempoMap::fetch()->get_metrics (metrics);
 
 	draw_metric_marks (metrics);
 	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
