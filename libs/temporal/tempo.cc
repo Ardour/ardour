@@ -1624,6 +1624,10 @@ TempoMap::dump (std::ostream& ostr) const
 	for (MusicTimes::const_iterator m = _bartimes.begin(); m != _bartimes.end(); ++m) {
 		ostr << &*m << ' ' << *m << endl;
 	}
+	ostr << "... all points ...\n";
+	for (Points::const_iterator p = _points.begin(); p != _points.end(); ++p) {
+		ostr << &*p << ' ' << *p << endl;
+	}
 	ostr << "------------\n\n\n";
 }
 
