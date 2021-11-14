@@ -21,6 +21,9 @@
  */
 
 #include "pbd/unwind.h"
+
+#include "ardour/audioengine.h"
+#include "ardour/session.h"
 #include "ardour/tempo.h"
 
 #include "actions.h"
@@ -113,7 +116,8 @@ MainClock::set (timepos_t const & when, bool force, timecnt_t const & /*offset*/
 	} else {
 		mode = UIConfiguration::instance().get_secondary_clock_delta_mode ();
 	}
-	if (!PublicEditor::instance().session()) {
+
+	if (!AudioEngine::instance()->session()) {
 		mode = NoDelta;
 	}
 
@@ -126,7 +130,7 @@ MainClock::set (timepos_t const & when, bool force, timecnt_t const & /*offset*/
 			break;
 		case DeltaOriginMarker:
 			{
-				Location* loc = PublicEditor::instance().session()->locations()->clock_origin_location ();
+				Location* loc = AudioEngine::instance()->session()->locations()->clock_origin_location ();
 				AudioClock::set (when, force, loc ? timecnt_t (loc->start()) : timecnt_t());
 			}
 			break;
