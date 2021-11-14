@@ -391,7 +391,6 @@ WaveView::compute_tips (ARDOUR::PeakData const& peak, WaveView::LineTips& tips,
 		tips.bot = rint (pmin);
 	}
 
-	assert (tips.top <= tips.bot);
 	if (tips.top > tips.bot) {
 		tips.top = tips.bot = rint (0.5 * (tips.top + tips.bot));
 	}
