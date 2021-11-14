@@ -446,11 +446,6 @@ std::operator>> (std::istream & o, timecnt_t & tc)
 
 timepos_t::timepos_t (timecnt_t const & t)
 {
-	if (t.distance() < 0) {
-		std::cerr << "timecnt_t has negative distance distance " << " val " << t.distance().val() << " flagged " << t.distance().flagged() << std::endl;
-		throw  std::domain_error("negative value for timepos_t constructor");
-	}
-
 	v = build (t.distance().flagged(), t.distance ().val());
 }
 
