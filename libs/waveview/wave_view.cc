@@ -369,54 +369,33 @@ WaveView::compute_tips (ARDOUR::PeakData const& peak, WaveView::LineTips& tips,
                         double const effective_height)
 {
 	/* remember: canvas (and cairo) coordinate space puts the origin at the upper left.
+	 *
+	 * So, a sample value of 1.0 (0dbFS) will be computed as:
+	 *     (1.0 - 1.0) * 0.5 * effective_height
+	 * which evaluates to 0, or the top of the image.
+	 *
+	 * A sample value of -1.0 will be computed as
+	 *     (1.0 + 1.0) * 0.5 * effective height
+	 * which evaluates to effective height, or the bottom of the image.
+	 */
 
-	   So, a sample value of 1.0 (0dbFS) will be computed as:
+	const double pmax = (1.0 - peak.max) * floor (0.5 * effective_height);
+	const double pmin = (1.0 - peak.min) * floor (0.5 * effective_height);
 
-	         (1.0 - 1.0) * 0.5 * effective_height
-
-	   which evaluates to 0, or the top of the image.
-
-	   A sample value of -1.0 will be computed as
-
-	        (1.0 + 1.0) * 0.5 * effective height
-
-           which evaluates to effective height, or the bottom of the image.
-	*/
-
-	const double pmax = (1.0 - peak.max) * 0.5 * effective_height;
-	const double pmin = (1.0 - peak.min) * 0.5 * effective_height;
-
-	/* remember that the bottom of the image (pmin) has larger y-coordinates
-	   than the top (pmax).
-	*/
-
-	double spread = (pmin - pmax) * 0.5;
-
-	/* find the nearest pixel to the nominal center. */
-	const double center = round (pmin - spread);
-
-	if (spread < 1.0) {
-		/* minimum distance between line ends is 1 pixel, and we want it "centered" on a pixel,
-		   as per cairo single-pixel line issues.
-
-		   NOTE: the caller will not draw a line between these two points if the spread is
-		   less than 2 pixels. So only the tips.top value matters, which is where we will
-		   draw a single pixel as part of the outline.
-		 */
-		tips.top = center;
-		tips.bot = center + 1.0;
+	if (pmax * pmin < 0) {
+		/* signal crosses zero, round away from 0 */
+		tips.top = ceil (pmax);
+		tips.bot = floor (pmin);
 	} else {
-		/* round spread above and below center to an integer number of pixels */
-		spread = round (spread);
-		/* top and bottom are located equally either side of the center */
-		tips.top = center - spread;
-		tips.bot = center + spread;
+		tips.top = rint (pmax);
+		tips.bot = rint (pmin);
 	}
 
-	tips.top = min (effective_height, max (0.0, tips.top));
-	tips.bot = min (effective_height, max (0.0, tips.bot));
+	assert (tips.top <= tips.bot);
+	if (tips.top > tips.bot) {
+		tips.top = tips.bot = rint (0.5 * (tips.top + tips.bot));
+	}
 }
-
 
 Coord
 WaveView::y_extent (double s, Shape const shape, double const height)
@@ -486,7 +465,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 	Cairo::RefPtr<Cairo::Context> outline_context = Cairo::Context::create (images.outline);
 	Cairo::RefPtr<Cairo::Context> clip_context = Cairo::Context::create (images.clip);
 	Cairo::RefPtr<Cairo::Context> zero_context = Cairo::Context::create (images.zero);
-	wave_context->set_antialias (Cairo::ANTIALIAS_NONE);
+
 	outline_context->set_antialias (Cairo::ANTIALIAS_NONE);
 	clip_context->set_antialias (Cairo::ANTIALIAS_NONE);
 	zero_context->set_antialias (Cairo::ANTIALIAS_NONE);
@@ -547,6 +526,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 		}
 
 	} else {
+		const int y_span = 2 * floor ((height - 1) * .5);
 
 		if (logscaled) {
 			for (int i = 0; i < n_peaks; ++i) {
@@ -577,7 +557,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 					p.min = 0.0;
 				}
 
-				compute_tips (p, tips[i], height);
+				compute_tips (p, tips[i], y_span);
 				tips[i].spread = tips[i].bot - tips[i].top;
 			}
 
@@ -590,7 +570,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 					tips[i].clip_min = true;
 				}
 
-				compute_tips (peaks[i], tips[i], height);
+				compute_tips (peaks[i], tips[i], y_span);
 				tips[i].spread = tips[i].bot - tips[i].top;
 			}
 
@@ -611,6 +591,8 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 	/* ensure single-pixel lines */
 
 	wave_context->set_line_width (1.0);
+	wave_context->set_line_cap (Cairo::LINE_CAP_BUTT);
+	wave_context->set_line_join (Cairo::LINE_JOIN_ROUND);
 	wave_context->translate (0.5, 0.5);
 
 	outline_context->set_line_width (1.0);
@@ -682,30 +664,26 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 		outline_context->stroke ();
 
 	} else {
-		const int height_zero = floor(height * .5);
+		const int height_zero = floor ((height - 1) * .5);
 
 		for (int i = 0; i < n_peaks; ++i) {
 
-			/* waveform line */
-
-			if (tips[i].spread >= 2.0) {
+			bool connected_segment = false;
+			/* http://lac.linuxaudio.org/2013/papers/36.pdf Fig3 */
+			if (i + 1 == n_peaks) {
 				wave_context->move_to (i, tips[i].top);
 				wave_context->line_to (i, tips[i].bot);
-			}
-
-			/* draw square waves and other discontiguous points clearly */
-			if (i > 0) {
-				if (tips[i-1].top + 2 < tips[i].top) {
-					wave_context->move_to (i-1, tips[i-1].top);
-					wave_context->line_to (i-1, (tips[i].bot + tips[i-1].top)/2);
-					wave_context->move_to (i, (tips[i].bot + tips[i-1].top)/2);
-					wave_context->line_to (i, tips[i].top);
-				} else if (tips[i-1].bot > tips[i].bot + 2) {
-					wave_context->move_to (i-1, tips[i-1].bot);
-					wave_context->line_to (i-1, (tips[i].top + tips[i-1].bot)/2);
-					wave_context->move_to (i, (tips[i].top + tips[i-1].bot)/2);
-					wave_context->line_to (i, tips[i].bot);
-				}
+			} else if (tips[i].top >= tips[i + 1].bot) {
+				connected_segment = true;
+				wave_context->move_to (i - .5, tips[i].bot);
+				wave_context->line_to (i + .5, tips[i + 1].bot);
+			} else if (tips[i].bot <= tips[i + 1].top) {
+				connected_segment = true;
+				wave_context->move_to (i - .5, tips[i].top);
+				wave_context->line_to (i + .5, tips[i + 1].top);
+			} else {
+				wave_context->move_to (i, tips[i].top);
+				wave_context->line_to (i, tips[i].bot);
 			}
 
 			/* zero line, show only if there is enough spread
@@ -717,56 +695,32 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 				zero_context->rel_line_to (1.0, 0);
 			}
 
-			if (tips[i].spread > 1.0) {
-				bool clipped = false;
-				/* outline/clip indicators */
-				if (_global_show_waveform_clipping && tips[i].clip_max) {
-					clip_context->move_to (i, tips[i].top);
-					/* clip-indicating upper terminal line */
-					clip_context->rel_line_to (0, min (clip_height, ceil(tips[i].spread + 0.5)));
-					clipped = true;
-				}
+			bool clipped = false;
+			/* outline/clip indicators */
+			if (_global_show_waveform_clipping && tips[i].clip_max) {
+				clip_context->move_to (i, tips[i].top);
+				/* clip-indicating upper terminal line */
+				clip_context->rel_line_to (0, min (clip_height, ceil(tips[i].spread + 0.5)));
+				clipped = true;
+			}
 
-				if (_global_show_waveform_clipping && tips[i].clip_min) {
-					clip_context->move_to (i, tips[i].bot);
-					/* clip-indicating lower terminal line */
-					clip_context->rel_line_to (0, - min (clip_height, ceil(tips[i].spread + 0.5)));
-					clipped = true;
-				}
+			if (_global_show_waveform_clipping && tips[i].clip_min) {
+				clip_context->move_to (i, tips[i].bot + 1);
+				/* clip-indicating lower terminal line */
+				clip_context->rel_line_to (0, - min (clip_height, ceil(tips[i].spread + 0.5)));
+				clipped = true;
+			}
 
-				if (!clipped && tips[i].spread > 2.0) {
-					/* only draw the outline if the spread
-					   implies 3 or more pixels (so that we see 1
-					   white pixel in the middle).
-					*/
-					outline_context->move_to (i, tips[i].bot);
-					outline_context->line_to (i, tips[i].bot);
+			if (!connected_segment && !clipped && tips[i].spread > 2.0) {
+				/* only draw the outline if the spread
+				 * implies 3 or more pixels (so that we see 1
+				 * white pixel in the middle).
+				 */
+				outline_context->move_to (i, tips[i].bot);
+				outline_context->line_to (i, tips[i].bot);
 
-					outline_context->move_to (i, tips[i].top);
-					outline_context->line_to (i, tips[i].top);
-				}
-			} else {
-				bool clipped = false;
-				/* outline/clip indicator */
-				if (_global_show_waveform_clipping && (tips[i].clip_max || tips[i].clip_min)) {
-					clip_context->move_to (i, tips[i].top);
-					/* clip-indicating upper / lower terminal line */
-					clip_context->rel_line_to (0, 1.0);
-					clipped = true;
-				}
-
-				if (!clipped) {
-					/* special case where only 1 pixel of
-					 * the waveform line is drawn (and
-					 * nothing else).
-					 *
-					 * we draw a 1px "line", pretending
-					 * that the span is 1.0 (whether it is
-					 * zero or 1.0)
-					 */
-					wave_context->move_to (i, tips[i].top);
-					wave_context->rel_line_to (0, 1.0);
-				}
+				outline_context->move_to (i, tips[i].top);
+				outline_context->line_to (i, tips[i].top);
 			}
 		}
 
