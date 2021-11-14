@@ -123,7 +123,7 @@ public:
 	virtual ~PublicEditor ();
 
 	/** @return Singleton PublicEditor instance */
-	static PublicEditor& instance () { return *_instance; }
+	static PublicEditor& instance () { assert (_instance); return *_instance; }
 
 	virtual bool have_idled() const = 0;
 	virtual void first_idle() = 0;
