@@ -394,6 +394,12 @@ SMFSource::write_unlocked (const Lock&                  lock,
 	return cnt;
 }
 
+void
+SMFSource::update_length (timecnt_t const & cnt)
+{
+	_length = cnt;
+}
+
 /** Append an event with a timestamp in beats */
 void
 SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
