@@ -614,6 +614,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 	wave_context->translate (0.5, 0.5);
 
 	outline_context->set_line_width (1.0);
+	outline_context->set_line_cap (Cairo::LINE_CAP_ROUND);
 	outline_context->translate (0.5, 0.5);
 
 	clip_context->set_line_width (1.0);
@@ -672,8 +673,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 				clip_context->rel_line_to (0, min (clip_height, ceil(tips[i].spread + .5)));
 			} else {
 				outline_context->move_to (i, tips[i].top);
-				/* normal upper terminal dot */
-				outline_context->rel_line_to (0, -1.0);
+				outline_context->line_to (i, tips[i].top);
 			}
 		}
 
@@ -740,12 +740,10 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 					   white pixel in the middle).
 					*/
 					outline_context->move_to (i, tips[i].bot);
-					/* normal lower terminal dot; line moves up */
-					outline_context->rel_line_to (0, -1.0);
+					outline_context->line_to (i, tips[i].bot);
 
 					outline_context->move_to (i, tips[i].top);
-					/* normal upper terminal dot, line moves down */
-					outline_context->rel_line_to (0, 1.0);
+					outline_context->line_to (i, tips[i].top);
 				}
 			} else {
 				bool clipped = false;
