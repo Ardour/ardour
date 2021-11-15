@@ -3350,7 +3350,7 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, Temporal::Beats de
 			delta = Temporal::Beats::ticks (Temporal::ticks_per_beat / 128);
 		} else {
 			/* grab the current grid distance */
-			delta = get_grid_beats (_region->position());
+			delta = get_draw_length_beats (_region->position());
 		}
 	}
 
@@ -3912,7 +3912,7 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	_ghost_note->show();
 
 	/* calculate time in of a single grid units worth of beats, at the start of source */
-	const Temporal::Beats length = get_grid_beats (_region->source_position() + timepos_t (snapped_beats));
+	const Temporal::Beats length = get_draw_length_beats (_region->source_position() + timepos_t (snapped_beats));
 
 	_ghost_note->note()->set_time (snapped_beats);
 	_ghost_note->note()->set_length (length);
@@ -4307,6 +4307,21 @@ MidiRegionView::get_grid_beats (timepos_t const & pos) const
 
 	return beats;
 }
+
+Temporal::Beats
+MidiRegionView::get_draw_length_beats (timepos_t const & pos) const
+{
+	PublicEditor& editor  = trackview.editor();
+	bool          success = false;
+	Temporal::Beats beats   = editor.get_draw_length_as_beats (success, pos);
+
+	if (!success) {
+		beats = Temporal::Beats (1, 0);
+	}
+
+	return beats;
+}
+
 uint8_t
 MidiRegionView::y_to_note (double y) const
 {

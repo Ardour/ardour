@@ -3786,7 +3786,7 @@ BBTRulerDrag::setup_pointer_offset ()
 
 	_grab_qn = max (Beats(), raw_grab_time().beats());
 
-	uint32_t divisions = _editor->get_grid_beat_divisions ();
+	uint32_t divisions = _editor->get_grid_beat_divisions (_editor->grid_type());
 
 	if (divisions == 0) {
 		divisions = 4;
@@ -6976,7 +6976,7 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	const timepos_t pos = _drags->current_pointer_time ();
 	Temporal::Beats aligned_beats (round_down_to_grid (pos, event));
-	const Temporal::Beats grid_beats (_region_view->get_grid_beats (pos));
+	const Temporal::Beats grid_beats (_region_view->get_draw_length_beats (pos));
 
 	_note[0] = timepos_t (aligned_beats);
 	/* minimum initial length is grid beats */
@@ -7027,7 +7027,7 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 	Beats const start = _region_view->region()->absolute_time_to_region_beats (min (_note[0], _note[1]));
 	Beats length = max (Beats (0, 1), (_note[0].distance (_note[1]).abs().beats()));
 
-	int32_t div = _editor->get_grid_music_divisions (ev->button.state);
+	int32_t div = _editor->get_grid_music_divisions (_editor->draw_length(), ev->button.state);
 
 	if (div > 0) {
 		length = length.round_to_subdivision (div, RoundUpMaybe);
@@ -7072,7 +7072,6 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_y = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
 
 	const timepos_t pos = _drags->current_pointer_time ();
-	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 
 	const Beats beats = pos.beats ();
 
@@ -7083,7 +7082,7 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	const Temporal::Beats start = beats - _region_view->region()->position().beats ();
-	Temporal::Beats length = _region_view->get_grid_beats (pos);
+	Temporal::Beats length = _region_view->get_draw_length_beats (pos);
 
 	_editor->begin_reversible_command (_("Create Hit"));
 	_region_view->clear_note_selection();
@@ -7096,9 +7095,9 @@ void
 HitCreateDrag::motion (GdkEvent* event, bool)
 {
 	const timepos_t pos = _drags->current_pointer_time ();
-	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 
-	if (divisions == 0) {
+	const int32_t divisions = _editor->get_grid_music_divisions (_editor->draw_length(), event->button.state);
+	if (divisions <= 0) {
 		return;
 	}
 
@@ -7109,7 +7108,7 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 		return;
 	}
 
-	Temporal::Beats length = _region_view->get_grid_beats (pos);
+	Temporal::Beats length = _region_view->get_draw_length_beats (pos);
 
 	boost::shared_ptr<MidiRegion> mr = _region_view->midi_region();
 

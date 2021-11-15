@@ -272,7 +272,7 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 		beat_duration = StepEntry::instance().note_length();
 	} else if (beat_duration == 0.0) {
 		bool success;
-		beat_duration = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
+		beat_duration = _editor.get_draw_length_as_beats (success, step_edit_insert_position);
 
 		if (!success) {
 			return -1;
@@ -387,7 +387,7 @@ StepEditor::step_edit_rest (Temporal::Beats beats)
 	bool success;
 
 	if (beats == 0.0) {
-		beats = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
+		beats = _editor.get_draw_length_as_beats (success, step_edit_insert_position);
 	} else {
 		success = true;
 	}

@@ -185,10 +185,12 @@ public:
 	void next_grid_choice ();
 	void prev_grid_choice ();
 	void set_grid_to (Editing::GridType);
+	void set_draw_length_to (Editing::GridType);
 	void set_snap_mode (Editing::SnapMode);
 
 	Editing::SnapMode  snap_mode () const;
 	Editing::GridType  grid_type () const;
+	Editing::GridType  draw_length () const;
 	bool  grid_type_is_musical (Editing::GridType) const;
 	bool  grid_musical () const;
 
@@ -360,10 +362,12 @@ public:
 
 	Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next);
 	Temporal::timecnt_t get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration);
-	unsigned get_grid_beat_divisions ();
-	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position);
 
-	int32_t get_grid_music_divisions (uint32_t event_state);
+	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position);
+	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position);
+
+	unsigned get_grid_beat_divisions (Editing::GridType gt);
+	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state);
 
 	void nudge_forward (bool next, bool force_playhead);
 	void nudge_backward (bool next, bool force_playhead);
@@ -1587,6 +1591,7 @@ private:
 	void move_range_selection_start_or_end_to_region_boundary (bool, bool);
 
 	Editing::GridType _grid_type;
+	Editing::GridType _draw_length;
 	Editing::SnapMode _snap_mode;
 
 	bool ignore_gui_changes;
@@ -1878,12 +1883,14 @@ private:
 	void cycle_edit_mode ();
 
 	ArdourWidgets::ArdourDropdown grid_type_selector;
+	ArdourWidgets::ArdourDropdown draw_length_selector;
 	void build_grid_type_menu ();
 
 	ArdourWidgets::ArdourButton snap_mode_button;
 	bool snap_mode_button_clicked (GdkEventButton*);
 
 	Gtk::HBox snap_box;
+	Gtk::HBox draw_box;
 
 	Gtk::HBox ebox_hpacker;
 	Gtk::VBox ebox_vpacker;
@@ -1894,11 +1901,14 @@ private:
 	std::vector<std::string> snap_mode_strings;
 
 	void grid_type_selection_done (Editing::GridType);
+	void draw_length_selection_done (Editing::GridType);
 	void snap_mode_selection_done (Editing::SnapMode);
 	void snap_mode_chosen (Editing::SnapMode);
 	void grid_type_chosen (Editing::GridType);
+	void draw_length_chosen (Editing::GridType);
 
 	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::GridType);
+	Glib::RefPtr<Gtk::RadioAction> draw_length_action (Editing::GridType);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
 
 	//zoom focus meu stuff

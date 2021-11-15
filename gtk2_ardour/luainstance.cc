@@ -1000,6 +1000,7 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("get_paste_offset", &PublicEditor::get_paste_offset)
 		.addFunction ("get_grid_beat_divisions", &PublicEditor::get_grid_beat_divisions)
 		.addRefFunction ("get_grid_type_as_beats", &PublicEditor::get_grid_type_as_beats)
+		.addRefFunction ("get_draw_length_as_beats", &PublicEditor::get_draw_length_as_beats)
 
 		.addFunction ("toggle_ruler_video", &PublicEditor::toggle_ruler_video)
 		.addFunction ("toggle_xjadeo_proc", &PublicEditor::toggle_xjadeo_proc)

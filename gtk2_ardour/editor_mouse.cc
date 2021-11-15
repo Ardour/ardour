@@ -337,6 +337,10 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	mouse_mode = m;
 
+	/* Ben ToDo:  once we have a dedicated 'region edit panel', we can store
+	 * one snap mode in the editor canvas and another one in the editor,
+	 * relieving the complexity here */
+
 	/* Switch snap type/mode if we're moving to/from an internal tool.  Note
 	   this must toggle the actions and not call set_snap_*() directly,
 	   otherwise things get out of sync and the combo box stops working. */
@@ -364,6 +368,13 @@ Editor::mouse_mode_toggled (MouseMode m)
 	set_gain_envelope_visibility ();
 
 	update_time_selection_display ();
+
+	if (mouse_mode == MouseDraw) {
+		draw_length_selector.set_sensitive(true);
+	} else {
+		draw_length_selector.set_sensitive(false);
+	}
+
 
 	if (internal_editing()) {
 

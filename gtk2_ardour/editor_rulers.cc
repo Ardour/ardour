@@ -1045,7 +1045,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	/* Now that we know how fine a grid (Ruler) is allowable on this screen, limit it to the coarseness selected by the user */
 	/* note: GridType and RulerScale are not the same enums, so it's not a simple mathematical operation */
 	int suggested_scale = (int) bbt_ruler_scale;
-	int divs = get_grid_music_divisions(_grid_type);
+	int divs = get_grid_music_divisions(_grid_type, 0);
 	if (_grid_type == GridTypeBar) {
 		suggested_scale = std::min(suggested_scale, (int) bbt_show_1);
 	} else if (_grid_type == GridTypeBeat) {

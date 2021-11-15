@@ -601,6 +601,27 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("next-grid-choice"), _("Next Quantize Grid Choice"), sigc::mem_fun (*this, &Editor::next_grid_choice));
 	ActionManager::register_action (editor_actions, X_("prev-grid-choice"), _("Previous Quantize Grid Choice"), sigc::mem_fun (*this, &Editor::prev_grid_choice));
 
+	Glib::RefPtr<ActionGroup> length_actions = ActionManager::create_action_group (bindings, X_("DrawLength"));
+	RadioAction::Group draw_length_group;
+
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv32)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyeighths"),  grid_type_strings[(int)GridTypeBeatDiv28].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv28)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyfourths"),  grid_type_strings[(int)GridTypeBeatDiv24].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv24)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentieths"),     grid_type_strings[(int)GridTypeBeatDiv20].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv20)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-asixteenthbeat"), grid_type_strings[(int)GridTypeBeatDiv16].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv16)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fourteenths"),    grid_type_strings[(int)GridTypeBeatDiv14].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv14)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twelfths"),       grid_type_strings[(int)GridTypeBeatDiv12].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv12)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-tenths"),         grid_type_strings[(int)GridTypeBeatDiv10].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv10)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv8)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv7)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv6)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv5)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv4)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv3)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv2)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeat)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBar)));
+
 	Glib::RefPtr<ActionGroup> snap_actions = ActionManager::create_action_group (bindings, X_("Snap"));
 	RadioAction::Group grid_choice_group;
 
@@ -1063,6 +1084,85 @@ Editor::edit_current_tempo ()
 }
 
 RefPtr<RadioAction>
+Editor::draw_length_action (GridType type)
+{
+	const char* action = 0;
+	RefPtr<Action> act;
+
+	switch (type) {
+	case Editing::GridTypeBeatDiv32:
+		action = "draw-length-thirtyseconds";
+		break;
+	case Editing::GridTypeBeatDiv28:
+		action = "draw-length-twentyeighths";
+		break;
+	case Editing::GridTypeBeatDiv24:
+		action = "draw-length-twentyfourths";
+		break;
+	case Editing::GridTypeBeatDiv20:
+		action = "draw-length-twentieths";
+		break;
+	case Editing::GridTypeBeatDiv16:
+		action = "draw-length-asixteenthbeat";
+		break;
+	case Editing::GridTypeBeatDiv14:
+		action = "draw-length-fourteenths";
+		break;
+	case Editing::GridTypeBeatDiv12:
+		action = "draw-length-twelfths";
+		break;
+	case Editing::GridTypeBeatDiv10:
+		action = "draw-length-tenths";
+		break;
+	case Editing::GridTypeBeatDiv8:
+		action = "draw-length-eighths";
+		break;
+	case Editing::GridTypeBeatDiv7:
+		action = "draw-length-sevenths";
+		break;
+	case Editing::GridTypeBeatDiv6:
+		action = "draw-length-sixths";
+		break;
+	case Editing::GridTypeBeatDiv5:
+		action = "draw-length-fifths";
+		break;
+	case Editing::GridTypeBeatDiv4:
+		action = "draw-length-quarters";
+		break;
+	case Editing::GridTypeBeatDiv3:
+		action = "draw-length-thirds";
+		break;
+	case Editing::GridTypeBeatDiv2:
+		action = "draw-length-halves";
+		break;
+	case Editing::GridTypeBeat:
+		action = "draw-length-beat";
+		break;
+	case Editing::GridTypeBar:
+		action = "draw-length-bar";
+		break;
+	case Editing::GridTypeNone:
+	case Editing::GridTypeTimecode:
+	case Editing::GridTypeCDFrame:
+	case Editing::GridTypeMinSec:
+	default:
+		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible grid length type", (int) type) << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	act = ActionManager::get_action (X_("DrawLength"), action);
+
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		return ract;
+
+	} else  {
+		error << string_compose (_("programming error: %1"), "Editor::draw_length_chosen could not find action to match type.") << endmsg;
+		return RefPtr<RadioAction>();
+	}
+}
+
+RefPtr<RadioAction>
 Editor::grid_type_action (GridType type)
 {
 	const char* action = 0;
@@ -1251,6 +1351,20 @@ Editor::grid_type_chosen (GridType type)
 
 	if (ract && ract->get_active()) {
 		set_grid_to (type);
+	}
+}
+void
+Editor::draw_length_chosen (GridType type)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = draw_length_action (type);
+
+	if (ract && ract->get_active()) {
+		set_draw_length_to (type);
 	}
 }
 

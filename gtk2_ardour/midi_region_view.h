@@ -531,6 +531,8 @@ public:
 	/** Get grid type as beats, or default to 1 if not snapped to beats. */
 	Temporal::Beats get_grid_beats(Temporal::timepos_t const & pos) const;
 
+	Temporal::Beats get_draw_length_beats(Temporal::timepos_t const & pos) const;
+
 	void remove_ghost_note ();
 	void mouse_mode_changed ();
 	void enter_internal (uint32_t state);

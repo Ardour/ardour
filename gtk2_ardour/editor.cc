@@ -369,6 +369,7 @@ Editor::Editor ()
 	, have_pending_keyboard_selection (false)
 	, pending_keyboard_selection_start (0)
 	, _grid_type (GridTypeBeat)
+	, _draw_length (GridTypeNone)
 	, _snap_mode (SnapOff)
 	, ignore_gui_changes (false)
 	, _drags (new DragManager (this))
@@ -855,6 +856,7 @@ Editor::Editor ()
 	setup_fade_images ();
 
 	set_grid_to (GridTypeNone);
+	set_draw_length_to (GridTypeBeat);
 }
 
 Editor::~Editor()
@@ -2095,6 +2097,12 @@ Editor::grid_type() const
 	return _grid_type;
 }
 
+GridType
+Editor::draw_length() const
+{
+	return _draw_length;
+}
+
 bool
 Editor::grid_musical() const
 {
@@ -2183,6 +2191,26 @@ Editor::show_rulers_for_grid ()
 			ruler_timecode_action->set_active(false);
 			ruler_samples_action->set_active(false);
 		}
+	}
+}
+
+void
+Editor::set_draw_length_to (GridType gt)
+{
+	if ( !grid_type_is_musical(gt) ) {  //range-check
+		gt = GridTypeBeat;
+	}
+
+	if (_draw_length == gt) { // already set
+		return;
+	}
+
+	_draw_length = gt;
+
+	unsigned int grid_index = (unsigned int)gt;
+	string str = grid_type_strings[grid_index];
+	if (str != draw_length_selector.get_text()) {
+		draw_length_selector.set_text (str);
 	}
 }
 
@@ -2355,6 +2383,12 @@ Editor::set_state (const XMLNode& node, int version)
 	}
 	set_grid_to (grid_type);
 
+	GridType draw_length;
+	if (!node.get_property ("draw-length", draw_length)) {
+		draw_length = GridTypeBeat;
+	}
+	set_draw_length_to (draw_length);
+
 	SnapMode sm;
 	if (node.get_property ("snap-mode", sm)) {
 		snap_mode_selection_done(sm);
@@ -2523,6 +2557,7 @@ Editor::get_state ()
 
 	node->set_property ("zoom", samples_per_pixel);
 	node->set_property ("grid-type", _grid_type);
+	node->set_property ("draw-length", _draw_length);
 	node->set_property ("snap-mode", _snap_mode);
 	node->set_property ("internal-grid-type", internal_grid_type);
 	node->set_property ("internal-snap-mode", internal_snap_mode);
@@ -2866,7 +2901,7 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 				break;
 		}
 	} else {
-		ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions(), direction));
+		ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions(_grid_type), direction));
 	}
 
 	return ret;
@@ -3043,6 +3078,7 @@ Editor::setup_toolbar ()
 	}
 
 	mouse_mode_size_group->add_widget (grid_type_selector);
+	mouse_mode_size_group->add_widget (draw_length_selector);
 	mouse_mode_size_group->add_widget (snap_mode_button);
 
 	mouse_mode_size_group->add_widget (edit_point_selector);
@@ -3153,6 +3189,7 @@ Editor::setup_toolbar ()
 	snap_box.set_border_width (2);
 
 	grid_type_selector.set_name ("mouse mode button");
+	draw_length_selector.set_name ("mouse mode button");
 
 	snap_mode_button.set_name ("mouse mode button");
 
@@ -3174,6 +3211,10 @@ Editor::setup_toolbar ()
 	nudge_box->pack_start (nudge_forward_button, false, false);
 	nudge_box->pack_start (*nudge_clock, false, false);
 
+	/* Draw  - these MIDI tools are only visible when in Draw mode */
+	draw_box.set_spacing (2);
+	draw_box.set_border_width (2);
+	draw_box.pack_start (draw_length_selector, false, false);
 
 	/* Pack everything in... */
 
@@ -3201,6 +3242,8 @@ Editor::setup_toolbar ()
 	toolbar_hbox.pack_start (snap_box, false, false);
 	toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 	toolbar_hbox.pack_start (*nudge_box, false, false);
+	toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
+	toolbar_hbox.pack_start (draw_box, false, false);
 	toolbar_hbox.pack_end (_zoom_box, false, false, 2);
 	toolbar_hbox.pack_end (*(manage (new ArdourVSpacer ())), false, false, 3);
 	toolbar_hbox.pack_end (_track_box, false, false);
@@ -3286,6 +3329,17 @@ Editor::build_grid_type_menu ()
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeTimecode], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeTimecode)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeMinSec], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeMinSec)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeCDFrame], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeCDFrame)));
+
+
+	/* main grid: bars, quarter-notes, etc */
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBar],       sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBar)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeat],      sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeat)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv2],  sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv2)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv4],  sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv4)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv8],  sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv8)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv16)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv32)));
+
 }
 
 void
@@ -3310,6 +3364,7 @@ Editor::setup_tooltips ()
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
+	set_tooltip (draw_length_selector, _("Note Length to Draw"));
 	set_tooltip (grid_type_selector, _("Grid Mode"));
 	set_tooltip (snap_mode_button, _("Snap Mode\n\nRight-click to visit Snap preferences."));
 	set_tooltip (edit_point_selector, _("Edit Point"));
@@ -3716,6 +3771,15 @@ Editor::grid_type_selection_done (GridType gridtype)
 }
 
 void
+Editor::draw_length_selection_done (GridType gridtype)
+{
+	RefPtr<RadioAction> ract = draw_length_action (gridtype);
+	if (ract) {
+		ract->set_active ();
+	}
+}
+
+void
 Editor::snap_mode_selection_done (SnapMode mode)
 {
 	RefPtr<RadioAction> ract = snap_mode_action (mode);
@@ -4075,9 +4139,9 @@ Editor::get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count,
 }
 
 unsigned
-Editor::get_grid_beat_divisions ()
+Editor::get_grid_beat_divisions (GridType gt)
 {
-	switch (_grid_type) {
+	switch (gt) {
 	case GridTypeBeatDiv32:  return 32;
 	case GridTypeBeatDiv28:  return 28;
 	case GridTypeBeatDiv24:  return 24;
@@ -4111,7 +4175,7 @@ Editor::get_grid_beat_divisions ()
     @param event_state the current keyboard modifier mask.
 */
 int32_t
-Editor::get_grid_music_divisions (uint32_t event_state)
+Editor::get_grid_music_divisions (Editing::GridType gt, uint32_t event_state)
 {
 	if (snap_mode() == SnapOff && !ArdourKeyboard::indicates_snap (event_state)) {
 		return 0;
@@ -4121,7 +4185,7 @@ Editor::get_grid_music_divisions (uint32_t event_state)
 		return 0;
 	}
 
-	switch (_grid_type) {
+	switch (gt) {
 	case GridTypeBeatDiv32:  return 32;
 	case GridTypeBeatDiv28:  return 28;
 	case GridTypeBeatDiv24:  return 24;
@@ -4153,9 +4217,9 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 {
 	success = true;
 
-	const unsigned divisions = get_grid_beat_divisions ();
+	const unsigned divisions = get_grid_beat_divisions (_grid_type);
 	if (divisions) {
-		return Temporal::Beats::from_double (1.0 / (double) get_grid_beat_divisions ());
+		return Temporal::Beats::from_double (1.0 / (double) divisions);
 	}
 
 	TempoMap::SharedPtr tmap (TempoMap::use());
@@ -4175,6 +4239,20 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 		break;
 	}
 
+	return Temporal::Beats();
+}
+
+Temporal::Beats
+Editor::get_draw_length_as_beats (bool& success, timepos_t const & position)
+{
+	success = true;
+
+	const unsigned divisions = get_grid_beat_divisions (_draw_length);
+	if (divisions) {
+		return Temporal::Beats::from_double (1.0 / (double) divisions);
+	}
+
+	success = false;
 	return Temporal::Beats();
 }
 
