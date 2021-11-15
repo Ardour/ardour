@@ -44,6 +44,7 @@ namespace ARDOUR {
 	namespace Properties {
 		PBD::PropertyDescriptor<bool> use_follow;
 		PBD::PropertyDescriptor<bool> running;
+		PBD::PropertyDescriptor<bool> passthru;
 		PBD::PropertyDescriptor<bool> legato;
 		PBD::PropertyDescriptor<bool> quantization;
 		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
@@ -1321,8 +1322,10 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 void
 Trigger::make_property_quarks ()
 {
-	Properties::muted.property_id = g_quark_from_static_string (X_("running"));
+	Properties::running.property_id = g_quark_from_static_string (X_("running"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for running = %1\n", Properties::running.property_id));
+	Properties::passthru.property_id = g_quark_from_static_string (X_("passthru"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for passthru = %1\n", Properties::passthru.property_id));
 	Properties::legato.property_id = g_quark_from_static_string (X_("legato"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for legato = %1\n", Properties::legato.property_id));
 	Properties::use_follow.property_id = g_quark_from_static_string (X_("use-follow"));
@@ -1376,6 +1379,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, up_next (0)
 	, currently_playing (0)
 	, _stop_all (false)
+	, _pass_thru (false)
 	, requests (1024)
 {
 
@@ -1748,6 +1752,13 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 }
 
 void
+TriggerBox::set_pass_thru (bool yn)
+{
+	_pass_thru = yn;
+	PropertyChanged (Properties::passthru);
+}
+
+void
 TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
 {
 	/* XXX a test to check if we have no usable slots would be good
@@ -1827,7 +1838,19 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	const double bpm = tmap->quarters_per_minute_at (start);
 	uint64_t max_chans = 0;
-	bool first = false;
+
+	/* if passthru is set, active triggers should always
+	 * ::accumulate_from() rather than ::read_from(). If false, then the
+	 * first active trigger uses ::read_from() and later ones will use
+	 * ::accumulate_from()
+	 *
+	 * Note that this is based on a now mostly (entirely?) unused idea of
+	 * allowing more than one trigger to operate at a time. Nevertheless
+	 * the logic is still correct even if there is only ever 1 active
+	 * trigger.
+	 */
+
+	bool first = (_pass_thru ? true : false);
 
 	/* see if there's another trigger explicitly queued that has legato set. */
 

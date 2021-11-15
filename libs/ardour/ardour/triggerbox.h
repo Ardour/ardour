@@ -431,6 +431,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void add_midi_sidechain (std::string const & name);
 
+	bool pass_thru() const { return _pass_thru; }
+	void set_pass_thru (bool yn);
+
 	void request_reload (int32_t slot, void*);
 	void request_use (int32_t slot, Trigger&);
 
@@ -475,6 +478,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	Trigger* up_next;
 	Trigger* currently_playing;
 	std::atomic<bool> _stop_all;
+	std::atomic<bool> _pass_thru;
 
 	boost::shared_ptr<SideChain> _sidechain;
 
@@ -546,6 +550,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> use_follow;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> running;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> passthru;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> legato;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> quantization;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
