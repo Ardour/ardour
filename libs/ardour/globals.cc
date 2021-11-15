@@ -729,6 +729,8 @@ ARDOUR::cleanup ()
 		return;
 	}
 
+	delete TriggerBox::worker;
+
 	release_dma_latency ();
 	config_connection.disconnect ();
 	engine_startup_connection.disconnect ();
