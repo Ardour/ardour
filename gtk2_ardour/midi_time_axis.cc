@@ -1726,6 +1726,10 @@ MidiTimeAxisView::stop_step_editing ()
 uint8_t
 MidiTimeAxisView::get_channel_for_add () const
 {
+	if (_editor.draw_channel() != Editing::DRAW_CHAN_AUTO) {
+		return _editor.draw_channel();
+	}
+
 	uint16_t const chn_mask = midi_track()->get_playback_channel_mask();
 	int chn_cnt = 0;
 	uint8_t channel = 0;

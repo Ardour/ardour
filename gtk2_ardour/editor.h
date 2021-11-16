@@ -185,14 +185,22 @@ public:
 	void next_grid_choice ();
 	void prev_grid_choice ();
 	void set_grid_to (Editing::GridType);
-	void set_draw_length_to (Editing::GridType);
 	void set_snap_mode (Editing::SnapMode);
+
+	void set_draw_length_to (Editing::GridType);
+	void set_draw_velocity_to (int);
+	void set_draw_channel_to (int);
 
 	Editing::SnapMode  snap_mode () const;
 	Editing::GridType  grid_type () const;
-	Editing::GridType  draw_length () const;
 	bool  grid_type_is_musical (Editing::GridType) const;
 	bool  grid_musical () const;
+
+	bool on_velocity_scroll_event (GdkEventScroll*);
+
+	Editing::GridType  draw_length () const;
+	int                draw_velocity () const;
+	int                draw_channel () const;
 
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);
@@ -1591,8 +1599,11 @@ private:
 	void move_range_selection_start_or_end_to_region_boundary (bool, bool);
 
 	Editing::GridType _grid_type;
-	Editing::GridType _draw_length;
 	Editing::SnapMode _snap_mode;
+
+	Editing::GridType _draw_length;
+	int _draw_velocity;
+	int _draw_channel;
 
 	bool ignore_gui_changes;
 
@@ -1883,8 +1894,11 @@ private:
 	void cycle_edit_mode ();
 
 	ArdourWidgets::ArdourDropdown grid_type_selector;
-	ArdourWidgets::ArdourDropdown draw_length_selector;
 	void build_grid_type_menu ();
+
+	ArdourWidgets::ArdourDropdown draw_length_selector;
+	ArdourWidgets::ArdourDropdown draw_velocity_selector;
+	ArdourWidgets::ArdourDropdown draw_channel_selector;
 
 	ArdourWidgets::ArdourButton snap_mode_button;
 	bool snap_mode_button_clicked (GdkEventButton*);
@@ -1901,15 +1915,25 @@ private:
 	std::vector<std::string> snap_mode_strings;
 
 	void grid_type_selection_done (Editing::GridType);
-	void draw_length_selection_done (Editing::GridType);
 	void snap_mode_selection_done (Editing::SnapMode);
 	void snap_mode_chosen (Editing::SnapMode);
 	void grid_type_chosen (Editing::GridType);
+
+	void draw_length_selection_done (Editing::GridType);
 	void draw_length_chosen (Editing::GridType);
 
+	void draw_velocity_selection_done (int);
+	void draw_velocity_chosen (int);
+
+	void draw_channel_selection_done (int);
+	void draw_channel_chosen (int);
+
 	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::GridType);
-	Glib::RefPtr<Gtk::RadioAction> draw_length_action (Editing::GridType);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
+
+	Glib::RefPtr<Gtk::RadioAction> draw_length_action (Editing::GridType);
+	Glib::RefPtr<Gtk::RadioAction> draw_velocity_action (int);
+	Glib::RefPtr<Gtk::RadioAction> draw_channel_action (int);
 
 	//zoom focus meu stuff
 	ArdourWidgets::ArdourDropdown	zoom_focus_selector;

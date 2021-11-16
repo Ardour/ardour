@@ -51,6 +51,10 @@ enum GridType {
 	#include "editing_syms.h"
 };
 
+static const int      DRAW_VEL_AUTO = -1;
+static const int      DRAW_CHAN_AUTO = -1;
+static const GridType DRAW_LEN_AUTO = GridTypeNone;  //special case: use the Grid's value instead of the note-length selection
+
 extern const char *gridtypestrs[];
 inline const char* enum2str(GridType m) {return gridtypestrs[m];}
 GridType str2gridtype(const std::string &);

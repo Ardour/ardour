@@ -372,6 +372,9 @@ public:
 	virtual Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
 	virtual Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
 
+	virtual int draw_velocity () const = 0;
+	virtual int draw_channel () const = 0;
+
 	virtual unsigned get_grid_beat_divisions (Editing::GridType gt) = 0;
 	virtual int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) = 0;
 

@@ -622,6 +622,28 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeat)));
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBar)));
 
+	Glib::RefPtr<ActionGroup> velocity_actions = ActionManager::create_action_group (bindings, X_("DrawVelocity"));
+	RadioAction::Group draw_velocity_group;
+	ActionManager::register_radio_action (velocity_actions, draw_velocity_group, X_("draw-velocity-auto"),  _("Auto"), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_chosen), DRAW_VEL_AUTO)));
+	for (int i = 1; i <= 127; i++) {
+		char buf[64];
+		sprintf(buf, X_("draw-velocity-%d"), i);
+		char vel[64];
+		sprintf(vel, X_("%d"), i);
+		ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, (sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_chosen), i)));
+	}
+	
+	Glib::RefPtr<ActionGroup> channel_actions = ActionManager::create_action_group (bindings, X_("DrawChannel"));
+	RadioAction::Group draw_channel_group;
+	ActionManager::register_radio_action (channel_actions, draw_channel_group, X_("draw-channel-auto"),  _("Auto"), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_channel_chosen), DRAW_CHAN_AUTO)));
+	for (int i = 0; i <= 15; i++) {
+		char buf[64];
+		sprintf(buf, X_("draw-channel-%d"), i+1);
+		char ch[64];
+		sprintf(ch, X_("%d"), i+1);
+		ActionManager::register_radio_action (channel_actions, draw_channel_group, buf, ch, (sigc::bind (sigc::mem_fun(*this, &Editor::draw_channel_chosen), i)));
+	}
+	
 	Glib::RefPtr<ActionGroup> snap_actions = ActionManager::create_action_group (bindings, X_("Snap"));
 	RadioAction::Group grid_choice_group;
 
@@ -1084,6 +1106,54 @@ Editor::edit_current_tempo ()
 }
 
 RefPtr<RadioAction>
+Editor::draw_velocity_action (int v)
+{
+	const char* action = 0;
+	RefPtr<Action> act;
+
+	if (v==DRAW_VEL_AUTO) {
+		action = "draw-velocity-auto";
+	} else if (v>=1 && v<=127) {
+		char buf[64];
+		sprintf(buf, X_("draw-velocity-%d"), v);  //we don't allow drawing a velocity 0;  some synths use that as note-off
+		action = buf;
+	}
+
+	act = ActionManager::get_action (X_("DrawVelocity"), action);
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		return ract;
+	} else  {
+		error << string_compose (_("programming error: %1"), "Editor::draw_velocity_action could not find action to match velocity.") << endmsg;
+		return RefPtr<RadioAction>();
+	}
+}
+
+RefPtr<RadioAction>
+Editor::draw_channel_action (int c)
+{
+	const char* action = 0;
+	RefPtr<Action> act;
+
+	if (c==DRAW_CHAN_AUTO) {
+		action = "draw-channel-auto";
+	} else if (c>=0 && c<=15) {
+		char buf[64];
+		sprintf(buf, X_("draw-channel-%d"), c+1);
+		action = buf;
+	}
+
+	act = ActionManager::get_action (X_("DrawChannel"), action);
+	if (act) {
+		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+		return ract;
+	} else  {
+		error << string_compose (_("programming error: %1"), "Editor::draw_channel_action could not find action to match channel.") << endmsg;
+		return RefPtr<RadioAction>();
+	}
+}
+
+RefPtr<RadioAction>
 Editor::draw_length_action (GridType type)
 {
 	const char* action = 0;
@@ -1353,6 +1423,7 @@ Editor::grid_type_chosen (GridType type)
 		set_grid_to (type);
 	}
 }
+
 void
 Editor::draw_length_chosen (GridType type)
 {
@@ -1365,6 +1436,36 @@ Editor::draw_length_chosen (GridType type)
 
 	if (ract && ract->get_active()) {
 		set_draw_length_to (type);
+	}
+}
+
+void
+Editor::draw_velocity_chosen (int v)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = draw_velocity_action (v);
+
+	if (ract && ract->get_active()) {
+		set_draw_velocity_to (v);
+	}
+}
+
+void
+Editor::draw_channel_chosen (int c)
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = draw_channel_action (c);
+
+	if (ract && ract->get_active()) {
+		set_draw_channel_to (c);
 	}
 }
 

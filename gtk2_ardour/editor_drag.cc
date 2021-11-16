@@ -7033,6 +7033,8 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 		length = length.round_to_subdivision (div, RoundUpMaybe);
 	}
 
+#warning NUTEMPO ALERT not snapping correctly
+
 	_editor->begin_reversible_command (_("Create Note"));
 	_region_view->create_note_at (timepos_t (start), _drag_rect->y0(), length, ev->button.state, false);
 	_editor->commit_reversible_command ();
@@ -7115,6 +7117,8 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 	if (beats > mr->nt_last().beats()) {
 		return;
 	}
+
+#warning NUTEMPO ALERT not snapping correctly
 
 	_region_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
 

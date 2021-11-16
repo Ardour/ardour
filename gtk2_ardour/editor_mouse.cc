@@ -370,9 +370,9 @@ Editor::mouse_mode_toggled (MouseMode m)
 	update_time_selection_display ();
 
 	if (mouse_mode == MouseDraw) {
-		draw_length_selector.set_sensitive(true);
+		draw_box.show();
 	} else {
-		draw_length_selector.set_sensitive(false);
+		draw_box.hide();
 	}
 
 

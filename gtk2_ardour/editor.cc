@@ -369,8 +369,10 @@ Editor::Editor ()
 	, have_pending_keyboard_selection (false)
 	, pending_keyboard_selection_start (0)
 	, _grid_type (GridTypeBeat)
-	, _draw_length (GridTypeNone)
 	, _snap_mode (SnapOff)
+	, _draw_length (GridTypeNone)
+	, _draw_velocity (-2)
+	, _draw_channel (-2)
 	, ignore_gui_changes (false)
 	, _drags (new DragManager (this))
 	, lock_dialog (0)
@@ -855,8 +857,11 @@ Editor::Editor ()
 
 	setup_fade_images ();
 
+	/* these are defaults; instant.xml will replace these with user's recent selection */
 	set_grid_to (GridTypeNone);
 	set_draw_length_to (GridTypeBeat);
+	set_draw_velocity_to (82);
+	set_draw_channel_to (0);
 }
 
 Editor::~Editor()
@@ -2103,6 +2108,18 @@ Editor::draw_length() const
 	return _draw_length;
 }
 
+int
+Editor::draw_velocity() const
+{
+	return _draw_velocity;
+}
+
+int
+Editor::draw_channel() const
+{
+	return _draw_channel;
+}
+
 bool
 Editor::grid_musical() const
 {
@@ -2201,10 +2218,6 @@ Editor::set_draw_length_to (GridType gt)
 		gt = GridTypeBeat;
 	}
 
-	if (_draw_length == gt) { // already set
-		return;
-	}
-
 	_draw_length = gt;
 
 	unsigned int grid_index = (unsigned int)gt;
@@ -2212,6 +2225,44 @@ Editor::set_draw_length_to (GridType gt)
 	if (str != draw_length_selector.get_text()) {
 		draw_length_selector.set_text (str);
 	}
+}
+
+void
+Editor::set_draw_velocity_to (int v)
+{
+	if ( v<0 || v>127 ) {  //range-check midi channel
+		v = DRAW_VEL_AUTO;
+	}
+
+	_draw_velocity = v;
+
+	if (DRAW_VEL_AUTO==v) {
+		draw_velocity_selector.set_text (_("Auto"));
+		return;
+	}
+
+	char buf[64];
+	sprintf(buf, "%d", v );
+	draw_velocity_selector.set_text (buf);
+}
+
+void
+Editor::set_draw_channel_to (int c)
+{
+	if ( c<0 || c>15 ) {  //range-check midi channel
+		c = DRAW_CHAN_AUTO;
+	}
+
+	_draw_channel = c;
+
+	if (DRAW_CHAN_AUTO==c) {
+		draw_channel_selector.set_text (_("Auto"));
+		return;
+	}
+
+	char buf[64];
+	sprintf(buf, "%d", c+1 );
+	draw_channel_selector.set_text (buf);
 }
 
 void
@@ -2389,6 +2440,18 @@ Editor::set_state (const XMLNode& node, int version)
 	}
 	set_draw_length_to (draw_length);
 
+	int draw_vel;
+	if (!node.get_property ("draw-velocity", draw_vel)) {
+		draw_vel = DRAW_VEL_AUTO;
+	}
+	set_draw_velocity_to (draw_vel);
+
+	int draw_chan;
+	if (!node.get_property ("draw-channel", draw_chan)) {
+		draw_chan = DRAW_CHAN_AUTO;
+	}
+	set_draw_channel_to (draw_chan);
+
 	SnapMode sm;
 	if (node.get_property ("snap-mode", sm)) {
 		snap_mode_selection_done(sm);
@@ -2557,7 +2620,6 @@ Editor::get_state ()
 
 	node->set_property ("zoom", samples_per_pixel);
 	node->set_property ("grid-type", _grid_type);
-	node->set_property ("draw-length", _draw_length);
 	node->set_property ("snap-mode", _snap_mode);
 	node->set_property ("internal-grid-type", internal_grid_type);
 	node->set_property ("internal-snap-mode", internal_snap_mode);
@@ -2565,6 +2627,10 @@ Editor::get_state ()
 	node->set_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 	node->set_property ("edit-point", _edit_point);
 	node->set_property ("visible-track-count", _visible_track_count);
+
+	node->set_property ("draw-length", _draw_length);
+	node->set_property ("draw-velocity", _draw_velocity);
+	node->set_property ("draw-channel", _draw_channel);
 
 	node->set_property ("playhead", _playhead_cursor->current_sample ());
 	node->set_property ("left-frame", _leftmost_sample);
@@ -3079,6 +3145,8 @@ Editor::setup_toolbar ()
 
 	mouse_mode_size_group->add_widget (grid_type_selector);
 	mouse_mode_size_group->add_widget (draw_length_selector);
+	mouse_mode_size_group->add_widget (draw_velocity_selector);
+	mouse_mode_size_group->add_widget (draw_channel_selector);
 	mouse_mode_size_group->add_widget (snap_mode_button);
 
 	mouse_mode_size_group->add_widget (edit_point_selector);
@@ -3190,6 +3258,11 @@ Editor::setup_toolbar ()
 
 	grid_type_selector.set_name ("mouse mode button");
 	draw_length_selector.set_name ("mouse mode button");
+	draw_velocity_selector.set_name ("mouse mode button");
+	draw_channel_selector.set_name ("mouse mode button");
+
+	draw_velocity_selector.disable_scrolling ();
+	draw_velocity_selector.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::on_velocity_scroll_event), false);
 
 	snap_mode_button.set_name ("mouse mode button");
 
@@ -3214,7 +3287,12 @@ Editor::setup_toolbar ()
 	/* Draw  - these MIDI tools are only visible when in Draw mode */
 	draw_box.set_spacing (2);
 	draw_box.set_border_width (2);
-	draw_box.pack_start (draw_length_selector, false, false);
+	draw_box.pack_start (*manage (new Label (_("Len:"))), false, false);
+	draw_box.pack_start (draw_length_selector, false, false, 4);
+	draw_box.pack_start (*manage (new Label (_("Ch:"))), false, false);
+	draw_box.pack_start (draw_channel_selector, false, false, 4);
+	draw_box.pack_start (*manage (new Label (_("Vel:"))), false, false);
+	draw_box.pack_start (draw_velocity_selector, false, false, 4);
 
 	/* Pack everything in... */
 
@@ -3250,6 +3328,25 @@ Editor::setup_toolbar ()
 
 	toolbar_hbox.show_all ();
 }
+
+bool
+Editor::on_velocity_scroll_event (GdkEventScroll* ev)
+{
+	int v = PBD::atoi (draw_velocity_selector.get_text ());
+	switch (ev->direction) {
+		case GDK_SCROLL_DOWN:
+			v = std::min (127, v + 1);
+			break;
+		case GDK_SCROLL_UP:
+			v = std::max (1, v - 1);
+			break;
+		default:
+			return false;
+	}
+	set_draw_velocity_to(v);
+	return true;
+}
+
 
 void
 Editor::build_edit_point_menu ()
@@ -3331,8 +3428,7 @@ Editor::build_grid_type_menu ()
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeCDFrame], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeCDFrame)));
 
 
-	/* main grid: bars, quarter-notes, etc */
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBar],       sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBar)));
+	/* Note-Length when drawing */
 	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeat],      sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeat)));
 	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv2],  sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv2)));
 	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv4],  sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv4)));
@@ -3340,6 +3436,24 @@ Editor::build_grid_type_menu ()
 	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv16)));
 	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv32)));
 
+	/* Note-Velocity when drawing */
+	{
+		draw_velocity_selector.AddMenuElem (MenuElem ("8",    sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 8)));
+		draw_velocity_selector.AddMenuElem (MenuElem ("32",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 32)));
+		draw_velocity_selector.AddMenuElem (MenuElem ("64",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 64)));
+		draw_velocity_selector.AddMenuElem (MenuElem ("82",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 82)));
+		draw_velocity_selector.AddMenuElem (MenuElem ("100",  sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 100)));
+		draw_velocity_selector.AddMenuElem (MenuElem ("127",  sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 127)));
+	}
+	draw_velocity_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), DRAW_VEL_AUTO)));
+
+	/* Note-Channel when drawing */
+	for (int i = 0; i<= 15; i++) {
+		char buf[64];
+		sprintf(buf, "%d", i+1);
+		draw_channel_selector.AddMenuElem (MenuElem (buf, sigc::bind (sigc::mem_fun(*this, &Editor::draw_channel_selection_done), i)));
+	}
+	draw_channel_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &Editor::draw_channel_selection_done), DRAW_CHAN_AUTO)));
 }
 
 void
@@ -3365,6 +3479,8 @@ Editor::setup_tooltips ()
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
 	set_tooltip (draw_length_selector, _("Note Length to Draw"));
+	set_tooltip (draw_velocity_selector, _("Note Velocity to Draw"));
+	set_tooltip (draw_channel_selector, _("Note Channel to Draw"));
 	set_tooltip (grid_type_selector, _("Grid Mode"));
 	set_tooltip (snap_mode_button, _("Snap Mode\n\nRight-click to visit Snap preferences."));
 	set_tooltip (edit_point_selector, _("Edit Point"));
@@ -3774,6 +3890,24 @@ void
 Editor::draw_length_selection_done (GridType gridtype)
 {
 	RefPtr<RadioAction> ract = draw_length_action (gridtype);
+	if (ract) {
+		ract->set_active ();
+	}
+}
+
+void
+Editor::draw_velocity_selection_done (int v)
+{
+	RefPtr<RadioAction> ract = draw_velocity_action (v);
+	if (ract) {
+		ract->set_active ();
+	}
+}
+
+void
+Editor::draw_channel_selection_done (int c)
+{
+	RefPtr<RadioAction> ract = draw_channel_action (c);
 	if (ract) {
 		ract->set_active ();
 	}
