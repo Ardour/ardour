@@ -938,6 +938,8 @@ TempoMap::remove_tempo (TempoPoint const & tp)
 	superclock_t sc (tp.sclock());
 	Tempos::iterator t;
 
+	assert (_tempos.size() > 1);
+
 	/* the argument is likely to be a Point-derived object that doesn't
 	 * actually exist in this TempoMap, since the caller called
 	 * TempoMap::write_copy() in order to perform an RCU operation, but
@@ -955,15 +957,40 @@ TempoMap::remove_tempo (TempoPoint const & tp)
 
 	for (t = _tempos.begin(); t != _tempos.end() && t->sclock() < tp.sclock(); ++t);
 
+	if (t == _tempos.end()) {
+		/* not found */
+		return;
+	}
+
 	if (t->sclock() != tp.sclock()) {
 		/* error ... no tempo point at the time of tp */
 		return;
 	}
 
+	Tempos::iterator nxt = _tempos.begin();
+	Tempos::iterator prev = _tempos.end();
+
+	if (t != _tempos.end()) {
+		nxt = t;
+		++nxt;
+	}
+
+	if (t != _tempos.begin()) {
+		prev = t;
+		--prev;
+	}
+
+	const bool was_end = (nxt == _tempos.end());
+
 	_tempos.erase (t);
 	remove_point (*t);
 
-	reset_starting_at (sc);
+	if (prev != _tempos.end() && was_end) {
+		Rampable& r (*prev);
+		r.set_ramped (false);
+	} else {
+		reset_starting_at (sc);
+	}
 }
 
 MusicTimePoint &
@@ -2911,8 +2938,7 @@ TempoMap::set_ramped (TempoPoint & tp, bool yn)
 
 	Rampable & r (tp);
 
-	if (_tempos.size() == 1 || tp == _tempos.back()) {
-		/* nothing to do */
+	if (tp.ramped() == yn) {
 		return;
 	}
 
@@ -2925,7 +2951,12 @@ TempoMap::set_ramped (TempoPoint & tp, bool yn)
 		}
 	}
 
-	r.set_end (nxt->end_super_note_type_per_second(), nxt->end_superclocks_per_note_type());
+	if (yn) {
+		r.set_end (nxt->end_super_note_type_per_second(), nxt->end_superclocks_per_note_type());
+	} else {
+		r.set_end (tp.super_note_type_per_second(), tp.superclocks_per_note_type());
+	}
+
 	r.set_ramped (yn);
 
 	reset_starting_at (tp.sclock());
