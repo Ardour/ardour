@@ -1501,12 +1501,12 @@ Editor::toggle_tempo_type ()
 	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
 
 	if (tm) {
-		Temporal::TempoPoint & tempo = tm->tempo();
 
 		begin_reversible_command (_("set tempo to constant"));
 		TempoMap::SharedPtr tmap (TempoMap::write_copy());
 
 		reassociate_metric_markers (tmap);
+		Temporal::TempoPoint & tempo = tm->tempo();
 
 		XMLNode &before = tmap->get_state();
 
@@ -1533,9 +1533,8 @@ Editor::toggle_tempo_clamped ()
 		TempoMap::SharedPtr tmap (TempoMap::write_copy());
 		XMLNode &before = tmap->get_state();
 
-		Temporal::Tempo & tempo (tm->tempo());
-
 		reassociate_metric_markers (tmap);
+		Temporal::Tempo & tempo (tm->tempo());
 
 		tempo.set_clamped (!tempo.clamped());
 
@@ -1562,9 +1561,10 @@ Editor::ramp_to_next_tempo ()
 		XMLNode &before = tmap->get_state();
 
 		reassociate_metric_markers (tmap);
-
 		Temporal::TempoPoint & tempo (tm->tempo());
+
 		tmap->set_ramped (tempo, !tempo.ramped());
+
 		XMLNode &after = tmap->get_state();
 		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
 		commit_reversible_command ();
