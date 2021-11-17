@@ -1895,7 +1895,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("meter_at", (Temporal::MeterPoint const & (Temporal::TempoMap::*)(timepos_t const &) const) &TempoMap::meter_at)
 		.addFunction ("bbt_at", (Temporal::BBT_Time (Temporal::TempoMap::*)(timepos_t const &) const) &TempoMap::bbt_at)
 		.addFunction ("quarters_at", (Temporal::Beats (Temporal::TempoMap::*)(timepos_t const &) const) &TempoMap::quarters_at)
-		.addFunction ("sample_at", (samplepos_t (Temporal::TempoMap::*)(timepos_t const &, samplecnt_t) const) &TempoMap::sample_at)
+		.addFunction ("sample_at", (samplepos_t (Temporal::TempoMap::*)(timepos_t const &) const) &TempoMap::sample_at)
 		.endClass ()
 
 		.beginClass <ChanCount> ("ChanCount")

@@ -986,8 +986,8 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		floor_lower_beat = Temporal::Beats();
 	}
 
-	const samplepos_t beat_before_lower_pos = tmap->sample_at (floor_lower_beat, _session->sample_rate());
-	const samplepos_t beat_after_upper_pos = tmap->sample_at ((std::max (Beats(), tmap->quarters_at_sample  (upper)).round_down_to_beat()) + Beats (1, 0), _session->sample_rate());
+	const samplepos_t beat_before_lower_pos = tmap->sample_at (floor_lower_beat);
+	const samplepos_t beat_after_upper_pos = tmap->sample_at ((std::max (Beats(), tmap->quarters_at_sample  (upper)).round_down_to_beat()) + Beats (1, 0));
 
 	_session->bbt_time (timepos_t (beat_before_lower_pos), lower_beat);
 	_session->bbt_time (timepos_t (beat_after_upper_pos), upper_beat);
@@ -1385,7 +1385,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 				next_beat.beats = bbt.beats;
 				next_beat.bars = bbt.bars;
 				next_beat.ticks = tick;
-				pos = TempoMap::use()->sample_at (next_beat, sr);
+				pos = TempoMap::use()->sample_at (next_beat);
 
 				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
 					i_am_accented = true;

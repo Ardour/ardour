@@ -2106,7 +2106,7 @@ AudioClock::samples_from_bbt_string (timepos_t const & pos, const string& str) c
 		bbt.beats++;
 		return TempoMap::use()->bbt_duration_at (pos, bbt).samples();
 	} else {
-		return TempoMap::use()->sample_at (bbt, _session->sample_rate());
+		return TempoMap::use()->sample_at (bbt);
 	}
 }
 

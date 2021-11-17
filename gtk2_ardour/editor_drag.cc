@@ -3455,7 +3455,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			timepos_t pos;
 
 			if (map->time_domain() == AudioTime) {
-				pos = timepos_t (map->sample_at (bbt, AudioEngine::instance()->sample_rate()));
+				pos = timepos_t (map->sample_at (bbt));
 			} else {
 				pos = timepos_t (map->quarters_at (bbt));
 			}
@@ -3632,7 +3632,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 			timepos_t pos;
 
 			if (map->time_domain() == AudioTime) {
-				pos = timepos_t (map->sample_at (bbt, _editor->session()->sample_rate()));
+				pos = timepos_t (map->sample_at (bbt));
 			} else {
 				pos = timepos_t (map->quarters_at (bbt));
 			}

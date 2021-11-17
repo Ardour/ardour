@@ -448,7 +448,7 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 	if (map->time_domain() == BeatTime) {
 		pos = timepos_t (map->quarters_at (requested));
 	} else {
-		pos = timepos_t (map->sample_at (requested, _session->sample_rate()));
+		pos = timepos_t (map->sample_at (requested));
 	}
 
 	map->set_meter (Meter (bpb, note_type), pos);
