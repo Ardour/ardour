@@ -823,9 +823,9 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	superclock_t superclock_at (BBT_Time const &) const;
 	LIBTEMPORAL_API	superclock_t superclock_at (timepos_t const &) const;
 
-	LIBTEMPORAL_API	samplepos_t sample_at (Beats const & b, samplecnt_t sr) const { return superclock_to_samples (superclock_at (b), sr); }
-	LIBTEMPORAL_API	samplepos_t sample_at (BBT_Time const & b, samplecnt_t sr) const { return superclock_to_samples (superclock_at (b), sr); }
-	LIBTEMPORAL_API	samplepos_t sample_at (timepos_t const & t, samplecnt_t sr) const { return superclock_to_samples (superclock_at (t), sr); }
+	LIBTEMPORAL_API	samplepos_t sample_at (Beats const & b) const { return superclock_to_samples (superclock_at (b), TEMPORAL_SAMPLE_RATE); }
+	LIBTEMPORAL_API	samplepos_t sample_at (BBT_Time const & b) const { return superclock_to_samples (superclock_at (b), TEMPORAL_SAMPLE_RATE); }
+	LIBTEMPORAL_API	samplepos_t sample_at (timepos_t const & t) const { return superclock_to_samples (superclock_at (t), TEMPORAL_SAMPLE_RATE); }
 
 	/* ways to walk along the tempo map, measure distance between points,
 	 * etc.
