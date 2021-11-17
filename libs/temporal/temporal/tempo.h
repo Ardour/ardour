@@ -815,6 +815,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	}
 
 	LIBTEMPORAL_API BBT_Time bbt_at (timepos_t const &) const;
+	LIBTEMPORAL_API BBT_Time bbt_at (Beats const &) const;
 
 	LIBTEMPORAL_API	Beats quarters_at (BBT_Time const &) const;
 	LIBTEMPORAL_API	Beats quarters_at (timepos_t const &) const;
@@ -900,7 +901,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	void copy_points (TempoMap const & other);
 
-	BBT_Time bbt_at (Beats const &) const;
 	BBT_Time bbt_at (superclock_t sc) const;
 
 	template<typename T, typename T1> struct const_traits {
