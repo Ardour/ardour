@@ -1848,10 +1848,10 @@ void
 LV2Plugin::set_property(uint32_t key, const Variant& value)
 {
 	if (_patch_port_in_index == (uint32_t)-1) {
-		error << string_compose (_("LV2<1>: set_property called with unset patch_port_in_index"), name ()) << endmsg;
+		error << string_compose (_("LV2<%1>: set_property called with unset patch_port_in_index"), name ()) << endmsg;
 		return;
 	} else if (value.type() == Variant::NOTHING) {
-		error << string_compose (_("LV2<1>: set_property called with void value"), name ()) << endmsg;
+		error << string_compose (_("LV2<%1>: set_property called with void value"), name ()) << endmsg;
 		return;
 	}
 
