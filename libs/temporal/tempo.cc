@@ -1926,19 +1926,13 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 	DEBUG_TRACE (DEBUG::Grid, string_compose ("start filling points with start = %1 end = %2 with limit @ %3\n", start, end, *p));
 
-	while (start < end) {
+	Temporal::Beats beats = metric.quarters_at_superclock (start);
 
-		Temporal::Beats beats = metric.quarters_at_superclock (start);
+	while (start < end) {
 
 		DEBUG_TRACE (DEBUG::Grid, string_compose ("start %1 end %2 bbt %3 find first/limit with limit @ = %4\n", start, end, bbt, *p));
 
-		superclock_t limit;
-
-		if (p == _points.end()) {
-			limit = end;
-		} else {
-			limit = std::min (p->sclock(), end);
-		}
+		const superclock_t limit = (p == _points.end()) ? end : std::min (p->sclock(), end);
 
 		while (start < limit) {
 
