@@ -1962,10 +1962,15 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			} else {
 
-				/* Advance by the number of bars specified by bar_mod */
+				/* Advance by the number of bars specified by
+				   bar_mod, then recompute the beats and
+				   superclock position corresponding to that
+				   BBT time.
+				*/
 
 				bbt.bars += bar_mod;
 				start = metric.superclock_at (bbt);
+				beats = metric.quarters_at_superclock (start);
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("bar mod %1 moved to %2 (start %3)\n", bar_mod, bbt, start))
 			}
 		}
