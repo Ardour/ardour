@@ -2051,6 +2051,10 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			p = nxt;
 		}
 
+		/* If we've reached the end of the points list, break and let
+		 * the final phase below fill out the rest of the grid
+		 */
+
 		if (p == _points.end()) {
 			break;
 		}
