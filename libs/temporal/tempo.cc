@@ -1803,6 +1803,12 @@ TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
 void
 TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, uint32_t bar_mod)
 {
+	/* note: @param bar_mod is "bar modulo", and describes the N in "give
+	   me every Nth bar". If the caller wants every 4th bar, bar_mod ==
+	   4. If we want every point defined by the tempo note type (e.g. every
+	   quarter not, then bar_mod is zero.
+	*/
+
 	assert (!_tempos.empty());
 	assert (!_meters.empty());
 	assert (!_points.empty());
