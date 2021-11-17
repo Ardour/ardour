@@ -1947,11 +1947,10 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			if (bar_mod == 0) {
 
 				/* Advance by the meter note value size */
-
-				step = metric.superclocks_per_grid_at (start);
-				start += step;
-				bbt = metric.bbt_at (timepos_t::from_superclock (start));
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("step for note type was %1, now @ %2\n", step, start));
+				beats += metric.tempo().note_type_as_beats ();
+				bbt = metric.bbt_at (beats);
+				start = metric.superclock_at (beats);
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("step at %3 for note type was %1, now @ %2 beats = %4\n", step, start, bbt, beats));
 
 			} else {
 
