@@ -2890,7 +2890,6 @@ double
 TempoMap::quarters_per_minute_at (timepos_t const & pos) const
 {
 	TempoPoint const & tp (tempo_at (pos));
-	cerr << "Get gpm using " << tp << " where sc-per-nt at " << pos << " = " << tp.superclocks_per_note_type_at (pos) << endl;
 	const double val = tp.note_types_per_minute_at_DOUBLE (pos) * (4.0 / tp.note_type());
 	return val;
 }
