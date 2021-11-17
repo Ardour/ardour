@@ -218,6 +218,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 	void   set_note_types_per_minute (double npm) { _superclocks_per_note_type = double_npm_to_scpn (npm); }
 
 	int note_type () const { return _note_type; }
+	Beats note_type_as_beats () const { return Beats (0, (1920 * 4) / _note_type); }
 
 	superclock_t superclocks_per_note_type () const {
 		return _superclocks_per_note_type;
