@@ -2217,6 +2217,7 @@ BBT_Time
 TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 {
 	BBT_Offset offset (o);
+	BBT_Time start (bbt);
 	Tempos::const_iterator t, prev_t, next_t;
 	Meters::const_iterator m, prev_m, next_m;
 
@@ -2274,7 +2275,7 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 	 */
 
 	TempoMetric metric (*const_cast<TempoPoint*>(&*prev_t), *const_cast<MeterPoint*>(&*prev_m));
-	superclock_t pos = metric.superclock_at (bbt);
+
 
 	/* normalize possibly too-large ticks count */
 
@@ -2286,22 +2287,16 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 		offset.ticks %= tpg;
 	}
 
-	/* add tick count, now guaranteed to be less than 1 grid unit */
-
-	if (offset.ticks) {
-		pos += metric.superclocks_per_ppqn () * offset.ticks;
-	}
-
 	/* add each beat, 1 by 1, rechecking to see if there's a new
 	 * TempoMetric in effect after each addition
 	 */
 
 #define TEMPO_CHECK_FOR_NEW_METRIC                                      \
-	if (((next_t != _tempos.end()) && (pos >= next_t->sclock())) || \
-	    ((next_m != _meters.end()) && (pos >= next_m->sclock()))) { \
+	if (((next_t != _tempos.end()) && (start >= next_t->bbt())) || \
+	    ((next_m != _meters.end()) && (start >= next_m->bbt()))) { \
 		/* need new metric */ \
-		if (pos >= next_t->sclock()) { \
-			if (pos >= next_m->sclock()) { \
+		if (start >= next_t->bbt()) { \
+			if (start >= next_m->bbt()) { \
 				metric = TempoMetric (*const_cast<TempoPoint*>(&*next_t), *const_cast<MeterPoint*>(&*next_m)); \
 				++next_t; \
 				++next_m; \
@@ -2309,30 +2304,37 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 				metric = TempoMetric (*const_cast<TempoPoint*>(&*next_t), metric.meter()); \
 				++next_t; \
 			} \
-		} else if (pos >= next_m->sclock()) { \
+		} else if (start >= next_m->bbt()) { \
 			metric = TempoMetric (metric.tempo(), *const_cast<MeterPoint*>(&*next_m)); \
 			++next_m; \
 		} \
 	}
 
-	for (int32_t b = 0; b < offset.beats; ++b) {
-
-		TEMPO_CHECK_FOR_NEW_METRIC;
-		pos += metric.superclocks_per_grid ();
-	}
-
-	/* add each bar, 1 by 1, rechecking to see if there's a new
-	 * TempoMetric in effect after each addition
-	 */
-
 	for (int32_t b = 0; b < offset.bars; ++b) {
 
 		TEMPO_CHECK_FOR_NEW_METRIC;
-
-		pos += metric.superclocks_per_bar ();
+		start.bars += 1;
 	}
 
-	return metric.bbt_at (timepos_t::from_superclock (pos));
+	for (int32_t b = 0; b < offset.beats; ++b) {
+
+		TEMPO_CHECK_FOR_NEW_METRIC;
+		start.beats += 1;
+		if (start.beats > metric.divisions_per_bar()) {
+			start.bars += 1;
+			start.beats = 1;
+		}
+	}
+
+	start.ticks += offset.ticks;
+
+	if (start.ticks >= ticks_per_beat) {
+		start.beats += 1;
+		start.ticks %= ticks_per_beat;
+	}
+
+
+	return start;
 }
 
 Temporal::Beats
@@ -3243,7 +3245,7 @@ TempoMap::midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_p
 
 	Temporal::Beats b = (quarters_at_sample (pos)).round_up_to_beat ();
 
-	clk_pos = sample_at (b, TEMPORAL_SAMPLE_RATE);
+	clk_pos = sample_at (b);
 	clk_beat = b.get_beats () * 24;
 
 	assert (clk_pos >= pos);
