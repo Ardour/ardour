@@ -556,7 +556,7 @@ BasicUI::jump_by_bars (int bars, LocateTransportDisposition ltd)
 		bbt.bars = 1;
 	}
 
-	session->request_locate (tmap->sample_at (bbt, session->sample_rate()), ltd);
+	session->request_locate (tmap->sample_at (bbt), ltd);
 }
 
 void
