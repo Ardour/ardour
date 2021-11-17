@@ -621,6 +621,7 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeatDiv2)));
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBeat)));
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBar)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), DRAW_LEN_AUTO)));
 
 	Glib::RefPtr<ActionGroup> velocity_actions = ActionManager::create_action_group (bindings, X_("DrawVelocity"));
 	RadioAction::Group draw_velocity_group;
@@ -1212,6 +1213,8 @@ Editor::draw_length_action (GridType type)
 		action = "draw-length-bar";
 		break;
 	case Editing::GridTypeNone:
+		action = "draw-length-auto";
+		break;
 	case Editing::GridTypeTimecode:
 	case Editing::GridTypeCDFrame:
 	case Editing::GridTypeMinSec:

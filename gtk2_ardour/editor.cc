@@ -2215,10 +2215,15 @@ void
 Editor::set_draw_length_to (GridType gt)
 {
 	if ( !grid_type_is_musical(gt) ) {  //range-check
-		gt = GridTypeBeat;
+		gt = DRAW_LEN_AUTO;
 	}
 
 	_draw_length = gt;
+
+	if (DRAW_LEN_AUTO==gt) {
+		draw_length_selector.set_text (_("Auto"));
+		return;
+	}
 
 	unsigned int grid_index = (unsigned int)gt;
 	string str = grid_type_strings[grid_index];
@@ -2436,7 +2441,7 @@ Editor::set_state (const XMLNode& node, int version)
 
 	GridType draw_length;
 	if (!node.get_property ("draw-length", draw_length)) {
-		draw_length = GridTypeBeat;
+		draw_length = DRAW_LEN_AUTO;
 	}
 	set_draw_length_to (draw_length);
 
@@ -3435,6 +3440,7 @@ Editor::build_grid_type_menu ()
 	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv8],  sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv8)));
 	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv16)));
 	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv32)));
+	draw_length_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) DRAW_LEN_AUTO)));
 
 	/* Note-Velocity when drawing */
 	{
@@ -3478,7 +3484,7 @@ Editor::setup_tooltips ()
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
-	set_tooltip (draw_length_selector, _("Note Length to Draw"));
+	set_tooltip (draw_length_selector, _("Note Length to Draw (AUTO uses the current Grid setting)"));
 	set_tooltip (draw_velocity_selector, _("Note Velocity to Draw"));
 	set_tooltip (draw_channel_selector, _("Note Channel to Draw"));
 	set_tooltip (grid_type_selector, _("Grid Mode"));
@@ -4381,7 +4387,7 @@ Editor::get_draw_length_as_beats (bool& success, timepos_t const & position)
 {
 	success = true;
 
-	const unsigned divisions = get_grid_beat_divisions (_draw_length);
+	const unsigned divisions = get_grid_beat_divisions (DRAW_LEN_AUTO ? _grid_type : _draw_length);
 	if (divisions) {
 		return Temporal::Beats::from_double (1.0 / (double) divisions);
 	}
