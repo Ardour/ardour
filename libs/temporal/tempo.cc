@@ -1954,7 +1954,11 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			if (bar_mod == 0) {
 
-				/* Advance by the meter note value size */
+				/* Advance beats by the meter note value size, and
+				 * then recompute the BBT and superclock
+				 * position corresponding to that musical time
+				 */
+
 				beats += metric.tempo().note_type_as_beats ();
 				bbt = metric.bbt_at (beats);
 				start = metric.superclock_at (beats);
@@ -2886,8 +2890,8 @@ double
 TempoMap::quarters_per_minute_at (timepos_t const & pos) const
 {
 	TempoPoint const & tp (tempo_at (pos));
+	cerr << "Get gpm using " << tp << " where sc-per-nt at " << pos << " = " << tp.superclocks_per_note_type_at (pos) << endl;
 	const double val = tp.note_types_per_minute_at_DOUBLE (pos) * (4.0 / tp.note_type());
-	std::cerr << "qpm @ " << pos << " using " << tp << " = " << val << std::endl;
 	return val;
 }
 
