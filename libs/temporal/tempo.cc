@@ -1926,7 +1926,15 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 		DEBUG_TRACE (DEBUG::Grid, string_compose ("start %1 end %2 bbt %3 find first/limit with limit @ = %4\n", start, end, bbt, *p));
 
-		while (start < p->sclock() && start < end) {
+		superclock_t limit;
+
+		if (p == _points.end()) {
+			limit = end;
+		} else {
+			limit = std::min (p->sclock(), end);
+		}
+
+		while (start < limit) {
 
 			/* add point to grid, perhaps */
 
