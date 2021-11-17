@@ -399,9 +399,9 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
 	}
 
 	/* Given that this tempo point controls tempo for the time indicated by
-	 * the argument of the following 4 functions, return information about
+	 * the argument of the following 3 functions, return information about
 	 * that time. The first 3 return convert between domains (with
-	 * ::sample_at() just being a convenience function); the fourth returns
+	 * ::sample_at() just being a convenience function); the third returns
 	 * information about the tempo at that time.
 	 */
 
