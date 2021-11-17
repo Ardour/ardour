@@ -511,7 +511,7 @@ TempoPoint::superclocks_per_note_type_at (timepos_t const &pos) const
 		return _superclocks_per_note_type;
 	}
 
-	return _superclocks_per_note_type * exp (-_omega * pos.superclocks());
+	return _superclocks_per_note_type * exp (-_omega * (pos.superclocks() - sclock()));
 }
 
 Temporal::Beats
