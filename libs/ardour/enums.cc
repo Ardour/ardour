@@ -875,7 +875,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (ForceLower);
 	REGISTER_ENUM (ForceHigher);
 	REGISTER_ENUM (ForceNearest);
-	REGISTER (_KeyEnforcementPolicy);
+	REGISTER_BITS (_KeyEnforcementPolicy);
 }
 
 } /* namespace ARDOUR */
