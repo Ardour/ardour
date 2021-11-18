@@ -76,7 +76,7 @@ MidiAutomationLine::get_verbose_cursor_string (double fraction) const
 		return AutomationLine::get_verbose_cursor_string(fraction);
 	}
 
-	const uint8_t channel = mtv->get_channel_for_add();
+	const uint8_t channel = mtv->get_preferred_midi_channel();
 	boost::shared_ptr<const ValueNameList> value_names = mtv->route()->instrument_info().value_name_list_by_control (channel, _parameter.id());
 
 	if (!value_names) {

@@ -1724,7 +1724,7 @@ MidiTimeAxisView::stop_step_editing ()
  *  of the channel selector.
  */
 uint8_t
-MidiTimeAxisView::get_channel_for_add () const
+MidiTimeAxisView::get_preferred_midi_channel () const
 {
 	if (_editor.draw_channel() != Editing::DRAW_CHAN_AUTO) {
 		return _editor.draw_channel();

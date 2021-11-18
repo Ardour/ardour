@@ -108,7 +108,7 @@ public:
 	void first_idle ();
 	void set_note_highlight (uint8_t note);
 
-	uint8_t get_channel_for_add () const;
+	uint8_t get_preferred_midi_channel () const;
 
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&);
 	void use_midnam_info ();

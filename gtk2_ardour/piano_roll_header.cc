@@ -688,7 +688,7 @@ PianoRollHeader::send_note_on (uint8_t note)
 	//cerr << "note on: " << (int) note << endl;
 
 	if (track) {
-		_event[0] = (MIDI_CMD_NOTE_ON | mtv->get_channel_for_add ());
+		_event[0] = (MIDI_CMD_NOTE_ON | mtv->get_preferred_midi_channel ());
 		_event[1] = note;
 		_event[2] = 100;
 
@@ -703,7 +703,7 @@ PianoRollHeader::send_note_off (uint8_t note)
 	MidiTimeAxisView*                    mtv   = dynamic_cast<MidiTimeAxisView*> (&_view.trackview ());
 
 	if (track) {
-		_event[0] = (MIDI_CMD_NOTE_OFF | mtv->get_channel_for_add ());
+		_event[0] = (MIDI_CMD_NOTE_OFF | mtv->get_preferred_midi_channel ());
 		_event[1] = note;
 		_event[2] = 100;
 

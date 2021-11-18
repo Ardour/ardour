@@ -829,6 +829,7 @@ MidiRegionView::show_list_editor ()
 	_list_editor->present ();
 }
 
+
 /** Add a note to the model, and the view, at a canvas (click) coordinate.
  * \param t time in samples relative to the position of the region
  * \param y vertical position in pixels
@@ -855,7 +856,7 @@ MidiRegionView::create_note_at (timepos_t const & t, double y, Temporal::Beats l
 	Temporal::Beats region_start = t.beats();
 
 	const double  note     = view->y_to_note(y);
-	const uint8_t chan     = mtv->get_channel_for_add();
+	const uint8_t chan     = get_channel_for_add(region_start);
 	const uint8_t velocity = get_velocity_for_add (region_start);
 
 	const boost::shared_ptr<NoteType> new_note (new NoteType (chan, region_start, length, (uint8_t)note, velocity));
@@ -2002,7 +2003,7 @@ MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const
 /** Add a patch change to the region.
  *  @param t Time in samples relative to region position
  *  @param patch Patch to add; time and channel are ignored (time is converted from t, and channel comes from
- *  MidiTimeAxisView::get_channel_for_add())
+ *  MidiTimeAxisView::get_preferred_midi_channel())
  */
 void
 MidiRegionView::add_patch_change (timecnt_t const & t, Evoral::PatchChange<Temporal::Beats> const & patch)
@@ -3917,7 +3918,7 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	_ghost_note->note()->set_time (snapped_beats);
 	_ghost_note->note()->set_length (length);
 	_ghost_note->note()->set_note (y_to_note (y));
-	_ghost_note->note()->set_channel (mtv->get_channel_for_add ());
+	_ghost_note->note()->set_channel (mtv->get_preferred_midi_channel ());
 	_ghost_note->note()->set_velocity (get_velocity_for_add (snapped_beats));
 
 	update_note (_ghost_note, false);
@@ -4247,6 +4248,32 @@ MidiRegionView::show_verbose_cursor (string const & text, double xoffset, double
 	trackview.editor().verbose_cursor()->set (text);
 	trackview.editor().verbose_cursor()->show ();
 	trackview.editor().verbose_cursor()->set_offset (ArdourCanvas::Duple (xoffset, yoffset));
+}
+
+
+uint8_t
+MidiRegionView::get_channel_for_add (MidiModel::TimeType time) const
+{
+	/* first, use the user-specified channel in the editor */
+	PublicEditor& editor  = trackview.editor();
+	if (editor.draw_channel() != Editing::DRAW_CHAN_AUTO) {
+		return editor.draw_channel();
+	}
+
+	/* second, use the nearest note in the region-view (consistent with get_velocity_for_add behavior) */
+	if (!_model->notes().empty()) {
+		MidiModel::Notes::const_iterator m = _model->note_lower_bound(time);
+		return (*m)->channel();
+	}
+
+	/* lastly: query the track's channel filter */
+	MidiTimeAxisView* const mtv  = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	if (mtv) {
+		return mtv->get_preferred_midi_channel();
+	}
+
+	/* fallback: ch0 */
+	return 0;
 }
 
 uint8_t

@@ -441,6 +441,7 @@ public:
 	void show_verbose_cursor (boost::shared_ptr<NoteType>) const;
 
 	uint8_t get_velocity_for_add (ARDOUR::MidiModel::TimeType time) const;
+	uint8_t get_channel_for_add (ARDOUR::MidiModel::TimeType time) const;
 
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
