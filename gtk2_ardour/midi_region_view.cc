@@ -856,6 +856,13 @@ MidiRegionView::create_note_at (timepos_t const & t, double y, Temporal::Beats l
 	Temporal::Beats region_start = t.beats();
 
 	const double  note     = view->y_to_note(y);
+
+	if (mtv->midi_track()->key_enforcment_policy() & NoInsert) {
+		if (!mtv->midi_track()->key().in_key (note)) {
+			return;
+		}
+	}
+
 	const uint8_t chan     = get_channel_for_add(region_start);
 	const uint8_t velocity = get_velocity_for_add (region_start);
 
