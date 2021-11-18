@@ -74,6 +74,8 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _pending_gain (1.0)
 	, _midi_velocity_effect (0.)
 	, _ui (0)
+	, expected_end_sample (0)
+	, since_transition (0)
 {
 	add_property (_legato);
 	add_property (_use_follow);
@@ -289,6 +291,7 @@ Trigger::jump_start()
 	   wait for quantization.
 	*/
 	_state = Running;
+	/* XXX set expected_end_sample */
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
 	PropertyChanged (ARDOUR::Properties::running);
 }
@@ -424,18 +427,21 @@ Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal:
 	}
 
 	timepos_t transition_time (BeatTime);
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	Temporal::BBT_Time start_bbt;
 
 	/* XXX need to use global grid here is quantization == zero */
 
 	if (_quantization.bars == 0) {
-		transition_time = timepos_t (start.snap_to (Temporal::Beats (_quantization.beats, _quantization.ticks)));
+		Temporal::Beats start_beats = start.snap_to (Temporal::Beats (_quantization.beats, _quantization.ticks));
+		start_bbt = tmap->bbt_at (start_beats);
+		transition_time = timepos_t (start_beats);
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 start at %2, sb %3 eb %4\n", index(), transition_time.beats(), start, end, _quantization));
 	} else {
-		TempoMap::SharedPtr tmap (TempoMap::use());
-		BBT_Time bbt = tmap->bbt_at (timepos_t (start));
-		bbt = bbt.round_up_to_bar ();
-		bbt.bars = (bbt.bars / _quantization.bars) * _quantization.bars;
-		transition_time = timepos_t (tmap->quarters_at (bbt));
+		start_bbt = tmap->bbt_at (timepos_t (start));
+		start_bbt = start_bbt.round_up_to_bar ();
+		start_bbt.bars = (start_bbt.bars / _quantization.bars) * _quantization.bars;
+		transition_time = timepos_t (tmap->quarters_at (start_bbt));
 	}
 
 	if (transition_time.beats() >= start && transition_time < end) {
@@ -452,12 +458,16 @@ Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal:
 		} else if (_state == WaitingToStart) {
 			retrigger ();
 			_state = Running;
+			expected_end_sample = tmap->sample_at (tmap->bbt_walk(start_bbt, BBT_Offset (round (_barcnt), 0, 0)));
+			cerr << "starting at " << start_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (start_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
 			_box.prepare_next (_index);
 			PropertyChanged (ARDOUR::Properties::running);
 			return RunStart;
 		} else if (_state == WaitingForRetrigger) {
 			retrigger ();
 			_state = Running;
+			expected_end_sample = tmap->sample_at (tmap->bbt_walk(start_bbt, BBT_Offset (round (_barcnt), 0, 0)));
+			cerr << "starting at " << start_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (start_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
 			_box.prepare_next (_index);
 			PropertyChanged (ARDOUR::Properties::running);
 			return RunAll;
@@ -679,14 +689,13 @@ AudioTrigger::determine_tempo ()
 		mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
 
 		_apparent_tempo = mbpm.estimateTempoOfSamples (data[0], data_length);
-		_apparent_tempo = 120.0;
 
 		if (_apparent_tempo == 0.0) {
 			/* no apparent tempo, just return since we'll use it as-is */
 			return;
 		}
 
-		cerr << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data_length / _box.session().sample_rate() << " seconds\n";
+		// err << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data_length / _box.session().sample_rate() << " seconds\n";
 
 		const double seconds = (double) data_length  / _box.session().sample_rate();
 		const double quarters = (seconds / 60.) * _apparent_tempo;
@@ -776,6 +785,7 @@ void
 AudioTrigger::retrigger ()
 {
 	read_index = _start_offset + _legato_offset;
+	since_transition = 0;
 	_legato_offset = 0; /* used one time only */
 	_stretcher->reset ();
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, read_index));
@@ -787,6 +797,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
 	const uint32_t nchans = ar->n_channels();
 	const bool long_enough_to_fade = (nframes >= 64);
+	const pframes_t orig_nframes = nframes;
 
 	assert (ar);
 	assert (active());
@@ -801,7 +812,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 	const double stretch = _apparent_tempo / bpm;
 	_stretcher->setTimeRatio (stretch);
 
-	cerr << "apparent " << _apparent_tempo << " bpm " << bpm << " TR " << std::setprecision (4) << stretch << endl;
+	// cerr << "apparent " << _apparent_tempo << " bpm " << bpm << " TR " << std::setprecision (4) << stretch << endl;
 
 	int avail = _stretcher->available();
 
@@ -813,8 +824,6 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 	while (nframes) {
 
 		pframes_t this_read;
-
-#if 1
 
 		if (read_index < last_sample) {
 
@@ -838,10 +847,12 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 				_stretcher->process (in, this_read, at_end);
 				read_index += this_read;
-
 				avail = _stretcher->available ();
+
 			}
+
 		} else {
+
 			/* finished reading data, but have not yet delivered it all */
 			avail = _stretcher->available ();
 			this_read = (pframes_t) std::min ((pframes_t) nframes, (pframes_t) avail);
@@ -858,8 +869,8 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 		/* fetch the stretch */
 
-		_stretcher->retrieve (out, this_read);
-#endif
+		pframes_t rc = _stretcher->retrieve (out, this_read);
+		assert (rc == this_read);
 
 		/* deliver to buffers */
 
@@ -867,8 +878,7 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 
 			uint64_t channel = chn %  data.size();
 			AudioBuffer& buf (bufs.get_audio (chn));
-			//Sample* src = out[channel];
-			Sample* src = data[channel] + read_index;
+			Sample* src = out[channel];
 
 			if (first) {
 				buf.read_from (src, this_read, dest_offset);
@@ -883,22 +893,42 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 				}
 			}
 		}
-
+		since_transition += this_read;
 		avail = _stretcher->available ();
 
 		if (read_index >= last_sample && avail <= 0) {
+
+			cerr << "at end, since_transition @ " << transition_samples  << " since_transition " << since_transition << " = " << transition_samples + since_transition << " vs. " << expected_end_sample << endl;
 
 			/* We reached the end */
 
 			_loop_cnt++;
 
 			if ((_loop_cnt == _follow_count) || (_launch_style == Repeat) || (_box.peek_next_trigger() == this)) { /* self repeat */
-				nframes -= this_read;
-				dest_offset += this_read;
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, but set to loop, so retrigger\n", index()));
-				retrigger ();
-				/* and go around again */
-				continue;
+
+				if (since_transition < expected_end_sample) {
+					if (!_box.pass_thru()) {
+						for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
+
+							uint64_t channel = chn %  data.size();
+							AudioBuffer& buf (bufs.get_audio (chn));
+							buf.silence (orig_nframes - nframes, nframes);
+						}
+					}
+					_state = WaitingForRetrigger;
+					retrigger ();
+					avail = 0;
+					break;
+				} else {
+					nframes -= this_read;
+					dest_offset += this_read;
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, but set to loop, so retrigger\n", index()));
+					retrigger ();
+					avail = 0;
+					cerr << "go around again with nf " << nframes << " ...\n";
+					/* and go around again */
+					continue;
+				}
 
 			} else {
 

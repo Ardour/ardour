@@ -225,6 +225,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	gain_t                    _pending_gain;
 	float                     _midi_velocity_effect;
 	void*                     _ui;
+	samplepos_t                expected_end_sample;
+	samplecnt_t                since_transition;
 
 	void set_region_internal (boost::shared_ptr<Region>);
 	void request_state (State s);
