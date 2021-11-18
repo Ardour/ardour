@@ -811,6 +811,13 @@ enum LocateTransportDisposition {
 	RollIfAppropriate
 };
 
+enum KeyEnforcementPolicy {
+	NoDraw = 0x1, /* do not show visually as candidate for new notes */
+	ForceLower = 0x2,
+	ForceHigher = 0x4,
+	ForceNearest = 0x8
+};
+
 typedef std::vector<CaptureInfo*> CaptureInfos;
 
 } // namespace ARDOUR
