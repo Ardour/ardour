@@ -155,8 +155,8 @@ public:
 	MusicalKey const & key() const { return _key; }
 	void set_key (MusicalKey const & key);
 
-	bool enforce_key () const;
-	void set_enforce_key (bool yn);
+	KeyEnforcementPolicy key_enforcment_policy () const;
+	void set_key_enforcement_policy (KeyEnforcementPolicy);
 
 protected:
 
@@ -181,7 +181,7 @@ private:
 	MidiChannelFilter           _capture_filter;
 
 	MusicalKey                  _key;
-	bool                        _enforce_key;
+	KeyEnforcementPolicy        _key_enforcement_policy;
 
 	void set_state_part_two ();
 	void set_state_part_three ();

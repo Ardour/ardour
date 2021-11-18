@@ -642,9 +642,9 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	items.push_back (MenuElem (_("Scale"), *build_musical_mode_menu ()));
 	items.push_back (MenuElem (_("Tonic (Root)"), *build_musical_root_menu ()));
-	items.push_back (CheckMenuElem (_("Enforce Key")));
-	Gtk::CheckMenuItem* eki = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
-	eki->set_active (midi_track ()->enforce_key ());
+	// items.push_back (CheckMenuElem (_("Enforce Key")));
+	// Gtk::CheckMenuItem* eki = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+	// eki->set_active (midi_track ()->enforce_key ());
 	// eki->signal_activate().connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_enforce_musical_key));
 
 	items.push_back (MenuElem (_("Color Mode"), *build_color_mode_menu ()));

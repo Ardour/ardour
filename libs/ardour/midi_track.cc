@@ -103,7 +103,7 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	, _input_active (true)
 	, _restore_pgm_on_load (true)
 	, _key (MusicalKey (MusicalMode::IonianMajor, 0))
-	, _enforce_key (false)
+	, _key_enforcement_policy (KeyEnforcementPolicy (0))
 {
 	_session.SessionLoaded.connect_same_thread (*this, boost::bind (&MidiTrack::restore_controls, this));
 
@@ -138,15 +138,15 @@ MidiTrack::init ()
 }
 
 void
-MidiTrack::set_enforce_key (bool yn)
+MidiTrack::set_key_enforcement_policy (KeyEnforcementPolicy kep) 
 {
-	_enforce_key = yn;
+	_key_enforcement_policy = kep;
 }
 
-bool
-MidiTrack::enforce_key () const
+KeyEnforcementPolicy
+MidiTrack::key_enforcment_policy () const
 {
-	return _enforce_key;
+	return _key_enforcement_policy;
 }
 
 void
