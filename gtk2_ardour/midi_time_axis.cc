@@ -642,10 +642,7 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	items.push_back (MenuElem (_("Scale"), *build_musical_mode_menu ()));
 	items.push_back (MenuElem (_("Tonic (Root)"), *build_musical_root_menu ()));
-	// items.push_back (CheckMenuElem (_("Enforce Key")));
-	// Gtk::CheckMenuItem* eki = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
-	// eki->set_active (midi_track ()->enforce_key ());
-	// eki->signal_activate().connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_enforce_musical_key));
+	items.push_back (MenuElem (_("Key Enforcement"), *build_key_enforcement_menu()));
 
 	items.push_back (MenuElem (_("Color Mode"), *build_color_mode_menu ()));
 
@@ -1145,6 +1142,65 @@ MidiTimeAxisView::build_musical_root_menu ()
 	}
 
 	return root_menu;
+}
+
+Gtk::Menu*
+MidiTimeAxisView::build_key_enforcement_menu ()
+{
+	using namespace Menu_Helpers;
+
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items();
+	menu->set_name ("ArdourContextMenu");
+
+	RadioMenuItem::Group group;
+	CheckMenuItem* last_check_item;
+	RadioMenuItem* last_radio_item;
+
+	KeyEnforcementPolicy kep = midi_track()->key_enforcment_policy();
+
+	items.push_back (CheckMenuElem (_("Don't show non-scale ghost notes while drawing/editing")));
+	last_check_item = dynamic_cast<CheckMenuItem*>(&items.back());
+	last_check_item->set_active (kep & NoDraw);
+	last_check_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_key_enforcement_policy), NoDraw, last_check_item));
+	items.push_back (CheckMenuElem (_("Don't allow mouse edits to create non-scale notes")));
+	last_check_item = dynamic_cast<CheckMenuItem*>(&items.back());
+	last_check_item->set_active (kep & NoInsert);
+	last_check_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_key_enforcement_policy), NoInsert, last_check_item));
+
+	items.push_back (RadioMenuElem (group, _("Force note edits of non-scale notes to next lower note")));
+	last_radio_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_radio_item->set_active (kep & ForceLower);
+	last_radio_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_key_enforcement_policy), ForceLower, last_radio_item));
+	items.push_back (RadioMenuElem (group, _("Force note edits of non-scale notes to next higher note")));
+	last_radio_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_radio_item->set_active (kep & ForceHigher);
+	last_radio_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_key_enforcement_policy), ForceHigher, last_radio_item));
+	items.push_back (RadioMenuElem (group, _("Force note edits of non-scale notes to nearest note")));
+	last_radio_item = dynamic_cast<RadioMenuItem*>(&items.back());
+	last_radio_item->set_active (kep & ForceNearest);
+	last_radio_item->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_key_enforcement_policy), ForceNearest, last_radio_item));
+	return menu;
+}
+
+void
+MidiTimeAxisView::toggle_key_enforcement_policy (KeyEnforcementPolicy kepb, CheckMenuItem* item)
+{
+	KeyEnforcementPolicy kep = midi_track()->key_enforcment_policy();
+
+	/* Some of the menu items that trigger this are radio menu items, and
+	   this method will be called when they go inactive. We want to ignore
+	   these calls.
+	*/
+
+	if (!item->get_active()) {
+		return;
+	}
+	if (kep & kepb) {
+		midi_track()->set_key_enforcement_policy (KeyEnforcementPolicy (kep & ~kepb));
+	} else {
+		midi_track()->set_key_enforcement_policy (KeyEnforcementPolicy (kep | kepb));
+	}
 }
 
 void

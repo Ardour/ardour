@@ -136,7 +136,9 @@ private:
 	Gtk::Menu* build_color_mode_menu();
 	Gtk::Menu* build_musical_mode_menu ();
 	Gtk::Menu* build_musical_root_menu ();
+	Gtk::Menu* build_key_enforcement_menu ();
 
+	void toggle_key_enforcement_policy (ARDOUR::KeyEnforcementPolicy, Gtk::CheckMenuItem*);
 	void set_musical_mode (MusicalMode::Type);
 	void set_musical_root (int note);
 	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
