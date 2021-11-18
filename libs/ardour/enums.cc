@@ -870,6 +870,8 @@ setup_enum_writer ()
 	REGISTER (_TriggerLaunchStyle);
 
 	REGISTER_ENUM (NoDraw);
+	REGISTER_ENUM (NoInsert);
+	REGISTER_ENUM (NoPlay);
 	REGISTER_ENUM (ForceLower);
 	REGISTER_ENUM (ForceHigher);
 	REGISTER_ENUM (ForceNearest);

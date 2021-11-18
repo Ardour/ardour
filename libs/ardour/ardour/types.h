@@ -813,9 +813,11 @@ enum LocateTransportDisposition {
 
 enum KeyEnforcementPolicy {
 	NoDraw = 0x1, /* do not show visually as candidate for new notes */
-	ForceLower = 0x2,
-	ForceHigher = 0x4,
-	ForceNearest = 0x8
+	NoInsert = 0x2,
+	NoPlay = 0x4,
+	ForceLower = 0x8,
+	ForceHigher = 0x10,
+	ForceNearest = 0x20
 };
 
 typedef std::vector<CaptureInfo*> CaptureInfos;
