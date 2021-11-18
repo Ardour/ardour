@@ -4261,9 +4261,17 @@ MidiRegionView::get_channel_for_add (MidiModel::TimeType time) const
 	}
 
 	/* second, use the nearest note in the region-view (consistent with get_velocity_for_add behavior) */
+
 	if (!_model->notes().empty()) {
 		MidiModel::Notes::const_iterator m = _model->note_lower_bound(time);
-		return (*m)->channel();
+		if (m == _model->notes().begin()) {
+			// Before the start, use the channel of the first note
+			return (*m)->channel();
+		} else if (m == _model->notes().end()) {
+			// Past the end, use the channel of the last note
+			--m;
+			return (*m)->channel();
+		}
 	}
 
 	/* lastly: query the track's channel filter */
@@ -4284,17 +4292,25 @@ MidiRegionView::get_velocity_for_add (MidiModel::TimeType time) const
 		return editor.draw_velocity();
 	}
 
-	if (_model->notes().empty()) {
+	if (_model->notes().size() < 2) {
 		return 0x40;  // No notes, use default
 	}
 
-	MidiModel::Notes::const_iterator m = _model->note_lower_bound(time);
-	if (m == _model->notes().begin()) {
-		// Before the start, use the velocity of the first note
-		return (*m)->velocity();
-	} else if (m == _model->notes().end()) {
-		// Past the end, use the velocity of the last note
-		--m;
+	MidiModel::Notes::const_iterator m = _model->notes().end();
+
+	if (!_model->notes().empty()) {
+		m = _model->note_lower_bound(time);
+		if (m == _model->notes().begin()) {
+			// Before the start, use the velocity of the first note
+			return (*m)->velocity();
+		} else if (m == _model->notes().end()) {
+			// Past the end, use the velocity of the last note
+			--m;
+			return (*m)->velocity();
+		}
+	}
+
+	if (_model->notes().size() == 1) {
 		return (*m)->velocity();
 	}
 
