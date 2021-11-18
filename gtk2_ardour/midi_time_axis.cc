@@ -640,8 +640,8 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	cmi->set_active (midi_track ()->restore_pgm_on_load ());
 	cmi->signal_activate().connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_restore_pgm_on_load));
 
-	items.push_back (MenuElem (_("Mode (Scale)"), *build_musical_mode_menu ()));
-	items.push_back (MenuElem (_("Root"), *build_musical_root_menu ()));
+	items.push_back (MenuElem (_("Scale"), *build_musical_mode_menu ()));
+	items.push_back (MenuElem (_("Tonic (Root)"), *build_musical_root_menu ()));
 	items.push_back (CheckMenuElem (_("Enforce Key")));
 	Gtk::CheckMenuItem* eki = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	eki->set_active (midi_track ()->enforce_key ());
