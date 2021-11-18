@@ -3921,6 +3921,12 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	_ghost_note->note()->set_channel (mtv->get_preferred_midi_channel ());
 	_ghost_note->note()->set_velocity (get_velocity_for_add (snapped_beats));
 
+	if (mtv->midi_track()->key().in_key (_ghost_note->note()->note())) {
+		_ghost_note->show ();
+	} else {
+		_ghost_note->hide ();
+	}
+
 	update_note (_ghost_note, false);
 
 	show_verbose_cursor (_ghost_note->note ());
