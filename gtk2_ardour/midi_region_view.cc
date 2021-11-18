@@ -2697,6 +2697,9 @@ MidiRegionView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, b
 	uint8_t highest_note_in_selection = 0;
 	uint8_t highest_note_difference   = 0;
 
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	MusicalKey const & key (mtv->midi_track()->key());
+
 	if (!copy) {
 		// find highest and lowest notes first
 
@@ -2742,7 +2745,11 @@ MidiRegionView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, b
 			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
 			highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
 
-			note_diff_add_change (*i, MidiModel::NoteDiffCommand::NoteNumber, new_pitch);
+			if (!(mtv->midi_track()->key_enforcment_policy() & NoInsert) || key.in_key (new_pitch)) {
+				note_diff_add_change (*i, MidiModel::NoteDiffCommand::NoteNumber, new_pitch);
+			} else {
+				/* XXX remove it? or what? */
+			}
 		}
 	} else {
 
@@ -2784,6 +2791,10 @@ MidiRegionView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, b
 
 			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
 			highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
+
+			if (!(mtv->midi_track()->key_enforcment_policy() & NoInsert) || key.in_key (new_pitch)) {
+				note_diff_add_change (*i, MidiModel::NoteDiffCommand::NoteNumber, new_pitch);
+			}
 
 			note_diff_add_note ((*i)->note(), true);
 
