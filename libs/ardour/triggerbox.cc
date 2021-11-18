@@ -1962,6 +1962,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			 */
 
 			trigger_samples = nframes - (currently_playing->transition_samples - start_sample);
+			if (currently_playing->transition_samples < start_sample) {
+				abort ();
+			}
 			dest_offset = 0;
 
 		} else if (rt == Trigger::RunStart) {
