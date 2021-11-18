@@ -1645,6 +1645,15 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	const timepos_t note_start (note->time());
 	timepos_t note_end (note->end_time());
 
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	MusicalKey const & key (mtv->midi_track()->key());
+	if (!(mtv->midi_track()->key_enforcment_policy() & NoDraw) || key.in_key (note->note())) {
+		ev->show ();
+	} else {
+		ev->hide ();
+		return;
+	}
+
 	/* The note is drawn as a child item of this region view, so its
 	 * coordinate system is relative to the region view. This means that x0
 	 * and x1 are pixel offsets relative to beginning of the region (view)
@@ -3927,13 +3936,6 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	_ghost_note->note()->set_note (y_to_note (y));
 	_ghost_note->note()->set_channel (mtv->get_preferred_midi_channel ());
 	_ghost_note->note()->set_velocity (get_velocity_for_add (snapped_beats));
-
-	MusicalKey const & key (mtv->midi_track()->key());
-	if (!(mtv->midi_track()->key_enforcment_policy() & NoDraw) || key.in_key (_ghost_note->note()->note())) {
-		_ghost_note->show ();
-	} else {
-		_ghost_note->hide ();
-	}
 
 	update_note (_ghost_note, false);
 
