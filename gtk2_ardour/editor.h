@@ -1320,6 +1320,7 @@ private:
 	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, Temporal::timepos_t const & position);
 	void recover_regions (ARDOUR::RegionList);
 	void remove_selected_regions ();
+	void remove_regions (const RegionSelection&, bool can_ripple, bool as_part_of_other_command);
 	void remove_clicked_region ();
 	void show_region_properties ();
 	void show_midi_list_editor ();
@@ -1343,6 +1344,8 @@ private:
 	void quantize_regions (const RegionSelection& rs);
 	void legatize_region (bool shrink_only);
 	void legatize_regions (const RegionSelection& rs, bool shrink_only);
+	void deinterlace_midi_regions (const RegionSelection& rs);
+	void deinterlace_selected_midi_regions ();
 	void transform_region ();
 	void transform_regions (const RegionSelection& rs);
 	void transpose_region ();

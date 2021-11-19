@@ -767,7 +767,7 @@ EditorSources::remove_selected_sources ()
 
 			}
 
-			_editor->remove_selected_regions(); // this operation is undo-able
+			_editor->remove_regions( _editor->get_regions_from_selection_and_entered(), false /*can_ripple*/, false /*as_part_of_other_command*/); // this operation is undo-able
 
 			if (opt==2) {
 				for (std::list<boost::weak_ptr<ARDOUR::Source> >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i) {

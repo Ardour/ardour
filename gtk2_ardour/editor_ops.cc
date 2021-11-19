@@ -4627,15 +4627,25 @@ Editor::recover_regions (ARDOUR::RegionList regions)
 }
 
 
-/** Remove the selected regions */
+/** This is an editor Action, called with no arguments */
 void
 Editor::remove_selected_regions ()
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 
-	if (!_session || rs.empty()) {
+	remove_regions (rs, true /*can_ripple*/, false /*as_part_of_other_command*/);
+}
+
+/** Remove region(s) from their associated playlists */
+void
+Editor::remove_regions (const RegionSelection& sel, bool can_ripple, bool as_part_of_other_command)
+{
+	if (!_session || sel.empty()) {
 		return;
 	}
+
+	/* make a local copy */
+	RegionSelection rs = sel;
 
 	list<boost::shared_ptr<Region> > regions_to_remove;
 
@@ -4675,7 +4685,7 @@ Editor::remove_selected_regions ()
 		playlist->freeze ();
 		playlist->remove_region (*rl);
 
-		if (should_ripple()) {
+		if (can_ripple && should_ripple()) {
 			do_ripple (playlist, (*rl)->position(), -(*rl)->length(), boost::shared_ptr<Region>(), false);
 		}
 	}
@@ -4690,7 +4700,7 @@ Editor::remove_selected_regions ()
 		   so we need to do a recursive diff here.
 		*/
 
-		if (!in_command) {
+		if (!in_command && !as_part_of_other_command) {
 			begin_reversible_command (_("remove region"));
 			in_command = true;
 		}
@@ -4701,7 +4711,7 @@ Editor::remove_selected_regions ()
 		_session->add_command(new StatefulDiffCommand (*pl));
 	}
 
-	if (in_command) {
+	if (in_command && !as_part_of_other_command) {
 		commit_reversible_command ();
 	}
 }
@@ -5836,6 +5846,43 @@ Editor::legatize_region (bool shrink_only)
 {
 	if (_session) {
 		legatize_regions(get_regions_from_selection_and_entered (), shrink_only);
+	}
+}
+
+void
+Editor::deinterlace_midi_regions (const RegionSelection& rs)
+{
+	begin_reversible_command (_("de-interlace midi"));
+
+	RegionSelection rcopy = rs;
+	if (_session) {
+
+		for (RegionSelection::iterator i = rcopy.begin (); i != rcopy.end(); i++) {
+			MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*i);
+			if (mrv) {
+				XMLNode& before (mrv->region()->playlist()->get_state());
+
+				/* pass the regions to deinterlace_midi_region*/
+				_session->deinterlace_midi_region(mrv->midi_region());
+
+				XMLNode& after (mrv->region()->playlist()->get_state());
+				_session->add_command (new MementoCommand<Playlist>(*(mrv->region()->playlist()), &before, &after));
+			}
+		}
+	}
+
+	/* Remove the original region(s) safely, without rippling, as part of this command */
+	remove_regions(rs, false /*can_ripple*/, true /*as_part_of_other_command*/);
+
+	commit_reversible_command ();
+}
+
+void
+Editor::deinterlace_selected_midi_regions ()
+{
+	if (_session) {
+		RegionSelection rs = get_regions_from_selection_and_entered ();
+		deinterlace_midi_regions(rs);
 	}
 }
 

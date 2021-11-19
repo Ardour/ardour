@@ -1874,6 +1874,7 @@ Editor::register_region_actions ()
 
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "quantize-region", _("Quantize..."), sigc::mem_fun (*this, &Editor::quantize_region));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "legatize-region", _("Legatize"), sigc::bind(sigc::mem_fun (*this, &Editor::legatize_region), false));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "deinterlace-midi", _("Deinterlace Into Layers"), sigc::mem_fun (*this, &Editor::deinterlace_selected_midi_regions));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "transform-region", _("Transform..."), sigc::mem_fun (*this, &Editor::transform_region));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "remove-overlap", _("Remove Overlap"), sigc::bind(sigc::mem_fun (*this, &Editor::legatize_region), true));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "insert-patch-change", _("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &Editor::insert_patch_change), false));
