@@ -40,9 +40,9 @@
 #include "temporal/bbt_time.h"
 #include "temporal/tempo.h"
 
+#include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/processor.h"
-#include "ardour/rt_midibuffer.h"
 
 #include "ardour/libardour_visibility.h"
 
@@ -321,24 +321,22 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
   private:
 	PBD::ID data_source;
-	RTMidiBuffer* data;
 	MidiStateTracker tracker;
 	PBD::ScopedConnection content_connection;
 
-	size_t read_index;          /* index into data */
-	samplecnt_t data_length;   /* using timestamps from data */
-	samplecnt_t usable_length; /* using timestamps from data */
+	Temporal::DoubleableBeats data_length;   /* using timestamps from data */
+	Temporal::DoubleableBeats usable_length; /* using timestamps from data */
+	Temporal::DoubleableBeats last_event_beats;
 
 	Temporal::BBT_Offset _start_offset;
 	Temporal::BBT_Offset _legato_offset;
 
-	void drop_data ();
+	MidiModel::const_iterator iter;
+	boost::shared_ptr<MidiModel> model;
+
 	int load_data (boost::shared_ptr<MidiRegion>);
 	RunResult at_end ();
 	void compute_and_set_length ();
-
-	void render (RTMidiBuffer&);
-	void re_render ();
 };
 
 

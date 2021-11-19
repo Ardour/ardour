@@ -965,39 +965,11 @@ AudioTrigger::reload (BufferSet&, void*)
 
 /*--------------------*/
 
-/* Design notes:
-
-   for the ::run() call, where we are in process() context, we will use an
-   RTMidiBuffer as the data structure holding our MIDI. The events here form a
-   simple array of sample-timestamped MIDI events (though with the extra
-   complication of having to handle 2/3 byte messages *slightly* differently
-   from larger messages).
-
-   This allows us to actually use a simple integer array index to record where
-   we are during playback and know when we've reached the end.
-
-   However, attributes of the trigger like start_offset are kept in BBT_Offsets
-   or Beats as appropriate, because those are the correct temporal
-   semantics. This means that we need to refer back to the Region for some
-   things, since it will be the place where we can look at MIDI events with
-   musical time stamps (unlike the sample timestamps in the RTMidiBuffer).
-
-   To keep things simple, this means that we will only render the actual clip
-   into the RTMidiBuffer - if start_offset/length reduce the clip from the
-   Region bounds, we will not place the "excess" in the RTMidiBuffer.
-
-   However, if we do any UI display of the clip, we will use the Region for
-   that, partly because it has music time timestamps and partly because we
-   already have GUI objects that can operate on MIDIRegions.
-
- */
-
 MIDITrigger::MIDITrigger (uint64_t n, TriggerBox& b)
 	: Trigger (n, b)
-	, data (0)
-	, read_index (0)
-	, data_length (0)
-	, usable_length (0)
+	, data_length (Temporal::Beats ())
+	, usable_length (Temporal::Beats ())
+	, last_event_beats (Temporal::Beats ())
 	, _start_offset (0, 0, 0)
 	, _legato_offset (0, 0, 0)
 {
@@ -1005,7 +977,6 @@ MIDITrigger::MIDITrigger (uint64_t n, TriggerBox& b)
 
 MIDITrigger::~MIDITrigger ()
 {
-	drop_data ();
 }
 
 void
@@ -1036,17 +1007,12 @@ MIDITrigger::position_as_fraction () const
 		return 0.0;
 	}
 
-	if (data->size() == 0) {
-		return 0.0;
-	}
+	Temporal::DoubleableBeats db (last_event_beats);
 
-	if (read_index >= data->size()) {
-		return 1.0;
-	}
+	double dl = db.to_double ();
+	double dr = data_length.to_double ();
 
-	const samplepos_t l = (*data)[read_index].timestamp;
-
-	return l / (double) usable_length;
+	return dl / dr;
 }
 
 XMLNode&
@@ -1075,7 +1041,7 @@ MIDITrigger::set_state (const XMLNode& node, int version)
 	_start_offset = Temporal::BBT_Offset (0, b.get_beats(), b.get_ticks());
 
 	node.get_property (X_("length"), t);
-	usable_length = t.samples();
+	usable_length = t.beats();
 
 	return 0;
 }
@@ -1115,7 +1081,7 @@ MIDITrigger::start_offset () const
 timepos_t
 MIDITrigger::current_pos() const
 {
-	return timepos_t ((*data)[read_index].timestamp);
+	return timepos_t (last_event_beats);
 }
 
 void
@@ -1147,7 +1113,7 @@ MIDITrigger::set_usable_length ()
 	/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
 
 	timecnt_t len (Temporal::Beats (_quantization.beats, _quantization.ticks), timepos_t (Temporal::Beats()));
-	usable_length = len.samples ();
+	usable_length = len.beats ();
 }
 
 timepos_t
@@ -1178,81 +1144,14 @@ MIDITrigger::set_region_threaded (boost::shared_ptr<Region> r)
 	}
 
 	set_region_internal (r);
-	load_data (mr);
-	set_length (mr->length());
-
-	mr->model()->ContentsChanged.connect_same_thread (content_connection, boost::bind (&MIDITrigger::re_render, this));
-	mr->PropertyChanged.connect_same_thread (content_connection, boost::bind (&MIDITrigger::re_render, this));
-
-	PropertyChanged (ARDOUR::Properties::name);
-
-	return 0;
-}
-
-void
-MIDITrigger::render (RTMidiBuffer& rtmb)
-{
-	/* this generates timestamps in session time. We want trigger-relative
-	 * time (so the beginning of the region/trigger is zero).
-	 */
-
-	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion> (_region);
-	assert (mr);
-
-	mr->render_range (rtmb, 0, Sustained, mr->start(), mr->length(), 0);
-	const sampleoffset_t shift = mr->position().samples();
-	rtmb.shift (-shift);
-}
-
-void
-MIDITrigger::reload (BufferSet& bufs, void* ptr)
-{
-	MidiBuffer& mb (bufs.get_midi (0));
-
-	tracker.resolve_notes (mb, 0);
-
-	RTMidiBuffer* rtmb = reinterpret_cast<RTMidiBuffer*> (ptr);
-
-	std::swap (data, rtmb);
-
-	delete rtmb;
-}
-
-void
-MIDITrigger::re_render ()
-{
-	RTMidiBuffer* new_data = new RTMidiBuffer;
-	std::cerr << "will re-render " << _region->name() << " into " << new_data << std::endl;
-	render (*new_data);
-	_box.request_reload (_index, new_data);
-}
-
-void
-MIDITrigger::drop_data ()
-{
-	delete data;
-	data = 0;
-}
-
-int
-MIDITrigger::load_data (boost::shared_ptr<MidiRegion> mr)
-{
-	drop_data ();
-
-	data = new RTMidiBuffer;
-
-	render (*data);
-
 	set_name (mr->name());
-
-	/* There may not be a MIDI event at the end of the region, but we use
-	 * the region size to define how long this trigger is. This allows for
-	 * space at the end of the region to be a part of the timing.
-	 */
-
-	data_length = mr->length().samples();
+	data_length = mr->length().beats();
+	set_length (mr->length());
+	model = mr->model ();
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
+
+	PropertyChanged (ARDOUR::Properties::name);
 
 	return 0;
 }
@@ -1262,58 +1161,65 @@ MIDITrigger::retrigger ()
 {
 	/* XXX need to deal with bar offsets */
 	// const Temporal::BBT_Offset o = _start_offset + _legato_offset;
-	read_index = 0;
+	iter = model->begin();
 	_legato_offset = Temporal::BBT_Offset ();
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2, ts = %3\n", _index, read_index, transition_samples));
+	last_event_beats = Temporal::Beats();
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2, ts = %3\n", _index, iter->time(), transition_beats));
+}
+
+void
+MIDITrigger::reload (BufferSet&, void*)
+{
 }
 
 int
-MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, pframes_t dest_offset, bool first, double bpm)
+MIDITrigger::run (BufferSet& bufs, samplepos_t start, samplepos_t end, pframes_t nframes, pframes_t dest_offset, bool first, double bpm)
 {
 	MidiBuffer& mb (bufs.get_midi (0));
+	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
+	const timepos_t region_start_time = _region->start();
+	const Temporal::Beats region_start = region_start_time.beats();
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 
 	while (true) {
 
-		if (read_index < data->size()) {
+		MidiEvent const & next_event (*iter);
 
-			RTMidiBuffer::Item const & item ((*data)[read_index]);
+		/* Event times are in beats, relative to start of source
+		 * file. We need to convert to region-relative time, and then
+		 * a session timeline time, which is defined by the time at
+		 * which we last transitioned (in this case, to being active)
+		 */
 
-			/* timestamps inside the RTMidiBuffer are relative to
-			   the start of the region.
+		const Temporal::Beats effective_time = transition_beats + (next_event.time() - region_start);
 
-			   Offset them to give us process/timeline timestamps.
-			*/
+		/* Now get samples */
 
-			const samplepos_t effective_time = transition_samples + item.timestamp;
+		samplepos_t effective_samples = tmap->sample_at (effective_time);
 
-			// cerr << start_sample << " .. " << end_sample << " Item " << read_index << " @ " << item.timestamp << " + " << transition_samples << " = " << effective_time << endl;
-
-			if (effective_time >= start_sample && effective_time < end_sample) {
-
-				uint32_t sz;
-				uint8_t const * bytes = data->bytes (item, sz);
-
-				samplepos_t process_relative_timestamp = effective_time - start_sample;
-
-				const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, process_relative_timestamp, sz, const_cast<uint8_t*>(bytes), false);
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("inserting %1\n", ev));
-				mb.insert_event (ev);
-
-				tracker.track (bytes);
-				read_index++;
-
-			} else {
-				break;
-			}
+		if (effective_samples > end) {
+			break;
 		}
 
-		const samplepos_t region_end = transition_samples + data_length;
+		/* Now we have to convert to a position within the buffer we
+		 * are writing to.
+		 */
 
-		if (read_index >= data->size() || (_state == Running && region_end >= start_sample && region_end <= end_sample)) {
+		samplepos_t buffer_samples = effective_samples - start + dest_offset;
+
+		const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, next_event.size(), const_cast<uint8_t*>(next_event.buffer()), false);
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("inserting %1\n", ev));
+		mb.insert_event (ev);
+		tracker.track (next_event.buffer());
+		last_event_beats = next_event.time();
+
+		++iter;
+
+		if (iter == model->end()) {
 
 			/* We reached the end */
 
-			cerr << "reached end, ri " << read_index << " rend " << transition_samples + data_length << " vs end @ " << end_sample << endl;
+			cerr << "reached end, @ " << transition_beats + data_length << endl;
 
 			_loop_cnt++;
 
@@ -1323,7 +1229,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 				/* we will "restart" at the beginning of the
 				   next iteration of the trigger.
 				*/
-				transition_samples = transition_samples + data_length;
+				transition_beats = transition_beats + data_length;
 				retrigger ();
 				/* and go around again */
 				continue;
