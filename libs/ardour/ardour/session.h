@@ -846,6 +846,8 @@ public:
 	boost::shared_ptr<AudioRegion> XMLAudioRegionFactory (const XMLNode&, bool full);
 	boost::shared_ptr<MidiRegion>  XMLMidiRegionFactory (const XMLNode&, bool full);
 
+	void deinterlace_midi_region ( boost::shared_ptr<MidiRegion> mr );
+
 	/* source management */
 
 	void import_files (ImportStatus&);

@@ -55,7 +55,10 @@
 #include "ardour/audioregion.h"
 #include "ardour/ffmpegfileimportable.h"
 #include "ardour/import_status.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_source.h"
 #include "ardour/mp3fileimportable.h"
+#include "ardour/playlist.h"
 #include "ardour/region_factory.h"
 #include "ardour/resampled_source.h"
 #include "ardour/runtime_functions.h"
@@ -496,6 +499,83 @@ remove_file_source (boost::shared_ptr<Source> source)
 
 	if (fs) {
 		::g_unlink (fs->path().c_str());
+	}
+}
+
+void
+Session::deinterlace_midi_region ( boost::shared_ptr<MidiRegion> mr )
+{
+	typedef vector<boost::shared_ptr<Source> > Sources;
+	Sources newfiles;
+
+	try {
+		boost::shared_ptr<MidiSource> ms = mr->midi_source(0);
+		boost::shared_ptr<SMFSource> smf = boost::dynamic_pointer_cast<SMFSource> (mr->midi_source(0));  //ToDo: handle compound sources?
+		string source_path = smf->path();
+
+		/* write_midi_data_to_new_files expects to find raw midi on-disk (SMF*).
+		 *  this means that a split looks like a no-op if the file wasn't written to disk yet.
+		 *  I've chosen to flush the file to disk, rather than reimplement write_midi_data_to_new_files for a Source */
+		smf->session_saved();  //ToDo:  should we just expose flush_midi() instead?
+
+		/* open the SMF file for reading */
+		boost::scoped_ptr<Evoral::SMF> smf_reader;
+		smf_reader.reset (new Evoral::SMF());
+		if (smf_reader->open( source_path )) {
+			throw Evoral::SMF::FileError (source_path);
+		}
+
+		/* create new file paths for 16 potential channels of midi data */
+		vector<string> smf_names;
+		for (int i = 0; i<16; i++) {
+			smf_names.push_back(string_compose("-ch%1", i+1));
+		}
+		vector<string> new_paths = get_paths_for_new_sources (false, source_path, 16, smf_names);
+
+		/* create source files and write 1 channel of midi data to each of them */
+		if (create_mono_sources_for_writing (new_paths, *this, sample_rate(), newfiles, 0) ) {
+			ImportStatus status;
+			write_midi_data_to_new_files (smf_reader.get(), status, newfiles, true /*split*/);
+		} else {
+			error << _("deinterlace_midi_region: failed to create sources") << endmsg;
+		}
+
+	} catch (...) {
+		error << _("deinterlace_midi_region: error opening MIDI file for splitting") << endmsg;
+		return;
+	}
+
+	/* not all 16 channels will have midi data;  delete any sources that turned up empty */
+	for (Sources::iterator x = newfiles.begin(); x != newfiles.end(); ) {
+		boost::shared_ptr<SMFSource> smfs;
+		if ((smfs = boost::dynamic_pointer_cast<SMFSource>(*x)) != 0 && smfs->is_empty()) {
+			x = newfiles.erase(x);
+		} else {
+			++x;
+		}
+	}
+
+	/* insert new regions with the properties of the source region */
+	for (Sources::iterator x = newfiles.begin(); x != newfiles.end(); x++) {
+
+		/* hand over the new Source to the session*/
+		add_source(*x);
+
+		/* create a whole-file region for this new source, so it shows up in the Source List...*/
+		PropertyList plist;
+		plist.add (Properties::whole_file, true);
+		plist.add (Properties::start, mr->start());
+		plist.add (Properties::position, mr->position());
+		plist.add (Properties::length, mr->length());
+		plist.add (Properties::name, (*x)->name());
+		plist.add (Properties::tags, "(split-chans)");
+		boost::shared_ptr<Region> whole = RegionFactory::create (*x, plist);
+
+		/* ... and insert a discrete copy into the playlist*/
+		PropertyList plist2;
+		plist2.add (ARDOUR::Properties::whole_file, false);
+		boost::shared_ptr<Region> copy (RegionFactory::create (whole, plist2));
+		mr->playlist()->add_region (copy, mr->position());
 	}
 }
 
