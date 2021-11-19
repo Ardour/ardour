@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-#   Copyright (C) 2009-2012 Paul Davis 
+#   Copyright (C) 2009-2012 Paul Davis
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -101,15 +101,16 @@ def signal(f, n, v):
     print("private:", file=f)
 
     print("""
-	/** The slots that this signal will call on emission */
-	typedef std::map<boost::shared_ptr<Connection>, slot_function_type> Slots;
-	Slots _slots;
+\t/** The slots that this signal will call on emission */
+\ttypedef std::map<boost::shared_ptr<Connection>, slot_function_type> Slots;
+\tSlots _slots;
 """, file=f)
 
     print("public:", file=f)
     print("", file=f)
     print("\t~Signal%d () {" % n, file=f)
 
+    print("\t\t_in_dtor.store (true, std::memory_order_release);", file=f)
     print("\t\tGlib::Threads::Mutex::Lock lm (_mutex);", file=f)
     print("\t\t/* Tell our connection objects that we are going away, so they don't try to call us */", file=f)
     print("\t\tfor (%sSlots::const_iterator i = _slots.begin(); i != _slots.end(); ++i) {" % typename, file=f)
@@ -125,67 +126,67 @@ def signal(f, n, v):
     else:
         p = ", %s" % comma_separated(Anan)
         q = ", %s" % comma_separated(an)
-    
+
     print("\tstatic void compositor (%sboost::function<void(%s)> f, EventLoop* event_loop, EventLoop::InvalidationRecord* ir%s) {" % (typename, comma_separated(An), p), file=f)
     print("\t\tevent_loop->call_slot (ir, boost::bind (f%s));" % q, file=f)
     print("\t}", file=f)
 
     print("""
-	/** Arrange for @a slot to be executed whenever this signal is emitted. 
-	    Store the connection that represents this arrangement in @a c.
+\t/** Arrange for @a slot to be executed whenever this signal is emitted.
+\t  * Store the connection that represents this arrangement in @a c.
+\t  *
+\t  * NOTE: @a slot will be executed in the same thread that the signal is
+\t  * emitted in.
+\t  */
 
-	    NOTE: @a slot will be executed in the same thread that the signal is
-	    emitted in.
-	*/
+\tvoid connect_same_thread (ScopedConnection& c, const slot_function_type& slot) {
+\t\tc = _connect (0, slot);
+\t}
 
-	void connect_same_thread (ScopedConnection& c, const slot_function_type& slot) {
-		c = _connect (0, slot);
-	}
+\t/** Arrange for @a slot to be executed whenever this signal is emitted.
+\t  * Add the connection that represents this arrangement to @a clist.
+\t  *
+\t  * NOTE: @a slot will be executed in the same thread that the signal is
+\t  * emitted in.
+\t  */
 
-	/** Arrange for @a slot to be executed whenever this signal is emitted. 
-	    Add the connection that represents this arrangement to @a clist.
+\tvoid connect_same_thread (ScopedConnectionList& clist, const slot_function_type& slot) {
+\t\tclist.add_connection (_connect (0, slot));
+\t}
 
-	    NOTE: @a slot will be executed in the same thread that the signal is
-	    emitted in.
-	*/
-	
-	void connect_same_thread (ScopedConnectionList& clist, const slot_function_type& slot) {
-		clist.add_connection (_connect (0, slot));
-	}
+\t/** Arrange for @a slot to be executed in the context of @a event_loop
+\t  * whenever this signal is emitted. Add the connection that represents
+\t  * this arrangement to @a clist.
+\t  *
+\t  * If the event loop/thread in which @a slot will be executed will
+\t  * outlive the lifetime of any object referenced in @a slot,
+\t  * then an InvalidationRecord should be passed, allowing
+\t  * any request sent to the @a event_loop and not executed
+\t  * before the object is destroyed to be marked invalid.
+\t  *
+\t  * "outliving the lifetime" doesn't have a specific, detailed meaning,
+\t  * but is best illustrated by two contrasting examples:
+\t  *
+\t  * 1) the main GUI event loop/thread - this will outlive more or
+\t  * less all objects in the application, and thus when arranging for
+\t  * @a slot to be called in that context, an invalidation record is
+\t  * highly advisable.
+\t  *
+\t  * 2) a secondary event loop/thread which will be destroyed along
+\t  * with the objects that are typically referenced by @a slot.
+\t  * Assuming that the event loop is stopped before the objects are
+\t  * destroyed, there is no reason to pass in an invalidation record,
+\t  * and MISSING_INVALIDATOR may be used.
+\t  */
 
-	/** Arrange for @a slot to be executed in the context of @a event_loop
-	    whenever this signal is emitted. Add the connection that represents
-	    this arrangement to @a clist.
-	
-	    If the event loop/thread in which @a slot will be executed will
-	    outlive the lifetime of any object referenced in @a slot,
-	    then an InvalidationRecord should be passed, allowing
-	    any request sent to the @a event_loop and not executed
-	    before the object is destroyed to be marked invalid.
-	
-	    "outliving the lifetime" doesn't have a specific, detailed meaning,
-	    but is best illustrated by two contrasting examples:
-	
-	    1) the main GUI event loop/thread - this will outlive more or 
-	    less all objects in the application, and thus when arranging for
-	    @a slot to be called in that context, an invalidation record is 
-	    highly advisable.
-	
-	    2) a secondary event loop/thread which will be destroyed along
-	    with the objects that are typically referenced by @a slot.
-	    Assuming that the event loop is stopped before the objects are
-	    destroyed, there is no reason to pass in an invalidation record,
-	    and MISSING_INVALIDATOR may be used.
-	*/
+\tvoid connect (ScopedConnectionList& clist,
+\t              PBD::EventLoop::InvalidationRecord* ir,
+\t              const slot_function_type& slot,
+\t              PBD::EventLoop* event_loop) {
 
-	void connect (ScopedConnectionList& clist, 
-		      PBD::EventLoop::InvalidationRecord* ir, 
-		      const slot_function_type& slot,
-		      PBD::EventLoop* event_loop) {
-
-		if (ir) {
-			ir->event_loop = event_loop;
-		}
+\t\tif (ir) {
+\t\t\tir->event_loop = event_loop;
+\t\t}
 """, file=f)
     u = []
     for i in range(0, n):
@@ -199,30 +200,30 @@ def signal(f, n, v):
     print("\t\tclist.add_connection (_connect (ir, boost::bind (&compositor, slot, event_loop, ir%s)));" % p, file=f)
 
     print("""
-	}
+\t}
 
-	/** See notes for the ScopedConnectionList variant of this function. This
-	 *  differs in that it stores the connection to the signal in a single
-	 *  ScopedConnection rather than a ScopedConnectionList.
-	 */
+\t/** See notes for the ScopedConnectionList variant of this function. This
+\t *  differs in that it stores the connection to the signal in a single
+\t *  ScopedConnection rather than a ScopedConnectionList.
+\t */
 
-	void connect (ScopedConnection& c, 
-		      PBD::EventLoop::InvalidationRecord* ir, 
-		      const slot_function_type& slot,
-		      PBD::EventLoop* event_loop) {
+\tvoid connect (ScopedConnection& c,
+\t              PBD::EventLoop::InvalidationRecord* ir,
+\t              const slot_function_type& slot,
+\t              PBD::EventLoop* event_loop) {
 
-		if (ir) {
-			ir->event_loop = event_loop;
-		}
+\t\tif (ir) {
+\t\t\tir->event_loop = event_loop;
+\t\t}
 """, file=f)
     print("\t\tc = _connect (ir, boost::bind (&compositor, slot, event_loop, ir%s));" % p, file=f)
     print("\t}", file=f)
 
     print("""
-	/** Emit this signal. This will cause all slots connected to it be executed
-	    in the order that they were connected (cross-thread issues may alter
-	    the precise execution time of cross-thread slots).
-	*/
+\t/** Emit this signal. This will cause all slots connected to it be executed
+\t  * in the order that they were connected (cross-thread issues may alter
+\t  * the precise execution time of cross-thread slots).
+\t  */
 """, file=f)
 
     if v:
@@ -242,18 +243,18 @@ def signal(f, n, v):
         print("\t\tstd::list<R> r;", file=f)
     print("\t\tfor (%sSlots::const_iterator i = s.begin(); i != s.end(); ++i) {" % typename, file=f)
     print("""
-			/* We may have just called a slot, and this may have resulted in
-			   disconnection of other slots from us.  The list copy means that
-			   this won't cause any problems with invalidated iterators, but we
-			   must check to see if the slot we are about to call is still on the list.
-			*/
-			bool still_there = false;
-			{
-				Glib::Threads::Mutex::Lock lm (_mutex);
-				still_there = _slots.find (i->first) != _slots.end ();
-			}
+\t\t\t/* We may have just called a slot, and this may have resulted in
+\t\t\t * disconnection of other slots from us.  The list copy means that
+\t\t\t * this won't cause any problems with invalidated iterators, but we
+\t\t\t * must check to see if the slot we are about to call is still on the list.
+\t\t\t */
+\t\t\tbool still_there = false;
+\t\t\t{
+\t\t\t\tGlib::Threads::Mutex::Lock lm (_mutex);
+\t\t\t\tstill_there = _slots.find (i->first) != _slots.end ();
+\t\t\t}
 
-			if (still_there) {""", file=f)
+\t\t\tif (still_there) {""", file=f)
     if v:
         print("\t\t\t\t(i->second)(%s);" % comma_separated(an), file=f)
     else:
@@ -268,16 +269,16 @@ def signal(f, n, v):
     print("\t}", file=f)
 
     print("""
-	bool empty () const {
-		Glib::Threads::Mutex::Lock lm (_mutex);
-		return _slots.empty ();
-	}
+\tbool empty () const {
+\t\tGlib::Threads::Mutex::Lock lm (_mutex);
+\t\treturn _slots.empty ();
+\t}
 """, file=f)
     print("""
-	bool size () const {
-		Glib::Threads::Mutex::Lock lm (_mutex);
-		return _slots.size ();
-	}
+\tbool size () const {
+\t\tGlib::Threads::Mutex::Lock lm (_mutex);
+\t\treturn _slots.size ();
+\t}
 """, file=f)
 
     if v:
@@ -290,36 +291,47 @@ def signal(f, n, v):
     print("\tfriend class Connection;", file=f)
 
     print("""
-	boost::shared_ptr<Connection> _connect (PBD::EventLoop::InvalidationRecord* ir, slot_function_type f)
-	{
-		boost::shared_ptr<Connection> c (new Connection (this, ir));
-		Glib::Threads::Mutex::Lock lm (_mutex);
-		_slots[c] = f;
+\tboost::shared_ptr<Connection> _connect (PBD::EventLoop::InvalidationRecord* ir, slot_function_type f)
+\t{
+\t\tboost::shared_ptr<Connection> c (new Connection (this, ir));
+\t\tGlib::Threads::Mutex::Lock lm (_mutex);
+\t\t_slots[c] = f;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
-                if (_debug_connection) {
-                        std::cerr << "+++++++ CONNECT " << this << " size now " << _slots.size() << std::endl;
-                        PBD::stacktrace (std::cerr, 10);
-                }
+\t\tif (_debug_connection) {
+\t\t\tstd::cerr << "+++++++ CONNECT " << this << " size now " << _slots.size() << std::endl;
+\t\t\tPBD::stacktrace (std::cerr, 10);
+\t\t}
 #endif
-		return c;
-	}""", file=f)
+\t\treturn c;
+\t}""", file=f)
 
     print("""
-	void disconnect (boost::shared_ptr<Connection> c)
-	{
-		{
-			Glib::Threads::Mutex::Lock lm (_mutex);
-    			_slots.erase (c);
-    		}
-		c->disconnected ();
+\tvoid disconnect (boost::shared_ptr<Connection> c)
+\t{
+\t\t/* Prevent destruction to complete before this method returns */
+\t\tGlib::Threads::Mutex::Lock lx (_destruct);
+
+\t\t/* ~ScopedConnection can call this concurrently with our d'tor */
+\t\tif (!_in_dtor.load (std::memory_order_acquire)) {
+\t\t\tGlib::Threads::Mutex::Lock lm (_mutex);
+\t\t\tif (_in_dtor.load (std::memory_order_acquire)) {
+\t\t\t/* d'tor signal_going_away() took care of everything already */
+\t\t\t\treturn;
+\t\t\t}
+\t\t\t_slots.erase (c);
+\t\t\tlm.release ();
+
+\t\t\tc->disconnected ();
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
-               	if (_debug_connection) {
-    			std::cerr << "------- DISCCONNECT " << this << " size now " << _slots.size() << std::endl;
-                        PBD::stacktrace (std::cerr, 10);
-		}
+\t\t\tif (_debug_connection) {
+\t\t\t\tstd::cerr << "------- DISCCONNECT " << this << " size now " << _slots.size() << std::endl;
+\t\t\t\tPBD::stacktrace (std::cerr, 10);
+\t\t\t}
+\t\t}
 #endif
-	}
-};    
+\t}
+
+};
 """, file=f)
 
 for i in range(0, 6):

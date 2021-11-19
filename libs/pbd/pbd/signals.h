@@ -31,6 +31,8 @@
 #undef nil
 #endif
 
+#include <atomic>
+
 #include <glibmm/threads.h>
 
 #include <boost/noncopyable.hpp>
@@ -60,11 +62,14 @@ class LIBPBD_API SignalBase
 {
 public:
 	SignalBase ()
+	: _in_dtor (false)
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
-	: _debug_connection (false)
+	, _debug_connection (false)
 #endif
 	{}
-	virtual ~SignalBase () {}
+	virtual ~SignalBase () {
+		Glib::Threads::Mutex::Lock lm (_destruct);
+	}
 	virtual void disconnect (boost::shared_ptr<Connection>) = 0;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	void set_debug_connection (bool yn) { _debug_connection = yn; }
@@ -72,6 +77,8 @@ public:
 
 protected:
 	mutable Glib::Threads::Mutex _mutex;
+	Glib::Threads::Mutex         _destruct;
+	std::atomic<bool>            _in_dtor;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	bool _debug_connection;
 #endif
@@ -80,7 +87,9 @@ protected:
 class LIBPBD_API Connection : public boost::enable_shared_from_this<Connection>
 {
 public:
-	Connection (SignalBase* b, PBD::EventLoop::InvalidationRecord* ir) : _signal (b), _invalidation_record (ir)
+	Connection (SignalBase* b, PBD::EventLoop::InvalidationRecord* ir)
+		: _signal (b)
+		, _invalidation_record (ir)
 	{
 		if (_invalidation_record) {
 			_invalidation_record->ref ();
@@ -89,10 +98,12 @@ public:
 
 	void disconnect ()
 	{
-		Glib::Threads::Mutex::Lock lm (_mutex);
-		if (_signal) {
-			_signal->disconnect (shared_from_this ());
-			_signal = 0;
+		SignalBase* signal = _signal.exchange (0, std::memory_order_acq_rel);
+		if (signal) {
+			/* This will lock Signal::_mutex, or return
+			 * immediately if Signal is being destructed
+			 */
+			signal->disconnect (shared_from_this ());
 		}
 	}
 
@@ -105,16 +116,16 @@ public:
 
 	void signal_going_away ()
 	{
-		Glib::Threads::Mutex::Lock lm (_mutex);
+		/* called with Signal::_mutex held */
+		(void*) _signal.exchange (0, std::memory_order_acq_rel);
 		if (_invalidation_record) {
 			_invalidation_record->unref ();
 		}
-		_signal = 0;
 	}
 
 private:
-        Glib::Threads::Mutex _mutex;
-	SignalBase* _signal;
+	Glib::Threads::Mutex     _mutex;
+	std::atomic<SignalBase*> _signal;
 	PBD::EventLoop::InvalidationRecord* _invalidation_record;
 };
 
