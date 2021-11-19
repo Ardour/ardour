@@ -614,13 +614,13 @@ Session::destroy ()
 	Port::PortSignalDrop (); /* EMIT SIGNAL */
 	drop_connections ();
 
+	/* stop auto dis/connecting */
+	auto_connect_thread_terminate ();
+
 	/* shutdown control surface protocols while we still have ports
 	 * and the engine to move data to any devices.
 	 */
 	ControlProtocolManager::instance().drop_protocols ();
-
-	/* stop auto dis/connecting */
-	auto_connect_thread_terminate ();
 
 	_engine.remove_session ();
 
