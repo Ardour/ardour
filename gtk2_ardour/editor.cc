@@ -859,9 +859,13 @@ Editor::Editor ()
 
 	/* these are defaults; instant.xml will replace these with user's recent selection */
 	set_grid_to (GridTypeNone);
-	set_draw_length_to (GridTypeBeat);
-	set_draw_velocity_to (82);
-	set_draw_channel_to (0);
+
+	RefPtr<RadioAction> ract = draw_length_action (GridTypeBeat);
+	ract->set_active();
+	ract = draw_velocity_action (82);
+	ract->set_active();
+	ract = draw_channel_action (0);
+	ract->set_active();
 }
 
 Editor::~Editor()
