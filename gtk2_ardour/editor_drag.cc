@@ -7027,7 +7027,8 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 	Beats const start = _region_view->region()->absolute_time_to_region_beats (min (_note[0], _note[1]));
 	Beats length = max (Beats (0, 1), (_note[0].distance (_note[1]).abs().beats()));
 
-	int32_t div = _editor->get_grid_music_divisions (_editor->draw_length(), ev->button.state);
+	GridType grid_to_use = _editor->draw_length() == DRAW_LEN_AUTO ? _editor->grid_type() : _editor->draw_length();
+	int32_t div = _editor->get_grid_music_divisions (grid_to_use, ev->button.state);
 
 	if (div > 0) {
 		length = length.round_to_subdivision (div, RoundUpMaybe);
@@ -7098,7 +7099,8 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 {
 	const timepos_t pos = _drags->current_pointer_time ();
 
-	const int32_t divisions = _editor->get_grid_music_divisions (_editor->draw_length(), event->button.state);
+	GridType grid_to_use = _editor->draw_length() == DRAW_LEN_AUTO ? _editor->grid_type() : _editor->draw_length();
+	int32_t divisions = _editor->get_grid_music_divisions (grid_to_use, event->button.state);
 	if (divisions <= 0) {
 		return;
 	}

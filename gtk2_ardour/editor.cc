@@ -4387,7 +4387,8 @@ Editor::get_draw_length_as_beats (bool& success, timepos_t const & position)
 {
 	success = true;
 
-	const unsigned divisions = get_grid_beat_divisions (DRAW_LEN_AUTO ? _grid_type : _draw_length);
+	GridType grid_to_use = draw_length() == DRAW_LEN_AUTO ? grid_type() : draw_length();
+	const unsigned divisions = get_grid_beat_divisions (grid_to_use);
 	if (divisions) {
 		return Temporal::Beats::from_double (1.0 / (double) divisions);
 	}
