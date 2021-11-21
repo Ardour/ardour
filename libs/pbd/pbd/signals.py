@@ -309,21 +309,23 @@ def signal(f, n, v):
 \tvoid disconnect (boost::shared_ptr<Connection> c)
 \t{
 \t\t/* ~ScopedConnection can call this concurrently with our d'tor */
-\t\tif (!_in_dtor.load (std::memory_order_acquire)) {
-\t\t\tGlib::Threads::Mutex::Lock lm (_mutex);
+\t\tGlib::Threads::Mutex::Lock lm (_mutex, Glib::Threads::TRY_LOCK);
+\t\twhile (!lm.locked()) {
 \t\t\tif (_in_dtor.load (std::memory_order_acquire)) {
 \t\t\t/* d'tor signal_going_away() took care of everything already */
 \t\t\t\treturn;
 \t\t\t}
-\t\t\t_slots.erase (c);
-\t\t\tlm.release ();
+\t\t\t/* Spin */
+\t\t\tlm.try_acquire ();
+\t\t}
+\t\t_slots.erase (c);
+\t\tlm.release ();
 
-\t\t\tc->disconnected ();
+\t\tc->disconnected ();
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
-\t\t\tif (_debug_connection) {
-\t\t\t\tstd::cerr << "------- DISCCONNECT " << this << " size now " << _slots.size() << std::endl;
-\t\t\t\tPBD::stacktrace (std::cerr, 10);
-\t\t\t}
+\t\tif (_debug_connection) {
+\t\t\tstd::cerr << "------- DISCCONNECT " << this << " size now " << _slots.size() << std::endl;
+\t\t\tPBD::stacktrace (std::cerr, 10);
 \t\t}
 #endif
 \t}
