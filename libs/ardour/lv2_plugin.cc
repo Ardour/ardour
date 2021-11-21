@@ -3681,17 +3681,31 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 		info->_is_utility    = 0 == strcmp (pcat, LV2_CORE__UtilityPlugin);
 		info->_is_analyzer   = 0 == strcmp (pcat, LV2_CORE__AnalyserPlugin);
 
-		/* iterate over additional classes */
+		/* check parent category, if any */
+		const LilvNode* lpc = lilv_plugin_class_get_parent_uri (pclass);
+		if (lpc) {
+			const char* pcu = lilv_node_as_uri (lpc);
+			info->_is_instrument |= 0 == strcmp (pcu, LV2_CORE__InstrumentPlugin);
+			info->_is_utility    |= 0 == strcmp (pcu, LV2_CORE__UtilityPlugin);
+			info->_is_analyzer   |= 0 == strcmp (pcu, LV2_CORE__AnalyserPlugin);
+			cb (uri, PluginScanLogEntry::OK, string_compose (_("LV2 Parent Class URI: '%1'"), pcu), false);
+		}
+
+#if 0
+		/* iterate over child classes */
 		LilvPluginClasses* classes  = lilv_plugin_class_get_children (pclass);
 		LILV_FOREACH(plugin_classes, i, classes) {
-			const char* pc = lilv_node_as_uri (lilv_plugin_class_get_uri (lilv_plugin_classes_get (classes, i)));
-			assert (pc);
-			info->_is_instrument |= 0 == strcmp (pc, LV2_CORE__InstrumentPlugin);
-			info->_is_utility    |= 0 == strcmp (pc, LV2_CORE__UtilityPlugin);
-			info->_is_analyzer   |= 0 == strcmp (pc, LV2_CORE__AnalyserPlugin);
-			cb (uri, PluginScanLogEntry::OK, string_compose (_("LV2 Class: '%1'"), pc), false);
+			const LilvPluginClass* lclass = lilv_plugin_classes_get (classes, i);
+			const LilvNode*        lcnode = lilv_plugin_class_get_uri (lclass);
+			const LilvNode*        lclbl  = lilv_plugin_class_get_label (lclass);
+			const char*            lcuri  = lilv_node_as_uri (lcnode);
+			info->_is_instrument |= 0 == strcmp (lcuri, LV2_CORE__InstrumentPlugin);
+			info->_is_utility    |= 0 == strcmp (lcuri, LV2_CORE__UtilityPlugin);
+			info->_is_analyzer   |= 0 == strcmp (lcuri, LV2_CORE__AnalyserPlugin);
+			cb (uri, PluginScanLogEntry::OK, string_compose (_("LV2 Class: '%1'"), lilv_node_as_string (lclbl)), false);
 		}
 		lilv_plugin_classes_free (classes);
+#endif
 
 		LilvNode* author_name = lilv_plugin_get_author_name(p);
 		info->creator = author_name ? string(lilv_node_as_string(author_name)) : "Unknown";
