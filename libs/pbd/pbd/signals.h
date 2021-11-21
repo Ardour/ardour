@@ -67,9 +67,7 @@ public:
 	, _debug_connection (false)
 #endif
 	{}
-	virtual ~SignalBase () {
-		Glib::Threads::Mutex::Lock lm (_destruct);
-	}
+	virtual ~SignalBase () { }
 	virtual void disconnect (boost::shared_ptr<Connection>) = 0;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	void set_debug_connection (bool yn) { _debug_connection = yn; }
@@ -77,7 +75,6 @@ public:
 
 protected:
 	mutable Glib::Threads::Mutex _mutex;
-	Glib::Threads::Mutex         _destruct;
 	std::atomic<bool>            _in_dtor;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	bool _debug_connection;
@@ -98,10 +95,15 @@ public:
 
 	void disconnect ()
 	{
+		Glib::Threads::Mutex::Lock lm (_mutex);
 		SignalBase* signal = _signal.exchange (0, std::memory_order_acq_rel);
 		if (signal) {
-			/* This will lock Signal::_mutex, or return
-			 * immediately if Signal is being destructed
+			/* It is safe to assume that signal has not been destructed.
+			 * If ~Signal d'tor runs, it will call our signal_going_away()
+			 * which will block until we're done here.
+			 *
+			 * This will lock Signal::_mutex, and call disconnected ()
+			 * or return immediately if Signal is being destructed.
 			 */
 			signal->disconnect (shared_from_this ());
 		}
@@ -117,7 +119,16 @@ public:
 	void signal_going_away ()
 	{
 		/* called with Signal::_mutex held */
-		(void*) _signal.exchange (0, std::memory_order_acq_rel);
+		if (!_signal.exchange (0, std::memory_order_acq_rel)) {
+			/* disconnect () grabbed the signal, but signal->disconnect()
+			 * has not [yet] removed the entry from the list.
+			 *
+			 * Allow disconnect () to complete, which will
+			 * be an effective NO-OP since SignalBase::_in_dtor is true,
+			 * then we can proceed.
+			 */
+			Glib::Threads::Mutex::Lock lm (_mutex);
+		}
 		if (_invalidation_record) {
 			_invalidation_record->unref ();
 		}

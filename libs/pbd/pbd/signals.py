@@ -308,9 +308,6 @@ def signal(f, n, v):
     print("""
 \tvoid disconnect (boost::shared_ptr<Connection> c)
 \t{
-\t\t/* Prevent destruction to complete before this method returns */
-\t\tGlib::Threads::Mutex::Lock lx (_destruct);
-
 \t\t/* ~ScopedConnection can call this concurrently with our d'tor */
 \t\tif (!_in_dtor.load (std::memory_order_acquire)) {
 \t\t\tGlib::Threads::Mutex::Lock lm (_mutex);
