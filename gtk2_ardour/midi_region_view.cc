@@ -1250,12 +1250,15 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 		if ((p = find_canvas_patch_change (*i)) != 0) {
 
 			const timepos_t region_time = _region->source_beats_to_region_time ((*i)->time());
-
 			if (region_time < timepos_t() || region_time >= _region->length()) {
 				p->hide();
 			} else {
-				const double x = trackview.editor().time_to_pixel (region_time);
-				p->canvas_item()->set_position (ArdourCanvas::Duple (x, 1.0));
+				const timepos_t flag_time = _region->source_beats_to_absolute_time ((*i)->time());
+				const double flag_x = trackview.editor().time_to_pixel (flag_time);
+
+				const double region_x = trackview.editor().time_to_pixel (_region->position());
+
+				p->canvas_item()->set_position (ArdourCanvas::Duple (flag_x-region_x, 1.0));
 				p->update_name ();
 
 				p->show();
@@ -1861,9 +1864,7 @@ MidiRegionView::step_sustain (Temporal::Beats beats)
 void
 MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 {
-	timepos_t patch_time = _region->source_beats_to_absolute_time (patch->time());
-	const double x = trackview.editor().time_to_pixel (patch_time);
-
+	const double x = 0;
 	double const height = midi_stream_view()->contents_height();
 
 	// CAIROCANVAS: active_channel info removed from PatcChange constructor
@@ -1879,18 +1880,9 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 				_patch_change_fill)
 		);
 
-	if (patch_change->item().width() < _pixel_width) {
-		// Show unless patch change is beyond the region bounds
-		if (patch_time < _region->position() || patch_time >= _region->nt_last()) {
-			patch_change->hide();
-		} else {
-			patch_change->show();
-		}
-	} else {
-		patch_change->hide ();
-	}
-
 	_patch_changes.insert (make_pair (patch, patch_change));
+
+	display_patch_changes();
 }
 
 void
