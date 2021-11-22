@@ -82,6 +82,27 @@ timecnt_t::timecnt_t (timecnt_t const & tc, timepos_t const & pos)
 	_distance = tc.distance();
 }
 
+timecnt_t::timecnt_t (samplepos_t s, timepos_t const & pos)
+	: _position (pos)
+{
+	assert (_position.time_domain() == AudioTime);
+
+	if (s == max_samplepos) {
+		_distance = int62_t (false, int62_t::max);
+	} else {
+		_distance = int62_t (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE));
+	}
+}
+
+timecnt_t::timecnt_t (samplepos_t s)
+	: _position (AudioTime)
+{
+	if (s == max_samplepos) {
+		_distance = int62_t (false, int62_t::max);
+	} else {
+		_distance = int62_t (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE));
+	}
+}
 
 timepos_t
 timecnt_t::end (TimeDomain return_domain) const
@@ -447,6 +468,15 @@ std::operator>> (std::istream & o, timecnt_t & tc)
 timepos_t::timepos_t (timecnt_t const & t)
 {
 	v = build (t.distance().flagged(), t.distance ().val());
+}
+
+timepos_t::timepos_t (samplepos_t s)
+{
+	if (s == max_samplepos) {
+		v = build (false, int62_t::max);
+	} else {
+		v = build (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE));
+	}
 }
 
 void

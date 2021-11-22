@@ -52,7 +52,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 
 	/* for now (Sept2020) do not allow implicit type conversions */
 
-	explicit timepos_t (samplepos_t s) : int62_t (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE)) {}
+	explicit timepos_t (samplepos_t s);
 	explicit timepos_t (Temporal::Beats const & b) : int62_t (true, b.to_ticks()) {}
 
 	explicit timepos_t (timecnt_t const &); /* will throw() if val is negative */
@@ -292,8 +292,8 @@ class LIBTEMPORAL_API timecnt_t {
 	timecnt_t (timecnt_t const &other) : _distance (other.distance()), _position (other.position()) {}
 
 	/* construct from sample count (position doesn't matter due to linear nature * of audio time */
-	explicit timecnt_t (samplepos_t s, timepos_t const & pos) : _distance (int62_t (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE))), _position (pos) {}
-	explicit timecnt_t (samplepos_t s) : _distance (int62_t (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE))), _position (AudioTime) {}
+	explicit timecnt_t (samplepos_t s, timepos_t const & pos);
+	explicit timecnt_t (samplepos_t s);
 
 	/* construct from timeline types */
 	explicit timecnt_t (timepos_t const & d) : _distance (d), _position (timepos_t::zero (d.flagged())) {}
