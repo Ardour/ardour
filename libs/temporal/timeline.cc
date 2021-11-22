@@ -873,7 +873,8 @@ timepos_t::string_to (std::string const & str)
 	int64_t ticks;
 	Beats beats;
 
-	if (isdigit (str[0])) {
+	if (isdigit (str[0]) || (str[0] == '-' && str.length() > 1)) {
+
 		/* old school position format: we assume samples */
 		std::stringstream ss (str);
 		ss >> sm;
