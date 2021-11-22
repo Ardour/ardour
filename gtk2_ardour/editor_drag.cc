@@ -6846,7 +6846,7 @@ PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 	f = max (f, r->position ());
 	f = min (f, r->nt_last ());
 
-	_region_view->move_patch_change (*_patch_change, _region_view->region()->absolute_time_to_region_beats (f));
+	_region_view->move_patch_change (*_patch_change, _region_view->region()->absolute_time_to_source_beats (f));
 }
 
 void
