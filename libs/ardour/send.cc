@@ -221,10 +221,9 @@ Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, do
 		return;
 	}
 
-	if (!_active && !_pending_active) {
+	if (!check_active()) {
 		_meter->reset ();
 		_output->silence (nframes);
-		_active = _pending_active;
 		return;
 	}
 

@@ -37,10 +37,9 @@ InternalReturn::InternalReturn (Session& s, Temporal::TimeDomain td, std::string
 void
 InternalReturn::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
-	if (!_active && !_pending_active) {
+	if (!check_active()) {
 		return;
 	}
-	_active = _pending_active;
 
 	Glib::Threads::Mutex::Lock lm (_sends_mutex, Glib::Threads::TRY_LOCK);
 

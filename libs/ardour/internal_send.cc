@@ -211,7 +211,7 @@ InternalSend::send_to_going_away ()
 void
 InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
-	if ((!_active && !_pending_active) || !_send_to) {
+	if (!check_active() || !_send_to) {
 		_meter->reset ();
 		return;
 	}
@@ -314,7 +314,7 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		/* we were quiet last time, and we're still supposed to be quiet. */
 		_meter->reset ();
 		Amp::apply_simple_gain (mixbufs, nframes, GAIN_COEFF_ZERO);
-		goto out;
+		return;
 	} else if (tgain != GAIN_COEFF_UNITY) {
 		/* target gain has not changed, but is not zero or unity */
 		Amp::apply_simple_gain (mixbufs, nframes, tgain);
@@ -339,9 +339,6 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	_thru_delay->run (bufs, start_sample, end_sample, speed, nframes, true);
 
 	/* target will pick up our output when it is ready */
-
-out:
-	_active = _pending_active;
 }
 
 void

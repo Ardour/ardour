@@ -92,7 +92,7 @@ PeakMeter::display_name () const
 void
 PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
-	if (!_active && !_pending_active) {
+	if (!check_active()) {
 		return;
 	}
 
@@ -196,8 +196,6 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 	if (_bufcnt > zoh) {
 		_bufcnt = 0;
 	}
-
-	_active = _pending_active;
 }
 
 void
