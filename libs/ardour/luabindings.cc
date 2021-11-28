@@ -2086,6 +2086,7 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Ramp", Temporal::Tempo::Type(Tempo::Ramped))
 		.addConst ("Constant", Temporal::Tempo::Type(Tempo::Constant))
 		.endNamespace ()
+		.endNamespace ()
 
 		.endNamespace () /* end of Temporal namespace */
 
