@@ -29,7 +29,7 @@ function factory ()
 		-- event at 09:32:00 UTC (here: rec-stop)
 		if (now >= hhmmss (09, 32, 00) and _last_time < hhmmss (09, 32, 00)) then
 			Session:disable_record (false, false)
-			Session:request_stop (false, false, TRS_UI);
+			Session:request_stop (false, false, ARDOUR.TransportRequestSource.TRS_UI);
 		end
 
 		_last_time = now

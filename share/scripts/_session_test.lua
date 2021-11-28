@@ -28,7 +28,7 @@ function factory (params)
 		end
 		a = a + n_samples
 		if (a > timeout * Session:sample_rate()) then
-			Session:request_stop (false, false, TRS_UI);
+			Session:request_stop (false, false, ARDOUR.TransportRequestSource.TRS_UI);
 		end
 	end
 end
