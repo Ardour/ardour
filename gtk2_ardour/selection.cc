@@ -117,6 +117,7 @@ Selection::clear ()
 	clear_playlists ();
 	clear_midi_notes ();
 	clear_markers ();
+	clear_triggers ();
 	pending_midi_note_selection.clear();
 }
 
@@ -128,6 +129,7 @@ Selection::clear_objects (bool with_signal)
 	clear_lines(with_signal);
 	clear_playlists (with_signal);
 	clear_midi_notes (with_signal);
+	clear_triggers (with_signal);
 }
 
 void
@@ -220,10 +222,22 @@ Selection::clear_markers (bool with_signal)
 }
 
 void
+Selection::clear_triggers (bool with_signal)
+{
+	if (!triggers.empty()) {
+		triggers.clear ();
+		if (with_signal) {
+			TriggersChanged ();
+		}
+	}
+}
+
+void
 Selection::toggle (boost::shared_ptr<Playlist> pl)
 {
 	clear_time(); // enforce object/range exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	PlaylistSelection::iterator i;
 
@@ -242,6 +256,7 @@ Selection::toggle (const MidiNoteSelection& midi_note_list)
 {
 	clear_time(); // enforce object/range exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	for (MidiNoteSelection::const_iterator i = midi_note_list.begin(); i != midi_note_list.end(); ++i) {
 		toggle ((*i));
@@ -270,6 +285,7 @@ Selection::toggle (RegionView* r)
 {
 	clear_time(); // enforce object/range exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	RegionSelection::iterator i;
 
@@ -287,6 +303,7 @@ Selection::toggle (vector<RegionView*>& r)
 {
 	clear_time(); // enforce object/range exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	RegionSelection::iterator i;
 
@@ -326,6 +343,7 @@ Selection::add (boost::shared_ptr<Playlist> pl)
 	if (find (playlists.begin(), playlists.end(), pl) == playlists.end()) {
 		clear_time(); // enforce object/range exclusivity
 		clear_tracks(); // enforce object/track exclusivity
+		clear_triggers(); // enforce trigger exclusivity
 		pl->use ();
 		playlists.push_back(pl);
 		PlaylistsChanged ();
@@ -348,6 +366,7 @@ Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 	if (changed) {
 		clear_time(); // enforce object/range exclusivity
 		clear_tracks(); // enforce object/track exclusivity
+		clear_triggers(); // enforce trigger exclusivity
 		PlaylistsChanged ();
 	}
 }
@@ -361,6 +380,7 @@ Selection::add (const MidiNoteSelection& midi_list)
 	if (!midi_list.empty()) {
 		clear_time(); // enforce object/range exclusivity
 		clear_tracks(); // enforce object/track exclusivity
+		clear_triggers(); // enforce trigger exclusivity
 		midi_notes.insert (midi_notes.end(), b, e);
 		MidiNotesChanged ();
 	}
@@ -503,6 +523,7 @@ Selection::add (boost::shared_ptr<Evoral::ControlList> cl)
 	if (!cl->empty()) {
 		clear_time(); // enforce object/range exclusivity
 		clear_tracks(); // enforce object/track exclusivity
+		clear_triggers(); // enforce trigger exclusivity
 	}
 
 	/* The original may change so we must store a copy (not a pointer) here.
@@ -640,6 +661,7 @@ Selection::set (const MidiNoteSelection& midi_list)
 	if (!midi_list.empty()) {
 		clear_time (); // enforce region/object exclusivity
 		clear_tracks(); // enforce object/track exclusivity
+		clear_triggers(); // enforce trigger exclusivity
 	}
 	clear_objects ();
 	add (midi_list);
@@ -651,6 +673,7 @@ Selection::set (boost::shared_ptr<Playlist> playlist)
 	if (playlist) {
 		clear_time (); // enforce region/object exclusivity
 		clear_tracks(); // enforce object/track exclusivity
+		clear_triggers(); // enforce trigger exclusivity
 	}
 	clear_objects ();
 	add (playlist);
@@ -802,7 +825,8 @@ Selection::empty (bool internal_selection)
 		lines.empty () &&
 		time.empty () &&
 		playlists.empty () &&
-		markers.empty()
+		markers.empty() &&
+		triggers.empty()
 		;
 
 	if (!internal_selection) {
@@ -821,6 +845,7 @@ Selection::toggle (ControlPoint* cp)
 {
 	clear_time(); // enforce region/object exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	cp->set_selected (!cp->selected ());
 	PointSelection::iterator i = find (points.begin(), points.end(), cp);
@@ -838,6 +863,7 @@ Selection::toggle (vector<ControlPoint*> const & cps)
 {
 	clear_time(); // enforce region/object exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	for (vector<ControlPoint*>::const_iterator i = cps.begin(); i != cps.end(); ++i) {
 		toggle (*i);
@@ -849,6 +875,7 @@ Selection::toggle (list<Selectable*> const & selectables)
 {
 	clear_time(); // enforce region/object exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	RegionView* rv;
 	ControlPoint* cp;
@@ -892,6 +919,7 @@ Selection::add (PointSelection const & s)
 {
 	clear_time (); // enforce region/object exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	for (PointSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
 		points.push_back (*i);
@@ -903,6 +931,7 @@ Selection::add (list<Selectable*> const & selectables)
 {
 	clear_time (); // enforce region/object exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	RegionView* rv;
 	ControlPoint* cp;
@@ -947,6 +976,7 @@ Selection::add (ControlPoint* cp)
 {
 	clear_time (); // enforce region/object exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	cp->set_selected (true);
 	points.push_back (cp);
@@ -958,6 +988,7 @@ Selection::add (vector<ControlPoint*> const & cps)
 {
 	clear_time (); // enforce region/object exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	for (vector<ControlPoint*>::const_iterator i = cps.begin(); i != cps.end(); ++i) {
 		(*i)->set_selected (true);
@@ -971,6 +1002,7 @@ Selection::set (ControlPoint* cp)
 {
 	clear_time (); // enforce region/object exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	if (cp->selected () && points.size () == 1) {
 		return;
@@ -989,6 +1021,7 @@ Selection::set (ArdourMarker* m)
 {
 	clear_time ();  // enforce region/object exclusivity
 	clear_tracks();  // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 	markers.clear ();
 
 	add (m);
@@ -1022,6 +1055,7 @@ Selection::add (ArdourMarker* m)
 {
 	clear_time (); //enforce region/object exclusivity
 	clear_tracks(); //enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	if (find (markers.begin(), markers.end(), m) == markers.end()) {
 		markers.push_back (m);
@@ -1034,6 +1068,7 @@ Selection::add (const list<ArdourMarker*>& m)
 {
 	clear_time (); // enforce region/object exclusivity
 	clear_tracks(); // enforce object/track exclusivity
+	clear_triggers(); // enforce trigger exclusivity
 
 	markers.insert (markers.end(), m.begin(), m.end());
 	markers.sort ();
@@ -1169,6 +1204,7 @@ Selection::set_state (XMLNode const & node, int)
 	clear_points ();
 	clear_time ();
 	clear_markers ();
+	clear_triggers();
 
 	/* NOTE: stripable/time-axis-view selection is saved/restored by
 	 * ARDOUR::CoreSelection, not this Selection object
@@ -1660,6 +1696,7 @@ Selection::selected (TriggerEntry* te) const
 void
 Selection::set (TriggerEntry* te)
 {
+	clear();
 	clear_triggers ();
 	add (te);
 }
@@ -1693,14 +1730,5 @@ Selection::toggle (TriggerEntry* te)
 		triggers.erase (e);
 	}
 	TriggersChanged ();
-}
-
-void
-Selection::clear_triggers ()
-{
-	if (!triggers.empty()) {
-		triggers.clear ();
-		TriggersChanged ();
-	}
 }
 
