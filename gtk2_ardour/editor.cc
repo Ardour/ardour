@@ -147,11 +147,11 @@
 #include "rhythm_ferret.h"
 #include "route_sorter.h"
 #include "selection.h"
+#include "selection_properties_box.h"
 #include "simple_progress_dialog.h"
 #include "sfdb_ui.h"
 #include "grid_lines.h"
 #include "time_axis_view.h"
-#include "time_info_box.h"
 #include "timers.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -254,7 +254,7 @@ Editor::Editor ()
 	: PublicEditor (global_hpacker)
 	, editor_mixer_strip_width (Wide)
 	, constructed (false)
-	, _time_info_box (0)
+	, _properties_box (0)
 	, no_save_visual (false)
 	, _leftmost_sample (0)
 	, samples_per_pixel (2048)
@@ -660,7 +660,7 @@ Editor::Editor ()
 	_sources = new EditorSources (this);
 	_snapshots = new EditorSnapshots (this);
 	_locations = new EditorLocations (this);
-	_time_info_box = new TimeInfoBox ("EditorTimeInfo", true);
+	_properties_box = new SelectionPropertiesBox ();
 
 	/* these are static location signals */
 
@@ -668,6 +668,7 @@ Editor::Editor ()
 	Location::end_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
 	Location::changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
 
+	add_notebook_page (_("Selection"), *_properties_box);
 	add_notebook_page (_("Tracks & Busses"), _routes->widget ());
 	add_notebook_page (_("Sources"), _sources->widget ());
 	add_notebook_page (_("Regions"), _regions->widget ());
@@ -724,8 +725,8 @@ Editor::Editor ()
 	editor_summary_pane.add (_summary_hbox);
 	edit_pane.set_check_divider_position (true);
 	edit_pane.add (editor_summary_pane);
-	_editor_list_vbox.pack_start (*_time_info_box, false, false, 0);
 	_editor_list_vbox.pack_start (_the_notebook);
+//	_editor_list_vbox.pack_start (*_properties_box, false, false, 0);
 	edit_pane.add (_editor_list_vbox);
 	edit_pane.set_child_minsize (_editor_list_vbox, 30); /* rough guess at width of notebook tabs */
 
@@ -892,7 +893,7 @@ Editor::~Editor()
 	delete _regions;
 	delete _snapshots;
 	delete _locations;
-	delete _time_info_box;
+	delete _properties_box;
 	delete selection;
 	delete cut_buffer;
 	delete _cursors;
@@ -1324,7 +1325,7 @@ Editor::set_session (Session *t)
 	_snapshots->set_session (_session);
 	_routes->set_session (_session);
 	_locations->set_session (_session);
-	_time_info_box->set_session (_session);
+	_properties_box->set_session (_session);
 
 	if (rhythm_ferret) {
 		rhythm_ferret->set_session (_session);

@@ -142,6 +142,7 @@ class RegionPeakCursor;
 class RhythmFerret;
 class RulerDialog;
 class Selection;
+class SelectionPropertiesBox;
 class SoundFileOmega;
 class StreamView;
 class GridLines;
@@ -637,7 +638,7 @@ private:
 	// to keep track of the playhead position for control_scroll
 	boost::optional<samplepos_t> _control_scroll_target;
 
-	TimeInfoBox*      _time_info_box;
+	SelectionPropertiesBox*      _properties_box;
 
 	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
 
