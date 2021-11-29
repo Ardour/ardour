@@ -1,0 +1,208 @@
+/*
+ * Copyright (C) 2011-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2021 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <algorithm>
+#include "pbd/compose.h"
+
+#include "gtkmm2ext/gui_thread.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/actions.h"
+
+#include "ardour/location.h"
+#include "ardour/profile.h"
+#include "ardour/session.h"
+
+#include "widgets/ardour_button.h"
+
+#include "audio_clock.h"
+#include "automation_line.h"
+#include "control_point.h"
+#include "editor.h"
+#include "region_view.h"
+
+#include "midi_region_properties_box.h"
+
+#include "pbd/i18n.h"
+
+using namespace Gtk;
+using namespace ARDOUR;
+using namespace ArdourWidgets;
+using std::min;
+using std::max;
+
+MidiRegionPropertiesBox::MidiRegionPropertiesBox () : SessionHandlePtr()
+	, length_clock (X_("regionlength"), true, "", true, false, true)
+	, start_clock (X_("regionstart"), true, "", false, false)
+	, loop_length_clock (X_("regionlength"), true, "", true, false, true)
+	, loop_start_clock (X_("regionstart"), true, "", false, false)
+	, bbt_toggle (ArdourButton::led_default_elements)
+	, loop_toggle (ArdourButton::led_default_elements)
+	, patch_enable_button (ArdourButton::led_default_elements)
+	, cc_enable_button (ArdourButton::led_default_elements)
+{
+	Gtk::Label *label;
+	int row = 0;
+
+	_header_label.set_text(_("MIDI Region Properties:"));
+	_header_label.set_alignment(0.0, 0.5);
+	pack_start(_header_label, false, false, 6);
+
+		Gtk::Table *bpm_table = manage(new Gtk::Table());
+		bpm_table->set_homogeneous (false);
+		bpm_table->set_spacings (4);
+		bpm_table->set_border_width (2);
+		label = manage(new Gtk::Label(_("BPM:")));  label->set_alignment(1.0, 0.5);
+		bpm_table->attach(*label,      0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
+		bpm_table->attach(bpm_button,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK ); row++;
+
+	pack_start (*bpm_table, false, false);
+
+		Gtk::Table *metrum_table = manage(new Gtk::Table());
+		metrum_table->set_homogeneous (false);
+		metrum_table->set_spacings (4);
+		metrum_table->set_border_width (2);
+		label = manage(new Gtk::Label(_("Time Sig:")));  label->set_alignment(1.0, 0.5);
+		bpm_table->attach(*label,         0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
+		bpm_table->attach(metrum_button,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK ); row++;
+
+	pack_start (*metrum_table, false, false);
+
+		row = 0;
+
+		bbt_toggle.set_text(_("BBT Sync"));
+		table.attach(bbt_toggle,  0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK ); row++;
+
+		label = manage(new Gtk::Label(_("Start:")));  label->set_alignment(1.0, 0.5);
+		table.attach(*label,       0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
+		table.attach(start_clock,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK );  row++;
+
+		label = manage(new Gtk::Label(_("Length:")));  label->set_alignment(1.0, 0.5);
+		table.attach(*label,       0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
+		table.attach(length_clock, 1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK );  row++;
+
+		loop_toggle.set_text(_("Loop"));
+		table.attach(loop_toggle,  0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK ); row++;
+
+		label = manage(new Gtk::Label(_("Loop Start:")));  label->set_alignment(1.0, 0.5);
+		table.attach(*label,            0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
+		table.attach(loop_start_clock,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK );  row++;
+
+	//	label = manage(new Gtk::Label(_("Loop Length:")));  label->set_alignment(1.0, 0.5);
+	//	table.attach(*label,            0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
+	//	table.attach(loop_length_clock, 1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK );  row++;
+
+		patch_enable_button.set_text (_("Send Patches"));
+		patch_enable_button.set_name ("generic button");
+	//	patch_enable_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+
+		patch_selector_button.set_text (_("Patches..."));
+		patch_selector_button.set_name ("generic button");
+	//	patch_selector_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+
+		table.attach(patch_enable_button,    0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
+		table.attach(patch_selector_button,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK );  row++;
+
+		cc_enable_button.set_text (_("Send CCs"));
+		cc_enable_button.set_name ("generic button");
+	//	cc_enable_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+
+		cc_selector_button.set_text (_("CCs..."));
+		cc_selector_button.set_name ("generic button");
+	//	cc_selector_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+
+		table.attach(cc_enable_button,    0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
+		table.attach(cc_selector_button,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK );  row++;
+
+	table.set_homogeneous (false);
+	table.set_spacings (4);
+	table.set_border_width (2);
+	pack_start (table, false, false);
+
+	Gtk::Table *chans = manage(new Gtk::Table());
+	chans->set_homogeneous (true);
+	chans->set_spacings (4);
+	for (int c = 0; c<16; c++) {
+		Gtk::Label *ch_label = manage(new Gtk::Label());
+		ch_label->set_name("MetricLabel");
+		ch_label->set_text(string_compose("%1", c+1));
+		chans->attach(*ch_label, c%4, (c%4)+1, c/4, (c/4)+1, Gtk::SHRINK, Gtk::SHRINK );
+	}
+//	table.attach(*chans, 2, 3, 0, row, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );
+}
+
+MidiRegionPropertiesBox::~MidiRegionPropertiesBox ()
+{
+}
+
+void
+MidiRegionPropertiesBox::set_session (Session* s)
+{
+	SessionHandlePtr::set_session (s);
+
+	length_clock.set_session (s);
+	start_clock.set_session (s);
+
+	loop_length_clock.set_session (s);
+	loop_start_clock.set_session (s);
+}
+
+void
+MidiRegionPropertiesBox::set_region (boost::shared_ptr<Region> r)
+{
+printf(" slot, region name %s\n", r->name().c_str());
+	set_session(&r->session());
+
+	state_connection.disconnect();
+
+	_region = r;
+
+	PBD::PropertyChange interesting_stuff;
+	region_changed(interesting_stuff);
+
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&MidiRegionPropertiesBox::region_changed, this, _1), gui_context());
+}
+
+void
+MidiRegionPropertiesBox::region_changed (const PBD::PropertyChange& what_changed)
+{
+//ToDo:  refactor the region_editor.cc  to cover this basic stuff
+//	if (what_changed.contains (ARDOUR::Properties::name)) {
+//		name_changed ();
+//	}
+
+//	PBD::PropertyChange interesting_stuff;
+//	interesting_stuff.add (ARDOUR::Properties::length);
+//	interesting_stuff.add (ARDOUR::Properties::start);
+//	if (what_changed.contains (interesting_stuff))
+printf("  slot, region name %s\n", _region->name().c_str());
+	{
+		AudioClock::Mode mode = _region->position_time_domain() == Temporal::AudioTime ? AudioClock::Samples : AudioClock::BBT;
+
+		start_clock.set_mode (mode);
+		length_clock.set_mode (mode);
+
+printf("  slot, region start %s\n", _region->start().str().c_str());
+		start_clock.set (_region->start());
+		length_clock.set_duration (_region->length());
+
+		bpm_button.set_text("122.2");
+		metrum_button.set_text("4/4");
+	}
+}
+
