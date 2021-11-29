@@ -228,9 +228,7 @@ public:
 	void clear_points (bool with_signal = true);
 	void clear_markers (bool with_signal = true);
 	void clear_midi_notes (bool with_signal = true);
-
-	/* triggers are only mutually exclusive with regions */
-	void clear_triggers ();
+	void clear_triggers (bool with_signal = true);
 
 	void foreach_region (void (ARDOUR::Region::*method)(void));
 	void foreach_regionview (void (RegionView::*method)(void));
