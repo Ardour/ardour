@@ -596,7 +596,7 @@ TriggerBoxUI::edit_trigger (uint64_t n)
 	TriggerWindow* tw = static_cast<TriggerWindow*> (trigger->ui());
 
 	if (!tw) {
-		tw = new TriggerWindow (*_triggerbox.trigger (n));
+		tw = new TriggerWindow (_triggerbox.trigger (n));
 		trigger->set_ui (tw);
 	}
 

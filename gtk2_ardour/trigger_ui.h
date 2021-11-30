@@ -39,11 +39,13 @@ namespace ArdourCanvas {
 class TriggerUI : public ArdourCanvas::Table, public sigc::trackable
 {
   public:
-	TriggerUI (ArdourCanvas::Item* parent, ARDOUR::Trigger&);
+	TriggerUI (ArdourCanvas::Item* parent);
 	~TriggerUI ();
 
+	void set_trigger (ARDOUR::Trigger*);
+
   private:
-	ARDOUR::Trigger& trigger;
+	ARDOUR::Trigger* trigger;
 
 	ArdourWidgets::ArdourButton* _follow_action_button;
 	ArdourCanvas::Widget* follow_action_button;
@@ -98,8 +100,9 @@ class TriggerUI : public ArdourCanvas::Table, public sigc::trackable
 class TriggerWidget : public ArdourCanvas::GtkCanvas
 {
   public:
-	TriggerWidget (ARDOUR::Trigger& tb);
+	TriggerWidget ();
 	void size_request (double& w, double& h) const;
+	void set_trigger (ARDOUR::Trigger* t) const {ui->set_trigger(t);}
 
   private:
 	TriggerUI* ui;
@@ -110,7 +113,7 @@ class TriggerWidget : public ArdourCanvas::GtkCanvas
 class TriggerWindow : public Gtk::Window
 {
     public:
-	TriggerWindow (ARDOUR::Trigger&);
+	TriggerWindow (ARDOUR::Trigger*);
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
