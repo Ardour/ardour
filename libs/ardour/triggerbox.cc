@@ -1216,6 +1216,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start, samplepos_t end, pframes_t
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	samplepos_t last_event_samples = 0;
 
 	if (!passthru) {
 		mb.clear ();
@@ -1246,7 +1247,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start, samplepos_t end, pframes_t
 		 */
 
 		samplepos_t buffer_samples = timeline_samples - start + dest_offset;
-		nframes -= buffer_samples;
+		last_event_samples = buffer_samples;
 
 		const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, next_event.size(), const_cast<uint8_t*>(next_event.buffer()), false);
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("inserting %1\n", ev));
@@ -1261,32 +1262,43 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start, samplepos_t end, pframes_t
 			/* We reached the end */
 
 			_loop_cnt++;
-
-			if ((_loop_cnt == _follow_count) || (_launch_style == Repeat) || (_box.peek_next_trigger() == this)) { /* self repeat */
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, but set to loop, so retrigger\n", index()));
-
-				/* we will "restart" at the beginning of the
-				   next iteration of the trigger.
-				*/
-				transition_beats = transition_beats + data_length;
-				retrigger ();
-				/* and go around again */
-				continue;
-
-			} else {
-
-				shutdown ();
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped\n", index()));
-				break;
-			}
-
+			_state = Stopped;
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped\n", index()));
 		}
+	}
+
+	if (last_event_samples) {
+		nframes -= (last_event_samples - start);
 	}
 
 	if (_state == Stopping) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
 		tracker.resolve_notes (mb, nframes);
 		shutdown ();
+	}
+
+	if (_state == Stopped) {
+		if (_loop_cnt == _follow_count) {
+			/* have played the specified number of times, we're done */
+
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
+			shutdown ();
+
+		} else {
+
+			/* reached the end, but we haven't done that enough
+			 * times yet for a follow action/stop to take
+			 * effect. Time to get played again.
+			 */
+
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
+			/* we will "restart" at the beginning of the
+			   next iteration of the trigger.
+			*/
+			transition_beats = transition_beats + data_length;
+			retrigger ();
+			_state = WaitingToStart;
+		}
 	}
 
 	return nframes;
@@ -1825,7 +1837,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		if (rwv.len[0] > 0) {
 
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue rvec %1 + 2%\n", rwv.len[0], rwv.len[1]));
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue rvec %1 + %2\n", rwv.len[0], rwv.len[1]));
 
 			/* peek at it without dequeing it */
 
