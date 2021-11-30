@@ -75,6 +75,12 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>	tags;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>		contents; // type doesn't matter here
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::TimeDomain> time_domain;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             bpm;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<uint8_t>           metrum_numerator; //pulses per bar (typically 4)
+	LIBARDOUR_API extern PBD::PropertyDescriptor<uint8_t>           metrum_divisor; //divisor note type (typically 4 = quarter-note)
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              sync_to_bbt;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              loop_enabled;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         loop_start;
 };
 
 class Playlist;
@@ -123,6 +129,14 @@ public:
 	timecnt_t length ()    const { return _length.val(); }
 	timepos_t end()        const;
 	timepos_t nt_last()       const { return end().decrement(); }
+
+	/** Note: these values are currently only used when the region is in a trigger slot */
+	float      bpm ()              const { return _bpm; }
+	uint8_t    metrum_numerator () const { return _metrum_numerator; }
+	uint8_t    metrum_divisor ()   const { return _metrum_divisor; }
+	bool       sync_to_bbt ()      const { return _sync_to_bbt; }
+	bool       loop_enabled ()     const { return _loop_enabled; }
+	timepos_t  loop_start ()       const { return _loop_start.val(); }
 
 	timepos_t source_position () const;
 	timepos_t source_relative_position (Temporal::timepos_t const &) const;
@@ -520,6 +534,14 @@ private:
 	PBD::Property<uint64_t>    _layering_index;
 	PBD::Property<std::string> _tags;
 	PBD::Property<bool>        _contents; // type is irrelevant
+
+	/* these properties are (currently) only used when the region is in a trigger slot */
+	PBD::Property<float>       _bpm;
+	PBD::Property<uint8_t>     _metrum_numerator; //pulses per bar (typically 4)
+	PBD::Property<uint8_t>     _metrum_divisor; //divisor note type (typically 4 = quarter-note)
+	PBD::Property<bool>        _sync_to_bbt;
+	PBD::Property<bool>        _loop_enabled;
+	PBD::Property<timepos_t>   _loop_start;
 
 	timecnt_t             _last_length;
 	mutable RegionEditState _first_edit;
