@@ -21,25 +21,15 @@
 
 #include "ardour/triggerbox.h"
 
-#include "canvas/box.h"
-#include "canvas/canvas.h"
-#include "canvas/table.h"
-
 namespace ArdourWidgets {
 	class ArdourButton;
+	class HSliderController;
 }
 
-namespace ArdourCanvas {
-	class Text;
-	class Polygon;
-	class Widget;
-	class Rectangle;
-};
-
-class TriggerUI : public ArdourCanvas::Table, public sigc::trackable
+class TriggerUI : public Gtk::Table //, public sigc::trackable
 {
   public:
-	TriggerUI (ArdourCanvas::Item* parent);
+	TriggerUI ();
 	~TriggerUI ();
 
 	void set_trigger (ARDOUR::Trigger*);
@@ -47,39 +37,17 @@ class TriggerUI : public ArdourCanvas::Table, public sigc::trackable
   private:
 	ARDOUR::Trigger* trigger;
 
-	ArdourWidgets::ArdourButton* _follow_action_button;
-	ArdourCanvas::Widget* follow_action_button;
-
-
-	ArdourWidgets::ArdourDropdown* _follow_left;
-	ArdourCanvas::Widget* follow_left;
-	ArdourWidgets::ArdourButton* _follow_left_percentage;
-	ArdourCanvas::Widget* follow_left_percentage;
-
-	ArdourWidgets::ArdourDropdown* _follow_right;
-	ArdourCanvas::Widget* follow_right;
-	ArdourWidgets::ArdourButton* _follow_right_percentage;
-	ArdourCanvas::Widget* follow_right_percentage;
-
-	ArdourCanvas::Rectangle* percentage_slider;
-
-	ArdourCanvas::Rectangle* follow_count;
-	ArdourCanvas::Text* follow_count_text;
+	ArdourWidgets::ArdourButton*       _follow_action_button;
+	Gtk::Adjustment                    _follow_percent_adjustment;
+	ArdourWidgets::HSliderController*  _follow_percent_slider;
+	ArdourWidgets::ArdourDropdown*     _follow_left;
+	ArdourWidgets::ArdourDropdown*     _follow_right;
 
 	ArdourWidgets::ArdourButton* _legato_button;
-	ArdourCanvas::Widget* legato_button;
 
 	ArdourWidgets::ArdourDropdown* _quantize_button;
-	ArdourCanvas::Widget* quantize_button;
-	ArdourCanvas::Text* quantize_text;
 
 	ArdourWidgets::ArdourDropdown* _launch_style_button;
-	ArdourCanvas::Widget* launch_style_button;
-	ArdourCanvas::Text* launch_text;
-
-	ArdourCanvas::Rectangle* velocity;
-	ArdourCanvas::Text* velocity_text;
-	ArdourCanvas::Text* velocity_label;
 
 	void set_quantize (Temporal::BBT_Offset);
 	void set_launch_style (ARDOUR::Trigger::LaunchStyle);
@@ -97,11 +65,10 @@ class TriggerUI : public ArdourCanvas::Table, public sigc::trackable
 	static std::string launch_style_to_string (ARDOUR::Trigger::LaunchStyle);
 };
 
-class TriggerWidget : public ArdourCanvas::GtkCanvas
+class TriggerWidget : public Gtk::VBox
 {
   public:
 	TriggerWidget ();
-	void size_request (double& w, double& h) const;
 	void set_trigger (ARDOUR::Trigger* t) const {ui->set_trigger(t);}
 
   private:
