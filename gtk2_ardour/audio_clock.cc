@@ -941,8 +941,8 @@ AudioClock::finish_set (Temporal::timepos_t const & when, bool btn_en)
 			_right_btn.set_elements (ArdourButton::Text);
 			_left_btn.set_alignment (0, .5);
 			_right_btn.set_alignment (1, .5);
-			set_tooltip (_left_btn, _(""));
-			set_tooltip (_right_btn, _(""));
+			set_tooltip (_left_btn, (""));
+			set_tooltip (_right_btn, (""));
 		}
 	}
 

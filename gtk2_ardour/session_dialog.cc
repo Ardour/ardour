@@ -601,8 +601,8 @@ SessionDialog::populate_session_templates ()
 	row[session_template_columns.name] = (_("Empty Template"));
 	row[session_template_columns.path] = string();
 	row[session_template_columns.description] = _("An empty session with factory default settings.\n\nSelect this option if you are importing files to mix.");
-	row[session_template_columns.modified_with_short] = _("");
-	row[session_template_columns.modified_with_long] = _("");
+	row[session_template_columns.modified_with_short] = ("");
+	row[session_template_columns.modified_with_long] = ("");
 
 	//auto-select the first item in the list
 	Gtk::TreeModel::Row first = template_model->children()[0];
