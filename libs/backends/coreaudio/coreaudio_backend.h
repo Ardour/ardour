@@ -45,14 +45,13 @@ namespace ARDOUR {
 
 class CoreAudioBackend;
 
-class CoreMidiEvent {
+class CoreMidiEvent : public BackendMIDIEvent {
   public:
 	CoreMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size);
 	CoreMidiEvent (const CoreMidiEvent& other);
 	size_t size () const { return _size; };
 	pframes_t timestamp () const { return _timestamp; };
 	const uint8_t* data () const { return _data; };
-	bool operator< (const CoreMidiEvent &other) const { return timestamp () < other.timestamp (); };
   private:
 	size_t _size;
 	pframes_t _timestamp;
