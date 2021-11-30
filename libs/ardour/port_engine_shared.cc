@@ -186,7 +186,85 @@ BackendPort::update_connected_latency (bool for_playback)
 	set_latency_range (lr, for_playback);
 }
 
+bool
+BackendMIDIEvent::operator< (const BackendMIDIEvent &other) const {
+	if (timestamp() == other.timestamp ()) {
+		/* concurrent MIDI events, sort
+		 * - CC first (may include bank/patch)
+		 * - Program Change
+		 * - Note Off
+		 * - Note On
+		 * - Note Pressure
+		 * - Channel Pressure
+		 * - Pitch Bend
+		 * - SysEx/RT, etc
+		 *
+		 * see Evoral::Sequence<Time>::const_iterator::choose_next
+		 * and MidiBuffer::second_simultaneous_midi_byte_is_first
+		 */
+		uint8_t ta = 9;
+		uint8_t tb = 9;
+		if (size () > 0 && size () < 4) {
+			switch (data ()[0] & 0xf0) {
+				case 0xB0: /* Control Change */
+					ta = 1;
+					break;
+				case 0xC0: /* Program Change */
+					ta = 2;
+					break;
+				case 0x80: /* Note Off */
+					ta = 3;
+					break;
+				case 0x90: /* Note On */
+					ta = 4;
+					break;
+				case 0xA0: /* Key Pressure */
+					ta = 5;
+					break;
+				case 0xD0: /* Channel Pressure */
+					ta = 6;
+					break;
+				case 0xE0: /* Pitch Bend */
+					ta = 7;
+					break;
+				default:
+					ta = 8;
+					break;
+			}
+		}
 
+		if (other.size () > 0 && other.size () < 4) {
+			switch (other.data ()[0] & 0xf0) {
+				case 0xB0: /* Control Change */
+					tb = 1;
+					break;
+				case 0xC0: /* Program Change */
+					tb = 2;
+					break;
+				case 0x80: /* Note Off */
+					tb = 3;
+					break;
+				case 0x90: /* Note On */
+					tb = 4;
+					break;
+				case 0xA0: /* Key Pressure */
+					tb = 5;
+					break;
+				case 0xD0: /* Channel Pressure */
+					tb = 6;
+					break;
+				case 0xE0: /* Pitch Bend */
+					tb = 7;
+					break;
+				default:
+					tb = 8;
+					break;
+			}
+		}
+		return ta < tb;
+	}
+	return timestamp () < other.timestamp ();
+};
 
 PortEngineSharedImpl::PortEngineSharedImpl (PortManager& mgr, std::string const & str)
 	: _instance_name (str)

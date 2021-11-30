@@ -121,6 +121,16 @@ private:
 
 }; // class BackendPort
 
+class LIBARDOUR_API BackendMIDIEvent
+{
+public:
+	virtual ~BackendMIDIEvent () {}
+	virtual size_t size () const = 0;
+	virtual pframes_t timestamp () const = 0;
+	virtual const uint8_t* data () const = 0;
+	bool operator< (const BackendMIDIEvent &other) const;
+};
+
 class LIBARDOUR_API PortEngineSharedImpl
 {
 public:
