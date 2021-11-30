@@ -27,11 +27,8 @@
 #include "ardour/region.h"
 #include "ardour/triggerbox.h"
 
-#include "canvas/polygon.h"
-#include "canvas/text.h"
-#include "canvas/widget.h"
-
 #include "widgets/ardour_button.h"
+#include "widgets/slider_controller.h"
 
 #include "gtkmm2ext/utils.h"
 
@@ -45,7 +42,6 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ArdourCanvas;
 using namespace ArdourWidgets;
 using namespace Gtkmm2ext;
 using namespace PBD;
@@ -58,10 +54,11 @@ static std::string longest_quantize;
 static std::vector<std::string> launch_strings;
 static std::string longest_launch;
 
-TriggerUI::TriggerUI (Item* parent)
-	: Table (parent)
-	, trigger(NULL)
+TriggerUI::TriggerUI () :
+	_follow_percent_adjustment(0,100,1)
 {
+	trigger = NULL;
+
 	using namespace Gtk::Menu_Helpers;
 
 	if (follow_strings.empty()) {
@@ -93,72 +90,73 @@ TriggerUI::TriggerUI (Item* parent)
 		}
 	}
 
-	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
-	name = "triggerUI-table";
-	set_row_spacing (10);
-	set_col_spacing (10);
-	set_padding ({10});
-	set_homogenous (false);
+//	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
+//	name = "triggerUI-table";
+//	set_row_spacing (2);
+	set_spacings (2);
+//	set_padding (2);
+	set_homogeneous (false);
 
-	_follow_action_button = new ArdourButton ();
+	_follow_action_button = new ArdourButton (ArdourButton::led_default_elements);
+	_follow_action_button->set_name("FollowAction");
 	_follow_action_button->set_text (_("Follow Action"));
-	_follow_action_button->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
-
-	follow_action_button = new ArdourCanvas::Widget (canvas(), *_follow_action_button);
-	follow_action_button->name = "FollowAction";
+//	_follow_action_button->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
 	_follow_action_button->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
 
+		_follow_percent_adjustment.set_lower (0.0);
+		_follow_percent_adjustment.set_upper (100.0);
+		_follow_percent_adjustment.set_step_increment (1.0);
+		_follow_percent_adjustment.set_page_increment (5.0);
+
+	_follow_percent_slider = new HSliderController (&_follow_percent_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ );
+	_follow_percent_slider->set_name("FollowAction");
+	_follow_percent_slider->set_text (_("100% Left"));
+//	_follow_percent_slider->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
+//	_follow_percent_slider->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
+
 	_follow_left = new ArdourDropdown;
+	_follow_left->set_name("FollowAction");
 	_follow_left->append_text_item (_("None"));
 	_follow_left->append_text_item (_("Repeat"));
 	_follow_left->append_text_item (_("Next"));
 	_follow_left->append_text_item (_("Previous"));
 	_follow_left->set_sizing_text (longest_follow);
 
-	follow_left = new Widget (canvas(), *_follow_left);
-	follow_left->name = "FollowLeft";
-
 	_follow_right = new ArdourDropdown;
+	_follow_right->set_name("FollowAction");
 	_follow_right->append_text_item (_("None"));
 	_follow_right->append_text_item (_("Repeat"));
 	_follow_right->append_text_item (_("Next"));
 	_follow_right->append_text_item (_("Previous"));
 	_follow_right->set_sizing_text (longest_follow);
 
-	follow_right = new Widget (canvas(), *_follow_right);
-	follow_right->name = "FollowRight";
-
-	launch_text = new Text (canvas());
+/*
+ * 	launch_text = new Text (canvas());
 	launch_text->set (_("Launch"));
 	launch_text->name = "LaunchText";
 	launch_text->set_color (Gtkmm2ext::contrasting_text_color (UIConfiguration::instance().color (X_("theme:bg"))));
 	launch_text->set_font_description (UIConfiguration::instance ().get_NormalBoldFont ());
-
+*/
 	_launch_style_button = new ArdourDropdown();
+	_launch_style_button->set_name("FollowAction");
 	_launch_style_button->set_sizing_text (longest_launch);
-
 	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::OneShot)));
 	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Gate)));
 	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Toggle)));
 	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Repeat)));
 
-	launch_style_button = new Widget (canvas(), *_launch_style_button);
-	launch_style_button->name = "LaunchButton";
-
-	_legato_button = new ArdourButton();
+	_legato_button = new ArdourButton(ArdourButton::led_default_elements);
+	_launch_style_button->set_name("FollowAction");
 	_legato_button->set_text (_("Legato"));
 	_legato_button->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
 	_legato_button->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::legato_button_event)));
 
-	legato_button = new ArdourCanvas::Widget (canvas(), *_legato_button);
-	legato_button->name = "Legato";
-
-	quantize_text = new Text (canvas());
+/*	quantize_text = new Text (canvas());
 	quantize_text->set (_("Quantize"));
 	quantize_text->name = "QuantizeText";
 	quantize_text->set_color (launch_text->color());
 	quantize_text->set_font_description (UIConfiguration::instance ().get_NormalBoldFont ());
-
+*/
 	_quantize_button = new ArdourDropdown;
 
 #define quantize_item(b) _quantize_button->AddMenuElem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_quantize), b)));
@@ -178,13 +176,11 @@ TriggerUI::TriggerUI (Item* parent)
 		}
 	}
 	_quantize_button->set_sizing_text (longest_quantize);
+	_quantize_button->set_name("FollowAction");
 
 #undef quantize_item
 
-	quantize_button = new Widget (canvas(), *_quantize_button);
-	quantize_button->name = "quantize";
-
-	velocity = new Rectangle (canvas());
+/*	velocity = new Rectangle (canvas());
 	velocity->name = "VelocityRect";
 	velocity->set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
 	velocity->set_outline_color (UIConfiguration::instance().color (X_("neutral:foreground")));
@@ -200,34 +196,34 @@ TriggerUI::TriggerUI (Item* parent)
 	velocity_label->name = "VelocityLabel";
 	velocity_label->set_color (quantize_text->color());
 	velocity_label->set_font_description (UIConfiguration::instance ().get_NormalBoldFont ());
+*/
 
-	/* Row 0 */
 
-	attach_with_span (follow_action_button, 0, 0, 2, 1, PackExpand, PackExpand);
 
-	/* Row 1 */
+	int row=0;
+	Gtk::Label *label;
 
-	attach (follow_left, 0, 1, PackExpand, PackExpand);
-	attach (follow_right, 1, 1,  PackExpand, PackExpand);
+	label = manage(new Gtk::Label(_("Velocity Sense:")));  label->set_alignment(1.0, 0.5);
+	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK ); 
+	label = manage(new Gtk::Label(_("100%")));  label->set_alignment(0.0, 0.5);
+	attach(*label,                 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
-	/* Row 2 */
+	label = manage(new Gtk::Label(_("Launch Style:")));  label->set_alignment(1.0, 0.5);
+	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(*_launch_style_button,   1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
-	attach (launch_text, 0, 2);
+	label = manage(new Gtk::Label(_("Launch Quantize:")));  label->set_alignment(1.0, 0.5);
+	attach(*label,            0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(*_quantize_button,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
-	/* Row 3 */
+	label = manage(new Gtk::Label(_("Legato Mode:")));  label->set_alignment(1.0, 0.5);
+	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(*_legato_button,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
-	attach (launch_style_button, 0, 3, PackExpand, PackExpand);
-	attach (legato_button, 1, 3, PackExpand, PackExpand);
-
-	/* Row 4 */
-
-	attach (quantize_text, 0, 4);
-	attach (velocity_label, 1, 4);
-
-	/* Row 5 */
-
-	attach (quantize_button, 0, 5, PackExpand, PackExpand);
-	attach (velocity, 1, 5, PackExpand, PackExpand);
+	attach(*_follow_action_button,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(*_follow_percent_slider,  0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(*_follow_left,   0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(*_follow_right,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 }
 
 TriggerUI::~TriggerUI ()
@@ -401,32 +397,21 @@ TriggerUI::trigger_changed (PropertyChange pc)
 
 TriggerWidget::TriggerWidget ()
 {
-	ui = new TriggerUI (root());
-	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
-}
-
-void
-TriggerWidget::size_request (double& w, double& h) const
-{
-	ui->size_request (w, h);
+	ui = new TriggerUI ();
+	pack_start(*ui);
+	ui->show();
+//	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
 }
 
 /* ------------ */
 
-TriggerWindow::TriggerWindow (Trigger* t)
+TriggerWindow::TriggerWindow (Trigger* slot)
 {
-	TriggerWidget* tw = manage (new TriggerWidget ());
-	tw->set_trigger(t);
-	set_title (string_compose (_("Trigger: %1"), t->name()));
+	set_title (string_compose (_("Trigger: %1"), slot->name()));
 
-	double w;
-	double h;
-
-	tw->show ();
-	tw->size_request (w, h);
-	set_default_size (w, h);
-	std::cerr << "TW: set default win size to " << w << " x " << h << std::endl;
-	add (*tw);
+	TriggerWidget *triggerwidget = manage (new TriggerWidget ());
+	add (*triggerwidget);
+	triggerwidget->show_all();
 }
 
 bool
