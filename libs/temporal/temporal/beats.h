@@ -158,8 +158,15 @@ public:
 		return *this;
 	}
 
-	Beats snap_to (Temporal::Beats const & snap) const {
-		return (*this / snap) * snap;
+  public:
+	Beats round_up_to_multiple  (Beats const & multiple) const {
+		return ticks (((to_ticks() + (multiple.to_ticks() - 1)) / multiple.to_ticks()) * multiple.to_ticks());
+	}
+	Beats round_to_multiple  (Beats const & multiple) const {
+		return ticks (((to_ticks() + (int_div_round (multiple.to_ticks(), (int64_t) 2))) / multiple.to_ticks()) * multiple.to_ticks());
+	}
+	Beats round_down_to_multiple (Beats const & multiple) const {
+		return ticks ((to_ticks() / multiple.to_ticks()) * multiple.to_ticks());
 	}
 
 	Beats round_to_beat() const {
