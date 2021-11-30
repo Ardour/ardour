@@ -58,9 +58,9 @@ static std::string longest_quantize;
 static std::vector<std::string> launch_strings;
 static std::string longest_launch;
 
-TriggerUI::TriggerUI (Item* parent, Trigger& t)
+TriggerUI::TriggerUI (Item* parent)
 	: Table (parent)
-	, trigger (t)
+	, trigger(NULL)
 {
 	using namespace Gtk::Menu_Helpers;
 
@@ -228,6 +228,16 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 
 	attach (quantize_button, 0, 5, PackExpand, PackExpand);
 	attach (velocity, 1, 5, PackExpand, PackExpand);
+}
+
+TriggerUI::~TriggerUI ()
+{
+}
+
+void
+TriggerUI::set_trigger (ARDOUR::Trigger* t)
+{
+	trigger = t;
 
 	PropertyChange pc;
 
@@ -240,12 +250,9 @@ TriggerUI::TriggerUI (Item* parent, Trigger& t)
 
 	trigger_changed (pc);
 
-	trigger.PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
+	trigger->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
 }
 
-TriggerUI::~TriggerUI ()
-{
-}
 
 void
 TriggerUI::set_quantize (BBT_Offset bbo)
@@ -255,7 +262,7 @@ TriggerUI::set_quantize (BBT_Offset bbo)
 		bbo = BBT_Offset (1, 2, 3); /* XXX get grid from editor */
 	}
 
-	trigger.set_quantization (bbo);
+	trigger->set_quantization (bbo);
 }
 
 bool
@@ -263,7 +270,7 @@ TriggerUI::follow_action_button_event (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		trigger.set_use_follow (!trigger.use_follow());
+		trigger->set_use_follow (!trigger->use_follow());
 		return true;
 
 	default:
@@ -278,7 +285,7 @@ TriggerUI::legato_button_event (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		trigger.set_legato (!trigger.legato());
+		trigger->set_legato (!trigger->legato());
 		return true;
 
 	default:
@@ -291,7 +298,7 @@ TriggerUI::legato_button_event (GdkEvent* ev)
 void
 TriggerUI::set_launch_style (Trigger::LaunchStyle ls)
 {
-	trigger.set_launch_style (ls);
+	trigger->set_launch_style (ls);
 }
 
 std::string
@@ -366,37 +373,37 @@ void
 TriggerUI::trigger_changed (PropertyChange pc)
 {
 	if (pc.contains (Properties::quantization)) {
-		BBT_Offset bbo (trigger.quantization());
+		BBT_Offset bbo (trigger->quantization());
 		_quantize_button->set_active (quantize_length_to_string (bbo));
 		std::cerr << "\n\n !!! quantize is " << quantize_length_to_string (bbo) << std::endl << std::endl;
 	}
 
 	if (pc.contains (Properties::use_follow)) {
-		_follow_action_button->set_active_state (trigger.use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_follow_action_button->set_active_state (trigger->use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::legato)) {
-		_legato_button->set_active_state (trigger.legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_legato_button->set_active_state (trigger->legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::launch_style)) {
-		_launch_style_button->set_active (launch_style_to_string (trigger.launch_style()));
+		_launch_style_button->set_active (launch_style_to_string (trigger->launch_style()));
 	}
 
 	if (pc.contains (Properties::follow_action0)) {
-		_follow_right->set_text (follow_action_to_string (trigger.follow_action (0)));
+		_follow_right->set_text (follow_action_to_string (trigger->follow_action (0)));
 	}
 
 	if (pc.contains (Properties::follow_action1)) {
-		_follow_left->set_text (follow_action_to_string (trigger.follow_action (1)));
+		_follow_left->set_text (follow_action_to_string (trigger->follow_action (1)));
 	}
 }
 
 /* ------------ */
 
-TriggerWidget::TriggerWidget (Trigger& t)
+TriggerWidget::TriggerWidget ()
 {
-	ui = new TriggerUI (root(), t);
+	ui = new TriggerUI (root());
 	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
 }
 
@@ -408,10 +415,11 @@ TriggerWidget::size_request (double& w, double& h) const
 
 /* ------------ */
 
-TriggerWindow::TriggerWindow (Trigger& t)
+TriggerWindow::TriggerWindow (Trigger* t)
 {
-	TriggerWidget* tw = manage (new TriggerWidget (t));
-	set_title (string_compose (_("Trigger: %1"), t.name()));
+	TriggerWidget* tw = manage (new TriggerWidget ());
+	tw->set_trigger(t);
+	set_title (string_compose (_("Trigger: %1"), t->name()));
 
 	double w;
 	double h;
