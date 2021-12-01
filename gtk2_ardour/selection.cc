@@ -232,6 +232,13 @@ Selection::clear_triggers (bool with_signal)
 	}
 }
 
+RegionSelection
+Selection::trigger_regionview_proxy () const
+{
+	RegionSelection rs;
+	return rs;
+}
+
 void
 Selection::toggle (boost::shared_ptr<Playlist> pl)
 {

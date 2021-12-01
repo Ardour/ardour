@@ -131,6 +131,12 @@ public:
 	bool selected (ControlPoint*) const;
 	bool selected (TriggerEntry*) const;
 
+	/* ToDo: some region operations (midi quantize, audio reverse) expect
+	 * a RegionSelection (a list of regionviews).  We're likely going to
+	 * need a region_view + time_axis_view proxy, and this will get it.
+	 */
+	RegionSelection trigger_regionview_proxy () const;
+
 	void set (std::list<Selectable*> const &);
 	void add (std::list<Selectable*> const &);
 	void toggle (std::list<Selectable*> const &);
