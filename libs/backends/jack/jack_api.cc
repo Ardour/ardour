@@ -58,7 +58,7 @@ instantiate (const std::string& arg1, const std::string& arg2)
 {
 	try {
 		jack_connection.reset (new JackConnection (arg1, arg2));
-        backend.reset ();
+		backend.reset ();
 	} catch (...) {
 		return -1;
 	}
