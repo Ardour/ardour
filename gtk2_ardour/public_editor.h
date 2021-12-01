@@ -210,6 +210,14 @@ public:
 	virtual void new_region_from_selection () = 0;
 	virtual void separate_region_from_selection () = 0;
 
+	virtual void reverse_region () = 0;
+	virtual void normalize_region () = 0;
+	virtual void quantize_region () = 0;
+	virtual void legatize_region (bool shrink_only) = 0;
+	virtual void transform_region () = 0;
+	virtual void transpose_region () = 0;
+	virtual void pitch_shift_region () = 0;
+
 	virtual void transition_to_rolling (bool fwd) = 0;
 	virtual samplepos_t pixel_to_sample (double pixel) const = 0;
 	virtual samplepos_t playhead_cursor_sample () const = 0;
