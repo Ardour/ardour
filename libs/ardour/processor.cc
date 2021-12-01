@@ -332,18 +332,3 @@ Processor::owner() const
 {
 	return _owner;
 }
-
-bool
-Processor::check_active ()
-{
-	if (_active) {
-		if (!_pending_active) {
-			_active = false;
-		}
-	} else {
-		if (_pending_active) {
-			_active = true;
-		}
-	}
-	return _active;
-}
