@@ -733,7 +733,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 	}
 
 	if (nsm) {
-		if (!AudioEngine::instance()->set_backend("JACK", "", "")) {
+		if (!AudioEngine::instance()->set_backend("JACK", ARDOUR_COMMAND_LINE::backend_client_name, "")) {
 			error << _("NSM: The JACK backend is mandatory and can not be loaded.") << endmsg;
 			return;
 		}
