@@ -5309,15 +5309,18 @@ Editor::get_regions_from_selection_and_mouse (timepos_t const & pos)
 	return regions;
 }
 
-/** Start with regions that are selected, or the entered regionview if none are selected.
- *  Then add equivalent regions on tracks in the same active edit-enabled route group as any
- *  of the regions that we started with.
+/** Start with the selected Region(s) or TriggerSlot
+ *  if neither is found, try using the entered_regionview (region under the mouse).
  */
 
 RegionSelection
 Editor::get_regions_from_selection_and_entered () const
 {
 	RegionSelection regions = selection->regions;
+
+	if (regions.empty() && !selection->triggers.empty()) {
+		regions = selection->trigger_regionview_proxy();
+	}
 
 	if (regions.empty() && entered_regionview) {
 		regions.add (entered_regionview);
