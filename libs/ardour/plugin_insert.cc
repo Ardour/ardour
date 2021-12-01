@@ -1254,7 +1254,7 @@ PluginInsert::silence (samplecnt_t nframes, samplepos_t start_sample)
 {
 	automation_run (start_sample, nframes, true); // evaluate automation only
 
-	if (!check_active()) {
+	if (!_active) {
 		// XXX delaybuffers need to be offset by nframes
 		return;
 	}
