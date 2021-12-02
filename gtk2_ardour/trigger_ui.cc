@@ -130,13 +130,6 @@ TriggerUI::TriggerUI () :
 	_follow_right->append_text_item (_("Previous"));
 	_follow_right->set_sizing_text (longest_follow);
 
-/*
- * 	launch_text = new Text (canvas());
-	launch_text->set (_("Launch"));
-	launch_text->name = "LaunchText";
-	launch_text->set_color (Gtkmm2ext::contrasting_text_color (UIConfiguration::instance().color (X_("theme:bg"))));
-	launch_text->set_font_description (UIConfiguration::instance ().get_NormalBoldFont ());
-*/
 	_launch_style_button = new ArdourDropdown();
 	_launch_style_button->set_name("FollowAction");
 	_launch_style_button->set_sizing_text (longest_launch);
@@ -151,12 +144,6 @@ TriggerUI::TriggerUI () :
 	_legato_button->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
 	_legato_button->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::legato_button_event)));
 
-/*	quantize_text = new Text (canvas());
-	quantize_text->set (_("Quantize"));
-	quantize_text->name = "QuantizeText";
-	quantize_text->set_color (launch_text->color());
-	quantize_text->set_font_description (UIConfiguration::instance ().get_NormalBoldFont ());
-*/
 	_quantize_button = new ArdourDropdown;
 
 #define quantize_item(b) _quantize_button->AddMenuElem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_quantize), b)));
@@ -179,26 +166,6 @@ TriggerUI::TriggerUI () :
 	_quantize_button->set_name("FollowAction");
 
 #undef quantize_item
-
-/*	velocity = new Rectangle (canvas());
-	velocity->name = "VelocityRect";
-	velocity->set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
-	velocity->set_outline_color (UIConfiguration::instance().color (X_("neutral:foreground")));
-
-	velocity_text = new Text (velocity);
-	velocity_text->set (_("100 %"));
-	velocity_text->name = "VelocityText";
-	velocity_text->set_color (quantize_text->color());
-	velocity_text->set_font_description (UIConfiguration::instance ().get_NormalFont ());
-
-	velocity_label = new Text (canvas());
-	velocity_label->set (_("Velocity"));
-	velocity_label->name = "VelocityLabel";
-	velocity_label->set_color (quantize_text->color());
-	velocity_label->set_font_description (UIConfiguration::instance ().get_NormalBoldFont ());
-*/
-
-
 
 	int row=0;
 	Gtk::Label *label;
