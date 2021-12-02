@@ -336,10 +336,6 @@ Trigger::process_state_requests ()
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 handling bang with state = %2\n", index(), enum_2_string (_state)));
 
 		switch (_state) {
-		case None:
-			abort ();
-			break;
-
 		case Running:
 			switch (launch_style()) {
 			case OneShot:
@@ -388,22 +384,20 @@ Trigger::process_state_requests ()
 	}
 }
 
-Trigger::RunType
-Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal::Beats const & end)
+pframes_t
+Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t dest_offset, bool passthru)
 {
 	using namespace Temporal;
 
+	/* This should never be called by a stopped trigger */
+
+	assert (_state != Stopped);
+
 	/* In these states, we are not waiting for a transition */
 
-	switch (_state) {
-	case Stopped:
-		return RunNone;
-	case Running:
-		return RunAll;
-	case Stopping:
-		return RunAll;
-	default:
-		break;
+	if (_state == Running || _state == Stopping) {
+		/* will cover everything */
+		return dest_offset;
 	}
 
 	timepos_t transition_time (BeatTime);
@@ -411,6 +405,10 @@ Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal:
 	Temporal::BBT_Time transition_bbt;
 
 	/* XXX need to use global grid here is quantization == zero */
+
+	/* Given the value of @param start, determine, based on the
+	 * quantization, the next time for a transition.
+	 */
 
 	if (_quantization.bars == 0) {
 		Temporal::Beats transition_beats = start.round_up_to_multiple (Temporal::Beats (_quantization.beats, _quantization.ticks));
@@ -425,42 +423,84 @@ Trigger::maybe_compute_next_transition (Temporal::Beats const & start, Temporal:
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), transition_time.beats(), start, end, _quantization));
 
+	/* See if this time falls within the range of time given to us */
+
 	if (transition_time.beats() >= start && transition_time < end) {
+
+		/* transition time has arrived! let's figure out what're doing:
+		 * stopping, starting, retriggering
+		 */
 
 		transition_samples = transition_time.samples();
 		transition_beats = transition_time.beats ();
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 in range, should start/stop at %2 aka %3\n", index(), transition_samples, transition_beats));
 
-		if (_state == WaitingToStop) {
+		switch (_state) {
+
+		case WaitingToStop:
 			_state = Stopping;
 			PropertyChanged (ARDOUR::Properties::running);
-			return RunEnd;
-		} else if (_state == WaitingToStart) {
-			retrigger ();
-			_state = Running;
-			expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, BBT_Offset (round (_barcnt), 0, 0)));
-			cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
-			PropertyChanged (ARDOUR::Properties::running);
-			return RunStart;
-		} else if (_state == WaitingForRetrigger) {
-			retrigger ();
-			_state = Running;
-			expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, BBT_Offset (round (_barcnt), 0, 0)));
-			cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
-			PropertyChanged (ARDOUR::Properties::running);
-			return RunAll;
-		}
-	} else {
-		if (_state == WaitingForRetrigger || _state == WaitingToStop) {
-			/* retrigger time has not been reached, just continue
-			   to play normally until then.
+
+			/* trigger will reach it's end somewhere within this
+			 * process cycle, so compute the number of samples it
+			 * should generate.
+			 */
+
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 will stop somewhere in the middle of run()\n", name()));
+
+			/* offset within the buffer(s) for output remains
+			   unchanged, since we will write from the first
+			   location corresponding to start
 			*/
-			return RunAll;
+			break;
+
+		case WaitingToStart:
+			retrigger ();
+			_state = Running;
+			expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, BBT_Offset (round (_barcnt), 0, 0)));
+			cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
+			PropertyChanged (ARDOUR::Properties::running);
+
+			/* trigger will start somewhere within this process
+			 * cycle. Compute the sample offset where any audio
+			 * should end up, and the number of samples it should generate.
+			 */
+
+			dest_offset += std::max (samplepos_t (0), transition_samples - start_sample);
+
+			if (!passthru) {
+				/* XXX need to silence start of buffers up to dest_offset */
+			}
+			break;
+
+		case WaitingForRetrigger:
+			retrigger ();
+			_state = Running;
+			expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, BBT_Offset (round (_barcnt), 0, 0)));
+			cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
+			PropertyChanged (ARDOUR::Properties::running);
+
+			/* trigger is just running normally, and will fill
+			 * buffers entirely.
+			 */
+
+			break;
+
+		default:
+			fatal << string_compose (_("programming error: %1"), "impossible trigger state in ::maybe_compute_next_transition()") << endmsg;
+			abort();
 		}
+
+	} else {
+
+		/* retrigger time has not been reached, just continue
+		   to play normally until then.
+		*/
+
 	}
 
-	return RunNone;
+	return dest_offset;
 }
 
 /*--------------------*/
@@ -778,7 +818,7 @@ AudioTrigger::retrigger ()
 }
 
 pframes_t
-AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bool passthru, double bpm)
+AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t dest_offset, bool passthru, double bpm)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
 	const uint32_t nchans = ar->n_channels();
@@ -788,8 +828,23 @@ AudioTrigger::run (BufferSet& bufs, pframes_t nframes, pframes_t dest_offset, bo
 	Sample* bufp[nchans];
 	const bool stretching = (_apparent_tempo != 0.);
 
-	assert (ar);
-	assert (active());
+	/* see if we're going to start or stop or retrigger in this run() call */
+	dest_offset = maybe_compute_next_transition (start_sample, start, end, dest_offset, passthru);
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2\n", name(), enum_2_string (_state)));
+
+	switch (_state) {
+	case Stopped:
+	case WaitingForRetrigger:
+	case WaitingToStart:
+		/* did everything we could do */
+		return nframes;
+	case Running:
+	case WaitingToStop:
+	case Stopping:
+		/* stuff to do */
+		break;
+	}
 
 	/* We use session scratch buffers for both padding the start of the
 	 * input to RubberBand, and to hold the output. Because of this dual
@@ -1209,7 +1264,9 @@ MIDITrigger::reload (BufferSet&, void*)
 }
 
 pframes_t
-MIDITrigger::run (BufferSet& bufs, samplepos_t start, samplepos_t end, pframes_t nframes, pframes_t dest_offset, bool passthru, double bpm)
+MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
+                  Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
+                  pframes_t nframes, pframes_t dest_offset, bool passthru, double bpm)
 {
 	MidiBuffer& mb (bufs.get_midi (0));
 	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
@@ -1218,11 +1275,25 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start, samplepos_t end, pframes_t
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	samplepos_t last_event_samples = 0;
 
+	/* see if we're going to start or stop or retrigger in this run() call */
+	dest_offset = maybe_compute_next_transition (start_sample, start_beats, end_beats, dest_offset, passthru);
+
+	switch (_state) {
+	case Stopped:
+	case WaitingForRetrigger:
+	case WaitingToStart:
+		return nframes;
+	case Running:
+	case WaitingToStop:
+	case Stopping:
+		break;
+	}
+
 	if (!passthru) {
 		mb.clear ();
 	}
 
-	while (true) {
+	while (iter != model->end()) {
 
 		MidiEvent const & next_event (*iter);
 
@@ -1238,15 +1309,27 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start, samplepos_t end, pframes_t
 
 		const samplepos_t timeline_samples = tmap->sample_at (effective_time);
 
-		if (timeline_samples > end) {
+		if (timeline_samples >= end_sample) {
 			break;
 		}
 
 		/* Now we have to convert to a position within the buffer we
 		 * are writing to.
+		 *
+		 * There's a slight complication here, because both
+		 * start_sample and dest_offset reflect an offset from the
+		 * start of the buffer that our parent (TriggerBox) processor
+		 * is handling in its own run() method. start_sample may have
+		 * been adjusted to reflect a previous Trigger's processing
+		 * during this run cycle, and so has dest_offset.
+		 *
+		 * Therefore, when computing the buffer sample for this MIDI
+		 * event, we only consider one of the two values, not both. If
+		 * we use both, we will double the "offset" that occurs if
+		 * another Trigger ran during this process cycle.
 		 */
 
-		samplepos_t buffer_samples = timeline_samples - start + dest_offset;
+		samplepos_t buffer_samples = timeline_samples - start_sample + dest_offset;
 		last_event_samples = buffer_samples;
 
 		const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, next_event.size(), const_cast<uint8_t*>(next_event.buffer()), false);
@@ -1256,49 +1339,54 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start, samplepos_t end, pframes_t
 		last_event_beats = next_event.time();
 
 		++iter;
-
-		if (iter == model->end()) {
-
-			/* We reached the end */
-
-			_loop_cnt++;
-			_state = Stopped;
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped\n", index()));
-		}
 	}
 
-	if (last_event_samples) {
-		nframes -= (last_event_samples - start);
-	}
 
 	if (_state == Stopping) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
 		tracker.resolve_notes (mb, nframes);
-		shutdown ();
 	}
 
-	if (_state == Stopped) {
-		if (_loop_cnt == _follow_count) {
-			/* have played the specified number of times, we're done */
+	if (iter == model->end()) {
 
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
-			shutdown ();
+		/* We reached the end */
 
-		} else {
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end\n", index()));
 
-			/* reached the end, but we haven't done that enough
-			 * times yet for a follow action/stop to take
-			 * effect. Time to get played again.
-			 */
+		if (!(_state == Stopping)) {
+			_loop_cnt++;
 
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
-			/* we will "restart" at the beginning of the
-			   next iteration of the trigger.
-			*/
-			transition_beats = transition_beats + data_length;
-			retrigger ();
-			_state = WaitingToStart;
+			if (_loop_cnt == _follow_count) {
+				/* have played the specified number of times, we're done */
+
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
+				shutdown ();
+
+			} else {
+
+				/* reached the end, but we haven't done that enough
+				 * times yet for a follow action/stop to take
+				 * effect. Time to get played again.
+				 */
+
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
+				/* we will "restart" at the beginning of the
+				   next iteration of the trigger.
+				*/
+				transition_beats = transition_beats + data_length;
+				retrigger ();
+				_state = WaitingToStart;
+			}
 		}
+
+		/* the time we processed spans from start to the last event */
+
+		nframes -= (last_event_samples - start_sample);
+
+	} else {
+		/* we didn't reach the end of the MIDI data, ergo we covered
+		   the entire timespan passed into us.
+		*/
 	}
 
 	return nframes;
@@ -1724,7 +1812,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (!check_active()) {
 		return;
-	}
+ 	}
 
 	_pass_thru = _requests.pass_thru.exchange (false);
 	bool allstop = _requests.stop_all.exchange (false);
@@ -1817,9 +1905,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	const Temporal::Beats end_beats (timepos_t (end_sample).beats());
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	uint64_t max_chans = 0;
+	uint32_t max_chans = 0;
 	Trigger* nxt = 0;
-	samplecnt_t processed_frames = 0;
+	pframes_t dest_offset = 0;
 
 	while (nframes) {
 
@@ -1828,7 +1916,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		const Temporal::Beats start_beats (timepos_t (start_sample).beats());
 		const double bpm = tmap->quarters_per_minute_at (timepos_t (start_beats));
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("nf loop, ss %1 sb %2 es %3 eb %4 bpm %5\n", start_sample, end_sample, start_beats, end_beats, bpm));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("nf loop, ss %1 es %2 sb %3 eb %4 bpm %5\n", start_sample, end_sample, start_beats, end_beats, bpm));
 
 		 /* see if there's another trigger explicitly queued */
 
@@ -1882,8 +1970,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 
 
-		cerr << "*** around again, state == " << enum_2_string (currently_playing->state()) << " SA ? " << _stop_all << endl;
-
 		/* if we're not in the process of stopping all active triggers,
 		 * but the current one has stopped, decide which (if any)
 		 * trigger to play next.
@@ -1902,109 +1988,27 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				currently_playing->startup ();
 			} else {
 				currently_playing = 0;
+				/* leave nframes loop */
 				break;
 			}
 		}
 
-		/* If the slot is waiting to stop/start/retrigger, determine
-		 * whether that will happen during this run() call.
-		 */
-
-		Trigger::RunType run_type;
-
-		switch (currently_playing->state()) {
-		case Trigger::WaitingToStop:
-		case Trigger::WaitingToStart:
-		case Trigger::WaitingForRetrigger:
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 in state %2, recompute next transition\n", currently_playing->name(), enum_2_string (currently_playing->state())));
-			run_type = currently_playing->maybe_compute_next_transition (start_beats, end_beats);
-			break;
-		default:
-			run_type = Trigger::RunAll;
-		}
-
-		if (run_type == Trigger::RunNone) {
-			/* transition is not happening in this run() cycle. Nothing to do at this time, still waiting ... */
-			return;
-		}
-
-		boost::shared_ptr<Region> r = currently_playing->region();
-
-		sampleoffset_t dest_offset;
-		pframes_t trigger_samples;
-
-		if (run_type == Trigger::RunEnd) {
-
-			/* trigger will reach it's end somewhere within this
-			 * process cycle, so compute the number of samples it
-			 * should generate.
-			 */
-
-			trigger_samples = nframes - (currently_playing->transition_samples - start_sample);
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 will stop after just %2 samples of %3\n", currently_playing->name(), trigger_samples, nframes));
-			if (currently_playing->transition_samples < start_sample) {
-				abort ();
-			}
-
-			/* offset within the buffer(s) for output */
-			dest_offset = processed_frames;
-
-		} else if (run_type == Trigger::RunStart) {
-
-			/* trigger will start somewhere within this process
-			 * cycle. Compute the sample offset where any audio
-			 * should end up, and the number of samples it should generate.
-			 */
-
-			dest_offset = processed_frames + std::max (samplepos_t (0), currently_playing->transition_samples - start_sample);
-			trigger_samples = nframes - dest_offset;
-
-			if (!_pass_thru) {
-				/* XXX need to silence start of buffers up to dest_offset */
-			}
-
-		} else if (run_type == Trigger::RunAll) {
-
-			/* trigger is just running normally, and will fill
-			 * buffers entirely.
-			 */
-
-			dest_offset = processed_frames;
-			trigger_samples = nframes;
-
-		}
-
-		AudioTrigger* at = dynamic_cast<AudioTrigger*> (currently_playing);
 		pframes_t frames_covered;
 
-		if (at) {
 
-			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
-			const uint64_t nchans = ar->n_channels ();
-
-			max_chans = std::max (max_chans, nchans);
-
-			// DEBUG_TRACE (DEBUG::Triggers, string_compose ("run %1 from %2 .. %3\n", at->name(), start_beats, end_beats));
-			frames_covered = at->run (bufs, trigger_samples, dest_offset, _pass_thru, bpm);
-
-		} else {
-
-			MIDITrigger* mt = dynamic_cast<MIDITrigger*> (currently_playing);
-
-			assert (mt); /* there are no other kinds besides Audio and MIDI */
-
-			frames_covered = mt->run (bufs, start_sample, end_sample, trigger_samples, dest_offset, _pass_thru, bpm);
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (currently_playing->region());
+		if (ar) {
+			max_chans = std::max (ar->n_channels(), max_chans);
 		}
 
-		if (run_type == Trigger::RunEnd) {
-			currently_playing->shutdown ();
-		}
+		frames_covered = currently_playing->run (bufs, start_sample, end_sample, start_beats, end_beats, nframes, dest_offset, _pass_thru, bpm);
 
 		nframes -= frames_covered;
 		start_sample += frames_covered;
+		dest_offset += frames_covered;
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("trig %1 ran, covered %2 of %3, state now %4 nframes now %5\n",
-		                                              currently_playing->name(), frames_covered, trigger_samples, enum_2_string (currently_playing->state()), nframes));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("trig %1 ran, covered %2 state now %3 nframes now %4\n",
+		                                              currently_playing->name(), frames_covered, enum_2_string (currently_playing->state()), nframes));
 
 	}
 

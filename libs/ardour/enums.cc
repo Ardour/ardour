@@ -845,7 +845,6 @@ setup_enum_writer ()
 	REGISTER_ENUM (RollIfAppropriate);
 	REGISTER (_LocateTransportDisposition);
 
-	REGISTER_CLASS_ENUM (Trigger, None);
 	REGISTER_CLASS_ENUM (Trigger, Stopped);
 	REGISTER_CLASS_ENUM (Trigger, WaitingToStart);
 	REGISTER_CLASS_ENUM (Trigger, Running);

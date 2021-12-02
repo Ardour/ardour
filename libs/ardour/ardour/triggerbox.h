@@ -63,13 +63,12 @@ class SideChain;
 class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
 	enum State {
-		None = 0, /* mostly for _requested_state */
-		Stopped = 1,
-		WaitingToStart = 2,
-		Running = 3,
-		WaitingForRetrigger = 4,
-		WaitingToStop = 5,
-		Stopping = 6
+		Stopped,
+		WaitingToStart,
+		Running,
+		WaitingForRetrigger,
+		WaitingToStop,
+		Stopping
 	};
 
 	Trigger (uint64_t index, TriggerBox&);
@@ -86,6 +85,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	/* explicitly call for the trigger to stop */
 	void request_stop ();
 
+	virtual pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample,
+	                       Temporal::Beats const & start, Temporal::Beats const & end,
+	                       pframes_t nframes, pframes_t offset, bool first, double bpm) = 0;
 	virtual void set_start (timepos_t const &) = 0;
 	virtual void set_end (timepos_t const &) = 0;
 	virtual void set_length (timecnt_t const &) = 0;
@@ -116,6 +118,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_launch_style (LaunchStyle);
 
 	enum FollowAction {
+		None,
 		Stop,
 		Again,
 		QueuedTrigger, /* DP-style */
@@ -150,22 +153,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
-	enum RunResult {
-		Relax = 0,
-		RemoveTrigger = 0x1,
-		ReadMore = 0x2,
-		FillSilence = 0x4,
-		ChangeTriggers = 0x8
-	};
-
-	enum RunType {
-		RunEnd,
-		RunStart,
-		RunAll,
-		RunNone,
-	};
-
-	RunType maybe_compute_next_transition (Temporal::Beats const & start, Temporal::Beats const & end);
+	pframes_t maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t dest_offset, bool passthru);
 
 	void set_next_trigger (int n);
 	int next_trigger() const { return _next_trigger; }
@@ -242,7 +230,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	AudioTrigger (uint64_t index, TriggerBox&);
 	~AudioTrigger ();
 
-	pframes_t run (BufferSet&, pframes_t nframes, pframes_t offset, bool first, double bpm);
+	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t offset, bool first, double bpm);
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
@@ -288,7 +276,6 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
-	RunResult at_end ();
 	void determine_tempo ();
 	void setup_stretcher ();
 };
@@ -299,7 +286,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	MIDITrigger (uint64_t index, TriggerBox&);
 	~MIDITrigger ();
 
-	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, pframes_t offset, bool first, double bpm);
+	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start_beats, Temporal::Beats const & end_beats, pframes_t nframes, pframes_t offset, bool passthru, double bpm);
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
@@ -342,7 +329,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	boost::shared_ptr<MidiModel> model;
 
 	int load_data (boost::shared_ptr<MidiRegion>);
-	RunResult at_end ();
 	void compute_and_set_length ();
 };
 
