@@ -30,9 +30,18 @@
 
 #include "actions.h"
 #include "ardour_ui.h"
+#include "editor.h"
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "timers.h"
+
+#include "audio_region_properties_box.h"
+#include "midi_region_properties_box.h"
+#include "audio_region_operations_box.h"
+#include "midi_region_operations_box.h"
+#include "slot_properties_box.h"
+#include "midi_region_trimmer_box.h"
+
 #include "trigger_page.h"
 #include "trigger_strip.h"
 #include "ui_config.h"
@@ -53,10 +62,30 @@ TriggerPage::TriggerPage ()
 	load_bindings ();
 	register_actions ();
 
+	_midi_prop_box = new MidiRegionPropertiesBox ();
+	_audio_prop_box = new AudioRegionPropertiesBox ();
+	_midi_ops_box = new MidiRegionOperationsBox ();
+	_audio_ops_box = new AudioRegionOperationsBox ();
+	_slot_prop_box = new SlotPropertiesBox ();
+	_midi_trim_box = new MidiRegionTrimmerBox ();
+
+	Gtk::Table* table = manage (new Gtk::Table);
+	table->set_homogeneous (false);
+	table->set_spacings (16);
+	table->set_border_width (8);
+
+	int col = 0;
+	table->attach(*_slot_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	table->attach(*_midi_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	table->attach(*_midi_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	table->attach(*_midi_ops_box,   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+
+	_parameter_box.pack_start (*table);
+
+
 #if 1 /* Placeholders */
 	_slot_area_box.pack_start (*Gtk::manage (new Gtk::Label ("Fixed\nWidth\nSlot\nArea")));
 	_browser_box.pack_start (*Gtk::manage (new Gtk::Label ("File Browser")));
-	_parameter_box.pack_start (*Gtk::manage (new Gtk::Label ("Parameter HBox")));
 	_slot_area_box.show_all ();
 	_browser_box.show_all ();
 	_parameter_box.show_all ();
@@ -121,6 +150,12 @@ TriggerPage::TriggerPage ()
 
 TriggerPage::~TriggerPage ()
 {
+	delete _slot_prop_box;
+	delete _midi_ops_box;
+	delete _audio_ops_box;
+	delete _midi_prop_box;
+	delete _audio_prop_box;
+	delete _midi_trim_box;
 }
 
 Gtk::Window*
@@ -196,7 +231,16 @@ TriggerPage::set_session (Session* s)
 
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
 
+	Editor::instance().get_selection().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerPage::selection_changed));
+
 	initial_track_display ();
+
+	_midi_prop_box->set_session(s);
+	_audio_prop_box->set_session(s);
+	_midi_ops_box->set_session(s);
+	_audio_ops_box->set_session(s);
+	_slot_prop_box->set_session(s);
+	_midi_trim_box->set_session(s);
 
 	update_title ();
 	start_updating ();
@@ -260,6 +304,39 @@ TriggerPage::initial_track_display ()
 	RouteList                    rl (*r);
 	_strips.clear ();
 	add_routes (rl);
+}
+
+void
+TriggerPage::selection_changed ()
+{
+	Selection& selection (Editor::instance().get_selection());
+
+	_midi_ops_box->hide();
+	_audio_ops_box->hide();
+	_midi_prop_box->hide();
+	_audio_prop_box->hide();
+	_slot_prop_box->hide();
+	_midi_trim_box->hide();
+
+	if (!selection.triggers.empty()) {
+		TriggerSelection ts = selection.triggers;
+		TriggerEntry* entry = *ts.begin();
+		Trigger* slot = &entry->trigger();
+
+		_slot_prop_box->set_slot(slot);
+		if (slot->region()) {
+			_midi_prop_box->set_region(slot->region());
+			_audio_prop_box->set_region(slot->region());
+			_midi_trim_box->set_region(slot->region());
+
+			_midi_ops_box->show();
+			_audio_ops_box->show();
+			_midi_prop_box->show();
+			_audio_prop_box->show();
+			_slot_prop_box->show();
+			_midi_trim_box->show();
+		}
+	}
 }
 
 void

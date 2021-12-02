@@ -30,6 +30,12 @@
 #include "widgets/tabbable.h"
 
 class TriggerStrip;
+class SlotPropertiesBox;
+class AudioRegionPropertiesBox;
+class MidiRegionPropertiesBox;
+class AudioRegionOperationsBox;
+class MidiRegionOperationsBox;
+class MidiRegionTrimmerBox;
 
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
@@ -59,6 +65,9 @@ private:
 	void pi_property_changed (PBD::PropertyChange const&);
 	void stripable_property_changed (PBD::PropertyChange const&, boost::weak_ptr<ARDOUR::Stripable>);
 
+	void selection_changed ();
+	PBD::ScopedConnectionList editor_connections;
+
 	gint start_updating ();
 	gint stop_updating ();
 	void fast_update_strips ();
@@ -75,6 +84,13 @@ private:
 	Gtk::VBox            _slot_area_box;
 	Gtk::VBox            _browser_box;
 	Gtk::HBox            _parameter_box;
+
+	AudioRegionPropertiesBox* _audio_prop_box;
+	MidiRegionPropertiesBox* _midi_prop_box;
+	AudioRegionOperationsBox* _audio_ops_box;
+	MidiRegionOperationsBox* _midi_ops_box;
+	SlotPropertiesBox* _slot_prop_box;
+	MidiRegionTrimmerBox *_midi_trim_box;
 
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;
