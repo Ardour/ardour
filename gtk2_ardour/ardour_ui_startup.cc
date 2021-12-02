@@ -782,7 +782,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 			psd.start ();
 
 			post_engine ();
-			_nsm_first_session_opened = true;
+			nsm_first_session_opened = true;
 		}
 	}
 
