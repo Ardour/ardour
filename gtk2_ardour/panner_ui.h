@@ -82,6 +82,7 @@ public:
 
 private:
 	friend class MixerStrip;
+	friend class TriggerStrip;
 	friend class SendUI;
 
 	boost::shared_ptr<ARDOUR::PannerShell> _panshell;

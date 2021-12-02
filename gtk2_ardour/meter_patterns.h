@@ -27,6 +27,10 @@
 
 #include <sigc++/signal.h>
 
+namespace Gtk {
+	class DrawingArea;
+}
+
 namespace ARDOUR {
 	class Route;
 	class RouteGroup;

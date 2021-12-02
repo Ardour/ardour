@@ -23,6 +23,10 @@
 #include "pbd/unwind.h"
 
 #include "ardour/audio_track.h"
+#include "ardour/pannable.h"
+#include "ardour/panner.h"
+#include "ardour/panner_manager.h"
+#include "ardour/panner_shell.h"
 #include "ardour/profile.h"
 
 #include "gtkmm2ext/utils.h"
@@ -30,6 +34,7 @@
 #include "widgets/tooltips.h"
 
 #include "gui_thread.h"
+#include "meter_patterns.h"
 #include "mixer_ui.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
@@ -37,6 +42,8 @@
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
+
+#define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
 using namespace ARDOUR;
 using namespace ArdourWidgets;
@@ -48,21 +55,21 @@ using namespace std;
 
 PBD::Signal1<void, TriggerStrip*> TriggerStrip::CatchDeletion;
 
-#define PX_SCALE(pxmin, dflt) rint (std::max ((double)pxmin, (double)dflt* UIConfiguration::instance ().get_ui_scale ()))
-
 TriggerStrip::TriggerStrip (Session* s, boost::shared_ptr<ARDOUR::Route> rt)
 	: SessionHandlePtr (s)
 	, RouteUI (s)
+	, _clear_meters (true)
 	, _pb_selection ()
 	, _processor_box (s, boost::bind (&TriggerStrip::plugin_selector, this), _pb_selection, 0)
 	, _trigger_display (*rt->triggerbox ())
+	, _panners (s)
+	, _gain_control (ArdourKnob::default_elements, ArdourKnob::Detent)
+	, _level_meter (s)
 {
 	init ();
-	RouteUI::set_route (rt);
+	set_route (rt);
 
-	/* set route */
-	_processor_box.set_route (rt);
-
+	io_changed ();
 	name_changed ();
 	map_frozen ();
 	update_sensitivity ();
@@ -115,13 +122,32 @@ TriggerStrip::init ()
 	_name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	_name_button.signal_size_allocate ().connect (sigc::mem_fun (*this, &TriggerStrip::name_button_resized));
 
-	/* main layout */
+	/* strip layout */
 	global_vpacker.set_spacing (2);
 	global_vpacker.pack_start (_name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_trigger_display, true, true); // XXX
 	global_vpacker.pack_start (_processor_box, true, true);
+	global_vpacker.pack_start (_panners, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (mute_solo_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (volume_table, Gtk::PACK_SHRINK);
 
-	/* top-level layout */
+	/* Mute & Solo */
+	mute_solo_table.set_homogeneous (true);
+	mute_solo_table.set_spacings (2);
+	mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
+	mute_solo_table.attach (*solo_button, 1, 2, 0, 1);
+
+	/* Fader/Gain */
+	_gain_control.set_size_request (PX_SCALE (19), PX_SCALE (19));
+	_gain_control.set_tooltip_prefix (_("Level: "));
+	_gain_control.set_name ("trim knob"); // XXX
+	_gain_control.StartGesture.connect (sigc::mem_fun (*this, &TriggerStrip::gain_start_touch));
+	_gain_control.StopGesture.connect (sigc::mem_fun (*this, &TriggerStrip::gain_end_touch));
+
+	volume_table.attach (_level_meter,  0, 1, 0, 1);
+	volume_table.attach (_gain_control, 0, 1, 1, 2);
+
+	/* top-level */
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
 	global_frame.set_name ("BaseFrame");
@@ -131,11 +157,22 @@ TriggerStrip::init ()
 	/* Signals */
 	_name_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerStrip::name_button_press), false);
 
+	ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun (*this, &TriggerStrip::reset_peak_display));
+	ArdourMeter::ResetRoutePeakDisplays.connect (sigc::mem_fun (*this, &TriggerStrip::reset_route_peak_display));
+	ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun (*this, &TriggerStrip::reset_group_peak_display));
+
 	/* Visibility */
 	_name_button.show ();
 	_trigger_display.show ();
 	_processor_box.show ();
+	_gain_control.show ();
+	_level_meter.show ();
 
+	mute_button->show ();
+	solo_button->show ();
+
+	mute_solo_table.show ();
+	volume_table.show ();
 	global_frame.show ();
 	global_vpacker.show ();
 	show ();
@@ -150,9 +187,43 @@ TriggerStrip::init ()
 }
 
 void
+TriggerStrip::set_route (boost::shared_ptr<Route> rt)
+{
+	RouteUI::set_route (rt);
+
+	_processor_box.set_route (rt);
+
+	_gain_control.set_controllable (_route->gain_control ());
+
+	_level_meter.set_meter (_route->shared_peak_meter ().get ());
+	_level_meter.clear_meters ();
+	_level_meter.setup_meters (PX_SCALE (100), PX_SCALE (10), 6);
+
+	_route->input ()->changed.connect (*this, invalidator (*this), boost::bind (&TriggerStrip::io_changed, this), gui_context ());
+	_route->output ()->changed.connect (*this, invalidator (*this), boost::bind (&TriggerStrip::io_changed, this), gui_context ());
+	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&TriggerStrip::io_changed, this), gui_context ());
+
+	if (_route->panner_shell ()) {
+		update_panner_choices ();
+		_route->panner_shell ()->Changed.connect (route_connections, invalidator (*this), boost::bind (&TriggerStrip::connect_to_pan, this), gui_context ());
+	}
+
+	_panners.set_panner (_route->main_outs ()->panner_shell (), _route->main_outs ()->panner ());
+	_panners.setup_pan ();
+	connect_to_pan ();
+
+#if 0
+	if (_route->panner()) {
+		((Gtk::Label*)_panners.pan_automation_state_button.get_child())->set_text (GainMeterBase::short_astate_string (_route->pannable()->automation_state()));
+	}
+
+#endif
+}
+
+void
 TriggerStrip::set_button_names ()
 {
-	mute_button->set_text (S_("Mute|M"));
+	mute_button->set_text (_("Mute"));
 	monitor_input_button->set_text (_("In"));
 	monitor_disk_button->set_text (_("Disk"));
 
@@ -171,6 +242,45 @@ TriggerStrip::set_button_names ()
 }
 
 void
+TriggerStrip::connect_to_pan ()
+{
+	ENSURE_GUI_THREAD (*this, &TriggerStrip::connect_to_pan)
+
+	_panstate_connection.disconnect ();
+
+	if (!_route->panner ()) {
+		return;
+	}
+
+	boost::shared_ptr<Pannable> p = _route->pannable ();
+
+	p->automation_state_changed.connect (_panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &_panners), gui_context ());
+
+	if (_panners._panner == 0) {
+		_panners.panshell_changed ();
+	}
+	update_panner_choices ();
+}
+
+void
+TriggerStrip::update_panner_choices ()
+{
+	/* code-dup TriggerStrip::update_panner_choices */
+	ENSURE_GUI_THREAD (*this, &TriggerStrip::update_panner_choices);
+	if (!_route->panner_shell ()) {
+		return;
+	}
+
+	uint32_t in  = _route->output ()->n_ports ().n_audio ();
+	uint32_t out = in;
+	if (_route->panner ()) {
+		in = _route->panner ()->in ().n_audio ();
+	}
+
+	_panners.set_available_panners (PannerManager::instance ().PannerManager::get_available_panners (in, out));
+}
+
+void
 TriggerStrip::route_property_changed (const PropertyChange& what_changed)
 {
 	if (what_changed.contains (ARDOUR::Properties::name)) {
@@ -182,6 +292,13 @@ void
 TriggerStrip::route_color_changed ()
 {
 	_name_button.modify_bg (STATE_NORMAL, color ());
+}
+
+void
+TriggerStrip::route_active_changed ()
+{
+	RouteUI::route_active_changed ();
+	update_sensitivity ();
 }
 
 void
@@ -211,7 +328,7 @@ TriggerStrip::plugin_selector ()
 void
 TriggerStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
 {
-	/* TODO consolidate w/ MixerStrip::hide_processor_editor
+	/* TODO consolidate w/ TriggerStrip::hide_processor_editor
 	 * -> RouteUI ?
 	 */
 	boost::shared_ptr<Processor> processor (p.lock ());
@@ -254,11 +371,51 @@ TriggerStrip::map_frozen ()
 void
 TriggerStrip::fast_update ()
 {
+	if (is_mapped ()) {
+		if (_clear_meters) {
+			_level_meter.clear_meters ();
+			_clear_meters = false;
+		}
+		_level_meter.update_meters ();
+	}
+}
+
+void
+TriggerStrip::reset_route_peak_display (Route* route)
+{
+	if (_route && _route.get () == route) {
+		reset_peak_display ();
+	}
+}
+
+void
+TriggerStrip::reset_group_peak_display (RouteGroup* group)
+{
+	if (_route && group == _route->route_group ()) {
+		reset_peak_display ();
+	}
+}
+
+void
+TriggerStrip::reset_peak_display ()
+{
+	//_route->shared_peak_meter ()->reset_max ();
+	_clear_meters = true;
 }
 
 void
 TriggerStrip::parameter_changed (string p)
 {
+}
+
+void
+TriggerStrip::io_changed ()
+{
+	if (has_audio_outputs ()) {
+		_panners.show_all ();
+	} else {
+		_panners.hide_all ();
+	}
 }
 
 void
@@ -279,4 +436,16 @@ TriggerStrip::name_button_press (GdkEventButton*)
 {
 	// TODO
 	return false;
+}
+
+void
+TriggerStrip::gain_start_touch ()
+{
+	_route->gain_control ()->start_touch (timepos_t (_session->transport_sample ()));
+}
+
+void
+TriggerStrip::gain_end_touch ()
+{
+	_route->gain_control ()->stop_touch (timepos_t (_session->transport_sample ()));
 }

@@ -910,6 +910,7 @@ MixerStrip::connect_to_pan ()
 void
 MixerStrip::update_panner_choices ()
 {
+	/* code-dup TriggerStrip::update_panner_choices */
 	ENSURE_GUI_THREAD (*this, &MixerStrip::update_panner_choices)
 	if (!_route->panner_shell()) { return; }
 

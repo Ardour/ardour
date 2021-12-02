@@ -29,8 +29,11 @@
 #include "ardour/types.h"
 
 #include "widgets/ardour_button.h"
+#include "widgets/ardour_knob.h"
 
 #include "axis_view.h"
+#include "level_meter.h"
+#include "panner_ui.h"
 #include "processor_box.h"
 #include "processor_selection.h"
 #include "route_ui.h"
@@ -73,39 +76,58 @@ protected:
 #if 0
 	void route_rec_enable_changed ();
 	void blink_rec_display (bool onoff);
-	void route_active_changed ();
-	void map_frozen ();
 #endif
 
 private:
 	void init ();
 
 	/* RouteUI */
+	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void route_property_changed (const PBD::PropertyChange&);
 	void route_color_changed ();
 	void update_sensitivity ();
 	void parameter_changed (std::string);
+	void route_active_changed ();
 	void map_frozen ();
 
 	/* Callbacks */
+	void io_changed ();
 	void name_changed ();
 	void name_button_resized (Gtk::Allocation&);
 	bool name_button_press (GdkEventButton*);
+	void reset_peak_display ();
+	void reset_route_peak_display (ARDOUR::Route*);
+	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
 	/* Plugin related */
 	PluginSelector* plugin_selector ();
 	void            hide_processor_editor (boost::weak_ptr<ARDOUR::Processor>);
 
-	ProcessorSelection _pb_selection;
+	/* Panner */
+	void connect_to_pan ();
+	void update_panner_choices ();
+
+	/* Fader */
+	void gain_start_touch ();
+	void gain_end_touch ();
+
+	bool                  _clear_meters;
+	ProcessorSelection    _pb_selection;
+	PBD::ScopedConnection _panstate_connection;
 
 	/* Layout */
 	Gtk::Frame global_frame;
 	Gtk::VBox  global_vpacker;
+	Gtk::Table mute_solo_table;
+	Gtk::Table volume_table;
 
 	/* Widgets */
 	ArdourWidgets::ArdourButton _name_button;
 	ProcessorBox                _processor_box;
 	TriggerBoxWidget            _trigger_display;
+	PannerUI                    _panners;
+	ArdourWidgets::ArdourKnob   _gain_control;
+	LevelMeterVBox              _level_meter;
 };
 
 #endif /* __ardour_trigger_strip__ */
