@@ -38,13 +38,18 @@ namespace ARDOUR {
 	class Location;
 }
 
-class AudioRegionOperationsBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+class RegionOperationsBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+{
+public:
+	RegionOperationsBox () {}
+	~RegionOperationsBox () {}
+};
+
+class AudioRegionOperationsBox : public RegionOperationsBox
 {
 public:
 	AudioRegionOperationsBox ();
 	~AudioRegionOperationsBox ();
-
-	void set_session (ARDOUR::Session*);
 
 	PBD::ScopedConnectionList editor_connections;
 	PBD::ScopedConnectionList region_property_connections;

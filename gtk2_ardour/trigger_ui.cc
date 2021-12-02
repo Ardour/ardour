@@ -386,11 +386,6 @@ TriggerWindow::TriggerWindow (Trigger* slot)
 	SlotPropertiesBox* slot_prop_box = manage (new SlotPropertiesBox ());
 	slot_prop_box->set_slot(slot);
 
-	MidiRegionPropertiesBox *midi_prop_box = manage(new MidiRegionPropertiesBox ());
-
-	MidiRegionOperationsBox *midi_ops_box = manage(new MidiRegionOperationsBox ());
-
-	MidiRegionTrimmerBox *midi_trim_box = manage(new MidiRegionTrimmerBox ());
 
 	Gtk::Table* table = manage (new Gtk::Table);
 	table->set_homogeneous (false);
@@ -399,26 +394,29 @@ TriggerWindow::TriggerWindow (Trigger* slot)
 
 	int col = 0;
 	table->attach(*slot_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-	table->attach(*midi_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-	table->attach(*midi_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-	table->attach(*midi_ops_box,   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+
+	if (slot->region()) {
+		if (slot->region()->data_type() == DataType::AUDIO) {
+			_prop_box = manage(new AudioRegionPropertiesBox ());
+			_ops_box = manage(new AudioRegionOperationsBox ());
+			_trim_box = manage(new AudioRegionTrimmerBox ());
+		} else {
+			_prop_box = manage(new MidiRegionPropertiesBox ());
+			_ops_box = manage(new MidiRegionOperationsBox ());
+			_trim_box = manage(new MidiRegionTrimmerBox ());
+		}
+		
+		_prop_box->set_region(slot->region());
+		_trim_box->set_region(slot->region());
+		_ops_box->set_session(&slot->region()->session());
+
+		table->attach(*_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+		table->attach(*_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+		table->attach(*_ops_box,   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	}
 
 	add (*table);
 	table->show_all();
-
-	if (slot->region()) {
-		midi_prop_box->set_region(slot->region());
-		midi_trim_box->set_region(slot->region());
-		midi_ops_box->set_session(&slot->region()->session());
-
-		midi_prop_box->show();
-		midi_trim_box->show();
-		midi_ops_box->show();
-	} else {
-		midi_prop_box->hide();
-		midi_trim_box->hide();
-		midi_ops_box->hide();
-	}
 }
 
 bool

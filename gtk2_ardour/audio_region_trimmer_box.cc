@@ -41,7 +41,7 @@
 #include "region_view.h"
 #include "ui_config.h"
 
-#include "midi_region_trimmer_box.h"
+#include "audio_region_trimmer_box.h"
 
 #include "pbd/i18n.h"
 
@@ -53,7 +53,7 @@ using std::max;
 
 /* ------------ */
 
-MidiTrimmerCanvas::MidiTrimmerCanvas (ArdourCanvas::Item* parent)
+AudioTrimmerCanvas::AudioTrimmerCanvas (ArdourCanvas::Item* parent)
 	: Rectangle (parent)
 {
 //	set_homogenous (true);
@@ -68,7 +68,7 @@ MidiTrimmerCanvas::MidiTrimmerCanvas (ArdourCanvas::Item* parent)
 
 //	name = string_compose ("trigger %1", _trigger.index());
 
-	Event.connect (sigc::mem_fun (*this, &MidiTrimmerCanvas::event_handler));
+	Event.connect (sigc::mem_fun (*this, &AudioTrimmerCanvas::event_handler));
 
 	ArdourCanvas::Rect r (0, 0, width, height);
 	set (r);
@@ -77,12 +77,12 @@ MidiTrimmerCanvas::MidiTrimmerCanvas (ArdourCanvas::Item* parent)
 //	selection_connection = PublicEditor::instance().get_selection().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerBoxUI::selection_changed));
 }
 
-MidiTrimmerCanvas::~MidiTrimmerCanvas ()
+AudioTrimmerCanvas::~AudioTrimmerCanvas ()
 {
 }
 
 void
-MidiTrimmerCanvas::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
+AudioTrimmerCanvas::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 {
 //	ArdourCanvas::Rect self (item_to_window (_rect, NO_ROUND));
 //	boost::optional<ArdourCanvas::Rect> i = self.intersection (area);
@@ -103,7 +103,7 @@ MidiTrimmerCanvas::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo:
 }
 
 bool
-MidiTrimmerCanvas::event_handler (GdkEvent* ev)
+AudioTrimmerCanvas::event_handler (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
@@ -124,14 +124,14 @@ MidiTrimmerCanvas::event_handler (GdkEvent* ev)
 
 /* ------------ */
 
-MidiTrimmerBoxWidget::MidiTrimmerBoxWidget ()
+AudioTrimmerBoxWidget::AudioTrimmerBoxWidget ()
 {
-	trimmer = new MidiTrimmerCanvas (root());
+	trimmer = new AudioTrimmerCanvas (root());
 	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
 }
 
 void
-MidiTrimmerBoxWidget::size_request (double& w, double& h) const
+AudioTrimmerBoxWidget::size_request (double& w, double& h) const
 {
 	trimmer->size_request (w, h);
 	w=600;
@@ -139,44 +139,38 @@ MidiTrimmerBoxWidget::size_request (double& w, double& h) const
 }
 
 void
-MidiTrimmerBoxWidget::on_map ()
+AudioTrimmerBoxWidget::on_map ()
 {
 	GtkCanvas::on_map ();
 }
 
 void
-MidiTrimmerBoxWidget::on_unmap ()
+AudioTrimmerBoxWidget::on_unmap ()
 {
 	GtkCanvas::on_unmap ();
 }
 
 /* ====================================================== */
 
-MidiRegionTrimmerBox::MidiRegionTrimmerBox ()
+AudioRegionTrimmerBox::AudioRegionTrimmerBox ()
 {
-	_header_label.set_text(_("MIDI Region Trimmer:"));
+	_header_label.set_text(_("AUDIO Region Trimmer:"));
 	_header_label.set_alignment(0.0, 0.5);
 	pack_start(_header_label, false, false, 6);
 
-	trimmer_widget = manage (new MidiTrimmerBoxWidget());
+	trimmer_widget = manage (new AudioTrimmerBoxWidget());
 	trimmer_widget->set_size_request(600,120);
 
 	pack_start(*trimmer_widget, true, true);
 	trimmer_widget->show();
 }
 
-MidiRegionTrimmerBox::~MidiRegionTrimmerBox ()
+AudioRegionTrimmerBox::~AudioRegionTrimmerBox ()
 {
 }
 
 void
-MidiRegionTrimmerBox::set_session (Session* s)
-{
-	SessionHandlePtr::set_session (s);
-}
-
-void
-MidiRegionTrimmerBox::set_region (boost::shared_ptr<Region> r)
+AudioRegionTrimmerBox::set_region (boost::shared_ptr<Region> r)
 {
 	set_session(&r->session());
 
@@ -187,11 +181,11 @@ MidiRegionTrimmerBox::set_region (boost::shared_ptr<Region> r)
 	PBD::PropertyChange interesting_stuff;
 	region_changed(interesting_stuff);
 
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&MidiRegionTrimmerBox::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&AudioRegionTrimmerBox::region_changed, this, _1), gui_context());
 }
 
 void
-MidiRegionTrimmerBox::region_changed (const PBD::PropertyChange& what_changed)
+AudioRegionTrimmerBox::region_changed (const PBD::PropertyChange& what_changed)
 {
 //ToDo:  refactor the region_editor.cc  to cover this basic stuff
 //	if (what_changed.contains (ARDOUR::Properties::name)) {

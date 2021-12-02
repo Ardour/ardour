@@ -79,12 +79,6 @@ AudioRegionOperationsBox::~AudioRegionOperationsBox ()
 }
 
 void
-AudioRegionOperationsBox::set_session (Session* s)
-{
-	SessionHandlePtr::set_session (s);
-}
-
-void
 AudioRegionOperationsBox::reverse_button_clicked ()
 {
 	Editor::instance().reverse_region();

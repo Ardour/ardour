@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __midi_region_trimmer_box_h__
-#define __midi_region_trimmer_box_h__
+#ifndef __audio_region_trimmer_box_h__
+#define __audio_region_trimmer_box_h__
 
 #include <map>
 
@@ -35,8 +35,6 @@
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 
-#include "audio_region_trimmer_box.h"
-
 #include "audio_clock.h"
 
 namespace ARDOUR {
@@ -49,11 +47,21 @@ namespace ArdourCanvas {
 	class Polygon;
 };
 
-class MidiTrimmerCanvas : public ArdourCanvas::Rectangle
+class RegionTrimmerBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+{
+public:
+	RegionTrimmerBox () {}
+	~RegionTrimmerBox () {}
+
+	virtual void set_region (boost::shared_ptr<ARDOUR::Region>) =0;
+};
+
+
+class AudioTrimmerCanvas : public ArdourCanvas::Rectangle
 {
   public:
-	MidiTrimmerCanvas (ArdourCanvas::Item* parent);
-	~MidiTrimmerCanvas ();
+	AudioTrimmerCanvas (ArdourCanvas::Item* parent);
+	~AudioTrimmerCanvas ();
 
 	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
@@ -61,26 +69,24 @@ class MidiTrimmerCanvas : public ArdourCanvas::Rectangle
 	bool event_handler (GdkEvent*);
 };
 
-class MidiTrimmerBoxWidget : public ArdourCanvas::GtkCanvas
+class AudioTrimmerBoxWidget : public ArdourCanvas::GtkCanvas
 {
   public:
-	MidiTrimmerBoxWidget ();
+	AudioTrimmerBoxWidget ();
 	void size_request (double& w, double& h) const;
 
 	void on_map ();
 	void on_unmap ();
 
   private:
-	MidiTrimmerCanvas* trimmer;
+	AudioTrimmerCanvas* trimmer;
 };
 
-class MidiRegionTrimmerBox : public RegionTrimmerBox
+class AudioRegionTrimmerBox : public RegionTrimmerBox
 {
 public:
-	MidiRegionTrimmerBox ();
-	~MidiRegionTrimmerBox ();
-
-	void set_session (ARDOUR::Session*);
+	AudioRegionTrimmerBox ();
+	~AudioRegionTrimmerBox ();
 
 	void set_region (boost::shared_ptr<ARDOUR::Region>);
 	void region_changed (const PBD::PropertyChange& what_changed);
@@ -89,11 +95,11 @@ private:
 	Gtk::Label _header_label;
 	Gtk::Table table;
 
-	MidiTrimmerBoxWidget *trimmer_widget;
+	AudioTrimmerBoxWidget *trimmer_widget;
 
 	PBD::ScopedConnection state_connection;
 
 	boost::shared_ptr<ARDOUR::Region> _region;
 };
 
-#endif /* __midi_region_trimmer_box_h__ */
+#endif /* __audio_region_trimmer_box_h__ */
