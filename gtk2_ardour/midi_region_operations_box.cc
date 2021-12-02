@@ -79,12 +79,6 @@ MidiRegionOperationsBox::~MidiRegionOperationsBox ()
 }
 
 void
-MidiRegionOperationsBox::set_session (Session* s)
-{
-	SessionHandlePtr::set_session (s);
-}
-
-void
 MidiRegionOperationsBox::quantize_button_clicked ()
 {
 	Editor::instance().quantize_region();

@@ -33,18 +33,18 @@
 
 #include "gtkmm2ext/cairo_packer.h"
 
+#include "audio_region_operations_box.h"
+
 namespace ARDOUR {
 	class Session;
 	class Location;
 }
 
-class MidiRegionOperationsBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+class MidiRegionOperationsBox : public RegionOperationsBox
 {
 public:
 	MidiRegionOperationsBox ();
 	~MidiRegionOperationsBox ();
-
-	void set_session (ARDOUR::Session*);
 
 	PBD::ScopedConnectionList editor_connections;
 	PBD::ScopedConnectionList region_property_connections;

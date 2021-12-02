@@ -29,25 +29,65 @@
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
+#include "widgets/ardour_button.h"
+
 #include "gtkmm2ext/cairo_packer.h"
+
+#include "audio_clock.h"
 
 namespace ARDOUR {
 	class Session;
 	class Location;
 }
 
-class AudioRegionPropertiesBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+class RegionPropertiesBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+{
+public:
+	RegionPropertiesBox ();
+	~RegionPropertiesBox ();
+
+	virtual void set_region (boost::shared_ptr<ARDOUR::Region>);
+
+	void set_session (ARDOUR::Session* s);
+
+protected:
+	boost::shared_ptr<ARDOUR::Region> _region;
+
+	Gtk::Label _header_label;
+private:
+	Gtk::Table table;
+
+	AudioClock length_clock;
+	AudioClock start_clock;
+
+	AudioClock loop_length_clock;
+	AudioClock loop_start_clock;
+
+	ArdourWidgets::ArdourButton  bpm_button;
+	ArdourWidgets::ArdourButton  metrum_button;
+
+	ArdourWidgets::ArdourButton  bbt_toggle;
+	ArdourWidgets::ArdourButton  loop_toggle;
+
+	void region_changed (const PBD::PropertyChange& what_changed);
+	PBD::ScopedConnection state_connection;
+};
+
+class AudioRegionPropertiesBox : public RegionPropertiesBox
 {
 public:
 	AudioRegionPropertiesBox ();
 	~AudioRegionPropertiesBox ();
 
-	void set_session (ARDOUR::Session*);
-
-	void set_region (boost::shared_ptr<ARDOUR::Region>);
+	virtual void set_region (boost::shared_ptr<ARDOUR::Region>);
 
 private:
-	Gtk::Table table;
+
+	ArdourWidgets::ArdourButton  fade_in_enable_button;
+	ArdourWidgets::ArdourButton  fade_out_enable_button;
+
+	ArdourWidgets::ArdourButton  gain_control;
+	ArdourWidgets::ArdourButton  stretch_selector;
 };
 
 #endif /* __audio_region_properties_box_h__ */

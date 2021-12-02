@@ -38,6 +38,7 @@ class AudioRegionPropertiesBox;
 class MidiRegionPropertiesBox;
 class AudioRegionOperationsBox;
 class MidiRegionOperationsBox;
+class AudioRegionTrimmerBox;
 class MidiRegionTrimmerBox;
 
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
@@ -91,12 +92,15 @@ private:
 	FittedCanvasWidget 		_master_widget;
 	CueMaster				*_master;
 
-	AudioRegionPropertiesBox* _audio_prop_box;
-	MidiRegionPropertiesBox* _midi_prop_box;
-	AudioRegionOperationsBox* _audio_ops_box;
-	MidiRegionOperationsBox* _midi_ops_box;
 	SlotPropertiesBox* _slot_prop_box;
-	MidiRegionTrimmerBox *_midi_trim_box;
+
+	AudioRegionPropertiesBox* _audio_prop_box;
+	AudioRegionOperationsBox* _audio_ops_box;
+	AudioRegionTrimmerBox*    _audio_trim_box;
+
+	MidiRegionPropertiesBox* _midi_prop_box;
+	MidiRegionOperationsBox* _midi_ops_box;
+	MidiRegionTrimmerBox*    _midi_trim_box;
 
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;

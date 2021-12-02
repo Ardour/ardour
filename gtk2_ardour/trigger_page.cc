@@ -80,19 +80,31 @@ TriggerPage::TriggerPage ()
 	_slot_area_box.pack_start (_master_widget, Gtk::PACK_SHRINK);
 
 	_midi_prop_box = new MidiRegionPropertiesBox ();
-	_audio_prop_box = new AudioRegionPropertiesBox ();
-	_midi_ops_box = new MidiRegionOperationsBox ();
-	_audio_ops_box = new AudioRegionOperationsBox ();
 	_slot_prop_box = new SlotPropertiesBox ();
+
+	_audio_prop_box = new AudioRegionPropertiesBox ();
+	_midi_prop_box = new MidiRegionPropertiesBox ();
+
+	_audio_ops_box = new AudioRegionOperationsBox ();
+	_midi_ops_box = new MidiRegionOperationsBox ();
+
+	_audio_trim_box = new AudioRegionTrimmerBox ();
 	_midi_trim_box = new MidiRegionTrimmerBox ();
 
 	Gtk::Table* table = manage (new Gtk::Table);
 	table->set_homogeneous (false);
-	table->set_spacings (16);
+	table->set_spacings (8);
 	table->set_border_width (8);
 
 	int col = 0;
-	table->attach(*_slot_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	table->attach(*_slot_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );
+
+	col=1;
+	table->attach(*_audio_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	table->attach(*_audio_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	table->attach(*_audio_ops_box,   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+
+	col=1;  /* audio and midi boxen share the same table locations; shown and hidden depending on region type */
 	table->attach(*_midi_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 	table->attach(*_midi_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 	table->attach(*_midi_ops_box,   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
@@ -135,7 +147,6 @@ TriggerPage::TriggerPage ()
 	_strip_packer.show ();
 	_slot_area_box.show_all ();
 	_browser_box.show ();
-	_parameter_box.show ();
 
 	/* setup keybidings */
 	_content.set_data ("ardour-bindings", bindings);
@@ -163,16 +174,18 @@ TriggerPage::TriggerPage ()
 
 TriggerPage::~TriggerPage ()
 {
-<<<<<<< HEAD
 	delete _master;
-=======
+
 	delete _slot_prop_box;
-	delete _midi_ops_box;
+
 	delete _audio_ops_box;
-	delete _midi_prop_box;
+	delete _midi_ops_box;
+
 	delete _audio_prop_box;
+	delete _midi_prop_box;
+
+	delete _audio_trim_box;
 	delete _midi_trim_box;
->>>>>>> Property Boxen: populate the Trigger page with property-editor placeholders
 }
 
 Gtk::Window*
@@ -252,15 +265,19 @@ TriggerPage::set_session (Session* s)
 
 	initial_track_display ();
 
-	_midi_prop_box->set_session(s);
-	_audio_prop_box->set_session(s);
-	_midi_ops_box->set_session(s);
-	_audio_ops_box->set_session(s);
 	_slot_prop_box->set_session(s);
+
+	_audio_prop_box->set_session(s);
+	_audio_ops_box->set_session(s);
+	_audio_trim_box->set_session(s);
+
+	_midi_prop_box->set_session(s);
+	_midi_ops_box->set_session(s);
 	_midi_trim_box->set_session(s);
 
 	update_title ();
 	start_updating ();
+	selection_changed();
 }
 
 void
@@ -328,12 +345,17 @@ TriggerPage::selection_changed ()
 {
 	Selection& selection (Editor::instance().get_selection());
 
-	_midi_ops_box->hide();
-	_audio_ops_box->hide();
-	_midi_prop_box->hide();
-	_audio_prop_box->hide();
 	_slot_prop_box->hide();
+
+	_audio_ops_box->hide();
+	_audio_prop_box->hide();
+	_audio_trim_box->hide();
+
+	_midi_ops_box->hide();
+	_midi_prop_box->hide();
 	_midi_trim_box->hide();
+
+	_parameter_box.hide ();
 
 	if (!selection.triggers.empty()) {
 		TriggerSelection ts = selection.triggers;
@@ -341,18 +363,25 @@ TriggerPage::selection_changed ()
 		Trigger* slot = &entry->trigger();
 
 		_slot_prop_box->set_slot(slot);
+		_slot_prop_box->show();
 		if (slot->region()) {
-			_midi_prop_box->set_region(slot->region());
-			_audio_prop_box->set_region(slot->region());
-			_midi_trim_box->set_region(slot->region());
+			if (slot->region()->data_type() == DataType::AUDIO) {
+				_audio_prop_box->set_region(slot->region());
+				_audio_trim_box->set_region(slot->region());
 
-			_midi_ops_box->show();
-			_audio_ops_box->show();
-			_midi_prop_box->show();
-			_audio_prop_box->show();
-			_slot_prop_box->show();
-			_midi_trim_box->show();
+				_audio_prop_box->show();
+				_audio_trim_box->show();
+				_audio_ops_box->show();
+			} else {
+				_midi_prop_box->set_region(slot->region());
+				_midi_trim_box->set_region(slot->region());
+
+				_midi_prop_box->show();
+				_midi_trim_box->show();
+				_midi_ops_box->show();
+			}
 		}
+		_parameter_box.show ();
 	}
 }
 

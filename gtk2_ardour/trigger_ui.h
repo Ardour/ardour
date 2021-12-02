@@ -26,6 +26,10 @@ namespace ArdourWidgets {
 	class HSliderController;
 }
 
+class RegionPropertiesBox;
+class RegionOperationsBox;
+class RegionTrimmerBox;
+
 class TriggerUI : public Gtk::Table //, public sigc::trackable
 {
   public:
@@ -84,6 +88,10 @@ class TriggerWindow : public Gtk::Window
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
+
+	RegionPropertiesBox *_prop_box;
+	RegionOperationsBox *_ops_box;
+	RegionTrimmerBox *_trim_box;
 };
 
 #endif /* __ardour_gtk_trigger_ui_h__ */
