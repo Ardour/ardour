@@ -287,7 +287,7 @@ ARDOUR_UI::set_session (Session *s)
 }
 
 int
-ARDOUR_UI::unload_session (bool hide_stuff)
+ARDOUR_UI::unload_session (bool hide_stuff, bool force_unload)
 {
 	if (_session) {
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
@@ -303,7 +303,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 		save_ardour_state ();
 	}
 
-	if (_session && _session->dirty()) {
+	if (!force_unload && _session && _session->dirty()) {
 		std::vector<std::string> actions;
 		actions.push_back (_("Don't close"));
 		if (_session->unnamed()) {

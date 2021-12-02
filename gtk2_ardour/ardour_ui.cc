@@ -369,6 +369,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, prefs_visibility_button (S_("Window|Prefs"))
 	, recorder_visibility_button (S_("Window|Rec"))
 	, trigger_page_visibility_button (S_("Window|Trig"))
+	, nsm_first_session_opened (false)
 {
 	Gtkmm2ext::init (localedir);
 
