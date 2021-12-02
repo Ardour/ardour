@@ -237,7 +237,7 @@ public:
 	int load_session_from_startup_fsm ();
 
 	/// @return true if session was successfully unloaded.
-	int unload_session (bool hide_stuff = false);
+	int unload_session (bool hide_stuff = false, bool force_unload = false);
 	void close_session();
 
 	int  save_state_canfail (std::string state_name = "", bool switch_to_it = false);
@@ -922,6 +922,7 @@ private:
 	void action_script_changed (int i, const std::string&);
 
 	void ask_about_scratch_deletion ();
+	bool _nsm_first_session_opened;
 };
 
 #endif /* __ardour_gui_h__ */
