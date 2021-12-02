@@ -80,8 +80,14 @@ public:
 	~AudioRegionPropertiesBox ();
 
 	virtual void set_region (boost::shared_ptr<ARDOUR::Region>);
+
 private:
-	Gtk::Table table;
+
+	ArdourWidgets::ArdourButton  fade_in_enable_button;
+	ArdourWidgets::ArdourButton  fade_out_enable_button;
+
+	ArdourWidgets::ArdourButton  gain_control;
+	ArdourWidgets::ArdourButton  stretch_selector;
 };
 
 #endif /* __audio_region_properties_box_h__ */

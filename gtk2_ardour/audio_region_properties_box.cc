@@ -169,6 +169,49 @@ printf("  slot, region start %s\n", _region->start().str().c_str());
 AudioRegionPropertiesBox::AudioRegionPropertiesBox ()
 {
 	_header_label.set_text(_("AUDIO Region Properties:"));
+
+	Gtk::Label *label;
+
+	Gtk::Table *audio_t = manage(new Gtk::Table());
+	audio_t->set_homogeneous (true);
+	audio_t->set_spacings (4);
+
+	int row = 0;
+
+		label = manage(new Gtk::Label(_("Stretch Mode:")));  label->set_alignment(1.0, 0.5);
+		audio_t->attach(*label,    0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+
+		stretch_selector.set_text ("Mixed");
+		stretch_selector.set_name ("generic button");
+	//	stretch_selector.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+		audio_t->attach(stretch_selector,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
+
+	row++;
+
+		label = manage(new Gtk::Label(_("Fades:")));  label->set_alignment(1.0, 0.5);
+		fade_in_enable_button.set_text (_("In"));
+		fade_in_enable_button.set_name ("generic button");
+	//	fade_in_enable_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+		fade_out_enable_button.set_text (_("Out"));
+		fade_out_enable_button.set_name ("generic button");
+	//	fade_out_enable_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+		audio_t->attach(*label,                  0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+		audio_t->attach(fade_in_enable_button,   1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
+		audio_t->attach(fade_out_enable_button,  2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
+
+	row++;
+
+		label = manage(new Gtk::Label(_("Gain:")));  label->set_alignment(1.0, 0.5);
+		audio_t->attach(*label,    0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+
+		gain_control.set_text (_("+6dB"));
+		gain_control.set_name ("generic button");
+	//	gain_control.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+		audio_t->attach(gain_control,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
+
+	row++;
+
+	pack_start(*audio_t);
 }
 
 AudioRegionPropertiesBox::~AudioRegionPropertiesBox ()
