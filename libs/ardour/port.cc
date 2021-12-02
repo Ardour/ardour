@@ -196,6 +196,7 @@ Port::disconnect_all ()
 		for (vector<string>::const_iterator c = connections.begin(); c != connections.end() && pself; ++c) {
 			boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (*c);
 			if (pother) {
+				pother->_connections.erase (_name);
 				ConnectedOrDisconnected (pself, pother, false); // emit signal
 			}
 		}
@@ -257,7 +258,22 @@ Port::connect (std::string const & other)
 	}
 
 	if (r == 0) {
+		/* Connections can be saved on either or both sides. The code above works regardless
+		 * from which end the conneciton is initiated, and connecting already connected ports
+		 * is idempotent.
+		 *
+		 * Only saving internal connection on the source-side would be preferable,
+		 * but this is not what JACK does :(
+		 * Port::get_state() calls Port::get_connections() which in case of JACK is symmetric.
+		 *
+		 * This is also nicer when reading the session file's <Port><Connection>.
+		 */
 		_connections.insert (other);
+
+		boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
+		if (pother) {
+			pother->_connections.insert (_name);
+		}
 	}
 
 	return r;
@@ -284,6 +300,10 @@ Port::disconnect (std::string const & other)
 	/* a cheaper, less hacky way to do boost::shared_from_this() ...  */
 	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
 	boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
+
+	if (r == 0 && pother) {
+		pother->_connections.erase (_name);
+	}
 
 	if (pself && pother) {
 		/* Disconnecting from another Ardour port: need to allow

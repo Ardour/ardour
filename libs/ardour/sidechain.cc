@@ -68,7 +68,7 @@ SideChain::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sampl
 		return;
 	}
 
-	if (!_active && !_pending_active) {
+	if (!check_active()) {
 		// zero buffers
 		for (DataType::iterator t = DataType::begin (); t != DataType::end (); ++t) {
 			for (uint32_t out = _configured_input.get (*t); out < bufs.count ().get (*t); ++out) {
@@ -80,8 +80,6 @@ SideChain::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sampl
 
 	_input->collect_input (bufs, nframes, _configured_input);
 	bufs.set_count (_configured_output);
-
-	_active = _pending_active;
 }
 
 bool

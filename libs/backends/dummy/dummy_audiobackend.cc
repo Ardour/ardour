@@ -1387,7 +1387,7 @@ void DummyAudioPort::midi_to_wavetable (DummyMidiBuffer const * const src, size_
 		// somewhat arbitrary mapping for quick visual feedback
 		float v = -.5f;
 		if ((*it)->size() == 3) {
-			const unsigned char *d = (*it)->const_data();
+			const unsigned char *d = (*it)->data();
 			if ((d[0] & 0xf0) == 0x90) { // note on
 				v = .25f + d[2] / 512.f;
 			}
@@ -1890,9 +1890,9 @@ DummyMidiEvent::DummyMidiEvent (const DummyMidiEvent& other)
 	, _timestamp (other.timestamp ())
 	, _data (0)
 {
-	if (other.size () && other.const_data ()) {
+	if (other.size () && other.data ()) {
 		_data = (uint8_t*) malloc (other.size ());
-		memcpy (_data, other.const_data (), other.size ());
+		memcpy (_data, other.data (), other.size ());
 	}
 };
 

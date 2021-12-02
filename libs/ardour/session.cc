@@ -2461,6 +2461,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 			if (with_triggers) {
 				boost::shared_ptr<Processor> triggers (new TriggerBox (*this, DataType::MIDI));
 				track->add_processor (triggers, track->polarity());
+				track->presentation_info ().set_trigger_track (true);
 			}
 
 			new_routes.push_back (track);
@@ -2732,6 +2733,7 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
 				 * a sidehcain MIDI input to be able to be MIDI controlled
 				 */
 				tb->add_midi_sidechain (track->name());
+				track->presentation_info ().set_trigger_track (true);
 			}
 
 			new_routes.push_back (track);

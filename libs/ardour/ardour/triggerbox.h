@@ -84,7 +84,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void bang ();
 	void unbang ();
 	/* explicitly call for the trigger to stop */
-	virtual void stop (int next_to_run);
+	void request_stop ();
 
 	virtual void set_start (timepos_t const &) = 0;
 	virtual void set_end (timepos_t const &) = 0;
@@ -182,7 +182,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void shutdown ();
 	virtual void jump_start ();
 	virtual void jump_stop ();
-	virtual void start_stop ();
+	virtual void begin_stop ();
 
 	uint32_t follow_count() const { return _follow_count; }
 	void set_follow_count (uint32_t n);
@@ -202,10 +202,15 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	double set_tempo (double t);
 
   protected:
+	struct UIRequests {
+		std::atomic<bool> stop;
+		UIRequests() : stop (false) {}
+	};
+
 	boost::shared_ptr<Region> _region;
 	TriggerBox&               _box;
+	UIRequests                _requests;
 	State                     _state;
-	std::atomic<State>        _requested_state;
 	std::atomic<int>          _bang;
 	std::atomic<int>          _unbang;
 	uint64_t                  _index;
@@ -226,10 +231,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	float                     _midi_velocity_effect;
 	void*                     _ui;
 	samplepos_t                expected_end_sample;
-	samplecnt_t                since_transition;
 
 	void set_region_internal (boost::shared_ptr<Region>);
-	void request_state (State s);
 	virtual void retrigger() = 0;
 	virtual void set_usable_length () = 0;
 };
@@ -239,7 +242,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	AudioTrigger (uint64_t index, TriggerBox&);
 	~AudioTrigger ();
 
-	int run (BufferSet&, pframes_t nframes, pframes_t offset, bool first, double bpm);
+	pframes_t run (BufferSet&, pframes_t nframes, pframes_t offset, bool first, double bpm);
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
@@ -271,13 +274,17 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	PBD::ID data_source;
 	std::vector<Sample*> data;
 	samplecnt_t read_index;
+	samplecnt_t process_index;
 	samplecnt_t data_length;
 	samplepos_t _start_offset;
 	samplepos_t _legato_offset;
 	samplecnt_t usable_length;
 	samplepos_t last_sample;
-
+	samplecnt_t retrieved;
 	RubberBand::RubberBandStretcher*  _stretcher;
+	samplecnt_t                got_stretcher_padding;
+	samplecnt_t                to_pad;
+	samplecnt_t                to_drop;
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
@@ -292,7 +299,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	MIDITrigger (uint64_t index, TriggerBox&);
 	~MIDITrigger ();
 
-	int run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, pframes_t offset, bool first, double bpm);
+	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, pframes_t offset, bool first, double bpm);
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
@@ -423,11 +430,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void set_next (uint64_t which);
 
 	void queue_explict (Trigger*);
-	void queue_implicit (Trigger*);
-	void clear_implicit ();
 	Trigger* get_next_trigger ();
 	Trigger* peek_next_trigger ();
-	void prepare_next (uint64_t current);
 
 	void add_midi_sidechain (std::string const & name);
 
@@ -466,6 +470,13 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void start_transport_stop (Session&);
 
   private:
+	struct Requests {
+		std::atomic<bool> stop_all;
+		std::atomic<bool> pass_thru;
+
+		Requests () : stop_all (false), pass_thru (true) {}
+	};
+
 	static Temporal::BBT_Offset _assumed_trigger_duration;
 
 	PBD::RingBuffer<Trigger*> _bang_queue;
@@ -475,10 +486,10 @@ class LIBARDOUR_API TriggerBox : public Processor
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
 	PBD::RingBuffer<Trigger*> explicit_queue; /* user queued triggers */
-	Trigger* up_next;
 	Trigger* currently_playing;
-	std::atomic<bool> _stop_all;
-	std::atomic<bool> _pass_thru;
+	Requests _requests;
+	bool _stop_all;
+	bool _pass_thru;
 
 	boost::shared_ptr<SideChain> _sidechain;
 

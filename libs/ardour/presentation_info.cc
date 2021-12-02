@@ -56,6 +56,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool>     selected;
 		PBD::PropertyDescriptor<uint32_t> order;
 		PBD::PropertyDescriptor<uint32_t> color;
+		PBD::PropertyDescriptor<bool>     trigger_track;
 	}
 }
 
@@ -190,6 +191,9 @@ PresentationInfo::set_state (XMLNode const& node, int /* version */)
 		if ((f&Hidden) != (_flags&Hidden)) {
 			pc.add (Properties::hidden);
 		}
+		if ((f&TriggerTrack) != (_flags&TriggerTrack)) {
+			pc.add (Properties::trigger_track);
+		}
 		_flags = f;
 	}
 
@@ -282,6 +286,22 @@ PresentationInfo::set_order (order_t order)
 		_order = order;
 		send_change (PropertyChange (Properties::order));
 		send_static_change (PropertyChange (Properties::order));
+	}
+}
+
+void
+PresentationInfo::set_trigger_track (bool yn)
+{
+	if (yn != trigger_track ()) {
+
+		if (yn) {
+			_flags = Flag (_flags | TriggerTrack);
+		} else {
+			_flags = Flag (_flags & ~TriggerTrack);
+		}
+
+		send_change (PropertyChange (Properties::trigger_track));
+		send_static_change (PropertyChange (Properties::trigger_track));
 	}
 }
 

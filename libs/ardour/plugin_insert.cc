@@ -1254,7 +1254,7 @@ PluginInsert::silence (samplecnt_t nframes, samplepos_t start_sample)
 {
 	automation_run (start_sample, nframes, true); // evaluate automation only
 
-	if (!active ()) {
+	if (!_active) {
 		// XXX delaybuffers need to be offset by nframes
 		return;
 	}
@@ -1327,8 +1327,6 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		automation_run (start_sample, nframes, true); // evaluate automation only
 		_delaybuffers.flush ();
 	}
-
-	_active = _pending_active;
 
 	/* we have no idea whether the plugin generated silence or not, so mark
 	 * all buffers appropriately.

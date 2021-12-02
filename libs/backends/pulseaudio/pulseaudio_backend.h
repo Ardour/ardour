@@ -43,7 +43,7 @@ namespace ARDOUR {
 
 class PulseAudioBackend;
 
-class PulseMidiEvent
+class PulseMidiEvent : public BackendMIDIEvent
 {
 public:
 	PulseMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size);
@@ -53,7 +53,6 @@ public:
 	pframes_t timestamp () const { return _timestamp; };
 	const uint8_t* data () const { return _data; };
 	const uint8_t* const_data () const { return _data; };
-	bool operator< (const PulseMidiEvent& other) const { return timestamp () < other.timestamp (); };
 
 private:
 	size_t    _size;

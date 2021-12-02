@@ -241,16 +241,16 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 {
 	assert (_output);
 
+	if (!check_active()) {
+		_output->silence (nframes);
+		return;
+	}
+
 	PortSet& ports (_output->ports());
 	gain_t tgain;
 
 	if (ports.num_ports () == 0) {
-		goto out;
-	}
-
-	if (!_active && !_pending_active) {
-		_output->silence (nframes);
-		goto out;
+		return;
 	}
 
 	/* this setup is not just for our purposes, but for anything that comes after us in the
@@ -283,7 +283,7 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 			bufs.set_count (output_buffers().count ());
 			Amp::apply_simple_gain (bufs, nframes, GAIN_COEFF_ZERO);
 		}
-		goto out;
+		return;
 
 	} else if (tgain != GAIN_COEFF_UNITY) {
 
@@ -353,9 +353,6 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 			}
 		}
 	}
-
-out:
-	_active = _pending_active;
 }
 
 XMLNode&

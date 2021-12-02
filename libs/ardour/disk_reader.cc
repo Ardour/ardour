@@ -277,17 +277,8 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	const bool                     midi_only = (c->empty() || !_playlists[DataType::AUDIO]);
 	bool                           no_disk_output = g_atomic_int_get (&_no_disk_output) != 0;
 
-	if (_active) {
-		if (!_pending_active) {
-			_active = false;
-			return;
-		}
-	} else {
-		if (_pending_active) {
-			_active = true;
-		} else {
-			return;
-		}
+	if (!check_active()) {
+		return;
 	}
 
 	const gain_t target_gain = ((speed == 0.0) || ((ms & MonitoringDisk) == 0)) ? 0.0 : 1.0;

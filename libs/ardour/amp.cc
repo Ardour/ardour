@@ -82,7 +82,7 @@ scale_midi_velocity(Evoral::Event<MidiBuffer::TimeType>& ev, float factor)
 void
 Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
-	if (!_active && !_pending_active) {
+	if (!check_active()) {
 		/* disregard potentially prepared gain-automation. */
 		_apply_gain_automation = false;
 		return;
@@ -155,8 +155,6 @@ Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sampl
 			_current_gain = target_gain;
 		}
 	}
-
-	_active = _pending_active;
 }
 
 gain_t

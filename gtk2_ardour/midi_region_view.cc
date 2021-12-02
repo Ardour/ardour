@@ -3689,7 +3689,7 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 	const Temporal::Beats first_time    = (*mcb.notes().begin())->time();
 	const Temporal::Beats last_time     = (*mcb.notes().rbegin())->end_time();
 	const Temporal::Beats duration      = last_time - first_time;
-	const Temporal::Beats snap_duration = duration.snap_to(snap_beats);
+	const Temporal::Beats snap_duration = duration.round_to_multiple (snap_beats);
 	const Temporal::Beats paste_offset  = snap_duration * int32_t (paste_count);
 	const Temporal::Beats quarter_note  = _region->absolute_time_to_source_beats (pos) + paste_offset;
 	Temporal::Beats       end_point;

@@ -157,6 +157,7 @@ class MainClock;
 class Mixer_UI;
 class PublicEditor;
 class RecorderUI;
+class TriggerPage;
 class SaveAsDialog;
 class SaveTemplateDialog;
 class SessionDialog;
@@ -280,6 +281,7 @@ public:
 	XMLNode* editor_settings() const;
 	XMLNode* preferences_settings() const;
 	XMLNode* mixer_settings () const;
+	XMLNode* trigger_page_settings () const;
 	XMLNode* recorder_settings () const;
 	XMLNode* keyboard_settings () const;
 	XMLNode* tearoff_settings (const char*) const;
@@ -420,6 +422,7 @@ private:
 	PublicEditor*  editor;
 	Mixer_UI*      mixer;
 	RecorderUI*    recorder;
+	TriggerPage*   trigger_page;
 	Gtk::Tooltips _tooltips;
 	NSM_Client*    nsm;
 	bool          _was_dirty;
@@ -711,6 +714,7 @@ private:
 	int         create_meterbridge ();
 	int         create_masters ();
 	int         create_recorder ();
+	int         create_trigger_page ();
 
 	Meterbridge  *meterbridge;
 
@@ -903,6 +907,7 @@ private:
 	ArdourWidgets::ArdourButton mixer_visibility_button;
 	ArdourWidgets::ArdourButton prefs_visibility_button;
 	ArdourWidgets::ArdourButton recorder_visibility_button;
+	ArdourWidgets::ArdourButton trigger_page_visibility_button;
 
 	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings*);
 	bool try_gtk_accel_binding (GtkWindow* win, GdkEventKey* ev, bool translate, GdkModifierType modifier);

@@ -206,6 +206,7 @@
 #include "time_info_box.h"
 #include "timers.h"
 #include "transport_masters_dialog.h"
+#include "trigger_page.h"
 #include "triggerbox_ui.h"
 #include "utils.h"
 #include "utils_videotl.h"
@@ -305,6 +306,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, editor (0)
 	, mixer (0)
 	, recorder (0)
+	, trigger_page (0)
 	, nsm (0)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
@@ -366,7 +368,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, mixer_visibility_button (S_("Window|Mix"))
 	, prefs_visibility_button (S_("Window|Prefs"))
 	, recorder_visibility_button (S_("Window|Rec"))
-    , _nsm_first_session_opened (false)
+  , _nsm_first_session_opened (false)
+	, trigger_page_visibility_button (S_("Window|Trig"))
 {
 	Gtkmm2ext::init (localedir);
 
@@ -861,6 +864,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete _process_thread; _process_thread = 0;
 		delete time_info_box; time_info_box = 0;
 		delete meterbridge; meterbridge = 0;
+		delete trigger_page; trigger_page = 0;
 		delete recorder; recorder = 0;
 		delete editor; editor = 0;
 		delete mixer; mixer = 0;

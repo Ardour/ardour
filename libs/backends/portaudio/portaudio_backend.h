@@ -43,14 +43,13 @@ namespace ARDOUR {
 
 class PortAudioBackend;
 
-class PortMidiEvent {
+class PortMidiEvent : public BackendMIDIEvent {
 	public:
 		PortMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size);
 		PortMidiEvent (const PortMidiEvent& other);
 		size_t size () const { return _size; };
 		pframes_t timestamp () const { return _timestamp; };
 		const uint8_t* data () const { return _data; };
-		bool operator< (const PortMidiEvent &other) const { return timestamp () < other.timestamp (); };
 	private:
 		size_t _size;
 		pframes_t _timestamp;

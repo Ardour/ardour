@@ -85,6 +85,7 @@
 #include "time_info_box.h"
 #include "timers.h"
 #include "transport_masters_dialog.h"
+#include "trigger_page.h"
 #include "virtual_keyboard_window.h"
 
 #include "pbd/i18n.h"
@@ -470,6 +471,10 @@ ARDOUR_UI::step_up_through_tabs ()
 		candidates.push_back (mixer);
 	}
 
+	if (trigger_page->tabbed()) {
+		candidates.push_back (trigger_page);
+	}
+
 	if (rc_option_editor->tabbed()) {
 		candidates.push_back (rc_option_editor);
 	}
@@ -513,6 +518,10 @@ ARDOUR_UI::step_down_through_tabs ()
 
 	if (mixer->tabbed()) {
 		candidates.push_back (mixer);
+	}
+
+	if (trigger_page->tabbed()) {
+		candidates.push_back (trigger_page);
 	}
 
 	if (rc_option_editor->tabbed()) {
@@ -635,6 +644,7 @@ ARDOUR_UI::tabs_page_added (Widget*,guint)
 		mixer_visibility_button.drag_source_set (drag_target_entries);
 		prefs_visibility_button.drag_source_set (drag_target_entries);
 		recorder_visibility_button.drag_source_set (drag_target_entries);
+		trigger_page_visibility_button.drag_source_set (drag_target_entries);
 
 		editor_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (editor->name(),
 		                                                                              Pango::FontDescription ("Sans 24"),
@@ -649,9 +659,13 @@ ARDOUR_UI::tabs_page_added (Widget*,guint)
 		                                                                             0, 0,
 		                                                                             Gdk::Color ("red")));
 		recorder_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (recorder->name(),
-		                                                                             Pango::FontDescription ("Sans 24"),
-		                                                                             0, 0,
-		                                                                             Gdk::Color ("red")));
+		                                                                                Pango::FontDescription ("Sans 24"),
+		                                                                                0, 0,
+		                                                                                Gdk::Color ("red")));
+		trigger_page_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (recorder->name(),
+		                                                                                    Pango::FontDescription ("Sans 24"),
+		                                                                                    0, 0,
+		                                                                                    Gdk::Color ("red")));
 	}
 }
 
@@ -663,6 +677,7 @@ ARDOUR_UI::tabs_page_removed (Widget*, guint)
 		mixer_visibility_button.drag_source_unset ();
 		prefs_visibility_button.drag_source_unset ();
 		recorder_visibility_button.drag_source_unset ();
+		trigger_page_visibility_button.drag_source_unset ();
 	}
 }
 
@@ -685,6 +700,10 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 			recorder_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
 
+		if (trigger_page && (trigger_page->tabbed() || trigger_page->tabbed_by_default())) {
+			trigger_page_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
 	} else if (mixer && (page == (guint) _tabs.page_num (mixer->contents()))) {
 
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
@@ -699,6 +718,10 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 
 		if (recorder && (recorder->tabbed() || recorder->tabbed_by_default())) {
 			recorder_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
+		if (trigger_page && (trigger_page->tabbed() || trigger_page->tabbed_by_default())) {
+			trigger_page_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
 
 	} else if (page == (guint) _tabs.page_num (rc_option_editor->contents())) {
@@ -717,6 +740,10 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 			recorder_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
 
+		if (trigger_page && (trigger_page->tabbed() || trigger_page->tabbed_by_default())) {
+			trigger_page_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
 	} else if (page == (guint) _tabs.page_num (recorder->contents())) {
 
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
@@ -732,6 +759,30 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 		}
 
 		recorder_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
+
+		if (trigger_page && (trigger_page->tabbed() || trigger_page->tabbed_by_default())) {
+			trigger_page_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
+	} else if (page == (guint) _tabs.page_num (trigger_page->contents())) {
+
+		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
+			editor_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
+		if (mixer && (mixer->tabbed() || mixer->tabbed_by_default())) {
+			mixer_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
+		if (rc_option_editor && (rc_option_editor->tabbed() || rc_option_editor->tabbed_by_default())) {
+			prefs_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
+		if (recorder && (recorder->tabbed() || recorder->tabbed_by_default())) {
+			recorder_visibility_button.set_active_state (Gtkmm2ext::Off);
+		}
+
+		trigger_page_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
 
 	}
 }
@@ -823,6 +874,8 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 		vis_button = &prefs_visibility_button;
 	} else if (&t == recorder) {
 		vis_button = &recorder_visibility_button;
+	} else if (&t == trigger_page) {
+		vis_button = &trigger_page_visibility_button;
 	}
 
 	if (!vis_button) {
