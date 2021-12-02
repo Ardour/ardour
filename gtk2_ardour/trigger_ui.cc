@@ -32,6 +32,13 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "audio_region_properties_box.h"
+#include "midi_region_properties_box.h"
+#include "audio_region_operations_box.h"
+#include "midi_region_operations_box.h"
+#include "slot_properties_box.h"
+#include "midi_region_trimmer_box.h"
+
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "trigger_ui.h"
@@ -376,9 +383,42 @@ TriggerWindow::TriggerWindow (Trigger* slot)
 {
 	set_title (string_compose (_("Trigger: %1"), slot->name()));
 
-	TriggerWidget *triggerwidget = manage (new TriggerWidget ());
-	add (*triggerwidget);
-	triggerwidget->show_all();
+	SlotPropertiesBox* slot_prop_box = manage (new SlotPropertiesBox ());
+	slot_prop_box->set_slot(slot);
+
+	MidiRegionPropertiesBox *midi_prop_box = manage(new MidiRegionPropertiesBox ());
+
+	MidiRegionOperationsBox *midi_ops_box = manage(new MidiRegionOperationsBox ());
+
+	MidiRegionTrimmerBox *midi_trim_box = manage(new MidiRegionTrimmerBox ());
+
+	Gtk::Table* table = manage (new Gtk::Table);
+	table->set_homogeneous (false);
+	table->set_spacings (16);
+	table->set_border_width (8);
+
+	int col = 0;
+	table->attach(*slot_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	table->attach(*midi_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	table->attach(*midi_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	table->attach(*midi_ops_box,   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+
+	add (*table);
+	table->show_all();
+
+	if (slot->region()) {
+		midi_prop_box->set_region(slot->region());
+		midi_trim_box->set_region(slot->region());
+		midi_ops_box->set_session(&slot->region()->session());
+
+		midi_prop_box->show();
+		midi_trim_box->show();
+		midi_ops_box->show();
+	} else {
+		midi_prop_box->hide();
+		midi_trim_box->hide();
+		midi_ops_box->hide();
+	}
 }
 
 bool
