@@ -428,7 +428,7 @@ ARDOUR_UI::nsm_init ()
 	 * The wrapper startup script should set the environment variable 'ARDOUR_SELF'
 	 */
 	const char *process_name = g_getenv ("ARDOUR_SELF");
-	nsm->announce (PROGRAM_NAME, ":dirty:", process_name ? process_name : "ardour6");
+	nsm->announce (PROGRAM_NAME, ":dirty:switch:", process_name ? process_name : "ardour7");
 
 	unsigned int i = 0;
 	// wait for announce reply from nsm server
@@ -751,7 +751,9 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 	}
 
 	if (nsm) {
-		if (!AudioEngine::instance()->set_backend("JACK", "", "")) {
+		unload_session(false, true);
+
+		if (!AudioEngine::instance()->set_backend("JACK", ARDOUR_COMMAND_LINE::backend_client_name, "")) {
 			error << _("NSM: The JACK backend is mandatory and can not be loaded.") << endmsg;
 			return;
 		}
@@ -775,10 +777,13 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 			}
 		}
 
-		PluginScanDialog psd (true, false);
-		psd.start ();
+		if (!nsm_first_session_opened) {
+			PluginScanDialog psd (true, false);
+			psd.start ();
 
-		post_engine ();
+			post_engine ();
+			nsm_first_session_opened = true;
+		}
 	}
 
 	/* the mechanisms that can result is this being called are only
