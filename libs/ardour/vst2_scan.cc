@@ -546,16 +546,6 @@ discover_vst2 (std::string const& path, ARDOUR::PluginType type, std::vector<ARD
 	return true;
 }
 
-static std::string vst2_suffix () {
-#ifdef __APPLE__
-	return "";
-#elif defined PLATFORM_WINDOWS
-	return ".dll";
-#else // Linux
-	return ".so";
-#endif
-}
-
 static string
 vst2_info_cache_dir ()
 {
