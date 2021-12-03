@@ -2473,7 +2473,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("actively_recording", &Session::actively_recording)
 		.addFunction ("new_audio_track", &Session::new_audio_track)
 		.addFunction ("new_audio_route", &Session::new_audio_route)
-		// .addFunction ("new_midi_track", &Session::new_midi_track) NUTEMPO FIXME
+		.addFunction ("new_midi_track", &Session::new_midi_track)
 		.addFunction ("new_midi_route", &Session::new_midi_route)
 
 		.addFunction ("add_master_bus", &Session::add_master_bus)
