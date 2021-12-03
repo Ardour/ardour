@@ -825,7 +825,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	const pframes_t orig_nframes = nframes;
 	int avail = 0;
 	BufferSet& scratch (_box.session().get_scratch_buffers (ChanCount (DataType::AUDIO, nchans)));
-	Sample* bufp[nchans];
+	std::vector<Sample*> bufp(nchans);
 	const bool stretching = (_apparent_tempo != 0.);
 
 	/* see if we're going to start or stop or retrigger in this run() call */
@@ -899,7 +899,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 				}
 			}
 
-			_stretcher->process (bufp, limit, false);
+			_stretcher->process (&bufp[0], limit, false);
 			to_pad -= limit;
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 padded %2 left %3\n", name(), limit, to_pad));
 		}
@@ -925,19 +925,19 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 					 * the end of the region
 					 */
 
-					Sample* in[nchans];
+					std::vector<Sample*> in(nchans);
 
 					for (uint32_t chn = 0; chn < nchans; ++chn) {
 						in[chn] = data[chn] + read_index;
 					}
 
-					_stretcher->process (in, to_stretcher, at_end);
+					_stretcher->process (&in[0], to_stretcher, at_end);
 					read_index += to_stretcher;
 					avail = _stretcher->available ();
 
 					if (to_drop && avail) {
 						samplecnt_t this_drop = std::min (std::min ((samplecnt_t) avail, to_drop), (samplecnt_t) scratch.get_audio (0).capacity());
-						_stretcher->retrieve (bufp, this_drop);
+						_stretcher->retrieve (&bufp[0], this_drop);
 						to_drop -= this_drop;
 						avail = _stretcher->available ();
 					}
@@ -960,7 +960,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 			/* fetch the stretch */
 
-			retrieved += _stretcher->retrieve (bufp, from_stretcher);
+			retrieved += _stretcher->retrieve (&bufp[0], from_stretcher);
 
 			if (read_index >= last_sample) {
 				if (transition_samples + retrieved > expected_end_sample) {
