@@ -63,7 +63,6 @@ TriggerStrip::TriggerStrip (Session* s, boost::shared_ptr<ARDOUR::Route> rt)
 	, _processor_box (s, boost::bind (&TriggerStrip::plugin_selector, this), _pb_selection, 0)
 	, _trigger_display (*rt->triggerbox ())
 	, _panners (s)
-	, _gain_control (ArdourKnob::default_elements, ArdourKnob::Detent)
 	, _level_meter (s)
 {
 	init ();
@@ -137,15 +136,8 @@ TriggerStrip::init ()
 	mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
 	mute_solo_table.attach (*solo_button, 1, 2, 0, 1);
 
-	/* Fader/Gain */
-	_gain_control.set_size_request (PX_SCALE (19), PX_SCALE (19));
-	_gain_control.set_tooltip_prefix (_("Level: "));
-	_gain_control.set_name ("trim knob"); // XXX
-	_gain_control.StartGesture.connect (sigc::mem_fun (*this, &TriggerStrip::gain_start_touch));
-	_gain_control.StopGesture.connect (sigc::mem_fun (*this, &TriggerStrip::gain_end_touch));
-
-	volume_table.attach (_level_meter,  0, 1, 0, 1);
-	volume_table.attach (_gain_control, 0, 1, 1, 2);
+	volume_table.attach (_level_meter, 0, 1, 0, 1);
+	/*Note: _gain_control is added in set_route */
 
 	/* top-level */
 	global_frame.add (global_vpacker);
@@ -165,7 +157,6 @@ TriggerStrip::init ()
 	_name_button.show ();
 	_trigger_display.show ();
 	_processor_box.show ();
-	_gain_control.show ();
 	_level_meter.show ();
 
 	mute_button->show ();
@@ -193,7 +184,13 @@ TriggerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	_processor_box.set_route (rt);
 
-	_gain_control.set_controllable (_route->gain_control ());
+	/* Fader/Gain */
+	boost::shared_ptr<AutomationControl> ac = _route->gain_control ();
+	_gain_control                           = AutomationController::create (ac->parameter (), ParameterDescriptor (ac->parameter ()), ac, false);
+	_gain_control->set_name (X_("ProcessorControlSlider"));
+	_gain_control->set_size_request (PX_SCALE (19), -1);
+	_gain_control->disable_vertical_scroll ();
+	volume_table.attach (*_gain_control, 0, 1, 1, 2);
 
 	_level_meter.set_meter (_route->shared_peak_meter ().get ());
 	_level_meter.clear_meters ();
@@ -436,16 +433,4 @@ TriggerStrip::name_button_press (GdkEventButton*)
 {
 	// TODO
 	return false;
-}
-
-void
-TriggerStrip::gain_start_touch ()
-{
-	_route->gain_control ()->start_touch (timepos_t (_session->transport_sample ()));
-}
-
-void
-TriggerStrip::gain_end_touch ()
-{
-	_route->gain_control ()->stop_touch (timepos_t (_session->transport_sample ()));
 }

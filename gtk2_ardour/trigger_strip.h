@@ -29,8 +29,8 @@
 #include "ardour/types.h"
 
 #include "widgets/ardour_button.h"
-#include "widgets/ardour_knob.h"
 
+#include "automation_controller.h"
 #include "axis_view.h"
 #include "level_meter.h"
 #include "panner_ui.h"
@@ -107,10 +107,6 @@ private:
 	void connect_to_pan ();
 	void update_panner_choices ();
 
-	/* Fader */
-	void gain_start_touch ();
-	void gain_end_touch ();
-
 	bool                  _clear_meters;
 	ProcessorSelection    _pb_selection;
 	PBD::ScopedConnection _panstate_connection;
@@ -122,12 +118,12 @@ private:
 	Gtk::Table volume_table;
 
 	/* Widgets */
-	ArdourWidgets::ArdourButton _name_button;
-	ProcessorBox                _processor_box;
-	TriggerBoxWidget            _trigger_display;
-	PannerUI                    _panners;
-	ArdourWidgets::ArdourKnob   _gain_control;
-	LevelMeterVBox              _level_meter;
+	ArdourWidgets::ArdourButton             _name_button;
+	ProcessorBox                            _processor_box;
+	TriggerBoxWidget                        _trigger_display;
+	PannerUI                                _panners;
+	LevelMeterVBox                          _level_meter;
+	boost::shared_ptr<AutomationController> _gain_control;
 };
 
 #endif /* __ardour_trigger_strip__ */
