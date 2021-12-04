@@ -1,18 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ArdourMIDIBindings version="1.0.0" name="Akai MPK 225 (with plugins) : preset 6">
+<ArdourMIDIBindings version="1.0.0" name="Akai MPK 225 (Eq mode) : preset 6">
 <DeviceInfo bank-size="8"/>
 
 <!-- NOTE : use preset 6 to enable these -->
-
-<Binding channel="2" ctl="28" uri="/route/mute S1"/>
-<Binding channel="2" ctl="75" uri="/route/mute S1"/>
-<Binding channel="2" ctl="106" uri="/route/mute S1"/>
-<Binding channel="2" ctl="29" uri="/route/solo S1"/>
-<Binding channel="2" ctl="76" uri="/route/solo S1"/>
-<Binding channel="2" ctl="107" uri="/route/solo S1"/>
-<Binding channel="2" ctl="30" uri="/route/recenable S1"/>
-<Binding channel="2" ctl="77" uri="/route/recenable S1"/>
-<Binding channel="2" ctl="108" uri="/route/recenable S1"/>
 
 <!-- Bank A : Miscellaneous -->
 <!-- K1 : Tape Drive -->
@@ -55,5 +45,97 @@
 <Binding channel="1" ctl="117" function="transport-stop"/>
 <Binding channel="1" ctl="118" function="transport-roll"/>
 <Binding channel="1" ctl="119" function="toggle-rec-enable"/>
+
+<!-- Any bank : button 1 mute, button 2 solo, button 3 rec, up to 10 selected tracks -->
+<Binding channel="2" ctl="28" uri="/route/mute S1"/>
+<Binding channel="2" ctl="75" uri="/route/mute S1"/>
+<Binding channel="2" ctl="106" uri="/route/mute S1"/>
+<Binding channel="2" ctl="29" uri="/route/solo S1"/>
+<Binding channel="2" ctl="76" uri="/route/solo S1"/>
+<Binding channel="2" ctl="107" uri="/route/solo S1"/>
+<Binding channel="2" ctl="30" uri="/route/recenable S1"/>
+<Binding channel="2" ctl="77" uri="/route/recenable S1"/>
+<Binding channel="2" ctl="108" uri="/route/recenable S1"/>
+<Binding channel="2" ctl="28" uri="/route/mute S2"/>
+<Binding channel="2" ctl="75" uri="/route/mute S2"/>
+<Binding channel="2" ctl="106" uri="/route/mute S2"/>
+<Binding channel="2" ctl="29" uri="/route/solo S2"/>
+<Binding channel="2" ctl="76" uri="/route/solo S2"/>
+<Binding channel="2" ctl="107" uri="/route/solo S2"/>
+<Binding channel="2" ctl="30" uri="/route/recenable S2"/>
+<Binding channel="2" ctl="77" uri="/route/recenable S2"/>
+<Binding channel="2" ctl="108" uri="/route/recenable S2"/>
+<Binding channel="2" ctl="28" uri="/route/mute S3"/>
+<Binding channel="2" ctl="75" uri="/route/mute S3"/>
+<Binding channel="2" ctl="106" uri="/route/mute S3"/>
+<Binding channel="2" ctl="29" uri="/route/solo S3"/>
+<Binding channel="2" ctl="76" uri="/route/solo S3"/>
+<Binding channel="2" ctl="107" uri="/route/solo S3"/>
+<Binding channel="2" ctl="30" uri="/route/recenable S3"/>
+<Binding channel="2" ctl="77" uri="/route/recenable S3"/>
+<Binding channel="2" ctl="108" uri="/route/recenable S3"/>
+<Binding channel="2" ctl="28" uri="/route/mute S4"/>
+<Binding channel="2" ctl="75" uri="/route/mute S4"/>
+<Binding channel="2" ctl="106" uri="/route/mute S4"/>
+<Binding channel="2" ctl="29" uri="/route/solo S4"/>
+<Binding channel="2" ctl="76" uri="/route/solo S4"/>
+<Binding channel="2" ctl="107" uri="/route/solo S4"/>
+<Binding channel="2" ctl="30" uri="/route/recenable S4"/>
+<Binding channel="2" ctl="77" uri="/route/recenable S4"/>
+<Binding channel="2" ctl="108" uri="/route/recenable S4"/>
+<Binding channel="2" ctl="28" uri="/route/mute S5"/>
+<Binding channel="2" ctl="75" uri="/route/mute S5"/>
+<Binding channel="2" ctl="106" uri="/route/mute S5"/>
+<Binding channel="2" ctl="29" uri="/route/solo S5"/>
+<Binding channel="2" ctl="76" uri="/route/solo S5"/>
+<Binding channel="2" ctl="107" uri="/route/solo S5"/>
+<Binding channel="2" ctl="30" uri="/route/recenable S5"/>
+<Binding channel="2" ctl="77" uri="/route/recenable S5"/>
+<Binding channel="2" ctl="108" uri="/route/recenable S5"/>
+<Binding channel="2" ctl="28" uri="/route/mute S6"/>
+<Binding channel="2" ctl="75" uri="/route/mute S6"/>
+<Binding channel="2" ctl="106" uri="/route/mute S6"/>
+<Binding channel="2" ctl="29" uri="/route/solo S6"/>
+<Binding channel="2" ctl="76" uri="/route/solo S6"/>
+<Binding channel="2" ctl="107" uri="/route/solo S6"/>
+<Binding channel="2" ctl="30" uri="/route/recenable S6"/>
+<Binding channel="2" ctl="77" uri="/route/recenable S6"/>
+<Binding channel="2" ctl="108" uri="/route/recenable S6"/>
+<Binding channel="2" ctl="28" uri="/route/mute S7"/>
+<Binding channel="2" ctl="75" uri="/route/mute S7"/>
+<Binding channel="2" ctl="106" uri="/route/mute S7"/>
+<Binding channel="2" ctl="29" uri="/route/solo S7"/>
+<Binding channel="2" ctl="76" uri="/route/solo S7"/>
+<Binding channel="2" ctl="107" uri="/route/solo S7"/>
+<Binding channel="2" ctl="30" uri="/route/recenable S7"/>
+<Binding channel="2" ctl="77" uri="/route/recenable S7"/>
+<Binding channel="2" ctl="108" uri="/route/recenable S7"/>
+<Binding channel="2" ctl="28" uri="/route/mute S8"/>
+<Binding channel="2" ctl="75" uri="/route/mute S8"/>
+<Binding channel="2" ctl="106" uri="/route/mute S8"/>
+<Binding channel="2" ctl="29" uri="/route/solo S8"/>
+<Binding channel="2" ctl="76" uri="/route/solo S8"/>
+<Binding channel="2" ctl="107" uri="/route/solo S8"/>
+<Binding channel="2" ctl="30" uri="/route/recenable S8"/>
+<Binding channel="2" ctl="77" uri="/route/recenable S8"/>
+<Binding channel="2" ctl="108" uri="/route/recenable S8"/>
+<Binding channel="2" ctl="28" uri="/route/mute S9"/>
+<Binding channel="2" ctl="75" uri="/route/mute S9"/>
+<Binding channel="2" ctl="106" uri="/route/mute S9"/>
+<Binding channel="2" ctl="29" uri="/route/solo S9"/>
+<Binding channel="2" ctl="76" uri="/route/solo S9"/>
+<Binding channel="2" ctl="107" uri="/route/solo S9"/>
+<Binding channel="2" ctl="30" uri="/route/recenable S9"/>
+<Binding channel="2" ctl="77" uri="/route/recenable S9"/>
+<Binding channel="2" ctl="108" uri="/route/recenable S9"/>
+<Binding channel="2" ctl="28" uri="/route/mute S10"/>
+<Binding channel="2" ctl="75" uri="/route/mute S10"/>
+<Binding channel="2" ctl="106" uri="/route/mute S10"/>
+<Binding channel="2" ctl="29" uri="/route/solo S10"/>
+<Binding channel="2" ctl="76" uri="/route/solo S10"/>
+<Binding channel="2" ctl="107" uri="/route/solo S10"/>
+<Binding channel="2" ctl="30" uri="/route/recenable S10"/>
+<Binding channel="2" ctl="77" uri="/route/recenable S10"/>
+<Binding channel="2" ctl="108" uri="/route/recenable S10"/>
 
 </ArdourMIDIBindings>
