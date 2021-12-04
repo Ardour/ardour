@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Akai MPK 225 (with plugins) : preset 6">
+<DeviceInfo bank-size="8"/>
+
+<!-- NOTE : use preset 6 to enable these -->
+
+<Binding channel="2" ctl="28" uri="/route/mute S1"/>
+<Binding channel="2" ctl="75" uri="/route/mute S1"/>
+<Binding channel="2" ctl="106" uri="/route/mute S1"/>
+<Binding channel="2" ctl="29" uri="/route/solo S1"/>
+<Binding channel="2" ctl="76" uri="/route/solo S1"/>
+<Binding channel="2" ctl="107" uri="/route/solo S1"/>
+<Binding channel="2" ctl="30" uri="/route/recenable S1"/>
+<Binding channel="2" ctl="77" uri="/route/recenable S1"/>
+<Binding channel="2" ctl="108" uri="/route/recenable S1"/>
+
+<!-- Bank A : Miscellaneous -->
+<!-- K1 : Tape Drive -->
+<Binding channel="2" enc-2="50" uri="/route/plugin/parameter S1 0 0"/>
+<!-- K3 : Pan width -->
+<Binding channel="2" enc-2="52" uri="/route/panwidth S1"/>
+<!-- K4 : High -->
+<Binding channel="2" enc-2="53" uri="/route/filter/hi/freq S1"/>
+<!-- K5 : Gain -->
+<Binding channel="2" enc-2="54" uri="/route/gain S1"/>
+<!-- K6 : Trim -->
+<Binding channel="2" enc-2="55" uri="/route/trim S1"/>
+<!-- K7 : Pan direction -->
+<Binding channel="2" enc-2="56" uri="/route/pandirection S1"/>
+<!-- K8 : Low -->
+<Binding channel="2" enc-2="57" uri="/route/filter/low/freq S1"/>
+
+<!-- Bank B : Equalizer -->
+<Binding channel="3" enc-2="50" uri="/route/eq/freq/0 S1"/>
+<Binding channel="3" enc-2="51" uri="/route/eq/freq/1 S1"/>
+<Binding channel="3" enc-2="52" uri="/route/eq/freq/2 S1"/>
+<Binding channel="3" enc-2="53" uri="/route/eq/freq/3 S1"/>
+<Binding channel="3" enc-2="54" uri="/route/eq/gain/0 S1"/>
+<Binding channel="3" enc-2="55" uri="/route/eq/gain/1 S1"/>
+<Binding channel="3" enc-2="56" uri="/route/eq/gain/2 S1"/>
+<Binding channel="3" enc-2="57" uri="/route/eq/gain/3 S1"/>
+
+<!-- Bank C : Compressor & Sends -->
+<Binding channel="4" enc-2="50" uri="/route/send/gain S1 1"/>
+<Binding channel="4" enc-2="51" uri="/route/send/gain S1 2"/>
+<Binding channel="4" enc-2="52" uri="/route/send/gain S1 3"/>
+<Binding channel="4" enc-2="53" uri="/route/send/gain S1 4"/>
+<Binding channel="4" enc-2="54" uri="/route/compressor/speed S1"/>
+<Binding channel="4" enc-2="55" uri="/route/compressor/threshold S1"/>
+<Binding channel="4" enc-2="56" uri="/route/compressor/makeup S1"/>
+
+<!-- Transport -->
+<Binding channel="1" ctl="115" action="Transport/Rewind"/>
+<Binding channel="1" ctl="116" action="Transport/Forward"/>
+<Binding channel="1" ctl="117" function="transport-stop"/>
+<Binding channel="1" ctl="118" function="transport-roll"/>
+<Binding channel="1" ctl="119" function="toggle-rec-enable"/>
+
+</ArdourMIDIBindings>
