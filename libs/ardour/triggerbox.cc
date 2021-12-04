@@ -1311,6 +1311,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		 * which we last transitioned (in this case, to being active)
 		 */
 
+
 		const Temporal::Beats effective_time = transition_beats + (next_event.time() - region_start);
 
 		/* Now get samples */
@@ -2108,6 +2109,8 @@ TriggerBox::determine_next_trigger (uint64_t current)
 	/* second switch: handle the "real" follow actions */
 
 	switch (all_triggers[current]->follow_action (which_follow_action)) {
+	case Trigger::None:
+		return -1;
 
 	case Trigger::Again:
 		return current;
