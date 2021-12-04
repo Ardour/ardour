@@ -61,6 +61,7 @@ end
 function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	local pos = self:shmem():atomic_get_int(0)
 	local buffer = self:shmem():to_int(1):array()
+	local newdata = false
 
 	-- passthrough all data
 	ARDOUR.DSP.process_map (bufs, n_out, in_map, out_map, n_samples, offset)
@@ -83,12 +84,16 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 			for j = e:size()+1, evlen do
 				buffer[(pos-1)*evlen + j] = 0
 			end
+			newdata = true
 		end
 	end
 
 	self:shmem():atomic_set_int(0, pos)
 
-	self:queue_draw ()
+	if newdata then
+		print ("new data", pos)
+		self:queue_draw ()
+	end
 end
 
 local txt = nil -- a pango context
