@@ -1979,6 +1979,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 		}
 
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 complete, state now %2\n", currently_playing->name(), enum_2_string (currently_playing->state())));
 
 		/* if we're not in the process of stopping all active triggers,
 		 * but the current one has stopped, decide which (if any)
@@ -1998,6 +1999,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				currently_playing->startup ();
 			} else {
 				currently_playing = 0;
+				DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set, leaving nf loop\n");
 				/* leave nframes loop */
 				break;
 			}
@@ -2035,6 +2037,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 
 	if (!currently_playing) {
+		DEBUG_TRACE (DEBUG::Triggers, "nothing currently playing, consider stopping transport\n");
 		_stop_all = false;
 		if (active_trigger_boxes.fetch_sub (1) == 1) {
 			/* last active trigger box */
