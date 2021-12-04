@@ -317,12 +317,20 @@ Trigger::process_state_requests ()
 	bool stop = _requests.stop.exchange (false);
 
 	if (stop) {
-		if (_state == Running) {
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 noticed stop request\n", name()));
-			begin_stop ();
-		} else if (_state == WaitingToStart || _state == WaitingForRetrigger) {
+
+		/* This is for an immediate stop, not a quantized one */
+
+		if (_state != Stopped) {
 			shutdown ();
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 immediate stop implemented\n", name()));
 		}
+
+		/* Don't process bang/unbang requests since we're stopping */
+
+		_bang = 0;
+		_unbang = 0;
+
+		return;
 	}
 
 	/* now check bangs/unbangs */
