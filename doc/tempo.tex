@@ -1,0 +1,301 @@
+% vim: tw=80 spl=en
+% Copyright (C) 2018  Julien "_FrnchFrgg_" RIVAUD
+%
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program.  If not, see <http://www.gnu.org/licenses/>.
+\documentclass[10pt]{article}
+
+
+%\usepackage{fontspec}
+%\usepackage{polyglossia}
+%\setmainlanguage{english}
+\usepackage[english]{babel}
+
+%\usepackage{lualatex-math}
+\usepackage{amsmath}
+%\usepackage[math-style=ISO,bold-style=ISO]{unicode-math}
+
+\usepackage{geometry}
+\geometry{reset,margin=1.5cm,left=6cm,includefoot,marginparwidth=4.5cm}
+
+\usepackage{cellprops}
+
+\begin{document}
+
+
+
+\def\define#1{\textbf{#1}}
+\def\d{\mathrm{d}}
+
+\section{A natural definition for tempo ramping}
+
+\subsection{Some definitions}
+
+The \define{time}, often denoted $t$, is the duration in some multiple unit of
+seconds (samples, superclock, etc).
+
+We define $b$ to be the \define{beats function}: $b$~is the number of beats that
+occurred since $t = 0$ until the current time. It is assumed to be continuous and
+even derivable rather than being a staircase function: $b$~will thus value~$4.5$
+when exactly in the middle of beat~$4$, halfway\footnote{Not necessarily halfway
+in time units, though.} between pulsations $4$~and~$5$.
+
+The \define{tempo function}, or simply tempo, is the number~$T$ of pulsations
+per unit of time. Thus $T = \dfrac{\d b}{\d t}$.
+
+\def\DT{\Delta T}
+\def\Dt{\Delta t}
+\def\Db{\Delta b}
+
+A \define{tempo ramp} is a definition of $T$ for $0 \le t \le \Dt$ such that
+$T_{t=0} = T_0$ and $T_{t=\Dt} = T_{\text{end}} = T_0 + \DT$ where $\Dt$, $T_0$
+and $T_{\text{end}}$~or~$\DT$ are given. Most of the times they are set by the
+user, but $\Dt$ can be sometimes defined in beats, that is be the unique~$\Dt$
+such that $b_{|t=\Dt} = \Db$.
+
+\subsection{Linear tempo ramping}
+
+The simplest definition that comes to mind is a tempo ramp where the tempo
+increases from $T_0$~to~$T_0 + \DT$ \emph{linearly} with time.
+
+Here $T = T_0 + \dfrac{\DT}{\Dt}\times t$, and thus
+$b = \dfrac{\DT}{2\Dt}\times t^2 + T_0 \times t$, assuming $b_{|t=0} = 0$.
+
+If $\Dt$~is defined implicitly from a duration~$\Db$ in beats, then
+\[ \Db = \dfrac{\DT}{2\Dt}\times \Dt^2 + T_0 \Dt
+  = \left( \frac{1}{2}\DT + T_0 \right) \times\Dt \]
+thus
+\[
+    \Dt = \dfrac{2\Db}{\DT + 2T_0}
+\]
+
+\subsection{Exponential tempo ramping}
+
+\def\e{\mathrm{e}}
+
+Humans are not very good at keeping track precisely of absolute time for long
+durations, and are better at comparing short durations, that is maintain a
+reasonably stable time span between successive pulsations, and have a precise
+sense of elapsed time \emph{in terms of these pulsations}.
+
+In particular, when changing the tempo, it is less far-fetched to imagine a
+human feeling the tempo increase as a function of elapsed \emph{beats} rather
+than absolute time in seconds which is a pulsation that is very hard to maintain
+constant and even sense when competing with the (increasing) musical pulsation.
+
+In other words, a definition more suitable than that of linear ramping would be
+that the tempo increases \emph{linearly} with the value of~$b$. We thus want
+\[ T = T_0 + \dfrac{\DT}{\Db}\times b
+    \text{, that is }
+\dfrac{\d b}{\d t} - \dfrac{\DT}{\Db}\times b = T_0 \]
+
+The solutions of this order 1 linear differential equation are\footnote{The
+exponential is the solution of the associated homogeneous equation and the
+second term is the constant solution of the equation.}
+$b = A \e^{\frac{\DT}{\Db}t} - \dfrac{\Db T_0}{\DT}$, and
+since we want $b_{|t=0} = 0$, we get $A = \dfrac{\Db T_0}{\DT}$ that is
+\[ b = \dfrac{\Db T_0}{\DT} (\e^{\frac{\DT}{\Db}t} - 1) \]
+
+Denoting $\omega = \dfrac{\DT}{\Db}$ we find
+$b = \frac{T_0}{\omega} (\e^{\omega t} - 1)$.
+(Note: $\omega$ is called $c$ in Nick's text, but I like $\omega$ better since
+it is a frequency).
+
+The \emph{tempo} is $T = \dfrac{\d b}{\d t}
+= T_0 \e^{\frac{\DT}{\Db}t} = T_0 \e^{\omega t}$, and this is where the name
+exponential tempo ramp comes from.
+
+Recall that $\Db$, $\DT$ and $T_0$ are parameters of the ramp, while $t$~is the
+arbitrary time within the ramp at which we want to know $b$~and~$T$.
+
+Let us compute the reciprocal of $b$:
+\[
+    b = \dfrac{\Db T_0}{\DT} (\e^{\frac{\DT}{\Db}t} - 1)
+    \iff
+    \dfrac{\DT}{\Db T_0} b = \e^{\frac{\DT}{\Db}t} - 1
+    \iff
+    1 + \dfrac{\DT}{\Db T_0} b = \e^{\frac{\DT}{\Db}t}
+\]
+\[
+    \iff
+    \log \left( 1 + \dfrac{\DT}{\Db T_0} b \right) = \frac{\DT}{\Db}t
+    \iff
+    t = \frac{\Db}{\DT} \log \left( 1 + \dfrac{\DT}{\Db T_0} b \right)
+\]
+
+If $\Dt$~is defined directly instead of implicitly from a duration~$\Db$ in
+beats, then we have to find out the value of~$\Db$. At $t=\Dt$, we have
+$b = \Db$ thus
+\[
+    \Dt = \frac{\Db}{\DT} \log \left( 1 + \dfrac{\DT}{\Db T_0} \Db \right)
+    \iff
+    \Dt = \frac{\Db}{\DT} \log \left( 1 + \dfrac{\DT}{T_0} \right)
+    \iff
+    \Db = \frac{\DT\Dt}{\log \left( 1 + \dfrac{\DT}{T_0} \right) }
+\]
+
+A more useful expression is
+\[
+    \omega = \frac{\DT}{\Db}
+    = \frac{1}{\Dt}\log\left(1+ \frac{\DT}{T_0}\right)
+\]
+which gives
+\[
+    b = \frac{\Dt T_0}{\log\left(1+ \frac{\DT}{T_0}\right)}
+    \e^{\frac{t}{\Dt}\log\left(1+ \frac{\DT}{T_0}\right)}
+    = \frac{\Dt T_0}{\log\left(1+ \frac{\DT}{T_0}\right)}
+    \left(1+ \frac{\DT}{T_0}\right)^{\frac{t}{\Dt}}
+\]
+and
+\[
+    T
+    = T_0 \e^{\frac{t}{\Dt}\log\left(1+ \frac{\DT}{T_0}\right)}
+    = T_0 \left(1+ \frac{\DT}{T_0}\right)^{\frac{t}{\Dt}}
+\]
+
+We at last compute the reciprocals:
+\[
+    b = \frac{\Dt T_0}{\log\left(1+ \frac{\DT}{T_0}\right)}
+        \e^{\frac{t}{\Dt}\log\left(1+ \frac{\DT}{T_0}\right)}
+    \iff
+    \frac{\log\left(1+ \frac{\DT}{T_0}\right)}{\Dt T_0} b
+    = \e^{\frac{t}{\Dt}\log\left(1+ \frac{\DT}{T_0}\right)}
+\]
+\[
+    \iff
+    \log\left( \frac{\log\left(1+ \frac{\DT}{T_0}\right)}{\Dt T_0} b \right)
+    = \frac{t}{\Dt}\log\left(1+ \frac{\DT}{T_0}\right)
+    \iff
+    t = \frac{
+    \Dt
+    \log\left( \frac{\log\left(1+ \frac{\DT}{T_0}\right)}{\Dt T_0} b \right)
+    }{
+    \log\left(1+ \frac{\DT}{T_0}\right)
+    }
+\]
+
+\subsection{Summary with $T$ as main tempo representation}
+
+The following table gathers all results. For code factorization we might want
+to only consider the red formulas, that is compute (and maybe cache) $\omega$
+beforehand. Note that in the formulas, $\omega$ is \emph{always} the inverse of
+a time, never in per-beats.
+
+\[\everymath{\displaystyle}
+    \cellprops{ td:nth-child(1) { math-mode: text; } }
+    \begin{array}{lccc}
+    \hline
+    When you know & \Dt & \Db & \omega \\
+    \hline
+    Compute $\omega$ &
+        \color{red}
+        \frac{1}{\Dt}\log\left(1+ \frac{\DT}{T_0}\right)
+        &
+        \color{red}
+        \frac{\DT}{\Db}
+        &
+        \\
+    Compute $b$ from $t$ &
+        \frac{\Dt T_0}{\log\left(1+ \frac{\DT}{T_0}\right)}
+        \left(1+ \frac{\DT}{T_0}\right)^{\frac{t}{\Dt}}
+        &
+        \frac{\Db T_0}{\DT} (\e^{\frac{\DT}{\Db}t} - 1)
+        &
+        \color{red}
+        \frac{T_0}{\omega} (\e^{\omega t} - 1)
+        \\
+    Compute $T$ from $t$ &
+        T_0 \left(1+ \frac{\DT}{T_0}\right)^{\frac{t}{\Dt}}
+        &
+        T_0 \e^{\frac{\DT}{\Db}t}
+        &
+        \color{red}
+        T_0 \e^{\omega t}
+        \\
+    Compute $t$ from $b$ &
+        \frac{
+            \Dt
+            \log\left( \frac{\log\left(1+ \frac{\DT}{T_0}\right)}
+                        {\Dt T_0} b \right)
+        }{
+            \log\left(1+ \frac{\DT}{T_0}\right)
+        }
+        &
+        \frac{\Db}{\DT} \log \left( 1 + \frac{\DT}{\Db T_0} b \right)
+        &
+        \color{red}
+        \frac{1}{\omega} \log \left( 1 + \frac{\omega b}{T_0} \right)
+        \\
+    Compute $T$ from $b$ &
+        T_0 + \frac{1}{\Dt}\log\left(1+ \frac{\DT}{T_0}\right) \times b
+        &
+        T_0 + \frac{\DT}{\Db}\times b
+        &
+        \color{red}
+        T_0 + \omega b
+        \\
+    \hline
+\end{array}\]
+
+Note that there are often library functions to compute $\log(1+x)$ directly
+from~$x$ more precise than computing $1+x$ then its logarithm. The main reason
+is that when adding 1to some very small number you loose a lot of precision
+because the exponent is now tailored to the representation of~$1$, and that
+the Taylor-McLaurin series for $\log(1+x)$ is a very efficient mean to compute
+an approximate value for it.
+
+\subsection{Using $S = \frac{1}{T}$ to represent tempo}
+
+\def\DS{\Delta S}
+
+\everymath{\displaystyle}
+
+Since the base time unit in ardour is not seconds but far smaller than
+that\footnote{It was samples in previous versions of Ardour, and is even more
+precise in later versions.}, any value of $T$~or~$\DT$ will be very small. A
+better value to store, that can easily be rounded to integer without a huge
+loss of precision, is $S = 1/T$.
+
+Instead of having $T_0$~and~$T_1 = T_0 + \DT$, we thus assume that when
+computing the formulas we have access to $S_0$~and~$S_1$.
+
+Then from $\Dt$,
+$\omega = \frac{1}{\Dt}\log\left(1 + \frac{\DT}{T_0}\right)
+ = \frac{1}{\Dt}\log\left(\frac{T_1}{T_0}\right)
+ = \frac{1}{\Dt}\log\left(\frac{S_0}{S_1}\right)$.
+
+From beats, $\omega = \frac{\DT}{\Db} = \frac{S_0 - S_1}{S_0S_1\Db}$ (or just
+use $\omega = \left( \frac{1}{S_1} - \frac{1}{S_0} \right) / \Db$).
+
+To compute $b$~from~$t$ we can use
+$b = \frac{\e^{\omega t}-1}{S_0 \omega}$.
+
+And for $S$~from~$t$ we have
+$S = \frac{S_0}{\e^{\omega t}} = S_0\e^{-\omega t}$.
+
+As for $t$~from~$b$ the formula becomes
+$t = \frac{1}{\omega} \log \left( 1 + S_0 \omega b \right)$.
+
+Lastly, for $S$~from~$b$ we can see:
+\[ S = 1/T = \frac{1}{1/S_0 + \omega b} = \frac{S_0}{1+S_0\omega b}\]
+
+Maybe we can also to compute and cache
+$\omega' = S_0 \omega = \frac{S_0}{\Dt}\log\left(\frac{S_0}{S_1}\right)
+    = \frac{S_0 - S_1}{S_1\Db}$
+Which is in « per-beats » and occurs often in the formulas (but not
+exclusively). Note that the fact that $\omega$~or~$\omega'$ is relevant is
+\emph{not} depending on whether we compute from time or from beats, or even if
+the ramp length is defined in time or in beats.
+
+\end{document}
+
