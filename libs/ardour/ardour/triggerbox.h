@@ -63,11 +63,35 @@ class SideChain;
 class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
 	enum State {
+		/* This is the initial state for a Trigger, and means that it is not
+		 *doing anything at all
+		 */
 		Stopped,
+		/* A Trigger in this state has been chosen by its parent TriggerBox
+		 * (e.g. because of a bang() call that put it in the queue), a Trigger in
+		 * this state is waiting for the next occurence of its quantization to
+		 *  occur before transitioning to Running
+		 */
 		WaitingToStart,
+		/* a Trigger in this state is going to deliver data during calls
+		 *  to its ::run() method.
+		 */
 		Running,
+		/* a Trigger in this state was running, has been re-triggered e.g. by a
+		 *  ::bang() call with LaunchStyle set to Repeat, and is waiting for the
+		 *  next occurence of its quantization to occur before transitioning
+		 *  back to Running.
+		 */
 		WaitingForRetrigger,
+		/* a Trigger in this state is delivering data during calls to ::run(), but
+		 *  is waiting for the next occurence of its quantization to occur when it will
+		 *transition to Stopping and then Stopped.
+		 */
 		WaitingToStop,
+		/* a Trigger in this state was Running but noticed that it should stop
+		 * during the current call to ::run(). By the end of that call, it will
+		 * have transitioned to Stopped.
+		 */
 		Stopping
 	};
 
@@ -79,10 +103,20 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_name (std::string const &);
 	std::string name() const { return _name; }
 
-	/* semantics of "bang" depend on the trigger */
+	/* Calling ::bang() will cause this Trigger to be placed in its owning
+	   TriggerBox's queue.
+	*/
 	void bang ();
+
+	/* Calling ::unbang() will cause a running Trigger to begin the process
+	   of stopping. If the Trigger is not running, it will move it to a
+	   full Stopped state.
+	*/
 	void unbang ();
-	/* explicitly call for the trigger to stop */
+
+	/* Calling ::request_stop() to stop a Trigger at the earliest possible
+	 * opportunity, rather than at the next quantization point.
+	 */
 	void request_stop ();
 
 	virtual pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample,
