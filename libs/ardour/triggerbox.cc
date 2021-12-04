@@ -1281,7 +1281,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	samplepos_t last_event_samples = 0;
+	samplepos_t last_event_samples = max_samplepos;
 
 	/* see if we're going to start or stop or retrigger in this run() call */
 	dest_offset = maybe_compute_next_transition (start_sample, start_beats, end_beats, dest_offset, passthru);
@@ -1361,35 +1361,37 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end\n", index()));
 
-		if (!(_state == Stopping)) {
-			_loop_cnt++;
+		_loop_cnt++;
 
-			if (_loop_cnt == _follow_count) {
-				/* have played the specified number of times, we're done */
+		if (_loop_cnt == _follow_count) {
+			/* have played the specified number of times, we're done */
 
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
-				shutdown ();
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
+			shutdown ();
 
-			} else {
+		} else {
 
-				/* reached the end, but we haven't done that enough
-				 * times yet for a follow action/stop to take
-				 * effect. Time to get played again.
-				 */
+			/* reached the end, but we haven't done that enough
+			 * times yet for a follow action/stop to take
+			 * effect. Time to get played again.
+			 */
 
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
-				/* we will "restart" at the beginning of the
-				   next iteration of the trigger.
-				*/
-				transition_beats = transition_beats + data_length;
-				retrigger ();
-				_state = WaitingToStart;
-			}
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
+			/* we will "restart" at the beginning of the
+			   next iteration of the trigger.
+			*/
+			transition_beats = transition_beats + data_length;
+			retrigger ();
+			_state = WaitingToStart;
 		}
 
 		/* the time we processed spans from start to the last event */
 
-		nframes -= (last_event_samples - start_sample);
+		if (last_event_samples != max_samplepos) {
+			nframes = (last_event_samples - start_sample);
+		} else {
+			/* all frames covered */
+		}
 
 	} else {
 		/* we didn't reach the end of the MIDI data, ergo we covered
