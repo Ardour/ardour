@@ -1352,7 +1352,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 	if (_state == Stopping) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
-		tracker.resolve_notes (mb, nframes);
+		tracker.resolve_notes (mb, nframes-1);
 	}
 
 	if (iter == model->end()) {
