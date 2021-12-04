@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Akai MPK 225 (Normal) : preset 6">
+<DeviceInfo bank-size="12"/>
+
+<!-- NOTE : use preset 6 to enable these -->
+
+<!-- solos -->
+<Binding channel="2" ctl="28" uri="/route/solo B1"/>
+<Binding channel="2" ctl="29" uri="/route/solo B2"/>
+<Binding channel="2" ctl="30" uri="/route/solo B3"/>
+<Binding channel="2" ctl="31" uri="/route/solo B4"/>
+<Binding channel="2" ctl="75" uri="/route/solo B5"/>
+<Binding channel="2" ctl="76" uri="/route/solo B6"/>
+<Binding channel="2" ctl="77" uri="/route/solo B7"/>
+<Binding channel="2" ctl="78" uri="/route/solo B8"/>
+<Binding channel="2" ctl="106" uri="/route/solo B9"/>
+<Binding channel="2" ctl="107" uri="/route/solo B10"/>
+<Binding channel="2" ctl="108" uri="/route/solo B11"/>
+<Binding channel="2" ctl="109" uri="/route/solo B12"/>
+
+<!-- pandirection -->
+<Binding channel="2" enc-2="50" uri="/route/pandirection B1"/>
+<Binding channel="2" enc-2="51" uri="/route/pandirection B2"/>
+<Binding channel="2" enc-2="52" uri="/route/pandirection B3"/>
+<Binding channel="2" enc-2="53" uri="/route/pandirection B4"/>
+<Binding channel="3" enc-2="50" uri="/route/pandirection B5"/>
+<Binding channel="3" enc-2="51" uri="/route/pandirection B6"/>
+<Binding channel="3" enc-2="52" uri="/route/pandirection B7"/>
+<Binding channel="3" enc-2="53" uri="/route/pandirection B8"/>
+<Binding channel="4" enc-2="50" uri="/route/pandirection B9"/>
+<Binding channel="4" enc-2="51" uri="/route/pandirection B10"/>
+<Binding channel="4" enc-2="52" uri="/route/pandirection B11"/>
+<Binding channel="4" enc-2="53" uri="/route/pandirection B12"/>
+
+<!-- gain -->
+<Binding channel="2" enc-2="54" uri="/route/gain B1"/>
+<Binding channel="2" enc-2="55" uri="/route/gain B2"/>
+<Binding channel="2" enc-2="56" uri="/route/gain B3"/>
+<Binding channel="2" enc-2="57" uri="/route/gain B4"/>
+<Binding channel="3" enc-2="54" uri="/route/gain B5"/>
+<Binding channel="3" enc-2="55" uri="/route/gain B6"/>
+<Binding channel="3" enc-2="56" uri="/route/gain B7"/>
+<Binding channel="3" enc-2="57" uri="/route/gain B8"/>
+<Binding channel="4" enc-2="54" uri="/route/gain B9"/>
+<Binding channel="4" enc-2="55" uri="/route/gain B10"/>
+<Binding channel="4" enc-2="56" uri="/route/gain B11"/>
+<Binding channel="4" enc-2="57" uri="/route/gain B12"/>
+
+
+<!-- Transport -->
+<Binding channel="1" ctl="115" action="Transport/Rewind"/>
+<Binding channel="1" ctl="116" action="Transport/Forward"/>
+<Binding channel="1" ctl="117" function="transport-stop"/>
+<Binding channel="1" ctl="118" function="transport-roll"/>
+<Binding channel="1" ctl="119" function="toggle-rec-enable"/>
+
+</ArdourMIDIBindings>
