@@ -301,7 +301,7 @@ MidiSource::midi_write (const Lock&                  lm,
 {
 	const timecnt_t ret = write_unlocked (lm, source, source_start, cnt);
 
-	if (cnt == std::numeric_limits<timecnt_t>::max()) {
+	if (cnt == timecnt_t::max (cnt.time_domain())) {
 		invalidate(lm);
 	} else {
 		_capture_length += cnt.samples();
