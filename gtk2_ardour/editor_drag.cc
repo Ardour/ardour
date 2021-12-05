@@ -252,7 +252,7 @@ DragManager::have_item (ArdourCanvas::Item* i) const
 	return j != _drags.end ();
 }
 
-Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
+Drag::Drag (Editor* e, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trackview_only)
 	: _editor (e)
 	, _drags (0)
 	, _item (i)
@@ -275,6 +275,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	, _snap_delta (0)
 	, _constraint_pressed (false)
 	, _grab_button (-1)
+	, _time_domain (td)
 {
 
 }
@@ -589,7 +590,7 @@ struct TimeAxisViewStripableSorter {
 };
 
 RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: Drag (e, i)
+	: Drag (e, i, p->region()->position().time_domain())
 	, _primary (p)
 	, _ntracks (0)
 {
@@ -2590,7 +2591,7 @@ RegionRippleDrag::aborted (bool movement_occurred)
 
 
 RegionCreateDrag::RegionCreateDrag (Editor* e, ArdourCanvas::Item* i, TimeAxisView* v)
-	: Drag (e, i),
+	: Drag (e, i, e->default_time_domain()),
 	  _view (dynamic_cast<MidiTimeAxisView*> (v))
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionCreateDrag\n");
@@ -2645,7 +2646,7 @@ RegionCreateDrag::aborted (bool)
 }
 
 NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
+	: Drag (e, i, Temporal::BeatTime)
 	, region (0)
 	, relative (false)
 	, at_front (true)
@@ -2866,7 +2867,7 @@ AVDraggingView::AVDraggingView (RegionView* v)
 }
 
 VideoTimeLineDrag::VideoTimeLineDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
+	: Drag (e, i, e->default_time_domain())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New VideoTimeLineDrag\n");
 
@@ -3381,7 +3382,7 @@ TrimDrag::setup_pointer_offset ()
 }
 
 MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
-	: Drag (e, i)
+	: Drag (e, i, Temporal::BeatTime)
 	, _marker (reinterpret_cast<MeterMarker*> (_item->get_data ("marker")))
 	, _copy (c)
 	, _old_grid_type (e->grid_type())
@@ -3540,7 +3541,7 @@ MeterMarkerDrag::aborted (bool moved)
 }
 
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
-	: Drag (e, i)
+	: Drag (e, i, Temporal::BeatTime)
 	, _copy (c)
 	, _grab_bpm (120.0, 4.0)
 	, _before_state (0)
@@ -3739,7 +3740,7 @@ TempoMarkerDrag::aborted (bool moved)
 }
 
 BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
+	: Drag (e, i, Temporal::BeatTime)
 	, _tempo (0)
 	, _before_state (0)
 	, _drag_valid (true)
@@ -3905,7 +3906,7 @@ BBTRulerDrag::aborted (bool moved)
 #if 0
 
 TempoTwistDrag::TempoTwistDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
+	: Drag (e, i, Temporal::BeatTime)
 	, _grab_qn (0.0)
 	, _grab_tempo (0.0)
 	, _tempo (0)
@@ -4037,7 +4038,7 @@ TempoTwistDrag::aborted (bool moved)
 #endif
 
 TempoEndDrag::TempoEndDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
+	: Drag (e, i, Temporal::BeatTime)
 	, _tempo (0)
 	, _before_state (0)
 	, _drag_valid (true)
@@ -4152,7 +4153,7 @@ TempoEndDrag::aborted (bool moved)
 }
 
 CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
-	: Drag (e, &c.track_canvas_item(), false)
+	: Drag (e, &c.track_canvas_item(), e->default_time_domain(), false)
 	, _cursor (c)
 	, _stop (s)
 	, _grab_zoom (0.0)
@@ -4588,7 +4589,7 @@ FadeOutDrag::aborted (bool)
 }
 
 MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
+	: Drag (e, i, e->default_time_domain())
 	, _selection_changed (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MarkerDrag\n");
@@ -4998,7 +4999,7 @@ MarkerDrag::update_item (Location*)
 }
 
 ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
+	: Drag (e, i, e->default_time_domain()) /* XXX NUTEMPO FIX TIME DOMAIN */
 	, _fixed_grab_x (0.0)
 	, _fixed_grab_y (0.0)
 	, _cumulative_x_drag (0.0)
@@ -5138,7 +5139,7 @@ ControlPointDrag::active (Editing::MouseMode m)
 }
 
 LineDrag::LineDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
+	: Drag (e, i, e->default_time_domain())
 	, _line (0)
 	, _fixed_grab_x (0.0)
 	, _fixed_grab_y (0.0)
@@ -5261,7 +5262,7 @@ LineDrag::aborted (bool)
 }
 
 FeatureLineDrag::FeatureLineDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i),
+	: Drag (e, i, e->default_time_domain()),
 	  _line (0),
 	  _arv (0),
 	  _region_view_grab_x (0.0),
@@ -5341,7 +5342,7 @@ FeatureLineDrag::aborted (bool)
 }
 
 RubberbandSelectDrag::RubberbandSelectDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
+	: Drag (e, i, e->default_time_domain())
 	, _vertical_only (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RubberbandSelectDrag\n");
@@ -5624,7 +5625,7 @@ TimeFXDrag::aborted (bool)
 }
 
 ScrubDrag::ScrubDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
+	: Drag (e, i, Temporal::AudioTime)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New ScrubDrag\n");
 }
@@ -5657,7 +5658,7 @@ ScrubDrag::aborted (bool)
 }
 
 SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
-	: Drag (e, i)
+	: Drag (e, i, e->default_time_domain())
 	, _operation (o)
 	, _add (false)
 	, _time_selection_at_start (!_editor->get_selection().time.empty())
@@ -6038,7 +6039,7 @@ SelectionDrag::aborted (bool)
 }
 
 RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
-	: Drag (e, i, false),
+	: Drag (e, i, e->default_time_domain(), false),
 	  _operation (o),
 	  _copy (false)
 {
@@ -6285,7 +6286,7 @@ RangeMarkerBarDrag::update_item (Location* location)
 }
 
 NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i)
+	: Drag (e, i, Temporal::BeatTime)
 	, _cumulative_dy (0)
 	, _was_selected (false)
 	, _copy (false)
@@ -6501,7 +6502,7 @@ NoteDrag::aborted (bool)
 
 /** Make an AutomationRangeDrag for lines in an AutomationTimeAxisView */
 AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView* atv, list<TimelineRange> const & r)
-	: Drag (editor, atv->base_item ())
+	: Drag (editor, atv->base_item (), editor->default_time_domain()) /* XXX NUTEMPO FIX TIME DOMAIN */
 	, _ranges (r)
 	, _y_origin (atv->y_position())
 	, _y_height (atv->effective_height()) // or atv->lines()->front()->height() ?!
@@ -6513,7 +6514,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView
 
 /** Make an AutomationRangeDrag for region gain lines or MIDI controller regions */
 AutomationRangeDrag::AutomationRangeDrag (Editor* editor, list<RegionView*> const & v, list<TimelineRange> const & r, double y_origin, double y_height)
-	: Drag (editor, v.front()->get_canvas_group ())
+	: Drag (editor, v.front()->get_canvas_group (), editor->default_time_domain()) /* XXX NUTEMPO FIX TIME DOMAIN */
 	, _ranges (r)
 	, _y_origin (y_origin)
 	, _y_height (y_height)
@@ -6807,7 +6808,7 @@ DraggingView::DraggingView (RegionView* v, RegionDrag* parent, TimeAxisView* ita
 }
 
 PatchChangeDrag::PatchChangeDrag (Editor* e, PatchChange* i, MidiRegionView* r)
-	: Drag (e, i->canvas_item ())
+	: Drag (e, i->canvas_item (), Temporal::BeatTime)
 	, _region_view (r)
 	, _patch_change (i)
 	, _cumulative_dx (0)
@@ -6949,7 +6950,7 @@ EditorRubberbandSelectDrag::deselect_things ()
 }
 
 NoteCreateDrag::NoteCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
-	: Drag (e, i)
+	: Drag (e, i, Temporal::BeatTime)
 	, _region_view (rv)
 	, _drag_rect (0)
 {
@@ -7056,7 +7057,7 @@ NoteCreateDrag::aborted (bool)
 }
 
 HitCreateDrag::HitCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
-	: Drag (e, i)
+	: Drag (e, i, Temporal::BeatTime)
 	, _region_view (rv)
 	, _last_pos (Temporal::Beats())
 	, _y (0.0)
@@ -7149,7 +7150,7 @@ HitCreateDrag::aborted (bool)
 }
 
 CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor* e, AudioRegionView* rv, ArdourCanvas::Item* i, bool start_yn)
-	: Drag (e, i)
+	: Drag (e, i, Temporal::AudioTime)
 	, arv (rv)
 	, start (start_yn)
 {
@@ -7248,7 +7249,7 @@ CrossfadeEdgeDrag::aborted (bool)
 }
 
 RegionCutDrag::RegionCutDrag (Editor* e, ArdourCanvas::Item* item, samplepos_t pos)
-	: Drag (e, item, true)
+	: Drag (e, item, e->default_time_domain(), true)
 {
 }
 
@@ -7292,7 +7293,7 @@ RegionCutDrag::aborted (bool)
 }
 
 RegionMarkerDrag::RegionMarkerDrag (Editor* ed, RegionView* r, ArdourCanvas::Item* i)
-	: Drag (ed, i)
+	: Drag (ed, i, r->region()->position().time_domain())
 	, rv (r)
 	, view (static_cast<ArdourMarker*> (i->get_data ("marker")))
 	, model (rv->find_model_cue_marker (view))

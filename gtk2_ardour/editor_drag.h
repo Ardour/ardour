@@ -143,7 +143,7 @@ private:
 class Drag
 {
 public:
-	Drag (Editor *, ArdourCanvas::Item *, bool trackview_only = true);
+	Drag (Editor *, ArdourCanvas::Item *, Temporal::TimeDomain td, bool trackview_only = true);
 	virtual ~Drag () {}
 
 	void set_manager (DragManager* m) {
@@ -154,6 +154,9 @@ public:
 	ArdourCanvas::Item* item () const {
 		return _item;
 	}
+
+	Temporal::TimeDomain time_domain() const { return _time_domain; }
+
 
 	void swap_grab (ArdourCanvas::Item *, Gdk::Cursor *, uint32_t);
 	bool motion_handler (GdkEvent*, bool);
@@ -317,6 +320,7 @@ private:
 	Temporal::timepos_t _raw_grab_time; ///< unsnapped time that the mouse was at when start_grab was called, or 0
 	Temporal::timepos_t _grab_time; ///< adjusted_time that the mouse was at when start_grab was called, or 0
 	Temporal::timepos_t _last_pointer_time; ///< adjusted_time the last time a motion occurred
+	Temporal::TimeDomain _time_domain;
 
 	/* difference between some key position's snapped and unsnapped
 	 *  samplepos. used for relative snap.
