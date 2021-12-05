@@ -31,6 +31,8 @@
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 
+#include "fitted_canvas_widget.h"
+
 namespace Gtk {
 class FileChooserDialog;
 class Menu;
@@ -48,20 +50,25 @@ namespace ArdourCanvas {
 class TriggerEntry : public ArdourCanvas::Rectangle
 {
   public:
-	TriggerEntry (ArdourCanvas::Canvas* canvas, ARDOUR::Trigger&);
+	TriggerEntry (ArdourCanvas::Item* item, ARDOUR::Trigger&);
 	~TriggerEntry ();
 
 	ARDOUR::Trigger& trigger() const { return _trigger; }
 
 	ArdourCanvas::Rectangle* play_button;
-	ArdourCanvas::Rectangle* active_bar;
 	ArdourCanvas::Polygon* play_shape;
+
+	ArdourCanvas::Rectangle* name_button;
 	ArdourCanvas::Text*    name_text;
+
+	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
 	void _size_allocate (ArdourCanvas::Rect const &);
 	void maybe_update ();
-	bool event_handler (GdkEvent*);
+
 	void selection_change ();
+
+	void set_default_colors();
 
   private:
 	ARDOUR::Trigger& _trigger;
@@ -75,9 +82,11 @@ class TriggerEntry : public ArdourCanvas::Rectangle
 	PBD::ScopedConnection owner_prop_connection;
 	void owner_prop_change (PBD::PropertyChange const &);
 	void owner_color_changed ();
+
+	void ui_parameter_changed (std::string const& p);
 };
 
-class TriggerBoxUI : public ArdourCanvas::Table
+class TriggerBoxUI : public ArdourCanvas::Rectangle
 {
    public:
 	TriggerBoxUI (ArdourCanvas::Item* parent, ARDOUR::TriggerBox&);
@@ -92,6 +101,8 @@ class TriggerBoxUI : public ArdourCanvas::Table
 
 	static void trigger_scene (int32_t);
 
+	void _size_allocate (ArdourCanvas::Rect const &);
+
    private:
 	ARDOUR::TriggerBox& _triggerbox;
 	typedef std::vector<TriggerEntry*> Slots;
@@ -104,9 +115,8 @@ class TriggerBoxUI : public ArdourCanvas::Table
 	static void load_bindings ();
 	static void register_actions ();
 
-	bool bang (GdkEvent*, uint64_t);
-	bool text_event (GdkEvent*, uint64_t);
-	bool event (GdkEvent*, uint64_t);
+	bool play_button_event (GdkEvent*, uint64_t);
+	bool text_button_event (GdkEvent*, uint64_t);
 
 	void choose_sample (uint64_t n);
 	void sample_chosen (int r, uint64_t n);
@@ -125,11 +135,10 @@ class TriggerBoxUI : public ArdourCanvas::Table
 	sigc::connection selection_connection;
 };
 
-class TriggerBoxWidget : public ArdourCanvas::GtkCanvas
+class TriggerBoxWidget : public FittedCanvasWidget
 {
   public:
-	TriggerBoxWidget (ARDOUR::TriggerBox& tb);
-	void size_request (double& w, double& h) const;
+	TriggerBoxWidget (ARDOUR::TriggerBox& tb, float w, float h);
 
 	void on_map ();
 	void on_unmap ();

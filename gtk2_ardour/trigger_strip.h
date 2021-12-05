@@ -32,6 +32,7 @@
 
 #include "automation_controller.h"
 #include "axis_view.h"
+#include "fitted_canvas_widget.h"
 #include "level_meter.h"
 #include "panner_ui.h"
 #include "processor_box.h"
@@ -40,6 +41,7 @@
 #include "triggerbox_ui.h"
 
 class PluginSelector;
+class TriggerStopper;
 
 class TriggerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 {
@@ -118,10 +120,13 @@ private:
 	Gtk::Table volume_table;
 
 	/* Widgets */
-	ArdourWidgets::ArdourButton             _name_button;
-	ProcessorBox                            _processor_box;
-	TriggerBoxWidget                        _trigger_display;
-	PannerUI                                _panners;
+	FittedCanvasWidget 			_stopper_widget;
+	TriggerStopper				*_stopper;
+
+	ArdourWidgets::ArdourButton _name_button;
+	ProcessorBox                _processor_box;
+	TriggerBoxWidget            _trigger_display;
+	PannerUI                    _panners;
 	LevelMeterVBox                          _level_meter;
 	boost::shared_ptr<AutomationController> _gain_control;
 };

@@ -52,49 +52,39 @@ using namespace ArdourCanvas;
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
-	: ArdourCanvas::Rectangle (canvas)
+TriggerEntry::TriggerEntry (Item* item, ARDOUR::Trigger& t)
+	: ArdourCanvas::Rectangle (item)
 	, _trigger (t)
 {
-	const double scale = UIConfiguration::instance().get_ui_scale();
-	const double width = 150. * scale;
-	const double height = 20. * scale;
+	set_layout_sensitive(true);  //why???
 
 	name = string_compose ("trigger %1", _trigger.index());
 
-	Event.connect (sigc::mem_fun (*this, &TriggerEntry::event_handler));
-
-	poly_margin = 2. * scale;
-	poly_size = height - (poly_margin * 2.);
-
-	ArdourCanvas::Rect r (0, 0, width, height);
-	set (r);
-	set_outline_all ();
-
-	active_bar = new ArdourCanvas::Rectangle (this);
-	active_bar->set_outline (false);
-
-	owner_color_changed ();
+	set_outline (false);
 
 	play_button = new ArdourCanvas::Rectangle (this);
-	play_button->set (ArdourCanvas::Rect (poly_margin/2., poly_margin/2., poly_size + ((poly_margin/2.) * 2.), height - ((poly_margin/2.) * 2.)));
-	play_button->set_outline (false);
-	play_button->set_fill_color (outline_color());
+	play_button->set_outline (true);
+	play_button->set_fill(true);
 	play_button->name = string_compose ("playbutton %1", _trigger.index());
-	play_button->hide ();
+	play_button->show ();
 
 	play_shape = new ArdourCanvas::Polygon (play_button);
-	play_shape->set_fill_color (outline_color());
-	play_shape->set_outline (false);
 	play_shape->name = string_compose ("playshape %1", _trigger.index());
-	play_shape->hide ();
+	play_shape->show ();
 
-	name_text = new Text (this);
-	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
-	name_text->set_height_based_on_allocation (true);
-	name_text->set_color (Gtkmm2ext::contrasting_text_color (fill_color()));
-	name_text->set_position (Duple (play_button->get().width() + (2. * scale), poly_margin));
-	name_text->set_ignore_events (true);
+	name_button = new ArdourCanvas::Rectangle (this);
+	name_button->set_outline (true);
+	name_button->set_fill(true);
+	name_button->name = ("slot_selector_button");
+	name_button->show ();
+
+	name_text = new Text (name_button);
+	name_text->set_ignore_events (false);
+	name_text->show();
+	
+	/* watch for change in theme */
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &TriggerEntry::ui_parameter_changed));
+	set_default_colors();
 
 	_trigger.PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context());
 	dynamic_cast<Stripable*> (_trigger.box().owner())->presentation_info().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context());
@@ -102,8 +92,9 @@ TriggerEntry::TriggerEntry (Canvas* canvas, ARDOUR::Trigger& t)
 	PropertyChange changed;
 	changed.add (ARDOUR::Properties::name);
 	changed.add (ARDOUR::Properties::running);
-
 	prop_change (changed);
+
+	selection_change();
 }
 
 TriggerEntry::~TriggerEntry ()
@@ -121,94 +112,56 @@ TriggerEntry::owner_prop_change (PropertyChange const & pc)
 void
 TriggerEntry::owner_color_changed ()
 {
-	set_fill_color (dynamic_cast<Stripable*> (_trigger.box().owner())->presentation_info().color());
-	selection_change ();
-	active_bar->set_fill_color (HSV (fill_color()).darker(0.3).color ());
+	//ToDo
 }
 
 void
 TriggerEntry::selection_change ()
 {
 	if (PublicEditor::instance().get_selection().selected (this)) {
-		set_outline_color (UIConfiguration::instance().color ("selection"));
+		name_button->set_outline_color (UIConfiguration::instance().color ("alert:red"));
 	} else {
-		set_outline_color (HSV (fill_color()).opposite().color());
+		set_default_colors();
 	}
-
-}
-
-bool
-TriggerEntry::event_handler (GdkEvent* ev)
-{
-	switch (ev->type) {
-	case GDK_BUTTON_PRESS:
-		PublicEditor::instance().get_selection().set (this);
-		break;
-	case GDK_ENTER_NOTIFY:
-		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-			play_button->show ();
-			play_shape->show ();
-		}
-		redraw ();
-		break;
-	case GDK_LEAVE_NOTIFY:
-		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-			play_button->hide ();
-			play_shape->hide ();
-		}
-		redraw ();
-		break;
-	default:
-		break;
-	}
-
-	return false;
 }
 
 void
 TriggerEntry::maybe_update ()
 {
-	double nbw;
-
-	if (!_trigger.active()) {
-		nbw = 0;
-	} else {
-		nbw = _trigger.position_as_fraction () * (_allocation.width() - _allocation.height());
-	}
-
-	if (nbw) {
-		const double scale = UIConfiguration::instance().get_ui_scale();
-		ArdourCanvas::Rect r (get());
-
-		active_bar->set (ArdourCanvas::Rect (r.height() * scale,
-		                                     (r.y0 + 1) * scale,
-		                                     (r.height() + nbw - 1) * scale,
-		                                     (r.y1 - 1) * scale));
-		active_bar->show ();
-	} else {
-		active_bar->hide ();
-	}
+	//what here?
 }
 
 void
 TriggerEntry::_size_allocate (ArdourCanvas::Rect const & alloc)
 {
-	const double scale = UIConfiguration::instance().get_ui_scale();
-
 	Rectangle::_size_allocate (alloc);
 
-	const Distance height = get().height();
+	const Distance width = _rect.width();
+	const Distance height = _rect.height();
 
-	poly_size = height - (poly_margin * 2.);
+	play_button->set (ArdourCanvas::Rect (0, 0, height, height));
+	name_button->set (ArdourCanvas::Rect (height, 0, width, height));
 
+	const double scale = UIConfiguration::instance().get_ui_scale();
+	poly_margin = 2. * scale;
+	poly_size = height - 2*poly_margin;
 	shape_play_button ();
-	play_button->set (ArdourCanvas::Rect (poly_margin/2., poly_margin/2., poly_size + ((poly_margin/2.) * 2.), height - ((poly_margin/2.) * 2.)));
 
-	const Distance lhs = play_button->get().width() + (2. * poly_margin * scale);
-	ArdourCanvas::Rect text_alloc (lhs, poly_margin, alloc.width() - lhs - (poly_margin * scale), alloc.height() - (2. * poly_margin));
-	name_text->size_allocate (text_alloc);
+	float tleft = height;  //make room for the play button
+	float twidth = name_button->width() - poly_margin*2;
 
-	name_text->set_position (Duple (lhs, poly_margin));
+	name_text->size_allocate (Rect(0, 0, width, height));
+	name_text->set_position (Duple (tleft + poly_margin, poly_margin -0.5));
+	name_text->clamp_width ( width - height );
+
+	//font scale may have changed. uiconfig 'embeds' the ui-scale in the font
+	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
+}
+
+void
+TriggerEntry::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	Rectangle::render(area, context);
 }
 
 void
@@ -226,15 +179,17 @@ TriggerEntry::shape_play_button ()
 		/* region exists; draw triangle to show that we can trigger */
 		p.push_back (Duple (poly_margin, poly_margin));
 		p.push_back (Duple (poly_margin, poly_size));
-		p.push_back (Duple (poly_size, poly_size / 2.));
+		p.push_back (Duple (poly_size, 0.5+poly_size / 2.));
 	}
 
 	play_shape->set (p);
 
 	if (_trigger.active()) {
-		play_button->set_fill (true);
+		play_shape->set_outline (false);
+		play_shape->set_fill (true);
 	} else {
-		play_button->set_fill (false);
+		play_shape->set_outline (true);
+		play_shape->set_fill (false);
 	}
 }
 
@@ -247,7 +202,6 @@ TriggerEntry::prop_change (PropertyChange const & change)
 		if (_trigger.region()) {
 			name_text->set (short_version (_trigger.name(), 16));
 		} else {
-			/* we need some spaces to have something to click on */
 			name_text->set ("");
 		}
 
@@ -263,6 +217,41 @@ TriggerEntry::prop_change (PropertyChange const & change)
 	}
 }
 
+void
+TriggerEntry::set_default_colors ()
+{
+	set_fill_color (UIConfiguration::instance().color ("theme:bg"));
+	play_button->set_fill_color (UIConfiguration::instance().color("theme:bg"));
+	play_button->set_outline_color (UIConfiguration::instance().color("theme:bg"));
+	name_button->set_fill_color (UIConfiguration::instance().color("theme:bg"));
+	name_button->set_outline_color (UIConfiguration::instance().color("theme:bg"));
+	if ((_trigger.index()/2)%2==0) {
+		set_fill_color (HSV (fill_color()).darker(0.15).color ());
+		play_button->set_fill_color (HSV (fill_color()).darker(0.15).color ());
+		play_button->set_outline_color (HSV (fill_color()).darker(0.15).color ());
+		name_button->set_fill_color (HSV (fill_color()).darker(0.15).color ());
+		name_button->set_outline_color (HSV (fill_color()).darker(0.15).color ());
+	}
+
+	name_text->set_color (UIConfiguration::instance().color("neutral:midground"));
+
+	play_shape->set_outline_color (UIConfiguration::instance().color("neutral:midground"));
+	play_shape->set_fill_color (UIConfiguration::instance().color("neutral:midground"));
+
+	/*preserve selection border*/
+	if (PublicEditor::instance().get_selection().selected (this)) {
+		name_button->set_outline_color (UIConfiguration::instance().color ("alert:red"));
+	}
+}
+
+void
+TriggerEntry::ui_parameter_changed (std::string const& p)
+{
+	if (p == "color-file") {
+		set_default_colors();
+	}
+}
+
 
 
 /* ---------------------------- */
@@ -271,14 +260,14 @@ Gtkmm2ext::Bindings* TriggerBoxUI::bindings = 0;
 Glib::RefPtr<Gtk::ActionGroup> TriggerBoxUI::trigger_actions;
 
 TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
-	: Table (parent)
+	: Rectangle (parent)
 	, _triggerbox (tb)
 	, file_chooser (0)
 	, _context_menu (0)
 {
-	set_homogenous (true);
-	set_row_spacing (4);
-	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
+	set_layout_sensitive(true);  //why???
+
+	set_fill_color (UIConfiguration::instance().color(X_("theme:bg")));
 	set_fill (true);
 
 	build ();
@@ -337,7 +326,6 @@ TriggerBoxUI::build ()
 {
 	Trigger* t;
 	uint64_t n = 0;
-	uint32_t row = 0;
 
 	// clear_items (true);
 
@@ -348,30 +336,60 @@ TriggerBoxUI::build ()
 		if (!t) {
 			break;
 		}
-		TriggerEntry* te = new TriggerEntry (canvas(), *t);
-		attach (te, 0, row++, PackExpand, PackExpand);
+		TriggerEntry* te = new TriggerEntry (this, *t);
 
 		_slots.push_back (te);
 
-		te->play_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::bang), n));
-		te->name_text->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::text_event), n));
-		te->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::event), n));
+		te->play_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::play_button_event), n));
+		te->name_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::text_button_event), n));
+//		te->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::event), n));
 
 		++n;
 	}
 }
 
-bool
-TriggerBoxUI::text_event (GdkEvent *ev, uint64_t n)
+void
+TriggerBoxUI::_size_allocate (ArdourCanvas::Rect const & alloc)
 {
-	return false;
+	Rectangle::_size_allocate (alloc);
+
+	const float width = alloc.width();
+	const float height = alloc.height();
+
+	const float slot_h = height / TriggerBox::default_triggers_per_box;  //ToDo
+
+	float ypos = 0;
+	for (auto & slot : _slots) {
+		slot->size_allocate (Rect(0, 0, width, slot_h));
+		slot->set_position (Duple (0, ypos));
+		ypos += slot_h;
+		slot->show();
+	}
+
 }
 
 bool
-TriggerBoxUI::event (GdkEvent* ev, uint64_t n)
+TriggerBoxUI::text_button_event (GdkEvent* ev, uint64_t n)
 {
 	switch (ev->type) {
+	case GDK_ENTER_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			_slots[n]->name_text->set_fill_color (UIConfiguration::instance().color ("neutral:foreground"));
+			_slots[n]->name_text->set_color (UIConfiguration::instance().color ("neutral:foreground"));
+		}
+		break;
+	case GDK_LEAVE_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			_slots[n]->set_default_colors();
+		}
+		break;
 	case GDK_BUTTON_PRESS:
+		if (_slots[n]->trigger().region()) {
+			PublicEditor::instance().get_selection().set (_slots[n]);
+			//a side-effect of selection-change is that the slot's color is reset. retain the "entered-color" here:
+			_slots[n]->name_text->set_fill_color (UIConfiguration::instance().color ("neutral:foreground"));
+			_slots[n]->name_text->set_color (UIConfiguration::instance().color ("neutral:foreground"));
+		}
 		break;
 	case GDK_2BUTTON_PRESS:
 		edit_trigger (n);
@@ -392,9 +410,8 @@ TriggerBoxUI::event (GdkEvent* ev, uint64_t n)
 	return false;
 }
 
-
 bool
-TriggerBoxUI::bang (GdkEvent *ev, uint64_t n)
+TriggerBoxUI::play_button_event (GdkEvent *ev, uint64_t n)
 {
 	if (!_triggerbox.trigger (n)->region()) {
 		/* this is a stop button */
@@ -430,6 +447,17 @@ TriggerBoxUI::bang (GdkEvent *ev, uint64_t n)
 			break;
 		default:
 			break;
+		}
+		break;
+	case GDK_ENTER_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			_slots[n]->play_shape->set_fill_color (UIConfiguration::instance().color ("neutral:foreground"));
+			_slots[n]->play_shape->set_outline_color (UIConfiguration::instance().color ("neutral:foreground"));
+		}
+		break;
+	case GDK_LEAVE_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			_slots[n]->set_default_colors();
 		}
 		break;
 	default:
@@ -698,29 +726,23 @@ TriggerBoxUI::rapid_update ()
 
 /* ------------ */
 
-TriggerBoxWidget::TriggerBoxWidget (TriggerBox& tb)
+TriggerBoxWidget::TriggerBoxWidget (TriggerBox& tb, float w, float h) : FittedCanvasWidget(w,h)
 {
 	ui = new TriggerBoxUI (root(), tb);
 	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
 }
 
 void
-TriggerBoxWidget::size_request (double& w, double& h) const
-{
-	ui->size_request (w, h);
-}
-
-void
 TriggerBoxWidget::on_map ()
 {
-	GtkCanvas::on_map ();
+	FittedCanvasWidget::on_map ();
 	ui->start_updating ();
 }
 
 void
 TriggerBoxWidget::on_unmap ()
 {
-	GtkCanvas::on_unmap ();
+	FittedCanvasWidget::on_unmap ();
 	ui->stop_updating ();
 }
 
@@ -729,15 +751,10 @@ TriggerBoxWidget::on_unmap ()
 
 TriggerBoxWindow::TriggerBoxWindow (TriggerBox& tb)
 {
-	TriggerBoxWidget* tbw = manage (new TriggerBoxWidget (tb));
+	TriggerBoxWidget* tbw = manage (new TriggerBoxWidget (tb, -1., TriggerBox::default_triggers_per_box*16.));
 	set_title (_("TriggerBox for XXXX"));
 
-	double w;
-	double h;
-
-	tbw->size_request (w, h);
-
-	set_default_size (w, h);
+	set_default_size (-1., TriggerBox::default_triggers_per_box*16.);
 	add (*tbw);
 	tbw->show ();
 }

@@ -38,6 +38,7 @@
 #include "mixer_ui.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
+#include "trigger_stopper.h"
 #include "trigger_strip.h"
 #include "ui_config.h"
 
@@ -60,8 +61,9 @@ TriggerStrip::TriggerStrip (Session* s, boost::shared_ptr<ARDOUR::Route> rt)
 	, RouteUI (s)
 	, _clear_meters (true)
 	, _pb_selection ()
+	, _stopper_widget ( -1, 16 )
 	, _processor_box (s, boost::bind (&TriggerStrip::plugin_selector, this), _pb_selection, 0)
-	, _trigger_display (*rt->triggerbox ())
+	, _trigger_display (*rt->triggerbox (), -1., 8*16.)
 	, _panners (s)
 	, _level_meter (s)
 {
@@ -123,9 +125,10 @@ TriggerStrip::init ()
 
 	/* strip layout */
 	global_vpacker.set_spacing (2);
-	global_vpacker.pack_start (_name_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (_trigger_display, true, true); // XXX
+	global_vpacker.pack_start (_trigger_display, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_stopper_widget, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_processor_box, true, true);
+	global_vpacker.pack_start (_name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (volume_table, Gtk::PACK_SHRINK);
@@ -154,6 +157,7 @@ TriggerStrip::init ()
 	ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun (*this, &TriggerStrip::reset_group_peak_display));
 
 	/* Visibility */
+	_stopper_widget.show ();
 	_name_button.show ();
 	_trigger_display.show ();
 	_processor_box.show ();
@@ -182,6 +186,8 @@ TriggerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
 
+	_stopper = new TriggerStopper(_stopper_widget.root(), _route->triggerbox());
+	
 	_processor_box.set_route (rt);
 
 	/* Fader/Gain */

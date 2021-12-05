@@ -1668,7 +1668,7 @@ MixerStrip::revert_to_default_display ()
 	if (_route->triggerbox() && UIConfiguration::instance().get_show_triggers_inline()) {
 		create_trigger_display (_route->triggerbox());
 		if (trigger_display->get_parent() != &global_vpacker) {
-			global_vpacker.pack_start (*trigger_display, true, true);
+			global_vpacker.pack_start (*trigger_display, Gtk::PACK_SHRINK);
 			trigger_display->show ();
 			global_vpacker.reorder_child (*trigger_display, 4);
 		}
@@ -2143,7 +2143,7 @@ void
 MixerStrip::create_trigger_display (boost::shared_ptr<TriggerBox> tb)
 {
 	if (!trigger_display) {
-		trigger_display = new TriggerBoxWidget (*(tb.get())); /* XXX fix to use shared ptr */
+		trigger_display = new TriggerBoxWidget (*(tb.get()), -1., 8*16.); /* XXX fix to use shared ptr */
 	}
 }
 

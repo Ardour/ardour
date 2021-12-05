@@ -337,6 +337,8 @@ std::string
 TriggerUI::follow_action_to_string (Trigger::FollowAction fa)
 {
 	switch (fa) {
+	case Trigger::None:
+		return _("None");
 	case Trigger::Stop:
 		return _("Stop");
 	case Trigger::Again:
