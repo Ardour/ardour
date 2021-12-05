@@ -102,11 +102,13 @@ public:
 
 	void dump (std::ostream&) const;
 
-  private:
+  protected:
 	/** Our rectangle; note that x0 may not always be less than x1
 	 *  and likewise with y0 and y1.
 	 */
 	Rect _rect;
+
+  private:
 	What _outline_what;
 	double _corner_radius;
 };
