@@ -314,7 +314,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 
 	const samplepos_t pos = _editor->canvas_event_sample (event, &_grab_x, &_grab_y);
 
-	if (_editor->default_time_domain() == Temporal::AudioTime) {
+	if (_time_domain == Temporal::AudioTime) {
 		_raw_grab_time = timepos_t (pos);
 	} else {
 		_raw_grab_time = timepos_t (timepos_t (pos).beats());
