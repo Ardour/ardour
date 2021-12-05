@@ -1328,7 +1328,7 @@ Locations::first_mark_after (timepos_t const & pos, bool include_special_ranges)
 void
 Locations::marks_either_side (timepos_t const & pos, timepos_t& before, timepos_t& after) const
 {
-	before = after = std::numeric_limits<timepos_t>::max();
+	before = after = timepos_t::max (pos.time_domain());
 
 	LocationList locs;
 
