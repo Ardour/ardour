@@ -252,6 +252,8 @@ protected:
 		return _grab_y;
 	}
 
+	Temporal::timepos_t pixel_to_time (double x) const;
+
 	Temporal::timepos_t raw_grab_time () const {
 		return _raw_grab_time;
 	}

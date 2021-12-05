@@ -279,6 +279,17 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trac
 {
 
 }
+timepos_t
+Drag::pixel_to_time (double x) const
+{
+	samplepos_t p = _editor->pixel_to_sample (x);
+
+	if (_time_domain == Temporal::AudioTime) {
+		return timepos_t (p);
+	}
+
+	return timepos_t (timepos_t (p).beats ());
+}
 
 void
 Drag::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t /*time*/)
