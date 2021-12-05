@@ -344,7 +344,7 @@ SMFSource::write_unlocked (const Lock&                  lock,
 			break;
 		}
 
-		if ((cnt != std::numeric_limits<timecnt_t>::max()) &&
+		if ((cnt != timecnt_t::max (cnt.time_domain())) &&
 		    (time > pos_samples + _capture_length + cnt_samples)) {
 			/* The diskstream doesn't want us to write everything, and this
 			   event is past the end of this block, so we're done for now. */
