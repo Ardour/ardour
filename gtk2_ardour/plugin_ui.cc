@@ -90,6 +90,7 @@ extern VST3PluginUI* create_mac_vst3_gui (boost::shared_ptr<ARDOUR::PluginInsert
 #include "plugin_presets_ui.h"
 #include "timers.h"
 #include "new_plugin_preset_dialog.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -101,6 +102,7 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 
+PluginUIWindow* PluginUIWindow::the_plugin_window = 0;
 
 PluginUIWindow::PluginUIWindow (
 	boost::shared_ptr<PluginInsert> insert,
@@ -198,11 +200,22 @@ PluginUIWindow::~PluginUIWindow ()
 	cerr << "PluginWindow deleted for " << this << endl;
 #endif
 	delete _pluginui;
+
+	if (the_plugin_window == this) {
+		the_plugin_window = 0;
+	}
 }
 
 void
 PluginUIWindow::on_show ()
 {
+	if (UIConfiguration::instance().get_one_plugin_window_only()) {
+		if (the_plugin_window) {
+			the_plugin_window->hide ();
+		}
+		the_plugin_window = this;
+	}
+
 	set_role("plugin_ui");
 
 	if (_pluginui) {

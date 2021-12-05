@@ -3803,6 +3803,16 @@ These settings will only take effect after %1 is restarted.\n\
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
 
+	bo = new BoolOption (
+		"one-plugin-window-only",
+		_("Show only one plugin window at a time"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_one_plugin_window_only),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_one_plugin_window_only)
+		);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> at most one plugin GUI window be on-screen at a time. When disabled, the number of visible plugin GUI windows is unlimited"));
+
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT || defined VST3_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
 #if 0
