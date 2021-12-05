@@ -905,7 +905,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, Temporal::timepos_t &
 		dx = _editor->duration_to_pixels_unrounded (_last_position.distance (pending_region_position));
 
 		/* total x movement */
-		timecnt_t total_dx = timecnt_t (samplepos_t (_editor->pixel_to_sample (_total_x_delta + dx)), grab_time());
+		timecnt_t total_dx = timecnt_t (pixel_to_time (_total_x_delta + dx), grab_time());
 
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 			const timepos_t off = i->view->region()->position() + total_dx;
@@ -2453,7 +2453,7 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 	timepos_t after;
 	double delta = compute_x_delta (event, after);
 
-	timecnt_t amount = timecnt_t (_editor->pixel_to_sample (delta), grab_time());
+	timecnt_t amount = timecnt_t (pixel_to_time (delta), grab_time());
 
 	if (allow_moves_across_tracks) {
 		// all the originally selected regions were on the same track
@@ -5094,7 +5094,7 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 		cy = zero_gain_y;
 	}
 
-	timepos_t cx_pos (timepos_t (_editor->pixel_to_sample (cx)) + snap_delta (event->button.state));
+	timepos_t cx_pos (timepos_t (pixel_to_time (cx)) + snap_delta (event->button.state));
 
 	if (need_snap) {
 		_editor->snap_to_with_modifier (cx_pos, event);
@@ -5456,7 +5456,7 @@ RubberbandSelectDrag::do_select_things (GdkEvent* event, bool drag_in_progress)
 	if (!UIConfiguration::instance().get_rubberbanding_snaps_to_grid ()) {
 		grab = raw_grab_time ();
 
-		timepos_t pos (_editor->pixel_to_sample_from_event (last_pointer_x()));
+		timepos_t pos (pixel_to_time (last_pointer_x()));
 
 		if (_editor->default_time_domain() == Temporal::AudioTime) {
 			lpf = pos;
@@ -6360,7 +6360,7 @@ NoteDrag::total_dx (GdkEvent * event) const
 	}
 
 	/* dx in as samples, because we can't do any better */
-	timecnt_t const dx = timecnt_t (_editor->pixel_to_sample (_drags->current_pointer_x() - grab_x()), timepos_t());
+	timecnt_t const dx = timecnt_t (pixel_to_time (_drags->current_pointer_x() - grab_x()), timepos_t());
 
 	/* primary note time in quarter notes */
 	timepos_t const n_qn = _region->region()->source_beats_to_absolute_time (_primary->note()->time());
@@ -7193,7 +7193,7 @@ CrossfadeEdgeDrag::motion (GdkEvent*, bool)
 
 	/* how long should it be ? */
 
-	new_length = len + timecnt_t (_editor->pixel_to_sample (distance));
+	new_length = len + timecnt_t (pixel_to_time (distance));
 
 	/* now check with the region that this is legal */
 
@@ -7223,8 +7223,7 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 		len = timecnt_t (ar->fade_out()->back()->when);
 	}
 
-	samplecnt_t samples = _editor->pixel_to_sample (distance);
-	timecnt_t tdist = timecnt_t (samples);
+	timecnt_t tdist = timecnt_t (pixel_to_time (distance));
 	timecnt_t newlen = len + tdist;
 	new_length = timecnt_t (ar->verify_xfade_bounds (newlen.samples(), start));
 
