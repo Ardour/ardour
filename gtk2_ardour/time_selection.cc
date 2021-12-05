@@ -93,7 +93,7 @@ TimeSelection::start_time () const
 		return timepos_t();
 	}
 
-	timepos_t first = std::numeric_limits<timepos_t>::max();
+	timepos_t first = timepos_t::max (front().start().time_domain());
 
 	for (std::list<TimelineRange>::const_iterator i = begin(); i != end(); ++i) {
 		if ((*i).start() < first) {
