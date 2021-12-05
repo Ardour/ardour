@@ -2063,7 +2063,7 @@ Playlist::find_next_region_boundary (timepos_t const & pos, int dir)
 	RegionReadLock rlock (this);
 
 	timecnt_t closest = std::numeric_limits<timecnt_t>::max();
-	timepos_t ret;
+	timepos_t ret = Temporal::timepos_t::max (pos.time_domain ());
 
 	if (dir > 0) {
 		for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
