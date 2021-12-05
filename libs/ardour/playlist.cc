@@ -1372,8 +1372,8 @@ Playlist::duplicate_ranges (std::list<TimelineRange>& ranges, float times)
 		return;
 	}
 
-	timepos_t min_pos = std::numeric_limits<timepos_t>::max();
-	timepos_t max_pos = std::numeric_limits<timepos_t>::min();
+	timepos_t min_pos = timepos_t::max (ranges.front().start().time_domain());
+	timepos_t max_pos = timepos_t (min_pos.time_domain());
 
 	for (std::list<TimelineRange>::const_iterator i = ranges.begin();
 	     i != ranges.end();
@@ -1971,7 +1971,7 @@ Playlist::find_next_region (timepos_t const & pos, RegionPoint point, int dir)
 {
 	RegionReadLock            rlock (this);
 	boost::shared_ptr<Region> ret;
-	timecnt_t closest = std::numeric_limits<timecnt_t>::max();
+	timecnt_t closest = timecnt_t::max (pos.time_domain());
 
 	bool end_iter = false;
 
@@ -2062,8 +2062,8 @@ Playlist::find_next_region_boundary (timepos_t const & pos, int dir)
 {
 	RegionReadLock rlock (this);
 
-	timecnt_t closest = std::numeric_limits<timecnt_t>::max();
-	timepos_t ret = Temporal::timepos_t::max (pos.time_domain ());
+	timecnt_t closest = timecnt_t::max (pos.time_domain());
+	timepos_t ret = timepos_t::max (pos.time_domain ());
 
 	if (dir > 0) {
 		for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
@@ -2513,8 +2513,8 @@ Playlist::relayer ()
 	int const divisions = 512;
 
 	/* find the start and end positions of the regions on this playlist */
-	timepos_t start = std::numeric_limits<timepos_t>::max();
-	timepos_t end = std::numeric_limits<timepos_t>::min();
+	timepos_t start = timepos_t::max (regions.front()->position().time_domain());
+	timepos_t end = timepos_t (start.time_domain());
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		start = min (start, (*i)->position());
@@ -2667,8 +2667,8 @@ Playlist::nudge_after (timepos_t const & start, timecnt_t const & distance, bool
 
 				if (forwards) {
 
-					if ((*i)->nt_last() > std::numeric_limits<timepos_t>::max().earlier (distance)) {
-						new_pos = std::numeric_limits<timepos_t>::max().earlier ((*i)->length());
+					if ((*i)->nt_last() > timepos_t::max ((*i)->position().time_domain()).earlier (distance)) {
+						new_pos = timepos_t::max ((*i)->position().time_domain()).earlier ((*i)->length());
 					} else {
 						new_pos = (*i)->position() + distance;
 					}
@@ -3001,18 +3001,21 @@ Playlist::find_next_top_layer_position (timepos_t const & t) const
 		}
 	}
 
-	return std::numeric_limits<timepos_t>::max();
+	return timepos_t::max (t.time_domain());
 }
 
 boost::shared_ptr<Region>
 Playlist::combine (const RegionList& r)
 {
+	if (r.empty()) {
+		return boost::shared_ptr<Region>();
+	}
 
 	ThawList                           thawlist;
 	PropertyList                       plist;
 	SourceList::size_type              channels          = 0;
 	uint32_t                           layer             = 0;
-	timepos_t                          earliest_position = std::numeric_limits<timepos_t>::max();
+	timepos_t                          earliest_position = timepos_t::max (r.front()->position().time_domain());
 	vector<TwoRegions>                 old_and_new_regions;
 	vector<boost::shared_ptr<Region> > originals;
 	vector<boost::shared_ptr<Region> > copies;
