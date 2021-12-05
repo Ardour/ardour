@@ -2504,6 +2504,11 @@ Playlist::relayer ()
 		return;
 	}
 
+	if (regions.empty()) {
+		/* nothing to do */
+		return;
+	}
+
 	/* Build up a new list of regions on each layer, stored in a set of lists
 	 * each of which represent some period of time on some layer.  The idea
 	 * is to avoid having to search the entire region list to establish whether
