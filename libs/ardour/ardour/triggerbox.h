@@ -587,6 +587,9 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<int> follow_count;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<float> velocity_effect;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<gain_t> gain;
 }
 
 

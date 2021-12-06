@@ -50,6 +50,9 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
+		PBD::PropertyDescriptor<int> follow_count;
+		PBD::PropertyDescriptor<float> velocity_effect;
+		PBD::PropertyDescriptor<gain_t> gain;
 	}
 }
 
@@ -122,18 +125,21 @@ void
 Trigger::set_gain (gain_t g)
 {
 	_pending_gain = g;
+	PropertyChanged (Properties::gain);
 }
 
 void
 Trigger::set_midi_velocity_effect (float mve)
 {
 	_midi_velocity_effect = std::min (1.f, std::max (0.f, mve));
+	PropertyChanged (Properties::velocity_effect);
 }
 
 void
 Trigger::set_follow_count (uint32_t n)
 {
 	_follow_count = n;
+	PropertyChanged (Properties::follow_count);
 }
 
 void
