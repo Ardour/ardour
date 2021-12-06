@@ -2401,6 +2401,16 @@ TriggerBox::reload (BufferSet& bufs, int32_t slot, void* ptr)
 	all_triggers[slot]->reload (bufs, ptr);
 }
 
+double
+TriggerBox::position_as_fraction () const
+{
+	Trigger* cp = _currently_playing;
+	if (!cp) {
+		return -1;
+	}
+	return cp->position_as_fraction ();
+}
+
 /* Thread */
 
 MultiAllocSingleReleasePool* TriggerBoxThread::Request::pool = 0;

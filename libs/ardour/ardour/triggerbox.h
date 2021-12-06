@@ -445,9 +445,13 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void request_stop_all ();
 
-	/* only valid when called by Triggers from within ::process_state_requests() */
-	bool currently_playing() const { return _currently_playing; }
-	void set_next (uint64_t which);
+	Trigger* currently_playing() const { return _currently_playing; }
+
+	/* Returns a negative value is there is no active Trigger, or a value between 0
+	 * and 1.0 if there is, corresponding to the value of position_as_fraction() for
+	 *  the active Trigger.
+	 */
+	double position_as_fraction() const;
 
 	void queue_explict (Trigger*);
 	Trigger* get_next_trigger ();
