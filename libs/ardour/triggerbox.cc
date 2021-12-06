@@ -1340,11 +1340,6 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		 * is handling in its own run() method. start_sample may have
 		 * been adjusted to reflect a previous Trigger's processing
 		 * during this run cycle, and so has dest_offset.
-		 *
-		 * Therefore, when computing the buffer sample for this MIDI
-		 * event, we only consider one of the two values, not both. If
-		 * we use both, we will double the "offset" that occurs if
-		 * another Trigger ran during this process cycle.
 		 */
 
 		samplepos_t buffer_samples = timeline_samples - start_sample + dest_offset;
