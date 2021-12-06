@@ -46,12 +46,12 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> running;
 		PBD::PropertyDescriptor<bool> passthru;
 		PBD::PropertyDescriptor<bool> legato;
-		PBD::PropertyDescriptor<bool> quantized;
 		PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
 		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
 		PBD::PropertyDescriptor<int> follow_count;
+		PBD::PropertyDescriptor<int> follow_action_probability;
 		PBD::PropertyDescriptor<float> velocity_effect;
 		PBD::PropertyDescriptor<gain_t> gain;
 	}
