@@ -38,6 +38,8 @@
 #include "ui_config.h"
 #include "utils.h"
 
+#include "audio_clip_editor.h"
+
 #include "pbd/i18n.h"
 
 #define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))

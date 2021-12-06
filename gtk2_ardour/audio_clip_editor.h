@@ -19,13 +19,32 @@
 #ifndef __gtk2_ardour_audio_clip_editor_h__
 #define __gtk2_ardour_audio_clip_editor_h__
 
+#include <vector>
+
 #include "canvas/canvas.h"
+
+namespace ARDOUR {
+class AudioRegion;
+}
+
+namespace ArdourWaveView {
+class WaveView;
+}
 
 class AudioClipEditor : public ArdourCanvas::GtkCanvas
 {
    public:
 	AudioClipEditor ();
 	~AudioClipEditor ();
+
+	void set_region (boost::shared_ptr<ARDOUR::AudioRegion>);
+
+  private:
+	std::vector<ArdourWaveView::WaveView *> waves;
+
+	void drop_waves ();
+	void size_allocate (Gtk::Allocation const &);
+	void set_wave_heights (int);
 };
 
 
