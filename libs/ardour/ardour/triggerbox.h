@@ -587,11 +587,12 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> running;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> passthru;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> legato;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> quantization;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<int> follow_count;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<int> follow_action_probability;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float> velocity_effect;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<gain_t> gain;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<int> currently_playing;

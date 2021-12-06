@@ -46,7 +46,8 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> running;
 		PBD::PropertyDescriptor<bool> passthru;
 		PBD::PropertyDescriptor<bool> legato;
-		PBD::PropertyDescriptor<bool> quantization;
+		PBD::PropertyDescriptor<bool> quantized;
+		PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
 		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
@@ -229,6 +230,7 @@ Trigger::set_follow_action_probability (int n)
 	n = std::max (0, n);
 
 	_follow_action_probability = n;
+	PropertyChanged (Properties::follow_action_probability);
 }
 
 void
