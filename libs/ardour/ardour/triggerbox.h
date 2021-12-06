@@ -446,7 +446,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void request_stop_all ();
 
 	/* only valid when called by Triggers from within ::process_state_requests() */
-	bool currently_running() const { return currently_playing; }
+	bool currently_playing() const { return _currently_playing; }
 	void set_next (uint64_t which);
 
 	void queue_explict (Trigger*);
@@ -506,7 +506,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
 	PBD::RingBuffer<Trigger*> explicit_queue; /* user queued triggers */
-	Trigger* currently_playing;
+	Trigger* _currently_playing;
 	Requests _requests;
 	bool _stop_all;
 	bool _pass_thru;
@@ -590,6 +590,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<int> follow_count;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float> velocity_effect;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<gain_t> gain;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<int> currently_playing;
 }
 
 

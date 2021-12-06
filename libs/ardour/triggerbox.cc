@@ -1468,7 +1468,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _data_type (dt)
 	, _order (-1)
 	, explicit_queue (64)
-	, currently_playing (0)
+	, _currently_playing (0)
 	, _stop_all (false)
 	, _pass_thru (false)
 	, requests (1024)
@@ -1532,8 +1532,8 @@ TriggerBox::queue_explict (Trigger* t)
 	explicit_queue.write (&t, 1);
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue %1, EQ = %2\n", t->index(), explicit_queue.read_space()));
 
-	if (currently_playing) {
-		currently_playing->unbang ();
+	if (_currently_playing) {
+		_currently_playing->unbang ();
 	}
 }
 
@@ -1889,9 +1889,10 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	/* STEP EIGHT: if there is no active slot, see if there any queued up
 	 */
 
-	if (!currently_playing) {
-		if ((currently_playing = get_next_trigger()) != 0) {
-			currently_playing->startup ();
+	if (!_currently_playing) {
+		if ((_currently_playing = get_next_trigger()) != 0) {
+			_currently_playing->startup ();
+			PropertyChanged (Properties::currently_playing);
 			active_trigger_boxes.fetch_add (1);
 		}
 	}
@@ -1906,7 +1907,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	/* STEP TEN: nothing to do?
 	 */
 
-	if (!currently_playing) {
+	if (!_currently_playing) {
 		return;
 	}
 
@@ -1952,7 +1953,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			 * it processed bang requests. Nothing to do here otherwise.
 			 */
 
-			if (nxt != currently_playing) {
+			if (nxt != _currently_playing) {
 
 				/* user has triggered a different slot than the currently waiting-to-play or playing slot */
 
@@ -1965,12 +1966,13 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 					explicit_queue.increment_read_idx (1); /* consume the entry we peeked at */
 
-					nxt->set_legato_offset (currently_playing->current_pos());
+					nxt->set_legato_offset (_currently_playing->current_pos());
 					nxt->jump_start ();
-					currently_playing->jump_stop ();
+					_currently_playing->jump_stop ();
 					/* and switch */
-					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 => %2 switched to in legato mode\n", currently_playing->index(), nxt->index()));
-					currently_playing = nxt;
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 => %2 switched to in legato mode\n", _currently_playing->index(), nxt->index()));
+					_currently_playing = nxt;
+					PropertyChanged (Properties::currently_playing);
 
 				} else {
 
@@ -1978,34 +1980,36 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					 * currently playing slot
 					 */
 
-					if (currently_playing->state() != Trigger::WaitingToStop) {
-						currently_playing->begin_stop ();
-						DEBUG_TRACE (DEBUG::Triggers, string_compose ("start stop for %1 before switching to %2\n", currently_playing->index(), nxt->index()));
+					if (_currently_playing->state() != Trigger::WaitingToStop) {
+						_currently_playing->begin_stop ();
+						DEBUG_TRACE (DEBUG::Triggers, string_compose ("start stop for %1 before switching to %2\n", _currently_playing->index(), nxt->index()));
 					}
 				}
 			}
 		}
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 complete, state now %2\n", currently_playing->name(), enum_2_string (currently_playing->state())));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 complete, state now %2\n", _currently_playing->name(), enum_2_string (_currently_playing->state())));
 
 		/* if we're not in the process of stopping all active triggers,
 		 * but the current one has stopped, decide which (if any)
 		 * trigger to play next.
 		 */
 
-		if (currently_playing->state() == Trigger::Stopped) {
+		if (_currently_playing->state() == Trigger::Stopped) {
 			if (!_stop_all) {
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 has stopped, need next...\n", currently_playing->name()));
-				int n = determine_next_trigger (currently_playing->index());
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 has stopped, need next...\n", _currently_playing->name()));
+				int n = determine_next_trigger (_currently_playing->index());
 				if (n < 0) {
 					break; /* no triggers to come next, break out * of nframes loop */
-					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 finished, no next trigger\n", currently_playing->name()));
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 finished, no next trigger\n", _currently_playing->name()));
 				}
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", currently_playing->name()));
-				currently_playing = all_triggers[n];
-				currently_playing->startup ();
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", _currently_playing->name()));
+				_currently_playing = all_triggers[n];
+				_currently_playing->startup ();
+				PropertyChanged (Properties::currently_playing);
 			} else {
-				currently_playing = 0;
+				_currently_playing = 0;
+				PropertyChanged (Properties::currently_playing);
 				DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set, leaving nf loop\n");
 				/* leave nframes loop */
 				break;
@@ -2015,19 +2019,19 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		pframes_t frames_covered;
 
 
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (currently_playing->region());
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (_currently_playing->region());
 		if (ar) {
 			max_chans = std::max (ar->n_channels(), max_chans);
 		}
 
-		frames_covered = currently_playing->run (bufs, start_sample, end_sample, start_beats, end_beats, nframes, dest_offset, _pass_thru, bpm);
+		frames_covered = _currently_playing->run (bufs, start_sample, end_sample, start_beats, end_beats, nframes, dest_offset, _pass_thru, bpm);
 
 		nframes -= frames_covered;
 		start_sample += frames_covered;
 		dest_offset += frames_covered;
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("trig %1 ran, covered %2 state now %3 nframes now %4\n",
-		                                              currently_playing->name(), frames_covered, enum_2_string (currently_playing->state()), nframes));
+		                                              _currently_playing->name(), frames_covered, enum_2_string (_currently_playing->state()), nframes));
 
 	}
 
@@ -2043,7 +2047,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
-	if (!currently_playing) {
+	if (!_currently_playing) {
 		DEBUG_TRACE (DEBUG::Triggers, "nothing currently playing, consider stopping transport\n");
 		_stop_all = false;
 		if (active_trigger_boxes.fetch_sub (1) == 1) {
@@ -2053,7 +2057,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 
 	/* audio buffer (channel) count determined by max of input and
-	 * currently_playing's channel count (if it was audio).
+	 * _currently_playing's channel count (if it was audio).
 	 */
 
 	ChanCount cc (DataType::AUDIO, max_chans);
