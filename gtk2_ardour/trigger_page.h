@@ -30,6 +30,7 @@
 #include "widgets/tabbable.h"
 
 class TriggerStrip;
+class AudioClipEditor;
 
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
@@ -75,6 +76,8 @@ private:
 	Gtk::VBox            _slot_area_box;
 	Gtk::VBox            _browser_box;
 	Gtk::HBox            _parameter_box;
+
+	AudioClipEditor*     _clip_editor;
 
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;

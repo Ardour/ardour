@@ -55,6 +55,9 @@ TriggerPage::TriggerPage ()
 	load_bindings ();
 	register_actions ();
 
+	_clip_editor = new AudioClipEditor;
+	_parameter_box.pack_start (*_clip_editor);
+
 #if 1 /* Placeholders */
 	_slot_area_box.pack_start (*Gtk::manage (new Gtk::Label ("Fixed\nWidth\nSlot\nArea")));
 	_browser_box.pack_start (*Gtk::manage (new Gtk::Label ("File Browser")));
