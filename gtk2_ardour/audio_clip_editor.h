@@ -45,6 +45,7 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	void drop_waves ();
 	void size_allocate (Gtk::Allocation const &);
 	void set_wave_heights (int);
+	void set_waveform_colors ();
 };
 
 

@@ -21,6 +21,7 @@
 #include "waveview/wave_view.h"
 
 #include "audio_clip_editor.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -79,7 +80,31 @@ AudioClipEditor::size_allocate (Gtk::Allocation const & alloc)
 void
 AudioClipEditor::set_wave_heights (int h)
 {
+	uint32_t n = 0;
+	Distance ht = h / waves.size();
+
 	for (auto & wave : waves) {
-		wave->set_height (h/waves.size());
+		wave->set_height (ht);
+		wave->set_y_position (n * ht);
+		wave->set_samples_per_pixel (8192);
+		wave->set_show_zero_line (false);
+		wave->set_clip_level (1.0);
 	}
 }
+
+void
+AudioClipEditor::set_waveform_colors ()
+{
+	Gtkmm2ext::Color clip = UIConfiguration::instance().color ("clipped waveform");
+	Gtkmm2ext::Color zero = UIConfiguration::instance().color ("zero line");
+	Gtkmm2ext::Color fill = UIConfiguration::instance().color ("waveform fill");
+	Gtkmm2ext::Color outline = UIConfiguration::instance().color ("waveform outline");
+
+	for (auto & wave : waves) {
+		wave->set_fill_color (fill);
+		wave->set_outline_color (outline);
+		wave->set_clip_color (clip);
+		wave->set_zero_color (zero);
+	}
+}
+
