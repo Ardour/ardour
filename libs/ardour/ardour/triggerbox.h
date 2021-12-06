@@ -595,7 +595,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<int> follow_action_probability;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float> velocity_effect;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<gain_t> gain;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<int> currently_playing;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger*> currently_playing;
 }
 
 

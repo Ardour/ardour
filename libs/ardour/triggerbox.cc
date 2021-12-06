@@ -50,6 +50,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
+		PBD::PropertyDescriptor<Trigger*> currently_playing;
 		PBD::PropertyDescriptor<int> follow_count;
 		PBD::PropertyDescriptor<int> follow_action_probability;
 		PBD::PropertyDescriptor<float> velocity_effect;
