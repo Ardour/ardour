@@ -405,7 +405,7 @@ pframes_t
 Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t dest_offset, bool passthru)
 {
 	using namespace Temporal;
-
+	
 	/* This should never be called by a stopped trigger */
 
 	assert (_state != Stopped);
@@ -414,12 +414,13 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 	if (_state == Running || _state == Stopping) {
 		/* will cover everything */
-		return dest_offset;
+		return 0;
 	}
 
 	timepos_t transition_time (BeatTime);
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	Temporal::BBT_Time transition_bbt;
+	pframes_t extra_offset = 0;
 
 	/* XXX need to use global grid here is quantization == zero */
 
@@ -484,7 +485,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 			 * should end up, and the number of samples it should generate.
 			 */
 
-			dest_offset += std::max (samplepos_t (0), transition_samples - start_sample);
+			extra_offset = std::max (samplepos_t (0), transition_samples - start_sample);
 
 			if (!passthru) {
 				/* XXX need to silence start of buffers up to dest_offset */
@@ -517,7 +518,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 	}
 
-	return dest_offset;
+	return extra_offset;
 }
 
 /*--------------------*/
@@ -846,7 +847,10 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	const bool stretching = (_apparent_tempo != 0.);
 
 	/* see if we're going to start or stop or retrigger in this run() call */
-	dest_offset = maybe_compute_next_transition (start_sample, start, end, dest_offset, passthru);
+	pframes_t extra_offset = maybe_compute_next_transition (start_sample, start, end, dest_offset, passthru);
+
+	nframes -= extra_offset;
+	dest_offset += extra_offset;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2\n", name(), enum_2_string (_state)));
 
