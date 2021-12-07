@@ -82,6 +82,8 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<uint64_t> layering_index;
 		PBD::PropertyDescriptor<std::string> tags;
 		PBD::PropertyDescriptor<bool> contents;
+
+	/* these properties are used as a convenience for announcing changes to state, but aren't stored as properties */
 		PBD::PropertyDescriptor<Temporal::TimeDomain> time_domain;
 		PBD::PropertyDescriptor<float> bpm;
 		PBD::PropertyDescriptor<uint8_t> metrum_numerator;
@@ -149,18 +151,6 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for tags = %1\n",	Properties::tags.property_id));
 	Properties::contents.property_id = g_quark_from_static_string (X_("contents"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for contents = %1\n",	Properties::contents.property_id));
-	Properties::bpm.property_id = g_quark_from_static_string (X_("bpm"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for bpm = %1\n",	Properties::bpm.property_id));
-	Properties::metrum_numerator.property_id = g_quark_from_static_string (X_("metrum_numerator"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for metrum_numerator = %1\n",	Properties::metrum_numerator.property_id));
-	Properties::metrum_divisor.property_id = g_quark_from_static_string (X_("metrum_divisor"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for metrum_divisor = %1\n",	Properties::metrum_divisor.property_id));
-	Properties::sync_to_bbt.property_id = g_quark_from_static_string (X_("sync_to_bbt"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync_to_bbt = %1\n",	Properties::sync_to_bbt.property_id));
-	Properties::loop_enabled.property_id = g_quark_from_static_string (X_("loop_enabled"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for loop_enabled = %1\n",	Properties::loop_enabled.property_id));
-	Properties::loop_start.property_id = g_quark_from_static_string (X_("loop_start"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for loop_start = %1\n",	Properties::loop_start.property_id));
 }
 
 void
@@ -192,12 +182,6 @@ Region::register_properties ()
 	add_property (_layering_index);
 	add_property (_tags);
 	add_property (_contents);
-	add_property (_bpm);
-	add_property (_metrum_numerator);
-	add_property (_metrum_divisor);
-	add_property (_sync_to_bbt);
-	add_property (_loop_enabled);
-	add_property (_loop_start);
 }
 
 #define REGION_DEFAULT_STATE(s,l) \
@@ -229,12 +213,12 @@ Region::register_properties ()
 	, _layering_index (Properties::layering_index, 0) \
 	, _tags (Properties::tags, "") \
 	, _contents (Properties::contents, false) \
-	, _bpm (Properties::bpm, 110) \
-	, _metrum_numerator (Properties::metrum_numerator, 4) \
-	, _metrum_divisor (Properties::metrum_divisor, 4) \
-	, _sync_to_bbt (Properties::sync_to_bbt, false) \
-	, _loop_enabled (Properties::loop_enabled, false) \
-	, _loop_start (Properties::loop_start, (s))
+	, _bpm (110) \
+	, _metrum_numerator (4) \
+	, _metrum_divisor (4) \
+	, _sync_to_bbt (false) \
+	, _loop_enabled (false) \
+	, _loop_start (0)
 
 #define REGION_COPY_STATE(other) \
 	  _sync_marked (Properties::sync_marked, other->_sync_marked) \
@@ -267,12 +251,12 @@ Region::register_properties ()
 	, _layering_index (Properties::layering_index, other->_layering_index) \
 	, _tags (Properties::tags, other->_tags) \
 	, _contents (Properties::contents, other->_contents) \
-	, _bpm (Properties::bpm, other->_bpm) \
-	, _metrum_numerator (Properties::metrum_numerator, other->_metrum_numerator) \
-	, _metrum_divisor (Properties::metrum_divisor, other->_metrum_divisor) \
-	, _sync_to_bbt (Properties::sync_to_bbt, other->_sync_to_bbt) \
-	, _loop_enabled (Properties::loop_enabled, other->_loop_enabled) \
-	, _loop_start (Properties::loop_start, other->_loop_start)
+	, _bpm (other->_bpm) \
+	, _metrum_numerator (other->_metrum_numerator) \
+	, _metrum_divisor (other->_metrum_divisor) \
+	, _sync_to_bbt (other->_sync_to_bbt) \
+	, _loop_enabled (other->_loop_enabled) \
+	, _loop_start (other->_loop_start)
 
 /* derived-from-derived constructor (no sources in constructor) */
 Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, const string& name, DataType type)
@@ -618,6 +602,13 @@ Region::set_position_time_domain (Temporal::TimeDomain td)
 		send_change (Properties::time_domain);
 	}
 }
+
+void  Region::set_bpm (float bpm)                { _bpm = bpm;              send_change (Properties::bpm);}
+void  Region::set_metrum_numerator (uint8_t num) { _metrum_numerator = num; send_change (Properties::metrum_numerator);}
+void  Region::set_metrum_divisor (uint8_t div)   { _metrum_divisor = div;   send_change (Properties::metrum_divisor);}
+void  Region::set_sync_to_bbt (bool sync)        { _sync_to_bbt = sync;     send_change (Properties::sync_to_bbt);}
+void  Region::set_loop_enabled (bool en)         { _loop_enabled = en;      send_change (Properties::loop_enabled);}
+void  Region::set_loop_start (timepos_t ls)      { _loop_start = ls;        send_change (Properties::loop_start);}
 
 void
 Region::recompute_position_from_time_domain ()

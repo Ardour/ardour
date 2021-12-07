@@ -74,6 +74,8 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          layering_index;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>	tags;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>		contents; // type doesn't matter here
+
+	/* these properties are used as a convenience for announcing changes to state, but aren't stored as properties */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::TimeDomain> time_domain;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             bpm;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint8_t>           metrum_numerator; //pulses per bar (typically 4)
@@ -136,7 +138,7 @@ public:
 	uint8_t    metrum_divisor ()   const { return _metrum_divisor; }
 	bool       sync_to_bbt ()      const { return _sync_to_bbt; }
 	bool       loop_enabled ()     const { return _loop_enabled; }
-	timepos_t  loop_start ()       const { return _loop_start.val(); }
+	timepos_t  loop_start ()       const { return _loop_start; }
 
 	timepos_t source_position () const;
 	timepos_t source_relative_position (Temporal::timepos_t const &) const;
@@ -292,6 +294,13 @@ public:
 	void set_locked (bool yn);
 	void set_video_locked (bool yn);
 	void set_position_locked (bool yn);
+
+	void  set_bpm (float bpm);
+	void  set_metrum_numerator (uint8_t num);
+	void  set_metrum_divisor (uint8_t div);
+	void  set_sync_to_bbt (bool sync);
+	void  set_loop_enabled (bool en);
+	void  set_loop_start (timepos_t);
 
 	Temporal::timepos_t region_beats_to_absolute_time(Temporal::Beats beats) const;
 	/** Convert a timestamp in beats into timepos_t (both relative to region position) */
@@ -535,13 +544,13 @@ private:
 	PBD::Property<std::string> _tags;
 	PBD::Property<bool>        _contents; // type is irrelevant
 
-	/* these properties are (currently) only used when the region is in a trigger slot */
-	PBD::Property<float>       _bpm;
-	PBD::Property<uint8_t>     _metrum_numerator; //pulses per bar (typically 4)
-	PBD::Property<uint8_t>     _metrum_divisor; //divisor note type (typically 4 = quarter-note)
-	PBD::Property<bool>        _sync_to_bbt;
-	PBD::Property<bool>        _loop_enabled;
-	PBD::Property<timepos_t>   _loop_start;
+	/* these values are (currently) only used when the region is in a trigger slot */
+	float       _bpm;
+	uint8_t     _metrum_numerator; //pulses per bar (typically 4)
+	uint8_t     _metrum_divisor; //divisor note type (typically 4 = quarter-note)
+	bool        _sync_to_bbt;
+	bool        _loop_enabled;
+	timepos_t   _loop_start;
 
 	timecnt_t             _last_length;
 	mutable RegionEditState _first_edit;
