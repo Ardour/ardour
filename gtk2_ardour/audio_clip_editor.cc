@@ -31,7 +31,7 @@ using namespace ArdourCanvas;
 
 AudioClipEditor::AudioClipEditor ()
 {
-
+	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
 }
 
 AudioClipEditor::~AudioClipEditor ()
