@@ -76,12 +76,13 @@ CueEntry::CueEntry (Item* item, uint64_t cue_index)
 	name_button->show ();
 
 	name_text = new Text (name_button);
+	name_text->set (string_compose ("%1", (char) ('A'+ _cue_idx) ));
 	name_text->set_ignore_events (false);
 	name_text->show();
 	
 	/* watch for change in theme */
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &CueEntry::ui_parameter_changed));
-	ui_parameter_changed("color-file");
+	set_default_colors();
 }
 
 CueEntry::~CueEntry ()
@@ -91,13 +92,20 @@ CueEntry::~CueEntry ()
 bool
 CueEntry::event_handler (GdkEvent* ev)
 {
-	//for now, we fall thru to the cuebox for all events
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		break;
 	case GDK_ENTER_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			play_shape->set_outline_color (UIConfiguration::instance().color ("neutral:foreground"));
+			name_text->set_color (UIConfiguration::instance().color("neutral:foreground"));
+		}
 		break;
 	case GDK_LEAVE_NOTIFY:
+		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			play_shape->set_outline_color (UIConfiguration::instance().color ("neutral:midground"));
+			name_text->set_color (UIConfiguration::instance().color("neutral:midground"));
+		}
 		break;
 	default:
 		break;
@@ -163,20 +171,34 @@ CueEntry::shape_play_button ()
 }
 
 void
+CueEntry::set_default_colors ()
+{
+	set_fill_color (UIConfiguration::instance().color ("theme:bg"));
+	play_button->set_fill_color (UIConfiguration::instance().color("theme:bg"));
+	play_button->set_outline_color (UIConfiguration::instance().color("theme:bg"));
+	name_button->set_fill_color (UIConfiguration::instance().color("theme:bg"));
+	name_text->set_fill_color (UIConfiguration::instance().color("theme:bg"));
+	name_button->set_outline_color (UIConfiguration::instance().color("theme:bg"));
+	if ((_cue_idx/2)%2==0) {
+		set_fill_color (HSV (fill_color()).darker(0.15).color ());
+		play_button->set_fill_color (HSV (fill_color()).darker(0.15).color ());
+		play_button->set_outline_color (HSV (fill_color()).darker(0.15).color ());
+		name_button->set_fill_color (HSV (fill_color()).darker(0.15).color ());
+		name_text->set_fill_color (HSV (fill_color()).darker(0.15).color ());
+		name_button->set_outline_color (HSV (fill_color()).darker(0.15).color ());
+	}
+
+	name_text->set_color (UIConfiguration::instance().color("neutral:midground"));
+
+	play_shape->set_outline_color (UIConfiguration::instance().color("neutral:midground"));
+	play_shape->set_fill_color (UIConfiguration::instance().color("neutral:midground"));
+}
+
+void
 CueEntry::ui_parameter_changed (std::string const& p)
 {
 	if (p == "color-file") {
-		set_fill_color (UIConfiguration::instance().color("theme:bg"));
-
-		name_text->set_color (UIConfiguration::instance().color("neutral:foreground"));
-
-		name_button->set_outline_color (UIConfiguration::instance().color("theme:bg"));
-
-		play_button->set_outline_color (UIConfiguration::instance().color("theme:bg"));
-		play_button->set_fill_color (UIConfiguration::instance().color("theme:bg"));
-
-		play_shape->set_outline_color (UIConfiguration::instance().color("neutral:midground"));
-		play_shape->set_fill_color (UIConfiguration::instance().color("neutral:midground"));
+		set_default_colors ();
 	}
 }
 
@@ -243,7 +265,7 @@ CueBoxUI::build ()
 
 	_slots.clear ();
 
-	for (int32_t n = 0; n < 8; ++n) {  //ToDo
+	for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {  //ToDo
 		CueEntry* te = new CueEntry (this, n);
 
 		_slots.push_back (te);
@@ -262,7 +284,7 @@ CueBoxUI::_size_allocate (ArdourCanvas::Rect const & alloc)
 	const float width = alloc.width();
 	const float height = alloc.height();
 
-	const float slot_h = height / 8;  //ToDo
+	const float slot_h = height / TriggerBox::default_triggers_per_box;  //ToDo
 
 	float ypos = 0;
 	for (auto & slot : _slots) {
@@ -324,10 +346,10 @@ CueBoxWidget::on_unmap ()
 
 CueBoxWindow::CueBoxWindow ()
 {
-	CueBoxWidget* tbw = manage (new CueBoxWidget (-1., 8*16.));
+	CueBoxWidget* tbw = manage (new CueBoxWidget (-1., TriggerBox::default_triggers_per_box*16.));
 	set_title (_("CueBox for XXXX"));
 
-	set_default_size (-1., 8*16.);
+	set_default_size (-1., TriggerBox::default_triggers_per_box*16.);
 	add (*tbw);
 	tbw->show ();
 }

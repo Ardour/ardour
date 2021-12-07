@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_trigger_stopper_h__
-#define __ardour_trigger_stopper_h__
+#ifndef __ardour_trigger_master_h__
+#define __ardour_trigger_master_h__
 
 #include <map>
 
@@ -46,19 +46,19 @@ namespace ArdourCanvas {
 	class Polygon;
 };
 
-class TriggerStopper : public ArdourCanvas::Rectangle
+class TriggerMaster : public ArdourCanvas::Rectangle
 {
   public:
-	TriggerStopper (ArdourCanvas::Item* canvas, boost::shared_ptr<ARDOUR::TriggerBox>);
-	~TriggerStopper ();
+	TriggerMaster (ArdourCanvas::Item* canvas, boost::shared_ptr<ARDOUR::TriggerBox>);
+	~TriggerMaster ();
 
 	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
 	void _size_allocate (ArdourCanvas::Rect const & alloc);
 
-	ArdourCanvas::Rectangle* play_button;
+	ArdourCanvas::Rectangle* stop_button;
 	ArdourCanvas::Rectangle* active_bar;
-	ArdourCanvas::Polygon* play_shape;
+	ArdourCanvas::Polygon* stop_shape;
 	ArdourCanvas::Text*    name_text;
 
 	void maybe_update ();
@@ -72,46 +72,40 @@ class TriggerStopper : public ArdourCanvas::Rectangle
 
 	PBD::ScopedConnection trigger_prop_connection;
 	void prop_change (PBD::PropertyChange const & change);
-	void shape_play_button ();
+	void shape_stop_button ();
 
 	PBD::ScopedConnection owner_prop_connection;
 	void owner_prop_change (PBD::PropertyChange const &);
 
 	void ui_parameter_changed (std::string const& p);
+	void set_default_colors();
 };
 
 
-class CueStopper : public ArdourCanvas::Rectangle
+class CueMaster : public ArdourCanvas::Rectangle
 {
   public:
-	CueStopper (ArdourCanvas::Item* canvas, boost::shared_ptr<ARDOUR::TriggerBox>);
-	~CueStopper ();
+	CueMaster (ArdourCanvas::Item* canvas);
+	~CueMaster ();
 
 	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
 	void _size_allocate (ArdourCanvas::Rect const & alloc);
 
-	ArdourCanvas::Rectangle* play_button;
-	ArdourCanvas::Rectangle* active_bar;
-	ArdourCanvas::Polygon* play_shape;
+	ArdourCanvas::Rectangle* stop_button;
+	ArdourCanvas::Polygon* stop_shape;
 	ArdourCanvas::Text*    name_text;
 
 	void maybe_update ();
 	bool event_handler (GdkEvent*);
-	void selection_change ();
 
   private:
-	boost::shared_ptr<ARDOUR::TriggerBox> _triggerbox;
 	double poly_size;
 	double poly_margin;
 
-	PBD::ScopedConnection trigger_prop_connection;
-	void prop_change (PBD::PropertyChange const & change);
-	void shape_play_button ();
-
-	PBD::ScopedConnection owner_prop_connection;
-	void owner_prop_change (PBD::PropertyChange const &);
+	void shape_stop_button ();
 
 	void ui_parameter_changed (std::string const& p);
+	void set_default_colors();
 };
-#endif /* __ardour_trigger_stopper_h__ */
+#endif /* __ardour_trigger_master_h__ */

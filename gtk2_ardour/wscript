@@ -302,7 +302,7 @@ gtk2_ardour_sources = [
         'transpose_dialog.cc',
         'trigger_page.cc',
         'trigger_strip.cc',
-        'trigger_stopper.cc',
+        'trigger_master.cc',
         'trigger_ui.cc',
         'triggerbox_ui.cc',
         'ui_config.cc',

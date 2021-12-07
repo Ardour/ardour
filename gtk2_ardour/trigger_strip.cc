@@ -38,7 +38,7 @@
 #include "mixer_ui.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
-#include "trigger_stopper.h"
+#include "trigger_master.h"
 #include "trigger_strip.h"
 #include "ui_config.h"
 
@@ -61,9 +61,9 @@ TriggerStrip::TriggerStrip (Session* s, boost::shared_ptr<ARDOUR::Route> rt)
 	, RouteUI (s)
 	, _clear_meters (true)
 	, _pb_selection ()
-	, _stopper_widget ( -1, 16 )
+	, _master_widget ( -1, 16 )
 	, _processor_box (s, boost::bind (&TriggerStrip::plugin_selector, this), _pb_selection, 0)
-	, _trigger_display (*rt->triggerbox (), -1., 8*16.)
+	, _trigger_display (*rt->triggerbox (), -1., TriggerBox::default_triggers_per_box*16.)
 	, _panners (s)
 	, _level_meter (s)
 {
@@ -125,8 +125,6 @@ TriggerStrip::init ()
 
 	/* strip layout */
 	global_vpacker.set_spacing (2);
-	global_vpacker.pack_start (_trigger_display, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (_stopper_widget, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_processor_box, true, true);
 	global_vpacker.pack_start (_name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_panners, Gtk::PACK_SHRINK);
@@ -147,7 +145,14 @@ TriggerStrip::init ()
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
 	global_frame.set_name ("BaseFrame");
 
-	add (global_frame);
+	Gtk::VBox *outer_vpacker = manage(new Gtk::VBox);
+
+	outer_vpacker->pack_start (_trigger_display, Gtk::PACK_SHRINK);
+	outer_vpacker->pack_start (_master_widget, Gtk::PACK_SHRINK);
+	outer_vpacker->pack_start (global_frame, true, true);
+	outer_vpacker->show();
+
+	add (*outer_vpacker);
 
 	/* Signals */
 	_name_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerStrip::name_button_press), false);
@@ -157,7 +162,7 @@ TriggerStrip::init ()
 	ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun (*this, &TriggerStrip::reset_group_peak_display));
 
 	/* Visibility */
-	_stopper_widget.show ();
+	_master_widget.show ();
 	_name_button.show ();
 	_trigger_display.show ();
 	_processor_box.show ();
@@ -186,7 +191,7 @@ TriggerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
 
-	_stopper = new TriggerStopper(_stopper_widget.root(), _route->triggerbox());
+	_master = new TriggerMaster(_master_widget.root(), _route->triggerbox());
 	
 	_processor_box.set_route (rt);
 

@@ -32,7 +32,7 @@
 #include "fitted_canvas_widget.h"
 
 class TriggerStrip;
-class CueStopper;
+class CueMaster;
 
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
@@ -79,8 +79,8 @@ private:
 	Gtk::VBox            _browser_box;
 	Gtk::HBox            _parameter_box;
 
-	FittedCanvasWidget 		_stopper_widget;
-	CueStopper				*_stopper;
+	FittedCanvasWidget 		_master_widget;
+	CueMaster				*_master;
 
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;

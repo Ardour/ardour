@@ -28,6 +28,8 @@
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/window_title.h"
 
+#include "widgets/ardour_spacer.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -36,7 +38,7 @@
 #include "trigger_page.h"
 #include "trigger_strip.h"
 #include "cuebox_ui.h"
-#include "trigger_stopper.h"
+#include "trigger_master.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -45,29 +47,32 @@
 #define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace std;
 
 TriggerPage::TriggerPage ()
 	: Tabbable (_content, _("Trigger Drom"), X_("trigger"))
-	, _stopper_widget(32, 16.)
+	, _master_widget(32, 16.)
 {
 	load_bindings ();
 	register_actions ();
 
-	CueBoxWidget *cue_box = new CueBoxWidget(32, 8*16.);
-	cue_box->show();
+	/* spacer to account for the trigger strip frame */
+	ArdourVSpacer *spacer = manage(new ArdourVSpacer());
+	spacer->set_size_request(-1,1);
+	_slot_area_box.pack_start (*spacer, Gtk::PACK_SHRINK);
+
+	CueBoxWidget *cue_box = manage(new CueBoxWidget(32, TriggerBox::default_triggers_per_box*16.));
 	_slot_area_box.pack_start (*cue_box, Gtk::PACK_SHRINK);
 
-	_stopper = new CueStopper(_stopper_widget.root());
-	_stopper->show();
-	_slot_area_box.pack_start (_stopper_widget, Gtk::PACK_SHRINK);
+	_master = new CueMaster(_master_widget.root());
+	_slot_area_box.pack_start (_master_widget, Gtk::PACK_SHRINK);
 
 #if 1 /* Placeholders */
 	_browser_box.pack_start (*Gtk::manage (new Gtk::Label ("File Browser")));
 	_parameter_box.pack_start (*Gtk::manage (new Gtk::Label ("Parameter HBox")));
-	_slot_area_box.show_all ();
 	_browser_box.show_all ();
 	_parameter_box.show_all ();
 #endif
@@ -101,7 +106,7 @@ TriggerPage::TriggerPage ()
 	_strip_group_box.show ();
 	_strip_scroller.show ();
 	_strip_packer.show ();
-	_slot_area_box.show ();
+	_slot_area_box.show_all ();
 	_browser_box.show ();
 	_parameter_box.show ();
 
@@ -131,6 +136,7 @@ TriggerPage::TriggerPage ()
 
 TriggerPage::~TriggerPage ()
 {
+	delete _master;
 }
 
 Gtk::Window*

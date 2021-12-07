@@ -74,6 +74,7 @@ class CueEntry : public ArdourCanvas::Rectangle
 	void shape_play_button ();
 
 	void ui_parameter_changed (std::string const& p);
+	void set_default_colors ();
 };
 
 

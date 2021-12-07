@@ -41,7 +41,7 @@
 #include "triggerbox_ui.h"
 
 class PluginSelector;
-class TriggerStopper;
+class TriggerMaster;
 
 class TriggerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 {
@@ -120,8 +120,8 @@ private:
 	Gtk::Table volume_table;
 
 	/* Widgets */
-	FittedCanvasWidget 			_stopper_widget;
-	TriggerStopper				*_stopper;
+	FittedCanvasWidget 			_master_widget;
+	TriggerMaster				*_master;
 
 	ArdourWidgets::ArdourButton _name_button;
 	ProcessorBox                _processor_box;
