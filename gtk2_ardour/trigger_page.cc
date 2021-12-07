@@ -35,6 +35,8 @@
 #include "timers.h"
 #include "trigger_page.h"
 #include "trigger_strip.h"
+#include "cuebox_ui.h"
+#include "trigger_stopper.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -49,12 +51,20 @@ using namespace std;
 
 TriggerPage::TriggerPage ()
 	: Tabbable (_content, _("Trigger Drom"), X_("trigger"))
+	, _stopper_widget(32, 16.)
 {
 	load_bindings ();
 	register_actions ();
 
+	CueBoxWidget *cue_box = new CueBoxWidget(32, 8*16.);
+	cue_box->show();
+	_slot_area_box.pack_start (*cue_box, Gtk::PACK_SHRINK);
+
+	_stopper = new CueStopper(_stopper_widget.root());
+	_stopper->show();
+	_slot_area_box.pack_start (_stopper_widget, Gtk::PACK_SHRINK);
+
 #if 1 /* Placeholders */
-	_slot_area_box.pack_start (*Gtk::manage (new Gtk::Label ("Fixed\nWidth\nSlot\nArea")));
 	_browser_box.pack_start (*Gtk::manage (new Gtk::Label ("File Browser")));
 	_parameter_box.pack_start (*Gtk::manage (new Gtk::Label ("Parameter HBox")));
 	_slot_area_box.show_all ();

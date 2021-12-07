@@ -29,7 +29,10 @@
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
 
+#include "fitted_canvas_widget.h"
+
 class TriggerStrip;
+class CueStopper;
 
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
@@ -75,6 +78,9 @@ private:
 	Gtk::VBox            _slot_area_box;
 	Gtk::VBox            _browser_box;
 	Gtk::HBox            _parameter_box;
+
+	FittedCanvasWidget 		_stopper_widget;
+	CueStopper				*_stopper;
 
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;
