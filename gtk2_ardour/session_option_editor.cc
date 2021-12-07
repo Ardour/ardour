@@ -331,6 +331,13 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_monitor_on_meterbridge)
 			    ));
 
+	add_option (_("Meterbridge"), new BoolOption (
+			    "show-fader-on-meterbridge",
+			    _("Fader as Gain Knob"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_fader_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_fader_on_meterbridge)
+			    ));
+
 	add_option (_("Meterbridge"), new OptionEditorHeading (_("Name Labels")));
 
 	add_option (_("Meterbridge"), new BoolOption (

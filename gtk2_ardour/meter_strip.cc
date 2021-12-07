@@ -136,6 +136,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	, _strip_type (0)
 	, _metricmode (-1)
 	, level_meter (0)
+	, gain_control (ArdourKnob::default_elements, ArdourKnob::Detent)
 	, _suspend_menu_callbacks (false)
 {
 	mtr_vbox.set_spacing (PX_SCALE(2, 2));
@@ -218,6 +219,17 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	solobox.pack_start(*solo_button, true, false);
 	btnbox.pack_start(solobox, false, false, 1);
 
+	/* Fader/Gain */
+	gain_control.set_size_request (PX_SCALE (18, 18), PX_SCALE (18, 18));
+	gain_control.set_tooltip_prefix (_("Level: "));
+	gain_control.set_name ("trim knob"); // XXX
+	gain_control.StartGesture.connect (sigc::mem_fun (*this, &MeterStrip::gain_start_touch));
+	gain_control.StopGesture.connect (sigc::mem_fun (*this, &MeterStrip::gain_end_touch));
+	gain_control.set_controllable (_route->gain_control ());
+
+	gain_box.pack_start(gain_control, true, false);
+	btnbox.pack_start(gain_box, false, false, 1);
+
 	rec_enable_button->set_corner_radius(2);
 	rec_enable_button->set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
 
@@ -238,6 +250,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	recbox.set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
 	mon_in_box.set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
 	mon_disk_box.set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
+	gain_box.set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
 	spacer.set_size_request(-1,0);
 
 	update_button_box();
@@ -262,6 +275,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.show();
 	peak_display.show();
 	peakbx.show();
+	gain_control.show ();
 	meter_ticks1_area.show();
 	meter_ticks2_area.show();
 	meterbox.show();
@@ -764,6 +778,12 @@ MeterStrip::update_button_box ()
 		mon_in_box.hide();
 		mon_disk_box.hide();
 	}
+	if (_session->config.get_show_fader_on_meterbridge ()) {
+		height += PX_SCALE(18, 18) + PX_SCALE(2, 2);
+		gain_box.show ();
+	} else {
+		gain_box.hide ();
+	}
 	btnbox.set_size_request(PX_SCALE(18, 18), height);
 	check_resize();
 }
@@ -798,6 +818,9 @@ MeterStrip::parameter_changed (std::string const & p)
 		update_name_box();
 	}
 	else if (p == "show-monitor-on-meterbridge") {
+		update_button_box();
+	}
+	else if (p == "show-fader-on-meterbridge") {
 		update_button_box();
 	}
 	else if (p == "meterbridge-label-height") {
@@ -989,3 +1012,14 @@ MeterStrip::color () const
 	return RouteUI::route_color ();
 }
 
+void
+MeterStrip::gain_start_touch ()
+{
+	_route->gain_control ()->start_touch (timepos_t (_session->transport_sample ()));
+}
+
+void
+MeterStrip::gain_end_touch ()
+{
+	_route->gain_control ()->stop_touch (timepos_t (_session->transport_sample ()));
+}

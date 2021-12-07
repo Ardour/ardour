@@ -760,6 +760,9 @@ Meterbridge::parameter_changed (std::string const & p)
 	else if (p == "show-monitor-on-meterbridge") {
 		scroller.queue_resize();
 	}
+	else if (p == "show-fader-on-meterbridge") {
+		scroller.queue_resize();
+	}
 	else if (p == "track-name-number") {
 		scroller.queue_resize();
 	}
