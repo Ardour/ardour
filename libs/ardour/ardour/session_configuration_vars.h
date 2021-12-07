@@ -87,4 +87,5 @@ CONFIG_VARIABLE (bool, show_mute_on_meterbridge, "show-mute-on-meterbridge", fal
 CONFIG_VARIABLE (bool, show_solo_on_meterbridge, "show-solo-on-meterbridge", false)
 CONFIG_VARIABLE (bool, show_monitor_on_meterbridge, "show-monitor-on-meterbridge", false)
 CONFIG_VARIABLE (bool, show_name_on_meterbridge, "show-name-on-meterbridge", true)
+CONFIG_VARIABLE (bool, show_fader_on_meterbridge, "show-fader-on-meterbridge", false)
 CONFIG_VARIABLE (uint32_t, meterbridge_label_height,  "meterbridge-label-height", 0)
