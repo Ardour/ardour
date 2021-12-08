@@ -505,7 +505,7 @@ TimeAxisViewItem::set_selected(bool yn)
 			selection_frame->set_outline_color (UIConfiguration::instance().color ("selected time axis frame"));
 			selection_frame->set_ignore_events (true);
 		}
-		selection_frame->set (frame->get().shrink (1.0, 1.0, 0.0, 1.0));
+		selection_frame->set (frame->get().shrink (0.0, 0.0, 0.0, 1.0));
 		selection_frame->show ();
 	} else {
 		if (selection_frame) {
@@ -572,7 +572,7 @@ TimeAxisViewItem::set_height (double height)
 		}
 
 		if (selection_frame) {
-			selection_frame->set (frame->get().shrink (1.0, 1.0, 0.0, 1.0));
+			selection_frame->set (frame->get().shrink (0.0, 0.0, 0.0, 1.0));
 		}
 	}
 }
@@ -840,7 +840,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			frame->set_x1 (pixel_width);
 
 			if (selection_frame) {
-				selection_frame->set (frame->get().shrink (1.0, 1.0, 0.0, 1.0));
+				selection_frame->set (frame->get().shrink (0.0, 0.0, 0.0, 1.0));
 			}
 		}
 
