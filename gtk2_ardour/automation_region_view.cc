@@ -66,9 +66,9 @@ AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*            
 
 	group->raise_to_top();
 
-	trackview.editor().MouseModeChanged.connect(_mouse_mode_connection, invalidator (*this),
-	                                            boost::bind (&AutomationRegionView::mouse_mode_changed, this),
-	                                            gui_context ());
+	PublicEditor::instance().MouseModeChanged.connect(_mouse_mode_connection, invalidator (*this),
+	                                                  boost::bind (&AutomationRegionView::mouse_mode_changed, this),
+	                                                  gui_context ());
 }
 
 AutomationRegionView::~AutomationRegionView ()
@@ -110,7 +110,7 @@ uint32_t
 AutomationRegionView::get_fill_color() const
 {
 	const std::string mod_name = (_dragging ? "dragging region" :
-	                              trackview.editor().internal_editing() ? "editable region" :
+	                              PublicEditor::instance().internal_editing() ? "editable region" :
 	                              "midi frame base");
 	if (_selected) {
 		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
@@ -134,9 +134,9 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 		return false;
 	}
 
-	PublicEditor& e = trackview.editor ();
+	PublicEditor& e (PublicEditor::instance());
 
-	if (trackview.editor().internal_editing() &&
+	if (e.internal_editing() &&
 	    ev->type == GDK_BUTTON_RELEASE &&
 	    ev->button.button == 1 &&
 	    e.current_mouse_mode() == Editing::MouseDraw &&
