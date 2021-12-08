@@ -389,6 +389,10 @@ Strip::notify_processor_changed (bool force_update)
 void
 Strip::notify_property_changed (const PropertyChange& what_changed)
 {
+	if (!_stripable) {
+		return;
+	}
+
 	if (what_changed.contains (ARDOUR::Properties::name)) {
 		show_stripable_name ();
 	}
