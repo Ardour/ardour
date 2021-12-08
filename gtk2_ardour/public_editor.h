@@ -63,6 +63,7 @@
 #include "axis_provider.h"
 #include "editing.h"
 #include "selection.h"
+#include "time_thing.h"
 
 namespace ARDOUR {
 	class Session;
@@ -116,7 +117,7 @@ using ARDOUR::samplecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public ArdourWidgets::Tabbable,  public ARDOUR::SessionHandlePtr, public AxisViewProvider
+class PublicEditor : public ArdourWidgets::Tabbable,  public ARDOUR::SessionHandlePtr, public AxisViewProvider, public TimeThing
 {
 public:
 	PublicEditor (Gtk::Widget& content);
@@ -211,14 +212,6 @@ public:
 	virtual void separate_region_from_selection () = 0;
 
 	virtual void transition_to_rolling (bool fwd) = 0;
-	virtual samplepos_t pixel_to_sample (double pixel) const = 0;
-	virtual samplepos_t playhead_cursor_sample () const = 0;
-	virtual double sample_to_pixel (samplepos_t sample) const = 0;
-	virtual double sample_to_pixel_unrounded (samplepos_t sample) const = 0;
-	virtual double time_to_pixel (Temporal::timepos_t const &) const = 0;
-	virtual double time_to_pixel_unrounded (Temporal::timepos_t const &) const = 0;
-	virtual double duration_to_pixels (Temporal::timecnt_t const &) const = 0;
-	virtual double duration_to_pixels_unrounded (Temporal::timecnt_t const &) const = 0;
 
 	virtual Selection& get_selection () const = 0;
 	virtual bool get_selection_extents (Temporal::timepos_t &start, Temporal::timepos_t &end) const = 0;
