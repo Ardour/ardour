@@ -43,7 +43,7 @@ class MidiRegionView;
 
 class GhostRegion : public sigc::trackable
 {
-public:
+  public:
 	GhostRegion(RegionView& rv,
 	            ArdourCanvas::Container* parent,
 	            TimeAxisView& tv,
@@ -53,10 +53,12 @@ public:
 	virtual ~GhostRegion();
 
 	virtual void set_samples_per_pixel (double) = 0;
-	virtual void set_height();
+	virtual void set_height (double h);
 	virtual void set_colors();
 
-	void set_duration(double units);
+	double height() const;
+
+	void set_duration (double units);
 
 	guint source_track_color(unsigned char alpha = 0xff);
 	bool is_automation_ghost();
@@ -78,7 +80,7 @@ public:
 	                 double initial_unit_pos);
 
 	void set_samples_per_pixel (double);
-	void set_height();
+	void set_height (double h);
 	void set_colors();
 
 	std::vector<ArdourWaveView::WaveView*> waves;
@@ -111,7 +113,7 @@ public:
 
 	MidiStreamView* midi_view();
 
-	void set_height();
+	void set_height (double h);
 	void set_samples_per_pixel (double spu);
 	void set_colors();
 

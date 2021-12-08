@@ -351,7 +351,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	}
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_height ();
+		(*i)->set_height (current_height());
 	}
 
 	/* put separator at the bottom of this time axis view */
@@ -621,7 +621,7 @@ TimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	set_gui_property ("height", height);
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_height ();
+		(*i)->set_height (current_height());
 	}
 
 	if (selection_group->visible ()) {

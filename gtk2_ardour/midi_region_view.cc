@@ -271,8 +271,6 @@ MidiRegionView::init (bool wfd)
 
 	RegionView::init (false);
 
-	//set_height (trackview.current_height());
-
 	region_muted ();
 	region_sync_changed ();
 	region_resized (ARDOUR::bounds_change);
@@ -1478,7 +1476,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	}
 
 	ghost->set_colors ();
-	ghost->set_height ();
+	ghost->set_height (trackview.current_height());
 	ghost->set_duration (_region->length().samples() / samples_per_pixel);
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
@@ -2516,7 +2514,6 @@ void
 MidiRegionView::move_selection(timecnt_t const & dx_qn, double dy, double cumulative_dy)
 {
 	typedef vector<boost::shared_ptr<NoteType> > PossibleChord;
-	Editor* editor = dynamic_cast<Editor*> (&trackview.editor());
 	PossibleChord to_play;
 	Temporal::Beats earliest = earliest_in_selection();
 

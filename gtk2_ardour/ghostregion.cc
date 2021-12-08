@@ -68,7 +68,7 @@ GhostRegion::GhostRegion (RegionView& rv,
 	CANVAS_DEBUG_NAME (base_rect, "ghost region rect");
 	base_rect->set_x0 (0);
 	base_rect->set_y0 (1.0);
-	base_rect->set_y1 (trackview.current_height());
+	base_rect->set_y1 (1);
 	base_rect->set_outline (false);
 
 	if (!is_automation_ghost()) {
@@ -97,9 +97,15 @@ GhostRegion::set_duration (double units)
 }
 
 void
-GhostRegion::set_height ()
+GhostRegion::set_height (double h)
 {
-	base_rect->set_y1 (trackview.current_height());
+	base_rect->set_y1 (h);
+}
+
+double
+GhostRegion::height() const
+{
+	return base_rect->y1 ();
 }
 
 void
@@ -141,14 +147,14 @@ AudioGhostRegion::set_samples_per_pixel (double fpp)
 }
 
 void
-AudioGhostRegion::set_height ()
+AudioGhostRegion::set_height (double h)
 {
 	vector<ArdourWaveView::WaveView*>::iterator i;
 	uint32_t n;
 
-	GhostRegion::set_height();
+	GhostRegion::set_height (h);
 
-	double const ht = ((trackview.current_height()) / (double) waves.size());
+	double const ht = (h / (double) waves.size());
 
 	for (n = 0, i = waves.begin(); i != waves.end(); ++i, ++n) {
 		(*i)->set_height (ht);
@@ -274,9 +280,9 @@ MidiGhostRegion::midi_view ()
 }
 
 void
-MidiGhostRegion::set_height ()
+MidiGhostRegion::set_height (double h)
 {
-	GhostRegion::set_height();
+	GhostRegion::set_height (h);
 	update_contents_height ();
 }
 
@@ -293,22 +299,20 @@ MidiGhostRegion::set_colors()
 }
 
 static double
-note_height(TimeAxisView& trackview, MidiStreamView* mv)
+note_height(GhostRegion const & gr, MidiStreamView* mv)
 {
-	const double tv_height  = trackview.current_height();
 	const double note_range = mv->contents_note_range();
 
-	return std::max(1.0, floor(tv_height / note_range - 1.0));
+	return std::max(1.0, floor (gr.height() / note_range - 1.0));
 }
 
 static double
-note_y(TimeAxisView& trackview, MidiStreamView* mv, uint8_t note_num)
+note_y (GhostRegion const & gr, MidiStreamView* mv, uint8_t note_num)
 {
-	const double tv_height  = trackview.current_height();
 	const double note_range = mv->contents_note_range();
-	const double s          = tv_height / note_range;
+	const double s          = gr.height() / note_range;
 
-	return tv_height - (note_num + 1 - mv->lowest_note()) * s;
+	return gr.height() - (note_num + 1 - mv->lowest_note()) * s;
 }
 
 void
@@ -320,12 +324,12 @@ MidiGhostRegion::update_contents_height ()
 		return;
 	}
 
-	double const h = note_height(trackview, mv);
+	double const h = note_height (*this, mv);
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		uint8_t const note_num = it->second->event->note()->note();
 
-		double const y = note_y(trackview, mv, note_num);
+		double const y = note_y (*this, mv, note_num);
 
 		if (!it->second->is_hit) {
 			_tmp_rect = static_cast<ArdourCanvas::Rectangle*>(it->second->item);
@@ -357,8 +361,8 @@ MidiGhostRegion::add_note (NoteBase* n)
 			event->item->hide();
 		} else {
 			uint8_t const note_num = n->note()->note();
-			double const  h        = note_height(trackview, mv);
-			double const  y        = note_y(trackview, mv, note_num);
+			double const  h        = note_height (*this, mv);
+			double const  y        = note_y (*this, mv, note_num);
 			if (!event->is_hit) {
 				_tmp_rect = static_cast<ArdourCanvas::Rectangle*>(event->item);
 				_tmp_rect->set (ArdourCanvas::Rect (_tmp_rect->x0(), y, _tmp_rect->x1(), y + h));
@@ -396,8 +400,8 @@ MidiGhostRegion::update_note (GhostEvent* ev)
 	_tmp_rect = static_cast<ArdourCanvas::Rectangle*>(ev->item);
 
 	uint8_t const note_num = ev->event->note()->note();
-	double const y = note_y(trackview, mv, note_num);
-	double const h = note_height(trackview, mv);
+	double const y = note_y (*this, mv, note_num);
+	double const h = note_height (*this, mv);
 
 	_tmp_rect->set (ArdourCanvas::Rect (ev->event->x0(), y, ev->event->x1(), y + h));
 }
@@ -417,8 +421,8 @@ MidiGhostRegion::update_hit (GhostEvent* ev)
 	_tmp_poly = static_cast<ArdourCanvas::Polygon*>(ev->item);
 
 	uint8_t const note_num = ev->event->note()->note();
-	double const h = note_height(trackview, mv);
-	double const y = note_y(trackview, mv, note_num);
+	double const h = note_height (*this, mv);
+	double const y = note_y (*this, mv, note_num);
 
 	ArdourCanvas::Duple ppos = ev->item->position();
 	ArdourCanvas::Duple gpos = _tmp_poly->position();
