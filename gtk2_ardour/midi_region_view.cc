@@ -1257,9 +1257,9 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 				p->hide();
 			} else {
 				const timepos_t flag_time = _region->source_beats_to_absolute_time ((*i)->time());
-				const double flag_x = trackview.editor().time_to_pixel (flag_time);
+				const double flag_x = time_thing.time_to_pixel (flag_time);
 
-				const double region_x = trackview.editor().time_to_pixel (_region->position());
+				const double region_x = time_thing.time_to_pixel (_region->position());
 
 				p->canvas_item()->set_position (ArdourCanvas::Duple (flag_x-region_x, 1.0));
 				p->update_name ();
@@ -1330,7 +1330,7 @@ MidiRegionView::display_sysexes()
 		}
 		string text = str.str();
 
-		const double x = trackview.editor().time_to_pixel (_region->source_beats_to_region_time (time.beats()));
+		const double x = time_thing.time_to_pixel (_region->source_beats_to_region_time (time.beats()));
 
 		double height = midi_stream_view()->contents_height();
 
@@ -1464,7 +1464,7 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 GhostRegion*
 MidiRegionView::add_ghost (TimeAxisView& tv)
 {
-	double unit_position = trackview.editor().time_to_pixel (_region->position ());
+	double unit_position = time_thing.time_to_pixel (_region->position ());
 	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&tv);
 	MidiGhostRegion* ghost;
 
@@ -1533,7 +1533,7 @@ MidiRegionView::resolve_note (uint8_t note, Temporal::Beats end_time)
 		_active_notes[note]->note()->set_length (end_time - _active_notes[note]->note()->time());
 
 		/* End time is relative to the region being recorded. */
-		_active_notes[note]->set_x1 (trackview.editor().time_to_pixel (_region->region_beats_to_region_time (end_time)));
+		_active_notes[note]->set_x1 (time_thing.time_to_pixel (_region->region_beats_to_region_time (end_time)));
 		_active_notes[note]->set_outline_all ();
 		_active_notes[note] = 0;
 	}
@@ -1551,7 +1551,7 @@ MidiRegionView::extend_active_notes()
 
 	for (unsigned i = 0; i < 128; ++i) {
 		if (_active_notes[i]) {
-			_active_notes[i]->set_x1 (trackview.editor().duration_to_pixels (_region->length()));
+			_active_notes[i]->set_x1 (time_thing.duration_to_pixels (_region->length()));
 		}
 	}
 }
@@ -1661,7 +1661,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 
 	const samplepos_t note_start_samples = (note_start + session_source_start).earlier ( _region->position()).samples();
 
-	const double x0 = trackview.editor().sample_to_pixel (note_start_samples);
+	const double x0 = time_thing.sample_to_pixel (note_start_samples);
 	double x1;
 
 
@@ -1686,13 +1686,13 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 
 		const samplepos_t note_end_samples = _region->position().distance ((note_end + session_source_start)).samples();
 
-		x1 = std::max(1., trackview.editor().sample_to_pixel (note_end_samples)) - 1;
+		x1 = std::max(1., time_thing.sample_to_pixel (note_end_samples)) - 1;
 
 	} else {
 
 		/* nascent note currently being recorded, noteOff has not yet arrived */
 
-		x1 = std::max(1., trackview.editor().duration_to_pixels (_region->length())) - 1;
+		x1 = std::max(1., time_thing.duration_to_pixels (_region->length())) - 1;
 	}
 
 	y1 = y0 + std::max(1., floor(note_height()) - 1);
@@ -1734,7 +1734,7 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
 	boost::shared_ptr<NoteType> note = ev->note();
 	const timepos_t note_time = _region->source_beats_to_absolute_time (note->time());
 
-	const double x = trackview.editor().time_to_pixel(note_time) - trackview.editor().time_to_pixel (_region->position());
+	const double x = time_thing.time_to_pixel(note_time) - time_thing.time_to_pixel (_region->position());
 	const double diamond_size = std::max(1., floor(note_height()) - 2.);
 	const double y = 1.5 + floor(note_to_y(note->note())) + diamond_size * .5;
 
@@ -2383,8 +2383,8 @@ MidiRegionView::update_drag_selection(timepos_t const & start, timepos_t const &
 
 	// Convert to local coordinates
 	const double     y  = midi_view()->y_position();
-	const double     x0 = editor.time_to_pixel (max (timepos_t(), _region->region_relative_position (start)));
-	const double     x1 = editor.time_to_pixel (max (timepos_t(), _region->region_relative_position (end)));
+	const double     x0 = time_thing.time_to_pixel (max (timepos_t(), _region->region_relative_position (start)));
+	const double     x1 = time_thing.time_to_pixel (max (timepos_t(), _region->region_relative_position (end)));
 	const double     y0 = max(0.0, gy0 - y);
 	const double     y1 = max(0.0, gy1 - y);
 
@@ -2529,13 +2529,13 @@ MidiRegionView::move_selection(timecnt_t const & dx_qn, double dy, double cumula
 		double dx = 0.0;
 
 		if (midi_view()->note_mode() == Sustained) {
-			dx = editor->time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()))
+			dx = time_thing.time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()))
 				- n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x;
 		} else {
 			/* Hit::x0() is offset by _position.x, unlike Note::x0() */
 			Hit* hit = dynamic_cast<Hit*>(n);
 			if (hit) {
-				dx = editor->time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()))
+				dx = time_thing.time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()))
 					- n->item()->item_to_canvas (ArdourCanvas::Duple (((hit->x0() + hit->x1()) / 2.0) - hit->position().x, 0)).x;
 			}
 		}
@@ -2545,7 +2545,7 @@ MidiRegionView::move_selection(timecnt_t const & dx_qn, double dy, double cumula
 		/* update length */
 		if (midi_view()->note_mode() == Sustained) {
 			Note* sus = dynamic_cast<Note*> (*i);
-			double const len_dx = editor->time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
+			double const len_dx = time_thing.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
 
 			sus->set_x1 (n->item()->canvas_to_item (ArdourCanvas::Duple (len_dx, 0)).x);
 		}
@@ -2640,7 +2640,7 @@ MidiRegionView::move_copies (timecnt_t const & dx_qn, double dy, double cumulati
 
 		if (midi_view()->note_mode() == Sustained) {
 			Note* sus = dynamic_cast<Note*> (*i);
-			double const len_dx = editor->time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
+			double const len_dx = time_thing.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
 
 			sus->set_x1 (n->item()->canvas_to_item (ArdourCanvas::Duple (len_dx, 0)).x);
 		}
@@ -2800,20 +2800,20 @@ MidiRegionView::snap_pixel_to_time (double x, bool ensure_snap)
 double
 MidiRegionView::snap_to_pixel(double x, bool ensure_snap)
 {
-	return (double) trackview.editor().time_to_pixel(snap_pixel_to_time(x, ensure_snap));
+	return (double) time_thing.time_to_pixel(snap_pixel_to_time(x, ensure_snap));
 }
 
 double
 MidiRegionView::get_position_pixels()
 {
-	return trackview.editor().time_to_pixel(get_position());
+	return time_thing.time_to_pixel(get_position());
 }
 
 double
 MidiRegionView::get_end_position_pixels()
 {
 	const timepos_t end = get_position() + get_duration ();
-	return trackview.editor().time_to_pixel (end);
+	return time_thing.time_to_pixel (end);
 }
 
 void
@@ -2896,8 +2896,8 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			 */
 			current_x = 0;
 		}
-		if (current_x > trackview.editor().duration_to_pixels (_region->length())) {
-			current_x = trackview.editor().duration_to_pixels (_region->length());
+		if (current_x > time_thing.duration_to_pixels (_region->length())) {
+			current_x = time_thing.duration_to_pixels (_region->length());
 		}
 
 		if (at_front) {
@@ -2937,7 +2937,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			if (with_snap) {
 				snapped_x = snap_pixel_to_time (current_x, ensure_snap); /* units depend on snap settings */
 			} else {
-				snapped_x = timepos_t (trackview.editor ().pixel_to_sample (current_x)); /* probably samples */
+				snapped_x = timepos_t (time_thing.pixel_to_sample (current_x)); /* probably samples */
 			}
 
 			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
@@ -3016,12 +3016,12 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 			current_x = 0;
 		}
 
-		if (current_x > trackview.editor().duration_to_pixels (_region->length())) {
-			current_x = trackview.editor().duration_to_pixels (_region->length());
+		if (current_x > time_thing.duration_to_pixels (_region->length())) {
+			current_x = time_thing.duration_to_pixels (_region->length());
 		}
 
 		/* Convert snap delta from pixels to beats with sign. */
-		timepos_t snap_delta_time (trackview.editor().pixel_to_sample (snap_delta));
+		timepos_t snap_delta_time (time_thing.pixel_to_sample (snap_delta));
 		Temporal::Beats snap_delta_beats;
 		int sign = 1;
 
@@ -3037,7 +3037,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		if (with_snap) {
 			current_time = snap_pixel_to_time (current_x, ensure_snap);
 		} else {
-			current_time = timepos_t (trackview.editor().pixel_to_sample (current_x));
+			current_time = timepos_t (time_thing.pixel_to_sample (current_x));
 		}
 
 		/* and then to beats */
@@ -3887,7 +3887,7 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 
 	PublicEditor& editor = trackview.editor ();
 
-	samplepos_t const unsnapped_sample = editor.pixel_to_sample (global_x);
+	samplepos_t const unsnapped_sample = time_thing.pixel_to_sample (global_x);
 	const Temporal::timepos_t snapped_pos = editor.snap_to_bbt (timepos_t (unsnapped_sample), RoundDownAlways, SnapToGrid_Unscaled);
 	const Temporal::Beats snapped_beats = _region->position().distance (snapped_pos).beats ();
 
@@ -4054,7 +4054,7 @@ MidiRegionView::move_step_edit_cursor (Temporal::Beats pos)
 	_step_edit_cursor_position = pos;
 
 	if (_step_edit_cursor) {
-		double pixel = trackview.editor().time_to_pixel (_region->region_beats_to_region_time (pos));
+		double pixel = time_thing.time_to_pixel (_region->region_beats_to_region_time (pos));
 		_step_edit_cursor->set_x0 (pixel);
 		set_step_edit_cursor_width (_step_edit_cursor_width);
 	}
@@ -4074,7 +4074,7 @@ MidiRegionView::set_step_edit_cursor_width (Temporal::Beats beats)
 	_step_edit_cursor_width = beats;
 
 	if (_step_edit_cursor) {
-		_step_edit_cursor->set_x1 (_step_edit_cursor->x0() + trackview.editor().duration_to_pixels (
+		_step_edit_cursor->set_x1 (_step_edit_cursor->x0() + time_thing.duration_to_pixels (
 			                           _region->region_beats_to_region_time (_step_edit_cursor_position).distance
 			                           (_region->region_beats_to_region_time (_step_edit_cursor_position + beats))));
 	}
