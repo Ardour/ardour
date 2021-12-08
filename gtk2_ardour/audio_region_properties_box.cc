@@ -123,7 +123,6 @@ RegionPropertiesBox::set_session (Session* s)
 void
 RegionPropertiesBox::set_region (boost::shared_ptr<Region> r)
 {
-printf(" slot, region name %s\n", r->name().c_str());
 	set_session(&r->session());
 
 	state_connection.disconnect();
@@ -148,14 +147,12 @@ RegionPropertiesBox::region_changed (const PBD::PropertyChange& what_changed)
 //	interesting_stuff.add (ARDOUR::Properties::length);
 //	interesting_stuff.add (ARDOUR::Properties::start);
 //	if (what_changed.contains (interesting_stuff))
-printf("  slot, region name %s\n", _region->name().c_str());
 	{
 		AudioClock::Mode mode = _region->position_time_domain() == Temporal::AudioTime ? AudioClock::Samples : AudioClock::BBT;
 
 		start_clock.set_mode (mode);
 		length_clock.set_mode (mode);
 
-printf("  slot, region start %s\n", _region->start().str().c_str());
 		start_clock.set (_region->start());
 		length_clock.set_duration (_region->length());
 

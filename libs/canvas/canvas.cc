@@ -897,7 +897,6 @@ GtkCanvas::on_realize ()
 void
 GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 {
-	std::cerr << "GtkCanvas::size_allocate (" << a.get_width() << " x " << a.get_height() << ")\n";
 	EventBox::on_size_allocate (a);
 
 	if (_use_image_surface) {
