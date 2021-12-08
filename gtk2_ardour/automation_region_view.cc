@@ -47,13 +47,14 @@
 using namespace Temporal;
 
 AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*                  parent,
+                                            TimeThing const &                         tt,
                                             AutomationTimeAxisView&                   time_axis,
                                             boost::shared_ptr<ARDOUR::Region>         region,
                                             const Evoral::Parameter&                  param,
                                             boost::shared_ptr<ARDOUR::AutomationList> list,
                                             double                                    spu,
                                             uint32_t                                  basic_color)
-	: RegionView(parent, time_axis, region, spu, basic_color, true)
+	: RegionView(parent, tt, time_axis, region, spu, basic_color, true)
 	, _parameter(param)
 {
 	TimeAxisViewItem::set_position (_region->position(), this);

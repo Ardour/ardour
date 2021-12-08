@@ -34,11 +34,13 @@ namespace ARDOUR {
 };
 
 class TimeAxisView;
+class TimeThing;
 
 class AutomationRegionView : public RegionView
 {
 public:
 	AutomationRegionView(ArdourCanvas::Container*,
+	                     TimeThing const &,
 	                     AutomationTimeAxisView&,
 	                     boost::shared_ptr<ARDOUR::Region>,
 	                     const Evoral::Parameter& parameter,

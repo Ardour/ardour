@@ -69,6 +69,7 @@
 #include "audio_time_axis.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
+#include "time_thing.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -111,9 +112,9 @@ static Cairo::RefPtr<Cairo::Pattern> create_pending_peak_pattern() {
 	return p;
 }
 
-AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
+AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, TimeThing const & tt, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  uint32_t basic_color)
-	: RegionView (parent, tv, r, spu, basic_color)
+	: RegionView (parent, tt, tv, r, spu, basic_color)
 	, sync_mark(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
@@ -132,9 +133,9 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxis
 {
 }
 
-AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
+AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, TimeThing const & tt, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  uint32_t basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
-	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
+	: RegionView (parent, tt, tv, r, spu, basic_color, recording, visibility)
 	, sync_mark(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)

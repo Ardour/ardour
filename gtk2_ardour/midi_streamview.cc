@@ -117,11 +117,11 @@ MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, b
 	RegionView* region_view = NULL;
 	if (recording) {
 		region_view = new MidiRegionView (
-			_canvas_group, _trackview, region,
+			_canvas_group, PublicEditor::instance(), _trackview, region,
 			_samples_per_pixel, region_color, recording,
 			TimeAxisViewItem::Visibility(TimeAxisViewItem::ShowFrame));
 	} else {
-		region_view = new MidiRegionView (_canvas_group, _trackview, region,
+		region_view = new MidiRegionView (_canvas_group, PublicEditor::instance(), _trackview, region,
 		                                  _samples_per_pixel, region_color);
 	}
 

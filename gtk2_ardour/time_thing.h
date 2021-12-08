@@ -20,6 +20,7 @@
 #define __gtk2_ardour_time_thing_h__
 
 struct TimeThing {
+	virtual ~TimeThing() {}
 	virtual samplepos_t pixel_to_sample (double pixel) const = 0;
 	virtual samplepos_t playhead_cursor_sample () const = 0;
 	virtual double sample_to_pixel (samplepos_t sample) const = 0;

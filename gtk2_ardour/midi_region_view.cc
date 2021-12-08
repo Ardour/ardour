@@ -90,6 +90,7 @@
 #include "hit.h"
 #include "patch_change.h"
 #include "sys_ex.h"
+#include "time_thing.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -104,11 +105,12 @@ using Gtkmm2ext::Keyboard;
 #define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
+                                TimeThing const &                     tt,
                                 RouteTimeAxisView&            tv,
                                 boost::shared_ptr<MidiRegion> r,
                                 double                        spu,
                                 uint32_t                      basic_color)
-	: RegionView (parent, tv, r, spu, basic_color)
+	: RegionView (parent, tt, tv, r, spu, basic_color)
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _active_notes(0)
@@ -144,13 +146,14 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
+                                TimeThing const &             tt,
                                 RouteTimeAxisView&            tv,
                                 boost::shared_ptr<MidiRegion> r,
                                 double                        spu,
                                 uint32_t                      basic_color,
                                 bool                          recording,
                                 TimeAxisViewItem::Visibility  visibility)
-	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
+	: RegionView (parent, tt, tv, r, spu, basic_color, recording, visibility)
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _active_notes(0)

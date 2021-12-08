@@ -41,6 +41,7 @@
 #include "marker.h"
 
 class TimeAxisView;
+class TimeThing;
 class RegionEditor;
 class GhostRegion;
 class AutomationTimeAxisView;
@@ -55,6 +56,7 @@ class RegionView : public TimeAxisViewItem
 {
 public:
 	RegionView (ArdourCanvas::Container*          parent,
+	            TimeThing const &                 time_thing,
 	            TimeAxisView&                     time_view,
 	            boost::shared_ptr<ARDOUR::Region> region,
 	            double                            samples_per_pixel,
@@ -141,6 +143,7 @@ protected:
 	 * to the TimeAxisViewItem parent class
 	 */
 	RegionView (ArdourCanvas::Container *,
+	            TimeThing const &,
 	            TimeAxisView&,
 	            boost::shared_ptr<ARDOUR::Region>,
 	            double samples_per_pixel,

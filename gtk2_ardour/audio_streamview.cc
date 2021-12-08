@@ -100,14 +100,14 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 	case NonLayered:
 	case Normal:
 		if (recording) {
-			region_view = new AudioRegionView (_canvas_group, _trackview, region,
+			region_view = new AudioRegionView (_canvas_group, PublicEditor::instance(), _trackview, region,
 							   _samples_per_pixel, region_color, recording, TimeAxisViewItem::Visibility(
 								   TimeAxisViewItem::ShowFrame |
 								   TimeAxisViewItem::HideFrameRight |
 								   TimeAxisViewItem::HideFrameLeft |
 								   TimeAxisViewItem::HideFrameTB));
 		} else {
-			region_view = new AudioRegionView (_canvas_group, _trackview, region,
+			region_view = new AudioRegionView (_canvas_group, PublicEditor::instance(), _trackview, region,
 					_samples_per_pixel, region_color);
 		}
 		break;

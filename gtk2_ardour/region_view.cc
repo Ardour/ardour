@@ -74,12 +74,13 @@ static const int32_t sync_mark_width = 9;
 PBD::Signal1<void,RegionView*> RegionView::RegionViewGoingAway;
 
 RegionView::RegionView (ArdourCanvas::Container*          parent,
+                        TimeThing const &                 tt,
                         TimeAxisView&                     tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                            spu,
                         uint32_t                          basic_color,
                         bool                              automation)
-	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false, automation,
+	: TimeAxisViewItem (r->name(), *parent, tt, tv, spu, basic_color, r->position(), r->length(), false, automation,
 			    (automation ? TimeAxisViewItem::ShowFrame :
 			     TimeAxisViewItem::Visibility ((UIConfiguration::instance().get_show_region_name() ? TimeAxisViewItem::ShowNameText : 0) |
 							   TimeAxisViewItem::ShowNameHighlight| TimeAxisViewItem::ShowFrame)))
@@ -153,13 +154,14 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 
 
 RegionView::RegionView (ArdourCanvas::Container*          parent,
+                        TimeThing const &                 tt,
                         TimeAxisView&                     tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                            spu,
                         uint32_t                          basic_color,
                         bool                              recording,
                         TimeAxisViewItem::Visibility      visibility)
-	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), recording, false, visibility)
+	: TimeAxisViewItem (r->name(), *parent, tt, tv, spu, basic_color, r->position(), r->length(), recording, false, visibility)
 	, _region (r)
 	, sync_mark(0)
 	, sync_line(0)
@@ -310,8 +312,8 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 
 		/* coordinates for the rect are relative to the regionview origin */
 
-		cr->set_x0 (trackview.editor().sample_to_pixel (i->first - _region->start_sample()));
-		cr->set_x1 (trackview.editor().sample_to_pixel (i->second - _region->start_sample()));
+		cr->set_x0 (time_thing.sample_to_pixel (i->first - _region->start_sample()));
+		cr->set_x1 (time_thing.sample_to_pixel (i->second - _region->start_sample()));
 		cr->set_y0 (1);
 		cr->set_y1 (_height - 2);
 		cr->set_outline (false);
@@ -345,7 +347,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 
 	/* both positions are relative to the region start offset in source */
 
-	_silence_text->set_x_position (trackview.editor().sample_to_pixel (silences.front().first - _region->start_sample()) + 10.0);
+	_silence_text->set_x_position (time_thing.sample_to_pixel (silences.front().first - _region->start_sample()) + 10.0);
 	_silence_text->set_y_position (20.0);
 
 	double ms = (float) shortest/_region->session().sample_rate();
@@ -505,7 +507,7 @@ RegionView::reset_width_dependent_items (double pixel_width)
 	if (_xrun_markers_visible) {
 		const samplepos_t start = _region->start_sample();
 		for (list<std::pair<samplepos_t, ArdourCanvas::Arrow*> >::iterator i = _xrun_markers.begin(); i != _xrun_markers.end(); ++i) {
-			float x_pos = trackview.editor().sample_to_pixel (i->first - start);
+			float x_pos = time_thing.sample_to_pixel (i->first - start);
 			i->second->set_x (x_pos);
 		}
 	}
@@ -522,7 +524,7 @@ RegionView::update_xrun_markers ()
 	const samplepos_t start = _region->start_sample();
 	const samplepos_t length = _region->length_samples();
 	for (list<std::pair<samplepos_t, ArdourCanvas::Arrow*> >::iterator i = _xrun_markers.begin(); i != _xrun_markers.end(); ++i) {
-		float x_pos = trackview.editor().sample_to_pixel (i->first - start);
+		float x_pos = time_thing.sample_to_pixel (i->first - start);
 		i->second->set_x (x_pos);
 		if (show_xruns_markers && (i->first >= start && i->first < start + length)) {
 			i->second->show ();
@@ -881,7 +883,7 @@ RegionView::region_sync_changed ()
 
 			//points = sync_mark->property_points().get_value();
 
-			double offset = trackview.editor().duration_to_pixels (sync_offset);
+			double offset = time_thing.duration_to_pixels (sync_offset);
 			points.push_back (ArdourCanvas::Duple (offset - ((sync_mark_width-1)/2), 1));
 			points.push_back (ArdourCanvas::Duple (offset + ((sync_mark_width-1)/2), 1));
 			points.push_back (ArdourCanvas::Duple (offset, sync_mark_width - 1));
@@ -958,7 +960,7 @@ RegionView::set_height (double h)
 		int sync_dir;
 		timecnt_t sync_offset;
 		sync_offset = _region->sync_offset (sync_dir);
-		double offset = trackview.editor().duration_to_pixels (sync_offset);
+		double offset = time_thing.duration_to_pixels (sync_offset);
 
 		sync_line->set (
 			ArdourCanvas::Duple (offset, 0),
@@ -1020,14 +1022,14 @@ RegionView::update_coverage_frame (LayerDisplay d)
 		bool const new_me = (pl->top_unmuted_region_at (t) == _region);
 		/* finish off any old rect, if required */
 		if (cr && me != new_me) {
-			cr->set_x1 (trackview.editor().duration_to_pixels (position.distance (t)));
+			cr->set_x1 (time_thing.duration_to_pixels (position.distance (t)));
 		}
 
 		/* start off any new rect, if required */
 		if (cr == 0 || me != new_me) {
 			cr = new ArdourCanvas::Rectangle (group);
 			_coverage_frame.push_back (cr);
-			cr->set_x0 (trackview.editor().duration_to_pixels (position.distance (t)));
+			cr->set_x0 (time_thing.duration_to_pixels (position.distance (t)));
 			cr->set_y0 (1);
 			cr->set_y1 (_height + 1);
 			cr->set_outline (false);
@@ -1049,7 +1051,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 
 	if (cr) {
 		/* finish off the last rectangle */
-		cr->set_x1 (trackview.editor().duration_to_pixels (position.distance (end)));
+		cr->set_x1 (time_thing.duration_to_pixels (position.distance (end)));
 	}
 
 	if (frame_handle_start) {

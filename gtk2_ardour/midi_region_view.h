@@ -75,12 +75,14 @@ public:
 	typedef Evoral::Sequence<Temporal::Beats>::Notes Notes;
 
 	MidiRegionView (ArdourCanvas::Container*              parent,
+	                TimeThing const &                     tt,
 	                RouteTimeAxisView&                    tv,
 	                boost::shared_ptr<ARDOUR::MidiRegion> r,
 	                double                                samples_per_pixel,
 	                uint32_t                              basic_color);
 
 	MidiRegionView (ArdourCanvas::Container*              parent,
+	                TimeThing const &                     tt,
 	                RouteTimeAxisView&                    tv,
 	                boost::shared_ptr<ARDOUR::MidiRegion> r,
 	                double                                samples_per_pixel,

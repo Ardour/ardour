@@ -49,6 +49,7 @@
 #include "ui_config.h"
 #include "utils.h"
 #include "rgb_macros.h"
+#include "time_thing.h"
 
 #include "pbd/i18n.h"
 
@@ -120,10 +121,11 @@ TimeAxisViewItem::set_constant_heights ()
  * @param automation true if this is an automation region view
  */
 TimeAxisViewItem::TimeAxisViewItem(
-	const string & it_name, ArdourCanvas::Item& parent, TimeAxisView& tv, double spu, uint32_t base_color,
+	const string & it_name, ArdourCanvas::Item& parent, TimeThing const & tt, TimeAxisView& tv, double spu, uint32_t base_color,
 	timepos_t const & start, timecnt_t const & duration, bool recording, bool automation, Visibility vis
 	)
 	: trackview (tv)
+	, time_thing (tt)
 	, item_name (it_name)
 	, selection_frame (0)
 	, _height (1.0)
@@ -140,6 +142,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	, Selectable (other)
 	, PBD::ScopedConnectionList()
 	, trackview (other.trackview)
+	, time_thing (other.time_thing)
 	, item_name (other.item_name)
 	, selection_frame (0)
 	, _height (1.0)
@@ -189,7 +192,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::Rectangle (group,
 		                                     ArdourCanvas::Rect (0.0, 0.0,
-		                                                         trackview.editor().duration_to_pixels (duration),
+		                                                         time_thing.duration_to_pixels (duration),
 		                                                         trackview.current_height()));
 
 		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
@@ -289,7 +292,7 @@ TimeAxisViewItem::set_position(timepos_t const & pos, void* src, double* delta)
 
 	time_position = pos;
 
-	double new_unit_pos = trackview.editor().time_to_pixel (time_position);
+	double new_unit_pos = time_thing.time_to_pixel (time_position);
 
 	if (delta) {
 		(*delta) = new_unit_pos - group->position().x;
@@ -342,8 +345,8 @@ TimeAxisViewItem::set_duration (timecnt_t const & dur, void* src)
 
 	item_duration = dur;
 
-	double end_pixel = trackview.editor().time_to_pixel (time_position + dur);
-	double first_pixel = trackview.editor().time_to_pixel (time_position);
+	double end_pixel = time_thing.time_to_pixel (time_position + dur);
+	double first_pixel = time_thing.time_to_pixel (time_position);
 
 	reset_width_dependent_items (end_pixel - first_pixel);
 
@@ -806,8 +809,8 @@ TimeAxisViewItem::set_samples_per_pixel (double fpp)
 	samples_per_pixel = fpp;
 	set_position (this->get_position(), this);
 
-	double end_pixel = trackview.editor().time_to_pixel (time_position + get_duration());
-	double first_pixel = trackview.editor().time_to_pixel (time_position);
+	double end_pixel = time_thing.time_to_pixel (time_position + get_duration());
+	double first_pixel = time_thing.time_to_pixel (time_position);
 
 	reset_width_dependent_items (end_pixel - first_pixel);
 }
