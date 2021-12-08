@@ -68,7 +68,7 @@ GhostRegion::GhostRegion (RegionView& rv,
 	CANVAS_DEBUG_NAME (base_rect, "ghost region rect");
 	base_rect->set_x0 (0);
 	base_rect->set_y0 (1.0);
-	base_rect->set_y1 (1);
+	base_rect->set_y1 (2.0); /* set height will change this later */
 	base_rect->set_outline (false);
 
 	if (!is_automation_ghost()) {

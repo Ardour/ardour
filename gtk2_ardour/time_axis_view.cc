@@ -350,10 +350,6 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 		}
 	}
 
-	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_height (current_height());
-	}
-
 	/* put separator at the bottom of this time axis view */
 
 	_canvas_separator->set (ArdourCanvas::Duple(0, height), ArdourCanvas::Duple(ArdourCanvas::COORD_MAX, height));
