@@ -242,7 +242,6 @@ AudioRegionView::init (bool wfd)
 	gain_line->reset ();
 
 	/* streamview will call set_height() */
-	//set_height (trackview.current_height()); // XXX not correct for Layered mode, but set_height() will fix later.
 
 	region_muted ();
 	region_sync_changed ();
