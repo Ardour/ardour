@@ -193,7 +193,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		frame = new ArdourCanvas::Rectangle (group,
 		                                     ArdourCanvas::Rect (0.0, 0.0,
 		                                                         time_thing.duration_to_pixels (duration),
-		                                                         trackview.current_height()));
+		                                                         1.0)); /* set_height() will fix */
 
 		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
 		frame->show ();
