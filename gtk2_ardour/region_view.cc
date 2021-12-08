@@ -244,9 +244,6 @@ RegionView::init (bool wfd)
 		_enable_display = true;
 	}
 
-	/* derived class calls set_height () including RegionView::set_height() in ::init() */
-	//set_height (trackview.current_height());
-
 	_region->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::region_changed, this, _1), gui_context());
 
 	/* derived class calls set_colors () including RegionView::set_colors() in ::init() */
