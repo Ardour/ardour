@@ -223,11 +223,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	if (visibility & ShowNameText) {
 		name_text = new ArdourCanvas::Text (group);
 		CANVAS_DEBUG_NAME (name_text, string_compose ("name text for %1", get_item_name()));
-		if (UIConfiguration::instance().get_show_name_highlight()) {
-			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, trackview.current_height() - NAME_Y_OFFSET));
-		} else {
-			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, NAME_Y_OFFSET));
-		}
+		/* ::set_height() will set the position */
 		name_text->set_font_description (NAME_FONT);
 		name_text->set_ignore_events (true);
 	} else {
