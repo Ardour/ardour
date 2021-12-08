@@ -1470,7 +1470,6 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 		ghost->waves.push_back(wave);
 	}
 
-	ghost->set_height (tv.current_height());
 	ghost->set_duration (_region->length_samples() / samples_per_pixel);
 	ghost->set_colors();
 	ghosts.push_back (ghost);

@@ -1476,7 +1476,6 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	}
 
 	ghost->set_colors ();
-	ghost->set_height (tv.current_height());
 	ghost->set_duration (_region->length().samples() / samples_per_pixel);
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {

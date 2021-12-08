@@ -1101,6 +1101,7 @@ TimeAxisView::add_ghost (RegionView* rv)
 	GhostRegion* gr = rv->add_ghost (*this);
 
 	if (gr) {
+		gr->set_height (current_height());
 		ghosts.push_back(gr);
 	}
 }
