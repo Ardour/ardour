@@ -32,13 +32,15 @@
 using namespace std;
 
 MidiAutomationLine::MidiAutomationLine (
-	const std::string&                                      name,
-	TimeAxisView&                                           tav,
-	ArdourCanvas::Item&                                     parent,
-	boost::shared_ptr<ARDOUR::AutomationList>               list,
-	boost::shared_ptr<ARDOUR::MidiRegion>                   region,
-	Evoral::Parameter                                       parameter)
-	: AutomationLine (name, tav, parent, list, parameter)
+	const std::string&                        name,
+	TimeThing const &                         tt,
+	ARDOUR::Session&                          s,
+	TimeAxisView&                             tv,
+	ArdourCanvas::Item&                       parent,
+	boost::shared_ptr<ARDOUR::AutomationList> list,
+	boost::shared_ptr<ARDOUR::MidiRegion>     region,
+	Evoral::Parameter                         parameter)
+	: AutomationLine (name, tt, s, tv, parent, list, parameter)
 	, _region (region)
 	, _parameter (parameter)
 {
@@ -71,7 +73,7 @@ MidiAutomationLine::get_verbose_cursor_string (double fraction) const
 		return AutomationLine::get_verbose_cursor_string(fraction);
 	}
 
-	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(trackview.get_parent());
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*> (_trackview.get_parent());
 	if (!mtv) {
 		return AutomationLine::get_verbose_cursor_string(fraction);
 	}

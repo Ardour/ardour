@@ -1116,7 +1116,7 @@ Selection::get_state () const
 	}
 
 	for (PointSelection::const_iterator i = points.begin(); i != points.end(); ++i) {
-		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (&(*i)->line().trackview);
+		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (&(*i)->line().trackview());
 		if (atv) {
 
 			XMLNode* r = node->add_child (X_("ControlPoint"));

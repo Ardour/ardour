@@ -43,8 +43,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& r, ArdourCanvas::Container& parent, boost::shared_ptr<AutomationList> l)
-	: AutomationLine (name, r.get_time_axis_view(), parent, l, l->parameter())
+AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& r, TimeThing const & tt, TimeAxisView& tv, ArdourCanvas::Container& parent, boost::shared_ptr<AutomationList> l)
+	: AutomationLine (name, tt, r.region()->session(), tv, parent, l, l->parameter())
 	, rv (r)
 {
 	// If this isn't true something is horribly wrong, and we'll get catastrophic gain values
@@ -72,7 +72,7 @@ AudioRegionGainLine::start_drag_single (ControlPoint* cp, double x, float fracti
 	// XXX Stateful need to capture automation curve data
 
 	if (!rv.audio_region()->envelope_active()) {
-		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
+		_session.add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
 		rv.audio_region()->set_envelope_active(false);
 	}
 }
@@ -81,21 +81,22 @@ AudioRegionGainLine::start_drag_single (ControlPoint* cp, double x, float fracti
 void
 AudioRegionGainLine::remove_point (ControlPoint& cp)
 {
-	trackview.editor().begin_reversible_command (_("remove control point"));
+	PublicEditor& e (PublicEditor::instance());
+	e.begin_reversible_command (_("remove control point"));
 	XMLNode &before = alist->get_state();
 
 	if (!rv.audio_region()->envelope_active()) {
 		rv.audio_region()->clear_changes ();
 		rv.audio_region()->set_envelope_active(true);
-		trackview.session()->add_command(new StatefulDiffCommand (rv.audio_region()));
+		_session.add_command(new StatefulDiffCommand (rv.audio_region()));
 	}
 
-	trackview.editor ().get_selection ().clear_points ();
+	e.get_selection ().clear_points ();
 	alist->erase (cp.model());
 
-	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
-	trackview.editor().commit_reversible_command ();
-	trackview.editor().session()->set_dirty ();
+	_session.add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+	e.commit_reversible_command ();
+	_session.set_dirty ();
 }
 
 void
@@ -103,7 +104,7 @@ AudioRegionGainLine::end_drag (bool with_push, uint32_t final_index)
 {
 	if (!rv.audio_region()->envelope_active()) {
 		rv.audio_region()->set_envelope_active(true);
-		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), 0, &rv.audio_region()->get_state()));
+		_session.add_command (new MementoCommand<AudioRegion>(*(rv.audio_region().get()), 0, &rv.audio_region()->get_state()));
 	}
 
 	AutomationLine::end_drag (with_push, final_index);

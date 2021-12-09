@@ -302,6 +302,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		boost::shared_ptr<AutomationLine> line (
 			new AutomationLine (
 				ARDOUR::EventTypeMap::instance().to_symbol(_parameter),
+				PublicEditor::instance(),
+				*session(),
 				*this,
 				*_canvas_display,
 				_control->alist(),

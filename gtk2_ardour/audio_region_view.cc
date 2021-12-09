@@ -236,7 +236,7 @@ AudioRegionView::init (bool wfd)
 
 	const string line_name = _region->name() + ":gain";
 
-	gain_line.reset (new AudioRegionGainLine (line_name, *this, *group, audio_region()->envelope()));
+	gain_line.reset (new AudioRegionGainLine (line_name, *this, PublicEditor::instance(), get_time_axis_view(), *group, audio_region()->envelope()));
 
 	update_envelope_visibility ();
 	gain_line->reset ();

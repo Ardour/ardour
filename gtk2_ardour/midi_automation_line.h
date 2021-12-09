@@ -24,13 +24,17 @@ namespace ARDOUR {
 	class MidiRegion;
 }
 
+class MidiTimeAxisView;
+
 /** Stub class so that lines for MIDI AutomationRegionViews can use the correct
  *  MementoCommandBinder.
  */
 class MidiAutomationLine : public AutomationLine
 {
 public:
-	MidiAutomationLine (const std::string&, TimeAxisView&, ArdourCanvas::Item&,
+	MidiAutomationLine (const std::string&, TimeThing const &, ARDOUR::Session&,
+	                    TimeAxisView& tv,
+	                    ArdourCanvas::Item&,
 	                    boost::shared_ptr<ARDOUR::AutomationList>,
 	                    boost::shared_ptr<ARDOUR::MidiRegion>,
 	                    Evoral::Parameter);

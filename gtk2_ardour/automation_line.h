@@ -39,11 +39,14 @@
 
 #include "ardour/automation_list.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/session_handle.h"
 #include "ardour/types.h"
 
 #include "canvas/types.h"
 #include "canvas/container.h"
 #include "canvas/poly_line.h"
+
+#include "time_thing.h"
 
 class AutomationLine;
 class ControlPoint;
@@ -54,9 +57,8 @@ class Selectable;
 class Selection;
 class PublicEditor;
 
-
 /** A GUI representation of an ARDOUR::AutomationList */
-class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
+class AutomationLine : public ARDOUR::SessionHandleRef, public sigc::trackable, public PBD::StatefulDestructible
 {
 public:
 	enum VisibleAspects {
@@ -66,6 +68,8 @@ public:
 	};
 
 	AutomationLine (const std::string&                                 name,
+	                TimeThing const &                                  tt,
+	                ARDOUR::Session&                                   s,
 	                TimeAxisView&                                      tv,
 	                ArdourCanvas::Item&                                parent,
 	                boost::shared_ptr<ARDOUR::AutomationList>          al,
@@ -115,8 +119,6 @@ public:
 
 	bool get_uses_gain_mapping () const;
 
-	TimeAxisView& trackview;
-
 	ArdourCanvas::Container& canvas_group() const { return *group; }
 	ArdourCanvas::Item&  parent_group() const { return _parent_group; }
 	ArdourCanvas::Item&  grab_item() const { return *line; }
@@ -164,11 +166,15 @@ public:
 	samplepos_t session_sample_position (ARDOUR::AutomationList::const_iterator) const;
 	Temporal::timepos_t session_position (ARDOUR::AutomationList::const_iterator) const;
 
-protected:
 
-	std::string    _name;
-	guint32        _height;
-	uint32_t       _line_color;
+	TimeAxisView& trackview() { return _trackview; }
+
+  protected:
+	TimeAxisView& _trackview;
+	TimeThing const & time_thing;
+	std::string      _name;
+	guint32          _height;
+	uint32_t         _line_color;
 
 	boost::shared_ptr<ARDOUR::AutomationList> alist;
 
@@ -193,7 +199,7 @@ public:
 		ContiguousControlPoints (AutomationLine& al);
 		double clamp_dx (double dx);
 		void move (double dx, double dvalue);
-		void compute_x_bounds (PublicEditor& e);
+		void compute_x_bounds (TimeThing const & e);
 private:
 		AutomationLine& line;
 		double before_x;

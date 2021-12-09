@@ -4427,7 +4427,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 	timepos_t earliest (earliest_time);
 
 	/* XXX: not ideal, as there may be more than one track involved in the point selection */
-	_last_cut_copy_source_track = &selection->points.front()->line().trackview;
+	_last_cut_copy_source_track = &selection->points.front()->line().trackview();
 
 	/* Keep a record of the AutomationLists that we end up using in this operation */
 	typedef std::map<boost::shared_ptr<AutomationList>, AutomationRecord> Lists;

@@ -660,7 +660,7 @@ Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, C
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
 		clicked_control_point = cp;
-		clicked_axisview = &cp->line().trackview;
+		clicked_axisview = &cp->line().trackview();
 		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		clicked_regionview = 0;
 		break;
@@ -689,7 +689,7 @@ Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, Automation
 	}
 
 	clicked_control_point = 0;
-	clicked_axisview = &al->trackview;
+	clicked_axisview = &al->trackview();
 	clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 
 	return typed_event (item, event, type);
