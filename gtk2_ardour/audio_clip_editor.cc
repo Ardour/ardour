@@ -97,6 +97,11 @@ AudioClipEditor::AudioClipEditor ()
 	frame->set_fill (false);
 	frame->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::event_handler));
 
+	scroll_bar_trough = new Rectangle (root());
+	scroll_bar_handle = new Rectangle (scroll_bar_trough);
+	scroll_bar_handle->set_outline (false);
+	scroll_bar_handle->set_corner_radius (5.);
+
 	waves_container = new ArdourCanvas::ScrollGroup (frame, ScrollGroup::ScrollsHorizontally);
 	line_container = new ArdourCanvas::Container (frame);
 
@@ -233,6 +238,10 @@ AudioClipEditor::set_colors ()
 	end_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting alt")));
 	loop_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting selection")));
 
+	scroll_bar_trough->set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
+	scroll_bar_trough->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting less")));
+	scroll_bar_handle->set_fill_color (UIConfiguration::instance().color (X_("theme:contrasting clock")));
+
 	set_waveform_colors ();
 }
 
@@ -279,7 +288,7 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
 	}
 
 	set_spp_from_length (len);
-	set_wave_heights (frame->get().height() - 2.0);
+	set_wave_heights ();
 	set_waveform_colors ();
 
 	line_container->show ();
@@ -293,13 +302,18 @@ AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
 	ArdourCanvas::Rect r (1, 1, alloc.get_width() - 2, alloc.get_height() - 2);
 	frame->set (r);
 
+	const double scroll_bar_height = 10.;
+
+	scroll_bar_trough->set (Rect (1, alloc.get_height() - scroll_bar_height, alloc.get_width() - 2, alloc.get_height()));
+	scroll_bar_handle->set (Rect (30, scroll_bar_trough->get().y0 + 1, 50, scroll_bar_trough->get().y1 - 1));
+
 	position_lines ();
 
 	start_line->set_y1 (frame->get().height() - 2.);
 	end_line->set_y1 (frame->get().height() - 2.);
 	loop_line->set_y1 (frame->get().height() - 2.);
 
-	set_wave_heights (r.height() - 2.0);
+	set_wave_heights ();
 }
 
 void
@@ -324,14 +338,15 @@ AudioClipEditor::set_spp_from_length (samplecnt_t len)
 }
 
 void
-AudioClipEditor::set_wave_heights (int h)
+AudioClipEditor::set_wave_heights ()
 {
 	if (waves.empty()) {
 		return;
 	}
 
 	uint32_t n = 0;
-	Distance ht = h / waves.size();
+	const Distance w = frame->get().height() - scroll_bar_trough->get().height() - 2.;
+	Distance ht = w / waves.size();
 
 	std::cerr << "wave heights: " << ht << std::endl;
 

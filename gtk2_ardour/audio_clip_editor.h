@@ -104,9 +104,17 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	ArdourCanvas::Line* start_line;
 	ArdourCanvas::Line* end_line;
 	ArdourCanvas::Line* loop_line;
+	ArdourCanvas::Rectangle* scroll_bar_trough;
+	ArdourCanvas::Rectangle* scroll_bar_handle;
 	std::vector<ArdourWaveView::WaveView *> waves;
+	double non_wave_height;
+	samplepos_t left_origin;
+	double scroll_fraction;
 	double _spp;
 	boost::shared_ptr<ARDOUR::AudioRegion> audio_region;
+
+	void scroll_left ();
+	void scrol_right ();
 
 	enum LineType {
 		StartLine,
@@ -117,7 +125,7 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	bool event_handler (GdkEvent* ev);
 	bool line_event_handler (GdkEvent* ev, ArdourCanvas::Line*);
 	void drop_waves ();
-	void set_wave_heights (int);
+	void set_wave_heights ();
 	void set_spp_from_length (ARDOUR::samplecnt_t);
 	void set_waveform_colors ();
 	void set_colors ();
