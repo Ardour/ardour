@@ -60,6 +60,7 @@ using std::max;
 
 AudioClipEditor::AudioClipEditor ()
 	: spp (0)
+	, _current_drag (0)
 {
 	const double scale = UIConfiguration::instance().get_ui_scale();
 
@@ -83,6 +84,10 @@ AudioClipEditor::AudioClipEditor ()
 	loop_line->set (Duple (50, 0), Duple (50, 1));
 	loop_line->set_outline_width (line_width * scale);
 
+	start_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), start_line));
+	end_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), end_line));
+	loop_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), loop_line));
+
 	/* hide lines until there is a region */
 
 	line_container->hide ();
@@ -93,6 +98,66 @@ AudioClipEditor::AudioClipEditor ()
 AudioClipEditor::~AudioClipEditor ()
 {
 	drop_waves ();
+}
+
+bool
+AudioClipEditor::line_event_handler (GdkEvent* ev, ArdourCanvas::Line* l)
+{
+	std::cerr << "event type " << Gtkmm2ext::event_type_string (ev->type) << " on line "  << std::endl;
+
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		_current_drag = new LineDrag (*this, *l);
+		return true;
+
+	case GDK_BUTTON_RELEASE:
+		if (_current_drag) {
+			_current_drag->end (&ev->button);
+			delete _current_drag;
+			_current_drag = 0;
+			return true;
+		}
+		break;
+
+	case GDK_MOTION_NOTIFY:
+		if (_current_drag) {
+			_current_drag->motion (&ev->motion);
+			return true;
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	return false;
+}
+
+AudioClipEditor::LineDrag::LineDrag (AudioClipEditor& ed, ArdourCanvas::Line& l)
+	: editor (ed)
+	, line (l)
+{
+	line.grab();
+}
+
+void
+AudioClipEditor::LineDrag::begin (GdkEventButton* ev)
+{
+}
+
+void
+AudioClipEditor::LineDrag::end (GdkEventButton* ev)
+{
+	line.ungrab();
+	std::cerr << "grab end\n";
+}
+
+void
+AudioClipEditor::LineDrag::motion (GdkEventMotion* ev)
+{
+	line.set_x0 (ev->x);
+	line.set_x1 (ev->x);
+	std::cerr << "move to " << ev->x << ", " << ev->y << std::endl;
 }
 
 void

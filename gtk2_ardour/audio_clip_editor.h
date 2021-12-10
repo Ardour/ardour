@@ -81,12 +81,35 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	std::vector<ArdourWaveView::WaveView *> waves;
 	double spp;
 
+	enum LineType {
+		StartLine,
+		EndLine,
+		LoopLine,
+	};
+
 	bool event_handler (GdkEvent* ev);
+	bool line_event_handler (GdkEvent* ev, ArdourCanvas::Line*);
 	void drop_waves ();
 	void set_wave_heights (int);
 	void set_wave_spp (ARDOUR::samplecnt_t);
 	void set_waveform_colors ();
 	void set_colors ();
+
+	class LineDrag {
+	  public:
+		LineDrag (AudioClipEditor&, ArdourCanvas::Line&);
+
+		void begin (GdkEventButton*);
+		void end (GdkEventButton*);
+		void motion (GdkEventMotion*);
+
+	  private:
+		AudioClipEditor& editor;
+		ArdourCanvas::Line& line;
+	};
+
+	friend class LineDrag;
+	LineDrag* _current_drag;
 };
 
 class AudioClipEditorBox : public ClipEditorBox
