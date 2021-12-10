@@ -178,7 +178,7 @@ AudioClipEditorBox::AudioClipEditorBox ()
 	pack_start(_header_label, false, false, 6);
 
 	editor = manage (new AudioClipEditor);
-	// editor->set_size_request(600,120);
+	editor->set_size_request(600,120);
 
 	pack_start(*editor, true, true);
 	editor->show();
