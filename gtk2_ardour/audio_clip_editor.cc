@@ -103,7 +103,7 @@ AudioClipEditor::AudioClipEditor ()
 	scroll_bar_handle->set_corner_radius (5.);
 
 	waves_container = new ArdourCanvas::ScrollGroup (frame, ScrollGroup::ScrollsHorizontally);
-	line_container = new ArdourCanvas::Container (frame);
+	line_container = new ArdourCanvas::Container (waves_container);
 
 	const double line_width = 3.;
 
@@ -292,6 +292,7 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
 	set_waveform_colors ();
 
 	line_container->show ();
+	line_container->raise_to_top ();
 }
 
 void
