@@ -64,7 +64,7 @@ AudioClipEditor::AudioClipEditor ()
 
 	frame = new Rectangle (root());
 	frame->name = "audio clip editor frame";
-	frame->set_fill_color (UIConfiguration::instance().color (X_("theme:contrasting")));
+	frame->set_fill (false);
 	frame->set_outline_color (UIConfiguration::instance().color (X_("theme:darkest")));
 	frame->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::event_handler));
 }
@@ -92,16 +92,15 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
 	uint32_t n_chans = r->n_channels ();
 
 	for (uint32_t n = 0; n < n_chans; ++n) {
-		WaveView* wv = new WaveView (this, r);
+		WaveView* wv = new WaveView (frame, r);
 		wv->set_channel (n);
 		waves.push_back (wv);
 	}
 
-	int h = get_allocation().get_height ();
+	std::cerr << "Now have " << waves.size() << " waves" << std::endl;
 
-	if (h) {
-		set_wave_heights (h);
-	}
+	set_wave_heights (frame->get().height() - 2.0);
+	set_waveform_colors ();
 }
 
 void
@@ -125,12 +124,15 @@ AudioClipEditor::set_wave_heights (int h)
 	uint32_t n = 0;
 	Distance ht = h / waves.size();
 
+	std::cerr << "wave heights: " << ht << std::endl;
+
 	for (auto & wave : waves) {
 		wave->set_height (ht);
 		wave->set_y_position (n * ht);
-		wave->set_samples_per_pixel (8192);
+		wave->set_samples_per_pixel (256);
 		wave->set_show_zero_line (false);
 		wave->set_clip_level (1.0);
+		++n;
 	}
 }
 
@@ -191,11 +193,18 @@ AudioClipEditorBox::~AudioClipEditorBox ()
 void
 AudioClipEditorBox::set_region (boost::shared_ptr<Region> r)
 {
+	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
+
+	if (!ar) {
+		return;
+	}
+
 	set_session(&r->session());
 
 	state_connection.disconnect();
 
 	_region = r;
+	editor->set_region (ar);
 
 	PBD::PropertyChange interesting_stuff;
 	region_changed(interesting_stuff);
