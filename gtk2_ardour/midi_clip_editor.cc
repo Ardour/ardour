@@ -41,26 +41,24 @@
 #include "region_view.h"
 #include "ui_config.h"
 
-#include "midi_region_trimmer_box.h"
+#include "midi_clip_editor.h"
 
 #include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace ARDOUR;
-using namespace ArdourWidgets;
+using namespace ArdourCanvas;
 using std::min;
 using std::max;
 
 /* ------------ */
 
-MidiTrimmerCanvas::MidiTrimmerCanvas (ArdourCanvas::Item* parent)
-	: Rectangle (parent)
+MidiClipEditor::MidiClipEditor ()
 {
 //	set_homogenous (true);
 //	set_row_spacing (4);
 
-	set_fill_color (UIConfiguration::instance().color (X_("theme:darkest")));
-	set_fill (true);
+	set_background_color (UIConfiguration::instance().color (X_("theme:darkest")));
 
 	const double scale = UIConfiguration::instance().get_ui_scale();
 	const double width = 600. * scale;
@@ -68,42 +66,23 @@ MidiTrimmerCanvas::MidiTrimmerCanvas (ArdourCanvas::Item* parent)
 
 //	name = string_compose ("trigger %1", _trigger.index());
 
-	Event.connect (sigc::mem_fun (*this, &MidiTrimmerCanvas::event_handler));
+	frame = new Rectangle (this);
 
 	ArdourCanvas::Rect r (0, 0, width, height);
-	set (r);
-	set_outline_all ();
-	
+	frame->set (r);
+	frame->set_outline_all ();
+
+	frame->Event.connect (sigc::mem_fun (*this, &MidiClipEditor::event_handler));
+
 //	selection_connection = PublicEditor::instance().get_selection().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerBoxUI::selection_changed));
 }
 
-MidiTrimmerCanvas::~MidiTrimmerCanvas ()
+MidiClipEditor::~MidiClipEditor ()
 {
-}
-
-void
-MidiTrimmerCanvas::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
-{
-//	ArdourCanvas::Rect self (item_to_window (_rect, NO_ROUND));
-//	boost::optional<ArdourCanvas::Rect> i = self.intersection (area);
-//	if (!i) {
-//		return;
-//	}
-	cr->set_identity_matrix();
-	cr->translate (area.x0, area.y0-0.5);  //should be self
-
-	float height = area.height();  //should be self
-	float width = area.width();
-
-	//black border...this should be in draw_bg
-	Gtkmm2ext::set_source_rgba (cr, Gtkmm2ext::rgba_to_color (0,0,0,1));
-	cr->set_line_width(1);
-	cr->rectangle(0, 0, width, height);
-	cr->fill ();
 }
 
 bool
-MidiTrimmerCanvas::event_handler (GdkEvent* ev)
+MidiClipEditor::event_handler (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
@@ -122,61 +101,33 @@ MidiTrimmerCanvas::event_handler (GdkEvent* ev)
 	return false;
 }
 
-/* ------------ */
-
-MidiTrimmerBoxWidget::MidiTrimmerBoxWidget ()
-{
-	trimmer = new MidiTrimmerCanvas (root());
-	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
-}
-
-void
-MidiTrimmerBoxWidget::size_request (double& w, double& h) const
-{
-	trimmer->size_request (w, h);
-	w=600;
-	h=210;
-}
-
-void
-MidiTrimmerBoxWidget::on_map ()
-{
-	GtkCanvas::on_map ();
-}
-
-void
-MidiTrimmerBoxWidget::on_unmap ()
-{
-	GtkCanvas::on_unmap ();
-}
-
 /* ====================================================== */
 
-MidiRegionTrimmerBox::MidiRegionTrimmerBox ()
+MidiClipEditorBox::MidiClipEditorBox ()
 {
 	_header_label.set_text(_("MIDI Region Trimmer:"));
 	_header_label.set_alignment(0.0, 0.5);
 	pack_start(_header_label, false, false, 6);
 
-	trimmer_widget = manage (new MidiTrimmerBoxWidget());
-	trimmer_widget->set_size_request(600,120);
+	editor = manage (new MidiClipEditor());
+	editor->set_size_request(600,120);
 
-	pack_start(*trimmer_widget, true, true);
-	trimmer_widget->show();
+	pack_start(*editor, true, true);
+	editor->show();
 }
 
-MidiRegionTrimmerBox::~MidiRegionTrimmerBox ()
+MidiClipEditorBox::~MidiClipEditorBox ()
 {
 }
 
 void
-MidiRegionTrimmerBox::set_session (Session* s)
+MidiClipEditorBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 }
 
 void
-MidiRegionTrimmerBox::set_region (boost::shared_ptr<Region> r)
+MidiClipEditorBox::set_region (boost::shared_ptr<Region> r)
 {
 	set_session(&r->session());
 
@@ -187,11 +138,11 @@ MidiRegionTrimmerBox::set_region (boost::shared_ptr<Region> r)
 	PBD::PropertyChange interesting_stuff;
 	region_changed(interesting_stuff);
 
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&MidiRegionTrimmerBox::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&MidiClipEditorBox::region_changed, this, _1), gui_context());
 }
 
 void
-MidiRegionTrimmerBox::region_changed (const PBD::PropertyChange& what_changed)
+MidiClipEditorBox::region_changed (const PBD::PropertyChange& what_changed)
 {
 //ToDo:  refactor the region_editor.cc  to cover this basic stuff
 //	if (what_changed.contains (ARDOUR::Properties::name)) {

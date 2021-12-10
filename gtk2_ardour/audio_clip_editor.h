@@ -47,46 +47,33 @@ namespace ArdourCanvas {
 	class Polygon;
 };
 
-class RegionTrimmerBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+class ClipEditorBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
 public:
-	RegionTrimmerBox () {}
-	~RegionTrimmerBox () {}
+	ClipEditorBox () {}
+	~ClipEditorBox () {}
 
 	virtual void set_region (boost::shared_ptr<ARDOUR::Region>) =0;
 };
 
 
-class AudioTrimmerCanvas : public ArdourCanvas::Rectangle
+class AudioClipEditor : public ArdourCanvas::GtkCanvas
 {
-  public:
-	AudioTrimmerCanvas (ArdourCanvas::Item* parent);
-	~AudioTrimmerCanvas ();
-
-	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
-
-//	void _size_allocate (ArdourCanvas::Rect const &);
-	bool event_handler (GdkEvent*);
-};
-
-class AudioTrimmerBoxWidget : public ArdourCanvas::GtkCanvas
-{
-  public:
-	AudioTrimmerBoxWidget ();
-	void size_request (double& w, double& h) const;
-
-	void on_map ();
-	void on_unmap ();
+   public:
+	AudioClipEditor ();
+	~AudioClipEditor ();
 
   private:
-	AudioTrimmerCanvas* trimmer;
+	ArdourCanvas::Rectangle* frame;
+	bool event_handler (GdkEvent* ev);
+
 };
 
-class AudioRegionTrimmerBox : public RegionTrimmerBox
+class AudioClipEditorBox : public ClipEditorBox
 {
 public:
-	AudioRegionTrimmerBox ();
-	~AudioRegionTrimmerBox ();
+	AudioClipEditorBox ();
+	~AudioClipEditorBox ();
 
 	void set_region (boost::shared_ptr<ARDOUR::Region>);
 	void region_changed (const PBD::PropertyChange& what_changed);
@@ -95,7 +82,7 @@ private:
 	Gtk::Label _header_label;
 	Gtk::Table table;
 
-	AudioTrimmerBoxWidget *trimmer_widget;
+	AudioClipEditor *editor;
 
 	PBD::ScopedConnection state_connection;
 

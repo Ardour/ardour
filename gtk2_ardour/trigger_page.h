@@ -38,8 +38,8 @@ class AudioRegionPropertiesBox;
 class MidiRegionPropertiesBox;
 class AudioRegionOperationsBox;
 class MidiRegionOperationsBox;
-class AudioRegionTrimmerBox;
-class MidiRegionTrimmerBox;
+class AudioClipEditorBox;
+class MidiClipEditorBox;
 
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
@@ -96,11 +96,11 @@ private:
 
 	AudioRegionPropertiesBox* _audio_prop_box;
 	AudioRegionOperationsBox* _audio_ops_box;
-	AudioRegionTrimmerBox*    _audio_trim_box;
+	AudioClipEditorBox*    _audio_trim_box;
 
 	MidiRegionPropertiesBox* _midi_prop_box;
 	MidiRegionOperationsBox* _midi_ops_box;
-	MidiRegionTrimmerBox*    _midi_trim_box;
+	MidiClipEditorBox*    _midi_trim_box;
 
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;

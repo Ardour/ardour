@@ -42,7 +42,7 @@
 #include "audio_region_operations_box.h"
 #include "midi_region_operations_box.h"
 #include "slot_properties_box.h"
-#include "midi_region_trimmer_box.h"
+#include "midi_clip_editor.h"
 
 #include "trigger_page.h"
 #include "trigger_strip.h"
@@ -88,8 +88,8 @@ TriggerPage::TriggerPage ()
 	_audio_ops_box = new AudioRegionOperationsBox ();
 	_midi_ops_box = new MidiRegionOperationsBox ();
 
-	_audio_trim_box = new AudioRegionTrimmerBox ();
-	_midi_trim_box = new MidiRegionTrimmerBox ();
+	_audio_trim_box = new AudioClipEditorBox ();
+	_midi_trim_box = new MidiClipEditorBox ();
 
 	Gtk::Table* table = manage (new Gtk::Table);
 	table->set_homogeneous (false);

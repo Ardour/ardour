@@ -31,11 +31,10 @@
 
 #include "gtkmm2ext/cairo_packer.h"
 
-#include "canvas/table.h"
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 
-#include "audio_region_trimmer_box.h"
+#include "audio_clip_editor.h"
 
 #include "audio_clock.h"
 
@@ -49,36 +48,22 @@ namespace ArdourCanvas {
 	class Polygon;
 };
 
-class MidiTrimmerCanvas : public ArdourCanvas::Rectangle
+class MidiClipEditor : public ArdourCanvas::GtkCanvas
 {
   public:
-	MidiTrimmerCanvas (ArdourCanvas::Item* parent);
-	~MidiTrimmerCanvas ();
-
-	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
-
-//	void _size_allocate (ArdourCanvas::Rect const &);
-	bool event_handler (GdkEvent*);
-};
-
-class MidiTrimmerBoxWidget : public ArdourCanvas::GtkCanvas
-{
-  public:
-	MidiTrimmerBoxWidget ();
-	void size_request (double& w, double& h) const;
-
-	void on_map ();
-	void on_unmap ();
+	MidiClipEditor ();
+	~MidiClipEditor ();
 
   private:
-	MidiTrimmerCanvas* trimmer;
+	ArdourCanvas::Rectangle* frame;
+	bool event_handler (GdkEvent* ev);
 };
 
-class MidiRegionTrimmerBox : public RegionTrimmerBox
+class MidiClipEditorBox : public ClipEditorBox
 {
 public:
-	MidiRegionTrimmerBox ();
-	~MidiRegionTrimmerBox ();
+	MidiClipEditorBox ();
+	~MidiClipEditorBox ();
 
 	void set_session (ARDOUR::Session*);
 
@@ -89,7 +74,7 @@ private:
 	Gtk::Label _header_label;
 	Gtk::Table table;
 
-	MidiTrimmerBoxWidget *trimmer_widget;
+	MidiClipEditor *editor;
 
 	PBD::ScopedConnection state_connection;
 

@@ -37,7 +37,7 @@
 #include "audio_region_operations_box.h"
 #include "midi_region_operations_box.h"
 #include "slot_properties_box.h"
-#include "midi_region_trimmer_box.h"
+#include "midi_clip_editor.h"
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -401,11 +401,11 @@ TriggerWindow::TriggerWindow (Trigger* slot)
 		if (slot->region()->data_type() == DataType::AUDIO) {
 			_prop_box = manage(new AudioRegionPropertiesBox ());
 			_ops_box = manage(new AudioRegionOperationsBox ());
-			_trim_box = manage(new AudioRegionTrimmerBox ());
+			_trim_box = manage(new AudioClipEditorBox ());
 		} else {
 			_prop_box = manage(new MidiRegionPropertiesBox ());
 			_ops_box = manage(new MidiRegionOperationsBox ());
-			_trim_box = manage(new MidiRegionTrimmerBox ());
+			_trim_box = manage(new MidiClipEditorBox ());
 		}
 		
 		_prop_box->set_region(slot->region());
