@@ -71,7 +71,7 @@ AudioClipEditor::AudioClipEditor ()
 	frame->set_fill (false);
 	frame->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::event_handler));
 
-	waves_container = new ArdourCanvas::Container (frame);
+	waves_container = new ArdourCanvas::ScrollGroup (frame, ScrollGroup::ScrollsHorizontally);
 	line_container = new ArdourCanvas::Container (frame);
 
 	const double line_width = 3.;

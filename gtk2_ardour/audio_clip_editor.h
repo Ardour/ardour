@@ -30,14 +30,17 @@
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
 
+#include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/cairo_packer.h"
 
 #include "widgets/ardour_button.h"
 
 #include "canvas/canvas.h"
 #include "canvas/container.h"
-#include "canvas/rectangle.h"
 #include "canvas/line.h"
+#include "canvas/rectangle.h"
+#include "canvas/scroll_group.h"
 
 #include "audio_clock.h"
 
@@ -79,9 +82,11 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	void set_spp (double);
 	double spp() const { return _spp; }
 
+	bool key_press (GdkEventKey*);
+
   private:
 	ArdourCanvas::Rectangle* frame;
-	ArdourCanvas::Container* waves_container;
+	ArdourCanvas::ScrollGroup* waves_container;
 	ArdourCanvas::Container* line_container;
 	ArdourCanvas::Line* start_line;
 	ArdourCanvas::Line* end_line;
