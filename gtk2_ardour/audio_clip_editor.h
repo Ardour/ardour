@@ -47,6 +47,10 @@ namespace ArdourCanvas {
 	class Polygon;
 };
 
+namespace ArdourWaveView {
+class WaveView;
+}
+
 class ClipEditorBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
 public:
@@ -56,17 +60,24 @@ public:
 	virtual void set_region (boost::shared_ptr<ARDOUR::Region>) =0;
 };
 
-
 class AudioClipEditor : public ArdourCanvas::GtkCanvas
 {
    public:
 	AudioClipEditor ();
 	~AudioClipEditor ();
 
+	void set_region (boost::shared_ptr<ARDOUR::AudioRegion>);
+	void on_size_allocate (Gtk::Allocation&);
+
   private:
 	ArdourCanvas::Rectangle* frame;
 	bool event_handler (GdkEvent* ev);
 
+	std::vector<ArdourWaveView::WaveView *> waves;
+
+	void drop_waves ();
+	void set_wave_heights (int);
+	void set_waveform_colors ();
 };
 
 class AudioClipEditorBox : public ClipEditorBox

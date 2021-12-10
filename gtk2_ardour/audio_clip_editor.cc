@@ -28,12 +28,16 @@
 #include "canvas/debug.h"
 #include "canvas/utils.h"
 
+#include "waveview/wave_view.h"
+
+#include "ardour/audioregion.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
 
 #include "widgets/ardour_button.h"
 
+#include "audio_clip_editor.h"
 #include "audio_clock.h"
 #include "automation_line.h"
 #include "control_point.h"
@@ -41,13 +45,12 @@
 #include "region_view.h"
 #include "ui_config.h"
 
-#include "audio_clip_editor.h"
-
 #include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace ARDOUR;
 using namespace ArdourCanvas;
+using namespace ArdourWaveView;
 using std::min;
 using std::max;
 
@@ -55,32 +58,97 @@ using std::max;
 
 AudioClipEditor::AudioClipEditor ()
 {
-//	set_homogenous (true);
-//	set_row_spacing (4);
-
-	set_background_color (UIConfiguration::instance().color (X_("theme:darkest")));
+	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
 
 	const double scale = UIConfiguration::instance().get_ui_scale();
-	const double width = 600. * scale;
-	const double height = 210. * scale;
 
-//	name = string_compose ("trigger %1", _trigger.index());
-
-	frame = new Rectangle (this);
-
-	ArdourCanvas::Rect r (0, 0, width, height);
-	frame->set (r);
-	frame->set_outline_all ();
-
+	frame = new Rectangle (root());
+	frame->name = "audio clip editor frame";
+	frame->set_fill_color (UIConfiguration::instance().color (X_("theme:contrasting")));
+	frame->set_outline_color (UIConfiguration::instance().color (X_("theme:darkest")));
 	frame->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::event_handler));
-
-//	selection_connection = PublicEditor::instance().get_selection().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerBoxUI::selection_changed));
 }
 
 AudioClipEditor::~AudioClipEditor ()
 {
+	drop_waves ();
 }
 
+void
+AudioClipEditor::drop_waves ()
+{
+	for (auto & wave : waves) {
+		delete wave;
+	}
+
+	waves.clear ();
+}
+
+void
+AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
+{
+	drop_waves ();
+
+	uint32_t n_chans = r->n_channels ();
+
+	for (uint32_t n = 0; n < n_chans; ++n) {
+		WaveView* wv = new WaveView (this, r);
+		wv->set_channel (n);
+		waves.push_back (wv);
+	}
+
+	int h = get_allocation().get_height ();
+
+	if (h) {
+		set_wave_heights (h);
+	}
+}
+
+void
+AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
+{
+	GtkCanvas::on_size_allocate (alloc);
+
+	ArdourCanvas::Rect r (1, 1, alloc.get_width() - 2, alloc.get_height() - 2);
+	frame->set (r);
+
+	set_wave_heights (r.height() - 2.0);
+}
+
+void
+AudioClipEditor::set_wave_heights (int h)
+{
+	if (waves.empty()) {
+		return;
+	}
+
+	uint32_t n = 0;
+	Distance ht = h / waves.size();
+
+	for (auto & wave : waves) {
+		wave->set_height (ht);
+		wave->set_y_position (n * ht);
+		wave->set_samples_per_pixel (8192);
+		wave->set_show_zero_line (false);
+		wave->set_clip_level (1.0);
+	}
+}
+
+void
+AudioClipEditor::set_waveform_colors ()
+{
+	Gtkmm2ext::Color clip = UIConfiguration::instance().color ("clipped waveform");
+	Gtkmm2ext::Color zero = UIConfiguration::instance().color ("zero line");
+	Gtkmm2ext::Color fill = UIConfiguration::instance().color ("waveform fill");
+	Gtkmm2ext::Color outline = UIConfiguration::instance().color ("waveform outline");
+
+	for (auto & wave : waves) {
+		wave->set_fill_color (fill);
+		wave->set_outline_color (outline);
+		wave->set_clip_color (clip);
+		wave->set_zero_color (zero);
+	}
+}
 bool
 AudioClipEditor::event_handler (GdkEvent* ev)
 {
@@ -110,7 +178,7 @@ AudioClipEditorBox::AudioClipEditorBox ()
 	pack_start(_header_label, false, false, 6);
 
 	editor = manage (new AudioClipEditor);
-	editor->set_size_request(600,120);
+	// editor->set_size_request(600,120);
 
 	pack_start(*editor, true, true);
 	editor->show();
