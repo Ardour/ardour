@@ -71,15 +71,19 @@ AudioClipEditor::AudioClipEditor ()
 	waves_container = new ArdourCanvas::Container (frame);
 	line_container = new ArdourCanvas::Container (frame);
 
+	const double line_width = 3.;
+
 	start_line = new Line (line_container);
 	start_line->set (Duple (10, 0), Duple (10, 1));
-	start_line->set_outline_width (2. * scale);
+	start_line->set_outline_width (line_width * scale);
 	end_line = new Line (line_container);
 	end_line->set (Duple (30, 0), Duple (30, 1));
-	end_line->set_outline_width (2. * scale);
+	end_line->set_outline_width (line_width * scale);
 	loop_line = new Line (line_container);
 	loop_line->set (Duple (50, 0), Duple (50, 1));
-	loop_line->set_outline_width (2. * scale);
+	loop_line->set_outline_width (line_width * scale);
+
+	/* hide lines until there is a region */
 
 	line_container->hide ();
 
@@ -96,7 +100,7 @@ AudioClipEditor::set_colors ()
 {
 	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
 
-	frame->set_outline_color (UIConfiguration::instance().color (X_("theme:darkest")));
+	frame->set_outline_color (UIConfiguration::instance().color (X_("neutral:midground")));
 
 	start_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting clock")));
 	end_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting alt")));
