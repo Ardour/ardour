@@ -32,6 +32,8 @@
 
 #include "gtkmm2ext/cairo_packer.h"
 
+#include "widgets/ardour_button.h"
+
 #include "canvas/canvas.h"
 #include "canvas/container.h"
 #include "canvas/rectangle.h"
@@ -71,6 +73,12 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	void set_region (boost::shared_ptr<ARDOUR::AudioRegion>);
 	void on_size_allocate (Gtk::Allocation&);
 
+	double sample_to_pixel (ARDOUR::samplepos_t);
+	samplepos_t pixel_to_sample (double);
+
+	void set_spp (double);
+	double spp() const { return _spp; }
+
   private:
 	ArdourCanvas::Rectangle* frame;
 	ArdourCanvas::Container* waves_container;
@@ -79,7 +87,8 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	ArdourCanvas::Line* end_line;
 	ArdourCanvas::Line* loop_line;
 	std::vector<ArdourWaveView::WaveView *> waves;
-	double spp;
+	double _spp;
+	boost::shared_ptr<ARDOUR::AudioRegion> audio_region;
 
 	enum LineType {
 		StartLine,
@@ -91,9 +100,10 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	bool line_event_handler (GdkEvent* ev, ArdourCanvas::Line*);
 	void drop_waves ();
 	void set_wave_heights (int);
-	void set_wave_spp (ARDOUR::samplecnt_t);
+	void set_spp_from_length (ARDOUR::samplecnt_t);
 	void set_waveform_colors ();
 	void set_colors ();
+	void position_lines ();
 
 	class LineDrag {
 	  public:
@@ -122,6 +132,9 @@ public:
 	void region_changed (const PBD::PropertyChange& what_changed);
 
 private:
+	Gtk::HBox  header_box;
+	ArdourWidgets::ArdourButton zoom_in_button;
+	ArdourWidgets::ArdourButton zoom_out_button;
 	Gtk::Label _header_label;
 	Gtk::Table table;
 
@@ -130,6 +143,9 @@ private:
 	PBD::ScopedConnection state_connection;
 
 	boost::shared_ptr<ARDOUR::Region> _region;
+
+	void zoom_in_click ();
+	void zoom_out_click ();
 };
 
 #endif /* __audio_region_trimmer_box_h__ */

@@ -38,6 +38,7 @@
 #include "ardour/source.h"
 
 #include "widgets/ardour_button.h"
+#include "widgets/ardour_icon.h"
 
 #include "audio_clip_editor.h"
 #include "audio_clock.h"
@@ -53,13 +54,14 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace ArdourCanvas;
 using namespace ArdourWaveView;
+using namespace ArdourWidgets;
 using std::min;
 using std::max;
 
 /* ------------ */
 
 AudioClipEditor::AudioClipEditor ()
-	: spp (0)
+	: _spp (0)
 	, _current_drag (0)
 {
 	const double scale = UIConfiguration::instance().get_ui_scale();
@@ -75,13 +77,10 @@ AudioClipEditor::AudioClipEditor ()
 	const double line_width = 3.;
 
 	start_line = new Line (line_container);
-	start_line->set (Duple (10, 0), Duple (10, 1));
 	start_line->set_outline_width (line_width * scale);
 	end_line = new Line (line_container);
-	end_line->set (Duple (30, 0), Duple (30, 1));
 	end_line->set_outline_width (line_width * scale);
 	loop_line = new Line (line_container);
-	loop_line->set (Duple (50, 0), Duple (50, 1));
 	loop_line->set_outline_width (line_width * scale);
 
 	start_line->Event.connect (sigc::bind (sigc::mem_fun (*this, &AudioClipEditor::line_event_handler), start_line));
@@ -132,6 +131,33 @@ AudioClipEditor::line_event_handler (GdkEvent* ev, ArdourCanvas::Line* l)
 
 	return false;
 }
+
+void
+AudioClipEditor::position_lines ()
+{
+	if (!audio_region) {
+		return;
+	}
+
+	start_line->set_x0 (sample_to_pixel (audio_region->start().samples()));
+	start_line->set_x1 (sample_to_pixel (audio_region->start().samples()));
+
+	end_line->set_x0 (sample_to_pixel (audio_region->end().samples()));
+	end_line->set_x1 (sample_to_pixel (audio_region->end().samples()));
+}
+
+double
+AudioClipEditor::sample_to_pixel (samplepos_t s)
+{
+	return s / _spp;
+}
+
+samplepos_t
+AudioClipEditor::pixel_to_sample (double p)
+{
+	return p * _spp;
+}
+
 
 AudioClipEditor::LineDrag::LineDrag (AudioClipEditor& ed, ArdourCanvas::Line& l)
 	: editor (ed)
@@ -189,6 +215,8 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
 {
 	drop_waves ();
 
+	audio_region = r;
+
 	uint32_t n_chans = r->n_channels ();
 	samplecnt_t len;
 
@@ -214,7 +242,7 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
 		waves.push_back (wv);
 	}
 
-	set_wave_spp (len);
+	set_spp_from_length (len);
 	set_wave_heights (frame->get().height() - 2.0);
 	set_waveform_colors ();
 
@@ -229,6 +257,8 @@ AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
 	ArdourCanvas::Rect r (1, 1, alloc.get_width() - 2, alloc.get_height() - 2);
 	frame->set (r);
 
+	position_lines ();
+
 	start_line->set_y1 (frame->get().height() - 2.);
 	end_line->set_y1 (frame->get().height() - 2.);
 	loop_line->set_y1 (frame->get().height() - 2.);
@@ -237,14 +267,24 @@ AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
 }
 
 void
-AudioClipEditor::set_wave_spp (samplecnt_t len)
+AudioClipEditor::set_spp (double samples_per_pixel)
 {
-	double available_width = frame->get().width();
-	spp = floor (len / available_width);
+	_spp = samples_per_pixel;
+
+	position_lines ();
 
 	for (auto & wave : waves) {
-		wave->set_samples_per_pixel (spp);
+		wave->set_samples_per_pixel (_spp);
 	}
+}
+
+void
+AudioClipEditor::set_spp_from_length (samplecnt_t len)
+{
+	double available_width = frame->get().width();
+	double s = floor (len / available_width);
+
+	set_spp (s);
 }
 
 void
@@ -307,7 +347,18 @@ AudioClipEditorBox::AudioClipEditorBox ()
 {
 	_header_label.set_text(_("AUDIO Region Trimmer:"));
 	_header_label.set_alignment(0.0, 0.5);
-	pack_start(_header_label, false, false, 6);
+
+	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
+	zoom_out_button.set_icon (ArdourIcon::ZoomOut);
+
+	zoom_in_button.signal_clicked.connect (sigc::mem_fun (*this, &AudioClipEditorBox::zoom_in_click));
+	zoom_out_button.signal_clicked.connect (sigc::mem_fun (*this, &AudioClipEditorBox::zoom_out_click));
+
+	header_box.pack_start (_header_label, false, false);
+	header_box.pack_start (zoom_in_button, false, false);
+	header_box.pack_start (zoom_out_button, false, false);
+
+	pack_start(header_box, false, false, 6);
 
 	editor = manage (new AudioClipEditor);
 	editor->set_size_request(600,120);
@@ -318,6 +369,19 @@ AudioClipEditorBox::AudioClipEditorBox ()
 
 AudioClipEditorBox::~AudioClipEditorBox ()
 {
+	delete editor;
+}
+
+void
+AudioClipEditorBox::zoom_in_click ()
+{
+	editor->set_spp (editor->spp() / 2.);
+}
+
+void
+AudioClipEditorBox::zoom_out_click ()
+{
+	editor->set_spp (editor->spp() * 2.);
 }
 
 void
