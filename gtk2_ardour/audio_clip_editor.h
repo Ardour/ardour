@@ -65,6 +65,19 @@ public:
 	~ClipEditorBox () {}
 
 	virtual void set_region (boost::shared_ptr<ARDOUR::Region>) =0;
+
+	static void init ();
+	static void register_clip_editor_actions (Gtkmm2ext::Bindings*);
+	static Glib::RefPtr<Gtk::ActionGroup> clip_editor_actions;
+};
+
+class ClipEditor
+{
+   public:
+	virtual ~ClipEditor() {}
+
+	virtual void zoom_in () = 0;
+	virtual void zoom_out () = 0;
 };
 
 class AudioClipEditor : public ArdourCanvas::GtkCanvas

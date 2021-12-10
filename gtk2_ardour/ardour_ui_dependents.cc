@@ -42,6 +42,7 @@
 #include "actions.h"
 #include "ardour_message.h"
 #include "ardour_ui.h"
+#include "audio_clip_editor.h"
 #include "public_editor.h"
 #include "meterbridge.h"
 #include "luainstance.h"
@@ -92,6 +93,7 @@ ARDOUR_UI::we_have_dependents ()
 	ProcessorBox::register_actions ();
 	StepEntry::setup_actions_and_bindings ();
 	TriggerBoxUI::setup_actions_and_bindings ();
+	ClipEditorBox::init ();
 
 	/* Global, editor, mixer, processor box actions are defined now. Link
 	   them with any bindings, so that GTK does not get a chance to define

@@ -51,12 +51,38 @@
 #include "pbd/i18n.h"
 
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace ArdourCanvas;
 using namespace ArdourWaveView;
 using namespace ArdourWidgets;
 using std::min;
 using std::max;
+
+
+Glib::RefPtr<Gtk::ActionGroup> ClipEditorBox::clip_editor_actions;
+
+void
+ClipEditorBox::init ()
+{
+	Bindings* bindings = Bindings::get_bindings (X_("Clip Editing"));
+
+	register_clip_editor_actions (bindings);
+
+	//_track_canvas_viewport->canvas()->set_data ("ardour-bindings",
+	//midi_bindings);
+}
+
+void
+ClipEditorBox::register_clip_editor_actions (Bindings* clip_editor_bindings)
+{
+	clip_editor_actions = ActionManager::create_action_group (clip_editor_bindings, X_("ClipEditing"));
+
+	/* two versions to allow same action for Delete and Backspace */
+
+	// ActionManager::register_action (clip_editor_actions, X_("zoom-in"), _("Zoom In"), sigc::mem_fun (*this, &ClipEditorBox::zoom_in));
+	// ActionManager::register_action (clip_editor_actions, X_("zoom-in"), _("Zoom In"), sigc::mem_fun (*this, &ClipEditorBox::zoom_out));
+}
 
 /* ------------ */
 
@@ -125,10 +151,20 @@ AudioClipEditor::line_event_handler (GdkEvent* ev, ArdourCanvas::Line* l)
 		}
 		break;
 
+
+	case GDK_KEY_PRESS:
+		return key_press (&ev->key);
+
 	default:
 		break;
 	}
 
+	return false;
+}
+
+bool
+AudioClipEditor::key_press (GdkEventKey* ev)
+{
 	return false;
 }
 

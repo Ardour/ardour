@@ -1,0 +1,6 @@
+<Bindings name="Clip Editing">
+  <Press>
+     <Binding key="equal" action="ClipEditing/zoom-in"/>
+     <Binding key="minus" action="ClipEditing/zoom-in"/>
+  </Press>
+</Bindings>
