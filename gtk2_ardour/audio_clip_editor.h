@@ -27,6 +27,7 @@
 #include <gtkmm/table.h>
 
 #include "ardour/ardour.h"
+#include "ardour/types.h"
 #include "ardour/session_handle.h"
 
 #include "gtkmm2ext/cairo_packer.h"
@@ -71,12 +72,13 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 
   private:
 	ArdourCanvas::Rectangle* frame;
-	bool event_handler (GdkEvent* ev);
-
 	std::vector<ArdourWaveView::WaveView *> waves;
+	double spp;
 
+	bool event_handler (GdkEvent* ev);
 	void drop_waves ();
 	void set_wave_heights (int);
+	void set_wave_spp (ARDOUR::samplecnt_t);
 	void set_waveform_colors ();
 };
 

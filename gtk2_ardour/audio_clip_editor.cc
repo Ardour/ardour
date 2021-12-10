@@ -33,7 +33,9 @@
 #include "ardour/audioregion.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
+#include "ardour/region_factory.h"
 #include "ardour/session.h"
+#include "ardour/source.h"
 
 #include "widgets/ardour_button.h"
 
@@ -57,6 +59,7 @@ using std::max;
 /* ------------ */
 
 AudioClipEditor::AudioClipEditor ()
+	: spp (0)
 {
 	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
 
@@ -90,15 +93,31 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
 	drop_waves ();
 
 	uint32_t n_chans = r->n_channels ();
+	samplecnt_t len;
+
+	len = r->source (0)->length().samples ();
 
 	for (uint32_t n = 0; n < n_chans; ++n) {
-		WaveView* wv = new WaveView (frame, r);
+
+		boost::shared_ptr<Region> wr = RegionFactory::get_whole_region_for_source (r->source (n));
+		if (!wr) {
+			continue;
+		}
+
+		boost::shared_ptr<AudioRegion> war = boost::dynamic_pointer_cast<AudioRegion> (wr);
+		if (!war) {
+			continue;
+		}
+
+		WaveView* wv = new WaveView (frame, war);
 		wv->set_channel (n);
+		wv->set_show_zero_line (false);
+		wv->set_clip_level (1.0);
+
 		waves.push_back (wv);
 	}
 
-	std::cerr << "Now have " << waves.size() << " waves" << std::endl;
-
+	set_wave_spp (len);
 	set_wave_heights (frame->get().height() - 2.0);
 	set_waveform_colors ();
 }
@@ -112,6 +131,17 @@ AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
 	frame->set (r);
 
 	set_wave_heights (r.height() - 2.0);
+}
+
+void
+AudioClipEditor::set_wave_spp (samplecnt_t len)
+{
+	double available_width = frame->get().width();
+	spp = floor (len / available_width);
+
+	for (auto & wave : waves) {
+		wave->set_samples_per_pixel (spp);
+	}
 }
 
 void
@@ -129,9 +159,6 @@ AudioClipEditor::set_wave_heights (int h)
 	for (auto & wave : waves) {
 		wave->set_height (ht);
 		wave->set_y_position (n * ht);
-		wave->set_samples_per_pixel (256);
-		wave->set_show_zero_line (false);
-		wave->set_clip_level (1.0);
 		++n;
 	}
 }
