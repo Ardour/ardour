@@ -61,20 +61,48 @@ using std::max;
 AudioClipEditor::AudioClipEditor ()
 	: spp (0)
 {
-	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
-
 	const double scale = UIConfiguration::instance().get_ui_scale();
 
 	frame = new Rectangle (root());
 	frame->name = "audio clip editor frame";
 	frame->set_fill (false);
-	frame->set_outline_color (UIConfiguration::instance().color (X_("theme:darkest")));
 	frame->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::event_handler));
+
+	waves_container = new ArdourCanvas::Container (frame);
+	line_container = new ArdourCanvas::Container (frame);
+
+	start_line = new Line (line_container);
+	start_line->set (Duple (10, 0), Duple (10, 1));
+	start_line->set_outline_width (2. * scale);
+	end_line = new Line (line_container);
+	end_line->set (Duple (30, 0), Duple (30, 1));
+	end_line->set_outline_width (2. * scale);
+	loop_line = new Line (line_container);
+	loop_line->set (Duple (50, 0), Duple (50, 1));
+	loop_line->set_outline_width (2. * scale);
+
+	line_container->hide ();
+
+	set_colors ();
 }
 
 AudioClipEditor::~AudioClipEditor ()
 {
 	drop_waves ();
+}
+
+void
+AudioClipEditor::set_colors ()
+{
+	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
+
+	frame->set_outline_color (UIConfiguration::instance().color (X_("theme:darkest")));
+
+	start_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting clock")));
+	end_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting alt")));
+	loop_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting selection")));
+
+	set_waveform_colors ();
 }
 
 void
@@ -109,7 +137,7 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
 			continue;
 		}
 
-		WaveView* wv = new WaveView (frame, war);
+		WaveView* wv = new WaveView (waves_container, war);
 		wv->set_channel (n);
 		wv->set_show_zero_line (false);
 		wv->set_clip_level (1.0);
@@ -120,6 +148,8 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
 	set_wave_spp (len);
 	set_wave_heights (frame->get().height() - 2.0);
 	set_waveform_colors ();
+
+	line_container->show ();
 }
 
 void
@@ -129,6 +159,10 @@ AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
 
 	ArdourCanvas::Rect r (1, 1, alloc.get_width() - 2, alloc.get_height() - 2);
 	frame->set (r);
+
+	start_line->set_y1 (frame->get().height() - 2.);
+	end_line->set_y1 (frame->get().height() - 2.);
+	loop_line->set_y1 (frame->get().height() - 2.);
 
 	set_wave_heights (r.height() - 2.0);
 }

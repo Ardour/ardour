@@ -32,9 +32,10 @@
 
 #include "gtkmm2ext/cairo_packer.h"
 
-#include "canvas/table.h"
 #include "canvas/canvas.h"
+#include "canvas/container.h"
 #include "canvas/rectangle.h"
+#include "canvas/line.h"
 
 #include "audio_clock.h"
 
@@ -72,6 +73,11 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 
   private:
 	ArdourCanvas::Rectangle* frame;
+	ArdourCanvas::Container* waves_container;
+	ArdourCanvas::Container* line_container;
+	ArdourCanvas::Line* start_line;
+	ArdourCanvas::Line* end_line;
+	ArdourCanvas::Line* loop_line;
 	std::vector<ArdourWaveView::WaveView *> waves;
 	double spp;
 
@@ -80,6 +86,7 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	void set_wave_heights (int);
 	void set_wave_spp (ARDOUR::samplecnt_t);
 	void set_waveform_colors ();
+	void set_colors ();
 };
 
 class AudioClipEditorBox : public ClipEditorBox
