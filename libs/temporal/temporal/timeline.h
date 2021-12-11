@@ -71,9 +71,9 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	bool is_beats() const { return flagged(); }
 	bool is_superclock() const { return !flagged(); }
 
-	bool positive () const { return val() > 0; }
-	bool negative () const { return val() < 0; }
-	bool zero ()     const { return val() == 0; }
+	bool is_positive () const { return val() > 0; }
+	bool is_negative () const { return val() < 0; }
+	bool is_zero ()     const { return val() == 0; }
 
 	Temporal::TimeDomain time_domain () const { if (flagged()) return Temporal::BeatTime; return Temporal::AudioTime; }
 	void set_time_domain (Temporal::TimeDomain);
@@ -329,9 +329,9 @@ class LIBTEMPORAL_API timecnt_t {
 
 	void set_position (timepos_t const &pos);
 
-	bool positive() const { return _distance.val() > 0; }
-	bool negative() const {return _distance.val() < 0; }
-	bool zero() const { return _distance.val() == 0; }
+	bool is_positive() const { return _distance.val() > 0; }
+	bool is_negative() const {return _distance.val() < 0; }
+	bool is_zero() const { return _distance.val() == 0; }
 
 	static timecnt_t const & max() { return _max_timecnt; }
 	static timecnt_t max (Temporal::TimeDomain td) { return timecnt_t (timepos_t::max (td)); }
