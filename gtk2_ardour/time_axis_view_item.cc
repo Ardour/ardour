@@ -182,7 +182,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	wide_enough_for_name = wide;
 	high_enough_for_name = high;
 
-	if (duration.zero ()) {
+	if (duration.is_zero ()) {
 		warning << "Time Axis Item Duration == 0" << endl;
 	}
 
@@ -336,7 +336,7 @@ TimeAxisViewItem::set_duration (timecnt_t const & dur, void* src)
 		return false;
 	}
 
-	if (dur.zero()) {
+	if (dur.is_zero()) {
 		group->hide();
 	}
 

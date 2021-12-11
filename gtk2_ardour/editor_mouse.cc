@@ -2389,7 +2389,7 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 
 		timepos_t where = get_preferred_edit_position();
 
-		if (where.negative()) {
+		if (where.is_negative()) {
 			return;
 		}
 

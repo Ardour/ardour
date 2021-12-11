@@ -877,7 +877,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, Temporal::timepos_t &
 		timecnt_t const sd = snap_delta (event->button.state);
 		timepos_t sync_snap (pending_region_position + (sync_offset * sync_dir) + sd);
 		_editor->snap_to_with_modifier (sync_snap, event);
-		if (sync_offset.zero() && sd.zero()) {
+		if (sync_offset.is_zero () && sd.is_zero ()) {
 			pending_region_position = sync_snap;
 		} else {
 			pending_region_position = _primary->region()->adjust_to_sync (sync_snap).earlier (sd);
@@ -890,7 +890,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, Temporal::timepos_t &
 		pending_region_position = _last_position;
 	}
 
-	if (!_earliest_time_limit.zero() && pending_region_position <= _earliest_time_limit) {
+	if (!_earliest_time_limit.is_zero () && pending_region_position <= _earliest_time_limit) {
 		pending_region_position = _earliest_time_limit;
 		return 0.0;
 	}
@@ -909,7 +909,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, Temporal::timepos_t &
 
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 			const timepos_t off = i->view->region()->position() + total_dx;
-			if (off.negative()) {
+			if (off.is_negative()) {
 				dx = dx - _editor->time_to_pixel_unrounded (off);
 				pending_region_position = pending_region_position.earlier (timecnt_t (off, timepos_t (pending_region_position.time_domain())));
 				break;
@@ -2449,7 +2449,7 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	timepos_t where = adjusted_current_time (event);
-	assert (!where.negative());
+	assert (!where.is_negative());
 	timepos_t after;
 	double delta = compute_x_delta (event, after);
 
@@ -4850,7 +4850,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 					copy_location->set_end (new_end, false);
 				} else if (new_start < copy_location->end()) {
 					copy_location->set_start (new_start, false);
-				} else if (newpos.positive()) {
+				} else if (newpos.is_positive()) {
 					//_editor->snap_to (next, RoundUpAlways, true);
 					copy_location->set_end (next, false);
 					copy_location->set_start (newpos, false);
@@ -4863,7 +4863,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 					copy_location->set_start (new_start, false);
 				} else if (new_end > copy_location->start()) {
 					copy_location->set_end (new_end, false);
-				} else if (newpos.positive()) {
+				} else if (newpos.is_positive()) {
 					//_editor->snap_to (next, RoundDownAlways, true);
 					copy_location->set_start (next, false);
 					copy_location->set_end (newpos, false);
@@ -6428,13 +6428,13 @@ NoteDrag::motion (GdkEvent * event, bool first_move)
 	timecnt_t const tdx = _x_constrained ? timecnt_t::zero (_cumulative_dx.time_domain()) : dx_qn - _cumulative_dx;
 	double const tdy = _y_constrained ? 0 : -dy * _note_height - _cumulative_dy;
 
-	if (!tdx.zero() || tdy) {
+	if (!tdx.is_zero () || tdy) {
 		_cumulative_dx = dx_qn;
 		_cumulative_dy += tdy;
 
 		int8_t note_delta = total_dy();
 
-		if (!tdx.zero() || tdy) {
+		if (!tdx.is_zero () || tdy) {
 			if (_copy) {
 				_region->move_copies (dx_qn, tdy, note_delta);
 			} else {

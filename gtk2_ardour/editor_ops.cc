@@ -352,12 +352,12 @@ Editor::move_range_selection_start_or_end_to_region_boundary (bool move_end, boo
 	int dir = next ? 1 : -1;
 
 	/* so we don't find the current region again */
-	if (dir > 0 || pos.positive()) {
+	if (dir > 0 || pos.is_positive()) {
 		pos.increment ();
 	}
 
 	timepos_t const target = get_region_boundary (pos, dir, true, false);
-	if (target.negative()) {
+	if (target.is_negative ()) {
 		return;
 	}
 
@@ -1014,7 +1014,7 @@ Editor::cursor_to_region_point (EditorCursor* cursor, RegionPoint point, int32_t
 	TimeAxisView *ontrack = 0;
 
 	// so we don't find the current region again..
-	if (dir > 0 || pos.positive())
+	if (dir > 0 || pos.is_positive())
 		pos = pos.increment();
 
 	if (!selection->tracks.empty()) {
@@ -1157,7 +1157,7 @@ Editor::selected_marker_to_region_boundary (bool with_selection, int32_t dir)
 	timepos_t pos = loc->start();
 
 	// so we don't find the current region again..
-	if (dir > 0 || pos.positive()) {
+	if (dir > 0 || pos.is_positive()) {
 		pos = pos.increment();
 	}
 
@@ -1972,7 +1972,7 @@ Editor::get_selection_extents (timepos_t &start, timepos_t &end) const
 	}
 
 	//range check
-	if ((start.zero() && end.zero()) || end < start) {
+	if ((start.is_zero () && end.is_zero ()) || end < start) {
 		ret = false;
 	}
 
@@ -7343,7 +7343,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 		 * shouldn't we have some kind of lower limit on region size?
 		 */
 
-		if (len.zero() || len.negative()) {
+		if (len.is_zero () || len.is_negative()) {
 			break;
 		}
 
@@ -8188,7 +8188,7 @@ Editor::do_remove_time ()
 
 	timecnt_t distance = d.distance();
 
-	if (distance.zero()) {
+	if (distance.is_zero ()) {
 		return;
 	}
 

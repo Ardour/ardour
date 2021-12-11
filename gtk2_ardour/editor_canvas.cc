@@ -650,7 +650,7 @@ Editor::session_gui_extents (bool use_extra) const
 	if (session_extent_end >= timepos_t::max (Temporal::AudioTime)) {
 		session_extent_end = timepos_t::max (Temporal::AudioTime);
 	}
-	if (session_extent_start.negative()) {
+	if (session_extent_start.is_negative()) {
 		session_extent_start = timepos_t (0);
 	}
 

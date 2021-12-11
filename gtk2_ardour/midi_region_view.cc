@@ -3022,9 +3022,9 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		Temporal::Beats snap_delta_beats;
 		int sign = 1;
 
-		if (snap_delta_time.positive()) {
+		if (snap_delta_time.is_positive()) {
 			snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (snap_delta_time, _region->position()));
-		} else if (snap_delta_time.negative()) {
+		} else if (snap_delta_time.is_negative()) {
 			snap_delta_beats = _region->region_distance_to_region_beats (timecnt_t (-snap_delta_time, _region->position()));
 			sign = -1;
 		}
@@ -4154,7 +4154,7 @@ MidiRegionView::trim_front_starting ()
 void
 MidiRegionView::trim_front_ending ()
 {
-	if (_region->start().negative()) {
+	if (_region->start().is_negative()) {
 		/* Trim drag made start time -ve; fix this */
 		midi_region()->fix_negative_start ();
 	}

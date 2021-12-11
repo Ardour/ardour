@@ -2030,7 +2030,7 @@ Editor::select_all_selectables_using_time_selection ()
 
 	const timecnt_t distance = start.distance (end);
 
-	if (distance.negative() || distance.zero())  {
+	if (distance.is_negative () || distance.is_zero ())  {
 		return;
 	}
 

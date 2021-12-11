@@ -832,7 +832,7 @@ RegionView::region_sync_changed ()
 
 	sync_offset = _region->sync_offset (sync_dir);
 
-	if (sync_offset.zero()) {
+	if (sync_offset.is_zero ()) {
 		/* no need for a sync mark */
 		if (sync_mark) {
 			sync_mark->hide();
@@ -1039,7 +1039,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 			}
 		}
 		t = pl->find_next_region_boundary (t, 1);
-		if (t.negative()) {
+		if (t.is_negative()) {
 			break;
 		}
 		me = new_me;

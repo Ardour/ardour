@@ -135,7 +135,7 @@ StepEditor::reset_step_edit_beat_pos ()
 	const timepos_t ep = _editor.get_preferred_edit_position();
 	timecnt_t distance_from_start (step_edit_region->position().distance (ep));
 
-	if (distance_from_start.negative()) {
+	if (distance_from_start.is_negative()) {
 		/* this can happen with snap enabled, and the edit point == Playhead. we snap the
 		   position of the new region, and it can end up after the edit point.
 		*/

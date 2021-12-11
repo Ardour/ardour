@@ -483,7 +483,7 @@ Selection::add (timepos_t const & start, timepos_t const & end)
 void
 Selection::move_time (timecnt_t const & distance)
 {
-	if (distance.zero()) {
+	if (distance.is_zero ()) {
 		return;
 	}
 
@@ -741,7 +741,7 @@ Selection::set (timepos_t const & start, timepos_t const & end)
 	clear_objects(); // enforce region/object exclusivity
 	clear_time();
 
-	if ((start.zero() && end.zero()) || end < start) {
+	if ((start.is_zero () && end.is_zero ()) || end < start) {
 		return 0;
 	}
 
@@ -777,7 +777,7 @@ Selection::set_preserving_all_ranges (timepos_t const & start, timepos_t const &
 {
 	clear_objects(); // enforce region/object exclusivity
 
-	if ((start.zero() && end.zero()) || (end < start)) {
+	if ((start.is_zero () && end.is_zero ()) || (end < start)) {
 		return;
 	}
 

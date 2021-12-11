@@ -3844,11 +3844,11 @@ Editor::duplicate_range (bool with_dialog)
 	}
 
 	if ((current_mouse_mode() == MouseRange)) {
-		if (!selection->time.length().zero()) {
+		if (!selection->time.length().is_zero()) {
 			duplicate_selection (times);
 		}
 	} else if (get_smart_mode()) {
-		if (!selection->time.length().zero()) {
+		if (!selection->time.length().is_zero()) {
 			duplicate_selection (times);
 		} else
 			duplicate_some_regions (rs, times);

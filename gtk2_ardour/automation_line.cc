@@ -1030,7 +1030,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 			continue;
 		}
 
-		if (tx >= timepos_t::max (tx.time_domain()) || tx.negative() || tx >= _maximum_time) {
+		if (tx >= timepos_t::max (tx.time_domain()) || tx.is_negative () || tx >= _maximum_time) {
 			continue;
 		}
 

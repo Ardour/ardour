@@ -612,7 +612,7 @@ EditorSources::format_position (timepos_t const & pos, char* buf, size_t bufsize
 	Temporal::BBT_Time bbt;
 	Timecode::Time timecode;
 
-	if (pos.negative()) {
+	if (pos.is_negative ()) {
 		error << string_compose (_("EditorSources::format_position: negative timecode position: %1"), pos) << endmsg;
 		snprintf (buf, bufsize, "invalid");
 		return;

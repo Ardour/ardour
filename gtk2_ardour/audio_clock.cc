@@ -784,7 +784,7 @@ AudioClock::end_edit_relative (bool add)
 	editing = false;
 	_layout->set_attributes (normal_attributes);
 
-	if (!distance.zero()) {
+	if (!distance.is_zero ()) {
 		if (add) {
 			AudioClock::set (current_time() + timepos_t (distance), true);
 		} else {
@@ -1028,7 +1028,7 @@ AudioClock::set_samples (timepos_t const & w, bool /*force*/)
 		return;
 	}
 
-	if (when.negative()) {
+	if (when.is_negative ()) {
 		when = -when;
 		negative = true;
 	}
@@ -1078,9 +1078,9 @@ AudioClock::set_seconds (timepos_t const & when, bool /*force*/)
 	}
 
 	if (when >= _limit_pos || when <= -_limit_pos) {
-		set_out_of_bounds (when.negative());
+		set_out_of_bounds (when.is_negative ());
 	} else {
-		if (when.negative()) {
+		if (when.is_negative ()) {
 			snprintf (buf, sizeof (buf), "%12.1f", when.samples() / (float)_session->sample_rate());
 		} else {
 			snprintf (buf, sizeof (buf), " %11.1f", when.samples() / (float)_session->sample_rate());
@@ -1162,7 +1162,7 @@ AudioClock::set_minsec (timepos_t const & when, bool /*force*/)
 	}
 
 	if (when >= _limit_pos || when <= -_limit_pos) {
-		set_out_of_bounds (when.negative());
+		set_out_of_bounds (when.is_negative ());
 	} else {
 		print_minsec (when.samples(), buf, sizeof (buf), _session->sample_rate());
 		_layout->set_text (buf);
@@ -1185,7 +1185,7 @@ AudioClock::set_timecode (timepos_t const & w, bool /*force*/)
 		return;
 	}
 
-	if (when.negative()) {
+	if (when.is_negative ()) {
 		when = -when;
 		negative = true;
 	}
@@ -1224,7 +1224,7 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 		return;
 	}
 
-	if (when.negative()) {
+	if (when.is_negative ()) {
 		when = -when;
 		negative = true;
 	}
@@ -1232,14 +1232,14 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 	/* handle a common case */
 
 	if (is_duration) {
-		if (when.zero()) {
+		if (when.is_zero ()) {
 			BBT.bars = 0;
 			BBT.beats = 0;
 			BBT.ticks = 0;
 		} else {
 			TempoMap::SharedPtr tmap (TempoMap::use());
 
-			if (offset.zero()) {
+			if (offset.is_zero ()) {
 				offset = timecnt_t (bbt_reference_time);
 			}
 
@@ -1292,7 +1292,7 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 	if (_with_info) {
 		timepos_t pos;
 
-		if (bbt_reference_time.negative()) {
+		if (bbt_reference_time.is_negative ()) {
 			pos = when;
 		} else {
 			pos = bbt_reference_time;
@@ -1784,7 +1784,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 
 	case GDK_SCROLL_UP:
 		step = get_incremental_step (f, current_time());
-		if (!step.zero()) {
+		if (!step.is_zero ()) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				step *= 10;
 			}
@@ -1795,7 +1795,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 
 	case GDK_SCROLL_DOWN:
 		step = get_incremental_step (f, current_time());
-		if (!step.zero()) {
+		if (!step.is_zero ()) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				step *= 10;
 			}
@@ -1840,7 +1840,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 
 		if (drag_accum > 0) { /* positive, so downward motion ... decrement clock */
 
-			if (!step.zero() && (step < pos)) {
+			if (!step.is_zero () && (step < pos)) {
 				AudioClock::set (pos.earlier (step), false);
 			} else {
 				AudioClock::set (timepos_t () , false);
