@@ -88,7 +88,9 @@ ClipEditorBox::register_clip_editor_actions (Bindings* clip_editor_bindings)
 
 AudioClipEditor::AudioClipEditor ()
 	: _spp (0)
-	, _current_drag (0)
+	, scroll_fraction (0)
+	, current_line_drag (0)
+	, current_scroll_drag (0)
 {
 	const double scale = UIConfiguration::instance().get_ui_scale();
 
@@ -101,6 +103,7 @@ AudioClipEditor::AudioClipEditor ()
 	scroll_bar_handle = new Rectangle (scroll_bar_trough);
 	scroll_bar_handle->set_outline (false);
 	scroll_bar_handle->set_corner_radius (5.);
+	scroll_bar_handle->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::scroll_event_handler));
 
 	waves_container = new ArdourCanvas::ScrollGroup (frame, ScrollGroup::ScrollsHorizontally);
 	line_container = new ArdourCanvas::Container (waves_container);
@@ -137,21 +140,57 @@ AudioClipEditor::line_event_handler (GdkEvent* ev, ArdourCanvas::Line* l)
 
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		_current_drag = new LineDrag (*this, *l);
+		current_line_drag = new LineDrag (*this, *l);
 		return true;
 
 	case GDK_BUTTON_RELEASE:
-		if (_current_drag) {
-			_current_drag->end (&ev->button);
-			delete _current_drag;
-			_current_drag = 0;
+		if (current_line_drag) {
+			current_line_drag->end (&ev->button);
+			delete current_line_drag;
+			current_line_drag = 0;
 			return true;
 		}
 		break;
 
 	case GDK_MOTION_NOTIFY:
-		if (_current_drag) {
-			_current_drag->motion (&ev->motion);
+		if (current_line_drag) {
+			current_line_drag->motion (&ev->motion);
+			return true;
+		}
+		break;
+
+
+	case GDK_KEY_PRESS:
+		return key_press (&ev->key);
+
+	default:
+		break;
+	}
+
+	return false;
+}
+
+bool
+AudioClipEditor::scroll_event_handler (GdkEvent* ev)
+{
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		current_scroll_drag = new ScrollDrag (*this);
+		current_scroll_drag->begin (&ev->button);
+		return true;
+
+	case GDK_BUTTON_RELEASE:
+		if (current_scroll_drag) {
+			current_scroll_drag->end (&ev->button);
+			delete current_scroll_drag;
+			current_scroll_drag = 0;
+			return true;
+		}
+		break;
+
+	case GDK_MOTION_NOTIFY:
+		if (current_scroll_drag) {
+			current_scroll_drag->motion (&ev->motion);
 			return true;
 		}
 		break;
@@ -190,13 +229,13 @@ AudioClipEditor::position_lines ()
 double
 AudioClipEditor::sample_to_pixel (samplepos_t s)
 {
-	return s / _spp;
+	return round (s / _spp);
 }
 
 samplepos_t
 AudioClipEditor::pixel_to_sample (double p)
 {
-	return p * _spp;
+	return round (p * _spp);
 }
 
 
@@ -246,6 +285,61 @@ AudioClipEditor::set_colors ()
 }
 
 void
+AudioClipEditor::scroll_changed ()
+{
+	if (!audio_region) {
+		return;
+	}
+
+	const double right_edge = scroll_bar_handle->get().x0;
+	const double avail_width = scroll_bar_trough->get().width() - scroll_bar_handle->get().width();
+	scroll_fraction = right_edge / avail_width;
+	scroll_fraction = std::min (1., std::max (0., scroll_fraction));
+	const samplepos_t s = llrintf (audio_region->source (0)->length().samples () * scroll_fraction);
+
+	std::cerr << "fract is now " << scroll_fraction << " of " << audio_region->source (0)->length().samples() << " = " << s << " pix " << sample_to_pixel (s) << std::endl;
+
+	waves_container->scroll_to (Duple (sample_to_pixel (s), 0));
+}
+
+AudioClipEditor::ScrollDrag::ScrollDrag (AudioClipEditor& e)
+	: editor (e)
+{
+	e.scroll_bar_handle->grab();
+}
+
+void
+AudioClipEditor::ScrollDrag::begin (GdkEventButton* ev)
+{
+	last_x = ev->x;
+}
+
+void
+AudioClipEditor::ScrollDrag::end (GdkEventButton* ev)
+{
+	editor.scroll_bar_handle->ungrab ();
+	editor.scroll_changed ();
+}
+
+void
+AudioClipEditor::ScrollDrag::motion (GdkEventMotion* ev)
+{
+	ArdourCanvas::Rectangle& r (*editor.scroll_bar_handle);
+	const double xdelta = ev->x - last_x;
+	ArdourCanvas::Rect n (r.get());
+	const double handle_width = n.width();
+	const double avail_width = editor.scroll_bar_trough->get().width() - handle_width;
+
+	n.x0 = std::max (0., std::min (avail_width, n.x0 + xdelta));
+	n.x1 = n.x0 + handle_width;
+
+	r.set (n);
+	last_x = ev->x;
+
+	editor.scroll_changed ();
+}
+
+void
 AudioClipEditor::drop_waves ()
 {
 	for (auto & wave : waves) {
@@ -283,6 +377,7 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
 		wv->set_channel (n);
 		wv->set_show_zero_line (false);
 		wv->set_clip_level (1.0);
+		wv->lower_to_bottom ();
 
 		waves.push_back (wv);
 	}
@@ -304,9 +399,11 @@ AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
 	frame->set (r);
 
 	const double scroll_bar_height = 10.;
+	const double scroll_bar_width = alloc.get_width() - 2;
+	const double scroll_bar_handle_left = scroll_bar_width * scroll_fraction;
 
-	scroll_bar_trough->set (Rect (1, alloc.get_height() - scroll_bar_height, alloc.get_width() - 2, alloc.get_height()));
-	scroll_bar_handle->set (Rect (30, scroll_bar_trough->get().y0 + 1, 50, scroll_bar_trough->get().y1 - 1));
+	scroll_bar_trough->set (Rect (1, alloc.get_height() - scroll_bar_height, scroll_bar_width, alloc.get_height()));
+	scroll_bar_handle->set (Rect (scroll_bar_handle_left, scroll_bar_trough->get().y0 + 1, scroll_bar_handle_left + 30., scroll_bar_trough->get().y1 - 1));
 
 	position_lines ();
 

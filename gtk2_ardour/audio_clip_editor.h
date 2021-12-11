@@ -109,8 +109,8 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	std::vector<ArdourWaveView::WaveView *> waves;
 	double non_wave_height;
 	samplepos_t left_origin;
-	double scroll_fraction;
 	double _spp;
+	double scroll_fraction;
 	boost::shared_ptr<ARDOUR::AudioRegion> audio_region;
 
 	void scroll_left ();
@@ -124,12 +124,14 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 
 	bool event_handler (GdkEvent* ev);
 	bool line_event_handler (GdkEvent* ev, ArdourCanvas::Line*);
+	bool scroll_event_handler (GdkEvent* ev);
 	void drop_waves ();
 	void set_wave_heights ();
 	void set_spp_from_length (ARDOUR::samplecnt_t);
 	void set_waveform_colors ();
 	void set_colors ();
 	void position_lines ();
+	void scroll_changed ();
 
 	class LineDrag {
 	  public:
@@ -145,7 +147,23 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	};
 
 	friend class LineDrag;
-	LineDrag* _current_drag;
+	LineDrag* current_line_drag;
+
+	class ScrollDrag {
+	  public:
+		ScrollDrag (AudioClipEditor&);
+
+		void begin (GdkEventButton*);
+		void end (GdkEventButton*);
+		void motion (GdkEventMotion*);
+
+	  private:
+		AudioClipEditor& editor;
+		double last_x;
+	};
+
+	friend class ScrollDrag;
+	ScrollDrag* current_scroll_drag;
 };
 
 class AudioClipEditorBox : public ClipEditorBox
