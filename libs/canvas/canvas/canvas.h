@@ -91,6 +91,9 @@ public:
 	/** called to ask the canvas' host to drop keyboard focus on an item */
 	virtual void unfocus (Item*) = 0;
 
+	virtual bool have_grab() const { return false; }
+	virtual bool check_grabbed_item_inside (Item*) const { return false; }
+
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context> const &) const;
 
 	void prepare_for_render (Rect const &) const;
@@ -213,6 +216,9 @@ public:
 	void ungrab ();
 	void focus (Item *);
 	void unfocus (Item*);
+
+	bool have_grab() const { return _grabbed_item; }
+	bool check_grabbed_item_inside (Item*) const;
 
 	Rect visible_area () const;
 	Coord width() const;

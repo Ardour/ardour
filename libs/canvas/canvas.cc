@@ -299,6 +299,7 @@ Canvas::window_to_canvas (Duple const & d) const
 {
 	ScrollGroup* best_group = 0;
 	ScrollGroup* sg = 0;
+	bool grabbed_item_inside = false;
 
 	/* if the coordinates are negative, clamp to zero and find the item
 	 * that covers that "edge" position.
@@ -329,7 +330,11 @@ Canvas::window_to_canvas (Duple const & d) const
 			   only group.
 			*/
 			if (!best_group || sg->sensitivity() > best_group->sensitivity()) {
+
 				best_group = sg;
+
+				grabbed_item_inside = check_grabbed_item_inside (sg);
+
 				if (sg->sensitivity() == (ScrollGroup::ScrollsVertically | ScrollGroup::ScrollsHorizontally)) {
 					/* Can't do any better than this. */
 					break;
@@ -338,7 +343,7 @@ Canvas::window_to_canvas (Duple const & d) const
 		}
 	}
 
-	if (best_group) {
+	if (best_group && (!have_grab() || grabbed_item_inside)) {
 		return d.translate (best_group->scroll_offset());
 	}
 
@@ -1512,6 +1517,16 @@ GtkCanvas::resize_handler ()
 	return false;
 }
 
+bool
+GtkCanvas::check_grabbed_item_inside (Item* possible_parent) const
+{
+	if (!_grabbed_item) {
+		return false;
+	}
+
+	return _grabbed_item->is_descendant_of (*possible_parent);
+}
+
 /** Create a GtkCanvaSViewport.
  *  @param hadj Adjustment to use for horizontal scrolling.
  *  @param vadj Adjustment to use for vertica scrolling.
@@ -1549,3 +1564,4 @@ GtkCanvasViewport::on_size_request (Gtk::Requisition* req)
 	req->width = width;
 	req->height = height;
 }
+
