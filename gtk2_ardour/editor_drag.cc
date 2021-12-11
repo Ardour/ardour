@@ -274,8 +274,8 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trac
 	, _last_pointer_y (0.0)
 	, _snap_delta (0)
 	, _constraint_pressed (false)
-	, _grab_button (-1)
 	, _time_domain (td)
+	, _grab_button (-1)
 {
 
 }
@@ -6802,8 +6802,8 @@ AutomationRangeDrag::aborted (bool)
 
 DraggingView::DraggingView (RegionView* v, RegionDrag* parent, TimeAxisView* itav)
 	: view (v)
-	, initial_time_axis_view (itav)
 	, anchored_fade_length (0)
+	, initial_time_axis_view (itav)
 {
 	TimeAxisView* tav = &v->get_time_axis_view();
 	if (tav) {
