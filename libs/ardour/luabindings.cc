@@ -546,9 +546,12 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("Temporal")
 
 		.addConst ("superclock_ticks_per_second", Temporal::superclock_ticks_per_second)
+		.addConst ("ticks_per_beat", Temporal::ticks_per_beat)
 
 		.beginClass <Temporal::Beats> ("Beats")
-		/* XXX need some way to construct beats in Lua */
+		.addConstructor <void (*) (int32_t, int32_t)> ()
+		.addStaticFunction ("from_double", &Temporal::Beats::from_double)
+		.addStaticFunction ("beats", &Temporal::Beats::beats)
 		.endClass ()
 
 		/* TODO */
@@ -579,7 +582,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginClass <Temporal::Tempo> ("Tempo")
-		.addConstructor <void (*) (double, double, double)> ()
+		.addConstructor <void (*) (double, double, int)> ()
 		.addFunction ("note_type", &Temporal::Tempo::note_type)
 		.addFunction ("note_types_per_minute",  (double (Temporal::Tempo::*)() const)&Temporal::Tempo::note_types_per_minute)
 		.addFunction ("quarter_notes_per_minute", &Temporal::Tempo::quarter_notes_per_minute)
