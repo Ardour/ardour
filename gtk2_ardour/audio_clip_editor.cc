@@ -106,6 +106,7 @@ AudioClipEditor::AudioClipEditor ()
 	scroll_bar_handle->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::scroll_event_handler));
 
 	waves_container = new ArdourCanvas::ScrollGroup (frame, ScrollGroup::ScrollsHorizontally);
+	add_scroller (*waves_container);
 	line_container = new ArdourCanvas::Container (waves_container);
 
 	const double line_width = 3.;
@@ -255,7 +256,6 @@ void
 AudioClipEditor::LineDrag::end (GdkEventButton* ev)
 {
 	line.ungrab();
-	std::cerr << "grab end\n";
 }
 
 void
@@ -263,7 +263,6 @@ AudioClipEditor::LineDrag::motion (GdkEventMotion* ev)
 {
 	line.set_x0 (ev->x);
 	line.set_x1 (ev->x);
-	std::cerr << "move to " << ev->x << ", " << ev->y << std::endl;
 }
 
 void
@@ -297,9 +296,8 @@ AudioClipEditor::scroll_changed ()
 	scroll_fraction = std::min (1., std::max (0., scroll_fraction));
 	const samplepos_t s = llrintf (audio_region->source (0)->length().samples () * scroll_fraction);
 
-	std::cerr << "fract is now " << scroll_fraction << " of " << audio_region->source (0)->length().samples() << " = " << s << " pix " << sample_to_pixel (s) << std::endl;
-
-	waves_container->scroll_to (Duple (sample_to_pixel (s), 0));
+	scroll_to (sample_to_pixel (s), 0);
+	queue_draw ();
 }
 
 AudioClipEditor::ScrollDrag::ScrollDrag (AudioClipEditor& e)
@@ -407,9 +405,9 @@ AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
 
 	position_lines ();
 
-	start_line->set_y1 (frame->get().height() - 2.);
-	end_line->set_y1 (frame->get().height() - 2.);
-	loop_line->set_y1 (frame->get().height() - 2.);
+	start_line->set_y1 (frame->get().height() - 2. - scroll_bar_height);
+	end_line->set_y1 (frame->get().height() - 2. - scroll_bar_height);
+	loop_line->set_y1 (frame->get().height() - 2. - scroll_bar_height);
 
 	set_wave_heights ();
 }
@@ -445,8 +443,6 @@ AudioClipEditor::set_wave_heights ()
 	uint32_t n = 0;
 	const Distance w = frame->get().height() - scroll_bar_trough->get().height() - 2.;
 	Distance ht = w / waves.size();
-
-	std::cerr << "wave heights: " << ht << std::endl;
 
 	for (auto & wave : waves) {
 		wave->set_height (ht);
