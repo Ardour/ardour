@@ -1271,7 +1271,7 @@ Item::dump (ostream& o) const
 	ArdourCanvas::Rect bb = bounding_box();
 
 	o << _canvas->indent() << whoami() << ' ' << this << " self-Visible ? " << self_visible() << " visible ? " << visible() << " layout " << layout_sensitive()
-	  << " @ " << position();
+	  << " @ " << position() << " +/- " << scroll_offset();
 
 	if (bb) {
 		o << endl << _canvas->indent() << "\tbbox: " << bb;
