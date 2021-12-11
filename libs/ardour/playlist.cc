@@ -1551,7 +1551,7 @@ Playlist::ripple_locked (timepos_t const & at, timecnt_t const & distance, Regio
 void
 Playlist::ripple_unlocked (timepos_t const & at, timecnt_t const & distance, RegionList *exclude, ThawList& thawlist, bool notify)
 {
-	if (distance.zero()) {
+	if (distance.is_zero()) {
 		return;
 	}
 
@@ -3271,7 +3271,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			break;
 		}
 
-		if (!move_offset.zero()) {
+		if (!move_offset.is_zero()) {
 			/* fix the position to match any movement of the compound region. */
 			original->set_position (original->position() + move_offset);
 			modified_region = true;

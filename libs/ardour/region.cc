@@ -474,7 +474,7 @@ Region::set_length (timecnt_t const & len)
 		return;
 	}
 
-	if (_length == len || len.zero()) {
+	if (_length == len || len.is_zero ()) {
 		return;
 	}
 
@@ -747,13 +747,13 @@ Region::nudge_position (timecnt_t const & n)
 		return;
 	}
 
-	if (n.zero()) {
+	if (n.is_zero()) {
 		return;
 	}
 
 	timepos_t new_position = position();
 
-	if (n.positive()) {
+	if (n.is_positive()) {
 		if (position() > timepos_t::max (n.time_domain()).earlier (n)) {
 			new_position = timepos_t::max (n.time_domain());
 		} else {
@@ -820,7 +820,7 @@ Region::move_start (timecnt_t const & distance)
 	timepos_t new_start (_start);
 	timepos_t current_start (_start);
 
-	if (distance.positive()) {
+	if (distance.is_positive()) {
 
 		if (current_start > timepos_t::max (current_start.time_domain()).earlier (distance)) {
 			new_start = timecnt_t::max(current_start.time_domain()); // makes no sense
@@ -970,7 +970,7 @@ Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
 
 	timecnt_t const start_shift = position().distance (pos);
 
-	if (start_shift.positive()) {
+	if (start_shift.is_positive()) {
 
 		if (start() > timecnt_t::max() - start_shift) {
 			new_start = timepos_t::max (start().time_domain());
@@ -978,7 +978,7 @@ Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
 			new_start = start() + start_shift;
 		}
 
-	} else if (start_shift.negative()) {
+	} else if (start_shift.is_negative()) {
 
 		if (start() < -start_shift && !can_trim_start_before_source_start ()) {
 			new_start = timecnt_t (start().time_domain());

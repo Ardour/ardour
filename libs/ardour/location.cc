@@ -216,7 +216,7 @@ Location::set_start (Temporal::timepos_t const & s, bool force)
 			scene_changed (); /* EMIT SIGNAL */
 		}
 
-		assert (s.zero() || s.positive());
+		assert (s.is_zero() || s.is_positive());
 
 		return 0;
 	} else if (!force) {
@@ -240,7 +240,7 @@ Location::set_start (Temporal::timepos_t const & s, bool force)
 		}
 	}
 
-	assert (_start.positive() || _start.zero());
+	assert (_start.is_positive() || _start.is_zero());
 
 	return 0;
 }
@@ -296,7 +296,7 @@ Location::set_end (Temporal::timepos_t const & e, bool force)
 		}
 	}
 
-	assert (_end.positive() || _end.zero());
+	assert (_end.is_positive() || _end.is_zero());
 
 	return 0;
 }
@@ -355,7 +355,7 @@ Location::set (Temporal::timepos_t const & s, Temporal::timepos_t const & e)
 			}
 		}
 
-		assert (e.positive() || e.zero());
+		assert (e.is_positive() || e.is_zero());
 	}
 
 	if (start_change && end_change) {
@@ -438,7 +438,7 @@ Location::set_is_clock_origin (bool yn, void*)
 void
 Location::set_skip (bool yn)
 {
-	if (is_range_marker() && length().positive()) {
+	if (is_range_marker() && length().is_positive()) {
 		if (set_flag_internal (yn, IsSkip)) {
 			flags_changed (this);
 			FlagsChanged ();
@@ -449,7 +449,7 @@ Location::set_skip (bool yn)
 void
 Location::set_skipping (bool yn)
 {
-	if (is_range_marker() && is_skip() && length().positive()) {
+	if (is_range_marker() && is_skip() && length().is_positive()) {
 		if (set_flag_internal (yn, IsSkipping)) {
 			flags_changed (this);
 			FlagsChanged ();
@@ -636,8 +636,8 @@ Location::set_state (const XMLNode& node, int version)
 	changed (this); /* EMIT SIGNAL */
 	Changed (); /* EMIT SIGNAL */
 
-	assert (_start.positive() || _start.zero());
-	assert (_end.positive() || _end.zero());
+	assert (_start.is_positive() || _start.is_zero());
+	assert (_end.is_positive() || _end.is_zero());
 
 	return 0;
 }
@@ -1265,7 +1265,7 @@ Locations::mark_at (timepos_t const & pos, timecnt_t const & slop) const
 				delta = pos.distance ((*i)->start());
 			}
 
-			if (slop.zero() && delta.zero()) {
+			if (slop.is_zero() && delta.is_zero()) {
 				/* special case: no slop, and direct hit for position */
 				return *i;
 			}
@@ -1499,7 +1499,7 @@ Locations::range_starts_at (timepos_t const & pos, timecnt_t const & slop, bool 
 
 		timecnt_t delta = (*i)->start().distance (pos).abs ();
 
-		if (delta.zero()) {
+		if (delta.is_zero()) {
 			return *i;
 		}
 
@@ -1531,7 +1531,7 @@ Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool includ
 		/* keep session range markers covering entire region if
 		   a ripple "extends" the session.
 		*/
-		if (distance.positive() && (*i)->is_session_range()) {
+		if (distance.is_positive() && (*i)->is_session_range()) {
 
 			/* Don't move start unless it occurs after the ripple point.
 			 */

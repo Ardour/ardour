@@ -540,13 +540,13 @@ ControlList::add_guard_point (timepos_t const & time, timecnt_t const & offset)
 
 	// caller needs to hold writer-lock
 
-	if (offset.negative() && when < offset) {
+	if (offset.is_negative() && when < offset) {
 		return;
 	}
 
 	assert (offset <= timecnt_t());
 
-	if (!offset.zero()) {
+	if (!offset.is_zero()) {
 		/* check if there are points between when + offset .. when */
 		ControlEvent cp (when + offset, 0.0);
 		iterator s;
@@ -1050,7 +1050,7 @@ ControlList::shift (timepos_t const & time, timecnt_t const & distance)
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 		double v0, v1;
 
-		if (distance.negative()) {
+		if (distance.is_negative()) {
 			/* Route::shift () with negative shift is used
 			 * for "remove time". The time [pos.. pos-frames] is removed.
 			 * and everyhing after, moved backwards.
@@ -1074,14 +1074,14 @@ ControlList::shift (timepos_t const & time, timecnt_t const & distance)
 		}
 
 		/* add guard-points to retain shape, if needed */
-		if (distance.positive()) {
+		if (distance.is_positive()) {
 			ControlEvent cp (pos, 0.0);
 			iterator s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 			if (s != _events.end ()) {
 				_events.insert (s, new ControlEvent (pos, v0));
 			}
 			pos += distance;
-		} else if (distance.negative() && pos > 0) {
+		} else if (distance.is_negative() && pos > 0) {
 			ControlEvent cp (pos.decrement(), 0.0);
 			iterator s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 			if (s != _events.end ()) {

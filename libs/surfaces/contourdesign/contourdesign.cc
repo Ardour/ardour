@@ -561,7 +561,7 @@ ContourDesignControlProtocol::prev_marker_keep_rolling ()
 {
 	timepos_t pos = session->locations()->first_mark_before (timepos_t (session->transport_sample()));
 
-	if (pos.positive() || pos.zero()) {
+	if (pos.is_positive() || pos.is_zero()) {
 		session->request_locate (pos.samples());
 	} else {
 		session->goto_start ();
@@ -573,7 +573,7 @@ ContourDesignControlProtocol::next_marker_keep_rolling ()
 {
 	timepos_t pos = session->locations()->first_mark_after (timepos_t (session->transport_sample()));
 
-	if (pos.positive() || pos.zero()) {
+	if (pos.is_positive() || pos.is_zero ()) {
 		session->request_locate (pos.samples());
 	} else {
 		session->goto_end();

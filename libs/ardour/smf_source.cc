@@ -241,7 +241,7 @@ SMFSource::read_unlocked (const Lock&                     lock,
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: start in ticks %1\n", start_ticks));
 
-	if (_smf_last_read_end.zero() || start != _smf_last_read_end) {
+	if (_smf_last_read_end.is_zero() || start != _smf_last_read_end) {
 		DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: seek to %1\n", start));
 		Evoral::SMF::seek_to_start();
 		while (time < start_ticks) {
@@ -756,7 +756,7 @@ SMFSource::destroy_model (const Glib::Threads::Mutex::Lock& lock)
 void
 SMFSource::flush_midi (const Lock& lock)
 {
-	if (!writable() || _length.zero()) {
+	if (!writable() || _length.is_zero()) {
 		return;
 	}
 

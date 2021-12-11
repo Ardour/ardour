@@ -5450,7 +5450,7 @@ Session::archive_session (const std::string& dest,
 				continue;
 			}
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
-			if (!afs || afs->length ().zero()) {
+			if (!afs || afs->length ().is_zero ()) {
 				continue;
 			}
 			if (only_used_sources) {
@@ -5469,7 +5469,7 @@ Session::archive_session (const std::string& dest,
 				continue;
 			}
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
-			if (!afs || afs->length ().zero()) {
+			if (!afs || afs->length ().is_zero ()) {
 				continue;
 			}
 
@@ -5533,7 +5533,7 @@ Session::archive_session (const std::string& dest,
 				continue;
 			}
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
-			if (!afs || afs->length ().zero()) {
+			if (!afs || afs->length ().is_zero ()) {
 				continue;
 			}
 
