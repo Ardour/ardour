@@ -86,6 +86,29 @@ ClipEditorBox::register_clip_editor_actions (Bindings* clip_editor_bindings)
 
 /* ------------ */
 
+class ClipBBTMetric : public ArdourCanvas::Ruler::Metric
+{
+    public:
+	ClipBBTMetric () { units_per_pixel = 1; }
+
+	void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const {
+		ArdourCanvas::Ruler::Mark mark;
+
+		std::cerr << "get marks between " << lower << " .. " << upper << std::endl;
+
+		for (int64_t n = lower; n < upper; n += 4000) {
+			mark.style = ArdourCanvas::Ruler::Mark::Major;
+			mark.label = string_compose ("%1", n);
+			mark.position = n / 100;
+			marks.push_back (mark);
+			std::cerr << "mark at " << mark.label << " @ " << mark.position << std::endl;
+		}
+	}
+
+    private:
+};
+
+
 AudioClipEditor::AudioClipEditor ()
 	: _spp (0)
 	, scroll_fraction (0)
@@ -107,6 +130,14 @@ AudioClipEditor::AudioClipEditor ()
 
 	waves_container = new ArdourCanvas::ScrollGroup (frame, ScrollGroup::ScrollsHorizontally);
 	add_scroller (*waves_container);
+
+	clip_metric = new ClipBBTMetric ();
+
+	ruler_container  = new ArdourCanvas::Container (waves_container);
+	ruler = new ArdourCanvas::Ruler (ruler_container, *clip_metric);
+	ruler->name = "Clip Editor";
+	ruler->set_font_description (UIConfiguration::instance().get_SmallerFont());
+
 	line_container = new ArdourCanvas::Container (waves_container);
 
 	const double line_width = 3.;
@@ -272,6 +303,9 @@ AudioClipEditor::set_colors ()
 
 	frame->set_outline_color (UIConfiguration::instance().color (X_("neutral:midground")));
 
+	ruler->set_fill_color (UIConfiguration::instance().color (X_("theme:bg1")));
+	ruler->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting less")));
+
 	start_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting clock")));
 	end_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting alt")));
 	loop_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting selection")));
@@ -396,6 +430,9 @@ AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
 	ArdourCanvas::Rect r (1, 1, alloc.get_width() - 2, alloc.get_height() - 2);
 	frame->set (r);
 
+	const double ruler_height = 25.;
+	ruler->set (Rect (2, 2, alloc.get_width() - 4, ruler_height));
+
 	const double scroll_bar_height = 10.;
 	const double scroll_bar_width = alloc.get_width() - 2;
 	const double scroll_bar_handle_left = scroll_bar_width * scroll_fraction;
@@ -416,6 +453,8 @@ void
 AudioClipEditor::set_spp (double samples_per_pixel)
 {
 	_spp = samples_per_pixel;
+
+	ruler->set_range (0, 48000);
 
 	position_lines ();
 
@@ -441,12 +480,12 @@ AudioClipEditor::set_wave_heights ()
 	}
 
 	uint32_t n = 0;
-	const Distance w = frame->get().height() - scroll_bar_trough->get().height() - 2.;
+	const Distance w = frame->get().height() - scroll_bar_trough->get().height() - 2. - ruler->get().height();
 	Distance ht = w / waves.size();
 
 	for (auto & wave : waves) {
 		wave->set_height (ht);
-		wave->set_y_position (n * ht);
+		wave->set_y_position (ruler->get().height() + (n * ht));
 		++n;
 	}
 }

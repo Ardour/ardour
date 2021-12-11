@@ -40,6 +40,7 @@
 #include "canvas/container.h"
 #include "canvas/line.h"
 #include "canvas/rectangle.h"
+#include "canvas/ruler.h"
 #include "canvas/scroll_group.h"
 
 #include "audio_clock.h"
@@ -52,6 +53,7 @@ namespace ARDOUR {
 namespace ArdourCanvas {
 	class Text;
 	class Polygon;
+
 };
 
 namespace ArdourWaveView {
@@ -106,6 +108,9 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	ArdourCanvas::Line* loop_line;
 	ArdourCanvas::Rectangle* scroll_bar_trough;
 	ArdourCanvas::Rectangle* scroll_bar_handle;
+	ArdourCanvas::Container* ruler_container;
+	ArdourCanvas::Ruler* ruler;
+	ArdourCanvas::Ruler::Metric* clip_metric;
 	std::vector<ArdourWaveView::WaveView *> waves;
 	double non_wave_height;
 	samplepos_t left_origin;
