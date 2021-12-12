@@ -17,12 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <algorithm>
 #include "pbd/compose.h"
+#include <algorithm>
 
+#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/actions.h"
 
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
@@ -48,23 +48,16 @@
 using namespace Gtk;
 using namespace ARDOUR;
 using namespace ArdourCanvas;
-using std::min;
 using std::max;
-
-/* ------------ */
+using std::min;
 
 MidiClipEditor::MidiClipEditor ()
 {
-//	set_homogenous (true);
-//	set_row_spacing (4);
+	set_background_color (UIConfiguration::instance ().color (X_("theme:darkest")));
 
-	set_background_color (UIConfiguration::instance().color (X_("theme:darkest")));
-
-	const double scale = UIConfiguration::instance().get_ui_scale();
-	const double width = 600. * scale;
+	const double scale  = UIConfiguration::instance ().get_ui_scale ();
+	const double width  = 600. * scale;
 	const double height = 210. * scale;
-
-//	name = string_compose ("trigger %1", _trigger.index());
 
 	frame = new Rectangle (this);
 
@@ -73,8 +66,6 @@ MidiClipEditor::MidiClipEditor ()
 	frame->set_outline_all ();
 
 	frame->Event.connect (sigc::mem_fun (*this, &MidiClipEditor::event_handler));
-
-//	selection_connection = PublicEditor::instance().get_selection().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerBoxUI::selection_changed));
 }
 
 MidiClipEditor::~MidiClipEditor ()
@@ -85,35 +76,30 @@ bool
 MidiClipEditor::event_handler (GdkEvent* ev)
 {
 	switch (ev->type) {
-	case GDK_BUTTON_PRESS:
-//		PublicEditor::instance().get_selection().set (this);
-		break;
-	case GDK_ENTER_NOTIFY:
-//		redraw ();
-		break;
-	case GDK_LEAVE_NOTIFY:
-//		redraw ();
-		break;
-	default:
-		break;
+		case GDK_BUTTON_PRESS:
+			break;
+		case GDK_ENTER_NOTIFY:
+			break;
+		case GDK_LEAVE_NOTIFY:
+			break;
+		default:
+			break;
 	}
 
 	return false;
 }
 
-/* ====================================================== */
-
 MidiClipEditorBox::MidiClipEditorBox ()
 {
-	_header_label.set_text(_("MIDI Region Trimmer:"));
-	_header_label.set_alignment(0.0, 0.5);
-	pack_start(_header_label, false, false, 6);
+	_header_label.set_text (_("MIDI Region Trimmer:"));
+	_header_label.set_alignment (0.0, 0.5);
+	pack_start (_header_label, false, false, 6);
 
-	editor = manage (new MidiClipEditor());
-	editor->set_size_request(600,120);
+	editor = manage (new MidiClipEditor ());
+	editor->set_size_request (600, 120);
 
-	pack_start(*editor, true, true);
-	editor->show();
+	pack_start (*editor, true, true);
+	editor->show ();
 }
 
 MidiClipEditorBox::~MidiClipEditorBox ()
@@ -129,33 +115,19 @@ MidiClipEditorBox::set_session (Session* s)
 void
 MidiClipEditorBox::set_region (boost::shared_ptr<Region> r)
 {
-	set_session(&r->session());
+	set_session (&r->session ());
 
-	state_connection.disconnect();
+	state_connection.disconnect ();
 
 	_region = r;
 
 	PBD::PropertyChange interesting_stuff;
-	region_changed(interesting_stuff);
+	region_changed (interesting_stuff);
 
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&MidiClipEditorBox::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&MidiClipEditorBox::region_changed, this, _1), gui_context ());
 }
 
 void
 MidiClipEditorBox::region_changed (const PBD::PropertyChange& what_changed)
 {
-//ToDo:  refactor the region_editor.cc  to cover this basic stuff
-//	if (what_changed.contains (ARDOUR::Properties::name)) {
-//		name_changed ();
-//	}
-
-//	PBD::PropertyChange interesting_stuff;
-//	interesting_stuff.add (ARDOUR::Properties::length);
-//	interesting_stuff.add (ARDOUR::Properties::start);
-//	if (what_changed.contains (interesting_stuff))
-	{
-	}
 }
-
-
-

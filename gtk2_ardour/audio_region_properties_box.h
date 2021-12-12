@@ -35,7 +35,8 @@
 
 #include "audio_clock.h"
 
-namespace ARDOUR {
+namespace ARDOUR
+{
 	class Session;
 	class Location;
 }
@@ -54,7 +55,10 @@ protected:
 	boost::shared_ptr<ARDOUR::Region> _region;
 
 	Gtk::Label _header_label;
+
 private:
+	void region_changed (const PBD::PropertyChange& what_changed);
+
 	Gtk::Table table;
 
 	AudioClock length_clock;
@@ -63,13 +67,12 @@ private:
 	AudioClock loop_length_clock;
 	AudioClock loop_start_clock;
 
-	ArdourWidgets::ArdourButton  bpm_button;
-	ArdourWidgets::ArdourButton  metrum_button;
+	ArdourWidgets::ArdourButton bpm_button;
+	ArdourWidgets::ArdourButton metrum_button;
 
-	ArdourWidgets::ArdourButton  bbt_toggle;
-	ArdourWidgets::ArdourButton  loop_toggle;
+	ArdourWidgets::ArdourButton bbt_toggle;
+	ArdourWidgets::ArdourButton loop_toggle;
 
-	void region_changed (const PBD::PropertyChange& what_changed);
 	PBD::ScopedConnection state_connection;
 };
 
@@ -82,12 +85,11 @@ public:
 	virtual void set_region (boost::shared_ptr<ARDOUR::Region>);
 
 private:
+	ArdourWidgets::ArdourButton fade_in_enable_button;
+	ArdourWidgets::ArdourButton fade_out_enable_button;
 
-	ArdourWidgets::ArdourButton  fade_in_enable_button;
-	ArdourWidgets::ArdourButton  fade_out_enable_button;
-
-	ArdourWidgets::ArdourButton  gain_control;
-	ArdourWidgets::ArdourButton  stretch_selector;
+	ArdourWidgets::ArdourButton gain_control;
+	ArdourWidgets::ArdourButton stretch_selector;
 };
 
 #endif /* __audio_region_properties_box_h__ */

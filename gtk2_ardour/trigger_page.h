@@ -69,7 +69,7 @@ private:
 	void pi_property_changed (PBD::PropertyChange const&);
 	void stripable_property_changed (PBD::PropertyChange const&, boost::weak_ptr<ARDOUR::Stripable>);
 
-	void selection_changed ();
+	void                      selection_changed ();
 	PBD::ScopedConnectionList editor_connections;
 
 	gint start_updating ();
@@ -89,18 +89,18 @@ private:
 	Gtk::VBox            _browser_box;
 	Gtk::HBox            _parameter_box;
 
-	FittedCanvasWidget 		_master_widget;
-	CueMaster				*_master;
+	FittedCanvasWidget _master_widget;
+	CueMaster*         _master;
 
 	SlotPropertiesBox* _slot_prop_box;
 
 	AudioRegionPropertiesBox* _audio_prop_box;
 	AudioRegionOperationsBox* _audio_ops_box;
-	AudioClipEditorBox*    _audio_trim_box;
+	AudioClipEditorBox*       _audio_trim_box;
 
 	MidiRegionPropertiesBox* _midi_prop_box;
 	MidiRegionOperationsBox* _midi_ops_box;
-	MidiClipEditorBox*    _midi_trim_box;
+	MidiClipEditorBox*       _midi_trim_box;
 
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;

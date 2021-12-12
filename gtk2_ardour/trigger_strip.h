@@ -120,13 +120,13 @@ private:
 	Gtk::Table volume_table;
 
 	/* Widgets */
-	FittedCanvasWidget 			_master_widget;
-	TriggerMaster				*_master;
+	FittedCanvasWidget _master_widget;
+	TriggerMaster*     _master;
 
-	ArdourWidgets::ArdourButton _name_button;
-	ProcessorBox                _processor_box;
-	TriggerBoxWidget            _trigger_display;
-	PannerUI                    _panners;
+	ArdourWidgets::ArdourButton             _name_button;
+	ProcessorBox                            _processor_box;
+	TriggerBoxWidget                        _trigger_display;
+	PannerUI                                _panners;
 	LevelMeterVBox                          _level_meter;
 	boost::shared_ptr<AutomationController> _gain_control;
 };

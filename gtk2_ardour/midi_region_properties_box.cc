@@ -17,12 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <algorithm>
 #include "pbd/compose.h"
+#include <algorithm>
 
+#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/actions.h"
 
 #include "ardour/location.h"
 #include "ardour/profile.h"
@@ -43,44 +43,42 @@
 using namespace Gtk;
 using namespace ARDOUR;
 using namespace ArdourWidgets;
-using std::min;
 using std::max;
+using std::min;
 
-MidiRegionPropertiesBox::MidiRegionPropertiesBox () :
-	 patch_enable_button (ArdourButton::led_default_elements)
+MidiRegionPropertiesBox::MidiRegionPropertiesBox ()
+	: patch_enable_button (ArdourButton::led_default_elements)
 	, cc_enable_button (ArdourButton::led_default_elements)
 {
-	_header_label.set_text(_("MIDI Region Properties:"));
+	_header_label.set_text (_("MIDI Region Properties:"));
 
-	Gtk::Table *midi_t = manage(new Gtk::Table());
+	Gtk::Table* midi_t = manage (new Gtk::Table ());
 	midi_t->set_homogeneous (true);
 	midi_t->set_spacings (4);
 
 	int row = 0;
 
-		patch_enable_button.set_text (_("Send Patches"));
-		patch_enable_button.set_name ("generic button");
-	//	patch_enable_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+	patch_enable_button.set_text (_("Send Patches"));
+	patch_enable_button.set_name ("generic button");
 
-		patch_selector_button.set_text (_("Patches..."));
-		patch_selector_button.set_name ("generic button");
-	//	patch_selector_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+	patch_selector_button.set_text (_("Patches..."));
+	patch_selector_button.set_name ("generic button");
 
-		midi_t->attach(patch_enable_button,    0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
-		midi_t->attach(patch_selector_button,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK );  row++;
+	midi_t->attach (patch_enable_button, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	midi_t->attach (patch_selector_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	row++;
 
-		cc_enable_button.set_text (_("Send CCs"));
-		cc_enable_button.set_name ("generic button");
-	//	cc_enable_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+	cc_enable_button.set_text (_("Send CCs"));
+	cc_enable_button.set_name ("generic button");
 
-		cc_selector_button.set_text (_("CCs..."));
-		cc_selector_button.set_name ("generic button");
-	//	cc_selector_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
+	cc_selector_button.set_text (_("CCs..."));
+	cc_selector_button.set_name ("generic button");
 
-		midi_t->attach(cc_enable_button,    0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
-		midi_t->attach(cc_selector_button,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK );  row++;
+	midi_t->attach (cc_enable_button, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	midi_t->attach (cc_selector_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	row++;
 
-	pack_start(*midi_t);
+	pack_start (*midi_t);
 }
 
 MidiRegionPropertiesBox::~MidiRegionPropertiesBox ()
@@ -92,12 +90,11 @@ MidiRegionPropertiesBox::set_region (boost::shared_ptr<Region> r)
 {
 	RegionPropertiesBox::set_region (r);
 
-	_region->PropertyChanged.connect (midi_state_connection, invalidator (*this), boost::bind (&MidiRegionPropertiesBox::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (midi_state_connection, invalidator (*this), boost::bind (&MidiRegionPropertiesBox::region_changed, this, _1), gui_context ());
 }
 
 void
 MidiRegionPropertiesBox::region_changed (const PBD::PropertyChange& what_changed)
 {
-	//CC and Pgm stuff ...?
+	/* CC and Pgm stuff ...? */
 }
-

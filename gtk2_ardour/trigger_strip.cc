@@ -61,9 +61,9 @@ TriggerStrip::TriggerStrip (Session* s, boost::shared_ptr<ARDOUR::Route> rt)
 	, RouteUI (s)
 	, _clear_meters (true)
 	, _pb_selection ()
-	, _master_widget ( -1, 16 )
+	, _master_widget (-1, 16)
 	, _processor_box (s, boost::bind (&TriggerStrip::plugin_selector, this), _pb_selection, 0)
-	, _trigger_display (*rt->triggerbox (), -1., TriggerBox::default_triggers_per_box*16.)
+	, _trigger_display (*rt->triggerbox (), -1., TriggerBox::default_triggers_per_box * 16.)
 	, _panners (s)
 	, _level_meter (s)
 {
@@ -145,12 +145,12 @@ TriggerStrip::init ()
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
 	global_frame.set_name ("BaseFrame");
 
-	Gtk::VBox *outer_vpacker = manage(new Gtk::VBox);
+	Gtk::VBox* outer_vpacker = manage (new Gtk::VBox);
 
 	outer_vpacker->pack_start (_trigger_display, Gtk::PACK_SHRINK);
 	outer_vpacker->pack_start (_master_widget, Gtk::PACK_SHRINK);
 	outer_vpacker->pack_start (global_frame, true, true);
-	outer_vpacker->show();
+	outer_vpacker->show ();
 
 	add (*outer_vpacker);
 
@@ -191,8 +191,8 @@ TriggerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
 
-	_master = new TriggerMaster(_master_widget.root(), _route->triggerbox());
-	
+	_master = new TriggerMaster (_master_widget.root (), _route->triggerbox ());
+
 	_processor_box.set_route (rt);
 
 	/* Fader/Gain */

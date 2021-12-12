@@ -27,8 +27,8 @@
 #include <gtkmm/table.h>
 
 #include "ardour/ardour.h"
-#include "ardour/types.h"
 #include "ardour/session_handle.h"
+#include "ardour/types.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
@@ -45,19 +45,21 @@
 
 #include "audio_clock.h"
 
-namespace ARDOUR {
+namespace ARDOUR
+{
 	class Session;
 	class Location;
 }
 
-namespace ArdourCanvas {
+namespace ArdourCanvas
+{
 	class Text;
 	class Polygon;
+}
 
-};
-
-namespace ArdourWaveView {
-class WaveView;
+namespace ArdourWaveView
+{
+	class WaveView;
 }
 
 class ClipEditorBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
@@ -66,56 +68,56 @@ public:
 	ClipEditorBox () {}
 	~ClipEditorBox () {}
 
-	virtual void set_region (boost::shared_ptr<ARDOUR::Region>) =0;
+	virtual void set_region (boost::shared_ptr<ARDOUR::Region>) = 0;
 
-	static void init ();
-	static void register_clip_editor_actions (Gtkmm2ext::Bindings*);
+	static void                           init ();
+	static void                           register_clip_editor_actions (Gtkmm2ext::Bindings*);
 	static Glib::RefPtr<Gtk::ActionGroup> clip_editor_actions;
 };
 
 class ClipEditor
 {
-   public:
-	virtual ~ClipEditor() {}
+public:
+	virtual ~ClipEditor () {}
 
-	virtual void zoom_in () = 0;
+	virtual void zoom_in ()  = 0;
 	virtual void zoom_out () = 0;
 };
 
 class AudioClipEditor : public ArdourCanvas::GtkCanvas
 {
-   public:
+public:
 	AudioClipEditor ();
 	~AudioClipEditor ();
 
 	void set_region (boost::shared_ptr<ARDOUR::AudioRegion>);
 	void on_size_allocate (Gtk::Allocation&);
 
-	double sample_to_pixel (ARDOUR::samplepos_t);
+	double      sample_to_pixel (ARDOUR::samplepos_t);
 	samplepos_t pixel_to_sample (double);
 
-	void set_spp (double);
-	double spp() const { return _spp; }
+	void   set_spp (double);
+	double spp () const
+	{
+		return _spp;
+	}
 
 	bool key_press (GdkEventKey*);
 
-  private:
-	ArdourCanvas::Rectangle* frame;
-	ArdourCanvas::ScrollGroup* waves_container;
-	ArdourCanvas::Container* line_container;
-	ArdourCanvas::Line* start_line;
-	ArdourCanvas::Line* end_line;
-	ArdourCanvas::Line* loop_line;
-	ArdourCanvas::Rectangle* scroll_bar_trough;
-	ArdourCanvas::Rectangle* scroll_bar_handle;
-	ArdourCanvas::Container* ruler_container;
-	ArdourCanvas::Ruler* ruler;
-	ArdourCanvas::Ruler::Metric* clip_metric;
-	std::vector<ArdourWaveView::WaveView *> waves;
-	double non_wave_height;
-	samplepos_t left_origin;
-	double _spp;
-	double scroll_fraction;
+private:
+	ArdourCanvas::Rectangle*               frame;
+	ArdourCanvas::ScrollGroup*             waves_container;
+	ArdourCanvas::Container*               line_container;
+	ArdourCanvas::Line*                    start_line;
+	ArdourCanvas::Line*                    end_line;
+	ArdourCanvas::Line*                    loop_line;
+	ArdourCanvas::Rectangle*               scroll_bar_trough;
+	ArdourCanvas::Rectangle*               scroll_bar_handle;
+	std::vector<ArdourWaveView::WaveView*> waves;
+	double                                 non_wave_height;
+	samplepos_t                            left_origin;
+	double                                 _spp;
+	double                                 scroll_fraction;
 	boost::shared_ptr<ARDOUR::AudioRegion> audio_region;
 
 	void scroll_left ();
@@ -138,33 +140,35 @@ class AudioClipEditor : public ArdourCanvas::GtkCanvas
 	void position_lines ();
 	void scroll_changed ();
 
-	class LineDrag {
-	  public:
+	class LineDrag
+	{
+	public:
 		LineDrag (AudioClipEditor&, ArdourCanvas::Line&);
 
 		void begin (GdkEventButton*);
 		void end (GdkEventButton*);
 		void motion (GdkEventMotion*);
 
-	  private:
-		AudioClipEditor& editor;
+	private:
+		AudioClipEditor&    editor;
 		ArdourCanvas::Line& line;
 	};
 
 	friend class LineDrag;
 	LineDrag* current_line_drag;
 
-	class ScrollDrag {
-	  public:
+	class ScrollDrag
+	{
+	public:
 		ScrollDrag (AudioClipEditor&);
 
 		void begin (GdkEventButton*);
 		void end (GdkEventButton*);
 		void motion (GdkEventMotion*);
 
-	  private:
+	private:
 		AudioClipEditor& editor;
-		double last_x;
+		double           last_x;
 	};
 
 	friend class ScrollDrag;
@@ -181,13 +185,13 @@ public:
 	void region_changed (const PBD::PropertyChange& what_changed);
 
 private:
-	Gtk::HBox  header_box;
+	Gtk::HBox                   header_box;
 	ArdourWidgets::ArdourButton zoom_in_button;
 	ArdourWidgets::ArdourButton zoom_out_button;
-	Gtk::Label _header_label;
-	Gtk::Table table;
+	Gtk::Label                  _header_label;
+	Gtk::Table                  table;
 
-	AudioClipEditor *editor;
+	AudioClipEditor* editor;
 
 	PBD::ScopedConnection state_connection;
 

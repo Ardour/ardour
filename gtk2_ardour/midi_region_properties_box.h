@@ -33,7 +33,8 @@
 
 #include "audio_region_properties_box.h"
 
-namespace ARDOUR {
+namespace ARDOUR
+{
 	class Session;
 	class Location;
 }
@@ -47,15 +48,15 @@ public:
 	void set_region (boost::shared_ptr<ARDOUR::Region>);
 
 private:
-
-	PBD::ScopedConnection midi_state_connection;
 	void region_changed (const PBD::PropertyChange& what_changed);
 
-	ArdourWidgets::ArdourButton  patch_enable_button;
-	ArdourWidgets::ArdourButton  patch_selector_button;
+	PBD::ScopedConnection midi_state_connection;
 
-	ArdourWidgets::ArdourButton  cc_enable_button;
-	ArdourWidgets::ArdourButton  cc_selector_button;
+	ArdourWidgets::ArdourButton patch_enable_button;
+	ArdourWidgets::ArdourButton patch_selector_button;
+
+	ArdourWidgets::ArdourButton cc_enable_button;
+	ArdourWidgets::ArdourButton cc_selector_button;
 };
 
 #endif /* __midi_region_properties_box_h__ */

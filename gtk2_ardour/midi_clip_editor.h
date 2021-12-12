@@ -38,25 +38,27 @@
 
 #include "audio_clock.h"
 
-namespace ARDOUR {
+namespace ARDOUR
+{
 	class Session;
 	class Location;
 }
 
-namespace ArdourCanvas {
+namespace ArdourCanvas
+{
 	class Text;
 	class Polygon;
-};
+}
 
 class MidiClipEditor : public ArdourCanvas::GtkCanvas
 {
-  public:
+public:
 	MidiClipEditor ();
 	~MidiClipEditor ();
 
-  private:
+private:
 	ArdourCanvas::Rectangle* frame;
-	bool event_handler (GdkEvent* ev);
+	bool                     event_handler (GdkEvent* ev);
 };
 
 class MidiClipEditorBox : public ClipEditorBox
@@ -74,7 +76,7 @@ private:
 	Gtk::Label _header_label;
 	Gtk::Table table;
 
-	MidiClipEditor *editor;
+	MidiClipEditor* editor;
 
 	PBD::ScopedConnection state_connection;
 

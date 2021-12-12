@@ -37,17 +37,17 @@
 #include "public_editor.h"
 #include "timers.h"
 
-#include "audio_region_properties_box.h"
-#include "midi_region_properties_box.h"
 #include "audio_region_operations_box.h"
-#include "midi_region_operations_box.h"
-#include "slot_properties_box.h"
+#include "audio_region_properties_box.h"
 #include "midi_clip_editor.h"
+#include "midi_region_operations_box.h"
+#include "midi_region_properties_box.h"
+#include "slot_properties_box.h"
 
-#include "trigger_page.h"
-#include "trigger_strip.h"
 #include "cuebox_ui.h"
 #include "trigger_master.h"
+#include "trigger_page.h"
+#include "trigger_strip.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -63,33 +63,33 @@ using namespace std;
 
 TriggerPage::TriggerPage ()
 	: Tabbable (_content, _("Trigger Drom"), X_("trigger"))
-	, _master_widget(32, 16.)
+	, _master_widget (32, 16.)
 {
 	load_bindings ();
 	register_actions ();
 
 	/* spacer to account for the trigger strip frame */
-	ArdourVSpacer *spacer = manage(new ArdourVSpacer());
-	spacer->set_size_request(-1,1);
+	ArdourVSpacer* spacer = manage (new ArdourVSpacer ());
+	spacer->set_size_request (-1, 1);
 	_slot_area_box.pack_start (*spacer, Gtk::PACK_SHRINK);
 
-	CueBoxWidget *cue_box = manage(new CueBoxWidget(32, TriggerBox::default_triggers_per_box*16.));
+	CueBoxWidget* cue_box = manage (new CueBoxWidget (32, TriggerBox::default_triggers_per_box * 16.));
 	_slot_area_box.pack_start (*cue_box, Gtk::PACK_SHRINK);
 
-	_master = new CueMaster(_master_widget.root());
+	_master = new CueMaster (_master_widget.root ());
 	_slot_area_box.pack_start (_master_widget, Gtk::PACK_SHRINK);
 
 	_midi_prop_box = new MidiRegionPropertiesBox ();
 	_slot_prop_box = new SlotPropertiesBox ();
 
 	_audio_prop_box = new AudioRegionPropertiesBox ();
-	_midi_prop_box = new MidiRegionPropertiesBox ();
+	_midi_prop_box  = new MidiRegionPropertiesBox ();
 
 	_audio_ops_box = new AudioRegionOperationsBox ();
-	_midi_ops_box = new MidiRegionOperationsBox ();
+	_midi_ops_box  = new MidiRegionOperationsBox ();
 
 	_audio_trim_box = new AudioClipEditorBox ();
-	_midi_trim_box = new MidiClipEditorBox ();
+	_midi_trim_box  = new MidiClipEditorBox ();
 
 	Gtk::Table* table = manage (new Gtk::Table);
 	table->set_homogeneous (false);
@@ -97,17 +97,23 @@ TriggerPage::TriggerPage ()
 	table->set_border_width (8);
 
 	int col = 0;
-	table->attach(*_slot_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );
+	table->attach (*_slot_prop_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
 
-	col=1;
-	table->attach(*_audio_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-	table->attach(*_audio_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-	table->attach(*_audio_ops_box,   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	col = 1;
+	table->attach (*_audio_prop_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
+	col++;
+	table->attach (*_audio_trim_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
+	col++;
+	table->attach (*_audio_ops_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
+	col++;
 
-	col=1;  /* audio and midi boxen share the same table locations; shown and hidden depending on region type */
-	table->attach(*_midi_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-	table->attach(*_midi_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-	table->attach(*_midi_ops_box,   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+	col = 1; /* audio and midi boxen share the same table locations; shown and hidden depending on region type */
+	table->attach (*_midi_prop_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
+	col++;
+	table->attach (*_midi_trim_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
+	col++;
+	table->attach (*_midi_ops_box,   col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
+	col++;
 
 	_parameter_box.pack_start (*table);
 
@@ -124,7 +130,7 @@ TriggerPage::TriggerPage ()
 	/* last item of strip packer */
 	_strip_packer.pack_end (_no_strips, true, true);
 	_no_strips.set_size_request (PX_SCALE (60), -1);
-	_no_strips.signal_expose_event().connect (sigc::bind (sigc::ptr_fun(&ArdourWidgets::ArdourIcon::expose), &_no_strips, ArdourWidgets::ArdourIcon::CloseCross));
+	_no_strips.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose), &_no_strips, ArdourWidgets::ArdourIcon::CloseCross));
 
 	_strip_group_box.pack_start (_slot_area_box, false, false);
 	_strip_group_box.pack_start (_strip_scroller, true, true);
@@ -261,23 +267,23 @@ TriggerPage::set_session (Session* s)
 
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
 
-	Editor::instance().get_selection().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerPage::selection_changed));
+	Editor::instance ().get_selection ().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerPage::selection_changed));
 
 	initial_track_display ();
 
-	_slot_prop_box->set_session(s);
+	_slot_prop_box->set_session (s);
 
-	_audio_prop_box->set_session(s);
-	_audio_ops_box->set_session(s);
-	_audio_trim_box->set_session(s);
+	_audio_prop_box->set_session (s);
+	_audio_ops_box->set_session (s);
+	_audio_trim_box->set_session (s);
 
-	_midi_prop_box->set_session(s);
-	_midi_ops_box->set_session(s);
-	_midi_trim_box->set_session(s);
+	_midi_prop_box->set_session (s);
+	_midi_ops_box->set_session (s);
+	_midi_trim_box->set_session (s);
 
 	update_title ();
 	start_updating ();
-	selection_changed();
+	selection_changed ();
 }
 
 void
@@ -343,42 +349,42 @@ TriggerPage::initial_track_display ()
 void
 TriggerPage::selection_changed ()
 {
-	Selection& selection (Editor::instance().get_selection());
+	Selection& selection (Editor::instance ().get_selection ());
 
-	_slot_prop_box->hide();
+	_slot_prop_box->hide ();
 
-	_audio_ops_box->hide();
-	_audio_prop_box->hide();
-	_audio_trim_box->hide();
+	_audio_ops_box->hide ();
+	_audio_prop_box->hide ();
+	_audio_trim_box->hide ();
 
-	_midi_ops_box->hide();
-	_midi_prop_box->hide();
-	_midi_trim_box->hide();
+	_midi_ops_box->hide ();
+	_midi_prop_box->hide ();
+	_midi_trim_box->hide ();
 
 	_parameter_box.hide ();
 
-	if (!selection.triggers.empty()) {
-		TriggerSelection ts = selection.triggers;
-		TriggerEntry* entry = *ts.begin();
-		Trigger* slot = &entry->trigger();
+	if (!selection.triggers.empty ()) {
+		TriggerSelection ts    = selection.triggers;
+		TriggerEntry*    entry = *ts.begin ();
+		Trigger*         slot  = &entry->trigger ();
 
-		_slot_prop_box->set_slot(slot);
-		_slot_prop_box->show();
-		if (slot->region()) {
-			if (slot->region()->data_type() == DataType::AUDIO) {
-				_audio_prop_box->set_region(slot->region());
-				_audio_trim_box->set_region(slot->region());
+		_slot_prop_box->set_slot (slot);
+		_slot_prop_box->show ();
+		if (slot->region ()) {
+			if (slot->region ()->data_type () == DataType::AUDIO) {
+				_audio_prop_box->set_region (slot->region ());
+				_audio_trim_box->set_region (slot->region ());
 
-				_audio_prop_box->show();
-				_audio_trim_box->show();
-				_audio_ops_box->show();
+				_audio_prop_box->show ();
+				_audio_trim_box->show ();
+				_audio_ops_box->show ();
 			} else {
-				_midi_prop_box->set_region(slot->region());
-				_midi_trim_box->set_region(slot->region());
+				_midi_prop_box->set_region (slot->region ());
+				_midi_trim_box->set_region (slot->region ());
 
-				_midi_prop_box->show();
-				_midi_trim_box->show();
-				_midi_ops_box->show();
+				_midi_prop_box->show ();
+				_midi_trim_box->show ();
+				_midi_ops_box->show ();
 			}
 		}
 		_parameter_box.show ();
@@ -403,7 +409,7 @@ TriggerPage::add_routes (RouteList& rl)
 		}
 #endif
 
-		if (!(*r)->triggerbox()) {
+		if (!(*r)->triggerbox ()) {
 			/* This Route has no TriggerBox -- and can never have one */
 			continue;
 		}
@@ -437,17 +443,17 @@ TriggerPage::redisplay_track_list ()
 {
 	bool visible_triggers = false;
 	for (list<TriggerStrip*>::iterator i = _strips.begin (); i != _strips.end (); ++i) {
-		TriggerStrip*                strip  = *i;
-		boost::shared_ptr<Stripable> s      = strip->stripable ();
-		boost::shared_ptr<Route> route      = boost::dynamic_pointer_cast<Route> (s);
+		TriggerStrip*                strip = *i;
+		boost::shared_ptr<Stripable> s     = strip->stripable ();
+		boost::shared_ptr<Route>     route = boost::dynamic_pointer_cast<Route> (s);
 
 		bool hidden = s->presentation_info ().hidden ();
 
 		if (!(s)->presentation_info ().trigger_track ()) {
 			hidden = true;
 		}
-		assert (route && route->triggerbox());
-		if (!route || !route->triggerbox()) {
+		assert (route && route->triggerbox ());
+		if (!route || !route->triggerbox ()) {
 			hidden = true;
 		}
 

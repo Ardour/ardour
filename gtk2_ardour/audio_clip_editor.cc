@@ -17,12 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <algorithm>
 #include "pbd/compose.h"
+#include <algorithm>
 
+#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/actions.h"
 
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
@@ -56,27 +56,25 @@ using namespace ARDOUR;
 using namespace ArdourCanvas;
 using namespace ArdourWaveView;
 using namespace ArdourWidgets;
-using std::min;
 using std::max;
-
+using std::min;
 
 Glib::RefPtr<Gtk::ActionGroup> ClipEditorBox::clip_editor_actions;
 
 void
 ClipEditorBox::init ()
 {
-	Bindings* bindings = Bindings::get_bindings (X_("Clip Editing"));
+	Bindings* bindings = Bindings::get_bindings (X_ ("Clip Editing"));
 
 	register_clip_editor_actions (bindings);
 
-	//_track_canvas_viewport->canvas()->set_data ("ardour-bindings",
-	//midi_bindings);
+	//_track_canvas_viewport->canvas()->set_data ("ardour-bindings", midi_bindings);
 }
 
 void
 ClipEditorBox::register_clip_editor_actions (Bindings* clip_editor_bindings)
 {
-	clip_editor_actions = ActionManager::create_action_group (clip_editor_bindings, X_("ClipEditing"));
+	clip_editor_actions = ActionManager::create_action_group (clip_editor_bindings, X_ ("ClipEditing"));
 
 	/* two versions to allow same action for Delete and Backspace */
 
@@ -84,45 +82,20 @@ ClipEditorBox::register_clip_editor_actions (Bindings* clip_editor_bindings)
 	// ActionManager::register_action (clip_editor_actions, X_("zoom-in"), _("Zoom In"), sigc::mem_fun (*this, &ClipEditorBox::zoom_out));
 }
 
-/* ------------ */
-
-class ClipBBTMetric : public ArdourCanvas::Ruler::Metric
-{
-    public:
-	ClipBBTMetric () { units_per_pixel = 1; }
-
-	void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const {
-		ArdourCanvas::Ruler::Mark mark;
-
-		std::cerr << "get marks between " << lower << " .. " << upper << std::endl;
-
-		for (int64_t n = lower; n < upper; n += 4000) {
-			mark.style = ArdourCanvas::Ruler::Mark::Major;
-			mark.label = string_compose ("%1", n);
-			mark.position = n / 100;
-			marks.push_back (mark);
-			std::cerr << "mark at " << mark.label << " @ " << mark.position << std::endl;
-		}
-	}
-
-    private:
-};
-
-
 AudioClipEditor::AudioClipEditor ()
 	: _spp (0)
 	, scroll_fraction (0)
 	, current_line_drag (0)
 	, current_scroll_drag (0)
 {
-	const double scale = UIConfiguration::instance().get_ui_scale();
+	const double scale = UIConfiguration::instance ().get_ui_scale ();
 
-	frame = new Rectangle (root());
+	frame       = new Rectangle (root ());
 	frame->name = "audio clip editor frame";
 	frame->set_fill (false);
 	frame->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::event_handler));
 
-	scroll_bar_trough = new Rectangle (root());
+	scroll_bar_trough = new Rectangle (root ());
 	scroll_bar_handle = new Rectangle (scroll_bar_trough);
 	scroll_bar_handle->set_outline (false);
 	scroll_bar_handle->set_corner_radius (5.);
@@ -133,10 +106,10 @@ AudioClipEditor::AudioClipEditor ()
 
 	clip_metric = new ClipBBTMetric ();
 
-	ruler_container  = new ArdourCanvas::Container (waves_container);
-	ruler = new ArdourCanvas::Ruler (ruler_container, *clip_metric);
-	ruler->name = "Clip Editor";
-	ruler->set_font_description (UIConfiguration::instance().get_SmallerFont());
+	ruler_container = new ArdourCanvas::Container (waves_container);
+	ruler           = new ArdourCanvas::Ruler (ruler_container, *clip_metric);
+	ruler->name     = "Clip Editor";
+	ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
 
 	line_container = new ArdourCanvas::Container (waves_container);
 
@@ -168,35 +141,34 @@ AudioClipEditor::~AudioClipEditor ()
 bool
 AudioClipEditor::line_event_handler (GdkEvent* ev, ArdourCanvas::Line* l)
 {
-	std::cerr << "event type " << Gtkmm2ext::event_type_string (ev->type) << " on line "  << std::endl;
+	std::cerr << "event type " << Gtkmm2ext::event_type_string (ev->type) << " on line " << std::endl;
 
 	switch (ev->type) {
-	case GDK_BUTTON_PRESS:
-		current_line_drag = new LineDrag (*this, *l);
-		return true;
-
-	case GDK_BUTTON_RELEASE:
-		if (current_line_drag) {
-			current_line_drag->end (&ev->button);
-			delete current_line_drag;
-			current_line_drag = 0;
+		case GDK_BUTTON_PRESS:
+			current_line_drag = new LineDrag (*this, *l);
 			return true;
-		}
-		break;
 
-	case GDK_MOTION_NOTIFY:
-		if (current_line_drag) {
-			current_line_drag->motion (&ev->motion);
-			return true;
-		}
-		break;
+		case GDK_BUTTON_RELEASE:
+			if (current_line_drag) {
+				current_line_drag->end (&ev->button);
+				delete current_line_drag;
+				current_line_drag = 0;
+				return true;
+			}
+			break;
 
+		case GDK_MOTION_NOTIFY:
+			if (current_line_drag) {
+				current_line_drag->motion (&ev->motion);
+				return true;
+			}
+			break;
 
-	case GDK_KEY_PRESS:
-		return key_press (&ev->key);
+		case GDK_KEY_PRESS:
+			return key_press (&ev->key);
 
-	default:
-		break;
+		default:
+			break;
 	}
 
 	return false;
@@ -206,33 +178,32 @@ bool
 AudioClipEditor::scroll_event_handler (GdkEvent* ev)
 {
 	switch (ev->type) {
-	case GDK_BUTTON_PRESS:
-		current_scroll_drag = new ScrollDrag (*this);
-		current_scroll_drag->begin (&ev->button);
-		return true;
-
-	case GDK_BUTTON_RELEASE:
-		if (current_scroll_drag) {
-			current_scroll_drag->end (&ev->button);
-			delete current_scroll_drag;
-			current_scroll_drag = 0;
+		case GDK_BUTTON_PRESS:
+			current_scroll_drag = new ScrollDrag (*this);
+			current_scroll_drag->begin (&ev->button);
 			return true;
-		}
-		break;
 
-	case GDK_MOTION_NOTIFY:
-		if (current_scroll_drag) {
-			current_scroll_drag->motion (&ev->motion);
-			return true;
-		}
-		break;
+		case GDK_BUTTON_RELEASE:
+			if (current_scroll_drag) {
+				current_scroll_drag->end (&ev->button);
+				delete current_scroll_drag;
+				current_scroll_drag = 0;
+				return true;
+			}
+			break;
 
+		case GDK_MOTION_NOTIFY:
+			if (current_scroll_drag) {
+				current_scroll_drag->motion (&ev->motion);
+				return true;
+			}
+			break;
 
-	case GDK_KEY_PRESS:
-		return key_press (&ev->key);
+		case GDK_KEY_PRESS:
+			return key_press (&ev->key);
 
-	default:
-		break;
+		default:
+			break;
 	}
 
 	return false;
@@ -251,11 +222,11 @@ AudioClipEditor::position_lines ()
 		return;
 	}
 
-	start_line->set_x0 (sample_to_pixel (audio_region->start().samples()));
-	start_line->set_x1 (sample_to_pixel (audio_region->start().samples()));
+	start_line->set_x0 (sample_to_pixel (audio_region->start ().samples ()));
+	start_line->set_x1 (sample_to_pixel (audio_region->start ().samples ()));
 
-	end_line->set_x0 (sample_to_pixel (audio_region->end().samples()));
-	end_line->set_x1 (sample_to_pixel (audio_region->end().samples()));
+	end_line->set_x0 (sample_to_pixel (audio_region->end ().samples ()));
+	end_line->set_x1 (sample_to_pixel (audio_region->end ().samples ()));
 }
 
 double
@@ -270,12 +241,11 @@ AudioClipEditor::pixel_to_sample (double p)
 	return round (p * _spp);
 }
 
-
 AudioClipEditor::LineDrag::LineDrag (AudioClipEditor& ed, ArdourCanvas::Line& l)
-	: editor (ed)
-	, line (l)
+    : editor (ed)
+    , line (l)
 {
-	line.grab();
+	line.grab ();
 }
 
 void
@@ -286,7 +256,7 @@ AudioClipEditor::LineDrag::begin (GdkEventButton* ev)
 void
 AudioClipEditor::LineDrag::end (GdkEventButton* ev)
 {
-	line.ungrab();
+	line.ungrab ();
 }
 
 void
@@ -299,20 +269,17 @@ AudioClipEditor::LineDrag::motion (GdkEventMotion* ev)
 void
 AudioClipEditor::set_colors ()
 {
-	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
+	set_background_color (UIConfiguration::instance ().color (X_ ("theme:bg")));
 
-	frame->set_outline_color (UIConfiguration::instance().color (X_("neutral:midground")));
+	frame->set_outline_color (UIConfiguration::instance ().color (X_ ("neutral:midground")));
 
-	ruler->set_fill_color (UIConfiguration::instance().color (X_("theme:bg1")));
-	ruler->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting less")));
+	start_line->set_outline_color (UIConfiguration::instance ().color (X_ ("theme:contrasting clock")));
+	end_line->set_outline_color (UIConfiguration::instance ().color (X_ ("theme:contrasting alt")));
+	loop_line->set_outline_color (UIConfiguration::instance ().color (X_ ("theme:contrasting selection")));
 
-	start_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting clock")));
-	end_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting alt")));
-	loop_line->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting selection")));
-
-	scroll_bar_trough->set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
-	scroll_bar_trough->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting less")));
-	scroll_bar_handle->set_fill_color (UIConfiguration::instance().color (X_("theme:contrasting clock")));
+	scroll_bar_trough->set_fill_color (UIConfiguration::instance ().color (X_ ("theme:bg")));
+	scroll_bar_trough->set_outline_color (UIConfiguration::instance ().color (X_ ("theme:contrasting less")));
+	scroll_bar_handle->set_fill_color (UIConfiguration::instance ().color (X_ ("theme:contrasting clock")));
 
 	set_waveform_colors ();
 }
@@ -324,20 +291,20 @@ AudioClipEditor::scroll_changed ()
 		return;
 	}
 
-	const double right_edge = scroll_bar_handle->get().x0;
-	const double avail_width = scroll_bar_trough->get().width() - scroll_bar_handle->get().width();
-	scroll_fraction = right_edge / avail_width;
-	scroll_fraction = std::min (1., std::max (0., scroll_fraction));
-	const samplepos_t s = llrintf (audio_region->source (0)->length().samples () * scroll_fraction);
+	const double right_edge  = scroll_bar_handle->get ().x0;
+	const double avail_width = scroll_bar_trough->get ().width () - scroll_bar_handle->get ().width ();
+	scroll_fraction          = right_edge / avail_width;
+	scroll_fraction          = std::min (1., std::max (0., scroll_fraction));
+	const samplepos_t s      = llrintf (audio_region->source (0)->length ().samples () * scroll_fraction);
 
 	scroll_to (sample_to_pixel (s), 0);
 	queue_draw ();
 }
 
 AudioClipEditor::ScrollDrag::ScrollDrag (AudioClipEditor& e)
-	: editor (e)
+    : editor (e)
 {
-	e.scroll_bar_handle->grab();
+	e.scroll_bar_handle->grab ();
 }
 
 void
@@ -357,10 +324,10 @@ void
 AudioClipEditor::ScrollDrag::motion (GdkEventMotion* ev)
 {
 	ArdourCanvas::Rectangle& r (*editor.scroll_bar_handle);
-	const double xdelta = ev->x - last_x;
-	ArdourCanvas::Rect n (r.get());
-	const double handle_width = n.width();
-	const double avail_width = editor.scroll_bar_trough->get().width() - handle_width;
+	const double             xdelta = ev->x - last_x;
+	ArdourCanvas::Rect       n (r.get ());
+	const double             handle_width = n.width ();
+	const double             avail_width  = editor.scroll_bar_trough->get ().width () - handle_width;
 
 	n.x0 = std::max (0., std::min (avail_width, n.x0 + xdelta));
 	n.x1 = n.x0 + handle_width;
@@ -374,7 +341,7 @@ AudioClipEditor::ScrollDrag::motion (GdkEventMotion* ev)
 void
 AudioClipEditor::drop_waves ()
 {
-	for (auto & wave : waves) {
+	for (auto& wave : waves) {
 		delete wave;
 	}
 
@@ -388,13 +355,12 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
 
 	audio_region = r;
 
-	uint32_t n_chans = r->n_channels ();
+	uint32_t    n_chans = r->n_channels ();
 	samplecnt_t len;
 
-	len = r->source (0)->length().samples ();
+	len = r->source (0)->length ().samples ();
 
 	for (uint32_t n = 0; n < n_chans; ++n) {
-
 		boost::shared_ptr<Region> wr = RegionFactory::get_whole_region_for_source (r->source (n));
 		if (!wr) {
 			continue;
@@ -427,24 +393,21 @@ AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
 {
 	GtkCanvas::on_size_allocate (alloc);
 
-	ArdourCanvas::Rect r (1, 1, alloc.get_width() - 2, alloc.get_height() - 2);
+	ArdourCanvas::Rect r (1, 1, alloc.get_width () - 2, alloc.get_height () - 2);
 	frame->set (r);
 
-	const double ruler_height = 25.;
-	ruler->set (Rect (2, 2, alloc.get_width() - 4, ruler_height));
-
-	const double scroll_bar_height = 10.;
-	const double scroll_bar_width = alloc.get_width() - 2;
+	const double scroll_bar_height      = 10.;
+	const double scroll_bar_width       = alloc.get_width () - 2;
 	const double scroll_bar_handle_left = scroll_bar_width * scroll_fraction;
 
-	scroll_bar_trough->set (Rect (1, alloc.get_height() - scroll_bar_height, scroll_bar_width, alloc.get_height()));
-	scroll_bar_handle->set (Rect (scroll_bar_handle_left, scroll_bar_trough->get().y0 + 1, scroll_bar_handle_left + 30., scroll_bar_trough->get().y1 - 1));
+	scroll_bar_trough->set (Rect (1, alloc.get_height () - scroll_bar_height, scroll_bar_width, alloc.get_height ()));
+	scroll_bar_handle->set (Rect (scroll_bar_handle_left, scroll_bar_trough->get ().y0 + 1, scroll_bar_handle_left + 30., scroll_bar_trough->get ().y1 - 1));
 
 	position_lines ();
 
-	start_line->set_y1 (frame->get().height() - 2. - scroll_bar_height);
-	end_line->set_y1 (frame->get().height() - 2. - scroll_bar_height);
-	loop_line->set_y1 (frame->get().height() - 2. - scroll_bar_height);
+	start_line->set_y1 (frame->get ().height () - 2. - scroll_bar_height);
+	end_line->set_y1 (frame->get ().height () - 2. - scroll_bar_height);
+	loop_line->set_y1 (frame->get ().height () - 2. - scroll_bar_height);
 
 	set_wave_heights ();
 }
@@ -458,7 +421,7 @@ AudioClipEditor::set_spp (double samples_per_pixel)
 
 	position_lines ();
 
-	for (auto & wave : waves) {
+	for (auto& wave : waves) {
 		wave->set_samples_per_pixel (_spp);
 	}
 }
@@ -466,8 +429,8 @@ AudioClipEditor::set_spp (double samples_per_pixel)
 void
 AudioClipEditor::set_spp_from_length (samplecnt_t len)
 {
-	double available_width = frame->get().width();
-	double s = floor (len / available_width);
+	double available_width = frame->get ().width ();
+	double s               = floor (len / available_width);
 
 	set_spp (s);
 }
@@ -475,17 +438,17 @@ AudioClipEditor::set_spp_from_length (samplecnt_t len)
 void
 AudioClipEditor::set_wave_heights ()
 {
-	if (waves.empty()) {
+	if (waves.empty ()) {
 		return;
 	}
 
-	uint32_t n = 0;
-	const Distance w = frame->get().height() - scroll_bar_trough->get().height() - 2. - ruler->get().height();
-	Distance ht = w / waves.size();
+	uint32_t       n  = 0;
+	const Distance w  = frame->get ().height () - scroll_bar_trough->get ().height () - 2.;
+	Distance       ht = w / waves.size ();
 
-	for (auto & wave : waves) {
+	for (auto& wave : waves) {
 		wave->set_height (ht);
-		wave->set_y_position (ruler->get().height() + (n * ht));
+		wave->set_y_position (ruler->get ().height () + (n * ht));
 		++n;
 	}
 }
@@ -493,44 +456,39 @@ AudioClipEditor::set_wave_heights ()
 void
 AudioClipEditor::set_waveform_colors ()
 {
-	Gtkmm2ext::Color clip = UIConfiguration::instance().color ("clipped waveform");
-	Gtkmm2ext::Color zero = UIConfiguration::instance().color ("zero line");
-	Gtkmm2ext::Color fill = UIConfiguration::instance().color ("waveform fill");
-	Gtkmm2ext::Color outline = UIConfiguration::instance().color ("waveform outline");
+	Gtkmm2ext::Color clip    = UIConfiguration::instance ().color ("clipped waveform");
+	Gtkmm2ext::Color zero    = UIConfiguration::instance ().color ("zero line");
+	Gtkmm2ext::Color fill    = UIConfiguration::instance ().color ("waveform fill");
+	Gtkmm2ext::Color outline = UIConfiguration::instance ().color ("waveform outline");
 
-	for (auto & wave : waves) {
+	for (auto& wave : waves) {
 		wave->set_fill_color (fill);
 		wave->set_outline_color (outline);
 		wave->set_clip_color (clip);
 		wave->set_zero_color (zero);
 	}
 }
+
 bool
 AudioClipEditor::event_handler (GdkEvent* ev)
 {
 	switch (ev->type) {
-	case GDK_BUTTON_PRESS:
-//		PublicEditor::instance().get_selection().set (this);
-		break;
-	case GDK_ENTER_NOTIFY:
-//		redraw ();
-		break;
-	case GDK_LEAVE_NOTIFY:
-//		redraw ();
-		break;
-	default:
-		break;
+		case GDK_BUTTON_PRESS:
+			break;
+		case GDK_ENTER_NOTIFY:
+			break;
+		case GDK_LEAVE_NOTIFY:
+			break;
+		default:
+			break;
 	}
-
 	return false;
 }
 
-/* ====================================================== */
-
 AudioClipEditorBox::AudioClipEditorBox ()
 {
-	_header_label.set_text(_("AUDIO Region Trimmer:"));
-	_header_label.set_alignment(0.0, 0.5);
+	_header_label.set_text (_ ("AUDIO Region Trimmer:"));
+	_header_label.set_alignment (0.0, 0.5);
 
 	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
 	zoom_out_button.set_icon (ArdourIcon::ZoomOut);
@@ -542,13 +500,13 @@ AudioClipEditorBox::AudioClipEditorBox ()
 	header_box.pack_start (zoom_in_button, false, false);
 	header_box.pack_start (zoom_out_button, false, false);
 
-	pack_start(header_box, false, false, 6);
+	pack_start (header_box, false, false, 6);
 
 	editor = manage (new AudioClipEditor);
-	editor->set_size_request(600,120);
+	editor->set_size_request (600, 120);
 
-	pack_start(*editor, true, true);
-	editor->show();
+	pack_start (*editor, true, true);
+	editor->show ();
 }
 
 AudioClipEditorBox::~AudioClipEditorBox ()
@@ -559,13 +517,13 @@ AudioClipEditorBox::~AudioClipEditorBox ()
 void
 AudioClipEditorBox::zoom_in_click ()
 {
-	editor->set_spp (editor->spp() / 2.);
+	editor->set_spp (editor->spp () / 2.);
 }
 
 void
 AudioClipEditorBox::zoom_out_click ()
 {
-	editor->set_spp (editor->spp() * 2.);
+	editor->set_spp (editor->spp () * 2.);
 }
 
 void
@@ -577,31 +535,20 @@ AudioClipEditorBox::set_region (boost::shared_ptr<Region> r)
 		return;
 	}
 
-	set_session(&r->session());
+	set_session (&r->session ());
 
-	state_connection.disconnect();
+	state_connection.disconnect ();
 
 	_region = r;
 	editor->set_region (ar);
 
 	PBD::PropertyChange interesting_stuff;
-	region_changed(interesting_stuff);
+	region_changed (interesting_stuff);
 
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&AudioClipEditorBox::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&AudioClipEditorBox::region_changed, this, _1), gui_context ());
 }
 
 void
 AudioClipEditorBox::region_changed (const PBD::PropertyChange& what_changed)
 {
-//ToDo:  refactor the region_editor.cc  to cover this basic stuff
-//	if (what_changed.contains (ARDOUR::Properties::name)) {
-//		name_changed ();
-//	}
-
-//	PBD::PropertyChange interesting_stuff;
-//	interesting_stuff.add (ARDOUR::Properties::length);
-//	interesting_stuff.add (ARDOUR::Properties::start);
-//	if (what_changed.contains (interesting_stuff))
-	{
-	}
 }

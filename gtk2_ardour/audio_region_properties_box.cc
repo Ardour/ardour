@@ -17,12 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <algorithm>
 #include "pbd/compose.h"
+#include <algorithm>
 
+#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/actions.h"
 
 #include "ardour/location.h"
 #include "ardour/profile.h"
@@ -41,62 +41,74 @@
 using namespace Gtk;
 using namespace ARDOUR;
 using namespace ArdourWidgets;
-using std::min;
 using std::max;
+using std::min;
 
-RegionPropertiesBox::RegionPropertiesBox() :
-	 length_clock (X_("regionlength"), true, "", true, false, true)
+RegionPropertiesBox::RegionPropertiesBox ()
+	: length_clock (X_("regionlength"), true, "", true, false, true)
 	, start_clock (X_("regionstart"), true, "", false, false)
 	, loop_length_clock (X_("regionlength"), true, "", true, false, true)
 	, loop_start_clock (X_("regionstart"), true, "", false, false)
 	, bbt_toggle (ArdourButton::led_default_elements)
 	, loop_toggle (ArdourButton::led_default_elements)
 {
-	Gtk::Label *label;
-	int row = 0;
+	Gtk::Label* label;
+	int         row = 0;
 
-	_header_label.set_alignment(0.0, 0.5);
-	pack_start(_header_label, false, false, 6);
+	_header_label.set_alignment (0.0, 0.5);
+	pack_start (_header_label, false, false, 6);
 
-		Gtk::Table *bpm_table = manage(new Gtk::Table());
-		bpm_table->set_homogeneous (false);
-		bpm_table->set_spacings (4);
-		bpm_table->set_border_width (2);
-		label = manage(new Gtk::Label(_("BPM:")));  label->set_alignment(1.0, 0.5);
-		bpm_table->attach(*label,      0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
-		bpm_table->attach(bpm_button,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK ); row++;
+	Gtk::Table* bpm_table = manage (new Gtk::Table ());
+	bpm_table->set_homogeneous (false);
+	bpm_table->set_spacings (4);
+	bpm_table->set_border_width (2);
+	label = manage (new Gtk::Label (_("BPM:")));
+	label->set_alignment (1.0, 0.5);
+	bpm_table->attach (*label,     0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	bpm_table->attach (bpm_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	row++;
 
 	pack_start (*bpm_table, false, false);
 
-		Gtk::Table *metrum_table = manage(new Gtk::Table());
-		metrum_table->set_homogeneous (false);
-		metrum_table->set_spacings (4);
-		metrum_table->set_border_width (2);
-		label = manage(new Gtk::Label(_("Time Sig:")));  label->set_alignment(1.0, 0.5);
-		bpm_table->attach(*label,         0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
-		bpm_table->attach(metrum_button,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK ); row++;
+	Gtk::Table* metrum_table = manage (new Gtk::Table ());
+	metrum_table->set_homogeneous (false);
+	metrum_table->set_spacings (4);
+	metrum_table->set_border_width (2);
+	label = manage (new Gtk::Label (_("Time Sig:")));
+	label->set_alignment (1.0, 0.5);
+	bpm_table->attach (*label,        0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	bpm_table->attach (metrum_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	row++;
 
 	pack_start (*metrum_table, false, false);
 
-		row = 0;
+	row = 0;
 
-		bbt_toggle.set_text(_("BBT Sync"));
-		table.attach(bbt_toggle,  0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK ); row++;
+	bbt_toggle.set_text (_("BBT Sync"));
+	table.attach (bbt_toggle, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	row++;
 
-		label = manage(new Gtk::Label(_("Start:")));  label->set_alignment(1.0, 0.5);
-		table.attach(*label,       0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
-		table.attach(start_clock,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK );  row++;
+	label = manage (new Gtk::Label (_("Start:")));
+	label->set_alignment (1.0, 0.5);
+	table.attach (*label, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	table.attach (start_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	row++;
 
-		label = manage(new Gtk::Label(_("Length:")));  label->set_alignment(1.0, 0.5);
-		table.attach(*label,       0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
-		table.attach(length_clock, 1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK );  row++;
+	label = manage (new Gtk::Label (_("Length:")));
+	label->set_alignment (1.0, 0.5);
+	table.attach (*label, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	table.attach (length_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	row++;
 
-		loop_toggle.set_text(_("Loop"));
-		table.attach(loop_toggle,  0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK ); row++;
+	loop_toggle.set_text (_("Loop"));
+	table.attach (loop_toggle, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	row++;
 
-		label = manage(new Gtk::Label(_("Loop Start:")));  label->set_alignment(1.0, 0.5);
-		table.attach(*label,            0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK );
-		table.attach(loop_start_clock,  1, 2, row, row+1, Gtk::SHRINK, Gtk::SHRINK );  row++;
+	label = manage (new Gtk::Label (_("Loop Start:")));
+	label->set_alignment (1.0, 0.5);
+	table.attach (*label, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	table.attach (loop_start_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	row++;
 
 	table.set_homogeneous (false);
 	table.set_spacings (4);
@@ -104,7 +116,7 @@ RegionPropertiesBox::RegionPropertiesBox() :
 	pack_start (table, false, false);
 }
 
-RegionPropertiesBox::~RegionPropertiesBox()
+RegionPropertiesBox::~RegionPropertiesBox ()
 {
 }
 
@@ -123,92 +135,81 @@ RegionPropertiesBox::set_session (Session* s)
 void
 RegionPropertiesBox::set_region (boost::shared_ptr<Region> r)
 {
-	set_session(&r->session());
+	set_session (&r->session ());
 
-	state_connection.disconnect();
+	state_connection.disconnect ();
 
 	_region = r;
 
 	PBD::PropertyChange interesting_stuff;
-	region_changed(interesting_stuff);
+	region_changed (interesting_stuff);
 
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&RegionPropertiesBox::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&RegionPropertiesBox::region_changed, this, _1), gui_context ());
 }
 
 void
 RegionPropertiesBox::region_changed (const PBD::PropertyChange& what_changed)
 {
-//ToDo:  refactor the region_editor.cc  to cover this basic stuff
-//	if (what_changed.contains (ARDOUR::Properties::name)) {
-//		name_changed ();
-//	}
-
-//	PBD::PropertyChange interesting_stuff;
-//	interesting_stuff.add (ARDOUR::Properties::length);
-//	interesting_stuff.add (ARDOUR::Properties::start);
-//	if (what_changed.contains (interesting_stuff))
+	// TODO: refactor the region_editor.cc to cover this basic stuff
 	{
-		AudioClock::Mode mode = _region->position_time_domain() == Temporal::AudioTime ? AudioClock::Samples : AudioClock::BBT;
+		AudioClock::Mode mode = _region->position_time_domain () == Temporal::AudioTime ? AudioClock::Samples : AudioClock::BBT;
 
 		start_clock.set_mode (mode);
 		length_clock.set_mode (mode);
 
-		start_clock.set (_region->start());
-		length_clock.set_duration (_region->length());
+		start_clock.set (_region->start ());
+		length_clock.set_duration (_region->length ());
 
-		bpm_button.set_text("122.2");
-		metrum_button.set_text("4/4");
+		bpm_button.set_text ("122.2");
+		metrum_button.set_text ("4/4");
 	}
 }
 
-/* ================== */
-
 AudioRegionPropertiesBox::AudioRegionPropertiesBox ()
 {
-	_header_label.set_text(_("AUDIO Region Properties:"));
+	_header_label.set_text (_("AUDIO Region Properties:"));
 
-	Gtk::Label *label;
+	Gtk::Label* label;
 
-	Gtk::Table *audio_t = manage(new Gtk::Table());
+	Gtk::Table* audio_t = manage (new Gtk::Table ());
 	audio_t->set_homogeneous (true);
 	audio_t->set_spacings (4);
 
 	int row = 0;
 
-		label = manage(new Gtk::Label(_("Stretch Mode:")));  label->set_alignment(1.0, 0.5);
-		audio_t->attach(*label,    0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	label = manage (new Gtk::Label (_("Stretch Mode:")));
+	label->set_alignment (1.0, 0.5);
+	audio_t->attach (*label, 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
-		stretch_selector.set_text ("Mixed");
-		stretch_selector.set_name ("generic button");
-	//	stretch_selector.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
-		audio_t->attach(stretch_selector,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
-
-	row++;
-
-		label = manage(new Gtk::Label(_("Fades:")));  label->set_alignment(1.0, 0.5);
-		fade_in_enable_button.set_text (_("In"));
-		fade_in_enable_button.set_name ("generic button");
-	//	fade_in_enable_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
-		fade_out_enable_button.set_text (_("Out"));
-		fade_out_enable_button.set_name ("generic button");
-	//	fade_out_enable_button.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
-		audio_t->attach(*label,                  0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-		audio_t->attach(fade_in_enable_button,   1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
-		audio_t->attach(fade_out_enable_button,  2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	stretch_selector.set_text ("Mixed");
+	stretch_selector.set_name ("generic button");
+	audio_t->attach (stretch_selector, 1, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	row++;
 
-		label = manage(new Gtk::Label(_("Gain:")));  label->set_alignment(1.0, 0.5);
-		audio_t->attach(*label,    0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-
-		gain_control.set_text (_("+6dB"));
-		gain_control.set_name ("generic button");
-	//	gain_control.signal_clicked.connect (sigc::mem_fun (*this, &MidiRegionPropertiesBox::patch_enable_button_clicked));
-		audio_t->attach(gain_control,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	label = manage (new Gtk::Label (_("Fades:")));
+	label->set_alignment (1.0, 0.5);
+	fade_in_enable_button.set_text (_("In"));
+	fade_in_enable_button.set_name ("generic button");
+	fade_out_enable_button.set_text (_("Out"));
+	fade_out_enable_button.set_name ("generic button");
+	audio_t->attach (*label,                 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	audio_t->attach (fade_in_enable_button,  1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	audio_t->attach (fade_out_enable_button, 2, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	row++;
 
-	pack_start(*audio_t);
+	label = manage (new Gtk::Label (_("Gain:")));
+	label->set_alignment (1.0, 0.5);
+	audio_t->attach (*label, 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+
+	gain_control.set_text (_("+6dB"));
+	gain_control.set_name ("generic button");
+	audio_t->attach (gain_control, 1, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+
+	row++;
+
+	pack_start (*audio_t);
 }
 
 AudioRegionPropertiesBox::~AudioRegionPropertiesBox ()
@@ -220,4 +221,3 @@ AudioRegionPropertiesBox::set_region (boost::shared_ptr<Region> r)
 {
 	RegionPropertiesBox::set_region (r);
 }
-
