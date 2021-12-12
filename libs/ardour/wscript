@@ -208,6 +208,7 @@ libardour_sources = [
         'rt_tasklist.cc',
         'scene_change.cc',
         'search_paths.cc',
+        'segment_descriptor.cc',
         'selection.cc',
         'send.cc',
         'session.cc',
