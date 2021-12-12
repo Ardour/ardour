@@ -1729,6 +1729,14 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 }
 
 void
+Route::stop_trigger (bool now)
+{
+	if (_triggerbox) {
+		_triggerbox->request_stop_all();  //ToDo: stop now or at end of quant?
+	}
+}
+
+void
 Route::reset_instrument_info ()
 {
 	boost::shared_ptr<Processor> instr = the_instrument();

@@ -205,6 +205,8 @@ public:
 	void set_disk_io_point (DiskIOPoint);
 	DiskIOPoint disk_io_point() const { return _disk_io_point; }
 
+	void stop_trigger(bool now);
+
 	/* Processors */
 
 	boost::shared_ptr<Amp> amp() const  { return _amp; }

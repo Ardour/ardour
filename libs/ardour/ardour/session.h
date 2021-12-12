@@ -487,6 +487,9 @@ public:
 
 	void start_transport_from_trigger ();
 	void stop_transport_from_trigger ();
+
+	void stop_all_triggers (bool now = true);
+
 	void request_transport_speed (double speed, TransportRequestSource origin = TRS_UI);
 	void request_default_play_speed (double speed, TransportRequestSource origin = TRS_UI);
 	void request_transport_speed_nonzero (double, TransportRequestSource origin = TRS_UI);

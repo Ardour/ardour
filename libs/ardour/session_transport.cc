@@ -432,6 +432,17 @@ Session::set_transport_speed (double speed)
 
 }
 
+/** Called from the gui thread */
+void
+Session::stop_all_triggers (bool now)
+{
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		(*i)->stop_trigger(now);
+	}
+}
+
+
 /** Stop the transport.  */
 void
 Session::stop_transport (bool abort, bool clear_state)
