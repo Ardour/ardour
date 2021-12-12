@@ -30,6 +30,7 @@
 #include "widgets/tabbable.h"
 
 #include "fitted_canvas_widget.h"
+#include "trigger_clip_picker.h"
 
 class TriggerStrip;
 class CueMaster;
@@ -86,8 +87,9 @@ private:
 	Gtk::HBox            _strip_packer;
 	Gtk::EventBox        _no_strips;
 	Gtk::VBox            _slot_area_box;
-	Gtk::VBox            _browser_box;
 	Gtk::HBox            _parameter_box;
+
+	TriggerClipPicker _trigger_clip_picker;
 
 	FittedCanvasWidget _master_widget;
 	CueMaster*         _master;

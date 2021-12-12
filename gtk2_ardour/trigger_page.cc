@@ -117,11 +117,6 @@ TriggerPage::TriggerPage ()
 
 	_parameter_box.pack_start (*table);
 
-#if 1 /* Placeholders */
-	_browser_box.pack_start (*Gtk::manage (new Gtk::Label ("File Browser")));
-	_browser_box.show_all ();
-#endif
-
 	/* Upper pane (slot | strips | file browser) */
 
 	_strip_scroller.add (_strip_packer);
@@ -136,7 +131,7 @@ TriggerPage::TriggerPage ()
 	_strip_group_box.pack_start (_strip_scroller, true, true);
 
 	_pane_upper.add (_strip_group_box);
-	_pane_upper.add (_browser_box);
+	_pane_upper.add (_trigger_clip_picker);
 
 	/* Top-level Layout */
 	_pane.add (_pane_upper);
@@ -152,7 +147,7 @@ TriggerPage::TriggerPage ()
 	_strip_scroller.show ();
 	_strip_packer.show ();
 	_slot_area_box.show_all ();
-	_browser_box.show ();
+	_trigger_clip_picker.show ();
 
 	/* setup keybidings */
 	_content.set_data ("ardour-bindings", bindings);
