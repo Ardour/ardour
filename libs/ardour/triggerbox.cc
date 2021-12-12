@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <cstdlib>
+#include <sstream>
 
 #include <glibmm.h>
 
@@ -405,7 +406,7 @@ pframes_t
 Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t dest_offset, bool passthru)
 {
 	using namespace Temporal;
-	
+
 	/* This should never be called by a stopped trigger */
 
 	assert (_state != Stopped);
@@ -714,17 +715,58 @@ AudioTrigger::determine_tempo ()
 {
 	using namespace Temporal;
 
-	/* now potentially stretch it to match our tempo.
-	 *
-	 * We do not handle tempo changes at present, and should probably issue
-	 * a warming about this.
+	/* check the name to see if there's a (heuristically obvious) hint
+	 * about the tempo.
 	 */
+
+	string str = _region->name();
+	string::size_type bi;
+	string::size_type ni;
+	double text_tempo = -1.;
+
+	if (((bi = str.find ("bpm")) != string::npos) ||
+	    ((bi = str.find ("BPM")) != string::npos)) {
+
+		string sub (str.substr (0, bi));
+
+		if ((ni = sub.find_last_of ("0123456789.,_-")) != string::npos) {
+
+			int nni = ni; /* ni is unsigned, nni is signed */
+
+			while (nni >= 0) {
+				if (!isdigit (sub[nni]) &&
+				    (sub[nni] != '.') &&
+				    (sub[nni] != ',')) {
+					break;
+				}
+				--nni;
+			}
+
+			if (nni > 0) {
+				std::stringstream p (sub.substr (nni + 1));
+				p >> text_tempo;
+				if (!p) {
+					text_tempo = -1.;
+				} else {
+					_apparent_tempo = text_tempo;
+					std::cerr << "from filename, tempo = " << _apparent_tempo << std::endl;
+				}
+			}
+		}
+	}
 
 	TempoMap::SharedPtr tm (TempoMap::use());
 
-	if (_barcnt == 0) {
+	/* We don't have too many good choices here. Triggers can fire at any
+	 * time, so there's no special place on the tempo map that we can use
+	 * to get the meter from and thus compute an apparent bar count for
+	 * this region. Our solution for now: just use the first meter.
+	 */
 
-		TempoMetric const & metric (tm->metric_at (timepos_t (AudioTime)));
+	TempoMetric const & metric (tm->metric_at (timepos_t (AudioTime)));
+
+	if (text_tempo < 0) {
+
 		breakfastquay::MiniBPM mbpm (_box.session().sample_rate());
 
 		mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
@@ -737,11 +779,11 @@ AudioTrigger::determine_tempo ()
 		}
 
 		cerr << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data_length / _box.session().sample_rate() << " seconds\n";
-
-		const double seconds = (double) data_length  / _box.session().sample_rate();
-		const double quarters = (seconds / 60.) * _apparent_tempo;
-		_barcnt = quarters / metric.meter().divisions_per_bar();
 	}
+
+	const double seconds = (double) data_length  / _box.session().sample_rate();
+	const double quarters = (seconds / 60.) * _apparent_tempo;
+	_barcnt = quarters / metric.meter().divisions_per_bar();
 
 	/* use initial tempo in map (assumed for now to be the only one */
 
