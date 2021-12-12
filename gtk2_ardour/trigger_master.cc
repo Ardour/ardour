@@ -360,7 +360,7 @@ CueMaster::event_handler (GdkEvent* ev)
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		if (ev->button.button == 1) {
-			//TriggerBox::StopAllTriggers ();
+			_session->stop_all_triggers();
 			return true;
 		}
 		break;

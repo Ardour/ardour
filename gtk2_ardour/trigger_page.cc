@@ -218,6 +218,8 @@ TriggerPage::set_session (Session* s)
 		return;
 	}
 
+	_master.set_session(s);
+
 	XMLNode* node = ARDOUR_UI::instance ()->trigger_page_settings ();
 	set_state (*node, Stateful::loading_state_version);
 

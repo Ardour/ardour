@@ -81,7 +81,7 @@ class TriggerMaster : public ArdourCanvas::Rectangle
 };
 
 
-class CueMaster : public ArdourCanvas::Rectangle
+class CueMaster : public ArdourCanvas::Rectangle, public ARDOUR::SessionHandlePtr
 {
   public:
 	CueMaster (ArdourCanvas::Item* canvas);
