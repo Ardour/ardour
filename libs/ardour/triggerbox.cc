@@ -550,6 +550,17 @@ AudioTrigger::~AudioTrigger ()
 	delete _stretcher;
 }
 
+SegmentDescriptor
+AudioTrigger::get_segment_descriptor () const
+{
+	SegmentDescriptor sd;
+
+	sd.set_extent (_start_offset, usable_length);
+	sd.set_tempo (Temporal::Tempo (_apparent_tempo, 4));
+
+	return sd;
+}
+
 void
 AudioTrigger::startup ()
 {
@@ -1131,6 +1142,21 @@ MIDITrigger::MIDITrigger (uint64_t n, TriggerBox& b)
 
 MIDITrigger::~MIDITrigger ()
 {
+}
+
+SegmentDescriptor
+MIDITrigger::get_segment_descriptor () const
+{
+	SegmentDescriptor sd;
+	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion> (_region);
+	assert (mr);
+
+	sd.set_extent (Temporal::Beats(), mr->length().beats());
+
+	/* we don't really have tempo information for MIDI yet */
+	sd.set_tempo (Temporal::Tempo (120, 4));
+
+	return sd;
 }
 
 void

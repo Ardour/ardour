@@ -43,6 +43,7 @@
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/processor.h"
+#include "ardour/segment_descriptor.h"
 
 #include "ardour/libardour_visibility.h"
 
@@ -223,6 +224,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	double apparent_tempo() const { return _apparent_tempo; }
 	double set_tempo (double t);
 
+	virtual SegmentDescriptor get_segment_descriptor () const = 0;
+
   protected:
 	struct UIRequests {
 		std::atomic<bool> stop;
@@ -288,6 +291,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	RubberBand::RubberBandStretcher* stretcher() { return (_stretcher); }
 
+	SegmentDescriptor get_segment_descriptor () const;
+
   protected:
 	void retrigger ();
 	void set_usable_length ();
@@ -342,6 +347,8 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
+
+	SegmentDescriptor get_segment_descriptor () const;
 
   protected:
 	void retrigger ();
