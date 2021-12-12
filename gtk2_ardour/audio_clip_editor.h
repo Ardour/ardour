@@ -113,6 +113,9 @@ private:
 	ArdourCanvas::Line*                    loop_line;
 	ArdourCanvas::Rectangle*               scroll_bar_trough;
 	ArdourCanvas::Rectangle*               scroll_bar_handle;
+	ArdourCanvas::Container*               ruler_container;
+	ArdourCanvas::Ruler*                   ruler;
+	ArdourCanvas::Ruler::Metric*           clip_metric;
 	std::vector<ArdourWaveView::WaveView*> waves;
 	double                                 non_wave_height;
 	samplepos_t                            left_origin;

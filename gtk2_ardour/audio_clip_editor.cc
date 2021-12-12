@@ -64,7 +64,7 @@ Glib::RefPtr<Gtk::ActionGroup> ClipEditorBox::clip_editor_actions;
 void
 ClipEditorBox::init ()
 {
-	Bindings* bindings = Bindings::get_bindings (X_ ("Clip Editing"));
+	Bindings* bindings = Bindings::get_bindings (X_("Clip Editing"));
 
 	register_clip_editor_actions (bindings);
 
@@ -74,13 +74,37 @@ ClipEditorBox::init ()
 void
 ClipEditorBox::register_clip_editor_actions (Bindings* clip_editor_bindings)
 {
-	clip_editor_actions = ActionManager::create_action_group (clip_editor_bindings, X_ ("ClipEditing"));
+	clip_editor_actions = ActionManager::create_action_group (clip_editor_bindings, X_("ClipEditing"));
 
 	/* two versions to allow same action for Delete and Backspace */
 
 	// ActionManager::register_action (clip_editor_actions, X_("zoom-in"), _("Zoom In"), sigc::mem_fun (*this, &ClipEditorBox::zoom_in));
 	// ActionManager::register_action (clip_editor_actions, X_("zoom-in"), _("Zoom In"), sigc::mem_fun (*this, &ClipEditorBox::zoom_out));
 }
+
+class ClipBBTMetric : public ArdourCanvas::Ruler::Metric
+{
+public:
+	ClipBBTMetric ()
+	{
+		units_per_pixel = 1;
+	}
+
+	void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const
+	{
+		ArdourCanvas::Ruler::Mark mark;
+
+		std::cerr << "get marks between " << lower << " .. " << upper << std::endl;
+
+		for (int64_t n = lower; n < upper; n += 4000) {
+			mark.style    = ArdourCanvas::Ruler::Mark::Major;
+			mark.label    = string_compose ("%1", n);
+			mark.position = n / 100;
+			marks.push_back (mark);
+			std::cerr << "mark at " << mark.label << " @ " << mark.position << std::endl;
+		}
+	}
+};
 
 AudioClipEditor::AudioClipEditor ()
 	: _spp (0)
@@ -269,17 +293,17 @@ AudioClipEditor::LineDrag::motion (GdkEventMotion* ev)
 void
 AudioClipEditor::set_colors ()
 {
-	set_background_color (UIConfiguration::instance ().color (X_ ("theme:bg")));
+	set_background_color (UIConfiguration::instance ().color (X_("theme:bg")));
 
-	frame->set_outline_color (UIConfiguration::instance ().color (X_ ("neutral:midground")));
+	frame->set_outline_color (UIConfiguration::instance ().color (X_("neutral:midground")));
 
-	start_line->set_outline_color (UIConfiguration::instance ().color (X_ ("theme:contrasting clock")));
-	end_line->set_outline_color (UIConfiguration::instance ().color (X_ ("theme:contrasting alt")));
-	loop_line->set_outline_color (UIConfiguration::instance ().color (X_ ("theme:contrasting selection")));
+	start_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting clock")));
+	end_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting alt")));
+	loop_line->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting selection")));
 
-	scroll_bar_trough->set_fill_color (UIConfiguration::instance ().color (X_ ("theme:bg")));
-	scroll_bar_trough->set_outline_color (UIConfiguration::instance ().color (X_ ("theme:contrasting less")));
-	scroll_bar_handle->set_fill_color (UIConfiguration::instance ().color (X_ ("theme:contrasting clock")));
+	scroll_bar_trough->set_fill_color (UIConfiguration::instance ().color (X_("theme:bg")));
+	scroll_bar_trough->set_outline_color (UIConfiguration::instance ().color (X_("theme:contrasting less")));
+	scroll_bar_handle->set_fill_color (UIConfiguration::instance ().color (X_("theme:contrasting clock")));
 
 	set_waveform_colors ();
 }
@@ -487,7 +511,7 @@ AudioClipEditor::event_handler (GdkEvent* ev)
 
 AudioClipEditorBox::AudioClipEditorBox ()
 {
-	_header_label.set_text (_ ("AUDIO Region Trimmer:"));
+	_header_label.set_text (_("AUDIO Region Trimmer:"));
 	_header_label.set_alignment (0.0, 0.5);
 
 	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
