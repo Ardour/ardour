@@ -29,18 +29,17 @@
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
 
+#include "audio_region_operations_box.h"
+#include "audio_region_properties_box.h"
 #include "fitted_canvas_widget.h"
+#include "midi_clip_editor.h"
+#include "midi_region_operations_box.h"
+#include "midi_region_properties_box.h"
+#include "slot_properties_box.h"
 #include "trigger_clip_picker.h"
+#include "trigger_master.h"
 
 class TriggerStrip;
-class CueMaster;
-class SlotPropertiesBox;
-class AudioRegionPropertiesBox;
-class MidiRegionPropertiesBox;
-class AudioRegionOperationsBox;
-class MidiRegionOperationsBox;
-class AudioClipEditorBox;
-class MidiClipEditorBox;
 
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
@@ -92,17 +91,17 @@ private:
 	TriggerClipPicker _trigger_clip_picker;
 
 	FittedCanvasWidget _master_widget;
-	CueMaster*         _master;
+	CueMaster          _master;
 
-	SlotPropertiesBox* _slot_prop_box;
+	SlotPropertiesBox _slot_prop_box;
 
-	AudioRegionPropertiesBox* _audio_prop_box;
-	AudioRegionOperationsBox* _audio_ops_box;
-	AudioClipEditorBox*       _audio_trim_box;
+	AudioRegionPropertiesBox _audio_prop_box;
+	AudioRegionOperationsBox _audio_ops_box;
+	AudioClipEditorBox       _audio_trim_box;
 
-	MidiRegionPropertiesBox* _midi_prop_box;
-	MidiRegionOperationsBox* _midi_ops_box;
-	MidiClipEditorBox*       _midi_trim_box;
+	MidiRegionPropertiesBox _midi_prop_box;
+	MidiRegionOperationsBox _midi_ops_box;
+	MidiClipEditorBox       _midi_trim_box;
 
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;
