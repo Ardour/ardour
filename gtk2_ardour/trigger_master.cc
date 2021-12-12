@@ -119,18 +119,25 @@ TriggerMaster::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 		context->fill ();
 	}
 
-	//fade-over at top
-	uint32_t bg_color = UIConfiguration::instance().color ("theme:bg");
-	double bg_r,bg_g,bg_b, unused;
-	Gtkmm2ext::color_to_rgba( bg_color, bg_r, bg_g, bg_b, unused);
-	Cairo::RefPtr<Cairo::LinearGradient> left_pattern = Cairo::LinearGradient::create (0, 0, 0, 6.*scale);
-	left_pattern->add_color_stop_rgba (0, 0,	0,	    0, 1);
-	left_pattern->add_color_stop_rgba (1, 0,	0,	    0, 0);
-	context->set_source (left_pattern);
-	context->rectangle(0, 0, width, 6.*scale);
-	context->fill ();
-
 	render_children (area, context);
+
+	{
+		//line at right
+		context->set_identity_matrix();
+		context->translate (self.x0, self.y0-0.5);
+		set_source_rgba (context, rgba_to_color (0,0,0,1));
+		context->rectangle(width-1, 0, width, height);
+		context->fill ();
+		context->set_identity_matrix();
+	}
+
+	//line at top
+	context->set_identity_matrix();
+	context->translate (self.x0, self.y0-0.5);
+	set_source_rgba (context, rgba_to_color (0,0,0,1));
+	context->rectangle(0, 0, width, 1.);
+	context->fill ();
+	context->set_identity_matrix();
 }
 
 void
@@ -157,13 +164,15 @@ TriggerMaster::event_handler (GdkEvent* ev)
 		break;
 	case GDK_ENTER_NOTIFY:
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			name_text->set_color (UIConfiguration::instance().color("neutral:foregroundest"));
 			stop_shape->set_fill_color (UIConfiguration::instance().color("neutral:foregroundest"));
+			set_fill_color (HSV (fill_color()).lighter(0.15).color ());
 		}
 		redraw ();
 		break;
 	case GDK_LEAVE_NOTIFY:
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-			stop_shape->set_fill_color (UIConfiguration::instance().color("neutral:midground"));
+			set_default_colors();
 		}
 		redraw ();
 		break;
@@ -255,7 +264,7 @@ TriggerMaster::set_default_colors ()
 {
 	set_fill_color (HSV (UIConfiguration::instance().color("theme:bg")).darker(0.25).color ());
 	name_text->set_color (UIConfiguration::instance().color("neutral:foreground"));
-	stop_shape->set_fill_color (UIConfiguration::instance().color("neutral:midground"));
+	stop_shape->set_fill_color (UIConfiguration::instance().color("neutral:foreground"));
 }
 
 
@@ -324,18 +333,25 @@ CueMaster::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		context->fill ();
 	}
 
-	//fade-over at top
-	uint32_t bg_color = UIConfiguration::instance().color ("theme:bg");
-	double bg_r,bg_g,bg_b, unused;
-	Gtkmm2ext::color_to_rgba( bg_color, bg_r, bg_g, bg_b, unused);
-	Cairo::RefPtr<Cairo::LinearGradient> left_pattern = Cairo::LinearGradient::create (0, 0, 0, 6.*scale);
-	left_pattern->add_color_stop_rgba (0, 0,	0,	    0, 1);
-	left_pattern->add_color_stop_rgba (1, 0,	0,	    0, 0);
-	context->set_source (left_pattern);
-	context->rectangle(0, 0, width, 6.*scale);
-	context->fill ();
-
 	render_children (area, context);
+
+	{
+		//line at right
+		context->set_identity_matrix();
+		context->translate (self.x0, self.y0-0.5);
+		set_source_rgba (context, rgba_to_color (0,0,0,1));
+		context->rectangle(width-1, 0, width, height);
+		context->fill ();
+		context->set_identity_matrix();
+	}
+
+	//line at top
+	context->set_identity_matrix();
+	context->translate (self.x0, self.y0-0.5);
+	set_source_rgba (context, rgba_to_color (0,0,0,1));
+	context->rectangle(0, 0, width, 1.);
+	context->fill ();
+	context->set_identity_matrix();
 }
 
 bool
@@ -350,12 +366,14 @@ CueMaster::event_handler (GdkEvent* ev)
 		break;
 	case GDK_ENTER_NOTIFY:
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			name_text->set_color (UIConfiguration::instance().color("neutral:foregroundest"));
 			stop_shape->set_fill_color (UIConfiguration::instance().color("neutral:foregroundest"));
+			set_fill_color (HSV (fill_color()).lighter(0.15).color ());
 		}
 		break;
 	case GDK_LEAVE_NOTIFY:
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-			stop_shape->set_fill_color (UIConfiguration::instance().color("neutral:midground"));
+			set_default_colors();
 		}
 		break;
 	default:
@@ -408,7 +426,7 @@ CueMaster::set_default_colors ()
 {
 	set_fill_color (HSV (UIConfiguration::instance().color("theme:bg")).darker(0.25).color ());
 	name_text->set_color (UIConfiguration::instance().color("neutral:foreground"));
-	stop_shape->set_fill_color (UIConfiguration::instance().color("neutral:midground"));
+	stop_shape->set_fill_color (UIConfiguration::instance().color("neutral:foreground"));
 }
 
 void

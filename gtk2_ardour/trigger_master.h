@@ -56,7 +56,6 @@ class TriggerMaster : public ArdourCanvas::Rectangle
 
 	void _size_allocate (ArdourCanvas::Rect const & alloc);
 
-	ArdourCanvas::Rectangle* stop_button;
 	ArdourCanvas::Rectangle* active_bar;
 	ArdourCanvas::Polygon* stop_shape;
 	ArdourCanvas::Text*    name_text;
@@ -92,7 +91,6 @@ class CueMaster : public ArdourCanvas::Rectangle
 
 	void _size_allocate (ArdourCanvas::Rect const & alloc);
 
-	ArdourCanvas::Rectangle* stop_button;
 	ArdourCanvas::Polygon* stop_shape;
 	ArdourCanvas::Text*    name_text;
 

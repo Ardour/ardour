@@ -148,7 +148,6 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const & alloc)
 	shape_play_button ();
 
 	float tleft = height;  //make room for the play button
-	float twidth = name_button->width() - poly_margin*2;
 
 	name_text->size_allocate (Rect(0, 0, width, height));
 	name_text->set_position (Duple (tleft + poly_margin, poly_margin -0.5));
@@ -162,6 +161,51 @@ void
 TriggerEntry::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	Rectangle::render(area, context);
+
+	/* Note that item_to_window() already takes _position into account (as
+	   part of item_to_canvas()
+	*/
+	Rect self (item_to_window (_rect));
+	const Rect draw = self.intersection (area);
+
+	if (!draw) {
+		return;
+	}
+
+	float width = _rect.width();
+	float height = _rect.height();
+
+	const double scale = UIConfiguration::instance().get_ui_scale();
+
+	if (_fill && !_transparent) {
+		setup_fill_context (context);
+		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
+		context->fill ();
+	}
+
+	render_children (area, context);
+
+	if (_trigger.index()%2==0) {
+		//line at top
+		context->set_identity_matrix();
+		context->translate (self.x0, self.y0-0.5);
+		set_source_rgba (context, rgba_to_color (0,0,0,1));
+		context->rectangle(0, 0, width, 1.);
+		context->fill ();
+		context->set_identity_matrix();
+	}
+
+
+	{
+		//line at right
+		context->set_identity_matrix();
+		context->translate (self.x0, self.y0-0.5);
+		set_source_rgba (context, rgba_to_color (0,0,0,1));
+		context->rectangle(width-1, 0, width, height);
+		context->fill ();
+		context->set_identity_matrix();
+	}
+
 }
 
 void
@@ -233,10 +277,16 @@ TriggerEntry::set_default_colors ()
 		name_button->set_outline_color (HSV (fill_color()).darker(0.15).color ());
 	}
 
-	name_text->set_color (UIConfiguration::instance().color("neutral:midground"));
+	name_text->set_color (UIConfiguration::instance().color("neutral:foreground"));
+	name_text->set_fill_color (UIConfiguration::instance().color("neutral:midground"));
 
-	play_shape->set_outline_color (UIConfiguration::instance().color("neutral:midground"));
-	play_shape->set_fill_color (UIConfiguration::instance().color("neutral:midground"));
+	if (_trigger.region()) {
+		play_shape->set_outline_color (UIConfiguration::instance().color("neutral:foreground"));
+		play_shape->set_fill_color (UIConfiguration::instance().color("neutral:foreground"));
+	} else {
+		play_shape->set_outline_color (UIConfiguration::instance().color("neutral:midground"));
+		play_shape->set_fill_color (UIConfiguration::instance().color("neutral:midground"));
+	}
 
 	/*preserve selection border*/
 	if (PublicEditor::instance().get_selection().selected (this)) {
@@ -374,8 +424,8 @@ TriggerBoxUI::text_button_event (GdkEvent* ev, uint64_t n)
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-			_slots[n]->name_text->set_fill_color (UIConfiguration::instance().color ("neutral:foreground"));
-			_slots[n]->name_text->set_color (UIConfiguration::instance().color ("neutral:foreground"));
+			_slots[n]->name_text->set_color (UIConfiguration::instance().color ("neutral:foregroundest"));
+			_slots[n]->name_button->set_fill_color (HSV (fill_color()).lighter(0.15).color ());
 		}
 		break;
 	case GDK_LEAVE_NOTIFY:
@@ -387,8 +437,8 @@ TriggerBoxUI::text_button_event (GdkEvent* ev, uint64_t n)
 		if (_slots[n]->trigger().region()) {
 			PublicEditor::instance().get_selection().set (_slots[n]);
 			//a side-effect of selection-change is that the slot's color is reset. retain the "entered-color" here:
-			_slots[n]->name_text->set_fill_color (UIConfiguration::instance().color ("neutral:foreground"));
-			_slots[n]->name_text->set_color (UIConfiguration::instance().color ("neutral:foreground"));
+			_slots[n]->name_text->set_color (UIConfiguration::instance().color ("neutral:foregroundest"));
+			_slots[n]->name_button->set_fill_color (HSV (fill_color()).lighter(0.15).color ());
 		}
 		break;
 	case GDK_2BUTTON_PRESS:
@@ -451,8 +501,9 @@ TriggerBoxUI::play_button_event (GdkEvent *ev, uint64_t n)
 		break;
 	case GDK_ENTER_NOTIFY:
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-			_slots[n]->play_shape->set_fill_color (UIConfiguration::instance().color ("neutral:foreground"));
-			_slots[n]->play_shape->set_outline_color (UIConfiguration::instance().color ("neutral:foreground"));
+			_slots[n]->play_button->set_fill_color (HSV (fill_color()).lighter(0.15).color ());
+			_slots[n]->play_shape->set_fill_color (UIConfiguration::instance().color ("neutral:foregroundest"));
+			_slots[n]->play_shape->set_outline_color (UIConfiguration::instance().color ("neutral:foregroundest"));
 		}
 		break;
 	case GDK_LEAVE_NOTIFY:

@@ -97,14 +97,15 @@ CueEntry::event_handler (GdkEvent* ev)
 		break;
 	case GDK_ENTER_NOTIFY:
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-			play_shape->set_outline_color (UIConfiguration::instance().color ("neutral:foreground"));
-			name_text->set_color (UIConfiguration::instance().color("neutral:foreground"));
+			name_text->set_color (UIConfiguration::instance().color("neutral:foregroundest"));
+			play_shape->set_outline_color (UIConfiguration::instance().color("neutral:foregroundest"));
+			play_button->set_fill_color (HSV (fill_color()).lighter(0.15).color ());
+			set_fill_color (HSV (fill_color()).lighter(0.15).color ());
 		}
 		break;
 	case GDK_LEAVE_NOTIFY:
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-			play_shape->set_outline_color (UIConfiguration::instance().color ("neutral:midground"));
-			name_text->set_color (UIConfiguration::instance().color("neutral:midground"));
+			set_default_colors();
 		}
 		break;
 	default:
@@ -145,6 +146,49 @@ void
 CueEntry::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	Rectangle::render(area, context);
+
+	/* Note that item_to_window() already takes _position into account (as
+	   part of item_to_canvas()
+	*/
+	Rect self (item_to_window (_rect));
+	const Rect draw = self.intersection (area);
+
+	if (!draw) {
+		return;
+	}
+
+	float width = _rect.width();
+	float height = _rect.height();
+
+	const double scale = UIConfiguration::instance().get_ui_scale();
+
+	if (_fill && !_transparent) {
+		setup_fill_context (context);
+		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
+		context->fill ();
+	}
+
+	render_children (area, context);
+
+	if (_cue_idx%2==0) {
+		//line at top
+		context->set_identity_matrix();
+		context->translate (self.x0, self.y0-0.5);
+		set_source_rgba (context, rgba_to_color (0,0,0,1));
+		context->rectangle(0, 0, width, 1.);
+		context->fill ();
+		context->set_identity_matrix();
+	}
+
+	{
+		//line at right
+		context->set_identity_matrix();
+		context->translate (self.x0, self.y0-0.5);
+		set_source_rgba (context, rgba_to_color (0,0,0,1));
+		context->rectangle(width-1, 0, width, height);
+		context->fill ();
+		context->set_identity_matrix();
+	}
 }
 
 void
@@ -152,12 +196,9 @@ CueEntry::shape_play_button ()
 {
 	Points p;
 
-	{
-		/* region exists; draw triangle to show that we can trigger */
-		p.push_back (Duple (poly_margin, poly_margin));
-		p.push_back (Duple (poly_margin, poly_size));
-		p.push_back (Duple (poly_size, 0.5+poly_size / 2.));
-	}
+	p.push_back (Duple (poly_margin, poly_margin));
+	p.push_back (Duple (poly_margin, poly_size));
+	p.push_back (Duple (poly_size, 0.5+poly_size / 2.));
 
 	play_shape->set (p);
 
@@ -188,10 +229,10 @@ CueEntry::set_default_colors ()
 		name_button->set_outline_color (HSV (fill_color()).darker(0.15).color ());
 	}
 
-	name_text->set_color (UIConfiguration::instance().color("neutral:midground"));
+	name_text->set_color (UIConfiguration::instance().color("neutral:foreground"));
 
-	play_shape->set_outline_color (UIConfiguration::instance().color("neutral:midground"));
-	play_shape->set_fill_color (UIConfiguration::instance().color("neutral:midground"));
+	play_shape->set_outline_color (UIConfiguration::instance().color("neutral:foreground"));
+	play_shape->set_fill_color (UIConfiguration::instance().color("neutral:foreground"));
 }
 
 void
