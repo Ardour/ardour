@@ -110,5 +110,7 @@ bool running_from_source_tree ();
 
 void inhibit_screensaver (bool);
 
+bool convert_drop_to_paths (std::vector<std::string>&, const Gtk::SelectionData&);
+
 } // namespace
 #endif /* __ardour_gtk_utils_h__ */

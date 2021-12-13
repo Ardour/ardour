@@ -869,3 +869,71 @@ ARDOUR_UI_UTILS::shared_popup_menu ()
 {
 	return ARDOUR_UI::instance()->shared_popup_menu ();
 }
+
+bool
+ARDOUR_UI_UTILS::convert_drop_to_paths (vector<string>& paths, const SelectionData& data)
+{
+	vector<string> uris = data.get_uris();
+
+	if (uris.empty ()) {
+		/* This is seriously fucked up. Nautilus doesn't say that its URI lists
+		 * are actually URI lists. So do it by hand.
+		 */
+		if (data.get_target() != "text/plain") {
+			return false;
+		}
+
+		/* Parse the "uri-list" format that Nautilus provides,
+		 * where each pathname is delimited by \r\n.
+		 *
+		 * THERE MAY BE NO NULL TERMINATING CHAR!!!
+		 */
+		string txt = data.get_text();
+
+		char* p = (char *) malloc (txt.length() + 1);
+		txt.copy (p, txt.length(), 0);
+		p[txt.length()] = '\0';
+
+		while (p) {
+			if (*p != '#') {
+				while (g_ascii_isspace (*p)) {
+					p++;
+				}
+
+				const char* q = p;
+				while (*q && (*q != '\n') && (*q != '\r')) {
+					q++;
+				}
+
+				if (q > p) {
+					--q;
+					while (q > p && g_ascii_isspace (*q)) {
+						--q;
+					}
+
+					if (q > p) {
+						uris.push_back (string (p, q - p + 1));
+					}
+				}
+			}
+			p = strchr (p, '\n');
+			if (p) {
+				++p;
+			}
+		}
+
+		free ((void*)p);
+
+		if (uris.empty()) {
+			return false;
+		}
+	}
+
+	for (vector<string>::iterator i = uris.begin(); i != uris.end(); ++i) {
+		if ((*i).substr (0,7) == "file://") {
+			paths.push_back (Glib::filename_from_uri (*i));
+		}
+	}
+
+	return !paths.empty ();
+}

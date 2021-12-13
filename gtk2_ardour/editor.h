@@ -2076,16 +2076,6 @@ private:
 	bool show_gain_after_trim;
 
 	/* Drag-n-Drop */
-
-	int convert_drop_to_paths (
-	        std::vector<std::string>&           paths,
-	        const Glib::RefPtr<Gdk::DragContext>& context,
-	        gint                                  x,
-	        gint                                  y,
-	        const Gtk::SelectionData&             data,
-	        guint                                 info,
-	        guint                                 time);
-
 	void track_canvas_drag_data_received (
 	        const Glib::RefPtr<Gdk::DragContext>& context,
 	        gint                                  x,

@@ -1029,7 +1029,7 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 		return;
 	}
 
-	if (_editor->convert_drop_to_paths (paths, context, x, y, data, info, dtime) == 0) {
+	if (_session && convert_drop_to_paths (paths, data)) {
 		timepos_t pos;
 		bool      copy = ((context->get_actions () & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
 

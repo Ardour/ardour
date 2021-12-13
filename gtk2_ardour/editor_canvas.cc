@@ -464,10 +464,9 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 	GdkEvent ev;
 	double cy;
 
-	if (convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
+	if (_session && convert_drop_to_paths (paths, data)) {
 
-		/* D-n-D coordinates are window-relative, so convert to canvas coordinates
-		 */
+		/* D-n-D coordinates are window-relative, so convert to canvas coordinates */
 
 		ev.type = GDK_BUTTON_RELEASE;
 		ev.button.x = x;
