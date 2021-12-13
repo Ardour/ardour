@@ -149,7 +149,7 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const & alloc)
 
 	float tleft = height;  //make room for the play button
 
-	name_text->size_allocate (Rect(0, 0, width, height));
+	name_text->size_allocate (ArdourCanvas::Rect(0, 0, width, height));
 	name_text->set_position (Duple (tleft + poly_margin, poly_margin -0.5));
 	name_text->clamp_width ( width - height );
 
@@ -158,7 +158,7 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const & alloc)
 }
 
 void
-TriggerEntry::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+TriggerEntry::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	Rectangle::render(area, context);
 
@@ -410,7 +410,7 @@ TriggerBoxUI::_size_allocate (ArdourCanvas::Rect const & alloc)
 
 	float ypos = 0;
 	for (auto & slot : _slots) {
-		slot->size_allocate (Rect(0, 0, width, slot_h));
+		slot->size_allocate (ArdourCanvas::Rect(0, 0, width, slot_h));
 		slot->set_position (Duple (0, ypos));
 		ypos += slot_h;
 		slot->show();
