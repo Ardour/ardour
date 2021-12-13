@@ -293,8 +293,6 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	SegmentDescriptor get_segment_descriptor () const;
 
-	static PBD::Signal1<void,std::string> CannotDetermineTempo;
-
   protected:
 	void retrigger ();
 	void set_usable_length ();

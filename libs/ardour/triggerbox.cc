@@ -524,8 +524,6 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 /*--------------------*/
 
-PBD::Signal1<void,std::string> AudioTrigger::CannotDetermineTempo;
-
 AudioTrigger::AudioTrigger (uint64_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, data (0)
@@ -791,7 +789,6 @@ AudioTrigger::determine_tempo ()
 		if (_apparent_tempo == 0.0) {
 			/* no apparent tempo, just return since we'll use it as-is */
 			std::cerr << "Could not determine tempo for " << name() << std::endl;
-			CannotDetermineTempo (_region->source (0)->name());
 			return;
 		}
 
