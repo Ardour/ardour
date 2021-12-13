@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <vector>
+
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
@@ -323,6 +325,17 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	build ();
 
 	selection_connection = PublicEditor::instance().get_selection().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerBoxUI::selection_changed));
+
+	std::vector<Gtk::TargetEntry> target_table;
+	target_table.push_back (Gtk::TargetEntry ("regions"));
+	target_table.push_back (Gtk::TargetEntry ("text/uri-list"));
+	target_table.push_back (Gtk::TargetEntry ("text/plain"));
+	target_table.push_back (Gtk::TargetEntry ("application/x-rootwin-drop"));
+
+	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas());
+	assert (gtkcanvas);
+	gtkcanvas->drag_dest_set (target_table);
+	gtkcanvas->signal_drag_data_received().connect (sigc::mem_fun(*this, &TriggerBoxUI::drag_data_received));
 }
 
 TriggerBoxUI::~TriggerBoxUI ()
@@ -596,7 +609,6 @@ TriggerBoxUI::context_menu (uint64_t n)
 		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
 	}
 
-
 	Menu* quant_menu = manage (new Menu);
 	MenuList& qitems = quant_menu->items();
 	bool success;
@@ -735,6 +747,34 @@ TriggerBoxUI::sample_chosen (int response, uint64_t n)
 		_triggerbox.set_from_path (n, *s);
 		++n;
 	}
+}
+
+void
+TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context, int /*x*/, int /*y*/, Gtk::SelectionData const& data, guint /*info*/, guint time)
+{
+	if (data.get_target() == X_("regions")) {
+#if 0
+		/* TODO -- get access to Editor::_regions */
+		/boost::shared_ptr<Region> region = EditorRegions::get_dragged_region ();
+		if (region) {
+			_triggerbox.set_from_selection (0, region);
+			context->drag_finish (true, false, time);
+		}
+#endif
+		context->drag_finish (false, false, time);
+		return;
+	}
+
+	std::vector<std::string> paths;
+	if (ARDOUR_UI_UTILS::convert_drop_to_paths (paths, data)) {
+		uint64_t n = 0; // TODO pick slot depending in Y coordinate
+		for (std::vector<std::string>::iterator s = paths.begin (); s != paths.end (); ++s) {
+			/* this will do nothing if n is too large */
+			_triggerbox.set_from_path (n, *s);
+			++n;
+		}
+	}
+	context->drag_finish (true, false, time);
 }
 
 void

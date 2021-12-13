@@ -103,7 +103,7 @@ class TriggerBoxUI : public ArdourCanvas::Rectangle
 
 	void _size_allocate (ArdourCanvas::Rect const &);
 
-   private:
+private:
 	ARDOUR::TriggerBox& _triggerbox;
 	typedef std::vector<TriggerEntry*> Slots;
 	Slots _slots;
@@ -130,6 +130,8 @@ class TriggerBoxUI : public ArdourCanvas::Rectangle
 	void rapid_update ();
 
 	void selection_changed ();
+
+	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
 
 	sigc::connection update_connection;
 	sigc::connection selection_connection;
