@@ -745,14 +745,22 @@ TriggerBoxUI::sample_chosen (int response, uint64_t n)
 }
 
 void
-TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context, int /*x*/, int /*y*/, Gtk::SelectionData const& data, guint /*info*/, guint time)
+TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context, int /*x*/, int y, Gtk::SelectionData const& data, guint /*info*/, guint time)
 {
+	uint64_t n = 0; // TODO pick slot depending in Y coordinate
+	for (auto& slot : _slots) {
+		if (slot->height () < y) {
+			++n;
+			y -= slot->height ();
+		}
+	}
+
 	if (data.get_target() == X_("regions")) {
 #if 0
 		/* TODO -- get access to Editor::_regions */
 		/boost::shared_ptr<Region> region = EditorRegions::get_dragged_region ();
 		if (region) {
-			_triggerbox.set_from_selection (0, region);
+			_triggerbox.set_from_selection (n, region);
 			context->drag_finish (true, false, time);
 		}
 #endif
@@ -762,7 +770,6 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 
 	std::vector<std::string> paths;
 	if (ARDOUR_UI_UTILS::convert_drop_to_paths (paths, data)) {
-		uint64_t n = 0; // TODO pick slot depending in Y coordinate
 		for (std::vector<std::string>::iterator s = paths.begin (); s != paths.end (); ++s) {
 			/* this will do nothing if n is too large */
 			_triggerbox.set_from_path (n, *s);
