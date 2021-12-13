@@ -1547,7 +1547,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _pass_thru (false)
 	, requests (1024)
 {
-	_display_to_user = false;
+	set_display_to_user (false);
 
 	/* default number of possible triggers. call ::add_trigger() to increase */
 

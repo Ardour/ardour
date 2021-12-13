@@ -2734,6 +2734,9 @@ Route::set_state (const XMLNode& node, int version)
 		if (_disk_reader) {
 			_disk_reader->set_display_to_user (diop == DiskIOCustom);
 		}
+		if (_triggerbox) {
+			_triggerbox->set_display_to_user (diop == DiskIOCustom);
+		}
 		set_disk_io_point (diop);
 	}
 
@@ -5056,8 +5059,6 @@ Route::setup_invisible_processors ()
 
 	ProcessorList new_processors;
 	ProcessorList foldback_sends;
-	ProcessorList::iterator dr;
-	ProcessorList::iterator dw;
 
 	/* find visible processors */
 
@@ -5201,13 +5202,15 @@ Route::setup_invisible_processors ()
 
 	/* DISK READER & WRITER (for Track objects) */
 
+	ProcessorList::iterator dw = new_processors.end();
+
 	if (_disk_reader || _disk_writer) {
 		switch (_disk_io_point) {
 		case DiskIOPreFader:
 			if (trim != new_processors.end()) {
 				/* insert BEFORE TRIM */
 				if (_disk_writer) {
-					new_processors.insert (trim, _disk_writer);
+					dw = new_processors.insert (trim, _disk_writer);
 				}
 				if (_disk_reader) {
 					new_processors.insert (trim, _disk_reader);
@@ -5215,6 +5218,7 @@ Route::setup_invisible_processors ()
 			} else {
 				if (_disk_writer) {
 					new_processors.push_front (_disk_writer);
+					dw = new_processors.begin();
 				}
 				if (_disk_reader) {
 					new_processors.push_front (_disk_reader);
@@ -5224,7 +5228,7 @@ Route::setup_invisible_processors ()
 		case DiskIOPostFader:
 			/* insert BEFORE main outs */
 			if (_disk_writer) {
-				new_processors.insert (main, _disk_writer);
+				dw = new_processors.insert (main, _disk_writer);
 			}
 			if (_disk_reader) {
 				new_processors.insert (main, _disk_reader);
@@ -5236,6 +5240,11 @@ Route::setup_invisible_processors ()
 			 */
 			break;
 		}
+	}
+
+	if (_triggerbox && _disk_writer) {
+		/* BEFORE the disk recorder */
+		new_processors.insert (dw, _triggerbox);
 	}
 
 	/* ensure dist-writer is before disk-reader */
@@ -6260,6 +6269,10 @@ Route::set_disk_io_point (DiskIOPoint diop)
 
 	if (_disk_reader) {
 		_disk_reader->set_display_to_user (display);
+	}
+
+	if (_triggerbox) {
+		_triggerbox->set_display_to_user (display);
 	}
 
 	const bool changed = (diop != _disk_io_point);
