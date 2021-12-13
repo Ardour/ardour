@@ -197,7 +197,6 @@ TriggerEntry::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Cont
 		context->set_identity_matrix();
 	}
 
-
 	{
 		//line at right
 		context->set_identity_matrix();
@@ -303,10 +302,6 @@ TriggerEntry::ui_parameter_changed (std::string const& p)
 		set_default_colors();
 	}
 }
-
-
-
-/* ---------------------------- */
 
 Gtkmm2ext::Bindings* TriggerBoxUI::bindings = 0;
 Glib::RefPtr<Gtk::ActionGroup> TriggerBoxUI::trigger_actions;
@@ -814,9 +809,6 @@ TriggerBoxUI::rapid_update ()
 	}
 }
 
-
-/* ------------ */
-
 TriggerBoxWidget::TriggerBoxWidget (TriggerBox& tb, float w, float h) : FittedCanvasWidget(w,h)
 {
 	ui = new TriggerBoxUI (root(), tb);
@@ -836,9 +828,6 @@ TriggerBoxWidget::on_unmap ()
 	FittedCanvasWidget::on_unmap ();
 	ui->stop_updating ();
 }
-
-
-/* ------------ */
 
 TriggerBoxWindow::TriggerBoxWindow (TriggerBox& tb)
 {
