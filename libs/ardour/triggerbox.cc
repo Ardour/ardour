@@ -524,6 +524,8 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 /*--------------------*/
 
+PBD::Signal1<void,std::string> AudioTrigger::CannotDetermineTempo;
+
 AudioTrigger::AudioTrigger (uint64_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, data (0)
@@ -735,6 +737,8 @@ AudioTrigger::determine_tempo ()
 	string::size_type ni;
 	double text_tempo = -1.;
 
+	std::cerr << "Determine tempo for " << name() << std::endl;
+
 	if (((bi = str.find ("bpm")) != string::npos) ||
 	    ((bi = str.find ("BPM")) != string::npos)) {
 
@@ -786,6 +790,8 @@ AudioTrigger::determine_tempo ()
 
 		if (_apparent_tempo == 0.0) {
 			/* no apparent tempo, just return since we'll use it as-is */
+			std::cerr << "Could not determine tempo for " << name() << std::endl;
+			CannotDetermineTempo (_region->source (0)->name());
 			return;
 		}
 
@@ -800,6 +806,7 @@ AudioTrigger::determine_tempo ()
 
 	const samplecnt_t one_bar = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (1, 0, 0)).samples();
 
+	cerr << "tempo: " << _apparent_tempo << endl;
 	cerr << "one bar in samples: " << one_bar << endl;
 	cerr << "barcnt = " << round (_barcnt) << endl;
 }
