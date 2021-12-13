@@ -30,6 +30,7 @@
 
 #include "waveview/wave_view.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
@@ -82,29 +83,41 @@ ClipEditorBox::register_clip_editor_actions (Bindings* clip_editor_bindings)
 	// ActionManager::register_action (clip_editor_actions, X_("zoom-in"), _("Zoom In"), sigc::mem_fun (*this, &ClipEditorBox::zoom_out));
 }
 
-class ClipBBTMetric : public ArdourCanvas::Ruler::Metric
+void
+AudioClipEditor::ClipBBTMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const
 {
-public:
-	ClipBBTMetric ()
-	{
-		units_per_pixel = 1;
+	if (!trigger) {
+		std::cerr << "No trigger\n";
+		return;
 	}
 
-	void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const
-	{
-		ArdourCanvas::Ruler::Mark mark;
+	ArdourCanvas::Ruler::Mark mark;
 
-		std::cerr << "get marks between " << lower << " .. " << upper << std::endl;
 
-		for (int64_t n = lower; n < upper; n += 4000) {
+	Temporal::Tempo tempo (trigger->apparent_tempo(), 4); /* XXX don't assume 4 */
+
+	std::cerr << "get marks between " << lower << " .. " << upper << " with tempo " << tempo << " upp = " << units_per_pixel << std::endl;
+
+	samplecnt_t samples_per_beat = tempo.samples_per_note_type (AudioEngine::instance()->sample_rate());
+	int64_t beat_number = (lower + (samples_per_beat/2)) / samples_per_beat;
+	int64_t last = INT64_MIN;
+	const double scale = UIConfiguration::instance ().get_ui_scale ();
+
+	for (int64_t n = beat_number * samples_per_beat; n < upper; n += samples_per_beat) {
+		/* ensure at least a 15 pixel (scaled) gap between marks */
+		if (marks.empty() || (((n - last) / units_per_pixel) > (15. * scale))) {
 			mark.style    = ArdourCanvas::Ruler::Mark::Major;
-			mark.label    = string_compose ("%1", n);
-			mark.position = n / 100;
+			mark.label    = string_compose ("%1", beat_number);
+			mark.position = n;
 			marks.push_back (mark);
+			beat_number++;
+			last = n;
 			std::cerr << "mark at " << mark.label << " @ " << mark.position << std::endl;
+		} else {
+			std::cerr << n << " - " << last << " = " << (n - last) << " pix " << (n - last) / units_per_pixel << std::endl;
 		}
 	}
-};
+}
 
 AudioClipEditor::AudioClipEditor ()
 	: _spp (0)
@@ -119,14 +132,22 @@ AudioClipEditor::AudioClipEditor ()
 	frame->set_fill (false);
 	frame->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::event_handler));
 
+	/* Scroll bar does not scroll and it outside the frame */
+
 	scroll_bar_trough = new Rectangle (root ());
 	scroll_bar_handle = new Rectangle (scroll_bar_trough);
 	scroll_bar_handle->set_outline (false);
 	scroll_bar_handle->set_corner_radius (5.);
 	scroll_bar_handle->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::scroll_event_handler));
 
+	/* A scrolling container for our waves and lines etc. */
+
 	waves_container = new ArdourCanvas::ScrollGroup (frame, ScrollGroup::ScrollsHorizontally);
 	add_scroller (*waves_container);
+
+	/* A ruler, that scrolls with the waves and is overlapped by our
+	 * various vertical lines
+	 */
 
 	clip_metric = new ClipBBTMetric ();
 
@@ -134,6 +155,10 @@ AudioClipEditor::AudioClipEditor ()
 	ruler           = new ArdourCanvas::Ruler (ruler_container, *clip_metric);
 	ruler->name     = "Clip Editor";
 	ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
+	ruler->set_fill_color (UIConfiguration::instance().color (X_("theme:bg1")));
+	ruler->set_outline_color (UIConfiguration::instance().color (X_("theme:contrasting less")));
+
+	/* the lines */
 
 	line_container = new ArdourCanvas::Container (waves_container);
 
@@ -321,7 +346,10 @@ AudioClipEditor::scroll_changed ()
 	scroll_fraction          = std::min (1., std::max (0., scroll_fraction));
 	const samplepos_t s      = llrintf (audio_region->source (0)->length ().samples () * scroll_fraction);
 
+	ruler->set_range (s, s + pixel_to_sample (frame->get().width() - 2.));
+
 	scroll_to (sample_to_pixel (s), 0);
+
 	queue_draw ();
 }
 
@@ -373,11 +401,12 @@ AudioClipEditor::drop_waves ()
 }
 
 void
-AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
+AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, Trigger* t)
 {
 	drop_waves ();
 
 	audio_region = r;
+	clip_metric->set_trigger (t);
 
 	uint32_t    n_chans = r->n_channels ();
 	samplecnt_t len;
@@ -404,6 +433,8 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r)
 		waves.push_back (wv);
 	}
 
+	ruler->set_range (0, pixel_to_sample (frame->get().width() - 2.));
+
 	set_spp_from_length (len);
 	set_wave_heights ();
 	set_waveform_colors ();
@@ -419,6 +450,9 @@ AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
 
 	ArdourCanvas::Rect r (1, 1, alloc.get_width () - 2, alloc.get_height () - 2);
 	frame->set (r);
+
+	const double ruler_height = 25.;
+	ruler->set (Rect (2, 2, alloc.get_width() - 4, ruler_height));
 
 	const double scroll_bar_height      = 10.;
 	const double scroll_bar_width       = alloc.get_width () - 2;
@@ -441,7 +475,7 @@ AudioClipEditor::set_spp (double samples_per_pixel)
 {
 	_spp = samples_per_pixel;
 
-	ruler->set_range (0, 48000);
+	clip_metric->units_per_pixel = _spp;
 
 	position_lines ();
 
@@ -467,7 +501,7 @@ AudioClipEditor::set_wave_heights ()
 	}
 
 	uint32_t       n  = 0;
-	const Distance w  = frame->get ().height () - scroll_bar_trough->get ().height () - 2.;
+	const Distance w  = frame->get ().height () - scroll_bar_trough->get ().height () - 2. - ruler->get().height();
 	Distance       ht = w / waves.size ();
 
 	for (auto& wave : waves) {
@@ -551,7 +585,7 @@ AudioClipEditorBox::zoom_out_click ()
 }
 
 void
-AudioClipEditorBox::set_region (boost::shared_ptr<Region> r)
+AudioClipEditorBox::set_region (boost::shared_ptr<Region> r, Trigger* t)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
@@ -564,7 +598,7 @@ AudioClipEditorBox::set_region (boost::shared_ptr<Region> r)
 	state_connection.disconnect ();
 
 	_region = r;
-	editor->set_region (ar);
+	editor->set_region (ar, t);
 
 	PBD::PropertyChange interesting_stuff;
 	region_changed (interesting_stuff);

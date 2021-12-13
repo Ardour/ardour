@@ -178,7 +178,7 @@ TriggerUI::TriggerUI () :
 	Gtk::Label *label;
 
 	label = manage(new Gtk::Label(_("Velocity Sense:")));  label->set_alignment(1.0, 0.5);
-	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK ); 
+	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	label = manage(new Gtk::Label(_("100%")));  label->set_alignment(0.0, 0.5);
 	attach(*label,                 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
@@ -407,9 +407,9 @@ TriggerWindow::TriggerWindow (Trigger* slot)
 			_ops_box = manage(new MidiRegionOperationsBox ());
 			_trim_box = manage(new MidiClipEditorBox ());
 		}
-		
+
 		_prop_box->set_region(slot->region());
-		_trim_box->set_region(slot->region());
+		_trim_box->set_region(slot->region(), slot);
 		_ops_box->set_session(&slot->region()->session());
 
 		table->attach(*_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;

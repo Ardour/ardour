@@ -335,14 +335,14 @@ TriggerPage::selection_changed ()
 		if (slot->region ()) {
 			if (slot->region ()->data_type () == DataType::AUDIO) {
 				_audio_prop_box.set_region (slot->region ());
-				_audio_trim_box.set_region (slot->region ());
+				_audio_trim_box.set_region (slot->region (), slot);
 
 				_audio_prop_box.show ();
 				_audio_trim_box.show ();
 				_audio_ops_box.show ();
 			} else {
 				_midi_prop_box.set_region (slot->region ());
-				_midi_trim_box.set_region (slot->region ());
+				_midi_trim_box.set_region (slot->region (), slot);
 
 				_midi_prop_box.show ();
 				_midi_trim_box.show ();

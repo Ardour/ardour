@@ -49,6 +49,7 @@ namespace ARDOUR
 {
 	class Session;
 	class Location;
+	class Trigger;
 }
 
 namespace ArdourCanvas
@@ -68,7 +69,7 @@ public:
 	ClipEditorBox () {}
 	~ClipEditorBox () {}
 
-	virtual void set_region (boost::shared_ptr<ARDOUR::Region>) = 0;
+	virtual void set_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::Trigger*) = 0;
 
 	static void                           init ();
 	static void                           register_clip_editor_actions (Gtkmm2ext::Bindings*);
@@ -90,7 +91,7 @@ public:
 	AudioClipEditor ();
 	~AudioClipEditor ();
 
-	void set_region (boost::shared_ptr<ARDOUR::AudioRegion>);
+	void set_region (boost::shared_ptr<ARDOUR::AudioRegion>, ARDOUR::Trigger*);
 	void on_size_allocate (Gtk::Allocation&);
 
 	double      sample_to_pixel (ARDOUR::samplepos_t);
@@ -115,7 +116,24 @@ private:
 	ArdourCanvas::Rectangle*               scroll_bar_handle;
 	ArdourCanvas::Container*               ruler_container;
 	ArdourCanvas::Ruler*                   ruler;
-	ArdourCanvas::Ruler::Metric*           clip_metric;
+
+	class ClipBBTMetric : public ArdourCanvas::Ruler::Metric
+	{
+	  public:
+		ClipBBTMetric() : trigger (0)  {
+			units_per_pixel = 1;
+		}
+
+		void set_trigger (ARDOUR::Trigger* t) { trigger = t; }
+
+		void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const;
+
+	  private:
+		ARDOUR::Trigger* trigger;
+
+	};
+
+	ClipBBTMetric*                         clip_metric;
 	std::vector<ArdourWaveView::WaveView*> waves;
 	double                                 non_wave_height;
 	samplepos_t                            left_origin;
@@ -184,7 +202,7 @@ public:
 	AudioClipEditorBox ();
 	~AudioClipEditorBox ();
 
-	void set_region (boost::shared_ptr<ARDOUR::Region>);
+	void set_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::Trigger*);
 	void region_changed (const PBD::PropertyChange& what_changed);
 
 private:
