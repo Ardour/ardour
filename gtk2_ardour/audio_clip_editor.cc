@@ -93,6 +93,7 @@ AudioClipEditor::ClipBBTMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark
 
 	ArdourCanvas::Ruler::Mark mark;
 
+	assert (trigger->apparent_tempo() > 0.);
 
 	Temporal::Tempo tempo (trigger->apparent_tempo(), 4); /* XXX don't assume 4 */
 
@@ -433,8 +434,17 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, Trigger* t)
 		waves.push_back (wv);
 	}
 
-	ruler->set_range (0, pixel_to_sample (frame->get().width() - 2.));
-
+	if (t) {
+		if (t->apparent_tempo() == 0.) {
+			/* tempo unknown, hide ruler */
+			ruler->hide ();
+		} else {
+			ruler->show ();
+			ruler->set_range (0, pixel_to_sample (frame->get().width() - 2.));
+		}
+	} else {
+		ruler->hide ();
+	}
 	set_spp_from_length (len);
 	set_wave_heights ();
 	set_waveform_colors ();
