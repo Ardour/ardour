@@ -1760,7 +1760,7 @@ bool
 TriggerBox::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	out.set_audio (std::max (out.n_audio(), 2U)); /* for now, enforce stereo output */
-	if (_sidechain) {
+	if (_data_type == DataType::MIDI) {
 		out.set_midi (std::max (out.n_midi(), 1U));
 	}
 	return true;
