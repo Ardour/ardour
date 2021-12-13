@@ -80,7 +80,6 @@ AddRouteDialog::AddRouteDialog ()
 	, strict_io_label (_("Pin Mode:"))
 	, mode_label (_("Record Mode:"))
 	, instrument_label (_("Instrument:"))
-	, with_triggers_label (_("Add TriggerBox:"))
 	, last_route_count (1)
 	, route_count_set_by_template (false)
 	, name_edited_by_user (false)
@@ -310,10 +309,6 @@ AddRouteDialog::AddRouteDialog ()
 
 		++n;
 	}
-
-	with_triggers_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	settings_table->attach (with_triggers_label, 4, 5, n, n+1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	settings_table->attach (with_triggers, 5, 6, n, n+1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
@@ -1005,12 +1000,6 @@ AddRouteDialog::route_group ()
 	}
 
 	return _session->route_group_by_name (route_group_combo.get_active_text());
-}
-
-
-bool
-AddRouteDialog::use_triggers() {
-	return with_triggers.get_active();
 }
 
 bool

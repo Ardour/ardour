@@ -2849,7 +2849,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 	RouteGroup* route_group = add_route_dialog->route_group ();
 	AutoConnectOption oac = Config->get_output_auto_connect();
 	bool strict_io = add_route_dialog->use_strict_io ();
-	bool with_triggers = add_route_dialog->use_triggers ();
+	bool with_triggers = true;
 
 	if (oac & AutoConnectMaster) {
 		output_chan.set (DataType::AUDIO, (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan.n_audio()));

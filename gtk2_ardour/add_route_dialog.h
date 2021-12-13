@@ -89,7 +89,6 @@ public:
 
 	RouteDialogs::InsertAt insert_at();
 	bool use_strict_io();
-	bool use_triggers();
 
 	std::string get_template_path();
 
@@ -109,13 +108,11 @@ private:
 	Gtk::Label strict_io_label;
 	Gtk::Label mode_label;
 	Gtk::Label instrument_label;
-	Gtk::Label with_triggers_label;
 	Gtk::ComboBoxText mode_combo;
 	Gtk::ComboBoxText route_group_combo;
 	InstrumentSelector instrument_combo;
 	Gtk::ComboBoxText insert_at_combo;
 	Gtk::ComboBoxText strict_io_combo;
-	Gtk::CheckButton with_triggers;
 
 	void track_type_chosen ();
 	void refill_channel_setups ();
