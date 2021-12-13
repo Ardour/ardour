@@ -330,6 +330,8 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas());
 	assert (gtkcanvas);
 	gtkcanvas->drag_dest_set (target_table);
+	gtkcanvas->signal_drag_motion().connect (sigc::mem_fun(*this, &TriggerBoxUI::drag_motion));
+	gtkcanvas->signal_drag_leave().connect (sigc::mem_fun(*this, &TriggerBoxUI::drag_leave));
 	gtkcanvas->signal_drag_data_received().connect (sigc::mem_fun(*this, &TriggerBoxUI::drag_data_received));
 }
 
@@ -744,17 +746,64 @@ TriggerBoxUI::sample_chosen (int response, uint64_t n)
 	}
 }
 
-void
-TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context, int /*x*/, int y, Gtk::SelectionData const& data, guint /*info*/, guint time)
+uint64_t
+TriggerBoxUI::slot_at_y (int y) const
 {
-	uint64_t n = 0; // TODO pick slot depending in Y coordinate
+	uint64_t n = 0;
 	for (auto& slot : _slots) {
 		if (slot->height () < y) {
 			++n;
 			y -= slot->height ();
 		}
 	}
+	return n;
+}
 
+bool
+TriggerBoxUI::drag_motion (Glib::RefPtr<Gdk::DragContext>const& context, int, int y, guint time)
+{
+	bool can_drop = true;
+	uint64_t n = slot_at_y (y);
+	if (n >= _slots.size ()) {
+		assert (0);
+		can_drop = false;
+	}
+
+	if (can_drop) {
+		context->drag_status(Gdk::ACTION_COPY, time);
+		/* prelight */
+		GdkEventCrossing ev;
+		ev.detail = GDK_NOTIFY_ANCESTOR;
+		for (size_t i = 0; i < _slots.size (); ++i) {
+			ev.type = (i == n) ? GDK_ENTER_NOTIFY : GDK_LEAVE_NOTIFY;
+				text_button_event ((GdkEvent*)&ev, i);
+		}
+		return true;
+	} else {
+		context->drag_status (Gdk::DragAction (0), time);
+		return false;
+	}
+}
+
+void
+TriggerBoxUI::drag_leave (Glib::RefPtr<Gdk::DragContext>const&, guint)
+{
+	GdkEventCrossing ev;
+	ev.type = GDK_LEAVE_NOTIFY;
+	ev.detail = GDK_NOTIFY_ANCESTOR;
+	for (size_t i = 0; i < _slots.size (); ++i) {
+		text_button_event ((GdkEvent*)&ev, i);
+	}
+}
+
+void
+TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context, int /*x*/, int y, Gtk::SelectionData const& data, guint /*info*/, guint time)
+{
+	uint64_t n = slot_at_y (y);
+	if (n >= _slots.size ()) {
+		context->drag_finish (false, false, time);
+		return;
+	}
 	if (data.get_target() == X_("regions")) {
 #if 0
 		/* TODO -- get access to Editor::_regions */

@@ -131,7 +131,11 @@ private:
 
 	void selection_changed ();
 
+	bool drag_motion (Glib::RefPtr<Gdk::DragContext>const&, int, int, guint);
+	void drag_leave (Glib::RefPtr<Gdk::DragContext>const&, guint);
 	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
+
+	uint64_t slot_at_y (int) const;
 
 	sigc::connection update_connection;
 	sigc::connection selection_connection;
