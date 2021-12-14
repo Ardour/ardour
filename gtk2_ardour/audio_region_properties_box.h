@@ -64,14 +64,10 @@ private:
 	AudioClock length_clock;
 	AudioClock start_clock;
 
-	AudioClock loop_length_clock;
-	AudioClock loop_start_clock;
-
 	ArdourWidgets::ArdourButton bpm_button;
 	ArdourWidgets::ArdourButton metrum_button;
 
 	ArdourWidgets::ArdourButton bbt_toggle;
-	ArdourWidgets::ArdourButton loop_toggle;
 
 	PBD::ScopedConnection state_connection;
 };

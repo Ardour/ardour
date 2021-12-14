@@ -47,10 +47,7 @@ using std::min;
 RegionPropertiesBox::RegionPropertiesBox ()
 	: length_clock (X_("regionlength"), true, "", true, false, true)
 	, start_clock (X_("regionstart"), true, "", false, false)
-	, loop_length_clock (X_("regionlength"), true, "", true, false, true)
-	, loop_start_clock (X_("regionstart"), true, "", false, false)
 	, bbt_toggle (ArdourButton::led_default_elements)
-	, loop_toggle (ArdourButton::led_default_elements)
 {
 	Gtk::Label* label;
 	int         row = 0;
@@ -100,16 +97,6 @@ RegionPropertiesBox::RegionPropertiesBox ()
 	table.attach (length_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
-	loop_toggle.set_text (_("Loop"));
-	table.attach (loop_toggle, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	row++;
-
-	label = manage (new Gtk::Label (_("Loop Start:")));
-	label->set_alignment (1.0, 0.5);
-	table.attach (*label, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	table.attach (loop_start_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	row++;
-
 	table.set_homogeneous (false);
 	table.set_spacings (4);
 	table.set_border_width (2);
@@ -127,9 +114,6 @@ RegionPropertiesBox::set_session (Session* s)
 
 	length_clock.set_session (s);
 	start_clock.set_session (s);
-
-	loop_length_clock.set_session (s);
-	loop_start_clock.set_session (s);
 }
 
 void
