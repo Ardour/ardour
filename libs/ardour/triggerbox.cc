@@ -70,7 +70,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _follow_action { NextTrigger, Stop }
 	, _follow_action_probability (100)
 	, _loop_cnt (0)
-	, _follow_count (1)
+	, _follow_count (Properties::follow_count, 1)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
 	, _legato (Properties::legato, false)
 	, _barcnt (0.)
@@ -83,6 +83,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 {
 	add_property (_legato);
 	add_property (_use_follow);
+	add_property (_follow_count);
 }
 
 void
@@ -1492,6 +1493,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for running = %1\n", Properties::running.property_id));
 	Properties::passthru.property_id = g_quark_from_static_string (X_("passthru"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for passthru = %1\n", Properties::passthru.property_id));
+	Properties::follow_count.property_id = g_quark_from_static_string (X_("follow-count"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow_count = %1\n", Properties::follow_count.property_id));
 	Properties::legato.property_id = g_quark_from_static_string (X_("legato"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for legato = %1\n", Properties::legato.property_id));
 	Properties::use_follow.property_id = g_quark_from_static_string (X_("use-follow"));

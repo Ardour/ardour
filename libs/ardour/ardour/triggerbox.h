@@ -245,7 +245,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	FollowAction              _follow_action[2];
 	int                       _follow_action_probability;
 	uint32_t                  _loop_cnt; /* how many times in a row has this played */
-	uint32_t                  _follow_count;
+	PBD::Property<int>        _follow_count;
 	Temporal::BBT_Offset      _quantization;
 	PBD::Property<bool>       _legato;
 	std::string               _name;
