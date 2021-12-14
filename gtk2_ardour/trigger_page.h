@@ -69,6 +69,8 @@ private:
 	void pi_property_changed (PBD::PropertyChange const&);
 	void stripable_property_changed (PBD::PropertyChange const&, boost::weak_ptr<ARDOUR::Stripable>);
 
+	bool no_strip_button_event (GdkEventButton*);
+
 	void                      selection_changed ();
 	PBD::ScopedConnectionList editor_connections;
 

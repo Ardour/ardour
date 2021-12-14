@@ -103,8 +103,12 @@ TriggerPage::TriggerPage ()
 
 	/* last item of strip packer */
 	_strip_packer.pack_end (_no_strips, true, true);
-	_no_strips.set_size_request (PX_SCALE (60), -1);
-	_no_strips.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose), &_no_strips, ArdourWidgets::ArdourIcon::CloseCross));
+	_no_strips.set_flags (Gtk::CAN_FOCUS);
+	_no_strips.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	_no_strips.set_size_request (PX_SCALE (20), -1);
+	_no_strips.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose), &_no_strips, ArdourWidgets::ArdourIcon::ShadedPlusSign));
+	_no_strips.signal_button_press_event().connect (sigc::mem_fun(*this, &TriggerPage::no_strip_button_event));
+	_no_strips.signal_button_release_event().connect (sigc::mem_fun(*this, &TriggerPage::no_strip_button_event));
 
 	_strip_group_box.pack_start (_slot_area_box, false, false);
 	_strip_group_box.pack_start (_strip_scroller, true, true);
@@ -127,6 +131,7 @@ TriggerPage::TriggerPage ()
 	_strip_packer.show ();
 	_slot_area_box.show_all ();
 	_trigger_clip_picker.show ();
+	_no_strips.show ();
 
 	/* setup keybidings */
 	_content.set_data ("ardour-bindings", bindings);
@@ -405,7 +410,6 @@ TriggerPage::remove_route (TriggerStrip* ra)
 void
 TriggerPage::redisplay_track_list ()
 {
-	bool visible_triggers = false;
 	for (list<TriggerStrip*>::iterator i = _strips.begin (); i != _strips.end (); ++i) {
 		TriggerStrip*                strip = *i;
 		boost::shared_ptr<Stripable> s     = strip->stripable ();
@@ -427,16 +431,9 @@ TriggerPage::redisplay_track_list ()
 		} else if (!hidden && strip->get_parent ()) {
 			/* already packed, put it at the end */
 			_strip_packer.reorder_child (*strip, -1); /* put at end */
-			visible_triggers = true;
 		} else if (!hidden) {
 			_strip_packer.pack_start (*strip, false, false);
-			visible_triggers = true;
 		}
-	}
-	if (visible_triggers) {
-		_no_strips.hide ();
-	} else {
-		_no_strips.show ();
 	}
 }
 
@@ -467,6 +464,16 @@ TriggerPage::stripable_property_changed (PBD::PropertyChange const& what_changed
 	if (what_changed.contains (ARDOUR::Properties::hidden)) {
 		redisplay_track_list ();
 	}
+}
+
+bool
+TriggerPage::no_strip_button_event (GdkEventButton* ev)
+{
+	if ((ev->type == GDK_2BUTTON_PRESS && ev->button == 1) || (ev->type == GDK_BUTTON_RELEASE && Keyboard::is_context_menu_event (ev))) {
+		ARDOUR_UI::instance()->add_route ();
+		return true;
+	}
+	return false;
 }
 
 gint
