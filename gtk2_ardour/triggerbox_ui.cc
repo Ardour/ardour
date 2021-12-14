@@ -805,15 +805,13 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 		return;
 	}
 	if (data.get_target() == X_("regions")) {
-#if 0
-		/* TODO -- get access to Editor::_regions */
-		/boost::shared_ptr<Region> region = EditorRegions::get_dragged_region ();
+		boost::shared_ptr<Region> region = PublicEditor::instance().get_dragged_region_from_sidebar ();
 		if (region) {
 			_triggerbox.set_from_selection (n, region);
 			context->drag_finish (true, false, time);
+		} else {
+			context->drag_finish (false, false, time);
 		}
-#endif
-		context->drag_finish (false, false, time);
 		return;
 	}
 
