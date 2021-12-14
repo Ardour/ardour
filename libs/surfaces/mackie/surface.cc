@@ -127,19 +127,19 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	}
 
 	//Store Qcon flag
-	if( mcp.device_info().is_qcon() ) {
-		is_qcon = true;
-		_has_master_display = (mcp.device_info().has_master_fader() && mcp.device_info().has_qcon_second_lcd());
-		_has_master_meter = mcp.device_info().has_qcon_master_meters();
-	} else {
-		is_qcon = false;
-	}
+	is_qcon = mcp.device_info().is_qcon();
 
 	/* only the first Surface object has global controls */
 	/* lets use master_position instead */
 	uint32_t mp = _mcp.device_info().master_position();
 	if (_number == mp) {
 		DEBUG_TRACE (DEBUG::MackieControl, "Surface matches MasterPosition. Might have global controls.\n");
+
+		if ( is_qcon ) {
+			_has_master_display = (mcp.device_info().has_master_fader() && mcp.device_info().has_qcon_second_lcd());
+			_has_master_meter = mcp.device_info().has_qcon_master_meters();
+		}
+
 		if (_mcp.device_info().has_global_controls()) {
 			init_controls ();
 			DEBUG_TRACE (DEBUG::MackieControl, "init_controls done\n");
