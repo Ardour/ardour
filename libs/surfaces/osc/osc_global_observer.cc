@@ -27,6 +27,8 @@
 #include "ardour/meter.h"
 #include "ardour/monitor_processor.h"
 
+#include "temporal/tempo.h"
+
 #include "osc.h"
 #include "osc_global_observer.h"
 
@@ -244,7 +246,7 @@ OSCGlobalObserver::tick ()
 		if (feedback[5]) { // Bar beat enabled
 			Temporal::BBT_Time bbt_time;
 
-			session->bbt_time (timepos_t (now_sample), bbt_time);
+			bbt_time = Temporal::TempoMap::use()->bbt_at (timepos_t (now_sample));
 
 			// semantics:  BBB/bb/tttt
 			ostringstream os;

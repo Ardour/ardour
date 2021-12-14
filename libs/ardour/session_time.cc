@@ -45,14 +45,6 @@ using namespace Temporal;
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 
-/* BBT TIME*/
-
-void
-Session::bbt_time (timepos_t const & when, Temporal::BBT_Time& bbt)
-{
-	bbt = TempoMap::use()->bbt_at (when);
-}
-
 /* Timecode TIME */
 
 double

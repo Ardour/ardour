@@ -67,6 +67,8 @@
 #include "ardour/audioengine.h"
 #include "ardour/vca_manager.h"
 
+#include "temporal/tempo.h"
+
 #include "mackie_control_protocol.h"
 
 #include "midi_byte_array.h"
@@ -1155,7 +1157,7 @@ MackieControlProtocol::format_bbt_timecode (samplepos_t now_sample)
 {
 	Temporal::BBT_Time bbt_time;
 
-	session->bbt_time (timepos_t (now_sample), bbt_time);
+	bbt_time = Temporal::TempoMap::use()->bbt_at (timepos_t (now_sample));
 
 	// The Mackie protocol spec is built around a BBT time display of
 	//

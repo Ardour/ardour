@@ -793,7 +793,6 @@ public:
 
 	void sync_time_vars();
 
-	void bbt_time (Temporal::timepos_t const & when, Temporal::BBT_Time&);
 	void timecode_to_sample(Timecode::Time& timecode, samplepos_t& sample, bool use_offset, bool use_subframes) const;
 	void sample_to_timecode(samplepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 	void timecode_time (Timecode::Time &);
