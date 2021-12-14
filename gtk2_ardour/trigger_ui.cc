@@ -61,8 +61,10 @@ static std::string longest_launch;
 
 TriggerUI::TriggerUI () :
 	 _follow_action_button (ArdourButton::led_default_elements)
-	, _follow_percent_adjustment(0,100,1)
-	, _follow_percent_slider (&_follow_percent_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
+	, _velocity_adjustment(1.,0.,1.0,0.01,0.1)
+	, _velocity_slider (&_velocity_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
+	, _follow_probability_adjustment(0,0,100,2,5)
+	, _follow_probability_slider (&_follow_probability_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _follow_count_adjustment (1, 1, 128, 1, 4)
 	, _follow_count_spinner (_follow_count_adjustment)
 	, _legato_button (ArdourButton::led_default_elements)
@@ -111,14 +113,13 @@ TriggerUI::TriggerUI () :
 	_follow_count_spinner.set_can_focus(false);
 	_follow_count_spinner.signal_changed ().connect (sigc::mem_fun (*this, &TriggerUI::follow_count_event));
 
-		_follow_percent_adjustment.set_lower (0.0);
-		_follow_percent_adjustment.set_upper (100.0);
-		_follow_percent_adjustment.set_step_increment (1.0);
-		_follow_percent_adjustment.set_page_increment (5.0);
+	_velocity_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &TriggerUI::velocity_adjusted));
 
-	_follow_percent_slider.set_name("FollowAction");
-	_follow_percent_slider.set_text (_("100% Left"));
-//	_follow_percent_slider.signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
+	_velocity_slider.set_name("FollowAction");
+
+	_follow_probability_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &TriggerUI::probability_adjusted));
+
+	_follow_probability_slider.set_name("FollowAction");
 
 	_follow_left.set_name("FollowAction");
 	_follow_left.append_text_item (_("None"));
@@ -171,8 +172,7 @@ TriggerUI::TriggerUI () :
 
 	label = manage(new Gtk::Label(_("Velocity Sense:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	label = manage(new Gtk::Label(_("100%")));  label->set_alignment(0.0, 0.5);
-	attach(*label,                 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_velocity_slider,       1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Launch Style:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
@@ -194,9 +194,20 @@ TriggerUI::TriggerUI () :
 	align->add (_follow_count_spinner);
 	attach(*align,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
 
-	attach(_follow_percent_slider,  0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-	attach(_follow_left,   0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_follow_right,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	Gtkmm2ext::set_size_request_to_display_given_text (_left_probability_label, "100% Left ", 12, 0);
+	_left_probability_label.set_alignment(0.0, 0.5);
+	Gtkmm2ext::set_size_request_to_display_given_text (_right_probability_label, "100% Right", 12, 0);
+	_right_probability_label.set_alignment(1.0, 0.5);
+
+	Gtk::Table *prob_table = manage(new Gtk::Table());
+	prob_table->set_spacings(2);
+	prob_table->attach(_follow_probability_slider, 0, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK );
+	prob_table->attach(_left_probability_label,    0, 1, 1, 2, Gtk::FILL,             Gtk::SHRINK );
+	prob_table->attach(_right_probability_label,   1, 2, 1, 2, Gtk::FILL,             Gtk::SHRINK );
+
+	attach( *prob_table,   0, 2, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK ); row++;
+	attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
+	attach(_follow_right,  1, 2, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
 }
 
 TriggerUI::~TriggerUI ()
@@ -217,6 +228,8 @@ TriggerUI::set_trigger (ARDOUR::Trigger* t)
 	pc.add (Properties::follow_count);
 	pc.add (Properties::follow_action0);
 	pc.add (Properties::follow_action1);
+	pc.add (Properties::velocity_effect);
+	pc.add (Properties::follow_action_probability);
 
 	trigger_changed (pc);
 
@@ -239,6 +252,18 @@ void
 TriggerUI::follow_count_event ()
 {
 	trigger->set_follow_count ((int) _follow_count_adjustment.get_value());
+}
+
+void
+TriggerUI::velocity_adjusted ()
+{
+	trigger->set_midi_velocity_effect (_velocity_adjustment.get_value());
+}
+
+void
+TriggerUI::probability_adjusted ()
+{
+	trigger->set_follow_action_probability ((int) _follow_probability_adjustment.get_value());
 }
 
 bool
@@ -378,16 +403,31 @@ TriggerUI::trigger_changed (PropertyChange pc)
 		_follow_left.set_text (follow_action_to_string (trigger->follow_action (1)));
 	}
 
+	if (pc.contains (Properties::velocity_effect)) {
+		_velocity_adjustment.set_value (trigger->midi_velocity_effect());
+	}
+
+	if (pc.contains (Properties::follow_action_probability)) {
+		int pval = trigger->follow_action_probability();
+		_follow_probability_adjustment.set_value (pval);
+		_left_probability_label.set_text (string_compose(_("%1%% Left"), pval));
+		_right_probability_label.set_text (string_compose(_("%1%% Right"), 100-pval));
+	}
+
 	if (trigger->use_follow()) {
 		_follow_left.set_sensitive(true);
 		_follow_right.set_sensitive(true);
 		_follow_count_spinner.set_sensitive(true);
-		_follow_percent_slider.set_sensitive(true);
+		_follow_probability_slider.set_sensitive(true);
+		_left_probability_label.set_sensitive(true);
+		_right_probability_label.set_sensitive(true);
 	} else {
 		_follow_left.set_sensitive(false);
 		_follow_right.set_sensitive(false);
 		_follow_count_spinner.set_sensitive(false);
-		_follow_percent_slider.set_sensitive(false);
+		_follow_probability_slider.set_sensitive(false);
+		_left_probability_label.set_sensitive(false);
+		_right_probability_label.set_sensitive(false);
 	}
 }
 

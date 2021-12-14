@@ -45,8 +45,13 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 
 	ArdourWidgets::ArdourButton        _follow_action_button;
 
-	Gtk::Adjustment                    _follow_percent_adjustment;
-	ArdourWidgets::HSliderController   _follow_percent_slider;
+	Gtk::Adjustment                    _velocity_adjustment;
+	ArdourWidgets::HSliderController   _velocity_slider;
+
+	Gtk::Label                    _left_probability_label;
+	Gtk::Label                    _right_probability_label;
+	Gtk::Adjustment                    _follow_probability_adjustment;
+	ArdourWidgets::HSliderController   _follow_probability_slider;
 
 	Gtk::Adjustment                    _follow_count_adjustment;
 	Gtk::SpinButton                    _follow_count_spinner;
@@ -68,6 +73,9 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	bool follow_action_button_event (GdkEvent*);
 	bool legato_button_event (GdkEvent*);
 	void follow_count_event ();
+
+	void probability_adjusted ();
+	void velocity_adjusted ();
 
 	PBD::ScopedConnectionList trigger_connections;
 
