@@ -226,6 +226,8 @@ public:
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
 	void show_a_region (boost::shared_ptr<ARDOUR::Region>);
 
+	boost::shared_ptr<ARDOUR::Region> get_dragged_region_from_sidebar ();
+
 #ifdef USE_RUBBERBAND
 	std::vector<std::string> rb_opt_strings;
 	int rb_current_opt;
