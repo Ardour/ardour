@@ -68,7 +68,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _launch_style (Toggle)
 	, _use_follow (Properties::use_follow, true)
 	, _follow_action { NextTrigger, Stop }
-	, _follow_action_probability (100)
+	, _follow_action_probability (Properties::follow_action_probability, 100)
 	, _loop_cnt (0)
 	, _follow_count (Properties::follow_count, 1)
 	, _quantization (Temporal::BBT_Offset (0, 1, 0))
@@ -77,13 +77,15 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _apparent_tempo (0.)
 	, _gain (1.0)
 	, _pending_gain (1.0)
-	, _midi_velocity_effect (0.)
+	, _midi_velocity_effect (Properties::velocity_effect, 0.)
 	, _ui (0)
 	, expected_end_sample (0)
 {
 	add_property (_legato);
 	add_property (_use_follow);
 	add_property (_follow_count);
+	add_property (_midi_velocity_effect);
+	add_property (_follow_action_probability);
 }
 
 void
@@ -1497,6 +1499,10 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow_count = %1\n", Properties::follow_count.property_id));
 	Properties::legato.property_id = g_quark_from_static_string (X_("legato"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for legato = %1\n", Properties::legato.property_id));
+	Properties::velocity_effect.property_id = g_quark_from_static_string (X_("velocity-effect"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for velocity_effect = %1\n", Properties::velocity_effect.property_id));
+	Properties::follow_action_probability.property_id = g_quark_from_static_string (X_("follow-action-probability"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow_action_probability = %1\n", Properties::follow_action_probability.property_id));
 	Properties::use_follow.property_id = g_quark_from_static_string (X_("use-follow"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for use-follow = %1\n", Properties::use_follow.property_id));
 	Properties::quantization.property_id = g_quark_from_static_string (X_("quantization"));

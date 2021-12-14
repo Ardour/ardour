@@ -243,7 +243,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	LaunchStyle               _launch_style;
 	PBD::Property<bool>       _use_follow;
 	FollowAction              _follow_action[2];
-	int                       _follow_action_probability;
+	PBD::Property<int>        _follow_action_probability;
 	uint32_t                  _loop_cnt; /* how many times in a row has this played */
 	PBD::Property<int>        _follow_count;
 	Temporal::BBT_Offset      _quantization;
@@ -253,7 +253,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	double                    _apparent_tempo;
 	gain_t                    _gain;
 	gain_t                    _pending_gain;
-	float                     _midi_velocity_effect;
+	PBD::Property<float>      _midi_velocity_effect;
 	void*                     _ui;
 	samplepos_t                expected_end_sample;
 
