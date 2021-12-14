@@ -28,9 +28,6 @@
 #include "ardour/region.h"
 #include "ardour/triggerbox.h"
 
-#include "widgets/ardour_button.h"
-#include "widgets/slider_controller.h"
-
 #include "gtkmm2ext/utils.h"
 
 #include "audio_region_properties_box.h"
@@ -63,9 +60,13 @@ static std::vector<std::string> launch_strings;
 static std::string longest_launch;
 
 TriggerUI::TriggerUI () :
-	_follow_percent_adjustment(0,100,1)
+	 _follow_action_button (ArdourButton::led_default_elements)
+	, _follow_percent_adjustment(0,100,1)
+	, _follow_percent_slider (&_follow_percent_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _follow_count_adjustment (1, 1, 128, 1, 4)
 	, _follow_count_spinner (_follow_count_adjustment)
+	, _legato_button (ArdourButton::led_default_elements)
+
 {
 	trigger = NULL;
 
@@ -103,11 +104,9 @@ TriggerUI::TriggerUI () :
 	set_spacings (2);
 	set_homogeneous (false);
 
-	_follow_action_button = new ArdourButton (ArdourButton::led_default_elements);
-	_follow_action_button->set_name("FollowAction");
-	_follow_action_button->set_text (_("Follow Action"));
-//	_follow_action_button->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
-	_follow_action_button->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
+	_follow_action_button.set_name("FollowAction");
+	_follow_action_button.set_text (_("Follow Action"));
+	_follow_action_button.signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
 
 	_follow_count_spinner.set_can_focus(false);
 	_follow_count_spinner.signal_changed ().connect (sigc::mem_fun (*this, &TriggerUI::follow_count_event));
@@ -117,45 +116,36 @@ TriggerUI::TriggerUI () :
 		_follow_percent_adjustment.set_step_increment (1.0);
 		_follow_percent_adjustment.set_page_increment (5.0);
 
-	_follow_percent_slider = new HSliderController (&_follow_percent_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ );
-	_follow_percent_slider->set_name("FollowAction");
-	_follow_percent_slider->set_text (_("100% Left"));
-//	_follow_percent_slider->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
-//	_follow_percent_slider->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
+	_follow_percent_slider.set_name("FollowAction");
+	_follow_percent_slider.set_text (_("100% Left"));
+//	_follow_percent_slider.signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
 
-	_follow_left = new ArdourDropdown;
-	_follow_left->set_name("FollowAction");
-	_follow_left->append_text_item (_("None"));
-	_follow_left->append_text_item (_("Repeat"));
-	_follow_left->append_text_item (_("Next"));
-	_follow_left->append_text_item (_("Previous"));
-	_follow_left->set_sizing_text (longest_follow);
+	_follow_left.set_name("FollowAction");
+	_follow_left.append_text_item (_("None"));
+	_follow_left.append_text_item (_("Repeat"));
+	_follow_left.append_text_item (_("Next"));
+	_follow_left.append_text_item (_("Previous"));
+	_follow_left.set_sizing_text (longest_follow);
 
-	_follow_right = new ArdourDropdown;
-	_follow_right->set_name("FollowAction");
-	_follow_right->append_text_item (_("None"));
-	_follow_right->append_text_item (_("Repeat"));
-	_follow_right->append_text_item (_("Next"));
-	_follow_right->append_text_item (_("Previous"));
-	_follow_right->set_sizing_text (longest_follow);
+	_follow_right.set_name("FollowAction");
+	_follow_right.append_text_item (_("None"));
+	_follow_right.append_text_item (_("Repeat"));
+	_follow_right.append_text_item (_("Next"));
+	_follow_right.append_text_item (_("Previous"));
+	_follow_right.set_sizing_text (longest_follow);
 
-	_launch_style_button = new ArdourDropdown();
-	_launch_style_button->set_name("FollowAction");
-	_launch_style_button->set_sizing_text (longest_launch);
-	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::OneShot)));
-	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Gate)));
-	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Toggle)));
-	_launch_style_button->AddMenuElem (MenuElem (launch_style_to_string (Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Repeat)));
+	_launch_style_button.set_name("FollowAction");
+	_launch_style_button.set_sizing_text (longest_launch);
+	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::OneShot)));
+	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Gate)));
+	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Toggle)));
+	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Repeat)));
 
-	_legato_button = new ArdourButton(ArdourButton::led_default_elements);
-	_launch_style_button->set_name("FollowAction");
-	_legato_button->set_text (_("Legato"));
-	_legato_button->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
-	_legato_button->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::legato_button_event)));
+	_launch_style_button.set_name("FollowAction");
+	_legato_button.set_text (_("Legato"));
+	_legato_button.signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::legato_button_event)));
 
-	_quantize_button = new ArdourDropdown;
-
-#define quantize_item(b) _quantize_button->AddMenuElem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_quantize), b)));
+#define quantize_item(b) _quantize_button.AddMenuElem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_quantize), b)));
 
 	quantize_item (BBT_Offset (0, 0, 0));
 	quantize_item (BBT_Offset (0, 1, 0));
@@ -171,8 +161,8 @@ TriggerUI::TriggerUI () :
 			longest_quantize = *i;
 		}
 	}
-	_quantize_button->set_sizing_text (longest_quantize);
-	_quantize_button->set_name("FollowAction");
+	_quantize_button.set_sizing_text (longest_quantize);
+	_quantize_button.set_name("FollowAction");
 
 #undef quantize_item
 
@@ -186,17 +176,17 @@ TriggerUI::TriggerUI () :
 
 	label = manage(new Gtk::Label(_("Launch Style:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(*_launch_style_button,   1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_launch_style_button,   1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Launch Quantize:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,            0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(*_quantize_button,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_quantize_button,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Legato Mode:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(*_legato_button,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_legato_button,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
-	attach(*_follow_action_button,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_follow_action_button,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Follow Count:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
@@ -204,9 +194,9 @@ TriggerUI::TriggerUI () :
 	align->add (_follow_count_spinner);
 	attach(*align,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
 
-	attach(*_follow_percent_slider,  0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-	attach(*_follow_left,   0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(*_follow_right,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_follow_percent_slider,  0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_follow_left,   0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(_follow_right,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 }
 
 TriggerUI::~TriggerUI ()
@@ -360,12 +350,12 @@ TriggerUI::trigger_changed (PropertyChange pc)
 {
 	if (pc.contains (Properties::quantization)) {
 		BBT_Offset bbo (trigger->quantization());
-		_quantize_button->set_active (quantize_length_to_string (bbo));
+		_quantize_button.set_active (quantize_length_to_string (bbo));
 		std::cerr << "\n\n !!! quantize is " << quantize_length_to_string (bbo) << std::endl << std::endl;
 	}
 
 	if (pc.contains (Properties::use_follow)) {
-		_follow_action_button->set_active_state (trigger->use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_follow_action_button.set_active_state (trigger->use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::follow_count)) {
@@ -373,31 +363,31 @@ TriggerUI::trigger_changed (PropertyChange pc)
 	}
 
 	if (pc.contains (Properties::legato)) {
-		_legato_button->set_active_state (trigger->legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_legato_button.set_active_state (trigger->legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::launch_style)) {
-		_launch_style_button->set_active (launch_style_to_string (trigger->launch_style()));
+		_launch_style_button.set_active (launch_style_to_string (trigger->launch_style()));
 	}
 
 	if (pc.contains (Properties::follow_action0)) {
-		_follow_right->set_text (follow_action_to_string (trigger->follow_action (0)));
+		_follow_right.set_text (follow_action_to_string (trigger->follow_action (0)));
 	}
 
 	if (pc.contains (Properties::follow_action1)) {
-		_follow_left->set_text (follow_action_to_string (trigger->follow_action (1)));
+		_follow_left.set_text (follow_action_to_string (trigger->follow_action (1)));
 	}
 
 	if (trigger->use_follow()) {
-		_follow_left->set_sensitive(true);
-		_follow_right->set_sensitive(true);
+		_follow_left.set_sensitive(true);
+		_follow_right.set_sensitive(true);
 		_follow_count_spinner.set_sensitive(true);
-		_follow_percent_slider->set_sensitive(true);
+		_follow_percent_slider.set_sensitive(true);
 	} else {
-		_follow_left->set_sensitive(false);
-		_follow_right->set_sensitive(false);
+		_follow_left.set_sensitive(false);
+		_follow_right.set_sensitive(false);
 		_follow_count_spinner.set_sensitive(false);
-		_follow_percent_slider->set_sensitive(false);
+		_follow_percent_slider.set_sensitive(false);
 	}
 }
 

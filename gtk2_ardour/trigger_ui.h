@@ -20,6 +20,8 @@
 #define __ardour_gtk_trigger_ui_h__
 
 #include "ardour/triggerbox.h"
+#include "widgets/ardour_button.h"
+#include "widgets/slider_controller.h"
 
 namespace ArdourWidgets {
 	class ArdourButton;
@@ -41,22 +43,22 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
   private:
 	ARDOUR::Trigger* trigger;
 
-	ArdourWidgets::ArdourButton*       _follow_action_button;
+	ArdourWidgets::ArdourButton        _follow_action_button;
 
 	Gtk::Adjustment                    _follow_percent_adjustment;
-	ArdourWidgets::HSliderController*  _follow_percent_slider;
+	ArdourWidgets::HSliderController   _follow_percent_slider;
 
 	Gtk::Adjustment                    _follow_count_adjustment;
 	Gtk::SpinButton                    _follow_count_spinner;
 
-	ArdourWidgets::ArdourDropdown*     _follow_left;
-	ArdourWidgets::ArdourDropdown*     _follow_right;
+	ArdourWidgets::ArdourDropdown      _follow_left;
+	ArdourWidgets::ArdourDropdown      _follow_right;
 
-	ArdourWidgets::ArdourButton* _legato_button;
+	ArdourWidgets::ArdourButton        _legato_button;
 
-	ArdourWidgets::ArdourDropdown* _quantize_button;
+	ArdourWidgets::ArdourDropdown      _quantize_button;
 
-	ArdourWidgets::ArdourDropdown* _launch_style_button;
+	ArdourWidgets::ArdourDropdown      _launch_style_button;
 
 	void set_quantize (Temporal::BBT_Offset);
 	void set_launch_style (ARDOUR::Trigger::LaunchStyle);
