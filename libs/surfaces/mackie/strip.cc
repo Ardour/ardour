@@ -129,7 +129,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 
 		// The main unit has 9 faders under the second display.
 		// Extenders have 8 faders.
-		if (s.mcp().device_info().has_master_fader()) {
+		if (s.number() == s.mcp().device_info().master_position()) {
 			_lcd2_label_pitch = 6;
 		}
 	}
