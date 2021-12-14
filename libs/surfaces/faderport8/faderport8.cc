@@ -268,7 +268,7 @@ FaderPort8::periodic ()
 		_timecode = Timecode::timecode_format_time(TC);
 
 		char buf[16];
-		Temporal::BBT_Time BBT = Temporal::TempoMap::use()->bbt_at (timepos_t (session->transport_sample ()));
+		Temporal::BBT_Time BBT = Temporal::TempoMap::fetch()->bbt_at (timepos_t (session->transport_sample ()));
 		snprintf (buf, sizeof (buf),
 				" %02" PRIu32 "|%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32,
 				BBT.bars % 100, BBT.beats %100,
