@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gtkmm/alignment.h>
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
@@ -63,6 +64,8 @@ static std::string longest_launch;
 
 TriggerUI::TriggerUI () :
 	_follow_percent_adjustment(0,100,1)
+	, _follow_count_adjustment (1, 1, 128, 1, 4)
+	, _follow_count_spinner (_follow_count_adjustment)
 {
 	trigger = NULL;
 
@@ -97,11 +100,7 @@ TriggerUI::TriggerUI () :
 		}
 	}
 
-//	set_fill_color (UIConfiguration::instance().color (X_("theme:bg")));
-//	name = "triggerUI-table";
-//	set_row_spacing (2);
 	set_spacings (2);
-//	set_padding (2);
 	set_homogeneous (false);
 
 	_follow_action_button = new ArdourButton (ArdourButton::led_default_elements);
@@ -109,6 +108,9 @@ TriggerUI::TriggerUI () :
 	_follow_action_button->set_text (_("Follow Action"));
 //	_follow_action_button->set_active_color (UIConfiguration::instance().color ("alert:greenish"));
 	_follow_action_button->signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
+
+	_follow_count_spinner.set_can_focus(false);
+	_follow_count_spinner.signal_changed ().connect (sigc::mem_fun (*this, &TriggerUI::follow_count_event));
 
 		_follow_percent_adjustment.set_lower (0.0);
 		_follow_percent_adjustment.set_upper (100.0);
@@ -195,6 +197,13 @@ TriggerUI::TriggerUI () :
 	attach(*_legato_button,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	attach(*_follow_action_button,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	label = manage(new Gtk::Label(_("Follow Count:")));  label->set_alignment(1.0, 0.5);
+	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
+	align->add (_follow_count_spinner);
+	attach(*align,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
+
 	attach(*_follow_percent_slider,  0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 	attach(*_follow_left,   0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	attach(*_follow_right,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
@@ -215,6 +224,7 @@ TriggerUI::set_trigger (ARDOUR::Trigger* t)
 	pc.add (Properties::legato);
 	pc.add (Properties::quantization);
 	pc.add (Properties::launch_style);
+	pc.add (Properties::follow_count);
 	pc.add (Properties::follow_action0);
 	pc.add (Properties::follow_action1);
 
@@ -233,6 +243,12 @@ TriggerUI::set_quantize (BBT_Offset bbo)
 	}
 
 	trigger->set_quantization (bbo);
+}
+
+void
+TriggerUI::follow_count_event ()
+{
+	trigger->set_follow_count ((int) _follow_count_adjustment.get_value());
 }
 
 bool
@@ -350,6 +366,10 @@ TriggerUI::trigger_changed (PropertyChange pc)
 
 	if (pc.contains (Properties::use_follow)) {
 		_follow_action_button->set_active_state (trigger->use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	}
+
+	if (pc.contains (Properties::follow_count)) {
+		_follow_count_adjustment.set_value (trigger->follow_count());
 	}
 
 	if (pc.contains (Properties::legato)) {
