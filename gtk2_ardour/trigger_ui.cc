@@ -387,6 +387,18 @@ TriggerUI::trigger_changed (PropertyChange pc)
 	if (pc.contains (Properties::follow_action1)) {
 		_follow_left->set_text (follow_action_to_string (trigger->follow_action (1)));
 	}
+
+	if (trigger->use_follow()) {
+		_follow_left->set_sensitive(true);
+		_follow_right->set_sensitive(true);
+		_follow_count_spinner.set_sensitive(true);
+		_follow_percent_slider->set_sensitive(true);
+	} else {
+		_follow_left->set_sensitive(false);
+		_follow_right->set_sensitive(false);
+		_follow_count_spinner.set_sensitive(false);
+		_follow_percent_slider->set_sensitive(false);
+	}
 }
 
 /* ------------ */
