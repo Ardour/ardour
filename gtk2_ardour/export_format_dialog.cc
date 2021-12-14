@@ -27,6 +27,8 @@
 #include "ardour/export_format_specification.h"
 #include "ardour/session.h"
 
+#include "temporal/tempo.h"
+
 #include "widgets/tooltips.h"
 
 #include "export_format_dialog.h"
@@ -1032,7 +1034,7 @@ ExportFormatDialog::update_time (AnyTime& time, AudioClock const& clock)
 		break;
 	case AudioClock::BBT:
 		time.type = AnyTime::BBT;
-		_session->bbt_time (timepos_t (samples), time.bbt);
+		time.bbt = Temporal::TempoMap::use()->bbt_at (timepos_t (samples));
 		break;
 	case AudioClock::Seconds:
 	case AudioClock::MinSec:

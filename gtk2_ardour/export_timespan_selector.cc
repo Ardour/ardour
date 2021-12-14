@@ -34,6 +34,8 @@
 #include "ardour/export_handler.h"
 #include "ardour/export_timespan.h"
 
+#include "temporal/tempo.h"
+
 #include "export_timespan_selector.h"
 
 #include "pbd/i18n.h"
@@ -302,7 +304,7 @@ ExportTimespanSelector::bbt_str (samplepos_t samples) const
 
 	std::ostringstream oss;
 	Temporal::BBT_Time time;
-	_session->bbt_time (timepos_t (samples), time);
+	time = Temporal::TempoMap::use()->bbt_at (timepos_t (samples));
 
 	time.print_padded (oss);
 

@@ -113,7 +113,7 @@ VerboseCursor::set_time (samplepos_t sample)
 
 	switch (m) {
 	case AudioClock::BBT:
-		_editor->_session->bbt_time (timepos_t (sample), bbt);
+		bbt = TempoMap::use()->bbt_at (timepos_t (sample));
 		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, bbt.bars, bbt.beats, bbt.ticks);
 		break;
 
@@ -156,8 +156,8 @@ VerboseCursor::set_duration (samplepos_t start, samplepos_t end)
 	switch (m) {
 	case AudioClock::BBT:
 	{
-		_editor->_session->bbt_time (timepos_t (start), sbbt);
-		_editor->_session->bbt_time (timepos_t (end), ebbt);
+		sbbt = TempoMap::use()->bbt_at (timepos_t (start));
+		ebbt = TempoMap::use()->bbt_at (timepos_t (end));
 
 		/* subtract */
 		/* XXX this computation won't work well if the

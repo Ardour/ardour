@@ -45,6 +45,8 @@
 #include "ardour/tempo.h"
 #include "ardour/profile.h"
 
+#include "temporal/tempo.h"
+
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/keyboard.h"
 
@@ -989,8 +991,8 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	const samplepos_t beat_before_lower_pos = tmap->sample_at (floor_lower_beat);
 	const samplepos_t beat_after_upper_pos = tmap->sample_at ((std::max (Beats(), tmap->quarters_at_sample  (upper)).round_down_to_beat()) + Beats (1, 0));
 
-	_session->bbt_time (timepos_t (beat_before_lower_pos), lower_beat);
-	_session->bbt_time (timepos_t (beat_after_upper_pos), upper_beat);
+	lower_beat = Temporal::TempoMap::use()->bbt_at (timepos_t (beat_before_lower_pos));
+	upper_beat = Temporal::TempoMap::use()->bbt_at (timepos_t (beat_after_upper_pos));
 	uint32_t beats = 0;
 
 	bbt_bar_helper_on = false;
