@@ -53,8 +53,6 @@ Editor::set_video_timeline_height (const int h)
 void
 Editor::update_video_timeline (bool flush)
 {
-	// catch GUIIdle -> Editor::idle_visual_changer during quit/close
-	assert (ARDOUR_UI::instance()->video_timeline);
 	if (!ARDOUR_UI::instance()->video_timeline) {
 		return;
 	}
