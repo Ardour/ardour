@@ -395,6 +395,8 @@ Trigger::process_state_requests ()
 
 		_unbang.fetch_sub (1);
 
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged\n", index()));
+
 		if (_launch_style == Gate || _launch_style == Repeat) {
 			switch (_state) {
 			case Running:
@@ -739,6 +741,7 @@ AudioTrigger::set_region_threaded (boost::shared_ptr<Region> r)
 	load_data (ar);
 	determine_tempo ();
 	setup_stretcher ();
+	set_usable_length ();
 
 	PropertyChanged (ARDOUR::Properties::name);
 
@@ -1128,34 +1131,43 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	if (_state == Stopped || _state == Stopping) {
 
-		if (_loop_cnt == _follow_count) {
+		if ((_state == Stopped) && !_explicitly_stopped && (_launch_style == Trigger::Gate || _launch_style == Trigger::Repeat)) {
 
-			/* have played the specified number of times, we're done */
-
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
-			shutdown ();
-
-		} else if (_state == Stopping) {
-
-			/* did not reach the end of the data. Presumably
-			 * another trigger was explicitly queued, and we
-			 * stopped
-			 */
-
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not at end, but ow stopped\n", index()));
-			shutdown ();
+			jump_start ();
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopped, repeat/gate ret\n", index()));
 
 		} else {
 
-			/* reached the end, but we haven't done that enough
-			 * times yet for a follow action/stop to take
-			 * effect. Time to get played again.
-			 */
+			if ((_launch_style != Repeat) && (_launch_style != Gate) && (_loop_cnt == _follow_count)) {
 
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
-			_state = WaitingToStart;
-			retrigger ();
-			PropertyChanged (ARDOUR::Properties::running);
+				/* have played the specified number of times, we're done */
+
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
+				shutdown ();
+
+
+			} else if (_state == Stopping) {
+
+				/* did not reach the end of the data. Presumably
+				 * another trigger was explicitly queued, and we
+				 * stopped
+				 */
+
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not at end, but ow stopped\n", index()));
+				shutdown ();
+
+			} else {
+
+				/* reached the end, but we haven't done that enough
+				 * times yet for a follow action/stop to take
+				 * effect. Time to get played again.
+				 */
+
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
+				_state = WaitingToStart;
+				retrigger ();
+				PropertyChanged (ARDOUR::Properties::running);
+			}
 		}
 	}
 

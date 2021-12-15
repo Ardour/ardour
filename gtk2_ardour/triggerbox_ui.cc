@@ -581,7 +581,8 @@ TriggerBoxUI::play_button_event (GdkEvent *ev, uint64_t n)
 	case GDK_BUTTON_RELEASE:
 		switch (ev->button.button) {
 		case 1:
-			if (_slots[n]->trigger().launch_style() == Trigger::Gate) {
+			if (_slots[n]->trigger().launch_style() == Trigger::Gate ||
+			    _slots[n]->trigger().launch_style() == Trigger::Repeat) {
 				_slots[n]->trigger().unbang ();
 			}
 			break;
