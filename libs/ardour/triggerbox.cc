@@ -56,6 +56,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<int> follow_action_probability;
 		PBD::PropertyDescriptor<float> velocity_effect;
 		PBD::PropertyDescriptor<gain_t> gain;
+		PBD::PropertyDescriptor<bool> stretching;
 	}
 }
 
@@ -80,12 +81,14 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _midi_velocity_effect (Properties::velocity_effect, 0.)
 	, _ui (0)
 	, expected_end_sample (0)
+	, _stretching (Properties::stretching, true)
 {
 	add_property (_legato);
 	add_property (_use_follow);
 	add_property (_follow_count);
 	add_property (_midi_velocity_effect);
 	add_property (_follow_action_probability);
+	add_property (_stretching);
 }
 
 void
@@ -368,8 +371,7 @@ Trigger::process_state_requests ()
 			case Toggle:
 			case Repeat:
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 gate/toggle/repeat => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingToStop)));
-				_state = WaitingToStop;
-				PropertyChanged (ARDOUR::Properties::running);
+				begin_stop ();
 			}
 			break;
 
@@ -480,7 +482,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		case WaitingToStart:
 			retrigger ();
 			_state = Running;
-			expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, BBT_Offset (round (_barcnt), 0, 0)));
+			set_expected_end_sample (tmap, transition_bbt);
 			cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
 			PropertyChanged (ARDOUR::Properties::running);
 
@@ -499,7 +501,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		case WaitingForRetrigger:
 			retrigger ();
 			_state = Running;
-			expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, BBT_Offset (round (_barcnt), 0, 0)));
+			set_expected_end_sample (tmap, transition_bbt);
 			cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
 			PropertyChanged (ARDOUR::Properties::running);
 
@@ -553,6 +555,22 @@ AudioTrigger::~AudioTrigger ()
 	delete _stretcher;
 }
 
+bool
+AudioTrigger::stretching() const
+{
+	return (_apparent_tempo != .0) && _stretching;
+}
+
+void
+AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt)
+{
+	if (stretching()) {
+		expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (round (_barcnt), 0, 0)));
+	} else {
+		expected_end_sample = transition_samples = usable_length;
+	}
+}
+
 SegmentDescriptor
 AudioTrigger::get_segment_descriptor () const
 {
@@ -592,7 +610,7 @@ AudioTrigger::position_as_fraction () const
 		return 0.0;
 	}
 
-	return process_index / (double) usable_length;
+	return process_index / (double) (expected_end_sample - transition_samples);
 }
 
 XMLNode&
@@ -904,7 +922,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	int avail = 0;
 	BufferSet& scratch (_box.session().get_scratch_buffers (ChanCount (DataType::AUDIO, nchans)));
 	std::vector<Sample*> bufp(nchans);
-	const bool stretching = (_apparent_tempo != 0.);
+	const bool do_stretch = stretching();
 
 	/* see if we're going to start or stop or retrigger in this run() call */
 	pframes_t extra_offset = maybe_compute_next_transition (start_sample, start, end, dest_offset, passthru);
@@ -919,7 +937,6 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	case WaitingForRetrigger:
 	case WaitingToStart:
 		/* did everything we could do */
-		std::cerr << name() << " when i run, stretching will be: " << stretching << std::endl;
 		return nframes;
 	case Running:
 	case WaitingToStop:
@@ -939,7 +956,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	/* tell the stretcher what we are doing for this ::run() call */
 
-	if (stretching) {
+	if (do_stretch) {
 
 		const double stretch = _apparent_tempo / bpm;
 		_stretcher->setTimeRatio (stretch);
@@ -992,7 +1009,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		pframes_t to_stretcher;
 		pframes_t from_stretcher;
 
-		if (stretching) {
+		if (do_stretch) {
 
 			if (read_index < last_sample) {
 
@@ -1068,7 +1085,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 			uint64_t channel = chn %  data.size();
 			AudioBuffer& buf (bufs.get_audio (channel));
-			Sample* src = stretching ? bufp[channel] : (data[channel] + read_index);
+			Sample* src = do_stretch ? bufp[channel] : (data[channel] + read_index);
 
 			if (!passthru) {
 				buf.read_from (src, from_stretcher, dest_offset);
@@ -1090,7 +1107,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		 * stretcher
 		 */
 
-		if (!stretching) {
+		if (!do_stretch) {
 			read_index += from_stretcher;
 		}
 
@@ -1161,6 +1178,12 @@ MIDITrigger::MIDITrigger (uint64_t n, TriggerBox& b)
 
 MIDITrigger::~MIDITrigger ()
 {
+}
+
+void
+MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt)
+{
+	expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (round (_barcnt), 0, 0)));
 }
 
 SegmentDescriptor
@@ -1525,6 +1548,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow-action-0 = %1\n", Properties::follow_action0.property_id));
 	Properties::follow_action1.property_id = g_quark_from_static_string (X_("follow-action-1"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow-action-1 = %1\n", Properties::follow_action1.property_id));
+	Properties::stretching.property_id = g_quark_from_static_string (X_("stretching"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretching = %1\n", Properties::stretching.property_id));
 }
 
 const int32_t TriggerBox::default_triggers_per_box = 8;

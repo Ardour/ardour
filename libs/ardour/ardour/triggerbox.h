@@ -129,6 +129,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void reload (BufferSet&, void*) = 0;
 
 	virtual double position_as_fraction() const = 0;
+	virtual void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &) = 0;
 
 	void set_use_follow (bool yn);
 	bool use_follow() const { return _use_follow; }
@@ -256,6 +257,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<float>      _midi_velocity_effect;
 	void*                     _ui;
 	samplepos_t                expected_end_sample;
+	PBD::Property<bool>       _stretching;
 
 	void set_region_internal (boost::shared_ptr<Region>);
 	virtual void retrigger() = 0;
@@ -292,13 +294,17 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	RubberBand::RubberBandStretcher* stretcher() { return (_stretcher); }
 
 	SegmentDescriptor get_segment_descriptor () const;
+	void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &);
+
+	void set_stretching (bool yn);
+	bool stretching () const;
 
   protected:
 	void retrigger ();
 	void set_usable_length ();
 
   private:
-	PBD::ID data_source;
+	PBD::ID     data_source;
 	std::vector<Sample*> data;
 	samplecnt_t read_index;
 	samplecnt_t process_index;
@@ -309,9 +315,9 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	samplepos_t last_sample;
 	samplecnt_t retrieved;
 	RubberBand::RubberBandStretcher*  _stretcher;
-	samplecnt_t                got_stretcher_padding;
-	samplecnt_t                to_pad;
-	samplecnt_t                to_drop;
+	samplecnt_t got_stretcher_padding;
+	samplecnt_t to_pad;
+	samplecnt_t to_drop;
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
@@ -349,6 +355,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	int set_state (const XMLNode&, int version);
 
 	SegmentDescriptor get_segment_descriptor () const;
+	void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &);
 
   protected:
 	void retrigger ();
@@ -603,6 +610,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float> velocity_effect;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<gain_t> gain;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger*> currently_playing;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> stretching;
 }
 
 
