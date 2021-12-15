@@ -700,6 +700,8 @@ AudioTrigger::set_usable_length ()
 	timecnt_t len (Temporal::Beats (_quantization.beats, _quantization.ticks), timepos_t (Temporal::Beats()));
 	usable_length = len.samples();
 	last_sample = _start_offset + usable_length;
+
+	// std::cerr << name() << " SUL ul " << usable_length << " of " << data_length << " so " << _start_offset << " ls " << last_sample << std::endl;
 }
 
 void
