@@ -128,15 +128,15 @@ AudioClipEditor::AudioClipEditor ()
 {
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 
-	frame       = new Rectangle (root ());
+	frame       = new ArdourCanvas::Rectangle (root ());
 	frame->name = "audio clip editor frame";
 	frame->set_fill (false);
 	frame->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::event_handler));
 
 	/* Scroll bar does not scroll and it outside the frame */
 
-	scroll_bar_trough = new Rectangle (root ());
-	scroll_bar_handle = new Rectangle (scroll_bar_trough);
+	scroll_bar_trough = new ArdourCanvas::Rectangle (root ());
+	scroll_bar_handle = new ArdourCanvas::Rectangle (scroll_bar_trough);
 	scroll_bar_handle->set_outline (false);
 	scroll_bar_handle->set_corner_radius (5.);
 	scroll_bar_handle->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::scroll_event_handler));
