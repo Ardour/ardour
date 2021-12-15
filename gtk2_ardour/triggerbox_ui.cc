@@ -153,10 +153,77 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const & alloc)
 
 	name_text->size_allocate (ArdourCanvas::Rect(0, 0, width, height));
 	name_text->set_position (Duple (tleft + poly_margin, poly_margin -0.5));
-	name_text->clamp_width ( width - height );
+	name_text->clamp_width ( width - height - height );
 
 	//font scale may have changed. uiconfig 'embeds' the ui-scale in the font
 	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
+}
+
+void draw_follow_icon( Cairo::RefPtr<Cairo::Context> context, Trigger::FollowAction icon, float size, float scale ) {
+
+	context->set_line_width ( 1*scale );
+
+	switch (icon) {
+		case Trigger::Stop:
+			context->rectangle ( 6*scale, 6*scale, size-12*scale, size-12*scale );
+			context->stroke();
+		break;
+		case Trigger::Again:
+			context->arc ( size/2, size/2, size*0.20, 60.*(M_PI/180.0), 2*M_PI );
+			context->stroke();
+			context->arc ( size/2+size*0.2, size/2, 1.5*scale, 0, 2*M_PI );  //arrow head
+			context->fill();
+		break;
+		case Trigger::NextTrigger:
+			context->move_to ( size/2, 3*scale );
+			context->line_to ( size/2, size-5*scale );
+			context->stroke();
+			context->arc ( size/2, size-5*scale, 1.5*scale, 0, 2*M_PI );  //arrow head
+			context->fill();
+		break;
+		case Trigger::PrevTrigger:
+			context->move_to ( size/2, 5*scale );
+			context->line_to ( size/2, size-3*scale );
+			context->stroke();
+			context->arc ( size/2, 5*scale, 1.5*scale, 0, 2*M_PI );  //arrow head
+			context->fill();
+		break;
+		case Trigger::QueuedTrigger: {
+			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
+			layout->set_font_description ( UIConfiguration::instance().get_SmallMonospaceFont() );
+			layout->set_text (icon == Trigger::AnyTrigger ? "&" : "@");
+			int tw, th; layout->get_pixel_size (tw, th);
+			context->move_to ( size/2, size/2 );
+			context->rel_move_to ( -tw/2, -th/2 );
+			layout->show_in_cairo_context (context);
+		} break;
+		case Trigger::AnyTrigger: {
+			context->move_to ( size/2, 3*scale );
+			context->line_to ( size/2, size-3*scale );
+			context->move_to ( size/2, size/2 );
+			context->line_to ( size/2-3*scale, size/2 );
+			context->stroke();
+			context->arc ( size/2,         4*scale,      1.5*scale, 0, 2*M_PI );  //arrow head
+			context->fill();
+			context->arc ( size/2,         size-3*scale, 1.5*scale, 0, 2*M_PI );  //arrow head
+			context->fill();
+			context->arc ( size/2-3*scale, size/2,       1.5*scale, 0, 2*M_PI );  //arrow head
+			context->fill();
+		} break;
+		case Trigger::OtherTrigger: {
+			context->move_to ( size/2, 3*scale );
+			context->line_to ( size/2, 7*scale );
+			context->move_to ( size/2, size-7*scale );
+			context->line_to ( size/2, size-3*scale );
+			context->stroke();
+			context->arc ( size/2, 3*scale,      1.5*scale, 0, 2*M_PI );  //arrow head
+			context->fill();
+			context->arc ( size/2, size-3*scale, 1.5*scale, 0, 2*M_PI );  //arrow head
+			context->fill();
+		} break;
+		default:
+		break;
+	}
 }
 
 void
@@ -204,6 +271,15 @@ TriggerEntry::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Cont
 		set_source_rgba (context, rgba_to_color (0,0,0,1));
 		context->rectangle(width-1, 0, width, height);
 		context->fill ();
+		context->set_identity_matrix();
+	}
+
+	if (_trigger.region()) {
+		context->set_identity_matrix();
+		context->translate (self.x0, self.y0-0.5);
+		context->translate ( width - height, 0);  //right side of the widget
+		set_source_rgba (context, UIConfiguration::instance().color("neutral:midground"));
+		draw_follow_icon( context, _trigger.follow_action(0), height, scale );
 		context->set_identity_matrix();
 	}
 
@@ -255,6 +331,10 @@ TriggerEntry::prop_change (PropertyChange const & change)
 
 	if (change.contains (ARDOUR::Properties::running)) {
 		need_pb = true;
+	}
+
+	if (change.contains (ARDOUR::Properties::follow_action0)) {
+		redraw();
 	}
 
 	if (need_pb) {
