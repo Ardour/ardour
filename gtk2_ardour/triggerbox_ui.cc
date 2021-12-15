@@ -234,8 +234,8 @@ TriggerEntry::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Cont
 	/* Note that item_to_window() already takes _position into account (as
 	   part of item_to_canvas()
 	*/
-	Rect self (item_to_window (_rect));
-	const Rect draw = self.intersection (area);
+	ArdourCanvas::Rect self (item_to_window (_rect));
+	const ArdourCanvas::Rect draw = self.intersection (area);
 
 	if (!draw) {
 		return;
