@@ -919,6 +919,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	case WaitingForRetrigger:
 	case WaitingToStart:
 		/* did everything we could do */
+		std::cerr << name() << " when i run, stretching will be: " << stretching << std::endl;
 		return nframes;
 	case Running:
 	case WaitingToStop:
@@ -1105,13 +1106,23 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 	}
 
-	if (_state == Stopped) {
+	if (_state == Stopped || _state == Stopping) {
 
 		if (_loop_cnt == _follow_count) {
 
 			/* have played the specified number of times, we're done */
 
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
+			shutdown ();
+
+		} else if (_state == Stopping) {
+
+			/* did not reach the end of the data. Presumably
+			 * another trigger was explicitly queued, and we
+			 * stopped
+			 */
+
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not at end, but ow stopped\n", index()));
 			shutdown ();
 
 		} else {
@@ -1122,8 +1133,9 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 			 */
 
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
-			retrigger ();
 			_state = WaitingToStart;
+			retrigger ();
+			PropertyChanged (ARDOUR::Properties::running);
 		}
 	}
 
@@ -2060,13 +2072,22 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				} else {
 
-					/* no legato-switch, but just begin stoppingthe
-					 * currently playing slot
-					 */
+					/* no legato-switch */
 
-					if (_currently_playing->state() != Trigger::WaitingToStop) {
+					if (_currently_playing->state() == Trigger::Stopped) {
+
+						explicit_queue.increment_read_idx (1); /* consume the entry we peeked at */
+						nxt->startup ();
+						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was finished, started %2\n", _currently_playing->index(), nxt->index()));
+						_currently_playing = nxt;
+						PropertyChanged (Properties::currently_playing);
+
+					} else if (_currently_playing->state() != Trigger::WaitingToStop) {
+
+						/* but just begin stoppingthe currently playing slot */
 						_currently_playing->begin_stop ();
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("start stop for %1 before switching to %2\n", _currently_playing->index(), nxt->index()));
+
 					}
 				}
 			}
