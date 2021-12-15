@@ -66,9 +66,10 @@ Loopster::set_fraction (float f)
 	f = std::max(0.f, f);
 	f = std::min(1.f, f);
 
-	float thresh = 1.0/nslices;
-	thresh *= 0.7;
-	if (fabs(_fraction-f)>thresh) {
+	float prior_slice = floor(_fraction * nslices);
+	float new_slice = floor(f*nslices);
+
+	if (new_slice != prior_slice) {
 		_fraction = f;
 		redraw();
 	}
