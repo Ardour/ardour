@@ -2129,18 +2129,34 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		 */
 
 		if (_currently_playing->state() == Trigger::Stopped) {
+
 			if (!_stop_all && !_currently_playing->explicitly_stopped()) {
+
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 has stopped, need next...\n", _currently_playing->name()));
-				int n = determine_next_trigger (_currently_playing->index());
-				if (n < 0) {
-					break; /* no triggers to come next, break out * of nframes loop */
-					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 finished, no next trigger\n", _currently_playing->name()));
+
+				if (_currently_playing->use_follow()) {
+					int n = determine_next_trigger (_currently_playing->index());
+
+					if (n < 0) {
+						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 finished, no next trigger\n", _currently_playing->name()));
+						_currently_playing = 0;
+						PropertyChanged (Properties::currently_playing);
+						break; /* no triggers to come next, break out of nframes loop */
+					}
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", _currently_playing->name()));
+					_currently_playing = all_triggers[n];
+					_currently_playing->startup ();
+					PropertyChanged (Properties::currently_playing);
+				} else {
+					_currently_playing = 0;
+					PropertyChanged (Properties::currently_playing);
+					DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set, leaving nf loop\n");
+					/* leave nframes loop */
+					break;
 				}
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", _currently_playing->name()));
-				_currently_playing = all_triggers[n];
-				_currently_playing->startup ();
-				PropertyChanged (Properties::currently_playing);
+
 			} else {
+
 				_currently_playing = 0;
 				PropertyChanged (Properties::currently_playing);
 				DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set, leaving nf loop\n");
