@@ -828,6 +828,12 @@ AudioTrigger::determine_tempo ()
 	const double quarters = (seconds / 60.) * _apparent_tempo;
 	_barcnt = quarters / metric.meter().divisions_per_bar();
 
+	/* now check the determined tempo and force it to a value that gives us
+	   an integer bar/quarter count. This is a heuristic that tries to
+	   avoid clips that slightly over- or underrun a quantization point,
+	   resulting in small or larger gaps in output if they are repeating.
+	*/
+
 	if ((_apparent_tempo != 0.) && (rint (_barcnt) != _barcnt)) {
 		/* fractional barcnt */
 		int intquarters = floor (quarters);
