@@ -82,6 +82,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _ui (0)
 	, expected_end_sample (0)
 	, _stretching (Properties::stretching, true)
+	, _explicitly_stopped (false)
 {
 	add_property (_legato);
 	add_property (_use_follow);
@@ -280,6 +281,7 @@ Trigger::startup()
 	_state = WaitingToStart;
 	_gain = _pending_gain;
 	_loop_cnt = 0;
+	_explicitly_stopped = false;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 starts up\n", name()));
 	PropertyChanged (ARDOUR::Properties::running);
 }
@@ -317,12 +319,13 @@ Trigger::jump_stop()
 }
 
 void
-Trigger::begin_stop()
+Trigger::begin_stop (bool explicit_stop)
 {
 	/* this is used when we start a tell a currently playing trigger to
 	   stop, but wait for quantization first.
 	*/
 	_state = WaitingToStop;
+	_explicitly_stopped = explicit_stop;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
 	PropertyChanged (ARDOUR::Properties::running);
 }
@@ -371,7 +374,7 @@ Trigger::process_state_requests ()
 			case Toggle:
 			case Repeat:
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 gate/toggle/repeat => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingToStop)));
-				begin_stop ();
+				begin_stop (true);
 			}
 			break;
 
@@ -395,7 +398,7 @@ Trigger::process_state_requests ()
 		if (_launch_style == Gate || _launch_style == Repeat) {
 			switch (_state) {
 			case Running:
-				begin_stop ();
+				begin_stop (true);
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, now in WaitingToStop\n", index()));
 				break;
 			default:
@@ -2126,7 +2129,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		 */
 
 		if (_currently_playing->state() == Trigger::Stopped) {
-			if (!_stop_all) {
+			if (!_stop_all && !_currently_playing->explicitly_stopped()) {
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 has stopped, need next...\n", _currently_playing->name()));
 				int n = determine_next_trigger (_currently_playing->index());
 				if (n < 0) {

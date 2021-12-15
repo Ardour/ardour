@@ -206,7 +206,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void shutdown ();
 	virtual void jump_start ();
 	virtual void jump_stop ();
-	virtual void begin_stop ();
+	void begin_stop (bool explicit_stop = false);
+
+	bool explicitly_stopped() const { return _explicitly_stopped; }
 
 	uint32_t loop_count() const { return _loop_cnt; }
 	uint32_t follow_count() const { return _follow_count; }
@@ -259,6 +261,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void*                     _ui;
 	samplepos_t                expected_end_sample;
 	PBD::Property<bool>       _stretching;
+	bool                      _explicitly_stopped;
 
 	void set_region_internal (boost::shared_ptr<Region>);
 	virtual void retrigger() = 0;
