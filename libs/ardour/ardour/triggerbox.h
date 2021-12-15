@@ -208,6 +208,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void jump_stop ();
 	virtual void begin_stop ();
 
+	uint32_t loop_count() const { return _loop_cnt; }
 	uint32_t follow_count() const { return _follow_count; }
 	void set_follow_count (uint32_t n);
 
