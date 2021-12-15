@@ -46,6 +46,17 @@ namespace ArdourCanvas {
 	class Polygon;
 };
 
+class Loopster : public ArdourCanvas::Rectangle
+{
+  public:
+	Loopster (ArdourCanvas::Item* canvas);
+
+	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
+	void set_fraction (float);
+  private:
+	float _fraction;
+};
+
 class TriggerMaster : public ArdourCanvas::Rectangle
 {
   public:
@@ -65,6 +76,15 @@ class TriggerMaster : public ArdourCanvas::Rectangle
 	void selection_change ();
 
   private:
+	Loopster* _loopster;
+
+	Gtk::Menu* _context_menu;
+	void context_menu ();
+
+	void set_all_follow_action (ARDOUR::Trigger::FollowAction);
+	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle);
+	void set_all_quantization (Temporal::BBT_Offset const &);
+
 	boost::shared_ptr<ARDOUR::TriggerBox> _triggerbox;
 	double poly_size;
 	double poly_margin;
@@ -78,6 +98,8 @@ class TriggerMaster : public ArdourCanvas::Rectangle
 
 	void ui_parameter_changed (std::string const& p);
 	void set_default_colors();
+
+	sigc::connection update_connection;
 };
 
 

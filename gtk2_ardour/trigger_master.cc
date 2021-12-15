@@ -52,8 +52,74 @@ using namespace ArdourCanvas;
 using namespace Gtkmm2ext;
 using namespace PBD;
 
+static const int nslices = 8;  //in 8 pie slices .. ToDo .. maybe make this meter-senstive  ... triplets and such... ?
+
+Loopster::Loopster (Item* parent)
+	: ArdourCanvas::Rectangle (parent)
+	, _fraction(0)
+{
+}
+
+void
+Loopster::set_fraction (float f)
+{
+	f = std::max(0.f, f);
+	f = std::min(1.f, f);
+
+	float thresh = 1.0/nslices;
+	thresh *= 0.7;
+	if (fabs(_fraction-f)>thresh) {
+		_fraction = f;
+		redraw();
+	}
+}
+
+void
+Loopster::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	/* Note that item_to_window() already takes _position into account (as
+	   part of item_to_canvas()
+	*/
+	Rect self (item_to_window (_rect));
+	const Rect draw = self.intersection (area);
+
+	if (!draw) {
+		return;
+	}
+
+	context->set_identity_matrix();
+	context->translate (self.x0, self.y0-0.5);
+
+	float width = _rect.width();
+	float height = _rect.height();
+
+	const double scale = UIConfiguration::instance().get_ui_scale();
+
+	//white area
+	set_source_rgba (context, rgba_to_color (1,1,1,1));
+	context->arc ( height/2, height/2, height/2 - 4*scale, 0, 2*M_PI );
+	context->fill();
+
+	//arc fill
+	context->set_line_width(5*scale);
+	float slices = floor(_fraction * nslices);
+	float deg_per_slice = 360/nslices;
+	float degrees = slices * deg_per_slice;
+	float radians = (degrees/180)*M_PI;
+	set_source_rgba (context, rgba_to_color (0,0,0,1));
+	context->arc ( height/2, height/2, height/2 - 5*scale, 1.5*M_PI+radians, 1.5*M_PI+2*M_PI );  //arrow head
+	context->stroke();
+
+	context->set_line_width(1);
+	context->set_identity_matrix();
+}
+
+//========================
+
+
 TriggerMaster::TriggerMaster (Item* parent, boost::shared_ptr<TriggerBox> t)
 	: ArdourCanvas::Rectangle (parent)
+	, _context_menu (0)
 	, _triggerbox (t)
 {
 	set_layout_sensitive(true);  //why???
@@ -72,19 +138,24 @@ TriggerMaster::TriggerMaster (Item* parent, boost::shared_ptr<TriggerBox> t)
 	stop_shape->show ();
 
 	name_text = new Text (this);
-	name_text->set("Now Playing");
+	name_text->set("");
 	name_text->set_ignore_events (false);
 
-	/* trigger changes */
+	_loopster = new Loopster(this);
+
+	/* trigger changes
 	_triggerbox->PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerMaster::prop_change, this, _1), gui_context());
-
-	/* route changes */
-//	dynamic_cast<Stripable*> (_triggerbox->owner())->presentation_info().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerMaster::owner_prop_change, this, _1), gui_context());
-
 	PropertyChange changed;
 	changed.add (ARDOUR::Properties::name);
 	changed.add (ARDOUR::Properties::running);
 	prop_change (changed);
+	*/
+
+	/* route changes
+	dynamic_cast<Stripable*> (_triggerbox->owner())->presentation_info().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerMaster::owner_prop_change, this, _1), gui_context());
+	*/
+
+	update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &TriggerMaster::maybe_update));
 
 	/* prefs (theme colors) */
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &TriggerMaster::ui_parameter_changed));
@@ -93,6 +164,7 @@ TriggerMaster::TriggerMaster (Item* parent, boost::shared_ptr<TriggerBox> t)
 
 TriggerMaster::~TriggerMaster ()
 {
+	delete _loopster;
 }
 
 void
@@ -176,6 +248,15 @@ TriggerMaster::event_handler (GdkEvent* ev)
 		}
 		redraw ();
 		break;
+	case GDK_BUTTON_RELEASE:
+		switch (ev->button.button) {
+		case 3:
+			context_menu ();
+			return true;
+		default:
+			break;
+		}
+		break;
 	default:
 		break;
 	}
@@ -184,29 +265,99 @@ TriggerMaster::event_handler (GdkEvent* ev)
 }
 
 void
+TriggerMaster::context_menu ()
+{
+	using namespace Gtk;
+	using namespace Gtk::Menu_Helpers;
+	using namespace Temporal;
+
+	delete _context_menu;
+
+	_context_menu = new Menu;
+	MenuList& items = _context_menu->items();
+	_context_menu->set_name ("ArdourContextMenu");
+
+	Menu* follow_menu = manage (new Menu);
+	MenuList& fitems = follow_menu->items();
+
+	fitems.push_back (MenuElem (_("Stop"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::Stop)));
+	fitems.push_back (MenuElem (_("Again"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::Again)));
+	fitems.push_back (MenuElem (_("Next"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::NextTrigger)));
+	fitems.push_back (MenuElem (_("Previous"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::PrevTrigger)));
+	fitems.push_back (MenuElem (_("Any"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::AnyTrigger)));
+	fitems.push_back (MenuElem (_("Other"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::OtherTrigger)));
+
+	Menu* launch_menu = manage (new Menu);
+	MenuList& litems = launch_menu->items();
+
+	litems.push_back (MenuElem (_("One Shot"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::OneShot)));
+	litems.push_back (MenuElem (_("Gate"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::Gate)));
+	litems.push_back (MenuElem (_("Toggle"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::Toggle)));
+	litems.push_back (MenuElem (_("Repeat"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::Repeat)));
+
+	Menu* quant_menu = manage (new Menu);
+	MenuList& qitems = quant_menu->items();
+
+	BBT_Offset b;
+
+	b = BBT_Offset (1, 0, 0);
+	qitems.push_back (MenuElem (_("Global"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));  //ToDo
+
+	b = BBT_Offset (1, 0, 0);
+	qitems.push_back (MenuElem (_("Bars"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 4, 0);
+	qitems.push_back (MenuElem (_("Whole"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 2, 0);
+	qitems.push_back (MenuElem (_("Half"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 1, 0);
+	qitems.push_back (MenuElem (_("Quarters"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 0, ticks_per_beat/2);
+	qitems.push_back (MenuElem (_("Eighths"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 0, ticks_per_beat/4);
+	qitems.push_back (MenuElem ( _("Sixteenths"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 0, ticks_per_beat/8);
+	qitems.push_back (MenuElem (_("Thirty-Seconds"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 0, ticks_per_beat/16);
+	qitems.push_back (MenuElem (_("Sixty-Fourths"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+
+	Menu* load_menu = manage (new Menu);
+	MenuList& loitems (load_menu->items());
+
+	items.push_back (MenuElem (_("Toggle Monitor Thru"), sigc::mem_fun (*this, &TriggerMaster::maybe_update)));  //ToDo
+	items.push_back (MenuElem (_("Enable/Disable..."), sigc::mem_fun (*this, &TriggerMaster::maybe_update)));  //ToDo
+	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
+	items.push_back (MenuElem (_("Launch Style..."), *launch_menu));
+	items.push_back (MenuElem (_("Quantization..."), *quant_menu));
+	items.push_back (MenuElem (_("Clear All..."), sigc::mem_fun (*this, &TriggerMaster::maybe_update)));  //ToDo
+
+	_context_menu->popup (1, gtk_get_current_event_time());
+}
+
+void
+TriggerMaster::set_all_follow_action (Trigger::FollowAction fa)
+{
+	//ToDo
+}
+
+void
+TriggerMaster::set_all_launch_style (Trigger::LaunchStyle ls)
+{
+	//ToDo
+}
+
+void
+TriggerMaster::set_all_quantization (Temporal::BBT_Offset const & q)
+{
+	//ToDo
+}
+
+void
 TriggerMaster::maybe_update ()
 {
-/*	double nbw;
-
-	if (!_trigger->active()) {
-		nbw = 0;
-	} else {
-		nbw = _trigger->position_as_fraction () * (_allocation.width() - _allocation.height());
-	}
-
-	if (nbw) {
-		const double scale = UIConfiguration::instance().get_ui_scale();
-		ArdourCanvas::Rect r (get());
-
-		active_bar->set (ArdourCanvas::Rect (r.height() * scale,
-		                                     (r.y0 + 1) * scale,
-		                                     (r.height() + nbw - 1) * scale,
-		                                     (r.y1 - 1) * scale));
-		active_bar->show ();
-	} else {
-		active_bar->hide ();
-	}
-	* */
+	PropertyChange changed;
+	changed.add (ARDOUR::Properties::name);
+	changed.add (ARDOUR::Properties::running);
+	prop_change(changed);
 }
 
 void
@@ -237,6 +388,8 @@ TriggerMaster::_size_allocate (ArdourCanvas::Rect const & alloc)
 	name_text->set_position (Duple (tleft, 1.*scale));
 	name_text->clamp_width (twidth);
 
+	_loopster->set(ArdourCanvas::Rect(width-height, 0, width, height));
+
 	//font scale may have changed. uiconfig 'embeds' the ui-scale in the font
 	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
 }
@@ -244,18 +397,29 @@ TriggerMaster::_size_allocate (ArdourCanvas::Rect const & alloc)
 void
 TriggerMaster::prop_change (PropertyChange const & change)
 {
-	if (change.contains (ARDOUR::Properties::name)
-		|| change.contains (ARDOUR::Properties::running)
-	) {
-		ARDOUR::Trigger *trigger = _triggerbox->currently_playing();
+	std::string text;
 
-		if (trigger) {
-			name_text->set (trigger->region()->name());
-		} else {
-//			name_text->set ("");
-		}
+	ARDOUR::Trigger *trigger = _triggerbox->currently_playing();
+	if (!trigger) {
+		name_text->set(text);
+		_loopster->hide();
+		return;
+	}
 
-		redraw();
+	text = string_compose ("%1", (char) ('A'+ trigger->index()));
+
+	if (trigger->follow_count() > 1) {
+		text.append(string_compose(X_(" %1/%2"), trigger->loop_count(), trigger->follow_count()));
+	}
+	
+	name_text->set(text);
+
+	if (trigger->active()) {
+		double f = trigger->position_as_fraction ();
+		_loopster->set_fraction(f);
+		_loopster->show();
+	} else {
+		_loopster->hide();
 	}
 }
 
