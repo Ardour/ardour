@@ -19,8 +19,16 @@
 #ifndef __gtk_ardour_trigger_clip_picker_h__
 #define __gtk_ardour_trigger_clip_picker_h__
 
+#include <string>
+
 #include <gtkmm/box.h>
-#include <gtkmm/filechooserwidget.h>
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treestore.h>
+#include <gtkmm/treeview.h>
+
+#include "widgets/ardour_dropdown.h"
 
 class TriggerClipPicker : public Gtk::VBox
 {
@@ -29,7 +37,30 @@ public:
 	~TriggerClipPicker ();
 
 private:
-	Gtk::FileChooserWidget _fc;
+	void list_dir (std::string const&);
+	void open_dir ();
+	void row_selected ();
+	void row_activated (Gtk::TreeModel::Path const&, Gtk::TreeViewColumn*);
+	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
+	void maybe_add_dir (std::string const&);
+
+	ArdourWidgets::ArdourDropdown _dir;
+	Gtk::FileChooserDialog        _fcd;
+
+	struct Columns : public Gtk::TreeModel::ColumnRecord {
+		Columns ()
+		{
+			add (name);
+			add (path);
+		}
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> path;
+	};
+
+	Columns                      _columns;
+	Glib::RefPtr<Gtk::TreeStore> _model;
+	Gtk::TreeView                _view;
+	Gtk::ScrolledWindow          _scroller;
 };
 
 #endif
