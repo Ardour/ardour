@@ -826,6 +826,14 @@ AudioTrigger::determine_tempo ()
 	const double quarters = (seconds / 60.) * _apparent_tempo;
 	_barcnt = quarters / metric.meter().divisions_per_bar();
 
+	if ((_apparent_tempo != 0.) && (rint (_barcnt) != _barcnt)) {
+		/* fractional barcnt */
+		int intquarters = floor (quarters);
+		double at = _apparent_tempo;
+		_apparent_tempo = intquarters / (seconds/60.);
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("adjusted barcnt of %1 and q = %2 to %3, old %4 new at = %5\n", _barcnt, quarters, intquarters, at, _apparent_tempo));
+	}
+
 	/* use initial tempo in map (assumed for now to be the only one */
 
 	const samplecnt_t one_bar = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (1, 0, 0)).samples();
