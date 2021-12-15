@@ -1066,10 +1066,6 @@ If you still wish to quit, please use the\n\n\
 		fps_connection.disconnect();
 	}
 
-	delete ARDOUR_UI::instance()->video_timeline;
-	ARDOUR_UI::instance()->video_timeline = NULL;
-	stop_video_server();
-
 	/* Save state before deleting the session, as that causes some
 	   windows to be destroyed before their visible state can be
 	   saved.
@@ -1084,8 +1080,15 @@ If you still wish to quit, please use the\n\n\
 
 	if (_session) {
 
-
 		if (delete_unnamed_session) {
+
+			/* This may run a recursive dialog, which will allow
+			 * for the GTK idle handler to do things. Not a problem
+			 * in itself, but something to keep in mind since it
+			 * isn't visually apparent that this will allow a
+			 * recursive main loop to execute.
+			 */
+
 			ask_about_scratch_deletion ();
 		}
 
@@ -1094,6 +1097,10 @@ If you still wish to quit, please use the\n\n\
 		_session = 0;
 
 	}
+
+	delete ARDOUR_UI::instance()->video_timeline;
+	ARDOUR_UI::instance()->video_timeline = NULL;
+	stop_video_server();
 
 	halt_connection.disconnect ();
 	AudioEngine::instance()->stop ();
