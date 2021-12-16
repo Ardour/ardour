@@ -1887,7 +1887,7 @@ TriggerBox::configure_io (ChanCount in, ChanCount out)
 			all_triggers[n]->io_change ();
 		}
 	}
-
+	return ret;
 }
 
 void
