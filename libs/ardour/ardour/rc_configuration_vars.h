@@ -191,6 +191,8 @@ CONFIG_VARIABLE (MeterType, meter_type_master, "meter-type-master", MeterK14)
 CONFIG_VARIABLE (MeterType, meter_type_track, "meter-type-track", MeterPeak)
 CONFIG_VARIABLE (MeterType, meter_type_bus, "meter-type-bus", MeterPeak)
 
+/* triggers */
+CONFIG_VARIABLE (bool, enable_triggers, "enable-triggers", false)
 
 /* miscellany */
 

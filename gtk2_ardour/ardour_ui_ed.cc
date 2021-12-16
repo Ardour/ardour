@@ -497,6 +497,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_toggle_action (common_actions, X_("toggle-triggers"), _("Enable Triggers Drom"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_triggers));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_toggle_action (main_actions, X_("ToggleLatencyCompensation"), _("Disable Latency Compensation"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_latency_switch));
 	ActionManager::session_sensitive_actions.push_back (act);
 

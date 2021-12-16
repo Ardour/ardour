@@ -505,6 +505,7 @@ private:
 	void repack_transport_hbox ();
 	void update_clock_visibility ();
 	void toggle_follow_edits ();
+	void toggle_triggers ();
 
 	void set_transport_controllable_state (const XMLNode&);
 	XMLNode& get_transport_controllable_state ();
