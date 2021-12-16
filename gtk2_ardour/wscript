@@ -671,8 +671,6 @@ def build(bld):
     obj.includes += ['../libs']
     obj.includes += ['../libs/vst3']
 
-    obj.use += 'libptformat'
-
     if bld.env['build_target'] == 'mingw':
         obj.linkflags += ' -mwindows'
         obj.use += [ 'PANGOFT2' ]
