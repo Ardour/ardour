@@ -481,7 +481,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void add_midi_sidechain (std::string const & name);
 
-	bool pass_thru() const { return _pass_thru; }
+	bool pass_thru() const { return _requests.pass_thru; }
 	void set_pass_thru (bool yn);
 
 	void request_reload (int32_t slot, void*);
@@ -520,7 +520,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 		std::atomic<bool> stop_all;
 		std::atomic<bool> pass_thru;
 
-		Requests () : stop_all (false), pass_thru (true) {}
+		Requests () : stop_all (false), pass_thru (false) {}
 	};
 
 	static Temporal::BBT_Offset _assumed_trigger_duration;

@@ -2021,7 +2021,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		return;
 	}
 
-	_pass_thru = _requests.pass_thru.exchange (false);
+	_pass_thru = _requests.pass_thru.load ();
 	bool allstop = _requests.stop_all.exchange (false);
 
 	/* STEP TWO: if latency compensation tells us that we haven't really
