@@ -31,9 +31,13 @@
 #include "gtkmm2ext/utils.h"
 
 #include "audio_region_properties_box.h"
-#include "midi_region_properties_box.h"
+#include "audio_trigger_properties_box.h"
 #include "audio_region_operations_box.h"
+
+#include "midi_trigger_properties_box.h"
+#include "midi_region_properties_box.h"
 #include "midi_region_operations_box.h"
+
 #include "slot_properties_box.h"
 #include "midi_clip_editor.h"
 
@@ -461,20 +465,23 @@ TriggerWindow::TriggerWindow (Trigger* slot)
 
 	if (slot->region()) {
 		if (slot->region()->data_type() == DataType::AUDIO) {
-			_prop_box = manage(new AudioRegionPropertiesBox ());
+			_trig_box = manage(new AudioTriggerPropertiesBox ());
 			_ops_box = manage(new AudioRegionOperationsBox ());
 			_trim_box = manage(new AudioClipEditorBox ());
+
+			_trig_box->set_trigger(slot);
 		} else {
-			_prop_box = manage(new MidiRegionPropertiesBox ());
+			_trig_box = manage(new MidiTriggerPropertiesBox ());
 			_ops_box = manage(new MidiRegionOperationsBox ());
 			_trim_box = manage(new MidiClipEditorBox ());
+
+			_trig_box->set_trigger(slot);
 		}
 
-		_prop_box->set_region(slot->region());
 		_trim_box->set_region(slot->region(), slot);
 		_ops_box->set_session(&slot->region()->session());
 
-		table->attach(*_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+		table->attach(*_trig_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 		table->attach(*_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 		table->attach(*_ops_box,   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 	}

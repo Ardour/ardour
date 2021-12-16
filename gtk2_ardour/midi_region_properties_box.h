@@ -52,10 +52,7 @@ private:
 
 	PBD::ScopedConnection midi_state_connection;
 
-	ArdourWidgets::ArdourButton patch_enable_button;
 	ArdourWidgets::ArdourButton patch_selector_button;
-
-	ArdourWidgets::ArdourButton cc_enable_button;
 	ArdourWidgets::ArdourButton cc_selector_button;
 };
 

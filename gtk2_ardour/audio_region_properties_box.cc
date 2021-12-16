@@ -81,7 +81,7 @@ RegionPropertiesBox::RegionPropertiesBox ()
 
 	row = 0;
 
-	bbt_toggle.set_text (_("BBT Sync"));
+	bbt_toggle.set_text (_("Stretch"));
 	table.attach (bbt_toggle, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
@@ -160,16 +160,6 @@ AudioRegionPropertiesBox::AudioRegionPropertiesBox ()
 	audio_t->set_spacings (4);
 
 	int row = 0;
-
-	label = manage (new Gtk::Label (_("Stretch Mode:")));
-	label->set_alignment (1.0, 0.5);
-	audio_t->attach (*label, 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-
-	stretch_selector.set_text ("Mixed");
-	stretch_selector.set_name ("generic button");
-	audio_t->attach (stretch_selector, 1, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-
-	row++;
 
 	label = manage (new Gtk::Label (_("Fades:")));
 	label->set_alignment (1.0, 0.5);

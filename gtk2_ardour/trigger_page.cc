@@ -79,7 +79,7 @@ TriggerPage::TriggerPage ()
 	table->attach (_slot_prop_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
 
 	col = 1;
-	table->attach (_audio_prop_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
+	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
 	col++;
 	table->attach (_audio_trim_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
 	col++;
@@ -87,7 +87,7 @@ TriggerPage::TriggerPage ()
 	col++;
 
 	col = 1; /* audio and midi boxen share the same table locations; shown and hidden depending on region type */
-	table->attach (_midi_prop_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
+	table->attach (_midi_trig_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
 	col++;
 	table->attach (_midi_trim_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
 	col++;
@@ -242,11 +242,11 @@ TriggerPage::set_session (Session* s)
 
 	_slot_prop_box.set_session (s);
 
-	_audio_prop_box.set_session (s);
+	_audio_trig_box.set_session (s);
 	_audio_ops_box.set_session (s);
 	_audio_trim_box.set_session (s);
 
-	_midi_prop_box.set_session (s);
+	_midi_trig_box.set_session (s);
 	_midi_ops_box.set_session (s);
 	_midi_trim_box.set_session (s);
 
@@ -322,12 +322,12 @@ TriggerPage::selection_changed ()
 
 	_slot_prop_box.hide ();
 
+	_audio_trig_box.hide ();
 	_audio_ops_box.hide ();
-	_audio_prop_box.hide ();
 	_audio_trim_box.hide ();
 
+	_midi_trig_box.hide ();
 	_midi_ops_box.hide ();
-	_midi_prop_box.hide ();
 	_midi_trim_box.hide ();
 
 	_parameter_box.hide ();
@@ -341,17 +341,17 @@ TriggerPage::selection_changed ()
 		_slot_prop_box.show ();
 		if (slot->region ()) {
 			if (slot->region ()->data_type () == DataType::AUDIO) {
-				_audio_prop_box.set_region (slot->region ());
+				_audio_trig_box.set_trigger (slot);
 				_audio_trim_box.set_region (slot->region (), slot);
 
-				_audio_prop_box.show ();
+				_audio_trig_box.show ();
 				_audio_trim_box.show ();
 				_audio_ops_box.show ();
 			} else {
-				_midi_prop_box.set_region (slot->region ());
+				_midi_trig_box.set_trigger (slot);
 				_midi_trim_box.set_region (slot->region (), slot);
 
-				_midi_prop_box.show ();
+				_midi_trig_box.show ();
 				_midi_trim_box.show ();
 				_midi_ops_box.show ();
 			}

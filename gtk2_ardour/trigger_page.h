@@ -31,10 +31,12 @@
 
 #include "audio_region_operations_box.h"
 #include "audio_region_properties_box.h"
+#include "audio_trigger_properties_box.h"
 #include "fitted_canvas_widget.h"
 #include "midi_clip_editor.h"
 #include "midi_region_operations_box.h"
 #include "midi_region_properties_box.h"
+#include "midi_trigger_properties_box.h"
 #include "slot_properties_box.h"
 #include "trigger_clip_picker.h"
 #include "trigger_master.h"
@@ -97,11 +99,11 @@ private:
 
 	SlotPropertiesBox _slot_prop_box;
 
-	AudioRegionPropertiesBox _audio_prop_box;
+	AudioTriggerPropertiesBox _audio_trig_box;
 	AudioRegionOperationsBox _audio_ops_box;
 	AudioClipEditorBox       _audio_trim_box;
 
-	MidiRegionPropertiesBox _midi_prop_box;
+	MidiTriggerPropertiesBox _midi_trig_box;
 	MidiRegionOperationsBox _midi_ops_box;
 	MidiClipEditorBox       _midi_trim_box;
 

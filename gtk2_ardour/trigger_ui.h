@@ -28,6 +28,7 @@ namespace ArdourWidgets {
 	class HSliderController;
 }
 
+class TriggerPropertiesBox;
 class RegionPropertiesBox;
 class RegionOperationsBox;
 class ClipEditorBox;
@@ -105,7 +106,7 @@ class TriggerWindow : public Gtk::Window
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 
-	RegionPropertiesBox *_prop_box;
+	TriggerPropertiesBox *_trig_box;
 	RegionOperationsBox *_ops_box;
 	ClipEditorBox *_trim_box;
 };

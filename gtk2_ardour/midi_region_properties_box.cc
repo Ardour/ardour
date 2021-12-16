@@ -47,8 +47,6 @@ using std::max;
 using std::min;
 
 MidiRegionPropertiesBox::MidiRegionPropertiesBox ()
-	: patch_enable_button (ArdourButton::led_default_elements)
-	, cc_enable_button (ArdourButton::led_default_elements)
 {
 	_header_label.set_text (_("MIDI Region Properties:"));
 
@@ -58,23 +56,15 @@ MidiRegionPropertiesBox::MidiRegionPropertiesBox ()
 
 	int row = 0;
 
-	patch_enable_button.set_text (_("Send Patches"));
-	patch_enable_button.set_name ("generic button");
-
 	patch_selector_button.set_text (_("Patches..."));
 	patch_selector_button.set_name ("generic button");
 
-	midi_t->attach (patch_enable_button, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	midi_t->attach (patch_selector_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
-
-	cc_enable_button.set_text (_("Send CCs"));
-	cc_enable_button.set_name ("generic button");
 
 	cc_selector_button.set_text (_("CCs..."));
 	cc_selector_button.set_name ("generic button");
 
-	midi_t->attach (cc_enable_button, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	midi_t->attach (cc_selector_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
