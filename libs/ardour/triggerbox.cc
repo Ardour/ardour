@@ -19,6 +19,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/debug.h"
+#include "ardour/import_status.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
@@ -1066,6 +1067,11 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 						in[chn] = data[chn] + read_index;
 					}
 
+					/* Note: RubberBandStretcher's process() and retrieve() API's accepts Sample**
+					 * as their first argument. This code may appear to only be processing the first
+					 * channel, but actually processes them all in one pass.
+					 */
+
 					_stretcher->process (&in[0], to_stretcher, at_end);
 					read_index += to_stretcher;
 					avail = _stretcher->available ();
@@ -1736,24 +1742,28 @@ TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 	}
 
 	try {
-		SoundFileInfo info;
-		string errmsg;
+		ImportStatus status;
 
-		if (!SndFileSource::get_soundfile_info (path, info, errmsg)) {
-			error << string_compose (_("Cannot get info from audio file %1 (%2)"), path, errmsg) << endmsg;
+		status.total = 1;
+		status.quality = SrcBest;
+		status.freeze = false;
+		status.paths.push_back (path);
+		status.replace_existing_source = false;
+		status.split_midi_channels = false;
+
+		_session.import_files (status);
+
+		if (status.cancel) {
+			error << string_compose (_("Cannot create source from %1"), path) << endmsg;
 			return;
 		}
 
+		/* XXX need to check data type */
+
 		SourceList src_list;
 
-		for (uint16_t n = 0; n < info.channels; ++n) {
-			boost::shared_ptr<Source> source (SourceFactory::createExternal (DataType::AUDIO, _session, path, n, Source::Flag (0), true));
-			if (!source) {
-				error << string_compose (_("Cannot create source from %1"), path) << endmsg;
-				src_list.clear ();
-				return;
-			}
-			src_list.push_back (source);
+		for (auto& src : status.sources) {
+			src_list.push_back (src);
 		}
 
 		PropertyList plist;
