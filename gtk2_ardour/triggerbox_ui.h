@@ -153,15 +153,4 @@ class TriggerBoxWidget : public FittedCanvasWidget
 	TriggerBoxUI* ui;
 };
 
-/* XXX probably for testing only */
-
-class TriggerBoxWindow : public Gtk::Window
-{
-    public:
-	TriggerBoxWindow (ARDOUR::TriggerBox&);
-
-	bool on_key_press_event (GdkEventKey*);
-	bool on_key_release_event (GdkEventKey*);
-};
-
 #endif /* __ardour_gtk_triggerbox_ui_h__ */

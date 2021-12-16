@@ -964,26 +964,21 @@ TriggerBoxWidget::on_unmap ()
 	ui->stop_updating ();
 }
 
-TriggerBoxWindow::TriggerBoxWindow (TriggerBox& tb)
+void
+TriggerBoxWidget::on_map ()
 {
-	TriggerBoxWidget* tbw = manage (new TriggerBoxWidget (tb, -1., TriggerBox::default_triggers_per_box*16.));
-	set_title (_("TriggerBox for XXXX"));
+	FittedCanvasWidget::on_map ();
 
-	set_default_size (-1., TriggerBox::default_triggers_per_box*16.);
-	add (*tbw);
-	tbw->show ();
+	if (ui) {
+		ui->start_updating ();
+	}
 }
 
-bool
-TriggerBoxWindow::on_key_press_event (GdkEventKey* ev)
+void
+TriggerBoxWidget::on_unmap ()
 {
-	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
-	return ARDOUR_UI_UTILS::relay_key_press (ev, &main_window);
-}
-
-bool
-TriggerBoxWindow::on_key_release_event (GdkEventKey* ev)
-{
-	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
-	return ARDOUR_UI_UTILS::relay_key_press (ev, &main_window);
+	FittedCanvasWidget::on_unmap ();
+	if (ui) {
+		ui->stop_updating ();
+	}
 }
