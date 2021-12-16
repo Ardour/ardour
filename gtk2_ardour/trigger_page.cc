@@ -220,11 +220,11 @@ TriggerPage::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	_trigger_clip_picker.set_session (s);
+	_master.set_session(s);
+
 	if (!_session) {
 		return;
 	}
-
-	_master.set_session(s);
 
 	XMLNode* node = ARDOUR_UI::instance ()->trigger_page_settings ();
 	set_state (*node, Stateful::loading_state_version);
