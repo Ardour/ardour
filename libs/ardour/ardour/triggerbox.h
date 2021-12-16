@@ -127,6 +127,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void set_end (timepos_t const &) = 0;
 	virtual void set_length (timecnt_t const &) = 0;
 	virtual void reload (BufferSet&, void*) = 0;
+	virtual void io_change () {}
 
 	virtual double position_as_fraction() const = 0;
 	virtual void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &) = 0;
@@ -284,6 +285,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	timepos_t current_length() const; /* offset from start of data */
 	timepos_t natural_length() const; /* offset from start of data */
 	void reload (BufferSet&, void*);
+	void io_change ();
 
 	double position_as_fraction() const;
 

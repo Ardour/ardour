@@ -858,6 +858,15 @@ AudioTrigger::determine_tempo ()
 	cerr << "barcnt = " << round (_barcnt) << endl;
 }
 
+void
+AudioTrigger::io_change ()
+{
+	if (_stretcher) {
+		setup_stretcher ();
+	}
+}
+
+/* This exists so that we can play with the value easily. Currently, 1024 seems as good as any */
 static const samplecnt_t rb_blocksize = 1024;
 
 void
@@ -871,18 +880,15 @@ AudioTrigger::setup_stretcher ()
 	}
 
 	boost::shared_ptr<AudioRegion> ar (boost::dynamic_pointer_cast<AudioRegion> (_region));
-	const uint32_t nchans = ar->n_channels();
+	const uint32_t nchans = std::min (_box.input_streams().n_audio(), ar->n_channels());
 
 	/* XXX maybe get some of these options from region properties (when/if we have them) ? */
 
 	RubberBandStretcher::Options options = RubberBandStretcher::Option (RubberBandStretcher::OptionProcessRealTime |
 	                                                                    RubberBandStretcher::OptionTransientsCrisp);
 
-	if (!_stretcher) {
-		_stretcher = new RubberBandStretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
-	} else {
-		_stretcher->reset ();
-	}
+	delete _stretcher;
+	_stretcher = new RubberBandStretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
 
 	_stretcher->setMaxProcessSize (rb_blocksize);
 }
@@ -946,7 +952,8 @@ pframes_t
 AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t dest_offset, bool passthru, double bpm)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
-	const uint32_t nchans = ar->n_channels();
+	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
+	const uint32_t nchans = std::min (bufs.count().n_audio(), ar->n_channels());
 	const pframes_t orig_nframes = nframes;
 	int avail = 0;
 	BufferSet& scratch (_box.session().get_scratch_buffers (ChanCount (DataType::AUDIO, nchans)));
@@ -1843,9 +1850,15 @@ TriggerBox::add_midi_sidechain (std::string const & name)
 bool
 TriggerBox::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
-	out.set_audio (std::max (out.n_audio(), 2U)); /* for now, enforce stereo output */
+	/* if this is an audio trigger, let it be known that we have at least 1 audio output.
+	*/
+	if (_data_type == DataType::AUDIO) {
+		out.set_audio (std::max (in.n_audio(), 1U));
+	}
+	/* if this is a MIDI trigger, let it be known that we have at least 1 MIDI output.
+	*/
 	if (_data_type == DataType::MIDI) {
-		out.set_midi (std::max (out.n_midi(), 1U));
+		out.set_midi (std::max (in.n_midi(), 1U));
 	}
 	return true;
 }
@@ -1856,7 +1869,15 @@ TriggerBox::configure_io (ChanCount in, ChanCount out)
 	if (_sidechain) {
 		_sidechain->configure_io (in, out);
 	}
-	return Processor::configure_io (in, out);
+
+	bool ret = Processor::configure_io (in, out);
+
+	if (ret) {
+		for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+			all_triggers[n]->io_change ();
+		}
+	}
+
 }
 
 void
