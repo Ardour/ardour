@@ -129,15 +129,6 @@ TriggerMaster::TriggerMaster (Item* parent, boost::shared_ptr<TriggerBox> t)
 
 	Event.connect (sigc::mem_fun (*this, &TriggerMaster::event_handler));
 
-	active_bar = new ArdourCanvas::Rectangle (this);
-	active_bar->set_outline (false);
-
-	stop_shape = new ArdourCanvas::Polygon (this);
-	stop_shape->set_outline (false);
-	stop_shape->name = X_("stopbutton");
-	stop_shape->set_ignore_events (true);
-	stop_shape->show ();
-
 	name_text = new Text (this);
 	name_text->set("");
 	name_text->set_ignore_events (false);
@@ -238,7 +229,6 @@ TriggerMaster::event_handler (GdkEvent* ev)
 	case GDK_ENTER_NOTIFY:
 		if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
 			name_text->set_color (UIConfiguration::instance().color("neutral:foregroundest"));
-			stop_shape->set_fill_color (UIConfiguration::instance().color("neutral:foregroundest"));
 			set_fill_color (HSV (fill_color()).lighter(0.15).color ());
 		}
 		redraw ();
@@ -374,13 +364,6 @@ TriggerMaster::_size_allocate (ArdourCanvas::Rect const & alloc)
 
 	poly_size = height - (poly_margin*2);
 
-	Points p;
-	p.push_back (Duple (poly_margin, poly_margin));
-	p.push_back (Duple (poly_margin, poly_size));
-	p.push_back (Duple (poly_size, poly_size));
-	p.push_back (Duple (poly_size, poly_margin));
-	stop_shape->set (p);
-
 	float tleft = poly_size + (poly_margin*3);
 	float twidth = width-poly_size-(poly_margin*3);
 
@@ -389,7 +372,7 @@ TriggerMaster::_size_allocate (ArdourCanvas::Rect const & alloc)
 	name_text->set_position (Duple (tleft, 1.*scale));
 	name_text->clamp_width (twidth);
 
-	_loopster->set(ArdourCanvas::Rect(width-height, 0, width, height));
+	_loopster->set(ArdourCanvas::Rect(0, 0, height, height));
 
 	//font scale may have changed. uiconfig 'embeds' the ui-scale in the font
 	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
@@ -429,7 +412,6 @@ TriggerMaster::set_default_colors ()
 {
 	set_fill_color (HSV (UIConfiguration::instance().color("theme:bg")).darker(0.25).color ());
 	name_text->set_color (UIConfiguration::instance().color("neutral:foreground"));
-	stop_shape->set_fill_color (UIConfiguration::instance().color("neutral:foreground"));
 }
 
 

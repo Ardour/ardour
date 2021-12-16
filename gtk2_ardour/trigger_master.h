@@ -67,8 +67,6 @@ class TriggerMaster : public ArdourCanvas::Rectangle
 
 	void _size_allocate (ArdourCanvas::Rect const & alloc);
 
-	ArdourCanvas::Rectangle* active_bar;
-	ArdourCanvas::Polygon* stop_shape;
 	ArdourCanvas::Text*    name_text;
 
 	void maybe_update ();
