@@ -277,6 +277,7 @@ children = [
         'libs/plugins/a-fluidsynth.lv2',
         'gtk2_ardour',
         'share/export',
+        'share/media',
         'share/midi_maps',
         'share/mcp',
         'share/osc',
