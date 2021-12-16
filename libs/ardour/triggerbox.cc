@@ -573,7 +573,7 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 	if (stretching()) {
 		expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (round (_barcnt), 0, 0)));
 	} else {
-		expected_end_sample = transition_samples = usable_length;
+		expected_end_sample = transition_samples + usable_length;
 	}
 }
 
