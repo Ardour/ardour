@@ -60,6 +60,7 @@
 #include "panner_ui.h"
 #include "enums.h"
 #include "processor_box.h"
+#include "triggerbox_ui.h"
 #include "trigger_master.h"
 #include "visibility_group.h"
 
@@ -154,8 +155,7 @@ public:
 
 	void set_selected (bool yn);
 
-	void toggle_trigger_display ();
-	void create_trigger_display (boost::shared_ptr<ARDOUR::TriggerBox>);
+	void set_trigger_display (boost::shared_ptr<ARDOUR::TriggerBox>);
 
 	static MixerStrip* entered_mixer_strip() { return _entered_mixer_strip; }
 
@@ -192,7 +192,7 @@ private:
 	ProcessorBox processor_box;
 	GainMeter    gpm;
 	PannerUI     panners;
-	TriggerBoxWidget* trigger_display;
+	TriggerBoxWidget trigger_display;
 
 	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
 

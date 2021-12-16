@@ -112,6 +112,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
+	, trigger_display (-1., 8*16.)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, rec_mon_table (2, 2)
 	, solo_iso_table (1, 2)
@@ -151,6 +152,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
+	, trigger_display (-1., 8*16.)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, rec_mon_table (2, 2)
 	, solo_iso_table (1, 2)
@@ -182,7 +184,6 @@ MixerStrip::init ()
 	group_menu = 0;
 	route_ops_menu = 0;
 	_width_owner = 0;
-	trigger_display = 0;
 
 	_tmaster = new TriggerMaster (_tmaster_widget.root ());
 
@@ -327,6 +328,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (input_button_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (invert_button_box, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (trigger_display, true, true);
 	global_vpacker.pack_start (_tmaster_widget, true, true);
 	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
@@ -406,6 +408,7 @@ MixerStrip::init ()
 	_visibility.add (&output_button, X_("Output"), _("Output"), false);
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"), false);
 	_visibility.add (&control_slave_ui, X_("VCA"), _("VCA Assigns"), false);
+	_visibility.add (&trigger_display, X_("Triggers"), _("Triggers"), false);
 
 	parameter_changed (X_("mixer-element-visibility"));
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MixerStrip::parameter_changed));
@@ -543,11 +546,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (rt != route()) {
 		if (rt && route()) {
 			std::cerr << "switching from " << rt->name() << " to " << route()->name() << std::endl;
-		}
-		if (trigger_display && trigger_display->get_parent() == &global_vpacker) {
-			global_vpacker.remove (*trigger_display);
-			delete trigger_display;
-			trigger_display = 0;
 		}
 	}
 
@@ -1674,18 +1672,8 @@ MixerStrip::revert_to_default_display ()
 
 	reset_strip_style ();
 
-	if (_route->triggerbox() && UIConfiguration::instance().get_show_triggers_inline()) {
-		create_trigger_display (_route->triggerbox());
-		if (trigger_display->get_parent() != &global_vpacker) {
-			global_vpacker.pack_start (*trigger_display, Gtk::PACK_SHRINK);
-			trigger_display->show ();
-			global_vpacker.reorder_child (*trigger_display, 4);
-		}
-	} else {
-		if (trigger_display && (trigger_display->get_parent() == &global_vpacker)) {
-			global_vpacker.remove (*trigger_display);
-		}
-	}
+	set_trigger_display (_route->triggerbox());
+
 }
 
 void
@@ -1838,11 +1826,7 @@ MixerStrip::parameter_changed (string p)
 			}
 		}
 	} else if (p == "show-triggers-inline") {
-		boost::shared_ptr<TriggerBox> tb = route()->triggerbox();
-		if (tb) {
-			create_trigger_display (tb);
-			toggle_trigger_display ();
-		}
+		/* XXX do something or get rid of this parameter */
 	}
 }
 
@@ -2149,26 +2133,8 @@ MixerStrip::hide_master_spacer (bool yn)
 }
 
 void
-MixerStrip::create_trigger_display (boost::shared_ptr<TriggerBox> tb)
+MixerStrip::set_trigger_display (boost::shared_ptr<TriggerBox> tb)
 {
-	if (!trigger_display) {
-		trigger_display = new TriggerBoxWidget (-1., 8*16.); /* XXX fix to use shared ptr */
-		trigger_display->set_triggerbox (tb.get());
-	}
+	trigger_display.set_triggerbox (tb.get());
 }
 
-void
-MixerStrip::toggle_trigger_display ()
-{
-	if (!trigger_display) {
-		return;
-	}
-
-	if (trigger_display->get_parent() == &global_vpacker) {
-		global_vpacker.remove (*trigger_display);
-	} else {
-		global_vpacker.pack_start (*trigger_display, true, true);
-		trigger_display->show ();
-		global_vpacker.reorder_child (*trigger_display, 4);
-	}
-}
