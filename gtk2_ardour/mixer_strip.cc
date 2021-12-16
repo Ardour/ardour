@@ -112,7 +112,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
-	, trigger_display (-1., 8*16.)
+	, trigger_display (-1., TriggerBox::default_triggers_per_box*16.)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, rec_mon_table (2, 2)
 	, solo_iso_table (1, 2)
@@ -328,8 +328,8 @@ MixerStrip::init ()
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (input_button_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (invert_button_box, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (trigger_display, true, true);
-	global_vpacker.pack_start (_tmaster_widget, true, true);
+	global_vpacker.pack_start (trigger_display, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_tmaster_widget, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (rec_mon_table, Gtk::PACK_SHRINK);
