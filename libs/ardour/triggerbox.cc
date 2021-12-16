@@ -56,7 +56,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<int> follow_action_probability;
 		PBD::PropertyDescriptor<float> velocity_effect;
 		PBD::PropertyDescriptor<gain_t> gain;
-		PBD::PropertyDescriptor<bool> stretching;
+		PBD::PropertyDescriptor<bool> stretchable;
 	}
 }
 
@@ -81,7 +81,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _midi_velocity_effect (Properties::velocity_effect, 0.)
 	, _ui (0)
 	, expected_end_sample (0)
-	, _stretching (Properties::stretching, true)
+	, _stretchable (Properties::stretchable, true)
 	, _explicitly_stopped (false)
 {
 	add_property (_legato);
@@ -89,7 +89,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	add_property (_follow_count);
 	add_property (_midi_velocity_effect);
 	add_property (_follow_action_probability);
-	add_property (_stretching);
+	add_property (_stretchable);
 }
 
 void
@@ -563,7 +563,7 @@ AudioTrigger::~AudioTrigger ()
 bool
 AudioTrigger::stretching() const
 {
-	return (_apparent_tempo != .0) && _stretching;
+	return (_apparent_tempo != .0) && _stretchable;
 }
 
 void
@@ -646,6 +646,13 @@ AudioTrigger::set_state (const XMLNode& node, int version)
 	last_sample = _start_offset + usable_length;
 
 	return 0;
+}
+
+void
+AudioTrigger::set_stretchable (bool s)
+{
+	_stretchable = s;
+	PropertyChanged (ARDOUR::Properties::stretchable);
 }
 
 void
@@ -1579,8 +1586,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow-action-0 = %1\n", Properties::follow_action0.property_id));
 	Properties::follow_action1.property_id = g_quark_from_static_string (X_("follow-action-1"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow-action-1 = %1\n", Properties::follow_action1.property_id));
-	Properties::stretching.property_id = g_quark_from_static_string (X_("stretching"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretching = %1\n", Properties::stretching.property_id));
+	Properties::stretchable.property_id = g_quark_from_static_string (X_("stretchable"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretchable = %1\n", Properties::stretchable.property_id));
 }
 
 const int32_t TriggerBox::default_triggers_per_box = 8;
