@@ -165,7 +165,7 @@ TriggerMaster::TriggerMaster (Item* parent, boost::shared_ptr<TriggerBox> t)
 
 TriggerMaster::~TriggerMaster ()
 {
-	delete _loopster;
+	update_connection.disconnect();
 }
 
 void
