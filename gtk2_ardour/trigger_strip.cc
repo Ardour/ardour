@@ -63,12 +63,14 @@ TriggerStrip::TriggerStrip (Session* s, boost::shared_ptr<ARDOUR::Route> rt)
 	, _pb_selection ()
 	, _tmaster_widget (-1, 16)
 	, _processor_box (s, boost::bind (&TriggerStrip::plugin_selector, this), _pb_selection, 0)
-	, _trigger_display (*rt->triggerbox (), -1., TriggerBox::default_triggers_per_box * 16.)
+	, _trigger_display (-1., TriggerBox::default_triggers_per_box * 16.)
 	, _panners (s)
 	, _level_meter (s)
 {
 	init ();
 	set_route (rt);
+
+	_trigger_display.set_triggerbox (rt->triggerbox ().get());
 
 	io_changed ();
 	name_changed ();

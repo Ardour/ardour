@@ -144,7 +144,9 @@ private:
 class TriggerBoxWidget : public FittedCanvasWidget
 {
   public:
-	TriggerBoxWidget (ARDOUR::TriggerBox& tb, float w, float h);
+	TriggerBoxWidget (float w, float h);
+
+	void set_triggerbox (ARDOUR::TriggerBox* tb);
 
 	void on_map ();
 	void on_unmap ();

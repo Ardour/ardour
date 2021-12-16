@@ -944,24 +944,28 @@ TriggerBoxUI::rapid_update ()
 	}
 }
 
-TriggerBoxWidget::TriggerBoxWidget (TriggerBox& tb, float w, float h) : FittedCanvasWidget(w,h)
+TriggerBoxWidget::TriggerBoxWidget (float w, float h) : FittedCanvasWidget(w,h), ui (0)
 {
-	ui = new TriggerBoxUI (root(), tb);
 	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
 }
 
 void
-TriggerBoxWidget::on_map ()
+TriggerBoxWidget::set_triggerbox (TriggerBox* tb)
 {
-	FittedCanvasWidget::on_map ();
-	ui->start_updating ();
-}
+	if (ui) {
+		delete ui;
+		ui = 0;
+	}
 
-void
-TriggerBoxWidget::on_unmap ()
-{
-	FittedCanvasWidget::on_unmap ();
-	ui->stop_updating ();
+	if (!tb) {
+		return;
+	}
+
+	ui = new TriggerBoxUI (root(), *tb);
+
+	if (is_mapped()) {
+		ui->start_updating ();
+	}
 }
 
 void

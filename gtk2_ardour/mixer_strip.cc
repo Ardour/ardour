@@ -2152,7 +2152,8 @@ void
 MixerStrip::create_trigger_display (boost::shared_ptr<TriggerBox> tb)
 {
 	if (!trigger_display) {
-		trigger_display = new TriggerBoxWidget (*(tb.get()), -1., 8*16.); /* XXX fix to use shared ptr */
+		trigger_display = new TriggerBoxWidget (-1., 8*16.); /* XXX fix to use shared ptr */
+		trigger_display->set_triggerbox (tb.get());
 	}
 }
 
