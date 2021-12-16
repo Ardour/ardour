@@ -120,8 +120,8 @@ private:
 	Gtk::Table volume_table;
 
 	/* Widgets */
-	FittedCanvasWidget _master_widget;
-	TriggerMaster*     _master;
+	FittedCanvasWidget _tmaster_widget;
+	TriggerMaster*     _tmaster;
 
 	ArdourWidgets::ArdourButton             _name_button;
 	ProcessorBox                            _processor_box;

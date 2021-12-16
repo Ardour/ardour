@@ -91,14 +91,13 @@ Loopster::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	context->set_identity_matrix();
 	context->translate (self.x0, self.y0-0.5);
 
-	float width = _rect.width();
-	float height = _rect.height();
+	float size = _rect.height();
 
 	const double scale = UIConfiguration::instance().get_ui_scale();
 
 	//white area
 	set_source_rgba (context, rgba_to_color (1,1,1,1));
-	context->arc ( height/2, height/2, height/2 - 4*scale, 0, 2*M_PI );
+	context->arc ( size/2, size/2, size/2 - 4*scale, 0, 2*M_PI );
 	context->fill();
 
 	//arc fill
@@ -108,7 +107,7 @@ Loopster::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	float degrees = slices * deg_per_slice;
 	float radians = (degrees/180)*M_PI;
 	set_source_rgba (context, rgba_to_color (0,0,0,1));
-	context->arc ( height/2, height/2, height/2 - 5*scale, 1.5*M_PI+radians, 1.5*M_PI+2*M_PI );  //arrow head
+	context->arc ( size/2, size/2, size/2 - 5*scale, 1.5*M_PI+radians, 1.5*M_PI+2*M_PI );  //arrow head
 	context->stroke();
 
 	context->set_line_width(1);
@@ -118,10 +117,9 @@ Loopster::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 //========================
 
 
-TriggerMaster::TriggerMaster (Item* parent, boost::shared_ptr<TriggerBox> t)
+TriggerMaster::TriggerMaster (Item* parent)
 	: ArdourCanvas::Rectangle (parent)
 	, _context_menu (0)
-	, _triggerbox (t)
 {
 	set_layout_sensitive(true);  //why???
 
@@ -157,6 +155,11 @@ TriggerMaster::TriggerMaster (Item* parent, boost::shared_ptr<TriggerBox> t)
 TriggerMaster::~TriggerMaster ()
 {
 	update_connection.disconnect();
+}
+
+void TriggerMaster::set_trigger (boost::shared_ptr<ARDOUR::TriggerBox> t)
+{
+	_triggerbox = t;
 }
 
 void
@@ -219,6 +222,10 @@ TriggerMaster::selection_change ()
 bool
 TriggerMaster::event_handler (GdkEvent* ev)
 {
+	if (!_triggerbox) {
+		return false;
+	}
+
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		if (ev->button.button == 1) {
@@ -381,6 +388,10 @@ TriggerMaster::_size_allocate (ArdourCanvas::Rect const & alloc)
 void
 TriggerMaster::prop_change (PropertyChange const & change)
 {
+	if (!_triggerbox) {
+		return;
+	}
+
 	std::string text;
 
 	ARDOUR::Trigger *trigger = _triggerbox->currently_playing();

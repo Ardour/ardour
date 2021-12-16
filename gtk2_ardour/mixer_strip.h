@@ -60,6 +60,7 @@
 #include "panner_ui.h"
 #include "enums.h"
 #include "processor_box.h"
+#include "trigger_master.h"
 #include "visibility_group.h"
 
 namespace ARDOUR {
@@ -229,6 +230,10 @@ private:
 
 	gint    mark_update_safe ();
 	guint32 mode_switch_in_progress;
+
+	/*Trigger widget*/
+	FittedCanvasWidget _tmaster_widget;
+	TriggerMaster*     _tmaster;
 
 	ArdourWidgets::ArdourButton name_button;
 	ArdourWidgets::ArdourButton _comment_button;

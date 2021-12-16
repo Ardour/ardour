@@ -61,7 +61,7 @@ TriggerStrip::TriggerStrip (Session* s, boost::shared_ptr<ARDOUR::Route> rt)
 	, RouteUI (s)
 	, _clear_meters (true)
 	, _pb_selection ()
-	, _master_widget (-1, 16)
+	, _tmaster_widget (-1, 16)
 	, _processor_box (s, boost::bind (&TriggerStrip::plugin_selector, this), _pb_selection, 0)
 	, _trigger_display (*rt->triggerbox (), -1., TriggerBox::default_triggers_per_box * 16.)
 	, _panners (s)
@@ -119,6 +119,8 @@ TriggerStrip::color () const
 void
 TriggerStrip::init ()
 {
+	_tmaster = new TriggerMaster (_tmaster_widget.root ());
+
 	_name_button.set_name ("mixer strip button");
 	_name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	_name_button.signal_size_allocate ().connect (sigc::mem_fun (*this, &TriggerStrip::name_button_resized));
@@ -148,7 +150,7 @@ TriggerStrip::init ()
 	Gtk::VBox* outer_vpacker = manage (new Gtk::VBox);
 
 	outer_vpacker->pack_start (_trigger_display, Gtk::PACK_SHRINK);
-	outer_vpacker->pack_start (_master_widget, Gtk::PACK_SHRINK);
+	outer_vpacker->pack_start (_tmaster_widget, Gtk::PACK_SHRINK);
 	outer_vpacker->pack_start (global_frame, true, true);
 	outer_vpacker->show ();
 
@@ -162,7 +164,7 @@ TriggerStrip::init ()
 	ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun (*this, &TriggerStrip::reset_group_peak_display));
 
 	/* Visibility */
-	_master_widget.show ();
+	_tmaster_widget.show ();
 	_name_button.show ();
 	_trigger_display.show ();
 	_processor_box.show ();
@@ -191,7 +193,7 @@ TriggerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
 
-	_master = new TriggerMaster (_master_widget.root (), _route->triggerbox ());
+	_tmaster->set_trigger(_route->triggerbox ());
 
 	_processor_box.set_route (rt);
 

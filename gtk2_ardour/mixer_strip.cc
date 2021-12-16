@@ -123,6 +123,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
 	, _plugin_insert_cnt (0)
+	, _tmaster_widget (-1, 16)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _master_volume_menu (0)
@@ -161,6 +162,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
 	, _plugin_insert_cnt (0)
+	, _tmaster_widget (-1, 16)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _master_volume_menu (0)
@@ -181,6 +183,8 @@ MixerStrip::init ()
 	route_ops_menu = 0;
 	_width_owner = 0;
 	trigger_display = 0;
+
+	_tmaster = new TriggerMaster (_tmaster_widget.root ());
 
 	/* the length of this string determines the width of the mixer strip when it is set to `wide' */
 	longest_label = "longest label";
@@ -323,6 +327,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (input_button_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (invert_button_box, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_tmaster_widget, true, true);
 	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (rec_mon_table, Gtk::PACK_SHRINK);
@@ -548,6 +553,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	RouteUI::set_route (rt);
 
+	_tmaster->set_trigger(rt->triggerbox ());
+
 	control_slave_ui.set_stripable (boost::dynamic_pointer_cast<Stripable> (rt));
 
 	/* ProcessorBox needs access to _route so that it can read
@@ -639,9 +646,11 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	hide_master_spacer (false);
 
 	if (is_track()) {
+		_tmaster_widget.show ();
 		monitor_input_button->show ();
 		monitor_disk_button->show ();
 	} else {
+		_tmaster_widget.hide ();
 		monitor_input_button->hide();
 		monitor_disk_button->hide ();
 	}

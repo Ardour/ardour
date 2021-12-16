@@ -32,6 +32,8 @@
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 
+#include "fitted_canvas_widget.h"
+
 namespace Gtk {
 class FileChooserDialog;
 class Menu;
@@ -60,8 +62,10 @@ class Loopster : public ArdourCanvas::Rectangle
 class TriggerMaster : public ArdourCanvas::Rectangle
 {
   public:
-	TriggerMaster (ArdourCanvas::Item* canvas, boost::shared_ptr<ARDOUR::TriggerBox>);
+	TriggerMaster (ArdourCanvas::Item* canvas);
 	~TriggerMaster ();
+
+	void set_trigger(boost::shared_ptr<ARDOUR::TriggerBox>);
 
 	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
