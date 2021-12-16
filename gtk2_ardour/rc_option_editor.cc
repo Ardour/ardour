@@ -2813,6 +2813,7 @@ RCOptionEditor::RCOptionEditor ()
 	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
 	_mixer_strip_visibility.add (0, X_("VCA"), _("VCA Assigns"));
 	_mixer_strip_visibility.add (0, X_("Triggers"), _("Triggers"));
+	_mixer_strip_visibility.add (0, X_("TriggerMaster"), _("Trigger Masters"));
 
 #ifndef MIXBUS
 	add_option (_("Appearance/Mixer"),
