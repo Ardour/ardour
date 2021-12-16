@@ -291,6 +291,7 @@ SoundFileBox::audition_active(bool active) {
 	seek_slider.set_sensitive (active);
 	if (!active) {
 		seek_slider.set_value(0);
+		_seeking = false;
 	}
 }
 

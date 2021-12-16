@@ -219,6 +219,7 @@ TriggerPage::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
+	_trigger_clip_picker.set_session (s);
 	if (!_session) {
 		return;
 	}

@@ -23,18 +23,24 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/filechooserdialog.h>
+#include <gtkmm/scale.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/table.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
 
+#include "ardour/session_handle.h"
+
 #include "widgets/ardour_dropdown.h"
 
-class TriggerClipPicker : public Gtk::VBox
+class TriggerClipPicker : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
 public:
 	TriggerClipPicker ();
 	~TriggerClipPicker ();
+
+	void set_session (ARDOUR::Session*);
 
 private:
 	void list_dir (std::string const&);
@@ -43,6 +49,13 @@ private:
 	void row_activated (Gtk::TreeModel::Path const&, Gtk::TreeViewColumn*);
 	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
 	void maybe_add_dir (std::string const&);
+	void audition_selected ();
+	void audition (std::string const&);
+	void audition_active (bool);
+	void audition_progress (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
+	void stop_audition ();
+	bool seek_button_press (GdkEventButton*);
+	bool seek_button_release (GdkEventButton*);
 
 	ArdourWidgets::ArdourDropdown _dir;
 	Gtk::FileChooserDialog        _fcd;
@@ -61,6 +74,13 @@ private:
 	Glib::RefPtr<Gtk::TreeStore> _model;
 	Gtk::TreeView                _view;
 	Gtk::ScrolledWindow          _scroller;
+	Gtk::Table                   _auditable;
+	Gtk::Button                  _play_btn;
+	Gtk::Button                  _stop_btn;
+	Gtk::HScale                  _seek_slider;
+
+	bool                      _seeking;
+	PBD::ScopedConnectionList _auditioner_connections;
 };
 
 #endif
