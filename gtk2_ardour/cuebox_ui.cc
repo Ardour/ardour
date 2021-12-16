@@ -118,7 +118,7 @@ CueEntry::event_handler (GdkEvent* ev)
 void
 CueEntry::_size_allocate (ArdourCanvas::Rect const & alloc)
 {
-	Rectangle::_size_allocate (alloc);
+	ArdourCanvas::Rectangle::_size_allocate (alloc);
 
 	const Distance width = _rect.width();
 	const Distance height = _rect.height();
@@ -134,7 +134,7 @@ CueEntry::_size_allocate (ArdourCanvas::Rect const & alloc)
 	float tleft = height;  //make room for the play button
 	float twidth = name_button->width() - poly_margin*2;
 
-	name_text->size_allocate (Rect(0, 0, width, height));
+	name_text->size_allocate (ArdourCanvas::Rect (0, 0, width, height));
 	name_text->set_position (Duple (tleft + poly_margin, poly_margin -0.5));
 	name_text->clamp_width ( width - height );
 
@@ -143,15 +143,15 @@ CueEntry::_size_allocate (ArdourCanvas::Rect const & alloc)
 }
 
 void
-CueEntry::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+CueEntry::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	Rectangle::render(area, context);
+	ArdourCanvas::Rectangle::render(area, context);
 
 	/* Note that item_to_window() already takes _position into account (as
 	   part of item_to_canvas()
 	*/
-	Rect self (item_to_window (_rect));
-	const Rect draw = self.intersection (area);
+	ArdourCanvas::Rect self (item_to_window (_rect));
+	const ArdourCanvas::Rect draw = self.intersection (area);
 
 	if (!draw) {
 		return;
@@ -251,7 +251,7 @@ Gtkmm2ext::Bindings* CueBoxUI::bindings = 0;
 Glib::RefPtr<Gtk::ActionGroup> CueBoxUI::trigger_actions;
 
 CueBoxUI::CueBoxUI (ArdourCanvas::Item* parent)
-	: Rectangle (parent)
+	: ArdourCanvas::Rectangle (parent)
 {
 	set_layout_sensitive(true);  //why???
 
@@ -320,7 +320,7 @@ CueBoxUI::build ()
 void
 CueBoxUI::_size_allocate (ArdourCanvas::Rect const & alloc)
 {
-	Rectangle::_size_allocate (alloc);
+	ArdourCanvas::Rectangle::_size_allocate (alloc);
 
 	const float width = alloc.width();
 	const float height = alloc.height();

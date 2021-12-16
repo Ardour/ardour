@@ -59,7 +59,7 @@ MidiClipEditor::MidiClipEditor ()
 	const double width  = 600. * scale;
 	const double height = 210. * scale;
 
-	frame = new Rectangle (this);
+	frame = new ArdourCanvas::Rectangle (this);
 
 	ArdourCanvas::Rect r (0, 0, width, height);
 	frame->set (r);
