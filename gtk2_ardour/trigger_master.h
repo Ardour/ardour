@@ -59,6 +59,8 @@ class Loopster : public ArdourCanvas::Rectangle
 	float _fraction;
 };
 
+class PassThru;
+
 class TriggerMaster : public ArdourCanvas::Rectangle
 {
   public:
@@ -73,12 +75,14 @@ class TriggerMaster : public ArdourCanvas::Rectangle
 
 	ArdourCanvas::Text*    name_text;
 
+	void toggle_thru ();
 	void maybe_update ();
 	bool event_handler (GdkEvent*);
 	void selection_change ();
 
   private:
 	Loopster* _loopster;
+	PassThru* _passthru;
 
 	Gtk::Menu* _context_menu;
 	void context_menu ();

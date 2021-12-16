@@ -107,14 +107,80 @@ Loopster::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	float degrees = slices * deg_per_slice;
 	float radians = (degrees/180)*M_PI;
 	set_source_rgba (context, rgba_to_color (0,0,0,1));
-	context->arc ( size/2, size/2, size/2 - 5*scale, 1.5*M_PI+radians, 1.5*M_PI+2*M_PI );  //arrow head
+	context->arc ( size/2, size/2, size/2 - 5*scale, 1.5*M_PI+radians, 1.5*M_PI+2*M_PI );
 	context->stroke();
 
 	context->set_line_width(1);
 	context->set_identity_matrix();
 }
 
-//========================
+/* ========================  */
+
+class PassThru : public ArdourCanvas::Rectangle
+{
+  public:
+	PassThru (ArdourCanvas::Item* canvas);
+
+	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
+	void set_enabled (bool e);
+  private:
+	bool _enabled;
+};
+
+PassThru::PassThru (Item* parent)
+	: ArdourCanvas::Rectangle (parent)
+{
+	set_enabled(false);
+}
+
+void
+PassThru::set_enabled (bool e)
+{
+	if (e != _enabled) {
+		_enabled = e;
+		redraw();
+	}
+}
+
+void
+PassThru::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	/* Note that item_to_window() already takes _position into account (as
+	   part of item_to_canvas()
+	*/
+	Rect self (item_to_window (_rect));
+	const Rect draw = self.intersection (area);
+
+	if (!draw) {
+		return;
+	}
+
+	context->set_identity_matrix();
+	context->translate (self.x0, self.y0-0.5);
+
+	float size = _rect.height();
+
+	const double scale = UIConfiguration::instance().get_ui_scale();
+
+	if (_enabled) {
+		//outer white circle
+		set_source_rgba (context, rgba_to_color (1,1,1,1));
+		context->arc ( size/2, size/2, size/2 - 3*scale, 0, 2*M_PI );
+		context->fill();
+
+		//black circle
+		set_source_rgba (context, rgba_to_color (0,0,0,1));
+		context->arc ( size/2, size/2, size/2 - 5*scale, 0, 2*M_PI );
+		context->fill();
+
+		//inner white circle
+		set_source_rgba (context, rgba_to_color (1,1,1,1));
+		context->arc ( size/2, size/2, size/2 - 7*scale, 0, 2*M_PI );
+		context->fill();
+	}
+}
+
+/* ========================  */
 
 
 TriggerMaster::TriggerMaster (Item* parent)
@@ -132,6 +198,7 @@ TriggerMaster::TriggerMaster (Item* parent)
 	name_text->set_ignore_events (false);
 
 	_loopster = new Loopster(this);
+	_passthru = new PassThru(this);
 
 	/* trigger changes
 	_triggerbox->PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerMaster::prop_change, this, _1), gui_context());
@@ -321,7 +388,11 @@ TriggerMaster::context_menu ()
 	Menu* load_menu = manage (new Menu);
 	MenuList& loitems (load_menu->items());
 
-	items.push_back (MenuElem (_("Toggle Monitor Thru"), sigc::mem_fun (*this, &TriggerMaster::maybe_update)));  //ToDo
+	items.push_back (CheckMenuElem (_("Toggle Monitor Thru"), sigc::mem_fun (*this, &TriggerMaster::toggle_thru)));
+	if (_triggerbox->pass_thru()) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
+	}
+
 	items.push_back (MenuElem (_("Enable/Disable..."), sigc::mem_fun (*this, &TriggerMaster::maybe_update)));  //ToDo
 	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
 	items.push_back (MenuElem (_("Launch Style..."), *launch_menu));
@@ -329,6 +400,12 @@ TriggerMaster::context_menu ()
 	items.push_back (MenuElem (_("Clear All..."), sigc::mem_fun (*this, &TriggerMaster::maybe_update)));  //ToDo
 
 	_context_menu->popup (1, gtk_get_current_event_time());
+}
+
+void
+TriggerMaster::toggle_thru ()
+{
+	_triggerbox->set_pass_thru(!_triggerbox->pass_thru());
 }
 
 void
@@ -380,6 +457,7 @@ TriggerMaster::_size_allocate (ArdourCanvas::Rect const & alloc)
 	name_text->clamp_width (twidth);
 
 	_loopster->set(ArdourCanvas::Rect(0, 0, height, height));
+	_passthru->set(ArdourCanvas::Rect(width-height, 0, width, height));
 
 	//font scale may have changed. uiconfig 'embeds' the ui-scale in the font
 	name_text->set_font_description (UIConfiguration::instance().get_NormalFont());
@@ -391,6 +469,8 @@ TriggerMaster::prop_change (PropertyChange const & change)
 	if (!_triggerbox) {
 		return;
 	}
+
+	_passthru->set_enabled(_triggerbox->pass_thru ());
 
 	std::string text;
 
