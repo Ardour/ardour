@@ -331,7 +331,7 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 		".smp", ".SMP",
 		".snd", ".SND",
 		".maud", ".MAUD",
-		".voc", ".VOC"
+		".voc", ".VOC",
 		".vwe", ".VWE",
 		".w64", ".W64",
 		".wav", ".WAV",
@@ -352,7 +352,8 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 	};
 
 	for (size_t n = 0; n < sizeof(suffixes)/sizeof(suffixes[0]); ++n) {
-		if (file.rfind (suffixes[n]) == file.length() - strlen (suffixes[n])) {
+		size_t pos = file.rfind (suffixes[n]);
+		if (pos > 0 && pos == file.length() - strlen(suffixes[n])) {
 			return true;
 		}
 	}
