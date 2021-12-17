@@ -17,10 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __audio_trigger_properties_box_h__
-#define __audio_trigger_properties_box_h__
-
-#include <map>
+#ifndef _gtk_ardour_audio_trigger_properties_box_h_
+#define _gtk_ardour_audio_trigger_properties_box_h_
 
 #include <gtkmm/box.h>
 #include <gtkmm/label.h>
@@ -31,15 +29,7 @@
 
 #include "widgets/ardour_button.h"
 
-#include "gtkmm2ext/cairo_packer.h"
-
 #include "audio_clock.h"
-
-namespace ARDOUR
-{
-	class Session;
-	class Location;
-}
 
 class TriggerPropertiesBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
@@ -47,7 +37,7 @@ public:
 	TriggerPropertiesBox () {}
 	~TriggerPropertiesBox () {}
 
-	virtual void set_trigger (ARDOUR::Trigger* t) = 0;
+	virtual void set_trigger (ARDOUR::Trigger*) = 0;
 };
 
 class AudioTriggerPropertiesBox : public TriggerPropertiesBox
@@ -56,9 +46,9 @@ public:
 	AudioTriggerPropertiesBox ();
 	~AudioTriggerPropertiesBox ();
 
-	void set_trigger (ARDOUR::Trigger* t);
+	void set_trigger (ARDOUR::Trigger*);
 
-	void set_session (ARDOUR::Session* s);
+	void set_session (ARDOUR::Session*);
 
 protected:
 	void trigger_changed (const PBD::PropertyChange& what_changed);
@@ -70,25 +60,23 @@ protected:
 private:
 	ARDOUR::AudioTrigger* _trigger;
 
-	Gtk::Table table;
+	Gtk::Table _table;
+	Gtk::Label _abpm_label;
+	AudioClock _length_clock;
+	AudioClock _start_clock;
 
-	Gtk::Label abpm_label;
+	ArdourWidgets::ArdourButton _bpm_button;
+	ArdourWidgets::ArdourButton _metrum_button;
 
-	AudioClock length_clock;
-	AudioClock start_clock;
+	ArdourWidgets::ArdourButton _stretch_toggle;
 
-	ArdourWidgets::ArdourButton bpm_button;
-	ArdourWidgets::ArdourButton metrum_button;
+	ArdourWidgets::ArdourButton _fade_in_enable_button;
+	ArdourWidgets::ArdourButton _fade_out_enable_button;
 
-	ArdourWidgets::ArdourButton stretch_toggle;
+	ArdourWidgets::ArdourButton _gain_control;
+	ArdourWidgets::ArdourButton _stretch_selector;
 
-	ArdourWidgets::ArdourButton fade_in_enable_button;
-	ArdourWidgets::ArdourButton fade_out_enable_button;
-
-	ArdourWidgets::ArdourButton gain_control;
-	ArdourWidgets::ArdourButton stretch_selector;
-
-	PBD::ScopedConnection state_connection;
+	PBD::ScopedConnection _state_connection;
 };
 
-#endif /* __audio_trigger_properties_box_h__ */
+#endif

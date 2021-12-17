@@ -45,9 +45,9 @@ using std::max;
 using std::min;
 
 AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
-	: length_clock (X_("regionlength"), true, "", true, false, true)
-	, start_clock (X_("regionstart"), true, "", false, false)
-	, stretch_toggle (ArdourButton::led_default_elements)
+	: _length_clock (X_("regionlength"), true, "", true, false, true)
+	, _start_clock (X_("regionstart"), true, "", false, false)
+	, _stretch_toggle (ArdourButton::led_default_elements)
 {
 	_header_label.set_text (_("AUDIO Trigger Properties:"));
 
@@ -63,9 +63,9 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	bpm_table->set_border_width (2);
 	label = manage (new Gtk::Label (_("BPM:")));
 	label->set_alignment (1.0, 0.5);
-	bpm_table->attach (*label,     0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	bpm_table->attach (bpm_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	bpm_table->attach (abpm_label, 2, 3, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	bpm_table->attach (*label,      0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	bpm_table->attach (_bpm_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	bpm_table->attach (_abpm_label, 2, 3, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
 	pack_start (*bpm_table, false, false);
@@ -76,35 +76,34 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	metrum_table->set_border_width (2);
 	label = manage (new Gtk::Label (_("Time Sig:")));
 	label->set_alignment (1.0, 0.5);
-	bpm_table->attach (*label,        0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	bpm_table->attach (metrum_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	bpm_table->attach (*label,         0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	bpm_table->attach (_metrum_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
 	pack_start (*metrum_table, false, false);
 
 	row = 0;
 
-	stretch_toggle.set_text (_("Stretch"));
-	table.attach (stretch_toggle, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	_stretch_toggle.set_text (_("Stretch"));
+	_table.attach (_stretch_toggle, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
 	label = manage (new Gtk::Label (_("Start:")));
 	label->set_alignment (1.0, 0.5);
-	table.attach (*label, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	table.attach (start_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	_table.attach (*label,       0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	_table.attach (_start_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
 	label = manage (new Gtk::Label (_("Length:")));
 	label->set_alignment (1.0, 0.5);
-	table.attach (*label, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	table.attach (length_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	_table.attach (*label,        0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	_table.attach (_length_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
-	table.set_homogeneous (false);
-	table.set_spacings (4);
-	table.set_border_width (2);
-	pack_start (table, false, false);
-
+	_table.set_homogeneous (false);
+	_table.set_spacings (4);
+	_table.set_border_width (2);
+	pack_start (_table, false, false);
 
 	Gtk::Table* audio_t = manage (new Gtk::Table ());
 	audio_t->set_homogeneous (true);
@@ -116,21 +115,21 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	label->set_alignment (1.0, 0.5);
 	audio_t->attach (*label, 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
-	stretch_selector.set_text ("Mixed");
-	stretch_selector.set_name ("generic button");
-	audio_t->attach (stretch_selector, 1, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_stretch_selector.set_text ("Mixed");
+	_stretch_selector.set_name ("generic button");
+	audio_t->attach (_stretch_selector, 1, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	row++;
 
 	label = manage (new Gtk::Label (_("Fades:")));
 	label->set_alignment (1.0, 0.5);
-	fade_in_enable_button.set_text (_("In"));
-	fade_in_enable_button.set_name ("generic button");
-	fade_out_enable_button.set_text (_("Out"));
-	fade_out_enable_button.set_name ("generic button");
-	audio_t->attach (*label,                 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	audio_t->attach (fade_in_enable_button,  1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	audio_t->attach (fade_out_enable_button, 2, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_fade_in_enable_button.set_text (_("In"));
+	_fade_in_enable_button.set_name ("generic button");
+	_fade_out_enable_button.set_text (_("Out"));
+	_fade_out_enable_button.set_name ("generic button");
+	audio_t->attach (*label,                  0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	audio_t->attach (_fade_in_enable_button,  1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	audio_t->attach (_fade_out_enable_button, 2, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	row++;
 
@@ -138,15 +137,15 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	label->set_alignment (1.0, 0.5);
 	audio_t->attach (*label, 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
-	gain_control.set_text (_("+6dB"));
-	gain_control.set_name ("generic button");
-	audio_t->attach (gain_control, 1, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_gain_control.set_text (_("+6dB"));
+	_gain_control.set_name ("generic button");
+	audio_t->attach (_gain_control, 1, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	row++;
 
 	pack_start (*audio_t);
-	
-	stretch_toggle.signal_clicked.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::toggle_stretch));
+
+	_stretch_toggle.signal_clicked.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::toggle_stretch));
 }
 
 AudioTriggerPropertiesBox::~AudioTriggerPropertiesBox ()
@@ -156,21 +155,20 @@ AudioTriggerPropertiesBox::~AudioTriggerPropertiesBox ()
 void
 AudioTriggerPropertiesBox::toggle_stretch ()
 {
-	_trigger->set_stretchable(!_trigger->stretchable());
+	_trigger->set_stretchable (!_trigger->stretchable ());
 }
-
 
 void
 AudioTriggerPropertiesBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	length_clock.set_session (s);
-	start_clock.set_session (s);
+	_length_clock.set_session (s);
+	_start_clock.set_session (s);
 }
 
 void
-AudioTriggerPropertiesBox::set_trigger (ARDOUR::Trigger *t)
+AudioTriggerPropertiesBox::set_trigger (ARDOUR::Trigger* t)
 {
 	ARDOUR::AudioTrigger* audio_trigger = dynamic_cast<ARDOUR::AudioTrigger*> (t);
 
@@ -179,7 +177,7 @@ AudioTriggerPropertiesBox::set_trigger (ARDOUR::Trigger *t)
 	}
 
 	_trigger = audio_trigger;
-	_trigger->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&AudioTriggerPropertiesBox::trigger_changed, this, _1), gui_context ());
+	_trigger->PropertyChanged.connect (_state_connection, invalidator (*this), boost::bind (&AudioTriggerPropertiesBox::trigger_changed, this, _1), gui_context ());
 
 	PBD::PropertyChange changed;
 	changed.add (ARDOUR::Properties::name);
@@ -187,23 +185,20 @@ AudioTriggerPropertiesBox::set_trigger (ARDOUR::Trigger *t)
 	trigger_changed (changed);
 }
 
-
 void
 AudioTriggerPropertiesBox::trigger_changed (const PBD::PropertyChange& what_changed)
 {
-	{
-		AudioClock::Mode mode = _trigger->box().data_type() == ARDOUR::DataType::AUDIO ? AudioClock::Samples : AudioClock::BBT;
+	AudioClock::Mode mode = _trigger->box ().data_type () == ARDOUR::DataType::AUDIO ? AudioClock::Samples : AudioClock::BBT;
 
-		start_clock.set_mode (mode);
-		length_clock.set_mode (mode);
+	_start_clock.set_mode (mode);
+	_length_clock.set_mode (mode);
 
-		start_clock.set (_trigger->start_offset ());
-		length_clock.set (_trigger->current_length());  //set_duration() ?
+	_start_clock.set (_trigger->start_offset ());
+	_length_clock.set (_trigger->current_length ()); // set_duration() ?
 
-		bpm_button.set_text (string_compose("%1",_trigger->apparent_tempo()));
-		abpm_label.set_text (string_compose("%1",_trigger->apparent_tempo()));
-		metrum_button.set_text ("4/4");
+	_bpm_button.set_text (string_compose ("%1", _trigger->apparent_tempo ()));
+	_abpm_label.set_text (string_compose ("%1", _trigger->apparent_tempo ()));
+	_metrum_button.set_text ("4/4");
 
-		stretch_toggle.set_active( _trigger->stretchable() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-	}
+	_stretch_toggle.set_active (_trigger->stretchable () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }

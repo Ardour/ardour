@@ -59,16 +59,16 @@ MidiTriggerPropertiesBox::MidiTriggerPropertiesBox ()
 
 	int row = 0;
 
-	patch_enable_button.set_text (_("Send Patches"));
-	patch_enable_button.set_name ("generic button");
+	_patch_enable_button.set_text (_("Send Patches"));
+	_patch_enable_button.set_name ("generic button");
 
-	midi_t->attach (patch_enable_button, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	midi_t->attach (_patch_enable_button, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
-	cc_enable_button.set_text (_("Send CCs"));
-	cc_enable_button.set_name ("generic button");
+	_cc_enable_button.set_text (_("Send CCs"));
+	_cc_enable_button.set_name ("generic button");
 
-	midi_t->attach (cc_enable_button, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	midi_t->attach (_cc_enable_button, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
 	pack_start (*midi_t);
@@ -79,7 +79,7 @@ MidiTriggerPropertiesBox::~MidiTriggerPropertiesBox ()
 }
 
 void
-MidiTriggerPropertiesBox::set_trigger (ARDOUR::Trigger *t)
+MidiTriggerPropertiesBox::set_trigger (ARDOUR::Trigger* t)
 {
 	ARDOUR::MIDITrigger* midi_trigger = dynamic_cast<ARDOUR::MIDITrigger*> (t);
 
@@ -88,7 +88,7 @@ MidiTriggerPropertiesBox::set_trigger (ARDOUR::Trigger *t)
 	}
 
 	_trigger = midi_trigger;
-	_trigger->PropertyChanged.connect (midi_state_connection, invalidator (*this), boost::bind (&MidiTriggerPropertiesBox::trigger_changed, this, _1), gui_context ());
+	_trigger->PropertyChanged.connect (_midi_state_connection, invalidator (*this), boost::bind (&MidiTriggerPropertiesBox::trigger_changed, this, _1), gui_context ());
 
 	PBD::PropertyChange changed;
 	changed.add (ARDOUR::Properties::name);

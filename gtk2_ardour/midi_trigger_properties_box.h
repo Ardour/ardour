@@ -17,27 +17,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __midi_trigger_properties_box_h__
-#define __midi_trigger_properties_box_h__
+#ifndef _gtk_ardour_midi_trigger_properties_box_h_
+#define _gtk_ardour_midi_trigger_properties_box_h_
 
-#include <map>
-
-#include <gtkmm/box.h>
 #include <gtkmm/label.h>
-#include <gtkmm/table.h>
 
 #include "ardour/ardour.h"
-#include "ardour/session_handle.h"
-
-#include "gtkmm2ext/cairo_packer.h"
 
 #include "audio_trigger_properties_box.h"
-
-namespace ARDOUR
-{
-	class Session;
-	class Location;
-}
 
 class MidiTriggerPropertiesBox : public TriggerPropertiesBox
 {
@@ -45,19 +32,18 @@ public:
 	MidiTriggerPropertiesBox ();
 	~MidiTriggerPropertiesBox ();
 
-	void set_trigger (ARDOUR::Trigger* t);
+	void set_trigger (ARDOUR::Trigger*);
 
 private:
-	ARDOUR::MIDITrigger *_trigger;
-
-	Gtk::Label _header_label;
-
 	void trigger_changed (const PBD::PropertyChange& what_changed);
 
-	PBD::ScopedConnection midi_state_connection;
+	ARDOUR::MIDITrigger* _trigger;
 
-	ArdourWidgets::ArdourButton patch_enable_button;
-	ArdourWidgets::ArdourButton cc_enable_button;
+	Gtk::Label                  _header_label;
+	ArdourWidgets::ArdourButton _patch_enable_button;
+	ArdourWidgets::ArdourButton _cc_enable_button;
+
+	PBD::ScopedConnection _midi_state_connection;
 };
 
-#endif /* __midi_trigger_properties_box_h__ */
+#endif
