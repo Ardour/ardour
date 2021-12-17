@@ -1137,11 +1137,11 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 			if (!passthru) {
 				buf.read_from (src, from_stretcher, dest_offset);
-				if (_gain != 1.0) {
+				if (_gain != 1.0f) {
 					buf.apply_gain (_gain, from_stretcher);
 				}
 			} else {
-				if (_gain != 1.0) {
+				if (_gain != 1.0f) {
 					buf.accumulate_with_gain_from (src, from_stretcher, _gain, dest_offset);
 				} else {
 					buf.accumulate_from (src, from_stretcher, dest_offset);
