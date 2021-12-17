@@ -98,7 +98,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	_auditable.attach (_seek_slider, 0, 2, 1, 2, EXPAND | FILL, SHRINK);
 	_auditable.set_spacings (6);
 
-	_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
+	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	_scroller.add (_view);
 
 	pack_start (_dir, false, false);
@@ -126,6 +126,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	_scroller.show ();
 	_view.show ();
 	_dir.show ();
+	_auditable.show_all ();
 
 	/* fill treeview with data */
 	_dir.items ().front ().activate ();
