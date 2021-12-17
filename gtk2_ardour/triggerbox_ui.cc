@@ -417,6 +417,8 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 
 TriggerBoxUI::~TriggerBoxUI ()
 {
+	_update_connection.disconnect ();
+	_selection_connection.disconnect ();
 }
 
 void
