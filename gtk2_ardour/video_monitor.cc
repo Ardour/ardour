@@ -59,12 +59,9 @@ VideoMonitor::VideoMonitor (PublicEditor *ed, std::string xjadeo_bin_path)
 
 VideoMonitor::~VideoMonitor ()
 {
-	if (clock_connection.connected()) {
-		clock_connection.disconnect();
-	}
-	if (state_connection.connected()) {
-		state_connection.disconnect();
-	}
+	clock_connection.disconnect();
+	state_connection.disconnect();
+
 	delete process;
 }
 
