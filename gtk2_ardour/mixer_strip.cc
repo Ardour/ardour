@@ -552,7 +552,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	RouteUI::set_route (rt);
 
-	_tmaster->set_trigger(rt->triggerbox ());
+	set_trigger_display (rt->triggerbox());
 
 	control_slave_ui.set_stripable (boost::dynamic_pointer_cast<Stripable> (rt));
 
@@ -1674,7 +1674,6 @@ MixerStrip::revert_to_default_display ()
 	reset_strip_style ();
 
 	set_trigger_display (_route->triggerbox());
-
 }
 
 void
@@ -2136,6 +2135,7 @@ MixerStrip::hide_master_spacer (bool yn)
 void
 MixerStrip::set_trigger_display (boost::shared_ptr<TriggerBox> tb)
 {
+	_tmaster->set_trigger (tb);
 	trigger_display.set_triggerbox (tb.get());
 }
 
