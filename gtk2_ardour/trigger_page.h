@@ -32,6 +32,7 @@
 #include "audio_region_operations_box.h"
 #include "audio_region_properties_box.h"
 #include "audio_trigger_properties_box.h"
+#include "cuebox_ui.h"
 #include "fitted_canvas_widget.h"
 #include "midi_clip_editor.h"
 #include "midi_region_operations_box.h"
@@ -89,11 +90,13 @@ private:
 	Gtk::ScrolledWindow  _strip_scroller;
 	Gtk::HBox            _strip_packer;
 	Gtk::EventBox        _no_strips;
-	Gtk::VBox            _slot_area_box;
+	Gtk::Alignment       _cue_area_frame;
+	Gtk::VBox            _cue_area_box;
 	Gtk::HBox            _parameter_box;
 
 	TriggerClipPicker _trigger_clip_picker;
 
+	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
 	CueMaster          _master;
 

@@ -129,8 +129,10 @@ TriggerStrip::init ()
 
 	/* strip layout */
 	global_vpacker.set_spacing (2);
-	global_vpacker.pack_start (_processor_box, true, true);
 	global_vpacker.pack_start (_name_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_trigger_display, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_tmaster_widget, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_processor_box, true, true);
 	global_vpacker.pack_start (_panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (volume_table, Gtk::PACK_SHRINK);
@@ -149,14 +151,7 @@ TriggerStrip::init ()
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
 	global_frame.set_name ("BaseFrame");
 
-	Gtk::VBox* outer_vpacker = manage (new Gtk::VBox);
-
-	outer_vpacker->pack_start (_trigger_display, Gtk::PACK_SHRINK);
-	outer_vpacker->pack_start (_tmaster_widget, Gtk::PACK_SHRINK);
-	outer_vpacker->pack_start (global_frame, true, true);
-	outer_vpacker->show ();
-
-	add (*outer_vpacker);
+	add (global_frame);
 
 	/* Signals */
 	_name_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerStrip::name_button_press), false);

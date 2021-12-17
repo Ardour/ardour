@@ -37,7 +37,6 @@
 #include "public_editor.h"
 #include "timers.h"
 
-#include "cuebox_ui.h"
 #include "trigger_page.h"
 #include "trigger_strip.h"
 #include "ui_config.h"
@@ -55,53 +54,37 @@ using namespace std;
 
 TriggerPage::TriggerPage ()
 	: Tabbable (_content, _("Trigger Drom"), X_("trigger"))
-	, _master_widget (32, 16.)
+	, _cue_area_frame (0.5, 0, 1.0, 0)
+	, _cue_box (32, 16 * TriggerBox::default_triggers_per_box)
+	, _master_widget (32, 16)
 	, _master (_master_widget.root ())
 {
 	load_bindings ();
 	register_actions ();
 
-	/* spacer to account for the trigger strip frame */
-	ArdourVSpacer* spacer = manage (new ArdourVSpacer ());
-	spacer->set_size_request (-1, 1);
-	_slot_area_box.pack_start (*spacer, Gtk::PACK_SHRINK);
+	/* Match TriggerStrip::_name_button height */
+	ArdourButton* spacer = manage (new ArdourButton (ArdourButton::Text));
+	spacer->set_name ("mixer strip button");
+	spacer->set_sensitive (false);
+	spacer->set_text (" ");
 
-	CueBoxWidget* cue_box = manage (new CueBoxWidget (32, TriggerBox::default_triggers_per_box * 16.));
-	_slot_area_box.pack_start (*cue_box, Gtk::PACK_SHRINK);
-	_slot_area_box.pack_start (_master_widget, Gtk::PACK_SHRINK);
+	/* left-side, fixed-size cue-box */
+	_cue_area_box.set_spacing (2);
+	_cue_area_box.pack_start (*spacer, Gtk::PACK_SHRINK);
+	_cue_area_box.pack_start (_cue_box, Gtk::PACK_SHRINK);
+	_cue_area_box.pack_start (_master_widget, Gtk::PACK_SHRINK);
 
-	Gtk::Table* table = manage (new Gtk::Table);
-	table->set_homogeneous (false);
-	table->set_spacings (8);
-	table->set_border_width (8);
-
-	int col = 0;
-	table->attach (_slot_prop_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
-
-	col = 1;
-	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
-	col++;
-	table->attach (_audio_trim_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
-	col++;
-	table->attach (_audio_ops_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
-	col++;
-
-	col = 1; /* audio and midi boxen share the same table locations; shown and hidden depending on region type */
-	table->attach (_midi_trig_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
-	col++;
-	table->attach (_midi_trim_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
-	col++;
-	table->attach (_midi_ops_box,   col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::FILL | Gtk::EXPAND);
-	col++;
-
-	_parameter_box.pack_start (*table);
-
-	/* Upper pane (slot | strips | file browser) */
+	/* left-side frame, same layout as TriggerStrip.
+	 * use Alignment instead of Frame with SHADOW_IN (2px)
+	 * +1px padding for _strip_scroller frame -> 3px top padding
+	 */
+	_cue_area_frame.set_padding (3, 1, 1, 1);
+	_cue_area_frame.add (_cue_area_box);
 
 	_strip_scroller.add (_strip_packer);
 	_strip_scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
 
-	/* last item of strip packer */
+	/* Last item of strip packer, "+" background */
 	_strip_packer.pack_end (_no_strips, true, true);
 	_no_strips.set_flags (Gtk::CAN_FOCUS);
 	_no_strips.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
@@ -110,11 +93,39 @@ TriggerPage::TriggerPage ()
 	_no_strips.signal_button_press_event().connect (sigc::mem_fun(*this, &TriggerPage::no_strip_button_event));
 	_no_strips.signal_button_release_event().connect (sigc::mem_fun(*this, &TriggerPage::no_strip_button_event));
 
-	_strip_group_box.pack_start (_slot_area_box, false, false);
+	_strip_group_box.pack_start (_cue_area_frame, false, false);
 	_strip_group_box.pack_start (_strip_scroller, true, true);
 
+	/* Upper pane ([slot | strips] | file browser) */
 	_pane_upper.add (_strip_group_box);
 	_pane_upper.add (_trigger_clip_picker);
+
+	/* Bottom -- Properties of selected Slot/Region */
+	Gtk::Table* table = manage (new Gtk::Table);
+	table->set_homogeneous (false);
+	table->set_spacings (8);
+	table->set_border_width (8);
+
+	int col = 0;
+	table->attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+
+	col = 1; /* audio and midi boxen share the same table locations; shown and hidden depending on region type */
+	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+	++col;
+	table->attach (_audio_trim_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+	++col;
+	table->attach (_audio_ops_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+	++col;
+
+	col = 1; /* audio and midi boxen share the same table locations; shown and hidden depending on region type */
+	table->attach (_midi_trig_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+	++col;
+	table->attach (_midi_trim_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+	++col;
+	table->attach (_midi_ops_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+	++col;
+
+	_parameter_box.pack_start (*table);
 
 	/* Top-level Layout */
 	_pane.add (_pane_upper);
@@ -129,7 +140,7 @@ TriggerPage::TriggerPage ()
 	_strip_group_box.show ();
 	_strip_scroller.show ();
 	_strip_packer.show ();
-	_slot_area_box.show_all ();
+	_cue_area_frame.show_all ();
 	_trigger_clip_picker.show ();
 	_no_strips.show ();
 
