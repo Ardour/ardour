@@ -262,7 +262,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	std::string               _name;
 	double                    _barcnt; /* our estimate of the number of bars in the region */
 	double                    _apparent_tempo;
-	gain_t                    _gain;
+	PBD::Property<gain_t>     _gain;
 	gain_t                    _pending_gain;
 	PBD::Property<float>      _midi_velocity_effect;
 	void*                     _ui;

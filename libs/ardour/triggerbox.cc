@@ -78,7 +78,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _legato (Properties::legato, false)
 	, _barcnt (0.)
 	, _apparent_tempo (0.)
-	, _gain (1.0)
+	, _gain (Properties::gain, 1.0)
 	, _pending_gain (1.0)
 	, _midi_velocity_effect (Properties::velocity_effect, 0.)
 	, _ui (0)
@@ -92,6 +92,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	add_property (_follow_count);
 	add_property (_midi_velocity_effect);
 	add_property (_follow_action_probability);
+	add_property (_gain);
 	add_property (_stretchable);
 	add_property (_isolated);
 }
@@ -1609,6 +1610,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow-action-0 = %1\n", Properties::follow_action0.property_id));
 	Properties::follow_action1.property_id = g_quark_from_static_string (X_("follow-action-1"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow-action-1 = %1\n", Properties::follow_action1.property_id));
+	Properties::gain.property_id = g_quark_from_static_string (X_("gain"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for gain = %1\n", Properties::gain.property_id));
 	Properties::stretchable.property_id = g_quark_from_static_string (X_("stretchable"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretchable = %1\n", Properties::stretchable.property_id));
 	Properties::isolated.property_id = g_quark_from_static_string (X_("isolated"));
