@@ -495,7 +495,7 @@ TriggerMaster::prop_change (PropertyChange const& change)
 	text = string_compose ("%1", (char)('A' + trigger->index ()));
 
 	if (trigger->follow_count () > 1) {
-		text.append (string_compose (X_(" %1/%2"), trigger->loop_count (), trigger->follow_count ()));
+		text.append (string_compose (X_(" %1/%2"), trigger->loop_count ()+1, trigger->follow_count ()));
 	}
 
 	name_text->set (text);
