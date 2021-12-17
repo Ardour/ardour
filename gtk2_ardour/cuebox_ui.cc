@@ -170,22 +170,19 @@ CueEntry::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>
 
 	render_children (area, context);
 
-	if (_cue_idx%2==0) {
+	if (_cue_idx==0) {
+		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6*scale);
+		drop_shadow_pattern->add_color_stop_rgba (0,	0,	0,	0,	0.7);
+		drop_shadow_pattern->add_color_stop_rgba (1,	0,	0,	0,	0.0);
+		context->set_source (drop_shadow_pattern);
+		context->rectangle(0, 0, width, 6*scale );
+		context->fill ();
+	} else if (_cue_idx%2==0) {
 		//line at top
 		context->set_identity_matrix();
 		context->translate (self.x0, self.y0-0.5);
 		set_source_rgba (context, rgba_to_color (0,0,0,1));
 		context->rectangle(0, 0, width, 1.);
-		context->fill ();
-		context->set_identity_matrix();
-	}
-
-	{
-		//line at right
-		context->set_identity_matrix();
-		context->translate (self.x0, self.y0-0.5);
-		set_source_rgba (context, rgba_to_color (0,0,0,1));
-		context->rectangle(width-1, 0, width, height);
 		context->fill ();
 		context->set_identity_matrix();
 	}

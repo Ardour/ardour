@@ -71,7 +71,8 @@ public:
 
 	void _size_allocate (ArdourCanvas::Rect const&);
 
-	ArdourCanvas::Text* name_text;
+	ArdourCanvas::Text*    name_text;
+	ArdourCanvas::Polygon* stop_shape;
 
 	void toggle_thru ();
 	void maybe_update ();
