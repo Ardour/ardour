@@ -417,8 +417,11 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 
 TriggerBoxUI::~TriggerBoxUI ()
 {
-	_update_connection.disconnect ();
+	/* sigc connection's are not scoped (i.e. they do not disconnect the
+	   functor from the signal when they are destroyed).
+	*/
 	_selection_connection.disconnect ();
+	_update_connection.disconnect ();
 }
 
 void
