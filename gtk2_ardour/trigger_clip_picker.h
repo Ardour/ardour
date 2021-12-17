@@ -43,10 +43,12 @@ public:
 	void set_session (ARDOUR::Session*);
 
 private:
-	void list_dir (std::string const&);
+	void list_dir (std::string const&, Gtk::TreeNodeChildren const* pc = NULL);
 	void open_dir ();
 	void row_selected ();
 	void row_activated (Gtk::TreeModel::Path const&, Gtk::TreeViewColumn*);
+	bool test_expand (Gtk::TreeModel::iterator const&, Gtk::TreeModel::Path const&);
+	void row_collapsed (Gtk::TreeModel::iterator const&, Gtk::TreeModel::Path const&);
 	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
 	void maybe_add_dir (std::string const&);
 	void audition_selected ();
@@ -65,9 +67,11 @@ private:
 		{
 			add (name);
 			add (path);
+			add (read);
 		}
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> path;
+		Gtk::TreeModelColumn<bool>        read;
 	};
 
 	Columns                      _columns;

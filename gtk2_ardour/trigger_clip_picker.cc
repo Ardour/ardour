@@ -120,6 +120,8 @@ TriggerClipPicker::TriggerClipPicker ()
 
 	_view.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &TriggerClipPicker::row_selected));
 	_view.signal_row_activated ().connect (sigc::mem_fun (*this, &TriggerClipPicker::row_activated));
+	_view.signal_test_expand_row ().connect (sigc::mem_fun (*this, &TriggerClipPicker::test_expand));
+	_view.signal_row_collapsed ().connect (sigc::mem_fun (*this, &TriggerClipPicker::row_collapsed));
 	_view.signal_drag_data_get ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_data_get));
 
 	/* show off */
@@ -157,7 +159,7 @@ void
 TriggerClipPicker::maybe_add_dir (std::string const& dir)
 {
 	if (Glib::file_test (dir, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
-		_dir.AddMenuElem (Gtkmm2ext::MenuElemNoMnemonic (Glib::path_get_basename (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir)));
+		_dir.AddMenuElem (Gtkmm2ext::MenuElemNoMnemonic (Glib::path_get_basename (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
 	}
 }
 
@@ -184,6 +186,38 @@ TriggerClipPicker::row_activated (TreeModel::Path const& p, TreeViewColumn*)
 	}
 }
 
+bool
+TriggerClipPicker::test_expand (TreeModel::iterator const& i, Gtk::TreeModel::Path const&)
+{
+	TreeModel::Row row = *i;
+	if (row[_columns.read]) {
+		/* already expanded */
+		return false; /* OK */
+	}
+	row[_columns.read] = true;
+
+	/* remove stub */
+	_model->erase (row.children ().begin ());
+
+	list_dir (row[_columns.path], &row.children ());
+
+	return row.children ().size () == 0;
+}
+
+void
+TriggerClipPicker::row_collapsed (TreeModel::iterator const& i, Gtk::TreeModel::Path const&)
+{
+	TreeModel::Row row = *i;
+	row[_columns.read] = false;
+	Gtk::TreeIter ti;
+	while ((ti = row.children ().begin ()) != row.children ().end ()) {
+		_model->erase (ti);
+	}
+	/* add stub child */
+	row                = *(_model->append (row.children ()));
+	row[_columns.read] = false;
+}
+
 void
 TriggerClipPicker::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, SelectionData& data, guint, guint time)
 {
@@ -202,7 +236,7 @@ TriggerClipPicker::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Selecti
 }
 
 static bool
-audio_midi_suffix (const std::string& str, void* /*arg*/)
+audio_midi_suffix (const std::string& str)
 {
 	if (AudioFileSource::safe_audio_file_extension (str)) {
 		return true;
@@ -232,17 +266,66 @@ TriggerClipPicker::open_dir ()
 }
 
 void
-TriggerClipPicker::list_dir (std::string const& dir)
+TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren const* pc)
 {
-	std::vector<std::string> fl;
-	find_files_matching_filter (fl, dir, audio_midi_suffix, 0, false, true, false);
-	_dir.set_active (Glib::path_get_basename (dir));
+	if (!pc) {
+		_model->clear ();
+		_dir.set_active (Glib::path_get_basename (path));
+	}
 
-	_model->clear ();
-	for (auto& f : fl) {
-		TreeModel::Row row = *(_model->append ());
-		row[_columns.name] = Glib::path_get_basename (f);
-		row[_columns.path] = f;
+	if (!Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+		return;
+	}
+
+	std::vector<std::string> dirs;
+	std::vector<std::string> files;
+
+	try {
+		Glib::Dir dir (path);
+		for (Glib::DirIterator i = dir.begin (); i != dir.end (); ++i) {
+			std::string fullpath = Glib::build_filename (path, *i);
+			std::string basename = *i;
+
+			if (Glib::file_test (fullpath, Glib::FILE_TEST_IS_DIR)) {
+				dirs.push_back (*i);
+				continue;
+			}
+
+			if (audio_midi_suffix (fullpath)) {
+				files.push_back (*i);
+			}
+		}
+	} catch (Glib::FileError const& err) {
+	}
+
+	std::sort (dirs.begin (), dirs.end ());
+	std::sort (files.begin (), files.end ());
+
+	for (auto& f : dirs) {
+		TreeModel::Row row;
+		if (pc) {
+			row = *(_model->append (*pc));
+		} else {
+			row = *(_model->append ());
+		}
+		row[_columns.name] = f;
+		row[_columns.path] = Glib::build_filename (path, f);
+		row[_columns.read] = false;
+		/* add stub child */
+		row                = *(_model->append (row.children ()));
+		row[_columns.read] = false;
+	}
+
+	for (auto& f : files) {
+		TreeModel::Row row;
+		if (pc) {
+			row = *(_model->append (*pc));
+		} else {
+			row = *(_model->append ());
+		}
+		row[_columns.name] = f;
+		row[_columns.path] = Glib::build_filename (path, f);
+		row[_columns.read] = false;
 	}
 }
 
