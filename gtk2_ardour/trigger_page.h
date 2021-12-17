@@ -103,12 +103,12 @@ private:
 	SlotPropertiesBox _slot_prop_box;
 
 	AudioTriggerPropertiesBox _audio_trig_box;
-	AudioRegionOperationsBox _audio_ops_box;
-	AudioClipEditorBox       _audio_trim_box;
+	AudioRegionOperationsBox  _audio_ops_box;
+	AudioClipEditorBox        _audio_trim_box;
 
 	MidiTriggerPropertiesBox _midi_trig_box;
-	MidiRegionOperationsBox _midi_ops_box;
-	MidiClipEditorBox       _midi_trim_box;
+	MidiRegionOperationsBox  _midi_ops_box;
+	MidiClipEditorBox        _midi_trim_box;
 
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;

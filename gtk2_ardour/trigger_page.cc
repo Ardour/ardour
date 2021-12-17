@@ -87,11 +87,11 @@ TriggerPage::TriggerPage ()
 	/* Last item of strip packer, "+" background */
 	_strip_packer.pack_end (_no_strips, true, true);
 	_no_strips.set_flags (Gtk::CAN_FOCUS);
-	_no_strips.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	_no_strips.add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
 	_no_strips.set_size_request (PX_SCALE (20), -1);
 	_no_strips.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose), &_no_strips, ArdourWidgets::ArdourIcon::ShadedPlusSign));
-	_no_strips.signal_button_press_event().connect (sigc::mem_fun(*this, &TriggerPage::no_strip_button_event));
-	_no_strips.signal_button_release_event().connect (sigc::mem_fun(*this, &TriggerPage::no_strip_button_event));
+	_no_strips.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerPage::no_strip_button_event));
+	_no_strips.signal_button_release_event ().connect (sigc::mem_fun (*this, &TriggerPage::no_strip_button_event));
 
 	_strip_group_box.pack_start (_cue_area_frame, false, false);
 	_strip_group_box.pack_start (_strip_scroller, true, true);
@@ -231,7 +231,7 @@ TriggerPage::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	_trigger_clip_picker.set_session (s);
-	_master.set_session(s);
+	_master.set_session (s);
 
 	if (!_session) {
 		return;
@@ -482,7 +482,7 @@ bool
 TriggerPage::no_strip_button_event (GdkEventButton* ev)
 {
 	if ((ev->type == GDK_2BUTTON_PRESS && ev->button == 1) || (ev->type == GDK_BUTTON_RELEASE && Keyboard::is_context_menu_event (ev))) {
-		ARDOUR_UI::instance()->add_route ();
+		ARDOUR_UI::instance ()->add_route ();
 		return true;
 	}
 	return false;
