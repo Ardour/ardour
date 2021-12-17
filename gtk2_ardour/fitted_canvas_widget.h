@@ -55,10 +55,14 @@ public:
 	/* per gtk convention you may use -1 for width OR height if you don't care about that dimension */
 	FittedCanvasWidget(float nominal_width, float nominal_height, bool follow_scale=true);
 
+	/* call if the root item's first child is changed, to force a size-allocate on it */
+	void repeat_size_allocation ();
+
 	void on_size_request (Gtk::Requisition* req);  //always returns the nominal size, regardless of children
 	void on_size_allocate (Gtk::Allocation& alloc);
 
 private:
+	ArdourCanvas::Rect _allocation;
 	float _nominal_width;
 	float _nominal_height;
 	bool  _follow_scale;

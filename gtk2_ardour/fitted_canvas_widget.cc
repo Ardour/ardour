@@ -76,10 +76,16 @@ void
 FittedCanvasWidget::on_size_allocate (Gtk::Allocation& alloc)
 {
 	GtkCanvas::on_size_allocate(alloc);
+	repeat_size_allocation ();
+}
 
+void
+FittedCanvasWidget::repeat_size_allocation ()
+{
 	if (!_root.items().empty()) {
 		ArdourCanvas::Item *fitted = *_root.items().begin();
-		fitted->size_allocate(ArdourCanvas::Rect(0,0,alloc.get_width(), alloc.get_height()));
+		Gtk::Allocation a = get_allocation ();
+		fitted->size_allocate (ArdourCanvas::Rect (0, 0, a.get_width(), a.get_height()));
 	}
 }
 
