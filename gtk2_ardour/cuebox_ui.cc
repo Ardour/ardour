@@ -329,7 +329,7 @@ CueBoxUI::_size_allocate (ArdourCanvas::Rect const & alloc)
 
 	float ypos = 0;
 	for (auto & slot : _slots) {
-		slot->size_allocate (Rect(0, 0, width, slot_h));
+		slot->size_allocate (ArdourCanvas::Rect (0, 0, width, slot_h));
 		slot->set_position (Duple (0, ypos));
 		ypos += slot_h;
 		slot->show();
