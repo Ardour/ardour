@@ -225,6 +225,7 @@ TriggerMaster::TriggerMaster (Item* parent)
 
 TriggerMaster::~TriggerMaster ()
 {
+	update_connection.disconnect ();
 }
 
 void
