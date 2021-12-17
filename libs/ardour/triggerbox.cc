@@ -58,6 +58,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<float> velocity_effect;
 		PBD::PropertyDescriptor<gain_t> gain;
 		PBD::PropertyDescriptor<bool> stretchable;
+		PBD::PropertyDescriptor<bool> isolated;
 	}
 }
 
@@ -83,6 +84,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _ui (0)
 	, expected_end_sample (0)
 	, _stretchable (Properties::stretchable, true)
+	, _isolated (Properties::isolated, false)
 	, _explicitly_stopped (false)
 {
 	add_property (_legato);
@@ -91,6 +93,7 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	add_property (_midi_velocity_effect);
 	add_property (_follow_action_probability);
 	add_property (_stretchable);
+	add_property (_isolated);
 }
 
 void
@@ -104,6 +107,20 @@ void
 Trigger::set_name (std::string const & str)
 {
 	_name = str;
+}
+
+void
+Trigger::set_scene_isolated (bool i)
+{
+	_isolated = i;
+	PropertyChanged (ARDOUR::Properties::isolated);
+}
+
+void
+Trigger::set_stretchable (bool s)
+{
+	_stretchable = s;
+	PropertyChanged (ARDOUR::Properties::stretchable);
 }
 
 void
@@ -647,13 +664,6 @@ AudioTrigger::set_state (const XMLNode& node, int version)
 	last_sample = _start_offset + usable_length;
 
 	return 0;
-}
-
-void
-AudioTrigger::set_stretchable (bool s)
-{
-	_stretchable = s;
-	PropertyChanged (ARDOUR::Properties::stretchable);
 }
 
 void
@@ -1601,6 +1611,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow-action-1 = %1\n", Properties::follow_action1.property_id));
 	Properties::stretchable.property_id = g_quark_from_static_string (X_("stretchable"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretchable = %1\n", Properties::stretchable.property_id));
+	Properties::isolated.property_id = g_quark_from_static_string (X_("isolated"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for isolated = %1\n", Properties::isolated.property_id));
 }
 
 const int32_t TriggerBox::default_triggers_per_box = 8;
@@ -2063,7 +2075,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (_active_scene >= 0) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("tb noticed active scene %1\n", _active_scene));
 		if (_active_scene < (int32_t) all_triggers.size()) {
-			all_triggers[_active_scene]->bang ();
+			if (!all_triggers[_active_scene]->scene_isolated()) {
+				all_triggers[_active_scene]->bang ();
+			}
 		}
 	}
 

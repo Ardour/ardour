@@ -104,6 +104,12 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_name (std::string const &);
 	std::string name() const { return _name; }
 
+	void set_stretchable (bool yn);
+	bool stretchable () const { return _stretchable; }
+
+	void set_scene_isolated (bool isolate);
+	bool scene_isolated () const { return _isolated; }
+
 	/* Calling ::bang() will cause this Trigger to be placed in its owning
 	   TriggerBox's queue.
 	*/
@@ -262,6 +268,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void*                     _ui;
 	samplepos_t                expected_end_sample;
 	PBD::Property<bool>       _stretchable;
+	PBD::Property<bool>       _isolated;
 	bool                      _explicitly_stopped;
 
 	void set_region_internal (boost::shared_ptr<Region>);
@@ -301,9 +308,6 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	SegmentDescriptor get_segment_descriptor () const;
 	void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &);
-
-	void set_stretchable (bool yn);
-	bool stretchable () const { return _stretchable; }
 
 	bool stretching () const;
 
@@ -619,6 +623,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<gain_t> gain;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger*> currently_playing;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> stretchable;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> isolated;
 }
 
 
