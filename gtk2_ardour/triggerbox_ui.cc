@@ -565,6 +565,17 @@ TriggerBoxUI::play_button_event (GdkEvent* ev, uint64_t n)
 					_triggerbox.request_stop_all ();
 					return true;
 				}
+			break;
+			case GDK_ENTER_NOTIFY:
+				if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+					_slots[n]->play_shape->set_outline_color (UIConfiguration::instance().color ("neutral:foregroundest"));
+				}
+			break;
+			case GDK_LEAVE_NOTIFY:
+				if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+					_slots[n]->set_default_colors();
+				}
+				break;
 			default:
 				break;
 		}
