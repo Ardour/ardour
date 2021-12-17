@@ -555,10 +555,8 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 AudioTrigger::AudioTrigger (uint64_t n, TriggerBox& b)
 	: Trigger (n, b)
-	, data (0)
 	, read_index (0)
 	, process_index (0)
-	, data_length (0)
 	, _start_offset (0)
 	, _legato_offset (0)
 	, usable_length (0)
@@ -572,10 +570,7 @@ AudioTrigger::AudioTrigger (uint64_t n, TriggerBox& b)
 
 AudioTrigger::~AudioTrigger ()
 {
-	for (std::vector<Sample*>::iterator d = data.begin(); d != data.end(); ++d) {
-		delete *d;
-	}
-
+	drop_data ();
 	delete _stretcher;
 }
 
@@ -703,13 +698,13 @@ AudioTrigger::set_usable_length ()
 	case Repeat:
 		break;
 	default:
-		usable_length = data_length;
+		usable_length = data.length;
 		last_sample = _start_offset + usable_length;
 		return;
 	}
 
 	if (_quantization == Temporal::BBT_Offset ()) {
-		usable_length = data_length;
+		usable_length = data.length;
 		last_sample = _start_offset + usable_length;
 		return;
 	}
@@ -720,7 +715,7 @@ AudioTrigger::set_usable_length ()
 	usable_length = len.samples();
 	last_sample = _start_offset + usable_length;
 
-	// std::cerr << name() << " SUL ul " << usable_length << " of " << data_length << " so " << _start_offset << " ls " << last_sample << std::endl;
+	// std::cerr << name() << " SUL ul " << usable_length << " of " << data.length << " so " << _start_offset << " ls " << last_sample << std::endl;
 }
 
 void
@@ -733,7 +728,7 @@ timepos_t
 AudioTrigger::current_length() const
 {
 	if (_region) {
-		return timepos_t (data_length);
+		return timepos_t (data.length);
 	}
 	return timepos_t (Temporal::BeatTime);
 }
@@ -832,7 +827,7 @@ AudioTrigger::determine_tempo ()
 
 		mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
 
-		_apparent_tempo = mbpm.estimateTempoOfSamples (data[0], data_length);
+		_apparent_tempo = mbpm.estimateTempoOfSamples (data[0], data.length);
 
 		if (_apparent_tempo == 0.0) {
 			/* no apparent tempo, just return since we'll use it as-is */
@@ -840,10 +835,10 @@ AudioTrigger::determine_tempo ()
 			return;
 		}
 
-		cerr << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data_length / _box.session().sample_rate() << " seconds\n";
+		cerr << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
 	}
 
-	const double seconds = (double) data_length  / _box.session().sample_rate();
+	const double seconds = (double) data.length  / _box.session().sample_rate();
 	const double quarters = (seconds / 60.) * _apparent_tempo;
 	_barcnt = quarters / metric.meter().divisions_per_bar();
 
@@ -908,8 +903,8 @@ AudioTrigger::setup_stretcher ()
 void
 AudioTrigger::drop_data ()
 {
-	for (uint32_t n = 0; n < data.size(); ++n) {
-		delete [] data[n];
+	for (auto& d : data) {
+		delete [] d;
 	}
 	data.clear ();
 }
@@ -920,11 +915,11 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 {
 	const uint32_t nchans = ar->n_channels();
 
-	data_length = ar->length_samples();
+	data.length = ar->length_samples();
 
 	/* if usable length was already set, only adjust it if it is too large */
-	if (!usable_length || usable_length > data_length) {
-		usable_length = data_length;
+	if (!usable_length || usable_length > data.length) {
+		usable_length = data.length;
 		last_sample = _start_offset + usable_length;
 	}
 
@@ -932,8 +927,8 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 
 	try {
 		for (uint32_t n = 0; n < nchans; ++n) {
-			data.push_back (new Sample[data_length]);
-			ar->read (data[n], 0, data_length, n);
+			data.push_back (new Sample[data.length]);
+			ar->read (data[n], 0, data.length, n);
 		}
 
 		set_name (ar->name());

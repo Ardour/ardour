@@ -177,12 +177,12 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_follow_action (FollowAction, uint64_t n);
 
 	void set_region (boost::shared_ptr<Region>);
+	void clear ();
 	virtual int set_region_threaded (boost::shared_ptr<Region>) = 0;
 	boost::shared_ptr<Region> region() const { return _region; }
 
 	Temporal::BBT_Offset quantization() const;
 	void set_quantization (Temporal::BBT_Offset const &);
-
 
 	uint64_t index() const { return _index; }
 
@@ -316,11 +316,15 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void set_usable_length ();
 
   private:
-	PBD::ID     data_source;
-	std::vector<Sample*> data;
+	struct Data : std::vector<Sample*> {
+		samplecnt_t length;
+
+		Data () : length (0) {}
+	};
+
+	Data        data;
 	samplecnt_t read_index;
 	samplecnt_t process_index;
-	samplecnt_t data_length;
 	samplepos_t _start_offset;
 	samplepos_t _legato_offset;
 	samplecnt_t usable_length;
