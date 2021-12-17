@@ -978,7 +978,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	nframes -= extra_offset;
 	dest_offset += extra_offset;
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2\n", name(), enum_2_string (_state)));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2, will stretch %3\n", name(), enum_2_string (_state), do_stretch));
 
 	switch (_state) {
 	case Stopped:
@@ -1009,7 +1009,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		const double stretch = _apparent_tempo / bpm;
 		_stretcher->setTimeRatio (stretch);
 
-		// cerr << "apparent " << _apparent_tempo << " bpm " << bpm << " TR " << std::setprecision (6) << stretch << " latency " << _stretcher->getLatency() << endl;
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("clip tempo %1 bpm %2 ratio %3%4\n", _apparent_tempo, bpm, std::setprecision (6), stretch));
 
 		if ((avail = _stretcher->available()) < 0) {
 			error << _("Could not configure rubberband stretcher") << endmsg;
