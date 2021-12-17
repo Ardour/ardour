@@ -645,11 +645,9 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	hide_master_spacer (false);
 
 	if (is_track()) {
-		_tmaster_widget.show ();
 		monitor_input_button->show ();
 		monitor_disk_button->show ();
 	} else {
-		_tmaster_widget.hide ();
 		monitor_input_button->hide();
 		monitor_disk_button->hide ();
 	}
@@ -780,6 +778,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	width_hide_box.show();
 	global_frame.show();
 	global_vpacker.show();
+	trigger_display.show ();
+	_tmaster_widget.show ();
 	mute_solo_table.show();
 	bottom_button_table.show();
 	gpm.show_all ();
