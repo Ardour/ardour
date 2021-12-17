@@ -93,6 +93,8 @@ public:
 	TriggerBoxUI (ArdourCanvas::Item* parent, ARDOUR::TriggerBox&);
 	~TriggerBoxUI ();
 
+	void toggle_trigger_isolated (uint64_t n);
+	void clear_trigger (uint64_t n);
 	void edit_trigger (uint64_t n);
 	void start_updating ();
 	void stop_updating ();
@@ -112,6 +114,7 @@ private:
 	Gtk::FileChooserDialog* _file_chooser;
 	sigc::connection        _file_chooser_connection;
 	Gtk::Menu*              _context_menu;
+	bool                    _ignore_menu_action;
 
 	static Gtkmm2ext::Bindings* bindings;
 	static void                 load_bindings ();

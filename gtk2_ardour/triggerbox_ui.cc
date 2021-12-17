@@ -256,11 +256,24 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 
 	render_children (area, context);
 
-	if (_trigger.index () == 1) {
-		/* drop-shadow at top */
-		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6 * scale);
-		drop_shadow_pattern->add_color_stop_rgba (0, 0, 0, 0, 0.7);
-		drop_shadow_pattern->add_color_stop_rgba (1, 0, 0, 0, 0.0);
+	if (_trigger.scene_isolated()) {
+		//left shadow
+		context->set_identity_matrix();
+		context->translate (self.x0, self.y0-0.5);
+		Cairo::RefPtr<Cairo::LinearGradient> l_shadow = Cairo::LinearGradient::create (0, 0, scale*12, 0);
+		l_shadow->add_color_stop_rgba ( 0.0, 0.0,0.0,0.0, 0.8);
+		l_shadow->add_color_stop_rgba ( 1.0, 0.0,0.0,0.0, 0.0);
+		context->set_source (l_shadow);
+		context->rectangle( 0, 0, scale*12, height );
+		context->fill ();
+		context->set_identity_matrix();
+	}
+
+	if (_trigger.index()==1) {
+		//drop-shadow at top
+		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6*scale);
+		drop_shadow_pattern->add_color_stop_rgba (0,	0,	0,	0,	0.7);
+		drop_shadow_pattern->add_color_stop_rgba (1,	0,	0,	0,	0.0);
 		context->set_source (drop_shadow_pattern);
 		context->rectangle (0, 0, width, 6 * scale);
 		context->fill ();
@@ -337,6 +350,10 @@ TriggerEntry::prop_change (PropertyChange const& change)
 		redraw ();
 	}
 
+	if (change.contains (ARDOUR::Properties::isolated)) {
+		redraw();
+	}
+
 	if (need_pb) {
 		shape_play_button ();
 	}
@@ -391,6 +408,7 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	, _triggerbox (tb)
 	, _file_chooser (0)
 	, _context_menu (0)
+	, _ignore_menu_action (false)
 {
 	set_layout_sensitive (true); // why???
 
@@ -764,13 +782,39 @@ TriggerBoxUI::context_menu (uint64_t n)
 	loitems.push_back (MenuElem (_("from file"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::choose_sample), n)));
 	loitems.push_back (MenuElem (_("from selection"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_from_selection), n)));
 
+	items.push_back (MenuElem (_("Clear"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::clear_trigger), n)));
 	items.push_back (MenuElem (_("Load..."), *load_menu));
 	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::edit_trigger), n)));
 	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
 	items.push_back (MenuElem (_("Launch Style..."), *launch_menu));
 	items.push_back (MenuElem (_("Quantization..."), *quant_menu));
 
+	items.push_back (CheckMenuElem (_("Cue Isolate"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::toggle_trigger_isolated), n)));
+	if (_triggerbox.trigger (n)->scene_isolated()) {
+		_ignore_menu_action = true;
+		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
+		_ignore_menu_action = false;
+	}
+
 	_context_menu->popup (1, gtk_get_current_event_time ());
+}
+
+void
+TriggerBoxUI::toggle_trigger_isolated (uint64_t n)
+{
+	if (_ignore_menu_action) {
+		return;
+	}
+
+	Trigger* trigger = _triggerbox.trigger (n);
+	trigger->set_scene_isolated(!trigger->scene_isolated());
+}
+
+void
+TriggerBoxUI::clear_trigger (uint64_t n)
+{
+	Trigger* trigger = _triggerbox.trigger (n);
+//	trigger->clear_trigger();
 }
 
 void
