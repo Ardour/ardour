@@ -953,6 +953,7 @@ void
 TriggerBoxWidget::set_triggerbox (TriggerBox* tb)
 {
 	if (ui) {
+		root()->remove (ui);
 		delete ui;
 		ui = 0;
 	}
@@ -962,6 +963,7 @@ TriggerBoxWidget::set_triggerbox (TriggerBox* tb)
 	}
 
 	ui = new TriggerBoxUI (root(), *tb);
+	repeat_size_allocation ();
 
 	if (is_mapped()) {
 		ui->start_updating ();
