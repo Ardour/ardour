@@ -161,23 +161,23 @@ PassThru::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 
 	if (_enabled) {
-		//outer white circle
-		set_source_rgba (context, rgba_to_color (1,1,1,1));
-		context->arc ( size/2, size/2, size/2 - 3*scale, 0, 2*M_PI );
-		context->fill();
+		/* outer white circle */
+		set_source_rgba (context, rgba_to_color (1, 1, 1, 1));
+		context->arc (size / 2, size / 2, size / 2 - 3 * scale, 0, 2 * M_PI);
+		context->fill ();
 
-		//black circle
-		set_source_rgba (context, rgba_to_color (0,0,0,1));
-		context->arc ( size/2, size/2, size/2 - 5*scale, 0, 2*M_PI );
-		context->fill();
+		/* black circle */
+		set_source_rgba (context, rgba_to_color (0, 0, 0, 1));
+		context->arc (size / 2, size / 2, size / 2 - 5 * scale, 0, 2 * M_PI);
+		context->fill ();
 
-		//inner white circle
-		set_source_rgba (context, rgba_to_color (1,1,1,1));
-		context->arc ( size/2, size/2, size/2 - 7*scale, 0, 2*M_PI );
-		context->fill();
+		/* inner white circle */
+		set_source_rgba (context, rgba_to_color (1, 1, 1, 1));
+		context->arc (size / 2, size / 2, size / 2 - 7 * scale, 0, 2 * M_PI);
+		context->fill ();
 	}
 
-	context->set_identity_matrix();
+	context->set_identity_matrix ();
 }
 
 TriggerMaster::TriggerMaster (Item* parent)
@@ -259,22 +259,22 @@ TriggerMaster::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) 
 
 	render_children (area, context);
 
-	//drop-shadow at top
 	if (true) {
-		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6*scale);
-		drop_shadow_pattern->add_color_stop_rgba (0,	0,	0,	0,	0.7);
-		drop_shadow_pattern->add_color_stop_rgba (1,	0,	0,	0,	0.0);
+		/* drop-shadow at top */
+		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6 * scale);
+		drop_shadow_pattern->add_color_stop_rgba (0, 0, 0, 0, 0.7);
+		drop_shadow_pattern->add_color_stop_rgba (1, 0, 0, 0, 0.0);
 		context->set_source (drop_shadow_pattern);
-		context->rectangle(0, 0, width, 6*scale );
+		context->rectangle (0, 0, width, 6 * scale);
 		context->fill ();
 	} else {
-		//line at top
-		context->set_identity_matrix();
-		context->translate (self.x0, self.y0-0.5);
-		set_source_rgba (context, rgba_to_color (0,0,0,1));
-		context->rectangle(0, 0, width, 1.);
+		/* line at top */
+		context->set_identity_matrix ();
+		context->translate (self.x0, self.y0 - 0.5);
+		set_source_rgba (context, rgba_to_color (0, 0, 0, 1));
+		context->rectangle (0, 0, width, 1.);
 		context->fill ();
-		context->set_identity_matrix();
+		context->set_identity_matrix ();
 	}
 }
 
@@ -306,23 +306,23 @@ TriggerMaster::event_handler (GdkEvent* ev)
 			break;
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				name_text->set_color (UIConfiguration::instance().color("neutral:foregroundest"));
-				stop_shape->set_outline_color (UIConfiguration::instance().color("neutral:foreground"));
-				set_fill_color (HSV (fill_color()).lighter(0.15).color ());
+				name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
+				stop_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foreground"));
+				set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			}
 			redraw ();
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_default_colors();
+				set_default_colors ();
 			}
 			redraw ();
 			break;
 		case GDK_BUTTON_RELEASE:
 			switch (ev->button.button) {
-			case 3:
-				context_menu ();
-				return true;
+				case 3:
+					context_menu ();
+					return true;
 			}
 		default:
 			break;
@@ -460,7 +460,7 @@ TriggerMaster::_size_allocate (ArdourCanvas::Rect const& alloc)
 	float tleft  = _poly_size + (_poly_margin * 3);
 	float twidth = width - _poly_size - (_poly_margin * 3);
 
-	ArdourCanvas::Rect text_alloc (tleft, 0, twidth, height); //testing
+	ArdourCanvas::Rect text_alloc (tleft, 0, twidth, height); // testing
 	name_text->size_allocate (text_alloc);
 	name_text->set_position (Duple (tleft, 1. * scale));
 	name_text->clamp_width (twidth);
@@ -486,8 +486,8 @@ TriggerMaster::prop_change (PropertyChange const& change)
 	ARDOUR::Trigger* trigger = _triggerbox->currently_playing ();
 	if (!trigger) {
 		name_text->set (text);
-		_loopster->hide();
-		stop_shape->show();
+		_loopster->hide ();
+		stop_shape->show ();
 		return;
 	}
 
@@ -501,21 +501,21 @@ TriggerMaster::prop_change (PropertyChange const& change)
 
 	if (trigger->active ()) {
 		double f = trigger->position_as_fraction ();
-		_loopster->set_fraction(f);
-		_loopster->show();
-		stop_shape->hide();
+		_loopster->set_fraction (f);
+		_loopster->show ();
+		stop_shape->hide ();
 	} else {
-		_loopster->hide();
-		stop_shape->show();
+		_loopster->hide ();
+		stop_shape->show ();
 	}
 }
 
 void
 TriggerMaster::set_default_colors ()
 {
-	set_fill_color (HSV (UIConfiguration::instance().color("theme:bg")).darker(0.25).color ());
-	name_text->set_color (UIConfiguration::instance().color("neutral:foreground"));
-	stop_shape->set_outline_color (UIConfiguration::instance().color("neutral:midground"));
+	set_fill_color (HSV (UIConfiguration::instance ().color ("theme:bg")).darker (0.25).color ());
+	name_text->set_color (UIConfiguration::instance ().color ("neutral:foreground"));
+	stop_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:midground"));
 }
 
 void
@@ -529,7 +529,7 @@ TriggerMaster::ui_parameter_changed (std::string const& p)
 CueMaster::CueMaster (Item* parent)
 	: ArdourCanvas::Rectangle (parent)
 {
-	set_layout_sensitive (true); //why???
+	set_layout_sensitive (true); // why???
 
 	name = X_("trigger stopper");
 
@@ -581,20 +581,20 @@ CueMaster::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) cons
 
 	render_children (area, context);
 
-	//drop-shadow at top
 	if (true) {
-		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6*scale);
-		drop_shadow_pattern->add_color_stop_rgba (0,	0,	0,	0,	0.7);
-		drop_shadow_pattern->add_color_stop_rgba (1,	0,	0,	0,	0.0);
+		/* drop-shadow at top */
+		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6 * scale);
+		drop_shadow_pattern->add_color_stop_rgba (0, 0, 0, 0, 0.7);
+		drop_shadow_pattern->add_color_stop_rgba (1, 0, 0, 0, 0.0);
 		context->set_source (drop_shadow_pattern);
-		context->rectangle(0, 0, width, 6*scale );
+		context->rectangle (0, 0, width, 6 * scale);
 		context->fill ();
 	} else {
-		//line at top
-		context->set_identity_matrix();
-		context->translate (self.x0, self.y0-0.5);
-		set_source_rgba (context, rgba_to_color (0,0,0,1));
-		context->rectangle(0, 0, width, 1.);
+		/* line at top */
+		context->set_identity_matrix ();
+		context->translate (self.x0, self.y0 - 0.5);
+		set_source_rgba (context, rgba_to_color (0, 0, 0, 1));
+		context->rectangle (0, 0, width, 1.);
 		context->fill ();
 		context->set_identity_matrix ();
 	}
@@ -606,20 +606,20 @@ CueMaster::event_handler (GdkEvent* ev)
 	switch (ev->type) {
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button == 1) {
-				_session->stop_all_triggers();
+				_session->stop_all_triggers ();
 				return true;
 			}
 			break;
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				name_text->set_color (UIConfiguration::instance().color("neutral:foregroundest"));
-				stop_shape->set_outline_color (UIConfiguration::instance().color("neutral:foreground"));
-				set_fill_color (HSV (fill_color()).lighter(0.15).color ());
+				name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
+				stop_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foreground"));
+				set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_default_colors();
+				set_default_colors ();
 			}
 			break;
 		default:
@@ -647,19 +647,19 @@ CueMaster::_size_allocate (ArdourCanvas::Rect const& alloc)
 
 	_poly_size = height - (_poly_margin * 2);
 
-	float centering_offset = (width/2)-_poly_margin-_poly_size/2;
+	float centering_offset = (width / 2) - _poly_margin - _poly_size / 2;
 
 	Points p;
-	p.push_back (Duple (centering_offset+ _poly_margin, _poly_margin));
-	p.push_back (Duple (centering_offset+ _poly_margin, _poly_size));
-	p.push_back (Duple (centering_offset+ _poly_size, _poly_size));
-	p.push_back (Duple (centering_offset+ _poly_size, _poly_margin));
+	p.push_back (Duple (centering_offset + _poly_margin, _poly_margin));
+	p.push_back (Duple (centering_offset + _poly_margin, _poly_size));
+	p.push_back (Duple (centering_offset + _poly_size, _poly_size));
+	p.push_back (Duple (centering_offset + _poly_size, _poly_margin));
 	stop_shape->set (p);
 
 	float tleft  = _poly_size + (_poly_margin * 3);
 	float twidth = width - _poly_size - (_poly_margin * 3);
 
-	ArdourCanvas::Rect text_alloc (tleft, 0, twidth, height); //testing
+	ArdourCanvas::Rect text_alloc (tleft, 0, twidth, height); // testing
 	name_text->size_allocate (text_alloc);
 	name_text->set_position (Duple (tleft, 1. * scale));
 	name_text->clamp_width (twidth);
@@ -671,9 +671,9 @@ CueMaster::_size_allocate (ArdourCanvas::Rect const& alloc)
 void
 CueMaster::set_default_colors ()
 {
-	set_fill_color (HSV (UIConfiguration::instance().color("theme:bg")).darker(0.25).color ());
-	name_text->set_color (UIConfiguration::instance().color("neutral:foreground"));
-	stop_shape->set_outline_color (UIConfiguration::instance().color("neutral:midground"));
+	set_fill_color (HSV (UIConfiguration::instance ().color ("theme:bg")).darker (0.25).color ());
+	name_text->set_color (UIConfiguration::instance ().color ("neutral:foreground"));
+	stop_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:midground"));
 }
 
 void
