@@ -25,6 +25,7 @@
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
+#include "pbd/unwind.h"
 
 #include "ardour/region.h"
 #include "ardour/triggerbox.h"
@@ -145,8 +146,8 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 	name_button->set (ArdourCanvas::Rect (height, 0, width, height));
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
-	_poly_margin        = 2. * scale;
-	_poly_size          = height - 2 * _poly_margin;
+	_poly_margin       = 2. * scale;
+	_poly_size         = height - 2 * _poly_margin;
 	shape_play_button ();
 
 	float tleft = height; // make room for the play button
@@ -256,24 +257,24 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 
 	render_children (area, context);
 
-	if (_trigger.scene_isolated()) {
-		//left shadow
-		context->set_identity_matrix();
-		context->translate (self.x0, self.y0-0.5);
-		Cairo::RefPtr<Cairo::LinearGradient> l_shadow = Cairo::LinearGradient::create (0, 0, scale*12, 0);
-		l_shadow->add_color_stop_rgba ( 0.0, 0.0,0.0,0.0, 0.8);
-		l_shadow->add_color_stop_rgba ( 1.0, 0.0,0.0,0.0, 0.0);
+	if (_trigger.scene_isolated ()) {
+		/* left shadow */
+		context->set_identity_matrix ();
+		context->translate (self.x0, self.y0 - 0.5);
+		Cairo::RefPtr<Cairo::LinearGradient> l_shadow = Cairo::LinearGradient::create (0, 0, scale * 12, 0);
+		l_shadow->add_color_stop_rgba (0.0, 0.0, 0.0, 0.0, 0.8);
+		l_shadow->add_color_stop_rgba (1.0, 0.0, 0.0, 0.0, 0.0);
 		context->set_source (l_shadow);
-		context->rectangle( 0, 0, scale*12, height );
+		context->rectangle (0, 0, scale * 12, height);
 		context->fill ();
-		context->set_identity_matrix();
+		context->set_identity_matrix ();
 	}
 
-	if (_trigger.index()==1) {
-		//drop-shadow at top
-		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6*scale);
-		drop_shadow_pattern->add_color_stop_rgba (0,	0,	0,	0,	0.7);
-		drop_shadow_pattern->add_color_stop_rgba (1,	0,	0,	0,	0.0);
+	if (_trigger.index () == 1) {
+		/* drop-shadow at top */
+		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6 * scale);
+		drop_shadow_pattern->add_color_stop_rgba (0, 0, 0, 0, 0.7);
+		drop_shadow_pattern->add_color_stop_rgba (1, 0, 0, 0, 0.0);
 		context->set_source (drop_shadow_pattern);
 		context->rectangle (0, 0, width, 6 * scale);
 		context->fill ();
@@ -346,12 +347,12 @@ TriggerEntry::prop_change (PropertyChange const& change)
 		need_pb = true;
 	}
 
-	if (change.contains (ARDOUR::Properties::follow_action0)) {
-		redraw ();
-	}
+	PropertyChange interesting_stuff;
+	interesting_stuff.add (ARDOUR::Properties::follow_action0);
+	interesting_stuff.add (ARDOUR::Properties::isolated);
 
-	if (change.contains (ARDOUR::Properties::isolated)) {
-		redraw();
+	if (change.contains (interesting_stuff)) {
+		redraw ();
 	}
 
 	if (need_pb) {
@@ -583,15 +584,15 @@ TriggerBoxUI::play_button_event (GdkEvent* ev, uint64_t n)
 					_triggerbox.request_stop_all ();
 					return true;
 				}
-			break;
+				break;
 			case GDK_ENTER_NOTIFY:
 				if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-					_slots[n]->play_shape->set_outline_color (UIConfiguration::instance().color ("neutral:foregroundest"));
+					_slots[n]->play_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 				}
-			break;
+				break;
 			case GDK_LEAVE_NOTIFY:
 				if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-					_slots[n]->set_default_colors();
+					_slots[n]->set_default_colors ();
 				}
 				break;
 			default:
@@ -790,10 +791,9 @@ TriggerBoxUI::context_menu (uint64_t n)
 	items.push_back (MenuElem (_("Quantization..."), *quant_menu));
 
 	items.push_back (CheckMenuElem (_("Cue Isolate"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::toggle_trigger_isolated), n)));
-	if (_triggerbox.trigger (n)->scene_isolated()) {
-		_ignore_menu_action = true;
+	if (_triggerbox.trigger (n)->scene_isolated ()) {
+		PBD::Unwinder<bool> uw (_ignore_menu_action, true);
 		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
-		_ignore_menu_action = false;
 	}
 
 	_context_menu->popup (1, gtk_get_current_event_time ());
@@ -807,14 +807,16 @@ TriggerBoxUI::toggle_trigger_isolated (uint64_t n)
 	}
 
 	Trigger* trigger = _triggerbox.trigger (n);
-	trigger->set_scene_isolated(!trigger->scene_isolated());
+	trigger->set_scene_isolated (!trigger->scene_isolated ());
 }
 
 void
 TriggerBoxUI::clear_trigger (uint64_t n)
 {
+#if 0 // XXX
 	Trigger* trigger = _triggerbox.trigger (n);
-//	trigger->clear_trigger();
+	trigger->clear_trigger();
+#endif
 }
 
 void
