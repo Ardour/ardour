@@ -1126,7 +1126,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
 
 			uint64_t channel = chn %  data.size();
-			AudioBuffer& buf (bufs.get_audio (channel));
+			AudioBuffer& buf (bufs.get_audio (chn));
 			Sample* src = do_stretch ? bufp[channel] : (data[channel] + read_index);
 
 			if (!passthru) {
@@ -1138,7 +1138,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 				if (_gain != 1.0) {
 					buf.accumulate_with_gain_from (src, from_stretcher, _gain, dest_offset);
 				} else {
-					buf.accumulate_with_gain_from (src, from_stretcher, _gain, dest_offset);
+					buf.accumulate_from (src, from_stretcher, dest_offset);
 				}
 			}
 		}
