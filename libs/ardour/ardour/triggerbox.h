@@ -256,7 +256,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	FollowAction              _follow_action[2];
 	PBD::Property<int>        _follow_action_probability;
 	uint32_t                  _loop_cnt; /* how many times in a row has this played */
-	PBD::Property<int>        _follow_count;
+	PBD::Property<uint32_t>   _follow_count;
 	Temporal::BBT_Offset      _quantization;
 	PBD::Property<bool>       _legato;
 	std::string               _name;
@@ -621,7 +621,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<int> follow_count;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> follow_count;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<int> follow_action_probability;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float> velocity_effect;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<gain_t> gain;
