@@ -97,6 +97,7 @@ private:
 	PassThru* _passthru;
 
 	Gtk::Menu* _context_menu;
+	bool       _ignore_menu_action;
 
 	double _poly_size;
 	double _poly_margin;

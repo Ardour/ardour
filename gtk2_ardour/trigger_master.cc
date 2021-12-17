@@ -183,6 +183,7 @@ PassThru::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 TriggerMaster::TriggerMaster (Item* parent)
 	: ArdourCanvas::Rectangle (parent)
 	, _context_menu (0)
+	, _ignore_menu_action (false)
 {
 	set_layout_sensitive (true); // why???
 
@@ -393,7 +394,9 @@ TriggerMaster::context_menu ()
 
 	items.push_back (CheckMenuElem (_("Toggle Monitor Thru"), sigc::mem_fun (*this, &TriggerMaster::toggle_thru)));
 	if (_triggerbox->pass_thru ()) {
+		_ignore_menu_action = true;
 		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
+		_ignore_menu_action = false;
 	}
 
 	items.push_back (MenuElem (_("Enable/Disable..."), sigc::mem_fun (*this, &TriggerMaster::maybe_update))); // TODO
@@ -408,6 +411,10 @@ TriggerMaster::context_menu ()
 void
 TriggerMaster::toggle_thru ()
 {
+	if (_ignore_menu_action) {
+		return;
+	}
+
 	_triggerbox->set_pass_thru (!_triggerbox->pass_thru ());
 }
 
