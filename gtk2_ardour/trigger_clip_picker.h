@@ -68,10 +68,12 @@ private:
 			add (name);
 			add (path);
 			add (read);
+			add (file);
 		}
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> path;
 		Gtk::TreeModelColumn<bool>        read;
+		Gtk::TreeModelColumn<bool>        file;
 	};
 
 	Columns                      _columns;

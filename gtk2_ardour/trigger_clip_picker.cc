@@ -170,10 +170,13 @@ TriggerClipPicker::row_selected ()
 		return;
 	}
 	_session->cancel_audition ();
+
 	if (_view.get_selection ()->count_selected_rows () < 1) {
 		_play_btn.set_sensitive (false);
 	} else {
-		_play_btn.set_sensitive (true);
+		TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
+		TreeIter                             i    = _model->get_iter (*rows.begin ());
+		_play_btn.set_sensitive ((*i)[_columns.file]);
 	}
 }
 
@@ -181,7 +184,7 @@ void
 TriggerClipPicker::row_activated (TreeModel::Path const& p, TreeViewColumn*)
 {
 	TreeModel::iterator i = _model->get_iter (p);
-	if (i) {
+	if (i && (*i)[_columns.file]) {
 		audition ((*i)[_columns.path]);
 	}
 }
@@ -229,7 +232,9 @@ TriggerClipPicker::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Selecti
 	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin (); i != rows.end (); ++i) {
 		TreeIter iter;
 		if ((iter = _model->get_iter (*i))) {
-			uris.push_back (Glib::filename_to_uri ((*iter)[_columns.path]));
+			if ((*iter)[_columns.file]) {
+				uris.push_back (Glib::filename_to_uri ((*iter)[_columns.path]));
+			}
 		}
 	}
 	data.set_uris (uris);
@@ -286,6 +291,10 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 			std::string fullpath = Glib::build_filename (path, *i);
 			std::string basename = *i;
 
+			if (basename.size() == 0 || basename[0] == '.') {
+				continue;
+			}
+
 			if (Glib::file_test (fullpath, Glib::FILE_TEST_IS_DIR)) {
 				dirs.push_back (*i);
 				continue;
@@ -311,6 +320,7 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 		row[_columns.name] = f;
 		row[_columns.path] = Glib::build_filename (path, f);
 		row[_columns.read] = false;
+		row[_columns.file] = false;
 		/* add stub child */
 		row                = *(_model->append (row.children ()));
 		row[_columns.read] = false;
@@ -326,6 +336,7 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 		row[_columns.name] = f;
 		row[_columns.path] = Glib::build_filename (path, f);
 		row[_columns.read] = false;
+		row[_columns.file] = true;
 	}
 }
 
