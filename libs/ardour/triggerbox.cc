@@ -2730,19 +2730,8 @@ TriggerBoxThread::queue_request (Request* req)
 			return;
 		}
 	}
-	if (_xthread.deliver (c) != 1) {
-		/* the x-thread channel is non-blocking
-		 * write may fail, but we really don't want to wait
-		 * under normal circumstances.
-		 *
-		 * a lost "run" requests under normal RT operation
-		 * is mostly harmless.
-		 *
-		 * TODO if ardour is freehweeling, wait & retry.
-		 * ditto for Request::Type Quit
-		 */
-		assert(1); // we're screwd
-	}
+
+	_xthread.deliver (c);
 }
 
 void*
