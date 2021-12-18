@@ -1775,6 +1775,11 @@ TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 			return;
 		}
 
+		if (status.sources.empty()) {
+			error << string_compose (_("Could not create source from %1"), path) << endmsg;
+			return;
+		}
+
 		/* XXX need to check data type */
 
 		SourceList src_list;
