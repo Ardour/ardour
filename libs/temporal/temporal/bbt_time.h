@@ -351,11 +351,27 @@ inline bool to_string (Temporal::BBT_Time val, std::string & str)
 }
 
 template<>
+inline std::string to_string (Temporal::BBT_Time val)
+{
+	std::ostringstream ostr;
+	ostr << val;
+	return ostr.str();
+}
+
+template<>
 inline bool string_to (std::string const & str, Temporal::BBT_Time & val)
 {
 	std::istringstream istr (str);
 	istr >> val;
 	return (bool) istr;
+}
+
+template<>
+inline Temporal::BBT_Time string_to (std::string const & str)
+{
+	Temporal::BBT_Time tmp;
+	string_to (str, tmp);
+	return tmp;
 }
 
 template<>
@@ -368,11 +384,27 @@ inline bool to_string (Temporal::BBT_Offset val, std::string & str)
 }
 
 template<>
+inline std::string to_string (Temporal::BBT_Offset val)
+{
+	std::ostringstream ostr;
+	ostr << val;
+	return ostr.str();
+}
+
+template<>
 inline bool string_to (std::string const & str, Temporal::BBT_Offset & val)
 {
 	std::istringstream istr (str);
 	istr >> val;
 	return (bool) istr;
+}
+
+template<>
+inline Temporal::BBT_Offset string_to (std::string const & str)
+{
+	Temporal::BBT_Offset tmp;
+	string_to (str, tmp);
+	return tmp;
 }
 
 } /* end namespace PBD */
