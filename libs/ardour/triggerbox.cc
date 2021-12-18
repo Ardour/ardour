@@ -30,6 +30,7 @@
 #include "ardour/session_object.h"
 #include "ardour/sidechain.h"
 #include "ardour/source_factory.h"
+#include "ardour/smf_source.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/triggerbox.h"
 #include "ardour/types_convert.h"
@@ -1757,6 +1758,15 @@ TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 		return;
 	}
 
+	const DataType source_type = SMFSource::safe_midi_file_extension (path) ? DataType::MIDI : DataType::AUDIO;
+
+	if (source_type != _data_type) {
+		error << string_compose (_("Cannot use %1 files in %2 slots"),
+		                         ((source_type == DataType::MIDI) ? "MIDI" : "audio"),
+		                         ((source_type == DataType::MIDI) ? "audio" : "MIDI")) << endmsg;
+		return;
+	}
+
 	try {
 		ImportStatus status;
 
@@ -1780,8 +1790,6 @@ TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 			return;
 		}
 
-		/* XXX need to check data type */
-
 		SourceList src_list;
 
 		for (auto& src : status.sources) {
@@ -1799,8 +1807,6 @@ TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 		boost::shared_ptr<Region> the_region (RegionFactory::create (src_list, plist, true));
 
 		all_triggers[slot]->set_region (the_region);
-
-		/* XXX catch region going away */
 
 	} catch (std::exception& e) {
 		cerr << "loading sample from " << path << " failed: " << e.what() << endl;
