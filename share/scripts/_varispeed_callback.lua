@@ -26,7 +26,7 @@ function factory (params)
 			if speed < -0.25 then delta = delta * -1 end
 			if speed >  0.25 then delta = delta * -1 end
 			speed = speed + delta
-			Session:request_transport_speed (speed, true, ARDOUR.TransportRequestSource.TRS_UI)
+			Session:request_transport_speed (speed, ARDOUR.TransportRequestSource.TRS_UI)
 		end
 	end
 end
