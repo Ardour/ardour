@@ -745,15 +745,21 @@ AudioTrigger::natural_length() const
 int
 AudioTrigger::set_region_threaded (boost::shared_ptr<Region> r)
 {
-	using namespace RubberBand;
+	assert (!active());
 
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
-	if (!ar) {
+	if (r && !ar) {
 		return -1;
 	}
 
 	set_region_internal (r);
+
+	if (!r) {
+		/* unset */
+		return 0;
+	}
+
 	load_data (ar);
 	determine_tempo ();
 	setup_stretcher ();
