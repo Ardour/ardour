@@ -1766,6 +1766,7 @@ TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 		status.paths.push_back (path);
 		status.replace_existing_source = false;
 		status.split_midi_channels = false;
+		status.midi_track_name_source = ARDOUR::SMFTrackName;
 
 		_session.import_files (status);
 
