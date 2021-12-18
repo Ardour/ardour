@@ -2725,6 +2725,10 @@ TriggerBoxThread::queue_request (Request* req)
 {
 	char c = req->type;
 
+	/* Quit is handled by simply delivering the request type (1 byte), with
+	 * no payload in the FIFO. See ::thread_work() above.
+	 */
+
 	if (req->type != Quit) {
 		if (requests.write (&req, 1) != 1) {
 			return;
