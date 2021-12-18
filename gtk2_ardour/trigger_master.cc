@@ -75,13 +75,13 @@ Loopster::set_fraction (float f)
 }
 
 void
-Loopster::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
+Loopster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	/* Note that item_to_window() already takes _position into account (as
 	 * part of item_to_canvas()
 	 */
-	Rect       self (item_to_window (_rect));
-	const Rect draw = self.intersection (area);
+	ArdourCanvas::Rect       self (item_to_window (_rect));
+	ArdourCanvas::Rect const draw = self.intersection (area);
 
 	if (!draw) {
 		return;
@@ -141,13 +141,13 @@ PassThru::set_enabled (bool e)
 }
 
 void
-PassThru::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
+PassThru::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	/* Note that item_to_window() already takes _position into account (as
 	 * part of item_to_canvas()
 	 */
-	Rect       self (item_to_window (_rect));
-	const Rect draw = self.intersection (area);
+	ArdourCanvas::Rect       self (item_to_window (_rect));
+	ArdourCanvas::Rect const draw = self.intersection (area);
 
 	if (!draw) {
 		return;
@@ -236,13 +236,13 @@ TriggerMaster::set_trigger (boost::shared_ptr<ARDOUR::TriggerBox> t)
 }
 
 void
-TriggerMaster::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
+TriggerMaster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	/* Note that item_to_window() already takes _position into account (as
 	 * part of item_to_canvas()
 	 */
-	Rect       self (item_to_window (_rect));
-	const Rect draw = self.intersection (area);
+	ArdourCanvas::Rect       self (item_to_window (_rect));
+	ArdourCanvas::Rect const draw = self.intersection (area);
 
 	if (!draw) {
 		return;
@@ -564,13 +564,13 @@ CueMaster::~CueMaster ()
 }
 
 void
-CueMaster::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
+CueMaster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	/* Note that item_to_window() already takes _position into account (as
 	   part of item_to_canvas()
 	*/
-	Rect       self (item_to_window (_rect));
-	const Rect draw = self.intersection (area);
+	ArdourCanvas::Rect       self (item_to_window (_rect));
+	ArdourCanvas::Rect const draw = self.intersection (area);
 
 	if (!draw) {
 		return;
