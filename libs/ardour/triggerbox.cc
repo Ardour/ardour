@@ -69,31 +69,38 @@ Trigger::Trigger (uint64_t n, TriggerBox& b)
 	, _bang (0)
 	, _unbang (0)
 	, _index (n)
-	, _launch_style (Toggle)
-	, _use_follow (Properties::use_follow, true)
-	, _follow_action { NextTrigger, Stop }
-	, _follow_action_probability (Properties::follow_action_probability, 100)
-	, _loop_cnt (0)
-	, _follow_count (Properties::follow_count, 1)
-	, _quantization (Temporal::BBT_Offset (0, 1, 0))
-	, _legato (Properties::legato, false)
-	, _barcnt (0.)
-	, _apparent_tempo (0.)
-	, _gain (Properties::gain, 1.0)
 	, _pending_gain (1.0)
-	, _midi_velocity_effect (Properties::velocity_effect, 0.)
+	, _loop_cnt (0)
 	, _ui (0)
-	, expected_end_sample (0)
+	, _explicitly_stopped (false)
+	, _launch_style (Properties::launch_style, Toggle)
+	, _use_follow (Properties::use_follow, true)
+	, _follow_action0 (Properties::follow_action0, NextTrigger)
+	, _follow_action1 (Properties::follow_action1, Stop)
+	, _follow_action_probability (Properties::follow_action_probability, 100)
+	, _follow_count (Properties::follow_count, 1)
+	, _quantization (Properties::quantization, Temporal::BBT_Offset (0, 1, 0))
+	, _legato (Properties::legato, false)
+	, _name (Properties::name, "")
+	, _gain (Properties::gain, 1.0)
+	, _midi_velocity_effect (Properties::velocity_effect, 0.)
 	, _stretchable (Properties::stretchable, true)
 	, _isolated (Properties::isolated, false)
-	, _explicitly_stopped (false)
+	, _barcnt (0.)
+	, _apparent_tempo (0.)
+	, expected_end_sample (0)
 {
-	add_property (_legato);
+	add_property (_launch_style);
 	add_property (_use_follow);
-	add_property (_follow_count);
-	add_property (_midi_velocity_effect);
+	add_property (_follow_action0);
+	add_property (_follow_action1);
 	add_property (_follow_action_probability);
+	add_property (_follow_count);
+	add_property (_quantization);
+	add_property (_legato);
+	add_property (_name);
 	add_property (_gain);
+	add_property (_midi_velocity_effect);
 	add_property (_stretchable);
 	add_property (_isolated);
 }
@@ -173,13 +180,15 @@ Trigger::set_follow_count (uint32_t n)
 }
 
 void
-Trigger::set_follow_action (FollowAction f, uint64_t n)
+Trigger::set_follow_action (FollowAction f, uint32_t n)
 {
 	assert (n < 2);
-	_follow_action[n] = f;
+
 	if (n == 0) {
+		_follow_action0 = f;
 		PropertyChanged (Properties::follow_action0);
 	} else {
+		_follow_action1 = f;
 		PropertyChanged (Properties::follow_action1);
 	}
 }
@@ -202,11 +211,6 @@ Trigger::get_state (void)
 		i->second->get_value (*node);
 	}
 
-	node->set_property (X_("launch-style"), enum_2_string (_launch_style));
-	node->set_property (X_("follow-action-0"), enum_2_string (_follow_action[0]));
-	node->set_property (X_("follow-action-1"), enum_2_string (_follow_action[1]));
-	node->set_property (X_("quantization"), _quantization);
-	node->set_property (X_("name"), _name);
 	node->set_property (X_("index"), _index);
 	node->set_property (X_("apparent-tempo"), _apparent_tempo);
 	node->set_property (X_("barcnt"), _barcnt);
@@ -225,11 +229,6 @@ Trigger::set_state (const XMLNode& node, int version)
 
 	what_changed = set_values (node);
 
-	node.get_property (X_("launch-style"), _launch_style);
-	node.get_property (X_("follow-action-0"), _follow_action[0]);
-	node.get_property (X_("follow-action-1"), _follow_action[1]);
-	node.get_property (X_("quantization"), _quantization);
-	node.get_property (X_("name"), _name);
 	node.get_property (X_("index"), _index);
 
 	PBD::ID rid;
@@ -452,6 +451,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	Temporal::BBT_Time transition_bbt;
 	pframes_t extra_offset = 0;
+	BBT_Offset q (_quantization);
 
 	/* XXX need to use global grid here is quantization == zero */
 
@@ -459,18 +459,18 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	 * quantization, the next time for a transition.
 	 */
 
-	if (_quantization.bars == 0) {
-		Temporal::Beats transition_beats = start.round_up_to_multiple (Temporal::Beats (_quantization.beats, _quantization.ticks));
+	if (q.bars == 0) {
+		Temporal::Beats transition_beats = start.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks));
 		transition_bbt = tmap->bbt_at (transition_beats);
 		transition_time = timepos_t (transition_beats);
 	} else {
 		transition_bbt = tmap->bbt_at (timepos_t (start));
 		transition_bbt = transition_bbt.round_up_to_bar ();
-		transition_bbt.bars = (transition_bbt.bars / _quantization.bars) * _quantization.bars;
+		transition_bbt.bars = (transition_bbt.bars / q.bars) * q.bars;
 		transition_time = timepos_t (tmap->quarters_at (transition_bbt));
 	}
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), transition_time.beats(), start, end, _quantization));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), transition_time.beats(), start, end, q));
 
 	/* See if this time falls within the range of time given to us */
 
@@ -704,7 +704,9 @@ AudioTrigger::set_usable_length ()
 		return;
 	}
 
-	if (_quantization == Temporal::BBT_Offset ()) {
+	Temporal::BBT_Offset q (_quantization);
+
+	if (q == Temporal::BBT_Offset ()) {
 		usable_length = data.length;
 		last_sample = _start_offset + usable_length;
 		return;
@@ -712,7 +714,7 @@ AudioTrigger::set_usable_length ()
 
 	/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
 
-	timecnt_t len (Temporal::Beats (_quantization.beats, _quantization.ticks), timepos_t (Temporal::Beats()));
+	timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
 	usable_length = len.samples();
 	last_sample = _start_offset + usable_length;
 
@@ -1391,14 +1393,16 @@ MIDITrigger::set_usable_length ()
 		return;
 	}
 
-	if (_quantization == Temporal::BBT_Offset ()) {
+	Temporal::BBT_Offset q (_quantization);
+
+	if (q == Temporal::BBT_Offset ()) {
 		usable_length = data_length;
 		return;
 	}
 
 	/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
 
-	timecnt_t len (Temporal::Beats (_quantization.beats, _quantization.ticks), timepos_t (Temporal::Beats()));
+	timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
 	usable_length = len.beats ();
 }
 
@@ -2333,18 +2337,19 @@ TriggerBox::determine_next_trigger (uint64_t current)
 
 	int which_follow_action;
 	int r = _pcg.rand (100); // 0 .. 99
+	Trigger::FollowAction fa;
 
 	if (r <= all_triggers[current]->follow_action_probability()) {
-		which_follow_action = 0;
+		fa = all_triggers[current]->follow_action (0);
 	} else {
-		which_follow_action = 1;
+		fa = all_triggers[current]->follow_action (1);
 	}
 
 	/* first switch: deal with the "special" cases where we either do
 	 * nothing or just repeat the current trigger
 	 */
 
-	switch (all_triggers[current]->follow_action (which_follow_action)) {
+	switch (fa) {
 
 	case Trigger::Stop:
 		return -1;

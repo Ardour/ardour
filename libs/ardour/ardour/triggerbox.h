@@ -173,8 +173,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		OtherTrigger,
 	};
 
-	FollowAction follow_action (uint64_t n) const { assert (n < 2); return _follow_action[n]; }
-	void set_follow_action (FollowAction, uint64_t n);
+	FollowAction follow_action (uint64_t n) const { assert (n < 2); return n ? _follow_action1 : _follow_action0; }
+	void set_follow_action (FollowAction, uint32_t n);
 
 	void set_region (boost::shared_ptr<Region>);
 	void clear ();
@@ -251,25 +251,32 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	std::atomic<int>          _unbang;
 	uint64_t                  _index;
 	int                       _next_trigger;
-	LaunchStyle               _launch_style;
-	PBD::Property<bool>       _use_follow;
-	FollowAction              _follow_action[2];
-	PBD::Property<int>        _follow_action_probability;
+	gain_t                    _pending_gain;
 	uint32_t                  _loop_cnt; /* how many times in a row has this played */
-	PBD::Property<uint32_t>   _follow_count;
-	Temporal::BBT_Offset      _quantization;
-	PBD::Property<bool>       _legato;
-	std::string               _name;
+	void*                     _ui;
+	bool                      _explicitly_stopped;
+
+	/* properties controllable by the user */
+
+	PBD::Property<LaunchStyle>          _launch_style;
+	PBD::Property<bool>                 _use_follow;
+	PBD::Property<FollowAction>         _follow_action0;
+	PBD::Property<FollowAction>         _follow_action1;
+	PBD::Property<int>                  _follow_action_probability; /* 1 .. 100 */
+	PBD::Property<uint32_t>             _follow_count;
+	PBD::Property<Temporal::BBT_Offset> _quantization;
+	PBD::Property<bool>                 _legato;
+	PBD::Property<std::string>          _name;
+	PBD::Property<gain_t>               _gain;
+	PBD::Property<float>                _midi_velocity_effect;
+	PBD::Property<bool>                 _stretchable;
+	PBD::Property<bool>                 _isolated;
+
+	/* computed from data */
+
 	double                    _barcnt; /* our estimate of the number of bars in the region */
 	double                    _apparent_tempo;
-	PBD::Property<gain_t>     _gain;
-	gain_t                    _pending_gain;
-	PBD::Property<float>      _midi_velocity_effect;
-	void*                     _ui;
 	samplepos_t                expected_end_sample;
-	PBD::Property<bool>       _stretchable;
-	PBD::Property<bool>       _isolated;
-	bool                      _explicitly_stopped;
 
 	void set_region_internal (boost::shared_ptr<Region>);
 	virtual void retrigger() = 0;
