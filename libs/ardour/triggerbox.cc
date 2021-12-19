@@ -2337,6 +2337,7 @@ TriggerBox::determine_next_trigger (uint64_t current)
 	 */
 
 	int which_follow_action = 0;
+
 	int r = _pcg.rand (100); // 0 .. 99
 	Trigger::FollowAction fa;
 
@@ -2371,7 +2372,7 @@ TriggerBox::determine_next_trigger (uint64_t current)
 
 	/* second switch: handle the "real" follow actions */
 
-	switch (all_triggers[current]->follow_action (which_follow_action)) {
+	switch (fa) {
 	case Trigger::None:
 		return -1;
 
