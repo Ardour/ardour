@@ -348,6 +348,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	samplecnt_t to_pad;
 	samplecnt_t to_drop;
 
+	PBD::RingBuffer<Data*> _deletion_queue;
+
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
 	void determine_tempo ();

@@ -567,6 +567,7 @@ AudioTrigger::AudioTrigger (uint64_t n, TriggerBox& b)
 	, got_stretcher_padding (false)
 	, to_pad (0)
 	, to_drop (0)
+	, _deletion_queue (4)
 {
 }
 
