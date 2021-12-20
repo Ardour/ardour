@@ -462,14 +462,14 @@ AudioClipEditor::on_size_allocate (Gtk::Allocation& alloc)
 	frame->set (r);
 
 	const double ruler_height = 25.;
-	ruler->set (Rect (2, 2, alloc.get_width() - 4, ruler_height));
+	ruler->set (ArdourCanvas::Rect (2, 2, alloc.get_width() - 4, ruler_height));
 
 	const double scroll_bar_height      = 10.;
 	const double scroll_bar_width       = alloc.get_width () - 2;
 	const double scroll_bar_handle_left = scroll_bar_width * scroll_fraction;
 
-	scroll_bar_trough->set (Rect (1, alloc.get_height () - scroll_bar_height, scroll_bar_width, alloc.get_height ()));
-	scroll_bar_handle->set (Rect (scroll_bar_handle_left, scroll_bar_trough->get ().y0 + 1, scroll_bar_handle_left + 30., scroll_bar_trough->get ().y1 - 1));
+	scroll_bar_trough->set (ArdourCanvas::Rect (1, alloc.get_height () - scroll_bar_height, scroll_bar_width, alloc.get_height ()));
+	scroll_bar_handle->set (ArdourCanvas::Rect (scroll_bar_handle_left, scroll_bar_trough->get ().y0 + 1, scroll_bar_handle_left + 30., scroll_bar_trough->get ().y1 - 1));
 
 	position_lines ();
 
