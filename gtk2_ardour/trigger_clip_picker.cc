@@ -23,6 +23,7 @@
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
+#include "pbd/pathexpand.h"
 #include "pbd/search_path.h"
 
 #include "ardour/audiofilesource.h"
@@ -39,6 +40,8 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
+
+#include "widgets/paths_dialog.h"
 
 #include "trigger_clip_picker.h"
 
@@ -59,23 +62,10 @@ TriggerClipPicker::TriggerClipPicker ()
 	Gtkmm2ext::add_volume_shortcuts (_fcd);
 
 	_fcd.add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	_fcd.add_button (Stock::OK, RESPONSE_ACCEPT);
+	_fcd.add_button (Stock::ADD, RESPONSE_ACCEPT);
+	_fcd.add_button (Stock::OPEN, RESPONSE_OK);
 
-	Searchpath spath (ardour_data_search_path ());
-	spath.add_subdirectory_to_paths (media_dir_name);
-	for (auto const& f : spath) {
-		maybe_add_dir (f);
-	}
-
-	maybe_add_dir (Glib::build_filename (user_config_directory (), media_dir_name));
-
-	for (auto const& f : _fcd.list_shortcut_folders ()) {
-		maybe_add_dir (f);
-	}
-	assert (_dir.items ().size () > 0);
-
-	_dir.AddMenuElem (Menu_Helpers::SeparatorElem ());
-	_dir.AddMenuElem (Menu_Helpers::MenuElem (_("Other..."), sigc::mem_fun (*this, &TriggerClipPicker::open_dir)));
+	refill_dropdown ();
 
 	/* Audition */
 	_seek_slider.set_draw_value (false);
@@ -124,6 +114,8 @@ TriggerClipPicker::TriggerClipPicker ()
 	_view.signal_row_collapsed ().connect (sigc::mem_fun (*this, &TriggerClipPicker::row_collapsed));
 	_view.signal_drag_data_get ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_data_get));
 
+	Config->ParameterChanged.connect (_config_connection, invalidator (*this), boost::bind (&TriggerClipPicker::parameter_changed, this, _1), gui_context ());
+
 	/* show off */
 	_scroller.show ();
 	_view.show ();
@@ -139,20 +131,62 @@ TriggerClipPicker::~TriggerClipPicker ()
 }
 
 void
-TriggerClipPicker::set_session (Session* s)
+TriggerClipPicker::parameter_changed (std::string const& p)
 {
-	SessionHandlePtr::set_session (s);
-
-	if (!_session) {
-		_play_btn.set_sensitive (false);
-		_stop_btn.set_sensitive (false);
-		_seek_slider.set_sensitive (false);
-		_auditioner_connections.drop_connections ();
-	} else {
-		_auditioner_connections.drop_connections ();
-		_session->AuditionActive.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_active, this, _1), gui_context ());
-		_session->the_auditioner ()->AuditionProgress.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_progress, this, _1, _2), gui_context ());
+	if (p == "sample-lib-path") {
+		refill_dropdown ();
 	}
+}
+
+/* ****************************************************************************
+ * Paths Dropdown Callbacks
+ */
+
+void
+TriggerClipPicker::edit_path ()
+{
+	Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
+	assert (tlw);
+	ArdourWidgets::PathsDialog pd (*tlw, _("Edit Sample Library Path"), Config->get_sample_lib_path (), "");
+	if (pd.run () != Gtk::RESPONSE_ACCEPT) {
+		return;
+	}
+	Config->set_sample_lib_path (pd.get_serialized_paths ());
+}
+
+void
+TriggerClipPicker::refill_dropdown ()
+{
+	_dir.clear_items ();
+
+	/* Bundled Content */
+	Searchpath spath (ardour_data_search_path ());
+	spath.add_subdirectory_to_paths (media_dir_name);
+	for (auto const& f : spath) {
+		maybe_add_dir (f);
+	}
+
+	/* User config folder */
+	maybe_add_dir (Glib::build_filename (user_config_directory (), media_dir_name));
+
+	/* Anything added by Gtkmm2ext::add_volume_shortcuts */
+	for (auto const& f : _fcd.list_shortcut_folders ()) {
+		maybe_add_dir (f);
+	}
+
+	/* Custom Paths */
+	assert (_dir.items ().size () > 0);
+	if (!Config->get_sample_lib_path ().empty ()) {
+		_dir.AddMenuElem (Menu_Helpers::SeparatorElem ());
+		Searchpath cpath (Config->get_sample_lib_path ());
+		for (auto const& f : cpath) {
+			maybe_add_dir (f);
+		}
+	}
+
+	_dir.AddMenuElem (Menu_Helpers::SeparatorElem ());
+	_dir.AddMenuElem (Menu_Helpers::MenuElem (_("Edit..."), sigc::mem_fun (*this, &TriggerClipPicker::edit_path)));
+	_dir.AddMenuElem (Menu_Helpers::MenuElem (_("Other..."), sigc::mem_fun (*this, &TriggerClipPicker::open_dir)));
 }
 
 void
@@ -162,6 +196,10 @@ TriggerClipPicker::maybe_add_dir (std::string const& dir)
 		_dir.AddMenuElem (Gtkmm2ext::MenuElemNoMnemonic (Glib::path_get_basename (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
 	}
 }
+
+/* ****************************************************************************
+ * Treeview Callbacks
+ */
 
 void
 TriggerClipPicker::row_selected ()
@@ -186,6 +224,8 @@ TriggerClipPicker::row_activated (TreeModel::Path const& p, TreeViewColumn*)
 	TreeModel::iterator i = _model->get_iter (p);
 	if (i && (*i)[_columns.file]) {
 		audition ((*i)[_columns.path]);
+	} else if (i) {
+		list_dir ((*i)[_columns.path]);
 	}
 }
 
@@ -210,6 +250,7 @@ TriggerClipPicker::test_expand (TreeModel::iterator const& i, Gtk::TreeModel::Pa
 void
 TriggerClipPicker::row_collapsed (TreeModel::iterator const& i, Gtk::TreeModel::Path const&)
 {
+	/* forget about expanded sub-view, refresh when expanded again */
 	TreeModel::Row row = *i;
 	row[_columns.read] = false;
 	Gtk::TreeIter ti;
@@ -240,6 +281,10 @@ TriggerClipPicker::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Selecti
 	data.set_uris (uris);
 }
 
+/* ****************************************************************************
+ * Dir Listing
+ */
+
 static bool
 audio_midi_suffix (const std::string& str)
 {
@@ -256,14 +301,30 @@ void
 TriggerClipPicker::open_dir ()
 {
 	Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
-	if (tlw) {
-		_fcd.set_transient_for (*tlw);
-	}
+	assert (tlw);
+	_fcd.set_transient_for (*tlw);
+
 	int result = _fcd.run ();
 	_fcd.hide ();
+
 	switch (result) {
-		case RESPONSE_ACCEPT:
+		case RESPONSE_OK:
 			list_dir (_fcd.get_filename ());
+			break;
+		case RESPONSE_ACCEPT:
+			if (Glib::file_test (_fcd.get_filename (), Glib::FILE_TEST_IS_DIR)) {
+				size_t                   j = 0;
+				std::string              path;
+				std::vector<std::string> a = PBD::parse_path (Config->get_sample_lib_path ());
+				a.push_back (_fcd.get_filename ());
+				for (std::vector<std::string>::const_iterator i = a.begin (); i != a.end (); ++i, ++j) {
+					if (j > 0)
+						path += G_SEARCHPATH_SEPARATOR;
+					path += *i;
+				}
+				Config->set_sample_lib_path (path);
+				list_dir (_fcd.get_filename ());
+			}
 			break;
 		default:
 			break;
@@ -273,14 +334,17 @@ TriggerClipPicker::open_dir ()
 void
 TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren const* pc)
 {
+	if (!Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+		assert (0);
+		return;
+	}
+
 	if (!pc) {
 		_model->clear ();
 		_dir.set_active (Glib::path_get_basename (path));
 	}
 
-	if (!Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
-		return;
-	}
+	_current_path = path;
 
 	std::vector<std::string> dirs;
 	std::vector<std::string> files;
@@ -291,7 +355,7 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 			std::string fullpath = Glib::build_filename (path, *i);
 			std::string basename = *i;
 
-			if (basename.size() == 0 || basename[0] == '.') {
+			if (basename.size () == 0 || basename[0] == '.') {
 				continue;
 			}
 
@@ -309,6 +373,17 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 
 	std::sort (dirs.begin (), dirs.end ());
 	std::sort (files.begin (), files.end ());
+
+	if (!pc) {
+		std::string const parent = Glib::path_get_dirname (_current_path);
+		if (parent != _current_path) {
+			TreeModel::Row row = *(_model->append ());
+			row[_columns.name] = "..";
+			row[_columns.path] = Glib::path_get_dirname (_current_path);
+			row[_columns.read] = false;
+			row[_columns.file] = false;
+		}
+	}
 
 	for (auto& f : dirs) {
 		TreeModel::Row row;
@@ -337,6 +412,27 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 		row[_columns.path] = Glib::build_filename (path, f);
 		row[_columns.read] = false;
 		row[_columns.file] = true;
+	}
+}
+
+/* ****************************************************************************
+ * Auditioner
+ */
+
+void
+TriggerClipPicker::set_session (Session* s)
+{
+	SessionHandlePtr::set_session (s);
+
+	if (!_session) {
+		_play_btn.set_sensitive (false);
+		_stop_btn.set_sensitive (false);
+		_seek_slider.set_sensitive (false);
+		_auditioner_connections.drop_connections ();
+	} else {
+		_auditioner_connections.drop_connections ();
+		_session->AuditionActive.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_active, this, _1), gui_context ());
+		_session->the_auditioner ()->AuditionProgress.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_progress, this, _1, _2), gui_context ());
 	}
 }
 

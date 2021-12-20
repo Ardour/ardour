@@ -45,6 +45,9 @@ public:
 private:
 	void list_dir (std::string const&, Gtk::TreeNodeChildren const* pc = NULL);
 	void open_dir ();
+	void edit_path ();
+	void refill_dropdown ();
+	void parameter_changed (std::string const&);
 	void row_selected ();
 	void row_activated (Gtk::TreeModel::Path const&, Gtk::TreeViewColumn*);
 	bool test_expand (Gtk::TreeModel::iterator const&, Gtk::TreeModel::Path const&);
@@ -85,8 +88,11 @@ private:
 	Gtk::Button                  _stop_btn;
 	Gtk::HScale                  _seek_slider;
 
+	std::string _current_path;
+
 	bool                      _seeking;
 	PBD::ScopedConnectionList _auditioner_connections;
+	PBD::ScopedConnection     _config_connection;
 };
 
 #endif
