@@ -195,6 +195,7 @@ Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
 PatchFiles=$Shared/patchfiles
 LuaScripts=$Shared/scripts
+MediaClips=$Shared/media
 WebSurfaces=$Shared/web_surfaces
 MackieControl=$Shared/mcp
 OSC=$Shared/osc
@@ -231,6 +232,7 @@ mkdir -p $Surfaces
 mkdir -p $MidiMaps
 mkdir -p $PatchFiles
 mkdir -p $LuaScripts
+mkdir -p $MediaClips
 mkdir -p $MackieControl
 mkdir -p $OSC
 mkdir -p $ExportFormats
@@ -378,6 +380,10 @@ done
 # recusively copy web-surface html/js
 cp -a $BUILD_ROOT/../share/web_surfaces $WebSurfaces
 rm $WebSurfaces/wscript
+
+# recusively copy clips/media
+cp -a $BUILD_ROOT/../share/media $MediaClips
+rm $MediaClips/wscript
 
 # MackieControl data
 # got to be careful with names here

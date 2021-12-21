@@ -132,6 +132,7 @@ ExportFormats=$Shared/export
 Templates=$Shared/templates
 PatchFiles=$Shared/patchfiles
 LuaScripts=$Shared/scripts
+MediaClips=$Shared/media
 WebSurfaces=$Shared/web_surfaces
 MackieControl=$Shared/mcp
 OSC=$Shared/osc
