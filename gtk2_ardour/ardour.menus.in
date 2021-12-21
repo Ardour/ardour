@@ -721,6 +721,13 @@
     <menuitem action='detach-preferences'/>
   </popup>
 
+  <popup action="triggerTabbableButtonMenu" accelerators='true'>
+    <menuitem action='show-trigger'/>
+    <menuitem action='hide-trigger'/>
+    <menuitem action='attach-trigger'/>
+    <menuitem action='detach-trigger'/>
+  </popup>
+
   <popup action="RulerMenuPopup" accelerators='true'>
     <menuitem action="toggle-minsec-ruler"/>
     <menuitem action="toggle-timecode-ruler"/>
