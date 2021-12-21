@@ -66,14 +66,16 @@ TriggerEntry::TriggerEntry (Item* item, ARDOUR::Trigger& t)
 	set_outline (false);
 
 	play_button = new ArdourCanvas::Rectangle (this);
-	play_button->set_outline (true);
+	play_button->set_outline (false);
 	play_button->set_fill (true);
 	play_button->name = string_compose ("playbutton %1", _trigger.index ());
 	play_button->show ();
 
-	play_shape       = new ArdourCanvas::Polygon (play_button);
-	play_shape->name = string_compose ("playshape %1", _trigger.index ());
-	play_shape->show ();
+	follow_button = new ArdourCanvas::Rectangle (this);
+	follow_button->set_outline (false);
+	follow_button->set_fill (true);
+	follow_button->name = ("slot_selector_button");
+	follow_button->show ();
 
 	name_button = new ArdourCanvas::Rectangle (this);
 	name_button->set_outline (true);
@@ -143,12 +145,12 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 	const Distance height = _rect.height ();
 
 	play_button->set (ArdourCanvas::Rect (0, 0, height, height));
-	name_button->set (ArdourCanvas::Rect (height, 0, width, height));
+	name_button->set (ArdourCanvas::Rect (height, 0, width-height, height));
+	follow_button->set (ArdourCanvas::Rect (width-height, 0, width, height));
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 	_poly_margin       = 2. * scale;
 	_poly_size         = height - 2 * _poly_margin;
-	shape_play_button ();
 
 	float tleft = height; // make room for the play button
 
@@ -161,7 +163,7 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 }
 
 void
-draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::FollowAction icon, float size, float scale)
+TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::FollowAction icon, float size, float scale) const
 {
 	context->set_line_width (1 * scale);
 
@@ -229,6 +231,84 @@ draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::FollowAction i
 	}
 }
 
+
+void
+TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float size, float scale) const
+{
+	context->set_line_width (1 * scale);
+
+	if (_trigger.active()) {
+		if (_trigger.launch_style()==Trigger::Toggle) {
+			//clicking again will Stop this clip
+			set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
+			context->move_to (_poly_margin, _poly_margin);
+			context->rel_line_to (_poly_size,  0);
+			context->rel_line_to (0,           _poly_size);
+			context->rel_line_to (-_poly_size, 0);
+			context->rel_line_to (0,           -_poly_size);
+			context->fill ();
+			return;  //done
+		} else {
+			//actively playing; draw a filled play triangle
+			set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
+			context->move_to (_poly_margin, _poly_margin);
+			context->line_to (_poly_margin, _poly_size);
+			context->line_to (_poly_size, 0.5 + _poly_size / 2.);
+			context->fill ();
+			return;  //done
+		}
+	}
+
+	set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+
+	if (!_trigger.region ()) {
+		//no content in this slot, it is only a Stop button
+		context->move_to (_poly_margin, _poly_margin);
+		context->rel_line_to (_poly_size,  0);
+		context->rel_line_to (0,           _poly_size);
+		context->rel_line_to (-_poly_size, 0);
+		context->rel_line_to (0,           -_poly_size);
+		context->stroke ();
+		return;  //done
+	}
+
+	switch (_trigger.launch_style()) {
+		case Trigger::Toggle:
+		case Trigger::OneShot:
+			context->move_to (_poly_margin, _poly_margin);
+			context->line_to (_poly_margin, _poly_size);
+			context->line_to (_poly_size, 0.5 + _poly_size / 2.);
+			context->line_to (_poly_margin, _poly_margin);
+			context->stroke ();
+			break;
+		case Trigger::Gate:  //diamond shape
+			context->move_to ( _poly_size/2, _poly_margin );
+			context->rel_line_to ( _poly_size/2,  _poly_size/2);
+			context->rel_line_to ( -_poly_size/2, _poly_size/2);
+			context->rel_line_to ( -_poly_size/2, -_poly_size/2);
+			context->rel_line_to ( _poly_size/2,  -_poly_size/2);
+			context->stroke ();
+			break;
+		case Trigger::Repeat:  //'stutter' shape
+			context->set_line_width (1 * scale);
+			context->move_to ( _poly_margin, _poly_margin );
+			context->rel_line_to ( 0, _poly_size);
+
+			context->move_to ( _poly_margin + scale*3, _poly_margin + scale*2 );
+			context->rel_line_to ( 0, _poly_size - scale*4);
+
+			context->move_to ( _poly_margin + scale*6, _poly_margin + scale*4 );
+			context->rel_line_to ( 0, _poly_size - scale*8);
+
+			context->stroke ();
+			break;
+		default:
+			break;
+	}
+
+	context->set_line_width (1);
+}
+
 void
 TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
@@ -288,6 +368,15 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 		context->set_identity_matrix ();
 	}
 
+	/* launch icon */
+	{
+		context->set_identity_matrix ();
+		context->translate (self.x0, self.y0 - 0.5);
+		context->translate (0, 0); // left side of the widget
+		draw_launch_icon (context, height, scale);
+		context->set_identity_matrix ();
+	}
+
 	/* follow-action icon */
 	if (_trigger.region ()) {
 		context->set_identity_matrix ();
@@ -300,63 +389,25 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 }
 
 void
-TriggerEntry::shape_play_button ()
-{
-	Points p;
-
-	if (!_trigger.region ()) {
-		/* no region, so must be a stop button, drawn as a square */
-		p.push_back (Duple (_poly_margin, _poly_margin));
-		p.push_back (Duple (_poly_margin, _poly_size));
-		p.push_back (Duple (_poly_size, _poly_size));
-		p.push_back (Duple (_poly_size, _poly_margin));
-	} else {
-		/* region exists; draw triangle to show that we can trigger */
-		p.push_back (Duple (_poly_margin, _poly_margin));
-		p.push_back (Duple (_poly_margin, _poly_size));
-		p.push_back (Duple (_poly_size, 0.5 + _poly_size / 2.));
-	}
-
-	play_shape->set (p);
-
-	if (_trigger.active ()) {
-		play_shape->set_outline (false);
-		play_shape->set_fill (true);
-	} else {
-		play_shape->set_outline (true);
-		play_shape->set_fill (false);
-	}
-}
-
-void
 TriggerEntry::prop_change (PropertyChange const& change)
 {
-	bool need_pb = false;
-
 	if (change.contains (ARDOUR::Properties::name)) {
 		if (_trigger.region ()) {
 			name_text->set (short_version (_trigger.name (), 16));
 		} else {
 			name_text->set ("");
 		}
-
-		need_pb = true;
-	}
-
-	if (change.contains (ARDOUR::Properties::running)) {
-		need_pb = true;
 	}
 
 	PropertyChange interesting_stuff;
+	interesting_stuff.add (ARDOUR::Properties::name);
+	interesting_stuff.add (ARDOUR::Properties::launch_style);
 	interesting_stuff.add (ARDOUR::Properties::follow_action0);
 	interesting_stuff.add (ARDOUR::Properties::isolated);
+	interesting_stuff.add (ARDOUR::Properties::running);
 
 	if (change.contains (interesting_stuff)) {
 		redraw ();
-	}
-
-	if (need_pb) {
-		shape_play_button ();
 	}
 }
 
@@ -365,27 +416,19 @@ TriggerEntry::set_default_colors ()
 {
 	set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
 	play_button->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
-	play_button->set_outline_color (UIConfiguration::instance ().color ("theme:bg"));
 	name_button->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
 	name_button->set_outline_color (UIConfiguration::instance ().color ("theme:bg"));
+	follow_button->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
 	if ((_trigger.index () / 2) % 2 == 0) {
 		set_fill_color (HSV (fill_color ()).darker (0.15).color ());
 		play_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
-		play_button->set_outline_color (HSV (fill_color ()).darker (0.15).color ());
 		name_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
 		name_button->set_outline_color (HSV (fill_color ()).darker (0.15).color ());
+		follow_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
 	}
 
 	name_text->set_color (UIConfiguration::instance ().color ("neutral:foreground"));
 	name_text->set_fill_color (UIConfiguration::instance ().color ("neutral:midground"));
-
-	if (_trigger.region ()) {
-		play_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foreground"));
-		play_shape->set_fill_color (UIConfiguration::instance ().color ("neutral:foreground"));
-	} else {
-		play_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:midground"));
-		play_shape->set_fill_color (UIConfiguration::instance ().color ("neutral:midground"));
-	}
 
 	/*preserve selection border*/
 	if (PublicEditor::instance ().get_selection ().selected (this)) {
@@ -502,8 +545,9 @@ TriggerBoxUI::build ()
 
 		_slots.push_back (te);
 
-		te->play_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::play_button_event), n));
-		te->name_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::text_button_event), n));
+		te->play_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::play_button_event), n));  //ToDo:  just trigger stuff
+		te->name_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::name_button_event), n));
+		te->follow_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::follow_button_event), n));  //ToDo:  just follow stuff
 #if 0
 		te->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::event), n));
 #endif
@@ -532,13 +576,17 @@ TriggerBoxUI::_size_allocate (ArdourCanvas::Rect const& alloc)
 }
 
 bool
-TriggerBoxUI::text_button_event (GdkEvent* ev, uint64_t n)
+TriggerBoxUI::name_button_event (GdkEvent* ev, uint64_t n)
 {
 	switch (ev->type) {
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+				_slots[n]->set_default_colors ();
 				_slots[n]->name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 				_slots[n]->name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+				_slots[n]->name_button->set_outline_color (HSV (fill_color ()).lighter (0.15).color ());
+				_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+				_slots[n]->play_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
@@ -552,6 +600,8 @@ TriggerBoxUI::text_button_event (GdkEvent* ev, uint64_t n)
 				/* a side-effect of selection-change is that the slot's color is reset. retain the "entered-color" here: */
 				_slots[n]->name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 				_slots[n]->name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+				_slots[n]->name_button->set_outline_color (HSV (fill_color ()).lighter (0.15).color ());
+				_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			}
 			break;
 		case GDK_2BUTTON_PRESS:
@@ -577,7 +627,7 @@ bool
 TriggerBoxUI::play_button_event (GdkEvent* ev, uint64_t n)
 {
 	if (!_triggerbox.trigger (n)->region ()) {
-		/* this is a stop button */
+		/* empty slot; this is just a stop button */
 		switch (ev->type) {
 			case GDK_BUTTON_PRESS:
 				if (ev->button.button == 1) {
@@ -585,21 +635,9 @@ TriggerBoxUI::play_button_event (GdkEvent* ev, uint64_t n)
 					return true;
 				}
 				break;
-			case GDK_ENTER_NOTIFY:
-				if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-					_slots[n]->play_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
-				}
-				break;
-			case GDK_LEAVE_NOTIFY:
-				if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-					_slots[n]->set_default_colors ();
-				}
-				break;
 			default:
 				break;
 		}
-
-		return false;
 	}
 
 	switch (ev->type) {
@@ -620,15 +658,17 @@ TriggerBoxUI::play_button_event (GdkEvent* ev, uint64_t n)
 						_slots[n]->trigger ().unbang ();
 					}
 					break;
+				case 3:
+					context_menu (n);
+					return true;
 				default:
 					break;
 			}
 			break;
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+				_slots[n]->set_default_colors ();
 				_slots[n]->play_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-				_slots[n]->play_shape->set_fill_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
-				_slots[n]->play_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
@@ -641,6 +681,37 @@ TriggerBoxUI::play_button_event (GdkEvent* ev, uint64_t n)
 	}
 	return false;
 }
+
+bool
+TriggerBoxUI::follow_button_event (GdkEvent* ev, uint64_t n)
+{
+	switch (ev->type) {
+		case GDK_BUTTON_RELEASE:
+			switch (ev->button.button) {
+				case 3:
+					context_menu (n);
+					return true;
+				default:
+					break;
+			}
+			break;
+		case GDK_ENTER_NOTIFY:
+			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+				_slots[n]->set_default_colors ();
+				_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+			}
+			break;
+		case GDK_LEAVE_NOTIFY:
+			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+				_slots[n]->set_default_colors ();
+			}
+			break;
+		default:
+			break;
+	}
+	return false;
+}
+
 
 void
 TriggerBoxUI::context_menu (uint64_t n)
@@ -918,7 +989,7 @@ TriggerBoxUI::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int, i
 		ev.detail = GDK_NOTIFY_ANCESTOR;
 		for (size_t i = 0; i < _slots.size (); ++i) {
 			ev.type = (i == n) ? GDK_ENTER_NOTIFY : GDK_LEAVE_NOTIFY;
-			text_button_event ((GdkEvent*)&ev, i);
+			name_button_event ((GdkEvent*)&ev, i);
 		}
 		return true;
 	} else {
@@ -934,7 +1005,7 @@ TriggerBoxUI::drag_leave (Glib::RefPtr<Gdk::DragContext> const&, guint)
 	ev.type   = GDK_LEAVE_NOTIFY;
 	ev.detail = GDK_NOTIFY_ANCESTOR;
 	for (size_t i = 0; i < _slots.size (); ++i) {
-		text_button_event ((GdkEvent*)&ev, i);
+		name_button_event ((GdkEvent*)&ev, i);
 	}
 }
 

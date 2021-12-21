@@ -57,10 +57,12 @@ public:
 	}
 
 	ArdourCanvas::Rectangle* play_button;
-	ArdourCanvas::Polygon*   play_shape;
-
 	ArdourCanvas::Rectangle* name_button;
+	ArdourCanvas::Rectangle* follow_button;
 	ArdourCanvas::Text*      name_text;
+
+	void draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float size, float scale) const;
+	void draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, ARDOUR::Trigger::FollowAction icon, float size, float scale) const;
 
 	void render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const;
 
@@ -78,7 +80,6 @@ private:
 
 	PBD::ScopedConnection trigger_prop_connection;
 	void                  prop_change (PBD::PropertyChange const& change);
-	void                  shape_play_button ();
 
 	PBD::ScopedConnection owner_prop_connection;
 	void                  owner_prop_change (PBD::PropertyChange const&);
@@ -121,7 +122,8 @@ private:
 	static void                 register_actions ();
 
 	bool play_button_event (GdkEvent*, uint64_t);
-	bool text_button_event (GdkEvent*, uint64_t);
+	bool name_button_event (GdkEvent*, uint64_t);
+	bool follow_button_event (GdkEvent*, uint64_t);
 
 	void choose_sample (uint64_t n);
 	void sample_chosen (int r, uint64_t n);
