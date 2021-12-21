@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <sstream>
 
+#include <boost/make_shared.hpp>
+
 #include <glibmm.h>
 
 #include <rubberband/RubberBandStretcher.h>
@@ -53,7 +55,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
-		PBD::PropertyDescriptor<Trigger*> currently_playing;
+		PBD::PropertyDescriptor<uint32_t> currently_playing;
 		PBD::PropertyDescriptor<uint32_t> follow_count;
 		PBD::PropertyDescriptor<int> follow_action_probability;
 		PBD::PropertyDescriptor<float> velocity_effect;
@@ -63,7 +65,7 @@ namespace ARDOUR {
 	}
 }
 
-Trigger::Trigger (uint64_t n, TriggerBox& b)
+Trigger::Trigger (uint32_t n, TriggerBox& b)
 	: _box (b)
 	, _state (Stopped)
 	, _bang (0)
@@ -272,7 +274,7 @@ Trigger::set_quantization (Temporal::BBT_Offset const & q)
 void
 Trigger::set_region (boost::shared_ptr<Region> r)
 {
-	TriggerBox::worker->set_region (this, r);
+	TriggerBox::worker->set_region (_box, index(), r);
 }
 
 void
@@ -399,7 +401,7 @@ Trigger::process_state_requests ()
 
 		case Stopped:
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 stopped => %3\n", index(), enum_2_string (Stopped), enum_2_string (WaitingToStart)));
-			_box.queue_explict (this);
+			_box.queue_explict (index());
 			break;
 
 		case WaitingToStart:
@@ -554,7 +556,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 /*--------------------*/
 
-AudioTrigger::AudioTrigger (uint64_t n, TriggerBox& b)
+AudioTrigger::AudioTrigger (uint32_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, _stretcher (0)
 	, _start_offset (0)
@@ -1142,7 +1144,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
 
-			uint64_t channel = chn %  data.size();
+			uint32_t channel = chn %  data.size();
 			AudioBuffer& buf (bufs.get_audio (chn));
 			Sample* src = do_stretch ? bufp[channel] : (data[channel] + read_index);
 
@@ -1234,7 +1236,7 @@ AudioTrigger::reload (BufferSet&, void*)
 
 /*--------------------*/
 
-MIDITrigger::MIDITrigger (uint64_t n, TriggerBox& b)
+MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, data_length (Temporal::Beats ())
 	, usable_length (Temporal::Beats ())
@@ -1657,8 +1659,6 @@ TriggerBox::start_transport_stop (Session& s)
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
-	, _bang_queue (1024)
-	, _unbang_queue (1024)
 	, _data_type (dt)
 	, _order (-1)
 	, explicit_queue (64)
@@ -1672,12 +1672,12 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	/* default number of possible triggers. call ::add_trigger() to increase */
 
 	if (_data_type == DataType::AUDIO) {
-		for (uint64_t n = 0; n < default_triggers_per_box; ++n) {
-			all_triggers.push_back (new AudioTrigger (n, *this));
+		for (uint32_t n = 0; n < default_triggers_per_box; ++n) {
+			all_triggers.push_back (boost::make_shared<AudioTrigger> (n, *this));
 		}
 	} else {
-		for (uint64_t n = 0; n < default_triggers_per_box; ++n) {
-			all_triggers.push_back (new MIDITrigger (n, *this));
+		for (uint32_t n = 0; n < default_triggers_per_box; ++n) {
+			all_triggers.push_back (boost::make_shared<MIDITrigger> (n, *this));
 		}
 	}
 
@@ -1721,24 +1721,24 @@ TriggerBox::set_order (int32_t n)
 }
 
 void
-TriggerBox::queue_explict (Trigger* t)
+TriggerBox::queue_explict (uint32_t n)
 {
-	assert (t);
-	explicit_queue.write (&t, 1);
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue %1, EQ = %2\n", t->index(), explicit_queue.read_space()));
+	assert (n < all_triggers.size());
+	explicit_queue.write (&n, 1);
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue %1, EQ = %2\n", n, explicit_queue.read_space()));
 
 	if (_currently_playing) {
 		_currently_playing->unbang ();
 	}
 }
 
-Trigger*
+TriggerPtr
 TriggerBox::get_next_trigger ()
 {
-	Trigger* r;
+	uint32_t n;
 
-	if (explicit_queue.read (&r, 1) == 1) {
-
+	if (explicit_queue.read (&n, 1) == 1) {
+		TriggerPtr r = trigger (n);
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("next trigger from explicit queue = %1\n", r->index()));
 		return r;
 	}
@@ -1746,7 +1746,7 @@ TriggerBox::get_next_trigger ()
 }
 
 void
-TriggerBox::set_from_selection (uint64_t slot, boost::shared_ptr<Region> region)
+TriggerBox::set_from_selection (uint32_t slot, boost::shared_ptr<Region> region)
 {
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("load %1 into %2\n", region->name(), slot));
 
@@ -1758,7 +1758,7 @@ TriggerBox::set_from_selection (uint64_t slot, boost::shared_ptr<Region> region)
 }
 
 void
-TriggerBox::set_from_path (uint64_t slot, std::string const & path)
+TriggerBox::set_from_path (uint32_t slot, std::string const & path)
 {
 	if (slot >= all_triggers.size()) {
 		return;
@@ -1822,7 +1822,6 @@ TriggerBox::set_from_path (uint64_t slot, std::string const & path)
 
 TriggerBox::~TriggerBox ()
 {
-	drop_triggers ();
 }
 
 void
@@ -1838,7 +1837,7 @@ TriggerBox::stop_all ()
 
 	DEBUG_TRACE (DEBUG::Triggers, "stop-all request received\n");
 
-	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
 		all_triggers[n]->request_stop ();
 	}
 
@@ -1851,18 +1850,10 @@ void
 TriggerBox::drop_triggers ()
 {
 	Glib::Threads::RWLock::WriterLock lm (trigger_lock);
-
-	for (Triggers::iterator t = all_triggers.begin(); t != all_triggers.end(); ++t) {
-		if (*t) {
-			delete *t;
-			(*t) = 0;
-		}
-	}
-
 	all_triggers.clear ();
 }
 
-Trigger*
+TriggerPtr
 TriggerBox::trigger (Triggers::size_type n)
 {
 	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
@@ -1917,7 +1908,7 @@ TriggerBox::configure_io (ChanCount in, ChanCount out)
 	bool ret = Processor::configure_io (in, out);
 
 	if (ret) {
-		for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		for (uint32_t n = 0; n < all_triggers.size(); ++n) {
 			all_triggers[n]->io_change ();
 		}
 	}
@@ -1925,7 +1916,7 @@ TriggerBox::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-TriggerBox::add_trigger (Trigger* trigger)
+TriggerBox::add_trigger (TriggerPtr trigger)
 {
 	Glib::Threads::RWLock::WriterLock lm (trigger_lock);
 	all_triggers.push_back (trigger);
@@ -2008,7 +1999,7 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 				continue;
 			}
 
-			Trigger* t = all_triggers[trigger_number];
+			TriggerPtr t = all_triggers[trigger_number];
 
 			if (!t) {
 				continue;
@@ -2106,9 +2097,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	/* STEP SEVEN: let each slot process any individual state requests
 	 */
 
-	std::vector<uint64_t> to_run;
+	std::vector<uint32_t> to_run;
 
-	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
 		all_triggers[n]->process_state_requests ();
 	}
 
@@ -2150,7 +2141,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	const Temporal::Beats end_beats (timepos_t (end_sample).beats());
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	uint32_t max_chans = 0;
-	Trigger* nxt = 0;
+	TriggerPtr nxt;
 	pframes_t dest_offset = 0;
 
 	while (nframes) {
@@ -2164,7 +2155,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		 /* see if there's another trigger explicitly queued */
 
-		RingBuffer<Trigger*>::rw_vector rwv;
+		RingBuffer<uint32_t>::rw_vector rwv;
 		explicit_queue.get_read_vector (&rwv);
 
 		if (rwv.len[0] > 0) {
@@ -2173,7 +2164,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			/* peek at it without dequeing it */
 
-			nxt = *(rwv.buf[0]);
+			uint32_t n = *(rwv.buf[0]);
+			nxt = trigger (n);
 
 			/* if user triggered same clip, that will have been handled as
 			 * it processed bang requests. Nothing to do here otherwise.
@@ -2292,7 +2284,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		 * doing pass thru, so silence whatever is left.
 		 */
 
-		for (uint64_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
+		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
 			AudioBuffer& buf (bufs.get_audio (chn));
 			buf.silence (nframes, (orig_nframes - nframes));
 		}
@@ -2320,14 +2312,14 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 }
 
 int
-TriggerBox::determine_next_trigger (uint64_t current)
+TriggerBox::determine_next_trigger (uint32_t current)
 {
-	uint64_t n;
-	uint64_t runnable = 0;
+	uint32_t n;
+	uint32_t runnable = 0;
 
 	/* count number of triggers that can actually be run (i.e. they have a region) */
 
-	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
 		if (all_triggers[n]->region()) {
 			runnable++;
 		}
@@ -2451,7 +2443,7 @@ TriggerBox::determine_next_trigger (uint64_t current)
 	case Trigger::OtherTrigger:
 		while (true) {
 			n = _pcg.rand (all_triggers.size());
-			if ((uint64_t) n == current) {
+			if ((uint32_t) n == current) {
 				continue;
 			}
 			if (!all_triggers[n]->region()) {
@@ -2526,14 +2518,14 @@ TriggerBox::set_state (const XMLNode& node, int version)
 		Glib::Threads::RWLock::WriterLock lm (trigger_lock);
 
 		for (XMLNodeList::const_iterator t = tchildren.begin(); t != tchildren.end(); ++t) {
-			Trigger* trig;
+			TriggerPtr trig;
 
 			if (_data_type == DataType::AUDIO) {
-				trig = new AudioTrigger (all_triggers.size(), *this);
+				trig = boost::make_shared<AudioTrigger> (all_triggers.size(), *this);
 				all_triggers.push_back (trig);
 				trig->set_state (**t, version);
 			} else if (_data_type == DataType::MIDI) {
-				trig = new MIDITrigger (all_triggers.size(), *this);
+				trig = boost::make_shared<MIDITrigger> (all_triggers.size(), *this);
 				all_triggers.push_back (trig);
 				trig->set_state (**t, version);
 			}
@@ -2612,15 +2604,6 @@ TriggerBox::request_reload (int32_t slot, void* ptr)
 }
 
 void
-TriggerBox::request_use (int32_t slot, Trigger& t)
-{
-	Request* r = new Request (Request::Use);
-	r->slot = slot;
-	r->trigger = &t;
-	requests.write (&r, 1);
-}
-
-void
 TriggerBox::process_requests (BufferSet& bufs)
 {
 	Request* r;
@@ -2659,7 +2642,7 @@ TriggerBox::reload (BufferSet& bufs, int32_t slot, void* ptr)
 double
 TriggerBox::position_as_fraction () const
 {
-	Trigger* cp = _currently_playing;
+	TriggerPtr cp = _currently_playing;
 	if (!cp) {
 		return -1;
 	}
@@ -2717,7 +2700,7 @@ TriggerBoxThread::thread_work ()
 			while (requests.read (&req, 1) == 1) {
 				switch (req->type) {
 				case SetRegion:
-					req->trig->set_region_threaded (req->region);
+					req->box->trigger (req->slot)->set_region_threaded (req->region);
 					break;
 				default:
 					break;
@@ -2767,11 +2750,12 @@ TriggerBoxThread::Request::init_pool ()
 }
 
 void
-TriggerBoxThread::set_region (Trigger* t, boost::shared_ptr<Region> r)
+TriggerBoxThread::set_region (TriggerBox& box, uint32_t slot, boost::shared_ptr<Region> r)
 {
 	TriggerBoxThread::Request* req = new TriggerBoxThread::Request (TriggerBoxThread::SetRegion);
 
-	req->trig = t;
+	req->box = &box;
+	req->slot = slot;
 	req->region = r;
 
 	queue_request (req);

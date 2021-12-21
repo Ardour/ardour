@@ -96,7 +96,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		Stopping
 	};
 
-	Trigger (uint64_t index, TriggerBox&);
+	Trigger (uint32_t index, TriggerBox&);
 	virtual ~Trigger() {}
 
 	static void make_property_quarks ();
@@ -173,7 +173,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		OtherTrigger,
 	};
 
-	FollowAction follow_action (uint64_t n) const { assert (n < 2); return n ? _follow_action1 : _follow_action0; }
+	FollowAction follow_action (uint32_t n) const { assert (n < 2); return n ? _follow_action1 : _follow_action0; }
 	void set_follow_action (FollowAction, uint32_t n);
 
 	void set_region (boost::shared_ptr<Region>);
@@ -184,7 +184,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	Temporal::BBT_Offset quantization() const;
 	void set_quantization (Temporal::BBT_Offset const &);
 
-	uint64_t index() const { return _index; }
+	uint32_t index() const { return _index; }
 
 	/* Managed by TriggerBox, these record the time that the trigger is
 	 * scheduled to start or stop at. Computed in
@@ -249,7 +249,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	State                     _state;
 	std::atomic<int>          _bang;
 	std::atomic<int>          _unbang;
-	uint64_t                  _index;
+	uint32_t                  _index;
 	int                       _next_trigger;
 	gain_t                    _pending_gain;
 	uint32_t                  _loop_cnt; /* how many times in a row has this played */
@@ -283,9 +283,11 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void set_usable_length () = 0;
 };
 
+typedef boost::shared_ptr<Trigger> TriggerPtr;
+
 class LIBARDOUR_API AudioTrigger : public Trigger {
   public:
-	AudioTrigger (uint64_t index, TriggerBox&);
+	AudioTrigger (uint32_t index, TriggerBox&);
 	~AudioTrigger ();
 
 	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t offset, bool first, double bpm);
@@ -359,7 +361,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 class LIBARDOUR_API MIDITrigger : public Trigger {
   public:
-	MIDITrigger (uint64_t index, TriggerBox&);
+	MIDITrigger (uint32_t index, TriggerBox&);
 	~MIDITrigger ();
 
 	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start_beats, Temporal::Beats const & end_beats, pframes_t nframes, pframes_t offset, bool passthru, double bpm);
@@ -420,7 +422,7 @@ class LIBARDOUR_API TriggerBoxThread
 
 	static void init_request_pool() { Request::init_pool(); }
 
-	void set_region (Trigger*, boost::shared_ptr<Region>);
+	void set_region (TriggerBox&, uint32_t slot, boost::shared_ptr<Region>);
 
 	void summon();
 	void stop();
@@ -441,7 +443,8 @@ class LIBARDOUR_API TriggerBoxThread
 
 		RequestType type;
 		/* for set region */
-		Trigger* trig; /* XXX lifetime mgmt issues */
+		TriggerBox* box;
+		uint32_t slot;
 		boost::shared_ptr<Region> region;
 
 		void* operator new (size_t);
@@ -472,25 +475,25 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int32_t order() const { return _order; }
 	void set_order(int32_t n);
 
-	typedef std::vector<Trigger*> Triggers;
+	typedef std::vector<TriggerPtr> Triggers;
 
-	Trigger* trigger (Triggers::size_type);
+	TriggerPtr trigger (Triggers::size_type);
 
-	bool bang_trigger (Trigger*);
-	bool unbang_trigger (Trigger*);
-	void add_trigger (Trigger*);
+	bool bang_trigger (TriggerPtr);
+	bool unbang_trigger (TriggerPtr);
+	void add_trigger (TriggerPtr);
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
-	void set_from_path (uint64_t slot, std::string const & path);
-	void set_from_selection (uint64_t slot, boost::shared_ptr<Region>);
+	void set_from_path (uint32_t slot, std::string const & path);
+	void set_from_selection (uint32_t slot, boost::shared_ptr<Region>);
 
 	DataType data_type() const { return _data_type; }
 
 	void request_stop_all ();
 
-	Trigger* currently_playing() const { return _currently_playing; }
+	TriggerPtr currently_playing() const { return _currently_playing; }
 
 	/* Returns a negative value is there is no active Trigger, or a value between 0
 	 * and 1.0 if there is, corresponding to the value of position_as_fraction() for
@@ -498,9 +501,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 	 */
 	double position_as_fraction() const;
 
-	void queue_explict (Trigger*);
-	Trigger* get_next_trigger ();
-	Trigger* peek_next_trigger ();
+	void queue_explict (uint32_t);
+	TriggerPtr get_next_trigger ();
+	TriggerPtr peek_next_trigger ();
 
 	void add_midi_sidechain (std::string const & name);
 
@@ -508,7 +511,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void set_pass_thru (bool yn);
 
 	void request_reload (int32_t slot, void*);
-	void request_use (int32_t slot, Trigger&);
 
 	enum TriggerMidiMapMode {
 		AbletonPush,
@@ -548,14 +550,12 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	static Temporal::BBT_Offset _assumed_trigger_duration;
 
-	PBD::RingBuffer<Trigger*> _bang_queue;
-	PBD::RingBuffer<Trigger*> _unbang_queue;
 	DataType _data_type;
 	int32_t _order;
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
-	PBD::RingBuffer<Trigger*> explicit_queue; /* user queued triggers */
-	Trigger* _currently_playing;
+	PBD::RingBuffer<uint32_t> explicit_queue; /* user queued triggers */
+	TriggerPtr _currently_playing;
 	Requests _requests;
 	bool _stop_all;
 	bool _pass_thru;
@@ -569,7 +569,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void drop_triggers ();
 	void process_ui_trigger_requests ();
 	void process_midi_trigger_requests (BufferSet&);
-	int determine_next_trigger (uint64_t n);
+	int determine_next_trigger (uint32_t n);
 	void stop_all ();
 
 	int note_to_trigger (int node, int channel);
@@ -593,14 +593,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 		Type type;
 
-		union {
-			Trigger* trigger;
-			void* ptr;
-		};
-
-		union {
-			int32_t slot;
-		};
+		TriggerPtr trigger;
+		void* ptr;
+		int32_t slot;
 
 		Request (Type t) : type (t) {}
 
@@ -640,7 +635,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<int> follow_action_probability;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float> velocity_effect;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<gain_t> gain;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger*> currently_playing;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> currently_playing;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> stretchable;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> isolated;
 }
