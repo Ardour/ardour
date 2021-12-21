@@ -205,11 +205,11 @@ TriggerUI::TriggerUI () :
 
 	Gtk::Table *prob_table = manage(new Gtk::Table());
 	prob_table->set_spacings(2);
-	prob_table->attach(_follow_probability_slider, 0, 2, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK );
+	prob_table->attach(_follow_probability_slider, 0, 2, 0, 1, Gtk::FILL, Gtk::SHRINK );
 	prob_table->attach(_left_probability_label,    0, 1, 1, 2, Gtk::FILL,             Gtk::SHRINK );
 	prob_table->attach(_right_probability_label,   1, 2, 1, 2, Gtk::FILL,             Gtk::SHRINK );
 
-	attach( *prob_table,   0, 2, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK ); row++;
+	attach( *prob_table,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 	attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
 	attach(_follow_right,  1, 2, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
 }

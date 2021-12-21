@@ -604,14 +604,12 @@ TriggerBoxUI::name_button_event (GdkEvent* ev, uint64_t n)
 			}
 			break;
 		case GDK_BUTTON_PRESS:
-			if (_slots[n]->trigger ().region ()) {
-				PublicEditor::instance ().get_selection ().set (_slots[n]);
-				/* a side-effect of selection-change is that the slot's color is reset. retain the "entered-color" here: */
-				_slots[n]->name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
-				_slots[n]->name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-				_slots[n]->name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
-				_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-			}
+			PublicEditor::instance ().get_selection ().set (_slots[n]);
+			/* a side-effect of selection-change is that the slot's color is reset. retain the "entered-color" here: */
+			_slots[n]->name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
+			_slots[n]->name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+			_slots[n]->name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
+			_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			break;
 		case GDK_2BUTTON_PRESS:
 			edit_trigger (n);
