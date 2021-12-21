@@ -2336,14 +2336,16 @@ TriggerBox::determine_next_trigger (uint64_t current)
 	 * random number and the probability setting)
 	 */
 
-	int which_follow_action;
+	int which_follow_action = 0;
 	int r = _pcg.rand (100); // 0 .. 99
 	Trigger::FollowAction fa;
 
 	if (r <= all_triggers[current]->follow_action_probability()) {
 		fa = all_triggers[current]->follow_action (0);
+		which_follow_action = 0;
 	} else {
 		fa = all_triggers[current]->follow_action (1);
+		which_follow_action = 1;
 	}
 
 	/* first switch: deal with the "special" cases where we either do
