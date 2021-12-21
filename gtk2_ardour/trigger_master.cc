@@ -451,7 +451,7 @@ TriggerMaster::_size_allocate (ArdourCanvas::Rect const& alloc)
 	Rectangle::_size_allocate (alloc);
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
-	_poly_margin       = 2. * scale;
+	_poly_margin       = 3. * scale;
 
 	const Distance width  = _rect.width ();
 	const Distance height = _rect.height ();

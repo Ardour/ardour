@@ -233,27 +233,30 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 
 
 void
-TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float size, float scale) const
+TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz, float scale) const
 {
 	context->set_line_width (1 * scale);
+
+	float margin = 4*scale;
+	float size = sz - 2*margin;
 
 	if (_trigger.active()) {
 		if (_trigger.launch_style()==Trigger::Toggle) {
 			//clicking again will Stop this clip
 			set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
-			context->move_to (_poly_margin, _poly_margin);
-			context->rel_line_to (_poly_size,  0);
-			context->rel_line_to (0,           _poly_size);
-			context->rel_line_to (-_poly_size, 0);
-			context->rel_line_to (0,           -_poly_size);
+			context->move_to (margin, margin);
+			context->rel_line_to (size,  0);
+			context->rel_line_to (0,     size);
+			context->rel_line_to (-size, 0);
+			context->rel_line_to (0,     -size);
 			context->fill ();
 			return;  //done
 		} else {
 			//actively playing; draw a filled play triangle
 			set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
-			context->move_to (_poly_margin, _poly_margin);
-			context->line_to (_poly_margin, _poly_size);
-			context->line_to (_poly_size, 0.5 + _poly_size / 2.);
+			context->move_to (margin, margin);
+			context->rel_line_to (0, size);
+			context->rel_line_to (size, -size/2);
 			context->fill ();
 			return;  //done
 		}
@@ -263,11 +266,11 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float siz
 
 	if (!_trigger.region ()) {
 		//no content in this slot, it is only a Stop button
-		context->move_to (_poly_margin, _poly_margin);
-		context->rel_line_to (_poly_size,  0);
-		context->rel_line_to (0,           _poly_size);
-		context->rel_line_to (-_poly_size, 0);
-		context->rel_line_to (0,           -_poly_size);
+		context->move_to (margin, margin);
+		context->rel_line_to (size,  0);
+		context->rel_line_to (0,     size);
+		context->rel_line_to (-size, 0);
+		context->rel_line_to (0,     -size);
 		context->stroke ();
 		return;  //done
 	}
@@ -275,30 +278,30 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float siz
 	switch (_trigger.launch_style()) {
 		case Trigger::Toggle:
 		case Trigger::OneShot:
-			context->move_to (_poly_margin, _poly_margin);
-			context->line_to (_poly_margin, _poly_size);
-			context->line_to (_poly_size, 0.5 + _poly_size / 2.);
-			context->line_to (_poly_margin, _poly_margin);
+			context->move_to (margin, margin);
+			context->rel_line_to (0, size);
+			context->rel_line_to (size, -size/2);
+			context->line_to (margin, margin);
 			context->stroke ();
 			break;
 		case Trigger::Gate:  //diamond shape
-			context->move_to ( _poly_size/2, _poly_margin );
-			context->rel_line_to ( _poly_size/2,  _poly_size/2);
-			context->rel_line_to ( -_poly_size/2, _poly_size/2);
-			context->rel_line_to ( -_poly_size/2, -_poly_size/2);
-			context->rel_line_to ( _poly_size/2,  -_poly_size/2);
+			context->move_to ( margin+size/2, margin );
+			context->rel_line_to ( size/2,  size/2);
+			context->rel_line_to ( -size/2, size/2);
+			context->rel_line_to ( -size/2, -size/2);
+			context->rel_line_to ( size/2,  -size/2);
 			context->stroke ();
 			break;
 		case Trigger::Repeat:  //'stutter' shape
 			context->set_line_width (1 * scale);
-			context->move_to ( _poly_margin, _poly_margin );
-			context->rel_line_to ( 0, _poly_size);
+			context->move_to ( margin, margin );
+			context->rel_line_to ( 0, size);
 
-			context->move_to ( _poly_margin + scale*3, _poly_margin + scale*2 );
-			context->rel_line_to ( 0, _poly_size - scale*4);
+			context->move_to ( margin + scale*3, margin + scale*2 );
+			context->rel_line_to ( 0, size - scale*4);
 
-			context->move_to ( _poly_margin + scale*6, _poly_margin + scale*4 );
-			context->rel_line_to ( 0, _poly_size - scale*8);
+			context->move_to ( margin + scale*6, margin + scale*3 );
+			context->rel_line_to ( 0, size - scale*6);
 
 			context->stroke ();
 			break;
@@ -589,6 +592,10 @@ TriggerBoxUI::name_button_event (GdkEvent* ev, uint64_t n)
 				_slots[n]->name_button->set_outline_color (HSV (fill_color ()).lighter (0.15).color ());
 				_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 				_slots[n]->play_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+				/*preserve selection border*/
+				if (PublicEditor::instance ().get_selection ().selected (_slots[n])) {
+					_slots[n]->name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
+				}
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
@@ -602,7 +609,7 @@ TriggerBoxUI::name_button_event (GdkEvent* ev, uint64_t n)
 				/* a side-effect of selection-change is that the slot's color is reset. retain the "entered-color" here: */
 				_slots[n]->name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 				_slots[n]->name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-				_slots[n]->name_button->set_outline_color (HSV (fill_color ()).lighter (0.15).color ());
+				_slots[n]->name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
 				_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			}
 			break;
