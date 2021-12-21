@@ -114,6 +114,8 @@ private:
 	Slots                   _slots;
 	Gtk::FileChooserDialog* _file_chooser;
 	sigc::connection        _file_chooser_connection;
+	Gtk::Menu*              _launch_context_menu;
+	Gtk::Menu*              _follow_context_menu;
 	Gtk::Menu*              _context_menu;
 	bool                    _ignore_menu_action;
 
@@ -127,7 +129,11 @@ private:
 
 	void choose_sample (uint64_t n);
 	void sample_chosen (int r, uint64_t n);
+
+	void launch_context_menu (uint64_t n);
+	void follow_context_menu (uint64_t n);
 	void context_menu (uint64_t n);
+
 	void set_follow_action (uint64_t slot, ARDOUR::Trigger::FollowAction);
 	void set_launch_style (uint64_t slot, ARDOUR::Trigger::LaunchStyle);
 	void set_quantization (uint64_t slot, Temporal::BBT_Offset const&);
