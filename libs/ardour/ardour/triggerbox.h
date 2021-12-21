@@ -483,6 +483,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	bool unbang_trigger (TriggerPtr);
 	void add_trigger (TriggerPtr);
 
+	void set_pending (uint32_t slot, TriggerPtr);
+
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
@@ -511,6 +513,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void set_pass_thru (bool yn);
 
 	void request_reload (int32_t slot, void*);
+	void set_region (uint32_t slot, boost::shared_ptr<Region> region);
 
 	enum TriggerMidiMapMode {
 		AbletonPush,
@@ -554,6 +557,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int32_t _order;
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
+	Triggers pending;
 	PBD::RingBuffer<uint32_t> explicit_queue; /* user queued triggers */
 	TriggerPtr _currently_playing;
 	Requests _requests;

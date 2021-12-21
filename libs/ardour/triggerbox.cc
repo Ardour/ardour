@@ -274,7 +274,13 @@ Trigger::set_quantization (Temporal::BBT_Offset const & q)
 void
 Trigger::set_region (boost::shared_ptr<Region> r)
 {
-	TriggerBox::worker->set_region (_box, index(), r);
+	if (!r) {
+		/* clear operation, no need to talk to the worker thread */
+		_box.set_pending (_index, TriggerPtr());
+	} else {
+		/* load data, do analysis in another thread */
+		TriggerBox::worker->set_region (_box, index(), r);
+	}
 }
 
 void
@@ -1681,6 +1687,8 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 		}
 	}
 
+	pending.reserve (all_triggers.size());
+
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
 
 	StopAllTriggers.connect_same_thread (stop_all_connection, boost::bind (&TriggerBox::request_stop_all, this));
@@ -1691,6 +1699,35 @@ TriggerBox::scene_bang (uint32_t n)
 {
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("scene bang on %1 for %2\n", n));
 	_pending_scene = n;
+}
+
+void
+TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
+{
+	/* This is called from our worker thread */
+
+	TriggerPtr t;
+
+	switch (_data_type) {
+	case DataType::AUDIO:
+		t = boost::make_shared<AudioTrigger> (slot, *this);
+		break;
+	case DataType::MIDI:
+		t = boost::make_shared<MIDITrigger> (slot, *this);
+		break;
+	}
+
+	t->set_region_threaded (region);
+
+	/* XXX what happens if pending is already set? */
+
+	set_pending (slot, t);
+}
+
+void
+TriggerBox::set_pending (uint32_t slot, TriggerPtr t)
+{
+	pending[slot] = t;
 }
 
 void
@@ -2700,7 +2737,7 @@ TriggerBoxThread::thread_work ()
 			while (requests.read (&req, 1) == 1) {
 				switch (req->type) {
 				case SetRegion:
-					req->box->trigger (req->slot)->set_region_threaded (req->region);
+					req->box->set_region (req->slot, req->region);
 					break;
 				default:
 					break;
