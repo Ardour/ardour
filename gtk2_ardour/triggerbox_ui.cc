@@ -55,27 +55,33 @@ using namespace ArdourCanvas;
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-TriggerEntry::TriggerEntry (Item* item, ARDOUR::Trigger& t)
+TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	: ArdourCanvas::Rectangle (item)
-	, _trigger (t)
+	, tref (tr)
 {
 	set_layout_sensitive (true); // why???
 
-	name = string_compose ("trigger %1", _trigger.index ());
+	name = string_compose ("trigger %1", tref.slot);
 
 	set_outline (false);
 
 	play_button = new ArdourCanvas::Rectangle (this);
 	play_button->set_outline (false);
 	play_button->set_fill (true);
-	play_button->name = string_compose ("playbutton %1", _trigger.index ());
+	play_button->name = string_compose ("playbutton %1", tref.slot);
 	play_button->show ();
 
+<<<<<<< HEAD
 	follow_button = new ArdourCanvas::Rectangle (this);
 	follow_button->set_outline (false);
 	follow_button->set_fill (true);
 	follow_button->name = ("slot_selector_button");
 	follow_button->show ();
+=======
+	play_shape       = new ArdourCanvas::Polygon (play_button);
+	play_shape->name = string_compose ("playshape %1", tref.slot);
+	play_shape->show ();
+>>>>>>> ea5651295d (triggerbox (UI): shared ptrs for everyone, plus indirect references to Triggers from TriggerEntry)
 
 	name_button = new ArdourCanvas::Rectangle (this);
 	name_button->set_outline (true);
@@ -91,8 +97,8 @@ TriggerEntry::TriggerEntry (Item* item, ARDOUR::Trigger& t)
 	UIConfiguration::instance ().ParameterChanged.connect (sigc::mem_fun (*this, &TriggerEntry::ui_parameter_changed));
 	set_default_colors ();
 
-	_trigger.PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context ());
-	dynamic_cast<Stripable*> (_trigger.box ().owner ())->presentation_info ().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
+	trigger()->PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context ());
+	dynamic_cast<Stripable*> (tref.box.owner ())->presentation_info ().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
 
 	PropertyChange changed;
 	changed.add (ARDOUR::Properties::name);
@@ -340,7 +346,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 
 	render_children (area, context);
 
-	if (_trigger.scene_isolated ()) {
+	if (trigger()->scene_isolated ()) {
 		/* left shadow */
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);
@@ -353,7 +359,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 		context->set_identity_matrix ();
 	}
 
-	if (_trigger.index () == 1) {
+	if (tref.slot == 1) {
 		/* drop-shadow at top */
 		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6 * scale);
 		drop_shadow_pattern->add_color_stop_rgba (0, 0, 0, 0, 0.7);
@@ -361,7 +367,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 		context->set_source (drop_shadow_pattern);
 		context->rectangle (0, 0, width, 6 * scale);
 		context->fill ();
-	} else if (_trigger.index () % 2 == 0) {
+	} else if (tref.slot % 2 == 0) {
 		/* line at top */
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);
@@ -381,12 +387,12 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 	}
 
 	/* follow-action icon */
-	if (_trigger.region ()) {
+	if (trigger()->region ()) {
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (width - height, 0); // right side of the widget
 		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
-		draw_follow_icon (context, _trigger.follow_action (0), height, scale);
+		draw_follow_icon (context, trigger()->follow_action (0), height, scale);
 		context->set_identity_matrix ();
 	}
 }
@@ -395,8 +401,8 @@ void
 TriggerEntry::prop_change (PropertyChange const& change)
 {
 	if (change.contains (ARDOUR::Properties::name)) {
-		if (_trigger.region ()) {
-			name_text->set (short_version (_trigger.name (), 16));
+		if (trigger()->region ()) {
+			name_text->set (short_version (trigger()->name (), 16));
 		} else {
 			name_text->set ("");
 		}
@@ -422,7 +428,7 @@ TriggerEntry::set_default_colors ()
 	name_button->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
 	name_button->set_outline_color (UIConfiguration::instance ().color ("theme:bg"));
 	follow_button->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
-	if ((_trigger.index () / 2) % 2 == 0) {
+	if ((tref.slot / 2) % 2 == 0) {
 		set_fill_color (HSV (fill_color ()).darker (0.15).color ());
 		play_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
 		name_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
@@ -534,7 +540,7 @@ TriggerBoxUI::trigger_scene (int32_t n)
 void
 TriggerBoxUI::build ()
 {
-	Trigger* t;
+	TriggerPtr t;
 	uint64_t n = 0;
 
 	// clear_items (true);
@@ -546,7 +552,7 @@ TriggerBoxUI::build ()
 		if (!t) {
 			break;
 		}
-		TriggerEntry* te = new TriggerEntry (this, *t);
+		TriggerEntry* te = new TriggerEntry (this, TriggerReference (_triggerbox, n));
 
 		_slots.push_back (te);
 
@@ -651,7 +657,7 @@ TriggerBoxUI::play_button_event (GdkEvent* ev, uint64_t n)
 		case GDK_BUTTON_PRESS:
 			switch (ev->button.button) {
 				case 1:
-					_slots[n]->trigger ().bang ();
+					_slots[n]->trigger()->bang ();
 					return true;
 				default:
 					break;
@@ -660,9 +666,9 @@ TriggerBoxUI::play_button_event (GdkEvent* ev, uint64_t n)
 		case GDK_BUTTON_RELEASE:
 			switch (ev->button.button) {
 				case 1:
-					if (_slots[n]->trigger ().launch_style () == Trigger::Gate ||
-					    _slots[n]->trigger ().launch_style () == Trigger::Repeat) {
-						_slots[n]->trigger ().unbang ();
+					if (_slots[n]->trigger()->launch_style () == Trigger::Gate ||
+					    _slots[n]->trigger()->launch_style () == Trigger::Repeat) {
+						_slots[n]->trigger()->unbang ();
 					}
 					break;
 				case 3:
@@ -925,7 +931,7 @@ TriggerBoxUI::toggle_trigger_isolated (uint64_t n)
 		return;
 	}
 
-	Trigger* trigger = _triggerbox.trigger (n);
+	TriggerPtr trigger = _triggerbox.trigger (n);
 	trigger->set_scene_isolated (!trigger->scene_isolated ());
 }
 
@@ -933,7 +939,7 @@ void
 TriggerBoxUI::clear_trigger (uint64_t n)
 {
 #if 0 // XXX
-	Trigger* trigger = _triggerbox.trigger (n);
+	TriggerPtr trigger = _triggerbox.trigger (n);
 	trigger->clear_trigger();
 #endif
 }
@@ -941,7 +947,7 @@ TriggerBoxUI::clear_trigger (uint64_t n)
 void
 TriggerBoxUI::edit_trigger (uint64_t n)
 {
-	Trigger*       trigger = _triggerbox.trigger (n);
+	TriggerPtr       trigger = _triggerbox.trigger (n);
 	TriggerWindow* tw      = static_cast<TriggerWindow*> (trigger->ui ());
 
 	if (!tw) {

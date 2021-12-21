@@ -219,7 +219,7 @@ TriggerUI::~TriggerUI ()
 }
 
 void
-TriggerUI::set_trigger (ARDOUR::Trigger* t)
+TriggerUI::set_trigger (ARDOUR::TriggerPtr t)
 {
 	trigger = t;
 
@@ -447,7 +447,7 @@ TriggerWidget::TriggerWidget ()
 
 /* ------------ */
 
-TriggerWindow::TriggerWindow (Trigger* slot)
+TriggerWindow::TriggerWindow (TriggerPtr slot)
 {
 	set_title (string_compose (_("Trigger: %1"), slot->name()));
 

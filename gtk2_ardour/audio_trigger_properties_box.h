@@ -37,7 +37,7 @@ public:
 	TriggerPropertiesBox () {}
 	~TriggerPropertiesBox () {}
 
-	virtual void set_trigger (ARDOUR::Trigger*) = 0;
+	virtual void set_trigger (ARDOUR::TriggerPtr) = 0;
 };
 
 class AudioTriggerPropertiesBox : public TriggerPropertiesBox
@@ -46,7 +46,7 @@ public:
 	AudioTriggerPropertiesBox ();
 	~AudioTriggerPropertiesBox ();
 
-	void set_trigger (ARDOUR::Trigger*);
+	void set_trigger (ARDOUR::TriggerPtr);
 
 	void set_session (ARDOUR::Session*);
 
@@ -58,7 +58,7 @@ protected:
 	Gtk::Label _header_label;
 
 private:
-	ARDOUR::AudioTrigger* _trigger;
+	boost::shared_ptr<ARDOUR::AudioTrigger> _trigger;
 
 	Gtk::Table _table;
 	Gtk::Label _abpm_label;

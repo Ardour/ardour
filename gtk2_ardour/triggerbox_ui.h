@@ -45,15 +45,25 @@ namespace ArdourCanvas
 	class Polygon;
 }
 
+class TriggerReference
+{
+public:
+	TriggerReference (ARDOUR::TriggerBox& b, uint32_t s) : box (b), slot (s) {}
+	boost::shared_ptr<ARDOUR::Trigger> trigger() const { return box.trigger (slot); }
+
+	ARDOUR::TriggerBox& box;
+	uint32_t    slot;
+};
+
 class TriggerEntry : public ArdourCanvas::Rectangle
 {
 public:
-	TriggerEntry (ArdourCanvas::Item* item, ARDOUR::Trigger&);
+	TriggerEntry (ArdourCanvas::Item* item, TriggerReference rf);
 	~TriggerEntry ();
 
-	ARDOUR::Trigger& trigger () const
+	boost::shared_ptr<ARDOUR::Trigger> trigger () const
 	{
-		return _trigger;
+		return tref.trigger();
 	}
 
 	ArdourCanvas::Rectangle* play_button;
@@ -74,7 +84,7 @@ public:
 	void set_default_colors ();
 
 private:
-	ARDOUR::Trigger& _trigger;
+	TriggerReference tref;
 	double           _poly_size;
 	double           _poly_margin;
 

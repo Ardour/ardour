@@ -491,7 +491,7 @@ TriggerMaster::prop_change (PropertyChange const& change)
 
 	std::string text;
 
-	ARDOUR::Trigger* trigger = _triggerbox->currently_playing ();
+	ARDOUR::TriggerPtr trigger = _triggerbox->currently_playing ();
 	if (!trigger) {
 		name_text->set (text);
 		_loopster->hide ();

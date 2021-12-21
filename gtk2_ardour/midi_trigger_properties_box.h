@@ -32,12 +32,12 @@ public:
 	MidiTriggerPropertiesBox ();
 	~MidiTriggerPropertiesBox ();
 
-	void set_trigger (ARDOUR::Trigger*);
+	void set_trigger (ARDOUR::TriggerPtr);
 
 private:
 	void trigger_changed (const PBD::PropertyChange& what_changed);
 
-	ARDOUR::MIDITrigger* _trigger;
+	boost::shared_ptr<ARDOUR::MIDITrigger> _trigger;
 
 	Gtk::Label                  _header_label;
 	ArdourWidgets::ArdourButton _patch_enable_button;

@@ -347,7 +347,7 @@ TriggerPage::selection_changed ()
 	if (!selection.triggers.empty ()) {
 		TriggerSelection ts    = selection.triggers;
 		TriggerEntry*    entry = *ts.begin ();
-		Trigger*         slot  = &entry->trigger ();
+		TriggerPtr       slot  = entry->trigger ();
 
 		_slot_prop_box.set_slot (slot);
 		_slot_prop_box.show ();

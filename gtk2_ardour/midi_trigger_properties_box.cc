@@ -79,9 +79,9 @@ MidiTriggerPropertiesBox::~MidiTriggerPropertiesBox ()
 }
 
 void
-MidiTriggerPropertiesBox::set_trigger (ARDOUR::Trigger* t)
+MidiTriggerPropertiesBox::set_trigger (ARDOUR::TriggerPtr t)
 {
-	ARDOUR::MIDITrigger* midi_trigger = dynamic_cast<ARDOUR::MIDITrigger*> (t);
+	boost::shared_ptr<ARDOUR::MIDITrigger> midi_trigger = boost::dynamic_pointer_cast<ARDOUR::MIDITrigger> (t);
 
 	if (!midi_trigger) {
 		return;

@@ -48,7 +48,7 @@ public:
 
 	void set_session (ARDOUR::Session*);
 
-	void set_slot (ARDOUR::Trigger*);
+	void set_slot (ARDOUR::TriggerPtr);
 
 private:
 	Gtk::Table table;

@@ -168,9 +168,9 @@ AudioTriggerPropertiesBox::set_session (Session* s)
 }
 
 void
-AudioTriggerPropertiesBox::set_trigger (ARDOUR::Trigger* t)
+AudioTriggerPropertiesBox::set_trigger (ARDOUR::TriggerPtr t)
 {
-	ARDOUR::AudioTrigger* audio_trigger = dynamic_cast<ARDOUR::AudioTrigger*> (t);
+	boost::shared_ptr<ARDOUR::AudioTrigger> audio_trigger = boost::dynamic_pointer_cast<ARDOUR::AudioTrigger> (t);
 
 	if (!audio_trigger) {
 		return;

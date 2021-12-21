@@ -402,7 +402,7 @@ AudioClipEditor::drop_waves ()
 }
 
 void
-AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, Trigger* t)
+AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, TriggerPtr t)
 {
 	drop_waves ();
 
@@ -595,7 +595,7 @@ AudioClipEditorBox::zoom_out_click ()
 }
 
 void
-AudioClipEditorBox::set_region (boost::shared_ptr<Region> r, Trigger* t)
+AudioClipEditorBox::set_region (boost::shared_ptr<Region> r, TriggerPtr t)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
