@@ -343,8 +343,8 @@ Session::Session (AudioEngine &eng,
 
 	TempoMap::SharedPtr tmcopy (TempoMap::write_copy());
 	/* this discards the copy that was made, and installs the new default tempo map */
-	tmcopy = new TempoMap();
-	TempoMap::update (new_tempo_map);
+	tmcopy.reset (new TempoMap (Tempo (120, 4), Meter (4, 4)));
+	TempoMap::update (tmcopy);
 
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
