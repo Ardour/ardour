@@ -337,6 +337,15 @@ Session::Session (AudioEngine &eng,
 	g_atomic_int_set (&_seek_counter, 0);
 	g_atomic_int_set (&_butler_seek_counter, 0);
 
+	/* create a new "default" tempo map. This maybe reset/overwritten by
+	 * the session if it already exists during ::set_state()
+	 */
+
+	TempoMap::SharedPtr tmcopy (TempoMap::write_copy());
+	/* this discards the copy that was made, and installs the new default tempo map */
+	tmcopy = new TempoMap();
+	TempoMap::update (new_tempo_map);
+
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
 	pthread_mutex_init (&_rt_emit_mutex, 0);
