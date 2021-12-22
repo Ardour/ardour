@@ -295,11 +295,8 @@ Trigger::set_region (boost::shared_ptr<Region> r)
 {
 	/* Called from (G)UI thread */
 
-	std::cerr << "set region to " << r << std::endl;
-
 	if (!r) {
 		/* clear operation, no need to talk to the worker thread */
-		std::cerr << "set pending to " << Trigger::MagicClearPointerValue << std::endl;
 		set_pending ((Trigger*) Trigger::MagicClearPointerValue);
 		request_stop ();
 	} else {
@@ -313,7 +310,6 @@ Trigger::clear_region ()
 {
 	/* Called from RT process thread */
 
-	std::cerr << "trigger " << index() << " clearing own region\n";
 	_region.reset ();
 }
 
@@ -1778,7 +1774,6 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 	p = all_triggers[slot]->swap_pending (p);
 
 	if (p) {
-		std::cerr << " box " << order() << " slot " << slot << " pending discovered, switching to " << p << std::endl;
 
 		if (p == Trigger::MagicClearPointerValue) {
 			all_triggers[slot]->clear_region ();
