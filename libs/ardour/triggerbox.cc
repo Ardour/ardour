@@ -65,6 +65,8 @@ namespace ARDOUR {
 	}
 }
 
+const Trigger* Trigger::MagicClearPointerValue = (Trigger*) 0xfeedface;
+
 Trigger::Trigger (uint32_t n, TriggerBox& b)
 	: _box (b)
 	, _state (Stopped)
@@ -112,7 +114,7 @@ void
 Trigger::set_pending (Trigger* t)
 {
 	Trigger* old = _pending.exchange (t);
-	if (old) {
+	if (old && old != MagicClearPointerValue) {
 		/* new pending trigger set before existing pending trigger was used */
 		delete old;
 	}
@@ -291,14 +293,28 @@ Trigger::set_quantization (Temporal::BBT_Offset const & q)
 void
 Trigger::set_region (boost::shared_ptr<Region> r)
 {
+	/* Called from (G)UI thread */
+
+	std::cerr << "set region to " << r << std::endl;
+
 	if (!r) {
 		/* clear operation, no need to talk to the worker thread */
-		set_pending ((Trigger*) 0);
+		std::cerr << "set pending to " << Trigger::MagicClearPointerValue << std::endl;
+		set_pending ((Trigger*) Trigger::MagicClearPointerValue);
 		request_stop ();
 	} else {
 		/* load data, do analysis in another thread */
 		TriggerBox::worker->set_region (_box, index(), r);
 	}
+}
+
+void
+Trigger::clear_region ()
+{
+	/* Called from RT process thread */
+
+	std::cerr << "trigger " << index() << " clearing own region\n";
+	_region.reset ();
 }
 
 void
@@ -1752,19 +1768,29 @@ TriggerBox::set_pending (uint32_t slot, Trigger* t)
 void
 TriggerBox::maybe_swap_pending (uint32_t slot)
 {
+	/* This is called synchronously with process() (i.e. in an RT process
+	   thread) and so it is impossible for any Triggers in this TriggerBox
+	   to be invoked while this executes.
+	*/
+
 	Trigger* p = 0;
 
 	p = all_triggers[slot]->swap_pending (p);
 
 	if (p) {
-		std::cerr << " box " << order() << " slot " << slot << " pending discovered, switching\n";
+		std::cerr << " box " << order() << " slot " << slot << " pending discovered, switching to " << p << std::endl;
 
-		if (all_triggers[slot]) {
-			// _deletion_queue....;
+		if (p == Trigger::MagicClearPointerValue) {
+			all_triggers[slot]->clear_region ();
+		} else {
+			if (all_triggers[slot]) {
+				/* Put existing Trigger for this slot in the deletion queue */
+				// XXX _deletion_queue....;
+			}
+
+			all_triggers[slot].reset (p);
+			TriggerSwapped (slot); /* EMIT SIGNAL */
 		}
-
-		all_triggers[slot].reset (p);
-		TriggerSwapped (slot); /* EMIT SIGNAL */
 	}
 }
 
@@ -2156,12 +2182,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	process_midi_trigger_requests (bufs);
 
-	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
-		if (all_triggers[n] != _currently_playing) {
-			maybe_swap_pending (n);
-		}
-	}
-
 	/* STEP SIX: if at this point there is an active cue, make it trigger
 	 * our corresponding slot
 	 */
@@ -2182,6 +2202,16 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
 		all_triggers[n]->process_state_requests ();
+	}
+
+	if (_currently_playing && _currently_playing->state() == Trigger::Stopped) {
+		_currently_playing = 0;
+	}
+
+	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
+		if (all_triggers[n] != _currently_playing) {
+			maybe_swap_pending (n);
+		}
 	}
 
 	/* STEP EIGHT: if there is no active slot, see if there any queued up
@@ -2323,7 +2353,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				if (_currently_playing->use_follow()) {
 					int n = determine_next_trigger (_currently_playing->index());
-
+					std::cerr << "dnt = " << n << endl;
 					if (n < 0) {
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 finished, no next trigger\n", _currently_playing->name()));
 						_currently_playing = 0;
@@ -2416,6 +2446,10 @@ TriggerBox::determine_next_trigger (uint32_t current)
 		if (all_triggers[n]->region()) {
 			runnable++;
 		}
+	}
+
+	if (runnable == 0 || !all_triggers[current]->region()) {
+		return -1;
 	}
 
 	/* decide which of the two follow actions we're going to use (based on

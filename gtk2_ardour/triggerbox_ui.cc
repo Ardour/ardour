@@ -945,10 +945,8 @@ TriggerBoxUI::toggle_trigger_isolated (uint64_t n)
 void
 TriggerBoxUI::clear_trigger (uint64_t n)
 {
-#if 0 // XXX
 	TriggerPtr trigger = _triggerbox.trigger (n);
-	trigger->clear_trigger();
-#endif
+	trigger->set_region (boost::shared_ptr<Region>());
 }
 
 void

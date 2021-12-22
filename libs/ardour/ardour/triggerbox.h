@@ -177,7 +177,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_follow_action (FollowAction, uint32_t n);
 
 	void set_region (boost::shared_ptr<Region>);
-	void clear ();
+	void clear_region ();
 	virtual int set_region_threaded (boost::shared_ptr<Region>) = 0;
 	boost::shared_ptr<Region> region() const { return _region; }
 
@@ -237,6 +237,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	void set_pending (Trigger*);
 	Trigger* swap_pending (Trigger*);
+
+	static const Trigger* MagicClearPointerValue;
 
 	virtual SegmentDescriptor get_segment_descriptor () const = 0;
 
