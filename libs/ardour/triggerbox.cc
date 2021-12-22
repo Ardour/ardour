@@ -785,7 +785,7 @@ AudioTrigger::natural_length() const
 }
 
 int
-AudioTrigger::set_region_threaded (boost::shared_ptr<Region> r)
+AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 {
 	assert (!active());
 
@@ -1464,7 +1464,7 @@ MIDITrigger::natural_length() const
 }
 
 int
-MIDITrigger::set_region_threaded (boost::shared_ptr<Region> r)
+MIDITrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 {
 	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion> (r);
 
@@ -1748,7 +1748,7 @@ TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
 		break;
 	}
 
-	t->set_region_threaded (region);
+	t->set_region_in_worker_thread (region);
 
 	/* XXX what happens if pending is already set? */
 

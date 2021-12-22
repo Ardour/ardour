@@ -178,7 +178,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	void set_region (boost::shared_ptr<Region>);
 	void clear_region ();
-	virtual int set_region_threaded (boost::shared_ptr<Region>) = 0;
+	virtual int set_region_in_worker_thread (boost::shared_ptr<Region>) = 0;
 	boost::shared_ptr<Region> region() const { return _region; }
 
 	Temporal::BBT_Offset quantization() const;
@@ -312,7 +312,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	double position_as_fraction() const;
 
-	int set_region_threaded (boost::shared_ptr<Region>);
+	int set_region_in_worker_thread (boost::shared_ptr<Region>);
 	void startup ();
 	void jump_start ();
 	void jump_stop ();
@@ -384,7 +384,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
 	double position_as_fraction() const;
 
-	int set_region_threaded (boost::shared_ptr<Region>);
+	int set_region_in_worker_thread (boost::shared_ptr<Region>);
 	void startup ();
 	void jump_start ();
 	void jump_stop ();
