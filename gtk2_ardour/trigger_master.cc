@@ -400,9 +400,9 @@ TriggerMaster::context_menu ()
 	}
 
 	items.push_back (MenuElem (_("Enable/Disable..."), sigc::mem_fun (*this, &TriggerMaster::maybe_update))); // TODO
-	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
-	items.push_back (MenuElem (_("Launch Style..."), *launch_menu));
-	items.push_back (MenuElem (_("Quantization..."), *quant_menu));
+	items.push_back (MenuElem (_("Set All Follow Actions..."), *follow_menu));
+	items.push_back (MenuElem (_("Set All Launch Styles..."), *launch_menu));
+	items.push_back (MenuElem (_("Set All Quantizations..."), *quant_menu));
 	items.push_back (MenuElem (_("Clear All..."), sigc::mem_fun (*this, &TriggerMaster::maybe_update))); // TODO
 
 	_context_menu->popup (1, gtk_get_current_event_time ());
@@ -421,19 +421,20 @@ TriggerMaster::toggle_thru ()
 void
 TriggerMaster::set_all_follow_action (Trigger::FollowAction fa)
 {
-	// TODO
+	_triggerbox->set_all_follow_action(fa);
+	_triggerbox->set_all_probability(100);
 }
 
 void
 TriggerMaster::set_all_launch_style (Trigger::LaunchStyle ls)
 {
-	// TODO
+	_triggerbox->set_all_launch_style(ls);
 }
 
 void
 TriggerMaster::set_all_quantization (Temporal::BBT_Offset const& q)
 {
-	// TODO
+	_triggerbox->set_all_quantization(q);
 }
 
 void
