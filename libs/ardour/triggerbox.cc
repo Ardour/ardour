@@ -118,12 +118,6 @@ Trigger::set_pending (Trigger* t)
 	}
 }
 
-void
-Trigger::swap_notify ()
-{
-	PropertyChanged (Properties::name);
-}
-
 Trigger*
 Trigger::swap_pending (Trigger* t)
 {
@@ -300,6 +294,7 @@ Trigger::set_region (boost::shared_ptr<Region> r)
 	if (!r) {
 		/* clear operation, no need to talk to the worker thread */
 		set_pending ((Trigger*) 0);
+		request_stop ();
 	} else {
 		/* load data, do analysis in another thread */
 		TriggerBox::worker->set_region (_box, index(), r);

@@ -237,7 +237,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	void set_pending (Trigger*);
 	Trigger* swap_pending (Trigger*);
-	void swap_notify ();
 
 	virtual SegmentDescriptor get_segment_descriptor () const = 0;
 
