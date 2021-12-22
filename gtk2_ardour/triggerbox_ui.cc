@@ -306,6 +306,7 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			context->stroke ();
 			break;
 		case Trigger::Repeat:  //'stutter' shape
+			set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); //stutter shape needs to be brighter to maintain balance
 			context->set_line_width (1 * scale);
 			context->move_to ( margin, margin );
 			context->rel_line_to ( 0, size);
