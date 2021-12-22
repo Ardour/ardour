@@ -113,9 +113,6 @@ AudioClipEditor::ClipBBTMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark
 			marks.push_back (mark);
 			beat_number++;
 			last = n;
-			std::cerr << "mark at " << mark.label << " @ " << mark.position << std::endl;
-		} else {
-			std::cerr << n << " - " << last << " = " << (n - last) << " pix " << (n - last) / units_per_pixel << std::endl;
 		}
 	}
 }
