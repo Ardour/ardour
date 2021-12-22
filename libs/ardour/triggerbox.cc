@@ -1927,6 +1927,38 @@ TriggerBox::request_stop_all ()
 }
 
 void
+TriggerBox::set_all_launch_style (ARDOUR::Trigger::LaunchStyle ls)
+{
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		all_triggers[n]->set_launch_style (ls);
+	}
+}
+
+void
+TriggerBox::set_all_follow_action (ARDOUR::Trigger::FollowAction fa, uint32_t fa_n)
+{
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		all_triggers[n]->set_follow_action (fa, fa_n);
+	}
+}
+
+void
+TriggerBox::set_all_probability (int zero_to_hundred)
+{
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		all_triggers[n]->set_follow_action_probability (zero_to_hundred);
+	}
+}
+
+void
+TriggerBox::set_all_quantization (Temporal::BBT_Offset const& q)
+{
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		all_triggers[n]->set_quantization (q);
+	}
+}
+
+void
 TriggerBox::stop_all ()
 {
 	/* XXX needs to be done with mutex or via thread-safe queue */

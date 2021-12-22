@@ -502,6 +502,11 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	TriggerPtr currently_playing() const { return _currently_playing; }
 
+	void set_all_follow_action (ARDOUR::Trigger::FollowAction, uint32_t n=0);
+	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle);
+	void set_all_quantization (Temporal::BBT_Offset const&);
+	void set_all_probability (int zero_to_a_hundred);
+
 	/* Returns a negative value is there is no active Trigger, or a value between 0
 	 * and 1.0 if there is, corresponding to the value of position_as_fraction() for
 	 *  the active Trigger.
