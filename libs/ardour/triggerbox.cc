@@ -491,13 +491,20 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	pframes_t extra_offset = 0;
 	BBT_Offset q (_quantization);
 
+
 	/* XXX need to use global grid here is quantization == zero */
 
 	/* Given the value of @param start, determine, based on the
 	 * quantization, the next time for a transition.
 	 */
 
-	if (q.bars == 0) {
+	if (q < Temporal::BBT_Offset (0, 0, 0)) {
+		/* negative quantization == do not quantize */
+		std::cerr << "negative quant, start right now\n";
+		transition_samples = start_sample;
+		transition_beats = start;
+		transition_time = timepos_t (start);
+	} else if (q.bars == 0) {
 		Temporal::Beats transition_beats = start.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks));
 		transition_bbt = tmap->bbt_at (transition_beats);
 		transition_time = timepos_t (transition_beats);
@@ -807,6 +814,31 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 	setup_stretcher ();
 	set_usable_length ();
 
+	/* Given what we know about the tempo and duration, set the defaults
+	 * for the trigger properties.
+	 */
+
+	if (_apparent_tempo == 0.) {
+		_stretchable = false;
+		_quantization = Temporal::BBT_Offset (-1, 0, 0);
+		_follow_action0 = None;
+		_follow_action_probability = 0; /* 100% left */
+	} else {
+
+		if (probably_oneshot()) {
+			/* short trigger, treat as a one shot */
+			_stretchable = false;
+			_follow_action0 = None;
+			_quantization = Temporal::BBT_Offset (-1, 0, 0);
+		} else {
+			_stretchable = true;
+			_quantization = Temporal::BBT_Offset (0, 1, 0);
+			_follow_action0 = Again;
+		}
+
+		_follow_action_probability = 0; /* 100% left */
+	}
+
 	PropertyChanged (ARDOUR::Properties::name);
 
 	return 0;
@@ -911,6 +943,21 @@ AudioTrigger::determine_tempo ()
 	cerr << "tempo: " << _apparent_tempo << endl;
 	cerr << "one bar in samples: " << one_bar << endl;
 	cerr << "barcnt = " << round (_barcnt) << endl;
+}
+
+bool
+AudioTrigger::probably_oneshot () const
+{
+	assert (_apparent_tempo != 0.);
+
+	if ((usable_length < (_box.session().sample_rate()/2)) ||
+	    /* XXX use Meter here, not 4.0 */
+	    ((_barcnt <= 1) && (usable_length < (4.0 * ((_box.session().sample_rate() * 60) / _apparent_tempo))))) {
+		std::cerr << "looks like a one-shot\n";
+		return true;
+	}
+
+	return false;
 }
 
 void
@@ -1283,6 +1330,13 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 
 MIDITrigger::~MIDITrigger ()
 {
+}
+
+bool
+MIDITrigger::probably_oneshot () const
+{
+	/* XXX fix for short chord stabs */
+	return false;
 }
 
 void

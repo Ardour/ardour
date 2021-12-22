@@ -141,6 +141,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_use_follow (bool yn);
 	bool use_follow() const { return _use_follow; }
 
+	virtual bool probably_oneshot () const = 0;
+
 	timepos_t start_offset () const; /* offset from start of data */
 	virtual timepos_t current_length() const = 0; /* offset from start() */
 	virtual timepos_t natural_length() const = 0; /* offset from start() */
@@ -309,6 +311,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	timepos_t natural_length() const; /* offset from start of data */
 	void reload (BufferSet&, void*);
 	void io_change ();
+	bool probably_oneshot () const;
 
 	double position_as_fraction() const;
 
@@ -381,6 +384,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	timepos_t current_length() const; /* offset from start of data */
 	timepos_t natural_length() const; /* offset from start of data */
 	void reload (BufferSet&, void*);
+	bool probably_oneshot () const;
 
 	double position_as_fraction() const;
 
