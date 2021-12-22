@@ -235,6 +235,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	double apparent_tempo() const { return _apparent_tempo; }
 	double set_tempo (double t);
 
+	void set_pending (Trigger*);
+	Trigger* swap_pending (Trigger*);
+	void swap_notify ();
+
 	virtual SegmentDescriptor get_segment_descriptor () const = 0;
 
   protected:
@@ -277,6 +281,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	double                    _barcnt; /* our estimate of the number of bars in the region */
 	double                    _apparent_tempo;
 	samplepos_t                expected_end_sample;
+
+	std::atomic<Trigger*>     _pending;
 
 	void set_region_internal (boost::shared_ptr<Region>);
 	virtual void retrigger() = 0;
@@ -349,8 +355,6 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	samplecnt_t got_stretcher_padding;
 	samplecnt_t to_pad;
 	samplecnt_t to_drop;
-
-	PBD::RingBuffer<Data*> _deletion_queue;
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
@@ -483,7 +487,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	bool unbang_trigger (TriggerPtr);
 	void add_trigger (TriggerPtr);
 
-	void set_pending (uint32_t slot, TriggerPtr);
+	void set_pending (uint32_t slot, Trigger*);
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
@@ -514,6 +518,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void request_reload (int32_t slot, void*);
 	void set_region (uint32_t slot, boost::shared_ptr<Region> region);
+
+	PBD::Signal1<void,uint32_t> TriggerSwapped;
 
 	enum TriggerMidiMapMode {
 		AbletonPush,
@@ -557,7 +563,10 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int32_t _order;
 	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
-	Triggers pending;
+
+	typedef std::vector<Trigger*> PendingTriggers;
+	PendingTriggers pending;
+
 	PBD::RingBuffer<uint32_t> explicit_queue; /* user queued triggers */
 	TriggerPtr _currently_playing;
 	Requests _requests;
@@ -575,6 +584,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void process_midi_trigger_requests (BufferSet&);
 	int determine_next_trigger (uint32_t n);
 	void stop_all ();
+
+	void maybe_swap_pending (uint32_t);
 
 	int note_to_trigger (int node, int channel);
 

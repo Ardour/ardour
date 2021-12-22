@@ -91,6 +91,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _barcnt (0.)
 	, _apparent_tempo (0.)
 	, expected_end_sample (0)
+	, _pending ((Trigger*) 0)
 {
 	add_property (_launch_style);
 	add_property (_use_follow);
@@ -105,6 +106,28 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	add_property (_midi_velocity_effect);
 	add_property (_stretchable);
 	add_property (_isolated);
+}
+
+void
+Trigger::set_pending (Trigger* t)
+{
+	Trigger* old = _pending.exchange (t);
+	if (old) {
+		/* new pending trigger set before existing pending trigger was used */
+		delete old;
+	}
+}
+
+void
+Trigger::swap_notify ()
+{
+	PropertyChanged (Properties::name);
+}
+
+Trigger*
+Trigger::swap_pending (Trigger* t)
+{
+	return _pending.exchange (t);
 }
 
 void
@@ -276,7 +299,7 @@ Trigger::set_region (boost::shared_ptr<Region> r)
 {
 	if (!r) {
 		/* clear operation, no need to talk to the worker thread */
-		_box.set_pending (_index, TriggerPtr());
+		set_pending ((Trigger*) 0);
 	} else {
 		/* load data, do analysis in another thread */
 		TriggerBox::worker->set_region (_box, index(), r);
@@ -575,7 +598,6 @@ AudioTrigger::AudioTrigger (uint32_t n, TriggerBox& b)
 	, got_stretcher_padding (false)
 	, to_pad (0)
 	, to_drop (0)
-	, _deletion_queue (4)
 {
 }
 
@@ -1687,7 +1709,9 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 		}
 	}
 
-	pending.reserve (all_triggers.size());
+	while (pending.size() < all_triggers.size()) {
+		pending.push_back (std::atomic<Trigger*>(0));
+	}
 
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
 
@@ -1706,14 +1730,14 @@ TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
 {
 	/* This is called from our worker thread */
 
-	TriggerPtr t;
+	Trigger* t;
 
 	switch (_data_type) {
 	case DataType::AUDIO:
-		t = boost::make_shared<AudioTrigger> (slot, *this);
+		t = new AudioTrigger (slot, *this);
 		break;
 	case DataType::MIDI:
-		t = boost::make_shared<MIDITrigger> (slot, *this);
+		t = new MIDITrigger (slot, *this);
 		break;
 	}
 
@@ -1725,9 +1749,28 @@ TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
 }
 
 void
-TriggerBox::set_pending (uint32_t slot, TriggerPtr t)
+TriggerBox::set_pending (uint32_t slot, Trigger* t)
 {
-	pending[slot] = t;
+	all_triggers[slot]->set_pending (t);
+}
+
+void
+TriggerBox::maybe_swap_pending (uint32_t slot)
+{
+	Trigger* p = 0;
+
+	p = all_triggers[slot]->swap_pending (p);
+
+	if (p) {
+		std::cerr << " box " << order() << " slot " << slot << " pending discovered, switching\n";
+
+		if (all_triggers[slot]) {
+			// _deletion_queue....;
+		}
+
+		all_triggers[slot].reset (p);
+		TriggerSwapped (slot); /* EMIT SIGNAL */
+	}
 }
 
 void
@@ -2118,6 +2161,12 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	process_midi_trigger_requests (bufs);
 
+	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
+		if (all_triggers[n] != _currently_playing) {
+			maybe_swap_pending (n);
+		}
+	}
+
 	/* STEP SIX: if at this point there is an active cue, make it trigger
 	 * our corresponding slot
 	 */
@@ -2145,6 +2194,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (!_currently_playing) {
 		if ((_currently_playing = get_next_trigger()) != 0) {
+			maybe_swap_pending (_currently_playing->index());
 			_currently_playing->startup ();
 			PropertyChanged (Properties::currently_playing);
 			active_trigger_boxes.fetch_add (1);
@@ -2222,6 +2272,12 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					explicit_queue.increment_read_idx (1); /* consume the entry we peeked at */
 
 					nxt->set_legato_offset (_currently_playing->current_pos());
+
+					/* starting up next trigger, check for pending */
+
+					maybe_swap_pending (n);
+					nxt = trigger (n);
+
 					nxt->jump_start ();
 					_currently_playing->jump_stop ();
 					/* and switch */
@@ -2236,6 +2292,11 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					if (_currently_playing->state() == Trigger::Stopped) {
 
 						explicit_queue.increment_read_idx (1); /* consume the entry we peeked at */
+
+						/* starting up next trigger, check for pending */
+						maybe_swap_pending (n);
+						nxt = trigger (n);
+
 						nxt->startup ();
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was finished, started %2\n", _currently_playing->index(), nxt->index()));
 						_currently_playing = nxt;
