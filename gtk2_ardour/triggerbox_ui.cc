@@ -71,17 +71,11 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	play_button->name = string_compose ("playbutton %1", tref.slot);
 	play_button->show ();
 
-<<<<<<< HEAD
 	follow_button = new ArdourCanvas::Rectangle (this);
 	follow_button->set_outline (false);
 	follow_button->set_fill (true);
 	follow_button->name = ("slot_selector_button");
 	follow_button->show ();
-=======
-	play_shape       = new ArdourCanvas::Polygon (play_button);
-	play_shape->name = string_compose ("playshape %1", tref.slot);
-	play_shape->show ();
->>>>>>> ea5651295d (triggerbox (UI): shared ptrs for everyone, plus indirect references to Triggers from TriggerEntry)
 
 	name_button = new ArdourCanvas::Rectangle (this);
 	name_button->set_outline (true);
@@ -98,6 +92,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	set_default_colors ();
 
 	trigger()->PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context ());
+	tref.box.TriggerSwapped.connect (trigger_swap_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::trigger_swap, this, _1), gui_context ());
 	dynamic_cast<Stripable*> (tref.box.owner ())->presentation_info ().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
 
 	PropertyChange changed;
@@ -110,6 +105,18 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 
 TriggerEntry::~TriggerEntry ()
 {
+}
+
+void
+TriggerEntry::trigger_swap (uint32_t n)
+{
+	if (n != tref.slot) {
+		/* some other slot in the same box got swapped. we don't care */
+		return;
+	}
+	trigger_prop_connection.disconnect ();
+	trigger()->PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context ());
+	prop_change (Properties::name);
 }
 
 void

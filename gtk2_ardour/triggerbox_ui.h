@@ -89,7 +89,10 @@ private:
 	double           _poly_margin;
 
 	PBD::ScopedConnection trigger_prop_connection;
+	PBD::ScopedConnection trigger_swap_connection;
 	void                  prop_change (PBD::PropertyChange const& change);
+
+	void                  trigger_swap (uint32_t);
 
 	PBD::ScopedConnection owner_prop_connection;
 	void                  owner_prop_change (PBD::PropertyChange const&);
