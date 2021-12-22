@@ -2804,6 +2804,8 @@ TriggerBoxThread::_thread_work (void* arg)
 void *
 TriggerBoxThread::thread_work ()
 {
+	pthread_set_name (X_("Trigger Worker"));
+
 	while (true) {
 
 		char msg;
