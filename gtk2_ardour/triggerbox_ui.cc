@@ -253,8 +253,8 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 	float margin = 4*scale;
 	float size = sz - 2*margin;
 
-	if (_trigger.active()) {
-		if (_trigger.launch_style()==Trigger::Toggle) {
+	if (trigger()->active()) {
+		if (trigger()->launch_style()==Trigger::Toggle) {
 			//clicking again will Stop this clip
 			set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 			context->move_to (margin, margin);
@@ -277,7 +277,7 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 
 	set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
 
-	if (!_trigger.region ()) {
+	if (!trigger()->region ()) {
 		//no content in this slot, it is only a Stop button
 		context->move_to (margin, margin);
 		context->rel_line_to (size,  0);
@@ -288,7 +288,7 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 		return;  //done
 	}
 
-	switch (_trigger.launch_style()) {
+	switch (trigger()->launch_style()) {
 		case Trigger::Toggle:
 		case Trigger::OneShot:
 			context->move_to (margin, margin);
