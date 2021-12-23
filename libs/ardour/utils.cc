@@ -323,9 +323,12 @@ ARDOUR::region_name_from_path (string path, bool strip_channels, bool add_channe
 
 	if (add_channel_suffix) {
 
+		/* compare to Session::format_audio_source_name */
 		path += '%';
 
-		if (total > 2) {
+		if (total > 25) {
+			path += string_compose ("%1", this_one + 1);
+		} else if (total > 2) {
 			path += (char) ('a' + this_one);
 		} else {
 			path += (char) (this_one == 0 ? 'L' : 'R');

@@ -184,7 +184,11 @@ AudioFileSource::construct_peak_filepath (const string& audio_path, const bool i
 		base = audio_path;
 	}
 	base += '%';
-	base += (char) ('A' + _channel);
+	if (_channel < 26) {
+		base += (char) ('A' + _channel);
+	} else {
+		base +=  string_compose ("%1", _channel + 1);
+	}
 	return _session.construct_peak_filepath (base, in_session, old_peak_name);
 }
 
