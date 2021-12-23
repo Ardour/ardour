@@ -2113,10 +2113,16 @@ private:
 
 	/* audio export */
 
+	enum BounceTarget {
+		NewSource,
+		NewTrigger,
+		ReplaceRange
+	};
+
 	int  write_region_selection(RegionSelection&);
 	bool write_region (std::string path, boost::shared_ptr<ARDOUR::AudioRegion>);
 	void bounce_region_selection (bool with_processing);
-	void bounce_range_selection (bool replace, bool enable_processing);
+	void bounce_range_selection (BounceTarget, bool enable_processing);
 	void external_edit_region ();
 
 	int write_audio_selection (TimeSelection&);

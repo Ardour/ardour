@@ -4105,17 +4105,26 @@ Editor::freeze_route ()
 }
 
 void
-Editor::bounce_range_selection (bool replace, bool enable_processing)
+Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 {
 	if (selection->time.empty()) {
 		return;
 	}
 
+	assert (enable_processing != (target == NewTrigger));
+
+	uint32_t trigger_slot = 0;
 	string bounce_name;
-	if (replace) {
-		bounce_name = "Consolidated";
-	} else {
-		bounce_name = "Bounced";
+	switch (target) {
+		case NewSource:
+			bounce_name = "Bounced";
+			break;
+		case ReplaceRange:
+			bounce_name = "Consolidated";
+			break;
+		case NewTrigger:
+			bounce_name = "Trigger";
+			break;
 	}
 
 	TrackSelection views = selection->tracks;
@@ -4126,7 +4135,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 
 			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 
-			if (rtv && rtv->track() && replace && enable_processing && !rtv->track()->bounceable (rtv->track()->main_outs(), false)) {
+			if (rtv && rtv->track() && target == ReplaceRange && !rtv->track()->bounceable (rtv->track()->main_outs(), false)) {
 				ArdourMessageDialog d (
 					_("You can't perform this operation because the processing of the signal "
 					  "will cause one or more of the tracks to end up with a region with more channels than this track has inputs.\n\n"
@@ -4141,26 +4150,52 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 
 	/*prompt the user for a new name*/
 	{
-		ArdourWidgets::Prompter dialog (true);
+		Prompter dialog (true);
+		ArdourDropdown* tslot = 0;
 
-		if (replace) {
-			dialog.set_prompt (_("Name for Consolidated Region:"));
-		} else {
-			dialog.set_prompt (_("Name for Bounced Region:"));
+		switch (target) {
+			case NewSource:
+				dialog.set_prompt (_("Name for Bounced Region:"));
+				dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
+				break;
+			case ReplaceRange:
+				dialog.set_prompt (_("Name for Consolidated Region:"));
+				dialog.add_button (_("Rename"), RESPONSE_ACCEPT);
+				break;
+			case NewTrigger:
+				dialog.set_prompt (_("Name for Trigger:"));
+				dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
+				break;
 		}
 
 		dialog.set_name ("BounceNameWindow");
 		dialog.set_size_request (400, -1);
 		dialog.set_position (Gtk::WIN_POS_MOUSE);
 
-		dialog.add_button (_("Rename"), RESPONSE_ACCEPT);
 		dialog.set_initial_text (bounce_name);
 
-		if (!replace) {
+		if (target == NewSource) {
 			Label* label = manage (new Label (_("Bounced Range will appear in the Source list.")));
 			dialog.get_vbox()->set_spacing (8);
 			dialog.get_vbox()->pack_start (*label);
 			label->show();
+		} else if (target == NewTrigger) {
+			Label* label = manage (new Label (_("Trigger Slot:")));
+			HBox*  tbox  = manage (new HBox);
+			tslot        = manage (new ArdourDropdown ());
+
+			for (int c = 0; c < 8; ++c) {
+				tslot->append_text_item (string_compose ("%1", (char)('A' + c)));
+			}
+			tslot->set_active ("A");
+
+			tbox->set_homogeneous (false);
+			tbox->set_spacing (5);
+			tbox->set_border_width (10);
+			tbox->pack_start (*label, false, false);
+			tbox->pack_start (*tslot, true, true);
+			tbox->show_all ();
+			dialog.get_vbox()->pack_start (*tbox);
 		}
 
 		dialog.show ();
@@ -4171,7 +4206,11 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		default:
 			return;
 		}
-		dialog.get_result(bounce_name);
+
+		dialog.get_result (bounce_name);
+		if (tslot) {
+			trigger_slot = tslot->get_text ()[0] - 'A';
+		}
 	}
 
 	timepos_t start = selection->time[clicked_selection].start();
@@ -4217,7 +4256,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			in_command = true;
 		}
 
-		if (replace) {
+		if (target == ReplaceRange) {
 			/*remove the edxisting regions under the edit range*/
 			list<TimelineRange> ranges;
 			ranges.push_back (TimelineRange (start, start+cnt, 0));
@@ -4229,6 +4268,8 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			plist.add (ARDOUR::Properties::whole_file, false);
 			boost::shared_ptr<Region> copy (RegionFactory::create (r, plist));
 			playlist->add_region (copy, start);
+		} else if (target == NewTrigger) {
+			rtv->track ()->triggerbox ()->set_from_selection (trigger_slot, r);
 		}
 
 		vector<Command*> cmds;
