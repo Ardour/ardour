@@ -178,7 +178,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	FollowAction follow_action (uint32_t n) const { assert (n < 2); return n ? _follow_action1 : _follow_action0; }
 	void set_follow_action (FollowAction, uint32_t n);
 
-	void set_region (boost::shared_ptr<Region>);
+	void set_region (boost::shared_ptr<Region>, bool use_thread = true);
 	void clear_region ();
 	virtual int set_region_in_worker_thread (boost::shared_ptr<Region>) = 0;
 	boost::shared_ptr<Region> region() const { return _region; }

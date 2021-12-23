@@ -246,11 +246,9 @@ Trigger::get_state (void)
 int
 Trigger::set_state (const XMLNode& node, int version)
 {
-	PropertyChange what_changed;
-
-	what_changed = set_values (node);
-
-	node.get_property (X_("index"), _index);
+	/* Set region first since set_region_in_worker_thread() will set some
+	   values that may/will need to be overridden by XML
+	*/
 
 	PBD::ID rid;
 
@@ -259,8 +257,12 @@ Trigger::set_state (const XMLNode& node, int version)
 	boost::shared_ptr<Region> r = RegionFactory::region_by_id (rid);
 
 	if (r) {
-		set_region (r);
+		set_region (r, false);
 	}
+
+	set_values (node);
+
+	node.get_property (X_("index"), _index);
 
 	return 0;
 }
@@ -291,7 +293,7 @@ Trigger::set_quantization (Temporal::BBT_Offset const & q)
 }
 
 void
-Trigger::set_region (boost::shared_ptr<Region> r)
+Trigger::set_region (boost::shared_ptr<Region> r, bool use_thread)
 {
 	/* Called from (G)UI thread */
 
@@ -299,9 +301,11 @@ Trigger::set_region (boost::shared_ptr<Region> r)
 		/* clear operation, no need to talk to the worker thread */
 		set_pending ((Trigger*) Trigger::MagicClearPointerValue);
 		request_stop ();
-	} else {
+	} else if (use_thread) {
 		/* load data, do analysis in another thread */
 		TriggerBox::worker->set_region (_box, index(), r);
+	} else {
+		set_region_in_worker_thread (r);
 	}
 }
 
