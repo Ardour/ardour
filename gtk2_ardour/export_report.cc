@@ -712,6 +712,21 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			assert (per_line > 0);
 			int lines = ceilf ((float)n_reports / per_line);
 
+			/* calc column width */
+			std::vector<int> col_w (per_line);
+			int i;
+			for (i = 0, pi = lp.begin (); pi != lp.end (); ++pi) {
+				if (!pi->report) {
+					continue;
+				}
+				int col = i % per_line;
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_text (pi->label);
+				layout->get_pixel_size (w, h);
+				col_w[col] = std::max (col_w[col], w);
+				++i;
+			}
+
 			int cw = 800 + m_l;
 			int ch = (lines * 1.3 + .65) * lin[0];
 
@@ -739,14 +754,14 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			const float dbfs = rint (accurate_coefficient_to_dB (p->peak) * 10.f) / 10.f;
 			const float dbtp = rint (accurate_coefficient_to_dB (p->truepeak) * 10.f) / 10.f;
 
-			int i = 0;
 			int yl = lin[0] / 2;
 
-			for (pi = lp.begin (); pi != lp.end (); ++pi) {
+			for (i = 0, pi = lp.begin (); pi != lp.end (); ++pi) {
 				if (!pi->report) {
 					continue;
 				}
-				int xl = m_l + 10 + (i % per_line) * (cw - 20 - m_l) / per_line;
+				int col = i % per_line;
+				int xl = m_l + 10 + col * (cw - 20 - m_l) / per_line;
 
 				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
 				cr->set_source_rgba (.9, .9, .9, 1.0);
@@ -785,7 +800,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				}
 				int ww, hh;
 				layout->get_pixel_size (ww, hh);
-				cr->move_to (xl + w + 4, yl - (hh - h) * .5);
+				cr->move_to (xl + col_w[col] + 4, yl - (hh - h) * .5);
 				layout->show_in_cairo_context (cr);
 
 				if (i % per_line == per_line - 1) {
