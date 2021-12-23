@@ -828,16 +828,22 @@ LoudnessDialog::test_conformity ()
 #endif
 			l->modify_font (UIConfiguration::instance ().get_BigFont ());
 			l->modify_fg (Gtk::STATE_NORMAL, color_fail);
-			Gtkmm2ext::set_size_request_to_display_given_text (*l, "\u274C\u2713", 0, 0);
 			set_tooltip (*l, "The signal is too loud.");
 		} else if (lufs_i < preset.LUFS_range[1]) {
+#ifdef PLATFORM_WINDOWS
 			l = manage (new Label ("\u2713", ALIGN_CENTER)); // check mark
+#else
+			l = manage (new Label ("\U0001F509", ALIGN_CENTER)); // speaker icon w/1 bar
+#endif
 			l->modify_font (UIConfiguration::instance ().get_BigFont ());
 			l->modify_fg (Gtk::STATE_NORMAL, color_warn);
-			Gtkmm2ext::set_size_request_to_display_given_text (*l, "\u274C\u2713", 0, 0);
 			set_tooltip (*l, "The signal is too quiet, but satisfies the max. loudness spec.");
 		} else {
+#ifdef __APPLE__
+			l = manage (new Label ("\u2713", ALIGN_CENTER)); // check mark
+#else
 			l = manage (new Label ("\u2714", ALIGN_CENTER)); // heavy check mark
+#endif
 			l->modify_font (UIConfiguration::instance ().get_BigFont ());
 			l->modify_fg (Gtk::STATE_NORMAL, color_good);
 			set_tooltip (*l, "Signal loudness is within the spec.");

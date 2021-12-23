@@ -693,7 +693,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 #ifdef PLATFORM_WINDOWS
 			layout->set_text ("\u2713"); // check mark
 #else
-			layout->set_text ("\u2713\u26A0"); // check mark + warning sign
+			layout->set_text ("\U0001F509"); // speaker icon w/1 bar
 #endif
 			layout->get_pixel_size (w, h);
 			max_wx = std::max (max_wx, w);
@@ -788,7 +788,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 #ifdef PLATFORM_WINDOWS
 					layout->set_text ("\u2713"); // check mark
 #else
-					layout->set_text ("\u2713\u26A0"); // check mark + warning sign
+					layout->set_text ("\U0001F509"); // speaker icon w/1 bar
 #endif
 				} else {
 					cr->set_source_rgba (.1, 1, .1, 1.0);
