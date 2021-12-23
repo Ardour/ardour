@@ -2538,7 +2538,8 @@ TriggerBox::determine_next_trigger (uint32_t current)
 	int r = _pcg.rand (100); // 0 .. 99
 	Trigger::FollowAction fa;
 
-	if (r <= all_triggers[current]->follow_action_probability()) {
+	cerr << "prob " << all_triggers[current]->follow_action_probability () << " from " << r << endl;
+	if (r >= all_triggers[current]->follow_action_probability()) {
 		fa = all_triggers[current]->follow_action (0);
 		which_follow_action = 0;
 	} else {
