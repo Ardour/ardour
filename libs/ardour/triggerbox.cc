@@ -500,7 +500,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 	if (q < Temporal::BBT_Offset (0, 0, 0)) {
 		/* negative quantization == do not quantize */
-		std::cerr << "negative quant, start right now\n";
+
 		transition_samples = start_sample;
 		transition_beats = start;
 		transition_time = timepos_t (start);
@@ -1726,7 +1726,6 @@ std::atomic<int32_t> TriggerBox::_pending_scene (-1);
 std::atomic<int32_t> TriggerBox::_active_scene (-1);
 std::atomic<int> TriggerBox::active_trigger_boxes (0);
 TriggerBoxThread* TriggerBox::worker = 0;
-PBD::Signal0<void> TriggerBox::StopAllTriggers;
 
 void
 TriggerBox::init ()
@@ -1734,16 +1733,6 @@ TriggerBox::init ()
 	worker = new TriggerBoxThread;
 	TriggerBoxThread::init_request_pool ();
 	init_pool ();
-}
-
-void
-TriggerBox::start_transport_stop (Session& s)
-{
-	if (active_trigger_boxes.load ()) {
-		StopAllTriggers(); /* EMIT SIGNAL */
-	} else {
-		s.stop_transport_from_trigger ();
-	}
 }
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
@@ -1775,8 +1764,6 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	}
 
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
-
-	StopAllTriggers.connect_same_thread (stop_all_connection, boost::bind (&TriggerBox::request_stop_all, this));
 }
 
 void
@@ -1975,7 +1962,7 @@ TriggerBox::~TriggerBox ()
 }
 
 void
-TriggerBox::request_stop_all ()
+TriggerBox::stop_all_immediately ()
 {
 	_requests.stop_all = true;
 }
@@ -2015,6 +2002,8 @@ TriggerBox::set_all_quantization (Temporal::BBT_Offset const& q)
 void
 TriggerBox::stop_all ()
 {
+	/* Stops all triggers as soon as possible */
+
 	/* XXX needs to be done with mutex or via thread-safe queue */
 
 	DEBUG_TRACE (DEBUG::Triggers, "stop-all request received\n");
@@ -2026,6 +2015,14 @@ TriggerBox::stop_all ()
 	_stop_all = true;
 
 	explicit_queue.reset ();
+}
+
+void
+TriggerBox::stop_all_quantized ()
+{
+	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
+		all_triggers[n]->unbang ();
+	}
 }
 
 void
@@ -2323,7 +2320,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	/* transport must be active for triggers */
 
-	if (!_session.transport_state_rolling()) {
+	if (!_session.transport_state_rolling() && !allstop) {
 		_session.start_transport_from_trigger ();
 	}
 
@@ -2497,10 +2494,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (!_currently_playing) {
 		DEBUG_TRACE (DEBUG::Triggers, "nothing currently playing, consider stopping transport\n");
 		_stop_all = false;
-		if (active_trigger_boxes.fetch_sub (1) == 1) {
-			/* last active trigger box */
-			_session.stop_transport_from_trigger ();
-		}
 	}
 
 	/* audio buffer (channel) count determined by max of input and

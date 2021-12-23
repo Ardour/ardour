@@ -438,7 +438,7 @@ Session::stop_all_triggers (bool now)
 {
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		(*i)->stop_trigger(now);
+		(*i)->stop_triggers (now);
 	}
 }
 
@@ -460,17 +460,8 @@ Session::stop_transport (bool abort, bool clear_state)
 void
 Session::start_transport_from_trigger ()
 {
-	transport_started_by_trigger = true;
 	ENSURE_PROCESS_THREAD;
 	TFSM_ROLL();
-}
-
-/** Called from the process thread */
-void
-Session::stop_transport_from_trigger ()
-{
-	ENSURE_PROCESS_THREAD;
-	TFSM_STOP (false, false);
 }
 
 /** Called from the process thread */

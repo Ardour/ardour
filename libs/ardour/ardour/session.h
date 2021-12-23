@@ -486,7 +486,6 @@ public:
 	void reset_transport_speed (TransportRequestSource origin = TRS_UI);
 
 	void start_transport_from_trigger ();
-	void stop_transport_from_trigger ();
 
 	void stop_all_triggers (bool now = true);
 
@@ -1435,7 +1434,6 @@ private:
 	bool                    _was_seamless;
 	bool                    _under_nsm_control;
 	unsigned int            _xrun_count;
-	bool                     transport_started_by_trigger;
 
 	std::string             _missing_file_replacement;
 

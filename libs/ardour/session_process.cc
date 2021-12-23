@@ -954,11 +954,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::EndRoll:
-		if (transport_started_by_trigger) {
-			TriggerBox::start_transport_stop (*this);
-		} else {
-			TFSM_STOP (ev->yes_or_no, ev->second_yes_or_no);
-		}
+		TFSM_STOP (ev->yes_or_no, ev->second_yes_or_no);
 		break;
 
 	case SessionEvent::SetTransportMaster:

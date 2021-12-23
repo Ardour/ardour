@@ -205,7 +205,7 @@ public:
 	void set_disk_io_point (DiskIOPoint);
 	DiskIOPoint disk_io_point() const { return _disk_io_point; }
 
-	void stop_trigger(bool now);
+	void stop_triggers (bool now);
 
 	/* Processors */
 

@@ -502,7 +502,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	DataType data_type() const { return _data_type; }
 
-	void request_stop_all ();
+	void stop_all_immediately ();
+	void stop_all_quantized ();
 
 	TriggerPtr currently_playing() const { return _currently_playing; }
 
@@ -644,7 +645,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void init_pool();
 
 	static std::atomic<int> active_trigger_boxes;
-	static PBD::Signal0<void> StopAllTriggers;
 };
 
 namespace Properties {

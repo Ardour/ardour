@@ -1729,10 +1729,16 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 }
 
 void
-Route::stop_trigger (bool now)
+Route::stop_triggers (bool now)
 {
 	if (_triggerbox) {
-		_triggerbox->request_stop_all();  //ToDo: stop now or at end of quant?
+		if (now) {
+			std::cerr << "stop immedaitely\n";
+			_triggerbox->stop_all_immediately ();
+		} else {
+			std::cerr << "stop quantized\n";
+			_triggerbox->stop_all_quantized();
+		}
 	}
 }
 
@@ -3686,6 +3692,8 @@ Route::realtime_handle_transport_stopped ()
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->realtime_handle_transport_stopped ();
 	}
+
+	stop_triggers (true);
 }
 
 
