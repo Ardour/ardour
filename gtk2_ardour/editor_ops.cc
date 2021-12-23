@@ -4157,11 +4157,10 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		dialog.set_initial_text (bounce_name);
 
 		if (!replace) {
-			Label label;
-			label.set_text (_("Bounced Range will appear in the Source list."));
+			Label* label = manage (new Label (_("Bounced Range will appear in the Source list.")));
 			dialog.get_vbox()->set_spacing (8);
-			dialog.get_vbox()->pack_start (label);
-			label.show();
+			dialog.get_vbox()->pack_start (*label);
+			label->show();
 		}
 
 		dialog.show ();
