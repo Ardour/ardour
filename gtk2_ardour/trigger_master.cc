@@ -35,6 +35,7 @@
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 #include "public_editor.h"
 #include "region_view.h"
 #include "selection.h"
@@ -302,7 +303,14 @@ TriggerMaster::event_handler (GdkEvent* ev)
 	switch (ev->type) {
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button == 1) {
-				_triggerbox->request_stop_all ();
+				if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+					_triggerbox->stop_all_immediately ();
+				} else {
+					_triggerbox->stop_all_quantized ();
+				}
+
+
+
 				return true;
 			}
 			break;
@@ -615,7 +623,14 @@ CueMaster::event_handler (GdkEvent* ev)
 	switch (ev->type) {
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button == 1) {
-				_session->stop_all_triggers ();
+				/* stop all running triggers, but let them run
+				   to their natural end
+				*/
+				if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+					_session->stop_all_triggers (true);
+				} else {
+					_session->stop_all_triggers (false);
+				}
 				return true;
 			}
 			break;

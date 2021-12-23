@@ -652,7 +652,7 @@ TriggerBoxUI::play_button_event (GdkEvent* ev, uint64_t n)
 		switch (ev->type) {
 			case GDK_BUTTON_PRESS:
 				if (ev->button.button == 1) {
-					_triggerbox.request_stop_all ();
+					_triggerbox.stop_all_immediately ();
 					return true;
 				}
 				break;
