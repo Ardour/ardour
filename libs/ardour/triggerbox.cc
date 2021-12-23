@@ -1971,6 +1971,14 @@ TriggerBox::stop_all_immediately ()
 }
 
 void
+TriggerBox::clear_all_triggers ()
+{
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		all_triggers[n]->set_region (boost::shared_ptr<Region>());
+	}
+}
+
+void
 TriggerBox::set_all_launch_style (ARDOUR::Trigger::LaunchStyle ls)
 {
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
