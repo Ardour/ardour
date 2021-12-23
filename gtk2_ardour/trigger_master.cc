@@ -508,7 +508,7 @@ TriggerMaster::prop_change (PropertyChange const& change)
 		return;
 	}
 
-	text = string_compose ("%1", (char)('A' + trigger->index ()));
+	text = string_compose ("%1", (char)('A' + trigger->index ())); // XXX not translatable
 
 	if (trigger->follow_count () > 1) {
 		text.append (string_compose (X_(" %1/%2"), trigger->loop_count ()+1, trigger->follow_count ()));

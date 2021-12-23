@@ -76,7 +76,8 @@ CueEntry::CueEntry (Item* item, uint64_t cue_index)
 	name_button->show ();
 
 	name_text = new Text (name_button);
-	name_text->set (string_compose ("%1", (char)('A' + _cue_idx)));
+	name_text->set (string_compose ("%1", (char)('A' + _cue_idx))); // XXX not translatable
+
 	name_text->set_ignore_events (false);
 	name_text->show ();
 

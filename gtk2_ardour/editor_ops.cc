@@ -4185,7 +4185,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 			tslot        = manage (new ArdourDropdown ());
 
 			for (int c = 0; c < 8; ++c) {
-				tslot->append_text_item (string_compose ("%1", (char)('A' + c)));
+				tslot->append_text_item (string_compose ("%1", (char)('A' + c))); // XXX not translatable
 			}
 			tslot->set_active ("A");
 
@@ -4209,7 +4209,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 
 		dialog.get_result (bounce_name);
 		if (tslot) {
-			trigger_slot = tslot->get_text ()[0] - 'A';
+			trigger_slot = tslot->get_text ()[0] - 'A'; // XXX
 		}
 	}
 
