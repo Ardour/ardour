@@ -6365,6 +6365,16 @@ Editor::play_solo_selection (bool restart)
 		_session->request_cancel_play_range();
 		transition_to_rolling (true);
 
+	} else if (! selection->triggers.empty()) {  //a Trigger is selected, so we solo its parent Stripable
+		TriggerSelection ts = selection->triggers;
+		TriggerEntry* entry = *ts.begin();
+		TriggerPtr slot = entry->trigger();
+		ARDOUR::SessionObject *obj = slot->box().owner();
+		boost::shared_ptr<Stripable> shared_strip = _session->stripable_by_id(obj->id());
+		StripableList sl;  sl.push_back(boost::shared_ptr<Stripable>(shared_strip));
+		_session->solo_selection (sl, true);
+		_session->request_cancel_play_range();
+		slot->bang();  //ToDo:  how will this work with Gate+Repeat ?
 	} else if (! selection->regions.empty()) {  //solo any tracks with selected regions, and roll
 		StripableList sl = tracklist_to_stripables (get_tracks_for_range_action());
 		_session->solo_selection (sl, true);
