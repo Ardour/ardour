@@ -79,7 +79,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _explicitly_stopped (false)
 	, _launch_style (Properties::launch_style, Toggle)
 	, _use_follow (Properties::use_follow, true)
-	, _follow_action0 (Properties::follow_action0, NextTrigger)
+	, _follow_action0 (Properties::follow_action0, Again)
 	, _follow_action1 (Properties::follow_action1, Stop)
 	, _follow_action_probability (Properties::follow_action_probability, 100)
 	, _follow_count (Properties::follow_count, 1)
@@ -826,7 +826,6 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 		_stretchable = false;
 		_quantization = Temporal::BBT_Offset (-1, 0, 0);
 		_follow_action0 = None;
-		_follow_action_probability = 0; /* 100% left */
 	} else {
 
 		if (probably_oneshot()) {
@@ -839,9 +838,9 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 			_quantization = Temporal::BBT_Offset (0, 1, 0);
 			_follow_action0 = Again;
 		}
-
-		_follow_action_probability = 0; /* 100% left */
 	}
+
+	_follow_action_probability = 0; /* 100% left */
 
 	PropertyChanged (ARDOUR::Properties::name);
 
