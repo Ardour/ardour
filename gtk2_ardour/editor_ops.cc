@@ -80,6 +80,7 @@
 #include "ardour/transient_detector.h"
 #include "ardour/transport_master_manager.h"
 #include "ardour/transpose.h"
+#include "ardour/triggerbox.h"
 #include "ardour/vca_manager.h"
 
 #include "canvas/canvas.h"
@@ -4184,7 +4185,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 			HBox*  tbox  = manage (new HBox);
 			tslot        = manage (new ArdourDropdown ());
 
-			for (int c = 0; c < 8; ++c) {
+			for (int c = 0; c < TriggerBox::default_triggers_per_box; ++c) {
 				tslot->append_text_item (string_compose ("%1", (char)('A' + c))); // XXX not translatable
 			}
 			tslot->set_active ("A");
