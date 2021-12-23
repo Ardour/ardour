@@ -661,12 +661,60 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 		if (p->have_loudness && p->have_dbtp && p->integrated_loudness > -180) {
 
-			const float lufs = rint (p->integrated_loudness * 10.f) / 10.f;
-			const float dbfs = rint (accurate_coefficient_to_dB (p->peak) * 10.f) / 10.f;
-			const float dbtp = rint (accurate_coefficient_to_dB (p->truepeak) * 10.f) / 10.f;
+			ALoudnessPresets alp (false);
+			std::vector<ALoudnessPreset> const& lp = alp.presets ();
+			std::vector<ALoudnessPreset>::const_iterator pi;
+
+			/* calc max label width */
+			int max_wl = 10;
+			int n_reports = 0;
+			for (pi = lp.begin (); pi != lp.end (); ++pi) {
+				if (!pi->report) {
+					continue;
+				}
+				++n_reports;
+				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+				layout->set_text (pi->label);
+				layout->get_pixel_size (w, h);
+				max_wl = std::max (max_wl, w);
+			}
+
+			/* calc max status width */
+			int max_wx = 10;
+			layout->set_font_description (UIConfiguration::instance ().get_LargeFont ());
+
+#if (defined PLATFORM_WINDOWS || defined __APPLE__)
+			layout->set_text ("X");
+#else
+			layout->set_text ("\u274C"); // cross mark
+#endif
+			layout->get_pixel_size (w, h);
+			max_wx = std::max (max_wx, w);
+#ifdef PLATFORM_WINDOWS
+			layout->set_text ("\u2713"); // check mark
+#else
+			layout->set_text ("\u2713\u26A0"); // check mark + warning sign
+#endif
+			layout->get_pixel_size (w, h);
+			max_wx = std::max (max_wx, w);
+#ifdef __APPLE__
+			layout->set_text ("\u2713"); // check mark
+#else
+			layout->set_text ("\u2714"); // heavy check mark
+#endif
+			layout->get_pixel_size (w, h);
+			max_wx = std::max (max_wx, w);
+
+			/* calc geometry of conformity analysis, add 1/2 max_wx space */
+			int max_w = std::min<int> (800, max_wl + max_wx * 1.5);
+
+			int per_line = std::min (5, 800 / max_w);
+			assert (per_line > 0);
+			int lines = ceilf ((float)n_reports / per_line);
 
 			int cw = 800 + m_l;
-			int ch = 3.25 * lin[0];
+			int ch = (lines * 1.3 + .65) * lin[0];
+
 			Cairo::RefPtr<Cairo::ImageSurface> conf = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cw, ch);
 			Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create (conf);
 			cr->set_source_rgba (0, 0, 0, 1.0);
@@ -687,18 +735,18 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			layout->show_in_cairo_context (cr);
 			layout->set_alignment (Pango::ALIGN_LEFT);
 
-			int yl = lin[0] / 2;
+			const float lufs = rint (p->integrated_loudness * 10.f) / 10.f;
+			const float dbfs = rint (accurate_coefficient_to_dB (p->peak) * 10.f) / 10.f;
+			const float dbtp = rint (accurate_coefficient_to_dB (p->truepeak) * 10.f) / 10.f;
 
 			int i = 0;
-			ALoudnessPresets alp (false);
-			std::vector<ALoudnessPreset> const& lp = alp.presets ();
-			std::vector<ALoudnessPreset>::const_iterator pi;
+			int yl = lin[0] / 2;
 
-			for (pi = lp.begin (); pi != lp.end () && i < 10; ++pi) {
+			for (pi = lp.begin (); pi != lp.end (); ++pi) {
 				if (!pi->report) {
 					continue;
 				}
-				int xl = m_l + 10 + (i % 5) * (cw - 20) / 5;
+				int xl = m_l + 10 + (i % per_line) * (cw - 20 - m_l) / per_line;
 
 				layout->set_font_description (UIConfiguration::instance ().get_SmallFont ());
 				cr->set_source_rgba (.9, .9, .9, 1.0);
@@ -740,7 +788,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				cr->move_to (xl + w + 4, yl - (hh - h) * .5);
 				layout->show_in_cairo_context (cr);
 
-				if (i % 5 == 4) {
+				if (i % per_line == per_line - 1) {
 					yl += lin[0] * 1.3;
 				}
 				++i;
