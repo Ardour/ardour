@@ -73,6 +73,7 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 
 	void set_quantize (Temporal::BBT_Offset);
 	void set_launch_style (ARDOUR::Trigger::LaunchStyle);
+	void set_follow_action (ARDOUR::Trigger::FollowAction, uint64_t);
 
 	void trigger_changed (PBD::PropertyChange);
 

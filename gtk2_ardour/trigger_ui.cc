@@ -318,6 +318,12 @@ TriggerUI::set_launch_style (Trigger::LaunchStyle ls)
 	trigger->set_launch_style (ls);
 }
 
+void
+TriggerUI::set_follow_action (Trigger::FollowAction fa, uint64_t idx)
+{
+	trigger->set_follow_action (fa, idx);
+}
+
 std::string
 TriggerUI::launch_style_to_string (Trigger::LaunchStyle ls)
 {
@@ -338,7 +344,9 @@ TriggerUI::launch_style_to_string (Trigger::LaunchStyle ls)
 std::string
 TriggerUI::quantize_length_to_string (BBT_Offset const & ql)
 {
-	if (ql == BBT_Offset (0, 1, 0)) {
+	if (ql == BBT_Offset (1, 0, 0)) {
+		return _("1 Bar");
+	} else if (ql == BBT_Offset (0, 1, 0)) {
 		return _("1/4");
 	} else if (ql == BBT_Offset (0, 2, 0)) {
 		return _("1/2");
@@ -392,7 +400,6 @@ TriggerUI::trigger_changed (PropertyChange pc)
 	if (pc.contains (Properties::quantization)) {
 		BBT_Offset bbo (trigger->quantization());
 		_quantize_button.set_active (quantize_length_to_string (bbo));
-		std::cerr << "\n\n !!! quantize is " << quantize_length_to_string (bbo) << std::endl << std::endl;
 	}
 
 	if (pc.contains (Properties::use_follow)) {
@@ -412,11 +419,11 @@ TriggerUI::trigger_changed (PropertyChange pc)
 	}
 
 	if (pc.contains (Properties::follow_action0)) {
-		_follow_right.set_text (follow_action_to_string (trigger->follow_action (0)));
+		_follow_left.set_text (follow_action_to_string (trigger->follow_action (0)));
 	}
 
 	if (pc.contains (Properties::follow_action1)) {
-		_follow_left.set_text (follow_action_to_string (trigger->follow_action (1)));
+		_follow_right.set_text (follow_action_to_string (trigger->follow_action (1)));
 	}
 
 	if (pc.contains (Properties::velocity_effect)) {

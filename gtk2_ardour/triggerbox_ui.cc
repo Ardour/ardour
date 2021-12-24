@@ -239,6 +239,7 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 			context->arc (size / 2, size - 3 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
 		} break;
+		case Trigger::None:
 		default:
 			break;
 	}
@@ -753,9 +754,12 @@ TriggerBoxUI::context_menu (uint64_t n)
 	loitems.push_back (MenuElem (_("from file"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::choose_sample), n)));
 	loitems.push_back (MenuElem (_("from selection"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_from_selection), n)));
 
-	items.push_back (MenuElem (_("Clear"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::clear_trigger), n)));
 	items.push_back (MenuElem (_("Load..."), *load_menu));
+#if DOUBLE_CLICK_IS_NOT_OBVIOUS_ENOUGH
 	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::edit_trigger), n)));
+#endif
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Clear"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::clear_trigger), n)));
 
 	_context_menu->popup (1, gtk_get_current_event_time ());
 }
@@ -800,15 +804,17 @@ TriggerBoxUI::launch_context_menu (uint64_t n)
 	MenuList& qitems     = quant_menu->items ();
 	bool      success;
 
-	Beats      grid_beats (PublicEditor::instance ().get_grid_type_as_beats (success, timepos_t (0)));
 	BBT_Offset b;
 
+#if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IS_IMPLEMENTED
+	Beats      grid_beats (PublicEditor::instance ().get_grid_type_as_beats (success, timepos_t (0)));
 	if (success) {
 		b = BBT_Offset (0, grid_beats.get_beats (), grid_beats.get_ticks ());
 		qitems.push_back (RadioMenuElem (qgroup, _("Main Grid"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
 		/* can't mark this active because the current trigger quant setting may just a specific setting below */
 		/* XXX HOW TO GET THIS TO FOLLOW GRID CHANGES (which are GUI only) */
 	}
+#endif
 
 	b = BBT_Offset (1, 0, 0);
 	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
