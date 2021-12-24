@@ -325,7 +325,7 @@ TriggerUI::set_launch_style (Trigger::LaunchStyle ls)
 void
 TriggerUI::set_follow_action (Trigger::FollowAction fa, uint64_t idx)
 {
-	trigger->set_follow_action (fa, idx);
+	trigger()->set_follow_action (fa, idx);
 }
 
 std::string
