@@ -52,7 +52,7 @@ ArdourGraphs::draw_waveform (Glib::RefPtr<Pango::Context> pctx, ExportAnalysisPt
 {
 	int w, h, anw;
 	const float         ht    = 2.f * height_2;
-	const size_t        width = sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
+	const size_t        width = p->width;
 	std::vector<double> dashes;
 	dashes.push_back (3.0);
 	dashes.push_back (5.0);
@@ -241,10 +241,9 @@ Cairo::RefPtr<Cairo::ImageSurface>
 ArdourGraphs::draw_spectrum (Glib::RefPtr<Pango::Context> pctx, ExportAnalysisPtr p, int height, int m_l)
 {
 	int w, h, anw;
-	const size_t swh   = sizeof (p->spectrum) / sizeof (float);
-	const size_t width = swh / height;
+	const size_t width = p->width;
 
-	assert (height == sizeof (p->spectrum[0]) / sizeof (float));
+	assert (height == p->spectrum[0].size ());
 
 	std::vector<double> dashes;
 	dashes.push_back (3.0);
@@ -536,7 +535,7 @@ ArdourGraphs::plot_loudness (Glib::RefPtr<Pango::Context> pctx, ExportAnalysisPt
 	layout->set_text ("00:00:00.0");
 	layout->get_pixel_size (w, h);
 
-	const size_t width    = sizeof (p->lgraph_i) / sizeof (float); // 800
+	const size_t width    = p->width;
 	const int    n_labels = width / (w * 1.75);
 
 	if (height < 0) {

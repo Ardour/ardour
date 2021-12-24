@@ -102,6 +102,8 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		std::string path = i->first;
 		ExportAnalysisPtr p = i->second;
 
+		const size_t p_width = p->width;
+
 		std::list<CimgPlayheadArea*> playhead_widgets;
 
 		if (with_file) {
@@ -246,14 +248,14 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		const int ht = lin[0] * 1.25 + lin[1] * 1.25 + lin[2] * 1.25 + lin[3] *1.25 + lin[4] * 1.25 + lin[5];
 		const int hh = std::max (100, ht + 12);
 		const int htn = lin[0] * 1.25 + lin[1] * 1.25 + lin[2] * 1.25 + lin[3];
-		int m_l =  2 * mnw + /*hist-width*/ 540 + /*box spacing*/ 8 - /*peak-width*/ 800 - m_r; // margin left
+		int m_l =  2 * mnw + /*hist-width*/ 540 + /*box spacing*/ 8 - /*peak-width*/ p_width - m_r; // margin left
 
 		int mml = 0; // min margin left -- ensure left margin is wide enough
 		TXTWIDTH (_("Time"), get_SmallFont);
 		TXTWIDTH (_("100"), get_SmallMonospaceFont);
 		m_l = (std::max(anw + mnh + 14, std::max (m_l, mml + 8)) + 3) & ~3;
 
-		mnw = (m_l - /*hist-width*/ 540 - /*box spacing*/ 8 + /*peak-width*/ 800 + m_r) / 2;
+		mnw = (m_l - /*hist-width*/ 540 - /*box spacing*/ 8 + /*peak-width*/ p_width + m_r) / 2;
 		const int nw2 = mnw / 2; // nums, horizontal center
 
 		int y0[6];
@@ -269,7 +271,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		y0[5] = y0[4] + lin[4] * 1.25;
 
 		/* calc heights & alignment of png-image */
-		const float specth = sizeof (p->spectrum[0]) / sizeof (float);
+		const float specth = p->spectrum[0].size ();
 		const float waveh2 = std::min (100, 8 * lin[0] / (int) p->n_channels);
 		const float loudnh = 180;
 
@@ -290,8 +292,8 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 		if (with_file && UIConfiguration::instance().get_save_export_analysis_image ()) { /*png image */
 			const int top_w = 540 + 2 * (mnw + 4); // 4px spacing
-			const int wav_w = m_l + m_r + 4 + sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
-			const int spc_w = m_l + m_r + 4 + sizeof (p->spectrum) / sizeof (float) / specth;
+			const int wav_w = m_l + m_r + 4 + p->width;
+			const int spc_w = m_l + m_r + 4 + p->width / specth;
 			int ann_h = 0;
 			int linesp = 0;
 
@@ -569,7 +571,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 		for (uint32_t c = 0; c < p->n_channels; ++c) {
 			/* draw waveform */
-			const size_t width = sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
+			const size_t width = p->width;
 
 			Cairo::RefPtr<Cairo::ImageSurface> wave      = ArdourGraphs::draw_waveform (get_pango_context (), p, c, waveh2, m_l, false, false);
 			Cairo::RefPtr<Cairo::ImageSurface> wave_log  = ArdourGraphs::draw_waveform (get_pango_context (), p, c, waveh2, m_l, true, false);
@@ -596,7 +598,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		if (channels > 0 && file_length > 0 && sample_rate > 0)
 		{
 			/* Time Axis  -- re-use waveform width */
-			const size_t width = sizeof (p->peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
+			const size_t width = p->width;
 			Cairo::RefPtr<Cairo::ImageSurface> ytme = ArdourGraphs::time_axis (get_pango_context (), width, m_l, start_off, file_length, sample_rate);
 
 			CimgPlayheadArea *tm = manage (new CimgPlayheadArea (ytme, m_l, width, true));
@@ -706,9 +708,9 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			max_wx = std::max (max_wx, w);
 
 			/* calc geometry of conformity analysis, add 1/2 max_wx space */
-			int max_w = std::min<int> (800, max_wl + max_wx * 1.5);
+			int max_w = std::min<int> (p_width, max_wl + max_wx * 1.5);
 
-			int per_line = std::min (5, 800 / max_w);
+			int per_line = std::min<int> (5, p_width / max_w);
 			assert (per_line > 0);
 			int lines = ceilf ((float)n_reports / per_line);
 
@@ -727,7 +729,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				++i;
 			}
 
-			int cw = 800 + m_l;
+			int cw = p_width + m_l;
 			int ch = (lines * 1.3 + .65) * lin[0];
 
 			Cairo::RefPtr<Cairo::ImageSurface> conf = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, cw, ch);
