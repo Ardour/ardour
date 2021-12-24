@@ -31,9 +31,9 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Ruler::Ruler (Canvas* c, const Metric& m)
+Ruler::Ruler (Canvas* c, const Metric* m)
 	: Rectangle (c)
-	, _metric (&m)
+	, _metric (m)
 	, _lower (0)
 	, _upper (0)
 	, _divide_height (-1.0)
@@ -43,9 +43,9 @@ Ruler::Ruler (Canvas* c, const Metric& m)
 {
 }
 
-Ruler::Ruler (Canvas* c, const Metric& m, Rect const& r)
+Ruler::Ruler (Canvas* c, const Metric* m, Rect const& r)
 	: Rectangle (c, r)
-	, _metric (&m)
+	, _metric (m)
 	, _lower (0)
 	, _upper (0)
 	, _divide_height (-1.0)
@@ -55,9 +55,9 @@ Ruler::Ruler (Canvas* c, const Metric& m, Rect const& r)
 {
 }
 
-Ruler::Ruler (Item* parent, const Metric& m)
+Ruler::Ruler (Item* parent, const Metric* m)
 	: Rectangle (parent)
-	, _metric (&m)
+	, _metric (m)
 	, _lower (0)
 	, _upper (0)
 	, _divide_height (-1.0)
@@ -67,9 +67,9 @@ Ruler::Ruler (Item* parent, const Metric& m)
 {
 }
 
-Ruler::Ruler (Item* parent, const Metric& m, Rect const& r)
+Ruler::Ruler (Item* parent, const Metric* m, Rect const& r)
 	: Rectangle (parent, r)
-	, _metric (&m)
+	, _metric (m)
 	, _lower (0)
 	, _upper (0)
 	, _divide_height (-1.0)
@@ -127,7 +127,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 	Distance height = self.height();
 
-	if (_need_marks) {
+	if (_need_marks && _metric) {
 		marks.clear ();
 		_metric->get_marks (marks, _lower, _upper, 50);
 		_need_marks = false;
@@ -155,27 +155,28 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 	}
 	cr->stroke ();
 
-	/* draw ticks + text */
+	if (_metric) {
+		/* draw ticks + text */
 
-	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (cr);
+		Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (cr);
 
-	Pango::FontDescription* last_font_description = 0;
+		Pango::FontDescription* last_font_description = 0;
 
-	for (vector<Mark>::const_iterator m = marks.begin(); m != marks.end(); ++m) {
-		Duple pos;
-		Pango::FontDescription* fd = _font_description;
+		for (vector<Mark>::const_iterator m = marks.begin(); m != marks.end(); ++m) {
+			Duple pos;
+			Pango::FontDescription* fd = _font_description;
 
-		pos.x = floor ((m->position - _lower) / _metric->units_per_pixel);
-		pos.y = self.y1; /* bottom edge */
+			pos.x = floor ((m->position - _lower) / _metric->units_per_pixel);
+			pos.y = self.y1; /* bottom edge */
 
-		if (_outline_width == 1.0) {
-			/* Cairo single pixel line correction */
-			cr->move_to (pos.x + 0.5, pos.y);
-		} else {
-			cr->move_to (pos.x, pos.y);
-		}
+			if (_outline_width == 1.0) {
+				/* Cairo single pixel line correction */
+				cr->move_to (pos.x + 0.5, pos.y);
+			} else {
+				cr->move_to (pos.x, pos.y);
+			}
 
-		switch (m->style) {
+			switch (m->style) {
 			case Mark::Major:
 				if (_divide_height >= 0) {
 					cr->rel_line_to (0, -_divide_height);
@@ -192,31 +193,32 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 			case Mark::Micro:
 				cr->rel_line_to (0, -height/5.0);
 				break;
-		}
-		cr->stroke ();
-
-		if (fd != last_font_description) {
-			layout->set_font_description (*fd);
-			last_font_description = fd;
-		}
-
-		/* and the text */
-
-		if (!m->label.empty()) {
-			Pango::Rectangle logical;
-
-			layout->set_text (m->label);
-			logical = layout->get_pixel_logical_extents ();
-
-			if (_divide_height >= 0) {
-				cr->move_to (pos.x + 2.0, self.y0 + _divide_height + logical.get_y() + 2.0); /* 2 pixel padding below divider */
-			} else {
-				cr->move_to (pos.x + 2.0, self.y0 + logical.get_y() + .5 * (height - logical.get_height()));
 			}
-			layout->show_in_cairo_context (cr);
+			cr->stroke ();
+
+			if (fd != last_font_description) {
+				layout->set_font_description (*fd);
+				last_font_description = fd;
+			}
+
+			/* and the text */
+
+			if (!m->label.empty()) {
+				Pango::Rectangle logical;
+
+				layout->set_text (m->label);
+				logical = layout->get_pixel_logical_extents ();
+
+				if (_divide_height >= 0) {
+					cr->move_to (pos.x + 2.0, self.y0 + _divide_height + logical.get_y() + 2.0); /* 2 pixel padding below divider */
+				} else {
+					cr->move_to (pos.x + 2.0, self.y0 + logical.get_y() + .5 * (height - logical.get_height()));
+				}
+				layout->show_in_cairo_context (cr);
+			}
 		}
 	}
-
+	
 	if (_divide_height >= 0.0) {
 
 		cr->set_line_width (1.0);

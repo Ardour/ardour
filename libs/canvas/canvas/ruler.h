@@ -56,10 +56,10 @@ public:
 		virtual void get_marks (std::vector<Mark>&, int64_t lower, int64_t upper, int maxchars) const = 0;
 	};
 
-	Ruler (Canvas*, const Metric& m);
-	Ruler (Canvas*, const Metric& m, Rect const&);
-	Ruler (Item*, const Metric& m);
-	Ruler (Item*, const Metric& m, Rect const&);
+	Ruler (Canvas*, const Metric* m);
+	Ruler (Canvas*, const Metric* m, Rect const&);
+	Ruler (Item*, const Metric* m);
+	Ruler (Item*, const Metric* m, Rect const&);
 
 	virtual ~Ruler () {
 		delete _font_description;
