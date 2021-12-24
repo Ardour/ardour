@@ -72,8 +72,7 @@ Limiter::set_duration (samplecnt_t s)
 	if (_pos != 0 || !_result) {
 		return;
 	}
-	const size_t n_data = sizeof (_result->limiter_pk) / sizeof (float);
-	_spp = ceilf ((s + 2.f) / (float) n_data);
+	_spp = ceilf ((s + 2.f) / (float) _result->width);
 }
 
 void
@@ -93,7 +92,7 @@ Limiter::stats (samplecnt_t n_samples)
 		float peak, gmax, gmin;
 		_limiter.get_stats (&peak, &gmax, &gmin);
 		_cnt -= _spp;
-		assert (_pos < sizeof (_result->limiter_pk) / sizeof (float));
+		assert (_pos < _result->width);
 		_result->limiter_pk[_pos++] = peak;
 	}
 }

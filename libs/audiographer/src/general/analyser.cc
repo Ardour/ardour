@@ -52,7 +52,7 @@ Analyser::Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsiz
 		_fft_data_out[i] = 0;
 	}
 
-	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
+	const size_t height = _result.spectrum[0].size ();
 	const float nyquist = (sample_rate * .5);
 #if 0 // linear
 #define YPOS(FREQ) rint (height * (1.0 - FREQ / nyquist))
@@ -105,13 +105,9 @@ Analyser::set_duration (samplecnt_t n_samples)
 	}
 	_n_samples = n_samples;
 
-	const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
-	_spp = ceil ((_n_samples + 2.f) / (float) peaks);
-
-	const size_t swh = sizeof (_result.spectrum) / sizeof (float);
-	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
-	const size_t width = swh / height;
-	_fpp = ceil ((_n_samples + 2.f) / (float) width);
+	const float width = _result.width;
+	_spp = ceil ((_n_samples + 2.f) / width);
+	_fpp = ceil ((_n_samples + 2.f) / width);
 }
 
 void
@@ -136,7 +132,7 @@ Analyser::process (ProcessContext<float> const & ctx)
 	for (s = 0; s < n_samples; ++s) {
 		_fft_data_in[s] = 0;
 		const samplecnt_t pbin = (_pos + s) / _spp;
-		assert (pbin >= 0 && pbin < (sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4));
+		assert (pbin >= 0 && pbin < _result.width);
 		for (unsigned int c = 0; c < _channels; ++c) {
 			const float v = *d;
 			if (fabsf(v) > _result.peak) { _result.peak = fabsf(v); }
@@ -164,7 +160,7 @@ Analyser::process (ProcessContext<float> const & ctx)
 			const samplecnt_t p0 = _pos / _spp;
 			const samplecnt_t p1 = (_pos + n_samples -1) / _spp;
 			for (samplecnt_t p = p0; p <= p1; ++p) {
-				assert (p >= 0 && p < (sizeof (_result.lgraph_i) / sizeof(float)));
+				assert (p >= 0 && p < _result.width);
 				_result.lgraph_i[p] = features[0][0].values[0];
 				_result.lgraph_s[p] = features[0][1].values[0];
 				_result.lgraph_m[p] = features[0][2].values[0];
@@ -192,7 +188,7 @@ Analyser::process (ProcessContext<float> const & ctx)
 #undef FRe
 #undef FIm
 
-	const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
+	const size_t height = _result.spectrum[0].size ();
 	const samplecnt_t x0 = _pos / _fpp;
 	samplecnt_t x1 = (_pos + n_samples) / _fpp;
 	if (x0 == x1) x1 = x0 + 1;
@@ -241,8 +237,8 @@ Analyser::result (bool ptr_only)
 
 	if (_pos + 1 < _n_samples) {
 		// crude re-bin (silence stripped version)
-		const size_t peaks = sizeof (_result.peaks) / sizeof (ARDOUR::PeakData::PeakDatum) / 4;
-		for (samplecnt_t b = peaks - 1; b > 0; --b) {
+		const size_t width = _result.width;
+		for (samplecnt_t b = width - 1; b > 0; --b) {
 			for (unsigned int c = 0; c < _result.n_channels; ++c) {
 				const samplecnt_t sb = b * _pos / _n_samples;
 				_result.peaks[c][b].min = _result.peaks[c][sb].min;
@@ -250,9 +246,7 @@ Analyser::result (bool ptr_only)
 			}
 		}
 
-		const size_t swh = sizeof (_result.spectrum) / sizeof (float);
-		const size_t height = sizeof (_result.spectrum[0]) / sizeof (float);
-		const size_t width = swh / height;
+		const size_t height = _result.spectrum[0].size ();
 		for (samplecnt_t b = width - 1; b > 0; --b) {
 			// TODO round down to prev _fft_data_size bin
 			const samplecnt_t sb = b * _pos / _n_samples;
@@ -262,7 +256,7 @@ Analyser::result (bool ptr_only)
 		}
 
 		/* re-scale loudnes graphs */
-		const size_t lw = sizeof (_result.lgraph_i) / sizeof (float);
+		const size_t lw = _result.width;
 		for (samplecnt_t b = lw - 1; b > 0; --b) {
 			const samplecnt_t sb = b * _pos / _n_samples;
 			_result.lgraph_i[b] = _result.lgraph_i[sb];
