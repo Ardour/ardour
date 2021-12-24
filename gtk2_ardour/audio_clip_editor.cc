@@ -402,8 +402,17 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, TriggerReference 
 	drop_waves ();
 
 	audio_region = r;
+
+	/* Ruler has to reflect tempo of the region, so we have to recreate it
+	 * every time. Note that we retain ownership of the metric, and that
+	 * because the GUI is single-threaded, we can set it and delete it
+	 * safely here (there will be no calls to use it from within the
+	 * ruler).
+	 */
+
 	delete clip_metric;
 	clip_metric = new ClipBBTMetric (tr);
+	ruler->set_metric (clip_metric);
 
 	uint32_t    n_chans = r->n_channels ();
 	samplecnt_t len;
