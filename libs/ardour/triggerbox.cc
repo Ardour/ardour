@@ -113,7 +113,6 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 void
 Trigger::request_trigger_delete (Trigger* t)
 {
-	std::cerr << "RTD\n";
 	TriggerBox::worker->request_delete_trigger (t);
 }
 
@@ -1835,12 +1834,7 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 		if (p == Trigger::MagicClearPointerValue) {
 			all_triggers[slot]->clear_region ();
 		} else {
-			if (all_triggers[slot]) {
-				/* Put existing Trigger for this slot in the deletion queue */
-				// XXX _deletion_queue....;
-			}
-
-			all_triggers[slot].reset (p);
+			all_triggers[slot].reset (p, Trigger::request_trigger_delete);
 			TriggerSwapped (slot); /* EMIT SIGNAL */
 		}
 	}
@@ -2990,7 +2984,6 @@ TriggerBoxThread::set_region (TriggerBox& box, uint32_t slot, boost::shared_ptr<
 void
 TriggerBoxThread::request_delete_trigger (Trigger* t)
 {
-	std::cerr << "RDT\n";
 	TriggerBoxThread::Request* req = new TriggerBoxThread::Request (DeleteTrigger);
 	req->trigger  = t;
 	queue_request (req);
@@ -2999,6 +2992,5 @@ TriggerBoxThread::request_delete_trigger (Trigger* t)
 void
 TriggerBoxThread::delete_trigger (Trigger* t)
 {
-	std::cerr << "trigger delete for " << t << endl;
 	delete t;
 }
