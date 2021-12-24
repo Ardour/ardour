@@ -1000,10 +1000,10 @@ ARDOUR_UI::save_ardour_state ()
 void
 ARDOUR_UI::on_theme_changed ()
 {
+	ARDOUR::set_global_ui_scale_factor (UIConfiguration::instance().get_ui_scale());
 	LV2Plugin::set_global_ui_background_color (UIConfiguration::instance().color ("gtk_background"));
 	LV2Plugin::set_global_ui_foreground_color (UIConfiguration::instance().color ("gtk_foreground"));
 	LV2Plugin::set_global_ui_contrasting_color (UIConfiguration::instance().color ("theme:contrasting clock")); // more contrast that "theme:contrasting"
-	LV2Plugin::set_global_ui_scale_factor (UIConfiguration::instance().get_ui_scale());
 	LV2Plugin::set_global_ui_style_boxy (UIConfiguration::instance().get_boxy_buttons());
 	LV2Plugin::set_global_ui_style_flat (UIConfiguration::instance().get_flat_buttons());
 }
