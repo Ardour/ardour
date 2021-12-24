@@ -182,9 +182,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	static void set_global_ui_contrasting_color (uint32_t c) {
 		_ui_contrasting_color = c;
 	}
-	static void set_global_ui_scale_factor (float s) {
-		_ui_scale_factor = s;
-	}
 	static void set_global_ui_style_boxy (bool yn) {
 		_ui_style_boxy = yn ? 1 : 0;
 	}
@@ -346,7 +343,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	static uint32_t      _ui_background_color;
 	static uint32_t      _ui_foreground_color;
 	static uint32_t      _ui_contrasting_color;
-	static float         _ui_scale_factor;
 	static unsigned long _ui_transient_win_id;
 
 	mutable unsigned _state_version;

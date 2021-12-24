@@ -135,7 +135,6 @@ int32_t       LV2Plugin::_ui_style_boxy        = 0;
 uint32_t      LV2Plugin::_ui_background_color  = 0x000000ff; // RGBA
 uint32_t      LV2Plugin::_ui_foreground_color  = 0xffffffff; // RGBA
 uint32_t      LV2Plugin::_ui_contrasting_color = 0x33ff33ff; // RGBA
-float         LV2Plugin::_ui_scale_factor      = 1.0;
 unsigned long LV2Plugin::_ui_transient_win_id  = 0;
 
 class LV2World : boost::noncopyable {
@@ -576,7 +575,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#contrastingColor"),
 		  sizeof(int32_t), atom_Int, &_ui_contrasting_color },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#scaleFactor"),
-		  sizeof(float), atom_Float, &_ui_scale_factor },
+		  sizeof(float), atom_Float, &ARDOUR::ui_scale_factor },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/theme/#styleBoxy"),
 		  sizeof(int32_t), atom_Bool, &_ui_style_boxy },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/theme/#styleFlat"),
