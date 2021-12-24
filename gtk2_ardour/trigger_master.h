@@ -81,6 +81,8 @@ public:
 
 private:
 	void context_menu ();
+
+	void clear_all_triggers();
 	void set_all_follow_action (ARDOUR::Trigger::FollowAction);
 	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle);
 	void set_all_quantization (Temporal::BBT_Offset const&);

@@ -409,7 +409,8 @@ TriggerMaster::context_menu ()
 	items.push_back (MenuElem (_("Set All Follow Actions..."), *follow_menu));
 	items.push_back (MenuElem (_("Set All Launch Styles..."), *launch_menu));
 	items.push_back (MenuElem (_("Set All Quantizations..."), *quant_menu));
-	items.push_back (MenuElem (_("Clear All..."), sigc::mem_fun (*this, &TriggerMaster::maybe_update))); // TODO
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Clear All..."), sigc::mem_fun (*this, &TriggerMaster::clear_all_triggers)));
 
 	_context_menu->popup (1, gtk_get_current_event_time ());
 }
@@ -422,6 +423,12 @@ TriggerMaster::toggle_thru ()
 	}
 
 	_triggerbox->set_pass_thru (!_triggerbox->pass_thru ());
+}
+
+void
+TriggerMaster::clear_all_triggers ()
+{
+	_triggerbox->clear_all_triggers();
 }
 
 void
