@@ -23,9 +23,9 @@ using namespace AudioGrapher;
 
 const float Analyser::fft_range_db (120); // dB
 
-Analyser::Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsize, samplecnt_t n_samples)
+Analyser::Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsize, samplecnt_t n_samples, size_t width, size_t bins)
 	: LoudnessReader (sample_rate, channels, bufsize)
-	, _rp (ARDOUR::ExportAnalysisPtr (new ARDOUR::ExportAnalysis))
+	, _rp (ARDOUR::ExportAnalysisPtr (new ARDOUR::ExportAnalysis (width, bins)))
 	, _result (*_rp)
 	, _n_samples (n_samples)
 	, _pos (0)

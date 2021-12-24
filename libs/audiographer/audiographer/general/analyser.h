@@ -29,7 +29,7 @@ namespace AudioGrapher
 class LIBAUDIOGRAPHER_API Analyser : public LoudnessReader
 {
   public:
-	Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsize, samplecnt_t n_samples);
+	Analyser (float sample_rate, unsigned int channels, samplecnt_t bufsize, samplecnt_t n_samples, size_t width = 800, size_t bins = 200);
 	~Analyser ();
 	void process (ProcessContext<float> const & c);
 	ARDOUR::ExportAnalysisPtr result (bool ptr = false);

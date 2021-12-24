@@ -456,7 +456,9 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		max_samples = std::min ((samplecnt_t) 8192 * channels, std::max ((samplecnt_t) 4096 * channels, max_samples));
 		chunker.reset (new Chunker<Sample> (max_samples));
 		analyser.reset (new Analyser (config.format->sample_rate(), channels, max_samples,
-					(samplecnt_t) ceil (duration * config.format->sample_rate () / (double) sample_rate)));
+		                              (samplecnt_t) ceil (duration * config.format->sample_rate () / (double) sample_rate),
+		                              800 * ui_scale_factor, 200 * ui_scale_factor
+		                             ));
 
 		config.filename->set_channel_config (config.channel_config);
 		parent.add_analyser (config.filename->get_path (config.format), analyser);
