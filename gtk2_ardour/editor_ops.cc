@@ -4105,11 +4105,6 @@ Editor::freeze_route ()
 	current_interthread_info = 0;
 }
 
-static void
-set_slot (uint32_t* t, uint32_t v) {
-	*t = v;
-}
-
 void
 Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 {
@@ -4192,7 +4187,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 
 			for (int c = 0; c < TriggerBox::default_triggers_per_box; ++c) {
 				// XXX ('A' + x) is not translatable, TODO abstract using nth_letter()
-				tslot->AddMenuElem (Menu_Helpers::MenuElem (string_compose ("%1", (char)('A' + c)), sigc::bind (sigc::ptr_fun (set_slot), &trigger_slot, c)));
+				tslot->AddMenuElem (Menu_Helpers::MenuElem (string_compose ("%1", (char)('A' + c)), sigc::bind ([] (uint32_t* t, uint32_t v) {*t = v;}, &trigger_slot, c)));
 			}
 			tslot->set_active ("A");
 
