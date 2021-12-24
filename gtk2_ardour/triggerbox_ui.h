@@ -45,26 +45,17 @@ namespace ArdourCanvas
 	class Polygon;
 }
 
-class TriggerReference
-{
-public:
-	TriggerReference (ARDOUR::TriggerBox& b, uint32_t s) : box (b), slot (s) {}
-	boost::shared_ptr<ARDOUR::Trigger> trigger() const { return box.trigger (slot); }
-
-	ARDOUR::TriggerBox& box;
-	uint32_t    slot;
-};
-
 class TriggerEntry : public ArdourCanvas::Rectangle
 {
 public:
-	TriggerEntry (ArdourCanvas::Item* item, TriggerReference rf);
+	TriggerEntry (ArdourCanvas::Item* item, ARDOUR::TriggerReference rf);
 	~TriggerEntry ();
 
 	boost::shared_ptr<ARDOUR::Trigger> trigger () const
 	{
 		return tref.trigger();
 	}
+	ARDOUR::TriggerReference trigger_reference() const { return tref; }
 
 	ArdourCanvas::Rectangle* play_button;
 	ArdourCanvas::Rectangle* name_button;

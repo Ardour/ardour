@@ -648,6 +648,18 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static std::atomic<int> active_trigger_boxes;
 };
 
+class TriggerReference
+{
+public:
+	TriggerReference () : box (0), slot (0) {}
+	TriggerReference (ARDOUR::TriggerBox& b, uint32_t s) : box (&b), slot (s) {}
+
+	boost::shared_ptr<ARDOUR::Trigger> trigger() const { assert (box); return box->trigger (slot); }
+
+	ARDOUR::TriggerBox* box;
+	uint32_t            slot;
+};
+
 namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> use_follow;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> running;
