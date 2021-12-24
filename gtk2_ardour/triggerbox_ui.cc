@@ -92,8 +92,8 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	set_default_colors ();
 
 	trigger()->PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context ());
-	tref.box.TriggerSwapped.connect (trigger_swap_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::trigger_swap, this, _1), gui_context ());
-	dynamic_cast<Stripable*> (tref.box.owner ())->presentation_info ().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
+	tref.box->TriggerSwapped.connect (trigger_swap_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::trigger_swap, this, _1), gui_context ());
+	dynamic_cast<Stripable*> (tref.box->owner ())->presentation_info ().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
 
 	PropertyChange changed;
 	changed.add (ARDOUR::Properties::name);
@@ -966,7 +966,7 @@ TriggerBoxUI::edit_trigger (uint64_t n)
 	TriggerWindow* tw      = static_cast<TriggerWindow*> (trigger->ui ());
 
 	if (!tw) {
-		tw = new TriggerWindow (_triggerbox.trigger (n));
+		tw = new TriggerWindow (TriggerReference (_triggerbox, n));
 		trigger->set_ui (tw);
 	}
 

@@ -75,7 +75,7 @@ public:
 	void set_default_colors ();
 
 private:
-	TriggerReference tref;
+	ARDOUR::TriggerReference tref;
 	double           _poly_size;
 	double           _poly_margin;
 

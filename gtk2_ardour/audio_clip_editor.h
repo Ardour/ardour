@@ -70,7 +70,7 @@ public:
 	ClipEditorBox () {}
 	~ClipEditorBox () {}
 
-	virtual void set_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerPtr) = 0;
+	virtual void set_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerReference) = 0;
 
 	static void                           init ();
 	static void                           register_clip_editor_actions (Gtkmm2ext::Bindings*);
@@ -92,7 +92,7 @@ public:
 	AudioClipEditor ();
 	~AudioClipEditor ();
 
-	void set_region (boost::shared_ptr<ARDOUR::AudioRegion>, ARDOUR::TriggerPtr);
+	void set_region (boost::shared_ptr<ARDOUR::AudioRegion>, ARDOUR::TriggerReference);
 	void on_size_allocate (Gtk::Allocation&);
 
 	double      sample_to_pixel (ARDOUR::samplepos_t);
@@ -121,16 +121,14 @@ private:
 	class ClipBBTMetric : public ArdourCanvas::Ruler::Metric
 	{
 	  public:
-		ClipBBTMetric() : trigger (0)  {
+		ClipBBTMetric (ARDOUR::TriggerReference tr) : tref (tr) {
 			units_per_pixel = 1;
 		}
-
-		void set_trigger (ARDOUR::TriggerPtr t) { trigger = t; }
 
 		void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const;
 
 	  private:
-		ARDOUR::TriggerPtr trigger;
+		ARDOUR::TriggerReference tref;
 
 	};
 
@@ -203,7 +201,7 @@ public:
 	AudioClipEditorBox ();
 	~AudioClipEditorBox ();
 
-	void set_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerPtr);
+	void set_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerReference);
 	void region_changed (const PBD::PropertyChange& what_changed);
 
 private:

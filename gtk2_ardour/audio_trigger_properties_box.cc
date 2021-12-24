@@ -155,7 +155,10 @@ AudioTriggerPropertiesBox::~AudioTriggerPropertiesBox ()
 void
 AudioTriggerPropertiesBox::toggle_stretch ()
 {
-	_trigger->set_stretchable (!_trigger->stretchable ());
+	TriggerPtr trigger (tref.trigger());
+	if (trigger) {
+		trigger->set_stretchable (!trigger->stretchable ());
+	}
 }
 
 void
@@ -168,16 +171,16 @@ AudioTriggerPropertiesBox::set_session (Session* s)
 }
 
 void
-AudioTriggerPropertiesBox::set_trigger (ARDOUR::TriggerPtr t)
+AudioTriggerPropertiesBox::set_trigger (ARDOUR::TriggerReference tr)
 {
-	boost::shared_ptr<ARDOUR::AudioTrigger> audio_trigger = boost::dynamic_pointer_cast<ARDOUR::AudioTrigger> (t);
+	boost::shared_ptr<ARDOUR::AudioTrigger> audio_trigger = boost::dynamic_pointer_cast<ARDOUR::AudioTrigger> (tr.trigger());
 
 	if (!audio_trigger) {
 		return;
 	}
 
-	_trigger = audio_trigger;
-	_trigger->PropertyChanged.connect (_state_connection, invalidator (*this), boost::bind (&AudioTriggerPropertiesBox::trigger_changed, this, _1), gui_context ());
+	tref = tr;
+	tref.trigger()->PropertyChanged.connect (_state_connection, invalidator (*this), boost::bind (&AudioTriggerPropertiesBox::trigger_changed, this, _1), gui_context ());
 
 	PBD::PropertyChange changed;
 	changed.add (ARDOUR::Properties::name);
@@ -188,17 +191,19 @@ AudioTriggerPropertiesBox::set_trigger (ARDOUR::TriggerPtr t)
 void
 AudioTriggerPropertiesBox::trigger_changed (const PBD::PropertyChange& what_changed)
 {
-	AudioClock::Mode mode = _trigger->box ().data_type () == ARDOUR::DataType::AUDIO ? AudioClock::Samples : AudioClock::BBT;
+	TriggerPtr trigger (tref.trigger());
+
+	AudioClock::Mode mode = trigger->box ().data_type () == ARDOUR::DataType::AUDIO ? AudioClock::Samples : AudioClock::BBT;
 
 	_start_clock.set_mode (mode);
 	_length_clock.set_mode (mode);
 
-	_start_clock.set (_trigger->start_offset ());
-	_length_clock.set (_trigger->current_length ()); // set_duration() ?
+	_start_clock.set (tref.trigger()->start_offset ());
+	_length_clock.set (tref.trigger()->current_length ()); // set_duration() ?
 
-	_bpm_button.set_text (string_compose ("%1", _trigger->apparent_tempo ()));
-	_abpm_label.set_text (string_compose ("%1", _trigger->apparent_tempo ()));
+	_bpm_button.set_text (string_compose ("%1", trigger->apparent_tempo ()));
+	_abpm_label.set_text (string_compose ("%1", trigger->apparent_tempo ()));
 	_metrum_button.set_text ("4/4");
 
-	_stretch_toggle.set_active (_trigger->stretchable () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	_stretch_toggle.set_active (tref.trigger()->stretchable () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }

@@ -79,16 +79,15 @@ MidiTriggerPropertiesBox::~MidiTriggerPropertiesBox ()
 }
 
 void
-MidiTriggerPropertiesBox::set_trigger (ARDOUR::TriggerPtr t)
+MidiTriggerPropertiesBox::set_trigger (ARDOUR::TriggerReference tref)
 {
-	boost::shared_ptr<ARDOUR::MIDITrigger> midi_trigger = boost::dynamic_pointer_cast<ARDOUR::MIDITrigger> (t);
+	boost::shared_ptr<ARDOUR::MIDITrigger> midi_trigger = boost::dynamic_pointer_cast<ARDOUR::MIDITrigger> (tref.trigger());
 
 	if (!midi_trigger) {
 		return;
 	}
 
-	_trigger = midi_trigger;
-	_trigger->PropertyChanged.connect (_midi_state_connection, invalidator (*this), boost::bind (&MidiTriggerPropertiesBox::trigger_changed, this, _1), gui_context ());
+	tref.trigger()->PropertyChanged.connect (_midi_state_connection, invalidator (*this), boost::bind (&MidiTriggerPropertiesBox::trigger_changed, this, _1), gui_context ());
 
 	PBD::PropertyChange changed;
 	changed.add (ARDOUR::Properties::name);

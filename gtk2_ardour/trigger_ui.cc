@@ -63,8 +63,8 @@ static std::string longest_quantize;
 static std::vector<std::string> launch_strings;
 static std::string longest_launch;
 
-TriggerUI::TriggerUI () :
-	 _follow_action_button (ArdourButton::led_default_elements)
+TriggerUI::TriggerUI ()
+	: _follow_action_button (ArdourButton::led_default_elements)
 	, _velocity_adjustment(1.,0.,1.0,0.01,0.1)
 	, _velocity_slider (&_velocity_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _follow_probability_adjustment(0,0,100,2,5)
@@ -74,8 +74,6 @@ TriggerUI::TriggerUI () :
 	, _legato_button (ArdourButton::led_default_elements)
 
 {
-	trigger = NULL;
-
 	using namespace Gtk::Menu_Helpers;
 
 	if (follow_strings.empty()) {
@@ -228,10 +226,16 @@ TriggerUI::~TriggerUI ()
 {
 }
 
-void
-TriggerUI::set_trigger (ARDOUR::TriggerPtr t)
+TriggerPtr
+TriggerUI::trigger() const
 {
-	trigger = t;
+	return tref.trigger();
+}
+
+void
+TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
+{
+	tref = tr;
 
 	PropertyChange pc;
 
@@ -247,7 +251,7 @@ TriggerUI::set_trigger (ARDOUR::TriggerPtr t)
 
 	trigger_changed (pc);
 
-	trigger->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
+	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
 }
 
 
@@ -261,25 +265,25 @@ TriggerUI::set_quantize (BBT_Offset bbo)
 	}
 #endif
 
-	trigger->set_quantization (bbo);
+	trigger()->set_quantization (bbo);
 }
 
 void
 TriggerUI::follow_count_event ()
 {
-	trigger->set_follow_count ((int) _follow_count_adjustment.get_value());
+	trigger()->set_follow_count ((int) _follow_count_adjustment.get_value());
 }
 
 void
 TriggerUI::velocity_adjusted ()
 {
-	trigger->set_midi_velocity_effect (_velocity_adjustment.get_value());
+	trigger()->set_midi_velocity_effect (_velocity_adjustment.get_value());
 }
 
 void
 TriggerUI::probability_adjusted ()
 {
-	trigger->set_follow_action_probability ((int) _follow_probability_adjustment.get_value());
+	trigger()->set_follow_action_probability ((int) _follow_probability_adjustment.get_value());
 }
 
 bool
@@ -287,7 +291,7 @@ TriggerUI::follow_action_button_event (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		trigger->set_use_follow (!trigger->use_follow());
+		trigger()->set_use_follow (!trigger()->use_follow());
 		return true;
 
 	default:
@@ -302,7 +306,7 @@ TriggerUI::legato_button_event (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		trigger->set_legato (!trigger->legato());
+		trigger()->set_legato (!trigger()->legato());
 		return true;
 
 	default:
@@ -315,7 +319,7 @@ TriggerUI::legato_button_event (GdkEvent* ev)
 void
 TriggerUI::set_launch_style (Trigger::LaunchStyle ls)
 {
-	trigger->set_launch_style (ls);
+	trigger()->set_launch_style (ls);
 }
 
 void
@@ -398,46 +402,46 @@ void
 TriggerUI::trigger_changed (PropertyChange pc)
 {
 	if (pc.contains (Properties::quantization)) {
-		BBT_Offset bbo (trigger->quantization());
+		BBT_Offset bbo (trigger()->quantization());
 		_quantize_button.set_active (quantize_length_to_string (bbo));
 	}
 
 	if (pc.contains (Properties::use_follow)) {
-		_follow_action_button.set_active_state (trigger->use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_follow_action_button.set_active_state (trigger()->use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::follow_count)) {
-		_follow_count_adjustment.set_value (trigger->follow_count());
+		_follow_count_adjustment.set_value (trigger()->follow_count());
 	}
 
 	if (pc.contains (Properties::legato)) {
-		_legato_button.set_active_state (trigger->legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_legato_button.set_active_state (trigger()->legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::launch_style)) {
-		_launch_style_button.set_active (launch_style_to_string (trigger->launch_style()));
+		_launch_style_button.set_active (launch_style_to_string (trigger()->launch_style()));
 	}
 
 	if (pc.contains (Properties::follow_action0)) {
-		_follow_left.set_text (follow_action_to_string (trigger->follow_action (0)));
+			_follow_left.set_text (follow_action_to_string (trigger()->follow_action (0)));
 	}
 
 	if (pc.contains (Properties::follow_action1)) {
-		_follow_right.set_text (follow_action_to_string (trigger->follow_action (1)));
+		_follow_right.set_text (follow_action_to_string (trigger()->follow_action (1)));
 	}
 
 	if (pc.contains (Properties::velocity_effect)) {
-		_velocity_adjustment.set_value (trigger->midi_velocity_effect());
+		_velocity_adjustment.set_value (trigger()->midi_velocity_effect());
 	}
 
 	if (pc.contains (Properties::follow_action_probability)) {
-		int pval = trigger->follow_action_probability();
+		int pval = trigger()->follow_action_probability();
 		_follow_probability_adjustment.set_value (pval);
 		_left_probability_label.set_text (string_compose(_("%1%% Left"), pval));
 		_right_probability_label.set_text (string_compose(_("%1%% Right"), 100-pval));
 	}
 
-	if (trigger->use_follow()) {
+	if (trigger()->use_follow()) {
 		_follow_left.set_sensitive(true);
 		_follow_right.set_sensitive(true);
 		_follow_count_spinner.set_sensitive(true);
@@ -466,13 +470,14 @@ TriggerWidget::TriggerWidget ()
 
 /* ------------ */
 
-TriggerWindow::TriggerWindow (TriggerPtr slot)
+TriggerWindow::TriggerWindow (TriggerReference tref)
 {
-	set_title (string_compose (_("Trigger: %1"), slot->name()));
+	TriggerPtr trigger (tref.trigger());
+
+	set_title (string_compose (_("Trigger: %1"), trigger->name()));
 
 	SlotPropertiesBox* slot_prop_box = manage (new SlotPropertiesBox ());
-	slot_prop_box->set_slot(slot);
-
+	slot_prop_box->set_slot (tref);
 
 	Gtk::Table* table = manage (new Gtk::Table);
 	table->set_homogeneous (false);
@@ -482,23 +487,23 @@ TriggerWindow::TriggerWindow (TriggerPtr slot)
 	int col = 0;
 	table->attach(*slot_prop_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 
-	if (slot->region()) {
-		if (slot->region()->data_type() == DataType::AUDIO) {
+	if (trigger->region()) {
+		if (trigger->region()->data_type() == DataType::AUDIO) {
 			_trig_box = manage(new AudioTriggerPropertiesBox ());
 			_ops_box = manage(new AudioRegionOperationsBox ());
 			_trim_box = manage(new AudioClipEditorBox ());
 
-			_trig_box->set_trigger(slot);
+			_trig_box->set_trigger (tref);
 		} else {
 			_trig_box = manage(new MidiTriggerPropertiesBox ());
 			_ops_box = manage(new MidiRegionOperationsBox ());
 			_trim_box = manage(new MidiClipEditorBox ());
 
-			_trig_box->set_trigger(slot);
+			_trig_box->set_trigger (tref);
 		}
 
-		_trim_box->set_region(slot->region(), slot);
-		_ops_box->set_session(&slot->region()->session());
+		_trim_box->set_region(trigger->region(), tref);
+		_ops_box->set_session(&trigger->region()->session());
 
 		table->attach(*_trig_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 		table->attach(*_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;

@@ -346,23 +346,24 @@ TriggerPage::selection_changed ()
 	_parameter_box.hide ();
 
 	if (!selection.triggers.empty ()) {
-		TriggerSelection ts    = selection.triggers;
-		TriggerEntry*    entry = *ts.begin ();
-		TriggerPtr       slot  = entry->trigger ();
+		TriggerSelection ts      = selection.triggers;
+		TriggerEntry*    entry   = *ts.begin ();
+		TriggerReference ref     = entry->trigger_reference ();
+		TriggerPtr       trigger = entry->trigger ();
 
-		_slot_prop_box.set_slot (slot);
+		_slot_prop_box.set_slot (ref);
 		_slot_prop_box.show ();
-		if (slot->region ()) {
-			if (slot->region ()->data_type () == DataType::AUDIO) {
-				_audio_trig_box.set_trigger (slot);
-				_audio_trim_box.set_region (slot->region (), slot);
+		if (trigger->region ()) {
+			if (trigger->region ()->data_type () == DataType::AUDIO) {
+				_audio_trig_box.set_trigger (ref);
+				_audio_trim_box.set_region (trigger->region (), ref);
 
 				_audio_trig_box.show ();
 				_audio_trim_box.show ();
 				_audio_ops_box.show ();
 			} else {
-				_midi_trig_box.set_trigger (slot);
-				_midi_trim_box.set_region (slot->region (), slot);
+				_midi_trig_box.set_trigger (ref);
+				_midi_trim_box.set_region (trigger->region (), ref);
 
 				_midi_trig_box.show ();
 				_midi_trim_box.show ();

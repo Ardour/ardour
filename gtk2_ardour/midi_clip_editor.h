@@ -69,7 +69,7 @@ public:
 
 	void set_session (ARDOUR::Session*);
 
-	void set_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerPtr);
+	void set_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerReference);
 	void region_changed (const PBD::PropertyChange& what_changed);
 
 private:

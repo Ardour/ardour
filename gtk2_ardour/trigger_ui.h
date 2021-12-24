@@ -39,7 +39,7 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	TriggerUI ();
 	~TriggerUI ();
 
-	void set_trigger (ARDOUR::TriggerPtr);
+	void set_trigger (ARDOUR::TriggerReference);
 
 	static std::string follow_action_to_string (ARDOUR::Trigger::FollowAction);
 	static ARDOUR::Trigger::FollowAction  string_to_follow_action (std::string const &);
@@ -47,7 +47,8 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	static std::string launch_style_to_string (ARDOUR::Trigger::LaunchStyle);
 
   private:
-	ARDOUR::TriggerPtr trigger;
+	ARDOUR::TriggerReference tref;
+	ARDOUR::TriggerPtr trigger() const;
 
 	ArdourWidgets::ArdourButton        _follow_action_button;
 
@@ -91,7 +92,7 @@ class TriggerWidget : public Gtk::VBox
 {
   public:
 	TriggerWidget ();
-	void set_trigger (ARDOUR::TriggerPtr t) const {ui->set_trigger(t);}
+	void set_trigger (ARDOUR::TriggerReference tr) const { ui->set_trigger(tr); }
 
   private:
 	TriggerUI* ui;
@@ -102,7 +103,7 @@ class TriggerWidget : public Gtk::VBox
 class TriggerWindow : public Gtk::Window
 {
     public:
-	TriggerWindow (ARDOUR::TriggerPtr);
+	TriggerWindow (ARDOUR::TriggerReference);
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);

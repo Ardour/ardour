@@ -209,13 +209,13 @@ SelectionPropertiesBox::selection_changed ()
 	if (!selection.triggers.empty()) {
 		TriggerSelection ts = selection.triggers;
 		TriggerEntry* entry = *ts.begin();
-		TriggerPtr slot = entry->trigger();
+		TriggerReference ref = entry->trigger_reference();
 
 		//slot properties incl "Follow Actions"
-		_slot_prop_box->set_slot(slot);
+		_slot_prop_box->set_slot(ref);
 		_slot_prop_box->show();
 
-		selected_region = slot->region();
+		selected_region = ref.trigger()->region();
 	} else if (selection.regions.size()==1)  {
 		selected_region = (*(selection.regions.begin()))->region();
 	}

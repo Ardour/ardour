@@ -32,7 +32,7 @@ public:
 	MidiTriggerPropertiesBox ();
 	~MidiTriggerPropertiesBox ();
 
-	void set_trigger (ARDOUR::TriggerPtr);
+	void set_trigger (ARDOUR::TriggerReference);
 
 private:
 	void trigger_changed (const PBD::PropertyChange& what_changed);

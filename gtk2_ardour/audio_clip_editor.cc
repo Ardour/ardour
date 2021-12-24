@@ -86,6 +86,8 @@ ClipEditorBox::register_clip_editor_actions (Bindings* clip_editor_bindings)
 void
 AudioClipEditor::ClipBBTMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const
 {
+	TriggerPtr trigger = tref.trigger();
+
 	if (!trigger) {
 		std::cerr << "No trigger\n";
 		return;
@@ -118,7 +120,8 @@ AudioClipEditor::ClipBBTMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark
 }
 
 AudioClipEditor::AudioClipEditor ()
-	: _spp (0)
+	: clip_metric (0)
+	, _spp (0)
 	, scroll_fraction (0)
 	, current_line_drag (0)
 	, current_scroll_drag (0)
@@ -143,14 +146,8 @@ AudioClipEditor::AudioClipEditor ()
 	waves_container = new ArdourCanvas::ScrollGroup (frame, ScrollGroup::ScrollsHorizontally);
 	add_scroller (*waves_container);
 
-	/* A ruler, that scrolls with the waves and is overlapped by our
-	 * various vertical lines
-	 */
-
-	clip_metric = new ClipBBTMetric ();
-
 	ruler_container = new ArdourCanvas::Container (waves_container);
-	ruler           = new ArdourCanvas::Ruler (ruler_container, *clip_metric);
+	ruler           = new ArdourCanvas::Ruler (ruler_container, 0);
 	ruler->name     = "Clip Editor";
 	ruler->set_font_description (UIConfiguration::instance ().get_SmallerFont ());
 	ruler->set_fill_color (UIConfiguration::instance().color (X_("theme:bg1")));
@@ -183,6 +180,7 @@ AudioClipEditor::AudioClipEditor ()
 AudioClipEditor::~AudioClipEditor ()
 {
 	drop_waves ();
+	delete clip_metric;
 }
 
 bool
@@ -399,12 +397,13 @@ AudioClipEditor::drop_waves ()
 }
 
 void
-AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, TriggerPtr t)
+AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, TriggerReference tr)
 {
 	drop_waves ();
 
 	audio_region = r;
-	clip_metric->set_trigger (t);
+	delete clip_metric;
+	clip_metric = new ClipBBTMetric (tr);
 
 	uint32_t    n_chans = r->n_channels ();
 	samplecnt_t len;
@@ -430,6 +429,8 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, TriggerPtr t)
 
 		waves.push_back (wv);
 	}
+
+	TriggerPtr t (tr.trigger());
 
 	if (t) {
 		if (t->apparent_tempo() == 0.) {
@@ -592,7 +593,7 @@ AudioClipEditorBox::zoom_out_click ()
 }
 
 void
-AudioClipEditorBox::set_region (boost::shared_ptr<Region> r, TriggerPtr t)
+AudioClipEditorBox::set_region (boost::shared_ptr<Region> r, TriggerReference tref)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
@@ -605,7 +606,7 @@ AudioClipEditorBox::set_region (boost::shared_ptr<Region> r, TriggerPtr t)
 	state_connection.disconnect ();
 
 	_region = r;
-	editor->set_region (ar, t);
+	editor->set_region (ar, tref);
 
 	PBD::PropertyChange interesting_stuff;
 	region_changed (interesting_stuff);

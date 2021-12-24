@@ -74,7 +74,7 @@ SlotPropertiesBox::set_session (Session* s)
 }
 
 void
-SlotPropertiesBox::set_slot (TriggerPtr t)
+SlotPropertiesBox::set_slot (TriggerReference tref)
 {
-	_triggerwidget->set_trigger (t);
+	_triggerwidget->set_trigger (tref);
 }
