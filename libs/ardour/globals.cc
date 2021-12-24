@@ -162,9 +162,12 @@ PBD::Signal3<bool, std::string, std::string, int>  ARDOUR::CopyConfigurationFile
 
 std::map<std::string, bool> ARDOUR::reserved_io_names;
 
+float ARDOUR::ui_scale_factor = 1.0;
+
 static bool have_old_configuration_files = false;
 static bool running_from_gui             = false;
 static int  cpu_dma_latency_fd           = -1;
+
 
 namespace ARDOUR {
 extern void setup_enum_writer ();
@@ -761,6 +764,10 @@ bool
 ARDOUR::no_auto_connect ()
 {
 	return getenv ("ARDOUR_NO_AUTOCONNECT") != 0;
+}
+
+void ARDOUR::set_global_ui_scale_factor (float s) {
+	ui_scale_factor = s;
 }
 
 void
