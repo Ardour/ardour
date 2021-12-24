@@ -733,6 +733,12 @@ AudioTrigger::set_legato_offset (timepos_t const & offset)
 }
 
 timepos_t
+AudioTrigger::start_offset () const
+{
+	return timepos_t (_start_offset);
+}
+
+timepos_t
 AudioTrigger::current_pos() const
 {
 	return timepos_t (process_index);

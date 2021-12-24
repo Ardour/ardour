@@ -143,7 +143,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	virtual bool probably_oneshot () const = 0;
 
-	timepos_t start_offset () const; /* offset from start of data */
+	virtual timepos_t start_offset () const = 0; /* offset from start of data */
 	virtual timepos_t current_length() const = 0; /* offset from start() */
 	virtual timepos_t natural_length() const = 0; /* offset from start() */
 
@@ -306,7 +306,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void set_legato_offset (timepos_t const &);
 	timepos_t current_pos() const;
 	void set_length (timecnt_t const &);
-	timepos_t start_offset () const { return timepos_t (_start_offset); } /* offset from start of data */
+	timepos_t start_offset () const; /* offset from start of data */
 	timepos_t current_length() const; /* offset from start of data */
 	timepos_t natural_length() const; /* offset from start of data */
 	void reload (BufferSet&, void*);
