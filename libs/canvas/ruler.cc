@@ -255,9 +255,9 @@ Ruler::set_divide_colors (Gtkmm2ext::Color t, Gtkmm2ext::Color b)
 }
 
 void
-Ruler::set_metric (const Metric& m)
+Ruler::set_metric (const Metric*  m)
 {
-        _metric = &m;
+        _metric = m;
         _need_marks = true;
         redraw ();
 }
