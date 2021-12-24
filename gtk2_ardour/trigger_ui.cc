@@ -79,6 +79,7 @@ TriggerUI::TriggerUI () :
 	using namespace Gtk::Menu_Helpers;
 
 	if (follow_strings.empty()) {
+		follow_strings.push_back (follow_action_to_string (Trigger::None));
 		follow_strings.push_back (follow_action_to_string (Trigger::Stop));
 		follow_strings.push_back (follow_action_to_string (Trigger::Again));
 		follow_strings.push_back (follow_action_to_string (Trigger::QueuedTrigger));
@@ -126,17 +127,23 @@ TriggerUI::TriggerUI () :
 	_follow_probability_slider.set_name("FollowAction");
 
 	_follow_left.set_name("FollowAction");
-	_follow_left.append_text_item (_("None"));
-	_follow_left.append_text_item (_("Repeat"));
-	_follow_left.append_text_item (_("Next"));
-	_follow_left.append_text_item (_("Previous"));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),         Trigger::None, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),         Trigger::Stop, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),        Trigger::Again, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),  Trigger::PrevTrigger, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),  Trigger::NextTrigger, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),   Trigger::AnyTrigger, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action), Trigger::OtherTrigger, 0)));
 	_follow_left.set_sizing_text (longest_follow);
 
 	_follow_right.set_name("FollowAction");
-	_follow_right.append_text_item (_("None"));
-	_follow_right.append_text_item (_("Repeat"));
-	_follow_right.append_text_item (_("Next"));
-	_follow_right.append_text_item (_("Previous"));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),         Trigger::None, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),         Trigger::Stop, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),        Trigger::Again, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),  Trigger::PrevTrigger, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),  Trigger::NextTrigger, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),   Trigger::AnyTrigger, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action), Trigger::OtherTrigger, 1)));
 	_follow_right.set_sizing_text (longest_follow);
 
 	_launch_style_button.set_name("FollowAction");
@@ -152,10 +159,13 @@ TriggerUI::TriggerUI () :
 
 #define quantize_item(b) _quantize_button.AddMenuElem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_quantize), b)));
 
+#if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IMPLEMENTED
 	quantize_item (BBT_Offset (0, 0, 0));
-	quantize_item (BBT_Offset (0, 1, 0));
-	quantize_item (BBT_Offset (0, 2, 0));
+#endif
+	quantize_item (BBT_Offset (1, 0, 0));
 	quantize_item (BBT_Offset (0, 4, 0));
+	quantize_item (BBT_Offset (0, 2, 0));
+	quantize_item (BBT_Offset (0, 1, 0));
 	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/2));
 	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/4));
 	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/8));
@@ -244,10 +254,12 @@ TriggerUI::set_trigger (ARDOUR::TriggerPtr t)
 void
 TriggerUI::set_quantize (BBT_Offset bbo)
 {
+#if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IMPLEMENTED
 	if (bbo == BBT_Offset (0, 0, 0)) {
 		/* use grid */
 		bbo = BBT_Offset (1, 2, 3); /* XXX get grid from editor */
 	}
+#endif
 
 	trigger->set_quantization (bbo);
 }

@@ -357,20 +357,21 @@ TriggerMaster::context_menu ()
 	Menu*     follow_menu = manage (new Menu);
 	MenuList& fitems      = follow_menu->items ();
 
-	fitems.push_back (MenuElem (_("Stop"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::Stop)));
-	fitems.push_back (MenuElem (_("Again"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::Again)));
-	fitems.push_back (MenuElem (_("Next"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::NextTrigger)));
-	fitems.push_back (MenuElem (_("Previous"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::PrevTrigger)));
-	fitems.push_back (MenuElem (_("Any"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::AnyTrigger)));
-	fitems.push_back (MenuElem (_("Other"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::OtherTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::None)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::Stop)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::Again)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::PrevTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::NextTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::AnyTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::OtherTrigger)));
 
 	Menu*     launch_menu = manage (new Menu);
 	MenuList& litems      = launch_menu->items ();
 
-	litems.push_back (MenuElem (_("One Shot"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::OneShot)));
-	litems.push_back (MenuElem (_("Gate"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::Gate)));
-	litems.push_back (MenuElem (_("Toggle"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::Toggle)));
-	litems.push_back (MenuElem (_("Repeat"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::Repeat)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::OneShot)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::Gate)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::Toggle)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_launch_style), Trigger::Repeat)));
 
 	Menu*     quant_menu = manage (new Menu);
 	MenuList& qitems     = quant_menu->items ();
@@ -378,24 +379,21 @@ TriggerMaster::context_menu ()
 	BBT_Offset b;
 
 	b = BBT_Offset (1, 0, 0);
-	qitems.push_back (MenuElem (_("Global"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b))); // TODO
-
-	b = BBT_Offset (1, 0, 0);
-	qitems.push_back (MenuElem (_("Bars"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
 	b = BBT_Offset (0, 4, 0);
-	qitems.push_back (MenuElem (_("Whole"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
 	b = BBT_Offset (0, 2, 0);
-	qitems.push_back (MenuElem (_("Half"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
 	b = BBT_Offset (0, 1, 0);
-	qitems.push_back (MenuElem (_("Quarters"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
 	b = BBT_Offset (0, 0, ticks_per_beat / 2);
-	qitems.push_back (MenuElem (_("Eighths"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
 	b = BBT_Offset (0, 0, ticks_per_beat / 4);
-	qitems.push_back (MenuElem (_("Sixteenths"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
 	b = BBT_Offset (0, 0, ticks_per_beat / 8);
-	qitems.push_back (MenuElem (_("Thirty-Seconds"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
 	b = BBT_Offset (0, 0, ticks_per_beat / 16);
-	qitems.push_back (MenuElem (_("Sixty-Fourths"), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
 
 	Menu*     load_menu = manage (new Menu);
 	MenuList& loitems (load_menu->items ());

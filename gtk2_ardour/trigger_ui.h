@@ -41,6 +41,11 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 
 	void set_trigger (ARDOUR::TriggerPtr);
 
+	static std::string follow_action_to_string (ARDOUR::Trigger::FollowAction);
+	static ARDOUR::Trigger::FollowAction  string_to_follow_action (std::string const &);
+	static std::string quantize_length_to_string (Temporal::BBT_Offset const &);
+	static std::string launch_style_to_string (ARDOUR::Trigger::LaunchStyle);
+
   private:
 	ARDOUR::TriggerPtr trigger;
 
@@ -79,11 +84,6 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	void velocity_adjusted ();
 
 	PBD::ScopedConnectionList trigger_connections;
-
-	static std::string follow_action_to_string (ARDOUR::Trigger::FollowAction);
-	static ARDOUR::Trigger::FollowAction  string_to_follow_action (std::string const &);
-	static std::string quantize_length_to_string (Temporal::BBT_Offset const &);
-	static std::string launch_style_to_string (ARDOUR::Trigger::LaunchStyle);
 };
 
 class TriggerWidget : public Gtk::VBox
