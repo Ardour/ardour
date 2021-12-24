@@ -244,6 +244,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	virtual SegmentDescriptor get_segment_descriptor () const = 0;
 
+	static void request_trigger_delete (Trigger* t);
+
   protected:
 	struct UIRequests {
 		std::atomic<bool> stop;
@@ -432,6 +434,7 @@ class LIBARDOUR_API TriggerBoxThread
 	static void init_request_pool() { Request::init_pool(); }
 
 	void set_region (TriggerBox&, uint32_t slot, boost::shared_ptr<Region>);
+	void request_delete_trigger (Trigger* t);
 
 	void summon();
 	void stop();
@@ -443,7 +446,8 @@ class LIBARDOUR_API TriggerBoxThread
 
 	enum RequestType {
 		Quit,
-		SetRegion
+		SetRegion,
+		DeleteTrigger
 	};
 
 	struct Request {
@@ -455,6 +459,8 @@ class LIBARDOUR_API TriggerBoxThread
 		TriggerBox* box;
 		uint32_t slot;
 		boost::shared_ptr<Region> region;
+		/* for DeleteTrigger */
+		Trigger* trigger;
 
 		void* operator new (size_t);
 		void  operator delete (void* ptr, size_t);
@@ -468,6 +474,7 @@ class LIBARDOUR_API TriggerBoxThread
 
 	CrossThreadChannel _xthread;
 	void queue_request (Request*);
+	void delete_trigger (Trigger*);
 };
 
 
@@ -619,6 +626,10 @@ class LIBARDOUR_API TriggerBox : public Processor
 		};
 
 		Type type;
+
+		/* cannot use a union here because we need Request to have a
+		 * "trivial" constructor.
+		 */
 
 		TriggerPtr trigger;
 		void* ptr;

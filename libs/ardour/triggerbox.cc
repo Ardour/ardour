@@ -111,6 +111,13 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 }
 
 void
+Trigger::request_trigger_delete (Trigger* t)
+{
+	std::cerr << "RTD\n";
+	TriggerBox::worker->request_delete_trigger (t);
+}
+
+void
 Trigger::set_pending (Trigger* t)
 {
 	Trigger* old = _pending.exchange (t);
@@ -2735,7 +2742,7 @@ TriggerBox::set_state (const XMLNode& node, int version)
 			TriggerPtr trig;
 
 			if (_data_type == DataType::AUDIO) {
-				trig = boost::make_shared<AudioTrigger> (all_triggers.size(), *this);
+				trig.reset (new AudioTrigger (all_triggers.size(), *this), Trigger::request_trigger_delete);
 				all_triggers.push_back (trig);
 				trig->set_state (**t, version);
 			} else if (_data_type == DataType::MIDI) {
@@ -2918,6 +2925,9 @@ TriggerBoxThread::thread_work ()
 				case SetRegion:
 					req->box->set_region (req->slot, req->region);
 					break;
+				case DeleteTrigger:
+					delete_trigger (req->trigger);
+					break;
 				default:
 					break;
 				}
@@ -2975,4 +2985,20 @@ TriggerBoxThread::set_region (TriggerBox& box, uint32_t slot, boost::shared_ptr<
 	req->region = r;
 
 	queue_request (req);
+}
+
+void
+TriggerBoxThread::request_delete_trigger (Trigger* t)
+{
+	std::cerr << "RDT\n";
+	TriggerBoxThread::Request* req = new TriggerBoxThread::Request (DeleteTrigger);
+	req->trigger  = t;
+	queue_request (req);
+}
+
+void
+TriggerBoxThread::delete_trigger (Trigger* t)
+{
+	std::cerr << "trigger delete for " << t << endl;
+	delete t;
 }
