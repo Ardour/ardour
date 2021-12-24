@@ -230,6 +230,7 @@ TriggerPage::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
+	_cue_box.set_session (s);
 	_trigger_clip_picker.set_session (s);
 	_master.set_session (s);
 

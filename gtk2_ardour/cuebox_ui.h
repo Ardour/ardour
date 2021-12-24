@@ -31,6 +31,8 @@
 
 #include "fitted_canvas_widget.h"
 
+typedef std::list<ARDOUR::TriggerPtr > TriggerList;
+
 namespace ArdourCanvas
 {
 	class Text;
@@ -64,7 +66,7 @@ private:
 	double   _poly_margin;
 };
 
-class CueBoxUI : public ArdourCanvas::Rectangle
+class CueBoxUI : public ArdourCanvas::Rectangle, public ARDOUR::SessionHandlePtr
 {
 public:
 	CueBoxUI (ArdourCanvas::Item* parent);
@@ -82,6 +84,16 @@ private:
 	bool text_event (GdkEvent*, uint64_t);
 	void build ();
 
+	void context_menu (uint64_t idx);
+	void get_slots (TriggerList &triggerlist, uint64_t idx);
+
+	void clear_all_triggers(uint64_t idx);
+	void set_all_follow_action (ARDOUR::Trigger::FollowAction, uint64_t idx);
+	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle, uint64_t idx);
+	void set_all_quantization (Temporal::BBT_Offset const&, uint64_t idx);
+
+	Gtk::Menu* _context_menu;
+
 	static Gtkmm2ext::Bindings* bindings;
 
 	static void load_bindings ();
@@ -92,10 +104,12 @@ private:
 	Slots _slots;
 };
 
-class CueBoxWidget : public FittedCanvasWidget
+class CueBoxWidget : public FittedCanvasWidget, public ARDOUR::SessionHandlePtr
 {
 public:
 	CueBoxWidget (float w, float h);
+
+	void set_session (ARDOUR::Session* s) {ui->set_session(s); SessionHandlePtr::set_session(s);}
 
 	void on_map ();
 	void on_unmap ();

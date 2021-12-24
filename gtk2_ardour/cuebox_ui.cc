@@ -20,6 +20,7 @@
 #include "pbd/convert.h"
 
 #include "ardour/region.h"
+#include "ardour/session.h"
 #include "ardour/triggerbox.h"
 
 #include "canvas/polygon.h"
@@ -27,6 +28,8 @@
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/colors.h"
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
 #include "gtkmm2ext/utils.h"
 
 #include "ardour_ui.h"
@@ -36,6 +39,7 @@
 #include "region_view.h"
 #include "selection.h"
 #include "timers.h"
+#include "trigger_ui.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -247,6 +251,7 @@ Glib::RefPtr<Gtk::ActionGroup> CueBoxUI::trigger_actions;
 
 CueBoxUI::CueBoxUI (ArdourCanvas::Item* parent)
 	: ArdourCanvas::Rectangle (parent)
+	, _context_menu (0)
 {
 	set_layout_sensitive (true); // why???
 
@@ -258,6 +263,128 @@ CueBoxUI::CueBoxUI (ArdourCanvas::Item* parent)
 
 CueBoxUI::~CueBoxUI ()
 {
+}
+
+void
+CueBoxUI::context_menu (uint64_t idx)
+{
+	using namespace Gtk;
+	using namespace Gtk::Menu_Helpers;
+	using namespace Temporal;
+
+	delete _context_menu;
+
+	_context_menu   = new Menu;
+	MenuList& items = _context_menu->items ();
+	_context_menu->set_name ("ArdourContextMenu");
+
+	Menu*     follow_menu = manage (new Menu);
+	MenuList& fitems      = follow_menu->items ();
+
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::None, idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::Stop, idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::Again, idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::PrevTrigger, idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::NextTrigger, idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::AnyTrigger, idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::OtherTrigger, idx)));
+
+	Menu*     launch_menu = manage (new Menu);
+	MenuList& litems      = launch_menu->items ();
+
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_launch_style), Trigger::OneShot, idx)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_launch_style), Trigger::Gate, idx)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_launch_style), Trigger::Toggle, idx)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_launch_style), Trigger::Repeat, idx)));
+
+	Menu*     quant_menu = manage (new Menu);
+	MenuList& qitems     = quant_menu->items ();
+
+	BBT_Offset b;
+
+	b = BBT_Offset (1, 0, 0);
+	qitems.push_back (MenuElem (_("1 Bar"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	b = BBT_Offset (0, 4, 0);
+	qitems.push_back (MenuElem (_("Whole"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	b = BBT_Offset (0, 2, 0);
+	qitems.push_back (MenuElem (_("1/2"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	b = BBT_Offset (0, 1, 0);
+	qitems.push_back (MenuElem (_("1/4"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	b = BBT_Offset (0, 0, ticks_per_beat / 2);
+	qitems.push_back (MenuElem (_("1/8"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	b = BBT_Offset (0, 0, ticks_per_beat / 4);
+	qitems.push_back (MenuElem (_("1/16"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	b = BBT_Offset (0, 0, ticks_per_beat / 8);
+	qitems.push_back (MenuElem (_("1/32"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	b = BBT_Offset (0, 0, ticks_per_beat / 16);
+	qitems.push_back (MenuElem (_("1/64"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+
+	Menu*     load_menu = manage (new Menu);
+	MenuList& loitems (load_menu->items ());
+
+	items.push_back (MenuElem (_("Set All Follow Actions..."), *follow_menu));
+	items.push_back (MenuElem (_("Set All Launch Styles..."), *launch_menu));
+	items.push_back (MenuElem (_("Set All Quantizations..."), *quant_menu));
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Clear All..."), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::clear_all_triggers), idx)));
+
+	_context_menu->popup (1, gtk_get_current_event_time ());
+}
+
+void
+CueBoxUI::get_slots (TriggerList &triggerlist, uint64_t idx)
+{
+	boost::shared_ptr<RouteList> rl = _session->get_routes();
+	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
+		boost::shared_ptr<Route> route = *r;
+		boost::shared_ptr<TriggerBox> box = route->triggerbox();
+#warning @Ben disambiguate processor *active* vs *visibility*
+		if (box /*&& box.active*/) {
+			TriggerPtr trigger = box->trigger(idx);
+			triggerlist.push_back(trigger);
+		}
+	}
+}
+
+void
+CueBoxUI::clear_all_triggers (uint64_t idx)
+{
+	TriggerList tl;
+	get_slots(tl, idx);
+	for (TriggerList::iterator t = tl.begin(); t != tl.end(); ++t) {
+		(*t)->set_region(boost::shared_ptr<Region>());
+	}
+}
+
+void
+CueBoxUI::set_all_follow_action (Trigger::FollowAction fa, uint64_t idx)
+{
+	TriggerList tl;
+	get_slots(tl, idx);
+	for (TriggerList::iterator t = tl.begin(); t != tl.end(); ++t) {
+		(*t)->set_follow_action(fa, 0);
+		(*t)->set_follow_action_probability(0);
+	}
+}
+
+void
+CueBoxUI::set_all_launch_style (Trigger::LaunchStyle ls, uint64_t idx)
+{
+	TriggerList tl;
+	get_slots(tl, idx);
+	for (TriggerList::iterator t = tl.begin(); t != tl.end(); ++t) {
+		(*t)->set_launch_style(ls);
+	}
+}
+
+void
+CueBoxUI::set_all_quantization (Temporal::BBT_Offset const& q, uint64_t idx)
+{
+	TriggerList tl;
+	get_slots(tl, idx);
+	for (TriggerList::iterator t = tl.begin(); t != tl.end(); ++t) {
+		(*t)->set_quantization(q);
+	}
 }
 
 void
@@ -344,12 +471,18 @@ CueBoxUI::event (GdkEvent* ev, uint64_t n)
 {
 	switch (ev->type) {
 		case GDK_BUTTON_PRESS:
-			trigger_scene (n);
+			if (ev->button.button==1) {
+				trigger_scene (n);
+			}
 			break;
 		case GDK_2BUTTON_PRESS:
 			break;
 		case GDK_BUTTON_RELEASE:
-			break;
+			switch (ev->button.button) {
+				case 3:
+					context_menu (n);
+					return true;
+			}
 		default:
 			break;
 	}
