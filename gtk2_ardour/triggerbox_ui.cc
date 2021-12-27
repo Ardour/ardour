@@ -408,8 +408,11 @@ TriggerEntry::prop_change (PropertyChange const& change)
 		}
 	}
 
+	name_text->set_color (trigger()->color());
+
 	PropertyChange interesting_stuff;
 	interesting_stuff.add (ARDOUR::Properties::name);
+	interesting_stuff.add (ARDOUR::Properties::color);
 	interesting_stuff.add (ARDOUR::Properties::launch_style);
 	interesting_stuff.add (ARDOUR::Properties::follow_action0);
 	interesting_stuff.add (ARDOUR::Properties::isolated);
@@ -436,7 +439,6 @@ TriggerEntry::set_default_colors ()
 		follow_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
 	}
 
-	name_text->set_color (UIConfiguration::instance ().color ("neutral:foreground"));
 	name_text->set_fill_color (UIConfiguration::instance ().color ("neutral:midground"));
 
 	/*preserve selection border*/
@@ -593,7 +595,6 @@ TriggerBoxUI::name_button_event (GdkEvent* ev, uint64_t n)
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
 				_slots[n]->set_default_colors ();
-				_slots[n]->name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 				_slots[n]->name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 				_slots[n]->name_button->set_outline_color (HSV (fill_color ()).lighter (0.15).color ());
 				_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
@@ -612,7 +613,6 @@ TriggerBoxUI::name_button_event (GdkEvent* ev, uint64_t n)
 		case GDK_BUTTON_PRESS:
 			PublicEditor::instance ().get_selection ().set (_slots[n]);
 			/* a side-effect of selection-change is that the slot's color is reset. retain the "entered-color" here: */
-			_slots[n]->name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 			_slots[n]->name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			_slots[n]->name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
 			_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
@@ -750,9 +750,37 @@ TriggerBoxUI::context_menu (uint64_t n)
 	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::edit_trigger), n)));
 #endif
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Color..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::pick_color), n)));
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Clear"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::clear_trigger), n)));
 
 	_context_menu->popup (1, gtk_get_current_event_time ());
+}
+
+void
+TriggerBoxUI::pick_color (uint64_t n)
+{
+	_color_dialog.get_colorsel()->set_has_opacity_control (false);
+	_color_dialog.get_colorsel()->set_has_palette (true);
+	_color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_ACCEPT));
+	_color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
+
+	Gdk::Color c = ARDOUR_UI_UTILS::gdk_color_from_rgba(_triggerbox.trigger (n)->color());
+
+	_color_dialog.get_colorsel()->set_previous_color (c);
+	_color_dialog.get_colorsel()->set_current_color (c);
+
+	switch (_color_dialog.run()) {
+		case Gtk::RESPONSE_ACCEPT: {
+			c = _color_dialog.get_colorsel()->get_current_color();
+			color_t ct = ARDOUR_UI_UTILS::gdk_color_to_rgba(c);
+			_triggerbox.trigger (n)->set_color(ct);
+		} break;
+		default:
+			break;
+	}
+
+	_color_dialog.hide ();
 }
 
 void

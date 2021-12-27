@@ -19,6 +19,8 @@
 #ifndef _gtk_ardour_triggerbox_ui_h_
 #define _gtk_ardour_triggerbox_ui_h_
 
+#include <gtkmm/colorselection.h>
+
 #include "pbd/properties.h"
 
 #include "ardour/triggerbox.h"
@@ -138,6 +140,8 @@ private:
 	void follow_context_menu (uint64_t n);
 	void context_menu (uint64_t n);
 
+	Gtk::ColorSelectionDialog _color_dialog;
+	void pick_color (uint64_t n);
 	void set_follow_action (uint64_t slot, ARDOUR::Trigger::FollowAction);
 	void set_launch_style (uint64_t slot, ARDOUR::Trigger::LaunchStyle);
 	void set_quantization (uint64_t slot, Temporal::BBT_Offset const&);
