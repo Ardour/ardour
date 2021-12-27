@@ -1583,7 +1583,12 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 	samplepos_t last_event_samples = max_samplepos;
 
 	/* see if we're going to start or stop or retrigger in this run() call */
-	dest_offset = maybe_compute_next_transition (start_sample, start_beats, end_beats, dest_offset, passthru);
+	pframes_t extra_offset = maybe_compute_next_transition (start_sample, start_beats, end_beats, dest_offset, passthru);
+
+	nframes -= extra_offset;
+	dest_offset += extra_offset;
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2\n", name(), enum_2_string (_state)));
 
 	switch (_state) {
 	case Stopped:
@@ -1610,7 +1615,6 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		 * which we last transitioned (in this case, to being active)
 		 */
 
-
 		const Temporal::Beats effective_time = transition_beats + (next_event.time() - region_start);
 
 		/* Now get samples */
@@ -1636,7 +1640,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		last_event_samples = timeline_samples;
 
 		const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, next_event.size(), const_cast<uint8_t*>(next_event.buffer()), false);
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("inserting %1\n", ev));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given et %1 ts %2 bs %3 ss %4 do %5, inserting %6\n", effective_time, timeline_samples, buffer_samples, start_sample, dest_offset, ev));
 		mb.insert_event (ev);
 		tracker.track (next_event.buffer());
 		last_event_beats = next_event.time();
@@ -1657,11 +1661,44 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end\n", index()));
 
 		_loop_cnt++;
+		_state = Stopped;
 
-		if (_loop_cnt == _follow_count) {
+		/* the time we processed spans from start to the last event */
+
+		if (last_event_samples != max_samplepos) {
+			nframes = (last_event_samples - start_sample);
+		} else {
+			/* all frames covered */
+		}
+	} else {
+		/* we didn't reach the end of the MIDI data, ergo we covered
+		   the entire timespan passed into us.
+		*/
+	}
+
+	if ((_state == Stopped) && !_explicitly_stopped && (_launch_style == Trigger::Gate || _launch_style == Trigger::Repeat)) {
+
+		jump_start ();
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopped, repeat/gate ret\n", index()));
+
+	} else {
+
+		if ((_launch_style != Repeat) && (_launch_style != Gate) && (_loop_cnt == _follow_count)) {
+
 			/* have played the specified number of times, we're done */
 
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
+			shutdown ();
+
+
+		} else if (_state == Stopping) {
+
+			/* did not reach the end of the data. Presumably
+			 * another trigger was explicitly queued, and we
+			 * stopped
+			 */
+
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not at end, but ow stopped\n", index()));
 			shutdown ();
 
 		} else {
@@ -1672,26 +1709,10 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 			 */
 
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
-			/* we will "restart" at the beginning of the
-			   next iteration of the trigger.
-			*/
-			transition_beats = transition_beats + data_length;
-			retrigger ();
 			_state = WaitingToStart;
+			retrigger ();
+			PropertyChanged (ARDOUR::Properties::running);
 		}
-
-		/* the time we processed spans from start to the last event */
-
-		if (last_event_samples != max_samplepos) {
-			nframes = (last_event_samples - start_sample);
-		} else {
-			/* all frames covered */
-		}
-
-	} else {
-		/* we didn't reach the end of the MIDI data, ergo we covered
-		   the entire timespan passed into us.
-		*/
 	}
 
 	return nframes;
