@@ -90,6 +90,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _midi_velocity_effect (Properties::velocity_effect, 0.)
 	, _stretchable (Properties::stretchable, true)
 	, _isolated (Properties::isolated, false)
+	, _color (Properties::color, 0xBEBEBEFF)
 	, _barcnt (0.)
 	, _apparent_tempo (0.)
 	, expected_end_sample (0)
@@ -108,6 +109,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	add_property (_midi_velocity_effect);
 	add_property (_stretchable);
 	add_property (_isolated);
+	add_property (_color);
 }
 
 void
@@ -150,6 +152,13 @@ Trigger::set_scene_isolated (bool i)
 {
 	_isolated = i;
 	PropertyChanged (ARDOUR::Properties::isolated);
+}
+
+void
+Trigger::set_color (color_t c)
+{
+	_color = c;
+	PropertyChanged (ARDOUR::Properties::color);
 }
 
 void

@@ -61,6 +61,8 @@ class MidiRegion;
 class TriggerBox;
 class SideChain;
 
+typedef uint32_t color_t;
+
 class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
 	enum State {
@@ -178,6 +180,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	FollowAction follow_action (uint32_t n) const { assert (n < 2); return n ? _follow_action1 : _follow_action0; }
 	void set_follow_action (FollowAction, uint32_t n);
 
+	color_t  color() const { return _color; }
+	void set_color (color_t);
+
 	void set_region (boost::shared_ptr<Region>, bool use_thread = true);
 	void clear_region ();
 	virtual int set_region_in_worker_thread (boost::shared_ptr<Region>) = 0;
@@ -280,6 +285,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<float>                _midi_velocity_effect;
 	PBD::Property<bool>                 _stretchable;
 	PBD::Property<bool>                 _isolated;
+	PBD::Property<color_t>              _color;
 
 	/* computed from data */
 
