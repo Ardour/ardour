@@ -139,12 +139,15 @@ Trigger::set_use_follow (bool yn)
 {
 	_use_follow = yn;
 	PropertyChanged (Properties::use_follow);
+	_box.session().set_dirty();
 }
 
 void
 Trigger::set_name (std::string const & str)
 {
 	_name = str;
+	PropertyChanged (Properties::name);
+	_box.session().set_dirty();
 }
 
 void
@@ -152,6 +155,7 @@ Trigger::set_scene_isolated (bool i)
 {
 	_isolated = i;
 	PropertyChanged (ARDOUR::Properties::isolated);
+	_box.session().set_dirty();
 }
 
 void
@@ -159,6 +163,7 @@ Trigger::set_color (color_t c)
 {
 	_color = c;
 	PropertyChanged (ARDOUR::Properties::color);
+	_box.session().set_dirty();
 }
 
 void
@@ -166,6 +171,7 @@ Trigger::set_stretchable (bool s)
 {
 	_stretchable = s;
 	PropertyChanged (ARDOUR::Properties::stretchable);
+	_box.session().set_dirty();
 }
 
 void
@@ -197,22 +203,37 @@ Trigger::unbang ()
 void
 Trigger::set_gain (gain_t g)
 {
+	if (_pending_gain == g) {
+		return;
+	}
+
 	_pending_gain = g;
 	PropertyChanged (Properties::gain);
+	_box.session().set_dirty();
 }
 
 void
 Trigger::set_midi_velocity_effect (float mve)
 {
+	if (_midi_velocity_effect == mve) {
+		return;
+	}
+
 	_midi_velocity_effect = std::min (1.f, std::max (0.f, mve));
 	PropertyChanged (Properties::velocity_effect);
+	_box.session().set_dirty();
 }
 
 void
 Trigger::set_follow_count (uint32_t n)
 {
+	if (_follow_count == n) {
+		return;
+	}
+
 	_follow_count = n;
 	PropertyChanged (Properties::follow_count);
+	_box.session().set_dirty();
 }
 
 void
@@ -221,21 +242,33 @@ Trigger::set_follow_action (FollowAction f, uint32_t n)
 	assert (n < 2);
 
 	if (n == 0) {
+		if (_follow_action0 == f) {
+			return;
+		}
 		_follow_action0 = f;
 		PropertyChanged (Properties::follow_action0);
 	} else {
+		if (_follow_action1 == f) {
+			return;
+		}
 		_follow_action1 = f;
 		PropertyChanged (Properties::follow_action1);
 	}
+	_box.session().set_dirty();
 }
 
 void
 Trigger::set_launch_style (LaunchStyle l)
 {
+	if (_launch_style == l) {
+		return;
+	}
+
 	_launch_style = l;
 
 	set_usable_length ();
 	PropertyChanged (Properties::launch_style);
+	_box.session().set_dirty();
 }
 
 XMLNode&
@@ -287,24 +320,35 @@ Trigger::set_legato (bool yn)
 {
 	_legato = yn;
 	PropertyChanged (Properties::legato);
+	_box.session().set_dirty();
 }
 
 void
 Trigger::set_follow_action_probability (int n)
 {
+	if (_follow_action_probability == n) {
+		return;
+	}
+
 	n = std::min (100, n);
 	n = std::max (0, n);
 
 	_follow_action_probability = n;
 	PropertyChanged (Properties::follow_action_probability);
+	_box.session().set_dirty();
 }
 
 void
 Trigger::set_quantization (Temporal::BBT_Offset const & q)
 {
+	if (_quantization == q) {
+		return;
+	}
+
 	_quantization = q;
 	set_usable_length ();
 	PropertyChanged (Properties::quantization);
+	_box.session().set_dirty();
 }
 
 void
