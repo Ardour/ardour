@@ -821,11 +821,11 @@ TriggerBoxUI::launch_context_menu (uint64_t n)
 
 	Menu*     quant_menu = manage (new Menu);
 	MenuList& qitems     = quant_menu->items ();
-	bool      success;
 
 	BBT_Offset b;
 
 #if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IS_IMPLEMENTED
+	bool      success;
 	Beats      grid_beats (PublicEditor::instance ().get_grid_type_as_beats (success, timepos_t (0)));
 	if (success) {
 		b = BBT_Offset (0, grid_beats.get_beats (), grid_beats.get_ticks ());
@@ -875,9 +875,6 @@ TriggerBoxUI::launch_context_menu (uint64_t n)
 	if (_triggerbox.trigger (n)->quantization () == b) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
-
-	Menu*     load_menu = manage (new Menu);
-	MenuList& loitems (load_menu->items ());
 
 	items.push_back (MenuElem (_("Launch Style..."), *launch_menu));
 	items.push_back (MenuElem (_("Quantization..."), *quant_menu));
