@@ -464,17 +464,23 @@ Trigger::process_state_requests ()
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged\n", index()));
 
-		if (_launch_style == Gate || _launch_style == Repeat) {
-			switch (_state) {
-			case Running:
-				begin_stop (true);
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, now in WaitingToStop\n", index()));
-				break;
-			default:
-				/* didn't even get started */
-				shutdown ();
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, never started, now stopped\n", index()));
-			}
+		switch (_state) {
+		case Running:
+			begin_stop (true);
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, now in WaitingToStop\n", index()));
+			break;
+
+		case Stopped:
+		case Stopping: /* theoretically not possible */
+		case WaitingToStop:
+		case WaitingForRetrigger:
+			/* do nothing */
+			break;
+
+		case WaitingToStart:
+			/* didn't even get started */
+			shutdown ();
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, never started, now stopped\n", index()));
 		}
 	}
 }
