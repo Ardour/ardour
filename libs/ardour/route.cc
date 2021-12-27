@@ -5300,8 +5300,6 @@ Route::setup_invisible_processors ()
 		if (_triggerbox && (_disk_io_point != DiskIOCustom)) {
 			/* BEFORE polarity */
 			new_processors.insert (polarity_pos, _triggerbox);
-			dump_processors ("tbn", new_processors);
-			
 		}
 	}
 
