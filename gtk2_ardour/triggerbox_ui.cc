@@ -376,14 +376,6 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 		context->set_source (drop_shadow_pattern);
 		context->rectangle (0, 0, width, 6 * scale);
 		context->fill ();
-	} else if (tref.slot % 2 == 0) {
-		/* line at top */
-		context->set_identity_matrix ();
-		context->translate (self.x0, self.y0 - 0.5);
-		set_source_rgba (context, rgba_to_color (0, 0, 0, 1));
-		context->rectangle (0, 0, width, 1);
-		context->fill ();
-		context->set_identity_matrix ();
 	}
 
 	/* launch icon */
