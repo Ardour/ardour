@@ -5255,7 +5255,7 @@ Route::setup_invisible_processors ()
 		new_processors.insert (dw, _triggerbox);
 	}
 
-	/* ensure dist-writer is before disk-reader */
+	/* ensure disk-writer is before disk-reader */
 	if (_disk_reader && _disk_writer) {
 		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
 		ProcessorList::iterator writer_pos = find (new_processors.begin(), new_processors.end(), _disk_writer);
