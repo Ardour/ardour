@@ -52,6 +52,7 @@ public:
 		b     = std::max<size_t> (100, b);
 		width = std::max<size_t> (800, width);
 
+		peaks.resize (2);
 		peaks[0].resize (w);
 		peaks[1].resize (width);
 		spectrum.resize (width);
@@ -135,8 +136,8 @@ public:
 	uint32_t n_samples;
 	uint32_t freq[6]; // y-pos, 50, 100, 500, 1k, 5k, 10k [Hz]
 
-	std::vector<PeakData>           peaks[2];
-	std::vector<std::vector<float>> spectrum;
+	std::vector<std::vector<PeakData> > peaks;
+	std::vector<std::vector<float> >    spectrum;
 
 	float* lgraph_i;
 	float* lgraph_s;
