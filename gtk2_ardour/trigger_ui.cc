@@ -443,8 +443,8 @@ TriggerUI::trigger_changed (PropertyChange pc)
 	if (pc.contains (Properties::follow_action_probability)) {
 		int pval = trigger()->follow_action_probability();
 		_follow_probability_adjustment.set_value (pval);
-		_left_probability_label.set_text (string_compose(_("%1%% Left"), pval));
-		_right_probability_label.set_text (string_compose(_("%1%% Right"), 100-pval));
+		_left_probability_label.set_text (string_compose(_("%1%% Left"), 100-pval));
+		_right_probability_label.set_text (string_compose(_("%1%% Right"), pval));
 	}
 
 	if (trigger()->use_follow()) {
