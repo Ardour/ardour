@@ -1834,6 +1834,11 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 		if (p == Trigger::MagicClearPointerValue) {
 			all_triggers[slot]->clear_region ();
 		} else {
+			/* Note use of a custom delete function. We cannot
+			   delete the old trigger from the RT context where the
+			   trigger swap will happen, so we will ask the trigger
+			   helper thread to take care of it.
+			*/
 			all_triggers[slot].reset (p, Trigger::request_trigger_delete);
 			TriggerSwapped (slot); /* EMIT SIGNAL */
 		}
