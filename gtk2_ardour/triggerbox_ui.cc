@@ -165,11 +165,10 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 	_poly_margin       = 2. * scale;
 	_poly_size         = height - 2 * _poly_margin;
 
+	name_text->size_allocate (ArdourCanvas::Rect (0, 0, width, height -_poly_margin*2));
 	float tleft = height; // make room for the play button
-
-	name_text->size_allocate (ArdourCanvas::Rect (0, 0, width, height));
-	name_text->set_position (Duple (tleft + _poly_margin, _poly_margin - 0.5));
-	name_text->clamp_width (width - height - height);
+	name_text->set_position (Duple (tleft + _poly_margin, _poly_margin));  //@paul why do we need tleft here?  isn't name_text a child of name_button?
+	name_text->clamp_width (width - height*2 -_poly_margin*3 );
 
 	/* font scale may have changed. uiconfig 'embeds' the ui-scale in the font */
 	name_text->set_font_description (UIConfiguration::instance ().get_NormalFont ());
