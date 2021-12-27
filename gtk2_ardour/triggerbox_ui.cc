@@ -216,28 +216,28 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 			layout->show_in_cairo_context (context);
 		} break;
 		case Trigger::AnyTrigger: {
-			context->move_to (size / 2, 3 * scale);
-			context->line_to (size / 2, size - 3 * scale);
-			context->move_to (size / 2, size / 2);
-			context->line_to (size / 2 - 3 * scale, size / 2);
-			context->stroke ();
-			context->arc (size / 2, 4 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
-			context->fill ();
-			context->arc (size / 2, size - 3 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
-			context->fill ();
-			context->arc (size / 2 - 3 * scale, size / 2, 1.5 * scale, 0, 2 * M_PI); // arrow head
-			context->fill ();
+			for (int i = 0; i<6; i++) {
+				Cairo::Matrix m = context->get_matrix();
+				context->translate (size / 2, size /2);
+				context->rotate (i*M_PI/3);
+				context->move_to (0, 0);
+				context->line_to (0, (size/2)-4*scale);
+				context->stroke ();
+				context->set_matrix(m);
+			}
+			context->set_identity_matrix ();
 		} break;
 		case Trigger::OtherTrigger: {
-			context->move_to (size / 2, 3 * scale);
-			context->line_to (size / 2, 7 * scale);
-			context->move_to (size / 2, size - 7 * scale);
-			context->line_to (size / 2, size - 3 * scale);
-			context->stroke ();
-			context->arc (size / 2, 3 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
-			context->fill ();
-			context->arc (size / 2, size - 3 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
-			context->fill ();
+			for (int i = 0; i<6; i++) {
+				Cairo::Matrix m = context->get_matrix();
+				context->translate (size / 2, size /2);
+				context->rotate (i*M_PI/3);
+				context->move_to (0, 2*scale);
+				context->line_to (0, (size/2)-4*scale);
+				context->stroke ();
+				context->set_matrix(m);
+			}
+			context->set_identity_matrix ();
 		} break;
 		case Trigger::None:
 		default:
