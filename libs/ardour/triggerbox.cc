@@ -2740,12 +2740,18 @@ TriggerBox::set_state (const XMLNode& node, int version)
 		for (XMLNodeList::const_iterator t = tchildren.begin(); t != tchildren.end(); ++t) {
 			TriggerPtr trig;
 
+			/* Note use of a custom delete function. We cannot
+			   delete the old trigger from the RT context where the
+			   trigger swap will happen, so we will ask the trigger
+			   helper thread to take care of it.
+			*/
+
 			if (_data_type == DataType::AUDIO) {
 				trig.reset (new AudioTrigger (all_triggers.size(), *this), Trigger::request_trigger_delete);
 				all_triggers.push_back (trig);
 				trig->set_state (**t, version);
 			} else if (_data_type == DataType::MIDI) {
-				trig = boost::make_shared<MIDITrigger> (all_triggers.size(), *this);
+				trig.reset (new MIDITrigger (all_triggers.size(), *this), Trigger::request_trigger_delete);
 				all_triggers.push_back (trig);
 				trig->set_state (**t, version);
 			}
