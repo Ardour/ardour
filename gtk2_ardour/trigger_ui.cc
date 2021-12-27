@@ -168,6 +168,7 @@ TriggerUI::TriggerUI ()
 	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/4));
 	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/8));
 	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/16));
+	quantize_item (BBT_Offset (-1, 0, 0));
 
 	for (std::vector<std::string>::const_iterator i = quantize_strings.begin(); i != quantize_strings.end(); ++i) {
 		if (i->length() > longest_quantize.length()) {
@@ -348,6 +349,11 @@ TriggerUI::launch_style_to_string (Trigger::LaunchStyle ls)
 std::string
 TriggerUI::quantize_length_to_string (BBT_Offset const & ql)
 {
+	if (ql < Temporal::BBT_Offset (0, 0, 0)) {
+		/* negative quantization == do not quantize */
+		return _("None");
+	}
+
 	if (ql == BBT_Offset (1, 0, 0)) {
 		return _("1 Bar");
 	} else if (ql == BBT_Offset (0, 1, 0)) {
