@@ -612,13 +612,10 @@ CueMaster::event_handler (GdkEvent* ev)
 	switch (ev->type) {
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button == 1) {
-				/* stop all running triggers, but let them run
-				   to their natural end
-				*/
 				if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
-					_session->stop_all_triggers (true);
+					_session->stop_all_triggers (true);  //stop 'now'
 				} else {
-					_session->stop_all_triggers (false);
+					_session->stop_all_triggers (false);  //stop quantized (bar end)
 				}
 				return true;
 			}
