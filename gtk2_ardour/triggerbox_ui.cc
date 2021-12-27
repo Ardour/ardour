@@ -178,6 +178,19 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 void
 TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::FollowAction icon, float size, float scale) const
 {
+	//in the case where there is a random follow-action, just put a "?"
+	if (trigger()->follow_action_probability()>0) {
+		Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
+		layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+		layout->set_text ("?");
+		int tw, th;
+		layout->get_pixel_size (tw, th);
+		context->move_to (size / 2, size / 2);
+		context->rel_move_to (-tw / 2, -th / 2);
+		layout->show_in_cairo_context (context);
+		return;
+	}
+
 	context->set_line_width (1 * scale);
 
 	switch (icon) {
@@ -388,7 +401,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 	}
 
 	/* follow-action icon */
-	if (trigger()->region ()) {
+	if (trigger()->region () && trigger()->use_follow()) {
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (width - height, 0); // right side of the widget
@@ -416,6 +429,10 @@ TriggerEntry::prop_change (PropertyChange const& change)
 	interesting_stuff.add (ARDOUR::Properties::color);
 	interesting_stuff.add (ARDOUR::Properties::launch_style);
 	interesting_stuff.add (ARDOUR::Properties::follow_action0);
+	interesting_stuff.add (ARDOUR::Properties::follow_action1);
+	interesting_stuff.add (ARDOUR::Properties::use_follow);
+	interesting_stuff.add (ARDOUR::Properties::follow_action_probability);
+	interesting_stuff.add (ARDOUR::Properties::follow_count);
 	interesting_stuff.add (ARDOUR::Properties::isolated);
 	interesting_stuff.add (ARDOUR::Properties::running);
 
@@ -911,6 +928,8 @@ TriggerBoxUI::follow_context_menu (uint64_t n)
 
 	RadioMenuItem::Group fagroup;
 
+	_ignore_menu_action = true;
+
 	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::None)));
 	if (_triggerbox.trigger (n)->follow_action (0) == Trigger::None) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
@@ -956,6 +975,8 @@ TriggerBoxUI::follow_context_menu (uint64_t n)
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 
+	_ignore_menu_action = false;
+
 	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
 
 	_follow_context_menu->popup (1, gtk_get_current_event_time ());
@@ -997,7 +1018,13 @@ TriggerBoxUI::edit_trigger (uint64_t n)
 void
 TriggerBoxUI::set_follow_action (uint64_t n, Trigger::FollowAction fa)
 {
+	if (_ignore_menu_action) {
+		return;
+	}
+
 	_triggerbox.trigger (n)->set_follow_action (fa, 0);
+	_triggerbox.trigger (n)->set_follow_action_probability (0);
+	_triggerbox.trigger (n)->set_use_follow (true);
 }
 
 void
