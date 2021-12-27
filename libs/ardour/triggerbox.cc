@@ -967,7 +967,7 @@ AudioTrigger::probably_oneshot () const
 
 	if ((usable_length < (_box.session().sample_rate()/2)) ||
 	    /* XXX use Meter here, not 4.0 */
-	    ((_barcnt <= 1) && (usable_length < (4.0 * ((_box.session().sample_rate() * 60) / _apparent_tempo))))) {
+	    ((_barcnt < 1) && (usable_length < (4.0 * ((_box.session().sample_rate() * 60) / _apparent_tempo))))) {
 		std::cerr << "looks like a one-shot\n";
 		return true;
 	}
