@@ -5210,15 +5210,13 @@ Route::setup_invisible_processors ()
 
 	/* DISK READER & WRITER (for Track objects) */
 
-	ProcessorList::iterator dw = new_processors.end();
-
 	if (_disk_reader || _disk_writer) {
 		switch (_disk_io_point) {
 		case DiskIOPreFader:
 			if (trim != new_processors.end()) {
 				/* insert BEFORE TRIM */
 				if (_disk_writer) {
-					dw = new_processors.insert (trim, _disk_writer);
+					new_processors.insert (trim, _disk_writer);
 				}
 				if (_disk_reader) {
 					new_processors.insert (trim, _disk_reader);
@@ -5226,17 +5224,17 @@ Route::setup_invisible_processors ()
 			} else {
 				if (_disk_writer) {
 					new_processors.push_front (_disk_writer);
-					dw = new_processors.begin();
 				}
 				if (_disk_reader) {
 					new_processors.push_front (_disk_reader);
+					new_processors.begin();
 				}
 			}
 			break;
 		case DiskIOPostFader:
 			/* insert BEFORE main outs */
 			if (_disk_writer) {
-				dw = new_processors.insert (main, _disk_writer);
+				new_processors.insert (main, _disk_writer);
 			}
 			if (_disk_reader) {
 				new_processors.insert (main, _disk_reader);
@@ -5250,11 +5248,6 @@ Route::setup_invisible_processors ()
 		}
 	}
 
-	if (_triggerbox && _disk_writer) {
-		/* BEFORE the disk recorder */
-		new_processors.insert (dw, _triggerbox);
-	}
-
 	/* ensure disk-writer is before disk-reader */
 	if (_disk_reader && _disk_writer) {
 		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
@@ -5264,7 +5257,7 @@ Route::setup_invisible_processors ()
 		if (std::distance (new_processors.begin(), reader_pos) < std::distance (new_processors.begin(), writer_pos)) {
 			new_processors.erase (reader_pos);
 			assert (writer_pos == find (new_processors.begin(), new_processors.end(), _disk_writer));
-			new_processors.insert (++writer_pos, _disk_reader);
+			reader_pos = new_processors.insert (++writer_pos, _disk_reader);
 		}
 	}
 
@@ -5289,17 +5282,26 @@ Route::setup_invisible_processors ()
 	/* Polarity Invert */
 	if (_polarity) {
 		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
+		ProcessorList::iterator polarity_pos;
 		if (reader_pos != new_processors.end()) {
 			/* insert after disk-reader */
-			new_processors.insert (++reader_pos, _polarity);
+			polarity_pos = new_processors.insert (++reader_pos, _polarity);
 		} else {
 			ProcessorList::iterator return_pos = find (new_processors.begin(), new_processors.end(), _intreturn);
 			/* insert after return */
 			if (return_pos != new_processors.end()) {
-				new_processors.insert (++return_pos, _polarity);
+				polarity_pos = new_processors.insert (++return_pos, _polarity);
 			} else {
 				new_processors.push_front (_polarity);
+				polarity_pos = new_processors.begin();
 			}
+		}
+
+		if (_triggerbox && (_disk_io_point != DiskIOCustom)) {
+			/* BEFORE polarity */
+			new_processors.insert (polarity_pos, _triggerbox);
+			dump_processors ("tbn", new_processors);
+			
 		}
 	}
 
