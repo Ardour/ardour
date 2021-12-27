@@ -65,7 +65,7 @@ namespace ARDOUR {
 	}
 }
 
-const Trigger* Trigger::MagicClearPointerValue = (Trigger*) 0xfeedface;
+Trigger * const Trigger::MagicClearPointerValue = (Trigger*) 0xfeedface;
 
 Trigger::Trigger (uint32_t n, TriggerBox& b)
 	: _box (b)
@@ -305,7 +305,7 @@ Trigger::set_region (boost::shared_ptr<Region> r, bool use_thread)
 
 	if (!r) {
 		/* clear operation, no need to talk to the worker thread */
-		set_pending ((Trigger*) Trigger::MagicClearPointerValue);
+		set_pending (Trigger::MagicClearPointerValue);
 		request_stop ();
 	} else if (use_thread) {
 		/* load data, do analysis in another thread */

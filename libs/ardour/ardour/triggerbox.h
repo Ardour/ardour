@@ -240,7 +240,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_pending (Trigger*);
 	Trigger* swap_pending (Trigger*);
 
-	static const Trigger* MagicClearPointerValue;
+	static Trigger * const MagicClearPointerValue;
 
 	virtual SegmentDescriptor get_segment_descriptor () const = 0;
 
