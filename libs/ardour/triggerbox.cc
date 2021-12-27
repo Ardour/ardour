@@ -374,6 +374,8 @@ Trigger::clear_region ()
 	/* Called from RT process thread */
 
 	_region.reset ();
+
+	set_name("");
 }
 
 void
