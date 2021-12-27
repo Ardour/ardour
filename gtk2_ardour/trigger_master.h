@@ -20,6 +20,8 @@
 #ifndef _gtk_ardour_trigger_master_h_
 #define _gtk_ardour_ardour_trigger_master_h_
 
+#include <gtkmm/colorselection.h>
+
 #include "pbd/properties.h"
 
 #include "ardour/triggerbox.h"
@@ -83,6 +85,7 @@ private:
 	void context_menu ();
 
 	void clear_all_triggers();
+	void set_all_colors();
 	void set_all_follow_action (ARDOUR::Trigger::FollowAction);
 	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle);
 	void set_all_quantization (Temporal::BBT_Offset const&);
@@ -98,6 +101,7 @@ private:
 	Loopster* _loopster;
 	PassThru* _passthru;
 
+	Gtk::ColorSelectionDialog _color_dialog;
 	Gtk::Menu* _context_menu;
 	bool       _ignore_menu_action;
 

@@ -21,6 +21,7 @@
 #define _gtk_ardour_cuebox_ui_h_
 
 #include <gtkmm/window.h>
+#include <gtkmm/colorselection.h>
 
 #include "pbd/properties.h"
 
@@ -88,11 +89,13 @@ private:
 	void get_slots (TriggerList &triggerlist, uint64_t idx);
 
 	void clear_all_triggers(uint64_t idx);
+	void set_all_colors (uint64_t idx);
 	void set_all_follow_action (ARDOUR::Trigger::FollowAction, uint64_t idx);
 	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle, uint64_t idx);
 	void set_all_quantization (Temporal::BBT_Offset const&, uint64_t idx);
 
 	Gtk::Menu* _context_menu;
+	Gtk::ColorSelectionDialog _color_dialog;
 
 	static Gtkmm2ext::Bindings* bindings;
 

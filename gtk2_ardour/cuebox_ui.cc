@@ -318,6 +318,8 @@ CueBoxUI::context_menu (uint64_t idx)
 	items.push_back (MenuElem (_("Set All Launch Styles..."), *launch_menu));
 	items.push_back (MenuElem (_("Set All Quantizations..."), *quant_menu));
 	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Set All Colors..."), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_colors), idx)));
+	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Clear All..."), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::clear_all_triggers), idx)));
 
 	_context_menu->popup (1, gtk_get_current_event_time ());
@@ -346,6 +348,35 @@ CueBoxUI::clear_all_triggers (uint64_t idx)
 	for (TriggerList::iterator t = tl.begin(); t != tl.end(); ++t) {
 		(*t)->set_region(boost::shared_ptr<Region>());
 	}
+}
+
+void
+CueBoxUI::set_all_colors (uint64_t idx)
+{
+	_color_dialog.get_colorsel()->set_has_opacity_control (false);
+	_color_dialog.get_colorsel()->set_has_palette (true);
+	_color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_ACCEPT));
+	_color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
+
+	Gdk::Color c = ARDOUR_UI_UTILS::gdk_color_from_rgba(0xBEBEBEFF);
+
+	_color_dialog.get_colorsel()->set_previous_color (c);
+	_color_dialog.get_colorsel()->set_current_color (c);
+
+	switch (_color_dialog.run()) {
+		case Gtk::RESPONSE_ACCEPT: {
+			c = _color_dialog.get_colorsel()->get_current_color();
+			color_t ct = ARDOUR_UI_UTILS::gdk_color_to_rgba(c);
+			TriggerList tl;
+			get_slots(tl, idx);
+			for (TriggerList::iterator t = tl.begin(); t != tl.end(); ++t) {
+				(*t)->set_color(ct);
+			}
+		} break;
+		default:
+			break;
+	}
+	_color_dialog.hide ();
 }
 
 void
