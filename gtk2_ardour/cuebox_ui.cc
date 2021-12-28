@@ -74,8 +74,8 @@ CueEntry::CueEntry (Item* item, uint64_t cue_index)
 	play_shape->show ();
 
 	name_button = new ArdourCanvas::Rectangle (this);
-	name_button->set_outline (true);
-	name_button->set_fill (false);
+	name_button->set_outline (false);
+	name_button->set_fill (true);
 	name_button->name = ("slot_selector_button");
 	name_button->show ();
 
@@ -105,6 +105,7 @@ CueEntry::event_handler (GdkEvent* ev)
 				name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 				play_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 				play_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+				name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 				set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			}
 			break;
@@ -213,7 +214,6 @@ CueEntry::set_default_colors ()
 	play_button->set_outline_color (UIConfiguration::instance ().color ("theme:bg"));
 	name_button->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
 	name_text->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
-	name_button->set_outline_color (UIConfiguration::instance ().color ("theme:bg"));
 
 	if ((_cue_idx / 2) % 2 == 0) {
 		set_fill_color (HSV (fill_color ()).darker (0.15).color ());
@@ -221,7 +221,6 @@ CueEntry::set_default_colors ()
 		play_button->set_outline_color (HSV (fill_color ()).darker (0.15).color ());
 		name_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
 		name_text->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
-		name_button->set_outline_color (HSV (fill_color ()).darker (0.15).color ());
 	}
 
 	name_text->set_color (UIConfiguration::instance ().color ("neutral:foreground"));
