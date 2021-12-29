@@ -1870,13 +1870,6 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 }
 
 void
-TriggerBox::scene_bang (uint32_t n)
-{
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("scene bang on %1 for %2\n", n));
-	_pending_scene = n;
-}
-
-void
 TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
 {
 	/* This is called from our worker thread */
@@ -1933,6 +1926,13 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 			TriggerSwapped (slot); /* EMIT SIGNAL */
 		}
 	}
+}
+
+void
+TriggerBox::scene_bang (uint32_t n)
+{
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("scene bang on %1 for %2\n", n));
+	_pending_scene = n;
 }
 
 void
