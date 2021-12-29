@@ -1690,12 +1690,11 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		/* Now we have to convert to a position within the buffer we
 		 * are writing to.
 		 *
-		 * There's a slight complication here, because both
-		 * start_sample and dest_offset reflect an offset from the
-		 * start of the buffer that our parent (TriggerBox) processor
-		 * is handling in its own run() method. start_sample may have
-		 * been adjusted to reflect a previous Trigger's processing
-		 * during this run cycle, and so has dest_offset.
+		 * start_sample has already been been adjusted to reflect a
+		 * previous Trigger's processing during this run cycle, so we
+		 * can ignore dest_offset (which is necessary for audio
+		 * triggers where the data is a continuous data stream, but not
+		 * required here).
 		 */
 
 		samplepos_t buffer_samples = timeline_samples - start_sample;
