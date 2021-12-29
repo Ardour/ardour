@@ -431,6 +431,7 @@ Trigger::shutdown ()
 {
 	_state = Stopped;
 	_gain = 1.0;
+	pop_cue_properties ();
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
 	PropertyChanged (ARDOUR::Properties::running);
 }
@@ -2432,7 +2433,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	/* STEP EIGHT: if there is no active slot, see if there any queued up
 	 */
 
-	if (!_currently_playing) {
+	if (!_currently_playing && !allstop) {
 		if ((_currently_playing = get_next_trigger()) != 0) {
 			maybe_swap_pending (_currently_playing->index());
 			_currently_playing->startup ();
