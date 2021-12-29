@@ -1642,6 +1642,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 	const Temporal::Beats region_start = region_start_time.beats();
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	samplepos_t last_event_samples = max_samplepos;
+	const pframes_t orig_nframes = nframes;
 
 	/* see if we're going to start or stop or retrigger in this run() call */
 	pframes_t extra_offset = maybe_compute_next_transition (start_sample, start_beats, end_beats, dest_offset, passthru);
@@ -1730,53 +1731,59 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 			nframes = (last_event_samples - start_sample);
 		} else {
 			/* all frames covered */
+			nframes = 0;
 		}
 	} else {
 		/* we didn't reach the end of the MIDI data, ergo we covered
 		   the entire timespan passed into us.
 		*/
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 did not reach end, nframes left at %2\n", index(), nframes));
+		nframes = 0;
 	}
 
-	if ((_state == Stopped) && !_explicitly_stopped && (_launch_style == Trigger::Gate || _launch_style == Trigger::Repeat)) {
+	if (_state == Stopped || _state == Stopping) {
 
-		jump_start ();
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopped, repeat/gate ret\n", index()));
+		if ((_state == Stopped) && !_explicitly_stopped && (_launch_style == Trigger::Gate || _launch_style == Trigger::Repeat)) {
 
-	} else {
-
-		if ((_launch_style != Repeat) && (_launch_style != Gate) && (_loop_cnt == _follow_count)) {
-
-			/* have played the specified number of times, we're done */
-
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
-			shutdown ();
-
-
-		} else if (_state == Stopping) {
-
-			/* did not reach the end of the data. Presumably
-			 * another trigger was explicitly queued, and we
-			 * stopped
-			 */
-
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not at end, but ow stopped\n", index()));
-			shutdown ();
+			jump_start ();
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopped, repeat/gate ret\n", index()));
 
 		} else {
 
-			/* reached the end, but we haven't done that enough
-			 * times yet for a follow action/stop to take
-			 * effect. Time to get played again.
-			 */
+			if ((_launch_style != Repeat) && (_launch_style != Gate) && (_loop_cnt == _follow_count)) {
 
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
-			_state = WaitingToStart;
-			retrigger ();
-			PropertyChanged (ARDOUR::Properties::running);
+				/* have played the specified number of times, we're done */
+
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
+				shutdown ();
+
+
+			} else if (_state == Stopping) {
+
+				/* did not reach the end of the data. Presumably
+				 * another trigger was explicitly queued, and we
+				 * stopped
+				 */
+
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not at end, but ow stopped\n", index()));
+				shutdown ();
+
+			} else {
+
+				/* reached the end, but we haven't done that enough
+				 * times yet for a follow action/stop to take
+				 * effect. Time to get played again.
+				 */
+
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
+				_state = WaitingToStart;
+				retrigger ();
+				PropertyChanged (ARDOUR::Properties::running);
+			}
 		}
 	}
 
-	return nframes;
+	return orig_nframes - nframes;
 }
 
 /**************/
@@ -2647,6 +2654,8 @@ TriggerBox::determine_next_trigger (uint32_t current)
 	/* first switch: deal with the "special" cases where we either do
 	 * nothing or just repeat the current trigger
 	 */
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("choose next trigger using follow action %1 given prob %2 and rnd %3\n", enum_2_string (fa), all_triggers[current]->follow_action_probability(), r));
 
 	switch (fa) {
 
