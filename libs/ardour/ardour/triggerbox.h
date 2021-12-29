@@ -565,6 +565,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void clear_scene_bang ();
 	static void scene_bang (uint32_t scene_number);
 	static void scene_unbang (uint32_t scene_number);
+	static int32_t active_scene ();
 
 	static void init ();
 

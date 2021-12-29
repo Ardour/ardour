@@ -1939,6 +1939,12 @@ TriggerBox::scene_unbang (uint32_t n)
 {
 }
 
+int32_t
+TriggerBox::active_scene ()
+{
+	return _active_scene.load ();
+}
+
 void
 TriggerBox::maybe_find_scene_bang ()
 {
