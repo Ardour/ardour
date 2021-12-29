@@ -1698,7 +1698,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		 * during this run cycle, and so has dest_offset.
 		 */
 
-		samplepos_t buffer_samples = timeline_samples - start_sample + dest_offset;
+		samplepos_t buffer_samples = timeline_samples - start_sample;
 		last_event_samples = timeline_samples;
 
 		const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, next_event.size(), const_cast<uint8_t*>(next_event.buffer()), false);
