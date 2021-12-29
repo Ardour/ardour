@@ -22,6 +22,7 @@
 #include "ardour/triggerbox.h"
 #include "widgets/ardour_button.h"
 #include "widgets/slider_controller.h"
+#include "widgets/frame.h"
 
 namespace ArdourWidgets {
 	class ArdourButton;
@@ -47,9 +48,31 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	static std::string launch_style_to_string (ARDOUR::Trigger::LaunchStyle);
 
   private:
+
+	/* name editing */
+	bool namebox_button_press (GdkEventButton*);
+	bool start_rename ();
+	void end_rename (bool);
+	void entry_changed ();
+	void entry_activated ();
+	bool entry_focus_in (GdkEventFocus*);
+	bool entry_focus_out (GdkEventFocus*);
+	bool entry_key_press (GdkEventKey*);
+	bool entry_key_release (GdkEventKey*);
+	bool entry_button_press (GdkEventButton*);
+	void disconnect_entry_signals ();
+
 	ARDOUR::TriggerReference tref;
 	ARDOUR::TriggerPtr trigger() const;
 
+	std::list<sigc::connection> _entry_connections;
+	bool                        _renaming;
+	Gtk::Entry                  _nameentry;
+	Gtk::Label                  _name_label;
+	Gtk::EventBox               _namebox;
+	ArdourWidgets::Frame        _name_frame;
+
+	sigc::connection            _file_chooser_connection;
 	ArdourWidgets::ArdourButton        _follow_action_button;
 
 	Gtk::Adjustment                    _velocity_adjustment;

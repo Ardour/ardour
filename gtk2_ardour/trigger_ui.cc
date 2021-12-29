@@ -43,6 +43,7 @@
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
+#include "keyboard.h"
 #include "trigger_ui.h"
 #include "public_editor.h"
 #include "ui_config.h"
@@ -64,7 +65,8 @@ static std::vector<std::string> launch_strings;
 static std::string longest_launch;
 
 TriggerUI::TriggerUI ()
-	: _follow_action_button (ArdourButton::led_default_elements)
+	: _renaming (false)
+	, _follow_action_button (ArdourButton::led_default_elements)
 	, _velocity_adjustment(1.,0.,1.0,0.01,0.1)
 	, _velocity_slider (&_velocity_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _follow_probability_adjustment(0,0,100,2,5)
@@ -180,32 +182,53 @@ TriggerUI::TriggerUI ()
 
 #undef quantize_item
 
+	_name_label.set_name (X_("TrackNameEditor"));
+	_name_label.set_alignment (0.0, 0.5);
+	_name_label.set_padding (4, 0);
+	_name_label.set_width_chars (12);
+
+	_namebox.add (_name_label);
+	_namebox.add_events (Gdk::BUTTON_PRESS_MASK);
+	_namebox.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerUI::namebox_button_press));
+
+	_name_frame.add (_namebox);
+	_name_frame.set_edge_color (0x000000ff);
+	_name_frame.set_border_width (0);
+	_name_frame.set_padding (0);
+
+	_load_button.set_name("FollowAction");
+	_load_button.set_text (_("Load"));
+	_load_button.signal_clicked.connect (sigc::mem_fun (*this, (&TriggerUI::choose_sample)));
+
 	int row=0;
 	Gtk::Label *label;
 
+	attach(_name_frame,       0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(_load_button,      2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
 	label = manage(new Gtk::Label(_("Velocity Sense:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_velocity_slider,       1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_velocity_slider,       1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Launch Style:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_launch_style_button,   1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_launch_style_button,   1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Launch Quantize:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,            0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_quantize_button,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_quantize_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Legato Mode:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_legato_button,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_legato_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
-	attach(_follow_action_button,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_follow_action_button,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Follow Count:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
 	align->add (_follow_count_spinner);
-	attach(*align,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
+	attach(*align,          1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
 
 	Gtkmm2ext::set_size_request_to_display_given_text (_left_probability_label, "100% Left ", 12, 0);
 	_left_probability_label.set_alignment(0.0, 0.5);
@@ -218,14 +241,166 @@ TriggerUI::TriggerUI ()
 	prob_table->attach(_left_probability_label,    0, 1, 1, 2, Gtk::FILL,             Gtk::SHRINK );
 	prob_table->attach(_right_probability_label,   1, 2, 1, 2, Gtk::FILL,             Gtk::SHRINK );
 
-	attach( *prob_table,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach( *prob_table,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 	attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
-	attach(_follow_right,  1, 2, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
+	attach(_follow_right,  1, 3, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
 }
 
 TriggerUI::~TriggerUI ()
 {
 }
+
+
+/* ****************************************************************************/
+
+bool
+TriggerUI::namebox_button_press (GdkEventButton* ev)
+{
+	if (_renaming) {
+		return false;
+	}
+	if ((ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (ev)) {
+		start_rename ();
+		return true;
+	}
+	return false;
+}
+
+bool
+TriggerUI::start_rename ()
+{
+	if (_renaming) {
+		return false;
+	}
+	assert (_entry_connections.empty ());
+
+	GtkRequisition r (_name_label.size_request ());
+	_nameentry.set_size_request (r.width, -1);
+	_nameentry.set_text (trigger()->name ());
+	_namebox.remove ();
+	_namebox.add (_nameentry);
+	_nameentry.show ();
+	_nameentry.grab_focus ();
+	_nameentry.add_modal_grab ();
+	_renaming = true;
+
+	_entry_connections.push_back (_nameentry.signal_changed().connect (sigc::mem_fun (*this, &TriggerUI::entry_changed)));
+	_entry_connections.push_back (_nameentry.signal_activate().connect (sigc::mem_fun (*this, &TriggerUI::entry_activated)));
+	_entry_connections.push_back (_nameentry.signal_key_press_event().connect (sigc::mem_fun (*this, &TriggerUI::entry_key_press), false));
+	_entry_connections.push_back (_nameentry.signal_key_release_event().connect (sigc::mem_fun (*this, &TriggerUI::entry_key_release), false));
+	_entry_connections.push_back (_nameentry.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerUI::entry_button_press), false));
+	_entry_connections.push_back (_nameentry.signal_focus_in_event ().connect (sigc::mem_fun (*this, &TriggerUI::entry_focus_in)));
+	_entry_connections.push_back (_nameentry.signal_focus_out_event ().connect (sigc::mem_fun (*this, &TriggerUI::entry_focus_out)));
+	return true;
+}
+
+void
+TriggerUI::end_rename (bool ignore_change)
+{
+	if (!_renaming) {
+		return;
+	}
+	std::string result = _nameentry.get_text ();
+	disconnect_entry_signals ();
+	_nameentry.remove_modal_grab ();
+	_namebox.remove ();
+	_namebox.add (_name_label);
+	_name_label.show ();
+	_renaming = false;
+
+	if (ignore_change) {
+		return;
+	}
+
+	trigger()->set_name (result);
+}
+
+void
+TriggerUI::entry_changed ()
+{
+}
+
+void
+TriggerUI::entry_activated ()
+{
+	end_rename (false);
+}
+
+bool
+TriggerUI::entry_focus_in (GdkEventFocus*)
+{
+	return false;
+}
+
+bool
+TriggerUI::entry_focus_out (GdkEventFocus*)
+{
+	end_rename (false);
+	return false;
+}
+
+bool
+TriggerUI::entry_button_press (GdkEventButton* ev)
+{
+	if (Keyboard::is_context_menu_event (ev)) {
+		return false;
+	} else if (Gtkmm2ext::event_inside_widget_window (_namebox, (GdkEvent*) ev)) {
+		return false;
+	} else {
+		end_rename (false);
+		return false;
+	}
+}
+
+bool
+TriggerUI::entry_key_press (GdkEventKey* ev)
+{
+	switch (ev->keyval) {
+		case GDK_Escape:
+			/* fallthrough */
+		case GDK_ISO_Left_Tab:
+			/* fallthrough */
+		case GDK_Tab:
+			/* fallthrough */
+			return true;
+		default:
+			break;
+	}
+	return false;
+}
+
+bool
+TriggerUI::entry_key_release (GdkEventKey* ev)
+{
+	switch (ev->keyval) {
+		case GDK_Escape:
+			end_rename (true);
+			return true;
+		case GDK_ISO_Left_Tab:
+			end_rename (false);
+//			EditNextName (this, false); /* TODO */
+			return true;
+		case GDK_Tab:
+			end_rename (false);
+//			EditNextName (this, true); /* TODO */
+			return true;
+		default:
+			break;
+	}
+	return false;
+}
+
+void
+TriggerUI::disconnect_entry_signals ()
+{
+	for (std::list<sigc::connection>::iterator i = _entry_connections.begin(); i != _entry_connections.end(); ++i) {
+		i->disconnect ();
+	}
+	_entry_connections.clear ();
+}
+
+/* ****************************************************************************/
+
 
 TriggerPtr
 TriggerUI::trigger() const
@@ -240,6 +415,7 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 
 	PropertyChange pc;
 
+	pc.add (Properties::name);
 	pc.add (Properties::use_follow);
 	pc.add (Properties::legato);
 	pc.add (Properties::quantization);
@@ -407,6 +583,9 @@ TriggerUI::follow_action_to_string (Trigger::FollowAction fa)
 void
 TriggerUI::trigger_changed (PropertyChange pc)
 {
+	if (pc.contains (Properties::name)) {
+		_name_label.set_text (trigger()->name());
+	}
 	if (pc.contains (Properties::quantization)) {
 		BBT_Offset bbo (trigger()->quantization());
 		_quantize_button.set_active (quantize_length_to_string (bbo));
