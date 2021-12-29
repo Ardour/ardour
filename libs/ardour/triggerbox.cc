@@ -113,6 +113,24 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 }
 
 void
+Trigger::push_cue_properties ()
+{
+	/* must be called from RT process context */
+	pre_cue_properties = CueModifiedProperties (_follow_action0, _launch_style);
+}
+
+void
+Trigger::pop_cue_properties ()
+{
+	/* must be called from RT process context */
+	if (pre_cue_properties.valid()) {
+		_follow_action0 = pre_cue_properties.follow_action;
+		_launch_style = pre_cue_properties.launch_style;
+		pre_cue_properties.invalidate ();
+	}
+}
+
+void
 Trigger::request_trigger_delete (Trigger* t)
 {
 	TriggerBox::worker->request_delete_trigger (t);

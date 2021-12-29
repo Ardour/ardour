@@ -287,6 +287,24 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<bool>                 _isolated;
 	PBD::Property<color_t>              _color;
 
+	struct CueModifiedProperties {
+		FollowAction follow_action;
+		LaunchStyle  launch_style;
+
+		CueModifiedProperties() : follow_action (NextTrigger), launch_style (Toggle), _valid (false) {}
+		CueModifiedProperties (FollowAction fa, LaunchStyle ls) : follow_action (fa), launch_style (ls), _valid (true) {}
+
+		bool valid() const { return _valid; }
+		void invalidate() { _valid = false; }
+
+        private:
+		bool         _valid;
+	};
+
+	CueModifiedProperties pre_cue_properties;
+	void push_cue_properties ();
+	void pop_cue_properties ();
+
 	/* computed from data */
 
 	double                    _barcnt; /* our estimate of the number of bars in the region */
