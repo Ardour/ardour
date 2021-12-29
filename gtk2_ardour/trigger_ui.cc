@@ -25,6 +25,13 @@
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 
+#include "pbd/basename.h"
+#include "pbd/file_utils.h"
+#include "pbd/pathexpand.h"
+#include "pbd/search_path.h"
+
+#include "ardour/directory_names.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/region.h"
 #include "ardour/triggerbox.h"
 
@@ -250,6 +257,72 @@ TriggerUI::~TriggerUI ()
 {
 }
 
+void
+TriggerUI::choose_sample ()
+{
+	if (!_file_chooser) {
+		_file_chooser = new Gtk::FileChooserDialog (_("Select sample"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+		_file_chooser->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+		_file_chooser->add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+
+		/* for newbies, start in the bundled media folder */
+		Searchpath spath (ardour_data_search_path ());
+		spath.add_subdirectory_to_paths (media_dir_name);
+		for (auto const& f : spath) {
+			if (Glib::file_test (f, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
+				_file_chooser->set_current_folder (f);
+			}
+		}
+
+		/* TODO: add various shortcut paths to user's media folders
+
+		_file_chooser->add_shortcut_folder_uri(Glib::build_filename (user_config_directory (), media_dir_name);
+
+		Searchpath cpath (Config->get_sample_lib_path ());
+		for (auto const& f : cpath) {
+			_file_chooser->add_shortcut_folder_uri (f);
+		}
+		*/
+
+#ifdef __APPLE__
+		try {
+			/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
+			_file_chooser->add_shortcut_folder_uri("file:///Library/GarageBand/Apple Loops");
+			_file_chooser->add_shortcut_folder_uri("file:///Library/Audio/Apple Loops");
+			_file_chooser->add_shortcut_folder_uri("file:///Library/Application Support/GarageBand/Instrument Library/Sampler/Sampler Files");
+		}
+		catch (Glib::Error & e) {
+			std::cerr << "sfdb.add_shortcut_folder() threw Glib::Error " << e.what() << std::endl;
+		}
+#endif
+
+	}
+
+	_file_chooser_connection.disconnect ();
+	_file_chooser_connection = _file_chooser->signal_response ().connect (sigc::mem_fun (*this, &TriggerUI::sample_chosen));
+
+	_file_chooser->present ();
+}
+
+void
+TriggerUI::sample_chosen (int response)
+{
+	_file_chooser->hide ();
+
+	switch (response) {
+		case Gtk::RESPONSE_OK:
+			break;
+		default:
+			return;
+	}
+
+	std::list<std::string> paths = _file_chooser->get_filenames ();
+
+	for (std::list<std::string>::iterator s = paths.begin (); s != paths.end (); ++s) {
+		TriggerBox *box = (TriggerBox *) &tref.trigger()->box();
+		box->set_from_path (trigger()->index(), *s);
+	}
+}
 
 /* ****************************************************************************/
 

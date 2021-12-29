@@ -27,6 +27,13 @@
 #include "pbd/convert.h"
 #include "pbd/unwind.h"
 
+#include "pbd/basename.h"
+#include "pbd/file_utils.h"
+#include "pbd/pathexpand.h"
+#include "pbd/search_path.h"
+
+#include "ardour/directory_names.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/region.h"
 #include "ardour/triggerbox.h"
 
@@ -1047,6 +1054,15 @@ TriggerBoxUI::choose_sample (uint64_t n)
 		_file_chooser->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 		_file_chooser->add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
 		_file_chooser->set_select_multiple (true);
+
+		/* for newbies, start in the bundled media folder */
+		Searchpath spath (ardour_data_search_path ());
+		spath.add_subdirectory_to_paths (media_dir_name);
+		for (auto const& f : spath) {
+			if (Glib::file_test (f, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
+				_file_chooser->set_current_folder (f);
+			}
+		}
 	}
 
 	_file_chooser_connection.disconnect ();

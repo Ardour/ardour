@@ -48,6 +48,8 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	static std::string launch_style_to_string (ARDOUR::Trigger::LaunchStyle);
 
   private:
+	void choose_sample ();
+	void sample_chosen (int r);
 
 	/* name editing */
 	bool namebox_button_press (GdkEventButton*);
@@ -73,6 +75,9 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	ArdourWidgets::Frame        _name_frame;
 
 	sigc::connection            _file_chooser_connection;
+	Gtk::FileChooserDialog*     _file_chooser;
+	ArdourWidgets::ArdourButton _load_button;
+
 	ArdourWidgets::ArdourButton        _follow_action_button;
 
 	Gtk::Adjustment                    _velocity_adjustment;
