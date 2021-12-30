@@ -48,6 +48,7 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	static std::string launch_style_to_string (ARDOUR::Trigger::LaunchStyle);
 
   private:
+	void choose_color ();
 	void choose_sample ();
 	void sample_chosen (int r);
 
@@ -64,6 +65,8 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	bool entry_button_press (GdkEventButton*);
 	void disconnect_entry_signals ();
 
+	Gtk::ColorSelectionDialog _color_dialog;
+
 	ARDOUR::TriggerReference tref;
 	ARDOUR::TriggerPtr trigger() const;
 
@@ -73,6 +76,9 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	Gtk::Label                  _name_label;
 	Gtk::EventBox               _namebox;
 	ArdourWidgets::Frame        _name_frame;
+
+	Glib::RefPtr<Gtk::SizeGroup> _follow_size_group;
+	ArdourWidgets::ArdourButton _color_button;
 
 	sigc::connection            _file_chooser_connection;
 	Gtk::FileChooserDialog*     _file_chooser;

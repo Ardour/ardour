@@ -35,6 +35,7 @@
 #include "ardour/region.h"
 #include "ardour/triggerbox.h"
 
+#include "gtkmm/sizegroup.h"
 #include "gtkmm2ext/utils.h"
 
 #include "audio_region_properties_box.h"
@@ -73,6 +74,7 @@ static std::string longest_launch;
 
 TriggerUI::TriggerUI ()
 	: _renaming (false)
+	, _color_button (ArdourButton::Element (ArdourButton::just_led_default_elements | ArdourButton::ColorBox))
 	, _follow_action_button (ArdourButton::led_default_elements)
 	, _velocity_adjustment(1.,0.,1.0,0.01,0.1)
 	, _velocity_slider (&_velocity_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
@@ -207,11 +209,22 @@ TriggerUI::TriggerUI ()
 	_load_button.set_text (_("Load"));
 	_load_button.signal_clicked.connect (sigc::mem_fun (*this, (&TriggerUI::choose_sample)));
 
+	_color_button.set_name("FollowAction");
+	_color_button.signal_clicked.connect (sigc::mem_fun (*this, (&TriggerUI::choose_color)));
+
+	_follow_size_group  = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
+	_follow_size_group->add_widget(_name_frame);
+	_follow_size_group->add_widget(_load_button);
+	_follow_size_group->add_widget(_color_button);
+	_follow_size_group->add_widget(_velocity_slider);
+	_follow_size_group->add_widget(_follow_count_spinner);
+
 	int row=0;
 	Gtk::Label *label;
 
 	attach(_name_frame,       0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_load_button,      2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_load_button,      2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(_color_button,     3, 4, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Velocity Sense:")));  label->set_alignment(1.0, 0.5);
 	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
@@ -255,6 +268,32 @@ TriggerUI::TriggerUI ()
 
 TriggerUI::~TriggerUI ()
 {
+}
+
+void
+TriggerUI::choose_color ()
+{
+	_color_dialog.get_colorsel()->set_has_opacity_control (false);
+	_color_dialog.get_colorsel()->set_has_palette (true);
+	_color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_ACCEPT));
+	_color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
+
+	Gdk::Color c = ARDOUR_UI_UTILS::gdk_color_from_rgba(trigger()->color());
+
+	_color_dialog.get_colorsel()->set_previous_color (c);
+	_color_dialog.get_colorsel()->set_current_color (c);
+
+	switch (_color_dialog.run()) {
+		case Gtk::RESPONSE_ACCEPT: {
+			c = _color_dialog.get_colorsel()->get_current_color();
+			color_t ct = ARDOUR_UI_UTILS::gdk_color_to_rgba(c);
+			trigger()->set_color(ct);
+		} break;
+		default:
+			break;
+	}
+
+	_color_dialog.hide ();
 }
 
 void
@@ -489,6 +528,7 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 	PropertyChange pc;
 
 	pc.add (Properties::name);
+	pc.add (Properties::color);
 	pc.add (Properties::use_follow);
 	pc.add (Properties::legato);
 	pc.add (Properties::quantization);
@@ -658,6 +698,9 @@ TriggerUI::trigger_changed (PropertyChange pc)
 {
 	if (pc.contains (Properties::name)) {
 		_name_label.set_text (trigger()->name());
+	}
+	if (pc.contains (Properties::color)) {
+		_color_button.set_custom_led_color (trigger()->color());
 	}
 	if (pc.contains (Properties::quantization)) {
 		BBT_Offset bbo (trigger()->quantization());
