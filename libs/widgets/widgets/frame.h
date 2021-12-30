@@ -22,6 +22,7 @@
 #include <boost/optional.hpp>
 #include <gtkmm/bin.h>
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/cairo_theme.h"
 #include "widgets/visibility.h"
 

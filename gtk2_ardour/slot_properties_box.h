@@ -24,21 +24,91 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/label.h>
+#include "gtkmm/sizegroup.h"
 #include <gtkmm/table.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
 #include "widgets/ardour_button.h"
+#include "widgets/slider_controller.h"
+#include "widgets/ardour_dropdown.h"
 
 #include "gtkmm2ext/cairo_packer.h"
+
+#include "trigger_ui.h"
 
 namespace ARDOUR {
 	class Session;
 	class Location;
 }
 
-class SlotPropertyWidget;
+namespace ArdourWidgets {
+	class ArdourButton;
+	class HSliderController;
+}
+
+class TriggerPropertiesBox;
+class RegionPropertiesBox;
+class RegionOperationsBox;
+class ClipEditorBox;
+
+class SlotPropertyTable : public TriggerUI, public Gtk::Table
+{
+  public:
+	SlotPropertyTable ();
+	~SlotPropertyTable ();
+
+	Glib::RefPtr<Gtk::SizeGroup> _follow_size_group;
+	ArdourWidgets::ArdourButton _color_button;
+
+	ArdourWidgets::ArdourButton _load_button;
+
+	ArdourWidgets::ArdourButton        _follow_action_button;
+
+	Gtk::Adjustment                    _velocity_adjustment;
+	ArdourWidgets::HSliderController   _velocity_slider;
+
+	Gtk::Label                    _left_probability_label;
+	Gtk::Label                    _right_probability_label;
+	Gtk::Adjustment                    _follow_probability_adjustment;
+	ArdourWidgets::HSliderController   _follow_probability_slider;
+
+	Gtk::Adjustment                    _follow_count_adjustment;
+	Gtk::SpinButton                    _follow_count_spinner;
+
+	ArdourWidgets::ArdourDropdown      _follow_left;
+	ArdourWidgets::ArdourDropdown      _follow_right;
+
+	ArdourWidgets::ArdourButton        _legato_button;
+
+	ArdourWidgets::ArdourDropdown      _quantize_button;
+
+	ArdourWidgets::ArdourDropdown      _launch_style_button;
+
+	void set_quantize (Temporal::BBT_Offset);
+	void set_launch_style (ARDOUR::Trigger::LaunchStyle);
+	void set_follow_action (ARDOUR::Trigger::FollowAction, uint64_t);
+
+	void on_trigger_changed (PBD::PropertyChange);
+
+	bool follow_action_button_event (GdkEvent*);
+	bool legato_button_event (GdkEvent*);
+	void follow_count_event ();
+
+	void probability_adjusted ();
+	void velocity_adjusted ();
+};
+
+class SlotPropertyWidget : public Gtk::VBox
+{
+  public:
+	SlotPropertyWidget ();
+	void set_trigger (ARDOUR::TriggerReference tr) const { ui->set_trigger(tr); }
+
+  private:
+	SlotPropertyTable* ui;
+};
 
 class SlotPropertiesBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
@@ -58,4 +128,18 @@ private:
 	SlotPropertyWidget* _triggerwidget;
 };
 
+/* XXX probably for testing only */
+
+class SlotPropertyWindow : public Gtk::Window
+{
+    public:
+	SlotPropertyWindow (ARDOUR::TriggerReference);
+
+	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
+
+	TriggerPropertiesBox *_trig_box;
+	RegionOperationsBox *_ops_box;
+	ClipEditorBox *_trim_box;
+};
 #endif /* __multi_region_properties_box_h__ */

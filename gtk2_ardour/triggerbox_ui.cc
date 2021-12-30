@@ -22,6 +22,7 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
 #include <gtkmm/stock.h>
+#include "gtkmm/sizegroup.h"
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -53,6 +54,7 @@
 #include "timers.h"
 #include "trigger_ui.h"
 #include "triggerbox_ui.h"
+#include "slot_properties_box.h"
 #include "ui_config.h"
 #include "utils.h"
 
