@@ -1324,6 +1324,7 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <MidiTrack, Track> ("MidiTrack")
 		.addFunction ("write_immediate_event", &MidiTrack::write_immediate_event)
+		.addFunction ("set_input_active", &MidiTrack::set_input_active)
 		.endClass ()
 
 		.beginWSPtrClass <AudioReadable> ("Readable")
