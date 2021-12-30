@@ -269,6 +269,8 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	const float corner_radius = boxy ? 0 : std::max(2.f, _corner_radius * UIConfigurationBase::instance().get_ui_scale());
 
+	const float scale = UIConfigurationBase::instance().get_ui_scale();
+
 	if (_update_colors) {
 		set_colors ();
 	}
@@ -510,7 +512,38 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	}
 
 	//Indicator LED
-	if (_elements & Indicator) {
+	if ((_elements & ColorBox)==ColorBox) {
+		cairo_save (cr);
+
+		/* move to the center of the indicator/led */
+		if (_elements & (Text | VectorIcon | IconRenderCallback)) {
+			int led_xoff = ceil((char_pixel_width() + _diameter) * .5);
+			if (_led_left) {
+				cairo_translate (cr, led_xoff, get_height() * .5);
+			} else {
+				cairo_translate (cr, get_width() - led_xoff, get_height() * .5);
+			}
+		} else {
+			cairo_translate (cr, get_width() * .5, get_height() * .5);
+		}
+
+		float size = ceil(std::min (get_width(), get_height())/2 - 3*scale);
+
+		//black border
+		cairo_set_source_rgb (cr, 0, 0, 0);
+		rounded_function (cr, -size, -size, size*2, size*2, corner_radius - 1*scale);
+		cairo_fill(cr);
+
+		//inset by 1 px
+		size = size - 1*scale;
+
+		//led color
+		Gtkmm2ext::set_source_rgba (cr, led_color);
+		rounded_function (cr, -size, -size, size*2, size*2, corner_radius - 2*scale);
+		cairo_fill(cr);
+
+		cairo_restore (cr);
+	} else if (_elements & Indicator) {
 		cairo_save (cr);
 
 		/* move to the center of the indicator/led */

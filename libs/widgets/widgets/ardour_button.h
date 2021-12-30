@@ -43,7 +43,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 		Body = 0x2,
 		Text = 0x4,
 		Indicator = 0x8,
-		unused = 0x10,
+		ColorBox = 0x18,  //also sets Indicator
 		Menu = 0x20,
 		Inactive = 0x40, // no _action is defined AND state is not used
 		VectorIcon = 0x80,
