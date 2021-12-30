@@ -106,11 +106,6 @@ public:
 	void start_updating ();
 	void stop_updating ();
 
-	static Glib::RefPtr<Gtk::ActionGroup> trigger_actions;
-	static void                           setup_actions_and_bindings ();
-
-	static void trigger_scene (int32_t);
-
 	void _size_allocate (ArdourCanvas::Rect const&);
 
 private:
@@ -124,10 +119,6 @@ private:
 	Gtk::Menu*              _follow_context_menu;
 	Gtk::Menu*              _context_menu;
 	bool                    _ignore_menu_action;
-
-	static Gtkmm2ext::Bindings* bindings;
-	static void                 load_bindings ();
-	static void                 register_actions ();
 
 	bool play_button_event (GdkEvent*, uint64_t);
 	bool name_button_event (GdkEvent*, uint64_t);

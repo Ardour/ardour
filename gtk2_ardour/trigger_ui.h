@@ -21,6 +21,9 @@
 
 #include "gtkmm/colorselection.h"
 
+#include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/bindings.h"
+
 #include "ardour/triggerbox.h"
 #include "widgets/ardour_button.h"
 #include "widgets/slider_controller.h"
@@ -48,8 +51,17 @@ public:
 	static std::vector<std::string> launch_strings;
 	static std::string              longest_launch;
 
+	static void                     setup_actions_and_bindings ();
+
 private:
 	void trigger_changed (PBD::PropertyChange);  //calls on_trigger_changed to subclasses
+
+	/* Actions for Triggers: accessed via ardour_ui and shortcuts and lua */
+	static Glib::RefPtr<Gtk::ActionGroup> trigger_actions;
+	static void trigger_scene (int32_t);
+	static Gtkmm2ext::Bindings* bindings;
+	static void                 load_bindings ();
+	static void                 register_actions ();
 
 protected:
 	void choose_color ();

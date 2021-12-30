@@ -56,7 +56,7 @@
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
 #include "time_info_box.h"
-#include "triggerbox_ui.h"
+#include "trigger_ui.h"
 #include "step_entry.h"
 #include "opts.h"
 #include "utils.h"
@@ -92,7 +92,7 @@ ARDOUR_UI::we_have_dependents ()
 	 */
 	ProcessorBox::register_actions ();
 	StepEntry::setup_actions_and_bindings ();
-	TriggerBoxUI::setup_actions_and_bindings ();
+	TriggerUI::setup_actions_and_bindings ();
 	ClipEditorBox::init ();
 
 	/* Global, editor, mixer, processor box actions are defined now. Link

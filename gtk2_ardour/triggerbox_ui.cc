@@ -41,7 +41,6 @@
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 
-#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/utils.h"
 
@@ -482,9 +481,6 @@ TriggerEntry::ui_parameter_changed (std::string const& p)
 	}
 }
 
-Gtkmm2ext::Bindings*           TriggerBoxUI::bindings = 0;
-Glib::RefPtr<Gtk::ActionGroup> TriggerBoxUI::trigger_actions;
-
 TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	: Rectangle (parent)
 	, _triggerbox (tb)
@@ -532,38 +528,6 @@ TriggerBoxUI::selection_changed ()
 	for (auto& slot : _slots) {
 		slot->selection_change ();
 	}
-}
-
-void
-TriggerBoxUI::setup_actions_and_bindings ()
-{
-	load_bindings ();
-	register_actions ();
-}
-
-void
-TriggerBoxUI::load_bindings ()
-{
-	bindings = Bindings::get_bindings (X_("Triggers"));
-}
-
-void
-TriggerBoxUI::register_actions ()
-{
-	trigger_actions = ActionManager::create_action_group (bindings, X_("Triggers"));
-
-	for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
-		const std::string action_name  = string_compose ("trigger-scene-%1", n);
-		const std::string display_name = string_compose (_("Scene %1"), n);
-
-		ActionManager::register_toggle_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::ptr_fun (TriggerBoxUI::trigger_scene), n));
-	}
-}
-
-void
-TriggerBoxUI::trigger_scene (int32_t n)
-{
-	TriggerBox::scene_bang (n);
 }
 
 void

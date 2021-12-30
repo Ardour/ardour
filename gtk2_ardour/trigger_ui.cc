@@ -58,6 +58,9 @@ std::string              TriggerUI::longest_quantize;
 std::vector<std::string> TriggerUI::launch_strings;
 std::string              TriggerUI::longest_launch;
 
+Gtkmm2ext::Bindings*           TriggerUI::bindings = 0;
+Glib::RefPtr<Gtk::ActionGroup> TriggerUI::trigger_actions;
+
 TriggerUI::TriggerUI ()
 	: _renaming (false)
 {
@@ -94,6 +97,38 @@ TriggerUI::TriggerUI ()
 
 TriggerUI::~TriggerUI()
 {
+}
+
+void
+TriggerUI::setup_actions_and_bindings ()
+{
+	load_bindings ();
+	register_actions ();
+}
+
+void
+TriggerUI::load_bindings ()
+{
+	bindings = Bindings::get_bindings (X_("Triggers"));
+}
+
+void
+TriggerUI::register_actions ()
+{
+	trigger_actions = ActionManager::create_action_group (bindings, X_("Triggers"));
+
+	for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
+		const std::string action_name  = string_compose ("trigger-scene-%1", n);
+		const std::string display_name = string_compose (_("Scene %1"), n);
+
+		ActionManager::register_toggle_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::ptr_fun (TriggerUI::trigger_scene), n));
+	}
+}
+
+void
+TriggerUI::trigger_scene (int32_t n)
+{
+	TriggerBox::scene_bang (n);
 }
 
 void
