@@ -457,7 +457,7 @@ void
 TriggerMaster::set_all_follow_action (Trigger::FollowAction fa)
 {
 	_triggerbox->set_all_follow_action(fa);
-	_triggerbox->set_all_probability(100);
+	_triggerbox->set_all_probability(0);
 }
 
 void
