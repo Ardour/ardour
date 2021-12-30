@@ -91,6 +91,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _stretchable (Properties::stretchable, true)
 	, _isolated (Properties::isolated, false)
 	, _color (Properties::color, 0xBEBEBEFF)
+	, cue_launched (false)
 	, _barcnt (0.)
 	, _apparent_tempo (0.)
 	, expected_end_sample (0)
@@ -422,6 +423,13 @@ Trigger::startup()
 	_gain = _pending_gain;
 	_loop_cnt = 0;
 	_explicitly_stopped = false;
+
+	if (cue_launched) {
+		push_cue_properties ();
+		_launch_style = Toggle;
+		cue_launched = false;
+	}
+
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 starts up\n", name()));
 	PropertyChanged (ARDOUR::Properties::running);
 }
@@ -522,6 +530,8 @@ Trigger::process_state_requests ()
 		case Stopped:
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 stopped => %3\n", index(), enum_2_string (Stopped), enum_2_string (WaitingToStart)));
 			_box.queue_explict (index());
+			cue_launched = (_box.active_scene() >= 0);
+			std::cerr << index() << " aka " << name() << " launched via cue ? " << cue_launched << std::endl;
 			break;
 
 		case WaitingToStart:

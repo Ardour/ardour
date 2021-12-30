@@ -302,6 +302,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	};
 
 	CueModifiedProperties pre_cue_properties;
+	bool cue_launched;
 	void push_cue_properties ();
 	void pop_cue_properties ();
 
