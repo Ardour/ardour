@@ -90,7 +90,7 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 	void set_launch_style (ARDOUR::Trigger::LaunchStyle);
 	void set_follow_action (ARDOUR::Trigger::FollowAction, uint64_t);
 
-	void on_trigger_changed (PBD::PropertyChange);
+	void on_trigger_changed (PBD::PropertyChange const& );
 
 	bool follow_action_button_event (GdkEvent*);
 	bool legato_button_event (GdkEvent*);

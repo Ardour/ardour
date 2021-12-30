@@ -347,7 +347,7 @@ SlotPropertyTable::set_follow_action (Trigger::FollowAction fa, uint64_t idx)
 }
 
 void
-SlotPropertyTable::on_trigger_changed (PropertyChange pc)
+SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 {
 	if (pc.contains (Properties::name)) {
 		_name_label.set_text (trigger()->name());

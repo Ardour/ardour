@@ -716,7 +716,7 @@ Editor::Editor ()
 	VBox* summary_arrows_right = manage (new VBox);
 	summary_arrows_right->pack_start (*summary_arrow_right);
 
-	Frame* summary_frame = manage (new Frame);
+	Gtk::Frame* summary_frame = manage (new Gtk::Frame);
 	summary_frame->set_shadow_type (Gtk::SHADOW_ETCHED_IN);
 
 	summary_frame->add (*_summary);

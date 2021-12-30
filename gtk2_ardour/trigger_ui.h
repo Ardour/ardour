@@ -29,6 +29,12 @@
 #include "widgets/slider_controller.h"
 #include "widgets/frame.h"
 
+namespace Gtk
+{
+	class FileChooserDialog;
+	class Menu;
+}
+
 class TriggerUI
 {
 public:
@@ -37,7 +43,7 @@ public:
 
 	void set_trigger (ARDOUR::TriggerReference);
 
-	virtual void on_trigger_changed (PBD::PropertyChange) = 0;
+	virtual void on_trigger_changed (PBD::PropertyChange const& ) = 0;
 
 	static std::string follow_action_to_string (ARDOUR::Trigger::FollowAction);
 	static ARDOUR::Trigger::FollowAction  string_to_follow_action (std::string const &);
@@ -53,8 +59,11 @@ public:
 
 	static void                     setup_actions_and_bindings ();
 
+	ARDOUR::TriggerReference trigger_reference() const { return tref; }
+	ARDOUR::TriggerPtr       trigger() const;
+
 private:
-	void trigger_changed (PBD::PropertyChange);  //calls on_trigger_changed to subclasses
+	void trigger_changed (PBD::PropertyChange const& );  //calls on_trigger_changed to subclasses
 
 	/* Actions for Triggers: accessed via ardour_ui and shortcuts and lua */
 	static Glib::RefPtr<Gtk::ActionGroup> trigger_actions;
@@ -92,9 +101,11 @@ protected:
 	sigc::connection            _file_chooser_connection;
 	Gtk::FileChooserDialog*     _file_chooser;
 
+	void                  trigger_swap (uint32_t);
+	PBD::ScopedConnection trigger_swap_connection;
+
 	ARDOUR::TriggerReference tref;
-	ARDOUR::TriggerPtr trigger() const;
-	PBD::ScopedConnectionList trigger_connections;
+	PBD::ScopedConnection trigger_connections;
 };
 
 

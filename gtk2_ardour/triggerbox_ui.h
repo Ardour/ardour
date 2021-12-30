@@ -30,11 +30,7 @@
 
 #include "fitted_canvas_widget.h"
 
-namespace Gtk
-{
-	class FileChooserDialog;
-	class Menu;
-}
+#include "trigger_ui.h"
 
 namespace Temporal
 {
@@ -47,17 +43,11 @@ namespace ArdourCanvas
 	class Polygon;
 }
 
-class TriggerEntry : public ArdourCanvas::Rectangle
+class TriggerEntry : public ArdourCanvas::Rectangle, public TriggerUI
 {
 public:
 	TriggerEntry (ArdourCanvas::Item* item, ARDOUR::TriggerReference rf);
 	~TriggerEntry ();
-
-	boost::shared_ptr<ARDOUR::Trigger> trigger () const
-	{
-		return tref.trigger();
-	}
-	ARDOUR::TriggerReference trigger_reference() const { return tref; }
 
 	ArdourCanvas::Rectangle* play_button;
 	ArdourCanvas::Rectangle* name_button;
@@ -72,20 +62,15 @@ public:
 	void _size_allocate (ArdourCanvas::Rect const&);
 	void maybe_update ();
 
+	void on_trigger_changed (PBD::PropertyChange const& change);
+
 	void selection_change ();
 
 	void set_default_colors ();
 
 private:
-	ARDOUR::TriggerReference tref;
 	double           _poly_size;
 	double           _poly_margin;
-
-	PBD::ScopedConnection trigger_prop_connection;
-	PBD::ScopedConnection trigger_swap_connection;
-	void                  prop_change (PBD::PropertyChange const& change);
-
-	void                  trigger_swap (uint32_t);
 
 	PBD::ScopedConnection owner_prop_connection;
 	void                  owner_prop_change (PBD::PropertyChange const&);

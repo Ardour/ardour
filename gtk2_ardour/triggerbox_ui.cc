@@ -66,18 +66,17 @@ using namespace PBD;
 
 TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	: ArdourCanvas::Rectangle (item)
-	, tref (tr)
 {
 	set_layout_sensitive (true); // why???
 
-	name = string_compose ("trigger %1", tref.slot);
+	name = string_compose ("trigger %1", tr.slot);
 
 	set_outline (false);
 
 	play_button = new ArdourCanvas::Rectangle (this);
 	play_button->set_outline (false);
 	play_button->set_fill (true);
-	play_button->name = string_compose ("playbutton %1", tref.slot);
+	play_button->name = string_compose ("playbutton %1", tr.slot);
 	play_button->show ();
 
 	follow_button = new ArdourCanvas::Rectangle (this);
@@ -96,36 +95,20 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	name_text->set_ignore_events (false);
 	name_text->show ();
 
+	/* this will trigger a call to on_trigger_changed() */
+	set_trigger(tr);
+
 	/* watch for change in theme */
 	UIConfiguration::instance ().ParameterChanged.connect (sigc::mem_fun (*this, &TriggerEntry::ui_parameter_changed));
 	set_default_colors ();
 
-	trigger()->PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context ());
-	tref.box->TriggerSwapped.connect (trigger_swap_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::trigger_swap, this, _1), gui_context ());
 	dynamic_cast<Stripable*> (tref.box->owner ())->presentation_info ().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
-
-	PropertyChange changed;
-	changed.add (ARDOUR::Properties::name);
-	changed.add (ARDOUR::Properties::running);
-	prop_change (changed);
 
 	selection_change ();
 }
 
 TriggerEntry::~TriggerEntry ()
 {
-}
-
-void
-TriggerEntry::trigger_swap (uint32_t n)
-{
-	if (n != tref.slot) {
-		/* some other slot in the same box got swapped. we don't care */
-		return;
-	}
-	trigger_prop_connection.disconnect ();
-	trigger()->PropertyChanged.connect (trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::prop_change, this, _1), gui_context ());
-	prop_change (Properties::name);
 }
 
 void
@@ -420,7 +403,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 }
 
 void
-TriggerEntry::prop_change (PropertyChange const& change)
+TriggerEntry::on_trigger_changed (PropertyChange const& change)
 {
 	if (change.contains (ARDOUR::Properties::name)) {
 		if (trigger()->region ()) {
@@ -1174,6 +1157,8 @@ TriggerBoxUI::rapid_update ()
 		slot->maybe_update ();
 	}
 }
+
+/* ********************************************** */
 
 TriggerBoxWidget::TriggerBoxWidget (float w, float h)
 	: FittedCanvasWidget (w, h)
