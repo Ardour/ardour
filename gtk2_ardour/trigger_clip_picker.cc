@@ -59,6 +59,16 @@ TriggerClipPicker::TriggerClipPicker ()
 	, _seeking (false)
 {
 	/* Setup Dropdown / File Browser */
+#ifdef __APPLE__
+	try {
+		/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
+		_fcd.add_shortcut_folder_uri ("file:///Library/GarageBand/Apple Loops");
+		_fcd.add_shortcut_folder_uri ("file:///Library/Audio/Apple Loops");
+		_fcd.add_shortcut_folder_uri ("file:///Library/Application Support/GarageBand/Instrument Library/Sampler/Sampler Files");
+	}
+	catch (Glib::Error & e) {}
+#endif
+
 	Gtkmm2ext::add_volume_shortcuts (_fcd);
 
 	_fcd.add_button (Stock::CANCEL, RESPONSE_CANCEL);
