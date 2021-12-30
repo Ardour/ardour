@@ -138,7 +138,9 @@ TriggerEntry::selection_change ()
 void
 TriggerEntry::maybe_update ()
 {
-	// what here?
+	if (trigger()->active()) {
+		redraw();
+	}
 }
 
 void
