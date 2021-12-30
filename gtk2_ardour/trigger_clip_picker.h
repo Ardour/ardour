@@ -19,6 +19,7 @@
 #ifndef __gtk_ardour_trigger_clip_picker_h__
 #define __gtk_ardour_trigger_clip_picker_h__
 
+#include <set>
 #include <string>
 
 #include <gtkmm/box.h>
@@ -89,6 +90,8 @@ private:
 	Gtk::HScale                  _seek_slider;
 
 	std::string _current_path;
+
+	std::set<std::string> _root_paths;
 
 	bool                      _seeking;
 	PBD::ScopedConnectionList _auditioner_connections;

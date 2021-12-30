@@ -158,6 +158,7 @@ void
 TriggerClipPicker::refill_dropdown ()
 {
 	_dir.clear_items ();
+	_root_paths.clear ();
 
 	/* Bundled Content */
 	Searchpath spath (ardour_data_search_path ());
@@ -189,11 +190,61 @@ TriggerClipPicker::refill_dropdown ()
 	_dir.AddMenuElem (Menu_Helpers::MenuElem (_("Other..."), sigc::mem_fun (*this, &TriggerClipPicker::open_dir)));
 }
 
+static bool
+is_subfolder (std::string const& parent, std::string dir)
+{
+	assert (Glib::file_test (dir, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS));
+	assert (Glib::file_test (parent, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS));
+
+	if (parent.size () > dir.size ()) {
+		return false;
+	}
+	if (parent == dir) {
+		return false;
+	}
+	if (dir == Glib::path_get_dirname (dir)) {
+		/* dir must be root */
+		return false;
+	}
+	while (parent.size () < dir.size ()) {
+		/* step up, compare with parent */
+		dir = Glib::path_get_dirname (dir);
+		if (parent == dir) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void
 TriggerClipPicker::maybe_add_dir (std::string const& dir)
 {
 	if (Glib::file_test (dir, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
 		_dir.AddMenuElem (Gtkmm2ext::MenuElemNoMnemonic (Glib::path_get_basename (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
+
+		bool insert = true;
+		auto it = _root_paths.begin ();
+		while (it != _root_paths.end ()) {
+			bool erase = false;
+			if (it->size () > dir.size()) {
+				if (is_subfolder (dir, *it)) {
+					erase = true;
+				}
+			} else if (is_subfolder (*it, dir)) {
+				insert = false;
+				break;
+			}
+			if (erase) {
+				auto it2 = it;
+				++it;
+				_root_paths.erase (it2);
+			} else {
+				++it;
+			}
+		}
+		if (insert) {
+			_root_paths.insert (dir);
+		}
 	}
 }
 
@@ -375,8 +426,7 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 	std::sort (files.begin (), files.end ());
 
 	if (!pc) {
-		std::string const parent = Glib::path_get_dirname (_current_path);
-		if (parent != _current_path) {
+		if (_root_paths.find (_current_path) == _root_paths.end ()) {
 			TreeModel::Row row = *(_model->append ());
 			row[_columns.name] = "..";
 			row[_columns.path] = Glib::path_get_dirname (_current_path);
