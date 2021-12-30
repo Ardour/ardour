@@ -231,7 +231,7 @@ TriggerMaster::~TriggerMaster ()
 }
 
 void
-TriggerMaster::set_trigger (boost::shared_ptr<ARDOUR::TriggerBox> t)
+TriggerMaster::set_triggerbox (boost::shared_ptr<ARDOUR::TriggerBox> t)
 {
 	_triggerbox = t;
 }

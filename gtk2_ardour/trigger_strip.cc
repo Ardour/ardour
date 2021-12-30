@@ -190,7 +190,7 @@ TriggerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
 
-	_tmaster->set_trigger(_route->triggerbox ());
+	_tmaster->set_triggerbox(_route->triggerbox ());
 
 	_processor_box.set_route (rt);
 

@@ -67,7 +67,7 @@ public:
 	TriggerMaster (ArdourCanvas::Item* canvas);
 	~TriggerMaster ();
 
-	void set_trigger (boost::shared_ptr<ARDOUR::TriggerBox>);
+	void set_triggerbox (boost::shared_ptr<ARDOUR::TriggerBox>);
 
 	void render (ArdourCanvas::Rect const&, Cairo::RefPtr<Cairo::Context>) const;
 

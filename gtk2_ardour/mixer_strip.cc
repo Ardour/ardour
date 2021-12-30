@@ -2135,7 +2135,7 @@ MixerStrip::hide_master_spacer (bool yn)
 void
 MixerStrip::set_trigger_display (boost::shared_ptr<TriggerBox> tb)
 {
-	_tmaster->set_trigger (tb);
+	_tmaster->set_triggerbox (tb);
 	trigger_display.set_triggerbox (tb.get());
 }
 
