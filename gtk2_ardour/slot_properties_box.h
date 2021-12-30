@@ -38,7 +38,7 @@ namespace ARDOUR {
 	class Location;
 }
 
-class TriggerWidget;
+class SlotPropertyWidget;
 
 class SlotPropertiesBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
@@ -55,7 +55,7 @@ private:
 
 	Gtk::Label _header_label;
 
-	TriggerWidget* _triggerwidget;
+	SlotPropertyWidget* _triggerwidget;
 };
 
 #endif /* __multi_region_properties_box_h__ */

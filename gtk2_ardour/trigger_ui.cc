@@ -74,199 +74,10 @@ static std::string longest_launch;
 
 TriggerUI::TriggerUI ()
 	: _renaming (false)
-	, _color_button (ArdourButton::Element (ArdourButton::just_led_default_elements | ArdourButton::ColorBox))
-	, _follow_action_button (ArdourButton::led_default_elements)
-	, _velocity_adjustment(1.,0.,1.0,0.01,0.1)
-	, _velocity_slider (&_velocity_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
-	, _follow_probability_adjustment(0,0,100,2,5)
-	, _follow_probability_slider (&_follow_probability_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
-	, _follow_count_adjustment (1, 1, 128, 1, 4)
-	, _follow_count_spinner (_follow_count_adjustment)
-	, _legato_button (ArdourButton::led_default_elements)
-
 {
-	using namespace Gtk::Menu_Helpers;
-
-	if (follow_strings.empty()) {
-		follow_strings.push_back (follow_action_to_string (Trigger::None));
-		follow_strings.push_back (follow_action_to_string (Trigger::Stop));
-		follow_strings.push_back (follow_action_to_string (Trigger::Again));
-		follow_strings.push_back (follow_action_to_string (Trigger::QueuedTrigger));
-		follow_strings.push_back (follow_action_to_string (Trigger::NextTrigger));
-		follow_strings.push_back (follow_action_to_string (Trigger::PrevTrigger));
-		follow_strings.push_back (follow_action_to_string (Trigger::FirstTrigger));
-		follow_strings.push_back (follow_action_to_string (Trigger::LastTrigger));
-		follow_strings.push_back (follow_action_to_string (Trigger::AnyTrigger));
-		follow_strings.push_back (follow_action_to_string (Trigger::OtherTrigger));
-
-		for (std::vector<std::string>::const_iterator i = follow_strings.begin(); i != follow_strings.end(); ++i) {
-			if (i->length() > longest_follow.length()) {
-				longest_follow = *i;
-			}
-		}
-
-		launch_strings.push_back (launch_style_to_string (Trigger::OneShot));
-		launch_strings.push_back (launch_style_to_string (Trigger::Gate));
-		launch_strings.push_back (launch_style_to_string (Trigger::Toggle));
-		launch_strings.push_back (launch_style_to_string (Trigger::Repeat));
-
-		for (std::vector<std::string>::const_iterator i = launch_strings.begin(); i != launch_strings.end(); ++i) {
-			if (i->length() > longest_launch.length()) {
-				longest_launch = *i;
-			}
-		}
-	}
-
-	set_spacings (2);
-	set_homogeneous (false);
-
-	_follow_action_button.set_name("FollowAction");
-	_follow_action_button.set_text (_("Follow Action"));
-	_follow_action_button.signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::follow_action_button_event)));
-
-	_follow_count_spinner.set_can_focus(false);
-	_follow_count_spinner.signal_changed ().connect (sigc::mem_fun (*this, &TriggerUI::follow_count_event));
-
-	_velocity_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &TriggerUI::velocity_adjusted));
-
-	_velocity_slider.set_name("FollowAction");
-
-	_follow_probability_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &TriggerUI::probability_adjusted));
-
-	_follow_probability_slider.set_name("FollowAction");
-
-	_follow_left.set_name("FollowAction");
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),         Trigger::None, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),         Trigger::Stop, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),        Trigger::Again, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),  Trigger::PrevTrigger, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),  Trigger::NextTrigger, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),   Trigger::AnyTrigger, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action), Trigger::OtherTrigger, 0)));
-	_follow_left.set_sizing_text (longest_follow);
-
-	_follow_right.set_name("FollowAction");
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),         Trigger::None, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),         Trigger::Stop, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),        Trigger::Again, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),  Trigger::PrevTrigger, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),  Trigger::NextTrigger, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action),   Trigger::AnyTrigger, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action), Trigger::OtherTrigger, 1)));
-	_follow_right.set_sizing_text (longest_follow);
-
-	_launch_style_button.set_name("FollowAction");
-	_launch_style_button.set_sizing_text (longest_launch);
-	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::OneShot)));
-	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Gate)));
-	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Toggle)));
-	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Repeat)));
-
-	_launch_style_button.set_name("FollowAction");
-	_legato_button.set_text (_("Legato"));
-	_legato_button.signal_event().connect (sigc::mem_fun (*this, (&TriggerUI::legato_button_event)));
-
-#define quantize_item(b) _quantize_button.AddMenuElem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_quantize), b)));
-
-#if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IMPLEMENTED
-	quantize_item (BBT_Offset (0, 0, 0));
-#endif
-	quantize_item (BBT_Offset (1, 0, 0));
-	quantize_item (BBT_Offset (0, 4, 0));
-	quantize_item (BBT_Offset (0, 2, 0));
-	quantize_item (BBT_Offset (0, 1, 0));
-	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/2));
-	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/4));
-	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/8));
-	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/16));
-	quantize_item (BBT_Offset (-1, 0, 0));
-
-	for (std::vector<std::string>::const_iterator i = quantize_strings.begin(); i != quantize_strings.end(); ++i) {
-		if (i->length() > longest_quantize.length()) {
-			longest_quantize = *i;
-		}
-	}
-	_quantize_button.set_sizing_text (longest_quantize);
-	_quantize_button.set_name("FollowAction");
-
-#undef quantize_item
-
-	_name_label.set_name (X_("TrackNameEditor"));
-	_name_label.set_alignment (0.0, 0.5);
-	_name_label.set_padding (4, 0);
-	_name_label.set_width_chars (12);
-
-	_namebox.add (_name_label);
-	_namebox.add_events (Gdk::BUTTON_PRESS_MASK);
-	_namebox.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerUI::namebox_button_press));
-
-	_name_frame.add (_namebox);
-	_name_frame.set_edge_color (0x000000ff);
-	_name_frame.set_border_width (0);
-	_name_frame.set_padding (0);
-
-	_load_button.set_name("FollowAction");
-	_load_button.set_text (_("Load"));
-	_load_button.signal_clicked.connect (sigc::mem_fun (*this, (&TriggerUI::choose_sample)));
-
-	_color_button.set_name("FollowAction");
-	_color_button.signal_clicked.connect (sigc::mem_fun (*this, (&TriggerUI::choose_color)));
-
-	_follow_size_group  = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
-	_follow_size_group->add_widget(_name_frame);
-	_follow_size_group->add_widget(_load_button);
-	_follow_size_group->add_widget(_color_button);
-	_follow_size_group->add_widget(_velocity_slider);
-	_follow_size_group->add_widget(_follow_count_spinner);
-
-	int row=0;
-	Gtk::Label *label;
-
-	attach(_name_frame,       0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_load_button,      2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_color_button,     3, 4, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-
-	label = manage(new Gtk::Label(_("Velocity Sense:")));  label->set_alignment(1.0, 0.5);
-	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_velocity_slider,       1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-
-	label = manage(new Gtk::Label(_("Launch Style:")));  label->set_alignment(1.0, 0.5);
-	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_launch_style_button,   1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-
-	label = manage(new Gtk::Label(_("Launch Quantize:")));  label->set_alignment(1.0, 0.5);
-	attach(*label,            0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_quantize_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-
-	label = manage(new Gtk::Label(_("Legato Mode:")));  label->set_alignment(1.0, 0.5);
-	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_legato_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-
-	attach(_follow_action_button,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-
-	label = manage(new Gtk::Label(_("Follow Count:")));  label->set_alignment(1.0, 0.5);
-	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
-	align->add (_follow_count_spinner);
-	attach(*align,          1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
-
-	Gtkmm2ext::set_size_request_to_display_given_text (_left_probability_label, "100% Left ", 12, 0);
-	_left_probability_label.set_alignment(0.0, 0.5);
-	Gtkmm2ext::set_size_request_to_display_given_text (_right_probability_label, "100% Right", 12, 0);
-	_right_probability_label.set_alignment(1.0, 0.5);
-
-	Gtk::Table *prob_table = manage(new Gtk::Table());
-	prob_table->set_spacings(2);
-	prob_table->attach(_follow_probability_slider, 0, 2, 0, 1, Gtk::FILL, Gtk::SHRINK );
-	prob_table->attach(_left_probability_label,    0, 1, 1, 2, Gtk::FILL,             Gtk::SHRINK );
-	prob_table->attach(_right_probability_label,   1, 2, 1, 2, Gtk::FILL,             Gtk::SHRINK );
-
-	attach( *prob_table,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-	attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
-	attach(_follow_right,  1, 3, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
 }
 
-TriggerUI::~TriggerUI ()
+TriggerUI::~TriggerUI()
 {
 }
 
@@ -338,7 +149,7 @@ TriggerUI::choose_sample ()
 	}
 
 	_file_chooser_connection.disconnect ();
-	_file_chooser_connection = _file_chooser->signal_response ().connect (sigc::mem_fun (*this, &TriggerUI::sample_chosen));
+	_file_chooser_connection = _file_chooser->signal_response ().connect (sigc::mem_fun (*this, &SlotPropertyTable::sample_chosen));
 
 	_file_chooser->present ();
 }
@@ -396,13 +207,13 @@ TriggerUI::start_rename ()
 	_nameentry.add_modal_grab ();
 	_renaming = true;
 
-	_entry_connections.push_back (_nameentry.signal_changed().connect (sigc::mem_fun (*this, &TriggerUI::entry_changed)));
-	_entry_connections.push_back (_nameentry.signal_activate().connect (sigc::mem_fun (*this, &TriggerUI::entry_activated)));
-	_entry_connections.push_back (_nameentry.signal_key_press_event().connect (sigc::mem_fun (*this, &TriggerUI::entry_key_press), false));
-	_entry_connections.push_back (_nameentry.signal_key_release_event().connect (sigc::mem_fun (*this, &TriggerUI::entry_key_release), false));
-	_entry_connections.push_back (_nameentry.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerUI::entry_button_press), false));
-	_entry_connections.push_back (_nameentry.signal_focus_in_event ().connect (sigc::mem_fun (*this, &TriggerUI::entry_focus_in)));
-	_entry_connections.push_back (_nameentry.signal_focus_out_event ().connect (sigc::mem_fun (*this, &TriggerUI::entry_focus_out)));
+	_entry_connections.push_back (_nameentry.signal_changed().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_changed)));
+	_entry_connections.push_back (_nameentry.signal_activate().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_activated)));
+	_entry_connections.push_back (_nameentry.signal_key_press_event().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_key_press), false));
+	_entry_connections.push_back (_nameentry.signal_key_release_event().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_key_release), false));
+	_entry_connections.push_back (_nameentry.signal_button_press_event ().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_button_press), false));
+	_entry_connections.push_back (_nameentry.signal_focus_in_event ().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_focus_in)));
+	_entry_connections.push_back (_nameentry.signal_focus_out_event ().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_focus_out)));
 	return true;
 }
 
@@ -514,109 +325,6 @@ TriggerUI::disconnect_entry_signals ()
 /* ****************************************************************************/
 
 
-TriggerPtr
-TriggerUI::trigger() const
-{
-	return tref.trigger();
-}
-
-void
-TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
-{
-	tref = tr;
-
-	PropertyChange pc;
-
-	pc.add (Properties::name);
-	pc.add (Properties::color);
-	pc.add (Properties::use_follow);
-	pc.add (Properties::legato);
-	pc.add (Properties::quantization);
-	pc.add (Properties::launch_style);
-	pc.add (Properties::follow_count);
-	pc.add (Properties::follow_action0);
-	pc.add (Properties::follow_action1);
-	pc.add (Properties::velocity_effect);
-	pc.add (Properties::follow_action_probability);
-
-	trigger_changed (pc);
-
-	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
-}
-
-
-void
-TriggerUI::set_quantize (BBT_Offset bbo)
-{
-#if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IMPLEMENTED
-	if (bbo == BBT_Offset (0, 0, 0)) {
-		/* use grid */
-		bbo = BBT_Offset (1, 2, 3); /* XXX get grid from editor */
-	}
-#endif
-
-	trigger()->set_quantization (bbo);
-}
-
-void
-TriggerUI::follow_count_event ()
-{
-	trigger()->set_follow_count ((int) _follow_count_adjustment.get_value());
-}
-
-void
-TriggerUI::velocity_adjusted ()
-{
-	trigger()->set_midi_velocity_effect (_velocity_adjustment.get_value());
-}
-
-void
-TriggerUI::probability_adjusted ()
-{
-	trigger()->set_follow_action_probability ((int) _follow_probability_adjustment.get_value());
-}
-
-bool
-TriggerUI::follow_action_button_event (GdkEvent* ev)
-{
-	switch (ev->type) {
-	case GDK_BUTTON_PRESS:
-		trigger()->set_use_follow (!trigger()->use_follow());
-		return true;
-
-	default:
-		break;
-	}
-
-	return false;
-}
-
-bool
-TriggerUI::legato_button_event (GdkEvent* ev)
-{
-	switch (ev->type) {
-	case GDK_BUTTON_PRESS:
-		trigger()->set_legato (!trigger()->legato());
-		return true;
-
-	default:
-		break;
-	}
-
-	return false;
-}
-
-void
-TriggerUI::set_launch_style (Trigger::LaunchStyle ls)
-{
-	trigger()->set_launch_style (ls);
-}
-
-void
-TriggerUI::set_follow_action (Trigger::FollowAction fa, uint64_t idx)
-{
-	trigger()->set_follow_action (fa, idx);
-}
 
 std::string
 TriggerUI::launch_style_to_string (Trigger::LaunchStyle ls)
@@ -693,8 +401,317 @@ TriggerUI::follow_action_to_string (Trigger::FollowAction fa)
 	return std::string();
 }
 
+TriggerPtr
+TriggerUI::trigger() const
+{
+	return tref.trigger();
+}
+
 void
-TriggerUI::trigger_changed (PropertyChange pc)
+TriggerUI::trigger_changed (PropertyChange what)
+{
+	on_trigger_changed(what);
+}
+
+
+void
+TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
+{
+	tref = tr;
+
+	PropertyChange pc;
+
+	pc.add (Properties::name);
+	pc.add (Properties::color);
+	pc.add (Properties::use_follow);
+	pc.add (Properties::legato);
+	pc.add (Properties::quantization);
+	pc.add (Properties::launch_style);
+	pc.add (Properties::follow_count);
+	pc.add (Properties::follow_action0);
+	pc.add (Properties::follow_action1);
+	pc.add (Properties::velocity_effect);
+	pc.add (Properties::follow_action_probability);
+
+	trigger_changed (pc);
+
+	trigger()->PropertyChanged.connect (trigger_connections, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
+}
+
+/* **************************************** */
+
+SlotPropertyTable::SlotPropertyTable ()
+	: _color_button (ArdourButton::Element (ArdourButton::just_led_default_elements | ArdourButton::ColorBox))
+	, _follow_action_button (ArdourButton::led_default_elements)
+	, _velocity_adjustment(1.,0.,1.0,0.01,0.1)
+	, _velocity_slider (&_velocity_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
+	, _follow_probability_adjustment(0,0,100,2,5)
+	, _follow_probability_slider (&_follow_probability_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
+	, _follow_count_adjustment (1, 1, 128, 1, 4)
+	, _follow_count_spinner (_follow_count_adjustment)
+	, _legato_button (ArdourButton::led_default_elements)
+
+{
+	using namespace Gtk::Menu_Helpers;
+
+	if (follow_strings.empty()) {
+		follow_strings.push_back (follow_action_to_string (Trigger::None));
+		follow_strings.push_back (follow_action_to_string (Trigger::Stop));
+		follow_strings.push_back (follow_action_to_string (Trigger::Again));
+		follow_strings.push_back (follow_action_to_string (Trigger::QueuedTrigger));
+		follow_strings.push_back (follow_action_to_string (Trigger::NextTrigger));
+		follow_strings.push_back (follow_action_to_string (Trigger::PrevTrigger));
+		follow_strings.push_back (follow_action_to_string (Trigger::FirstTrigger));
+		follow_strings.push_back (follow_action_to_string (Trigger::LastTrigger));
+		follow_strings.push_back (follow_action_to_string (Trigger::AnyTrigger));
+		follow_strings.push_back (follow_action_to_string (Trigger::OtherTrigger));
+
+		for (std::vector<std::string>::const_iterator i = follow_strings.begin(); i != follow_strings.end(); ++i) {
+			if (i->length() > longest_follow.length()) {
+				longest_follow = *i;
+			}
+		}
+
+		launch_strings.push_back (launch_style_to_string (Trigger::OneShot));
+		launch_strings.push_back (launch_style_to_string (Trigger::Gate));
+		launch_strings.push_back (launch_style_to_string (Trigger::Toggle));
+		launch_strings.push_back (launch_style_to_string (Trigger::Repeat));
+
+		for (std::vector<std::string>::const_iterator i = launch_strings.begin(); i != launch_strings.end(); ++i) {
+			if (i->length() > longest_launch.length()) {
+				longest_launch = *i;
+			}
+		}
+	}
+
+	set_spacings (2);
+	set_homogeneous (false);
+
+	_follow_action_button.set_name("FollowAction");
+	_follow_action_button.set_text (_("Follow Action"));
+	_follow_action_button.signal_event().connect (sigc::mem_fun (*this, (&SlotPropertyTable::follow_action_button_event)));
+
+	_follow_count_spinner.set_can_focus(false);
+	_follow_count_spinner.signal_changed ().connect (sigc::mem_fun (*this, &SlotPropertyTable::follow_count_event));
+
+	_velocity_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &SlotPropertyTable::velocity_adjusted));
+
+	_velocity_slider.set_name("FollowAction");
+
+	_follow_probability_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &SlotPropertyTable::probability_adjusted));
+
+	_follow_probability_slider.set_name("FollowAction");
+
+	_follow_left.set_name("FollowAction");
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),         Trigger::None, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),         Trigger::Stop, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),        Trigger::Again, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::PrevTrigger, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::NextTrigger, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),   Trigger::AnyTrigger, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), Trigger::OtherTrigger, 0)));
+	_follow_left.set_sizing_text (longest_follow);
+
+	_follow_right.set_name("FollowAction");
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),         Trigger::None, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),         Trigger::Stop, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),        Trigger::Again, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::PrevTrigger, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::NextTrigger, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),   Trigger::AnyTrigger, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), Trigger::OtherTrigger, 1)));
+	_follow_right.set_sizing_text (longest_follow);
+
+	_launch_style_button.set_name("FollowAction");
+	_launch_style_button.set_sizing_text (longest_launch);
+	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::OneShot)));
+	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Gate)));
+	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Toggle)));
+	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Repeat)));
+
+	_launch_style_button.set_name("FollowAction");
+	_legato_button.set_text (_("Legato"));
+	_legato_button.signal_event().connect (sigc::mem_fun (*this, (&SlotPropertyTable::legato_button_event)));
+
+#define quantize_item(b) _quantize_button.AddMenuElem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_quantize), b)));
+
+#if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IMPLEMENTED
+	quantize_item (BBT_Offset (0, 0, 0));
+#endif
+	quantize_item (BBT_Offset (1, 0, 0));
+	quantize_item (BBT_Offset (0, 4, 0));
+	quantize_item (BBT_Offset (0, 2, 0));
+	quantize_item (BBT_Offset (0, 1, 0));
+	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/2));
+	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/4));
+	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/8));
+	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/16));
+	quantize_item (BBT_Offset (-1, 0, 0));
+
+	for (std::vector<std::string>::const_iterator i = quantize_strings.begin(); i != quantize_strings.end(); ++i) {
+		if (i->length() > longest_quantize.length()) {
+			longest_quantize = *i;
+		}
+	}
+	_quantize_button.set_sizing_text (longest_quantize);
+	_quantize_button.set_name("FollowAction");
+
+#undef quantize_item
+
+	_name_label.set_name (X_("TrackNameEditor"));
+	_name_label.set_alignment (0.0, 0.5);
+	_name_label.set_padding (4, 0);
+	_name_label.set_width_chars (12);
+
+	_namebox.add (_name_label);
+	_namebox.add_events (Gdk::BUTTON_PRESS_MASK);
+	_namebox.signal_button_press_event ().connect (sigc::mem_fun (*this, &SlotPropertyTable::namebox_button_press));
+
+	_name_frame.add (_namebox);
+	_name_frame.set_edge_color (0x000000ff);
+	_name_frame.set_border_width (0);
+	_name_frame.set_padding (0);
+
+	_load_button.set_name("FollowAction");
+	_load_button.set_text (_("Load"));
+	_load_button.signal_clicked.connect (sigc::mem_fun (*this, (&SlotPropertyTable::choose_sample)));
+
+	_color_button.set_name("FollowAction");
+	_color_button.signal_clicked.connect (sigc::mem_fun (*this, (&SlotPropertyTable::choose_color)));
+
+	_follow_size_group  = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
+	_follow_size_group->add_widget(_name_frame);
+	_follow_size_group->add_widget(_load_button);
+	_follow_size_group->add_widget(_color_button);
+	_follow_size_group->add_widget(_velocity_slider);
+	_follow_size_group->add_widget(_follow_count_spinner);
+
+	int row=0;
+	Gtk::Label *label;
+
+	attach(_name_frame,       0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(_load_button,      2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(_color_button,     3, 4, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	label = manage(new Gtk::Label(_("Velocity Sense:")));  label->set_alignment(1.0, 0.5);
+	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(_velocity_slider,       1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	label = manage(new Gtk::Label(_("Launch Style:")));  label->set_alignment(1.0, 0.5);
+	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(_launch_style_button,   1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	label = manage(new Gtk::Label(_("Launch Quantize:")));  label->set_alignment(1.0, 0.5);
+	attach(*label,            0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(_quantize_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	label = manage(new Gtk::Label(_("Legato Mode:")));  label->set_alignment(1.0, 0.5);
+	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	attach(_legato_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	attach(_follow_action_button,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	label = manage(new Gtk::Label(_("Follow Count:")));  label->set_alignment(1.0, 0.5);
+	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
+	align->add (_follow_count_spinner);
+	attach(*align,          1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
+
+	Gtkmm2ext::set_size_request_to_display_given_text (_left_probability_label, "100% Left ", 12, 0);
+	_left_probability_label.set_alignment(0.0, 0.5);
+	Gtkmm2ext::set_size_request_to_display_given_text (_right_probability_label, "100% Right", 12, 0);
+	_right_probability_label.set_alignment(1.0, 0.5);
+
+	Gtk::Table *prob_table = manage(new Gtk::Table());
+	prob_table->set_spacings(2);
+	prob_table->attach(_follow_probability_slider, 0, 2, 0, 1, Gtk::FILL, Gtk::SHRINK );
+	prob_table->attach(_left_probability_label,    0, 1, 1, 2, Gtk::FILL,             Gtk::SHRINK );
+	prob_table->attach(_right_probability_label,   1, 2, 1, 2, Gtk::FILL,             Gtk::SHRINK );
+
+	attach( *prob_table,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
+	attach(_follow_right,  1, 3, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
+}
+
+SlotPropertyTable::~SlotPropertyTable ()
+{
+}
+
+void
+SlotPropertyTable::set_quantize (BBT_Offset bbo)
+{
+#if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IMPLEMENTED
+	if (bbo == BBT_Offset (0, 0, 0)) {
+		/* use grid */
+		bbo = BBT_Offset (1, 2, 3); /* XXX get grid from editor */
+	}
+#endif
+
+	trigger()->set_quantization (bbo);
+}
+
+void
+SlotPropertyTable::follow_count_event ()
+{
+	trigger()->set_follow_count ((int) _follow_count_adjustment.get_value());
+}
+
+void
+SlotPropertyTable::velocity_adjusted ()
+{
+	trigger()->set_midi_velocity_effect (_velocity_adjustment.get_value());
+}
+
+void
+SlotPropertyTable::probability_adjusted ()
+{
+	trigger()->set_follow_action_probability ((int) _follow_probability_adjustment.get_value());
+}
+
+bool
+SlotPropertyTable::follow_action_button_event (GdkEvent* ev)
+{
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		trigger()->set_use_follow (!trigger()->use_follow());
+		return true;
+
+	default:
+		break;
+	}
+
+	return false;
+}
+
+bool
+SlotPropertyTable::legato_button_event (GdkEvent* ev)
+{
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		trigger()->set_legato (!trigger()->legato());
+		return true;
+
+	default:
+		break;
+	}
+
+	return false;
+}
+
+void
+SlotPropertyTable::set_launch_style (Trigger::LaunchStyle ls)
+{
+	trigger()->set_launch_style (ls);
+}
+
+void
+SlotPropertyTable::set_follow_action (Trigger::FollowAction fa, uint64_t idx)
+{
+	trigger()->set_follow_action (fa, idx);
+}
+
+void
+SlotPropertyTable::on_trigger_changed (PropertyChange pc)
 {
 	if (pc.contains (Properties::name)) {
 		_name_label.set_text (trigger()->name());
@@ -761,9 +778,9 @@ TriggerUI::trigger_changed (PropertyChange pc)
 
 /* ------------ */
 
-TriggerWidget::TriggerWidget ()
+SlotPropertyWidget::SlotPropertyWidget ()
 {
-	ui = new TriggerUI ();
+	ui = new SlotPropertyTable ();
 	pack_start(*ui);
 	ui->show();
 //	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
@@ -771,7 +788,7 @@ TriggerWidget::TriggerWidget ()
 
 /* ------------ */
 
-TriggerWindow::TriggerWindow (TriggerReference tref)
+SlotPropertyWindow::SlotPropertyWindow (TriggerReference tref)
 {
 	TriggerPtr trigger (tref.trigger());
 
@@ -816,14 +833,14 @@ TriggerWindow::TriggerWindow (TriggerReference tref)
 }
 
 bool
-TriggerWindow::on_key_press_event (GdkEventKey* ev)
+SlotPropertyWindow::on_key_press_event (GdkEventKey* ev)
 {
 	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
 	return ARDOUR_UI_UTILS::relay_key_press (ev, &main_window);
 }
 
 bool
-TriggerWindow::on_key_release_event (GdkEventKey* ev)
+SlotPropertyWindow::on_key_release_event (GdkEventKey* ev)
 {
 	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
 	return ARDOUR_UI_UTILS::relay_key_press (ev, &main_window);

@@ -1012,10 +1012,10 @@ void
 TriggerBoxUI::edit_trigger (uint64_t n)
 {
 	TriggerPtr       trigger = _triggerbox.trigger (n);
-	TriggerWindow* tw      = static_cast<TriggerWindow*> (trigger->ui ());
+	SlotPropertyWindow* tw      = static_cast<SlotPropertyWindow*> (trigger->ui ());
 
 	if (!tw) {
-		tw = new TriggerWindow (TriggerReference (_triggerbox, n));
+		tw = new SlotPropertyWindow (TriggerReference (_triggerbox, n));
 		trigger->set_ui (tw);
 	}
 

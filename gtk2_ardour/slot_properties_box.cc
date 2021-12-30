@@ -50,7 +50,7 @@ SlotPropertiesBox::SlotPropertiesBox ()
 	_header_label.set_alignment(0.0, 0.5);
 	pack_start(_header_label, false, false, 6);
 
-	_triggerwidget = manage (new TriggerWidget ());
+	_triggerwidget = manage (new SlotPropertyWidget ());
 	_triggerwidget->show();
 
 //	double w;

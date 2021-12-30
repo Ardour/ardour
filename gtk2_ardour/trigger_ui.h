@@ -34,25 +34,30 @@ class RegionPropertiesBox;
 class RegionOperationsBox;
 class ClipEditorBox;
 
-class TriggerUI : public Gtk::Table //, public sigc::trackable
+class TriggerUI
 {
-  public:
+public:
 	TriggerUI ();
 	~TriggerUI ();
 
 	void set_trigger (ARDOUR::TriggerReference);
+
+	virtual void on_trigger_changed (PBD::PropertyChange) = 0;
 
 	static std::string follow_action_to_string (ARDOUR::Trigger::FollowAction);
 	static ARDOUR::Trigger::FollowAction  string_to_follow_action (std::string const &);
 	static std::string quantize_length_to_string (Temporal::BBT_Offset const &);
 	static std::string launch_style_to_string (ARDOUR::Trigger::LaunchStyle);
 
-  private:
+private:
+	void trigger_changed (PBD::PropertyChange);  //calls on_trigger_changed to subclasses
+
+protected:
 	void choose_color ();
 	void choose_sample ();
 	void sample_chosen (int r);
 
-	/* name editing */
+	/* all of this for name editing ...  */
 	bool namebox_button_press (GdkEventButton*);
 	bool start_rename ();
 	void end_rename (bool);
@@ -64,12 +69,6 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	bool entry_key_release (GdkEventKey*);
 	bool entry_button_press (GdkEventButton*);
 	void disconnect_entry_signals ();
-
-	Gtk::ColorSelectionDialog _color_dialog;
-
-	ARDOUR::TriggerReference tref;
-	ARDOUR::TriggerPtr trigger() const;
-
 	std::list<sigc::connection> _entry_connections;
 	bool                        _renaming;
 	Gtk::Entry                  _nameentry;
@@ -77,11 +76,25 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	Gtk::EventBox               _namebox;
 	ArdourWidgets::Frame        _name_frame;
 
-	Glib::RefPtr<Gtk::SizeGroup> _follow_size_group;
-	ArdourWidgets::ArdourButton _color_button;
+	Gtk::ColorSelectionDialog   _color_dialog;
 
 	sigc::connection            _file_chooser_connection;
 	Gtk::FileChooserDialog*     _file_chooser;
+
+	ARDOUR::TriggerReference tref;
+	ARDOUR::TriggerPtr trigger() const;
+	PBD::ScopedConnectionList trigger_connections;
+};
+
+class SlotPropertyTable : public TriggerUI, public Gtk::Table
+{
+  public:
+	SlotPropertyTable ();
+	~SlotPropertyTable ();
+
+	Glib::RefPtr<Gtk::SizeGroup> _follow_size_group;
+	ArdourWidgets::ArdourButton _color_button;
+
 	ArdourWidgets::ArdourButton _load_button;
 
 	ArdourWidgets::ArdourButton        _follow_action_button;
@@ -110,7 +123,7 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 	void set_launch_style (ARDOUR::Trigger::LaunchStyle);
 	void set_follow_action (ARDOUR::Trigger::FollowAction, uint64_t);
 
-	void trigger_changed (PBD::PropertyChange);
+	void on_trigger_changed (PBD::PropertyChange);
 
 	bool follow_action_button_event (GdkEvent*);
 	bool legato_button_event (GdkEvent*);
@@ -118,26 +131,24 @@ class TriggerUI : public Gtk::Table //, public sigc::trackable
 
 	void probability_adjusted ();
 	void velocity_adjusted ();
-
-	PBD::ScopedConnectionList trigger_connections;
 };
 
-class TriggerWidget : public Gtk::VBox
+class SlotPropertyWidget : public Gtk::VBox
 {
   public:
-	TriggerWidget ();
+	SlotPropertyWidget ();
 	void set_trigger (ARDOUR::TriggerReference tr) const { ui->set_trigger(tr); }
 
   private:
-	TriggerUI* ui;
+	SlotPropertyTable* ui;
 };
 
 /* XXX probably for testing only */
 
-class TriggerWindow : public Gtk::Window
+class SlotPropertyWindow : public Gtk::Window
 {
     public:
-	TriggerWindow (ARDOUR::TriggerReference);
+	SlotPropertyWindow (ARDOUR::TriggerReference);
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
