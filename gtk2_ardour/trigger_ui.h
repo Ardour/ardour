@@ -39,7 +39,7 @@ class TriggerUI
 {
 public:
 	TriggerUI ();
-	~TriggerUI ();
+	virtual ~TriggerUI ();
 
 	void set_trigger (ARDOUR::TriggerReference);
 
