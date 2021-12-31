@@ -1793,7 +1793,11 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 				 * effect. Time to get played again.
 				 */
 
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3\n", index(), _loop_cnt, _follow_count));
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now waiting to retrigger, loop cnt %2 fc %3 , reset TS to %4 + %5\n", index(), _loop_cnt, _follow_count, transition_beats, data_length));
+				/* we will "restart" at the beginning of the
+				   next iteration of the trigger.
+				*/
+				transition_beats = transition_beats + data_length;
 				_state = WaitingToStart;
 				retrigger ();
 				PropertyChanged (ARDOUR::Properties::running);
