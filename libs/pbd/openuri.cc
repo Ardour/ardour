@@ -39,6 +39,7 @@
 # include <shellapi.h>
 #else
 # include <sys/types.h>
+# include <sys/wait.h>
 # include <unistd.h>
 #endif
 
@@ -70,9 +71,18 @@ PBD::open_uri (const char* uri)
 	while (s.find("\"") != std::string::npos)
 		s.replace(s.find("\\"), 1, "\\\"");
 
-	if (::vfork () == 0) {
-		::execlp ("xdg-open", "xdg-open", s.c_str(), (char*)NULL);
+	char const* arg = s.c_str();
+
+	pid_t pid = ::vfork ();
+
+	if (pid == 0) {
+		::execlp ("xdg-open", "xdg-open", arg, (char*)NULL);
 		_exit (EXIT_SUCCESS);
+	} else if (pid > 0) {
+		/* wait until started, keep std::string s in scope */
+		::waitpid (pid, 0, 0);
+	} else {
+		return false;
 	}
 
 #endif /* not PLATFORM_WINDOWS and not __APPLE__ */
