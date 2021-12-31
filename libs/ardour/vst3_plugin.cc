@@ -416,19 +416,19 @@ VST3PI::vst3_to_midi_buffers (BufferSet& bufs, ChanMapping const& out_map)
 				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, e.data.size, (uint8_t const*)e.data.bytes);
 				break;
 			case Vst::Event::kNoteOffEvent:
-				data[0] = 0x80 | e.noteOff.channel;
+				data[0] = MIDI_CMD_NOTE_OFF | e.noteOff.channel;
 				data[1] = e.noteOff.pitch;
 				data[2] = vst_to_midi (e.noteOff.velocity);
 				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, 3, data);
 				break;
 			case Vst::Event::kNoteOnEvent:
-				data[0] = 0x90 | e.noteOn.channel;
+				data[0] = MIDI_CMD_NOTE_ON | e.noteOn.channel;
 				data[1] = e.noteOn.pitch;
 				data[2] = vst_to_midi (e.noteOn.velocity);
 				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, 3, data);
 				break;
 			case Vst::Event::kPolyPressureEvent:
-				data[0] = 0xa0 | e.noteOff.channel;
+				data[0] = MIDI_CMD_NOTE_PRESSURE | e.noteOff.channel;
 				data[1] = e.polyPressure.pitch;
 				data[2] = vst_to_midi (e.polyPressure.pressure);
 				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, 3, data);
@@ -436,27 +436,27 @@ VST3PI::vst3_to_midi_buffers (BufferSet& bufs, ChanMapping const& out_map)
 			case Vst::Event::kLegacyMIDICCOutEvent:
 				switch (e.midiCCOut.controlNumber) {
 					case Vst::kCtrlPolyPressure:
-						data[0] = 0x0a | e.midiCCOut.channel;
+						data[0] = MIDI_CMD_NOTE_PRESSURE | e.midiCCOut.channel;
 						data[1] = e.midiCCOut.value;
 						data[2] = e.midiCCOut.value2;
 						break;
 					default: /* Control Change */
-						data[0] = 0xb0 | e.midiCCOut.channel;
+						data[0] = MIDI_CMD_CONTROL | e.midiCCOut.channel;
 						data[1] = e.midiCCOut.controlNumber;
 						data[2] = e.midiCCOut.value;
 						break;
 					case Vst::kCtrlProgramChange:
-						data[0] = 0x0c | e.midiCCOut.channel;
+						data[0] = MIDI_CMD_PGM_CHANGE | e.midiCCOut.channel;
 						data[1] = e.midiCCOut.value;
 						data[2] = e.midiCCOut.value2;
 						break;
 					case Vst::kAfterTouch:
-						data[0] = 0x0d | e.midiCCOut.channel;
+						data[0] = MIDI_CMD_CHANNEL_PRESSURE | e.midiCCOut.channel;
 						data[1] = e.midiCCOut.value;
 						data[2] = e.midiCCOut.value2;
 						break;
 					case Vst::kPitchBend:
-						data[0] = 0x0e | e.midiCCOut.channel;
+						data[0] = MIDI_CMD_BENDER | e.midiCCOut.channel;
 						data[1] = e.midiCCOut.value;
 						data[2] = e.midiCCOut.value2;
 						break;
