@@ -1730,7 +1730,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		last_event_samples = timeline_samples;
 
 		const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, next_event.size(), const_cast<uint8_t*>(next_event.buffer()), false);
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given et %1 ts %2 bs %3 ss %4 do %5, inserting %6\n", effective_time, timeline_samples, buffer_samples, start_sample, dest_offset, ev));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given et %1 TS %7 rs %8 ts %2 bs %3 ss %4 do %5, inserting %6\n", effective_time, timeline_samples, buffer_samples, start_sample, dest_offset, ev, transition_beats, region_start));
 		mb.insert_event (ev);
 		tracker.track (next_event.buffer());
 		last_event_beats = next_event.time();
@@ -2373,6 +2373,17 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		return;
 	}
 
+#ifndef NDEBUG
+	{
+		Temporal::TempoMap::SharedPtr __tmap (Temporal::TempoMap::use());
+		const Temporal::Beats __start_beats (timepos_t (start_sample).beats());
+		const Temporal::Beats __end_beats (timepos_t (end_sample).beats());
+		const double __bpm = __tmap->quarters_per_minute_at (timepos_t (__start_beats));
+
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("**** Triggerbox::run() for %6, ss %1 es %2 sb %3 eb %4 bpm %5\n", start_sample, end_sample, __start_beats, __end_beats, __bpm, order()));
+	}
+#endif
+
 	_pass_thru = _requests.pass_thru.load ();
 	bool allstop = _requests.stop_all.exchange (false);
 
@@ -2564,7 +2575,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 		}
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 complete, state now %2\n", _currently_playing->name(), enum_2_string (_currently_playing->state())));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("currently playing: %1, state now %2\n", _currently_playing->name(), enum_2_string (_currently_playing->state())));
 
 		/* if we're not in the process of stopping all active triggers,
 		 * but the current one has stopped, decide which (if any)
