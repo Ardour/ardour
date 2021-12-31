@@ -67,6 +67,19 @@ public:
 	void choose_sample ();
 	void sample_chosen (int r);
 
+	void launch_context_menu ();
+	void follow_context_menu ();
+	void context_menu ();
+
+	void set_follow_action (ARDOUR::Trigger::FollowAction);
+	void set_launch_style (ARDOUR::Trigger::LaunchStyle);
+	void set_quantization (Temporal::BBT_Offset const&);
+	void set_from_selection ();
+
+	void toggle_trigger_isolated ();
+	void clear_trigger ();
+	void edit_trigger ();
+
 private:
 	void trigger_changed (PBD::PropertyChange const& );  //calls on_trigger_changed to subclasses
 
@@ -97,10 +110,15 @@ protected:
 	Gtk::EventBox               _namebox;
 	ArdourWidgets::Frame        _name_frame;
 
-	Gtk::ColorSelectionDialog   _color_dialog;
+	Gtk::FileChooserDialog* _file_chooser;
+	sigc::connection        _file_chooser_connection;
 
-	sigc::connection            _file_chooser_connection;
-	Gtk::FileChooserDialog*     _file_chooser;
+	Gtk::Menu*              _launch_context_menu;
+	Gtk::Menu*              _follow_context_menu;
+	Gtk::Menu*              _context_menu;
+	bool                    _ignore_menu_action;
+
+	Gtk::ColorSelectionDialog   _color_dialog;
 
 	void                  trigger_swap (uint32_t);
 	PBD::ScopedConnection trigger_swap_connection;

@@ -72,34 +72,9 @@ public:
 	bool name_button_event (GdkEvent*);
 	bool follow_button_event (GdkEvent*);
 
-	void choose_sample ();
-	void sample_chosen (int r);
-
-	void launch_context_menu ();
-	void follow_context_menu ();
-	void context_menu ();
-
-	Gtk::ColorSelectionDialog _color_dialog;
-	void pick_color ();
-	void set_follow_action (ARDOUR::Trigger::FollowAction);
-	void set_launch_style (ARDOUR::Trigger::LaunchStyle);
-	void set_quantization (Temporal::BBT_Offset const&);
-	void set_from_selection ();
-
-	void toggle_trigger_isolated ();
-	void clear_trigger ();
-	void edit_trigger ();
-
 private:
 	double           _poly_size;
 	double           _poly_margin;
-
-	Gtk::FileChooserDialog* _file_chooser;
-	sigc::connection        _file_chooser_connection;
-	Gtk::Menu*              _launch_context_menu;
-	Gtk::Menu*              _follow_context_menu;
-	Gtk::Menu*              _context_menu;
-	bool                    _ignore_menu_action;
 
 	PBD::ScopedConnection owner_prop_connection;
 	void                  owner_prop_change (PBD::PropertyChange const&);

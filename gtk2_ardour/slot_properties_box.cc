@@ -210,10 +210,10 @@ SlotPropertyTable::SlotPropertyTable ()
 
 	_load_button.set_name("FollowAction");
 	_load_button.set_text (_("Load"));
-	_load_button.signal_clicked.connect (sigc::mem_fun (*this, (&SlotPropertyTable::choose_sample)));
+	_load_button.signal_clicked.connect (sigc::mem_fun (*this, (&TriggerUI::choose_sample)));
 
 	_color_button.set_name("FollowAction");
-	_color_button.signal_clicked.connect (sigc::mem_fun (*this, (&SlotPropertyTable::choose_color)));
+	_color_button.signal_clicked.connect (sigc::mem_fun (*this, (&TriggerUI::choose_color)));
 
 	_follow_size_group  = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
 	_follow_size_group->add_widget(_name_frame);
