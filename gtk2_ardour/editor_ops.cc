@@ -4112,7 +4112,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 		return;
 	}
 
-	assert (enable_processing != (target == NewTrigger));
+	assert (!(enable_processing && (target == NewTrigger)));
 
 	uint32_t trigger_slot = 0;
 	string bounce_name;
