@@ -1890,6 +1890,8 @@ TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
 	case DataType::MIDI:
 		t = new MIDITrigger (slot, *this);
 		break;
+	default:
+		return;
 	}
 
 	t->set_region_in_worker_thread (region);
