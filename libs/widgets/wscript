@@ -36,7 +36,6 @@ widgets_sources = [
         'ardour_spinner.cc',
         'barcontroller.cc',
         'binding_proxy.cc',
-        'color_button.cc',
         'eventboxext.cc',
         'choice.cc',
         'fastmeter.cc',
