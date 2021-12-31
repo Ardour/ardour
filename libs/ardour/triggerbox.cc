@@ -114,24 +114,6 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 }
 
 void
-Trigger::push_cue_properties ()
-{
-	/* must be called from RT process context */
-	pre_cue_properties = CueModifiedProperties (_follow_action0, _launch_style);
-}
-
-void
-Trigger::pop_cue_properties ()
-{
-	/* must be called from RT process context */
-	if (pre_cue_properties.valid()) {
-		_follow_action0 = pre_cue_properties.follow_action;
-		_launch_style = pre_cue_properties.launch_style;
-		pre_cue_properties.invalidate ();
-	}
-}
-
-void
 Trigger::request_trigger_delete (Trigger* t)
 {
 	TriggerBox::worker->request_delete_trigger (t);
@@ -274,6 +256,15 @@ Trigger::set_follow_action (FollowAction f, uint32_t n)
 		PropertyChanged (Properties::follow_action1);
 	}
 	_box.session().set_dirty();
+}
+
+Trigger::LaunchStyle
+Trigger::launch_style () const
+{
+	if (cue_launched) {
+		return OneShot;
+	}
+	return _launch_style;
 }
 
 void
@@ -423,13 +414,6 @@ Trigger::startup()
 	_gain = _pending_gain;
 	_loop_cnt = 0;
 	_explicitly_stopped = false;
-
-	if (cue_launched) {
-		push_cue_properties ();
-		_launch_style = Toggle;
-		cue_launched = false;
-	}
-
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 starts up\n", name()));
 	PropertyChanged (ARDOUR::Properties::running);
 }
@@ -439,7 +423,7 @@ Trigger::shutdown ()
 {
 	_state = Stopped;
 	_gain = 1.0;
-	pop_cue_properties ();
+	cue_launched = false;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
 	PropertyChanged (ARDOUR::Properties::running);
 }
@@ -522,8 +506,14 @@ Trigger::process_state_requests ()
 			case Gate:
 			case Toggle:
 			case Repeat:
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 gate/toggle/repeat => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingToStop)));
-				begin_stop (true);
+				if (_box.active_scene() >= 0) {
+					_state = WaitingForRetrigger;
+					cue_launched = true;
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 cue-launched %2, now wait for retrigger\n", index(), enum_2_string (_launch_style.val())));
+				} else {
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 gate/toggle/repeat => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingToStop)));
+					begin_stop (true);
+				}
 			}
 			break;
 
@@ -847,7 +837,7 @@ AudioTrigger::set_usable_length ()
 		return;
 	}
 
-	switch (_launch_style) {
+	switch (launch_style()) {
 	case Repeat:
 		break;
 	default:
@@ -1373,14 +1363,14 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	if (_state == Stopped || _state == Stopping) {
 
-		if ((_state == Stopped) && !_explicitly_stopped && (_launch_style == Trigger::Gate || _launch_style == Trigger::Repeat)) {
+		if ((_state == Stopped) && !_explicitly_stopped && (launch_style() == Trigger::Gate || launch_style() == Trigger::Repeat)) {
 
 			jump_start ();
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopped, repeat/gate ret\n", index()));
 
 		} else {
 
-			if ((_launch_style != Repeat) && (_launch_style != Gate) && (_loop_cnt == _follow_count)) {
+			if ((launch_style() != Repeat) && (launch_style() != Gate) && (_loop_cnt == _follow_count)) {
 
 				/* have played the specified number of times, we're done */
 
@@ -1583,7 +1573,7 @@ MIDITrigger::set_usable_length ()
 		return;
 	}
 
-	switch (_launch_style) {
+	switch (launch_style()) {
 	case Repeat:
 		break;
 	default:
@@ -1771,14 +1761,14 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 	if (_state == Stopped || _state == Stopping) {
 
-		if ((_state == Stopped) && !_explicitly_stopped && (_launch_style == Trigger::Gate || _launch_style == Trigger::Repeat)) {
+		if ((_state == Stopped) && !_explicitly_stopped && (launch_style() == Trigger::Gate || launch_style() == Trigger::Repeat)) {
 
 			jump_start ();
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopped, repeat/gate ret\n", index()));
 
 		} else {
 
-			if ((_launch_style != Repeat) && (_launch_style != Gate) && (_loop_cnt == _follow_count)) {
+			if ((launch_style() != Repeat) && (launch_style() != Gate) && (_loop_cnt == _follow_count)) {
 
 				/* have played the specified number of times, we're done */
 
