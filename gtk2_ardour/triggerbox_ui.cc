@@ -66,6 +66,11 @@ using namespace PBD;
 
 TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	: ArdourCanvas::Rectangle (item)
+	, _file_chooser (0)
+	, _launch_context_menu (0)
+	, _follow_context_menu (0)
+	, _context_menu (0)
+	, _ignore_menu_action (false)
 {
 	set_layout_sensitive (true); // why???
 
@@ -98,10 +103,16 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	/* this will trigger a call to on_trigger_changed() */
 	set_trigger(tr);
 
+	/* event handling */
+	play_button->Event.connect (sigc::mem_fun (*this, &TriggerEntry::play_button_event));
+	name_button->Event.connect (sigc::mem_fun (*this, &TriggerEntry::name_button_event));
+	follow_button->Event.connect (sigc::mem_fun (*this, &TriggerEntry::follow_button_event));
+
 	/* watch for change in theme */
 	UIConfiguration::instance ().ParameterChanged.connect (sigc::mem_fun (*this, &TriggerEntry::ui_parameter_changed));
 	set_default_colors ();
 
+	/* owner color changes (?) */
 	dynamic_cast<Stripable*> (tref.box->owner ())->presentation_info ().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
 
 	selection_change ();
@@ -466,14 +477,434 @@ TriggerEntry::ui_parameter_changed (std::string const& p)
 	}
 }
 
+bool
+TriggerEntry::name_button_event (GdkEvent* ev)
+{
+	switch (ev->type) {
+		case GDK_ENTER_NOTIFY:
+			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+				set_default_colors ();
+				name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+				name_button->set_outline_color (HSV (fill_color ()).lighter (0.15).color ());
+				follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+				play_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+				/*preserve selection border*/
+				if (PublicEditor::instance ().get_selection ().selected (this)) {
+					name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
+				}
+			}
+			break;
+		case GDK_LEAVE_NOTIFY:
+			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+				set_default_colors ();
+			}
+			break;
+		case GDK_BUTTON_PRESS:
+			PublicEditor::instance ().get_selection ().set (this);
+			/* a side-effect of selection-change is that the slot's color is reset. retain the "entered-color" here: */
+			name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+			name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
+			follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+			break;
+		case GDK_2BUTTON_PRESS:
+			edit_trigger ();
+			return true;
+		case GDK_BUTTON_RELEASE:
+			switch (ev->button.button) {
+				case 3:
+					context_menu ();
+					return true;
+				default:
+					break;
+			}
+			break;
+		default:
+			break;
+	}
+
+	return false;
+}
+
+bool
+TriggerEntry::play_button_event (GdkEvent* ev)
+{
+	if (!trigger ()->region ()) {
+		/* empty slot; this is just a stop button */
+		switch (ev->type) {
+			case GDK_BUTTON_PRESS:
+				if (ev->button.button == 1) {
+					if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+						trigger()->box().stop_all_immediately ();
+					} else {
+						trigger()->box().stop_all_quantized ();
+					}
+					return true;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
+	switch (ev->type) {
+		case GDK_BUTTON_PRESS:
+			switch (ev->button.button) {
+				case 1:
+					trigger()->bang ();
+					return true;
+				default:
+					break;
+			}
+			break;
+		case GDK_BUTTON_RELEASE:
+			switch (ev->button.button) {
+				case 1:
+					if (trigger()->launch_style () == Trigger::Gate ||
+					    trigger()->launch_style () == Trigger::Repeat) {
+						trigger()->unbang ();
+					}
+					break;
+				case 3:
+					launch_context_menu ();
+					return true;
+				default:
+					break;
+			}
+			break;
+		case GDK_ENTER_NOTIFY:
+			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+				set_default_colors ();
+				play_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+			}
+			break;
+		case GDK_LEAVE_NOTIFY:
+			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+				set_default_colors ();
+			}
+			break;
+		default:
+			break;
+	}
+	return false;
+}
+
+bool
+TriggerEntry::follow_button_event (GdkEvent* ev)
+{
+	switch (ev->type) {
+		case GDK_BUTTON_RELEASE:
+			switch (ev->button.button) {
+				case 3:
+					follow_context_menu ();
+					return true;
+				default:
+					break;
+			}
+			break;
+		case GDK_ENTER_NOTIFY:
+			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+				set_default_colors ();
+				follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+			}
+			break;
+		case GDK_LEAVE_NOTIFY:
+			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
+				set_default_colors ();
+			}
+			break;
+		default:
+			break;
+	}
+	return false;
+}
+
+
+void
+TriggerEntry::context_menu ()
+{
+	using namespace Gtk;
+	using namespace Gtk::Menu_Helpers;
+	using namespace Temporal;
+
+	delete _context_menu;
+
+	_context_menu   = new Menu;
+	MenuList& items = _context_menu->items ();
+	_context_menu->set_name ("ArdourContextMenu");
+
+	Menu*     load_menu = manage (new Menu);
+	MenuList& loitems (load_menu->items ());
+
+	loitems.push_back (MenuElem (_("from file"), sigc::mem_fun (*this, &TriggerUI::choose_sample)));
+	loitems.push_back (MenuElem (_("from selection"), sigc::mem_fun (*this, &TriggerEntry::set_from_selection)));
+
+	items.push_back (MenuElem (_("Load..."), *load_menu));
+#if DOUBLE_CLICK_IS_NOT_OBVIOUS_ENOUGH
+	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun (*this, &TriggerEntry::edit_trigger)));
+#endif
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &TriggerUI::choose_color)));
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Clear"), sigc::mem_fun (*this, &TriggerEntry::clear_trigger)));
+
+	_context_menu->popup (1, gtk_get_current_event_time ());
+}
+
+void
+TriggerEntry::launch_context_menu ()
+{
+	using namespace Gtk;
+	using namespace Gtk::Menu_Helpers;
+	using namespace Temporal;
+
+	delete _launch_context_menu;
+
+	_launch_context_menu   = new Menu;
+	MenuList& items = _launch_context_menu->items ();
+	_launch_context_menu->set_name ("ArdourContextMenu");
+
+	RadioMenuItem::Group lagroup;
+	RadioMenuItem::Group qgroup;
+
+	Menu*     launch_menu = manage (new Menu);
+	MenuList& litems      = launch_menu->items ();
+
+	litems.push_back (RadioMenuElem (lagroup, TriggerUI::launch_style_to_string(Trigger::OneShot), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_launch_style), Trigger::OneShot)));
+	if (trigger ()->launch_style () == Trigger::OneShot) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
+	}
+	litems.push_back (RadioMenuElem (lagroup, TriggerUI::launch_style_to_string(Trigger::Gate), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_launch_style), Trigger::Gate)));
+	if (trigger ()->launch_style () == Trigger::Gate) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
+	}
+	litems.push_back (RadioMenuElem (lagroup, TriggerUI::launch_style_to_string(Trigger::Toggle), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_launch_style), Trigger::Toggle)));
+	if (trigger ()->launch_style () == Trigger::Toggle) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
+	}
+	litems.push_back (RadioMenuElem (lagroup, TriggerUI::launch_style_to_string(Trigger::Repeat), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_launch_style), Trigger::Repeat)));
+	if (trigger ()->launch_style () == Trigger::Repeat) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
+	}
+
+	Menu*     quant_menu = manage (new Menu);
+	MenuList& qitems     = quant_menu->items ();
+
+	BBT_Offset b;
+
+#if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IS_IMPLEMENTED
+	bool      success;
+	Beats      grid_beats (PublicEditor::instance ().get_grid_type_as_beats (success, timepos_t (0)));
+	if (success) {
+		b = BBT_Offset (0, grid_beats.get_beats (), grid_beats.get_ticks ());
+		qitems.push_back (RadioMenuElem (qgroup, _("Main Grid"), sigc::bind(sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), b)));
+		/* can't mark this active because the current trigger quant setting may just a specific setting below */
+		/* XXX HOW TO GET THIS TO FOLLOW GRID CHANGES (which are GUI only) */
+	}
+#endif
+
+	b = BBT_Offset (1, 0, 0);
+	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_quantization), b)));
+	if (trigger ()->quantization () == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+	b = BBT_Offset (0, 4, 0);
+	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_quantization), b)));
+	if (trigger ()->quantization () == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+	b = BBT_Offset (0, 2, 0);
+	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_quantization), b)));
+	if (trigger ()->quantization () == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+	b = BBT_Offset (0, 1, 0);
+	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_quantization), b)));
+	if (trigger ()->quantization () == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+	b = BBT_Offset (0, 0, ticks_per_beat / 2);
+	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_quantization), b)));
+	if (trigger ()->quantization () == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+	b = BBT_Offset (0, 0, ticks_per_beat / 4);
+	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_quantization), b)));
+	if (trigger ()->quantization () == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+	b = BBT_Offset (0, 0, ticks_per_beat / 8);
+	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_quantization), b)));
+	if (trigger ()->quantization () == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+	b = BBT_Offset (0, 0, ticks_per_beat / 16);
+	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_quantization), b)));
+	if (trigger ()->quantization () == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+
+	items.push_back (MenuElem (_("Launch Style..."), *launch_menu));
+	items.push_back (MenuElem (_("Quantization..."), *quant_menu));
+
+	items.push_back (CheckMenuElem (_("Cue Isolate"), sigc::mem_fun (*this, &TriggerEntry::toggle_trigger_isolated)));
+	if (trigger ()->scene_isolated ()) {
+		PBD::Unwinder<bool> uw (_ignore_menu_action, true);
+		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
+	}
+
+	_launch_context_menu->popup (1, gtk_get_current_event_time ());
+}
+
+void
+TriggerEntry::follow_context_menu ()
+{
+	using namespace Gtk;
+	using namespace Gtk::Menu_Helpers;
+	using namespace Temporal;
+
+	delete _follow_context_menu;
+
+	_follow_context_menu   = new Menu;
+	MenuList& items = _follow_context_menu->items ();
+	_follow_context_menu->set_name ("ArdourContextMenu");
+
+	Menu*     follow_menu = manage (new Menu);
+	MenuList& fitems      = follow_menu->items ();
+
+	RadioMenuItem::Group fagroup;
+
+	_ignore_menu_action = true;
+
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::None), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_follow_action), Trigger::None)));
+	if (trigger ()->follow_action (0) == Trigger::None) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::Stop), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_follow_action), Trigger::Stop)));
+	if (trigger ()->follow_action (0) == Trigger::Stop) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::Again), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_follow_action), Trigger::Again)));
+	if (trigger ()->follow_action (0) == Trigger::Again) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+#if QUEUED_SLOTS_IMPLEMENTED
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::QueuedTrigger), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_follow_action), Trigger::QueuedTrigger)));
+	if (trigger ()->follow_action (0) == Trigger::QueuedTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+#endif
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::PrevTrigger), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_follow_action), Trigger::PrevTrigger)));
+	if (trigger ()->follow_action (0) == Trigger::PrevTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::NextTrigger), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_follow_action), Trigger::NextTrigger)));
+	if (trigger ()->follow_action (0) == Trigger::NextTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+#if 0
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::FirstTrigger), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_follow_action), Trigger::FirstTrigger)));
+	if (trigger ()->follow_action (0) == Trigger::FirstTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::LastTrigger), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_follow_action), Trigger::LastTrigger)));
+	if (trigger ()->follow_action (0) == Trigger::LastTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+#endif
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::AnyTrigger), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_follow_action), Trigger::AnyTrigger)));
+	if (trigger ()->follow_action (0) == Trigger::AnyTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::OtherTrigger), sigc::bind(sigc::mem_fun (*this, &TriggerEntry::set_follow_action), Trigger::OtherTrigger)));
+	if (trigger ()->follow_action (0) == Trigger::OtherTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+
+	_ignore_menu_action = false;
+
+	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
+
+	_follow_context_menu->popup (1, gtk_get_current_event_time ());
+}
+
+
+void
+TriggerEntry::toggle_trigger_isolated ()
+{
+	if (_ignore_menu_action) {
+		return;
+	}
+
+	trigger()->set_scene_isolated (!trigger()->scene_isolated ());
+}
+
+void
+TriggerEntry::clear_trigger ()
+{
+	trigger()->set_region (boost::shared_ptr<Region>());
+}
+
+void
+TriggerEntry::edit_trigger ()
+{
+	SlotPropertyWindow* tw      = static_cast<SlotPropertyWindow*> (trigger()->ui ());
+
+	if (!tw) {
+		tw = new SlotPropertyWindow (TriggerReference (trigger()->box(), trigger()->index()));
+		trigger()->set_ui (tw);
+	}
+
+	tw->present ();
+}
+
+void
+TriggerEntry::set_follow_action (Trigger::FollowAction fa)
+{
+	if (_ignore_menu_action) {
+		return;
+	}
+
+	trigger()->set_follow_action (fa, 0);
+	trigger()->set_follow_action_probability (0);
+	trigger()->set_use_follow (true);
+}
+
+void
+TriggerEntry::set_launch_style (Trigger::LaunchStyle ls)
+{
+	trigger()->set_launch_style (ls);
+}
+
+void
+TriggerEntry::set_quantization (Temporal::BBT_Offset const& q)
+{
+	trigger()->set_quantization (q);
+}
+
+void
+TriggerEntry::set_from_selection ()
+{
+	Selection&      selection (PublicEditor::instance ().get_selection ());
+	RegionSelection rselection (selection.regions);
+
+	if (rselection.empty ()) {
+		/* XXX possible message about no selection ? */
+		return;
+	}
+
+	int n = trigger()->index();
+
+	for (RegionSelection::iterator r = rselection.begin (); r != rselection.end (); ++r) {
+		trigger()->box().set_from_selection (n, (*r)->region ());
+		++n;
+	}
+}
+
+/* ***************************************************** */
+
 TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	: Rectangle (parent)
 	, _triggerbox (tb)
-	, _file_chooser (0)
-	, _launch_context_menu (0)
-	, _follow_context_menu (0)
-	, _context_menu (0)
-	, _ignore_menu_action (false)
 {
 	set_layout_sensitive (true); // why???
 
@@ -534,9 +965,6 @@ TriggerBoxUI::build ()
 
 		_slots.push_back (te);
 
-		te->play_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::play_button_event), n));  //ToDo:  just trigger stuff
-		te->name_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::name_button_event), n));
-		te->follow_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::follow_button_event), n));  //ToDo:  just follow stuff
 #if 0
 		te->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::event), n));
 #endif
@@ -561,485 +989,6 @@ TriggerBoxUI::_size_allocate (ArdourCanvas::Rect const& alloc)
 		slot->set_position (Duple (0, ypos));
 		ypos += slot_h;
 		slot->show ();
-	}
-}
-
-bool
-TriggerBoxUI::name_button_event (GdkEvent* ev, uint64_t n)
-{
-	switch (ev->type) {
-		case GDK_ENTER_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				_slots[n]->set_default_colors ();
-				_slots[n]->name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-				_slots[n]->name_button->set_outline_color (HSV (fill_color ()).lighter (0.15).color ());
-				_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-				_slots[n]->play_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-				/*preserve selection border*/
-				if (PublicEditor::instance ().get_selection ().selected (_slots[n])) {
-					_slots[n]->name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
-				}
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				_slots[n]->set_default_colors ();
-			}
-			break;
-		case GDK_BUTTON_PRESS:
-			PublicEditor::instance ().get_selection ().set (_slots[n]);
-			/* a side-effect of selection-change is that the slot's color is reset. retain the "entered-color" here: */
-			_slots[n]->name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-			_slots[n]->name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
-			_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-			break;
-		case GDK_2BUTTON_PRESS:
-			edit_trigger (n);
-			return true;
-		case GDK_BUTTON_RELEASE:
-			switch (ev->button.button) {
-				case 3:
-					context_menu (n);
-					return true;
-				default:
-					break;
-			}
-			break;
-		default:
-			break;
-	}
-
-	return false;
-}
-
-bool
-TriggerBoxUI::play_button_event (GdkEvent* ev, uint64_t n)
-{
-	if (!_triggerbox.trigger (n)->region ()) {
-		/* empty slot; this is just a stop button */
-		switch (ev->type) {
-			case GDK_BUTTON_PRESS:
-				if (ev->button.button == 1) {
-					if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
-						_triggerbox.stop_all_immediately ();
-					} else {
-						_triggerbox.stop_all_quantized ();
-					}
-					return true;
-				}
-				break;
-			default:
-				break;
-		}
-	}
-
-	switch (ev->type) {
-		case GDK_BUTTON_PRESS:
-			switch (ev->button.button) {
-				case 1:
-					_slots[n]->trigger()->bang ();
-					return true;
-				default:
-					break;
-			}
-			break;
-		case GDK_BUTTON_RELEASE:
-			switch (ev->button.button) {
-				case 1:
-					if (_slots[n]->trigger()->launch_style () == Trigger::Gate ||
-					    _slots[n]->trigger()->launch_style () == Trigger::Repeat) {
-						_slots[n]->trigger()->unbang ();
-					}
-					break;
-				case 3:
-					launch_context_menu (n);
-					return true;
-				default:
-					break;
-			}
-			break;
-		case GDK_ENTER_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				_slots[n]->set_default_colors ();
-				_slots[n]->play_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				_slots[n]->set_default_colors ();
-			}
-			break;
-		default:
-			break;
-	}
-	return false;
-}
-
-bool
-TriggerBoxUI::follow_button_event (GdkEvent* ev, uint64_t n)
-{
-	switch (ev->type) {
-		case GDK_BUTTON_RELEASE:
-			switch (ev->button.button) {
-				case 3:
-					follow_context_menu (n);
-					return true;
-				default:
-					break;
-			}
-			break;
-		case GDK_ENTER_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				_slots[n]->set_default_colors ();
-				_slots[n]->follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				_slots[n]->set_default_colors ();
-			}
-			break;
-		default:
-			break;
-	}
-	return false;
-}
-
-
-void
-TriggerBoxUI::context_menu (uint64_t n)
-{
-	using namespace Gtk;
-	using namespace Gtk::Menu_Helpers;
-	using namespace Temporal;
-
-	delete _context_menu;
-
-	_context_menu   = new Menu;
-	MenuList& items = _context_menu->items ();
-	_context_menu->set_name ("ArdourContextMenu");
-
-	Menu*     load_menu = manage (new Menu);
-	MenuList& loitems (load_menu->items ());
-
-	loitems.push_back (MenuElem (_("from file"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::choose_sample), n)));
-	loitems.push_back (MenuElem (_("from selection"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_from_selection), n)));
-
-	items.push_back (MenuElem (_("Load..."), *load_menu));
-#if DOUBLE_CLICK_IS_NOT_OBVIOUS_ENOUGH
-	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::edit_trigger), n)));
-#endif
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Color..."), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::pick_color), n)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Clear"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::clear_trigger), n)));
-
-	_context_menu->popup (1, gtk_get_current_event_time ());
-}
-
-void
-TriggerBoxUI::pick_color (uint64_t n)
-{
-	_color_dialog.get_colorsel()->set_has_opacity_control (false);
-	_color_dialog.get_colorsel()->set_has_palette (true);
-	_color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_ACCEPT));
-	_color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
-
-	Gdk::Color c = ARDOUR_UI_UTILS::gdk_color_from_rgba(_triggerbox.trigger (n)->color());
-
-	_color_dialog.get_colorsel()->set_previous_color (c);
-	_color_dialog.get_colorsel()->set_current_color (c);
-
-	switch (_color_dialog.run()) {
-		case Gtk::RESPONSE_ACCEPT: {
-			c = _color_dialog.get_colorsel()->get_current_color();
-			color_t ct = ARDOUR_UI_UTILS::gdk_color_to_rgba(c);
-			_triggerbox.trigger (n)->set_color(ct);
-		} break;
-		default:
-			break;
-	}
-
-	_color_dialog.hide ();
-}
-
-void
-TriggerBoxUI::launch_context_menu (uint64_t n)
-{
-	using namespace Gtk;
-	using namespace Gtk::Menu_Helpers;
-	using namespace Temporal;
-
-	delete _launch_context_menu;
-
-	_launch_context_menu   = new Menu;
-	MenuList& items = _launch_context_menu->items ();
-	_launch_context_menu->set_name ("ArdourContextMenu");
-
-	RadioMenuItem::Group lagroup;
-	RadioMenuItem::Group qgroup;
-
-	Menu*     launch_menu = manage (new Menu);
-	MenuList& litems      = launch_menu->items ();
-
-	litems.push_back (RadioMenuElem (lagroup, TriggerUI::launch_style_to_string(Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::OneShot)));
-	if (_triggerbox.trigger (n)->launch_style () == Trigger::OneShot) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
-	}
-	litems.push_back (RadioMenuElem (lagroup, TriggerUI::launch_style_to_string(Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::Gate)));
-	if (_triggerbox.trigger (n)->launch_style () == Trigger::Gate) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
-	}
-	litems.push_back (RadioMenuElem (lagroup, TriggerUI::launch_style_to_string(Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::Toggle)));
-	if (_triggerbox.trigger (n)->launch_style () == Trigger::Toggle) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
-	}
-	litems.push_back (RadioMenuElem (lagroup, TriggerUI::launch_style_to_string(Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_launch_style), n, Trigger::Repeat)));
-	if (_triggerbox.trigger (n)->launch_style () == Trigger::Repeat) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
-	}
-
-	Menu*     quant_menu = manage (new Menu);
-	MenuList& qitems     = quant_menu->items ();
-
-	BBT_Offset b;
-
-#if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IS_IMPLEMENTED
-	bool      success;
-	Beats      grid_beats (PublicEditor::instance ().get_grid_type_as_beats (success, timepos_t (0)));
-	if (success) {
-		b = BBT_Offset (0, grid_beats.get_beats (), grid_beats.get_ticks ());
-		qitems.push_back (RadioMenuElem (qgroup, _("Main Grid"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
-		/* can't mark this active because the current trigger quant setting may just a specific setting below */
-		/* XXX HOW TO GET THIS TO FOLLOW GRID CHANGES (which are GUI only) */
-	}
-#endif
-
-	b = BBT_Offset (1, 0, 0);
-	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
-	if (_triggerbox.trigger (n)->quantization () == b) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
-	}
-	b = BBT_Offset (0, 4, 0);
-	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
-	if (_triggerbox.trigger (n)->quantization () == b) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
-	}
-	b = BBT_Offset (0, 2, 0);
-	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
-	if (_triggerbox.trigger (n)->quantization () == b) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
-	}
-	b = BBT_Offset (0, 1, 0);
-	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
-	if (_triggerbox.trigger (n)->quantization () == b) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
-	}
-	b = BBT_Offset (0, 0, ticks_per_beat / 2);
-	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
-	if (_triggerbox.trigger (n)->quantization () == b) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
-	}
-	b = BBT_Offset (0, 0, ticks_per_beat / 4);
-	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
-	if (_triggerbox.trigger (n)->quantization () == b) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
-	}
-	b = BBT_Offset (0, 0, ticks_per_beat / 8);
-	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
-	if (_triggerbox.trigger (n)->quantization () == b) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
-	}
-	b = BBT_Offset (0, 0, ticks_per_beat / 16);
-	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_quantization), n, b)));
-	if (_triggerbox.trigger (n)->quantization () == b) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
-	}
-
-	items.push_back (MenuElem (_("Launch Style..."), *launch_menu));
-	items.push_back (MenuElem (_("Quantization..."), *quant_menu));
-
-	items.push_back (CheckMenuElem (_("Cue Isolate"), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::toggle_trigger_isolated), n)));
-	if (_triggerbox.trigger (n)->scene_isolated ()) {
-		PBD::Unwinder<bool> uw (_ignore_menu_action, true);
-		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
-	}
-
-	_launch_context_menu->popup (1, gtk_get_current_event_time ());
-}
-
-void
-TriggerBoxUI::follow_context_menu (uint64_t n)
-{
-	using namespace Gtk;
-	using namespace Gtk::Menu_Helpers;
-	using namespace Temporal;
-
-	delete _follow_context_menu;
-
-	_follow_context_menu   = new Menu;
-	MenuList& items = _follow_context_menu->items ();
-	_follow_context_menu->set_name ("ArdourContextMenu");
-
-	Menu*     follow_menu = manage (new Menu);
-	MenuList& fitems      = follow_menu->items ();
-
-	RadioMenuItem::Group fagroup;
-
-	_ignore_menu_action = true;
-
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::None)));
-	if (_triggerbox.trigger (n)->follow_action (0) == Trigger::None) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::Stop)));
-	if (_triggerbox.trigger (n)->follow_action (0) == Trigger::Stop) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::Again)));
-	if (_triggerbox.trigger (n)->follow_action (0) == Trigger::Again) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-#if QUEUED_SLOTS_IMPLEMENTED
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::QueuedTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::QueuedTrigger)));
-	if (_triggerbox.trigger (n)->follow_action (0) == Trigger::QueuedTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-#endif
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::PrevTrigger)));
-	if (_triggerbox.trigger (n)->follow_action (0) == Trigger::PrevTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::NextTrigger)));
-	if (_triggerbox.trigger (n)->follow_action (0) == Trigger::NextTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-#if 0
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::FirstTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::FirstTrigger)));
-	if (_triggerbox.trigger (n)->follow_action (0) == Trigger::FirstTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::LastTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::LastTrigger)));
-	if (_triggerbox.trigger (n)->follow_action (0) == Trigger::LastTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-#endif
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::AnyTrigger)));
-	if (_triggerbox.trigger (n)->follow_action (0) == Trigger::AnyTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::set_follow_action), n, Trigger::OtherTrigger)));
-	if (_triggerbox.trigger (n)->follow_action (0) == Trigger::OtherTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-
-	_ignore_menu_action = false;
-
-	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
-
-	_follow_context_menu->popup (1, gtk_get_current_event_time ());
-}
-
-
-void
-TriggerBoxUI::toggle_trigger_isolated (uint64_t n)
-{
-	if (_ignore_menu_action) {
-		return;
-	}
-
-	TriggerPtr trigger = _triggerbox.trigger (n);
-	trigger->set_scene_isolated (!trigger->scene_isolated ());
-}
-
-void
-TriggerBoxUI::clear_trigger (uint64_t n)
-{
-	TriggerPtr trigger = _triggerbox.trigger (n);
-	trigger->set_region (boost::shared_ptr<Region>());
-}
-
-void
-TriggerBoxUI::edit_trigger (uint64_t n)
-{
-	TriggerPtr       trigger = _triggerbox.trigger (n);
-	SlotPropertyWindow* tw      = static_cast<SlotPropertyWindow*> (trigger->ui ());
-
-	if (!tw) {
-		tw = new SlotPropertyWindow (TriggerReference (_triggerbox, n));
-		trigger->set_ui (tw);
-	}
-
-	tw->present ();
-}
-
-void
-TriggerBoxUI::set_follow_action (uint64_t n, Trigger::FollowAction fa)
-{
-	if (_ignore_menu_action) {
-		return;
-	}
-
-	_triggerbox.trigger (n)->set_follow_action (fa, 0);
-	_triggerbox.trigger (n)->set_follow_action_probability (0);
-	_triggerbox.trigger (n)->set_use_follow (true);
-}
-
-void
-TriggerBoxUI::set_launch_style (uint64_t n, Trigger::LaunchStyle ls)
-{
-	_triggerbox.trigger (n)->set_launch_style (ls);
-}
-
-void
-TriggerBoxUI::set_quantization (uint64_t n, Temporal::BBT_Offset const& q)
-{
-	_triggerbox.trigger (n)->set_quantization (q);
-}
-
-void
-TriggerBoxUI::choose_sample (uint64_t n)
-{
-	if (!_file_chooser) {
-		_file_chooser = new Gtk::FileChooserDialog (_("Select sample"), Gtk::FILE_CHOOSER_ACTION_OPEN);
-		_file_chooser->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-		_file_chooser->add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
-		_file_chooser->set_select_multiple (true);
-
-		/* for newbies, start in the bundled media folder */
-		Searchpath spath (ardour_data_search_path ());
-		spath.add_subdirectory_to_paths (media_dir_name);
-		for (auto const& f : spath) {
-			if (Glib::file_test (f, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
-				_file_chooser->set_current_folder (f);
-			}
-		}
-	}
-
-	_file_chooser_connection.disconnect ();
-	_file_chooser_connection = _file_chooser->signal_response ().connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::sample_chosen), n));
-
-	_file_chooser->present ();
-}
-
-void
-TriggerBoxUI::sample_chosen (int response, uint64_t n)
-{
-	_file_chooser->hide ();
-
-	switch (response) {
-		case Gtk::RESPONSE_OK:
-			break;
-		default:
-			return;
-	}
-
-	std::list<std::string> paths = _file_chooser->get_filenames ();
-
-	for (std::list<std::string>::iterator s = paths.begin (); s != paths.end (); ++s) {
-		/* this will do nothing if n is too large */
-		_triggerbox.set_from_path (n, *s);
-		++n;
 	}
 }
 
@@ -1073,7 +1022,7 @@ TriggerBoxUI::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int, i
 		ev.detail = GDK_NOTIFY_ANCESTOR;
 		for (size_t i = 0; i < _slots.size (); ++i) {
 			ev.type = (i == n) ? GDK_ENTER_NOTIFY : GDK_LEAVE_NOTIFY;
-			name_button_event ((GdkEvent*)&ev, i);
+			_slots[i]->name_button_event ((GdkEvent*)&ev);
 		}
 		return true;
 	} else {
@@ -1089,7 +1038,7 @@ TriggerBoxUI::drag_leave (Glib::RefPtr<Gdk::DragContext> const&, guint)
 	ev.type   = GDK_LEAVE_NOTIFY;
 	ev.detail = GDK_NOTIFY_ANCESTOR;
 	for (size_t i = 0; i < _slots.size (); ++i) {
-		name_button_event ((GdkEvent*)&ev, i);
+		_slots[i]->name_button_event ((GdkEvent*)&ev);
 	}
 }
 
@@ -1121,23 +1070,6 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 		}
 	}
 	context->drag_finish (true, false, time);
-}
-
-void
-TriggerBoxUI::set_from_selection (uint64_t n)
-{
-	Selection&      selection (PublicEditor::instance ().get_selection ());
-	RegionSelection rselection (selection.regions);
-
-	if (rselection.empty ()) {
-		/* XXX possible message about no selection ? */
-		return;
-	}
-
-	for (RegionSelection::iterator r = rselection.begin (); r != rselection.end (); ++r) {
-		_triggerbox.set_from_selection (n, (*r)->region ());
-		++n;
-	}
 }
 
 void

@@ -234,8 +234,7 @@ TriggerUI::sample_chosen (int response)
 	std::list<std::string> paths = _file_chooser->get_filenames ();
 
 	for (std::list<std::string>::iterator s = paths.begin (); s != paths.end (); ++s) {
-		TriggerBox *box = (TriggerBox *) &tref.trigger()->box();
-		box->set_from_path (trigger()->index(), *s);
+		trigger()->box().set_from_path (trigger()->index(), *s);
 	}
 }
 
@@ -482,8 +481,8 @@ TriggerUI::trigger_changed (PropertyChange const& what)
 void
 TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 {
-//	trigger_connections.clear();
-//	trigger_swap_connection.clear();
+	trigger_connections.disconnect();
+	trigger_swap_connection.disconnect();
 
 	tref = tr;
 

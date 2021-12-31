@@ -68,9 +68,38 @@ public:
 
 	void set_default_colors ();
 
+	bool play_button_event (GdkEvent*);
+	bool name_button_event (GdkEvent*);
+	bool follow_button_event (GdkEvent*);
+
+	void choose_sample ();
+	void sample_chosen (int r);
+
+	void launch_context_menu ();
+	void follow_context_menu ();
+	void context_menu ();
+
+	Gtk::ColorSelectionDialog _color_dialog;
+	void pick_color ();
+	void set_follow_action (ARDOUR::Trigger::FollowAction);
+	void set_launch_style (ARDOUR::Trigger::LaunchStyle);
+	void set_quantization (Temporal::BBT_Offset const&);
+	void set_from_selection ();
+
+	void toggle_trigger_isolated ();
+	void clear_trigger ();
+	void edit_trigger ();
+
 private:
 	double           _poly_size;
 	double           _poly_margin;
+
+	Gtk::FileChooserDialog* _file_chooser;
+	sigc::connection        _file_chooser_connection;
+	Gtk::Menu*              _launch_context_menu;
+	Gtk::Menu*              _follow_context_menu;
+	Gtk::Menu*              _context_menu;
+	bool                    _ignore_menu_action;
 
 	PBD::ScopedConnection owner_prop_connection;
 	void                  owner_prop_change (PBD::PropertyChange const&);
@@ -85,9 +114,6 @@ public:
 	TriggerBoxUI (ArdourCanvas::Item* parent, ARDOUR::TriggerBox&);
 	~TriggerBoxUI ();
 
-	void toggle_trigger_isolated (uint64_t n);
-	void clear_trigger (uint64_t n);
-	void edit_trigger (uint64_t n);
 	void start_updating ();
 	void stop_updating ();
 
@@ -98,30 +124,6 @@ private:
 
 	ARDOUR::TriggerBox&     _triggerbox;
 	Slots                   _slots;
-	Gtk::FileChooserDialog* _file_chooser;
-	sigc::connection        _file_chooser_connection;
-	Gtk::Menu*              _launch_context_menu;
-	Gtk::Menu*              _follow_context_menu;
-	Gtk::Menu*              _context_menu;
-	bool                    _ignore_menu_action;
-
-	bool play_button_event (GdkEvent*, uint64_t);
-	bool name_button_event (GdkEvent*, uint64_t);
-	bool follow_button_event (GdkEvent*, uint64_t);
-
-	void choose_sample (uint64_t n);
-	void sample_chosen (int r, uint64_t n);
-
-	void launch_context_menu (uint64_t n);
-	void follow_context_menu (uint64_t n);
-	void context_menu (uint64_t n);
-
-	Gtk::ColorSelectionDialog _color_dialog;
-	void pick_color (uint64_t n);
-	void set_follow_action (uint64_t slot, ARDOUR::Trigger::FollowAction);
-	void set_launch_style (uint64_t slot, ARDOUR::Trigger::LaunchStyle);
-	void set_quantization (uint64_t slot, Temporal::BBT_Offset const&);
-	void set_from_selection (uint64_t slot);
 
 	void build ();
 	void rapid_update ();

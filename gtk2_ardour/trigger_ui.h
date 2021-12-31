@@ -61,6 +61,11 @@ public:
 
 	ARDOUR::TriggerReference trigger_reference() const { return tref; }
 	ARDOUR::TriggerPtr       trigger() const;
+	ARDOUR::TriggerBox&		 triggerbox() const { return trigger()->box(); }
+
+	void choose_color ();
+	void choose_sample ();
+	void sample_chosen (int r);
 
 private:
 	void trigger_changed (PBD::PropertyChange const& );  //calls on_trigger_changed to subclasses
@@ -73,10 +78,6 @@ private:
 	static void                 register_actions ();
 
 protected:
-	void choose_color ();
-	void choose_sample ();
-	void sample_chosen (int r);
-
 	/* all of this for name editing ...  */
 	bool namebox_button_press (GdkEventButton*);
 	bool start_rename ();
