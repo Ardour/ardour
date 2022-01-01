@@ -297,6 +297,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	std::atomic<Trigger*>     _pending;
 
+	void when_stopped_during_run ();
 	void set_region_internal (boost::shared_ptr<Region>);
 	virtual void retrigger() = 0;
 	virtual void set_usable_length () = 0;
