@@ -225,10 +225,12 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	_name_column = _display.append_column ("", _columns.text) - 1;
 	_visible_column = _display.append_column ("", _columns.visible) - 1;
+	_trigger_column = _display.append_column ("", _columns.trigger) - 1;
 	_active_column = _display.append_column ("", _columns.active) - 1;
 
 	name_column = _display.get_column (_name_column);
 	visible_column = _display.get_column (_visible_column);
+	trigger_column = _display.get_column (_trigger_column);
 	active_column = _display.get_column (_active_column);
 
 	_display.append_column (*input_active_column);
@@ -246,14 +248,15 @@ EditorRoutes::EditorRoutes (Editor* e)
 	ColumnInfo ci[] = {
 		{ 0,  _("Name"),        _("Track/Bus Name") },
 		{ 1, S_("Visible|V"),   _("Track/Bus visible ?") },
-		{ 2, S_("Active|A"),    _("Track/Bus active ?") },
-		{ 3, S_("MidiInput|I"), _("MIDI input enabled") },
-		{ 4, S_("Rec|R"),       _("Record enabled") },
-		{ 5, S_("Rec|RS"),      _("Record Safe") },
-		{ 6, S_("Mute|M"),      _("Muted") },
-		{ 7, S_("Solo|S"),      _("Soloed") },
-		{ 8, S_("SoloIso|SI"),  _("Solo Isolated") },
-		{ 9, S_("SoloLock|SS"), _("Solo Safe (Locked)") },
+		{ 2, S_("Trigger|T"),   _("Visible on TriggerPage ?") },
+		{ 3, S_("Active|A"),    _("Track/Bus active ?") },
+		{ 4, S_("MidiInput|I"), _("MIDI input enabled") },
+		{ 5, S_("Rec|R"),       _("Record enabled") },
+		{ 6, S_("Rec|RS"),      _("Record Safe") },
+		{ 7, S_("Mute|M"),      _("Muted") },
+		{ 8, S_("Solo|S"),      _("Soloed") },
+		{ 9, S_("SoloIso|SI"),  _("Solo Isolated") },
+		{10, S_("SoloLock|SS"), _("Solo Safe (Locked)") },
 		{ -1, 0, 0 }
 	};
 
@@ -303,6 +306,19 @@ EditorRoutes::EditorRoutes (Editor* e)
 	visible_col->set_fixed_width(30);
 	visible_col->set_alignment(ALIGN_CENTER);
 
+	CellRendererToggle* trigger_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (_trigger_column));
+
+	trigger_cell->property_activatable() = true;
+	trigger_cell->property_radio() = false;
+	trigger_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRoutes::trigger_changed));
+
+	TreeViewColumn* trigger_col = dynamic_cast<TreeViewColumn*> (_display.get_column (_trigger_column));
+	trigger_col->set_expand(false);
+	trigger_col->set_sizing(TREE_VIEW_COLUMN_FIXED);
+	trigger_col->set_fixed_width(30);
+	trigger_col->set_alignment(ALIGN_CENTER);
+	trigger_col->add_attribute (trigger_cell->property_visible(), _columns.is_track);
+
 	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (_active_column));
 
 	active_cell->property_activatable() = true;
@@ -315,6 +331,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	active_col->set_fixed_width (30);
 	active_col->set_alignment (ALIGN_CENTER);
 	active_col->add_attribute (active_cell->property_visible(), _columns.no_vca);
+
 
 	_model->signal_row_deleted().connect (sigc::mem_fun (*this, &EditorRoutes::row_deleted));
 	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
@@ -705,6 +722,22 @@ EditorRoutes::visible_changed (std::string const & path)
 }
 
 void
+EditorRoutes::trigger_changed (std::string const & path)
+{
+	if (_session && _session->deletion_in_progress()) {
+		return;
+	}
+
+	Gtk::TreeModel::Row row = *_model->get_iter (path);
+	assert (row[_columns.is_track]);
+	boost::shared_ptr<Stripable> stripable = row[_columns.stripable];
+	if (stripable) {
+		bool const tt = row[_columns.trigger];
+		stripable->presentation_info ().set_trigger_track (!tt);
+	}
+}
+
+void
 EditorRoutes::active_changed (std::string const & path)
 {
 	if (_session && _session->deletion_in_progress ()) {
@@ -784,6 +817,7 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 
 		row[_columns.text] = stripable->name();
 		row[_columns.visible] = (*x)->marked_for_display();
+		row[_columns.trigger] = stripable->presentation_info ().trigger_track () && row[_columns.is_track];
 		row[_columns.active] = true;
 		row[_columns.tv] = *x;
 		row[_columns.stripable] = stripable;
@@ -902,11 +936,16 @@ EditorRoutes::route_removed (TimeAxisView *tv)
 void
 EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost::weak_ptr<Stripable> s)
 {
-	if (!what_changed.contains (ARDOUR::Properties::hidden) && !what_changed.contains (ARDOUR::Properties::name)) {
+	if (_adding_routes) {
 		return;
 	}
 
-	if (_adding_routes) {
+	PropertyChange interests;
+	interests.add (ARDOUR::Properties::name);
+	interests.add (ARDOUR::Properties::hidden);
+	interests.add (ARDOUR::Properties::trigger_track);
+
+  if (!what_changed.contains (interests)) {
 		return;
 	}
 
@@ -933,7 +972,10 @@ EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost:
 			if (what_changed.contains (ARDOUR::Properties::hidden)) {
 				(*i)[_columns.visible] = !stripable->presentation_info().hidden();
 				redisplay ();
+			}
 
+			if (what_changed.contains (ARDOUR::Properties::trigger_track)) {
+				(*i)[_columns.trigger] = stripable->presentation_info ().trigger_track () && (*i)[_columns.is_track];
 			}
 
 			break;
@@ -1446,6 +1488,7 @@ EditorRoutes::button_press (GdkEventButton* ev)
 	    (tvc == solo_safe_state_column) ||
 	    (tvc == solo_isolate_state_column) ||
 	    (tvc == visible_column) ||
+	    (tvc == trigger_column) ||
 	    (tvc == active_column)) {
 		column_does_not_select = true;
 	}

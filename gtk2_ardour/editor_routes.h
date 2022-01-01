@@ -89,6 +89,7 @@ private:
 	void presentation_info_changed (PBD::PropertyChange const &);
 	void row_deleted (Gtk::TreeModel::Path const &);
 	void visible_changed (std::string const &);
+	void trigger_changed (std::string const &);
 	void active_changed (std::string const &);
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
 	bool button_press (GdkEventButton *);
@@ -125,6 +126,7 @@ private:
 		ModelColumns() {
 			add (text);
 			add (visible);
+			add (trigger);
 			add (rec_state);
 			add (rec_safe);
 			add (mute_state);
@@ -145,6 +147,7 @@ private:
 
 		Gtk::TreeModelColumn<std::string>    text;
 		Gtk::TreeModelColumn<bool>           visible;
+		Gtk::TreeModelColumn<bool>           trigger;
 		Gtk::TreeModelColumn<uint32_t>       rec_state;
 		Gtk::TreeModelColumn<uint32_t>       rec_safe;
 		Gtk::TreeModelColumn<uint32_t>       mute_state;
@@ -173,6 +176,7 @@ private:
 	Gtk::TreeViewColumn* solo_isolate_state_column;
 	Gtk::TreeViewColumn* name_column;
 	Gtk::TreeViewColumn* visible_column;
+	Gtk::TreeViewColumn* trigger_column;
 	Gtk::TreeViewColumn* active_column;
 
 	Gtk::ScrolledWindow _scroller;
@@ -181,6 +185,7 @@ private:
 	ModelColumns _columns;
 	int _name_column;
 	int _visible_column;
+	int _trigger_column;
 	int _active_column;
 
 	bool _ignore_reorder;
