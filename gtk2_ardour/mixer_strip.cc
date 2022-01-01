@@ -432,6 +432,7 @@ MixerStrip::~MixerStrip ()
 	}
 
 	delete _master_volume_menu;
+	delete route_ops_menu;
 }
 
 void
