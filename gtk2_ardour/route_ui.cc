@@ -2254,6 +2254,23 @@ RouteUI::route_group() const
 	return _route->route_group();
 }
 
+void
+RouteUI::help_count_plugins (boost::weak_ptr<Processor> p, uint32_t* plugin_insert_cnt)
+{
+	boost::shared_ptr<Processor> processor (p.lock ());
+	if (!processor || !processor->display_to_user()) {
+		return;
+	}
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+#ifdef MIXBUS
+	if (pi && pi->is_channelstrip ()) {
+		return;
+	}
+#endif
+	if (pi) {
+		++(*plugin_insert_cnt);
+	}
+}
 
 RoutePinWindowProxy::RoutePinWindowProxy(std::string const &name, boost::shared_ptr<ARDOUR::Route> route)
 	: WM::ProxyBase (name, string())

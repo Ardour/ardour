@@ -217,6 +217,8 @@ protected:
 
 	static void delete_ioselector (IOSelectorMap&, boost::shared_ptr<ARDOUR::Route>);
 
+	static void help_count_plugins (boost::weak_ptr<ARDOUR::Processor> p, uint32_t*);
+
 	PBD::ScopedConnectionList route_connections;
 	bool                      self_destruct;
 

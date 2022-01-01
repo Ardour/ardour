@@ -225,9 +225,6 @@ private:
 	bool input_active_button_press (GdkEventButton*);
 	bool input_active_button_release (GdkEventButton*);
 
-	void help_count_plugins (boost::weak_ptr<ARDOUR::Processor>);
-	uint32_t _plugin_insert_cnt;
-
 	gint    mark_update_safe ();
 	guint32 mode_switch_in_progress;
 

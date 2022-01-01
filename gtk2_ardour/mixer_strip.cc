@@ -123,7 +123,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, output_button (false)
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
-	, _plugin_insert_cnt (0)
 	, _tmaster_widget (-1, 16)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
@@ -163,7 +162,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, output_button (false)
 	, monitor_section_button (0)
 	, midi_input_enable_button (0)
-	, _plugin_insert_cnt (0)
 	, _tmaster_widget (-1, 16)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
@@ -1066,24 +1064,6 @@ MixerStrip::show_passthru_color ()
 	reset_strip_style ();
 }
 
-
-void
-MixerStrip::help_count_plugins (boost::weak_ptr<Processor> p)
-{
-	boost::shared_ptr<Processor> processor (p.lock ());
-	if (!processor || !processor->display_to_user()) {
-		return;
-	}
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
-#ifdef MIXBUS
-	if (pi && pi->is_channelstrip ()) {
-		return;
-	}
-#endif
-	if (pi) {
-		++_plugin_insert_cnt;
-	}
-}
 void
 MixerStrip::build_route_ops_menu ()
 {
@@ -1171,9 +1151,9 @@ MixerStrip::build_route_ops_menu ()
 		items.push_back (SeparatorElem());
 	}
 
-	_plugin_insert_cnt = 0;
-	_route->foreach_processor (sigc::mem_fun (*this, &MixerStrip::help_count_plugins));
-	if (active && _plugin_insert_cnt > 0) {
+	uint32_t plugin_insert_cnt = 0;
+	_route->foreach_processor (boost::bind (RouteUI::help_count_plugins, _1, & plugin_insert_cnt));
+	if (active && plugin_insert_cnt > 0) {
 		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
 	}
 
