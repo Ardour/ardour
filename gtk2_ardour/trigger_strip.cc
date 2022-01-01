@@ -23,6 +23,7 @@
 #include "pbd/unwind.h"
 
 #include "ardour/audio_track.h"
+#include "ardour/midi_track.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_manager.h"
@@ -38,6 +39,7 @@
 #include "mixer_ui.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
+#include "public_editor.h"
 #include "trigger_master.h"
 #include "trigger_strip.h"
 #include "ui_config.h"
@@ -121,6 +123,7 @@ TriggerStrip::color () const
 void
 TriggerStrip::init ()
 {
+	_route_ops_menu = 0;
 	_tmaster = new TriggerMaster (_tmaster_widget.root ());
 
 	_name_button.set_name ("mixer strip button");
@@ -206,6 +209,9 @@ TriggerStrip::set_route (boost::shared_ptr<Route> rt)
 	_level_meter.clear_meters ();
 	_level_meter.setup_meters (PX_SCALE (100), PX_SCALE (10), 6);
 
+	delete _route_ops_menu;
+	_route_ops_menu = 0;
+
 	_route->input ()->changed.connect (*this, invalidator (*this), boost::bind (&TriggerStrip::io_changed, this), gui_context ());
 	_route->output ()->changed.connect (*this, invalidator (*this), boost::bind (&TriggerStrip::io_changed, this), gui_context ());
 	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&TriggerStrip::io_changed, this), gui_context ());
@@ -225,6 +231,108 @@ TriggerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 #endif
+}
+
+void
+TriggerStrip::build_route_ops_menu ()
+{
+	using namespace Menu_Helpers;
+	_route_ops_menu = new Menu;
+	_route_ops_menu->set_name ("ArdourContextMenu");
+
+	bool active = _route->active () || ARDOUR::Profile->get_mixbus();
+
+	MenuList& items = _route_ops_menu->items();
+	if (active) {
+
+		items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+
+		items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
+
+		items.push_back (MenuElem (_("Inputs..."), sigc::mem_fun (*this, &RouteUI::edit_input_configuration)));
+
+		items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
+
+		if (!Profile->get_mixbus()) {
+			items.push_back (SeparatorElem());
+			items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
+			/* do not allow rename if the track is record-enabled */
+			items.back().set_sensitive (!is_track() || !track()->rec_enable_control()->get_value());
+		}
+
+		items.push_back (SeparatorElem());
+	}
+
+	if ((!_route->is_master() || !active)
+#ifdef MIXBUS
+			&& !_route->mixbus()
+#endif
+	   )
+	{
+		items.push_back (CheckMenuElem (_("Active")));
+		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+		i->set_active (active);
+		i->set_sensitive (!_session->transport_rolling());
+		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
+		items.push_back (SeparatorElem());
+	}
+
+	if (active && !Profile->get_mixbus ()) {
+		items.push_back (CheckMenuElem (_("Strict I/O")));
+		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+		i->set_active (_route->strict_io());
+		i->signal_activate().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*_route, &Route::set_strict_io), !_route->strict_io())));
+		items.push_back (SeparatorElem());
+	}
+
+	uint32_t plugin_insert_cnt = 0;
+	_route->foreach_processor (boost::bind (RouteUI::help_count_plugins, _1, & plugin_insert_cnt));
+
+	if (active && plugin_insert_cnt > 0) {
+		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
+	}
+
+	if (active && (boost::dynamic_pointer_cast<MidiTrack>(_route) || _route->the_instrument ())) {
+		items.push_back (MenuElem (_("Patch Selector..."),
+					sigc::mem_fun(*this, &RouteUI::select_midi_patch)));
+	}
+
+	if (active && _route->the_instrument () && _route->the_instrument ()->output_streams().n_audio() > 2) {
+		// TODO ..->n_audio() > 1 && separate_output_groups) hard to check here every time.
+		items.push_back (MenuElem (_("Fan out to Busses"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), true, true)));
+		items.push_back (MenuElem (_("Fan out to Tracks"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), false, true)));
+		items.push_back (SeparatorElem());
+	}
+
+	items.push_back (CheckMenuElem (_("Protect Against Denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
+	denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+	denormal_menu_item->set_active (_route->denormal_protection());
+
+	/* note that this relies on selection being shared across editor and
+	 * mixer (or global to the backend, in the future), which is the only
+	 * sane thing for users anyway.
+	 */
+	StripableTimeAxisView* stav = PublicEditor::instance().get_stripable_time_axis_by_id (_route->id());
+	if (active && stav) {
+		Selection& selection (PublicEditor::instance().get_selection());
+		if (!selection.selected (stav)) {
+			selection.set (stav);
+		}
+
+#ifdef MIXBUS
+		if (_route->mixbus()) {
+			/* no dup, no remove */
+			return;
+		}
+#endif
+
+		if (!_route->is_master()) {
+			items.push_back (SeparatorElem());
+			items.push_back (MenuElem (_("Duplicate..."), sigc::mem_fun (*this, &RouteUI::duplicate_selected_routes)));
+			items.push_back (SeparatorElem());
+			items.push_back (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
+		}
+	}
 }
 
 void
@@ -439,8 +547,19 @@ TriggerStrip::name_button_resized (Gtk::Allocation& alloc)
 }
 
 bool
-TriggerStrip::name_button_press (GdkEventButton*)
+TriggerStrip::name_button_press (GdkEventButton* ev)
 {
-	// TODO
+	if (ev->button == 1 || ev->button == 3) {
+		delete _route_ops_menu;
+		build_route_ops_menu ();
+
+		if (ev->button == 1) {
+			Gtkmm2ext::anchored_menu_popup (_route_ops_menu, &_name_button, "", 1, ev->time);
+		} else {
+			_route_ops_menu->popup (3, ev->time);
+		}
+
+		return true;
+	}
 	return false;
 }

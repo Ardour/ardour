@@ -97,6 +97,7 @@ private:
 	void name_changed ();
 	void name_button_resized (Gtk::Allocation&);
 	bool name_button_press (GdkEventButton*);
+	void build_route_ops_menu ();
 	void reset_peak_display ();
 	void reset_route_peak_display (ARDOUR::Route*);
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
@@ -129,6 +130,8 @@ private:
 	PannerUI                                _panners;
 	LevelMeterVBox                          _level_meter;
 	boost::shared_ptr<AutomationController> _gain_control;
+
+	Gtk::Menu* _route_ops_menu;
 };
 
 #endif /* __ardour_trigger_strip__ */
