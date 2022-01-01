@@ -34,16 +34,13 @@ public:
 
 	void set_trigger (ARDOUR::TriggerReference);
 
-private:
+protected:
 	void trigger_changed (const PBD::PropertyChange& what_changed);
 
-	boost::shared_ptr<ARDOUR::MIDITrigger> _trigger;
-
-	Gtk::Label                  _header_label;
+private:
 	ArdourWidgets::ArdourButton _patch_enable_button;
 	ArdourWidgets::ArdourButton _cc_enable_button;
 
-	PBD::ScopedConnection _midi_state_connection;
 };
 
 #endif

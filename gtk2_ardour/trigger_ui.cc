@@ -789,6 +789,5 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 	trigger_changed (pc);
 
 	trigger()->PropertyChanged.connect (trigger_connections, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
-
 	tref.box->TriggerSwapped.connect (trigger_swap_connection, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
 }

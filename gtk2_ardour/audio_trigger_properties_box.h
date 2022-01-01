@@ -38,6 +38,16 @@ public:
 	~TriggerPropertiesBox () {}
 
 	virtual void set_trigger (ARDOUR::TriggerReference) = 0;
+
+protected:
+	ARDOUR::TriggerReference tref;
+	Gtk::Label _header_label;
+
+	virtual void trigger_changed (const PBD::PropertyChange& what_changed) = 0;
+	void trigger_swap (uint32_t);
+
+	PBD::ScopedConnection _state_connection;
+	PBD::ScopedConnection trigger_swap_connection;
 };
 
 class AudioTriggerPropertiesBox : public TriggerPropertiesBox
@@ -51,14 +61,10 @@ public:
 	void set_session (ARDOUR::Session*);
 
 protected:
+	void toggle_stretch ();
 	void trigger_changed (const PBD::PropertyChange& what_changed);
 
-	void toggle_stretch ();
-
-	Gtk::Label _header_label;
-
 private:
-	ARDOUR::TriggerReference tref;
 
 	Gtk::Table _table;
 	Gtk::Label _abpm_label;
@@ -76,7 +82,6 @@ private:
 	ArdourWidgets::ArdourButton _gain_control;
 	ArdourWidgets::ArdourButton _stretch_selector;
 
-	PBD::ScopedConnection _state_connection;
 };
 
 #endif
