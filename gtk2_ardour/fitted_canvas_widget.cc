@@ -65,10 +65,10 @@ FittedCanvasWidget::on_size_request (Gtk::Requisition* req)
 {
 	const double scale = _follow_scale ? UIConfiguration::instance ().get_ui_scale () : 1;
 	if (_nominal_width > 0) {
-		req->width = _nominal_width * scale;
+		req->width = nominal_width() * scale;
 	}
 	if (_nominal_height > 0) {
-		req->height = _nominal_height * scale;
+		req->height = nominal_height() * scale;
 	}
 }
 
