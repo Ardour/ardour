@@ -18,7 +18,7 @@
  */
 
 #ifndef _gtk_ardour_trigger_master_h_
-#define _gtk_ardour_ardour_trigger_master_h_
+#define _gtk_ardour_trigger_master_h_
 
 #include <gtkmm/colorselection.h>
 
