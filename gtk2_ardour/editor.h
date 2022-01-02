@@ -1368,7 +1368,8 @@ private:
 	void transpose_region ();
 	void transpose_regions (const RegionSelection& rs);
 	void insert_patch_change (bool from_context);
-	void fork_region ();
+	void fork_selected_regions ();
+	void fork_regions_from_unselected ();
 
 	void do_insert_time ();
 	void insert_time (Temporal::timepos_t const &, Temporal::timecnt_t const &, Editing::InsertTimeOption, bool, bool, bool, bool, bool, bool);

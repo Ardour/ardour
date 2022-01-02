@@ -1539,7 +1539,8 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 		_region_actions->get_action("legatize-region")->set_sensitive (false);
 		_region_actions->get_action("remove-overlap")->set_sensitive (false);
 		_region_actions->get_action("transform-region")->set_sensitive (false);
-		_region_actions->get_action("fork-region")->set_sensitive (false);
+		_region_actions->get_action("fork-selected-regions")->set_sensitive (false);
+		_region_actions->get_action("fork-regions-from-unselected")->set_sensitive (false);
 		_region_actions->get_action("insert-patch-change-context")->set_sensitive (false);
 		_region_actions->get_action("insert-patch-change")->set_sensitive (false);
 		_region_actions->get_action("transpose-region")->set_sensitive (false);

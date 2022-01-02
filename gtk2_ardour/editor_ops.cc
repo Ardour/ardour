@@ -5871,8 +5871,91 @@ Editor::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
 	}
 }
 
+#include "ardour/midi_source.h" // MidiSource::name()
+
 void
-Editor::fork_region ()
+Editor::fork_regions_from_unselected ()
+{
+	/* keep linkage between regions in the selection, but unlink from unselected regions */
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (rs.empty()) {
+		return;
+	}
+
+	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
+	bool in_command = false;
+
+	gdk_flush ();
+
+	/* find the set of all MidiSources associated with the selected regions */
+	std::set<boost::shared_ptr<MidiSource> > sources_list;
+	for (const auto& r : rs) {
+		const MidiRegionView* const mrv = dynamic_cast<const MidiRegionView*>(r);
+		if (!mrv)
+			continue; // not a MIDI region
+
+		sources_list.insert(mrv->midi_region()->midi_source());
+	}
+
+	std::set<boost::shared_ptr<Playlist> > affected_playlists;
+	for (auto r : rs) {
+		const MidiRegionView* const mrv = dynamic_cast<const MidiRegionView*>(r);
+		if (mrv && sources_list.find(mrv->midi_region()->midi_source()) != sources_list.end()) {
+			affected_playlists.insert(mrv->region()->playlist());
+		}
+	}
+	for (auto p : affected_playlists) {
+		p->clear_changes ();
+		p->freeze ();
+	}
+
+	/* iterate over sources that need to be duplicated */
+	for (const auto& ms : sources_list) {
+		/* duplicate source */
+		boost::shared_ptr<MidiSource> new_source = _session->create_midi_source_for_session (ms->name());
+		for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
+			RegionSelection::iterator tmp = r;
+			++tmp;
+
+			const MidiRegionView* const mrv = dynamic_cast<const MidiRegionView*>(*r);
+
+			if (!mrv) {
+				r = tmp;
+				continue;
+			}
+			if (mrv->midi_region()->midi_source() != ms) {
+				r = tmp;
+				continue;
+			}
+
+			try {
+				if (!in_command) {
+					begin_reversible_command (_("Unlink from unselected"));
+					in_command = true;
+				}
+				boost::shared_ptr<Playlist> playlist = mrv->region()->playlist();
+				boost::shared_ptr<Region> new_region = mrv->midi_region()->clone (new_source);
+				new_region->set_name (mrv->region()->name() + "-unlinked-region");
+				playlist->replace_region (mrv->region(), new_region, mrv->region()->position());
+			} catch (...) {
+				error << string_compose (_("Could not unlink %1"), mrv->region()->name()) << endmsg;
+			}
+			r = tmp;
+		}
+	}
+	if (in_command) {
+		for (auto p : affected_playlists) {
+			p->thaw ();
+			_session->add_command(new StatefulDiffCommand (p));
+		}
+
+		commit_reversible_command ();
+	}
+}
+
+void
+Editor::fork_selected_regions ()
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 

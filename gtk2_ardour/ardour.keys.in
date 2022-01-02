@@ -175,7 +175,7 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/alternate-redo|                                <@PRIMARY@>y|redo
 @select|Editor/select-all-between-cursors|                  <@PRIMARY@>u|select all regions enclosed by Range
 @select|Editor/select-all-within-cursors|                              u|select all regions touched by Range
-@rop|Region/fork-region|                                   <@TERTIARY@>u|unlink midi from other regions
+@rop|Region/fork-regions-from-unselected|                  <@TERTIARY@>u|unlink midi from unselected regions
 @eep|Region/insert-region-from-source-list|                            i|insert from region list
 @sess|Common/addExistingAudioFiles|                         <@PRIMARY@>i|import audio files
 @gselect|Common/invert-selection|               <@PRIMARY@><@TERTIARY@>i|invert selection

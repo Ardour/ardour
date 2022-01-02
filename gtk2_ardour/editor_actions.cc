@@ -1910,7 +1910,8 @@ Editor::register_region_actions ()
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "remove-overlap", _("Remove Overlap"), sigc::bind(sigc::mem_fun (*this, &Editor::legatize_region), true));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "insert-patch-change", _("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &Editor::insert_patch_change), false));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "insert-patch-change-context", _("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &Editor::insert_patch_change), true));
-	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "fork-region", _("Unlink from other copies"), sigc::mem_fun (*this, &Editor::fork_region));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "fork-selected-regions", _("Unlink all selected regions"), sigc::mem_fun (*this, &Editor::fork_selected_regions));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "fork-regions-from-unselected", _("Unlink from unselected"), sigc::mem_fun (*this, &Editor::fork_regions_from_unselected));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "strip-region-silence", _("Strip Silence..."), sigc::mem_fun (*this, &Editor::strip_region_silence));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "set-selection-from-region", _("Set Range Selection"), sigc::mem_fun (*this, &Editor::set_selection_from_region));
 

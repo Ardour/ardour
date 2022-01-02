@@ -357,7 +357,8 @@
         <menuitem action='legatize-region'/>
         <menuitem action='remove-overlap'/>
         <menuitem action='transform-region'/>
-        <menuitem action='fork-region'/>
+        <menuitem action='fork-selected-regions'/>
+        <menuitem action='fork-regions-from-unselected'/>
         <menuitem action='deinterlace-midi'/>
         <menuitem action='show-region-list-editor'/>
       </menu>
@@ -857,7 +858,8 @@
       <menuitem action='legatize-region'/>
       <menuitem action='remove-overlap'/>
       <menuitem action='transform-region'/>
-      <menuitem action='fork-region'/>
+      <menuitem action='fork-selected-regions'/>
+      <menuitem action='fork-regions-from-unselected'/>
       <menuitem action='deinterlace-midi'/>
       <menuitem action='show-region-list-editor'/>
     </menu>
