@@ -462,8 +462,17 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 				/* we wrote something */
 
+				/* try to guess at the meter, for 5/4 midi loop oddballs */
+				int pulses_per_bar = 4;
+				Evoral::SMF::Tempo *tempo = source->nth_tempo (0);
+				if (tempo && (tempo->numerator>0) ) {
+					pulses_per_bar = tempo->numerator;
+				}
+
+				/* extend the length of the region to the end of a bar */
 				const Temporal::Beats  length_beats = Temporal::Beats::ticks_at_rate(t, source->ppqn());
-				smfs->update_length (timecnt_t (length_beats.round_up_to_beat(), timepos_t(Temporal::BeatTime)));
+				smfs->update_length (timecnt_t (length_beats.round_up_to_multiple(Temporal::Beats(pulses_per_bar,0)), timepos_t(Temporal::BeatTime)));
+
 				smfs->mark_streaming_write_completed (source_lock);
 				smfs->load_model (source_lock, true);
 
