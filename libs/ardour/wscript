@@ -584,14 +584,14 @@ def build(bld):
         if bld.env['SINGLE_TESTS']:
             create_ardour_test_program(bld, obj.includes, 'unit-test-audio_engine', 'test_audio_engine', ['test/audio_engine_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-automation_list_property', 'test_automation_list_property', ['test/automation_list_property_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'unit-test-bbt', 'test_bbt', ['test/bbt_test.cc'])
+            #create_ardour_test_program(bld, obj.includes, 'unit-test-bbt', 'test_bbt', ['test/bbt_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-fpu', 'test_fpu', ['test/fpu_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'unit-test-tempo', 'test_tempo', ['test/tempo_test.cc'])
+            #create_ardour_test_program(bld, obj.includes, 'unit-test-tempo', 'test_tempo', ['test/tempo_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-lua_script', 'test_lua_script', ['test/lua_script_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-midi_clock', 'test_midi_clock', ['test/midi_clock_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-resampled_source', 'test_resampled_source', ['test/resampled_source_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'unit-test-samplewalk_to_beats', 'test_samplewalk_to_beats', ['test/samplewalk_to_beats_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'unit-test-samplepos_plus_beats', 'test_samplepos_plus_beats', ['test/samplepos_plus_beats_test.cc'])
+            #create_ardour_test_program(bld, obj.includes, 'unit-test-samplewalk_to_beats', 'test_samplewalk_to_beats', ['test/samplewalk_to_beats_test.cc'])
+            #create_ardour_test_program(bld, obj.includes, 'unit-test-samplepos_plus_beats', 'test_samplepos_plus_beats', ['test/samplepos_plus_beats_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-playlist_equivalent_regions', 'test_playlist_equivalent_regions', ['test/playlist_equivalent_regions_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-playlist_layering', 'test_playlist_layering', ['test/playlist_layering_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-plugins', 'test_plugins', ['test/plugins_test.cc'])
@@ -602,27 +602,27 @@ def build(bld):
             create_ardour_test_program(bld, obj.includes, 'unit-test-session', 'test_session', ['test/session_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'unit-test-dsp_load_calculator', 'test_dsp_load_calculator', ['test/dsp_load_calculator_test.cc'])
 
-        test_sources  = '''
-            test/audio_engine_test.cc
-            test/automation_list_property_test.cc
-            test/bbt_test.cc
-            test/dsp_load_calculator_test.cc
-            test/fpu_test.cc
-            test/tempo_test.cc
-            test/lua_script_test.cc
-            test/midi_clock_test.cc
-            test/resampled_source_test.cc
-            test/samplewalk_to_beats_test.cc
-            test/samplepos_plus_beats_test.cc
-            test/playlist_equivalent_regions_test.cc
-            test/playlist_layering_test.cc
-            test/plugins_test.cc
-            test/region_naming_test.cc
-            test/control_surfaces_test.cc
-            test/mtdm_test.cc
-            test/sha1_test.cc
-            test/session_test.cc
-        '''.split()
+        test_sources  = [
+            'test/audio_engine_test.cc',
+            'test/automation_list_property_test.cc',
+            #'test/bbt_test.cc',
+            'test/dsp_load_calculator_test.cc',
+            'test/fpu_test.cc',
+            #'test/tempo_test.cc',
+            'test/lua_script_test.cc',
+            'test/midi_clock_test.cc',
+            'test/resampled_source_test.cc',
+            #'test/samplewalk_to_beats_test.cc',
+            #'test/samplepos_plus_beats_test.cc',
+            'test/playlist_equivalent_regions_test.cc',
+            'test/playlist_layering_test.cc',
+            'test/plugins_test.cc',
+            'test/region_naming_test.cc',
+            'test/control_surfaces_test.cc',
+            'test/mtdm_test.cc',
+            'test/sha1_test.cc',
+            'test/session_test.cc',
+        ]
 
 # Tests that don't work
 #                test/playlist_read_test.cc

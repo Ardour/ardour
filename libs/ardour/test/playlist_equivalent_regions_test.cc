@@ -49,10 +49,10 @@ void
 PlaylistEquivalentRegionsTest::basicsTest ()
 {
 	/* Put _r[0] on _playlist */
-	_playlist->add_region (_r[0], 42);
+	_playlist->add_region (_r[0], timepos_t(42));
 
 	/* And _r[1] on _playlist_b at the same position */
-	_playlist_b->add_region (_r[1], 42);
+	_playlist_b->add_region (_r[1], timepos_t(42));
 
 	/* Look for the equivalents to _r[0] on _playlist_b */
 	vector<boost::shared_ptr<Region> > e;
@@ -63,7 +63,7 @@ PlaylistEquivalentRegionsTest::basicsTest ()
 	CPPUNIT_ASSERT_EQUAL (e.front(), _r[1]);
 
 	/* Move _r[1] */
-	_r[1]->set_position (66);
+	_r[1]->set_position (timepos_t (66));
 
 	/* Look again for the equivalents to _r[0] on _playlist_b */
 	e.clear ();
@@ -80,12 +80,12 @@ PlaylistEquivalentRegionsTest::multiLayerTest ()
 	_playlist_b->clear ();
 
 	/* Put _r[0] and _r[1] at the same position on _playlist so that they overlap */
-	_playlist->add_region (_r[0], 42);
-	_playlist->add_region (_r[1], 42);
+	_playlist->add_region (_r[0], timepos_t(42));
+	_playlist->add_region (_r[1], timepos_t(42));
 
 	/* And _r[2], _r[3] similarly on _playlist_b */
-	_playlist_b->add_region (_r[2], 42);
-	_playlist_b->add_region (_r[3], 42);
+	_playlist_b->add_region (_r[2], timepos_t(42));
+	_playlist_b->add_region (_r[3], timepos_t(42));
 
 	RegionEquivalence re = Config->get_region_equivalence();
 

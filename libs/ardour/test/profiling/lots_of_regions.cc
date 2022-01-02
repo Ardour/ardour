@@ -40,7 +40,8 @@ main (int argc, char* argv[])
 	/* Duplicate it a lot */
 	session->begin_reversible_command ("foo");
 	playlist->clear_changes ();
-	playlist->duplicate (region, region->last_sample() + 1, 1000);
+	timepos_t pos (region->last_sample() + 1);
+	playlist->duplicate (region, pos, 1000);
 	session->add_command (new StatefulDiffCommand (playlist));
 	session->commit_reversible_command ();
 
@@ -50,7 +51,8 @@ main (int argc, char* argv[])
 	/* And do it again */
 	session->begin_reversible_command ("foo");
 	playlist->clear_changes ();
-	playlist->duplicate (region, region->last_sample() + 1, 1000);
+	timepos_t pos2 (region->last_sample() + 1);
+	playlist->duplicate (region, pos2, 1000);
 	session->add_command (new StatefulDiffCommand (playlist));
 	session->commit_reversible_command ();
 

@@ -43,6 +43,21 @@ write_automation_list_xml (XMLNode* node, std::string filename)
 	CPPUNIT_ASSERT (write_ref (node, output_file));
 }
 
+static int
+static_sample_rate () { return 48000; }
+
+void
+AutomationListPropertyTest::setUp ()
+{
+	Temporal::set_sample_rate_callback (static_sample_rate);
+}
+
+void
+AutomationListPropertyTest::tearDown ()
+{
+	Temporal::set_sample_rate_callback (0);
+}
+
 void
 AutomationListPropertyTest::basicTest ()
 {
@@ -53,7 +68,7 @@ AutomationListPropertyTest::basicTest ()
 	descriptor.property_id = g_quark_from_static_string ("FadeIn");
 	AutomationListProperty property (
 		descriptor,
-		boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation)))
+		boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::AudioTime))
 		);
 
 	property.clear_changes ();
@@ -61,8 +76,8 @@ AutomationListPropertyTest::basicTest ()
 	/* No change since we just cleared them */
 	CPPUNIT_ASSERT_EQUAL (false, property.changed());
 
-	property->add (1, 0.5, false, false);
-	property->add (3, 2.0, false, false);
+	property->add (timepos_t(1), 0.5, false, false);
+	property->add (timepos_t(3), 2.0, false, false);
 
 	/* Now it has changed */
 	CPPUNIT_ASSERT_EQUAL (true, property.changed());
@@ -83,8 +98,8 @@ AutomationListPropertyTest::basicTest ()
 	/* Do some more */
 	property.clear_changes ();
 	CPPUNIT_ASSERT_EQUAL (false, property.changed());
-	property->add (5, 1.5, false, false);
-	property->add (7, 1.0, false, false);
+	property->add (timepos_t(5), 1.5, false, false);
+	property->add (timepos_t(7), 1.0, false, false);
 	CPPUNIT_ASSERT_EQUAL (true, property.changed());
 	delete foo;
 	foo = new XMLNode ("test");
@@ -99,7 +114,7 @@ class Fred : public StatefulDestructible
 {
 public:
 	Fred ()
-		: _jim (_descriptor, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation))))
+		: _jim (_descriptor, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::AudioTime)))
 
 	{
 		add_property (_jim);
@@ -137,13 +152,13 @@ AutomationListPropertyTest::undoTest ()
 	boost::shared_ptr<Fred> sheila (new Fred);
 
 	/* Add some data */
-	sheila->_jim->add (0, 1, false, false);
-	sheila->_jim->add (1, 2, false, false);
+	sheila->_jim->add (timepos_t(0), 1, false, false);
+	sheila->_jim->add (timepos_t(1), 2, false, false);
 
 	/* Do a `command' */
 	sheila->clear_changes ();
-	sheila->_jim->add (2, 1, false, false);
-	sheila->_jim->add (3, 0, false, false);
+	sheila->_jim->add (timepos_t(2), 1, false, false);
+	sheila->_jim->add (timepos_t(3), 0, false, false);
 	StatefulDiffCommand sdc (sheila);
 
 	std::string test_data_filename = "automation_list_property_test3.ref";

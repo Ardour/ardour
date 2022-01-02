@@ -28,15 +28,15 @@ using namespace ARDOUR;
 void
 PlaylistLayeringTest::basicsTest ()
 {
-	_playlist->add_region (_r[0], 0);
-	_playlist->add_region (_r[1], 10);
-	_playlist->add_region (_r[2], 20);
+	_playlist->add_region (_r[0], timepos_t(0));
+	_playlist->add_region (_r[1], timepos_t(10));
+	_playlist->add_region (_r[2], timepos_t(20));
 
 	CPPUNIT_ASSERT_EQUAL (layer_t (0), _r[0]->layer ());
 	CPPUNIT_ASSERT_EQUAL (layer_t (1), _r[1]->layer ());
 	CPPUNIT_ASSERT_EQUAL (layer_t (2), _r[2]->layer ());
 
-	_r[0]->set_position (5);
+	_r[0]->set_position (timepos_t(5));
 
 	/* region move should have no effect */
 	CPPUNIT_ASSERT_EQUAL (layer_t (0), _r[0]->layer ());

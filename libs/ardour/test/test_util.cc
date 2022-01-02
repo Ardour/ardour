@@ -107,6 +107,7 @@ create_and_start_dummy_backend ()
 	CPPUNIT_ASSERT (engine->set_backend ("None (Dummy)", "Unit-Test", ""));
 
 	CPPUNIT_ASSERT (engine->start () == 0);
+	Temporal::set_sample_rate_callback (AudioEngine::static_sample_rate);
 }
 
 void
@@ -115,6 +116,7 @@ stop_and_destroy_backend ()
 	AudioEngine::instance()->remove_session ();
 	AudioEngine::instance()->stop ();
 	AudioEngine::destroy ();
+	Temporal::set_sample_rate_callback (0);
 }
 
 /** @param dir Session directory.
