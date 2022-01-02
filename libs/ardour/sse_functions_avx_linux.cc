@@ -29,11 +29,11 @@
 #define IS_ALIGNED_TO(ptr, bytes) (((uintptr_t)ptr) % (bytes) == 0)
 
 #if defined(__GNUC__)
-#define IS_NOT_ALIGNED_TO(ptr, bytes)                                          \
-  __builtin_expect(!!(reinterpret_cast<intptr_t>(ptr) % (bytes)), 0)
+#define IS_NOT_ALIGNED_TO(ptr, bytes) \
+	__builtin_expect(!!(reinterpret_cast<intptr_t>(ptr) % (bytes)), 0)
 #else
-#define IS_NOT_ALIGNED_TO(ptr, bytes)                                          \
-  (!!(reinterpret_cast<intptr_t>(ptr) % (bytes)))
+#define IS_NOT_ALIGNED_TO(ptr, bytes) \
+	(!!(reinterpret_cast<intptr_t>(ptr) % (bytes)))
 #endif
 
 #ifdef __cplusplus
@@ -155,9 +155,7 @@ x86_sse_avx_compute_peak(const float *src, uint32_t nframes, float current)
 		--nframes;
 	}
 
-	vmax = _mm256_max_ps(vmax, _mm256_permute2f128_ps(vmax, vmax, 1));
-	vmax = _mm256_max_ps(vmax, _mm256_permute_ps(vmax, _MM_SHUFFLE(0, 0, 3, 2)));
-	vmax = _mm256_max_ps(vmax, _mm256_permute_ps(vmax, _MM_SHUFFLE(0, 0, 0, 1)));
+	vmax = avx_getmax_ps(vmax);
 
 	// zero upper 128 bit of 256 bit ymm register to avoid penalties using non-AVX
 	// instructions.
@@ -191,7 +189,7 @@ x86_sse_avx_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 	__m256 vmax = _mm256_broadcast_ss(maxf);
 
 	// Compute single min/max of unaligned portion until alignment is reached
-	while ((((intptr_t)src) % 32 != 0) && nframes > 0) {
+	while (IS_NOT_ALIGNED_TO(src, sizeof(__m256)) && nframes > 0) {
 		__m256 vsrc;
 
 		vsrc = _mm256_broadcast_ss(src);
@@ -202,27 +200,31 @@ x86_sse_avx_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 		--nframes;
 	}
 
-	// Process the remaining samples 16 at a time
-	while (nframes >= 16)
+	// Process the aligned portion 32 samples at a time
+	while (nframes >= 32)
 	{
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)src + 64), _mm_hint(0));
+#ifdef _WIN32
+		_mm_prefetch(reinterpret_cast<char const *>(src + 32), _mm_hint(0));
 #else
-		__builtin_prefetch(src + 64, 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 32), 0, 0);
 #endif
+		__m256 t0 = _mm256_load_ps(src + 0);
+		__m256 t1 = _mm256_load_ps(src + 8);
+		__m256 t2 = _mm256_load_ps(src + 16);
+		__m256 t3 = _mm256_load_ps(src + 24);
 
-		__m256 vsrc1, vsrc2;
-		vsrc1 = _mm256_load_ps(src + 0);
-		vsrc2 = _mm256_load_ps(src + 8);
+		vmax = _mm256_max_ps(vmax, t0);
+		vmax = _mm256_max_ps(vmax, t1);
+		vmax = _mm256_max_ps(vmax, t2);
+		vmax = _mm256_max_ps(vmax, t3);
 
-		vmax = _mm256_max_ps(vmax, vsrc1);
-		vmin = _mm256_min_ps(vmin, vsrc1);
+		vmin = _mm256_min_ps(vmin, t0);
+		vmin = _mm256_min_ps(vmin, t1);
+		vmin = _mm256_min_ps(vmin, t2);
+		vmin = _mm256_min_ps(vmin, t3);
 
-		vmax = _mm256_max_ps(vmax, vsrc2);
-		vmin = _mm256_min_ps(vmin, vsrc2);
-
-		src += 16;
-		nframes -= 16;
+		src += 32;
+		nframes -= 32;
 	}
 
 	// Process the remaining samples 8 at a time
@@ -833,13 +835,9 @@ x86_sse_avx_mix_buffers_no_gain_aligned(float *dst, const float *src, uint32_t n
  */
 static inline __m256 avx_getmax_ps(__m256 vmax)
 {
-	__m256 tmp;
-	tmp  = _mm256_shuffle_ps(vmax, vmax, _MM_SHUFFLE(2, 3, 0, 1));
-	vmax = _mm256_max_ps(tmp, vmax);
-	tmp  = _mm256_shuffle_ps(vmax, vmax, _MM_SHUFFLE(1, 0, 3, 2));
-	vmax = _mm256_max_ps(tmp, vmax);
-	tmp  = _mm256_permute2f128_ps(vmax, vmax, 1);
-	vmax = _mm256_max_ps(tmp, vmax);
+	vmax = _mm256_max_ps(vmax, _mm256_permute2f128_ps(vmax, vmax, 1));
+	vmax = _mm256_max_ps(vmax, _mm256_permute_ps(vmax, _MM_SHUFFLE(0, 0, 3, 2)));
+	vmax = _mm256_max_ps(vmax, _mm256_permute_ps(vmax, _MM_SHUFFLE(0, 0, 0, 1)));
 	return vmax;
 }
 
@@ -850,12 +848,8 @@ static inline __m256 avx_getmax_ps(__m256 vmax)
  */
 static inline __m256 avx_getmin_ps(__m256 vmin)
 {
-	__m256 tmp;
-	tmp = _mm256_shuffle_ps(vmin, vmin, _MM_SHUFFLE(2, 3, 0, 1));
-	vmin = _mm256_min_ps(tmp, vmin);
-	tmp = _mm256_shuffle_ps(vmin, vmin, _MM_SHUFFLE(1, 0, 3, 2));
-	vmin = _mm256_min_ps(tmp, vmin);
-	tmp = _mm256_permute2f128_ps(vmin, vmin, 1);
-	vmin = _mm256_min_ps(tmp, vmin);
+	vmin = _mm256_min_ps(vmin, _mm256_permute2f128_ps(vmin, vmin, 1));
+	vmin = _mm256_min_ps(vmin, _mm256_permute_ps(vmin, _MM_SHUFFLE(0, 0, 3, 2)));
+	vmin = _mm256_min_ps(vmin, _mm256_permute_ps(vmin, _MM_SHUFFLE(0, 0, 0, 1)));
 	return vmin;
 }
