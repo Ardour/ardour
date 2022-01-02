@@ -3960,7 +3960,7 @@ These settings will only take effect after %1 is restarted.\n\
 				_("Additional VST3 Path:"));
 
 	vst3_path->set_note (_("Customizing VST3 paths is discouraged. Note that default VST3 paths as per "
-	                       "<a href=\"https://developer.steinberg.help/display/VST/Plug-in+Locations\">specification</a>"
+	                       "<a href=\"https://developer.steinberg.help/display/VST/Plug-in+Locations\">specification</a> "
 	                       "are always searched, and need not be explicitly set."));
 	add_option (_("Plugins/VST"), vst3_path);
 
@@ -4036,7 +4036,7 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Plugins"),
 	     new BoolOption (
 		     "show-inline-display-by-default",
-		     _("Show Plugin Inline Display on Mixerstrip by default"),
+		     _("Show Plugin Inline Display on Mixer Strip by default"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_inline_display_by_default),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_inline_display_by_default)
 		     ));
