@@ -280,7 +280,7 @@ x86_sse_avx_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 #if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
 #else
-		__builtin_prefetch(dst + (16 * sizeof(float)), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(dst + 16), 0, 0);
 #endif
 		__m256 d0, d1;
 		d0 = _mm256_load_ps(dst + 0);
@@ -413,8 +413,8 @@ x86_sse_avx_mix_buffers_with_gain_unaligned(float *dst, const float *src, uint32
 		_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
 		_mm_prefetch(((char *)src + (16 * sizeof(float))), _mm_hint(0));
 #else
-		__builtin_prefetch(src + (16 * sizeof(float)), 0, 0);
-		__builtin_prefetch(dst + (16 * sizeof(float)), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 16), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(dst + 16), 0, 0);
 #endif
 		__m256 s0, s1;
 		__m256 d0, d1;
@@ -506,8 +506,8 @@ x86_sse_avx_mix_buffers_with_gain_aligned(float *dst, const float *src, uint32_t
 		_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
 		_mm_prefetch(((char *)src + (16 * sizeof(float))), _mm_hint(0));
 #else
-		__builtin_prefetch(src + (16 * sizeof(float)), 0, 0);
-		__builtin_prefetch(dst + (16 * sizeof(float)), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 16), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(dst + 16), 0, 0);
 #endif
 		__m256 s0, s1;
 		__m256 d0, d1;
@@ -595,8 +595,8 @@ x86_sse_avx_mix_buffers_no_gain_unaligned(float *dst, const float *src, uint32_t
 		_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
 		_mm_prefetch(((char *)src + (16 * sizeof(float))), _mm_hint(0));
 #else
-		__builtin_prefetch(src + (16 * sizeof(float)), 0, 0);
-		__builtin_prefetch(dst + (16 * sizeof(float)), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 16), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(dst + 16), 0, 0);
 #endif
 		__m256 s0, s1;
 		__m256 d0, d1;
@@ -677,8 +677,8 @@ x86_sse_avx_mix_buffers_no_gain_aligned(float *dst, const float *src, uint32_t n
 		_mm_prefetch(((char *)dst + (32 * sizeof(float))), _mm_hint(0));
 		_mm_prefetch(((char *)src + (32 * sizeof(float))), _mm_hint(0));
 #else
-		__builtin_prefetch(src + (32 * sizeof(float)), 0, 0);
-		__builtin_prefetch(dst + (32 * sizeof(float)), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 32), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(dst + 32), 0, 0);
 #endif
 		__m256 s0, s1, s2, s3;
 		__m256 d0, d1, d2, d3;
@@ -720,8 +720,8 @@ x86_sse_avx_mix_buffers_no_gain_aligned(float *dst, const float *src, uint32_t n
 		_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
 		_mm_prefetch(((char *)src + (16 * sizeof(float))), _mm_hint(0));
 #else
-		__builtin_prefetch(src + (16 * sizeof(float)), 0, 0);
-		__builtin_prefetch(dst + (16 * sizeof(float)), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 16), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(dst + 16), 0, 0);
 #endif
 		__m256 s0, s1;
 		__m256 d0, d1;
