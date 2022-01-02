@@ -45,6 +45,9 @@ public:
 
 	void on_size_allocate (Gtk::Allocation&);
 
+	virtual float nominal_width() {return _nominal_width;}
+	virtual float nominal_height() {return _nominal_height;}
+
 private:
 	ArdourCanvas::Rect _allocation;
 
