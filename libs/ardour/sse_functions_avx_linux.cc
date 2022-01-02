@@ -157,14 +157,6 @@ x86_sse_avx_compute_peak(const float *src, uint32_t nframes, float current)
 
 	vmax = avx_getmax_ps(vmax);
 
-	// zero upper 128 bit of 256 bit ymm register to avoid penalties using non-AVX
-	// instructions.
-
-	// _mm256_zeroupper();
-	// This is probably not needed in 2021 as compilers will insert them
-	// automatically. See stackoverflow reference:
-	// https://stackoverflow.com/questions/68736527/do-i-need-to-use-mm256-zeroupper-in-2021
-
 #if defined(__GNUC__) && (__GNUC__ < 5)
 	return *((float *)&vmax);
 #elif defined(__GNUC__) && (__GNUC__ < 8)
@@ -255,13 +247,6 @@ x86_sse_avx_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 	vmin = avx_getmin_ps(vmin);
 	vmax = avx_getmax_ps(vmax);
 
-	// There's a penalty going away from AVX mode to SSE mode. This can
-	// be avoided by ensuring to the CPU that rest of the routine is no
-	// longer interested in the upper portion of the YMM register.
-
-	// zero upper 128 bit of 256 bit ymm register to avoid penalties using non-AVX instructions
-	_mm256_zeroupper();
-
 	_mm_store_ss(minf, _mm256_castps256_ps128(vmin));
 	_mm_store_ss(maxf, _mm256_castps256_ps128(vmax));
 }
@@ -317,13 +302,6 @@ x86_sse_avx_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 		dst += 8;
 		frames -= 8;
 	}
-
-
-	// There's a penalty going away from AVX mode to SSE mode. This can
-	// be avoided by ensuring to the CPU that rest of the routine is no
-	// longer interested in the upper portion of the YMM register.
-
-	_mm256_zeroupper(); // zeros the upper portion of YMM register
 
 	// Process the remaining samples
 	do {
@@ -486,13 +464,6 @@ x86_sse_avx_mix_buffers_with_gain_unaligned(float *dst, const float *src, uint32
 		nframes -= 8;
 	}
 
-
-	// There's a penalty going away from AVX mode to SSE mode. This can
-	// be avoided by ensuring the CPU that rest of the routine is no
-	// longer interested in the upper portion of the YMM register.
-
-	_mm256_zeroupper(); // zeros the upper portion of YMM register
-
 	// Process the remaining samples
 	do {
 		__m128 g0 = _mm_set_ss(gain);
@@ -586,13 +557,6 @@ x86_sse_avx_mix_buffers_with_gain_aligned(float *dst, const float *src, uint32_t
 		nframes -= 8;
 	}
 
-
-	// There's a penalty going from AVX mode to SSE mode. This can
-	// be avoided by ensuring the CPU that rest of the routine is no
-	// longer interested in the upper portion of the YMM register.
-
-	_mm256_zeroupper(); // zeros the upper portion of YMM register
-
 	// Process the remaining samples, one sample at a time.
 	do {
 		__m128 g0 = _mm256_castps256_ps128(vgain); // use the same register
@@ -675,12 +639,6 @@ x86_sse_avx_mix_buffers_no_gain_unaligned(float *dst, const float *src, uint32_t
 		dst += 8;
 		nframes -= 8;
 	}
-
-	// There's a penalty going away from AVX mode to SSE mode. This can
-	// be avoided by ensuring the CPU that rest of the routine is no
-	// longer interested in the upper portion of the YMM register.
-
-	_mm256_zeroupper(); // zeros the upper portion of YMM register
 
 	// Process the remaining samples
 	do {
@@ -806,12 +764,6 @@ x86_sse_avx_mix_buffers_no_gain_aligned(float *dst, const float *src, uint32_t n
 		dst += 8;
 		nframes -= 8;
 	}
-
-	// There's a penalty going from AVX mode to SSE mode. This can
-	// be avoided by ensuring the CPU that rest of the routine is no
-	// longer interested in the upper portion of the YMM register.
-
-	_mm256_zeroupper(); // zeros the upper portion of YMM register
 
 	// Process the remaining samples
 	do {
