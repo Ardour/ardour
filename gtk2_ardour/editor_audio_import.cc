@@ -1085,6 +1085,8 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 		break;
 	}
 
+	case ImportAsTrigger:
+	/* fallthrough */
 	case ImportAsTrack:
 	{
 		if (!existing_track) {
@@ -1137,11 +1139,17 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 			}
 		}
 
-		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
-		boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
-		playlist->clear_changes ();
-		playlist->add_region (copy, pos);
-		_session->add_command (new StatefulDiffCommand (playlist));
+		if (mode == ImportAsTrigger) {
+			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
+			/* TODO handle ImportSerializeFiles, pos > 0, use next free trigger-slot */
+			existing_track->triggerbox ()->set_from_selection (0, copy);
+		} else {
+			boost::shared_ptr<Playlist> playlist = existing_track->playlist();
+			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
+			playlist->clear_changes ();
+			playlist->add_region (copy, pos);
+			_session->add_command (new StatefulDiffCommand (playlist));
+		}
 		break;
 	}
 

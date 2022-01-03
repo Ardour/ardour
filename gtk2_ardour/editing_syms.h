@@ -86,6 +86,7 @@ DISPLAYCONTROL(ShowWaveformsRecording)
 IMPORTMODE(ImportAsRegion)
 IMPORTMODE(ImportToTrack)
 IMPORTMODE(ImportAsTrack)
+IMPORTMODE(ImportAsTrigger)
 
 // if this is changed, remember to update the string table in sfdb_ui.cc
 IMPORTPOSITION(ImportAtTimestamp)

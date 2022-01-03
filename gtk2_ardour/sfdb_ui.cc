@@ -142,6 +142,9 @@ importmode2string (ImportMode mode)
 		return _("to selected tracks");
 	case ImportAsRegion:
 		return _("to source list");
+	case ImportAsTrigger:
+		/* TODO: n/a */
+		break;
 	}
 	abort(); /*NOTREACHED*/
 	return _("as new tracks");
