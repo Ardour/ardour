@@ -144,6 +144,8 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),        Trigger::Again, 0)));
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::PrevTrigger, 0)));
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::NextTrigger, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::ReverseTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::ReverseTrigger, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::ForwardTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::ForwardTrigger, 0)));
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),   Trigger::AnyTrigger, 0)));
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), Trigger::OtherTrigger, 0)));
 	_follow_left.set_sizing_text (longest_follow);
@@ -154,6 +156,8 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),        Trigger::Again, 1)));
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::PrevTrigger, 1)));
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::NextTrigger, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::ReverseTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::ReverseTrigger, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::ForwardTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::ForwardTrigger, 1)));
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),   Trigger::AnyTrigger, 1)));
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), Trigger::OtherTrigger, 1)));
 	_follow_right.set_sizing_text (longest_follow);

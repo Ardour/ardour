@@ -277,6 +277,8 @@ CueBoxUI::context_menu (uint64_t idx)
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::Again, idx)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::PrevTrigger, idx)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::NextTrigger, idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ReverseTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::ReverseTrigger, idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ForwardTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::ForwardTrigger, idx)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::AnyTrigger, idx)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::OtherTrigger, idx)));
 

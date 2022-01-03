@@ -354,6 +354,8 @@ TriggerMaster::context_menu ()
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::Again)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::PrevTrigger)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::NextTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ForwardTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::ForwardTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ReverseTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::ReverseTrigger)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::AnyTrigger)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::OtherTrigger)));
 

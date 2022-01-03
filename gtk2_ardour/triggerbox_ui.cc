@@ -217,6 +217,21 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 			context->arc (size / 2, 5 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
 			break;
+			/* XXX Ben to add new icons for next two */
+		case Trigger::ForwardTrigger:
+			context->move_to (size / 2, 3 * scale);
+			context->line_to (size / 2, size - 5 * scale);
+			context->stroke ();
+			context->arc (size / 2, size - 5 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
+			context->fill ();
+			break;
+		case Trigger::ReverseTrigger:
+			context->move_to (size / 2, 5 * scale);
+			context->line_to (size / 2, size - 3 * scale);
+			context->stroke ();
+			context->arc (size / 2, 5 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
+			context->fill ();
+			break;
 		case Trigger::QueuedTrigger: {
 			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());

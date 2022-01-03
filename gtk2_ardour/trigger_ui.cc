@@ -78,6 +78,8 @@ TriggerUI::TriggerUI ()
 		follow_strings.push_back (follow_action_to_string (Trigger::QueuedTrigger));
 		follow_strings.push_back (follow_action_to_string (Trigger::NextTrigger));
 		follow_strings.push_back (follow_action_to_string (Trigger::PrevTrigger));
+		follow_strings.push_back (follow_action_to_string (Trigger::ForwardTrigger));
+		follow_strings.push_back (follow_action_to_string (Trigger::ReverseTrigger));
 		follow_strings.push_back (follow_action_to_string (Trigger::FirstTrigger));
 		follow_strings.push_back (follow_action_to_string (Trigger::LastTrigger));
 		follow_strings.push_back (follow_action_to_string (Trigger::AnyTrigger));
@@ -577,6 +579,16 @@ TriggerUI::follow_context_menu ()
 	if (trigger ()->follow_action (0) == Trigger::NextTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
+
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::ForwardTrigger), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), Trigger::ForwardTrigger)));
+	if (trigger ()->follow_action (0) == Trigger::ForwardTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::ReverseTrigger), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), Trigger::ReverseTrigger)));
+	if (trigger ()->follow_action (0) == Trigger::ReverseTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+
 #if 0
 	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(Trigger::FirstTrigger), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), Trigger::FirstTrigger)));
 	if (trigger ()->follow_action (0) == Trigger::FirstTrigger) {
@@ -738,6 +750,10 @@ TriggerUI::follow_action_to_string (Trigger::FollowAction fa)
 		return _("Next");
 	case Trigger::PrevTrigger:
 		return _("Prev");
+	case Trigger::ForwardTrigger:
+		return _("Forward");
+	case Trigger::ReverseTrigger:
+		return _("Reverse");
 	case Trigger::FirstTrigger:
 		return _("First");
 	case Trigger::LastTrigger:
