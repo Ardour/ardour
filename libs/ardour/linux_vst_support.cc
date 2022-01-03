@@ -120,7 +120,6 @@ static void* vstfx_load_vst_library(const char* path)
 	/*Path not specified - not much more we can do*/
 
 	if (envdup == 0) {
-		std::cerr << "no search path\n";
 		return 0;
 	}
 
