@@ -859,6 +859,8 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Trigger, QueuedTrigger);
 	REGISTER_CLASS_ENUM (Trigger, NextTrigger);
 	REGISTER_CLASS_ENUM (Trigger, PrevTrigger);
+	REGISTER_CLASS_ENUM (Trigger, ForwardTrigger);
+	REGISTER_CLASS_ENUM (Trigger, ReverseTrigger);
 	REGISTER_CLASS_ENUM (Trigger, FirstTrigger);
 	REGISTER_CLASS_ENUM (Trigger, LastTrigger);
 	REGISTER_CLASS_ENUM (Trigger, AnyTrigger);

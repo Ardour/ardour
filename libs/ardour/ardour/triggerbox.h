@@ -171,6 +171,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		QueuedTrigger, /* DP-style */
 		NextTrigger,   /* Live-style, and below */
 		PrevTrigger,
+		ForwardTrigger, /* any "next" skipping empties */
+		ReverseTrigger, /* any "prev" skipping empties */
 		FirstTrigger,
 		LastTrigger,
 		AnyTrigger,

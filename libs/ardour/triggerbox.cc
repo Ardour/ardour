@@ -2695,7 +2695,26 @@ TriggerBox::determine_next_trigger (uint32_t current)
 	case Trigger::Again:
 		return current;
 
+
 	case Trigger::NextTrigger:
+		n = current + 1;
+		if (n < all_triggers.size()) {
+			if (all_triggers[n]->region()) {
+				return n;
+			}
+		}
+		break;
+
+	case Trigger::PrevTrigger:
+		if (current > 0) {
+			n = current - 1;
+			if (all_triggers[n]->region()) {
+				return n;
+			}
+		}
+		break;
+
+	case Trigger::ForwardTrigger:
 		n = current;
 		while (true) {
 			++n;
@@ -2715,7 +2734,8 @@ TriggerBox::determine_next_trigger (uint32_t current)
 			}
 		}
 		break;
-	case Trigger::PrevTrigger:
+
+	case Trigger::ReverseTrigger:
 		n = current;
 		while (true) {
 			if (n == 0) {
