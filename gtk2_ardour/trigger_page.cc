@@ -30,6 +30,8 @@
 
 #include "widgets/ardour_spacer.h"
 
+#include "ardour/smf_source.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "editor.h"
@@ -92,6 +94,15 @@ TriggerPage::TriggerPage ()
 	_no_strips.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose), &_no_strips, ArdourWidgets::ArdourIcon::ShadedPlusSign));
 	_no_strips.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerPage::no_strip_button_event));
 	_no_strips.signal_button_release_event ().connect (sigc::mem_fun (*this, &TriggerPage::no_strip_button_event));
+	_no_strips.signal_drag_motion ().connect (sigc::mem_fun (*this, &TriggerPage::no_strip_drag_motion));
+	_no_strips.signal_drag_data_received ().connect (sigc::mem_fun (*this, &TriggerPage::no_strip_drag_data_received));
+
+	std::vector<Gtk::TargetEntry> target_table;
+	target_table.push_back (Gtk::TargetEntry ("regions"));
+	target_table.push_back (Gtk::TargetEntry ("text/uri-list"));
+	target_table.push_back (Gtk::TargetEntry ("text/plain"));
+	target_table.push_back (Gtk::TargetEntry ("application/x-rootwin-drop"));
+	_no_strips.drag_dest_set (target_table);
 
 	_strip_group_box.pack_start (_cue_area_frame, false, false);
 	_strip_group_box.pack_start (_strip_scroller, true, true);
@@ -488,6 +499,73 @@ TriggerPage::no_strip_button_event (GdkEventButton* ev)
 		return true;
 	}
 	return false;
+}
+
+bool
+TriggerPage::no_strip_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int, int y, guint time)
+{
+	context->drag_status (Gdk::ACTION_COPY, time);
+	return true;
+}
+
+void
+TriggerPage::no_strip_drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context, int /*x*/, int y, Gtk::SelectionData const& data, guint /*info*/, guint time)
+{
+	if (data.get_target () == X_("regions")) {
+		boost::shared_ptr<Region> region = PublicEditor::instance ().get_dragged_region_from_sidebar ();
+#if 0 // TODO ..
+		if (region) {
+			context->drag_finish (true, false, time);
+		} else {
+			context->drag_finish (false, false, time);
+		}
+#else
+		context->drag_finish (false, false, time);
+#endif
+		return;
+	}
+
+	std::vector<std::string> paths;
+	if (ARDOUR_UI_UTILS::convert_drop_to_paths (paths, data)) {
+#ifdef __APPLE__
+		/* We are not allowed to call recursive main event loops from within
+		 * the main event loop with GTK/Quartz. Since import/embed wants
+		 * to push up a progress dialog, defer all this till we go idle.
+		 */
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &TriggerPage::idle_drop_paths), paths));
+#else
+		drop_paths_part_two (paths);
+#endif
+	}
+	context->drag_finish (true, false, time);
+}
+
+void
+TriggerPage::drop_paths_part_two (std::vector<std::string> paths)
+{
+	/* compare to Editor::drop_paths_part_two */
+	std::vector<string> midi_paths;
+	std::vector<string> audio_paths;
+	for (std::vector<std::string>::iterator s = paths.begin (); s != paths.end (); ++s) {
+		if (SMFSource::safe_midi_file_extension (*s)) {
+			midi_paths.push_back (*s);
+		} else {
+			audio_paths.push_back (*s);
+		}
+	}
+	InstrumentSelector is; // instantiation builds instrument-list and sets default.
+	timepos_t pos_a (0);
+	timepos_t pos_m (0);
+	// TODO ImportSerializeFiles
+	PublicEditor::instance().do_import (midi_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrigger, SrcBest, SMFTrackName, SMFTempoIgnore, pos_m, is.selected_instrument (), false);
+	PublicEditor::instance().do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrigger, SrcBest, SMFTrackName, SMFTempoIgnore, pos_a);
+}
+
+bool
+TriggerPage::idle_drop_paths (std::vector<std::string> paths)
+{
+  drop_paths_part_two (paths);
+  return false;
 }
 
 gint

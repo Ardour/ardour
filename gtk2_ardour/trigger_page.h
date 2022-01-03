@@ -73,6 +73,11 @@ private:
 	void stripable_property_changed (PBD::PropertyChange const&, boost::weak_ptr<ARDOUR::Stripable>);
 
 	bool no_strip_button_event (GdkEventButton*);
+	bool no_strip_drag_motion (Glib::RefPtr<Gdk::DragContext> const&, int, int, guint);
+	void no_strip_drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
+
+	bool idle_drop_paths (std::vector<std::string>);
+	void drop_paths_part_two (std::vector<std::string>);
 
 	void                      selection_changed ();
 	PBD::ScopedConnectionList editor_connections;
