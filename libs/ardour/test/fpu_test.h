@@ -36,8 +36,8 @@ public:
 #endif
 
 private:
-	void run (size_t);
-	void compare (std::string, size_t);
+	void run (size_t, float const max_diff = 0);
+	void compare (std::string, size_t, float const max_diff = 0);
 
 	ARDOUR::compute_peak_t          compute_peak;
 	ARDOUR::find_peaks_t            find_peaks;
