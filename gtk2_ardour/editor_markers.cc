@@ -722,10 +722,10 @@ Editor::LocationMarkers::setup_lines ()
 }
 
 void
-Editor::mouse_add_new_marker (timepos_t where, bool is_cd)
+Editor::mouse_add_new_marker (timepos_t where, Location::Flags extra_flags)
 {
 	string markername;
-	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
+	Location::Flags flags = Location::Flags (extra_flags|Location::IsMark);
 
 	cerr << "adding new marker @ " << where << endl;
 
@@ -735,7 +735,7 @@ Editor::mouse_add_new_marker (timepos_t where, bool is_cd)
 			return;
 		}
 
-		Location *location = new Location (*_session, where, where, markername, (Location::Flags) flags);
+		Location *location = new Location (*_session, where, where, markername, flags);
 		begin_reversible_command (_("add marker"));
 
 		XMLNode &before = _session->locations()->get_state();

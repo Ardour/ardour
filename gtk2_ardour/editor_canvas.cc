@@ -196,6 +196,11 @@ Editor::initialize_canvas ()
 	cd_marker_bar_drag_rect->set_outline (false);
 	cd_marker_bar_drag_rect->hide ();
 
+	cue_marker_bar_drag_rect = new ArdourCanvas::Rectangle (cue_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
+	CANVAS_DEBUG_NAME (cd_marker_bar_drag_rect, "cd marker drag");
+	cue_marker_bar_drag_rect->set_outline (false);
+	cue_marker_bar_drag_rect->hide ();
+
 	range_bar_drag_rect = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
 	CANVAS_DEBUG_NAME (range_bar_drag_rect, "range drag");
 	range_bar_drag_rect->set_outline (false);
@@ -1451,6 +1456,7 @@ Editor::which_canvas_cursor(ItemType type) const
 	case MarkerBarItem:
 	case RangeMarkerBarItem:
 	case CdMarkerBarItem:
+	case CueMarkerBarItem:
 	case VideoBarItem:
 	case TransportMarkerBarItem:
 	case DropZoneItem:

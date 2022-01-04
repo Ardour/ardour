@@ -857,6 +857,15 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
+	case CueMarkerBarItem:
+		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
+		} else {
+			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateCueMarker), event);
+		}
+		return true;
+		break;
+
 	case TransportMarkerBarItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
@@ -1632,6 +1641,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case RangeMarkerBarItem:
 			case TransportMarkerBarItem:
 			case CdMarkerBarItem:
+			case CueMarkerBarItem:
 			case TempoBarItem:
 			case TempoCurveItem:
 			case MeterBarItem:
@@ -1740,7 +1750,15 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			if (!_dragging_playhead) {
 				/* if we get here then a dragged range wasn't done */
 				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
-				mouse_add_new_marker (where, true);
+				mouse_add_new_marker (where, Location::IsCDMarker);
+			}
+			return true;
+
+		case CueMarkerBarItem:
+			if (!_dragging_playhead) {
+				/* if we get here then a dragged range wasn't done */
+				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
+				mouse_add_new_marker (where, Location::IsCueMarker);
 			}
 			return true;
 		case TempoBarItem:

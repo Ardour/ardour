@@ -595,7 +595,7 @@ public:
 	void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, int64_t, int64_t, gint);
 
 	/* editing operations that need to be public */
-	void mouse_add_new_marker (Temporal::timepos_t where, bool is_cd=false);
+	void mouse_add_new_marker (Temporal::timepos_t where, ARDOUR::Location::Flags extra_flags = ARDOUR::Location::Flags (0));
 	void split_regions_at (Temporal::timepos_t const & , RegionSelection&);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (Temporal::timepos_t const &);
@@ -2014,6 +2014,7 @@ private:
 	/* transport range select process */
 
 	ArdourCanvas::Rectangle* cd_marker_bar_drag_rect;
+	ArdourCanvas::Rectangle* cue_marker_bar_drag_rect;
 	ArdourCanvas::Rectangle* range_bar_drag_rect;
 	ArdourCanvas::Rectangle* transport_bar_drag_rect;
 	ArdourCanvas::Rectangle* transport_bar_range_rect;

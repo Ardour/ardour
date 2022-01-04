@@ -1299,7 +1299,8 @@ public:
 		CreateSkipMarker,
 		CreateRangeMarker,
 		CreateTransportMarker,
-		CreateCDMarker
+		CreateCDMarker,
+		CreateCueMarker
 	};
 
 	RangeMarkerBarDrag (Editor *, ArdourCanvas::Item *, Operation);
