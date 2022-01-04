@@ -62,6 +62,7 @@ PBD::Signal1<void,Location*> Location::start_changed;
 PBD::Signal1<void,Location*> Location::flags_changed;
 PBD::Signal1<void,Location*> Location::lock_changed;
 PBD::Signal1<void,Location*> Location::changed;
+PBD::Signal1<void,Location*> Location::cue_change;
 
 Location::Location (Session& s)
 	: SessionHandleRef (s)
@@ -240,6 +241,10 @@ Location::set_start (Temporal::timepos_t const & s, bool force)
 		}
 	}
 
+	if (is_cue_marker()) {
+		cue_change (this);
+	}
+
 	assert (_start.is_positive() || _start.is_zero());
 
 	return 0;
@@ -369,6 +374,10 @@ Location::set (Temporal::timepos_t const & s, Temporal::timepos_t const & e)
 		EndChanged(); /* EMIT SIGNAL */
 	}
 
+	if (is_cue_marker()) {
+		cue_change (this);
+	}
+
 	return 0;
 }
 
@@ -386,6 +395,10 @@ Location::move_to (Temporal::timepos_t const & pos)
 
 		changed (this); /* EMIT SIGNAL */
 		Changed (); /* EMIT SIGNAL */
+
+		if (is_cue_marker()) {
+			cue_change (this);
+		}
 	}
 
 	assert (_start >= 0);
@@ -412,6 +425,15 @@ void
 Location::set_cd (bool yn, void*)
 {
 	if (set_flag_internal (yn, IsCDMarker)) {
+		flags_changed (this); /* EMIT SIGNAL */
+		FlagsChanged ();
+	}
+}
+
+void
+Location::set_cue (bool yn, void*)
+{
+	if (set_flag_internal (yn, IsCueMarker)) {
 		flags_changed (this); /* EMIT SIGNAL */
 		FlagsChanged ();
 	}
@@ -980,6 +1002,10 @@ Locations::add (Location *loc, bool make_current)
 	if (loc->is_session_range()) {
 		Session::StartTimeChanged (0);
 		Session::EndTimeChanged (1);
+	}
+
+	if (loc->is_cue_marker()) {
+		Location::cue_change (loc);
 	}
 }
 

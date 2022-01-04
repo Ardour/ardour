@@ -99,6 +99,7 @@ public:
 	void set_auto_loop (bool yn, void *src);
 	void set_hidden (bool yn, void *src);
 	void set_cd (bool yn, void *src);
+	void set_cue (bool yn, void *src);
 	void set_is_range_marker (bool yn, void* src);
 	void set_is_clock_origin (bool yn, void* src);
 	void set_skip (bool yn);
@@ -132,6 +133,7 @@ public:
 	static PBD::Signal1<void,Location*> start_changed;
 	static PBD::Signal1<void,Location*> flags_changed;
 	static PBD::Signal1<void,Location*> lock_changed;
+	static PBD::Signal1<void,Location*> cue_change;
 
 	/* this is sent only when both start and end change at the same time */
 	static PBD::Signal1<void,Location*> changed;
