@@ -1141,8 +1141,12 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 
 		if (mode == ImportAsTrigger) {
 			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
-			/* TODO handle ImportSerializeFiles, pos > 0, use next free trigger-slot */
-			existing_track->triggerbox ()->set_from_selection (0, copy);
+			for (int s = 0; s < TriggerBox::default_triggers_per_box; ++s) {
+				if (!existing_track->triggerbox ()->trigger (s)->region ()) {
+					existing_track->triggerbox ()->set_from_selection (s, copy);
+					break;
+				}
+			}
 		} else {
 			boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
