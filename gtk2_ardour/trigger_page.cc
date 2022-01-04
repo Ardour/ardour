@@ -20,6 +20,8 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include <list>
+
 #include <gtkmm/label.h>
 
 #include "pbd/properties.h"
@@ -30,6 +32,12 @@
 
 #include "widgets/ardour_spacer.h"
 
+#include "ardour/audio_track.h"
+#include "ardour/audioregion.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
+#include "ardour/region_factory.h"
+#include "ardour/profile.h"
 #include "ardour/smf_source.h"
 
 #include "actions.h"
@@ -513,15 +521,41 @@ TriggerPage::no_strip_drag_data_received (Glib::RefPtr<Gdk::DragContext> const& 
 {
 	if (data.get_target () == X_("regions")) {
 		boost::shared_ptr<Region> region = PublicEditor::instance ().get_dragged_region_from_sidebar ();
-#if 0 // TODO ..
-		if (region) {
-			context->drag_finish (true, false, time);
-		} else {
-			context->drag_finish (false, false, time);
+		boost::shared_ptr<TriggerBox> triggerbox;
+
+		if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
+			uint32_t output_chan = region->sources().size();
+			if ((Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out()) {
+				output_chan =  session()->master_out()->n_inputs().n_audio();
+			}
+			std::list<boost::shared_ptr<AudioTrack> > audio_tracks;
+			audio_tracks = session()->new_audio_track (region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
+			if (!audio_tracks.empty()) {
+				triggerbox = audio_tracks.front()->triggerbox ();
+			}
+		} else if (boost::dynamic_pointer_cast<MidiRegion> (region)) {
+			ChanCount one_midi_port (DataType::MIDI, 1);
+			list<boost::shared_ptr<MidiTrack> > midi_tracks;
+			midi_tracks = session()->new_midi_track (one_midi_port, one_midi_port,
+			                                         Config->get_strict_io () || Profile->get_mixbus (),
+			                                         boost::shared_ptr<ARDOUR::PluginInfo>(),
+			                                         (ARDOUR::Plugin::PresetRecord*) 0,
+			                                         (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order, Normal, true);
+			if (!midi_tracks.empty()) {
+				triggerbox = midi_tracks.front()->triggerbox ();
+			}
 		}
-#else
-		context->drag_finish (false, false, time);
-#endif
+
+		if (!triggerbox) {
+			context->drag_finish (false, false, time);
+			return;
+		}
+
+		// XXX: check does the region need to be copied?
+		boost::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
+		triggerbox->set_from_selection (0, region_copy);
+
+		context->drag_finish (true, false, time);
 		return;
 	}
 
