@@ -156,6 +156,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	enum LaunchStyle {
 		OneShot,  /* mouse down/NoteOn starts; mouse up/NoteOff ignored */
+		ReTrigger, /* mouse down/NoteOn starts or retriggers; mouse up/NoteOff */
 		Gate,     /* runs till mouse up/note off then to next quantization */
 		Toggle,   /* runs till next mouse down/NoteOn */
 		Repeat,   /* plays only quantization extent until mouse up/note off */

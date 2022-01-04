@@ -868,6 +868,7 @@ setup_enum_writer ()
 	REGISTER (_TriggerFollowAction);
 
 	REGISTER_CLASS_ENUM (Trigger, OneShot);
+	REGISTER_CLASS_ENUM (Trigger, ReTrigger);
 	REGISTER_CLASS_ENUM (Trigger, Gate);
 	REGISTER_CLASS_ENUM (Trigger, Toggle);
 	REGISTER_CLASS_ENUM (Trigger, Repeat);

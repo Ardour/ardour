@@ -77,7 +77,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _loop_cnt (0)
 	, _ui (0)
 	, _explicitly_stopped (false)
-	, _launch_style (Properties::launch_style, Toggle)
+	, _launch_style (Properties::launch_style, OneShot)
 	, _use_follow (Properties::use_follow, true)
 	, _follow_action0 (Properties::follow_action0, Again)
 	, _follow_action1 (Properties::follow_action1, Stop)
@@ -499,6 +499,9 @@ Trigger::process_state_requests ()
 		case Running:
 			switch (launch_style()) {
 			case OneShot:
+				/* do nothing, just let it keep playing */
+				break;
+			case ReTrigger:
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 oneshot %2 => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingForRetrigger)));
 				_state = WaitingForRetrigger;
 				PropertyChanged (ARDOUR::Properties::running);
@@ -507,9 +510,7 @@ Trigger::process_state_requests ()
 			case Toggle:
 			case Repeat:
 				if (_box.active_scene() >= 0) {
-					_state = WaitingForRetrigger;
-					cue_launched = true;
-					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 cue-launched %2, now wait for retrigger\n", index(), enum_2_string (_launch_style.val())));
+					std::cerr << "should not happen, cue launching but launch_style() said " << enum_2_string (launch_style()) << std::endl;
 				} else {
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 gate/toggle/repeat => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingToStop)));
 					begin_stop (true);
