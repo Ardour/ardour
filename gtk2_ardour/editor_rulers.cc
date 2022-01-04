@@ -245,7 +245,7 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 
 	case CueMarkerBarItem:
 		// TODO
-		ruler_items.push_back (MenuElem (_("New Cue track marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker)));
+		ruler_items.push_back (MenuElem (_("New Cue marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker)));
 		break;
 
 	case TempoBarItem:

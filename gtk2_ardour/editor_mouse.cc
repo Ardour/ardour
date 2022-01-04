@@ -861,7 +861,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
 		} else {
-			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateCueMarker), event);
+			/* no range dragging on this ruler/bar */
 		}
 		return true;
 		break;

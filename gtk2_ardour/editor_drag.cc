@@ -6092,7 +6092,6 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	case CreateRangeMarker:
 	case CreateTransportMarker:
 	case CreateCDMarker:
-	case CreateCueMarker:
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
 			_copy = true;
 		} else {
@@ -6127,9 +6126,6 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 	case CreateCDMarker:
 		crect = _editor->cd_marker_bar_drag_rect;
 		break;
-	case CreateCueMarker:
-		crect = _editor->cue_marker_bar_drag_rect;
-		break;
 	default:
 		error << string_compose (_("programming_error: %1"), "Error: unknown range marker op passed to Editor::drag_range_markerbar_op ()") << endmsg;
 		return;
@@ -6138,7 +6134,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 
 	timepos_t const pf = adjusted_current_time (event);
 
-	if (_operation == CreateSkipMarker || _operation == CreateRangeMarker || _operation == CreateTransportMarker || _operation == CreateCDMarker || _operation == CreateCueMarker) {
+	if (_operation == CreateSkipMarker || _operation == CreateRangeMarker || _operation == CreateTransportMarker || _operation == CreateCDMarker) {
 		timepos_t grab (grab_time());
 		_editor->snap_to (grab);
 
@@ -6187,7 +6183,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	Location * newloc = 0;
 	string rangename;
-	int flags;
+	Location::Flags flags;
 
 	if (movement_occurred) {
 		motion (event, false);
@@ -6197,24 +6193,18 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 		case CreateSkipMarker:
 		case CreateRangeMarker:
 		case CreateCDMarker:
-		case CreateCueMarker:
 		{
 			XMLNode &before = _editor->session()->locations()->get_state();
 			if (_operation == CreateSkipMarker) {
 				_editor->begin_reversible_command (_("new skip marker"));
 				_editor->session()->locations()->next_available_name(rangename,_("skip"));
-				flags = Location::IsRangeMarker | Location::IsSkip;
+				flags = Location::Flags (Location::IsRangeMarker | Location::IsSkip);
 				_editor->range_bar_drag_rect->hide();
 			} else if (_operation == CreateCDMarker) {
 				_editor->session()->locations()->next_available_name(rangename, _("CD"));
 				_editor->begin_reversible_command (_("new CD marker"));
-				flags = Location::IsRangeMarker | Location::IsCDMarker;
+				flags = Location::Flags (Location::IsRangeMarker | Location::IsCDMarker);
 				_editor->cd_marker_bar_drag_rect->hide();
-			} else if (_operation == CreateCueMarker) {
-				_editor->session()->locations()->next_available_name(rangename, _("Cue"));
-				_editor->begin_reversible_command (_("new cue marker"));
-				flags = Location::IsRangeMarker | Location::IsCueMarker;
-				_editor->cue_marker_bar_drag_rect->hide();
 			} else {
 				_editor->begin_reversible_command (_("new skip marker"));
 				_editor->session()->locations()->next_available_name(rangename, _("unnamed"));
@@ -6222,7 +6212,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 				_editor->range_bar_drag_rect->hide();
 			}
 
-			newloc = new Location (*_editor->session(), _editor->temp_location->start(), _editor->temp_location->end(), rangename, (Location::Flags) flags);
+			newloc = new Location (*_editor->session(), _editor->temp_location->start(), _editor->temp_location->end(), rangename, flags);
 
 			_editor->session()->locations()->add (newloc, true);
 			XMLNode &after = _editor->session()->locations()->get_state();
@@ -6249,8 +6239,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		} else if (_operation == CreateCDMarker) {
 
-			/* didn't drag, but mark is already created so do
-			 * nothing */
+			/* didn't drag, but mark is already created so do nothing */
 
 		} else { /* operation == CreateRangeMarker || CreateSkipMarker */
 
