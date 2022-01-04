@@ -30,6 +30,7 @@ enum ItemType {
 	MarkerBarItem,
 	RangeMarkerBarItem,
 	CdMarkerBarItem,
+	CueMarkerBarItem,
 	VideoBarItem,
 	TransportMarkerBarItem,
 	SelectionItem,

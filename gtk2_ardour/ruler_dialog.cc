@@ -38,6 +38,7 @@ RulerDialog::RulerDialog ()
 	get_vbox()->pack_start (range_button);
 	get_vbox()->pack_start (loop_punch_button);
 	get_vbox()->pack_start (cdmark_button);
+	get_vbox()->pack_start (cuemark_button);
 	get_vbox()->pack_start (mark_button);
 	get_vbox()->pack_start (video_button);
 
@@ -53,6 +54,7 @@ RulerDialog::RulerDialog ()
 	connect_action (range_button, "range-ruler");
 	connect_action (mark_button, "marker-ruler");
 	connect_action (cdmark_button, "cd-marker-ruler");
+	connect_action (cuemark_button, "cue-marker-ruler");
 	connect_action (video_button, "video-ruler");
 }
 

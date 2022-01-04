@@ -177,6 +177,7 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(cue_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
 
@@ -316,6 +317,7 @@ Editor::store_ruler_visibility ()
 	node->set_property (X_("rangemarker"), ruler_range_action->get_active());
 	node->set_property (X_("transportmarker"), ruler_loop_punch_action->get_active());
 	node->set_property (X_("cdmarker"), ruler_cd_marker_action->get_active());
+	node->set_property (X_("cuemarker"), ruler_cue_marker_action->get_active());
 	node->set_property (X_("videotl"), ruler_video_action->get_active());
 
 	_session->add_extra_xml (*node);
@@ -359,7 +361,7 @@ Editor::restore_ruler_visibility ()
 		}
 
 		if (node->get_property ("cdmarker", yn)) {
-				ruler_cd_marker_action->set_active (yn);
+			ruler_cd_marker_action->set_active (yn);
 		} else {
 			// this _session doesn't yet know about the cdmarker ruler
 			// as a benefit to the user who doesn't know the feature exists, show the ruler if
@@ -369,6 +371,22 @@ Editor::restore_ruler_visibility ()
 			for (Locations::LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
 				if ((*i)->is_cd_marker()) {
 					ruler_cd_marker_action->set_active (true);
+					break;
+				}
+			}
+		}
+
+		if (node->get_property ("cuemarker", yn)) {
+			ruler_cue_marker_action->set_active (yn);
+		} else {
+			// this _session doesn't yet know about the cue marker ruler
+			// as a benefit to the user who doesn't know the feature exists, show the ruler if
+			// any cue marks exist
+			ruler_cue_marker_action->set_active (false);
+			const Locations::LocationList & locs = _session->locations()->list();
+			for (Locations::LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
+				if ((*i)->is_cue_marker()) {
+					ruler_cue_marker_action->set_active (true);
 					break;
 				}
 			}
@@ -411,6 +429,7 @@ Editor::update_ruler_visibility ()
 	range_mark_label.hide();
 	transport_mark_label.hide();
 	cd_mark_label.hide();
+	cue_mark_label.hide();
 	mark_label.hide();
 	videotl_label.hide();
 #endif
@@ -553,6 +572,25 @@ Editor::update_ruler_visibility ()
 		cd_mark_label.hide();
 		// make sure all cd markers show up in their respective places
 		update_cd_marker_display();
+	}
+
+	if (ruler_cue_marker_action->get_active()) {
+		old_unit_pos = cue_marker_group->position().y;
+		if (tbpos != old_unit_pos) {
+			cue_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+		}
+		cue_marker_group->show();
+		cue_mark_label.show();
+		tbpos += timebar_height;
+		tbgpos += timebar_height;
+		visible_timebars++;
+		// make sure all cd markers show up in their respective places
+		update_cue_marker_display();
+	} else {
+		cue_marker_group->hide();
+		cue_mark_label.hide();
+		// make sure all cd markers show up in their respective places
+		update_cue_marker_display();
 	}
 
 	if (ruler_marker_action->get_active()) {

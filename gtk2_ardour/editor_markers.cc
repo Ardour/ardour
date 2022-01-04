@@ -121,6 +121,9 @@ Editor::add_new_location_internal (Location* location)
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
 			lam->start = new ArdourMarker (*this, *cd_marker_group, color, location->name(), ArdourMarker::Mark, location->start());
 			group = cd_marker_group;
+		} else if (location->is_cue_marker() && ruler_cue_marker_action->get_active()) {
+			lam->start = new ArdourMarker (*this, *cue_marker_group, color, location->name(), ArdourMarker::Mark, location->start());
+			group = cue_marker_group;
 		} else {
 			lam->start = new ArdourMarker (*this, *marker_group, color, location->name(), ArdourMarker::Mark, location->start());
 			group = marker_group;
@@ -418,7 +421,8 @@ Editor::location_flags_changed (Location *location)
 	}
 }
 
-void Editor::update_cd_marker_display ()
+void
+Editor::update_cd_marker_display ()
 {
 	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
 		LocationMarkers * lam = i->second;
@@ -428,7 +432,55 @@ void Editor::update_cd_marker_display ()
 	}
 }
 
+
 void Editor::ensure_cd_marker_updated (LocationMarkers * lam, Location * location)
+{
+	if (location->is_cd_marker()
+	    && (ruler_cd_marker_action->get_active() &&  lam->start->get_parent() != cd_marker_group))
+	{
+		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
+		if (lam->start) {
+			lam->start->reparent (*cd_marker_group);
+		}
+		if (lam->end) {
+			lam->end->reparent (*cd_marker_group);
+		}
+	}
+	else if ( (!location->is_cd_marker() || !ruler_cd_marker_action->get_active())
+		  && (lam->start->get_parent() == cd_marker_group))
+	{
+		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
+		if (location->is_mark()) {
+			if (lam->start) {
+				lam->start->reparent (*marker_group);
+			}
+			if (lam->end) {
+				lam->end->reparent (*marker_group);
+			}
+		}
+		else {
+			if (lam->start) {
+				lam->start->reparent (*range_marker_group);
+			}
+			if (lam->end) {
+				lam->end->reparent (*range_marker_group);
+			}
+		}
+	}
+}
+
+void
+Editor::update_cue_marker_display ()
+{
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		LocationMarkers * lam = i->second;
+		Location * location = i->first;
+
+		ensure_cue_marker_updated (lam, location);
+	}
+}
+
+void Editor::ensure_cue_marker_updated (LocationMarkers * lam, Location * location)
 {
 	if (location->is_cd_marker()
 	    && (ruler_cd_marker_action->get_active() &&  lam->start->get_parent() != cd_marker_group))

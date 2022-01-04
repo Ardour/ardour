@@ -787,6 +787,8 @@ private:
 	bool choose_new_marker_name(std::string &name, bool is_range=false);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers* lam, ARDOUR::Location* location);
+	void update_cue_marker_display ();
+	void ensure_cue_marker_updated (LocationMarkers* lam, ARDOUR::Location* location);
 
 	TimeAxisView*      clicked_axisview;
 	RouteTimeAxisView* clicked_routeview;
@@ -916,6 +918,7 @@ private:
 	ArdourCanvas::Container* range_marker_group;
 	ArdourCanvas::Container* transport_marker_group;
 	ArdourCanvas::Container* cd_marker_group;
+	ArdourCanvas::Container* cue_marker_group;
 
 	/* parent for groups which themselves contain time markers */
 	ArdourCanvas::Container* _time_markers_group;
@@ -960,6 +963,7 @@ private:
 	Glib::RefPtr<Gtk::ToggleAction> ruler_range_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_loop_punch_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_cue_marker_action;
 	bool                            no_ruler_shown_update;
 
 	Gtk::Widget* ruler_grabbed_widget;
@@ -1049,6 +1053,7 @@ private:
 	ArdourCanvas::Rectangle* range_marker_bar;
 	ArdourCanvas::Rectangle* transport_marker_bar;
 	ArdourCanvas::Rectangle* cd_marker_bar;
+	ArdourCanvas::Rectangle* cue_marker_bar;
 
 	Gtk::Label  minsec_label;
 	Gtk::Label  bbt_label;
@@ -1060,6 +1065,7 @@ private:
 	Gtk::Label  range_mark_label;
 	Gtk::Label  transport_mark_label;
 	Gtk::Label  cd_mark_label;
+	Gtk::Label  cue_mark_label;
 
 	/* videtimline related actions */
 	Gtk::Label                videotl_label;
@@ -1697,6 +1703,7 @@ private:
 	bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_transport_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_cd_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_cue_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	void update_video_timeline (bool flush = false);

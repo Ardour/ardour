@@ -1002,6 +1002,13 @@ Editor::canvas_cd_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 	return typed_event (item, event, CdMarkerBarItem);
 }
 
+
+bool
+Editor::canvas_cue_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
+{
+	return typed_event (item, event, CueMarkerBarItem);
+}
+
 bool
 Editor::canvas_videotl_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
