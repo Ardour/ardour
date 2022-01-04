@@ -962,7 +962,9 @@ Locations::add (Location *loc, bool make_current)
 	if (loc->name().empty()) {
 		string new_name;
 
-		if (loc->is_mark()) {
+		if (loc->is_cue_marker()) {
+			next_available_name (new_name, _("cue"));
+		} else if (loc->is_mark()) {
 			next_available_name (new_name, _("mark"));
 		} else {
 			next_available_name (new_name, _("range"));
