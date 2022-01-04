@@ -62,6 +62,7 @@ public:
 		IsSkipping = 0x100, /* skipping is active (or not) */
 		IsClockOrigin = 0x200,
 		IsXrun = 0x400,
+		IsCueMarker = 0x800,
 	};
 
 	Location (Session &);
@@ -108,6 +109,7 @@ public:
 	bool is_mark () const { return _flags & IsMark; }
 	bool is_hidden () const { return _flags & IsHidden; }
 	bool is_cd_marker () const { return _flags & IsCDMarker; }
+	bool is_cue_marker () const { return _flags & IsCueMarker; }
 	bool is_session_range () const { return _flags & IsSessionRange; }
 	bool is_range_marker() const { return _flags & IsRangeMarker; }
 	bool is_skip() const { return _flags & IsSkip; }
