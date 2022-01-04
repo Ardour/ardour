@@ -177,6 +177,9 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 void
 TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::FollowAction icon, float size, float scale) const
 {
+	uint32_t bg_color = fill_color();
+	uint32_t fg_color = UIConfiguration::instance ().color ("neutral:midground");
+
 	//in the case where there is a random follow-action, just put a "?"
 	if (trigger()->follow_action_probability()>0) {
 		Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
@@ -190,6 +193,7 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 		return;
 	}
 
+	set_source_rgba (context, fg_color);
 	context->set_line_width (1 * scale);
 
 	switch (icon) {
@@ -207,30 +211,50 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 			context->move_to (size / 2, 3 * scale);
 			context->line_to (size / 2, size - 5 * scale);
 			context->stroke ();
-			context->arc (size / 2, size - 5 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
+			context->arc (size / 2, size - 5 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
 			break;
 		case Trigger::PrevTrigger:
 			context->move_to (size / 2, 5 * scale);
 			context->line_to (size / 2, size - 3 * scale);
 			context->stroke ();
-			context->arc (size / 2, 5 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
+			context->arc (size / 2, 5 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
 			break;
-			/* XXX Ben to add new icons for next two */
 		case Trigger::ForwardTrigger:
 			context->move_to (size / 2, 3 * scale);
-			context->line_to (size / 2, size - 5 * scale);
+			context->line_to (size / 2, size - 3 * scale);
 			context->stroke ();
-			context->arc (size / 2, size - 5 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
+
+			context->arc (size / 2, 7 * scale, 2 * scale, 0, 2 * M_PI);
+			set_source_rgba (context, fg_color);
+			context->fill ();
+
+			context->arc (size / 2, 7 * scale, 1 * scale, 0, 2 * M_PI);
+			set_source_rgba (context, fill_color());
+			context->fill ();
+
+			set_source_rgba (context, fg_color);
+			context->arc (size / 2, size - 3 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
 			break;
 		case Trigger::ReverseTrigger:
-			context->move_to (size / 2, 5 * scale);
+			context->arc (size / 2, 3 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
+			set_source_rgba (context, fg_color);
+			context->fill ();
+
+			context->move_to (size / 2, 3 * scale);
 			context->line_to (size / 2, size - 3 * scale);
 			context->stroke ();
-			context->arc (size / 2, 5 * scale, 1.5 * scale, 0, 2 * M_PI); // arrow head
+
+			context->arc (size / 2, size - 7 * scale, 2 * scale, 0, 2 * M_PI);
+			set_source_rgba (context, fg_color);
 			context->fill ();
+
+			context->arc (size / 2, size - 7 * scale, 1 * scale, 0, 2 * M_PI);
+			set_source_rgba (context, bg_color);
+			context->fill ();
+
 			break;
 		case Trigger::QueuedTrigger: {
 			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
@@ -255,6 +279,8 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 			context->set_identity_matrix ();
 		} break;
 		case Trigger::OtherTrigger: {
+			context->set_line_width (1.5 * scale);
+			set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); //needs to be brighter to maintain balance
 			for (int i = 0; i<6; i++) {
 				Cairo::Matrix m = context->get_matrix();
 				context->translate (size / 2, size /2);
@@ -281,29 +307,19 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 	float margin = 4*scale;
 	float size = sz - 2*margin;
 
-	if (trigger()->active()) {
-		if (trigger()->launch_style()==Trigger::Toggle) {
-			//clicking again will Stop this clip
-			set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
-			context->move_to (margin, margin);
-			context->rel_line_to (size,  0);
-			context->rel_line_to (0,     size);
-			context->rel_line_to (-size, 0);
-			context->rel_line_to (0,     -size);
-			context->fill ();
-			return;  //done
-		} else {
-			//actively playing; draw a filled play triangle
-			set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
-			context->move_to (margin, margin);
-			context->rel_line_to (0, size);
-			context->rel_line_to (size, -size/2);
-			context->fill ();
-			return;  //done
-		}
-	}
+	bool active = trigger()->active();
 
-	set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+	if (active && trigger()->launch_style()==Trigger::Toggle) {
+		//clicking again will Stop this clip
+		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
+		context->move_to (margin, margin);
+		context->rel_line_to (size,  0);
+		context->rel_line_to (0,     size);
+		context->rel_line_to (-size, 0);
+		context->rel_line_to (0,     -size);
+		context->fill ();
+		return;  //done
+	}
 
 	if (!trigger()->region ()) {
 		//no content in this slot, it is only a Stop button
@@ -312,26 +328,73 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 		context->rel_line_to (0,     size);
 		context->rel_line_to (-size, 0);
 		context->rel_line_to (0,     -size);
+		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
 		context->stroke ();
 		return;  //done
 	}
 
+	set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+
 	switch (trigger()->launch_style()) {
 		case Trigger::Toggle:
+			if (active) {
+				context->move_to (margin, margin);  //special case: now it's a square Stop button
+				context->rel_line_to (size,  0);
+				context->rel_line_to (0,     size);
+				context->rel_line_to (-size, 0);
+				context->line_to (margin, margin);
+				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
+				context->fill ();
+				context->stroke ();
+			} else {
+				context->move_to (margin, margin);  //boxy arrow
+				context->rel_line_to (0, size);
+				context->rel_line_to (size*1/3, 0);
+				context->rel_line_to (size*2/3, -size/2);
+				context->rel_line_to (-size*2/3, -size/2);
+				context->line_to (margin, margin);
+				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+				context->stroke ();
+			}
+			break;
 		case Trigger::OneShot:
 			context->move_to (margin, margin);
 			context->rel_line_to (0, size);
 			context->rel_line_to (size, -size/2);
 			context->line_to (margin, margin);
-			context->stroke ();
+			if (active) {
+				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
+				context->fill ();
+				context->stroke ();
+			} else {
+				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+				context->stroke ();
+			}
 			break;
-			/* XXX ben this needs a new icon */
-		case Trigger::ReTrigger:
-			context->move_to (margin, margin);
-			context->rel_line_to (0, size);
-			context->rel_line_to (size, -size/2);
-			context->line_to (margin, margin);
+		case Trigger::ReTrigger:  //line + boxy arrow + line
+			if (active) {
+				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
+			} else {
+				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+			}
+
+			//vertical line at left
+			context->set_line_width (2 * scale);
+			context->move_to (margin + 1*scale, margin);
+			context->line_to (margin + 1*scale, margin+size);
 			context->stroke ();
+
+			//small triangle
+			context->set_line_width (1 * scale);
+			context->move_to (margin + scale*4, margin + 2*scale);
+			context->line_to (margin + size, margin+size/2);
+			context->line_to (margin + scale*4, margin+size-2*scale);
+			context->line_to (margin + scale*4, margin + 2*scale);
+			if (active) {
+				context->fill ();
+			} else {
+				context->stroke ();
+			}
 			break;
 		case Trigger::Gate:  //diamond shape
 			context->move_to ( margin+size/2, margin );
@@ -339,10 +402,16 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			context->rel_line_to ( -size/2, size/2);
 			context->rel_line_to ( -size/2, -size/2);
 			context->rel_line_to ( size/2,  -size/2);
-			context->stroke ();
+			if (active) {
+				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
+				context->fill ();
+				context->stroke ();
+			} else {
+				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+				context->stroke ();
+			}
 			break;
 		case Trigger::Repeat:  //'stutter' shape
-			set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); //stutter shape needs to be brighter to maintain balance
 			context->set_line_width (1 * scale);
 			context->move_to ( margin, margin );
 			context->rel_line_to ( 0, size);
@@ -353,6 +422,11 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			context->move_to ( margin + scale*6, margin + scale*3 );
 			context->rel_line_to ( 0, size - scale*6);
 
+			if (active) {
+				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foregroundest"));
+			} else {
+				set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); //stutter shape needs to be brighter to maintain balance
+			}
 			context->stroke ();
 			break;
 		default:
