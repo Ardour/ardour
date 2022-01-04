@@ -113,6 +113,8 @@ private:
 	sigc::connection      _update_connection;
 };
 
+typedef std::list<boost::shared_ptr<ARDOUR::TriggerBox> > TriggerBoxList;
+
 class CueMaster : public ArdourCanvas::Rectangle, public ARDOUR::SessionHandlePtr
 {
 public:
@@ -130,9 +132,19 @@ public:
 	bool event_handler (GdkEvent*);
 
 private:
+	void context_menu ();
+
+	void get_boxen (TriggerBoxList &boxlist);
+	void clear_all_triggers();
+	void set_all_follow_action (ARDOUR::Trigger::FollowAction);
+	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle);
+	void set_all_quantization (Temporal::BBT_Offset const&);
+
 	void ui_parameter_changed (std::string const& p);
 	void set_default_colors ();
 	void shape_stop_button ();
+
+	Gtk::Menu* _context_menu;
 
 	double _poly_size;
 	double _poly_margin;

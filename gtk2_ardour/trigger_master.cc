@@ -309,7 +309,7 @@ TriggerMaster::event_handler (GdkEvent* ev)
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
 				name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
-				stop_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foreground"));
+				stop_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:midground"));
 				set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			}
 			redraw ();
@@ -498,10 +498,9 @@ TriggerMaster::_size_allocate (ArdourCanvas::Rect const& alloc)
 	_poly_size = height - (_poly_margin * 2);
 
 	Points p;
-	p.push_back (Duple (_poly_margin, _poly_margin));
 	p.push_back (Duple (_poly_margin, _poly_size));
 	p.push_back (Duple (_poly_size, _poly_size));
-	p.push_back (Duple (_poly_size, _poly_margin));
+	p.push_back (Duple (0.5 + _poly_size / 2, _poly_margin ));
 	stop_shape->set (p);
 
 	float tleft  = _poly_size + (_poly_margin * 3);
@@ -562,7 +561,7 @@ TriggerMaster::set_default_colors ()
 {
 	set_fill_color (HSV (UIConfiguration::instance ().color ("theme:bg")).darker (0.25).color ());
 	name_text->set_color (UIConfiguration::instance ().color ("neutral:foreground"));
-	stop_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:midground"));
+	stop_shape->set_outline_color (fill_color());
 }
 
 void
@@ -575,6 +574,7 @@ TriggerMaster::ui_parameter_changed (std::string const& p)
 
 CueMaster::CueMaster (Item* parent)
 	: ArdourCanvas::Rectangle (parent)
+	, _context_menu (0)
 {
 	set_layout_sensitive (true); // why???
 
@@ -653,6 +653,13 @@ CueMaster::event_handler (GdkEvent* ev)
 				return true;
 			}
 			break;
+		case GDK_BUTTON_RELEASE:
+			switch (ev->button.button) {
+				case 3:
+					context_menu ();
+					return true;
+			}
+			break;
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
 				name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
@@ -690,13 +697,11 @@ CueMaster::_size_allocate (ArdourCanvas::Rect const& alloc)
 
 	_poly_size = height - (_poly_margin * 2);
 
-	float centering_offset = (width / 2) - _poly_margin - _poly_size / 2;
-
 	Points p;
-	p.push_back (Duple (centering_offset + _poly_margin, _poly_margin));
-	p.push_back (Duple (centering_offset + _poly_margin, _poly_size));
-	p.push_back (Duple (centering_offset + _poly_size, _poly_size));
-	p.push_back (Duple (centering_offset + _poly_size, _poly_margin));
+	p.push_back (Duple (_poly_margin, _poly_margin));
+	p.push_back (Duple (_poly_margin, _poly_size));
+	p.push_back (Duple (_poly_size, _poly_size));
+	p.push_back (Duple (_poly_size, _poly_margin));
 	stop_shape->set (p);
 
 	float tleft  = _poly_size + (_poly_margin * 3);
@@ -716,7 +721,7 @@ CueMaster::set_default_colors ()
 {
 	set_fill_color (HSV (UIConfiguration::instance ().color ("theme:bg")).darker (0.25).color ());
 	name_text->set_color (UIConfiguration::instance ().color ("neutral:foreground"));
-	stop_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:midground"));
+	stop_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foreground"));
 }
 
 void
@@ -724,5 +729,147 @@ CueMaster::ui_parameter_changed (std::string const& p)
 {
 	if (p == "color-file") {
 		set_default_colors ();
+	}
+}
+
+void
+CueMaster::context_menu ()
+{
+	using namespace Gtk;
+	using namespace Gtk::Menu_Helpers;
+	using namespace Temporal;
+
+	delete _context_menu;
+
+	_context_menu   = new Menu;
+	MenuList& items = _context_menu->items ();
+	_context_menu->set_name ("ArdourContextMenu");
+
+	Menu*     follow_menu = manage (new Menu);
+	MenuList& fitems      = follow_menu->items ();
+
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::None)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::Stop)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::Again)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::PrevTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::NextTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ForwardTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::ForwardTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ReverseTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::ReverseTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::AnyTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::OtherTrigger)));
+
+	Menu*     launch_menu = manage (new Menu);
+	MenuList& litems      = launch_menu->items ();
+
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_launch_style), Trigger::OneShot)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::ReTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_launch_style), Trigger::ReTrigger)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_launch_style), Trigger::Gate)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_launch_style), Trigger::Toggle)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_launch_style), Trigger::Repeat)));
+
+	Menu*     quant_menu = manage (new Menu);
+	MenuList& qitems     = quant_menu->items ();
+
+	BBT_Offset b;
+
+	b = BBT_Offset (1, 0, 0);
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 4, 0);
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 2, 0);
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 1, 0);
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 0, ticks_per_beat / 2);
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 0, ticks_per_beat / 4);
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 0, ticks_per_beat / 8);
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_quantization), b)));
+	b = BBT_Offset (0, 0, ticks_per_beat / 16);
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_quantization), b)));
+
+	Menu*     load_menu = manage (new Menu);
+	MenuList& loitems (load_menu->items ());
+
+//	items.push_back (CheckMenuElem (_("Toggle Monitor Thru"), sigc::mem_fun (*this, &CueMaster::toggle_thru)));
+//	if (_triggerbox->pass_thru ()) {
+//		_ignore_menu_action = true;
+//		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
+//		_ignore_menu_action = false;
+//	}
+
+	items.push_back (MenuElem (_("Set All Follow Actions..."), *follow_menu));
+	items.push_back (MenuElem (_("Set All Launch Styles..."), *launch_menu));
+	items.push_back (MenuElem (_("Set All Quantizations..."), *quant_menu));
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Clear All..."), sigc::mem_fun (*this, &CueMaster::clear_all_triggers)));
+
+	_context_menu->popup (1, gtk_get_current_event_time ());
+}
+
+void
+CueMaster::get_boxen (TriggerBoxList &boxlist)
+{
+	boost::shared_ptr<RouteList> rl = _session->get_routes();
+	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
+		boost::shared_ptr<Route> route = *r;
+		boost::shared_ptr<TriggerBox> box = route->triggerbox();
+#warning @Ben disambiguate processor *active* vs *visibility*
+		if (box /*&& box.active*/) {
+			boxlist.push_back(box);
+		}
+	}
+}
+
+//void
+//CueMaster::toggle_thru ()
+//{
+//	TriggerBoxList tl;
+//	get_boxen(tl);
+//	for (TriggerBoxList::iterator t = tl.begin(); t != tl.end(); ++t) {
+//		_triggerbox->set_pass_thru (!_triggerbox->pass_thru ());
+//	}
+//}
+
+
+void
+CueMaster::clear_all_triggers ()
+{
+	TriggerBoxList tl;
+	get_boxen(tl);
+	for (TriggerBoxList::iterator t = tl.begin(); t != tl.end(); ++t) {
+		(*t)->clear_all_triggers();
+	}
+}
+
+
+void
+CueMaster::set_all_follow_action (Trigger::FollowAction fa)
+{
+	TriggerBoxList tl;
+	get_boxen(tl);
+	for (TriggerBoxList::iterator t = tl.begin(); t != tl.end(); ++t) {
+		(*t)->set_all_follow_action(fa, 0);
+	}
+}
+
+void
+CueMaster::set_all_launch_style (Trigger::LaunchStyle ls)
+{
+	TriggerBoxList tl;
+	get_boxen(tl);
+	for (TriggerBoxList::iterator t = tl.begin(); t != tl.end(); ++t) {
+		(*t)->set_all_launch_style(ls);
+	}
+}
+
+void
+CueMaster::set_all_quantization (Temporal::BBT_Offset const& q)
+{
+	TriggerBoxList tl;
+	get_boxen(tl);
+	for (TriggerBoxList::iterator t = tl.begin(); t != tl.end(); ++t) {
+		(*t)->set_all_quantization(q);
 	}
 }
