@@ -725,13 +725,21 @@ void
 Editor::mouse_add_new_marker (timepos_t where, Location::Flags extra_flags)
 {
 	string markername;
+	string namebase;
 	Location::Flags flags = Location::Flags (extra_flags|Location::IsMark);
 
 	cerr << "adding new marker @ " << where << endl;
 
 	if (_session) {
-		_session->locations()->next_available_name(markername, _("mark"));
-		if (!choose_new_marker_name(markername)) {
+
+		if (flags & Location::IsCueMarker) {
+			namebase = _("cue");
+		} else {
+			namebase = _("mark");
+		}
+		_session->locations()->next_available_name (markername, namebase);
+
+		if (!choose_new_marker_name (markername)) {
 			return;
 		}
 
