@@ -325,6 +325,14 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 			context->line_to (margin, margin);
 			context->stroke ();
 			break;
+			/* XXX ben this needs a new icon */
+		case Trigger::ReTrigger:
+			context->move_to (margin, margin);
+			context->rel_line_to (0, size);
+			context->rel_line_to (size, -size/2);
+			context->line_to (margin, margin);
+			context->stroke ();
+			break;
 		case Trigger::Gate:  //diamond shape
 			context->move_to ( margin+size/2, margin );
 			context->rel_line_to ( size/2,  size/2);

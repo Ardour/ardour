@@ -165,6 +165,7 @@ SlotPropertyTable::SlotPropertyTable ()
 	_launch_style_button.set_name("FollowAction");
 	_launch_style_button.set_sizing_text (longest_launch);
 	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::OneShot)));
+	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::ReTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::ReTrigger)));
 	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Gate)));
 	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Toggle)));
 	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Repeat)));

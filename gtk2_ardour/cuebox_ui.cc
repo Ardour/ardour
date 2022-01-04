@@ -286,6 +286,7 @@ CueBoxUI::context_menu (uint64_t idx)
 	MenuList& litems      = launch_menu->items ();
 
 	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::OneShot), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_launch_style), Trigger::OneShot, idx)));
+	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::ReTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_launch_style), Trigger::ReTrigger, idx)));
 	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Gate), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_launch_style), Trigger::Gate, idx)));
 	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Toggle), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_launch_style), Trigger::Toggle, idx)));
 	litems.push_back (MenuElem (TriggerUI::launch_style_to_string(Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_launch_style), Trigger::Repeat, idx)));

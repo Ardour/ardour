@@ -92,6 +92,7 @@ TriggerUI::TriggerUI ()
 		}
 
 		launch_strings.push_back (launch_style_to_string (Trigger::OneShot));
+		launch_strings.push_back (launch_style_to_string (Trigger::ReTrigger));
 		launch_strings.push_back (launch_style_to_string (Trigger::Gate));
 		launch_strings.push_back (launch_style_to_string (Trigger::Toggle));
 		launch_strings.push_back (launch_style_to_string (Trigger::Repeat));
@@ -451,6 +452,10 @@ TriggerUI::launch_context_menu ()
 	if (trigger ()->launch_style () == Trigger::OneShot) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
 	}
+	litems.push_back (RadioMenuElem (lagroup, TriggerUI::launch_style_to_string(Trigger::ReTrigger), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::ReTrigger)));
+	if (trigger ()->launch_style () == Trigger::ReTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
+	}
 	litems.push_back (RadioMenuElem (lagroup, TriggerUI::launch_style_to_string(Trigger::Gate), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_launch_style), Trigger::Gate)));
 	if (trigger ()->launch_style () == Trigger::Gate) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&litems.back ())->set_active (true);
@@ -694,6 +699,8 @@ TriggerUI::launch_style_to_string (Trigger::LaunchStyle ls)
 	switch (ls) {
 	case Trigger::OneShot:
 		return _("One Shot");
+	case Trigger::ReTrigger:
+		return _("Retrigger");
 	case Trigger::Gate:
 		return _("Gate");
 	case Trigger::Toggle:
