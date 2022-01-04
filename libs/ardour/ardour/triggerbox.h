@@ -541,7 +541,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	TriggerPtr get_next_trigger ();
 	TriggerPtr peek_next_trigger ();
 
-	void add_midi_sidechain (std::string const & name);
+	void add_midi_sidechain ();
+	void update_sidechain_name ();
 
 	bool pass_thru() const { return _requests.pass_thru; }
 	void set_pass_thru (bool yn);

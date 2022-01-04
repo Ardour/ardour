@@ -3160,8 +3160,11 @@ Route::set_processor_state (const XMLNode& node, int version)
 			cerr << "Seen triggerbox!\n";
 			if (!_triggerbox) {
 				_triggerbox.reset (new TriggerBox (_session, _default_type));
+				_triggerbox->set_owner (this);
 			}
 			_triggerbox->set_state (**niter, version);
+			_triggerbox->update_sidechain_name ();
+
 			new_order.push_back (_triggerbox);
 		} else {
 			set_processor_state (**niter, version, prop, new_order, must_configure);
@@ -4579,6 +4582,10 @@ Route::set_name (const string& str)
 			break;
 		}
 		pi->update_sidechain_name ();
+	}
+
+	if (_triggerbox) {
+		_triggerbox->update_sidechain_name ();
 	}
 
 	bool ret = (_input->set_name(newname) && _output->set_name(newname));

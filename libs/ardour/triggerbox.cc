@@ -2158,10 +2158,11 @@ TriggerBox::trigger (Triggers::size_type n)
 }
 
 void
-TriggerBox::add_midi_sidechain (std::string const & name)
+TriggerBox::add_midi_sidechain ()
 {
+	assert (owner());
 	if (!_sidechain) {
-		_sidechain.reset (new SideChain (_session, name + "-trig"));
+		_sidechain.reset (new SideChain (_session, string_compose ("%1/%2", owner()->name(), name ())));
 		_sidechain->activate ();
 		_sidechain->input()->add_port ("", owner(), DataType::MIDI); // add a port, don't connect.
 		boost::shared_ptr<Port> p = _sidechain->input()->nth (0);
@@ -2172,6 +2173,16 @@ TriggerBox::add_midi_sidechain (std::string const & name)
 			error << _("Could not create port for trigger side-chain") << endmsg;
 		}
 	}
+}
+
+void
+TriggerBox::update_sidechain_name ()
+{
+	if (!_sidechain) {
+		return;
+	}
+	assert (owner());
+	_sidechain->set_name (string_compose ("%1/%2", owner()->name(), name ()));
 }
 
 bool
@@ -2831,12 +2842,7 @@ TriggerBox::get_state (void)
 	node.add_child_nocopy (*trigger_child);
 
 	if (_sidechain) {
-		XMLNode* scnode = new XMLNode (X_("Sidechain"));
-		std::string port_name = _sidechain->input()->nth (0)->name();
-		port_name = port_name.substr (0, port_name.find ('-'));
-		scnode->set_property (X_("name"), port_name);
-		scnode->add_child_nocopy (_sidechain->get_state());
-		node.add_child_nocopy (*scnode);
+		node.add_child_nocopy (_sidechain->get_state ());
 	}
 
 	return node;
@@ -2881,14 +2887,12 @@ TriggerBox::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	XMLNode* scnode = node.child (X_("Sidechain"));
-
+	/* sidechain is a Processor (IO) */
+	XMLNode* scnode = node.child (Processor::state_node_name.c_str ());
 	if (scnode) {
-		std::string name;
-		scnode->get_property (X_("name"), name);
-		add_midi_sidechain (name);
+		add_midi_sidechain ();
 		assert (_sidechain);
-		_sidechain->set_state (*scnode->children().front(), version);
+		_sidechain->set_state (*scnode, version);
 	}
 
 	return 0;

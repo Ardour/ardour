@@ -2740,7 +2740,7 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
 				 * data type is AUDIO, the triggerbox will need
 				 * a sidehcain MIDI input to be able to be MIDI controlled
 				 */
-				tb->add_midi_sidechain (track->name());
+				tb->add_midi_sidechain ();
 				track->presentation_info ().set_trigger_track (true);
 			}
 
