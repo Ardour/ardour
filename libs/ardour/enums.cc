@@ -466,6 +466,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (SessionEvent, EndRoll);
 	REGISTER_CLASS_ENUM (SessionEvent, TransportStateChange);
 	REGISTER_CLASS_ENUM (SessionEvent, AutoLoop);
+	REGISTER_CLASS_ENUM (SessionEvent, TriggerSceneChange);
 	REGISTER (_SessionEvent_Type);
 
 	REGISTER_CLASS_ENUM (SessionEvent, Add);
@@ -568,6 +569,8 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsRangeMarker);
 	REGISTER_CLASS_ENUM (Location, IsSkip);
 	REGISTER_CLASS_ENUM (Location, IsClockOrigin);
+	REGISTER_CLASS_ENUM (Location, IsXrun);
+	REGISTER_CLASS_ENUM (Location, IsCueMarker);
 	REGISTER_BITS (_Location_Flags);
 
 	REGISTER_CLASS_ENUM (Track, NoFreeze);
