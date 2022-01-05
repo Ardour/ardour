@@ -2299,6 +2299,8 @@ private:
 	GATOMIC_QUAL gint _update_pretty_names;
 
 	void setup_thread_local_variables ();
+	void cue_marker_change (Location*);
+	void sync_cues ();
 };
 
 

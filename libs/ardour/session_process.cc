@@ -1047,6 +1047,10 @@ Session::process_event (SessionEvent* ev)
 		g_atomic_int_set (&_suspend_timecode_transmission, ev->yes_or_no ? 0 : 1);
 		break;
 
+	case SessionEvent::SyncCues:
+		sync_cues ();
+		break;
+
 	default:
 	  fatal << string_compose(_("Programming error: illegal event type in process_event (%1)"), ev->type) << endmsg;
 		abort(); /*NOTREACHED*/
@@ -1580,3 +1584,9 @@ Session::implement_master_strategy ()
 
 	return true;
 }
+
+void
+Session::sync_cues ()
+{
+}
+

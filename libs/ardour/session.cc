@@ -483,6 +483,8 @@ Session::Session (AudioEngine &eng,
 
 	Controllable::ControlTouched.connect_same_thread (*this, boost::bind (&Session::controllable_touched, this, _1));
 
+	Location::cue_change.connect_same_thread (*this, boost::bind (&Session::cue_marker_change, this, _1));
+
 	emit_thread_start ();
 	auto_connect_thread_start ();
 
@@ -7365,4 +7367,11 @@ bool
 Session::had_destructive_tracks() const
 {
 	return _had_destructive_tracks;
+}
+
+void
+Session::cue_marker_change (Location* loc)
+{
+	SessionEvent* ev = new SessionEvent (SessionEvent::SyncCues, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
+	queue_event (ev);
 }
