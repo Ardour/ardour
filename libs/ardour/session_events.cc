@@ -162,7 +162,7 @@ SessionEventManager::dump_events () const
 	cerr << "EVENT DUMP" << endl;
 	for (Events::const_iterator i = events.begin(); i != events.end(); ++i) {
 
-		cerr << "\tat " << (*i)->action_sample << ' ' << enum_2_string ((*i)->type) << " target = " << (*i)->target_sample << endl;
+		cerr << "\tat " << (*i)->action_sample << " type " << enum_2_string ((*i)->type) << " target = " << (*i)->target_sample << endl;
 	}
 	cerr << "Next event: ";
 

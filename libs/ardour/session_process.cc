@@ -861,6 +861,11 @@ Session::set_next_event ()
 			break;
 		}
 	}
+	if (next_event != events.end()) {
+		DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("@ %1 next event set to %2 @ %3\n", _transport_sample, enum_2_string ((*next_event)->type), (*next_event)->action_sample));
+	} else {
+		DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("no next event for %1\n", _transport_sample));
+	}
 }
 
 void
@@ -968,6 +973,8 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::TriggerSceneChange:
 		TriggerBox::scene_bang (ev->scene);
+		remove = false;
+		del = false;
 		break;
 
 	case SessionEvent::PunchIn:
@@ -1588,5 +1595,81 @@ Session::implement_master_strategy ()
 void
 Session::sync_cues ()
 {
+	std::cerr << "Need to sync cues!\n";
+
+	_locations->apply (*this, &Session::sync_cues_from_list);
+
 }
 
+struct LocationByTime
+{
+	bool operator() (Location const *a, Location const * b) {
+		return a->start() < b->start();
+	}
+};
+
+void
+Session::sync_cues_from_list (Locations::LocationList const & locs)
+{
+	/* iterate over all cue markers, check there is a SessionEvent for them all */
+
+	Locations::LocationList sorted (locs);
+	LocationByTime cmp;
+
+	sorted.sort (cmp);
+
+	Events::iterator evi = events.begin();
+
+	for (auto const & loc : locs) {
+
+		if (loc->is_cue_marker()) {
+
+			const samplepos_t cue_sample = loc->start_sample();
+
+			if (evi == events.end()) {
+
+				SessionEvent* ev = new SessionEvent (SessionEvent::TriggerSceneChange, SessionEvent::Add, cue_sample, 0, 0);
+				ev->scene = loc->cue_id();
+				events.insert (evi, ev);
+
+			} else if (cue_sample > (*evi)->target_sample) {
+
+				SessionEvent* ev = new SessionEvent (SessionEvent::TriggerSceneChange, SessionEvent::Add, cue_sample, 0, 0);
+				ev->scene = loc->cue_id();
+				events.insert (evi, ev);
+
+				/* we don't advance evi here because we inserted before it */
+
+			} else if ((*evi)->type == SessionEvent::TriggerSceneChange) {
+
+				if ((*evi)->action_sample == cue_sample) {
+
+					/* replace the contents of the event */
+					(*evi)->scene = loc->cue_id();
+					++evi;
+
+				} else if ((*evi)->action_sample < cue_sample) {
+
+					/* existing event but no corresponding cue marker */
+					evi = events.erase (evi);
+				}
+			} else {
+				++evi;
+			}
+
+		}
+	}
+
+	/* Remove any relevant events that are timestamped after the last cue marker */
+
+	while (evi != events.end()) {
+		if ((*evi)->type == SessionEvent::TriggerSceneChange) {
+			evi = events.erase (evi);
+		} else {
+			++evi;
+		}
+	}
+
+	dump_events ();
+	set_next_event ();
+}

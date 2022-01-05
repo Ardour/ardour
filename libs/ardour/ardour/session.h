@@ -2301,6 +2301,7 @@ private:
 	void setup_thread_local_variables ();
 	void cue_marker_change (Location*);
 	void sync_cues ();
+	void sync_cues_from_list (Locations::LocationList const &);
 };
 
 
