@@ -722,7 +722,7 @@ Editor::LocationMarkers::setup_lines ()
 }
 
 void
-Editor::mouse_add_new_marker (timepos_t where, Location::Flags extra_flags)
+Editor::mouse_add_new_marker (timepos_t where, Location::Flags extra_flags, int32_t cue_id)
 {
 	string markername;
 	string namebase;
@@ -733,17 +733,18 @@ Editor::mouse_add_new_marker (timepos_t where, Location::Flags extra_flags)
 	if (_session) {
 
 		if (flags & Location::IsCueMarker) {
-			namebase = _("cue");
+			/* XXX i18n needed for cue letter names */
+			markername = string_compose (_("cue %1"), (char) ('A' + cue_id));
 		} else {
 			namebase = _("mark");
-		}
-		_session->locations()->next_available_name (markername, namebase);
+			_session->locations()->next_available_name (markername, namebase);
 
-		if (!choose_new_marker_name (markername)) {
-			return;
+			if (!choose_new_marker_name (markername)) {
+				return;
+			}
 		}
 
-		Location *location = new Location (*_session, where, where, markername, flags);
+		Location *location = new Location (*_session, where, where, markername, flags, cue_id);
 		begin_reversible_command (_("add marker"));
 
 		XMLNode &before = _session->locations()->get_state();

@@ -221,7 +221,7 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 
 	switch (t) {
 	case MarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New location marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags (0))));
+		ruler_items.push_back (MenuElem (_("New location marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags (0), 0)));
 		ruler_items.push_back (MenuElem (_("Clear all locations"), sigc::mem_fun(*this, &Editor::clear_markers)));
 		ruler_items.push_back (MenuElem (_("Clear all xruns"), sigc::mem_fun(*this, &Editor::clear_xrun_markers)));
 		ruler_items.push_back (MenuElem (_("Unhide locations"), sigc::mem_fun(*this, &Editor::unhide_markers)));
@@ -240,12 +240,14 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 
 	case CdMarkerBarItem:
 		// TODO
-		ruler_items.push_back (MenuElem (_("New CD track marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCDMarker)));
+		ruler_items.push_back (MenuElem (_("New CD track marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCDMarker, 0)));
 		break;
 
 	case CueMarkerBarItem:
-		// TODO
-		ruler_items.push_back (MenuElem (_("New Cue marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker)));
+		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
+			/* XXX the "letter" names of the cues need to be subject to i18n somehow */
+			ruler_items.push_back (MenuElem (string_compose (_("Cue %1"), (char) ('A' + n)), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, n)));
+		}
 		break;
 
 	case TempoBarItem:
