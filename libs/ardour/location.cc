@@ -69,11 +69,12 @@ Location::Location (Session& s)
 	, _flags (Flags (0))
 	, _locked (false)
 	, _timestamp (time (0))
+	, _cue (0)
 {
 }
 
 /** Construct a new Location, giving it the position lock style determined by glue-new-markers-to-bars-and-beats */
-Location::Location (Session& s, timepos_t const & start, timepos_t const & end, const std::string &name, Flags bits)
+Location::Location (Session& s, timepos_t const & start, timepos_t const & end, const std::string &name, Flags bits, int32_t cue_id)
 	: SessionHandleRef (s)
 	, _name (name)
 	, _start (start)
@@ -81,6 +82,7 @@ Location::Location (Session& s, timepos_t const & start, timepos_t const & end, 
 	, _flags (bits)
 	, _locked (false)
 	, _timestamp (time (0))
+	, _cue (cue_id)
 {
 
 	/* it would be nice if the caller could ensure that the start and end
@@ -108,6 +110,7 @@ Location::Location (const Location& other)
 	, _end (other._end)
 	, _flags (other._flags)
 	, _timestamp (time (0))
+	, _cue (other._cue)
 {
 	/* copy is not locked even if original was */
 
@@ -219,6 +222,10 @@ Location::set_start (Temporal::timepos_t const & s, bool force)
 
 		assert (s.is_zero() || s.is_positive());
 
+		if (is_cue_marker()) {
+			cue_change (this);
+		}
+
 		return 0;
 	} else if (!force) {
 		/* range locations must exceed a minimum duration */
@@ -239,10 +246,6 @@ Location::set_start (Temporal::timepos_t const & s, bool force)
 			Session::StartTimeChanged (old.samples()); /* emit signal */
 			AudioFileSource::set_header_position_offset (s.samples());
 		}
-	}
-
-	if (is_cue_marker()) {
-		cue_change (this);
 	}
 
 	assert (_start.is_positive() || _start.is_zero());
@@ -431,11 +434,14 @@ Location::set_cd (bool yn, void*)
 }
 
 void
-Location::set_cue (bool yn, void*)
+Location::set_cue_id (int32_t cue_id)
 {
-	if (set_flag_internal (yn, IsCueMarker)) {
-		flags_changed (this); /* EMIT SIGNAL */
-		FlagsChanged ();
+	if (!is_cue_marker()) {
+		return;
+	}
+	if (_cue != cue_id) {
+		_cue = cue_id;
+		cue_change (this);
 	}
 }
 
@@ -534,7 +540,6 @@ Location::set_mark (bool yn)
 	set_flag_internal (yn, IsMark);
 }
 
-
 XMLNode&
 Location::cd_info_node(const string & name, const string & value)
 {
@@ -565,6 +570,7 @@ Location::get_state ()
 	node->set_property ("flags", _flags);
 	node->set_property ("locked", _locked);
 	node->set_property ("timestamp", _timestamp);
+	node->set_property ("cue", _cue);
 	if (_scene_change) {
 		node->add_child_nocopy (_scene_change->get_state());
 	}
@@ -614,6 +620,7 @@ Location::set_state (const XMLNode& node, int version)
 	}
 
 	node.get_property ("timestamp", _timestamp);
+	node.get_property ("cue", _cue);
 
 	Flags old_flags (_flags);
 
@@ -1073,6 +1080,10 @@ Locations::remove (Location *loc)
 		}
 
 		removed (loc); /* EMIT SIGNAL */
+
+		if (loc->is_cue_marker()) {
+			Location::cue_change (loc);
+		}
 
 		if (was_current) {
 			current_changed (0); /* EMIT SIGNAL */

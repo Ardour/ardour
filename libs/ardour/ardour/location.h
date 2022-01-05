@@ -66,7 +66,7 @@ public:
 	};
 
 	Location (Session &);
-	Location (Session &, Temporal::timepos_t const &, Temporal::timepos_t const &, const std::string &, Flags bits = Flags(0));
+	Location (Session &, Temporal::timepos_t const &, Temporal::timepos_t const &, const std::string &, Flags bits = Flags(0), int32_t cue_id = 0);
 	Location (const Location& other);
 	Location (Session &, const XMLNode&);
 	Location* operator= (const Location& other);
@@ -124,6 +124,9 @@ public:
 	boost::shared_ptr<SceneChange> scene_change() const { return _scene_change; }
 	void set_scene_change (boost::shared_ptr<SceneChange>);
 
+	int32_t cue_id() const { assert (is_cue_marker()); return _cue; }
+	void set_cue_id (int32_t);
+
 	/* these are static signals for objects that want to listen to all
 	 * locations at once.
 	 */
@@ -173,6 +176,7 @@ private:
 	bool               _locked;
 	boost::shared_ptr<SceneChange> _scene_change;
 	int64_t            _timestamp;
+	int32_t            _cue;
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
