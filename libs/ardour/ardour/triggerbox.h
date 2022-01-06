@@ -149,7 +149,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual timepos_t current_length() const = 0; /* offset from start() */
 	virtual timepos_t natural_length() const = 0; /* offset from start() */
 
-	void process_state_requests ();
+	void process_state_requests (BufferSet& bufs, pframes_t dest_offset);
 
 	bool active() const { return _state >= Running; }
 	State state() const { return _state; }
@@ -220,9 +220,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	bool legato () const { return _legato; }
 
 	virtual void startup ();
-	virtual void shutdown ();
+	virtual void shutdown (BufferSet& bufs, pframes_t dest_offset);
 	virtual void jump_start ();
-	virtual void jump_stop ();
+	virtual void jump_stop (BufferSet& bufs, pframes_t dest_offset);
 	void begin_stop (bool explicit_stop = false);
 
 	bool explicitly_stopped() const { return _explicitly_stopped; }
@@ -300,7 +300,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	std::atomic<Trigger*>     _pending;
 
-	void when_stopped_during_run ();
+	void when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset);
 	void set_region_internal (boost::shared_ptr<Region>);
 	virtual void retrigger() = 0;
 	virtual void set_usable_length () = 0;
@@ -332,7 +332,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	int set_region_in_worker_thread (boost::shared_ptr<Region>);
 	void startup ();
 	void jump_start ();
-	void jump_stop ();
+	void jump_stop (BufferSet& bufs, pframes_t dest_offset);
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
@@ -405,7 +405,8 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	int set_region_in_worker_thread (boost::shared_ptr<Region>);
 	void startup ();
 	void jump_start ();
-	void jump_stop ();
+	void shutdown (BufferSet& bufs, pframes_t dest_offset);
+	void jump_stop (BufferSet& bufs, pframes_t dest_offset);
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);

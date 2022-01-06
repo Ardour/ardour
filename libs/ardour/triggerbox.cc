@@ -419,7 +419,7 @@ Trigger::startup()
 }
 
 void
-Trigger::shutdown ()
+Trigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
 {
 	_state = Stopped;
 	_gain = 1.0;
@@ -441,12 +441,12 @@ Trigger::jump_start()
 }
 
 void
-Trigger::jump_stop()
+Trigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
 {
 	/* this is used when we start a new trigger in legato mode. We do not
 	   wait for quantization.
 	*/
-	shutdown ();
+	shutdown (bufs, dest_offset);
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
 	PropertyChanged (ARDOUR::Properties::running);
 }
@@ -464,7 +464,7 @@ Trigger::begin_stop (bool explicit_stop)
 }
 
 void
-Trigger::process_state_requests ()
+Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 {
 	bool stop = _requests.stop.exchange (false);
 
@@ -473,7 +473,7 @@ Trigger::process_state_requests ()
 		/* This is for an immediate stop, not a quantized one */
 
 		if (_state != Stopped) {
-			shutdown ();
+			shutdown (bufs, dest_offset);
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 immediate stop implemented\n", name()));
 		}
 
@@ -554,7 +554,7 @@ Trigger::process_state_requests ()
 
 		case WaitingToStart:
 			/* didn't even get started */
-			shutdown ();
+			shutdown (bufs, dest_offset);
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, never started, now stopped\n", index()));
 		}
 	}
@@ -692,7 +692,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 }
 
 void
-Trigger::when_stopped_during_run ()
+Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 {
 	if (_state == Stopped || _state == Stopping) {
 
@@ -708,7 +708,7 @@ Trigger::when_stopped_during_run ()
 				/* have played the specified number of times, we're done */
 
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
-				shutdown ();
+				shutdown (bufs, dest_offset);
 
 
 			} else if (_state == Stopping) {
@@ -719,7 +719,7 @@ Trigger::when_stopped_during_run ()
 				 */
 
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not at end, but ow stopped\n", index()));
-				shutdown ();
+				shutdown (bufs, dest_offset);
 
 			} else {
 
@@ -808,9 +808,9 @@ AudioTrigger::jump_start ()
 }
 
 void
-AudioTrigger::jump_stop ()
+AudioTrigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
 {
-	Trigger::jump_stop ();
+	Trigger::jump_stop (bufs, dest_offset);
 	retrigger ();
 }
 
@@ -1414,7 +1414,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	}
 
 	if (_state == Stopped || _state == Stopping) {
-		when_stopped_during_run ();
+		when_stopped_during_run (bufs, dest_offset);
 	}
 
 	return orig_nframes - nframes;
@@ -1484,9 +1484,21 @@ MIDITrigger::jump_start ()
 }
 
 void
-MIDITrigger::jump_stop ()
+MIDITrigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
 {
-	Trigger::jump_stop ();
+	Trigger::shutdown (bufs, dest_offset);
+	MidiBuffer& mb (bufs.get_midi (0));
+	tracker.resolve_notes (mb, dest_offset);
+}
+
+void
+MIDITrigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
+{
+	Trigger::jump_stop (bufs, dest_offset);
+
+	MidiBuffer& mb (bufs.get_midi (0));
+	tracker.resolve_notes (mb, dest_offset);
+
 	retrigger ();
 }
 
@@ -1771,7 +1783,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 	}
 
 	if (_state == Stopped || _state == Stopping) {
-		when_stopped_during_run ();
+		when_stopped_during_run (bufs, dest_offset);
 	}
 
 	return orig_nframes - nframes;
@@ -2383,7 +2395,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	std::vector<uint32_t> to_run;
 
 	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
-		all_triggers[n]->process_state_requests ();
+		all_triggers[n]->process_state_requests (bufs, nframes - 1);
 	}
 
 	/* cue handling is over at this point, reset _active_scene to reflect this */
@@ -2490,7 +2502,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					nxt = trigger (n);
 
 					nxt->jump_start ();
-					_currently_playing->jump_stop ();
+					_currently_playing->jump_stop (bufs, dest_offset);
 					/* and switch */
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 => %2 switched to in legato mode\n", _currently_playing->index(), nxt->index()));
 					_currently_playing = nxt;
