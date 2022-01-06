@@ -443,7 +443,7 @@ CueBoxUI::register_actions ()
 void
 CueBoxUI::trigger_scene (uint64_t n)
 {
-	TriggerBox::scene_bang (n);
+	_session->cue_bang (n);
 }
 
 void

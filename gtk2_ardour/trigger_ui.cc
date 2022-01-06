@@ -31,6 +31,7 @@
 #include "pbd/search_path.h"
 #include "pbd/unwind.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/region.h"
@@ -153,7 +154,11 @@ TriggerUI::register_actions ()
 void
 TriggerUI::trigger_scene (int32_t n)
 {
-	TriggerBox::scene_bang (n);
+	Session* s = AudioEngine::instance()->session();
+
+	if (s) {
+		s->cue_bang (n);
+	}
 }
 
 void
