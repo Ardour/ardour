@@ -1636,6 +1636,10 @@ Session::first_cue_within (samplepos_t s, samplepos_t e)
 		return active_cue;
 	}
 
+	if (Config->get_cue_behavior() != FollowCues) {
+		return -1;
+	}
+
 	CueEventTimeComparator cmp;
 	CueEvents::iterator si = lower_bound (_cue_events.begin(), _cue_events.end(), s, cmp);
 
