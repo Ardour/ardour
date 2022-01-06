@@ -610,79 +610,78 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 	/* See if this time falls within the range of time given to us */
 
-	if (transition_time.beats() >= start && transition_time < end) {
-
-		/* transition time has arrived! let's figure out what're doing:
-		 * stopping, starting, retriggering
-		 */
-
-		transition_samples = transition_time.samples();
-		transition_beats = transition_time.beats ();
-
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 in range, should start/stop at %2 aka %3\n", index(), transition_samples, transition_beats));
-
-		switch (_state) {
-
-		case WaitingToStop:
-			_state = Stopping;
-			PropertyChanged (ARDOUR::Properties::running);
-
-			/* trigger will reach it's end somewhere within this
-			 * process cycle, so compute the number of samples it
-			 * should generate.
-			 */
-
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 will stop somewhere in the middle of run()\n", name()));
-
-			/* offset within the buffer(s) for output remains
-			   unchanged, since we will write from the first
-			   location corresponding to start
-			*/
-			break;
-
-		case WaitingToStart:
-			retrigger ();
-			_state = Running;
-			set_expected_end_sample (tmap, transition_bbt);
-			cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
-			PropertyChanged (ARDOUR::Properties::running);
-
-			/* trigger will start somewhere within this process
-			 * cycle. Compute the sample offset where any audio
-			 * should end up, and the number of samples it should generate.
-			 */
-
-			extra_offset = std::max (samplepos_t (0), transition_samples - start_sample);
-
-			if (!passthru) {
-				/* XXX need to silence start of buffers up to dest_offset */
-			}
-			break;
-
-		case WaitingForRetrigger:
-			retrigger ();
-			_state = Running;
-			set_expected_end_sample (tmap, transition_bbt);
-			cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
-			PropertyChanged (ARDOUR::Properties::running);
-
-			/* trigger is just running normally, and will fill
-			 * buffers entirely.
-			 */
-
-			break;
-
-		default:
-			fatal << string_compose (_("programming error: %1"), "impossible trigger state in ::maybe_compute_next_transition()") << endmsg;
-			abort();
-		}
-
-	} else {
+	if (transition_time.beats() < start || transition_time > end) {
 
 		/* retrigger time has not been reached, just continue
 		   to play normally until then.
 		*/
 
+		return extra_offset;
+	}
+
+	/* transition time has arrived! let's figure out what're doing:
+	 * stopping, starting, retriggering
+	 */
+
+	transition_samples = transition_time.samples();
+	transition_beats = transition_time.beats ();
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 in range, should start/stop at %2 aka %3\n", index(), transition_samples, transition_beats));
+
+	switch (_state) {
+
+	case WaitingToStop:
+		_state = Stopping;
+		PropertyChanged (ARDOUR::Properties::running);
+
+		/* trigger will reach it's end somewhere within this
+		 * process cycle, so compute the number of samples it
+		 * should generate.
+		 */
+
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 will stop somewhere in the middle of run()\n", name()));
+
+		/* offset within the buffer(s) for output remains
+		   unchanged, since we will write from the first
+		   location corresponding to start
+		*/
+		break;
+
+	case WaitingToStart:
+		retrigger ();
+		_state = Running;
+		set_expected_end_sample (tmap, transition_bbt);
+		cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
+		PropertyChanged (ARDOUR::Properties::running);
+
+		/* trigger will start somewhere within this process
+		 * cycle. Compute the sample offset where any audio
+		 * should end up, and the number of samples it should generate.
+		 */
+
+		extra_offset = std::max (samplepos_t (0), transition_samples - start_sample);
+
+		if (!passthru) {
+			/* XXX need to silence start of buffers up to dest_offset */
+		}
+		break;
+
+	case WaitingForRetrigger:
+		retrigger ();
+		_state = Running;
+		set_expected_end_sample (tmap, transition_bbt);
+		cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
+		PropertyChanged (ARDOUR::Properties::running);
+
+		/* trigger is just running normally, and will fill
+		 * buffers entirely.
+		 */
+
+		break;
+
+	default:
+		fatal << string_compose (_("programming error: %1"), "impossible trigger state in ::maybe_compute_next_transition()") << endmsg;
+		abort();
 	}
 
 	return extra_offset;
