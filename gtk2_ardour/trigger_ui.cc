@@ -67,6 +67,7 @@ Glib::RefPtr<Gtk::ActionGroup> TriggerUI::trigger_actions;
 
 TriggerUI::TriggerUI ()
 	: _renaming (false)
+	, _file_chooser (0)
 	, _launch_context_menu (0)
 	, _follow_context_menu (0)
 	, _context_menu (0)
