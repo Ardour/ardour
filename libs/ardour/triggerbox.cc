@@ -560,8 +560,8 @@ Trigger::process_state_requests ()
 	}
 }
 
-pframes_t
-Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t dest_offset, bool passthru)
+void
+Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t& nframes, pframes_t&  dest_offset, bool passthru)
 {
 	using namespace Temporal;
 
@@ -573,7 +573,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 	if (_state == Running || _state == Stopping) {
 		/* will cover everything */
-		return 0;
+		return;
 	}
 
 	timepos_t transition_time (BeatTime);
@@ -581,7 +581,6 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	Temporal::BBT_Time transition_bbt;
 	pframes_t extra_offset = 0;
 	BBT_Offset q (_quantization);
-
 
 	/* XXX need to use global grid here is quantization == zero */
 
@@ -616,7 +615,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		   to play normally until then.
 		*/
 
-		return extra_offset;
+		return;
 	}
 
 	/* transition time has arrived! let's figure out what're doing:
@@ -639,7 +638,9 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		 * should generate.
 		 */
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 will stop somewhere in the middle of run()\n", name()));
+		nframes = transition_samples - start_sample;
+
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 will stop somewhere in the middle of run(), specifically at %2 (%3) vs expected end at %4\n", name(), transition_time, transition_time.beats(), expected_end_sample));
 
 		/* offset within the buffer(s) for output remains
 		   unchanged, since we will write from the first
@@ -660,6 +661,9 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		 */
 
 		extra_offset = std::max (samplepos_t (0), transition_samples - start_sample);
+
+		nframes -= extra_offset;
+		dest_offset += extra_offset;
 
 		if (!passthru) {
 			/* XXX need to silence start of buffers up to dest_offset */
@@ -684,7 +688,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		abort();
 	}
 
-	return extra_offset;
+	return;
 }
 
 void
@@ -1202,17 +1206,14 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
 	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
 	const uint32_t nchans = std::min (bufs.count().n_audio(), ar->n_channels());
-	const pframes_t orig_nframes = nframes;
 	int avail = 0;
 	BufferSet& scratch (_box.session().get_scratch_buffers (ChanCount (DataType::AUDIO, nchans)));
 	std::vector<Sample*> bufp(nchans);
 	const bool do_stretch = stretching();
 
 	/* see if we're going to start or stop or retrigger in this run() call */
-	pframes_t extra_offset = maybe_compute_next_transition (start_sample, start, end, dest_offset, passthru);
-
-	nframes -= extra_offset;
-	dest_offset += extra_offset;
+	maybe_compute_next_transition (start_sample, start, end, nframes, dest_offset, passthru);
+	const pframes_t orig_nframes = nframes;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2, will stretch %3\n", name(), enum_2_string (_state), do_stretch));
 
@@ -1330,7 +1331,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 						avail = _stretcher->available ();
 					}
 
-					// DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 process %2 at-end %3 avail %4 of %5\n", name(), to_stretcher, at_end, avail, nframes));
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 process %2 at-end %3 avail %4 of %5\n", name(), to_stretcher, at_end, avail, nframes));
 				}
 
 				/* we've fed the stretcher enough data to have
@@ -1366,7 +1367,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 			from_stretcher = (pframes_t) std::min ((samplecnt_t) nframes, (last_sample - read_index));
 		}
 
-		// DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ready with %2 ri %3 ls %4, will write %5\n", name(), avail, read_index, last_sample, from_stretcher));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ready with %2 ri %3 ls %4, will write %5\n", name(), avail, read_index, last_sample, from_stretcher));
 
 		/* deliver to buffers */
 
@@ -1674,13 +1675,10 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 	const Temporal::Beats region_start = region_start_time.beats();
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	samplepos_t last_event_samples = max_samplepos;
-	const pframes_t orig_nframes = nframes;
 
 	/* see if we're going to start or stop or retrigger in this run() call */
-	pframes_t extra_offset = maybe_compute_next_transition (start_sample, start_beats, end_beats, dest_offset, passthru);
-
-	nframes -= extra_offset;
-	dest_offset += extra_offset;
+	maybe_compute_next_transition (start_sample, start_beats, end_beats, nframes, dest_offset, passthru);
+	const pframes_t orig_nframes = nframes;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2\n", name(), enum_2_string (_state)));
 
