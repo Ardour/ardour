@@ -1820,8 +1820,6 @@ Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
 //TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::AbletonPush);
 TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::SequentialNote);
 int TriggerBox::_first_midi_note = 60;
-std::atomic<int32_t> TriggerBox::_pending_scene (-1);
-std::atomic<int32_t> TriggerBox::_active_scene (-1);
 std::atomic<int> TriggerBox::active_trigger_boxes (0);
 TriggerBoxThread* TriggerBox::worker = 0;
 
@@ -1841,6 +1839,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _currently_playing (0)
 	, _stop_all (false)
 	, _pass_thru (false)
+	, _active_scene (-1)
 	, requests (1024)
 {
 	set_display_to_user (false);
@@ -1921,40 +1920,6 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 			TriggerSwapped (slot); /* EMIT SIGNAL */
 		}
 	}
-}
-
-void
-TriggerBox::scene_bang (uint32_t n)
-{
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("scene bang on %1 for %2\n", n));
-	_pending_scene = n;
-}
-
-void
-TriggerBox::scene_unbang (uint32_t n)
-{
-}
-
-int32_t
-TriggerBox::active_scene ()
-{
-	return _active_scene.load ();
-}
-
-void
-TriggerBox::maybe_find_scene_bang ()
-{
-	int32_t pending = _pending_scene.exchange (-1);
-
-	if (pending >= 0) {
-		_active_scene = pending;
-	}
-}
-
-void
-TriggerBox::clear_scene_bang ()
-{
-	(void) _active_scene.exchange (-1);
 }
 
 void
@@ -2385,16 +2350,11 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		_sidechain->run (bufs, start_sample, end_sample, speed, nframes, true);
 	}
 
-	/* STEP FOUR: handle any incoming requests from the GUI or other
-	 * non-MIDI UIs
-	 */
-
-	process_requests (bufs);
-
-	/* STEP FIVE: handle any incoming MIDI requests
-	 */
-
-	process_midi_trigger_requests (bufs);
+	int32_t cue_bang = _session.first_cue_within (start_sample, end_sample);
+	if (cue_bang >= 0) {
+		std::cerr << " CUE BANG " << cue_bang << std::endl;
+		_active_scene = cue_bang;
+	}
 
 	/* STEP SIX: if at this point there is an active cue, make it trigger
 	 * our corresponding slot
@@ -2409,6 +2369,17 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
+	/* STEP FOUR: handle any incoming requests from the GUI or other
+	 * non-MIDI UIs
+	 */
+
+	process_requests (bufs);
+
+	/* STEP FIVE: handle any incoming MIDI requests
+	 */
+
+	process_midi_trigger_requests (bufs);
+
 	/* STEP SEVEN: let each slot process any individual state requests
 	 */
 
@@ -2417,6 +2388,10 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
 		all_triggers[n]->process_state_requests ();
 	}
+
+	/* cue handling is over at this point, reset _active_scene to reflect this */
+
+	_active_scene = -1;
 
 	if (_currently_playing && _currently_playing->state() == Trigger::Stopped) {
 		_currently_playing = 0;

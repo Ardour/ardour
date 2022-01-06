@@ -389,7 +389,7 @@ Session::process_with_events (pframes_t nframes)
 
 	// DEBUG_TRACE (DEBUG::Transport, string_compose ("Running count in/latency preroll of %1 & %2\n", _count_in_samples, _remaining_latency_preroll));
 
-	TriggerBox::maybe_find_scene_bang ();
+	maybe_find_pending_cue ();
 
 	while (_count_in_samples > 0 || _remaining_latency_preroll > 0) {
 		samplecnt_t ns;
@@ -631,7 +631,7 @@ Session::process_with_events (pframes_t nframes)
 
 	} /* implicit release of route lock */
 
-	TriggerBox::clear_scene_bang ();
+	clear_active_cue ();
 
 	if (session_needs_butler) {
 		DEBUG_TRACE (DEBUG::Butler, "p-with-events: session needs butler, call it\n");
@@ -696,14 +696,14 @@ Session::process_without_events (pframes_t nframes)
 
 	click (_transport_sample, nframes);
 
-	TriggerBox::maybe_find_scene_bang ();
+	maybe_find_pending_cue ();
 
 	if (process_routes (nframes, session_needs_butler)) {
 		fail_roll (nframes);
 		return;
 	}
 
-	TriggerBox::clear_scene_bang ();
+	clear_active_cue ();
 
 	get_track_statistics ();
 
@@ -969,12 +969,6 @@ Session::process_event (SessionEvent* ev)
 		if (!config.get_external_sync()) {
 			TransportMasterManager::instance().set_current (ev->transport_master);
 		}
-		break;
-
-	case SessionEvent::TriggerSceneChange:
-		TriggerBox::scene_bang (ev->scene);
-		remove = false;
-		del = false;
 		break;
 
 	case SessionEvent::PunchIn:
@@ -1611,65 +1605,73 @@ struct LocationByTime
 void
 Session::sync_cues_from_list (Locations::LocationList const & locs)
 {
-	/* iterate over all cue markers, check there is a SessionEvent for them all */
-
 	Locations::LocationList sorted (locs);
 	LocationByTime cmp;
 
 	sorted.sort (cmp);
 
-	Events::iterator evi = events.begin();
+	CueEvents::size_type n = 0;
 
-	for (auto const & loc : locs) {
+	/* this leaves the capacity unchanged */
+	_cue_events.clear ();
+
+	for (auto const & loc : sorted) {
 
 		if (loc->is_cue_marker()) {
+			_cue_events.push_back (CueEvent (loc->cue_id(), loc->start_sample()));
+		}
 
-			const samplepos_t cue_sample = loc->start_sample();
+		if (++n >= _cue_events.capacity()) {
+			break;
+		}
+	}
+}
 
-			if (evi == events.end()) {
+int32_t
+Session::first_cue_within (samplepos_t s, samplepos_t e)
+{
+	int32_t active_cue = _active_cue.load ();
 
-				SessionEvent* ev = new SessionEvent (SessionEvent::TriggerSceneChange, SessionEvent::Add, cue_sample, 0, 0);
-				ev->scene = loc->cue_id();
-				events.insert (evi, ev);
+	if (active_cue >= 0) {
+		return active_cue;
+	}
 
-			} else if (cue_sample > (*evi)->target_sample) {
+	CueEventTimeComparator cmp;
+	CueEvents::iterator si = lower_bound (_cue_events.begin(), _cue_events.end(), s, cmp);
 
-				SessionEvent* ev = new SessionEvent (SessionEvent::TriggerSceneChange, SessionEvent::Add, cue_sample, 0, 0);
-				ev->scene = loc->cue_id();
-				events.insert (evi, ev);
-
-				/* we don't advance evi here because we inserted before it */
-
-			} else if ((*evi)->type == SessionEvent::TriggerSceneChange) {
-
-				if ((*evi)->action_sample == cue_sample) {
-
-					/* replace the contents of the event */
-					(*evi)->scene = loc->cue_id();
-					++evi;
-
-				} else if ((*evi)->action_sample < cue_sample) {
-
-					/* existing event but no corresponding cue marker */
-					evi = events.erase (evi);
-				}
-			} else {
-				++evi;
-			}
-
+	if (si != _cue_events.end()) {
+		if (si->time < e) {
+			return si->cue;
 		}
 	}
 
-	/* Remove any relevant events that are timestamped after the last cue marker */
+	return -1;
+}
 
-	while (evi != events.end()) {
-		if ((*evi)->type == SessionEvent::TriggerSceneChange) {
-			evi = events.erase (evi);
-		} else {
-			++evi;
-		}
+void
+Session::cue_marker_change (Location* loc)
+{
+	SessionEvent* ev = new SessionEvent (SessionEvent::SyncCues, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
+	queue_event (ev);
+}
+
+void
+Session::cue_bang (int32_t cue)
+{
+	_pending_cue.store (cue);
+}
+
+void
+Session::maybe_find_pending_cue ()
+{
+	int32_t ac = _pending_cue.exchange (-1);
+	if (ac >= 0) {
+		_active_cue.store (ac);
 	}
+}
 
-	dump_events ();
-	set_next_event ();
+void
+Session::clear_active_cue ()
+{
+	_active_cue.store (-1);
 }

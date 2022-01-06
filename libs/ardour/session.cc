@@ -319,6 +319,8 @@ Session::Session (AudioEngine &eng,
 	, _selection (new CoreSelection (*this))
 	, _global_locate_pending (false)
 	, _had_destructive_tracks (false)
+	, _pending_cue (-1)
+	, _active_cue (-1)
 {
 	g_atomic_int_set (&_suspend_save, 0);
 	g_atomic_int_set (&_playback_load, 0);
@@ -355,6 +357,8 @@ Session::Session (AudioEngine &eng,
 
 	init_name_id_counter (1); // reset for new sessions, start at 1
 	VCA::set_next_vca_number (1); // reset for new sessions, start at 1
+
+	_cue_events.reserve (1024);
 
 	pre_engine_init (fullpath); // sets _is_new
 
@@ -803,10 +807,6 @@ Session::destroy ()
 		case SessionEvent::PunchOut:
 		case SessionEvent::RangeStop:
 		case SessionEvent::RangeLocate:
-		case SessionEvent::TriggerSceneChange:
-			remove = false;
-			del = false;
-			break;
 		case SessionEvent::RealTimeOperation:
 			process_rtop (ev);
 			del = false;
@@ -7369,9 +7369,3 @@ Session::had_destructive_tracks() const
 	return _had_destructive_tracks;
 }
 
-void
-Session::cue_marker_change (Location* loc)
-{
-	SessionEvent* ev = new SessionEvent (SessionEvent::SyncCues, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-	queue_event (ev);
-}

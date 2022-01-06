@@ -551,6 +551,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void request_reload (int32_t slot, void*);
 	void set_region (uint32_t slot, boost::shared_ptr<Region> region);
 
+	/* valid only within the ::run() call tree */
+	int32_t active_scene() const { return _active_scene; }
+
 	PBD::Signal1<void,uint32_t> TriggerSwapped;
 
 	enum TriggerMidiMapMode {
@@ -567,12 +570,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	static int first_midi_note() { return _first_midi_note; }
 	static void set_first_midi_note (int n);
-
-	static void maybe_find_scene_bang ();
-	static void clear_scene_bang ();
-	static void scene_bang (uint32_t scene_number);
-	static void scene_unbang (uint32_t scene_number);
-	static int32_t active_scene ();
 
 	static void init ();
 
@@ -601,10 +598,11 @@ class LIBARDOUR_API TriggerBox : public Processor
 	PendingTriggers pending;
 
 	PBD::RingBuffer<uint32_t> explicit_queue; /* user queued triggers */
-	TriggerPtr _currently_playing;
-	Requests _requests;
-	bool _stop_all;
-	bool _pass_thru;
+	TriggerPtr               _currently_playing;
+	Requests                 _requests;
+	bool                     _stop_all;
+	bool                     _pass_thru;
+	int32_t                  _active_scene;
 
 	boost::shared_ptr<SideChain> _sidechain;
 
@@ -630,8 +628,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	static int _first_midi_note;
 	static TriggerMidiMapMode _midi_map_mode;
-	static std::atomic<int32_t> _pending_scene;
-	static std::atomic<int32_t> _active_scene;
 
 	struct Request {
 		enum Type {

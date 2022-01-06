@@ -1849,6 +1849,7 @@ Session::set_state (const XMLNode& node, int version)
 	}
 
 	update_route_record_state ();
+	sync_cues ();
 
 	/* here beginneth the second phase ... */
 	set_snapshot_name (_current_snapshot_name);

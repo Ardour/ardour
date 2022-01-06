@@ -466,7 +466,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (SessionEvent, EndRoll);
 	REGISTER_CLASS_ENUM (SessionEvent, TransportStateChange);
 	REGISTER_CLASS_ENUM (SessionEvent, AutoLoop);
-	REGISTER_CLASS_ENUM (SessionEvent, TriggerSceneChange);
+	REGISTER_CLASS_ENUM (SessionEvent, SyncCues);
 	REGISTER (_SessionEvent_Type);
 
 	REGISTER_CLASS_ENUM (SessionEvent, Add);

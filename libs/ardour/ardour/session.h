@@ -1354,6 +1354,9 @@ public:
 
 	PBD::TimingStats dsp_stats[NTT];
 
+	int32_t first_cue_within (samplepos_t s, samplepos_t e);
+	void cue_bang (int32_t);
+
 protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
@@ -2300,9 +2303,32 @@ private:
 
 	void setup_thread_local_variables ();
 	void cue_marker_change (Location*);
+
+	struct CueEvent {
+		int32_t cue;
+		samplepos_t time;
+
+		CueEvent (int32_t c, samplepos_t t) : cue (c), time (t) {}
+	};
+
+	struct CueEventTimeComparator {
+		bool operator() (CueEvent const & c, samplepos_t s) {
+			return c.time < s;
+		}
+	};
+
+	typedef std::vector<CueEvent> CueEvents;
+
+	CueEvents _cue_events;
 	void sync_cues ();
 	void sync_cues_from_list (Locations::LocationList const &);
-};
+
+	std::atomic<int32_t> _pending_cue;
+	std::atomic<int32_t> _active_cue;
+	void maybe_find_pending_cue ();
+	void clear_active_cue ();
+
+ };
 
 
 } // namespace ARDOUR
