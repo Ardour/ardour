@@ -812,9 +812,8 @@ enum LocateTransportDisposition {
 };
 
 enum CueBehavior {
-	FollowCues,
-	ImplicitlyIgnoreCues,
-	ExplicitlyIgnoreCues
+	FollowCues = 0x1,
+	ImplicitlyIgnoreCues = 0x2
 };
 
 typedef std::vector<CaptureInfo*> CaptureInfos;

@@ -880,8 +880,7 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (FollowCues);
 	REGISTER_ENUM (ImplicitlyIgnoreCues);
-	REGISTER_ENUM (ExplicitlyIgnoreCues);
-	REGISTER (_CueBehavior);
+	REGISTER_BITS (_CueBehavior);
 }
 
 } /* namespace ARDOUR */

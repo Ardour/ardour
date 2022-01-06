@@ -1636,7 +1636,7 @@ Session::first_cue_within (samplepos_t s, samplepos_t e)
 		return active_cue;
 	}
 
-	if (Config->get_cue_behavior() != FollowCues) {
+	if (!(Config->get_cue_behavior() & FollowCues)) {
 		return -1;
 	}
 
