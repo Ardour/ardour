@@ -30,13 +30,6 @@
     the value of the variable.
 *****************************************************/
 
-/*****************************************************
-    DO dump the config using cfgtool to system_config
-    after modifying this file.
-
-    ./waf && gtk2_ardour/arcfg system_config
-*****************************************************/
-
 /* IO connection */
 
 CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-busses", true)
