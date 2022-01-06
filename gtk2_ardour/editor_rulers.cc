@@ -216,6 +216,8 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 
 	// always build from scratch
 	MenuList& ruler_items = editor_ruler_menu->items();
+	CheckMenuItem* cme;
+
 	editor_ruler_menu->set_name ("ArdourContextMenu");
 	ruler_items.clear();
 
@@ -244,6 +246,10 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		break;
 
 	case CueMarkerBarItem:
+		ruler_items.push_back (CheckMenuElem (_("Ignore cue markers")));
+		cme = static_cast<Gtk::CheckMenuItem*> (&ruler_items.back());
+		cme->set_active (Config->get_cue_behavior() != ARDOUR::FollowCues);
+		cme->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_cue_behavior));
 		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
 			/* XXX the "letter" names of the cues need to be subject to i18n somehow */
 			ruler_items.push_back (MenuElem (string_compose (_("Cue %1"), (char) ('A' + n)), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, n)));

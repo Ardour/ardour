@@ -1055,6 +1055,8 @@ private:
 	ArdourCanvas::Rectangle* cd_marker_bar;
 	ArdourCanvas::Rectangle* cue_marker_bar;
 
+	void toggle_cue_behavior ();
+
 	Gtk::Label  minsec_label;
 	Gtk::Label  bbt_label;
 	Gtk::Label  timecode_label;

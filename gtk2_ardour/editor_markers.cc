@@ -1918,3 +1918,15 @@ Editor::find_marker_from_location_id (PBD::ID const & id, bool is_start) const
 
 	return 0;
 }
+
+void
+Editor::toggle_cue_behavior ()
+{
+	CueBehavior cb (Config->get_cue_behavior());
+
+	if (cb & ARDOUR::FollowCues) {
+		Config->set_cue_behavior (ARDOUR::CueBehavior (cb & ~ARDOUR::FollowCues));
+	} else {
+		Config->set_cue_behavior (ARDOUR::CueBehavior (cb | ARDOUR::FollowCues));
+	}
+}
