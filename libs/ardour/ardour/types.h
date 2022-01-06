@@ -811,6 +811,12 @@ enum LocateTransportDisposition {
 	RollIfAppropriate
 };
 
+enum CueBehavior {
+	FollowCues,
+	ImplicitlyIgnoreCues,
+	ExplicitlyIgnoreCues
+};
+
 typedef std::vector<CaptureInfo*> CaptureInfos;
 
 } // namespace ARDOUR
