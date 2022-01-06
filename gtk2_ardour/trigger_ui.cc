@@ -189,7 +189,7 @@ TriggerUI::choose_color ()
 }
 
 void
-TriggerUI::choose_sample ()
+TriggerUI::choose_sample (bool allow_multiple_select)
 {
 	if (!_file_chooser) {
 		_file_chooser = new Gtk::FileChooserDialog (_("Select sample"), Gtk::FILE_CHOOSER_ACTION_OPEN);
@@ -228,6 +228,8 @@ TriggerUI::choose_sample ()
 #endif
 
 	}
+
+	_file_chooser->set_select_multiple (allow_multiple_select);
 
 	_file_chooser_connection.disconnect ();
 	_file_chooser_connection = _file_chooser->signal_response ().connect (sigc::mem_fun (*this, &SlotPropertyTable::sample_chosen));
@@ -420,7 +422,7 @@ TriggerUI::context_menu ()
 	Menu*     load_menu = manage (new Menu);
 	MenuList& loitems (load_menu->items ());
 
-	loitems.push_back (MenuElem (_("from file"), sigc::mem_fun (*this, &TriggerUI::choose_sample)));
+	loitems.push_back (MenuElem (_("from file"), sigc::bind(sigc::mem_fun (*this, (&TriggerUI::choose_sample)), true)));
 	loitems.push_back (MenuElem (_("from selection"), sigc::mem_fun (*this, &TriggerUI::set_from_selection)));
 
 	items.push_back (MenuElem (_("Load..."), *load_menu));

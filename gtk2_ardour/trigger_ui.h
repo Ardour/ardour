@@ -64,7 +64,7 @@ public:
 	ARDOUR::TriggerBox&		 triggerbox() const { return trigger()->box(); }
 
 	void choose_color ();
-	void choose_sample ();
+	void choose_sample (bool allow_multiple_select);
 	void sample_chosen (int r);
 
 	void launch_context_menu ();
