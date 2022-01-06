@@ -34,7 +34,7 @@
     DO dump the config using cfgtool to system_config
     after modifying this file.
 
-S    ./waf && gtk2_ardour/arcfg system_config
+    ./waf && gtk2_ardour/arcfg system_config
 *****************************************************/
 
 /* IO connection */
