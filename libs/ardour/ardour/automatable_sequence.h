@@ -38,7 +38,7 @@ public:
 
 	AutomatableSequence(const AutomatableSequence<T>& other)
 		: Evoral::ControlSet(other)
-		, Automatable(other._a_session, other._time_domain)
+		, Automatable(other._a_session, other.time_domain())
 		, Evoral::Sequence<T>(other)
 	{}
 
