@@ -83,7 +83,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _follow_action1 (Properties::follow_action1, Stop)
 	, _follow_action_probability (Properties::follow_action_probability, 0)
 	, _follow_count (Properties::follow_count, 1)
-	, _quantization (Properties::quantization, Temporal::BBT_Offset (0, 1, 0))
+	, _quantization (Properties::quantization, Temporal::BBT_Offset (1, 0, 0))
 	, _legato (Properties::legato, false)
 	, _name (Properties::name, "")
 	, _gain (Properties::gain, 1.0)
@@ -982,7 +982,7 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 			_quantization = Temporal::BBT_Offset (-1, 0, 0);
 		} else {
 			_stretchable = true;
-			_quantization = Temporal::BBT_Offset (0, 1, 0);
+			_quantization = Temporal::BBT_Offset (1, 0, 0);
 			_follow_action0 = Again;
 		}
 	}
