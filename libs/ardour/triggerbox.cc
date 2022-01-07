@@ -601,7 +601,8 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	} else {
 		transition_bbt = tmap->bbt_at (timepos_t (start));
 		transition_bbt = transition_bbt.round_up_to_bar ();
-		transition_bbt.bars = (transition_bbt.bars / q.bars) * q.bars;
+		/* bars are 1-based; 'every 4 bars' means 'on bar 1, 5, 9, ...' */
+		transition_bbt.bars = 1 + ((transition_bbt.bars-1) / q.bars * q.bars);
 		transition_time = timepos_t (tmap->quarters_at (transition_bbt));
 	}
 
