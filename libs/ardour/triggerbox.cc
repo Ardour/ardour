@@ -52,6 +52,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> passthru;
 		PBD::PropertyDescriptor<bool> legato;
 		PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
+		PBD::PropertyDescriptor<Temporal::BBT_Offset> follow_length;
 		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
 		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
@@ -84,6 +85,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _follow_action_probability (Properties::follow_action_probability, 0)
 	, _follow_count (Properties::follow_count, 1)
 	, _quantization (Properties::quantization, Temporal::BBT_Offset (1, 0, 0))
+	, _follow_length (Properties::quantization, Temporal::BBT_Offset (0, 1, 0))
 	, _legato (Properties::legato, false)
 	, _name (Properties::name, "")
 	, _gain (Properties::gain, 1.0)
@@ -1222,7 +1224,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	maybe_compute_next_transition (start_sample, start, end, nframes, dest_offset, passthru);
 	const pframes_t orig_nframes = nframes;
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2, will stretch %3\n", name(), enum_2_string (_state), do_stretch));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2, will stretch %3, nf will be %4\n", name(), enum_2_string (_state), do_stretch, nframes));
 
 	switch (_state) {
 	case Stopped:
@@ -2280,7 +2282,7 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 				continue;
 			}
 
-			if (trigger_number > (int) all_triggers.size()) {
+			if (trigger_number >= (int) all_triggers.size()) {
 				continue;
 			}
 
