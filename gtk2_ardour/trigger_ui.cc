@@ -493,12 +493,17 @@ TriggerUI::launch_context_menu ()
 	}
 #endif
 
-	b = BBT_Offset (1, 0, 0);
+	b = BBT_Offset (4, 0, 0);
 	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_quantization), b)));
 	if (trigger ()->quantization () == b) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
-	b = BBT_Offset (0, 4, 0);
+	b = BBT_Offset (2, 0, 0);
+	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_quantization), b)));
+	if (trigger ()->quantization () == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
+	b = BBT_Offset (1, 0, 0);
 	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_quantization), b)));
 	if (trigger ()->quantization () == b) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
@@ -728,7 +733,11 @@ TriggerUI::quantize_length_to_string (BBT_Offset const & ql)
 		return _("None");
 	}
 
-	if (ql == BBT_Offset (1, 0, 0)) {
+	if (ql == BBT_Offset (4, 0, 0)) {
+		return _("4 Bars");
+	} else if (ql == BBT_Offset (2, 0, 0)) {
+		return _("2 Bars");
+	} else if (ql == BBT_Offset (1, 0, 0)) {
 		return _("1 Bar");
 	} else if (ql == BBT_Offset (0, 1, 0)) {
 		return _("1/4");

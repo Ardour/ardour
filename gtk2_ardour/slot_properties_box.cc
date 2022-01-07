@@ -179,8 +179,9 @@ SlotPropertyTable::SlotPropertyTable ()
 #if TRIGGER_PAGE_GLOBAL_QUANTIZATION_IMPLEMENTED
 	quantize_item (BBT_Offset (0, 0, 0));
 #endif
+	quantize_item (BBT_Offset (4, 0, 0));
+	quantize_item (BBT_Offset (2, 0, 0));
 	quantize_item (BBT_Offset (1, 0, 0));
-	quantize_item (BBT_Offset (0, 4, 0));
 	quantize_item (BBT_Offset (0, 2, 0));
 	quantize_item (BBT_Offset (0, 1, 0));
 	quantize_item (BBT_Offset (0, 0, Temporal::ticks_per_beat/2));

@@ -296,10 +296,12 @@ CueBoxUI::context_menu (uint64_t idx)
 
 	BBT_Offset b;
 
+	b = BBT_Offset (4, 0, 0);
+	qitems.push_back (MenuElem (_("4 Bars"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	b = BBT_Offset (2, 0, 0);
+	qitems.push_back (MenuElem (_("2 Bars"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (1, 0, 0);
 	qitems.push_back (MenuElem (_("1 Bar"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
-	b = BBT_Offset (0, 4, 0);
-	qitems.push_back (MenuElem (_("Whole"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (0, 2, 0);
 	qitems.push_back (MenuElem (_("1/2"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (0, 1, 0);
