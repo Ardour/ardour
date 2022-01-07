@@ -295,6 +295,10 @@ LocationEditRow::set_location (Location *loc)
 			remove_button.set_sensitive (false);
 		}
 
+		if (location->is_cue_marker()) {
+			cd_check_button.set_sensitive (false);
+		}
+
 		cd_check_button.set_active (location->is_cd_marker());
 		cd_check_button.show();
 
