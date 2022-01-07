@@ -499,6 +499,7 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 
 		switch (_state) {
 		case Running:
+		case Playout:
 			switch (launch_style()) {
 			case OneShot:
 				/* do nothing, just let it keep playing */
@@ -543,6 +544,7 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 
 		switch (_state) {
 		case Running:
+		case Playout:
 			begin_stop (true);
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, now in WaitingToStop\n", index()));
 			break;
@@ -859,6 +861,7 @@ AudioTrigger::set_state (const XMLNode& node, int version)
 	node.get_property (X_("length"), t);
 	usable_length = t.samples();
 	last_sample = _start_offset + usable_length;
+	final_sample = _start_offset + usable_length;
 
 	return 0;
 }
@@ -907,6 +910,7 @@ AudioTrigger::set_usable_length ()
 	default:
 		usable_length = data.length;
 		last_sample = _start_offset + usable_length;
+		final_sample = last_sample;
 		return;
 	}
 
@@ -915,6 +919,7 @@ AudioTrigger::set_usable_length ()
 	if (q == Temporal::BBT_Offset ()) {
 		usable_length = data.length;
 		last_sample = _start_offset + usable_length;
+		final_sample = last_sample;
 		return;
 	}
 
@@ -923,6 +928,7 @@ AudioTrigger::set_usable_length ()
 	timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
 	usable_length = len.samples();
 	last_sample = _start_offset + usable_length;
+	final_sample = last_sample;
 
 	// std::cerr << name() << " SUL ul " << usable_length << " of " << data.length << " so " << _start_offset << " ls " << last_sample << std::endl;
 }
@@ -1175,6 +1181,7 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 	if (!usable_length || usable_length > data.length) {
 		usable_length = data.length;
 		last_sample = _start_offset + usable_length;
+		final_sample = last_sample;
 	}
 
 	drop_data ();
@@ -1233,6 +1240,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		/* did everything we could do */
 		return nframes;
 	case Running:
+	case Playout:
 	case WaitingToStop:
 	case Stopping:
 		/* stuff to do */
@@ -1298,7 +1306,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 	}
 
-	while (nframes) {
+	while (nframes && (_state != Playout)) {
 
 		pframes_t to_stretcher;
 		pframes_t from_stretcher;
@@ -1414,19 +1422,53 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		avail = _stretcher->available ();
 		dest_offset += from_stretcher;
 
-		if (read_index >= last_sample && (_apparent_tempo == 0. || avail <= 0)) {
-			_state = Stopped;
-			_loop_cnt++;
+		if (read_index >= last_sample && (!do_stretch || avail <= 0)) {
+
+			if (last_sample < final_sample) {
+				_state = Playout;
+			} else {
+				_state = Stopped;
+				_loop_cnt++;
+			}
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped, retrieved %2, avail %3\n", index(), retrieved, avail));
 			break;
 		}
+	}
+
+
+	pframes_t covered_frames =  orig_nframes - nframes;
+
+	if (_state == Playout) {
+
+		const pframes_t remaining_frames_for_run= orig_nframes - covered_frames;
+		const pframes_t remaining_frames_till_final = final_sample - read_index;
+		const pframes_t to_fill = std::min (remaining_frames_till_final, remaining_frames_for_run);
+
+		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
+
+			uint32_t channel = chn %  data.size();
+			AudioBuffer& buf (bufs.get_audio (chn));
+
+			buf.silence (to_fill, dest_offset + covered_frames);
+		}
+
+		read_index += to_fill;
+		covered_frames += to_fill;
+
+		if (read_index < final_sample) {
+			/* more playout to be done */
+			return covered_frames;
+		}
+
+		_state == Stopped;
+		_loop_cnt++;
 	}
 
 	if (_state == Stopped || _state == Stopping) {
 		when_stopped_during_run (bufs, dest_offset);
 	}
 
-	return orig_nframes - nframes;
+	return covered_frames;
 }
 
 void

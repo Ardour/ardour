@@ -95,7 +95,11 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		 * during the current call to ::run(). By the end of that call, it will
 		 * have transitioned to Stopped.
 		 */
-		Stopping
+		Stopping,
+		/* a Trigger in this state has played all of its data and is
+		 * now silent-filling until we reach the "true end" of the trigger
+		 */
+		Playout,
 	};
 
 	Trigger (uint32_t index, TriggerBox&);
@@ -363,7 +367,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	/* computed after data is reset */
 
 	samplecnt_t usable_length;
-	samplepos_t last_sample;
+	samplepos_t last_sample;   /* where the data runs out */
+	samplepos_t final_sample;  /* where we stop playing */
 
 	/* computed during run */
 
