@@ -73,6 +73,8 @@ public:
 	bool follow_button_event (GdkEvent*);
 
 private:
+	bool			_grabbed;
+
 	double           _poly_size;
 	double           _poly_margin;
 
@@ -108,6 +110,8 @@ private:
 	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const&, int, int, guint);
 	void drag_leave (Glib::RefPtr<Gdk::DragContext> const&, guint);
 	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
+
+	bool triggerbox_event (GdkEvent*);
 
 	uint64_t slot_at_y (int) const;
 

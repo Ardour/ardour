@@ -66,6 +66,7 @@ using namespace PBD;
 
 TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	: ArdourCanvas::Rectangle (item)
+	, _grabbed (false)
 {
 	set_layout_sensitive (true); // why???
 
@@ -642,7 +643,14 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 		case GDK_BUTTON_PRESS:
 			switch (ev->button.button) {
 				case 1:
-					trigger()->bang ();
+					if (trigger()->launch_style () == Trigger::Gate ||
+					    trigger()->launch_style () == Trigger::Repeat) {
+						trigger()->bang ();
+						_grabbed = true;
+						play_button->grab();
+					} else {
+						trigger()->bang ();
+					}
 					return true;
 				default:
 					break;
@@ -651,9 +659,10 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 		case GDK_BUTTON_RELEASE:
 			switch (ev->button.button) {
 				case 1:
-					if (trigger()->launch_style () == Trigger::Gate ||
-					    trigger()->launch_style () == Trigger::Repeat) {
+					if (_grabbed) {
 						trigger()->unbang ();
+						play_button->ungrab();
+						_grabbed = false;
 					}
 					break;
 				case 3:
