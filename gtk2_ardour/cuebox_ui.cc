@@ -297,23 +297,23 @@ CueBoxUI::context_menu (uint64_t idx)
 	BBT_Offset b;
 
 	b = BBT_Offset (4, 0, 0);
-	qitems.push_back (MenuElem (_("4 Bars"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (2, 0, 0);
-	qitems.push_back (MenuElem (_("2 Bars"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (1, 0, 0);
-	qitems.push_back (MenuElem (_("1 Bar"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (0, 2, 0);
-	qitems.push_back (MenuElem (_("1/2"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (0, 1, 0);
-	qitems.push_back (MenuElem (_("1/4"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (0, 0, ticks_per_beat / 2);
-	qitems.push_back (MenuElem (_("1/8"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (0, 0, ticks_per_beat / 4);
-	qitems.push_back (MenuElem (_("1/16"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (0, 0, ticks_per_beat / 8);
-	qitems.push_back (MenuElem (_("1/32"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (0, 0, ticks_per_beat / 16);
-	qitems.push_back (MenuElem (_("1/64"), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 
 	Menu*     load_menu = manage (new Menu);
 	MenuList& loitems (load_menu->items ());
