@@ -314,6 +314,8 @@ CueBoxUI::context_menu (uint64_t idx)
 	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (0, 0, ticks_per_beat / 16);
 	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
+	b = BBT_Offset (-1, 0, 0);
+	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 
 	Menu*     load_menu = manage (new Menu);
 	MenuList& loitems (load_menu->items ());

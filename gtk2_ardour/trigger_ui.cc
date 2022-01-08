@@ -538,6 +538,11 @@ TriggerUI::launch_context_menu ()
 	if (trigger ()->quantization () == b) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
 	}
+	b = BBT_Offset (-1, 0, 0);
+	qitems.push_back (RadioMenuElem (qgroup, TriggerUI::quantize_length_to_string (b), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_quantization), b)));
+	if (trigger ()->quantization () == b) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&qitems.back ())->set_active (true);
+	}
 
 	items.push_back (MenuElem (_("Launch Style..."), *launch_menu));
 	items.push_back (MenuElem (_("Quantization..."), *quant_menu));
