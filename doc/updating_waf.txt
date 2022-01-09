@@ -11,10 +11,10 @@
 
 ARDOURSRC=`pwd`
 cd /tmp
-curl https://waf.io/waf-2.0.19.tar.bz2 | tar xj
-cd waf-2.0.19
+curl https://waf.io/waf-2.0.23.tar.bz2 | tar xj
+cd waf-2.0.23
 
 patch -p1 < $ARDOURSRC/tools/patches/waf-str.patch
 
-./waf-light -v --make-waf --tools=misc,doxygen,$ARDOURSRC/tools/autowaf.py,$ARDOURSRC/tools/misc.py --prelude=''
+./waf-light -v --make-waf --tools=misc,doxygen,clang_compilation_database,$ARDOURSRC/tools/autowaf.py,$ARDOURSRC/tools/misc.py --prelude=''
 cp ./waf $ARDOURSRC/waf
