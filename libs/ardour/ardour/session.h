@@ -390,7 +390,7 @@ public:
 	}
 
 	RecordState record_status() const {
-		return (RecordState) g_atomic_int_get (&_record_status);
+		return (RecordState) g_atomic_int_get (const_cast<GATOMIC_QUAL gint*> (&_record_status));
 	}
 
 	bool actively_recording () const {
@@ -1613,7 +1613,7 @@ private:
 	static const PostTransportWork ProcessCannotProceedMask = PostTransportWork (PostTransportAudition);
 
 	GATOMIC_QUAL gint _post_transport_work; /* accessed only atomic ops */
-	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (&_post_transport_work); }
+	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (const_cast<GATOMIC_QUAL gint*> (&_post_transport_work)); }
 	void set_post_transport_work (PostTransportWork ptw) { g_atomic_int_set (&_post_transport_work, (gint) ptw); }
 	void add_post_transport_work (PostTransportWork ptw);
 

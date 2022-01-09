@@ -109,7 +109,7 @@ public:
 	void start_touch (timepos_t const & when);
 	void stop_touch (timepos_t const &  when);
 
-	bool touching () const { return g_atomic_int_get (&_touching) != 0; }
+	bool touching () const { return g_atomic_int_get (const_cast<GATOMIC_QUAL gint*>(&_touching)) != 0; }
 	bool writing () const { return _state == Write; }
 	bool touch_enabled () const { return _state & (Touch | Latch); }
 

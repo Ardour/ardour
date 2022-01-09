@@ -73,17 +73,17 @@ public:
 
 	/** Atomically get both the channel mode and mask. */
 	void get_mode_and_mask(ChannelMode* mode, uint16_t* mask) const {
-		const uint32_t mm = g_atomic_int_get (&_mode_mask);
+		const uint32_t mm = g_atomic_int_get (const_cast<GATOMIC_QUAL guint*> (&_mode_mask));
 		*mode = static_cast<ChannelMode>((mm & 0xFFFF0000) >> 16);
 		*mask = (mm & 0x0000FFFF);
 	}
 
 	ChannelMode get_channel_mode() const {
-		return static_cast<ChannelMode>((g_atomic_int_get (&_mode_mask) & 0xFFFF0000) >> 16);
+		return static_cast<ChannelMode>((g_atomic_int_get (const_cast<GATOMIC_QUAL guint*> (&_mode_mask)) & 0xFFFF0000) >> 16);
 	}
 
 	uint16_t get_channel_mask() const {
-		return g_atomic_int_get (&_mode_mask) & 0x0000FFFF;
+		return g_atomic_int_get (const_cast<GATOMIC_QUAL guint*> (&_mode_mask)) & 0x0000FFFF;
 	}
 
 	PBD::Signal0<void> ChannelMaskChanged;
