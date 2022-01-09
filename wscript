@@ -933,6 +933,7 @@ def sub_config_and_use(conf, name, has_objects = True):
 def configure(conf):
     conf.load('compiler_c')
     conf.load('compiler_cxx')
+    conf.load('clang_compilation_database')
     if Options.options.dist_target == 'mingw':
         conf.load('winres')
 
