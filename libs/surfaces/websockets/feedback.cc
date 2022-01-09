@@ -93,7 +93,7 @@ struct PluginParamValueObserver {
 		if (!control) {
 			return;
 		}
-		
+
 		p->update_all (Node::strip_plugin_param_value, strip_id, plugin_id, param_id,
 		               ArdourMixerPlugin::param_value (control));
 	}
@@ -149,7 +149,7 @@ ArdourFeedback::stop ()
 
 	_periodic_connection.disconnect ();
 	_transport_connections.drop_connections ();
-	
+
 	return 0;
 }
 
@@ -210,6 +210,7 @@ bool
 ArdourFeedback::poll () const
 {
 	update_all (Node::transport_time, transport ().time ());
+	update_all (Node::transport_bbt, transport ().bbt ());
 
 	Glib::Threads::Mutex::Lock lock (mixer ().mutex ());
 

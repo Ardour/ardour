@@ -19,6 +19,8 @@
 #ifndef _ardour_surface_websockets_transport_h_
 #define _ardour_surface_websockets_transport_h_
 
+#include <string>
+
 #include "component.h"
 
 namespace ArdourSurface {
@@ -34,6 +36,8 @@ public:
 	void   set_tempo (double);
 
 	double time () const;
+
+	std::string bbt () const;
 
 	bool roll () const;
 	void set_roll (bool);

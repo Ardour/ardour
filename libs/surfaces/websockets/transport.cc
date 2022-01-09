@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <sstream>
+
 #include "ardour/tempo.h"
 
 #include "transport.h"
@@ -50,6 +52,16 @@ ArdourTransport::time () const
 	samplepos_t t = session ().transport_sample ();
 	samplecnt_t f = session ().sample_rate ();
 	return static_cast<double>(t) / static_cast<double>(f);
+}
+
+std::string
+ArdourTransport::bbt () const
+{
+	const samplepos_t t = session ().transport_sample ();
+	const Temporal::BBT_Time bbt_time = Temporal::TempoMap::fetch()->bbt_at (timepos_t (t));
+	std::ostringstream oss;
+	bbt_time.print_padded(oss);
+	return oss.str();
 }
 
 bool
