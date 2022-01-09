@@ -62,13 +62,13 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 
 		AddressVector strip_addr = AddressVector ();
 		strip_addr.push_back (strip_id);
-		
+
 		ValueVector strip_desc = ValueVector ();
 		strip_desc.push_back (strip.name ());
 		strip_desc.push_back ((int)strip.stripable ()->presentation_info ().flags ());
-		
+
 		update (client, Node::strip_description, strip_addr, strip_desc);
-		
+
 		update (client, Node::strip_gain, strip_id, strip.gain ());
 		update (client, Node::strip_mute, strip_id, strip.mute ());
 
@@ -130,6 +130,7 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 
 	update (client, Node::transport_tempo, transport ().tempo ());
 	update (client, Node::transport_time, transport ().time ());
+	update (client, Node::transport_bbt, transport ().bbt ());
 	update (client, Node::transport_roll, transport ().roll ());
 	update (client, Node::transport_record, transport ().record ());
 }

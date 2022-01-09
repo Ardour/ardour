@@ -44,6 +44,7 @@ namespace Node
 	const std::string strip_plugin_param_value       = "strip_plugin_param_value";
 	const std::string transport_tempo                = "transport_tempo";
 	const std::string transport_time                 = "transport_time";
+	const std::string transport_bbt                  = "transport_bbt";
 	const std::string transport_roll                 = "transport_roll";
 	const std::string transport_record               = "transport_record";
 } // namespace Node
