@@ -63,7 +63,7 @@ ArdourTransport::set_roll (bool value)
 {
 	if ((value && !roll ()) || (!value && roll ())) {
 		// this call is equivalent to hitting the spacebar
-		basic_ui ().toggle_roll (false);
+		basic_ui ().toggle_roll (false, false);
 	}
 }
 

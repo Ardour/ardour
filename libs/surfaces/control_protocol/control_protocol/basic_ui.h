@@ -108,7 +108,7 @@ class LIBCONTROLCP_API BasicUI {
 	void quick_snapshot_stay ();
 	void quick_snapshot_switch ();
 
-	void toggle_roll(bool roll_out_of_bounded_mode=true);  //this provides the same operation as the "spacebar", it's a lot smarter than "play".
+	void toggle_roll(bool with_abort, bool roll_out_of_bounded_mode);  //this provides the same operation as the "spacebar", it's a lot smarter than "play".
 
 	void stop_forget();
 

@@ -623,7 +623,7 @@ BasicUI::toggle_click ()
 }
 
 void
-BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
+BasicUI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 {
 	/* TO BE KEPT IN SYNC WITH ARDOUR_UI::toggle_roll() */
 
@@ -672,7 +672,7 @@ BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
 			}
 
 		} else {
-			session->request_stop (true, true);
+			session->request_stop (with_abort, true);
 		}
 
 	} else { /* not rolling */
