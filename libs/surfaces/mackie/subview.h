@@ -25,7 +25,7 @@
 #include "ardour/types.h"
 
 namespace ARDOUR {
-	class ParameterDescriptor;
+	struct ParameterDescriptor;
 	class Plugin;
 	class PluginInsert;
 }

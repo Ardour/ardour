@@ -41,7 +41,7 @@ namespace ArdourWidgets {
 class LIBWIDGETS_API Pane : public Gtk::Container
 {
 private:
-	class Divider;
+	struct Divider;
 
 public:
 	struct Child

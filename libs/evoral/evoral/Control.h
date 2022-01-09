@@ -35,7 +35,7 @@
 
 namespace Evoral {
 
-class ParameterDescriptor;
+struct ParameterDescriptor;
 class Transport;
 class TypeMap;
 

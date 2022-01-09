@@ -29,7 +29,7 @@
 namespace Evoral {
 
 class Parameter;
-class ParameterDescriptor;
+struct ParameterDescriptor;
 
 /** The applications passes one of these which provide the implementation
  * with required information about event types in an opaque, type neutral way
