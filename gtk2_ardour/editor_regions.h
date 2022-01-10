@@ -182,10 +182,6 @@ private:
 
 	void clock_format_changed ();
 
-	void drag_data_received (
-		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
-		);
-
 	Glib::RefPtr<Gtk::Action> remove_unused_regions_action () const;
 
 	Gtk::Menu* _menu;

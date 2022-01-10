@@ -277,15 +277,6 @@ EditorRegions::EditorRegions (Editor* e)
 
 	/* setup DnD handling */
 
-	list<TargetEntry> region_list_target_table;
-
-	region_list_target_table.push_back (TargetEntry ("text/uri-list"));
-	region_list_target_table.push_back (TargetEntry ("text/plain"));
-	region_list_target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
-
-	_display.add_drop_targets (region_list_target_table);
-	_display.signal_drag_data_received ().connect (sigc::mem_fun (*this, &EditorRegions::drag_data_received));
-
 	_scroller.add (_display);
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
@@ -1011,35 +1002,6 @@ EditorRegions::selection_mapover (sigc::slot<void, boost::shared_ptr<Region> > s
 				sl (r);
 			}
 		}
-	}
-}
-
-void
-EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
-                                   int x, int y,
-                                   const SelectionData& data,
-                                   guint info, guint dtime)
-{
-	vector<string> paths;
-
-	if (data.get_target () == "GTK_TREE_MODEL_ROW") {
-		/* something is being dragged over the region list */
-		_editor->_drags->abort ();
-		_display.on_drag_data_received (context, x, y, data, info, dtime);
-		return;
-	}
-
-	if (_session && convert_drop_to_paths (paths, data)) {
-		timepos_t pos;
-		bool      copy = ((context->get_actions () & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
-
-		if (UIConfiguration::instance ().get_only_copy_imported_files () || copy) {
-			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion,
-			                    SrcBest, SMFTrackName, SMFTempoIgnore, pos);
-		} else {
-			_editor->do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);
-		}
-		context->drag_finish (true, false, dtime);
 	}
 }
 

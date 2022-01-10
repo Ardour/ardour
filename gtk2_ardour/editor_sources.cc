@@ -924,9 +924,29 @@ void
 EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
                                    int x, int y,
                                    const SelectionData& data,
-                                   guint info, guint time)
+                                   guint info, guint dtime)
 {
-	/* ToDo: allow dropping files/loops into the source list?  */
+	vector<string> paths;
+
+	if (data.get_target () == "GTK_TREE_MODEL_ROW") {
+		/* something is being dragged over the source list */
+		_editor->_drags->abort ();
+		_display.on_drag_data_received (context, x, y, data, info, dtime);
+		return;
+	}
+
+	if (_session && convert_drop_to_paths (paths, data)) {
+		timepos_t pos;
+		bool      copy = ((context->get_actions () & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
+
+		if (UIConfiguration::instance ().get_only_copy_imported_files () || copy) {
+			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion,
+			                    SrcBest, SMFTrackName, SMFTempoIgnore, pos);
+		} else {
+			_editor->do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);
+		}
+		context->drag_finish (true, false, dtime);
+	}
 }
 
 /** @return Region that has been dragged out of the list, or 0 */
