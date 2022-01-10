@@ -124,9 +124,9 @@ DnDTreeViewBase::add_drop_targets (list<TargetEntry>& targets)
 }
 
 void
-DnDTreeViewBase::add_object_drag (int column, string type_name)
+DnDTreeViewBase::add_object_drag (int column, string type_name, TargetFlags flags)
 {
-	draggable.push_back (TargetEntry (type_name, TargetFlags(0)));
+	draggable.push_back (TargetEntry (type_name, flags));
 	data_column = column;
 	object_type = type_name;
 

@@ -66,7 +66,7 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 	sigc::signal4<bool, const Glib::RefPtr<Gdk::DragContext>&, int, int, guint, BoolAccumulator> signal_motion;
 
 	void add_drop_targets (std::list<Gtk::TargetEntry>&);
-	void add_object_drag (int column, std::string type_name);
+	void add_object_drag (int column, std::string type_name, Gtk::TargetFlags flags = Gtk::TargetFlags (0));
 
 	void on_drag_begin (Glib::RefPtr<Gdk::DragContext> const & context);
 	void on_drag_end (Glib::RefPtr<Gdk::DragContext> const & context);
