@@ -925,7 +925,7 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 
 	samplecnt_t usable_length;
 
-	if (end_by_follow_length && (end_by_follow_length < end_by_data_length)) 
+	if (end_by_follow_length && (end_by_follow_length < end_by_data_length)) {
 		usable_length = tmap->sample_at (tmap->bbt_walk (Temporal::BBT_Time (), _follow_length));
 	} else {
 		usable_length = data.length;
