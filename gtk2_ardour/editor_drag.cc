@@ -601,6 +601,7 @@ struct TimeAxisViewStripableSorter {
 };
 
 RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
+#warning nutempo un-hardcode time-domain, see fa7e7a462c8
 	: Drag (e, i, p && p->region () ? p->region()->position().time_domain() : Temporal::AudioTime)
 	, _primary (p)
 	, _ntracks (0)
@@ -2210,6 +2211,7 @@ RegionMoveDrag::setup_pointer_offset ()
 }
 
 RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, RouteTimeAxisView* v, timepos_t const & pos)
+#warning nutempo pass pos.time_domain () up to Drag's c'tor
 	: RegionMotionDrag (e, 0, 0, list<RegionView*> ())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionInsertDrag\n");
