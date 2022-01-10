@@ -601,7 +601,7 @@ struct TimeAxisViewStripableSorter {
 };
 
 RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: Drag (e, i, p->region()->position().time_domain())
+	: Drag (e, i, p && p->region () ? p->region()->position().time_domain() : Temporal::AudioTime)
 	, _primary (p)
 	, _ntracks (0)
 {
