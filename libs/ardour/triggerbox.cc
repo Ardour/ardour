@@ -85,7 +85,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _follow_action_probability (Properties::follow_action_probability, 0)
 	, _follow_count (Properties::follow_count, 1)
 	, _quantization (Properties::quantization, Temporal::BBT_Offset (1, 0, 0))
-	, _follow_length (Properties::quantization, Temporal::BBT_Offset (0, 1, 0))
+	, _follow_length (Properties::quantization, Temporal::BBT_Offset (0, 0, 0))
 	, _legato (Properties::legato, false)
 	, _name (Properties::name, "")
 	, _gain (Properties::gain, 1.0)
@@ -278,7 +278,6 @@ Trigger::set_launch_style (LaunchStyle l)
 
 	_launch_style = l;
 
-	set_usable_length ();
 	PropertyChanged (Properties::launch_style);
 	_box.session().set_dirty();
 }
@@ -328,6 +327,12 @@ Trigger::set_state (const XMLNode& node, int version)
 }
 
 void
+Trigger::set_follow_length (Temporal::BBT_Offset const & bbo)
+{
+	_follow_length = bbo;
+}
+
+void
 Trigger::set_legato (bool yn)
 {
 	_legato = yn;
@@ -358,7 +363,6 @@ Trigger::set_quantization (Temporal::BBT_Offset const & q)
 	}
 
 	_quantization = q;
-	set_usable_length ();
 	PropertyChanged (Properties::quantization);
 	_box.session().set_dirty();
 }
@@ -575,7 +579,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 	/* In these states, we are not waiting for a transition */
 
-	if (_state == Running || _state == Stopping) {
+	if (_state == Running || _state == Stopping || _state == Playout) {
 		/* will cover everything */
 		return;
 	}
@@ -662,8 +666,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	case WaitingToStart:
 		retrigger ();
 		_state = Running;
-		set_expected_end_sample (tmap, transition_bbt);
-		cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
+		set_expected_end_sample (tmap, transition_bbt, transition_samples);
 		PropertyChanged (ARDOUR::Properties::running);
 
 		/* trigger will start somewhere within this process
@@ -684,8 +687,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	case WaitingForRetrigger:
 		retrigger ();
 		_state = Running;
-		set_expected_end_sample (tmap, transition_bbt);
-		cerr << "starting at " << transition_bbt << " bars " << round(_barcnt) << " end at " << tmap->bbt_walk (transition_bbt, BBT_Offset (round (_barcnt), 0, 0)) << " sample = " << expected_end_sample << endl;
+		set_expected_end_sample (tmap, transition_bbt, transition_samples);
 		PropertyChanged (ARDOUR::Properties::running);
 
 		/* trigger is just running normally, and will fill
@@ -743,7 +745,6 @@ Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 				/* we will "restart" at the beginning of the
 				   next iteration of the trigger.
 				*/
-				// transition_beats = transition_beats + data_length;
 				_state = WaitingToStart;
 				retrigger ();
 				PropertyChanged (ARDOUR::Properties::running);
@@ -759,7 +760,6 @@ AudioTrigger::AudioTrigger (uint32_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, _stretcher (0)
 	, _start_offset (0)
-	, usable_length (0)
 	, last_sample (0)
 	, read_index (0)
 	, process_index (0)
@@ -783,22 +783,11 @@ AudioTrigger::stretching() const
 	return (_apparent_tempo != .0) && _stretchable;
 }
 
-void
-AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt)
-{
-	if (stretching()) {
-		expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (round (_barcnt), 0, 0)));
-	} else {
-		expected_end_sample = transition_samples + usable_length;
-	}
-}
-
 SegmentDescriptor
 AudioTrigger::get_segment_descriptor () const
 {
 	SegmentDescriptor sd;
 
-	sd.set_extent (_start_offset, usable_length);
 	sd.set_tempo (Temporal::Tempo (_apparent_tempo, 4));
 
 	return sd;
@@ -841,7 +830,6 @@ AudioTrigger::get_state (void)
 	XMLNode& node (Trigger::get_state());
 
 	node.set_property (X_("start"), timepos_t (_start_offset));
-	node.set_property (X_("length"), timepos_t (usable_length));
 
 	return node;
 }
@@ -857,11 +845,6 @@ AudioTrigger::set_state (const XMLNode& node, int version)
 
 	node.get_property (X_("start"), t);
 	_start_offset = t.samples();
-
-	node.get_property (X_("length"), t);
-	usable_length = t.samples();
-	last_sample = _start_offset + usable_length;
-	final_sample = _start_offset + usable_length;
 
 	return 0;
 }
@@ -898,39 +881,80 @@ AudioTrigger::current_pos() const
 }
 
 void
-AudioTrigger::set_usable_length ()
+AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t transition_sample)
 {
-	if (!_region) {
-		return;
+	/* Our task here is to set:
+
+	   expected_end_sample: the sample position where the data for the clip should run out (taking stretch into account)
+           last_sample: the sample in the data where we stop reading
+           final_sample: the sample where the trigger stops and the follow action if any takes effect
+
+           Things that affect these values:
+
+           data.length : how many samples there are in the data  (AudioTime / samples)
+           _follow_length : the time after the start of the trigger when the follow action should take effect
+           _barcnt : the expected duration of the trigger, based on analysis of its tempo, or user-set
+
+	*/
+
+	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk(transition_bbt, _follow_length));
+	samplepos_t end_by_barcnt = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (round (_barcnt), 0, 0)));
+	samplepos_t end_by_data_length = transition_sample + data.length;
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ends: FL %2 BC %3 DL %4\n", index(), end_by_follow_length, end_by_barcnt, end_by_data_length));
+
+	if (stretching()) {
+		expected_end_sample = std::min (end_by_follow_length, end_by_barcnt);
+	} else {
+		expected_end_sample = std::min (end_by_follow_length, end_by_data_length);
 	}
 
-	switch (launch_style()) {
-	case Repeat:
-		break;
-	default:
+	if (_follow_length != Temporal::BBT_Offset()) {
+		final_sample = end_by_follow_length;
+	} else {
+		final_sample = expected_end_sample;
+	}
+
+	samplecnt_t usable_length;
+
+	if (end_by_follow_length < end_by_data_length) {
+		usable_length = tmap->sample_at (tmap->bbt_walk (Temporal::BBT_Time (), _follow_length));
+	} else {
 		usable_length = data.length;
-		last_sample = _start_offset + usable_length;
-		final_sample = last_sample;
-		return;
 	}
 
-	Temporal::BBT_Offset q (_quantization);
+	/* called from set_expected_end_sample() when we know the time (audio &
+	 * musical time domains when we start starting. Our job here is to
+	 * define the last_sample we can use as data.
+	 */
 
-	if (q == Temporal::BBT_Offset ()) {
-		usable_length = data.length;
+	if (launch_style() != Repeat) {
+
 		last_sample = _start_offset + usable_length;
-		final_sample = last_sample;
-		return;
+
+	} else {
+
+		/* This is for Repeat mode only deliberately ignore the _follow_length
+		 * here, because we'll be playing just the quantization distance no
+		 * matter what.
+		 */
+
+		Temporal::BBT_Offset q (_quantization);
+
+		if (q == Temporal::BBT_Offset ()) {
+			usable_length = data.length;
+			last_sample = _start_offset + usable_length;
+			return;
+		}
+
+		/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
+
+		timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
+		usable_length = len.samples();
+		last_sample = _start_offset + usable_length;
 	}
 
-	/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
-
-	timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
-	usable_length = len.samples();
-	last_sample = _start_offset + usable_length;
-	final_sample = last_sample;
-
-	// std::cerr << name() << " SUL ul " << usable_length << " of " << data.length << " so " << _start_offset << " ls " << last_sample << std::endl;
+	std::cerr << "final sample = " << final_sample << " vs expected end " << expected_end_sample << " last sample " << last_sample << std::endl;
 }
 
 void
@@ -978,7 +1002,6 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 	load_data (ar);
 	determine_tempo ();
 	setup_stretcher ();
-	set_usable_length ();
 
 	/* Given what we know about the tempo and duration, set the defaults
 	 * for the trigger properties.
@@ -1115,9 +1138,9 @@ AudioTrigger::probably_oneshot () const
 {
 	assert (_apparent_tempo != 0.);
 
-	if ((usable_length < (_box.session().sample_rate()/2)) ||
+	if ((data.length < (_box.session().sample_rate()/2)) ||
 	    /* XXX use Meter here, not 4.0 */
-	    ((_barcnt < 1) && (usable_length < (4.0 * ((_box.session().sample_rate() * 60) / _apparent_tempo))))) {
+	    ((_barcnt < 1) && (data.length < (4.0 * ((_box.session().sample_rate() * 60) / _apparent_tempo))))) {
 		std::cerr << "looks like a one-shot\n";
 		return true;
 	}
@@ -1170,20 +1193,11 @@ AudioTrigger::drop_data ()
 }
 
 int
-
 AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 {
 	const uint32_t nchans = ar->n_channels();
 
 	data.length = ar->length_samples();
-
-	/* if usable length was already set, only adjust it if it is too large */
-	if (!usable_length || usable_length > data.length) {
-		usable_length = data.length;
-		last_sample = _start_offset + usable_length;
-		final_sample = last_sample;
-	}
-
 	drop_data ();
 
 	try {
@@ -1258,7 +1272,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	/* tell the stretcher what we are doing for this ::run() call */
 
-	if (do_stretch) {
+	if (do_stretch && _state != Playout) {
 
 		const double stretch = _apparent_tempo / bpm;
 		_stretcher->setTimeRatio (stretch);
@@ -1267,7 +1281,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 		if ((avail = _stretcher->available()) < 0) {
 			error << _("Could not configure rubberband stretcher") << endmsg;
-			return -1;
+			return 0;
 		}
 
 		/* We are using Rubberband in realtime mode, but this mdoe of
@@ -1369,13 +1383,31 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 			retrieved += _stretcher->retrieve (&bufp[0], from_stretcher);
 
 			if (read_index >= last_sample) {
+
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 no more data to deliver to stretcher, but retrieved %2 to put current end at %3 vs %4 / %5 pi %6\n",
+				                                              index(), retrieved, transition_samples + retrieved, expected_end_sample, final_sample, process_index));
+
 				if (transition_samples + retrieved > expected_end_sample) {
-					from_stretcher = std::min ((samplecnt_t) from_stretcher, (retrieved - (expected_end_sample - transition_samples)));
-					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 total retrieved data %2 exceeds theoretical size %3, truncate from_stretcher to %4\n", expected_end_sample - transition_samples, from_stretcher));
+					/* final pull from stretched data into output buffers */
+					from_stretcher = std::min ((samplecnt_t) from_stretcher, expected_end_sample - process_index);
+
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 total retrieved data %2 exceeds theoretical size %3, truncate from_stretcher to %4\n",
+					                                              index(), retrieved, expected_end_sample - transition_samples, from_stretcher));
 
 					if (from_stretcher == 0) {
+
+						if (process_index < final_sample) {
+							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_sample));
+							_state = Playout;
+						} else {
+							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, now stopped, retrieved %2, avail %3 pi %4 vs fs %5\n", index(), retrieved, avail, process_index, final_sample));
+							_state = Stopped;
+							_loop_cnt++;
+						}
+
 						break;
 					}
+
 				}
 			}
 
@@ -1409,6 +1441,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 
 		process_index += from_stretcher;
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 pi grew by %2 to %3\n", index(), from_stretcher, process_index));
 
 		/* Move read_index, in the case that we are not using a
 		 * stretcher
@@ -1424,13 +1457,14 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 		if (read_index >= last_sample && (!do_stretch || avail <= 0)) {
 
-			if (last_sample < final_sample) {
+			if (process_index < final_sample) {
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_sample));
 				_state = Playout;
 			} else {
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped, retrieved %2, avail %3\n", index(), retrieved, avail));
 				_state = Stopped;
 				_loop_cnt++;
 			}
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped, retrieved %2, avail %3\n", index(), retrieved, avail));
 			break;
 		}
 	}
@@ -1440,31 +1474,43 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	if (_state == Playout) {
 
+		if (nframes != orig_nframes) {
+			/* we've already taken dest_offset into account, it plays no
+			   role in a "playout" during the same ::run() call
+			*/
+			dest_offset = 0;
+		}
+
 		const pframes_t remaining_frames_for_run= orig_nframes - covered_frames;
-		const pframes_t remaining_frames_till_final = final_sample - read_index;
+		const pframes_t remaining_frames_till_final = (final_sample - transition_samples) - process_index;
 		const pframes_t to_fill = std::min (remaining_frames_till_final, remaining_frames_for_run);
 
-		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout mode, remaining in run %2 till final %3 @ %5 ts %7 vs pi @ %6 to fill %4\n",
+		                                              index(), remaining_frames_for_run, remaining_frames_till_final, to_fill, final_sample, process_index, transition_samples));
 
-			uint32_t channel = chn %  data.size();
-			AudioBuffer& buf (bufs.get_audio (chn));
+		if (remaining_frames_till_final != 0) {
 
-			buf.silence (to_fill, dest_offset + covered_frames);
+			for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
+
+				AudioBuffer& buf (bufs.get_audio (chn));
+				buf.silence (to_fill, covered_frames + dest_offset);
+			}
+
+			process_index += to_fill;
+			covered_frames += to_fill;
+
+			if (process_index < final_sample) {
+				/* more playout to be done */
+				return covered_frames;
+			}
 		}
 
-		read_index += to_fill;
-		covered_frames += to_fill;
-
-		if (read_index < final_sample) {
-			/* more playout to be done */
-			return covered_frames;
-		}
-
-		_state == Stopped;
+		_state = Stopped;
 		_loop_cnt++;
 	}
 
 	if (_state == Stopped || _state == Stopping) {
+		/* note: neither argument is used in the audio case */
 		when_stopped_during_run (bufs, dest_offset);
 	}
 
@@ -1481,7 +1527,6 @@ AudioTrigger::reload (BufferSet&, void*)
 MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, data_length (Temporal::Beats ())
-	, usable_length (Temporal::Beats ())
 	, last_event_beats (Temporal::Beats ())
 	, _start_offset (0, 0, 0)
 	, _legato_offset (0, 0, 0)
@@ -1500,9 +1545,30 @@ MIDITrigger::probably_oneshot () const
 }
 
 void
-MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt)
+MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t)
 {
 	expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (round (_barcnt), 0, 0)));
+
+	Temporal::Beats usable_length; /* using timestamps from data */
+
+	if (launch_style() != Repeat) {
+
+		usable_length = data_length;
+
+	} else {
+
+		Temporal::BBT_Offset q (_quantization);
+
+		if (q == Temporal::BBT_Offset ()) {
+			usable_length = data_length;
+			return;
+		}
+
+		/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
+
+		timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
+		usable_length = len.beats ();
+	}
 }
 
 SegmentDescriptor
@@ -1574,7 +1640,6 @@ MIDITrigger::get_state (void)
 	XMLNode& node (Trigger::get_state());
 
 	node.set_property (X_("start"), start_offset());
-	node.set_property (X_("length"), timepos_t (usable_length));
 
 	return node;
 }
@@ -1593,8 +1658,6 @@ MIDITrigger::set_state (const XMLNode& node, int version)
 	/* XXX need to deal with bar offsets */
 	_start_offset = Temporal::BBT_Offset (0, b.get_beats(), b.get_ticks());
 
-	node.get_property (X_("length"), t);
-	usable_length = t.beats();
 
 	return 0;
 }
@@ -1641,34 +1704,6 @@ void
 MIDITrigger::set_length (timecnt_t const & newlen)
 {
 
-}
-
-void
-MIDITrigger::set_usable_length ()
-{
-	if (!_region) {
-		return;
-	}
-
-	switch (launch_style()) {
-	case Repeat:
-		break;
-	default:
-		usable_length = data_length;
-		return;
-	}
-
-	Temporal::BBT_Offset q (_quantization);
-
-	if (q == Temporal::BBT_Offset ()) {
-		usable_length = data_length;
-		return;
-	}
-
-	/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
-
-	timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
-	usable_length = len.beats ();
 }
 
 timepos_t
@@ -1751,6 +1786,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 	case WaitingToStart:
 		return nframes;
 	case Running:
+	case Playout:
 	case WaitingToStop:
 	case Stopping:
 		break;

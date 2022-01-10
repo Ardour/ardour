@@ -142,7 +142,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void io_change () {}
 
 	virtual double position_as_fraction() const = 0;
-	virtual void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &) = 0;
+	virtual void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t) = 0;
 
 	void set_use_follow (bool yn);
 	bool use_follow() const { return _use_follow; }
@@ -214,6 +214,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	void set_next_trigger (int n);
 	int next_trigger() const { return _next_trigger; }
+
+	void set_follow_length (Temporal::BBT_Offset const &);
+	Temporal::BBT_Offset follow_length() const { return _follow_length; }
 
 	void set_follow_action_probability (int zero_to_a_hundred);
 	int  follow_action_probability() const { return _follow_action_probability; }
@@ -308,7 +311,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset);
 	void set_region_internal (boost::shared_ptr<Region>);
 	virtual void retrigger() = 0;
-	virtual void set_usable_length () = 0;
 };
 
 typedef boost::shared_ptr<Trigger> TriggerPtr;
@@ -345,13 +347,12 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	RubberBand::RubberBandStretcher* stretcher() { return (_stretcher); }
 
 	SegmentDescriptor get_segment_descriptor () const;
-	void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &);
+	void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t);
 
 	bool stretching () const;
 
   protected:
 	void retrigger ();
-	void set_usable_length ();
 
   private:
 	struct Data : std::vector<Sample*> {
@@ -366,14 +367,13 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	/* computed after data is reset */
 
-	samplecnt_t usable_length;
-	samplepos_t last_sample;   /* where the data runs out */
-	samplepos_t final_sample;  /* where we stop playing */
+	samplepos_t last_sample;   /* where the data runs out, relative to the start of the data, compare with read_index */
 
 	/* computed during run */
 
 	samplecnt_t read_index;
 	samplecnt_t process_index;
+	samplepos_t final_sample;  /* where we stop playing, relative to the timeline */
 	samplepos_t _legato_offset;
 	samplecnt_t retrieved;
 	samplecnt_t got_stretcher_padding;
@@ -418,11 +418,10 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	int set_state (const XMLNode&, int version);
 
 	SegmentDescriptor get_segment_descriptor () const;
-	void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &);
+	void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t);
 
   protected:
 	void retrigger ();
-	void set_usable_length ();
 
   private:
 	PBD::ID data_source;
@@ -430,7 +429,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	PBD::ScopedConnection content_connection;
 
 	Temporal::DoubleableBeats data_length;   /* using timestamps from data */
-	Temporal::DoubleableBeats usable_length; /* using timestamps from data */
 	Temporal::DoubleableBeats last_event_beats;
 
 	Temporal::BBT_Offset _start_offset;
