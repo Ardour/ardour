@@ -50,6 +50,7 @@ private:
 	void refill_dropdown ();
 	void parameter_changed (std::string const&);
 	void row_selected ();
+	void cursor_changed ();
 	void row_activated (Gtk::TreeModel::Path const&, Gtk::TreeViewColumn*);
 	bool test_expand (Gtk::TreeModel::iterator const&, Gtk::TreeModel::Path const&);
 	void row_collapsed (Gtk::TreeModel::iterator const&, Gtk::TreeModel::Path const&);
@@ -60,6 +61,7 @@ private:
 	void audition_active (bool);
 	void audition_progress (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
 	void stop_audition ();
+	void autoplay_toggled ();
 	bool seek_button_press (GdkEventButton*);
 	bool seek_button_release (GdkEventButton*);
 
@@ -88,6 +90,7 @@ private:
 	Gtk::Button                  _play_btn;
 	Gtk::Button                  _stop_btn;
 	Gtk::HScale                  _seek_slider;
+	Gtk::CheckButton             _autoplay_btn;
 
 	std::string _current_path;
 

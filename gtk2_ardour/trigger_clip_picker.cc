@@ -44,6 +44,7 @@
 #include "widgets/paths_dialog.h"
 
 #include "trigger_clip_picker.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -56,6 +57,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	, _play_btn (Stock::MEDIA_PLAY)
 	, _stop_btn (Stock::MEDIA_STOP)
 	, _seek_slider (0, 1000, 1)
+	, _autoplay_btn (_("Auto-play"))
 	, _seeking (false)
 {
 	/* Setup Dropdown / File Browser */
@@ -78,6 +80,8 @@ TriggerClipPicker::TriggerClipPicker ()
 	refill_dropdown ();
 
 	/* Audition */
+	 _autoplay_btn.set_active (UIConfiguration::instance ().get_autoplay_clips ());
+
 	_seek_slider.set_draw_value (false);
 
 	_seek_slider.add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
@@ -90,12 +94,13 @@ TriggerClipPicker::TriggerClipPicker ()
 
 	_play_btn.signal_clicked ().connect (sigc::mem_fun (*this, &TriggerClipPicker::audition_selected));
 	_stop_btn.signal_clicked ().connect (sigc::mem_fun (*this, &TriggerClipPicker::stop_audition));
+	_autoplay_btn.signal_toggled ().connect (sigc::mem_fun (*this, &TriggerClipPicker::autoplay_toggled));
 
 	/* Layout */
-
-	_auditable.attach (_play_btn, 0, 1, 0, 1, EXPAND | FILL, SHRINK);
-	_auditable.attach (_stop_btn, 1, 2, 0, 1, EXPAND | FILL, SHRINK);
-	_auditable.attach (_seek_slider, 0, 2, 1, 2, EXPAND | FILL, SHRINK);
+	_auditable.attach (_autoplay_btn, 0, 2, 0, 1, EXPAND | FILL, SHRINK);
+	_auditable.attach (_play_btn,     0, 1, 1, 2, EXPAND | FILL, SHRINK);
+	_auditable.attach (_stop_btn,     1, 2, 1, 2, EXPAND | FILL, SHRINK);
+	_auditable.attach (_seek_slider,  0, 2, 2, 3, EXPAND | FILL, SHRINK);
 	_auditable.set_spacings (6);
 
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
@@ -123,6 +128,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	_view.signal_test_expand_row ().connect (sigc::mem_fun (*this, &TriggerClipPicker::test_expand));
 	_view.signal_row_collapsed ().connect (sigc::mem_fun (*this, &TriggerClipPicker::row_collapsed));
 	_view.signal_drag_data_get ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_data_get));
+	_view.signal_cursor_changed ().connect (sigc::mem_fun (*this, &TriggerClipPicker::cursor_changed));
 
 	Config->ParameterChanged.connect (_config_connection, invalidator (*this), boost::bind (&TriggerClipPicker::parameter_changed, this, _1), gui_context ());
 
@@ -263,14 +269,38 @@ TriggerClipPicker::maybe_add_dir (std::string const& dir)
  */
 
 void
+TriggerClipPicker::cursor_changed ()
+{
+	if (!_session || !_autoplay_btn.get_active ()) {
+		return;
+	}
+
+	_session->cancel_audition ();
+
+	TreeModel::Path p;
+	TreeViewColumn* col = NULL;
+	_view.get_cursor (p, col);
+	TreeModel::iterator i = _model->get_iter (p);
+	/* This also plays the file if the cursor change deselects the row.
+	 * However, checking if `i` is _view.get_selection () does not reliably work from this context.
+	 */
+	if (i && (*i)[_columns.file]) {
+		audition ((*i)[_columns.path]);
+	}
+}
+
+void
 TriggerClipPicker::row_selected ()
 {
 	if (!_session) {
 		return;
 	}
-	_session->cancel_audition ();
 
-	if (_view.get_selection ()->count_selected_rows () < 1) {
+	if (!_autoplay_btn.get_active ()) {
+		_session->cancel_audition ();
+	}
+
+	if (_view.get_selection ()->count_selected_rows () < 1 || _autoplay_btn.get_active ()) {
 		_play_btn.set_sensitive (false);
 	} else {
 		TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
@@ -494,6 +524,13 @@ TriggerClipPicker::set_session (Session* s)
 		_session->AuditionActive.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_active, this, _1), gui_context ());
 		_session->the_auditioner ()->AuditionProgress.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_progress, this, _1, _2), gui_context ());
 	}
+}
+
+void
+TriggerClipPicker::autoplay_toggled ()
+{
+	UIConfiguration::instance ().set_autoplay_clips (_autoplay_btn.get_active ());
+	row_selected (); /* maybe cancel audition, update sensitivity */
 }
 
 void
