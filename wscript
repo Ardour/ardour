@@ -933,9 +933,10 @@ def sub_config_and_use(conf, name, has_objects = True):
 def configure(conf):
     conf.load('compiler_c')
     conf.load('compiler_cxx')
-    conf.load('clang_compilation_database')
     if Options.options.dist_target == 'mingw':
         conf.load('winres')
+    else:
+        conf.load('clang_compilation_database')
 
     if Options.options.dist_target == 'msvc':
         conf.env['MSVC_VERSIONS'] = ['msvc 10.0', 'msvc 9.0', 'msvc 8.0', 'msvc 7.1', 'msvc 7.0', 'msvc 6.0', ]
