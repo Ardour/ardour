@@ -897,19 +897,27 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 
 	*/
 
-	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk(transition_bbt, _follow_length));
+	samplepos_t end_by_follow_length = _follow_length != Temporal::BBT_Offset() ? tmap->sample_at (tmap->bbt_walk(transition_bbt, _follow_length)) : 0;
 	samplepos_t end_by_barcnt = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (round (_barcnt), 0, 0)));
 	samplepos_t end_by_data_length = transition_sample + data.length;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ends: FL %2 BC %3 DL %4\n", index(), end_by_follow_length, end_by_barcnt, end_by_data_length));
 
 	if (stretching()) {
-		expected_end_sample = std::min (end_by_follow_length, end_by_barcnt);
+		if (end_by_follow_length) {
+			expected_end_sample = std::min (end_by_follow_length, end_by_barcnt);
+		} else {
+			expected_end_sample = end_by_barcnt;
+		}
 	} else {
-		expected_end_sample = std::min (end_by_follow_length, end_by_data_length);
+		if (end_by_follow_length) {
+			expected_end_sample = std::min (end_by_follow_length, end_by_data_length);
+		} else {
+			expected_end_sample = end_by_data_length;
+		}
 	}
 
-	if (_follow_length != Temporal::BBT_Offset()) {
+	if (end_by_follow_length) {
 		final_sample = end_by_follow_length;
 	} else {
 		final_sample = expected_end_sample;
@@ -917,7 +925,7 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 
 	samplecnt_t usable_length;
 
-	if (end_by_follow_length < end_by_data_length) {
+	if (end_by_follow_length && (end_by_follow_length < end_by_data_length)) 
 		usable_length = tmap->sample_at (tmap->bbt_walk (Temporal::BBT_Time (), _follow_length));
 	} else {
 		usable_length = data.length;
