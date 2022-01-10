@@ -638,7 +638,7 @@ ARDOUR_UI::tabs_page_added (Widget*,guint)
 	if (_tabs.get_n_pages() > 1) {
 
 		std::vector<TargetEntry> drag_target_entries;
-		drag_target_entries.push_back (TargetEntry ("tabbable"));
+		drag_target_entries.push_back (TargetEntry ("ardour/x-tabbable"));
 
 		editor_visibility_button.drag_source_set (drag_target_entries);
 		mixer_visibility_button.drag_source_set (drag_target_entries);

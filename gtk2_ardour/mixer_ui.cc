@@ -155,7 +155,7 @@ Mixer_UI::Mixer_UI ()
 
 	/* set up drag-n-drop */
 	vector<TargetEntry> target_table;
-	target_table.push_back (TargetEntry ("PluginFavoritePtr"));
+	target_table.push_back (TargetEntry ("x-ardour/plugin.favorite", Gtk::TARGET_SAME_APP));
 	scroller_base.drag_dest_set (target_table);
 	scroller_base.signal_drag_data_received().connect (sigc::mem_fun(*this, &Mixer_UI::scroller_drag_data_received));
 
@@ -229,7 +229,7 @@ Mixer_UI::Mixer_UI ()
 	group_display_frame.add (group_display_vbox);
 
 	list<TargetEntry> target_list;
-	target_list.push_back (TargetEntry ("PluginPresetPtr"));
+	target_list.push_back (TargetEntry ("x-ardour/plugin.preset", Gtk::TARGET_SAME_APP));
 
 	favorite_plugins_model = PluginTreeStore::create (favorite_plugins_columns);
 	favorite_plugins_display.set_model (favorite_plugins_model);
@@ -240,7 +240,7 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.set_headers_visible (false);
 	favorite_plugins_display.set_rules_hint (true);
 	favorite_plugins_display.set_can_focus (false);
-	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginFavoritePtr");
+	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "x-ardour/plugin.favorite", Gtk::TARGET_SAME_APP);
 	favorite_plugins_display.set_drag_column (favorite_plugins_columns.name.index());
 	favorite_plugins_display.add_drop_targets (target_list);
 	favorite_plugins_display.signal_row_activated().connect (sigc::mem_fun (*this, &Mixer_UI::plugin_row_activated));
@@ -2406,7 +2406,7 @@ Mixer_UI::strip_scroller_button_event (GdkEventButton* ev)
 void
 Mixer_UI::scroller_drag_data_received (const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& data, guint info, guint time)
 {
-	if (data.get_target() != "PluginFavoritePtr") {
+	if (data.get_target() != "x-ardour/plugin.favorite") {
 		context->drag_finish (false, false, time);
 		return;
 	}
@@ -3490,7 +3490,7 @@ Mixer_UI::plugin_drag_motion (const Glib::RefPtr<Gdk::DragContext>& ctx, int x, 
 			ctx->drag_status (Gdk::ACTION_MOVE, time);
 			return true;
 		}
-	} else if (target == "PluginPresetPtr") {
+	} else if (target == "x-ardour/plugin.preset") {
 		ctx->drag_status (Gdk::ACTION_COPY, time);
 		//favorite_plugins_mode_combo.set_active_text (_("Favorite Plugins"));
 		return true;
@@ -3503,7 +3503,7 @@ Mixer_UI::plugin_drag_motion (const Glib::RefPtr<Gdk::DragContext>& ctx, int x, 
 void
 Mixer_UI::plugin_drop (const Glib::RefPtr<Gdk::DragContext>&, const Gtk::SelectionData& data)
 {
-	if (data.get_target() != "PluginPresetPtr") {
+	if (data.get_target() != "x-ardour/plugin.preset") {
 		return;
 	}
 	if (data.get_length() != sizeof (PluginPresetPtr)) {

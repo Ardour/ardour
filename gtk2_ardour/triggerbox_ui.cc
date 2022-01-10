@@ -736,7 +736,8 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	_selection_connection = PublicEditor::instance ().get_selection ().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerBoxUI::selection_changed));
 
 	std::vector<Gtk::TargetEntry> target_table;
-	target_table.push_back (Gtk::TargetEntry ("regions"));
+	target_table.push_back (Gtk::TargetEntry ("x-ardour/region.erl", Gtk::TARGET_SAME_APP));
+	target_table.push_back (Gtk::TargetEntry ("x-ardour/region.esl", Gtk::TARGET_SAME_APP));
 	target_table.push_back (Gtk::TargetEntry ("text/uri-list"));
 	target_table.push_back (Gtk::TargetEntry ("text/plain"));
 	target_table.push_back (Gtk::TargetEntry ("application/x-rootwin-drop"));
@@ -870,7 +871,7 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 		context->drag_finish (false, false, time);
 		return;
 	}
-	if (data.get_target () == X_("regions")) {
+	if (data.get_target () == "x-ardour/region.erl" || data.get_target () == "x-ardour/region.esl") {
 		boost::shared_ptr<Region> region = PublicEditor::instance ().get_dragged_region_from_sidebar ();
 		if (region) {
 			_triggerbox.set_from_selection (n, region);

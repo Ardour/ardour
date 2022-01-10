@@ -338,7 +338,7 @@ ProcessorEntry::can_copy_state (Gtkmm2ext::DnDVBoxChild* o) const
 bool
 ProcessorEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::SelectionData &data)
 {
-	if (data.get_target() == "PluginPresetPtr") {
+	if (data.get_target() == "x-ardour/plugin.preset") {
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
 
 		if (!_plugin_preset_pointer || !pi) {
@@ -1801,24 +1801,24 @@ ProcessorEntry::LuaPluginDisplay::render_inline (cairo_t *cr, uint32_t width)
 static std::list<Gtk::TargetEntry> drop_targets()
 {
 	std::list<Gtk::TargetEntry> tmp;
-	tmp.push_back (Gtk::TargetEntry ("processor")); // from processor-box to processor-box
-	tmp.push_back (Gtk::TargetEntry ("PluginInfoPtr")); // from plugin-manager
-	tmp.push_back (Gtk::TargetEntry ("PluginFavoritePtr")); // from sidebar
+	tmp.push_back (Gtk::TargetEntry ("x-ardour/processor", Gtk::TARGET_SAME_APP)); // from processor-box to processor-box
+	tmp.push_back (Gtk::TargetEntry ("x-ardour/plugin.info", Gtk::TARGET_SAME_APP)); // from plugin-manager
+	tmp.push_back (Gtk::TargetEntry ("x-ardour/plugin.favorite", Gtk::TARGET_SAME_APP)); // from sidebar
 	return tmp;
 }
 
 static std::list<Gtk::TargetEntry> drag_targets()
 {
 	std::list<Gtk::TargetEntry> tmp;
-	tmp.push_back (Gtk::TargetEntry ("PluginPresetPtr")); // to sidebar (optional preset)
-	tmp.push_back (Gtk::TargetEntry ("processor")); // to processor-box (copy)
+	tmp.push_back (Gtk::TargetEntry ("x-ardour/processor", Gtk::TARGET_SAME_APP)); // to processor-box (copy)
+	tmp.push_back (Gtk::TargetEntry ("x-ardour/plugin.preset", Gtk::TARGET_SAME_APP)); // to sidebar (optional preset)
 	return tmp;
 }
 
 static std::list<Gtk::TargetEntry> drag_targets_noplugin()
 {
 	std::list<Gtk::TargetEntry> tmp;
-	tmp.push_back (Gtk::TargetEntry ("processor")); // to processor box (sends, faders re-order)
+	tmp.push_back (Gtk::TargetEntry ("x-ardour/processor", Gtk::TARGET_SAME_APP)); // to processor box (sends, faders re-order)
 	return tmp;
 }
 
@@ -2011,10 +2011,10 @@ ProcessorBox::plugin_drop (Gtk::SelectionData const &data, ProcessorEntry* posit
 	boost::shared_ptr<Processor> p = find_drop_position (position);
 	Route::ProcessorList pl;
 
-	if (data.get_target() == "PluginInfoPtr") {
+	if (data.get_target() == "x-ardour/plugin.info") {
 		_drop_plugin (data, pl);
 	}
-	else if (data.get_target() == "PluginFavoritePtr") {
+	else if (data.get_target() == "x-ardour/plugin.favorite") {
 		_drop_plugin_preset (data, pl);
 	}
 	else {

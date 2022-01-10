@@ -1210,8 +1210,10 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 	if (can_drop) {
 
-		if (target == X_("regions")) {
+		if (target == "x-ardour/region.erl") {
 			region = _regions->get_dragged_region ();
+		} else if (target == "x-ardour/region.esl") {
+			region = _sources->get_dragged_region ();
 		}
 
 		if (region) {

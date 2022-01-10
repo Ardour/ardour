@@ -272,7 +272,7 @@ EditorRegions::EditorRegions (Editor* e)
 	opaque_cell->signal_toggled ().connect (sigc::mem_fun (*this, &EditorRegions::opaque_changed));
 
 	_display.get_selection ()->set_mode (SELECTION_MULTIPLE);
-	_display.add_object_drag (_columns.region.index (), "regions");
+	_display.add_object_drag (_columns.region.index (), "x-ardour/region.erl", TARGET_SAME_APP);
 	_display.set_drag_column (_columns.name.index ());
 
 	/* setup DnD handling */
