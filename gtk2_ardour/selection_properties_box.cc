@@ -34,6 +34,7 @@
 #include "editor.h"
 #include "region_view.h"
 #include "time_info_box.h"
+#include "triggerbox_ui.h"
 
 #include "multi_region_properties_box.h"
 

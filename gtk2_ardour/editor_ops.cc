@@ -127,6 +127,7 @@
 #include "timers.h"
 #include "transpose_dialog.h"
 #include "transform_dialog.h"
+#include "triggerbox_ui.h"
 #include "ui_config.h"
 #include "utils.h"
 #include "vca_time_axis.h"

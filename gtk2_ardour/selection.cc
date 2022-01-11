@@ -48,6 +48,7 @@
 #include "automation_time_axis.h"
 #include "public_editor.h"
 #include "control_point.h"
+#include "triggerbox_ui.h"
 #include "vca_time_axis.h"
 
 #include "pbd/i18n.h"

@@ -50,6 +50,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
+#include "ardour/triggerbox.h"
 #include "ardour/utils.h"
 #include "pbd/memento_command.h"
 

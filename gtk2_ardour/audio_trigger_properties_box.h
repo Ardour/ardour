@@ -26,6 +26,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
+#include "ardour/triggerbox.h"
 
 #include "widgets/ardour_button.h"
 

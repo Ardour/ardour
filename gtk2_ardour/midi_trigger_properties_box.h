@@ -23,6 +23,7 @@
 #include <gtkmm/label.h>
 
 #include "ardour/ardour.h"
+#include "ardour/triggerbox.h"
 
 #include "audio_trigger_properties_box.h"
 

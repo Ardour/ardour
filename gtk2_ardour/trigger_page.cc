@@ -49,6 +49,7 @@
 
 #include "trigger_page.h"
 #include "trigger_strip.h"
+#include "triggerbox_ui.h"
 #include "ui_config.h"
 #include "utils.h"
 

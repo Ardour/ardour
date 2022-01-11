@@ -22,7 +22,7 @@
 
 #include <list>
 
-#include "triggerbox_ui.h"
+class TriggerEntry;
 
 class TriggerSelection : public std::list<TriggerEntry*>
 {

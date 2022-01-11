@@ -44,6 +44,7 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/profile.h"
+#include "ardour/triggerbox.h"
 
 #include "temporal/tempo.h"
 
