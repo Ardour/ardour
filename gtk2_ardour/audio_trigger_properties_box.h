@@ -31,24 +31,18 @@
 #include "widgets/ardour_button.h"
 
 #include "audio_clock.h"
+#include "trigger_ui.h"
 
-class TriggerPropertiesBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+class TriggerPropertiesBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr, public TriggerUI
 {
 public:
 	TriggerPropertiesBox () {}
 	~TriggerPropertiesBox () {}
 
-	virtual void set_trigger (ARDOUR::TriggerReference) = 0;
-
 protected:
-	ARDOUR::TriggerReference tref;
 	Gtk::Label _header_label;
 
-	virtual void trigger_changed (const PBD::PropertyChange& what_changed) = 0;
-	void trigger_swap (uint32_t);
-
 	PBD::ScopedConnection _state_connection;
-	PBD::ScopedConnection trigger_swap_connection;
 };
 
 class AudioTriggerPropertiesBox : public TriggerPropertiesBox
@@ -57,13 +51,12 @@ public:
 	AudioTriggerPropertiesBox ();
 	~AudioTriggerPropertiesBox ();
 
-	void set_trigger (ARDOUR::TriggerReference);
-
 	void set_session (ARDOUR::Session*);
 
 protected:
+	virtual void on_trigger_changed (const PBD::PropertyChange& what_changed);
+
 	void toggle_stretch ();
-	void trigger_changed (const PBD::PropertyChange& what_changed);
 
 	void start_clock_changed();
 	void length_clock_changed();

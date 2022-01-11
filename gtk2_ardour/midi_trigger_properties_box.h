@@ -33,10 +33,8 @@ public:
 	MidiTriggerPropertiesBox ();
 	~MidiTriggerPropertiesBox ();
 
-	void set_trigger (ARDOUR::TriggerReference);
-
 protected:
-	void trigger_changed (const PBD::PropertyChange& what_changed);
+	virtual void on_trigger_changed (const PBD::PropertyChange& what_changed);
 
 private:
 	ArdourWidgets::ArdourButton _patch_enable_button;

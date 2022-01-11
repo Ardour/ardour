@@ -44,35 +44,6 @@ using namespace ArdourWidgets;
 using std::max;
 using std::min;
 
-void
-TriggerPropertiesBox::set_trigger (TriggerReference tr)
-{
-	tref = tr;
-	tref.trigger()->PropertyChanged.connect (_state_connection, invalidator (*this), boost::bind (&TriggerPropertiesBox::trigger_changed, this, _1), gui_context ());
-	tref.box->TriggerSwapped.connect (trigger_swap_connection, MISSING_INVALIDATOR, boost::bind (&TriggerPropertiesBox::trigger_swap, this, _1), gui_context ());
-
-	PBD::PropertyChange changed;
-	changed.add (ARDOUR::Properties::name);
-	changed.add (ARDOUR::Properties::running);
-	trigger_changed (changed);
-}
-
-void
-TriggerPropertiesBox::trigger_swap (uint32_t n)
-{
-	if (n != tref.slot) {
-		/* some other slot in the same box got swapped. we don't care */
-		return;
-	}
-	_state_connection.disconnect ();
-	tref.trigger()->PropertyChanged.connect (_state_connection, invalidator (*this), boost::bind (&TriggerPropertiesBox::trigger_changed, this, _1), gui_context ());
-
-	PBD::PropertyChange changed;
-	changed.add (ARDOUR::Properties::name);
-	changed.add (ARDOUR::Properties::running);
-	trigger_changed (changed);
-}
-
 AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	: _length_clock (X_("regionlength"), true, "", true, false, true)
 	, _start_clock (X_("regionstart"), true, "", false, false)
@@ -220,19 +191,7 @@ AudioTriggerPropertiesBox::set_session (Session* s)
 }
 
 void
-AudioTriggerPropertiesBox::set_trigger (ARDOUR::TriggerReference tr)
-{
-	boost::shared_ptr<ARDOUR::AudioTrigger> audio_trigger = boost::dynamic_pointer_cast<ARDOUR::AudioTrigger> (tr.trigger());
-
-	if (!audio_trigger) {
-		return;
-	}
-
-	TriggerPropertiesBox::set_trigger (tr);
-}
-
-void
-AudioTriggerPropertiesBox::trigger_changed (const PBD::PropertyChange& what_changed)
+AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& what_changed)
 {
 	TriggerPtr trigger (tref.trigger());
 
