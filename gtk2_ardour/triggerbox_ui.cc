@@ -767,18 +767,40 @@ TriggerEntry::event (GdkEvent* ev)
 void
 TriggerEntry::drag_begin (Glib::RefPtr<Gdk::DragContext> const& context)
 {
-#if 0
-	int width  = 130;
-	int height = 20;
-	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
-	Glib::RefPtr<Gdk::Pixmap> pixmap = Gdk::Pixmap::create (gtkcanvas->get_root_window(), width, height);
-	cairo_t *cr = gdk_cairo_create (Glib::unwrap (pixmap));
-	cairo_set_source_rgb (cr, 1, 0, 0);
-	cairo_rectangle (cr, 0, 0, width, height);
-	cairo_fill (cr);
-	cairo_destroy (cr);
-	context->set_icon (pixmap->get_colormap(), pixmap, Glib::RefPtr<Gdk::Bitmap>(NULL), width / 2, height / 2);
-#endif
+	if (!_drag_active) {
+		/* Since the canvas is shared, all TriggerEntry inside
+		 * the TriggerBox canvas receive this signal
+		 */
+		return;
+	}
+	//const ArdourCanvas::Rect rect = allocation ();
+	int                       width     = _rect.width ();
+	int                       height    = _rect.height ();
+	GtkCanvas*                gtkcanvas = static_cast<GtkCanvas*> (canvas ());
+	Glib::RefPtr<Gdk::Pixmap> pixmap    = Gdk::Pixmap::create (gtkcanvas->get_root_window (), width, height);
+
+	{
+		cairo_t*                      cr  = gdk_cairo_create (Glib::unwrap (pixmap));
+		Cairo::RefPtr<Cairo::Context> ctx = Cairo::RefPtr<Cairo::Context> (new Cairo::Context (cr, true /* has_reference */));
+
+		/* inverse offset, because ::render() translates coordinates itself */
+		ArdourCanvas::Rect self (item_to_window (_rect));
+		ctx->translate (-self.x0, -self.y0);
+		/* save context because ::render() calls set_identity_matrix () */
+		ctx->save ();
+		render (self, ctx);
+		ctx->restore ();
+
+		/* draw an outline around the drag object, replace red selection border */
+		ctx->set_identity_matrix ();
+		ctx->rectangle (0, 0, width, height);
+		set_source_rgba (ctx, UIConfiguration::instance ().color ("neutral:foreground"));
+		ctx->set_line_width (1.5);
+		ctx->stroke ();
+		/* ctx leaves scope, cr is destroyed, and pixmap surface is flush()ed */
+	}
+
+	context->set_icon (pixmap->get_colormap (), pixmap, Glib::RefPtr<Gdk::Bitmap> (NULL), width / 2, height / 2);
 }
 
 void
