@@ -60,13 +60,19 @@ public:
 	void render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const;
 
 	void _size_allocate (ArdourCanvas::Rect const&);
-	void maybe_update ();
 
 	void on_trigger_changed (PBD::PropertyChange const& change);
 
 	void selection_change ();
 
-	void set_default_colors ();
+	enum EnteredState {
+		PlayEntered,
+		NameEntered,
+		FollowEntered,
+		NoneEntered
+	};
+
+	void set_widget_colors (TriggerEntry::EnteredState es=NoneEntered);
 
 	bool play_button_event (GdkEvent*);
 	bool name_button_event (GdkEvent*);
@@ -90,9 +96,6 @@ public:
 	TriggerBoxUI (ArdourCanvas::Item* parent, ARDOUR::TriggerBox&);
 	~TriggerBoxUI ();
 
-	void start_updating ();
-	void stop_updating ();
-
 	void _size_allocate (ArdourCanvas::Rect const&);
 
 private:
@@ -108,7 +111,6 @@ private:
 	Glib::RefPtr<Gtk::TargetList> _dnd_src;
 
 	void build ();
-	void rapid_update ();
 
 	void selection_changed ();
 
@@ -125,7 +127,6 @@ private:
 
 	uint64_t slot_at_y (int) const;
 
-	sigc::connection _update_connection;
 	sigc::connection _selection_connection;
 };
 
@@ -135,9 +136,6 @@ public:
 	TriggerBoxWidget (float w, float h);
 
 	void set_triggerbox (ARDOUR::TriggerBox* tb);
-
-	void on_map ();
-	void on_unmap ();
 
 private:
 	TriggerBoxUI* ui;

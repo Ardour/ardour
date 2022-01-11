@@ -76,7 +76,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	set_outline (false);
 
 	play_button = new ArdourCanvas::Rectangle (this);
-	play_button->set_outline (false);
+	play_button->set_outline (true);
 	play_button->set_fill (true);
 	play_button->name = string_compose ("playbutton %1", tr.slot);
 	play_button->show ();
@@ -107,7 +107,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 
 	/* watch for change in theme */
 	UIConfiguration::instance ().ParameterChanged.connect (sigc::mem_fun (*this, &TriggerEntry::ui_parameter_changed));
-	set_default_colors ();
+	set_widget_colors ();
 
 	/* owner color changes (?) */
 	dynamic_cast<Stripable*> (tref.box->owner ())->presentation_info ().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
@@ -136,19 +136,7 @@ TriggerEntry::owner_color_changed ()
 void
 TriggerEntry::selection_change ()
 {
-	if (PublicEditor::instance ().get_selection ().selected (this)) {
-		name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
-	} else {
-		set_default_colors ();
-	}
-}
-
-void
-TriggerEntry::maybe_update ()
-{
-	if (trigger ()->active ()) {
-		redraw ();
-	}
+	set_widget_colors ();
 }
 
 void
@@ -309,18 +297,6 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 	float size   = sz - 2 * margin;
 
 	bool active = trigger ()->active ();
-
-	if (active && trigger ()->launch_style () == Trigger::Toggle) {
-		/* clicking again will Stop this clip */
-		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
-		context->move_to (margin, margin);
-		context->rel_line_to (size, 0);
-		context->rel_line_to (0, size);
-		context->rel_line_to (-size, 0);
-		context->rel_line_to (0, -size);
-		context->fill ();
-		return;
-	}
 
 	if (!trigger ()->region ()) {
 		/* no content in this slot, it is only a Stop button */
@@ -508,7 +484,6 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (width - height, 0); // right side of the widget
-		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
 		draw_follow_icon (context, trigger ()->follow_action (0), height, scale);
 		context->set_identity_matrix ();
 	}
@@ -525,7 +500,7 @@ TriggerEntry::on_trigger_changed (PropertyChange const& change)
 		}
 	}
 
-	name_text->set_color (trigger ()->color ());
+	set_widget_colors();  //depending on the state, this might change a color and queue a redraw
 
 	PropertyChange interesting_stuff;
 	interesting_stuff.add (ARDOUR::Properties::name);
@@ -545,26 +520,39 @@ TriggerEntry::on_trigger_changed (PropertyChange const& change)
 }
 
 void
-TriggerEntry::set_default_colors ()
+TriggerEntry::set_widget_colors (TriggerEntry::EnteredState es)
 {
-	set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
-	play_button->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
-	name_button->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
-	name_button->set_outline_color (UIConfiguration::instance ().color ("theme:bg"));
-	follow_button->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
+	color_t bg_col = UIConfiguration::instance ().color ("theme:bg");
+
+	//alternating darker bands
 	if ((tref.slot / 2) % 2 == 0) {
-		set_fill_color (HSV (fill_color ()).darker (0.15).color ());
-		play_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
-		name_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
-		name_button->set_outline_color (HSV (fill_color ()).darker (0.15).color ());
-		follow_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
+		bg_col = HSV (bg_col).darker (0.15).color ();
 	}
 
+	set_fill_color (bg_col);
+
+	//child widgets highlight when entered
+	color_t hilite = HSV (bg_col).lighter (0.15).color ();
+
+	play_button->set_fill_color ((es==PlayEntered) ? hilite : bg_col);
+	play_button->set_outline_color ((es==PlayEntered) ? hilite : bg_col);
+
+	name_button->set_fill_color ((es==NameEntered) ? hilite : bg_col);
+	name_button->set_outline_color ((es==NameEntered) ? hilite : bg_col);
+
+	follow_button->set_fill_color ((es==FollowEntered) ? hilite : bg_col);
+
+	name_text->set_color (trigger()->color());
 	name_text->set_fill_color (UIConfiguration::instance ().color ("neutral:midground"));
 
 	/*preserve selection border*/
 	if (PublicEditor::instance ().get_selection ().selected (this)) {
 		name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
+	}
+
+	/*draw a box around 'queued' trigger*/
+	if (!trigger()->active() && trigger()->box().currently_playing () == trigger()) {
+		play_button->set_outline_color (UIConfiguration::instance ().color ("neutral:foreground"));
 	}
 }
 
@@ -572,7 +560,7 @@ void
 TriggerEntry::ui_parameter_changed (std::string const& p)
 {
 	if (p == "color-file") {
-		set_default_colors ();
+		set_widget_colors ();
 	}
 }
 
@@ -582,28 +570,16 @@ TriggerEntry::name_button_event (GdkEvent* ev)
 	switch (ev->type) {
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_default_colors ();
-				name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-				name_button->set_outline_color (HSV (fill_color ()).lighter (0.15).color ());
-				follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-				play_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-				/*preserve selection border*/
-				if (PublicEditor::instance ().get_selection ().selected (this)) {
-					name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
-				}
+				set_widget_colors (NameEntered);
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_default_colors ();
+				set_widget_colors (NoneEntered);
 			}
 			break;
 		case GDK_BUTTON_PRESS:
 			PublicEditor::instance ().get_selection ().set (this);
-			/* a side-effect of selection-change is that the slot's color is reset. retain the "entered-color" here: */
-			name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-			name_button->set_outline_color (UIConfiguration::instance ().color ("alert:red"));
-			follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			break;
 		case GDK_2BUTTON_PRESS:
 			edit_trigger ();
@@ -680,13 +656,12 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 			break;
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_default_colors ();
-				play_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+				set_widget_colors (PlayEntered);
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_default_colors ();
+				set_widget_colors (NoneEntered);
 			}
 			break;
 		default:
@@ -710,13 +685,12 @@ TriggerEntry::follow_button_event (GdkEvent* ev)
 			break;
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_default_colors ();
-				follow_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+				set_widget_colors (FollowEntered);
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				set_default_colors ();
+				set_widget_colors (NoneEntered);
 			}
 			break;
 		default:
@@ -772,7 +746,6 @@ TriggerBoxUI::~TriggerBoxUI ()
 	   functor from the signal when they are destroyed).
 	*/
 	_selection_connection.disconnect ();
-	_update_connection.disconnect ();
 }
 
 void
@@ -1017,26 +990,6 @@ TriggerBoxUI::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::Selecti
 	}
 }
 
-void
-TriggerBoxUI::start_updating ()
-{
-	_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &TriggerBoxUI::rapid_update));
-}
-
-void
-TriggerBoxUI::stop_updating ()
-{
-	_update_connection.disconnect ();
-}
-
-void
-TriggerBoxUI::rapid_update ()
-{
-	for (auto& slot : _slots) {
-		slot->maybe_update ();
-	}
-}
-
 /* ********************************************** */
 
 TriggerBoxWidget::TriggerBoxWidget (float w, float h)
@@ -1061,27 +1014,4 @@ TriggerBoxWidget::set_triggerbox (TriggerBox* tb)
 
 	ui = new TriggerBoxUI (root (), *tb);
 	repeat_size_allocation ();
-
-	if (is_mapped ()) {
-		ui->start_updating ();
-	}
-}
-
-void
-TriggerBoxWidget::on_map ()
-{
-	FittedCanvasWidget::on_map ();
-
-	if (ui) {
-		ui->start_updating ();
-	}
-}
-
-void
-TriggerBoxWidget::on_unmap ()
-{
-	FittedCanvasWidget::on_unmap ();
-	if (ui) {
-		ui->stop_updating ();
-	}
 }
