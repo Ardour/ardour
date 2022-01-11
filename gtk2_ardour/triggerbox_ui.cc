@@ -18,11 +18,11 @@
 
 #include <vector>
 
+#include "gtkmm/sizegroup.h"
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
 #include <gtkmm/stock.h>
-#include "gtkmm/sizegroup.h"
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
@@ -51,10 +51,10 @@
 #include "public_editor.h"
 #include "region_view.h"
 #include "selection.h"
+#include "slot_properties_box.h"
 #include "timers.h"
 #include "trigger_ui.h"
 #include "triggerbox_ui.h"
-#include "slot_properties_box.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -98,7 +98,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	name_text->show ();
 
 	/* this will trigger a call to on_trigger_changed() */
-	set_trigger(tr);
+	set_trigger (tr);
 
 	/* event handling */
 	play_button->Event.connect (sigc::mem_fun (*this, &TriggerEntry::play_button_event));
@@ -146,8 +146,8 @@ TriggerEntry::selection_change ()
 void
 TriggerEntry::maybe_update ()
 {
-	if (trigger()->active()) {
-		redraw();
+	if (trigger ()->active ()) {
+		redraw ();
 	}
 }
 
@@ -160,17 +160,17 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 	const Distance height = _rect.height ();
 
 	play_button->set (ArdourCanvas::Rect (0, 0, height, height));
-	name_button->set (ArdourCanvas::Rect (height, 0, width-height, height));
-	follow_button->set (ArdourCanvas::Rect (width-height, 0, width, height));
+	name_button->set (ArdourCanvas::Rect (height, 0, width - height, height));
+	follow_button->set (ArdourCanvas::Rect (width - height, 0, width, height));
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 	_poly_margin       = 2. * scale;
 	_poly_size         = height - 2 * _poly_margin;
 
-	name_text->size_allocate (ArdourCanvas::Rect (0, 0, width, height -_poly_margin*2));
-	float tleft = height; // make room for the play button
-	name_text->set_position (Duple (tleft + _poly_margin, _poly_margin));  //@paul why do we need tleft here?  isn't name_text a child of name_button?
-	name_text->clamp_width (width - height*2 -_poly_margin*3 );
+	name_text->size_allocate (ArdourCanvas::Rect (0, 0, width, height - _poly_margin * 2));
+	float tleft = height;                                                 // make room for the play button
+	name_text->set_position (Duple (tleft + _poly_margin, _poly_margin)); // @paul why do we need tleft here? isn't name_text a child of name_button?
+	name_text->clamp_width (width - height * 2 - _poly_margin * 3);
 
 	/* font scale may have changed. uiconfig 'embeds' the ui-scale in the font */
 	name_text->set_font_description (UIConfiguration::instance ().get_NormalFont ());
@@ -179,11 +179,11 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 void
 TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::FollowAction icon, float size, float scale) const
 {
-	uint32_t bg_color = fill_color();
+	uint32_t bg_color = fill_color ();
 	uint32_t fg_color = UIConfiguration::instance ().color ("neutral:midground");
 
-	//in the case where there is a random follow-action, just put a "?"
-	if (trigger()->follow_action_probability()>0) {
+	/* in the case where there is a random follow-action, just put a "?" */
+	if (trigger ()->follow_action_probability () > 0) {
 		Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 		layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
 		layout->set_text ("?");
@@ -233,7 +233,7 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 			context->fill ();
 
 			context->arc (size / 2, 7 * scale, 1 * scale, 0, 2 * M_PI);
-			set_source_rgba (context, fill_color());
+			set_source_rgba (context, fill_color ());
 			context->fill ();
 
 			set_source_rgba (context, fg_color);
@@ -269,28 +269,28 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 			layout->show_in_cairo_context (context);
 		} break;
 		case Trigger::AnyTrigger: {
-			for (int i = 0; i<6; i++) {
-				Cairo::Matrix m = context->get_matrix();
-				context->translate (size / 2, size /2);
-				context->rotate (i*M_PI/3);
+			for (int i = 0; i < 6; i++) {
+				Cairo::Matrix m = context->get_matrix ();
+				context->translate (size / 2, size / 2);
+				context->rotate (i * M_PI / 3);
 				context->move_to (0, 0);
-				context->line_to (0, (size/2)-4*scale);
+				context->line_to (0, (size / 2) - 4 * scale);
 				context->stroke ();
-				context->set_matrix(m);
+				context->set_matrix (m);
 			}
 			context->set_identity_matrix ();
 		} break;
 		case Trigger::OtherTrigger: {
 			context->set_line_width (1.5 * scale);
-			set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); //needs to be brighter to maintain balance
-			for (int i = 0; i<6; i++) {
-				Cairo::Matrix m = context->get_matrix();
-				context->translate (size / 2, size /2);
-				context->rotate (i*M_PI/3);
-				context->move_to (0, 2*scale);
-				context->line_to (0, (size/2)-4*scale);
+			set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); // needs to be brighter to maintain balance
+			for (int i = 0; i < 6; i++) {
+				Cairo::Matrix m = context->get_matrix ();
+				context->translate (size / 2, size / 2);
+				context->rotate (i * M_PI / 3);
+				context->move_to (0, 2 * scale);
+				context->line_to (0, (size / 2) - 4 * scale);
 				context->stroke ();
-				context->set_matrix(m);
+				context->set_matrix (m);
 			}
 			context->set_identity_matrix ();
 		} break;
@@ -300,60 +300,61 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 	}
 }
 
-
 void
 TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz, float scale) const
 {
 	context->set_line_width (1 * scale);
 
-	float margin = 4*scale;
-	float size = sz - 2*margin;
+	float margin = 4 * scale;
+	float size   = sz - 2 * margin;
 
-	bool active = trigger()->active();
+	bool active = trigger ()->active ();
 
-	if (active && trigger()->launch_style()==Trigger::Toggle) {
-		//clicking again will Stop this clip
+	if (active && trigger ()->launch_style () == Trigger::Toggle) {
+		/* clicking again will Stop this clip */
 		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 		context->move_to (margin, margin);
-		context->rel_line_to (size,  0);
-		context->rel_line_to (0,     size);
+		context->rel_line_to (size, 0);
+		context->rel_line_to (0, size);
 		context->rel_line_to (-size, 0);
-		context->rel_line_to (0,     -size);
+		context->rel_line_to (0, -size);
 		context->fill ();
-		return;  //done
+		return;
 	}
 
-	if (!trigger()->region ()) {
-		//no content in this slot, it is only a Stop button
+	if (!trigger ()->region ()) {
+		/* no content in this slot, it is only a Stop button */
 		context->move_to (margin, margin);
-		context->rel_line_to (size,  0);
-		context->rel_line_to (0,     size);
+		context->rel_line_to (size, 0);
+		context->rel_line_to (0, size);
 		context->rel_line_to (-size, 0);
-		context->rel_line_to (0,     -size);
+		context->rel_line_to (0, -size);
 		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
 		context->stroke ();
-		return;  //done
+		return;
 	}
 
 	set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
 
-	switch (trigger()->launch_style()) {
+	switch (trigger ()->launch_style ()) {
 		case Trigger::Toggle:
 			if (active) {
-				context->move_to (margin, margin);  //special case: now it's a square Stop button
-				context->rel_line_to (size,  0);
-				context->rel_line_to (0,     size);
+				/* special case: now it's a square Stop button */
+				context->move_to (margin, margin);
+				context->rel_line_to (size, 0);
+				context->rel_line_to (0, size);
 				context->rel_line_to (-size, 0);
 				context->line_to (margin, margin);
 				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 				context->fill ();
 				context->stroke ();
 			} else {
-				context->move_to (margin, margin);  //boxy arrow
+				/* boxy arrow */
+				context->move_to (margin, margin);
 				context->rel_line_to (0, size);
-				context->rel_line_to (size*1/3, 0);
-				context->rel_line_to (size*2/3, -size/2);
-				context->rel_line_to (-size*2/3, -size/2);
+				context->rel_line_to (size * 1 / 3, 0);
+				context->rel_line_to (size * 2 / 3, -size / 2);
+				context->rel_line_to (-size * 2 / 3, -size / 2);
 				context->line_to (margin, margin);
 				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
 				context->stroke ();
@@ -362,7 +363,7 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 		case Trigger::OneShot:
 			context->move_to (margin, margin);
 			context->rel_line_to (0, size);
-			context->rel_line_to (size, -size/2);
+			context->rel_line_to (size, -size / 2);
 			context->line_to (margin, margin);
 			if (active) {
 				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
@@ -373,37 +374,39 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 				context->stroke ();
 			}
 			break;
-		case Trigger::ReTrigger:  //line + boxy arrow + line
+		case Trigger::ReTrigger:
+			/* line + boxy arrow + line */
 			if (active) {
 				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 			} else {
 				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
 			}
 
-			//vertical line at left
+			/* vertical line at left */
 			context->set_line_width (2 * scale);
-			context->move_to (margin + 1*scale, margin);
-			context->line_to (margin + 1*scale, margin+size);
+			context->move_to (margin + 1 * scale, margin);
+			context->line_to (margin + 1 * scale, margin + size);
 			context->stroke ();
 
-			//small triangle
+			/* small triangle */
 			context->set_line_width (1 * scale);
-			context->move_to (margin + scale*4, margin + 2*scale);
-			context->line_to (margin + size, margin+size/2);
-			context->line_to (margin + scale*4, margin+size-2*scale);
-			context->line_to (margin + scale*4, margin + 2*scale);
+			context->move_to (margin + scale * 4, margin + 2 * scale);
+			context->line_to (margin + size, margin + size / 2);
+			context->line_to (margin + scale * 4, margin + size - 2 * scale);
+			context->line_to (margin + scale * 4, margin + 2 * scale);
 			if (active) {
 				context->fill ();
 			} else {
 				context->stroke ();
 			}
 			break;
-		case Trigger::Gate:  //diamond shape
-			context->move_to ( margin+size/2, margin );
-			context->rel_line_to ( size/2,  size/2);
-			context->rel_line_to ( -size/2, size/2);
-			context->rel_line_to ( -size/2, -size/2);
-			context->rel_line_to ( size/2,  -size/2);
+		case Trigger::Gate:
+			/* diamond shape */
+			context->move_to (margin + size / 2, margin);
+			context->rel_line_to (size / 2, size / 2);
+			context->rel_line_to (-size / 2, size / 2);
+			context->rel_line_to (-size / 2, -size / 2);
+			context->rel_line_to (size / 2, -size / 2);
 			if (active) {
 				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 				context->fill ();
@@ -413,21 +416,23 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 				context->stroke ();
 			}
 			break;
-		case Trigger::Repeat:  //'stutter' shape
+		case Trigger::Repeat:
+			/* 'stutter' shape */
 			context->set_line_width (1 * scale);
-			context->move_to ( margin, margin );
-			context->rel_line_to ( 0, size);
+			context->move_to (margin, margin);
+			context->rel_line_to (0, size);
 
-			context->move_to ( margin + scale*3, margin + scale*2 );
-			context->rel_line_to ( 0, size - scale*4);
+			context->move_to (margin + scale * 3, margin + scale * 2);
+			context->rel_line_to (0, size - scale * 4);
 
-			context->move_to ( margin + scale*6, margin + scale*3 );
-			context->rel_line_to ( 0, size - scale*6);
+			context->move_to (margin + scale * 6, margin + scale * 3);
+			context->rel_line_to (0, size - scale * 6);
 
 			if (active) {
 				set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foregroundest"));
 			} else {
-				set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); //stutter shape needs to be brighter to maintain balance
+				/* stutter shape needs to be brighter to maintain balance */
+				set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ());
 			}
 			context->stroke ();
 			break;
@@ -444,8 +449,8 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 	Rectangle::render (area, context);
 
 	/* Note that item_to_window() already takes _position into account (as
-	   part of item_to_canvas()
-	*/
+	 * part of item_to_canvas()
+	 */
 	ArdourCanvas::Rect       self (item_to_window (_rect));
 	const ArdourCanvas::Rect draw = self.intersection (area);
 
@@ -466,7 +471,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 
 	render_children (area, context);
 
-	if (trigger()->scene_isolated ()) {
+	if (trigger ()->scene_isolated ()) {
 		/* left shadow */
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);
@@ -499,12 +504,12 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 	}
 
 	/* follow-action icon */
-	if (trigger()->region () && trigger()->use_follow()) {
+	if (trigger ()->region () && trigger ()->use_follow ()) {
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (width - height, 0); // right side of the widget
 		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
-		draw_follow_icon (context, trigger()->follow_action (0), height, scale);
+		draw_follow_icon (context, trigger ()->follow_action (0), height, scale);
 		context->set_identity_matrix ();
 	}
 }
@@ -513,14 +518,14 @@ void
 TriggerEntry::on_trigger_changed (PropertyChange const& change)
 {
 	if (change.contains (ARDOUR::Properties::name)) {
-		if (trigger()->region ()) {
-			name_text->set (short_version (trigger()->name (), 16));
+		if (trigger ()->region ()) {
+			name_text->set (short_version (trigger ()->name (), 16));
 		} else {
 			name_text->set ("");
 		}
 	}
 
-	name_text->set_color (trigger()->color());
+	name_text->set_color (trigger ()->color ());
 
 	PropertyChange interesting_stuff;
 	interesting_stuff.add (ARDOUR::Properties::name);
@@ -628,9 +633,9 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 			case GDK_BUTTON_PRESS:
 				if (ev->button.button == 1) {
 					if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
-						trigger()->box().stop_all_immediately ();
+						trigger ()->box ().stop_all_immediately ();
 					} else {
-						trigger()->box().stop_all_quantized ();
+						trigger ()->box ().stop_all_quantized ();
 					}
 					return true;
 				}
@@ -644,13 +649,13 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 		case GDK_BUTTON_PRESS:
 			switch (ev->button.button) {
 				case 1:
-					if (trigger()->launch_style () == Trigger::Gate ||
-					    trigger()->launch_style () == Trigger::Repeat) {
-						trigger()->bang ();
+					if (trigger ()->launch_style () == Trigger::Gate ||
+					    trigger ()->launch_style () == Trigger::Repeat) {
+						trigger ()->bang ();
 						_grabbed = true;
-						play_button->grab();
+						play_button->grab ();
 					} else {
-						trigger()->bang ();
+						trigger ()->bang ();
 					}
 					return true;
 				default:
@@ -661,8 +666,8 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 			switch (ev->button.button) {
 				case 1:
 					if (_grabbed) {
-						trigger()->unbang ();
-						play_button->ungrab();
+						trigger ()->unbang ();
+						play_button->ungrab ();
 						_grabbed = false;
 					}
 					break;
@@ -719,7 +724,6 @@ TriggerEntry::follow_button_event (GdkEvent* ev)
 	}
 	return false;
 }
-
 
 /* ***************************************************** */
 
@@ -783,7 +787,7 @@ void
 TriggerBoxUI::build ()
 {
 	TriggerPtr t;
-	uint64_t n = 0;
+	uint64_t   n = 0;
 
 	// clear_items (true);
 
@@ -896,7 +900,7 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 		/* Long term goal is to receive all information from another TriggerBox Slot,
 		 * not just the region.
 		 */
-		PBD::ID rid (data.get_data_as_string ());
+		PBD::ID                   rid (data.get_data_as_string ());
 		boost::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
 		if (region) {
 			_triggerbox.set_from_selection (n, region);
@@ -922,17 +926,17 @@ bool
 TriggerBoxUI::event (GdkEvent* ev, uint64_t n)
 {
 	assert (n < _slots.size ());
-	if (!_slots[n]->trigger()->region ()) {
+	if (!_slots[n]->trigger ()->region ()) {
 		return false;
 	}
 
 	switch (ev->type) {
 		case GDK_2BUTTON_PRESS:
-				gdk_pointer_ungrab (GDK_CURRENT_TIME);
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 			break;
 
 		case GDK_BUTTON_RELEASE:
-				gdk_pointer_ungrab (GDK_CURRENT_TIME);
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 			break;
 
 		case GDK_BUTTON_PRESS:
@@ -941,7 +945,7 @@ TriggerBoxUI::event (GdkEvent* ev, uint64_t n)
 				if (bev->button == 1) {
 					_drag_start_x = bev->x;
 					_drag_start_y = bev->y;
-					gdk_pointer_grab (bev->window, false, GdkEventMask (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK), NULL, NULL, bev->time);
+					gdk_pointer_grab (bev->window, false, GdkEventMask (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK), NULL, NULL, bev->time);
 				} else {
 					_drag_start_x = -1;
 					_drag_start_y = -1;
@@ -951,11 +955,11 @@ TriggerBoxUI::event (GdkEvent* ev, uint64_t n)
 
 		case GDK_MOTION_NOTIFY:
 			if (!_drag_active) {
-				int x, y;
+				int               x, y;
 				Gdk::ModifierType mask;
 
 				GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
-				gtkcanvas->get_window()->get_pointer (x, y, mask);
+				gtkcanvas->get_window ()->get_pointer (x, y, mask);
 
 				if (mask & GDK_BUTTON1_MASK) {
 					if (gtkcanvas->drag_check_threshold (_drag_start_x, _drag_start_y, x, y)) {
@@ -1006,7 +1010,7 @@ TriggerBoxUI::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::Selecti
 	/* use selection, for now */
 	TriggerSelection ts = PublicEditor::instance ().get_selection ().triggers;
 	for (auto& te : ts) {
-		region = te->trigger()->region ();
+		region = te->trigger ()->region ();
 	}
 	if (region) {
 		data.set (data.get_target (), region->id ().to_s ());

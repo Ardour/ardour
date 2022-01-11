@@ -73,10 +73,9 @@ public:
 	bool follow_button_event (GdkEvent*);
 
 private:
-	bool			_grabbed;
-
-	double           _poly_size;
-	double           _poly_margin;
+	bool   _grabbed;
+	double _poly_size;
+	double _poly_margin;
 
 	PBD::ScopedConnection owner_prop_connection;
 	void                  owner_prop_change (PBD::PropertyChange const&);
@@ -99,8 +98,8 @@ public:
 private:
 	typedef std::vector<TriggerEntry*> Slots;
 
-	ARDOUR::TriggerBox&     _triggerbox;
-	Slots                   _slots;
+	ARDOUR::TriggerBox& _triggerbox;
+	Slots               _slots;
 
 	int  _drag_start_x;
 	int  _drag_start_y;
