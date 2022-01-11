@@ -72,7 +72,7 @@ public:
 		NoneEntered
 	};
 
-	void set_widget_colors (TriggerEntry::EnteredState es=NoneEntered);
+	void set_widget_colors (TriggerEntry::EnteredState es = NoneEntered);
 
 	bool name_button_event (GdkEvent*);
 

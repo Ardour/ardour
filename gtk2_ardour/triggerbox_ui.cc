@@ -511,7 +511,7 @@ TriggerEntry::on_trigger_changed (PropertyChange const& change)
 		}
 	}
 
-	set_widget_colors();  //depending on the state, this might change a color and queue a redraw
+	set_widget_colors (); //depending on the state, this might change a color and queue a redraw
 
 	PropertyChange interesting_stuff;
 	interesting_stuff.add (ARDOUR::Properties::name);
@@ -545,15 +545,15 @@ TriggerEntry::set_widget_colors (TriggerEntry::EnteredState es)
 	//child widgets highlight when entered
 	color_t hilite = HSV (bg_col).lighter (0.15).color ();
 
-	play_button->set_fill_color ((es==PlayEntered) ? hilite : bg_col);
-	play_button->set_outline_color ((es==PlayEntered) ? hilite : bg_col);
+	play_button->set_fill_color ((es == PlayEntered) ? hilite : bg_col);
+	play_button->set_outline_color ((es == PlayEntered) ? hilite : bg_col);
 
-	name_button->set_fill_color ((es==NameEntered) ? hilite : bg_col);
-	name_button->set_outline_color ((es==NameEntered) ? hilite : bg_col);
+	name_button->set_fill_color ((es == NameEntered) ? hilite : bg_col);
+	name_button->set_outline_color ((es == NameEntered) ? hilite : bg_col);
 
-	follow_button->set_fill_color ((es==FollowEntered) ? hilite : bg_col);
+	follow_button->set_fill_color ((es == FollowEntered) ? hilite : bg_col);
 
-	name_text->set_color (trigger()->color());
+	name_text->set_color (trigger ()->color ());
 	name_text->set_fill_color (UIConfiguration::instance ().color ("neutral:midground"));
 
 	/*preserve selection border*/
@@ -562,7 +562,7 @@ TriggerEntry::set_widget_colors (TriggerEntry::EnteredState es)
 	}
 
 	/*draw a box around 'queued' trigger*/
-	if (!trigger()->active() && trigger()->box().currently_playing () == trigger()) {
+	if (!trigger ()->active () && trigger ()->box ().currently_playing () == trigger ()) {
 		play_button->set_outline_color (UIConfiguration::instance ().color ("neutral:foreground"));
 	}
 }
