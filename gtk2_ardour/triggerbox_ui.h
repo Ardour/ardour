@@ -74,20 +74,31 @@ public:
 
 	void set_widget_colors (TriggerEntry::EnteredState es=NoneEntered);
 
-	bool play_button_event (GdkEvent*);
 	bool name_button_event (GdkEvent*);
-	bool follow_button_event (GdkEvent*);
 
 private:
 	bool   _grabbed;
 	double _poly_size;
 	double _poly_margin;
 
-	PBD::ScopedConnection owner_prop_connection;
-	void                  owner_prop_change (PBD::PropertyChange const&);
-	void                  owner_color_changed ();
+	int  _drag_start_x;
+	int  _drag_start_y;
+	bool _drag_active;
+
+	bool event (GdkEvent*);
+	void drag_begin (Glib::RefPtr<Gdk::DragContext> const&);
+	void drag_end (Glib::RefPtr<Gdk::DragContext> const&);
+	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
 
 	void ui_parameter_changed (std::string const& p);
+
+	bool play_button_event (GdkEvent*);
+	bool follow_button_event (GdkEvent*);
+
+	void owner_prop_change (PBD::PropertyChange const&);
+	void owner_color_changed ();
+
+	PBD::ScopedConnection _owner_prop_connection;
 };
 
 class TriggerBoxUI : public ArdourCanvas::Rectangle
@@ -98,17 +109,18 @@ public:
 
 	void _size_allocate (ArdourCanvas::Rect const&);
 
+	static Glib::RefPtr<Gtk::TargetList> dnd_src ()
+	{
+		return _dnd_src;
+	}
+
 private:
 	typedef std::vector<TriggerEntry*> Slots;
 
 	ARDOUR::TriggerBox& _triggerbox;
 	Slots               _slots;
 
-	int  _drag_start_x;
-	int  _drag_start_y;
-	bool _drag_active;
-
-	Glib::RefPtr<Gtk::TargetList> _dnd_src;
+	static Glib::RefPtr<Gtk::TargetList> _dnd_src;
 
 	void build ();
 
@@ -117,11 +129,6 @@ private:
 	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const&, int, int, guint);
 	void drag_leave (Glib::RefPtr<Gdk::DragContext> const&, guint);
 	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
-
-	bool event (GdkEvent*, uint64_t n);
-	void drag_begin (Glib::RefPtr<Gdk::DragContext> const&);
-	void drag_end (Glib::RefPtr<Gdk::DragContext> const&);
-	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
 
 	bool triggerbox_event (GdkEvent*);
 

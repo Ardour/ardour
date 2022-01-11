@@ -68,6 +68,7 @@ using namespace PBD;
 TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	: ArdourCanvas::Rectangle (item)
 	, _grabbed (false)
+	, _drag_active (false)
 {
 	set_layout_sensitive (true); // why???
 
@@ -100,17 +101,27 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	/* this will trigger a call to on_trigger_changed() */
 	set_trigger (tr);
 
+	/* DnD Source */
+	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
+	assert (gtkcanvas);
+
+	gtkcanvas->signal_drag_begin ().connect (sigc::mem_fun (*this, &TriggerEntry::drag_begin));
+	gtkcanvas->signal_drag_end ().connect (sigc::mem_fun (*this, &TriggerEntry::drag_end));
+	gtkcanvas->signal_drag_data_get ().connect (sigc::mem_fun (*this, &TriggerEntry::drag_data_get));
+
 	/* event handling */
 	play_button->Event.connect (sigc::mem_fun (*this, &TriggerEntry::play_button_event));
 	name_button->Event.connect (sigc::mem_fun (*this, &TriggerEntry::name_button_event));
 	follow_button->Event.connect (sigc::mem_fun (*this, &TriggerEntry::follow_button_event));
+
+	Event.connect (sigc::mem_fun (*this, &TriggerEntry::event));
 
 	/* watch for change in theme */
 	UIConfiguration::instance ().ParameterChanged.connect (sigc::mem_fun (*this, &TriggerEntry::ui_parameter_changed));
 	set_widget_colors ();
 
 	/* owner color changes (?) */
-	dynamic_cast<Stripable*> (tref.box->owner ())->presentation_info ().Change.connect (owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
+	dynamic_cast<Stripable*> (tref.box->owner ())->presentation_info ().Change.connect (_owner_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerEntry::owner_prop_change, this, _1), gui_context ());
 
 	selection_change ();
 }
@@ -699,12 +710,109 @@ TriggerEntry::follow_button_event (GdkEvent* ev)
 	return false;
 }
 
+bool
+TriggerEntry::event (GdkEvent* ev)
+{
+	if (!trigger ()->region ()) {
+		return false;
+	}
+
+	switch (ev->type) {
+		case GDK_2BUTTON_PRESS:
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
+			break;
+
+		case GDK_BUTTON_RELEASE:
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
+			break;
+
+		case GDK_BUTTON_PRESS:
+			if (!_drag_active) {
+				GdkEventButton* bev = (GdkEventButton*)ev;
+				if (bev->button == 1) {
+					_drag_start_x = bev->x;
+					_drag_start_y = bev->y;
+					gdk_pointer_grab (bev->window, false, GdkEventMask (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK), NULL, NULL, bev->time);
+					return true;
+				} else {
+					_drag_start_x = -1;
+					_drag_start_y = -1;
+				}
+			}
+			break;
+
+		case GDK_MOTION_NOTIFY:
+			if (!_drag_active) {
+				int               x, y;
+				Gdk::ModifierType mask;
+
+				GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
+				gtkcanvas->get_window ()->get_pointer (x, y, mask);
+
+				if (mask & GDK_BUTTON1_MASK) {
+					if (gtkcanvas->drag_check_threshold (_drag_start_x, _drag_start_y, x, y)) {
+						_drag_active = true;
+						gtkcanvas->drag_begin (TriggerBoxUI::dnd_src (), Gdk::ACTION_COPY, 1, ev);
+						// -> save a reference to the dragged slot, for use in ::drag_begin ::drag_data_get()
+						return true;
+					}
+				}
+			}
+		default:
+			break;
+	}
+	return false;
+}
+
+void
+TriggerEntry::drag_begin (Glib::RefPtr<Gdk::DragContext> const& context)
+{
+#if 0
+	int width  = 130;
+	int height = 20;
+	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
+	Glib::RefPtr<Gdk::Pixmap> pixmap = Gdk::Pixmap::create (gtkcanvas->get_root_window(), width, height);
+	cairo_t *cr = gdk_cairo_create (Glib::unwrap (pixmap));
+	cairo_set_source_rgb (cr, 1, 0, 0);
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
+	cairo_destroy (cr);
+	context->set_icon (pixmap->get_colormap(), pixmap, Glib::RefPtr<Gdk::Bitmap>(NULL), width / 2, height / 2);
+#endif
+}
+
+void
+TriggerEntry::drag_end (Glib::RefPtr<Gdk::DragContext> const&)
+{
+	_drag_active = false;
+}
+
+void
+TriggerEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData& data, guint, guint)
+{
+	if (!_drag_active) {
+		/* Since the canvas is shared, all TriggerEntry instances
+		 * inside a TriggerBox canvas receive this signal.
+		 */
+		return;
+	}
+	if (data.get_target () != "x-ardour/region.pbdid") {
+		return;
+	}
+
+	boost::shared_ptr<Region> region = trigger ()->region ();
+	if (region) {
+		data.set (data.get_target (), region->id ().to_s ());
+	}
+}
+
 /* ***************************************************** */
+
+Glib::RefPtr<Gtk::TargetList> TriggerBoxUI::_dnd_src;
 
 TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	: Rectangle (parent)
 	, _triggerbox (tb)
-	, _drag_active (false)
 {
 	set_layout_sensitive (true); // why???
 
@@ -714,6 +822,14 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	build ();
 
 	_selection_connection = PublicEditor::instance ().get_selection ().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerBoxUI::selection_changed));
+
+	/* DnD */
+
+	if (!_dnd_src) {
+		std::vector<Gtk::TargetEntry> source_table;
+		source_table.push_back (Gtk::TargetEntry ("x-ardour/region.pbdid", Gtk::TARGET_SAME_APP));
+		_dnd_src = Gtk::TargetList::create (source_table);
+	}
 
 	std::vector<Gtk::TargetEntry> target_table;
 	target_table.push_back (Gtk::TargetEntry ("x-ardour/region.erl", Gtk::TARGET_SAME_APP));
@@ -729,15 +845,6 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	gtkcanvas->signal_drag_motion ().connect (sigc::mem_fun (*this, &TriggerBoxUI::drag_motion));
 	gtkcanvas->signal_drag_leave ().connect (sigc::mem_fun (*this, &TriggerBoxUI::drag_leave));
 	gtkcanvas->signal_drag_data_received ().connect (sigc::mem_fun (*this, &TriggerBoxUI::drag_data_received));
-
-	/* DnD Source */
-	std::vector<Gtk::TargetEntry> source_table;
-	source_table.push_back (Gtk::TargetEntry ("x-ardour/region.pbdid", Gtk::TARGET_SAME_APP));
-	_dnd_src = Gtk::TargetList::create (source_table);
-
-	gtkcanvas->signal_drag_begin ().connect (sigc::mem_fun (*this, &TriggerBoxUI::drag_begin));
-	gtkcanvas->signal_drag_end ().connect (sigc::mem_fun (*this, &TriggerBoxUI::drag_end));
-	gtkcanvas->signal_drag_data_get ().connect (sigc::mem_fun (*this, &TriggerBoxUI::drag_data_get));
 }
 
 TriggerBoxUI::~TriggerBoxUI ()
@@ -774,8 +881,6 @@ TriggerBoxUI::build ()
 		TriggerEntry* te = new TriggerEntry (this, TriggerReference (_triggerbox, n));
 
 		_slots.push_back (te);
-
-		te->Event.connect (sigc::bind (sigc::mem_fun (*this, &TriggerBoxUI::event), n));
 
 		++n;
 	}
@@ -893,101 +998,6 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 		}
 	}
 	context->drag_finish (true, false, time);
-}
-
-bool
-TriggerBoxUI::event (GdkEvent* ev, uint64_t n)
-{
-	assert (n < _slots.size ());
-	if (!_slots[n]->trigger ()->region ()) {
-		return false;
-	}
-
-	switch (ev->type) {
-		case GDK_2BUTTON_PRESS:
-			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-			break;
-
-		case GDK_BUTTON_RELEASE:
-			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-			break;
-
-		case GDK_BUTTON_PRESS:
-			if (!_drag_active) {
-				GdkEventButton* bev = (GdkEventButton*)ev;
-				if (bev->button == 1) {
-					_drag_start_x = bev->x;
-					_drag_start_y = bev->y;
-					gdk_pointer_grab (bev->window, false, GdkEventMask (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK), NULL, NULL, bev->time);
-				} else {
-					_drag_start_x = -1;
-					_drag_start_y = -1;
-				}
-			}
-			break;
-
-		case GDK_MOTION_NOTIFY:
-			if (!_drag_active) {
-				int               x, y;
-				Gdk::ModifierType mask;
-
-				GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
-				gtkcanvas->get_window ()->get_pointer (x, y, mask);
-
-				if (mask & GDK_BUTTON1_MASK) {
-					if (gtkcanvas->drag_check_threshold (_drag_start_x, _drag_start_y, x, y)) {
-						_drag_active = true;
-						gtkcanvas->drag_begin (_dnd_src, Gdk::ACTION_COPY, 1, ev);
-						// -> save a reference to the dragged slot, for use in ::drag_begin ::drag_data_get()
-						return true;
-					}
-				}
-			}
-		default:
-			break;
-	}
-	return false;
-}
-
-void
-TriggerBoxUI::drag_begin (Glib::RefPtr<Gdk::DragContext> const& context)
-{
-#if 0
-	int width  = 130;
-	int height = 20;
-	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
-	Glib::RefPtr<Gdk::Pixmap> pixmap = Gdk::Pixmap::create (gtkcanvas->get_root_window(), width, height);
-	cairo_t *cr = gdk_cairo_create (Glib::unwrap (pixmap));
-	cairo_set_source_rgb (cr, 1, 0, 0);
-	cairo_rectangle (cr, 0, 0, width, height);
-	cairo_fill (cr);
-	cairo_destroy (cr);
-	context->set_icon (pixmap->get_colormap(), pixmap, Glib::RefPtr<Gdk::Bitmap>(NULL), width / 2, height / 2);
-#endif
-}
-
-void
-TriggerBoxUI::drag_end (Glib::RefPtr<Gdk::DragContext> const&)
-{
-	_drag_active = false;
-}
-
-void
-TriggerBoxUI::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData& data, guint, guint)
-{
-	if (data.get_target () != "x-ardour/region.pbdid") {
-		return;
-	}
-
-	boost::shared_ptr<Region> region;
-	/* use selection, for now */
-	TriggerSelection ts = PublicEditor::instance ().get_selection ().triggers;
-	for (auto& te : ts) {
-		region = te->trigger ()->region ();
-	}
-	if (region) {
-		data.set (data.get_target (), region->id ().to_s ());
-	}
 }
 
 /* ********************************************** */
