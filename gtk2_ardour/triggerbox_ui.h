@@ -102,6 +102,12 @@ private:
 	ARDOUR::TriggerBox&     _triggerbox;
 	Slots                   _slots;
 
+	int  _drag_start_x;
+	int  _drag_start_y;
+	bool _drag_active;
+
+	Glib::RefPtr<Gtk::TargetList> _dnd_src;
+
 	void build ();
 	void rapid_update ();
 
@@ -110,6 +116,11 @@ private:
 	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const&, int, int, guint);
 	void drag_leave (Glib::RefPtr<Gdk::DragContext> const&, guint);
 	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
+
+	bool event (GdkEvent*, uint64_t n);
+	void drag_begin (Glib::RefPtr<Gdk::DragContext> const&);
+	void drag_end (Glib::RefPtr<Gdk::DragContext> const&);
+	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
 
 	bool triggerbox_event (GdkEvent*);
 
