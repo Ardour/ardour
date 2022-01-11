@@ -49,6 +49,7 @@ public:
 	static ARDOUR::Trigger::FollowAction  string_to_follow_action (std::string const &);
 	static std::string quantize_length_to_string (Temporal::BBT_Offset const &);
 	static std::string launch_style_to_string (ARDOUR::Trigger::LaunchStyle);
+	static std::string stretch_mode_to_string (ARDOUR::Trigger::StretchMode);
 
 	static std::vector<std::string> follow_strings;
 	static std::string              longest_follow;
@@ -56,6 +57,8 @@ public:
 	static std::string              longest_quantize;
 	static std::vector<std::string> launch_strings;
 	static std::string              longest_launch;
+	static std::vector<std::string> stretch_mode_strings;
+	static std::string              longest_stretch_mode;
 
 	static void                     setup_actions_and_bindings ();
 

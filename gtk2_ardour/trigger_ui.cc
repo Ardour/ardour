@@ -61,6 +61,8 @@ std::vector<std::string> TriggerUI::quantize_strings;
 std::string              TriggerUI::longest_quantize;
 std::vector<std::string> TriggerUI::launch_strings;
 std::string              TriggerUI::longest_launch;
+std::vector<std::string> TriggerUI::stretch_mode_strings;
+std::string              TriggerUI::longest_stretch_mode;
 
 Gtkmm2ext::Bindings*           TriggerUI::bindings = 0;
 Glib::RefPtr<Gtk::ActionGroup> TriggerUI::trigger_actions;
@@ -102,6 +104,16 @@ TriggerUI::TriggerUI ()
 		for (std::vector<std::string>::const_iterator i = launch_strings.begin(); i != launch_strings.end(); ++i) {
 			if (i->length() > longest_launch.length()) {
 				longest_launch = *i;
+			}
+		}
+
+		stretch_mode_strings.push_back (stretch_mode_to_string (Trigger::Crisp));
+		stretch_mode_strings.push_back (stretch_mode_to_string (Trigger::Mixed));
+		stretch_mode_strings.push_back (stretch_mode_to_string (Trigger::Smooth));
+
+		for (std::vector<std::string>::const_iterator i = stretch_mode_strings.begin(); i != stretch_mode_strings.end(); ++i) {
+			if (i->length() > longest_stretch_mode.length()) {
+				longest_stretch_mode = *i;
 			}
 		}
 	}
@@ -794,6 +806,21 @@ TriggerUI::follow_action_to_string (Trigger::FollowAction fa)
 		return _("Any");
 	case Trigger::OtherTrigger:
 		return _("Other");
+	}
+	/*NOTREACHED*/
+	return std::string();
+}
+
+std::string
+TriggerUI::stretch_mode_to_string (Trigger::StretchMode sm)
+{
+	switch (sm) {
+	case Trigger::Crisp:
+		return _("Crisp");
+	case Trigger::Mixed:
+		return _("Mixed");
+	case Trigger::Smooth:
+		return _("Smooth");
 	}
 	/*NOTREACHED*/
 	return std::string();

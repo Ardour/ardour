@@ -29,6 +29,7 @@
 #include "ardour/triggerbox.h"
 
 #include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
 
 #include "audio_clock.h"
 #include "trigger_ui.h"
@@ -57,6 +58,7 @@ protected:
 	virtual void on_trigger_changed (const PBD::PropertyChange& what_changed);
 
 	void toggle_stretch ();
+	void set_stretch_mode (ARDOUR::Trigger::StretchMode sm);
 
 	void start_clock_changed();
 	void length_clock_changed();
@@ -82,7 +84,7 @@ private:
 
 	ArdourWidgets::ArdourButton _stretch_toggle;
 
-	ArdourWidgets::ArdourButton _stretch_selector;
+	ArdourWidgets::ArdourDropdown _stretch_selector;
 
 };
 

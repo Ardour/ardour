@@ -20,9 +20,13 @@
 #include "pbd/compose.h"
 #include <algorithm>
 
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
+
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/menu_elems.h"
 
 #include "ardour/location.h"
 #include "ardour/profile.h"
@@ -90,6 +94,7 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 
 	_stretch_toggle.set_text (_("Stretch"));
 	_table.attach (_stretch_toggle, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	_table.attach (_stretch_selector, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
 	label = manage (new Gtk::Label (_("Start:")));
@@ -124,16 +129,6 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 
 	row = 0;
 
-	label = manage (new Gtk::Label (_("Stretch Mode:")));
-	label->set_alignment (1.0, 0.5);
-	audio_t->attach (*label, 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-
-	_stretch_selector.set_text ("Mixed");
-	_stretch_selector.set_name ("generic button");
-	audio_t->attach (_stretch_selector, 1, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-
-	row++;
-
 	label = manage (new Gtk::Label (_("Gain:")));
 	label->set_alignment (1.0, 0.5);
 	Gtk::Label *db_label = manage (new Gtk::Label (_("(dB)")));
@@ -145,6 +140,15 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	row++;
 
 	pack_start (*audio_t);
+
+	using namespace Menu_Helpers;
+
+	_stretch_selector.set_text ("??");
+	_stretch_selector.set_name ("generic button");
+	_stretch_selector.set_sizing_text (TriggerUI::longest_stretch_mode);
+	_stretch_selector.AddMenuElem (MenuElem (TriggerUI::stretch_mode_to_string(Trigger::Crisp),  sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::set_stretch_mode), Trigger::Crisp)));
+	_stretch_selector.AddMenuElem (MenuElem (TriggerUI::stretch_mode_to_string(Trigger::Mixed),  sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::set_stretch_mode), Trigger::Mixed)));
+	_stretch_selector.AddMenuElem (MenuElem (TriggerUI::stretch_mode_to_string(Trigger::Smooth), sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::set_stretch_mode), Trigger::Smooth)));
 
 	_stretch_toggle.signal_clicked.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::toggle_stretch));
 
@@ -166,6 +170,15 @@ AudioTriggerPropertiesBox::toggle_stretch ()
 	TriggerPtr trigger (tref.trigger());
 	if (trigger) {
 		trigger->set_stretchable (!trigger->stretchable ());
+	}
+}
+
+void
+AudioTriggerPropertiesBox::set_stretch_mode (Trigger::StretchMode sm)
+{
+	TriggerPtr trigger (tref.trigger());
+	if (trigger) {
+		trigger->set_stretch_mode (sm);
 	}
 }
 
@@ -204,6 +217,9 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& what_c
 	_metrum_button.set_text ("4/4");
 
 	_stretch_toggle.set_active (tref.trigger()->stretchable () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+
+	_stretch_selector.set_sensitive(tref.trigger()->stretchable ());
+	_stretch_selector.set_text(stretch_mode_to_string(tref.trigger()->stretch_mode ()));
 
 	float gain = accurate_coefficient_to_dB(tref.trigger()->gain());
 	if (gain != _gain_adjustment.get_value()) {
