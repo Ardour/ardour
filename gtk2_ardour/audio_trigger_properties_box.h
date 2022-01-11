@@ -66,7 +66,9 @@ protected:
 
 	void start_clock_changed();
 	void length_clock_changed();
+
 	void follow_clock_changed();
+	void gain_changed();
 
 private:
 
@@ -78,6 +80,9 @@ private:
 	Gtk::Adjustment  _follow_length_adjustment;
 	Gtk::SpinButton  _follow_length_spinner;
 
+	Gtk::Adjustment  _gain_adjustment;
+	Gtk::SpinButton  _gain_spinner;
+
 	ArdourWidgets::ArdourButton _bpm_button;
 	ArdourWidgets::ArdourButton _metrum_button;
 
@@ -86,7 +91,6 @@ private:
 	ArdourWidgets::ArdourButton _fade_in_enable_button;
 	ArdourWidgets::ArdourButton _fade_out_enable_button;
 
-	ArdourWidgets::ArdourButton _gain_control;
 	ArdourWidgets::ArdourButton _stretch_selector;
 
 };

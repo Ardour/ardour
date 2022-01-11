@@ -78,6 +78,8 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	, _start_clock (X_("regionstart"), true, "", false, false)
 	, _follow_length_adjustment (0, 0, 128, 1, 4)
 	, _follow_length_spinner (_follow_length_adjustment)
+	, _gain_adjustment( 0.0, -20.0, +20.0, 1.0, 3.0, 0)
+	, _gain_spinner (_gain_adjustment)
 	, _stretch_toggle (ArdourButton::led_default_elements)
 {
 	_header_label.set_text (_("AUDIO Trigger Properties:"));
@@ -175,11 +177,11 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 
 	label = manage (new Gtk::Label (_("Gain:")));
 	label->set_alignment (1.0, 0.5);
-	audio_t->attach (*label, 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-
-	_gain_control.set_text (_("+6dB"));
-	_gain_control.set_name ("generic button");
-	audio_t->attach (_gain_control, 1, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	Gtk::Label *db_label = manage (new Gtk::Label (_("(dB)")));
+	db_label->set_alignment (0.0, 0.5);
+	audio_t->attach (*label,        0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	audio_t->attach (_gain_spinner, 1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	audio_t->attach (*db_label,     2, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	row++;
 
@@ -190,6 +192,9 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	_follow_length_spinner.set_can_focus(false);
 	_follow_length_spinner.signal_changed ().connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::follow_clock_changed));
 
+	_gain_spinner.set_can_focus(false);
+	_gain_spinner.configure(_gain_adjustment, 0.0, 1);
+	_gain_spinner.signal_changed ().connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::gain_changed));
 }
 
 AudioTriggerPropertiesBox::~AudioTriggerPropertiesBox ()
@@ -252,6 +257,19 @@ AudioTriggerPropertiesBox::trigger_changed (const PBD::PropertyChange& what_chan
 	_metrum_button.set_text ("4/4");
 
 	_stretch_toggle.set_active (tref.trigger()->stretchable () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+
+	float gain = accurate_coefficient_to_dB(tref.trigger()->gain());
+	if (gain != _gain_adjustment.get_value()) {
+		_gain_adjustment.set_value (gain);
+	}
+}
+
+void
+AudioTriggerPropertiesBox::gain_changed ()
+{
+	float coeff = dB_to_coefficient(_gain_adjustment.get_value());
+
+	tref.trigger()->set_gain(coeff);
 }
 
 
