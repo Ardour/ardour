@@ -54,8 +54,6 @@ using namespace ARDOUR;
 
 TriggerClipPicker::TriggerClipPicker ()
 	: _fcd (_("Select Sample Folder"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
-	, _play_btn (Stock::MEDIA_PLAY)
-	, _stop_btn (Stock::MEDIA_STOP)
 	, _seek_slider (0, 1000, 1)
 	, _autoplay_btn (_("Auto-play"))
 	, _seeking (false)
@@ -89,24 +87,30 @@ TriggerClipPicker::TriggerClipPicker ()
 	_seek_slider.signal_button_release_event ().connect (sigc::mem_fun (*this, &TriggerClipPicker::seek_button_release), false);
 
 	_play_btn.set_sensitive (false);
-	_stop_btn.set_sensitive (false);
-	_seek_slider.set_sensitive (false);
+	_play_btn.set_name ("generic button");
+	_play_btn.set_icon (ArdourWidgets::ArdourIcon::TransportPlay);
+	_play_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::audition_selected));
 
-	_play_btn.signal_clicked ().connect (sigc::mem_fun (*this, &TriggerClipPicker::audition_selected));
-	_stop_btn.signal_clicked ().connect (sigc::mem_fun (*this, &TriggerClipPicker::stop_audition));
+	_stop_btn.set_name ("generic button");
+	_stop_btn.set_icon (ArdourWidgets::ArdourIcon::TransportStop);
+	_stop_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::stop_audition));
+
+	_autoplay_btn.set_can_focus(false);
 	_autoplay_btn.signal_toggled ().connect (sigc::mem_fun (*this, &TriggerClipPicker::autoplay_toggled));
 
 	/* Layout */
-	_auditable.attach (_autoplay_btn, 0, 2, 0, 1, EXPAND | FILL, SHRINK);
-	_auditable.attach (_play_btn,     0, 1, 1, 2, EXPAND | FILL, SHRINK);
-	_auditable.attach (_stop_btn,     1, 2, 1, 2, EXPAND | FILL, SHRINK);
-	_auditable.attach (_seek_slider,  0, 2, 2, 3, EXPAND | FILL, SHRINK);
-	_auditable.set_spacings (6);
+	_auditable.set_homogeneous(false);
+	_auditable.attach (_play_btn,     0, 1, 0, 1, SHRINK, SHRINK);
+	_auditable.attach (_stop_btn,     1, 2, 0, 1, SHRINK, SHRINK);
+	_auditable.attach (_autoplay_btn, 2, 3, 0, 1, EXPAND | FILL, SHRINK);
+	_auditable.attach (_seek_slider,  0, 3, 1, 2, EXPAND | FILL, SHRINK);
+	_auditable.set_border_width (4);
+	_auditable.set_spacings (4);
 
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	_scroller.add (_view);
 
-	pack_start (_dir, false, false);
+	pack_start (_dir, false, false, 4);
 	pack_start (_scroller);
 	pack_start (_auditable, false, false);
 
@@ -114,7 +118,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	_model = TreeStore::create (_columns);
 	_view.set_model (_model);
 	_view.append_column (_("File Name"), _columns.name);
-	_view.set_headers_visible (true);
+	_view.set_headers_visible (false);  //TODO: show headers when we have size/tags/etc
 	_view.set_reorderable (false);
 	_view.get_selection ()->set_mode (SELECTION_MULTIPLE);
 
@@ -514,9 +518,10 @@ TriggerClipPicker::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
+	_play_btn.set_sensitive (false);
+	_stop_btn.set_sensitive (false);
+
 	if (!_session) {
-		_play_btn.set_sensitive (false);
-		_stop_btn.set_sensitive (false);
 		_seek_slider.set_sensitive (false);
 		_auditioner_connections.drop_connections ();
 	} else {
@@ -544,6 +549,7 @@ TriggerClipPicker::stop_audition ()
 void
 TriggerClipPicker::audition_active (bool active)
 {
+	_play_btn.set_sensitive (!active && !_autoplay_btn.get_active ());
 	_stop_btn.set_sensitive (active);
 	_seek_slider.set_sensitive (active);
 

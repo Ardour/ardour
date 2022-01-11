@@ -34,6 +34,7 @@
 #include "ardour/session_handle.h"
 
 #include "widgets/ardour_dropdown.h"
+#include "widgets/ardour_button.h"
 
 class TriggerClipPicker : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
@@ -87,8 +88,8 @@ private:
 	Gtk::TreeView                _view;
 	Gtk::ScrolledWindow          _scroller;
 	Gtk::Table                   _auditable;
-	Gtk::Button                  _play_btn;
-	Gtk::Button                  _stop_btn;
+	ArdourWidgets::ArdourButton  _play_btn;
+	ArdourWidgets::ArdourButton  _stop_btn;
 	Gtk::HScale                  _seek_slider;
 	Gtk::CheckButton             _autoplay_btn;
 
