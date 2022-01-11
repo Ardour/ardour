@@ -74,10 +74,11 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _bang (0)
 	, _unbang (0)
 	, _index (n)
-	, _pending_gain (1.0)
 	, _loop_cnt (0)
 	, _ui (0)
 	, _explicitly_stopped (false)
+	, _pending_velocity_gain (1.0)
+	, _velocity_gain (1.0)
 	, _launch_style (Properties::launch_style, OneShot)
 	, _use_follow (Properties::use_follow, true)
 	, _follow_action0 (Properties::follow_action0, Again)
@@ -206,11 +207,11 @@ Trigger::unbang ()
 void
 Trigger::set_gain (gain_t g)
 {
-	if (_pending_gain == g) {
+	if (_gain == g) {
 		return;
 	}
 
-	_pending_gain = g;
+	_gain = g;
 	PropertyChanged (Properties::gain);
 	_box.session().set_dirty();
 }
@@ -417,8 +418,8 @@ void
 Trigger::startup()
 {
 	_state = WaitingToStart;
-	_gain = _pending_gain;
 	_loop_cnt = 0;
+	_velocity_gain = _pending_velocity_gain;
 	_explicitly_stopped = false;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 starts up\n", name()));
 	PropertyChanged (ARDOUR::Properties::running);
@@ -428,8 +429,8 @@ void
 Trigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
 {
 	_state = Stopped;
-	_gain = 1.0;
 	cue_launched = false;
+	_pending_velocity_gain = _velocity_gain = 1.0;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
 	PropertyChanged (ARDOUR::Properties::running);
 }
@@ -1434,14 +1435,16 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 			AudioBuffer& buf (bufs.get_audio (chn));
 			Sample* src = do_stretch ? bufp[channel] : (data[channel] + read_index);
 
+			gain_t gain = _velocity_gain * _gain;  //incorporate the gain from velocity_effect
+
 			if (!passthru) {
 				buf.read_from (src, from_stretcher, dest_offset);
-				if (_gain != 1.0f) {
-					buf.apply_gain (_gain, from_stretcher);
+				if (gain != 1.0f) {
+					buf.apply_gain (gain, from_stretcher);
 				}
 			} else {
-				if (_gain != 1.0f) {
-					buf.accumulate_with_gain_from (src, from_stretcher, _gain, dest_offset);
+				if (gain != 1.0f) {
+					buf.accumulate_with_gain_from (src, from_stretcher, gain, dest_offset);
 				} else {
 					buf.accumulate_from (src, from_stretcher, dest_offset);
 				}
@@ -2387,7 +2390,7 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 					   approaches 1.0, it has full control
 					   over the trigger gain.
 				*/
-					t->set_gain (1.0 - (t->midi_velocity_effect() * (*ev).velocity() / 127.f));
+					t->set_velocity_gain (1.0 - (t->midi_velocity_effect() * (*ev).velocity() / 127.f));
 				}
 				t->bang ();
 

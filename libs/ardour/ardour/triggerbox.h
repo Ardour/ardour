@@ -243,8 +243,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	TriggerBox& box() const { return _box; }
 
-	gain_t gain() const { return _pending_gain; }
+	gain_t gain() const { return _gain; }
 	void set_gain (gain_t);
+
+	void set_velocity_gain (gain_t g) {_pending_velocity_gain=g;}
 
 	float midi_velocity_effect() const { return _midi_velocity_effect; }
 	void set_midi_velocity_effect (float);
@@ -275,10 +277,12 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	std::atomic<int>          _unbang;
 	uint32_t                  _index;
 	int                       _next_trigger;
-	gain_t                    _pending_gain;
 	uint32_t                  _loop_cnt; /* how many times in a row has this played */
 	void*                     _ui;
 	bool                      _explicitly_stopped;
+
+	gain_t                    _pending_velocity_gain;
+	gain_t                    _velocity_gain;
 
 	/* properties controllable by the user */
 
