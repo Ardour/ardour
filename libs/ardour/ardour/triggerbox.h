@@ -251,6 +251,15 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	float midi_velocity_effect() const { return _midi_velocity_effect; }
 	void set_midi_velocity_effect (float);
 
+	enum StretchMode { /* currently mapped to the matching RubberBand::RubberBandStretcher::Option  */
+		Crisp,
+		Mixed,
+		Smooth,
+	};
+
+	StretchMode stretch_mode() const { return _stretch_mode; }
+	void set_stretch_mode (StretchMode);
+
 	double apparent_tempo() const { return _apparent_tempo; }
 	double set_tempo (double t);
 
@@ -301,6 +310,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<bool>                 _stretchable;
 	PBD::Property<bool>                 _isolated;
 	PBD::Property<color_t>              _color;
+	PBD::Property<StretchMode>          _stretch_mode;
 
 	bool cue_launched;
 
@@ -702,6 +712,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::StretchMode> stretch_mode;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> follow_count;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<int> follow_action_probability;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float> velocity_effect;
@@ -717,6 +728,7 @@ namespace Properties {
 namespace PBD {
 DEFINE_ENUM_CONVERT(ARDOUR::Trigger::FollowAction);
 DEFINE_ENUM_CONVERT(ARDOUR::Trigger::LaunchStyle);
+DEFINE_ENUM_CONVERT(ARDOUR::Trigger::StretchMode);
 } /* namespace PBD */
 
 

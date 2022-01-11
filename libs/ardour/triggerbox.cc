@@ -63,6 +63,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<gain_t> gain;
 		PBD::PropertyDescriptor<bool> stretchable;
 		PBD::PropertyDescriptor<bool> isolated;
+		PBD::PropertyDescriptor<Trigger::StretchMode> stretch_mode;
 	}
 }
 
@@ -94,6 +95,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _stretchable (Properties::stretchable, true)
 	, _isolated (Properties::isolated, false)
 	, _color (Properties::color, 0xBEBEBEFF)
+	, _stretch_mode (Properties::stretch_mode, Trigger::Crisp)
 	, cue_launched (false)
 	, _barcnt (0.)
 	, _apparent_tempo (0.)
@@ -114,6 +116,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	add_property (_stretchable);
 	add_property (_isolated);
 	add_property (_color);
+	add_property (_stretch_mode);
 }
 
 void
@@ -213,6 +216,18 @@ Trigger::set_gain (gain_t g)
 
 	_gain = g;
 	PropertyChanged (Properties::gain);
+	_box.session().set_dirty();
+}
+
+void
+Trigger::set_stretch_mode (Trigger::StretchMode sm)
+{
+	if (_stretch_mode == sm) {
+		return;
+	}
+
+	_stretch_mode = sm;
+	PropertyChanged (Properties::stretch_mode);
 	_box.session().set_dirty();
 }
 
@@ -1174,10 +1189,16 @@ AudioTrigger::setup_stretcher ()
 	boost::shared_ptr<AudioRegion> ar (boost::dynamic_pointer_cast<AudioRegion> (_region));
 	const uint32_t nchans = std::min (_box.input_streams().n_audio(), ar->n_channels());
 
-	/* XXX maybe get some of these options from region properties (when/if we have them) ? */
+	//map our internal enum to a rubberband option
+	RubberBandStretcher::Option ro;
+	switch (_stretch_mode) {
+		case Trigger::Crisp  : ro = RubberBandStretcher::OptionTransientsCrisp; break;
+		case Trigger::Mixed  : ro = RubberBandStretcher::OptionTransientsMixed; break;
+		case Trigger::Smooth : ro = RubberBandStretcher::OptionTransientsSmooth; break;
+	}
 
 	RubberBandStretcher::Options options = RubberBandStretcher::Option (RubberBandStretcher::OptionProcessRealTime |
-	                                                                    RubberBandStretcher::OptionTransientsCrisp);
+	                                                                    ro);
 
 	delete _stretcher;
 	_stretcher = new RubberBandStretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
@@ -1948,6 +1969,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretchable = %1\n", Properties::stretchable.property_id));
 	Properties::isolated.property_id = g_quark_from_static_string (X_("isolated"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for isolated = %1\n", Properties::isolated.property_id));
+	Properties::stretch_mode.property_id = g_quark_from_static_string (X_("stretch_mode"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretch_mode = %1\n", Properties::stretch_mode.property_id));
 }
 
 const int32_t TriggerBox::default_triggers_per_box = 8;

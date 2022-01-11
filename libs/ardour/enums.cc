@@ -158,6 +158,7 @@ setup_enum_writer ()
 	Trigger::State _TriggerState;
 	Trigger::LaunchStyle _TriggerLaunchStyle;
 	Trigger::FollowAction _TriggerFollowAction;
+	Trigger::StretchMode _TriggerStretchMode;
 	CueBehavior _CueBehavior;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -878,6 +879,11 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Trigger, Toggle);
 	REGISTER_CLASS_ENUM (Trigger, Repeat);
 	REGISTER (_TriggerLaunchStyle);
+
+	REGISTER_CLASS_ENUM (Trigger, Crisp);
+	REGISTER_CLASS_ENUM (Trigger, Mixed);
+	REGISTER_CLASS_ENUM (Trigger, Smooth);
+	REGISTER (_TriggerStretchMode);
 
 	REGISTER_ENUM (FollowCues);
 	REGISTER_ENUM (ImplicitlyIgnoreCues);
