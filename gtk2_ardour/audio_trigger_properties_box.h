@@ -64,12 +64,19 @@ protected:
 	void toggle_stretch ();
 	void trigger_changed (const PBD::PropertyChange& what_changed);
 
+	void start_clock_changed();
+	void length_clock_changed();
+	void follow_clock_changed();
+
 private:
 
 	Gtk::Table _table;
 	Gtk::Label _abpm_label;
 	AudioClock _length_clock;
 	AudioClock _start_clock;
+
+	Gtk::Adjustment  _follow_length_adjustment;
+	Gtk::SpinButton  _follow_length_spinner;
 
 	ArdourWidgets::ArdourButton _bpm_button;
 	ArdourWidgets::ArdourButton _metrum_button;
