@@ -124,7 +124,7 @@ protected:
 	PBD::ScopedConnection trigger_swap_connection;
 
 	ARDOUR::TriggerReference tref;
-	PBD::ScopedConnection trigger_connections;
+	PBD::ScopedConnectionList trigger_connections;
 };
 
 

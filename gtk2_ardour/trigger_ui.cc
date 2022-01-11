@@ -110,7 +110,7 @@ TriggerUI::TriggerUI ()
 TriggerUI::~TriggerUI()
 {
 	trigger_swap_connection.disconnect ();
-	trigger_connections.disconnect ();
+	trigger_connections.drop_connections ();
 }
 
 void
@@ -120,8 +120,11 @@ TriggerUI::trigger_swap (uint32_t n)
 		/* some other slot in the same box got swapped. we don't care */
 		return;
 	}
-	trigger_connections.disconnect ();
+	trigger_connections.drop_connections ();
+
 	trigger()->PropertyChanged.connect (trigger_connections, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	tref.box->PropertyChanged.connect (trigger_connections, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+
 	trigger_changed (Properties::name);
 }
 
@@ -812,7 +815,7 @@ TriggerUI::trigger_changed (PropertyChange const& what)
 void
 TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 {
-	trigger_connections.disconnect();
+	trigger_connections.drop_connections();
 	trigger_swap_connection.disconnect();
 
 	tref = tr;
@@ -834,5 +837,7 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 	trigger_changed (pc);
 
 	trigger()->PropertyChanged.connect (trigger_connections, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
+	tref.box->PropertyChanged.connect (trigger_connections, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+
 	tref.box->TriggerSwapped.connect (trigger_swap_connection, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
 }
