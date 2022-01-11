@@ -592,7 +592,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	BBT_Offset q (_quantization);
 
 	/* Clips don't stop on their own quantize; in Live they stop on the Global Quantize setting; we will choose 1 bar (Live's default) for now */
-# warning when Global Quantize is implemented, use that instead of '1 bar' here
+#warning when Global Quantize is implemented, use that instead of '1 bar' here
 	if (_state == WaitingToStop) {
 		q = BBT_Offset(1,0,0);
 	}
@@ -937,7 +937,9 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 	 * define the last_sample we can use as data.
 	 */
 
-	if (launch_style() != Repeat) {
+	Temporal::BBT_Offset q (_quantization);
+
+	if (launch_style() != Repeat || (q == Temporal::BBT_Offset())) {
 
 		last_sample = _start_offset + usable_length;
 
@@ -948,19 +950,10 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 		 * matter what.
 		 */
 
-		Temporal::BBT_Offset q (_quantization);
-
-		if (q == Temporal::BBT_Offset ()) {
-			usable_length = data.length;
-			last_sample = _start_offset + usable_length;
-			return;
-		}
-
 		/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
 
 		timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
-		usable_length = len.samples();
-		last_sample = _start_offset + usable_length;
+		last_sample = _start_offset + len.samples();
 	}
 
 	std::cerr << "final sample = " << final_sample << " vs expected end " << expected_end_sample << " last sample " << last_sample << std::endl;
@@ -1558,27 +1551,35 @@ MIDITrigger::probably_oneshot () const
 void
 MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t)
 {
-	expected_end_sample = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (round (_barcnt), 0, 0)));
+	Temporal::Beats end_by_follow_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length));
+	Temporal::Beats end_by_data_length = transition_beats + data_length;
 
-	Temporal::Beats usable_length; /* using timestamps from data */
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ends: FL %2 DL %3 tbbt %4 fl %5\n", index(), end_by_follow_length, end_by_data_length, transition_bbt, _follow_length));
 
-	if (launch_style() != Repeat) {
+	Temporal::Beats usable_length;
 
+	if (end_by_follow_length && (end_by_follow_length < end_by_data_length)) {
+		usable_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length)) - transition_beats;
+	} else {
 		usable_length = data_length;
+	}
+
+	Temporal::BBT_Offset q (_quantization);
+
+	if (launch_style() != Repeat || (q == Temporal::BBT_Offset())) {
+
+		if (end_by_follow_length) {
+			final_beat = end_by_follow_length;
+		} else {
+			final_beat = end_by_data_length;
+		}
 
 	} else {
-
-		Temporal::BBT_Offset q (_quantization);
-
-		if (q == Temporal::BBT_Offset ()) {
-			usable_length = data_length;
-			return;
-		}
 
 		/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
 
 		timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
-		usable_length = len.beats ();
+		final_beat = len.beats ();
 	}
 }
 
@@ -1807,7 +1808,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		mb.clear ();
 	}
 
-	while (iter != model->end()) {
+	while (iter != model->end() && _state != Playout) {
 
 		MidiEvent const & next_event (*iter);
 
@@ -1859,18 +1860,45 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 		/* We reached the end */
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end\n", index()));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, leb %2 les %3 fb %4 dl %5\n", index(), last_event_beats, last_event_samples, final_beat, data_length));
 
-		_loop_cnt++;
-		_state = Stopped;
+		if (last_event_beats < final_beat) {
 
-		/* the time we processed spans from start to the last event */
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ...\n", index()));
 
-		if (last_event_samples != max_samplepos) {
-			nframes = (last_event_samples - start_sample);
+			if (_state != Playout) {
+				_state = Playout;
+
+			}
+
+			if (_state == Playout) {
+				if (final_beat > end_beats) {
+					/* not finished with playout yet, all frames covered */
+					nframes = 0;
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not done with playout, all frames covered\n", index()));
+				} else {
+					/* finishing up playout */
+					samplepos_t final_sample = tmap->sample_at (timepos_t (final_beat));
+					nframes = orig_nframes - (final_sample - start_sample);
+					_loop_cnt++;
+					_state = Stopped;
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout done, nf = %2 fb %3 fs %4 %5\n", index(), nframes, final_beat, final_sample, start_sample));
+				}
+			}
+
 		} else {
-			/* all frames covered */
-			nframes = 0;
+
+			_loop_cnt++;
+			_state = Stopped;
+
+			/* the time we processed spans from start to the last event */
+
+			if (last_event_samples != max_samplepos) {
+				nframes = (last_event_samples - start_sample);
+			} else {
+				/* all frames covered */
+				nframes = 0;
+			}
 		}
 	} else {
 		/* we didn't reach the end of the MIDI data, ergo we covered
