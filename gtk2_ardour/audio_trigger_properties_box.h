@@ -82,9 +82,6 @@ private:
 
 	ArdourWidgets::ArdourButton _stretch_toggle;
 
-	ArdourWidgets::ArdourButton _fade_in_enable_button;
-	ArdourWidgets::ArdourButton _fade_out_enable_button;
-
 	ArdourWidgets::ArdourButton _stretch_selector;
 
 };

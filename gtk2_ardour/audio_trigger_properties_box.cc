@@ -134,18 +134,6 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 
 	row++;
 
-	label = manage (new Gtk::Label (_("Fades:")));
-	label->set_alignment (1.0, 0.5);
-	_fade_in_enable_button.set_text (_("In"));
-	_fade_in_enable_button.set_name ("generic button");
-	_fade_out_enable_button.set_text (_("Out"));
-	_fade_out_enable_button.set_name ("generic button");
-	audio_t->attach (*label,                  0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	audio_t->attach (_fade_in_enable_button,  1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	audio_t->attach (_fade_out_enable_button, 2, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-
-	row++;
-
 	label = manage (new Gtk::Label (_("Gain:")));
 	label->set_alignment (1.0, 0.5);
 	Gtk::Label *db_label = manage (new Gtk::Label (_("(dB)")));
