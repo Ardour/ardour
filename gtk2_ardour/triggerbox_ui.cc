@@ -36,6 +36,7 @@
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/region.h"
+#include "ardour/region_factory.h"
 #include "ardour/triggerbox.h"
 
 #include "canvas/polygon.h"
@@ -738,6 +739,7 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 	std::vector<Gtk::TargetEntry> target_table;
 	target_table.push_back (Gtk::TargetEntry ("x-ardour/region.erl", Gtk::TARGET_SAME_APP));
 	target_table.push_back (Gtk::TargetEntry ("x-ardour/region.esl", Gtk::TARGET_SAME_APP));
+	target_table.push_back (Gtk::TargetEntry ("x-ardour/region.pbdid", Gtk::TARGET_SAME_APP));
 	target_table.push_back (Gtk::TargetEntry ("text/uri-list"));
 	target_table.push_back (Gtk::TargetEntry ("text/plain"));
 	target_table.push_back (Gtk::TargetEntry ("application/x-rootwin-drop"));
@@ -873,6 +875,21 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 	}
 	if (data.get_target () == "x-ardour/region.erl" || data.get_target () == "x-ardour/region.esl") {
 		boost::shared_ptr<Region> region = PublicEditor::instance ().get_dragged_region_from_sidebar ();
+		if (region) {
+			_triggerbox.set_from_selection (n, region);
+			context->drag_finish (true, false, time);
+		} else {
+			context->drag_finish (false, false, time);
+		}
+		return;
+	}
+
+	if (data.get_target () == "x-ardour/region.pbdid") {
+		/* Long term goal is to receive all information from another TriggerBox Slot,
+		 * not just the region.
+		 */
+		PBD::ID rid (data.get_data_as_string ());
+		boost::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
 		if (region) {
 			_triggerbox.set_from_selection (n, region);
 			context->drag_finish (true, false, time);
