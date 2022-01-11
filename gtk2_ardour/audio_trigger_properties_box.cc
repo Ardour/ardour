@@ -186,6 +186,10 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	pack_start (*audio_t);
 
 	_stretch_toggle.signal_clicked.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::toggle_stretch));
+
+	_follow_length_spinner.set_can_focus(false);
+	_follow_length_spinner.signal_changed ().connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::follow_clock_changed));
+
 }
 
 AudioTriggerPropertiesBox::~AudioTriggerPropertiesBox ()
@@ -242,9 +246,6 @@ AudioTriggerPropertiesBox::trigger_changed (const PBD::PropertyChange& what_chan
 
 	_start_clock.ValueChanged.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::start_clock_changed));
 	_length_clock.ValueChanged.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::length_clock_changed));
-
-	_follow_length_spinner.set_can_focus(false);
-	_follow_length_spinner.signal_changed ().connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::follow_clock_changed));
 
 	_bpm_button.set_text (string_compose ("%1", trigger->apparent_tempo ()));
 	_abpm_label.set_text (string_compose ("%1", trigger->apparent_tempo ()));
