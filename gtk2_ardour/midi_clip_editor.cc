@@ -53,7 +53,7 @@ using std::min;
 
 MidiClipEditor::MidiClipEditor ()
 {
-	set_background_color (UIConfiguration::instance ().color (X_("theme:darkest")));
+	set_background_color (UIConfiguration::instance ().color (X_("neutral:backgroundest")));
 
 	const double scale  = UIConfiguration::instance ().get_ui_scale ();
 	const double width  = 600. * scale;
