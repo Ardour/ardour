@@ -86,7 +86,6 @@ TriggerClipPicker::TriggerClipPicker ()
 	_seek_slider.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerClipPicker::seek_button_press), false);
 	_seek_slider.signal_button_release_event ().connect (sigc::mem_fun (*this, &TriggerClipPicker::seek_button_release), false);
 
-	_play_btn.set_sensitive (false);
 	_play_btn.set_name ("generic button");
 	_play_btn.set_icon (ArdourWidgets::ArdourIcon::TransportPlay);
 	_play_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::audition_selected));
@@ -94,6 +93,9 @@ TriggerClipPicker::TriggerClipPicker ()
 	_stop_btn.set_name ("generic button");
 	_stop_btn.set_icon (ArdourWidgets::ArdourIcon::TransportStop);
 	_stop_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::stop_audition));
+
+	_play_btn.set_sensitive (false);
+	_stop_btn.set_sensitive (false);
 
 	_autoplay_btn.set_can_focus(false);
 	_autoplay_btn.signal_toggled ().connect (sigc::mem_fun (*this, &TriggerClipPicker::autoplay_toggled));
