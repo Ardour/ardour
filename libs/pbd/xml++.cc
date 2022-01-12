@@ -381,6 +381,26 @@ XMLNode::set_content(const string& c)
 	return _content;
 }
 
+/* Return the content of the first content child
+ *
+ * `<node>Foo</node>`.
+ * the `node` is not a content node, but has a child-node `text`.
+ *
+ * This method effectively is identical to
+ * return this->child("text")->content()
+ */
+const string&
+XMLNode::child_content() const
+{
+	static const string empty = "";
+	for (XMLNodeList::const_iterator n = children ().begin (); n != children ().end (); ++n) {
+		if ((*n)->is_content ()) {
+			return (*n)->content ();
+		}
+	}
+	return empty;
+}
+
 XMLNode*
 XMLNode::child (const char* name) const
 {

@@ -130,6 +130,8 @@ public:
 	const std::string& set_content(const std::string&);
 	XMLNode*      add_content(const std::string& s = std::string());
 
+	const std::string& child_content() const;
+
 	const XMLNodeList& children(const std::string& str = std::string()) const;
 	XMLNode* child(const char*) const;
 	XMLNode* add_child(const char *);
