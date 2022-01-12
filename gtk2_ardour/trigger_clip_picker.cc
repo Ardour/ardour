@@ -236,35 +236,77 @@ is_subfolder (std::string const& parent, std::string dir)
 	return false;
 }
 
+static std::string
+display_name (std::string const& dir) {
+	std::string metadata = Glib::build_filename (dir, ".daw-meta.xml");
+	if (Glib::file_test (metadata, Glib::FILE_TEST_IS_REGULAR | Glib::FILE_TEST_EXISTS)) {
+		XMLTree tree;
+		if (tree.read (metadata) && tree.root()->name () == "DAWDirectory") {
+			XMLNode* root = tree.root();
+			std::string type;
+			if (root->get_property ("type", type)) {
+				if (type == "bundled") {
+					return string_compose (_("%1 Bundled Content"), PROGRAM_NAME);
+				}
+			}
+#if ENABLE_NLS
+			if (ARDOUR::translations_are_enabled ()) {
+				for (XMLNodeList::const_iterator n = root->children ("title").begin (); n != root->children ("title").end (); ++n) {
+					std::string lang;
+					if (!(*n)->get_property ("lang", lang)) {
+						continue;
+					}
+					if (lang != "en_US") { // TODO: get current lang
+						continue;
+					}
+					return (*n)->child_content ();
+				}
+			}
+#endif
+			/* pick first title, if any */
+			XMLNode* child = root->child ("title");
+			if (child) {
+				return child->child_content ();
+			}
+		}
+	}
+	return Glib::path_get_basename (dir);
+}
+
 void
 TriggerClipPicker::maybe_add_dir (std::string const& dir)
 {
-	if (Glib::file_test (dir, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
-		_dir.AddMenuElem (Gtkmm2ext::MenuElemNoMnemonic (Glib::path_get_basename (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
+	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
+		return;
+	}
 
-		bool insert = true;
-		auto it = _root_paths.begin ();
-		while (it != _root_paths.end ()) {
-			bool erase = false;
-			if (it->size () > dir.size()) {
-				if (is_subfolder (dir, *it)) {
-					erase = true;
-				}
-			} else if (is_subfolder (*it, dir)) {
-				insert = false;
-				break;
+	_dir.AddMenuElem (Gtkmm2ext::MenuElemNoMnemonic (display_name (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
+
+	/* check if a parent path of the given dir already exists,
+	 * or if this new path is parent to any exising ones.
+	 */
+	bool insert = true;
+	auto it = _root_paths.begin ();
+	while (it != _root_paths.end ()) {
+		bool erase = false;
+		if (it->size () > dir.size()) {
+			if (is_subfolder (dir, *it)) {
+				erase = true;
 			}
-			if (erase) {
-				auto it2 = it;
-				++it;
-				_root_paths.erase (it2);
-			} else {
-				++it;
-			}
+		} else if (is_subfolder (*it, dir)) {
+			insert = false;
+			break;
 		}
-		if (insert) {
-			_root_paths.insert (dir);
+		if (erase) {
+			auto it2 = it;
+			++it;
+			_root_paths.erase (it2);
+		} else {
+			++it;
 		}
+	}
+	if (insert) {
+		_root_paths.insert (dir);
 	}
 }
 
@@ -436,7 +478,7 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 
 	if (!pc) {
 		_model->clear ();
-		_dir.set_active (Glib::path_get_basename (path));
+		_dir.set_active (display_name (path));
 	}
 
 	_current_path = path;
