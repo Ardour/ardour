@@ -87,7 +87,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _follow_action_probability (Properties::follow_action_probability, 0)
 	, _follow_count (Properties::follow_count, 1)
 	, _quantization (Properties::quantization, Temporal::BBT_Offset (1, 0, 0))
-	, _follow_length (Properties::quantization, Temporal::BBT_Offset (0, 0, 0))
+	, _follow_length (Properties::quantization, Temporal::BBT_Offset (0, 2, 0))
 	, _legato (Properties::legato, false)
 	, _name (Properties::name, "")
 	, _gain (Properties::gain, 1.0)
@@ -109,6 +109,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	add_property (_follow_action_probability);
 	add_property (_follow_count);
 	add_property (_quantization);
+	add_property (_follow_length);
 	add_property (_legato);
 	add_property (_name);
 	add_property (_gain);
@@ -1135,7 +1136,7 @@ AudioTrigger::determine_tempo ()
 
 	if ((_apparent_tempo != 0.) && (rint (_barcnt) != _barcnt)) {
 		/* fractional barcnt */
-		int intquarters = floor (quarters);
+		int intquarters = round (quarters);
 		double at = _apparent_tempo;
 		_apparent_tempo = intquarters / (seconds/60.);
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("adjusted barcnt of %1 and q = %2 to %3, old %4 new at = %5\n", _barcnt, quarters, intquarters, at, _apparent_tempo));
@@ -1254,7 +1255,8 @@ AudioTrigger::retrigger ()
 }
 
 pframes_t
-AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t dest_offset, bool passthru, double bpm)
+AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end,
+                   pframes_t nframes, pframes_t dest_offset, bool passthru, double bpm, bool /* can_clear */)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
 	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
@@ -1515,10 +1517,12 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 		if (remaining_frames_till_final != 0) {
 
-			for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
+			if (!passthru) {
+				for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
 
-				AudioBuffer& buf (bufs.get_audio (chn));
-				buf.silence (to_fill, covered_frames + dest_offset);
+					AudioBuffer& buf (bufs.get_audio (chn));
+					buf.silence (to_fill, covered_frames + dest_offset);
+				}
 			}
 
 			process_index += to_fill;
@@ -1551,9 +1555,9 @@ AudioTrigger::reload (BufferSet&, void*)
 
 MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	: Trigger (n, b)
-	, data_length (Temporal::Beats ())
-	, last_event_beats (Temporal::Beats ())
 	, _start_offset (0, 0, 0)
+	, data_length (Temporal::Beats())
+	, last_event_beats (Temporal::Beats())
 	, _legato_offset (0, 0, 0)
 {
 }
@@ -1798,7 +1802,7 @@ MIDITrigger::reload (BufferSet&, void*)
 pframes_t
 MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
                   Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
-                  pframes_t nframes, pframes_t dest_offset, bool passthru, double bpm)
+                  pframes_t nframes, pframes_t dest_offset, bool passthru, double bpm, bool can_clear)
 {
 	MidiBuffer& mb (bufs.get_midi (0));
 	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
@@ -1825,13 +1829,23 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		break;
 	}
 
-	if (!passthru) {
+	if (!passthru && can_clear) {
+		/* XXX MidiBuffer::silence() doesn't work correctly - it does
+		   the same thing as MidiBuffer::clear(). It needs to be fixed
+		   so that we can just clear out events in the range we're
+		   processing. Until that is done, @param can_clear controls
+		   whether or not we can clear the whole buffer, and is set
+		   true for the first ::run() call per process cycle.
+		*/
 		mb.clear ();
 	}
 
+	Temporal::Beats last_event_timeline_beats;
+
 	while (iter != model->end() && _state != Playout) {
 
-		MidiEvent const & next_event (*iter);
+		MidiEvent const & event (*iter);
+
 
 		/* Event times are in beats, relative to start of source
 		 * file. We need to convert to region-relative time, and then
@@ -1839,11 +1853,18 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		 * which we last transitioned (in this case, to being active)
 		 */
 
-		const Temporal::Beats effective_time = transition_beats + (next_event.time() - region_start);
+		const Temporal::Beats maybe_last_event_timeline_beats = transition_beats + (event.time() - region_start);
+
+		if (maybe_last_event_timeline_beats >= final_beat) {
+			/* do this to "fake" having reached the end */
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 tlrr %2 >- fb %3, so at end\n", index(), maybe_last_event_timeline_beats, final_beat));
+			iter = model->end();
+			break;
+		}
 
 		/* Now get samples */
 
-		const samplepos_t timeline_samples = tmap->sample_at (effective_time);
+		const samplepos_t timeline_samples = tmap->sample_at (maybe_last_event_timeline_beats);
 
 		if (timeline_samples >= end_sample) {
 			break;
@@ -1860,13 +1881,16 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		 */
 
 		samplepos_t buffer_samples = timeline_samples - start_sample;
-		last_event_samples = timeline_samples;
 
-		const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, next_event.size(), const_cast<uint8_t*>(next_event.buffer()), false);
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given et %1 TS %7 rs %8 ts %2 bs %3 ss %4 do %5, inserting %6\n", effective_time, timeline_samples, buffer_samples, start_sample, dest_offset, ev, transition_beats, region_start));
+		const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, event.size(), const_cast<uint8_t*>(event.buffer()), false);
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given et %1 TS %7 rs %8 ts %2 bs %3 ss %4 do %5, inserting %6\n", maybe_last_event_timeline_beats, timeline_samples, buffer_samples, start_sample, dest_offset, ev, transition_beats, region_start));
 		mb.insert_event (ev);
-		tracker.track (next_event.buffer());
-		last_event_beats = next_event.time();
+
+		tracker.track (event.buffer());
+
+		last_event_beats = event.time();
+		last_event_timeline_beats = maybe_last_event_timeline_beats;
+		last_event_samples = timeline_samples;
 
 		++iter;
 	}
@@ -1881,11 +1905,11 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 		/* We reached the end */
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, leb %2 les %3 fb %4 dl %5\n", index(), last_event_beats, last_event_samples, final_beat, data_length));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, leb %2 les %3 fb %4 dl %5\n", index(), last_event_timeline_beats, last_event_samples, final_beat, data_length));
 
-		if (last_event_beats < final_beat) {
+		if (last_event_timeline_beats < final_beat) {
 
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ...\n", index()));
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ... leb %2 < fb %3\n", index(), last_event_timeline_beats, final_beat));
 
 			if (_state != Playout) {
 				_state = Playout;
@@ -1929,11 +1953,13 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		nframes = 0;
 	}
 
+	const samplecnt_t covered_frames = orig_nframes - nframes;
+
 	if (_state == Stopped || _state == Stopping) {
-		when_stopped_during_run (bufs, dest_offset);
+		when_stopped_during_run (bufs, dest_offset + orig_nframes - 1);
 	}
 
-	return orig_nframes - nframes;
+	return covered_frames;
 }
 
 /**************/
@@ -2602,6 +2628,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	uint32_t max_chans = 0;
 	TriggerPtr nxt;
 	pframes_t dest_offset = 0;
+	bool can_clear = true;
 
 	while (nframes) {
 
@@ -2655,6 +2682,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					/* and switch */
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 => %2 switched to in legato mode\n", _currently_playing->index(), nxt->index()));
 					_currently_playing = nxt;
+					can_clear = true;
 					PropertyChanged (Properties::currently_playing);
 
 				} else {
@@ -2672,6 +2700,10 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						nxt->startup ();
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was finished, started %2\n", _currently_playing->index(), nxt->index()));
 						_currently_playing = nxt;
+						/* since we just switched, can_clear needs to be true again so that MIDITriggers can do the right
+						   thing for !passthru
+						*/
+						can_clear = true;
 						PropertyChanged (Properties::currently_playing);
 
 					} else if (_currently_playing->state() != Trigger::WaitingToStop) {
@@ -2710,6 +2742,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", _currently_playing->name()));
 					_currently_playing = all_triggers[n];
 					_currently_playing->startup ();
+					can_clear = true;
 					PropertyChanged (Properties::currently_playing);
 				} else {
 					_currently_playing = 0;
@@ -2737,11 +2770,12 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			max_chans = std::max (ar->n_channels(), max_chans);
 		}
 
-		frames_covered = _currently_playing->run (bufs, start_sample, end_sample, start_beats, end_beats, nframes, dest_offset, _pass_thru, bpm);
+		frames_covered = _currently_playing->run (bufs, start_sample, end_sample, start_beats, end_beats, nframes, dest_offset, _pass_thru, bpm, can_clear);
 
 		nframes -= frames_covered;
 		start_sample += frames_covered;
 		dest_offset += frames_covered;
+		can_clear = false;
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("trig %1 ran, covered %2 state now %3 nframes now %4\n",
 		                                              _currently_playing->name(), frames_covered, enum_2_string (_currently_playing->state()), nframes));

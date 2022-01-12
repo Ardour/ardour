@@ -134,7 +134,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	virtual pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample,
 	                       Temporal::Beats const & start, Temporal::Beats const & end,
-	                       pframes_t nframes, pframes_t offset, bool first, double bpm) = 0;
+	                       pframes_t nframes, pframes_t offset, bool first, double bpm, bool can_clear) = 0;
 	virtual void set_start (timepos_t const &) = 0;
 	virtual void set_end (timepos_t const &) = 0;
 	virtual void set_length (timecnt_t const &) = 0;
@@ -334,7 +334,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	AudioTrigger (uint32_t index, TriggerBox&);
 	~AudioTrigger ();
 
-	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t offset, bool first, double bpm);
+	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t offset, bool first, double bpm, bool);
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
@@ -406,7 +406,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	MIDITrigger (uint32_t index, TriggerBox&);
 	~MIDITrigger ();
 
-	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start_beats, Temporal::Beats const & end_beats, pframes_t nframes, pframes_t offset, bool passthru, double bpm);
+	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start_beats, Temporal::Beats const & end_beats, pframes_t nframes, pframes_t offset, bool passthru, double bpm, bool can_clear);
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
