@@ -1583,7 +1583,7 @@ MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap
 
 	Temporal::Beats usable_length;
 
-	if (end_by_follow_length && (end_by_follow_length < end_by_data_length)) {
+	if ((_follow_length != Temporal::BBT_Offset()) && (end_by_follow_length < end_by_data_length)) {
 		usable_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length)) - transition_beats;
 	} else {
 		usable_length = data_length;
@@ -1593,7 +1593,7 @@ MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap
 
 	if (launch_style() != Repeat || (q == Temporal::BBT_Offset())) {
 
-		if (end_by_follow_length) {
+		if (_follow_length != Temporal::BBT_Offset()) {
 			final_beat = end_by_follow_length;
 		} else {
 			final_beat = end_by_data_length;
@@ -1854,6 +1854,8 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		 */
 
 		const Temporal::Beats maybe_last_event_timeline_beats = transition_beats + (event.time() - region_start);
+
+		// std::cerr << "considering " << event << " with sb " << start_beats << " eb " << end_beats << " tb " << maybe_last_event_timeline_beats << " fb " << final_beat << endl;
 
 		if (maybe_last_event_timeline_beats >= final_beat) {
 			/* do this to "fake" having reached the end */
