@@ -515,10 +515,10 @@ Source::empty () const
 	return _length == timecnt_t();
 }
 
-SegmentDescriptor*
-Source::get_segment_descriptor (TimelineRange const & range)
+bool
+Source::get_segment_descriptor (TimelineRange const & range, SegmentDescriptor& segment)
 {
-	return 0;
+	return false;
 }
 
 int

@@ -1073,12 +1073,15 @@ AudioTrigger::determine_tempo ()
 	TempoMap::SharedPtr tm (TempoMap::use());
 
 	TimelineRange range (_region->start(), _region->start() + _region->length(), 0);
-	SegmentDescriptor* segment = _region->source (0)->get_segment_descriptor (range);
+	SegmentDescriptor segment;
+	bool have_segment;
 
-	if (segment) {
+	have_segment = _region->source (0)->get_segment_descriptor (range, segment);
 
-		_apparent_tempo = segment->tempo().quarter_notes_per_minute ();
-		_meter = segment->meter();
+	if (have_segment) {
+
+		_apparent_tempo = segment.tempo().quarter_notes_per_minute ();
+		_meter = segment.meter();
 
 	} else {
 		/* not a great guess, but what else can we do? */
@@ -1147,6 +1150,16 @@ AudioTrigger::determine_tempo ()
 				/* no apparent tempo, just return since we'll use it as-is */
 				std::cerr << "Could not determine tempo for " << name() << std::endl;
 				return;
+			}
+
+			if (!have_segment) {
+				segment.set_extent (_region->start_sample(), _region->length_samples());
+			}
+
+			segment.set_tempo (Temporal::Tempo (_apparent_tempo, 4));
+
+			for (auto & src : _region->sources()) {
+				src->set_segment_descriptor (segment);
 			}
 
 			cerr << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";

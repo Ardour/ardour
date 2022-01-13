@@ -146,7 +146,7 @@ public:
 	void set_captured_for (std::string str) { _captured_for = str; }
 	std::string captured_for() const { return _captured_for; }
 
-	SegmentDescriptor* get_segment_descriptor (TimelineRange const &);
+	bool get_segment_descriptor (TimelineRange const &, SegmentDescriptor&);
 	int set_segment_descriptor (SegmentDescriptor const &);
 
   protected:
