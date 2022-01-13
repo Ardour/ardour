@@ -2772,7 +2772,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						PropertyChanged (Properties::currently_playing);
 						break; /* no triggers to come next, break out of nframes loop */
 					}
-					if (_currently_playing->index() == n) {
+					if ((int) _currently_playing->index() == n) {
 						start_quantization = _currently_playing->follow_length();
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n, will use start Q %2", all_triggers[n]->name(), _currently_playing->follow_length()));
 					} else {
