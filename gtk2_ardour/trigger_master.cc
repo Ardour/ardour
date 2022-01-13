@@ -128,8 +128,8 @@ private:
 
 PassThru::PassThru (Item* parent)
 	: ArdourCanvas::Rectangle (parent)
+	, _enabled (false)
 {
-	set_enabled (false);
 }
 
 void
