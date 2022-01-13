@@ -22,6 +22,8 @@
 #include "temporal/timeline.h"
 #include "temporal/tempo.h"
 
+class XMLNode;
+
 namespace ARDOUR {
 
 /* An object that describes an extent (duration & position), along with a
@@ -57,6 +59,11 @@ public:
 
 	Temporal::Meter meter() const { return _meter; }
 	void set_meter (Temporal::Meter const&);
+
+	/* Replicate the API of PBD::Stateful without the overhead */
+
+	XMLNode& get_state (void);
+	int set_state (const XMLNode&, int version);
 
 private:
 	Temporal::TimeDomain _time_domain;

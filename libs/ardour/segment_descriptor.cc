@@ -16,6 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/xml++.h"
+#include "pbd/enumwriter.h"
+#include "pbd/i18n.h"
+
+#include "temporal/tempo.h"
+
 #include "ardour/segment_descriptor.h"
 
 using namespace ARDOUR;
@@ -106,4 +112,31 @@ void
 SegmentDescriptor::set_meter (Meter const & m)
 {
 	_meter = m;
+}
+
+XMLNode&
+SegmentDescriptor::get_state (void)
+{
+	XMLNode* root = new XMLNode (X_("SegmentDescriptor"));
+
+	root->set_property (X_("time-domain"), _time_domain);
+
+	if (_time_domain == Temporal::AudioTime) {
+		root->set_property (X_("position"), _position_samples);
+		root->set_property (X_("duration"), _duration_samples);
+	} else {
+		root->set_property (X_("position"), _position_beats);
+		root->set_property (X_("duration"), _duration_beats);
+	}
+
+	root->add_child_nocopy (_tempo.get_state());
+	root->add_child_nocopy (_meter.get_state());
+
+	return *root;
+}
+
+int
+SegmentDescriptor::set_state (const XMLNode&, int version)
+{
+	return 0;
 }
