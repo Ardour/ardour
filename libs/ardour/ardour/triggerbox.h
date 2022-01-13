@@ -226,7 +226,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_legato (bool yn);
 	bool legato () const { return _legato; }
 
-	virtual void startup ();
+	void startup (Temporal::BBT_Offset const & start_quantization = Temporal::BBT_Offset ());
 	virtual void shutdown (BufferSet& bufs, pframes_t dest_offset);
 	virtual void jump_start ();
 	virtual void jump_stop (BufferSet& bufs, pframes_t dest_offset);
@@ -319,12 +319,13 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	double                    _barcnt; /* our estimate of the number of bars in the region */
 	double                    _apparent_tempo;
 	samplepos_t                expected_end_sample;
-
+	Temporal::BBT_Offset      _start_quantization;
 	std::atomic<Trigger*>     _pending;
 
 	void when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset);
 	void set_region_internal (boost::shared_ptr<Region>);
 	virtual void retrigger() = 0;
+	virtual void _startup (Temporal::BBT_Offset const &);
 };
 
 typedef boost::shared_ptr<Trigger> TriggerPtr;
@@ -351,7 +352,6 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	double position_as_fraction() const;
 
 	int set_region_in_worker_thread (boost::shared_ptr<Region>);
-	void startup ();
 	void jump_start ();
 	void jump_stop (BufferSet& bufs, pframes_t dest_offset);
 
@@ -398,6 +398,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	int load_data (boost::shared_ptr<AudioRegion>);
 	void determine_tempo ();
 	void setup_stretcher ();
+	void _startup (Temporal::BBT_Offset const &);
 };
 
 
@@ -423,7 +424,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	double position_as_fraction() const;
 
 	int set_region_in_worker_thread (boost::shared_ptr<Region>);
-	void startup ();
 	void jump_start ();
 	void shutdown (BufferSet& bufs, pframes_t dest_offset);
 	void jump_stop (BufferSet& bufs, pframes_t dest_offset);
@@ -455,8 +455,8 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
 	int load_data (boost::shared_ptr<MidiRegion>);
 	void compute_and_set_length ();
+	void _startup (Temporal::BBT_Offset const &);
 };
-
 
 class LIBARDOUR_API TriggerBoxThread
 {

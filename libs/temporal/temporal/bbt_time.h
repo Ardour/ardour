@@ -240,6 +240,9 @@ struct LIBTEMPORAL_API BBT_Offset
 		return bars != other.bars || beats != other.beats || ticks != other.ticks;
 	}
 
+	operator bool() const {
+		return bars == 0 && beats == 0 && ticks == 0;
+	}
 };
 
 inline BBT_Offset LIBTEMPORAL_API bbt_delta (Temporal::BBT_Time const & a, Temporal::BBT_Time const & b) {

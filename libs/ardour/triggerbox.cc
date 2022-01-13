@@ -431,12 +431,28 @@ Trigger::request_stop ()
 }
 
 void
-Trigger::startup()
+Trigger::startup (Temporal::BBT_Offset const & start_quantization)
+{
+	/* This is just a non-virtual wrapper with a default parameter that calls _startup() */
+	_startup (start_quantization);
+}
+
+void
+Trigger::_startup (Temporal::BBT_Offset const & start_quantization)
 {
 	_state = WaitingToStart;
 	_loop_cnt = 0;
 	_velocity_gain = _pending_velocity_gain;
 	_explicitly_stopped = false;
+
+	if (start_quantization != Temporal::BBT_Offset()) {
+		_start_quantization = start_quantization;
+	} else {
+		_start_quantization = _quantization;
+	}
+
+	retrigger ();
+
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 starts up\n", name()));
 	PropertyChanged (ARDOUR::Properties::running);
 }
@@ -605,7 +621,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	Temporal::BBT_Time transition_bbt;
 	pframes_t extra_offset = 0;
-	BBT_Offset q (_quantization);
+	BBT_Offset q (_start_quantization);
 
 	/* Clips don't stop on their own quantize; in Live they stop on the Global Quantize setting; we will choose 1 bar (Live's default) for now */
 #warning when Global Quantize is implemented, use that instead of '1 bar' here
@@ -811,10 +827,9 @@ AudioTrigger::get_segment_descriptor () const
 }
 
 void
-AudioTrigger::startup ()
+AudioTrigger::_startup (Temporal::BBT_Offset const & start_quantization)
 {
-	Trigger::startup ();
-	retrigger ();
+	Trigger::_startup (start_quantization);
 }
 
 void
@@ -1555,9 +1570,9 @@ AudioTrigger::reload (BufferSet&, void*)
 
 MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	: Trigger (n, b)
-	, _start_offset (0, 0, 0)
 	, data_length (Temporal::Beats())
 	, last_event_beats (Temporal::Beats())
+	, _start_offset (0, 0, 0)
 	, _legato_offset (0, 0, 0)
 {
 }
@@ -1624,10 +1639,9 @@ MIDITrigger::get_segment_descriptor () const
 }
 
 void
-MIDITrigger::startup ()
+MIDITrigger::_startup (Temporal::BBT_Offset const & start_quantization)
 {
-	Trigger::startup ();
-	retrigger ();
+	Trigger::_startup (start_quantization);
 }
 
 void
@@ -2734,6 +2748,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				if (_currently_playing->use_follow()) {
 					int n = determine_next_trigger (_currently_playing->index());
+					Temporal::BBT_Offset start_quantization;
 					std::cerr << "dnt = " << n << endl;
 					if (n < 0) {
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 finished, no next trigger\n", _currently_playing->name()));
@@ -2741,9 +2756,14 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						PropertyChanged (Properties::currently_playing);
 						break; /* no triggers to come next, break out of nframes loop */
 					}
-					DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", _currently_playing->name()));
+					if (_currently_playing->index() == n) {
+						start_quantization = _currently_playing->follow_length();
+						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n, will use start Q %2", all_triggers[n]->name(), _currently_playing->follow_length()));
+					} else {
+						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", all_triggers[n]->name()));
+					}
 					_currently_playing = all_triggers[n];
-					_currently_playing->startup ();
+					_currently_playing->startup (start_quantization);
 					can_clear = true;
 					PropertyChanged (Properties::currently_playing);
 				} else {
