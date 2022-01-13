@@ -99,6 +99,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, cue_launched (false)
 	, _barcnt (0.)
 	, _apparent_tempo (0.)
+	, _meter (4, 4)
 	, expected_end_sample (0)
 	, _pending ((Trigger*) 0)
 {
@@ -1069,79 +1070,92 @@ void
 AudioTrigger::determine_tempo ()
 {
 	using namespace Temporal;
-
-	/* check the name to see if there's a (heuristically obvious) hint
-	 * about the tempo.
-	 */
-
-	string str = _region->name();
-	string::size_type bi;
-	string::size_type ni;
-	double text_tempo = -1.;
-
-	std::cerr << "Determine tempo for " << name() << std::endl;
-
-	if (((bi = str.find ("bpm")) != string::npos) ||
-	    ((bi = str.find ("BPM")) != string::npos)) {
-
-		string sub (str.substr (0, bi));
-
-		if ((ni = sub.find_last_of ("0123456789.,_-")) != string::npos) {
-
-			int nni = ni; /* ni is unsigned, nni is signed */
-
-			while (nni >= 0) {
-				if (!isdigit (sub[nni]) &&
-				    (sub[nni] != '.') &&
-				    (sub[nni] != ',')) {
-					break;
-				}
-				--nni;
-			}
-
-			if (nni > 0) {
-				std::stringstream p (sub.substr (nni + 1));
-				p >> text_tempo;
-				if (!p) {
-					text_tempo = -1.;
-				} else {
-					_apparent_tempo = text_tempo;
-					std::cerr << "from filename, tempo = " << _apparent_tempo << std::endl;
-				}
-			}
-		}
-	}
-
 	TempoMap::SharedPtr tm (TempoMap::use());
 
-	/* We don't have too many good choices here. Triggers can fire at any
-	 * time, so there's no special place on the tempo map that we can use
-	 * to get the meter from and thus compute an apparent bar count for
-	 * this region. Our solution for now: just use the first meter.
-	 */
+	TimelineRange range (_region->start(), _region->start() + _region->length(), 0);
+	SegmentDescriptor* segment = _region->source (0)->get_segment_descriptor (range);
 
-	TempoMetric const & metric (tm->metric_at (timepos_t (AudioTime)));
+	if (segment) {
 
-	if (text_tempo < 0) {
+		_apparent_tempo = segment->tempo().quarter_notes_per_minute ();
+		_meter = segment->meter();
 
-		breakfastquay::MiniBPM mbpm (_box.session().sample_rate());
+	} else {
+		/* not a great guess, but what else can we do? */
 
-		mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
+		TempoMetric const & metric (tm->metric_at (timepos_t (AudioTime)));
 
-		_apparent_tempo = mbpm.estimateTempoOfSamples (data[0], data.length);
+		_meter = metric.meter ();
 
-		if (_apparent_tempo == 0.0) {
-			/* no apparent tempo, just return since we'll use it as-is */
-			std::cerr << "Could not determine tempo for " << name() << std::endl;
-			return;
+		/* check the name to see if there's a (heuristically obvious) hint
+		 * about the tempo.
+		 */
+
+		string str = _region->name();
+		string::size_type bi;
+		string::size_type ni;
+		double text_tempo = -1.;
+
+		std::cerr << "Determine tempo for " << name() << std::endl;
+
+		if (((bi = str.find ("bpm")) != string::npos) ||
+		    ((bi = str.find ("BPM")) != string::npos)) {
+
+			string sub (str.substr (0, bi));
+
+			if ((ni = sub.find_last_of ("0123456789.,_-")) != string::npos) {
+
+				int nni = ni; /* ni is unsigned, nni is signed */
+
+				while (nni >= 0) {
+					if (!isdigit (sub[nni]) &&
+					    (sub[nni] != '.') &&
+					    (sub[nni] != ',')) {
+						break;
+					}
+					--nni;
+				}
+
+				if (nni > 0) {
+					std::stringstream p (sub.substr (nni + 1));
+					p >> text_tempo;
+					if (!p) {
+						text_tempo = -1.;
+					} else {
+						_apparent_tempo = text_tempo;
+						std::cerr << "from filename, tempo = " << _apparent_tempo << std::endl;
+					}
+				}
+			}
 		}
 
-		cerr << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
+		/* We don't have too many good choices here. Triggers can fire at any
+		 * time, so there's no special place on the tempo map that we can use
+		 * to get the meter from and thus compute an apparent bar count for
+		 * this region. Our solution for now: just use the first meter.
+		 */
+
+		if (text_tempo < 0) {
+
+			breakfastquay::MiniBPM mbpm (_box.session().sample_rate());
+
+			mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
+
+			_apparent_tempo = mbpm.estimateTempoOfSamples (data[0], data.length);
+
+			if (_apparent_tempo == 0.0) {
+				/* no apparent tempo, just return since we'll use it as-is */
+				std::cerr << "Could not determine tempo for " << name() << std::endl;
+				return;
+			}
+
+			cerr << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
+		}
 	}
 
 	const double seconds = (double) data.length  / _box.session().sample_rate();
 	const double quarters = (seconds / 60.) * _apparent_tempo;
-	_barcnt = quarters / metric.meter().divisions_per_bar();
+	_barcnt = quarters / _meter.divisions_per_bar();
 
 	/* now check the determined tempo and force it to a value that gives us
 	   an integer bar/quarter count. This is a heuristic that tries to

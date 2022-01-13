@@ -263,6 +263,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	double apparent_tempo() const { return _apparent_tempo; }
 	double set_tempo (double t);
 
+	Temporal::Meter meter() const { return _meter; }
+	void set_tempo (Temporal::Meter const &);
+
 	void set_pending (Trigger*);
 	Trigger* swap_pending (Trigger*);
 
@@ -318,6 +321,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	double                    _barcnt; /* our estimate of the number of bars in the region */
 	double                    _apparent_tempo;
+	Temporal::Meter           _meter;
 	samplepos_t                expected_end_sample;
 	Temporal::BBT_Offset      _start_quantization;
 	std::atomic<Trigger*>     _pending;
