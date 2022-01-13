@@ -87,7 +87,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _follow_action_probability (Properties::follow_action_probability, 0)
 	, _follow_count (Properties::follow_count, 1)
 	, _quantization (Properties::quantization, Temporal::BBT_Offset (1, 0, 0))
-	, _follow_length (Properties::quantization, Temporal::BBT_Offset (0, 0, 0))
+	, _follow_length (Properties::follow_length, Temporal::BBT_Offset (0, 0, 0))
 	, _legato (Properties::legato, false)
 	, _name (Properties::name, "")
 	, _gain (Properties::gain, 1.0)
@@ -1154,7 +1154,7 @@ AudioTrigger::determine_tempo ()
 		int intquarters = round (quarters);
 		double at = _apparent_tempo;
 		_apparent_tempo = intquarters / (seconds/60.);
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("adjusted barcnt of %1 and q = %2 to %3, old %4 new at = %5\n", _barcnt, quarters, intquarters, at, _apparent_tempo));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("adjusted barcnt of %1 and q = %2 to %3, old %4 new at = %5 seconds was %6\n", _barcnt, quarters, intquarters, at, _apparent_tempo, seconds));
 	}
 
 	/* use initial tempo in map (assumed for now to be the only one */
@@ -1989,6 +1989,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for passthru = %1\n", Properties::passthru.property_id));
 	Properties::follow_count.property_id = g_quark_from_static_string (X_("follow-count"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow_count = %1\n", Properties::follow_count.property_id));
+	Properties::follow_length.property_id = g_quark_from_static_string (X_("follow-length"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow_length = %1\n", Properties::follow_length.property_id));
 	Properties::legato.property_id = g_quark_from_static_string (X_("legato"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for legato = %1\n", Properties::legato.property_id));
 	Properties::velocity_effect.property_id = g_quark_from_static_string (X_("velocity-effect"));
