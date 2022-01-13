@@ -514,3 +514,15 @@ Source::empty () const
 {
 	return _length == timecnt_t();
 }
+
+SegmentDescriptor*
+Source::get_segment_descriptor (TimelineRange const & range)
+{
+	return 0;
+}
+
+int
+Source::set_segment_descriptor (SegmentDescriptor const & sr)
+{
+	return 0;
+}

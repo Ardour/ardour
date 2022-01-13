@@ -38,6 +38,7 @@
 #include "ardour/ardour.h"
 #include "ardour/session_object.h"
 #include "ardour/data_type.h"
+#include "ardour/segment_descriptor.h"
 
 namespace ARDOUR {
 
@@ -145,6 +146,9 @@ public:
 	void set_captured_for (std::string str) { _captured_for = str; }
 	std::string captured_for() const { return _captured_for; }
 
+	SegmentDescriptor* get_segment_descriptor (TimelineRange const &);
+	int set_segment_descriptor (SegmentDescriptor const &);
+
   protected:
 	DataType            _type;
 	Flag                _flags;
@@ -160,6 +164,9 @@ public:
 	timecnt_t           _length;
 	XrunPositions      _xruns;
 	CueMarkers         _cue_markers;
+
+	typedef std::vector<SegmentDescriptor> SegmentDescriptors;
+	SegmentDescriptors segment_descriptors;
 
 	mutable Glib::Threads::Mutex _lock;
 	mutable Glib::Threads::Mutex _analysis_lock;
