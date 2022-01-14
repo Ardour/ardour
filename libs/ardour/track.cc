@@ -39,6 +39,7 @@
 #include "ardour/monitor_control.h"
 #include "ardour/playlist.h"
 #include "ardour/playlist_factory.h"
+#include "ardour/polarity_processor.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
@@ -50,6 +51,7 @@
 #include "ardour/session_playlists.h"
 #include "ardour/smf_source.h"
 #include "ardour/track.h"
+#include "ardour/triggerbox.h"
 #include "ardour/types_convert.h"
 #include "ardour/utils.h"
 
@@ -98,6 +100,17 @@ Track::init ()
 	_disk_writer.reset (new DiskWriter (_session, *this, name(), dflags));
 	_disk_writer->set_block_size (_session.get_block_size ());
 	_disk_writer->set_owner (this);
+
+	boost::shared_ptr<TriggerBox> tb (new TriggerBox (_session, data_type ()));
+	tb->set_owner (this);
+	add_processor (tb, _polarity);
+	if (data_type () == DataType::AUDIO) {
+		/* if placing this in a route where the default
+		 * data type is AUDIO, the triggerbox will need
+		 * a sidehcain MIDI input to be able to be MIDI controlled
+		 */
+		tb->add_midi_sidechain ();
+	}
 
 	set_align_choice_from_io ();
 

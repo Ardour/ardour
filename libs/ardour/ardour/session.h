@@ -738,7 +738,7 @@ public:
 		PresentationInfo::order_t order,
 		TrackMode mode = Normal,
 		bool input_auto_connect = true,
-		bool with_triggers = true
+		bool with_triggers = false
 		);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
@@ -749,7 +749,7 @@ public:
 		PresentationInfo::order_t,
 		TrackMode mode,
 		bool input_auto_connect,
-		bool with_triggers = true
+		bool with_triggers = false
 		);
 
 	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template, PresentationInfo::Flag, PresentationInfo::order_t);
