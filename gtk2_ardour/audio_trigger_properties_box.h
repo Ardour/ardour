@@ -68,8 +68,10 @@ protected:
 
 private:
 
+	void MultiplyTempo(float mult);
+
 	Gtk::Table _table;
-	Gtk::Label _abpm_label;
+
 	AudioClock _length_clock;
 	AudioClock _start_clock;
 
@@ -79,12 +81,13 @@ private:
 	Gtk::Adjustment  _gain_adjustment;
 	Gtk::SpinButton  _gain_spinner;
 
-	ArdourWidgets::ArdourButton _bpm_button;
 	ArdourWidgets::ArdourButton _metrum_button;
 
 	ArdourWidgets::ArdourButton _stretch_toggle;
 
 	ArdourWidgets::ArdourDropdown _stretch_selector;
+
+	ArdourWidgets::ArdourButton _abpm_label;
 
 };
 

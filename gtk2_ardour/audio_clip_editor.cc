@@ -95,9 +95,9 @@ AudioClipEditor::ClipBBTMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark
 
 	ArdourCanvas::Ruler::Mark mark;
 
-	assert (trigger->apparent_tempo() > 0.);
+	assert (trigger->segment_tempo() > 0.);
 
-	Temporal::Tempo tempo (trigger->apparent_tempo(), 4); /* XXX don't assume 4 */
+	Temporal::Tempo tempo (trigger->segment_tempo(), trigger->meter().divisions_per_bar());
 
 	std::cerr << "get marks between " << lower << " .. " << upper << " with tempo " << tempo << " upp = " << units_per_pixel << std::endl;
 
@@ -442,7 +442,7 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, TriggerReference 
 	TriggerPtr t (tr.trigger());
 
 	if (t) {
-		if (t->apparent_tempo() == 0.) {
+		if (t->segment_tempo() == 0.) {
 			/* tempo unknown, hide ruler */
 			ruler->hide ();
 		} else {

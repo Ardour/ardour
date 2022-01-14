@@ -28,6 +28,8 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/menu_elems.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour/location.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
@@ -56,6 +58,7 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	, _gain_adjustment( 0.0, -20.0, +20.0, 1.0, 3.0, 0)
 	, _gain_spinner (_gain_adjustment)
 	, _stretch_toggle (ArdourButton::led_default_elements)
+	, _abpm_label  (ArdourButton::Text)
 {
 	_header_label.set_text (_("AUDIO Trigger Properties:"));
 
@@ -72,8 +75,15 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	label = manage (new Gtk::Label (_("BPM:")));
 	label->set_alignment (1.0, 0.5);
 	bpm_table->attach (*label,      0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	bpm_table->attach (_bpm_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	bpm_table->attach (_abpm_label, 2, 3, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	bpm_table->attach (_abpm_label, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+
+	ArdourButton *half = manage (new ArdourButton (_("/2")));
+	half->signal_clicked.connect(sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::MultiplyTempo), 0.5));
+	bpm_table->attach (*half, 2, 3, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	ArdourButton *dbl = manage (new ArdourButton (_("x2")));
+	dbl->signal_clicked.connect(sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::MultiplyTempo), 2.0));
+	bpm_table->attach (*dbl, 3, 4, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+
 	row++;
 
 	pack_start (*bpm_table, false, false);
@@ -165,6 +175,15 @@ AudioTriggerPropertiesBox::~AudioTriggerPropertiesBox ()
 }
 
 void
+AudioTriggerPropertiesBox::MultiplyTempo(float mult)
+{
+	TriggerPtr trigger (tref.trigger());
+	if (trigger) {
+		trigger->set_segment_tempo (trigger->segment_tempo () * mult);
+	}
+}
+
+void
 AudioTriggerPropertiesBox::toggle_stretch ()
 {
 	TriggerPtr trigger (tref.trigger());
@@ -204,17 +223,18 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& what_c
 	_start_clock.set (tref.trigger()->start_offset ());
 	_length_clock.set (tref.trigger()->current_length ()); // set_duration() ?
 
-	int metrum_numerator = 4;  //TODO: use the SegmentDescriptor's meter
-	int bar_beats = metrum_numerator * tref.trigger()->follow_length().bars;
+	int metrum_numerator = trigger->meter().divisions_per_bar();
+	int bar_beats = metrum_numerator * trigger->follow_length().bars;
 	int beats = tref.trigger()->follow_length().beats;
 	_follow_length_adjustment.set_value (bar_beats+beats);  //note: 0 is a special case meaning "use clip length"
 
 	_start_clock.ValueChanged.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::start_clock_changed));
 	_length_clock.ValueChanged.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::length_clock_changed));
 
-	_bpm_button.set_text (string_compose ("%1", trigger->apparent_tempo ()));
-	_abpm_label.set_text (string_compose ("%1", trigger->apparent_tempo ()));
-	_metrum_button.set_text ("4/4");
+	_abpm_label.set_text (string_compose ("%1", trigger->segment_tempo ()));
+	ArdourWidgets::set_tooltip (_abpm_label, string_compose ("Clip Tempo, used for stretching.  Estimated tempo (from file) was: %1", trigger->estimated_tempo ()));
+
+	_metrum_button.set_text (string_compose ("%1/%2", metrum_numerator, trigger->meter().note_value()));
 
 	_stretch_toggle.set_active (tref.trigger()->stretchable () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 
@@ -253,10 +273,10 @@ AudioTriggerPropertiesBox::follow_clock_changed ()
 {
 	int beatz = (int) _follow_length_adjustment.get_value();
 
-	int metrum_numerator = 4;  //TODO: use the SegmentDescriptor's meter
+	int metrum_numerator = trigger()->meter().divisions_per_bar();
 
 	int bars = beatz/metrum_numerator;
 	int beats = beatz%metrum_numerator;
 
-	tref.trigger()->set_follow_length(Temporal::BBT_Offset(bars,beats,0));
+	trigger()->set_follow_length(Temporal::BBT_Offset(bars,beats,0));
 }
