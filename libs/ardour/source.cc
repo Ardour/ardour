@@ -160,6 +160,7 @@ Source::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	int64_t t;
 	samplepos_t ts;
+	XMLNode* sd_node;
 
 	if (node.name() == X_("Cues")) {
 		/* partial state */
@@ -249,6 +250,20 @@ Source::set_state (const XMLNode& node, int version)
 		   sometimes marks sources as removable which shouldn't be.
 		*/
 		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+	}
+
+	sd_node = node.child (X_("SegmentDescriptors"));
+
+	if (sd_node) {
+		segment_descriptors.clear ();
+		try {
+			XMLNodeList nlist = sd_node->children();
+			for (XMLNodeIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
+				segment_descriptors.push_back (SegmentDescriptor (**niter, version));
+			}
+		} catch (...) {
+			error << string_compose (_("Segment descriptors not loaded for source %1"), name()) << endmsg;
+		}
 	}
 
 	/* support to make undo/redo actually function. Very few things about
