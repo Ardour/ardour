@@ -950,7 +950,9 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 	samplepos_t end_by_barcnt = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (round (_barcnt), 0, 0)));
 	samplepos_t end_by_data_length = transition_sample + data.length;
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ends: FL %2 (from %5 + %6) BC %3 DL %4\n", index(), end_by_follow_length, end_by_barcnt, end_by_data_length, transition_bbt, _follow_length));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 @ %2 / %3 / %4 ends: FL %5 (from %6) BC %7 DL %8\n",
+	                                              index(), transition_sample, transition_beats, transition_bbt,
+	                                              end_by_follow_length, _follow_length, end_by_barcnt, end_by_data_length));
 
 	if (stretching()) {
 		if (_follow_length != Temporal::BBT_Offset()) {
@@ -1004,7 +1006,7 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 		last_sample = _start_offset + len.samples();
 	}
 
-	std::cerr << "final sample = " << final_sample << " vs expected end " << expected_end_sample << " last sample " << last_sample << std::endl;
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: final sample %2 vs ees %3 ls %4\n", index(), final_sample, expected_end_sample, last_sample));
 }
 
 void
@@ -1172,14 +1174,13 @@ AudioTrigger::estimate_tempo ()
 				return;
 			}
 
-			cerr << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
+			cerr << name() << " Estimated bpm " << _estimated_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
 		}
 
 		if (!have_segment) {
 			segment.set_extent (_region->start_sample(), _region->length_samples());
 		}
 
-		cerr << name() << " Estimated bpm " << _estimated_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
 		segment.set_tempo (Temporal::Tempo (_estimated_tempo, 4));
 
 		for (auto & src : _region->sources()) {
@@ -2785,7 +2786,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 		}
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("currently playing: %1, state now %2\n", _currently_playing->name(), enum_2_string (_currently_playing->state())));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("currently playing: %1, state now %2 stop all ? %3\n", _currently_playing->name(), enum_2_string (_currently_playing->state()), _stop_all));
 
 		/* if we're not in the process of stopping all active triggers,
 		 * but the current one has stopped, decide which (if any)
@@ -2869,7 +2870,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 
 	if (!_currently_playing) {
-		DEBUG_TRACE (DEBUG::Triggers, "nothing currently playing, consider stopping transport\n");
+		DEBUG_TRACE (DEBUG::Triggers, "nothing currently playing 2, reset stop_all to false\n");
 		_stop_all = false;
 	}
 
