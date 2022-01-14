@@ -136,7 +136,53 @@ SegmentDescriptor::get_state (void)
 }
 
 int
-SegmentDescriptor::set_state (const XMLNode&, int version)
+SegmentDescriptor::set_state (XMLNode const & node, int version)
 {
+	if (node.name() != X_("SegmentDescriptor")) {
+		return -1;
+	}
+
+	if (node.get_property (X_("time-domain"), _time_domain)) {
+		return -1;
+	}
+
+	if (_time_domain == Temporal::AudioTime) {
+		if (node.get_property (X_("position"), _position_samples)) {
+			return -1;
+		}
+		if (node.get_property (X_("duration"), _duration_samples)) {
+			return -1;
+		}
+	} else {
+		if (node.get_property (X_("position"), _position_beats)) {
+			return -1;
+		}
+		if (node.get_property (X_("duration"), _duration_beats)) {
+			return -1;
+		}
+	}
+
+	XMLNode* child;
+
+	child = node.child (Tempo::xml_node_name.c_str());
+
+	if (!child) {
+		return -1;
+	}
+
+	if (_tempo.set_state (*child, version)) {
+		return -1;
+	}
+
+	child = node.child (Meter::xml_node_name.c_str());
+
+	if (!child) {
+		return -1;
+	}
+
+	if (_meter.set_state (*child, version)) {
+		return -1;
+	}
+
 	return 0;
 }
