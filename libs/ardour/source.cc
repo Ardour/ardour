@@ -147,7 +147,9 @@ Source::get_state ()
 		for (auto const & sd : segment_descriptors) {
 			sd_node->add_child_nocopy (sd.get_state());
 		}
+		node->add_child_nocopy (*sd_node);
 	}
+
 
 	return *node;
 }
@@ -540,11 +542,34 @@ Source::empty () const
 bool
 Source::get_segment_descriptor (TimelineRange const & range, SegmentDescriptor& segment)
 {
+	/* Note: since we disallow overlapping segments, any overlap between
+	   the @param range and an existing segment counts as a match.
+	*/
+
+	for (auto const & sd : segment_descriptors) {
+		if (coverage_exclusive_ends (sd.position(), sd.position() + sd.extent(),
+		                             segment.position(), segment.position() + segment.extent()) != Temporal::OverlapNone) {
+			segment = sd;
+			return true;
+		}
+	}
+
 	return false;
 }
 
 int
 Source::set_segment_descriptor (SegmentDescriptor const & sr)
 {
+	/* We disallow any overlap between segments. They must describe non-overlapping ranges */
+
+	for (auto const & sd : segment_descriptors) {
+		if (coverage_exclusive_ends (sd.position(), sd.position() + sd.extent(),
+		                             sr.position(), sr.position() + sr.extent()) != Temporal::OverlapNone) {
+			return -1;
+		}
+	}
+
+	segment_descriptors.push_back (sr);
+
 	return 0;
 }

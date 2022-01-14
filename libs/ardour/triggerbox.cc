@@ -1100,6 +1100,7 @@ AudioTrigger::estimate_tempo ()
 
 		_estimated_tempo = segment.tempo().quarter_notes_per_minute ();
 		_meter = segment.meter();
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: tempo and meter from segment descriptor\n", index()));
 
 	} else {
 		/* not a great guess, but what else can we do? */
@@ -1170,17 +1171,18 @@ AudioTrigger::estimate_tempo ()
 				return;
 			}
 
-			if (!have_segment) {
-				segment.set_extent (_region->start_sample(), _region->length_samples());
-			}
+			cerr << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
+		}
 
-			segment.set_tempo (Temporal::Tempo (_estimated_tempo, 4));
+		if (!have_segment) {
+			segment.set_extent (_region->start_sample(), _region->length_samples());
+		}
 
-			for (auto & src : _region->sources()) {
-				src->set_segment_descriptor (segment);
-			}
+		cerr << name() << " Estimated bpm " << _estimated_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
+		segment.set_tempo (Temporal::Tempo (_estimated_tempo, 4));
 
-			cerr << name() << " Estimated bpm " << _estimated_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
+		for (auto & src : _region->sources()) {
+			src->set_segment_descriptor (segment);
 		}
 	}
 
