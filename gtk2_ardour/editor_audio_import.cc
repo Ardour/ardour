@@ -1092,8 +1092,14 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 	{
 		if (!existing_track) {
 			if (ar) {
-				list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, 0, 1, string(), PresentationInfo::max_order, Normal));
-
+				list<boost::shared_ptr<AudioTrack> > at (
+					_session->new_audio_track (in_chans, out_chans,
+					                           0, 1, string(),
+					                           PresentationInfo::max_order,
+					                           Normal,
+					                           true,
+					                           mode == ImportAsTrigger
+					));
 				if (at.empty()) {
 					return -1;
 				}
@@ -1108,7 +1114,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 			} else if (mr) {
 				list<boost::shared_ptr<MidiTrack> > mt (
 					_session->new_midi_track (ChanCount (DataType::MIDI, 1),
-						                  ChanCount (DataType::MIDI, 1),
+					                          ChanCount (DataType::MIDI, 1),
 					                          Config->get_strict_io () || Profile->get_mixbus (),
 					                          instrument, (Plugin::PresetRecord*) 0,
 					                          (RouteGroup*) 0,
@@ -1116,7 +1122,8 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 					                          string(),
 					                          PresentationInfo::max_order,
 					                          Normal,
-					                          true
+					                          true,
+					                          mode == ImportAsTrigger
 						));
 
 				if (mt.empty()) {
