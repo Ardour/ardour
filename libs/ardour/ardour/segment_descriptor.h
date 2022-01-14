@@ -34,6 +34,7 @@ namespace ARDOUR {
 class SegmentDescriptor {
 public:
 	SegmentDescriptor ();
+	SegmentDescriptor (XMLNode const &, int version);
 
 	/* This object does not use the tempo map to convert between time
 	 * domains, since it describes things that are not (always) on the

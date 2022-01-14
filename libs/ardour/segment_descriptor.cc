@@ -16,9 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
+#include "pbd/failed_constructor.h"
 #include "pbd/i18n.h"
+#include "pbd/xml++.h"
 
 #include "temporal/tempo.h"
 
@@ -34,6 +35,19 @@ SegmentDescriptor::SegmentDescriptor ()
 	, _tempo (120, 4)
 	, _meter (4, 4)
 {
+}
+
+
+SegmentDescriptor::SegmentDescriptor (XMLNode const & node, int version)
+	: _time_domain (AudioTime)
+	, _position_samples (0)
+	, _duration_samples (0)
+	, _tempo (120, 4)
+	, _meter (4, 4)
+{
+	if (!set_state (node, version)) {
+		throw failed_constructor ();
+	}
 }
 
 void
