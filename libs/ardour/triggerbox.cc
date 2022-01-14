@@ -2676,6 +2676,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	 */
 
 	if (!_currently_playing) {
+		DEBUG_TRACE (DEBUG::Triggers, "nothing currently playing 1, reset stop_all to false\n");
+		_stop_all = false;
 		return;
 	}
 
