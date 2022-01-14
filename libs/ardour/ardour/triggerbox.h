@@ -260,8 +260,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	StretchMode stretch_mode() const { return _stretch_mode; }
 	void set_stretch_mode (StretchMode);
 
-	double apparent_tempo() const { return _apparent_tempo; }
-	double set_tempo (double t);
+	double estimated_tempo() const { return _estimated_tempo; }
+	double segment_tempo() const { return _segment_tempo; }
+	void set_segment_tempo (double t);
 
 	Temporal::Meter meter() const { return _meter; }
 	void set_tempo (Temporal::Meter const &);
@@ -319,9 +320,12 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	/* computed from data */
 
+	double                    _estimated_tempo;  //TODO:  this should come from the MIDI file
+	double                    _segment_tempo;  //TODO: this will likely get stored in the SegmentDescriptor for audio triggers
+
 	double                    _barcnt; /* our estimate of the number of bars in the region */
-	double                    _apparent_tempo;
 	Temporal::Meter           _meter;
+
 	samplepos_t                expected_end_sample;
 	Temporal::BBT_Offset      _start_quantization;
 	std::atomic<Trigger*>     _pending;
@@ -400,7 +404,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
-	void determine_tempo ();
+	void estimate_tempo ();
 	void setup_stretcher ();
 	void _startup (Temporal::BBT_Offset const &);
 };
@@ -724,6 +728,8 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> currently_playing;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> stretchable;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> isolated;
+
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> tempo_meter; /* only used to transmit changes, not storage */
 }
 
 

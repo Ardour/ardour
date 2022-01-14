@@ -64,6 +64,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> stretchable;
 		PBD::PropertyDescriptor<bool> isolated;
 		PBD::PropertyDescriptor<Trigger::StretchMode> stretch_mode;
+		PBD::PropertyDescriptor<bool> tempo_meter;  /* only to transmit updates, not storage */
 	}
 }
 
@@ -98,7 +99,8 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _stretch_mode (Properties::stretch_mode, Trigger::Crisp)
 	, cue_launched (false)
 	, _barcnt (0.)
-	, _apparent_tempo (0.)
+	, _estimated_tempo (0.)
+	, _segment_tempo (0.)
 	, _meter (4, 4)
 	, expected_end_sample (0)
 	, _pending ((Trigger*) 0)
@@ -181,6 +183,16 @@ Trigger::set_stretchable (bool s)
 	_stretchable = s;
 	PropertyChanged (ARDOUR::Properties::stretchable);
 	_box.session().set_dirty();
+}
+
+void
+Trigger::set_segment_tempo (double t)
+{
+	if (_segment_tempo != t) {
+		_segment_tempo = t;  //TODO : this data will likely get stored in the SegmentDescriptor, not the trigger itself
+		PropertyChanged (ARDOUR::Properties::tempo_meter);
+		_box.session().set_dirty();
+	}
 }
 
 void
@@ -310,7 +322,8 @@ Trigger::get_state (void)
 	}
 
 	node->set_property (X_("index"), _index);
-	node->set_property (X_("apparent-tempo"), _apparent_tempo);
+	node->set_property (X_("estimated-tempo"), _estimated_tempo);
+	node->set_property (X_("segment-tempo"), _segment_tempo);
 	node->set_property (X_("barcnt"), _barcnt);
 
 	if (_region) {
@@ -334,12 +347,14 @@ Trigger::set_state (const XMLNode& node, int version)
 	boost::shared_ptr<Region> r = RegionFactory::region_by_id (rid);
 
 	if (r) {
-		set_region (r, false);
+		set_region (r, false);  //TODO: this results in a call to estimate_tempo() which should be avoided if bpm is already known
 	}
 
-	set_values (node);
+	node.get_property (X_("estimated-tempo"), _estimated_tempo);  //TODO: for now: if we know the bpm, overwrite the value that estimate_tempo() found
+	node.get_property (X_("segment-tempo"), _segment_tempo);
 
 	node.get_property (X_("index"), _index);
+	set_values (node);
 
 	return 0;
 }
@@ -814,7 +829,7 @@ AudioTrigger::~AudioTrigger ()
 bool
 AudioTrigger::stretching() const
 {
-	return (_apparent_tempo != .0) && _stretchable;
+	return (_segment_tempo != .0) && _stretchable;
 }
 
 SegmentDescriptor
@@ -822,7 +837,7 @@ AudioTrigger::get_segment_descriptor () const
 {
 	SegmentDescriptor sd;
 
-	sd.set_tempo (Temporal::Tempo (_apparent_tempo, 4));
+	sd.set_tempo (Temporal::Tempo (_segment_tempo, 4));
 
 	return sd;
 }
@@ -1034,14 +1049,17 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 	}
 
 	load_data (ar);
-	determine_tempo ();
+
+	estimate_tempo ();  //TODO: should first check if we already know this info from xml
+	_segment_tempo = _estimated_tempo;
+
 	setup_stretcher ();
 
 	/* Given what we know about the tempo and duration, set the defaults
 	 * for the trigger properties.
 	 */
 
-	if (_apparent_tempo == 0.) {
+	if (_segment_tempo == 0.) {
 		_stretchable = false;
 		_quantization = Temporal::BBT_Offset (-1, 0, 0);
 		_follow_action0 = None;
@@ -1067,7 +1085,7 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 }
 
 void
-AudioTrigger::determine_tempo ()
+AudioTrigger::estimate_tempo ()
 {
 	using namespace Temporal;
 	TempoMap::SharedPtr tm (TempoMap::use());
@@ -1080,7 +1098,7 @@ AudioTrigger::determine_tempo ()
 
 	if (have_segment) {
 
-		_apparent_tempo = segment.tempo().quarter_notes_per_minute ();
+		_estimated_tempo = segment.tempo().quarter_notes_per_minute ();
 		_meter = segment.meter();
 
 	} else {
@@ -1125,8 +1143,8 @@ AudioTrigger::determine_tempo ()
 					if (!p) {
 						text_tempo = -1.;
 					} else {
-						_apparent_tempo = text_tempo;
-						std::cerr << "from filename, tempo = " << _apparent_tempo << std::endl;
+						_estimated_tempo = text_tempo;
+						std::cerr << "from filename, tempo = " << _estimated_tempo << std::endl;
 					}
 				}
 			}
@@ -1134,7 +1152,7 @@ AudioTrigger::determine_tempo ()
 
 		/* We don't have too many good choices here. Triggers can fire at any
 		 * time, so there's no special place on the tempo map that we can use
-		 * to get the meter from and thus compute an apparent bar count for
+		 * to get the meter from and thus compute an estimated bar count for
 		 * this region. Our solution for now: just use the first meter.
 		 */
 
@@ -1144,10 +1162,10 @@ AudioTrigger::determine_tempo ()
 
 			mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
 
-			_apparent_tempo = mbpm.estimateTempoOfSamples (data[0], data.length);
+			_estimated_tempo = mbpm.estimateTempoOfSamples (data[0], data.length);
 
-			if (_apparent_tempo == 0.0) {
-				/* no apparent tempo, just return since we'll use it as-is */
+			if (_estimated_tempo == 0.0) {
+				/* no estimated tempo, just return since we'll use it as-is */
 				std::cerr << "Could not determine tempo for " << name() << std::endl;
 				return;
 			}
@@ -1156,18 +1174,18 @@ AudioTrigger::determine_tempo ()
 				segment.set_extent (_region->start_sample(), _region->length_samples());
 			}
 
-			segment.set_tempo (Temporal::Tempo (_apparent_tempo, 4));
+			segment.set_tempo (Temporal::Tempo (_estimated_tempo, 4));
 
 			for (auto & src : _region->sources()) {
 				src->set_segment_descriptor (segment);
 			}
 
-			cerr << name() << " Estimated bpm " << _apparent_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
+			cerr << name() << " Estimated bpm " << _estimated_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
 		}
 	}
 
 	const double seconds = (double) data.length  / _box.session().sample_rate();
-	const double quarters = (seconds / 60.) * _apparent_tempo;
+	const double quarters = (seconds / 60.) * _estimated_tempo;
 	_barcnt = quarters / _meter.divisions_per_bar();
 
 	/* now check the determined tempo and force it to a value that gives us
@@ -1176,19 +1194,19 @@ AudioTrigger::determine_tempo ()
 	   resulting in small or larger gaps in output if they are repeating.
 	*/
 
-	if ((_apparent_tempo != 0.) && (rint (_barcnt) != _barcnt)) {
+	if ((_estimated_tempo != 0.) && (rint (_barcnt) != _barcnt)) {
 		/* fractional barcnt */
 		int intquarters = round (quarters);
-		double at = _apparent_tempo;
-		_apparent_tempo = intquarters / (seconds/60.);
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("adjusted barcnt of %1 and q = %2 to %3, old %4 new at = %5 seconds was %6\n", _barcnt, quarters, intquarters, at, _apparent_tempo, seconds));
+		double at = _estimated_tempo;
+		_estimated_tempo = intquarters / (seconds/60.);
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("adjusted barcnt of %1 and q = %2 to %3, old %4 new at = %5 seconds was %6\n", _barcnt, quarters, intquarters, at, _estimated_tempo, seconds));
 	}
 
 	/* use initial tempo in map (assumed for now to be the only one */
 
 	const samplecnt_t one_bar = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (1, 0, 0)).samples();
 
-	cerr << "tempo: " << _apparent_tempo << endl;
+	cerr << "estimated tempo: " << _estimated_tempo << endl;
 	cerr << "one bar in samples: " << one_bar << endl;
 	cerr << "barcnt = " << round (_barcnt) << endl;
 }
@@ -1196,11 +1214,11 @@ AudioTrigger::determine_tempo ()
 bool
 AudioTrigger::probably_oneshot () const
 {
-	assert (_apparent_tempo != 0.);
+	assert (_segment_tempo != 0.);
 
 	if ((data.length < (_box.session().sample_rate()/2)) ||
 	    /* XXX use Meter here, not 4.0 */
-	    ((_barcnt < 1) && (data.length < (4.0 * ((_box.session().sample_rate() * 60) / _apparent_tempo))))) {
+	    ((_barcnt < 1) && (data.length < (4.0 * ((_box.session().sample_rate() * 60) / _segment_tempo))))) {
 		std::cerr << "looks like a one-shot\n";
 		return true;
 	}
@@ -1341,10 +1359,10 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	if (do_stretch && _state != Playout) {
 
-		const double stretch = _apparent_tempo / bpm;
+		const double stretch = _segment_tempo / bpm;
 		_stretcher->setTimeRatio (stretch);
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("clip tempo %1 bpm %2 ratio %3%4\n", _apparent_tempo, bpm, std::setprecision (6), stretch));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("clip tempo %1 bpm %2 ratio %3%4\n", _segment_tempo, bpm, std::setprecision (6), stretch));
 
 		if ((avail = _stretcher->available()) < 0) {
 			error << _("Could not configure rubberband stretcher") << endmsg;
