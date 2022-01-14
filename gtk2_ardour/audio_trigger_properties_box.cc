@@ -214,18 +214,21 @@ void
 AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& what_changed)
 {
 	TriggerPtr trigger (tref.trigger());
+	if (!trigger) {
+		return;
+	}
 
 	AudioClock::Mode mode = trigger->box ().data_type () == ARDOUR::DataType::AUDIO ? AudioClock::Samples : AudioClock::BBT;
 
 	_start_clock.set_mode (mode);
 	_length_clock.set_mode (mode);
 
-	_start_clock.set (tref.trigger()->start_offset ());
-	_length_clock.set (tref.trigger()->current_length ()); // set_duration() ?
+	_start_clock.set (trigger->start_offset ());
+	_length_clock.set (trigger->current_length ()); // set_duration() ?
 
 	int metrum_numerator = trigger->meter().divisions_per_bar();
 	int bar_beats = metrum_numerator * trigger->follow_length().bars;
-	int beats = tref.trigger()->follow_length().beats;
+	int beats = trigger->follow_length().beats;
 	_follow_length_adjustment.set_value (bar_beats+beats);  //note: 0 is a special case meaning "use clip length"
 
 	_start_clock.ValueChanged.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::start_clock_changed));
@@ -236,12 +239,12 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& what_c
 
 	_metrum_button.set_text (string_compose ("%1/%2", metrum_numerator, trigger->meter().note_value()));
 
-	_stretch_toggle.set_active (tref.trigger()->stretchable () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	_stretch_toggle.set_active (trigger->stretchable () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 
-	_stretch_selector.set_sensitive(tref.trigger()->stretchable ());
-	_stretch_selector.set_text(stretch_mode_to_string(tref.trigger()->stretch_mode ()));
+	_stretch_selector.set_sensitive(trigger->stretchable ());
+	_stretch_selector.set_text(stretch_mode_to_string(trigger->stretch_mode ()));
 
-	float gain = accurate_coefficient_to_dB(tref.trigger()->gain());
+	float gain = accurate_coefficient_to_dB(trigger->gain());
 	if (gain != _gain_adjustment.get_value()) {
 		_gain_adjustment.set_value (gain);
 	}
@@ -252,20 +255,20 @@ AudioTriggerPropertiesBox::gain_changed ()
 {
 	float coeff = dB_to_coefficient(_gain_adjustment.get_value());
 
-	tref.trigger()->set_gain(coeff);
+	trigger()->set_gain(coeff);
 }
 
 
 void
 AudioTriggerPropertiesBox::start_clock_changed ()
 {
-	tref.trigger()->set_start(_start_clock.current_time());
+	trigger()->set_start(_start_clock.current_time());
 }
 
 void
 AudioTriggerPropertiesBox::length_clock_changed ()
 {
-	tref.trigger()->set_length(_length_clock.current_duration());  //?
+	trigger()->set_length(_length_clock.current_duration());  //?
 }
 
 void
