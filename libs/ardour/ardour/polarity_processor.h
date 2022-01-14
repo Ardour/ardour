@@ -24,6 +24,8 @@
 
 namespace ARDOUR {
 
+class PhaseControl;
+
 class LIBARDOUR_API PolarityProcessor : public Processor
 {
 public:
