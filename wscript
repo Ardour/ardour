@@ -796,6 +796,7 @@ def create_resource_file(icon):
 def options(opt):
     opt.load('compiler_c')
     opt.load('compiler_cxx')
+    opt.load('clang_compilation_database')
     autowaf.set_options(opt, debug_by_default=True)
     opt.add_option('--program-name', type='string', action='store', default='Ardour', dest='program_name',
                     help='The user-visible name of the program being built')
@@ -935,8 +936,6 @@ def configure(conf):
     conf.load('compiler_cxx')
     if Options.options.dist_target == 'mingw':
         conf.load('winres')
-    else:
-        conf.load('clang_compilation_database')
 
     if Options.options.dist_target == 'msvc':
         conf.env['MSVC_VERSIONS'] = ['msvc 10.0', 'msvc 9.0', 'msvc 8.0', 'msvc 7.1', 'msvc 7.0', 'msvc 6.0', ]
