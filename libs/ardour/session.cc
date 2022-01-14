@@ -2419,7 +2419,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
                          RouteGroup* route_group, uint32_t how_many,
                          string name_template, PresentationInfo::order_t order,
                          TrackMode mode, bool input_auto_connect,
-                         bool with_triggers)
+                         bool trigger_visibility)
 {
 	string track_name;
 	uint32_t track_id = 0;
@@ -2468,7 +2468,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 				route_group->add (track);
 			}
 
-			track->presentation_info ().set_trigger_track (with_triggers);
+			track->presentation_info ().set_trigger_track (trigger_visibility);
 
 			new_routes.push_back (track);
 			ret.push_back (track);
@@ -2674,7 +2674,7 @@ list< boost::shared_ptr<AudioTrack> >
 Session::new_audio_track (int input_channels, int output_channels, RouteGroup* route_group,
                           uint32_t how_many, string name_template, PresentationInfo::order_t order,
                           TrackMode mode, bool input_auto_connect,
-                          bool with_triggers)
+                          bool trigger_visibility)
 {
 	string track_name;
 	uint32_t track_id = 0;
@@ -2731,7 +2731,7 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
 				route_group->add (track);
 			}
 
-			track->presentation_info ().set_trigger_track (with_triggers);
+			track->presentation_info ().set_trigger_track (trigger_visibility);
 
 			new_routes.push_back (track);
 			ret.push_back (track);
