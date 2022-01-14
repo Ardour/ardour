@@ -142,6 +142,13 @@ Source::get_state ()
 		node->add_child_nocopy (get_cue_state());
 	}
 
+	if (!segment_descriptors.empty()) {
+		XMLNode* sd_node = new XMLNode (X_("SegmentDescriptors"));
+		for (auto const & sd : segment_descriptors) {
+			sd_node->add_child_nocopy (sd.get_state());
+		}
+	}
+
 	return *node;
 }
 
