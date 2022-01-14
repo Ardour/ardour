@@ -461,6 +461,7 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	bool follow_widgets_sensitive = trigger()->follow_action (0) != Trigger::None;
 
 	if (follow_widgets_sensitive) {
+		_follow_right.set_sensitive(true);
 		_follow_count_spinner.set_sensitive(true);
 		_follow_length_spinner.set_sensitive(true);
 		_follow_probability_slider.set_sensitive(true);
