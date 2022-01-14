@@ -69,6 +69,10 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 	Gtk::Adjustment                    _velocity_adjustment;
 	ArdourWidgets::HSliderController   _velocity_slider;
 
+	Gtk::Table                    _trigger_table;
+	Gtk::Table                    _launch_table;
+	Gtk::Table                    _follow_table;
+
 	Gtk::Label                    _left_probability_label;
 	Gtk::Label                    _right_probability_label;
 	Gtk::Adjustment                    _follow_probability_adjustment;
@@ -76,6 +80,9 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 
 	Gtk::Adjustment                    _follow_count_adjustment;
 	Gtk::SpinButton                    _follow_count_spinner;
+
+	Gtk::Adjustment  _follow_length_adjustment;
+	Gtk::SpinButton  _follow_length_spinner;
 
 	ArdourWidgets::ArdourDropdown      _follow_left;
 	ArdourWidgets::ArdourDropdown      _follow_right;
@@ -95,6 +102,7 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 	bool follow_action_button_event (GdkEvent*);
 	bool legato_button_event (GdkEvent*);
 	void follow_count_event ();
+	void follow_length_event ();
 
 	void probability_adjusted ();
 	void velocity_adjusted ();

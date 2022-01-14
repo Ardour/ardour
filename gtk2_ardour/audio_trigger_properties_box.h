@@ -75,9 +75,6 @@ private:
 	AudioClock _length_clock;
 	AudioClock _start_clock;
 
-	Gtk::Adjustment  _follow_length_adjustment;
-	Gtk::SpinButton  _follow_length_spinner;
-
 	Gtk::Adjustment  _gain_adjustment;
 	Gtk::SpinButton  _gain_spinner;
 

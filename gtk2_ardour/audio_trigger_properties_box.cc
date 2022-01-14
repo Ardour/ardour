@@ -53,8 +53,6 @@ using std::min;
 AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	: _length_clock (X_("regionlength"), true, "", true, false, true)
 	, _start_clock (X_("regionstart"), true, "", false, false)
-	, _follow_length_adjustment (0, 0, 128, 1, 4)
-	, _follow_length_spinner (_follow_length_adjustment)
 	, _gain_adjustment( 0.0, -20.0, +20.0, 1.0, 3.0, 0)
 	, _gain_spinner (_gain_adjustment)
 	, _stretch_toggle (ArdourButton::led_default_elements)
@@ -119,15 +117,6 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	_table.attach (_length_clock, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
-	label = manage (new Gtk::Label (_("Follow Length:")));
-	label->set_alignment (1.0, 0.5);
-	Gtk::Label *beat_label = manage (new Gtk::Label (_("(beats)")));
-	beat_label->set_alignment (0.0, 0.5);
-	_table.attach (*label,                 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	_table.attach (_follow_length_spinner, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	_table.attach (*beat_label,            2, 3, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	row++;
-
 	_table.set_homogeneous (false);
 	_table.set_spacings (4);
 	_table.set_border_width (2);
@@ -161,9 +150,6 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	_stretch_selector.AddMenuElem (MenuElem (TriggerUI::stretch_mode_to_string(Trigger::Smooth), sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::set_stretch_mode), Trigger::Smooth)));
 
 	_stretch_toggle.signal_clicked.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::toggle_stretch));
-
-	_follow_length_spinner.set_can_focus(false);
-	_follow_length_spinner.signal_changed ().connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::follow_clock_changed));
 
 	_gain_spinner.set_can_focus(false);
 	_gain_spinner.configure(_gain_adjustment, 0.0, 1);
@@ -226,18 +212,13 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& what_c
 	_start_clock.set (trigger->start_offset ());
 	_length_clock.set (trigger->current_length ()); // set_duration() ?
 
-	int metrum_numerator = trigger->meter().divisions_per_bar();
-	int bar_beats = metrum_numerator * trigger->follow_length().bars;
-	int beats = trigger->follow_length().beats;
-	_follow_length_adjustment.set_value (bar_beats+beats);  //note: 0 is a special case meaning "use clip length"
-
 	_start_clock.ValueChanged.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::start_clock_changed));
 	_length_clock.ValueChanged.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::length_clock_changed));
 
 	_abpm_label.set_text (string_compose ("%1", trigger->segment_tempo ()));
 	ArdourWidgets::set_tooltip (_abpm_label, string_compose ("Clip Tempo, used for stretching.  Estimated tempo (from file) was: %1", trigger->estimated_tempo ()));
 
-	_metrum_button.set_text (string_compose ("%1/%2", metrum_numerator, trigger->meter().note_value()));
+	_metrum_button.set_text (string_compose ("%1/%2", trigger->meter().divisions_per_bar(), trigger->meter().note_value()));
 
 	_stretch_toggle.set_active (trigger->stretchable () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 
@@ -269,17 +250,4 @@ void
 AudioTriggerPropertiesBox::length_clock_changed ()
 {
 	trigger()->set_length(_length_clock.current_duration());  //?
-}
-
-void
-AudioTriggerPropertiesBox::follow_clock_changed ()
-{
-	int beatz = (int) _follow_length_adjustment.get_value();
-
-	int metrum_numerator = trigger()->meter().divisions_per_bar();
-
-	int bars = beatz/metrum_numerator;
-	int beats = beatz%metrum_numerator;
-
-	trigger()->set_follow_length(Temporal::BBT_Offset(bars,beats,0));
 }

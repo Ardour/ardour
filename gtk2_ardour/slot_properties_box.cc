@@ -73,17 +73,10 @@ SlotPropertiesBox::SlotPropertiesBox ()
 {
 	_header_label.set_text(_("Slot Properties:"));
 	_header_label.set_alignment(0.0, 0.5);
-	pack_start(_header_label, false, false, 6);
+//	pack_start(_header_label, false, false, 6);
 
 	_triggerwidget = manage (new SlotPropertyWidget ());
 	_triggerwidget->show();
-
-//	double w;
-//	double h;
-
-//	_triggerwidget->size_request (w, h);
-//	_triggerwidget->set_size_request (w, h);
-
 
 	pack_start (*_triggerwidget, true, true);
 }
@@ -115,13 +108,12 @@ SlotPropertyTable::SlotPropertyTable ()
 	, _follow_probability_slider (&_follow_probability_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _follow_count_adjustment (1, 1, 128, 1, 4)
 	, _follow_count_spinner (_follow_count_adjustment)
+	, _follow_length_adjustment (0, 0, 128, 1, 4)
+	, _follow_length_spinner (_follow_length_adjustment)
 	, _legato_button (ArdourButton::led_default_elements)
 
 {
 	using namespace Gtk::Menu_Helpers;
-
-	set_spacings (2);
-	set_homogeneous (false);
 
 	_follow_action_button.set_name("FollowAction");
 	_follow_action_button.set_text (_("Follow Action"));
@@ -129,6 +121,9 @@ SlotPropertyTable::SlotPropertyTable ()
 
 	_follow_count_spinner.set_can_focus(false);
 	_follow_count_spinner.signal_changed ().connect (sigc::mem_fun (*this, &SlotPropertyTable::follow_count_event));
+
+	_follow_length_spinner.set_can_focus(false);
+	_follow_length_spinner.signal_changed ().connect (sigc::mem_fun (*this, &SlotPropertyTable::follow_length_event));
 
 	_velocity_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &SlotPropertyTable::velocity_adjusted));
 
@@ -228,36 +223,66 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_size_group->add_widget(_velocity_slider);
 	_follow_size_group->add_widget(_follow_count_spinner);
 
+	set_spacings (4);
+	set_homogeneous (false);
+
 	int row=0;
 	Gtk::Label *label;
 
-	attach(_name_frame,       0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_load_button,      2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_color_button,     3, 4, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	/* ---- Basic trigger properties (name, color) ----- */
+	_trigger_table.set_spacings (4);
+	_trigger_table.set_homogeneous (false);
+
+	_trigger_table.attach(_name_frame,       0, 2, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK );
+	_trigger_table.attach(_load_button,      2, 3, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
+	_trigger_table.attach(_color_button,     3, 4, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
+
+
+	/* ---- Launch settings ----- */
+	_launch_table.set_spacings (2);
+	_launch_table.set_border_width (8);
+	_launch_table.set_homogeneous (false);
+	row=0;
 
 	label = manage(new Gtk::Label(_("Velocity Sense:")));  label->set_alignment(1.0, 0.5);
-	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_velocity_slider,       1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	_launch_table.attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	_launch_table.attach(_velocity_slider,       1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Launch Style:")));  label->set_alignment(1.0, 0.5);
-	attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_launch_style_button,   1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	_launch_table.attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	_launch_table.attach(_launch_style_button,   1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Launch Quantize:")));  label->set_alignment(1.0, 0.5);
-	attach(*label,            0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_quantize_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	_launch_table.attach(*label,            0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	_launch_table.attach(_quantize_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Legato Mode:")));  label->set_alignment(1.0, 0.5);
-	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	attach(_legato_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	_launch_table.attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	_launch_table.attach(_legato_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
-	attach(_follow_action_button,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	/* ---- Follow settings ----- */
+	_follow_table.set_spacings (2);
+	_follow_table.set_border_width (8);
+	_follow_table.set_homogeneous (false);
+	row=0;
+
+	_follow_table.attach(_follow_action_button,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Follow Count:")));  label->set_alignment(1.0, 0.5);
-	attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	_follow_table.attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
 	align->add (_follow_count_spinner);
-	attach(*align,          1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
+	_follow_table.attach(*align,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
+
+	label = manage(new Gtk::Label(_("Follow Length:")));  label->set_alignment(1.0, 0.5);
+	Gtk::Label *beat_label = manage (new Gtk::Label (_("(beats)")));
+	beat_label->set_alignment (0.0, 0.5);
+	_follow_table.attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	Gtk::Alignment *fl_align = manage (new Gtk::Alignment (0, .5, 0, 0));
+	fl_align->add (_follow_length_spinner);
+	_follow_table.attach(*fl_align,       1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 );
+	_follow_table.attach(*beat_label,     2, 3, row, row+1, Gtk::SHRINK, Gtk::SHRINK); row++;
 
 	Gtkmm2ext::set_size_request_to_display_given_text (_left_probability_label, "100% Left ", 12, 0);
 	_left_probability_label.set_alignment(0.0, 0.5);
@@ -270,9 +295,21 @@ SlotPropertyTable::SlotPropertyTable ()
 	prob_table->attach(_left_probability_label,    0, 1, 1, 2, Gtk::FILL,             Gtk::SHRINK );
 	prob_table->attach(_right_probability_label,   1, 2, 1, 2, Gtk::FILL,             Gtk::SHRINK );
 
-	attach( *prob_table,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-	attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
-	attach(_follow_right,  1, 3, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
+	_follow_table.attach( *prob_table,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	_follow_table.attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
+	_follow_table.attach(_follow_right,  1, 3, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
+
+	Gtk::EventBox* eFollowBox = manage (new Gtk::EventBox); // a themeable box
+	eFollowBox->set_name("EditorDark");
+	eFollowBox->add (_follow_table);
+
+	Gtk::EventBox* eLaunchBox = manage (new Gtk::EventBox); // a themeable box
+	eLaunchBox->set_name("EditorDark");
+	eLaunchBox->add (_launch_table);
+
+	attach(_trigger_table,  0,1, 0,1, Gtk::FILL, Gtk::SHRINK );
+	attach(*eLaunchBox,     0,1, 1,2, Gtk::FILL, Gtk::SHRINK );
+	attach(*eFollowBox,     1,2, 1,2, Gtk::FILL, Gtk::SHRINK );
 }
 
 SlotPropertyTable::~SlotPropertyTable ()
@@ -290,6 +327,19 @@ SlotPropertyTable::set_quantize (BBT_Offset bbo)
 #endif
 
 	trigger()->set_quantization (bbo);
+}
+
+void
+SlotPropertyTable::follow_length_event ()
+{
+	int beatz = (int) _follow_length_adjustment.get_value();
+
+	int metrum_numerator = trigger()->meter().divisions_per_bar();
+
+	int bars = beatz/metrum_numerator;
+	int beats = beatz%metrum_numerator;
+
+	trigger()->set_follow_length(Temporal::BBT_Offset(bars,beats,0));
 }
 
 void
@@ -372,6 +422,13 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 
 	if (pc.contains (Properties::follow_count)) {
 		_follow_count_adjustment.set_value (trigger()->follow_count());
+	}
+
+	if (pc.contains (Properties::tempo_meter)) {
+		int metrum_numerator = trigger()->meter().divisions_per_bar();
+		int bar_beats = metrum_numerator * trigger()->follow_length().bars;
+		int beats = trigger()->follow_length().beats;
+		_follow_length_adjustment.set_value (bar_beats+beats);  //note: 0 is a special case meaning "use clip length"
 	}
 
 	if (pc.contains (Properties::legato)) {

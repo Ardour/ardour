@@ -433,6 +433,11 @@ style "editor_window"
 {
 }
 
+style "editor_dark" = "editor_window"
+{
+	bg[NORMAL] = shade (0.7, @background)
+}
+
 style "transport_base" = "medium_bold_text"
 {
 }
@@ -1136,6 +1141,7 @@ widget "*TransportFrame" style:highest "transport_frame"
 widget "*TransportFrame*" style:highest  "transport_frame"
 widget "*EditorWindow*" style:highest  "editor_window"
 widget "*EditorWindow" style:highest  "editor_window"
+widget "*EditorDark" style:highest  "editor_dark"
 
 widget "*SendStripBase" style:highest "send_strip_base"
 widget "*AudioTrackStripBase" style:highest "audio_track_base"
