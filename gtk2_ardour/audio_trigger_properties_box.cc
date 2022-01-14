@@ -58,22 +58,23 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	, _stretch_toggle (ArdourButton::led_default_elements)
 	, _abpm_label  (ArdourButton::Text)
 {
-	_header_label.set_text (_("AUDIO Trigger Properties:"));
-
 	Gtk::Label* label;
 	int         row = 0;
 
-	_header_label.set_alignment (0.0, 0.5);
-	pack_start (_header_label, false, false, 6);
-
+	/* ------- Stretching and Tempo stuff ----------------------------- */
 	Gtk::Table* bpm_table = manage (new Gtk::Table ());
 	bpm_table->set_homogeneous (false);
 	bpm_table->set_spacings (4);
-	bpm_table->set_border_width (2);
+	bpm_table->set_border_width (8);
+
+	_stretch_toggle.set_text (_("Stretch"));
+	bpm_table->attach (_stretch_toggle, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	bpm_table->attach (_stretch_selector, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK); row++;
+
 	label = manage (new Gtk::Label (_("BPM:")));
 	label->set_alignment (1.0, 0.5);
-	bpm_table->attach (*label,      0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	bpm_table->attach (_abpm_label, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	bpm_table->attach (*label,      0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	bpm_table->attach (_abpm_label, 1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	ArdourButton *half = manage (new ArdourButton (_("/2")));
 	half->signal_clicked.connect(sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::MultiplyTempo), 0.5));
@@ -84,26 +85,17 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 
 	row++;
 
-	pack_start (*bpm_table, false, false);
-
-	Gtk::Table* metrum_table = manage (new Gtk::Table ());
-	metrum_table->set_homogeneous (false);
-	metrum_table->set_spacings (4);
-	metrum_table->set_border_width (2);
 	label = manage (new Gtk::Label (_("Time Sig:")));
 	label->set_alignment (1.0, 0.5);
-	bpm_table->attach (*label,         0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	bpm_table->attach (_metrum_button, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	row++;
+	bpm_table->attach (*label,         0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	bpm_table->attach (_metrum_button, 1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
-	pack_start (*metrum_table, false, false);
+	Gtk::EventBox* eTempoBox = manage (new Gtk::EventBox); // a themeable box
+	eTempoBox->set_name("EditorDark");
+	eTempoBox->add (*bpm_table);
 
+	/* -------------- Clip start&length (redundant with the trimmer gui handles?)  ----------*/
 	row = 0;
-
-	_stretch_toggle.set_text (_("Stretch"));
-	_table.attach (_stretch_toggle, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	_table.attach (_stretch_selector, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	row++;
 
 	label = manage (new Gtk::Label (_("Start:")));
 	label->set_alignment (1.0, 0.5);
@@ -120,7 +112,6 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	_table.set_homogeneous (false);
 	_table.set_spacings (4);
 	_table.set_border_width (2);
-	pack_start (_table, false, false);
 
 	Gtk::Table* audio_t = manage (new Gtk::Table ());
 	audio_t->set_homogeneous (true);
@@ -138,7 +129,9 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 
 	row++;
 
-	pack_start (*audio_t);
+	attach (*eTempoBox,    0,1, 0,1, Gtk::FILL, Gtk::SHRINK);
+	attach (_table,        0,1, 1,2, Gtk::FILL, Gtk::SHRINK);
+	attach (*audio_t,      0,1, 2,3, Gtk::FILL, Gtk::SHRINK);
 
 	using namespace Menu_Helpers;
 

@@ -267,7 +267,21 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_table.set_homogeneous (false);
 	row=0;
 
-	_follow_table.attach(_follow_action_button,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	Gtkmm2ext::set_size_request_to_display_given_text (_left_probability_label, "100% Left ", 12, 0);
+	_left_probability_label.set_alignment(0.0, 0.5);
+	Gtkmm2ext::set_size_request_to_display_given_text (_right_probability_label, "100% Right", 12, 0);
+	_right_probability_label.set_alignment(1.0, 0.5);
+
+	Gtk::Table *prob_table = manage(new Gtk::Table());
+	prob_table->set_spacings(2);
+	prob_table->set_border_width(4);
+	prob_table->attach(_follow_probability_slider, 0, 2, 0, 1, Gtk::FILL, Gtk::SHRINK );
+	prob_table->attach(_left_probability_label,    0, 1, 1, 2, Gtk::FILL,             Gtk::SHRINK );
+	prob_table->attach(_right_probability_label,   1, 2, 1, 2, Gtk::FILL,             Gtk::SHRINK );
+
+	_follow_table.attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
+	_follow_table.attach(_follow_right,  1, 3, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
+	_follow_table.attach( *prob_table,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	label = manage(new Gtk::Label(_("Follow Count:")));  label->set_alignment(1.0, 0.5);
 	_follow_table.attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
@@ -283,21 +297,6 @@ SlotPropertyTable::SlotPropertyTable ()
 	fl_align->add (_follow_length_spinner);
 	_follow_table.attach(*fl_align,       1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 );
 	_follow_table.attach(*beat_label,     2, 3, row, row+1, Gtk::SHRINK, Gtk::SHRINK); row++;
-
-	Gtkmm2ext::set_size_request_to_display_given_text (_left_probability_label, "100% Left ", 12, 0);
-	_left_probability_label.set_alignment(0.0, 0.5);
-	Gtkmm2ext::set_size_request_to_display_given_text (_right_probability_label, "100% Right", 12, 0);
-	_right_probability_label.set_alignment(1.0, 0.5);
-
-	Gtk::Table *prob_table = manage(new Gtk::Table());
-	prob_table->set_spacings(2);
-	prob_table->attach(_follow_probability_slider, 0, 2, 0, 1, Gtk::FILL, Gtk::SHRINK );
-	prob_table->attach(_left_probability_label,    0, 1, 1, 2, Gtk::FILL,             Gtk::SHRINK );
-	prob_table->attach(_right_probability_label,   1, 2, 1, 2, Gtk::FILL,             Gtk::SHRINK );
-
-	_follow_table.attach( *prob_table,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
-	_follow_table.attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
-	_follow_table.attach(_follow_right,  1, 3, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
 
 	Gtk::EventBox* eFollowBox = manage (new Gtk::EventBox); // a themeable box
 	eFollowBox->set_name("EditorDark");
@@ -405,6 +404,8 @@ SlotPropertyTable::set_follow_action (Trigger::FollowAction fa, uint64_t idx)
 void
 SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 {
+	int probability = trigger()->follow_action_probability();
+
 	if (pc.contains (Properties::name)) {
 		_name_label.set_text (trigger()->name());
 	}
@@ -452,26 +453,22 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (pc.contains (Properties::follow_action_probability)) {
-		int pval = trigger()->follow_action_probability();
-		_follow_probability_adjustment.set_value (pval);
-		_left_probability_label.set_text (string_compose(_("%1%% Left"), 100-pval));
-		_right_probability_label.set_text (string_compose(_("%1%% Right"), pval));
+		_follow_probability_adjustment.set_value (probability);
+		_left_probability_label.set_text (string_compose(_("%1%% Left"), 100-probability));
+		_right_probability_label.set_text (string_compose(_("%1%% Right"), probability));
 	}
 
-	if (trigger()->use_follow()) {
-		_follow_left.set_sensitive(true);
-		_follow_right.set_sensitive(true);
+	bool follow_widgets_sensitive = trigger()->follow_action (0) != Trigger::None;
+
+	if (follow_widgets_sensitive) {
 		_follow_count_spinner.set_sensitive(true);
+		_follow_length_spinner.set_sensitive(true);
 		_follow_probability_slider.set_sensitive(true);
-		_left_probability_label.set_sensitive(true);
-		_right_probability_label.set_sensitive(true);
 	} else {
-		_follow_left.set_sensitive(false);
 		_follow_right.set_sensitive(false);
 		_follow_count_spinner.set_sensitive(false);
+		_follow_length_spinner.set_sensitive(false);
 		_follow_probability_slider.set_sensitive(false);
-		_left_probability_label.set_sensitive(false);
-		_right_probability_label.set_sensitive(false);
 	}
 }
 
@@ -482,7 +479,6 @@ SlotPropertyWidget::SlotPropertyWidget ()
 	ui = new SlotPropertyTable ();
 	pack_start(*ui);
 	ui->show();
-//	set_background_color (UIConfiguration::instance().color (X_("theme:bg")));
 }
 
 /* ------------ */

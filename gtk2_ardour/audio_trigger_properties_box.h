@@ -34,7 +34,7 @@
 #include "audio_clock.h"
 #include "trigger_ui.h"
 
-class TriggerPropertiesBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr, public TriggerUI
+class TriggerPropertiesBox : public Gtk::Table, public ARDOUR::SessionHandlePtr, public TriggerUI
 {
 public:
 	TriggerPropertiesBox () {}

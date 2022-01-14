@@ -48,11 +48,6 @@ using std::min;
 
 MidiTriggerPropertiesBox::MidiTriggerPropertiesBox ()
 {
-	_header_label.set_text (_("MIDI Trigger Properties:"));
-
-	_header_label.set_alignment (0.0, 0.5);
-	pack_start (_header_label, false, false, 6);
-
 	Gtk::Table* midi_t = manage (new Gtk::Table ());
 	midi_t->set_homogeneous (true);
 	midi_t->set_spacings (4);
@@ -71,7 +66,7 @@ MidiTriggerPropertiesBox::MidiTriggerPropertiesBox ()
 	midi_t->attach (_cc_enable_button, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	row++;
 
-	pack_start (*midi_t);
+	attach (*midi_t, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK);
 }
 
 MidiTriggerPropertiesBox::~MidiTriggerPropertiesBox ()
