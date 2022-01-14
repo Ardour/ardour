@@ -115,7 +115,7 @@ SegmentDescriptor::set_meter (Meter const & m)
 }
 
 XMLNode&
-SegmentDescriptor::get_state (void)
+SegmentDescriptor::get_state (void) const
 {
 	XMLNode* root = new XMLNode (X_("SegmentDescriptor"));
 
