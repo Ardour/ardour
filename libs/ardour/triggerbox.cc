@@ -461,8 +461,9 @@ Trigger::_startup (Temporal::BBT_Offset const & start_quantization)
 	_velocity_gain = _pending_velocity_gain;
 	_explicitly_stopped = false;
 
-	if (start_quantization != Temporal::BBT_Offset()) {
-		_start_quantization = start_quantization;
+	if (start_quantization == Temporal::BBT_Offset()) {
+		/* negative quantization means "do not quantize */
+		_start_quantization = Temporal::BBT_Offset (-1, 0, 0);
 	} else {
 		_start_quantization = _quantization;
 	}
@@ -966,9 +967,9 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 	}
 
 	if (_follow_length != Temporal::BBT_Offset()) {
-		final_sample = end_by_follow_length;
+		final_sample = end_by_follow_length - transition_sample;
 	} else {
-		final_sample = expected_end_sample;
+		final_sample = expected_end_sample - transition_sample;
 	}
 
 	samplecnt_t usable_length;
@@ -1571,7 +1572,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 
 		const pframes_t remaining_frames_for_run= orig_nframes - covered_frames;
-		const pframes_t remaining_frames_till_final = (final_sample - transition_samples) - process_index;
+		const pframes_t remaining_frames_till_final = final_sample - process_index;
 		const pframes_t to_fill = std::min (remaining_frames_till_final, remaining_frames_for_run);
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout mode, remaining in run %2 till final %3 @ %5 ts %7 vs pi @ %6 to fill %4\n",
@@ -2806,8 +2807,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						break; /* no triggers to come next, break out of nframes loop */
 					}
 					if ((int) _currently_playing->index() == n) {
-						start_quantization = _currently_playing->follow_length();
-						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1, will use start Q %2\n", all_triggers[n]->name(), _currently_playing->follow_length()));
+						start_quantization = Temporal::BBT_Offset ();
+						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1, will use start immediately \n", all_triggers[n]->name()));
 					} else {
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", all_triggers[n]->name()));
 					}

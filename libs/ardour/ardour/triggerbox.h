@@ -226,7 +226,11 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_legato (bool yn);
 	bool legato () const { return _legato; }
 
-	void startup (Temporal::BBT_Offset const & start_quantization = Temporal::BBT_Offset ());
+	/* any non-zero value will work for the default argument, and means
+	   "use your own launch quantization". BBT_Offset (0, 0, 0) means what
+	   it says: start immediately
+	*/
+	void startup (Temporal::BBT_Offset const & start_quantization = Temporal::BBT_Offset (9, 3,0));
 	virtual void shutdown (BufferSet& bufs, pframes_t dest_offset);
 	virtual void jump_start ();
 	virtual void jump_stop (BufferSet& bufs, pframes_t dest_offset);
