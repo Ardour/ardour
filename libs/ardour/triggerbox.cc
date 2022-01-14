@@ -2805,7 +2805,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					}
 					if ((int) _currently_playing->index() == n) {
 						start_quantization = _currently_playing->follow_length();
-						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n, will use start Q %2", all_triggers[n]->name(), _currently_playing->follow_length()));
+						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1, will use start Q %2\n", all_triggers[n]->name(), _currently_playing->follow_length()));
 					} else {
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", all_triggers[n]->name()));
 					}
