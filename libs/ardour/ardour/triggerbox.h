@@ -144,8 +144,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual double position_as_fraction() const = 0;
 	virtual void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t) = 0;
 
-	void set_use_follow (bool yn);
-	bool use_follow() const { return _use_follow; }
+	/* because follow actions involve probability is it easier to code the will-not-follow case */
+
+	bool will_not_follow() const;
+	bool will_follow() const { return !will_not_follow(); }
 
 	virtual bool probably_oneshot () const = 0;
 
@@ -304,7 +306,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	/* properties controllable by the user */
 
 	PBD::Property<LaunchStyle>          _launch_style;
-	PBD::Property<bool>                 _use_follow;
 	PBD::Property<FollowAction>         _follow_action0;
 	PBD::Property<FollowAction>         _follow_action1;
 	PBD::Property<int>                  _follow_action_probability; /* 1 .. 100 */
@@ -715,7 +716,6 @@ public:
 };
 
 namespace Properties {
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> use_follow;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> running;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> passthru;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> legato;

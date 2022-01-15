@@ -47,7 +47,6 @@ using std::endl;
 
 namespace ARDOUR {
 	namespace Properties {
-		PBD::PropertyDescriptor<bool> use_follow;
 		PBD::PropertyDescriptor<bool> running;
 		PBD::PropertyDescriptor<bool> passthru;
 		PBD::PropertyDescriptor<bool> legato;
@@ -82,7 +81,6 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _pending_velocity_gain (1.0)
 	, _velocity_gain (1.0)
 	, _launch_style (Properties::launch_style, OneShot)
-	, _use_follow (Properties::use_follow, true)
 	, _follow_action0 (Properties::follow_action0, Again)
 	, _follow_action1 (Properties::follow_action1, Stop)
 	, _follow_action_probability (Properties::follow_action_probability, 0)
@@ -106,7 +104,6 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _pending ((Trigger*) 0)
 {
 	add_property (_launch_style);
-	add_property (_use_follow);
 	add_property (_follow_action0);
 	add_property (_follow_action1);
 	add_property (_follow_action_probability);
@@ -145,12 +142,11 @@ Trigger::swap_pending (Trigger* t)
 	return _pending.exchange (t);
 }
 
-void
-Trigger::set_use_follow (bool yn)
+bool
+Trigger::will_not_follow () const
 {
-	_use_follow = yn;
-	PropertyChanged (Properties::use_follow);
-	_box.session().set_dirty();
+	return (_follow_action0 == None && _follow_action_probability == 0) ||
+		(_follow_action0 == None && _follow_action1 == None);
 }
 
 void
@@ -2046,8 +2042,6 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for velocity_effect = %1\n", Properties::velocity_effect.property_id));
 	Properties::follow_action_probability.property_id = g_quark_from_static_string (X_("follow-action-probability"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow_action_probability = %1\n", Properties::follow_action_probability.property_id));
-	Properties::use_follow.property_id = g_quark_from_static_string (X_("use-follow"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for use-follow = %1\n", Properties::use_follow.property_id));
 	Properties::quantization.property_id = g_quark_from_static_string (X_("quantization"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for quantization = %1\n", Properties::quantization.property_id));
 	Properties::launch_style.property_id = g_quark_from_static_string (X_("launch-style"));
@@ -2799,7 +2793,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 has stopped, need next...\n", _currently_playing->name()));
 
-				if (_currently_playing->use_follow()) {
+				if (_currently_playing->will_follow()) {
 					int n = determine_next_trigger (_currently_playing->index());
 					Temporal::BBT_Offset start_quantization;
 					std::cerr << "dnt = " << n << endl;
