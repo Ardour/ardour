@@ -16,9 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <math.h> // M_PI
-#include <assert.h>
 #include <algorithm> // std:min
+#include <assert.h>
+#include <math.h> // M_PI
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/rgb_macros.h"
@@ -39,38 +39,37 @@ using namespace ArdourWidgets::ArdourIcon;
 
 #define OUTLINEWIDTH 1.5 // px
 
-#define VECTORICONSTROKEFILL(fillalpha)              \
-  cairo_set_line_width (cr, OUTLINEWIDTH);           \
-  cairo_set_source_rgba (cr, 0, 0, 0, 1.0);          \
-  cairo_stroke_preserve (cr);                        \
-  cairo_set_source_rgba (cr, 1, 1, 1, (fillalpha));  \
+#define VECTORICONSTROKEFILL(fillalpha)             \
+  cairo_set_line_width (cr, OUTLINEWIDTH);          \
+  cairo_set_source_rgba (cr, 0, 0, 0, 1.0);         \
+  cairo_stroke_preserve (cr);                       \
+  cairo_set_source_rgba (cr, 1, 1, 1, (fillalpha)); \
   cairo_fill (cr);
 
-#define VECTORICONSTROKEOUTLINE(LW, color)           \
-  cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);     \
-  cairo_set_line_width (cr, (LW) + OUTLINEWIDTH);    \
-  ardour_icon_set_source_inv_rgba (cr, color);       \
-  cairo_stroke_preserve (cr);                        \
-  Gtkmm2ext::set_source_rgba (cr, color);            \
-  cairo_set_line_width (cr, (LW));                   \
+#define VECTORICONSTROKEOUTLINE(LW, color)        \
+  cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);  \
+  cairo_set_line_width (cr, (LW) + OUTLINEWIDTH); \
+  ardour_icon_set_source_inv_rgba (cr, color);    \
+  cairo_stroke_preserve (cr);                     \
+  Gtkmm2ext::set_source_rgba (cr, color);         \
+  cairo_set_line_width (cr, (LW));                \
   cairo_stroke (cr);
 
-#define VECTORICONSTROKE(LW, color)                  \
-  cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);     \
-  Gtkmm2ext::set_source_rgba (cr, color);            \
-  cairo_set_line_width (cr, (LW));                   \
+#define VECTORICONSTROKE(LW, color)              \
+  cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND); \
+  Gtkmm2ext::set_source_rgba (cr, color);        \
+  cairo_set_line_width (cr, (LW));               \
   cairo_stroke (cr);
-
 
 /** inverse color */
-static void ardour_icon_set_source_inv_rgba (cairo_t *cr, uint32_t color)
+static void
+ardour_icon_set_source_inv_rgba (cairo_t* cr, uint32_t color)
 {
 	cairo_set_source_rgba (cr,
-			1.0 - ((color >> 24) & 0xff) / 255.0,
-			1.0 - ((color >> 16) & 0xff) / 255.0,
-			1.0 - ((color >>  8) & 0xff) / 255.0,
-			((color >>  0) & 0xff) / 255.0
-			);
+	                       1.0 - ((color >> 24) & 0xff) / 255.0,
+	                       1.0 - ((color >> 16) & 0xff) / 255.0,
+	                       1.0 - ((color >> 8) & 0xff) / 255.0,
+	                       ((color >> 0) & 0xff) / 255.0);
 }
 
 /*****************************************************************************
@@ -79,57 +78,60 @@ static void ardour_icon_set_source_inv_rgba (cairo_t *cr, uint32_t color)
  */
 
 /** internal edit icon */
-static void icon_tool_content (cairo_t *cr, const int width, const int height) {
-#define EM_POINT(X,Y) round (x + (X) * em) + .5, round (y + (Y) * em) + .5
+static void
+icon_tool_content (cairo_t* cr, const int width, const int height)
+{
+#define EM_POINT(X, Y) round (x + (X)*em) + .5, round (y + (Y)*em) + .5
 
-		const double x  = width * .5;
-		const double y  = height * .5;
-		const double em = std::min (x, y) * .1; // 1px at 20x20
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double em = std::min (x, y) * .1; // 1px at 20x20
 
-		// draw dot outlines (control-points)
-		cairo_move_to (cr, EM_POINT(-6.0,  0.0));
-		cairo_close_path (cr);
-		cairo_move_to (cr, EM_POINT(-2.5,  4.0));
-		cairo_close_path (cr);
-		cairo_move_to (cr, EM_POINT( 5.0, -5.0));
-		cairo_close_path (cr);
+	// draw dot outlines (control-points)
+	cairo_move_to (cr, EM_POINT (-6.0,  0.0));
+	cairo_close_path (cr);
+	cairo_move_to (cr, EM_POINT (-2.5,  4.0));
+	cairo_close_path (cr);
+	cairo_move_to (cr, EM_POINT ( 5.0, -5.0));
+	cairo_close_path (cr);
 
-		cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
-		ardour_icon_set_source_inv_rgba (cr, 0xffffffff);
-		cairo_set_line_width (cr, 3 * em + OUTLINEWIDTH);
-		cairo_stroke (cr);
+	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
+	ardour_icon_set_source_inv_rgba (cr, 0xffffffff);
+	cairo_set_line_width (cr, 3 * em + OUTLINEWIDTH);
+	cairo_stroke (cr);
 
-		// "midi note" lines
-		cairo_move_to (cr, EM_POINT(-7.0, -5.0));
-		cairo_line_to (cr, EM_POINT( 0.0, -5.0));
+	// "midi note" lines
+	cairo_move_to (cr, EM_POINT (-7.0, -5.0));
+	cairo_line_to (cr, EM_POINT ( 0.0, -5.0));
 
-		cairo_move_to (cr, EM_POINT( 2.0,  4.0));
-		cairo_line_to (cr, EM_POINT( 6.0,  4.0));
+	cairo_move_to (cr, EM_POINT (2.0, 4.0));
+	cairo_line_to (cr, EM_POINT (6.0, 4.0));
 
-		// automation line (connect control-points)
-		cairo_move_to (cr, EM_POINT(-6.0,  0.0));
-		cairo_line_to (cr, EM_POINT(-2.5,  4.0));
-		cairo_line_to (cr, EM_POINT( 5.0, -5.0));
+	// automation line (connect control-points)
+	cairo_move_to (cr, EM_POINT (-6.0,  0.0));
+	cairo_line_to (cr, EM_POINT (-2.5,  4.0));
+	cairo_line_to (cr, EM_POINT ( 5.0, -5.0));
 
-		cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
-		VECTORICONSTROKEOUTLINE(1 * em, 0xffffffff);
+	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
+	VECTORICONSTROKEOUTLINE (1 * em, 0xffffffff);
 
-		// remove automation line outline at control-points
-		cairo_move_to (cr, EM_POINT(-6.0,  0.0));
-		cairo_close_path (cr);
-		cairo_move_to (cr, EM_POINT(-2.5,  4.0));
-		cairo_close_path (cr);
-		cairo_move_to (cr, EM_POINT( 5.0, -5.0));
-		cairo_close_path (cr);
+	// remove automation line outline at control-points
+	cairo_move_to (cr, EM_POINT (-6.0,  0.0));
+	cairo_close_path (cr);
+	cairo_move_to (cr, EM_POINT (-2.5,  4.0));
+	cairo_close_path (cr);
+	cairo_move_to (cr, EM_POINT ( 5.0, -5.0));
+	cairo_close_path (cr);
 
-		Gtkmm2ext::set_source_rgba (cr, 0xffffffff);
-		cairo_set_line_width (cr, 3 * em);
-		cairo_stroke (cr);
+	Gtkmm2ext::set_source_rgba (cr, 0xffffffff);
+	cairo_set_line_width (cr, 3 * em);
+	cairo_stroke (cr);
 #undef EM_POINT
 }
 
 /** range tool |<->| */
-static void icon_tool_range (cairo_t *cr, const int width, const int height)
+static void
+icon_tool_range (cairo_t* cr, const int width, const int height)
 {
 	const double x  = width * .5;
 	const double y  = height * .5;
@@ -139,8 +141,8 @@ static void icon_tool_range (cairo_t *cr, const int width, const int height)
 	const double bw = ceil (wh) - .5;
 	const double y0 = ceil (y);
 	const double ym = rint (y0 - wh * .1) + .5; // arrow-horizontal; slightly to the top, on a px
-	const double x0 = rint (x) - bw; // left arrow tip
-	const double x1 = rint (x) + bw; // right arrow tip
+	const double x0 = rint (x) - bw;            // left arrow tip
+	const double x1 = rint (x) + bw;            // right arrow tip
 
 	// left and right box
 	cairo_move_to (cr, x0, y0 - bw);
@@ -160,87 +162,89 @@ static void icon_tool_range (cairo_t *cr, const int width, const int height)
 	// line connecting the arrows
 	cairo_move_to (cr, x0, ym);
 	cairo_line_to (cr, x1, ym);
-	VECTORICONSTROKEOUTLINE(DEFAULT_LINE_WIDTH, 0xffffffff);
+	VECTORICONSTROKEOUTLINE (DEFAULT_LINE_WIDTH, 0xffffffff);
 }
 
 /** Grab/Object tool - 6x8em "hand", with 'em' wide index finger. */
-static void icon_tool_grab (cairo_t *cr, const int width, const int height)
+static void
+icon_tool_grab (cairo_t* cr, const int width, const int height)
 {
 	const double x  = width * .5;
 	const double y  = height * .5;
 	const double em = std::min (x, y) * .15; // 1.5px at 20x20
 
-#define EM_POINT(X,Y) x + (X) * em, y + (Y) * em
+#define EM_POINT(X, Y) x + (X)*em, y + (Y)*em
 
 	// wrist
-	cairo_move_to (cr, EM_POINT( 2.0,  4.0));
-	cairo_line_to (cr, EM_POINT(-1.5,  4.0));
-	cairo_line_to (cr, EM_POINT(-2.5,  2.0));
+	cairo_move_to (cr, EM_POINT ( 2.0, 4.0));
+	cairo_line_to (cr, EM_POINT (-1.5, 4.0));
+	cairo_line_to (cr, EM_POINT (-2.5, 2.0));
 	// thumb
-	cairo_line_to (cr, EM_POINT(-3.0,  1.0));
+	cairo_line_to (cr, EM_POINT (-3.0, 1.0));
 
 	// index finger
-	cairo_line_to (cr, EM_POINT(-2.0,  0.0));
-	cairo_line_to (cr, EM_POINT(-2.1, -4.0));
-	cairo_line_to (cr, EM_POINT(-1.5, -4.5));
-	cairo_line_to (cr, EM_POINT(-1.1, -4.0));
-	cairo_line_to (cr, EM_POINT(-1.0,  0.1));
+	cairo_line_to (cr, EM_POINT (-2.0,  0.0));
+	cairo_line_to (cr, EM_POINT (-2.1, -4.0));
+	cairo_line_to (cr, EM_POINT (-1.5, -4.5));
+	cairo_line_to (cr, EM_POINT (-1.1, -4.0));
+	cairo_line_to (cr, EM_POINT (-1.0,  0.1));
 
 	// middle finger knuckle
-	cairo_line_to (cr, EM_POINT(-0.6,  0.3));
-	cairo_line_to (cr, EM_POINT(-0.3,  0.0));
-	cairo_line_to (cr, EM_POINT(-0.2, -0.2));
-	cairo_line_to (cr, EM_POINT( 0.1, -0.3));
-	cairo_line_to (cr, EM_POINT( 0.4, -0.2));
-	cairo_line_to (cr, EM_POINT( 0.5,  0.1));
+	cairo_line_to (cr, EM_POINT (-0.6,  0.3));
+	cairo_line_to (cr, EM_POINT (-0.3,  0.0));
+	cairo_line_to (cr, EM_POINT (-0.2, -0.2));
+	cairo_line_to (cr, EM_POINT ( 0.1, -0.3));
+	cairo_line_to (cr, EM_POINT ( 0.4, -0.2));
+	cairo_line_to (cr, EM_POINT ( 0.5,  0.1));
 
 	// ring finger knuckle
-	cairo_line_to (cr, EM_POINT( 0.8,  0.4));
-	cairo_line_to (cr, EM_POINT( 1.1,  0.2));
-	cairo_line_to (cr, EM_POINT( 1.2,  0.0));
-	cairo_line_to (cr, EM_POINT( 1.5, -0.1));
-	cairo_line_to (cr, EM_POINT( 1.8,  0.0));
-	cairo_line_to (cr, EM_POINT( 1.9,  0.4));
+	cairo_line_to (cr, EM_POINT (0.8,  0.4));
+	cairo_line_to (cr, EM_POINT (1.1,  0.2));
+	cairo_line_to (cr, EM_POINT (1.2,  0.0));
+	cairo_line_to (cr, EM_POINT (1.5, -0.1));
+	cairo_line_to (cr, EM_POINT (1.8,  0.0));
+	cairo_line_to (cr, EM_POINT (1.9,  0.4));
 
 	// pinky
-	cairo_line_to (cr, EM_POINT( 2.0,  0.6));
-	cairo_line_to (cr, EM_POINT( 2.4,  0.4));
-	cairo_line_to (cr, EM_POINT( 2.8,  0.5));
-	cairo_line_to (cr, EM_POINT( 3.0,  1.0));
+	cairo_line_to (cr, EM_POINT (2.0, 0.6));
+	cairo_line_to (cr, EM_POINT (2.4, 0.4));
+	cairo_line_to (cr, EM_POINT (2.8, 0.5));
+	cairo_line_to (cr, EM_POINT (3.0, 1.0));
 
 	// wrist
-	cairo_line_to (cr, EM_POINT( 3.0,  1.5));
-	cairo_line_to (cr, EM_POINT( 2.0,  4.0));
+	cairo_line_to (cr, EM_POINT (3.0, 1.5));
+	cairo_line_to (cr, EM_POINT (2.0, 4.0));
 
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
 	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
-	VECTORICONSTROKEFILL(1.0);
+	VECTORICONSTROKEFILL (1.0);
 #undef EM_POINT
 }
 
 /** cut icon - scissors */
-static void icon_tool_cut (cairo_t *cr, const int width, const int height)
+static void
+icon_tool_cut (cairo_t* cr, const int width, const int height)
 {
 	const double x  = width * .5;
 	const double y  = height * .5;
 	const double em = std::min (x, y) * .1; // 1px at 20x20
 
-#define EM_POINT(X,Y) x + (X) * em, y + (Y) * em
+#define EM_POINT(X, Y) x + (X)*em, y + (Y)*em
 
 	cairo_save (cr);
-	cairo_translate (cr, EM_POINT(4, -3));
+	cairo_translate (cr, EM_POINT (4, -3));
 	cairo_scale (cr, 1.6, 1.0); // ellipse
 	cairo_arc (cr, 0., 0., 1.5 * em, 0., 2 * M_PI);
 	cairo_restore (cr);
 
-	cairo_move_to (cr, EM_POINT(-6.0,  2.5));
-	cairo_line_to (cr, EM_POINT( 5.5, -2.0));
+	cairo_move_to (cr, EM_POINT (-6.0,  2.5));
+	cairo_line_to (cr, EM_POINT ( 5.5, -2.0));
 
-	cairo_move_to (cr, EM_POINT(-6.0, -2.5));
-	cairo_line_to (cr, EM_POINT( 5.5,  2.0));
+	cairo_move_to (cr, EM_POINT (-6.0, -2.5));
+	cairo_line_to (cr, EM_POINT ( 5.5,  2.0));
 
 	cairo_save (cr);
-	cairo_translate (cr, EM_POINT(4,  3));
+	cairo_translate (cr, EM_POINT (4, 3));
 	cairo_scale (cr, 1.6, 1.0); // ellipse
 	cairo_arc (cr, 0., 0., 1.5 * em, 0., 2 * M_PI);
 	cairo_restore (cr);
@@ -253,7 +257,8 @@ static void icon_tool_cut (cairo_t *cr, const int width, const int height)
 }
 
 /** time stretch icon */
-static void icon_tool_stretch (cairo_t *cr, const int width, const int height)
+static void
+icon_tool_stretch (cairo_t* cr, const int width, const int height)
 {
 	const double x  = width * .5;
 	const double y  = height * .5;
@@ -298,26 +303,27 @@ static void icon_tool_stretch (cairo_t *cr, const int width, const int height)
 }
 
 /** audition - small speaker with sound-waves*/
-static void icon_tool_audition (cairo_t *cr, const int width, const int height)
+static void
+icon_tool_audition (cairo_t* cr, const int width, const int height)
 {
 	const double x  = width * .5;
 	const double y  = height * .5;
 	const double em = std::min (x, y) * .1; // 1px at 20x20
 
-#define EM_POINT(X,Y) x + (X) * em, y + (Y) * em
+#define EM_POINT(X, Y) x + (X)*em, y + (Y)*em
 
-	cairo_move_to (cr, EM_POINT(-7.0, -2.0));
-	cairo_line_to (cr, EM_POINT(-7.0,  2.0));
-	cairo_line_to (cr, EM_POINT(-6.0,  3.0));
-	cairo_line_to (cr, EM_POINT(-3.0,  3.0));
-	cairo_line_to (cr, EM_POINT( 2.0,  6.0));
-	cairo_line_to (cr, EM_POINT( 2.0, -6.0));
-	cairo_line_to (cr, EM_POINT(-3.0, -3.0));
-	cairo_line_to (cr, EM_POINT(-6.0, -3.0));
+	cairo_move_to (cr, EM_POINT (-7.0, -2.0));
+	cairo_line_to (cr, EM_POINT (-7.0,  2.0));
+	cairo_line_to (cr, EM_POINT (-6.0,  3.0));
+	cairo_line_to (cr, EM_POINT (-3.0,  3.0));
+	cairo_line_to (cr, EM_POINT ( 2.0,  6.0));
+	cairo_line_to (cr, EM_POINT ( 2.0, -6.0));
+	cairo_line_to (cr, EM_POINT (-3.0, -3.0));
+	cairo_line_to (cr, EM_POINT (-6.0, -3.0));
 	cairo_close_path (cr);
 
-	cairo_pattern_t *speaker;
-	speaker = cairo_pattern_create_linear (EM_POINT(0, -3.0), EM_POINT(0, 3.0));
+	cairo_pattern_t* speaker;
+	speaker = cairo_pattern_create_linear (EM_POINT (0, -3.0), EM_POINT (0, 3.0));
 	cairo_pattern_add_color_stop_rgba (speaker, 0.0,  0.8, 0.8, 0.8, 1.0);
 	cairo_pattern_add_color_stop_rgba (speaker, 0.25, 1.0, 1.0, 1.0, 1.0);
 	cairo_pattern_add_color_stop_rgba (speaker, 1.0,  0.6, 0.6, 0.6, 1.0);
@@ -332,9 +338,9 @@ static void icon_tool_audition (cairo_t *cr, const int width, const int height)
 	cairo_pattern_destroy (speaker);
 
 	// TODO use a slight curve
-	cairo_move_to (cr, EM_POINT(-3.0, -3.0));
-	cairo_line_to (cr, EM_POINT(-3.5,  0.0));
-	cairo_line_to (cr, EM_POINT(-3.0,  3.0));
+	cairo_move_to (cr, EM_POINT (-3.0, -3.0));
+	cairo_line_to (cr, EM_POINT (-3.5,  0.0));
+	cairo_line_to (cr, EM_POINT (-3.0,  3.0));
 	cairo_set_source_rgba (cr, 0, 0, 0, 0.7);
 	cairo_set_line_width (cr, 1.0);
 	cairo_stroke (cr);
@@ -358,30 +364,31 @@ static void icon_tool_audition (cairo_t *cr, const int width, const int height)
 }
 
 /** pen top-left to bottom right */
-static void icon_tool_draw (cairo_t *cr, const int width, const int height)
+static void
+icon_tool_draw (cairo_t* cr, const int width, const int height)
 {
 	const double x  = width * .5;
 	const double y  = height * .5;
 	const double em = std::min (x, y) * .1; // 1px at 20x20
 
-#define EM_POINT(X,Y) x + (X) * em, y + (Y) * em
+#define EM_POINT(X, Y) x + (X)*em, y + (Y)*em
 
 	// pen [6,-5] to [-3, 3]
 	// y = -8 * x / 9 + 1/3
 
 	// top-right end
-	cairo_move_to (cr, EM_POINT( 5.0, -6.11));
-	cairo_line_to (cr, EM_POINT( 6.4, -5.35)); // todo round properly.
-	cairo_line_to (cr, EM_POINT( 7.0, -3.88));
+	cairo_move_to (cr, EM_POINT (5.0, -6.11));
+	cairo_line_to (cr, EM_POINT (6.4, -5.35)); // todo round properly.
+	cairo_line_to (cr, EM_POINT (7.0, -3.88));
 
 	// bottom-left w/tip
-	cairo_line_to (cr, EM_POINT(-2.0,  4.11));
-	cairo_line_to (cr, EM_POINT(-6.0,  5.66)); // pen tip
-	cairo_line_to (cr, EM_POINT(-4.0,  1.88));
+	cairo_line_to (cr, EM_POINT (-2.0, 4.11));
+	cairo_line_to (cr, EM_POINT (-6.0, 5.66)); // pen tip
+	cairo_line_to (cr, EM_POINT (-4.0, 1.88));
 	cairo_close_path (cr);
 
-	cairo_pattern_t *pen;
-	pen = cairo_pattern_create_linear (EM_POINT(-3.0, -6.0), EM_POINT(6.0, 4.0));
+	cairo_pattern_t* pen;
+	pen = cairo_pattern_create_linear (EM_POINT (-3.0, -6.0), EM_POINT (6.0, 4.0));
 	cairo_pattern_add_color_stop_rgba (pen, 0.4, 0.6, 0.6, 0.6, 1.0);
 	cairo_pattern_add_color_stop_rgba (pen, 0.5, 1.0, 1.0, 1.0, 1.0);
 	cairo_pattern_add_color_stop_rgba (pen, 0.6, 0.1, 0.1, 0.1, 1.0);
@@ -395,18 +402,18 @@ static void icon_tool_draw (cairo_t *cr, const int width, const int height)
 	cairo_fill (cr);
 
 	// separate the tip
-	cairo_move_to (cr, EM_POINT(-2.0,  4.11));
-	cairo_line_to (cr, EM_POINT(-3.0,  2.8)); // slight curve [-3,3]
-	cairo_line_to (cr, EM_POINT(-4.0,  2.0));
+	cairo_move_to (cr, EM_POINT (-2.0, 4.11));
+	cairo_line_to (cr, EM_POINT (-3.0, 2.8)); // slight curve [-3,3]
+	cairo_line_to (cr, EM_POINT (-4.0, 2.0));
 	cairo_set_line_width (cr, OUTLINEWIDTH);
 	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
 	cairo_stroke (cr);
 
 	// pen tip
-	cairo_move_to (cr, EM_POINT(-5.0, 3.9));
-	cairo_line_to (cr, EM_POINT(-6.0, 5.66));
-	cairo_line_to (cr, EM_POINT(-4.1, 4.9));
+	cairo_move_to (cr, EM_POINT (-5.0, 3.9));
+	cairo_line_to (cr, EM_POINT (-6.0, 5.66));
+	cairo_line_to (cr, EM_POINT (-4.1, 4.9));
 	cairo_close_path (cr);
 	cairo_set_source_rgba (cr, 0, 0, 0, 0.7);
 	cairo_set_line_width (cr, em);
@@ -418,16 +425,17 @@ static void icon_tool_draw (cairo_t *cr, const int width, const int height)
 }
 
 /** Toolbar icon - Time Axis View reduce height */
-static void icon_tav_shrink (cairo_t *cr, const int width, const int height)
+static void
+icon_tav_shrink (cairo_t* cr, const int width, const int height)
 {
-	const double x = width * .5;
-	const double y = height * .5;
-	const double wh = std::min (x, y) * .66;
-	const double ar = std::min (x, y) * .15;
+	const double x   = width * .5;
+	const double y   = height * .5;
+	const double wh  = std::min (x, y) * .66;
+	const double ar  = std::min (x, y) * .15;
 	const double tri = .7 * (wh - ar);
 
 	cairo_rectangle (cr, x - wh, y - ar, 2 * wh, 2 * ar);
-	VECTORICONSTROKEFILL(.75);
+	VECTORICONSTROKEFILL (.75);
 
 	cairo_set_line_width (cr, 1.0);
 
@@ -453,16 +461,17 @@ static void icon_tav_shrink (cairo_t *cr, const int width, const int height)
 }
 
 /** Toolbar icon - Time Axis View increase height */
-static void icon_tav_expand (cairo_t *cr, const int width, const int height)
+static void
+icon_tav_expand (cairo_t* cr, const int width, const int height)
 {
-	const double x = width * .5;
-	const double y = height * .5;
-	const double wh = std::min (x, y) * .66;
-	const double ar = std::min (x, y) * .15;
+	const double x   = width * .5;
+	const double y   = height * .5;
+	const double wh  = std::min (x, y) * .66;
+	const double ar  = std::min (x, y) * .15;
 	const double tri = .7 * (wh - ar);
 
 	cairo_rectangle (cr, x - wh, y - wh, 2 * wh, 2 * wh);
-	VECTORICONSTROKEFILL(.75);
+	VECTORICONSTROKEFILL (.75);
 
 	cairo_set_line_width (cr, 1.0);
 
@@ -476,7 +485,7 @@ static void icon_tav_expand (cairo_t *cr, const int width, const int height)
 	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 	cairo_fill (cr);
 
-	cairo_move_to (cr, x      , y + wh - 0.5);
+	cairo_move_to (cr, x,       y + wh - 0.5);
 	cairo_line_to (cr, x - tri, y + ar + 0.5);
 	cairo_line_to (cr, x + tri, y + ar + 0.5);
 	cairo_close_path (cr);
@@ -494,7 +503,8 @@ static void icon_tav_expand (cairo_t *cr, const int width, const int height)
  */
 
 /** standard rec-enable circle */
-static void icon_rec_enable (cairo_t *cr, const int width, const int height, const Gtkmm2ext::ActiveState state)
+static void
+icon_rec_enable (cairo_t* cr, const int width, const int height, const Gtkmm2ext::ActiveState state)
 {
 	const double x = width * .5;
 	const double y = height * .5;
@@ -502,11 +512,9 @@ static void icon_rec_enable (cairo_t *cr, const int width, const int height, con
 	cairo_arc (cr, x, y, r, 0, 2 * M_PI);
 	if (state == Gtkmm2ext::ExplicitActive) {
 		cairo_set_source_rgba (cr, 1.0, .1, .1, 1.0);
-	}
-	else if (state == Gtkmm2ext::ImplicitActive) {
+	} else if (state == Gtkmm2ext::ImplicitActive) {
 		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
-	}
-	else {
+	} else {
 		cairo_set_source_rgba (cr, .4, .3, .3, 1.0);
 	}
 	cairo_fill_preserve (cr);
@@ -520,58 +528,62 @@ static void icon_rec_enable (cairo_t *cr, const int width, const int height, con
  */
 
 /** stop square box */
-static void icon_transport_stop (cairo_t *cr, const int width, const int height)
+static void
+icon_transport_stop (cairo_t* cr, const int width, const int height)
 {
 	const int wh = std::min (width, height);
 	cairo_rectangle (cr,
-			(width - wh) * .5 + wh * .225,
-			(height - wh) * .5 + wh * .225,
-			wh * .55, wh * .55);
-	VECTORICONSTROKEFILL(0.9); // small 'shine'
+	                 (width - wh) * .5 + wh * .225,
+	                 (height - wh) * .5 + wh * .225,
+	                 wh * .55, wh * .55);
+	VECTORICONSTROKEFILL (0.9); // small 'shine'
 }
 
 /** play triangle */
-static void icon_transport_play (cairo_t *cr, const int width, const int height)
+static void
+icon_transport_play (cairo_t* cr, const int width, const int height)
 {
-	const int wh = std::min (width, height) * .5;
-	const double y = height * .5;
-	const double x = width * .5;
+	const int    wh = std::min (width, height) * .5;
+	const double y  = height * .5;
+	const double x  = width * .5;
 
 	const double tri = ceil (.577 * wh); // 1/sqrt(3)
 
-	cairo_move_to (cr,  x + wh * .5, y);
-	cairo_line_to (cr,  x - wh * .5, y - tri);
-	cairo_line_to (cr,  x - wh * .5, y + tri);
+	cairo_move_to (cr, x + wh * .5, y);
+	cairo_line_to (cr, x - wh * .5, y - tri);
+	cairo_line_to (cr, x - wh * .5, y + tri);
 	cairo_close_path (cr);
 
-	VECTORICONSTROKEFILL(0.9);
+	VECTORICONSTROKEFILL (0.9);
 }
 
 /** Midi Panic "!" */
-static void icon_transport_panic (cairo_t *cr, const int width, const int height)
+static void
+icon_transport_panic (cairo_t* cr, const int width, const int height)
 {
-	const int wh = ceil (std::min (width, height) * .1) - .5;
+	const int    wh = ceil (std::min (width, height) * .1) - .5;
 	const double xc = rint (width * .5);
 	const double yh = std::min (width, height);
 	const double y0 = (height - yh) * .5;
 	cairo_rectangle (cr,
-	                 xc - wh, y0 + yh *.12,
-	                 wh * 2,  yh *.48);
-	VECTORICONSTROKEFILL(0.9);
+	                 xc - wh, y0 + yh * .12,
+	                 wh * 2, yh * .48);
+	VECTORICONSTROKEFILL (0.9);
 
-	cairo_arc (cr, xc, y0 + yh *.78, wh, 0, 2 * M_PI);
-	VECTORICONSTROKEFILL(0.9);
+	cairo_arc (cr, xc, y0 + yh * .78, wh, 0, 2 * M_PI);
+	VECTORICONSTROKEFILL (0.9);
 }
 
 /** various combinations of lines and triangles "|>|", ">|" "|>" */
-static void icon_transport_ck (cairo_t *cr,
-		const enum ArdourWidgets::ArdourIcon::Icon icon,
-		const int width, const int height)
+static void
+icon_transport_ck (cairo_t*                                   cr,
+                   const enum ArdourWidgets::ArdourIcon::Icon icon,
+                   const int width, const int height)
 {
 	// small play triangle
-	int wh = std::min (width, height);
-	const double y = height * .5;
-	const double x = width * .5;
+	int          wh = std::min (width, height);
+	const double y  = height * .5;
+	const double x  = width * .5;
 	wh *= .18;
 	const double tri = ceil (.577 * wh * 2); // 1/sqrt(3)
 
@@ -579,54 +591,55 @@ static void icon_transport_ck (cairo_t *cr,
 
 	if (icon == TransportStart || icon == TransportRange) {
 		cairo_rectangle (cr,
-				x - wh - ln, y  - tri * 1.7,
-				ln * 2,  tri * 3.4);
+		                 x - wh - ln, y - tri * 1.7,
+		                 ln * 2, tri * 3.4);
 
-		VECTORICONSTROKEFILL(1.0);
+		VECTORICONSTROKEFILL (1.0);
 	}
 
 	if (icon == TransportEnd || icon == TransportRange) {
 		cairo_rectangle (cr,
-				x + wh - ln, y  - tri * 1.7,
-				ln * 2,  tri * 3.4);
+		                 x + wh - ln, y - tri * 1.7,
+		                 ln * 2, tri * 3.4);
 
-		VECTORICONSTROKEFILL(1.0);
+		VECTORICONSTROKEFILL (1.0);
 	}
 
 	if (icon == TransportStart) {
-		cairo_move_to (cr,  x - wh, y);
-		cairo_line_to (cr,  x + wh, y - tri);
-		cairo_line_to (cr,  x + wh, y + tri);
+		cairo_move_to (cr, x - wh, y);
+		cairo_line_to (cr, x + wh, y - tri);
+		cairo_line_to (cr, x + wh, y + tri);
 	} else {
-		cairo_move_to (cr,  x + wh, y);
-		cairo_line_to (cr,  x - wh, y - tri);
-		cairo_line_to (cr,  x - wh, y + tri);
+		cairo_move_to (cr, x + wh, y);
+		cairo_line_to (cr, x - wh, y - tri);
+		cairo_line_to (cr, x - wh, y + tri);
 	}
 
 	cairo_close_path (cr);
-	VECTORICONSTROKEFILL(1.0);
+	VECTORICONSTROKEFILL (1.0);
 }
 
 /** loop spiral */
-static void icon_transport_loop (cairo_t *cr, const int width, const int height)
+static void
+icon_transport_loop (cairo_t* cr, const int width, const int height)
 {
 	const double x = width * .5;
 	const double y = height * .5;
 	const double r = std::min (x, y);
 
-	cairo_arc          (cr, x, y, r * .58, 0, 2 * M_PI);
+	cairo_arc (cr, x, y, r * .58, 0, 2 * M_PI);
 	cairo_arc_negative (cr, x, y, r * .30, 2 * M_PI, 0);
 
 	VECTORICONSTROKEFILL (1.0);
 
 #define ARCARROW(rad, ang) \
-	x + (rad) * sin ((ang) * 2.0 * M_PI), y + (rad) * cos ((ang) * 2.0 * M_PI)
+	x + (rad)*sin ((ang)*2.0 * M_PI), y + (rad)*cos ((ang)*2.0 * M_PI)
 
-	cairo_move_to (cr, ARCARROW(r * .30, .72));
-	cairo_line_to (cr, ARCARROW(r * .11, .72));
-	cairo_line_to (cr, ARCARROW(r * .55, .60));
-	cairo_line_to (cr, ARCARROW(r * .74, .72));
-	cairo_line_to (cr, ARCARROW(r * .58, .72));
+	cairo_move_to (cr, ARCARROW (r * .30, .72));
+	cairo_line_to (cr, ARCARROW (r * .11, .72));
+	cairo_line_to (cr, ARCARROW (r * .55, .60));
+	cairo_line_to (cr, ARCARROW (r * .74, .72));
+	cairo_line_to (cr, ARCARROW (r * .58, .72));
 
 	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 	cairo_stroke_preserve (cr);
@@ -637,71 +650,73 @@ static void icon_transport_loop (cairo_t *cr, const int width, const int height)
 }
 
 /** de-construct thorwil's metronom */
-static void icon_transport_metronom (cairo_t *cr, const int width, const int height)
+static void
+icon_transport_metronom (cairo_t* cr, const int width, const int height)
 {
 	const double x  = width * .5;
 	const double y  = height * .5;
 	const double wh = .95 * std::min (x, y);
 	const double h  = wh * .80;
 	const double w  = wh * .55;
-	const double lw = w  * .34;
+	const double lw = w * .34;
 
 	cairo_rectangle (cr,
-			x - w * .7, y + h * .25,
-			w * 1.4, lw);
+	                 x - w * .7, y + h * .25,
+	                 w * 1.4, lw);
 
-	VECTORICONSTROKEFILL(1.0);
+	VECTORICONSTROKEFILL (1.0);
 
-	cairo_move_to (cr,  x - w,       y + h);
-	cairo_line_to (cr,  x + w,       y + h);
-	cairo_line_to (cr,  x + w * .35, y - h);
-	cairo_line_to (cr,  x - w * .35, y - h);
-	cairo_line_to (cr,  x - w,       y + h);
+	cairo_move_to (cr, x - w,       y + h);
+	cairo_line_to (cr, x + w,       y + h);
+	cairo_line_to (cr, x + w * .35, y - h);
+	cairo_line_to (cr, x - w * .35, y - h);
+	cairo_line_to (cr, x - w, y + h);
 
-	cairo_move_to (cr,  x - w + lw,       y + h -lw);
-	cairo_line_to (cr,  x - w * .35 + lw, y - h + lw);
-	cairo_line_to (cr,  x + w * .35 - lw, y - h + lw);
-	cairo_line_to (cr,  x + w - lw,       y + h -lw);
-	cairo_line_to (cr,  x - w + lw,       y + h -lw);
+	cairo_move_to (cr, x - w + lw,       y + h - lw);
+	cairo_line_to (cr, x - w * .35 + lw, y - h + lw);
+	cairo_line_to (cr, x + w * .35 - lw, y - h + lw);
+	cairo_line_to (cr, x + w - lw,       y + h - lw);
+	cairo_line_to (cr, x - w + lw,       y + h - lw);
 
-	VECTORICONSTROKEFILL(1.0);
+	VECTORICONSTROKEFILL (1.0);
 
 	// Pendulum
 	// ddx = .70 w      = .75 * .5 wh              = .375 wh
 	// ddy = .75 h - lw = .75 * .8 wh - wh .5 * .2 = .5 wh
 	// ang = (ddx/ddy):
 	// -> angle = atan (ang) = atan (375 / .5) ~= 36deg
-	const double dx = lw * .2;  // 1 - cos(tan^-1(ang))
-	const double dy = lw * .4;  // 1 - sin(tan^-1(ang))
-	cairo_move_to (cr,  x - w * .3     , y + h * .25 + lw * .5);
-	cairo_line_to (cr,  x - w + dx     , y - h + lw + dy);
-	cairo_line_to (cr,  x - w + lw     , y - h + lw);
-	cairo_line_to (cr,  x - w * .3 + lw, y + h * .25 + lw * .5);
+	const double dx = lw * .2; // 1 - cos(tan^-1(ang))
+	const double dy = lw * .4; // 1 - sin(tan^-1(ang))
+	cairo_move_to (cr, x - w * .3,      y + h * .25 + lw * .5);
+	cairo_line_to (cr, x - w + dx,      y - h + lw + dy);
+	cairo_line_to (cr, x - w + lw,      y - h + lw);
+	cairo_line_to (cr, x - w * .3 + lw, y + h * .25 + lw * .5);
 	cairo_close_path (cr);
 
-	VECTORICONSTROKEFILL(1.0);
+	VECTORICONSTROKEFILL (1.0);
 
 	cairo_rectangle (cr,
-			x - w * .7, y + h * .25,
-			w * 1.4, lw);
+	                 x - w * .7, y + h * .25,
+	                 w * 1.4, lw);
 	cairo_fill (cr);
 }
 
 /*****************************************************************************
  * Zoom: In "+", Out "-" and Full "[]"
  */
-static void icon_zoom (cairo_t *cr, const enum ArdourWidgets::ArdourIcon::Icon icon, const int width, const int height, const uint32_t fg_color)
+static void
+icon_zoom (cairo_t* cr, const enum ArdourWidgets::ArdourIcon::Icon icon, const int width, const int height, const uint32_t fg_color)
 {
-	const double x = width * .5;
-	const double y = height * .5;
-	const double r = std::min (x, y) * .7;
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double r  = std::min (x, y) * .7;
 	const double wh = std::min (x, y) * .45;
 
 	// draw handle first
 #define LINE45DEG(rad) \
-	x + r * (rad) * .707, y + r * (rad) * .707 // sin(45deg) = cos(45deg) = .707
-	cairo_move_to (cr, LINE45DEG(.9));
-	cairo_line_to (cr, LINE45DEG(1.3));
+	x + r*(rad)*.707, y + r*(rad)*.707 // sin(45deg) = cos(45deg) = .707
+	cairo_move_to (cr, LINE45DEG (.9));
+	cairo_line_to (cr, LINE45DEG (1.3));
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 	cairo_set_line_width (cr, 3.0);
 	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
@@ -714,7 +729,7 @@ static void icon_zoom (cairo_t *cr, const enum ArdourWidgets::ArdourIcon::Icon i
 	cairo_fill_preserve (cr);
 
 	// add a lens gradient
-	cairo_pattern_t *lens;
+	cairo_pattern_t* lens;
 	lens = cairo_pattern_create_radial (x - r, y - r, r * .5, x - r, y - r, r * 2);
 	cairo_pattern_add_color_stop_rgba (lens, 0, 1, 1, 1, .4);
 	cairo_pattern_add_color_stop_rgba (lens, 1, 0, 0, 0, .4);
@@ -762,16 +777,17 @@ static void icon_zoom (cairo_t *cr, const enum ArdourWidgets::ArdourIcon::Icon i
 }
 
 /** Toolbar icon - Mixbus Zoom Expand, rotated TimeAxisExpand */
-static void icon_zoom_expand (cairo_t *cr, const int width, const int height)
+static void
+icon_zoom_expand (cairo_t* cr, const int width, const int height)
 {
-	const double x = width * .5;
-	const double y = height * .5;
-	const double wh = std::min (x, y) * .66;
-	const double ar = std::min (x, y) * .15;
+	const double x   = width * .5;
+	const double y   = height * .5;
+	const double wh  = std::min (x, y) * .66;
+	const double ar  = std::min (x, y) * .15;
 	const double tri = .7 * (wh - ar);
 
 	cairo_rectangle (cr, x - wh, y - wh, 2 * wh, 2 * wh);
-	VECTORICONSTROKEFILL(.75);
+	VECTORICONSTROKEFILL (.75);
 
 	cairo_set_line_width (cr, 1.0);
 
@@ -801,29 +817,31 @@ static void icon_zoom_expand (cairo_t *cr, const int width, const int height)
  */
 
 /** "close" - "X" , no outline */
-static void icon_close_cross (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_close_cross (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double x = width * .5;
 	const double y = height * .5;
 	const double o = .5 + std::min (x, y) * .4;
 	Gtkmm2ext::set_source_rgba (cr, fg_color);
 	cairo_set_line_width (cr, DEFAULT_LINE_WIDTH);
-	cairo_move_to (cr, x-o, y-o);
-	cairo_line_to (cr, x+o, y+o);
-	cairo_move_to (cr, x+o, y-o);
-	cairo_line_to (cr, x-o, y+o);
+	cairo_move_to (cr, x - o, y - o);
+	cairo_line_to (cr, x + o, y + o);
+	cairo_move_to (cr, x + o, y - o);
+	cairo_line_to (cr, x - o, y + o);
 	cairo_stroke (cr);
 }
 
 /** "hide" strike through eye */
-static void icon_hide_eye (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_hide_eye (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double x = width * .5;
-	const double y = height * .5;
+	const double x  = width * .5;
+	const double y  = height * .5;
 	const double wh = std::min (x, y);
 
 	const double r  = .2 * wh;
-	const double o =  .60 * wh;
+	const double o  = .60 * wh;
 	const double dx = .75 * wh;
 	const double dy = .65 * wh;
 
@@ -833,7 +851,7 @@ static void icon_hide_eye (cairo_t *cr, const int width, const int height, const
 	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
 
 	cairo_arc (cr, x, y, r, 0, 2 * M_PI);
-  //cairo_fill (cr);
+	//cairo_fill (cr);
 	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
 
 	cairo_move_to (cr, x - o, y + o);
@@ -842,10 +860,11 @@ static void icon_hide_eye (cairo_t *cr, const int width, const int height, const
 }
 
 /** slim "<" */
-static void icon_scroll_left (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_scroll_left (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double x = width * .5;
-	const double y = height * .5;
+	const double x  = width * .5;
+	const double y  = height * .5;
 	const double wh = std::min (x, y);
 
 	const double tri1 = .2 * wh;
@@ -858,11 +877,11 @@ static void icon_scroll_left (cairo_t *cr, const int width, const int height, co
 }
 
 /** slim ">" */
-static void icon_scroll_right (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_scroll_right (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-
-	const double x = width * .5;
-	const double y = height * .5;
+	const double x  = width * .5;
+	const double y  = height * .5;
 	const double wh = std::min (x, y);
 
 	const double tri1 = .2 * wh;
@@ -875,10 +894,11 @@ static void icon_scroll_right (cairo_t *cr, const int width, const int height, c
 }
 
 /** "<" */
-static void icon_nudge_left (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_nudge_left (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double x = width * .5;
-	const double y = height * .5;
+	const double x  = width * .5;
+	const double y  = height * .5;
 	const double wh = std::min (x, y);
 
 	const double tri_x = .3 * wh;
@@ -887,15 +907,15 @@ static void icon_nudge_left (cairo_t *cr, const int width, const int height, con
 	cairo_move_to (cr, x + tri_x, y - tri_y);
 	cairo_line_to (cr, x - tri_x, y);
 	cairo_line_to (cr, x + tri_x, y + tri_y);
-	VECTORICONSTROKEOUTLINE(.5 + DEFAULT_LINE_WIDTH, fg_color);
+	VECTORICONSTROKEOUTLINE (.5 + DEFAULT_LINE_WIDTH, fg_color);
 }
 
 /** ">" */
-static void icon_nudge_right (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_nudge_right (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-
-	const double x = width * .5;
-	const double y = height * .5;
+	const double x  = width * .5;
+	const double y  = height * .5;
 	const double wh = std::min (x, y);
 
 	const double tri_x = .3 * wh;
@@ -904,11 +924,11 @@ static void icon_nudge_right (cairo_t *cr, const int width, const int height, co
 	cairo_move_to (cr, x - tri_x, y - tri_y);
 	cairo_line_to (cr, x + tri_x, y);
 	cairo_line_to (cr, x - tri_x, y + tri_y);
-	VECTORICONSTROKEOUTLINE(.5 + DEFAULT_LINE_WIDTH, fg_color);
-
+	VECTORICONSTROKEOUTLINE (.5 + DEFAULT_LINE_WIDTH, fg_color);
 }
 
-static void icon_plus_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_plus_sign (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double lw = DEFAULT_LINE_WIDTH;
 	const double lc = fmod (lw * .5, 1.0);
@@ -916,14 +936,15 @@ static void icon_plus_sign (cairo_t *cr, const int width, const int height, cons
 	const double yc = rint (height * .5) - lc;
 	const double ln = rint (std::min (width, height) * .2);
 
-	cairo_rectangle (cr, xc - lw * .5, yc - ln, lw,  ln * 2);
-	cairo_rectangle (cr, xc - ln, yc - lw * .5, ln * 2,  lw);
+	cairo_rectangle (cr, xc - lw * .5, yc - ln, lw, ln * 2);
+	cairo_rectangle (cr, xc - ln, yc - lw * .5, ln * 2, lw);
 
-  Gtkmm2ext::set_source_rgba (cr, fg_color);
-  cairo_fill (cr);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_fill (cr);
 }
 
-static void icon_shaded_plus_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_shaded_plus_sign (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double lw = std::min (10., ceil (std::min (width, height) * .035));
 	const double ln = std::min (57., rint (std::min (width, height) * .2));
@@ -931,16 +952,17 @@ static void icon_shaded_plus_sign (cairo_t *cr, const int width, const int heigh
 	const double xc = rint (width * .5) - lc;
 	const double yc = rint (height * .5) - lc;
 
-	cairo_rectangle (cr, xc - lw * .5, yc - ln, lw,  ln * 2);
-	cairo_rectangle (cr, xc - ln, yc - lw * .5, ln * 2,  lw);
+	cairo_rectangle (cr, xc - lw * .5, yc - ln, lw, ln * 2);
+	cairo_rectangle (cr, xc - ln, yc - lw * .5, ln * 2, lw);
 
-	int alpha = lw == 1 ? 0x80 : 0x20;
+	int alpha = lw <= 1 ? 0x80 : 0x20;
 	Gtkmm2ext::set_source_rgba (cr, (fg_color & 0xffffff00) | alpha);
 	cairo_fill (cr);
 }
 
 /** mixer strip narrow/wide */
-static void icon_strip_width (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_strip_width (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double lw = DEFAULT_LINE_WIDTH;
 	const double xm = rint (width * .5) - lw * .5;
@@ -954,7 +976,7 @@ static void icon_strip_width (cairo_t *cr, const int width, const int height, co
 	const double y0 = ym - dy;
 	const double y1 = ym + dy;
 
-	const double arx = width  * .15;
+	const double arx = width * .15;
 	const double ary = height * .15;
 
 	Gtkmm2ext::set_source_rgba (cr, fg_color);
@@ -971,21 +993,22 @@ static void icon_strip_width (cairo_t *cr, const int width, const int height, co
 	cairo_line_to (cr, x1, ym);
 
 	// arrow left
-	cairo_move_to (cr,  x0, ym);
+	cairo_move_to (cr, x0, ym);
 	cairo_rel_line_to (cr, arx, -ary);
-	cairo_move_to (cr,  x0, ym);
+	cairo_move_to (cr, x0, ym);
 	cairo_rel_line_to (cr, arx, ary);
 
 	// arrow right
-	cairo_move_to (cr,  x1,  ym);
+	cairo_move_to (cr, x1, ym);
 	cairo_rel_line_to (cr, -arx, -ary);
-	cairo_move_to (cr,  x1,  ym);
+	cairo_move_to (cr, x1, ym);
 	cairo_rel_line_to (cr, -arx, ary);
 	cairo_stroke (cr);
 }
 
 /** 5-pin DIN MIDI socket */
-static void icon_din_midi (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_din_midi (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double x = width * .5;
 	const double y = height * .5;
@@ -1002,14 +1025,14 @@ static void icon_din_midi (cairo_t *cr, const int width, const int height, const
 	cairo_fill (cr);
 	cairo_arc (cr, x * 1.5, y, r * .15, 0, 2 * M_PI);
 	cairo_fill (cr);
-	//  .5 + .5 * .5 * sin(45deg),  1.5 - .5 * .5 * cos(45deg)
+	// .5 + .5 * .5 * sin(45deg),  1.5 - .5 * .5 * cos(45deg)
 	cairo_arc (cr, x * 0.677, y * .677, r * .15, 0, 2 * M_PI);
 	cairo_fill (cr);
 	cairo_arc (cr, x * 1.323, y * .677, r * .15, 0, 2 * M_PI);
 	cairo_fill (cr);
 
 	// bottom notch
-	cairo_arc (cr, x, y+r, r * .26, 1.05 * M_PI, 1.95 * M_PI);
+	cairo_arc (cr, x, y + r, r * .26, 1.05 * M_PI, 1.95 * M_PI);
 	cairo_stroke (cr);
 }
 
@@ -1017,7 +1040,8 @@ static void icon_din_midi (cairo_t *cr, const int width, const int height, const
  * Plugin Window Buttons
  */
 
-static void icon_add_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_add_sign (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double lw = DEFAULT_LINE_WIDTH;
 	const double lc = fmod (lw * .5, 1.0);
@@ -1025,18 +1049,19 @@ static void icon_add_sign (cairo_t *cr, const int width, const int height, const
 	const double yc = rint (height * .5) - lc;
 	const double ln = rint (std::min (width, height) * .3);
 
-	cairo_rectangle (cr, xc - lw * .5, yc - ln, lw,  ln * 2);
-	cairo_rectangle (cr, xc - ln, yc - lw * .5, ln * 2,  lw);
+	cairo_rectangle (cr, xc - lw * .5, yc - ln, lw, ln * 2);
+	cairo_rectangle (cr, xc - ln, yc - lw * .5, ln * 2, lw);
 
-  Gtkmm2ext::set_source_rgba (cr, fg_color);
-  cairo_fill (cr);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_fill (cr);
 }
 
-static void icon_no_parking (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_no_parking (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double x = width * .5;
-	const double y = height * .5;
-	const double r = std::min (x, y) * .6;
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double r  = std::min (x, y) * .6;
 	const double rl = .7 * r;
 	cairo_arc (cr, x, y, r, 0, 2. * M_PI);
 	cairo_move_to (cr, x - rl, y - rl);
@@ -1044,7 +1069,8 @@ static void icon_no_parking (cairo_t *cr, const int width, const int height, con
 	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
 }
 
-static void icon_save_arrow_box (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_save_arrow_box (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double x = width * .5;
 	const double y = height * .5;
@@ -1078,21 +1104,22 @@ static void icon_save_arrow_box (cairo_t *cr, const int width, const int height,
 	VECTORICONSTROKE (lw, fg_color);
 }
 
-static void icon_list_browse (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_list_browse (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double x = width * .5;
-	const double y = height * .5;
-	const double d = std::min (x, y) * .5;
-	const double r = std::min (x, y) * .1;
-	const double l = std::min (x, y) * .2;
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double d  = std::min (x, y) * .5;
+	const double r  = std::min (x, y) * .1;
+	const double l  = std::min (x, y) * .2;
 	const double lw = DEFAULT_LINE_WIDTH;
 
-  Gtkmm2ext::set_source_rgba (cr, fg_color);
-	cairo_arc (cr, x-d, y-d, r, 0, 2. * M_PI);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_arc (cr, x - d, y - d, r, 0, 2. * M_PI);
 	cairo_fill (cr);
-	cairo_arc (cr, x-d, y, r, 0, 2. * M_PI);
+	cairo_arc (cr, x - d, y, r, 0, 2. * M_PI);
 	cairo_fill (cr);
-	cairo_arc (cr, x-d, y+d, r, 0, 2. * M_PI);
+	cairo_arc (cr, x - d, y + d, r, 0, 2. * M_PI);
 	cairo_fill (cr);
 
 	cairo_move_to (cr, x - l, rint (y - d) + .5);
@@ -1101,14 +1128,15 @@ static void icon_list_browse (cairo_t *cr, const int width, const int height, co
 	cairo_line_to (cr, x + d, rint (y)     + .5);
 	cairo_move_to (cr, x - l, rint (y + d) + .5);
 	cairo_line_to (cr, x + d, rint (y + d) + .5);
-	VECTORICONSTROKE(lw, fg_color);
+	VECTORICONSTROKE (lw, fg_color);
 }
 
-static void icon_on_off (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_on_off (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double x = width * .5;
-	const double y = height * .5;
-	const double r = std::min (x, y) * .65;
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double r  = std::min (x, y) * .65;
 	const double lw = DEFAULT_LINE_WIDTH;
 	const double lc = fmod (lw * .5, 1.0);
 	const double x0 = rint (x) - lc;
@@ -1119,41 +1147,43 @@ static void icon_on_off (cairo_t *cr, const int width, const int height, const u
 	VECTORICONSTROKE (lw, fg_color);
 }
 
-static void icon_bypass (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_bypass (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double x = width * .5;
-	const double y = height * .5;
+	const double x  = width * .5;
+	const double y  = height * .5;
 	const double y0 = height * .6;
-	const double r = std::min (x, y) * .75;
-	const double o = std::min (x, y) * .275;
+	const double r  = std::min (x, y) * .75;
+	const double o  = std::min (x, y) * .275;
 	const double pt = DEFAULT_LINE_WIDTH;
 
 	const double dashes[] = { 1, pt };
 	cairo_set_dash (cr, dashes, 2, 0);
 	cairo_move_to (cr, x - r, y0);
 	cairo_line_to (cr, x + r, y0);
-	VECTORICONSTROKE(pt * .8, fg_color);
+	VECTORICONSTROKE (pt * .8, fg_color);
 	cairo_set_dash (cr, 0, 0, 0);
 
 	cairo_move_to (cr, x - o, y0 - o);
 	cairo_line_to (cr, x + o, y0 + o);
 	cairo_move_to (cr, x + o, y0 - o);
 	cairo_line_to (cr, x - o, y0 + o);
-	VECTORICONSTROKE(pt * .8, fg_color);
+	VECTORICONSTROKE (pt * .8, fg_color);
 
 	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
 	cairo_arc (cr, x, y0, r, 0, 0);
-	cairo_arc (cr, x, y0, r *.8, 1.92 * M_PI, 1.92 * M_PI);
+	cairo_arc (cr, x, y0, r * .8,   1.92 * M_PI, 1.92 * M_PI);
 	cairo_arc (cr, x, y0, r * 1.17, 1.92 * M_PI, 1.92 * M_PI);
 	cairo_close_path (cr);
 	cairo_arc_negative (cr, x, y0, r, 0, M_PI);
-	VECTORICONSTROKE(pt, fg_color);
+	VECTORICONSTROKE (pt, fg_color);
 }
 
-static void icon_reset_knob (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_reset_knob (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double x = width * .5;
-	const double y = height * .5;
+	const double x  = width * .5;
+	const double y  = height * .5;
 	const double r0 = std::min (x, y) * .3;
 	const double r1 = std::min (x, y) * .65;
 	const double ar = std::min (x, y) * .25;
@@ -1164,7 +1194,7 @@ static void icon_reset_knob (cairo_t *cr, const int width, const int height, con
 	cairo_arc (cr, x0, y, r0, 0, 2. * M_PI);
 	cairo_move_to (cr, x0, y - r0);
 	cairo_line_to (cr, x0, y);
-	VECTORICONSTROKE(lw, fg_color);
+	VECTORICONSTROKE (lw, fg_color);
 
 	/* outer ring w/CCW arrow */
 	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
@@ -1173,13 +1203,14 @@ static void icon_reset_knob (cairo_t *cr, const int width, const int height, con
 	cairo_rel_line_to (cr, ar, -ar);
 	cairo_arc (cr, x0, y, r1, -.25 * M_PI, -.25 * M_PI);
 	cairo_arc (cr, x0, y, r1, -.25 * M_PI, 1.50 * M_PI);
-	VECTORICONSTROKE(lw, fg_color);
+	VECTORICONSTROKE (lw, fg_color);
 }
 
-static void icon_config_wheel (cairo_t *cr, const int width, const int height, const uint32_t fg_color, int arrow)
+static void
+icon_config_wheel (cairo_t* cr, const int width, const int height, const uint32_t fg_color, int arrow)
 {
-	const double x = width * .5;
-	const double y = height * .5;
+	const double x  = width * .5;
+	const double y  = height * .5;
 	const double r0 = std::min (x, y) * .3;
 	const double r1 = std::min (x, y) * .55;
 	const double r2 = std::min (x, y) * .70;
@@ -1196,7 +1227,7 @@ static void icon_config_wheel (cairo_t *cr, const int width, const int height, c
 		cairo_arc (cr, x, y, r1, ang0 + angm + angd, ang1 - angm - angd);
 	}
 	cairo_close_path (cr);
-	VECTORICONSTROKE(lw, fg_color);
+	VECTORICONSTROKE (lw, fg_color);
 
 	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
 	if (arrow == 0) {
@@ -1216,10 +1247,11 @@ static void icon_config_wheel (cairo_t *cr, const int width, const int height, c
 		cairo_arc (cr, x, y, r0, 1.1 * M_PI, 1.1 * M_PI);
 		cairo_arc (cr, x, y, r0, 1.1 * M_PI, .5 * M_PI);
 	}
-	VECTORICONSTROKE(lw, fg_color);
+	VECTORICONSTROKE (lw, fg_color);
 }
 
-static void icon_pcb_via (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_pcb_via (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double x = ceil (width * .5) - .5;
 	const double y = ceil (height * .5) - .5;
@@ -1228,24 +1260,25 @@ static void icon_pcb_via (cairo_t *cr, const int width, const int height, const 
 	const double r = std::min (x, y) * .16;
 	const double p = std::min (x, y) * .1;
 
-	cairo_arc_negative (cr, x+d, y+d, r,        1.15 * M_PI, -.85 * M_PI);
-	cairo_arc          (cr, x+d, y+d, d * 1.12, 1.15 * M_PI, 1.15 * M_PI);
+	cairo_arc_negative (cr, x + d, y + d, r,        1.15 * M_PI, -.85 * M_PI);
+	cairo_arc          (cr, x + d, y + d, d * 1.12, 1.15 * M_PI, 1.15 * M_PI);
 
-	cairo_arc          (cr, x-d, y-d, d * 1.12, 0.15 * M_PI, .15 * M_PI);
-	cairo_arc          (cr, x-d, y-d, r,        0.15 * M_PI, 2.5 * M_PI);
+	cairo_arc          (cr, x - d, y - d, d * 1.12, 0.15 * M_PI,  .15 * M_PI);
+	cairo_arc          (cr, x - d, y - d, r,        0.15 * M_PI,  2.5 * M_PI);
 
-	cairo_arc          (cr, x-d, y-d, r,          .5 * M_PI,  .5 * M_PI);
-	cairo_arc          (cr, x-d, y+d, r,         -.5 * M_PI, 1.5 * M_PI);
+	cairo_arc          (cr, x - d, y - d, r,          .5 * M_PI,   .5 * M_PI);
+	cairo_arc          (cr, x - d, y + d, r,         -.5 * M_PI,  1.5 * M_PI);
 	VECTORICONSTROKE (p, fg_color);
 
-	cairo_arc (cr, x+d, y-d, r, -.5 * M_PI, 1.5 * M_PI);
+	cairo_arc          (cr, x + d, y - d, r,         -.5 * M_PI,  1.5 * M_PI);
 	VECTORICONSTROKE (p, fg_color);
 }
 
-static void icon_latency_clock (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+static void
+icon_latency_clock (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double x = width * .5;
-	const double y = height * .5;
+	const double x  = width * .5;
+	const double y  = height * .5;
 	const double y0 = std::min (x, y) * .4;
 	const double r0 = std::min (x, y) * .1;
 	const double r1 = std::min (x, y) * .5;
@@ -1256,24 +1289,24 @@ static void icon_latency_clock (cairo_t *cr, const int width, const int height, 
 	const double x0 = rint (x) - lc;
 
 	cairo_move_to (cr, x0, y - y0);
-	cairo_arc     (cr, x0, y, r2, -.5 * M_PI, 1.25 * M_PI);
-	VECTORICONSTROKE(lw, fg_color);
+	cairo_arc (cr, x0, y, r2, -.5 * M_PI, 1.25 * M_PI);
+	VECTORICONSTROKE (lw, fg_color);
 
-	cairo_arc (cr, x0, y, r0,  -.4 * M_PI  , .9 * M_PI);
+	cairo_arc (cr, x0, y, r0,  -.4 * M_PI,  .9  * M_PI);
 	cairo_arc (cr, x0, y, r1, 1.25 * M_PI, 1.25 * M_PI);
-	cairo_arc (cr, x0, y, r0,  -.4 * M_PI,  -.4 * M_PI);
+	cairo_arc (cr, x0, y, r0,  -.4 * M_PI, -.4  * M_PI);
 	cairo_close_path (cr);
-  cairo_fill (cr);
+	cairo_fill (cr);
 }
 
 /*****************************************************************************/
 
 bool
-ArdourWidgets::ArdourIcon::render (cairo_t *cr,
+ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr,
                                    const enum ArdourWidgets::ArdourIcon::Icon icon,
                                    const int width, const int height,
                                    const Gtkmm2ext::ActiveState state,
-                                   const uint32_t fg_color)
+                                   const uint32_t               fg_color)
 {
 	bool rv = true;
 	cairo_save (cr);
@@ -1420,38 +1453,39 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 bool
 ArdourWidgets::ArdourIcon::expose (GdkEventExpose* ev, Gtk::Widget* w, const enum ArdourIcon::Icon icon)
 {
-	Glib::RefPtr<Gdk::Window> win (w->get_window());
-  cairo_t* cr = gdk_cairo_create (win->gobj());
+	Glib::RefPtr<Gdk::Window> win (w->get_window ());
+	cairo_t*                  cr = gdk_cairo_create (win->gobj ());
 	gdk_cairo_rectangle (cr, &ev->area);
 	cairo_clip (cr);
 
-	Glib::RefPtr<Gtk::Style> style = w->get_style();
-	Gdk::Color fg (style->get_fg (Gtk::STATE_NORMAL));
+	Glib::RefPtr<Gtk::Style> style = w->get_style ();
+	Gdk::Color               fg (style->get_fg (Gtk::STATE_NORMAL));
 
-	ArdourIcon::render (cr, icon, win->get_width (), win->get_height (), Gtkmm2ext::ExplicitActive, 
-	                    RGBA_TO_UINT (fg.get_red() / 255., fg.get_green() / 255, fg.get_blue() / 255, 255));
+	ArdourIcon::render (cr, icon, win->get_width (), win->get_height (), Gtkmm2ext::ExplicitActive,
+	                    RGBA_TO_UINT (fg.get_red () / 255., fg.get_green () / 255, fg.get_blue () / 255, 255));
 	cairo_destroy (cr);
 
-  return true;
+	return true;
 }
 
 bool
 ArdourWidgets::ArdourIcon::expose_with_text (GdkEventExpose* ev, Gtk::Widget* w, const enum ArdourIcon::Icon icon, std::string const& caption)
 {
-	Glib::RefPtr<Gdk::Window> win (w->get_window());
-	cairo_t* cr = gdk_cairo_create (win->gobj());
+	Glib::RefPtr<Gdk::Window> win (w->get_window ());
+	cairo_t*                  cr = gdk_cairo_create (win->gobj ());
 	gdk_cairo_rectangle (cr, &ev->area);
 	cairo_clip (cr);
 
 	int width  = win->get_width ();
 	int height = win->get_height ();
 
-	Glib::RefPtr<Gtk::Style> style = w->get_style();
-	Gdk::Color fg (style->get_fg (Gtk::STATE_NORMAL));
-	const uint32_t fg_color = RGBA_TO_UINT (fg.get_red() / 255., fg.get_green() / 255, fg.get_blue() / 255, 255);
+	Glib::RefPtr<Gtk::Style> style = w->get_style ();
 
-	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (w->get_pango_context());
-	layout->set_font_description (style->get_font());
+	Gdk::Color     fg (style->get_fg (Gtk::STATE_NORMAL));
+	const uint32_t fg_color = RGBA_TO_UINT (fg.get_red () / 255., fg.get_green () / 255, fg.get_blue () / 255, 255);
+
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (w->get_pango_context ());
+	layout->set_font_description (style->get_font ());
 	layout->set_alignment (Pango::ALIGN_CENTER);
 	layout->set_text (caption);
 
@@ -1466,7 +1500,7 @@ ArdourWidgets::ArdourIcon::expose_with_text (GdkEventExpose* ev, Gtk::Widget* w,
 		const double wh = std::min (170, std::min (width, height));
 		cairo_move_to (cr, 0.5 * (width - text_width), .5 * (height + wh) - text_height - 2);
 		Gtkmm2ext::set_source_rgba (cr, fg_color);
-		pango_cairo_show_layout (cr, layout->gobj());
+		pango_cairo_show_layout (cr, layout->gobj ());
 	} else {
 		text_height = 0;
 	}
