@@ -148,6 +148,7 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	sort (popdowns.begin(), popdowns.end(), less<string>());
 
 	popdowns.insert (popdowns.begin(), _("Reset All"));
+	popdowns.insert (popdowns.begin(), _("Drop Bindings"));
 
 	set_popdown_strings (map_combo, popdowns);
 
@@ -269,6 +270,8 @@ GMCPGUI::binding_changed ()
 	string str = map_combo.get_active_text ();
 
 	if (str == _("Reset All")) {
+		cp.drop_all ();
+	} else if (str == _("Drop Bindings")) {
 		cp.drop_bindings ();
 	} else {
 		for (list<GenericMidiControlProtocol::MapInfo>::iterator x = cp.map_info.begin(); x != cp.map_info.end(); ++x) {

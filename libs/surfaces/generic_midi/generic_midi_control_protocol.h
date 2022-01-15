@@ -96,6 +96,7 @@ public:
 
 	int load_bindings (const std::string&);
 	void drop_bindings ();
+	void drop_all ();
 
 	void check_used_event (int, int);
 
@@ -174,7 +175,6 @@ private:
 	MIDIAction* create_action (const XMLNode&);
 
 	void reset_controllables ();
-	void drop_all ();
 
 	enum ConnectionState {
 		InputConnected = 0x1,
