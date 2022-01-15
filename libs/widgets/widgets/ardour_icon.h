@@ -84,6 +84,11 @@ namespace ArdourWidgets { namespace ArdourIcon {
 	                            Gtk::Widget* w,
 	                            const enum Icon icon);
 
+	LIBWIDGETS_API bool expose_with_text (GdkEventExpose* ev,
+	                                      Gtk::Widget* w,
+	                                      const enum Icon icon,
+	                                      std::string const&);
+
 }; } /* end namespace */
 
 #endif

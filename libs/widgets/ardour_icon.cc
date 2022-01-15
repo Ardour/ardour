@@ -1434,3 +1434,46 @@ ArdourWidgets::ArdourIcon::expose (GdkEventExpose* ev, Gtk::Widget* w, const enu
 
   return true;
 }
+
+bool
+ArdourWidgets::ArdourIcon::expose_with_text (GdkEventExpose* ev, Gtk::Widget* w, const enum ArdourIcon::Icon icon, std::string const& caption)
+{
+	Glib::RefPtr<Gdk::Window> win (w->get_window());
+	cairo_t* cr = gdk_cairo_create (win->gobj());
+	gdk_cairo_rectangle (cr, &ev->area);
+	cairo_clip (cr);
+
+	int width  = win->get_width ();
+	int height = win->get_height ();
+
+	Glib::RefPtr<Gtk::Style> style = w->get_style();
+	Gdk::Color fg (style->get_fg (Gtk::STATE_NORMAL));
+	const uint32_t fg_color = RGBA_TO_UINT (fg.get_red() / 255., fg.get_green() / 255, fg.get_blue() / 255, 255);
+
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (w->get_pango_context());
+	layout->set_font_description (style->get_font());
+	layout->set_alignment (Pango::ALIGN_CENTER);
+	layout->set_text (caption);
+
+	int text_width, text_height;
+	layout->get_pixel_size (text_width, text_height);
+
+	if (width > text_width && height > text_height) {
+		/* TODO: either change render methods to return used w/h e.g. (int& width, int& height),
+		 * or add a parameter to allow the called to specify the max y-offset.
+		 * 170 is to match max-size of ::icon_shaded_plus_sign ()
+		 */
+		const double wh = std::min (170, std::min (width, height));
+		cairo_move_to (cr, 0.5 * (width - text_width), .5 * (height + wh) - text_height - 2);
+		Gtkmm2ext::set_source_rgba (cr, fg_color);
+		pango_cairo_show_layout (cr, layout->gobj());
+	} else {
+		text_height = 0;
+	}
+
+	ArdourIcon::render (cr, icon, win->get_width (), win->get_height () - text_height, Gtkmm2ext::ExplicitActive, fg_color);
+
+	cairo_destroy (cr);
+
+	return true;
+}
