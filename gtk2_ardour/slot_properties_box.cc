@@ -362,6 +362,7 @@ SlotPropertyTable::probability_adjusted ()
 bool
 SlotPropertyTable::follow_action_button_event (GdkEvent* ev)
 {
+#if 0 /* ben to remove */
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		trigger()->set_use_follow (!trigger()->use_follow());
@@ -370,7 +371,7 @@ SlotPropertyTable::follow_action_button_event (GdkEvent* ev)
 	default:
 		break;
 	}
-
+#endif
 	return false;
 }
 
@@ -415,10 +416,6 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	if (pc.contains (Properties::quantization)) {
 		BBT_Offset bbo (trigger()->quantization());
 		_quantize_button.set_active (quantize_length_to_string (bbo));
-	}
-
-	if (pc.contains (Properties::use_follow)) {
-		_follow_action_button.set_active_state (trigger()->use_follow() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::follow_count)) {

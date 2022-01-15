@@ -692,7 +692,6 @@ TriggerUI::set_follow_action (Trigger::FollowAction fa)
 
 	trigger()->set_follow_action (fa, 0);
 	trigger()->set_follow_action_probability (0);
-	trigger()->set_use_follow (true);
 }
 
 void
@@ -851,7 +850,6 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 
 	pc.add (Properties::name);
 	pc.add (Properties::color);
-	pc.add (Properties::use_follow);
 	pc.add (Properties::legato);
 	pc.add (Properties::quantization);
 	pc.add (Properties::launch_style);

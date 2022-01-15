@@ -491,7 +491,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 	}
 
 	/* follow-action icon */
-	if (trigger ()->region () && trigger ()->use_follow ()) {
+	if (trigger ()->region () && trigger ()->will_follow ()) {
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (width - height, 0); // right side of the widget
@@ -519,7 +519,6 @@ TriggerEntry::on_trigger_changed (PropertyChange const& change)
 	interesting_stuff.add (ARDOUR::Properties::launch_style);
 	interesting_stuff.add (ARDOUR::Properties::follow_action0);
 	interesting_stuff.add (ARDOUR::Properties::follow_action1);
-	interesting_stuff.add (ARDOUR::Properties::use_follow);
 	interesting_stuff.add (ARDOUR::Properties::follow_action_probability);
 	interesting_stuff.add (ARDOUR::Properties::follow_count);
 	interesting_stuff.add (ARDOUR::Properties::isolated);
