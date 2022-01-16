@@ -3580,7 +3580,7 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 		/* setup thread-local tempo map ptr as a writable copy */
 
-		TempoMap::fetch_writable ();
+		_editor->begin_tempo_map_edit ();
 	}
 }
 
@@ -3682,6 +3682,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 		timepos_t pos = adjusted_current_time (event);
 
+		std::cerr << " going to move " << &_marker->tempo() << std::endl;
 		map->move_tempo (_marker->tempo(), pos, false);
 
 		show_verbose_cursor_time (_marker->tempo().time());
@@ -3710,7 +3711,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		 * official version
 		 */
 
-		TempoMap::abort_update ();
+		_editor->abort_tempo_map_edit ();
 
 		if (was_double_click()) {
 			_editor->edit_tempo_marker (*_marker);
@@ -3721,9 +3722,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	/* push the current state of our writable map copy */
 
-	TempoMap::SharedPtr map (TempoMap::use());
-	TempoMap::update (map);
-
+	_editor->commit_tempo_map_edit ();
 	XMLNode &after = TempoMap::use()->get_state();
 
 	_editor->session()->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), _before_state, &after));
@@ -3741,7 +3740,7 @@ TempoMarkerDrag::aborted (bool moved)
 	 * official version
 	 */
 
-	TempoMap::abort_update ();
+	_editor->abort_tempo_map_edit ();
 
 	// _point->end_float ();
 	_marker->set_position (timepos_t (_marker->tempo().beats()));
