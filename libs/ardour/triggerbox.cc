@@ -155,6 +155,10 @@ Trigger::will_not_follow () const
 void
 Trigger::set_name (std::string const & str)
 {
+	if (_name == str) {
+		return;
+	}
+
 	_name = str;
 	PropertyChanged (Properties::name);
 	_box.session().set_dirty();
@@ -163,6 +167,10 @@ Trigger::set_name (std::string const & str)
 void
 Trigger::set_scene_isolated (bool i)
 {
+	if (_isolated == i) {
+		return;
+	}
+
 	_isolated = i;
 	PropertyChanged (ARDOUR::Properties::isolated);
 	_box.session().set_dirty();
@@ -171,6 +179,10 @@ Trigger::set_scene_isolated (bool i)
 void
 Trigger::set_color (color_t c)
 {
+	if (_color == c) {
+		return;
+	}
+
 	_color = c;
 	PropertyChanged (ARDOUR::Properties::color);
 	_box.session().set_dirty();
@@ -179,6 +191,10 @@ Trigger::set_color (color_t c)
 void
 Trigger::set_stretchable (bool s)
 {
+	if (_stretchable == s) {
+		return;
+	}
+
 	_stretchable = s;
 	PropertyChanged (ARDOUR::Properties::stretchable);
 	_box.session().set_dirty();
@@ -361,7 +377,14 @@ Trigger::set_state (const XMLNode& node, int version)
 void
 Trigger::set_follow_length (Temporal::BBT_Offset const & bbo)
 {
+	if (_use_follow_length == bbo) {
+		return;
+	}
 	_follow_length = bbo;
+	PropertyChanged (Properties::use_follow_length);
+	_box.session().set_dirty();
+}
+
 void
 Trigger::set_use_follow_length (bool ufl)
 {
@@ -376,6 +399,9 @@ Trigger::set_use_follow_length (bool ufl)
 void
 Trigger::set_legato (bool yn)
 {
+	if (_legato == yn) {
+		return;
+	}
 	_legato = yn;
 	PropertyChanged (Properties::legato);
 	_box.session().set_dirty();
@@ -2560,6 +2586,7 @@ TriggerBox::set_pass_thru (bool yn)
 {
 	_requests.pass_thru = yn;
 	PropertyChanged (Properties::passthru);
+	session().set_dirty();
 }
 
 void
