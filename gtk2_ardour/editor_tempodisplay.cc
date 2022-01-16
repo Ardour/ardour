@@ -96,6 +96,14 @@ Editor::reassociate_metric_markers (TempoMap::SharedPtr const & tmap)
 	TempoMap::Metrics metrics;
 	tmap->get_metrics (metrics);
 
+	for (auto & marker : metric_marks) {
+		reassociate_metric_marker (tmap, metrics, *marker);
+	}
+}
+
+void
+Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::Metrics & metrics, ArdourMarker& marker)
+{
 	TempoMarker* tm;
 	MeterMarker* mm;
 	BBTMarker* bm;
@@ -104,46 +112,44 @@ Editor::reassociate_metric_markers (TempoMap::SharedPtr const & tmap)
 	Temporal::MeterPoint* mp;
 	Temporal::MusicTimePoint* mtp;
 
-	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
+	if ((tm = dynamic_cast<TempoMarker*> (&marker)) != 0) {
 
-		if ((tm = dynamic_cast<TempoMarker*> (*x)) != 0) {
-
-			for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
-				if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
-					/* do nothing .. but we had to catch
-					   this first because MusicTimePoint
-					   IS-A TempoPoint
-					*/
-				} else if ((tp = dynamic_cast<Temporal::TempoPoint*>(*m)) != 0) {
-					if (tm->tempo() == *tp) {
-						tm->reset_tempo (*tp);
-						break;
-					}
+		for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
+			if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
+				/* do nothing .. but we had to catch
+				   this first because MusicTimePoint
+				   IS-A TempoPoint
+				*/
+			} else if ((tp = dynamic_cast<Temporal::TempoPoint*>(*m)) != 0) {
+				if (tm->tempo() == *tp) {
+					tm->reset_tempo (*tp);
+					break;
 				}
 			}
-		} else if ((mm = dynamic_cast<MeterMarker*> (*x)) != 0) {
-			for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
-				if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
-					/* do nothing .. but we had to catch
-					   this first because MusicTimePoint
-					   IS-A TempoPoint
-					*/
+		}
+	} else if ((mm = dynamic_cast<MeterMarker*> (&marker)) != 0) {
+		for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
+			if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
+				/* do nothing .. but we had to catch
+				   this first because MusicTimePoint
+				   IS-A TempoPoint
+				*/
 
-				} else if ((mp = dynamic_cast<Temporal::MeterPoint*>(*m)) != 0) {
-					if (mm->meter() == *mp) {
-						mm->reset_meter (*mp);
-						break;
-					}
+			} else if ((mp = dynamic_cast<Temporal::MeterPoint*>(*m)) != 0) {
+				if (mm->meter() == *mp) {
+					mm->reset_meter (*mp);
+					break;
 				}
 			}
-		} else if ((bm = dynamic_cast<BBTMarker*> (*x)) != 0) {
+		}
 
-			for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
-				if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
-					if (bm->point() == *mtp) {
-						bm->reset_point (*mtp);
-						break;
-					}
+	} else if ((bm = dynamic_cast<BBTMarker*> (&marker)) != 0) {
+
+		for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
+			if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
+				if (bm->point() == *mtp) {
+					bm->reset_point (*mtp);
+					break;
 				}
 			}
 		}
