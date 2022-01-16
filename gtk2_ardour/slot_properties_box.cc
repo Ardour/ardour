@@ -273,37 +273,47 @@ SlotPropertyTable::SlotPropertyTable ()
 
 	Gtk::Table *prob_table = manage(new Gtk::Table());
 	prob_table->set_spacings(2);
-	prob_table->set_border_width(4);
-	prob_table->attach(_follow_probability_slider, 0, 2, 0, 1, Gtk::FILL, Gtk::SHRINK );
-	prob_table->attach(_left_probability_label,    0, 1, 1, 2, Gtk::FILL,             Gtk::SHRINK );
-	prob_table->attach(_right_probability_label,   1, 2, 1, 2, Gtk::FILL,             Gtk::SHRINK );
+	prob_table->set_border_width(0);
+	prob_table->attach(_left_probability_label,    0, 1, 0, 1, Gtk::FILL,             Gtk::SHRINK );
+	prob_table->attach(_right_probability_label,   1, 2, 0, 1, Gtk::FILL,             Gtk::SHRINK );
+	prob_table->attach(_follow_probability_slider, 0, 2, 1, 2, Gtk::FILL, Gtk::SHRINK );
 
-	_follow_table.attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
-	_follow_table.attach(_follow_right,  1, 3, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
-	_follow_table.attach( *prob_table,   0, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	/* follow count, follow length */
+	Gtk::Table *fol_table = manage(new Gtk::Table());
+	fol_table->set_spacings(2);
+	fol_table->set_border_width(4);
 
 	label = manage(new Gtk::Label(_("Follow Count:")));  label->set_alignment(1.0, 0.5);
-	_follow_table.attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	fol_table->attach(*label,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
 	align->add (_follow_count_spinner);
-	_follow_table.attach(*align,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
+	fol_table->attach(*align,          2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
 
 	label = manage(new Gtk::Label(_("Follow Length:")));  label->set_alignment(1.0, 0.5);
 	Gtk::Label *beat_label = manage (new Gtk::Label (_("(beats)")));
 	beat_label->set_alignment (0.0, 0.5);
-	_follow_table.attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	Gtk::Alignment *fl_align = manage (new Gtk::Alignment (0, .5, 0, 0));
 	fl_align->add (_follow_length_spinner);
-	_follow_table.attach(*fl_align,       1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 );
-	_follow_table.attach(*beat_label,     2, 3, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
-	_follow_table.attach(_use_follow_length_button,     3, 4, row, row+1, Gtk::SHRINK, Gtk::SHRINK); row++;
+	fol_table->attach(_use_follow_length_button,     0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
+	fol_table->attach(*label,                        1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	fol_table->attach(*fl_align,                     2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	fol_table->attach(*beat_label,                   3, 4, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
 
-	Gtk::EventBox* eFollowBox = manage (new Gtk::EventBox); // a themeable box
+	_follow_table.attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
+	_follow_table.attach(_follow_right,  1, 2, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
+	_follow_table.attach( *prob_table,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	_follow_table.attach( *fol_table,    0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	ArdourWidgets::Frame* eFollowBox = manage (new ArdourWidgets::Frame);
+	eFollowBox->set_label("Follow Options");
 	eFollowBox->set_name("EditorDark");
+	eFollowBox->set_edge_color (0x000000ff); // black
 	eFollowBox->add (_follow_table);
 
-	Gtk::EventBox* eLaunchBox = manage (new Gtk::EventBox); // a themeable box
+	ArdourWidgets::Frame* eLaunchBox = manage (new ArdourWidgets::Frame);
+	eLaunchBox->set_label("Launch Options");
 	eLaunchBox->set_name("EditorDark");
+	eLaunchBox->set_edge_color (0x000000ff); // black
 	eLaunchBox->add (_launch_table);
 
 	attach(_trigger_table,  0,1, 0,1, Gtk::FILL, Gtk::SHRINK );

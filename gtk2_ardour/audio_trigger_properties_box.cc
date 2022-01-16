@@ -90,8 +90,10 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	bpm_table->attach (*label,         0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 	bpm_table->attach (_metrum_button, 1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
-	Gtk::EventBox* eTempoBox = manage (new Gtk::EventBox); // a themeable box
+	ArdourWidgets::Frame* eTempoBox = manage (new ArdourWidgets::Frame);
+	eTempoBox->set_label("Stretch Options");
 	eTempoBox->set_name("EditorDark");
+	eTempoBox->set_edge_color (0x000000ff); // black
 	eTempoBox->add (*bpm_table);
 
 	/* -------------- Clip start&length (redundant with the trimmer gui handles?)  ----------*/
