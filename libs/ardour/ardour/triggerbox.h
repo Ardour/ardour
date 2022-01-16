@@ -217,6 +217,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_next_trigger (int n);
 	int next_trigger() const { return _next_trigger; }
 
+	void set_use_follow_length (bool);
+	bool use_follow_length() const { return _use_follow_length; }
+
 	void set_follow_length (Temporal::BBT_Offset const &);
 	Temporal::BBT_Offset follow_length() const { return _follow_length; }
 
@@ -312,6 +315,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<uint32_t>             _follow_count;
 	PBD::Property<Temporal::BBT_Offset> _quantization;
 	PBD::Property<Temporal::BBT_Offset> _follow_length;
+	PBD::Property<bool>                 _use_follow_length;
 	PBD::Property<bool>                 _legato;
 	PBD::Property<std::string>          _name;
 	PBD::Property<gain_t>               _gain;
@@ -719,6 +723,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> running;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> passthru;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> legato;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> use_follow_length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::BBT_Offset> follow_length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;

@@ -50,6 +50,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> running;
 		PBD::PropertyDescriptor<bool> passthru;
 		PBD::PropertyDescriptor<bool> legato;
+		PBD::PropertyDescriptor<bool> use_follow_length;
 		PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
 		PBD::PropertyDescriptor<Temporal::BBT_Offset> follow_length;
 		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
@@ -86,7 +87,8 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _follow_action_probability (Properties::follow_action_probability, 0)
 	, _follow_count (Properties::follow_count, 1)
 	, _quantization (Properties::quantization, Temporal::BBT_Offset (1, 0, 0))
-	, _follow_length (Properties::follow_length, Temporal::BBT_Offset (0, 0, 0))
+	, _follow_length (Properties::follow_length, Temporal::BBT_Offset (1, 0, 0))
+	, _use_follow_length (Properties::use_follow_length, false)
 	, _legato (Properties::legato, false)
 	, _name (Properties::name, "")
 	, _gain (Properties::gain, 1.0)
@@ -110,6 +112,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	add_property (_follow_count);
 	add_property (_quantization);
 	add_property (_follow_length);
+	add_property (_use_follow_length);
 	add_property (_legato);
 	add_property (_name);
 	add_property (_gain);
@@ -359,6 +362,15 @@ void
 Trigger::set_follow_length (Temporal::BBT_Offset const & bbo)
 {
 	_follow_length = bbo;
+void
+Trigger::set_use_follow_length (bool ufl)
+{
+	if (_use_follow_length == ufl) {
+		return;
+	}
+	_use_follow_length = ufl;
+	PropertyChanged (Properties::use_follow_length);
+	_box.session().set_dirty();
 }
 
 void
@@ -937,12 +949,13 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
            Things that affect these values:
 
            data.length : how many samples there are in the data  (AudioTime / samples)
-           _follow_length : the time after the start of the trigger when the follow action should take effect
+           _follow_length : the (user specified) time after the start of the trigger when the follow action should take effect
+           _use_follow_length : whether to use the follow_length value, or the clip's natural length
            _barcnt : the expected duration of the trigger, based on analysis of its tempo, or user-set
 
 	*/
 
-	samplepos_t end_by_follow_length = _follow_length != Temporal::BBT_Offset() ? tmap->sample_at (tmap->bbt_walk(transition_bbt, _follow_length)) : 0;
+	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk(transition_bbt, _follow_length));
 	samplepos_t end_by_barcnt = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (round (_barcnt), 0, 0)));
 	samplepos_t end_by_data_length = transition_sample + data.length;
 
@@ -951,20 +964,20 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 	                                              end_by_follow_length, _follow_length, end_by_barcnt, end_by_data_length));
 
 	if (stretching()) {
-		if (_follow_length != Temporal::BBT_Offset()) {
+		if (_use_follow_length) {
 			expected_end_sample = std::min (end_by_follow_length, end_by_barcnt);
 		} else {
 			expected_end_sample = end_by_barcnt;
 		}
 	} else {
-		if (_follow_length != Temporal::BBT_Offset()) {
+		if (_use_follow_length) {
 			expected_end_sample = std::min (end_by_follow_length, end_by_data_length);
 		} else {
 			expected_end_sample = end_by_data_length;
 		}
 	}
 
-	if (_follow_length != Temporal::BBT_Offset()) {
+	if (_use_follow_length) {
 		final_sample = end_by_follow_length - transition_sample;
 	} else {
 		final_sample = expected_end_sample - transition_sample;
@@ -972,7 +985,7 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 
 	samplecnt_t usable_length;
 
-	if ((_follow_length != Temporal::BBT_Offset()) && (end_by_follow_length < end_by_data_length)) {
+	if (_use_follow_length && (end_by_follow_length < end_by_data_length)) {
 		usable_length = tmap->sample_at (tmap->bbt_walk (Temporal::BBT_Time (), _follow_length));
 	} else {
 		usable_length = data.length;
@@ -1643,7 +1656,7 @@ MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap
 
 	Temporal::Beats usable_length;
 
-	if ((_follow_length != Temporal::BBT_Offset()) && (end_by_follow_length < end_by_data_length)) {
+	if (_use_follow_length && (end_by_follow_length < end_by_data_length)) {
 		usable_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length)) - transition_beats;
 	} else {
 		usable_length = data_length;
@@ -1653,7 +1666,7 @@ MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap
 
 	if (launch_style() != Repeat || (q == Temporal::BBT_Offset())) {
 
-		if (_follow_length != Temporal::BBT_Offset()) {
+		if (_use_follow_length) {
 			final_beat = end_by_follow_length;
 		} else {
 			final_beat = end_by_data_length;
@@ -2034,6 +2047,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for passthru = %1\n", Properties::passthru.property_id));
 	Properties::follow_count.property_id = g_quark_from_static_string (X_("follow-count"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow_count = %1\n", Properties::follow_count.property_id));
+	Properties::use_follow_length.property_id = g_quark_from_static_string (X_("use-follow-length"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for use_follow_length = %1\n", Properties::use_follow_length.property_id));
 	Properties::follow_length.property_id = g_quark_from_static_string (X_("follow-length"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow_length = %1\n", Properties::follow_length.property_id));
 	Properties::legato.property_id = g_quark_from_static_string (X_("legato"));
