@@ -64,7 +64,6 @@ protected:
 	void length_clock_changed();
 
 	void follow_clock_changed();
-	void gain_changed();
 
 private:
 
@@ -74,9 +73,6 @@ private:
 
 	AudioClock _length_clock;
 	AudioClock _start_clock;
-
-	Gtk::Adjustment  _gain_adjustment;
-	Gtk::SpinButton  _gain_spinner;
 
 	ArdourWidgets::ArdourButton _metrum_button;
 

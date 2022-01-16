@@ -101,8 +101,12 @@ SlotPropertiesBox::set_slot (TriggerReference tref)
 
 SlotPropertyTable::SlotPropertyTable ()
 	: _color_button (ArdourButton::Element (ArdourButton::just_led_default_elements | ArdourButton::ColorBox))
+	, _color_label (_("Color:"))
 	, _velocity_adjustment(1.,0.,1.0,0.01,0.1)
 	, _velocity_slider (&_velocity_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
+	, _gain_adjustment( 0.0, -20.0, +20.0, 1.0, 3.0, 0)
+	, _gain_spinner (_gain_adjustment)
+	, _gain_label (_("Gain (dB):"))
 	, _follow_probability_adjustment(0,0,100,2,5)
 	, _follow_probability_slider (&_follow_probability_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _follow_count_adjustment (1, 1, 128, 1, 4)
@@ -208,6 +212,13 @@ SlotPropertyTable::SlotPropertyTable ()
 	_name_frame.set_border_width (0);
 	_name_frame.set_padding (0);
 
+//	_gain_label.set_alignment (1.0, 0.5);
+//	_color_label.set_alignment (1.0, 0.5);
+
+	_gain_spinner.set_can_focus(false);
+	_gain_spinner.configure(_gain_adjustment, 0.0, 1);
+	_gain_spinner.signal_changed ().connect (sigc::mem_fun (*this, &SlotPropertyTable::gain_change_event));
+
 	_load_button.set_name("FollowAction");
 	_load_button.set_text (_("Load"));
 	_load_button.signal_clicked.connect (sigc::bind((sigc::mem_fun (*this, (&TriggerUI::choose_sample))), false));
@@ -232,9 +243,12 @@ SlotPropertyTable::SlotPropertyTable ()
 	_trigger_table.set_spacings (4);
 	_trigger_table.set_homogeneous (false);
 
-	_trigger_table.attach(_name_frame,       0, 2, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK );
-	_trigger_table.attach(_load_button,      2, 3, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
-	_trigger_table.attach(_color_button,     3, 4, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
+	_trigger_table.attach(_name_frame,    0, 2, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK );
+	_trigger_table.attach(_load_button,   2, 3, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
+	_trigger_table.attach(_color_label,   3, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_trigger_table.attach(_color_button,  4, 5, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
+	_trigger_table.attach(_gain_label,    5, 6, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_trigger_table.attach(_gain_spinner,  6, 7, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 
 	/* ---- Launch settings ----- */
@@ -316,7 +330,7 @@ SlotPropertyTable::SlotPropertyTable ()
 	eLaunchBox->set_edge_color (0x000000ff); // black
 	eLaunchBox->add (_launch_table);
 
-	attach(_trigger_table,  0,1, 0,1, Gtk::FILL, Gtk::SHRINK );
+	attach(_trigger_table,  0,2, 0,1, Gtk::FILL, Gtk::SHRINK );
 	attach(*eLaunchBox,     0,1, 1,2, Gtk::FILL, Gtk::SHRINK );
 	attach(*eFollowBox,     1,2, 1,2, Gtk::FILL, Gtk::SHRINK );
 }
@@ -405,6 +419,19 @@ SlotPropertyTable::use_follow_length_event (GdkEvent* ev)
 	return false;
 }
 
+void
+SlotPropertyTable::gain_change_event ()
+{
+	if (_ignore_changes) {
+		return;
+	}
+
+	float coeff = dB_to_coefficient(_gain_adjustment.get_value());
+
+	trigger()->set_gain(coeff);
+}
+
+
 bool
 SlotPropertyTable::legato_button_event (GdkEvent* ev)
 {
@@ -457,6 +484,22 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	if (pc.contains (Properties::color)) {
 		_color_button.set_custom_led_color (trigger()->color());
 	}
+
+	if (pc.contains (Properties::gain)) {
+		float gain = accurate_coefficient_to_dB(trigger()->gain());
+		if (gain != _gain_adjustment.get_value()) {
+			_gain_adjustment.set_value (gain);
+		}
+	}
+
+	if (triggerbox().data_type () == DataType::AUDIO) {
+		_gain_spinner.show();
+		_gain_label.show();
+	} else {
+		_gain_spinner.hide();
+		_gain_label.hide();
+	}
+
 	if (pc.contains (Properties::quantization)) {
 		BBT_Offset bbo (trigger()->quantization());
 		_quantize_button.set_active (quantize_length_to_string (bbo));

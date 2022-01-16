@@ -60,7 +60,9 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 	~SlotPropertyTable ();
 
 	Glib::RefPtr<Gtk::SizeGroup> _follow_size_group;
-	ArdourWidgets::ArdourButton _color_button;
+
+	ArdourWidgets::ArdourButton   _color_button;
+	Gtk::Label                    _color_label;
 
 	ArdourWidgets::ArdourButton _load_button;
 
@@ -70,6 +72,10 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 	Gtk::Table                    _trigger_table;
 	Gtk::Table                    _launch_table;
 	Gtk::Table                    _follow_table;
+
+	Gtk::Adjustment               _gain_adjustment;
+	Gtk::SpinButton               _gain_spinner;
+	Gtk::Label                    _gain_label;
 
 	Gtk::Label                    _left_probability_label;
 	Gtk::Label                    _right_probability_label;
@@ -100,6 +106,8 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 
 	bool legato_button_event (GdkEvent*);
 	void follow_count_event ();
+
+	void gain_change_event ();
 
 	bool use_follow_length_event (GdkEvent*);
 	void follow_length_event ();

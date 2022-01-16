@@ -53,8 +53,6 @@ using std::min;
 AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	: _length_clock (X_("regionlength"), true, "", true, false, true)
 	, _start_clock (X_("regionstart"), true, "", false, false)
-	, _gain_adjustment( 0.0, -20.0, +20.0, 1.0, 3.0, 0)
-	, _gain_spinner (_gain_adjustment)
 	, _stretch_toggle (ArdourButton::led_default_elements)
 	, _abpm_label  (ArdourButton::Text)
 {
@@ -115,25 +113,10 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	_table.set_spacings (4);
 	_table.set_border_width (2);
 
-	Gtk::Table* audio_t = manage (new Gtk::Table ());
-	audio_t->set_homogeneous (true);
-	audio_t->set_spacings (4);
-
-	row = 0;
-
-	label = manage (new Gtk::Label (_("Gain:")));
-	label->set_alignment (1.0, 0.5);
-	Gtk::Label *db_label = manage (new Gtk::Label (_("(dB)")));
-	db_label->set_alignment (0.0, 0.5);
-	audio_t->attach (*label,        0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	audio_t->attach (_gain_spinner, 1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	audio_t->attach (*db_label,     2, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-
-	row++;
-
 	attach (*eTempoBox,    0,1, 0,1, Gtk::FILL, Gtk::SHRINK);
+#if 0
 	attach (_table,        0,1, 1,2, Gtk::FILL, Gtk::SHRINK);
-	attach (*audio_t,      0,1, 2,3, Gtk::FILL, Gtk::SHRINK);
+#endif
 
 	using namespace Menu_Helpers;
 
@@ -145,10 +128,6 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	_stretch_selector.AddMenuElem (MenuElem (TriggerUI::stretch_mode_to_string(Trigger::Smooth), sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::set_stretch_mode), Trigger::Smooth)));
 
 	_stretch_toggle.signal_clicked.connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::toggle_stretch));
-
-	_gain_spinner.set_can_focus(false);
-	_gain_spinner.configure(_gain_adjustment, 0.0, 1);
-	_gain_spinner.signal_changed ().connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::gain_changed));
 }
 
 AudioTriggerPropertiesBox::~AudioTriggerPropertiesBox ()
@@ -219,21 +198,7 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& what_c
 
 	_stretch_selector.set_sensitive(trigger->stretchable ());
 	_stretch_selector.set_text(stretch_mode_to_string(trigger->stretch_mode ()));
-
-	float gain = accurate_coefficient_to_dB(trigger->gain());
-	if (gain != _gain_adjustment.get_value()) {
-		_gain_adjustment.set_value (gain);
-	}
 }
-
-void
-AudioTriggerPropertiesBox::gain_changed ()
-{
-	float coeff = dB_to_coefficient(_gain_adjustment.get_value());
-
-	trigger()->set_gain(coeff);
-}
-
 
 void
 AudioTriggerPropertiesBox::start_clock_changed ()
