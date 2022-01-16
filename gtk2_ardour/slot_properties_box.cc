@@ -101,26 +101,25 @@ SlotPropertiesBox::set_slot (TriggerReference tref)
 
 SlotPropertyTable::SlotPropertyTable ()
 	: _color_button (ArdourButton::Element (ArdourButton::just_led_default_elements | ArdourButton::ColorBox))
-	, _follow_action_button (ArdourButton::led_default_elements)
 	, _velocity_adjustment(1.,0.,1.0,0.01,0.1)
 	, _velocity_slider (&_velocity_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _follow_probability_adjustment(0,0,100,2,5)
 	, _follow_probability_slider (&_follow_probability_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _follow_count_adjustment (1, 1, 128, 1, 4)
 	, _follow_count_spinner (_follow_count_adjustment)
-	, _follow_length_adjustment (0, 0, 128, 1, 4)
+	, _use_follow_length_button (ArdourButton::default_elements)
+	, _follow_length_adjustment (1, 1, 128, 1, 4)
 	, _follow_length_spinner (_follow_length_adjustment)
 	, _legato_button (ArdourButton::led_default_elements)
+	, _ignore_changes(false)
 
 {
 	using namespace Gtk::Menu_Helpers;
 
-	_follow_action_button.set_name("FollowAction");
-	_follow_action_button.set_text (_("Follow Action"));
-	_follow_action_button.signal_event().connect (sigc::mem_fun (*this, (&SlotPropertyTable::follow_action_button_event)));
-
 	_follow_count_spinner.set_can_focus(false);
 	_follow_count_spinner.signal_changed ().connect (sigc::mem_fun (*this, &SlotPropertyTable::follow_count_event));
+
+	_use_follow_length_button.signal_event().connect (sigc::mem_fun (*this, (&SlotPropertyTable::use_follow_length_event)));
 
 	_follow_length_spinner.set_can_focus(false);
 	_follow_length_spinner.signal_changed ().connect (sigc::mem_fun (*this, &SlotPropertyTable::follow_length_event));
@@ -296,7 +295,8 @@ SlotPropertyTable::SlotPropertyTable ()
 	Gtk::Alignment *fl_align = manage (new Gtk::Alignment (0, .5, 0, 0));
 	fl_align->add (_follow_length_spinner);
 	_follow_table.attach(*fl_align,       1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 );
-	_follow_table.attach(*beat_label,     2, 3, row, row+1, Gtk::SHRINK, Gtk::SHRINK); row++;
+	_follow_table.attach(*beat_label,     2, 3, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
+	_follow_table.attach(_use_follow_length_button,     3, 4, row, row+1, Gtk::SHRINK, Gtk::SHRINK); row++;
 
 	Gtk::EventBox* eFollowBox = manage (new Gtk::EventBox); // a themeable box
 	eFollowBox->set_name("EditorDark");
@@ -331,6 +331,10 @@ SlotPropertyTable::set_quantize (BBT_Offset bbo)
 void
 SlotPropertyTable::follow_length_event ()
 {
+	if (_ignore_changes) {
+		return;
+	}
+
 	int beatz = (int) _follow_length_adjustment.get_value();
 
 	int metrum_numerator = trigger()->meter().divisions_per_bar();
@@ -339,45 +343,65 @@ SlotPropertyTable::follow_length_event ()
 	int beats = beatz%metrum_numerator;
 
 	trigger()->set_follow_length(Temporal::BBT_Offset(bars,beats,0));
+	trigger()->set_use_follow_length (true);  //if the user is adjusting follow-length, they want to use it
 }
 
 void
 SlotPropertyTable::follow_count_event ()
 {
+	if (_ignore_changes) {
+		return;
+	}
+
 	trigger()->set_follow_count ((int) _follow_count_adjustment.get_value());
 }
 
 void
 SlotPropertyTable::velocity_adjusted ()
 {
+	if (_ignore_changes) {
+		return;
+	}
+
 	trigger()->set_midi_velocity_effect (_velocity_adjustment.get_value());
 }
 
 void
 SlotPropertyTable::probability_adjusted ()
 {
+	if (_ignore_changes) {
+		return;
+	}
+
 	trigger()->set_follow_action_probability ((int) _follow_probability_adjustment.get_value());
 }
 
 bool
-SlotPropertyTable::follow_action_button_event (GdkEvent* ev)
+SlotPropertyTable::use_follow_length_event (GdkEvent* ev)
 {
-#if 0 /* ben to remove */
+	if (_ignore_changes) {
+		return false;
+	}
+
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		trigger()->set_use_follow (!trigger()->use_follow());
+		trigger()->set_use_follow_length (!trigger()->use_follow_length());
 		return true;
 
 	default:
 		break;
 	}
-#endif
+
 	return false;
 }
 
 bool
 SlotPropertyTable::legato_button_event (GdkEvent* ev)
 {
+	if (_ignore_changes) {
+		return false;
+	}
+
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
 		trigger()->set_legato (!trigger()->legato());
@@ -393,18 +417,28 @@ SlotPropertyTable::legato_button_event (GdkEvent* ev)
 void
 SlotPropertyTable::set_launch_style (Trigger::LaunchStyle ls)
 {
+	if (_ignore_changes) {
+		return;
+	}
+
 	trigger()->set_launch_style (ls);
 }
 
 void
 SlotPropertyTable::set_follow_action (Trigger::FollowAction fa, uint64_t idx)
 {
+	if (_ignore_changes) {
+		return;
+	}
+
 	trigger()->set_follow_action (fa, idx);
 }
 
 void
 SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 {
+	_ignore_changes = true;
+
 	int probability = trigger()->follow_action_probability();
 
 	if (pc.contains (Properties::name)) {
@@ -422,11 +456,15 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 		_follow_count_adjustment.set_value (trigger()->follow_count());
 	}
 
-	if (pc.contains (Properties::tempo_meter)) {
+	if (pc.contains (Properties::tempo_meter) || pc.contains (Properties::follow_length)) {
 		int metrum_numerator = trigger()->meter().divisions_per_bar();
 		int bar_beats = metrum_numerator * trigger()->follow_length().bars;
 		int beats = trigger()->follow_length().beats;
-		_follow_length_adjustment.set_value (bar_beats+beats);  //note: 0 is a special case meaning "use clip length"
+		_follow_length_adjustment.set_value (bar_beats+beats);
+	}
+
+	if (pc.contains (Properties::use_follow_length)) {
+		_use_follow_length_button.set_active_state(trigger()->use_follow_length() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::legato)) {
@@ -461,13 +499,17 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 		_follow_right.set_sensitive(true);
 		_follow_count_spinner.set_sensitive(true);
 		_follow_length_spinner.set_sensitive(true);
+		_use_follow_length_button.set_sensitive(true);
 		_follow_probability_slider.set_sensitive(true);
 	} else {
 		_follow_right.set_sensitive(false);
 		_follow_count_spinner.set_sensitive(false);
 		_follow_length_spinner.set_sensitive(false);
+		_use_follow_length_button.set_sensitive(false);
 		_follow_probability_slider.set_sensitive(false);
 	}
+
+	_ignore_changes = false;
 }
 
 /* ------------ */

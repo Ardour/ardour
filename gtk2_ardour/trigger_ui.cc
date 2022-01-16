@@ -850,9 +850,13 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 
 	pc.add (Properties::name);
 	pc.add (Properties::color);
+	pc.add (Properties::gain);
+	pc.add (Properties::stretch_mode);
 	pc.add (Properties::legato);
 	pc.add (Properties::quantization);
 	pc.add (Properties::launch_style);
+	pc.add (Properties::use_follow_length);
+	pc.add (Properties::follow_length);
 	pc.add (Properties::follow_count);
 	pc.add (Properties::follow_action0);
 	pc.add (Properties::follow_action1);
