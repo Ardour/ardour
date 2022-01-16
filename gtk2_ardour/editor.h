@@ -1847,6 +1847,9 @@ private:
 
 	void reassociate_metric_markers (Temporal::TempoMap::SharedPtr const &);
 	void reassociate_metric_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::TempoMap::Metrics & metric, ArdourMarker& marker);
+	void begin_tempo_map_edit ();
+	void abort_tempo_map_edit ();
+	void commit_tempo_map_edit ();
 	void tempo_map_changed ();
 
 	void redisplay_grid (bool immediate_redraw);

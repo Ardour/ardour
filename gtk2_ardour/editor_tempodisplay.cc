@@ -626,3 +626,28 @@ Editor::real_remove_meter_marker (Temporal::MeterPoint *section)
 
 	return FALSE;
 }
+
+void
+Editor::begin_tempo_map_edit ()
+{
+	TempoMap::fetch_writable ();
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	reassociate_metric_markers (tmap);
+}
+
+void
+Editor::abort_tempo_map_edit ()
+{
+	/* this drops the lock held while we have a writable copy in our per-thread pointer */
+	TempoMap::abort_update ();
+
+	TempoMap::SharedPtr tmap (TempoMap::fetch());
+	reassociate_metric_markers (tmap);
+}
+
+void
+Editor::commit_tempo_map_edit ()
+{
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	TempoMap::update (tmap);
+}
