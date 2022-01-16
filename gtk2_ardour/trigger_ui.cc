@@ -247,7 +247,7 @@ TriggerUI::choose_sample (bool allow_multiple_select)
 	_file_chooser->set_select_multiple (allow_multiple_select);
 
 	_file_chooser_connection.disconnect ();
-	_file_chooser_connection = _file_chooser->signal_response ().connect (sigc::mem_fun (*this, &SlotPropertyTable::sample_chosen));
+	_file_chooser_connection = _file_chooser->signal_response ().connect (sigc::mem_fun (*this, &TriggerUI::sample_chosen));
 
 	_file_chooser->present ();
 }
@@ -304,13 +304,13 @@ TriggerUI::start_rename ()
 	_nameentry.add_modal_grab ();
 	_renaming = true;
 
-	_entry_connections.push_back (_nameentry.signal_changed().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_changed)));
-	_entry_connections.push_back (_nameentry.signal_activate().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_activated)));
-	_entry_connections.push_back (_nameentry.signal_key_press_event().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_key_press), false));
-	_entry_connections.push_back (_nameentry.signal_key_release_event().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_key_release), false));
-	_entry_connections.push_back (_nameentry.signal_button_press_event ().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_button_press), false));
-	_entry_connections.push_back (_nameentry.signal_focus_in_event ().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_focus_in)));
-	_entry_connections.push_back (_nameentry.signal_focus_out_event ().connect (sigc::mem_fun (*this, &SlotPropertyTable::entry_focus_out)));
+	_entry_connections.push_back (_nameentry.signal_changed().connect (sigc::mem_fun (*this, &TriggerUI::entry_changed)));
+	_entry_connections.push_back (_nameentry.signal_activate().connect (sigc::mem_fun (*this, &TriggerUI::entry_activated)));
+	_entry_connections.push_back (_nameentry.signal_key_press_event().connect (sigc::mem_fun (*this, &TriggerUI::entry_key_press), false));
+	_entry_connections.push_back (_nameentry.signal_key_release_event().connect (sigc::mem_fun (*this, &TriggerUI::entry_key_release), false));
+	_entry_connections.push_back (_nameentry.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerUI::entry_button_press), false));
+	_entry_connections.push_back (_nameentry.signal_focus_in_event ().connect (sigc::mem_fun (*this, &TriggerUI::entry_focus_in)));
+	_entry_connections.push_back (_nameentry.signal_focus_out_event ().connect (sigc::mem_fun (*this, &TriggerUI::entry_focus_out)));
 	return true;
 }
 
