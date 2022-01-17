@@ -355,7 +355,7 @@ if test -n "$MIXBUS"; then
 	curl -s -S --fail -#  \
 		-z "${SRCCACHE}/MixbusBundledMedia.zip" \
 		-o "${SRCCACHE}/MixbusBundledMedia.zip" \
-		"http://www.rsrc.harrisonconsoles.com/mixbus/mb8/content/MixbusBundledMedia.zip"
+		"http://rsrc.harrisonconsoles.com/mixbus/mb8/content/MixbusBundledMedia.zip"
 
 	if test -f "${SRCCACHE}/MixbusBundledMedia.zip"; then
 		echo "Adding Mixbus Bundled Content"

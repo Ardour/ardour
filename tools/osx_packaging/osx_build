@@ -363,7 +363,7 @@ cp -R $BUILD_ROOT/../share/web_surfaces $WebSurfaces
 rm $WebSurfaces/wscript
 
 # recusively copy clips/media
-cp -a $BUILD_ROOT/../share/media $MediaClips
+cp -R $BUILD_ROOT/../share/media $MediaClips
 rm $MediaClips/wscript
 
 # MackieControl data
@@ -803,9 +803,9 @@ if test -n "$MIXBUS"; then
 
 	# Mixbus Bundled Media Content
 	curl -s -S --fail -#  \
-		-z "${CACHEDIR}/MixbusBundledMedia.zip" \
-		-o "${CACHEDIR}/MixbusBundledMedia.zip" \
-		"http://www.rsrc.harrisonconsoles.com/mixbus/mb8/content/MixbusBundledMedia.zip"
+		-z "/tmp/MixbusBundledMedia.zip" \
+		-o "/tmp/MixbusBundledMedia.zip" \
+		"http://rsrc.harrisonconsoles.com/mixbus/mb8/content/MixbusBundledMedia.zip"
 
 	if test -f "${CACHEDIR}/MixbusBundledMedia.zip"; then
 		echo "Adding Mixbus Bundled Content"
