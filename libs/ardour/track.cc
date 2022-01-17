@@ -109,13 +109,7 @@ Track::init ()
 		boost::shared_ptr<TriggerBox> tb (new TriggerBox (_session, data_type ()));
 		tb->set_owner (this);
 		add_processor (tb, _polarity);
-		if (data_type () == DataType::AUDIO) {
-			/* if placing this in a route where the default
-			 * data type is AUDIO, the triggerbox will need
-			 * a sidehcain MIDI input to be able to be MIDI controlled
-			 */
-			tb->add_midi_sidechain ();
-		}
+		tb->add_midi_sidechain ();
 	}
 
 	set_align_choice_from_io ();
