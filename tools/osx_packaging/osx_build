@@ -803,8 +803,8 @@ if test -n "$MIXBUS"; then
 
 	# Mixbus Bundled Media Content
 	curl -s -S --fail -#  \
-		-z "/tmp/MixbusBundledMedia.zip" \
-		-o "/tmp/MixbusBundledMedia.zip" \
+		-z "${CACHEDIR}/MixbusBundledMedia.zip" \
+		-o "${CACHEDIR}/MixbusBundledMedia.zip" \
 		"http://rsrc.harrisonconsoles.com/mixbus/mb8/content/MixbusBundledMedia.zip"
 
 	if test -f "${CACHEDIR}/MixbusBundledMedia.zip"; then
