@@ -350,6 +350,18 @@ if test -n "$MIXBUS"; then
 
 	cp "${SRCCACHE}/harrison_vamp.${WARCH}.dll" \
 		"$ALIBDIR/vamp/harrison_vamp.dll"
+
+	# Mixbus Bundled Media Content
+	curl -s -S --fail -#  \
+		-z "${SRCCACHE}/MixbusBundledMedia.zip" \
+		-o "${SRCCACHE}/MixbusBundledMedia.zip" \
+		"http://www.rsrc.harrisonconsoles.com/mixbus/mb8/content/MixbusBundledMedia.zip"
+
+	if test -f "${SRCCACHE}/MixbusBundledMedia.zip"; then
+		echo "Adding Mixbus Bundled Content"
+		rm -f $DESTDIR/share/media/*.*
+		unzip -q -d "$DESTDIR/share/media/" "${SRCCACHE}/MixbusBundledMedia.zip"
+	fi
 fi
 
 ################################################################################

@@ -172,8 +172,8 @@ mkdir -p $MackieControl
 mkdir -p $OSC
 mkdir -p $PatchFiles
 mkdir -p $LuaScripts
+mkdir -p $MediaClips
 mkdir -p $Themes
-
 
 
 EXECUTABLE=${BUNDLENAME}
@@ -361,6 +361,10 @@ done
 # recusively copy web-surface html/js
 cp -R $BUILD_ROOT/../share/web_surfaces $WebSurfaces
 rm $WebSurfaces/wscript
+
+# recusively copy clips/media
+cp -a $BUILD_ROOT/../share/media $MediaClips
+rm $MediaClips/wscript
 
 # MackieControl data
 # got to be careful with names here
@@ -640,6 +644,10 @@ else
 
 fi
 
+################################################################################
+# from here on $PRODUCT_PKG_DIR/ prefix is needed
+################################################################################
+
 DMG_ARCH=""
 if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
 	OSX_ARCH=x86_64
@@ -792,6 +800,19 @@ if test -n "$MIXBUS"; then
 
 	cp "${CACHEDIR}/harrison_vamp.${OSX_BENSID}.dylib" \
 		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/harrison_vamp.dylib"
+
+	# Mixbus Bundled Media Content
+	curl -s -S --fail -#  \
+		-z "${CACHEDIR}/MixbusBundledMedia.zip" \
+		-o "${CACHEDIR}/MixbusBundledMedia.zip" \
+		"http://www.rsrc.harrisonconsoles.com/mixbus/mb8/content/MixbusBundledMedia.zip"
+
+	if test -f "${CACHEDIR}/MixbusBundledMedia.zip"; then
+		echo "Adding Mixbus Bundled Content"
+		rm -f "${PRODUCT_PKG_DIR}/${MediaClips}/"*.*
+		bsdtar -C "${PRODUCT_PKG_DIR}/${MediaClips}" -xf \
+			"${CACHEDIR}/MixbusBundledMedia.zip"
+	fi
 fi
 
 ################################################################################

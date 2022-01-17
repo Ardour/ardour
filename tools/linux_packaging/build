@@ -730,6 +730,18 @@ if test -n "$MIXBUS"; then
 	cp "${CACHEDIR}/harrison_vamp.${VAMPARCH}.so" \
 		$APPLIB/harrison_vamp.so
 	chmod +x $APPLIB/harrison_vamp.so
+
+	# Mixbus Bundled Media Content
+	curl -s -S --fail -#  \
+		-z "${CACHEDIR}/MixbusBundledMedia.zip" \
+		-o "${CACHEDIR}/MixbusBundledMedia.zip" \
+		"http://www.rsrc.harrisonconsoles.com/mixbus/mb8/content/MixbusBundledMedia.zip"
+
+	if test -f "${CACHEDIR}/MixbusBundledMedia.zip"; then
+		echo "Adding Mixbus Bundled Content"
+		rm -f "${MediaClips}/"*.*
+		unzip -q -d "${MediaClips}" "${CACHEDIR}/MixbusBundledMedia.zip"
+	fi
 fi
 
 if true ; then
