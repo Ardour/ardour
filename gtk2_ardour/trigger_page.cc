@@ -118,9 +118,18 @@ TriggerPage::TriggerPage ()
 	_strip_group_box.pack_start (_cue_area_frame, false, false);
 	_strip_group_box.pack_start (_strip_scroller, true, true);
 
+	/* sidebar */
+	_sidebar_notebook.set_show_tabs (true);
+	_sidebar_notebook.set_scrollable (true);
+	_sidebar_notebook.popup_disable ();
+	_sidebar_notebook.set_tab_pos (Gtk::POS_RIGHT);
+
+	_sidebar_vbox.pack_start (_sidebar_notebook);
+	add_sidebar_page (_("Clips"), _trigger_clip_picker);
+
 	/* Upper pane ([slot | strips] | file browser) */
 	_pane_upper.add (_strip_group_box);
-	_pane_upper.add (_trigger_clip_picker);
+	_pane_upper.add (_sidebar_vbox);
 
 	/* Bottom -- Properties of selected Slot/Region */
 	Gtk::Table* table = manage (new Gtk::Table);
@@ -165,6 +174,7 @@ TriggerPage::TriggerPage ()
 	_cue_area_frame.show_all ();
 	_trigger_clip_picker.show ();
 	_no_strips.show ();
+	_sidebar_notebook.show_all ();
 
 	/* setup keybidings */
 	_content.set_data ("ardour-bindings", bindings);
@@ -226,12 +236,18 @@ TriggerPage::get_state ()
 
 	node->set_property (X_("triggerpage-vpane-pos"), _pane.get_divider ());
 	node->set_property (X_("triggerpage-hpane-pos"), _pane_upper.get_divider ());
+	node->set_property (X_("triggerpage-sidebar-page"), _sidebar_notebook.get_current_page ());
+
 	return *node;
 }
 
 int
 TriggerPage::set_state (const XMLNode& node, int version)
 {
+	int32_t sidebar_page;
+	if (node.get_property (X_("triggerpage-sidebar-page"), sidebar_page)) {
+		_sidebar_notebook.set_current_page (sidebar_page);
+	}
 	return Tabbable::set_state (node, version);
 }
 
@@ -339,6 +355,17 @@ TriggerPage::update_title ()
 		title += Glib::get_application_name ();
 		own_window ()->set_title (title.get_string ());
 	}
+}
+
+void
+TriggerPage::add_sidebar_page (string const & name, Gtk::Widget& widget)
+{
+	EventBox* b = manage (new EventBox);
+	Label* l = manage (new Label (name));
+	l->set_angle (-90);
+	b->add (*l);
+	b->show_all ();
+	_sidebar_notebook.append_page (widget, *b);
 }
 
 void

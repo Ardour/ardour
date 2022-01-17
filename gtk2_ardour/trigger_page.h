@@ -72,6 +72,8 @@ private:
 	void pi_property_changed (PBD::PropertyChange const&);
 	void stripable_property_changed (PBD::PropertyChange const&, boost::weak_ptr<ARDOUR::Stripable>);
 
+	void add_sidebar_page (std::string const&, Gtk::Widget&);
+
 	bool no_strip_button_event (GdkEventButton*);
 	bool no_strip_drag_motion (Glib::RefPtr<Gdk::DragContext> const&, int, int, guint);
 	void no_strip_drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
@@ -98,8 +100,9 @@ private:
 	Gtk::Alignment       _cue_area_frame;
 	Gtk::VBox            _cue_area_box;
 	Gtk::HBox            _parameter_box;
-
-	TriggerClipPicker _trigger_clip_picker;
+	Gtk::VBox            _sidebar_vbox;
+	Gtk::Notebook        _sidebar_notebook;
+	TriggerClipPicker    _trigger_clip_picker;
 
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
