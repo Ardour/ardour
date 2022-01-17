@@ -134,18 +134,18 @@ TriggerPage::TriggerPage ()
 	/* Bottom -- Properties of selected Slot/Region */
 	Gtk::Table* table = manage (new Gtk::Table);
 	table->set_homogeneous (false);
-	table->set_spacings (8);
+	table->set_spacings (8);  //match to slot_properties_box::set_spacings
 	table->set_border_width (8);
 
 	int col = 0;
-	table->attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+	table->attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
 
 	col = 1;
-	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
 	++col;
 
 	col = 2;
-	table->attach (_midi_trig_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+	table->attach (_midi_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
 	++col;
 
 	_parameter_box.pack_start (*table);

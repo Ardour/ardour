@@ -201,7 +201,7 @@ SlotPropertyTable::SlotPropertyTable ()
 	_name_label.set_name (X_("TrackNameEditor"));
 	_name_label.set_alignment (0.0, 0.5);
 	_name_label.set_padding (4, 0);
-	_name_label.set_width_chars (12);
+	_name_label.set_width_chars (24);
 
 	_namebox.add (_name_label);
 	_namebox.add_events (Gdk::BUTTON_PRESS_MASK);
@@ -233,7 +233,8 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_size_group->add_widget(_velocity_slider);
 	_follow_size_group->add_widget(_follow_count_spinner);
 
-	set_spacings (4);
+	set_spacings (8);  //match to TriggerPage::  table->set_spacings
+	set_border_width (0);  //change TriggerPage::  table->set_border_width   instead
 	set_homogeneous (false);
 
 	int row=0;
@@ -241,14 +242,15 @@ SlotPropertyTable::SlotPropertyTable ()
 
 	/* ---- Basic trigger properties (name, color) ----- */
 	_trigger_table.set_spacings (4);
+	_trigger_table.set_border_width (8);
 	_trigger_table.set_homogeneous (false);
 
-	_trigger_table.attach(_name_frame,    0, 2, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK );
-	_trigger_table.attach(_load_button,   2, 3, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
-	_trigger_table.attach(_color_label,   3, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	_trigger_table.attach(_color_button,  4, 5, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
-	_trigger_table.attach(_gain_label,    5, 6, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	_trigger_table.attach(_gain_spinner,  6, 7, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_trigger_table.attach(_name_frame,    0, 5, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK ); row++;
+	_trigger_table.attach(_load_button,   0, 1, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
+	_trigger_table.attach(_color_label,   1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_trigger_table.attach(_color_button,  2, 3, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
+	_trigger_table.attach(_gain_label,    3, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_trigger_table.attach(_gain_spinner,  4, 5, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 
 	/* ---- Launch settings ----- */
@@ -318,6 +320,12 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_table.attach( *prob_table,   0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 	_follow_table.attach( *fol_table,    0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
+	ArdourWidgets::Frame* trigBox = manage (new ArdourWidgets::Frame);
+	trigBox->set_label("Clip Properties");
+	trigBox->set_name("EditorDark");
+	trigBox->set_edge_color (0x000000ff); // black
+	trigBox->add (_trigger_table);
+
 	ArdourWidgets::Frame* eFollowBox = manage (new ArdourWidgets::Frame);
 	eFollowBox->set_label("Follow Options");
 	eFollowBox->set_name("EditorDark");
@@ -330,9 +338,9 @@ SlotPropertyTable::SlotPropertyTable ()
 	eLaunchBox->set_edge_color (0x000000ff); // black
 	eLaunchBox->add (_launch_table);
 
-	attach(_trigger_table,  0,2, 0,1, Gtk::FILL, Gtk::SHRINK );
-	attach(*eLaunchBox,     0,1, 1,2, Gtk::FILL, Gtk::SHRINK );
-	attach(*eFollowBox,     1,2, 1,2, Gtk::FILL, Gtk::SHRINK );
+	attach(*trigBox,        0,1, 0,1, Gtk::FILL, Gtk::SHRINK );
+	attach(*eLaunchBox,     1,2, 0,1, Gtk::FILL, Gtk::SHRINK );
+	attach(*eFollowBox,     2,3, 0,1, Gtk::FILL, Gtk::SHRINK );
 }
 
 SlotPropertyTable::~SlotPropertyTable ()
