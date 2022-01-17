@@ -101,7 +101,11 @@ Track::init ()
 	_disk_writer->set_block_size (_session.get_block_size ());
 	_disk_writer->set_owner (this);
 
-	if (!is_auditioner ()) {
+	/* no triggerbox for the auditioner, to avoid visual clutter in
+	 * patchbays and elsewhere (or special-case code in those places)
+	 */
+
+	if (!is_auditioner()) {
 		boost::shared_ptr<TriggerBox> tb (new TriggerBox (_session, data_type ()));
 		tb->set_owner (this);
 		add_processor (tb, _polarity);
