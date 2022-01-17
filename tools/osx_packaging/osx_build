@@ -172,9 +172,7 @@ mkdir -p $MackieControl
 mkdir -p $OSC
 mkdir -p $PatchFiles
 mkdir -p $LuaScripts
-mkdir -p $MediaClips
 mkdir -p $Themes
-
 
 EXECUTABLE=${BUNDLENAME}
 
