@@ -627,8 +627,8 @@ TriggerPage::drop_paths_part_two (std::vector<std::string> paths)
 bool
 TriggerPage::idle_drop_paths (std::vector<std::string> paths)
 {
-  drop_paths_part_two (paths);
-  return false;
+	drop_paths_part_two (paths);
+	return false;
 }
 
 gint
