@@ -677,10 +677,9 @@ Editor::Editor ()
 	Location::end_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
 	Location::changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
 
-#if 0
+#if SELECTION_PROPERTIES_BOX_TODO
 	add_notebook_page (_("Selection"), *_properties_box);
-#else
-#warning @Ben Fix Properties Sidebar Layout to fit < 720px height
+#warning Fix Properties Sidebar Layout to fit < 720px height
 #endif
 	add_notebook_page (_("Tracks & Busses"), _routes->widget ());
 	add_notebook_page (_("Sources"), _sources->widget ());
@@ -738,8 +737,8 @@ Editor::Editor ()
 	editor_summary_pane.add (_summary_hbox);
 	edit_pane.set_check_divider_position (true);
 	edit_pane.add (editor_summary_pane);
+	_editor_list_vbox.pack_start (*_properties_box, false, false, 0);
 	_editor_list_vbox.pack_start (_the_notebook);
-//	_editor_list_vbox.pack_start (*_properties_box, false, false, 0);
 	edit_pane.add (_editor_list_vbox);
 	edit_pane.set_child_minsize (_editor_list_vbox, 30); /* rough guess at width of notebook tabs */
 

@@ -65,6 +65,7 @@ SelectionPropertiesBox::SelectionPropertiesBox ()
 	_time_info_box = new TimeInfoBox ("EditorTimeInfo", true);
 	pack_start(*_time_info_box, false, false, 0);
 
+#if SELECTION_PROPERTIES_BOX_TODO
 	/* Region ops (mute/unmute), for multiple-Region selections */
 	_mregions_prop_box = new MultiRegionPropertiesBox ();
 	pack_start(*_mregions_prop_box, false, false, 0);
@@ -91,7 +92,7 @@ SelectionPropertiesBox::SelectionPropertiesBox ()
 	/* SLOT properties, for Trigger slot selections */
 	_slot_prop_box = new SlotPropertiesBox ();
 	pack_start(*_slot_prop_box, false, false, 0);
-
+#endif
 
 	/* watch for any change in our selection, so we can show an appropriate property editor */
 	Editor::instance().get_selection().TracksChanged.connect (sigc::mem_fun (*this, &SelectionPropertiesBox::selection_changed));
@@ -114,6 +115,7 @@ SelectionPropertiesBox::~SelectionPropertiesBox ()
 {
 	delete _time_info_box;
 
+#if SELECTION_PROPERTIES_BOX_TODO
 	delete _mregions_prop_box;
 
 	delete _slot_prop_box;
@@ -123,6 +125,7 @@ SelectionPropertiesBox::~SelectionPropertiesBox ()
 
 	delete _midi_prop_box;
 	delete _audio_prop_box;
+#endif
 }
 
 void
@@ -131,6 +134,8 @@ SelectionPropertiesBox::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	_time_info_box->set_session(s);
+
+#if SELECTION_PROPERTIES_BOX_TODO
 	_mregions_prop_box->set_session(s);
 
 	_midi_prop_box->set_session(s);
@@ -140,6 +145,7 @@ SelectionPropertiesBox::set_session (Session* s)
 	_audio_ops_box->set_session(s);
 
 	_slot_prop_box->set_session(s);
+#endif
 }
 
 void
@@ -155,6 +161,7 @@ SelectionPropertiesBox::selection_changed ()
 
 	_time_info_box->hide();
 
+#if SELECTION_PROPERTIES_BOX_TODO
 	_mregions_prop_box->hide();
 
 	_midi_ops_box->hide();
@@ -164,17 +171,20 @@ SelectionPropertiesBox::selection_changed ()
 	_audio_prop_box->hide();
 
 	_slot_prop_box->hide();
+#endif
 
 	if (selection.empty()) {
-		_header_label.set_text(_("Nothing Selected"));
+		_header_label.hide();
 	} else  {
-		_header_label.set_text(_("Selection Properties (ESC = Deselect All)"));
+		_header_label.set_text(_("Range Properties (Press ESC to Deselect All)"));
+		_header_label.show();
 	}
 
 	if (!selection.time.empty()) {
 		_time_info_box->show();
 	}
 
+#if SELECTION_PROPERTIES_BOX_TODO
 	/* one or more regions, show the multi-region operations box (just MUTE? kinda boring) */
 	if (!selection.regions.empty()) {
 		_mregions_prop_box->show();
@@ -233,4 +243,5 @@ SelectionPropertiesBox::selection_changed ()
 			_audio_ops_box->show();
 		}
 	}
+#endif
 }
