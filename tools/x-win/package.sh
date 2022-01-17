@@ -355,10 +355,10 @@ fi
 ################################################################################
 
 if test x$DEMO_SESSION_URL != x ; then
-	mkdir -p $Shared/sessions
+	mkdir -p $DESTDIR/share/sessions
 	DEMO_SESSIONS=$(curl -s -S --fail $DEMO_SESSION_URL/index.txt)
 	for demo in $DEMO_SESSIONS; do
-		curl -s -S --fail -# -o $Shared/sessions/$demo $DEMO_SESSION_URL/$demo
+		curl -s -S --fail -# -o $DESTDIR/share/sessions/$demo $DEMO_SESSION_URL/$demo
 	done
 fi
 
