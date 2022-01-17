@@ -140,20 +140,12 @@ TriggerPage::TriggerPage ()
 	int col = 0;
 	table->attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 
-	col = 1; /* audio and midi boxen share the same table locations; shown and hidden depending on region type */
+	col = 1;
 	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 	++col;
-	table->attach (_audio_trim_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
-	++col;
-	table->attach (_audio_ops_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
-	++col;
 
-	col = 1; /* audio and midi boxen share the same table locations; shown and hidden depending on region type */
+	col = 2;
 	table->attach (_midi_trig_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
-	++col;
-	table->attach (_midi_trim_box, col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
-	++col;
-	table->attach (_midi_ops_box,  col, col + 1, 0, 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 	++col;
 
 	_parameter_box.pack_start (*table);
@@ -294,12 +286,8 @@ TriggerPage::set_session (Session* s)
 	_slot_prop_box.set_session (s);
 
 	_audio_trig_box.set_session (s);
-	_audio_ops_box.set_session (s);
-	_audio_trim_box.set_session (s);
 
 	_midi_trig_box.set_session (s);
-	_midi_ops_box.set_session (s);
-	_midi_trim_box.set_session (s);
 
 	update_title ();
 	start_updating ();
@@ -385,12 +373,8 @@ TriggerPage::selection_changed ()
 	_slot_prop_box.hide ();
 
 	_audio_trig_box.hide ();
-	_audio_ops_box.hide ();
-	_audio_trim_box.hide ();
 
 	_midi_trig_box.hide ();
-	_midi_ops_box.hide ();
-	_midi_trim_box.hide ();
 
 	_parameter_box.hide ();
 
@@ -405,18 +389,10 @@ TriggerPage::selection_changed ()
 		if (trigger->region ()) {
 			if (trigger->region ()->data_type () == DataType::AUDIO) {
 				_audio_trig_box.set_trigger (ref);
-				_audio_trim_box.set_region (trigger->region (), ref);
-
 				_audio_trig_box.show ();
-				_audio_trim_box.show ();
-				_audio_ops_box.show ();
 			} else {
 				_midi_trig_box.set_trigger (ref);
-				_midi_trim_box.set_region (trigger->region (), ref);
-
 				_midi_trig_box.show ();
-				_midi_trim_box.show ();
-				_midi_ops_box.show ();
 			}
 		}
 		_parameter_box.show ();
