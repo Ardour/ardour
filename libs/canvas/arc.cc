@@ -68,7 +68,7 @@ Arc::compute_bounding_box () const
 }
 
 void
-Arc::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
+Arc::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	if (_radius <= 0.0 || _arc_degrees <= 0.0 || (!fill() && !outline())) {
 		return;
@@ -91,6 +91,8 @@ Arc::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
 		setup_outline_context (context);
 		context->stroke ();
 	}
+
+	render_children (area, context);
 }
 
 void
