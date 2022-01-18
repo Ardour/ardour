@@ -166,9 +166,11 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 	_poly_margin       = 2. * scale;
 	_poly_size         = height - 2 * _poly_margin;
 
-	name_text->size_allocate (ArdourCanvas::Rect (0, 0, width, height - _poly_margin * 2));
+	float font_margin = 2. * scale;
+
+	name_text->size_allocate (ArdourCanvas::Rect (0, 0, width, height - font_margin * 2));
 	float tleft = height;                                                 // make room for the play button
-	name_text->set_position (Duple (tleft + _poly_margin, _poly_margin)); // @paul why do we need tleft here? isn't name_text a child of name_button?
+	name_text->set_position (Duple (tleft + _poly_margin, font_margin)); // @paul why do we need tleft here? isn't name_text a child of name_button?
 	name_text->clamp_width (width - height * 2 - _poly_margin * 3);
 
 	/* font scale may have changed. uiconfig 'embeds' the ui-scale in the font */
@@ -471,7 +473,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 		context->set_identity_matrix ();
 	}
 
-	if (tref.slot == 1) {
+	if (false /*tref.slot == 1*/) {
 		/* drop-shadow at top */
 		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6 * scale);
 		drop_shadow_pattern->add_color_stop_rgba (0, 0, 0, 0, 0.7);
@@ -536,7 +538,7 @@ TriggerEntry::set_widget_colors (TriggerEntry::EnteredState es)
 
 	//alternating darker bands
 	if ((tref.slot / 2) % 2 == 0) {
-		bg_col = HSV (bg_col).darker (0.15).color ();
+		bg_col = HSV (bg_col).darker (0.25).color ();
 	}
 
 	set_fill_color (bg_col);

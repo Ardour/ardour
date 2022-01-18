@@ -74,7 +74,6 @@ public:
 	void _size_allocate (ArdourCanvas::Rect const&);
 
 	ArdourCanvas::Text*    name_text;
-	ArdourCanvas::Polygon* stop_shape;
 
 	void toggle_thru ();
 	void maybe_update ();
@@ -126,7 +125,6 @@ public:
 	void _size_allocate (ArdourCanvas::Rect const& alloc);
 
 	ArdourCanvas::Polygon* stop_shape;
-	ArdourCanvas::Text*    name_text;
 
 	void maybe_update ();
 	bool event_handler (GdkEvent*);

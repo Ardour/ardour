@@ -38,6 +38,7 @@ namespace ArdourCanvas
 {
 	class Text;
 	class Polygon;
+	class Circle;
 }
 
 class CueEntry : public ArdourCanvas::Rectangle
@@ -46,10 +47,7 @@ public:
 	CueEntry (ArdourCanvas::Item* item, uint64_t cue_index);
 	~CueEntry ();
 
-	ArdourCanvas::Rectangle* play_button;
-	ArdourCanvas::Polygon*   play_shape;
-
-	ArdourCanvas::Rectangle* name_button;
+	ArdourCanvas::Circle*    name_button;
 	ArdourCanvas::Text*      name_text;
 
 	void render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const;

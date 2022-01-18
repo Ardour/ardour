@@ -23,6 +23,7 @@
 #include "ardour/session.h"
 #include "ardour/triggerbox.h"
 
+#include "canvas/circle.h"
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 
@@ -63,17 +64,7 @@ CueEntry::CueEntry (Item* item, uint64_t cue_index)
 	set_outline (false);
 	set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
 
-	play_button = new ArdourCanvas::Rectangle (this);
-	play_button->set_outline (false);
-	play_button->set_fill (true);
-	play_button->name = string_compose ("playbutton %1", _cue_idx);
-	play_button->show ();
-
-	play_shape       = new ArdourCanvas::Polygon (play_button);
-	play_shape->name = string_compose ("playshape %1", _cue_idx);
-	play_shape->show ();
-
-	name_button = new ArdourCanvas::Rectangle (this);
+	name_button = new ArdourCanvas::Circle (this);
 	name_button->set_outline (false);
 	name_button->set_fill (true);
 	name_button->name = ("slot_selector_button");
@@ -81,7 +72,6 @@ CueEntry::CueEntry (Item* item, uint64_t cue_index)
 
 	name_text = new Text (name_button);
 	name_text->set (string_compose ("%1", (char)('A' + _cue_idx))); // XXX not translatable
-
 	name_text->set_ignore_events (false);
 	name_text->show ();
 
@@ -102,10 +92,7 @@ CueEntry::event_handler (GdkEvent* ev)
 			break;
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
-				play_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
-				play_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
-				name_button->set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
+//				name_button->set_fill_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 				set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			}
 			break;
@@ -129,23 +116,17 @@ CueEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 	const Distance width  = _rect.width ();
 	const Distance height = _rect.height ();
 
-	play_button->set (ArdourCanvas::Rect (0, 0, height, height));
-	name_button->set (ArdourCanvas::Rect (height, 0, width, height));
-
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
-	_poly_margin        = 2. * scale;
-	_poly_size          = height - 2 * _poly_margin;
-	shape_play_button ();
 
-	float tleft  = height; // make room for the play button
-	float twidth = name_button->width () - _poly_margin * 2;
+	name_button->set_center ( Duple(height/2, height/2) );
+	name_button->set_radius ( (height/2)- 2*scale );
 
-	name_text->size_allocate (ArdourCanvas::Rect (0, 0, width, height));
-	name_text->set_position (Duple (tleft + _poly_margin, _poly_margin - 0.5));
+	name_text->size_allocate (ArdourCanvas::Rect (0, 0, height, height));
+	name_text->set_position (Duple (4. * scale, 2.5 * scale));
 	name_text->clamp_width (width - height);
 
 	/* font scale may have changed. uiconfig 'embeds' the ui-scale in the font */
-	name_text->set_font_description (UIConfiguration::instance ().get_NormalFont ());
+	name_text->set_font_description (UIConfiguration::instance ().get_SmallBoldMonospaceFont ());
 }
 
 void
@@ -164,7 +145,7 @@ CueEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 	}
 
 	float width  = _rect.width ();
-	float height = _rect.height ();
+	float height  = _rect.height ();
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 
@@ -176,7 +157,26 @@ CueEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 
 	render_children (area, context);
 
-	if (_cue_idx == 0) {
+	{ //Play triangle, needs to match TriggerEntry buttons exactly
+		context->set_line_width (1 * scale);
+
+		float margin = 4 * scale;
+		float size   = height - 2 * margin;
+
+		context->set_identity_matrix ();
+		context->translate (self.x0, self.y0 - 0.5);
+		context->move_to (height + margin, margin);
+		context->rel_line_to (0, size);
+		context->rel_line_to (size, -size / 2);
+		context->close_path ();
+		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
+		context->stroke ();
+		context->set_identity_matrix ();
+
+		context->set_line_width (1);
+	}
+
+	if (false /*_cue_idx == 0*/) {
 		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6 * scale);
 		drop_shadow_pattern->add_color_stop_rgba (0, 0, 0, 0, 0.7);
 		drop_shadow_pattern->add_color_stop_rgba (1, 0, 0, 0, 0.0);
@@ -187,46 +187,18 @@ CueEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 }
 
 void
-CueEntry::shape_play_button ()
-{
-	Points p;
-
-	p.push_back (Duple (_poly_margin, _poly_margin));
-	p.push_back (Duple (_poly_margin, _poly_size));
-	p.push_back (Duple (_poly_size, 0.5 + _poly_size / 2.));
-
-	play_shape->set (p);
-
-	if (false /*TODO*/) {
-		play_shape->set_outline (false);
-		play_shape->set_fill (true);
-	} else {
-		play_shape->set_outline (true);
-		play_shape->set_fill (false);
-	}
-}
-
-void
 CueEntry::set_default_colors ()
 {
-	set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
-	play_button->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
-	play_button->set_outline_color (UIConfiguration::instance ().color ("theme:bg"));
-	name_button->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
-	name_text->set_fill_color (UIConfiguration::instance ().color ("theme:bg"));
+	color_t bg_col = UIConfiguration::instance ().color ("theme:bg");
 
+	//alternating darker bands
 	if ((_cue_idx / 2) % 2 == 0) {
-		set_fill_color (HSV (fill_color ()).darker (0.15).color ());
-		play_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
-		play_button->set_outline_color (HSV (fill_color ()).darker (0.15).color ());
-		name_button->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
-		name_text->set_fill_color (HSV (fill_color ()).darker (0.15).color ());
+		bg_col = HSV (bg_col).darker (0.25).color ();
 	}
 
-	name_text->set_color (UIConfiguration::instance ().color ("neutral:foreground"));
-
-	play_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foreground"));
-	play_shape->set_fill_color (UIConfiguration::instance ().color ("neutral:foreground"));
+	set_fill_color (bg_col);
+	name_button->set_fill_color (UIConfiguration::instance ().color ("neutral:midground"));
+	name_text->set_color (UIConfiguration::instance ().color ("neutral:background"));
 }
 
 void
@@ -316,9 +288,6 @@ CueBoxUI::context_menu (uint64_t idx)
 	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
 	b = BBT_Offset (-1, 0, 0);
 	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_quantization), b, idx)));
-
-	Menu*     load_menu = manage (new Menu);
-	MenuList& loitems (load_menu->items ());
 
 	items.push_back (MenuElem (_("Set All Follow Actions..."), *follow_menu));
 	items.push_back (MenuElem (_("Set All Launch Styles..."), *launch_menu));
@@ -463,7 +432,6 @@ CueBoxUI::build ()
 		_slots.push_back (te);
 
 #if 0
-		te->play_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &CueBoxUI::trigger_scene), n));
 		te->name_text->Event.connect (sigc::bind (sigc::mem_fun (*this, &CueBoxUI::text_event), n));
 #endif
 		te->Event.connect (sigc::bind (sigc::mem_fun (*this, &CueBoxUI::event), n));
