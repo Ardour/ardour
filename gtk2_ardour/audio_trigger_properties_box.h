@@ -63,7 +63,9 @@ protected:
 	void start_clock_changed();
 	void length_clock_changed();
 
-	void follow_clock_changed();
+	void meter_changed (Temporal::Meter m);
+
+	void bars_changed();
 
 private:
 
@@ -74,7 +76,10 @@ private:
 	AudioClock _length_clock;
 	AudioClock _start_clock;
 
-	ArdourWidgets::ArdourButton _metrum_button;
+	ArdourWidgets::ArdourDropdown _meter_selector;
+
+	Gtk::Adjustment               _bar_adjustment;
+	Gtk::SpinButton               _bar_spinner;
 
 	ArdourWidgets::ArdourButton _stretch_toggle;
 
@@ -82,6 +87,7 @@ private:
 
 	ArdourWidgets::ArdourButton _abpm_label;
 
+	bool _ignore_changes;
 };
 
 #endif

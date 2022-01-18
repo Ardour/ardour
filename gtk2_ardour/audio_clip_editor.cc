@@ -86,18 +86,22 @@ ClipEditorBox::register_clip_editor_actions (Bindings* clip_editor_bindings)
 void
 AudioClipEditor::ClipBBTMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const
 {
-	TriggerPtr trigger = tref.trigger();
-
+	TriggerPtr trigger (tref.trigger());
 	if (!trigger) {
 		std::cerr << "No trigger\n";
 		return;
 	}
 
+	boost::shared_ptr<AudioTrigger> at = boost::dynamic_pointer_cast<AudioTrigger> (trigger);
+	if (!at) {
+		return;
+	}
+
 	ArdourCanvas::Ruler::Mark mark;
 
-	assert (trigger->segment_tempo() > 0.);
+	assert (at->segment_tempo() > 0.);
 
-	Temporal::Tempo tempo (trigger->segment_tempo(), trigger->meter().divisions_per_bar());
+	Temporal::Tempo tempo (at->segment_tempo(), at->meter().divisions_per_bar());
 
 	std::cerr << "get marks between " << lower << " .. " << upper << " with tempo " << tempo << " upp = " << units_per_pixel << std::endl;
 
@@ -439,10 +443,10 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, TriggerReference 
 		waves.push_back (wv);
 	}
 
-	TriggerPtr t (tr.trigger());
-
-	if (t) {
-		if (t->segment_tempo() == 0.) {
+	TriggerPtr trigger (tr.trigger());
+	boost::shared_ptr<AudioTrigger> at = boost::dynamic_pointer_cast<AudioTrigger> (trigger);
+	if (at) {
+		if (at->segment_tempo() == 0.) {
 			/* tempo unknown, hide ruler */
 			ruler->hide ();
 		} else {
