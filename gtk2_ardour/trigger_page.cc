@@ -144,9 +144,11 @@ TriggerPage::TriggerPage ()
 	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
 	++col;
 
+#if MIDI_PROPERTIES_BOX_IMPLEMENTED
 	col = 2;
 	table->attach (_midi_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
 	++col;
+#endif
 
 	_parameter_box.pack_start (*table);
 
