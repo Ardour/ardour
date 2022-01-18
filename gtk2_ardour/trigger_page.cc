@@ -535,7 +535,7 @@ TriggerPage::no_strip_drag_data_received (Glib::RefPtr<Gdk::DragContext> const& 
 				output_chan =  session()->master_out()->n_inputs().n_audio();
 			}
 			std::list<boost::shared_ptr<AudioTrack> > audio_tracks;
-			audio_tracks = session()->new_audio_track (region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
+			audio_tracks = session()->new_audio_track (region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order, Normal, true, true);
 			if (!audio_tracks.empty()) {
 				triggerbox = audio_tracks.front()->triggerbox ();
 			}
@@ -546,7 +546,7 @@ TriggerPage::no_strip_drag_data_received (Glib::RefPtr<Gdk::DragContext> const& 
 			                                         Config->get_strict_io () || Profile->get_mixbus (),
 			                                         boost::shared_ptr<ARDOUR::PluginInfo>(),
 			                                         (ARDOUR::Plugin::PresetRecord*) 0,
-			                                         (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order, Normal, true);
+			                                         (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order, Normal, true, true);
 			if (!midi_tracks.empty()) {
 				triggerbox = midi_tracks.front()->triggerbox ();
 			}
