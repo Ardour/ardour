@@ -252,6 +252,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	TriggerBox& box() const { return _box; }
 
+	double estimated_tempo() const { return _estimated_tempo; }
+
+	Temporal::Meter meter() const { return _meter; }
+
 	gain_t gain() const { return _gain; }
 	void set_gain (gain_t);
 
@@ -265,16 +269,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		Mixed,
 		Smooth,
 	};
-
-	StretchMode stretch_mode() const { return _stretch_mode; }
-	void set_stretch_mode (StretchMode);
-
-	double estimated_tempo() const { return _estimated_tempo; }
-	double segment_tempo() const { return _segment_tempo; }
-	void set_segment_tempo (double t);
-
-	Temporal::Meter meter() const { return _meter; }
-	void set_tempo (Temporal::Meter const &);
 
 	void set_pending (Trigger*);
 	Trigger* swap_pending (Trigger*);
@@ -353,6 +347,18 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	~AudioTrigger ();
 
 	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t offset, bool first, double bpm, bool);
+
+	StretchMode stretch_mode() const { return _stretch_mode; }
+	void set_stretch_mode (StretchMode);
+
+	double segment_tempo() const { return _segment_tempo; }
+	void set_segment_tempo (double t);
+
+	Temporal::Meter segment_meter() const { return _meter; }  //TODO: might be different?
+	void set_segment_meter(Temporal::Meter const &);  //TODO: disambiguated from a future midi::metrum
+
+	double segment_barcnt () { return _barcnt; }
+	void set_segment_barcnt (double count);
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);

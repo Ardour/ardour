@@ -201,16 +201,6 @@ Trigger::set_stretchable (bool s)
 }
 
 void
-Trigger::set_segment_tempo (double t)
-{
-	if (_segment_tempo != t) {
-		_segment_tempo = t;  //TODO : this data will likely get stored in the SegmentDescriptor, not the trigger itself
-		PropertyChanged (ARDOUR::Properties::tempo_meter);
-		_box.session().set_dirty();
-	}
-}
-
-void
 Trigger::set_ui (void* p)
 {
 	_ui = p;
@@ -245,18 +235,6 @@ Trigger::set_gain (gain_t g)
 
 	_gain = g;
 	PropertyChanged (Properties::gain);
-	_box.session().set_dirty();
-}
-
-void
-Trigger::set_stretch_mode (Trigger::StretchMode sm)
-{
-	if (_stretch_mode == sm) {
-		return;
-	}
-
-	_stretch_mode = sm;
-	PropertyChanged (Properties::stretch_mode);
 	_box.session().set_dirty();
 }
 
@@ -367,6 +345,7 @@ Trigger::set_state (const XMLNode& node, int version)
 
 	node.get_property (X_("estimated-tempo"), _estimated_tempo);  //TODO: for now: if we know the bpm, overwrite the value that estimate_tempo() found
 	node.get_property (X_("segment-tempo"), _segment_tempo);
+	node.get_property (X_("barcnt"), _barcnt);
 
 	node.get_property (X_("index"), _index);
 	set_values (node);
@@ -859,6 +838,59 @@ AudioTrigger::~AudioTrigger ()
 {
 	drop_data ();
 	delete _stretcher;
+}
+
+void
+AudioTrigger::set_stretch_mode (Trigger::StretchMode sm)
+{
+	if (_stretch_mode == sm) {
+		return;
+	}
+
+	_stretch_mode = sm;
+	PropertyChanged (Properties::stretch_mode);
+	_box.session().set_dirty();
+}
+
+void
+AudioTrigger::set_segment_tempo (double t)
+{
+	if (_segment_tempo != t) {
+		_segment_tempo = t;  //TODO : this data will likely get stored in the SegmentDescriptor, not the trigger itself
+		PropertyChanged (ARDOUR::Properties::tempo_meter);
+		_box.session().set_dirty();
+	}
+}
+
+void
+AudioTrigger::set_segment_meter (Temporal::Meter const &m)
+{
+	if (_meter != m) {
+		_meter = m;
+
+		//given a meter from the user, tempo is assumed constant and we re-calc barcnt internally
+		const double seconds = (double) data.length  / _box.session().sample_rate();
+		const double quarters = (seconds / 60.) * _segment_tempo;
+		_barcnt = quarters / _meter.divisions_per_bar();
+
+		PropertyChanged (ARDOUR::Properties::tempo_meter);
+		_box.session().set_dirty();
+	}
+}
+
+void
+AudioTrigger::set_segment_barcnt (double count)
+{
+	if (_barcnt != count) {
+		_barcnt = count;
+
+		//given a barcnt from the user, meter is assumed constant and we re-calc tempo internally
+		const double seconds = (double) data.length  / _box.session().sample_rate();
+		const double quarters = _barcnt * _meter.divisions_per_bar();  //TODO: this assumes note_value=quarter
+		_estimated_tempo = quarters / (seconds/60.0);
+
+		set_segment_tempo(_estimated_tempo);
+	}
 }
 
 bool
