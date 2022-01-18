@@ -77,6 +77,10 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 	Gtk::SpinButton               _gain_spinner;
 	Gtk::Label                    _gain_label;
 
+	Gtk::Label                    _beat_label;
+	Gtk::Label                    _follow_length_label;
+	Gtk::Label                    _follow_count_label;
+
 	Gtk::Label                    _left_probability_label;
 	Gtk::Label                    _right_probability_label;
 	Gtk::Adjustment                    _follow_probability_adjustment;
@@ -91,6 +95,11 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 
 	ArdourWidgets::ArdourDropdown      _follow_left;
 	ArdourWidgets::ArdourDropdown      _follow_right;
+
+	Gtk::Label                    _vel_sense_label;
+	Gtk::Label                    _launch_style_label;
+	Gtk::Label                    _launch_quant_label;
+	Gtk::Label                    _legato_label;
 
 	ArdourWidgets::ArdourButton        _legato_button;
 

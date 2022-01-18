@@ -74,34 +74,34 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	bpm_table->attach (_stretch_toggle, 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 	bpm_table->attach (_stretch_selector, 1, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK); row++;
 
-	label = manage (new Gtk::Label (_("BPM:")));
-	label->set_alignment (1.0, 0.5);
-	bpm_table->attach (*label,      0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_bpm_label.set_text(_("BPM:"));
+	_bpm_label.set_alignment (1.0, 0.5);
+	bpm_table->attach (_bpm_label,  0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 	bpm_table->attach (_abpm_label, 1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
-	ArdourButton *half = manage (new ArdourButton (_("/2")));
-	half->signal_clicked.connect(sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::MultiplyTempo), 0.5));
-	bpm_table->attach (*half, 2, 3, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	ArdourButton *dbl = manage (new ArdourButton (_("x2")));
-	dbl->signal_clicked.connect(sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::MultiplyTempo), 2.0));
-	bpm_table->attach (*dbl, 3, 4, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
+	_half_button.set_text(_("/2"));
+	_half_button.signal_clicked.connect(sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::MultiplyTempo), 0.5));
+	bpm_table->attach (_half_button, 2, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_dbl_button.set_text(_("x2"));
+	_dbl_button.signal_clicked.connect(sigc::bind (sigc::mem_fun(*this, &AudioTriggerPropertiesBox::MultiplyTempo), 2.0));
+	bpm_table->attach (_dbl_button,  3, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	row++;
 
-	label = manage (new Gtk::Label (_("Meter:")));
-	label->set_alignment (1.0, 0.5);
-	bpm_table->attach (*label,         0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_meter_label.set_text(_("Meter:"));
+	_meter_label.set_alignment (1.0, 0.5);
+	bpm_table->attach (_meter_label,    0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 	bpm_table->attach (_meter_selector, 1, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	row++;
 
-	label = manage (new Gtk::Label (_("Clip Length:")));
-	label->set_alignment (1.0, 0.5);
-	Gtk::Label *bar_label = manage (new Gtk::Label (_("(bars)")));
-	bar_label->set_alignment (0.0, 0.5);
-	bpm_table->attach (*label,       0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_length_label.set_text(_("Clip Length:"));
+	_length_label.set_alignment (1.0, 0.5);
+	_bar_label.set_text(_("(bars)"));
+	_bar_label.set_alignment (0.0, 0.5);
+	bpm_table->attach (_length_label,0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 	bpm_table->attach (_bar_spinner, 1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	bpm_table->attach (*bar_label,   2, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	bpm_table->attach (_bar_label,   2, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	ArdourWidgets::Frame* eTempoBox = manage (new ArdourWidgets::Frame);
 	eTempoBox->set_label("Stretch Options");
@@ -237,9 +237,34 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& pc)
 
 	if (pc.contains (Properties::stretch_mode) || pc.contains (Properties::stretchable)) {
 		_stretch_toggle.set_active (at->stretchable () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-
-		_stretch_selector.set_sensitive(at->stretchable ());
 		_stretch_selector.set_text(stretch_mode_to_string(at->stretch_mode ()));
+
+		/* set widget sensitivity based on stretchable button state */
+		bool follow_widgets_sensitive = at->stretchable ();
+
+		if (follow_widgets_sensitive) {
+			_stretch_selector.set_sensitive(true);
+			_meter_selector.set_sensitive(true);
+			_bar_spinner.set_sensitive(true);
+			_bar_label.set_sensitive(true);
+			_length_label.set_sensitive(true);
+			_meter_label.set_sensitive(true);
+			_bpm_label.set_sensitive(true);
+			_half_button.set_sensitive(true);
+			_dbl_button.set_sensitive(true);
+			_abpm_label.set_sensitive(true);
+		} else {
+			_stretch_selector.set_sensitive(false);
+			_meter_selector.set_sensitive(false);
+			_bar_spinner.set_sensitive(false);
+			_bar_label.set_sensitive(false);
+			_length_label.set_sensitive(false);
+			_meter_label.set_sensitive(false);
+			_bpm_label.set_sensitive(false);
+			_half_button.set_sensitive(false);
+			_dbl_button.set_sensitive(false);
+			_abpm_label.set_sensitive(false);
+		}
 	}
 
 	_ignore_changes = false;

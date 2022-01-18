@@ -76,6 +76,11 @@ private:
 	AudioClock _length_clock;
 	AudioClock _start_clock;
 
+	Gtk::Label               _bpm_label;
+	Gtk::Label               _length_label;
+	Gtk::Label               _bar_label;
+	Gtk::Label               _meter_label;
+
 	ArdourWidgets::ArdourDropdown _meter_selector;
 
 	Gtk::Adjustment               _bar_adjustment;
@@ -86,6 +91,9 @@ private:
 	ArdourWidgets::ArdourDropdown _stretch_selector;
 
 	ArdourWidgets::ArdourButton _abpm_label;
+
+	ArdourWidgets::ArdourButton _half_button;
+	ArdourWidgets::ArdourButton _dbl_button;
 
 	bool _ignore_changes;
 };

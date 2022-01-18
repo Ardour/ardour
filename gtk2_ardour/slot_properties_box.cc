@@ -238,7 +238,6 @@ SlotPropertyTable::SlotPropertyTable ()
 	set_homogeneous (false);
 
 	int row=0;
-	Gtk::Label *label;
 
 	/* ---- Basic trigger properties (name, color) ----- */
 	_trigger_table.set_spacings (4);
@@ -259,20 +258,20 @@ SlotPropertyTable::SlotPropertyTable ()
 	_launch_table.set_homogeneous (false);
 	row=0;
 
-	label = manage(new Gtk::Label(_("Velocity Sense:")));  label->set_alignment(1.0, 0.5);
-	_launch_table.attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	_vel_sense_label.set_text(_("Velocity Sense:"));  _vel_sense_label.set_alignment(1.0, 0.5);
+	_launch_table.attach(_vel_sense_label,       0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	_launch_table.attach(_velocity_slider,       1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
-	label = manage(new Gtk::Label(_("Launch Style:")));  label->set_alignment(1.0, 0.5);
-	_launch_table.attach(*label,                 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	_launch_style_label.set_text(_("Launch Style:"));  _launch_style_label.set_alignment(1.0, 0.5);
+	_launch_table.attach(_launch_style_label,    0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	_launch_table.attach(_launch_style_button,   1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
-	label = manage(new Gtk::Label(_("Launch Quantize:")));  label->set_alignment(1.0, 0.5);
-	_launch_table.attach(*label,            0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	_launch_table.attach(_quantize_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+	_launch_quant_label.set_text(_("Launch Quantize:"));  _launch_quant_label.set_alignment(1.0, 0.5);
+	_launch_table.attach(_launch_quant_label, 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	_launch_table.attach(_quantize_button,    1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
-	label = manage(new Gtk::Label(_("Legato Mode:")));  label->set_alignment(1.0, 0.5);
-	_launch_table.attach(*label,          0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	_legato_label.set_text(_("Launch Quantize:"));  _legato_label.set_alignment(1.0, 0.5);
+	_launch_table.attach(_legato_label,   0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	_launch_table.attach(_legato_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 
@@ -299,21 +298,20 @@ SlotPropertyTable::SlotPropertyTable ()
 	fol_table->set_spacings(2);
 	fol_table->set_border_width(4);
 
-	label = manage(new Gtk::Label(_("Follow Count:")));  label->set_alignment(1.0, 0.5);
-	fol_table->attach(*label,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	_follow_count_label.set_text(_("Follow Count:"));  _follow_count_label.set_alignment(1.0, 0.5);
+	fol_table->attach(_follow_count_label,  1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
 	align->add (_follow_count_spinner);
-	fol_table->attach(*align,          2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
+	fol_table->attach(*align,               2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 0, 0 ); row++;
 
-	label = manage(new Gtk::Label(_("Follow Length:")));  label->set_alignment(1.0, 0.5);
-	Gtk::Label *beat_label = manage (new Gtk::Label (_("(beats)")));
-	beat_label->set_alignment (0.0, 0.5);
+	_follow_length_label.set_text(_("Follow Length:"));  _follow_length_label.set_alignment(1.0, 0.5);
+	_beat_label.set_text(_("(beats)"));	_beat_label.set_alignment (0.0, 0.5);
 	Gtk::Alignment *fl_align = manage (new Gtk::Alignment (0, .5, 0, 0));
 	fl_align->add (_follow_length_spinner);
 	fol_table->attach(_use_follow_length_button,     0, 1, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
-	fol_table->attach(*label,                        1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	fol_table->attach(_follow_length_label,          1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	fol_table->attach(*fl_align,                     2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK );
-	fol_table->attach(*beat_label,                   3, 4, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
+	fol_table->attach(_beat_label,                   3, 4, row, row+1, Gtk::SHRINK, Gtk::SHRINK);
 
 	_follow_table.attach(_follow_left,   0, 1, row, row+1, Gtk::FILL,             Gtk::SHRINK );
 	_follow_table.attach(_follow_right,  1, 2, row, row+1, Gtk::FILL,             Gtk::SHRINK ); row++;
@@ -537,7 +535,33 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (pc.contains (Properties::follow_action0)) {
-			_follow_left.set_text (follow_action_to_string (trigger()->follow_action (0)));
+		_follow_left.set_text (follow_action_to_string (trigger()->follow_action (0)));
+
+		/* set widget sensitivity based on 'left' follow action */
+		bool follow_widgets_sensitive = trigger()->follow_action (0) != Trigger::None;
+		if (follow_widgets_sensitive) {
+			_follow_right.set_sensitive(true);
+			_follow_count_spinner.set_sensitive(true);
+			_follow_length_spinner.set_sensitive(true);
+			_use_follow_length_button.set_sensitive(true);
+			_follow_probability_slider.set_sensitive(true);
+			_left_probability_label.set_sensitive(true);
+			_right_probability_label.set_sensitive(true);
+			_beat_label.set_sensitive(true);
+			_follow_count_label.set_sensitive(true);
+			_follow_length_label.set_sensitive(true);
+		} else {
+			_follow_right.set_sensitive(false);
+			_follow_count_spinner.set_sensitive(false);
+			_follow_length_spinner.set_sensitive(false);
+			_use_follow_length_button.set_sensitive(false);
+			_follow_probability_slider.set_sensitive(false);
+			_left_probability_label.set_sensitive(false);
+			_right_probability_label.set_sensitive(false);
+			_beat_label.set_sensitive(false);
+			_follow_count_label.set_sensitive(false);
+			_follow_length_label.set_sensitive(false);
+		}
 	}
 
 	if (pc.contains (Properties::follow_action1)) {
@@ -552,22 +576,6 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 		_follow_probability_adjustment.set_value (probability);
 		_left_probability_label.set_text (string_compose(_("%1%% Left"), 100-probability));
 		_right_probability_label.set_text (string_compose(_("%1%% Right"), probability));
-	}
-
-	bool follow_widgets_sensitive = trigger()->follow_action (0) != Trigger::None;
-
-	if (follow_widgets_sensitive) {
-		_follow_right.set_sensitive(true);
-		_follow_count_spinner.set_sensitive(true);
-		_follow_length_spinner.set_sensitive(true);
-		_use_follow_length_button.set_sensitive(true);
-		_follow_probability_slider.set_sensitive(true);
-	} else {
-		_follow_right.set_sensitive(false);
-		_follow_count_spinner.set_sensitive(false);
-		_follow_length_spinner.set_sensitive(false);
-		_use_follow_length_button.set_sensitive(false);
-		_follow_probability_slider.set_sensitive(false);
 	}
 
 	_ignore_changes = false;
