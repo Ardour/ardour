@@ -125,6 +125,7 @@ TriggerPage::TriggerPage ()
 
 	_sidebar_vbox.pack_start (_sidebar_notebook);
 	add_sidebar_page (_("Clips"), _trigger_clip_picker);
+	add_sidebar_page (_("Regions"), _trigger_region_list.widget ());
 
 	/* Upper pane ([slot | strips] | file browser) */
 	_pane_upper.add (_strip_group_box);
@@ -264,6 +265,7 @@ TriggerPage::set_session (Session* s)
 	_cue_box.set_session (s);
 	_trigger_clip_picker.set_session (s);
 	_master.set_session (s);
+	_trigger_region_list.set_session (s);
 
 	if (!_session) {
 		return;

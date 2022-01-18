@@ -40,6 +40,7 @@
 #include "midi_trigger_properties_box.h"
 #include "slot_properties_box.h"
 #include "trigger_clip_picker.h"
+#include "trigger_region_list.h"
 #include "trigger_master.h"
 
 class TriggerStrip;
@@ -103,6 +104,7 @@ private:
 	Gtk::VBox            _sidebar_vbox;
 	Gtk::Notebook        _sidebar_notebook;
 	TriggerClipPicker    _trigger_clip_picker;
+	TriggerRegionList    _trigger_region_list;
 
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
