@@ -62,6 +62,8 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	Gtk::Label* label;
 	int         row = 0;
 
+	_abpm_label.set_sizing_text("200.00");
+
 	/* ------- Stretching and Tempo stuff ----------------------------- */
 	Gtk::Table* bpm_table = manage (new Gtk::Table ());
 	bpm_table->set_homogeneous (false);
@@ -69,8 +71,8 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	bpm_table->set_border_width (8);
 
 	_stretch_toggle.set_text (_("Stretch"));
-	bpm_table->attach (_stretch_toggle, 0, 1, row, row + 1, Gtk::SHRINK, Gtk::SHRINK);
-	bpm_table->attach (_stretch_selector, 1, 2, row, row + 1, Gtk::SHRINK, Gtk::SHRINK); row++;
+	bpm_table->attach (_stretch_toggle, 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	bpm_table->attach (_stretch_selector, 1, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK); row++;
 
 	label = manage (new Gtk::Label (_("BPM:")));
 	label->set_alignment (1.0, 0.5);
@@ -86,17 +88,20 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 
 	row++;
 
-	label = manage (new Gtk::Label (_("Time Sig:")));
+	label = manage (new Gtk::Label (_("Meter:")));
 	label->set_alignment (1.0, 0.5);
 	bpm_table->attach (*label,         0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	bpm_table->attach (_meter_selector, 1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	bpm_table->attach (_meter_selector, 1, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	row++;
 
-	label = manage (new Gtk::Label (_("Bar Count:")));
+	label = manage (new Gtk::Label (_("Clip Length:")));
 	label->set_alignment (1.0, 0.5);
+	Gtk::Label *bar_label = manage (new Gtk::Label (_("(bars)")));
+	bar_label->set_alignment (0.0, 0.5);
 	bpm_table->attach (*label,       0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 	bpm_table->attach (_bar_spinner, 1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	bpm_table->attach (*bar_label,   2, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	ArdourWidgets::Frame* eTempoBox = manage (new ArdourWidgets::Frame);
 	eTempoBox->set_label("Stretch Options");
@@ -218,7 +223,11 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& pc)
 	}
 
 	if (pc.contains (Properties::tempo_meter) || pc.contains (Properties::follow_length)) {
-		_abpm_label.set_text (string_compose ("%1", at->segment_tempo ()));
+
+		char buf[32];
+		sprintf(buf, "%3.2f", at->segment_tempo ());
+		_abpm_label.set_text (buf);
+
 		ArdourWidgets::set_tooltip (_abpm_label, string_compose ("Clip Tempo, used for stretching.  Estimated tempo (from file) was: %1", trigger->estimated_tempo ()));
 
 		_meter_selector.set_text (string_compose ("%1/%2", at->meter().divisions_per_bar(), at->meter().note_value()));
