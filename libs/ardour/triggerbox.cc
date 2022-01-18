@@ -1257,7 +1257,12 @@ AudioTrigger::estimate_tempo ()
 
 	const double seconds = (double) data.length  / _box.session().sample_rate();
 	const double quarters = (seconds / 60.) * _estimated_tempo;
+
+	/* initialize bar count to match the file length ... user can later change this value */
 	_barcnt = quarters / _meter.divisions_per_bar();
+
+	/* initialize our follow_length to match the barcnt ... user can later change this value */
+	_follow_length = (Temporal::BBT_Offset( rint(_barcnt), 0, 0));
 
 	/* now check the determined tempo and force it to a value that gives us
 	   an integer bar/quarter count. This is a heuristic that tries to
