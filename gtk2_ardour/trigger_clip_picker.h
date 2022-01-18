@@ -56,6 +56,7 @@ private:
 	bool test_expand (Gtk::TreeModel::iterator const&, Gtk::TreeModel::Path const&);
 	void row_collapsed (Gtk::TreeModel::iterator const&, Gtk::TreeModel::Path const&);
 	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
+	void drag_end (Glib::RefPtr<Gdk::DragContext> const&);
 	void maybe_add_dir (std::string const&);
 	void audition_selected ();
 	void audition (std::string const&);

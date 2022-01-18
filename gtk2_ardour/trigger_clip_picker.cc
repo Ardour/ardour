@@ -135,6 +135,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	_view.signal_row_collapsed ().connect (sigc::mem_fun (*this, &TriggerClipPicker::row_collapsed));
 	_view.signal_drag_data_get ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_data_get));
 	_view.signal_cursor_changed ().connect (sigc::mem_fun (*this, &TriggerClipPicker::cursor_changed));
+	_view.signal_drag_end ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_end));
 
 	Config->ParameterChanged.connect (_config_connection, invalidator (*this), boost::bind (&TriggerClipPicker::parameter_changed, this, _1), gui_context ());
 
@@ -315,6 +316,12 @@ TriggerClipPicker::maybe_add_dir (std::string const& dir)
 /* ****************************************************************************
  * Treeview Callbacks
  */
+
+void
+TriggerClipPicker::drag_end (Glib::RefPtr<Gdk::DragContext> const&)
+{
+	_session->cancel_audition ();
+}
 
 void
 TriggerClipPicker::cursor_changed ()
