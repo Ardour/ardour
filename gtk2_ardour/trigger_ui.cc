@@ -730,7 +730,7 @@ TriggerUI::launch_style_to_string (Trigger::LaunchStyle ls)
 {
 	switch (ls) {
 	case Trigger::OneShot:
-		return _("One Shot");
+		return _("Trigger");
 	case Trigger::ReTrigger:
 		return _("Retrigger");
 	case Trigger::Gate:
