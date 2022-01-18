@@ -2581,7 +2581,6 @@ Editor::set_state (const XMLNode& node, int version)
 	XMLNodeList children = node.children ();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		selection->set_state (**i, Stateful::current_state_version);
-		_regions->set_state (**i);
 		_locations->set_state (**i);
 	}
 
@@ -2683,7 +2682,6 @@ Editor::get_state ()
 	node->set_property (X_("show-touched-automation"), _show_touched_automation);
 
 	node->add_child_nocopy (selection->get_state ());
-	node->add_child_nocopy (_regions->get_state ());
 
 	node->set_property ("nudge-clock-value", nudge_clock->current_duration());
 
@@ -6215,7 +6213,6 @@ Editor::session_going_away ()
 
 	/* rip everything out of the list displays */
 
-	_regions->clear ();
 	_sources->clear ();
 	_routes->clear ();
 	_route_groups->clear ();
