@@ -55,9 +55,6 @@ EditorRegions::EditorRegions (Editor* e)
 
 	_change_connection = _display.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &EditorRegions::selection_changed));
 
-	_display.add_object_drag (_columns.region.index (), "x-ardour/region.erl", TARGET_SAME_APP);
-	_display.set_drag_column (_columns.name.index ());
-
 	e->EditorFreeze.connect (_editor_freeze_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::freeze_tree_model, this), gui_context ());
 	e->EditorThaw.connect (_editor_thaw_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::thaw_tree_model, this), gui_context ());
 }
@@ -242,21 +239,6 @@ EditorRegions::regions_changed (boost::shared_ptr<RegionList> rl, const Property
 	}
 
 	RegionListBase::regions_changed (rl, what_changed);
-}
-
-/** @return Region that has been dragged out of the list, or 0 */
-boost::shared_ptr<Region>
-EditorRegions::get_dragged_region ()
-{
-	list<boost::shared_ptr<Region>> regions;
-	TreeView*                       source;
-	_display.get_object_drag_data (regions, &source);
-
-	if (regions.empty ()) {
-		return boost::shared_ptr<Region> ();
-	}
-
-	return regions.front ();
 }
 
 boost::shared_ptr<Region>

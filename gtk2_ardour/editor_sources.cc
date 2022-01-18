@@ -227,11 +227,13 @@ EditorSources::EditorSources (Editor* e)
 	tv_col->set_expand (true);
 
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
-	_display.add_object_drag (_columns.region.index (), "x-ardour/region.esl", TARGET_SAME_APP);
+
+	/* Set up DnD Source */
+	_display.add_object_drag (_columns.region.index (), "x-ardour/region.pbdid", TARGET_SAME_APP);
 	_display.set_drag_column (_columns.name.index());
+	_display.signal_drag_data_get ().connect (sigc::mem_fun (*this, &EditorSources::drag_data_get));
 
-	/* setup DnD handling */
-
+	/* setup DnD Receive */
 	list<TargetEntry> source_list_target_table;
 
 	source_list_target_table.push_back (TargetEntry ("text/plain"));
@@ -949,20 +951,21 @@ EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 	}
 }
 
-/** @return Region that has been dragged out of the list, or 0 */
-boost::shared_ptr<ARDOUR::Region>
-EditorSources::get_dragged_region ()
+void
+EditorSources::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData& data, guint, guint)
 {
+	if (data.get_target () != "x-ardour/region.pbdid") {
+		return;
+	}
+
 	list<boost::shared_ptr<ARDOUR::Region> > regions;
 	TreeView* region;
 	_display.get_object_drag_data (regions, &region);
 
-	if (regions.empty()) {
-		return boost::shared_ptr<ARDOUR::Region> ();
+	if (!regions.empty ()) {
+		assert (regions.size() == 1);
+		data.set (data.get_target (), regions.front()->id ().to_s ());
 	}
-
-	assert (regions.size() == 1);
-	return regions.front ();
 }
 
 void

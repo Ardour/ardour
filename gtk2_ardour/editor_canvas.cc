@@ -268,8 +268,7 @@ Editor::initialize_canvas ()
 
 	vector<TargetEntry> target_table;
 
-	target_table.push_back (TargetEntry ("x-ardour/region.erl", TARGET_SAME_APP)); // DnD from the region list will generate this target
-	target_table.push_back (TargetEntry ("x-ardour/region.esl", TARGET_SAME_APP)); // DnD from the source list will generate this target
+	target_table.push_back (TargetEntry ("x-ardour/region.pbdid", TARGET_SAME_APP));
 	target_table.push_back (TargetEntry ("text/uri-list"));
 	target_table.push_back (TargetEntry ("text/plain"));
 	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
@@ -391,10 +390,8 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return;
 	}
-	if (data.get_target() == "x-ardour/region.erl") {
-		drop_regions (context, x, y, data, info, time, true);
-	} else if (data.get_target() == "x-ardour/region.esl") {
-		drop_regions (context, x, y, data, info, time, false);
+	if (data.get_target() == "x-ardour/region.pbdid") {
+		drop_regions (context, x, y, data, info, time);
 	} else {
 		drop_paths (context, x, y, data, info, time);
 	}

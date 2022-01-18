@@ -213,6 +213,8 @@ protected:
 
 	void clock_format_changed ();
 
+	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
+
 	Columns _columns;
 
 	int           _sort_col_id;

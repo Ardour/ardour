@@ -77,6 +77,10 @@ RegionListBase::RegionListBase ()
 	_model = TreeStore::create (_columns);
 	_model->set_sort_column (0, SORT_ASCENDING);
 
+	_display.add_object_drag (_columns.region.index (), "x-ardour/region.pbdid", Gtk::TARGET_SAME_APP);
+	_display.set_drag_column (_columns.name.index ());
+	_display.signal_drag_data_get ().connect (sigc::mem_fun (*this, &RegionListBase::drag_data_get));
+
 	_display.set_model (_model);
 
 	_display.set_headers_visible (true);
@@ -215,6 +219,22 @@ RegionListBase::leave_notify (GdkEventCrossing*)
 	}
 	Keyboard::magic_widget_drop_focus ();
 	return false;
+}
+
+void
+RegionListBase::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData& data, guint, guint)
+{
+	if (data.get_target () != "x-ardour/region.pbdid") {
+		return;
+	}
+
+	list<boost::shared_ptr<ARDOUR::Region>> regions;
+	TreeView*                               source;
+	_display.get_object_drag_data (regions, &source);
+
+	if (!regions.empty ()) {
+		data.set (data.get_target (), regions.front ()->id ().to_s ());
+	}
 }
 
 void

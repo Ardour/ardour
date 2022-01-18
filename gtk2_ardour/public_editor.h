@@ -203,9 +203,6 @@ public:
 	 */
 	virtual void consider_auditioning (boost::shared_ptr<ARDOUR::Region> r) = 0;
 
-	/* Editor::_regions DnD */
-	virtual boost::shared_ptr<ARDOUR::Region> get_dragged_region_from_sidebar () = 0;
-
 	/* import dialogs -> ardour-ui ?! */
 	virtual void external_audio_dialog () = 0;
 	virtual void session_import_dialog () = 0;

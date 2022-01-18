@@ -25,6 +25,8 @@
 #include <gtkmm/treerowreference.h>
 #include <gtkmm/treestore.h>
 
+#include "gtkmm2ext/dndtreeview.h"
+
 #include "editor_component.h"
 
 #include "selection.h"
@@ -42,7 +44,6 @@ public:
 
 	void clear ();
 
-	boost::shared_ptr<ARDOUR::Region> get_dragged_region ();
 	boost::shared_ptr<ARDOUR::Region> get_single_selection ();
 
 	void unselect_all () {
@@ -132,9 +133,8 @@ private:
 
 	void redisplay ();
 
-	void drag_data_received (
-		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
-		);
+	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
+	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint);
 
 	Gtk::ScrolledWindow _scroller;
 

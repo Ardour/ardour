@@ -5875,16 +5875,6 @@ Editor::consider_auditioning (boost::shared_ptr<Region> region)
 	last_audition_region = r;
 }
 
-boost::shared_ptr<ARDOUR::Region>
-Editor::get_dragged_region_from_sidebar ()
-{
-	boost::shared_ptr<ARDOUR::Region> rv = _regions->get_dragged_region ();
-	if (!rv) {
-		rv = _sources->get_dragged_region ();
-	}
-	return rv;
-}
-
 void
 Editor::hide_a_region (boost::shared_ptr<Region> r)
 {

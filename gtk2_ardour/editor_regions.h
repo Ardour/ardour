@@ -35,7 +35,6 @@ public:
 	void selection_mapover (sigc::slot<void, boost::shared_ptr<ARDOUR::Region>>);
 	void remove_unused_regions ();
 
-	boost::shared_ptr<ARDOUR::Region> get_dragged_region ();
 	boost::shared_ptr<ARDOUR::Region> get_single_selection ();
 
 	void unselect_all ()
