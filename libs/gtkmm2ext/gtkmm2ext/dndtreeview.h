@@ -136,13 +136,15 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 
 			TreeView::on_drag_data_get (context, selection_data, info, time);
 
-		} else if (selection_data.get_target() == object_type) {
+		} else if (selection_data.get_target() == object_type && drag_data.data_column >= 0) {
 
 			/* return a pointer to this object, which allows
 			 * the receiver to call on_drag_data_received()
 			 */
 			void *c = this;
 			selection_data.set (8, (guchar*)&c, sizeof(void*));
+		} else {
+			TreeView::on_drag_data_get (context, selection_data, info, time);
 		}
 	}
 
@@ -178,7 +180,7 @@ class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 
 	void get_object_drag_data (std::list<DataType>& l, Gtk::TreeView** source) const {
 
-		if (drag_data.source == 0) {
+		if (drag_data.source == 0 || drag_data.data_column < 0) {
 			return;
 		}
 
