@@ -51,6 +51,7 @@
 #include "public_editor.h"
 #include "utils.h"
 #include "rgb_macros.h"
+#include "tempo_curve.h"
 
 #include <gtkmm2ext/utils.h>
 
@@ -535,6 +536,7 @@ void
 ArdourMarker::set_position (timepos_t const & pos)
 {
 	unit_position = editor.sample_to_pixel (pos.samples()) - _shift;
+	cerr << "marker @ " << this << " set pos to " << unit_position << endl;
 	group->set_x_position (unit_position);
 	setup_line ();
 	_position = pos;
@@ -631,18 +633,32 @@ ArdourMarker::set_right_label_limit (double p)
 	}
 }
 
+MetricMarker::MetricMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rgba, const string& annotation,
+                            Type type, timepos_t const & pos, bool handle_events)
+	: ArdourMarker (ed, parent, rgba, annotation, type, pos, false)
+{
+}
+
 /***********************************************************************/
 
-TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 rgba, const string& text,
-                          Temporal::TempoPoint& temp)
-	: ArdourMarker (editor, parent, rgba, text, Tempo, temp.time(), false)
+TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 rgba, const string& text, Temporal::TempoPoint const & temp, samplepos_t sample, uint32_t curve_color)
+	: MetricMarker (editor, parent, rgba, text, Tempo, temp.time(), false)
 	, _tempo (&temp)
 {
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), group, this));
+	/* points[1].x gives the width of the marker */
+	_curve = new TempoCurve (editor, *group, curve_color, temp, true, (*points)[1].x);
 }
 
 TempoMarker::~TempoMarker ()
 {
+	delete _curve;
+}
+
+TempoCurve&
+TempoMarker::curve()
+{
+	return *_curve;
 }
 
 void
@@ -666,16 +682,21 @@ TempoMarker::update_height_mark (const double ratio)
 }
 
 void
-TempoMarker::reset_tempo (Temporal::TempoPoint & t)
+TempoMarker::reset_tempo (Temporal::TempoPoint const & t)
 {
 	_tempo = &t;
 }
 
+Temporal::Point const &
+TempoMarker::point() const
+{
+	return *_tempo;
+}
 
 /***********************************************************************/
 
-MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 rgba, const string& text, Temporal::MeterPoint& m)
-	: ArdourMarker (editor, parent, rgba, text, Meter, m.time(), false)
+MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 rgba, const string& text, Temporal::MeterPoint const & m)
+	: MetricMarker (editor, parent, rgba, text, Meter, m.time(), false)
 	, _meter (&m)
 {
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_meter_marker_event), group, this));
@@ -686,15 +707,21 @@ MeterMarker::~MeterMarker ()
 }
 
 void
-MeterMarker::reset_meter (Temporal::MeterPoint & m)
+MeterMarker::reset_meter (Temporal::MeterPoint const & m)
 {
 	_meter = &m;
 }
 
+Temporal::Point const &
+MeterMarker::point() const
+{
+	return *_meter;
+}
+
 /***********************************************************************/
 
-BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 rgba, const string& text, Temporal::MusicTimePoint& p)
-	: ArdourMarker (editor, parent, rgba, text, BBTPosition, p.time(), false)
+BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 rgba, const string& text, Temporal::MusicTimePoint const & p)
+	: MetricMarker (editor, parent, rgba, text, BBTPosition, p.time(), false)
 	, _point (&p)
 {
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_bbt_marker_event), group, this));
@@ -705,7 +732,13 @@ BBTMarker::~BBTMarker ()
 }
 
 void
-BBTMarker::reset_point (Temporal::MusicTimePoint & p)
+BBTMarker::reset_point (Temporal::MusicTimePoint const & p)
 {
 	_point = &p;
+}
+
+Temporal::Point const &
+BBTMarker::point() const
+{
+	return *_point;
 }

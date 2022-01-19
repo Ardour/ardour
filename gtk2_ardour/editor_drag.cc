@@ -3600,73 +3600,15 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	TempoMap::SharedPtr map (TempoMap::use());
 
 	if (first_move) {
-
-		// mvc drag - create a dummy marker to catch events, hide it.
-
-		char name[64];
-		snprintf (name, sizeof (name), "%.2f", _marker->tempo().note_types_per_minute());
-
-		_marker = new TempoMarker (
-			*_editor,
-			*_editor->tempo_group,
-			UIConfiguration::instance().color ("tempo marker"),
-			name,
-			_marker->tempo()
-			);
-
-		/* use the new marker for the grab */
-		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
-		_marker->hide();
-
 		/* get current state */
 		_before_state = &map->get_state();
-
-		if (!_copy) {
-
-			_editor->begin_reversible_command (_("move tempo mark"));
-
-		} else {
-
-			timepos_t const pointer = adjusted_current_time (event, false);
-			BBT_Time pointer_bbt = map->bbt_at (pointer);
-			Temporal::TempoMetric metric = map->metric_at (pointer);
-			Temporal::MeterPoint const & meter = metric.meter();
-			Temporal::TempoPoint const & tempo = metric.tempo();
-			BBT_Time bbt = tempo.bbt();
-
-			/* we can't add a tempo where one currently exists */
-			if (bbt < pointer_bbt) {
-				bbt = meter.bbt_add (bbt, BBT_Offset (0, 1, 0));
-			} else {
-				bbt = meter.bbt_add (bbt, BBT_Offset (0, -1, 0));
-			}
-
-			_editor->begin_reversible_command (_("copy tempo mark"));
-
-			timepos_t pos;
-
-			if (map->time_domain() == AudioTime) {
-				pos = timepos_t (map->sample_at (bbt));
-			} else {
-				pos = timepos_t (map->quarters_at (bbt));
-			}
-
-			_marker->reset_tempo (map->set_tempo (tempo, pos));
-
-#warning paul, need a return status from set_tempo
-#if 0
-			if (!) {
-				aborted (true);
-				return;
-			}
-#endif
-		}
+		_editor->begin_reversible_command (_("move tempo mark"));
 	}
 
 	if (ArdourKeyboard::indicates_constraint (event->button.state) && ArdourKeyboard::indicates_copy (event->button.state)) {
 		double new_bpm = max (1.5, _grab_bpm.end_note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
 		stringstream strs;
-		map->change_tempo (_marker->tempo(), Tempo (_marker->tempo().note_types_per_minute(), _marker->tempo().note_type(), new_bpm));
+		map->change_tempo (const_cast<TempoPoint&>(_marker->tempo()), Tempo (_marker->tempo().note_types_per_minute(), _marker->tempo().note_type(), new_bpm));
 		strs << "end:" << fixed << setprecision(3) << new_bpm;
 		show_verbose_cursor_text (strs.str());
 
@@ -3674,30 +3616,18 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		/* use vertical movement to alter tempo .. should be log */
 		double new_bpm = max (1.5, _grab_bpm.note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
 		stringstream strs;
-		map->change_tempo (_marker->tempo(), Tempo (new_bpm, _marker->tempo().note_type(), _marker->tempo().end_note_types_per_minute()));
+		map->change_tempo (const_cast<TempoPoint&>(_marker->tempo()), Tempo (new_bpm, _marker->tempo().note_type(), _marker->tempo().end_note_types_per_minute()));
 		strs << "start:" << fixed << setprecision(3) << new_bpm;
 		show_verbose_cursor_text (strs.str());
 
 	} else if (_movable) {
-
 		timepos_t pos = adjusted_current_time (event);
-
-		std::cerr << " going to move " << &_marker->tempo() << std::endl;
 		map->move_tempo (_marker->tempo(), pos, false);
-
 		show_verbose_cursor_time (_marker->tempo().time());
-	}
-
-
-	if (_movable && (!first_move || !_copy)) {
-
-		timepos_t pos = adjusted_current_time (event);
-
-		map->move_tempo (_marker->tempo(), pos, false);
-
-		show_verbose_cursor_time (_marker->tempo().time());
+		_editor->mid_tempo_change ();
 	}
 }
+
 
 void
 TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
@@ -3727,10 +3657,6 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	_editor->session()->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), _before_state, &after));
 	_editor->commit_reversible_command ();
-
-	// delete the dummy marker we used for visual representation while moving.
-	// a new visual marker will show up automatically.
-	delete _marker;
 }
 
 void

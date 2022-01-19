@@ -36,6 +36,7 @@
 #include "canvas/types.h"
 
 namespace Temporal {
+	class Point;
 	class TempoPoint;
 	class MeterPoint;
 	class MusicTimePoint;
@@ -43,6 +44,7 @@ namespace Temporal {
 
 class PublicEditor;
 class RegionView;
+class TempoCurve;
 
 /** Location Marker
  *
@@ -156,47 +158,60 @@ private:
 	ArdourMarker & operator= (ArdourMarker const &);
 };
 
-class TempoMarker : public ArdourMarker
+class MetricMarker : public ArdourMarker
 {
   public:
-	TempoMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, const std::string& text, Temporal::TempoPoint&);
+	MetricMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rgba, const std::string& annotation, Type type, Temporal::timepos_t const & pos, bool handle_events);
+	virtual Temporal::Point const & point() const = 0;
+};
+
+class TempoMarker : public MetricMarker
+{
+  public:
+	TempoMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, const std::string& text, Temporal::TempoPoint const &, samplepos_t sample, uint32_t curve_color);
 	~TempoMarker ();
 
-	void reset_tempo (Temporal::TempoPoint & t);
+	void reset_tempo (Temporal::TempoPoint const & t);
 
-	Temporal::TempoPoint& tempo() const { return *_tempo; }
+	Temporal::TempoPoint const & tempo() const { return *_tempo; }
+	Temporal::Point const & point() const;
 
 	void update_height_mark (const double ratio);
+	TempoCurve& curve();
+
   private:
-	Temporal::TempoPoint* _tempo;
+	Temporal::TempoPoint const * _tempo;
+	TempoCurve* _curve;
 };
 
-class MeterMarker : public ArdourMarker
+class MeterMarker : public MetricMarker
 {
   public:
-	MeterMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, const std::string& text, Temporal::MeterPoint&);
+	MeterMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, const std::string& text, Temporal::MeterPoint const &);
 	~MeterMarker ();
 
-	void reset_meter (Temporal::MeterPoint & m);
+	void reset_meter (Temporal::MeterPoint const & m);
 
-	Temporal::MeterPoint& meter() const { return *_meter; }
+	Temporal::MeterPoint const & meter() const { return *_meter; }
+	Temporal::Point const & point() const;
 
   private:
-	Temporal::MeterPoint* _meter;
+	Temporal::MeterPoint const * _meter;
 };
 
-class BBTMarker : public ArdourMarker
+class BBTMarker : public MetricMarker
 {
   public:
-	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, const std::string& text, Temporal::MusicTimePoint&);
+	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, const std::string& text, Temporal::MusicTimePoint const &);
 	~BBTMarker ();
 
-	void reset_point (Temporal::MusicTimePoint &);
+	void reset_point (Temporal::MusicTimePoint const &);
 
-	Temporal::MusicTimePoint& point() const { return *_point; }
+	Temporal::MusicTimePoint const & mt_point() const { return *_point; }
+	Temporal::Point const & point() const;
 
   private:
-	Temporal::MusicTimePoint* _point;
+	Temporal::MusicTimePoint const * _point;
 };
 
 #endif /* __gtk_ardour_marker_h__ */

@@ -1531,9 +1531,9 @@ Editor::marker_menu_edit ()
 	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
 
 	if (mm) {
-		edit_meter_section (mm->meter());
+		edit_meter_section (const_cast<Temporal::MeterPoint&>(mm->meter()));
 	} else if (tm) {
-		edit_tempo_section (tm->tempo());
+		edit_tempo_section (const_cast<Temporal::TempoPoint&>(tm->tempo()));
 	}
 }
 
@@ -1567,11 +1567,11 @@ Editor::toggle_tempo_type ()
 		TempoMap::SharedPtr tmap (TempoMap::write_copy());
 
 		reassociate_metric_markers (tmap);
-		Temporal::TempoPoint & tempo = tm->tempo();
+		Temporal::TempoPoint const & tempo = tm->tempo();
 
 		XMLNode &before = tmap->get_state();
 
-		tmap->set_ramped (tempo, !tempo.ramped());
+		tmap->set_ramped (const_cast<Temporal::TempoPoint&>(tempo), !tempo.ramped());
 
 		XMLNode &after = tmap->get_state();
 		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
@@ -1595,9 +1595,9 @@ Editor::toggle_tempo_clamped ()
 		XMLNode &before = tmap->get_state();
 
 		reassociate_metric_markers (tmap);
-		Temporal::Tempo & tempo (tm->tempo());
+		Temporal::Tempo const & tempo (tm->tempo());
 
-		tempo.set_clamped (!tempo.clamped());
+		const_cast<Temporal::Tempo&>(tempo).set_clamped (!tempo.clamped());
 
 		XMLNode &after = tmap->get_state();
 		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
@@ -1622,9 +1622,9 @@ Editor::ramp_to_next_tempo ()
 		XMLNode &before = tmap->get_state();
 
 		reassociate_metric_markers (tmap);
-		Temporal::TempoPoint & tempo (tm->tempo());
+		Temporal::TempoPoint const & tempo (tm->tempo());
 
-		tmap->set_ramped (tempo, !tempo.ramped());
+		tmap->set_ramped (const_cast<Temporal::TempoPoint&>(tempo), !tempo.ramped());
 
 		XMLNode &after = tmap->get_state();
 		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));

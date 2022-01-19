@@ -875,7 +875,7 @@ public:
 
 private:
 	TempoMarker* _marker;
-	Temporal::TempoPoint* _real_section;
+	Temporal::TempoPoint const * _real_section;
 
 	bool _copy;
 	bool _movable;
@@ -968,7 +968,7 @@ public:
 
 private:
 	Temporal::Beats _grab_qn;
-	Temporal::TempoPoint* _tempo;
+	Temporal::TempoPoint const * _tempo;
 	XMLNode* _before_state;
 	bool _drag_valid;
 };

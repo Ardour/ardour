@@ -73,22 +73,20 @@ Editor::remove_metric_marks ()
 {
 	/* don't delete these while handling events, just punt till the GUI is idle */
 
-	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
-		delete_when_idle (*x);
+	for (auto & m : tempo_marks) {
+		delete_when_idle (m);
 	}
-	metric_marks.clear ();
+	for (auto & m : meter_marks) {
+		delete_when_idle (m);
+	}
+	for (auto & m : bbt_marks) {
+		delete_when_idle (m);
+	}
 
-	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ++x) {
-		delete (*x);
-	}
-	tempo_curves.clear ();
+	tempo_marks.clear ();
+	meter_marks.clear ();
+	bbt_marks.clear ();
 }
-
-struct CurveComparator {
-	bool operator() (TempoCurve const * a, TempoCurve const * b) {
-		return a->tempo().sclock() < b->tempo().sclock();
-	}
-};
 
 void
 Editor::reassociate_metric_markers (TempoMap::SharedPtr const & tmap)
@@ -96,13 +94,19 @@ Editor::reassociate_metric_markers (TempoMap::SharedPtr const & tmap)
 	TempoMap::Metrics metrics;
 	tmap->get_metrics (metrics);
 
-	for (auto & marker : metric_marks) {
-		reassociate_metric_marker (tmap, metrics, *marker);
+	for (auto & m : tempo_marks) {
+		reassociate_metric_marker (tmap, metrics, *m);
+	}
+	for (auto & m : meter_marks) {
+		reassociate_metric_marker (tmap, metrics, *m);
+	}
+	for (auto & m : bbt_marks) {
+		reassociate_metric_marker (tmap, metrics, *m);
 	}
 }
 
 void
-Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::Metrics & metrics, ArdourMarker& marker)
+Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::Metrics & metrics, MetricMarker& marker)
 {
 	TempoMarker* tm;
 	MeterMarker* mm;
@@ -157,70 +161,266 @@ Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::M
 }
 
 void
-Editor::draw_metric_marks (TempoMap::Metrics const & metrics)
+Editor::make_bbt_marker (MusicTimePoint const  * mtp)
+{
+	if (mtp->map().time_domain() == BeatTime) {
+		bbt_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker music"), "bar!", *mtp));
+	} else {
+		bbt_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker"), "foo!", *mtp));
+	}
+}
+
+void
+Editor::make_meter_marker (Temporal::MeterPoint const * ms)
+{
+	char buf[64];
+
+	snprintf (buf, sizeof(buf), "%d/%d", ms->divisions_per_bar(), ms->note_value ());
+	if (ms->map().time_domain() == BeatTime) {
+		meter_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker music"), buf, *ms));
+	} else {
+		meter_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf, *ms));
+	}
+}
+
+void
+Editor::make_tempo_marker (Temporal::TempoPoint const * ts, double& min_tempo, double& max_tempo, TempoPoint const *& prev_ts, uint32_t tc_color, samplecnt_t sr)
+{
+	max_tempo = max (max_tempo, ts->note_types_per_minute());
+	max_tempo = max (max_tempo, ts->end_note_types_per_minute());
+	min_tempo = min (min_tempo, ts->note_types_per_minute());
+	min_tempo = min (min_tempo, ts->end_note_types_per_minute());
+
+	const std::string tname (X_(""));
+	char const * color_name;
+
+	/* XXX not sure this is the right thing to do here (differentiate time
+	 * domains with color).
+	 */
+
+	if (ts->map().time_domain() == BeatTime) {
+		color_name = X_("tempo marker music");
+	} else {
+		color_name = X_("tempo marker music");
+	}
+
+	tempo_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color (color_name), tname, *ts, ts->sample (sr), tc_color));
+
+	/* XXX the point of this code was "a jump in tempo by more than 1 ntpm results in a red
+	   tempo mark pointer."  (3a7bc1fd3f32f0)
+	*/
+
+	if (prev_ts && abs (prev_ts->end_note_types_per_minute() - ts->note_types_per_minute()) < 1.0) {
+		tempo_marks.back()->set_points_color (UIConfiguration::instance().color ("tempo marker music"));
+	} else {
+		tempo_marks.back()->set_points_color (UIConfiguration::instance().color ("tempo marker"));
+	}
+
+	prev_ts = ts;
+}
+
+void
+Editor::draw_metric_marks (Temporal::TempoMap::Metrics const &)
+{
+	draw_tempo_marks ();
+	draw_meter_marks ();
+	draw_bbt_marks ();
+}
+
+void
+Editor::draw_tempo_marks ()
 {
 	if (!_session) {
 		return;
 	}
 
-	char buf[64];
-	TempoPoint* prev_ts = 0;
+	const uint32_t tc_color = UIConfiguration::instance().color ("tempo curve");
+	const samplecnt_t sr (_session->sample_rate());
+	TempoPoint const * prev_ts = 0;
+	Temporal::TempoMap::SharedPtr tmap (TempoMap::use());
+	TempoMap::Tempos const & tempi (tmap->tempos());
+	TempoMap::Tempos::const_iterator t = tempi.begin();
+	Marks::iterator mm = tempo_marks.begin();
 	double max_tempo = 0.0;
 	double min_tempo = DBL_MAX;
-	const samplecnt_t sr (_session->sample_rate());
 
-	remove_metric_marks (); // also clears tempo curves
+	std::cerr << "**** BEGIN DRAW TEMPO\n";
 
-	for (TempoMap::Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
-		Temporal::MeterPoint *ms;
-		Temporal::TempoPoint *ts;
-		Temporal::MusicTimePoint *mtp;
+	while (t != tempi.end() && mm != tempo_marks.end()) {
 
-		/* must check MusicTimePoint first, since it IS-A TempoPoint
-		 * and MeterPoint.
-		 */
+		Temporal::Point const & mark_point ((*mm)->point());
+		Temporal::TempoPoint const & metric_point (*t);
 
-		if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*i)) != 0) {
+		std::cerr << "\tmark @ " << mark_point.sclock() << " tempo @ " << metric_point.sclock() << std::endl;
 
-			if (mtp->map().time_domain() == BeatTime) {
-				metric_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker music"), "bar!", *mtp));
-			} else {
-				metric_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker"), "foo!", *mtp));
-			}
-		} else if ((ms = dynamic_cast<Temporal::MeterPoint*>(*i)) != 0) {
-			snprintf (buf, sizeof(buf), "%d/%d", ms->divisions_per_bar(), ms->note_value ());
-			if (ms->map().time_domain() == BeatTime) {
-				metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker music"), buf, *ms));
-			} else {
-				metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf, *ms));
-			}
-		} else if ((ts = dynamic_cast<Temporal::TempoPoint*>(*i)) != 0) {
-			max_tempo = max (max_tempo, ts->note_types_per_minute());
-			max_tempo = max (max_tempo, ts->end_note_types_per_minute());
-			min_tempo = min (min_tempo, ts->note_types_per_minute());
-			min_tempo = min (min_tempo, ts->end_note_types_per_minute());
-			uint32_t const tc_color = UIConfiguration::instance().color ("tempo curve");
+		if (mark_point.sclock() < metric_point.sclock()) {
 
-			tempo_curves.push_back (new TempoCurve (*this, *tempo_group, tc_color, *ts, ts->sample (sr), false));
+			/* advance through markers, deleting the unused ones */
 
-			const std::string tname (X_(""));
-			if (ts->map().time_domain() == BeatTime) {
-				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker music"), tname, *ts));
+			std::cerr << "\tDeleting marker that doesn't match a tempo point\n";
+			delete *mm;
+			mm = tempo_marks.erase (mm);
 
-			} else {
-				metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), tname, *ts));
-			}
-			if (prev_ts && abs (prev_ts->end_note_types_per_minute() - ts->note_types_per_minute()) < 1.0) {
-				metric_marks.back()->set_points_color (UIConfiguration::instance().color ("tempo marker music"));
-			} else {
-				metric_marks.back()->set_points_color (UIConfiguration::instance().color ("tempo marker"));
-			}
-			prev_ts = ts;
+
+		} else if (metric_point.sclock() < mark_point.sclock()) {
+
+			std::cerr << "\tCreating a marker for " << metric_point << " @ " << metric_point.sample (sr) << " next marker @ " << mark_point.sample (sr) << std::endl;
+			make_tempo_marker (&metric_point, min_tempo, max_tempo, prev_ts, tc_color, sr);
+			++t;
+
+		} else {
+			/* marker represents an existing point, update text, properties etc */
+			/* XXX left/right text stuff */
+			// (*mm)->set_name ((*m)->name());
+			std::cerr << "\tMoving marker to " << t->time() << std::endl;
+			(*mm)->set_position (t->time());
+
+			max_tempo = max (max_tempo, t->note_types_per_minute());
+			max_tempo = max (max_tempo, t->end_note_types_per_minute());
+			min_tempo = min (min_tempo, t->note_types_per_minute());
+			min_tempo = min (min_tempo, t->end_note_types_per_minute());
+
+			++t;
+			++mm;
 		}
-
 	}
-	tempo_curves.sort (CurveComparator());
 
+	if ((t == tempi.end()) && (mm != tempo_marks.end())) {
+		while (mm != tempo_marks.end()) {
+			std::cerr << "\tdrop excess tempo marker @ " << (*mm)->point().time() << std::endl;
+			delete *mm;
+			mm = tempo_marks.erase (mm);
+		}
+	}
+
+	if ((mm == tempo_marks.end()) && (t != tempi.end())) {
+		while (t != tempi.end()) {
+			std::cerr << "\tmake new tempo marker @ " << t->time() << std::endl;
+			make_tempo_marker (&*t, min_tempo, max_tempo, prev_ts, tc_color, sr);
+			++t;
+		}
+	}
+
+	update_tempo_curves (min_tempo, max_tempo, sr);
+
+	for (auto & m : tempo_marks) {
+		TempoMarker* tm = static_cast<TempoMarker*> (m);
+		tm->update_height_mark ((tm->tempo().note_types_per_minute() - min_tempo) / max (10.0, max_tempo - min_tempo));
+		std::cerr << "TEMPO:\n\t" << tm->tempo() << std::endl;
+	}
+}
+
+void
+Editor::draw_meter_marks ()
+{
+	if (!_session) {
+		return;
+	}
+
+	Temporal::TempoMap::SharedPtr tmap (TempoMap::use());
+	TempoMap::Meters const & meters (tmap->meters());
+	TempoMap::Meters::const_iterator m = meters.begin();
+	Marks::iterator mm = meter_marks.begin();
+
+	while (m != meters.end() && mm != meter_marks.end()) {
+
+		Temporal::Point const & mark_point ((*mm)->point());
+		Temporal::MeterPoint const & metric_point (*m);
+
+		if (mark_point.sclock() < metric_point.sclock()) {
+
+			/* advance through markers, deleting the unused ones */
+
+			delete *mm;
+			mm = meter_marks.erase (mm);
+
+		} else if (metric_point.sclock() < mark_point.sclock()) {
+
+			make_meter_marker (&metric_point);
+			++m;
+
+		} else {
+			/* marker represents an existing point, update text, properties etc */
+			/* XXX left/right text stuff */
+			// (*mm)->set_name ((*m)->name());
+			(*mm)->set_position (m->time());
+			++m;
+			++mm;
+		}
+	}
+
+	if ((m == meters.end()) && (mm != meter_marks.end())) {
+		while (mm != meter_marks.end()) {
+			delete *mm;
+			mm = meter_marks.erase (mm);
+		}
+	}
+
+	if ((mm == tempo_marks.end()) && (m != meters.end())) {
+		while (m != meters.end()) {
+			make_meter_marker (&*m);
+			++m;
+		}
+	}
+}
+
+void
+Editor::draw_bbt_marks ()
+{
+	if (!_session) {
+		return;
+	}
+
+	Temporal::TempoMap::SharedPtr tmap (TempoMap::use());
+	TempoMap::MusicTimes const & bartimes (tmap->bartimes());
+	TempoMap::MusicTimes::const_iterator m = bartimes.begin();
+	Marks::iterator mm = bbt_marks.begin();
+
+	while (m != bartimes.end() && mm != bbt_marks.end()) {
+
+		Temporal::Point const & mark_point ((*mm)->point());
+		Temporal::MeterPoint const & metric_point (*m);
+
+		if (mark_point.sclock() < metric_point.sclock()) {
+
+			/* advance through markers, deleting the unused ones */
+
+			delete *mm;
+			mm = bbt_marks.erase (mm);
+
+		} else if (metric_point.sclock() < mark_point.sclock()) {
+
+			make_meter_marker (&metric_point);
+			++m;
+
+		} else {
+			/* marker represents an existing point, update text, properties etc */
+			/* XXX left/right text stuff */
+			// (*mm)->set_name ((*m)->name());
+			(*mm)->set_position (m->time());
+			++m;
+			++mm;
+		}
+	}
+
+	if ((m == bartimes.end()) && (mm != bbt_marks.end())) {
+		while (mm != bbt_marks.end()) {
+			delete *mm;
+			mm = bbt_marks.erase (mm);
+		}
+	}
+
+	if ((mm == tempo_marks.end()) && (m != bartimes.end())) {
+		while (m != bartimes.end()) {
+			make_meter_marker (&*m);
+			++m;
+		}
+	}
+}
+
+void
+Editor::update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr)
+{
 	const double min_tempo_range = 5.0;
 	const double tempo_delta = fabs (max_tempo - min_tempo);
 
@@ -229,31 +429,28 @@ Editor::draw_metric_marks (TempoMap::Metrics const & metrics)
 		min_tempo += tempo_delta - min_tempo_range;
 	}
 
-	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ) {
-		Curves::iterator tmp = x;
-		(*x)->set_max_tempo (max_tempo);
-		(*x)->set_min_tempo (min_tempo);
+	for (Marks::iterator m = tempo_marks.begin(); m != tempo_marks.end(); ++m) {
+
+		TempoMarker* tm = static_cast<TempoMarker*>(*m);
+		Marks::iterator tmp = m;
 		++tmp;
-		if (tmp != tempo_curves.end()) {
-			(*x)->set_position ((*x)->tempo().sample(sr), (*tmp)->tempo().sample(sr));
+
+		TempoCurve& curve (tm->curve());
+
+		curve.set_max_tempo (max_tempo);
+		curve.set_min_tempo (min_tempo);
+
+		if (tmp != tempo_marks.end()) {
+			TempoMarker* nxt = static_cast<TempoMarker*>(*tmp);
+			curve.set_duration (nxt->tempo().sample(sr) - tm->tempo().sample(sr));
 		} else {
-			(*x)->set_position ((*x)->tempo().sample(sr), UINT32_MAX);
+			curve.set_duration (samplecnt_t (UINT32_MAX));
 		}
 
-		if (!(*x)->tempo().active()) {
-			(*x)->hide();
+		if (!tm->tempo().active()) {
+			curve.hide();
 		} else {
-			(*x)->show();
-		}
-
-		++x;
-	}
-
-	for (Marks::iterator x = metric_marks.begin(); x != metric_marks.end(); ++x) {
-		TempoMarker* tempo_marker;
-
-		if ((tempo_marker = dynamic_cast<TempoMarker*> (*x)) != 0) {
-			tempo_marker->update_height_mark ((tempo_marker->tempo().note_types_per_minute() - min_tempo) / max (10.0, max_tempo - min_tempo));
+			curve.show();
 		}
 	}
 }
@@ -294,12 +491,13 @@ Editor::tempo_curve_selected (Temporal::TempoPoint const * ts, bool yn)
 		return;
 	}
 
-	for (Curves::iterator x = tempo_curves.begin(); x != tempo_curves.end(); ++x) {
-		if (&(*x)->tempo() == ts) {
+	for (Marks::iterator x = tempo_marks.begin(); x != tempo_marks.end(); ++x) {
+		TempoMarker* tm = static_cast<TempoMarker*> (*x);
+		if (&tm->tempo() == ts) {
 			if (yn) {
-				(*x)->set_color_rgba (UIConfiguration::instance().color ("location marker"));
+				tm->curve().set_color_rgba (UIConfiguration::instance().color ("location marker"));
 			} else {
-				(*x)->set_color_rgba (UIConfiguration::instance().color ("tempo curve"));
+				tm->curve().set_color_rgba (UIConfiguration::instance().color ("tempo curve"));
 			}
 			break;
 		}
@@ -565,17 +763,17 @@ Editor::edit_tempo_section (TempoPoint& section)
 void
 Editor::edit_tempo_marker (TempoMarker& tm)
 {
-	edit_tempo_section (tm.tempo());
+	edit_tempo_section (const_cast<Temporal::TempoPoint&>(tm.tempo()));
 }
 
 void
 Editor::edit_meter_marker (MeterMarker& mm)
 {
-	edit_meter_section (mm.meter());
+	edit_meter_section (const_cast<Temporal::MeterPoint&>(mm.meter()));
 }
 
 gint
-Editor::real_remove_tempo_marker (TempoPoint *section)
+Editor::real_remove_tempo_marker (TempoPoint const * section)
 {
 	begin_reversible_command (_("remove tempo mark"));
 	TempoMap::SharedPtr tmap (TempoMap::write_copy());
@@ -612,7 +810,7 @@ Editor::remove_meter_marker (ArdourCanvas::Item* item)
 }
 
 gint
-Editor::real_remove_meter_marker (Temporal::MeterPoint *section)
+Editor::real_remove_meter_marker (Temporal::MeterPoint const * section)
 {
 	begin_reversible_command (_("remove tempo mark"));
 	TempoMap::SharedPtr tmap (TempoMap::write_copy());
@@ -650,4 +848,11 @@ Editor::commit_tempo_map_edit ()
 {
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	TempoMap::update (tmap);
+}
+
+void
+Editor::mid_tempo_change ()
+{
+	std::cerr << "============== MID TEMPO\n";
+	draw_tempo_marks ();
 }

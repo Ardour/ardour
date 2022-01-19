@@ -1723,6 +1723,11 @@ private:
 	PBD::Signal0<void> EditorFreeze;
 	PBD::Signal0<void> EditorThaw;
 
+	void begin_tempo_map_edit ();
+	void abort_tempo_map_edit ();
+	void commit_tempo_map_edit ();
+	void mid_tempo_change ();
+
 private:
 	friend class DragManager;
 	friend class EditorRouteGroups;
@@ -1777,8 +1782,8 @@ private:
 
 	void remove_tempo_marker (ArdourCanvas::Item*);
 	void remove_meter_marker (ArdourCanvas::Item*);
-	gint real_remove_tempo_marker (Temporal::TempoPoint*);
-	gint real_remove_meter_marker (Temporal::MeterPoint*);
+	gint real_remove_tempo_marker (Temporal::TempoPoint const *);
+	gint real_remove_meter_marker (Temporal::MeterPoint const *);
 
 	void edit_tempo_marker (TempoMarker&);
 	void edit_meter_marker (MeterMarker&);
@@ -1834,22 +1839,26 @@ private:
 	Gtk::Menu* new_transport_marker_menu;
 	ArdourCanvas::Item* marker_menu_item;
 
-	typedef std::list<ArdourMarker*> Marks;
-	Marks metric_marks;
-
-	typedef std::list<TempoCurve*> Curves;
-	Curves tempo_curves;
+	typedef std::list<MetricMarker*> Marks;
+	Marks tempo_marks;
+	Marks meter_marks;
+	Marks bbt_marks;
 
 	void remove_metric_marks ();
 	void draw_metric_marks (Temporal::TempoMap::Metrics const & metrics);
+	void draw_tempo_marks ();
+	void draw_meter_marks ();
+	void draw_bbt_marks ();
 
 	void compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t left, samplepos_t right);
 
 	void reassociate_metric_markers (Temporal::TempoMap::SharedPtr const &);
-	void reassociate_metric_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::TempoMap::Metrics & metric, ArdourMarker& marker);
-	void begin_tempo_map_edit ();
-	void abort_tempo_map_edit ();
-	void commit_tempo_map_edit ();
+	void reassociate_metric_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::TempoMap::Metrics & metric, MetricMarker& marker);
+	void make_bbt_marker (Temporal::MusicTimePoint const *);
+	void make_meter_marker (Temporal::MeterPoint const *);
+	void make_tempo_marker (Temporal::TempoPoint const * ts, double& min_tempo, double& max_tempo, Temporal::TempoPoint const *& prev_ts, uint32_t tc_color, samplecnt_t sr);
+	void update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr);
+
 	void tempo_map_changed ();
 
 	void redisplay_grid (bool immediate_redraw);
