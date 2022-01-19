@@ -66,6 +66,7 @@ private:
 	void update_minitimeline ();
 	void draw_dots (cairo_t*, int left, int right, int y, Gtkmm2ext::Color);
 	int  draw_mark (cairo_t*, int x0, int x1, const std::string&, bool& prelight);
+	void draw_cue (cairo_t*, int x0, int x1, int cue_index, bool& prelight);
 	int  draw_edge (cairo_t*, int x0, int x1, bool left, const std::string&, bool& prelight);
 
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
@@ -83,6 +84,7 @@ private:
 	Glib::RefPtr<Pango::Layout> _layout;
 	sigc::connection super_rapid_connection;
 	PBD::ScopedConnectionList marker_connection;
+	PBD::ScopedConnectionList tempo_map_connection;
 	PBD::ScopedConnectionList session_connection;
 
 	samplepos_t _last_update_sample;
@@ -104,10 +106,8 @@ private:
 	uint32_t _phead_color;
 
 	struct JumpRange {
-		JumpRange (int l, int r, samplepos_t t, bool p = false)
-			: left (l), right (r), to (t), prelight (p) {}
-		int left;
-		int right;
+		JumpRange (samplepos_t t, bool p = false)
+			: to (t), prelight (p) {}
 		samplepos_t to;
 		bool prelight;
 	};
