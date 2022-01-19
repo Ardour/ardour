@@ -869,6 +869,10 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	typedef boost::intrusive::list<MusicTimePoint, boost::intrusive::base_hook<bartime_hook>> MusicTimes;
 	typedef boost::intrusive::list<Point, boost::intrusive::base_hook<point_hook>> Points;
 
+	Tempos const & tempos() const { return _tempos; }
+	Meters const & meters() const { return _meters; }
+	MusicTimes const & bartimes() const { return _bartimes; }
+
 	LIBTEMPORAL_API	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
 	LIBTEMPORAL_API	Beats quarters_at_superclock (superclock_t sc) const;
 
