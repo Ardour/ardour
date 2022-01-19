@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2021 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,32 +15,25 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef __gtk_ardour_editor_sources_h__
-#define __gtk_ardour_editor_sources_h__
+#ifndef _gtk_ardour_source_list_base_h_
+#define _gtk_ardour_source_list_base_h_
 
-#include "editor_component.h"
-#include "source_list_base.h"
+#include "region_list_base.h"
 
-class EditorSources : public EditorComponent, public SourceListBase
+class SourceListBase : public RegionListBase
 {
 public:
-	EditorSources (Editor*);
+	SourceListBase ();
+	void set_session (ARDOUR::Session*);
 
-	boost::shared_ptr<ARDOUR::Region> get_single_selection ();
-
-	/* user actions */
-	void remove_selected_sources ();
-	void recover_selected_sources ();
+protected:
+	void name_edit (const std::string&, const std::string&);
+	void tag_edit (const std::string&, const std::string&);
+	bool list_region (boost::shared_ptr<ARDOUR::Region>) const;
 
 private:
-	void init ();
-	bool key_press (GdkEventKey*);
-	bool button_press (GdkEventButton*);
-	void show_context_menu (int button, int time);
-
-	void selection_changed ();
-
-	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, gint, gint, Gtk::SelectionData const&, guint, guint);
+	void remove_source (boost::shared_ptr<ARDOUR::Source>);
+	void remove_weak_source (boost::weak_ptr<ARDOUR::Source>);
 };
 
-#endif
+#endif /* _gtk_ardour_source_list_base_h_ */

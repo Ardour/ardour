@@ -280,6 +280,7 @@ gtk2_ardour_sources = [
         'sfdb_ui.cc',
         'shuttle_control.cc',
         'slot_properties_box.cc',
+        'source_list_base.cc',
         'soundcloud_export_selector.cc',
         'splash.cc',
         'speaker_dialog.cc',

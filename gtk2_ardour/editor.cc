@@ -6203,7 +6203,6 @@ Editor::session_going_away ()
 
 	/* rip everything out of the list displays */
 
-	_sources->clear ();
 	_routes->clear ();
 	_route_groups->clear ();
 

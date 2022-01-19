@@ -166,21 +166,22 @@ protected:
 
 	void freeze_tree_model ();
 	void thaw_tree_model ();
+	void remove_weak_region (boost::weak_ptr<ARDOUR::Region>);
 
 	virtual void regions_changed (boost::shared_ptr<ARDOUR::RegionList>, PBD::PropertyChange const&);
 
 	void name_editing_started (Gtk::CellEditable*, const Glib::ustring&);
-	void name_edit (const std::string&, const std::string&);
 	void tag_editing_started (Gtk::CellEditable*, const Glib::ustring&);
-	void tag_edit (const std::string&, const std::string&);
+
+	virtual void name_edit (const std::string&, const std::string&);
+	virtual void tag_edit (const std::string&, const std::string&);
 
 	void locked_changed (std::string const&);
 	void glued_changed (std::string const&);
 	void muted_changed (std::string const&);
 	void opaque_changed (std::string const&);
 
-	bool key_press (GdkEventKey*);
-
+	virtual bool key_press (GdkEventKey*);
 	virtual bool button_press (GdkEventButton*)
 	{
 		return false;
@@ -215,6 +216,8 @@ protected:
 
 	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
 
+	virtual bool list_region (boost::shared_ptr<ARDOUR::Region>) const;
+
 	Columns _columns;
 
 	int           _sort_col_id;
@@ -241,6 +244,8 @@ protected:
 
 	PBD::ScopedConnection _editor_freeze_connection;
 	PBD::ScopedConnection _editor_thaw_connection;
+
+	PBD::ScopedConnectionList _remove_region_connections;
 };
 
 #endif /* _gtk_ardour_region_list_base_h_ */

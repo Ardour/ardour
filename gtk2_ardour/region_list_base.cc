@@ -25,12 +25,17 @@
 #include <algorithm>
 #include <string>
 
+#include "pbd/file_utils.h"
+
 #include "ardour/audiofilesource.h"
 #include "ardour/audioregion.h"
+#include "ardour/midi_source.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
+#include "ardour/session_directory.h"
 #include "ardour/session_playlist.h"
 #include "ardour/silentfilesource.h"
+#include "ardour/smf_source.h"
 
 #include "gtkmm2ext/treeutils.h"
 #include "gtkmm2ext/utils.h"
@@ -254,14 +259,32 @@ RegionListBase::set_session (ARDOUR::Session* s)
 }
 
 void
-RegionListBase::add_region (boost::shared_ptr<Region> region)
+RegionListBase::remove_weak_region (boost::weak_ptr<ARDOUR::Region> r)
 {
-	if (!region || !_session) {
+	boost::shared_ptr<ARDOUR::Region> region = r.lock ();
+	if (!region) {
 		return;
 	}
 
+	RegionRowMap::iterator map_it = region_row_map.find (region);
+	if (map_it != region_row_map.end ()) {
+		Gtk::TreeModel::iterator r_it = map_it->second;
+		region_row_map.erase (map_it);
+		_model->erase (r_it);
+	}
+}
+
+bool
+RegionListBase::list_region (boost::shared_ptr<ARDOUR::Region> region) const
+{
 	/* whole-file regions are shown in the Source List */
-	if (region->whole_file ()) {
+	return !region->whole_file ();
+}
+
+void
+RegionListBase::add_region (boost::shared_ptr<Region> region)
+{
+	if (!region || !_session || !list_region (region)) {
 		return;
 	}
 
@@ -269,8 +292,19 @@ RegionListBase::add_region (boost::shared_ptr<Region> region)
 	 * if there's some other kind of region, we ignore it (for now)
 	 */
 	boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (region->source ());
-	if (!fs || fs->empty ()) {
+	if (!fs) {
 		return;
+	}
+
+	if (fs->empty ()) {
+		/* MIDI sources are allowed to be empty */
+		if (!boost::dynamic_pointer_cast<MidiSource> (region->source ())) {
+			return;
+		}
+	}
+
+	if (region->whole_file ()) {
+		region->DropReferences.connect (_remove_region_connections, MISSING_INVALIDATOR, boost::bind (&RegionListBase::remove_weak_region, this, boost::weak_ptr<Region> (region)), gui_context ());
 	}
 
 	PropertyChange                pc;
@@ -289,16 +323,18 @@ RegionListBase::regions_changed (boost::shared_ptr<RegionList> rl, const Propert
 	for (RegionList::const_iterator i = rl->begin (); i != rl->end (); ++i) {
 		boost::shared_ptr<Region> r = *i;
 
-		RegionRowMap::iterator map_it = region_row_map.find (r);
+		RegionRowMap::iterator              map_it = region_row_map.find (r);
+		boost::shared_ptr<ARDOUR::Playlist> pl     = r->playlist ();
 
-		boost::shared_ptr<ARDOUR::Playlist> pl = r->playlist ();
-		if (!(pl && _session && _session->playlist_is_active (pl))) {
+		bool is_on_active_playlist = pl && _session && _session->playlist_is_active (pl);
+
+		if (!((is_on_active_playlist || r->whole_file ()) && list_region (r))) {
 			/* this region is not on an active playlist
 			 * maybe it got deleted, or whatever */
 			if (map_it != region_row_map.end ()) {
-				Gtk::TreeModel::iterator r = map_it->second;
+				Gtk::TreeModel::iterator r_it = map_it->second;
 				region_row_map.erase (map_it);
-				_model->erase (r);
+				_model->erase (r_it);
 			}
 			break;
 		}
@@ -334,6 +370,8 @@ RegionListBase::redisplay ()
 
 	/* store sort column id and type for later */
 	_model->get_sort_column_id (_sort_col_id, _sort_type);
+
+	_remove_region_connections.drop_connections ();
 
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->clear ();
@@ -495,6 +533,8 @@ RegionListBase::populate_row (boost::shared_ptr<Region> region, TreeModel::Row c
 	if (all || what_changed.contains (Properties::name) || what_changed.contains (Properties::tags)) {
 		populate_row_name (region, row);
 	}
+	/* CAPTURED DROPOUTS */
+	row[_columns.captd_xruns] = region->source ()->n_captured_xruns ();
 }
 
 void
@@ -632,10 +672,44 @@ RegionListBase::populate_row_name (boost::shared_ptr<Region> region, TreeModel::
 void
 RegionListBase::populate_row_source (boost::shared_ptr<Region> region, TreeModel::Row const& row)
 {
-	if (boost::dynamic_pointer_cast<SilentFileSource> (region->source ())) {
-		row[_columns.path] = _("MISSING ") + Gtkmm2ext::markup_escape_text (region->source ()->name ());
+	boost::shared_ptr<ARDOUR::Source> source = region->source ();
+	if (boost::dynamic_pointer_cast<SilentFileSource> (source)) {
+		row[_columns.path] = _("MISSING ") + Gtkmm2ext::markup_escape_text (source->name ());
 	} else {
-		row[_columns.path] = Gtkmm2ext::markup_escape_text (region->source ()->name ());
+		row[_columns.path] = Gtkmm2ext::markup_escape_text (source->name ());
+
+		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (source);
+		if (fs) {
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (source);
+			if (afs) {
+				const string audio_directory = _session->session_directory ().sound_path ();
+				if (!PBD::path_is_within (audio_directory, fs->path ())) {
+					row[_columns.path] = Gtkmm2ext::markup_escape_text (fs->path ());
+				}
+			}
+			boost::shared_ptr<SMFSource> mfs = boost::dynamic_pointer_cast<SMFSource> (source);
+			if (mfs) {
+				const string midi_directory = _session->session_directory ().midi_path ();
+				if (!PBD::path_is_within (midi_directory, fs->path ())) {
+					row[_columns.path] = Gtkmm2ext::markup_escape_text (fs->path ());
+				}
+			}
+		}
+	}
+
+	row[_columns.captd_for] = source->captured_for ();
+	row[_columns.take_id]   = source->take_id ();
+
+	/* Natural Position (samples, an invisible column for sorting) */
+	row[_columns.natural_s] = source->natural_position ();
+
+	/* Natural Position (text representation) */
+	if (source->have_natural_position ()) {
+		char buf[64];
+		format_position (source->natural_position (), buf, sizeof (buf));
+		row[_columns.natural_pos] = buf;
+	} else {
+		row[_columns.natural_pos] = X_("--");
 	}
 }
 
@@ -765,6 +839,7 @@ RegionListBase::tag_edit (const std::string& path, const std::string& new_text)
 void
 RegionListBase::clear ()
 {
+	_remove_region_connections.drop_connections ();
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->clear ();
 	_display.set_model (_model);
