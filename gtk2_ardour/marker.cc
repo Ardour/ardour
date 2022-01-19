@@ -167,6 +167,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 	 *          \  |
 	 *   MH,MH
 	 *
+	 * Cue:
+	 *  ben: put your shape here :)
 	 */
 
 	switch (type) {
@@ -268,6 +270,20 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		_label_offset = 0.0;
 		break;
 
+	case Cue:
+		/* ben: new shape needed here */
+		points = new ArdourCanvas::Points ();
+
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple ( M6, 0.0));
+		points->push_back (ArdourCanvas::Duple ( M6, MH * .4));
+		points->push_back (ArdourCanvas::Duple ( M3, MH));
+		points->push_back (ArdourCanvas::Duple (0.0, MH * .4));
+		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
+
+		_shift = 3;
+		_label_offset = 10.0;
+		break;
 	}
 
 	_position = pos;

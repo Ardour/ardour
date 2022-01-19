@@ -66,7 +66,8 @@ public:
 		LoopEnd,
 		PunchIn,
 		PunchOut,
-		RegionCue
+		RegionCue,
+		Cue
 	};
 
 
