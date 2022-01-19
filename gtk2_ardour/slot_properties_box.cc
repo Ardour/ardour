@@ -137,27 +137,27 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_probability_slider.set_name("FollowAction");
 
 	_follow_left.set_name("FollowAction");
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),         Trigger::None, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),         Trigger::Stop, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),        Trigger::Again, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::PrevTrigger, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::NextTrigger, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::ReverseTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::ReverseTrigger, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::ForwardTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::ForwardTrigger, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),   Trigger::AnyTrigger, 0)));
-	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), Trigger::OtherTrigger, 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::None), 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Stop), 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Again), 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::PrevTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::PrevTrigger), 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::NextTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::NextTrigger), 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ReverseTrigger), 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::AnyTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::AnyTrigger), 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::OtherTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::OtherTrigger), 0)));
 	_follow_left.set_sizing_text (longest_follow);
 
 	_follow_right.set_name("FollowAction");
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),         Trigger::None, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),         Trigger::Stop, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),        Trigger::Again, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::PrevTrigger, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::NextTrigger, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::ReverseTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::ReverseTrigger, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::ForwardTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),  Trigger::ForwardTrigger, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action),   Trigger::AnyTrigger, 1)));
-	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), Trigger::OtherTrigger, 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::None), 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Stop), 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::Again), 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::PrevTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::PrevTrigger), 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::NextTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::NextTrigger), 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ReverseTrigger), 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::AnyTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::AnyTrigger), 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::OtherTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::OtherTrigger), 1)));
 	_follow_right.set_sizing_text (longest_follow);
 
 	_launch_style_button.set_name("FollowAction");
@@ -468,7 +468,7 @@ SlotPropertyTable::set_launch_style (Trigger::LaunchStyle ls)
 }
 
 void
-SlotPropertyTable::set_follow_action (Trigger::FollowAction fa, uint64_t idx)
+SlotPropertyTable::set_follow_action (FollowAction const & fa, uint64_t idx)
 {
 	if (_ignore_changes) {
 		return;
@@ -538,7 +538,7 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 		_follow_left.set_text (follow_action_to_string (trigger()->follow_action (0)));
 
 		/* set widget sensitivity based on 'left' follow action */
-		bool follow_widgets_sensitive = trigger()->follow_action (0) != Trigger::None;
+		bool follow_widgets_sensitive = trigger()->follow_action (0).type != FollowAction::None;
 		if (follow_widgets_sensitive) {
 			_follow_right.set_sensitive(true);
 			_follow_count_spinner.set_sensitive(true);

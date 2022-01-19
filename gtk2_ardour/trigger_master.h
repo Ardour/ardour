@@ -85,7 +85,7 @@ private:
 
 	void clear_all_triggers();
 	void set_all_colors();
-	void set_all_follow_action (ARDOUR::Trigger::FollowAction);
+	void set_all_follow_action (ARDOUR::FollowAction const &);
 	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle);
 	void set_all_quantization (Temporal::BBT_Offset const&);
 
@@ -134,7 +134,7 @@ private:
 
 	void get_boxen (TriggerBoxList &boxlist);
 	void clear_all_triggers();
-	void set_all_follow_action (ARDOUR::Trigger::FollowAction);
+	void set_all_follow_action (ARDOUR::FollowAction const &);
 	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle);
 	void set_all_quantization (Temporal::BBT_Offset const&);
 

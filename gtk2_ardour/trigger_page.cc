@@ -66,7 +66,7 @@ using namespace std;
 TriggerPage::TriggerPage ()
 	: Tabbable (_content, _("Trigger Drom"), X_("trigger"))
 	, _cue_area_frame (0.5, 0, 1.0, 0)
-	, _cue_box (32, 16 * TriggerBox::default_triggers_per_box)
+	, _cue_box (32, 16 * default_triggers_per_box)
 	, _master_widget (32, 16)
 	, _master (_master_widget.root ())
 {

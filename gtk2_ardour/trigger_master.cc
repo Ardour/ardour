@@ -341,15 +341,15 @@ TriggerMaster::context_menu ()
 	Menu*     follow_menu = manage (new Menu);
 	MenuList& fitems      = follow_menu->items ();
 
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::None)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::Stop)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::Again)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::PrevTrigger)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::NextTrigger)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ForwardTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::ForwardTrigger)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ReverseTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::ReverseTrigger)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::AnyTrigger)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), Trigger::OtherTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::None))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::Stop))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::Again))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::PrevTrigger)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::PrevTrigger))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::NextTrigger)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::NextTrigger))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::ForwardTrigger))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::ReverseTrigger))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::AnyTrigger)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::AnyTrigger))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::OtherTrigger)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::OtherTrigger))));
 
 	Menu*     launch_menu = manage (new Menu);
 	MenuList& litems      = launch_menu->items ();
@@ -441,7 +441,7 @@ TriggerMaster::set_all_colors ()
 		case Gtk::RESPONSE_ACCEPT: {
 			c = _color_dialog.get_colorsel()->get_current_color();
 			color_t ct = ARDOUR_UI_UTILS::gdk_color_to_rgba(c);
-			for (int n = 0; n< TriggerBox::default_triggers_per_box; n++) {
+			for (int n = 0; n < default_triggers_per_box; n++) {
 				_triggerbox->trigger (n)->set_color(ct);
 			}
 		} break;
@@ -453,10 +453,10 @@ TriggerMaster::set_all_colors ()
 }
 
 void
-TriggerMaster::set_all_follow_action (Trigger::FollowAction fa)
+TriggerMaster::set_all_follow_action (FollowAction const & fa)
 {
-	_triggerbox->set_all_follow_action(fa);
-	_triggerbox->set_all_probability(0);
+	_triggerbox->set_all_follow_action (fa);
+	_triggerbox->set_all_probability (0);
 }
 
 void
@@ -722,15 +722,15 @@ CueMaster::context_menu ()
 	Menu*     follow_menu = manage (new Menu);
 	MenuList& fitems      = follow_menu->items ();
 
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::None)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::Stop)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::Again)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::PrevTrigger)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::NextTrigger)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ForwardTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::ForwardTrigger)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ReverseTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::ReverseTrigger)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::AnyTrigger)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), Trigger::OtherTrigger)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::None))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::Stop))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::Again))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::PrevTrigger)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::PrevTrigger))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::NextTrigger)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::NextTrigger))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::ForwardTrigger))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::ReverseTrigger))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::AnyTrigger)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::AnyTrigger))));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::OtherTrigger)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::OtherTrigger))));
 
 	Menu*     launch_menu = manage (new Menu);
 	MenuList& litems      = launch_menu->items ();
@@ -823,7 +823,7 @@ CueMaster::clear_all_triggers ()
 
 
 void
-CueMaster::set_all_follow_action (Trigger::FollowAction fa)
+CueMaster::set_all_follow_action (FollowAction const & fa)
 {
 	TriggerBoxList tl;
 	get_boxen(tl);

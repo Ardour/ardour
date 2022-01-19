@@ -244,15 +244,15 @@ CueBoxUI::context_menu (uint64_t idx)
 	Menu*     follow_menu = manage (new Menu);
 	MenuList& fitems      = follow_menu->items ();
 
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::None), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::None, idx)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Stop), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::Stop, idx)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::Again), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::Again, idx)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::PrevTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::PrevTrigger, idx)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::NextTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::NextTrigger, idx)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ReverseTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::ReverseTrigger, idx)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::ForwardTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::ForwardTrigger, idx)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::AnyTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::AnyTrigger, idx)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(Trigger::OtherTrigger), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), Trigger::OtherTrigger, idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::None), idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::Stop), idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::Again), idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::PrevTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::PrevTrigger), idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::NextTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::NextTrigger), idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::ReverseTrigger), idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::ForwardTrigger), idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::AnyTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::AnyTrigger), idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::OtherTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::OtherTrigger), idx)));
 
 	Menu*     launch_menu = manage (new Menu);
 	MenuList& litems      = launch_menu->items ();
@@ -355,7 +355,7 @@ CueBoxUI::set_all_colors (uint64_t idx)
 }
 
 void
-CueBoxUI::set_all_follow_action (Trigger::FollowAction fa, uint64_t idx)
+CueBoxUI::set_all_follow_action (FollowAction const & fa, uint64_t idx)
 {
 	TriggerList tl;
 	get_slots(tl, idx);
@@ -426,7 +426,7 @@ CueBoxUI::build ()
 
 	_slots.clear ();
 
-	for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) { // TODO
+	for (int32_t n = 0; n < default_triggers_per_box; ++n) { // TODO
 		CueEntry* te = new CueEntry (this, n);
 
 		_slots.push_back (te);
@@ -446,7 +446,7 @@ CueBoxUI::_size_allocate (ArdourCanvas::Rect const& alloc)
 	const float width  = alloc.width ();
 	const float height = alloc.height ();
 
-	const float slot_h = height / TriggerBox::default_triggers_per_box; // TODO
+	const float slot_h = height / default_triggers_per_box; // TODO
 
 	float ypos = 0;
 	for (auto& slot : _slots) {
@@ -508,10 +508,10 @@ CueBoxWidget::on_unmap ()
 
 CueBoxWindow::CueBoxWindow ()
 {
-	CueBoxWidget* tbw = manage (new CueBoxWidget (-1., TriggerBox::default_triggers_per_box * 16.));
+	CueBoxWidget* tbw = manage (new CueBoxWidget (-1., default_triggers_per_box * 16.));
 	set_title (_("CueBox for XXXX"));
 
-	set_default_size (-1., TriggerBox::default_triggers_per_box * 16.);
+	set_default_size (-1., default_triggers_per_box * 16.);
 	add (*tbw);
 	tbw->show ();
 }

@@ -55,7 +55,7 @@ public:
 	ArdourCanvas::Text*      name_text;
 
 	void draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float size, float scale) const;
-	void draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, ARDOUR::Trigger::FollowAction icon, float size, float scale) const;
+	void draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, ARDOUR::FollowAction const & icon, float size, float scale) const;
 
 	void render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const;
 

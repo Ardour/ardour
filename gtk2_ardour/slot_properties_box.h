@@ -109,7 +109,7 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 
 	void set_quantize (Temporal::BBT_Offset);
 	void set_launch_style (ARDOUR::Trigger::LaunchStyle);
-	void set_follow_action (ARDOUR::Trigger::FollowAction, uint64_t);
+	void set_follow_action (ARDOUR::FollowAction const &, uint64_t);
 
 	void on_trigger_changed (PBD::PropertyChange const& );
 

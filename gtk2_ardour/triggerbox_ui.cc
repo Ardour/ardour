@@ -178,7 +178,7 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 }
 
 void
-TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::FollowAction icon, float size, float scale) const
+TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, FollowAction const & icon, float size, float scale) const
 {
 	uint32_t bg_color = fill_color ();
 	uint32_t fg_color = UIConfiguration::instance ().color ("neutral:midground");
@@ -199,32 +199,32 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 	set_source_rgba (context, fg_color);
 	context->set_line_width (1 * scale);
 
-	switch (icon) {
-		case Trigger::Stop:
+	switch (icon.type) {
+		case FollowAction::Stop:
 			context->rectangle (6 * scale, 6 * scale, size - 12 * scale, size - 12 * scale);
 			context->stroke ();
 			break;
-		case Trigger::Again:
+		case FollowAction::Again:
 			context->arc (size / 2, size / 2, size * 0.20, 60. * (M_PI / 180.0), 2 * M_PI);
 			context->stroke ();
 			context->arc (size / 2 + size * 0.2, size / 2, 1.5 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
 			break;
-		case Trigger::NextTrigger:
+		case FollowAction::NextTrigger:
 			context->move_to (size / 2, 3 * scale);
 			context->line_to (size / 2, size - 5 * scale);
 			context->stroke ();
 			context->arc (size / 2, size - 5 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
 			break;
-		case Trigger::PrevTrigger:
+		case FollowAction::PrevTrigger:
 			context->move_to (size / 2, 5 * scale);
 			context->line_to (size / 2, size - 3 * scale);
 			context->stroke ();
 			context->arc (size / 2, 5 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
 			break;
-		case Trigger::ForwardTrigger:
+		case FollowAction::ForwardTrigger:
 			context->move_to (size / 2, 3 * scale);
 			context->line_to (size / 2, size - 3 * scale);
 			context->stroke ();
@@ -241,7 +241,7 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 			context->arc (size / 2, size - 3 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
 			break;
-		case Trigger::ReverseTrigger:
+		case FollowAction::ReverseTrigger:
 			context->arc (size / 2, 3 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
 			set_source_rgba (context, fg_color);
 			context->fill ();
@@ -259,17 +259,17 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 			context->fill ();
 
 			break;
-		case Trigger::QueuedTrigger: {
+		case FollowAction::QueuedTrigger: {
 			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
-			layout->set_text (icon == Trigger::AnyTrigger ? "&" : "@");
+			layout->set_text (icon == FollowAction::AnyTrigger ? "&" : "@");
 			int tw, th;
 			layout->get_pixel_size (tw, th);
 			context->move_to (size / 2, size / 2);
 			context->rel_move_to (-tw / 2, -th / 2);
 			layout->show_in_cairo_context (context);
 		} break;
-		case Trigger::AnyTrigger: {
+		case FollowAction::AnyTrigger: {
 			for (int i = 0; i < 6; i++) {
 				Cairo::Matrix m = context->get_matrix ();
 				context->translate (size / 2, size / 2);
@@ -281,7 +281,7 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 			}
 			context->set_identity_matrix ();
 		} break;
-		case Trigger::OtherTrigger: {
+		case FollowAction::OtherTrigger: {
 			context->set_line_width (1.5 * scale);
 			set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); // needs to be brighter to maintain balance
 			for (int i = 0; i < 6; i++) {
@@ -295,7 +295,7 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, Trigger::
 			}
 			context->set_identity_matrix ();
 		} break;
-		case Trigger::None:
+		case FollowAction::None:
 		default:
 			break;
 	}
@@ -924,7 +924,7 @@ TriggerBoxUI::_size_allocate (ArdourCanvas::Rect const& alloc)
 	const float width  = alloc.width ();
 	const float height = alloc.height ();
 
-	const float slot_h = height / TriggerBox::default_triggers_per_box; // TODO
+	const float slot_h = height / default_triggers_per_box; // TODO
 
 	float ypos = 0;
 	for (auto& slot : _slots) {

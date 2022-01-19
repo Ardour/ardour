@@ -88,7 +88,7 @@ private:
 
 	void clear_all_triggers(uint64_t idx);
 	void set_all_colors (uint64_t idx);
-	void set_all_follow_action (ARDOUR::Trigger::FollowAction, uint64_t idx);
+	void set_all_follow_action (ARDOUR::FollowAction const &, uint64_t idx);
 	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle, uint64_t idx);
 	void set_all_quantization (Temporal::BBT_Offset const&, uint64_t idx);
 

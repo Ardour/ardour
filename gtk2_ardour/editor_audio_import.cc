@@ -1149,7 +1149,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 
 		if (mode == ImportAsTrigger) {
 			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
-			for (int s = 0; s < TriggerBox::default_triggers_per_box; ++s) {
+			for (int s = 0; s < default_triggers_per_box; ++s) {
 				if (!existing_track->triggerbox ()->trigger (s)->region ()) {
 					existing_track->triggerbox ()->set_from_selection (s, copy);
 					break;

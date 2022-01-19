@@ -4186,7 +4186,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 			HBox*  tbox  = manage (new HBox);
 			tslot        = manage (new ArdourDropdown ());
 
-			for (int c = 0; c < TriggerBox::default_triggers_per_box; ++c) {
+			for (int c = 0; c < default_triggers_per_box; ++c) {
 				// XXX ('A' + x) is not translatable, TODO abstract using nth_letter()
 				tslot->AddMenuElem (Menu_Helpers::MenuElem (string_compose ("%1", (char)('A' + c)), sigc::bind ([] (uint32_t* t, uint32_t v) {*t = v;}, &trigger_slot, c)));
 			}
