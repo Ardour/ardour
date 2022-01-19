@@ -31,6 +31,8 @@ const int PublicEditor::horizontal_spacing = 6;
 
 sigc::signal<void> PublicEditor::DropDownKeys;
 
+ARDOUR::DataType PublicEditor::pbdid_dragged_dt = ARDOUR::DataType::NIL;
+
 PublicEditor::PublicEditor (Gtk::Widget& content)
 	: Tabbable (content, _("Editor"), X_("editor"))
 {

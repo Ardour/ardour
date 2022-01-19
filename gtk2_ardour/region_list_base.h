@@ -214,6 +214,8 @@ protected:
 
 	void clock_format_changed ();
 
+	void drag_begin (Glib::RefPtr<Gdk::DragContext> const&);
+	void drag_end (Glib::RefPtr<Gdk::DragContext> const&);
 	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
 
 	virtual bool list_region (boost::shared_ptr<ARDOUR::Region>) const;

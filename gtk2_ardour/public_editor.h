@@ -425,6 +425,9 @@ public:
 			: action (a), target (tgt) {}
 	};
 
+	/* data-type of [region] object currently dragged with x-ardour/region.pbdid */
+	static ARDOUR::DataType pbdid_dragged_dt;
+
 	std::map<std::string,RegionAction> region_action_map;
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;

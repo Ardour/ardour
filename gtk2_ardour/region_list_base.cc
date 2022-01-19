@@ -48,6 +48,7 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "main_clock.h"
+#include "public_editor.h"
 #include "region_list_base.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -82,8 +83,10 @@ RegionListBase::RegionListBase ()
 	_model = TreeStore::create (_columns);
 	_model->set_sort_column (0, SORT_ASCENDING);
 
-	_display.add_object_drag (_columns.region.index (), "x-ardour/region.pbdid", Gtk::TARGET_SAME_APP);
+	_display.add_object_drag (-1, "x-ardour/region.pbdid", Gtk::TARGET_SAME_APP);
 	_display.set_drag_column (_columns.name.index ());
+	_display.signal_drag_begin ().connect (sigc::mem_fun (*this, &RegionListBase::drag_begin));
+	_display.signal_drag_end ().connect (sigc::mem_fun (*this, &RegionListBase::drag_end));
 	_display.signal_drag_data_get ().connect (sigc::mem_fun (*this, &RegionListBase::drag_data_get));
 
 	_display.set_model (_model);
@@ -227,18 +230,36 @@ RegionListBase::leave_notify (GdkEventCrossing*)
 }
 
 void
+RegionListBase::drag_begin (Glib::RefPtr<Gdk::DragContext> const&)
+{
+	if (_display.get_selection ()->count_selected_rows () == 0) {
+		PublicEditor::instance ().pbdid_dragged_dt = DataType::NIL;
+	}
+	TreeView::Selection::ListHandle_Path rows = _display.get_selection ()->get_selected_rows ();
+	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin (); i != rows.end (); ++i) {
+		boost::shared_ptr<Region> region           = (*_model->get_iter (*i))[_columns.region];
+		PublicEditor::instance ().pbdid_dragged_dt = region->data_type ();
+		break;
+	}
+}
+
+void
+RegionListBase::drag_end (Glib::RefPtr<Gdk::DragContext> const&)
+{
+	PublicEditor::instance ().pbdid_dragged_dt = DataType::NIL;
+}
+
+void
 RegionListBase::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData& data, guint, guint)
 {
 	if (data.get_target () != "x-ardour/region.pbdid") {
 		return;
 	}
-
-	list<boost::shared_ptr<ARDOUR::Region>> regions;
-	TreeView*                               source;
-	_display.get_object_drag_data (regions, &source);
-
-	if (!regions.empty ()) {
-		data.set (data.get_target (), regions.front ()->id ().to_s ());
+	TreeView::Selection::ListHandle_Path rows = _display.get_selection ()->get_selected_rows ();
+	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin (); i != rows.end (); ++i) {
+		boost::shared_ptr<Region> region = (*_model->get_iter (*i))[_columns.region];
+		data.set (data.get_target (), region->id ().to_s ());
+		break;
 	}
 }
 

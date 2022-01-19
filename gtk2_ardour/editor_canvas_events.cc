@@ -1211,26 +1211,18 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 	if (can_drop) {
 
 		if (target == "x-ardour/region.pbdid") {
-#if 0
-			// TODO check drag_source::drag_data_get() -> SelectionData& region
-
-			if (tv.first == 0 && region) {
+			if (tv.first == 0 && pbdid_dragged_dt != DataType::NIL) {
 				/* drop to drop-zone */
-				context->drag_status (context->get_suggested_action(), time);
+				context->drag_status (Gdk::ACTION_COPY, time);
 				return true;
 			}
 
-			if ((boost::dynamic_pointer_cast<AudioRegion> (region) != 0 && dynamic_cast<AudioTimeAxisView*> (tv.first) != 0) ||
-			    (boost::dynamic_pointer_cast<MidiRegion> (region) != 0 && dynamic_cast<MidiTimeAxisView*> (tv.first) != 0)) {
+			if ((pbdid_dragged_dt == DataType::AUDIO && dynamic_cast<AudioTimeAxisView*> (tv.first) != 0) ||
+			    (pbdid_dragged_dt == DataType::MIDI  && dynamic_cast<MidiTimeAxisView*> (tv.first) != 0)) {
 				/* audio to audio OR MIDI to MIDI */
-				context->drag_status (context->get_suggested_action(), time);
+				context->drag_status (Gdk::ACTION_COPY, time);
 				return true;
 			}
-#else
-			/* region drop always works */
-			context->drag_status (context->get_suggested_action(), time);
-#endif
-			return true;
 		} else {
 			/* DND originating from outside ardour
 			 *
