@@ -161,7 +161,6 @@ Source::set_state (const XMLNode& node, int version)
 	const CueMarkers old_cues = _cue_markers;
 	XMLNodeList nlist = node.children();
 	int64_t t;
-	samplepos_t ts;
 	XMLNode* sd_node;
 
 	if (node.name() == X_("Cues")) {
@@ -189,14 +188,12 @@ Source::set_state (const XMLNode& node, int version)
 		_timestamp = (time_t) t;
 	}
 
-	if (node.get_property ("natural-position", ts)) {
-		_natural_position = timepos_t (ts);
+	if (node.get_property ("natural-position", _natural_position)) {
 		_have_natural_position = true;
-	} else if (node.get_property ("timeline-position", ts)) {
+	} else if (node.get_property ("timeline-position", _natural_position)) {
 		/* some older versions of ardour might have stored this with
 		   this property name.
 		*/
-		_natural_position = timepos_t (ts);
 		_have_natural_position = true;
 	}
 
