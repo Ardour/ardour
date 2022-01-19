@@ -432,7 +432,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, timepos_t const & p, d
 		/* drop onto canvas background: create new tracks */
 
 		InstrumentSelector is; // instantiation builds instrument-list and sets default.
-	        do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, SMFTempoIgnore, pos, is.selected_instrument(), false);
+	        do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackNumber, SMFTempoIgnore, pos, is.selected_instrument(), false);
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack,
@@ -450,7 +450,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, timepos_t const & p, d
 			selection->set (tv);
 
 			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack,
-				   SrcBest, SMFTrackName, SMFTempoIgnore, pos);
+				   SrcBest, SMFTrackNumber, SMFTempoIgnore, pos);
 
 			if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack,

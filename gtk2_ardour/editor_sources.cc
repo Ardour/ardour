@@ -280,7 +280,7 @@ EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 
 		if (UIConfiguration::instance ().get_only_copy_imported_files () || copy) {
 			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion,
-			                    SrcBest, SMFTrackName, SMFTempoIgnore, pos);
+			                    SrcBest, SMFTrackNumber, SMFTempoIgnore, pos);
 		} else {
 			_editor->do_embed (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, pos);
 		}
