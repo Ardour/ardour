@@ -30,6 +30,14 @@
 #include "ardour/data_type.h"
 #include "ardour/mode.h"
 
+/* NOTE: when adding types to this file, you must add four functions:
+
+   std::string to_string (T);
+   T string_to (std::string const &);
+   bool to_string (T, std::string &);
+   bool string_to (std::string const &, T&);
+*/
+
 namespace PBD {
 
 DEFINE_ENUM_CONVERT(Timecode::TimecodeFormat)
@@ -161,6 +169,33 @@ inline bool string_to (const std::string& str, ARDOUR::DataType& dt)
 	dt = ARDOUR::DataType(str);
 	return true;
 }
+
+template <>
+inline bool to_string (ARDOUR::FollowAction fa, std::string& str)
+{
+	str = fa.to_string();
+	return true;
+}
+
+template <>
+inline bool string_to (const std::string& str, ARDOUR::FollowAction& fa)
+{
+	fa = ARDOUR::FollowAction (str);
+	return true;
+}
+
+template<>
+inline std::string to_string (ARDOUR::FollowAction fa)
+{
+	return fa.to_string ();
+}
+
+template<>
+inline ARDOUR::FollowAction string_to (std::string const & str)
+{
+	return ARDOUR::FollowAction (str);
+}
+
 
 } // namespace PBD
 

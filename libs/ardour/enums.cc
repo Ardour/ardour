@@ -157,7 +157,7 @@ setup_enum_writer ()
 	LocateTransportDisposition _LocateTransportDisposition;
 	Trigger::State _TriggerState;
 	Trigger::LaunchStyle _TriggerLaunchStyle;
-	Trigger::FollowAction _TriggerFollowAction;
+	FollowAction::Type _FollowAction;
 	Trigger::StretchMode _TriggerStretchMode;
 	CueBehavior _CueBehavior;
 
@@ -859,19 +859,19 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Trigger, Stopping);
 	REGISTER (_TriggerState);
 
-	REGISTER_CLASS_ENUM (Trigger, None);
-	REGISTER_CLASS_ENUM (Trigger, Stop);
-	REGISTER_CLASS_ENUM (Trigger, Again);
-	REGISTER_CLASS_ENUM (Trigger, QueuedTrigger);
-	REGISTER_CLASS_ENUM (Trigger, NextTrigger);
-	REGISTER_CLASS_ENUM (Trigger, PrevTrigger);
-	REGISTER_CLASS_ENUM (Trigger, ForwardTrigger);
-	REGISTER_CLASS_ENUM (Trigger, ReverseTrigger);
-	REGISTER_CLASS_ENUM (Trigger, FirstTrigger);
-	REGISTER_CLASS_ENUM (Trigger, LastTrigger);
-	REGISTER_CLASS_ENUM (Trigger, AnyTrigger);
-	REGISTER_CLASS_ENUM (Trigger, OtherTrigger);
-	REGISTER (_TriggerFollowAction);
+	REGISTER_CLASS_ENUM (FollowAction, None);
+	REGISTER_CLASS_ENUM (FollowAction, Stop);
+	REGISTER_CLASS_ENUM (FollowAction, Again);
+	REGISTER_CLASS_ENUM (FollowAction, QueuedTrigger);
+	REGISTER_CLASS_ENUM (FollowAction, NextTrigger);
+	REGISTER_CLASS_ENUM (FollowAction, PrevTrigger);
+	REGISTER_CLASS_ENUM (FollowAction, ForwardTrigger);
+	REGISTER_CLASS_ENUM (FollowAction, ReverseTrigger);
+	REGISTER_CLASS_ENUM (FollowAction, FirstTrigger);
+	REGISTER_CLASS_ENUM (FollowAction, LastTrigger);
+	REGISTER_CLASS_ENUM (FollowAction, AnyTrigger);
+	REGISTER_CLASS_ENUM (FollowAction, OtherTrigger);
+	REGISTER (_FollowAction);
 
 	REGISTER_CLASS_ENUM (Trigger, OneShot);
 	REGISTER_CLASS_ENUM (Trigger, ReTrigger);

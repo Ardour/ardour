@@ -54,8 +54,8 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
 		PBD::PropertyDescriptor<Temporal::BBT_Offset> follow_length;
 		PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
-		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
-		PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
+		PBD::PropertyDescriptor<ARDOUR::FollowAction> follow_action0;
+		PBD::PropertyDescriptor<ARDOUR::FollowAction> follow_action1;
 		PBD::PropertyDescriptor<uint32_t> currently_playing;
 		PBD::PropertyDescriptor<uint32_t> follow_count;
 		PBD::PropertyDescriptor<int> follow_action_probability;
@@ -67,6 +67,38 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> tempo_meter;  /* only to transmit updates, not storage */
 	}
 }
+
+FollowAction::FollowAction (std::string const & str)
+{
+	std::string::size_type colon = str.find_first_of (':');
+
+	if (colon == std::string::npos) {
+		throw failed_constructor ();
+	}
+
+	type = FollowAction::Type (string_2_enum (str.substr (0, colon), type));
+
+	/* We use the ulong representation of the bitset because the string
+	   version is absurd.
+	*/
+	unsigned long ul;
+	std::stringstream ss (str.substr (colon+1));
+	ss >> ul;
+	if (!ss) {
+		throw failed_constructor();
+	}
+	targets = Targets (ul);
+}
+
+std::string
+FollowAction::to_string () const
+{
+	/* We use the ulong representation of the bitset because the string
+	   version is absurd.
+	*/
+	return string_compose ("%1:%2", enum_2_string (type), targets.to_ulong());
+}
+
 
 Trigger * const Trigger::MagicClearPointerValue = (Trigger*) 0xfeedface;
 
@@ -82,8 +114,8 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _pending_velocity_gain (1.0)
 	, _velocity_gain (1.0)
 	, _launch_style (Properties::launch_style, OneShot)
-	, _follow_action0 (Properties::follow_action0, Again)
-	, _follow_action1 (Properties::follow_action1, Stop)
+	, _follow_action0 (Properties::follow_action0, FollowAction (FollowAction::Again))
+	, _follow_action1 (Properties::follow_action1, FollowAction (FollowAction::Stop))
 	, _follow_action_probability (Properties::follow_action_probability, 0)
 	, _follow_count (Properties::follow_count, 1)
 	, _quantization (Properties::quantization, Temporal::BBT_Offset (1, 0, 0))
@@ -148,8 +180,8 @@ Trigger::swap_pending (Trigger* t)
 bool
 Trigger::will_not_follow () const
 {
-	return (_follow_action0 == None && _follow_action_probability == 0) ||
-		(_follow_action0 == None && _follow_action1 == None);
+	return (_follow_action0.val().type == FollowAction::None && _follow_action_probability == 0) ||
+		(_follow_action0.val().type == FollowAction::None && _follow_action1.val().type == FollowAction::None);
 }
 
 void
@@ -1132,18 +1164,18 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 	if (_segment_tempo == 0.) {
 		_stretchable = false;
 		_quantization = Temporal::BBT_Offset (-1, 0, 0);
-		_follow_action0 = None;
+		_follow_action0 = FollowAction (FollowAction::None);
 	} else {
 
 		if (probably_oneshot()) {
 			/* short trigger, treat as a one shot */
 			_stretchable = false;
-			_follow_action0 = None;
+			_follow_action0 = FollowAction (FollowAction::None);
 			_quantization = Temporal::BBT_Offset (-1, 0, 0);
 		} else {
 			_stretchable = true;
 			_quantization = Temporal::BBT_Offset (1, 0, 0);
-			_follow_action0 = Again;
+			_follow_action0 = FollowAction (FollowAction::Again);
 		}
 	}
 
@@ -2138,7 +2170,6 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretch_mode = %1\n", Properties::stretch_mode.property_id));
 }
 
-const int32_t TriggerBox::default_triggers_per_box = 8;
 Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
 //TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::AbletonPush);
 TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::SequentialNote);
@@ -2378,7 +2409,7 @@ TriggerBox::set_all_launch_style (ARDOUR::Trigger::LaunchStyle ls)
 }
 
 void
-TriggerBox::set_all_follow_action (ARDOUR::Trigger::FollowAction fa, uint32_t fa_n)
+TriggerBox::set_all_follow_action (ARDOUR::FollowAction const & fa, uint32_t fa_n)
 {
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
 		all_triggers[n]->set_follow_action (fa, fa_n);
@@ -2982,7 +3013,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 	 */
 
 	int r = _pcg.rand (100); // 0 .. 99
-	Trigger::FollowAction fa;
+	FollowAction fa;
 
 	if (r >= all_triggers[current]->follow_action_probability()) {
 		fa = all_triggers[current]->follow_action (0);
@@ -2994,14 +3025,14 @@ TriggerBox::determine_next_trigger (uint32_t current)
 	 * nothing or just repeat the current trigger
 	 */
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("choose next trigger using follow action %1 given prob %2 and rnd %3\n", enum_2_string (fa), all_triggers[current]->follow_action_probability(), r));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("choose next trigger using follow action %1 given prob %2 and rnd %3\n", fa.to_string(), all_triggers[current]->follow_action_probability(), r));
 
-	switch (fa) {
+	switch (fa.type) {
 
-	case Trigger::Stop:
+	case FollowAction::Stop:
 		return -1;
 
-	case Trigger::QueuedTrigger:
+	case FollowAction::QueuedTrigger:
 		/* XXX implement me */
 		return -1;
 	default:
@@ -3015,15 +3046,15 @@ TriggerBox::determine_next_trigger (uint32_t current)
 
 	/* second switch: handle the "real" follow actions */
 
-	switch (fa) {
-	case Trigger::None:
+	switch (fa.type) {
+	case FollowAction::None:
 		return -1;
 
-	case Trigger::Again:
+	case FollowAction::Again:
 		return current;
 
 
-	case Trigger::NextTrigger:
+	case FollowAction::NextTrigger:
 		n = current + 1;
 		if (n < all_triggers.size()) {
 			if (all_triggers[n]->region()) {
@@ -3032,7 +3063,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 		}
 		break;
 
-	case Trigger::PrevTrigger:
+	case FollowAction::PrevTrigger:
 		if (current > 0) {
 			n = current - 1;
 			if (all_triggers[n]->region()) {
@@ -3041,7 +3072,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 		}
 		break;
 
-	case Trigger::ForwardTrigger:
+	case FollowAction::ForwardTrigger:
 		n = current;
 		while (true) {
 			++n;
@@ -3062,7 +3093,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 		}
 		break;
 
-	case Trigger::ReverseTrigger:
+	case FollowAction::ReverseTrigger:
 		n = current;
 		while (true) {
 			if (n == 0) {
@@ -3081,14 +3112,14 @@ TriggerBox::determine_next_trigger (uint32_t current)
 		}
 		break;
 
-	case Trigger::FirstTrigger:
+	case FollowAction::FirstTrigger:
 		for (n = 0; n < all_triggers.size(); ++n) {
 			if (all_triggers[n]->region() && !all_triggers[n]->active ()) {
 				return n;
 			}
 		}
 		break;
-	case Trigger::LastTrigger:
+	case FollowAction::LastTrigger:
 		for (int i = all_triggers.size() - 1; i >= 0; --i) {
 			if (all_triggers[i]->region() && !all_triggers[i]->active ()) {
 				return i;
@@ -3096,7 +3127,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 		}
 		break;
 
-	case Trigger::AnyTrigger:
+	case FollowAction::AnyTrigger:
 		while (true) {
 			n = _pcg.rand (all_triggers.size());
 			if (!all_triggers[n]->region()) {
@@ -3110,7 +3141,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 		return n;
 
 
-	case Trigger::OtherTrigger:
+	case FollowAction::OtherTrigger:
 		while (true) {
 			n = _pcg.rand (all_triggers.size());
 			if ((uint32_t) n == current) {
@@ -3128,8 +3159,8 @@ TriggerBox::determine_next_trigger (uint32_t current)
 
 
 	/* NOTREACHED */
-	case Trigger::Stop:
-	case Trigger::QueuedTrigger:
+	case FollowAction::Stop:
+	case FollowAction::QueuedTrigger:
 		break;
 
 	}

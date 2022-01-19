@@ -31,6 +31,7 @@
 #ifndef __ardour_types_h__
 #define __ardour_types_h__
 
+#include <bitset>
 #include <istream>
 #include <vector>
 #include <map>
@@ -817,6 +818,53 @@ enum CueBehavior {
 };
 
 typedef std::vector<CaptureInfo*> CaptureInfos;
+
+const int32_t default_triggers_per_box = 8;
+
+
+struct FollowAction {
+	enum Type {
+		None,
+		Stop,
+		Again,
+		QueuedTrigger, /* DP-style */
+		NextTrigger,   /* Live-style, and below */
+		PrevTrigger,
+		ForwardTrigger, /* any "next" skipping empties */
+		ReverseTrigger, /* any "prev" skipping empties */
+		FirstTrigger,
+		LastTrigger,
+		AnyTrigger,
+		OtherTrigger,
+	};
+
+	/* We could theoretically limit this to default_triggers_per_box but
+	 * doing it this way makes it likely that this will not change. Could
+	 * be worth a constexpr-style compile time assert to check
+	 * default_triggers_per_box < 64.
+	 */
+
+	typedef std::bitset<64> Targets;
+
+	Type type;
+	Targets targets;
+
+	FollowAction () : type (None) {}
+	FollowAction (Type t, Targets const & tgts = Targets()) : type (t), targets (tgts) {}
+	FollowAction (Type t, std::string const & bitstring) : type (t), targets (bitstring) {}
+	FollowAction (std::string const &);
+
+	bool operator!= (FollowAction const & other) const {
+		return other.type != type || other.targets != targets;
+	}
+
+	bool operator== (FollowAction const & other) const {
+		return other.type == type && other.targets == targets;
+	}
+
+	std::string to_string() const;
+};
+
 
 } // namespace ARDOUR
 

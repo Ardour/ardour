@@ -44,6 +44,8 @@
 #include "ardour/midi_state_tracker.h"
 #include "ardour/processor.h"
 #include "ardour/segment_descriptor.h"
+#include "ardour/types.h"
+#include "ardour/types_convert.h"
 
 #include "ardour/libardour_visibility.h"
 
@@ -170,21 +172,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	LaunchStyle launch_style() const;
 	void set_launch_style (LaunchStyle);
-
-	enum FollowAction {
-		None,
-		Stop,
-		Again,
-		QueuedTrigger, /* DP-style */
-		NextTrigger,   /* Live-style, and below */
-		PrevTrigger,
-		ForwardTrigger, /* any "next" skipping empties */
-		ReverseTrigger, /* any "prev" skipping empties */
-		FirstTrigger,
-		LastTrigger,
-		AnyTrigger,
-		OtherTrigger,
-	};
 
 	FollowAction follow_action (uint32_t n) const { assert (n < 2); return n ? _follow_action1 : _follow_action0; }
 	void set_follow_action (FollowAction, uint32_t n);
@@ -571,7 +558,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	TriggerPtr currently_playing() const { return _currently_playing; }
 
 	void clear_all_triggers ();
-	void set_all_follow_action (ARDOUR::Trigger::FollowAction, uint32_t n=0);
+	void set_all_follow_action (ARDOUR::FollowAction const &, uint32_t n=0);
 	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle);
 	void set_all_quantization (Temporal::BBT_Offset const&);
 	void set_all_probability (int zero_to_a_hundred);
@@ -616,8 +603,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void set_first_midi_note (int n);
 
 	static void init ();
-
-	static const int32_t default_triggers_per_box;
 
 	static TriggerBoxThread* worker;
 
@@ -733,8 +718,8 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Temporal::BBT_Offset> follow_length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::LaunchStyle> launch_style;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action0;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::FollowAction> follow_action1;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<FollowAction> follow_action0;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<FollowAction> follow_action1;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<Trigger::StretchMode> stretch_mode;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> follow_count;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<int> follow_action_probability;
@@ -751,7 +736,7 @@ namespace Properties {
 } // namespace ARDOUR
 
 namespace PBD {
-DEFINE_ENUM_CONVERT(ARDOUR::Trigger::FollowAction);
+DEFINE_ENUM_CONVERT(ARDOUR::FollowAction::Type);
 DEFINE_ENUM_CONVERT(ARDOUR::Trigger::LaunchStyle);
 DEFINE_ENUM_CONVERT(ARDOUR::Trigger::StretchMode);
 } /* namespace PBD */
