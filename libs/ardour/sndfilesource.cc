@@ -536,7 +536,7 @@ SndFileSource::read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) c
 		if (sf_seek (_sndfile, (sf_count_t) start, SEEK_SET|SFM_READ) != (sf_count_t) start) {
 			char errbuf[256];
 			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-			error << string_compose(_("SndFileSource: could not seek to sample %1 within %2 (%3)"), start, _name.val().substr (1), errbuf) << endmsg;
+			error << string_compose(_("SndFileSource: could not seek to sample %1 within %2 (%3)"), start, _name, errbuf) << endmsg;
 			return 0;
 		}
 
@@ -545,7 +545,7 @@ SndFileSource::read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) c
 			if (ret != file_cnt) {
 				char errbuf[256];
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-				error << string_compose(_("SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"), start, file_cnt, _name.val().substr (1), errbuf, _length, ret) << endl;
+				error << string_compose(_("SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"), start, file_cnt, _name, errbuf, _length, ret) << endl;
 			}
 			if (_gain != 1.f) {
 				for (samplecnt_t i = 0; i < ret; ++i) {
