@@ -410,7 +410,7 @@ Trigger::set_use_follow_length (bool ufl)
 bool
 Trigger::internal_use_follow_length () const
 {
-	return (_follow_action0.val().type != None) && _use_follow_length;
+	return (_follow_action0.val().type != FollowAction::None) && _use_follow_length;
 }
 
 void
