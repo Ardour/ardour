@@ -836,12 +836,13 @@ struct FollowAction {
 		LastTrigger,
 		AnyTrigger,
 		OtherTrigger,
+		JumpTrigger,
 	};
 
 	/* We could theoretically limit this to default_triggers_per_box but
 	 * doing it this way makes it likely that this will not change. Could
 	 * be worth a constexpr-style compile time assert to check
-	 * default_triggers_per_box < 64.
+	 * default_triggers_per_box < 64
 	 */
 
 	typedef std::bitset<64> Targets;
@@ -853,6 +854,13 @@ struct FollowAction {
 	FollowAction (Type t, Targets const & tgts = Targets()) : type (t), targets (tgts) {}
 	FollowAction (Type t, std::string const & bitstring) : type (t), targets (bitstring) {}
 	FollowAction (std::string const &);
+
+	static Targets target_any () { Targets t; t.set(); return t; }
+	static Targets target_other (uint8_t skip) { Targets t; t.set (); t.reset (skip); return t; }
+	static Targets target_next_wrap (uint8_t from) { Targets t; if (from < t.size() - 1) { t.set (from + 1); } else { t.set (0); } return t; }
+	static Targets target_prev_wrap (uint8_t from) { Targets t; if (from) { t.set (from - 1); } else { t.set (t.size() - 1); } return t; }
+	static Targets target_next_nowrap (uint8_t from) { Targets t; if (from < t.size() - 1) { t.set (from + 1); } return t; }
+	static Targets target_prev_nowrap (uint8_t from) { Targets t; if (from) { t.set (from - 1); } return t; }
 
 	bool operator!= (FollowAction const & other) const {
 		return other.type != type || other.targets != targets;

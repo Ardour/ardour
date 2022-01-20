@@ -2995,6 +2995,9 @@ TriggerBox::determine_next_trigger (uint32_t current)
 {
 	uint32_t n;
 	uint32_t runnable = 0;
+	std::vector<int32_t> possible_targets;
+
+	possible_targets.reserve (default_triggers_per_box);
 
 	/* count number of triggers that can actually be run (i.e. they have a region) */
 
@@ -3156,6 +3159,17 @@ TriggerBox::determine_next_trigger (uint32_t current)
 			break;
 		}
 		return n;
+
+	case FollowAction::JumpTrigger:
+		for (std::size_t n = 0; n < default_triggers_per_box; ++n) {
+			if (fa.targets.test (n) && all_triggers[n]->region()) {
+				possible_targets.push_back (n);
+			}
+		}
+		if (possible_targets.empty()) {
+			return 1;
+		}
+		return possible_targets[_pcg.rand (possible_targets.size())];
 
 
 	/* NOTREACHED */
