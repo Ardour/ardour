@@ -1419,10 +1419,10 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 				ca->add_child_nocopy (*can);
 				/* see above, child is still "Regions" here  */
 				if (i->second->playlist() == 0 && only_used_assets) {
-					if (boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>( i->second)) {
+					if (boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (i->second)) {
 						child->add_child_nocopy (ar->get_basic_state ());
 					} else {
-						child->add_child_nocopy (ar->get_state ());
+						child->add_child_nocopy (i->second->get_state ());
 					}
 				}
 			}
