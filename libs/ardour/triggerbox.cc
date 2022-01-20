@@ -3018,6 +3018,11 @@ TriggerBox::determine_next_trigger (uint32_t current)
 		return -1;
 	}
 
+	if (all_triggers[current]->follow_action (0).type == FollowAction::None) {
+		/* when left follow action is disabled, no follow action */
+		return -1;
+	}
+
 	/* decide which of the two follow actions we're going to use (based on
 	 * random number and the probability setting)
 	 */
