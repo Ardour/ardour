@@ -146,6 +146,7 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 0)));
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::AnyTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::AnyTrigger), 0)));
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::OtherTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::OtherTrigger), 0)));
+	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::JumpTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::JumpTrigger), 0)));
 	_follow_left.set_sizing_text (longest_follow);
 
 	_follow_right.set_name("FollowAction");
@@ -158,6 +159,7 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 1)));
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::AnyTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::AnyTrigger), 1)));
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::OtherTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::OtherTrigger), 1)));
+	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::JumpTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::JumpTrigger), 1)));
 	_follow_right.set_sizing_text (longest_follow);
 
 	_launch_style_button.set_name("FollowAction");

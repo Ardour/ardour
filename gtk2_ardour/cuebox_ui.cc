@@ -253,6 +253,7 @@ CueBoxUI::context_menu (uint64_t idx)
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::ForwardTrigger), idx)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::AnyTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::AnyTrigger), idx)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::OtherTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::OtherTrigger), idx)));
+	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::JumpTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::JumpTrigger), idx)));
 
 	Menu*     launch_menu = manage (new Menu);
 	MenuList& litems      = launch_menu->items ();

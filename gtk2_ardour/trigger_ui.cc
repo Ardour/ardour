@@ -88,6 +88,7 @@ TriggerUI::TriggerUI ()
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::LastTrigger)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::AnyTrigger)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::OtherTrigger)));
+		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::JumpTrigger)));
 
 		for (std::vector<std::string>::const_iterator i = follow_strings.begin(); i != follow_strings.end(); ++i) {
 			if (i->length() > longest_follow.length()) {
@@ -646,6 +647,11 @@ TriggerUI::follow_context_menu ()
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 
+	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::JumpTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::JumpTrigger))));
+	if (trigger ()->follow_action (0) == FollowAction::JumpTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
+	}
+
 	_ignore_menu_action = false;
 
 	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
@@ -805,6 +811,8 @@ TriggerUI::follow_action_to_string (FollowAction const & fa)
 		return _("Any");
 	case FollowAction::OtherTrigger:
 		return _("Other");
+	case FollowAction::JumpTrigger:
+		return _("Jump");
 	}
 	/*NOTREACHED*/
 	return std::string();
