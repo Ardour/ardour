@@ -14,7 +14,7 @@
     <Color name="theme:bg2" value="101010ff"/>  <!--ruler base-->
     <Color name="theme:contrasting" value="0xf10000ff"/>  <!--play head-->
     <Color name="theme:contrasting clock" value="4BCD2FFF"/>  <!--clock: text-->
-    <Color name="theme:contrasting less" value="5697B3FF"/>  <!--gtk_bg_tooltip-->
+    <Color name="theme:contrasting less" value="46B357FF"/>  <!--gtk_bg_tooltip-->
     <Color name="theme:contrasting selection" value="5da3c1ff"/>  <!--gtk_bg_selected-->
     <Color name="theme:contrasting alt" value="CCA336ff"/>  <!--delta clock , clock edit-->
     <Color name="neutral:backgroundest" value="000000ff"/>  <!--border color-->
@@ -167,11 +167,11 @@
     <ColorAlias name="latency button: led active" alias="alert:ruddy"/>
     <ColorAlias name="layered button: fill" alias="widget:bg"/>
     <ColorAlias name="layered button: fill active" alias="alert:ruddy"/>
-    <ColorAlias name="location cd marker" alias="alert:cyan"/>
-    <ColorAlias name="location loop" alias="alert:green"/>
-    <ColorAlias name="location marker" alias="theme:contrasting clock"/>
-    <ColorAlias name="location punch" alias="alert:ruddy"/>
-    <ColorAlias name="location range" alias="alert:green"/>
+    <ColorAlias name="location cd marker" alias="theme:contrasting less"/>
+    <ColorAlias name="location loop" alias="theme:contrasting less"/>
+    <ColorAlias name="location marker" alias="theme:contrasting less"/>
+    <ColorAlias name="location punch" alias="widget:ruddy"/>
+    <ColorAlias name="location range" alias="theme:contrasting less"/>
     <ColorAlias name="lock button: fill active" alias="widget:bg"/>
     <ColorAlias name="lock button: led active" alias="alert:red"/>
     <ColorAlias name="lua action button: fill" alias="widget:bg"/>

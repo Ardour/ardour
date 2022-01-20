@@ -366,7 +366,7 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, 
 	cairo_rel_line_to (cr, w2, -h1);
 	cairo_rel_line_to (cr, 0, -h0);
 	cairo_close_path (cr);
-	set_source_rgba (cr, HSV (color).darker (0.35).color ());
+	set_source_rgba (cr, color);
 	cairo_set_line_width (cr, 1.0);
 	cairo_stroke_preserve (cr);
 	cairo_fill (cr);
@@ -375,7 +375,7 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, 
 		rw = x1;
 	} else {
 		cairo_save (cr);
-		set_source_rgba (cr, HSV (color).darker (0.35).color ());
+		set_source_rgba (cr, color);
 		cairo_rectangle (cr, x0-5*scale, y, rw - x0 + 4*scale, h);
 		cairo_fill_preserve (cr);
 		cairo_clip (cr);
@@ -414,7 +414,7 @@ MiniTimeline::draw_cue (cairo_t* cr, int x0, int x1, int cue_index, bool& prelig
 
 	// draw Cue as a circle
 	cairo_arc(cr, x0+h/2, y_offs+h/2, (h/2)-1*scale, 0, 2*M_PI);
-	set_source_rgba (cr, HSV (color).darker (0.35).color ());
+	set_source_rgba (cr, color);
 	cairo_fill (cr);
 
 	//draw cue letter

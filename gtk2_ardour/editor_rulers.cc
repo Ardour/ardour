@@ -178,8 +178,8 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(cue_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(cue_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
 
 	/* 1 event handler to bind them all ... */
@@ -538,6 +538,8 @@ Editor::update_ruler_visibility ()
 		tempo_label.hide();
 	}
 
+	ArdourCanvas::Rectangle *last_marker_bar = 0;
+
 	if (ruler_range_action->get_active()) {
 		old_unit_pos = range_marker_group->position().y;
 		if (tbpos != old_unit_pos) {
@@ -545,6 +547,9 @@ Editor::update_ruler_visibility ()
 		}
 		range_marker_group->show();
 		range_mark_label.show();
+
+		range_marker_bar->set_outline(false);
+		last_marker_bar = range_marker_bar;
 
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
@@ -561,6 +566,10 @@ Editor::update_ruler_visibility ()
 		}
 		transport_marker_group->show();
 		transport_mark_label.show();
+
+		transport_marker_bar->set_outline(false);
+		last_marker_bar = transport_marker_bar;
+
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
@@ -576,6 +585,10 @@ Editor::update_ruler_visibility ()
 		}
 		cd_marker_group->show();
 		cd_mark_label.show();
+
+		cd_marker_bar->set_outline(false);
+		last_marker_bar = cd_marker_bar;
+
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
@@ -588,6 +601,25 @@ Editor::update_ruler_visibility ()
 		update_cd_marker_display();
 	}
 
+	if (ruler_marker_action->get_active()) {
+		old_unit_pos = marker_group->position().y;
+		if (tbpos != old_unit_pos) {
+			marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+		}
+		marker_group->show();
+		mark_label.show();
+
+		marker_bar->set_outline(false);
+		last_marker_bar = marker_bar;
+
+		tbpos += timebar_height;
+		tbgpos += timebar_height;
+		visible_timebars++;
+	} else {
+		marker_group->hide();
+		mark_label.hide();
+	}
+
 	if (ruler_cue_marker_action->get_active()) {
 		old_unit_pos = cue_marker_group->position().y;
 		if (tbpos != old_unit_pos) {
@@ -595,6 +627,10 @@ Editor::update_ruler_visibility ()
 		}
 		cue_marker_group->show();
 		cue_mark_label.show();
+
+		cue_marker_bar->set_outline(false);
+		last_marker_bar = cue_marker_bar;
+
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
@@ -607,19 +643,10 @@ Editor::update_ruler_visibility ()
 		update_cue_marker_display();
 	}
 
-	if (ruler_marker_action->get_active()) {
-		old_unit_pos = marker_group->position().y;
-		if (tbpos != old_unit_pos) {
-			marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		marker_group->show();
-		mark_label.show();
-		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
-	} else {
-		marker_group->hide();
-		mark_label.hide();
+	//the bottom ruler needs a black outline to separate it from the editor canvas
+	if ( last_marker_bar ) {
+		last_marker_bar->set_outline(true);
+		last_marker_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 	}
 
 	if (ruler_video_action->get_active()) {

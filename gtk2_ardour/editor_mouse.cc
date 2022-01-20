@@ -1762,7 +1762,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case CueMarkerBarItem:
 			if (!_dragging_playhead) {
 				/* if we get here then a dragged range wasn't done */
-				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
+				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);  //TODO: force to-measure?
 				mouse_add_new_marker (where, Location::IsCueMarker);
 			}
 			return true;

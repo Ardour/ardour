@@ -123,6 +123,7 @@ Editor::add_new_location_internal (Location* location)
 			group = cd_marker_group;
 		} else if (location->is_cue_marker() && ruler_cue_marker_action->get_active()) {
 			lam->start = new ArdourMarker (*this, *cue_marker_group, color, location->name(), ArdourMarker::Cue, location->start());
+			lam->start->set_cue_index(location->cue_id());
 			group = cue_marker_group;
 		} else {
 			lam->start = new ArdourMarker (*this, *marker_group, color, location->name(), ArdourMarker::Mark, location->start());

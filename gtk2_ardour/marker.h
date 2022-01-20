@@ -34,6 +34,7 @@
 
 #include "canvas/fwd.h"
 #include "canvas/types.h"
+#include "canvas/circle.h"
 
 namespace Temporal {
 	class Point;
@@ -116,6 +117,11 @@ public:
 
 	RegionView* region_view() const { return _region_view; }
 
+	/* this will be -1 for all non-cue markers; or cue_index for cue markers */
+
+	void set_cue_index(int c) { _cue_index = c; set_name(_name); }
+	int cue_index() const { return _cue_index; }
+
 protected:
 	PublicEditor& editor;
 
@@ -123,11 +129,12 @@ protected:
 
 	ArdourCanvas::Item* _parent;
 	ArdourCanvas::Item *group;
-	ArdourCanvas::Polygon *mark;
+	ArdourCanvas::Circle *_pcue;
+	ArdourCanvas::Polygon *_pmark;
 	ArdourCanvas::Text *_name_item;
 	ArdourCanvas::Points *points;
 	ArdourCanvas::Line* _track_canvas_line;
-	ArdourCanvas::Rectangle* _name_background;
+	ArdourCanvas::Rectangle* _name_flag;
 
 	std::string  _name;
 	double        unit_position;
@@ -148,6 +155,8 @@ protected:
 	double       _line_height;
 
 	RegionView*  _region_view;
+
+	int          _cue_index;
 
 	void reposition ();
 	void setup_line_x ();
