@@ -407,6 +407,12 @@ Trigger::set_use_follow_length (bool ufl)
 	_box.session().set_dirty();
 }
 
+bool
+Trigger::internal_use_follow_length () const
+{
+	return (_follow_action0.val().type != None) && _use_follow_length;
+}
+
 void
 Trigger::set_legato (bool yn)
 {
@@ -1055,20 +1061,20 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 	                                              end_by_follow_length, _follow_length, end_by_barcnt, end_by_data_length));
 
 	if (stretching()) {
-		if (_use_follow_length) {
+		if (internal_use_follow_length()) {
 			expected_end_sample = std::min (end_by_follow_length, end_by_barcnt);
 		} else {
 			expected_end_sample = end_by_barcnt;
 		}
 	} else {
-		if (_use_follow_length) {
+		if (internal_use_follow_length()) {
 			expected_end_sample = std::min (end_by_follow_length, end_by_data_length);
 		} else {
 			expected_end_sample = end_by_data_length;
 		}
 	}
 
-	if (_use_follow_length) {
+	if (internal_use_follow_length()) {
 		final_sample = end_by_follow_length - transition_sample;
 	} else {
 		final_sample = expected_end_sample - transition_sample;
@@ -1076,7 +1082,7 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 
 	samplecnt_t usable_length;
 
-	if (_use_follow_length && (end_by_follow_length < end_by_data_length)) {
+	if (internal_use_follow_length() && (end_by_follow_length < end_by_data_length)) {
 		usable_length = tmap->sample_at (tmap->bbt_walk (Temporal::BBT_Time (), _follow_length));
 	} else {
 		usable_length = data.length;
@@ -1752,7 +1758,7 @@ MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap
 
 	Temporal::Beats usable_length;
 
-	if (_use_follow_length && (end_by_follow_length < end_by_data_length)) {
+	if (internal_use_follow_length() && (end_by_follow_length < end_by_data_length)) {
 		usable_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length)) - transition_beats;
 	} else {
 		usable_length = data_length;
@@ -1762,7 +1768,7 @@ MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap
 
 	if (launch_style() != Repeat || (q == Temporal::BBT_Offset())) {
 
-		if (_use_follow_length) {
+		if (internal_use_follow_length()) {
 			final_beat = end_by_follow_length;
 		} else {
 			final_beat = end_by_data_length;

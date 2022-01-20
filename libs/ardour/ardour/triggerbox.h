@@ -324,6 +324,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_region_internal (boost::shared_ptr<Region>);
 	virtual void retrigger() = 0;
 	virtual void _startup (Temporal::BBT_Offset const &);
+
+	bool internal_use_follow_length() const;
 };
 
 typedef boost::shared_ptr<Trigger> TriggerPtr;
