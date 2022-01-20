@@ -285,6 +285,9 @@ public:
         bool resize_queued() const { return _resize_queued; }
         void queue_resize();
 
+	bool scroll_translation() const { return _scroll_translation; }
+	void disable_scroll_translation ();
+
         /* only derived containers need to implement this, but this
            is where they compute the sizes and position and their
            children. A fixed-layout container (i.e. one where every child
@@ -369,7 +372,8 @@ private:
 
 	std::string _tooltip;
 	bool _ignore_events;
-
+	bool _scroll_translation;
+	
 	void find_scroll_parent ();
 	void propagate_show_hide ();
 };

@@ -92,7 +92,7 @@ public:
 	virtual void unfocus (Item*) = 0;
 
 	virtual bool have_grab() const { return false; }
-	virtual bool check_grabbed_item_inside (Item*) const { return false; }
+	virtual bool grab_can_translate () const { return true; }
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context> const &) const;
 
@@ -218,7 +218,7 @@ public:
 	void unfocus (Item*);
 
 	bool have_grab() const { return _grabbed_item; }
-	bool check_grabbed_item_inside (Item*) const;
+	bool grab_can_translate () const;
 
 	Rect visible_area () const;
 	Coord width() const;

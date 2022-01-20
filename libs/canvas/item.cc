@@ -49,6 +49,7 @@ Item::Item (Canvas* canvas)
 	, _requested_width (-1)
 	, _requested_height (-1)
 	, _ignore_events (false)
+	, _scroll_translation (true)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 }
@@ -68,6 +69,7 @@ Item::Item (Item* parent)
 	, _requested_width (-1)
 	, _requested_height (-1)
 	, _ignore_events (false)
+	, _scroll_translation (true)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
@@ -1341,4 +1343,10 @@ Item::set_pack_options (PackOptions po)
 {
 	/* must be called before adding/packing Item in a Container */
 	_pack_options = po;
+}
+
+void
+Item::disable_scroll_translation ()
+{
+	_scroll_translation = false;
 }
