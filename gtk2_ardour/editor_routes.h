@@ -26,13 +26,20 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treestore.h>
+#include <gtkmm/treeview.h>
 
+#include "pbd/properties.h"
 #include "pbd/signals.h"
+
+#include "ardour/route.h"
+#include "ardour/session_handle.h"
+#include "ardour/types.h"
+
 #include "gtkmm2ext/widget_state.h"
 
 #include "editor_component.h"
 
-class VCATimeAxisView;
+class TimeAxisView;
 
 class EditorRoutes : public EditorComponent, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
@@ -86,7 +93,6 @@ private:
 	void on_tv_solo_isolate_toggled (std::string const &);
 	void on_tv_solo_safe_toggled (std::string const &);
 	void build_menu ();
-	void presentation_info_changed (PBD::PropertyChange const &);
 	void row_deleted (Gtk::TreeModel::Path const &);
 	void visible_changed (std::string const &);
 	void trigger_changed (std::string const &);
@@ -197,7 +203,7 @@ private:
 	bool _redisplay_on_resume;
 	bool _idle_update_queued;
 
-	volatile int _redisplay_active;
+	int _redisplay_active;
 
 	Gtk::Menu* _menu;
 	Gtk::Widget* old_focus;
