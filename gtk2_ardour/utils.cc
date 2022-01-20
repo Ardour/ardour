@@ -890,7 +890,10 @@ ARDOUR_UI_UTILS::convert_drop_to_paths (vector<string>& paths, const SelectionDa
 		 */
 		string txt = data.get_text();
 
-		char* p = (char *) malloc (txt.length() + 1);
+		/* copy to char* for easy char-wise checks and modification */
+		char* tmp = (char *) malloc (txt.length() + 1);
+		char* p   = tmp;
+
 		txt.copy (p, txt.length(), 0);
 		p[txt.length()] = '\0';
 
@@ -922,7 +925,7 @@ ARDOUR_UI_UTILS::convert_drop_to_paths (vector<string>& paths, const SelectionDa
 			}
 		}
 
-		free ((void*)p);
+		free ((void*)tmp);
 
 		if (uris.empty()) {
 			return false;
