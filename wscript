@@ -807,8 +807,8 @@ def options(opt):
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
                     help='Compile without support for AU Plugins with only CARBON UI (needed for 64bit)')
-    opt.add_option('--no-compile-database', action='store_true', default=False, dest='clang_compile_db',
-                    help='Do not call clang_compilation_database to write compile_commands.json prior to build')
+    opt.add_option('--compile-database', action='store_true', default=False, dest='clang_compile_db',
+                    help='Enable clang_compilation_database to write compile_commands.json prior to build')
     opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
                     help='Compile with Boost shared pointer debugging')
     opt.add_option('--debug-symbols', action='store_true', default=False, dest='debug_symbols',
@@ -937,7 +937,7 @@ def configure(conf):
     conf.load('compiler_cxx')
     if Options.options.dist_target == 'mingw':
         conf.load('winres')
-    elif not Options.options.clang_compile_db:
+    elif Options.options.clang_compile_db:
         conf.load('clang_compilation_database')
 
     if Options.options.dist_target == 'msvc':
