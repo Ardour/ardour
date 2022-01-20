@@ -703,6 +703,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		transition_samples = start_sample;
 		transition_beats = start;
 		transition_time = timepos_t (start);
+		transition_bbt = tmap->bbt_at (transition_beats);
 	} else if (q.bars == 0) {
 		Temporal::Beats transition_beats = start.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks));
 		transition_bbt = tmap->bbt_at (transition_beats);
