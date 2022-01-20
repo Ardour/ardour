@@ -144,6 +144,7 @@ AudioClipEditor::AudioClipEditor ()
 	scroll_bar_handle->set_outline (false);
 	scroll_bar_handle->set_corner_radius (5.);
 	scroll_bar_handle->Event.connect (sigc::mem_fun (*this, &AudioClipEditor::scroll_event_handler));
+	scroll_bar_handle->disable_scroll_translation ();
 
 	/* A scrolling container for our waves and lines etc. */
 
