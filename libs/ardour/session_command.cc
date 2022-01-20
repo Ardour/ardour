@@ -147,6 +147,10 @@ Session::memento_command_factory(XMLNode *n)
     /* we failed */
     info << string_compose (_("Could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), type_name, id.to_s()) << endmsg;
 
+    delete after;
+    delete before;
+    delete child;
+
     return 0 ;
 }
 
