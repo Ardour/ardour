@@ -1476,6 +1476,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	clear_clicks();
 	unset_preroll_record_trim ();
+	flush_cue_recording ();
 
 	/* do this before seeking, because otherwise the tracks will do the wrong thing in seamless loop mode.
 	*/
@@ -2078,4 +2079,27 @@ Session::actual_speed() const
 	if (_transport_fsm->transport_speed() > 0) return _engine_speed;
 	if (_transport_fsm->transport_speed() < 0) return - _engine_speed;
 	return 0;
+}
+
+void
+Session::flush_cue_recording ()
+{
+	CueRecord cr;
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
+	while (TriggerBox::cue_records.read (&cr, 1) == 1) {
+		BBT_Time bbt = tmap->bbt_at (timepos_t (cr.when));
+		bbt = bbt.round_up_to_bar ();
+
+		timepos_t when;
+
+		if (tmap->time_domain() == Temporal::AudioTime) {
+			when = timepos_t (tmap->sample_at (bbt));
+		} else {
+			when = timepos_t (tmap->quarters_at (bbt));
+		}
+
+		Location* l = new Location (*this, when, when, std::string(), Location::Flags (Location::IsMark|Location::IsCueMarker), cr.cue_number);
+		_locations->add (l);
+	}
 }

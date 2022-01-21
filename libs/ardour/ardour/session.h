@@ -1876,6 +1876,7 @@ private:
 	void set_track_loop (bool);
 	bool select_playhead_priority_target (samplepos_t&);
 	void follow_playhead_priority ();
+	void flush_cue_recording ();
 
 	/* These are synchronous and so can only be called from within the process
 	 * cycle
