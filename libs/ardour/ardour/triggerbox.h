@@ -522,12 +522,20 @@ class LIBARDOUR_API TriggerBoxThread
 	void delete_trigger (Trigger*);
 };
 
+struct CueRecord {
+	int32_t cue_number;
+	timepos_t when;
+};
+
+typedef PBD::RingBuffer<CueRecord> CueRecords;
 
 class LIBARDOUR_API TriggerBox : public Processor
 {
   public:
 	TriggerBox (Session&, DataType dt);
 	~TriggerBox ();
+
+	static CueRecords cue_records;
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
