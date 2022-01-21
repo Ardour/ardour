@@ -74,6 +74,9 @@ private:
 	void pi_property_changed (PBD::PropertyChange const&);
 	void stripable_property_changed (PBD::PropertyChange const&, boost::weak_ptr<ARDOUR::Stripable>);
 
+	void rec_state_changed ();
+	void rec_state_clicked ();
+
 	void add_sidebar_page (std::string const&, Gtk::Widget&);
 
 	bool no_strip_button_event (GdkEventButton*);
@@ -111,6 +114,7 @@ private:
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
 	CueMaster          _master;
+	ArdourWidgets::ArdourButton  _cue_rec_enable;
 
 	SlotPropertiesBox _slot_prop_box;
 

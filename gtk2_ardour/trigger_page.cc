@@ -84,6 +84,7 @@ TriggerPage::TriggerPage ()
 	_cue_area_box.pack_start (*spacer, Gtk::PACK_SHRINK);
 	_cue_area_box.pack_start (_cue_box, Gtk::PACK_SHRINK);
 	_cue_area_box.pack_start (_master_widget, Gtk::PACK_SHRINK);
+	_cue_area_box.pack_start (_cue_rec_enable, Gtk::PACK_SHRINK);
 
 	/* left-side frame, same layout as TriggerStrip.
 	 * use Alignment instead of Frame with SHADOW_IN (2px)
@@ -286,6 +287,10 @@ TriggerPage::set_session (Session* s)
 
 	Editor::instance ().get_selection ().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerPage::selection_changed));
 
+	TriggerBox::CueRecordingChanged.connect (_session_connections, invalidator (*this), boost::bind (&TriggerPage::rec_state_changed, this), gui_context ());
+	rec_state_changed();
+	_cue_rec_enable.signal_clicked.connect(sigc::mem_fun(*this, &TriggerPage::rec_state_clicked));
+
 	initial_track_display ();
 
 	_slot_prop_box.set_session (s);
@@ -479,6 +484,18 @@ TriggerPage::redisplay_track_list ()
 			_strip_packer.pack_start (*strip, false, false);
 		}
 	}
+}
+
+void
+TriggerPage::rec_state_clicked ()
+{
+	TriggerBox::set_cue_recording(!TriggerBox::cue_recording());
+}
+
+void
+TriggerPage::rec_state_changed ()
+{
+	_cue_rec_enable.set_active_state( TriggerBox::cue_recording() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
 void
