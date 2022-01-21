@@ -1040,24 +1040,39 @@ Editor::build_marker_menu (Location* loc)
 	MenuList& items = marker_menu->items();
 	marker_menu->set_name ("ArdourContextMenu");
 
+	if (loc->is_cue_marker()) {
+		Menu *cues_menu = manage (new Menu());
+		MenuList& cue_items (cues_menu->items());
+		for (int32_t n = 0; n < default_triggers_per_box; ++n) {
+			/* XXX the "letter" names of the cues need to be subject to i18n somehow */
+			cue_items.push_back (MenuElem (string_compose (_("%1"), (char) ('A' + n)), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_change_cue), n)));
+		}
+		items.push_back (Menu_Helpers::MenuElem ("Set Cue:", *cues_menu));
+		/* TODO: tweak marker_menu_range_to_next to make a range between 2 Cues? */
+
+		items.push_back (SeparatorElem());
+	}
+
 	items.push_back (MenuElem (_("Locate to Here"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
 	items.push_back (MenuElem (_("Play from Here"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
 	items.push_back (MenuElem (_("Move Mark to Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Create Range to Next Marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
+	if (!loc->is_cue_marker()) {
+		items.push_back (MenuElem (_("Create Range to Next Marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
 
-	items.push_back (MenuElem (_("Promote to Time Origin"), sigc::mem_fun(*this, &Editor::marker_menu_set_origin)));
-	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
-	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
+		items.push_back (MenuElem (_("Promote to Time Origin"), sigc::mem_fun(*this, &Editor::marker_menu_set_origin)));
+		items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
+		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
 
-	items.push_back (CheckMenuElem (_("Lock")));
-	Gtk::CheckMenuItem* lock_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
-	if (loc->locked ()) {
-		lock_item->set_active ();
+		items.push_back (CheckMenuElem (_("Lock")));
+		Gtk::CheckMenuItem* lock_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
+		if (loc->locked ()) {
+			lock_item->set_active ();
+		}
+		lock_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_lock));
 	}
-	lock_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_lock));
 
 	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
 	Gtk::CheckMenuItem* glue_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
@@ -1339,6 +1354,31 @@ Editor::marker_menu_set_playhead ()
 				_session->request_locate (l->end_sample(), MustStop);
 			}
 		}
+	}
+}
+
+void
+Editor::marker_menu_change_cue (int n)
+{
+	ArdourMarker* marker;
+	if (!_session) {
+		return;
+	}
+
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	Location* loc;
+	bool is_start;
+
+	if ((loc = find_location_from_marker (marker, is_start)) == 0) {
+		return;
+	}
+
+	if (loc->is_cue_marker()) {
+		loc->set_cue_id(n);
 	}
 }
 

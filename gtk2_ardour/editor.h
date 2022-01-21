@@ -1813,6 +1813,7 @@ private:
 	void marker_menu_set_from_playhead ();
 	void marker_menu_set_from_selection (bool force_regions);
 	void marker_menu_range_to_next ();
+	void marker_menu_change_cue (int cue);
 	void marker_menu_zoom_to_range ();
 	void new_transport_marker_menu_set_loop ();
 	void new_transport_marker_menu_set_punch ();
