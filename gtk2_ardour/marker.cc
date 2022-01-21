@@ -187,7 +187,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 
 		_shift = 3 * scale;
-		_label_offset = 4.0 * scale;
+		_label_offset = 8.0 * scale;
 		break;
 
 	case Tempo:
