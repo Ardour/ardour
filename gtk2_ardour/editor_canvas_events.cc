@@ -984,12 +984,12 @@ Editor::canvas_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 	switch (event->type) {
 		case GDK_ENTER_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				marker_bar->set_fill_color (0xFFFFFF20);
+				marker_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color ("marker bar")).lighter(0.5).color());
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				marker_bar->set_fill_color (0);
+				marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
 			}
 			break;
 		default:
@@ -1005,12 +1005,12 @@ Editor::canvas_range_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item
 	switch (event->type) {
 		case GDK_ENTER_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				range_marker_bar->set_fill_color (0xFFFFFF20);
+				range_marker_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color ("marker bar")).lighter(0.5).color());
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				range_marker_bar->set_fill_color (0);
+				range_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
 			}
 			break;
 		default:
@@ -1026,12 +1026,12 @@ Editor::canvas_transport_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* 
 	switch (event->type) {
 		case GDK_ENTER_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				transport_marker_bar->set_fill_color (0xFFFFFF20);
+				transport_marker_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color ("marker bar")).lighter(0.5).color());
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				transport_marker_bar->set_fill_color (0);
+				transport_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
 			}
 			break;
 		default:
@@ -1047,12 +1047,12 @@ Editor::canvas_cd_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 	switch (event->type) {
 		case GDK_ENTER_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				cd_marker_bar->set_fill_color (0xFFFFFF20);  //TODO:  theme these
+				cd_marker_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color ("marker bar")).lighter(0.25).color());
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				cd_marker_bar->set_fill_color (0);
+				cd_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
 			}
 			break;
 		default:
@@ -1068,12 +1068,12 @@ Editor::canvas_cue_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 	switch (event->type) {
 		case GDK_ENTER_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				cue_marker_bar->set_fill_color (0xFFFFFF20);
+				cue_marker_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color ("marker bar")).lighter(0.5).color());
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				cue_marker_bar->set_fill_color (0);
+				cue_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
 			}
 			break;
 		default:
@@ -1177,12 +1177,12 @@ Editor::canvas_tempo_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 	switch (event->type) {
 		case GDK_ENTER_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				tempo_bar->set_fill_color (0xFFFFFF20);  //TODO:  theme these
+				tempo_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color ("marker bar")).lighter(0.25).color());
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				tempo_bar->set_fill_color (0);
+				tempo_bar->set_fill_color (UIConfiguration::instance().color_mod ("tempo bar", "marker bar"));
 			}
 			break;
 		default:
@@ -1198,12 +1198,12 @@ Editor::canvas_meter_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 	switch (event->type) {
 		case GDK_ENTER_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				meter_bar->set_fill_color (0xFFFFFF20);  //TODO:  theme these
+				meter_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color ("marker bar")).lighter(0.25).color());
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				meter_bar->set_fill_color (0);
+				meter_bar->set_fill_color (UIConfiguration::instance().color_mod ("meter bar", "marker bar"));
 			}
 			break;
 		default:

@@ -170,6 +170,9 @@ Editor::initialize_canvas ()
 
 	tempo_bar = new ArdourCanvas::Rectangle (tempo_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
 	CANVAS_DEBUG_NAME (tempo_bar, "Tempo  Bar");
+	tempo_bar->set_fill(true);
+	tempo_bar->set_outline(false);
+	tempo_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
@@ -1026,14 +1029,25 @@ Editor::color_handler()
 
 	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
 
-	//these have no color (transparent) until moused-over
-	meter_bar->set_fill_color (0);
-	tempo_bar->set_fill_color (0);
-	cd_marker_bar->set_fill_color (0);
-	cue_marker_bar->set_fill_color (0);
-	range_marker_bar->set_fill_color (0);
-	marker_bar->set_fill_color (0);
-	transport_marker_bar->set_fill_color (0);
+	meter_bar->set_fill_color (UIConfiguration::instance().color_mod ("meter bar", "marker bar"));
+	meter_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
+
+	tempo_bar->set_fill_color (UIConfiguration::instance().color_mod ("tempo bar", "marker bar"));
+
+	marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("marker bar", "marker bar"));
+	marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
+
+	cd_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("cd marker bar", "marker bar"));
+	cd_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
+
+	cue_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("cd marker bar", "marker bar"));
+	cue_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
+
+	range_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
+	range_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
+
+	transport_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("transport marker bar", "marker bar"));
+	transport_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
 	cd_marker_bar_drag_rect->set_fill_color (UIConfiguration::instance().color ("range drag bar rect"));
 	cd_marker_bar_drag_rect->set_outline_color (UIConfiguration::instance().color ("range drag bar rect"));
