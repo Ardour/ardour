@@ -524,7 +524,10 @@ class LIBARDOUR_API TriggerBoxThread
 
 struct CueRecord {
 	int32_t cue_number;
-	timepos_t when;
+	samplepos_t when;
+
+	CueRecord (int32_t cn, samplepos_t t): cue_number (cn), when (t) {}
+	CueRecord () : cue_number (0), when (0) {}
 };
 
 typedef PBD::RingBuffer<CueRecord> CueRecords;

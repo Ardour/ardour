@@ -1671,6 +1671,12 @@ Session::maybe_find_pending_cue ()
 	int32_t ac = _pending_cue.exchange (-1);
 	if (ac >= 0) {
 		_active_cue.store (ac);
+
+		if (TriggerBox::cue_recording()) {
+			CueRecord cr (ac, _transport_sample);
+			TriggerBox::cue_records.write (&cr, 1);
+			/* failure is acceptable, but unlikely */
+		}
 	}
 }
 
