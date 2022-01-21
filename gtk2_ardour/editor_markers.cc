@@ -180,7 +180,7 @@ Editor::add_new_location_internal (Location* location)
 		lam->show ();
 	}
 
-	location->name_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
+	location->NameChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, location), gui_context());
 	location->TimeDomainChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, location), gui_context());
 	location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, location), gui_context());
 
