@@ -79,8 +79,6 @@ TriggerUI::TriggerUI ()
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::None)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::Stop)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::Again)));
-		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::NextTrigger)));
-		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::PrevTrigger)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::ForwardTrigger)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::ReverseTrigger)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::FirstTrigger)));
@@ -603,15 +601,6 @@ TriggerUI::follow_context_menu ()
 	if (trigger ()->follow_action (0) == FollowAction::Again) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::PrevTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::PrevTrigger))));
-	if (trigger ()->follow_action (0) == FollowAction::PrevTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::NextTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::NextTrigger))));
-	if (trigger ()->follow_action (0) == FollowAction::NextTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-
 	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::ForwardTrigger))));
 	if (trigger ()->follow_action (0) == FollowAction::ForwardTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
@@ -786,10 +775,6 @@ TriggerUI::follow_action_to_string (FollowAction const & fa)
 		return _("Stop");
 	case FollowAction::Again:
 		return _("Again");
-	case FollowAction::NextTrigger:
-		return _("Next");
-	case FollowAction::PrevTrigger:
-		return _("Prev");
 	case FollowAction::ForwardTrigger:
 		return _("Forward");
 	case FollowAction::ReverseTrigger:

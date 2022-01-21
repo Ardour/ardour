@@ -210,20 +210,6 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, FollowAct
 			context->arc (size / 2 + size * 0.2, size / 2, 1.5 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
 			break;
-		case FollowAction::NextTrigger:
-			context->move_to (size / 2, 3 * scale);
-			context->line_to (size / 2, size - 5 * scale);
-			context->stroke ();
-			context->arc (size / 2, size - 5 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
-			context->fill ();
-			break;
-		case FollowAction::PrevTrigger:
-			context->move_to (size / 2, 5 * scale);
-			context->line_to (size / 2, size - 3 * scale);
-			context->stroke ();
-			context->arc (size / 2, 5 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
-			context->fill ();
-			break;
 		case FollowAction::ForwardTrigger:
 			context->move_to (size / 2, 3 * scale);
 			context->line_to (size / 2, size - 3 * scale);
