@@ -980,6 +980,18 @@ Locations::add (Location *loc, bool make_current)
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
+
+		/* Do not allow multiple cue markers in the same location */
+
+		if (loc->is_cue_marker()) {
+			for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
+				if ((*i)->is_cue_marker() && (*i)->start() == loc->start()) {
+					locations.erase (i);
+					break;
+				}
+			}
+		}
+
 		locations.push_back (loc);
 
 		if (make_current) {
