@@ -2184,6 +2184,8 @@ int TriggerBox::_first_midi_note = 60;
 std::atomic<int> TriggerBox::active_trigger_boxes (0);
 TriggerBoxThread* TriggerBox::worker = 0;
 CueRecords TriggerBox::cue_records (256);
+std::atomic<bool> TriggerBox::_cue_recording (false);
+PBD::Signal0<void> TriggerBox::CueRecordingChanged;
 
 void
 TriggerBox::init ()
@@ -2223,6 +2225,15 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	}
 
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
+}
+
+void
+TriggerBox::set_cue_recording (bool yn)
+{
+	if (yn != _cue_recording) {
+		_cue_recording = yn;
+		CueRecordingChanged ();
+	}
 }
 
 void

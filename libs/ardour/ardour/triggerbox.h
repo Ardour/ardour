@@ -536,6 +536,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 	~TriggerBox ();
 
 	static CueRecords cue_records;
+	static bool cue_recording () { return _cue_recording; }
+	static void set_cue_recording (bool yn);
+	static PBD::Signal0<void> CueRecordingChanged;
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
@@ -706,6 +709,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void init_pool();
 
 	static std::atomic<int> active_trigger_boxes;
+	static std::atomic<bool> _cue_recording;
 };
 
 class TriggerReference
