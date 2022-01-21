@@ -866,8 +866,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (FollowAction, ReverseTrigger);
 	REGISTER_CLASS_ENUM (FollowAction, FirstTrigger);
 	REGISTER_CLASS_ENUM (FollowAction, LastTrigger);
-	REGISTER_CLASS_ENUM (FollowAction, AnyTrigger);
-	REGISTER_CLASS_ENUM (FollowAction, OtherTrigger);
 	REGISTER_CLASS_ENUM (FollowAction, JumpTrigger);
 	REGISTER (_FollowAction);
 

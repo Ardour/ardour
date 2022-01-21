@@ -831,8 +831,6 @@ struct FollowAction {
 		ReverseTrigger, /* any "prev" skipping empties */
 		FirstTrigger,
 		LastTrigger,
-		AnyTrigger,
-		OtherTrigger,
 		JumpTrigger,
 	};
 

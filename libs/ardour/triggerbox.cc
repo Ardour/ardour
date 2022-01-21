@@ -3117,36 +3117,6 @@ TriggerBox::determine_next_trigger (uint32_t current)
 		}
 		break;
 
-	case FollowAction::AnyTrigger:
-		while (true) {
-			n = _pcg.rand (all_triggers.size());
-			if (!all_triggers[n]->region()) {
-				continue;
-			}
-			if (all_triggers[n]->active()) {
-				continue;
-			}
-			break;
-		}
-		return n;
-
-
-	case FollowAction::OtherTrigger:
-		while (true) {
-			n = _pcg.rand (all_triggers.size());
-			if ((uint32_t) n == current) {
-				continue;
-			}
-			if (!all_triggers[n]->region()) {
-				continue;
-			}
-			if (all_triggers[n]->active()) {
-				continue;
-			}
-			break;
-		}
-		return n;
-
 	case FollowAction::JumpTrigger:
 		for (std::size_t n = 0; n < default_triggers_per_box; ++n) {
 			if (fa.targets.test (n) && all_triggers[n]->region()) {
