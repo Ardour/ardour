@@ -393,7 +393,6 @@ TriggerMaster::context_menu ()
 		_ignore_menu_action = false;
 	}
 
-	items.push_back (MenuElem (_("Enable/Disable..."), sigc::mem_fun (*this, &TriggerMaster::maybe_update))); // TODO
 	items.push_back (MenuElem (_("Set All Follow Actions..."), *follow_menu));
 	items.push_back (MenuElem (_("Set All Launch Styles..."), *launch_menu));
 	items.push_back (MenuElem (_("Set All Quantizations..."), *quant_menu));
