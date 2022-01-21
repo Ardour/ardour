@@ -249,7 +249,14 @@ CueBoxUI::context_menu (uint64_t idx)
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::Again), idx)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::ReverseTrigger), idx)));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::ForwardTrigger), idx)));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::JumpTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::JumpTrigger), idx)));
+		Menu*     jump_menu = manage (new Menu);
+		MenuList& jitems      = jump_menu->items ();
+		for (int i = 0; i < default_triggers_per_box; i++) {
+			FollowAction jump_fa = (FollowAction::JumpTrigger);
+			jump_fa.targets.set(i);
+			jitems.push_back (MenuElem (string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), jump_fa, idx)));
+		}
+	fitems.push_back (MenuElem (_("Jump..."), *jump_menu));
 
 	Menu*     launch_menu = manage (new Menu);
 	MenuList& litems      = launch_menu->items ();
