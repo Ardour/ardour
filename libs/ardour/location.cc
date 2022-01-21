@@ -441,7 +441,8 @@ Location::set_cue_id (int32_t cue_id)
 	}
 	if (_cue != cue_id) {
 		_cue = cue_id;
-		cue_change (this);
+		cue_change (this); /* EMIT SIGNAL */
+		CueChanged  (); /* EMIT SIGNAL */
 	}
 }
 

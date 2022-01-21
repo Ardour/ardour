@@ -148,6 +148,7 @@ public:
 	PBD::Signal0<void> Changed;
 
 	PBD::Signal0<void> NameChanged;
+	PBD::Signal0<void> CueChanged;
 	PBD::Signal0<void> EndChanged;
 	PBD::Signal0<void> StartChanged;
 	PBD::Signal0<void> FlagsChanged;
