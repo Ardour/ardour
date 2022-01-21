@@ -827,8 +827,6 @@ struct FollowAction {
 		None,
 		Stop,
 		Again,
-		NextTrigger,   /* Live-style, and below */
-		PrevTrigger,
 		ForwardTrigger, /* any "next" skipping empties */
 		ReverseTrigger, /* any "prev" skipping empties */
 		FirstTrigger,

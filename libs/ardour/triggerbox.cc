@@ -3062,25 +3062,6 @@ TriggerBox::determine_next_trigger (uint32_t current)
 	case FollowAction::Again:
 		return current;
 
-
-	case FollowAction::NextTrigger:
-		n = current + 1;
-		if (n < all_triggers.size()) {
-			if (all_triggers[n]->region()) {
-				return n;
-			}
-		}
-		break;
-
-	case FollowAction::PrevTrigger:
-		if (current > 0) {
-			n = current - 1;
-			if (all_triggers[n]->region()) {
-				return n;
-			}
-		}
-		break;
-
 	case FollowAction::ForwardTrigger:
 		n = current;
 		while (true) {
