@@ -14,7 +14,7 @@
     <Color name="theme:bg2" value="101010ff"/>  <!--ruler base-->
     <Color name="theme:contrasting" value="0xf10000ff"/>  <!--play head-->
     <Color name="theme:contrasting clock" value="4BCD2FFF"/>  <!--clock: text-->
-    <Color name="theme:contrasting less" value="46B357FF"/>  <!--gtk_bg_tooltip-->
+    <Color name="theme:contrasting less" value="46B357FF"/>
     <Color name="theme:contrasting selection" value="5da3c1ff"/>  <!--gtk_bg_selected-->
     <Color name="theme:contrasting alt" value="CCA336ff"/>  <!--delta clock , clock edit-->
     <Color name="neutral:backgroundest" value="000000ff"/>  <!--border color-->
@@ -119,7 +119,7 @@
     <ColorAlias name="gtk_background" alias="theme:bg"/>
     <ColorAlias name="gtk_bases" alias="theme:bg2"/>
     <ColorAlias name="gtk_bg_selected" alias="theme:contrasting selection"/>
-    <ColorAlias name="gtk_bg_tooltip" alias="theme:contrasting less"/>
+    <ColorAlias name="gtk_bg_tooltip" alias="neutral:backgroundest"/>
     <ColorAlias name="gtk_bright_color" alias="widget:blue"/>
     <ColorAlias name="gtk_bright_indicator" alias="alert:red"/>
     <ColorAlias name="gtk_clip_indicator" alias="alert:red"/>
@@ -130,7 +130,7 @@
     <ColorAlias name="gtk_darkest" alias="theme:bg2"/>
     <ColorAlias name="gtk_entry_cursor" alias="alert:red"/>
     <ColorAlias name="gtk_fg_selected" alias="theme:bg2"/>
-    <ColorAlias name="gtk_fg_tooltip" alias="neutral:background"/>
+    <ColorAlias name="gtk_fg_tooltip" alias="neutral:foreground"/>
     <ColorAlias name="gtk_foldback_bg" alias="theme:bg1"/>
     <ColorAlias name="gtk_foreground" alias="neutral:foreground"/>
     <ColorAlias name="gtk_light_text_on_dark" alias="neutral:foreground2"/>
