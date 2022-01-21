@@ -966,7 +966,13 @@ TriggerBoxUI::slot_at_y (int y) const
 bool
 TriggerBoxUI::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int, int y, guint time)
 {
-	bool can_drop = PublicEditor::instance ().pbdid_dragged_dt == _triggerbox.data_type ();
+	bool can_drop = true;
+	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
+	std::string target = gtkcanvas->drag_dest_find_target (context, gtkcanvas->drag_dest_get_target_list ());
+
+	if (target == "x-ardour/region.pbdid") {
+		can_drop = PublicEditor::instance ().pbdid_dragged_dt == _triggerbox.data_type ();
+	}
 
 	uint64_t n = slot_at_y (y);
 	if (n >= _slots.size ()) {
