@@ -3042,21 +3042,15 @@ TriggerBox::determine_next_trigger (uint32_t current)
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("choose next trigger using follow action %1 given prob %2 and rnd %3\n", fa.to_string(), all_triggers[current]->follow_action_probability(), r));
 
-	switch (fa.type) {
-
-	case FollowAction::Stop:
+	if (fa.type == FollowAction::Stop) {
 		return -1;
+	}
 
-	case FollowAction::QueuedTrigger:
-		/* XXX implement me */
-		return -1;
-	default:
-		if (runnable == 1) {
-			/* there's only 1 runnable trigger, so the "next" one
-			   is the same as the current one.
-			*/
-			return current;
-		}
+	if (runnable == 1) {
+		/* there's only 1 runnable trigger, so the "next" one
+		   is the same as the current one.
+		*/
+		return current;
 	}
 
 	/* second switch: handle the "real" follow actions */
@@ -3186,7 +3180,6 @@ TriggerBox::determine_next_trigger (uint32_t current)
 
 	/* NOTREACHED */
 	case FollowAction::Stop:
-	case FollowAction::QueuedTrigger:
 		break;
 
 	}

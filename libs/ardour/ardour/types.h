@@ -827,7 +827,6 @@ struct FollowAction {
 		None,
 		Stop,
 		Again,
-		QueuedTrigger, /* DP-style */
 		NextTrigger,   /* Live-style, and below */
 		PrevTrigger,
 		ForwardTrigger, /* any "next" skipping empties */
