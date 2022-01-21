@@ -2724,10 +2724,12 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		_sidechain->run (bufs, start_sample, end_sample, speed, nframes, true);
 	}
 
-	int32_t cue_bang = _session.first_cue_within (start_sample, end_sample);
-	if (cue_bang >= 0) {
-		std::cerr << " CUE BANG " << cue_bang << std::endl;
-		_active_scene = cue_bang;
+	if (!_cue_recording) {
+		int32_t cue_bang = _session.first_cue_within (start_sample, end_sample);
+		if (cue_bang >= 0) {
+			std::cerr << " CUE BANG " << cue_bang << std::endl;
+			_active_scene = cue_bang;
+		}
 	}
 
 	/* STEP SIX: if at this point there is an active cue, make it trigger
