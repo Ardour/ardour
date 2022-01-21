@@ -79,7 +79,6 @@ TriggerUI::TriggerUI ()
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::None)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::Stop)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::Again)));
-		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::QueuedTrigger)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::NextTrigger)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::PrevTrigger)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::ForwardTrigger)));
@@ -604,12 +603,6 @@ TriggerUI::follow_context_menu ()
 	if (trigger ()->follow_action (0) == FollowAction::Again) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
-#if QUEUED_SLOTS_IMPLEMENTED
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::QueuedTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::QueuedTrigger))));
-	if (trigger ()->follow_action (0) == FollowAction::QueuedTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-#endif
 	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::PrevTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::PrevTrigger))));
 	if (trigger ()->follow_action (0) == FollowAction::PrevTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
@@ -793,8 +786,6 @@ TriggerUI::follow_action_to_string (FollowAction const & fa)
 		return _("Stop");
 	case FollowAction::Again:
 		return _("Again");
-	case FollowAction::QueuedTrigger:
-		return _("Queued");
 	case FollowAction::NextTrigger:
 		return _("Next");
 	case FollowAction::PrevTrigger:

@@ -259,16 +259,6 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, FollowAct
 			context->fill ();
 
 			break;
-		case FollowAction::QueuedTrigger: {
-			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
-			layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
-			layout->set_text (icon == FollowAction::AnyTrigger ? "&" : "@");
-			int tw, th;
-			layout->get_pixel_size (tw, th);
-			context->move_to (size / 2, size / 2);
-			context->rel_move_to (-tw / 2, -th / 2);
-			layout->show_in_cairo_context (context);
-		} break;
 		case FollowAction::AnyTrigger: {
 			for (int i = 0; i < 6; i++) {
 				Cairo::Matrix m = context->get_matrix ();
