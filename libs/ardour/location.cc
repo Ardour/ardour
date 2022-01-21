@@ -1381,7 +1381,7 @@ Locations::marks_either_side (timepos_t const & pos, timepos_t& before, timepos_
 	std::list<timepos_t> positions;
 
 	for (LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
-		if (((*i)->is_auto_loop() || (*i)->is_auto_punch()) || (*i)->is_xrun()) {
+		if (((*i)->is_auto_loop() || (*i)->is_auto_punch()) || (*i)->is_xrun() || (*i)->is_cue_marker()) {
 			continue;
 		}
 
