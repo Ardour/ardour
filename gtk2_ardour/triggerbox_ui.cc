@@ -212,53 +212,60 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, FollowAct
 			break;
 		case FollowAction::ForwardTrigger:
 			context->move_to (size / 2, 3 * scale);
-			context->line_to (size / 2, size - 3 * scale);
+			context->line_to (size / 2, size - 5 * scale);
 			context->stroke ();
-
-			context->arc (size / 2, 7 * scale, 2 * scale, 0, 2 * M_PI);
-			set_source_rgba (context, fg_color);
-			context->fill ();
-
-			context->arc (size / 2, 7 * scale, 1 * scale, 0, 2 * M_PI);
-			set_source_rgba (context, fill_color ());
-			context->fill ();
-
-			set_source_rgba (context, fg_color);
-			context->arc (size / 2, size - 3 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
+			context->arc (size / 2, size - 5 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
 			break;
 		case FollowAction::ReverseTrigger:
-			context->arc (size / 2, 3 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
-			set_source_rgba (context, fg_color);
-			context->fill ();
-
-			context->move_to (size / 2, 3 * scale);
+			context->move_to (size / 2, 5 * scale);
 			context->line_to (size / 2, size - 3 * scale);
 			context->stroke ();
-
-			context->arc (size / 2, size - 7 * scale, 2 * scale, 0, 2 * M_PI);
-			set_source_rgba (context, fg_color);
+			context->arc (size / 2, 5 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
 			context->fill ();
-
-			context->arc (size / 2, size - 7 * scale, 1 * scale, 0, 2 * M_PI);
-			set_source_rgba (context, bg_color);
-			context->fill ();
-
 			break;
-			/* ben: new shape here ? */
 		case FollowAction::JumpTrigger: {
-			context->set_line_width (1.5 * scale);
-			set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); // needs to be brighter to maintain balance
-			for (int i = 0; i < 6; i++) {
-				Cairo::Matrix m = context->get_matrix ();
-				context->translate (size / 2, size / 2);
-				context->rotate (i * M_PI / 3);
-				context->move_to (0, 2 * scale);
-				context->line_to (0, (size / 2) - 4 * scale);
-				context->stroke ();
-				context->set_matrix (m);
+			if ( icon.targets.count() == 1 ) {  //jump to a specific row
+				int cue_idx = -1;
+				for (int i = 0; i < default_triggers_per_box; i++) {
+					if (icon.targets.test(i)) {
+						cue_idx = i;
+						break;
+					}
+				}
+				Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
+				layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
+				layout->set_text (string_compose ("%1", (char)('A' + cue_idx)));  //XXX translate?
+				int tw, th;
+				layout->get_pixel_size (tw, th);
+				context->move_to (size / 2, size / 2);
+				context->rel_move_to (-tw / 2, -th / 2);
+				layout->show_in_cairo_context (context);
+			} else if (false) {  // 'ANY' jump
+				for (int i = 0; i < 6; i++) {
+					Cairo::Matrix m = context->get_matrix ();
+					context->translate (size / 2, size / 2);
+					context->rotate (i * M_PI / 3);
+					context->move_to (0, 0);
+					context->line_to (0, (size / 2) - 4 * scale);
+					context->stroke ();
+					context->set_matrix (m);
+				}
+				context->set_identity_matrix ();
+			} else { // 'OTHER' jump
+				context->set_line_width (1.5 * scale);
+				set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); // needs to be brighter to maintain balance
+				for (int i = 0; i < 6; i++) {
+					Cairo::Matrix m = context->get_matrix ();
+					context->translate (size / 2, size / 2);
+					context->rotate (i * M_PI / 3);
+					context->move_to (0, 2 * scale);
+					context->line_to (0, (size / 2) - 4 * scale);
+					context->stroke ();
+					context->set_matrix (m);
+				}
+				context->set_identity_matrix ();
 			}
-			context->set_identity_matrix ();
 		} break;
 		case FollowAction::None:
 		default:
