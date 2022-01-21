@@ -106,6 +106,7 @@ Track::init ()
 	 */
 
 	if (!is_auditioner()) {
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		boost::shared_ptr<TriggerBox> tb (new TriggerBox (_session, data_type ()));
 		tb->set_owner (this);
 		add_processor (tb, _polarity);
