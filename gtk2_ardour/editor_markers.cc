@@ -181,6 +181,7 @@ Editor::add_new_location_internal (Location* location)
 	}
 
 	location->NameChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, location), gui_context());
+	location->CueChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, location), gui_context());
 	location->TimeDomainChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, location), gui_context());
 	location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, location), gui_context());
 
@@ -225,6 +226,10 @@ Editor::location_changed (Location *location)
 		lam->set_name ("\u266B" + location->name ()); // BEAMED EIGHTH NOTES
 	} else {
 		lam->set_name (location->name ());
+	}
+
+	if (location->is_cue_marker()) {
+		lam->start->set_cue_index (location->cue_id());
 	}
 
 	lam->set_position (location->start(), location->end());
