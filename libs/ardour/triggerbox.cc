@@ -2184,7 +2184,7 @@ int TriggerBox::_first_midi_note = 60;
 std::atomic<int> TriggerBox::active_trigger_boxes (0);
 TriggerBoxThread* TriggerBox::worker = 0;
 CueRecords TriggerBox::cue_records (256);
-std::atomic<bool> TriggerBox::_cue_recording (false);
+std::atomic<bool> TriggerBox::_cue_recording (true);
 PBD::Signal0<void> TriggerBox::CueRecordingChanged;
 
 void
