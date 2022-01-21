@@ -92,7 +92,7 @@ CueEntry::event_handler (GdkEvent* ev)
 			break;
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-//				name_button->set_fill_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
+				name_button->set_fill_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 				set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			}
 			break;
@@ -123,7 +123,7 @@ CueEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 
 	name_text->size_allocate (ArdourCanvas::Rect (0, 0, height, height));
 	name_text->set_position (Duple (4. * scale, 2.5 * scale));
-	name_text->clamp_width (width - height);
+	name_text->clamp_width (height);
 
 	/* font scale may have changed. uiconfig 'embeds' the ui-scale in the font */
 	name_text->set_font_description (UIConfiguration::instance ().get_SmallBoldMonospaceFont ());
@@ -157,7 +157,7 @@ CueEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 
 	render_children (area, context);
 
-	{ //Play triangle, needs to match TriggerEntry buttons exactly
+	if (false) { //Play triangle, needs to match TriggerEntry buttons exactly
 		context->set_line_width (1 * scale);
 
 		float margin = 4 * scale;

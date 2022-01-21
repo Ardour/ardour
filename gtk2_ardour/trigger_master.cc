@@ -564,7 +564,7 @@ CueMaster::CueMaster (Item* parent)
 	Event.connect (sigc::mem_fun (*this, &CueMaster::event_handler));
 
 	stop_shape = new ArdourCanvas::Polygon (this);
-	stop_shape->set_outline (true);
+	stop_shape->set_outline (false);
 	stop_shape->set_fill (true);
 	stop_shape->name = X_("stopbutton");
 	stop_shape->set_ignore_events (true);
@@ -639,7 +639,6 @@ CueMaster::event_handler (GdkEvent* ev)
 			break;
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				stop_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foreground"));
 				stop_shape->set_fill_color (UIConfiguration::instance ().color ("neutral:foreground"));
 				set_fill_color (HSV (fill_color ()).lighter (0.25).color ());
 			}
@@ -667,7 +666,7 @@ CueMaster::_size_allocate (ArdourCanvas::Rect const& alloc)
 	Rectangle::_size_allocate (alloc);
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
-	_poly_margin       = 2. * scale;
+	_poly_margin       = 2 * scale;
 
 	const Distance width  = _rect.width ();
 	const Distance height = _rect.height ();
@@ -689,8 +688,7 @@ void
 CueMaster::set_default_colors ()
 {
 	set_fill_color (HSV (UIConfiguration::instance ().color ("theme:bg")).darker (0.5).color ());
-	stop_shape->set_outline_color (UIConfiguration::instance ().color ("neutral:foreground"));
-	stop_shape->set_fill_color (fill_color());
+	stop_shape->set_fill_color (UIConfiguration::instance ().color ("neutral:midground"));
 }
 
 void
