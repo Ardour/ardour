@@ -1653,7 +1653,7 @@ Session::first_cue_within (samplepos_t s, samplepos_t e)
 }
 
 void
-Session::cue_marker_change (Location* loc)
+Session::cue_marker_change (Location* /* ignored */)
 {
 	SessionEvent* ev = new SessionEvent (SessionEvent::SyncCues, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 	queue_event (ev);

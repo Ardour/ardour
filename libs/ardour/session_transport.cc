@@ -2102,4 +2102,7 @@ Session::flush_cue_recording ()
 		Location* l = new Location (*this, when, when, std::string(), Location::Flags (Location::IsMark|Location::IsCueMarker), cr.cue_number);
 		_locations->add (l);
 	}
+
+	/* scheduled sync of cue markers in RT thread */
+	cue_marker_change (0);
 }
