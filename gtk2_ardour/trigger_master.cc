@@ -346,8 +346,6 @@ TriggerMaster::context_menu ()
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::Again))));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::ForwardTrigger))));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::ReverseTrigger))));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::AnyTrigger)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::AnyTrigger))));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::OtherTrigger)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::OtherTrigger))));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::JumpTrigger)), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_follow_action), FollowAction (FollowAction::JumpTrigger))));
 
 	Menu*     launch_menu = manage (new Menu);
@@ -726,8 +724,6 @@ CueMaster::context_menu ()
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::Again))));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::ForwardTrigger))));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::ReverseTrigger))));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::AnyTrigger)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::AnyTrigger))));
-	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::OtherTrigger)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::OtherTrigger))));
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::JumpTrigger)), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_follow_action), FollowAction (FollowAction::JumpTrigger))));
 
 

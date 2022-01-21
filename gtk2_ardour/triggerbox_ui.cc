@@ -245,32 +245,6 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, FollowAct
 			context->fill ();
 
 			break;
-		case FollowAction::AnyTrigger: {
-			for (int i = 0; i < 6; i++) {
-				Cairo::Matrix m = context->get_matrix ();
-				context->translate (size / 2, size / 2);
-				context->rotate (i * M_PI / 3);
-				context->move_to (0, 0);
-				context->line_to (0, (size / 2) - 4 * scale);
-				context->stroke ();
-				context->set_matrix (m);
-			}
-			context->set_identity_matrix ();
-		} break;
-		case FollowAction::OtherTrigger: {
-			context->set_line_width (1.5 * scale);
-			set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); // needs to be brighter to maintain balance
-			for (int i = 0; i < 6; i++) {
-				Cairo::Matrix m = context->get_matrix ();
-				context->translate (size / 2, size / 2);
-				context->rotate (i * M_PI / 3);
-				context->move_to (0, 2 * scale);
-				context->line_to (0, (size / 2) - 4 * scale);
-				context->stroke ();
-				context->set_matrix (m);
-			}
-			context->set_identity_matrix ();
-		} break;
 			/* ben: new shape here ? */
 		case FollowAction::JumpTrigger: {
 			context->set_line_width (1.5 * scale);

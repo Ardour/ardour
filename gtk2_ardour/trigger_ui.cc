@@ -83,8 +83,6 @@ TriggerUI::TriggerUI ()
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::ReverseTrigger)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::FirstTrigger)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::LastTrigger)));
-		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::AnyTrigger)));
-		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::OtherTrigger)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::JumpTrigger)));
 
 		for (std::vector<std::string>::const_iterator i = follow_strings.begin(); i != follow_strings.end(); ++i) {
@@ -620,15 +618,6 @@ TriggerUI::follow_context_menu ()
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
 	}
 #endif
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::AnyTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::AnyTrigger))));
-	if (trigger ()->follow_action (0) == FollowAction::AnyTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::OtherTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::OtherTrigger))));
-	if (trigger ()->follow_action (0) == FollowAction::OtherTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
-	}
-
 	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::JumpTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::JumpTrigger))));
 	if (trigger ()->follow_action (0) == FollowAction::JumpTrigger) {
 		dynamic_cast<Gtk::CheckMenuItem*> (&fitems.back ())->set_active (true);
@@ -783,10 +772,6 @@ TriggerUI::follow_action_to_string (FollowAction const & fa)
 		return _("First");
 	case FollowAction::LastTrigger:
 		return _("Last");
-	case FollowAction::AnyTrigger:
-		return _("Any");
-	case FollowAction::OtherTrigger:
-		return _("Other");
 	case FollowAction::JumpTrigger:
 		return _("Jump");
 	}
