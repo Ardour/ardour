@@ -1622,3 +1622,54 @@ Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool includ
 		changed(); /* EMIT SIGNAL */
 	}
 }
+
+void
+Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
+{
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	Temporal::Beats sb;
+	Temporal::Beats eb;
+	bool have_beats = false;
+	vector<Location*> r;
+
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+
+		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
+
+			if ((*i)->is_cue_marker()) {
+				Location* l (*i);
+
+				if (l->start().time_domain() == AudioTime) {
+					samplepos_t when = l->start().samples();
+					if (when >= start && when < end) {
+						i = locations.erase (i);
+						r.push_back (l);
+						continue;
+					}
+				} else {
+					if (!have_beats) {
+						sb = tmap->quarters_at (timepos_t (start));
+						eb = tmap->quarters_at (timepos_t (end));
+						have_beats = true;
+					}
+
+					Temporal::Beats when = l->start().beats();
+					if (when >= sb && when < eb) {
+						r.push_back (l);
+						i = locations.erase (i);
+						continue;
+					}
+				}
+			}
+
+			++i;
+		}
+	} /* end lock scope */
+
+	for (auto & l : r) {
+		removed (l); /* EMIT SIGNAL */
+		delete l;
+	}
+}

@@ -1355,6 +1355,11 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		auditioner->cancel_audition ();
 	}
 
+	/* This must be called while _transport_sample still reflects where we stopped
+	 */
+
+	flush_cue_recording ();
+
 	if (did_record) {
 		begin_reversible_command (Operations::capture);
 		_have_captured = true;
@@ -1476,7 +1481,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	clear_clicks();
 	unset_preroll_record_trim ();
-	flush_cue_recording ();
 
 	/* do this before seeking, because otherwise the tracks will do the wrong thing in seamless loop mode.
 	*/
@@ -2084,8 +2088,14 @@ Session::actual_speed() const
 void
 Session::flush_cue_recording ()
 {
+	if (!TriggerBox::cue_records.read_space()) {
+		return;
+	}
+
 	CueRecord cr;
 	TempoMap::SharedPtr tmap (TempoMap::use());
+
+	_locations->clear_cue_markers (_last_roll_location, _transport_sample);
 
 	while (TriggerBox::cue_records.read (&cr, 1) == 1) {
 		BBT_Time bbt = tmap->bbt_at (timepos_t (cr.when));

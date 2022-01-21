@@ -212,6 +212,8 @@ public:
 	bool clear_xrun_markers ();
 	bool clear_ranges ();
 
+	void clear_cue_markers (samplepos_t start, samplepos_t end);
+
 	void ripple (timepos_t const & at, timecnt_t const & distance, bool include_locked, bool notify);
 
 	XMLNode& get_state (void);
