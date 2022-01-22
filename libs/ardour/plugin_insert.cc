@@ -243,7 +243,14 @@ PluginInsert::set_preset_out (const ChanCount& c)
 bool
 PluginInsert::add_sidechain (uint32_t n_audio, uint32_t n_midi)
 {
-	// caller must hold process lock
+	/* Caller must not hold process lock, since add_port() takes the lock.
+	 *
+	 * Since the SC adds a port, an additional buffer may be needed.
+	 * So Route::configure_processors() has to be called to set
+	 * processor_max_streams -> _session.ensure_buffers ().
+	 * SideChain::run () will do nothing before
+	 * _sidechain->configure_io () is called.
+	 */
 	if (_sidechain) {
 		return false;
 	}
@@ -255,8 +262,7 @@ PluginInsert::add_sidechain (uint32_t n_audio, uint32_t n_midi)
 	} else {
 		n << "toBeRenamed" << id().to_s();
 	}
-	SideChain *sc = new SideChain (_session, n.str ());
-	_sidechain = boost::shared_ptr<SideChain> (sc);
+	_sidechain.reset (new SideChain (_session, n.str ()));
 	_sidechain->activate ();
 	for (uint32_t n = 0; n < n_audio; ++n) {
 		_sidechain->input()->add_port ("", owner(), DataType::AUDIO); // add a port, don't connect.

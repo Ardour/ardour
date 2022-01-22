@@ -63,8 +63,7 @@ SideChain::set_state (const XMLNode& node, int version)
 void
 SideChain::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double /*speed*/, pframes_t nframes, bool)
 {
-	if (_input->n_ports () == ChanCount::ZERO) {
-		// inplace pass-through
+	if (_input->n_ports () == ChanCount::ZERO || !_configured) {
 		return;
 	}
 
