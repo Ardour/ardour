@@ -87,6 +87,12 @@ Track::~Track ()
 int
 Track::init ()
 {
+	if (!is_auditioner()) {
+		_triggerbox = boost::shared_ptr<TriggerBox> (new TriggerBox (_session, data_type ()));
+		_triggerbox->set_owner (this);
+		_triggerbox->add_midi_sidechain ();
+	}
+
 	if (Route::init ()) {
 		return -1;
 	}
@@ -104,13 +110,6 @@ Track::init ()
 	/* no triggerbox for the auditioner, to avoid visual clutter in
 	 * patchbays and elsewhere (or special-case code in those places)
 	 */
-
-	if (!is_auditioner()) {
-		boost::shared_ptr<TriggerBox> tb (new TriggerBox (_session, data_type ()));
-		tb->set_owner (this);
-		add_processor (tb, _polarity);
-		tb->add_midi_sidechain ();
-	}
 
 	set_align_choice_from_io ();
 
