@@ -10,7 +10,7 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    autowaf.configure(conf)
+    pass
 
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')

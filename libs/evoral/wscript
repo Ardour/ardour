@@ -34,9 +34,6 @@ def options(opt):
                    help='Build internal libs as shared libraries')
 
 def configure(conf):
-    conf.load('compiler_c')
-    conf.load('compiler_cxx')
-    autowaf.configure(conf)
     #autowaf.display_header('Evoral Configuration')
 
     autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)

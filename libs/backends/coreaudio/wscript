@@ -15,7 +15,6 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    autowaf.configure(conf)
     if Options.options.ppc:
         conf.env['build_arch'] = "ppc"
 

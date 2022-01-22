@@ -37,8 +37,7 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    conf.load ('compiler_cxx')
-    autowaf.configure(conf)
+    pass
 
 def build(bld):
     obj = bld.stlib(features = 'cxx cxxstlib', source = zresampler_sources)

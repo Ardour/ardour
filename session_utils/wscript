@@ -24,8 +24,6 @@ def configure(conf):
 
     autowaf.display_msg(conf, 'build session-utils', 'yes')
     conf.load('misc')
-    conf.load('compiler_cxx')
-    autowaf.configure(conf)
 
 def build_ardour_util(bld, util):
     pgmprefix = bld.env['PROGRAM_NAME'].lower() + str(bld.env['MAJOR'])

@@ -41,7 +41,6 @@ def configure(conf):
     global children
 
     autowaf.set_recursive()
-    autowaf.configure(conf)
 
     autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
     #if Options.options.tranzport and conf.is_defined('HAVE_USB'):

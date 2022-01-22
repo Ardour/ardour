@@ -23,8 +23,6 @@ def options(opt):
 
 def configure(conf):
     conf.load('misc')
-    conf.load('compiler_cxx')
-    autowaf.configure(conf)
 
 
 def build(bld):

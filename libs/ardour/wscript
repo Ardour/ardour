@@ -295,10 +295,8 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    conf.load('compiler_cxx')
     conf.load('gas')
     # we don't use hard-coded micro versions with ardour, so hard code it to zero
-    autowaf.configure(conf)
     autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
                       atleast_version='0.3.2')
     autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO4',

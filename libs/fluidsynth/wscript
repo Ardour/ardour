@@ -25,9 +25,6 @@ def options(opt):
 def configure(conf):
     if conf.is_defined('USE_EXTERNAL_LIBS'):
         autowaf.check_pkg(conf, 'fluidsynth', uselib_store='LIBFLUIDSYNTH', atleast_version=LIBFLUIDSYNTH_VERSION, mandatory=True)
-    else:
-        conf.load('compiler_c')
-        autowaf.configure(conf)
 
 def build(bld):
     if bld.is_defined('USE_EXTERNAL_LIBS'):

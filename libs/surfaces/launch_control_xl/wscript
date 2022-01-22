@@ -12,8 +12,7 @@ def options(opt):
 
 
 def configure(conf):
-    conf.load('compiler_cxx')
-    autowaf.configure(conf)
+    pass
 
 
 def build(bld):

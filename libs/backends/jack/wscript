@@ -25,7 +25,6 @@ def configure(conf):
     if Options.options.dist_target == 'mingw':
         autowaf.check_pkg(conf, 'portaudio-2.0', uselib_store='PORTAUDIO',
                           atleast_version='19')
-    autowaf.configure(conf)
 
     if Options.options.libjack_link == 'auto':
         if Options.options.dist_target == 'mingw' or sys.platform == 'darwin':

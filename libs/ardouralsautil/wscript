@@ -16,7 +16,6 @@ def options(opt):
 
 
 def configure(conf):
-    autowaf.configure(conf)
     if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
         autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
         autowaf.check_pkg(conf, 'dbus-1', uselib_store='DBUS', mandatory = False)

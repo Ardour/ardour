@@ -35,8 +35,6 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    conf.load ('compiler_cxx')
-    autowaf.configure(conf)
     autowaf.check_pkg(conf, 'cairomm-1.0', uselib_store='CAIROMM', atleast_version='1.8.4')
 
 def build(bld):

@@ -17,14 +17,12 @@ def options(opt):
 
 def configure(conf):
     conf.load('misc')
-    conf.load('compiler_cxx')
     conf.check_cc(
             header_name='stdio.h readline/readline.h',
             lib='readline',
             uselib_store='READLINE',
             define_name='HAVE_READLINE',
             mandatory=False)
-    autowaf.configure(conf)
 
 def build(bld):
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])

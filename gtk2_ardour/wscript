@@ -430,8 +430,6 @@ def options(opt):
 
 def configure(conf):
     conf.load('misc')
-    conf.load('compiler_cxx')
-    autowaf.configure(conf)
 
     # TODO: Insert a sanity check for on OS X to ensure CoreAudio is present
 

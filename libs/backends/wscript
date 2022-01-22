@@ -18,7 +18,6 @@ def sub_config_and_use(conf, name, has_objects = True):
 
 def configure(conf):
     autowaf.set_recursive()
-    autowaf.configure(conf)
 
     backends = conf.env['BACKENDS']
     for i in backends:

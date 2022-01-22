@@ -15,7 +15,6 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    autowaf.configure(conf)
     autowaf.check_pkg(conf, 'portaudio-2.0', uselib_store='PORTAUDIO', atleast_version='19')
     conf.check(header_name='pa_asio.h', define_name='WITH_ASIO', mandatory=False)
 

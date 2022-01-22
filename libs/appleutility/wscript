@@ -25,7 +25,6 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    autowaf.configure(conf)
     if conf.env['build_target'] in ['panther', 'tiger', 'leopard'] or (Options.options.ppc and conf.env['build_target'] == 'snowleopard'):
         conf.env.append_value ('CFLAGS', '-DCOREAUDIO105')
         conf.env.append_value ('CXXFLAGS', '-DCOREAUDIO105')

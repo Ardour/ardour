@@ -12,8 +12,7 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    conf.load('compiler_c')
-    autowaf.configure(conf)
+    pass
 
 def build(bld):
     obj = bld(features = 'c cshlib')

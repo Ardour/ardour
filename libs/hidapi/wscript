@@ -33,8 +33,6 @@ def configure(conf):
                 conf.define ('HAVE_HIDAPI', 1)
         else:
             print ("hidapi is not yet available for the given system")
-        conf.load('compiler_c')
-        autowaf.configure(conf)
 
 def build(bld):
     if bld.is_defined('USE_EXTERNAL_LIBS'):
