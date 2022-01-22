@@ -1982,6 +1982,11 @@ Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLo
 			processor_max_streams = ChanCount::max(processor_max_streams, iop->natural_input_streams());
 			processor_max_streams = ChanCount::max(processor_max_streams, iop->natural_output_streams());
 		}
+		else if (boost::dynamic_pointer_cast<TriggerBox>(*p) != 0) {
+			/* TB sidechain control input */
+			processor_max_streams = ChanCount::max(processor_max_streams, c->first + ChanCount (DataType::MIDI, 1));
+		}
+
 		out = c->second;
 
 		if (boost::dynamic_pointer_cast<Delivery> (*p)
@@ -1999,7 +2004,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLo
 
 	lr.release ();
 	lm->acquire ();
-
 
 	if (_meter) {
 		_meter->set_max_channels (processor_max_streams);
