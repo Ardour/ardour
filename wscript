@@ -1172,7 +1172,7 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
                                            mandatory = False,
                                            execute   = False,
                                            use = 'SNDFILE',
-                                           msg       = 'Checking for  sndfile RF64=>RIFF support',
+                                           msg       = 'Checking for sndfile RF64=>RIFF support',
                                            okmsg = 'Found',
                                            errmsg = 'Not found, no RF64-to-WAV support')
 

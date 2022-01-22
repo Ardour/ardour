@@ -24,7 +24,7 @@ def options(opt):
 
 def configure(conf):
     if conf.is_defined('USE_EXTERNAL_LIBS'):
-        conf.check_cxx(header_name="base/Pitch.h", mandatory=True)
+        conf.check_cxx(header_name="base/Pitch.h", mandatory=True, msg="Checking for qm-dsp headers")
         conf.check_cxx(lib="qm-dsp", uselib_store="QMDSP", mandatory=True)
 
 def build(bld):
