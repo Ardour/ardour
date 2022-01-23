@@ -190,15 +190,20 @@ void
 CueEntry::set_default_colors ()
 {
 	color_t bg_col = UIConfiguration::instance ().color ("theme:bg");
-
-	//alternating darker bands
 	if ((_cue_idx / 2) % 2 == 0) {
 		bg_col = HSV (bg_col).darker (0.25).color ();
 	}
-
 	set_fill_color (bg_col);
-	name_button->set_fill_color (UIConfiguration::instance ().color ("neutral:midground"));
-	name_text->set_color (UIConfiguration::instance ().color ("neutral:background"));
+
+	color_t fg_col = UIConfiguration::instance ().color ("neutral:midground");
+	if ((_cue_idx / 2) % 2 == 0) {
+		fg_col = HSV (fg_col).darker (0.20).color ();
+	}
+	name_button->set_fill_color (fg_col);
+
+	name_text->set_fill_color (UIConfiguration::instance ().color ("neutral:background"));
+
+	if (TriggerBox::cue_recording()) {
 }
 
 void
