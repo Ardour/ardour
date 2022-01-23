@@ -149,7 +149,6 @@ Session::memento_command_factory(XMLNode *n)
 
     delete after;
     delete before;
-    delete child;
 
     return 0 ;
 }
