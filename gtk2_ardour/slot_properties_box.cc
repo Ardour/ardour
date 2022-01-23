@@ -279,7 +279,7 @@ SlotPropertyTable::SlotPropertyTable ()
 	_launch_table.attach(_launch_quant_label, 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	_launch_table.attach(_quantize_button,    1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
-	_legato_label.set_text(_("Launch Quantize:"));  _legato_label.set_alignment(1.0, 0.5);
+	_legato_label.set_text(_("Legato:"));  _legato_label.set_alignment(1.0, 0.5);
 	_launch_table.attach(_legato_label,   0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	_launch_table.attach(_legato_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
