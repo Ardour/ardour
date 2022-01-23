@@ -7615,7 +7615,7 @@ msgstr ""
 
 #: editor_sources.cc:669
 msgid "Remove the selected Sources"
-msgstr "ENtferne die ausgewählten Quellen"
+msgstr "Entferne die ausgewählten Quellen"
 
 #: editor_sources.cc:703
 msgid ""
