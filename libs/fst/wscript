@@ -10,8 +10,6 @@ def options(opt):
     pass
 
 def configure(conf):
-    conf.load('misc')
-
     if conf.env['WINDOWS_VST_SUPPORT'] == True:
         conf.check(compiler='cxx', lib='gdi32', mandatory=True, uselib_store='GDI32')
 

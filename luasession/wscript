@@ -7,7 +7,6 @@ def options(opt):
     pass
 
 def configure(conf):
-    conf.load('misc')
     conf.check_cc(
             header_name='stdio.h readline/readline.h',
             lib='readline',
