@@ -11,7 +11,7 @@ def options(opt):
     pass
 
 def configure(conf):
-    conf.load('misc')
+    pass
 
 def build(bld):
     # just the normal executable version of the GTK GUI

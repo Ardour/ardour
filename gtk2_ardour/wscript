@@ -433,7 +433,7 @@ def options(opt):
     pass
 
 def configure(conf):
-    conf.load('misc')
+    conf.load('misc')  # make 'command-output' available
 
     # TODO: Insert a sanity check for on OS X to ensure CoreAudio is present
 
