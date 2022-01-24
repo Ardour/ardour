@@ -75,6 +75,9 @@ CueEntry::CueEntry (Item* item, uint64_t cue_index)
 	name_text->set_ignore_events (false);
 	name_text->show ();
 
+	/* watch for cue-recording state */
+	TriggerBox::CueRecordingChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&CueEntry::rec_state_changed, this), gui_context ());
+
 	/* watch for change in theme */
 	UIConfiguration::instance ().ParameterChanged.connect (sigc::mem_fun (*this, &CueEntry::ui_parameter_changed));
 	set_default_colors ();
@@ -113,7 +116,6 @@ CueEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 {
 	ArdourCanvas::Rectangle::_size_allocate (alloc);
 
-	const Distance width  = _rect.width ();
 	const Distance height = _rect.height ();
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
@@ -204,6 +206,8 @@ CueEntry::set_default_colors ()
 	name_text->set_fill_color (UIConfiguration::instance ().color ("neutral:background"));
 
 	if (TriggerBox::cue_recording()) {
+		name_button->set_fill_color (UIConfiguration::instance ().color ("alert:ruddy"));
+	}
 }
 
 void
@@ -212,6 +216,12 @@ CueEntry::ui_parameter_changed (std::string const& p)
 	if (p == "color-file") {
 		set_default_colors ();
 	}
+}
+
+void
+CueEntry::rec_state_changed ()
+{
+	set_default_colors ();
 }
 
 Gtkmm2ext::Bindings*           CueBoxUI::bindings = 0;

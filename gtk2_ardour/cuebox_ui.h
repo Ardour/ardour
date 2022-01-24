@@ -60,6 +60,10 @@ private:
 	void ui_parameter_changed (std::string const& p);
 	void set_default_colors ();
 
+	void rec_state_changed ();
+
+	PBD::ScopedConnectionList _session_connections;
+
 	uint64_t _cue_idx;
 	double   _poly_size;
 	double   _poly_margin;
