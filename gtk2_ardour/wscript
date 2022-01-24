@@ -490,63 +490,6 @@ def configure(conf):
     conf.write_config_header('gtk2ardour-version.h')
     conf.env['define_key'] = bak
 
-def _doPyp(infileName, deps = False):
-    outStr = ''
-    out = []
-    re_spaces = re.compile("\s+")
-
-    if infileName == '-':
-        fd = sys.stdin
-    else:
-        fd = open(infileName)
-    inLines = fd.readlines()
-    if fd != sys.stdin:
-        fd.close()
-
-    for line in inLines:
-        bits = re_spaces.split(line)
-        if bits[0] == '##include':
-            incName = bits[1]
-            if (deps):
-                out += [ incName ]
-            else:
-                # assume included file comes from same place as source file
-                incName = os.path.join (os.path.dirname (infileName), incName);
-                outStr += _doPyp(incName)
-        else:
-            if not deps:
-                outStr += line
-
-    # done
-    if deps:
-        return out
-    else:
-        return outStr
-
-def include_processor(task):
-    infileName = task.inputs[0].srcpath()
-    outfileName = os.path.join(out, task.outputs[0].bldpath())
-    fdOut = open (outfileName, "w")
-    fdOut.write (_doPyp(infileName))
-    fdOut.close ()
-
-def build_color_scheme(path, prefix):
-    f = open (path, 'r')
-    color_scheme = ''
-    for line in f:
-        if re.search ('^#@color', line):
-            line.strip() # remove newline
-            words = line.split()
-            if len(color_scheme):
-                color_scheme += ';'
-            color_scheme += prefix
-            color_scheme += '_'
-            color_scheme += words[1]
-            color_scheme += ':'
-            color_scheme += words[2]
-    f.close()
-    return color_scheme
-
 def build(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
 
