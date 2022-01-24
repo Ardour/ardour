@@ -19,20 +19,20 @@ c_compiler['darwin'] = ['gcc', 'clang' ]
 cxx_compiler['darwin'] = ['g++', 'clang++' ]
 
 class i18n(BuildContext):
-        cmd = 'i18n'
-        fun = 'i18n'
+    cmd = 'i18n'
+    fun = 'i18n'
 
 class i18n_pot(BuildContext):
-        cmd = 'i18n_pot'
-        fun = 'i18n_pot'
+    cmd = 'i18n_pot'
+    fun = 'i18n_pot'
 
 class i18n_po(BuildContext):
-        cmd = 'i18n_po'
-        fun = 'i18n_po'
+    cmd = 'i18n_po'
+    fun = 'i18n_po'
 
 class i18n_mo(BuildContext):
-        cmd = 'i18n_mo'
-        fun = 'i18n_mo'
+    cmd = 'i18n_mo'
+    fun = 'i18n_mo'
 
 compiler_flags_dictionaries= {
     'gcc' : {
@@ -233,10 +233,10 @@ PROGRAM_VERSION = sanitize(MAJOR)
 del sanitize
 
 if any(arg in ('dist', 'distcheck') for arg in sys.argv[1:]):
-        if not 'APPNAME' in os.environ:
-                print ("You must define APPNAME in the environment when running ./waf dist/distcheck")
-                sys.exit (1)
-        APPNAME = os.environ['APPNAME'];
+    if not 'APPNAME' in os.environ:
+        print ("You must define APPNAME in the environment when running ./waf dist/distcheck")
+        sys.exit (1)
+    APPNAME = os.environ['APPNAME'];
 
 # Mandatory variables
 top = '.'
@@ -387,7 +387,7 @@ int main() { return 0; }''',
         else:
             compiler_name = 'clang'
     elif conf.env['MSVC_COMPILER']:
-            compiler_name = 'msvc'
+        compiler_name = 'msvc'
     else:
         if platform == 'darwin':
             compiler_name = 'gcc-darwin'
@@ -510,8 +510,8 @@ int main() { return 0; }''',
                            define_name = 'FPU_AVX_FMA_SUPPORT')
 
     if opt.use_libcpp or conf.env['build_host'] in [ 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
-       cxx_flags.append('--stdlib=libc++')
-       linker_flags.append('--stdlib=libc++')
+        cxx_flags.append('--stdlib=libc++')
+        linker_flags.append('--stdlib=libc++')
 
     if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
@@ -548,7 +548,7 @@ int main() { return 0; }''',
 
 
         if not (opt.arm64 or conf.env['build_target'] == 'armhf' and conf.env['build_target'] == 'aarch64'):
-           compiler_flags.append ("-DARCH_X86")
+            compiler_flags.append ("-DARCH_X86")
 
         if platform == 'linux' and conf.env['build_target'] != 'armhf' and conf.env['build_target'] != 'aarch64':
 
@@ -598,13 +598,13 @@ int main() { return 0; }''',
             compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS");
             conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'Accelerate'])
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
-                compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+            compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         elif conf.env['build_target'] == 'mingw':
-                # usability of the 64 bit windows assembler depends on the compiler target,
-                # not the build host, which in turn can only be inferred from the name
-                # of the compiler.
-                if re.search ('x86_64-w64', str(conf.env['CC'])) is not None:
-                        compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+            # usability of the 64 bit windows assembler depends on the compiler target,
+            # not the build host, which in turn can only be inferred from the name
+            # of the compiler.
+            if re.search ('x86_64-w64', str(conf.env['CC'])) is not None:
+                    compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
 
@@ -1177,8 +1177,8 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
                                            errmsg = 'Not found, no RF64-to-WAV support')
 
     if have_rf64_riff_support:
-            conf.env.append_value('CXXFLAGS', "-DHAVE_RF64_RIFF")
-            conf.env.append_value('CFLAGS', "-DHAVE_RF64_RIFF")
+        conf.env.append_value('CXXFLAGS', "-DHAVE_RF64_RIFF")
+        conf.env.append_value('CFLAGS', "-DHAVE_RF64_RIFF")
 
     if Options.options.dist_target == 'mingw':
         Options.options.fpu_optimization = True
@@ -1303,8 +1303,8 @@ int main () { return 0; }
             conf.define('LXVST_SUPPORT', 1)
             conf.env['LXVST_SUPPORT'] = True
     if opts.vst3:
-            conf.define('VST3_SUPPORT', 1)
-            conf.env['VST3_SUPPORT'] = True
+        conf.define('VST3_SUPPORT', 1)
+        conf.env['VST3_SUPPORT'] = True
     conf.env['WINDOWS_KEY'] = opts.windows_key
     if opts.rt_alloc_debug:
         conf.define('DEBUG_RT_ALLOC', 1)
@@ -1364,10 +1364,10 @@ int main () { return 0; }
 
     if (Options.options.use_lld):
         if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
-                conf.fatal("lld is only for Linux builds")
+            conf.fatal("lld is only for Linux builds")
         else:
-                conf.find_program ('lld')
-                conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
+            conf.find_program ('lld')
+            conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
 
     if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
         conf.fatal("PortAudio Backend is not for Linux")

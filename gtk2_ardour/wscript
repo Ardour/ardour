@@ -64,7 +64,7 @@ gtk2_ardour_sources = [
         'automation_streamview.cc',
         'automation_time_axis.cc',
         'axis_view.cc',
-   # 'beatbox_gui.cc',
+        # 'beatbox_gui.cc',
         'bbt_marker_dialog.cc',
         'big_clock_window.cc',
         'big_transport_window.cc',
@@ -331,7 +331,7 @@ gtk2_ardour_sources = [
         'virtual_keyboard_window.cc',
         'visibility_group.cc',
         'window_manager.cc',
-# video-timeline related sources:
+        # video-timeline related sources:
         'video_image_frame.cc',
         'add_video_dialog.cc',
         'editor_videotimeline.cc',
@@ -820,8 +820,8 @@ def build(bld):
 
     # @FONT_SIZE_XXXX@
     for sizename,points in iter(font_sizes.items()):
-            key = "_".join (['FONT_SIZE',sizename])
-            font_subst_dict[key] = points
+        key = "_".join (['FONT_SIZE',sizename])
+        font_subst_dict[key] = points
 
     # various font names, eg @BOLD_MONOSPACE@
     for font_sym,text in iter(font_names.items()):
@@ -969,28 +969,28 @@ def build(bld):
                             mo)
 
 def i18n(bld):
-        I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-        autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                           'Paul Davis')
-        appdata_i18n_pot(bld)
-        appdata_i18n_po(bld)
+    I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+    autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+                       'Paul Davis')
+    appdata_i18n_pot(bld)
+    appdata_i18n_po(bld)
 
 def i18n_pot(bld):
-        I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-        autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                               'Paul Davis')
-        appdata_i18n_pot(bld)
+    I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+    autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+                           'Paul Davis')
+    appdata_i18n_pot(bld)
 
 def i18n_po(bld):
-        I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-        autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                              'Paul Davis')
-        appdata_i18n_po(bld)
+    I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+    autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+                          'Paul Davis')
+    appdata_i18n_po(bld)
 
 def i18n_mo(bld):
-        I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-        autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                              'Paul Davis')
+    I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+    autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+                          'Paul Davis')
 
 def appdata_i18n_pot(bld):
     potfile = os.path.join(bld.top_dir, 'gtk2_ardour', 'appdata',
@@ -1002,9 +1002,9 @@ def appdata_i18n_pot(bld):
                 'ardour.appdata.xml.in.in')
         Logs.info('Updating ' + potfile)
         try:
-                subprocess.call(('itstool', '-i', itsfile, '-o', potfile, adsource))
+            subprocess.call(('itstool', '-i', itsfile, '-o', potfile, adsource))
         except:
-                print ('Error processing appdata pot file - ignored')
+            print ('Error processing appdata pot file - ignored')
     elif bld.cmd == 'clean' and os.path.exists(potfile):
         Logs.info('Removing Ardour appdata pot file')
         os.remove(potfile)

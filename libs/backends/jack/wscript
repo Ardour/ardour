@@ -49,15 +49,15 @@ def configure(conf):
 
     # Check to see if jack_port_rename() is available and working
     if conf.env['libjack_link'] == 'link':
-            conf.check_cxx(fragment = "#include <jack/jack.h>\nint main(void) { jack_client_t* c; jack_port_t* p; jack_port_rename (c, p, \"foo\"); return 0; }\n",
-                   mandatory = False,
-                   execute = False,
-                   features = ['cxx'],
-                   msg = 'Checking for jack_port_rename()',
-                   okmsg = 'ok',
-                   errmsg = 'not found (or broken). jack_port_rename() will not be used, and jack_port_set_name() will be used instead',
-                   define_name = 'HAVE_JACK_PORT_RENAME',
-                   uselib = 'JACK')
+        conf.check_cxx(fragment = "#include <jack/jack.h>\nint main(void) { jack_client_t* c; jack_port_t* p; jack_port_rename (c, p, \"foo\"); return 0; }\n",
+                       mandatory = False,
+                       execute = False,
+                       features = ['cxx'],
+                       msg = 'Checking for jack_port_rename()',
+                       okmsg = 'ok',
+                       errmsg = 'not found (or broken). jack_port_rename() will not be used, and jack_port_set_name() will be used instead',
+                       define_name = 'HAVE_JACK_PORT_RENAME',
+                       uselib = 'JACK')
 
 def build(bld):
     obj = bld(features = 'c cxx cxxshlib')
@@ -115,4 +115,4 @@ def build(bld):
     #
 
     if re.search ("linux", sys.platform) != None:
-       obj.uselib += [ 'ALSA' ]
+        obj.uselib += [ 'ALSA' ]

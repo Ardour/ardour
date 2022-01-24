@@ -489,14 +489,14 @@ def build(bld):
             avx_sources = [ 'sse_functions_avx_linux.cc' ]
             fma_sources = [ 'x86_functions_fma.cc' ]
         elif bld.env['build_target'] == 'mingw':
-                # usability of the 64 bit windows assembler depends on the compiler target,
-                # not the build host, which in turn can only be inferred from the name
-                # of the compiler.
-                if re.search ('x86_64-w64', str(bld.env['CC'])):
-                        obj.source += [ 'sse_functions_xmm.cc' ]
-                        obj.source += [ 'sse_functions_64bit_win.s',  'sse_avx_functions_64bit_win.s' ]
-                        avx_sources = [ 'sse_functions_avx.cc' ]
-                        fma_sources = [ 'x86_functions_fma.cc' ]
+            # usability of the 64 bit windows assembler depends on the compiler target,
+            # not the build host, which in turn can only be inferred from the name
+            # of the compiler.
+            if re.search ('x86_64-w64', str(bld.env['CC'])):
+                obj.source += [ 'sse_functions_xmm.cc' ]
+                obj.source += [ 'sse_functions_64bit_win.s',  'sse_avx_functions_64bit_win.s' ]
+                avx_sources = [ 'sse_functions_avx.cc' ]
+                fma_sources = [ 'x86_functions_fma.cc' ]
         elif bld.env['build_target'] == 'aarch64':
             obj.source += ['arm_neon_functions.cc']
             obj.defines += [ 'ARM_NEON_SUPPORT' ]

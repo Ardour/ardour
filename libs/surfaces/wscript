@@ -71,7 +71,7 @@ def configure(conf):
         else:
             print('You are missing the libbluetooth headers needed to compile wiimote support')
     else:
-            print('You are missing the cwiid headers needed to compile wiimote support')
+        print('You are missing the cwiid headers needed to compile wiimote support')
 
     autowaf.check_pkg(conf, 'libwebsockets', uselib_store='WEBSOCKETS', atleast_version='2.0.0', mandatory=False)
     if conf.is_defined('HAVE_WEBSOCKETS'):
