@@ -19,19 +19,19 @@ def build(bld):
             push2.cc
             buttons.cc
             canvas.cc
-	    interface.cc
+            interface.cc
             midi_byte_array.cc
             leds.cc
             level_meter.cc
-	    gui.cc
-	    knob.cc
-	    layout.cc
-	    menu.cc
-	    mix.cc
-	    scale.cc
-	    splash.cc
-	    track_mix.cc
-	    utils.cc
+            gui.cc
+            knob.cc
+            layout.cc
+            menu.cc
+            mix.cc
+            scale.cc
+            splash.cc
+            track_mix.cc
+            utils.cc
     '''
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_push2"' ]

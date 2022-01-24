@@ -20,8 +20,8 @@ out = 'build'
 from waflib import TaskGen
 @TaskGen.extension('.m')
 def m_hook(self, node):
-	"""Alias .m files to be compiled the same as .c files, gcc will do the right thing."""
-	return self.create_compiled_task('c', node)
+    """Alias .m files to be compiled the same as .c files, gcc will do the right thing."""
+    return self.create_compiled_task('c', node)
 
 path_prefix = 'gtk2_ardour/'
 

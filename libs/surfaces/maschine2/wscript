@@ -19,14 +19,14 @@ def build(bld):
             maschine2.cc
             callbacks.cc
             canvas.cc
-	    interface.cc
-	    layout.cc
-	    m2_dev_mk2.cc
-	    m2_map_mk2.cc
-	    m2_dev_mikro.cc
-	    m2_map_mikro.cc
-	    ui_knob.cc
-	    ui_menu.cc
+            interface.cc
+            layout.cc
+            m2_dev_mk2.cc
+            m2_map_mk2.cc
+            m2_dev_mikro.cc
+            m2_map_mikro.cc
+            ui_knob.cc
+            ui_menu.cc
     '''
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_maschine2"' ]
