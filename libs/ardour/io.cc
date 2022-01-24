@@ -1141,6 +1141,7 @@ IO::set_name (const string& requested_name)
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		string current_name = i->name();
+		assert (current_name.find (_name) != std::string::npos);
 		current_name.replace (current_name.find (_name), _name.val().length(), name);
 		i->set_name (current_name);
 	}

@@ -3167,7 +3167,6 @@ Route::set_processor_state (const XMLNode& node, int version)
 				_triggerbox->set_owner (this);
 			}
 			_triggerbox->set_state (**niter, version);
-			_triggerbox->update_sidechain_name ();
 
 			new_order.push_back (_triggerbox);
 		} else {

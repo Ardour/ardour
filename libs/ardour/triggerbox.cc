@@ -3223,7 +3223,11 @@ TriggerBox::set_state (const XMLNode& node, int version)
 	if (scnode) {
 		add_midi_sidechain ();
 		assert (_sidechain);
-		_sidechain->set_state (*scnode, version);
+		if (!regenerate_xml_or_string_ids ()) {
+			_sidechain->set_state (*scnode, version);
+		} else {
+			update_sidechain_name ();
+		}
 	}
 
 	return 0;
