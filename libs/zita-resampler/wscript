@@ -15,10 +15,6 @@ ZRESAMPLER_LIB_VERSION = '1.6.0'
 
 I18N_PACKAGE = 'libzita-resampler'
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 zresampler_sources = [
         'resampler.cc',
         'resampler-table.cc',

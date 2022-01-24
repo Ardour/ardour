@@ -3,9 +3,6 @@ from waflib.extras import autowaf as autowaf
 import os
 import sys
 
-top = '.'
-out = 'build'
-
 path_prefix = 'libs/clearlooks-newer'
 
 def options(opt):

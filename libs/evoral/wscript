@@ -16,10 +16,6 @@ EVORAL_LIB_VERSION = '0.0.0'
 
 APPNAME = 'evoral'
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 def options(opt):
     opt.load('compiler_c')
     opt.load('compiler_cxx')

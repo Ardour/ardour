@@ -2,10 +2,6 @@
 from waflib.extras import autowaf as autowaf
 import os
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 # Version of this package (even if built as a child)
 MAJOR = '0'
 MINOR = '0'

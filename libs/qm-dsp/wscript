@@ -10,10 +10,6 @@ QM_DSP_VERSION = '1.7.1'
 # micro increment <=> no interface changes
 QM_DSP_LIB_VERSION = '1.7.1'
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 def options(opt):
     autowaf.set_options(opt)
 

@@ -3,10 +3,6 @@ from waflib.extras import autowaf as autowaf
 import os
 import sys
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 hardour_sources = [
         'load_session.cc',
         'misc.cc',

@@ -2,10 +2,6 @@
 import waflib.Utils as Utils
 import os
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 def options(ctx):
     pass
 

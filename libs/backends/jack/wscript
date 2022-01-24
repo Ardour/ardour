@@ -7,10 +7,6 @@ import re
 
 I18N_PACKAGE = 'jack-backend'
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 def options(opt):
     autowaf.set_options(opt)
 
