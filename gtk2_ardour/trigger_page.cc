@@ -73,6 +73,8 @@ TriggerPage::TriggerPage ()
 	load_bindings ();
 	register_actions ();
 
+	_cue_rec_enable.set_name ("record enable button");
+
 	/* Match TriggerStrip::_name_button height */
 	ArdourButton* spacer = manage (new ArdourButton (ArdourButton::Text));
 	spacer->set_name ("mixer strip button");
