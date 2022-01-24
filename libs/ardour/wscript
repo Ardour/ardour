@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-from waflib import Options, Task, Tools
+from waflib import Options, Task
 import os
 import re
 
