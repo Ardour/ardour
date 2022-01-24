@@ -767,7 +767,6 @@ def build(bld):
 
     font_subst_dict = {}
     font_sizes      = {}
-    base_font       = ""
 
     # Set up font sizes
     if sys.platform == 'darwin':
