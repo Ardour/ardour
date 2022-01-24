@@ -40,6 +40,3 @@ def build(bld):
     autowaf.ensure_visible_symbols (obj, True)
     obj.vnum         = VAMP_PYIN_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'vamp')
-
-def shutdown():
-    autowaf.shutdown()

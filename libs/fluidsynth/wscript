@@ -59,6 +59,3 @@ def build(bld):
                uselib = 'GLIB',
                defines = [ 'HAVE_CONFIG_H', 'DEFAULT_SOUNDFONT=""' ]
                )
-
-def shutdown():
-    autowaf.shutdown()

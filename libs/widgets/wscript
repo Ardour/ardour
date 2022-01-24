@@ -72,6 +72,3 @@ def build(bld):
     obj.vnum         = WIDGETS_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines      += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
-
-def shutdown():
-    autowaf.shutdown()

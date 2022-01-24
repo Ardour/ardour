@@ -120,6 +120,3 @@ def build(bld):
         obj.target       = 'run-tests'
         obj.name         = 'audiographer-unit-tests'
         obj.install_path = ''
-
-def shutdown():
-    autowaf.shutdown()

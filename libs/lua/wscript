@@ -19,6 +19,3 @@ def build(bld):
                    uselib = [ 'SIGCPP', 'DL' ]
                )
     autowaf.ensure_visible_symbols (obj, True)
-
-def shutdown():
-    autowaf.shutdown()

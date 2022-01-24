@@ -31,6 +31,3 @@ def build(bld):
     obj.vnum            = ZCONVOLVER_LIB_VERSION
     obj.uselib          = 'FFTW3F'
     obj.defines         = [ 'PACKAGE="' + I18N_PACKAGE + '"', 'ENABLE_VECTOR_MODE', '_POSIX_PTHREAD_SEMANTICS', '_REENTRANT' ]
-
-def shutdown():
-    autowaf.shutdown()

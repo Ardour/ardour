@@ -35,6 +35,3 @@ def build(bld):
                target = 'libltc',
                use    = 'libltc_includes'
                )
-
-def shutdown():
-    autowaf.shutdown()

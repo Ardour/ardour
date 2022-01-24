@@ -52,8 +52,5 @@ def build(bld):
     obj.target         = 'appleutility'
     obj.install_path   = os.path.join(bld.env['LIBDIR'], 'appleutility')
 
-def shutdown():
-    autowaf.shutdown()
-
 def i18n(bld):
     pass

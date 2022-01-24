@@ -108,6 +108,3 @@ def i18n_po(bld):
 def i18n_mo(bld):
     autowaf.build_i18n_mo(bld, '.', 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
                        'Paul Davis')
-
-def shutdown():
-    autowaf.shutdown()
