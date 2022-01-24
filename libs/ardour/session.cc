@@ -2907,7 +2907,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 				string const route_name  = node_copy.property(X_("name"))->value ();
 
 				/* generate a new name by adding a number to the end of the template name */
-				if (!find_route_name (route_name.c_str(), ++number, name, true)) {
+				if (!find_route_name (route_name, ++number, name, true)) {
 					fatal << _("Session: Failed to generate unique name and ID for track from template.") << endmsg;
 					abort(); /*NOTREACHED*/
 				}
