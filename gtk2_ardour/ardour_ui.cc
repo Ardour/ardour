@@ -864,6 +864,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete _process_thread; _process_thread = 0;
 		delete time_info_box; time_info_box = 0;
 		delete meterbridge; meterbridge = 0;
+		delete duplicate_routes_dialog; duplicate_routes_dialog = 0;
 		delete trigger_page; trigger_page = 0;
 		delete recorder; recorder = 0;
 		delete editor; editor = 0;
