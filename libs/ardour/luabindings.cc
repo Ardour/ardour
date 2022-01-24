@@ -101,6 +101,22 @@
 
 #include "LuaBridge/LuaBridge.h"
 
+/* lambda function to use for Lua metatable methods.
+ * A generic C++ template won't work here because
+ * operators cannot be used as template parameters.
+ */
+#define CPPOPERATOR2(RTYPE, TYPE1, TYPE2, OP)                         \
+  [] (lua_State* L) {                                                 \
+    TYPE1* const t0 = luabridge::Userdata::get <TYPE1> (L, 1, false); \
+    TYPE2* const t1 = luabridge::Userdata::get <TYPE2> (L, 2, false); \
+    luabridge::Stack <RTYPE>::push (L, (*t0 OP *t1));                 \
+    return 1;                                                         \
+  }
+
+#define CPPCOMPERATOR(TYPE, OP) CPPOPERATOR2 (bool, TYPE, TYPE, OP)
+#define CPPOPERATOR(TYPE, OP) CPPOPERATOR2 (TYPE, TYPE, TYPE, OP)
+
+
 #ifdef PLATFORM_WINDOWS
 /* luabridge uses addresses of static functions/variables to identify classes.
  *
@@ -548,6 +564,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("superclock_ticks_per_second", Temporal::superclock_ticks_per_second)
 		.addConst ("ticks_per_beat", Temporal::ticks_per_beat)
 
+		.beginClass <Temporal::ratio_t> ("ratio")
+		.addConstructor <void (*) (int64_t, int64_t)> ()
+		.addFunction ("is_unity", &Temporal::ratio_t::is_unity)
+		.addFunction ("is_zero", &Temporal::ratio_t::is_zero)
+		.endClass ()
+
 		.beginClass <Temporal::Beats> ("Beats")
 		.addConstructor <void (*) (int32_t, int32_t)> ()
 		.addStaticFunction ("from_double", &Temporal::Beats::from_double)
@@ -560,17 +582,61 @@ LuaBindings::common (lua_State* L)
 		// add wrappers to construct timepos_t from samples
 
 		.beginClass <Temporal::timepos_t> ("timepos_t")
-		.addVoidConstructor ()
+		.addConstructor <void (*) (Temporal::samplepos_t)> ()
+		.addOperator ("__add", CPPOPERATOR(Temporal::timepos_t, +))
+		.addOperator ("__mod", CPPOPERATOR2(Temporal::timepos_t, Temporal::timepos_t, Temporal::timecnt_t, %))
+		.addOperator ("__mul", CPPOPERATOR2(Temporal::timepos_t, Temporal::timepos_t, Temporal::ratio_t , *))
+		.addOperator ("__div", CPPOPERATOR2(Temporal::timepos_t, Temporal::timepos_t, Temporal::ratio_t , /))
+		.addOperator ("__lt", CPPCOMPERATOR(Temporal::timepos_t, <))
+		.addOperator ("__le", CPPCOMPERATOR(Temporal::timepos_t, <=))
+		.addOperator ("__eq", CPPCOMPERATOR(Temporal::timepos_t, ==))
 		.addStaticFunction ("zero", &Temporal::timepos_t::zero)
 		.addStaticFunction ("from_superclock", &Temporal::timepos_t::from_superclock)
 		.addStaticFunction ("from_ticks", &Temporal::timepos_t::from_ticks)
+		.addFunction ("is_positive", &Temporal::timepos_t::is_positive)
+		.addFunction ("is_negative", &Temporal::timepos_t::is_negative)
+		.addFunction ("is_zero", &Temporal::timepos_t::is_zero)
 		.addFunction ("is_beats", &Temporal::timepos_t::is_beats)
 		.addFunction ("is_superclock", &Temporal::timepos_t::is_superclock)
+		.addFunction ("superclocks", &Temporal::timepos_t::superclocks)
+		.addFunction ("samples", &Temporal::timepos_t::samples)
+		.addFunction ("ticks", &Temporal::timepos_t::ticks)
+		.addFunction ("beats", &Temporal::timepos_t::beats)
+		.addFunction ("str", &Temporal::timepos_t::str)
+		.addMetamethod ("__tostring", &Temporal::timepos_t::str)
 		.endClass ()
 
 		.beginClass <timecnt_t> ("timecnt_t")
-		.addVoidConstructor ()
-		.addStaticFunction ("zero", &timecnt_t::zero)
+		.addConstructor <void (*) (Temporal::samplepos_t)> ()
+		.addOperator ("__add", CPPOPERATOR(Temporal::timecnt_t, +))
+		.addOperator ("__sub", CPPOPERATOR(Temporal::timecnt_t, -))
+		.addOperator ("__mul", CPPOPERATOR2(Temporal::timecnt_t, Temporal::timecnt_t, Temporal::ratio_t , *))
+		.addOperator ("__div", CPPOPERATOR2(Temporal::timecnt_t, Temporal::timecnt_t, Temporal::ratio_t , /))
+		.addOperator ("__lt", CPPCOMPERATOR(Temporal::timecnt_t, <))
+		.addOperator ("__le", CPPCOMPERATOR(Temporal::timecnt_t, <=))
+		.addOperator ("__eq", CPPCOMPERATOR(Temporal::timecnt_t, ==))
+#if 0 // TODO these methods are, despite the static_cast<>, ambiguous
+		.addStaticFunction ("zero", &Temporal::timecnt_t::zero)
+		.addStaticFunction ("from_superclock", static_cast<Temporal::timecnt_t(Temporal::timecnt_t::*)(Temporal::superclock_t)>(&Temporal::timecnt_t::from_superclock))
+		.addStaticFunction ("from_samples", static_cast<Temporal::timecnt_t(Temporal::timecnt_t::*)(Temporal::samplepos_t)>(&Temporal::timecnt_t::from_samples))
+		.addStaticFunction ("from_ticks", static_cast<Temporal::timecnt_t(Temporal::timecnt_t::*)(int64_t)>(&Temporal::timecnt_t::from_ticks))
+#endif
+		.addFunction ("magnitude", &Temporal::timecnt_t::magnitude)
+		.addFunction ("position", &Temporal::timecnt_t::position)
+		.addFunction ("origin", &Temporal::timecnt_t::origin)
+		.addFunction ("set_position", &Temporal::timecnt_t::set_position)
+		.addFunction ("is_positive", &Temporal::timecnt_t::is_positive)
+		.addFunction ("is_negative", &Temporal::timecnt_t::is_negative)
+		.addFunction ("is_zero", &Temporal::timecnt_t::is_zero)
+		.addFunction ("abs", &Temporal::timecnt_t::abs)
+		.addFunction ("time_domain", &Temporal::timecnt_t::time_domain)
+		.addFunction ("set_time_domain", &Temporal::timecnt_t::set_time_domain)
+		.addFunction ("superclocks", &Temporal::timecnt_t::superclocks)
+		.addFunction ("samples", &Temporal::timecnt_t::samples)
+		.addFunction ("beats", &Temporal::timecnt_t::beats)
+		.addFunction ("ticks", &Temporal::timecnt_t::ticks)
+		.addFunction ("str", &Temporal::timecnt_t::str)
+		.addMetamethod ("__tostring", &Temporal::timecnt_t::str)
 		.endClass ()
 
 		.beginClass <Temporal::BBT_Time> ("BBT_TIME")
