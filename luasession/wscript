@@ -20,7 +20,6 @@ def configure(conf):
             mandatory=False)
 
 def build(bld):
-    VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
     if not bld.is_defined('HAVE_READLINE'):
         return
 

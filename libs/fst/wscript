@@ -21,8 +21,6 @@ def configure(conf):
         conf.check(compiler='cxx', lib='gdi32', mandatory=True, uselib_store='GDI32')
 
 def build(bld):
-    VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
-
     if bld.is_defined('VST3_SUPPORT'):
         obj = bld (features = 'cxx c cxxprogram')
         obj.source    = 'vst3-scanner.cc'
