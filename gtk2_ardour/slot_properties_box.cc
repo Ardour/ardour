@@ -345,9 +345,9 @@ SlotPropertyTable::SlotPropertyTable ()
 	eLaunchBox->set_edge_color (0x000000ff); // black
 	eLaunchBox->add (_launch_table);
 
-	attach(*trigBox,        0,1, 0,1, Gtk::FILL, Gtk::SHRINK );
-	attach(*eLaunchBox,     1,2, 0,1, Gtk::FILL, Gtk::SHRINK );
-	attach(*eFollowBox,     2,3, 0,1, Gtk::FILL, Gtk::SHRINK );
+	attach(*trigBox,        0,1, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
+	attach(*eLaunchBox,     1,2, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
+	attach(*eFollowBox,     2,3, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 }
 
 SlotPropertyTable::~SlotPropertyTable ()
