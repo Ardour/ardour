@@ -16,8 +16,6 @@ CANVAS_LIB_VERSION = '0.0.0'
 
 I18N_PACKAGE = 'libcanvas'
 
-path_prefix = 'libs/canvas/'
-
 canvas_sources = [
         'arc.cc',
         'arrow.cc',

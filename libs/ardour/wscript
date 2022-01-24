@@ -9,8 +9,6 @@ CURRENT_SESSION_FILE_VERSION = 7002
 
 I18N_PACKAGE = 'ardour'
 
-path_prefix = 'libs/ardour/'
-
 libardour_sources = [
         'amp.cc',
         'analyser.cc',
