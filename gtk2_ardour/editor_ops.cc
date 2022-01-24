@@ -9309,7 +9309,7 @@ bool
 Editor::should_ripple () const
 {
 	return (Config->get_edit_mode() == Ripple ||
-	        Config->get_edit_mode() == RippleAll);
+	        (Config->get_edit_mode() == RippleAll && (selection->tracks.size() > 1 || !Config->get_interview_editing())));
 }
 
 void
