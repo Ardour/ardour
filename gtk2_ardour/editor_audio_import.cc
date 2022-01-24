@@ -963,6 +963,13 @@ Editor::add_sources (vector<string>            paths,
 		}
 	}
 
+#ifdef MIXBUS
+	if (mode == ImportAsTrigger) {
+		/* Mixbus will only ever use stereo tracks when using DnD to import to triggers */
+		input_chan = 2;
+	}
+#endif
+
 	if (Config->get_output_auto_connect() & AutoConnectMaster) {
 		output_chan = (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan);
 	} else {
