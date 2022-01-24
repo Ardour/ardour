@@ -548,8 +548,6 @@ def build_color_scheme(path, prefix):
     return color_scheme
 
 def build(bld):
-
-    VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
 
     # Tool to dump lua-bindings (of gtk2ardour + libs)

@@ -19,9 +19,6 @@ def configure(conf):
     conf.load('misc')
 
 def build(bld):
-
-    VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
-
     # just the normal executable version of the GTK GUI
     obj = bld (features = 'cxx c cxxprogram')
     # this program does not do the whole hidden symbols thing
