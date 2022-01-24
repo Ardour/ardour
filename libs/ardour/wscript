@@ -10,7 +10,6 @@ CURRENT_SESSION_FILE_VERSION = 7002
 I18N_PACKAGE = 'ardour'
 
 # Mandatory variables
-top = '.'
 out = 'build'
 
 path_prefix = 'libs/ardour/'
@@ -728,17 +727,17 @@ def shutdown():
     autowaf.shutdown()
 
 def i18n(bld):
-    autowaf.build_i18n(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')
 
 def i18n_pot(bld):
-    autowaf.build_i18n(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')
 
 def i18n_po(bld):
-    autowaf.build_i18n_po(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n_po(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')
 
 def i18n_mo(bld):
-    autowaf.build_i18n_mo(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n_mo(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')

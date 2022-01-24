@@ -9,7 +9,6 @@ import subprocess
 import glob
 
 # Mandatory variables
-top = '.'
 out = 'build'
 
 @TaskGen.extension('.m')
@@ -921,26 +920,26 @@ def build(bld):
 
 def i18n(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-    autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+    autowaf.build_i18n(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                        'Paul Davis')
     appdata_i18n_pot(bld)
     appdata_i18n_po(bld)
 
 def i18n_pot(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-    autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+    autowaf.build_i18n_pot(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                            'Paul Davis')
     appdata_i18n_pot(bld)
 
 def i18n_po(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-    autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+    autowaf.build_i18n_po(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                           'Paul Davis')
     appdata_i18n_po(bld)
 
 def i18n_mo(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-    autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+    autowaf.build_i18n_mo(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                           'Paul Davis')
 
 def appdata_i18n_pot(bld):
