@@ -128,7 +128,7 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	_table.set_spacings (4);
 	_table.set_border_width (2);
 
-	attach (*eTempoBox,    0,1, 0,1, Gtk::FILL, Gtk::SHRINK);
+	attach (*eTempoBox,    0,1, 0,1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL);
 #if 0
 	attach (_table,        0,1, 1,2, Gtk::FILL, Gtk::SHRINK);
 #endif

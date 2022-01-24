@@ -142,10 +142,10 @@ TriggerPage::TriggerPage ()
 	table->set_border_width (8);
 
 	int col = 0;
-	table->attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
+	table->attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 
 	col = 1;
-	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
+	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 	++col;
 
 #ifdef MIDI_PROPERTIES_BOX_IMPLEMENTED
