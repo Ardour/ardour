@@ -3,10 +3,6 @@ import re
 import waflib.extras.autowaf as autowaf
 import waflib.Utils as Utils
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 def options(opt):
     autowaf.set_options(opt)
 

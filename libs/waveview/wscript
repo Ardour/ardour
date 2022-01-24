@@ -15,10 +15,6 @@ WAVEVIEW_LIB_VERSION = '0.0.0'
 
 I18N_PACKAGE = 'libwaveview'
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 waveview_sources = [
         'debug.cc',
         'wave_view.cc',

@@ -11,10 +11,6 @@ LIBSURFACES_VERSION = '4.1.0'
 # micro increment <=> no interface changes
 LIBSURFACES_LIB_VERSION = '4.1.0'
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 children = [
     'faderport',
     'faderport8',

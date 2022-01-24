@@ -2,10 +2,6 @@
 from waflib.extras import autowaf as autowaf
 import os
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 # needed for code used from libardour
 I18N_PACKAGE = 'ardour'
 

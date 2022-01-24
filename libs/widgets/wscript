@@ -15,10 +15,6 @@ WIDGETS_LIB_VERSION = '0.0.0'
 
 I18N_PACKAGE = 'libwidgets'
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 widgets_sources = [
         'ardour_ctrl_base.cc',
         'ardour_button.cc',

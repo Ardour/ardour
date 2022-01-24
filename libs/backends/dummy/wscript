@@ -4,10 +4,6 @@ import os
 
 I18N_PACKAGE = 'dummy-backend'
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 def options(opt):
     autowaf.set_options(opt)
 

@@ -15,10 +15,6 @@ LIBLTC_LIB_VERSION = '1.1.1'
 
 I18N_PACKAGE = 'libltc'
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 def options(opt):
     autowaf.set_options(opt)
 

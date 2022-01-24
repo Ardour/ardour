@@ -13,10 +13,6 @@ LIBMIDIPP_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # micro increment <=> no interface changes
 LIBMIDIPP_LIB_VERSION = '4.1.0'
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 path_prefix = 'libs/midi++2/'
 
 libmidi_sources = [

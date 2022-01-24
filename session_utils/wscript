@@ -4,10 +4,6 @@ import waflib.Utils as Utils
 import os
 import sys
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 def options(opt):
     autowaf.set_options(opt)
 

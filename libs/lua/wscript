@@ -3,10 +3,6 @@ from waflib.extras import autowaf as autowaf
 
 I18N_PACKAGE = 'liblua'
 
-# Mandatory variables
-top = '.'
-out = 'build'
-
 def options(opt):
     autowaf.set_options(opt)
 
