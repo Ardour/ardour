@@ -48,7 +48,6 @@ gtkmm2ext_sources = [
 ]
 
 # Mandatory variables
-top = '.'
 out = 'build'
 
 path_prefix = 'libs/gtkmm2ext/'
@@ -100,19 +99,19 @@ def build(bld):
                             mo)
 
 def i18n(bld):
-    autowaf.build_i18n(bld, top, 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
+    autowaf.build_i18n(bld, '.', 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
                        'Paul Davis')
 
 def i18n_pot(bld):
-    autowaf.build_i18n_pot(bld, top, 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
+    autowaf.build_i18n_pot(bld, '.', 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
                        'Paul Davis')
 
 def i18n_po(bld):
-    autowaf.build_i18n_po(bld, top, 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
+    autowaf.build_i18n_po(bld, '.', 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
                        'Paul Davis')
 
 def i18n_mo(bld):
-    autowaf.build_i18n_mo(bld, top, 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
+    autowaf.build_i18n_mo(bld, '.', 'libs/gtkmm2ext', I18N_PACKAGE, gtkmm2ext_sources,
                        'Paul Davis')
 
 def shutdown():
