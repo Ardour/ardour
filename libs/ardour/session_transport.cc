@@ -2088,13 +2088,15 @@ Session::actual_speed() const
 void
 Session::flush_cue_recording ()
 {
-	if (!TriggerBox::cue_records.read_space()) {
+	/* if the user canceled cue recording before stopping *and* didn't record any cues, leave cues unchanged */
+	if (!TriggerBox::cue_recording() && !TriggerBox::cue_records.read_space()) {
 		return;
 	}
 
 	CueRecord cr;
 	TempoMap::SharedPtr tmap (TempoMap::use());
 
+	/* we will delete the cues we rolled over, even if the user never wrote any new cues (??)*/
 	_locations->clear_cue_markers (_last_roll_location, _transport_sample);
 
 	while (TriggerBox::cue_records.read (&cr, 1) == 1) {
@@ -2115,4 +2117,7 @@ Session::flush_cue_recording ()
 
 	/* scheduled sync of cue markers in RT thread */
 	cue_marker_change (0);
+
+	/* disarm the cues from recording when we finish our pass */
+	TriggerBox::set_cue_recording(false);
 }
