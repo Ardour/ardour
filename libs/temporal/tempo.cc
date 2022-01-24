@@ -1789,9 +1789,9 @@ TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
 		p = last_used;
 
 		if (can_match) {
-			while (((*p).*method)() <= arg && p != endi) ++p;
+			while ((p != endi) && ((*p).*method)() <= arg) ++p;
 		} else {
-			while (((*p).*method)() < arg && p != endi) ++p;
+			while ((p != endi) && ((*p).*method)() < arg) ++p;
 		}
 
 		return p;
