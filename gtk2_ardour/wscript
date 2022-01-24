@@ -17,7 +17,6 @@ import copy
 top = '.'
 out = 'build'
 
-from waflib import TaskGen
 @TaskGen.extension('.m')
 def m_hook(self, node):
     """Alias .m files to be compiled the same as .c files, gcc will do the right thing."""

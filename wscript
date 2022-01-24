@@ -102,7 +102,6 @@ compiler_flags_dictionaries= {
         'linker-debuggable' : ['/DEBUG', '/INCREMENTAL' ],
         'nondebuggable' : ['/DNDEBUG', '/Ob1', '/MD', '/Gd', '/EHsc'],
         'profile' : '/Oy-',
-        'sse' : '/arch:SSE',
         'silence-unused-arguments' : '',
         'sse' : '',
         'xsaveintrin' : '',
