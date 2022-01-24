@@ -35,7 +35,7 @@ def build(bld):
         obj = bld.stdlib (source = [ 'ptformat.cc' ])
         obj.cxxflags = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.cflags   = [ bld.env['compiler_flags_dict']['pic'] ]
-        
+
     obj.export_includes     = ['.']
     obj.includes     = ['.']
     obj.name         = 'libptformat'
@@ -45,6 +45,6 @@ def build(bld):
     obj.vnum         = LIBPTFORMAT_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines     += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
-    
+
 def shutdown():
     autowaf.shutdown()

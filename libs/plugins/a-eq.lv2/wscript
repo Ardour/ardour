@@ -15,7 +15,7 @@ def options(opt):
 def configure(conf):
     autowaf.check_pkg(conf, 'lv2', atleast_version='1.0.0',
                       uselib_store='LV2_1_0_0')
-    autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12.0') 
+    autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12.0')
 
 def build(bld):
     bundle = 'a-eq.lv2'

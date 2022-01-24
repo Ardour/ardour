@@ -161,7 +161,6 @@ def build(bld):
                     manual_testobj.target       = target
                     manual_testobj.install_path = ''
 
-    
+
 def shutdown():
     autowaf.shutdown()
-

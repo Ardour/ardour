@@ -84,4 +84,3 @@ def build(bld):
 
 def shutdown():
     autowaf.shutdown()
-

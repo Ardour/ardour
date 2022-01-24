@@ -116,4 +116,3 @@ def build(bld):
 
     if re.search ("linux", sys.platform) != None:
        obj.uselib += [ 'ALSA' ]
-
