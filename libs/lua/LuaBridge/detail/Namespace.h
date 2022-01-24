@@ -745,6 +745,52 @@ private:
     }
 #endif
 
+    /**
+      Add or replace a Metatable Metamethod calling a lua_CFunction.
+    */
+    Class <T>& addOperator (char const* name, int (*const fp)(lua_State*))
+    {
+      /* get metatable */
+      lua_rawgetp (L, LUA_REGISTRYINDEX, ClassInfo <T>::getClassKey ());
+      lua_pushcfunction (L, fp);
+      rawsetfield (L, -2, name);
+      lua_pop (L, 1);
+
+      /* reset stack */
+      lua_pop (L, 3);
+      lua_rawgetp (L, LUA_REGISTRYINDEX, ClassInfo <T>::getStaticKey ());
+      rawgetfield (L, -1, "__class");
+      rawgetfield (L, -1, "__const");
+      lua_insert (L, -3);
+      lua_insert (L, -2);
+
+      return *this;
+    }
+
+    /**
+      Add or replace a Metamethod Metamethod, evaluate a const class-member method
+    */
+    template <class FP>
+    Class <T>& addMetamethod (char const* name, FP const fp)
+    {
+      /* get metatable */
+      lua_rawgetp (L, LUA_REGISTRYINDEX, ClassInfo <T>::getClassKey ());
+      new (lua_newuserdata (L, sizeof (FP))) FP (fp);
+      lua_pushcclosure (L, &CFunc::CallConstMember <FP>::f, 1);
+      rawsetfield (L, -2, name);
+      lua_pop (L, 1);
+
+      /* reset stack */
+      lua_pop (L, 3);
+      lua_rawgetp (L, LUA_REGISTRYINDEX, ClassInfo <T>::getStaticKey ());
+      rawgetfield (L, -1, "__class");
+      rawgetfield (L, -1, "__const");
+      lua_insert (L, -3);
+      lua_insert (L, -2);
+
+      return *this;
+    }
+
     //--------------------------------------------------------------------------
     /**
       Add or replace a static member function.
