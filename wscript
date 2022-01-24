@@ -6,7 +6,6 @@ import re
 import subprocess
 import sys
 import platform as PLATFORM
-from waflib.Build import Context
 from waflib.Build import BuildContext
 import waflib.Utils as Utils
 
