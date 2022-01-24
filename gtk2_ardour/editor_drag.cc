@@ -5704,7 +5704,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	if (first_move) {
-		if (Config->get_edit_mode() == RippleAll) {
+		if (Config->get_edit_mode() == RippleAll && Config->get_interview_editing()) {
 			_editor->selection->set (_editor->get_track_views());
 		}
 		_track_selection_at_start = _editor->selection->tracks;

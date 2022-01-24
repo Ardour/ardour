@@ -113,6 +113,7 @@ CONFIG_VARIABLE (bool, region_boundaries_from_onscreen_tracks, "region-boundarie
 CONFIG_VARIABLE (FadeShape, default_fade_shape, "default-fade-shape", FadeConstantPower)
 CONFIG_VARIABLE (RangeSelectionAfterSplit, range_selection_after_split, "range-selection-after-split", PreserveSel)
 CONFIG_VARIABLE (RegionSelectionAfterSplit, region_selection_after_split, "region-selection-after-split", None)
+CONFIG_VARIABLE (bool, interview_editing, "interview-editing", false)
 
 /* monitoring, mute, solo etc */
 
