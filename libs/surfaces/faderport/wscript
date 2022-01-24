@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from waflib.extras import autowaf as autowaf
 import os
 
 def options(opt):
@@ -24,6 +23,3 @@ def build(bld):
     obj.uselib       = 'GTKMM GTK GDK XML OSX'
     obj.use          = 'libardour libardour_cp libardour_midisurface libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
-
-def shutdown():
-    autowaf.shutdown()

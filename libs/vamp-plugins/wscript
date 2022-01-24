@@ -48,6 +48,3 @@ def build(bld):
         obj.source += ' Onset.cpp '
         obj.uselib += ' AUBIO '
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'vamp')
-
-def shutdown():
-    autowaf.shutdown()

@@ -95,6 +95,3 @@ def build(bld):
         bld.recurse('maschine2')
     if bld.is_defined ('HAVE_WEBSOCKETS'):
         bld.recurse('websockets')
-
-def shutdown():
-    autowaf.shutdown()

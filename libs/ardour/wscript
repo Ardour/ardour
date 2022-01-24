@@ -718,9 +718,6 @@ def create_ardour_test_program(bld, includes, name, target, sources):
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
         ]
 
-def shutdown():
-    autowaf.shutdown()
-
 def i18n(bld):
     autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')

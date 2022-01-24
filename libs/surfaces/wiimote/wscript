@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from waflib.extras import autowaf as autowaf
 import os
 
 def options(opt):
@@ -22,6 +21,3 @@ def build(bld):
     obj.uselib       = 'GTKMM CWIID XML'
     obj.use          = 'libardour libardour_cp libgtkmm2ext'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
-
-def shutdown():
-    autowaf.shutdown()

@@ -91,6 +91,3 @@ def build(bld):
     if bld.env['build_target'] != 'mingw':
         obj.cxxflags += [ bld.env['compiler_flags_dict']['pic'] ]
         obj.cflags   += [ bld.env['compiler_flags_dict']['pic'] ]
-
-def shutdown():
-    autowaf.shutdown()
