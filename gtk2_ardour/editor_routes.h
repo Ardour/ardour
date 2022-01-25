@@ -123,8 +123,6 @@ private:
 	void show_tracks_with_regions_at_playhead ();
 	void selection_changed ();
 
-	int plugin_setup (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);
-
 	void name_edit (std::string const &, std::string const &);
 	void solo_changed_so_update_mute ();
 

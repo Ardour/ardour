@@ -139,6 +139,7 @@
 #include "mixer_ui.h"
 #include "mouse_cursors.h"
 #include "note_base.h"
+#include "plugin_setup_dialog.h"
 #include "public_editor.h"
 #include "quantize_dialog.h"
 #include "region_peak_cursor.h"
@@ -840,6 +841,7 @@ Editor::Editor ()
 	/* problematic: has to return a value and thus cannot be x-thread */
 
 	Session::AskAboutPlaylistDeletion.connect_same_thread (*this, boost::bind (&Editor::playlist_deletion_dialog, this, _1));
+	Route::PluginSetup.connect_same_thread (*this, boost::bind (&Editor::plugin_setup, this, _1, _2, _3));
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&Editor::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &Editor::ui_parameter_changed));
@@ -4388,6 +4390,14 @@ Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 	}
 
 	return -1;
+}
+
+int
+Editor::plugin_setup (boost::shared_ptr<Route> r, boost::shared_ptr<PluginInsert> pi, ARDOUR::Route::PluginSetupOptions flags)
+{
+	PluginSetupDialog psd (r, pi, flags);
+	int rv = psd.run ();
+	return rv + (psd.fan_out() ? 4 : 0);
 }
 
 bool

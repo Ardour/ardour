@@ -58,7 +58,6 @@
 #include "keyboard.h"
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
-#include "plugin_setup_dialog.h"
 #include "route_sorter.h"
 #include "vca_time_axis.h"
 #include "utils.h"
@@ -347,8 +346,6 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.signal_leave_notify_event().connect (sigc::mem_fun (*this, &EditorRoutes::leave_notify), false);
 
 	_display.set_enable_search (false);
-
-	Route::PluginSetup.connect_same_thread (*this, boost::bind (&EditorRoutes::plugin_setup, this, _1, _2, _3));
 }
 
 EditorRoutes::~EditorRoutes ()
@@ -1873,12 +1870,4 @@ EditorRoutes::show_tracks_with_regions_at_playhead ()
 	 */
 
 	sync_presentation_info_from_treeview ();
-}
-
-int
-EditorRoutes::plugin_setup (boost::shared_ptr<Route> r, boost::shared_ptr<PluginInsert> pi, ARDOUR::Route::PluginSetupOptions flags)
-{
-	PluginSetupDialog psd (r, pi, flags);
-	int rv = psd.run ();
-	return rv + (psd.fan_out() ? 4 : 0);
 }

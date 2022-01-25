@@ -2236,6 +2236,9 @@ private:
 	Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 
+	/* plugin setup */
+	int plugin_setup (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);
+
 	/* handling cleanup */
 
 	int playlist_deletion_dialog (boost::shared_ptr<ARDOUR::Playlist>);
