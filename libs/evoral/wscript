@@ -17,8 +17,6 @@ EVORAL_LIB_VERSION = '0.0.0'
 APPNAME = 'evoral'
 
 def options(opt):
-    opt.load('compiler_c')
-    opt.load('compiler_cxx')
     autowaf.set_options(opt)
     opt.add_option('--test', action='store_true', default=False, dest='build_tests',
                     help="Build unit tests")
