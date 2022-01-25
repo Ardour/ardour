@@ -11,7 +11,7 @@ QM_DSP_VERSION = '1.7.1'
 QM_DSP_LIB_VERSION = '1.7.1'
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     if conf.is_defined('USE_EXTERNAL_LIBS'):

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from waflib.extras import autowaf as autowaf
 import os
 import sys
 import re
@@ -8,7 +7,7 @@ import re
 I18N_PACKAGE = 'ardour'
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     conf.load('misc')

@@ -4,7 +4,7 @@ from waflib.extras import autowaf as autowaf
 I18N_PACKAGE = 'liblua'
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     pass

@@ -25,7 +25,7 @@ mackie_sources = [
 ]
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     pass

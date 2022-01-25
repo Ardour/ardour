@@ -8,7 +8,7 @@ import re
 I18N_PACKAGE = 'jack-backend'
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.121.0')

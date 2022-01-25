@@ -10,7 +10,7 @@ LIBFLUIDSYNTH_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 I18N_PACKAGE = 'libfluidsynth'
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     if conf.is_defined('USE_EXTERNAL_LIBS'):

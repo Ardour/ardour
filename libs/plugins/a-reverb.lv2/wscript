@@ -4,7 +4,7 @@ import waflib.extras.autowaf as autowaf
 import waflib.Utils as Utils
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     autowaf.check_pkg(conf, 'lv2', atleast_version='1.0.0',
