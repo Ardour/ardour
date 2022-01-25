@@ -353,6 +353,8 @@ Editor::Editor ()
 	, edit_controls_left_menu (0)
 	, edit_controls_right_menu (0)
 	, visual_change_queued(false)
+	, _tvl_no_redisplay(false)
+	, _tvl_redisplay_on_resume(false)
 	, _last_update_time (0)
 	, _err_screen_engine (0)
 	, cut_buffer_start (0)
@@ -1337,7 +1339,7 @@ Editor::set_session (Session *t)
 	_regions->set_session (_session);
 	_sources->set_session (_session);
 	_snapshots->set_session (_session);
-	_routes->set_session (_session);
+	//_routes->set_session (_session); // temp disabled for EditorRoutes update
 	_locations->set_session (_session);
 	_properties_box->set_session (_session);
 
@@ -1353,6 +1355,7 @@ Editor::set_session (Session *t)
 		sfbrowser->set_session (_session);
 	}
 
+	initial_display ();
 	compute_fixed_ruler_scale ();
 
 	/* Make sure we have auto loop and auto punch ranges */
@@ -4762,7 +4765,7 @@ Editor::use_visual_state (VisualState& vs)
 		}
 	}
 
-	_routes->update_visibility ();
+	// TODO push state to PresentationInfo, force update ?
 }
 
 /** This is the core function that controls the zoom level of the canvas. It is called
@@ -5410,7 +5413,7 @@ Editor::first_idle ()
 	selection->set (rs);
 
 	/* first idle adds route children (automation tracks), so we need to redisplay here */
-	_routes->redisplay ();
+	redisplay_track_views ();
 
 	delete dialog;
 
@@ -5586,18 +5589,33 @@ Editor::axis_views_from_routes (boost::shared_ptr<RouteList> r) const
 void
 Editor::suspend_route_redisplay ()
 {
-	if (_routes) {
-		_routes->suspend_redisplay();
+	_tvl_no_redisplay = true;
+}
+
+void
+Editor::queue_redisplay_track_views ()
+{
+	if (!_tvl_redisplay_connection.connected ()) {
+		_tvl_redisplay_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &Editor::redisplay_track_views));
 	}
 }
 
 void
 Editor::resume_route_redisplay ()
 {
-	if (_routes) {
-		_routes->redisplay(); // queue redisplay
-		_routes->resume_redisplay();
+	_tvl_no_redisplay = false;
+	if (_tvl_redisplay_on_resume) {
+		queue_redisplay_track_views ();
 	}
+}
+
+void
+Editor::initial_display ()
+{
+	DisplaySuspender ds;
+	StripableList s;
+	_session->get_stripables (s);
+	add_stripables (s);
 }
 
 void
@@ -5627,10 +5645,10 @@ Editor::add_routes (RouteList& rlist)
 void
 Editor::add_stripables (StripableList& sl)
 {
-	list<TimeAxisView*> new_views;
 	boost::shared_ptr<VCA> v;
 	boost::shared_ptr<Route> r;
 	TrackViewList new_selection;
+	bool changed = false;
 	bool from_scratch = (track_views.size() == 0);
 
 	sl.sort (Stripable::Sorter());
@@ -5645,7 +5663,10 @@ Editor::add_stripables (StripableList& sl)
 
 			VCATimeAxisView* vtv = new VCATimeAxisView (*this, _session, *_track_canvas);
 			vtv->set_vca (v);
-			new_views.push_back (vtv);
+			track_views.push_back (vtv);
+
+			(*s)->gui_changed.connect (*this, invalidator (*this), boost::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
+			changed = true;
 
 		} else if ((r = boost::dynamic_pointer_cast<Route> (*s)) != 0) {
 
@@ -5666,7 +5687,6 @@ Editor::add_stripables (StripableList& sl)
 				throw unknown_type();
 			}
 
-			new_views.push_back (rtv);
 			track_views.push_back (rtv);
 			new_selection.push_back (rtv);
 
@@ -5674,12 +5694,13 @@ Editor::add_stripables (StripableList& sl)
 
 			rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 			rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
+			(*s)->gui_changed.connect (*this, invalidator (*this), boost::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
+			changed = true;
 		}
 	}
 
-	if (new_views.size() > 0) {
-		_routes->time_axis_views_added (new_views);
-		//_summary->routes_added (new_selection); /* XXX requires RouteTimeAxisViewList */
+	if (changed) {
+		queue_redisplay_track_views ();
 	}
 
 	/* note: !new_selection.empty() means that we got some routes rather
@@ -5718,8 +5739,6 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 	}
 
 	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv);
-
-	_routes->route_removed (tv);
 
 	TimeAxisView::Children c = tv->get_child_list ();
 	for (TimeAxisView::Children::const_iterator i = c.begin(); i != c.end(); ++i) {
@@ -5806,6 +5825,9 @@ Editor::hide_track_in_display (TimeAxisView* tv, bool apply_to_selection)
 		}
 		if (rtv) {
 			rtv->route()->presentation_info().set_hidden (true);
+			/* TODO also handle Routegroups IFF (rg->is_hidden() && !rg->is_selection())
+			 * selection currently unconditionally hides due to above if() clause :(
+			 */
 		}
 	}
 }
@@ -5819,21 +5841,92 @@ Editor::show_track_in_display (TimeAxisView* tv, bool move_into_view)
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 	if (rtv) {
 		rtv->route()->presentation_info().set_hidden (false);
+#if 0 // TODO see above
+		RouteGroup* rg = rtv->route ()->route_group ();
+		if (rg && rg->is_active () && rg->is_hidden () && !rg->is_select ()) {
+			boost::shared_ptr<RouteList> rl (rg->route_list ());
+			for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
+				(*i)->presentation_info().set_hidden (false);
+			}
+	}
+#endif
 	}
 	if (move_into_view) {
 		ensure_time_axis_view_is_visible (*tv, false);
 	}
 }
 
-bool
-Editor::sync_track_view_list_and_routes ()
+struct TrackViewStripableSorter
 {
-	track_views = TrackViewList (_routes->views ());
+  bool operator() (const TimeAxisView* tav_a, const TimeAxisView *tav_b)
+  {
+    StripableTimeAxisView const* stav_a = dynamic_cast<StripableTimeAxisView const*>(tav_a);
+    StripableTimeAxisView const* stav_b = dynamic_cast<StripableTimeAxisView const*>(tav_b);
+    assert (stav_a && stav_b);
+
+    boost::shared_ptr<ARDOUR::Stripable> const& a = stav_a->stripable ();
+    boost::shared_ptr<ARDOUR::Stripable> const& b = stav_b->stripable ();
+    return ARDOUR::Stripable::Sorter () (a, b);
+  }
+};
+
+bool
+Editor::redisplay_track_views ()
+{
+	if (!_session || _session->deletion_in_progress()) {
+		return false;
+	}
+
+	if (_tvl_no_redisplay) {
+		_tvl_redisplay_on_resume = true;
+		return false;
+	}
+
+	TrackViewStripableSorter cmp;
+	track_views.sort (cmp);
+
+	uint32_t position;
+	TrackViewList::const_iterator i;
+
+	/* n will be the count of tracks plus children (updated by TimeAxisView::show_at),
+	 * so we will use that to know where to put things.
+	 */
+	int n;
+	for (n = 0, position = 0, i = track_views.begin(); i != track_views.end(); ++i) {
+		TimeAxisView *tv = (*i);
+
+		if (tv->marked_for_display ()) {
+			position += tv->show_at (position, n, &edit_controls_vbox);
+		} else {
+			tv->hide ();
+		}
+		n++;
+	}
+
+	reset_controls_layout_height (position);
+	reset_controls_layout_width ();
+	_full_canvas_height = position;
+
+	if ((vertical_adjustment.get_value() + _visible_canvas_height) > vertical_adjustment.get_upper()) {
+		/*
+		 * We're increasing the size of the canvas while the bottom is visible.
+		 * We scroll down to keep in step with the controls layout.
+		 */
+		vertical_adjustment.set_value (_full_canvas_height - _visible_canvas_height);
+	}
 
 	_summary->set_background_dirty();
 	_group_tabs->set_dirty ();
 
-	return false; // do not call again (until needed)
+	return false;
+}
+
+void
+Editor::handle_gui_changes (string const & what, void*)
+{
+	if (what == "track_height" || what == "visible_tracks") {
+		queue_redisplay_track_views ();
+	}
 }
 
 void

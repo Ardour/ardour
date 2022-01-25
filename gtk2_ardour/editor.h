@@ -868,6 +868,7 @@ private:
 	void popup_note_context_menu (ArdourCanvas::Item*, GdkEvent*);
 	Gtk::Menu _note_context_menu;
 
+	void initial_display ();
 	void add_stripables (ARDOUR::StripableList&);
 	void add_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView*);
@@ -1222,6 +1223,7 @@ private:
 
 	/* track views */
 	TrackViewList track_views;
+
 	std::pair<TimeAxisView*, double> trackview_by_y_position (double, bool trackview_relative_offset = true) const;
 
 	AxisView* axis_view_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
@@ -1232,6 +1234,14 @@ private:
 	}
 
 	TrackViewList get_tracks_for_range_action () const;
+
+	Gtk::VBox list_vpacker;
+	void queue_redisplay_track_views ();
+	bool redisplay_track_views ();
+
+	bool             _tvl_no_redisplay;
+	bool             _tvl_redisplay_on_resume;
+	sigc::connection _tvl_redisplay_connection;
 
 	sigc::connection super_rapid_screen_update_connection;
 	void center_screen_internal (samplepos_t, float);
@@ -1533,6 +1543,7 @@ private:
 	void scroll_forward (float pages=0.8f);
 	void scroll_tracks_down ();
 	void scroll_tracks_up ();
+	void move_selected_tracks (bool);
 	void set_mark ();
 	void clear_markers ();
 	void clear_xrun_markers ();
@@ -1995,6 +2006,7 @@ private:
 	void track_selection_changed ();
 	void update_time_selection_display ();
 	void presentation_info_changed (PBD::PropertyChange const &);
+	void handle_gui_changes (std::string const&, void*);
 	void region_selection_changed ();
 	void catch_up_on_midi_selection ();
 	sigc::connection editor_regions_selection_changed_connection;
@@ -2064,10 +2076,6 @@ private:
 	Glib::RefPtr<Gdk::Pixbuf> rec_disabled_icon;
 
 	Glib::RefPtr<Gtk::TreeSelection> route_display_selection;
-
-	bool sync_track_view_list_and_routes ();
-
-	Gtk::VBox list_vpacker;
 
 	/* autoscrolling */
 

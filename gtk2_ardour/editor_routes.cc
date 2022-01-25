@@ -618,7 +618,7 @@ EditorRoutes::redisplay_real ()
 	 * we can't do this here, because we could mess up something that is traversing
 	 * the track order and has caused a redisplay of the list.
 	 */
-	Glib::signal_idle().connect (sigc::mem_fun (*_editor, &Editor::sync_track_view_list_and_routes));
+	//Glib::signal_idle().connect (sigc::mem_fun (*_editor, &Editor::sync_track_view_list_and_routes));
 
 	_editor->reset_controls_layout_height (position);
 	_editor->reset_controls_layout_width ();

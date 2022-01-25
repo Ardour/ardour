@@ -1234,16 +1234,15 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 		}
 	}
 
-	/* STEP 4: update EditorRoutes treeview */
+	/* STEP 4: update Editor::track_views */
 
 	PropertyChange soh;
 
-	soh.add (Properties::selected);
 	soh.add (Properties::order);
 	soh.add (Properties::hidden);
 
 	if (what_changed.contains (soh)) {
-		_routes->sync_treeview_from_presentation_info (what_changed);
+		queue_redisplay_track_views ();
 	}
 }
 
@@ -2347,5 +2346,120 @@ Editor::catch_up_on_midi_selection ()
 
 	if (!regions.empty()) {
 		selection->set (regions);
+	}
+}
+
+struct ViewStripable {
+	TimeAxisView* tav;
+	boost::shared_ptr<Stripable> stripable;
+
+	ViewStripable (TimeAxisView* t, boost::shared_ptr<Stripable> s)
+		: tav (t), stripable (s) {}
+};
+
+void
+Editor::move_selected_tracks (bool up)
+{
+	TimeAxisView* scroll_to = 0;
+	StripableList sl;
+	_session->get_stripables (sl);
+
+	if (sl.size() < 2) {
+		/* nope */
+		return;
+	}
+
+	sl.sort (Stripable::Sorter());
+
+	std::list<ViewStripable> view_stripables;
+
+	/* build a list that includes time axis view information */
+
+	for (StripableList::const_iterator sli = sl.begin(); sli != sl.end(); ++sli) {
+		TimeAxisView* tv = time_axis_view_from_stripable (*sli);
+		view_stripables.push_back (ViewStripable (tv, *sli));
+	}
+
+	/* for each selected stripable, move it above or below the adjacent
+	 * stripable that has a time-axis view representation here. If there's
+	 * no such representation, then
+	 */
+
+	list<ViewStripable>::iterator unselected_neighbour;
+	list<ViewStripable>::iterator vsi;
+
+	{
+		PresentationInfo::ChangeSuspender cs;
+
+		if (up) {
+			unselected_neighbour = view_stripables.end ();
+			vsi = view_stripables.begin();
+
+			while (vsi != view_stripables.end()) {
+
+				if (vsi->stripable->is_selected()) {
+
+					if (unselected_neighbour != view_stripables.end()) {
+
+						PresentationInfo::order_t unselected_neighbour_order = unselected_neighbour->stripable->presentation_info().order();
+						PresentationInfo::order_t my_order = vsi->stripable->presentation_info().order();
+
+						unselected_neighbour->stripable->set_presentation_order (my_order);
+						vsi->stripable->set_presentation_order (unselected_neighbour_order);
+
+						if (!scroll_to) {
+							scroll_to = vsi->tav;
+						}
+					}
+
+				} else {
+
+					if (vsi->tav) {
+						unselected_neighbour = vsi;
+					}
+
+				}
+
+				++vsi;
+			}
+
+		} else {
+
+			unselected_neighbour = view_stripables.end();
+			vsi = unselected_neighbour;
+
+			do {
+
+				--vsi;
+
+				if (vsi->stripable->is_selected()) {
+
+					if (unselected_neighbour != view_stripables.end()) {
+
+						PresentationInfo::order_t unselected_neighbour_order = unselected_neighbour->stripable->presentation_info().order();
+						PresentationInfo::order_t my_order = vsi->stripable->presentation_info().order();
+
+						unselected_neighbour->stripable->set_presentation_order (my_order);
+						vsi->stripable->set_presentation_order (unselected_neighbour_order);
+
+						if (!scroll_to) {
+							scroll_to = vsi->tav;
+						}
+					}
+
+				} else {
+
+					if (vsi->tav) {
+						unselected_neighbour = vsi;
+					}
+
+				}
+
+			} while (vsi != view_stripables.begin());
+		}
+	}
+
+	if (scroll_to) {
+		ensure_time_axis_view_is_visible (*scroll_to, false);
 	}
 }
