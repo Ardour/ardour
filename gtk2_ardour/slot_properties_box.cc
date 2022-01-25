@@ -115,6 +115,7 @@ SlotPropertyTable::SlotPropertyTable ()
 	, _follow_length_adjustment (1, 1, 128, 1, 4)
 	, _follow_length_spinner (_follow_length_adjustment)
 	, _legato_button (ArdourButton::led_default_elements)
+	, _isolate_button (ArdourButton::led_default_elements)
 	, _ignore_changes(false)
 
 {
@@ -178,8 +179,12 @@ SlotPropertyTable::SlotPropertyTable ()
 	_launch_style_button.AddMenuElem (MenuElem (launch_style_to_string (Trigger::Repeat), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_launch_style), Trigger::Repeat)));
 
 	_launch_style_button.set_name("FollowAction");
+
 	_legato_button.set_text (_("Legato"));
 	_legato_button.signal_event().connect (sigc::mem_fun (*this, (&SlotPropertyTable::legato_button_event)));
+
+	_isolate_button.set_text (_("Isolate"));
+	_isolate_button.signal_event().connect (sigc::mem_fun (*this, (&SlotPropertyTable::isolate_button_event)));
 
 #define quantize_item(b) _quantize_button.AddMenuElem (MenuElem (quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_quantize), b)));
 
@@ -282,6 +287,10 @@ SlotPropertyTable::SlotPropertyTable ()
 	_legato_label.set_text(_("Legato:"));  _legato_label.set_alignment(1.0, 0.5);
 	_launch_table.attach(_legato_label,   0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
 	_launch_table.attach(_legato_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
+
+	_isolate_label.set_text(_("Cue Isolate:"));  _isolate_label.set_alignment(1.0, 0.5);
+	_launch_table.attach(_isolate_label,   0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK );
+	_launch_table.attach(_isolate_button,  1, 3, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 
 	/* ---- Follow settings ----- */
@@ -466,6 +475,25 @@ SlotPropertyTable::legato_button_event (GdkEvent* ev)
 	return false;
 }
 
+bool
+SlotPropertyTable::isolate_button_event (GdkEvent* ev)
+{
+	if (_ignore_changes) {
+		return false;
+	}
+
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		trigger()->set_scene_isolated (!trigger()->scene_isolated());
+		return true;
+
+	default:
+		break;
+	}
+
+	return false;
+}
+
 void
 SlotPropertyTable::set_launch_style (Trigger::LaunchStyle ls)
 {
@@ -537,6 +565,10 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 
 	if (pc.contains (Properties::legato)) {
 		_legato_button.set_active_state (trigger()->legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	}
+
+	if (pc.contains (Properties::isolated)) {
+		_isolate_button.set_active_state (trigger()->scene_isolated() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::launch_style)) {

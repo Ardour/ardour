@@ -100,8 +100,11 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 	Gtk::Label                    _launch_style_label;
 	Gtk::Label                    _launch_quant_label;
 	Gtk::Label                    _legato_label;
+	Gtk::Label                    _isolate_label;
 
 	ArdourWidgets::ArdourButton        _legato_button;
+
+	ArdourWidgets::ArdourButton        _isolate_button;
 
 	ArdourWidgets::ArdourDropdown      _quantize_button;
 
@@ -115,6 +118,8 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 
 	bool legato_button_event (GdkEvent*);
 	void follow_count_event ();
+
+	bool isolate_button_event (GdkEvent*);
 
 	void gain_change_event ();
 
