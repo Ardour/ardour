@@ -59,6 +59,9 @@ PBD::stacktrace (std::ostream& out, int levels, int start)
 	size = backtrace (array, 200);
 
 	if (size && size >= start) {
+		if (start == 0) {
+			out << "-- Stacktrace Thread: " << pthread_name () << std::endl;
+		}
 		strings = backtrace_symbols (array, size);
 
 		if (strings) {
