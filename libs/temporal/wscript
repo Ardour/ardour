@@ -14,7 +14,6 @@ TEMPORAL_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # micro increment <=> no interface changes
 TEMPORAL_LIB_VERSION = '0.0.0'
 
-APPNAME = 'temporal'
 I18N_PACKAGE = 'libtemporal'
 
 temporal_sources = [
@@ -101,6 +100,7 @@ def build(bld):
             obj.linkflags = ' -lintl'
 
 def test(ctx):
+    APPNAME = 'temporal'
     autowaf.pre_test(ctx, APPNAME)
     print(os.getcwd())
     os.environ['EVORAL_TEST_PATH'] = os.path.abspath('../test/testdata/')
