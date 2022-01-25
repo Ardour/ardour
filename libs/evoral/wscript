@@ -14,8 +14,6 @@ EVORAL_VERSION = '0.0.0'
 #   0.0.0 = 0,0,0
 EVORAL_LIB_VERSION = '0.0.0'
 
-APPNAME = 'evoral'
-
 def options(opt):
     opt.add_option('--test', action='store_true', default=False, dest='build_tests',
                     help="Build unit tests")
@@ -142,8 +140,8 @@ def build(bld):
             obj.cxxflags       = ['--coverage']
 
 def test(ctx):
-    autowaf.pre_test(ctx, APPNAME)
+    autowaf.pre_test(ctx, 'evoral')
     print(os.getcwd())
     os.environ['EVORAL_TEST_PATH'] = os.path.abspath('../test/testdata/')
-    autowaf.run_tests(ctx, APPNAME, ['./run-tests'])
-    autowaf.post_test(ctx, APPNAME)
+    autowaf.run_tests(ctx, 'evoral', ['./run-tests'])
+    autowaf.post_test(ctx, 'evoral')
