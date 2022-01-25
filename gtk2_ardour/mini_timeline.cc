@@ -322,7 +322,7 @@ MiniTimeline::draw_dots (cairo_t* cr, int left, int right, int y, Gtkmm2ext::Col
 }
 
 int
-MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, bool& prelight)
+MiniTimeline::draw_mark (cairo_t* cr, int marker_loc, int marker_right_edge, const std::string& label, bool& prelight)
 {
 	int h = _marker_height;
 	/* ArdourMarker shape
@@ -346,9 +346,9 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, 
 	int lw, lh;
 	_layout->set_text (label);
 	_layout->get_pixel_size (lw, lh);
-	int rw = std::min (x1, x0 + w2 + lw + 2);
+	int rw = std::min (marker_right_edge, marker_loc + w2 + lw + 2);
 
-	if (_pointer_y >= 0 && _pointer_y <= y + h && _pointer_x >= x0 - w2 && _pointer_x <= rw) {
+	if (_pointer_y >= 0 && _pointer_y <= y + h && _pointer_x >= marker_loc - w2 && _pointer_x <= rw) {
 		prelight = true;
 	}
 
@@ -360,7 +360,7 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, 
 	h -= 4*scale;
 
 	// draw marker first
-	cairo_move_to (cr, x0 - .5, y + .5);
+	cairo_move_to (cr, marker_loc - .5, y + .5);
 	cairo_rel_line_to (cr, -w2 , 0);
 	cairo_rel_line_to (cr, 0, h0);
 	cairo_rel_line_to (cr, w2, h1);
@@ -372,17 +372,17 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, 
 	cairo_stroke_preserve (cr);
 	cairo_fill (cr);
 
-	if (rw < x0) {
-		rw = x1;
+	if (rw < marker_loc) {
+		rw = marker_right_edge;
 	} else {
 		cairo_save (cr);
 		set_source_rgba (cr, color);
-		cairo_rectangle (cr, x0-5*scale, y, rw - x0 + 4*scale, h);
+		cairo_rectangle (cr, marker_loc-5*scale, y, rw - marker_loc + 4*scale, h);
 		cairo_fill_preserve (cr);
 		cairo_clip (cr);
 
 		// marker label
-		cairo_move_to (cr, x0 + w2 - 4*scale, y + .5 * (h - lh));
+		cairo_move_to (cr, marker_loc + w2 - 4*scale, y + .5 * (h - lh));
 		cairo_set_source_rgb (cr, 0, 0, 0);
 		pango_cairo_show_layout (cr, _layout->gobj());
 		cairo_restore (cr);
@@ -396,47 +396,54 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, 
 	return rw;
 }
 
-void
-MiniTimeline::draw_cue (cairo_t* cr, int x0, int x1, int cue_index, bool& prelight)
+int
+MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int /*ignored*/, int cue_index, bool& prelight)
 {
-	int y_offs = _marker_height * 1.4;  //make room for 'regular' markers
+	const double scale = UIConfiguration::instance ().get_ui_scale ();
 
 	int h = _marker_height;
-	x0 -= h/2;  //left side of circle
-	x1 = x0 + h;  //right side of circle
 
-	if (_pointer_y >= y_offs && _pointer_y <= y_offs+h && _pointer_x >= x0 && _pointer_x <= x1) {
+	int y_center = PADDING + _marker_height + 2*scale + h/2;
+
+	int marker_left_edge = marker_loc - h/2;  //left side of circle
+	int marker_right_edge = marker_loc + h/2;  //right side of circle (we ignore the arg, which is the next marker's edge)
+
+	if (_pointer_y >= y_center-h/2 && _pointer_y <= y_center+h/2 && _pointer_x >= marker_left_edge && _pointer_x <= marker_right_edge) {
 		prelight = true;
 	}
 
-	const double scale = UIConfiguration::instance ().get_ui_scale ();
 	uint32_t color = UIConfiguration::instance().color (
 		prelight ? "entered marker" : "location marker");
 
 	// draw Cue as a circle
-	cairo_arc(cr, x0+h/2, y_offs+h/2, (h/2)-1*scale, 0, 2*M_PI);
+	cairo_arc(cr, marker_loc, y_center, (h/2)-1*scale, 0, 2*M_PI);
 	set_source_rgba (cr, color);
 	cairo_fill (cr);
 
 	//draw cue letter
 	_layout->set_text (string_compose (_("%1"), (char) ('A' + cue_index)));
 	cairo_set_source_rgb (cr, 0, 0, 0);  //black
-	cairo_move_to (cr, x0 + h/2, y_offs+h/2);  //move to center of circle
+	cairo_move_to (cr, marker_loc, y_center);  //move to center of circle
 	int tw, th;
 	_layout->get_pixel_size (tw, th);
-	cairo_rel_move_to (cr, -tw/2, -th/2);  //move to top-left of text
+	cairo_rel_move_to (cr, -1*scale-tw/2, -1*scale-th/2);  //move to top-left of text
 	pango_cairo_show_layout (cr, _layout->gobj());
+
+	return marker_right_edge;
 }
 
 int
 MiniTimeline::draw_edge (cairo_t* cr, int x0, int x1, bool left, const std::string& label, bool& prelight)
 {
-	int h = _marker_height;
+	const double scale = UIConfiguration::instance ().get_ui_scale ();
+
+	int h = _marker_height - 4*scale;
+
 	int w2 = (h - 1) / 4;
 
 	const int y = PADDING;
-	const double yc = rint (h * .5);
-	const double dy = h * .4;
+	const double dy = (0.5*h);  //half the triangle pointer's height
+	const double yc = dy;
 
 	bool with_label;
 	int lw, lh, lx;
@@ -476,7 +483,6 @@ MiniTimeline::draw_edge (cairo_t* cr, int x0, int x1, bool left, const std::stri
 		prelight = true;
 	}
 
-	// TODO cache in set_colors()
 	uint32_t color = UIConfiguration::instance().color (
 			prelight ? "entered marker" : "location marker");
 
@@ -487,23 +493,23 @@ MiniTimeline::draw_edge (cairo_t* cr, int x0, int x1, bool left, const std::stri
 		const int y = PADDING;
 		cairo_save (cr);
 		cairo_rectangle (cr, lx, y, lw + 2, h);
-		cairo_set_source_rgba (cr, r, g, b, 0.5); // this should use a shaded color
+		set_source_rgba (cr, color);
 		cairo_fill_preserve (cr);
 		cairo_clip (cr);
 
 		// marker label
 		cairo_move_to (cr, lx + 1, y + .5 * (h - lh));
-		cairo_set_source_rgb (cr, 0, 0, 0);
+		cairo_set_source_rgb (cr, 0, 0, 0);  //black text
 		pango_cairo_show_layout (cr, _layout->gobj());
 		cairo_restore (cr);
 	}
 
 	// draw arrow
-	cairo_move_to (cr, px - .5, PADDING + yc - .5);
+	cairo_move_to (cr, px - .5*scale, PADDING + yc - .5*scale);
 	cairo_rel_line_to (cr, dx , dy);
 	cairo_rel_line_to (cr, 0, -2. * dy);
 	cairo_close_path (cr);
-	cairo_set_source_rgba (cr, r, g, b, 1.0);
+	set_source_rgba (cr, color);
 	cairo_set_line_width (cr, 1.0);
 	cairo_stroke_preserve (cr);
 	cairo_fill (cr);
@@ -600,8 +606,8 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	cairo_fill (cr);
 
 	/* locations */
-	samplepos_t lmin = std::max ((samplepos_t)0, (phead - _time_span_samples));
-	samplepos_t lmax = phead + _time_span_samples;
+	samplepos_t left_edge_samples = std::max ((samplepos_t)0, (phead - _time_span_samples));
+	samplepos_t right_edge_samples = phead + _time_span_samples;
 
 	int tw, th;
 	_layout->set_text (X_("Marker@"));
@@ -609,10 +615,10 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 	_marker_height = th + 2;
 	assert (_marker_height > 4);
-	const int mw = (_marker_height - 1) / 4;
+	const int marker_width = (_marker_height - 1) / 4;
 
-	lmin -= mw / _px_per_sample;
-	lmax += mw / _px_per_sample;
+	left_edge_samples -= marker_width / _px_per_sample;
+	right_edge_samples += marker_width / _px_per_sample;
 
 	std::vector<LocationMarker> lm;
 
@@ -637,75 +643,78 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	LocationMarkerSort location_marker_sort;
 	std::sort (lm.begin(), lm.end(), location_marker_sort);
 
-	std::vector<LocationMarker>::const_iterator outside_left = lm.end();
-	std::vector<LocationMarker>::const_iterator outside_right = lm.end();
-	int left_limit = 0;
-	int right_limit = width * .5 + mw;
+	std::vector<LocationMarker>::const_iterator outside_left_marker = lm.end();
+	std::vector<LocationMarker>::const_iterator outside_right_marker = lm.end();
+	int rightmost_marker_right_edge = width * .5 + marker_width;
 	int id = 0;
+	int leftmost_marker_left_edge = width;
 
 	for (std::vector<LocationMarker>::const_iterator l = lm.begin(); l != lm.end(); ++id) {
-		const samplepos_t when = (*l).when.samples();
-		if (when < lmin) {
-			outside_left = l;
-			if (++l != lm.end()) {
-				left_limit = floor (width * .5 + (when - phead) * _px_per_sample) - 1 - mw;
-			} else {
-				left_limit = width * .5 - mw;
-			}
-			continue;
-		}
-		if (when > lmax) {
-			outside_right = l;
-			break;
-		}
-		int x0 = floor (width * .5 + (when - phead) * _px_per_sample);
-		int x1 = width;
 		const std::string& label = (*l).label;
 		const int cue_index = (*l).cue_index;
+		const samplepos_t when = (*l).when.samples();
 
+		if (when < left_edge_samples && cue_index==-1) {
+			outside_left_marker = l;
+			++l;
+			continue;
+		}
+		if (when > right_edge_samples && cue_index==-1) {
+			outside_right_marker = l;
+			break;
+		}
+		int marker_loc = floor (width * .5 + (when - phead) * _px_per_sample);
+		int marker_rightmost_marker_right_edge = width;
+
+		//peek forward to set our marker's right-side limit
 		std::vector<LocationMarker>::const_iterator peek = l;
 		for (peek++; peek != lm.end(); peek++) {
 			if ((*peek).cue_index == -1) {
-				x1 = floor (width * .5 + ((*peek).when.samples() - phead) * _px_per_sample) - 1 - mw;
+				marker_rightmost_marker_right_edge = floor (width * .5 + ((*peek).when.samples() - phead) * _px_per_sample) - 1 - marker_width;
 				break;
 			}
 		}
 
 		//draw the mark
-		bool prelight = false;
-		if (cue_index >= 0) {
-			draw_cue (cr, x0, x1, cue_index, prelight);
-		} else {
-			x1 = draw_mark (cr, x0, x1, label, prelight);
-		}
+		if (when > left_edge_samples) {
+			bool prelight = false;
+			int marker_left_edge = marker_loc - marker_width/2;
+			int marker_right_edge = 0;
+			if (cue_index >= 0) {
+				marker_right_edge = draw_cue (cr, marker_loc, marker_rightmost_marker_right_edge, cue_index, prelight);
+			} else {
+				marker_right_edge = draw_mark (cr, marker_loc, marker_rightmost_marker_right_edge, label, prelight);
+				leftmost_marker_left_edge = std::min(marker_left_edge, leftmost_marker_left_edge);
+				rightmost_marker_right_edge = std::max (marker_right_edge, rightmost_marker_right_edge);
+			}
 
-		_jumplist.push_back (JumpRange (when, prelight));
-		right_limit = std::max (x1, right_limit);
+			_jumplist.push_back (JumpRange (marker_left_edge, marker_right_edge, when, prelight));
+		}
 
 		l++;
 	}
 
-	if (outside_left != lm.end ()) {
-		if (left_limit > 3 * mw + PADDING) {
+	if (outside_left_marker != lm.end ()) {
+		if ( leftmost_marker_left_edge > 3 * marker_width) {
 			int x0 = PADDING + 1;
-			int x1 = left_limit - mw;
+			int x1 = leftmost_marker_left_edge;
 			bool prelight = false;
-			x1 = draw_edge (cr, x0, x1, true, (*outside_left).label, prelight);
+			x1 = draw_edge (cr, x0, x1, true, (*outside_left_marker).label, prelight);
 			if (x0 != x1) {
-				_jumplist.push_back (JumpRange ((*outside_left).when.samples(), prelight));
-				right_limit = std::max (x1, right_limit);
+				_jumplist.push_back (JumpRange (x0, x1, (*outside_left_marker).when.samples(), prelight));
+				rightmost_marker_right_edge = std::max (x1, rightmost_marker_right_edge);
 			}
 		}
 	}
 
-	if (outside_right != lm.end ()) {
-		if (right_limit + PADDING < width - 3 * mw) {
-			int x0 = right_limit;
+	if (outside_right_marker != lm.end ()) {
+		if (rightmost_marker_right_edge + PADDING < width - 3 * marker_width) {
+			int x0 = rightmost_marker_right_edge;
 			int x1 = width - PADDING;
 			bool prelight = false;
-			x0 = draw_edge (cr, x0, x1, false, (*outside_right).label, prelight);
+			x0 = draw_edge (cr, x0, x1, false, (*outside_right_marker).label, prelight);
 			if (x0 != x1) {
-				_jumplist.push_back (JumpRange ((*outside_right).when.samples(), prelight));
+				_jumplist.push_back (JumpRange (x0, x1, (*outside_right_marker).when.samples(), prelight));
 			}
 		}
 	}
@@ -799,7 +808,23 @@ MiniTimeline::on_motion_notify_event (GdkEventMotion *ev)
 
 	bool need_expose = false;
 
-	update_minitimeline ();
+	for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
+		if (i->left < ev->x && ev->x < i->right && ev->y <= PADDING + _marker_height*3) {
+			if (!(*i).prelight) {
+				need_expose = true;
+				break;
+			}
+		} else {
+			if ((*i).prelight) {
+				need_expose = true;
+				break;
+			}
+		}
+	}
+
+	if (need_expose) {
+		update_minitimeline ();
+	}
 
 	return true;
 }
