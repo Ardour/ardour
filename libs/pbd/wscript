@@ -87,7 +87,6 @@ libpbd_sources = [
 ]
 
 def options(opt):
-    opt.load('compiler_cxx')
     autowaf.set_options(opt)
     opt.add_option('--ppc', action='store_true', default=False, dest='ppc',
                    help='Compile with -arch ppc (OS X ONLY)')
