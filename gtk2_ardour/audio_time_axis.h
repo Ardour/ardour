@@ -76,9 +76,6 @@ public:
 
 	void set_show_waveforms_recording (bool yn);
 
-	/* Overridden from parent to store display state */
-	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
-
 	void create_automation_child (const Evoral::Parameter& param, bool show);
 
 	void first_idle ();
@@ -96,9 +93,6 @@ private:
 
 	Gtk::Menu* build_mode_menu();
 	void build_automation_action_menu (bool);
-
-
-	void hide ();
 
 	void update_control_names ();
 };

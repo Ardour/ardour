@@ -882,7 +882,6 @@ void
 MixerStrip::set_packed (bool yn)
 {
 	_packed = yn;
-	set_gui_property ("visible", _packed);
 }
 
 void

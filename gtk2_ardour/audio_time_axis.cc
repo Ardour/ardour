@@ -164,20 +164,6 @@ AudioTimeAxisView::audio_view()
 	return dynamic_cast<AudioStreamView*>(_view);
 }
 
-guint32
-AudioTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
-{
-	set_gui_property ("visible", true);
-	return TimeAxisView::show_at (y, nth, parent);
-}
-
-void
-AudioTimeAxisView::hide ()
-{
-	set_gui_property ("visible", false);
-	TimeAxisView::hide ();
-}
-
 void
 AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
 {
