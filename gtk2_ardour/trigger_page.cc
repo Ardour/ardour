@@ -64,7 +64,7 @@ using namespace Gtk;
 using namespace std;
 
 TriggerPage::TriggerPage ()
-	: Tabbable (_content, _("Trigger Drom"), X_("trigger"))
+	: Tabbable (_content, _("Cue Grid"), X_("trigger"))
 	, _cue_area_frame (0.5, 0, 1.0, 0)
 	, _cue_box (16, 16 * default_triggers_per_box)
 	, _master_widget (16, 16)
@@ -211,7 +211,7 @@ TriggerPage::use_own_window (bool and_fill_it)
 
 	if (win && new_window) {
 		win->set_name ("TriggerWindow");
-		ARDOUR_UI::instance ()->setup_toplevel_window (*win, _("Trigger Drom"), this);
+		ARDOUR_UI::instance ()->setup_toplevel_window (*win, _("Cue Grid"), this);
 		win->signal_event ().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
 		win->set_data ("ardour-bindings", bindings);
 		update_title ();
