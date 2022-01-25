@@ -5804,8 +5804,9 @@ Editor::hide_track_in_display (TimeAxisView* tv, bool apply_to_selection)
 			/* this will hide the mixer strip */
 			set_selected_mixer_strip (*tv);
 		}
-
-		_routes->hide_track_in_display (*tv);
+		if (rtv) {
+			rtv->route()->presentation_info().set_hidden (true);
+		}
 	}
 }
 
@@ -5815,7 +5816,10 @@ Editor::show_track_in_display (TimeAxisView* tv, bool move_into_view)
 	if (!tv) {
 		return;
 	}
-	_routes->show_track_in_display (*tv);
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	if (rtv) {
+		rtv->route()->presentation_info().set_hidden (false);
+	}
 	if (move_into_view) {
 		ensure_time_axis_view_is_visible (*tv, false);
 	}

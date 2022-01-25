@@ -515,7 +515,7 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange&)
 			if (group->is_hidden ()) {
 				_editor->hide_track_in_display (*i);
 			} else {
-				_editor->_routes->show_track_in_display (**i);
+				_editor->show_track_in_display (*i);
 			}
 		}
 	}
