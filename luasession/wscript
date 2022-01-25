@@ -27,7 +27,7 @@ def configure(conf):
 def build(bld):
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
     if not bld.is_defined('HAVE_READLINE'):
-        return;
+        return
 
     # commandline luasession wrapper script
     if bld.env['build_target'] != 'mingw':

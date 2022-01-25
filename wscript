@@ -142,9 +142,9 @@ gcc_darwin_dict['strict'] = ['-Wall', '-Wcast-align', '-Wextra', '-Wwrite-string
 gcc_darwin_dict['generic-x86'] = [ '-arch', 'i386' ]
 gcc_darwin_dict['generic-ppc'] = [ '-arch', 'ppc' ]
 gcc_darwin_dict['generic-arm64'] = [ '-arch', 'arm64' ]
-compiler_flags_dictionaries['gcc-darwin'] = gcc_darwin_dict;
+compiler_flags_dictionaries['gcc-darwin'] = gcc_darwin_dict
 
-clang_dict = compiler_flags_dictionaries['gcc'].copy();
+clang_dict = compiler_flags_dictionaries['gcc'].copy()
 clang_dict['sse'] = ''
 clang_dict['fpmath-sse'] = ''
 clang_dict['xsaveintrin'] = ''
@@ -156,12 +156,12 @@ clang_dict['strict'] = ['-Wall', '-Wcast-align', '-Wextra', '-Wwrite-strings' ]
 clang_dict['generic-x86'] = [ '-arch', 'i386' ]
 clang_dict['generic-arm64'] = [ '-arch', 'arm64' ]
 clang_dict['full-optimization'] = [ '-O3', '-fomit-frame-pointer', '-ffast-math', ]
-compiler_flags_dictionaries['clang'] = clang_dict;
+compiler_flags_dictionaries['clang'] = clang_dict
 
-clang_darwin_dict = compiler_flags_dictionaries['clang'].copy();
+clang_darwin_dict = compiler_flags_dictionaries['clang'].copy()
 clang_darwin_dict['cxx-strict'] = [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded-virtual', ]
 clang_darwin_dict['full-optimization'] = [ '-O3', '-ffast-math']
-compiler_flags_dictionaries['clang-darwin'] = clang_darwin_dict;
+compiler_flags_dictionaries['clang-darwin'] = clang_darwin_dict
 
 def fetch_git_revision_date ():
     cmd = ["git", "describe", "HEAD"]
@@ -236,7 +236,7 @@ if any(arg in ('dist', 'distcheck') for arg in sys.argv[1:]):
     if not 'APPNAME' in os.environ:
         print ("You must define APPNAME in the environment when running ./waf dist/distcheck")
         sys.exit (1)
-    APPNAME = os.environ['APPNAME'];
+    APPNAME = os.environ['APPNAME']
 
 # Mandatory variables
 top = '.'
@@ -313,7 +313,7 @@ def fetch_gcc_version (CC):
 def create_stored_revision():
     rev = ""
     if os.path.exists('.git'):
-        rev, rev_date = fetch_git_revision_date();
+        rev, rev_date = fetch_git_revision_date()
         print("Git version: " + rev + "\n")
     elif os.path.exists('libs/ardour/revision.cc'):
         print("Using packaged revision")
@@ -345,7 +345,7 @@ def get_depstack_rev(depstack_root):
         with open(depstack_root + '/../.vers', 'r') as f:
             return f.readline().decode('utf-8').strip()[:7]
     except IOError:
-        return '-unknown-';
+        return '-unknown-'
 
 def set_compiler_flags (conf,opt):
     #
@@ -398,7 +398,7 @@ int main() { return 0; }''',
     # Save the compiler flags because we need them at build time
     # when we need to add compiler specific flags in certain
     # libraries
-    conf.env['compiler_flags_dict'] = flags_dict;
+    conf.env['compiler_flags_dict'] = flags_dict
 
     autowaf.set_basic_compiler_flags (conf,flags_dict)
 
@@ -593,7 +593,7 @@ int main() { return 0; }''',
     # optimization section
     if conf.env['FPU_OPTIMIZATION']:
         if sys.platform == 'darwin':
-            compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS");
+            compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS")
             conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'Accelerate'])
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
             compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
@@ -1413,11 +1413,11 @@ int main () { return 0; }
         # override waf's -install_name added in
         # waflib/Tools/ccroot.py when -dynamiclib is used
         if conf.env.LINKFLAGS_cshlib:
-            conf.env.LINKFLAGS_cshlib = [];
+            conf.env.LINKFLAGS_cshlib = []
             conf.env.LDFLAGS_cshlib = ['-dynamiclib']
 
         if conf.env.LINKFLAGS_cxxshlib:
-            conf.env.LINKFLAGS_cxxshlib = [];
+            conf.env.LINKFLAGS_cxxshlib = []
             conf.env.LDFLAGS_cxxshlib = ['-dynamiclib']
 
     config_text = open('libs/ardour/config_text.cc', "w")
@@ -1538,7 +1538,7 @@ def build(bld):
     bld.env['DLLDIR'] = os.path.join(bld.env['LIBDIR'], lwrcase_dirname)
     bld.env['LIBDIR'] = bld.env['DLLDIR']
     bld.env['LOCALEDIR'] = os.path.join(bld.env['DATADIR'], 'locale')
-    bld.env['lwrcase_dirname'] = lwrcase_dirname;
+    bld.env['lwrcase_dirname'] = lwrcase_dirname
 
     autowaf.set_recursive()
 

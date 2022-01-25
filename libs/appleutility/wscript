@@ -33,16 +33,16 @@ def configure(conf):
 def build(bld):
     obj                = bld(features = 'cxx cxxshlib')
     obj.uselib         = 'AUDIOUNITS OSX'
-    obj.source         = '';
+    obj.source         = ''
     if bld.is_defined('COREAUDIO105'):
         obj.export_includes = ['CoreAudio105']
-        obj.source += ' CoreAudio105/CAAudioFile.cpp';
+        obj.source += ' CoreAudio105/CAAudioFile.cpp'
         for src in libappleutility_sources:
-            obj.source += ' CoreAudio105/' + src;
+            obj.source += ' CoreAudio105/' + src
     else:
         obj.export_includes = ['CoreAudio/PublicUtility']
         for src in libappleutility_sources:
-            obj.source += ' CoreAudio/PublicUtility/' + src;
+            obj.source += ' CoreAudio/PublicUtility/' + src
 
     # apple did not write this library with full symbol export control
     # so we need to override any visibility default.

@@ -475,7 +475,7 @@ def configure(conf):
     conf.define('CODENAME', enoify(int(conf.env['MAJOR']), int(conf.env['MINOR'])))
     conf.env['define_key'] = ['VERSIONSTRING', 'CODENAME' ]
     conf.write_config_header('gtk2ardour-version.h')
-    conf.env['define_key'] = bak;
+    conf.env['define_key'] = bak
 
     # Boost headers
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
@@ -952,7 +952,7 @@ def build(bld):
     bld.install_files(bld.env['CONFDIR'], 'default_ui_config')
     # Color Themes. Find each color file for this program only
     # and install
-    bld.install_files (os.path.join(bld.env['DATADIR'], 'themes'), bld.path.ant_glob ('themes/*-' + pgmname.lower() + '.colors'));
+    bld.install_files (os.path.join(bld.env['DATADIR'], 'themes'), bld.path.ant_glob ('themes/*-' + pgmname.lower() + '.colors'))
 
     # Default export stuff
     bld.install_files(os.path.join(bld.env['CONFDIR'], 'export'), bld.path.ant_glob('export/*.format'))

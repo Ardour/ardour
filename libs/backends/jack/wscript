@@ -107,7 +107,7 @@ def build(bld):
         obj.defines += [ 'USE_WEAK_JACK', 'HAVE_JACK_PORT_RENAME' ]
         obj.deps = [ 'weak_libjack.def' ]
 
-    obj.uselib   += [ 'GLIBMM', 'XML', 'OSX'];
+    obj.uselib   += [ 'GLIBMM', 'XML', 'OSX']
 
     #
     # device discovery code in the jack backend needs ALSA
