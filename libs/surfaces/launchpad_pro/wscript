@@ -3,7 +3,7 @@ from waflib.extras import autowaf as autowaf
 import os
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     autowaf.check_pkg(conf, 'pangomm-1.4', uselib_store='PANGOMM', atleast_version='1.4', mandatory=True)

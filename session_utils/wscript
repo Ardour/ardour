@@ -5,7 +5,7 @@ import os
 import sys
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     if not "dummy" in conf.env['BACKENDS']:

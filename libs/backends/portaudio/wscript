@@ -5,7 +5,7 @@ import os
 I18N_PACKAGE = 'portaudio-backend'
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     autowaf.check_pkg(conf, 'portaudio-2.0', uselib_store='PORTAUDIO', atleast_version='19')

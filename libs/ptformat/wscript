@@ -13,7 +13,7 @@ LIBPTFORMAT_LIB_VERSION = '0.0.0'
 I18N_PACKAGE = 'libptformat'
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     pass

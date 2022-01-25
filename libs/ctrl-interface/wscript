@@ -7,7 +7,7 @@ children = [
 ]
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def sub_config_and_use(conf, name, has_objects = True):
     conf.recurse(name)

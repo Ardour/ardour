@@ -16,7 +16,7 @@ LIBLTC_LIB_VERSION = '1.1.1'
 I18N_PACKAGE = 'libltc'
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     if conf.is_defined('USE_EXTERNAL_LIBS'):

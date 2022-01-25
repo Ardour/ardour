@@ -9,7 +9,7 @@ import os
 VAMP_PYIN_LIB_VERSION = '0.0.0'
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     pass

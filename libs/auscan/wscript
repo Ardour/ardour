@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-from waflib.extras import autowaf as autowaf
 import os
 
 # needed for code used from libardour
 I18N_PACKAGE = 'ardour'
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     pass

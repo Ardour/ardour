@@ -2,7 +2,7 @@
 from waflib.extras import autowaf as autowaf
 
 def options(opt):
-    autowaf.set_options(opt)
+    pass
 
 def configure(conf):
     pass
