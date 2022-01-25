@@ -667,7 +667,7 @@ Editor::Editor ()
 	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, boost::bind (&Editor::presentation_info_changed, this, _1), gui_context());
 
 	_route_groups = new EditorRouteGroups (this);
-	_routes = new EditorRoutes (this);
+	_routes = new EditorRoutes ();
 	_regions = new EditorRegions (this);
 	_sources = new EditorSources (this);
 	_snapshots = new EditorSnapshots (this);
@@ -1339,7 +1339,7 @@ Editor::set_session (Session *t)
 	_regions->set_session (_session);
 	_sources->set_session (_session);
 	_snapshots->set_session (_session);
-	//_routes->set_session (_session); // temp disabled for EditorRoutes update
+	_routes->set_session (_session);
 	_locations->set_session (_session);
 	_properties_box->set_session (_session);
 

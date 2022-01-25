@@ -258,6 +258,7 @@ gtk2_ardour_sources = [
         'rhythm_ferret.cc',
         'route_group_dialog.cc',
         'route_group_menu.cc',
+        'route_list_base.cc',
         'route_params_ui.cc',
         'route_processor_selection.cc',
         'route_time_axis.cc',
