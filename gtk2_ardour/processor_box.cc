@@ -2422,7 +2422,7 @@ ProcessorBox::leave_notify (GdkEventCrossing* ev)
 
 	Widget* top = get_toplevel();
 
-	if (top->is_toplevel()) {
+	if (top->get_is_toplevel()) {
 		Window* win = dynamic_cast<Window*> (top);
 		gtk_window_set_focus (win->gobj(), 0);
 	}
