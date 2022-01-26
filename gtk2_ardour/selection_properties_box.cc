@@ -173,15 +173,12 @@ SelectionPropertiesBox::selection_changed ()
 	_slot_prop_box->hide();
 #endif
 
-	if (selection.empty()) {
-		_header_label.hide();
-	} else  {
-		_header_label.set_text(_("Range Properties (Press ESC to Deselect All)"));
-		_header_label.show();
-	}
+	_header_label.hide();
 
 	if (!selection.time.empty()) {
 		_time_info_box->show();
+		_header_label.set_text(_("Range Properties (Press ESC to Deselect All)"));
+		_header_label.show();
 	}
 
 #if SELECTION_PROPERTIES_BOX_TODO
