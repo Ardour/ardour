@@ -58,7 +58,7 @@ ExportDialog::ExportDialog (PublicEditor & editor, std::string title, ARDOUR::Ex
   : ArdourDialog (title)
   , type (type)
   , editor (editor)
-  , warn_label ("", Gtk::ALIGN_LEFT)
+  , warn_label ("", Gtk::ALIGN_START)
   , list_files_label (_("<span color=\"#ffa755\">Some already existing files will be overwritten.</span>"), Gtk::ALIGN_RIGHT)
   , list_files_button (_("List files"))
   , previous_progress (0)
@@ -327,7 +327,7 @@ ExportDialog::show_conflicting_files ()
 {
 	ArdourDialog dialog (_("Files that will be overwritten"), true);
 
-	Gtk::Label label ("", Gtk::ALIGN_LEFT);
+	Gtk::Label label ("", Gtk::ALIGN_START);
 	label.set_use_markup (true);
 	label.set_markup (list_files_string);
 

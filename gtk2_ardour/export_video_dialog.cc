@@ -65,9 +65,9 @@ ExportVideoDialog::ExportVideoDialog ()
 	, _normalize (false)
 	, _previous_progress (0)
 	, _transcoder (0)
-	, outfn_path_label (_("File:"), Gtk::ALIGN_LEFT)
+	, outfn_path_label (_("File:"), Gtk::ALIGN_START)
 	, outfn_browse_button (_("Browse"))
-	, invid_path_label (_("Video:"), Gtk::ALIGN_LEFT)
+	, invid_path_label (_("Video:"), Gtk::ALIGN_START)
 	, invid_browse_button (_("Browse"))
 	, transcode_button (_("Export"))
 	, abort_button (_("Abort"))
@@ -88,7 +88,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	/* check if ffmpeg can be found */
 	_transcoder = new TranscodeFfmpeg (X_(""));
 	if (!_transcoder->ffexec_ok ()) {
-		l = manage (new Label (_("ffmpeg installation was not found. Video Export is not possible. See the Log window for more information."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("ffmpeg installation was not found. Video Export is not possible. See the Log window for more information."), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		l->set_line_wrap ();
 		vbox->pack_start (*l, false, false, 8);
 		get_vbox ()->pack_start (*vbox, false, false);
@@ -122,9 +122,9 @@ ExportVideoDialog::ExportVideoDialog ()
 	input_box->pack_start (*path_hbox, false, false, 2);
 
 	path_hbox = manage (new HBox);
-	l         = manage (new Label (_("Audio:"), ALIGN_LEFT, ALIGN_CENTER, false));
+	l         = manage (new Label (_("Audio:"), ALIGN_START, ALIGN_CENTER, false));
 	path_hbox->pack_start (*l, false, false, 3);
-	l = manage (new Label (_("Master Bus"), ALIGN_LEFT, ALIGN_CENTER, false));
+	l = manage (new Label (_("Master Bus"), ALIGN_START, ALIGN_CENTER, false));
 	path_hbox->pack_start (*l, false, false, 2);
 	input_box->pack_start (*path_hbox, false, false, 2);
 
@@ -139,7 +139,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	t->set_border_width (2);
 	t->set_spacings (4);
 	int ty = 0;
-	l      = manage (new Label (_("Range:"), ALIGN_LEFT, ALIGN_CENTER, false));
+	l      = manage (new Label (_("Range:"), ALIGN_START, ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, ty, ty + 1);
 	t->attach (insnd_combo, 1, 2, ty, ty + 1);
 	ty++;

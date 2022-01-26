@@ -29,7 +29,7 @@
 #include "pbd/i18n.h"
 
 ExportPresetSelector::ExportPresetSelector () :
-  label (_("Preset"), Gtk::ALIGN_LEFT),
+  label (_("Preset"), Gtk::ALIGN_START),
   save_button (Gtk::Stock::SAVE),
   remove_button (Gtk::Stock::REMOVE),
   new_button (Gtk::Stock::NEW)

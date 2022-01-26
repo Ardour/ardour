@@ -52,7 +52,7 @@ using namespace PBD;
 
 PortExportChannelSelector::PortExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager) :
   ExportChannelSelector (session, manager),
-  channels_label (_("Channels:"), Gtk::ALIGN_LEFT),
+  channels_label (_("Channels:"), Gtk::ALIGN_START),
   split_checkbox (_("Split to mono files")),
   max_channels (MAX_EXPORT_CHANNELS),
   channel_view (max_channels)

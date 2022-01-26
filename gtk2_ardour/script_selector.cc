@@ -222,7 +222,7 @@ ScriptParameterDialog::ScriptParameterDialog (std::string title,
 	++ty;
 
 	if (_lsp.size () > 0) {
-		l = manage (new Label (_("<b>Instance Parameters</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("<b>Instance Parameters</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		l->set_use_markup ();
 		t->attach (*l, 0, 2, ty, ty+1);
 		++ty;
@@ -236,7 +236,7 @@ ScriptParameterDialog::ScriptParameterDialog (std::string title,
 			c->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ScriptParameterDialog::active_changed), i, c, e));
 			t->attach (*c, 0, 1, ty, ty+1);
 		} else {
-			Label* l = manage (new Label (_lsp[i]->title, Gtk::ALIGN_LEFT));
+			Label* l = manage (new Label (_lsp[i]->title, Gtk::ALIGN_START));
 			t->attach (*l, 0, 1, ty, ty+1);
 		}
 

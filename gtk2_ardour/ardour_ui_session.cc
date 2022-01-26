@@ -1281,7 +1281,7 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 
 	prompt_label.set_text (prompt);
 	prompt_label.set_name (X_("PrompterLabel"));
-	prompt_label.set_alignment(ALIGN_LEFT, ALIGN_TOP);
+	prompt_label.set_alignment(ALIGN_START, ALIGN_TOP);
 
 	dimage->set_alignment(ALIGN_CENTER, ALIGN_TOP);
 	dhbox.set_homogeneous (false);

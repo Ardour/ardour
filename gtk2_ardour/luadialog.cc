@@ -621,7 +621,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 			if (i.value ()["align"].isString ()) {
 				std::string align = i.value ()["align"].cast <std::string> ();
 				if (align == "left") {
-					xalign = Gtk::ALIGN_LEFT;
+					xalign = Gtk::ALIGN_START;
 				} else if (align == "right") {
 					xalign = Gtk::ALIGN_RIGHT;
 				}
@@ -632,7 +632,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 			if (i.value ()["align"].isString ()) {
 				std::string align = i.value ()["align"].cast <std::string> ();
 				if (align == "left") {
-					xalign = Gtk::ALIGN_LEFT;
+					xalign = Gtk::ALIGN_START;
 				} else if (align == "right") {
 					xalign = Gtk::ALIGN_RIGHT;
 				}

@@ -2530,7 +2530,7 @@ require some unused files to continue to exist."));
 	Gtk::HBox ddhbox; // the hbox we eventually pack into the dialog's vbox
 	Gtk::Image* dimage = manage (new Gtk::Image(Stock::DIALOG_INFO,  Gtk::ICON_SIZE_DIALOG));
 
-	dimage->set_alignment(ALIGN_LEFT, ALIGN_TOP);
+	dimage->set_alignment(ALIGN_START, ALIGN_TOP);
 
 	const string dead_directory = _session->session_directory().dead_path();
 

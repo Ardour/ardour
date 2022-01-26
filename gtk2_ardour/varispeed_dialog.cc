@@ -39,12 +39,12 @@ VarispeedDialog::VarispeedDialog ()
 	t->set_col_spacings (6);
 
 	int    r = 0;
-	Label* l = manage (new Label (_("Semitones:"), ALIGN_LEFT, ALIGN_CENTER, false));
+	Label* l = manage (new Label (_("Semitones:"), ALIGN_START, ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, r, r + 1, FILL, EXPAND, 0, 0);
 	t->attach (_semitones_spinner, 1, 2, r, r + 1, FILL, EXPAND & FILL, 0, 0);
 	++r;
 
-	l = manage (new Label (_("Cents:"), ALIGN_LEFT, ALIGN_CENTER, false));
+	l = manage (new Label (_("Cents:"), ALIGN_START, ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, r, r + 1, FILL, EXPAND, 0, 0);
 	t->attach (_cents_spinner, 1, 2, r, r + 1, FILL, EXPAND & FILL, 0, 0);
 	++r;

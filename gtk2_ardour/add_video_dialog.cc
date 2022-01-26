@@ -59,10 +59,10 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	: ArdourDialog (_("Set Video Track"))
 	, seek_slider (0,1000,1)
 	, preview_path ("")
-	, pi_tcin ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
-	, pi_tcout ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
-	, pi_aspect ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
-	, pi_fps ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
+	, pi_tcin ("-", Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false)
+	, pi_tcout ("-", Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false)
+	, pi_aspect ("-", Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false)
+	, pi_fps ("-", Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false)
 	, chooser (FILE_CHOOSER_ACTION_OPEN)
 	, xjadeo_checkbox (_("Open Video Monitor Window"))
 	, set_session_fps_checkbox (_("Adjust Session Framerate to Match Video Framerate"))
@@ -138,7 +138,7 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	Gtk::Label* l;
 	VBox* options_box = manage (new VBox);
 
-	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 
 	options_box->pack_start (*l, false, true, 4);

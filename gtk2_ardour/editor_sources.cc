@@ -84,17 +84,17 @@ EditorSources::init ()
 
 	add_name_column ();
 
-	setup_col (append_col (_columns.channels, "Chans    "), 1, ALIGN_LEFT, _("# Ch"), _("# Channels in the region"));
-	setup_col (append_col (_columns.captd_for, date_width), 17, ALIGN_LEFT, _("Captured For"), _("Original Track this was recorded on"));
+	setup_col (append_col (_columns.channels, "Chans    "), 1, ALIGN_START, _("# Ch"), _("# Channels in the region"));
+	setup_col (append_col (_columns.captd_for, date_width), 17, ALIGN_START, _("Captured For"), _("Original Track this was recorded on"));
 	setup_col (append_col (_columns.captd_xruns, "1234567890"), 21, ALIGN_RIGHT, _("# Xruns"), _("Number of dropouts that occurred during recording"));
 
 	add_tag_column ();
 
-	setup_col (append_col (_columns.take_id, date_width), 18, ALIGN_LEFT, _("Take ID"), _("Take ID"));
+	setup_col (append_col (_columns.take_id, date_width), 18, ALIGN_START, _("Take ID"), _("Take ID"));
 	setup_col (append_col (_columns.natural_pos, bbt_width), 20, ALIGN_RIGHT, _("Orig Pos"), _("Original Position of the file on timeline, when it was recorded"));
 
 	TreeViewColumn* tvc = append_col (_columns.path, bbt_width);
-	setup_col (tvc, 13, ALIGN_LEFT, _("Path"), _("Path (folder) of the file location"));
+	setup_col (tvc, 13, ALIGN_START, _("Path"), _("Path (folder) of the file location"));
 	tvc->set_expand (true);
 
 	/* make Name and Path columns manually resizable */
