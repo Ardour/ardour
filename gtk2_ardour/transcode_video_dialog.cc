@@ -184,11 +184,11 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	options_box->pack_start (*l, false, true, 4);
 
 	if (ffok) {
-		video_combo.append_text(_("Reference from Current Location (Previously Transcoded Files Only)"));
-		video_combo.append_text(_("Import/Transcode Video to Session"));
+		video_combo.append(_("Reference from Current Location (Previously Transcoded Files Only)"));
+		video_combo.append(_("Import/Transcode Video to Session"));
 		video_combo.set_active(1);
 		if (as.size() > 0) {
-			video_combo.append_text(_("Do Not Import Video (Audio Import Only)"));
+			video_combo.append(_("Do Not Import Video (Audio Import Only)"));
 			audio_combo.set_sensitive(true);
 		} else {
 			audio_combo.set_sensitive(false);
@@ -198,7 +198,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 		path_entry.set_sensitive (true);
 		browse_button.set_sensitive (true);
 	} else if (as.size() > 0) {
-		video_combo.append_text(_("Do Not Import Video (Audio Import Only)"));
+		video_combo.append(_("Do Not Import Video (Audio Import Only)"));
 		video_combo.set_active(0);
 		path_entry.set_text ("");
 
@@ -208,7 +208,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 		path_entry.set_sensitive (false);
 		browse_button.set_sensitive (false);
 	} else {
-		video_combo.append_text(_("Do Not Import Video"));
+		video_combo.append(_("Do Not Import Video"));
 		video_combo.set_active(0);
 		path_entry.set_text ("");
 		video_combo.set_sensitive(false);
@@ -230,18 +230,18 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	t->attach (aspect_checkbox, 2, 3, 0, 1);
 	t->attach (height_spinner, 3, 4, 0, 1);
 
-	scale_combo.append_text(_("Original Width"));
-	if (w > 1920) { scale_combo.append_text("1920 (hd1080)"); }
-	if (w > 1408) { scale_combo.append_text("1408 (16cif)"); }
-	if (w > 1280) { scale_combo.append_text("1280 (sxga, hd720)"); }
-	if (w > 1024) { scale_combo.append_text("1024 (xga)"); }
-	if (w > 852)  { scale_combo.append_text(" 852 (hd480)"); }
-	if (w > 768)  { scale_combo.append_text(" 768 (PAL)"); }
-	if (w > 720)  { scale_combo.append_text(" 720 (PAL)"); }
-	if (w > 640)  { scale_combo.append_text(" 640 (vga, ega)"); }
-	if (w > 352)  { scale_combo.append_text(" 352 (cif)"); }
-	if (w > 320)  { scale_combo.append_text(" 320 (cga, qvga)"); }
-	if (w > 176)  { scale_combo.append_text(" 176 (qcif)"); }
+	scale_combo.append(_("Original Width"));
+	if (w > 1920) { scale_combo.append("1920 (hd1080)"); }
+	if (w > 1408) { scale_combo.append("1408 (16cif)"); }
+	if (w > 1280) { scale_combo.append("1280 (sxga, hd720)"); }
+	if (w > 1024) { scale_combo.append("1024 (xga)"); }
+	if (w > 852)  { scale_combo.append(" 852 (hd480)"); }
+	if (w > 768)  { scale_combo.append(" 768 (PAL)"); }
+	if (w > 720)  { scale_combo.append(" 720 (PAL)"); }
+	if (w > 640)  { scale_combo.append(" 640 (vga, ega)"); }
+	if (w > 352)  { scale_combo.append(" 352 (cif)"); }
+	if (w > 320)  { scale_combo.append(" 320 (cga, qvga)"); }
+	if (w > 176)  { scale_combo.append(" 176 (qcif)"); }
 	scale_combo.set_active(0);
 	height_spinner.set_value(h);
 
@@ -255,12 +255,12 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	t->attach (audio_combo, 1, 4, 2, 3);
 	t->attach (ltc_detect, 1, 4, 3, 4);
 	if (as.size() == 0) {
-		audio_combo.append_text(_("No Audio Track Present"));
+		audio_combo.append(_("No Audio Track Present"));
 		audio_combo.set_sensitive(false);
 	} else {
-		audio_combo.append_text(_("Do Not Extract Audio"));
+		audio_combo.append(_("Do Not Extract Audio"));
 		for (TranscodeFfmpeg::FFAudioStreams::iterator it = as.begin(); it < as.end(); ++it) {
-			audio_combo.append_text((*it).name);
+			audio_combo.append((*it).name);
 		}
 	}
 	audio_combo.set_active(0);

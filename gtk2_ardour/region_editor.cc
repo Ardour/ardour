@@ -175,7 +175,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	set_title (string_compose (_("Region '%1'"), _region->name()));
 
 	for (uint32_t i = 0; i < _region->sources().size(); ++i) {
-		_sources.append_text (_region->source(i)->name());
+		_sources.append (_region->source(i)->name());
 	}
 
 	_sources.set_headers_visible (false);

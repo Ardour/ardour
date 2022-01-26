@@ -126,12 +126,12 @@ PluginEqGui::PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	dBSelectBin->add (*manage(dBScaleCombo));
 
 	_live_signal_combo = new Gtk::ComboBoxText ();
-	_live_signal_combo->append_text (_("Off"));
-	_live_signal_combo->append_text (_("Output / Input"));
-	_live_signal_combo->append_text (_("Input"));
-	_live_signal_combo->append_text (_("Output"));
-	_live_signal_combo->append_text (_("Input +40dB"));
-	_live_signal_combo->append_text (_("Output +40dB"));
+	_live_signal_combo->append (_("Off"));
+	_live_signal_combo->append (_("Output / Input"));
+	_live_signal_combo->append (_("Input"));
+	_live_signal_combo->append (_("Output"));
+	_live_signal_combo->append (_("Input +40dB"));
+	_live_signal_combo->append (_("Output +40dB"));
 	_live_signal_combo->set_active (0);
 
 	Gtk::Label *live_signal_label = new Gtk::Label (_("Live signal:"));

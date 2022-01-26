@@ -54,10 +54,10 @@ DuplicateRouteDialog::DuplicateRouteDialog ()
 	playlist_button_box.pack_start (share_playlists_button, false, false);
 	playlist_button_box.show_all ();
 
-	insert_at_combo.append_text (_("First"));
-	insert_at_combo.append_text (_("Before Selection"));
-	insert_at_combo.append_text (_("After Selection"));
-	insert_at_combo.append_text (_("Last"));
+	insert_at_combo.append (_("First"));
+	insert_at_combo.append (_("Before Selection"));
+	insert_at_combo.append (_("After Selection"));
+	insert_at_combo.append (_("Last"));
 	insert_at_combo.set_active (3);
 
 	Gtk::Label* l = manage (new Label (_("Insert duplicates at: ")));

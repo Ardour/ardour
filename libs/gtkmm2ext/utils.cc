@@ -476,7 +476,7 @@ Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, const vector<string>& str
 	cr.clear ();
 
 	for (i = strings.begin(); i != strings.end(); ++i) {
-		cr.append_text (*i);
+		cr.append (*i);
 	}
 }
 

@@ -1104,8 +1104,8 @@ RecorderUI::new_track_for_port (DataType dt, string const& port_name)
 		track_name_entry.set_text (port_name);
 	}
 
-	strict_io_combo.append_text (_("Flexible-I/O"));
-	strict_io_combo.append_text (_("Strict-I/O"));
+	strict_io_combo.append (_("Flexible-I/O"));
+	strict_io_combo.append (_("Strict-I/O"));
 	strict_io_combo.set_active (Config->get_strict_io () ? 1 : 0);
 
 	Label* l;

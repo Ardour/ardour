@@ -206,65 +206,65 @@ ExportVideoDialog::ExportVideoDialog ()
 	t->attach (debug_checkbox, 0, 4, ty, ty+1); ty++;
 #endif
 
-	preset_combo.append_text("none");
-	preset_combo.append_text("dvd-mp2");
-	preset_combo.append_text("dvd-NTSC");
-	preset_combo.append_text("dvd-PAL");
-	preset_combo.append_text("flv");
-	preset_combo.append_text("mpeg4");
-	preset_combo.append_text("mp4/h264/aac");
-	preset_combo.append_text("ogg");
-	preset_combo.append_text("webm");
-	preset_combo.append_text("you-tube");
+	preset_combo.append("none");
+	preset_combo.append("dvd-mp2");
+	preset_combo.append("dvd-NTSC");
+	preset_combo.append("dvd-PAL");
+	preset_combo.append("flv");
+	preset_combo.append("mpeg4");
+	preset_combo.append("mp4/h264/aac");
+	preset_combo.append("ogg");
+	preset_combo.append("webm");
+	preset_combo.append("you-tube");
 
-	audio_codec_combo.append_text(_("(default for format)"));
-	audio_codec_combo.append_text("ac3");
-	audio_codec_combo.append_text("aac");
-	audio_codec_combo.append_text("libmp3lame");
-	audio_codec_combo.append_text("libvorbis");
-	audio_codec_combo.append_text("mp2");
-	audio_codec_combo.append_text("pcm_s16le");
+	audio_codec_combo.append(_("(default for format)"));
+	audio_codec_combo.append("ac3");
+	audio_codec_combo.append("aac");
+	audio_codec_combo.append("libmp3lame");
+	audio_codec_combo.append("libvorbis");
+	audio_codec_combo.append("mp2");
+	audio_codec_combo.append("pcm_s16le");
 
-	video_codec_combo.append_text(_("(default for format)"));
-	video_codec_combo.append_text("flv");
-	video_codec_combo.append_text("libtheora");
-	video_codec_combo.append_text("mjpeg");
-	video_codec_combo.append_text("mpeg2video");
-	video_codec_combo.append_text("mpeg4");
-	video_codec_combo.append_text("h264");
-	video_codec_combo.append_text("vpx (webm)");
-	video_codec_combo.append_text("copy");
+	video_codec_combo.append(_("(default for format)"));
+	video_codec_combo.append("flv");
+	video_codec_combo.append("libtheora");
+	video_codec_combo.append("mjpeg");
+	video_codec_combo.append("mpeg2video");
+	video_codec_combo.append("mpeg4");
+	video_codec_combo.append("h264");
+	video_codec_combo.append("vpx (webm)");
+	video_codec_combo.append("copy");
 
-	audio_bitrate_combo.append_text(_("(default)"));
-	audio_bitrate_combo.append_text("64k");
-	audio_bitrate_combo.append_text("128k");
-	audio_bitrate_combo.append_text("192k");
-	audio_bitrate_combo.append_text("256k");
-	audio_bitrate_combo.append_text("320k");
+	audio_bitrate_combo.append(_("(default)"));
+	audio_bitrate_combo.append("64k");
+	audio_bitrate_combo.append("128k");
+	audio_bitrate_combo.append("192k");
+	audio_bitrate_combo.append("256k");
+	audio_bitrate_combo.append("320k");
 
-	audio_samplerate_combo.append_text("22050");
-	audio_samplerate_combo.append_text("44100");
-	audio_samplerate_combo.append_text("48000");
+	audio_samplerate_combo.append("22050");
+	audio_samplerate_combo.append("44100");
+	audio_samplerate_combo.append("48000");
 
-	video_bitrate_combo.append_text(_("(default)"));
-	video_bitrate_combo.append_text(_("(retain)"));
-	video_bitrate_combo.append_text("200k");
-	video_bitrate_combo.append_text("800k");
-	video_bitrate_combo.append_text("2000k");
-	video_bitrate_combo.append_text("5000k");
-	video_bitrate_combo.append_text("8000k");
+	video_bitrate_combo.append(_("(default)"));
+	video_bitrate_combo.append(_("(retain)"));
+	video_bitrate_combo.append("200k");
+	video_bitrate_combo.append("800k");
+	video_bitrate_combo.append("2000k");
+	video_bitrate_combo.append("5000k");
+	video_bitrate_combo.append("8000k");
 
-	fps_combo.append_text("23.976");
-	fps_combo.append_text("24");
-	fps_combo.append_text("24.976");
-	fps_combo.append_text("25");
-	fps_combo.append_text("29.97");
-	fps_combo.append_text("30");
-	fps_combo.append_text("59.94");
-	fps_combo.append_text("60");
+	fps_combo.append("23.976");
+	fps_combo.append("24");
+	fps_combo.append("24.976");
+	fps_combo.append("25");
+	fps_combo.append("29.97");
+	fps_combo.append("30");
+	fps_combo.append("59.94");
+	fps_combo.append("60");
 
-	aspect_combo.append_text("4:3");
-	aspect_combo.append_text("16:9");
+	aspect_combo.append("4:3");
+	aspect_combo.append("16:9");
 
 	vbox->pack_start (*options_box, false, true, 4);
 	get_vbox()->set_spacing (4);
@@ -341,15 +341,15 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 
 	insnd_combo.remove_all ();
 
-	insnd_combo.append_text (_("from session start marker to session end marker"));
+	insnd_combo.append (_("from session start marker to session end marker"));
 
 	if (av_offset < 0 ) {
-		insnd_combo.append_text (_("from 00:00:00:00 to the video end"));
+		insnd_combo.append (_("from 00:00:00:00 to the video end"));
 	} else {
-		insnd_combo.append_text (_("from video start to video end"));
+		insnd_combo.append (_("from video start to video end"));
 	}
 	if (!export_range.empty()) {
-		insnd_combo.append_text (_("Selected range"));  // TODO show export_range.start() -> export_range.end_sample()
+		insnd_combo.append (_("Selected range"));  // TODO show export_range.start() -> export_range.end_sample()
 	}
 	if (range) {
 		insnd_combo.set_active(2);

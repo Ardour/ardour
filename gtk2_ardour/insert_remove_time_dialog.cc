@@ -88,9 +88,9 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 		Label* intersected_label = manage (new Label (_("Intersected regions should:")));
 		intersected_label->set_alignment (1, 0.5);
 		table->attach (*intersected_label, 0, 1, 2, 3, FILL | EXPAND);
-		_intersected_combo.append_text (_("stay in position"));
-		_intersected_combo.append_text (_("move"));
-		_intersected_combo.append_text (_("be split"));
+		_intersected_combo.append (_("stay in position"));
+		_intersected_combo.append (_("move"));
+		_intersected_combo.append (_("be split"));
 		_intersected_combo.set_active (0);
 		table->attach (_intersected_combo, 1, 2, 2, 3);
 	}

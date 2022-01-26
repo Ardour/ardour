@@ -758,15 +758,15 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 
 	// Order of the following must correspond with enum sortMethod
 	// in sfdb_freesound_mootcher.h
-	freesound_sort.append_text(_("None"));
-	freesound_sort.append_text(_("Longest"));
-	freesound_sort.append_text(_("Shortest"));
-	freesound_sort.append_text(_("Newest"));
-	freesound_sort.append_text(_("Oldest"));
-	freesound_sort.append_text(_("Most downloaded"));
-	freesound_sort.append_text(_("Least downloaded"));
-	freesound_sort.append_text(_("Highest rated"));
-	freesound_sort.append_text(_("Lowest rated"));
+	freesound_sort.append(_("None"));
+	freesound_sort.append(_("Longest"));
+	freesound_sort.append(_("Shortest"));
+	freesound_sort.append(_("Newest"));
+	freesound_sort.append(_("Oldest"));
+	freesound_sort.append(_("Most downloaded"));
+	freesound_sort.append(_("Least downloaded"));
+	freesound_sort.append(_("Highest rated"));
+	freesound_sort.append(_("Lowest rated"));
 	freesound_sort.set_active(0);
 
 	passbox->pack_start (freesound_search_btn, false, false);

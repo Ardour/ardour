@@ -471,7 +471,7 @@ void
 ComboStringOption::set_popdown_strings (const std::vector<std::string>& strings) {
 	_combo->clear_items ();
 	for (std::vector<std::string>::const_iterator i = strings.begin(); i != strings.end(); ++i) {
-		_combo->append_text (*i);
+		_combo->append (*i);
 	}
 }
 
@@ -513,9 +513,9 @@ BoolComboOption::BoolComboOption (
 	_combo = manage (new ComboBoxText);
 
 	/* option 0 is the false option */
-	_combo->append_text (f);
+	_combo->append (f);
 	/* and option 1 is the true */
-	_combo->append_text (t);
+	_combo->append (t);
 
 	_combo->signal_changed().connect (sigc::mem_fun (*this, &BoolComboOption::changed));
 }
