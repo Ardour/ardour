@@ -132,7 +132,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, cue_launched (false)
 	, _estimated_tempo (0.)
 	, _segment_tempo (0.)
-	, _barcnt (0.)
+	, _beatcnt (0.)
 	, _meter (4, 4)
 	, expected_end_sample (0)
 	, _pending ((Trigger*) 0)
@@ -371,7 +371,7 @@ Trigger::get_state (void)
 	node->set_property (X_("index"), _index);
 	node->set_property (X_("estimated-tempo"), _estimated_tempo);
 	node->set_property (X_("segment-tempo"), _segment_tempo);
-	node->set_property (X_("barcnt"), _barcnt);
+	node->set_property (X_("beatcnt"), _beatcnt);
 
 	if (_region) {
 		node->set_property (X_("region"), _region->id());
@@ -399,7 +399,7 @@ Trigger::set_state (const XMLNode& node, int version)
 
 	node.get_property (X_("estimated-tempo"), _estimated_tempo);  //TODO: for now: if we know the bpm, overwrite the value that estimate_tempo() found
 	node.get_property (X_("segment-tempo"), _segment_tempo);
-	node.get_property (X_("barcnt"), _barcnt);
+	node.get_property (X_("beatcnt"), _beatcnt);
 
 	node.get_property (X_("index"), _index);
 	set_values (node);
@@ -860,33 +860,17 @@ AudioTrigger::set_segment_tempo (double t)
 }
 
 void
-AudioTrigger::set_segment_meter (Temporal::Meter const &m)
+AudioTrigger::set_segment_beatcnt (double count)
 {
-	if (_meter != m) {
-		_meter = m;
+	if (_beatcnt != count) {
+		_beatcnt = count;
 
-		//given a meter from the user, tempo is assumed constant and we re-calc barcnt internally
+		//given a beatcnt from the user, we use the data length to re-calc tempo internally
+		// ... TODO:  provide a graphical trimmer to give the user control of data.length by dragging the start and end of the sample.
 		const double seconds = (double) data.length  / _box.session().sample_rate();
-		const double quarters = (seconds / 60.) * _segment_tempo;
-		_barcnt = quarters / _meter.divisions_per_bar();
+		double tempo = _beatcnt / (seconds/60.0);
 
-		PropertyChanged (ARDOUR::Properties::tempo_meter);
-		_box.session().set_dirty();
-	}
-}
-
-void
-AudioTrigger::set_segment_barcnt (double count)
-{
-	if (_barcnt != count) {
-		_barcnt = count;
-
-		//given a barcnt from the user, meter is assumed constant and we re-calc tempo internally
-		const double seconds = (double) data.length  / _box.session().sample_rate();
-		const double quarters = _barcnt * _meter.divisions_per_bar();  //TODO: this assumes note_value=quarter
-		_estimated_tempo = quarters / (seconds/60.0);
-
-		set_segment_tempo(_estimated_tempo);
+		set_segment_tempo(tempo);
 	}
 }
 
@@ -1006,23 +990,22 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
            data.length : how many samples there are in the data  (AudioTime / samples)
            _follow_length : the (user specified) time after the start of the trigger when the follow action should take effect
            _use_follow_length : whether to use the follow_length value, or the clip's natural length
-           _barcnt : the expected duration of the trigger, based on analysis of its tempo, or user-set
-
+           _beatcnt : the expected duration of the trigger, based on analysis of its tempo .. can be overridden by the user later
 	*/
 
 	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk(transition_bbt, _follow_length));
-	samplepos_t end_by_barcnt = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (round (_barcnt), 0, 0)));
+	samplepos_t end_by_beatcnt = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (0, round (_beatcnt), 0)));  //OK?
 	samplepos_t end_by_data_length = transition_sample + data.length;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 @ %2 / %3 / %4 ends: FL %5 (from %6) BC %7 DL %8\n",
 	                                              index(), transition_sample, transition_beats, transition_bbt,
-	                                              end_by_follow_length, _follow_length, end_by_barcnt, end_by_data_length));
+	                                              end_by_follow_length, _follow_length, end_by_beatcnt, end_by_data_length));
 
 	if (stretching()) {
 		if (internal_use_follow_length()) {
-			expected_end_sample = std::min (end_by_follow_length, end_by_barcnt);
+			expected_end_sample = std::min (end_by_follow_length, end_by_beatcnt);
 		} else {
-			expected_end_sample = end_by_barcnt;
+			expected_end_sample = end_by_beatcnt;
 		}
 	} else {
 		if (internal_use_follow_length()) {
@@ -1253,35 +1236,32 @@ AudioTrigger::estimate_tempo ()
 	}
 
 	const double seconds = (double) data.length  / _box.session().sample_rate();
-	const double quarters = (seconds / 60.) * _estimated_tempo;
-
-	/* initialize bar count to match the file length ... user can later change this value */
-	_barcnt = quarters / _meter.divisions_per_bar();
-
-	/* initialize our follow_length to match the barcnt ... user can later change this value */
-	_follow_length = (Temporal::BBT_Offset( rint(_barcnt), 0, 0));
 
 	/* now check the determined tempo and force it to a value that gives us
-	   an integer bar/quarter count. This is a heuristic that tries to
+	   an integer beat/quarter count. This is a heuristic that tries to
 	   avoid clips that slightly over- or underrun a quantization point,
 	   resulting in small or larger gaps in output if they are repeating.
 	*/
 
-	if ((_estimated_tempo != 0.) && (rint (_barcnt) != _barcnt)) {
-		/* fractional barcnt */
-		int intquarters = round (quarters);
-		double at = _estimated_tempo;
-		_estimated_tempo = intquarters / (seconds/60.);
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("adjusted barcnt of %1 and q = %2 to %3, old %4 new at = %5 seconds was %6\n", _barcnt, quarters, intquarters, at, _estimated_tempo, seconds));
+	if ((_estimated_tempo != 0.)) {
+		/* fractional beatcnt */
+		double maybe_beats = (seconds / 60.) * _estimated_tempo;
+		_beatcnt = round (maybe_beats);
+		double est = _estimated_tempo;
+		_estimated_tempo = _beatcnt / (seconds/60.);
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given original estimated tempo %1, rounded beatcnt is %2 : resulting in working bpm = %3\n", est, _beatcnt, _estimated_tempo));
 	}
+
+	/* initialize our follow_length to match the beatcnt ... user can later change this value to have the clip end sooner or later than its data length */
+	_follow_length = (Temporal::BBT_Offset( 0, rint(_beatcnt), 0));  //OK ?
 
 	/* use initial tempo in map (assumed for now to be the only one */
 
-	const samplecnt_t one_bar = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (1, 0, 0)).samples();
+	const samplecnt_t one_beat = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (0, 1, 0)).samples();
 
 	cerr << "estimated tempo: " << _estimated_tempo << endl;
-	cerr << "one bar in samples: " << one_bar << endl;
-	cerr << "barcnt = " << round (_barcnt) << endl;
+	cerr << "one beat in samples: " << one_beat << endl;
+	cerr << "beatcnt = " << round (_beatcnt) << endl;
 }
 
 bool
@@ -1289,9 +1269,9 @@ AudioTrigger::probably_oneshot () const
 {
 	assert (_segment_tempo != 0.);
 
-	if ((data.length < (_box.session().sample_rate()/2)) ||
-	    /* XXX use Meter here, not 4.0 */
-	    ((_barcnt < 1) && (data.length < (4.0 * ((_box.session().sample_rate() * 60) / _segment_tempo))))) {
+	if ((data.length < (_box.session().sample_rate()/2)) ||  //less than 1/2 second
+        (_segment_tempo > 140) ||                            //minibpm thinks this is really fast
+        (_segment_tempo < 60)) {                             //minibpm thinks this is really slow
 		std::cerr << "looks like a one-shot\n";
 		return true;
 	}

@@ -352,7 +352,16 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	double                    _estimated_tempo;  //TODO:  this should come from the MIDI file
 	double                    _segment_tempo;  //TODO: this will likely get stored in the SegmentDescriptor for audio triggers
 
-	double                    _barcnt; /* our estimate of the number of bars in the region */
+	/* basic process is :
+	   1) when a file is loaded, we infer its bpm either by minibpm's estimate, a flag in the filename, metadata (TBD) or other means
+	   2) we assume the clip must have an integer number of beats in it  (simplest case is a one-bar loop with 4 beats in it)
+	   3) ...so we round to the nearest beat length, and set the tempo to *exactly* fit the sample-length into the assumed beat-length
+	   4) the user may recognize a problem:  "this was a 3/4 beat, which was rounded to 4 beats but it should have been 3"
+	   5) if the user changes the beat-length, then the tempo is recalculated for use during stretching
+	   6) someday, we will also allow the sample start and length to be adjusted in a trimmer, and that will also adjust the tempo
+	   7) in all cases the user should be in final control; but our "internal" value for stretching are just sample-start and BPM, end of story
+	*/
+	double                    _beatcnt;
 	Temporal::Meter           _meter;
 
 	samplepos_t                expected_end_sample;
@@ -382,11 +391,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	double segment_tempo() const { return _segment_tempo; }
 	void set_segment_tempo (double t);
 
-	Temporal::Meter segment_meter() const { return _meter; }  //TODO: might be different?
-	void set_segment_meter(Temporal::Meter const &);  //TODO: disambiguated from a future midi::metrum
-
-	double segment_barcnt () { return _barcnt; }
-	void set_segment_barcnt (double count);
+	double segment_beatcnt () { return _beatcnt; }
+	void set_segment_beatcnt (double count);
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
