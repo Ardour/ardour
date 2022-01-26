@@ -38,7 +38,7 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 
 DspStatisticsGUI::DspStatisticsGUI ()
-	: buffer_size_label ("", ALIGN_RIGHT, ALIGN_CENTER)
+	: buffer_size_label ("", ALIGN_END, ALIGN_CENTER)
 	, reset_button (_("Reset"))
 {
 	const size_t nlabels = Session::NTT + AudioEngine::NTT + AudioBackend::NTT;
@@ -48,34 +48,34 @@ DspStatisticsGUI::DspStatisticsGUI ()
 	snprintf (buf, sizeof (buf), "%7.2f msec %6.2f%%", 10000.0, 100.0);
 
 	for (size_t n = 0; n < nlabels; ++n) {
-		labels[n] = new Label ("", ALIGN_RIGHT, ALIGN_CENTER);
+		labels[n] = new Label ("", ALIGN_END, ALIGN_CENTER);
 		set_size_request_to_display_given_text (*labels[n], buf, 0, 0);
 	}
 
 	int row = 0;
 
-	table.attach (*manage (new Gtk::Label (_("Buffer size: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*manage (new Gtk::Label (_("Buffer size: "), ALIGN_END, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	table.attach (buffer_size_label, 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	table.attach (*manage (new Gtk::Label (_("Idle: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*manage (new Gtk::Label (_("Idle: "), ALIGN_END, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	table.attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::DeviceWait], 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	table.attach (*manage (new Gtk::Label (_("DSP: "), ALIGN_RIGHT, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*manage (new Gtk::Label (_("DSP: "), ALIGN_END, ALIGN_CENTER)), 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	table.attach (*labels[AudioEngine::NTT + Session::NTT + AudioBackend::RunLoop], 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	Label* right_angle_text1 = manage (new Label ("\xe2\x94\x94", ALIGN_RIGHT, ALIGN_CENTER));
+	Label* right_angle_text1 = manage (new Label ("\xe2\x94\x94", ALIGN_END, ALIGN_CENTER));
 
-	table.attach (*manage (new Gtk::Label (_("Engine: "), ALIGN_RIGHT, ALIGN_CENTER)), 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*manage (new Gtk::Label (_("Engine: "), ALIGN_END, ALIGN_CENTER)), 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	table.attach (*right_angle_text1, 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	table.attach (*labels[AudioEngine::ProcessCallback], 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;
 
-	Label* right_angle_text2 = manage (new Label ("\xe2\x94\x94", ALIGN_RIGHT, ALIGN_CENTER));
+	Label* right_angle_text2 = manage (new Label ("\xe2\x94\x94", ALIGN_END, ALIGN_CENTER));
 
-	table.attach (*manage (new Gtk::Label (_("Session: "), ALIGN_RIGHT, ALIGN_CENTER)), 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	table.attach (*manage (new Gtk::Label (_("Session: "), ALIGN_END, ALIGN_CENTER)), 1, 2, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	table.attach (*right_angle_text2, 0, 1, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	table.attach (*labels[AudioEngine::NTT + Session::OverallProcess], 2, 3, row, row+1, Gtk::FILL, Gtk::SHRINK, 2, 0);
 	row++;

@@ -53,8 +53,8 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, timepos_t const & pos
 	, end_bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, end_bpm_spinner (end_bpm_adjustment)
 	, _end_bpm_label (_("End Beats per Minute:"), ALIGN_START, ALIGN_CENTER)
-	, when_bar_label (_("bar:"), ALIGN_RIGHT, ALIGN_CENTER)
-	, when_beat_label (_("beat:"), ALIGN_RIGHT, ALIGN_CENTER)
+	, when_bar_label (_("bar:"), ALIGN_END, ALIGN_CENTER)
+	, when_beat_label (_("beat:"), ALIGN_END, ALIGN_CENTER)
 	, pulse_selector_label (_("Pulse:"), ALIGN_START, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
@@ -73,8 +73,8 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, TempoPoint& point, co
 	, end_bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, end_bpm_spinner (end_bpm_adjustment)
 	, _end_bpm_label (_("End Beats per Minute:"), ALIGN_START, ALIGN_CENTER)
-	, when_bar_label (_("bar:"), ALIGN_RIGHT, ALIGN_CENTER)
-	, when_beat_label (_("beat:"), ALIGN_RIGHT, ALIGN_CENTER)
+	, when_bar_label (_("bar:"), ALIGN_END, ALIGN_CENTER)
+	, when_beat_label (_("beat:"), ALIGN_END, ALIGN_CENTER)
 	, pulse_selector_label (_("Pulse:"), ALIGN_START, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
@@ -563,9 +563,9 @@ MeterDialog::init (const Temporal::BBT_Time& when, double bpb, double divisor, b
 		lock_style.set_active_text (strings[0]); // "music"
 	}
 
-	Label* note_label = manage (new Label (_("Note value:"), ALIGN_RIGHT, ALIGN_CENTER));
-	Label* lock_label = manage (new Label (_("Lock style:"), ALIGN_RIGHT, ALIGN_CENTER));
-	Label* bpb_label = manage (new Label (_("Beats per bar:"), ALIGN_RIGHT, ALIGN_CENTER));
+	Label* note_label = manage (new Label (_("Note value:"), ALIGN_END, ALIGN_CENTER));
+	Label* lock_label = manage (new Label (_("Lock style:"), ALIGN_END, ALIGN_CENTER));
+	Label* bpb_label = manage (new Label (_("Beats per bar:"), ALIGN_END, ALIGN_CENTER));
 	Table* table = manage (new Table (3, 3));
 	table->set_spacings (6);
 

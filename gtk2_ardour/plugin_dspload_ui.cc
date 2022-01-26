@@ -30,10 +30,10 @@ using namespace Gtk;
 
 PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert> insert)
 	: _insert (insert)
-	, _lbl_min ("", ALIGN_RIGHT, ALIGN_CENTER)
-	, _lbl_max ("", ALIGN_RIGHT, ALIGN_CENTER)
-	, _lbl_avg ("", ALIGN_RIGHT, ALIGN_CENTER)
-	, _lbl_dev ("", ALIGN_RIGHT, ALIGN_CENTER)
+	, _lbl_min ("", ALIGN_END, ALIGN_CENTER)
+	, _lbl_max ("", ALIGN_END, ALIGN_CENTER)
+	, _lbl_avg ("", ALIGN_END, ALIGN_CENTER)
+	, _lbl_dev ("", ALIGN_END, ALIGN_CENTER)
 	, _reset_button (_("Reset"))
 	, _valid (false)
 {
@@ -43,13 +43,13 @@ PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert> 
 	set_size_request_to_display_given_text (_lbl_dev, string_compose (_("%1 [ms]"), 99.123), 0, 0);
 	_darea.set_size_request (360, 32); // TODO  max (320, 360 * UIConfiguration::instance().get_ui_scale ())
 
-	attach (*manage (new Gtk::Label (_("Minimum"), ALIGN_RIGHT, ALIGN_CENTER)),
+	attach (*manage (new Gtk::Label (_("Minimum"), ALIGN_END, ALIGN_CENTER)),
 			0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	attach (*manage (new Gtk::Label (_("Maximum"), ALIGN_RIGHT, ALIGN_CENTER)),
+	attach (*manage (new Gtk::Label (_("Maximum"), ALIGN_END, ALIGN_CENTER)),
 			0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	attach (*manage (new Gtk::Label (_("Average"), ALIGN_RIGHT, ALIGN_CENTER)),
+	attach (*manage (new Gtk::Label (_("Average"), ALIGN_END, ALIGN_CENTER)),
 			0, 1, 2, 3, Gtk::FILL, Gtk::SHRINK, 2, 0);
-	attach (*manage (new Gtk::Label (_("Std.Dev"), ALIGN_RIGHT, ALIGN_CENTER)),
+	attach (*manage (new Gtk::Label (_("Std.Dev"), ALIGN_END, ALIGN_CENTER)),
 			0, 1, 3, 4, Gtk::FILL, Gtk::SHRINK, 2, 0);
 
 	attach (_lbl_min, 1, 2, 0, 1, Gtk::FILL, Gtk::SHRINK, 2, 0);

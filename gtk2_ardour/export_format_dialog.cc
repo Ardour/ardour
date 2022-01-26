@@ -78,7 +78,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog)
 	, format_label (_("File format"), Gtk::ALIGN_START)
 	, sample_rate_label (_("Sample rate"), Gtk::ALIGN_START)
 
-	, src_quality_label (_("Sample rate conversion quality:"), Gtk::ALIGN_RIGHT)
+	, src_quality_label (_("Sample rate conversion quality:"), Gtk::ALIGN_END)
 
 	/* Watermarking */
 	, watermark_heading (_("Preview / Watermark"), Gtk::ALIGN_START)

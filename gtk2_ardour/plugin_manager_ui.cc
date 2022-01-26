@@ -606,37 +606,37 @@ PluginManagerUI::refill ()
 	}
 
 	Label* head_type  = new Label (_("Type"), ALIGN_START, ALIGN_CENTER);
-	Label* head_count = new Label (_("Total"), ALIGN_RIGHT, ALIGN_CENTER);
+	Label* head_count = new Label (_("Total"), ALIGN_END, ALIGN_CENTER);
 	_tbl_nfo.attach (*head_type,  0, 1, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	_tbl_nfo.attach (*head_count, 1, 2, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	if (pc_max.error > 0) {
-		Label* hd = new Label (_("Err"), ALIGN_RIGHT, ALIGN_CENTER);
+		Label* hd = new Label (_("Err"), ALIGN_END, ALIGN_CENTER);
 		_tbl_nfo.attach (*hd, 2, 3, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	}
 	if (pc_max.stale > 0) {
-		Label* hd = new Label (_("Mis"), ALIGN_RIGHT, ALIGN_CENTER);
+		Label* hd = new Label (_("Mis"), ALIGN_END, ALIGN_CENTER);
 		_tbl_nfo.attach (*hd, 3, 4, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	}
 	if (pc_max.ndscn > 0) {
-		Label* hd = new Label (_("New"), ALIGN_RIGHT, ALIGN_CENTER);
+		Label* hd = new Label (_("New"), ALIGN_END, ALIGN_CENTER);
 		_tbl_nfo.attach (*hd, 4, 5, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	}
 	++row;
 	for (std::map<PluginType, PluginCount>::const_iterator i = plugin_count.begin (); i != plugin_count.end (); ++i, ++row) {
 		Label* lbl_type  = new Label (plugin_type (i->first), ALIGN_START, ALIGN_CENTER);
-		Label* lbl_count = new Label (string_compose ("%1", i->second.total), ALIGN_RIGHT, ALIGN_CENTER);
+		Label* lbl_count = new Label (string_compose ("%1", i->second.total), ALIGN_END, ALIGN_CENTER);
 		_tbl_nfo.attach (*lbl_type,  0, 1, row, row + 1, EXPAND | FILL, SHRINK, 2, 2);
 		_tbl_nfo.attach (*lbl_count, 1, 2, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 		if (pc_max.error > 0) {
-			Label* lbl = new Label (string_compose ("%1", i->second.error), ALIGN_RIGHT, ALIGN_CENTER);
+			Label* lbl = new Label (string_compose ("%1", i->second.error), ALIGN_END, ALIGN_CENTER);
 			_tbl_nfo.attach (*lbl, 2, 3, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 		}
 		if (pc_max.stale > 0) {
-			Label* lbl = new Label (string_compose ("%1", i->second.stale), ALIGN_RIGHT, ALIGN_CENTER);
+			Label* lbl = new Label (string_compose ("%1", i->second.stale), ALIGN_END, ALIGN_CENTER);
 			_tbl_nfo.attach (*lbl, 3, 4, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 		}
 		if (pc_max.ndscn > 0) {
-			Label* lbl = new Label (string_compose ("%1", i->second.ndscn), ALIGN_RIGHT, ALIGN_CENTER);
+			Label* lbl = new Label (string_compose ("%1", i->second.ndscn), ALIGN_END, ALIGN_CENTER);
 			_tbl_nfo.attach (*lbl, 4, 5, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 		}
 	}

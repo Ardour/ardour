@@ -59,7 +59,7 @@ ExportDialog::ExportDialog (PublicEditor & editor, std::string title, ARDOUR::Ex
   , type (type)
   , editor (editor)
   , warn_label ("", Gtk::ALIGN_START)
-  , list_files_label (_("<span color=\"#ffa755\">Some already existing files will be overwritten.</span>"), Gtk::ALIGN_RIGHT)
+  , list_files_label (_("<span color=\"#ffa755\">Some already existing files will be overwritten.</span>"), Gtk::ALIGN_END)
   , list_files_button (_("List files"))
   , previous_progress (0)
   , _initialized (false)
