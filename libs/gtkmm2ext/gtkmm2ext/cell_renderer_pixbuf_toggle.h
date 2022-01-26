@@ -27,8 +27,6 @@
 
 #include "gtkmm2ext/visibility.h"
 
-using namespace Gtk;
-
 namespace Gtkmm2ext {
 
 class LIBGTKMM2EXT_API CellRendererPixbufToggle : public Gtk::CellRenderer

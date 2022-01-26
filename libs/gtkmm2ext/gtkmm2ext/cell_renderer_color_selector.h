@@ -26,8 +26,6 @@
 
 #include "gtkmm2ext/visibility.h"
 
-using namespace Gtk;
-
 namespace Gtk {
 	class ColorSelectionDialog;
 }
