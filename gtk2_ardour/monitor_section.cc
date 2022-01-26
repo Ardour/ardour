@@ -560,7 +560,7 @@ MonitorSection::leave_handler (GdkEventCrossing* ev)
 
 	Widget* top = get_toplevel();
 
-	if (top->is_toplevel() && top != &_tearoff->tearoff_window()) {
+	if (top->get_is_toplevel() && top != &_tearoff->tearoff_window()) {
 		Window* win = dynamic_cast<Window*> (top);
 		gtk_window_set_focus (win->gobj(), 0);
 	}
