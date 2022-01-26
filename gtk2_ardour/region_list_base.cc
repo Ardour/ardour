@@ -131,7 +131,7 @@ RegionListBase::setup_col (TreeViewColumn* col, int sort_idx, Gtk::AlignmentEnum
 	col->set_alignment (al);
 
 	/* ...and this sets the alignment for the data cells */
-	CellRendererText* renderer = dynamic_cast<CellRendererText*> (col->get_first_cell_renderer ());
+	CellRendererText* renderer = dynamic_cast<CellRendererText*> (col->get_first_cell ());
 	if (renderer) {
 		renderer->property_xalign () = (al == ALIGN_END ? 1.0 : (al == ALIGN_START ? 0.0 : 0.5));
 	}
@@ -140,7 +140,7 @@ RegionListBase::setup_col (TreeViewColumn* col, int sort_idx, Gtk::AlignmentEnum
 void
 RegionListBase::setup_toggle (Gtk::TreeViewColumn* tvc, sigc::slot<void, std::string> cb)
 {
-	CellRendererToggle* tc      = dynamic_cast<CellRendererToggle*> (tvc->get_first_cell_renderer ());
+	CellRendererToggle* tc      = dynamic_cast<CellRendererToggle*> (tvc->get_first_cell ());
 	tc->property_activatable () = true;
 	tc->signal_toggled ().connect (cb);
 }
@@ -152,7 +152,7 @@ RegionListBase::add_name_column ()
 	setup_col (tvc, 0, ALIGN_START, _("Name"), ("Region name"));
 
 	/* Region Name: make editable */
-	CellRendererText* region_name_cell     = dynamic_cast<CellRendererText*> (tvc->get_first_cell_renderer ());
+	CellRendererText* region_name_cell     = dynamic_cast<CellRendererText*> (tvc->get_first_cell ());
 	region_name_cell->property_editable () = true;
 	region_name_cell->signal_edited ().connect (sigc::mem_fun (*this, &RegionListBase::name_edit));
 	region_name_cell->signal_editing_started ().connect (sigc::mem_fun (*this, &RegionListBase::name_editing_started));
@@ -169,7 +169,7 @@ RegionListBase::add_tag_column ()
 	setup_col (tvc, 2, ALIGN_START, _("Tags"), _("Tags"));
 
 	/* Tags cell: make editable */
-	CellRendererText* region_tags_cell     = dynamic_cast<CellRendererText*> (tvc->get_first_cell_renderer ());
+	CellRendererText* region_tags_cell     = dynamic_cast<CellRendererText*> (tvc->get_first_cell ());
 	region_tags_cell->property_editable () = true;
 	region_tags_cell->signal_edited ().connect (sigc::mem_fun (*this, &RegionListBase::tag_edit));
 	region_tags_cell->signal_editing_started ().connect (sigc::mem_fun (*this, &RegionListBase::tag_editing_started));
