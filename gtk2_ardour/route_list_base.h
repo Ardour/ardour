@@ -75,7 +75,7 @@ protected:
 		tvc->set_expand (false);
 		tvc->set_alignment (Gtk::ALIGN_CENTER);
 
-		Gtk::CellRendererToggle* tc = dynamic_cast<Gtk::CellRendererToggle*> (tvc->get_first_cell_renderer ());
+		Gtk::CellRendererToggle* tc = dynamic_cast<Gtk::CellRendererToggle*> (tvc->get_first_cell ());
 		tc->property_activatable () = true;
 		tc->property_radio ()       = false;
 		tc->signal_toggled ().connect (cb);

@@ -144,7 +144,7 @@ RouteListBase::add_name_column ()
 
 	setup_col (tvc, _("Name"), ("Track/Bus name"));
 
-	CellRendererText* cell = dynamic_cast<CellRendererText*> (tvc->get_first_cell_renderer ());
+	CellRendererText* cell = dynamic_cast<CellRendererText*> (tvc->get_first_cell ());
 	cell->signal_editing_started ().connect (sigc::mem_fun (*this, &RouteListBase::name_edit_started));
 	tvc->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	tvc->set_expand (true);
