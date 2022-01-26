@@ -469,7 +469,7 @@ ComboStringOption::add_to_page (OptionEditorPage* p)
  */
 void
 ComboStringOption::set_popdown_strings (const std::vector<std::string>& strings) {
-	_combo->clear_items ();
+	_combo->remove_all ();
 	for (std::vector<std::string>::const_iterator i = strings.begin(); i != strings.end(); ++i) {
 		_combo->append (*i);
 	}
@@ -477,7 +477,7 @@ ComboStringOption::set_popdown_strings (const std::vector<std::string>& strings)
 
 void
 ComboStringOption::clear () {
-	_combo->clear_items();
+	_combo->remove_all();
 }
 
 void
