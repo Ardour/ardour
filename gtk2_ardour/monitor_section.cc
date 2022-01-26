@@ -486,7 +486,7 @@ MonitorSection::MonitorSection ()
 
 	signal_enter_notify_event().connect (sigc::mem_fun (*this, &MonitorSection::enter_handler));
 	signal_leave_notify_event().connect (sigc::mem_fun (*this, &MonitorSection::leave_handler));
-	set_flags (CAN_FOCUS);
+	set_can_focus ();
 
 	_tearoff = new TearOff (*this);
 
@@ -694,10 +694,10 @@ MonitorSection::ChannelButtonSet::ChannelButtonSet ()
 	solo.set_name (X_("solo button"));
 	invert.set_name (X_("invert button"));
 
-	cut.unset_flags (Gtk::CAN_FOCUS);
-	dim.unset_flags (Gtk::CAN_FOCUS);
-	solo.unset_flags (Gtk::CAN_FOCUS);
-	invert.unset_flags (Gtk::CAN_FOCUS);
+	cut.set_can_focus (false);
+	dim.set_can_focus (false);
+	solo.set_can_focus (false);
+	invert.set_can_focus (false);
 }
 
 void

@@ -160,7 +160,7 @@ RecorderUI::RecorderUI ()
 	_meter_scroller.add (_meter_area);
 	_meter_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	_scroller_base.set_flags (CAN_FOCUS);
+	_scroller_base.set_can_focus ();
 	_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	_scroller_base.signal_button_press_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_event));
 	_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_event));

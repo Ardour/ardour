@@ -27,7 +27,7 @@ NoteSelectDialog::NoteSelectDialog ()
 	: ArdourDialog (_("Select Note"))
 	, _note_number(60)
 {
-	_piano.set_flags(Gtk::CAN_FOCUS);
+	_piano.set_can_focus ();
 	_piano.show();
 	_piano.NoteOn.connect (sigc::mem_fun (*this, &NoteSelectDialog::note_on_event_handler));
 

@@ -273,7 +273,7 @@ ARDOUR_UI::set_session (Session *s)
 		ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_group_peak_display));
 
 		editor_meter_peak_display.set_name ("meterbridge peakindicator");
-		editor_meter_peak_display.unset_flags (Gtk::CAN_FOCUS);
+		editor_meter_peak_display.set_can_focus (false);
 		editor_meter_peak_display.set_size_request (-1, std::max (5.f, std::min (12.f, rintf (8.f * UIConfiguration::instance().get_ui_scale()))) );
 		editor_meter_peak_display.set_corner_radius (1.0);
 

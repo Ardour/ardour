@@ -58,25 +58,25 @@ VCATimeAxisView::VCATimeAxisView (PublicEditor& ed, Session* s, ArdourCanvas::Ca
 	solo_button.set_name ("solo button");
 	set_tooltip (solo_button, _("Solo slaves"));
 	solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::solo_release), false);
-	solo_button.unset_flags (Gtk::CAN_FOCUS);
+	solo_button.set_can_focus (false);
 
 	mute_button.set_name ("mute button");
 	mute_button.set_text (S_("Mute|M"));
 	set_tooltip (mute_button, _("Mute slaves"));
 	mute_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::mute_release), false);
-	mute_button.unset_flags (Gtk::CAN_FOCUS);
+	mute_button.set_can_focus (false);
 
 	drop_button.set_name ("mute button");
 	drop_button.set_text (S_("VCA|D"));
 	set_tooltip (drop_button, _("Unassign all slaves"));
 	drop_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::drop_release), false);
-	drop_button.unset_flags (Gtk::CAN_FOCUS);
+	drop_button.set_can_focus (false);
 
 	automation_button.set_name ("route button");
 	automation_button.set_text (S_("RTAV|A"));
 	set_tooltip (automation_button, _("Automation"));
 	automation_button.signal_button_press_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::automation_click), false);
-	automation_button.unset_flags (Gtk::CAN_FOCUS);
+	automation_button.set_can_focus (false);
 
 	mute_button.set_tweaks(ArdourButton::TrackHeader);
 	solo_button.set_tweaks(ArdourButton::TrackHeader);

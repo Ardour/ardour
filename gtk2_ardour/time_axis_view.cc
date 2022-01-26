@@ -208,7 +208,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 				  Gdk::ENTER_NOTIFY_MASK|
 				  Gdk::LEAVE_NOTIFY_MASK|
 				  Gdk::SCROLL_MASK);
-	controls_ebox.set_flags (CAN_FOCUS);
+	controls_ebox.set_can_focus ();
 
 	/* note that this handler connects *before* the default handler */
 	controls_ebox.signal_scroll_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_scroll), true);

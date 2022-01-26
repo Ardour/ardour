@@ -422,7 +422,7 @@ StepEntry::StepEntry ()
 	length_divisor_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::length_value_change));
 	dot_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::dot_value_change));
 
-	_piano.set_flags (Gtk::CAN_FOCUS);
+	_piano.set_can_focus ();
 
 	_piano.NoteOff.connect (sigc::mem_fun (*this, &StepEntry::note_off_event_handler));
 	_piano.Rest.connect (sigc::mem_fun (*this, &StepEntry::rest_event_handler));

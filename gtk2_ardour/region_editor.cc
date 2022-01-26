@@ -87,7 +87,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 
 	ArdourWidgets::set_tooltip (audition_button, _("audition this region"));
 
-	audition_button.unset_flags (Gtk::CAN_FOCUS);
+	audition_button.set_can_focus (false);
 
 	audition_button.set_events (audition_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 

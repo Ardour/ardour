@@ -391,7 +391,7 @@ MixerStrip::init ()
 		    Gdk::KEY_PRESS_MASK|
 		    Gdk::KEY_RELEASE_MASK);
 
-	set_flags (get_flags() | Gtk::CAN_FOCUS);
+	set_can_focus ();
 
 	/* Add the widgets under visibility control to the VisibilityGroup; the names used here
 	   must be the same as those used in RCOptionEditor so that the configuration changes
@@ -593,7 +593,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			monitor_changed ();
 			monitor_section_button->set_related_action (act);
 			set_tooltip (monitor_section_button, _("Show/Hide Monitoring Section"));
-			monitor_section_button->unset_flags (Gtk::CAN_FOCUS);
+			monitor_section_button->set_can_focus (false);
 			monitor_section_added_or_removed ();
 		}
 	} else {

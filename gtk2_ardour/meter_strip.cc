@@ -169,7 +169,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	peak_display.set_name ("meterbridge peakindicator");
 	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 	set_tooltip (peak_display, _("Reset Peak"));
-	peak_display.unset_flags (Gtk::CAN_FOCUS);
+	peak_display.set_can_focus (false);
 	peak_display.set_size_request(PX_SCALE(12, 12), PX_SCALE(8, 8));
 	peak_display.set_corner_radius(2); // ardour-button scales this
 
