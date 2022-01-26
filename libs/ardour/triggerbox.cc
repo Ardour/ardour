@@ -2592,53 +2592,53 @@ TriggerBox::note_to_trigger (int midi_note, int channel)
 void
 TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 {
-	/* check MIDI port input buffers for triggers */
+	/* check MIDI port input buffer for triggers. This is always the last
+	 * MIDI buffer of the BufferSet
+	 */
 
-	for (BufferSet::midi_iterator mi = bufs.midi_begin(); mi != bufs.midi_end(); ++mi) {
-		MidiBuffer& mb (*mi);
+	MidiBuffer& mb (bufs.get_midi (bufs.count().n_midi() - 1 /* due to zero-based index*/));
 
-		for (MidiBuffer::iterator ev = mb.begin(); ev != mb.end(); ++ev) {
+	for (MidiBuffer::iterator ev = mb.begin(); ev != mb.end(); ++ev) {
 
-			if (!(*ev).is_note()) {
-				continue;
-			}
+		if (!(*ev).is_note()) {
+			continue;
+		}
 
-			int trigger_number = note_to_trigger ((*ev).note(), (*ev).channel());
+		int trigger_number = note_to_trigger ((*ev).note(), (*ev).channel());
 
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("note %1 received on %2, translated to trigger num %3\n", (int) (*ev).note(), (int) (*ev).channel(), trigger_number));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("note %1 received on %2, translated to trigger num %3\n", (int) (*ev).note(), (int) (*ev).channel(), trigger_number));
 
-			if (trigger_number < 0) {
-				/* not for us */
-				continue;
-			}
+		if (trigger_number < 0) {
+			/* not for us */
+			continue;
+		}
 
-			if (trigger_number >= (int) all_triggers.size()) {
-				continue;
-			}
+		if (trigger_number >= (int) all_triggers.size()) {
+			continue;
+		}
 
-			TriggerPtr t = all_triggers[trigger_number];
+		TriggerPtr t = all_triggers[trigger_number];
 
-			if (!t) {
-				continue;
-			}
+		if (!t) {
+			continue;
+		}
 
-			if ((*ev).is_note_on()) {
+		if ((*ev).is_note_on()) {
 
-				if (t->midi_velocity_effect() != 0.0) {
-					/* if MVE is zero, MIDI velocity has no
-					   impact on gain. If it is small, it
-					   has a small effect on gain. As it
-					   approaches 1.0, it has full control
-					   over the trigger gain.
+			if (t->midi_velocity_effect() != 0.0) {
+				/* if MVE is zero, MIDI velocity has no
+				   impact on gain. If it is small, it
+				   has a small effect on gain. As it
+				   approaches 1.0, it has full control
+				   over the trigger gain.
 				*/
-					t->set_velocity_gain (1.0 - (t->midi_velocity_effect() * (*ev).velocity() / 127.f));
-				}
-				t->bang ();
-
-			} else if ((*ev).is_note_off()) {
-
-				t->unbang ();
+				t->set_velocity_gain (1.0 - (t->midi_velocity_effect() * (*ev).velocity() / 127.f));
 			}
+			t->bang ();
+
+		} else if ((*ev).is_note_off()) {
+
+			t->unbang ();
 		}
 	}
 }
