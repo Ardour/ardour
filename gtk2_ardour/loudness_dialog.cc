@@ -624,11 +624,11 @@ LoudnessDialog::apply_preset ()
 void
 LoudnessDialog::update_sensitivity ()
 {
-	_dbfs_spinbutton.set_sensitive (_dbfs_btn.get_active () && _dbfs_btn.sensitive ());
-	_dbtp_spinbutton.set_sensitive (_dbtp_btn.get_active () && _dbtp_btn.sensitive ());
-	_lufs_i_spinbutton.set_sensitive (_lufs_i_btn.get_active () && _dbtp_btn.sensitive ());
-	_lufs_s_spinbutton.set_sensitive (_lufs_s_btn.get_active () && _lufs_s_btn.sensitive ());
-	_lufs_m_spinbutton.set_sensitive (_lufs_m_btn.get_active () && _lufs_m_btn.sensitive ());
+	_dbfs_spinbutton.set_sensitive (_dbfs_btn.get_active () && _dbfs_btn.is_sensitive ());
+	_dbtp_spinbutton.set_sensitive (_dbtp_btn.get_active () && _dbtp_btn.is_sensitive ());
+	_lufs_i_spinbutton.set_sensitive (_lufs_i_btn.get_active () && _dbtp_btn.is_sensitive ());
+	_lufs_s_spinbutton.set_sensitive (_lufs_s_btn.get_active () && _lufs_s_btn.is_sensitive ());
+	_lufs_m_spinbutton.set_sensitive (_lufs_m_btn.get_active () && _lufs_m_btn.is_sensitive ());
 }
 
 void
@@ -742,19 +742,19 @@ LoudnessDialog::calculate_gain ()
     set = true;                          \
   }
 
-	if (_dbfs_btn.get_active () && _dbfs_btn.sensitive ()) {
+	if (_dbfs_btn.get_active () && _dbfs_btn.is_sensitive ()) {
 		MIN_IF_SET (dbfs, _dbfs);
 	}
-	if (_dbtp_btn.get_active () && _dbtp_btn.sensitive ()) {
+	if (_dbtp_btn.get_active () && _dbtp_btn.is_sensitive ()) {
 		MIN_IF_SET (dbtp, _dbtp);
 	}
-	if (_lufs_i_btn.get_active () && _lufs_i_btn.sensitive ()) {
+	if (_lufs_i_btn.get_active () && _lufs_i_btn.is_sensitive ()) {
 		MIN_IF_SET (lufs_i, _lufs_i);
 	}
-	if (_lufs_s_btn.get_active () && _lufs_s_btn.sensitive ()) {
+	if (_lufs_s_btn.get_active () && _lufs_s_btn.is_sensitive ()) {
 		MIN_IF_SET (lufs_s, _lufs_s);
 	}
-	if (_lufs_m_btn.get_active () && _lufs_m_btn.sensitive ()) {
+	if (_lufs_m_btn.get_active () && _lufs_m_btn.is_sensitive ()) {
 		MIN_IF_SET (lufs_m, _lufs_m);
 	}
 
