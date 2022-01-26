@@ -802,7 +802,6 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 	DEBUG_TRACE (DEBUG::OrderKeys, "mixer sync presentation info from treeview\n");
 
 	TreeModel::Children::iterator ri;
-	bool change = false;
 
 	PresentationInfo::order_t master_key = _session->master_order_key ();
 	PresentationInfo::order_t order = 0;
@@ -828,26 +827,16 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 		}
 #endif
 
-		stripable->presentation_info().set_hidden (!visible);
-
 		// leave master where it is.
 		if (order == master_key) {
 			++order;
 		}
 
-		if (order != stripable->presentation_info().order()) {
-			stripable->set_presentation_order (order);
-			change = true;
-		}
+		stripable->presentation_info().set_hidden (!visible);
+		stripable->set_presentation_order (order);
 		++order;
 	}
 
-	change |= _session->ensure_stripable_sort_order ();
-
-	if (change) {
-		DEBUG_TRACE (DEBUG::OrderKeys, "... notify PI change from mixer GUI\n");
-		_session->set_dirty();
-	}
 }
 
 void
@@ -1558,11 +1547,13 @@ Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 	*/
 
 	DEBUG_TRACE (DEBUG::OrderKeys, "mixer UI treeview row deleted\n");
-	sync_presentation_info_from_treeview ();
 
 	if (_route_deletion_in_progress) {
 		redisplay_track_list ();
+	} else {
+		sync_presentation_info_from_treeview ();
 	}
+
 }
 
 void
