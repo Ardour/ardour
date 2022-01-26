@@ -260,7 +260,7 @@ ArdourKnob::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 	cairo_stroke (cr);
 
 	// a transparent overlay to indicate insensitivity
-	if (!sensitive ()) {
+	if (!get_sensitive ()) {
 		cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
 		uint32_t ins_color = UIConfigurationBase::instance().color ("gtk_background");
 		Gtkmm2ext::set_source_rgb_a (cr, ins_color, 0.6);
