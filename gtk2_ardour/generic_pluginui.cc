@@ -130,7 +130,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	if (!for_auditioner) { /*auditioner is not run when it isn't auditioning; so the piano keyboard, cpu usage, and other features are not applicable */
 		if (pi->is_instrument ()) {
 			_piano = new APianoKeyboard ();
-			_piano->set_flags(Gtk::CAN_FOCUS);
+			_piano->set_can_focus ();
 
 			_piano->NoteOn.connect (sigc::mem_fun (*this, &GenericPluginUI::note_on_event_handler));
 			_piano->NoteOff.connect (sigc::mem_fun (*this, &GenericPluginUI::note_off_event_handler));

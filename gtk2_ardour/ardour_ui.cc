@@ -3123,7 +3123,7 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 	window.set_title (title.get_string());
 	window.set_wmclass (string_compose (X_("%1_%1"), downcase (std::string(PROGRAM_NAME)), downcase (name)), PROGRAM_NAME);
 
-	window.set_flags (CAN_FOCUS);
+	window.set_can_focus ();
 	window.add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	/* This is a hack to ensure that GTK-accelerators continue to

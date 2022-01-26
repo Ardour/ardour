@@ -110,7 +110,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, yscale (1.0)
 {
 	if (editable) {
-		set_flags (CAN_FOCUS);
+		set_can_focus ();
 	}
 
 	_layout = Pango::Layout::create (get_pango_context());

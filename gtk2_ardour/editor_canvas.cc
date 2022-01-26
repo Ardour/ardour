@@ -261,7 +261,7 @@ Editor::initialize_canvas ()
 	_track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 	_track_canvas->signal_leave_notify_event().connect (sigc::mem_fun(*this, &Editor::left_track_canvas), false);
 	_track_canvas->signal_enter_notify_event().connect (sigc::mem_fun(*this, &Editor::entered_track_canvas), false);
-	_track_canvas->set_flags (CAN_FOCUS);
+	_track_canvas->set_can_focus ();
 
 	_track_canvas->PreRender.connect (sigc::mem_fun(*this, &Editor::pre_render));
 

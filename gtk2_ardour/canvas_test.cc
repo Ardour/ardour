@@ -130,7 +130,7 @@ CANVAS_UI::CANVAS_UI (int *argcp, char **argvp[], const char* localedir)
 
 	Gtkmm2ext::WindowTitle title ("Canvas Test");
 	_main_window.set_title (title.get_string());
-	_main_window.set_flags (CAN_FOCUS);
+	_main_window.set_can_focus ();
 	_main_window.signal_delete_event().connect (sigc::mem_fun (*this, &CANVAS_UI::main_window_delete_event));
 
 

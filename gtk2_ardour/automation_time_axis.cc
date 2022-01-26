@@ -195,8 +195,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	auto_dropdown.set_name ("route button");
 	hide_button.set_name ("route button");
 
-	auto_dropdown.unset_flags (Gtk::CAN_FOCUS);
-	hide_button.unset_flags (Gtk::CAN_FOCUS);
+	auto_dropdown.set_can_focus (false);
+	hide_button.set_can_focus (false);
 
 	controls_table.set_no_show_all();
 

@@ -625,7 +625,7 @@ EngineControl::build_full_control_notebook ()
 	row++;
 
 	input_channels.set_name ("InputChannels");
-	input_channels.set_flags (Gtk::CAN_FOCUS);
+	input_channels.set_can_focus ();
 	input_channels.set_digits (0);
 	input_channels.set_wrap (false);
 	output_channels.set_editable (true);
@@ -638,7 +638,7 @@ EngineControl::build_full_control_notebook ()
 	}
 
 	output_channels.set_name ("OutputChannels");
-	output_channels.set_flags (Gtk::CAN_FOCUS);
+	output_channels.set_can_focus ();
 	output_channels.set_digits (0);
 	output_channels.set_wrap (false);
 	output_channels.set_editable (true);
@@ -658,7 +658,7 @@ EngineControl::build_full_control_notebook ()
 	}
 
 	input_latency.set_name ("InputLatency");
-	input_latency.set_flags (Gtk::CAN_FOCUS);
+	input_latency.set_can_focus ();
 	input_latency.set_digits (0);
 	input_latency.set_wrap (false);
 	input_latency.set_editable (true);
@@ -671,7 +671,7 @@ EngineControl::build_full_control_notebook ()
 	++row;
 
 	output_latency.set_name ("OutputLatency");
-	output_latency.set_flags (Gtk::CAN_FOCUS);
+	output_latency.set_can_focus ();
 	output_latency.set_digits (0);
 	output_latency.set_wrap (false);
 	output_latency.set_editable (true);

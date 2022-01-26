@@ -98,7 +98,7 @@ TriggerPage::TriggerPage ()
 
 	/* Last item of strip packer, "+" background */
 	_strip_packer.pack_end (_no_strips, true, true);
-	_no_strips.set_flags (Gtk::CAN_FOCUS);
+	_no_strips.set_can_focus ();
 	_no_strips.add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
 	_no_strips.set_size_request (PX_SCALE (20), -1);
 	_no_strips.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &_no_strips, ArdourWidgets::ArdourIcon::ShadedPlusSign,

@@ -49,7 +49,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::parameter_changed));
 
-	_piano.set_flags (Gtk::CAN_FOCUS);
+	_piano.set_can_focus ();
 
 	select_keyboard_layout (UIConfiguration::instance().get_vkeybd_layout ());
 	_piano.set_annotate_octave (true);

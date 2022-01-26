@@ -453,7 +453,7 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 	_piano.NoteOn.connect (sigc::mem_fun (*this, &PatchChangeWidget::_note_on_event_handler));
 	_piano.NoteOff.connect (sigc::mem_fun (*this, &PatchChangeWidget::note_off_event_handler));
 
-	_piano.set_flags (Gtk::CAN_FOCUS);
+	_piano.set_can_focus ();
 	pack_start (_piano, false, false);
 
 	_audition_start_spin.set_sensitive (false);

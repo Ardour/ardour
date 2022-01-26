@@ -102,7 +102,7 @@ main (int argc, char* argv[])
 
 	eventbox.signal_event().connect (sigc::ptr_fun (print_event));
 	eventbox.add_events (Gdk::SCROLL_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-	eventbox.set_flags (Gtk::CAN_FOCUS);
+	eventbox.set_can_focus ();
 
 	eventbox.show ();
 	window.show ();

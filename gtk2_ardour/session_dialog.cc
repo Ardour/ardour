@@ -473,7 +473,7 @@ SessionDialog::setup_initial_choice_box ()
 	/* --disable plugins UI */
 
 	_disable_plugins.set_label (_("Safe Mode: Disable all Plugins"));
-	_disable_plugins.set_flags (Gtk::CAN_FOCUS);
+	_disable_plugins.set_can_focus ();
 	_disable_plugins.set_relief (Gtk::RELIEF_NORMAL);
 	_disable_plugins.set_mode (true);
 	_disable_plugins.set_active (ARDOUR::Session::get_disable_all_loaded_plugins());

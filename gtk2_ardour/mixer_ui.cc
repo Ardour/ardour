@@ -147,7 +147,7 @@ Mixer_UI::Mixer_UI ()
 	scroller.set_can_default (true);
 	// set_default (scroller);
 
-	scroller_base.set_flags (Gtk::CAN_FOCUS);
+	scroller_base.set_can_focus ();
 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	scroller_base.set_name ("MixerWindow");
 	scroller_base.signal_button_press_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));

@@ -405,7 +405,7 @@ FoldbackStrip::init ()
 	_name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	_name_button.set_layout_ellipsize_width (PX_SCALE (_width) * PANGO_SCALE);
 
-	_send_display.set_flags (CAN_FOCUS);
+	_send_display.set_can_focus ();
 	_send_display.set_spacing (4);
 
 	_send_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -523,7 +523,7 @@ FoldbackStrip::init ()
 	            Gdk::KEY_PRESS_MASK |
 	            Gdk::KEY_RELEASE_MASK);
 
-	set_flags (get_flags () | Gtk::CAN_FOCUS);
+	set_can_focus ();
 
 	signal_enter_notify_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::fb_strip_enter_event));
 
