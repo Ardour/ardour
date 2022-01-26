@@ -511,7 +511,11 @@ SlotPropertyTable::set_follow_action (FollowAction const & fa, uint64_t idx)
 		return;
 	}
 
-	trigger()->set_follow_action (fa, idx);
+	if (idx == 0) {
+		trigger()->set_follow_action0 (fa);
+	} else {
+		trigger()->set_follow_action1 (fa);
+	}
 }
 
 void

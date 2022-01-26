@@ -559,7 +559,7 @@ TriggerUI::launch_context_menu ()
 	items.push_back (MenuElem (_("Quantization..."), *quant_menu));
 
 	items.push_back (CheckMenuElem (_("Cue Isolate"), sigc::mem_fun (*this, &TriggerUI::toggle_trigger_isolated)));
-	if (trigger ()->scene_isolated ()) {
+	if (trigger ()->cue_isolated ()) {
 		PBD::Unwinder<bool> uw (_ignore_menu_action, true);
 		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
 	}
@@ -616,7 +616,7 @@ TriggerUI::toggle_trigger_isolated ()
 		return;
 	}
 
-	trigger()->set_scene_isolated (!trigger()->scene_isolated ());
+	trigger()->set_cue_isolated (!trigger()->cue_isolated ());
 }
 
 void
@@ -645,7 +645,7 @@ TriggerUI::set_follow_action (FollowAction const & fa)
 		return;
 	}
 
-	trigger()->set_follow_action (fa, 0);
+	trigger()->set_follow_action0 (fa);
 	trigger()->set_follow_action_probability (0);
 }
 

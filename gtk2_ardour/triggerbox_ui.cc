@@ -432,7 +432,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 
 	render_children (area, context);
 
-	if (trigger ()->scene_isolated ()) {
+	if (trigger ()->cue_isolated ()) {
 		/* left shadow */
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);

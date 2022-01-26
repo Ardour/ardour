@@ -379,7 +379,7 @@ CueBoxUI::set_all_follow_action (FollowAction const & fa, uint64_t idx)
 	TriggerList tl;
 	get_slots(tl, idx);
 	for (TriggerList::iterator t = tl.begin(); t != tl.end(); ++t) {
-		(*t)->set_follow_action(fa, 0);
+		(*t)->set_follow_action0 (fa);
 		(*t)->set_follow_action_probability(0);
 	}
 }
