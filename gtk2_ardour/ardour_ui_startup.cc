@@ -188,7 +188,7 @@ This session was created with a sample rate of %1 Hz, but\n\
 %2 is currently running at %3 Hz.  If you load this session,\n\
 audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual));
 
-	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
+	image->set_alignment(ALIGN_CENTER, ALIGN_START);
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
 	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
 	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
