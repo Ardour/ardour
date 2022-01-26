@@ -948,7 +948,8 @@ AudioTrigger::set_state (const XMLNode& node, int version)
 void
 AudioTrigger::set_start (timepos_t const & s)
 {
-	_start_offset = s.samples ();
+	/* XXX better minimum size needed */
+	_start_offset = std::min (samplepos_t (4096), s.samples ());
 }
 
 void
@@ -995,7 +996,7 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 
 	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk(transition_bbt, _follow_length));
 	samplepos_t end_by_beatcnt = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (0, round (_beatcnt), 0)));  //OK?
-	samplepos_t end_by_data_length = transition_sample + data.length;
+	samplepos_t end_by_data_length = transition_sample + (data.length - _start_offset);
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 @ %2 / %3 / %4 ends: FL %5 (from %6) BC %7 DL %8\n",
 	                                              index(), transition_sample, transition_beats, transition_bbt,
@@ -1026,7 +1027,7 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 	if (internal_use_follow_length() && (end_by_follow_length < end_by_data_length)) {
 		usable_length = tmap->sample_at (tmap->bbt_walk (Temporal::BBT_Time (), _follow_length));
 	} else {
-		usable_length = data.length;
+		usable_length = (data.length - _start_offset);
 	}
 
 	/* called from set_expected_end_sample() when we know the time (audio &
@@ -1038,7 +1039,7 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 
 	if (launch_style() != Repeat || (q == Temporal::BBT_Offset())) {
 
-		last_sample = _start_offset + usable_length;
+		last_sample = usable_length;
 
 	} else {
 
