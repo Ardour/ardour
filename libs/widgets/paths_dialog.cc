@@ -135,7 +135,7 @@ PathsDialog::add_path() {
 				}
 			}
 			if (!dup) {
-				paths_list_view.prepend_text(dir);
+				paths_list_view.prepend(dir);
 			}
 		}
 	}
