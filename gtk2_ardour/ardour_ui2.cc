@@ -420,24 +420,24 @@ ARDOUR_UI::setup_transport ()
 	/* and tooltips */
 
 	Gtkmm2ext::UI::instance()->set_tip (editor_visibility_button,
-	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), editor->name()));
+	                                    string_compose (_("Left-Click to show the %1 window\n"
+	                                                      "Right-click to show more options"), editor->name()));
 
 	Gtkmm2ext::UI::instance()->set_tip (mixer_visibility_button,
-	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), mixer->name()));
+	                                    string_compose (_("Left-Click to show the %1 window\n"
+	                                                      "Right-click to show more options"), mixer->name()));
 
 	Gtkmm2ext::UI::instance()->set_tip (prefs_visibility_button,
-	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), rc_option_editor->name()));
+	                                    string_compose (_("Left-Click to show the %1 window\n"
+	                                                      "Right-click to show more options"), rc_option_editor->name()));
 
 	Gtkmm2ext::UI::instance()->set_tip (recorder_visibility_button,
-	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), recorder->name()));
+	                                    string_compose (_("Left-Click to show the %1 window\n"
+	                                                      "Right-click to show more options"), recorder->name()));
 
 	Gtkmm2ext::UI::instance()->set_tip (trigger_page_visibility_button,
-	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To re-attach the window, use the Window > %1 > Attach menu action"), trigger_page->name()));
+	                                    string_compose (_("Left-Click to show the %1 window\n"
+	                                                      "Right-click to show more options"), trigger_page->name()));
 
 	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
