@@ -30,18 +30,18 @@ class SimpleProgressDialog : public Gtk::MessageDialog
 {
 public:
 	SimpleProgressDialog (std::string title, const Glib::SignalProxy0< void >::SlotType & cancel)
-		: MessageDialog (title, false, MESSAGE_OTHER, BUTTONS_NONE, true)
+		: MessageDialog (title, false, Gtk::MESSAGE_OTHER, Gtk::BUTTONS_NONE, true)
 	{
 		get_vbox()->set_size_request(400,-1);
 		set_title (title);
 		pbar = manage (new Gtk::ProgressBar());
 		pbar->show();
-		get_vbox()->pack_start (*pbar, PACK_SHRINK, 4);
+		get_vbox()->pack_start (*pbar, Gtk::PACK_SHRINK, 4);
 
 		Gtk::Button *cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 		cancel_button->signal_clicked().connect (cancel);
 		cancel_button->show();
-		get_vbox()->pack_start (*cancel_button, PACK_SHRINK);
+		get_vbox()->pack_start (*cancel_button, Gtk::PACK_SHRINK);
 	}
 
 	void update_progress (samplecnt_t c, samplecnt_t t) {
