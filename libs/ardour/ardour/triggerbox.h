@@ -104,19 +104,119 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		Playout,
 	};
 
+	enum LaunchStyle {
+		OneShot,  /* mouse down/NoteOn starts; mouse up/NoteOff ignored */
+		ReTrigger, /* mouse down/NoteOn starts or retriggers; mouse up/NoteOff */
+		Gate,     /* runs till mouse up/note off then to next quantization */
+		Toggle,   /* runs till next mouse down/NoteOn */
+		Repeat,   /* plays only quantization extent until mouse up/note off */
+	};
+
+	enum StretchMode { /* currently mapped to the matching RubberBand::RubberBandStretcher::Option  */
+		Crisp,
+		Mixed,
+		Smooth,
+	};
+
 	Trigger (uint32_t index, TriggerBox&);
 	virtual ~Trigger() {}
 
 	static void make_property_quarks ();
 
-	void set_name (std::string const &);
-	std::string name() const { return _name; }
+  protected:
+	/* properties controllable by the user */
 
-	void set_stretchable (bool yn);
-	bool stretchable () const { return _stretchable; }
+	PBD::Property<LaunchStyle>          _launch_style;
+	PBD::Property<FollowAction>         _follow_action0;
+	PBD::Property<FollowAction>         _follow_action1;
+	PBD::Property<int>                  _follow_action_probability; /* 1 .. 100 */
+	PBD::Property<uint32_t>             _follow_count;
+	PBD::Property<Temporal::BBT_Offset> _quantization;
+	PBD::Property<Temporal::BBT_Offset> _follow_length;
+	PBD::Property<bool>                 _use_follow_length;
+	PBD::Property<bool>                 _legato;
+	PBD::Property<gain_t>               _gain;
+	PBD::Property<float>                _velocity_effect;
+	PBD::Property<bool>                 _stretchable;
+	PBD::Property<bool>                 _cue_isolated;
+	PBD::Property<StretchMode>          _stretch_mode;
 
-	void set_cue_isolated (bool isolate);
-	bool cue_isolated () const { return _cue_isolated; }
+	/* Properties that are not CAS-updated at retrigger */
+
+	PBD::Property<std::string>          _name;
+	PBD::Property<color_t>              _color;
+
+  public:
+	/* this is positioner here so that we can easily keep it in sync
+	   with the properties list above.
+	*/
+	struct UIState {
+		std::atomic<unsigned int> generation; /* used for CAS */
+
+		LaunchStyle launch_style;
+		FollowAction follow_action0;
+		FollowAction follow_action1;
+		int follow_action_probability; /* 1 .. 100 */
+		uint32_t follow_count;
+		Temporal::BBT_Offset quantization;
+		Temporal::BBT_Offset follow_length;
+		bool use_follow_length;
+		bool legato;
+		gain_t gain;
+		float velocity_effect;
+		bool stretchable;
+		bool cue_isolated;
+		StretchMode stretch_mode;
+
+		UIState() : generation (0) {}
+
+		UIState& operator= (UIState const & other) {
+
+			/* we do not copy generation */
+
+			generation = 0;
+
+			launch_style = other.launch_style;
+			follow_action0 = other.follow_action0;
+			follow_action1 = other.follow_action1;
+			follow_action_probability = other.follow_action_probability;
+			follow_count = other.follow_count;
+			quantization = other.quantization;
+			follow_length = other.follow_length;
+			use_follow_length = other.use_follow_length;
+			legato = other.legato;
+			gain = other.gain;
+			velocity_effect = other.velocity_effect;
+			stretchable = other.stretchable;
+			cue_isolated = other.cue_isolated;
+			stretch_mode = other.stretch_mode;
+
+			return *this;
+		}
+	};
+
+#define TRIGGERBOX_PROPERTY_DECL(name,type) void set_ ## name (type); type name () const;
+#define TRIGGERBOX_PROPERTY_DECL_CONST_REF(name,type) void set_ ## name (type const &); type name () const
+
+	TRIGGERBOX_PROPERTY_DECL (launch_style, LaunchStyle);
+	TRIGGERBOX_PROPERTY_DECL_CONST_REF (follow_action0, FollowAction);
+	TRIGGERBOX_PROPERTY_DECL_CONST_REF (follow_action1, FollowAction);
+	TRIGGERBOX_PROPERTY_DECL (follow_action_probability, int);
+	TRIGGERBOX_PROPERTY_DECL (follow_count, uint32_t);
+	TRIGGERBOX_PROPERTY_DECL_CONST_REF (quantization, Temporal::BBT_Offset);
+	TRIGGERBOX_PROPERTY_DECL_CONST_REF (follow_length, Temporal::BBT_Offset);
+	TRIGGERBOX_PROPERTY_DECL (use_follow_length, bool);
+	TRIGGERBOX_PROPERTY_DECL (legato, bool);
+	TRIGGERBOX_PROPERTY_DECL (gain, gain_t);
+	TRIGGERBOX_PROPERTY_DECL (velocity_effect, float);
+	TRIGGERBOX_PROPERTY_DECL (stretchable, bool);
+	TRIGGERBOX_PROPERTY_DECL (cue_isolated, bool);
+	TRIGGERBOX_PROPERTY_DECL (stretch_mode, StretchMode);
+	TRIGGERBOX_PROPERTY_DECL (color, color_t);
+	TRIGGERBOX_PROPERTY_DECL_CONST_REF (name, std::string);
+
+#undef TRIGGERBOX_PROPERTY_DECL
+#undef TRIGGERBOX_PROPERTY_DECL_CONST_REF
 
 	/* Calling ::bang() will cause this Trigger to be placed in its owning
 	   TriggerBox's queue.
@@ -142,6 +242,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void set_length (timecnt_t const &) = 0;
 	virtual void reload (BufferSet&, void*) = 0;
 	virtual void io_change () {}
+	virtual timepos_t current_pos() const = 0;
+	virtual void set_legato_offset (timepos_t const & offset) = 0;
 
 	virtual double position_as_fraction() const = 0;
 	virtual void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t) = 0;
@@ -162,31 +264,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	bool active() const { return _state >= Running; }
 	State state() const { return _state; }
 
-	enum LaunchStyle {
-		OneShot,  /* mouse down/NoteOn starts; mouse up/NoteOff ignored */
-		ReTrigger, /* mouse down/NoteOn starts or retriggers; mouse up/NoteOff */
-		Gate,     /* runs till mouse up/note off then to next quantization */
-		Toggle,   /* runs till next mouse down/NoteOn */
-		Repeat,   /* plays only quantization extent until mouse up/note off */
-	};
-
-	LaunchStyle launch_style() const;
-	void set_launch_style (LaunchStyle);
-
-	FollowAction follow_action (uint32_t n) const { assert (n < 2); return n ? _follow_action1 : _follow_action0; }
-	void set_follow_action0 (FollowAction);
-	void set_follow_action1 (FollowAction);
-
-	color_t  color() const { return _color; }
-	void set_color (color_t);
-
 	void set_region (boost::shared_ptr<Region>, bool use_thread = true);
 	void clear_region ();
 	virtual int set_region_in_worker_thread (boost::shared_ptr<Region>) = 0;
 	boost::shared_ptr<Region> region() const { return _region; }
-
-	Temporal::BBT_Offset quantization() const;
-	void set_quantization (Temporal::BBT_Offset const &);
 
 	uint32_t index() const { return _index; }
 
@@ -205,20 +286,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_next_trigger (int n);
 	int next_trigger() const { return _next_trigger; }
 
-	void set_use_follow_length (bool);
-	bool use_follow_length() const { return _use_follow_length; }
-
-	void set_follow_length (Temporal::BBT_Offset const &);
-	Temporal::BBT_Offset follow_length() const { return _follow_length; }
-
-	void set_follow_action_probability (int zero_to_a_hundred);
-	int  follow_action_probability() const { return _follow_action_probability; }
-
-	virtual void set_legato_offset (timepos_t const & offset) = 0;
-	virtual timepos_t current_pos() const = 0;
-	void set_legato (bool yn);
-	bool legato () const { return _legato; }
-
 	/* any non-zero value will work for the default argument, and means
 	   "use your own launch quantization". BBT_Offset (0, 0, 0) means what
 	   it says: start immediately
@@ -232,8 +299,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	bool explicitly_stopped() const { return _explicitly_stopped; }
 
 	uint32_t loop_count() const { return _loop_cnt; }
-	uint32_t follow_count() const { return _follow_count; }
-	void set_follow_count (uint32_t n);
 
 	void set_ui (void*);
 	void* ui () const { return _ui; }
@@ -244,19 +309,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	Temporal::Meter meter() const { return _meter; }
 
-	gain_t gain() const { return _gain; }
-	void set_gain (gain_t);
-
 	void set_velocity_gain (gain_t g) {_pending_velocity_gain=g;}
-
-	float midi_velocity_effect() const { return _midi_velocity_effect; }
-	void set_midi_velocity_effect (float);
-
-	enum StretchMode { /* currently mapped to the matching RubberBand::RubberBandStretcher::Option  */
-		Crisp,
-		Mixed,
-		Smooth,
-	};
 
 	void set_pending (Trigger*);
 	Trigger* swap_pending (Trigger*);
@@ -274,6 +327,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	};
 
 	boost::shared_ptr<Region> _region;
+	UIState                    ui_state;
 	TriggerBox&               _box;
 	UIRequests                _requests;
 	State                     _state;
@@ -284,84 +338,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	uint32_t                  _loop_cnt; /* how many times in a row has this played */
 	void*                     _ui;
 	bool                      _explicitly_stopped;
-
 	gain_t                    _pending_velocity_gain;
 	gain_t                    _velocity_gain;
 
-	/* properties controllable by the user */
-
-	PBD::Property<LaunchStyle>          _launch_style;
-	PBD::Property<FollowAction>         _follow_action0;
-	PBD::Property<FollowAction>         _follow_action1;
-	PBD::Property<int>                  _follow_action_probability; /* 1 .. 100 */
-	PBD::Property<uint32_t>             _follow_count;
-	PBD::Property<Temporal::BBT_Offset> _quantization;
-	PBD::Property<Temporal::BBT_Offset> _follow_length;
-	PBD::Property<bool>                 _use_follow_length;
-	PBD::Property<bool>                 _legato;
-	PBD::Property<gain_t>               _gain;
-	PBD::Property<float>                _midi_velocity_effect;
-	PBD::Property<bool>                 _stretchable;
-	PBD::Property<bool>                 _cue_isolated;
-	PBD::Property<StretchMode>          _stretch_mode;
-
-	/* Properties that are not CAS-updated at retrigger */
-
-	PBD::Property<std::string>          _name;
-	PBD::Property<color_t>              _color;
-
-  public:
-	/* this is positioner here so that we can easily keep it in sync
-	   with the properties list above.
-	*/
-	struct UIState {
-		std::atomic<int> generation; /* used for CAS */
-
-		LaunchStyle launch_style;
-		FollowAction follow_action0;
-		FollowAction follow_action1;
-		int follow_action_probability; /* 1 .. 100 */
-		uint32_t follow_count;
-		Temporal::BBT_Offset quantization;
-		Temporal::BBT_Offset follow_length;
-		bool use_follow_length;
-		bool legato;
-		gain_t gain;
-		float midi_velocity_effect;
-		bool stretchable;
-		bool cue_isolated;
-		StretchMode stretch_mode;
-
-		UIState() : generation (0) {}
-
-		UIState& operator= (UIState const & other) {
-
-			/* we do not copy generation */
-
-			generation = 0;
-
-			launch_style = other.launch_style;
-			follow_action0 = other.follow_action0;
-			follow_action1 = other.follow_action1;
-			follow_action_probability = other.follow_action_probability;
-			follow_count = other.follow_count;
-			quantization = other.quantization;
-			follow_length = other.follow_length;
-			use_follow_length = other.use_follow_length;
-			legato = other.legato;
-			gain = other.gain;
-			midi_velocity_effect = other.midi_velocity_effect;
-			stretchable = other.stretchable;
-			cue_isolated = other.cue_isolated;
-			stretch_mode = other.stretch_mode;
-
-			return *this;
-		}
-	};
-
-	UIState ui_state;
-
-  protected:
 	void copy_ui_state (UIState&);
 	void copy_to_ui_state ();
 	void update_properties ();
@@ -804,7 +783,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<gain_t> gain;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> currently_playing;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> stretchable;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> isolated;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> cue_isolated;
 
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> tempo_meter; /* only used to transmit changes, not storage */
 }
