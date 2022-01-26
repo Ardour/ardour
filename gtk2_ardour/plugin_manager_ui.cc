@@ -108,12 +108,12 @@ PluginManagerUI::PluginManagerUI ()
 		const char*   tooltip;
 	} ci[] = {
 		/* clang-format off */
-		{ALIGN_LEFT,   false,  _("Status"),       _("Plugin Scan Result") },
+		{ALIGN_START,   false,  _("Status"),       _("Plugin Scan Result") },
 		{ALIGN_CENTER, false, S_("Ignore|Ign"),   _("Ignore this plugin (and others that are loaded in the same file)") },
 		{ALIGN_CENTER, false, S_("Favorite|Fav"), _("Add this plugin to the favorite list") },
 		{ALIGN_CENTER, false,  _("Hide"),         _("Hide this plugin in the plugin-selector") },
 		{ALIGN_CENTER, false,  _("Type"),         _("Plugin standard") },
-		{ALIGN_LEFT,   true,   _("File/ID"),      _("The plugin file (VST) or unique ID (AU, LV2)") },
+		{ALIGN_START,   true,   _("File/ID"),      _("The plugin file (VST) or unique ID (AU, LV2)") },
 		{ALIGN_CENTER, true,   _("Name"),         _("Name of the plugin") },
 		{ALIGN_CENTER, true,   _("Creator"),      _("The plugin's vendor") },
 		{ALIGN_CENTER, true,   _("Tags"),         _("Meta data: category and tags") },
@@ -605,7 +605,7 @@ PluginManagerUI::refill ()
 		pc_max.ndscn = std::max (pc_max.ndscn, i->second.ndscn);
 	}
 
-	Label* head_type  = new Label (_("Type"), ALIGN_LEFT, ALIGN_CENTER);
+	Label* head_type  = new Label (_("Type"), ALIGN_START, ALIGN_CENTER);
 	Label* head_count = new Label (_("Total"), ALIGN_RIGHT, ALIGN_CENTER);
 	_tbl_nfo.attach (*head_type,  0, 1, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
 	_tbl_nfo.attach (*head_count, 1, 2, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);
@@ -623,7 +623,7 @@ PluginManagerUI::refill ()
 	}
 	++row;
 	for (std::map<PluginType, PluginCount>::const_iterator i = plugin_count.begin (); i != plugin_count.end (); ++i, ++row) {
-		Label* lbl_type  = new Label (plugin_type (i->first), ALIGN_LEFT, ALIGN_CENTER);
+		Label* lbl_type  = new Label (plugin_type (i->first), ALIGN_START, ALIGN_CENTER);
 		Label* lbl_count = new Label (string_compose ("%1", i->second.total), ALIGN_RIGHT, ALIGN_CENTER);
 		_tbl_nfo.attach (*lbl_type,  0, 1, row, row + 1, EXPAND | FILL, SHRINK, 2, 2);
 		_tbl_nfo.attach (*lbl_count, 1, 2, row, row + 1, SHRINK | FILL, SHRINK, 2, 2);

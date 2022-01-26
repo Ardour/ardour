@@ -52,10 +52,10 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, timepos_t const & pos
 	, bpm_spinner (bpm_adjustment)
 	, end_bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, end_bpm_spinner (end_bpm_adjustment)
-	, _end_bpm_label (_("End Beats per Minute:"), ALIGN_LEFT, ALIGN_CENTER)
+	, _end_bpm_label (_("End Beats per Minute:"), ALIGN_START, ALIGN_CENTER)
 	, when_bar_label (_("bar:"), ALIGN_RIGHT, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_RIGHT, ALIGN_CENTER)
-	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
+	, pulse_selector_label (_("Pulse:"), ALIGN_START, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Temporal::BBT_Time when (_map->bbt_at (pos));
@@ -72,10 +72,10 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, TempoPoint& point, co
 	, bpm_spinner (bpm_adjustment)
 	, end_bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
 	, end_bpm_spinner (end_bpm_adjustment)
-	, _end_bpm_label (_("End Beats per Minute:"), ALIGN_LEFT, ALIGN_CENTER)
+	, _end_bpm_label (_("End Beats per Minute:"), ALIGN_START, ALIGN_CENTER)
 	, when_bar_label (_("bar:"), ALIGN_RIGHT, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_RIGHT, ALIGN_CENTER)
-	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
+	, pulse_selector_label (_("Pulse:"), ALIGN_START, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Temporal::BBT_Time when (map->bbt_at (point.time()));
@@ -190,7 +190,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 		++row;
 	}
 
-	Label* bpm_label = manage (new Label(_("Start Beats per Minute:"), ALIGN_LEFT, ALIGN_CENTER));
+	Label* bpm_label = manage (new Label(_("Start Beats per Minute:"), ALIGN_START, ALIGN_CENTER));
 	table->attach (*bpm_label, 0, 1, row, row + 1);
 	table->attach (bpm_spinner, 1, 5, row, row + 1);
 	++row;
@@ -199,7 +199,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	table->attach (end_bpm_spinner, 1, 5, row, row + 1);
 	++row;
 
-	Label* tempo_type_label = manage (new Label(_("Tempo Type:"), ALIGN_LEFT, ALIGN_CENTER));
+	Label* tempo_type_label = manage (new Label(_("Tempo Type:"), ALIGN_START, ALIGN_CENTER));
 	table->attach (*tempo_type_label, 0, 1, row, row + 1);
 	table->attach (tempo_type, 1, 5, row, row + 1);
 
@@ -227,13 +227,13 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 		table->attach (when_beat_label, 3, 4, row, row+1, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
 		table->attach (when_beat_entry, 4, 5, row, row+1, Gtk::AttachOptions(0), Gtk::AttachOptions(0));
 
-		Label* when_label = manage (new Label(_("Tempo begins at"), ALIGN_LEFT, ALIGN_CENTER));
+		Label* when_label = manage (new Label(_("Tempo begins at"), ALIGN_START, ALIGN_CENTER));
 		table->attach (*when_label, 0, 1, row, row+1);
 
 		++row;
 		++row;
 
-		Label* lock_style_label = manage (new Label(_("Lock Style:"), ALIGN_LEFT, ALIGN_CENTER));
+		Label* lock_style_label = manage (new Label(_("Lock Style:"), ALIGN_START, ALIGN_CENTER));
 		table->attach (*lock_style_label, 0, 1, row, row + 1);
 		table->attach (lock_style, 1, 5, row, row + 1);
 
@@ -579,7 +579,7 @@ MeterDialog::init (const Temporal::BBT_Time& when, double bpb, double divisor, b
 	when_bar_entry.set_alignment (1.0);
 
 	if (!initial) {
-		Label* when_label = manage (new Label(_("Meter begins at bar:"), ALIGN_LEFT, ALIGN_CENTER));
+		Label* when_label = manage (new Label(_("Meter begins at bar:"), ALIGN_START, ALIGN_CENTER));
 
 		table->attach (*when_label, 0, 1, 2, 3, FILL | EXPAND, FILL | EXPAND);
 		table->attach (when_bar_entry, 1, 2, 2, 3, FILL | EXPAND, FILL | EXPAND);

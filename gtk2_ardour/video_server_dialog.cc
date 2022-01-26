@@ -59,9 +59,9 @@ using namespace VideoUtils;
 
 VideoServerDialog::VideoServerDialog (Session* s)
 	: ArdourDialog (_("Launch Video Server"))
-	, path_label (_("Server Executable:"), Gtk::ALIGN_LEFT)
+	, path_label (_("Server Executable:"), Gtk::ALIGN_START)
 	, path_browse_button (_("Browse"))
-	, docroot_label (_("Server Docroot:"), Gtk::ALIGN_LEFT)
+	, docroot_label (_("Server Docroot:"), Gtk::ALIGN_START)
 	, docroot_browse_button (_("Browse"))
 	, listenport_adjustment (1554, 1025, 65536, 1, 10, 0)
 	, listenport_spinner (listenport_adjustment)
@@ -137,7 +137,7 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	docroot_hbox->pack_start (docroot_entry, true, true, 3);
 	docroot_hbox->pack_start (docroot_browse_button, false, false, 3);
 
-	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true, 4);
 
@@ -162,7 +162,7 @@ VideoServerDialog::VideoServerDialog (Session* s)
 
 	l = manage (new Label (string_compose(
 					_("%1 relies on an external video server for the videotimeline.\nThe server configured in Edit -> Preferences -> Video is not reachable.\nDo you want %1 to launch 'harvid' on this machine?"), PROGRAM_NAME)
-				, Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+				, Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_max_width_chars(80);
 	l->set_line_wrap();
 	vbox->pack_start (*l, true, true, 4);

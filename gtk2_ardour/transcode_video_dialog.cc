@@ -58,7 +58,7 @@ using namespace VideoUtils;
 TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	: ArdourDialog (_("Transcode/Import Video File "))
 	, infn (infile)
-	, path_label (_("Output File:"), Gtk::ALIGN_LEFT)
+	, path_label (_("Output File:"), Gtk::ALIGN_START)
 	, browse_button (_("Browse"))
 	, transcode_button (_("OK"))
 	, abort_button (_("Abort"))
@@ -107,20 +107,20 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	std::string dstfn  = video_dest_file(dstdir, infile);
 	path_entry.set_text (dstfn);
 
-	l = manage (new Label (_("<b>File Information</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>File Information</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true, 4);
 
 	bool ffok = false;
 	if (!transcoder->ffexec_ok()) {
-		l = manage (new Label (_("ffmpeg installation was not found. Video Import is not possible. See the Log window for more information."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("ffmpeg installation was not found. Video Import is not possible. See the Log window for more information."), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		l->set_line_wrap();
 		options_box->pack_start (*l, false, true, 4);
 		aspect_checkbox.set_sensitive(false);
 		bitrate_checkbox.set_sensitive(false);
 	}
 	else if (!transcoder->probe_ok()) {
-		l = manage (new Label (string_compose(_("File-info can not be read. Most likely '%1' is not a valid video-file or an unsupported video codec or format."), infn), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (string_compose(_("File-info can not be read. Most likely '%1' is not a valid video-file or an unsupported video codec or format."), infn), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		options_box->pack_start (*l, false, true, 4);
 		aspect_checkbox.set_sensitive(false);
 		bitrate_checkbox.set_sensitive(false);
@@ -137,23 +137,23 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 		Table* t = manage (new Table (4, 2));
 		t->set_spacings (4);
 		options_box->pack_start (*t, true, true, 4);
-		l = manage (new Label (_("FPS:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("FPS:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		t->attach (*l, 0, 1, 0, 1);
-		l = manage (new Label (_("Duration:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("Duration:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		t->attach (*l, 2, 3, 0, 1);
-		l = manage (new Label (_("Codec:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("Codec:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		t->attach (*l, 0, 1, 1, 2);
-		l = manage (new Label (_("Geometry:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("Geometry:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		t->attach (*l, 2, 3, 1, 2);
 
 		std::ostringstream osstream;
 		osstream << transcoder->get_fps();
-		l = manage (new Label (osstream.str(), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (osstream.str(), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		t->attach (*l, 1, 2, 0, 1);
 
 		osstream.str("");
 		osstream << w << "x" << h;
-		l = manage (new Label (osstream.str(), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (osstream.str(), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		t->attach (*l, 3, 4, 1, 2);
 
 		osstream.str("");
@@ -170,16 +170,16 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 			osstream << setfill('0') << setw(2);
 			osstream << (transcoder->get_duration() % (int) floor(transcoder->get_fps()));
 		}
-		l = manage (new Label (osstream.str(), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (osstream.str(), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		t->attach (*l, 3, 4, 0, 1);
 
 		osstream.str("");
 		osstream << transcoder->get_codec();
-		l = manage (new Label (osstream.str(), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (osstream.str(), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		t->attach (*l, 1, 2, 1, 2);
 	}
 
-	l = manage (new Label (_("<b>Import Settings</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Import Settings</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true, 4);
 
@@ -224,7 +224,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	t->set_spacings (4);
 	options_box->pack_start (*t, true, true, 4);
 
-	l = manage (new Label (_("Scale Video: Width = "), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Scale Video: Width = "), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, 0, 1);
 	t->attach (scale_combo, 1, 2, 0, 1);
 	t->attach (aspect_checkbox, 2, 3, 0, 1);
@@ -245,12 +245,12 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	scale_combo.set_active(0);
 	height_spinner.set_value(h);
 
-	l = manage (new Label (_("Bitrate (KBit/s):"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Bitrate (KBit/s):"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, 1, 2);
 	t->attach (bitrate_checkbox, 2, 3, 1, 2);
 	t->attach (bitrate_spinner, 3, 4, 1, 2);
 
-	l = manage (new Label (_("Extract Audio:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Extract Audio:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, 2, 3);
 	t->attach (audio_combo, 1, 4, 2, 3);
 	t->attach (ltc_detect, 1, 4, 3, 4);

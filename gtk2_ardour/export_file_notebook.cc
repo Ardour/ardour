@@ -205,8 +205,8 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	filename_state (filename_state),
 	profile_manager (profile_manager),
 
-	format_label (_("Format"), Gtk::ALIGN_LEFT),
-	filename_label (_("Location"), Gtk::ALIGN_LEFT),
+	format_label (_("Format"), Gtk::ALIGN_START),
+	filename_label (_("Location"), Gtk::ALIGN_START),
 	soundcloud_upload_button (_("Upload to Soundcloud")),
 	analysis_button (_("Analyze Exported Audio")),
 	tab_number (number)

@@ -171,7 +171,7 @@ LoudnessDialog::LoudnessDialog (Session* s, TimelineRange const& ar, bool as)
 	Table* t = manage (new Table (11, 8, false));
 	t->set_spacings (4);
 
-	l = manage (new Label (_("Preset:"), ALIGN_LEFT));
+	l = manage (new Label (_("Preset:"), ALIGN_START));
 	t->attach (*l, 0, 1, ROW, SHRINK | FILL);
 	t->attach (_preset_dropdown, 1, 3, ROW);
 
@@ -179,10 +179,10 @@ LoudnessDialog::LoudnessDialog (Session* s, TimelineRange const& ar, bool as)
 	t->attach (_remove_preset, 4, 5, ROW, SHRINK | FILL);
 
 	/* horiz space */
-	l = manage (new Label (" ", ALIGN_LEFT));
+	l = manage (new Label (" ", ALIGN_START));
 	t->attach (*l, 5, 6, ROW, SHRINK, SHRINK, 6, 0);
 
-	l = manage (new Label (" ", ALIGN_LEFT));
+	l = manage (new Label (" ", ALIGN_START));
 	t->attach (*l, 6, 7, ROW);
 
 	t->attach (_show_report_button, 7, 8, ROW, SHRINK | FILL);
@@ -207,12 +207,12 @@ LoudnessDialog::LoudnessDialog (Session* s, TimelineRange const& ar, bool as)
 
 	++row; // spacer
 
-	l = manage (new Label (_("Gain to normalize:"), ALIGN_LEFT));
+	l = manage (new Label (_("Gain to normalize:"), ALIGN_START));
 	t->attach (*l, 0, 2, ROW); ++row;
-	l = manage (new Label (_("Previous output gain:"), ALIGN_LEFT));
+	l = manage (new Label (_("Previous output gain:"), ALIGN_START));
 	t->attach (*l, 0, 2, ROW); ++row;
 
-	l = manage (new Label (_("Total gain:"), ALIGN_LEFT));
+	l = manage (new Label (_("Total gain:"), ALIGN_START));
 	t->attach (*l, 0, 2, ROW);
 
 	row = 2;
@@ -284,12 +284,12 @@ LoudnessDialog::LoudnessDialog (Session* s, TimelineRange const& ar, bool as)
 	t->set_spacings (4);
 	l = manage (new Label ());
 	l->set_markup (_("<b>Loudness Analysis</b>\n"));
-	l->set_alignment (ALIGN_LEFT, ALIGN_TOP);
+	l->set_alignment (ALIGN_START, ALIGN_TOP);
 	t->attach (*l, 0, 1, 0, 1, EXPAND | FILL, FILL, 8, 2);
 
 	l = manage (new Label ());
 	l->set_line_wrap ();
-	l->set_alignment (ALIGN_LEFT, ALIGN_TOP);
+	l->set_alignment (ALIGN_START, ALIGN_TOP);
 	l->set_markup (_(
 	    "This allows the user to analyze and conform the loudness of the signal at the master-bus "
 	    "output of the complete session, as it would be exported. "
@@ -298,7 +298,7 @@ LoudnessDialog::LoudnessDialog (Session* s, TimelineRange const& ar, bool as)
 
 	l = manage (new Label ());
 	l->set_line_wrap ();
-	l->set_alignment (ALIGN_LEFT, ALIGN_TOP);
+	l->set_alignment (ALIGN_START, ALIGN_TOP);
 	l->set_markup (_(
 	    "By default, a faster-than-realtime export is used to assess the loudness of the "
 	    "session. If any outboard gear is used, a <i>realtime</i> export is available, to "
@@ -814,7 +814,7 @@ LoudnessDialog::test_conformity ()
 
 	for (size_t i = 1; i < n_pset; ++i) {
 		CLoudnessPreset const& preset = _lp[i];
-		Label* l = manage (new Label (preset.label + ":", ALIGN_LEFT));
+		Label* l = manage (new Label (preset.label + ":", ALIGN_START));
 		t->attach (*l, col, col + 1, row, row + 1, EXPAND | FILL, SHRINK, 2, 0);
 
 		if (lufs_i > preset.LUFS_range[0]

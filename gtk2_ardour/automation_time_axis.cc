@@ -222,7 +222,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	}
 
 	name_label.set_text (_name);
-	name_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+	name_label.set_alignment (Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 	name_label.set_name (X_("TrackParameterName"));
 	name_label.set_ellipsize (Pango::ELLIPSIZE_END);
 	name_label.set_size_request (floor (50.0 * UIConfiguration::instance().get_ui_scale()), -1);

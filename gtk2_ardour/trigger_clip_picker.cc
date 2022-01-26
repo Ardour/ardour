@@ -133,8 +133,8 @@ TriggerClipPicker::TriggerClipPicker ()
 	ArdourWidgets::set_tooltip (_show_plugin_btn, _("Show the GUI for the Auditioner Synth"));
 	ArdourWidgets::set_tooltip (_clip_dir_menu, _("Click to select a clip folder and edit your available clip folders"));
 
-	format_text.set_alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
-	channels_value.set_alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+	format_text.set_alignment(Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
+	channels_value.set_alignment(Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 	_midi_prop_table.attach (format_text,       0, 1, 0, 1, EXPAND | FILL, SHRINK);
 	_midi_prop_table.attach (channels_value,    0, 1, 1, 2, EXPAND | FILL, SHRINK);
 	_midi_prop_table.attach (_auditioner_combo, 0, 3, 2, 3, EXPAND | FILL, SHRINK);

@@ -69,7 +69,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 
 	HBox* hbox = manage (new HBox);
 	hbox->set_spacing (6);
-	l = manage (new Label (_("Name:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false ));
+	l = manage (new Label (_("Name:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false ));
 
 	hbox->pack_start (*l, false, true);
 	hbox->pack_start (_name, true, true);
@@ -80,7 +80,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	top_vbox->pack_start (*hbox, false, true);
 	top_vbox->pack_start (_active);
 
-	l = manage (new Label (_("Color"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Color"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	hbox = manage (new HBox);
 	hbox->set_spacing (12);
 	hbox->pack_start (*l, false, false);
@@ -98,7 +98,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	VBox* options_box = manage (new VBox);
 	options_box->set_spacing (6);
 
-	l = manage (new Label (_("<b>Sharing</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false ));
+	l = manage (new Label (_("<b>Sharing</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false ));
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true);
 
@@ -142,13 +142,13 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	Table* table = manage (new Table (11, 4, false));
 	table->set_row_spacings	(6);
 
-	l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label ("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_padding (8, 0);
 	table->attach (*l, 0, 1, 0, 8, Gtk::FILL, Gtk::FILL, 0, 0);
 
 	table->attach (_gain, 1, 3, 1, 2, Gtk::FILL, Gtk::FILL, 0, 0);
 
-	l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label ("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_padding (0, 0);
 	table->attach (*l, 1, 2, 2, 3, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_relative, 2, 3, 2, 3, Gtk::FILL, Gtk::FILL, 0, 0);

@@ -133,7 +133,7 @@ RegionListBase::setup_col (TreeViewColumn* col, int sort_idx, Gtk::AlignmentEnum
 	/* ...and this sets the alignment for the data cells */
 	CellRendererText* renderer = dynamic_cast<CellRendererText*> (col->get_first_cell_renderer ());
 	if (renderer) {
-		renderer->property_xalign () = (al == ALIGN_RIGHT ? 1.0 : (al == ALIGN_LEFT ? 0.0 : 0.5));
+		renderer->property_xalign () = (al == ALIGN_RIGHT ? 1.0 : (al == ALIGN_START ? 0.0 : 0.5));
 	}
 }
 
@@ -149,7 +149,7 @@ void
 RegionListBase::add_name_column ()
 {
 	TreeViewColumn* tvc = append_col (_columns.name, 120);
-	setup_col (tvc, 0, ALIGN_LEFT, _("Name"), ("Region name"));
+	setup_col (tvc, 0, ALIGN_START, _("Name"), ("Region name"));
 
 	/* Region Name: make editable */
 	CellRendererText* region_name_cell     = dynamic_cast<CellRendererText*> (tvc->get_first_cell_renderer ());
@@ -166,7 +166,7 @@ void
 RegionListBase::add_tag_column ()
 {
 	TreeViewColumn* tvc = append_col (_columns.tags, "2099-10-10 10:10:30");
-	setup_col (tvc, 2, ALIGN_LEFT, _("Tags"), _("Tags"));
+	setup_col (tvc, 2, ALIGN_START, _("Tags"), _("Tags"));
 
 	/* Tags cell: make editable */
 	CellRendererText* region_tags_cell     = dynamic_cast<CellRendererText*> (tvc->get_first_cell_renderer ());

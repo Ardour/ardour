@@ -25,6 +25,6 @@ using namespace Gtk;
 TriggerRegionList::TriggerRegionList ()
 {
 	add_name_column ();
-	setup_col (append_col (_columns.channels, "Chans    "), 1, ALIGN_LEFT, _("# Ch"), _("# Channels in the region"));
+	setup_col (append_col (_columns.channels, "Chans    "), 1, ALIGN_START, _("# Ch"), _("# Channels in the region"));
 	add_tag_column ();
 }
