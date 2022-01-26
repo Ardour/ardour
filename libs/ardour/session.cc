@@ -281,6 +281,7 @@ Session::Session (AudioEngine &eng,
 	, _adding_routes_in_progress (false)
 	, _reconnecting_routes_in_progress (false)
 	, _route_deletion_in_progress (false)
+	, _route_reorder_in_progress (false)
 	, _track_number_decimals(1)
 	, default_fade_steepness (0)
 	, default_fade_msecs (0)
@@ -468,7 +469,7 @@ Session::Session (AudioEngine &eng,
 	bool was_dirty = dirty();
 	unset_dirty ();
 
-	PresentationInfo::Change.connect_same_thread (*this, boost::bind (&Session::notify_presentation_info_change, this));
+	PresentationInfo::Change.connect_same_thread (*this, boost::bind (&Session::notify_presentation_info_change, this, _1));
 
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, false));
 	config.ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, true));
@@ -6968,13 +6969,18 @@ Session::session_name_is_legal (const string& path)
 }
 
 void
-Session::notify_presentation_info_change ()
+Session::notify_presentation_info_change (PropertyChange const& what_changed)
 {
-	if (deletion_in_progress()) {
+	if (deletion_in_progress() || _route_reorder_in_progress) {
 		return;
 	}
 
-	reassign_track_numbers();
+	if (what_changed.contains (Properties::order)) {
+		PBD::Unwinder<bool> uw (_route_reorder_in_progress, true);
+		ensure_stripable_sort_order ();
+		reassign_track_numbers ();
+		set_dirty ();
+	}
 }
 
 void

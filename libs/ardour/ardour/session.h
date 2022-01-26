@@ -355,7 +355,7 @@ public:
 		return _bundles.reader ();
 	}
 
-	void notify_presentation_info_change ();
+	void notify_presentation_info_change (PBD::PropertyChange const&);
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&), bool sort = true);
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>), bool sort = true);
@@ -1906,6 +1906,7 @@ private:
 	bool _adding_routes_in_progress;
 	bool _reconnecting_routes_in_progress;
 	bool _route_deletion_in_progress;
+	bool _route_reorder_in_progress;
 
 	void load_and_connect_instruments (RouteList&,
 			bool strict_io,
