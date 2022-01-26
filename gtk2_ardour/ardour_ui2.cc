@@ -618,8 +618,8 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (io_latency_value, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
 	++col;
 
-	route_latency_value.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	io_latency_value.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	route_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+	io_latency_value.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 
 	transport_table.attach (latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;

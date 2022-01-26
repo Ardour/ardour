@@ -623,7 +623,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 				if (align == "left") {
 					xalign = Gtk::ALIGN_START;
 				} else if (align == "right") {
-					xalign = Gtk::ALIGN_RIGHT;
+					xalign = Gtk::ALIGN_END;
 				}
 			}
 			w = new LuaDialogHeading (title, xalign);
@@ -634,7 +634,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 				if (align == "left") {
 					xalign = Gtk::ALIGN_START;
 				} else if (align == "right") {
-					xalign = Gtk::ALIGN_RIGHT;
+					xalign = Gtk::ALIGN_END;
 				}
 			}
 			w = new LuaDialogLabel (title, xalign);

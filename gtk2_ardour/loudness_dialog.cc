@@ -253,22 +253,22 @@ LoudnessDialog::LoudnessDialog (Session* s, TimelineRange const& ar, bool as)
 		  "<b>When disabled</b>, the gain is applied directly to the output of the master-bus. This results in an efficient and reliable volume adjustment."
 		 ));
 
-	_dbfs_label.set_alignment (ALIGN_RIGHT);
-	_dbtp_label.set_alignment (ALIGN_RIGHT);
-	_lufs_i_label.set_alignment (ALIGN_RIGHT);
-	_lufs_s_label.set_alignment (ALIGN_RIGHT);
-	_lufs_m_label.set_alignment (ALIGN_RIGHT);
+	_dbfs_label.set_alignment (ALIGN_END);
+	_dbtp_label.set_alignment (ALIGN_END);
+	_lufs_i_label.set_alignment (ALIGN_END);
+	_lufs_s_label.set_alignment (ALIGN_END);
+	_lufs_m_label.set_alignment (ALIGN_END);
 
-	_delta_dbfs_label.set_alignment (ALIGN_RIGHT);
-	_delta_dbtp_label.set_alignment (ALIGN_RIGHT);
-	_delta_lufs_i_label.set_alignment (ALIGN_RIGHT);
-	_delta_lufs_s_label.set_alignment (ALIGN_RIGHT);
-	_delta_lufs_m_label.set_alignment (ALIGN_RIGHT);
+	_delta_dbfs_label.set_alignment (ALIGN_END);
+	_delta_dbtp_label.set_alignment (ALIGN_END);
+	_delta_lufs_i_label.set_alignment (ALIGN_END);
+	_delta_lufs_s_label.set_alignment (ALIGN_END);
+	_delta_lufs_m_label.set_alignment (ALIGN_END);
 
-	_gain_norm_label.set_alignment (ALIGN_RIGHT);
-	_gain_out_label.set_alignment (ALIGN_RIGHT);
-	_gain_total_label.set_alignment (ALIGN_RIGHT);
-	_gain_exceeds_label.set_alignment (ALIGN_RIGHT);
+	_gain_norm_label.set_alignment (ALIGN_END);
+	_gain_out_label.set_alignment (ALIGN_END);
+	_gain_total_label.set_alignment (ALIGN_END);
+	_gain_exceeds_label.set_alignment (ALIGN_END);
 
 	HBox* hb = manage (new (HBox));
 	hb->pack_start (_loudness_graph, true, false);

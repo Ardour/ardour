@@ -47,30 +47,30 @@ IdleOMeter::IdleOMeter ()
 	get_vbox()->pack_start (*hbox, false, false);
 	get_vbox()->pack_start (*b, false, false);
 
-	_label_cur.set_alignment (ALIGN_RIGHT, ALIGN_CENTER);
-	_label_min.set_alignment (ALIGN_RIGHT, ALIGN_CENTER);
-	_label_max.set_alignment (ALIGN_RIGHT, ALIGN_CENTER);
-	_label_avg.set_alignment (ALIGN_RIGHT, ALIGN_CENTER);
-	_label_dev.set_alignment (ALIGN_RIGHT, ALIGN_CENTER);
+	_label_cur.set_alignment (ALIGN_END, ALIGN_CENTER);
+	_label_min.set_alignment (ALIGN_END, ALIGN_CENTER);
+	_label_max.set_alignment (ALIGN_END, ALIGN_CENTER);
+	_label_avg.set_alignment (ALIGN_END, ALIGN_CENTER);
+	_label_dev.set_alignment (ALIGN_END, ALIGN_CENTER);
 	_label_acq.set_alignment (ALIGN_CENTER, ALIGN_CENTER);
 
 	int row = 0;
-	t->attach (*manage (new Label (_("Current:"), ALIGN_RIGHT)), 0, 1, row, row + 1, FILL, SHRINK);
+	t->attach (*manage (new Label (_("Current:"), ALIGN_END)), 0, 1, row, row + 1, FILL, SHRINK);
 	t->attach (_label_cur, 1, 2, row, row + 1, FILL, SHRINK);
 	++row;
-	t->attach (*manage (new Label (_("Min:"),     ALIGN_RIGHT)), 0, 1, row, row + 1, FILL, SHRINK);
+	t->attach (*manage (new Label (_("Min:"),     ALIGN_END)), 0, 1, row, row + 1, FILL, SHRINK);
 	t->attach (_label_min, 1, 2, row, row + 1, FILL, SHRINK);
 	++row;
-	t->attach (*manage (new Label (_("Max:"),     ALIGN_RIGHT)), 0, 1, row, row + 1, FILL, SHRINK);
+	t->attach (*manage (new Label (_("Max:"),     ALIGN_END)), 0, 1, row, row + 1, FILL, SHRINK);
 	t->attach (_label_max, 1, 2, row, row + 1, FILL, SHRINK);
 	++row;
-	t->attach (*manage (new Label (_("Mean:"),    ALIGN_RIGHT)), 0, 1, row, row + 1, FILL, SHRINK);
+	t->attach (*manage (new Label (_("Mean:"),    ALIGN_END)), 0, 1, row, row + 1, FILL, SHRINK);
 	t->attach (_label_avg, 1, 2, row, row + 1, FILL, SHRINK);
 	++row;
-	t->attach (*manage (new Label (_("\u03c3:"),  ALIGN_RIGHT)), 0, 1, row, row + 1, FILL, SHRINK);
+	t->attach (*manage (new Label (_("\u03c3:"),  ALIGN_END)), 0, 1, row, row + 1, FILL, SHRINK);
 	t->attach (_label_dev, 1, 2, row, row + 1, FILL, SHRINK);
 	++row;
-	t->attach (*manage (new Label (_("Elapsed:"),  ALIGN_RIGHT)), 0, 1, row, row + 1, FILL, SHRINK);
+	t->attach (*manage (new Label (_("Elapsed:"),  ALIGN_END)), 0, 1, row, row + 1, FILL, SHRINK);
 	t->attach (_label_acq, 1, 2, row, row + 1, FILL, SHRINK);
 }
 

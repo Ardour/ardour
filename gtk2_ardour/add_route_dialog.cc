@@ -260,7 +260,7 @@ AddRouteDialog::AddRouteDialog ()
 	++n;
 
 	/* Number */
-	add_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	add_label.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 	settings_table->attach (add_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 	Gtk::Alignment *align = manage (new Alignment (0, .5, 0, 0));
 	align->add (routes_spinner);
@@ -269,24 +269,24 @@ AddRouteDialog::AddRouteDialog ()
 	++n;
 
 	/* Name */
-	name_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	name_label.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 	settings_table->attach (name_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 	settings_table->attach (name_template_entry, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	/* Route configuration */
-	configuration_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	configuration_label.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 	settings_table->attach (configuration_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 	settings_table->attach (channel_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
 	/* instrument choice (for MIDI) */
-	instrument_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	instrument_label.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 	settings_table->attach (instrument_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 	settings_table->attach (instrument_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	/* Group choice */
-	group_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	group_label.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 	settings_table->attach (group_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 	settings_table->attach (route_group_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
@@ -296,7 +296,7 @@ AddRouteDialog::AddRouteDialog ()
 	if (Profile->get_mixbus ()) {
 		strict_io_combo.set_active (1);
 	} else {
-		strict_io_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+		strict_io_label.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 		settings_table->attach (strict_io_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 		settings_table->attach (strict_io_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
@@ -304,7 +304,7 @@ AddRouteDialog::AddRouteDialog ()
 				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
 
 		/* recording mode */
-		mode_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+		mode_label.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 		settings_table->attach (mode_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 		settings_table->attach (mode_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
@@ -317,7 +317,7 @@ AddRouteDialog::AddRouteDialog ()
 	outer_box->set_spacing (4);
 
 	/* New route will be inserted at.. */
-	insert_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	insert_label.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 	outer_box->pack_start (insert_label, false, false);
 	outer_box->pack_start (insert_at_combo, false, false);
 

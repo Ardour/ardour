@@ -133,7 +133,7 @@ RegionListBase::setup_col (TreeViewColumn* col, int sort_idx, Gtk::AlignmentEnum
 	/* ...and this sets the alignment for the data cells */
 	CellRendererText* renderer = dynamic_cast<CellRendererText*> (col->get_first_cell_renderer ());
 	if (renderer) {
-		renderer->property_xalign () = (al == ALIGN_RIGHT ? 1.0 : (al == ALIGN_START ? 0.0 : 0.5));
+		renderer->property_xalign () = (al == ALIGN_END ? 1.0 : (al == ALIGN_START ? 0.0 : 0.5));
 	}
 }
 

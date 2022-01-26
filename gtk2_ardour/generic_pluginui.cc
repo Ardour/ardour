@@ -660,7 +660,7 @@ GenericPluginUI::build_midi_table ()
 		cui->set_text_ellipsize (Pango::ELLIPSIZE_END);
 		cui->set_layout_ellipsize_width (PANGO_SCALE * 112 * UIConfiguration::instance ().get_ui_scale ());
 		midi_pgmsel.push_back (cui);
-		pgm_table->attach (*manage (new Label (string_compose ("C%1:", (int)(chn + 1)), ALIGN_RIGHT)), col, col + 1, row, row+1, FILL, SHRINK);
+		pgm_table->attach (*manage (new Label (string_compose ("C%1:", (int)(chn + 1)), ALIGN_END)), col, col + 1, row, row+1, FILL, SHRINK);
 		pgm_table->attach (*cui, col + 1, col + 2, row, row+1, SHRINK, SHRINK);
 	}
 

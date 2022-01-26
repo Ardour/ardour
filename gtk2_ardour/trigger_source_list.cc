@@ -31,7 +31,7 @@ TriggerSourceList::TriggerSourceList ()
 	setup_col (append_col (_columns.channels, "Chans    "), 1, ALIGN_START, _("# Ch"), _("# Channels in the region"));
 	add_tag_column ();
 
-	setup_col (append_col (_columns.captd_xruns, "1234567890"), 21, ALIGN_RIGHT, _("# Xruns"), _("Number of dropouts that occurred during recording"));
+	setup_col (append_col (_columns.captd_xruns, "1234567890"), 21, ALIGN_END, _("# Xruns"), _("Number of dropouts that occurred during recording"));
 	setup_col (append_col (_columns.take_id, "2021-01-19 02:34:03"), 18, ALIGN_START, _("Take ID"), _("Take ID"));
 	_display.get_column (0)->set_resizable (true);
 }
