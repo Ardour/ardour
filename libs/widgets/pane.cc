@@ -321,6 +321,12 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 			} else {
 				child_alloc.set_height (max (child_alloc.get_height(), (*child)->minsize));
 			}
+		} else if ((*child)->w->is_visible ()) {
+			if (horizontal) {
+				child_alloc.set_width (max (child_alloc.get_width(), cr.width));
+			} else {
+				child_alloc.set_height (max (child_alloc.get_height(), cr.height));
+			}
 		}
 
 		if ((*child)->w->is_visible ()) {
