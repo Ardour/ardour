@@ -1816,7 +1816,11 @@ RouteUI::set_route_active (bool a, bool apply_to_selection)
 {
 	if (apply_to_selection) {
 		ARDOUR_UI::instance()->the_editor().get_selection().tracks.foreach_route_ui (boost::bind (&RouteUI::set_route_active, _1, a, false));
-	} else {
+	} else if (!is_master ()
+#ifdef MIXBUS
+		         && !_route->mixbus()
+#endif
+			) {
 		_route->set_active (a, this);
 	}
 }

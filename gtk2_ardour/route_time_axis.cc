@@ -822,13 +822,17 @@ RouteTimeAxisView::build_display_menu ()
 
 	int active = 0;
 	int inactive = 0;
+	bool always_active = false;
 	TrackSelection const & s = _editor.get_selection().tracks;
 	for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
 		RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
 		if (!r) {
 			continue;
 		}
-
+		always_active |= r->route()->is_master();
+#ifdef MIXBUS
+		always_active |= r->route()->mixbus() != 0;
+#endif
 		if (r->route()->active()) {
 			++active;
 		} else {
@@ -845,7 +849,7 @@ RouteTimeAxisView::build_display_menu ()
 	} else if (active > 0 && inactive > 0) {
 		i->set_inconsistent (true);
 	}
-	i->set_sensitive(! _session->transport_rolling());
+	i->set_sensitive(! _session->transport_rolling() && ! always_active);
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), click_sets_active, true));
 
 	items.push_back (SeparatorElem());
