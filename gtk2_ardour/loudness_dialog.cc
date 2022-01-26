@@ -284,12 +284,12 @@ LoudnessDialog::LoudnessDialog (Session* s, TimelineRange const& ar, bool as)
 	t->set_spacings (4);
 	l = manage (new Label ());
 	l->set_markup (_("<b>Loudness Analysis</b>\n"));
-	l->set_alignment (ALIGN_START, ALIGN_TOP);
+	l->set_alignment (ALIGN_START, ALIGN_START);
 	t->attach (*l, 0, 1, 0, 1, EXPAND | FILL, FILL, 8, 2);
 
 	l = manage (new Label ());
 	l->set_line_wrap ();
-	l->set_alignment (ALIGN_START, ALIGN_TOP);
+	l->set_alignment (ALIGN_START, ALIGN_START);
 	l->set_markup (_(
 	    "This allows the user to analyze and conform the loudness of the signal at the master-bus "
 	    "output of the complete session, as it would be exported. "
@@ -298,7 +298,7 @@ LoudnessDialog::LoudnessDialog (Session* s, TimelineRange const& ar, bool as)
 
 	l = manage (new Label ());
 	l->set_line_wrap ();
-	l->set_alignment (ALIGN_START, ALIGN_TOP);
+	l->set_alignment (ALIGN_START, ALIGN_START);
 	l->set_markup (_(
 	    "By default, a faster-than-realtime export is used to assess the loudness of the "
 	    "session. If any outboard gear is used, a <i>realtime</i> export is available, to "

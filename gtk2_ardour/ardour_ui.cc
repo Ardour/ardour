@@ -2530,7 +2530,7 @@ require some unused files to continue to exist."));
 	Gtk::HBox ddhbox; // the hbox we eventually pack into the dialog's vbox
 	Gtk::Image* dimage = manage (new Gtk::Image(Stock::DIALOG_INFO,  Gtk::ICON_SIZE_DIALOG));
 
-	dimage->set_alignment(ALIGN_START, ALIGN_TOP);
+	dimage->set_alignment(ALIGN_START, ALIGN_START);
 
 	const string dead_directory = _session->session_directory().dead_path();
 
@@ -2973,7 +2973,7 @@ without save, or in middle of recording when\n\
 %1 can recover any changes for\n\
 you, or it can ignore it. Please decide\n\
 what you would like to do.\n"), PROGRAM_NAME));
-	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
+	image->set_alignment(ALIGN_CENTER, ALIGN_START);
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
 	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
 	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
