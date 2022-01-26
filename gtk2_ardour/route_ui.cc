@@ -593,7 +593,7 @@ RouteUI::edit_output_configuration ()
 
 	IOSelectorWindow* w = output_selectors[id];
 
-	if (w->is_visible()) {
+	if (w->get_visible()) {
 		w->get_toplevel()->get_window()->raise();
 	} else {
 		w->present ();
@@ -611,7 +611,7 @@ RouteUI::edit_input_configuration ()
 
 	IOSelectorWindow* w = input_selectors[_route->id ()];
 
-	if (w->is_visible()) {
+	if (w->get_visible()) {
 		w->get_toplevel()->get_window()->raise();
 	} else {
 		w->present ();
@@ -635,8 +635,8 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 	if (Keyboard::is_context_menu_event (ev)) {
 
-		if (! (solo_isolated_led && solo_isolated_led->is_visible()) ||
-		    ! (solo_safe_led && solo_safe_led->is_visible())) {
+		if (! (solo_isolated_led && solo_isolated_led->get_visible()) ||
+		    ! (solo_safe_led && solo_safe_led->get_visible())) {
 
 			if (solo_menu == 0) {
 				build_solo_menu ();
@@ -1751,7 +1751,7 @@ RouteUI::route_rename ()
 void
 RouteUI::toggle_comment_editor ()
 {
-	if (_comment_window && _comment_window->is_visible ()) {
+	if (_comment_window && _comment_window->get_visible ()) {
 		_comment_window->hide ();
 	} else {
 		open_comment_editor ();

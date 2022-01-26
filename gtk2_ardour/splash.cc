@@ -269,7 +269,7 @@ Splash::expose (GdkEventExpose* ev)
 void
 Splash::boot_message (std::string msg)
 {
-	if (!is_visible() && _window_stack.empty ()) {
+	if (!get_visible() && _window_stack.empty ()) {
 		display ();
 	}
 	message (msg);

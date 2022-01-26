@@ -848,7 +848,7 @@ AudioClock::set (timepos_t const & w, bool force, timecnt_t const & offset)
 {
 	timepos_t when (w);
 
-	if ((!force && !is_visible()) || !_session) {
+	if ((!force && !get_visible()) || !_session) {
 		return;
 	}
 

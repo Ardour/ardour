@@ -1583,7 +1583,7 @@ PluginPinWidget::connect_sidechain ()
 		_sidechain_selector = new IOSelectorWindow (_session, _pi->sidechain_input ());
 	}
 
-	if (_sidechain_selector->is_visible ()) {
+	if (_sidechain_selector->get_visible ()) {
 		_sidechain_selector->get_toplevel ()->get_window ()->raise ();
 	} else {
 		_sidechain_selector->present ();

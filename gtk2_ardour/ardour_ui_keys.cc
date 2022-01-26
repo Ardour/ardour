@@ -55,7 +55,7 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 	Gtkmm2ext::Bindings* bindings = 0;
 	Gtk::Window* window = 0;
 
-	if (virtual_keyboard_window && virtual_keyboard_window->is_visible()) {
+	if (virtual_keyboard_window && virtual_keyboard_window->get_visible()) {
 		if (gtk_window_propagate_key_event (virtual_keyboard_window->gobj(), ev)) {
 			return true;
 		}

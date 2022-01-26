@@ -2030,7 +2030,7 @@ SoundFileOmega::reset (uint32_t selected_audio_tracks, uint32_t selected_midi_tr
 		chooser.set_filter (audio_and_midi_filter);
 	}
 
-	if (is_visible()) {
+	if (get_visible()) {
 		reset_options ();
 	}
 }
@@ -2038,7 +2038,7 @@ SoundFileOmega::reset (uint32_t selected_audio_tracks, uint32_t selected_midi_tr
 void
 SoundFileOmega::file_selection_changed ()
 {
-	if (resetting_ourselves || !is_visible ()) {
+	if (resetting_ourselves || !get_visible ()) {
 		return;
 	}
 

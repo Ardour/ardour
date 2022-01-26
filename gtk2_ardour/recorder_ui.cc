@@ -1081,7 +1081,7 @@ void
 RecorderUI::update_spacer_width (Allocation&, TrackRecordAxis* rec)
 {
 	int w = rec->summary_xpos ();
-	if (_rec_group_tabs->is_visible ()) {
+	if (_rec_group_tabs->get_visible ()) {
 		w += _rec_group_tabs->get_width ();
 	}
 	_space.set_size_request (w, -1); //< Note: this is idempotent

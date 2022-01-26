@@ -3824,7 +3824,7 @@ Mixer_UI::screenshot (std::string const& filename)
 	}
 
 	int height = strip_packer.get_height();
-	bool with_vca = vca_vpacker.is_visible ();
+	bool with_vca = vca_vpacker.get_visible ();
 	MixerStrip* master = strip_by_route (_session->master_out ());
 
 	Gtk::OffscreenWindow osw;

@@ -736,7 +736,7 @@ ProcessorEntry::add_control_state (XMLNode* node) const
 	if (_plugin_display) {
 		XMLNode* c = new XMLNode (X_("Object"));
 		c->set_property (X_("id"), X_("InlineDisplay"));
-		c->set_property (X_("visible"), _plugin_display->is_visible ());
+		c->set_property (X_("visible"), _plugin_display->get_visible ());
 		node->add_child_nocopy (*c);
 	}
 }
@@ -793,7 +793,7 @@ ProcessorEntry::build_controls_menu ()
 	if (_plugin_display) {
 		items.push_back (CheckMenuElem (_("Inline Display")));
 		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-		c->set_active (_plugin_display->is_visible ());
+		c->set_active (_plugin_display->get_visible ());
 		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_inline_display_visibility));
 	}
 
@@ -826,7 +826,7 @@ ProcessorEntry::build_controls_menu ()
 void
 ProcessorEntry::toggle_inline_display_visibility ()
 {
-	if (_plugin_display->is_visible ()) {
+	if (_plugin_display->get_visible ()) {
 		_plugin_display->hide();
 	} else {
 		_plugin_display->show();
@@ -1736,7 +1736,7 @@ ProcessorEntry::PluginInlineDisplay::update_height_alloc (uint32_t inline_height
 	Gtk::ScrolledWindow* sw = dynamic_cast<Gtk::ScrolledWindow*> (pr);
 	if (sw) {
 		const Gtk::VScrollbar* vsb = sw->get_vscrollbar();
-		sc = vsb && vsb->is_visible();
+		sc = vsb && vsb->get_visible();
 	}
 
 	if (shm != _cur_height) {

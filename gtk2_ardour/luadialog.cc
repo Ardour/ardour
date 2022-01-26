@@ -52,7 +52,7 @@ Message::run ()
 
 	bool splash_pushed = false;
 	Splash* spl = Splash::exists () ? Splash::instance() : NULL;
-	if (spl && spl->is_visible()) {
+	if (spl && spl->get_visible()) {
 		spl->pop_back_for (_message_dialog);
 		splash_pushed = true;
 	}

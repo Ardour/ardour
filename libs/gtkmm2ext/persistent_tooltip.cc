@@ -143,7 +143,7 @@ PersistentTooltip::show ()
 
 	set_tip (_tip);
 
-	if (!_window->is_visible ()) {
+	if (!_window->get_visible ()) {
 		int rx, ry;
 		int sw = gdk_screen_width ();
 

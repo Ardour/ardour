@@ -103,7 +103,7 @@ Pane::on_size_request (GtkRequisition* req)
 	for (Children::iterator c = children.begin(); c != children.end(); ++c) {
 		GtkRequisition r;
 
-		if (!(*c)->w->is_visible ()) {
+		if (!(*c)->w->get_visible ()) {
 			continue;
 		}
 
@@ -248,7 +248,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 
 	if (children.size() == 1) {
 		/* only child gets the full allocation */
-		if (children.front()->w->is_visible ()) {
+		if (children.front()->w->get_visible ()) {
 			children.front()->w->size_allocate (alloc);
 		}
 		return;
@@ -269,7 +269,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 	/* skip initial hidden children */
 
 	while (child != children.end()) {
-		if ((*child)->w->is_visible()) {
+		if ((*child)->w->get_visible()) {
 			break;
 		}
 		++child;
@@ -284,7 +284,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 		/* Move on to next *visible* child */
 
 		while (++next != children.end()) {
-			if ((*next)->w->is_visible()) {
+			if ((*next)->w->get_visible()) {
 				break;
 			}
 		}
@@ -321,7 +321,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 			} else {
 				child_alloc.set_height (max (child_alloc.get_height(), (*child)->minsize));
 			}
-		} else if (!check_fract && (*child)->w->is_visible ()) {
+		} else if (!check_fract && (*child)->w->get_visible ()) {
 			if (horizontal) {
 				child_alloc.set_width (max (child_alloc.get_width(), cr.width));
 			} else {
@@ -329,7 +329,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 			}
 		}
 
-		if ((*child)->w->is_visible ()) {
+		if ((*child)->w->get_visible ()) {
 			(*child)->w->size_allocate (child_alloc);
 		}
 
@@ -380,12 +380,12 @@ Pane::on_expose_event (GdkEventExpose* ev)
 
 	for (child = children.begin(), div = dividers.begin(); child != children.end(); ++child) {
 
-		if ((*child)->w->is_visible()) {
+		if ((*child)->w->get_visible()) {
 			propagate_expose (*((*child)->w), ev);
 		}
 
 		if (div != dividers.end()) {
-			if ((*div)->is_visible()) {
+			if ((*div)->get_visible()) {
 				propagate_expose (**div, ev);
 			}
 			++div;

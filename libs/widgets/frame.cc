@@ -313,7 +313,7 @@ Frame::on_expose_event (GdkEventExpose* ev)
 		cr->restore ();
 	}
 
-	if (_w->is_visible ()) {
+	if (_w->get_visible ()) {
 		propagate_expose (*_w, ev);
 	}
 	return true;

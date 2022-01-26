@@ -162,7 +162,7 @@ ARDOUR_UI::shared_popup_menu ()
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::shared_popup_menu, ignored);
 
-	assert (!_shared_popup_menu || !_shared_popup_menu->is_visible());
+	assert (!_shared_popup_menu || !_shared_popup_menu->get_visible());
 	delete _shared_popup_menu;
 	_shared_popup_menu = new Gtk::Menu;
 	return _shared_popup_menu;
