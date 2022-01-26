@@ -65,7 +65,7 @@ protected:
 
 	void meter_changed (Temporal::Meter m);
 
-	void bars_changed();
+	void beats_changed();
 
 private:
 
@@ -78,13 +78,10 @@ private:
 
 	Gtk::Label               _bpm_label;
 	Gtk::Label               _length_label;
-	Gtk::Label               _bar_label;
-	Gtk::Label               _meter_label;
+	Gtk::Label               _beat_label;
 
-	ArdourWidgets::ArdourDropdown _meter_selector;
-
-	Gtk::Adjustment               _bar_adjustment;
-	Gtk::SpinButton               _bar_spinner;
+	Gtk::Adjustment               _beat_adjustment;
+	Gtk::SpinButton               _beat_spinner;
 
 	ArdourWidgets::ArdourButton _stretch_toggle;
 
