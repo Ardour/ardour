@@ -865,6 +865,13 @@ struct FollowAction {
 		return other.type == type && other.targets == targets;
 	}
 
+	bool is_arrangement() {
+		return (
+			(type==ForwardTrigger) ||
+			(type==ReverseTrigger) ||
+			(type==JumpTrigger)    );
+	}
+
 	std::string to_string() const;
 };
 

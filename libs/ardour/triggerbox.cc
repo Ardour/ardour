@@ -2200,6 +2200,20 @@ TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
 
 	t->set_region_in_worker_thread (region);
 
+	//* always preserve the launch-style and cue_isolate status. It's likely to be right, but if it's wrong the user can "see" it's wrong anyway */
+	t->set_launch_style(all_triggers[slot]->launch_style());
+	t->set_cue_isolated(all_triggers[slot]->cue_isolated());
+
+	//* if the existing slot seems to be part of a FA 'arrangement', preserve the settings */
+	if (all_triggers[slot]->follow_action0().is_arrangement()) {
+		t->set_follow_action0(all_triggers[slot]->follow_action0());
+		t->set_follow_action1(all_triggers[slot]->follow_action1());
+		t->set_follow_action_probability(all_triggers[slot]->follow_action_probability());
+		t->set_quantization(all_triggers[slot]->quantization());
+		//color ?
+		//we could try to match the prior clip's length by playing with the follow_count and follow_length (?)
+	}
+
 	/* XXX what happens if pending is already set? */
 
 	set_pending (slot, t);
