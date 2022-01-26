@@ -34,7 +34,7 @@ using namespace PBD;
 MissingPluginDialog::MissingPluginDialog (Gtk::Window& parent, Session* s, list<string> const & plugins, bool cache_valid)
 	: ArdourDialog (parent, _("Missing Plugins"), true, false)
 {
-	/* This dialog is always shown programatically. Center the window.*/
+	/* This dialog is always shown programmatically. Center the window.*/
 	set_position (Gtk::WIN_POS_CENTER);
 
 	set_session (s);

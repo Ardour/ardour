@@ -176,13 +176,13 @@ MidiTracer::port_changed ()
 		return;
 	}
 
-	/* The inheritance heirarchy makes this messy. AsyncMIDIPort has two
+	/* The inheritance hierarchy makes this messy. AsyncMIDIPort has two
 	 * available MIDI::Parsers what we could connect to, ::self_parser()
 	 * (from ARDOUR::MidiPort) and ::parser() from MIDI::Port. One day,
 	 * this mess will all go away ...
 	 */
 
-	/* Some ports have a parser avaiable (Transport Masters and ASYNC ports)
+	/* Some ports have a parser available (Transport Masters and ASYNC ports)
 	 * and some do not. If the port has a parser already, just attach to it.
 	 * If not use our local parser and tell the port that we need it to be called.
 	 */

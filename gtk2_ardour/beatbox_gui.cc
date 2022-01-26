@@ -142,7 +142,7 @@ BBGUI::SwitchRow::switch_event (GdkEvent* ev, int col)
 	Switch* s = switches[col];
 
 	if (ev->type == GDK_BUTTON_PRESS) {
-		/* XXX changes hould be driven by model */
+		/* XXX changes should be driven by model */
 		if (s->button->value()) {
 			owner.bbox->remove_note (note, at);
 			s->button->set_value (0);
@@ -211,7 +211,7 @@ BBGUI::sequencer_changed (PropertyChange const &)
 
 	vertical_adjustment.set_upper (required_scroll);
 
-	/* height is 1 step_dimen larger to accomodate the "step indicator"
+	/* height is 1 step_dimen larger to accommodate the "step indicator"
 	 * line at the top
 	 */
 

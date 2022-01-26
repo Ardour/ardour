@@ -650,7 +650,7 @@ EngineControl::build_full_control_notebook ()
 		++row;
 	}
 
-	/* Prefere next available vertical slot, 1 row */
+	/* Prefer next available vertical slot, 1 row */
 	if (btn < row && !autostart_packed) {
 		basic_packer.attach (try_autostart_button, 3, 4, btn, btn + 1, xopt, xopt);
 		btn++;

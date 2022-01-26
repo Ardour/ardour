@@ -421,7 +421,7 @@ TriggerPage::add_routes (RouteList& rl)
 			continue;
 		}
 #if 0
-		/* TODO, only subscribe to PropertyChanged, create (and destory) TriggerStrip as needed.
+		/* TODO, only subscribe to PropertyChanged, create (and destroy) TriggerStrip as needed.
 		 * For now we just hide non trigger strips.
 		 */
 		if (!(*r)->presentation_info ().trigger_track ()) {

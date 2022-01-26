@@ -286,7 +286,7 @@ TriggerClipPicker::maybe_add_dir (std::string const& dir)
 	_dir.AddMenuElem (Gtkmm2ext::MenuElemNoMnemonic (display_name (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
 
 	/* check if a parent path of the given dir already exists,
-	 * or if this new path is parent to any exising ones.
+	 * or if this new path is parent to any existing ones.
 	 */
 	bool insert = true;
 	auto it = _root_paths.begin ();

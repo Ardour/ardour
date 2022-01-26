@@ -658,7 +658,7 @@ StartupFSM::get_session_parameters_from_path (string const & path, string const 
 		}
 
 		if (!have_resolved_template_name) {
-			/* this will produce a more or less meaninful error later:
+			/* this will produce a more or less meaningful error later:
 			 * "ERROR: Could not open session template [abs-path to user-config dir]"
 			 */
 			session_template = Glib::build_filename (ARDOUR::user_template_directory (), template_name);
@@ -687,7 +687,7 @@ StartupFSM::get_session_parameters_from_path (string const & path, string const 
 /** return values:
  * -1: failure
  *  1: failure but user can retry
- *  0: success, seesion parameters ready for use
+ *  0: success, session parameters ready for use
  */
 int
 StartupFSM::check_session_parameters (bool must_be_new)
@@ -729,7 +729,7 @@ StartupFSM::check_session_parameters (bool must_be_new)
 	/* check for ".ardour" in statefile name, because we don't want
 	 * it
 	 *
-	 * XXX Note this wierd conflation of a
+	 * XXX Note this weird conflation of a
 	 * file-name-without-a-suffix and the session name. It's not
 	 * really a session name at all, but rather the suffix-free
 	 * name of a statefile (snapshot).
@@ -871,7 +871,7 @@ StartupFSM::copy_demo_sessions ()
 				continue;
 			}
 			/* skip sessions that are already in 'recent'.
-			 * eg. a new user changed <session-default-dir> shorly after installation
+			 * eg. a new user changed <session-default-dir> shortly after installation
 			 */
 			for (ARDOUR::RecentSessions::iterator r = rs.begin(); r != rs.end(); ++r) {
 				if ((*r).first == name) {

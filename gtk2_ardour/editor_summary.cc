@@ -653,7 +653,7 @@ EditorSummary::summary_zoom_step (int steps /* positive steps to zoom "out" , ne
 
 	/* for now, disallow really close zooming-in from the scroomer. (Currently it
 	 * causes the start-offset to 'walk' because of integer limitations.
-	 * To fix this, probably need to maintain float throught the get/set_editor() path.)
+	 * To fix this, probably need to maintain float through the get/set_editor() path.)
 	 */
 	if (steps<0) {
       if ((xn.second - xn.first) < 2)

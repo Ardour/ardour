@@ -86,7 +86,7 @@ EditorSources::init ()
 
 	setup_col (append_col (_columns.channels, "Chans    "), 1, ALIGN_LEFT, _("# Ch"), _("# Channels in the region"));
 	setup_col (append_col (_columns.captd_for, date_width), 17, ALIGN_LEFT, _("Captured For"), _("Original Track this was recorded on"));
-	setup_col (append_col (_columns.captd_xruns, "1234567890"), 21, ALIGN_RIGHT, _("# Xruns"), _("Number of dropouts that occured during recording"));
+	setup_col (append_col (_columns.captd_xruns, "1234567890"), 21, ALIGN_RIGHT, _("# Xruns"), _("Number of dropouts that occurred during recording"));
 
 	add_tag_column ();
 

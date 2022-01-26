@@ -1217,7 +1217,7 @@ MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 
 		md.set_title (_("Show All Automation"));
 
-		md.set_secondary_text (_("There are a total of 16 MIDI channels times 128 Control-Change parameters, not including other MIDI controls. Showing all will add more than 2000 automation lanes which is not generally useful. This will take some time and also slow down the GUI signficantly."));
+		md.set_secondary_text (_("There are a total of 16 MIDI channels times 128 Control-Change parameters, not including other MIDI controls. Showing all will add more than 2000 automation lanes which is not generally useful. This will take some time and also slow down the GUI significantly."));
 		if (md.run () != RESPONSE_YES) {
 			return;
 		}

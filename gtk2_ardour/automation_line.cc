@@ -549,7 +549,7 @@ AutomationLine::ContiguousControlPoints::clamp_dx (double dx)
 
 	tx = cp->get_x() + dx; // new possible position if we just add the motion
 	tx = max (tx, before_x); // can't move later than following point
-	tx = min (tx, after_x);  // can't move earlier than preceeding point
+	tx = min (tx, after_x);  // can't move earlier than preceding point
 	return  tx - cp->get_x ();
 }
 
@@ -1098,7 +1098,7 @@ AutomationLine::reset ()
 		return;
 	}
 
-	/* TODO: abort any drags in progress, e.g. draging points while writing automation
+	/* TODO: abort any drags in progress, e.g. dragging points while writing automation
 	 * (the control-point model, used by AutomationLine::drag_motion, will be invalid).
 	 *
 	 * Note: reset() may also be called from an aborted drag (LineDrag::aborted)

@@ -1101,7 +1101,7 @@ public:
 	 * Test if any undo commands were added since the
 	 * call to begin_reversible_command ()
 	 *
-	 * This is is useful to determine if an undoable
+	 * This is useful to determine if an undoable
 	 * action was performed before adding additional
 	 * information (e.g. selection changes) to the
 	 * undo transaction.

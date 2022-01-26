@@ -50,7 +50,7 @@ using namespace ARDOUR_PLUGIN_UTILS;
 PluginManagerUI::PluginManagerUI ()
 	: ArdourWindow (_("Plugin Manager"))
 	, _btn_reindex (_("Update Index Only"))
-	, _btn_discover (_("Disover New/Updated"))
+	, _btn_discover (_("Discover New/Updated"))
 	, _btn_rescan_all (_("Re-scan All"))
 	, _btn_rescan_err (_("Re-scan Faulty"))
 	, _btn_rescan_sel (_("Re-scan Selected"))

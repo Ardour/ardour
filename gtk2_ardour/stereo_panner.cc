@@ -126,7 +126,7 @@ StereoPanner::set_tooltip ()
 	   This is expressed as a pair of percentage values that ranges from (100,0)
 	   (hard left) through (50,50) (hard center) to (0,100) (hard right).
 
-	   This is pretty wierd, but its the way audio engineers expect it. Just remember that
+	   This is pretty weird, but its the way audio engineers expect it. Just remember that
 	   the center of the USA isn't Kansas, its (50LA, 50NY) and it will all make sense.
 	*/
 

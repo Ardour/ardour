@@ -646,7 +646,7 @@ ExportFormatDialog::init_format_table ()
 	src_quality_combo.pack_start (src_quality_cols.label);
 	src_quality_combo.set_active (0);
 
-	/* Demo Noise Optoins */
+	/* Demo Noise Options */
 
 	demo_noise_list = Gtk::ListStore::create (demo_noise_cols);
 	demo_noise_combo.set_model (demo_noise_list);

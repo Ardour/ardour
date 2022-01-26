@@ -2105,7 +2105,7 @@ Route::apply_processor_order (const ProcessorList& new_order)
 	 * (note though that  ::processors_reorder_needs_configure() ensured that
 	 * this function will only ever be called from the rt-thread if no processor were removed)
 	 *
-	 * either way, I can't proove it, but an xrun due to re-order here is less likley
+	 * either way, I can't proove it, but an xrun due to re-order here is less likely
 	 * than an xrun-less 'ardour-silent cycle' both of which effectively "click".
 	 */
 

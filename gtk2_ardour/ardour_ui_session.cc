@@ -314,7 +314,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	/* load_session calls flush_pending() which allows
 	 * GUI interaction and potentially loading another session
 	 * (that was easy via snapshot sidebar).
-	 * Recursing into load_session() from load_session() and recusive
+	 * Recursing into load_session() from load_session() and recursive
 	 * event loops causes all kind of crashes.
 	 */
 	assert (!session_load_in_progress);

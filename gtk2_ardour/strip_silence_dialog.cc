@@ -187,8 +187,8 @@ StripSilenceDialog::silences (AudioIntervalMap& m)
 void
 StripSilenceDialog::drop_rects ()
 {
-	// called by parent when starting to progess (dialog::run returned),
-	// but before the dialog is destoyed.
+	// called by parent when starting to progress (dialog::run returned),
+	// but before the dialog is destroyed.
 
 	_interthread_info.cancel = true;
 

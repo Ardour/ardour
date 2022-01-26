@@ -2012,7 +2012,7 @@ class ColumVisibilityOption : public Option
 };
 
 
-/** A class which allows control of visibility of some editor components usign
+/** A class which allows control of visibility of some editor components using
  *  a VisibilityGroup.  The caller should pass in a `dummy' VisibilityGroup
  *  which has the correct members, but with null widget pointers.  This
  *  class allows the user to set visibility of the members, the details

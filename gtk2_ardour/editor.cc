@@ -244,7 +244,7 @@ static const gchar *_rb_opt_strings[] = {
 };
 #endif
 
-/* Robin says: this should be odd to accomodate cairo drawing offset (width/2 rounds up to pixel boundary) */
+/* Robin says: this should be odd to accommodate cairo drawing offset (width/2 rounds up to pixel boundary) */
 #ifdef __APPLE__
 #define COMBO_TRIANGLE_WIDTH 19 // ArdourButton _diameter (11) + 2 * arrow-padding (2*2) + 2 * text-padding (2*5)
 #else

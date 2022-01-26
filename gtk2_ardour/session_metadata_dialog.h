@@ -270,7 +270,7 @@ private:
 
 /// Metadata dialog interface
 /**
- * The DataSets are initalized in this class so that all
+ * The DataSets are initialized in this class so that all
  * Dialogs have the same sets of data in the same order.
  */
 template <typename DataSet>

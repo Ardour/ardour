@@ -29,7 +29,7 @@ using namespace Gtk;
 AmbiguousFileDialog::AmbiguousFileDialog (const string& file, const vector<string>& paths)
 	: ArdourDialog (_("Ambiguous File"), true, false)
 {
-	/* This dialog is always shown programatically. Center the window.*/
+	/* This dialog is always shown programmatically. Center the window.*/
 	set_position (Gtk::WIN_POS_CENTER);
 
 	get_vbox()->set_spacing (6);

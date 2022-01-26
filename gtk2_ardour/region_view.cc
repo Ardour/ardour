@@ -592,7 +592,7 @@ RegionView::update_cue_markers ()
 		if (existing == _cue_markers.end()) {
 
 			if (c->position() < start || c->position() >= end) {
-				/* not withing this region */
+				/* not within this region */
 				continue;
 			}
 
@@ -618,7 +618,7 @@ RegionView::update_cue_markers ()
 		} else {
 
 			if (c->position() < start || c->position() >= end) {
-				/* not withing this region */
+				/* not within this region */
 				delete (*existing);
 				_cue_markers.erase (existing);
 				continue;

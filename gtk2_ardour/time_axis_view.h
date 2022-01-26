@@ -275,7 +275,7 @@ protected:
 
 	virtual bool name_entry_changed (std::string const&);
 
-	/** Handle mouse relaese on our LHS control name ebox.
+	/** Handle mouse release on our LHS control name ebox.
 	 *
 	 *@ param ev the event
 	 */

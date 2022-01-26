@@ -1747,7 +1747,7 @@ AudioRegionView::transients_changed ()
 void
 AudioRegionView::update_transient(float /*old_pos*/, float new_pos)
 {
-	/* Find sample at old pos, calulate new sample then update region transients*/
+	/* Find sample at old pos, calculate new sample then update region transients*/
 	list<std::pair<samplepos_t, ArdourCanvas::Line*> >::iterator l;
 
 	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
@@ -1772,7 +1772,7 @@ AudioRegionView::remove_transient (float pos)
 	/* this is called from Editor::remove_transient () with pos == get_data ("position")
 	 * which is the item's x-coordinate inside the ARV.
 	 *
-	 * Find sample at old pos, calulate new sample then update region transients
+	 * Find sample at old pos, calculate new sample then update region transients
 	 */
 	list<std::pair<samplepos_t, ArdourCanvas::Line*> >::iterator l;
 
@@ -1816,7 +1816,7 @@ AudioRegionView::drag_end ()
 	//see comment for drag_start
 
 	if (fade_in_handle && fade_in_handle->visible()) {
-		// lenght of region or fade changed, re-check
+		// length of region or fade changed, re-check
 		// if fade_in_trim_handle or fade_out_trim_handle should
 		// be visible. -- If the fade_in_handle is visible
 		// we have focus and are not in internal edit mode.

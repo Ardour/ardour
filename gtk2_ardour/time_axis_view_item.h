@@ -131,7 +131,7 @@ public:
 	/** Emitted when the name of this item is changed */
 	sigc::signal<void,std::string,std::string,void*> NameChanged;
 
-	/** Emiited when the position of this item changes */
+	/** Emitted when the position of this item changes */
 	sigc::signal<void,Temporal::timepos_t,void*> PositionChanged;
 
 	/** Emitted when the position lock of this item is changed */
