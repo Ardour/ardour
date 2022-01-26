@@ -90,7 +90,7 @@ ArdourMessageDialog::push_splash ()
 {
 	if (Splash::exists()) {
 		Splash* spl = Splash::instance();
-		if (spl->is_visible()) {
+		if (spl->get_visible()) {
 			spl->pop_back_for (*this);
 			_splash_pushed = true;
 		}

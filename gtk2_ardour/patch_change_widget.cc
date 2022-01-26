@@ -484,7 +484,7 @@ PatchChangeWidget::~PatchChangeWidget ()
 void
 PatchChangeWidget::refresh ()
 {
-	if (is_visible ()) {
+	if (get_visible ()) {
 		on_show ();
 	}
 }

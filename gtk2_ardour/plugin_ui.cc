@@ -422,7 +422,7 @@ PluginUIWindow::app_activated (bool)
 				was_visible = true;
 			}
 		} else {
-			was_visible = is_visible();
+			was_visible = get_visible();
 			get_position (pre_deactivate_x, pre_deactivate_y);
 			hide ();
 			_pluginui->deactivate ();

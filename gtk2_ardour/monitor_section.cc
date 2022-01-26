@@ -579,7 +579,7 @@ MonitorSection::update_processor_box ()
 		toggle_processorbox_button.set_name (X_("monitor section processors toggle"));
 	}
 
-	if (insert_box->is_visible() == show_processor_box) {
+	if (insert_box->get_visible() == show_processor_box) {
 		return;
 	}
 

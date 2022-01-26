@@ -74,7 +74,7 @@ PluginDSPLoadWindow::set_session (Session* s)
 	ArdourWindow::set_session (s);
 	if (!s) {
 		drop_references ();
-	} else if (is_visible ()) {
+	} else if (get_visible ()) {
 		refill_processors ();
 	}
 }

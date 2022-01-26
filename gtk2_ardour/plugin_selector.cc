@@ -916,7 +916,7 @@ PluginSelector::plugin_menu()
 void
 PluginSelector::build_plugin_menu ()
 {
-	if (is_visible ()) {
+	if (get_visible ()) {
 		_need_menu_rebuild = true;
 		return;
 	}

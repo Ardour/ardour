@@ -2790,7 +2790,7 @@ ARDOUR_UI::add_route ()
 		add_route_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::add_route_dialog_response));
 	}
 
-	if (add_route_dialog->is_visible()) {
+	if (add_route_dialog->get_visible()) {
 		/* we're already doing this */
 		return;
 	}

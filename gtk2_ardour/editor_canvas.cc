@@ -334,7 +334,7 @@ Editor::reset_controls_layout_width ()
 	edit_controls_vbox.size_request (req);
 	w = req.width;
 
-	if (_group_tabs->is_visible()) {
+	if (_group_tabs->get_visible()) {
 		_group_tabs->size_request (req);
 		w += req.width;
 	}
