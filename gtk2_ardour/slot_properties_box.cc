@@ -484,7 +484,7 @@ SlotPropertyTable::isolate_button_event (GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		trigger()->set_scene_isolated (!trigger()->scene_isolated());
+		trigger()->set_cue_isolated (!trigger()->cue_isolated());
 		return true;
 
 	default:
@@ -572,7 +572,7 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (pc.contains (Properties::isolated)) {
-		_isolate_button.set_active_state (trigger()->scene_isolated() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		_isolate_button.set_active_state (trigger()->cue_isolated() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::launch_style)) {
