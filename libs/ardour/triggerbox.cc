@@ -2519,7 +2519,7 @@ bool
 TriggerBox::configure_io (ChanCount in, ChanCount out)
 {
 	if (_sidechain) {
-		_sidechain->configure_io (in, out);
+		_sidechain->configure_io (in, out + ChanCount (DataType::MIDI, 1));
 	}
 
 	bool ret = Processor::configure_io (in, out);
