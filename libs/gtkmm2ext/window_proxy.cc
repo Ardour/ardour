@@ -128,7 +128,7 @@ WindowProxy::toggle()
 		/* we'd like to just call this and nothing else */
 		_window->present ();
 	} else {
-		if (_window->is_mapped()) {
+		if (_window->get_mapped()) {
 			save_pos_and_size();
 		}
 
@@ -138,7 +138,7 @@ WindowProxy::toggle()
 			_window->present ();
 		}
 
-		if (_window->is_mapped()) {
+		if (_window->get_mapped()) {
 			if (_width != -1 && _height != -1) {
 				_window->set_default_size (_width, _height);
 			}
@@ -261,7 +261,7 @@ WindowProxy::configure_handler (GdkEventConfigure* ev)
 
 	   the difference is generally down to window manager framing.
 	*/
-	if (!visible() || !_window->is_mapped()) {
+	if (!visible() || !_window->get_mapped()) {
 		return false;
 	}
 	save_pos_and_size ();

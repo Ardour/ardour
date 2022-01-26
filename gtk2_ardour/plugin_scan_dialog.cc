@@ -234,7 +234,7 @@ format_time (char* buf, size_t size, int timeout)
 void
 PluginScanDialog::plugin_scan_timeout (int timeout)
 {
-	if (!is_mapped ()) {
+	if (!get_mapped ()) {
 		return;
 	}
 
@@ -286,14 +286,14 @@ PluginScanDialog::message_handler (std::string type, std::string plugin, bool ca
 
 	timeout_info.hide ();
 
-	if (type == X_("closeme") && !is_mapped ()) {
+	if (type == X_("closeme") && !get_mapped ()) {
 		return;
 	}
 
 	const bool cancelled = PluginManager::instance ().cancelled ();
 
 	if (type != X_("closeme") && !UIConfiguration::instance ().get_show_plugin_scan_window () && !verbose) {
-		if (is_mapped ()) {
+		if (get_mapped ()) {
 			hide ();
 			connections.drop_connections ();
 			ARDOUR_UI::instance ()->gui_idle_handler ();

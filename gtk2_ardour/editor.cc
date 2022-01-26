@@ -1177,7 +1177,7 @@ Editor::generic_event_handler (GdkEvent* ev)
 	case GDK_MOTION_NOTIFY:
 	case GDK_KEY_PRESS:
 	case GDK_KEY_RELEASE:
-		if (contents().is_mapped()) {
+		if (contents().get_mapped()) {
 			gettimeofday (&last_event_time, 0);
 		}
 		break;
@@ -4184,7 +4184,7 @@ Editor::set_stationary_playhead (bool yn)
 bool
 Editor::show_touched_automation () const
 {
-	if (!contents().is_mapped()) {
+	if (!contents().get_mapped()) {
 		return false;
 	}
 	return _show_touched_automation;
@@ -6153,7 +6153,7 @@ Editor::super_rapid_screen_update ()
 	/* METERING / MIXER STRIPS */
 
 	/* update track meters, if required */
-	if (contents().is_mapped() && meters_running) {
+	if (contents().get_mapped() && meters_running) {
 		RouteTimeAxisView* rtv;
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {

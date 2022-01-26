@@ -504,7 +504,7 @@ TriggerStrip::map_frozen ()
 void
 TriggerStrip::fast_update ()
 {
-	if (is_mapped ()) {
+	if (get_mapped ()) {
 		if (_clear_meters) {
 			_level_meter.clear_meters ();
 			_clear_meters = false;

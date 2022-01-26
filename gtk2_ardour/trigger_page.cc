@@ -752,7 +752,7 @@ TriggerPage::stop_updating ()
 void
 TriggerPage::fast_update_strips ()
 {
-	if (_content.is_mapped () && _session) {
+	if (_content.get_mapped () && _session) {
 		for (list<TriggerStrip*>::iterator i = _strips.begin (); i != _strips.end (); ++i) {
 			(*i)->fast_update ();
 		}

@@ -197,7 +197,7 @@ MiniTimeline::set_span (samplecnt_t ts)
 void
 MiniTimeline::super_rapid_update ()
 {
-	if (!_session || !_session->engine().running() || !is_mapped ()) {
+	if (!_session || !_session->engine().running() || !get_mapped ()) {
 		return;
 	}
 	samplepos_t const sample = PublicEditor::instance().playhead_cursor_sample ();

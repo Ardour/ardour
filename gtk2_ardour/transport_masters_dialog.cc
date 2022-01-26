@@ -283,7 +283,7 @@ TransportMastersWidget::idle_remove (TransportMastersWidget::Row* row)
 void
 TransportMastersWidget::update_ports ()
 {
-	if (!is_mapped()) {
+	if (!get_mapped ()) {
 		return;
 	}
 

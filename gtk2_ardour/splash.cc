@@ -157,7 +157,7 @@ Splash::pop_back_for (Gtk::Window& win)
 #else
 	if (UIConfiguration::instance().get_hide_splash_screen ()) {
 		hide ();
-	} else if (is_mapped()) {
+	} else if (get_mapped ()) {
 		get_window()->restack (win.get_window(), false);
 		if (0 == win.get_transient_for ()) {
 			win.set_transient_for (*this);
@@ -285,7 +285,7 @@ Splash::idle_after_expose ()
 void
 Splash::display ()
 {
-	bool was_mapped = is_mapped ();
+	bool was_mapped = get_mapped ();
 
 	if (ARDOUR_COMMAND_LINE::no_splash) {
 		return;
