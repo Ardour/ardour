@@ -366,7 +366,7 @@ public:
 
 	void clear ()
 	{
-		_combo->clear_items();
+		_combo->remove_all();
 		_options.clear ();
 	}
 
