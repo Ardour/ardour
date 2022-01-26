@@ -67,6 +67,7 @@ private:
 	uint64_t _cue_idx;
 	double   _poly_size;
 	double   _poly_margin;
+	bool _grabbed;
 };
 
 class CueBoxUI : public ArdourCanvas::Rectangle, public ARDOUR::SessionHandlePtr

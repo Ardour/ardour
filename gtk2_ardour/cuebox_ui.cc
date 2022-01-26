@@ -54,6 +54,7 @@ using namespace PBD;
 CueEntry::CueEntry (Item* item, uint64_t cue_index)
 	: ArdourCanvas::Rectangle (item)
 	, _cue_idx (cue_index)
+	, _grabbed (false)
 {
 	set_layout_sensitive (true); // why???
 
@@ -92,6 +93,12 @@ CueEntry::event_handler (GdkEvent* ev)
 {
 	switch (ev->type) {
 		case GDK_BUTTON_PRESS:
+			_grabbed = true;
+			set_fill_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
+			break;
+		case GDK_BUTTON_RELEASE:
+			_grabbed = false;
+			set_default_colors ();
 			break;
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
@@ -100,6 +107,7 @@ CueEntry::event_handler (GdkEvent* ev)
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
+			_grabbed = false;
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
 				set_default_colors ();
 			}
