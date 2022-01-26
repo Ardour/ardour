@@ -700,7 +700,7 @@ RecorderUI::update_meters ()
 		}
 	}
 
-	if (!contents ().is_mapped ()) {
+	if (!contents ().get_mapped ()) {
 		return true;
 	}
 

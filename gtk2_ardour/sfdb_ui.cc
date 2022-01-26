@@ -980,7 +980,7 @@ SoundFileBrowser::stop_metering ()
 void
 SoundFileBrowser::meter ()
 {
-	if (is_mapped () && _session && gm) {
+	if (get_mapped () && _session && gm) {
 		gm->update_meters ();
 	}
 }

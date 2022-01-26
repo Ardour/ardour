@@ -1081,7 +1081,7 @@ LocationUI::refresh_location_list ()
 	using namespace Box_Helpers;
 
 	// this is just too expensive to do when window is not shown
-	if (!is_mapped()) {
+	if (!get_mapped ()) {
 		return;
 	}
 

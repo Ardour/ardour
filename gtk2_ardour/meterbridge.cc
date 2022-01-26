@@ -515,7 +515,7 @@ Meterbridge::stop_updating ()
 void
 Meterbridge::fast_update_strips ()
 {
-	if (!is_mapped () || !_session) {
+	if (!get_mapped () || !_session) {
 		return;
 	}
 	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {

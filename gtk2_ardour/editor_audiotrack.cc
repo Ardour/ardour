@@ -40,7 +40,7 @@ Editor::start_updating_meters ()
 {
 	RouteTimeAxisView* rtv;
 
-	if (contents().is_mapped() && _session) {
+	if (contents().get_mapped() && _session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
 				rtv->reset_meter ();
@@ -58,7 +58,7 @@ Editor::stop_updating_meters ()
 
 	meters_running = false;
 
-	if (contents().is_mapped() && _session) {
+	if (contents().get_mapped() && _session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
 				rtv->hide_meter ();

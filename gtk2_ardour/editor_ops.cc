@@ -5968,7 +5968,7 @@ Editor::quantize_regions (const RegionSelection& rs)
 		quantize_dialog = new QuantizeDialog (*this);
 	}
 
-	if (quantize_dialog->is_mapped()) {
+	if (quantize_dialog->get_mapped()) {
 		/* in progress already */
 		return;
 	}
