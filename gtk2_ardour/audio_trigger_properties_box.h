@@ -80,6 +80,9 @@ private:
 	Gtk::Label               _length_label;
 	Gtk::Label               _beat_label;
 
+	Gtk::Label               _bars_label;
+	Gtk::Label               _bars_display;
+
 	Gtk::Adjustment               _beat_adjustment;
 	Gtk::SpinButton               _beat_spinner;
 

@@ -96,6 +96,14 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	bpm_table->attach (_beat_spinner, 1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 	bpm_table->attach (_beat_label,   2, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
+	row++;
+
+	_bars_label.set_text(_("Length in Bars:"));
+	_bars_label.set_alignment (1.0, 0.5);
+	bpm_table->attach (_bars_label,   0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_bars_display.set_alignment (0.0, 0.5);
+	bpm_table->attach (_bars_display, 1, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+
 	ArdourWidgets::Frame* eTempoBox = manage (new ArdourWidgets::Frame);
 	eTempoBox->set_label("Stretch Options");
 	eTempoBox->set_name("EditorDark");
@@ -210,13 +218,18 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& pc)
 
 	if ( pc.contains (Properties::tempo_meter) || pc.contains (Properties::follow_length)) {
 
-		char buf[32];
+		char buf[64];
 		sprintf(buf, "%3.2f", at->segment_tempo ());
 		_abpm_label.set_text (buf);
 
 		ArdourWidgets::set_tooltip (_abpm_label, string_compose ("Clip Tempo, used for stretching.  Estimated tempo (from file) was: %1", trigger->estimated_tempo ()));
 
-		_beat_adjustment.set_value(at->segment_beatcnt());
+		int beats = at->segment_beatcnt();
+
+		_beat_adjustment.set_value(beats);
+
+		sprintf(buf, "%3.2f(4/4) - %3.2f(3/4)", (double)beats/4.0, (double)beats/3.0);
+		_bars_display.set_text(buf);
 	}
 
 	if (pc.contains (Properties::stretch_mode) || pc.contains (Properties::stretchable)) {
