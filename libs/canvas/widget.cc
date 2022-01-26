@@ -127,8 +127,7 @@ Widget::compute_bounding_box () const
 	if (_allocation) {
 		_bounding_box = Rect (0, 0, _allocation.width(), _allocation.height());
 	} else {
-		GtkRequisition req = { 0, 0 };
-		_widget.size_request (req);
+		GtkRequisition req = _widget.size_request ();
 		_bounding_box = Rect (0., 0., req.width, req.height);
 	}
 
