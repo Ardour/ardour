@@ -1013,7 +1013,7 @@ AddRouteDialog::refill_channel_setups ()
 void
 AddRouteDialog::add_route_group (RouteGroup* g)
 {
-	route_group_combo.insert_text (3, g->name ());
+	route_group_combo.insert (3, g->name ());
 }
 
 RouteGroup*
