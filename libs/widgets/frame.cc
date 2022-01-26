@@ -97,7 +97,7 @@ Frame::on_size_request (GtkRequisition* r)
 	}
 
 	if (_w) {
-		_w->size_request (*r);
+		*r = _w->size_request ();
 	} else {
 		r->width  = 0;
 		r->height = 0;

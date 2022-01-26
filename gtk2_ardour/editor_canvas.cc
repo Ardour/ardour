@@ -331,11 +331,11 @@ Editor::reset_controls_layout_width ()
 	GtkRequisition req = { 0, 0 };
 	gint w;
 
-	edit_controls_vbox.size_request (req);
+	req = edit_controls_vbox.size_request ();
 	w = req.width;
 
 	if (_group_tabs->get_visible()) {
-		_group_tabs->size_request (req);
+		req = _group_tabs->size_request ();
 		w += req.width;
 	}
 

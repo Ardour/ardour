@@ -1138,7 +1138,7 @@ AUPluginUI::parent_cocoa_window ()
 	resizable = false;
 
 	if (toplevel && toplevel->is_toplevel()) {
-		toplevel->size_request (req);
+		req = toplevel->size_request ();
 		toplevel->set_size_request (req.width, req.height);
 		dynamic_cast<Gtk::Window*>(toplevel)->set_resizable (false);
 	}
