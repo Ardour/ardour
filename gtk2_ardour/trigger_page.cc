@@ -128,6 +128,7 @@ TriggerPage::TriggerPage ()
 
 	_sidebar_vbox.pack_start (_sidebar_notebook);
 	add_sidebar_page (_("Clips"), _trigger_clip_picker);
+	add_sidebar_page (_("Tracks"), _trigger_route_list.widget ());
 	add_sidebar_page (_("Sources"), _trigger_source_list.widget ());
 	add_sidebar_page (_("Regions"), _trigger_region_list.widget ());
 
@@ -262,6 +263,7 @@ TriggerPage::set_session (Session* s)
 	_master.set_session (s);
 	_trigger_source_list.set_session (s);
 	_trigger_region_list.set_session (s);
+	_trigger_route_list.set_session (s);
 
 	if (!_session) {
 		return;

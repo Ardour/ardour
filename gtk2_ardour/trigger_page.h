@@ -41,6 +41,7 @@
 #include "slot_properties_box.h"
 #include "trigger_clip_picker.h"
 #include "trigger_region_list.h"
+#include "trigger_route_list.h"
 #include "trigger_source_list.h"
 #include "trigger_master.h"
 
@@ -109,6 +110,7 @@ private:
 	TriggerClipPicker    _trigger_clip_picker;
 	TriggerSourceList    _trigger_source_list;
 	TriggerRegionList    _trigger_region_list;
+	TriggerRouteList     _trigger_route_list;
 
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
