@@ -88,7 +88,7 @@ CairoWidget::use_nsglview ()
 {
 	assert (!_nsglview);
 	assert (!_canvas_widget);
-	assert (!is_realized());
+	assert (!get_realized());
 #ifdef ARDOUR_CANVAS_NSVIEW_TAG // patched gdkquartz.h
 	_nsglview = Gtkmm2ext::nsglview_create (this);
 #endif

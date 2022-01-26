@@ -495,7 +495,7 @@ Meterbridge::get_state (void)
 {
 	XMLNode* node = new XMLNode ("Meterbridge");
 
-	if (is_realized() && _visible) {
+	if (get_realized() && _visible) {
 		get_window_pos_and_size ();
 	}
 

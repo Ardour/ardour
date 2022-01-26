@@ -247,7 +247,7 @@ InputPortMonitor::InputScope::InputScope (samplecnt_t rate, int l, int g, Orient
 void
 InputPortMonitor::InputScope::dpi_reset ()
 {
-	if (is_realized ()) {
+	if (get_realized ()) {
 		queue_resize ();
 	}
 }
@@ -453,7 +453,7 @@ InputPortMonitor::EventMeter::dpi_reset ()
 	_layout->get_pixel_size (_length, _extent);
 	_extent += 2;
 	_length += 2;
-	if (is_realized ()) {
+	if (get_realized ()) {
 		queue_resize ();
 	}
 }
@@ -562,7 +562,7 @@ InputPortMonitor::EventMonitor::dpi_reset ()
 	_layout->get_pixel_size (_width, _height);
 	_width += 2;
 	_height += 2;
-	if (is_realized ()) {
+	if (get_realized ()) {
 		queue_resize ();
 	}
 }
