@@ -140,7 +140,7 @@ MiniTimeline::dpi_changed ()
 {
 	calculate_time_width ();
 
-	if (is_realized()) {
+	if (get_realized()) {
 		queue_resize ();
 	}
 }

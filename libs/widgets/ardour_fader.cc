@@ -385,7 +385,7 @@ ArdourFader::on_size_allocate (Gtk::Allocation& alloc)
 		_span = alloc.get_width ();
 	}
 
-	if (is_realized() && ((old_girth != _girth) || (old_span != _span))) {
+	if (get_realized() && ((old_girth != _girth) || (old_span != _span))) {
 		/* recreate patterns in case we've changed size */
 		create_patterns ();
 	}

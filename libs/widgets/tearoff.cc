@@ -307,7 +307,7 @@ TearOff::set_state (const XMLNode& node)
 	node.get_property (X_("xpos"), own_window_xpos);
 	node.get_property (X_("ypos"), own_window_ypos);
 
-	if (own_window.is_realized ()) {
+	if (own_window.get_realized ()) {
 		own_window.set_default_size (own_window_width, own_window_height);
 		own_window.move (own_window_xpos, own_window_ypos);
 	}

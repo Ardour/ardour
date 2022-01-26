@@ -171,7 +171,7 @@ Frame::on_style_changed (const Glib::RefPtr<Gtk::Style>& style)
 	if (_layout && (_layout->get_font_description ().gobj () == 0 || _layout->get_font_description () != new_style->get_font ())) {
 		_layout->set_font_description (new_style->get_font ());
 		queue_resize ();
-	} else if (is_realized ()) {
+	} else if (get_realized ()) {
 		queue_resize ();
 	}
 }
