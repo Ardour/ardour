@@ -469,7 +469,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (width - height, 0); // right side of the widget
-		draw_follow_icon (context, trigger ()->follow_action (0), height, scale);
+		draw_follow_icon (context, trigger ()->follow_action0 (), height, scale);
 		context->set_identity_matrix ();
 	}
 }
@@ -495,7 +495,7 @@ TriggerEntry::on_trigger_changed (PropertyChange const& change)
 	interesting_stuff.add (ARDOUR::Properties::follow_action1);
 	interesting_stuff.add (ARDOUR::Properties::follow_action_probability);
 	interesting_stuff.add (ARDOUR::Properties::follow_count);
-	interesting_stuff.add (ARDOUR::Properties::isolated);
+	interesting_stuff.add (ARDOUR::Properties::cue_isolated);
 	interesting_stuff.add (ARDOUR::Properties::running);
 
 	if (change.contains (interesting_stuff)) {

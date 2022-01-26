@@ -411,7 +411,7 @@ SlotPropertyTable::velocity_adjusted ()
 		return;
 	}
 
-	trigger()->set_midi_velocity_effect (_velocity_adjustment.get_value());
+	trigger()->set_velocity_effect (_velocity_adjustment.get_value());
 }
 
 void
@@ -571,7 +571,7 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 		_legato_button.set_active_state (trigger()->legato() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
-	if (pc.contains (Properties::isolated)) {
+	if (pc.contains (Properties::cue_isolated)) {
 		_isolate_button.set_active_state (trigger()->cue_isolated() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
@@ -580,10 +580,10 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (pc.contains (Properties::follow_action0)) {
-		_follow_left.set_text (follow_action_to_string (trigger()->follow_action (0)));
+		_follow_left.set_text (follow_action_to_string (trigger()->follow_action0 ()));
 
 		/* set widget sensitivity based on 'left' follow action */
-		bool follow_widgets_sensitive = trigger()->follow_action (0).type != FollowAction::None;
+		bool follow_widgets_sensitive = trigger()->follow_action0 ().type != FollowAction::None;
 		if (follow_widgets_sensitive) {
 			_follow_right.set_sensitive(true);
 			_follow_count_spinner.set_sensitive(true);
@@ -610,11 +610,11 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (pc.contains (Properties::follow_action1)) {
-		_follow_right.set_text (follow_action_to_string (trigger()->follow_action (1)));
+		_follow_right.set_text (follow_action_to_string (trigger()->follow_action1 ()));
 	}
 
 	if (pc.contains (Properties::velocity_effect)) {
-		_velocity_adjustment.set_value (trigger()->midi_velocity_effect());
+		_velocity_adjustment.set_value (trigger()->velocity_effect());
 	}
 
 	if (pc.contains (Properties::follow_action_probability)) {
