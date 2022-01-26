@@ -1170,8 +1170,10 @@ AudioTrigger::estimate_tempo ()
 
 		std::cerr << "Determine tempo for " << name() << std::endl;
 
-		if (((bi = str.find ("bpm")) != string::npos) ||
-		    ((bi = str.find ("BPM")) != string::npos)) {
+		if (((bi = str.find (" bpm")) != string::npos) ||
+		    ((bi = str.find ("bpm")) != string::npos)  ||
+		    ((bi = str.find (" BPM")) != string::npos) ||
+		    ((bi = str.find ("BPM")) != string::npos)  ){
 
 			string sub (str.substr (0, bi));
 
