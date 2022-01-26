@@ -356,7 +356,7 @@ Editor::draw_meter_marks ()
 		}
 	}
 
-	if ((mm == tempo_marks.end()) && (m != meters.end())) {
+	if ((mm == meter_marks.end()) && (m != meters.end())) {
 		while (m != meters.end()) {
 			make_meter_marker (&*m);
 			++m;
@@ -410,7 +410,7 @@ Editor::draw_bbt_marks ()
 		}
 	}
 
-	if ((mm == tempo_marks.end()) && (m != bartimes.end())) {
+	if ((mm == bbt_marks.end()) && (m != bartimes.end())) {
 		while (m != bartimes.end()) {
 			make_meter_marker (&*m);
 			++m;
