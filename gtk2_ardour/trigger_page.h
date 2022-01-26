@@ -96,7 +96,6 @@ private:
 	Gtkmm2ext::Bindings* bindings;
 	Gtk::VBox            _content;
 
-	ArdourWidgets::VPane _pane;
 	ArdourWidgets::HPane _pane_upper;
 	Gtk::HBox            _strip_group_box;
 	Gtk::ScrolledWindow  _strip_scroller;

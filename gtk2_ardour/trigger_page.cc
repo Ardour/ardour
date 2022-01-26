@@ -157,14 +157,11 @@ TriggerPage::TriggerPage ()
 	_parameter_box.pack_start (*table);
 
 	/* Top-level Layout */
-	_pane.add (_pane_upper);
-	_pane.add (_parameter_box);
-
-	_content.pack_start (_pane, true, true);
+	_content.pack_start (_pane_upper, true, true);
+	_content.pack_start (_parameter_box, false, false);
 	_content.show ();
 
 	/* Show all */
-	_pane.show ();
 	_pane_upper.show ();
 	_strip_group_box.show ();
 	_strip_scroller.show ();
@@ -187,11 +184,6 @@ TriggerPage::TriggerPage ()
 	/* Restore pane state */
 	float          fract;
 	XMLNode const* settings = ARDOUR_UI::instance ()->trigger_page_settings ();
-	if (!settings || !settings->get_property ("triggerpage-vpane-pos", fract) || fract > 1.0) {
-		fract = 0.75f;
-	}
-	_pane.set_divider (0, fract);
-
 	if (!settings || !settings->get_property ("triggerpage-hpane-pos", fract) || fract > 1.0) {
 		fract = 0.75f;
 	}
@@ -232,7 +224,6 @@ TriggerPage::get_state ()
 	XMLNode* node = new XMLNode (X_("TriggerPage"));
 	node->add_child_nocopy (Tabbable::get_state ());
 
-	node->set_property (X_("triggerpage-vpane-pos"), _pane.get_divider ());
 	node->set_property (X_("triggerpage-hpane-pos"), _pane_upper.get_divider ());
 	node->set_property (X_("triggerpage-sidebar-page"), _sidebar_notebook.get_current_page ());
 
