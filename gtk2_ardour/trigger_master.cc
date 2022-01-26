@@ -243,7 +243,6 @@ TriggerMaster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Cont
 	}
 
 	float width  = _rect.width ();
-	float height = _rect.height ();
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 
@@ -381,9 +380,6 @@ TriggerMaster::context_menu ()
 	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
 	b = BBT_Offset (-1, 0, 0);
 	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &TriggerMaster::set_all_quantization), b)));
-
-	Menu*     load_menu = manage (new Menu);
-	MenuList& loitems (load_menu->items ());
 
 	items.push_back (CheckMenuElem (_("Toggle Monitor Thru"), sigc::mem_fun (*this, &TriggerMaster::toggle_thru)));
 	if (_triggerbox->pass_thru ()) {
@@ -593,7 +589,6 @@ CueMaster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context>
 	}
 
 	float width  = _rect.width ();
-	float height = _rect.height ();
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 
@@ -668,7 +663,6 @@ CueMaster::_size_allocate (ArdourCanvas::Rect const& alloc)
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 	_poly_margin       = 2 * scale;
 
-	const Distance width  = _rect.width ();
 	const Distance height = _rect.height ();
 
 	_poly_size = height - (_poly_margin * 2);
@@ -679,9 +673,6 @@ CueMaster::_size_allocate (ArdourCanvas::Rect const& alloc)
 	p.push_back (Duple (_poly_size, _poly_size));
 	p.push_back (Duple (_poly_size, _poly_margin));
 	stop_shape->set (p);
-
-	float tleft  = _poly_size + (_poly_margin * 3);
-	float twidth = width - _poly_size - (_poly_margin * 3);
 }
 
 void
@@ -755,9 +746,6 @@ CueMaster::context_menu ()
 	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_quantization), b)));
 	b = BBT_Offset (-1, 0, 0);
 	qitems.push_back (MenuElem (TriggerUI::quantize_length_to_string (b), sigc::bind (sigc::mem_fun (*this, &CueMaster::set_all_quantization), b)));
-
-	Menu*     load_menu = manage (new Menu);
-	MenuList& loitems (load_menu->items ());
 
 //	items.push_back (CheckMenuElem (_("Toggle Monitor Thru"), sigc::mem_fun (*this, &CueMaster::toggle_thru)));
 //	if (_triggerbox->pass_thru ()) {
