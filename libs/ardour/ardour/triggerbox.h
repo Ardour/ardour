@@ -115,8 +115,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_stretchable (bool yn);
 	bool stretchable () const { return _stretchable; }
 
-	void set_scene_isolated (bool isolate);
-	bool scene_isolated () const { return _isolated; }
+	void set_cue_isolated (bool isolate);
+	bool cue_isolated () const { return _cue_isolated; }
 
 	/* Calling ::bang() will cause this Trigger to be placed in its owning
 	   TriggerBox's queue.
@@ -174,7 +174,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_launch_style (LaunchStyle);
 
 	FollowAction follow_action (uint32_t n) const { assert (n < 2); return n ? _follow_action1 : _follow_action0; }
-	void set_follow_action (FollowAction, uint32_t n);
+	void set_follow_action0 (FollowAction);
+	void set_follow_action1 (FollowAction);
 
 	color_t  color() const { return _color; }
 	void set_color (color_t);
@@ -298,13 +299,72 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<Temporal::BBT_Offset> _follow_length;
 	PBD::Property<bool>                 _use_follow_length;
 	PBD::Property<bool>                 _legato;
-	PBD::Property<std::string>          _name;
 	PBD::Property<gain_t>               _gain;
 	PBD::Property<float>                _midi_velocity_effect;
 	PBD::Property<bool>                 _stretchable;
-	PBD::Property<bool>                 _isolated;
-	PBD::Property<color_t>              _color;
+	PBD::Property<bool>                 _cue_isolated;
 	PBD::Property<StretchMode>          _stretch_mode;
+
+	/* Properties that are not CAS-updated at retrigger */
+
+	PBD::Property<std::string>          _name;
+	PBD::Property<color_t>              _color;
+
+  public:
+	/* this is positioner here so that we can easily keep it in sync
+	   with the properties list above.
+	*/
+	struct UIState {
+		std::atomic<int> generation; /* used for CAS */
+
+		LaunchStyle launch_style;
+		FollowAction follow_action0;
+		FollowAction follow_action1;
+		int follow_action_probability; /* 1 .. 100 */
+		uint32_t follow_count;
+		Temporal::BBT_Offset quantization;
+		Temporal::BBT_Offset follow_length;
+		bool use_follow_length;
+		bool legato;
+		gain_t gain;
+		float midi_velocity_effect;
+		bool stretchable;
+		bool cue_isolated;
+		StretchMode stretch_mode;
+
+		UIState() : generation (0) {}
+
+		UIState& operator= (UIState const & other) {
+
+			/* we do not copy generation */
+
+			generation = 0;
+
+			launch_style = other.launch_style;
+			follow_action0 = other.follow_action0;
+			follow_action1 = other.follow_action1;
+			follow_action_probability = other.follow_action_probability;
+			follow_count = other.follow_count;
+			quantization = other.quantization;
+			follow_length = other.follow_length;
+			use_follow_length = other.use_follow_length;
+			legato = other.legato;
+			gain = other.gain;
+			midi_velocity_effect = other.midi_velocity_effect;
+			stretchable = other.stretchable;
+			cue_isolated = other.cue_isolated;
+			stretch_mode = other.stretch_mode;
+
+			return *this;
+		}
+	};
+
+	UIState ui_state;
+
+  protected:
+	void copy_ui_state (UIState&);
+	void copy_to_ui_state ();
+	void update_properties ();
 
 	bool cue_launched;
 

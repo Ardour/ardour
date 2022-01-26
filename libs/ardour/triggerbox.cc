@@ -122,13 +122,13 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _follow_length (Properties::follow_length, Temporal::BBT_Offset (1, 0, 0))
 	, _use_follow_length (Properties::use_follow_length, false)
 	, _legato (Properties::legato, false)
-	, _name (Properties::name, "")
 	, _gain (Properties::gain, 1.0)
 	, _midi_velocity_effect (Properties::velocity_effect, 0.)
 	, _stretchable (Properties::stretchable, true)
-	, _isolated (Properties::isolated, false)
-	, _color (Properties::color, 0xBEBEBEFF)
+	, _cue_isolated (Properties::isolated, false)
 	, _stretch_mode (Properties::stretch_mode, Trigger::Crisp)
+	, _name (Properties::name, "")
+	, _color (Properties::color, 0xBEBEBEFF)
 	, cue_launched (false)
 	, _estimated_tempo (0.)
 	, _segment_tempo (0.)
@@ -150,15 +150,120 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	add_property (_gain);
 	add_property (_midi_velocity_effect);
 	add_property (_stretchable);
-	add_property (_isolated);
+	add_property (_cue_isolated);
 	add_property (_color);
 	add_property (_stretch_mode);
+
+	copy_to_ui_state ();
 }
 
 void
 Trigger::request_trigger_delete (Trigger* t)
 {
 	TriggerBox::worker->request_delete_trigger (t);
+}
+
+void
+Trigger::copy_ui_state (UIState& uis)
+{
+	int g = ui_state.generation.load ();
+
+	do { uis = ui_state; } while (!ui_state.generation.compare_exchange_strong (g, g+1));
+}
+
+void
+Trigger::update_properties ()
+{
+	UIState uis;
+
+	copy_ui_state (uis);
+	PropertyChange pc;
+
+	/* ONLY CAS-set properties should appear here */
+
+	if (_launch_style != uis.launch_style) {
+		_launch_style = uis.launch_style;
+		pc.add (Properties::launch_style);
+	}
+	if (_follow_action0 != uis.follow_action0) {
+		_follow_action0 = uis.follow_action0;
+		pc.add (Properties::follow_action0);
+	}
+	if (_follow_action1 != uis.follow_action1) {
+		_follow_action1 = uis.follow_action1;
+		pc.add (Properties::follow_action1);
+	}
+	if (_follow_action_probability != uis.follow_action_probability) {
+		_follow_action_probability = uis.follow_action_probability;
+		pc.add (Properties::follow_action_probability);
+	}
+	if (_follow_count != uis.follow_count) {
+		_follow_count = uis.follow_count;
+		pc.add (Properties::follow_count);
+	}
+	if (_quantization != uis.quantization) {
+		_quantization = uis.quantization;
+		pc.add (Properties::quantization);
+	}
+	if (_follow_length != uis.follow_length) {
+		_follow_length = uis.follow_length;
+		pc.add (Properties::follow_length);
+	}
+	if (_use_follow_length != uis.use_follow_length) {
+		_use_follow_length = uis.use_follow_length;
+		pc.add (Properties::use_follow_length);
+	}
+	if (_legato != uis.legato) {
+		_legato = uis.legato;
+		pc.add (Properties::legato);
+	}
+	if (_gain != uis.gain) {
+		_gain = uis.gain;
+		pc.add (Properties::gain);
+	}
+	if (_midi_velocity_effect != uis.midi_velocity_effect) {
+		_midi_velocity_effect = uis.midi_velocity_effect;
+		pc.add (Properties::velocity_effect);
+	}
+	if (_stretchable != uis.stretchable) {
+		_stretchable = uis.stretchable;
+		pc.add (Properties::stretchable);
+	}
+	if (_cue_isolated != uis.cue_isolated) {
+		_cue_isolated = uis.cue_isolated;
+		pc.add (Properties::isolated);
+	}
+	if (_stretch_mode != uis.stretch_mode) {
+		_stretch_mode = uis.stretch_mode;
+		pc.add (Properties::stretch_mode);
+	}
+
+	if (pc != PropertyChange()) {
+
+		PropertyChanged (pc); /* EMIT SIGNAL */
+		_box.session().set_dirty ();
+	}
+}
+
+void
+Trigger::copy_to_ui_state ()
+{
+	/* usable only at object creation */
+
+	ui_state.launch_style = _launch_style;
+	ui_state.follow_action0 = _follow_action0;
+	ui_state.follow_action1 = _follow_action1;
+	ui_state.follow_action_probability = _follow_action_probability;
+	ui_state.follow_count = _follow_count;
+	ui_state.quantization = _quantization;
+	ui_state.follow_length = _follow_length;
+	ui_state.use_follow_length = _use_follow_length;
+	ui_state.legato = _legato;
+	ui_state.gain = _gain;
+	ui_state.midi_velocity_effect = _midi_velocity_effect;
+	ui_state.stretchable = _stretchable;
+	ui_state.cue_isolated = _cue_isolated;
+	ui_state.stretch_mode = _stretch_mode;
 }
 
 void
@@ -184,53 +289,43 @@ Trigger::will_not_follow () const
 		(_follow_action0.val().type == FollowAction::None && _follow_action1.val().type == FollowAction::None);
 }
 
-void
-Trigger::set_name (std::string const & str)
-{
-	if (_name == str) {
-		return;
-	}
-
-	_name = str;
-	PropertyChanged (Properties::name);
-	_box.session().set_dirty();
+#define TRIGGER_CAS_SET(name,type) \
+void \
+Trigger::set_ ## name (type val) \
+{ \
+	int g = ui_state.generation.load(); \
+	do { ui_state.name = val; } while (!ui_state.generation.compare_exchange_strong (g, g+1)); \
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 property cas-set: %2\n", _ ## name.property_name()));  \
 }
 
-void
-Trigger::set_scene_isolated (bool i)
-{
-	if (_isolated == i) {
-		return;
-	}
 
-	_isolated = i;
-	PropertyChanged (ARDOUR::Properties::isolated);
-	_box.session().set_dirty();
+TRIGGER_CAS_SET (cue_isolated,bool)
+TRIGGER_CAS_SET (stretchable, bool)
+TRIGGER_CAS_SET (gain, gain_t)
+TRIGGER_CAS_SET (midi_velocity_effect, float)
+TRIGGER_CAS_SET (follow_count, uint32_t)
+TRIGGER_CAS_SET (follow_action0, FollowAction)
+TRIGGER_CAS_SET (follow_action1, FollowAction)
+TRIGGER_CAS_SET (launch_style, LaunchStyle)
+TRIGGER_CAS_SET (follow_length, Temporal::BBT_Offset const &)
+TRIGGER_CAS_SET (use_follow_length, bool)
+TRIGGER_CAS_SET (legato, bool)
+TRIGGER_CAS_SET (follow_action_probability, int)
+TRIGGER_CAS_SET (quantization, Temporal::BBT_Offset const &)
+
+#define TRIGGER_SET(name,type) \
+void \
+Trigger::set_ ## name (type val) \
+{ \
+	if (_ ## name == val) { return; } \
+	_ ## name = val; \
+	PropertyChanged (Properties::name); /* EMIT SIGNAL */ \
+	_box.session().set_dirty (); \
 }
 
-void
-Trigger::set_color (color_t c)
-{
-	if (_color == c) {
-		return;
-	}
+TRIGGER_SET (name, std::string const &)
+TRIGGER_SET (color, color_t)
 
-	_color = c;
-	PropertyChanged (ARDOUR::Properties::color);
-	_box.session().set_dirty();
-}
-
-void
-Trigger::set_stretchable (bool s)
-{
-	if (_stretchable == s) {
-		return;
-	}
-
-	_stretchable = s;
-	PropertyChanged (ARDOUR::Properties::stretchable);
-	_box.session().set_dirty();
-}
 
 void
 Trigger::set_ui (void* p)
@@ -258,63 +353,6 @@ Trigger::unbang ()
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("un-bang on %1\n", _index));
 }
 
-void
-Trigger::set_gain (gain_t g)
-{
-	if (_gain == g) {
-		return;
-	}
-
-	_gain = g;
-	PropertyChanged (Properties::gain);
-	_box.session().set_dirty();
-}
-
-void
-Trigger::set_midi_velocity_effect (float mve)
-{
-	if (_midi_velocity_effect == mve) {
-		return;
-	}
-
-	_midi_velocity_effect = std::min (1.f, std::max (0.f, mve));
-	PropertyChanged (Properties::velocity_effect);
-	_box.session().set_dirty();
-}
-
-void
-Trigger::set_follow_count (uint32_t n)
-{
-	if (_follow_count == n) {
-		return;
-	}
-
-	_follow_count = n;
-	PropertyChanged (Properties::follow_count);
-	_box.session().set_dirty();
-}
-
-void
-Trigger::set_follow_action (FollowAction f, uint32_t n)
-{
-	assert (n < 2);
-
-	if (n == 0) {
-		if (_follow_action0 == f) {
-			return;
-		}
-		_follow_action0 = f;
-		PropertyChanged (Properties::follow_action0);
-	} else {
-		if (_follow_action1 == f) {
-			return;
-		}
-		_follow_action1 = f;
-		PropertyChanged (Properties::follow_action1);
-	}
-	_box.session().set_dirty();
-}
-
 Trigger::LaunchStyle
 Trigger::launch_style () const
 {
@@ -322,19 +360,6 @@ Trigger::launch_style () const
 		return OneShot;
 	}
 	return _launch_style;
-}
-
-void
-Trigger::set_launch_style (LaunchStyle l)
-{
-	if (_launch_style == l) {
-		return;
-	}
-
-	_launch_style = l;
-
-	PropertyChanged (Properties::launch_style);
-	_box.session().set_dirty();
 }
 
 XMLNode&
@@ -382,73 +407,15 @@ Trigger::set_state (const XMLNode& node, int version)
 	node.get_property (X_("index"), _index);
 	set_values (node);
 
+	copy_to_ui_state ();
+
 	return 0;
-}
-
-void
-Trigger::set_follow_length (Temporal::BBT_Offset const & bbo)
-{
-	if (_use_follow_length == bbo) {
-		return;
-	}
-	_follow_length = bbo;
-	PropertyChanged (Properties::use_follow_length);
-	_box.session().set_dirty();
-}
-
-void
-Trigger::set_use_follow_length (bool ufl)
-{
-	if (_use_follow_length == ufl) {
-		return;
-	}
-	_use_follow_length = ufl;
-	PropertyChanged (Properties::use_follow_length);
-	_box.session().set_dirty();
 }
 
 bool
 Trigger::internal_use_follow_length () const
 {
 	return (_follow_action0.val().type != FollowAction::None) && _use_follow_length;
-}
-
-void
-Trigger::set_legato (bool yn)
-{
-	if (_legato == yn) {
-		return;
-	}
-	_legato = yn;
-	PropertyChanged (Properties::legato);
-	_box.session().set_dirty();
-}
-
-void
-Trigger::set_follow_action_probability (int n)
-{
-	if (_follow_action_probability == n) {
-		return;
-	}
-
-	n = std::min (100, n);
-	n = std::max (0, n);
-
-	_follow_action_probability = n;
-	PropertyChanged (Properties::follow_action_probability);
-	_box.session().set_dirty();
-}
-
-void
-Trigger::set_quantization (Temporal::BBT_Offset const & q)
-{
-	if (_quantization == q) {
-		return;
-	}
-
-	_quantization = q;
-	PropertyChanged (Properties::quantization);
-	_box.session().set_dirty();
 }
 
 void
@@ -1418,6 +1385,8 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 void
 AudioTrigger::retrigger ()
 {
+	update_properties ();
+
 	read_index = _start_offset + _legato_offset;
 	process_index = 0;
 	retrieved = 0;
@@ -1960,6 +1929,8 @@ MIDITrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 void
 MIDITrigger::retrigger ()
 {
+	update_properties ();
+
 	/* XXX need to deal with bar offsets */
 	// const Temporal::BBT_Offset o = _start_offset + _legato_offset;
 	iter = model->begin();
@@ -2431,7 +2402,11 @@ void
 TriggerBox::set_all_follow_action (ARDOUR::FollowAction const & fa, uint32_t fa_n)
 {
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
-		all_triggers[n]->set_follow_action (fa, fa_n);
+		if (fa_n == 0) {
+			all_triggers[n]->set_follow_action0 (fa);
+		} else {
+			all_triggers[n]->set_follow_action1 (fa);
+		}
 	}
 }
 
@@ -2739,7 +2714,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (_active_scene >= 0) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("tb noticed active scene %1\n", _active_scene));
 		if (_active_scene < (int32_t) all_triggers.size()) {
-			if (!all_triggers[_active_scene]->scene_isolated()) {
+			if (!all_triggers[_active_scene]->cue_isolated()) {
 				all_triggers[_active_scene]->bang ();
 			}
 		}
