@@ -213,15 +213,15 @@ ExportVideoDialog::apply_state (TimeSelection& tme, bool range)
 	sampleoffset_t av_offset = ARDOUR_UI::instance ()->video_timeline->get_offset ();
 
 	insnd_combo.remove_all ();
-	insnd_combo.append_text (_("from session start marker to session end marker"));
+	insnd_combo.append (_("from session start marker to session end marker"));
 
 	if (av_offset < 0) {
-		insnd_combo.append_text (_("from 00:00:00:00 to the video end"));
+		insnd_combo.append (_("from 00:00:00:00 to the video end"));
 	} else {
-		insnd_combo.append_text (_("from video start to video end"));
+		insnd_combo.append (_("from video start to video end"));
 	}
 	if (!_export_range.empty ()) {
-		insnd_combo.append_text (_("Selected range")); // TODO show _export_range.start() -> _export_range.end_sample()
+		insnd_combo.append (_("Selected range")); // TODO show _export_range.start() -> _export_range.end_sample()
 	}
 	if (range) {
 		insnd_combo.set_active (2);

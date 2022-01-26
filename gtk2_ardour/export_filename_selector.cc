@@ -46,9 +46,9 @@ ExportFilenameSelector::ExportFilenameSelector ()
 {
 	include_label.set_markup (_("Build filename(s) from these components:"));
 
-	session_snap_name.append_text (_("No Name"));
-	session_snap_name.append_text (_("Session Name"));
-	session_snap_name.append_text (_("Snapshot Name"));
+	session_snap_name.append (_("No Name"));
+	session_snap_name.append (_("Session Name"));
+	session_snap_name.append (_("Snapshot Name"));
 	session_snap_name.set_active (0);
 
 	pack_start (path_hbox, false, false, 12);

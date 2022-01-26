@@ -159,10 +159,10 @@ using the program.</span> \
 	Label* bazmatic = manage (new Label);
 	bazmatic->set_markup (_("<small><i>This can later be changed in Preferences &gt; Appearance.</i></small>"));
 
-	ui_font_scale.append_text (_("100%"));
-	ui_font_scale.append_text (_("150%"));
-	ui_font_scale.append_text (_("200%"));
-	ui_font_scale.append_text (_("250%"));
+	ui_font_scale.append (_("100%"));
+	ui_font_scale.append (_("150%"));
+	ui_font_scale.append (_("200%"));
+	ui_font_scale.append (_("250%"));
 	ui_font_scale.set_active_text (_("100%"));
 
 	HBox* hbox = manage (new HBox);

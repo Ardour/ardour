@@ -87,8 +87,8 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	docroot_entry.set_width_chars(38);
 	docroot_entry.set_text(video_get_docroot (Config));
 
-	listenaddr_combo.append_text("127.0.0.1");
-	listenaddr_combo.append_text("0.0.0.0");
+	listenaddr_combo.append("127.0.0.1");
+	listenaddr_combo.append("0.0.0.0");
 #ifdef __APPLE__
 	/* Note: on OSX icsd is not able to bind to IPv4 localhost,
 	 * except on bigsur where 0.0.0.0 works

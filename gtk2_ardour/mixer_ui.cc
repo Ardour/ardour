@@ -256,9 +256,9 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_model->signal_row_has_child_toggled().connect (sigc::mem_fun (*this, &Mixer_UI::sync_treeview_favorite_ui_state));
 	favorite_plugins_model->signal_row_deleted().connect (sigc::mem_fun (*this, &Mixer_UI::favorite_plugins_deleted));
 
-	favorite_plugins_mode_combo.append_text (_("Favorite Plugins"));
-	favorite_plugins_mode_combo.append_text (_("Recent Plugins"));
-	favorite_plugins_mode_combo.append_text (_("Top-10 Plugins"));
+	favorite_plugins_mode_combo.append (_("Favorite Plugins"));
+	favorite_plugins_mode_combo.append (_("Recent Plugins"));
+	favorite_plugins_mode_combo.append (_("Top-10 Plugins"));
 	favorite_plugins_mode_combo.set_active_text (_("Favorite Plugins"));
 	favorite_plugins_mode_combo.signal_changed().connect (sigc::mem_fun (*this, &Mixer_UI::plugin_list_mode_changed));
 

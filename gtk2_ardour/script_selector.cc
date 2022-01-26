@@ -107,13 +107,13 @@ ScriptSelector::setup_list ()
 	_script_combo.set_row_separator_func (sigc::mem_fun (*this, &ScriptSelector::script_separator));
 
 	if (_script_type == LuaScriptInfo::EditorAction) {
-		_script_combo.append_text ("Shortcut");
-		_script_combo.append_text ("--separator--");
+		_script_combo.append ("Shortcut");
+		_script_combo.append ("--separator--");
 	}
 
 	vector<string>::const_iterator i;
 	for (i = script_names.begin(); i != script_names.end(); ++i) {
-		_script_combo.append_text (*i);
+		_script_combo.append (*i);
 	}
 
 	_script_combo.set_active(0);

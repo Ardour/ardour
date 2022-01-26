@@ -148,7 +148,7 @@ MidiTracer::ports_changed ()
 	}
 
 	for (ARDOUR::PortManager::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
-		_port_combo.append_text ((*i)->name());
+		_port_combo.append ((*i)->name());
 	}
 
 	if (c.empty()) {

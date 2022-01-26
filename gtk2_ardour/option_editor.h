@@ -347,7 +347,7 @@ public:
 	void add (T e, std::string const & o)
 	{
 		_options.push_back (e);
-		_combo->append_text (o);
+		_combo->append (o);
 		/* Remove excess space.
 		 * gtk_combo_box_size_requet() does the following:
 		 * {

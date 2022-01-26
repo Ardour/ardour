@@ -52,8 +52,8 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 	tbl->set_border_width (6);
 
 	_dbfs_dbtp = manage (new Gtk::ComboBoxText);
-	_dbfs_dbtp->append_text (_("dBFS"));
-	_dbfs_dbtp->append_text (_("dBTP"));
+	_dbfs_dbtp->append (_("dBFS"));
+	_dbfs_dbtp->append (_("dBTP"));
 	_dbfs_dbtp->set_active (_last_normalize_true_peak ? 1 : 0);
 
 	_spin_peak = manage (new SpinButton (0.2, 2));
