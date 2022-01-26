@@ -132,8 +132,8 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	_display.set_headers_visible (true);
 
-	color_dialog.get_colorsel()->set_has_opacity_control (false);
-	color_dialog.get_colorsel()->set_has_palette (true);
+	color_dialog.get_color_selection()->set_has_opacity_control (false);
+	color_dialog.get_color_selection()->set_has_palette (true);
 	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
 	color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
 
@@ -268,12 +268,12 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
 	case 0:
 		c =  (*iter)[_columns.gdkcolor];
-		color_dialog.get_colorsel()->set_previous_color (c);
-		color_dialog.get_colorsel()->set_current_color (c);
+		color_dialog.get_color_selection()->set_previous_color (c);
+		color_dialog.get_color_selection()->set_current_color (c);
 
 		switch (color_dialog.run()) {
 			case RESPONSE_ACCEPT:
-				c = color_dialog.get_colorsel()->get_current_color();
+				c = color_dialog.get_color_selection()->get_current_color();
 				GroupTabs::set_group_color (group, gdk_color_to_rgba (c));
 				break;
 

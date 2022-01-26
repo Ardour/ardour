@@ -178,19 +178,19 @@ TriggerUI::trigger_cue (int32_t n)
 void
 TriggerUI::choose_color ()
 {
-	_color_dialog.get_colorsel()->set_has_opacity_control (false);
-	_color_dialog.get_colorsel()->set_has_palette (true);
+	_color_dialog.get_color_selection()->set_has_opacity_control (false);
+	_color_dialog.get_color_selection()->set_has_palette (true);
 	_color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_ACCEPT));
 	_color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
 
 	Gdk::Color c = ARDOUR_UI_UTILS::gdk_color_from_rgba(trigger()->color());
 
-	_color_dialog.get_colorsel()->set_previous_color (c);
-	_color_dialog.get_colorsel()->set_current_color (c);
+	_color_dialog.get_color_selection()->set_previous_color (c);
+	_color_dialog.get_color_selection()->set_current_color (c);
 
 	switch (_color_dialog.run()) {
 		case Gtk::RESPONSE_ACCEPT: {
-			c = _color_dialog.get_colorsel()->get_current_color();
+			c = _color_dialog.get_color_selection()->get_current_color();
 			color_t ct = ARDOUR_UI_UTILS::gdk_color_to_rgba(c);
 			trigger()->set_color(ct);
 		} break;
