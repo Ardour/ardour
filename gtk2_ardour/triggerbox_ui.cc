@@ -803,14 +803,11 @@ TriggerEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::Selecti
 		 */
 		return;
 	}
-	if (data.get_target () != "x-ardour/region.pbdid") {
+	if (data.get_target () != "x-ardour/trigger.pbdid") {
 		return;
 	}
 
-	boost::shared_ptr<Region> region = trigger ()->region ();
-	if (region) {
-		data.set (data.get_target (), region->id ().to_s ());
-	}
+	data.set (data.get_target (), trigger()->id ().to_s ());
 }
 
 /* ***************************************************** */
@@ -834,11 +831,12 @@ TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
 
 	if (!_dnd_src) {
 		std::vector<Gtk::TargetEntry> source_table;
-		source_table.push_back (Gtk::TargetEntry ("x-ardour/region.pbdid", Gtk::TARGET_SAME_APP));
+		source_table.push_back (Gtk::TargetEntry ("x-ardour/trigger.pbdid", Gtk::TARGET_SAME_APP));
 		_dnd_src = Gtk::TargetList::create (source_table);
 	}
 
 	std::vector<Gtk::TargetEntry> target_table;
+	target_table.push_back (Gtk::TargetEntry ("x-ardour/trigger.pbdid", Gtk::TARGET_SAME_APP));
 	target_table.push_back (Gtk::TargetEntry ("x-ardour/region.pbdid", Gtk::TARGET_SAME_APP));
 	target_table.push_back (Gtk::TargetEntry ("text/uri-list"));
 	target_table.push_back (Gtk::TargetEntry ("text/plain"));
@@ -930,9 +928,11 @@ TriggerBoxUI::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int, i
 	GtkCanvas* gtkcanvas = static_cast<GtkCanvas*> (canvas ());
 	std::string target = gtkcanvas->drag_dest_find_target (context, gtkcanvas->drag_dest_get_target_list ());
 
-	if (target == "x-ardour/region.pbdid") {
-		can_drop = PublicEditor::instance ().pbdid_dragged_dt == _triggerbox.data_type ();
+	if ((target == "x-ardour/region.pbdid") || (target == "x-ardour/trigger.pbdid")) {
+		can_drop &= PublicEditor::instance ().pbdid_dragged_dt == _triggerbox.data_type ();
 	}
+
+	//TODO: currently for a 'plain' list of paths we are unable to report to the user if the slot can accept it.
 
 	uint64_t n = slot_at_y (y);
 	if (n >= _slots.size ()) {
