@@ -2502,7 +2502,9 @@ TriggerBox::add_midi_sidechain ()
 		boost::shared_ptr<Port> p = _sidechain->input()->nth (0);
 
 		if (p) {
-			p->connect (Config->get_default_trigger_input_port());
+			if (!Config->get_default_trigger_input_port().empty ()) {
+				p->connect (Config->get_default_trigger_input_port());
+			}
 		} else {
 			error << _("Could not create port for trigger side-chain") << endmsg;
 		}
