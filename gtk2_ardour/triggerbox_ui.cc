@@ -988,6 +988,19 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 		return;
 	}
 
+	if (data.get_target () == "x-ardour/trigger.pbdid") {
+		PBD::ID tid (data.get_data_as_string ());
+		boost::shared_ptr<Trigger> source = _triggerbox.session().trigger_by_id (tid);
+		if (source) {
+			_triggerbox.enqueue_trigger_source(tid);
+			_triggerbox.set_from_selection (n, source->region());
+			context->drag_finish (true, false, time);
+		} else {
+			context->drag_finish (false, false, time);
+		}
+		return;
+	}
+
 	std::vector<std::string> paths;
 	if (ARDOUR_UI_UTILS::convert_drop_to_paths (paths, data)) {
 		for (std::vector<std::string>::iterator s = paths.begin (); s != paths.end (); ++s) {
