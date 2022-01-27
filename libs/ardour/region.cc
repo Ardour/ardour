@@ -1314,13 +1314,27 @@ Region::set_state (const XMLNode& node, int version)
 }
 
 int
-Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_changed, bool send)
+Region::_set_state (const XMLNode& node, int version, PropertyChange& what_changed, bool send)
 {
 	Temporal::BBT_Time bbt_time;
 
 	Stateful::save_extra_xml (node);
 
 	what_changed = set_values (node);
+
+	if (version < 7000) {
+
+		/* Older versions saved position and length as separate XML
+		 * node properties.
+		 */
+
+		samplepos_t p;
+		samplepos_t l;
+
+		if (node.get_property (X_("position"), p) && node.get_property (X_("length"), l)) {
+			_length = timecnt_t (l, timepos_t (p));
+		}
+	}
 
 	/* Regions derived from "Destructive/Tape" mode tracks in earlier
 	 * versions will have their length set to an extremely large value
