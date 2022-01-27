@@ -692,12 +692,11 @@ TriggerEntry::event (GdkEvent* ev)
 
 	switch (ev->type) {
 		case GDK_2BUTTON_PRESS:
-			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-			break;
-
 		case GDK_BUTTON_RELEASE:
-			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-			break;
+			if(_grabbed) {
+				ungrab();
+				_grabbed = false;
+			} break;
 
 		case GDK_BUTTON_PRESS:
 			if (!_drag_active) {
@@ -705,7 +704,8 @@ TriggerEntry::event (GdkEvent* ev)
 				if (bev->button == 1) {
 					_drag_start_x = bev->x;
 					_drag_start_y = bev->y;
-					gdk_pointer_grab (bev->window, false, GdkEventMask (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK), NULL, NULL, bev->time);
+					_grabbed = true;
+					grab();
 					return true;
 				} else {
 					_drag_start_x = -1;
