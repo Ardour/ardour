@@ -299,6 +299,7 @@ top = '.'
 out = 'build'
 
 children = [
+        'libs/clearlooks-newer',
         # optionally external libraries
         'libs/fluidsynth',
         'libs/hidapi',
@@ -1469,8 +1470,6 @@ int main () { __int128 x = 0; return 0; }
     if not (Options.options.dist_target == 'mingw' or Options.options.dist_target == 'msvc'):
         conf.env.append_value('LIB', 'm')
 
-    sub_config_and_use(conf, 'libs/clearlooks-newer')
-
     for i in children:
         sub_config_and_use(conf, i)
 
@@ -1627,8 +1626,6 @@ def build(bld):
         obj.target       = 'libs/ardour-avahi'
         obj.chmod        = Utils.O755
         obj.install_path = bld.env['LIBDIR']
-
-    bld.recurse('libs/clearlooks-newer')
 
     for i in children:
         bld.recurse(i)
