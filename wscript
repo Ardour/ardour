@@ -1481,7 +1481,7 @@ int main () { __int128 x = 0; return 0; }
         conf.env.append_value('LIB', 'm')
 
     for i in children:
-        sub_config_and_use(conf, i)
+        conf.recurse(i)
 
     # Fix utterly braindead FLAC include path to not smash assert.h
     conf.env['INCLUDES_FLAC'] = []

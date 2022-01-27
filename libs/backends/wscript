@@ -4,16 +4,12 @@ from waflib.extras import autowaf as autowaf
 def options(opt):
     pass
 
-def sub_config_and_use(conf, name, has_objects = True):
-    conf.recurse(name)
-    autowaf.set_local_lib(conf, name, has_objects)
-
 def configure(conf):
     autowaf.set_recursive()
 
     backends = conf.env['BACKENDS']
     for i in backends:
-        sub_config_and_use(conf, i)
+        conf.recurse(i)
 
 def build(bld):
     backends = bld.env['BACKENDS']
