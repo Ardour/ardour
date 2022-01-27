@@ -2136,6 +2136,7 @@ TriggerBoxThread* TriggerBox::worker = 0;
 CueRecords TriggerBox::cue_records (256);
 std::atomic<bool> TriggerBox::_cue_recording (false);
 PBD::Signal0<void> TriggerBox::CueRecordingChanged;
+std::string TriggerBox::_enqueued_drop_source("0");
 
 void
 TriggerBox::init ()
@@ -2205,6 +2206,15 @@ TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
 	}
 
 	t->set_region_in_worker_thread (region);
+
+	/* if we are the target of a drag&drop from another Trigger Slot, we probably want the name, color and other properties to carry over */
+	boost::shared_ptr<Trigger> source = session().trigger_by_id (PBD::ID(_enqueued_drop_source));
+	if (source) {
+		t->set_name(source->name());
+		t->set_color(source->color());
+		t->set_gain(source->gain());
+		_enqueued_drop_source = "0";
+	}
 
 	//* always preserve the launch-style and cue_isolate status. It's likely to be right, but if it's wrong the user can "see" it's wrong anyway */
 	t->set_launch_style(all_triggers[slot]->launch_style());
@@ -2302,6 +2312,11 @@ TriggerBox::trigger_by_id (PBD::ID check)
 }
 
 void
+TriggerBox::enqueue_trigger_source (PBD::ID queued)
+{
+	_enqueued_drop_source = queued.to_s ();
+}
+
 void
 TriggerBox::set_from_selection (uint32_t slot, boost::shared_ptr<Region> region)
 {

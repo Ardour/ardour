@@ -643,6 +643,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void request_reload (int32_t slot, void*);
 	void set_region (uint32_t slot, boost::shared_ptr<Region> region);
 
+	void enqueue_trigger_source (PBD::ID queued);
+
 	/* valid only within the ::run() call tree */
 	int32_t active_scene() const { return _active_scene; }
 
@@ -758,6 +760,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	static std::atomic<int> active_trigger_boxes;
 	static std::atomic<bool> _cue_recording;
+
+	static std::string _enqueued_drop_source;
 };
 
 class TriggerReference
