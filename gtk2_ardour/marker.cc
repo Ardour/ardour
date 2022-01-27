@@ -570,7 +570,6 @@ void
 ArdourMarker::set_position (timepos_t const & pos)
 {
 	unit_position = editor.sample_to_pixel (pos.samples()) - _shift;
-	cerr << "marker @ " << this << " set pos to " << unit_position << endl;
 	group->set_x_position (unit_position);
 	setup_line ();
 	_position = pos;
