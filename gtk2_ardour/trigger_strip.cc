@@ -423,6 +423,8 @@ TriggerStrip::update_sensitivity ()
 	monitor_input_button->set_sensitive (en);
 	monitor_disk_button->set_sensitive (en);
 
+	map_frozen ();
+
 #if 0
 	if (!en) {
 		end_rename (true);
