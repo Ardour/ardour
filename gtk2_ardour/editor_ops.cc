@@ -8506,6 +8506,9 @@ Editor::fit_tracks (TrackViewList & tracks)
 		}
 	}
 
+	/* apply height changes, so that scrolling works */
+	process_redisplay_track_views ();
+
 	/*
 	   set the controls_layout height now, because waiting for its size
 	   request signal handler will cause the vertical adjustment setting to fail

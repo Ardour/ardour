@@ -5601,6 +5601,22 @@ Editor::queue_redisplay_track_views ()
 }
 
 void
+Editor::process_redisplay_track_views ()
+{
+	if (_tvl_redisplay_connection.connected ()) {
+		_tvl_redisplay_connection.disconnect ();
+		redisplay_track_views ();
+	}
+}
+
+void
+Editor::redisplay_track_views_now ()
+{
+	_tvl_redisplay_connection.disconnect ();
+	redisplay_track_views ();
+}
+
+void
 Editor::resume_route_redisplay ()
 {
 	_tvl_no_redisplay = false;
@@ -5881,6 +5897,8 @@ Editor::redisplay_track_views ()
 		_tvl_redisplay_on_resume = true;
 		return false;
 	}
+
+	_tvl_redisplay_on_resume = false;
 
 	TrackViewStripableSorter cmp;
 	track_views.sort (cmp);

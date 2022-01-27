@@ -957,6 +957,9 @@ Editor::ensure_time_axis_view_is_visible (TimeAxisView const & track, bool at_to
 		return;
 	}
 
+	/* apply any pending [height] changes */
+	process_redisplay_track_views ();
+
 	/* compute visible area of trackview group, as offsets from top of
 	 * trackview group.
 	 */

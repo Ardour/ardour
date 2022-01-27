@@ -1236,8 +1236,11 @@ private:
 	TrackViewList get_tracks_for_range_action () const;
 
 	Gtk::VBox list_vpacker;
+
 	void queue_redisplay_track_views ();
-	bool redisplay_track_views ();
+	void process_redisplay_track_views ();
+	void redisplay_track_views_now ();
+	bool redisplay_track_views (); // do not call this directly, use above wrappers
 
 	bool             _tvl_no_redisplay;
 	bool             _tvl_redisplay_on_resume;
