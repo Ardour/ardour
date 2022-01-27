@@ -255,7 +255,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	tap_tempo_button.show ();
 	get_vbox()->set_spacing (6);
 	get_vbox()->pack_end (tap_tempo_button);
-	tap_tempo_button.can_focus ();
+	tap_tempo_button.set_can_focus ();
 	tap_tempo_button.grab_focus ();
 
 	set_name ("MetricDialog");
