@@ -4125,6 +4125,23 @@ Session::stripable_by_id (PBD::ID id) const
 	return boost::shared_ptr<Stripable>();
 }
 
+boost::shared_ptr<Trigger>
+Session::trigger_by_id (PBD::ID id) const
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		boost::shared_ptr<TriggerBox> box = (*i)->triggerbox();
+		if (box) {
+			TriggerPtr trigger = box->trigger_by_id(id);
+			if (trigger) {
+				return trigger;
+			}
+		}
+	}
+
+	return boost::shared_ptr<Trigger> ();
+}
+
 boost::shared_ptr<Processor>
 Session::processor_by_id (PBD::ID id) const
 {

@@ -90,6 +90,7 @@
 #include "ardour/route.h"
 #include "ardour/route_graph.h"
 #include "ardour/transport_api.h"
+#include "ardour/triggerbox.h"
 
 class XMLTree;
 class XMLNode;
@@ -1194,6 +1195,8 @@ public:
 	boost::shared_ptr<Speakers> get_speakers ();
 
 	/* Controllables */
+
+	boost::shared_ptr<ARDOUR::Trigger> trigger_by_id (PBD::ID) const;
 
 	boost::shared_ptr<Processor> processor_by_id (PBD::ID) const;
 
