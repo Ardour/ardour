@@ -695,7 +695,6 @@ TriggerEntry::event (GdkEvent* ev)
 	}
 
 	switch (ev->type) {
-		case GDK_2BUTTON_PRESS:
 		case GDK_BUTTON_RELEASE:
 			if(_grabbed) {
 				ungrab();
