@@ -27,6 +27,29 @@ def configure(conf):
         conf.check_cxx(header_name="base/Pitch.h", mandatory=True, msg="Checking for qm-dsp headers")
         conf.check_cxx(lib="qm-dsp", uselib_store="QMDSP", mandatory=True)
 
+        # Verify that qm-dsp is self-contained and that FFT transforms actually works
+        if not conf.check_cxx(msg = 'Checking qm-dsp without explicit kiss linking',
+                              features = 'cxx cxxprogram',
+                              fragment = """#include "dsp/transforms/FFT.h"\nint main(void) {\nFFT(4).process(false, nullptr, 0, nullptr, nullptr);\nFFTReal(4).forward(nullptr, nullptr, nullptr);\nreturn 0;\n}""",
+                              uselib = 'QMDSP',
+                              okmsg = 'ok',
+                              errmsg = "-lqm-dsp by itself failed",
+                              mandatory = False,
+                              ):
+            # The external qm-dsp might be built without embedded kiss - try to link with it explicitly and check again
+            conf.check_cxx(lib="kiss_fft_double", uselib_store="KISSFFT", mandatory=True)
+            conf.check_cxx(lib="kiss_fftr_double", uselib_store="KISSFFTR", mandatory=True)
+            conf.env.append_value('LIB_QMDSP', conf.env['LIB_KISSFFT'] + conf.env['LIB_KISSFFTR'])
+
+            conf.check_cxx(msg = 'Checking qm-dsp with explicit kiss linking',
+                           features = 'cxx cxxprogram',
+                           fragment = """#include "dsp/transforms/FFT.h"\nint main(void) {\nFFT(4).process(false, nullptr, 0, nullptr, nullptr);\nFFTReal(4).forward(nullptr, nullptr, nullptr);\nreturn 0;\n}""",
+                           uselib = 'QMDSP',
+                           okmsg = '-lqm-dsp needs explicit kiss linking',
+                           errmsg = "qm-dsp doesn't work, even with kiss libraries",
+                           mandatory = True,
+                           )
+
 def build(bld):
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         return
