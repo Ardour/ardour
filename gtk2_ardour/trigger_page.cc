@@ -451,9 +451,20 @@ TriggerPage::remove_route (TriggerStrip* ra)
 	redisplay_track_list ();
 }
 
+struct TriggerStripSorter {
+	bool operator() (const TriggerStrip* ts_a, const TriggerStrip* ts_b)
+	{
+		boost::shared_ptr<ARDOUR::Stripable> const& a = ts_a->stripable ();
+		boost::shared_ptr<ARDOUR::Stripable> const& b = ts_b->stripable ();
+		return ARDOUR::Stripable::Sorter () (a, b);
+	}
+};
+
 void
 TriggerPage::redisplay_track_list ()
 {
+	_strips.sort (TriggerStripSorter ());
+
 	for (list<TriggerStrip*>::iterator i = _strips.begin (); i != _strips.end (); ++i) {
 		TriggerStrip*                strip = *i;
 		boost::shared_ptr<Stripable> s     = strip->stripable ();
@@ -501,7 +512,9 @@ TriggerPage::parameter_changed (string const& p)
 void
 TriggerPage::pi_property_changed (PBD::PropertyChange const& what_changed)
 {
-	/* static signal, not yet used */
+	if (what_changed.contains (ARDOUR::Properties::order)) {
+		redisplay_track_list ();
+	}
 }
 
 void
