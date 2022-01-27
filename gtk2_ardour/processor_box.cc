@@ -3030,8 +3030,6 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 		e->set_selectable(false);
 	}
 
-	cerr << "Adding " << processor->name() << endl;
-
 	/* Set up this entry's state from the GUIObjectState */
 	XMLNode* proc = entry_gui_object_state (e);
 	if (proc) {
