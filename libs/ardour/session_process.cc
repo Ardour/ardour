@@ -1628,9 +1628,11 @@ Session::sync_cues_from_list (Locations::LocationList const & locs)
 }
 
 int32_t
-Session::first_cue_within (samplepos_t s, samplepos_t e)
+Session::first_cue_within (samplepos_t s, samplepos_t e, bool& was_recorded)
 {
 	int32_t active_cue = _active_cue.load ();
+
+	was_recorded = false;
 
 	if (active_cue >= 0) {
 		return active_cue;
@@ -1645,6 +1647,7 @@ Session::first_cue_within (samplepos_t s, samplepos_t e)
 
 	if (si != _cue_events.end()) {
 		if (si->time < e) {
+			was_recorded = true;
 			return si->cue;
 		}
 	}
