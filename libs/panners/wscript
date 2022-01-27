@@ -4,17 +4,13 @@ from waflib.extras import autowaf as autowaf
 def options(opt):
     pass
 
-def sub_config_and_use(conf, name, has_objects = True):
-    conf.recurse(name)
-    autowaf.set_local_lib(conf, name, has_objects)
-
 def configure(conf):
     autowaf.set_recursive()
 
     panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
 
     for i in panners:
-        sub_config_and_use(conf, i)
+        conf.recurse(i)
 
 def build(bld):
     panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
