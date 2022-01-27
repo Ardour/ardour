@@ -580,30 +580,44 @@ TriggerUI::follow_context_menu ()
 	MenuList& items = _follow_context_menu->items ();
 	_follow_context_menu->set_name ("ArdourContextMenu");
 
-	Menu*     follow_menu = manage (new Menu);
-	MenuList& fitems      = follow_menu->items ();
-
 	RadioMenuItem::Group fagroup;
 
 	_ignore_menu_action = true;
 
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::None))));
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::Stop))));
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::Again))));
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::ForwardTrigger))));
-	fitems.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::ReverseTrigger))));
+	items.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::None))));
+	if (trigger ()->follow_action0 ().type == FollowAction::None) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
+	}
+	items.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::Stop))));
+	if (trigger ()->follow_action0 ().type == FollowAction::Stop) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
+	}
+	items.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::Again))));
+	if (trigger ()->follow_action0 ().type == FollowAction::Again) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
+	}
+	items.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::ForwardTrigger))));
+	if (trigger ()->follow_action0 ().type == FollowAction::ForwardTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
+	}
+	items.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::ReverseTrigger))));
+	if (trigger ()->follow_action0 ().type == FollowAction::ReverseTrigger) {
+		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
+	}
+
 	Menu*     jump_menu = manage (new Menu);
 	MenuList& jitems      = jump_menu->items ();
 	for (int i = 0; i < default_triggers_per_box; i++) {
 		FollowAction jump_fa = (FollowAction::JumpTrigger);
 		jump_fa.targets.set(i);
-		jitems.push_back (MenuElem (string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action), jump_fa)));
+		jitems.push_back (RadioMenuElem (fagroup, string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action), jump_fa)));
+		if (trigger ()->follow_action0 () == jump_fa) {
+			dynamic_cast<Gtk::CheckMenuItem*> (&jitems.back ())->set_active (true);
+		}
 	}
-	fitems.push_back (MenuElem (_("Jump..."), *jump_menu));
+	items.push_back (MenuElem (_("Jump..."), *jump_menu));
 
 	_ignore_menu_action = false;
-
-	items.push_back (MenuElem (_("Follow Action..."), *follow_menu));
 
 	_follow_context_menu->popup (1, gtk_get_current_event_time ());
 }

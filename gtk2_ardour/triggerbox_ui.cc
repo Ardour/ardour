@@ -658,8 +658,12 @@ bool
 TriggerEntry::follow_button_event (GdkEvent* ev)
 {
 	switch (ev->type) {
+		case GDK_BUTTON_PRESS:
+			return true;  //wait for release to show the menu
+			break;
 		case GDK_BUTTON_RELEASE:
 			switch (ev->button.button) {
+				case 1:
 				case 3:
 					follow_context_menu ();
 					return true;
