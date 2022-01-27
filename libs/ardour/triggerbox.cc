@@ -2290,6 +2290,18 @@ TriggerBox::get_next_trigger ()
 	return 0;
 }
 
+TriggerPtr
+TriggerBox::trigger_by_id (PBD::ID check)
+{
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		if (trigger (n)->id() == check) {
+			return trigger (n);
+		}
+	}
+	return TriggerPtr();
+}
+
+void
 void
 TriggerBox::set_from_selection (uint32_t slot, boost::shared_ptr<Region> region)
 {
