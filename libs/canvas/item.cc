@@ -96,6 +96,7 @@ Item::Item (Item* parent, Duple const& p)
 	, _lut (0)
 	, _resize_queued (false)
 	, _ignore_events (false)
+	, _scroll_translation (true)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
