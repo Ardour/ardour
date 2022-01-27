@@ -436,15 +436,13 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	RubberBand::RubberBandStretcher*  _stretcher;
 	samplepos_t _start_offset;
 
-	/* computed after data is reset */
-
-	samplepos_t last_sample;   /* where the data runs out, relative to the start of the data, compare with read_index */
 
 	/* computed during run */
 
 	samplecnt_t read_index;
 	samplecnt_t process_index;
-	samplepos_t final_sample;  /* where we stop playing, relative to the timeline */
+	samplepos_t last_readable_sample;   /* where the data runs out, relative to the start of the data, compare with read_index */
+	samplepos_t final_processed_sample;  /* where we stop playing, in process time, compare with process_index */
 	samplepos_t _legato_offset;
 	samplecnt_t retrieved;
 	samplecnt_t got_stretcher_padding;

@@ -820,9 +820,10 @@ AudioTrigger::AudioTrigger (uint32_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, _stretcher (0)
 	, _start_offset (0)
-	, last_sample (0)
 	, read_index (0)
 	, process_index (0)
+	, last_readable_sample (0)
+	, final_processed_sample (0)
 	, _legato_offset (0)
 	, retrieved (0)
 	, got_stretcher_padding (false)
@@ -949,7 +950,7 @@ void
 AudioTrigger::set_start (timepos_t const & s)
 {
 	/* XXX better minimum size needed */
-	_start_offset = std::min (samplepos_t (4096), s.samples ());
+	_start_offset = std::max (samplepos_t (4096), s.samples ());
 }
 
 void
@@ -982,9 +983,9 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 {
 	/* Our task here is to set:
 
-	   expected_end_sample: the sample position where the data for the clip should run out (taking stretch into account)
-           last_sample: the sample in the data where we stop reading
-           final_sample: the sample where the trigger stops and the follow action if any takes effect
+	   expected_end_sample: (TIMELINE!) the sample position where the data for the clip should run out (taking stretch into account)
+           last_readable_sample: the sample in the data where we stop reading
+           final_processed_sample: the sample where the trigger stops and the follow action if any takes effect
 
            Things that affect these values:
 
@@ -998,9 +999,9 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 	samplepos_t end_by_beatcnt = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (0, round (_beatcnt), 0)));  //OK?
 	samplepos_t end_by_data_length = transition_sample + (data.length - _start_offset);
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 @ %2 / %3 / %4 ends: FL %5 (from %6) BC %7 DL %8\n",
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 SO %9 @ %2 / %3 / %4 ends: FL %5 (from %6) BC %7 DL %8\n",
 	                                              index(), transition_sample, transition_beats, transition_bbt,
-	                                              end_by_follow_length, _follow_length, end_by_beatcnt, end_by_data_length));
+	                                              end_by_follow_length, _follow_length, end_by_beatcnt, end_by_data_length, _start_offset));
 
 	if (stretching()) {
 		if (internal_use_follow_length()) {
@@ -1017,29 +1018,29 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 	}
 
 	if (internal_use_follow_length()) {
-		final_sample = end_by_follow_length - transition_sample;
+		final_processed_sample = end_by_follow_length - transition_sample;
 	} else {
-		final_sample = expected_end_sample - transition_sample;
+		final_processed_sample = expected_end_sample - transition_sample;
 	}
 
 	samplecnt_t usable_length;
 
 	if (internal_use_follow_length() && (end_by_follow_length < end_by_data_length)) {
-		usable_length = tmap->sample_at (tmap->bbt_walk (Temporal::BBT_Time (), _follow_length));
+		usable_length = end_by_follow_length - transition_samples;
 	} else {
 		usable_length = (data.length - _start_offset);
 	}
 
 	/* called from set_expected_end_sample() when we know the time (audio &
 	 * musical time domains when we start starting. Our job here is to
-	 * define the last_sample we can use as data.
+	 * define the last_readable_sample we can use as data.
 	 */
 
 	Temporal::BBT_Offset q (_quantization);
 
 	if (launch_style() != Repeat || (q == Temporal::BBT_Offset())) {
 
-		last_sample = usable_length;
+		last_readable_sample = _start_offset + usable_length;
 
 	} else {
 
@@ -1051,10 +1052,10 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 		/* XXX MUST HANDLE BAR-LEVEL QUANTIZATION */
 
 		timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
-		last_sample = _start_offset + len.samples();
+		last_readable_sample = _start_offset + len.samples();
 	}
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: final sample %2 vs ees %3 ls %4\n", index(), final_sample, expected_end_sample, last_sample));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: final sample %2 vs ees %3 ls %4\n", index(), final_processed_sample, expected_end_sample, last_readable_sample));
 }
 
 void
@@ -1470,14 +1471,14 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 		if (do_stretch) {
 
-			if (read_index < last_sample) {
+			if (read_index < last_readable_sample) {
 
 				/* still have data to push into the stretcher */
 
-				to_stretcher = (pframes_t) std::min (samplecnt_t (rb_blocksize), (last_sample - read_index));
+				to_stretcher = (pframes_t) std::min (samplecnt_t (rb_blocksize), (last_readable_sample - read_index));
 				const bool at_end = (to_stretcher < rb_blocksize);
 
-				while ((pframes_t) avail < nframes && (read_index < last_sample)) {
+				while ((pframes_t) avail < nframes && (read_index < last_readable_sample)) {
 					/* keep feeding the stretcher in chunks of "to_stretcher",
 					 * until there's nframes of data available, or we reach
 					 * the end of the region
@@ -1513,37 +1514,39 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 				 */
 
 				from_stretcher = nframes;
-
+				// cerr << "FS#1 from nframes = " << from_stretcher << endl;
 			} else {
 
 				/* finished delivering data to stretcher, but may have not yet retrieved it all */
 				avail = _stretcher->available ();
 				from_stretcher = (pframes_t) std::min ((pframes_t) nframes, (pframes_t) avail);
+				// cerr << "FS#X from avail " << avail << " nf " << nframes << " = " << from_stretcher << endl;
 			}
 
 			/* fetch the stretch */
 
 			retrieved += _stretcher->retrieve (&bufp[0], from_stretcher);
 
-			if (read_index >= last_sample) {
+			if (read_index >= last_readable_sample) {
 
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 no more data to deliver to stretcher, but retrieved %2 to put current end at %3 vs %4 / %5 pi %6\n",
-				                                              index(), retrieved, transition_samples + retrieved, expected_end_sample, final_sample, process_index));
+				                                              index(), retrieved, transition_samples + retrieved, expected_end_sample, final_processed_sample, process_index));
 
 				if (transition_samples + retrieved > expected_end_sample) {
 					/* final pull from stretched data into output buffers */
 					from_stretcher = std::min ((samplecnt_t) from_stretcher, expected_end_sample - process_index);
+					// cerr << "FS#2 from ees " << expected_end_sample << " - " << process_index << " = " << from_stretcher << endl;
 
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 total retrieved data %2 exceeds theoretical size %3, truncate from_stretcher to %4\n",
 					                                              index(), retrieved, expected_end_sample - transition_samples, from_stretcher));
 
 					if (from_stretcher == 0) {
 
-						if (process_index < final_sample) {
-							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_sample));
+						if (process_index < final_processed_sample) {
+							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_processed_sample));
 							_state = Playout;
 						} else {
-							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, now stopped, retrieved %2, avail %3 pi %4 vs fs %5\n", index(), retrieved, avail, process_index, final_sample));
+							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, now stopped, retrieved %2, avail %3 pi %4 vs fs %5\n", index(), retrieved, avail, process_index, final_processed_sample));
 							_state = Stopped;
 							_loop_cnt++;
 						}
@@ -1556,10 +1559,12 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 		} else {
 			/* no stretch */
-			from_stretcher = (pframes_t) std::min ((samplecnt_t) nframes, (last_sample - read_index));
+			from_stretcher = (pframes_t) std::min ((samplecnt_t) nframes, (last_readable_sample - read_index));
+			// cerr << "FS#3 from lrs " << last_readable_sample <<  " - " << read_index << " = " << from_stretcher << endl;
+
 		}
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ready with %2 ri %3 ls %4, will write %5\n", name(), avail, read_index, last_sample, from_stretcher));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ready with %2 ri %3 ls %4, will write %5\n", name(), avail, read_index, last_readable_sample, from_stretcher));
 
 		/* deliver to buffers */
 
@@ -1600,10 +1605,10 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		avail = _stretcher->available ();
 		dest_offset += from_stretcher;
 
-		if (read_index >= last_sample && (!do_stretch || avail <= 0)) {
+		if (read_index >= last_readable_sample && (!do_stretch || avail <= 0)) {
 
-			if (process_index < final_sample) {
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_sample));
+			if (process_index < final_processed_sample) {
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_processed_sample));
 				_state = Playout;
 			} else {
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped, retrieved %2, avail %3\n", index(), retrieved, avail));
@@ -1627,11 +1632,11 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 
 		const pframes_t remaining_frames_for_run= orig_nframes - covered_frames;
-		const pframes_t remaining_frames_till_final = final_sample - process_index;
+		const pframes_t remaining_frames_till_final = final_processed_sample - process_index;
 		const pframes_t to_fill = std::min (remaining_frames_till_final, remaining_frames_for_run);
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout mode, remaining in run %2 till final %3 @ %5 ts %7 vs pi @ %6 to fill %4\n",
-		                                              index(), remaining_frames_for_run, remaining_frames_till_final, to_fill, final_sample, process_index, transition_samples));
+		                                              index(), remaining_frames_for_run, remaining_frames_till_final, to_fill, final_processed_sample, process_index, transition_samples));
 
 		if (remaining_frames_till_final != 0) {
 
@@ -1646,7 +1651,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 			process_index += to_fill;
 			covered_frames += to_fill;
 
-			if (process_index < final_sample) {
+			if (process_index < final_processed_sample) {
 				/* more playout to be done */
 				return covered_frames;
 			}
@@ -2044,11 +2049,11 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not done with playout, all frames covered\n", index()));
 				} else {
 					/* finishing up playout */
-					samplepos_t final_sample = tmap->sample_at (timepos_t (final_beat));
-					nframes = orig_nframes - (final_sample - start_sample);
+					samplepos_t final_processed_sample = tmap->sample_at (timepos_t (final_beat));
+					nframes = orig_nframes - (final_processed_sample - start_sample);
 					_loop_cnt++;
 					_state = Stopped;
-					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout done, nf = %2 fb %3 fs %4 %5\n", index(), nframes, final_beat, final_sample, start_sample));
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout done, nf = %2 fb %3 fs %4 %5\n", index(), nframes, final_beat, final_processed_sample, start_sample));
 				}
 			}
 
