@@ -165,7 +165,8 @@ RecorderUI::RecorderUI ()
 	_scroller_base.signal_button_press_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_event));
 	_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &RecorderUI::scroller_button_event));
 	_scroller_base.set_size_request (-1, PX_SCALE (20));
-	_scroller_base.signal_expose_event().connect (sigc::bind (sigc::ptr_fun(&ArdourWidgets::ArdourIcon::expose), &_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign));
+	_scroller_base.signal_expose_event ().connect (sigc::bind (sigc::ptr_fun (&ArdourWidgets::ArdourIcon::expose_with_text), &_scroller_base, ArdourWidgets::ArdourIcon::ShadedPlusSign,
+			_("Right-click or Double-click here\nto add Tracks")));
 
 	/* LAYOUT */
 
