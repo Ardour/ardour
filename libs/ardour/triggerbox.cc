@@ -2205,6 +2205,7 @@ TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
 		return;
 	}
 
+	/* set_region_in_worker_thread makes some guesses about whether a clip is a one-shot or looping*/
 	t->set_region_in_worker_thread (region);
 
 	/* if we are the target of a drag&drop from another Trigger Slot, we probably want the name, color and other properties to carry over */
