@@ -606,6 +606,7 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 	}
 
 	switch (ev->type) {
+		case GDK_2BUTTON_PRESS:  //need to un-grab in a double-click action
 		case GDK_BUTTON_PRESS:
 			switch (ev->button.button) {
 				case 1:
@@ -695,6 +696,7 @@ TriggerEntry::event (GdkEvent* ev)
 	}
 
 	switch (ev->type) {
+		case GDK_2BUTTON_PRESS:  //need to un-grab in a double-click action
 		case GDK_BUTTON_RELEASE:
 			if(_grabbed) {
 				ungrab();
