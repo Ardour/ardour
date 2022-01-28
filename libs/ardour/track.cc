@@ -20,6 +20,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include "pbd/error.h"
 
 #include "ardour/amp.h"
@@ -913,6 +914,8 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		return;
 	}
 
+	/* There is an assumption here that we have only a single MIDI file */
+
 	boost::shared_ptr<SMFSource> mfs = boost::dynamic_pointer_cast<SMFSource> (srcs.front());
 	boost::shared_ptr<Playlist> pl = _playlists[DataType::MIDI];
 	boost::shared_ptr<MidiRegion> midi_region;
@@ -952,7 +955,7 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		plist.add (Properties::whole_file, true);
 		plist.add (Properties::automatic, true);
 		plist.add (Properties::start, timecnt_t (Temporal::BeatTime));
-		plist.add (Properties::length, timecnt_t (total_capture, timepos_t (Temporal::BeatTime)));
+		plist.add (Properties::length, mfs->length());
 		plist.add (Properties::layer, 0);
 
 		boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
