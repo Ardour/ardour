@@ -59,6 +59,7 @@ def build(bld):
     audiographer_sources = [
         'private/gdither/gdither.cc',
         'private/limiter/limiter.cc',
+        'src/general/sndfile.cc',
         'src/general/sample_format_converter.cc',
         'src/routines.cc',
         'src/debug_utils.cc',
