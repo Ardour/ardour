@@ -232,35 +232,32 @@ Graph::swap_process_chain ()
 	/* Intended to be called Session::process_audition.
 	 * Must not be called while the graph is processing.
 	 */
-	bool need_prep = false;
 	if (_swap_mutex.trylock ()) {
 		/* swap mutex acquired */
 		if (_current_chain != _pending_chain) {
+			DEBUG_TRACE (DEBUG::Graph, string_compose ("Graph::swap_process_chain = %1)\n", _pending_chain));
 			/* use new chain */
 			_setup_chain   = _current_chain;
 			_current_chain = _pending_chain;
+			printf ("Graph::swap to %d\n", _current_chain);
 			_trigger_queue.clear ();
 			/* ensure that all nodes can be queued */
 			_trigger_queue.reserve (_nodes_rt[_current_chain].size ());
 			g_atomic_int_set (&_trigger_queue_size, 0);
 			_cleanup_cond.signal ();
-			need_prep = true;
 		}
 		_swap_mutex.unlock ();
-	}
-
-	if (need_prep) {
-		prep (false);
 	}
 }
 
 void
-Graph::prep (bool check_pending_chain)
+Graph::prep ()
 {
-	if (check_pending_chain && _swap_mutex.trylock ()) {
+	if (_swap_mutex.trylock ()) {
 		/* swap mutex acquired */
 		if (_current_chain != _pending_chain) {
 			/* use new chain */
+			DEBUG_TRACE (DEBUG::Graph, string_compose ("Graph::prep chain = %1)\n", _pending_chain));
 			_setup_chain   = _current_chain;
 			_current_chain = _pending_chain;
 			/* ensure that all nodes can be queued */
@@ -281,6 +278,7 @@ Graph::prep (bool check_pending_chain)
 		_graph_empty = false;
 	}
 
+	assert (g_atomic_uint_get (&_trigger_queue_size) == 0);
 	assert (_graph_empty != (_n_terminal_nodes[chain] > 0));
 
 	g_atomic_int_set (&_terminal_refcnt, _n_terminal_nodes[chain]);
@@ -360,7 +358,7 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist, GraphEdges const& edges)
 	Glib::Threads::Mutex::Lock ls (_swap_mutex);
 
 	int chain = _setup_chain;
-	DEBUG_TRACE (DEBUG::Graph, string_compose ("============== setup %1\n", chain));
+	DEBUG_TRACE (DEBUG::Graph, string_compose ("============== setup %1 (current = %2 pending = %3) thread %4\n", chain, _current_chain, _pending_chain, pthread_name()));
 
 	/* This will become the number of nodes that do not feed any other node;
 	 * once we have processed this number of those nodes, we have finished.

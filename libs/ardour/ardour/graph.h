@@ -86,7 +86,7 @@ private:
 	void drop_threads ();
 	void run_one ();
 	void main_thread ();
-	void prep (bool check_pending_chain = true);
+	void prep ();
 	void dump (int chain) const;
 
 	node_list_t _nodes_rt[2];
