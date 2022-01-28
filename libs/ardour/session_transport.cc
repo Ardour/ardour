@@ -1798,6 +1798,7 @@ Session::engine_halted ()
 	   We can't queue SessionEvents because they only get
 	   handled from within a process callback.
 	*/
+	cancel_audition ();
 
 	/* this just stops the FSM engine ... it doesn't change the state of
 	 * the FSM directly or anything else ... but the FSM will be
