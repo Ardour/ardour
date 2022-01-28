@@ -135,7 +135,7 @@ public:
 
 	void set_selected_for_solo(bool yn);
 
-	timecnt_t source_length (uint32_t n) const;
+	timepos_t source_length (uint32_t n) const;
 	uint32_t   max_source_level () const;
 
 	/* these two are valid ONLY during a StateChanged signal handler */
@@ -498,7 +498,6 @@ private:
 	void maybe_uncopy ();
 
 	bool verify_start (timepos_t const &);
-	bool verify_start_mutable (timecnt_t&);
 	bool verify_length (timecnt_t&);
 
 	virtual void recompute_at_start () = 0;

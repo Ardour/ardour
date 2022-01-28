@@ -150,10 +150,14 @@ AudioSource::set_state (const XMLNode& node, int /*version*/)
 }
 
 void
-AudioSource::update_length (timecnt_t const & len)
+AudioSource::update_length (timepos_t const & dur)
 {
-	if (len > _length) {
-		_length = len;
+	assert (_length.time_domain() == dur.time_domain());
+
+	/* audio files cannot get smaller via this mechanism */
+
+	if (dur > _length) {
+		_length = dur;
 	}
 }
 

@@ -1347,8 +1347,8 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 	 */
 
 	if (!_sources.empty() && _type == DataType::AUDIO) {
-		if ((length().time_domain() == Temporal::AudioTime) && (length() > _sources.front()->length())) {
-			_length = _sources.front()->length() - start();
+		if ((length().time_domain() == Temporal::AudioTime) && (length().distance() > _sources.front()->length())) {
+			_length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
 		 }
 	}
 
@@ -1659,7 +1659,7 @@ Region::uses_source (boost::shared_ptr<const Source> source, bool shallow) const
 }
 
 
-timecnt_t
+timepos_t
 Region::source_length (uint32_t n) const
 {
 	assert (n < _sources.size());
@@ -1676,10 +1676,12 @@ Region::verify_length (timecnt_t& len)
 	timecnt_t maxlen;
 
 	for (uint32_t n = 0; n < _sources.size(); ++n) {
-		maxlen = max (maxlen, source_length(n) - _start);
+		/* this is computing the distance between _start and the end of the source */
+		timecnt_t max_possible_length = _start.val().distance (source_length(n));
+		maxlen = max (maxlen, max_possible_length);
 	}
 
-	len = min (len, maxlen);
+	len = timecnt_t (min (len, maxlen), len.position());
 
 	return true;
 }
@@ -1694,7 +1696,7 @@ Region::verify_start_and_length (timepos_t const & new_start, timecnt_t& new_len
 	timecnt_t maxlen;
 
 	for (uint32_t n = 0; n < _sources.size(); ++n) {
-		maxlen = max (maxlen, source_length(n) - new_start);
+		maxlen = max (maxlen, new_start.distance (source_length(n)));
 	}
 
 	new_length = min (new_length, maxlen);
@@ -1710,26 +1712,11 @@ Region::verify_start (timepos_t const & pos)
 	}
 
 	for (uint32_t n = 0; n < _sources.size(); ++n) {
-		if (pos > source_length(n) - _length) {
+		/* _start can't be before the start of the region as defined by its length */
+		if (pos > source_length(n).earlier (_length)) {
 			return false;
 		}
 	}
-	return true;
-}
-
-bool
-Region::verify_start_mutable (timecnt_t & new_start)
-{
-	if (source() && source()->length_mutable()) {
-		return true;
-	}
-
-	for (uint32_t n = 0; n < _sources.size(); ++n) {
-		if (new_start > source_length(n) - _length) {
-			new_start = source_length(n) - _length;
-		}
-	}
-
 	return true;
 }
 
@@ -1977,7 +1964,7 @@ Region::latest_possible_sample () const
 		/* non-audio regions have a length that may vary based on their
 		 * position, so we have to pass it in the call.
 		 */
-		minlen = min (minlen, (*i)->length ());
+		minlen = min (minlen, timecnt_t ((*i)->length (), (*i)->natural_position()));
 	}
 
 	/* the latest possible last sample is determined by the current

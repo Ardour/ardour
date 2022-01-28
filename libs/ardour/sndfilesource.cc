@@ -605,13 +605,15 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, samplecnt_t cnt)
 		return 0;
 	}
 
+	assert (_length.time_domain() == Temporal::AudioTime);
 	samplepos_t sample_pos = _length.samples();
 
 	if (write_float (data, sample_pos, cnt) != cnt) {
 		return 0;
 	}
 
-	update_length (_length + timecnt_t (cnt, timepos_t (Temporal::AudioTime)));
+	assert (_length.time_domain() == Temporal::AudioTime);
+	update_length (timepos_t (_length.samples() + cnt));
 
 	if (_build_peakfiles) {
 		compute_and_write_peaks (data, sample_pos, cnt, true, true);

@@ -74,6 +74,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	bool is_positive () const { return val() > 0; }
 	bool is_negative () const { return val() < 0; }
 	bool is_zero ()     const { return val() == 0; }
+	bool operator! ()   const { return val() == 0; }
 
 	Temporal::TimeDomain time_domain () const { if (flagged()) return Temporal::BeatTime; return Temporal::AudioTime; }
 	void set_time_domain (Temporal::TimeDomain);
@@ -84,6 +85,8 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	Beats        beats() const { if (is_beats()) return Beats::ticks (val()); return _beats (); }
 
 	timepos_t & operator= (timecnt_t const & t); /* will throw() if val is negative */
+	timepos_t & operator= (Beats const & b) { v.store (build (true, b.to_ticks())); return *this; }
+	timepos_t & operator= (samplepos_t const & s) { v.store (build (false, samples_to_superclock (s, TEMPORAL_SAMPLE_RATE))); return *this; }
 
 	timepos_t operator-() const { return timepos_t (int62_t::operator-()); }
 

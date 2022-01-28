@@ -395,9 +395,10 @@ SMFSource::write_unlocked (const Lock&                  lock,
 }
 
 void
-SMFSource::update_length (timecnt_t const & cnt)
+SMFSource::update_length (timepos_t const & dur)
 {
-	_length = cnt;
+	assert (!_length || (_length.time_domain() == dur.time_domain()));
+	_length = dur;
 }
 
 /** Append an event with a timestamp in beats */
@@ -445,7 +446,8 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 		_model->append (ev, event_id);
 	}
 
-	_length  = max (_length, timecnt_t (time));
+	assert (!_length || (_length.time_domain() == Temporal::BeatTime));
+	_length  = timepos_t (max (_length.beats(), time));
 
 	const Temporal::Beats delta_time_beats = time - _last_ev_time_beats;
 	const uint32_t      delta_time_ticks = delta_time_beats.to_ticks(ppqn());
@@ -498,7 +500,8 @@ SMFSource::append_event_samples (const Glib::Threads::Mutex::Lock& lock,
 		_model->append (beat_ev, event_id);
 	}
 
-	_length = max (_length, timecnt_t (ev_time_beats, timepos_t (position)));
+	assert (!_length || (_length.time_domain() == Temporal::BeatTime));
+	_length = timepos_t (max (_length.beats(), ev_time_beats));
 
 	/* a distance measure that starts at @param _last_ev_time_samples (audio time) and
 	   extends for ev.time() (audio time)
@@ -718,7 +721,8 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 				scratch_size = std::max(size, scratch_size);
 				size = scratch_size;
 
-				_length = max (_length, timecnt_t (event_time));
+				assert (!_length || (_length.time_domain() == Temporal::BeatTime));
+				_length = max (_length, timepos_t (event_time));
 			}
 
 			/* event ID's must immediately precede the event they are for */

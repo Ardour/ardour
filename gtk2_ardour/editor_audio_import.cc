@@ -925,18 +925,20 @@ Editor::add_sources (vector<string>            paths,
 			PropertyList plist;
 
 			/* Fudge region length to ensure it is non-zero; make it 1 beat at 120bpm
-			   for want of a better idea.  It can't be too small, otherwise if this
-			   is a MIDI region the conversion from samples -> beats -> samples will
-			   round it back down to 0 again.
+			   for want of a better idea.
 			*/
-			timecnt_t len = (*x)->length ();
+			timepos_t len = (*x)->length ();
 			cerr << "for " << (*x)->name() << " source length appears to be " << len << endl;
-			if (len == 0) {
-				len = timecnt_t (_session->sample_rate ()) / 2;
+			if (len.is_zero()) {
+				if ((*x)->type() == DataType::AUDIO) {
+					len = timepos_t (_session->sample_rate ()) / 2;
+				} else {
+					len = timepos_t (Beats (1, 0));
+				}
 				cerr << " reset to use " << len << endl;
 			}
 
-			plist.add (ARDOUR::Properties::start, timecnt_t ((*x)->type() == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime));
+			plist.add (ARDOUR::Properties::start, timepos_t ((*x)->type() == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime));
 			plist.add (ARDOUR::Properties::length, len);
 			plist.add (ARDOUR::Properties::name, region_name);
 			plist.add (ARDOUR::Properties::layer, 0);

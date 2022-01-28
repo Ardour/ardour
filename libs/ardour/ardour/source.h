@@ -75,11 +75,10 @@ public:
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
 
-	virtual timecnt_t length() const { return _length; }
-	samplecnt_t length_samples () const { return _length.samples(); };
+	virtual timepos_t length() const { return _length; }
 
 	virtual bool        empty () const;
-	virtual void        update_length (timecnt_t const & cnt) {}
+	virtual void        update_length (timepos_t const & dur) {}
 
 	void                 set_take_id (std::string id) { _take_id =id; }
 	const std::string&   take_id ()        const { return _take_id; }
@@ -161,7 +160,7 @@ public:
 	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
 	std::string         _ancestor_name;
 	std::string        _captured_for;
-	timecnt_t           _length;
+	timepos_t          _length;
 	XrunPositions      _xruns;
 	CueMarkers         _cue_markers;
 

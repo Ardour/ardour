@@ -419,7 +419,6 @@ Source::set_natural_position (timepos_t const & pos)
 {
 	_natural_position = pos;
 	_have_natural_position = true;
-	_length.set_position (pos);
 }
 
 void
@@ -533,7 +532,7 @@ Source::clear_cue_markers ()
 bool
 Source::empty () const
 {
-	return _length == timecnt_t();
+	return _length == timepos_t ();
 }
 
 bool

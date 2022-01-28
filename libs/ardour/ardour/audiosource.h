@@ -51,7 +51,7 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 	samplecnt_t readable_length_samples() const { return _length.samples(); }
 	virtual uint32_t n_channels()      const { return 1; }
 
-	void       update_length (timecnt_t const & cnt);
+	void       update_length (timepos_t const & dur);
 
 	virtual samplecnt_t available_peaks (double zoom) const;
 
