@@ -32,6 +32,7 @@
 #include <boost/scoped_array.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <glibmm/fileutils.h>
 #include <glibmm/threads.h>
 
 #include "pbd/basename.h"
@@ -41,6 +42,7 @@
 
 #include "evoral/Curve.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/analysis_graph.h"
 #include "ardour/audioregion.h"
 #include "ardour/session.h"
@@ -51,11 +53,14 @@
 #include "ardour/audiofilesource.h"
 #include "ardour/region_factory.h"
 #include "ardour/runtime_functions.h"
+#include "ardour/sndfilesource.h"
 #include "ardour/transient_detector.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/progress.h"
 
-#include "ardour/sndfilesource.h"
+#include "audiographer/general/interleaver.h"
+#include "audiographer/general/sample_format_converter.h"
+#include "audiographer/sndfile/sndfile_writer.h"
 
 #include "pbd/i18n.h"
 #include <locale.h>
@@ -64,7 +69,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-#include "ardour/audioengine.h"
 #define S2SC(s) Temporal::samples_to_superclock (s, AudioEngine::instance()->sample_rate())
 #define SC2S(s) Temporal::superclock_to_samples (s, AudioEngine::instance()->sample_rate())
 
@@ -2041,4 +2045,53 @@ AudioRegion::verify_xfade_bounds (samplecnt_t len, bool start)
 
 	return min (length_samples(), min (maxlen, len));
 
+}
+
+bool
+AudioRegion::do_export (std::string const& path) const
+{
+	const uint32_t    n_chn      = n_channels ();
+	const samplepos_t chunk_size = 8192;
+	Sample            buf[chunk_size];
+	gain_t            gain_buffer[chunk_size];
+
+	const int format = SF_FORMAT_FLAC | SF_FORMAT_PCM_24; // TODO preference or option
+
+	assert (!path.empty ());
+	assert (!Glib::file_test (path, Glib::FILE_TEST_EXISTS));
+
+	typedef boost::shared_ptr<AudioGrapher::SndfileWriter<Sample>> FloatWriterPtr;
+	FloatWriterPtr                                                 sfw;
+	try {
+		sfw.reset (new AudioGrapher::SndfileWriter<Sample> (path, format, n_chn, audio_source ()->sample_rate (), 0));
+	} catch (...) {
+		return false;
+	}
+
+	AudioGrapher::Interleaver<Sample> interleaver;
+	interleaver.init (n_channels (), chunk_size);
+	interleaver.add_output (sfw);
+
+	samplepos_t to_read = length_samples ();
+	samplepos_t pos     = position_sample ();
+
+	while (to_read) {
+		samplepos_t this_time = min (to_read, chunk_size);
+
+		for (uint32_t chn = 0; chn < n_chn; ++chn) {
+			if (read_at (buf, buf, gain_buffer, pos, this_time, chn) != this_time) {
+				break;
+			}
+
+			AudioGrapher::ConstProcessContext<Sample> context (buf, this_time, 1);
+			if (to_read == this_time) {
+				context ().set_flag (AudioGrapher::ProcessContext<Sample>::EndOfInput);
+			}
+			interleaver.input (chn)->process (context);
+		}
+
+		to_read -= this_time;
+		pos += this_time;
+	}
+	return to_read == 0;
 }

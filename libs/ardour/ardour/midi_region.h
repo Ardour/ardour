@@ -59,8 +59,6 @@ class LIBARDOUR_API MidiRegion : public Region
   public:
 	~MidiRegion();
 
-	bool do_export (std::string path) const;
-
 	boost::shared_ptr<MidiRegion> clone (std::string path = std::string()) const;
 	boost::shared_ptr<MidiRegion> clone (boost::shared_ptr<MidiSource>, ThawList* tl = 0) const;
 
@@ -96,6 +94,8 @@ class LIBARDOUR_API MidiRegion : public Region
 	virtual boost::shared_ptr<const Evoral::Control> control(const Evoral::Parameter& id) const;
 
 	/* export */
+
+	bool do_export (std::string const& path) const;
 
 	boost::shared_ptr<MidiModel> model();
 	boost::shared_ptr<const MidiModel> model() const;

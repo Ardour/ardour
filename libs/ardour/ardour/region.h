@@ -349,6 +349,8 @@ public:
 	XMLNode&         get_state ();
 	virtual int      set_state (const XMLNode&, int version);
 
+	virtual bool do_export (std::string const&) const = 0;
+
 	virtual boost::shared_ptr<Region> get_parent() const;
 
 	uint64_t layering_index () const { return _layering_index; }

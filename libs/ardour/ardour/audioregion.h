@@ -170,6 +170,10 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 		return _automatable.control(id);
 	}
 
+	/* export */
+
+	bool do_export (std::string const&) const;
+
 	/* xfade/fade interactions */
 
 	void suspend_fade_in ();

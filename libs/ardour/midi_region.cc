@@ -98,7 +98,7 @@ MidiRegion::~MidiRegion ()
 /** Export the MIDI data of the MidiRegion to a new MIDI file (SMF).
  */
 bool
-MidiRegion::do_export (string path) const
+MidiRegion::do_export (string const& path) const
 {
 	boost::shared_ptr<MidiSource> newsrc;
 
