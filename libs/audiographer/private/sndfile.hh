@@ -52,22 +52,16 @@
 #ifndef SNDFILE_HH
 #define SNDFILE_HH
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#include <glib.h>
-#include "pbd/gstdio_compat.h"
+#include "audiographer/visibility.h"
 
 #include <sndfile.h>
 
 #include <string>
-#include <new> // for std::nothrow
 
 // Prevent conflicts
 namespace AudioGrapher {
 
-class SndfileHandle
+class LIBAUDIOGRAPHER_API SndfileHandle
 {	private :
 		struct SNDFILE_ref
 		{	SNDFILE_ref (void) ;
