@@ -404,11 +404,12 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 
 		this_time = min (to_read, chunk_size);
 
-		for (vector<boost::shared_ptr<AudioFileSource> >::iterator src=sources.begin(); src != sources.end(); ++src) {
+		uint32_t chn = 0;
+		for (vector<boost::shared_ptr<AudioFileSource> >::iterator src=sources.begin(); src != sources.end(); ++src, ++chn) {
 
 			fs = (*src);
 
-			if (region->read_at (buf, buf, gain_buffer, pos, this_time) != this_time) {
+			if (region->read_at (buf, buf, gain_buffer, pos, this_time, chn) != this_time) {
 				break;
 			}
 
