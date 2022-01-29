@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 2022-1-4 Vincent Tassy: Map file creation -->
+<ArdourMIDIBindings version="1.0.0" name="Alesis Q49 MKII">
+
+  <Binding channel="1" ctl="118" function="transport-stop"/>
+  <Binding channel="1" ctl="119" function="transport-roll"/>
+  <Binding channel="1" ctl="114" action="Transport/alternate-record-roll"/>
+
+  <Binding channel="1" ctl="23" function="transport-start"/>
+  <Binding channel="1" ctl="24" function="transport-end"/>
+  <Binding channel="1" ctl="21" action="Common/alternate-jump-backward-to-mark"/>
+  <Binding channel="1" ctl="22" action="Common/alternate-jump-forward-to-mark"/>
+  <Binding channel="1" ctl="20" action="Transport/ToggleRollForgetCapture"/>
+
+</ArdourMIDIBindings>
