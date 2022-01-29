@@ -393,7 +393,10 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region
 	_highest_note = highest;
 	_lowest_note = lowest;
 
-	int const max_note_height = 20;  // This should probably be based on text size...
+	float uiscale = UIConfiguration::instance().get_ui_scale();
+	uiscale = expf (uiscale) / expf (1.f);
+
+	int const max_note_height = std::max<int> (20, 20 * uiscale);
 	int const range = _highest_note - _lowest_note;
 	int const pixels_per_note = floor (child_height () / range);
 

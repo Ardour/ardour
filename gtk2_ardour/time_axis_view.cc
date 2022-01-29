@@ -81,6 +81,7 @@ using namespace ArdourWidgets;
 using Gtkmm2ext::Keyboard;
 
 #define TOP_LEVEL_WIDGET controls_ebox
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
 const double trim_handle_size = 6.0; /* pixels */
 uint32_t TimeAxisView::button_height = 0;
@@ -1325,11 +1326,11 @@ TimeAxisView::preset_height (Height h)
 {
 	switch (h) {
 	case HeightLargest:
-		return (button_height * 2) + extra_height + 260;
+		return (button_height * 2) + extra_height + PX_SCALE (260);
 	case HeightLarger:
-		return (button_height * 2) + extra_height + 160;
+		return (button_height * 2) + extra_height + PX_SCALE (160);
 	case HeightLarge:
-		return (button_height * 2) + extra_height + 60;
+		return (button_height * 2) + extra_height + PX_SCALE (60);
 	case HeightNormal:
 		return (button_height * 2) + extra_height + 10;
 	case HeightSmall:
