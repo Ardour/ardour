@@ -34,10 +34,10 @@
 
 template<typename T> /*LIBGTKMM2EXT_API*/ gint idle_delete (T *obj) { delete obj; return FALSE; }
 template<typename T> /*LIBGTKMM2EXT_API*/ void delete_when_idle (T *obj) {
-	Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (idle_delete<T>), obj));
+	Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (idle_delete<T>), obj), Glib::PRIORITY_HIGH_IDLE);
 }
 template<typename T> /*LIBGTKMM2EXT_API*/ gint delete_on_unmap (GdkEventAny *ignored, T *obj) {
-	Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (idle_delete<T>), obj));
+	Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (idle_delete<T>), obj), Glib::PRIORITY_HIGH_IDLE);
 	return FALSE;
 }
 
