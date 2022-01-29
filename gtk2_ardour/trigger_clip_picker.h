@@ -51,6 +51,7 @@ private:
 	void edit_path ();
 	void refill_dropdown ();
 	void parameter_changed (std::string const&);
+	void clip_added (std::string const&, void*);
 	void row_selected ();
 	void cursor_changed ();
 	void row_activated (Gtk::TreeModel::Path const&, Gtk::TreeViewColumn*);
@@ -61,7 +62,7 @@ private:
 	void drag_end (Glib::RefPtr<Gdk::DragContext> const&);
 	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const&, int, int, guint);
 	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
-	void maybe_add_dir (std::string const&);
+	bool maybe_add_dir (std::string const&);
 	void audition_selected ();
 	void audition (std::string const&);
 	void audition_active (bool);
@@ -99,12 +100,16 @@ private:
 	Gtk::CheckButton             _autoplay_btn;
 
 	std::string _current_path;
+	std::string _clip_library_dir;
+	bool        _clip_library_listed;
+	bool        _ignore_list_dir;
 
 	std::set<std::string> _root_paths;
 
 	bool                      _seeking;
 	PBD::ScopedConnectionList _auditioner_connections;
 	PBD::ScopedConnection     _config_connection;
+	PBD::ScopedConnection     _clip_added_connection;
 };
 
 #endif

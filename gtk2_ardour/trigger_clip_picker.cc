@@ -25,10 +25,12 @@
 #include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
 #include "pbd/search_path.h"
+#include "pbd/unwind.h"
 
 #include "ardour/audiofilesource.h"
 #include "ardour/audioregion.h"
 #include "ardour/auditioner.h"
+#include "ardour/clip_library.h"
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"
@@ -56,6 +58,8 @@ TriggerClipPicker::TriggerClipPicker ()
 	: _fcd (_("Select Sample Folder"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, _seek_slider (0, 1000, 1)
 	, _autoplay_btn (_("Auto-play"))
+	, _clip_library_listed (false)
+	, _ignore_list_dir (false)
 	, _seeking (false)
 {
 	/* Setup Dropdown / File Browser */
@@ -145,6 +149,10 @@ TriggerClipPicker::TriggerClipPicker ()
 	_view.signal_drag_data_received ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_data_received));
 
 	Config->ParameterChanged.connect (_config_connection, invalidator (*this), boost::bind (&TriggerClipPicker::parameter_changed, this, _1), gui_context ());
+	LibraryClipAdded.connect (_clip_added_connection, invalidator (*this), boost::bind (&TriggerClipPicker::clip_added, this, _1, _2), gui_context ());
+
+	/* cache value */
+	_clip_library_dir = clip_library_dir ();
 
 	/* show off */
 	_scroller.show ();
@@ -165,6 +173,23 @@ TriggerClipPicker::parameter_changed (std::string const& p)
 {
 	if (p == "sample-lib-path") {
 		refill_dropdown ();
+	} else if (p == "clip-library-dir") {
+		_clip_library_dir = clip_library_dir ();
+		refill_dropdown ();
+	}
+}
+
+void
+TriggerClipPicker::clip_added (std::string const&, void* src)
+{
+	if (!_clip_library_listed) {
+		_clip_library_dir = clip_library_dir ();
+		refill_dropdown ();
+	}
+	if (src == this) {
+		list_dir (clip_library_dir ());
+	} else {
+		list_dir (_current_path);
 	}
 }
 
@@ -214,6 +239,8 @@ TriggerClipPicker::refill_dropdown ()
 			maybe_add_dir (f);
 		}
 	}
+
+	_clip_library_listed = maybe_add_dir (clip_library_dir (false));
 
 	_dir.AddMenuElem (Menu_Helpers::SeparatorElem ());
 	_dir.AddMenuElem (Menu_Helpers::MenuElem (_("Edit..."), sigc::mem_fun (*this, &TriggerClipPicker::edit_path)));
@@ -283,11 +310,11 @@ display_name (std::string const& dir) {
 	return Glib::path_get_basename (dir);
 }
 
-void
+bool
 TriggerClipPicker::maybe_add_dir (std::string const& dir)
 {
-	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
-		return;
+	if (dir.empty () || !Glib::file_test (dir, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
+		return false;
 	}
 
 	_dir.AddMenuElem (Gtkmm2ext::MenuElemNoMnemonic (display_name (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
@@ -318,6 +345,7 @@ TriggerClipPicker::maybe_add_dir (std::string const& dir)
 	if (insert) {
 		_root_paths.insert (dir);
 	}
+	return true;
 }
 
 /* ****************************************************************************
@@ -450,7 +478,10 @@ TriggerClipPicker::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Selecti
 bool
 TriggerClipPicker::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int, int y, guint time)
 {
-	//list_dir ("/tmp/");
+	if (!_clip_library_dir.empty () && _current_path != _clip_library_dir) {
+		list_dir (_clip_library_dir);
+	}
+
 	context->drag_status (Gdk::ACTION_COPY, time);
 	return true;
 }
@@ -463,14 +494,11 @@ TriggerClipPicker::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& con
 	}
 		PBD::ID rid (data.get_data_as_string ());
 		boost::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
-		if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
-			//region->do_export ("/tmp/foo.flac");
+		if (export_to_clip_library (region, this)) {
 			context->drag_finish (true, false, time);
-		} else if (boost::dynamic_pointer_cast<MidiRegion> (region)) {
-			//region->do_export ("/tmp/foo.mid");
+		} else {
 			context->drag_finish (true, false, time);
 		}
-		context->drag_finish (true, false, time);
 }
 
 /* ****************************************************************************
@@ -526,12 +554,19 @@ TriggerClipPicker::open_dir ()
 void
 TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren const* pc)
 {
+	if (_ignore_list_dir) {
+		return;
+	}
+	/* do not recurse when calling _dir.set_active() */
+	PBD::Unwinder<bool> uw (_ignore_list_dir, true);
+
 	if (!Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
 		assert (0);
 		return;
 	}
 
 	if (!pc) {
+		_view.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 		_model->clear ();
 		_dir.set_active (display_name (path));
 	}
@@ -603,6 +638,10 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 		row[_columns.path] = Glib::build_filename (path, f);
 		row[_columns.read] = false;
 		row[_columns.file] = true;
+	}
+
+	if (!pc) {
+		_view.set_model (_model);
 	}
 }
 
