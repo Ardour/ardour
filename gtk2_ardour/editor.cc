@@ -5904,8 +5904,7 @@ Editor::redisplay_track_views ()
 
 	_tvl_redisplay_on_resume = false;
 
-	TrackViewStripableSorter cmp;
-	track_views.sort (cmp);
+	track_views.sort (TrackViewStripableSorter ());
 
 	uint32_t position;
 	TrackViewList::const_iterator i;
