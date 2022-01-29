@@ -213,7 +213,8 @@ CONFIG_VARIABLE_SPECIAL (std::string, default_session_parent_dir, "default-sessi
 #else
 CONFIG_VARIABLE_SPECIAL (std::string, default_session_parent_dir, "default-session-parent-dir", "~", poor_mans_glob)
 #endif
-CONFIG_VARIABLE (std::string, sample_lib_path, "sample-lib-path", "")
+CONFIG_VARIABLE (std::string, clip_library_dir, "clip-library-dir", "@default@") /* writable folder */
+CONFIG_VARIABLE (std::string, sample_lib_path, "sample-lib-path", "") /* custom paths */
 CONFIG_VARIABLE (bool, allow_special_bus_removal, "allow-special-bus-removal", false)
 CONFIG_VARIABLE (int32_t, processor_usage, "processor-usage", -1)
 CONFIG_VARIABLE (int32_t, cpu_dma_latency, "cpu-dma-latency", -1) /* >=0 to enable */

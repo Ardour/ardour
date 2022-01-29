@@ -57,6 +57,7 @@ libardour_sources = [
         'chan_count.cc',
         'chan_mapping.cc',
         'circular_buffer.cc',
+        'clip_library.cc',
         'config_text.cc',
         'control_group.cc',
         'control_protocol_manager.cc',
