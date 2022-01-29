@@ -31,6 +31,7 @@
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
 
+#include "ardour/types.h"
 #include "ardour/session_handle.h"
 
 #include "widgets/ardour_dropdown.h"
@@ -56,7 +57,10 @@ private:
 	bool test_expand (Gtk::TreeModel::iterator const&, Gtk::TreeModel::Path const&);
 	void row_collapsed (Gtk::TreeModel::iterator const&, Gtk::TreeModel::Path const&);
 	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
+	void drag_begin (Glib::RefPtr<Gdk::DragContext> const&);
 	void drag_end (Glib::RefPtr<Gdk::DragContext> const&);
+	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const&, int, int, guint);
+	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
 	void maybe_add_dir (std::string const&);
 	void audition_selected ();
 	void audition (std::string const&);

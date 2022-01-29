@@ -124,11 +124,10 @@ TriggerClipPicker::TriggerClipPicker ()
 	_view.set_reorderable (false);
 	_view.get_selection ()->set_mode (SELECTION_MULTIPLE);
 
-	/* DnD */
+	/* DnD source */
 	std::vector<TargetEntry> dnd;
 	dnd.push_back (TargetEntry ("text/uri-list"));
-	_view.enable_model_drag_source (dnd, Gdk::MODIFIER_MASK, Gdk::ACTION_COPY);
-
+	_view.drag_source_set (dnd, Gdk::MODIFIER_MASK, Gdk::ACTION_COPY);
 	_view.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &TriggerClipPicker::row_selected));
 	_view.signal_row_activated ().connect (sigc::mem_fun (*this, &TriggerClipPicker::row_activated));
 	_view.signal_test_expand_row ().connect (sigc::mem_fun (*this, &TriggerClipPicker::test_expand));
@@ -136,6 +135,14 @@ TriggerClipPicker::TriggerClipPicker ()
 	_view.signal_drag_data_get ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_data_get));
 	_view.signal_cursor_changed ().connect (sigc::mem_fun (*this, &TriggerClipPicker::cursor_changed));
 	_view.signal_drag_end ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_end));
+
+	/* DnD target */
+	std::vector<Gtk::TargetEntry> target_table;
+	target_table.push_back (Gtk::TargetEntry ("x-ardour/region.pbdid", Gtk::TARGET_SAME_APP));
+	_view.drag_dest_set (target_table, DEST_DEFAULT_ALL, Gdk::ACTION_COPY);
+	_view.signal_drag_begin ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_begin));
+	_view.signal_drag_motion ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_motion));
+	_view.signal_drag_data_received ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_data_received));
 
 	Config->ParameterChanged.connect (_config_connection, invalidator (*this), boost::bind (&TriggerClipPicker::parameter_changed, this, _1), gui_context ());
 
@@ -318,6 +325,19 @@ TriggerClipPicker::maybe_add_dir (std::string const& dir)
  */
 
 void
+TriggerClipPicker::drag_begin (Glib::RefPtr<Gdk::DragContext> const& context)
+{
+	TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
+	if (!rows.empty()) {
+		Glib::RefPtr< Gdk::Pixmap > pix = _view.create_row_drag_icon (*rows.begin ());
+
+		int w, h;
+		pix->get_size (w, h);
+		context->set_icon (pix->get_colormap (), pix, Glib::RefPtr<Gdk::Bitmap> (), 4, h / 2);
+	}
+}
+
+void
 TriggerClipPicker::drag_end (Glib::RefPtr<Gdk::DragContext> const&)
 {
 	_session->cancel_audition ();
@@ -425,6 +445,32 @@ TriggerClipPicker::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Selecti
 		}
 	}
 	data.set_uris (uris);
+}
+
+bool
+TriggerClipPicker::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int, int y, guint time)
+{
+	//list_dir ("/tmp/");
+	context->drag_status (Gdk::ACTION_COPY, time);
+	return true;
+}
+
+void
+TriggerClipPicker::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context, int /*x*/, int y, Gtk::SelectionData const& data, guint /*info*/, guint time)
+{
+	if (data.get_target () != "x-ardour/region.pbdid") {
+		return;
+	}
+		PBD::ID rid (data.get_data_as_string ());
+		boost::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
+		if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
+			//region->do_export ("/tmp/foo.flac");
+			context->drag_finish (true, false, time);
+		} else if (boost::dynamic_pointer_cast<MidiRegion> (region)) {
+			//region->do_export ("/tmp/foo.mid");
+			context->drag_finish (true, false, time);
+		}
+		context->drag_finish (true, false, time);
 }
 
 /* ****************************************************************************

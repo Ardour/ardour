@@ -115,7 +115,7 @@ TriggerPage::TriggerPage ()
 	target_table.push_back (Gtk::TargetEntry ("text/uri-list"));
 	target_table.push_back (Gtk::TargetEntry ("text/plain"));
 	target_table.push_back (Gtk::TargetEntry ("application/x-rootwin-drop"));
-	_no_strips.drag_dest_set (target_table);
+	_no_strips.drag_dest_set (target_table, DEST_DEFAULT_ALL, Gdk::ACTION_COPY);
 
 	_strip_group_box.pack_start (_cue_area_frame, false, false);
 	_strip_group_box.pack_start (_strip_scroller, true, true);
