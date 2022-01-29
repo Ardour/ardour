@@ -61,6 +61,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioregion.h"
 #include "ardour/boost_debug.h"
+#include "ardour/clip_library.h"
 #include "ardour/dB.h"
 #include "ardour/location.h"
 #include "ardour/midi_region.h"
@@ -4115,7 +4116,9 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 
 	assert (!(enable_processing && (target == NewTrigger)));
 
-	uint32_t trigger_slot = 0;
+	bool     copy_to_clip_library = false;
+	uint32_t trigger_slot         = 0;
+
 	string bounce_name;
 	switch (target) {
 		case NewSource:
@@ -4154,6 +4157,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 	{
 		Prompter dialog (true);
 		ArdourDropdown* tslot = 0;
+		Gtk::CheckButton* cliplib = 0;
 
 		switch (target) {
 			case NewSource:
@@ -4175,6 +4179,12 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 		dialog.set_position (Gtk::WIN_POS_MOUSE);
 
 		dialog.set_initial_text (bounce_name);
+
+		if (target != ReplaceRange) {
+			cliplib = manage (new Gtk::CheckButton (_("Copy to Clip Libary")));
+			dialog.get_vbox()->pack_start (*cliplib);
+			cliplib->show ();
+		}
 
 		if (target == NewSource) {
 			Label* label = manage (new Label (_("Bounced Range will appear in the Source list.")));
@@ -4211,6 +4221,10 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 		}
 
 		dialog.get_result (bounce_name);
+
+		if (cliplib && cliplib->get_active ()) {
+			copy_to_clip_library = true;
+		}
 	}
 
 	timepos_t start = selection->time[clicked_selection].start();
@@ -4254,6 +4268,10 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 		if (!in_command) {
 			begin_reversible_command (_("bounce range"));
 			in_command = true;
+		}
+
+		if (copy_to_clip_library) {
+			export_to_clip_library (r);
 		}
 
 		if (target == ReplaceRange) {

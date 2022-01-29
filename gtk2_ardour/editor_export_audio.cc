@@ -40,6 +40,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/chan_count.h"
+#include "ardour/clip_library.h"
 #include "ardour/midi_region.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
@@ -280,6 +281,7 @@ Editor::bounce_region_selection (bool with_processing)
 
 	/*prompt the user for a new name*/
 	string bounce_name;
+	bool   copy_to_clip_library = false;
 	{
 		ArdourWidgets::Prompter dialog (true);
 
@@ -289,8 +291,12 @@ Editor::bounce_region_selection (bool with_processing)
 		dialog.set_size_request (400, -1);
 		dialog.set_position (Gtk::WIN_POS_MOUSE);
 
-		dialog.add_button (_("Rename"), RESPONSE_ACCEPT);
+		dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
 		dialog.set_initial_text (bounce_name);
+
+		Gtk::CheckButton cliplib (_("Copy to Clip Libary"));
+		dialog.get_vbox()->pack_start (cliplib);
+		cliplib.show ();
 
 		Label label;
 		label.set_text (_("Bounced Region will appear in the Source list."));
@@ -307,6 +313,7 @@ Editor::bounce_region_selection (bool with_processing)
 			return;
 		}
 		dialog.get_result(bounce_name);
+		copy_to_clip_library = cliplib.get_active ();
 	}
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
@@ -323,6 +330,10 @@ Editor::bounce_region_selection (bool with_processing)
 			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, track->main_outs(), false, bounce_name);
 		} else {
 			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, boost::shared_ptr<Processor>(), false, bounce_name);
+		}
+
+		if (copy_to_clip_library) {
+			export_to_clip_library (r);
 		}
 	}
 }
