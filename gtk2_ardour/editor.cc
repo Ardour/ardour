@@ -5669,6 +5669,8 @@ Editor::add_stripables (StripableList& sl)
 
 	sl.sort (Stripable::Sorter());
 
+	DisplaySuspender ds;
+
 	for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
 
 		if ((*s)->is_foldbackbus()) {
@@ -5746,6 +5748,8 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 		/* the situation is under control */
 		return;
 	}
+
+	DisplaySuspender ds;
 
 	ENSURE_GUI_THREAD (*this, &Editor::timeaxisview_deleted, tv);
 
