@@ -129,8 +129,6 @@ VCATimeAxisView::~VCATimeAxisView ()
 void
 VCATimeAxisView::self_delete ()
 {
-	/* reset reference immediately rather than deferring to idle */
-	_vca.reset ();
 	delete_when_idle (this);
 }
 
