@@ -48,7 +48,6 @@ using std::endl;
 namespace ARDOUR {
 	namespace Properties {
 		PBD::PropertyDescriptor<bool> running;
-		PBD::PropertyDescriptor<bool> passthru;
 		PBD::PropertyDescriptor<bool> legato;
 		PBD::PropertyDescriptor<bool> use_follow_length;
 		PBD::PropertyDescriptor<Temporal::BBT_Offset> quantization;
@@ -628,7 +627,7 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 }
 
 void
-Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t& nframes, pframes_t&  dest_offset, bool passthru)
+Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t& nframes, pframes_t&  dest_offset)
 {
 	using namespace Temporal;
 
@@ -739,9 +738,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		nframes -= extra_offset;
 		dest_offset += extra_offset;
 
-		if (!passthru) {
-			/* XXX need to silence start of buffers up to dest_offset */
-		}
+		/* XXX need to silence start of buffers up to dest_offset */
 		break;
 
 	case WaitingForRetrigger:
@@ -1374,8 +1371,9 @@ AudioTrigger::retrigger ()
 }
 
 pframes_t
-AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end,
-                   pframes_t nframes, pframes_t dest_offset, bool passthru, double bpm, bool /* can_clear */)
+AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
+                   Temporal::Beats const & start, Temporal::Beats const & end,
+                   pframes_t nframes, pframes_t dest_offset, double bpm)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
 	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
@@ -1386,7 +1384,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	const bool do_stretch = stretching();
 
 	/* see if we're going to start or stop or retrigger in this run() call */
-	maybe_compute_next_transition (start_sample, start, end, nframes, dest_offset, passthru);
+	maybe_compute_next_transition (start_sample, start, end, nframes, dest_offset);
 	const pframes_t orig_nframes = nframes;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2, will stretch %3, nf will be %4\n", name(), enum_2_string (_state), do_stretch, nframes));
@@ -1576,17 +1574,10 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 			gain_t gain = _velocity_gain * _gain;  //incorporate the gain from velocity_effect
 
-			if (!passthru) {
-				buf.read_from (src, from_stretcher, dest_offset);
-				if (gain != 1.0f) {
-					buf.apply_gain (gain, from_stretcher);
-				}
+			if (gain != 1.0f) {
+				buf.accumulate_with_gain_from (src, from_stretcher, gain, dest_offset);
 			} else {
-				if (gain != 1.0f) {
-					buf.accumulate_with_gain_from (src, from_stretcher, gain, dest_offset);
-				} else {
-					buf.accumulate_from (src, from_stretcher, dest_offset);
-				}
+				buf.accumulate_from (src, from_stretcher, dest_offset);
 			}
 		}
 
@@ -1639,14 +1630,6 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		                                              index(), remaining_frames_for_run, remaining_frames_till_final, to_fill, final_processed_sample, process_index, transition_samples));
 
 		if (remaining_frames_till_final != 0) {
-
-			if (!passthru) {
-				for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
-
-					AudioBuffer& buf (bufs.get_audio (chn));
-					buf.silence (to_fill, covered_frames + dest_offset);
-				}
-			}
 
 			process_index += to_fill;
 			covered_frames += to_fill;
@@ -1926,7 +1909,7 @@ MIDITrigger::reload (BufferSet&, void*)
 pframes_t
 MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
                   Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
-                  pframes_t nframes, pframes_t dest_offset, bool passthru, double bpm, bool can_clear)
+                  pframes_t nframes, pframes_t dest_offset, double bpm)
 {
 	MidiBuffer& mb (bufs.get_midi (0));
 	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
@@ -1936,7 +1919,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 	samplepos_t last_event_samples = max_samplepos;
 
 	/* see if we're going to start or stop or retrigger in this run() call */
-	maybe_compute_next_transition (start_sample, start_beats, end_beats, nframes, dest_offset, passthru);
+	maybe_compute_next_transition (start_sample, start_beats, end_beats, nframes, dest_offset);
 	const pframes_t orig_nframes = nframes;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2\n", name(), enum_2_string (_state)));
@@ -1951,17 +1934,6 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 	case WaitingToStop:
 	case Stopping:
 		break;
-	}
-
-	if (!passthru && can_clear) {
-		/* XXX MidiBuffer::silence() doesn't work correctly - it does
-		   the same thing as MidiBuffer::clear(). It needs to be fixed
-		   so that we can just clear out events in the range we're
-		   processing. Until that is done, @param can_clear controls
-		   whether or not we can clear the whole buffer, and is set
-		   true for the first ::run() call per process cycle.
-		*/
-		mb.clear ();
 	}
 
 	Temporal::Beats last_event_timeline_beats;
@@ -2095,8 +2067,6 @@ Trigger::make_property_quarks ()
 {
 	Properties::running.property_id = g_quark_from_static_string (X_("running"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for running = %1\n", Properties::running.property_id));
-	Properties::passthru.property_id = g_quark_from_static_string (X_("passthru"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for passthru = %1\n", Properties::passthru.property_id));
 	Properties::follow_count.property_id = g_quark_from_static_string (X_("follow-count"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow_count = %1\n", Properties::follow_count.property_id));
 	Properties::use_follow_length.property_id = g_quark_from_static_string (X_("use-follow-length"));
@@ -2153,7 +2123,6 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, explicit_queue (64)
 	, _currently_playing (0)
 	, _stop_all (false)
-	, _pass_thru (false)
 	, _active_scene (-1)
 	, requests (1024)
 {
@@ -2667,14 +2636,6 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 }
 
 void
-TriggerBox::set_pass_thru (bool yn)
-{
-	_requests.pass_thru = yn;
-	PropertyChanged (Properties::passthru);
-	session().set_dirty();
-}
-
-void
 TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
 {
 	/* XXX a test to check if we have no usable slots would be good
@@ -2698,7 +2659,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 #endif
 
-	_pass_thru = _requests.pass_thru.load ();
 	bool allstop = _requests.stop_all.exchange (false);
 
 	/* STEP TWO: if latency compensation tells us that we haven't really
@@ -2709,8 +2669,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (start_sample < 0) {
 		return;
 	}
-
-	const pframes_t orig_nframes = nframes;
 
 	/* STEP THREE: triggers in audio tracks need a MIDI sidechain to be
 	 * able to receive inbound MIDI for triggering etc. This needs to run
@@ -2826,7 +2784,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	uint32_t max_chans = 0;
 	TriggerPtr nxt;
 	pframes_t dest_offset = 0;
-	bool can_clear = true;
 
 	while (nframes) {
 
@@ -2880,7 +2837,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					/* and switch */
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 => %2 switched to in legato mode\n", _currently_playing->index(), nxt->index()));
 					_currently_playing = nxt;
-					can_clear = true;
 					PropertyChanged (Properties::currently_playing);
 
 				} else {
@@ -2898,10 +2854,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						nxt->startup ();
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was finished, started %2\n", _currently_playing->index(), nxt->index()));
 						_currently_playing = nxt;
-						/* since we just switched, can_clear needs to be true again so that MIDITriggers can do the right
-						   thing for !passthru
-						*/
-						can_clear = true;
 						PropertyChanged (Properties::currently_playing);
 
 					} else if (_currently_playing->state() != Trigger::WaitingToStop) {
@@ -2946,7 +2898,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					}
 					_currently_playing = all_triggers[n];
 					_currently_playing->startup (start_quantization);
-					can_clear = true;
 					PropertyChanged (Properties::currently_playing);
 				} else {
 					_currently_playing = 0;
@@ -2974,28 +2925,15 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			max_chans = std::max (ar->n_channels(), max_chans);
 		}
 
-		frames_covered = _currently_playing->run (bufs, start_sample, end_sample, start_beats, end_beats, nframes, dest_offset, _pass_thru, bpm, can_clear);
+		frames_covered = _currently_playing->run (bufs, start_sample, end_sample, start_beats, end_beats, nframes, dest_offset, bpm);
 
 		nframes -= frames_covered;
 		start_sample += frames_covered;
 		dest_offset += frames_covered;
-		can_clear = false;
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("trig %1 ran, covered %2 state now %3 nframes now %4\n",
 		                                              _currently_playing->name(), frames_covered, enum_2_string (_currently_playing->state()), nframes));
 
-	}
-
-	if (nframes && !_pass_thru) {
-
-		/* didn't cover the entire nframes worth of the buffer, and not
-		 * doing pass thru, so silence whatever is left.
-		 */
-
-		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
-			AudioBuffer& buf (bufs.get_audio (chn));
-			buf.silence (nframes, (orig_nframes - nframes));
-		}
 	}
 
 	if (!_currently_playing) {
