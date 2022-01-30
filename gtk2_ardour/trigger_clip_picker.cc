@@ -23,6 +23,7 @@
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
+#include "pbd/openuri.h"
 #include "pbd/pathexpand.h"
 #include "pbd/search_path.h"
 #include "pbd/unwind.h"
@@ -44,6 +45,8 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/paths_dialog.h"
+#include "widgets/tooltips.h"
+#include "widgets/ardour_icon.h"
 
 #include "trigger_clip_picker.h"
 #include "ui_config.h"
@@ -98,18 +101,28 @@ TriggerClipPicker::TriggerClipPicker ()
 	_stop_btn.set_icon (ArdourWidgets::ArdourIcon::TransportStop);
 	_stop_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::stop_audition));
 
+	_open_library_btn.set_name ("generic button");
+	_open_library_btn.set_icon (ArdourWidgets::ArdourIcon::Folder);
+	_open_library_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::open_library));
+	_open_library_btn.set_no_show_all ();
+
 	_play_btn.set_sensitive (false);
 	_stop_btn.set_sensitive (false);
 
 	_autoplay_btn.set_can_focus(false);
 	_autoplay_btn.signal_toggled ().connect (sigc::mem_fun (*this, &TriggerClipPicker::autoplay_toggled));
 
+	ArdourWidgets::set_tooltip (_play_btn, _("Audition selected clip"));
+	ArdourWidgets::set_tooltip (_stop_btn, _("Stop the audition"));
+	ArdourWidgets::set_tooltip (_open_library_btn, _("Open clip library folder"));
+
 	/* Layout */
 	_auditable.set_homogeneous(false);
-	_auditable.attach (_play_btn,     0, 1, 0, 1, SHRINK, SHRINK);
-	_auditable.attach (_stop_btn,     1, 2, 0, 1, SHRINK, SHRINK);
-	_auditable.attach (_autoplay_btn, 2, 3, 0, 1, EXPAND | FILL, SHRINK);
-	_auditable.attach (_seek_slider,  0, 3, 1, 2, EXPAND | FILL, SHRINK);
+	_auditable.attach (_play_btn,         0, 1, 0, 1, SHRINK, SHRINK);
+	_auditable.attach (_stop_btn,         1, 2, 0, 1, SHRINK, SHRINK);
+	_auditable.attach (_autoplay_btn,     2, 3, 0, 1, EXPAND | FILL, SHRINK);
+	_auditable.attach (_open_library_btn, 3, 4, 0, 1, SHRINK, SHRINK);
+	_auditable.attach (_seek_slider,      0, 4, 1, 2, EXPAND | FILL, SHRINK);
 	_auditable.set_border_width (4);
 	_auditable.set_spacings (4);
 
@@ -573,6 +586,12 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 
 	_current_path = path;
 
+	if (_clip_library_dir == path) {
+		_open_library_btn.show ();
+	} else {
+		_open_library_btn.hide ();
+	}
+
 	std::vector<std::string> dirs;
 	std::vector<std::string> files;
 
@@ -643,6 +662,12 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 	if (!pc) {
 		_view.set_model (_model);
 	}
+}
+
+void
+TriggerClipPicker::open_library ()
+{
+	PBD::open_folder (_clip_library_dir);
 }
 
 /* ****************************************************************************

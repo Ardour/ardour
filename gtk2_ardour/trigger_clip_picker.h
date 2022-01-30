@@ -69,6 +69,7 @@ private:
 	void audition_progress (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
 	void stop_audition ();
 	void autoplay_toggled ();
+	void open_library ();
 	bool seek_button_press (GdkEventButton*);
 	bool seek_button_release (GdkEventButton*);
 
@@ -96,6 +97,7 @@ private:
 	Gtk::Table                   _auditable;
 	ArdourWidgets::ArdourButton  _play_btn;
 	ArdourWidgets::ArdourButton  _stop_btn;
+	ArdourWidgets::ArdourButton  _open_library_btn;
 	Gtk::HScale                  _seek_slider;
 	Gtk::CheckButton             _autoplay_btn;
 
