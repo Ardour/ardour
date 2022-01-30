@@ -1299,6 +1299,51 @@ icon_latency_clock (cairo_t* cr, const int width, const int height, const uint32
 	cairo_fill (cr);
 }
 
+static void
+icon_file_folder (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+
+	const double x0 = rint (x) - lc;
+	const double y0 = rint (y + std::min (x, y) * .05) - lc;
+	const double ww = rint (std::min (x, y) * .65);
+	const double hh = rint (std::min (x, y) * .65);
+
+	const double w2 = rint (std::min (x, y) * .40);
+	const double hl = rint (std::min (x, y) * .50);
+	const double h2 = rint (std::min (x, y) * .30);
+	const double oo = std::min (x, y) * .20;
+
+	cairo_move_to (cr, x0 - ww, y0 + hh);
+	cairo_line_to (cr, x0 - ww, y0 - hh);
+	cairo_line_to (cr, x0 - oo, y0 - hh);
+	cairo_line_to (cr, x0     , y0 - hl);
+
+	cairo_line_to (cr, x0 + w2, y0 - hl);
+	cairo_line_to (cr, x0 + w2, y0 - h2);
+	cairo_line_to (cr, x0 + ww, y0 - h2);
+
+	cairo_line_to (cr, x0 + w2, y0 + hh);
+	cairo_line_to (cr, x0 - ww, y0 + hh);
+	cairo_line_to (cr, x0 - w2, y0 - h2);
+	cairo_line_to (cr, x0 + w2, y0 - h2);
+
+#if 1
+	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
+	cairo_set_line_join (cr, CAIRO_LINE_JOIN_BEVEL);
+  Gtkmm2ext::set_source_rgba (cr, fg_color);
+  cairo_set_line_width (cr, lw);
+	cairo_stroke (cr);
+#else
+	VECTORICONSTROKE (lw, fg_color);
+#endif
+}
+
+
 /*****************************************************************************/
 
 bool
@@ -1441,6 +1486,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case LatencyClock: /* unused */
 			icon_latency_clock (cr, width, height, fg_color);
+			break;
+		case Folder:
+			icon_file_folder (cr, width, height, fg_color);
 			break;
 		case NoIcon:
 			rv = false;
