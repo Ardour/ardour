@@ -47,8 +47,6 @@ namespace ArdourCanvas
 	class Polygon;
 }
 
-class PassThru;
-
 class Loopster : public ArdourCanvas::Rectangle
 {
 public:
@@ -75,7 +73,6 @@ public:
 
 	ArdourCanvas::Text*    name_text;
 
-	void toggle_thru ();
 	void maybe_update ();
 	bool event_handler (GdkEvent*);
 	void selection_change ();
@@ -98,7 +95,6 @@ private:
 	boost::shared_ptr<ARDOUR::TriggerBox> _triggerbox;
 
 	Loopster* _loopster;
-	PassThru* _passthru;
 
 	Gtk::ColorSelectionDialog _color_dialog;
 	Gtk::Menu* _context_menu;
