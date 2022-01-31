@@ -4288,6 +4288,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 			playlist->add_region (copy, start);
 		} else if (target == NewTrigger) {
 			rtv->track ()->triggerbox ()->set_from_selection (trigger_slot, r);
+			rtv->track ()->presentation_info ().set_trigger_track (true);
 		}
 
 		vector<Command*> cmds;
