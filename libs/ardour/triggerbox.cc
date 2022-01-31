@@ -1532,8 +1532,10 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 				if (transition_samples + retrieved > expected_end_sample) {
 					/* final pull from stretched data into output buffers */
-					from_stretcher = std::min ((samplecnt_t) from_stretcher, expected_end_sample - process_index);
+					from_stretcher = std::min ((samplecnt_t) from_stretcher, final_processed_sample - process_index);
 					// cerr << "FS#2 from ees " << expected_end_sample << " - " << process_index << " = " << from_stretcher << endl;
+
+					fade_out = true;
 
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 total retrieved data %2 exceeds theoretical size %3, truncate from_stretcher to %4\n",
 					                                              index(), retrieved, expected_end_sample - transition_samples, from_stretcher));
