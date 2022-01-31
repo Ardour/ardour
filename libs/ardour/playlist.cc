@@ -2052,6 +2052,15 @@ Playlist::find_prev_region_start (timepos_t const & at)
 				closest = distance;
 			}
 		}
+
+		/* XXX may be able to break out of loop here if first_sample >=
+		   at, since regions should be sorted by position. Check this.
+		*/
+	}
+
+	if (ret == timepos_t::max (at.time_domain())) {
+		/* no earlier region found */
+		ret = timepos_t (at.time_domain());
 	}
 
 	return ret;
