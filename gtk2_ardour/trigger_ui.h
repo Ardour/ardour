@@ -35,6 +35,8 @@ namespace Gtk
 	class Menu;
 }
 
+class TriggerJumpDialog;
+
 class TriggerUI
 {
 public:
@@ -43,6 +45,7 @@ public:
 
 	void set_trigger (ARDOUR::TriggerReference);
 
+	virtual void on_trigger_set () {}
 	virtual void on_trigger_changed (PBD::PropertyChange const& ) = 0;
 
 	static std::string follow_action_to_string (ARDOUR::FollowAction const &);
@@ -72,6 +75,9 @@ public:
 	void launch_context_menu ();
 	void follow_context_menu ();
 	void context_menu ();
+
+	void edit_jump_done (int r, TriggerJumpDialog* d);
+	void edit_jump();
 
 	void set_follow_action (ARDOUR::FollowAction const &);
 	void set_launch_style (ARDOUR::Trigger::LaunchStyle);

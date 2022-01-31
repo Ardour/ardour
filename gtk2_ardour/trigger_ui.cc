@@ -44,8 +44,10 @@
 #include "keyboard.h"
 #include "public_editor.h"
 #include "region_view.h"
-#include "trigger_ui.h"
+#include "trigger_jump_dialog.h"
 #include "ui_config.h"
+
+#include "trigger_ui.h"
 
 #include "pbd/i18n.h"
 
@@ -580,46 +582,49 @@ TriggerUI::follow_context_menu ()
 	MenuList& items = _follow_context_menu->items ();
 	_follow_context_menu->set_name ("ArdourContextMenu");
 
-	RadioMenuItem::Group fagroup;
-
 	_ignore_menu_action = true;
 
-	items.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::None))));
-	if (trigger ()->follow_action0 ().type == FollowAction::None) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
-	}
-	items.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::Stop))));
-	if (trigger ()->follow_action0 ().type == FollowAction::Stop) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
-	}
-	items.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::Again))));
-	if (trigger ()->follow_action0 ().type == FollowAction::Again) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
-	}
-	items.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::ForwardTrigger))));
-	if (trigger ()->follow_action0 ().type == FollowAction::ForwardTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
-	}
-	items.push_back (RadioMenuElem (fagroup, TriggerUI::follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::ReverseTrigger))));
-	if (trigger ()->follow_action0 ().type == FollowAction::ReverseTrigger) {
-		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
-	}
+	items.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::None))));
+	items.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::Stop))));
+	items.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::Again))));
+	items.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::ForwardTrigger))));
+	items.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ReverseTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::ReverseTrigger))));
 
 	Menu*     jump_menu = manage (new Menu);
 	MenuList& jitems      = jump_menu->items ();
 	for (int i = 0; i < default_triggers_per_box; i++) {
 		FollowAction jump_fa = (FollowAction::JumpTrigger);
 		jump_fa.targets.set(i);
-		jitems.push_back (RadioMenuElem (fagroup, string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action), jump_fa)));
-		if (trigger ()->follow_action0 () == jump_fa) {
-			dynamic_cast<Gtk::CheckMenuItem*> (&jitems.back ())->set_active (true);
-		}
+		jitems.push_back (MenuElem (string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action), jump_fa)));
 	}
+	jitems.push_back (MenuElem (_("Multi"), sigc::mem_fun (*this, &TriggerUI::edit_jump)));
+
 	items.push_back (MenuElem (_("Jump..."), *jump_menu));
 
 	_ignore_menu_action = false;
 
 	_follow_context_menu->popup (1, gtk_get_current_event_time ());
+}
+
+void
+TriggerUI::edit_jump ()
+{
+	if (_ignore_menu_action) {
+		return;
+	}
+
+	TriggerJumpDialog* d = new TriggerJumpDialog ();
+	d->set_trigger(tref);
+	d->show_all ();
+
+	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump_done), d));
+}
+
+void
+TriggerUI::edit_jump_done (int r, TriggerJumpDialog* d)
+{
+	d->done (r);
+	delete d;
 }
 
 
@@ -830,4 +835,6 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 	tref.box->PropertyChanged.connect (trigger_connections, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
 
 	tref.box->TriggerSwapped.connect (trigger_swap_connection, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
+
+	on_trigger_set();  //derived classes can do initialization here
 }

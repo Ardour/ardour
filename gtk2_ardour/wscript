@@ -314,6 +314,7 @@ gtk2_ardour_sources = [
         'transport_masters_dialog.cc',
         'transpose_dialog.cc',
         'trigger_clip_picker.cc',
+        'trigger_jump_dialog.cc',
         'trigger_page.cc',
         'trigger_region_list.cc',
         'trigger_route_list.cc',
