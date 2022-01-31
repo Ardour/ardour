@@ -1524,13 +1524,15 @@ ArdourWidgets::ArdourIcon::expose_with_text (GdkEventExpose* ev, Gtk::Widget* w,
 	gdk_cairo_rectangle (cr, &ev->area);
 	cairo_clip (cr);
 
-	int width  = win->get_width ();
-	int height = win->get_height ();
+	int const width  = win->get_width ();
+	int const height = win->get_height ();
+
 
 	Glib::RefPtr<Gtk::Style> style = w->get_style ();
 
-	Gdk::Color     fg (style->get_fg (Gtk::STATE_NORMAL));
-	const uint32_t fg_color = RGBA_TO_UINT (fg.get_red () / 255., fg.get_green () / 255, fg.get_blue () / 255, 255);
+	Gdk::Color fg (style->get_fg (Gtk::STATE_NORMAL));
+	int const  alpha    = icon == ShadedPlusSign ? 0x80 : 0xff;
+	uint32_t   fg_color = RGBA_TO_UINT (fg.get_red () / 255., fg.get_green () / 255, fg.get_blue () / 255, alpha);
 
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (w->get_pango_context ());
 	layout->set_font_description (style->get_font ());
@@ -1552,6 +1554,8 @@ ArdourWidgets::ArdourIcon::expose_with_text (GdkEventExpose* ev, Gtk::Widget* w,
 	} else {
 		text_height = 0;
 	}
+
+	fg_color |= 0xff; /* restore alpha */
 
 	ArdourIcon::render (cr, icon, win->get_width (), win->get_height () - text_height, Gtkmm2ext::ExplicitActive, fg_color);
 
