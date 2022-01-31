@@ -592,14 +592,14 @@ TriggerUI::follow_context_menu ()
 
 	Menu*     jump_menu = manage (new Menu);
 	MenuList& jitems      = jump_menu->items ();
+	jitems.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), false)));
 	for (int i = 0; i < default_triggers_per_box; i++) {
 		FollowAction jump_fa = (FollowAction::JumpTrigger);
 		jump_fa.targets.set(i);
 		jitems.push_back (MenuElem (string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action), jump_fa)));
 	}
-	jitems.push_back (MenuElem (_("Multi"), sigc::mem_fun (*this, &TriggerUI::edit_jump)));
 
-	items.push_back (MenuElem (_("Jump..."), *jump_menu));
+	items.push_back (MenuElem (_("Jump"), *jump_menu));
 
 	_ignore_menu_action = false;
 
@@ -607,13 +607,13 @@ TriggerUI::follow_context_menu ()
 }
 
 void
-TriggerUI::edit_jump ()
+TriggerUI::edit_jump (bool right_fa)
 {
 	if (_ignore_menu_action) {
 		return;
 	}
 
-	TriggerJumpDialog* d = new TriggerJumpDialog ();
+	TriggerJumpDialog* d = new TriggerJumpDialog (right_fa);
 	d->set_trigger(tref);
 	d->show_all ();
 
@@ -752,7 +752,7 @@ TriggerUI::quantize_length_to_string (BBT_Offset const & ql)
 }
 
 std::string
-TriggerUI::follow_action_to_string (FollowAction const & fa)
+TriggerUI::follow_action_to_string (FollowAction const & fa, bool with_targets)
 {
 	switch (fa.type) {
 	case FollowAction::None:
@@ -770,10 +770,24 @@ TriggerUI::follow_action_to_string (FollowAction const & fa)
 	case FollowAction::LastTrigger:
 		return _("Last");
 	case FollowAction::JumpTrigger:
-		return _("Jump");
+		if (!with_targets) {
+			return _("Jump");
+		}
 	}
-	/*NOTREACHED*/
-	return std::string();
+
+	/* Jump case, and target(s) are desired */
+	if ( fa.targets.count() == 1 ) {  //jump to a specific row
+		for (int i = 0; i < default_triggers_per_box; i++) {
+			if (fa.targets.test(i)) {
+				return string_compose (_("Jump to: %1"), (char)('A' + i));
+			}
+		}
+	} else {
+		return _("Jump: Multi");
+	}
+
+	/* should never be reached */
+	return "";
 }
 
 std::string

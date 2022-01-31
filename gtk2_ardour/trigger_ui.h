@@ -48,7 +48,7 @@ public:
 	virtual void on_trigger_set () {}
 	virtual void on_trigger_changed (PBD::PropertyChange const& ) = 0;
 
-	static std::string follow_action_to_string (ARDOUR::FollowAction const &);
+	static std::string follow_action_to_string (ARDOUR::FollowAction const &, bool with_targets=false);
 	static std::string quantize_length_to_string (Temporal::BBT_Offset const &);
 	static std::string launch_style_to_string (ARDOUR::Trigger::LaunchStyle);
 	static std::string stretch_mode_to_string (ARDOUR::Trigger::StretchMode);
@@ -77,7 +77,7 @@ public:
 	void context_menu ();
 
 	void edit_jump_done (int r, TriggerJumpDialog* d);
-	void edit_jump();
+	void edit_jump(bool right_fa);
 
 	void set_follow_action (ARDOUR::FollowAction const &);
 	void set_launch_style (ARDOUR::Trigger::LaunchStyle);

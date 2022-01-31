@@ -30,7 +30,7 @@ namespace ArdourWidgets {
 class TriggerJumpDialog : public ArdourDialog, public TriggerUI
 {
 public:
-	TriggerJumpDialog ();
+	TriggerJumpDialog (bool right_fa);
 
 	void done (int);
 
@@ -40,6 +40,8 @@ public:
 
 private:
 	Gtk::Table _table;
+
+	bool _right_fa;
 
 	typedef std::list <ArdourWidgets::ArdourButton*> ButtonList;
 	ButtonList _buttonlist;

@@ -145,13 +145,13 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_left.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 0)));
 		Menu*     jump_menu = manage (new Menu);
 		MenuList& jitems      = jump_menu->items ();
+		jitems.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), false)));
 		for (int i = 0; i < default_triggers_per_box; i++) {
 			FollowAction jump_fa = (FollowAction::JumpTrigger);
 			jump_fa.targets.set(i);
 			jitems.push_back (MenuElem (string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 0)));
 		}
-		//jitems.push_back (MenuElem ("Combo...", sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::JumpTrigger), 0)));
-	_follow_left.AddMenuElem (MenuElem (_("Jump..."), *jump_menu));
+	_follow_left.AddMenuElem (MenuElem (_("Jump"), *jump_menu));
 	_follow_left.set_sizing_text (longest_follow);
 
 	_follow_right.set_name("FollowAction");
@@ -162,12 +162,13 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_right.AddMenuElem (MenuElem (follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), FollowAction (FollowAction::ForwardTrigger), 1)));
 		Menu*     jump_menu_1 = manage (new Menu);
 		MenuList& jitems_1      = jump_menu_1->items ();
+		jitems_1.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), true)));
 		for (int i = 0; i < default_triggers_per_box; i++) {
 			FollowAction jump_fa = (FollowAction::JumpTrigger);
 			jump_fa.targets.set(i);
 			jitems_1.push_back (MenuElem (string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 1)));
 		}
-	_follow_right.AddMenuElem (MenuElem (_("Jump..."), *jump_menu_1));
+	_follow_right.AddMenuElem (MenuElem (_("Jump"), *jump_menu_1));
 	_follow_right.set_sizing_text (longest_follow);
 
 	_launch_style_button.set_name("FollowAction");
@@ -580,7 +581,7 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (pc.contains (Properties::follow_action0)) {
-		_follow_left.set_text (follow_action_to_string (trigger()->follow_action0 ()));
+		_follow_left.set_text (follow_action_to_string (trigger()->follow_action0 (), true));
 
 		/* set widget sensitivity based on 'left' follow action */
 		bool follow_widgets_sensitive = trigger()->follow_action0 ().type != FollowAction::None;
@@ -610,7 +611,7 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (pc.contains (Properties::follow_action1)) {
-		_follow_right.set_text (follow_action_to_string (trigger()->follow_action1 ()));
+		_follow_right.set_text (follow_action_to_string (trigger()->follow_action1 (), true));
 	}
 
 	if (pc.contains (Properties::velocity_effect)) {

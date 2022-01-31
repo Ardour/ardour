@@ -42,8 +42,9 @@ using namespace ArdourWidgets;
  *    @param n Notes to edit.
  */
 
-TriggerJumpDialog::TriggerJumpDialog ()
+TriggerJumpDialog::TriggerJumpDialog (bool right)
 	: ArdourDialog ("")
+	, _right_fa(right)
 {
 //	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 //	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_ACCEPT);
@@ -83,12 +84,16 @@ TriggerJumpDialog::on_trigger_set ()
 void
 TriggerJumpDialog::button_clicked (int b)
 {
-	FollowAction jump_fa = trigger()->follow_action0();
+	FollowAction jump_fa = _right_fa ? trigger()->follow_action1() : trigger()->follow_action0();
 
 	jump_fa.type = FollowAction::JumpTrigger;  //should already be the case if we are in this dialog, but let's take no chances
 	jump_fa.targets.flip(b);
 
-	trigger()->set_follow_action0(jump_fa);
+	if (_right_fa) {
+		trigger()->set_follow_action1(jump_fa);
+	} else {
+		trigger()->set_follow_action0(jump_fa);
+	}
 }
 
 void
@@ -98,7 +103,7 @@ TriggerJumpDialog::on_trigger_changed (PropertyChange const& what)
 	
 	TriggerBox &box = trigger()->box();
 
-	FollowAction jump_fa = trigger()->follow_action0();
+	FollowAction jump_fa = _right_fa ? trigger()->follow_action1() : trigger()->follow_action0();
 
 	//update button display state
 	ButtonList::const_iterator b = _buttonlist.begin ();
