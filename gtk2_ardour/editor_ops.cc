@@ -4128,7 +4128,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 			bounce_name = "Consolidated";
 			break;
 		case NewTrigger:
-			bounce_name = "Trigger";
+			bounce_name = "Unnamed Clip";
 			break;
 	}
 
@@ -4169,7 +4169,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 				dialog.add_button (_("Rename"), RESPONSE_ACCEPT);
 				break;
 			case NewTrigger:
-				dialog.set_prompt (_("Name for Trigger:"));
+				dialog.set_prompt (_("Name for Trigger Clip:"));
 				dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
 				break;
 		}
