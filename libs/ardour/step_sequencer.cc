@@ -224,7 +224,7 @@ Step::adjust_octave (int amt)
 }
 
 bool
-Step::run (MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t end_sample, MidiStateTracker&  tracker)
+Step::run (MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t end_sample, MidiNoteTracker&  tracker)
 {
 	for (size_t n = 0; n < _parameters_per_step; ++n) {
 		check_parameter (n, buf, running, start_sample, end_sample);
@@ -264,7 +264,7 @@ Step::dump_parameter (MusicTimeEvents& events, size_t n, Temporal::Beats const &
 }
 
 void
-Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t end_sample, MidiStateTracker& tracker)
+Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t end_sample, MidiNoteTracker& tracker)
 {
 	Note& note (_notes[n]);
 
@@ -518,7 +518,7 @@ StepSequence::set_channel (int c)
 }
 
 bool
-StepSequence::run (MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t end_sample, MidiStateTracker& tracker)
+StepSequence::run (MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t end_sample, MidiNoteTracker& tracker)
 {
 	const size_t s = _sequencer.start_step();
 	const size_t e = _sequencer.end_step();

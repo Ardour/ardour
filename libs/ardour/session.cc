@@ -5730,7 +5730,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	string legal_playlist_name;
 	string possible_path;
 	MidiBuffer resolved (256);
-	MidiStateTracker tracker;
+	MidiNoteTracker tracker;
 	DataType data_type = track.data_type();
 	std::vector<MidiSourceLockMap*> midi_source_locks;
 

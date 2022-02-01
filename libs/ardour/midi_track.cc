@@ -528,7 +528,7 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
                          bool                         include_endpoint,
                          bool                         for_export,
                          bool                         for_freeze,
-                         MidiStateTracker&            tracker)
+                         MidiNoteTracker&            tracker)
 {
 	if (buffers.count().n_midi() == 0) {
 		return -1;
@@ -547,7 +547,7 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 	 * subsequent call
 	 */
 
-	MidiStateTracker ignored;
+	MidiNoteTracker ignored;
 
 	/* XXX this doesn't fail, other than if the lock cannot be obtained */
 	mpl->rendered()->read (buffers.get_midi(0), start, start+nframes, ignored, start);

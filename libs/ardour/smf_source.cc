@@ -216,7 +216,7 @@ SMFSource::read_unlocked (const Lock&                     lock,
                           timepos_t const &               start,
                           timecnt_t const &               duration,
                           Temporal::Range*                loop_range,
-                          MidiStateTracker*               tracker,
+                          MidiNoteTracker*               tracker,
                           MidiChannelFilter*              filter) const
 {
 	int      ret  = 0;

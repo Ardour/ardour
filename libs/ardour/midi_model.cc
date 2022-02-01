@@ -1299,7 +1299,7 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
                              bool                              offset_events)
 {
 	ReadLock lock(read_lock());
-	MidiStateTracker mst;
+	MidiNoteTracker mst;
 
 	const bool old_percussive = percussive();
 	set_percussive(false);

@@ -44,7 +44,7 @@ namespace ARDOUR {
 
 class MidiChannelFilter;
 class MidiModel;
-class MidiStateTracker;
+class MidiNoteTracker;
 
 template<typename T> class MidiRingBuffer;
 
@@ -96,7 +96,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	 * @param loop_range If non-null, all event times will be mapped into this loop range.
 	 * @param cursor Cached iterator to start copying events
 	 * @param filter Channel filter to apply or NULL to disable filter
-	 * @param tracker an optional pointer to MidiStateTracker object, for note on/off tracking.
+	 * @param tracker an optional pointer to MidiNoteTracker object, for note on/off tracking.
 	 * @param filtered Parameters whose MIDI messages will not be returned.
 	 */
 	virtual timecnt_t midi_read (const Lock&                       lock,
@@ -106,7 +106,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	                             timecnt_t const &                  cnt,
 	                             Temporal::Range*                   loop_range,
 	                             MidiCursor&                        cursor,
-	                             MidiStateTracker*                  tracker,
+	                             MidiNoteTracker*                  tracker,
 	                             MidiChannelFilter*                 filter,
 	                             const std::set<Evoral::Parameter>& filtered);
 
@@ -212,7 +212,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	                                 timepos_t const &               start,
 	                                 timecnt_t const &               cnt,
 	                                 Temporal::Range*                loop_range,
-	                                 MidiStateTracker*               tracker,
+	                                 MidiNoteTracker*               tracker,
 	                                 MidiChannelFilter*              filter) const = 0;
 
 	/** Write data to this source from a MidiRingBuffer.

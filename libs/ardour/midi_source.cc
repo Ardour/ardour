@@ -180,7 +180,7 @@ MidiSource::midi_read (const Lock&                        lm,
                        timecnt_t const &                  cnt,
                        Temporal::Range*                   loop_range,
                        MidiCursor&                        cursor,
-                       MidiStateTracker*                  tracker,
+                       MidiNoteTracker*                  tracker,
                        MidiChannelFilter*                 filter,
                        const std::set<Evoral::Parameter>& filtered)
 {

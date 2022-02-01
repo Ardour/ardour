@@ -287,7 +287,7 @@ MidiPlaylist::contained_automation()
 void
 MidiPlaylist::render (MidiChannelFilter* filter)
 {
-	typedef pair<MidiStateTracker*,samplepos_t> TrackerInfo;
+	typedef pair<MidiNoteTracker*,samplepos_t> TrackerInfo;
 
 	Playlist::RegionReadLock rl (this);
 

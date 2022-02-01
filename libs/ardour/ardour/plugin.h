@@ -398,7 +398,7 @@ private:
 	virtual void add_state (XMLNode*) const = 0;
 
 	bool             _have_presets;
-	MidiStateTracker _tracker;
+	MidiNoteTracker _tracker;
 	BufferSet        _pending_stop_events;
 	bool             _have_pending_stop_events;
 	PresetRecord     _last_preset;

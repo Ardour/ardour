@@ -64,8 +64,8 @@ class BeatBox {
 	superclock_t measure_superclocks;
 	int _quantize_divisor;
 	bool clear_pending;
-	ARDOUR::MidiStateTracker inbound_tracker;
-	ARDOUR::MidiStateTracker outbound_tracker;
+	ARDOUR::MidiNoteTracker inbound_tracker;
+	ARDOUR::MidiNoteTracker outbound_tracker;
 
 	struct Event {
 		superclock_t time;

@@ -494,7 +494,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
   private:
 	PBD::ID data_source;
-	MidiStateTracker tracker;
+	MidiNoteTracker tracker;
 	PBD::ScopedConnection content_connection;
 
 	Temporal::Beats final_beat;

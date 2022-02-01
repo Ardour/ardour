@@ -87,7 +87,7 @@ public:
 		return boost::shared_ptr<Region> ();
 	}
 
-	int export_stuff (BufferSet&, samplepos_t, samplecnt_t, boost::shared_ptr<Processor>, bool, bool, bool, MidiStateTracker&) { return -1; }
+	int export_stuff (BufferSet&, samplepos_t, samplecnt_t, boost::shared_ptr<Processor>, bool, bool, bool, MidiNoteTracker&) { return -1; }
 
 	void set_audition_synth_info(PluginInfoPtr in) { audition_synth_info = in; }
 

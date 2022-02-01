@@ -99,7 +99,7 @@ public:
 	                         timepos_t const &               start,
 	                         timecnt_t const &               cnt,
 	                         Temporal::Range*                loop_range,
-	                         MidiStateTracker*               tracker,
+	                         MidiNoteTracker*               tracker,
 	                         MidiChannelFilter*              filter) const;
 
 	timecnt_t write_unlocked (const Lock&                  lock,

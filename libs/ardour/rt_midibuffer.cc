@@ -252,7 +252,7 @@ item_item_earlier (ARDOUR::RTMidiBuffer::Item const & item, ARDOUR::RTMidiBuffer
 }
 
 uint32_t
-RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiStateTracker& tracker, samplecnt_t offset)
+RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiNoteTracker& tracker, samplecnt_t offset)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_lock, Glib::Threads::TRY_LOCK);
 

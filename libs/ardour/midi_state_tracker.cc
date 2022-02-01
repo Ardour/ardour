@@ -33,13 +33,13 @@ using namespace std;
 using namespace ARDOUR;
 
 
-MidiStateTracker::MidiStateTracker ()
+MidiNoteTracker::MidiNoteTracker ()
 {
 	reset ();
 }
 
 void
-MidiStateTracker::reset ()
+MidiNoteTracker::reset ()
 {
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: reset\n", this));
 	memset (_active_notes, 0, sizeof (_active_notes));
@@ -47,7 +47,7 @@ MidiStateTracker::reset ()
 }
 
 void
-MidiStateTracker::add (uint8_t note, uint8_t chn)
+MidiNoteTracker::add (uint8_t note, uint8_t chn)
 {
 	if (_active_notes[note+128 * chn] == 0) {
 		++_on;
@@ -64,7 +64,7 @@ MidiStateTracker::add (uint8_t note, uint8_t chn)
 }
 
 void
-MidiStateTracker::remove (uint8_t note, uint8_t chn)
+MidiNoteTracker::remove (uint8_t note, uint8_t chn)
 {
 	switch (_active_notes[note + 128 * chn]) {
 	case 0:
@@ -84,7 +84,7 @@ MidiStateTracker::remove (uint8_t note, uint8_t chn)
 }
 
 void
-MidiStateTracker::track (const MidiBuffer::const_iterator &from, const MidiBuffer::const_iterator &to)
+MidiNoteTracker::track (const MidiBuffer::const_iterator &from, const MidiBuffer::const_iterator &to)
 {
 	for (MidiBuffer::const_iterator i = from; i != to; ++i) {
 		track(*i);
@@ -92,7 +92,7 @@ MidiStateTracker::track (const MidiBuffer::const_iterator &from, const MidiBuffe
 }
 
 void
-MidiStateTracker::track (const uint8_t* evbuf)
+MidiNoteTracker::track (const uint8_t* evbuf)
 {
 	const uint8_t type = evbuf[0] & 0xF0;
 	const uint8_t chan = evbuf[0] & 0x0F;
@@ -110,7 +110,7 @@ MidiStateTracker::track (const uint8_t* evbuf)
 }
 
 void
-MidiStateTracker::resolve_notes (MidiBuffer &dst, samplepos_t time)
+MidiNoteTracker::resolve_notes (MidiBuffer &dst, samplepos_t time)
 {
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 MB-resolve notes @ %2 on = %3\n", this, time, _on));
 
@@ -138,7 +138,7 @@ MidiStateTracker::resolve_notes (MidiBuffer &dst, samplepos_t time)
 }
 
 void
-MidiStateTracker::resolve_notes (Evoral::EventSink<samplepos_t> &dst, samplepos_t time)
+MidiNoteTracker::resolve_notes (Evoral::EventSink<samplepos_t> &dst, samplepos_t time)
 {
 	uint8_t buf[3];
 
@@ -168,7 +168,7 @@ MidiStateTracker::resolve_notes (Evoral::EventSink<samplepos_t> &dst, samplepos_
 }
 
 void
-MidiStateTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, Temporal::Beats time)
+MidiNoteTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, Temporal::Beats time)
 {
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 MS-resolve notes @ %2 on = %3\n", this, time, _on));
 
@@ -199,7 +199,7 @@ MidiStateTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, 
 }
 
 void
-MidiStateTracker::dump (ostream& o)
+MidiNoteTracker::dump (ostream& o)
 {
 	o << "******\n";
 	for (int c = 0; c < 16; ++c) {

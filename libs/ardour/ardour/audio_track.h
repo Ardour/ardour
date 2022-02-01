@@ -50,7 +50,7 @@ class LIBARDOUR_API AudioTrack : public Track
 	                                        std::string const& name);
 	int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
 	                  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
-	                  MidiStateTracker&);
+	                  MidiNoteTracker&);
 
 	int set_state (const XMLNode&, int version);
 

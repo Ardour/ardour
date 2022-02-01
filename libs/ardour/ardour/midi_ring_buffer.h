@@ -61,7 +61,7 @@ public:
 	void resolve_tracker (Evoral::EventSink<samplepos_t>& dst, samplepos_t);
 
 private:
-	MidiStateTracker _tracker;
+	MidiNoteTracker _tracker;
 };
 
 

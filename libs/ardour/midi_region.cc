@@ -179,7 +179,7 @@ MidiRegion::read_at (Evoral::EventSink<samplepos_t>& out,
                      MidiCursor&                     cursor,
                      uint32_t                        chan_n,
                      NoteMode                        mode,
-                     MidiStateTracker*               tracker,
+                     MidiNoteTracker*               tracker,
                      MidiChannelFilter*              filter) const
 {
 	return _read_at (_sources, out, position, dur, loop_range, cursor, chan_n, mode, tracker, filter);
@@ -206,7 +206,7 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
                       MidiCursor&                     cursor,
                       uint32_t                        chan_n,
                       NoteMode                        mode,
-                      MidiStateTracker*               tracker,
+                      MidiNoteTracker*               tracker,
                       MidiChannelFilter*              filter) const
 {
 	timecnt_t dur (xdur);
@@ -320,7 +320,7 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 #endif
 
 	MidiCursor cursor;
-	MidiStateTracker tracker;
+	MidiNoteTracker tracker;
 
 	/* This call reads events from a source and writes them to `dst' timed in session samples */
 

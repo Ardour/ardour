@@ -44,7 +44,7 @@
 namespace ARDOUR {
 
 class MidiBuffer;
-class MidiStateTracker;
+class MidiNoteTracker;
 class StepSequencer;
 class StepSequence;
 class TempoMap;
@@ -105,7 +105,7 @@ class Step : public PBD::Stateful {
 	void set_beat (Temporal::Beats const & beat);
 	Temporal::Beats beat () const { return _nominal_beat; }
 
-	bool run (MidiBuffer& buf, bool running, samplepos_t, samplepos_t, MidiStateTracker&);
+	bool run (MidiBuffer& buf, bool running, samplepos_t, samplepos_t, MidiNoteTracker&);
 
 	bool skipped() const { return _skipped; }
 	void set_skipped (bool);
@@ -158,7 +158,7 @@ class Step : public PBD::Stateful {
 	ParameterValue _parameters[_parameters_per_step];
 	size_t _repeat;
 
-	void check_note (size_t n, MidiBuffer& buf, bool, samplepos_t, samplepos_t, MidiStateTracker&);
+	void check_note (size_t n, MidiBuffer& buf, bool, samplepos_t, samplepos_t, MidiNoteTracker&);
 	void check_parameter (size_t n, MidiBuffer& buf, bool, samplepos_t, samplepos_t);
 	void dump_note (MusicTimeEvents&, size_t n, Temporal::Beats const &) const;
 	void dump_parameter (MusicTimeEvents&, size_t n, Temporal::Beats const &) const;
@@ -204,7 +204,7 @@ class StepSequence : public PBD::Stateful
 	void reschedule (Temporal::Beats const &, Temporal::Beats const &);
 	void schedule (Temporal::Beats const &);
 
-	bool run (MidiBuffer& buf, bool running, samplepos_t, samplepos_t, MidiStateTracker&);
+	bool run (MidiBuffer& buf, bool running, samplepos_t, samplepos_t, MidiNoteTracker&);
 
 	StepSequencer& sequencer() const { return _sequencer; }
 
@@ -281,7 +281,7 @@ class StepSequencer : public PBD::Stateful
 	bool            _running;
 	size_t          _step_capacity;
 
-	ARDOUR::MidiStateTracker outbound_tracker;
+	ARDOUR::MidiNoteTracker outbound_tracker;
 
 	struct Request {
 

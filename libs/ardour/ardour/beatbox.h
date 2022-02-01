@@ -66,7 +66,7 @@ class BeatBox : public ARDOUR::Processor {
   private:
 	StepSequencer* _sequencer;
 
-	ARDOUR::MidiStateTracker inbound_tracker;
+	ARDOUR::MidiNoteTracker inbound_tracker;
 
 	bool fill_midi_source (boost::shared_ptr<SMFSource>);
 

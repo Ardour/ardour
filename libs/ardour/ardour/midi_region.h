@@ -46,7 +46,7 @@ class MidiChannelFilter;
 class MidiFilter;
 class MidiModel;
 class MidiSource;
-class MidiStateTracker;
+class MidiNoteTracker;
 class Playlist;
 class Route;
 class Session;
@@ -71,7 +71,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	                   MidiCursor& cursor,
 	                   uint32_t  chan_n = 0,
 	                   NoteMode  mode = Sustained,
-	                   MidiStateTracker* tracker = 0,
+	                   MidiNoteTracker* tracker = 0,
 	                   MidiChannelFilter* filter = 0) const;
 
 	timecnt_t master_read_at (MidiRingBuffer<samplepos_t>& dst,
@@ -136,7 +136,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	                    MidiCursor& cursor,
 	                    uint32_t chan_n = 0,
 	                    NoteMode mode = Sustained,
-	                    MidiStateTracker* tracker = 0,
+	                    MidiNoteTracker* tracker = 0,
 	                    MidiChannelFilter* filter = 0) const;
 
 	void register_properties ();

@@ -37,10 +37,10 @@ class MidiSource;
 /** Tracks played notes, so they can be resolved in potential stuck note
  * situations (e.g. looping, transport stop, etc).
  */
-class LIBARDOUR_API MidiStateTracker
+class LIBARDOUR_API MidiNoteTracker
 {
 public:
-	MidiStateTracker();
+	MidiNoteTracker();
 
 	void track (const MidiBuffer::const_iterator& from, const MidiBuffer::const_iterator& to);
 	void track (const uint8_t* evbuf);

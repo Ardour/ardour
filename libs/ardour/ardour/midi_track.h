@@ -68,7 +68,7 @@ public:
 	                  bool                         include_endpoint,
 	                  bool                         for_export,
 	                  bool                         for_freeze,
-	                  MidiStateTracker&            tracker);
+	                  MidiNoteTracker&            tracker);
 
 	int set_state (const XMLNode&, int version);
 
