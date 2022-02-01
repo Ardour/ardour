@@ -1130,15 +1130,6 @@ MixerStrip::build_route_ops_menu ()
 		items.push_back (SeparatorElem());
 	}
 
-	if (active && is_track() && _route->triggerbox ()) {
-		bool tt = _route->presentation_info ().trigger_track ();
-		items.push_back (CheckMenuElem (_("TriggerBox")));
-		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
-		i->set_active (tt);
-		i->signal_activate().connect (sigc::bind (sigc::mem_fun (_route->presentation_info (), &PresentationInfo::set_trigger_track), !tt));
-		items.push_back (SeparatorElem());
-	}
-
 	if (active && is_track()) {
 		Gtk::Menu* dio_menu = new Menu;
 		MenuList& dio_items = dio_menu->items();
