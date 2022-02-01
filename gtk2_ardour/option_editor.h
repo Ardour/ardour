@@ -656,6 +656,7 @@ private:
 	sigc::slot<std::string> _get; ///< slot to get the configuration variable's value
 	sigc::slot<bool, std::string> _set;  ///< slot to set the configuration variable's value
 	Gtk::FileChooserButton _file_chooser;
+	sigc::connection _changed_connection;
 };
 
 /** Class to represent a single page in an OptionEditor's notebook.

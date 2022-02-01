@@ -916,13 +916,15 @@ DirectoryOption::DirectoryOption (string const & i, string const & n, sigc::slot
 {
 	Gtkmm2ext::add_volume_shortcuts (_file_chooser);
 	_file_chooser.set_action (Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
-	_file_chooser.signal_selection_changed().connect (sigc::mem_fun (*this, &DirectoryOption::selection_changed));
+	_changed_connection = _file_chooser.signal_selection_changed().connect (sigc::mem_fun (*this, &DirectoryOption::selection_changed));
 }
 
 void
 DirectoryOption::set_state_from_config ()
 {
-	_file_chooser.set_current_folder (poor_mans_glob(_get ()));
+	_changed_connection.block ();
+	_file_chooser.set_filename (poor_mans_glob(_get ()));
+	_changed_connection.unblock ();
 }
 
 void
