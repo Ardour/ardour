@@ -2243,6 +2243,8 @@ Editor::set_draw_length_to (GridType gt)
 	if (str != draw_length_selector.get_text()) {
 		draw_length_selector.set_text (str);
 	}
+
+	instant_save ();
 }
 
 void
@@ -2262,6 +2264,8 @@ Editor::set_draw_velocity_to (int v)
 	char buf[64];
 	sprintf(buf, "%d", v );
 	draw_velocity_selector.set_text (buf);
+
+	instant_save ();
 }
 
 void
@@ -2281,6 +2285,8 @@ Editor::set_draw_channel_to (int c)
 	char buf[64];
 	sprintf(buf, "%d", c+1 );
 	draw_channel_selector.set_text (buf);
+
+	instant_save ();
 }
 
 void
