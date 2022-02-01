@@ -232,9 +232,6 @@ CueEntry::rec_state_changed ()
 	set_default_colors ();
 }
 
-Gtkmm2ext::Bindings*           CueBoxUI::bindings = 0;
-Glib::RefPtr<Gtk::ActionGroup> CueBoxUI::trigger_actions;
-
 CueBoxUI::CueBoxUI (ArdourCanvas::Item* parent)
 	: ArdourCanvas::Rectangle (parent)
 	, _context_menu (0)
@@ -413,35 +410,7 @@ CueBoxUI::set_all_quantization (Temporal::BBT_Offset const& q, uint64_t idx)
 }
 
 void
-CueBoxUI::setup_actions_and_bindings ()
-{
-	load_bindings ();
-	register_actions ();
-}
-
-void
-CueBoxUI::load_bindings ()
-{
-	bindings = Bindings::get_bindings (X_("Triggers"));
-}
-
-void
-CueBoxUI::register_actions ()
-{
-#if 0
-	trigger_actions = ActionManager::create_action_group (bindings, X_("Triggers"));
-
-	for (int32_t n = 0; n < CueBox::default_triggers_per_box; ++n) {
-		const std::string action_name = string_compose ("trigger-scene-%1", n);
-		const std::string display_name = string_compose (_("Scene %1"), n);
-
-		ActionManager::register_toggle_action (trigger_actions, action_name.c_str(), display_name.c_str(), sigc::bind (sigc::ptr_fun (CueBoxUI::trigger_scene), n));
-	}
-#endif
-}
-
-void
-CueBoxUI::trigger_scene (uint64_t n)
+CueBoxUI::trigger_cue (uint64_t n)
 {
 	_session->cue_bang (n);
 }
@@ -496,7 +465,7 @@ CueBoxUI::event (GdkEvent* ev, uint64_t n)
 	switch (ev->type) {
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button==1) {
-				trigger_scene (n);
+				trigger_cue (n);
 			}
 			break;
 		case GDK_2BUTTON_PRESS:

@@ -76,10 +76,7 @@ public:
 	CueBoxUI (ArdourCanvas::Item* parent);
 	~CueBoxUI ();
 
-	void trigger_scene (uint64_t n);
-
-	static Glib::RefPtr<Gtk::ActionGroup> trigger_actions;
-	static void                           setup_actions_and_bindings ();
+	void trigger_cue (uint64_t n);
 
 	void _size_allocate (ArdourCanvas::Rect const&);
 
@@ -99,11 +96,6 @@ private:
 
 	Gtk::Menu* _context_menu;
 	Gtk::ColorSelectionDialog _color_dialog;
-
-	static Gtkmm2ext::Bindings* bindings;
-
-	static void load_bindings ();
-	static void register_actions ();
 
 	typedef std::vector<ArdourCanvas::Rectangle*> Slots;
 

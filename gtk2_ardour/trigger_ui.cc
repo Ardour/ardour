@@ -155,18 +155,18 @@ TriggerUI::load_bindings ()
 void
 TriggerUI::register_actions ()
 {
-	trigger_actions = ActionManager::create_action_group (bindings, X_("Triggers"));
+	trigger_actions = ActionManager::create_action_group (bindings, X_("Cues"));
 
 	for (int32_t n = 0; n < default_triggers_per_box; ++n) {
-		const std::string action_name  = string_compose ("trigger-scene-%1", n);
-		const std::string display_name = string_compose (_("Scene %1"), n);
+		const std::string action_name  = string_compose ("trigger-cue-%1", n);
+		const std::string display_name = string_compose (_("Trigger Cue %1"), n);
 
-		ActionManager::register_toggle_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::ptr_fun (TriggerUI::trigger_scene), n));
+		ActionManager::register_toggle_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::ptr_fun (TriggerUI::trigger_cue), n));
 	}
 }
 
 void
-TriggerUI::trigger_scene (int32_t n)
+TriggerUI::trigger_cue (int32_t n)
 {
 	Session* s = AudioEngine::instance()->session();
 

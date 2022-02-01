@@ -93,7 +93,7 @@ private:
 
 	/* Actions for Triggers: accessed via ardour_ui and shortcuts and lua */
 	static Glib::RefPtr<Gtk::ActionGroup> trigger_actions;
-	static void trigger_scene (int32_t);
+	static void trigger_cue (int32_t);
 	static Gtkmm2ext::Bindings* bindings;
 	static void                 load_bindings ();
 	static void                 register_actions ();
