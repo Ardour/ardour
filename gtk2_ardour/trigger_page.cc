@@ -64,7 +64,7 @@ using namespace Gtk;
 using namespace std;
 
 TriggerPage::TriggerPage ()
-	: Tabbable (_content, _("Cue Grid"), X_("trigger"))
+	: Tabbable (_content, _("Cues"), X_("trigger"))
 	, _cue_area_frame (0.5, 0, 1.0, 0)
 	, _cue_box (16, 16 * default_triggers_per_box)
 	, _master_widget (16, 16)
@@ -204,7 +204,7 @@ TriggerPage::use_own_window (bool and_fill_it)
 
 	if (win && new_window) {
 		win->set_name ("TriggerWindow");
-		ARDOUR_UI::instance ()->setup_toplevel_window (*win, _("Cue Grid"), this);
+		ARDOUR_UI::instance ()->setup_toplevel_window (*win, _("Cues"), this);
 		win->signal_event ().connect (sigc::bind (sigc::ptr_fun (&Keyboard::catch_user_event_for_pre_dialog_focus), win));
 		win->set_data ("ardour-bindings", bindings);
 		update_title ();
@@ -339,12 +339,12 @@ TriggerPage::update_title ()
 		}
 
 		WindowTitle title (n);
-		title += S_("Window|Trigger");
+		title += S_("Window|Cues");
 		title += Glib::get_application_name ();
 		own_window ()->set_title (title.get_string ());
 
 	} else {
-		WindowTitle title (S_("Window|Trigger"));
+		WindowTitle title (S_("Window|Cues"));
 		title += Glib::get_application_name ();
 		own_window ()->set_title (title.get_string ());
 	}

@@ -705,7 +705,7 @@ ARDOUR_UI::install_dependent_actions ()
 	ActionManager::register_action (common_actions, X_("show-mixer"), _("Show Mixer"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
 	ActionManager::register_action (common_actions, X_("show-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
 	ActionManager::register_action (common_actions, X_("show-recorder"), _("Show Recorder"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), recorder));
-	ActionManager::register_action (common_actions, X_("show-trigger"), _("Show Cue Grid"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), trigger_page));
+	ActionManager::register_action (common_actions, X_("show-trigger"), _("Show Cues"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), trigger_page));
 
 	/* These "change" actions are not intended to be used inside menus, but
 	   are for the tab/window control buttons, which have somewhat odd
