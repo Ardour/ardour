@@ -2124,6 +2124,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _currently_playing (0)
 	, _stop_all (false)
 	, _active_scene (-1)
+	, _active_slots (0)
 	, requests (1024)
 {
 	set_display_to_user (false);
@@ -2220,14 +2221,29 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 	*/
 
 	Trigger* p = 0;
+	bool empty_changed = false;
 
 	p = all_triggers[slot]->swap_pending (p);
 
 	if (p) {
 
 		if (p == Trigger::MagicClearPointerValue) {
+			if (all_triggers[slot]->region()) {
+				if (_active_slots) {
+					_active_slots--;
+				}
+				if (_active_slots == 0) {
+					empty_changed = true;
+				}
+			}
 			all_triggers[slot]->clear_region ();
 		} else {
+			if (!all_triggers[slot]->region()) {
+				if (_active_slots == 0) {
+					empty_changed = true;
+				}
+				_active_slots++;
+			}
 			/* Note use of a custom delete function. We cannot
 			   delete the old trigger from the RT context where the
 			   trigger swap will happen, so we will ask the trigger
@@ -2236,6 +2252,10 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 			all_triggers[slot].reset (p, Trigger::request_trigger_delete);
 			TriggerSwapped (slot); /* EMIT SIGNAL */
 		}
+	}
+
+	if (empty_changed) {
+		EmptyStatusChanged (); /* EMIT SIGNAL */
 	}
 }
 
@@ -3157,6 +3177,7 @@ TriggerBox::set_state (const XMLNode& node, int version)
 				all_triggers.push_back (trig);
 				trig->set_state (**t, version);
 			}
+			_active_slots++;
 		}
 	}
 
@@ -3171,6 +3192,11 @@ TriggerBox::set_state (const XMLNode& node, int version)
 			update_sidechain_name ();
 		}
 	}
+
+	/* Since _active_slots may have changed, we could consider sending
+	 * EmptyStatusChanged, but for now we don't consider ::set_state() to
+	 * be used except at session load.
+	 */
 
 	return 0;
 }

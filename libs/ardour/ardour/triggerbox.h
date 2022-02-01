@@ -590,6 +590,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
+	bool empty() const { return _active_slots == 0; }
+	PBD::Signal0<void> EmptyStatusChanged;
+
 	int32_t order() const { return _order; }
 	void set_order(int32_t n);
 
@@ -690,6 +693,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	Requests                 _requests;
 	bool                     _stop_all;
 	int32_t                  _active_scene;
+	int32_t                  _active_slots;
 
 	boost::shared_ptr<SideChain> _sidechain;
 
