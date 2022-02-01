@@ -3279,6 +3279,11 @@ Editor::setup_toolbar ()
 	draw_velocity_selector.set_name ("mouse mode button");
 	draw_channel_selector.set_name ("mouse mode button");
 
+	grid_type_selector.set_sizing_text (grid_type_strings[(int)GridTypeBeatDiv32]);
+	draw_length_selector.set_sizing_text (grid_type_strings[(int)GridTypeBeatDiv32]);
+	draw_velocity_selector.set_sizing_text (_("Auto"));
+	draw_channel_selector.set_sizing_text (_("Auto"));
+
 	draw_velocity_selector.disable_scrolling ();
 	draw_velocity_selector.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::on_velocity_scroll_event), false);
 
