@@ -68,6 +68,8 @@ private:
 	void show_audio_setup ();
 	void show_transport_masters ();
 
+	void reset_clip_library_dir ();
+
 	/* plugin actions */
 	void plugin_scan_refresh ();
 	void plugin_reset_stats ();

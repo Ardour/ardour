@@ -50,6 +50,7 @@
 
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
+#include "ardour/clip_library.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/dB.h"
 #include "ardour/port_manager.h"
@@ -4712,6 +4713,19 @@ These settings will only take effect after %1 is restarted.\n\
 	                                   "or a regular MIDI device capable of sending sequential note numbers (like a typical keyboard)"));
 	add_option (_("Triggering"), dtip);
 
+	add_option (_("Triggering"), new OptionEditorHeading (_("Clip Library")));
+
+	add_option (_("Triggering"), new DirectoryOption (
+			    X_("clip-library-dir"),
+			    _("User writable Clip Library:"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_clip_library_dir),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_clip_library_dir)
+			    ));
+
+	add_option (_("Triggering"),
+			new RcActionButton (_("Reset Clip Library Dir"),
+				sigc::mem_fun (*this, &RCOptionEditor::reset_clip_library_dir)));
+
 	/* END OF SECTIONS/OPTIONS etc */
 
 	Widget::show_all ();
@@ -4785,6 +4799,11 @@ RCOptionEditor::parameter_changed (string const & p)
 	} else if (p == "conceal-vst2-if-vst3-exists") {
 		plugin_scan_refresh ();
 	}
+}
+
+void RCOptionEditor::reset_clip_library_dir () {
+	_rc_config->set_clip_library_dir ("@default@");
+	clip_library_dir (false);
 }
 
 void RCOptionEditor::show_audio_setup () {
