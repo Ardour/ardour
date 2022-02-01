@@ -85,16 +85,16 @@ Session::process (pframes_t nframes)
 {
 	TimerRAII tr (dsp_stats[OverallProcess]);
 
-	samplepos_t transport_at_start = _transport_sample;
-
-	setup_thread_local_variables ();
-
-	_silent = false;
-
 	if (processing_blocked()) {
 		_silent = true;
 		return;
+	} else {
+		_silent = false;
 	}
+
+	samplepos_t transport_at_start = _transport_sample;
+
+	setup_thread_local_variables ();
 
 	if (non_realtime_work_pending()) {
 		DEBUG_TRACE (DEBUG::Butler, string_compose ("non-realtime work pending: %1 (%2%3%4)\n", enum_2_string (post_transport_work()), std::hex, post_transport_work(), std::dec));
