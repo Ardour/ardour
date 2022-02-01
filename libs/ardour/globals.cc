@@ -102,6 +102,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/buffer_manager.h"
+#include "ardour/clip_library.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/directory_names.h"
 #include "ardour/event_type_map.h"
@@ -620,6 +621,9 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	if (Config->get_cpu_dma_latency () >= 0) {
 		request_dma_latency ();
 	}
+
+	/* expand `@default@' clip-library-dir config */
+	clip_library_dir (false);
 
 	SourceFactory::init ();
 	Analyser::init ();
