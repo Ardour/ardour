@@ -29,6 +29,6 @@ void
 TriggerRouteList::init ()
 {
 	setup_col (append_toggle (_columns.visible, _columns.noop_true, sigc::mem_fun (*this, &TriggerRouteList::on_tv_visible_changed)), S_("Visible|V"), _("Track/Bus visible ?"));
-	setup_col (append_toggle (_columns.trigger, _columns.is_track, sigc::mem_fun (*this, &TriggerRouteList::on_tv_trigger_changed)),  S_("Trigger|T"), _("Visible on TriggerPage ?"));
+	setup_col (append_toggle (_columns.trigger, _columns.is_track, sigc::mem_fun (*this, &TriggerRouteList::on_tv_trigger_changed)),  S_("Cues|C"), _("Visible on Cues window ?"));
 	setup_col (append_toggle (_columns.active, _columns.activatable, sigc::mem_fun (*this, &TriggerRouteList::on_tv_active_changed)), S_("Active|A"),  _("Track/Bus active ?"));
 }
