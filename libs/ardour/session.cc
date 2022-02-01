@@ -5762,6 +5762,8 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		// and processing_blocked() is honored before
 		// acquiring thread buffers
 		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+		/* latency callback may be in process, wait until complete */
+		Glib::Threads::Mutex::Lock lx (_engine.latency_lock());
 	}
 
 	_bounce_processing_active = true;

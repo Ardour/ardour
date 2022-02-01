@@ -135,6 +135,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	bool running() const { return _running; }
 
 	Glib::Threads::Mutex& process_lock() { return _process_lock; }
+	Glib::Threads::Mutex& latency_lock() { return _latency_lock; }
 	Glib::Threads::RecMutex& state_lock() { return _state_lock; }
 
 	int request_buffer_size (pframes_t samples) {
@@ -268,6 +269,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	static AudioEngine*       _instance;
 
 	Glib::Threads::Mutex       _process_lock;
+	Glib::Threads::Mutex       _latency_lock;
 	Glib::Threads::RecMutex    _state_lock;
 	Glib::Threads::Cond        session_removed;
 	bool                       session_remove_pending;

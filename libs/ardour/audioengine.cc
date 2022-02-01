@@ -308,6 +308,7 @@ AudioEngine::process_callback (pframes_t nframes)
 			lc = true;
 		}
 		if (lp || lc) {
+			Glib::Threads::Mutex::Lock ll (_latency_lock);
 			tm.release ();
 			/* re-check after releasing lock */
 			if (_session->processing_blocked ()) {
@@ -1479,12 +1480,18 @@ AudioEngine::latency_callback (bool for_playback)
 		return;
 	}
 
-	if (in_process_thread () && ! _session->processing_blocked ()) {
+	if (in_process_thread ()) {
 		/* internal backends emit the latency callback in the rt-callback,
 		 * async to connect/disconnect or port creation/deletion.
 		 * All is fine.
 		 */
-		_session->update_latency (for_playback);
+		Glib::Threads::Mutex::Lock ll (_latency_lock);
+		if (_session->processing_blocked ()) {
+		 /* Except Session::write_one_track() might just have called block_processing() */
+			queue_latency_update (for_playback);
+		} else {
+			_session->update_latency (for_playback);
+		}
 	} else {
 		/* However jack 1/2 emit the callback in sync with creating the port
 		 * (or while handling the connection change).
