@@ -155,6 +155,17 @@
         <menuitem action='set-session-end-from-playhead'/>
       </menu>
 
+      <menu action="CueMenu">
+        <menuitem action='trigger-cue-0'/>
+        <menuitem action='trigger-cue-1'/>
+        <menuitem action='trigger-cue-2'/>
+        <menuitem action='trigger-cue-3'/>
+        <menuitem action='trigger-cue-4'/>
+        <menuitem action='trigger-cue-5'/>
+        <menuitem action='trigger-cue-6'/>
+        <menuitem action='trigger-cue-7'/>
+      </menu>
+
       <separator/>
       <menuitem action='ToggleTimeMaster'/>
       <menuitem action='TogglePunch'/>

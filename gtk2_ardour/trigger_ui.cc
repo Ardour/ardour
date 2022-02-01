@@ -149,7 +149,7 @@ TriggerUI::setup_actions_and_bindings ()
 void
 TriggerUI::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("Triggers"));
+	bindings = Bindings::get_bindings (X_("Cues"));
 }
 
 void
@@ -159,9 +159,9 @@ TriggerUI::register_actions ()
 
 	for (int32_t n = 0; n < default_triggers_per_box; ++n) {
 		const std::string action_name  = string_compose ("trigger-cue-%1", n);
-		const std::string display_name = string_compose (_("Trigger Cue %1"), n);
+		const std::string display_name = string_compose (_("Trigger Cue %1"), (char) ('A' + n));
 
-		ActionManager::register_toggle_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::ptr_fun (TriggerUI::trigger_cue), n));
+		ActionManager::register_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::ptr_fun (TriggerUI::trigger_cue), n));
 	}
 }
 

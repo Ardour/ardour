@@ -1,5 +1,12 @@
-<Bindings name="Triggers">
+<Bindings name="Cues">
   <Press>
-     <Binding key="F1" action="Triggers/trigger-scene-1"/>
+     <Binding key="F1" action="Cues/trigger-cue-0"/>
+     <Binding key="F2" action="Cues/trigger-cue-1"/>
+     <Binding key="F3" action="Cues/trigger-cue-2"/>
+     <Binding key="F4" action="Cues/trigger-cue-3"/>
+     <Binding key="F5" action="Cues/trigger-cue-4"/>
+     <Binding key="F6" action="Cues/trigger-cue-5"/>
+     <Binding key="F7" action="Cues/trigger-cue-6"/>
+     <Binding key="F8" action="Cues/trigger-cue-7"/>
   </Press>
 </Bindings>

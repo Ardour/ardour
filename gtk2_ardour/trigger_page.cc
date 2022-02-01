@@ -244,13 +244,13 @@ TriggerPage::set_state (const XMLNode& node, int version)
 void
 TriggerPage::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("TriggerPage"));
+	bindings = Bindings::get_bindings (X_("Cues"));
 }
 
 void
 TriggerPage::register_actions ()
 {
-	Glib::RefPtr<ActionGroup> group = ActionManager::create_action_group (bindings, X_("TriggerPage"));
+	//this was done by TriggerUI ?
 }
 
 void

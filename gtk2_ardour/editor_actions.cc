@@ -149,6 +149,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("ZoomFocusMenu"), _("Zoom Focus"));
 	ActionManager::register_action (editor_menu_actions, X_("LocateToMarker"), _("Locate to Markers"));
 	ActionManager::register_action (editor_menu_actions, X_("MarkerMenu"), _("Markers"));
+	ActionManager::register_action (editor_menu_actions, X_("CueMenu"), _("Cues"));
 	ActionManager::register_action (editor_menu_actions, X_("MeterFalloff"), _("Meter falloff"));
 	ActionManager::register_action (editor_menu_actions, X_("MeterHold"), _("Meter hold"));
 	ActionManager::register_action (editor_menu_actions, X_("MIDI"), _("MIDI Options"));
