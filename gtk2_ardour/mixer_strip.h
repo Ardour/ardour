@@ -216,7 +216,7 @@ private:
 
 	void comment_button_resized (Gtk::Allocation&);
 
-	ArdourWidgets::ArdourButton* midi_input_enable_button;
+	ArdourWidgets::ArdourButton midi_input_enable_button;
 	Gtk::HBox input_button_box;
 
 	std::string longest_label;

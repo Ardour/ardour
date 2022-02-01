@@ -122,7 +122,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, input_button (true)
 	, output_button (false)
 	, monitor_section_button (0)
-	, midi_input_enable_button (0)
 	, _tmaster_widget (-1, 16)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
@@ -161,7 +160,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, input_button (true)
 	, output_button (false)
 	, monitor_section_button (0)
-	, midi_input_enable_button (0)
 	, _tmaster_widget (-1, 16)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
@@ -656,27 +654,23 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	update_trim_control();
 
 	if (is_midi_track()) {
-		if (midi_input_enable_button == 0) {
-			midi_input_enable_button = manage (new ArdourButton);
-			midi_input_enable_button->set_name ("midi input button");
-			midi_input_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
-			midi_input_enable_button->set_icon (ArdourIcon::DinMidi);
-			midi_input_enable_button->signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_press), false);
-			midi_input_enable_button->signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_release), false);
-			set_tooltip (midi_input_enable_button, _("Enable/Disable MIDI input"));
-		} else {
-			input_button_box.remove (*midi_input_enable_button);
-		}
+
+		midi_input_enable_button.set_name ("midi input button");
+		midi_input_enable_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+		midi_input_enable_button.set_icon (ArdourIcon::DinMidi);
+		midi_input_enable_button.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_press), false);
+		midi_input_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_release), false);
+		set_tooltip (midi_input_enable_button, _("Enable/Disable MIDI input"));
+		input_button_box.pack_start (midi_input_enable_button, false, false);
+
 		/* get current state */
 		midi_input_status_changed ();
-		input_button_box.pack_start (*midi_input_enable_button, false, false);
+
 		/* follow changes */
 		midi_track()->InputActiveChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::midi_input_status_changed, this), gui_context());
 	} else {
-		if (midi_input_enable_button) {
-			/* removal from the container will delete it */
-			input_button_box.remove (*midi_input_enable_button);
-			midi_input_enable_button = 0;
+		if (midi_input_enable_button.get_parent()) {
+			input_button_box.remove (midi_input_enable_button);
 		}
 	}
 
@@ -1771,11 +1765,9 @@ MixerStrip::input_active_button_release (GdkEventButton* ev)
 void
 MixerStrip::midi_input_status_changed ()
 {
-	if (midi_input_enable_button) {
-		boost::shared_ptr<MidiTrack> mt = midi_track ();
-		assert (mt);
-		midi_input_enable_button->set_active (mt->input_active ());
-	}
+	boost::shared_ptr<MidiTrack> mt = midi_track ();
+	assert (mt);
+	midi_input_enable_button.set_active (mt->input_active ());
 }
 
 string
@@ -1882,10 +1874,7 @@ MixerStrip::update_sensitivity ()
 	_comment_button.set_sensitive (en && !send);
 	trim_control.set_sensitive (en && !send);
 	control_slave_ui.set_sensitive (en && !send);
-
-	if (midi_input_enable_button) {
-		midi_input_enable_button->set_sensitive (en && !send);
-	}
+	midi_input_enable_button.set_sensitive (en && !send);
 
 	output_button.set_sensitive (en && !aux);
 
