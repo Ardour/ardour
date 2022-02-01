@@ -309,11 +309,21 @@ AudioEngine::process_callback (pframes_t nframes)
 		}
 		if (lp || lc) {
 			tm.release ();
-			if (lc) {
-				_session->update_latency (false);
-			}
-			if (lp) {
-				_session->update_latency (true);
+			/* re-check after releasing lock */
+			if (_session->processing_blocked ()) {
+				if (lc) {
+					g_atomic_int_set (&_pending_capture_latency_callback, 1);
+				}
+				if (lp) {
+					g_atomic_int_set (&_pending_playback_latency_callback, 1);
+				}
+			} else {
+				if (lc) {
+					_session->update_latency (false);
+				}
+				if (lp) {
+					_session->update_latency (true);
+				}
 			}
 			tm.acquire ();
 		}
