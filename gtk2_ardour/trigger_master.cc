@@ -175,6 +175,7 @@ TriggerMaster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Cont
 	}
 
 	float width  = _rect.width ();
+	float height = _rect.height ();
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 
@@ -185,6 +186,19 @@ TriggerMaster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Cont
 	}
 
 	render_children (area, context);
+
+	/* MIDI triggers get a 'note' symbol */
+	if (_triggerbox && _triggerbox->data_type () == ARDOUR::DataType::MIDI) {
+		Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
+		layout->set_font_description (UIConfiguration::instance ().get_BigBoldMonospaceFont ());
+		layout->set_text ("\u266b");
+		int tw, th;
+		layout->get_pixel_size (tw, th);
+		context->move_to (width / 2, height / 2);
+		context->rel_move_to (-tw / 2, -th / 2);
+		Gtkmm2ext::set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
+		layout->show_in_cairo_context (context);
+	}
 
 	if (true) {
 		/* drop-shadow at top */
