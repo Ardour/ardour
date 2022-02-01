@@ -298,7 +298,7 @@ AudioEngine::process_callback (pframes_t nframes)
 	 *
 	 * Note: this must be done without holding the _process_lock
 	 */
-	if (_session) {
+	if (_session && !_session->processing_blocked ()) {
 		bool lp = false;
 		bool lc = false;
 		if (g_atomic_int_compare_and_exchange (&_pending_playback_latency_callback, 1, 0)) {
@@ -1469,7 +1469,7 @@ AudioEngine::latency_callback (bool for_playback)
 		return;
 	}
 
-	if (in_process_thread ()) {
+	if (in_process_thread () && ! _session->processing_blocked ()) {
 		/* internal backends emit the latency callback in the rt-callback,
 		 * async to connect/disconnect or port creation/deletion.
 		 * All is fine.
