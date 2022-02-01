@@ -375,8 +375,8 @@ Editor::Editor ()
 	, _grid_type (GridTypeBeat)
 	, _snap_mode (SnapOff)
 	, _draw_length (GridTypeNone)
-	, _draw_velocity (-2)
-	, _draw_channel (-2)
+	, _draw_velocity (DRAW_VEL_AUTO)
+	, _draw_channel (DRAW_CHAN_AUTO)
 	, ignore_gui_changes (false)
 	, _drags (new DragManager (this))
 	, lock_dialog (0)
@@ -873,16 +873,6 @@ Editor::Editor ()
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
-
-	/* these are defaults; instant.xml will replace these with user's recent selection */
-	set_grid_to (GridTypeNone);
-
-	RefPtr<RadioAction> ract = draw_length_action (GridTypeBeat);
-	ract->set_active();
-	ract = draw_velocity_action (82);
-	ract->set_active();
-	ract = draw_channel_action (0);
-	ract->set_active();
 }
 
 Editor::~Editor()
@@ -2296,10 +2286,6 @@ Editor::set_draw_channel_to (int c)
 void
 Editor::set_grid_to (GridType gt)
 {
-	if (_grid_type == gt) { // already set
-		return;
-	}
-
 	unsigned int grid_ind = (unsigned int)gt;
 
 	if (internal_editing() && UIConfiguration::instance().get_grid_follows_internal()) {
@@ -2460,25 +2446,25 @@ Editor::set_state (const XMLNode& node, int version)
 	if (!node.get_property ("grid-type", grid_type)) {
 		grid_type = _grid_type;
 	}
-	set_grid_to (grid_type);
+	grid_type_selection_done (grid_type);
 
 	GridType draw_length;
 	if (!node.get_property ("draw-length", draw_length)) {
-		draw_length = DRAW_LEN_AUTO;
+		draw_length = _draw_length;
 	}
-	set_draw_length_to (draw_length);
+	draw_length_selection_done (draw_length);
 
 	int draw_vel;
 	if (!node.get_property ("draw-velocity", draw_vel)) {
-		draw_vel = DRAW_VEL_AUTO;
+		draw_vel = _draw_velocity;
 	}
-	set_draw_velocity_to (draw_vel);
+	draw_velocity_selection_done (draw_vel);
 
 	int draw_chan;
 	if (!node.get_property ("draw-channel", draw_chan)) {
 		draw_chan = DRAW_CHAN_AUTO;
 	}
-	set_draw_channel_to (draw_chan);
+	draw_channel_selection_done (draw_chan);
 
 	SnapMode sm;
 	if (node.get_property ("snap-mode", sm)) {
@@ -3823,7 +3809,9 @@ void
 Editor::grid_type_selection_done (GridType gridtype)
 {
 	RefPtr<RadioAction> ract = grid_type_action (gridtype);
-	if (ract) {
+	if (ract && ract->get_active()) {  /*radio-action is already set*/
+		set_grid_to(gridtype);         /*so we must set internal state here*/
+	} else {
 		ract->set_active ();
 	}
 }
@@ -3832,7 +3820,9 @@ void
 Editor::draw_length_selection_done (GridType gridtype)
 {
 	RefPtr<RadioAction> ract = draw_length_action (gridtype);
-	if (ract) {
+	if (ract && ract->get_active()) {  /*radio-action is already set*/
+		set_draw_length_to(gridtype);  /*so we must set internal state here*/
+	} else {
 		ract->set_active ();
 	}
 }
@@ -3841,7 +3831,9 @@ void
 Editor::draw_velocity_selection_done (int v)
 {
 	RefPtr<RadioAction> ract = draw_velocity_action (v);
-	if (ract) {
+	if (ract && ract->get_active()) {  /*radio-action is already set*/
+		set_draw_velocity_to(v);       /*so we must set internal state here*/
+	} else {
 		ract->set_active ();
 	}
 }
@@ -3850,7 +3842,9 @@ void
 Editor::draw_channel_selection_done (int c)
 {
 	RefPtr<RadioAction> ract = draw_channel_action (c);
-	if (ract) {
+	if (ract && ract->get_active()) {  /*radio-action is already set*/
+		set_draw_channel_to(c);        /*so we must set internal state here*/
+	} else {
 		ract->set_active ();
 	}
 }
