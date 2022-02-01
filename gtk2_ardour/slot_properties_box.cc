@@ -642,7 +642,7 @@ SlotPropertyWindow::SlotPropertyWindow (TriggerReference tref)
 {
 	TriggerPtr trigger (tref.trigger());
 
-	set_title (string_compose (_("Trigger: %1"), trigger->name()));
+	set_title (string_compose (_("Trigger Slot: %1"), trigger->name()));
 
 	SlotPropertiesBox* slot_prop_box = manage (new SlotPropertiesBox ());
 	slot_prop_box->set_slot (tref);
