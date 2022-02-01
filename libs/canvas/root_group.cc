@@ -37,12 +37,9 @@ void
 Root::size_request (Distance& w, Distance& h) const
 {
 	if (_items.size() == 1) {
-		cerr << "Call prefsize on " << _items.front()->whoami() << endl;
 		_items.front()->size_request (w, h);
 		return;
 	}
-
-	cerr << "use regular prefsize for root\n";
 
 	Item::size_request (w, h);
 }
