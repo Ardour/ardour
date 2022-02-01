@@ -39,8 +39,9 @@ replace_all (std::string& str,
 std::string
 poor_mans_glob (std::string path)
 {
-	std::string copy = path;
-	replace_all (copy, "~", Glib::get_home_dir());
-	return copy;
+	if (path.find ('~') == 0) {
+		path.replace (0, 1, Glib::get_home_dir());
+	}
+	return path;
 }
 
