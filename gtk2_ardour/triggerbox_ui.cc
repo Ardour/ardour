@@ -566,7 +566,9 @@ TriggerEntry::name_button_event (GdkEvent* ev)
 			PublicEditor::instance ().get_selection ().set (this);
 			break;
 		case GDK_2BUTTON_PRESS:
+#if SELECTION_PROPERTIES_BOX_TODO
 			edit_trigger ();
+#endif
 			return true;
 		case GDK_BUTTON_RELEASE:
 			switch (ev->button.button) {
