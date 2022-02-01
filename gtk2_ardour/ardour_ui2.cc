@@ -973,13 +973,6 @@ ARDOUR_UI::toggle_follow_edits ()
 }
 
 void
-ARDOUR_UI::toggle_triggers ()
-{
-	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Common"), X_("toggle-triggers"));
-	Config->set_enable_triggers (tact->get_active ());
-}
-
-void
 ARDOUR_UI::update_title ()
 {
 	stringstream snap_label;
