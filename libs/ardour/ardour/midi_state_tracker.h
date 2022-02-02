@@ -85,7 +85,6 @@ class LIBARDOUR_API MidiStateTracker : public MidiNoteTracker
 	void flush (MidiBuffer&, samplepos_t);
 
   private:
-	uint8_t  have_program[16];
 	uint8_t  program[16];
 	uint16_t bender[16];
 	uint16_t pressure[16];
