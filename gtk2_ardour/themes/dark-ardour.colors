@@ -13,7 +13,7 @@
     <Color name="theme:bg1" value="373737ff"/>  <!--gtk_audio_track-->
     <Color name="theme:bg2" value="101010ff"/>  <!--ruler base-->
     <Color name="theme:contrasting" value="0xf10000ff"/>  <!--play head-->
-    <Color name="theme:contrasting clock" value="4BCD2FFF"/>  <!--clock: text-->
+    <Color name="theme:contrasting clock" value="78cd2fff"/>  <!--clock: text-->
     <Color name="theme:contrasting less" value="46B357FF"/>
     <Color name="theme:contrasting selection" value="5da3c1ff"/>  <!--gtk_bg_selected-->
     <Color name="theme:contrasting alt" value="CCA336ff"/>  <!--delta clock , clock edit-->
