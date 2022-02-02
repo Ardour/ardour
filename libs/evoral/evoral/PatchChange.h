@@ -74,6 +74,15 @@ public:
 		unset ();
 	}
 
+	PatchChange& operator= (PatchChange const & other) {
+		/* Need to be careful with assignment here, due to buffer
+		   ownership issues etc.
+		*/
+		_bank_change_msb.set (other._bank_change_msb.buffer(), 3, other.time());
+		_bank_change_lsb.set (other._bank_change_lsb.buffer(), 3, other.time());
+		_program_change.set (other._program_change.buffer(), 2, other.time());
+		return *this;
+	}
 	void unset() {
 		_bank_change_msb.buffer()[1] = 0xf; /* unset */
 		_bank_change_lsb.buffer()[1] = 0xf; /* unset */
