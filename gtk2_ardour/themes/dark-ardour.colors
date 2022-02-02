@@ -229,7 +229,7 @@
     <ColorAlias name="midi note mid" alias="alert:yellow"/>
     <ColorAlias name="midi note min" alias="alert:orange"/>
     <ColorAlias name="midi note selected" alias="widget:ruddy"/>
-    <ColorAlias name="midi note selected outline" alias="alert:red"/>
+    <ColorAlias name="midi note selected outline" alias="neutral:foregroundest"/>
     <ColorAlias name="midi note velocity text" alias="theme:contrasting"/>
     <ColorAlias name="midi patch change fill" alias="theme:contrasting selection"/>
     <ColorAlias name="midi patch change outline" alias="neutral:foreground"/>
