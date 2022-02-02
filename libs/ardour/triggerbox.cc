@@ -2017,7 +2017,12 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 		samplepos_t buffer_samples = timeline_samples - start_sample;
 
-		const Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, event.size(), const_cast<uint8_t*>(event.buffer()), false);
+		Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, event.size(), const_cast<uint8_t*>(event.buffer()), false);
+
+		if (_gain != 1.0 && ev.is_note()) {
+			ev.scale_velocity (_gain);
+		}
+
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given et %1 TS %7 rs %8 ts %2 bs %3 ss %4 do %5, inserting %6\n", maybe_last_event_timeline_beats, timeline_samples, buffer_samples, start_sample, dest_offset, ev, transition_beats, region_start));
 		mb.insert_event (ev);
 
