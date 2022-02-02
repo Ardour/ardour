@@ -64,6 +64,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> cue_isolated;
 		PBD::PropertyDescriptor<Trigger::StretchMode> stretch_mode;
 		PBD::PropertyDescriptor<bool> tempo_meter;  /* only to transmit updates, not storage */
+		PBD::PropertyDescriptor<bool> patch_change;  /* only to transmit updates, not storage */
 	}
 }
 
@@ -1709,6 +1710,54 @@ MIDITrigger::~MIDITrigger ()
 {
 }
 
+void
+MIDITrigger::set_patch_change (Evoral::PatchChange<MidiBuffer::TimeType> const & pc)
+{
+	assert (pc.is_set());
+	_patch_change[pc.channel()] = pc;
+	PropertyChanged (Properties::patch_change);
+}
+
+void
+MIDITrigger::unset_all_patch_changes ()
+{
+	bool changed = false;
+
+	for (uint8_t chn = 0; chn < 16; ++chn) {
+		changed |= _patch_change[chn].is_set();
+		_patch_change[chn].unset ();
+	}
+
+	if (changed) {
+		PropertyChanged (Properties::patch_change);
+	}
+}
+
+void
+MIDITrigger::unset_patch_change (uint8_t channel)
+{
+	assert (channel < 16);
+	if (_patch_change[channel].is_set()) {
+		_patch_change[channel].unset ();
+		PropertyChanged (Properties::patch_change);
+	}
+}
+
+bool
+MIDITrigger::patch_change_set (uint8_t channel) const
+{
+	assert (channel < 16);
+	return _patch_change[channel].is_set();
+}
+
+Evoral::PatchChange<MidiBuffer::TimeType> const &
+MIDITrigger::patch_change (uint8_t channel) const
+{
+	assert (channel < 16);
+	return _patch_change[channel];
+}
+
+
 bool
 MIDITrigger::probably_oneshot () const
 {
@@ -1837,6 +1886,10 @@ MIDITrigger::set_state (const XMLNode& node, int version)
 	/* XXX need to deal with bar offsets */
 	_start_offset = Temporal::BBT_Offset (0, b.get_beats(), b.get_ticks());
 
+	XMLNode* patch_child = node.child (X_("PatchChanges"));
+
+	if (patch_child) {
+	}
 
 	return 0;
 }
@@ -2137,6 +2190,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for cue_isolated = %1\n", Properties::cue_isolated.property_id));
 	Properties::stretch_mode.property_id = g_quark_from_static_string (X_("stretch_mode"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretch_mode = %1\n", Properties::stretch_mode.property_id));
+	Properties::patch_change.property_id = g_quark_from_static_string (X_("patch_change"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for patch_change = %1\n", Properties::patch_change.property_id));
 }
 
 Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);

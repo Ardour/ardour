@@ -40,6 +40,8 @@
 #include "temporal/bbt_time.h"
 #include "temporal/tempo.h"
 
+#include "evoral/PatchChange.h"
+
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/processor.h"
@@ -493,6 +495,12 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	SegmentDescriptor get_segment_descriptor () const;
 	void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t);
 
+	void set_patch_change (Evoral::PatchChange<MidiBuffer::TimeType> const &);
+	Evoral::PatchChange<MidiBuffer::TimeType> const & patch_change (uint8_t) const;
+	void unset_patch_change (uint8_t channel);
+	void unset_all_patch_changes ();
+	bool patch_change_set (uint8_t channel) const;
+
   protected:
 	void retrigger ();
 
@@ -510,6 +518,8 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
 	MidiModel::const_iterator iter;
 	boost::shared_ptr<MidiModel> model;
+
+	Evoral::PatchChange<MidiBuffer::TimeType> _patch_change[16];
 
 	int load_data (boost::shared_ptr<MidiRegion>);
 	void compute_and_set_length ();
@@ -798,6 +808,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> currently_playing;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> stretchable;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> cue_isolated;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> patch_change; /* type not important */
 
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> tempo_meter; /* only used to transmit changes, not storage */
 }
