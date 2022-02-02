@@ -168,7 +168,7 @@
     <ColorAlias name="layered button: fill" alias="widget:bg"/>
     <ColorAlias name="layered button: fill active" alias="alert:ruddy"/>
     <ColorAlias name="location cd marker" alias="theme:contrasting less"/>
-    <ColorAlias name="location loop" alias="theme:contrasting less"/>
+    <ColorAlias name="location loop" alias="alert:blue"/>
     <ColorAlias name="location marker" alias="theme:contrasting less"/>
     <ColorAlias name="location punch" alias="widget:ruddy"/>
     <ColorAlias name="location range" alias="theme:contrasting less"/>
@@ -444,7 +444,7 @@
     <ColorAlias name="transport delta clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="transport delta clock: text" alias="theme:contrasting alt"/>
     <ColorAlias name="transport drag rect" alias="neutral:midground"/>
-    <ColorAlias name="transport loop rect" alias="alert:green"/>
+    <ColorAlias name="transport loop rect" alias="widget:blue"/>
     <ColorAlias name="transport marker bar" alias="widget:bg"/>
     <ColorAlias name="transport option button: fill" alias="widget:bg"/>
     <ColorAlias name="transport option button: fill active" alias="widget:bg"/>
