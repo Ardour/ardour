@@ -106,7 +106,6 @@ SlotPropertyTable::SlotPropertyTable ()
 	, _velocity_slider (&_velocity_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _gain_adjustment( 0.0, -20.0, +20.0, 1.0, 3.0, 0)
 	, _gain_spinner (_gain_adjustment)
-	, _gain_label (_("Gain (dB):"))
 	, _follow_probability_adjustment(0,0,100,2,5)
 	, _follow_probability_slider (&_follow_probability_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _follow_count_adjustment (1, 1, 128, 1, 4)
@@ -226,9 +225,6 @@ SlotPropertyTable::SlotPropertyTable ()
 	_name_frame.set_edge_color (0x000000ff);
 	_name_frame.set_border_width (0);
 	_name_frame.set_padding (0);
-
-//	_gain_label.set_alignment (1.0, 0.5);
-//	_color_label.set_alignment (1.0, 0.5);
 
 	_gain_spinner.set_can_focus(false);
 	_gain_spinner.configure(_gain_adjustment, 0.0, 1);
@@ -541,11 +537,9 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 	}
 
 	if (triggerbox().data_type () == DataType::AUDIO) {
-		_gain_spinner.show();
-		_gain_label.show();
+		_gain_label.set_text(_("Gain (dB):"));
 	} else {
-		_gain_spinner.hide();
-		_gain_label.hide();
+		_gain_label.set_text(_("Velocity Adj:"));
 	}
 
 	if (pc.contains (Properties::quantization)) {
