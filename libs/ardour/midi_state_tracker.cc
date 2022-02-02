@@ -199,6 +199,33 @@ MidiNoteTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, T
 }
 
 void
+MidiNoteTracker::flush_notes (MidiBuffer &dst, samplepos_t time)
+{
+	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 MB-flushing notes @ %2 on = %3\n", this, time, _on));
+
+	if (!_on) {
+		return;
+	}
+
+	for (int channel = 0; channel < 16; ++channel) {
+		for (int note = 0; note < 128; ++note) {
+			while (_active_notes[note + 128 * channel]) {
+				uint8_t buffer[3] = { ((uint8_t) (MIDI_CMD_NOTE_ON | channel)), uint8_t (note), 0 };
+				Evoral::Event<MidiBuffer::TimeType> noteoff (Evoral::MIDI_EVENT, time, 3, buffer, false);
+				/* note that we do not care about failure from
+				   push_back() ... should we warn someone ?
+				*/
+				dst.push_back (noteoff);
+				_active_notes[note + 128 * channel]--;
+				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-flushed note %2/%3 at %4\n",
+										       this, (int) note, (int) channel, time));
+			}
+		}
+	}
+	_on = 0;
+}
+
+void
 MidiNoteTracker::dump (ostream& o)
 {
 	o << "******\n";
