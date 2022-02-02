@@ -626,26 +626,21 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 	}
 }
 
-void
-Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t& nframes, pframes_t&  dest_offset)
+pframes_t
+Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes,
+                                  Temporal::BBT_Time& t_bbt, Temporal::timepos_t& t_time,
+                                  Temporal::Beats& t_beats, samplepos_t& t_samples,
+                                  Temporal::TempoMap::SharedPtr& tmap)
 {
 	using namespace Temporal;
 
-	/* This should never be called by a stopped trigger */
-
-	assert (_state != Stopped);
-
 	/* In these states, we are not waiting for a transition */
 
-	if (_state == Running || _state == Stopping || _state == Playout) {
-		/* will cover everything */
-		return;
+	if (_state == Stopped || _state == Running || _state == Stopping || _state == Playout) {
+		/* no transition */
+		return 0;
 	}
 
-	timepos_t transition_time (BeatTime);
-	TempoMap::SharedPtr tmap (TempoMap::use());
-	Temporal::BBT_Time transition_bbt;
-	pframes_t extra_offset = 0;
 	BBT_Offset q (_start_quantization);
 
 	/* Clips don't stop on their own quantize; in Live they stop on the Global Quantize setting; we will choose 1 bar (Live's default) for now */
@@ -663,41 +658,83 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	if (q < Temporal::BBT_Offset (0, 0, 0)) {
 		/* negative quantization == do not quantize */
 
-		transition_samples = start_sample;
-		transition_beats = start;
-		transition_time = timepos_t (start);
-		transition_bbt = tmap->bbt_at (transition_beats);
+		t_samples = start_sample;
+		t_beats = start;
+		t_time = timepos_t (start);
+		t_bbt = tmap->bbt_at (t_beats);
 	} else if (q.bars == 0) {
-		Temporal::Beats transition_beats = start.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks));
-		transition_bbt = tmap->bbt_at (transition_beats);
-		transition_time = timepos_t (transition_beats);
+		Temporal::Beats t_beats = start.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks));
+		t_bbt = tmap->bbt_at (t_beats);
+		t_time = timepos_t (t_beats);
 	} else {
-		transition_bbt = tmap->bbt_at (timepos_t (start));
-		transition_bbt = transition_bbt.round_up_to_bar ();
+		t_bbt = tmap->bbt_at (timepos_t (start));
+		t_bbt = t_bbt.round_up_to_bar ();
 		/* bars are 1-based; 'every 4 bars' means 'on bar 1, 5, 9, ...' */
-		transition_bbt.bars = 1 + ((transition_bbt.bars-1) / q.bars * q.bars);
-		transition_time = timepos_t (tmap->quarters_at (transition_bbt));
+		t_bbt.bars = 1 + ((t_bbt.bars-1) / q.bars * q.bars);
+		t_time = timepos_t (tmap->quarters_at (t_bbt));
 	}
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), transition_time.beats(), start, end, q));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), t_time.beats(), start, end, q));
 
 	/* See if this time falls within the range of time given to us */
 
-	if (transition_time.beats() < start || transition_time > end) {
+	if (t_time.beats() < start || t_time > end) {
+		/* transition time not reached */
+		return 0;
+	}
 
-		/* retrigger time has not been reached, just continue
-		   to play normally until then.
-		*/
+	t_samples = t_time.samples();
+	t_beats = t_time.beats ();
 
+	switch (_state) {
+	case WaitingToStop:
+		nframes = t_samples - start_sample;
+		break;
+
+	case WaitingToStart:
+		nframes -= std::max (samplepos_t (0), t_samples - start_sample);
+		break;
+
+	case WaitingForRetrigger:
+		break;
+
+	default:
+		fatal << string_compose (_("programming error: %1"), "impossible trigger state in ::adjust_nframes()") << endmsg;
+		abort();
+	}
+
+	return nframes;
+}
+
+void
+Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t& nframes, pframes_t&  dest_offset)
+{
+	using namespace Temporal;
+
+	/* This should never be called by a stopped trigger */
+
+	assert (_state != Stopped);
+
+	/* In these states, we are not waiting for a transition */
+
+	if (_state == Running || _state == Stopping || _state == Playout) {
+		/* will cover everything */
 		return;
 	}
+
+	timepos_t transition_time (BeatTime);
+	Temporal::BBT_Time transition_bbt;
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
+	if (!compute_next_transition (start_sample, start, end, nframes, transition_bbt, transition_time, transition_beats, transition_samples, tmap)) {
+		return;
+	}
+
+	pframes_t extra_offset = 0;
 
 	/* transition time has arrived! let's figure out what're doing:
 	 * stopping, starting, retriggering
 	 */
-
-	transition_samples = transition_time.samples();
-	transition_beats = transition_time.beats ();
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 in range, should start/stop at %2 aka %3\n", index(), transition_samples, transition_beats));
 

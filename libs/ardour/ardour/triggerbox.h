@@ -282,6 +282,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	int set_state (const XMLNode&, int version);
 
 	void maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t& nframes, pframes_t& dest_offset);
+	pframes_t compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes,
+	                                   Temporal::BBT_Time& t_bbt, Temporal::timepos_t& t_time,
+	                                   Temporal::Beats& t_beats, samplepos_t& t_samples,
+	                                   Temporal::TempoMap::SharedPtr& tmap);
 
 	void set_next_trigger (int n);
 	int next_trigger() const { return _next_trigger; }
