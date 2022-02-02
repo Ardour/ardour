@@ -655,6 +655,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_midi_track()) {
 
+		midi_input_enable_button.set_size_request (PX_SCALE(19), PX_SCALE(19));
 		midi_input_enable_button.set_name ("midi input button");
 		midi_input_enable_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
 		midi_input_enable_button.set_icon (ArdourIcon::DinMidi);
