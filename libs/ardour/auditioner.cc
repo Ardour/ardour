@@ -53,6 +53,7 @@ Auditioner::Auditioner (Session& s)
 	, current_sample (0)
 	, length (0)
 	, _seek_sample (-1)
+	, _reload_synth (false)
 	, _seeking (false)
 	, _seek_complete (false)
 	, via_monitor (false)
@@ -126,23 +127,47 @@ Auditioner::lookup_fallback_synth ()
 	set_audition_synth_info(nfo);
 }
 
-void
-Auditioner::load_synth (bool need_lock)
+bool
+Auditioner::load_synth ()
 {
-	unload_synth(need_lock);
-
 	if (!audition_synth_info) {
 		lookup_fallback_synth ();
 	}
 
 	if (!audition_synth_info) {
-		return;
+		unload_synth (true);
+		return false;
 	}
+
+	if (asynth && !_reload_synth) {
+		asynth->deactivate ();
+		asynth->activate ();
+		_queue_panic = true;
+		return true;
+	}
+
+	unload_synth (true);
 
 	boost::shared_ptr<Plugin> p = audition_synth_info->load (_session);
 	if (p) {
 		asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, time_domain(), p));
 	}
+
+	if (asynth) {
+		ProcessorStreams ps;
+		if (add_processor (asynth, PreFader, &ps, true)) {
+			error << _("Failed to load synth for MIDI-Audition.") << endmsg;
+		}
+
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		if (configure_processors (&ps)) {
+			error << _("Cannot setup auditioner processing flow.") << endmsg;
+			unload_synth (true);
+			return false;
+		}
+		_reload_synth = false;
+	}
+	return true;
 }
 
 void
@@ -320,8 +345,8 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		_disk_reader->audio_playlist()->drop_regions ();
 		_disk_reader->audio_playlist()->add_region (the_region, timepos_t (Temporal::AudioTime), 1);
 
-		ProcessorStreams ps;
 		{
+			ProcessorStreams ps;
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
 			if (configure_processors (&ps)) {
@@ -347,26 +372,8 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		_disk_reader->midi_playlist()->add_region (midi_region, _import_position, 1);
 		_disk_reader->reset_tracker();
 
-		ProcessorStreams ps;
-
-		load_synth (true);
-
-		if (asynth) {
-			int rv = add_processor (asynth, PreFader, &ps, true);
-			if (rv) {
-				error << _("Failed to load synth for MIDI-Audition.") << endmsg;
-			}
-		}
-
-		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-
-			if (configure_processors (&ps)) {
-				error << string_compose (_("Cannot setup auditioner processing flow for %1 channels"),
-				                         region->sources().size()) << endmsg;
-				unload_synth (true);
-				return;
-			}
+		if (!load_synth ()) {
+			return;
 		}
 
 	} else {
@@ -421,6 +428,16 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	g_atomic_int_set (&_auditioning, 1);
 }
 
+void
+Auditioner::set_audition_synth_info(PluginInfoPtr in)
+{
+	if (audition_synth_info == in) {
+		return;
+	}
+	audition_synth_info = in;
+	_reload_synth = true;
+}
+
 int
 Auditioner::play_audition (samplecnt_t nframes)
 {
@@ -430,7 +447,9 @@ Auditioner::play_audition (samplecnt_t nframes)
 
 	if (g_atomic_int_get (&_auditioning) == 0) {
 		silence (nframes);
-		unload_synth (false);
+		if (_reload_synth) {
+			unload_synth (false);
+		}
 		return 0;
 	}
 
@@ -489,7 +508,9 @@ Auditioner::play_audition (samplecnt_t nframes)
 
 	if (current_sample >= (length + _import_position).samples()) {
 		_session.cancel_audition ();
-		unload_synth (false);
+		if (_reload_synth) {
+			unload_synth (false);
+		}
 		return 0;
 	} else {
 		return need_butler ? 1 : 0;

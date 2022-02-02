@@ -89,7 +89,7 @@ public:
 
 	int export_stuff (BufferSet&, samplepos_t, samplecnt_t, boost::shared_ptr<Processor>, bool, bool, bool, MidiNoteTracker&) { return -1; }
 
-	void set_audition_synth_info(PluginInfoPtr in) { audition_synth_info = in; }
+	void set_audition_synth_info(PluginInfoPtr in);
 
 	samplecnt_t output_latency () const { return 0; }
 
@@ -104,6 +104,7 @@ private:
 	Glib::Threads::Mutex lock;
 	timecnt_t length;
 	sampleoffset_t _seek_sample;
+	bool _reload_synth;
 	bool _seeking;
 	bool _seek_complete;
 	bool via_monitor;
@@ -115,7 +116,7 @@ private:
 	PluginInfoPtr lookup_fallback_synth_plugin_info (std::string const&) const;
 	void drop_ports ();
 	void lookup_fallback_synth ();
-	void load_synth(bool);
+	bool load_synth();
 	void unload_synth (bool);
 	static void*_drop_ports (void*);
 	void actually_drop_ports ();
