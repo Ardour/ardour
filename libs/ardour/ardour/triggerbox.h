@@ -494,7 +494,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
   private:
 	PBD::ID data_source;
-	MidiNoteTracker tracker;
 	PBD::ScopedConnection content_connection;
 
 	Temporal::Beats final_beat;
@@ -655,6 +654,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 		SequentialNote,
 		ByMidiChannel
 	};
+
+	/* This is null for TriggerBoxen constructed with DataType::AUDIO */
+	MidiStateTracker* tracker;
 
 	static Temporal::BBT_Offset assumed_trigger_duration () { return _assumed_trigger_duration; }
 	static void set_assumed_trigger_duration (Temporal::BBT_Offset const &);

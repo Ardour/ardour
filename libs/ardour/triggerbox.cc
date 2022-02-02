@@ -1747,7 +1747,7 @@ MIDITrigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
 {
 	Trigger::shutdown (bufs, dest_offset);
 	MidiBuffer& mb (bufs.get_midi (0));
-	tracker.resolve_notes (mb, dest_offset);
+	_box.tracker->resolve_notes (mb, dest_offset);
 }
 
 void
@@ -1756,7 +1756,7 @@ MIDITrigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
 	Trigger::jump_stop (bufs, dest_offset);
 
 	MidiBuffer& mb (bufs.get_midi (0));
-	tracker.resolve_notes (mb, dest_offset);
+	_box.tracker->resolve_notes (mb, dest_offset);
 
 	retrigger ();
 }
@@ -1984,7 +1984,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given et %1 TS %7 rs %8 ts %2 bs %3 ss %4 do %5, inserting %6\n", maybe_last_event_timeline_beats, timeline_samples, buffer_samples, start_sample, dest_offset, ev, transition_beats, region_start));
 		mb.insert_event (ev);
 
-		tracker.track (event.buffer());
+		_box.tracker->track (event.buffer());
 
 		last_event_beats = event.time();
 		last_event_timeline_beats = maybe_last_event_timeline_beats;
@@ -1996,7 +1996,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 	if (_state == Stopping) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
-		tracker.resolve_notes (mb, nframes-1);
+		_box.tracker->resolve_notes (mb, nframes-1);
 	}
 
 	if (iter == model->end()) {
@@ -2118,6 +2118,7 @@ TriggerBox::init ()
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
+	, tracker (dt == DataType::MIDI ? new MidiStateTracker : 0)
 	, _data_type (dt)
 	, _order (-1)
 	, explicit_queue (64)
