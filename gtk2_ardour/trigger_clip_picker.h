@@ -37,6 +37,9 @@
 #include "widgets/ardour_dropdown.h"
 #include "widgets/ardour_button.h"
 
+
+class PluginUIWindow;
+
 class TriggerClipPicker : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
 public:
@@ -67,6 +70,9 @@ private:
 	void audition (std::string const&);
 	void audition_active (bool);
 	void audition_progress (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
+	void audition_processors_changed ();
+	void audition_processor_going_away ();
+	void audition_show_plugin_ui ();
 	void stop_audition ();
 	void autoplay_toggled ();
 	void open_library ();
@@ -98,6 +104,7 @@ private:
 	ArdourWidgets::ArdourButton  _play_btn;
 	ArdourWidgets::ArdourButton  _stop_btn;
 	ArdourWidgets::ArdourButton  _open_library_btn;
+	ArdourWidgets::ArdourButton  _show_plugin_btn;
 	Gtk::HScale                  _seek_slider;
 	Gtk::CheckButton             _autoplay_btn;
 
@@ -108,8 +115,11 @@ private:
 
 	std::set<std::string> _root_paths;
 
-	bool                      _seeking;
+	bool            _seeking;
+	PluginUIWindow* _audition_plugnui;
+
 	PBD::ScopedConnectionList _auditioner_connections;
+	PBD::ScopedConnectionList _processor_connections;
 	PBD::ScopedConnection     _config_connection;
 	PBD::ScopedConnection     _clip_added_connection;
 };

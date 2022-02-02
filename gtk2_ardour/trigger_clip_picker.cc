@@ -35,6 +35,7 @@
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/region_factory.h"
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
@@ -48,6 +49,7 @@
 #include "widgets/tooltips.h"
 #include "widgets/ardour_icon.h"
 
+#include "plugin_ui.h"
 #include "trigger_clip_picker.h"
 #include "ui_config.h"
 
@@ -64,6 +66,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	, _clip_library_listed (false)
 	, _ignore_list_dir (false)
 	, _seeking (false)
+	, _audition_plugnui (0)
 {
 	/* Setup Dropdown / File Browser */
 #ifdef __APPLE__
@@ -106,6 +109,11 @@ TriggerClipPicker::TriggerClipPicker ()
 	_open_library_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::open_library));
 	_open_library_btn.set_no_show_all ();
 
+	_show_plugin_btn.set_name ("generic button");
+	_show_plugin_btn.set_icon (ArdourWidgets::ArdourIcon::PsetBrowse);
+	_show_plugin_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::audition_show_plugin_ui));
+	_show_plugin_btn.set_sensitive (false);
+
 	_play_btn.set_sensitive (false);
 	_stop_btn.set_sensitive (false);
 
@@ -121,8 +129,9 @@ TriggerClipPicker::TriggerClipPicker ()
 	_auditable.attach (_play_btn,         0, 1, 0, 1, SHRINK, SHRINK);
 	_auditable.attach (_stop_btn,         1, 2, 0, 1, SHRINK, SHRINK);
 	_auditable.attach (_autoplay_btn,     2, 3, 0, 1, EXPAND | FILL, SHRINK);
-	_auditable.attach (_open_library_btn, 3, 4, 0, 1, SHRINK, SHRINK);
-	_auditable.attach (_seek_slider,      0, 4, 1, 2, EXPAND | FILL, SHRINK);
+	_auditable.attach (_show_plugin_btn,  3, 4, 0, 1, SHRINK, SHRINK);
+	_auditable.attach (_open_library_btn, 4, 5, 0, 1, SHRINK, SHRINK);
+	_auditable.attach (_seek_slider,      0, 5, 1, 2, EXPAND | FILL, SHRINK);
 	_auditable.set_border_width (4);
 	_auditable.set_spacings (4);
 
@@ -685,10 +694,14 @@ TriggerClipPicker::set_session (Session* s)
 	if (!_session) {
 		_seek_slider.set_sensitive (false);
 		_auditioner_connections.drop_connections ();
+		_processor_connections.drop_connections ();
+		audition_processor_going_away ();
 	} else {
 		_auditioner_connections.drop_connections ();
 		_session->AuditionActive.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_active, this, _1), gui_context ());
 		_session->the_auditioner ()->AuditionProgress.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_progress, this, _1, _2), gui_context ());
+		_session->the_auditioner ()->processors_changed.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_processors_changed, this), gui_context ());
+		audition_processors_changed (); /* set sensitivity */
 	}
 }
 
@@ -838,4 +851,38 @@ TriggerClipPicker::audition (std::string const& path)
 	r->set_position (timepos_t ());
 
 	_session->audition_region (r);
+}
+
+void
+TriggerClipPicker::audition_show_plugin_ui ()
+{
+	if (!_audition_plugnui) {
+		boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (_session->the_auditioner ()->the_instrument ());
+		if (plugin_insert) {
+			_audition_plugnui = new PluginUIWindow (plugin_insert);
+			_audition_plugnui->set_session (_session);
+			_audition_plugnui->show_all ();
+			_audition_plugnui->set_title (/* generate_processor_title (plugin_insert)*/ _("Audition Synth"));
+			plugin_insert->DropReferences.connect (_processor_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_processor_going_away, this), gui_context());
+		}
+	}
+	if (_audition_plugnui) {
+		_audition_plugnui->present ();
+	}
+}
+
+void
+TriggerClipPicker::audition_processor_going_away ()
+{
+	if (_audition_plugnui) {
+		delete _audition_plugnui;
+	}
+	_audition_plugnui = 0;
+}
+
+void
+TriggerClipPicker::audition_processors_changed ()
+{
+	boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (_session->the_auditioner ()->the_instrument ());
+	_show_plugin_btn.set_sensitive (plugin_insert != 0);
 }
