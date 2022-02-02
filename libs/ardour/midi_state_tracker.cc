@@ -291,15 +291,15 @@ MidiStateTracker::track (const uint8_t* evbuf)
 		break;
 
 	case MIDI_CMD_CONTROL:
-		control[chan][evbuf[1]] = 0xf|evbuf[2];
+		control[chan][evbuf[1]] = 0x80|evbuf[2];
 		break;
 
 	case MIDI_CMD_PGM_CHANGE:
-		program[chan] = 0xf|evbuf[1];
+		program[chan] = 0x80|evbuf[1];
 		break;
 
 	case MIDI_CMD_CHANNEL_PRESSURE:
-		pressure[chan] = 0xf|evbuf[1];
+		pressure[chan] = 0x80|evbuf[1];
 		break;
 
 	case MIDI_CMD_NOTE_PRESSURE:
@@ -331,7 +331,7 @@ MidiStateTracker::flush (MidiBuffer& dst, samplepos_t time)
 	 */
 
 	for (int chn = 0; chn < n_channels; ++chn) {
-		if (program[chn] & 0xf) {
+		if (program[chn] & 0x80) {
 			buf[0] = MIDI_CMD_PGM_CHANGE|chn;
 			buf[1] = program[chn] & 0x7f;
 			dst.write (time, Evoral::MIDI_EVENT, 2, buf);
@@ -340,7 +340,7 @@ MidiStateTracker::flush (MidiBuffer& dst, samplepos_t time)
 
 	for (int chn = 0; chn < 16; ++chn) {
 		for (int ctl = 0; ctl < n_controls; ++ctl) {
-			if (control[chn][ctl] & 0xf) {
+			if (control[chn][ctl] & 0x80) {
 				buf[0] = MIDI_CMD_CONTROL|chn;
 				buf[1] = ctl;
 				buf[2] = control[chn][ctl] & 0x7f;

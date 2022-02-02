@@ -456,14 +456,14 @@ Trigger::request_stop ()
 }
 
 void
-Trigger::startup (Temporal::BBT_Offset const & start_quantization)
+Trigger::startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset const & start_quantization)
 {
 	/* This is just a non-virtual wrapper with a default parameter that calls _startup() */
-	_startup (start_quantization);
+	_startup (bufs, dest_offset, start_quantization);
 }
 
 void
-Trigger::_startup (Temporal::BBT_Offset const & start_quantization)
+Trigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset const & start_quantization)
 {
 	_state = WaitingToStart;
 	_loop_cnt = 0;
@@ -927,9 +927,9 @@ AudioTrigger::get_segment_descriptor () const
 }
 
 void
-AudioTrigger::_startup (Temporal::BBT_Offset const & start_quantization)
+AudioTrigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset const & start_quantization)
 {
-	Trigger::_startup (start_quantization);
+	Trigger::_startup (bufs, dest_offset, start_quantization);
 }
 
 void
@@ -1704,6 +1704,8 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	, _start_offset (0, 0, 0)
 	, _legato_offset (0, 0, 0)
 {
+	Evoral::PatchChange<MidiBuffer::TimeType> pc (0, 0, 12, 0);
+	set_patch_change (pc);
 }
 
 MIDITrigger::~MIDITrigger ()
@@ -1816,9 +1818,24 @@ MIDITrigger::get_segment_descriptor () const
 }
 
 void
-MIDITrigger::_startup (Temporal::BBT_Offset const & start_quantization)
+MIDITrigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset const & start_quantization)
 {
-	Trigger::_startup (start_quantization);
+	Trigger::_startup (bufs, dest_offset, start_quantization);
+
+	MidiBuffer& mb (bufs.get_midi (0));
+
+	/* Possibly inject patch changes, if set */
+
+	for (int chn = 0; chn < 16; ++chn) {
+		if (_patch_change[chn].is_set()) {
+			_patch_change[chn].set_time (dest_offset);
+			cerr << index() << " Injecting patch change " << _patch_change[chn].program() << " @ " << dest_offset << endl;
+			for (int msg = 0; msg < _patch_change[chn].messages(); ++msg) {
+				mb.insert_event (_patch_change[chn].message (msg));
+				_box.tracker->track (_patch_change[chn].message (msg).buffer());
+			}
+		}
+	}
 }
 
 void
@@ -2072,7 +2089,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 		Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, event.size(), const_cast<uint8_t*>(event.buffer()), false);
 
-		if (_gain != 1.0 && ev.is_note()) {
+		if (_gain != 1.0f && ev.is_note()) {
 			ev.scale_velocity (_gain);
 		}
 
@@ -2865,7 +2882,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (!_currently_playing && !allstop) {
 		if ((_currently_playing = get_next_trigger()) != 0) {
 			maybe_swap_pending (_currently_playing->index());
-			_currently_playing->startup ();
+			_currently_playing->startup (bufs, 0);
 			PropertyChanged (Properties::currently_playing);
 			active_trigger_boxes.fetch_add (1);
 		}
@@ -2969,7 +2986,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						maybe_swap_pending (n);
 						nxt = trigger (n);
 
-						nxt->startup ();
+						nxt->startup (bufs, dest_offset);
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was finished, started %2\n", _currently_playing->index(), nxt->index()));
 						_currently_playing = nxt;
 						PropertyChanged (Properties::currently_playing);
@@ -3015,7 +3032,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", all_triggers[n]->name()));
 					}
 					_currently_playing = all_triggers[n];
-					_currently_playing->startup (start_quantization);
+					_currently_playing->startup (bufs, dest_offset, start_quantization);
 					PropertyChanged (Properties::currently_playing);
 				} else {
 					_currently_playing = 0;
