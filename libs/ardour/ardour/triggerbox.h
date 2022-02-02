@@ -296,7 +296,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	   "use your own launch quantization". BBT_Offset (0, 0, 0) means what
 	   it says: start immediately
 	*/
-	void startup (Temporal::BBT_Offset const & start_quantization = Temporal::BBT_Offset (9, 3,0));
+	void startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const & start_quantization = Temporal::BBT_Offset (9, 3,0));
 	virtual void shutdown (BufferSet& bufs, pframes_t dest_offset);
 	virtual void jump_start ();
 	virtual void jump_stop (BufferSet& bufs, pframes_t dest_offset);
@@ -377,7 +377,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset);
 	void set_region_internal (boost::shared_ptr<Region>);
 	virtual void retrigger() = 0;
-	virtual void _startup (Temporal::BBT_Offset const &);
+	virtual void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
 
 	bool internal_use_follow_length() const;
 };
@@ -459,7 +459,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	int load_data (boost::shared_ptr<AudioRegion>);
 	void estimate_tempo ();
 	void setup_stretcher ();
-	void _startup (Temporal::BBT_Offset const &);
+	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
 };
 
 
@@ -523,7 +523,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
 	int load_data (boost::shared_ptr<MidiRegion>);
 	void compute_and_set_length ();
-	void _startup (Temporal::BBT_Offset const &);
+	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
 };
 
 class LIBARDOUR_API TriggerBoxThread
