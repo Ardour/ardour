@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Ardour theme-name="dark">
   <Colors>
-    <Color name="alert:blue" value="2E41E6ff"/>
-    <Color name="alert:cyan" value="20b2b2ff"/>
-    <Color name="alert:green" value="3dcc4cff"/>
-    <Color name="alert:greenish" value="459952ff"/>
+    <Color name="alert:blue" value="172ce6ff"/>
+    <Color name="alert:cyan" value="0eb2b2ff"/>
+    <Color name="alert:green" value="17e62cff"/>
+    <Color name="alert:greenish" value="369945ff"/>
     <Color name="alert:orange" value="e58b05ff"/>
     <Color name="alert:red" value="f10000ff"/>
-    <Color name="alert:ruddy" value="bb2828ff"/>
+    <Color name="alert:ruddy" value="bb1515ff"/>
     <Color name="alert:yellow" value="e0e000ff"/>
-    <Color name="theme:bg" value="3d3d3dff"/>  <!--gtk_background-->
+    <Color name="theme:bg" value="292929ff"/>  <!--gtk_background-->
     <Color name="theme:bg1" value="373737ff"/>  <!--gtk_audio_track-->
     <Color name="theme:bg2" value="101010ff"/>  <!--ruler base-->
-    <Color name="theme:contrasting" value="0xf10000ff"/>  <!--play head-->
-    <Color name="theme:contrasting clock" value="4BCD2FFF"/>  <!--clock: text-->
-    <Color name="theme:contrasting less" value="46B357FF"/>
+    <Color name="theme:contrasting" value="f10000ff"/>  <!--play head-->
+    <Color name="theme:contrasting clock" value="4bcd2fff"/>  <!--clock: text-->
+    <Color name="theme:contrasting less" value="5697b3ff"/>  <!--gtk_bg_tooltip-->
     <Color name="theme:contrasting selection" value="5da3c1ff"/>  <!--gtk_bg_selected-->
-    <Color name="theme:contrasting alt" value="CCA336ff"/>  <!--delta clock , clock edit-->
+    <Color name="theme:contrasting alt" value="cca336ff"/>  <!--delta clock , clock edit-->
     <Color name="neutral:backgroundest" value="000000ff"/>  <!--border color-->
     <Color name="neutral:background" value="202020ff"/>  <!--audio track base-->
     <Color name="neutral:background2" value="555555ff"/>  <!--range marker bar-->
@@ -24,14 +24,14 @@
     <Color name="neutral:foreground2" value="ccccccff"/>  <!--marker track-->
     <Color name="neutral:foreground" value="e5e5e5ff"/>  <!--gtk_foreground-->
     <Color name="neutral:foregroundest" value="ffffffff"/>  <!--grid line major-->
-    <Color name="widget:bg" value="4F4D4Dff"/>    <!--generic button-->
-    <Color name="widget:blue" value="526d94ff"/>  <!--processor fader: fill-->
-    <Color name="widget:blue darker" value="20242aff"/>  <!--gtk_audio_bus-->
+    <Color name="widget:bg" value="4f4d4dff"/>    <!--generic button-->
+    <Color name="widget:blue" value="3b6094ff"/>  <!--processor fader: fill-->
+    <Color name="widget:blue darker" value="262b33ff"/>  <!--gtk_audio_bus-->
     <Color name="widget:gray" value="595755ff"/>  <!--gtk_processor fader-->
-    <Color name="widget:green" value="617552ff"/>  <!--gtk processor postfader,  gtk_midi_track-->
-    <Color name="widget:green darker" value="3C403AFF"/>  <!--midi track base-->
+    <Color name="widget:green" value="334228ff"/>  <!--gtk processor postfader,  gtk_midi_track-->
+    <Color name="widget:green darker" value="242623ff"/>  <!--midi track base-->
     <Color name="widget:orange" value="904010ff"/>  <!--tempo marker-->
-    <Color name="widget:ruddy" value="7c3a3aff"/>  <!--processor prefader-->
+    <Color name="widget:ruddy" value="7c2e2eff"/>  <!--processor prefader-->
     <Color name="meter color0" value="008800ff"/>
     <Color name="meter color1" value="00aa00ff"/>
     <Color name="meter color2" value="00ff00ff"/>
