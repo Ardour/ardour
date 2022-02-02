@@ -54,6 +54,8 @@ public:
 
 		_program_change.buffer()[0] = MIDI_CMD_PGM_CHANGE | c;
 		_program_change.buffer()[1] = p;
+
+		assert (is_set());
 	}
 
 	PatchChange (const PatchChange & other)
@@ -62,6 +64,27 @@ public:
 		, _program_change (other._program_change, true)
 	{
 		set_id (other.id ());
+	}
+
+	PatchChange ()
+		: _bank_change_msb (MIDI_EVENT, 0, 3, 0, true)
+		,  _bank_change_lsb (MIDI_EVENT, 0, 3, 0, true)
+		, _program_change (MIDI_EVENT, 0, 2, 0, true)
+	{
+		unset ();
+	}
+
+	void unset() {
+		_bank_change_msb.buffer()[1] = 0xf; /* unset */
+		_bank_change_lsb.buffer()[1] = 0xf; /* unset */
+		_program_change.buffer()[1] = 0xf; /* unset */
+		assert (!is_set());
+	}
+
+	bool is_set() const {
+		return ((_bank_change_msb.buffer()[1] & 0xf) == 0) &&
+			((_bank_change_lsb.buffer()[1] & 0xf) == 0) &&
+			((_program_change.buffer()[1] & 0xf) == 0);
 	}
 
 	event_id_t id () const {
@@ -94,6 +117,7 @@ public:
 	}
 
 	uint8_t program () const {
+		assert (is_set());
 		return _program_change.buffer()[1];
 	}
 
@@ -111,16 +135,22 @@ public:
 	}
 
 	uint8_t bank_msb () const {
+		assert (is_set());
 		return _bank_change_msb.buffer()[2];
 	}
 
 	uint8_t bank_lsb () const {
+		assert (is_set());
 		return _bank_change_lsb.buffer()[2];
 	}
 
-	uint8_t channel () const { return _program_change.buffer()[0] & 0xf; }
+	uint8_t channel () const {
+		assert (is_set());
+		return _program_change.buffer()[0] & 0xf;
+	}
 
 	inline bool operator< (const PatchChange<Time>& o) const {
+		assert (is_set());
 		if (time() != o.time()) {
 			return time() < o.time();
 		}
@@ -140,6 +170,7 @@ public:
 	 *  @param i index of message to return.
 	 */
 	Event<Time> const & message (int i) const {
+		assert (is_set());
 		switch (i) {
 		case 0:
 			return _bank_change_msb;
