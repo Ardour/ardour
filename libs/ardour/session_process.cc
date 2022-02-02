@@ -490,11 +490,6 @@ Session::process_with_events (pframes_t nframes)
 		send_full_time_code (_transport_sample, nframes);
 	}
 
-	if (!process_can_proceed()) {
-		_silent = true;
-		return;
-	}
-
 	if (events.empty() || next_event == events.end()) {
 		try_run_lua (nframes); // also during export ?? ->move to process_without_events()
 		/* lua scripts may inject events */
@@ -517,11 +512,6 @@ Session::process_with_events (pframes_t nframes)
 	{
 		SessionEvent* this_event;
 		Events::iterator the_next_one;
-
-		if (!process_can_proceed()) {
-			_silent = true;
-			return;
-		}
 
 		if (!_exporting && config.get_external_sync()) {
 			if (!implement_master_strategy ()) {
@@ -655,11 +645,6 @@ Session::process_without_events (pframes_t nframes)
 	TimerRAII tr (dsp_stats[ProcessFunction]);
 	bool session_needs_butler = false;
 	samplecnt_t samples_moved;
-
-	if (!process_can_proceed()) {
-		_silent = true;
-		return;
-	}
 
 	if (!_exporting && config.get_external_sync()) {
 		if (!implement_master_strategy ()) {

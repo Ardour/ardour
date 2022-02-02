@@ -1613,8 +1613,6 @@ private:
 
 	TransportFSM* _transport_fsm;
 
-	static const PostTransportWork ProcessCannotProceedMask = PostTransportWork (PostTransportAudition);
-
 	GATOMIC_QUAL gint _post_transport_work; /* accessed only atomic ops */
 	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (const_cast<GATOMIC_QUAL gint*> (&_post_transport_work)); }
 	void set_post_transport_work (PostTransportWork ptw) { g_atomic_int_set (&_post_transport_work, (gint) ptw); }
@@ -1836,7 +1834,6 @@ private:
 	int fail_roll (pframes_t nframes);
 
 	bool non_realtime_work_pending() const { return static_cast<bool>(post_transport_work()); }
-	bool process_can_proceed() const { return !(post_transport_work() & ProcessCannotProceedMask); }
 
 	MidiControlUI* midi_control_ui;
 
