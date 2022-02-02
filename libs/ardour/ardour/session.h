@@ -1469,7 +1469,7 @@ private:
 
 	samplecnt_t calc_preroll_subcycle (samplecnt_t) const;
 
-	void block_processing() { g_atomic_int_set (&_processing_prohibited, 1); }
+	void block_processing();
 	void unblock_processing() { g_atomic_int_set (&_processing_prohibited, 0); }
 	bool processing_blocked() const { return g_atomic_int_get (&_processing_prohibited); }
 

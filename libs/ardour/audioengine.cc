@@ -308,25 +308,32 @@ AudioEngine::process_callback (pframes_t nframes)
 			lc = true;
 		}
 		if (lp || lc) {
-			Glib::Threads::Mutex::Lock ll (_latency_lock);
-			tm.release ();
-			/* re-check after releasing lock */
-			if (_session->processing_blocked ()) {
+			/* synchronize with Session::processing_blocked
+			 * This lock is not contended by this thread, but acts
+			 * as barrier for Session::block_processing (Session::write_one_track).
+			 */
+			Glib::Threads::Mutex::Lock ll (_latency_lock, Glib::Threads::TRY_LOCK);
+			/* re-check after talking latency-lock */
+			if (!ll.locked () || _session->processing_blocked ()) {
 				if (lc) {
-					g_atomic_int_set (&_pending_capture_latency_callback, 1);
+					queue_latency_update (false);
 				}
 				if (lp) {
-					g_atomic_int_set (&_pending_playback_latency_callback, 1);
+					queue_latency_update (true);
 				}
 			} else {
+				/* release process-lock to call Session::update_latency */
+				tm.release ();
 				if (lc) {
 					_session->update_latency (false);
 				}
 				if (lp) {
 					_session->update_latency (true);
 				}
+				/* release latency lock, **before** reacquiring process-lock */
+				ll.release ();
+				tm.acquire ();
 			}
-			tm.acquire ();
 		}
 	}
 
@@ -1485,8 +1492,8 @@ AudioEngine::latency_callback (bool for_playback)
 		 * async to connect/disconnect or port creation/deletion.
 		 * All is fine.
 		 */
-		Glib::Threads::Mutex::Lock ll (_latency_lock);
-		if (_session->processing_blocked ()) {
+		Glib::Threads::Mutex::Lock ll (_latency_lock, Glib::Threads::TRY_LOCK);
+		if (!ll.locked () || _session->processing_blocked ()) {
 		 /* Except Session::write_one_track() might just have called block_processing() */
 			queue_latency_update (for_playback);
 		} else {

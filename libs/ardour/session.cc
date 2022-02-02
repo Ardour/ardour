@@ -846,6 +846,21 @@ Session::destroy ()
 	BOOST_SHOW_POINTERS ();
 }
 
+
+void
+Session::block_processing()
+{
+	g_atomic_int_set (&_processing_prohibited, 1);
+
+	/* processing_blocked() is only checked at the beginning
+	 * of the next cycle. So wait until any ongoing
+	 * process-callback returns.
+	 */
+	Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+	/* latency callback may be in process, wait until it completed */
+	Glib::Threads::Mutex::Lock lx (_engine.latency_lock());
+}
+
 void
 Session::setup_ltc ()
 {
@@ -5752,19 +5767,10 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		return result;
 	}
 
-	// block all process callback handling
-
+	/* block all process callback handling, so that thread-buffers
+	 * are available here.
+	 */
 	block_processing ();
-
-	{
-		// synchronize with AudioEngine::process_callback()
-		// make sure processing is not currently running
-		// and processing_blocked() is honored before
-		// acquiring thread buffers
-		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
-		/* latency callback may be in process, wait until complete */
-		Glib::Threads::Mutex::Lock lx (_engine.latency_lock());
-	}
 
 	_bounce_processing_active = true;
 
