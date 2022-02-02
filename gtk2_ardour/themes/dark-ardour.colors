@@ -363,7 +363,7 @@
     <ColorAlias name="secondary clock: background" alias="theme:bg2"/>
     <ColorAlias name="secondary clock: cursor" alias="theme:contrasting alt"/>
     <ColorAlias name="secondary clock: edited text" alias="theme:contrasting alt"/>
-    <ColorAlias name="secondary clock: text" alias="theme:contrasting clock"/>
+    <ColorAlias name="secondary clock: text" alias="neutral:foregroundest"/>
     <ColorAlias name="secondary delta clock: background" alias="theme:bg2"/>
     <ColorAlias name="secondary delta clock: cursor" alias="theme:contrasting alt"/>
     <ColorAlias name="secondary delta clock: edited text" alias="theme:contrasting alt"/>
