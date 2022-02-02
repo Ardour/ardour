@@ -84,16 +84,16 @@ public:
 		return *this;
 	}
 	void unset() {
-		_bank_change_msb.buffer()[1] = 0xf; /* unset */
-		_bank_change_lsb.buffer()[1] = 0xf; /* unset */
-		_program_change.buffer()[1] = 0xf; /* unset */
+		_bank_change_msb.buffer()[1] = 0x80; /* unset */
+		_bank_change_lsb.buffer()[1] = 0x80; /* unset */
+		_program_change.buffer()[1] = 0x80; /* unset */
 		assert (!is_set());
 	}
 
 	bool is_set() const {
-		return ((_bank_change_msb.buffer()[1] & 0xf) == 0) &&
-			((_bank_change_lsb.buffer()[1] & 0xf) == 0) &&
-			((_program_change.buffer()[1] & 0xf) == 0);
+		return ((_bank_change_msb.buffer()[1] & 0x80) == 0) &&
+			((_bank_change_lsb.buffer()[1] & 0x80) == 0) &&
+			((_program_change.buffer()[1] & 0x80) == 0);
 	}
 
 	event_id_t id () const {
@@ -117,12 +117,9 @@ public:
 	}
 
 	void set_channel (uint8_t c) {
-		_bank_change_msb.buffer()[0] &= 0xf0;
-		_bank_change_msb.buffer()[0] |= c;
-		_bank_change_lsb.buffer()[0] &= 0xf0;
-		_bank_change_lsb.buffer()[0] |= c;
-		_program_change.buffer()[0] &= 0xf0;
-		_program_change.buffer()[0] |= c;
+		_bank_change_msb.buffer()[0] = c & 0xf;
+		_bank_change_lsb.buffer()[0] = c & 0xf;
+		_program_change.buffer()[0]  = c & 0xf;
 	}
 
 	uint8_t program () const {
