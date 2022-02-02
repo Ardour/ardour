@@ -229,10 +229,6 @@ MidiStateTracker::reset ()
 	MidiNoteTracker::reset ();
 
 	for (size_t n = 0; n < n_channels; ++n) {
-		have_program[n] = 0;
-	}
-
-	for (size_t n = 0; n < n_channels; ++n) {
 		program[n] = 0;
 	}
 
@@ -259,6 +255,7 @@ MidiStateTracker::track (const uint8_t* evbuf)
 	case MIDI_CTL_ALL_NOTES_OFF:
 		MidiNoteTracker::reset();
 		break;
+
 	case MIDI_CMD_NOTE_ON:
 		add (evbuf[1], chan);
 		break;
@@ -267,16 +264,15 @@ MidiStateTracker::track (const uint8_t* evbuf)
 		break;
 
 	case MIDI_CMD_CONTROL:
-		control[chan][evbuf[1]] = evbuf[2];
+		control[chan][evbuf[1]] = 0xf|evbuf[2];
 		break;
 
 	case MIDI_CMD_PGM_CHANGE:
-		program[chan] = evbuf[1];
-		have_program[chan] = 1;
+		program[chan] = 0xf|evbuf[1];
 		break;
 
 	case MIDI_CMD_CHANNEL_PRESSURE:
-		pressure[chan] = evbuf[1];
+		pressure[chan] = 0xf|evbuf[1];
 		break;
 
 	case MIDI_CMD_NOTE_PRESSURE:
@@ -290,12 +286,39 @@ MidiStateTracker::track (const uint8_t* evbuf)
 		break;
 
 	default:
-		break;
+ 		break;
 	}
 }
 
 void
-MidiStateTracker::resolve (MidiBuffer& buffer, samplepos_t time)
+MidiStateTracker::flush (MidiBuffer& dst, samplepos_t time)
 {
 	/* XXX implement me */
+
+	uint8_t buf[3];
+	const size_t n_channels = 16;
+	const size_t n_controls = 127;
+
+	/* XXX need MidiNoteTracker::flush() method that will emit NoteOn for
+	 * all currently-on notes.
+	 */
+
+	for (int chn = 0; chn < n_channels; ++chn) {
+		if (program[chn] & 0xf) {
+			buf[0] = MIDI_CMD_PGM_CHANGE|chn;
+			buf[1] = program[chn] & 0x7f;
+			dst.write (time, Evoral::MIDI_EVENT, 2, buf);
+		}
+	}
+
+	for (int chn = 0; chn < 16; ++chn) {
+		for (int ctl = 0; ctl < n_controls; ++ctl) {
+			if (control[chn][ctl] & 0xf) {
+				buf[0] = MIDI_CMD_CONTROL|chn;
+				buf[1] = ctl;
+				buf[2] = control[chn][ctl] & 0x7f;
+				dst.write (time, Evoral::MIDI_EVENT, 3, buf);
+			}
+		}
+	}
 }

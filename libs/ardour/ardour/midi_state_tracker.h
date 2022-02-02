@@ -54,6 +54,8 @@ public:
 	void resolve_notes (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
 	void resolve_notes (MidiSource& src, const Glib::Threads::Mutex::Lock& lock, Temporal::Beats time);
 
+	void flush_notes (MidiBuffer&, samplepos_t);
+
 	bool empty() const { return _on == 0; }
 	uint16_t on() const { return _on; }
 	bool active (uint8_t note, uint8_t channel) {
@@ -80,7 +82,7 @@ class LIBARDOUR_API MidiStateTracker : public MidiNoteTracker
 	void dump (std::ostream&);
 	void reset ();
 
-	void resolve (MidiBuffer&, samplepos_t);
+	void flush (MidiBuffer&, samplepos_t);
 
   private:
 	uint8_t  have_program[16];
