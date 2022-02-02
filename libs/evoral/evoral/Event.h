@@ -23,8 +23,10 @@
 #ifndef EVORAL_EVENT_HPP
 #define EVORAL_EVENT_HPP
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 #include <sstream>
 #include <stdint.h>
 
@@ -178,6 +180,11 @@ public:
 	void set_cc_number(uint8_t num)    { _buf[1] = num; }
 	void set_cc_value(uint8_t val)     { _buf[2] = val; }
 	void set_pgm_number(uint8_t num)   { _buf[1] = num; }
+
+	void scale_velocity (float factor) {
+		factor = std::max (factor, 0.0f);
+		set_velocity (std::min (127L, lrintf (velocity() * factor)));
+	}
 
 	uint16_t value() const {
 		switch (type()) {
