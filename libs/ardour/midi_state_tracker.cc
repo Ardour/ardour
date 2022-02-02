@@ -212,3 +212,90 @@ MidiNoteTracker::dump (ostream& o)
 	}
 	o << "+++++\n";
 }
+
+/*----------------*/
+
+MidiStateTracker::MidiStateTracker ()
+{
+	reset ();
+}
+
+void
+MidiStateTracker::reset ()
+{
+	const size_t n_channels = 16;
+	const size_t n_controls = 127;
+
+	MidiNoteTracker::reset ();
+
+	for (size_t n = 0; n < n_channels; ++n) {
+		have_program[n] = 0;
+	}
+
+	for (size_t n = 0; n < n_channels; ++n) {
+		program[n] = 0;
+	}
+
+	for (size_t chn = 0; chn < n_channels; ++chn) {
+		for (size_t c = 0; c < n_controls; ++c) {
+			control[chn][c] = 0;
+		}
+	}
+}
+
+void
+MidiStateTracker::dump (ostream& o)
+{
+	MidiNoteTracker::dump (o);
+	o << "implement MidiStateTracker::dump()";
+}
+
+void
+MidiStateTracker::track (const uint8_t* evbuf)
+{
+	const uint8_t type = evbuf[0] & 0xF0;
+	const uint8_t chan = evbuf[0] & 0x0F;
+	switch (type) {
+	case MIDI_CTL_ALL_NOTES_OFF:
+		MidiNoteTracker::reset();
+		break;
+	case MIDI_CMD_NOTE_ON:
+		add (evbuf[1], chan);
+		break;
+	case MIDI_CMD_NOTE_OFF:
+		remove (evbuf[1], chan);
+		break;
+
+	case MIDI_CMD_CONTROL:
+		control[chan][evbuf[1]] = evbuf[2];
+		break;
+
+	case MIDI_CMD_PGM_CHANGE:
+		program[chan] = evbuf[1];
+		have_program[chan] = 1;
+		break;
+
+	case MIDI_CMD_CHANNEL_PRESSURE:
+		pressure[chan] = evbuf[1];
+		break;
+
+	case MIDI_CMD_NOTE_PRESSURE:
+		break;
+
+	case MIDI_CMD_BENDER:
+		break;
+
+	case MIDI_CMD_COMMON_RESET:
+		reset ();
+		break;
+
+	default:
+		break;
+	}
+}
+
+void
+MidiStateTracker::resolve (MidiBuffer& buffer, samplepos_t time)
+{
+	/* XXX implement me */
+}

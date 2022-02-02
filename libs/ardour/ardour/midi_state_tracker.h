@@ -41,16 +41,19 @@ class LIBARDOUR_API MidiNoteTracker
 {
 public:
 	MidiNoteTracker();
+	virtual ~MidiNoteTracker() {}
+
+	virtual void track (const uint8_t* evbuf);
+	virtual void dump (std::ostream&);
+	virtual void reset ();
 
 	void track (const MidiBuffer::const_iterator& from, const MidiBuffer::const_iterator& to);
-	void track (const uint8_t* evbuf);
 	void add (uint8_t note, uint8_t chn);
 	void remove (uint8_t note, uint8_t chn);
 	void resolve_notes (MidiBuffer& buffer, samplepos_t time);
 	void resolve_notes (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
 	void resolve_notes (MidiSource& src, const Glib::Threads::Mutex::Lock& lock, Temporal::Beats time);
-	void dump (std::ostream&);
-	void reset ();
+
 	bool empty() const { return _on == 0; }
 	uint16_t on() const { return _on; }
 	bool active (uint8_t note, uint8_t channel) {
@@ -67,6 +70,25 @@ private:
 	uint16_t _on;
 };
 
+class LIBARDOUR_API MidiStateTracker : public MidiNoteTracker
+{
+  public:
+	MidiStateTracker ();
+	~MidiStateTracker() {}
+
+	void track (const uint8_t* evbuf);
+	void dump (std::ostream&);
+	void reset ();
+
+	void resolve (MidiBuffer&, samplepos_t);
+
+  private:
+	uint8_t  have_program[16];
+	uint8_t  program[16];
+	uint16_t bender[16];
+	uint16_t pressure[16];
+	uint8_t  control[16][127];
+};
 
 } // namespace ARDOUR
 
