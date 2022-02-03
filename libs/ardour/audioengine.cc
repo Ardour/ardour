@@ -257,7 +257,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	if (!tm.locked()) {
 		/* return having done nothing */
-		if (_session) {
+		if (_session && !_session->bounce_processing ()) {
 			Xrun();
 		}
 		/* really only JACK requires this
@@ -298,7 +298,7 @@ AudioEngine::process_callback (pframes_t nframes)
 	 *
 	 * Note: this must be done without holding the _process_lock
 	 */
-	if (_session && !_session->processing_blocked ()) {
+	if (_session) {
 		bool lp = false;
 		bool lc = false;
 		if (g_atomic_int_compare_and_exchange (&_pending_playback_latency_callback, 1, 0)) {
@@ -308,13 +308,11 @@ AudioEngine::process_callback (pframes_t nframes)
 			lc = true;
 		}
 		if (lp || lc) {
-			/* synchronize with Session::processing_blocked
-			 * This lock is not contended by this thread, but acts
-			 * as barrier for Session::block_processing (Session::write_one_track).
+			/* The process-lock needs to be released before calling Session::update_latency,
+			 * However latency callbacks may not happen concurrently.
 			 */
 			Glib::Threads::Mutex::Lock ll (_latency_lock, Glib::Threads::TRY_LOCK);
-			/* re-check after talking latency-lock */
-			if (!ll.locked () || _session->processing_blocked ()) {
+			if (!ll.locked ()) {
 				if (lc) {
 					queue_latency_update (false);
 				}
@@ -332,7 +330,16 @@ AudioEngine::process_callback (pframes_t nframes)
 				}
 				/* release latency lock, **before** reacquiring process-lock */
 				ll.release ();
-				tm.acquire ();
+				tm.try_acquire ();
+
+				if (!tm.locked()) {
+					if (!_session->bounce_processing ()) {
+						Xrun();
+					}
+
+					PortManager::silence_outputs (nframes);
+					return 0;
+				}
 			}
 		}
 	}
@@ -1493,7 +1500,7 @@ AudioEngine::latency_callback (bool for_playback)
 		 * All is fine.
 		 */
 		Glib::Threads::Mutex::Lock ll (_latency_lock, Glib::Threads::TRY_LOCK);
-		if (!ll.locked () || _session->processing_blocked ()) {
+		if (!ll.locked ()) {
 		 /* Except Session::write_one_track() might just have called block_processing() */
 			queue_latency_update (for_playback);
 		} else {

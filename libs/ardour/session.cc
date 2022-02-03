@@ -327,7 +327,6 @@ Session::Session (AudioEngine &eng,
 	g_atomic_int_set (&_playback_load, 0);
 	g_atomic_int_set (&_capture_load, 0);
 	g_atomic_int_set (&_post_transport_work, 0);
-	g_atomic_int_set (&_processing_prohibited, Disabled);
 	g_atomic_int_set (&_record_status, Disabled);
 	g_atomic_int_set (&_punch_or_loop, NoConstraint);
 	g_atomic_int_set (&_current_usecs_per_track, 1000);
@@ -846,20 +845,6 @@ Session::destroy ()
 	BOOST_SHOW_POINTERS ();
 }
 
-
-void
-Session::block_processing()
-{
-	g_atomic_int_set (&_processing_prohibited, 1);
-
-	/* processing_blocked() is only checked at the beginning
-	 * of the next cycle. So wait until any ongoing
-	 * process-callback returns.
-	 */
-	Glib::Threads::Mutex::Lock lm (_engine.process_lock());
-	/* latency callback may be in process, wait until it completed */
-	Glib::Threads::Mutex::Lock lx (_engine.latency_lock());
-}
 
 void
 Session::setup_ltc ()
@@ -5770,9 +5755,13 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	/* block all process callback handling, so that thread-buffers
 	 * are available here.
 	 */
-	block_processing ();
-
+	Glib::Threads::Mutex::Lock lm (_engine.process_lock());
 	_bounce_processing_active = true;
+
+	/* prevent concurrent latency callbacks, they must not be called
+	 * concurrently with ::run ()
+	 */
+	Glib::Threads::Mutex::Lock lx (_engine.latency_lock());
 
 	/* call tree *MUST* hold route_lock */
 
@@ -6053,8 +6042,6 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		_engine.main_thread()->drop_buffers ();
 		track.set_block_size (get_block_size());
 	}
-
-	unblock_processing ();
 
 	return result;
 }

@@ -85,12 +85,7 @@ Session::process (pframes_t nframes)
 {
 	TimerRAII tr (dsp_stats[OverallProcess]);
 
-	if (processing_blocked()) {
-		_silent = true;
-		return;
-	} else {
-		_silent = false;
-	}
+	_silent = false;
 
 	samplepos_t transport_at_start = _transport_sample;
 

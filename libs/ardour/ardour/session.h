@@ -1443,7 +1443,6 @@ private:
 
 	std::string             _missing_file_replacement;
 
-	mutable GATOMIC_QUAL gint _processing_prohibited;
 	mutable GATOMIC_QUAL gint _record_status;
 
 	void add_monitor_section ();
@@ -1468,10 +1467,6 @@ private:
 	void process_export_fw      (pframes_t);
 
 	samplecnt_t calc_preroll_subcycle (samplecnt_t) const;
-
-	void block_processing();
-	void unblock_processing() { g_atomic_int_set (&_processing_prohibited, 0); }
-	bool processing_blocked() const { return g_atomic_int_get (&_processing_prohibited); }
 
 	static const samplecnt_t bounce_chunk_size;
 
