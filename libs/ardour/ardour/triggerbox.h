@@ -501,6 +501,11 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void unset_all_patch_changes ();
 	bool patch_change_set (uint8_t channel) const;
 
+	void set_channel_map (int channel, int target);
+	void unset_channel_map (int channel);
+	int channel_map (int channel);
+	std::vector<int> const & channel_map() const { return _channel_map; }
+
   protected:
 	void retrigger ();
 
@@ -520,6 +525,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	boost::shared_ptr<MidiModel> model;
 
 	Evoral::PatchChange<MidiBuffer::TimeType> _patch_change[16];
+	std::vector<int> _channel_map;
 
 	int load_data (boost::shared_ptr<MidiRegion>);
 	void compute_and_set_length ();

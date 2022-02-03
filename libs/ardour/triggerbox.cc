@@ -1706,10 +1706,42 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 {
 	Evoral::PatchChange<MidiBuffer::TimeType> pc (0, 0, 12, 0);
 	set_patch_change (pc);
+
+	_channel_map.assign (16, -1);
 }
 
 MIDITrigger::~MIDITrigger ()
 {
+}
+
+void
+MIDITrigger::set_channel_map (int channel, int target)
+{
+	if (channel < 0 || channel >= 16) {
+		return;
+	}
+	if (target < 0 || target >= 16) {
+		return;
+	}
+	_channel_map[channel] = target;
+}
+
+void
+MIDITrigger::unset_channel_map (int channel)
+{
+	if (channel < 0 || channel >= 16) {
+		return;
+	}
+	_channel_map[channel] = -1;
+}
+
+int
+MIDITrigger::channel_map (int channel)
+{
+	if (channel < 0 || channel >= 16) {
+		return -1;
+	}
+	return _channel_map[channel];
 }
 
 void
@@ -2122,6 +2154,10 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 		if (_gain != 1.0f && ev.is_note()) {
 			ev.scale_velocity (_gain);
+		}
+
+		if (_channel_map[ev.channel()] > 0) {
+			ev.set_channel (_channel_map[ev.channel()]);
 		}
 
 		if (ev.is_pgm_change() || (ev.is_cc() && ((ev.cc_number() == MIDI_CTL_LSB_BANK) || (ev.cc_number() == MIDI_CTL_MSB_BANK)))) {
