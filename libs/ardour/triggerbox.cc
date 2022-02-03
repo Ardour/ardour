@@ -1886,6 +1886,26 @@ MIDITrigger::get_state (void)
 
 	node.set_property (X_("start"), start_offset());
 
+	XMLNode* patches_node = 0;
+
+	for (int chn = 0; chn < 16; ++chn) {
+		if (_patch_change[chn].is_set()) {
+			if (!patches_node) {
+				patches_node = new XMLNode (X_("PatchChanges"));
+			}
+			XMLNode* patch_node = new XMLNode (X_("PatchChange"));
+			patch_node->set_property (X_("channel"), _patch_change[chn].channel());
+			patch_node->set_property (X_("bank"), _patch_change[chn].bank());
+			patch_node->set_property (X_("program"), _patch_change[chn].program());
+
+			patches_node->add_child_nocopy (*patch_node);
+		}
+	}
+
+	if (patches_node) {
+		node.add_child_nocopy (*patches_node);
+	}
+
 	return node;
 }
 
@@ -1903,9 +1923,20 @@ MIDITrigger::set_state (const XMLNode& node, int version)
 	/* XXX need to deal with bar offsets */
 	_start_offset = Temporal::BBT_Offset (0, b.get_beats(), b.get_ticks());
 
-	XMLNode* patch_child = node.child (X_("PatchChanges"));
+	XMLNode* patches_node = node.child (X_("PatchChanges"));
 
-	if (patch_child) {
+	if (patches_node) {
+		XMLNodeList const & children = patches_node->children();
+		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+			if ((*i)->name() == X_("PatchChange")) {
+				int c, p, b;
+				if ((*i)->get_property (X_("channel"), c) &&
+				    (*i)->get_property (X_("program"), p) &&
+				    (*i)->get_property (X_("program"), b)) {
+					_patch_change[c] = Evoral::PatchChange<MidiBuffer::TimeType> (0, c, p, b);
+				}
+			}
+		}
 	}
 
 	return 0;
