@@ -703,8 +703,14 @@ TriggerEntry::event (GdkEvent* ev)
 			if(_grabbed) {
 				ungrab();
 				_grabbed = false;
+				if (ev->type == GDK_BUTTON_RELEASE) {
+					/* Pass event down to child item, as if this item was not grabbed.
+					 * This is needed to select item on release.
+					 */
+					name_button->Event (ev);
+					return true;
+				}
 			}
-			return false;
 			break;
 
 		case GDK_BUTTON_PRESS:
