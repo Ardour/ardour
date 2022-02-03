@@ -238,10 +238,6 @@ TriggerMaster::event_handler (GdkEvent* ev)
 				} else {
 					_triggerbox->stop_all_quantized ();
 				}
-
-
-
-				return true;
 			}
 			break;
 		case GDK_ENTER_NOTIFY:
@@ -261,13 +257,12 @@ TriggerMaster::event_handler (GdkEvent* ev)
 			switch (ev->button.button) {
 				case 3:
 					context_menu ();
-					return true;
 			}
 		default:
 			break;
 	}
 
-	return false;
+	return true;
 }
 
 void

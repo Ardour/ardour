@@ -602,7 +602,6 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 					} else {
 						trigger ()->box ().stop_all_quantized ();
 					}
-					return true;
 				}
 				break;
 			default:
@@ -623,7 +622,6 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 					} else {
 						trigger ()->bang ();
 					}
-					return true;
 				default:
 					break;
 			}
@@ -657,7 +655,7 @@ TriggerEntry::play_button_event (GdkEvent* ev)
 		default:
 			break;
 	}
-	return false;
+	return true;
 }
 
 bool
@@ -672,7 +670,6 @@ TriggerEntry::follow_button_event (GdkEvent* ev)
 				case 1:
 				case 3:
 					follow_context_menu ();
-					return true;
 				default:
 					break;
 			}
@@ -690,7 +687,7 @@ TriggerEntry::follow_button_event (GdkEvent* ev)
 		default:
 			break;
 	}
-	return false;
+	return true;
 }
 
 bool
@@ -706,7 +703,9 @@ TriggerEntry::event (GdkEvent* ev)
 			if(_grabbed) {
 				ungrab();
 				_grabbed = false;
-			} break;
+			}
+			return false;
+			break;
 
 		case GDK_BUTTON_PRESS:
 			if (!_drag_active) {
@@ -741,6 +740,7 @@ TriggerEntry::event (GdkEvent* ev)
 					}
 				}
 			}
+			break;
 		default:
 			break;
 	}
