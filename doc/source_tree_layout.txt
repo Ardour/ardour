@@ -1,4 +1,4 @@
-Ardour Source-Tree layout (April 2020)
+Ardour Source-Tree layout (Feb 2022)
 
 ===== Front Ends =====
 
@@ -15,147 +15,153 @@ session_utils/
 luasession/
  arlua -- commandline interface to libardour
 
-vst
- wine application top-level (WindowsVST on Linux)
-
 ===== LIBRARIES =====
  A collection of libraries and utility functions. While most are shared
- libraries, they're pretty much exclusive to Ardour.
+ libraries, and almost all are exclusive to Ardour.
 
 libs/
 
- **** Independent libs ****
+ **** Independent, standalone libs ****
 
- - appleutility
+ - libs/appleutility/
    Utility Classes, abstraction for CoreAudio and AudioUnits (OSX, macOS)
 
- - ardouralsautil
+ - libs/ardouralsautil/
    Utility Class for device-listing (used by the jack and  ALSA backends).
    Device-reservation comandline tool (linked against libdbus), which is
    also available from https://github.com/x42/alsa_request_device
 
- - clearlooks-newer
+ - libs/clearlooks-newer/
    GTK theme engine (used by gtk2_ardour)
 
- - fluidsynth
+ - libs/fluidsynth/
    Stripped down (library only) and slightly customized version of fluidsynth
    use  tools/update_fluidsynth.sh to update from upstream
 
- - hidapi
+ - libs/hidapi/
    Unmodified https://github.com/signal11/hidapi for interaction with some
    control surfaces (Push2, NI Maschine)
 
- - libltc
+ - libs/libltc/
    Unmodified https://github.com/x42/libltc/ for Linear Timecode en/decoding
 
- - lua
+ - libs/lua/
    Lua Script interpreter and C++ class abstraction
    - libs/lua/lua-5.3.5 is unmodified upstream Lua-5.3.5
    - libs/lua/LuaBridge is a highly customized version of
      https://github.com/vinniefalco/LuaBridge (C++ bindings)
 
- - midi++2
+ - libs/midi++2/
    (uses libpdb)
    MIDI parsing, MIDNAM handling, Port abstraction for I/O
 
- - ptformat
+ - libs/ptformat/
    Unmodified https://github.com/zamaudio/ptformat for loading ProTools sessions
 
- - temporal
+ - libs/temporal
    various utility code for dealing with different kinds of time,
    including Timecode (FPS) and musical time conversions
 
- - qm-dsp
+ - libs/qm-dsp/
    Stripped down version of https://github.com/c4dm/qm-dsp
    The Queen Mary DSP library is used by VAMP Plugins
 
  - vamp-plugins
    VAMP plugins for audio analysis and offline processing (uses qm-dsp)
 
- - vamp-pyin
+ - libs/vamp-pyin/
    VAMP plugins for pitch and note-tracking (uses qm-dsp), offline analyis
 
- - vfork
+ - libs/vfork/
    A exec-wrapper which redirects file-descriptors to be used with vfork(2)
 
- - plugins
+ - libs/vst3/
+   Stripped down version of Steinberg's VST3 SDK
+   https://github.com/steinbergmedia/vst3sdk/
+   see also tools/update_vst3.sh
+
+ - libs/plugins/
    LV2 Plugins included with Ardour. These are currently mostly
    independent (a-fluidsynth uses libfluidsynth).
    Most of them are custom version of existing plugins (zamaudio, x42),
    that have been customized to be bundled with Ardour on all platforms
    tha ardour runs on.
 
- - zita-convolver
+ - libs/zita-convolver/
    convolution kernel, so far only avialable to Lua scripts.
 
- - zita-resampler
+ - libs/zita-resampler/
    Efficient resampler with variable rate, useful for adaptive resampling.
    Mainly used for vari-speed playback.
 
  **** PBD dependent libs ****
 
- - pbd
+ - libs/pbd/
    Generic non-Ardour-specific utility classes. This is the basis for all Ardour specifics.
    It provides basic concepts and OS abstractions. The name comes from "Paul
    Barton-Davis", Paul's full name at the time he started working on working on
    audio software.
 
- - evoral
+ - libs/evoral/
    (uses libpbd)
    Control events, control lists, automation evaluation,
    parameter descriptions, incl MIDI event abstraction
 
-   - libsmf (contains several non-upstreamed fixes)
+   - libs/evoral/libsmf/ (contains several non-upstreamed fixes)
      (used inside evoral)
      Handling Standard MIDI File format. Abstracted to C++ in SMF.{cc,h}
  
- - backends
+ - libs/backends/
    (uses libpdb, ardouralsautil | appleutility, implements libardour interface)
    Interaction with Operating System's Audio/MIDI API:
    ALSA, CoreAudio, JACK, PortAudio/ASIO, Pulseaudio
 
- - surfaces
+ - libs/surfaces/
    (uses libpbd, libevoral, libtimecode, libardour ;; libgtkmm2ext, libcanvas)
    Control Surfaces, dynamically loaded by libardour on runtime,
    to remote-control ardour (midi bindings, network etc).
 
- - panners
+ - libs/panners/
    (uses libpdb, implements libardour interface)
    Pan plugins (stereo-balance, VBAP, etc) are dynamically loaded at runtime.
 
- - audiographer
+ - libs/audiographer/
    (uses libpdb)
    Mini Ardour inside Ardour to export audio-files from sessions.
 
- - fst
-   (uses libpbd, implements external methods for libardour and gtk2ardour)
-   VST scanner tool and abstraction for Windows-VSTs to be used with
-   wine or MS windows.
-
- - ardour
+ - libs/ardour/
    (uses pretty much all the libs above)
    This is it. libardour runs Ardour sessions
    All realtime processing happens here, plugins are managed etc.
 
+ **** Plugin Scan Tools ****
+
+ - libs/auscan/
+   Apple Audio Unit Plugin Scan commandline tool.
+
+ - libs/fst/
+   VST2/3 plugin scan commandline tool.
+
+
  **** UI related libs ****
 
- - gtkmm2ext
+ - libs/gtkmm2ext/
    (uses libpbd)
    Utility Library to extend GDK, GTK, and basic abstraction for UIs
    and event-loops. This library is not limited to the GUI, but also
    used for other graphical interfaces (e.g. Push2, NI Maschine control
    surfaces).
 
- - canvas
+ - libs/canvas/
    (uses libpbd, libgtkmm2ext)
    Cairo Canvas, provides a slate for scalable drawing and basic layout/packing
   This is used by gtk2ardour's main editor.
 
- - widgets
+ - libs/widgets/
    (uses libpbd, libgtkmm2ext ;; libcanvas utils/colors)
    Ardour GUI widgets (buttons, fader, knobs, etc)
 
- - waveview
+ - libs/waveview/
    (uses libpbd, libgtkmm2ext, canvas,  libardour)
    Threaded waveform rendering and waveform image cache
 
