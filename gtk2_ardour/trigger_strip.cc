@@ -404,6 +404,22 @@ TriggerStrip::route_property_changed (const PropertyChange& what_changed)
 }
 
 void
+TriggerStrip::set_selected (bool yn)
+{
+	AxisView::set_selected (yn);
+
+	if (selected()) {
+		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
+		global_frame.set_name ("MixerStripSelectedFrame");
+	} else {
+		global_frame.set_shadow_type (Gtk::SHADOW_IN);
+		global_frame.set_name ("MixerStripFrame");
+	}
+
+	global_frame.queue_draw ();
+}
+
+void
 TriggerStrip::route_color_changed ()
 {
 	_name_button.modify_bg (STATE_NORMAL, color ());

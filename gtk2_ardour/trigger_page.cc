@@ -69,6 +69,7 @@ TriggerPage::TriggerPage ()
 	, _cue_box (16, 16 * default_triggers_per_box)
 	, _master_widget (16, 16)
 	, _master (_master_widget.root ())
+	, _selection (*this, *this)
 {
 	load_bindings ();
 	register_actions ();
@@ -266,6 +267,7 @@ TriggerPage::set_session (Session* s)
 	_trigger_route_list.set_session (s);
 
 	if (!_session) {
+		_selection.clear ();
 		return;
 	}
 
@@ -297,6 +299,10 @@ TriggerPage::set_session (Session* s)
 	update_title ();
 	start_updating ();
 	selection_changed ();
+
+	PBD::PropertyChange sc;
+	sc.add (Properties::selected);
+	_selection.presentation_info_changed (sc);
 }
 
 void
@@ -312,6 +318,7 @@ TriggerPage::session_going_away ()
 		delete (*i);
 	}
 #endif
+	_selection.clear ();
 	_strips.clear ();
 
 	SessionHandlePtr::session_going_away ();
@@ -432,6 +439,7 @@ TriggerPage::add_routes (RouteList& rl)
 
 		(*r)->presentation_info ().PropertyChanged.connect (*this, invalidator (*this), boost::bind (&TriggerPage::stripable_property_changed, this, _1, boost::weak_ptr<Stripable> (*r)), gui_context ());
 		(*r)->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&TriggerPage::stripable_property_changed, this, _1, boost::weak_ptr<Stripable> (*r)), gui_context ());
+		ts->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &TriggerPage::strip_button_release_event), ts));
 	}
 	redisplay_track_list ();
 }
@@ -464,6 +472,7 @@ void
 TriggerPage::redisplay_track_list ()
 {
 	_strips.sort (TriggerStripSorter ());
+	PresentationInfo::ChangeSuspender cs;
 
 	for (list<TriggerStrip*>::iterator i = _strips.begin (); i != _strips.end (); ++i) {
 		TriggerStrip*                strip = *i;
@@ -471,6 +480,12 @@ TriggerPage::redisplay_track_list ()
 		boost::shared_ptr<Route>     route = boost::dynamic_pointer_cast<Route> (s);
 
 		bool hidden = s->presentation_info ().hidden ();
+
+		if (s->is_selected ()) {
+			_selection.add (*i);
+		} else {
+			_selection.remove (*i);
+		}
 
 		if (!(s)->presentation_info ().trigger_track ()) {
 			hidden = true;
@@ -492,6 +507,25 @@ TriggerPage::redisplay_track_list ()
 	}
 }
 
+AxisView*
+TriggerPage::axis_view_by_stripable (boost::shared_ptr<Stripable> s) const
+{
+	for (list<TriggerStrip*>::const_iterator i = _strips.begin (); i != _strips.end (); ++i) {
+		TriggerStrip* strip = *i;
+		if (s == strip->stripable ()) {
+			return strip;
+		}
+	}
+	return 0;
+}
+
+AxisView*
+TriggerPage::axis_view_by_control (boost::shared_ptr<AutomationControl> c) const
+{
+	return 0;
+}
+
+
 void
 TriggerPage::rec_state_clicked ()
 {
@@ -512,6 +546,9 @@ TriggerPage::parameter_changed (string const& p)
 void
 TriggerPage::pi_property_changed (PBD::PropertyChange const& what_changed)
 {
+	if (what_changed.contains (Properties::selected)) {
+		_selection.presentation_info_changed (what_changed);
+	}
 	if (what_changed.contains (ARDOUR::Properties::order)) {
 		redisplay_track_list ();
 	}
@@ -533,6 +570,87 @@ TriggerPage::stripable_property_changed (PBD::PropertyChange const& what_changed
 	if (what_changed.contains (ARDOUR::Properties::hidden)) {
 		redisplay_track_list ();
 	}
+}
+
+bool
+TriggerPage::strip_button_release_event (GdkEventButton *ev, TriggerStrip *strip)
+{
+	if (ev->button != 1) {
+		return false;
+	}
+
+	if (_selection.selected (strip)) {
+		/* primary-click: toggle selection state of strip */
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			_selection.remove (strip, true);
+		} else if (_selection.axes.size() > 1) {
+			/* de-select others */
+			_selection.set (strip);
+		}
+		PublicEditor& pe = PublicEditor::instance();
+		TimeAxisView* tav = pe.time_axis_view_from_stripable (strip->stripable());
+		if (tav) {
+			pe.set_selected_mixer_strip (*tav);
+		}
+	} else {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			_selection.add (strip, true);
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier)) {
+
+			/* extend selection */
+
+			vector<TriggerStrip*> tmp;
+			bool accumulate = false;
+			bool found_another = false;
+
+			_strips.sort (TriggerStripSorter ());
+
+			for (list<TriggerStrip*>::iterator i = _strips.begin (); i != _strips.end (); ++i) {
+				TriggerStrip* ts = *i;
+
+				if (ts == strip) {
+					/* hit clicked strip, start accumulating till we hit the first
+						 selected strip
+						 */
+					if (accumulate) {
+						/* done */
+						break;
+					} else {
+						accumulate = true;
+					}
+				} else if (_selection.selected (ts)) {
+					/* hit selected strip. if currently accumulating others,
+						 we're done. if not accumulating others, start doing so.
+						 */
+					found_another = true;
+					if (accumulate) {
+						/* done */
+						break;
+					} else {
+						accumulate = true;
+					}
+				} else {
+					if (accumulate) {
+						tmp.push_back (ts);
+					}
+				}
+			}
+
+			tmp.push_back (strip);
+
+			if (found_another) {
+				PresentationInfo::ChangeSuspender cs;
+				for (vector<TriggerStrip*>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+					_selection.add (*i, true);
+				}
+			} else {
+				_selection.set (strip);  //user wants to start a range selection, but there aren't any others selected yet
+			}
+		} else {
+			_selection.set (strip);
+		}
+	}
+	return true;
 }
 
 bool

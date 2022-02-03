@@ -59,6 +59,7 @@ public:
 	}
 
 	void set_session (ARDOUR::Session* s);
+	void set_selected (bool yn);
 
 	void fast_update ();
 

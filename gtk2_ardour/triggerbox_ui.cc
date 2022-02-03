@@ -563,7 +563,6 @@ TriggerEntry::name_button_event (GdkEvent* ev)
 			}
 			break;
 		case GDK_BUTTON_PRESS:
-			PublicEditor::instance ().get_selection ().set (this);
 			break;
 		case GDK_2BUTTON_PRESS:
 #if SELECTION_PROPERTIES_BOX_TODO
@@ -573,7 +572,11 @@ TriggerEntry::name_button_event (GdkEvent* ev)
 		case GDK_BUTTON_RELEASE:
 			switch (ev->button.button) {
 				case 3:
+					PublicEditor::instance ().get_selection ().set (this);
 					context_menu ();
+					return true;
+				case 1:
+					PublicEditor::instance ().get_selection ().set (this);
 					return true;
 				default:
 					break;

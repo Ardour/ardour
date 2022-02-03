@@ -38,6 +38,7 @@
 #include "midi_region_operations_box.h"
 #include "midi_region_properties_box.h"
 #include "midi_trigger_properties_box.h"
+#include "route_processor_selection.h"
 #include "slot_properties_box.h"
 #include "trigger_clip_picker.h"
 #include "trigger_region_list.h"
@@ -47,7 +48,7 @@
 
 class TriggerStrip;
 
-class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
+class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList, public AxisViewProvider
 {
 public:
 	TriggerPage ();
@@ -59,6 +60,8 @@ public:
 	int      set_state (const XMLNode&, int /* version */);
 
 	Gtk::Window* use_own_window (bool and_fill_it);
+
+	RouteProcessorSelection& selection() { return _selection; }
 
 private:
 	void load_bindings ();
@@ -80,12 +83,16 @@ private:
 
 	void add_sidebar_page (std::string const&, Gtk::Widget&);
 
+	bool strip_button_release_event (GdkEventButton*, TriggerStrip*);
 	bool no_strip_button_event (GdkEventButton*);
 	bool no_strip_drag_motion (Glib::RefPtr<Gdk::DragContext> const&, int, int, guint);
 	void no_strip_drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
 
 	bool idle_drop_paths (std::vector<std::string>);
 	void drop_paths_part_two (std::vector<std::string>);
+
+	AxisView* axis_view_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
+	AxisView* axis_view_by_control (boost::shared_ptr<ARDOUR::AutomationControl>) const;
 
 	void                      selection_changed ();
 	PBD::ScopedConnectionList editor_connections;
@@ -130,6 +137,7 @@ private:
 	MidiClipEditorBox        _midi_trim_box;
 #endif
 
+	RouteProcessorSelection  _selection;
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;
 };
