@@ -65,6 +65,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<Trigger::StretchMode> stretch_mode;
 		PBD::PropertyDescriptor<bool> tempo_meter;  /* only to transmit updates, not storage */
 		PBD::PropertyDescriptor<bool> patch_change;  /* only to transmit updates, not storage */
+		PBD::PropertyDescriptor<bool> channel_map;  /* only to transmit updates, not storage */
 	}
 }
 
@@ -1720,10 +1721,15 @@ MIDITrigger::set_channel_map (int channel, int target)
 	if (channel < 0 || channel >= 16) {
 		return;
 	}
+
 	if (target < 0 || target >= 16) {
 		return;
 	}
-	_channel_map[channel] = target;
+
+	if (_channel_map[channel] != target) {
+		_channel_map[channel] = target;
+		PropertyChanged (Properties::channel_map);
+	}
 }
 
 void
@@ -1732,7 +1738,11 @@ MIDITrigger::unset_channel_map (int channel)
 	if (channel < 0 || channel >= 16) {
 		return;
 	}
-	_channel_map[channel] = -1;
+
+	if (_channel_map[channel] >= 0) {
+		_channel_map[channel] = -1;
+		PropertyChanged (Properties::channel_map);
+	}
 }
 
 int
@@ -1938,6 +1948,21 @@ MIDITrigger::get_state (void)
 		node.add_child_nocopy (*patches_node);
 	}
 
+	std::string cmstr;
+
+	for (int chn = 0; chn < 16; ++chn) {
+		char buf[4];
+
+		if (chn > 0) {
+			cmstr += ',';
+		}
+
+		snprintf (buf, sizeof (buf), "%d", _channel_map[chn]);
+		cmstr += buf;
+	}
+
+	node.set_property (X_("channel-map"), cmstr);
+
 	return node;
 }
 
@@ -1967,6 +1992,23 @@ MIDITrigger::set_state (const XMLNode& node, int version)
 				    (*i)->get_property (X_("program"), b)) {
 					_patch_change[c] = Evoral::PatchChange<MidiBuffer::TimeType> (0, c, p, b);
 				}
+			}
+		}
+	}
+
+	std::string cmstr;
+
+	if (node.get_property (X_("channel-map"), cmstr)) {
+		std::stringstream ss (cmstr);
+		char comma;
+		for (int chn = 0; chn < 16; ++chn) {
+			ss >> _channel_map[chn];
+			if (!ss) {
+				break;
+			}
+			ss >> comma;
+			if (!ss) {
+				break;
 			}
 		}
 	}
@@ -2284,6 +2326,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretch_mode = %1\n", Properties::stretch_mode.property_id));
 	Properties::patch_change.property_id = g_quark_from_static_string (X_("patch_change"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for patch_change = %1\n", Properties::patch_change.property_id));
+	Properties::channel_map.property_id = g_quark_from_static_string (X_("channel_map"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for channel_map = %1\n", Properties::channel_map.property_id));
 }
 
 Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
