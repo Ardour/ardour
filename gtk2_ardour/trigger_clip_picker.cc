@@ -913,8 +913,9 @@ TriggerClipPicker::audition_processor_going_away ()
 void
 TriggerClipPicker::audition_processors_changed ()
 {
-	if (!_session || _session->deletion_in_progress () || ! _session->the_auditioner ()) {
+	if (!_session || _session->deletion_in_progress () || !_session->the_auditioner ()) {
 		_show_plugin_btn.set_sensitive (false);
+		return;
 	}
 	boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (_session->the_auditioner ()->the_instrument ());
 	_show_plugin_btn.set_sensitive (plugin_insert != 0);
