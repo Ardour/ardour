@@ -47,6 +47,7 @@
 
 #include "midi++/midnam_patch.h"
 
+#include "ardour/auditioner.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_track.h"
 #include "ardour/plugin.h"
@@ -58,7 +59,9 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/doi.h"
 
+#include "widgets/frame.h"
 #include "widgets/ardour_knob.h"
+#include "widgets/ardour_spacer.h"
 #include "widgets/fastmeter.h"
 #include "widgets/slider_controller.h"
 #include "widgets/tooltips.h"
@@ -91,6 +94,11 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	, _piano_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
 	, _piano_channel (*manage (new Adjustment (0, 1, 16, 1, 1)))
 {
+	bool for_auditioner = false;
+	if (insert->session().the_auditioner()) {
+		for_auditioner = insert->session().the_auditioner()->the_instrument() == insert;
+	}
+
 	set_name ("PluginEditor");
 	set_border_width (6);
 	//set_homogeneous (false);
@@ -100,7 +108,13 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	HBox* smaller_hbox = manage (new HBox);
 	smaller_hbox->set_spacing (6);
 	smaller_hbox->set_border_width (0);
-	add_common_widgets (smaller_hbox, false);
+
+	if (for_auditioner) {
+		Gtk::Label* spacer = manage (new Gtk::Label());
+		smaller_hbox->pack_start(*spacer);
+	} else {
+		add_common_widgets (smaller_hbox, false);
+	}
 
 	automation_manual_all_button.set_text (GainMeterBase::astate_string (ARDOUR::Off));
 	automation_manual_all_button.set_name (X_("generic button"));
@@ -113,40 +127,42 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	automation_latch_all_button.set_text (GainMeterBase::astate_string (ARDOUR::Latch));
 	automation_latch_all_button.set_name (X_("generic button"));
 
-	if (pi->is_instrument ()) {
-		_piano = new APianoKeyboard ();
-		_piano->set_flags(Gtk::CAN_FOCUS);
+	if (!for_auditioner) { /*auditioner is not run when it isn't auditioning; so the piano keyboard, cpu usage, and other features are not applicable */
+		if (pi->is_instrument ()) {
+			_piano = new APianoKeyboard ();
+			_piano->set_flags(Gtk::CAN_FOCUS);
 
-		_piano->NoteOn.connect (sigc::mem_fun (*this, &GenericPluginUI::note_on_event_handler));
-		_piano->NoteOff.connect (sigc::mem_fun (*this, &GenericPluginUI::note_off_event_handler));
+			_piano->NoteOn.connect (sigc::mem_fun (*this, &GenericPluginUI::note_on_event_handler));
+			_piano->NoteOff.connect (sigc::mem_fun (*this, &GenericPluginUI::note_off_event_handler));
 
-		HBox* box = manage (new HBox);
-		box->pack_start (*manage (new Label (_("Channel:"))), false, false);
-		box->pack_start (_piano_channel, false, false);
-		box->pack_start (*manage (new Label (_("Velocity:"))), false, false);
-		box->pack_start (_piano_velocity, false, false);
+			HBox* box = manage (new HBox);
+			box->pack_start (*manage (new Label (_("Channel:"))), false, false);
+			box->pack_start (_piano_channel, false, false);
+			box->pack_start (*manage (new Label (_("Velocity:"))), false, false);
+			box->pack_start (_piano_velocity, false, false);
 
-		Box* box2 = manage (new HBox ());
-		box2->pack_start (*box, true, false);
+			Box* box2 = manage (new HBox ());
+			box2->pack_start (*box, true, false);
 
-		_pianobox.set_spacing (4);
-		_pianobox.pack_start (*box2, true, true);
-		_pianobox.pack_start (*_piano, true, true);
+			_pianobox.set_spacing (4);
+			_pianobox.pack_start (*box2, true, true);
+			_pianobox.pack_start (*_piano, true, true);
 
-		_plugin_pianokeyboard_expander.set_expanded(false);
-		_plugin_pianokeyboard_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &GenericPluginUI::toggle_pianokeyboard));
+			_plugin_pianokeyboard_expander.set_expanded(false);
+			_plugin_pianokeyboard_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &GenericPluginUI::toggle_pianokeyboard));
 
-		pack_end (_plugin_pianokeyboard_expander, false, false);
-	} else {
-		pack_end (plugin_analysis_expander, false, false);
-	}
+			pack_end (_plugin_pianokeyboard_expander, false, false);
+		} else {
+			pack_end (plugin_analysis_expander, false, false);
+		}
 
-	if (insert->provides_stats ()) {
-		pack_end (cpuload_expander, false, false);
-	}
+		if (insert->provides_stats ()) {
+			pack_end (cpuload_expander, false, false);
+		}
 
-	if (!plugin->get_docs().empty()) {
-		pack_end (description_expander, false, false);
+		if (!plugin->get_docs().empty()) {
+			pack_end (description_expander, false, false);
+		}
 	}
 
 	settings_box.set_homogeneous (false);
@@ -415,8 +431,8 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	Gtk::Table* button_table = manage (new Gtk::Table (initial_button_rows, initial_button_cols));
 	Gtk::Table* output_table = manage (new Gtk::Table (initial_output_rows, initial_output_cols));
 
-	Frame* frame;
-	Frame* bt_frame;
+	Gtk::Frame* frame;
+	Gtk::Frame* bt_frame;
 	VBox* box;
 	int output_row, output_col;
 	int button_row, button_col;
@@ -446,7 +462,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	output_table->set_border_width (5);
 
 
-	bt_frame = manage (new Frame);
+	bt_frame = manage (new Gtk::Frame);
 	bt_frame->set_name ("BaseFrame");
 	bt_frame->set_label (_("Switches"));
 	bt_frame->add (*button_table);
@@ -456,7 +472,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	box->set_border_width (5);
 	box->set_spacing (1);
 
-	frame = manage (new Frame);
+	frame = manage (new Gtk::Frame);
 	frame->set_name ("BaseFrame");
 	frame->set_label (_("Controls"));
 	frame->add (*box);
@@ -562,7 +578,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 
 		if (x > max_controls_per_column || similarity_scores[i] <= similarity_threshold) {
 			if (x > min_controls_per_column) {
-				frame = manage (new Frame);
+				frame = manage (new Gtk::Frame);
 				frame->set_name ("BaseFrame");
 				frame->set_label (_("Controls"));
 				box = manage (new VBox);
@@ -597,7 +613,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	}
 
 	if (!output_table->children().empty()) {
-		frame = manage (new Frame);
+		frame = manage (new Gtk::Frame);
 		frame->set_name ("BaseFrame");
 		frame->set_label(_("Meters"));
 		frame->add (*output_table);
@@ -626,7 +642,7 @@ GenericPluginUI::build_midi_table ()
 	pgm_table->set_border_width (5);
 	pgm_table->set_col_spacing (2, 10);
 
-	Frame* frame = manage (new Frame);
+	ArdourWidgets::Frame* frame = manage (new ArdourWidgets::Frame);
 	frame->set_name ("BaseFrame");
 	if (dynamic_cast<MidiTrack*> (insert->owner())) {
 		frame->set_label (_("MIDI Programs (sent to track)"));

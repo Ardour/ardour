@@ -25,6 +25,7 @@
 
 #include <gtkmm/stock.h>
 
+#include "ardour/auditioner.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
 #include "pbd/error.h"
@@ -307,7 +308,14 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 {
 	_ardour_buttons_box.set_spacing (6);
 	_ardour_buttons_box.set_border_width (6);
-	add_common_widgets (&_ardour_buttons_box);
+
+	bool for_auditioner = false;
+	if (insert->session().the_auditioner()) {
+		for_auditioner = insert->session().the_auditioner()->the_instrument() == insert;
+	}
+	if (!for_auditioner) {
+		add_common_widgets (&_ardour_buttons_box);
+	}
 
 	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&LV2PluginUI::queue_port_update, this), gui_context ());
 }

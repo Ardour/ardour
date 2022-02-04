@@ -46,6 +46,7 @@
 #include "widgets/tooltips.h"
 #include "widgets/fastmeter.h"
 
+#include "ardour/auditioner.h"
 #include "ardour/session.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
@@ -542,6 +543,11 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, preset_gui (0)
 	, preset_dialog (0)
 {
+	bool for_auditioner = false;
+	if (insert->session().the_auditioner()) {
+		for_auditioner = insert->session().the_auditioner()->the_instrument() == insert;
+	}
+
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.set_text("(default)");
 	set_tooltip (_preset_combo, _("Presets (if any) for this plugin\n(Both factory and user-created)"));
@@ -620,16 +626,18 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	insert->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PlugUIBase::plugin_going_away, this), gui_context());
 
-	plugin->PresetAdded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
-	plugin->PresetRemoved.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
-	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset, this), gui_context ());
-	plugin->PresetDirty.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset_modified, this), gui_context ());
+	if (!for_auditioner) { /*auditioner can skip these signal-callbacks because these widgets are not shown anyway */
+		plugin->PresetAdded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
+		plugin->PresetRemoved.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
+		plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset, this), gui_context ());
+		plugin->PresetDirty.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset_modified, this), gui_context ());
 
-	insert->AutomationStateChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::automation_state_changed, this), gui_context());
+		insert->AutomationStateChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::automation_state_changed, this), gui_context());
 
-	insert->LatencyChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::set_latency_label, this), gui_context());
+		insert->LatencyChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::set_latency_label, this), gui_context());
 
-	automation_state_changed();
+		automation_state_changed();
+	}
 }
 
 PlugUIBase::~PlugUIBase()

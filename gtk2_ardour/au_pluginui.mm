@@ -425,7 +425,14 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	top_box.set_homogeneous (false);
 	top_box.set_spacing (6);
 	top_box.set_border_width (6);
-	add_common_widgets (&top_box);
+
+	bool for_auditioner = false;
+	if (insert->session().the_auditioner()) {
+		for_auditioner = insert->session().the_auditioner()->the_instrument() == insert;
+	}
+	if (!for_auditioner) {
+		add_common_widgets (&top_box);
+	}
 
 	set_spacing (0);
 	pack_start (top_box, false, false);

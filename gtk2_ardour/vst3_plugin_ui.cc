@@ -18,6 +18,8 @@
 
 #include <glibmm/main.h>
 
+#include "ardour/auditioner.h"
+#include "ardour/session.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/vst3_plugin.h"
 
@@ -45,7 +47,14 @@ VST3PluginUI::VST3PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_pt
 {
 	_ardour_buttons_box.set_spacing (6);
 	_ardour_buttons_box.set_border_width (6);
-	add_common_widgets (&_ardour_buttons_box);
+
+	bool for_auditioner =false;
+	if (insert->session().the_auditioner()) {
+		for_auditioner = insert->session().the_auditioner()->the_instrument() == insert;
+	}
+	if (!for_auditioner) {
+		add_common_widgets (&_ardour_buttons_box);
+	}
 
 	_vst3->OnResizeView.connect (_resize_connection, invalidator (*this), boost::bind (&VST3PluginUI::resize_callback, this, _1, _2), gui_context());
 	//pi->plugin()->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&VST3PluginUI::queue_port_update, this), gui_context ());

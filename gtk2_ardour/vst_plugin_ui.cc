@@ -20,6 +20,8 @@
  */
 
 #include <gtkmm.h>
+#include "ardour/auditioner.h"
+#include "ardour/session.h"
 #include "ardour/vst_plugin.h"
 #include "ardour/vst_types.h"
 #include "ardour/plugin_insert.h"
@@ -40,7 +42,14 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	Gtk::HBox* box = manage (new Gtk::HBox);
 	box->set_spacing (6);
 	box->set_border_width (6);
-	add_common_widgets (box);
+
+	bool for_auditioner =false;
+	if (insert->session().the_auditioner()) {
+		for_auditioner = insert->session().the_auditioner()->the_instrument() == insert;
+	}
+	if (!for_auditioner) {
+		add_common_widgets (box);
+	}
 
 	pack_start (*box, false, false);
 	box->signal_size_allocate().connect (sigc::mem_fun (*this, &VSTPluginUI::top_box_allocated));
