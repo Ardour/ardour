@@ -88,6 +88,8 @@ public:
 
 	int smf_format () const;
 	int num_channels () const { return _num_channels; }
+	std::set<uint8_t> const& used_channels () const { return _used_channels; }
+
 	void track_names (std::vector<std::string>&) const;
 	void instrument_names (std::vector<std::string>&) const;
 
@@ -136,6 +138,7 @@ public:
 	mutable Glib::Threads::Mutex _smf_lock;
 
 	int _num_channels;
+	std::set<uint8_t> _used_channels;
 
 	mutable Markers _markers;
 };

@@ -126,6 +126,7 @@ SMF::open(const std::string& path, int track)
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 
 	_num_channels = 0;
+	_used_channels.clear ();
 
 	assert(track >= 1);
 	if (_smf) {
@@ -185,10 +186,10 @@ SMF::open(const std::string& path, int track)
 				uint8_t type = buf[0] & 0xf0;
 				uint8_t chan = buf[0] & 0x0f;
 				if (type >= 0x80 && type <= 0xE0) {
-					used.insert(chan);
+					_used_channels.insert(chan);
 				}
 			}
-			_num_channels += used.size();
+			_num_channels += _used_channels.size();
 			free (buf);
 		}
 
