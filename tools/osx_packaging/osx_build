@@ -992,7 +992,7 @@ mkdir -p "$MNTPATH"
 
 TMPDMG="${TMPDMG}.dmg"
 
-trap "rm -rf $MNTPATH $TMPDMG ${TMPDMG}.dmg $ICNSTMP" EXIT
+trap "rm -rf $MNTPATH $TMPDMG $ICNSTMP" EXIT
 
 hdiutil create -megabytes $DMGMEGABYTES -fs HFS+ -volname "${VOLNAME}" "$TMPDMG"
 DiskDevice=$(hdid -nomount "$TMPDMG" | grep Apple_HFS | cut -f 1 -d ' ')
