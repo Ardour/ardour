@@ -6324,6 +6324,11 @@ operator| (const MonitorState& a, const MonitorState& b) {
   return static_cast<MonitorState> (static_cast <int>(a) | static_cast<int> (b));
 }
 
+static inline MonitorState
+operator& (const MonitorState& a, const MonitorState& b) {
+  return static_cast<MonitorState> (static_cast <int>(a) & static_cast<int> (b));
+}
+
 MonitorState
 Route::monitoring_state () const
 {
@@ -6349,9 +6354,14 @@ Route::monitoring_state () const
 		return ms;
 	}
 
+	/* When TriggerBox is not empty, do not implicitly monitor Disk */
+	bool const tod = _session.config.get_triggerbox_overrides_disk_monitoring ();
+	MonitorState auto_monitor_disk = !tod || (_triggerbox && _triggerbox->empty ()) ? MonitoringDisk : MonitoringSilence;
+	MonitorState auto_monitor_mask = !tod || (_triggerbox && _triggerbox->empty ()) ? MonitoringCue : MonitoringInput;
+
 	switch (_session.config.get_session_monitoring ()) {
 		case MonitorDisk:
-			return MonitoringDisk;
+			return auto_monitor_disk;
 			break;
 		case MonitorInput:
 			return MonitoringInput;
@@ -6401,15 +6411,15 @@ Route::monitoring_state () const
 	if (track_rec) {
 
 		if (!session_rec && roll && auto_input) {
-			return MonitoringDisk | get_input_monitoring_state (false, false);
+			return auto_monitor_disk | get_input_monitoring_state (false, false);
 		} else {
 			/* recording */
 			const samplecnt_t prtl = _session.preroll_record_trim_len ();
 			if (session_rec && roll && prtl > 0 && _disk_writer->get_captured_samples () < prtl) {
 				/* CUE monitor during pre-roll */
-				return MonitoringDisk | get_input_monitoring_state (true, false);
+				return auto_monitor_disk | (get_input_monitoring_state (true, false) & auto_monitor_mask);
 			}
-			return get_input_monitoring_state (true, false);
+			return get_input_monitoring_state (true, false) & auto_monitor_mask;
 		}
 
 	} else {
@@ -6417,14 +6427,14 @@ Route::monitoring_state () const
 		if (auto_input_does_talkback) {
 
 			if (!roll && auto_input) {
-				return get_input_monitoring_state (false, true);
+				return get_input_monitoring_state (false, true) & auto_monitor_mask;
 			} else {
-				return MonitoringDisk | get_input_monitoring_state (false, false);
+				return auto_monitor_disk | get_input_monitoring_state (false, false);
 			}
 
 		} else {
 			/* tape-machine-mode */
-			return MonitoringDisk | get_input_monitoring_state (false, false);
+			return auto_monitor_disk | get_input_monitoring_state (false, false);
 		}
 	}
 
