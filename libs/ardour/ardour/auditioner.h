@@ -57,6 +57,8 @@ public:
 	sampleoffset_t seek_sample() const { return _seeking ? _seek_sample : -1;}
 	void seek_response(sampleoffset_t pos);
 
+	void idle_synth_update ();
+
 	MonitorState monitoring_state () const;
 
 	bool needs_monitor() const { return via_monitor; }

@@ -551,6 +551,22 @@ Auditioner::seek_response (sampleoffset_t pos) {
 	}
 }
 
+void
+Auditioner::idle_synth_update ()
+{
+	if (auditioning() || !asynth) {
+		return;
+	}
+	auto pi = boost::dynamic_pointer_cast<PluginInsert> (asynth);
+
+	/* Note: calling thread must have process buffers */
+	BufferSet   bufs;
+	samplepos_t start     = 0;
+	pframes_t   n_samples = 16;
+	/* MIDI buffers need to be able to hold patch/pgm change messages. (16 bytes + msg-size) per event */
+	bufs.ensure_buffers (max (asynth->input_streams (), asynth->output_streams ()), std::max<size_t> (1024, n_samples));
+	pi->run  (bufs, start, start + n_samples, 1.0, n_samples, false);
+}
 
 void
 Auditioner::output_changed (IOChange change, void* /*src*/)
