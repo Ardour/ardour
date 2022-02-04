@@ -801,6 +801,51 @@ ARDOUR_UI_UTILS::samples_as_time_string (samplecnt_t s, float rate, bool show_sa
 	return buf;
 }
 
+string
+ARDOUR_UI_UTILS::midi_channels_as_string (std::set<uint8_t> const& channels)
+{
+	if (channels.empty ()) {
+		return _("none");
+	}
+
+	string rv;
+	auto i = channels.begin ();
+
+	uint8_t next = *i;
+	uint8_t prev = next;
+	rv += to_string<int> (next + 1);
+
+	do {
+		if (*i == next) {
+			++i;
+			++next;
+			if (i != channels.end ()) {
+				continue;
+			}
+		}
+		if (next - prev > 2) {
+			rv += "-";
+			rv += to_string<int> (next);
+		} else if (next - prev > 1) {
+			rv += ", ";
+			rv += to_string<int> (next);
+		}
+
+		if (i == channels.end ()) {
+			break;
+		}
+
+		rv += ", ";
+		rv += to_string<int> (*i + 1);
+
+		prev = *i;
+		next = prev + 1;
+		++i;
+	} while (i != channels.end ());
+
+	return rv;
+}
+
 bool
 ARDOUR_UI_UTILS::windows_overlap (Gtk::Window *a, Gtk::Window *b)
 {
