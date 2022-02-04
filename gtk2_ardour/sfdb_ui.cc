@@ -357,7 +357,7 @@ SoundFileBox::setup_labels (const string& filename)
 			} else {
 				format_text.set_text (string_compose("%1 (%2 Tracks)", ms->smf_format()==2 ? "MIDI Type 2" : "MIDI Type 1", ms->num_tracks()));
 			}
-			channels_value.set_text (to_string<uint32_t>(ms->num_channels()));
+			channels_value.set_text (ARDOUR_UI_UTILS::midi_channels_as_string (ms->used_channels()));
 			length_clock.set_duration (timecnt_t (0));
 			switch (ms->num_tempos()) {
 			case 0:
