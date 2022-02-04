@@ -3411,7 +3411,9 @@ TriggerBox::set_state (const XMLNode& node, int version)
 				all_triggers.push_back (trig);
 				trig->set_state (**t, version);
 			}
-			_active_slots++;
+			if (trig->region ()) {
+				_active_slots++;
+			}
 		}
 	}
 
