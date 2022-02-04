@@ -256,12 +256,12 @@ MidiStateTracker::reset ()
 	MidiNoteTracker::reset ();
 
 	for (size_t n = 0; n < n_channels; ++n) {
-		program[n] = 0;
+		program[n] = 0x80;
 	}
 
 	for (size_t chn = 0; chn < n_channels; ++chn) {
 		for (size_t c = 0; c < n_controls; ++c) {
-			control[chn][c] = 0;
+			control[chn][c] = 0x80;
 		}
 	}
 }
@@ -278,6 +278,7 @@ MidiStateTracker::track (const uint8_t* evbuf)
 {
 	const uint8_t type = evbuf[0] & 0xF0;
 	const uint8_t chan = evbuf[0] & 0x0F;
+
 	switch (type) {
 	case MIDI_CTL_ALL_NOTES_OFF:
 		MidiNoteTracker::reset();
@@ -291,15 +292,15 @@ MidiStateTracker::track (const uint8_t* evbuf)
 		break;
 
 	case MIDI_CMD_CONTROL:
-		control[chan][evbuf[1]] = 0x80|evbuf[2];
+		control[chan][evbuf[1]] = evbuf[2];
 		break;
 
 	case MIDI_CMD_PGM_CHANGE:
-		program[chan] = 0x80|evbuf[1];
+		program[chan] = evbuf[1];
 		break;
 
 	case MIDI_CMD_CHANNEL_PRESSURE:
-		pressure[chan] = 0x80|evbuf[1];
+		pressure[chan] = evbuf[1];
 		break;
 
 	case MIDI_CMD_NOTE_PRESSURE:
@@ -331,16 +332,16 @@ MidiStateTracker::flush (MidiBuffer& dst, samplepos_t time)
 	 */
 
 	for (int chn = 0; chn < n_channels; ++chn) {
-		if (program[chn] & 0x80) {
+		if (program[chn] & 0x80 == 0) {
 			buf[0] = MIDI_CMD_PGM_CHANGE|chn;
 			buf[1] = program[chn] & 0x7f;
 			dst.write (time, Evoral::MIDI_EVENT, 2, buf);
 		}
 	}
 
-	for (int chn = 0; chn < 16; ++chn) {
+	for (int chn = 0; chn < n_channels; ++chn) {
 		for (int ctl = 0; ctl < n_controls; ++ctl) {
-			if (control[chn][ctl] & 0x80) {
+			if (control[chn][ctl] & 0x80 == 0) {
 				buf[0] = MIDI_CMD_CONTROL|chn;
 				buf[1] = ctl;
 				buf[2] = control[chn][ctl] & 0x7f;
