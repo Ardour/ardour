@@ -981,8 +981,9 @@ VOLNAME=$APPNAME-$release_version
 MNTPATH=`mktemp -d -t ardourimg`
 TMPDMG=`mktemp -t ardour`
 ICNSTMP=`mktemp -t ardouricon`
-EXTRA_SPACE_MB=30
-DMGMEGABYTES=$[ `du -sk "$PRODUCT_PKG_DIR" | cut -f 1` * 1024 / 1000000 + $EXTRA_SPACE_MB ]
+DMGMEGABYTES=$[ `du -sk "$PRODUCT_PKG_DIR" | cut -f 1` * 1024 / 1000000 ]
+EXTRA_SPACE_MB=$[ ($DMGMEGABYTES * 25) / 100 ]          #25 percent without using floating point math
+DMGMEGABYTES=$[ $DMGMEGABYTES + $EXTRA_SPACE_MB ]
 
 echo "DMG MB = " $DMGMEGABYTES
 
