@@ -49,7 +49,9 @@
 #include "widgets/tooltips.h"
 #include "widgets/ardour_icon.h"
 
+#include "ardour_ui.h"
 #include "plugin_ui.h"
+#include "timers.h"
 #include "trigger_clip_picker.h"
 #include "ui_config.h"
 
@@ -188,6 +190,7 @@ TriggerClipPicker::TriggerClipPicker ()
 
 TriggerClipPicker::~TriggerClipPicker ()
 {
+	_idle_connection.disconnect ();
 }
 
 void
@@ -854,6 +857,29 @@ TriggerClipPicker::audition (std::string const& path)
 }
 
 void
+TriggerClipPicker::audition_processor_idle ()
+{
+	if (!_session || _session->deletion_in_progress () || !_session->the_auditioner ()) {
+		return;
+	}
+	assert (_session && _session->the_auditioner ());
+	ARDOUR_UI::instance ()->get_process_buffers ();
+	_session->the_auditioner ()->idle_synth_update ();
+	ARDOUR_UI::instance ()->drop_process_buffers ();
+}
+
+bool
+TriggerClipPicker::audition_processor_viz (bool show)
+{
+	if (show) {
+		_idle_connection = Timers::fps_connect (sigc::mem_fun (*this, &TriggerClipPicker::audition_processor_idle));
+	} else {
+		_idle_connection.disconnect ();
+	}
+	return false;
+}
+
+void
 TriggerClipPicker::audition_show_plugin_ui ()
 {
 	if (!_audition_plugnui) {
@@ -864,6 +890,9 @@ TriggerClipPicker::audition_show_plugin_ui ()
 			_audition_plugnui->show_all ();
 			_audition_plugnui->set_title (/* generate_processor_title (plugin_insert)*/ _("Audition Synth"));
 			plugin_insert->DropReferences.connect (_processor_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_processor_going_away, this), gui_context());
+
+			_audition_plugnui->signal_map_event ().connect (sigc::hide (sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::audition_processor_viz), true)));
+			_audition_plugnui->signal_unmap_event ().connect (sigc::hide (sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::audition_processor_viz), false)));
 		}
 	}
 	if (_audition_plugnui) {
@@ -875,6 +904,7 @@ void
 TriggerClipPicker::audition_processor_going_away ()
 {
 	if (_audition_plugnui) {
+		_idle_connection.disconnect ();
 		delete _audition_plugnui;
 	}
 	_audition_plugnui = 0;

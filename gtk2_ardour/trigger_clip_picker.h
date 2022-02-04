@@ -72,6 +72,8 @@ private:
 	void audition_progress (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
 	void audition_processors_changed ();
 	void audition_processor_going_away ();
+	void audition_processor_idle ();
+	bool audition_processor_viz (bool);
 	void audition_show_plugin_ui ();
 	void stop_audition ();
 	void autoplay_toggled ();
@@ -122,6 +124,7 @@ private:
 	PBD::ScopedConnectionList _processor_connections;
 	PBD::ScopedConnection     _config_connection;
 	PBD::ScopedConnection     _clip_added_connection;
+	sigc::connection          _idle_connection;
 };
 
 #endif
