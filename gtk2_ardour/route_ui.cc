@@ -416,6 +416,10 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		update_monitoring_display ();
 	}
 
+	if (_route->triggerbox ()) {
+		_route->triggerbox ()->EmptyStatusChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_monitoring_display, this), gui_context());
+	}
+
 	mute_button->unset_flags (Gtk::CAN_FOCUS);
 	solo_button->unset_flags (Gtk::CAN_FOCUS);
 
@@ -2022,6 +2026,8 @@ RouteUI::parameter_changed (string const & p)
 	} else if (p == "session-monitoring") {
 		update_monitoring_display ();
 	} else if (p == "auto-input") {
+		update_monitoring_display ();
+	} else if (p == "triggerbox-overrides-disk-monitoring") {
 		update_monitoring_display ();
 	} else if (p == "layered-record-mode") {
 		update_monitoring_display ();
