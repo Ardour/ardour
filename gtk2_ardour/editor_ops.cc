@@ -5167,7 +5167,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		latest_regionviews.clear ();
 		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
-		timepos_t position = end_sample + (start_sample.distance (r->end()));
+		timepos_t position = end_sample;
 		playlist = (*i)->region()->playlist();
 
 		if (!should_ripple()) {
