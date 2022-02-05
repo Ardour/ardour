@@ -744,19 +744,6 @@ Session::process_audition (pframes_t nframes)
 		_process_graph->swap_process_chain ();
 	}
 
-	/* run the auditioner, and if it says we need butler service, ask for it */
-
-	if (auditioner->play_audition (nframes) > 0) {
-		DEBUG_TRACE (DEBUG::Butler, "auditioner needs butler, call it\n");
-		_butler->summon ();
-	}
-
-	/* if using a monitor section, run it because otherwise we don't hear anything */
-
-	if (_monitor_out && auditioner->needs_monitor()) {
-		_monitor_out->monitor_run (_transport_sample, _transport_sample + nframes, nframes);
-	}
-
 	/* handle pending events */
 
 	while (pending_events.read (&ev, 1) == 1) {
@@ -772,6 +759,19 @@ Session::process_audition (pframes_t nframes)
 		SessionEvent *ev = immediate_events.front ();
 		immediate_events.pop_front ();
 		process_event (ev);
+	}
+
+	/* run the auditioner, and if it says we need butler service, ask for it */
+
+	if (auditioner->play_audition (nframes) > 0) {
+		DEBUG_TRACE (DEBUG::Butler, "auditioner needs butler, call it\n");
+		_butler->summon ();
+	}
+
+	/* if using a monitor section, run it because otherwise we don't hear anything */
+
+	if (_monitor_out && auditioner->needs_monitor()) {
+		_monitor_out->monitor_run (_transport_sample, _transport_sample + nframes, nframes);
 	}
 
 	if (!auditioner->auditioning()) {
