@@ -254,11 +254,11 @@ SessionEventManager::_replace_event (SessionEvent* ev)
 	Events& e (ev->action_sample == SessionEvent::Immediate ? immediate_events : events);
 
 	for (i = e.begin(); i != e.end(); ++i) {
-		if ((*i)->type == ev->type && ev->type == SessionEvent::Overwrite && (*i)->track.lock() == ev->track.lock() && (*i)->overwrite == ev->overwrite) {
+		if ((*i)->type == ev->type && ev->type == SessionEvent::Overwrite && (*i)->track.lock() == ev->track.lock()) {
 			assert (ev->action_sample == SessionEvent::Immediate);
-			ret = true;
+			(*i)->overwrite = ARDOUR::OverwriteReason ((*i)->overwrite | ev->overwrite);
 			delete ev;
-			break;
+			return true;
 		}
 		else if ((*i)->type == ev->type && ev->type != SessionEvent::Overwrite) {
 			assert (ev->action_sample != SessionEvent::Immediate);
