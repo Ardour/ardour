@@ -1705,10 +1705,12 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	, _start_offset (0, 0, 0)
 	, _legato_offset (0, 0, 0)
 {
+#if TRIGGER_MIDI_PROP_TESTING
 	Evoral::PatchChange<MidiBuffer::TimeType> pc (0, 0, 12, 0);
 	set_patch_change (pc);
 
 	_channel_map.assign (16, -1);
+#endif
 }
 
 MIDITrigger::~MIDITrigger ()
