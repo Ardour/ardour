@@ -5354,19 +5354,6 @@ Session::non_realtime_set_audition ()
 	assert (pending_audition_region);
 	auditioner->audition_region (pending_audition_region);
 	pending_audition_region.reset ();
-
-	/* clear any SessionEvent::Overwrite that the DR may have scheduled
-	 * due to PL modification. audition_region() will have called
-	 * overwrite_existing_buffers().
-	 *
-	 * Otherwise the event will be handled in the future by
-	 * Session::process_audition () after !non_realtime_work_pending().
-	 * This will cause the DiskReader::run_must_resolve = true, and the
-	 * Note-tracker will kill any active notes, while auditioning
-	 * is already in progress.
-	 */
-	_clear_event_type (SessionEvent::Overwrite);
-
 	AuditionActive (true); /* EMIT SIGNAL */
 }
 
