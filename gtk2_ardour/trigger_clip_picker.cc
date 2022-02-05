@@ -65,6 +65,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	: _fcd (_("Select Sample Folder"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, _seek_slider (0, 1000, 1)
 	, _autoplay_btn (_("Auto-play"))
+	, _auditioner_combo (InstrumentSelector::ForAuditioner)
 	, _clip_library_listed (false)
 	, _ignore_list_dir (false)
 	, _seeking (false)
@@ -122,6 +123,9 @@ TriggerClipPicker::TriggerClipPicker ()
 	_autoplay_btn.set_can_focus(false);
 	_autoplay_btn.signal_toggled ().connect (sigc::mem_fun (*this, &TriggerClipPicker::autoplay_toggled));
 
+	auditioner_combo_changed();
+	_auditioner_combo.signal_changed().connect(sigc::mem_fun(*this, &TriggerClipPicker::auditioner_combo_changed) );
+
 	ArdourWidgets::set_tooltip (_play_btn, _("Audition selected clip"));
 	ArdourWidgets::set_tooltip (_stop_btn, _("Stop the audition"));
 	ArdourWidgets::set_tooltip (_open_library_btn, _("Open clip library folder"));
@@ -133,7 +137,8 @@ TriggerClipPicker::TriggerClipPicker ()
 	_auditable.attach (_autoplay_btn,     2, 3, 0, 1, EXPAND | FILL, SHRINK);
 	_auditable.attach (_show_plugin_btn,  3, 4, 0, 1, SHRINK, SHRINK);
 	_auditable.attach (_open_library_btn, 4, 5, 0, 1, SHRINK, SHRINK);
-	_auditable.attach (_seek_slider,      0, 5, 1, 2, EXPAND | FILL, SHRINK);
+	_auditable.attach (_auditioner_combo, 0, 2, 1, 2, SHRINK, SHRINK);
+	_auditable.attach (_seek_slider,      0, 4, 2, 3, EXPAND | FILL, SHRINK);
 	_auditable.set_border_width (4);
 	_auditable.set_spacings (4);
 
@@ -192,6 +197,15 @@ TriggerClipPicker::~TriggerClipPicker ()
 {
 	_idle_connection.disconnect ();
 }
+
+void
+TriggerClipPicker::auditioner_combo_changed()
+{
+	if (_session) {
+		_session->the_auditioner()->set_audition_synth_info( _auditioner_combo.selected_instrument() );
+	}
+}
+
 
 void
 TriggerClipPicker::parameter_changed (std::string const& p)
@@ -915,8 +929,15 @@ TriggerClipPicker::audition_processors_changed ()
 {
 	if (!_session || _session->deletion_in_progress () || !_session->the_auditioner ()) {
 		_show_plugin_btn.set_sensitive (false);
+		set_tooltip (_show_plugin_btn, "You must first play one midi file to show the plugin's GUI");
 		return;
 	}
-	boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (_session->the_auditioner ()->the_instrument ());
-	_show_plugin_btn.set_sensitive (plugin_insert != 0);
+
+	if (_session && _session->the_auditioner ()->get_audition_synth_info()) {
+		boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (_session->the_auditioner ()->the_instrument ());
+		if (plugin_insert) {
+			set_tooltip (_show_plugin_btn, "Show the selected audition-instrument's GUI");
+			_show_plugin_btn.set_sensitive (true);
+		}
+	}
 }

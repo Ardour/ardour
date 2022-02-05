@@ -37,6 +37,7 @@
 #include "widgets/ardour_dropdown.h"
 #include "widgets/ardour_button.h"
 
+#include "instrument_selector.h"
 
 class PluginUIWindow;
 
@@ -80,6 +81,7 @@ private:
 	void open_library ();
 	bool seek_button_press (GdkEventButton*);
 	bool seek_button_release (GdkEventButton*);
+	void auditioner_combo_changed ();
 
 	ArdourWidgets::ArdourDropdown _dir;
 	Gtk::FileChooserDialog        _fcd;
@@ -109,6 +111,8 @@ private:
 	ArdourWidgets::ArdourButton  _show_plugin_btn;
 	Gtk::HScale                  _seek_slider;
 	Gtk::CheckButton             _autoplay_btn;
+
+	InstrumentSelector           _auditioner_combo;
 
 	std::string _current_path;
 	std::string _clip_library_dir;
