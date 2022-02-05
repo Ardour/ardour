@@ -21,7 +21,7 @@ main (int argc, char** argv)
 #if 0
 	Evoral::SMF smf;
 	smf.open (fn);
-	printf ("SMF '%s' tracks=%d, ppqn=%d\n", fn, smf.num_tracks (), smf.ppqn());
+	printf ("SMF '%s' tracks=%d, ppqn=%d (n_notes: %ld)\n", fn, smf.num_tracks (), smf.ppqn(), smf.n_note_on_events ());
 #else
 	FILE* f = g_fopen(fn, "r");
 	if (!f) {
