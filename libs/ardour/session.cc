@@ -6641,8 +6641,10 @@ Session::missing_filesources (DataType dt) const
 void
 Session::initialize_latencies ()
 {
+	block_processing ();
 	update_latency (false);
 	update_latency (true);
+	unblock_processing ();
 }
 
 void
