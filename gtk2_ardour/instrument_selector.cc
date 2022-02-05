@@ -29,10 +29,10 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
-InstrumentSelector::InstrumentSelector (bool allow_none)
+InstrumentSelector::InstrumentSelector (InstrumentListDisposition disp)
 	: _reasonable_synth_id (0)
 	, _gmsynth_id (UINT32_MAX)
-	, _allow_none (allow_none)
+	, _disposition (disp)
 {
 	refill ();
 
@@ -122,17 +122,23 @@ InstrumentSelector::build_instrument_list()
 
 	_instrument_list = ListStore::create(_instrument_list_columns);
 
-	if (_allow_none) {
+	if (_disposition==ForTrackSelector) {
 		TreeModel::Row row = *(_instrument_list->append());
 		row[_instrument_list_columns.info_ptr] = PluginInfoPtr();
 		row[_instrument_list_columns.name]     = _("-none-");
 	}
 
-	uint32_t n = _allow_none ? 1 : 0;
+	_longest_instrument_name = "";
+
+	uint32_t n = (_disposition==ForTrackSelector) ? 1 : 0;
 	std::string prev;
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i, ++n) {
 		PluginInfoPtr p = *i;
 		
+		if (p->name.length() > _longest_instrument_name.length()) {
+			_longest_instrument_name = p->name;
+		}
+
 		std::string suffix;
 
 #ifdef MIXBUS

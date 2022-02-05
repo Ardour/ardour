@@ -39,7 +39,13 @@ class Editor;
 class InstrumentSelector : public Gtk::ComboBox
 {
 public:
-	InstrumentSelector (bool allow_none = true);
+	enum InstrumentListDisposition {
+		ForAuditioner,    /* this will always return some synth, never 'None' */
+		ForTrackDefault,  /* functionally same as ForAuditioner, but for tracks */
+		ForTrackSelector  /* this provides the 'None' option so the user can add a synth later */
+	};
+
+	InstrumentSelector (InstrumentListDisposition);
 
 	ARDOUR::PluginInfoPtr selected_instrument () const;
 	std::string selected_instrument_name () const;
@@ -57,11 +63,13 @@ private:
 	void build_instrument_list();
 	void refill();
 
+	std::string					 _longest_instrument_name;
+
 	Glib::RefPtr<Gtk::ListStore> _instrument_list;
 	InstrumentListColumns        _instrument_list_columns;
 	uint32_t                     _reasonable_synth_id;
 	uint32_t                     _gmsynth_id;
-	bool                         _allow_none;
+	InstrumentListDisposition    _disposition;
 	PBD::ScopedConnection        _update_connection;
 };
 

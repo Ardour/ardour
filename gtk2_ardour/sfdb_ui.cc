@@ -1757,7 +1757,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 				bool persistent,
 				Editing::ImportMode mode_hint)
 	: SoundFileBrowser (title, s, persistent)
-	, instrument_combo (false)
+	, instrument_combo (InstrumentSelector::ForTrackSelector)
 	, copy_files_btn ( _("Copy files to session"))
 	, smf_tempo_btn (_("Use MIDI Tempo Map (if defined)"))
 	, smf_marker_btn (_("Import MIDI markers (if any)"))

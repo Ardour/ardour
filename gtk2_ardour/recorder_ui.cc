@@ -1094,7 +1094,7 @@ RecorderUI::new_track_for_port (DataType dt, string const& port_name)
 	ArdourDialog d (_("Create track for input"), true, false);
 
 	Entry track_name_entry;
-	InstrumentSelector instrument_combo;
+	InstrumentSelector instrument_combo(InstrumentSelector::ForTrackDefault);
 	ComboBoxText strict_io_combo;
 
 	string pn = AudioEngine::instance()->get_pretty_name_by_name (port_name);

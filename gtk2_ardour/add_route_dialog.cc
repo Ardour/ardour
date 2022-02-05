@@ -81,6 +81,7 @@ AddRouteDialog::AddRouteDialog ()
 	, mode_label (_("Record Mode:"))
 	, instrument_label (_("Instrument:"))
 	, last_route_count (1)
+	, instrument_combo (InstrumentSelector::ForTrackSelector)
 	, route_count_set_by_template (false)
 	, name_edited_by_user (false)
 {
