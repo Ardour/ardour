@@ -29,6 +29,7 @@
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
+#include "ardour/auditioner.h"
 #include "ardour/audio_unit.h"
 #include "ardour/debug.h"
 #include "ardour/plugin_insert.h"
