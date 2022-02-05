@@ -92,6 +92,7 @@ public:
 	int export_stuff (BufferSet&, samplepos_t, samplecnt_t, boost::shared_ptr<Processor>, bool, bool, bool, MidiNoteTracker&) { return -1; }
 
 	void set_audition_synth_info(PluginInfoPtr in);
+	PluginInfoPtr get_audition_synth_info() {return audition_synth_info;}
 
 	samplecnt_t output_latency () const { return 0; }
 
