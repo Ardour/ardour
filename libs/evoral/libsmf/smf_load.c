@@ -972,6 +972,11 @@ smf_load_from_memory(void *buffer, const size_t buffer_length)
 		smf->expected_number_of_tracks = smf->number_of_tracks;
 	}
 
+	/* process tempo-map */
+	if (smf->need_tempo_map_compute) {
+		smf_create_tempo_map_and_compute_seconds(smf);
+	}
+
 	smf->file_buffer = NULL;
 	smf->file_buffer_length = 0;
 	smf->next_chunk_offset = 0;

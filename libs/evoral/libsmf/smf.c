@@ -525,7 +525,7 @@ smf_track_add_event(smf_track_t *track, smf_event_t *event)
 		if (smf_event_is_last(event))
 			maybe_add_to_tempo_map(event);
 		else
-			smf_create_tempo_map_and_compute_seconds(event->track->smf);
+			event->track->smf->need_tempo_map_compute = 1;
 	}
 }
 
@@ -709,6 +709,7 @@ smf_track_get_next_event(smf_track_t *track)
 	if (track->next_event_number < track->number_of_events) {
 		next_event = smf_track_get_event_by_number(track, track->next_event_number + 1);
 		assert(next_event);
+		assert(next_event->time_pulses >= event->time_pulses);
 
 		track->time_of_next_event = next_event->time_pulses;
 		track->next_event_number++;

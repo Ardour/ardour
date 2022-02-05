@@ -251,6 +251,7 @@ struct smf_struct {
 	/** Private, used by smf.c. */
 	GPtrArray *tracks_array;
 	double     last_seek_position;
+	int        need_tempo_map_compute;
 
 	/** Private, used by smf_tempo.c. */
 	/** Array of pointers to smf_tempo_struct. */
