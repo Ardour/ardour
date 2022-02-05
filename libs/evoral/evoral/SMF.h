@@ -87,8 +87,11 @@ public:
 	double round_to_file_precision (double val) const;
 
 	int smf_format () const;
+
 	int num_channels () const { return _num_channels; }
 	std::set<uint8_t> const& used_channels () const { return _used_channels; }
+	uint64_t n_note_on_events () const { return _n_note_on_events; }
+	bool has_pgm_change () const { return _has_pgm_change; }
 
 	void track_names (std::vector<std::string>&) const;
 	void instrument_names (std::vector<std::string>&) const;
@@ -139,6 +142,9 @@ public:
 
 	int _num_channels;
 	std::set<uint8_t> _used_channels;
+
+	uint64_t _n_note_on_events;
+	bool     _has_pgm_change;
 
 	mutable Markers _markers;
 };

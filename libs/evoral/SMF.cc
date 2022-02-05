@@ -125,7 +125,9 @@ SMF::open(const std::string& path, int track)
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 
-	_num_channels = 0;
+	_num_channels     = 0;
+	_n_note_on_events = 0;
+	_has_pgm_change   = false;
 	_used_channels.clear ();
 
 	assert(track >= 1);
@@ -185,8 +187,19 @@ SMF::open(const std::string& path, int track)
 				}
 				uint8_t type = buf[0] & 0xf0;
 				uint8_t chan = buf[0] & 0x0f;
+
 				if (type >= 0x80 && type <= 0xE0) {
 					_used_channels.insert(chan);
+					switch (type) {
+						case MIDI_CMD_NOTE_ON:
+							++_n_note_on_events;
+							break;
+						case MIDI_CMD_PGM_CHANGE:
+							_has_pgm_change = true;
+							break;
+						default:
+							break;
+					}
 				}
 			}
 			_num_channels += _used_channels.size();
