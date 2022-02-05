@@ -452,7 +452,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	 * we may need to monitor disk instead.
 	 */
 	const MonitorState ms = monitoring_state ();
-	const bool silent = _have_internal_generator ? false : (ms == MonitoringSilence);
+	const bool silent = _have_internal_generator || (_triggerbox && !_triggerbox->empty ()) ? false : (ms == MonitoringSilence);
 
 	_main_outs->no_outs_cuz_we_no_monitor (silent);
 
