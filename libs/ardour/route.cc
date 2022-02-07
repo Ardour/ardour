@@ -4034,6 +4034,17 @@ Route::silent_roll (pframes_t nframes, samplepos_t /*start_sample*/, samplepos_t
 	return 0;
 }
 
+void
+Route::update_send_delaylines ()
+{
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if (boost::shared_ptr<LatentSend> snd = boost::dynamic_pointer_cast<LatentSend> (*i)) {
+			snd->update_delaylines (true);
+		}
+	}
+}
+
 #ifdef __clang__
 __attribute__((annotate("realtime")))
 #endif

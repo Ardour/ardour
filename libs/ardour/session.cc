@@ -204,6 +204,7 @@ Session::Session (AudioEngine &eng,
 	, _worst_route_latency (0)
 	, _io_latency (0)
 	, _send_latency_changes (0)
+	, _update_send_delaylines (false)
 	, _have_captured (false)
 	, _capture_duration (0)
 	, _capture_xruns (0)
@@ -484,6 +485,7 @@ Session::Session (AudioEngine &eng,
 	EndTimeChanged.connect_same_thread (*this, boost::bind (&Session::end_time_changed, this, _1));
 
 	LatentSend::ChangedLatency.connect_same_thread (*this, boost::bind (&Session::send_latency_compensation_change, this));
+	LatentSend::QueueUpdate.connect_same_thread (*this, boost::bind (&Session::update_send_delaylines, this));
 	Latent::DisableSwitchChanged.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, this));
 
 	Controllable::ControlTouched.connect_same_thread (*this, boost::bind (&Session::controllable_touched, this, _1));
@@ -6663,6 +6665,13 @@ Session::send_latency_compensation_change ()
 	 * (we should probably recurse or process the graph in a 2 step process).
 	 */
 	++_send_latency_changes;
+}
+
+void
+Session::update_send_delaylines ()
+{
+	/* called in rt-thread, if send latency changed */
+	_update_send_delaylines = true;
 }
 
 bool

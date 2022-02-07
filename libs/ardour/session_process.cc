@@ -130,6 +130,13 @@ Session::process (pframes_t nframes)
 		}
 	}
 
+	if (_update_send_delaylines) {
+		boost::shared_ptr<RouteList> r = routes.reader ();
+		for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+			(*i)->update_send_delaylines ();
+		}
+	}
+
 	if (_rt_emit_pending) {
 		if (!_rt_thread_active) {
 			emit_route_signals ();

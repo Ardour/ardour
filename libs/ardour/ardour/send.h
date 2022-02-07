@@ -54,8 +54,10 @@ public:
 	 * (via Route::update_signal_latency)
 	 */
 	virtual void set_delay_out (samplecnt_t, size_t bus = 0) = 0;
+	virtual void update_delaylines (bool rt_ok) = 0;
 
 	static PBD::Signal0<void> ChangedLatency;
+	static PBD::Signal0<void> QueueUpdate;
 
 protected:
 	samplecnt_t _delay_in;
@@ -105,6 +107,8 @@ public:
 	void activate ();
 	void deactivate ();
 
+	void update_delaylines (bool rt_ok);
+
 	bool set_name (const std::string& str);
 
 	static std::string name_and_id_new_send (Session&, Delivery::Role r, uint32_t&, bool);
@@ -126,8 +130,6 @@ private:
 	void panshell_changed ();
 	void pannable_changed ();
 	void snd_output_changed (IOChange, void*);
-
-	void update_delaylines ();
 
 	int set_state_2X (XMLNode const &, int);
 

@@ -1428,6 +1428,7 @@ private:
 	samplecnt_t             _worst_route_latency;
 	samplecnt_t             _io_latency;
 	uint32_t                _send_latency_changes;
+	bool                    _update_send_delaylines;
 	bool                    _have_captured;
 	samplecnt_t             _capture_duration;
 	unsigned int            _capture_xruns;
@@ -1457,6 +1458,7 @@ private:
 	void set_worst_input_latency ();
 
 	void send_latency_compensation_change ();
+	void update_send_delaylines ();
 
 	void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
 

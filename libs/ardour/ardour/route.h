@@ -199,6 +199,8 @@ public:
 	void         emit_pending_signals ();
 	MeterPoint   meter_point() const { return _pending_meter_point; }
 
+	void update_send_delaylines ();
+
 	void         set_meter_type (MeterType t);
 	MeterType    meter_type () const;
 

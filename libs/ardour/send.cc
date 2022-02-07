@@ -26,6 +26,7 @@
 #include "pbd/xml++.h"
 
 #include "ardour/amp.h"
+#include "ardour/audioengine.h"
 #include "ardour/boost_debug.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
@@ -51,6 +52,7 @@ using namespace PBD;
 using namespace std;
 
 PBD::Signal0<void> LatentSend::ChangedLatency;
+PBD::Signal0<void> LatentSend::QueueUpdate;
 
 LatentSend::LatentSend ()
 		: _delay_in (0)
@@ -152,7 +154,7 @@ Send::signal_latency () const
 }
 
 void
-Send::update_delaylines ()
+Send::update_delaylines (bool rt_ok)
 {
 	if (_role == Listen) {
 		/* Don't align monitor-listen (just yet).
@@ -166,6 +168,19 @@ Send::update_delaylines ()
 		return;
 	}
 
+	if (!rt_ok && AudioEngine::instance()->running() && AudioEngine::instance()->in_process_thread ()) {
+		if (_delay_out > _delay_in) {
+			if (_send_delay->delay () != 0 || _thru_delay->delay () != _delay_out - _delay_in) {
+				QueueUpdate (); /* EMIT SIGNAL */
+			}
+		}else {
+			if (_thru_delay->delay () != 0 || _send_delay->delay () != _delay_in - _delay_out) {
+				QueueUpdate (); /* EMIT SIGNAL */
+			}
+		}
+		return;
+	}
+
 	bool changed;
 	if (_delay_out > _delay_in) {
 		changed = _thru_delay->set_delay(_delay_out - _delay_in);
@@ -175,10 +190,7 @@ Send::update_delaylines ()
 		_send_delay->set_delay(_delay_in - _delay_out);
 	}
 
-	if (changed) {
-		// TODO -- ideally postpone for effective no-op changes
-		// (in case both  _delay_out and _delay_in are changed by the
-		// same amount in a single latency-update cycle).
+	if (changed && !AudioEngine::instance()->in_process_thread ()) {
 		ChangedLatency (); /* EMIT SIGNAL */
 	}
 }
@@ -195,7 +207,7 @@ Send::set_delay_in (samplecnt_t delay)
 			string_compose ("Send::set_delay_in %1: (%2) - %3 = %4\n",
 				name (), _delay_in, _delay_out, _delay_in - _delay_out));
 
-	update_delaylines ();
+	update_delaylines (false);
 }
 
 void
@@ -209,7 +221,7 @@ Send::set_delay_out (samplecnt_t delay, size_t /*bus*/)
 			string_compose ("Send::set_delay_out %1: %2 - (%3) = %4\n",
 				name (), _delay_in, _delay_out, _delay_in - _delay_out));
 
-	update_delaylines ();
+	update_delaylines (true);
 }
 
 void
