@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <cstdlib>
+#include <memory>
 #include <sstream>
 
 #include <boost/make_shared.hpp>
@@ -447,6 +448,7 @@ void
 Trigger::set_region_internal (boost::shared_ptr<Region> r)
 {
 	_region = r;
+	cerr << index() << " aka " << this << " region set to " << r << endl;
 }
 
 void
@@ -628,11 +630,71 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 	}
 }
 
+Temporal::BBT_Time
+Trigger::compute_start (Temporal::TempoMap::SharedPtr const & tmap, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start)
+{
+	Temporal::Beats start_beats (tmap->quarters_at (timepos_t (start)));
+	Temporal::Beats end_beats (tmap->quarters_at (timepos_t (end)));
+
+	Temporal::BBT_Time t_bbt;
+	Temporal::Beats t_beats;
+
+	if (!compute_quantized_transition (start, start_beats, end_beats, t_bbt, t_beats, start_samples, tmap, q)) {
+		will_start = false;
+		return Temporal::BBT_Time ();
+	}
+
+	will_start = true;
+	return t_bbt;
+}
+
+bool
+Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
+                                       Temporal::BBT_Time& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
+                                       Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q)
+{
+	/* XXX need to use global grid here is quantization == zero */
+
+	/* Given the value of @param start, determine, based on the
+	 * quantization, the next time for a transition.
+	 */
+
+	if (q < Temporal::BBT_Offset (0, 0, 0)) {
+		/* negative quantization == do not quantize */
+
+		t_samples = start_sample;
+		t_beats = start_beats;
+		t_bbt = tmap->bbt_at (t_beats);
+	} else if (q.bars == 0) {
+		t_beats = start_beats.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks));
+		t_bbt = tmap->bbt_at (t_beats);
+		t_samples = tmap->sample_at (t_beats);
+	} else {
+		t_bbt = tmap->bbt_at (timepos_t (start_beats));
+		t_bbt = t_bbt.round_up_to_bar ();
+		/* bars are 1-based; 'every 4 bars' means 'on bar 1, 5, 9, ...' */
+		t_bbt.bars = 1 + ((t_bbt.bars-1) / q.bars * q.bars);
+		t_beats = tmap->quarters_at (t_bbt);
+		t_samples = tmap->sample_at (t_bbt);
+	}
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), t_samples, start_beats, end_beats, q));
+
+	/* See if this time falls within the range of time given to us */
+
+	if (t_beats < start_beats || t_beats > end_beats) {
+		/* transition time not reached */
+		return false;
+	}
+
+
+	return true;
+}
+
 pframes_t
 Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes,
-                                  Temporal::BBT_Time& t_bbt, Temporal::timepos_t& t_time,
-                                  Temporal::Beats& t_beats, samplepos_t& t_samples,
-                                  Temporal::TempoMap::SharedPtr& tmap)
+                                  Temporal::BBT_Time& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
+                                  Temporal::TempoMap::SharedPtr const & tmap)
 {
 	using namespace Temporal;
 
@@ -651,42 +713,10 @@ Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats cons
 		q = BBT_Offset(1,0,0);
 	}
 
-	/* XXX need to use global grid here is quantization == zero */
-
-	/* Given the value of @param start, determine, based on the
-	 * quantization, the next time for a transition.
-	 */
-
-	if (q < Temporal::BBT_Offset (0, 0, 0)) {
-		/* negative quantization == do not quantize */
-
-		t_samples = start_sample;
-		t_beats = start;
-		t_time = timepos_t (start);
-		t_bbt = tmap->bbt_at (t_beats);
-	} else if (q.bars == 0) {
-		Temporal::Beats t_beats = start.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks));
-		t_bbt = tmap->bbt_at (t_beats);
-		t_time = timepos_t (t_beats);
-	} else {
-		t_bbt = tmap->bbt_at (timepos_t (start));
-		t_bbt = t_bbt.round_up_to_bar ();
-		/* bars are 1-based; 'every 4 bars' means 'on bar 1, 5, 9, ...' */
-		t_bbt.bars = 1 + ((t_bbt.bars-1) / q.bars * q.bars);
-		t_time = timepos_t (tmap->quarters_at (t_bbt));
-	}
-
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), t_time.beats(), start, end, q));
-
-	/* See if this time falls within the range of time given to us */
-
-	if (t_time.beats() < start || t_time > end) {
-		/* transition time not reached */
+	if (!compute_quantized_transition (start_sample, start, end, t_bbt, t_beats, t_samples, tmap, q)) {
+		/* no transition */
 		return 0;
 	}
-
-	t_samples = t_time.samples();
-	t_beats = t_time.beats ();
 
 	switch (_state) {
 	case WaitingToStop:
@@ -724,11 +754,10 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		return;
 	}
 
-	timepos_t transition_time (BeatTime);
 	Temporal::BBT_Time transition_bbt;
 	TempoMap::SharedPtr tmap (TempoMap::use());
 
-	if (!compute_next_transition (start_sample, start, end, nframes, transition_bbt, transition_time, transition_beats, transition_samples, tmap)) {
+	if (!compute_next_transition (start_sample, start, end, nframes, transition_bbt, transition_beats, transition_samples, tmap)) {
 		return;
 	}
 
@@ -753,7 +782,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 		nframes = transition_samples - start_sample;
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 will stop somewhere in the middle of run(), specifically at %2 (%3) vs expected end at %4\n", name(), transition_time, transition_time.beats(), expected_end_sample));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 will stop somewhere in the middle of run(), specifically at %2 (%3) vs expected end at %4\n", name(), transition_beats, expected_end_sample));
 
 		/* offset within the buffer(s) for output remains
 		   unchanged, since we will write from the first
@@ -764,7 +793,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	case WaitingToStart:
 		retrigger ();
 		_state = Running;
-		set_expected_end_sample (tmap, transition_bbt, transition_samples);
+		compute_end (tmap, transition_bbt, transition_samples);
 		PropertyChanged (ARDOUR::Properties::running);
 
 		/* trigger will start somewhere within this process
@@ -783,7 +812,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	case WaitingForRetrigger:
 		retrigger ();
 		_state = Running;
-		set_expected_end_sample (tmap, transition_bbt, transition_samples);
+		compute_end (tmap, transition_bbt, transition_samples);
 		PropertyChanged (ARDOUR::Properties::running);
 
 		/* trigger is just running normally, and will fill
@@ -1015,7 +1044,12 @@ AudioTrigger::current_pos() const
 }
 
 void
-AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t transition_sample)
+AudioTrigger::start_and_roll_to (samplepos_t position)
+{
+}
+
+samplepos_t
+AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t transition_sample)
 {
 	/* Our task here is to set:
 
@@ -1067,7 +1101,7 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 		usable_length = (data.length - _start_offset);
 	}
 
-	/* called from set_expected_end_sample() when we know the time (audio &
+	/* called from compute_end() when we know the time (audio &
 	 * musical time domains when we start starting. Our job here is to
 	 * define the last_readable_sample we can use as data.
 	 */
@@ -1092,6 +1126,8 @@ AudioTrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tma
 	}
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: final sample %2 vs ees %3 ls %4\n", index(), final_processed_sample, expected_end_sample, last_readable_sample));
+
+	return expected_end_sample;
 }
 
 void
@@ -1409,16 +1445,18 @@ AudioTrigger::retrigger ()
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, read_index));
 }
 
+template<bool actually_run>
 pframes_t
-AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
-                   Temporal::Beats const & start, Temporal::Beats const & end,
-                   pframes_t nframes, pframes_t dest_offset, double bpm)
+AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
+                         Temporal::Beats const & start, Temporal::Beats const & end,
+                         pframes_t nframes, pframes_t dest_offset, double bpm)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
 	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
 	const uint32_t nchans = std::min (bufs.count().n_audio(), ar->n_channels());
 	int avail = 0;
-	BufferSet& scratch (_box.session().get_scratch_buffers (ChanCount (DataType::AUDIO, nchans)));
+	BufferSet* scratch;
+	std::unique_ptr<BufferSet> scratchp;
 	std::vector<Sample*> bufp(nchans);
 	const bool do_stretch = stretching();
 
@@ -1447,8 +1485,19 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	 * purpose, we use a generic variable name ('bufp') to refer to them.
 	 */
 
-	for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
-		bufp[chn] = scratch.get_audio (chn).data();
+	if (actually_run) {
+		scratch = &(_box.session().get_scratch_buffers (ChanCount (DataType::AUDIO, nchans)));
+
+		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
+			bufp[chn] = scratch->get_audio (chn).data();
+		}
+	} else {
+		scratchp.reset (new BufferSet ());
+		scratchp->ensure_buffers (DataType::AUDIO, nchans, nframes);
+		/* have to set up scratch as a raw ptr so that the actually_run
+		   and !actually_run case can use the same code syntax
+		*/
+		scratch = scratchp.get();
 	}
 
 	/* tell the stretcher what we are doing for this ::run() call */
@@ -1488,11 +1537,9 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 
 		while (to_pad > 0) {
-			const samplecnt_t limit = std::min ((samplecnt_t) scratch.get_audio (0).capacity(), to_pad);
+			const samplecnt_t limit = std::min ((samplecnt_t) scratch->get_audio (0).capacity(), to_pad);
 			for (uint32_t chn = 0; chn < nchans; ++chn) {
-				for (samplecnt_t n = 0; n < limit; ++n) {
-					bufp[chn][n] = 0.f;
-				}
+				memset (bufp[chn], 0, sizeof (Sample) * limit);
 			}
 
 			_stretcher->process (&bufp[0], limit, false);
@@ -1537,7 +1584,7 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 					avail = _stretcher->available ();
 
 					if (to_drop && avail) {
-						samplecnt_t this_drop = std::min (std::min ((samplecnt_t) avail, to_drop), (samplecnt_t) scratch.get_audio (0).capacity());
+						samplecnt_t this_drop = std::min (std::min ((samplecnt_t) avail, to_drop), (samplecnt_t) scratch->get_audio (0).capacity());
 						_stretcher->retrieve (&bufp[0], this_drop);
 						to_drop -= this_drop;
 						avail = _stretcher->available ();
@@ -1605,18 +1652,21 @@ AudioTrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 		/* deliver to buffers */
 
-		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
+		if (actually_run) { /* constexpr, will be handled at compile time */
 
-			uint32_t channel = chn %  data.size();
-			AudioBuffer& buf (bufs.get_audio (chn));
-			Sample* src = do_stretch ? bufp[channel] : (data[channel] + read_index);
+			for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
 
-			gain_t gain = _velocity_gain * _gain;  //incorporate the gain from velocity_effect
+				uint32_t channel = chn %  data.size();
+				AudioBuffer& buf (bufs.get_audio (chn));
+				Sample* src = do_stretch ? bufp[channel] : (data[channel] + read_index);
 
-			if (gain != 1.0f) {
-				buf.accumulate_with_gain_from (src, from_stretcher, gain, dest_offset);
-			} else {
-				buf.accumulate_from (src, from_stretcher, dest_offset);
+				gain_t gain = _velocity_gain * _gain;  //incorporate the gain from velocity_effect
+
+				if (gain != 1.0f) {
+					buf.accumulate_with_gain_from (src, from_stretcher, gain, dest_offset);
+				} else {
+					buf.accumulate_from (src, from_stretcher, dest_offset);
+				}
 			}
 		}
 
@@ -1812,7 +1862,12 @@ MIDITrigger::probably_oneshot () const
 }
 
 void
-MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t)
+MIDITrigger::start_and_roll_to (samplepos_t position)
+{
+}
+
+samplepos_t
+MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t)
 {
 	Temporal::Beats end_by_follow_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length));
 	Temporal::Beats end_by_data_length = transition_beats + data_length;
@@ -1844,6 +1899,8 @@ MIDITrigger::set_expected_end_sample (Temporal::TempoMap::SharedPtr const & tmap
 		timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
 		final_beat = len.beats ();
 	}
+	/* XXX FIX ME */
+	return 0;
 }
 
 SegmentDescriptor
@@ -2120,12 +2177,13 @@ MIDITrigger::reload (BufferSet&, void*)
 {
 }
 
+template<bool actually_run>
 pframes_t
-MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
-                  Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
-                  pframes_t nframes, pframes_t dest_offset, double bpm)
+MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
+                       Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
+                       pframes_t nframes, pframes_t dest_offset, double bpm)
 {
-	MidiBuffer& mb (bufs.get_midi (0));
+	MidiBuffer* mb (actually_run? &bufs.get_midi (0) : 0);
 	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
@@ -2156,7 +2214,6 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 
 		MidiEvent const & event (*iter);
 
-
 		/* Event times are in beats, relative to start of source
 		 * file. We need to convert to region-relative time, and then
 		 * a session timeline time, which is defined by the time at
@@ -2182,27 +2239,26 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 			break;
 		}
 
-		/* Now we have to convert to a position within the buffer we
-		 * are writing to.
-		 *
-		 * start_sample has already been been adjusted to reflect a
-		 * previous Trigger's processing during this run cycle, so we
-		 * can ignore dest_offset (which is necessary for audio
-		 * triggers where the data is a continuous data stream, but not
-		 * required here).
-		 */
+		if (actually_run) { /* compile-time const expr */
 
-		samplepos_t buffer_samples = timeline_samples - start_sample;
+			/* Now we have to convert to a position within the buffer we
+			 * are writing to.
+			 *
+			 * start_sample has already been been adjusted to reflect a
+			 * previous Trigger's processing during this run cycle, so we
+			 * can ignore dest_offset (which is necessary for audio
+			 * triggers where the data is a continuous data stream, but not
+			 * required here).
+			 */
 
-		Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, event.size(), const_cast<uint8_t*>(event.buffer()), false);
+			samplepos_t buffer_samples = timeline_samples - start_sample;
 
-		if (_gain != 1.0f && ev.is_note()) {
-			ev.scale_velocity (_gain);
-		}
+			Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, event.size(), const_cast<uint8_t*>(event.buffer()), false);
 
-		if (_channel_map[ev.channel()] > 0) {
-			ev.set_channel (_channel_map[ev.channel()]);
-		}
+			if (_gain != 1.0f && ev.is_note()) {
+				ev.scale_velocity (_gain);
+			}
+
 
 		if (ev.is_pgm_change() || (ev.is_cc() && ((ev.cc_number() == MIDI_CTL_LSB_BANK) || (ev.cc_number() == MIDI_CTL_MSB_BANK)))) {
 			if (_patch_change[ev.channel()].is_set() || _box.ignore_patch_changes ()) {
@@ -2210,10 +2266,14 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 				++iter;
 				continue;
 			}
-		}
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given et %1 TS %7 rs %8 ts %2 bs %3 ss %4 do %5, inserting %6\n", maybe_last_event_timeline_beats, timeline_samples, buffer_samples, start_sample, dest_offset, ev, transition_beats, region_start));
-		mb.insert_event (ev);
+			if (_channel_map[ev.channel()] > 0) {
+				ev.set_channel (_channel_map[ev.channel()]);
+			}
+
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("given et %1 TS %7 rs %8 ts %2 bs %3 ss %4 do %5, inserting %6\n", maybe_last_event_timeline_beats, timeline_samples, buffer_samples, start_sample, dest_offset, ev, transition_beats, region_start));
+			mb->insert_event (ev);
+		}
 
 		_box.tracker->track (event.buffer());
 
@@ -2225,9 +2285,9 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 	}
 
 
-	if (_state == Stopping) {
+	if (actually_run && _state == Stopping) { /* first clause is a compile-time constexpr */
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
-		_box.tracker->resolve_notes (mb, nframes-1);
+		_box.tracker->resolve_notes (*mb, nframes-1);
 	}
 
 	if (iter == model->end()) {
@@ -2403,6 +2463,138 @@ TriggerBox::set_ignore_patch_changes (bool yn)
 	if (yn != _ignore_patch_changes) {
 		_ignore_patch_changes = yn;
 	}
+}
+
+void
+TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position)
+{
+	if (cues.empty() || cues.front().time > transport_position) {
+		std::cerr << "no cues before " << transport_position << endl;
+		return;
+	}
+
+	using namespace Temporal;
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
+	CueEvents::const_iterator c = cues.begin();
+	samplepos_t pos = c->time;
+	TriggerPtr prev;
+	Temporal::BBT_Time start_bbt;
+	samplepos_t start_samples;
+
+	while (pos < transport_position && c != cues.end() && c->time < transport_position) {
+
+		CueEvents::const_iterator nxt_cue = c; ++nxt_cue;
+
+		cerr << "Current cue: " << (char) ('A' + c->cue) << endl;
+
+		TriggerPtr trig (all_triggers[c->cue]);
+
+		if (!trig->region() || trig->cue_isolated()) {
+			cerr << "trig " << trig << ' ' << trig->index() << " ignored, region : " << trig->region() << " iso " << trig->cue_isolated() << endl;
+			c = nxt_cue;
+			continue;
+		}
+
+		samplepos_t limit;
+
+		if (nxt_cue == cues.end()) {
+			limit = transport_position;
+			cerr << "limit is trans. pos\n";
+		} else {
+			limit = nxt_cue->time;
+			cerr << "limit is next cue at " << nxt_cue->time << endl;
+		}
+
+		bool will_start = true;
+
+		start_bbt = trig->compute_start (tmap, pos, limit, trig->quantization(), start_samples, will_start);
+
+		if (!will_start) {
+			/* trigger will not start between this cue and the next */
+			cerr << "trigger " << trig->index() << " will not start before " << limit << endl;
+			c = nxt_cue;
+			pos = limit;
+			continue;
+		}
+		cerr << "trig " << trig->index() << " starts at " << start_bbt << endl;
+
+		/* XXX need to determine when the trigger will actually start
+		 * (due to its quantization)
+		 */
+
+		/* we now consider this trigger to be running. Let's see when
+		 * it ends...
+		 */
+
+		samplepos_t trig_ends_at = trig->compute_end (tmap, start_bbt, start_samples);
+
+		cerr << "trig " << trig->index() << " ends at " << trig_ends_at << " vs. " << transport_position << " aka " << trig->transition_beats << endl;
+
+		if (nxt_cue != cues.end() && trig_ends_at >= nxt_cue->time) {
+			/* trigger will be interrupted by next cue .
+			 *
+			 */
+			trig_ends_at = tmap->sample_at (tmap->bbt_at (timepos_t (nxt_cue->time)).round_up_to_bar ());
+			std::cerr << "trig " << trig->index() << " will be interrupted by cue " << (char) ('A' + nxt_cue->cue) << " at " << trig_ends_at << " aka " << tmap->bbt_at (timepos_t (nxt_cue->time)).round_up_to_bar() << endl;
+		}
+
+		if (trig_ends_at >= transport_position) {
+			prev = trig;
+			/* we're done. prev now indicates the trigger that
+			   would have started most recently before the
+			   transport position.
+			*/
+			break;
+		}
+
+		cerr << "trigger ended at " << trig_ends_at << " get next\n";
+
+		int dnt = determine_next_trigger (trig->index());
+
+		if (dnt < 0) {
+			/* no trigger follows the current one. Back to
+			   looking for another cue.
+			*/
+			cerr << "next trigger said none\n";
+			c = nxt_cue;
+			continue;
+		}
+
+		cerr << "moving onto " << dnt << endl;
+
+		prev = trig;
+		pos = trig_ends_at;
+	}
+
+	cerr << "DONE. pos = " << pos << " prev " << prev << endl;
+
+	if (pos >= transport_position || !prev) {
+		/* nothing to do */
+		cerr << "No trigger active at " << transport_position << endl;
+		return;
+	}
+
+	/* prev now points to a trigger that would start before
+	 * transport_position and would still be running at
+	 * transport_position. We need to run it in a special mode that ensures
+	 * that
+	 *
+	 * 1) for MIDI, we know the state at transport position
+	 * 2) for audio, the stretcher is in the correct state
+	 */
+
+	cerr << "will fake-roll " << prev->index() << " to " << transport_position << endl;
+	prev->start_and_roll_to (transport_position);
+
+	_currently_playing = prev;
+
+	/* currently playing is now ready to keep running at transport position
+	 *
+	 * Note that a MIDITrigger will have set a flag so that when we call
+	 * ::run() again, it will dump its current MIDI state before anything
+	 * else.
+	 */
 }
 
 void
@@ -3555,6 +3747,18 @@ TriggerBox::position_as_fraction () const
 		return -1;
 	}
 	return cp->position_as_fraction ();
+}
+
+void
+TriggerBox::non_realtime_transport_stop (samplepos_t now, bool /*flush*/)
+{
+	fast_forward (_session.cue_events(), now);
+}
+
+void
+TriggerBox::non_realtime_locate (samplepos_t now)
+{
+	fast_forward (_session.cue_events(), now);
 }
 
 /* Thread */

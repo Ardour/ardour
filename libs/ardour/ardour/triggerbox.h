@@ -248,7 +248,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void set_legato_offset (timepos_t const & offset) = 0;
 
 	virtual double position_as_fraction() const = 0;
-	virtual void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t) = 0;
+
+	Temporal::BBT_Time compute_start (Temporal::TempoMap::SharedPtr const &, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start);
+	virtual samplepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t) = 0;
+	virtual void start_and_roll_to (samplepos_t position) = 0;
 
 	/* because follow actions involve probability is it easier to code the will-not-follow case */
 
@@ -284,10 +287,15 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	int set_state (const XMLNode&, int version);
 
 	void maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t& nframes, pframes_t& dest_offset);
+
+
+	bool compute_quantized_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end,
+	                                   Temporal::BBT_Time& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
+	                                   Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q);
+
 	pframes_t compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes,
-	                                   Temporal::BBT_Time& t_bbt, Temporal::timepos_t& t_time,
-	                                   Temporal::Beats& t_beats, samplepos_t& t_samples,
-	                                   Temporal::TempoMap::SharedPtr& tmap);
+	                                   Temporal::BBT_Time& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
+	                                   Temporal::TempoMap::SharedPtr const & tmap);
 
 	void set_next_trigger (int n);
 	int next_trigger() const { return _next_trigger; }
@@ -389,7 +397,13 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	AudioTrigger (uint32_t index, TriggerBox&);
 	~AudioTrigger ();
 
-	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t offset, double bpm);
+	template<bool actually_run>  pframes_t audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
+	                                                  Temporal::Beats const & start, Temporal::Beats const & end,
+	                                                  pframes_t nframes, pframes_t dest_offset, double bpm);
+
+	pframes_t run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t dest_offset, double bpm) {
+		return audio_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm);
+	}
 
 	StretchMode stretch_mode() const { return _stretch_mode; }
 	void set_stretch_mode (StretchMode);
@@ -424,7 +438,8 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	RubberBand::RubberBandStretcher* stretcher() { return (_stretcher); }
 
 	SegmentDescriptor get_segment_descriptor () const;
-	void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t);
+	samplepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t);
+	void start_and_roll_to (samplepos_t position);
 
 	bool stretching () const;
 
@@ -468,7 +483,12 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	MIDITrigger (uint32_t index, TriggerBox&);
 	~MIDITrigger ();
 
-	pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start_beats, Temporal::Beats const & end_beats, pframes_t nframes, pframes_t offset, double bpm);
+	template<bool actually_run> pframes_t midi_run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample,
+	                                                Temporal::Beats const & start_beats, Temporal::Beats const & end_beats, pframes_t nframes, pframes_t offset, double bpm);
+
+	pframes_t run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t dest_offset, double bpm) {
+		return midi_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm);
+	}
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
@@ -493,7 +513,8 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	int set_state (const XMLNode&, int version);
 
 	SegmentDescriptor get_segment_descriptor () const;
-	void set_expected_end_sample (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t);
+	samplepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t);
+	void start_and_roll_to (samplepos_t position);
 
 	void set_patch_change (Evoral::PatchChange<MidiBuffer::TimeType> const &);
 	Evoral::PatchChange<MidiBuffer::TimeType> const & patch_change (uint8_t) const;
@@ -623,6 +644,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	bool unbang_trigger (TriggerPtr);
 	void add_trigger (TriggerPtr);
 
+	void fast_forward (CueEvents const &, samplepos_t transport_postiion);
+
 	void set_pending (uint32_t slot, Trigger*);
 
 	XMLNode& get_state (void);
@@ -664,6 +687,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void request_reload (int32_t slot, void*);
 	void set_region (uint32_t slot, boost::shared_ptr<Region> region);
+
+	void non_realtime_transport_stop (samplepos_t now, bool flush);
+	void non_realtime_locate (samplepos_t now);
 
 	void enqueue_trigger_source (PBD::ID queued);
 

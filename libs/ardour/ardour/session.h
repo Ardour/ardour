@@ -1359,6 +1359,7 @@ public:
 
 	int32_t first_cue_within (samplepos_t s, samplepos_t e, bool& was_recorded);
 	void cue_bang (int32_t);
+	CueEvents const & cue_events() const { return _cue_events; }
 
 protected:
 	friend class AudioEngine;
@@ -2311,20 +2312,11 @@ private:
 	void setup_thread_local_variables ();
 	void cue_marker_change (Location*);
 
-	struct CueEvent {
-		int32_t cue;
-		samplepos_t time;
-
-		CueEvent (int32_t c, samplepos_t t) : cue (c), time (t) {}
-	};
-
 	struct CueEventTimeComparator {
 		bool operator() (CueEvent const & c, samplepos_t s) {
 			return c.time < s;
 		}
 	};
-
-	typedef std::vector<CueEvent> CueEvents;
 
 	CueEvents _cue_events;
 	void sync_cues ();

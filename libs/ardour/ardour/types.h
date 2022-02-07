@@ -875,6 +875,14 @@ struct FollowAction {
 	std::string to_string() const;
 };
 
+struct CueEvent {
+	int32_t cue;
+	samplepos_t time;
+
+	CueEvent (int32_t c, samplepos_t t) : cue (c), time (t) {}
+};
+
+typedef std::vector<CueEvent> CueEvents;
 
 } // namespace ARDOUR
 
