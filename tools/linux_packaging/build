@@ -777,7 +777,7 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 
 	echo "Adding gratis x42 Plugins"
 
-	for proj in x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
+	for proj in x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/linux/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/linux/${proj}-lv2-linux-${WARCH}-${X42_VERSION}.zip \

@@ -758,7 +758,7 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 	echo "Adding gratis x42 plugins"
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
-	for proj in x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
+	for proj in x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
 		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
