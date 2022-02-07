@@ -83,7 +83,7 @@ private:
 	bool seek_button_release (GdkEventButton*);
 	void auditioner_combo_changed ();
 
-	ArdourWidgets::ArdourDropdown _dir;
+	ArdourWidgets::ArdourDropdown _clip_dir_menu;
 	Gtk::FileChooserDialog        _fcd;
 
 	struct Columns : public Gtk::TreeModel::ColumnRecord {

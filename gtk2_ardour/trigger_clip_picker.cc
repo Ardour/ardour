@@ -135,9 +135,8 @@ TriggerClipPicker::TriggerClipPicker ()
 	_auditable.attach (_play_btn,         0, 1, 0, 1, SHRINK, SHRINK);
 	_auditable.attach (_stop_btn,         1, 2, 0, 1, SHRINK, SHRINK);
 	_auditable.attach (_autoplay_btn,     2, 3, 0, 1, EXPAND | FILL, SHRINK);
-	_auditable.attach (_show_plugin_btn,  3, 4, 0, 1, SHRINK, SHRINK);
-	_auditable.attach (_open_library_btn, 4, 5, 0, 1, SHRINK, SHRINK);
-	_auditable.attach (_auditioner_combo, 0, 2, 1, 2, SHRINK, SHRINK);
+	_auditable.attach (_auditioner_combo, 0, 3, 1, 2, EXPAND | FILL, SHRINK);
+	_auditable.attach (_show_plugin_btn,  3, 4, 1, 2, SHRINK, SHRINK);
 	_auditable.attach (_seek_slider,      0, 4, 2, 3, EXPAND | FILL, SHRINK);
 	_auditable.set_border_width (4);
 	_auditable.set_spacings (4);
@@ -145,7 +144,13 @@ TriggerClipPicker::TriggerClipPicker ()
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	_scroller.add (_view);
 
-	pack_start (_dir, false, false, 4);
+	Gtk::Table *dir_table = manage(new Gtk::Table());
+	dir_table->set_border_width(2);
+	dir_table->set_spacings(2);
+	dir_table->attach (_clip_dir_menu,    0, 1, 0, 1, EXPAND | FILL, SHRINK);
+	dir_table->attach (_open_library_btn, 1, 2, 0, 1, SHRINK, SHRINK);
+
+	pack_start (*dir_table, false, false, 4);
 	pack_start (_scroller);
 	pack_start (_auditable, false, false);
 
@@ -186,11 +191,11 @@ TriggerClipPicker::TriggerClipPicker ()
 	/* show off */
 	_scroller.show ();
 	_view.show ();
-	_dir.show ();
+	_clip_dir_menu.show ();
 	_auditable.show_all ();
 
 	/* fill treeview with data */
-	_dir.items ().front ().activate ();
+	_clip_dir_menu.items ().front ().activate ();
 }
 
 TriggerClipPicker::~TriggerClipPicker ()
@@ -251,7 +256,7 @@ TriggerClipPicker::edit_path ()
 void
 TriggerClipPicker::refill_dropdown ()
 {
-	_dir.clear_items ();
+	_clip_dir_menu.clear_items ();
 	_root_paths.clear ();
 
 	/* Bundled Content */
@@ -270,9 +275,9 @@ TriggerClipPicker::refill_dropdown ()
 	}
 
 	/* Custom Paths */
-	assert (_dir.items ().size () > 0);
+	assert (_clip_dir_menu.items ().size () > 0);
 	if (!Config->get_sample_lib_path ().empty ()) {
-		_dir.AddMenuElem (Menu_Helpers::SeparatorElem ());
+		_clip_dir_menu.AddMenuElem (Menu_Helpers::SeparatorElem ());
 		Searchpath cpath (Config->get_sample_lib_path ());
 		for (auto const& f : cpath) {
 			maybe_add_dir (f);
@@ -281,9 +286,9 @@ TriggerClipPicker::refill_dropdown ()
 
 	_clip_library_listed = maybe_add_dir (clip_library_dir (false));
 
-	_dir.AddMenuElem (Menu_Helpers::SeparatorElem ());
-	_dir.AddMenuElem (Menu_Helpers::MenuElem (_("Edit..."), sigc::mem_fun (*this, &TriggerClipPicker::edit_path)));
-	_dir.AddMenuElem (Menu_Helpers::MenuElem (_("Other..."), sigc::mem_fun (*this, &TriggerClipPicker::open_dir)));
+	_clip_dir_menu.AddMenuElem (Menu_Helpers::SeparatorElem ());
+	_clip_dir_menu.AddMenuElem (Menu_Helpers::MenuElem (_("Edit..."), sigc::mem_fun (*this, &TriggerClipPicker::edit_path)));
+	_clip_dir_menu.AddMenuElem (Menu_Helpers::MenuElem (_("Other..."), sigc::mem_fun (*this, &TriggerClipPicker::open_dir)));
 }
 
 static bool
@@ -356,7 +361,7 @@ TriggerClipPicker::maybe_add_dir (std::string const& dir)
 		return false;
 	}
 
-	_dir.AddMenuElem (Gtkmm2ext::MenuElemNoMnemonic (display_name (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
+	_clip_dir_menu.AddMenuElem (Gtkmm2ext::MenuElemNoMnemonic (display_name (dir), sigc::bind (sigc::mem_fun (*this, &TriggerClipPicker::list_dir), dir, (Gtk::TreeNodeChildren*)0)));
 
 	/* check if a parent path of the given dir already exists,
 	 * or if this new path is parent to any existing ones.
@@ -596,7 +601,7 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 	if (_ignore_list_dir) {
 		return;
 	}
-	/* do not recurse when calling _dir.set_active() */
+	/* do not recurse when calling _clip_dir_menu.set_active() */
 	PBD::Unwinder<bool> uw (_ignore_list_dir, true);
 
 	if (!Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
@@ -607,7 +612,7 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 	if (!pc) {
 		_view.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 		_model->clear ();
-		_dir.set_active (display_name (path));
+		_clip_dir_menu.set_active (display_name (path));
 	}
 
 	_current_path = path;
