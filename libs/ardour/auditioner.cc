@@ -315,7 +315,7 @@ Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_s
 }
 
 void
-Auditioner::audition_region (boost::shared_ptr<Region> region)
+Auditioner::audition_region (boost::shared_ptr<Region> region, bool loop)
 {
 	if (g_atomic_int_get (&_auditioning)) {
 		/* don't go via session for this, because we are going
@@ -323,6 +323,8 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		*/
 		cancel_audition ();
 	}
+
+	_loop = loop;
 
 	Glib::Threads::Mutex::Lock lm (lock);
 
@@ -507,6 +509,10 @@ Auditioner::play_audition (samplecnt_t nframes)
 	}
 
 	if (current_sample >= (length + _import_position).samples()) {
+		if (_loop) {
+			_seek_sample = 0;
+			return 1;
+		}
 		_session.cancel_audition ();
 		if (_reload_synth) {
 			unload_synth (false);

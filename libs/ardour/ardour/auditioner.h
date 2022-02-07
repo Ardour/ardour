@@ -48,7 +48,7 @@ public:
 	int connect ();
 
 	bool auditioning() const;
-	void audition_region (boost::shared_ptr<Region>);
+	void audition_region (boost::shared_ptr<Region>, bool loop = false);
 	int play_audition (samplecnt_t nframes);
 	void cancel_audition ();
 
@@ -113,6 +113,7 @@ private:
 	bool via_monitor;
 	bool _midi_audition;
 	bool _queue_panic;
+	bool _loop;
 
 	boost::shared_ptr<Processor> asynth;
 
