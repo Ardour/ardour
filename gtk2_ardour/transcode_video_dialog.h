@@ -25,38 +25,51 @@
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
-#include <gtkmm/label.h>
 #include <gtkmm/entry.h>
+#include <gtkmm/label.h>
 #include <gtkmm/progressbar.h>
 #include <gtkmm/spinbutton.h>
 
-#include "ardour/types.h"
 #include "ardour/template_utils.h"
+#include "ardour/types.h"
 #include "ardour_dialog.h"
 
 #include "transcode_ffmpeg.h"
 
 enum VtlTranscodeOption {
- VTL_IMPORT_REFERENCE = 0,
- VTL_IMPORT_TRANSCODED = 1,
- VTL_IMPORT_NO_VIDEO = 2
+	VTL_IMPORT_REFERENCE  = 0,
+	VTL_IMPORT_TRANSCODED = 1,
+	VTL_IMPORT_NO_VIDEO   = 2
 };
 
 /** @class TranscodeVideoDialog
  *  @brief dialog-box and controller for importing video-files
  */
-class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
+class TranscodeVideoDialog : public ArdourDialog, public PBD::ScopedConnectionList
 {
 public:
 	TranscodeVideoDialog (ARDOUR::Session*, std::string);
 	~TranscodeVideoDialog ();
 
-	std::string get_filename () { return path_entry.get_text(); }
-	std::string get_audiofile () { return audiofile; }
 	VtlTranscodeOption import_option ();
-	bool detect_ltc () { return ltc_detect.get_active (); }
 
-	void on_response (int response_id) {
+	std::string get_filename ()
+	{
+		return path_entry.get_text ();
+	}
+
+	std::string get_audiofile ()
+	{
+		return audiofile;
+	}
+
+	bool detect_ltc ()
+	{
+		return ltc_detect.get_active ();
+	}
+
+	void on_response (int response_id)
+	{
 		Gtk::Dialog::on_response (response_id);
 	}
 
@@ -74,29 +87,30 @@ private:
 	void launch_transcode ();
 	void launch_extract ();
 	void dialog_progress_mode ();
-	bool aborted;
-	bool pending_audio_extract;
-	std::string audiofile;
-	std::string infn;
-	double m_aspect;
-
-	PBD::Signal0<void> StartNextStage;
-	void finished ();
+	void finished (int);
 	void update_progress (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
 
-	TranscodeFfmpeg *transcoder;
+	bool        aborted;
+	bool        pending_audio_extract;
+	std::string audiofile;
+	std::string infn;
+	double      m_aspect;
 
-	Gtk::Label        path_label;
-	Gtk::Entry        path_entry;
-	Gtk::Button       browse_button;
-	Gtk::Button       transcode_button;
+	PBD::Signal0<void> StartNextStage;
 
-	Gtk::VBox* vbox;
-	Gtk::Button *cancel_button;
-	Gtk::Button abort_button;
+	TranscodeFfmpeg* transcoder;
 
-	Gtk::VBox*  progress_box;
-	Gtk::Label  progress_label;
+	Gtk::Label  path_label;
+	Gtk::Entry  path_entry;
+	Gtk::Button browse_button;
+	Gtk::Button transcode_button;
+
+	Gtk::VBox*   vbox;
+	Gtk::Button* cancel_button;
+	Gtk::Button  abort_button;
+
+	Gtk::VBox*       progress_box;
+	Gtk::Label       progress_label;
 	Gtk::ProgressBar pbar;
 
 	Gtk::ComboBoxText video_combo;
@@ -109,10 +123,7 @@ private:
 	Gtk::CheckButton  bitrate_checkbox;
 	Gtk::Adjustment   bitrate_adjustment;
 	Gtk::SpinButton   bitrate_spinner;
-#if 1 /* tentative debug mode */
 	Gtk::CheckButton  debug_checkbox;
-#endif
-
 };
 
 #endif /* __gtk_ardour_transcode_video_dialog_h__ */

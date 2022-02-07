@@ -99,7 +99,8 @@ Editor::embed_audio_from_video (std::string path, samplepos_t n, bool lock_posit
 	std::string const& gid = ARDOUR::Playlist::generate_pgroup_id ();
 	Temporal::timepos_t pos (n);
 
-	bool ok = (import_sndfiles (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, ARDOUR::SrcBest, pos, 1, 1, track, gid, false) == 0);
+	bool ok = import_sndfiles (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, ARDOUR::SrcBest, pos, 1, 1, track, gid, false) == 0;
+	import_status.clear();
 
 	if (ok && track) {
 		if (lock_position_to_video) {
@@ -110,5 +111,5 @@ Editor::embed_audio_from_video (std::string path, samplepos_t n, bool lock_posit
 	}
 
 	import_status.all_done = true;
-	::g_unlink(path.c_str());
+	::g_unlink (path.c_str());
 }
