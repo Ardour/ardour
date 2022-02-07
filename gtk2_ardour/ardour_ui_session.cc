@@ -775,7 +775,7 @@ ARDOUR_UI::rename_session (bool for_unnamed)
 
 	prompter.set_name ("Prompter");
 
-	prompter.add_button (Gtk::Stock::DISCARD, Gtk::RESPONSE_CANCEL);
+	prompter.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 
 	if (for_unnamed) {
