@@ -91,7 +91,7 @@ class LIBARDOUR_API SoloControl : public SlavableAutomationControl
 
 	int32_t transitioned_into_solo () const { return _transition_into_solo; }
 
-	void clear_all_solo_state ();
+	bool clear_all_solo_state ();
 
 	int set_state (XMLNode const&, int);
 	XMLNode& get_state () const;

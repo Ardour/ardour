@@ -6279,7 +6279,9 @@ Route::muted_by_others_soloing () const
 void
 Route::clear_all_solo_state ()
 {
-	_solo_control->clear_all_solo_state ();
+	if (_solo_control->clear_all_solo_state ()) {
+		_session.add_solo_history( id() );
+	}
 }
 
 boost::shared_ptr<AutomationControl>

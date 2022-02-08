@@ -62,7 +62,11 @@ void
 ARDOUR_UI::cancel_solo ()
 {
 	if (_session) {
-		_session->cancel_all_solo ();
+		if( _session->soloing() )
+			_session->cancel_all_solo ();
+		else{
+			_session->restore_solo_history ();
+		}
 	}
 }
 

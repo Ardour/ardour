@@ -615,6 +615,10 @@ public:
 	int save_template (const std::string& template_name, const std::string& description = "", bool replace_existing = false);
 	int save_history (std::string snapshot_name = "");
 	int restore_history (std::string snapshot_name);
+
+	void add_solo_history (const PBD::ID &routeId);
+	void restore_solo_history ();
+
 	void remove_state (std::string snapshot_name);
 	void rename_state (std::string old_name, std::string new_name);
 	void remove_pending_capture_state ();
@@ -1457,6 +1461,8 @@ private:
 	unsigned int            _xrun_count;
 
 	std::string             _missing_file_replacement;
+
+	std::list<PBD::ID> 		_solo_history;
 
 	mutable GATOMIC_QUAL gint _processing_prohibited;
 	mutable GATOMIC_QUAL gint _record_status;

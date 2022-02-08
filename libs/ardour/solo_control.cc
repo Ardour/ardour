@@ -189,15 +189,16 @@ SoloControl::get_value () const
 	return soloed();
 }
 
-void
+bool
 SoloControl::clear_all_solo_state ()
 {
 	bool change = false;
+	bool write_history = false;
 
 	if (self_soloed()) {
 		PBD::info << string_compose (_("Cleared Explicit solo: %1\n"), name()) << endmsg;
 		actually_set_value (0.0, Controllable::NoGroup);
-		change = true;
+		write_history = change = true;
 	}
 
 	if (_soloed_by_others_upstream) {
@@ -219,6 +220,7 @@ SoloControl::clear_all_solo_state ()
 	if (change) {
 		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 	}
+	return write_history; 
 }
 
 int

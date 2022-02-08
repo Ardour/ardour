@@ -235,6 +235,8 @@ VCAManager::clear_all_solo_state ()
 	Mutex::Lock lm (lock);
 
 	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
+		if( (*i)->solo_control()->self_soloed() )
+			_session.add_solo_history( (*i)->id() );
 		(*i)->clear_all_solo_state ();
 	}
 }

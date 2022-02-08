@@ -6348,6 +6348,24 @@ Session::listen_position_changed ()
 }
 
 void
+Session::add_solo_history (const PBD::ID &routeId)
+{
+	_solo_history.emplace_back (routeId);
+}
+
+void Session::restore_solo_history ()
+{
+	for (PBD::ID routeId : _solo_history) {
+		boost::shared_ptr<Stripable> route = stripable_by_id( routeId );
+		if (route && route->solo_control()){
+			set_control (route->solo_control(), 1.0, Controllable::NoGroup);
+			continue;
+		}
+	}
+	_solo_history.clear ();
+}
+
+void
 Session::solo_control_mode_changed ()
 {
 	if (soloing() || listening()) {
@@ -7448,7 +7466,6 @@ Session::cancel_all_solo ()
 
 	get_stripables (sl);
 
-	set_controls (stripable_list_to_control_list (sl, &Stripable::solo_control), 0.0, Controllable::NoGroup);
 	clear_all_solo_state (routes.reader());
 
 	_engine.monitor_port().clear_ports (false);
