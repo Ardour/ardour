@@ -21,6 +21,8 @@
 #ifndef EVORAL_PATCH_CHANGE_HPP
 #define EVORAL_PATCH_CHANGE_HPP
 
+#include <cassert>
+
 #include "evoral/visibility.h"
 #include "evoral/Event.h"
 #include "evoral/Event.h"
