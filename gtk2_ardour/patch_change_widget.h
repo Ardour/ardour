@@ -49,11 +49,11 @@ protected:
 	void refill (uint8_t const channel);
 	void set_active_pgm (uint8_t);
 
-	virtual int  bank (uint8_t chn) const = 0;
-	virtual void select_bank (uint32_t) = 0;
-	virtual void select_program (uint8_t) = 0;
+	virtual int  bank (uint8_t chn) const   = 0;
+	virtual void select_bank (uint32_t)     = 0;
+	virtual void select_program (uint8_t)   = 0;
 	virtual void instrument_info_changed () = 0;
-	virtual void processors_changed () = 0;
+	virtual void processors_changed ()      = 0;
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 
@@ -116,7 +116,7 @@ public:
 	void refresh ();
 
 protected:
-	int bank (uint8_t) const;
+	int     bank (uint8_t) const;
 	uint8_t program (uint8_t) const;
 
 	void on_show ();
@@ -151,6 +151,7 @@ private:
 	void audition ();
 	void cancel_audition ();
 	bool audition_next ();
+
 	sigc::connection _note_queue_connection;
 
 	ArdourWidgets::ArdourButton _audition_enable;
@@ -183,14 +184,28 @@ class PatchChangeGridDialog : public ArdourDialog
 {
 public:
 	PatchChangeGridDialog (boost::shared_ptr<ARDOUR::Route>);
-	void on_hide () { w.hide (); ArdourDialog::on_hide (); }
-	void on_show () { w.show (); ArdourDialog::on_show (); }
-	void refresh () { w.refresh (); }
+
+	void on_hide ()
+	{
+		w.hide ();
+		ArdourDialog::on_hide ();
+	}
+
+	void on_show ()
+	{
+		w.show ();
+		ArdourDialog::on_show ();
+	}
+
+	void refresh ()
+	{
+		w.refresh ();
+	}
 
 private:
-	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route>);
+	void                  route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route>);
 	PBD::ScopedConnection _route_connection;
-	PatchChangeWidget w;
+	PatchChangeWidget     w;
 };
 
 #endif
