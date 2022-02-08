@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <pangomm.h>
+
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 
@@ -27,10 +29,11 @@
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 
-#include "gtkmm2ext/actions.h"
-#include "gtkmm2ext/colors.h"
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
+
+#include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/utils.h"
 
 #include "ardour_ui.h"
@@ -70,11 +73,6 @@ CueEntry::CueEntry (Item* item, uint64_t cue_index)
 	name_button->set_fill (true);
 	name_button->name = ("slot_selector_button");
 	name_button->show ();
-
-	name_text = new Text (name_button);
-	name_text->set (string_compose ("%1", (char)('A' + _cue_idx))); // XXX not translatable
-	name_text->set_ignore_events (false);
-	name_text->show ();
 
 	/* watch for cue-recording state */
 	TriggerBox::CueRecordingChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&CueEntry::rec_state_changed, this), gui_context ());
@@ -130,13 +128,6 @@ CueEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 
 	name_button->set_center ( Duple(height/2, height/2) );
 	name_button->set_radius ( (height/2)- 2*scale );
-
-	name_text->size_allocate (ArdourCanvas::Rect (0, 0, height, height));
-	name_text->set_position (Duple (4. * scale, 2.5 * scale));
-	name_text->clamp_width (height);
-
-	/* font scale may have changed. uiconfig 'embeds' the ui-scale in the font */
-	name_text->set_font_description (UIConfiguration::instance ().get_SmallBoldMonospaceFont ());
 }
 
 void
@@ -186,6 +177,19 @@ CueEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 		context->set_line_width (1);
 	}
 
+	//draw cue letter
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
+	layout->set_font_description (UIConfiguration::instance ().get_NormalFont ());
+	layout->set_text (string_compose (_("%1"), (char) ('A' + _cue_idx)));
+	int tw, th;
+	layout->get_pixel_size (tw, th);
+	context->translate (self.x0, self.y0 - 0.5);  //canvas widget offset (sigh)
+	context->move_to (width/2,height/2);  //move to center
+	context->rel_move_to (-tw/2, -th/2);  //rel move to top-left of text
+	context->set_source_rgb (0, 0, 0);  //black
+	layout->show_in_cairo_context (context);
+	context->set_identity_matrix ();
+
 	if (false /*_cue_idx == 0*/) {
 		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6 * scale);
 		drop_shadow_pattern->add_color_stop_rgba (0, 0, 0, 0, 0.7);
@@ -205,13 +209,11 @@ CueEntry::set_default_colors ()
 	}
 	set_fill_color (bg_col);
 
-	color_t fg_col = UIConfiguration::instance ().color ("neutral:midground");
+	color_t fg_col = UIConfiguration::instance ().color ("location marker");
 	if ((_cue_idx / 2) % 2 == 0) {
 		fg_col = HSV (fg_col).darker (0.20).color ();
 	}
 	name_button->set_fill_color (fg_col);
-
-	name_text->set_fill_color (UIConfiguration::instance ().color ("neutral:background"));
 
 	if (TriggerBox::cue_recording()) {
 		name_button->set_fill_color (UIConfiguration::instance ().color ("alert:ruddy"));
@@ -427,9 +429,6 @@ CueBoxUI::build ()
 
 		_slots.push_back (te);
 
-#if 0
-		te->name_text->Event.connect (sigc::bind (sigc::mem_fun (*this, &CueBoxUI::text_event), n));
-#endif
 		te->Event.connect (sigc::bind (sigc::mem_fun (*this, &CueBoxUI::event), n));
 	}
 }
