@@ -20,11 +20,12 @@
 #define __gtkardour_patch_change_widget_h__
 
 #include <gtkmm/box.h>
+#include <gtkmm/notebook.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
 
-#include "pbd/signals.h"
 #include "midi++/midnam_patch.h"
+#include "pbd/signals.h"
 
 #include "ardour/route.h"
 
@@ -33,6 +34,10 @@
 
 #include "ardour_dialog.h"
 #include "pianokeyboard.h"
+
+namespace ARDOUR {
+	class MIDITrigger;
+};
 
 class PatchBankList : virtual public sigc::trackable
 {
@@ -67,6 +72,39 @@ private:
 
 	PBD::ScopedConnection _info_changed_connection;
 	PBD::ScopedConnection _route_connection;
+};
+
+class PatchChangeTab : public Gtk::VBox, public PatchBankList
+{
+public:
+	PatchChangeTab (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::MIDITrigger>, int channel);
+
+	void refresh ();
+
+protected:
+	int     bank (uint8_t) const;
+	uint8_t program () const;
+
+	/* Implement PatchBankList */
+	void select_bank (uint32_t);
+	void select_program (uint8_t);
+	void instrument_info_changed ();
+	void processors_changed ();
+
+private:
+	void refill_banks ();
+	void trigger_property_changed (PBD::PropertyChange const&);
+	void enable_toggle ();
+	void update_sensitivity ();
+
+	ArdourWidgets::ArdourButton _enable_btn;
+
+	int  _channel;
+	int  _bank;
+	bool _ignore_callback;
+
+	boost::shared_ptr<ARDOUR::MIDITrigger> _trigger;
+	PBD::ScopedConnection                  _trigger_connection;
 };
 
 class PatchChangeWidget : public Gtk::VBox, public PatchBankList
@@ -127,6 +165,18 @@ private:
 	void _note_on_event_handler (int, int);
 	void note_on_event_handler (int, bool for_audition);
 	void note_off_event_handler (int);
+};
+
+class PatchChangeTriggerDialog : public ArdourDialog
+{
+public:
+	PatchChangeTriggerDialog (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::MIDITrigger>);
+
+private:
+	void on_switch_page (GtkNotebookPage*, guint page_num);
+
+	Gtk::Notebook   _notebook;
+	PatchChangeTab* _w[16];
 };
 
 class PatchChangeGridDialog : public ArdourDialog

@@ -23,14 +23,15 @@
 
 #include "pbd/unwind.h"
 
-#include "evoral/midi_events.h"
 #include "evoral/PatchChange.h"
+#include "evoral/midi_events.h"
 
 #include "midi++/midnam_patch.h"
 
 #include "ardour/instrument_info.h"
 #include "ardour/midi_track.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/triggerbox.h"
 
 #include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
@@ -248,6 +249,148 @@ PatchBankList::set_active_pgm (uint8_t p)
 
 /* ****************************************************************************/
 
+PatchChangeTab::PatchChangeTab (boost::shared_ptr<Route> r, boost::shared_ptr<MIDITrigger> t, int channel)
+	: PatchBankList (r)
+	, _enable_btn (_("Override Patch Changes"), ArdourWidgets::ArdourButton::led_default_elements)
+	, _channel (channel)
+	, _bank (0)
+	, _ignore_callback (false)
+	, _trigger (t)
+{
+	if (_trigger->patch_change_set (_channel)) {
+		_bank = _trigger->patch_change (_channel).bank ();
+		_enable_btn.set_active (true);
+	} else {
+		_enable_btn.set_active (false);
+	}
+
+	Box* box;
+	box = manage (new HBox ());
+	box->set_border_width (2);
+	box->set_spacing (4);
+	box->pack_start (_enable_btn, false, false);
+	box->pack_start (*manage (new Label (_("Bank:"))), false, false);
+	box->pack_start (_bank_select, true, true);
+	box->pack_start (*manage (new Label (_("MSB:"))), false, false);
+	box->pack_start (_bank_msb_spin, false, false);
+	box->pack_start (*manage (new Label (_("LSB:"))), false, false);
+	box->pack_start (_bank_lsb_spin, false, false);
+
+	pack_start (*box, false, false);
+
+	_program_table.set_spacings (1);
+	pack_start (_program_table, true, true);
+
+	set_spacing (4);
+	show_all ();
+
+	_enable_btn.signal_clicked.connect (sigc::mem_fun (*this, &PatchChangeTab::enable_toggle));
+
+	_trigger->PropertyChanged.connect (_trigger_connection, invalidator (*this), boost::bind (&PatchChangeTab::trigger_property_changed, this, _1), gui_context ());
+	if (!boost::dynamic_pointer_cast<MidiTrack> (_route)) {
+		processors_changed ();
+	}
+	refill_banks ();
+	update_sensitivity ();
+}
+
+void
+PatchChangeTab::enable_toggle ()
+{
+	if (_ignore_callback) {
+		return;
+	}
+	if (_enable_btn.get_active ()) {
+		_trigger->unset_patch_change (_channel);
+	} else {
+		select_program (program ());
+	}
+	update_sensitivity ();
+}
+
+void
+PatchChangeTab::update_sensitivity ()
+{
+	bool en = _trigger->patch_change_set (_channel);
+	_program_table.set_sensitive (en);
+	_bank_select.set_sensitive (en);
+	_bank_msb_spin.set_sensitive (en);
+	_bank_lsb_spin.set_sensitive (en);
+}
+
+void
+PatchChangeTab::trigger_property_changed (PBD::PropertyChange const& what_changed)
+{
+	if (what_changed.contains (Properties::patch_change)) {
+		PBD::Unwinder<bool> uw (_ignore_callback, true);
+		_enable_btn.set_active (_trigger->patch_change_set (_channel));
+		refill_banks ();
+	}
+}
+
+void
+PatchChangeTab::select_bank (uint32_t bank)
+{
+	_bank = bank;
+	select_program (program ());
+}
+
+void
+PatchChangeTab::select_program (uint8_t pgm)
+{
+	if (pgm > 127) {
+		return;
+	}
+
+	Evoral::PatchChange<MidiBuffer::TimeType> pc (0, _channel, pgm, _bank);
+	_trigger->set_patch_change (pc);
+}
+
+void
+PatchChangeTab::refresh ()
+{
+	refill_banks ();
+}
+
+void
+PatchChangeTab::refill_banks ()
+{
+	refill (_channel);
+	set_active_pgm (program ());
+}
+
+int
+PatchChangeTab::bank (uint8_t c) const
+{
+	assert (c == _channel);
+	if (_trigger->patch_change_set (_channel)) {
+		return _trigger->patch_change (_channel).bank ();
+	}
+	return _bank;
+}
+
+uint8_t
+PatchChangeTab::program () const
+{
+	if (_trigger->patch_change_set (_channel)) {
+		return _trigger->patch_change (_channel).program ();
+	}
+	return 0;
+}
+
+void
+PatchChangeTab::instrument_info_changed ()
+{
+	refill_banks ();
+}
+
+void
+PatchChangeTab::processors_changed ()
+{
+}
+
+/* ****************************************************************************/
+
 PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 	: PatchBankList (r)
 	, _channel (-1)
@@ -277,7 +420,7 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 	pack_start (_program_table, true, true);
 
 	if (!boost::dynamic_pointer_cast<MidiTrack> (_route)) {
-		pack_start ( *manage (new Label (_("Note: Patch Selection is volatile (only Midi-Tracks retain bank/patch selection)."))), false, false);
+		pack_start (*manage (new Label (_("Note: Patch Selection is volatile (only Midi-Tracks retain bank/patch selection)."))), false, false);
 	}
 
 	box = manage (new HBox ());
@@ -653,6 +796,29 @@ PatchChangeWidget::program (uint8_t chn) const
 		}
 	}
 	return 255;
+}
+
+/* ***************************************************************************/
+
+PatchChangeTriggerDialog::PatchChangeTriggerDialog (boost::shared_ptr<Route> r, boost::shared_ptr<MIDITrigger> t)
+	: ArdourDialog (string_compose (_("Select Patch for \"%1\""), t->name ()), false, false)
+{
+	for (uint32_t chn = 0; chn < 16; ++chn) {
+		_w[chn] = manage (new PatchChangeTab (r, t, chn));
+		_notebook.append_page (*_w[chn], string_compose (_("Chn %1"), chn + 1));
+	}
+
+	_notebook.signal_switch_page ().connect (sigc::mem_fun (*this, &PatchChangeTriggerDialog::on_switch_page));
+	_notebook.set_current_page (0);
+
+	get_vbox ()->add (_notebook);
+	_notebook.show_all ();
+}
+
+void
+PatchChangeTriggerDialog::on_switch_page (GtkNotebookPage*, guint page_num)
+{
+	_w[page_num]->refresh ();
 }
 
 /* ***************************************************************************/
