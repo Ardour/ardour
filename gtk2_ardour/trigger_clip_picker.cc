@@ -130,14 +130,23 @@ TriggerClipPicker::TriggerClipPicker ()
 	ArdourWidgets::set_tooltip (_stop_btn, _("Stop the audition"));
 	ArdourWidgets::set_tooltip (_open_library_btn, _("Open clip library folder"));
 
+	format_text.set_alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+	channels_value.set_alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+	_midi_prop_table.attach (format_text,       0, 1, 0, 1, EXPAND | FILL, SHRINK);
+	_midi_prop_table.attach (channels_value,    0, 1, 1, 2, EXPAND | FILL, SHRINK);
+	_midi_prop_table.attach (_auditioner_combo, 0, 3, 2, 3, EXPAND | FILL, SHRINK);
+	_midi_prop_table.attach (_show_plugin_btn,  3, 4, 2, 3, SHRINK, SHRINK);
+	_midi_prop_table.set_border_width (4);
+	_midi_prop_table.set_spacings (4);
+
 	/* Layout */
+	int r = 0;
 	_auditable.set_homogeneous(false);
-	_auditable.attach (_play_btn,         0, 1, 0, 1, SHRINK, SHRINK);
-	_auditable.attach (_stop_btn,         1, 2, 0, 1, SHRINK, SHRINK);
-	_auditable.attach (_autoplay_btn,     2, 3, 0, 1, EXPAND | FILL, SHRINK);
-	_auditable.attach (_auditioner_combo, 0, 3, 1, 2, EXPAND | FILL, SHRINK);
-	_auditable.attach (_show_plugin_btn,  3, 4, 1, 2, SHRINK, SHRINK);
-	_auditable.attach (_seek_slider,      0, 4, 2, 3, EXPAND | FILL, SHRINK);
+	_auditable.attach (_play_btn,         0, 1, r,r+1, SHRINK, SHRINK);
+	_auditable.attach (_stop_btn,         1, 2, r,r+1, SHRINK, SHRINK);
+	_auditable.attach (_autoplay_btn,     2, 3, r,r+1, EXPAND | FILL, SHRINK);  r++;
+	_auditable.attach (_seek_slider,      0, 4, r,r+1, EXPAND | FILL, SHRINK);  r++;
+	_auditable.attach (_midi_prop_table,  0, 4, r,r+1, EXPAND | FILL, SHRINK);
 	_auditable.set_border_width (4);
 	_auditable.set_spacings (4);
 
@@ -145,12 +154,12 @@ TriggerClipPicker::TriggerClipPicker ()
 	_scroller.add (_view);
 
 	Gtk::Table *dir_table = manage(new Gtk::Table());
-	dir_table->set_border_width(2);
-	dir_table->set_spacings(2);
+	dir_table->set_border_width(4);
+	dir_table->set_spacings(4);
 	dir_table->attach (_clip_dir_menu,    0, 1, 0, 1, EXPAND | FILL, SHRINK);
 	dir_table->attach (_open_library_btn, 1, 2, 0, 1, SHRINK, SHRINK);
 
-	pack_start (*dir_table, false, false, 4);
+	pack_start (*dir_table, false, false);
 	pack_start (_scroller);
 	pack_start (_auditable, false, false);
 
@@ -192,7 +201,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	_scroller.show ();
 	_view.show ();
 	_clip_dir_menu.show ();
-	_auditable.show_all ();
+	_auditable.show ();
 
 	/* fill treeview with data */
 	_clip_dir_menu.items ().front ().activate ();
@@ -447,12 +456,43 @@ TriggerClipPicker::row_selected ()
 		_session->cancel_audition ();
 	}
 
+	_midi_prop_table.hide();
+
 	if (_view.get_selection ()->count_selected_rows () < 1 || _autoplay_btn.get_active ()) {
 		_play_btn.set_sensitive (false);
 	} else {
 		TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
 		TreeIter                             i    = _model->get_iter (*rows.begin ());
 		_play_btn.set_sensitive ((*i)[_columns.file]);
+
+		std::string path = (*i)[_columns.path];
+		if (SMFSource::valid_midi_file (path)) {
+			/* TODO: if it's a really big file, we could skip this check */
+			boost::shared_ptr<SMFSource> ms;
+			try {
+				ms = boost::dynamic_pointer_cast<SMFSource> (
+					SourceFactory::createExternal (DataType::MIDI, *_session,
+												   path, 0, Source::Flag (0), false));
+			} catch (const std::exception& e) {
+				error << string_compose(_("Could not read file: %1 (%2)."),
+										path, e.what()) << endmsg;
+			}
+
+			if (ms) {
+				if (ms->smf_format()==0) {
+					format_text.set_text ("MIDI Type 0");
+				} else {
+					format_text.set_text (string_compose( _("%1 (%2 Tracks)"), ms->smf_format()==2 ? X_("MIDI Type 2") : X_("MIDI Type 1"), ms->num_tracks()));
+				}
+				channels_value.set_text (string_compose(
+				    _("Channel(s) used: %1 - %2 "),
+					ARDOUR_UI_UTILS::midi_channels_as_string (ms->used_channels()),
+					ms->has_pgm_change() ? _("with pgms") : X_("")
+					));
+
+				_midi_prop_table.show();
+			}
+		}
 	}
 }
 
@@ -712,6 +752,7 @@ TriggerClipPicker::set_session (Session* s)
 
 	_play_btn.set_sensitive (false);
 	_stop_btn.set_sensitive (false);
+	_midi_prop_table.hide ();  //only shown when a valid smf is chosen
 
 	if (!_session) {
 		_seek_slider.set_sensitive (false);
@@ -819,6 +860,17 @@ TriggerClipPicker::audition (std::string const& path)
 
 		r = boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (boost::dynamic_pointer_cast<Source> (ms), plist, false));
 		assert (r);
+
+#ifdef MIXBUS  /* for testing */
+		if (!ms->has_pgm_change()) {  //smf has no midi cc's, we might need to help the user pick one
+			if (_session && _session->the_auditioner ()) {
+				PluginInfoPtr p = _session->the_auditioner ()->get_audition_synth_info();
+				if (p->unique_id == "http://gareus.org/oss/lv2/gmsynth") {
+					audition_show_plugin_ui();
+				}
+			}
+		}
+#endif
 
 	} else {
 		SourceList                         srclist;

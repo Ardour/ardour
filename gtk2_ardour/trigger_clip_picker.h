@@ -112,6 +112,11 @@ private:
 	Gtk::HScale                  _seek_slider;
 	Gtk::CheckButton             _autoplay_btn;
 
+	/* MIDI props */
+	Gtk::Table _midi_prop_table;
+	Gtk::Label format_text;
+	Gtk::Label channels_value;
+
 	InstrumentSelector           _auditioner_combo;
 
 	std::string _current_path;
