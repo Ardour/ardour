@@ -34,7 +34,42 @@
 #include "ardour_dialog.h"
 #include "pianokeyboard.h"
 
-class PatchChangeWidget : public Gtk::VBox
+class PatchBankList : virtual public sigc::trackable
+{
+public:
+	PatchBankList (boost::shared_ptr<ARDOUR::Route>);
+	virtual ~PatchBankList ();
+
+protected:
+	void refill (uint8_t const channel);
+	void set_active_pgm (uint8_t);
+
+	virtual int  bank (uint8_t chn) const = 0;
+	virtual void select_bank (uint32_t) = 0;
+	virtual void select_program (uint8_t) = 0;
+	virtual void instrument_info_changed () = 0;
+	virtual void processors_changed () = 0;
+
+	boost::shared_ptr<ARDOUR::Route> _route;
+
+	ArdourWidgets::ArdourDropdown _bank_select;
+	Gtk::SpinButton               _bank_msb_spin;
+	Gtk::SpinButton               _bank_lsb_spin;
+	Gtk::Table                    _program_table;
+
+private:
+	void select_bank_spin ();
+
+	ARDOUR::InstrumentInfo&                  _info;
+	ArdourWidgets::ArdourButton              _program_btn[128];
+	boost::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
+	bool                                     _ignore_spin_btn_signals;
+
+	PBD::ScopedConnection _info_changed_connection;
+	PBD::ScopedConnection _route_connection;
+};
+
+class PatchChangeWidget : public Gtk::VBox, public PatchBankList
 {
 public:
 	PatchChangeWidget (boost::shared_ptr<ARDOUR::Route>);
@@ -50,40 +85,29 @@ protected:
 	void on_hide ();
 
 private:
-	boost::shared_ptr<ARDOUR::Route> _route;
+	void refill_banks ();
 
 	ArdourWidgets::ArdourDropdown _channel_select;
-	ArdourWidgets::ArdourDropdown _bank_select;
-	Gtk::SpinButton               _bank_msb_spin;
-	Gtk::SpinButton               _bank_lsb_spin;
-	ArdourWidgets::ArdourButton   _program_btn[128];
-	Gtk::Table                    _program_table;
 
 	uint8_t _channel;
-	bool    _ignore_spin_btn_signals;
 	bool    _no_notifications;
 
 	void select_channel (uint8_t);
-	void select_bank (uint32_t);
-	void select_bank_spin ();
-	void select_program (uint8_t);
 
+	/* Implement PatchBankList */
+	void select_bank (uint32_t);
+	void select_program (uint8_t);
+	void instrument_info_changed ();
+	void processors_changed ();
+
+	/* callbacks from route AC */
 	void bank_changed ();
 	void program_changed ();
 	void bankpatch_changed (uint8_t);
 
-	void refill_banks ();
-
-	void instrument_info_changed ();
-	void processors_changed ();
-
-	PBD::ScopedConnection _info_changed_connection;
-	PBD::ScopedConnection _route_connection;
 	PBD::ScopedConnectionList _ac_connections;
 
-	ARDOUR::InstrumentInfo& _info;
-	boost::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
-
+	/* Audition */
 	void audition_toggle ();
 	void check_note_range (bool);
 	void audition ();

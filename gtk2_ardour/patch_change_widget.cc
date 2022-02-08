@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,15 +45,213 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
-PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
+PatchBankList::PatchBankList (boost::shared_ptr<ARDOUR::Route> r)
 	: _route (r)
 	, _bank_msb_spin (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _bank_lsb_spin (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _program_table (/*rows*/ 16, /*cols*/ 8, true)
-	, _channel (-1)
-	, _ignore_spin_btn_signals (false)
-	, _no_notifications (false)
 	, _info (r->instrument_info ())
+	, _ignore_spin_btn_signals (false)
+{
+	_program_table.set_spacings (1);
+
+	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
+		_program_btn[pgm].set_text_ellipsize (Pango::ELLIPSIZE_END);
+		_program_btn[pgm].set_layout_ellipsize_width (PANGO_SCALE * 112 * UIConfiguration::instance ().get_ui_scale ());
+		int row = pgm % 16;
+		int col = pgm / 16;
+		_program_table.attach (_program_btn[pgm], col, col + 1, row, row + 1);
+		_program_btn[pgm].signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PatchBankList::select_program), pgm));
+	}
+
+	_bank_msb_spin.signal_changed().connect (sigc::mem_fun (*this, &PatchBankList::select_bank_spin));
+	_bank_lsb_spin.signal_changed().connect (sigc::mem_fun (*this, &PatchBankList::select_bank_spin));
+
+	_info.Changed.connect (_info_changed_connection, invalidator (*this),
+			boost::bind (&PatchBankList::instrument_info_changed, this), gui_context());
+
+	if (!boost::dynamic_pointer_cast<MidiTrack> (_route)) {
+		_route->processors_changed.connect (_route_connection, invalidator (*this),
+				boost::bind (&PatchBankList::processors_changed, this), gui_context());
+	}
+}
+
+PatchBankList::~PatchBankList ()
+{
+}
+
+/* allow to sort bank-name by use-count */
+template <typename A, typename B>
+static std::multimap<B, A> flip_map (std::map<A, B> const& src)
+{
+	std::multimap<B,A> dst;
+
+	for (typename std::map<A, B>::const_iterator it = src.begin(); it != src.end(); ++it) {
+		dst.insert (std::pair<B, A> (it->second, it->first));
+	}
+
+	return dst;
+}
+
+void
+PatchBankList::refill (const uint8_t channel)
+{
+	using namespace Menu_Helpers;
+	using namespace Gtkmm2ext;
+	using namespace MIDI::Name;
+
+	_current_patch_bank.reset ();
+	_bank_select.clear_items ();
+
+	const int b = bank (channel);
+
+	{
+		PBD::Unwinder<bool> uw (_ignore_spin_btn_signals, true);
+		_bank_msb_spin.set_value (b >> 7);
+		_bank_lsb_spin.set_value (b & 127);
+	}
+
+	typedef std::map<std::string, unsigned int> BankName;
+	typedef std::map<uint16_t, BankName> BankSet;
+
+	bool bank_set = false;
+	std::bitset<128> unset_notes;
+	BankSet generic_banks;
+
+	unset_notes.set ();
+
+	boost::shared_ptr<ChannelNameSet> cns = _info.get_patches (channel);
+	if (cns) {
+		const ChannelNameSet::PatchBanks& patch_banks = cns->patch_banks ();
+		for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin (); bank != patch_banks.end (); ++bank) {
+			if ((*bank)->number () != UINT16_MAX) {
+				continue;
+			}
+			/* no shared MIDI bank for this PatchBanks,
+			 * iterate over all programs in the patchbank, collect  "<ControlChange>"
+			 */
+			const PatchNameList& patches = (*bank)->patch_name_list ();
+			for (PatchNameList::const_iterator patch = patches.begin (); patch != patches.end (); ++patch) {
+
+				BankName& bn (generic_banks[(*patch)->bank_number ()]);
+				++bn[(*bank)->name ()];
+
+				if ((*patch)->bank_number () != b) {
+					continue;
+				}
+				const std::string n = (*patch)->name ();
+				MIDI::Name::PatchPrimaryKey const& key = (*patch)->patch_primary_key ();
+
+				const uint8_t pgm = key.program();
+				_program_btn[pgm].set_text (n);
+				set_tooltip (_program_btn[pgm], string_compose (_("%1 (Pgm-%2)"),
+							Gtkmm2ext::markup_escape_text (n), (int)(pgm +1)));
+				unset_notes.reset (pgm);
+			}
+		}
+
+		for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin (); bank != patch_banks.end (); ++bank) {
+			if ((*bank)->number () == UINT16_MAX) {
+				continue;
+			}
+			generic_banks.erase ((*bank)->number ());
+			std::string n = (*bank)->name ();
+			_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchBankList::select_bank), (*bank)->number ())));
+			if ((*bank)->number () == b) {
+				_current_patch_bank = *bank;
+				_bank_select.set_text (n);
+			}
+		}
+
+		for (BankSet::const_iterator i = generic_banks.begin(); i != generic_banks.end(); ++i) {
+			std::string n = string_compose (_("Bank %1"), (i->first) + 1);
+#if 1
+			typedef std::multimap <unsigned int, std::string> BankByCnt;
+			BankByCnt bc (flip_map (i->second));
+			unsigned int cnt = 0; // pick top three
+			for (BankByCnt::reverse_iterator j = bc.rbegin(); j != bc.rend() && cnt < 3; ++j, ++cnt) {
+				n += " (" + j->second + ")";
+				if (n.size () > 64) {
+					break;
+				}
+			}
+			if (bc.size () > cnt) {
+				n += " (...)";
+			}
+#endif
+			_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchBankList::select_bank), i->first)));
+			if (i->first == b) {
+				_bank_select.set_text (n);
+				bank_set = true;
+			}
+		}
+	}
+
+	if (!_current_patch_bank && !bank_set) {
+		std::string n = string_compose (_("Bank %1"), b + 1);
+		_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchBankList::select_bank), b)));
+		_bank_select.set_text (n);
+	}
+
+	/* refill_program_list */
+
+	if (_current_patch_bank) {
+		const MIDI::Name::PatchNameList& patches = _current_patch_bank->patch_name_list ();
+		for (MIDI::Name::PatchNameList::const_iterator i = patches.begin(); i != patches.end(); ++i) {
+			const std::string n = (*i)->name ();
+			MIDI::Name::PatchPrimaryKey const& key = (*i)->patch_primary_key ();
+
+			const uint8_t pgm = key.program();
+			_program_btn[pgm].set_text (n);
+			set_tooltip (_program_btn[pgm], string_compose (_("%1 (Pgm-%2)"),
+						Gtkmm2ext::markup_escape_text (n), (int)(pgm +1)));
+			unset_notes.reset (pgm);
+		}
+	}
+
+	bool shade = unset_notes.count () != 128;
+
+	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
+		if (!unset_notes.test (pgm)) {
+			_program_btn[pgm].set_name (X_("patch change button"));
+			continue;
+		}
+		std::string n = string_compose (_("Pgm-%1"), (int)(pgm +1));
+		_program_btn[pgm].set_text (n);
+		if (shade) {
+			_program_btn[pgm].set_name (X_("patch change button unnamed"));
+		} else {
+			_program_btn[pgm].set_name (X_("patch change button"));
+			continue;
+		}
+		set_tooltip (_program_btn[pgm], n);
+	}
+}
+
+void
+PatchBankList::select_bank_spin ()
+{
+	if (_ignore_spin_btn_signals) {
+		return;
+	}
+	const uint32_t b = (_bank_msb_spin.get_value_as_int() << 7) + _bank_lsb_spin.get_value_as_int();
+	select_bank (b);
+}
+
+void
+PatchBankList::set_active_pgm (uint8_t p)
+{
+	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
+		_program_btn[pgm].set_active (pgm == p);
+	}
+}
+
+/* ****************************************************************************/
+
+PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
+	: PatchBankList (r)
+	, _channel (-1)
+	, _no_notifications (false)
 	, _audition_enable (_("Audition on Change"), ArdourWidgets::ArdourButton::led_default_elements)
 	, _audition_start_spin (*manage (new Adjustment (48, 0, 127, 1, 16)))
 	, _audition_end_spin (*manage (new Adjustment (60, 0, 127, 1, 16)))
@@ -97,15 +295,6 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 	box2->set_border_width (2);
 	pack_start (*box2, false, false);
 
-	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
-		_program_btn[pgm].set_text_ellipsize (Pango::ELLIPSIZE_END);
-		_program_btn[pgm].set_layout_ellipsize_width (PANGO_SCALE * 112 * UIConfiguration::instance ().get_ui_scale ());
-		int row = pgm % 16;
-		int col = pgm / 16;
-		_program_table.attach (_program_btn[pgm], col, col + 1, row, row + 1);
-		_program_btn[pgm].signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_program), pgm));
-	}
-
 	for (uint32_t chn = 0; chn < 16; ++chn) {
 		using namespace Menu_Helpers;
 		using namespace Gtkmm2ext;
@@ -127,20 +316,13 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 	_audition_enable.signal_clicked.connect (sigc::mem_fun (*this, &PatchChangeWidget::audition_toggle));
 	_audition_start_spin.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::check_note_range), false));
 	_audition_end_spin.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::check_note_range), true));
-	_bank_msb_spin.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeWidget::select_bank_spin));
-	_bank_lsb_spin.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeWidget::select_bank_spin));
-
-	_info.Changed.connect (_info_changed_connection, invalidator (*this),
-			boost::bind (&PatchChangeWidget::instrument_info_changed, this), gui_context());
-
-	if (!boost::dynamic_pointer_cast<MidiTrack> (_route)) {
-		_route->processors_changed.connect (_route_connection, invalidator (*this),
-				boost::bind (&PatchChangeWidget::processors_changed, this), gui_context());
-		processors_changed ();
-	}
 
 	set_spacing (4);
 	show_all ();
+
+	if (!boost::dynamic_pointer_cast<MidiTrack> (_route)) {
+		processors_changed ();
+	}
 }
 
 PatchChangeWidget::~PatchChangeWidget ()
@@ -215,169 +397,15 @@ PatchChangeWidget::select_channel (uint8_t chn)
 	refill_banks ();
 }
 
-
-/* allow to sort bank-name by use-count */
-template <typename A, typename B>
-static std::multimap<B, A> flip_map (std::map<A, B> const& src)
-{
-	std::multimap<B,A> dst;
-
-	for (typename std::map<A, B>::const_iterator it = src.begin(); it != src.end(); ++it) {
-		dst.insert (std::pair<B, A> (it->second, it->first));
-	}
-
-	return dst;
-}
-
 void
 PatchChangeWidget::refill_banks ()
 {
 	cancel_audition ();
-	using namespace Menu_Helpers;
-	using namespace Gtkmm2ext;
-	using namespace MIDI::Name;
-
-	_current_patch_bank.reset ();
-	_bank_select.clear_items ();
-
-	const int b = bank (_channel);
-
-	{
-		PBD::Unwinder<bool> uw (_ignore_spin_btn_signals, true);
-		_bank_msb_spin.set_value (b >> 7);
-		_bank_lsb_spin.set_value (b & 127);
-	}
-
-	typedef std::map<std::string, unsigned int> BankName;
-	typedef std::map<uint16_t, BankName> BankSet;
-
-	bool bank_set = false;
-	std::bitset<128> unset_notes;
-	BankSet generic_banks;
-
-	unset_notes.set ();
-
-	boost::shared_ptr<ChannelNameSet> cns = _info.get_patches (_channel);
-	if (cns) {
-		const ChannelNameSet::PatchBanks& patch_banks = cns->patch_banks ();
-		for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin (); bank != patch_banks.end (); ++bank) {
-			if ((*bank)->number () != UINT16_MAX) {
-				continue;
-			}
-			/* no shared MIDI bank for this PatchBanks,
-			 * iterate over all programs in the patchbank, collect  "<ControlChange>"
-			 */
-			const PatchNameList& patches = (*bank)->patch_name_list ();
-			for (PatchNameList::const_iterator patch = patches.begin (); patch != patches.end (); ++patch) {
-
-				BankName& bn (generic_banks[(*patch)->bank_number ()]);
-				++bn[(*bank)->name ()];
-
-				if ((*patch)->bank_number () != b) {
-					continue;
-				}
-				const std::string n = (*patch)->name ();
-				MIDI::Name::PatchPrimaryKey const& key = (*patch)->patch_primary_key ();
-
-				const uint8_t pgm = key.program();
-				_program_btn[pgm].set_text (n);
-				set_tooltip (_program_btn[pgm], string_compose (_("%1 (Pgm-%2)"),
-							Gtkmm2ext::markup_escape_text (n), (int)(pgm +1)));
-				unset_notes.reset (pgm);
-			}
-		}
-
-		for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin (); bank != patch_banks.end (); ++bank) {
-			if ((*bank)->number () == UINT16_MAX) {
-				continue;
-			}
-			generic_banks.erase ((*bank)->number ());
-			std::string n = (*bank)->name ();
-			_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), (*bank)->number ())));
-			if ((*bank)->number () == b) {
-				_current_patch_bank = *bank;
-				_bank_select.set_text (n);
-			}
-		}
-
-		for (BankSet::const_iterator i = generic_banks.begin(); i != generic_banks.end(); ++i) {
-			std::string n = string_compose (_("Bank %1"), (i->first) + 1);
-#if 1
-			typedef std::multimap <unsigned int, std::string> BankByCnt;
-			BankByCnt bc (flip_map (i->second));
-			unsigned int cnt = 0; // pick top three
-			for (BankByCnt::reverse_iterator j = bc.rbegin(); j != bc.rend() && cnt < 3; ++j, ++cnt) {
-				n += " (" + j->second + ")";
-				if (n.size () > 64) {
-					break;
-				}
-			}
-			if (bc.size () > cnt) {
-				n += " (...)";
-			}
-#endif
-			_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), i->first)));
-			if (i->first == b) {
-				_bank_select.set_text (n);
-				bank_set = true;
-			}
-		}
-	}
-
-	if (!_current_patch_bank && !bank_set) {
-		std::string n = string_compose (_("Bank %1"), b + 1);
-		_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), b)));
-		_bank_select.set_text (n);
-	}
-
-	/* refill_program_list */
-
-	if (_current_patch_bank) {
-		const MIDI::Name::PatchNameList& patches = _current_patch_bank->patch_name_list ();
-		for (MIDI::Name::PatchNameList::const_iterator i = patches.begin(); i != patches.end(); ++i) {
-			const std::string n = (*i)->name ();
-			MIDI::Name::PatchPrimaryKey const& key = (*i)->patch_primary_key ();
-
-			const uint8_t pgm = key.program();
-			_program_btn[pgm].set_text (n);
-			set_tooltip (_program_btn[pgm], string_compose (_("%1 (Pgm-%2)"),
-						Gtkmm2ext::markup_escape_text (n), (int)(pgm +1)));
-			unset_notes.reset (pgm);
-		}
-	}
-
-	bool shade = unset_notes.count () != 128;
-
-	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
-		if (!unset_notes.test (pgm)) {
-			_program_btn[pgm].set_name (X_("patch change button"));
-			continue;
-		}
-		std::string n = string_compose (_("Pgm-%1"), (int)(pgm +1));
-		_program_btn[pgm].set_text (n);
-		if (shade) {
-			_program_btn[pgm].set_name (X_("patch change button unnamed"));
-		} else {
-			_program_btn[pgm].set_name (X_("patch change button"));
-			continue;
-		}
-		set_tooltip (_program_btn[pgm], n);
-	}
-
+	refill (_channel);
 	program_changed ();
 }
 
 /* ***** user GUI actions *****/
-
-void
-PatchChangeWidget::select_bank_spin ()
-{
-	if (_ignore_spin_btn_signals) {
-		return;
-	}
-	const uint32_t b = (_bank_msb_spin.get_value_as_int() << 7) + _bank_lsb_spin.get_value_as_int();
-	select_bank (b);
-}
 
 void
 PatchChangeWidget::select_bank (uint32_t bank)
@@ -450,9 +478,7 @@ void
 PatchChangeWidget::program_changed ()
 {
 	uint8_t p = program (_channel);
-	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
-		_program_btn[pgm].set_active (pgm == p);
-	}
+	set_active_pgm (p);
 }
 
 void
