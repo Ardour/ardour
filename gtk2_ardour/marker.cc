@@ -507,8 +507,10 @@ ArdourMarker::setup_name_display ()
 		limit = _right_label_limit;
 	}
 
-	const float padding =  std::max(2.f, rintf(2.f * UIConfiguration::instance().get_ui_scale()));
-	const double M3 = std::max(1.f, rintf(3.f * UIConfiguration::instance().get_ui_scale()));
+	float scale = UIConfiguration::instance().get_ui_scale();
+
+	const float padding =  std::max(2.f, rintf(2.f * scale));
+	const double M3 = std::max(1.f, rintf(3.f * scale));
 
 	/* Work out how wide the name can be */
 	int name_width = min ((double) pixel_width (_name, name_font) + padding, limit);
@@ -550,6 +552,10 @@ ArdourMarker::setup_name_display ()
 				case Meter:
 					_name_flag->set_x0 (M3);
 					_name_flag->set_x1 (_name_item->position().x + name_width + padding);
+					break;
+				case Cue:
+					_name_flag->set_x0 (M3);
+					_name_flag->set_x1 (_name_item->position().x + name_width + padding + 1*scale);
 					break;
 				default:
 					_name_flag->set_x0 (0);
