@@ -793,7 +793,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	case WaitingToStart:
 		retrigger ();
 		_state = Running;
-		compute_end (tmap, transition_bbt, transition_samples);
+		(void) compute_end (tmap, transition_bbt, transition_samples);
 		PropertyChanged (ARDOUR::Properties::running);
 
 		/* trigger will start somewhere within this process
@@ -812,7 +812,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	case WaitingForRetrigger:
 		retrigger ();
 		_state = Running;
-		compute_end (tmap, transition_bbt, transition_samples);
+		(void) compute_end (tmap, transition_bbt, transition_samples);
 		PropertyChanged (ARDOUR::Properties::running);
 
 		/* trigger is just running normally, and will fill
@@ -1048,7 +1048,7 @@ AudioTrigger::start_and_roll_to (samplepos_t position)
 {
 }
 
-samplepos_t
+timepos_t
 AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t transition_sample)
 {
 	/* Our task here is to set:
@@ -1127,7 +1127,7 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: final sample %2 vs ees %3 ls %4\n", index(), final_processed_sample, expected_end_sample, last_readable_sample));
 
-	return expected_end_sample;
+	return timepos_t (expected_end_sample);
 }
 
 void
@@ -1866,7 +1866,7 @@ MIDITrigger::start_and_roll_to (samplepos_t position)
 {
 }
 
-samplepos_t
+timepos_t
 MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t)
 {
 	Temporal::Beats end_by_follow_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length));
@@ -1899,8 +1899,8 @@ MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::
 		timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
 		final_beat = len.beats ();
 	}
-	/* XXX FIX ME */
-	return 0;
+
+	return timepos_t (final_beat);
 }
 
 SegmentDescriptor
@@ -1951,6 +1951,7 @@ MIDITrigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
 {
 	Trigger::shutdown (bufs, dest_offset);
 	MidiBuffer& mb (bufs.get_midi (0));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shutdown, resolve notes @ %2\n", index(), dest_offset));
 	_box.tracker->resolve_notes (mb, dest_offset);
 }
 
@@ -1960,6 +1961,7 @@ MIDITrigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
 	Trigger::jump_stop (bufs, dest_offset);
 
 	MidiBuffer& mb (bufs.get_midi (0));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 jump stop, resolve notes @ %2\n", index(), dest_offset));
 	_box.tracker->resolve_notes (mb, dest_offset);
 
 	retrigger ();
@@ -2222,11 +2224,11 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		const Temporal::Beats maybe_last_event_timeline_beats = transition_beats + (event.time() - region_start);
 
-		// std::cerr << "considering " << event << " with sb " << start_beats << " eb " << end_beats << " tb " << maybe_last_event_timeline_beats << " fb " << final_beat << endl;
+		std::cerr << "considering " << event << " with sb " << start_beats << " eb " << end_beats << " tb " << transition_beats << " + " << event.time() << " - " << region_start << " mletb "<< maybe_last_event_timeline_beats << " fb " << final_beat << endl;
 
-		if (maybe_last_event_timeline_beats >= final_beat) {
+		if (maybe_last_event_timeline_beats > final_beat) {
 			/* do this to "fake" having reached the end */
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 tlrr %2 >- fb %3, so at end\n", index(), maybe_last_event_timeline_beats, final_beat));
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 tlrr %2 >= fb %3, so at end with %4\n", index(), maybe_last_event_timeline_beats, final_beat, event));
 			iter = model->end();
 			break;
 		}
@@ -2244,14 +2246,14 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			/* Now we have to convert to a position within the buffer we
 			 * are writing to.
 			 *
-			 * start_sample has already been been adjusted to reflect a
-			 * previous Trigger's processing during this run cycle, so we
-			 * can ignore dest_offset (which is necessary for audio
-			 * triggers where the data is a continuous data stream, but not
-			 * required here).
+			 * (timeline_samples - start_sample) gives us the
+			 * sample offset from the start of our run() call. But
+			 * since we may be executing after another trigger in
+			 * the same process() cycle, we must take dest_offset
+			 * into account to get an actual buffer position.
 			 */
 
-			samplepos_t buffer_samples = timeline_samples - start_sample;
+			samplepos_t buffer_samples = (timeline_samples - start_sample) + dest_offset;
 
 			Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, event.size(), const_cast<uint8_t*>(event.buffer()), false);
 
@@ -2286,7 +2288,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 
 	if (actually_run && _state == Stopping) { /* first clause is a compile-time constexpr */
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped\n", index()));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped, resolving notes @ %2\n", index(), nframes-1));
 		_box.tracker->resolve_notes (*mb, nframes-1);
 	}
 
@@ -2296,9 +2298,9 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, leb %2 les %3 fb %4 dl %5\n", index(), last_event_timeline_beats, last_event_samples, final_beat, data_length));
 
-		if (last_event_timeline_beats < final_beat) {
+		if (last_event_timeline_beats >= final_beat) {
 
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ... leb %2 < fb %3\n", index(), last_event_timeline_beats, final_beat));
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ... leb %2 >= fb %3\n", index(), last_event_timeline_beats, final_beat));
 
 			if (_state != Playout) {
 				_state = Playout;
@@ -2338,14 +2340,14 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		/* we didn't reach the end of the MIDI data, ergo we covered
 		   the entire timespan passed into us.
 		*/
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 did not reach end, nframes left at %2\n", index(), nframes));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 did not reach end, nframes left at %2, next event is %3\n", index(), nframes, *iter));
 		nframes = 0;
 	}
 
 	const samplecnt_t covered_frames = orig_nframes - nframes;
 
 	if (_state == Stopped || _state == Stopping) {
-		when_stopped_during_run (bufs, dest_offset + orig_nframes - 1);
+		when_stopped_during_run (bufs, dest_offset + covered_frames);
 	}
 
 	return covered_frames;
