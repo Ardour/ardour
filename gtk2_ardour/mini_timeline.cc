@@ -397,7 +397,7 @@ MiniTimeline::draw_mark (cairo_t* cr, int marker_loc, int marker_right_edge, con
 }
 
 int
-MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int /*ignored*/, int cue_index, bool& prelight)
+MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int &leftmost_cue_pos, int tl_width, int cue_index, bool& prelight)
 {
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 
@@ -416,9 +416,22 @@ MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int /*ignored*/, int cue_in
 		prelight ? "entered marker" : "location marker");
 
 	// draw Cue as a circle
+	cairo_arc(cr, marker_loc, y_center, (h/2), 0, 2*M_PI);
+	cairo_set_source_rgb (cr, 0, 0, 0);  //black
+	cairo_fill (cr);
 	cairo_arc(cr, marker_loc, y_center, (h/2)-1*scale, 0, 2*M_PI);
 	set_source_rgba (cr, color);
 	cairo_fill (cr);
+
+	// draw 'bar' to show that the Cue continues forever (*)
+	if (marker_loc <= leftmost_cue_pos) {
+		cairo_rectangle (cr, marker_loc, y_center-2*scale, tl_width, 4*scale);
+		set_source_rgba (cr, color);
+		cairo_fill (cr);
+		leftmost_cue_pos = marker_loc;
+	}
+
+	//TODO:  (*) we may need 'stop' marker(s) on the timeline as well, they will overwrite the bar with black
 
 	//draw cue letter
 	_layout->set_text (string_compose (_("%1"), (char) ('A' + cue_index)));
@@ -426,7 +439,7 @@ MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int /*ignored*/, int cue_in
 	cairo_move_to (cr, marker_loc, y_center);  //move to center of circle
 	int tw, th;
 	_layout->get_pixel_size (tw, th);
-	cairo_rel_move_to (cr, -1*scale-tw/2, -1*scale-th/2);  //move to top-left of text
+	cairo_rel_move_to (cr, -tw/2, -th/2);  //move to top-left of text
 	pango_cairo_show_layout (cr, _layout->gobj());
 
 	return marker_right_edge;
@@ -540,6 +553,8 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	Gtkmm2ext::Color base = UIConfiguration::instance().color ("ruler base");
 	Gtkmm2ext::Color text = UIConfiguration::instance().color ("ruler text");
 
+	const double scale = UIConfiguration::instance ().get_ui_scale ();
+
 	if (_n_labels == 0) {
 		return;
 	}
@@ -649,6 +664,25 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	int id = 0;
 	int leftmost_marker_left_edge = width;
 
+	/* draw 'bar' to show that Cues are continuous */
+	int leftmost_cue_pos = width;
+	for (std::vector<LocationMarker>::const_iterator l = lm.begin(); l != lm.end(); l++) {
+		if ((*l).cue_index >=0 ) {
+			const samplepos_t when = (*l).when.samples();
+			leftmost_cue_pos = floor (width * .5 + (when - phead) * _px_per_sample);
+			leftmost_cue_pos = std::max ( leftmost_cue_pos, 0 );
+			break;
+		}
+	}
+	if (leftmost_cue_pos < width) {
+		uint32_t color = UIConfiguration::instance().color ("location marker");
+		int y_center = PADDING + _marker_height + 2*scale + _marker_height/2;
+		cairo_rectangle (cr, leftmost_cue_pos, y_center-2*scale, width, 4*scale);
+		set_source_rgba (cr, color);
+		cairo_fill (cr);
+	}
+
+	/* draw the location and cue markers */
 	for (std::vector<LocationMarker>::const_iterator l = lm.begin(); l != lm.end(); ++id) {
 		const std::string& label = (*l).label;
 		const int cue_index = (*l).cue_index;
@@ -681,7 +715,7 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			int marker_left_edge = marker_loc - marker_width/2;
 			int marker_right_edge = 0;
 			if (cue_index >= 0) {
-				marker_right_edge = draw_cue (cr, marker_loc, marker_rightmost_marker_right_edge, cue_index, prelight);
+				marker_right_edge = draw_cue (cr, marker_loc, leftmost_cue_pos, width, cue_index, prelight);
 			} else {
 				marker_right_edge = draw_mark (cr, marker_loc, marker_rightmost_marker_right_edge, label, prelight);
 				leftmost_marker_left_edge = std::min(marker_left_edge, leftmost_marker_left_edge);
