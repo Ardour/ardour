@@ -91,7 +91,6 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	self:shmem():atomic_set_int(0, pos)
 
 	if newdata then
-		print ("new data", pos)
 		self:queue_draw ()
 	end
 end
