@@ -1,4 +1,4 @@
-x1/*
+/*
  * Copyright (C) 2006-2007 John Anderson
  * Copyright (C) 2007-2010 David Robillard <d@drobilla.net>
  * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
