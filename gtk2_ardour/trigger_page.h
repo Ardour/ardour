@@ -38,6 +38,7 @@
 #include "midi_region_operations_box.h"
 #include "midi_region_properties_box.h"
 #include "midi_trigger_properties_box.h"
+#include "patch_change_widget.h"
 #include "route_processor_selection.h"
 #include "slot_properties_box.h"
 #include "trigger_clip_picker.h"
@@ -137,6 +138,7 @@ private:
 	MidiClipEditorBox        _midi_trim_box;
 #endif
 
+	PatchChangeTriggerWindow _patch_change_window;
 	RouteProcessorSelection  _selection;
 	std::list<TriggerStrip*> _strips;
 	sigc::connection         _fast_screen_update_connection;

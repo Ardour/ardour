@@ -390,6 +390,8 @@ TriggerPage::selection_changed ()
 
 	_parameter_box.hide ();
 
+	bool hide_patch_selector = true;
+
 	if (!selection.triggers.empty ()) {
 		TriggerSelection ts      = selection.triggers;
 		TriggerEntry*    entry   = *ts.begin ();
@@ -408,6 +410,20 @@ TriggerPage::selection_changed ()
 			}
 		}
 		_parameter_box.show ();
+
+		if (boost::dynamic_pointer_cast<MIDITrigger> (trigger)) {
+			/* TODO @ben: only show optionally. checkbox? */
+			hide_patch_selector = false;
+			SessionObject* obj = trigger->box ().owner ();
+			boost::shared_ptr<Stripable> stripable = _session->stripable_by_id (obj->id ());
+			_patch_change_window.reset (boost::dynamic_pointer_cast<Route> (stripable), boost::dynamic_pointer_cast<MIDITrigger> (trigger));
+			_patch_change_window.present ();
+		}
+	}
+
+	if (hide_patch_selector) {
+		_patch_change_window.hide ();
+		_patch_change_window.clear (); /* drop route/trigger ref */
 	}
 }
 
