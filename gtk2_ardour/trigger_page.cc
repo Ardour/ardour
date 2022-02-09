@@ -742,10 +742,9 @@ TriggerPage::drop_paths_part_two (std::vector<std::string> paths)
 			audio_paths.push_back (*s);
 		}
 	}
-	InstrumentSelector is(InstrumentSelector::ForTrackDefault); // instantiation builds instrument-list and sets default.
 	timepos_t pos (0);
 	Editing::ImportDisposition disposition = Editing::ImportSerializeFiles; // or Editing::ImportDistinctFiles // TODO use drop modifier? config?
-	PublicEditor::instance().do_import (midi_paths, disposition, Editing::ImportAsTrigger, SrcBest, SMFTrackNumber, SMFTempoIgnore, pos, is.selected_instrument (), false);
+	PublicEditor::instance().do_import (midi_paths, disposition, Editing::ImportAsTrigger, SrcBest, SMFTrackNumber, SMFTempoIgnore, pos, _trigger_clip_picker.instrument_plugin (), false);
 	PublicEditor::instance().do_import (audio_paths, disposition, Editing::ImportAsTrigger, SrcBest, SMFTrackNumber, SMFTempoIgnore, pos);
 }
 

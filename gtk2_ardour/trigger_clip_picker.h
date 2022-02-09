@@ -49,6 +49,10 @@ public:
 
 	void set_session (ARDOUR::Session*);
 
+	ARDOUR::PluginInfoPtr instrument_plugin () const {
+		return _auditioner_combo.selected_instrument ();
+	}
+
 private:
 	void list_dir (std::string const&, Gtk::TreeNodeChildren const* pc = NULL);
 	void open_dir ();
