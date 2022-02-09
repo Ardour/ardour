@@ -2300,12 +2300,12 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 				ev.scale_velocity (_gain);
 			}
 
-
-		if (ev.is_pgm_change() || (ev.is_cc() && ((ev.cc_number() == MIDI_CTL_LSB_BANK) || (ev.cc_number() == MIDI_CTL_MSB_BANK)))) {
-			if (_patch_change[ev.channel()].is_set() || _box.ignore_patch_changes ()) {
-				/* skip pgm change info in data because trigger has its own */
-				++iter;
-				continue;
+			if (ev.is_pgm_change() || (ev.is_cc() && ((ev.cc_number() == MIDI_CTL_LSB_BANK) || (ev.cc_number() == MIDI_CTL_MSB_BANK)))) {
+				if (_patch_change[ev.channel()].is_set() || _box.ignore_patch_changes ()) {
+					/* skip pgm change info in data because trigger has its own */
+					++iter;
+					continue;
+				}
 			}
 
 			if (_channel_map[ev.channel()] > 0) {
