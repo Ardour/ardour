@@ -125,10 +125,6 @@ TriggerMaster::TriggerMaster (Item* parent)
 
 	Event.connect (sigc::mem_fun (*this, &TriggerMaster::event_handler));
 
-	name_text = new Text (this);
-	name_text->set ("");
-	name_text->set_ignore_events (false);
-
 	_loopster = new Loopster (this);
 
 #if 0 /* XXX trigger changes */
@@ -187,15 +183,38 @@ TriggerMaster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Cont
 
 	render_children (area, context);
 
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
+
 	/* MIDI triggers get a 'note' symbol */
 	if (_triggerbox && _triggerbox->data_type () == ARDOUR::DataType::MIDI) {
-		Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 		layout->set_font_description (UIConfiguration::instance ().get_BigBoldMonospaceFont ());
 		layout->set_text ("\u266b");
 		int tw, th;
 		layout->get_pixel_size (tw, th);
 		context->move_to (width / 2, height / 2);
 		context->rel_move_to (-tw / 2, -th / 2);
+		Gtkmm2ext::set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
+		layout->show_in_cairo_context (context);
+	}
+
+	if (play_text != "") {
+		layout->set_font_description (UIConfiguration::instance ().get_NormalFont ());
+		layout->set_text (play_text);
+		int tw, th;
+		layout->get_pixel_size (tw, th);
+		context->move_to ( height + 4*scale, height / 2);  //left side, but make room for loopster
+		context->rel_move_to ( 0, -th / 2);  //vertically centered text
+		Gtkmm2ext::set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
+		layout->show_in_cairo_context (context);
+	}
+
+	if (loop_text != "") {
+		layout->set_font_description (UIConfiguration::instance ().get_NormalFont ());
+		layout->set_text (loop_text);
+		int tw, th;
+		layout->get_pixel_size (tw, th);
+		context->move_to ( width-4*scale, height / 2);  //right side
+		context->rel_move_to ( -tw, -th / 2);  //right justified, vertically centered text
 		Gtkmm2ext::set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 		layout->show_in_cairo_context (context);
 	}
@@ -242,7 +261,6 @@ TriggerMaster::event_handler (GdkEvent* ev)
 			break;
 		case GDK_ENTER_NOTIFY:
 			if (ev->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				name_text->set_color (UIConfiguration::instance ().color ("neutral:foregroundest"));
 				set_fill_color (HSV (fill_color ()).lighter (0.15).color ());
 			}
 			redraw ();
@@ -403,63 +421,73 @@ TriggerMaster::_size_allocate (ArdourCanvas::Rect const& alloc)
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 	_poly_margin       = 3. * scale;
 
-	const Distance width  = _rect.width ();
 	const Distance height = _rect.height ();
 
-	_poly_size = height - (_poly_margin * 2);
-
-	float tleft  = _poly_size + (_poly_margin * 3);
-	float twidth = width - _poly_size - (_poly_margin * 3);
-
-	ArdourCanvas::Rect text_alloc (tleft, 0, twidth, height); // testing
-	name_text->size_allocate (text_alloc);
-	name_text->set_position (Duple (tleft, 1. * scale));
-	name_text->clamp_width (twidth);
-
 	_loopster->set (ArdourCanvas::Rect (0, 0, height, height));
-
-	/* font scale may have changed. uiconfig 'embeds' the ui-scale in the font */
-	name_text->set_font_description (UIConfiguration::instance ().get_NormalFont ());
 }
 
 void
-TriggerMaster::prop_change (PropertyChange const& change)
+TriggerMaster::prop_change (PropertyChange const& what_changed)
 {
 	if (!_triggerbox) {
 		return;
 	}
 
-	std::string text;
+	/* currently, TriggerBox generates a continuous stream of ::name and ::running messages
+	 TODO: I'd prefer a discrete message when currently_playing, follow_count, or loop_count has changed
+	 Until then, we will cache our prior settings and only redraw when something actually changes */
+	std::string old_play = play_text;
+	std::string old_loop = loop_text;
+	bool old_vis = _loopster->visible();
 
-	ARDOUR::TriggerPtr trigger = _triggerbox->currently_playing ();
-	if (!trigger) {
-		name_text->set (text);
-		_loopster->hide ();
-		return;
+	/* for debugging */
+	/* for (auto & c : what_changed) { std::cout << g_quark_to_string (c) << std::endl; } */
+
+	if (what_changed.contains (ARDOUR::Properties::running)) {
+
+		ARDOUR::TriggerPtr trigger = _triggerbox->currently_playing ();
+		if (!trigger) {
+			play_text = X_("");
+			loop_text = X_("");
+			_loopster->hide ();
+		} else {
+
+			play_text = (string_compose ("%1", (char)('A' + trigger->index ()))); // XXX not translatable
+
+			int fc = trigger->follow_count ();
+			int lc = trigger->loop_count ();
+			std::string text;
+			if (fc > 1) {
+				text = string_compose (X_("%1/%2"), lc+1, fc);
+			} else if (lc > 1) {
+				text = string_compose (X_("%1"), lc+1);  /* TODO: currently loop-count never updates unless follow_count is in use. */
+			}
+			loop_text = text;
+
+			if (trigger->active ()) {
+				double f = trigger->position_as_fraction ();
+				_loopster->set_fraction (f); /*this sometimes triggers a redraw of the loopster widget (only). */
+				_loopster->show ();
+			} else {
+				_loopster->hide ();
+			}
+		}
 	}
 
-	text = string_compose ("%1", (char)('A' + trigger->index ())); // XXX not translatable
-
-	if (trigger->follow_count () > 1) {
-		text.append (string_compose (X_(" %1/%2"), trigger->loop_count ()+1, trigger->follow_count ()));
+	/* only trigger a redraw if a display value actually changes */
+	if((_loopster->visible() != old_vis)
+		|| (play_text != old_play)
+		|| (loop_text != old_loop))
+	{
+		redraw();
 	}
 
-	name_text->set (text);
-
-	if (trigger->active ()) {
-		double f = trigger->position_as_fraction ();
-		_loopster->set_fraction (f);
-		_loopster->show ();
-	} else {
-		_loopster->hide ();
-	}
 }
 
 void
 TriggerMaster::set_default_colors ()
 {
 	set_fill_color (HSV (UIConfiguration::instance ().color ("theme:bg")).darker (0.5).color ());
-	name_text->set_color (UIConfiguration::instance ().color ("neutral:foreground"));
 }
 
 void

@@ -71,7 +71,8 @@ public:
 
 	void _size_allocate (ArdourCanvas::Rect const&);
 
-	ArdourCanvas::Text*    name_text;
+	std::string   play_text;
+	std::string   loop_text;
 
 	void maybe_update ();
 	bool event_handler (GdkEvent*);
