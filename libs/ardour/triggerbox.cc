@@ -960,6 +960,7 @@ void
 AudioTrigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset const & start_quantization)
 {
 	Trigger::_startup (bufs, dest_offset, start_quantization);
+	reset_stretcher ();
 }
 
 void
@@ -1063,22 +1064,16 @@ AudioTrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position
 	samplepos_t pos = start_pos;
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 
-	cerr << "Trigger " << index() << " started for ffwd at " << start_pos << endl;
-
 	while (pos < end_position) {
 		pframes_t nframes = std::min (block_size, (pframes_t) (end_position - pos));
 		Temporal::Beats start_beats = tmap->quarters_at (timepos_t (pos));
 		Temporal::Beats end_beats = tmap->quarters_at (timepos_t (pos+nframes));
 		const double bpm = tmap->quarters_per_minute_at (timepos_t (start_beats));
 
-		cerr << "\tnow at " << pos << " running for " << nframes << endl;
-
 		pframes_t n = audio_run<false> (bufs, pos, pos+nframes, start_beats, end_beats, nframes, 0, bpm);
 
 		pos += n;
 	}
-
-	cerr << "\t DONE, pos = " << pos << " tp " << end_position << endl;
 }
 
 timepos_t
@@ -1400,6 +1395,15 @@ AudioTrigger::io_change ()
 static const samplecnt_t rb_blocksize = 1024;
 
 void
+AudioTrigger::reset_stretcher ()
+{
+	_stretcher->reset ();
+	got_stretcher_padding = false;
+	to_pad = 0;
+	to_drop = 0;
+}
+
+void
 AudioTrigger::setup_stretcher ()
 {
 	using namespace RubberBand;
@@ -1425,7 +1429,7 @@ AudioTrigger::setup_stretcher ()
 
 	delete _stretcher;
 	_stretcher = new RubberBandStretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
-
+	cerr << index() << " Set up stretcher for " << nchans << " channels\n";
 	_stretcher->setMaxProcessSize (rb_blocksize);
 }
 
@@ -1466,15 +1470,15 @@ void
 AudioTrigger::retrigger ()
 {
 	update_properties ();
+	reset_stretcher ();
 
 	read_index = _start_offset + _legato_offset;
 	process_index = 0;
 	retrieved = 0;
 	_legato_offset = 0; /* used one time only */
-	_stretcher->reset ();
-	got_stretcher_padding = false;
-	to_pad = 0;
-	to_drop = 0;
+
+
+
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, read_index));
 }
 
@@ -1529,14 +1533,8 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 		scratch = scratchp.get();
 	}
 
-	if (actually_run) {
-		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
-			bufp[chn] = scratch->get_audio (chn).data();
-		}
-	} else {
-		for (uint32_t chn = 0; chn < nchans; ++chn) {
-			bufp[chn] = scratch->get_audio (chn).data();
-		}
+	for (uint32_t chn = 0; chn < nchans; ++chn) {
+		bufp[chn] = scratch->get_audio (chn).data();
 	}
 
 	/* tell the stretcher what we are doing for this ::run() call */
@@ -2531,12 +2529,9 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		CueEvents::const_iterator nxt_cue = c; ++nxt_cue;
 
-		cerr << "Current cue: " << (char) ('A' + c->cue) << endl;
-
 		TriggerPtr trig (all_triggers[c->cue]);
 
 		if (!trig->region() || trig->cue_isolated()) {
-			cerr << "trig " << trig << ' ' << trig->index() << " ignored, region : " << trig->region() << " iso " << trig->cue_isolated() << endl;
 			c = nxt_cue;
 			continue;
 		}
@@ -2545,10 +2540,8 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		if (nxt_cue == cues.end()) {
 			limit = transport_position;
-			cerr << "limit is trans. pos\n";
 		} else {
 			limit = nxt_cue->time;
-			cerr << "limit is next cue at " << nxt_cue->time << endl;
 		}
 
 		bool will_start = true;
@@ -2557,12 +2550,10 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		if (!will_start) {
 			/* trigger will not start between this cue and the next */
-			cerr << "trigger " << trig->index() << " will not start before " << limit << endl;
 			c = nxt_cue;
 			pos = limit;
 			continue;
 		}
-		cerr << "trig " << trig->index() << " starts at " << start_bbt << endl;
 
 		/* XXX need to determine when the trigger will actually start
 		 * (due to its quantization)
@@ -2574,14 +2565,11 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		samplepos_t trig_ends_at = trig->compute_end (tmap, start_bbt, start_samples).samples();
 
-		cerr << "trig " << trig->index() << " ends at " << trig_ends_at << " vs. " << transport_position << " aka " << trig->transition_beats << endl;
-
 		if (nxt_cue != cues.end() && trig_ends_at >= nxt_cue->time) {
 			/* trigger will be interrupted by next cue .
 			 *
 			 */
 			trig_ends_at = tmap->sample_at (tmap->bbt_at (timepos_t (nxt_cue->time)).round_up_to_bar ());
-			std::cerr << "trig " << trig->index() << " will be interrupted by cue " << (char) ('A' + nxt_cue->cue) << " at " << trig_ends_at << " aka " << tmap->bbt_at (timepos_t (nxt_cue->time)).round_up_to_bar() << endl;
 		}
 
 		if (trig_ends_at >= transport_position) {
@@ -2593,15 +2581,12 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			break;
 		}
 
-		cerr << "trigger ended at " << trig_ends_at << " get next\n";
-
 		int dnt = determine_next_trigger (trig->index());
 
 		if (dnt < 0) {
 			/* no trigger follows the current one. Back to
 			   looking for another cue.
 			*/
-			cerr << "next trigger said none\n";
 			c = nxt_cue;
 			continue;
 		}
@@ -2610,15 +2595,10 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		pos = trig_ends_at;
 		trig = all_triggers[dnt];
 		c = nxt_cue;
-
-		cerr << "moving onto " << dnt << " with pos " << pos << " end @ " << transport_position << endl;
 	}
-
-	cerr << "DONE. pos = " << pos << " prev " << prev << endl;
 
 	if (pos >= transport_position || !prev) {
 		/* nothing to do */
-		cerr << "No trigger active at " << transport_position << endl;
 		return;
 	}
 
@@ -2631,7 +2611,6 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	 * 2) for audio, the stretcher is in the correct state
 	 */
 
-	cerr << "will fake-roll " << prev->index() << " from " << start_samples << " to " << transport_position << endl;
 	prev->start_and_roll_to (start_samples, transport_position);
 
 	_currently_playing = prev;
@@ -3280,14 +3259,11 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (!_locate_armed) {
 		if (!_session.transport_state_rolling() && !allstop) {
-			cerr << "\n\n\n\n\n START TRANSPORT \n\n\n\n";
 			_session.start_transport_from_trigger ();
 		}
 	} else if (_session.transport_state_rolling()) {
-		cerr << "\n\n\n\n\n LOCARM OFF \n\n\n\n";
 		_locate_armed = false;
 	} else {
-		cerr << "no roll, loc armed\n";
 		return;
 	}
 

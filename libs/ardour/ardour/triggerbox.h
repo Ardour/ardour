@@ -474,6 +474,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	int load_data (boost::shared_ptr<AudioRegion>);
 	void estimate_tempo ();
 	void setup_stretcher ();
+	void reset_stretcher ();
 	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
 };
 
