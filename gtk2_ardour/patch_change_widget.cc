@@ -46,12 +46,10 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
-PatchBankList::PatchBankList (boost::shared_ptr<ARDOUR::Route> r)
-	: _route (r)
-	, _bank_msb_spin (*manage (new Adjustment (0, 0, 127, 1, 16)))
+PatchBankList::PatchBankList ()
+	: _bank_msb_spin (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _bank_lsb_spin (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _program_table (/*rows*/ 16, /*cols*/ 8, true)
-	, _info (r->instrument_info ())
 	, _ignore_spin_btn_signals (false)
 {
 	_program_table.set_spacings (1);
@@ -67,14 +65,6 @@ PatchBankList::PatchBankList (boost::shared_ptr<ARDOUR::Route> r)
 
 	_bank_msb_spin.signal_changed ().connect (sigc::mem_fun (*this, &PatchBankList::select_bank_spin));
 	_bank_lsb_spin.signal_changed ().connect (sigc::mem_fun (*this, &PatchBankList::select_bank_spin));
-
-	_info.Changed.connect (_info_changed_connection, invalidator (*this),
-	                       boost::bind (&PatchBankList::instrument_info_changed, this), gui_context ());
-
-	if (!boost::dynamic_pointer_cast<MidiTrack> (_route)) {
-		_route->processors_changed.connect (_route_connection, invalidator (*this),
-		                                    boost::bind (&PatchBankList::processors_changed, this), gui_context ());
-	}
 }
 
 PatchBankList::~PatchBankList ()
@@ -96,7 +86,7 @@ flip_map (std::map<A, B> const& src)
 }
 
 void
-PatchBankList::refill (const uint8_t channel)
+PatchBankList::refill (boost::shared_ptr<MIDI::Name::ChannelNameSet> cns, int const b)
 {
 	using namespace Menu_Helpers;
 	using namespace Gtkmm2ext;
@@ -104,8 +94,6 @@ PatchBankList::refill (const uint8_t channel)
 
 	_current_patch_bank.reset ();
 	_bank_select.clear_items ();
-
-	const int b = bank (channel);
 
 	{
 		PBD::Unwinder<bool> uw (_ignore_spin_btn_signals, true);
@@ -122,7 +110,6 @@ PatchBankList::refill (const uint8_t channel)
 
 	unset_notes.set ();
 
-	boost::shared_ptr<ChannelNameSet> cns = _info.get_patches (channel);
 	if (cns) {
 		const ChannelNameSet::PatchBanks& patch_banks = cns->patch_banks ();
 		for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin (); bank != patch_banks.end (); ++bank) {
@@ -251,21 +238,12 @@ PatchBankList::set_active_pgm (uint8_t p)
 
 /* ****************************************************************************/
 
-PatchChangeTab::PatchChangeTab (boost::shared_ptr<Route> r, boost::shared_ptr<MIDITrigger> t, int channel)
-	: PatchBankList (r)
-	, _enable_btn (_("Override Patch Changes"), ArdourWidgets::ArdourButton::led_default_elements)
+PatchChangeTab::PatchChangeTab (int channel)
+	: _enable_btn (_("Override Patch Changes"), ArdourWidgets::ArdourButton::led_default_elements)
 	, _channel (channel)
 	, _bank (0)
 	, _ignore_callback (false)
-	, _trigger (t)
 {
-	if (_trigger->patch_change_set (_channel)) {
-		_bank = _trigger->patch_change (_channel).bank ();
-		_enable_btn.set_active (true);
-	} else {
-		_enable_btn.set_active (false);
-	}
-
 	Box* box;
 	box = manage (new HBox ());
 	box->set_border_width (2);
@@ -288,18 +266,39 @@ PatchChangeTab::PatchChangeTab (boost::shared_ptr<Route> r, boost::shared_ptr<MI
 
 	_enable_btn.signal_clicked.connect (sigc::mem_fun (*this, &PatchChangeTab::enable_toggle));
 
-	_trigger->PropertyChanged.connect (_trigger_connection, invalidator (*this), boost::bind (&PatchChangeTab::trigger_property_changed, this, _1), gui_context ());
-	if (!boost::dynamic_pointer_cast<MidiTrack> (_route)) {
-		processors_changed ();
+	reset (boost::shared_ptr<ARDOUR::Route> (), boost::shared_ptr<ARDOUR::MIDITrigger>());
+}
+
+void
+PatchChangeTab::reset (boost::shared_ptr<ARDOUR::Route> r, boost::shared_ptr<MIDITrigger> t)
+{
+	_route = r;
+	_trigger = t;
+	_connections.drop_connections ();
+
+	if (!r || !t) {
+		_enable_btn.set_active (false);
+		refill_banks ();
+		return;
 	}
+
+	if (_trigger->patch_change_set (_channel)) {
+		_bank = _trigger->patch_change (_channel).bank ();
+		_enable_btn.set_active (true);
+	} else {
+		_enable_btn.set_active (false);
+	}
+
+	_route->instrument_info().Changed.connect (_connections, invalidator (*this), boost::bind (&PatchChangeTab::instrument_info_changed, this), gui_context ());
+	_trigger->PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&PatchChangeTab::trigger_property_changed, this, _1), gui_context ());
+
 	refill_banks ();
-	update_sensitivity ();
 }
 
 void
 PatchChangeTab::enable_toggle ()
 {
-	if (_ignore_callback) {
+	if (_ignore_callback || !_trigger) {
 		return;
 	}
 	if (_enable_btn.get_active ()) {
@@ -313,7 +312,8 @@ PatchChangeTab::enable_toggle ()
 void
 PatchChangeTab::update_sensitivity ()
 {
-	bool en = _trigger->patch_change_set (_channel);
+	bool en = _trigger ? _trigger->patch_change_set (_channel) : false;
+	_enable_btn.set_sensitive (_trigger ? true : false /* _trigger->region () ? true : false) : false */);
 	_program_table.set_sensitive (en);
 	_bank_select.set_sensitive (en);
 	_bank_msb_spin.set_sensitive (en);
@@ -340,7 +340,7 @@ PatchChangeTab::select_bank (uint32_t bank)
 void
 PatchChangeTab::select_program (uint8_t pgm)
 {
-	if (pgm > 127) {
+	if (pgm > 127 || !_trigger) {
 		return;
 	}
 
@@ -357,15 +357,19 @@ PatchChangeTab::refresh ()
 void
 PatchChangeTab::refill_banks ()
 {
-	refill (_channel);
+	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns;
+	if (_route) {
+		cns = _route->instrument_info ().get_patches (_channel);
+	}
+	update_sensitivity ();
+	refill (cns, bank ());
 	set_active_pgm (program ());
 }
 
 int
-PatchChangeTab::bank (uint8_t c) const
+PatchChangeTab::bank () const
 {
-	assert (c == _channel);
-	if (_trigger->patch_change_set (_channel)) {
+	if (_trigger && _trigger->patch_change_set (_channel)) {
 		return _trigger->patch_change (_channel).bank ();
 	}
 	return _bank;
@@ -374,7 +378,7 @@ PatchChangeTab::bank (uint8_t c) const
 uint8_t
 PatchChangeTab::program () const
 {
-	if (_trigger->patch_change_set (_channel)) {
+	if (_trigger && _trigger->patch_change_set (_channel)) {
 		return _trigger->patch_change (_channel).program ();
 	}
 	return 0;
@@ -386,15 +390,11 @@ PatchChangeTab::instrument_info_changed ()
 	refill_banks ();
 }
 
-void
-PatchChangeTab::processors_changed ()
-{
-}
-
 /* ****************************************************************************/
 
 PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
-	: PatchBankList (r)
+	: _route (r)
+	, _info (r->instrument_info ())
 	, _channel (-1)
 	, _no_notifications (false)
 	, _audition_enable (_("Audition on Change"), ArdourWidgets::ArdourButton::led_default_elements)
@@ -467,7 +467,12 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 
 	if (!boost::dynamic_pointer_cast<MidiTrack> (_route)) {
 		processors_changed ();
+		_route->processors_changed.connect (_route_connections, invalidator (*this),
+		                                    boost::bind (&PatchChangeWidget::processors_changed, this), gui_context ());
 	}
+
+	_info.Changed.connect (_route_connections, invalidator (*this),
+	                       boost::bind (&PatchChangeWidget::instrument_info_changed, this), gui_context ());
 }
 
 PatchChangeWidget::~PatchChangeWidget ()
@@ -546,7 +551,9 @@ void
 PatchChangeWidget::refill_banks ()
 {
 	cancel_audition ();
-	refill (_channel);
+
+	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel);
+	refill (cns, bank (_channel));
 	program_changed ();
 }
 
@@ -804,23 +811,53 @@ PatchChangeWidget::program (uint8_t chn) const
 
 /* ***************************************************************************/
 
-PatchChangeTriggerDialog::PatchChangeTriggerDialog (boost::shared_ptr<Route> r, boost::shared_ptr<MIDITrigger> t)
-	: ArdourDialog (string_compose (_("Select Patch for \"%1\""), t->name ()), false, false)
+PatchChangeTriggerWindow::PatchChangeTriggerWindow ()
+	: ArdourWindow (_("Trigger Patch Select"))
 {
 	for (uint32_t chn = 0; chn < 16; ++chn) {
-		_w[chn] = manage (new PatchChangeTab (r, t, chn));
+		_w[chn] = manage (new PatchChangeTab (chn));
 		_notebook.append_page (*_w[chn], string_compose (_("Chn %1"), chn + 1));
 	}
-
-	_notebook.signal_switch_page ().connect (sigc::mem_fun (*this, &PatchChangeTriggerDialog::on_switch_page));
-	_notebook.set_current_page (0);
-
-	get_vbox ()->add (_notebook);
 	_notebook.show_all ();
+	add (_notebook);
+
+	_notebook.signal_switch_page ().connect (sigc::mem_fun (*this, &PatchChangeTriggerWindow::on_switch_page));
+
+	_notebook.set_current_page (0);
 }
 
 void
-PatchChangeTriggerDialog::on_switch_page (GtkNotebookPage*, guint page_num)
+PatchChangeTriggerWindow::clear ()
+{
+	_route_connection.disconnect ();
+
+	set_title (_("Trigger Patch Select"));
+
+	for (uint32_t chn = 0; chn < 16; ++chn) {
+		_w[chn]->reset (boost::shared_ptr<ARDOUR::Route> (), boost::shared_ptr<ARDOUR::MIDITrigger>());
+	}
+}
+
+void
+PatchChangeTriggerWindow::reset (boost::shared_ptr<Route> r, boost::shared_ptr<MIDITrigger> t)
+{
+	if (!r || !t) {
+		clear ();
+		return;
+	}
+
+	set_title (string_compose (_("Select Patch for \"%1\" - \"%2\""), r->name (), t->name ()));
+
+	r->DropReferences.connect (_route_connection, invalidator(*this), boost::bind (&PatchChangeTriggerWindow::clear, this), gui_context());
+
+	for (uint32_t chn = 0; chn < 16; ++chn) {
+		_w[chn]->reset (r, t);
+	}
+	_notebook.set_current_page (0);
+}
+
+void
+PatchChangeTriggerWindow::on_switch_page (GtkNotebookPage*, guint page_num)
 {
 	_w[page_num]->refresh ();
 }

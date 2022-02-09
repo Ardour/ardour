@@ -33,29 +33,26 @@
 #include "widgets/ardour_dropdown.h"
 
 #include "ardour_dialog.h"
+#include "ardour_window.h"
 #include "pianokeyboard.h"
 
 namespace ARDOUR {
 	class MIDITrigger;
 };
 
-class PatchBankList : virtual public sigc::trackable
+class PatchBankList
 {
 public:
-	PatchBankList (boost::shared_ptr<ARDOUR::Route>);
+	PatchBankList ();
 	virtual ~PatchBankList ();
 
 protected:
-	void refill (uint8_t const channel);
+	void refill (boost::shared_ptr<MIDI::Name::ChannelNameSet>, int const bank);
 	void set_active_pgm (uint8_t);
 
-	virtual int  bank (uint8_t chn) const   = 0;
 	virtual void select_bank (uint32_t)     = 0;
 	virtual void select_program (uint8_t)   = 0;
 	virtual void instrument_info_changed () = 0;
-	virtual void processors_changed ()      = 0;
-
-	boost::shared_ptr<ARDOUR::Route> _route;
 
 	ArdourWidgets::ArdourDropdown _bank_select;
 	Gtk::SpinButton               _bank_msb_spin;
@@ -65,37 +62,34 @@ protected:
 private:
 	void select_bank_spin ();
 
-	ARDOUR::InstrumentInfo&                  _info;
 	ArdourWidgets::ArdourButton              _program_btn[128];
 	boost::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
 	bool                                     _ignore_spin_btn_signals;
 
-	PBD::ScopedConnection _info_changed_connection;
-	PBD::ScopedConnection _route_connection;
 };
 
 class PatchChangeTab : public Gtk::VBox, public PatchBankList
 {
 public:
-	PatchChangeTab (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::MIDITrigger>, int channel);
+	PatchChangeTab (int channel);
 
 	void refresh ();
+	void reset (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::MIDITrigger>);
 
 protected:
-	int     bank (uint8_t) const;
+	int     bank () const;
 	uint8_t program () const;
 
 	/* Implement PatchBankList */
 	void select_bank (uint32_t);
 	void select_program (uint8_t);
-	void instrument_info_changed ();
-	void processors_changed ();
 
 private:
 	void refill_banks ();
 	void trigger_property_changed (PBD::PropertyChange const&);
 	void enable_toggle ();
 	void update_sensitivity ();
+	void instrument_info_changed ();
 
 	ArdourWidgets::ArdourButton _enable_btn;
 
@@ -103,8 +97,9 @@ private:
 	int  _bank;
 	bool _ignore_callback;
 
+	boost::shared_ptr<ARDOUR::Route>       _route;
 	boost::shared_ptr<ARDOUR::MIDITrigger> _trigger;
-	PBD::ScopedConnection                  _trigger_connection;
+	PBD::ScopedConnectionList              _connections;
 };
 
 class PatchChangeWidget : public Gtk::VBox, public PatchBankList
@@ -125,16 +120,13 @@ protected:
 private:
 	void refill_banks ();
 
-	ArdourWidgets::ArdourDropdown _channel_select;
-
-	uint8_t _channel;
-	bool    _no_notifications;
-
 	void select_channel (uint8_t);
 
 	/* Implement PatchBankList */
 	void select_bank (uint32_t);
 	void select_program (uint8_t);
+
+	/* Route Callbacks */
 	void instrument_info_changed ();
 	void processors_changed ();
 
@@ -143,8 +135,6 @@ private:
 	void program_changed ();
 	void bankpatch_changed (uint8_t);
 
-	PBD::ScopedConnectionList _ac_connections;
-
 	/* Audition */
 	void audition_toggle ();
 	void check_note_range (bool);
@@ -152,32 +142,46 @@ private:
 	void cancel_audition ();
 	bool audition_next ();
 
-	sigc::connection _note_queue_connection;
+	boost::shared_ptr<ARDOUR::Route> _route;
+	ARDOUR::InstrumentInfo&          _info;
 
-	ArdourWidgets::ArdourButton _audition_enable;
-	Gtk::SpinButton             _audition_start_spin; // Consider a click-box w/note-names
-	Gtk::SpinButton             _audition_end_spin;
-	Gtk::SpinButton             _audition_velocity;
-	uint8_t                     _audition_note_num;
-	bool                        _audition_note_on;
+	uint8_t _channel;
+	bool    _no_notifications;
+
+	ArdourWidgets::ArdourDropdown _channel_select;
+	ArdourWidgets::ArdourButton   _audition_enable;
+	Gtk::SpinButton               _audition_start_spin; // Consider a click-box w/note-names
+	Gtk::SpinButton               _audition_end_spin;
+	Gtk::SpinButton               _audition_velocity;
+	uint8_t                       _audition_note_num;
+	bool                          _audition_note_on;
 
 	APianoKeyboard _piano;
 
 	void _note_on_event_handler (int, int);
 	void note_on_event_handler (int, bool for_audition);
 	void note_off_event_handler (int);
+
+	sigc::connection          _note_queue_connection;
+	PBD::ScopedConnectionList _ac_connections;
+	PBD::ScopedConnectionList _route_connections;
 };
 
-class PatchChangeTriggerDialog : public ArdourDialog
+class PatchChangeTriggerWindow : public ArdourWindow
 {
 public:
-	PatchChangeTriggerDialog (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::MIDITrigger>);
+	PatchChangeTriggerWindow ();
+
+	void reset (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::MIDITrigger>);
+	void clear ();
 
 private:
 	void on_switch_page (GtkNotebookPage*, guint page_num);
 
 	Gtk::Notebook   _notebook;
 	PatchChangeTab* _w[16];
+
+	PBD::ScopedConnection _route_connection;
 };
 
 class PatchChangeGridDialog : public ArdourDialog
