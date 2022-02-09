@@ -1044,8 +1044,41 @@ AudioTrigger::current_pos() const
 }
 
 void
-AudioTrigger::start_and_roll_to (samplepos_t position)
+AudioTrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position)
 {
+	const pframes_t block_size = AudioEngine::instance()->samples_per_cycle ();
+	BufferSet bufs;
+
+	/* no need to allocate any space for BufferSet because we call
+	   audio_run<false>() which is guaranteed to never use the buffers.
+
+	   AudioTrigger::_startup() also does not use BufferSet (MIDITrigger
+	   does, and we use virtual functions so the argument list is the same
+	   for both, even though only the MIDI case needs the BufferSet).
+	*/
+
+	startup (bufs, 0, _quantization);
+	cue_launched = true;
+
+	samplepos_t pos = start_pos;
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+
+	cerr << "Trigger " << index() << " started for ffwd at " << start_pos << endl;
+
+	while (pos < end_position) {
+		pframes_t nframes = std::min (block_size, (pframes_t) (end_position - pos));
+		Temporal::Beats start_beats = tmap->quarters_at (timepos_t (pos));
+		Temporal::Beats end_beats = tmap->quarters_at (timepos_t (pos+nframes));
+		const double bpm = tmap->quarters_per_minute_at (timepos_t (start_beats));
+
+		cerr << "\tnow at " << pos << " running for " << nframes << endl;
+
+		pframes_t n = audio_run<false> (bufs, pos, pos+nframes, start_beats, end_beats, nframes, 0, bpm);
+
+		pos += n;
+	}
+
+	cerr << "\t DONE, pos = " << pos << " tp " << end_position << endl;
 }
 
 timepos_t
@@ -1453,7 +1486,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
 	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
-	const uint32_t nchans = std::min (bufs.count().n_audio(), ar->n_channels());
+	const uint32_t nchans = (actually_run ? std::min (bufs.count().n_audio(), ar->n_channels()) : ar->n_channels());
 	int avail = 0;
 	BufferSet* scratch;
 	std::unique_ptr<BufferSet> scratchp;
@@ -1487,10 +1520,6 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 	if (actually_run) {
 		scratch = &(_box.session().get_scratch_buffers (ChanCount (DataType::AUDIO, nchans)));
-
-		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
-			bufp[chn] = scratch->get_audio (chn).data();
-		}
 	} else {
 		scratchp.reset (new BufferSet ());
 		scratchp->ensure_buffers (DataType::AUDIO, nchans, nframes);
@@ -1498,6 +1527,16 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 		   and !actually_run case can use the same code syntax
 		*/
 		scratch = scratchp.get();
+	}
+
+	if (actually_run) {
+		for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
+			bufp[chn] = scratch->get_audio (chn).data();
+		}
+	} else {
+		for (uint32_t chn = 0; chn < nchans; ++chn) {
+			bufp[chn] = scratch->get_audio (chn).data();
+		}
 	}
 
 	/* tell the stretcher what we are doing for this ::run() call */
@@ -1862,7 +1901,7 @@ MIDITrigger::probably_oneshot () const
 }
 
 void
-MIDITrigger::start_and_roll_to (samplepos_t position)
+MIDITrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position)
 {
 }
 
@@ -2237,6 +2276,8 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		const samplepos_t timeline_samples = tmap->sample_at (maybe_last_event_timeline_beats);
 
+		cerr << "\tin samples, that's " << timeline_samples << " vs. " << end_sample << endl;
+
 		if (timeline_samples >= end_sample) {
 			break;
 		}
@@ -2424,6 +2465,8 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _active_scene (-1)
 	, _active_slots (0)
 	, _ignore_patch_changes (false)
+	, _locate_armed (false)
+
 	, requests (1024)
 {
 	set_display_to_user (false);
@@ -2529,7 +2572,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		 * it ends...
 		 */
 
-		samplepos_t trig_ends_at = trig->compute_end (tmap, start_bbt, start_samples);
+		samplepos_t trig_ends_at = trig->compute_end (tmap, start_bbt, start_samples).samples();
 
 		cerr << "trig " << trig->index() << " ends at " << trig_ends_at << " vs. " << transport_position << " aka " << trig->transition_beats << endl;
 
@@ -2563,10 +2606,12 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			continue;
 		}
 
-		cerr << "moving onto " << dnt << endl;
-
 		prev = trig;
 		pos = trig_ends_at;
+		trig = all_triggers[dnt];
+		c = nxt_cue;
+
+		cerr << "moving onto " << dnt << " with pos " << pos << " end @ " << transport_position << endl;
 	}
 
 	cerr << "DONE. pos = " << pos << " prev " << prev << endl;
@@ -2586,11 +2631,11 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	 * 2) for audio, the stretcher is in the correct state
 	 */
 
-	cerr << "will fake-roll " << prev->index() << " to " << transport_position << endl;
-	prev->start_and_roll_to (transport_position);
+	cerr << "will fake-roll " << prev->index() << " from " << start_samples << " to " << transport_position << endl;
+	prev->start_and_roll_to (start_samples, transport_position);
 
 	_currently_playing = prev;
-
+	_locate_armed = true;
 	/* currently playing is now ready to keep running at transport position
 	 *
 	 * Note that a MIDITrigger will have set a flag so that when we call
@@ -3117,7 +3162,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		const Temporal::Beats __end_beats (timepos_t (end_sample).beats());
 		const double __bpm = __tmap->quarters_per_minute_at (timepos_t (__start_beats));
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("**** Triggerbox::run() for %6, ss %1 es %2 sb %3 eb %4 bpm %5\n", start_sample, end_sample, __start_beats, __end_beats, __bpm, order()));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("**** Triggerbox::run() for %6, ss %1 es %2 sb %3 eb %4 bpm %5 nf %7\n", start_sample, end_sample, __start_beats, __end_beats, __bpm, order(), nframes));
 	}
 #endif
 
@@ -3233,8 +3278,17 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	/* transport must be active for triggers */
 
-	if (!_session.transport_state_rolling() && !allstop) {
-		_session.start_transport_from_trigger ();
+	if (!_locate_armed) {
+		if (!_session.transport_state_rolling() && !allstop) {
+			cerr << "\n\n\n\n\n START TRANSPORT \n\n\n\n";
+			_session.start_transport_from_trigger ();
+		}
+	} else if (_session.transport_state_rolling()) {
+		cerr << "\n\n\n\n\n LOCARM OFF \n\n\n\n";
+		_locate_armed = false;
+	} else {
+		cerr << "no roll, loc armed\n";
+		return;
 	}
 
 	/* now get the information we need related to the tempo map and the

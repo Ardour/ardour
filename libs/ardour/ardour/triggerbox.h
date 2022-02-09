@@ -746,6 +746,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int32_t                  _active_scene;
 	int32_t                  _active_slots;
 	bool                     _ignore_patch_changes;
+	bool                     _locate_armed;
 
 	boost::shared_ptr<SideChain> _sidechain;
 
