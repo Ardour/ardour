@@ -42,7 +42,6 @@
 #include "ardour_ui.h"
 #include "gui_thread.h"
 #include "keyboard.h"
-#include "patch_change_widget.h"
 #include "public_editor.h"
 #include "region_view.h"
 #include "trigger_jump_dialog.h"
@@ -200,19 +199,6 @@ TriggerUI::choose_color ()
 	}
 
 	_color_dialog.hide ();
-}
-
-void
-TriggerUI::choose_patch ()
-{
-	/* XXX can we get a shared_from (owner()) ? */
-	SessionObject* obj = trigger ()->box ().owner ();
-	Session*       s   = AudioEngine::instance ()->session ();
-	boost::shared_ptr<Stripable> stripable = s->stripable_by_id (obj->id ());
-	assert (boost::dynamic_pointer_cast<MIDITrigger> (trigger ()) != 0);
-
-	PatchChangeTriggerDialog pcd (boost::dynamic_pointer_cast<Route> (stripable), boost::dynamic_pointer_cast<MIDITrigger> (trigger ()));
-	pcd.run ();
 }
 
 void
@@ -456,9 +442,6 @@ TriggerUI::context_menu ()
 #if DOUBLE_CLICK_IS_NOT_OBVIOUS_ENOUGH
 	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun (*this, &TriggerUI::edit_trigger)));
 #endif
-	if (boost::dynamic_pointer_cast<MIDITrigger> (trigger ())) {
-		items.push_back (MenuElem (_("Select Patch.."), sigc::mem_fun (*this, &TriggerUI::choose_patch)));
-	}
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &TriggerUI::choose_color)));
 	items.push_back (SeparatorElem());
