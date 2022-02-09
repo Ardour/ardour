@@ -1,4 +1,4 @@
-/*
+x1/*
  * Copyright (C) 2006-2007 John Anderson
  * Copyright (C) 2007-2010 David Robillard <d@drobilla.net>
  * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
@@ -1157,7 +1157,7 @@ MackieControlProtocol::format_bbt_timecode (samplepos_t now_sample)
 {
 	Temporal::BBT_Time bbt_time;
 
-	bbt_time = Temporal::TempoMap::use()->bbt_at (timepos_t (now_sample));
+	bbt_time = Temporal::TempoMap::fetch()->bbt_at (timepos_t (now_sample));
 
 	// The Mackie protocol spec is built around a BBT time display of
 	//
