@@ -659,6 +659,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void add_midi_sidechain ();
 	void update_sidechain_name ();
 
+	void set_ignore_patch_changes (bool);
+	bool ignore_patch_changes () const { return _ignore_patch_changes; }
+
 	void request_reload (int32_t slot, void*);
 	void set_region (uint32_t slot, boost::shared_ptr<Region> region);
 
@@ -716,6 +719,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	bool                     _stop_all;
 	int32_t                  _active_scene;
 	int32_t                  _active_slots;
+	bool                     _ignore_patch_changes;
 
 	boost::shared_ptr<SideChain> _sidechain;
 

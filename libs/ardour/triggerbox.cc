@@ -2205,7 +2205,7 @@ MIDITrigger::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sam
 		}
 
 		if (ev.is_pgm_change() || (ev.is_cc() && ((ev.cc_number() == MIDI_CTL_LSB_BANK) || (ev.cc_number() == MIDI_CTL_MSB_BANK)))) {
-			if (_patch_change[ev.channel()].is_set()) {
+			if (_patch_change[ev.channel()].is_set() || _box.ignore_patch_changes ()) {
 				/* skip pgm change info in data because trigger has its own */
 				++iter;
 				continue;
@@ -2361,6 +2361,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _stop_all (false)
 	, _active_scene (-1)
 	, _active_slots (0)
+	, _ignore_patch_changes (false)
 	, requests (1024)
 {
 	set_display_to_user (false);
@@ -2390,6 +2391,17 @@ TriggerBox::set_cue_recording (bool yn)
 	if (yn != _cue_recording) {
 		_cue_recording = yn;
 		CueRecordingChanged ();
+	}
+}
+
+void
+TriggerBox::set_ignore_patch_changes (bool yn)
+{
+	if (_data_type != DataType::MIDI) {
+		return;
+	}
+	if (yn != _ignore_patch_changes) {
+		_ignore_patch_changes = yn;
 	}
 }
 
@@ -3358,6 +3370,7 @@ TriggerBox::get_state (void)
 	node.set_property (X_("type"), X_("triggerbox"));
 	node.set_property (X_("data-type"), _data_type.to_string());
 	node.set_property (X_("order"), _order);
+	node.set_property (X_("ignore_patch_changes"), _ignore_patch_changes);
 
 	XMLNode* trigger_child (new XMLNode (X_("Triggers")));
 
@@ -3384,6 +3397,7 @@ TriggerBox::set_state (const XMLNode& node, int version)
 
 	node.get_property (X_("data-type"), _data_type);
 	node.get_property (X_("order"), _order);
+	node.get_property (X_("ignore_patch_changes"), _ignore_patch_changes);
 
 	XMLNode* tnode (node.child (X_("Triggers")));
 	assert (tnode);
