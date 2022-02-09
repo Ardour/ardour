@@ -861,17 +861,6 @@ TriggerClipPicker::audition (std::string const& path)
 		r = boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (boost::dynamic_pointer_cast<Source> (ms), plist, false));
 		assert (r);
 
-#ifdef MIXBUS  /* for testing */
-		if (!ms->has_pgm_change()) {  //smf has no midi cc's, we might need to help the user pick one
-			if (_session && _session->the_auditioner ()) {
-				PluginInfoPtr p = _session->the_auditioner ()->get_audition_synth_info();
-				if (p->unique_id == "http://gareus.org/oss/lv2/gmsynth") {
-					audition_show_plugin_ui();
-				}
-			}
-		}
-#endif
-
 	} else {
 		SourceList                         srclist;
 		boost::shared_ptr<AudioFileSource> afs;
