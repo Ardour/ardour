@@ -2300,16 +2300,16 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 				ev.scale_velocity (_gain);
 			}
 
+			if (_channel_map[ev.channel()] > 0) {
+				ev.set_channel (_channel_map[ev.channel()]);
+			}
+
 			if (ev.is_pgm_change() || (ev.is_cc() && ((ev.cc_number() == MIDI_CTL_LSB_BANK) || (ev.cc_number() == MIDI_CTL_MSB_BANK)))) {
 				if (_patch_change[ev.channel()].is_set() || _box.ignore_patch_changes ()) {
 					/* skip pgm change info in data because trigger has its own */
 					++iter;
 					continue;
 				}
-			}
-
-			if (_channel_map[ev.channel()] > 0) {
-				ev.set_channel (_channel_map[ev.channel()]);
 			}
 
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("given et %1 TS %7 rs %8 ts %2 bs %3 ss %4 do %5, inserting %6\n", maybe_last_event_timeline_beats, timeline_samples, buffer_samples, start_sample, dest_offset, ev, transition_beats, region_start));
