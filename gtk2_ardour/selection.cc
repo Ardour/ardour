@@ -1704,8 +1704,20 @@ Selection::selected (TriggerEntry* te) const
 void
 Selection::set (TriggerEntry* te)
 {
+#if 0
 	clear();
-	clear_triggers ();
+#else
+	clear_tracks ();
+	clear_regions ();
+	clear_points ();
+	clear_lines ();
+	clear_time ();
+	clear_playlists ();
+	clear_midi_notes ();
+	clear_markers ();
+	pending_midi_note_selection.clear();
+#endif
+	clear_triggers (te ? false: true); /* Do not emit signal here, add() emits signal */
 	add (te);
 }
 
