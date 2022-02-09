@@ -972,7 +972,7 @@ AudioTrigger::set_state (const XMLNode& node, int version)
 {
 	timepos_t t;
 
-	if (!Trigger::set_state (node, version)) {
+	if (Trigger::set_state (node, version)) {
 		return -1;
 	}
 
@@ -1973,7 +1973,7 @@ MIDITrigger::set_state (const XMLNode& node, int version)
 {
 	timepos_t t;
 
-	if (!Trigger::set_state (node, version)) {
+	if (Trigger::set_state (node, version)) {
 		return -1;
 	}
 
@@ -1991,7 +1991,7 @@ MIDITrigger::set_state (const XMLNode& node, int version)
 				int c, p, b;
 				if ((*i)->get_property (X_("channel"), c) &&
 				    (*i)->get_property (X_("program"), p) &&
-				    (*i)->get_property (X_("program"), b)) {
+				    (*i)->get_property (X_("bank"), b)) {
 					_patch_change[c] = Evoral::PatchChange<MidiBuffer::TimeType> (0, c, p, b);
 				}
 			}
