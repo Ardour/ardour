@@ -24,6 +24,7 @@
 #include <glib.h>
 #include <set>
 #include <vector>
+#include <ostream>
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/xml++.h"
@@ -79,6 +80,8 @@ public:
 	void add (PropertyID id)               { insert (id); }
 	void add (const PropertyChange& other) { insert (other.begin (), other.end ()); }
 	template<typename T> void add (PropertyDescriptor<T> p);
+
+	void dump (std::ostream& out) const { int n = 0; for (auto const & what_changed : *this) { if (n > 0) { out << ',' ; } out << g_quark_to_string (what_changed); ++n; } }
 };
 
 /** Base (non template) part of Property
