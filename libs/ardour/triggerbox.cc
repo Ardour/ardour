@@ -138,6 +138,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _meter (4, 4)
 	, expected_end_sample (0)
 	, _pending ((Trigger*) 0)
+	, last_property_generation (0)
 {
 	add_property (_launch_style);
 	add_property (_follow_action0);
@@ -166,36 +167,38 @@ Trigger::request_trigger_delete (Trigger* t)
 }
 
 void
-Trigger::copy_ui_state (UIState& uis)
-{
-	unsigned int g = ui_state.generation.load ();
-
-	do { uis = ui_state; } while (!ui_state.generation.compare_exchange_strong (g, g+1));
-}
-
-void
 Trigger::update_properties ()
 {
-	UIState uis;
+	/* Don't update unless there is evidence of a change */
 
-	/* Give ourselves a copy on the stack. XXX might not be necessary */
+	unsigned int g;
 
-	copy_ui_state (uis);
+	while ((g = ui_state.generation.load()) != last_property_generation) {
 
-	_launch_style = uis.launch_style;
-	_follow_action0 = uis.follow_action0;
-	_follow_action1 = uis.follow_action1;
-	_follow_action_probability = uis.follow_action_probability;
-	_follow_count = uis.follow_count;
-	_quantization = uis.quantization;
-	_follow_length = uis.follow_length;
-	_use_follow_length = uis.use_follow_length;
-	_legato = uis.legato;
-	_gain = uis.gain;
-	_velocity_effect = uis.velocity_effect;
-	_stretchable = uis.stretchable;
-	_cue_isolated = uis.cue_isolated;
-	_stretch_mode = uis.stretch_mode;
+		std::cerr << "prop copy for " << index() << endl;
+
+		_launch_style = ui_state.launch_style;
+		_follow_action0 = ui_state.follow_action0;
+		_follow_action1 = ui_state.follow_action1;
+		_follow_action_probability = ui_state.follow_action_probability;
+		_follow_count = ui_state.follow_count;
+		_quantization = ui_state.quantization;
+		_follow_length = ui_state.follow_length;
+		_use_follow_length = ui_state.use_follow_length;
+		_legato = ui_state.legato;
+		_gain = ui_state.gain;
+		_velocity_effect = ui_state.velocity_effect;
+		_stretchable = ui_state.stretchable;
+		_cue_isolated = ui_state.cue_isolated;
+		_stretch_mode = ui_state.stretch_mode;
+
+		last_property_generation = g;
+	}
+
+	/* we get here when we were able to copy the entire set of properties
+	 * without the ui_state.generation value changing during the copy, or
+	 * when no update appeared to be required.
+	 */
 }
 
 void
@@ -3252,7 +3255,26 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (!_currently_playing) {
 		DEBUG_TRACE (DEBUG::Triggers, "nothing currently playing 1, reset stop_all to false\n");
 		_stop_all = false;
+
+		/* nobody is active, but we should catch up on changes
+		 * requested by the UI
+		 */
+
+		for (auto & trig : all_triggers) {
+			trig->update_properties();
+		}
+
 		return;
+	}
+
+	/* some trigger is active, but the others should catch up on changes
+	 * requested by the UI
+	 */
+
+	for (auto & trig : all_triggers) {
+		if (trig != _currently_playing) {
+			trig->update_properties();
+		}
 	}
 
 	/* transport must be active for triggers */

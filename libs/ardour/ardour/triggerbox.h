@@ -328,6 +328,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void set_pending (Trigger*);
 	Trigger* swap_pending (Trigger*);
 
+	void update_properties ();
+
 	static Trigger * const MagicClearPointerValue;
 
 	virtual SegmentDescriptor get_segment_descriptor () const = 0;
@@ -357,7 +359,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	void copy_ui_state (UIState&);
 	void copy_to_ui_state ();
-	void update_properties ();
 
 	bool cue_launched;
 
@@ -381,6 +382,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	samplepos_t                expected_end_sample;
 	Temporal::BBT_Offset      _start_quantization;
 	std::atomic<Trigger*>     _pending;
+	std::atomic<unsigned int>  last_property_generation;
 
 	void when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset);
 	void set_region_internal (boost::shared_ptr<Region>);
@@ -691,6 +693,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void non_realtime_transport_stop (samplepos_t now, bool flush);
 	void non_realtime_locate (samplepos_t now);
+	void realtime_handle_transport_stopped ();
 
 	void enqueue_trigger_source (PBD::ID queued);
 
