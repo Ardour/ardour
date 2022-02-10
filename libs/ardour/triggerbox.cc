@@ -251,7 +251,7 @@ Trigger::set_ ## name (type val) \
 { \
 	unsigned int g = ui_state.generation.load(); \
 	do { ui_state.name = val; } while (!ui_state.generation.compare_exchange_strong (g, g+1)); \
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 property cas-set: %2\n", _ ## name.property_name()));  \
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 property& cas-set: %2 gen %3\n", index(), _ ## name.property_name(), ui_state.generation.load())); \
 	PropertyChanged (Properties::name); /* EMIT SIGNAL */ \
 	_box.session().set_dirty (); \
 } \
@@ -272,7 +272,7 @@ Trigger::set_ ## name (type const & val) \
 { \
 	unsigned int g = ui_state.generation.load(); \
 	do { ui_state.name = val; } while (!ui_state.generation.compare_exchange_strong (g, g+1)); \
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 property cas-set: %2\n", _ ## name.property_name()));  \
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 property& cas-set: %2 gen %3\n", index(), _ ## name.property_name(), ui_state.generation.load())); \
 	PropertyChanged (Properties::name); /* EMIT SIGNAL */ \
 	_box.session().set_dirty (); \
 } \
