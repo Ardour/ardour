@@ -3221,8 +3221,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	std::vector<uint32_t> to_run;
 
-	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
-		all_triggers[n]->process_state_requests (bufs, nframes - 1);
+	for (auto & trig : all_triggers) {
+		trig->process_state_requests (bufs, nframes - 1);
 	}
 
 	/* cue handling is over at this point, reset _active_scene to reflect this */
