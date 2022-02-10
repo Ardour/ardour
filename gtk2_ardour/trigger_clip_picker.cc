@@ -598,7 +598,7 @@ TriggerClipPicker::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& con
 		std::vector<std::string> a = PBD::parse_path (Config->get_sample_lib_path ());
 		if (ARDOUR_UI_UTILS::convert_drop_to_paths (paths, data)) {
 			for (std::vector<std::string>::const_iterator s = paths.begin (); s != paths.end (); ++s) {
-				if (Glib::file_test (*s, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
+				if (Glib::file_test (*s, Glib::FILE_TEST_IS_DIR)) {
 					if (std::find (a.begin(), a.end(), *s) == a.end()) {
 						a.push_back (*s);
 						changed = true;
