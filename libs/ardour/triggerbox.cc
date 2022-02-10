@@ -963,7 +963,6 @@ void
 AudioTrigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset const & start_quantization)
 {
 	Trigger::_startup (bufs, dest_offset, start_quantization);
-	reset_stretcher ();
 }
 
 void
