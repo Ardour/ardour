@@ -186,6 +186,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	/* DnD target */
 	std::vector<Gtk::TargetEntry> target_table;
 	target_table.push_back (Gtk::TargetEntry ("x-ardour/region.pbdid", Gtk::TARGET_SAME_APP));
+	target_table.push_back (TargetEntry ("text/uri-list"));
 	_view.drag_dest_set (target_table, DEST_DEFAULT_ALL, Gdk::ACTION_COPY);
 	_view.signal_drag_begin ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_begin));
 	_view.signal_drag_motion ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_motion));
@@ -573,9 +574,7 @@ TriggerClipPicker::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, i
 void
 TriggerClipPicker::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context, int /*x*/, int y, Gtk::SelectionData const& data, guint /*info*/, guint time)
 {
-	if (data.get_target () != "x-ardour/region.pbdid") {
-		return;
-	}
+	if (data.get_target () == "x-ardour/region.pbdid") {
 		PBD::ID rid (data.get_data_as_string ());
 		boost::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
 		if (export_to_clip_library (region, this)) {
@@ -583,6 +582,31 @@ TriggerClipPicker::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& con
 		} else {
 			context->drag_finish (true, false, time);
 		}
+	} else {
+		bool                     changed = false;
+		std::string              path;
+		std::vector<std::string> paths;
+
+		std::vector<std::string> a = PBD::parse_path (Config->get_sample_lib_path ());
+		if (ARDOUR_UI_UTILS::convert_drop_to_paths (paths, data)) {
+			for (std::vector<std::string>::const_iterator s = paths.begin (); s != paths.end (); ++s) {
+				if (Glib::file_test (*s, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
+					a.push_back (*s);
+					changed = true;
+				}
+			}
+			if (changed) {
+				size_t j = 0;
+				for (std::vector<std::string>::const_iterator i = a.begin (); i != a.end (); ++i, ++j) {
+					if (j > 0)
+						path += G_SEARCHPATH_SEPARATOR;
+					path += *i;
+				}
+				Config->set_sample_lib_path (path);
+				list_dir (a.back ());
+			}
+		}
+	}
 }
 
 /* ****************************************************************************
