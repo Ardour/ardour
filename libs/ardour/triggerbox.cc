@@ -3804,6 +3804,14 @@ TriggerBox::position_as_fraction () const
 }
 
 void
+TriggerBox::realtime_handle_transport_stopped ()
+{
+	Processor::realtime_handle_transport_stopped ();
+	stop_all ();
+	_currently_playing = 0;
+}
+
+void
 TriggerBox::non_realtime_transport_stop (samplepos_t now, bool /*flush*/)
 {
 	fast_forward (_session.cue_events(), now);

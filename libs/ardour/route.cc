@@ -3698,8 +3698,6 @@ Route::realtime_handle_transport_stopped ()
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->realtime_handle_transport_stopped ();
 	}
-
-	stop_triggers (true);
 }
 
 
