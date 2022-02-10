@@ -1489,8 +1489,6 @@ AudioTrigger::retrigger ()
 	retrieved = 0;
 	_legato_offset = 0; /* used one time only */
 
-
-
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, read_index));
 }
 
