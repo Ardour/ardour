@@ -1074,6 +1074,16 @@ AudioTrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position
 
 		pframes_t n = audio_run<false> (bufs, pos, pos+nframes, start_beats, end_beats, nframes, 0, bpm);
 
+		/* We could have reached the end. Check and restart, because
+		 * TriggerBox::fast_forward() already determined that we are
+		 * the active trigger at @param end_position
+		 */
+
+		if (_state == Stopped) {
+			retrigger ();
+			_state = WaitingToStart;
+		}
+
 		pos += n;
 	}
 }
