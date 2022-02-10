@@ -563,6 +563,13 @@ TriggerClipPicker::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Selecti
 bool
 TriggerClipPicker::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int, int y, guint time)
 {
+	for (auto i : context->get_targets ()) {
+		if (i == "text/uri-list") {
+			context->drag_status (Gdk::ACTION_LINK, time);
+			return true;
+		}
+	}
+
 	if (!_clip_library_dir.empty () && _current_path != _clip_library_dir) {
 		list_dir (_clip_library_dir);
 	}
