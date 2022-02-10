@@ -585,14 +585,18 @@ TriggerClipPicker::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& con
 	} else {
 		bool                     changed = false;
 		std::string              path;
+		std::string              path_to_list;
 		std::vector<std::string> paths;
 
 		std::vector<std::string> a = PBD::parse_path (Config->get_sample_lib_path ());
 		if (ARDOUR_UI_UTILS::convert_drop_to_paths (paths, data)) {
 			for (std::vector<std::string>::const_iterator s = paths.begin (); s != paths.end (); ++s) {
 				if (Glib::file_test (*s, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
-					a.push_back (*s);
-					changed = true;
+					if (std::find (a.begin(), a.end(), *s) == a.end()) {
+						a.push_back (*s);
+						changed = true;
+					}
+					path_to_list = *s;
 				}
 			}
 			if (changed) {
@@ -603,7 +607,9 @@ TriggerClipPicker::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& con
 					path += *i;
 				}
 				Config->set_sample_lib_path (path);
-				list_dir (a.back ());
+			}
+			if (!path_to_list.empty ()) {
+				list_dir (path_to_list);
 			}
 		}
 	}
@@ -644,6 +650,10 @@ TriggerClipPicker::open_dir ()
 				size_t                   j = 0;
 				std::string              path;
 				std::vector<std::string> a = PBD::parse_path (Config->get_sample_lib_path ());
+				if (std::find (a.begin(), a.end(), _fcd.get_filename ()) != a.end()) {
+					list_dir (_fcd.get_filename ());
+					break;
+				}
 				a.push_back (_fcd.get_filename ());
 				for (std::vector<std::string>::const_iterator i = a.begin (); i != a.end (); ++i, ++j) {
 					if (j > 0)
