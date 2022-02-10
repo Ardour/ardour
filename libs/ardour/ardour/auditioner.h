@@ -27,6 +27,8 @@
 
 #include <glibmm/threads.h>
 
+#include "evoral/PatchChange.h"
+
 #include "ardour/ardour.h"
 #include "ardour/plugin.h"
 #include "ardour/track.h"
@@ -59,6 +61,10 @@ public:
 
 	void idle_synth_update ();
 
+	Evoral::PatchChange<MidiBuffer::TimeType> const& patch_change (uint8_t chn) {
+		return _patch_change[chn & 0xf];
+	}
+
 	MonitorState monitoring_state () const;
 
 	bool needs_monitor() const { return via_monitor; }
@@ -80,6 +86,9 @@ public:
 	bool bounceable (boost::shared_ptr<Processor>, bool) const { return false; }
 	void freeze_me (InterThreadInfo&) {}
 	void unfreeze () {}
+
+	/* MIDI Track -- listen to Bank/Patch */
+	void update_controls (BufferSet const& bufs);
 
 	boost::shared_ptr<Region> bounce (InterThreadInfo&, std::string const& name) {
 		return boost::shared_ptr<Region> ();
@@ -116,6 +125,8 @@ private:
 	bool _loop;
 
 	boost::shared_ptr<Processor> asynth;
+
+	Evoral::PatchChange<MidiBuffer::TimeType> _patch_change[16];
 
 	PluginInfoPtr lookup_fallback_synth_plugin_info (std::string const&) const;
 	void drop_ports ();

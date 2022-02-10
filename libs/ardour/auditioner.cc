@@ -296,6 +296,10 @@ Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_s
 
 	process_output_buffers (bufs, start_sample, end_sample, nframes, !_session.transport_stopped(), true);
 
+	if (_midi_audition) {
+		update_controls (bufs);
+	}
+
 	/* note: auditioner never writes to disk, so we don't care about the
 	 * disk writer status (it's buffers will always have no data in them).
 	 */
@@ -315,6 +319,46 @@ Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_s
 }
 
 void
+Auditioner::update_controls (BufferSet const& bufs)
+{
+	const MidiBuffer& buf = bufs.get_midi(0);
+	for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
+		const Evoral::Event<samplepos_t>& ev = *e;
+		const uint8_t* buf = ev.buffer();
+		const uint8_t channel = buf[0] & 0x0F;
+		const int bank = _patch_change[channel].is_set () ? _patch_change[channel].bank () : 0;
+		switch (midi_parameter_type (buf[0])) {
+			case MidiPgmChangeAutomation:
+				if (!_patch_change[channel].is_set ()) {
+					_patch_change[channel] = Evoral::PatchChange<MidiBuffer::TimeType> (0, channel, 0, 0);
+				}
+				_patch_change[channel].set_program (ev.pgm_number ());
+				break;
+			case MidiCCAutomation:
+				switch (ev.cc_number ()) {
+					case MIDI_CTL_MSB_BANK:
+						if (!_patch_change[channel].is_set ()) {
+							_patch_change[channel] = Evoral::PatchChange<MidiBuffer::TimeType> (0, channel, 0, 0);
+						}
+						_patch_change[channel].set_bank ((bank & 0x007f) | (ev.cc_value () << 7));
+						break;
+					case MIDI_CTL_LSB_BANK:
+						if (!_patch_change[channel].is_set ()) {
+							_patch_change[channel] = Evoral::PatchChange<MidiBuffer::TimeType> (0, channel, 0, 0);
+						}
+						_patch_change[channel].set_bank ((bank & 0x3f80) | ev.cc_value ());
+						break;
+					default:
+						break;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+void
 Auditioner::audition_region (boost::shared_ptr<Region> region, bool loop)
 {
 	if (g_atomic_int_get (&_auditioning)) {
@@ -327,6 +371,10 @@ Auditioner::audition_region (boost::shared_ptr<Region> region, bool loop)
 	_loop = loop;
 
 	Glib::Threads::Mutex::Lock lm (lock);
+
+	for (uint8_t c = 0; c < 16; ++c) {
+		_patch_change[c].unset ();
+	}
 
 	if (boost::dynamic_pointer_cast<AudioRegion>(region) != 0) {
 
@@ -571,7 +619,8 @@ Auditioner::idle_synth_update ()
 	pframes_t   n_samples = 16;
 	/* MIDI buffers need to be able to hold patch/pgm change messages. (16 bytes + msg-size) per event */
 	bufs.ensure_buffers (max (asynth->input_streams (), asynth->output_streams ()), std::max<size_t> (1024, n_samples));
-	pi->run  (bufs, start, start + n_samples, 1.0, n_samples, false);
+	pi->run (bufs, start, start + n_samples, 1.0, n_samples, false);
+	update_controls (bufs);
 }
 
 void
