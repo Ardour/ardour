@@ -52,9 +52,11 @@
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
 
+#include "ardour/auditioner.h"
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/search_paths.h"
+#include "ardour/triggerbox.h"
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/utils.h"
@@ -984,4 +986,21 @@ ARDOUR_UI_UTILS::convert_drop_to_paths (vector<string>& paths, const SelectionDa
 	}
 
 	return !paths.empty ();
+}
+
+void
+ARDOUR_UI_UTILS::copy_patch_changes (boost::shared_ptr<ARDOUR::Auditioner> a, boost::shared_ptr<ARDOUR::Trigger> t)
+{
+	boost::shared_ptr<ARDOUR::MIDITrigger> mt = boost::dynamic_pointer_cast <ARDOUR::MIDITrigger> (t);
+
+	if (!mt || !a) {
+		return;
+	}
+	for (uint8_t c = 0; c < 16; ++c) {
+		if (a->patch_change (c).is_set()) {
+			mt->set_patch_change (a->patch_change (c));
+		} else {
+			mt->unset_patch_change (c);
+		}
+	}
 }

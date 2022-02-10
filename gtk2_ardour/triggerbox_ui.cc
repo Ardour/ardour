@@ -1022,6 +1022,9 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 		for (std::vector<std::string>::iterator s = paths.begin (); s != paths.end (); ++s) {
 			/* this will do nothing if n is too large */
 			_triggerbox.set_from_path (n, *s);
+#if 1 /* assume drop from sidebar -- TODO use a special data.get_target() ? */
+			ARDOUR_UI_UTILS::copy_patch_changes (_triggerbox.session().the_auditioner (), _triggerbox.trigger (n));
+#endif
 			++n;
 		}
 	}

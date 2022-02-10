@@ -43,6 +43,7 @@
 
 namespace PBD {
 	class Controllable;
+	class Controllable;
 	class ScopedConnectionList;
 }
 
@@ -54,6 +55,11 @@ namespace Gtk {
 
 namespace ArdourCanvas {
 	class Item;
+}
+
+namespace ARDOUR {
+	class Auditioner;
+	class Trigger;
 }
 
 namespace ARDOUR_UI_UTILS {
@@ -111,6 +117,8 @@ bool overwrite_file_dialog (Gtk::Window& parent, std::string title, std::string 
 bool running_from_source_tree ();
 
 void inhibit_screensaver (bool);
+
+void copy_patch_changes (boost::shared_ptr<ARDOUR::Auditioner>, boost::shared_ptr<ARDOUR::Trigger>);
 
 bool convert_drop_to_paths (std::vector<std::string>&, const Gtk::SelectionData&);
 

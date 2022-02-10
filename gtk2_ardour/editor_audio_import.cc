@@ -67,6 +67,7 @@
 #include "interthread_progress_window.h"
 #include "mouse_cursors.h"
 #include "editor_cursors.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -1161,6 +1162,9 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 			for (int s = 0; s < default_triggers_per_box; ++s) {
 				if (!existing_track->triggerbox ()->trigger (s)->region ()) {
 					existing_track->triggerbox ()->set_from_selection (s, copy);
+#if 1 /* assume drop from sidebar */
+					ARDOUR_UI_UTILS::copy_patch_changes (_session->the_auditioner (), existing_track->triggerbox ()->trigger (s));
+#endif
 					break;
 				}
 			}
