@@ -50,11 +50,11 @@ public:
 	void track (const MidiBuffer::const_iterator& from, const MidiBuffer::const_iterator& to);
 	void add (uint8_t note, uint8_t chn);
 	void remove (uint8_t note, uint8_t chn);
-	void resolve_notes (MidiBuffer& buffer, samplepos_t time);
+	void resolve_notes (MidiBuffer& buffer, samplepos_t time, bool reset = true);
 	void resolve_notes (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
 	void resolve_notes (MidiSource& src, const Glib::Threads::Mutex::Lock& lock, Temporal::Beats time);
 
-	void flush_notes (MidiBuffer&, samplepos_t);
+	void flush_notes (MidiBuffer& buffer, samplepos_t time, bool reset = true);
 
 	bool empty() const { return _on == 0; }
 	uint16_t on() const { return _on; }
@@ -70,6 +70,9 @@ public:
 private:
 	uint8_t  _active_notes[128*16];
 	uint16_t _on;
+
+	void push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int cmd, int velocity);
+
 };
 
 class LIBARDOUR_API MidiStateTracker : public MidiNoteTracker
@@ -82,7 +85,7 @@ class LIBARDOUR_API MidiStateTracker : public MidiNoteTracker
 	void dump (std::ostream&);
 	void reset ();
 
-	void flush (MidiBuffer&, samplepos_t);
+	void flush (MidiBuffer&, samplepos_t, bool reset);
 
   private:
 	uint8_t  program[16];
