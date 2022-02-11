@@ -260,6 +260,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	bool will_not_follow() const;
 	bool will_follow() const { return !will_not_follow(); }
 
+	/* assumes that this is currently playing but does not enforce it */
+	bool cue_launched() const { return _cue_launched; }
+
 	virtual bool probably_oneshot () const = 0;
 
 	virtual timepos_t start_offset () const = 0; /* offset from start of data */
@@ -358,11 +361,11 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	bool                      _explicitly_stopped;
 	gain_t                    _pending_velocity_gain;
 	gain_t                    _velocity_gain;
+	bool                      _cue_launched;
 
 	void copy_ui_state (UIState&);
 	void copy_to_ui_state ();
 
-	bool cue_launched;
 
 	/* computed from data */
 

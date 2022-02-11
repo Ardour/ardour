@@ -80,6 +80,11 @@ ARDOUR::cue_marker_name (int32_t index)
 
 	using std::string;
 
+	if (index == INT32_MAX) {
+		/* this is a reasonable "stop" icon */
+		return string (X_("\u25a1"));
+	}
+
 	switch (index) {
 	case 0: return string (_("A"));
 	case 1: return string (_("B"));
@@ -173,7 +178,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _explicitly_stopped (false)
 	, _pending_velocity_gain (1.0)
 	, _velocity_gain (1.0)
-	, cue_launched (false)
+	, _cue_launched (false)
 	, _estimated_tempo (0.)
 	, _segment_tempo (0.)
 	, _beatcnt (0.)
@@ -270,7 +275,7 @@ Trigger::send_property_change (PropertyChange pc)
 	if (_box.fast_forwarding()) {
 		return;
 	}
-	cerr << "spc "; pc.dump (cerr); cerr << endl;
+
 	PropertyChanged (pc);
 }
 
@@ -545,7 +550,7 @@ void
 Trigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
 {
 	_state = Stopped;
-	cue_launched = false;
+	_cue_launched = false;
 	_pending_velocity_gain = _velocity_gain = 1.0;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
 	send_property_change (ARDOUR::Properties::running);
@@ -645,8 +650,8 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 		case Stopped:
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 stopped => %3\n", index(), enum_2_string (Stopped), enum_2_string (WaitingToStart)));
 			_box.queue_explict (index());
-			cue_launched = (_box.active_scene() >= 0);
-			std::cerr << index() << " aka " << name() << " launched via cue ? " << cue_launched << std::endl;
+			_cue_launched = (_box.active_scene() >= 0);
+			std::cerr << index() << " aka " << name() << " launched via cue ? " << _cue_launched << std::endl;
 			break;
 
 		case WaitingToStart:
@@ -1113,7 +1118,7 @@ AudioTrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position
 	*/
 
 	startup (bufs, 0, _quantization);
-	cue_launched = true;
+	_cue_launched = true;
 
 	samplepos_t pos = start_pos;
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
@@ -1134,7 +1139,7 @@ AudioTrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position
 		if (_state == Stopped) {
 			retrigger ();
 			_state = WaitingToStart;
-			cue_launched = true;
+			_cue_launched = true;
 		}
 
 		pos += n;
@@ -1976,7 +1981,7 @@ MIDITrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position)
 	*/
 
 	startup (bufs, 0, _quantization);
-	cue_launched = true;
+	_cue_launched = true;
 
 	samplepos_t pos = start_pos;
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
@@ -1997,7 +2002,7 @@ MIDITrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position)
 		if (_state == Stopped) {
 			retrigger ();
 			_state = WaitingToStart;
-			cue_launched = true;
+			_cue_launched = true;
 		}
 
 		pos += n;
@@ -2639,7 +2644,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		CueEvents::const_iterator nxt_cue = c; ++nxt_cue;
 
-		if (c->cue < 0) {
+		if (c->cue == INT32_MAX) {
 			/* "stop all cues" marker encountered.  This ends the
 			   duration of whatever slot might have been running
 			   when we hit the cue.
@@ -2730,6 +2735,10 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 	if (pos >= transport_position || !prev) {
 		/* nothing to do */
+		_locate_armed = false;
+		if (tracker) {
+			tracker->reset ();
+		}
 		return;
 	}
 
@@ -3300,10 +3309,22 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	bool    was_recorded;
 	int32_t cue_bang = _session.first_cue_within (start_sample, end_sample, was_recorded);
 
-	if (cue_bang >= 0) {
-		if (!_cue_recording || !was_recorded) {
+	if (!_cue_recording || !was_recorded) {
+
+		if (cue_bang == INT32_MAX) {
+
+			/* reached a "stop all cue-launched cues from playing"
+			 * marker.The stop is quantized, not immediate.
+			 */
+
+			if (_currently_playing && _currently_playing->cue_launched()) {
+				_currently_playing->unbang ();
+			}
+
+		} else if (cue_bang >= 0) {
 			_active_scene = cue_bang;
 		}
+
 	}
 
 	/* STEP SIX: if at this point there is an active cue, make it trigger
