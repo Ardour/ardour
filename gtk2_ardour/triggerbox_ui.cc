@@ -1008,7 +1008,10 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 		PBD::ID tid (data.get_data_as_string ());
 		boost::shared_ptr<Trigger> source = _triggerbox.session().trigger_by_id (tid);
 		if (source) {
-			_triggerbox.enqueue_trigger_source(tid);
+			Trigger::UIState *state = new Trigger::UIState();
+			source->get_ui_state(*state);
+			boost::shared_ptr<Trigger::UIState> state_p (state);
+			_triggerbox.enqueue_trigger_state_for_region(source->region(), state_p);
 			_triggerbox.set_from_selection (n, source->region());
 			context->drag_finish (true, false, time);
 		} else {
