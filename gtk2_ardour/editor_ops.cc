@@ -4114,6 +4114,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 		return;
 	}
 
+	/* you can't currently apply processing to a NewTrigger bounce */
 	assert (!(enable_processing && (target == NewTrigger)));
 
 	bool     copy_to_clip_library = false;
@@ -4158,6 +4159,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 		Prompter dialog (true);
 		ArdourDropdown* tslot = 0;
 		Gtk::CheckButton* cliplib = 0;
+		Gtk::Alignment *align = 0;
 
 		switch (target) {
 			case NewSource:
@@ -4182,7 +4184,8 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 
 		if (target != ReplaceRange) {
 			cliplib = manage (new Gtk::CheckButton (_("Copy to Clip Libary")));
-			dialog.get_vbox()->pack_start (*cliplib);
+			align = manage (new Gtk::Alignment (0, .5, 0, 0));
+			align->add (*cliplib);
 			cliplib->show ();
 		}
 
@@ -4190,9 +4193,11 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 			Label* label = manage (new Label (_("Bounced Range will appear in the Source list.")));
 			dialog.get_vbox()->set_spacing (8);
 			dialog.get_vbox()->pack_start (*label);
+			dialog.get_vbox()->pack_start (*align);
 			label->show();
 		} else if (target == NewTrigger) {
 			Label* label = manage (new Label (_("Trigger Slot:")));
+			label->set_alignment(1.0, 0.5);
 			HBox*  tbox  = manage (new HBox);
 			tslot        = manage (new ArdourDropdown ());
 
@@ -4206,9 +4211,12 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 			tbox->set_spacing (5);
 			tbox->set_border_width (10);
 			tbox->pack_start (*label, false, false);
-			tbox->pack_start (*tslot, true, true);
+			tbox->pack_start (*tslot, false, false);
+			tbox->pack_start (*align, true, true);
 			tbox->show_all ();
 			dialog.get_vbox()->pack_start (*tbox);
+		} else {
+			dialog.get_vbox()->pack_start (*align);
 		}
 
 		dialog.show ();
