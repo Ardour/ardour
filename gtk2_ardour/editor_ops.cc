@@ -4232,6 +4232,9 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 	timecnt_t cnt = start.distance (end);
 	bool in_command = false;
 
+	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+	double tempo = tmap->tempo_at(start).quarter_notes_per_minute();
+
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
 
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
@@ -4287,6 +4290,10 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 			boost::shared_ptr<Region> copy (RegionFactory::create (r, plist));
 			playlist->add_region (copy, start);
 		} else if (target == NewTrigger) {
+			boost::shared_ptr<Trigger::UIState> state (new Trigger::UIState());
+			state->name = bounce_name;
+			state->tempo = tempo;
+			rtv->track ()->triggerbox ()->enqueue_trigger_state_for_region(r, state);
 			rtv->track ()->triggerbox ()->set_from_selection (trigger_slot, r);
 			rtv->track ()->presentation_info ().set_trigger_track (true);
 		}
