@@ -2579,11 +2579,11 @@ TriggerBox::set_ignore_patch_changes (bool yn)
 void
 TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position)
 {
-	PBD::Unwinder<bool> uw (_fast_fowarding, true);
-
-	if (cues.empty() || cues.front().time > transport_position) {
+	if (cues.empty() || !(Config->get_cue_behavior() & FollowCues) || (cues.front().time > transport_position)) {
 		return;
 	}
+
+	PBD::Unwinder<bool> uw (_fast_fowarding, true);
 
 	using namespace Temporal;
 	TempoMap::SharedPtr tmap (TempoMap::use());
