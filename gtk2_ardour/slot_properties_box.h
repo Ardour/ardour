@@ -36,6 +36,7 @@
 
 #include "gtkmm2ext/cairo_packer.h"
 
+#include "patch_change_widget.h"
 #include "trigger_ui.h"
 
 namespace ARDOUR {
@@ -59,6 +60,8 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 	SlotPropertyTable ();
 	~SlotPropertyTable ();
 
+	virtual void on_trigger_set ();
+
 	Glib::RefPtr<Gtk::SizeGroup> _follow_size_group;
 
 	ArdourWidgets::ArdourButton   _color_button;
@@ -76,6 +79,8 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 	Gtk::Adjustment               _gain_adjustment;
 	Gtk::SpinButton               _gain_spinner;
 	Gtk::Label                    _gain_label;
+
+	ArdourWidgets::ArdourButton   _patch_button;
 
 	Gtk::Label                    _beat_label;
 	Gtk::Label                    _follow_length_label;
@@ -129,8 +134,12 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 	void probability_adjusted ();
 	void velocity_adjusted ();
 
+	void patch_button_event ();
+
 private:
 	bool     _ignore_changes;
+
+	PatchChangeTriggerWindow _patch_change_window;
 };
 
 class SlotPropertyWidget : public Gtk::VBox

@@ -244,6 +244,10 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_size_group->add_widget(_velocity_slider);
 	_follow_size_group->add_widget(_follow_count_spinner);
 
+	_patch_button.set_text (_("MIDI Patches"));
+	_patch_button.set_name("FollowAction");
+	_patch_button.signal_clicked.connect (sigc::mem_fun (*this, (&SlotPropertyTable::patch_button_event)));
+
 	set_spacings (8);  //match to TriggerPage::  table->set_spacings
 	set_border_width (0);  //change TriggerPage::  table->set_border_width   instead
 	set_homogeneous (false);
@@ -260,7 +264,8 @@ SlotPropertyTable::SlotPropertyTable ()
 	_trigger_table.attach(_color_label,   1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 	_trigger_table.attach(_color_button,  2, 3, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
 	_trigger_table.attach(_gain_label,    3, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	_trigger_table.attach(_gain_spinner,  4, 5, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_trigger_table.attach(_gain_spinner,  4, 5, row, row + 1, Gtk::FILL, Gtk::SHRINK); row++;
+	_trigger_table.attach(_patch_button,  0, 5, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 
 	/* ---- Launch settings ----- */
@@ -372,6 +377,19 @@ SlotPropertyTable::set_quantize (BBT_Offset bbo)
 
 	trigger()->set_quantization (bbo);
 }
+
+void
+SlotPropertyTable::patch_button_event ()
+{
+	boost::shared_ptr<Trigger> trigr = trigger();
+	if (boost::dynamic_pointer_cast<MIDITrigger> (trigr)) {
+		SessionObject* obj = trigr->box ().owner ();
+		boost::shared_ptr<Stripable> stripable = obj->session().stripable_by_id (obj->id ());
+		_patch_change_window.reset (boost::dynamic_pointer_cast<Route> (stripable), boost::dynamic_pointer_cast<MIDITrigger> (trigr));
+		_patch_change_window.present ();
+	}
+}
+
 
 void
 SlotPropertyTable::follow_length_event ()
@@ -512,6 +530,20 @@ SlotPropertyTable::set_follow_action (FollowAction const & fa, uint64_t idx)
 		trigger()->set_follow_action0 (fa);
 	} else {
 		trigger()->set_follow_action1 (fa);
+	}
+}
+
+void
+SlotPropertyTable::on_trigger_set ()
+{
+	boost::shared_ptr<Trigger> trigr = trigger();
+	if (boost::dynamic_pointer_cast<MIDITrigger> (trigr)) {
+		SessionObject* obj = triggerbox ().owner ();
+		boost::shared_ptr<Stripable> stripable = obj->session().stripable_by_id (obj->id ());
+		_patch_change_window.reset (boost::dynamic_pointer_cast<Route> (stripable), boost::dynamic_pointer_cast<MIDITrigger> (trigr));
+		_patch_button.show();
+	} else {
+		_patch_button.hide();
 	}
 }
 
