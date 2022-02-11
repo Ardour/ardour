@@ -740,7 +740,7 @@ Editor::mouse_add_new_marker (timepos_t where, Location::Flags extra_flags, int3
 
 		if (flags & Location::IsCueMarker) {
 			/* XXX i18n needed for cue letter names */
-			markername = string_compose (_("cue %1"), (char) ('A' + cue_id));
+			markername = string_compose (_("cue %1"), cue_marker_name (cue_id));
 		} else {
 			namebase = _("mark");
 			_session->locations()->next_available_name (markername, namebase);
@@ -1045,7 +1045,7 @@ Editor::build_marker_menu (Location* loc)
 		MenuList& cue_items (cues_menu->items());
 		for (int32_t n = 0; n < default_triggers_per_box; ++n) {
 			/* XXX the "letter" names of the cues need to be subject to i18n somehow */
-			cue_items.push_back (MenuElem (string_compose (_("%1"), (char) ('A' + n)), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_change_cue), n)));
+			cue_items.push_back (MenuElem (cue_marker_name (n), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_change_cue), n)));
 		}
 		items.push_back (Menu_Helpers::MenuElem ("Set Cue:", *cues_menu));
 		/* TODO: tweak marker_menu_range_to_next to make a range between 2 Cues? */

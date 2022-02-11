@@ -64,7 +64,7 @@ TriggerJumpDialog::on_trigger_set ()
 
 		b->signal_clicked.connect(sigc::bind(sigc::mem_fun(*this, &TriggerJumpDialog::button_clicked), i));
 
-		Gtk::Label* l = manage(new Gtk::Label(string_compose ("%1:", (char)('A' + i)), ALIGN_RIGHT));
+		Gtk::Label* l = manage(new Gtk::Label (cue_marker_name(i), ALIGN_RIGHT));
 		_table.attach (*l, 0, 1, r,r+1, Gtk::FILL, Gtk::SHRINK);
 		_table.attach (*b, 1, 2, r,r+1, Gtk::FILL, Gtk::SHRINK);
 

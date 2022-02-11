@@ -527,7 +527,7 @@ ArdourMarker::setup_name_display ()
 		_name_item->clamp_width (name_width);
 
 		if (_type == Cue) {
-			_name_item->set (string_compose ("%1", (char)('A' + _cue_index))); // XXX not translatable
+			_name_item->set (cue_marker_name (_cue_index));
 		} else {
 			_name_item->set (_name);
 		}

@@ -180,7 +180,7 @@ CueEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 	//draw cue letter
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 	layout->set_font_description (UIConfiguration::instance ().get_NormalFont ());
-	layout->set_text (string_compose (_("%1"), (char) ('A' + _cue_idx)));
+	layout->set_text (cue_marker_name (_cue_idx));
 	int tw, th;
 	layout->get_pixel_size (tw, th);
 	context->translate (self.x0, self.y0 - 0.5);  //canvas widget offset (sigh)
@@ -276,7 +276,7 @@ CueBoxUI::context_menu (uint64_t idx)
 		for (int i = 0; i < default_triggers_per_box; i++) {
 			FollowAction jump_fa = (FollowAction::JumpTrigger);
 			jump_fa.targets.set(i);
-			jitems.push_back (MenuElem (string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), jump_fa, idx)));
+			jitems.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), jump_fa, idx)));
 		}
 	fitems.push_back (MenuElem (_("Jump..."), *jump_menu));
 

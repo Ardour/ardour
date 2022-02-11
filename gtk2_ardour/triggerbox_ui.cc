@@ -235,7 +235,7 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, FollowAct
 				}
 				Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 				layout->set_font_description (UIConfiguration::instance ().get_SmallMonospaceFont ());
-				layout->set_text (string_compose ("%1", (char)('A' + cue_idx)));  //XXX translate?
+				layout->set_text (cue_marker_name (cue_idx));
 				int tw, th;
 				layout->get_pixel_size (tw, th);
 				context->move_to (size / 2, size / 2);

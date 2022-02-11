@@ -434,7 +434,7 @@ MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int &leftmost_cue_pos, int 
 	//TODO:  (*) we may need 'stop' marker(s) on the timeline as well, they will overwrite the bar with black
 
 	//draw cue letter
-	_layout->set_text (string_compose (_("%1"), (char) ('A' + cue_index)));
+	_layout->set_text (cue_marker_name (cue_index));
 	cairo_set_source_rgb (cr, 0, 0, 0);  //black
 	cairo_move_to (cr, marker_loc, y_center);  //move to center of circle
 	int tw, th;

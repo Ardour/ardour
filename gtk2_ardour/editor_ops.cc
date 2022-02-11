@@ -4197,8 +4197,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 			tslot        = manage (new ArdourDropdown ());
 
 			for (int c = 0; c < default_triggers_per_box; ++c) {
-				// XXX ('A' + x) is not translatable, TODO abstract using nth_letter()
-				std::string lbl = string_compose ("%1", (char)('A' + c));
+				std::string lbl = cue_marker_name (c);
 				tslot->AddMenuElem (Menu_Helpers::MenuElem (lbl, sigc::bind ([] (uint32_t* t, uint32_t v, ArdourDropdown* s, std::string l) {*t = v; s->set_text (l);}, &trigger_slot, c, tslot, lbl)));
 			}
 			tslot->set_active ("A");

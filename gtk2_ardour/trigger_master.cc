@@ -452,7 +452,7 @@ TriggerMaster::prop_change (PropertyChange const& what_changed)
 			_loopster->hide ();
 		} else {
 
-			play_text = (string_compose ("%1", (char)('A' + trigger->index ()))); // XXX not translatable
+			play_text = cue_marker_name (trigger->index ());
 
 			int fc = trigger->follow_count ();
 			int lc = trigger->loop_count ();

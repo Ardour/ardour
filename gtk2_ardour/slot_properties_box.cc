@@ -148,7 +148,7 @@ SlotPropertyTable::SlotPropertyTable ()
 		for (int i = 0; i < default_triggers_per_box; i++) {
 			FollowAction jump_fa = (FollowAction::JumpTrigger);
 			jump_fa.targets.set(i);
-			jitems.push_back (MenuElem (string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 0)));
+			jitems.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 0)));
 		}
 	_follow_left.AddMenuElem (MenuElem (_("Jump"), *jump_menu));
 	_follow_left.set_sizing_text (longest_follow);
@@ -165,7 +165,7 @@ SlotPropertyTable::SlotPropertyTable ()
 		for (int i = 0; i < default_triggers_per_box; i++) {
 			FollowAction jump_fa = (FollowAction::JumpTrigger);
 			jump_fa.targets.set(i);
-			jitems_1.push_back (MenuElem (string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 1)));
+			jitems_1.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 1)));
 		}
 	_follow_right.AddMenuElem (MenuElem (_("Jump"), *jump_menu_1));
 	_follow_right.set_sizing_text (longest_follow);

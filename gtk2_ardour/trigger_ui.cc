@@ -159,7 +159,7 @@ TriggerUI::register_actions ()
 
 	for (int32_t n = 0; n < default_triggers_per_box; ++n) {
 		const std::string action_name  = string_compose ("trigger-cue-%1", n);
-		const std::string display_name = string_compose (_("Trigger Cue %1"), (char) ('A' + n));
+		const std::string display_name = string_compose (_("Trigger Cue %1"), cue_marker_name (n));
 
 		ActionManager::register_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::ptr_fun (TriggerUI::trigger_cue), n));
 	}
@@ -597,7 +597,7 @@ TriggerUI::follow_context_menu ()
 	for (int i = 0; i < default_triggers_per_box; i++) {
 		FollowAction jump_fa = (FollowAction::JumpTrigger);
 		jump_fa.targets.set(i);
-		jitems.push_back (MenuElem (string_compose ("%1", (char)('A' + i)), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action), jump_fa)));
+		jitems.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &TriggerUI::set_follow_action), jump_fa)));
 	}
 
 	items.push_back (MenuElem (_("Jump"), *jump_menu));
@@ -780,7 +780,7 @@ TriggerUI::follow_action_to_string (FollowAction const & fa, bool with_targets)
 	if ( fa.targets.count() == 1 ) {  //jump to a specific row
 		for (int i = 0; i < default_triggers_per_box; i++) {
 			if (fa.targets.test(i)) {
-				return string_compose (_("Jump to: %1"), (char)('A' + i));
+				return string_compose (_("Jump to: %1"), cue_marker_name (i));
 			}
 		}
 	} else {
