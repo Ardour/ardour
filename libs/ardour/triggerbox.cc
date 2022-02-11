@@ -2568,7 +2568,6 @@ void
 TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position)
 {
 	if (cues.empty() || cues.front().time > transport_position) {
-		std::cerr << "no cues before " << transport_position << endl;
 		return;
 	}
 
