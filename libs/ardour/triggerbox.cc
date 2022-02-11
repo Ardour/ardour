@@ -229,7 +229,7 @@ Trigger::send_property_change (PropertyChange pc)
 	if (_box.fast_forwarding()) {
 		return;
 	}
-
+	cerr << "spc "; pc.dump (cerr); cerr << endl;
 	PropertyChanged (pc);
 }
 
