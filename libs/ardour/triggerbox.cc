@@ -2598,6 +2598,16 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		CueEvents::const_iterator nxt_cue = c; ++nxt_cue;
 
+		if (c->cue < 0) {
+			/* "stop all cues" marker encountered.  This ends the
+			   duration of whatever slot might have been running
+			   when we hit the cue.
+			*/
+			prev.reset ();
+			c = nxt_cue;
+			continue;
+		}
+
 		TriggerPtr trig (all_triggers[c->cue]);
 
 		if (trig->cue_isolated()) {
