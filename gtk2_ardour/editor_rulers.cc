@@ -251,8 +251,8 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		cme = static_cast<Gtk::CheckMenuItem*> (&ruler_items.back());
 		cme->set_active (Config->get_cue_behavior() != ARDOUR::FollowCues);
 		cme->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_cue_behavior));
+		ruler_items.push_back (MenuElem (_("Stop All Cues"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, INT32_MAX)));
 		for (int32_t n = 0; n < default_triggers_per_box; ++n) {
-			/* XXX the "letter" names of the cues need to be subject to i18n somehow */
 			ruler_items.push_back (MenuElem (string_compose (_("Cue %1"), cue_marker_name (n)), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, n)));
 		}
 		break;
