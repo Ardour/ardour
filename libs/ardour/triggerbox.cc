@@ -214,6 +214,49 @@ Trigger::request_trigger_delete (Trigger* t)
 }
 
 void
+Trigger::get_ui_state (Trigger::UIState &state) const 
+{
+	/* this is used for operations like d&d when we want to query the current state */
+	/* you can't return ui_state here because that struct is used to queue properties that are being input *to* the trigger */
+	/* TODO: rename our member variable ui_state to _queued_ui_state or similar @paul ? */
+	state.launch_style = _launch_style;
+	state.follow_action0 = _follow_action0;
+	state.follow_action1 = _follow_action1;
+	state.follow_action_probability = _follow_action_probability;
+	state.follow_count = _follow_count;
+	state.quantization = _quantization;
+	state.follow_length = _follow_length;
+	state.use_follow_length = _use_follow_length;
+	state.legato = _legato;
+	state.gain = _gain;
+	state.velocity_effect = _velocity_effect;
+	state.stretchable = _stretchable;
+	state.cue_isolated = _cue_isolated;
+	state.stretch_mode = _stretch_mode;
+
+	state.name = _name;
+	state.color = _color;
+
+	/* tempo is currently not a property */
+	state.tempo = segment_tempo();
+}
+
+void
+Trigger::set_ui_state (Trigger::UIState &state)
+{
+	ui_state = state;
+
+	/* increment ui_state generation so vals will get loaded when the trigger stops */
+	unsigned int g = ui_state.generation.load();
+	while (!ui_state.generation.compare_exchange_strong (g, g+1));
+
+	/* tempo is currently outside the scope of ui_state */
+	if (state.tempo > 0) {
+		set_segment_tempo(state.tempo);
+	}
+}
+	
+void
 Trigger::update_properties ()
 {
 	/* Don't update unless there is evidence of a change */
@@ -238,6 +281,15 @@ Trigger::update_properties ()
 		_stretchable = ui_state.stretchable;
 		_cue_isolated = ui_state.cue_isolated;
 		_stretch_mode = ui_state.stretch_mode;
+		_color = ui_state.color;
+
+		/* during construction of a new trigger, the ui_state.name is initialized and queued
+		 *   ...but in the interim, we have likely been assigned a name from a region in a separate thread
+		 *   ...so don't overwrite our name if ui_state.name is empty
+		 */
+		if (ui_state.name != "" ) {
+			_name = ui_state.name;
+		}
 
 		last_property_generation = g;
 	}
@@ -267,6 +319,8 @@ Trigger::copy_to_ui_state ()
 	ui_state.stretchable = _stretchable;
 	ui_state.cue_isolated = _cue_isolated;
 	ui_state.stretch_mode = _stretch_mode;
+	ui_state.name = _name;
+	ui_state.color = _color;
 }
 
 void
@@ -2555,7 +2609,9 @@ TriggerBoxThread* TriggerBox::worker = 0;
 CueRecords TriggerBox::cue_records (256);
 std::atomic<bool> TriggerBox::_cue_recording (false);
 PBD::Signal0<void> TriggerBox::CueRecordingChanged;
-std::string TriggerBox::_enqueued_drop_source("0");
+
+typedef std::map <boost::shared_ptr<Region>, boost::shared_ptr<Trigger::UIState>> RegionStateMap;
+RegionStateMap enqueued_state_map;
 
 void
 TriggerBox::init ()
@@ -2781,16 +2837,15 @@ TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
 		return;
 	}
 
-	/* set_region_in_worker_thread makes some guesses about whether a clip is a one-shot or looping*/
+	/* set_region_in_worker_thread estimates a tempo, and makes some guesses about whether a clip is a one-shot or looping*/
 	t->set_region_in_worker_thread (region);
 
-	/* if we are the target of a drag&drop from another Trigger Slot, we probably want the name, color and other properties to carry over */
-	boost::shared_ptr<Trigger> source = session().trigger_by_id (PBD::ID(_enqueued_drop_source));
-	if (source) {
-		t->set_name(source->name());
-		t->set_color(source->color());
-		t->set_gain(source->gain());
-		_enqueued_drop_source = "0";
+	/* if we are the target of a drag&drop from another Trigger Slot, we need the name, color and other properties to carry over with the region */
+	RegionStateMap::iterator rs;
+	if ((rs = enqueued_state_map.find (region)) != enqueued_state_map.end()) {
+		Trigger::UIState copy; copy = *(rs->second);
+		t->set_ui_state(*(rs->second));
+		enqueued_state_map.erase(rs);
 	}
 
 	//* always preserve the launch-style and cue_isolate status. It's likely to be right, but if it's wrong the user can "see" it's wrong anyway */
@@ -2908,9 +2963,9 @@ TriggerBox::trigger_by_id (PBD::ID check)
 }
 
 void
-TriggerBox::enqueue_trigger_source (PBD::ID queued)
+TriggerBox::enqueue_trigger_state_for_region (boost::shared_ptr<Region> region, boost::shared_ptr<Trigger::UIState> state)
 {
-	_enqueued_drop_source = queued.to_s ();
+	enqueued_state_map.insert (std::make_pair(region, state));
 }
 
 void

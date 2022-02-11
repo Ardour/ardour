@@ -333,6 +333,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	TriggerBox& box() const { return _box; }
 
 	double estimated_tempo() const { return _estimated_tempo; }
+	virtual double segment_tempo() const = 0;
+	virtual void set_segment_tempo (double t) = 0;
 
 	Temporal::Meter meter() const { return _meter; }
 
@@ -348,6 +350,11 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual SegmentDescriptor get_segment_descriptor () const = 0;
 
 	static void request_trigger_delete (Trigger* t);
+
+	/* these operations are provided to get/set all the "user visible" trigger properties at once */
+	/* examples: drag+dropping from slot to slot, or "Range->Bounce to Slot", where a single operation sets many  */
+	void get_ui_state (UIState &state) const;
+	void set_ui_state (UIState &state);
 
   protected:
 	struct UIRequests {
@@ -371,7 +378,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	gain_t                    _velocity_gain;
 	bool                      _cue_launched;
 
-	void copy_ui_state (UIState&);
 	void copy_to_ui_state ();
 
 
@@ -538,6 +544,11 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void unset_patch_change (uint8_t channel);
 	void unset_all_patch_changes ();
 	bool patch_change_set (uint8_t channel) const;
+
+	/* theoretically, MIDI files can have a dedicated tempo outside the session tempo map (*un-stretched*) but this is currently unimplemented */
+	/* boilerplate tempo functions are provided here so we don't have to do constant dynamic_cast checks to use the tempo API */
+	virtual double segment_tempo() const {return 120.0;}
+	virtual void set_segment_tempo (double t) {}
 
 	void set_channel_map (int channel, int target);
 	void unset_channel_map (int channel);
@@ -710,7 +721,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void non_realtime_locate (samplepos_t now);
 	void realtime_handle_transport_stopped ();
 
-	void enqueue_trigger_source (PBD::ID queued);
+	void enqueue_trigger_state_for_region (boost::shared_ptr<Region>, boost::shared_ptr<Trigger::UIState>);
 
 	/* valid only within the ::run() call tree */
 	int32_t active_scene() const { return _active_scene; }
@@ -832,8 +843,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	static std::atomic<int> active_trigger_boxes;
 	static std::atomic<bool> _cue_recording;
-
-	static std::string _enqueued_drop_source;
 };
 
 class TriggerReference
