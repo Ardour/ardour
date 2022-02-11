@@ -71,6 +71,47 @@ namespace ARDOUR {
 	}
 }
 
+std::string
+ARDOUR::cue_marker_name (int32_t index)
+{
+	/* this somewhat weird code structure is intended to allow for easy and
+	 * correct translation.
+	 */
+
+	using std::string;
+
+	switch (index) {
+	case 0: return string (_("A"));
+	case 1: return string (_("B"));
+	case 2: return string (_("C"));
+	case 3: return string (_("D"));
+	case 4: return string (_("E"));
+	case 5: return string (_("F"));
+	case 6: return string (_("G"));
+	case 7: return string (_("H"));
+	case 8: return string (_("I"));
+	case 9: return string (_("J"));
+	case 10: return string (_("K"));
+	case 11: return string (_("L"));
+	case 12: return string (_("M"));
+	case 13: return string (_("N"));
+	case 14: return string (_("O"));
+	case 15: return string (_("P"));
+	case 16: return string (_("Q"));
+	case 17: return string (_("R"));
+	case 18: return string (_("S"));
+	case 19: return string (_("T"));
+	case 20: return string (_("U"));
+	case 21: return string (_("V"));
+	case 22: return string (_("W"));
+	case 23: return string (_("X"));
+	case 24: return string (_("Y"));
+	case 25: return string (_("Z"));
+	}
+
+	return string();
+}
+
 FollowAction::FollowAction (std::string const & str)
 {
 	std::string::size_type colon = str.find_first_of (':');
