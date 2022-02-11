@@ -2681,7 +2681,13 @@ TriggerBox::set_ignore_patch_changes (bool yn)
 void
 TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position)
 {
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: ffwd to %2\n", order(), transport_position));
 	if (cues.empty() || !(Config->get_cue_behavior() & FollowCues) || (cues.front().time > transport_position)) {
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: nothing to be done\n", order()));
+		_locate_armed = false;
+		if (tracker) {
+			tracker->reset ();
+		}
 		return;
 	}
 
@@ -2791,6 +2797,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 	if (pos >= transport_position || !prev) {
 		/* nothing to do */
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: no trigger to be rolled\n", order()));
 		_locate_armed = false;
 		if (tracker) {
 			tracker->reset ();
@@ -2807,6 +2814,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	 * 2) for audio, the stretcher is in the correct state
 	 */
 
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: roll trigger %2 to %3\n", order(), prev->index(), transport_position));
 	prev->start_and_roll_to (start_samples, transport_position);
 
 	_currently_playing = prev;
@@ -3367,6 +3375,8 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (!_cue_recording || !was_recorded) {
 
 		if (cue_bang == INT32_MAX) {
+
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 sees STOP ALL!\n", order()));
 
 			/* reached a "stop all cue-launched cues from playing"
 			 * marker.The stop is quantized, not immediate.
