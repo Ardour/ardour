@@ -1082,6 +1082,7 @@ AudioTrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position
 		if (_state == Stopped) {
 			retrigger ();
 			_state = WaitingToStart;
+			cue_launched = true;
 		}
 
 		pos += n;
@@ -1911,6 +1912,44 @@ MIDITrigger::probably_oneshot () const
 void
 MIDITrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position)
 {
+	const pframes_t block_size = AudioEngine::instance()->samples_per_cycle ();
+	BufferSet bufs;
+
+	/* no need to allocate any space for BufferSet because we call
+	   audio_run<false>() which is guaranteed to never use the buffers.
+
+	   AudioTrigger::_startup() also does not use BufferSet (MIDITrigger
+	   does, and we use virtual functions so the argument list is the same
+	   for both, even though only the MIDI case needs the BufferSet).
+	*/
+
+	startup (bufs, 0, _quantization);
+	cue_launched = true;
+
+	samplepos_t pos = start_pos;
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+
+	while (pos < end_position) {
+		pframes_t nframes = std::min (block_size, (pframes_t) (end_position - pos));
+		Temporal::Beats start_beats = tmap->quarters_at (timepos_t (pos));
+		Temporal::Beats end_beats = tmap->quarters_at (timepos_t (pos+nframes));
+		const double bpm = tmap->quarters_per_minute_at (timepos_t (start_beats));
+
+		pframes_t n = midi_run<false> (bufs, pos, pos+nframes, start_beats, end_beats, nframes, 0, bpm);
+
+		/* We could have reached the end. Check and restart, because
+		 * TriggerBox::fast_forward() already determined that we are
+		 * the active trigger at @param end_position
+		 */
+
+		if (_state == Stopped) {
+			retrigger ();
+			_state = WaitingToStart;
+			cue_launched = true;
+		}
+
+		pos += n;
+	}
 }
 
 timepos_t
@@ -1970,7 +2009,11 @@ MIDITrigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Off
 {
 	Trigger::_startup (bufs, dest_offset, start_quantization);
 
-	MidiBuffer& mb (bufs.get_midi (0));
+	MidiBuffer* mb  = 0;
+
+	if (bufs.count().n_midi() != 0) {
+		mb = &bufs.get_midi (0);
+	}
 
 	/* Possibly inject patch changes, if set */
 
@@ -1979,7 +2022,9 @@ MIDITrigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Off
 			_patch_change[chn].set_time (dest_offset);
 			cerr << index() << " Injecting patch change " << _patch_change[chn].program() << " @ " << dest_offset << endl;
 			for (int msg = 0; msg < _patch_change[chn].messages(); ++msg) {
-				mb.insert_event (_patch_change[chn].message (msg));
+				if (mb) {
+					mb->insert_event (_patch_change[chn].message (msg));
+				}
 				_box.tracker->track (_patch_change[chn].message (msg).buffer());
 			}
 		}
@@ -1997,9 +2042,14 @@ void
 MIDITrigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
 {
 	Trigger::shutdown (bufs, dest_offset);
-	MidiBuffer& mb (bufs.get_midi (0));
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shutdown, resolve notes @ %2\n", index(), dest_offset));
-	_box.tracker->resolve_notes (mb, dest_offset);
+
+	if (bufs.count().n_midi()) {
+		MidiBuffer& mb (bufs.get_midi (0));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shutdown, resolve notes @ %2\n", index(), dest_offset));
+		_box.tracker->resolve_notes (mb, dest_offset);
+	}
+
+	_box.tracker->reset ();
 }
 
 void
@@ -2271,8 +2321,6 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		const Temporal::Beats maybe_last_event_timeline_beats = transition_beats + (event.time() - region_start);
 
-		std::cerr << "considering " << event << " with sb " << start_beats << " eb " << end_beats << " tb " << transition_beats << " + " << event.time() << " - " << region_start << " mletb "<< maybe_last_event_timeline_beats << " fb " << final_beat << endl;
-
 		if (maybe_last_event_timeline_beats > final_beat) {
 			/* do this to "fake" having reached the end */
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 tlrr %2 >= fb %3, so at end with %4\n", index(), maybe_last_event_timeline_beats, final_beat, event));
@@ -2283,8 +2331,6 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		/* Now get samples */
 
 		const samplepos_t timeline_samples = tmap->sample_at (maybe_last_event_timeline_beats);
-
-		cerr << "\tin samples, that's " << timeline_samples << " vs. " << end_sample << endl;
 
 		if (timeline_samples >= end_sample) {
 			break;
@@ -3290,10 +3336,24 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		if (!_session.transport_state_rolling() && !allstop) {
 			_session.start_transport_from_trigger ();
 		}
-	} else if (_session.transport_state_rolling()) {
-		_locate_armed = false;
 	} else {
-		return;
+
+		/* _locate_armed is true, so _currently_playing has been
+		   fast-forwarded to our position, and is ready to
+		   play. However, for MIDI triggers, we may need to dump a
+		   bunch of state into our BufferSet to ensure that the state
+		   of things matches the way it would have been had we actually
+		   played the trigger/slot from the start.
+		*/
+
+		if (_session.transport_state_rolling()) {
+			if (tracker && bufs.count().n_midi()) {
+				tracker->flush (bufs.get_midi (0), 0, true);
+			}
+			_locate_armed = false;
+		} else {
+			return;
+		}
 	}
 
 	/* now get the information we need related to the tempo map and the
