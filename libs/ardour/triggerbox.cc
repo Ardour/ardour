@@ -2586,7 +2586,18 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		TriggerPtr trig (all_triggers[c->cue]);
 
-		if (!trig->region() || trig->cue_isolated()) {
+		if (trig->cue_isolated()) {
+			c = nxt_cue;
+			continue;
+		}
+
+		if (!trig->region()) {
+			/* the cue-identified slot is empty for this
+			   triggerbox. This effectively ends the duration of
+			   whatever slot might have been running when we hit
+			   the cue.
+			*/
+			prev.reset ();
 			c = nxt_cue;
 			continue;
 		}
