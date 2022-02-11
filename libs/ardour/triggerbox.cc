@@ -230,7 +230,7 @@ Trigger::send_property_change (PropertyChange pc)
 		return;
 	}
 
-	send_property_change (pc);
+	PropertyChanged (pc);
 }
 
 void
