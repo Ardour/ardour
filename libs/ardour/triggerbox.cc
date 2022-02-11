@@ -15,6 +15,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/types_convert.h"
+#include "pbd/unwind.h"
 
 #include "temporal/tempo.h"
 
@@ -223,6 +224,16 @@ Trigger::copy_to_ui_state ()
 }
 
 void
+Trigger::send_property_change (PropertyChange pc)
+{
+	if (_box.fast_forwarding()) {
+		return;
+	}
+
+	send_property_change (pc);
+}
+
+void
 Trigger::set_pending (Trigger* t)
 {
 	Trigger* old = _pending.exchange (t);
@@ -252,7 +263,7 @@ Trigger::set_ ## name (type val) \
 	unsigned int g = ui_state.generation.load(); \
 	do { ui_state.name = val; } while (!ui_state.generation.compare_exchange_strong (g, g+1)); \
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 property& cas-set: %2 gen %3\n", index(), _ ## name.property_name(), ui_state.generation.load())); \
-	PropertyChanged (Properties::name); /* EMIT SIGNAL */ \
+	send_property_change (Properties::name); /* EMIT SIGNAL */ \
 	_box.session().set_dirty (); \
 } \
 type \
@@ -273,7 +284,7 @@ Trigger::set_ ## name (type const & val) \
 	unsigned int g = ui_state.generation.load(); \
 	do { ui_state.name = val; } while (!ui_state.generation.compare_exchange_strong (g, g+1)); \
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 property& cas-set: %2 gen %3\n", index(), _ ## name.property_name(), ui_state.generation.load())); \
-	PropertyChanged (Properties::name); /* EMIT SIGNAL */ \
+	send_property_change (Properties::name); /* EMIT SIGNAL */ \
 	_box.session().set_dirty (); \
 } \
 type \
@@ -307,7 +318,7 @@ Trigger::set_ ## name (type val) \
 { \
 	if (_ ## name == val) { return; } \
 	_ ## name = val; \
-	PropertyChanged (Properties::name); /* EMIT SIGNAL */ \
+	send_property_change (Properties::name); /* EMIT SIGNAL */ \
 	_box.session().set_dirty (); \
 } \
 type \
@@ -322,7 +333,7 @@ Trigger::set_ ## name (type const & val) \
 { \
 	if (_ ## name == val) { return; } \
 	_ ## name = val; \
-	PropertyChanged (Properties::name); /* EMIT SIGNAL */ \
+	send_property_change (Properties::name); /* EMIT SIGNAL */ \
 	_box.session().set_dirty (); \
 } \
 type \
@@ -486,7 +497,7 @@ Trigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset 
 	retrigger ();
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 starts up\n", name()));
-	PropertyChanged (ARDOUR::Properties::running);
+	send_property_change (ARDOUR::Properties::running);
 }
 
 void
@@ -496,7 +507,7 @@ Trigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
 	cue_launched = false;
 	_pending_velocity_gain = _velocity_gain = 1.0;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
-	PropertyChanged (ARDOUR::Properties::running);
+	send_property_change (ARDOUR::Properties::running);
 }
 
 void
@@ -508,7 +519,7 @@ Trigger::jump_start()
 	_state = Running;
 	/* XXX set expected_end_sample */
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
-	PropertyChanged (ARDOUR::Properties::running);
+	send_property_change (ARDOUR::Properties::running);
 }
 
 void
@@ -519,7 +530,7 @@ Trigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
 	*/
 	shutdown (bufs, dest_offset);
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
-	PropertyChanged (ARDOUR::Properties::running);
+	send_property_change (ARDOUR::Properties::running);
 }
 
 void
@@ -531,7 +542,7 @@ Trigger::begin_stop (bool explicit_stop)
 	_state = WaitingToStop;
 	_explicitly_stopped = explicit_stop;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
-	PropertyChanged (ARDOUR::Properties::running);
+	send_property_change (ARDOUR::Properties::running);
 }
 
 void
@@ -576,7 +587,7 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 			case ReTrigger:
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 oneshot %2 => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingForRetrigger)));
 				_state = WaitingForRetrigger;
-				PropertyChanged (ARDOUR::Properties::running);
+				send_property_change (ARDOUR::Properties::running);
 				break;
 			case Gate:
 			case Toggle:
@@ -776,7 +787,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 	case WaitingToStop:
 		_state = Stopping;
-		PropertyChanged (ARDOUR::Properties::running);
+		send_property_change (ARDOUR::Properties::running);
 
 		/* trigger will reach it's end somewhere within this
 		 * process cycle, so compute the number of samples it
@@ -797,7 +808,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		retrigger ();
 		_state = Running;
 		(void) compute_end (tmap, transition_bbt, transition_samples);
-		PropertyChanged (ARDOUR::Properties::running);
+		send_property_change (ARDOUR::Properties::running);
 
 		/* trigger will start somewhere within this process
 		 * cycle. Compute the sample offset where any audio
@@ -816,7 +827,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		retrigger ();
 		_state = Running;
 		(void) compute_end (tmap, transition_bbt, transition_samples);
-		PropertyChanged (ARDOUR::Properties::running);
+		send_property_change (ARDOUR::Properties::running);
 
 		/* trigger is just running normally, and will fill
 		 * buffers entirely.
@@ -875,7 +886,7 @@ Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 				*/
 				_state = WaitingToStart;
 				retrigger ();
-				PropertyChanged (ARDOUR::Properties::running);
+				send_property_change (ARDOUR::Properties::running);
 			}
 		}
 	}
@@ -914,7 +925,7 @@ AudioTrigger::set_stretch_mode (Trigger::StretchMode sm)
 	}
 
 	_stretch_mode = sm;
-	PropertyChanged (Properties::stretch_mode);
+	send_property_change (Properties::stretch_mode);
 	_box.session().set_dirty();
 }
 
@@ -923,7 +934,7 @@ AudioTrigger::set_segment_tempo (double t)
 {
 	if (_segment_tempo != t) {
 		_segment_tempo = t;  //TODO : this data will likely get stored in the SegmentDescriptor, not the trigger itself
-		PropertyChanged (ARDOUR::Properties::tempo_meter);
+		send_property_change (ARDOUR::Properties::tempo_meter);
 		_box.session().set_dirty();
 	}
 }
@@ -1244,7 +1255,7 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 
 	_follow_action_probability = 0; /* 100% left */
 
-	PropertyChanged (ARDOUR::Properties::name);
+	send_property_change (ARDOUR::Properties::name);
 
 	return 0;
 }
@@ -1828,7 +1839,7 @@ MIDITrigger::set_channel_map (int channel, int target)
 
 	if (_channel_map[channel] != target) {
 		_channel_map[channel] = target;
-		PropertyChanged (Properties::channel_map);
+		send_property_change (Properties::channel_map);
 	}
 }
 
@@ -1841,7 +1852,7 @@ MIDITrigger::unset_channel_map (int channel)
 
 	if (_channel_map[channel] >= 0) {
 		_channel_map[channel] = -1;
-		PropertyChanged (Properties::channel_map);
+		send_property_change (Properties::channel_map);
 	}
 }
 
@@ -1859,7 +1870,7 @@ MIDITrigger::set_patch_change (Evoral::PatchChange<MidiBuffer::TimeType> const &
 {
 	assert (pc.is_set());
 	_patch_change[pc.channel()] = pc;
-	PropertyChanged (Properties::patch_change);
+	send_property_change (Properties::patch_change);
 }
 
 void
@@ -1873,7 +1884,7 @@ MIDITrigger::unset_all_patch_changes ()
 	}
 
 	if (changed) {
-		PropertyChanged (Properties::patch_change);
+		send_property_change (Properties::patch_change);
 	}
 }
 
@@ -1883,7 +1894,7 @@ MIDITrigger::unset_patch_change (uint8_t channel)
 	assert (channel < 16);
 	if (_patch_change[channel].is_set()) {
 		_patch_change[channel].unset ();
-		PropertyChanged (Properties::patch_change);
+		send_property_change (Properties::patch_change);
 	}
 }
 
@@ -2253,7 +2264,7 @@ MIDITrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
 
-	PropertyChanged (ARDOUR::Properties::name);
+	send_property_change (ARDOUR::Properties::name);
 
 	return 0;
 }
@@ -2520,6 +2531,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _active_slots (0)
 	, _ignore_patch_changes (false)
 	, _locate_armed (false)
+	, _fast_fowarding (false)
 
 	, requests (1024)
 {
@@ -2567,6 +2579,8 @@ TriggerBox::set_ignore_patch_changes (bool yn)
 void
 TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position)
 {
+	PBD::Unwinder<bool> uw (_fast_fowarding, true);
+
 	if (cues.empty() || cues.front().time > transport_position) {
 		return;
 	}

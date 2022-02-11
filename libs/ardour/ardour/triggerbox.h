@@ -390,6 +390,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
 
 	bool internal_use_follow_length() const;
+	void send_property_change (PBD::PropertyChange pc);
 };
 
 typedef boost::shared_ptr<Trigger> TriggerPtr;
@@ -648,6 +649,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void add_trigger (TriggerPtr);
 
 	void fast_forward (CueEvents const &, samplepos_t transport_postiion);
+	bool fast_forwarding() const { return _fast_fowarding; }
 
 	void set_pending (uint32_t slot, Trigger*);
 
@@ -751,6 +753,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int32_t                  _active_slots;
 	bool                     _ignore_patch_changes;
 	bool                     _locate_armed;
+	bool                     _fast_fowarding;
 
 	boost::shared_ptr<SideChain> _sidechain;
 
