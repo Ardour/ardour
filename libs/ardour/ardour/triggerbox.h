@@ -172,6 +172,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		bool cue_isolated = false;
 		StretchMode stretch_mode = Trigger::Crisp;
 
+		std::string  name = "";
+		color_t      color = 0xBEBEBEFF;
+		double       tempo = 0;  //unset
 
 		UIState() : generation (0) {}
 
@@ -195,6 +198,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 			stretchable = other.stretchable;
 			cue_isolated = other.cue_isolated;
 			stretch_mode = other.stretch_mode;
+
+			name = other.name;
+			color = other.color;
+			tempo = other.tempo;
 
 			return *this;
 		}
