@@ -457,14 +457,14 @@ TriggerClipPicker::row_selected ()
 		_session->cancel_audition ();
 	}
 
-	_midi_prop_table.hide();
-
-	if (_view.get_selection ()->count_selected_rows () < 1 || _autoplay_btn.get_active ()) {
+	if (_view.get_selection ()->count_selected_rows () < 1) {
 		_play_btn.set_sensitive (false);
+		_midi_prop_table.hide();
 	} else {
 		TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
 		TreeIter                             i    = _model->get_iter (*rows.begin ());
-		_play_btn.set_sensitive ((*i)[_columns.file]);
+
+		_play_btn.set_sensitive ((*i)[_columns.file] && !_autoplay_btn.get_active ());
 
 		std::string path = (*i)[_columns.path];
 		if (SMFSource::valid_midi_file (path)) {
@@ -493,6 +493,8 @@ TriggerClipPicker::row_selected ()
 
 				_midi_prop_table.show();
 			}
+		} else {
+			_midi_prop_table.hide();
 		}
 	}
 }
