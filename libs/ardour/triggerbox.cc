@@ -1048,9 +1048,11 @@ AudioTrigger::set_segment_tempo (double t)
 	/* TODO:  once we have a Region Trimmer, this could get more complicated:
 	 *  this segment might overlap another SD (Coverage==Internal|Start|End)
 	 *  in which case we might be setting both SDs, or not.  TBD*/
-	SegmentDescriptor segment = get_segment_descriptor();
-	for (auto & src : _region->sources()) {
-		src->set_segment_descriptor (segment);
+	if (_region) {
+		SegmentDescriptor segment = get_segment_descriptor();
+		for (auto & src : _region->sources()) {
+			src->set_segment_descriptor (segment);
+		}
 	}
 }
 
