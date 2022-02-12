@@ -63,5 +63,48 @@ def build(bld):
     obj.uselib       = [ 'GLIBMM', 'XML', 'OSX' ]
     obj.use          = [ 'libpbd' ]
 
+    if  bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
+        # Static library (for unit test code coverage)
+        obj = bld(features = 'cxx cstlib')
+        obj.source         = temporal_sources
+        obj.export_includes = ['.']
+        obj.includes       = ['.']
+        obj.name           = 'libtemporal_static'
+        obj.target         = 'temporal_static'
+        obj.uselib         = 'GLIBMM GTHREAD XML LIBPBD'
+        obj.use            = 'libpbd'
+        obj.vnum           = TEMPORAL_VERSION
+        obj.install_path   = ''
+        if bld.env['TEST_COVERAGE']:
+             obj.linkflags      = ['--coverage']
+             obj.cflags         = ['--coverage']
+             obj.cxxflags       = ['--coverage']
+        obj.defines        = ['PACKAGE="libevoral"']
+
+        # Unit tests
+        obj              = bld(features = 'cxx cxxprogram')
+        obj.source       = '''
+                test/beats.cc
+                test/testrunner.cc
+        '''
+        obj.includes     = ['.']
+        obj.use          = 'libtemporal_static'
+        obj.uselib       = 'GLIBMM GTHREAD XML LIBPBD CPPUNIT'
+        obj.target       = 'run-tests'
+        obj.name         = 'libtemporal-tests'
+        obj.install_path = ''
+        obj.defines      = ['PACKAGE="libtemporaltest"']
+        if bld.env['TEST_COVERAGE']:
+            obj.linkflags      = ['--coverage']
+            obj.cflags         = ['--coverage']
+            obj.cxxflags       = ['--coverage']
+
+def test(ctx):
+    autowaf.pre_test(ctx, APPNAME)
+    print(os.getcwd())
+    os.environ['EVORAL_TEST_PATH'] = os.path.abspath('../test/testdata/')
+    autowaf.run_tests(ctx, APPNAME, ['./run-tests'])
+    autowaf.post_test(ctx, APPNAME)
+
 def shutdown():
     autowaf.shutdown()

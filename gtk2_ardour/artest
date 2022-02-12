@@ -35,6 +35,7 @@ run_tests midi++2
 run_tests evoral
 run_tests pbd
 run_tests ardour
+run_tests temporal
 
 if test "$ALLGOOD" != "yes"; then
 	echo ""
