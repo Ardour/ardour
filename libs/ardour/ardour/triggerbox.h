@@ -336,6 +336,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual double segment_tempo() const = 0;
 	virtual void set_segment_tempo (double t) = 0;
 
+	virtual void setup_stretcher () = 0;
+
 	Temporal::Meter meter() const { return _meter; }
 
 	void set_velocity_gain (gain_t g) {_pending_velocity_gain=g;}
@@ -492,10 +494,11 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	samplecnt_t to_pad;
 	samplecnt_t to_drop;
 
+	virtual void setup_stretcher ();
+
 	void drop_data ();
 	int load_data (boost::shared_ptr<AudioRegion>);
 	void estimate_tempo ();
-	void setup_stretcher ();
 	void reset_stretcher ();
 	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
 };
@@ -546,9 +549,10 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	bool patch_change_set (uint8_t channel) const;
 
 	/* theoretically, MIDI files can have a dedicated tempo outside the session tempo map (*un-stretched*) but this is currently unimplemented */
-	/* boilerplate tempo functions are provided here so we don't have to do constant dynamic_cast checks to use the tempo API */
+	/* boilerplate tempo functions are provided here so we don't have to do constant dynamic_cast checks to use the tempo+stretch APIs */
 	virtual double segment_tempo() const {return 120.0;}
 	virtual void set_segment_tempo (double t) {}
+	virtual void setup_stretcher () {}
 
 	void set_channel_map (int channel, int target);
 	void unset_channel_map (int channel);

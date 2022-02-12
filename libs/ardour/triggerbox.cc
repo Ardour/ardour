@@ -265,6 +265,8 @@ Trigger::update_properties ()
 
 	while ((g = ui_state.generation.load()) != last_property_generation) {
 
+		StretchMode old_stretch = _stretch_mode;
+
 		std::cerr << "prop copy for " << index() << endl;
 
 		_launch_style = ui_state.launch_style;
@@ -282,6 +284,13 @@ Trigger::update_properties ()
 		_cue_isolated = ui_state.cue_isolated;
 		_stretch_mode = ui_state.stretch_mode;
 		_color = ui_state.color;
+
+		/* @paul: is this safe to do here ?*/
+		/* the UI only allows changing stretch_mode when the clip is stopped,
+		 * and you can't d+d or create a new clip while it's playing, so I think it's OK */
+		if (_stretch_mode != old_stretch) {
+			setup_stretcher ();
+		}
 
 		/* during construction of a new trigger, the ui_state.name is initialized and queued
 		 *   ...but in the interim, we have likely been assigned a name from a region in a separate thread
