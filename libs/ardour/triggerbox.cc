@@ -1498,7 +1498,7 @@ AudioTrigger::estimate_tempo ()
 	}
 
 	/* initialize our follow_length to match the beatcnt ... user can later change this value to have the clip end sooner or later than its data length */
-	_follow_length = (Temporal::BBT_Offset( 0, rint(_beatcnt), 0));  //OK ?
+	set_follow_length(Temporal::BBT_Offset( 0, rint(beatcount), 0));
 
 	/* use initial tempo in map (assumed for now to be the only one */
 
