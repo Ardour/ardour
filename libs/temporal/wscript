@@ -84,7 +84,7 @@ def build(bld):
         # Unit tests
         obj              = bld(features = 'cxx cxxprogram')
         obj.source       = '''
-                test/beats.cc
+                test/BeatTest.cc
                 test/testrunner.cc
         '''
         obj.includes     = ['.']
