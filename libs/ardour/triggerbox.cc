@@ -487,7 +487,6 @@ Trigger::get_state (void)
 	node->set_property (X_("index"), _index);
 	node->set_property (X_("estimated-tempo"), _estimated_tempo);
 	node->set_property (X_("segment-tempo"), _segment_tempo);
-	node->set_property (X_("beatcnt"), _beatcnt);
 
 	if (_region) {
 		node->set_property (X_("region"), _region->id());
@@ -514,8 +513,10 @@ Trigger::set_state (const XMLNode& node, int version)
 	}
 
 	node.get_property (X_("estimated-tempo"), _estimated_tempo);  //TODO: for now: if we know the bpm, overwrite the value that estimate_tempo() found
-	node.get_property (X_("segment-tempo"), _segment_tempo);
-	node.get_property (X_("beatcnt"), _beatcnt);
+
+	double tempo;
+	node.get_property (X_("segment-tempo"), tempo);
+	set_segment_tempo(tempo);
 
 	node.get_property (X_("index"), _index);
 	set_values (node);
@@ -1033,25 +1034,35 @@ void
 AudioTrigger::set_segment_tempo (double t)
 {
 	if (_segment_tempo != t) {
-		_segment_tempo = t;  //TODO : this data will likely get stored in the SegmentDescriptor, not the trigger itself
+
+		_segment_tempo = t;
+
+		/*beatcnt is a derived property from segment tempo and the file's length*/
+		const double seconds = (double) data.length  / _box.session().sample_rate();
+		_beatcnt = _segment_tempo * (seconds/60.0);
+
 		send_property_change (ARDOUR::Properties::tempo_meter);
 		_box.session().set_dirty();
+	}
+
+	/* TODO:  once we have a Region Trimmer, this could get more complicated:
+	 *  this segment might overlap another SD (Coverage==Internal|Start|End)
+	 *  in which case we might be setting both SDs, or not.  TBD*/
+	SegmentDescriptor segment = get_segment_descriptor();
+	for (auto & src : _region->sources()) {
+		src->set_segment_descriptor (segment);
 	}
 }
 
 void
 AudioTrigger::set_segment_beatcnt (double count)
 {
-	if (_beatcnt != count) {
-		_beatcnt = count;
+	//given a beatcnt from the user, we use the data length to re-calc tempo internally
+	// ... TODO:  provide a graphical trimmer to give the user control of data.length by dragging the start and end of the sample.
+	const double seconds = (double) data.length  / _box.session().sample_rate();
+	double tempo = count / (seconds/60.0);
 
-		//given a beatcnt from the user, we use the data length to re-calc tempo internally
-		// ... TODO:  provide a graphical trimmer to give the user control of data.length by dragging the start and end of the sample.
-		const double seconds = (double) data.length  / _box.session().sample_rate();
-		double tempo = _beatcnt / (seconds/60.0);
-
-		set_segment_tempo(tempo);
-	}
+	set_segment_tempo(tempo);
 }
 
 bool
@@ -1065,6 +1076,7 @@ AudioTrigger::get_segment_descriptor () const
 {
 	SegmentDescriptor sd;
 
+	sd.set_extent (_region->start_sample(), _region->length_samples());
 	sd.set_tempo (Temporal::Tempo (_segment_tempo, 4));
 
 	return sd;
@@ -1326,8 +1338,11 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 
 	load_data (ar);
 
-	estimate_tempo ();  //TODO: should first check if we already know this info from xml
-	_segment_tempo = _estimated_tempo;
+	estimate_tempo ();  /* NOTE: if this is an existing clip (D+D copy) then it will likely have a SD tempo, and that short-circuits minibpm for us */
+
+	/* given an initial tempo guess, we need to set our operating tempo and beat_cnt value.
+	 *  this may be reset momentarily with user-settings (UIState) from a d+d operation */
+	set_segment_tempo(_estimated_tempo);
 
 	setup_stretcher ();
 
@@ -1471,12 +1486,13 @@ AudioTrigger::estimate_tempo ()
 	   resulting in small or larger gaps in output if they are repeating.
 	*/
 
+	double beatcount;
 	if ((_estimated_tempo != 0.)) {
 		/* fractional beatcnt */
 		double maybe_beats = (seconds / 60.) * _estimated_tempo;
-		_beatcnt = round (maybe_beats);
+		beatcount = round (maybe_beats);
 		double est = _estimated_tempo;
-		_estimated_tempo = _beatcnt / (seconds/60.);
+		_estimated_tempo = beatcount / (seconds/60.);
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given original estimated tempo %1, rounded beatcnt is %2 : resulting in working bpm = %3\n", est, _beatcnt, _estimated_tempo));
 	}
 
@@ -1489,7 +1505,7 @@ AudioTrigger::estimate_tempo ()
 
 	cerr << "estimated tempo: " << _estimated_tempo << endl;
 	cerr << "one beat in samples: " << one_beat << endl;
-	cerr << "beatcnt = " << round (_beatcnt) << endl;
+	cerr << "rounded beatcount = " << round (beatcount) << endl;
 }
 
 bool
