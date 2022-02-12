@@ -206,6 +206,12 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& pc)
 
 	_ignore_changes = true;
 
+	bool set_sensitivities = false;
+
+	if (pc.contains (Properties::running)) {
+		set_sensitivities = true;  //can't change stretch params while we are playing so we must watch active state
+	}
+
 	if (pc.contains (Properties::start) || pc.contains (Properties::length)) {  /* NOT REACHED from current code */
 		AudioClock::Mode mode = at->box ().data_type () == ARDOUR::DataType::AUDIO ? AudioClock::Samples : AudioClock::BBT;
 
@@ -235,11 +241,16 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& pc)
 	if (pc.contains (Properties::stretch_mode) || pc.contains (Properties::stretchable)) {
 		_stretch_toggle.set_active (at->stretchable () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 		_stretch_selector.set_text(stretch_mode_to_string(at->stretch_mode ()));
+		set_sensitivities = true;
+	}
 
-		/* set widget sensitivity based on stretchable button state */
-		bool follow_widgets_sensitive = at->stretchable ();
+	if (set_sensitivities) {
+		_stretch_toggle.set_sensitive(!at->active());
 
-		if (follow_widgets_sensitive) {
+		/* set remaining widget sensitivity based on stretchable button state & running state */
+		bool stretch_widgets_sensitive = at->stretchable () && !at->active();
+
+		if (stretch_widgets_sensitive) {
 			_stretch_selector.set_sensitive(true);
 			_beat_spinner.set_sensitive(true);
 			_beat_label.set_sensitive(true);
@@ -248,6 +259,7 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& pc)
 			_half_button.set_sensitive(true);
 			_dbl_button.set_sensitive(true);
 			_abpm_label.set_sensitive(true);
+			_bars_display.set_sensitive(true);
 		} else {
 			_stretch_selector.set_sensitive(false);
 			_beat_spinner.set_sensitive(false);
@@ -257,6 +269,7 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& pc)
 			_half_button.set_sensitive(false);
 			_dbl_button.set_sensitive(false);
 			_abpm_label.set_sensitive(false);
+			_bars_display.set_sensitive(false);
 		}
 	}
 
