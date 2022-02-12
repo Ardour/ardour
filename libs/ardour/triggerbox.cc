@@ -1502,11 +1502,13 @@ AudioTrigger::estimate_tempo ()
 
 	/* use initial tempo in map (assumed for now to be the only one */
 
-	const samplecnt_t one_beat = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (0, 1, 0)).samples();
-
 	cerr << "estimated tempo: " << _estimated_tempo << endl;
+
+#if 0
+	const samplecnt_t one_beat = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (0, 1, 0)).samples();
 	cerr << "one beat in samples: " << one_beat << endl;
 	cerr << "rounded beatcount = " << round (beatcount) << endl;
+#endif
 }
 
 bool
