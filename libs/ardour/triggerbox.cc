@@ -1477,16 +1477,6 @@ AudioTrigger::estimate_tempo ()
 
 			cerr << name() << " Estimated bpm " << _estimated_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
 		}
-
-		if (!have_segment) {
-			segment.set_extent (_region->start_sample(), _region->length_samples());
-		}
-
-		segment.set_tempo (Temporal::Tempo (_estimated_tempo, 4));
-
-		for (auto & src : _region->sources()) {
-			src->set_segment_descriptor (segment);
-		}
 	}
 
 	const double seconds = (double) data.length  / _box.session().sample_rate();
