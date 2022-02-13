@@ -85,6 +85,7 @@ def build(bld):
         obj              = bld(features = 'cxx cxxprogram')
         obj.source       = '''
                 test/BeatTest.cc
+                test/BBTTest.cc
                 test/testrunner.cc
         '''
         obj.includes     = ['.']

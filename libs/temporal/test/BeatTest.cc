@@ -6,7 +6,6 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(BeatsTest);
 
-using namespace Evoral;
 using namespace Temporal;
 
 static const double delta = 1.5 / (double)Beats::PPQN;

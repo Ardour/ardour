@@ -51,6 +51,10 @@ main(int argc, char* argv[])
 	if (!PBD::init ()) return 1;
 	Temporal::init ();
 
+	// TempoMap::SharedPtr tmap = TempoMap::write_copy (); /* get writable copy of current tempo map */
+	// change it
+	// TempoMap::update (tmap); /* update the global tempo map manager */
+
 	CppUnit::TestResult testresult;
 
 	CppUnit::TestResultCollector collectedresults;
