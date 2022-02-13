@@ -122,7 +122,6 @@ private:
 	CueBoxWidget       _cue_box;
 	FittedCanvasWidget _master_widget;
 	CueMaster          _master;
-	ArdourWidgets::ArdourButton  _cue_rec_enable;
 
 	SlotPropertiesBox _slot_prop_box;
 

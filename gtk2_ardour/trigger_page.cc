@@ -74,8 +74,6 @@ TriggerPage::TriggerPage ()
 	load_bindings ();
 	register_actions ();
 
-	_cue_rec_enable.set_name ("record enable button");
-
 	/* Match TriggerStrip::_name_button height */
 	ArdourButton* spacer = manage (new ArdourButton (ArdourButton::Text));
 	spacer->set_name ("mixer strip button");
@@ -87,7 +85,6 @@ TriggerPage::TriggerPage ()
 	_cue_area_box.pack_start (*spacer, Gtk::PACK_SHRINK);
 	_cue_area_box.pack_start (_cue_box, Gtk::PACK_SHRINK);
 	_cue_area_box.pack_start (_master_widget, Gtk::PACK_SHRINK);
-	_cue_area_box.pack_start (_cue_rec_enable, Gtk::PACK_SHRINK);
 
 	/* left-side frame, same layout as TriggerStrip.
 	 * use Alignment instead of Frame with SHADOW_IN (2px)
@@ -283,10 +280,6 @@ TriggerPage::set_session (Session* s)
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&TriggerPage::parameter_changed, this, _1), gui_context ());
 
 	Editor::instance ().get_selection ().TriggersChanged.connect (sigc::mem_fun (*this, &TriggerPage::selection_changed));
-
-	TriggerBox::CueRecordingChanged.connect (_session_connections, invalidator (*this), boost::bind (&TriggerPage::rec_state_changed, this), gui_context ());
-	rec_state_changed();
-	_cue_rec_enable.signal_clicked.connect(sigc::mem_fun(*this, &TriggerPage::rec_state_clicked));
 
 	initial_track_display ();
 
@@ -523,19 +516,6 @@ AxisView*
 TriggerPage::axis_view_by_control (boost::shared_ptr<AutomationControl> c) const
 {
 	return 0;
-}
-
-
-void
-TriggerPage::rec_state_clicked ()
-{
-	TriggerBox::set_cue_recording(!TriggerBox::cue_recording());
-}
-
-void
-TriggerPage::rec_state_changed ()
-{
-	_cue_rec_enable.set_active_state( TriggerBox::cue_recording() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
 void
