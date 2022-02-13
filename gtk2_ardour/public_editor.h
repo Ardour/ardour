@@ -331,6 +331,8 @@ public:
 	virtual void toggle_stationary_playhead () = 0;
 	virtual bool stationary_playhead() const = 0;
 
+	virtual void toggle_cue_behavior () = 0;
+
 	/** Set whether the editor should follow the playhead.
 	 * @param yn true to follow playhead, otherwise false.
 	 * @param catch_up true to reset the editor view to show the playhead (if yn == true), otherwise false.
