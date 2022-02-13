@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "temporal/beats.h"
+#include "temporal/bbt_time.h"
 
 #include "BBTTest.h"
 

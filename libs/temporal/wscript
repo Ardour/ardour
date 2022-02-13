@@ -86,6 +86,7 @@ def build(bld):
         obj.source       = '''
                 test/BeatTest.cc
                 test/BBTTest.cc
+                test/TempoMapTest.cc
                 test/testrunner.cc
         '''
         obj.includes     = ['.']
