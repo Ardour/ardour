@@ -172,6 +172,27 @@ bool drag_failed (const Glib::RefPtr<Gdk::DragContext>& context, DragResult resu
 }
 
 void
+ARDOUR_UI::cue_rec_state_clicked ()
+{
+	TriggerBox::set_cue_recording(!TriggerBox::cue_recording());
+}
+
+void
+ARDOUR_UI::cue_ffwd_state_clicked ()
+{
+	if (editor) {
+		editor->toggle_cue_behavior ();
+	}
+}
+
+void
+ARDOUR_UI::cue_rec_state_changed ()
+{
+	_cue_rec_enable.set_active_state( TriggerBox::cue_recording() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	//Config->get_cue_behavior()
+}
+
+void
 ARDOUR_UI::repack_transport_hbox ()
 {
 	if (time_info_box) {
@@ -345,6 +366,12 @@ ARDOUR_UI::setup_transport ()
 	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
 	recorder_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), recorder));
 	trigger_page_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), trigger_page));
+
+	_cue_rec_enable.set_name ("record enable button");
+	_cue_rec_enable.signal_clicked.connect(sigc::mem_fun(*this, &ARDOUR_UI::cue_rec_state_clicked));
+
+	_cue_play_enable.set_name ("record enable button");
+	_cue_play_enable.signal_clicked.connect(sigc::mem_fun(*this, &ARDOUR_UI::cue_ffwd_state_clicked));
 
 	/* catch context clicks so that we can show a menu on these buttons */
 
@@ -620,6 +647,10 @@ ARDOUR_UI::setup_transport ()
 	++col;
 
 	transport_table.attach (*monitor_box, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
+	transport_table.attach (_cue_rec_enable, TCOL, 0, 1 , FILL, FILL, 3, 0);
+	transport_table.attach (_cue_play_enable, TCOL, 1, 2 , FILL, FILL, 3, 0);
 	++col;
 
 	/* editor-meter, mini-timeline and selection clock are options in the transport_hbox */

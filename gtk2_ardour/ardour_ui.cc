@@ -124,6 +124,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/transport_master.h"
 #include "ardour/transport_master_manager.h"
+#include "ardour/triggerbox.h"
 #include "ardour/system_exec.h"
 #include "ardour/track.h"
 #include "ardour/vca_manager.h"
@@ -314,6 +315,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, startup_fsm (0)
 	, secondary_clock_spacer (0)
 	, latency_disable_button (ArdourButton::led_default_elements)
+
+	, _cue_rec_enable (_("Rec Cues"), ArdourButton::led_default_elements)
+	, _cue_play_enable (_("Play Cues"), ArdourButton::led_default_elements)
+
 	, time_info_box (0)
 	, auto_return_button (ArdourButton::led_default_elements)
 	, follow_edits_button (ArdourButton::led_default_elements)
@@ -436,6 +441,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	ARDOUR::DiskReader::Underrun.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::disk_underrun_handler, this), gui_context());
 
 	ARDOUR::Session::VersionMismatch.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_format_mismatch, this, _1, _2), gui_context());
+
+	TriggerBox::CueRecordingChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::cue_rec_state_changed, this), gui_context ());
+	cue_rec_state_changed();
 
 	/* handle dialog requests */
 

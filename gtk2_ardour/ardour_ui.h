@@ -472,6 +472,10 @@ private:
 	void session_dirty_changed ();
 	void update_title ();
 
+	void cue_rec_state_changed ();
+	void cue_rec_state_clicked ();
+	void cue_ffwd_state_clicked ();
+
 	void map_transport_state ();
 	int32_t do_engine_start ();
 
@@ -535,6 +539,9 @@ private:
 
 
 	ArdourWidgets::ArdourButton latency_disable_button;
+
+	ArdourWidgets::ArdourButton  _cue_rec_enable;
+	ArdourWidgets::ArdourButton  _cue_play_enable;
 
 	Gtk::Label route_latency_value;
 	Gtk::Label io_latency_label;
