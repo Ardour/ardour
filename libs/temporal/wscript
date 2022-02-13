@@ -87,6 +87,7 @@ def build(bld):
                 test/BeatTest.cc
                 test/BBTTest.cc
                 test/TempoMapTest.cc
+                test/TimelineTest.cc
                 test/testrunner.cc
         '''
         obj.includes     = ['.']
