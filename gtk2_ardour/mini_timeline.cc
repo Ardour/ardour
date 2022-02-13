@@ -63,6 +63,7 @@ MiniTimeline::MiniTimeline ()
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &MiniTimeline::set_colors));
 	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &MiniTimeline::dpi_changed));
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MiniTimeline::parameter_changed));
 
 	set_name ("minitimeline");
 
@@ -154,6 +155,9 @@ MiniTimeline::set_colors ()
 void
 MiniTimeline::parameter_changed (std::string const& p)
 {
+	if (p == "cue-behavior") {
+		update_minitimeline ();
+	}
 	if (p == "minitimeline-span") {
 		calculate_time_spacing ();
 		update_minitimeline ();
@@ -415,32 +419,52 @@ MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int &leftmost_cue_pos, int 
 	uint32_t color = UIConfiguration::instance().color (
 		prelight ? "entered marker" : "location marker");
 
-	// draw Cue as a circle
-	cairo_arc(cr, marker_loc, y_center, (h/2), 0, 2*M_PI);
-	cairo_set_source_rgb (cr, 0, 0, 0);  //black
-	cairo_fill (cr);
-	cairo_arc(cr, marker_loc, y_center, (h/2)-1*scale, 0, 2*M_PI);
-	set_source_rgba (cr, color);
-	cairo_fill (cr);
+	CueBehavior cb (Config->get_cue_behavior());
+	if (!(cb & ARDOUR::FollowCues)) {
+		color = Gtkmm2ext::HSV(color).darker(0.5).color();
+	};
 
-	// draw 'bar' to show that the Cue continues forever (*)
-	if (marker_loc <= leftmost_cue_pos) {
+	// draw a bar to show that the Cue continues forever
+	{
 		cairo_rectangle (cr, marker_loc, y_center-2*scale, tl_width, 4*scale);
-		set_source_rgba (cr, color);
+		if (cue_index==INT32_MAX) {
+			set_source_rgba (cr, UIConfiguration::instance().color ("ruler base"));
+		} else {
+			set_source_rgba (cr, color);
+		}
 		cairo_fill (cr);
 		leftmost_cue_pos = marker_loc;
 	}
 
-	//TODO:  (*) we may need 'stop' marker(s) on the timeline as well, they will overwrite the bar with black
+	// draw the Cue
+	if (cue_index!=INT32_MAX) {  //regular cues are a circle
+		cairo_arc(cr, marker_loc, y_center, (h/2), 0, 2*M_PI);
+		cairo_set_source_rgb (cr, 0, 0, 0);  //black
+		cairo_fill (cr);
+		cairo_arc(cr, marker_loc, y_center, (h/2)-1*scale, 0, 2*M_PI);
+		set_source_rgba (cr, color);
+		cairo_fill (cr);
+	} else {  //'Stop' cues are a square
+		float size = h- 4*scale;
+		cairo_rectangle(cr, marker_loc - (size/2), y_center-(size/2), size, size);
+		cairo_set_source_rgb (cr, 0, 0, 0);  //black
+		cairo_fill (cr);
+		size -= 1*scale;
+		cairo_rectangle(cr, marker_loc - (size/2), y_center-(size/2), size, size);
+		set_source_rgba (cr, color);
+		cairo_fill (cr);
+	}
 
 	//draw cue letter
-	_layout->set_text (cue_marker_name (cue_index));
-	cairo_set_source_rgb (cr, 0, 0, 0);  //black
-	cairo_move_to (cr, marker_loc, y_center);  //move to center of circle
-	int tw, th;
-	_layout->get_pixel_size (tw, th);
-	cairo_rel_move_to (cr, -tw/2, -th/2);  //move to top-left of text
-	pango_cairo_show_layout (cr, _layout->gobj());
+	if (cue_index!=INT32_MAX) {
+		_layout->set_text (cue_marker_name (cue_index));
+		cairo_set_source_rgb (cr, 0, 0, 0);  //black
+		cairo_move_to (cr, marker_loc, y_center);  //move to center of circle
+		int tw, th;
+		_layout->get_pixel_size (tw, th);
+		cairo_rel_move_to (cr, -tw/2, -th/2);  //move to top-left of text
+		pango_cairo_show_layout (cr, _layout->gobj());
+	}
 
 	return marker_right_edge;
 }
