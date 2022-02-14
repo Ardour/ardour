@@ -67,7 +67,7 @@ class SideChain;
 
 typedef uint32_t color_t;
 
-std::string cue_marker_name (int32_t);
+LIBARDOUR_API std::string cue_marker_name (int32_t);
 
 class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
