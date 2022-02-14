@@ -2412,7 +2412,8 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	samplepos_t last_event_samples = max_samplepos;
 
 	/* see if we're going to start or stop or retrigger in this run() call */
-	maybe_compute_next_transition (start_sample, start_beats, end_beats, nframes, dest_offset);
+	pframes_t ignore_computed_dest_offset = 0;
+	maybe_compute_next_transition (start_sample, start_beats, end_beats, nframes, ignore_computed_dest_offset);
 	const pframes_t orig_nframes = nframes;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2\n", name(), enum_2_string (_state)));
