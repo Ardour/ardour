@@ -168,6 +168,8 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _stretch_mode (Properties::stretch_mode, Trigger::Crisp)
 	, _name (Properties::name, "")
 	, _color (Properties::color, 0xBEBEBEFF)
+	, process_index (0)
+	, final_processed_sample (0)
 	, _box (b)
 	, _state (Stopped)
 	, _bang (0)
@@ -573,6 +575,28 @@ Trigger::set_region_internal (boost::shared_ptr<Region> r)
 {
 	_region = r;
 	cerr << index() << " aka " << this << " region set to " << r << endl;
+}
+
+timepos_t
+Trigger::current_pos() const
+{
+	return timepos_t (process_index);
+}
+
+double
+Trigger::position_as_fraction () const
+{
+	if (!active()) {
+		return 0.0;
+	}
+
+	return process_index / (double) final_processed_sample;
+}
+
+void
+Trigger::retrigger ()
+{
+	process_index = 0;
 }
 
 void
@@ -1010,9 +1034,7 @@ AudioTrigger::AudioTrigger (uint32_t n, TriggerBox& b)
 	, _stretcher (0)
 	, _start_offset (0)
 	, read_index (0)
-	, process_index (0)
 	, last_readable_sample (0)
-	, final_processed_sample (0)
 	, _legato_offset (0)
 	, retrieved (0)
 	, got_stretcher_padding (false)
@@ -1113,16 +1135,6 @@ AudioTrigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
 	retrigger ();
 }
 
-double
-AudioTrigger::position_as_fraction () const
-{
-	if (!active()) {
-		return 0.0;
-	}
-
-	return process_index / (double) (expected_end_sample - transition_samples);
-}
-
 XMLNode&
 AudioTrigger::get_state (void)
 {
@@ -1172,12 +1184,6 @@ timepos_t
 AudioTrigger::start_offset () const
 {
 	return timepos_t (_start_offset);
-}
-
-timepos_t
-AudioTrigger::current_pos() const
-{
-	return timepos_t (process_index);
 }
 
 void
@@ -1612,11 +1618,12 @@ AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
 void
 AudioTrigger::retrigger ()
 {
+	Trigger::retrigger ();
+
 	update_properties ();
 	reset_stretcher ();
 
 	read_index = _start_offset + _legato_offset;
-	process_index = 0;
 	retrieved = 0;
 	_legato_offset = 0; /* used one time only */
 
@@ -2116,7 +2123,11 @@ MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::
 		final_beat = len.beats ();
 	}
 
-	return timepos_t (final_beat);
+	timepos_t e (final_beat);
+
+	final_processed_sample = e.samples() - transition_samples;
+
+	return e;
 }
 
 SegmentDescriptor
@@ -2192,21 +2203,6 @@ MIDITrigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
 	_box.tracker->resolve_notes (mb, dest_offset);
 
 	retrigger ();
-}
-
-double
-MIDITrigger::position_as_fraction () const
-{
-	if (!active()) {
-		return 0.0;
-	}
-
-	Temporal::DoubleableBeats db (last_event_beats);
-
-	double dl = db.to_double ();
-	double dr = data_length.to_double ();
-
-	return dl / dr;
 }
 
 XMLNode&
@@ -2336,12 +2332,6 @@ MIDITrigger::start_offset () const
 	return timepos_t (m.to_quarters (_start_offset));
 }
 
-timepos_t
-MIDITrigger::current_pos() const
-{
-	return timepos_t (last_event_beats);
-}
-
 void
 MIDITrigger::set_length (timecnt_t const & newlen)
 {
@@ -2391,6 +2381,8 @@ MIDITrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 void
 MIDITrigger::retrigger ()
 {
+	Trigger::retrigger ();
+
 	update_properties ();
 
 	/* XXX need to deal with bar offsets */
@@ -2574,6 +2566,8 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	if (_state == Stopped || _state == Stopping) {
 		when_stopped_during_run (bufs, dest_offset + covered_frames);
 	}
+
+	process_index += covered_frames;
 
 	return covered_frames;
 }

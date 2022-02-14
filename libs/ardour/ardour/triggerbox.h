@@ -254,10 +254,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void set_length (timecnt_t const &) = 0;
 	virtual void reload (BufferSet&, void*) = 0;
 	virtual void io_change () {}
-	virtual timepos_t current_pos() const = 0;
 	virtual void set_legato_offset (timepos_t const & offset) = 0;
 
-	virtual double position_as_fraction() const = 0;
+	timepos_t current_pos() const;
+	double position_as_fraction() const;
 
 	Temporal::BBT_Time compute_start (Temporal::TempoMap::SharedPtr const &, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start);
 	virtual timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t) = 0;
@@ -365,6 +365,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	};
 
 	boost::shared_ptr<Region> _region;
+	samplecnt_t                process_index;
+	samplepos_t                final_processed_sample;  /* where we stop playing, in process time, compare with process_index */
 	UIState                    ui_state;
 	TriggerBox&               _box;
 	UIRequests                _requests;
@@ -407,7 +409,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	void when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset);
 	void set_region_internal (boost::shared_ptr<Region>);
-	virtual void retrigger() = 0;
+	virtual void retrigger();
 	virtual void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
 
 	bool internal_use_follow_length() const;
@@ -441,7 +443,6 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
 	void set_legato_offset (timepos_t const &);
-	timepos_t current_pos() const;
 	void set_length (timecnt_t const &);
 	timepos_t start_offset () const; /* offset from start of data */
 	timepos_t current_length() const; /* offset from start of data */
@@ -449,8 +450,6 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void reload (BufferSet&, void*);
 	void io_change ();
 	bool probably_oneshot () const;
-
-	double position_as_fraction() const;
 
 	int set_region_in_worker_thread (boost::shared_ptr<Region>);
 	void jump_start ();
@@ -485,9 +484,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	/* computed during run */
 
 	samplecnt_t read_index;
-	samplecnt_t process_index;
 	samplepos_t last_readable_sample;   /* where the data runs out, relative to the start of the data, compare with read_index */
-	samplepos_t final_processed_sample;  /* where we stop playing, in process time, compare with process_index */
 	samplepos_t _legato_offset;
 	samplecnt_t retrieved;
 	samplecnt_t got_stretcher_padding;
@@ -519,7 +516,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
 	void set_legato_offset (timepos_t const &);
-	timepos_t current_pos() const;
 	void set_length (timecnt_t const &);
 	timepos_t start_offset () const;
 	timepos_t end() const;            /* offset from start of data */
@@ -527,8 +523,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	timepos_t natural_length() const; /* offset from start of data */
 	void reload (BufferSet&, void*);
 	bool probably_oneshot () const;
-
-	double position_as_fraction() const;
 
 	int set_region_in_worker_thread (boost::shared_ptr<Region>);
 	void jump_start ();
