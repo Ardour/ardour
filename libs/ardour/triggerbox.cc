@@ -2812,6 +2812,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	if (pos >= transport_position || !prev) {
 		/* nothing to do */
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: no trigger to be rolled\n", order()));
+		_currently_playing = 0;
 		_locate_armed = false;
 		if (tracker) {
 			tracker->reset ();
