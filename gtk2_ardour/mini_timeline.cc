@@ -401,7 +401,7 @@ MiniTimeline::draw_mark (cairo_t* cr, int marker_loc, int marker_right_edge, con
 }
 
 int
-MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int &leftmost_cue_pos, int tl_width, int cue_index, bool& prelight)
+MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int next_cue_left_edge, int tl_width, int cue_index, bool& prelight)
 {
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 
@@ -425,15 +425,10 @@ MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int &leftmost_cue_pos, int 
 	};
 
 	// draw a bar to show that the Cue continues forever
-	{
-		cairo_rectangle (cr, marker_loc, y_center-2*scale, tl_width, 4*scale);
-		if (cue_index==INT32_MAX) {
-			set_source_rgba (cr, UIConfiguration::instance().color ("ruler base"));
-		} else {
-			set_source_rgba (cr, color);
-		}
+	if (cue_index!=INT32_MAX) {
+		cairo_rectangle (cr, marker_loc, y_center-2*scale, next_cue_left_edge - marker_loc, 4*scale);
+		set_source_rgba (cr, color);
 		cairo_fill (cr);
-		leftmost_cue_pos = marker_loc;
 	}
 
 	// draw the Cue
@@ -688,20 +683,35 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	int id = 0;
 	int leftmost_marker_left_edge = width;
 
-	/* draw 'bar' to show that Cues are continuous */
-	int leftmost_cue_pos = width;
+	/* calculate positions of cue markers immediately before and inside my width*/
+	int prior_cue_pos = width;
+	int prior_cue_idx = -1;
+	int first_shown_cue_pos = width;
 	for (std::vector<LocationMarker>::const_iterator l = lm.begin(); l != lm.end(); l++) {
 		if ((*l).cue_index >=0 ) {
 			const samplepos_t when = (*l).when.samples();
-			leftmost_cue_pos = floor (width * .5 + (when - phead) * _px_per_sample);
-			leftmost_cue_pos = std::max ( leftmost_cue_pos, 0 );
-			break;
+			int cue_pos = floor (width * .5 + (when - phead) * _px_per_sample);
+			if (cue_pos < 0) {
+				prior_cue_pos = cue_pos;
+				prior_cue_idx = (*l).cue_index;
+			} else if (cue_pos < width) {
+				first_shown_cue_pos = cue_pos;
+				break;
+			} else {
+				break;
+			}
 		}
 	}
-	if (leftmost_cue_pos < width) {
+
+	/* if there is a cue off-window immediately to the left, we need to draw its bar to show that Cues are continuous */
+	if (prior_cue_pos < 0 && prior_cue_idx != INT32_MAX) {
 		uint32_t color = UIConfiguration::instance().color ("location marker");
+		CueBehavior cb (Config->get_cue_behavior());
+		if (!(cb & ARDOUR::FollowCues)) {
+			color = Gtkmm2ext::HSV(color).darker(0.5).color();
+		};
 		int y_center = PADDING + _marker_height + 2*scale + _marker_height/2;
-		cairo_rectangle (cr, leftmost_cue_pos, y_center-2*scale, width, 4*scale);
+		cairo_rectangle (cr, 0, y_center-2*scale, first_shown_cue_pos, 4*scale);
 		set_source_rgba (cr, color);
 		cairo_fill (cr);
 	}
@@ -722,13 +732,23 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			break;
 		}
 		int marker_loc = floor (width * .5 + (when - phead) * _px_per_sample);
-		int marker_rightmost_marker_right_edge = width;
 
 		//peek forward to set our marker's right-side limit
+		int next_marker_left_edge = width;
 		std::vector<LocationMarker>::const_iterator peek = l;
 		for (peek++; peek != lm.end(); peek++) {
 			if ((*peek).cue_index == -1) {
-				marker_rightmost_marker_right_edge = floor (width * .5 + ((*peek).when.samples() - phead) * _px_per_sample) - 1 - marker_width;
+				next_marker_left_edge = floor (width * .5 + ((*peek).when.samples() - phead) * _px_per_sample) - 1 - marker_width;
+				break;
+			}
+		}
+
+		//peek forward to set our cue's right side limit
+		int next_cue_left_edge = width;
+		peek = l;
+		for (peek++; peek != lm.end(); peek++) {
+			if ((*peek).cue_index >= 0) {
+				next_cue_left_edge = floor (width * .5 + ((*peek).when.samples() - phead) * _px_per_sample) - 1 - marker_width;
 				break;
 			}
 		}
@@ -739,9 +759,9 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			int marker_left_edge = marker_loc - marker_width/2;
 			int marker_right_edge = 0;
 			if (cue_index >= 0) {
-				marker_right_edge = draw_cue (cr, marker_loc, leftmost_cue_pos, width, cue_index, prelight);
+				marker_right_edge = draw_cue (cr, marker_loc, next_cue_left_edge, width, cue_index, prelight);
 			} else {
-				marker_right_edge = draw_mark (cr, marker_loc, marker_rightmost_marker_right_edge, label, prelight);
+				marker_right_edge = draw_mark (cr, marker_loc, next_marker_left_edge, label, prelight);
 				leftmost_marker_left_edge = std::min(marker_left_edge, leftmost_marker_left_edge);
 				rightmost_marker_right_edge = std::max (marker_right_edge, rightmost_marker_right_edge);
 			}
