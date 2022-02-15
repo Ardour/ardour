@@ -1630,7 +1630,7 @@ AudioTrigger::retrigger ()
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2\n", _index, read_index));
 }
 
-template<bool actually_run>
+template<bool in_process_context>
 pframes_t
 AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
                          Temporal::Beats const & start, Temporal::Beats const & end,
@@ -1638,7 +1638,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
 	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
-	const uint32_t nchans = (actually_run ? std::min (bufs.count().n_audio(), ar->n_channels()) : ar->n_channels());
+	const uint32_t nchans = (in_process_context ? std::min (bufs.count().n_audio(), ar->n_channels()) : ar->n_channels());
 	int avail = 0;
 	BufferSet* scratch;
 	std::unique_ptr<BufferSet> scratchp;
@@ -1670,13 +1670,13 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 	 * purpose, we use a generic variable name ('bufp') to refer to them.
 	 */
 
-	if (actually_run) {
+	if (in_process_context) {
 		scratch = &(_box.session().get_scratch_buffers (ChanCount (DataType::AUDIO, nchans)));
 	} else {
 		scratchp.reset (new BufferSet ());
 		scratchp->ensure_buffers (DataType::AUDIO, nchans, nframes);
-		/* have to set up scratch as a raw ptr so that the actually_run
-		   and !actually_run case can use the same code syntax
+		/* have to set up scratch as a raw ptr so that the in_process_context
+		   and !in_process_context case can use the same code syntax
 		*/
 		scratch = scratchp.get();
 	}
@@ -1837,7 +1837,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 		/* deliver to buffers */
 
-		if (actually_run) { /* constexpr, will be handled at compile time */
+		if (in_process_context) { /* constexpr, will be handled at compile time */
 
 			for (uint32_t chn = 0; chn < bufs.count().n_audio(); ++chn) {
 
@@ -2390,13 +2390,13 @@ MIDITrigger::reload (BufferSet&, void*)
 {
 }
 
-template<bool actually_run>
+template<bool in_process_context>
 pframes_t
 MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
                        Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
                        pframes_t nframes, pframes_t dest_offset, double bpm)
 {
-	MidiBuffer* mb (actually_run? &bufs.get_midi (0) : 0);
+	MidiBuffer* mb (in_process_context? &bufs.get_midi (0) : 0);
 	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
@@ -2451,7 +2451,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			break;
 		}
 
-		if (actually_run) { /* compile-time const expr */
+		if (in_process_context) { /* compile-time const expr */
 
 			/* Now we have to convert to a position within the buffer we
 			 * are writing to.
@@ -2497,7 +2497,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	}
 
 
-	if (actually_run && _state == Stopping) { /* first clause is a compile-time constexpr */
+	if (in_process_context && _state == Stopping) { /* first clause is a compile-time constexpr */
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was stopping, now stopped, resolving notes @ %2\n", index(), nframes-1));
 		_box.tracker->resolve_notes (*mb, nframes-1);
 	}
