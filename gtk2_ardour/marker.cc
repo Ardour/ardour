@@ -317,7 +317,9 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 
 		_pcue->show();
 		_pmark->hide();
-		_name_flag->hide();
+		if (_name_flag) {
+			_name_flag->hide();
+		}
 	} else {
 		_pcue->hide();
 		_pmark->show();
