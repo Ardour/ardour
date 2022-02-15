@@ -204,7 +204,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		points->push_back (ArdourCanvas::Duple ( M5, 0.0));
 
 		_shift = 5 * scale;
-		_label_offset = 8.0 * scale;
+		_label_offset = 12.0 * scale;
 		break;
 
 	case SessionStart:
@@ -292,7 +292,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 	group->name = string_compose ("Marker::group for %1", annotation);
 #endif
 
-	if (type != RegionCue) {
+	if ((type != RegionCue) && (type != Meter)) {
 		_name_flag = new ArdourCanvas::Rectangle (group);
 #ifdef CANVAS_DEBUG
 		_name_flag->name = string_compose ("Marker::_name_flag for %1", annotation);
@@ -637,8 +637,7 @@ ArdourMarker::set_color_rgba (uint32_t c)
 			/* make sure text stands out over bg color */
 			_name_item->set_color (contrasting_text_color (_color));
 		} else {
-			/* make sure text is same color as everything else */
-			_name_item->set_color (_color);
+			_name_item->set_color (RGBA_TO_UINT (255,255,255,255));  //white: matched to TempoCurve text
 		}
 	}
 
