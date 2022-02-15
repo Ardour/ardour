@@ -1026,6 +1026,54 @@ Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 	}
 }
 
+template<typename TriggerType>
+void
+Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, TriggerType& trigger,
+                            pframes_t (TriggerType::*run_method) (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
+                                                                  Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
+                                                                  pframes_t nframes, pframes_t dest_offset, double bpm))
+{
+	const pframes_t block_size = AudioEngine::instance()->samples_per_cycle ();
+	BufferSet bufs;
+
+	/* no need to allocate any space for BufferSet because we call
+	   audio_run<false>() which is guaranteed to never use the buffers.
+
+	   AudioTrigger::_startup() also does not use BufferSet (MIDITrigger
+	   does, and we use virtual functions so the argument list is the same
+	   for both, even though only the MIDI case needs the BufferSet).
+	*/
+
+	startup (bufs, 0, _quantization);
+	_cue_launched = true;
+
+	samplepos_t pos = start_pos;
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+
+	while (pos < end_position) {
+		pframes_t nframes = std::min (block_size, (pframes_t) (end_position - pos));
+		Temporal::Beats start_beats = tmap->quarters_at (timepos_t (pos));
+		Temporal::Beats end_beats = tmap->quarters_at (timepos_t (pos+nframes));
+		const double bpm = tmap->quarters_per_minute_at (timepos_t (start_beats));
+
+		pframes_t n = (trigger.*run_method) (bufs, pos, pos+nframes, start_beats, end_beats, nframes, 0, bpm);
+
+		/* We could have reached the end. Check and restart, because
+		 * TriggerBox::fast_forward() already determined that we are
+		 * the active trigger at @param end_position
+		 */
+
+		if (_state == Stopped) {
+			retrigger ();
+			_state = WaitingToStart;
+			_cue_launched = true;
+		}
+
+		pos += n;
+	}
+}
+
+
 
 /*--------------------*/
 
@@ -1189,44 +1237,7 @@ AudioTrigger::start_offset () const
 void
 AudioTrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position)
 {
-	const pframes_t block_size = AudioEngine::instance()->samples_per_cycle ();
-	BufferSet bufs;
-
-	/* no need to allocate any space for BufferSet because we call
-	   audio_run<false>() which is guaranteed to never use the buffers.
-
-	   AudioTrigger::_startup() also does not use BufferSet (MIDITrigger
-	   does, and we use virtual functions so the argument list is the same
-	   for both, even though only the MIDI case needs the BufferSet).
-	*/
-
-	startup (bufs, 0, _quantization);
-	_cue_launched = true;
-
-	samplepos_t pos = start_pos;
-	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-
-	while (pos < end_position) {
-		pframes_t nframes = std::min (block_size, (pframes_t) (end_position - pos));
-		Temporal::Beats start_beats = tmap->quarters_at (timepos_t (pos));
-		Temporal::Beats end_beats = tmap->quarters_at (timepos_t (pos+nframes));
-		const double bpm = tmap->quarters_per_minute_at (timepos_t (start_beats));
-
-		pframes_t n = audio_run<false> (bufs, pos, pos+nframes, start_beats, end_beats, nframes, 0, bpm);
-
-		/* We could have reached the end. Check and restart, because
-		 * TriggerBox::fast_forward() already determined that we are
-		 * the active trigger at @param end_position
-		 */
-
-		if (_state == Stopped) {
-			retrigger ();
-			_state = WaitingToStart;
-			_cue_launched = true;
-		}
-
-		pos += n;
-	}
+	Trigger::start_and_roll_to<AudioTrigger> (start_pos, end_position, *this, &AudioTrigger::audio_run<false>);
 }
 
 timepos_t
@@ -2049,44 +2060,7 @@ MIDITrigger::probably_oneshot () const
 void
 MIDITrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position)
 {
-	const pframes_t block_size = AudioEngine::instance()->samples_per_cycle ();
-	BufferSet bufs;
-
-	/* no need to allocate any space for BufferSet because we call
-	   audio_run<false>() which is guaranteed to never use the buffers.
-
-	   AudioTrigger::_startup() also does not use BufferSet (MIDITrigger
-	   does, and we use virtual functions so the argument list is the same
-	   for both, even though only the MIDI case needs the BufferSet).
-	*/
-
-	startup (bufs, 0, _quantization);
-	_cue_launched = true;
-
-	samplepos_t pos = start_pos;
-	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-
-	while (pos < end_position) {
-		pframes_t nframes = std::min (block_size, (pframes_t) (end_position - pos));
-		Temporal::Beats start_beats = tmap->quarters_at (timepos_t (pos));
-		Temporal::Beats end_beats = tmap->quarters_at (timepos_t (pos+nframes));
-		const double bpm = tmap->quarters_per_minute_at (timepos_t (start_beats));
-
-		pframes_t n = midi_run<false> (bufs, pos, pos+nframes, start_beats, end_beats, nframes, 0, bpm);
-
-		/* We could have reached the end. Check and restart, because
-		 * TriggerBox::fast_forward() already determined that we are
-		 * the active trigger at @param end_position
-		 */
-
-		if (_state == Stopped) {
-			retrigger ();
-			_state = WaitingToStart;
-			_cue_launched = true;
-		}
-
-		pos += n;
-	}
+	Trigger::start_and_roll_to (start_pos, end_position, *this, &MIDITrigger::midi_run<false>);
 }
 
 timepos_t

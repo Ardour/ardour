@@ -310,6 +310,12 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	                                   Temporal::BBT_Time& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
 	                                   Temporal::TempoMap::SharedPtr const & tmap);
 
+
+	template<typename TriggerType>
+		void start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, TriggerType& trigger,
+		                        pframes_t (TriggerType::*run_method) (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
+		                                                              Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
+		                                                              pframes_t nframes, pframes_t dest_offset, double bpm));
 	void set_next_trigger (int n);
 	int next_trigger() const { return _next_trigger; }
 
