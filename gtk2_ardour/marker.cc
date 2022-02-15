@@ -292,7 +292,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 	group->name = string_compose ("Marker::group for %1", annotation);
 #endif
 
-	if ((type != RegionCue) && (type != Meter)) {
+	if ((type != RegionCue) && (type != Meter) && (type != Tempo)) {
 		_name_flag = new ArdourCanvas::Rectangle (group);
 #ifdef CANVAS_DEBUG
 		_name_flag->name = string_compose ("Marker::_name_flag for %1", annotation);
