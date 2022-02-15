@@ -2510,7 +2510,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		if (last_event_timeline_beats <= final_beat) {
 
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ... leb %2 >= fb %3\n", index(), last_event_timeline_beats, final_beat));
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ... leb %2 <= fb %3\n", index(), last_event_timeline_beats, final_beat));
 
 			if (_state != Playout) {
 				_state = Playout;
@@ -2534,18 +2534,13 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		} else {
 
+			samplepos_t final_processed_sample = tmap->sample_at (timepos_t (final_beat));
+			nframes = orig_nframes - (final_processed_sample - start_sample);
 			_loop_cnt++;
 			_state = Stopped;
-
-			/* the time we processed spans from start to the last event */
-
-			if (last_event_samples != max_samplepos) {
-				nframes = (last_event_samples - start_sample);
-			} else {
-				/* all frames covered */
-				nframes = 0;
-			}
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached final event, now stopped, nf = %2 fb %3 fs %4 %5\n", index(), nframes, final_beat, final_processed_sample, start_sample));
 		}
+
 	} else {
 		/* we didn't reach the end of the MIDI data, ergo we covered
 		   the entire timespan passed into us.
