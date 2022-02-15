@@ -98,6 +98,9 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 	const double M3 = std::max(1.f, rintf(3.f * scale));
 	const double M6 = std::max(2.f, rintf(6.f * scale));
 
+	const double M5 =  std::max(1.f, rintf(5.f * scale));
+	const double M10 = std::max(2.f, rintf(10.f * scale));
+
 	/* Shapes we use:
 	 *
 	 * Mark:
@@ -193,14 +196,14 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 	case Tempo:
 	case Meter:
 		points = new ArdourCanvas::Points ();
-		points->push_back (ArdourCanvas::Duple ( M3, 0.0));
-		points->push_back (ArdourCanvas::Duple ( M6, MH * .6));
-		points->push_back (ArdourCanvas::Duple ( M6, MH));
+		points->push_back (ArdourCanvas::Duple ( M5, 0.0));
+		points->push_back (ArdourCanvas::Duple ( M10, MH * .6));
+		points->push_back (ArdourCanvas::Duple ( M10, MH));
 		points->push_back (ArdourCanvas::Duple (0.0, MH));
 		points->push_back (ArdourCanvas::Duple (0.0, MH * .6));
-		points->push_back (ArdourCanvas::Duple ( M3, 0.0));
+		points->push_back (ArdourCanvas::Duple ( M5, 0.0));
 
-		_shift = 3 * scale;
+		_shift = 5 * scale;
 		_label_offset = 8.0 * scale;
 		break;
 
