@@ -628,7 +628,7 @@ void
 CueMaster::set_default_colors ()
 {
 	set_fill_color (HSV (UIConfiguration::instance ().color ("theme:bg")).darker (0.5).color ());
-	stop_shape->set_fill_color (UIConfiguration::instance ().color ("neutral:midground"));
+	stop_shape->set_fill_color (UIConfiguration::instance ().color ("location marker"));
 }
 
 void
