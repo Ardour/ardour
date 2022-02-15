@@ -2097,14 +2097,6 @@ MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ends: FL %2 DL %3 tbbt %4 fl %5\n", index(), end_by_follow_length, end_by_data_length, transition_bbt, _follow_length));
 
-	Temporal::Beats usable_length;
-
-	if (internal_use_follow_length() && (end_by_follow_length < end_by_data_length)) {
-		usable_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length)) - transition_beats;
-	} else {
-		usable_length = data_length;
-	}
-
 	Temporal::BBT_Offset q (_quantization);
 
 	if (launch_style() != Repeat || (q == Temporal::BBT_Offset())) {
