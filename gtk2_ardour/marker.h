@@ -186,7 +186,6 @@ class TempoMarker : public MetricMarker
 	Temporal::TempoPoint const & tempo() const { return *_tempo; }
 	Temporal::Point const & point() const;
 
-	void update_height_mark (const double ratio);
 	TempoCurve& curve();
 
   private:

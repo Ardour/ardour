@@ -302,12 +302,6 @@ Editor::draw_tempo_marks ()
 	}
 
 	update_tempo_curves (min_tempo, max_tempo, sr);
-
-	for (auto & m : tempo_marks) {
-		TempoMarker* tm = static_cast<TempoMarker*> (m);
-		tm->update_height_mark ((tm->tempo().note_types_per_minute() - min_tempo) / max (10.0, max_tempo - min_tempo));
-		std::cerr << "TEMPO:\n\t" << tm->tempo() << std::endl;
-	}
 }
 
 void

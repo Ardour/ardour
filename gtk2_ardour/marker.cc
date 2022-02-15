@@ -703,26 +703,6 @@ TempoMarker::curve()
 }
 
 void
-TempoMarker::update_height_mark (const double ratio)
-{
-	const double MH = marker_height - .5;
-	const double top = MH * (1 - ratio);
-	const double M3 = std::max(1.f, rintf(3.f * UIConfiguration::instance().get_ui_scale()));
-	const double M6 = std::max(2.f, rintf(6.f * UIConfiguration::instance().get_ui_scale()));
-
-	delete points;
-	points = new ArdourCanvas::Points ();
-	points->push_back (ArdourCanvas::Duple ( M3, top));
-	points->push_back (ArdourCanvas::Duple ( M6, min (top + (MH * .6), MH)));
-	points->push_back (ArdourCanvas::Duple ( M6, MH));
-	points->push_back (ArdourCanvas::Duple (0.0, MH));
-	points->push_back (ArdourCanvas::Duple (0.0, min (top + (MH * .6), MH)));
-	points->push_back (ArdourCanvas::Duple ( M3, top));
-
-	_pmark->set (*points);
-}
-
-void
 TempoMarker::reset_tempo (Temporal::TempoPoint const & t)
 {
 	_tempo = &t;
