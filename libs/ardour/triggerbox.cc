@@ -2666,6 +2666,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	if (cues.empty() || !(Config->get_cue_behavior() & FollowCues) || (cues.front().time > transport_position)) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: nothing to be done\n", order()));
 		_locate_armed = false;
+		_currently_playing = 0;
 		if (tracker) {
 			tracker->reset ();
 		}
