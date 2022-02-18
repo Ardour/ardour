@@ -668,7 +668,7 @@ Trigger::jump_start()
 	*/
 	_state = Running;
 	/* XXX set expected_end_sample */
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 jump_start() requested state %2\n", index(), enum_2_string (_state)));
 	send_property_change (ARDOUR::Properties::running);
 }
 
@@ -679,7 +679,7 @@ Trigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
 	   wait for quantization.
 	*/
 	shutdown (bufs, dest_offset);
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 jump_stop() requested state %2\n", index(), enum_2_string (_state)));
 	send_property_change (ARDOUR::Properties::running);
 }
 
@@ -691,7 +691,7 @@ Trigger::begin_stop (bool explicit_stop)
 	*/
 	_state = WaitingToStop;
 	_explicitly_stopped = explicit_stop;
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requested state %2\n", index(), enum_2_string (_state)));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 begin_stop() requested state %2\n", index(), enum_2_string (_state)));
 	send_property_change (ARDOUR::Properties::running);
 }
 
@@ -944,7 +944,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 		nframes = transition_samples - start_sample;
 
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 will stop somewhere in the middle of run(), specifically at %2 (%3) vs expected end at %4\n", name(), transition_beats, expected_end_sample));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 will stop somewhere in the middle of run(), specifically at %3 (%4) vs expected end at %5\n", index(), name(), transition_beats, transition_samples, expected_end_sample));
 
 		/* offset within the buffer(s) for output remains
 		   unchanged, since we will write from the first
@@ -1674,7 +1674,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 	maybe_compute_next_transition (start_sample, start, end, nframes, dest_offset);
 	const pframes_t orig_nframes = nframes;
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2, will stretch %3, nf will be %4\n", name(), enum_2_string (_state), do_stretch, nframes));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 after checking for transition, state = %3, will stretch %4, nf will be %5 of %6\n", index(), name(), enum_2_string (_state), do_stretch, nframes));
 
 	switch (_state) {
 	case Stopped:
@@ -1719,6 +1719,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("clip tempo %1 bpm %2 ratio %3%4\n", _segment_tempo, bpm, std::setprecision (6), stretch));
 
 		if ((avail = _stretcher->available()) < 0) {
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 stretcher->available() returned %3 - not configured!\n", index(), name(), avail));
 			error << _("Could not configure rubberband stretcher") << endmsg;
 			return 0;
 		}
@@ -1839,9 +1840,9 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_processed_sample));
 							_playout = true;
 						} else {
-							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, now stopped, retrieved %2, avail %3 pi %4 vs fs %5\n", index(), retrieved, avail, process_index, final_processed_sample));
 							_state = Stopped;
 							_loop_cnt++;
+							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, now stopped, retrieved %2, avail %3 pi %4 vs fs %5 LC now %6\n", index(), retrieved, avail, process_index, final_processed_sample, _loop_cnt));
 						}
 
 						break;
@@ -1939,6 +1940,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 		_state = Stopped;
 		_loop_cnt++;
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout finished, LC now %4\n", index(), _loop_cnt));
 	}
 
 	if (_state == Stopped || _state == Stopping) {
@@ -2495,7 +2497,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		if (last_event_timeline_beats <= final_beat) {
 
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ... leb %2 <= fb %3\n", index(), last_event_timeline_beats, final_beat));
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ... leb %2 < fb %3\n", index(), last_event_timeline_beats, final_beat));
 
 			_playout = true;
 
@@ -2518,7 +2520,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			nframes = orig_nframes - (final_processed_sample - start_sample);
 			_loop_cnt++;
 			_state = Stopped;
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached final event, now stopped, nf = %2 fb %3 fs %4 %5\n", index(), nframes, final_beat, final_processed_sample, start_sample));
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached final event, now stopped, nf = %2 fb %3 fs %4 %5 LC %6\n", index(), nframes, final_beat, final_processed_sample, start_sample, _loop_cnt));
 		}
 
 	} else {
@@ -2664,7 +2666,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 {
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: ffwd to %2\n", order(), transport_position));
 	if (cues.empty() || !(Config->get_cue_behavior() & FollowCues) || (cues.front().time > transport_position)) {
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: nothing to be done\n", order()));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: nothing to be done, cp = %2\n", order(), _currently_playing));
 		_locate_armed = false;
 		_currently_playing = 0;
 		if (tracker) {
