@@ -411,7 +411,6 @@ Trigger::name () const \
 
 TRIGGER_UI_SET (cue_isolated,bool)
 TRIGGER_UI_SET (stretchable, bool)
-TRIGGER_UI_SET (gain, gain_t)
 TRIGGER_UI_SET (velocity_effect, float)
 TRIGGER_UI_SET (follow_count, uint32_t)
 TRIGGER_UI_SET_CONST_REF (follow_action0, FollowAction)
@@ -460,6 +459,18 @@ void
 Trigger::set_ui (void* p)
 {
 	_ui = p;
+}
+
+void
+Trigger::set_gain (gain_t g)
+{
+	if (_gain == g) {
+		return;
+	}
+
+	_gain = g;
+	send_property_change (Properties::gain);
+	_box.session().set_dirty();
 }
 
 void

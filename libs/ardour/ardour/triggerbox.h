@@ -219,7 +219,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	TRIGGERBOX_PROPERTY_DECL_CONST_REF (follow_length, Temporal::BBT_Offset);
 	TRIGGERBOX_PROPERTY_DECL (use_follow_length, bool);
 	TRIGGERBOX_PROPERTY_DECL (legato, bool);
-	TRIGGERBOX_PROPERTY_DECL (gain, gain_t);
 	TRIGGERBOX_PROPERTY_DECL (velocity_effect, float);
 	TRIGGERBOX_PROPERTY_DECL (stretchable, bool);
 	TRIGGERBOX_PROPERTY_DECL (cue_isolated, bool);
@@ -345,6 +344,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void setup_stretcher () = 0;
 
 	Temporal::Meter meter() const { return _meter; }
+
+	gain_t gain() {return _gain;}
+	void set_gain (gain_t g);
 
 	void set_velocity_gain (gain_t g) {_pending_velocity_gain=g;}
 
