@@ -3585,6 +3585,11 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 					} else if (_currently_playing->state() != Trigger::WaitingToStop) {
 
+						/* Notice that this condition
+						 * leaves the next trigger to
+						 * run in the queue.
+						 */
+
 						/* but just begin stoppingthe currently playing slot */
 						_currently_playing->begin_stop ();
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("start stop for %1 before switching to %2\n", _currently_playing->index(), nxt->index()));
