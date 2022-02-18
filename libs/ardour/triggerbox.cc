@@ -653,6 +653,7 @@ Trigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
 {
 	_state = Stopped;
 	_playout = false;
+	_loop_cnt = 0;
 	_cue_launched = false;
 	_pending_velocity_gain = _velocity_gain = 1.0;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
