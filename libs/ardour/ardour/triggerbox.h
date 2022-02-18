@@ -73,28 +73,28 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
 	enum State {
 		/* This is the initial state for a Trigger, and means that it is not
-		 *doing anything at all
+		 * doing anything at all
 		 */
 		Stopped,
 		/* A Trigger in this state has been chosen by its parent TriggerBox
 		 * (e.g. because of a bang() call that put it in the queue), a Trigger in
 		 * this state is waiting for the next occurence of its quantization to
-		 *  occur before transitioning to Running
+		 * occur before transitioning to Running
 		 */
 		WaitingToStart,
 		/* a Trigger in this state is going to deliver data during calls
-		 *  to its ::run() method.
+		 * to its ::run() method.
 		 */
 		Running,
 		/* a Trigger in this state was running, has been re-triggered e.g. by a
-		 *  ::bang() call with LaunchStyle set to Repeat, and is waiting for the
-		 *  next occurence of its quantization to occur before transitioning
-		 *  back to Running.
+		 * ::bang() call with LaunchStyle set to Repeat, and is waiting for the
+		 * next occurence of its quantization to occur before transitioning
+		 * back to Running.
 		 */
 		WaitingForRetrigger,
 		/* a Trigger in this state is delivering data during calls to ::run(), but
-		 *  is waiting for the next occurence of its quantization to occur when it will
-		 *transition to Stopping and then Stopped.
+		 * is waiting for the next occurence of its quantization to occur when it will
+		 * transition to Stopping and then Stopped.
 		 */
 		WaitingToStop,
 		/* a Trigger in this state was Running but noticed that it should stop
