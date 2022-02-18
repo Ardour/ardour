@@ -2407,7 +2407,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		break;
 	}
 
-	Temporal::Beats last_event_timeline_beats;
+	Temporal::Beats last_event_timeline_beats = final_beat; /* will indicate "done" if there is nothing to do */
 
 	while (iter != model->end() && !_playout) {
 
