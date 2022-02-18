@@ -2495,7 +2495,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, leb %2 les %3 fb %4 dl %5\n", index(), last_event_timeline_beats, last_event_samples, final_beat, data_length));
 
-		if (last_event_timeline_beats <= final_beat) {
+		if (last_event_timeline_beats < final_beat) {
 
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ... leb %2 < fb %3\n", index(), last_event_timeline_beats, final_beat));
 
