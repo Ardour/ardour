@@ -853,7 +853,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Trigger, Stopped);
 	REGISTER_CLASS_ENUM (Trigger, WaitingToStart);
 	REGISTER_CLASS_ENUM (Trigger, Running);
-	REGISTER_CLASS_ENUM (Trigger, Playout);
 	REGISTER_CLASS_ENUM (Trigger, WaitingForRetrigger);
 	REGISTER_CLASS_ENUM (Trigger, WaitingToStop);
 	REGISTER_CLASS_ENUM (Trigger, Stopping);
