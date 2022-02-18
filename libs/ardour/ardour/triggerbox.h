@@ -102,10 +102,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		 * have transitioned to Stopped.
 		 */
 		Stopping,
-		/* a Trigger in this state has played all of its data and is
-		 * now silent-filling until we reach the "true end" of the trigger
-		 */
-		Playout,
 	};
 
 	enum LaunchStyle {
@@ -379,6 +375,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	TriggerBox&               _box;
 	UIRequests                _requests;
 	State                     _state;
+	bool                      _playout;
 	std::atomic<int>          _bang;
 	std::atomic<int>          _unbang;
 	uint32_t                  _index;

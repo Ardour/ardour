@@ -172,6 +172,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, final_processed_sample (0)
 	, _box (b)
 	, _state (Stopped)
+	, _playout (false)
 	, _bang (0)
 	, _unbang (0)
 	, _index (n)
@@ -608,6 +609,7 @@ void
 Trigger::retrigger ()
 {
 	process_index = 0;
+	_playout = false;
 }
 
 void
@@ -628,6 +630,7 @@ void
 Trigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset const & start_quantization)
 {
 	_state = WaitingToStart;
+	_playout = false;
 	_loop_cnt = 0;
 	_velocity_gain = _pending_velocity_gain;
 	_explicitly_stopped = false;
@@ -649,6 +652,7 @@ void
 Trigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
 {
 	_state = Stopped;
+	_playout = false;
 	_cue_launched = false;
 	_pending_velocity_gain = _velocity_gain = 1.0;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
@@ -724,7 +728,6 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 
 		switch (_state) {
 		case Running:
-		case Playout:
 			switch (launch_style()) {
 			case OneShot:
 				/* do nothing, just let it keep playing */
@@ -769,7 +772,6 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 
 		switch (_state) {
 		case Running:
-		case Playout:
 			begin_stop (true);
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, now in WaitingToStop\n", index()));
 			break;
@@ -859,7 +861,7 @@ Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats cons
 
 	/* In these states, we are not waiting for a transition */
 
-	if (_state == Stopped || _state == Running || _state == Stopping || _state == Playout) {
+	if (_state == Stopped || _state == Running || _state == Stopping) {
 		/* no transition */
 		return 0;
 	}
@@ -908,7 +910,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 
 	/* In these states, we are not waiting for a transition */
 
-	if (_state == Running || _state == Stopping || _state == Playout) {
+	if ((_state == Running) || (_state == Stopping)) {
 		/* will cover everything */
 		return;
 	}
@@ -1680,7 +1682,6 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 		/* did everything we could do */
 		return nframes;
 	case Running:
-	case Playout:
 	case WaitingToStop:
 	case Stopping:
 		/* stuff to do */
@@ -1709,7 +1710,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 	/* tell the stretcher what we are doing for this ::run() call */
 
-	if (do_stretch && _state != Playout) {
+	if (do_stretch && !_playout) {
 
 		const double stretch = _segment_tempo / bpm;
 		_stretcher->setTimeRatio (stretch);
@@ -1755,7 +1756,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 		}
 	}
 
-	while (nframes && (_state != Playout)) {
+	while (nframes && !_playout) {
 
 		pframes_t to_stretcher;
 		pframes_t from_stretcher;
@@ -1835,7 +1836,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 						if (process_index < final_processed_sample) {
 							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_processed_sample));
-							_state = Playout;
+							_playout = true;
 						} else {
 							DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached (EX) end, now stopped, retrieved %2, avail %3 pi %4 vs fs %5\n", index(), retrieved, avail, process_index, final_processed_sample));
 							_state = Stopped;
@@ -1896,20 +1897,19 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 			if (process_index < final_processed_sample) {
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, entering playout mode to cover %2 .. %3\n", index(), process_index, final_processed_sample));
-				_state = Playout;
+				_playout = true;
 			} else {
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped, retrieved %2, avail %3\n", index(), retrieved, avail));
 				_state = Stopped;
 				_loop_cnt++;
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, now stopped, retrieved %2, avail %3 LC now %4\n", index(), retrieved, avail, _loop_cnt));
 			}
 			break;
 		}
 	}
 
-
 	pframes_t covered_frames =  orig_nframes - nframes;
 
-	if (_state == Playout) {
+	if (_playout) {
 
 		if (nframes != orig_nframes) {
 			/* we've already taken dest_offset into account, it plays no
@@ -2401,7 +2401,6 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	case WaitingToStart:
 		return nframes;
 	case Running:
-	case Playout:
 	case WaitingToStop:
 	case Stopping:
 		break;
@@ -2409,7 +2408,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 	Temporal::Beats last_event_timeline_beats;
 
-	while (iter != model->end() && _state != Playout) {
+	while (iter != model->end() && !_playout) {
 
 		MidiEvent const & event (*iter);
 
@@ -2497,24 +2496,19 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ... leb %2 <= fb %3\n", index(), last_event_timeline_beats, final_beat));
 
-			if (_state != Playout) {
-				_state = Playout;
+			_playout = true;
 
-			}
-
-			if (_state == Playout) {
-				if (final_beat > end_beats) {
-					/* not finished with playout yet, all frames covered */
-					nframes = 0;
-					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not done with playout, all frames covered\n", index()));
-				} else {
-					/* finishing up playout */
-					samplepos_t final_processed_sample = tmap->sample_at (timepos_t (final_beat));
-					nframes = orig_nframes - (final_processed_sample - start_sample);
-					_loop_cnt++;
-					_state = Stopped;
-					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout done, nf = %2 fb %3 fs %4 %5\n", index(), nframes, final_beat, final_processed_sample, start_sample));
-				}
+			if (final_beat > end_beats) {
+				/* not finished with playout yet, all frames covered */
+				nframes = 0;
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not done with playout, all frames covered\n", index()));
+			} else {
+				/* finishing up playout */
+				samplepos_t final_processed_sample = tmap->sample_at (timepos_t (final_beat));
+				nframes = orig_nframes - (final_processed_sample - start_sample);
+				_loop_cnt++;
+				_state = Stopped;
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout done, nf = %2 fb %3 fs %4 %5 LC %6\n", index(), nframes, final_beat, final_processed_sample, start_sample, _loop_cnt));
 			}
 
 		} else {
