@@ -35,6 +35,8 @@
 #include <gtkmm/menuitem.h>
 #include <gtkmm/stock.h>
 
+#include "widgets/tooltips.h"
+
 #include "ardour/location.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
@@ -119,6 +121,7 @@ SlotPropertyTable::SlotPropertyTable ()
 
 {
 	using namespace Gtk::Menu_Helpers;
+	using namespace ArdourWidgets;
 
 	_follow_count_spinner.set_can_focus(false);
 	_follow_count_spinner.signal_changed ().connect (sigc::mem_fun (*this, &SlotPropertyTable::follow_count_event));
@@ -359,6 +362,25 @@ SlotPropertyTable::SlotPropertyTable ()
 	attach(*trigBox,        0,1, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 	attach(*eLaunchBox,     1,2, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 	attach(*eFollowBox,     2,3, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
+
+	set_tooltip(_name_frame, _("Double-click to rename this Clip"));
+	set_tooltip(_gain_spinner, _("Adjust audio gain (or MIDI velocity) for this clip"));
+	set_tooltip(_load_button, _("Load a new file into this clip"));
+	set_tooltip(_color_button, _("Pick a color for this clip"));
+	set_tooltip(_patch_button, _("View and edit the programs (patches) that this MIDI clip will send to a synth"));
+
+	set_tooltip(_follow_count_spinner, _("Number of times to repeat this clip's Follow Length before triggering the Follow-Action"));
+	set_tooltip(_use_follow_length_button, _("Click to use the Follow Length instead of the Clip Length"));
+	set_tooltip(_follow_length_spinner, _("When enabled, the Follow Length is used instead of Clip Length"));
+	set_tooltip(_velocity_slider, _("MIDI Velocity Sensitivity for clip's volume"));
+	set_tooltip(_follow_probability_slider, _("Probability for the Left vs Right Follow-Action to be activated"));
+	set_tooltip(_follow_left, _("Select an action that will occur when this clip ends"));
+	set_tooltip(_follow_right, _("Select an action that will occur when this clip ends"));
+
+	set_tooltip(_launch_style_button, _("Set the behavior of this clip's launch button"));
+	set_tooltip(_quantize_button, _("Clip will wait until the timeline passes this boundary before it triggers"));
+	set_tooltip(_legato_button, _("If selected, this clip can 'take over' playback in the playback position of the prior clip"));
+	set_tooltip(_isolate_button, _("If selected, this slot will not respond to Cue events (either starting or stopping)"));
 }
 
 SlotPropertyTable::~SlotPropertyTable ()
