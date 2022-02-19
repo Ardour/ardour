@@ -2495,14 +2495,25 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached end, leb %2 les %3 fb %4 dl %5\n", index(), last_event_timeline_beats, last_event_samples, final_beat, data_length));
 
-		if (last_event_timeline_beats < final_beat) {
+		/* "final_beat" is an inclusive end of the trigger, not
+		 * exclusive, so we must use <= here. That is, any last event
+		 * (remeber, iter == model->end() here, so we have already read
+		 * through the entire MIDI model) that is up to AND INCLUDING
+		 * final_beat counts as "haven't reached the end".
+		 */
+
+		if (last_event_timeline_beats <= final_beat) {
 
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 entering playout because ... leb %2 < fb %3\n", index(), last_event_timeline_beats, final_beat));
 
 			_playout = true;
 
 			if (final_beat > end_beats) {
-				/* not finished with playout yet, all frames covered */
+				/* no more events to come before final_beat,
+				 * and that is beyond the end of this ::run()
+				 * call. Not finished with playout yet, but
+				 * all frames covered.
+				 */
 				nframes = 0;
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 not done with playout, all frames covered\n", index()));
 			} else {
