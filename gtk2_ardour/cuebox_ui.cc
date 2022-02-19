@@ -74,6 +74,8 @@ CueEntry::CueEntry (Item* item, uint64_t cue_index)
 	name_button->name = ("slot_selector_button");
 	name_button->show ();
 
+	set_tooltip (_("Click to launch all clips in this row\nRight-click to select properties for all clips in this row"));
+
 	/* watch for cue-recording state */
 	TriggerBox::CueRecordingChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&CueEntry::rec_state_changed, this), gui_context ());
 

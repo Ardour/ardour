@@ -129,6 +129,9 @@ TriggerClipPicker::TriggerClipPicker ()
 	ArdourWidgets::set_tooltip (_play_btn, _("Audition selected clip"));
 	ArdourWidgets::set_tooltip (_stop_btn, _("Stop the audition"));
 	ArdourWidgets::set_tooltip (_open_library_btn, _("Open clip library folder"));
+	ArdourWidgets::set_tooltip (_auditioner_combo, _("Select the Synth used for auditioning"));
+	ArdourWidgets::set_tooltip (_show_plugin_btn, _("Show the GUI for the Auditioner Synth"));
+	ArdourWidgets::set_tooltip (_clip_dir_menu, _("Click to select a clip folder and edit your available clip folders"));
 
 	format_text.set_alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
 	channels_value.set_alignment(Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);

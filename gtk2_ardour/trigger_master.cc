@@ -127,6 +127,8 @@ TriggerMaster::TriggerMaster (Item* parent)
 
 	_loopster = new Loopster (this);
 
+	set_tooltip (_("Click to stop all clips in this track\nRight-click to select properties for all clips in this track"));
+
 #if 0 /* XXX trigger changes */
 	_triggerbox->PropertyChanged.connect (_trigger_prop_connection, MISSING_INVALIDATOR, boost::bind (&TriggerMaster::prop_change, this, _1), gui_context());
 	PropertyChange changed;
@@ -507,6 +509,8 @@ CueMaster::CueMaster (Item* parent)
 	name = X_("trigger stopper");
 
 	Event.connect (sigc::mem_fun (*this, &CueMaster::event_handler));
+
+	set_tooltip (_("Click to stop all clips\nRight-click to select properties for all clips in the grid"));
 
 	stop_shape = new ArdourCanvas::Polygon (this);
 	stop_shape->set_outline (false);

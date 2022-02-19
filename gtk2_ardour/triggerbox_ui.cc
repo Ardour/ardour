@@ -86,6 +86,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 	follow_button->set_outline (false);
 	follow_button->set_fill (true);
 	follow_button->name = ("slot_selector_button");
+	follow_button->set_tooltip (_("Click to select Follow-Actions for this clip"));
 	follow_button->show ();
 
 	name_button = new ArdourCanvas::Rectangle (this);
@@ -96,6 +97,7 @@ TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
 
 	name_text = new Text (name_button);
 	name_text->set_ignore_events (false);
+	name_text->set_tooltip (_("Click to select this clip and edit its properties\nRight-Click for context menu"));
 	name_text->show ();
 
 	/* this will trigger a call to on_trigger_changed() */
@@ -180,7 +182,6 @@ TriggerEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 void
 TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, FollowAction const & icon, float size, float scale) const
 {
-	uint32_t bg_color = fill_color ();
 	uint32_t fg_color = UIConfiguration::instance ().color ("neutral:midground");
 
 	/* in the case where there is a random follow-action, just put a "?" */
@@ -480,8 +481,10 @@ TriggerEntry::on_trigger_changed (PropertyChange const& change)
 	if (change.contains (ARDOUR::Properties::name)) {
 		if (trigger ()->region ()) {
 			name_text->set (short_version (trigger ()->name (), 16));
+			play_button->set_tooltip (_("Launch this clip\nRight-click to select Launch Options for this clip"));
 		} else {
 			name_text->set ("");
+			play_button->set_tooltip (_("Stop other clips on this track.\nRight-click to select Launch Options for this clip"));
 		}
 	}
 
