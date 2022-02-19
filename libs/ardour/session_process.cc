@@ -1645,7 +1645,7 @@ Session::first_cue_within (samplepos_t s, samplepos_t e, bool& was_recorded)
 		return active_cue;
 	}
 
-	if (!(Config->get_cue_behavior() & FollowCues)) {
+	if (!(config.get_cue_behavior() & FollowCues)) {
 		return -1;
 	}
 

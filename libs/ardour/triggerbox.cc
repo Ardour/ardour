@@ -2681,7 +2681,7 @@ TriggerBox::parameter_changed (std::string const & param)
 		reconnect_to_default ();
 
 	} else if (param == "cue-behavior") {
-		bool follow = (Config->get_cue_behavior() & FollowCues);
+		bool follow = (_session.config.get_cue_behavior() & FollowCues);
 		if (follow) {
 
 			/* XXX this is all wrong. We have to do the
@@ -2712,7 +2712,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 {
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: ffwd to %2\n", order(), transport_position));
 
-	if (!(Config->get_cue_behavior() & FollowCues)) {
+	if (!(_session.config.get_cue_behavior() & FollowCues)) {
 		/* do absolutely nothing */
 		return;
 	}
