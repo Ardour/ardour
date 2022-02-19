@@ -276,7 +276,15 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		break;
 
 	case Cue:
+		float offs = 1.0 * scale;
+
 		points = new ArdourCanvas::Points ();
+		points->push_back (ArdourCanvas::Duple (offs,    offs));
+		points->push_back (ArdourCanvas::Duple (MH-offs*2, offs));
+		points->push_back (ArdourCanvas::Duple (MH-offs*2, MH-offs*2));
+		points->push_back (ArdourCanvas::Duple (offs,    MH-offs*2));
+		points->push_back (ArdourCanvas::Duple (offs,    offs));
+
 		_shift = MH/2;
 		_label_offset = 2.0 * scale;
 		break;
@@ -532,7 +540,15 @@ ArdourMarker::setup_name_display ()
 		_name_item->clamp_width (name_width);
 
 		if (_type == Cue) {
-			_name_item->set (cue_marker_name (_cue_index));
+			if (_cue_index != INT32_MAX) {
+				_name_item->set (cue_marker_name (_cue_index));
+				_pcue->show();  //show the circle
+				_pmark->hide();
+			} else {
+				_name_item->set ("");
+				_pcue->hide();  //show a square
+				_pmark->show();
+			}
 		} else {
 			_name_item->set (_name);
 		}
