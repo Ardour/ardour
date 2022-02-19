@@ -188,8 +188,6 @@ RegionView::init (bool wfd)
 	wait_for_data = wfd;
 	sync_mark     = 0;
 	sync_line     = 0;
-	sync_mark     = 0;
-	sync_line     = 0;
 
 	if (name_highlight) {
 		name_highlight->set_data ("regionview", this);
