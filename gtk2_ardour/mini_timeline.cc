@@ -419,7 +419,7 @@ MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int next_cue_left_edge, int
 	uint32_t color = UIConfiguration::instance().color (
 		prelight ? "entered marker" : "location marker");
 
-	CueBehavior cb (Config->get_cue_behavior());
+	CueBehavior cb (_session->config.get_cue_behavior());
 	if (!(cb & ARDOUR::FollowCues)) {
 		color = Gtkmm2ext::HSV(color).darker(0.5).color();
 	};
@@ -706,7 +706,7 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	/* if there is a cue off-window immediately to the left, we need to draw its bar to show that Cues are continuous */
 	if (prior_cue_pos < 0 && prior_cue_idx != INT32_MAX) {
 		uint32_t color = UIConfiguration::instance().color ("location marker");
-		CueBehavior cb (Config->get_cue_behavior());
+		CueBehavior cb (_session->config.get_cue_behavior());
 		if (!(cb & ARDOUR::FollowCues)) {
 			color = Gtkmm2ext::HSV(color).darker(0.5).color();
 		};
