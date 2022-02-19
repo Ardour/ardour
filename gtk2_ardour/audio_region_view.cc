@@ -114,7 +114,6 @@ static Cairo::RefPtr<Cairo::Pattern> create_pending_peak_pattern() {
 AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  uint32_t basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
-	, sync_mark(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
 	, fade_in_trim_handle(0)
@@ -135,7 +134,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxis
 AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  uint32_t basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
-	, sync_mark(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
 	, fade_in_trim_handle(0)
