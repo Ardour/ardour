@@ -217,7 +217,7 @@ Trigger::request_trigger_delete (Trigger* t)
 }
 
 void
-Trigger::get_ui_state (Trigger::UIState &state) const 
+Trigger::get_ui_state (Trigger::UIState &state) const
 {
 	/* this is used for operations like d&d when we want to query the current state */
 	/* you can't return ui_state here because that struct is used to queue properties that are being input *to* the trigger */
@@ -258,7 +258,7 @@ Trigger::set_ui_state (Trigger::UIState &state)
 		set_segment_tempo(state.tempo);
 	}
 }
-	
+
 void
 Trigger::update_properties ()
 {
