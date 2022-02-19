@@ -107,6 +107,8 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 RegionView::RegionView (const RegionView& other)
 	: sigc::trackable(other)
 	, TimeAxisViewItem (other)
+	, sync_mark(0)
+	, sync_line(0)
 	, _silence_text (0)
 	, _xrun_markers_visible (false)
 	, _cue_markers_visible (false)
@@ -186,8 +188,6 @@ RegionView::init (bool wfd)
 	valid         = true;
 	in_destructor = false;
 	wait_for_data = wfd;
-	sync_mark     = 0;
-	sync_line     = 0;
 
 	if (name_highlight) {
 		name_highlight->set_data ("regionview", this);
