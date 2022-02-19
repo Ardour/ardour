@@ -65,15 +65,20 @@ TriggerJumpDialog::on_trigger_set ()
 		b->signal_clicked.connect(sigc::bind(sigc::mem_fun(*this, &TriggerJumpDialog::button_clicked), i));
 
 		Gtk::Label* l = manage(new Gtk::Label (cue_marker_name(i), ALIGN_RIGHT));
-		_table.attach (*l, 0, 1, r,r+1, Gtk::FILL, Gtk::SHRINK);
-		_table.attach (*b, 1, 2, r,r+1, Gtk::FILL, Gtk::SHRINK);
+		_table.attach (*l, 0, 1, r,r+1, Gtk::FILL,        Gtk::FILL);
+		_table.attach (*b, 1, 2, r,r+1, Gtk::FILL|EXPAND, Gtk::FILL);
 
 		_buttonlist.push_back(b);
 
 		++r;
 	}
 
-	get_vbox()->pack_start (_table);
+	get_vbox()->pack_start (_table, false, false, 4);
+
+	Gtk::Label *label = manage (new Gtk::Label(_("Enabling multiple slots will result\n"
+	                                             "in an equal random probability of\n"
+	                                             "the selected slots being launched."), ALIGN_CENTER));
+	get_vbox()->pack_start (*label, false, false, 4);
 
 	PropertyChange pc;
 	pc.add (Properties::name);
