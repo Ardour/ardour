@@ -780,6 +780,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int32_t                  _active_slots;
 	bool                     _ignore_patch_changes;
 	bool                     _locate_armed;
+	bool                     _cancel_locate_armed;
 	bool                     _fast_fowarding;
 
 	boost::shared_ptr<SideChain> _sidechain;
@@ -839,6 +840,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void process_request (BufferSet&, Request*);
 
 	void reload (BufferSet& bufs, int32_t slot, void* ptr);
+
+	void cancel_locate_armed ();
 
 	PBD::ScopedConnection stop_all_connection;
 

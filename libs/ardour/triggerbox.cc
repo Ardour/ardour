@@ -2627,6 +2627,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _active_slots (0)
 	, _ignore_patch_changes (false)
 	, _locate_armed (false)
+	, _cancel_locate_armed (false)
 	, _fast_fowarding (false)
 
 	, requests (1024)
@@ -2673,13 +2674,53 @@ TriggerBox::set_ignore_patch_changes (bool yn)
 }
 
 void
+TriggerBox::parameter_changed (std::string const & param)
+{
+	if (param == X_("default-trigger-input-port")) {
+
+		reconnect_to_default ();
+
+	} else if (param == "cue-behavior") {
+		bool follow = (Config->get_cue_behavior() & FollowCues);
+		if (follow) {
+
+			/* XXX this is all wrong. We have to do the
+			 * fast_forward() call from something like the butler
+			 * thread, as we do when a locate happens (and we are
+			 * following cues).
+			 *
+			 * FIX ME.
+			 */
+
+			if (!_session.transport_state_rolling()) {
+				fast_forward (_session.cue_events(), _session.transport_sample());
+			}
+		} else {
+			cancel_locate_armed ();
+		}
+	}
+}
+
+void
+TriggerBox::cancel_locate_armed ()
+{
+	_cancel_locate_armed = true;
+}
+
+void
 TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position)
 {
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: ffwd to %2\n", order(), transport_position));
-	if (cues.empty() || !(Config->get_cue_behavior() & FollowCues) || (cues.front().time > transport_position)) {
+
+	if (!(Config->get_cue_behavior() & FollowCues)) {
+		/* do absolutely nothing */
+		return;
+	}
+
+	if (cues.empty() || (cues.front().time > transport_position)) {
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: nothing to be done, cp = %2\n", order(), _currently_playing));
 		_locate_armed = false;
-		_currently_playing = 0;
+		cancel_locate_armed ();
 		if (tracker) {
 			tracker->reset ();
 		}
@@ -3459,6 +3500,15 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		stop_all ();
 	}
 
+	if (_locate_armed && _cancel_locate_armed) {
+		if (_currently_playing) {
+			_currently_playing->shutdown (bufs, 0);
+			_currently_playing = 0;
+			PropertyChanged (Properties::currently_playing);
+		}
+		_cancel_locate_armed = false;
+	}
+
 	/* STEP TEN: nothing to do?
 	 */
 
@@ -3926,14 +3976,6 @@ TriggerBox::set_state (const XMLNode& node, int version)
 	 */
 
 	return 0;
-}
-
-void
-TriggerBox::parameter_changed (std::string const & param)
-{
-	if (param == X_("default-trigger-input-port")) {
-		reconnect_to_default ();
-	}
 }
 
 void
