@@ -835,34 +835,46 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 	 * quantization, the next time for a transition.
 	 */
 
+	Temporal::BBT_Time possible_bbt;
+	Temporal::Beats possible_beats;
+	samplepos_t possible_samples;
+
 	if (q < Temporal::BBT_Offset (0, 0, 0)) {
 		/* negative quantization == do not quantize */
 
-		t_samples = start_sample;
-		t_beats = start_beats;
-		t_bbt = tmap->bbt_at (t_beats);
+		possible_samples = start_sample;
+		possible_beats = start_beats;
+		possible_bbt = tmap->bbt_at (possible_beats);
+
 	} else if (q.bars == 0) {
-		t_beats = start_beats.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks));
-		t_bbt = tmap->bbt_at (t_beats);
-		t_samples = tmap->sample_at (t_beats);
+
+		possible_beats = start_beats.round_up_to_multiple (Temporal::Beats (q.beats, q.ticks));
+		possible_bbt = tmap->bbt_at (possible_beats);
+		possible_samples = tmap->sample_at (possible_beats);
+
 	} else {
-		t_bbt = tmap->bbt_at (timepos_t (start_beats));
-		t_bbt = t_bbt.round_up_to_bar ();
+
+		possible_bbt = tmap->bbt_at (timepos_t (start_beats));
+		possible_bbt = possible_bbt.round_up_to_bar ();
 		/* bars are 1-based; 'every 4 bars' means 'on bar 1, 5, 9, ...' */
-		t_bbt.bars = 1 + ((t_bbt.bars-1) / q.bars * q.bars);
-		t_beats = tmap->quarters_at (t_bbt);
-		t_samples = tmap->sample_at (t_bbt);
+		possible_bbt.bars = 1 + ((possible_bbt.bars-1) / q.bars * q.bars);
+		possible_beats = tmap->quarters_at (possible_bbt);
+		possible_samples = tmap->sample_at (possible_bbt);
+
 	}
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), t_samples, start_beats, end_beats, q));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), possible_samples, start_beats, end_beats, q));
 
 	/* See if this time falls within the range of time given to us */
 
-	if (t_beats < start_beats || t_beats > end_beats) {
+	if (possible_beats < start_beats || possible_beats > end_beats) {
 		/* transition time not reached */
 		return false;
 	}
 
+	t_bbt = possible_bbt;
+	t_beats = possible_beats;
+	t_samples = possible_samples;
 
 	return true;
 }
