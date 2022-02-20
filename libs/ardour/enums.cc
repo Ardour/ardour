@@ -855,6 +855,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Trigger, Running);
 	REGISTER_CLASS_ENUM (Trigger, WaitingForRetrigger);
 	REGISTER_CLASS_ENUM (Trigger, WaitingToStop);
+	REGISTER_CLASS_ENUM (Trigger, WaitingToSwitch);
 	REGISTER_CLASS_ENUM (Trigger, Stopping);
 	REGISTER (_TriggerState);
 

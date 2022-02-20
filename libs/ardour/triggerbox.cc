@@ -696,6 +696,18 @@ Trigger::begin_stop (bool explicit_stop)
 }
 
 void
+Trigger::begin_switch (TriggerPtr nxt)
+{
+	/* this is used when we start a tell a currently playing trigger to
+	   stop, but wait for quantization first.
+	*/
+	_state = WaitingToSwitch;
+	_nxt_quantization = nxt->_quantization;
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 begin_switch() requested state %2\n", index(), enum_2_string (_state)));
+	send_property_change (ARDOUR::Properties::running);
+}
+
+void
 Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 {
 	bool stop = _requests.stop.exchange (false);
@@ -759,6 +771,7 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 
 		case WaitingToStart:
 		case WaitingToStop:
+		case WaitingToSwitch:
 		case WaitingForRetrigger:
 		case Stopping:
 			break;
@@ -780,6 +793,7 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 		case Stopped:
 		case Stopping: /* theoretically not possible */
 		case WaitingToStop:
+		case WaitingToSwitch:
 		case WaitingForRetrigger:
 			/* do nothing */
 			break;
@@ -872,7 +886,13 @@ Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats cons
 	/* Clips don't stop on their own quantize; in Live they stop on the Global Quantize setting; we will choose 1 bar (Live's default) for now */
 #warning when Global Quantize is implemented, use that instead of '1 bar' here
 	if (_state == WaitingToStop) {
+
 		q = BBT_Offset(1,0,0);
+
+	} else if (_state == WaitingToSwitch) {
+
+		q = _nxt_quantization;
+
 	}
 
 	if (!compute_quantized_transition (start_sample, start, end, t_bbt, t_beats, t_samples, tmap, q)) {
@@ -882,6 +902,7 @@ Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats cons
 
 	switch (_state) {
 	case WaitingToStop:
+	case WaitingToSwitch:
 		nframes = t_samples - start_sample;
 		break;
 
@@ -934,6 +955,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	switch (_state) {
 
 	case WaitingToStop:
+	case WaitingToSwitch:
 		_state = Stopping;
 		send_property_change (ARDOUR::Properties::running);
 
@@ -1684,6 +1706,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 		return nframes;
 	case Running:
 	case WaitingToStop:
+	case WaitingToSwitch:
 	case Stopping:
 		/* stuff to do */
 		break;
@@ -2405,6 +2428,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		return nframes;
 	case Running:
 	case WaitingToStop:
+	case WaitingToSwitch:
 	case Stopping:
 		break;
 	}
@@ -3644,7 +3668,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						_currently_playing = nxt;
 						PropertyChanged (Properties::currently_playing);
 
-					} else if (_currently_playing->state() != Trigger::WaitingToStop) {
+					} else if (_currently_playing->state() != Trigger::WaitingToSwitch) {
 
 						/* Notice that this condition
 						 * leaves the next trigger to
@@ -3652,10 +3676,11 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						 */
 
 						/* but just begin stoppingthe currently playing slot */
-						_currently_playing->begin_stop ();
+						_currently_playing->begin_switch (nxt);
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("start stop for %1 before switching to %2\n", _currently_playing->index(), nxt->index()));
 
 					}
+
 				}
 			}
 		}

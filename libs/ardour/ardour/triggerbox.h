@@ -69,6 +69,10 @@ typedef uint32_t color_t;
 
 LIBARDOUR_API std::string cue_marker_name (int32_t);
 
+class Trigger;
+
+typedef boost::shared_ptr<Trigger> TriggerPtr;
+
 class LIBARDOUR_API Trigger : public PBD::Stateful {
   public:
 	enum State {
@@ -97,6 +101,12 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		 * transition to Stopping and then Stopped.
 		 */
 		WaitingToStop,
+		/* a Trigger in this state is delivering data during calls to ::run(), but
+		 * is waiting for the next occurence of another Trigger's quantization to occur when it will
+		 * transition to Stopping and then Stopped (and be followed by
+		 * the other Trigger.
+		 */
+		WaitingToSwitch,
 		/* a Trigger in this state was Running but noticed that it should stop
 		 * during the current call to ::run(). By the end of that call, it will
 		 * have transitioned to Stopped.
@@ -323,6 +333,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void jump_start ();
 	virtual void jump_stop (BufferSet& bufs, pframes_t dest_offset);
 	void begin_stop (bool explicit_stop = false);
+	void begin_switch (TriggerPtr);
 
 	bool explicitly_stopped() const { return _explicitly_stopped; }
 
@@ -409,6 +420,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	samplepos_t                expected_end_sample;
 	Temporal::BBT_Offset      _start_quantization;
+	Temporal::BBT_Offset      _nxt_quantization;
 	std::atomic<Trigger*>     _pending;
 	std::atomic<unsigned int>  last_property_generation;
 
@@ -420,8 +432,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	bool internal_use_follow_length() const;
 	void send_property_change (PBD::PropertyChange pc);
 };
-
-typedef boost::shared_ptr<Trigger> TriggerPtr;
 
 class LIBARDOUR_API AudioTrigger : public Trigger {
   public:
