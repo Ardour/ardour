@@ -4240,7 +4240,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 	timecnt_t cnt = start.distance (end);
 	bool in_command = false;
 
-	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+	TempoMap::SharedPtr tmap (TempoMap::use());
 	double tempo = tmap->tempo_at(start).quarter_notes_per_minute();
 
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
@@ -7211,7 +7211,7 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 {
 	timecnt_t length = start.distance (end);
 
-	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+	TempoMap::SharedPtr tmap (TempoMap::use());
 	const Meter& m (tmap->meter_at (start));
 
 	/* length = 1 bar */
