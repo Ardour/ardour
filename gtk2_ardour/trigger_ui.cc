@@ -77,6 +77,8 @@ TriggerUI::TriggerUI ()
 	, _context_menu (0)
 	, _ignore_menu_action (false)
 {
+	std::cerr << "CONSTRUCT TUI " << this << std::endl;
+
 	if (follow_strings.empty()) {
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::None)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::Stop)));
@@ -119,6 +121,7 @@ TriggerUI::TriggerUI ()
 
 TriggerUI::~TriggerUI()
 {
+	std::cerr << "DESTROY TUI " << this << std::endl;
 	trigger_swap_connection.disconnect ();
 	trigger_connections.drop_connections ();
 }
@@ -132,8 +135,8 @@ TriggerUI::trigger_swap (uint32_t n)
 	}
 	trigger_connections.drop_connections ();
 
-	trigger()->PropertyChanged.connect (trigger_connections, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
-	tref.box->PropertyChanged.connect (trigger_connections, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	tref.box->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
 
 	trigger_changed (Properties::name);
 }
@@ -846,10 +849,10 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 
 	trigger_changed (pc);
 
-	trigger()->PropertyChanged.connect (trigger_connections, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
-	tref.box->PropertyChanged.connect (trigger_connections, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
+	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
+	tref.box->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
 
-	tref.box->TriggerSwapped.connect (trigger_swap_connection, MISSING_INVALIDATOR, boost::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
+	tref.box->TriggerSwapped.connect (trigger_swap_connection, invalidator (*this), boost::bind (&TriggerUI::trigger_swap, this, _1), gui_context ());
 
 	on_trigger_set();  //derived classes can do initialization here
 }
