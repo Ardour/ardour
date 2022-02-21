@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+import sys
+import re
+
+I18N_PACKAGE = 'ndi-backend'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    pass
+
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = [
+            'ndi_backend.cc',
+            ]
+    obj.includes = ['.']
+    obj.name     = 'ndi_backend'
+    obj.target   = 'ndi_backend'
+    obj.use      = 'libardour libpbd'
+    obj.uselib   = 'GLIBMM XML'
+    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
+    obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
+                   'ARDOURBACKEND_DLL_EXPORTS'
+                  ]

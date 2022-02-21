@@ -1344,6 +1344,9 @@ int main () { return 0; }
     if opts.build_tests and 'dummy' not in backends:
         backends += ['dummy']
 
+    if True:
+        backends += ['ndi']
+
     conf.env['BACKENDS'] = backends
     conf.env['BUILD_JACKBACKEND'] = any('jack' in b for b in backends)
     conf.env['BUILD_ALSABACKEND'] = any('alsa' in b for b in backends)
@@ -1351,6 +1354,7 @@ int main () { return 0; }
     conf.env['BUILD_PABACKEND'] = any('portaudio' in b for b in backends)
     conf.env['BUILD_CORECRAPPITA'] = any('coreaudio' in b for b in backends)
     conf.env['BUILD_PULSEAUDIO'] = any('pulseaudio' in b for b in backends)
+    conf.env['BUILD_NDIBACKEND'] = any('ndi' in b for b in backends)
 
     if backends == [''] or not (
                conf.env['BUILD_JACKBACKEND']
@@ -1497,6 +1501,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('ALSA Backend',          conf.env['BUILD_ALSABACKEND'])
     write_config_text('Dummy backend',         conf.env['BUILD_DUMMYBACKEND'])
     write_config_text('JACK Backend',          conf.env['BUILD_JACKBACKEND'])
+    write_config_text('NDI Backend',           conf.env['BUILD_NDIBACKEND'])
     write_config_text('Pulseaudio Backend',    conf.env['BUILD_PULSEAUDIO'])
     config_text.write("\\n\\\n")
     write_config_text('Buildstack', conf.env['DEPSTACK_REV'])
