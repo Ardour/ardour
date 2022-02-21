@@ -77,8 +77,6 @@ TriggerUI::TriggerUI ()
 	, _context_menu (0)
 	, _ignore_menu_action (false)
 {
-	std::cerr << "CONSTRUCT TUI " << this << std::endl;
-
 	if (follow_strings.empty()) {
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::None)));
 		follow_strings.push_back (follow_action_to_string (FollowAction (FollowAction::Stop)));
@@ -121,7 +119,6 @@ TriggerUI::TriggerUI ()
 
 TriggerUI::~TriggerUI()
 {
-	std::cerr << "DESTROY TUI " << this << std::endl;
 	trigger_swap_connection.disconnect ();
 	trigger_connections.drop_connections ();
 }
