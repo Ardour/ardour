@@ -37,7 +37,7 @@ namespace Gtk
 
 class TriggerJumpDialog;
 
-class TriggerUI : virtual public sigc::trackable
+class TriggerUI
 {
 public:
 	TriggerUI ();
