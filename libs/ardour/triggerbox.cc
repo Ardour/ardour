@@ -3454,7 +3454,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			 * marker.The stop is quantized, not immediate.
 			 */
 
-			if (_currently_playing && _currently_playing->cue_launched()) {
+			if (_currently_playing) {
 				_currently_playing->unbang ();
 			}
 
