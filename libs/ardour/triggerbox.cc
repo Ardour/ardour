@@ -3458,10 +3458,12 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				_currently_playing->unbang ();
 			}
 
+			_locate_armed = 0;
+
 		} else if (cue_bang >= 0) {
 			_active_scene = cue_bang;
+			_locate_armed = 0;
 		}
-
 	}
 
 	/* STEP SIX: if at this point there is an active cue, make it trigger
