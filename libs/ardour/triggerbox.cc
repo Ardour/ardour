@@ -19,6 +19,7 @@
 
 #include "temporal/tempo.h"
 
+#include "ardour/auditioner.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
 #include "ardour/audio_buffer.h"
@@ -68,6 +69,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> tempo_meter;  /* only to transmit updates, not storage */
 		PBD::PropertyDescriptor<bool> patch_change;  /* only to transmit updates, not storage */
 		PBD::PropertyDescriptor<bool> channel_map;  /* only to transmit updates, not storage */
+		PBD::PropertyDescriptor<bool> used_channels;  /* only to transmit updates, not storage */
 	}
 }
 
@@ -240,6 +242,11 @@ Trigger::get_ui_state (Trigger::UIState &state) const
 	state.name = _name;
 	state.color = _color;
 
+	state.used_channels = used_channels();
+	for (int i = 0; i<16; i++) {
+		state.patch_change[i] = patch_change(i);
+	}
+
 	/* tempo is currently not a property */
 	state.tempo = segment_tempo();
 }
@@ -256,6 +263,13 @@ Trigger::set_ui_state (Trigger::UIState &state)
 	/* tempo is currently outside the scope of ui_state */
 	if (state.tempo > 0) {
 		set_segment_tempo(state.tempo);
+	}
+
+	set_used_channels(state.used_channels);
+	for (int chan = 0; chan<16; chan++) {
+		if (state.patch_change[chan].is_set()) {
+			set_patch_change(state.patch_change[chan]);
+		}
 	}
 }
 
@@ -303,6 +317,14 @@ Trigger::update_properties ()
 			_name = ui_state.name;
 		}
 
+		set_used_channels(ui_state.used_channels);
+
+		for (int chan = 0; chan<16; chan++) {
+			if (ui_state.patch_change[chan].is_set()) {
+				set_patch_change(ui_state.patch_change[chan]);
+			}
+		}
+
 		last_property_generation = g;
 	}
 
@@ -333,6 +355,11 @@ Trigger::copy_to_ui_state ()
 	ui_state.stretch_mode = _stretch_mode;
 	ui_state.name = _name;
 	ui_state.color = _color;
+
+	ui_state.used_channels = used_channels();
+	for (int i = 0; i<16; i++) {
+		ui_state.patch_change[i] = patch_change(i);  //TODO:  maybe these should be initialized here instead of later
+	}
 }
 
 void
@@ -1999,17 +2026,25 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	, last_event_beats (Temporal::Beats())
 	, _start_offset (0, 0, 0)
 	, _legato_offset (0, 0, 0)
+	, _used_channels (Evoral::SMF::UsedChannels())
 {
-#if 0 /* for prototype + testing only */
-	Evoral::PatchChange<MidiBuffer::TimeType> pc (0, 0, 12, 0);
-	set_patch_change (pc);
-#endif
-
 	_channel_map.assign (16, -1);
 }
 
 MIDITrigger::~MIDITrigger ()
 {
+}
+
+void
+MIDITrigger::set_used_channels (Evoral::SMF::UsedChannels used)
+{
+	if (_used_channels != used) {
+
+		_used_channels = used;
+
+		send_property_change (ARDOUR::Properties::used_channels);
+		_box.session().set_dirty();
+	}
 }
 
 void
@@ -2091,11 +2126,15 @@ MIDITrigger::patch_change_set (uint8_t channel) const
 	return _patch_change[channel].is_set();
 }
 
-Evoral::PatchChange<MidiBuffer::TimeType> const &
+Evoral::PatchChange<MidiBuffer::TimeType> const
 MIDITrigger::patch_change (uint8_t channel) const
 {
+	Evoral::PatchChange<MidiBuffer::TimeType> ret;
+
 	assert (channel < 16);
-	return _patch_change[channel];
+	ret = _patch_change[channel];
+
+	return ret;
 }
 
 
@@ -2174,7 +2213,7 @@ MIDITrigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Off
 	/* Possibly inject patch changes, if set */
 
 	for (int chn = 0; chn < 16; ++chn) {
-		if (_patch_change[chn].is_set()) {
+		if (_used_channels.test(chn) && _patch_change[chn].is_set()) {
 			_patch_change[chn].set_time (dest_offset);
 			cerr << index() << " Injecting patch change " << _patch_change[chn].program() << " @ " << dest_offset << endl;
 			for (int msg = 0; msg < _patch_change[chn].messages(); ++msg) {
@@ -2227,6 +2266,9 @@ MIDITrigger::get_state (void)
 
 	node.set_property (X_("start"), start_offset());
 
+	std::string uchan = string_compose ("%1", _used_channels.to_ulong());
+	node.set_property (X_("used-channels"), uchan);
+
 	XMLNode* patches_node = 0;
 
 	for (int chn = 0; chn < 16; ++chn) {
@@ -2274,6 +2316,18 @@ MIDITrigger::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
+	std::string uchan;
+	if (node.get_property (X_("used-channels"), uchan)) {
+	} else {
+		unsigned long ul;
+		std::stringstream ss (uchan);
+		ss >> ul;
+		if (!ss) {
+			return -1;
+		}
+		set_used_channels( Evoral::SMF::UsedChannels(ul) );
+	}
+
 	node.get_property (X_("start"), t);
 	Temporal::Beats b (t.beats());
 	/* XXX need to deal with bar offsets */
@@ -2311,6 +2365,9 @@ MIDITrigger::set_state (const XMLNode& node, int version)
 			}
 		}
 	}
+
+	/* we've changed our internal values; we need to update our queued UIState or they will be lost when UIState is applied */
+	copy_to_ui_state ();
 
 	return 0;
 }
@@ -2370,6 +2427,7 @@ MIDITrigger::natural_length() const
 	}
 	return timepos_t (Temporal::BeatTime);
 }
+
 
 int
 MIDITrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)

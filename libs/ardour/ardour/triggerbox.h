@@ -41,6 +41,7 @@
 #include "temporal/tempo.h"
 
 #include "evoral/PatchChange.h"
+#include "evoral/SMF.h"
 
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
@@ -178,6 +179,9 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		bool cue_isolated = false;
 		StretchMode stretch_mode = Trigger::Crisp;
 
+		Evoral::SMF::UsedChannels used_channels = Evoral::SMF::UsedChannels();
+		Evoral::PatchChange<MidiBuffer::TimeType> patch_change[16];
+
 		std::string  name = "";
 		color_t      color = 0xBEBEBEFF;
 		double       tempo = 0;  //unset
@@ -204,6 +208,13 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 			stretchable = other.stretchable;
 			cue_isolated = other.cue_isolated;
 			stretch_mode = other.stretch_mode;
+			used_channels = other.used_channels;
+
+			for (int i = 0; i<16; i++) {
+				if (other.patch_change[i].is_set()) {
+					patch_change[i] = other.patch_change[i];
+				}
+			}
 
 			name = other.name;
 			color = other.color;
@@ -345,8 +356,22 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	TriggerBox& box() const { return _box; }
 
 	double estimated_tempo() const { return _estimated_tempo; }
+
+	/* the following functions deal with audio- or midi-specific SegmentDescriptor properties, provided as virtuals so we don't have to do lots of dynamic_casting  */
+	/* segment_tempo is currently a no-op for MIDI, but may be implemented later  */
 	virtual double segment_tempo() const = 0;
 	virtual void set_segment_tempo (double t) = 0;
+
+	/* used_channels is a no-op for audio  */
+	virtual Evoral::SMF::UsedChannels used_channels() const { return Evoral::SMF::UsedChannels(); }
+	virtual void set_used_channels (Evoral::SMF::UsedChannels) {}
+
+	/* patch changes are a no-op for audio */
+	virtual void set_patch_change (Evoral::PatchChange<MidiBuffer::TimeType> const &) {}
+	virtual Evoral::PatchChange<MidiBuffer::TimeType> const patch_change (uint8_t) const { return Evoral::PatchChange<MidiBuffer::TimeType>(); }
+	virtual void unset_patch_change (uint8_t channel) {}
+	virtual void unset_all_patch_changes () {}
+	virtual bool patch_change_set (uint8_t channel) const { return false; }
 
 	virtual void setup_stretcher () = 0;
 
@@ -552,10 +577,14 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void start_and_roll_to (samplepos_t start, samplepos_t position);
 
 	void set_patch_change (Evoral::PatchChange<MidiBuffer::TimeType> const &);
-	Evoral::PatchChange<MidiBuffer::TimeType> const & patch_change (uint8_t) const;
+	Evoral::PatchChange<MidiBuffer::TimeType> const patch_change (uint8_t) const;
 	void unset_patch_change (uint8_t channel);
 	void unset_all_patch_changes ();
 	bool patch_change_set (uint8_t channel) const;
+
+	/* It's possible that a portion of a midi file would use a subset of the total channels used, so store that info in the segment descriptor */
+	Evoral::SMF::UsedChannels used_channels() const { return _used_channels; }
+	void set_used_channels (Evoral::SMF::UsedChannels);
 
 	/* theoretically, MIDI files can have a dedicated tempo outside the session tempo map (*un-stretched*) but this is currently unimplemented */
 	/* boilerplate tempo functions are provided here so we don't have to do constant dynamic_cast checks to use the tempo+stretch APIs */
@@ -588,6 +617,8 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
 	Evoral::PatchChange<MidiBuffer::TimeType> _patch_change[16];
 	std::vector<int> _channel_map;
+
+	Evoral::SMF::UsedChannels _used_channels;
 
 	int load_data (boost::shared_ptr<MidiRegion>);
 	void compute_and_set_length ();
@@ -892,6 +923,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> cue_isolated;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> patch_change; /* type not important */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> channel_map; /* type not important */
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> used_channels; /* type not important */
 
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> tempo_meter; /* only used to transmit changes, not storage */
 }
