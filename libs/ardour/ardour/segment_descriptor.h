@@ -19,8 +19,12 @@
 #ifndef __libardour_segment_descriptor_h__
 #define __libardour_segment_descriptor_h__
 
+#include <bitset>
+
 #include "temporal/timeline.h"
 #include "temporal/tempo.h"
+
+#include "evoral/SMF.h"
 
 class XMLNode;
 
@@ -58,6 +62,9 @@ public:
 	Temporal::Tempo tempo() const { return _tempo; }
 	void set_tempo (Temporal::Tempo const&);
 
+	Evoral::SMF::UsedChannels used_channels() const { return _used_channels; }
+	void set_used_channels (Evoral::SMF::UsedChannels);
+
 	Temporal::Meter meter() const { return _meter; }
 	void set_meter (Temporal::Meter const&);
 
@@ -68,6 +75,8 @@ public:
 
 private:
 	Temporal::TimeDomain _time_domain;
+
+	Evoral::SMF::UsedChannels _used_channels;
 
 	/* cannot use a union for these because Temporal::Beats has a
 	   "non-trivial" constructor.

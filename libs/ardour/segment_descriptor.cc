@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <sstream>
+
 #include "pbd/enumwriter.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/i18n.h"
@@ -128,6 +130,12 @@ SegmentDescriptor::set_meter (Meter const & m)
 	_meter = m;
 }
 
+void
+SegmentDescriptor::set_used_channels (Evoral::SMF::UsedChannels used)
+{
+	_used_channels = used;
+}
+
 XMLNode&
 SegmentDescriptor::get_state (void) const
 {
@@ -146,6 +154,9 @@ SegmentDescriptor::get_state (void) const
 	root->add_child_nocopy (_tempo.get_state());
 	root->add_child_nocopy (_meter.get_state());
 
+	std::string uchan = string_compose ("%1", _used_channels.to_ulong());
+	root->set_property (X_("used-channels"), uchan);
+
 	return *root;
 }
 
@@ -158,6 +169,18 @@ SegmentDescriptor::set_state (XMLNode const & node, int version)
 
 	if (node.get_property (X_("time-domain"), _time_domain)) {
 		return -1;
+	}
+
+	std::string uchan;
+	if (node.get_property (X_("used-channels"), uchan)) {
+	} else {
+		unsigned long ul;
+		std::stringstream ss (uchan);
+		ss >> ul;
+		if (!ss) {
+			return -1;
+		}
+		_used_channels = Evoral::SMF::UsedChannels(ul);
 	}
 
 	if (_time_domain == Temporal::AudioTime) {
