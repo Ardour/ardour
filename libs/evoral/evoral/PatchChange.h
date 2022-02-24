@@ -66,6 +66,8 @@ public:
 		, _program_change (other._program_change, true)
 	{
 		set_id (other.id ());
+
+		assert (is_set());
 	}
 
 	PatchChange ()
@@ -73,6 +75,17 @@ public:
 		,  _bank_change_lsb (MIDI_EVENT, 0, 3, 0, true)
 		, _program_change (MIDI_EVENT, 0, 2, 0, true)
 	{
+		_bank_change_msb.buffer()[0] = MIDI_CMD_CONTROL;
+		_bank_change_msb.buffer()[1] = MIDI_CTL_MSB_BANK;
+		_bank_change_msb.buffer()[2] = 0;
+
+		_bank_change_lsb.buffer()[0] = MIDI_CMD_CONTROL;
+		_bank_change_lsb.buffer()[1] = MIDI_CTL_LSB_BANK;
+		_bank_change_lsb.buffer()[2] = 0;
+
+		_program_change.buffer()[0] = MIDI_CMD_PGM_CHANGE;
+		_program_change.buffer()[1] = 0;
+
 		unset ();
 	}
 
@@ -83,18 +96,20 @@ public:
 		_bank_change_msb.set (other._bank_change_msb.buffer(), 3, other.time());
 		_bank_change_lsb.set (other._bank_change_lsb.buffer(), 3, other.time());
 		_program_change.set (other._program_change.buffer(), 2, other.time());
+
+		assert (is_set());
 		return *this;
 	}
 	void unset() {
-		_bank_change_msb.buffer()[1] = 0x80; /* unset */
-		_bank_change_lsb.buffer()[1] = 0x80; /* unset */
+		_bank_change_msb.buffer()[2] = 0x80; /* unset */
+		_bank_change_lsb.buffer()[2] = 0x80; /* unset */
 		_program_change.buffer()[1] = 0x80; /* unset */
 		assert (!is_set());
 	}
 
 	bool is_set() const {
-		return ((_bank_change_msb.buffer()[1] & 0x80) == 0) &&
-			((_bank_change_lsb.buffer()[1] & 0x80) == 0) &&
+		return ((_bank_change_msb.buffer()[2] & 0x80) == 0) &&
+			((_bank_change_lsb.buffer()[2] & 0x80) == 0) &&
 			((_program_change.buffer()[1] & 0x80) == 0);
 	}
 
@@ -126,14 +141,15 @@ public:
 
 	uint8_t program () const {
 		assert (is_set());
-		return _program_change.buffer()[1];
+		return _program_change.buffer()[1] & 0x7f;
 	}
 
 	void set_program (uint8_t p) {
-		_program_change.buffer()[1] = p;
+		_program_change.buffer()[1] = p & 0x7f;
 	}
 
 	int bank () const {
+		assert (is_set());
 		return (bank_msb() << 7) | bank_lsb();
 	}
 
