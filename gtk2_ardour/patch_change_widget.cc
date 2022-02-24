@@ -850,10 +850,25 @@ PatchChangeTriggerWindow::reset (boost::shared_ptr<Route> r, boost::shared_ptr<M
 
 	r->DropReferences.connect (_route_connection, invalidator(*this), boost::bind (&PatchChangeTriggerWindow::clear, this), gui_context());
 
+	/* only show tabs for the chans that this region uses */
+	Evoral::SMF::UsedChannels used = t->segment_used_channels();
+	uint32_t first_used_chan = 15;
+	for (uint32_t chn = 0; chn < 16; ++chn) {
+		if (used.test(chn)) {
+			if (chn < first_used_chan) {
+				first_used_chan = chn;
+			}
+			_w[chn]->show();
+		} else {
+			_w[chn]->hide();
+		}
+	}
+
 	for (uint32_t chn = 0; chn < 16; ++chn) {
 		_w[chn]->reset (r, t);
 	}
-	_notebook.set_current_page (0);
+
+	_notebook.set_current_page (first_used_chan);
 }
 
 void
