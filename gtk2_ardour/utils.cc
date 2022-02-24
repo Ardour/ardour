@@ -804,46 +804,45 @@ ARDOUR_UI_UTILS::samples_as_time_string (samplecnt_t s, float rate, bool show_sa
 }
 
 string
-ARDOUR_UI_UTILS::midi_channels_as_string (std::set<uint8_t> const& channels)
+ARDOUR_UI_UTILS::midi_channels_as_string (std::bitset<16> channels)
 {
-	if (channels.empty ()) {
+	if (channels.none ()) {
 		return _("none");
 	}
 
 	string rv;
-	auto i = channels.begin ();
 
-	uint8_t next = *i;
-	uint8_t prev = next;
-	rv += to_string<int> (next + 1);
+	for (int i = 0; i<16; i++) {
 
-	do {
-		if (*i == next) {
-			++i;
-			++next;
-			if (i != channels.end ()) {
-				continue;
+		bool prior = i<1 ? false : channels.test(i-1);
+		bool current = channels.test(i);
+		bool next = i>14 ? false : channels.test(i+1);
+		bool nextnext = i>13 ? false : channels.test(i+2);
+		bool future = false;
+		for (int f = i+1; f<16; f++) {
+			if (channels.test(f)) {
+				future = true;
 			}
 		}
-		if (next - prev > 2) {
-			rv += "-";
-			rv += to_string<int> (next);
-		} else if (next - prev > 1) {
-			rv += ", ";
-			rv += to_string<int> (next);
+
+		if (prior && current && next) {
+			/* I'm in the middle of a consecutive chain, maybe just add a dash */
+			if (!rv.empty() && (rv.rfind("-") != rv.length()-1 )) {
+				rv += "-";
+			}
+			continue;
 		}
 
-		if (i == channels.end ()) {
-			break;
+		if (current) {
+			/* here I am! */
+			rv+=to_string<int> (i+1);
 		}
 
-		rv += ", ";
-		rv += to_string<int> (*i + 1);
-
-		prev = *i;
-		next = prev + 1;
-		++i;
-	} while (i != channels.end ());
+		if (current && future && !(next && nextnext)) {
+			/* there are channels after me but they are not 3 consecutive; add a comma */
+			rv += ",";
+		}
+	}
 
 	return rv;
 }
