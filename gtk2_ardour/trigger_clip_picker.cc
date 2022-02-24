@@ -486,12 +486,13 @@ TriggerClipPicker::row_selected ()
 				if (ms->smf_format()==0) {
 					format_text.set_text ("MIDI Type 0");
 				} else {
-					format_text.set_text (string_compose( _("%1 (%2 Tracks)"), ms->smf_format()==2 ? X_("MIDI Type 2") : X_("MIDI Type 1"), ms->num_tracks()));
+					format_text.set_text (string_compose( _("%1 (%2 Tracks, only the first track will be used)"), ms->smf_format()==2 ? X_("MIDI Type 2") : X_("MIDI Type 1"), ms->num_tracks()));
 				}
 				channels_value.set_text (string_compose(
-				    _("Channel(s) used: %1 - %2 "),
+				    _("%1 notes on channel: %2%3 "),
+					ms->n_note_on_events(),
 					ARDOUR_UI_UTILS::midi_channels_as_string (ms->used_channels()),
-					ms->has_pgm_change() ? _("with pgms") : X_("")
+					ms->has_pgm_change() ? _(", with pgms") : X_("")
 					));
 
 				_midi_prop_table.show();
