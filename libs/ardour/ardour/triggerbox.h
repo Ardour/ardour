@@ -539,6 +539,8 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void reload (BufferSet&, void*);
 	bool probably_oneshot () const;
 
+	void estimate_midi_patches ();
+
 	int set_region_in_worker_thread (boost::shared_ptr<Region>);
 	void jump_start ();
 	void shutdown (BufferSet& bufs, pframes_t dest_offset);
