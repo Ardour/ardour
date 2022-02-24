@@ -2428,6 +2428,47 @@ MIDITrigger::natural_length() const
 	return timepos_t (Temporal::BeatTime);
 }
 
+void
+MIDITrigger::estimate_midi_patches ()
+{
+	/* first, intialize all our slot's patches to GM defaults, to make playback deterministic */
+	for (uint8_t chan = 0; chan < 16; ++chan) {
+		_patch_change[chan].set_channel(chan);
+		_patch_change[chan].set_bank( chan == 9 ? 120 : 0 );
+		_patch_change[chan].set_program( 0 );
+	}
+
+	boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource> (_region->source(0));
+	if (smfs) {
+		/* second, apply any patches that the Auditioner has in its memory
+		 * ...this handles the case where the user chose patches for a file that itself lacked patch-settings
+		 * (it's possible that the user didn't audition the actual file they dragged in, but this is still the best starting-point we have)
+		 * */
+		boost::shared_ptr<ARDOUR::Auditioner> aud = _box.session().the_auditioner();
+		if (aud) {
+			for (uint8_t chan = 0; chan < 16; ++chan) {
+				if (aud->patch_change (chan).is_set()) {
+					_patch_change[chan] = aud->patch_change (chan);
+				}
+			}
+		}
+
+		/* thirdly, apply the patches from the file itself (if it has any) */
+		boost::shared_ptr<MidiModel> model = smfs->model();
+		for (MidiModel::PatchChanges::const_iterator i = model->patch_changes().begin(); i != model->patch_changes().end(); ++i) {
+			if ((*i)->is_set()) {
+				int chan = (*i)->channel();  /* behavior is undefined for SMF's with multiple patch changes. I'm not sure that we care */
+				_patch_change[chan].set_channel ((*i)->channel());
+				_patch_change[chan].set_bank((*i)->bank());
+				_patch_change[chan].set_program((*i)->program());
+			}
+		}
+
+		/* finally, store the used_channels so the UI can show patches only for those chans actually used */
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 estimate_midi_patches(), using channels %2\n", name(), smfs->used_channels().to_string().c_str()));
+		set_used_channels(smfs->used_channels());
+	}
+}
 
 int
 MIDITrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
@@ -2443,6 +2484,11 @@ MIDITrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 	data_length = mr->length().beats();
 	set_length (mr->length());
 	model = mr->model ();
+
+	estimate_midi_patches ();
+
+	/* we've changed some of our internal values; we need to update our queued UIState or they will be lost when UIState is applied */
+	copy_to_ui_state ();
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loaded midi region, span is %2\n", name(), data_length));
 
