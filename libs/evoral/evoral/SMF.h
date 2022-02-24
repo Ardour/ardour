@@ -89,7 +89,9 @@ public:
 	int smf_format () const;
 
 	int num_channels () const { return _num_channels; }
-	std::set<uint8_t> const& used_channels () const { return _used_channels; }
+	typedef std::bitset<16> UsedChannels;
+	UsedChannels const& used_channels () const { return _used_channels; }
+	void set_used_channels (UsedChannels used) { _used_channels  = used; }
 	uint64_t n_note_on_events () const { return _n_note_on_events; }
 	bool has_pgm_change () const { return _has_pgm_change; }
 
@@ -134,17 +136,19 @@ public:
 	Markers const & markers() const { return _markers; }
 	void load_markers ();
 
+  protected:
+
+	uint64_t _n_note_on_events;
+	bool     _has_pgm_change;
+
+	int _num_channels;
+	UsedChannels _used_channels;
+
   private:
 	smf_t*       _smf;
 	smf_track_t* _smf_track;
 	bool         _empty; ///< true iff file contains(non-empty) events
 	mutable Glib::Threads::Mutex _smf_lock;
-
-	int _num_channels;
-	std::set<uint8_t> _used_channels;
-
-	uint64_t _n_note_on_events;
-	bool     _has_pgm_change;
 
 	mutable Markers _markers;
 };

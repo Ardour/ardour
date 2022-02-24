@@ -52,6 +52,7 @@
 #include "ardour/midi_state_tracker.h"
 #include "ardour/parameter_types.h"
 #include "ardour/session.h"
+#include "ardour/segment_descriptor.h"
 #include "ardour/smf_source.h"
 
 #include "pbd/i18n.h"
@@ -670,6 +671,11 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 	Evoral::event_id_t event_id;
 	bool have_event_id;
 
+	_num_channels     = 0;
+	_n_note_on_events = 0;
+	_has_pgm_change   = false;
+	_used_channels.reset ();
+
 	// TODO simplify event allocation
 	std::list< std::pair< Evoral::Event<Temporal::Beats>*, gint > > eventlist;
 
@@ -689,6 +695,23 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 					have_event_id = true;
 				}
 				continue;
+			}
+
+			/* aggregate information about channels and pgm-changes */
+			uint8_t type = buf[0] & 0xf0;
+			uint8_t chan = buf[0] & 0x0f;
+			if (type >= 0x80 && type <= 0xE0) {
+				_used_channels.set(chan);
+				switch (type) {
+					case MIDI_CMD_NOTE_ON:
+						++_n_note_on_events;
+						break;
+					case MIDI_CMD_PGM_CHANGE:
+						_has_pgm_change = true;
+						break;
+					default:
+						break;
+				}
 			}
 
 			if (ret > 0) {
@@ -730,6 +753,8 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 		}
 	}
 
+	_num_channels = _used_channels.size();
+
 	eventlist.sort(compare_eventlist);
 
 	std::list< std::pair< Evoral::Event<Temporal::Beats>*, gint > >::iterator it;
@@ -747,6 +772,12 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 	invalidate(lock);
 
 	free(buf);
+}
+
+Evoral::SMF::UsedChannels
+SMFSource::used_midi_channels()
+{
+	return _used_channels;
 }
 
 void

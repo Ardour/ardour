@@ -76,6 +76,9 @@ public:
 	void prevent_deletion ();
 	void set_path (const std::string& newpath);
 
+	/** Query the smf file for its channel info */
+	SMF::UsedChannels used_midi_channels();
+
   protected:
 	void close ();
 	void flush_midi (const Lock& lock);
