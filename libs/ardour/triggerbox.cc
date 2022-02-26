@@ -575,8 +575,6 @@ Trigger::set_state (const XMLNode& node, int version)
 	node.get_property (X_("index"), _index);
 	set_values (node);
 
-	copy_to_ui_state ();
-
 	return 0;
 }
 
@@ -1283,6 +1281,9 @@ AudioTrigger::set_state (const XMLNode& node, int version)
 
 	node.get_property (X_("start"), t);
 	_start_offset = t.samples();
+
+	/* we've changed our internal values; we need to update our queued UIState or they will be lost when UIState is applied */
+	copy_to_ui_state ();
 
 	return 0;
 }
