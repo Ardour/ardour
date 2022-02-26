@@ -539,7 +539,7 @@ Trigger::get_state (void)
 	}
 
 	node->set_property (X_("index"), _index);
-	node->set_property (X_("estimated-tempo"), _estimated_tempo);
+
 	node->set_property (X_("segment-tempo"), _segment_tempo);
 
 	if (_region) {
@@ -563,13 +563,11 @@ Trigger::set_state (const XMLNode& node, int version)
 	boost::shared_ptr<Region> r = RegionFactory::region_by_id (rid);
 
 	if (r) {
-		set_region (r, false);  //TODO: this results in a call to estimate_tempo() which should be avoided if bpm is already known
+		set_region (r, false);  //this results in a call to estimate_tempo()
 	}
 
-	node.get_property (X_("estimated-tempo"), _estimated_tempo);  //TODO: for now: if we know the bpm, overwrite the value that estimate_tempo() found
-
 	double tempo;
-	node.get_property (X_("segment-tempo"), tempo);
+	node.get_property (X_("segment-tempo"), tempo);  //this is the user-selected tempo which overrides estimated_tempo
 	set_segment_tempo(tempo);
 
 	node.get_property (X_("index"), _index);
