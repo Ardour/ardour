@@ -372,10 +372,6 @@ Auditioner::audition_region (boost::shared_ptr<Region> region, bool loop)
 
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (uint8_t c = 0; c < 16; ++c) {
-		_patch_change[c].unset ();
-	}
-
 	if (boost::dynamic_pointer_cast<AudioRegion>(region) != 0) {
 
 		_midi_audition = false;
