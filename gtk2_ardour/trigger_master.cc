@@ -89,7 +89,7 @@ Loopster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 	}
 
 	context->set_identity_matrix ();
-	context->translate (self.x0, self.y0 - 0.5);
+	context->translate (self.x0, self.y0);
 
 	float size = _rect.height ();
 
@@ -189,34 +189,43 @@ TriggerMaster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Cont
 
 	/* MIDI triggers get a 'note' symbol */
 	if (_triggerbox && _triggerbox->data_type () == ARDOUR::DataType::MIDI) {
-		layout->set_font_description (UIConfiguration::instance ().get_BigBoldMonospaceFont ());
+		int font_size = 14 * scale;
+		char font_name[128];
+		snprintf (font_name, sizeof (font_name), "ArdourSans %d", font_size);
+		Pango::FontDescription pfd (font_name);
+		layout->set_font_description (pfd);
 		layout->set_text ("\u266b");
 		int tw, th;
 		layout->get_pixel_size (tw, th);
 		context->move_to (width / 2, height / 2);
-		context->rel_move_to (-tw / 2, -th / 2);
+		context->rel_move_to (-tw / 2, -2*scale -th / 2);
 		Gtkmm2ext::set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 		layout->show_in_cairo_context (context);
 	}
 
+	int font_size = 8 * scale;
+	char font_name[128];
+	snprintf (font_name, sizeof (font_name), "ArdourSans %d", font_size);
+	Pango::FontDescription pfd (font_name);
+
 	if (play_text != "") {
-		layout->set_font_description (UIConfiguration::instance ().get_NormalFont ());
+		layout->set_font_description (pfd);
 		layout->set_text (play_text);
 		int tw, th;
 		layout->get_pixel_size (tw, th);
 		context->move_to ( height + 4*scale, height / 2);  //left side, but make room for loopster
-		context->rel_move_to ( 0, -th / 2);  //vertically centered text
+		context->rel_move_to ( 0, -1*scale -th / 2);  //vertically centered text
 		Gtkmm2ext::set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 		layout->show_in_cairo_context (context);
 	}
 
 	if (loop_text != "") {
-		layout->set_font_description (UIConfiguration::instance ().get_NormalFont ());
+		layout->set_font_description (pfd);
 		layout->set_text (loop_text);
 		int tw, th;
 		layout->get_pixel_size (tw, th);
 		context->move_to ( width-4*scale, height / 2);  //right side
-		context->rel_move_to ( -tw, -th / 2);  //right justified, vertically centered text
+		context->rel_move_to ( -tw, -1*scale -th / 2);  //right justified, vertically centered text
 		Gtkmm2ext::set_source_rgba (context, UIConfiguration::instance ().color ("neutral:foreground"));
 		layout->show_in_cairo_context (context);
 	}

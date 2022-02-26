@@ -181,11 +181,15 @@ CueEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 
 	//draw cue letter
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
-	layout->set_font_description (UIConfiguration::instance ().get_NormalFont ());
+	int font_size = 8 * scale;
+	char font_name[128];
+	snprintf (font_name, sizeof (font_name), "ArdourMono %d", font_size);
+	Pango::FontDescription pfd (font_name);
+	layout->set_font_description (pfd);
 	layout->set_text (cue_marker_name (_cue_idx));
 	int tw, th;
 	layout->get_pixel_size (tw, th);
-	context->translate (self.x0, self.y0 - 0.5);  //canvas widget offset (sigh)
+	context->translate (self.x0 - 0.5*scale, self.y0 - 0.5*scale);
 	context->move_to (width/2,height/2);  //move to center
 	context->rel_move_to (-tw/2, -th/2);  //rel move to top-left of text
 	context->set_source_rgb (0, 0, 0);  //black
