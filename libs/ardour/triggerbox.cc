@@ -244,7 +244,9 @@ Trigger::get_ui_state (Trigger::UIState &state) const
 
 	state.used_channels = used_channels();
 	for (int i = 0; i<16; i++) {
-		state.patch_change[i] = patch_change(i);
+		if (patch_change(i).is_set()) {
+			state.patch_change[i] = patch_change(i);
+		}
 	}
 
 	/* tempo is currently not a property */
@@ -358,7 +360,9 @@ Trigger::copy_to_ui_state ()
 
 	ui_state.used_channels = used_channels();
 	for (int i = 0; i<16; i++) {
-		ui_state.patch_change[i] = patch_change(i);  //TODO:  maybe these should be initialized here instead of later
+		if (patch_change(i).is_set()) {
+			ui_state.patch_change[i] = patch_change(i);
+		}
 	}
 }
 
@@ -2132,7 +2136,9 @@ MIDITrigger::patch_change (uint8_t channel) const
 	Evoral::PatchChange<MidiBuffer::TimeType> ret;
 
 	assert (channel < 16);
-	ret = _patch_change[channel];
+	if (_patch_change[channel].is_set()) {
+		ret = _patch_change[channel];
+	}
 
 	return ret;
 }
@@ -2215,12 +2221,12 @@ MIDITrigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Off
 	for (int chn = 0; chn < 16; ++chn) {
 		if (_used_channels.test(chn) && _patch_change[chn].is_set()) {
 			_patch_change[chn].set_time (dest_offset);
-			cerr << index() << " Injecting patch change " << _patch_change[chn].program() << " @ " << dest_offset << endl;
+			DEBUG_TRACE (DEBUG::MidiTriggers, string_compose ("Injecting patch change c:%1 b:%2 p:%3\n", (uint32_t) _patch_change[chn].channel(), (uint32_t) _patch_change[chn].bank(), (uint32_t) _patch_change[chn].program()));
 			for (int msg = 0; msg < _patch_change[chn].messages(); ++msg) {
 				if (mb) {
 					mb->insert_event (_patch_change[chn].message (msg));
+					_box.tracker->track (_patch_change[chn].message (msg).buffer());
 				}
-				_box.tracker->track (_patch_change[chn].message (msg).buffer());
 			}
 		}
 	}
@@ -2598,15 +2604,29 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 				ev.scale_velocity (_gain);
 			}
 
+			int chn = ev.channel();
+
 			if (_channel_map[ev.channel()] > 0) {
-				ev.set_channel (_channel_map[ev.channel()]);
+				ev.set_channel (_channel_map[chn]);
 			}
 
 			if (ev.is_pgm_change() || (ev.is_cc() && ((ev.cc_number() == MIDI_CTL_LSB_BANK) || (ev.cc_number() == MIDI_CTL_MSB_BANK)))) {
-				if (_patch_change[ev.channel()].is_set() || _box.ignore_patch_changes ()) {
-					/* skip pgm change info in data because trigger has its own */
+				if (_box.ignore_patch_changes ()) {
+					/* do not send ANY patch or bank messages, just skip them */
+					DEBUG_TRACE (DEBUG::MidiTriggers, string_compose ("Ignoring patch change on chn:%1\n", (uint32_t) _patch_change[chn].channel()));
 					++iter;
 					continue;
+				} else if ( _patch_change[chn].is_set() ) {
+					/* from this context we don't know if a pgm message in the midi buffer is from the file or from triggerbox */
+					/* so when a bank or pgm message is recognized, just replace it with the desired patch */
+					DEBUG_TRACE (DEBUG::MidiTriggers, string_compose ("Replacing patch change c:%1 b:%2 p:%3\n", (uint32_t) _patch_change[chn].channel(), (uint32_t) _patch_change[chn].bank(), (uint32_t) _patch_change[chn].program()));
+					if (ev.is_cc() && (ev.cc_number() == MIDI_CTL_MSB_BANK)) {
+						ev.set_cc_value(_patch_change[chn].bank_msb());
+					} else if (ev.is_cc() && (ev.cc_number() == MIDI_CTL_LSB_BANK)) {
+						ev.set_cc_value(_patch_change[chn].bank_lsb());
+					} else if (ev.is_pgm_change()) {
+						ev.set_pgm_number(_patch_change[chn].program());
+					}
 				}
 			}
 
