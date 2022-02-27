@@ -134,9 +134,9 @@ public:
 	}
 
 	void set_channel (uint8_t c) {
-		_bank_change_msb.buffer()[0] = c & 0xf;
-		_bank_change_lsb.buffer()[0] = c & 0xf;
-		_program_change.buffer()[0]  = c & 0xf;
+		_bank_change_msb.buffer()[0] = MIDI_CMD_CONTROL | c;
+		_bank_change_lsb.buffer()[0] = MIDI_CMD_CONTROL | c;
+		_program_change.buffer()[0]  = MIDI_CMD_PGM_CHANGE | c;
 	}
 
 	uint8_t program () const {
