@@ -41,8 +41,7 @@ Worker::Worker(Workee* workee, uint32_t ring_size, bool threaded)
 	, _synchronous(!threaded)
 {
 	if (threaded) {
-		_thread = Glib::Threads::Thread::create(
-			sigc::mem_fun(*this, &Worker::run));
+		_thread = PBD::Thread::create (boost::bind (&Worker::run, this));
 	}
 }
 

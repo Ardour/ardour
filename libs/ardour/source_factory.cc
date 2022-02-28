@@ -105,7 +105,7 @@ void
 SourceFactory::init ()
 {
 	for (int n = 0; n < 2; ++n) {
-		Glib::Threads::Thread::create (sigc::ptr_fun (::peak_thread_work));
+		PBD::Thread::create (&peak_thread_work);
 	}
 }
 

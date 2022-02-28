@@ -299,12 +299,12 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 
 	std::string               _last_backend_error_string;
 
-	Glib::Threads::Thread*    _hw_reset_event_thread;
+	PBD::Thread*              _hw_reset_event_thread;
 	GATOMIC_QUAL gint         _hw_reset_request_count;
 	Glib::Threads::Cond       _hw_reset_condition;
 	Glib::Threads::Mutex      _reset_request_lock;
 	GATOMIC_QUAL gint         _stop_hw_reset_processing;
-	Glib::Threads::Thread*    _hw_devicelist_update_thread;
+	PBD::Thread*              _hw_devicelist_update_thread;
 	GATOMIC_QUAL gint         _hw_devicelist_update_count;
 	Glib::Threads::Cond       _hw_devicelist_update_condition;
 	Glib::Threads::Mutex      _devicelist_update_lock;

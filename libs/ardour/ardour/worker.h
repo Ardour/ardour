@@ -23,8 +23,7 @@
 
 #include <stdint.h>
 
-#include <glibmm/threads.h>
-
+#include "pbd/pthread_utils.h"
 #include "pbd/ringbuffer.h"
 #include "pbd/semutils.h"
 
@@ -110,7 +109,7 @@ private:
 	PBD::RingBuffer<uint8_t>* _responses;
 	uint8_t*                  _response;
 	PBD::Semaphore            _sem;
-	Glib::Threads::Thread*    _thread;
+	PBD::Thread*              _thread;
 	bool                      _exit;
 	bool                      _synchronous;
 };

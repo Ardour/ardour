@@ -22,9 +22,9 @@
 
 #include <set>
 #include <boost/shared_ptr.hpp>
-#include <glibmm/threads.h>
 #include <sigc++/signal.h>
 
+#include "pbd/pthread_utils.h"
 #include "pbd/signals.h"
 
 #include "ardour/session_handle.h"
@@ -54,7 +54,7 @@ private:
 	~AutomationWatch();
 
 	static AutomationWatch* _instance;
-	Glib::Threads::Thread*  _thread;
+	PBD::Thread*            _thread;
 	samplepos_t             _last_time;
 	bool                    _run_thread;
 	AutomationWatches        automation_watches;

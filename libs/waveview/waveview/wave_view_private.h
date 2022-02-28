@@ -21,6 +21,7 @@
 
 #include <deque>
 
+#include "pbd/pthread_utils.h"
 #include "waveview/wave_view.h"
 
 namespace ARDOUR {
@@ -298,7 +299,7 @@ private:
 	void run ();
 
 private:
-	Glib::Threads::Thread* _thread;
+	PBD::Thread* _thread;
 };
 
 class WaveViewThreads {

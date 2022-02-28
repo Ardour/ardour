@@ -291,7 +291,7 @@ MidiPatchManager::load_midnams ()
 void
 MidiPatchManager::load_midnams_in_thread ()
 {
-	_midnam_load_thread = Glib::Threads::Thread::create (sigc::mem_fun (*this, &MidiPatchManager::load_midnams));
+	_midnam_load_thread = PBD::Thread::create (boost::bind (&MidiPatchManager::load_midnams, this));
 }
 
 void

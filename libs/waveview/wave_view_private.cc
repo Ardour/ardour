@@ -405,7 +405,7 @@ WaveViewDrawingThread::start ()
 {
 	assert (!_thread);
 
-	_thread = Glib::Threads::Thread::create (sigc::ptr_fun (&WaveViewThreads::thread_proc));
+	_thread = PBD::Thread::create (&WaveViewThreads::thread_proc);
 }
 
 void

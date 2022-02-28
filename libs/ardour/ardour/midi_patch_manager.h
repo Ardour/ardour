@@ -23,11 +23,10 @@
 #ifndef MIDI_PATCH_MANAGER_H_
 #define MIDI_PATCH_MANAGER_H_
 
-#include <glibmm/threads.h>
-
 #include "midi++/midnam_patch.h"
 
 #include "pbd/event_loop.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/signals.h"
 #include "pbd/search_path.h"
 
@@ -173,7 +172,7 @@ private:
 	Glib::Threads::Mutex _lock;
 	bool no_patch_changed_messages;
 	bool stop_thread;
-	Glib::Threads::Thread* _midnam_load_thread;
+	PBD::Thread* _midnam_load_thread;
 	void load_midnams ();
 };
 

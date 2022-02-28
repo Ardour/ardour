@@ -51,17 +51,10 @@ Analyser::~Analyser ()
 {
 }
 
-static void
-analyser_work ()
-{
-	pthread_set_name ("Analyzer");
-	Analyser::work ();
-}
-
 void
 Analyser::init ()
 {
-	Glib::Threads::Thread::create (sigc::ptr_fun (analyser_work));
+	PBD::Thread::create (sigc::ptr_fun (&Analyser::work), "Analyzer");
 }
 
 void
