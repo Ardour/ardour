@@ -96,10 +96,9 @@ UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 	}
 
 	/* the GUI event loop runs in the main thread of the app,
-	   which is assumed to have called this.
-	*/
-
-	run_loop_thread = Threads::Thread::self();
+	 * which is assumed to have called this.
+	 */
+	_run_loop_thread = PBD::Thread::self ();
 
 	/* store "this" as the UI-for-thread of this thread, same argument
 	   as for previous line.
@@ -144,9 +143,9 @@ UI::~UI ()
 }
 
 bool
-UI::caller_is_ui_thread ()
+UI::caller_is_ui_thread () const
 {
-	return Threads::Thread::self() == run_loop_thread;
+	return caller_is_self ();
 }
 
 int

@@ -37,7 +37,7 @@ TestUI::TestUI ()
 
 	pthread_set_name ("test_ui_thread");
 
-	run_loop_thread = Glib::Threads::Thread::self ();
+	_run_loop_thread = PBD::Thread::self ();
 
 	set_event_loop_for_thread (this);
 

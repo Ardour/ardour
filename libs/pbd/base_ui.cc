@@ -58,7 +58,7 @@ BaseUI::RequestType BaseUI::Quit = BaseUI::new_request_type();
 BaseUI::BaseUI (const string& loop_name)
 	: EventLoop (loop_name)
 	, m_context(MainContext::get_default())
-	, run_loop_thread (0)
+	, _run_loop_thread (0)
 	, request_channel (true)
 {
 	base_ui_instance = this;
@@ -69,6 +69,7 @@ BaseUI::BaseUI (const string& loop_name)
 
 BaseUI::~BaseUI()
 {
+	delete _run_loop_thread;
 }
 
 BaseUI::RequestType
@@ -121,7 +122,7 @@ BaseUI::run ()
 	attach_request_source ();
 
 	Glib::Threads::Mutex::Lock lm (_run_lock);
-	run_loop_thread = Glib::Threads::Thread::create (mem_fun (*this, &BaseUI::main_thread));
+	_run_loop_thread = PBD::Thread::create (boost::bind (&BaseUI::main_thread, this));
 	_running.wait (_run_lock);
 }
 
@@ -130,7 +131,7 @@ BaseUI::quit ()
 {
 	if (_main_loop && _main_loop->is_running()) {
 		_main_loop->quit ();
-		run_loop_thread->join ();
+		_run_loop_thread->join ();
 	}
 }
 
