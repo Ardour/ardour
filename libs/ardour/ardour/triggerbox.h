@@ -150,6 +150,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<float>                _velocity_effect;
 	PBD::Property<bool>                 _stretchable;
 	PBD::Property<bool>                 _cue_isolated;
+	PBD::Property<bool>                 _allow_patch_changes;
 	PBD::Property<StretchMode>          _stretch_mode;
 
 	/* Properties that are not CAS-updated at retrigger */
@@ -177,6 +178,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		float velocity_effect = 0;
 		bool stretchable = true;
 		bool cue_isolated = false;
+		bool allow_patch_changes = true;
 		StretchMode stretch_mode = Trigger::Crisp;
 
 		Evoral::SMF::UsedChannels used_channels = Evoral::SMF::UsedChannels();
@@ -207,6 +209,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 			velocity_effect = other.velocity_effect;
 			stretchable = other.stretchable;
 			cue_isolated = other.cue_isolated;
+			allow_patch_changes = other.allow_patch_changes;
 			stretch_mode = other.stretch_mode;
 			used_channels = other.used_channels;
 
@@ -239,6 +242,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	TRIGGERBOX_PROPERTY_DECL (velocity_effect, float);
 	TRIGGERBOX_PROPERTY_DECL (stretchable, bool);
 	TRIGGERBOX_PROPERTY_DECL (cue_isolated, bool);
+	TRIGGERBOX_PROPERTY_DECL (allow_patch_changes, bool);
+	TRIGGERBOX_PROPERTY_DECL (gain, gain_t);
 	TRIGGERBOX_PROPERTY_DECL (stretch_mode, StretchMode);
 	TRIGGERBOX_PROPERTY_DECL (color, color_t);
 	TRIGGERBOX_PROPERTY_DECL_CONST_REF (name, std::string);
@@ -376,9 +381,6 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	virtual void setup_stretcher () = 0;
 
 	Temporal::Meter meter() const { return _meter; }
-
-	gain_t gain() {return _gain;}
-	void set_gain (gain_t g);
 
 	void set_velocity_gain (gain_t g) {_pending_velocity_gain=g;}
 
@@ -757,9 +759,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void add_midi_sidechain ();
 	void update_sidechain_name ();
 
-	void set_ignore_patch_changes (bool);
-	bool ignore_patch_changes () const { return _ignore_patch_changes; }
-
 	void request_reload (int32_t slot, void*);
 	void set_region (uint32_t slot, boost::shared_ptr<Region> region);
 
@@ -821,7 +820,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 	bool                     _stop_all;
 	int32_t                  _active_scene;
 	int32_t                  _active_slots;
-	bool                     _ignore_patch_changes;
 	bool                     _locate_armed;
 	bool                     _cancel_locate_armed;
 	bool                     _fast_fowarding;
@@ -923,6 +921,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> currently_playing;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> stretchable;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> cue_isolated;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> allow_patch_changes;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> patch_change; /* type not important */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> channel_map; /* type not important */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> used_channels; /* type not important */

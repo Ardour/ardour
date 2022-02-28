@@ -65,6 +65,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<gain_t> gain;
 		PBD::PropertyDescriptor<bool> stretchable;
 		PBD::PropertyDescriptor<bool> cue_isolated;
+		PBD::PropertyDescriptor<bool> allow_patch_changes;
 		PBD::PropertyDescriptor<Trigger::StretchMode> stretch_mode;
 		PBD::PropertyDescriptor<bool> tempo_meter;  /* only to transmit updates, not storage */
 		PBD::PropertyDescriptor<bool> patch_change;  /* only to transmit updates, not storage */
@@ -167,6 +168,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _velocity_effect (Properties::velocity_effect, 0.)
 	, _stretchable (Properties::stretchable, true)
 	, _cue_isolated (Properties::cue_isolated, false)
+	, _allow_patch_changes (Properties::allow_patch_changes, true)
 	, _stretch_mode (Properties::stretch_mode, Trigger::Crisp)
 	, _name (Properties::name, "")
 	, _color (Properties::color, 0xBEBEBEFF)
@@ -205,6 +207,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	add_property (_gain);
 	add_property (_velocity_effect);
 	add_property (_stretchable);
+	add_property (_allow_patch_changes);
 	add_property (_cue_isolated);
 	add_property (_color);
 	add_property (_stretch_mode);
@@ -236,6 +239,7 @@ Trigger::get_ui_state (Trigger::UIState &state) const
 	state.gain = _gain;
 	state.velocity_effect = _velocity_effect;
 	state.stretchable = _stretchable;
+	state.allow_patch_changes = _allow_patch_changes;
 	state.cue_isolated = _cue_isolated;
 	state.stretch_mode = _stretch_mode;
 
@@ -300,6 +304,7 @@ Trigger::update_properties ()
 		_gain = ui_state.gain;
 		_velocity_effect = ui_state.velocity_effect;
 		_stretchable = ui_state.stretchable;
+		_allow_patch_changes = ui_state.allow_patch_changes;
 		_cue_isolated = ui_state.cue_isolated;
 		_stretch_mode = ui_state.stretch_mode;
 		_color = ui_state.color;
@@ -354,6 +359,7 @@ Trigger::copy_to_ui_state ()
 	ui_state.velocity_effect = _velocity_effect;
 	ui_state.stretchable = _stretchable;
 	ui_state.cue_isolated = _cue_isolated;
+	ui_state.allow_patch_changes = _allow_patch_changes;
 	ui_state.stretch_mode = _stretch_mode;
 	ui_state.name = _name;
 	ui_state.color = _color;
@@ -441,6 +447,7 @@ Trigger::name () const \
 	return val; \
 }
 
+/* some params do not appear here ... gain, patch-changes, name, allow-patch-changes, etc ... because they don't need to be queued */
 TRIGGER_UI_SET (cue_isolated,bool)
 TRIGGER_UI_SET (stretchable, bool)
 TRIGGER_UI_SET (velocity_effect, float)
@@ -492,6 +499,34 @@ Trigger::set_ui (void* p)
 {
 	_ui = p;
 }
+
+bool
+Trigger::allow_patch_changes () const
+{
+	return _allow_patch_changes;
+}
+
+void
+Trigger::set_allow_patch_changes (bool yn)
+{
+	if (_box.data_type() != DataType::MIDI) {
+		return;
+	}
+	if (_allow_patch_changes == yn) {
+		return;
+	}
+
+	_allow_patch_changes = yn;
+	send_property_change (Properties::allow_patch_changes);
+	_box.session().set_dirty();
+}
+
+gain_t
+Trigger::gain () const
+{
+	return _gain;
+}
+
 
 void
 Trigger::set_gain (gain_t g)
@@ -2235,7 +2270,7 @@ MIDITrigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Off
 	/* Possibly inject patch changes, if set */
 
 	for (int chn = 0; chn < 16; ++chn) {
-		if (_used_channels.test(chn) && _patch_change[chn].is_set()) {
+		if (_used_channels.test(chn) && allow_patch_changes() && _patch_change[chn].is_set()) {
 			_patch_change[chn].set_time (dest_offset);
 			DEBUG_TRACE (DEBUG::MidiTriggers, string_compose ("Injecting patch change c:%1 b:%2 p:%3\n", (uint32_t) _patch_change[chn].channel(), (uint32_t) _patch_change[chn].bank(), (uint32_t) _patch_change[chn].program()));
 			for (int msg = 0; msg < _patch_change[chn].messages(); ++msg) {
@@ -2487,7 +2522,7 @@ MIDITrigger::estimate_midi_patches ()
 		}
 
 		/* finally, store the used_channels so the UI can show patches only for those chans actually used */
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 estimate_midi_patches(), using channels %2\n", name(), smfs->used_channels().to_string().c_str()));
+		DEBUG_TRACE (DEBUG::MidiTriggers, string_compose ("%1 estimate_midi_patches(), using channels %2\n", name(), smfs->used_channels().to_string().c_str()));
 		set_used_channels(smfs->used_channels());
 	}
 }
@@ -2627,7 +2662,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			}
 
 			if (ev.is_pgm_change() || (ev.is_cc() && ((ev.cc_number() == MIDI_CTL_LSB_BANK) || (ev.cc_number() == MIDI_CTL_MSB_BANK)))) {
-				if (_box.ignore_patch_changes ()) {
+				if (!allow_patch_changes ()) {
 					/* do not send ANY patch or bank messages, just skip them */
 					DEBUG_TRACE (DEBUG::MidiTriggers, string_compose ("Ignoring patch change on chn:%1\n", (uint32_t) _patch_change[chn].channel()));
 					++iter;
@@ -2762,6 +2797,8 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretchable = %1\n", Properties::stretchable.property_id));
 	Properties::cue_isolated.property_id = g_quark_from_static_string (X_("cue_isolated"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for cue_isolated = %1\n", Properties::cue_isolated.property_id));
+	Properties::allow_patch_changes.property_id = g_quark_from_static_string (X_("allow_patch_changes"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for allow_patch_changes = %1\n", Properties::allow_patch_changes.property_id));
 	Properties::stretch_mode.property_id = g_quark_from_static_string (X_("stretch_mode"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretch_mode = %1\n", Properties::stretch_mode.property_id));
 	Properties::patch_change.property_id = g_quark_from_static_string (X_("patch_change"));
@@ -2801,7 +2838,6 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _stop_all (false)
 	, _active_scene (-1)
 	, _active_slots (0)
-	, _ignore_patch_changes (false)
 	, _locate_armed (false)
 	, _cancel_locate_armed (false)
 	, _fast_fowarding (false)
@@ -2835,17 +2871,6 @@ TriggerBox::set_cue_recording (bool yn)
 	if (yn != _cue_recording) {
 		_cue_recording = yn;
 		CueRecordingChanged ();
-	}
-}
-
-void
-TriggerBox::set_ignore_patch_changes (bool yn)
-{
-	if (_data_type != DataType::MIDI) {
-		return;
-	}
-	if (yn != _ignore_patch_changes) {
-		_ignore_patch_changes = yn;
 	}
 }
 
@@ -4073,8 +4098,6 @@ TriggerBox::get_state (void)
 	node.set_property (X_("type"), X_("triggerbox"));
 	node.set_property (X_("data-type"), _data_type.to_string());
 	node.set_property (X_("order"), _order);
-	node.set_property (X_("ignore_patch_changes"), _ignore_patch_changes);
-
 	XMLNode* trigger_child (new XMLNode (X_("Triggers")));
 
 	{
@@ -4100,7 +4123,6 @@ TriggerBox::set_state (const XMLNode& node, int version)
 
 	node.get_property (X_("data-type"), _data_type);
 	node.get_property (X_("order"), _order);
-	node.get_property (X_("ignore_patch_changes"), _ignore_patch_changes);
 
 	XMLNode* tnode (node.child (X_("Triggers")));
 	assert (tnode);
