@@ -283,7 +283,6 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	samplecnt_t                last_monitor_check;
 	/// the number of samples processed since start() was called
 	samplecnt_t               _processed_samples;
-	Glib::Threads::Thread*     m_meter_thread;
 	ProcessThread*            _main_thread;
 	MTDM*                     _mtdm;
 	MIDIDM*                   _mididm;
