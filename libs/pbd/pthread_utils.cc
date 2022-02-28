@@ -28,6 +28,7 @@
 #include <dlfcn.h>
 #endif
 
+#include "pbd/failed_constructor.h"
 #include "pbd/pthread_utils.h"
 
 #ifdef COMPILER_MSVC
@@ -435,4 +436,66 @@ pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns, bool main)
 	return res != KERN_SUCCESS;
 #endif
 	return false; // OK
+}
+
+PBD::Thread*
+PBD::Thread::create (boost::function<void ()> const& slot, std::string const& name)
+{
+	try {
+		return new PBD::Thread (slot, name);
+	} catch (...) {
+		return 0;
+	}
+}
+
+PBD::Thread*
+PBD::Thread::self ()
+{
+	return new PBD::Thread ();
+}
+
+PBD::Thread::Thread ()
+	: _name ("Main")
+	, _joinable (false)
+{
+	_t = pthread_self ();
+}
+
+PBD::Thread::Thread (boost::function<void ()> const& slot, std::string const& name)
+	: _name (name)
+	, _slot (slot)
+	, _joinable (true)
+{
+	pthread_attr_t thread_attributes;
+	pthread_attr_init (&thread_attributes);
+
+	if (pthread_create (&_t, &thread_attributes, _run, this)) {
+		throw failed_constructor ();
+	}
+}
+
+void*
+PBD::Thread::_run (void* arg) {
+	PBD::Thread* self = static_cast<PBD::Thread *>(arg);
+	if (!self->_name.empty ()) {
+		pthread_set_name (self->_name.c_str ());
+	}
+	self->_slot ();
+
+	pthread_exit (0);
+	return 0;
+}
+
+void
+PBD::Thread::join ()
+{
+	if (_joinable) {
+		pthread_join (_t, NULL);
+	}
+}
+
+bool
+PBD::Thread::caller_is_self () const
+{
+	return pthread_equal (_t, pthread_self ()) != 0;
 }
