@@ -359,18 +359,18 @@ if test -n "$MIXBUS"; then
 
 	if test -f "${SRCCACHE}/MixbusBundledMedia.zip"; then
 		echo "Adding Mixbus Bundled Content"
-		rm -f $DESTDIR/share/media/*.*
-		unzip -q -d "$DESTDIR/share/media/" "${SRCCACHE}/MixbusBundledMedia.zip"
+		rm -f $DESTDIR/share/${LOWERCASE_DIRNAME}/media/*.*
+		unzip -q -d "$DESTDIR/share/${LOWERCASE_DIRNAME}/media/" "${SRCCACHE}/MixbusBundledMedia.zip"
 	fi
 fi
 
 ################################################################################
 
 if test x$DEMO_SESSION_URL != x ; then
-	mkdir -p $DESTDIR/share/sessions
+	mkdir -p $DESTDIR/share/${LOWERCASE_DIRNAME}/sessions
 	DEMO_SESSIONS=$(curl -s -S --fail $DEMO_SESSION_URL/index.txt)
 	for demo in $DEMO_SESSIONS; do
-		curl -s -S --fail -# -o $DESTDIR/share/sessions/$demo $DEMO_SESSION_URL/$demo
+		curl -s -S --fail -# -o $DESTDIR/share/${LOWERCASE_DIRNAME}/sessions/$demo $DEMO_SESSION_URL/$demo
 	done
 fi
 
