@@ -266,6 +266,17 @@ ARDOUR_UI::repack_transport_hbox ()
 		latency_spacer.hide ();
 	}
 
+	bool show_cue = UIConfiguration::instance().get_show_toolbar_cuectrl ();
+	if (show_cue) {
+		_cue_rec_enable.show ();
+		_cue_play_enable.show ();
+		cuectrl_spacer.show ();
+	} else {
+		_cue_rec_enable.hide ();
+		_cue_play_enable.hide ();
+		cuectrl_spacer.hide ();
+	}
+
 	bool show_mnfo = UIConfiguration::instance().get_show_toolbar_monitor_info ();
 	if (show_mnfo) {
 		monitor_dim_button.show ();
@@ -649,6 +660,9 @@ ARDOUR_UI::setup_transport ()
 	++col;
 
 	transport_table.attach (*monitor_box, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
+	transport_table.attach (cuectrl_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	transport_table.attach (_cue_rec_enable, TCOL, 0, 1 , FILL, FILL, 3, 0);

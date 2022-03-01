@@ -523,6 +523,7 @@ private:
 	ArdourWidgets::ArdourVSpacer latency_spacer;
 	ArdourWidgets::ArdourVSpacer monitor_spacer;
 	ArdourWidgets::ArdourVSpacer scripts_spacer;
+	ArdourWidgets::ArdourVSpacer cuectrl_spacer;
 
 	ArdourWidgets::ArdourButton monitor_dim_button;
 	ArdourWidgets::ArdourButton monitor_mono_button;

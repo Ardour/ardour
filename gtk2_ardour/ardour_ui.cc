@@ -315,10 +315,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, startup_fsm (0)
 	, secondary_clock_spacer (0)
 	, latency_disable_button (ArdourButton::led_default_elements)
-
 	, _cue_rec_enable (_("Rec Cues"), ArdourButton::led_default_elements)
 	, _cue_play_enable (_("Play Cues"), ArdourButton::led_default_elements)
-
 	, time_info_box (0)
 	, auto_return_button (ArdourButton::led_default_elements)
 	, follow_edits_button (ArdourButton::led_default_elements)

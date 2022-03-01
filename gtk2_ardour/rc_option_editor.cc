@@ -2900,6 +2900,14 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (
+		     "show-toolbar-cuectrl",
+		     _("Display Cue Rec/Play Controls"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_cuectrl),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_cuectrl)
+		     ));
+
+	add_option (_("Appearance/Toolbar"),
+	     new BoolOption (
 		     "show-mini-timeline",
 		     _("Display Navigation Timeline"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_mini_timeline),

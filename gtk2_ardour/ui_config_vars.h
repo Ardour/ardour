@@ -96,6 +96,7 @@ UI_CONFIG_VARIABLE (bool, show_toolbar_recpunch, "show-toolbar-recpunch", true)
 UI_CONFIG_VARIABLE (bool, show_toolbar_monitoring, "show-toolbar-monitoring", false) /* deprecated */
 UI_CONFIG_VARIABLE (bool, show_toolbar_selclock, "show-toolbar-selclock", false)
 UI_CONFIG_VARIABLE (bool, show_toolbar_latency, "show-toolbar-latency", false)
+UI_CONFIG_VARIABLE (bool, show_toolbar_cuectrl, "show-toolbar-cuectrl", true)
 UI_CONFIG_VARIABLE (bool, show_toolbar_monitor_info, "show-toolbar-monitor-info", false)
 UI_CONFIG_VARIABLE (bool, show_mini_timeline, "show-mini-timeline", true)
 UI_CONFIG_VARIABLE (bool, show_secondary_clock, "show-secondary-clock", true)
