@@ -566,20 +566,23 @@ TriggerClipPicker::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Selecti
 }
 
 bool
-TriggerClipPicker::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int, int y, guint time)
+TriggerClipPicker::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int, int, guint time)
 {
 	for (auto i : context->get_targets ()) {
-		if (i == "text/uri-list") {
-			context->drag_status (Gdk::ACTION_LINK, time);
+		if (i == "x-ardour/region.pbdid") {
+			/* prepare for export to local clip library */
+			if (!_clip_library_dir.empty () && _current_path != _clip_library_dir) {
+				list_dir (_clip_library_dir);
+			}
+			context->drag_status (Gdk::ACTION_COPY, time);
 			return true;
 		}
 	}
 
-	if (!_clip_library_dir.empty () && _current_path != _clip_library_dir) {
-		list_dir (_clip_library_dir);
-	}
-
-	context->drag_status (Gdk::ACTION_COPY, time);
+	/* drag from clip-picker (to slots), or
+	 * drag of an external folder to the clip-picker (add to sample_lib_path)
+	 */
+	context->drag_status (Gdk::ACTION_LINK, time);
 	return true;
 }
 
