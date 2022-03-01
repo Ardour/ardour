@@ -19,7 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include "ardour/analyser.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/rc_configuration.h"
@@ -35,16 +34,15 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Glib::Threads::Mutex Analyser::analysis_active_lock;
-Glib::Threads::Mutex Analyser::analysis_queue_lock;
-Glib::Threads::Cond  Analyser::SourcesToAnalyse;
-list<boost::weak_ptr<Source> > Analyser::analysis_queue;
-bool Analyser::analysis_thread_run = false;
-PBD::Thread* Analyser::analysis_thread = 0;
+Glib::Threads::Mutex          Analyser::analysis_active_lock;
+Glib::Threads::Mutex          Analyser::analysis_queue_lock;
+Glib::Threads::Cond           Analyser::SourcesToAnalyse;
+list<boost::weak_ptr<Source>> Analyser::analysis_queue;
+bool                          Analyser::analysis_thread_run = false;
+PBD::Thread*                  Analyser::analysis_thread     = 0;
 
 Analyser::Analyser ()
 {
-
 }
 
 void
@@ -54,7 +52,7 @@ Analyser::init ()
 		return;
 	}
 	analysis_thread_run = true;
-	analysis_thread = PBD::Thread::create (sigc::ptr_fun (&Analyser::work), "Analyzer");
+	analysis_thread     = PBD::Thread::create (sigc::ptr_fun (&Analyser::work), "Analyzer");
 }
 
 void
@@ -71,16 +69,16 @@ Analyser::terminate ()
 void
 Analyser::queue_source_for_analysis (boost::shared_ptr<Source> src, bool force)
 {
-	if (!src->can_be_analysed()) {
+	if (!src->can_be_analysed ()) {
 		return;
 	}
 
-	if (!force && src->has_been_analysed()) {
+	if (!force && src->has_been_analysed ()) {
 		return;
 	}
 
 	Glib::Threads::Mutex::Lock lm (analysis_queue_lock);
-	analysis_queue.push_back (boost::weak_ptr<Source>(src));
+	analysis_queue.push_back (boost::weak_ptr<Source> (src));
 	SourcesToAnalyse.broadcast ();
 }
 
@@ -92,8 +90,8 @@ Analyser::work ()
 	while (true) {
 		analysis_queue_lock.lock ();
 
-	  wait:
-		if (analysis_queue.empty() && analysis_thread_run) {
+	wait:
+		if (analysis_queue.empty () && analysis_thread_run) {
 			SourcesToAnalyse.wait (analysis_queue_lock);
 		}
 
@@ -102,17 +100,17 @@ Analyser::work ()
 			break;
 		}
 
-		if (analysis_queue.empty()) {
+		if (analysis_queue.empty ()) {
 			goto wait;
 		}
 
-		boost::shared_ptr<Source> src (analysis_queue.front().lock());
-		analysis_queue.pop_front();
+		boost::shared_ptr<Source> src (analysis_queue.front ().lock ());
+		analysis_queue.pop_front ();
 		analysis_queue_lock.unlock ();
 
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 
-		if (afs && !afs->empty()) {
+		if (afs && !afs->empty ()) {
 			Glib::Threads::Mutex::Lock lm (analysis_active_lock);
 			analyse_audio_file_source (afs);
 		}
@@ -125,15 +123,16 @@ Analyser::analyse_audio_file_source (boost::shared_ptr<AudioFileSource> src)
 	AnalysisFeatureList results;
 
 	try {
-		TransientDetector td (src->sample_rate());
-		td.set_sensitivity (3, Config->get_transient_sensitivity()); // "General purpose"
-		if (td.run (src->get_transients_path(), src.get(), 0, results) == 0) {
+		TransientDetector td (src->sample_rate ());
+		td.set_sensitivity (3, Config->get_transient_sensitivity ()); // "General purpose"
+		if (td.run (src->get_transients_path (), src.get (), 0, results) == 0) {
 			src->set_been_analysed (true);
 		} else {
 			src->set_been_analysed (false);
 		}
 	} catch (...) {
-		error << string_compose(_("Transient Analysis failed for %1."), _("Audio File Source")) << endmsg;;
+		error << string_compose (_ ("Transient Analysis failed for %1."), _ ("Audio File Source")) << endmsg;
+		;
 		src->set_been_analysed (false);
 		return;
 	}
@@ -144,5 +143,5 @@ Analyser::flush ()
 {
 	Glib::Threads::Mutex::Lock lq (analysis_queue_lock);
 	Glib::Threads::Mutex::Lock la (analysis_active_lock);
-	analysis_queue.clear();
+	analysis_queue.clear ();
 }
