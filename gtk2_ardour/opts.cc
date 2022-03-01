@@ -41,7 +41,7 @@
 using namespace std;
 
 string ARDOUR_COMMAND_LINE::session_name = "";
-string ARDOUR_COMMAND_LINE::backend_client_name = "ardour";
+string ARDOUR_COMMAND_LINE::backend_client_name = PBD::downcase(PROGRAM_NAME);
 bool  ARDOUR_COMMAND_LINE::show_key_actions = false;
 bool  ARDOUR_COMMAND_LINE::show_actions = false;
 bool ARDOUR_COMMAND_LINE::no_splash = false;
