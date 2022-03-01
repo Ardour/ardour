@@ -567,8 +567,10 @@ Trigger::set_state (const XMLNode& node, int version)
 	}
 
 	double tempo;
-	node.get_property (X_("segment-tempo"), tempo);  //this is the user-selected tempo which overrides estimated_tempo
-	set_segment_tempo(tempo);
+	if (node.get_property (X_("segment-tempo"), tempo)) {
+		/* this is the user-selected tempo which overrides estimated_tempo */
+		set_segment_tempo(tempo);
+	}
 
 	node.get_property (X_("index"), _index);
 	set_values (node);
@@ -1582,24 +1584,22 @@ AudioTrigger::estimate_tempo ()
 	   resulting in small or larger gaps in output if they are repeating.
 	*/
 
-	double beatcount;
 	if ((_estimated_tempo != 0.)) {
 		/* fractional beatcnt */
 		double maybe_beats = (seconds / 60.) * _estimated_tempo;
-		beatcount = round (maybe_beats);
+		double beatcount = round (maybe_beats);
 		double est = _estimated_tempo;
 		_estimated_tempo = beatcount / (seconds/60.);
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given original estimated tempo %1, rounded beatcnt is %2 : resulting in working bpm = %3\n", est, _beatcnt, _estimated_tempo));
-	}
 
-	/* initialize our follow_length to match the beatcnt ... user can later change this value to have the clip end sooner or later than its data length */
-	set_follow_length(Temporal::BBT_Offset( 0, rint(beatcount), 0));
+		/* initialize our follow_length to match the beatcnt ... user can later change this value to have the clip end sooner or later than its data length */
+		set_follow_length(Temporal::BBT_Offset( 0, rint(beatcount), 0));
+	}
 
 	/* use initial tempo in map (assumed for now to be the only one */
 
-	cerr << "estimated tempo: " << _estimated_tempo << endl;
-
 #if 0
+	cerr << "estimated tempo: " << _estimated_tempo << endl;
 	const samplecnt_t one_beat = tm->bbt_duration_at (timepos_t (AudioTime), BBT_Offset (0, 1, 0)).samples();
 	cerr << "one beat in samples: " << one_beat << endl;
 	cerr << "rounded beatcount = " << round (beatcount) << endl;
