@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <string>
 
+#include "pbd/pthread_utils.h"
 #include "ardour/source.h"
 
 class XMLNode;
@@ -38,6 +39,7 @@ class LIBARDOUR_API SourceFactory
 {
 public:
 	static void init ();
+	static void terminate ();
 
 	static PBD::Signal1<void, boost::shared_ptr<Source>> SourceCreated;
 
@@ -50,6 +52,9 @@ public:
 
 	static Glib::Threads::Cond  PeaksToBuild;
 	static Glib::Threads::Mutex peak_building_lock;
+
+	static bool                      peak_thread_run;
+	static std::vector<PBD::Thread*> peak_thread_pool;
 
 	static std::list<boost::weak_ptr<AudioSource>> files_with_peaks;
 

@@ -26,7 +26,6 @@
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
-#include "pbd/pthread_utils.h"
 
 #include "ardour/audio_playlist_source.h"
 #include "ardour/audioplaylist.h"
@@ -55,6 +54,8 @@ PBD::Signal1<void, boost::shared_ptr<Source>> SourceFactory::SourceCreated;
 Glib::Threads::Cond                           SourceFactory::PeaksToBuild;
 Glib::Threads::Mutex                          SourceFactory::peak_building_lock;
 std::list<boost::weak_ptr<AudioSource>>       SourceFactory::files_with_peaks;
+std::vector<PBD::Thread*>                     SourceFactory::peak_thread_pool;
+bool                                          SourceFactory::peak_thread_run = false;
 
 static int active_threads = 0;
 
@@ -68,8 +69,13 @@ peak_thread_work ()
 		SourceFactory::peak_building_lock.lock ();
 
 	wait:
-		if (SourceFactory::files_with_peaks.empty ()) {
+		if (SourceFactory::files_with_peaks.empty () && SourceFactory::peak_thread_run) {
 			SourceFactory::PeaksToBuild.wait (SourceFactory::peak_building_lock);
+		}
+
+		if (!SourceFactory::peak_thread_run) {
+			SourceFactory::peak_building_lock.unlock ();
+			return;
 		}
 
 		if (SourceFactory::files_with_peaks.empty ()) {
@@ -78,7 +84,9 @@ peak_thread_work ()
 
 		boost::shared_ptr<AudioSource> as (SourceFactory::files_with_peaks.front ().lock ());
 		SourceFactory::files_with_peaks.pop_front ();
-		++active_threads;
+		if (as) {
+			++active_threads;
+		}
 		SourceFactory::peak_building_lock.unlock ();
 
 		if (!as) {
@@ -103,8 +111,25 @@ SourceFactory::peak_work_queue_length ()
 void
 SourceFactory::init ()
 {
+	if (peak_thread_run) {
+		return;
+	}
+	peak_thread_run = true;
 	for (int n = 0; n < 2; ++n) {
-		PBD::Thread::create (&peak_thread_work);
+		peak_thread_pool.push_back (PBD::Thread::create (&peak_thread_work));
+	}
+}
+
+void
+SourceFactory::terminate ()
+{
+	if (!peak_thread_run) {
+		return;
+	}
+	peak_thread_run = false;
+	PeaksToBuild.broadcast ();
+	for (auto& t : peak_thread_pool) {
+		t->join ();
 	}
 }
 

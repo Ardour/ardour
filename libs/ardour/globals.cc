@@ -739,6 +739,7 @@ ARDOUR::cleanup ()
 	delete TriggerBox::worker;
 
 	Analyser::terminate ();
+	SourceFactory::terminate ();
 
 	release_dma_latency ();
 	config_connection.disconnect ();
