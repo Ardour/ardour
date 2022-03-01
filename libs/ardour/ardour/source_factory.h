@@ -20,58 +20,43 @@
 #ifndef __ardour_source_factory_h__
 #define __ardour_source_factory_h__
 
-#include <string>
-#include <stdint.h>
 #include <boost/shared_ptr.hpp>
-
-#include <glibmm/threads.h>
+#include <stdint.h>
+#include <string>
 
 #include "ardour/source.h"
 
 class XMLNode;
 
-namespace ARDOUR {
-
+namespace ARDOUR
+{
 class Session;
 class AudioSource;
 class Playlist;
 
-class LIBARDOUR_API SourceFactory {
-  public:
+class LIBARDOUR_API SourceFactory
+{
+public:
 	static void init ();
 
-	static PBD::Signal1<void,boost::shared_ptr<Source> > SourceCreated;
+	static PBD::Signal1<void, boost::shared_ptr<Source>> SourceCreated;
 
 	static boost::shared_ptr<Source> create (Session&, const XMLNode& node, bool async = false);
-	static boost::shared_ptr<Source> createSilent (Session&, const XMLNode& node,
-	                                               samplecnt_t nframes, float sample_rate);
+	static boost::shared_ptr<Source> createSilent (Session&, const XMLNode& node, samplecnt_t, float sample_rate);
+	static boost::shared_ptr<Source> createExternal (DataType, Session&, const std::string& path, int chn, Source::Flag, bool announce = true, bool async = false);
+	static boost::shared_ptr<Source> createWritable (DataType, Session&, const std::string& path, samplecnt_t rate, bool announce = true, bool async = false);
+	static boost::shared_ptr<Source> createForRecovery (DataType, Session&, const std::string& path, int chn);
+	static boost::shared_ptr<Source> createFromPlaylist (DataType, Session&, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name, uint32_t chn, timepos_t start, timepos_t const& len, bool copy, bool defer_peaks);
 
-	static boost::shared_ptr<Source> createExternal
-		(DataType type, Session&,
-		 const std::string& path,
-		 int chn, Source::Flag flags, bool announce = true, bool async = false);
+	static Glib::Threads::Cond  PeaksToBuild;
+	static Glib::Threads::Mutex peak_building_lock;
 
-	static boost::shared_ptr<Source> createWritable
-		(DataType type, Session&,
-		 const std::string& path,
-		 samplecnt_t rate, bool announce = true, bool async = false);
-
-
-	static boost::shared_ptr<Source> createForRecovery
-		(DataType type, Session&, const std::string& path, int chn);
-
-	static boost::shared_ptr<Source> createFromPlaylist
-		(DataType type, Session& s, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name,
-		 uint32_t chn, timepos_t start, timepos_t const & len, bool copy, bool defer_peaks);
-
-        static Glib::Threads::Cond                       PeaksToBuild;
-        static Glib::Threads::Mutex                      peak_building_lock;
-	static std::list< boost::weak_ptr<AudioSource> > files_with_peaks;
+	static std::list<boost::weak_ptr<AudioSource>> files_with_peaks;
 
 	static int peak_work_queue_length ();
 	static int setup_peakfile (boost::shared_ptr<Source>, bool async);
 };
 
-}
+} // namespace ARDOUR
 
 #endif /* __ardour_source_factory_h__ */
