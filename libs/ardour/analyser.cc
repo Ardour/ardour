@@ -28,7 +28,6 @@
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
-#include "pbd/pthread_utils.h"
 
 #include "pbd/i18n.h"
 
@@ -36,25 +35,37 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Analyser* Analyser::the_analyser = 0;
 Glib::Threads::Mutex Analyser::analysis_active_lock;
 Glib::Threads::Mutex Analyser::analysis_queue_lock;
 Glib::Threads::Cond  Analyser::SourcesToAnalyse;
 list<boost::weak_ptr<Source> > Analyser::analysis_queue;
+bool Analyser::analysis_thread_run = false;
+PBD::Thread* Analyser::analysis_thread = 0;
 
 Analyser::Analyser ()
 {
 
 }
 
-Analyser::~Analyser ()
-{
-}
-
 void
 Analyser::init ()
 {
-	PBD::Thread::create (sigc::ptr_fun (&Analyser::work), "Analyzer");
+	if (analysis_thread_run) {
+		return;
+	}
+	analysis_thread_run = true;
+	analysis_thread = PBD::Thread::create (sigc::ptr_fun (&Analyser::work), "Analyzer");
+}
+
+void
+Analyser::terminate ()
+{
+	if (!analysis_thread_run) {
+		return;
+	}
+	analysis_thread_run = false;
+	SourcesToAnalyse.broadcast ();
+	analysis_thread->join ();
 }
 
 void
@@ -82,8 +93,13 @@ Analyser::work ()
 		analysis_queue_lock.lock ();
 
 	  wait:
-		if (analysis_queue.empty()) {
+		if (analysis_queue.empty() && analysis_thread_run) {
 			SourcesToAnalyse.wait (analysis_queue_lock);
+		}
+
+		if (!analysis_thread_run) {
+			analysis_queue_lock.unlock ();
+			break;
 		}
 
 		if (analysis_queue.empty()) {
