@@ -53,6 +53,7 @@ PatchBankList::PatchBankList ()
 	, _ignore_spin_btn_signals (false)
 {
 	_program_table.set_spacings (1);
+	_bank_select.disable_scrolling (); /* changing bank refills the dropdown */
 
 	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
 		_program_btn[pgm].set_text_ellipsize (Pango::ELLIPSIZE_END);
