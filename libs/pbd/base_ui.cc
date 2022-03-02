@@ -119,12 +119,11 @@ BaseUI::run ()
 
 	m_context = MainContext::create();
 	_main_loop = MainLoop::create (m_context);
+	attach_request_source ();
 
 	Glib::Threads::Mutex::Lock lm (_run_lock);
 	_run_loop_thread = PBD::Thread::create (boost::bind (&BaseUI::main_thread, this));
 	_running.wait (_run_lock);
-
-	attach_request_source ();
 }
 
 void

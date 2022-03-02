@@ -53,7 +53,7 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	BaseUI* base_instance() { return base_ui_instance; }
 
 	Glib::RefPtr<Glib::MainLoop> main_loop() const { return _main_loop; }
-	bool caller_is_self () const { assert (_run_loop_thread); return _run_loop_thread->caller_is_self (); }
+	bool caller_is_self () const { return _run_loop_thread ? _run_loop_thread->caller_is_self () : true; }
 
 	bool ok() const { return _ok; }
 
