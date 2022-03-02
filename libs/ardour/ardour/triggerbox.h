@@ -614,8 +614,8 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	Temporal::BBT_Offset _start_offset;
 	Temporal::BBT_Offset _legato_offset;
 
-	MidiModel::const_iterator iter;
 	boost::shared_ptr<MidiModel> model;
+	MidiModel::const_iterator iter;
 
 	Evoral::PatchChange<MidiBuffer::TimeType> _patch_change[16];
 	std::vector<int> _channel_map;
