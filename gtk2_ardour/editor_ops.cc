@@ -4235,6 +4235,32 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 		}
 	}
 
+	/* prevent user from accidentally overwriting a slot that they can't see */
+	bool overwriting = false;
+	if (target == NewTrigger) {
+		for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (!rtv) {
+				continue;
+			}
+			boost::shared_ptr<ARDOUR::Track> track = rtv->track();
+			if (!track) {
+				continue;
+			}
+			if (track->triggerbox()->trigger(trigger_slot)->region()) {
+				overwriting = true;
+			}
+		}
+	}
+	if (overwriting) {
+		ArdourMessageDialog msg (string_compose(_("Are you sure you want to overwrite the contents in slot %1?"),cue_marker_name(trigger_slot)), false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
+		msg.set_title (_("Overwriting slot"));
+		msg.set_secondary_text (_("One of your selected tracks has content in this slot."));
+		if (msg.run () != RESPONSE_YES) {
+			return;
+		}
+	}
+
 	timepos_t start = selection->time[clicked_selection].start();
 	timepos_t end = selection->time[clicked_selection].end();
 	timecnt_t cnt = start.distance (end);
