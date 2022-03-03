@@ -1189,6 +1189,16 @@ AudioTrigger::set_stretch_mode (Trigger::StretchMode sm)
 void
 AudioTrigger::set_segment_tempo (double t)
 {
+	if (t<=0.) {
+		/*special case: we're told the file has no defined tempo.
+		 * this can happen from crazy user input (0 beat length or somesuch), or if estimate_tempo() fails entirely
+		 * in either case, we need to make a sensible _beatcnt, and that means we need a tempo */
+		const double seconds = (double) data.length  / _box.session().sample_rate();
+		double beats = ceil(4. * 120. * (seconds/60.0));  //how many (rounded up) 16th-notes would this be at 120bpm?
+		beats /= 4.;  //convert to quarter notes
+		t = beats / (seconds/60); /* our operating tempo. note that _estimated_tempo probably retains the 0bpm */
+	}
+
 	if (_segment_tempo != t) {
 
 		_segment_tempo = t;
@@ -1458,9 +1468,9 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 	 * for the trigger properties.
 	 */
 
-	if (_segment_tempo == 0.) {
+	if (_estimated_tempo == 0.) {
 		_stretchable = false;
-		_quantization = Temporal::BBT_Offset (-1, 0, 0);
+		_quantization = Temporal::BBT_Offset (1, 0, 0);
 		_follow_action0 = FollowAction (FollowAction::None);
 	} else {
 
@@ -1569,13 +1579,7 @@ AudioTrigger::estimate_tempo ()
 
 			_estimated_tempo = mbpm.estimateTempoOfSamples (data[0], data.length);
 
-			if (_estimated_tempo == 0.0) {
-				/* no estimated tempo, just return since we'll use it as-is */
-				std::cerr << "Could not determine tempo for " << name() << std::endl;
-				return;
-			}
-
-			cerr << name() << " Estimated bpm " << _estimated_tempo << " from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
+			cerr << name() << "MiniBPM Estimated: " << _estimated_tempo << " bpm from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
 		}
 	}
 
