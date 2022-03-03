@@ -1478,6 +1478,9 @@ AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 
 	_follow_action_probability = 0; /* 100% left */
 
+	/* we've changed our internal values; we need to update our queued UIState or they will be lost when UIState is applied */
+	copy_to_ui_state ();
+
 	send_property_change (ARDOUR::Properties::name);
 
 	return 0;
