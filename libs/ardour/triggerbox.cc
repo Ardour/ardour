@@ -1735,7 +1735,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 	BufferSet* scratch;
 	std::unique_ptr<BufferSet> scratchp;
 	std::vector<Sample*> bufp(nchans);
-	const bool do_stretch = stretching();
+	const bool do_stretch = stretching() && _segment_tempo > 1;
 
 	/* see if we're going to start or stop or retrigger in this run() call */
 	maybe_compute_next_transition (start_sample, start, end, nframes, dest_offset);
