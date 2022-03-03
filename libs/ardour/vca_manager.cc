@@ -86,6 +86,7 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 	uint32_t n_stripables = _session.nstripables ();
 
 	{
+		PresentationInfo::ChangeSuspender cs;
 		Mutex::Lock lm (lock);
 
 		for (uint32_t n = 0; n < howmany; ++n) {
@@ -102,7 +103,7 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 			BOOST_MARK_VCA (vca);
 
 			vca->init ();
-			vca->set_presentation_order (n + n_stripables);
+			vca->set_presentation_order (n + n_stripables); /* EMIT SIGNAL */
 
 			_vcas.push_back (vca);
 			vcal.push_back (vca);
