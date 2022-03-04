@@ -410,6 +410,33 @@ Surface::master_monitor_may_have_changed ()
 	}
 }
 
+bool
+Surface::master_stripable_is_master_monitor ()
+{
+	if (_master_stripable == _mcp.get_session().monitor_out())
+	{
+		return true;
+	}
+	return false;
+}
+
+void
+Surface::toggle_master_monitor ()
+{
+	if(master_stripable_is_master_monitor())
+	{
+		_master_stripable = _mcp.get_session().master_out();
+	} else if (_mcp.get_session().monitor_out() != 0)
+	{
+		_master_stripable = _mcp.get_session().monitor_out();
+	} else { return; }
+	
+	_master_fader->set_control (_master_stripable->gain_control());
+	_master_stripable->gain_control()->Changed.connect (master_connection, MISSING_INVALIDATOR, boost::bind (&Surface::master_gain_changed, this), ui_context());
+	_last_master_gain_written = FLT_MAX;
+	master_gain_changed ();
+}
+
 void
 Surface::setup_master ()
 {
