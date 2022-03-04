@@ -385,7 +385,7 @@ public:
 	virtual int draw_velocity () const = 0;
 	virtual int draw_channel () const = 0;
 
-	virtual unsigned get_grid_beat_divisions (Editing::GridType gt) = 0;
+	virtual int32_t get_grid_beat_divisions (Editing::GridType gt) = 0;
 	virtual int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) = 0;
 
 	virtual void edit_notes (MidiRegionView*) = 0;

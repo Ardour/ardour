@@ -4219,7 +4219,7 @@ Editor::get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count,
 	return pos.distance (snap_pos);
 }
 
-unsigned
+int32_t
 Editor::get_grid_beat_divisions (GridType gt)
 {
 	switch (gt) {
@@ -4239,7 +4239,7 @@ Editor::get_grid_beat_divisions (GridType gt)
 	case GridTypeBeatDiv3:   return 3;
 	case GridTypeBeatDiv2:   return 2;
 	case GridTypeBeat:       return 1;
-	case GridTypeBar:        return 1;
+	case GridTypeBar:        return -1;
 
 	case GridTypeNone:       return 0;
 	case GridTypeTimecode:   return 0;
@@ -4266,31 +4266,7 @@ Editor::get_grid_music_divisions (Editing::GridType gt, uint32_t event_state)
 		return 0;
 	}
 
-	switch (gt) {
-	case GridTypeBeatDiv32:  return 32;
-	case GridTypeBeatDiv28:  return 28;
-	case GridTypeBeatDiv24:  return 24;
-	case GridTypeBeatDiv20:  return 20;
-	case GridTypeBeatDiv16:  return 16;
-	case GridTypeBeatDiv14:  return 14;
-	case GridTypeBeatDiv12:  return 12;
-	case GridTypeBeatDiv10:  return 10;
-	case GridTypeBeatDiv8:   return 8;
-	case GridTypeBeatDiv7:   return 7;
-	case GridTypeBeatDiv6:   return 6;
-	case GridTypeBeatDiv5:   return 5;
-	case GridTypeBeatDiv4:   return 4;
-	case GridTypeBeatDiv3:   return 3;
-	case GridTypeBeatDiv2:   return 2;
-	case GridTypeBeat:       return 1;
-	case GridTypeBar :       return -1;
-
-	case GridTypeNone:       return 0;
-	case GridTypeTimecode:   return 0;
-	case GridTypeMinSec:     return 0;
-	case GridTypeCDFrame:    return 0;
-	}
-	return 0;
+	return get_grid_beat_divisions (gt);
 }
 
 Temporal::Beats
@@ -4298,8 +4274,9 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 {
 	success = true;
 
-	const unsigned divisions = get_grid_beat_divisions (_grid_type);
-	if (divisions) {
+	int32_t const divisions = get_grid_beat_divisions (_grid_type);
+	/* Beat (+1), and Bar (-1) are handled below */
+	if (divisions > 1) {
 		return Temporal::Beats::from_double (1.0 / (double) divisions);
 	}
 
@@ -4329,9 +4306,9 @@ Editor::get_draw_length_as_beats (bool& success, timepos_t const & position)
 	success = true;
 
 	GridType grid_to_use = draw_length() == DRAW_LEN_AUTO ? grid_type() : draw_length();
-	const unsigned divisions = get_grid_beat_divisions (grid_to_use);
-	if (divisions) {
-		return Temporal::Beats::from_double (1.0 / (double) divisions);
+	int32_t const divisions = get_grid_beat_divisions (grid_to_use);
+	if (divisions != 0) {
+		return Temporal::Beats::from_double (1.0 / fabs (divisions));
 	}
 
 	success = false;

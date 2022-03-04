@@ -375,7 +375,7 @@ public:
 	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position);
 	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position);
 
-	unsigned get_grid_beat_divisions (Editing::GridType gt);
+	int32_t get_grid_beat_divisions (Editing::GridType gt);
 	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state);
 
 	void nudge_forward (bool next, bool force_playhead);
