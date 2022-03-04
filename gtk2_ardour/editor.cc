@@ -2952,8 +2952,15 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 			case GridTypeBeatDiv28:
 				divisor = 7;
 				break;
+			case GridTypeBar:
+			case GridTypeBeat:
+				divisor = 1;
+				break;
+			case GridTypeNone:
+				return ret;
 			default:
 				divisor = 2;
+				break;
 		};
 
 		BBTRulerScale scale = bbt_ruler_scale;
@@ -2963,10 +2970,12 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 			case bbt_show_16:
 			case bbt_show_4:
 			case bbt_show_1:
-				ret = timepos_t (tmap->quarters_at (tmap->round_to_bar (tmap->bbt_at (presnap))));
+				/* Round to Bar */
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (-1, direction));
 				break;
 			case bbt_show_quarters:
-				ret = timepos_t (tmap->quarters_at (presnap).round_to_beat ());
+				/* Round to Beat */
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (1, direction));
 				break;
 			case bbt_show_eighths:
 				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (1 * divisor, direction));
