@@ -198,6 +198,9 @@ public:
 
 	bool get_qcon_flag() { return is_qcon; }
 
+	void toggle_master_monitor ();
+	bool master_stripable_is_master_monitor ();
+
   private:
 	MackieControlProtocol& _mcp;
 	SurfacePort*           _port;

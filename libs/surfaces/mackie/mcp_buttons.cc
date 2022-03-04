@@ -560,6 +560,19 @@ MackieControlProtocol::flip_window_release (Button &)
 	return off;
 }
 
+LedState
+MackieControlProtocol::master_press (Button &)
+{
+	_master_surface->toggle_master_monitor ();
+	return on;
+}
+
+LedState
+MackieControlProtocol::master_release (Button &)
+{
+	return off;
+}
+
 /////////////////////////////////////
 // Transport Buttons
 /////////////////////////////////////

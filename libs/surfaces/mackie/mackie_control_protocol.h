@@ -511,6 +511,8 @@ class MackieControlProtocol
 	Mackie::LedState view_release (Mackie::Button&);
 
 	Mackie::LedState bank_release (Mackie::Button&, uint32_t bank_num);
+	Mackie::LedState master_press(Mackie::Button &);
+	Mackie::LedState master_release(Mackie::Button &);
 	Mackie::LedState redo_press(Mackie::Button &);
 	Mackie::LedState redo_release(Mackie::Button &);
 	Mackie::LedState prev_marker_press(Mackie::Button &);
