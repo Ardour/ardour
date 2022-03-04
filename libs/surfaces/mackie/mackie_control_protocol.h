@@ -353,6 +353,7 @@ class MackieControlProtocol
 	void clear_surfaces ();
 	void force_special_stripable_to_strip (boost::shared_ptr<ARDOUR::Stripable> r, uint32_t surface, uint32_t strip_number);
 	void build_button_map ();
+	void build_device_specific_button_map ();
 	void stripable_selection_changed ();
 	int ipmidi_restart ();
         void initialize ();
