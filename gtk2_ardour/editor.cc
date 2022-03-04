@@ -2934,26 +2934,26 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 
 	if (gpref != SnapToGrid_Unscaled) { // use the visual grid lines which are limited by the zoom scale that the user selected
 
-		int divisor = 2;
+		int divisor;
 		switch (_grid_type) {
-		case GridTypeBeatDiv3:
-		case GridTypeBeatDiv6:
-		case GridTypeBeatDiv12:
-		case GridTypeBeatDiv24:
-			divisor = 3;
-			break;
-		case GridTypeBeatDiv5:
-		case GridTypeBeatDiv10:
-		case GridTypeBeatDiv20:
-			divisor = 5;
-			break;
-		case GridTypeBeatDiv7:
-		case GridTypeBeatDiv14:
-		case GridTypeBeatDiv28:
-			divisor = 7;
-			break;
-		default:
-			divisor = 2;
+			case GridTypeBeatDiv3:
+			case GridTypeBeatDiv6:
+			case GridTypeBeatDiv12:
+			case GridTypeBeatDiv24:
+				divisor = 3;
+				break;
+			case GridTypeBeatDiv5:
+			case GridTypeBeatDiv10:
+			case GridTypeBeatDiv20:
+				divisor = 5;
+				break;
+			case GridTypeBeatDiv7:
+			case GridTypeBeatDiv14:
+			case GridTypeBeatDiv28:
+				divisor = 7;
+				break;
+			default:
+				divisor = 2;
 		};
 
 		BBTRulerScale scale = bbt_ruler_scale;

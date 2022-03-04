@@ -7806,17 +7806,17 @@ Editor::playhead_forward_to_grid ()
 		return;
 	}
 
-	timepos_t pos  (_playhead_cursor->current_sample ());
+	timepos_t pos (_playhead_cursor->current_sample ());
 
-	if ( _grid_type == GridTypeNone) {
-		if (pos < timepos_t::max (pos.time_domain()).earlier (timepos_t (samplepos_t (floor (current_page_samples()*0.1))))) {
-			pos += timepos_t (samplepos_t (floor (current_page_samples()*0.1)));
+	if (_grid_type == GridTypeNone) {
+		timepos_t const decipage (samplepos_t(floor (current_page_samples() * 0.1)));
+		if (pos < timepos_t::max (pos.time_domain()).earlier (decipage)) {
+			pos += timepos_t (decipage);
 			_session->request_locate (pos.samples());
 		} else {
 			_session->request_locate (0);
 		}
 	} else {
-
 		if (pos < timepos_t::max (pos.time_domain()).earlier (timepos_t (samplepos_t (3)))) {
 			pos += timepos_t (samplepos_t (2));
 			pos = snap_to_grid (pos, Temporal::RoundUpAlways, SnapToGrid_Scaled);
@@ -7824,10 +7824,9 @@ Editor::playhead_forward_to_grid ()
 		}
 	}
 
-
 	/* keep PH visible in window */
-	if (pos > timepos_t (_leftmost_sample + current_page_samples() *0.9)) {
-		reset_x_origin (pos.samples() -  (current_page_samples()*0.9));
+	if (pos > timepos_t (_leftmost_sample + current_page_samples() * 0.9)) {
+		reset_x_origin (pos.samples() - current_page_samples() * 0.9);
 	}
 }
 
@@ -7839,26 +7838,30 @@ Editor::playhead_backward_to_grid ()
 		return;
 	}
 
-	timepos_t pos  (_playhead_cursor->current_sample ());
+	timepos_t pos (_playhead_cursor->current_sample ());
 
-	if ( _grid_type == GridTypeNone) {
-		if (pos.samples() > current_page_samples()*0.1 ) {
-			pos.shift_earlier (timepos_t (samplepos_t (floor (current_page_samples()*0.1))));
+	if (_grid_type == GridTypeNone) {
+		samplepos_t const decipage (floor (current_page_samples() * 0.1));
+		if (pos.samples() > decipage) {
+			pos.shift_earlier (timepos_t (decipage));
 			_session->request_locate (pos.samples());
 		} else {
 			_session->request_locate (0);
 		}
 	} else {
-
 		if (pos.samples() > 2) {
 			pos.shift_earlier (timepos_t (samplepos_t (2)));
 			pos = snap_to_grid (pos, Temporal::RoundDownAlways, SnapToGrid_Scaled);
+		} else {
+			pos = timepos_t (samplepos_t (0));
 		}
 
-		//handle the case where we are rolling, and we're less than one-half second past the mark, we want to go to the prior mark...
-		//also see:  jump_backward_to_mark
+		/* handle the case where we are rolling, and we're less than one-half second past the mark,
+		 * we want to go to the prior mark...
+		 * also see: jump_backward_to_mark
+		 */
 		if (_session->transport_rolling()) {
-			if ((_playhead_cursor->current_sample() - pos.samples()) < _session->sample_rate()/2) {
+			if ((_playhead_cursor->current_sample() - pos.samples()) < _session->sample_rate() * 0.5) {
 				pos = snap_to_grid (pos, Temporal::RoundDownAlways, SnapToGrid_Scaled);
 			}
 		}
@@ -7867,8 +7870,8 @@ Editor::playhead_backward_to_grid ()
 	}
 
 	/* keep PH visible in window */
-	if (pos.samples() < (_leftmost_sample + current_page_samples() *0.1)) {
-		reset_x_origin (pos.samples() - (current_page_samples()*0.1));
+	if (pos.samples() < (_leftmost_sample + current_page_samples() * 0.1)) {
+		reset_x_origin (pos.samples() - current_page_samples() * 0.1);
 	}
 }
 
