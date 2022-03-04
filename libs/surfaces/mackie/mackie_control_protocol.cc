@@ -834,6 +834,8 @@ MackieControlProtocol::set_device (const string& device_name, bool force)
 		ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&MackieControlProtocol::connection_handler, this, _1, _2, _3, _4, _5), this);
 	}
 
+	build_button_map();
+
 	if (create_surfaces ()) {
 		return -1;
 	}
@@ -1503,6 +1505,12 @@ MackieControlProtocol::build_button_map ()
 
 #define DEFINE_BUTTON_HANDLER(b,p,r) button_map.insert (pair<Button::ID,ButtonHandlers> ((b), ButtonHandlers ((p),(r))));
 
+	if(!button_map.empty()) {
+		button_map.clear();
+	}
+
+	build_device_specific_button_map();
+
 	DEFINE_BUTTON_HANDLER (Button::Track, &MackieControlProtocol::track_press, &MackieControlProtocol::track_release);
 	DEFINE_BUTTON_HANDLER (Button::Send, &MackieControlProtocol::send_press, &MackieControlProtocol::send_release);
 	DEFINE_BUTTON_HANDLER (Button::Pan, &MackieControlProtocol::pan_press, &MackieControlProtocol::pan_release);
@@ -1568,6 +1576,16 @@ MackieControlProtocol::build_button_map ()
 	DEFINE_BUTTON_HANDLER (Button::UserA, &MackieControlProtocol::user_a_press, &MackieControlProtocol::user_a_release);
 	DEFINE_BUTTON_HANDLER (Button::UserB, &MackieControlProtocol::user_b_press, &MackieControlProtocol::user_b_release);
 	DEFINE_BUTTON_HANDLER (Button::MasterFaderTouch, &MackieControlProtocol::master_fader_touch_press, &MackieControlProtocol::master_fader_touch_release);
+}
+
+void
+MackieControlProtocol::build_device_specific_button_map()
+{
+	/* this maps our device-dependent button codes to the methods that handle them.
+	 */
+	
+#define DEFINE_BUTTON_HANDLER(b,p,r) button_map.insert (pair<Button::ID,ButtonHandlers> ((b), ButtonHandlers ((p),(r))));
+
 }
 
 void
