@@ -1594,7 +1594,7 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
 		return;
 	}
 
-	if (what_changed.contains (Properties::position)) {
+	if (what_changed.contains (Properties::length)) {
 		/* remove it from the list then add it back in
 		 * the right place again.
 		 */
@@ -1613,9 +1613,6 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
 
 		regions.erase (i);
 		regions.insert (upper_bound (regions.begin (), regions.end (), region, cmp), region);
-	}
-
-	if (what_changed.contains (Properties::position) || what_changed.contains (Properties::length)) {
 
 		if (holding_state ()) {
 			pending_bounds.push_back (region);
@@ -1661,7 +1658,6 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 	our_interests.add (Properties::contents);
 
 	bounds.add (Properties::start);
-	bounds.add (Properties::position);
 	bounds.add (Properties::length);
 
 	bool send_contents = false;
@@ -1676,11 +1672,12 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 		send_contents = true;
 	}
 
-	if (what_changed.contains (Properties::position) && !what_changed.contains (Properties::length)) {
+	/* since cc6c0f1263ab272707b0241ec333776036515fc2 can no longer distinguish between
+	 * position and length changes, so we have to assume that all have happpened :(
+	 */
+	if (what_changed.contains (Properties::length)) {
 		notify_region_moved (region);
-	} else if (!what_changed.contains (Properties::position) && what_changed.contains (Properties::length)) {
 		notify_region_end_trimmed (region);
-	} else if (what_changed.contains (Properties::position) && what_changed.contains (Properties::length)) {
 		notify_region_start_trimmed (region);
 	}
 
