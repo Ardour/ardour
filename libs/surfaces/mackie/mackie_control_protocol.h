@@ -511,6 +511,8 @@ class MackieControlProtocol
 	Mackie::LedState view_release (Mackie::Button&);
 
 	Mackie::LedState bank_release (Mackie::Button&, uint32_t bank_num);
+	Mackie::LedState flip_window_press (Mackie::Button&);
+	Mackie::LedState flip_window_release (Mackie::Button&);
 };
 
 } // namespace

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="iCON Platform M+"/>
+  <Strips value="8"/>
+  <MasterFader value="yes"/>
+  <TimecodeDisplay value="no"/>
+  <TwoCharacterDisplay value="no"/>
+  <Extenders value="0"/>
+  <MasterPosition value="0"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="yes"/>
+  <NoHandShake value="yes"/>
+  <HasMeters value="no"/>
+  <IsPlatformMp value="yes"/>
+</MackieProtocolDevice>
