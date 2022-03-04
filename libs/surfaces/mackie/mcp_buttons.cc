@@ -384,6 +384,19 @@ MackieControlProtocol::undo_release (Button&)
 }
 
 LedState
+MackieControlProtocol::redo_press (Button &)
+{
+	redo ();
+	return on;
+}
+
+LedState
+MackieControlProtocol::redo_release (Button &)
+{
+	return off;
+}
+
+LedState
 MackieControlProtocol::drop_press (Button &)
 {
 	if (main_modifier_state() == MODIFIER_SHIFT) {
@@ -417,6 +430,19 @@ LedState
 MackieControlProtocol::save_release (Button &)
 {
 	return none;
+}
+
+LedState
+MackieControlProtocol::open_press (Button &)
+{
+	access_action ("Main/Open");
+	return on;
+}
+
+LedState
+MackieControlProtocol::open_release (Button &)
+{
+	return off;
 }
 
 LedState
@@ -492,6 +518,32 @@ MackieControlProtocol::marker_release (Button &)
 	session->locations()->next_available_name (markername,"mark");
 	add_marker (markername);
 
+	return off;
+}
+
+LedState
+MackieControlProtocol::prev_marker_press (Button &)
+{
+	prev_marker ();
+	return on;
+}
+
+LedState
+MackieControlProtocol::prev_marker_release (Button &)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::next_marker_press (Button &)
+{
+	next_marker ();
+	return on;
+}
+
+LedState
+MackieControlProtocol::next_marker_release (Button &)
+{
 	return off;
 }
 
