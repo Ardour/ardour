@@ -143,13 +143,13 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 	plist.add (Properties::length, region->length());
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);
-	plist.add (Properties::position, region->position());
 
 	boost::shared_ptr<Region> r = RegionFactory::create (nsrcs, plist);
 
 	boost::shared_ptr<AudioRegion> audio_region = boost::dynamic_pointer_cast<AudioRegion> (region);
 	boost::shared_ptr<AudioRegion> audio_r = boost::dynamic_pointer_cast<AudioRegion> (r);
 	if (audio_region && audio_r) {
+		audio_r->set_position (region->position());
 		audio_r->set_scale_amplitude (audio_region->scale_amplitude());
 		audio_r->set_fade_in_active (audio_region->fade_in_active ());
 		audio_r->set_fade_in (audio_region->fade_in ());

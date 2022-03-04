@@ -575,7 +575,6 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	*/
 
 	bounds_change.add (ARDOUR::Properties::start);
-	bounds_change.add (ARDOUR::Properties::position);
 	bounds_change.add (ARDOUR::Properties::length);
 
 	/* provide a state version for the few cases that need it and are not

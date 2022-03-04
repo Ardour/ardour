@@ -575,7 +575,6 @@ Session::deinterlace_midi_region ( boost::shared_ptr<MidiRegion> mr )
 		PropertyList plist;
 		plist.add (Properties::whole_file, true);
 		plist.add (Properties::start, mr->start());
-		plist.add (Properties::position, mr->position());
 		plist.add (Properties::length, mr->length());
 		plist.add (Properties::name, (*x)->name());
 		plist.add (Properties::tags, "(split-chans)");

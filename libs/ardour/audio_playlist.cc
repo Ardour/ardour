@@ -358,7 +358,6 @@ AudioPlaylist::region_changed (const PropertyChange& what_changed, boost::shared
 
 	PropertyChange bounds;
 	bounds.add (Properties::start);
-	bounds.add (Properties::position);
 	bounds.add (Properties::length);
 
 	PropertyChange our_interests;

@@ -73,7 +73,6 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<timecnt_t> length;
 		PBD::PropertyDescriptor<double> beat;
 		PBD::PropertyDescriptor<timepos_t> sync_position;
-		PBD::PropertyDescriptor<timepos_t> position;
 		PBD::PropertyDescriptor<layer_t> layer;
 		PBD::PropertyDescriptor<timepos_t> ancestral_start;
 		PBD::PropertyDescriptor<timecnt_t> ancestral_length;

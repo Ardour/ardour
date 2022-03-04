@@ -1231,7 +1231,6 @@ LuaAPI::Rubberband::finalize ()
 	plist.add (Properties::length, _region->length_samples ());
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);
-	plist.add (Properties::position, _region->position_sample ());
 
 	boost::shared_ptr<Region>      r  = RegionFactory::create (sl, plist);
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
@@ -1245,6 +1244,7 @@ LuaAPI::Rubberband::finalize ()
 
 	ar->set_ancestral_data (timepos_t (_read_start), timecnt_t (_read_len), _stretch_ratio, _pitch_ratio);
 	ar->set_master_sources (_region->master_sources ());
+	ar->set_position (timepos_t (_region->position_sample ()));
 	ar->set_length (ar->length () * _stretch_ratio); // XXX
 	if (_stretch_ratio != 1.0) {
 		// TODO: apply mapping

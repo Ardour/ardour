@@ -64,7 +64,6 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              valid_transients;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         start;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         length;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         sync_position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<layer_t>           layer;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         ancestral_start;
