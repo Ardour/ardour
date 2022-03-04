@@ -7817,11 +7817,8 @@ Editor::playhead_forward_to_grid ()
 			_session->request_locate (0);
 		}
 	} else {
-		if (pos < timepos_t::max (pos.time_domain()).earlier (timepos_t (samplepos_t (3)))) {
-			pos += timepos_t (samplepos_t (2));
-			pos = snap_to_grid (pos, Temporal::RoundUpAlways, SnapToGrid_Scaled);
-			_session->request_locate (pos.samples());
-		}
+		pos = snap_to_grid (pos, Temporal::RoundUpAlways, SnapToGrid_Scaled);
+		_session->request_locate (pos.samples());
 	}
 
 	/* keep PH visible in window */
@@ -7849,12 +7846,10 @@ Editor::playhead_backward_to_grid ()
 			_session->request_locate (0);
 		}
 	} else {
-		if (pos.samples() > 2) {
-			pos.shift_earlier (timepos_t (samplepos_t (2)));
-			pos = snap_to_grid (pos, Temporal::RoundDownAlways, SnapToGrid_Scaled);
-		} else {
-			pos = timepos_t (samplepos_t (0));
+		if (pos.samples() == 0) {
+			return;
 		}
+		pos = snap_to_grid (pos, Temporal::RoundDownAlways, SnapToGrid_Scaled);
 
 		/* handle the case where we are rolling, and we're less than one-half second past the mark,
 		 * we want to go to the prior mark...
