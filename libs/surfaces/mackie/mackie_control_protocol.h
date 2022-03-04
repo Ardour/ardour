@@ -511,8 +511,16 @@ class MackieControlProtocol
 	Mackie::LedState view_release (Mackie::Button&);
 
 	Mackie::LedState bank_release (Mackie::Button&, uint32_t bank_num);
+	Mackie::LedState redo_press(Mackie::Button &);
+	Mackie::LedState redo_release(Mackie::Button &);
+	Mackie::LedState prev_marker_press(Mackie::Button &);
+	Mackie::LedState prev_marker_release(Mackie::Button &);
+	Mackie::LedState next_marker_press(Mackie::Button &);
+	Mackie::LedState next_marker_release(Mackie::Button &);
 	Mackie::LedState flip_window_press (Mackie::Button&);
 	Mackie::LedState flip_window_release (Mackie::Button&);
+	Mackie::LedState open_press(Mackie::Button &);
+	Mackie::LedState open_release(Mackie::Button &);
 };
 
 } // namespace
