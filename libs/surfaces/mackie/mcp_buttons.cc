@@ -1226,3 +1226,139 @@ MackieControlProtocol::view_release (Mackie::Button&)
 {
 	return none;
 }
+
+/////////////////////////////////////
+// QCon Pro G2 Buttons
+/////////////////////////////////////
+
+LedState
+MackieControlProtocol::prog2_undo_press (Button &)
+{
+	if(main_modifier_state () & MODIFIER_SHIFT) {
+		access_action ("Common/menu-show-preferences");
+		return on;
+	}
+	undo ();
+	return on;
+}
+
+LedState
+MackieControlProtocol::prog2_undo_release (Button &)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::prog2_clear_solo_press (Button &)
+{
+	if (main_modifier_state() & MODIFIER_SHIFT) {
+
+		StripableList sl;
+		session->get_stripables (sl);
+		bool allmuted = true;
+		for (StripableList::const_iterator i = sl.begin(); i != sl.end(); ++i)
+		{
+			boost::shared_ptr<MuteControl> mc = (*i)->mute_control();
+			if (!mc->muted() && (!(*i)->is_master()))
+			{
+				mc->set_value(1.0, Controllable::UseGroup);
+				allmuted = false;
+			}
+		}
+
+		return none;   
+	}
+	cancel_all_solo ();
+	return none;
+}
+
+LedState
+MackieControlProtocol::prog2_clear_solo_release (Button &)
+{
+	return none;
+}
+
+LedState
+MackieControlProtocol::prog2_save_press (Button &)
+{
+	if (main_modifier_state() & MODIFIER_SHIFT)
+	{
+		access_action("Main/SaveAs");
+		return on;
+	}
+	save_state ();
+	return on;
+}
+
+LedState
+MackieControlProtocol::prog2_save_release (Button &)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::prog2_vst_press (Button &)
+{
+	access_action("Mixer/select-all-processors");
+	access_action("Mixer/toggle-processors");
+
+	return on;
+}
+
+LedState
+MackieControlProtocol::prog2_vst_release (Button &)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::prog2_left_press (Button &)
+{
+	access_action("Mixer/select-prev-stripable");
+	return on;
+}
+
+LedState
+MackieControlProtocol::prog2_left_release (Button &)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::prog2_right_press (Button &)
+{
+	access_action("Mixer/select-next-stripable");
+	return on;
+}
+
+LedState
+MackieControlProtocol::prog2_right_release (Button &)
+{
+	return off;
+}
+
+LedState
+MackieControlProtocol::prog2_marker_press (Button &)
+{
+	if (main_modifier_state() & MODIFIER_SHIFT) {
+		access_action ("Common/remove-location-from-playhead");
+		return on;
+	}
+
+	samplepos_t where = session->audible_sample();
+	if (session->transport_stopped_or_stopping() && session->locations()->mark_at (timepos_t (where), timecnt_t (session->sample_rate() / 100.0))) {
+		return on;
+	}
+
+	string markername;
+	session->locations()->next_available_name (markername,"mark");
+	add_marker (markername);
+
+	return on;
+}
+
+LedState
+MackieControlProtocol::prog2_marker_release (Button &)
+{
+	return off;
+}
