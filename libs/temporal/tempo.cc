@@ -327,18 +327,13 @@ Meter::bbt_subtract (Temporal::BBT_Time const & bbt, Temporal::BBT_Offset const 
 	const int32_t tpg = ticks_per_grid ();
 
 	if (r.ticks < 0) {
-		r.beats -= (r.ticks / tpg);
+		r.beats += floor ((double) r.ticks / tpg);
 		r.ticks = tpg + (r.ticks % Temporal::Beats::PPQN);
 	}
 
-	if (r.beats < 0) {
-
-		r.beats += 1;
-
-		r.bars -= r.beats / _divisions_per_bar;
-		r.beats = r.beats % _divisions_per_bar;
-
-		r.beats -= 1;
+	if (r.beats <= 0) {
+		r.bars += floor ((r.beats - 1.0) / _divisions_per_bar);
+		r.beats = _divisions_per_bar + (r.beats % _divisions_per_bar);
 	}
 
 	if (r.bars <= 0) {
