@@ -46,8 +46,14 @@ Beats::round_to_subdivision (int subdivision, RoundMode dir) const {
 		BBT_Time bbt (metric.bbt_at (*this));
 
 		if (dir < 0) {
+			if (dir == RoundDownAlways && bbt.ticks == 0) {
+				bbt = metric.bbt_subtract (bbt, Temporal::BBT_Offset (0, 0, 1));
+			}
 			bbt = metric.meter().round_down_to_bar (bbt);
 		} if (dir > 0) {
+			if (dir == RoundUpAlways && bbt.ticks == 0) {
+				bbt.ticks += 1;
+			}
 			bbt = metric.meter().round_up_to_bar (bbt);
 		} else {
 			bbt = metric.meter().round_to_bar (bbt);
