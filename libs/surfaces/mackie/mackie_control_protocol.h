@@ -523,6 +523,20 @@ class MackieControlProtocol
 	Mackie::LedState flip_window_release (Mackie::Button&);
 	Mackie::LedState open_press(Mackie::Button &);
 	Mackie::LedState open_release(Mackie::Button &);
+	Mackie::LedState prog2_clear_solo_press(Mackie::Button &);
+	Mackie::LedState prog2_clear_solo_release(Mackie::Button &);
+	Mackie::LedState prog2_save_press(Mackie::Button &);
+	Mackie::LedState prog2_save_release(Mackie::Button &);
+	Mackie::LedState prog2_vst_press(Mackie::Button &);
+	Mackie::LedState prog2_vst_release(Mackie::Button &);
+	Mackie::LedState prog2_left_press(Mackie::Button &);
+	Mackie::LedState prog2_left_release(Mackie::Button &);
+	Mackie::LedState prog2_right_press(Mackie::Button &);
+	Mackie::LedState prog2_right_release(Mackie::Button &);
+	Mackie::LedState prog2_marker_press(Mackie::Button &);
+	Mackie::LedState prog2_marker_release(Mackie::Button &);
+	Mackie::LedState prog2_undo_press(Mackie::Button &);
+	Mackie::LedState prog2_undo_release(Mackie::Button &);
 };
 
 } // namespace
