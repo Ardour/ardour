@@ -14,5 +14,6 @@
   <LogicControlButtons value="yes"/>
   <usesIPMIDI value="no"/>
   <NoHandShake value="yes"/>
+  <IsProG2 value="yes"/>
   <IsQCon value="yes"/>
 </MackieProtocolDevice>

@@ -61,6 +61,7 @@ DeviceInfo::DeviceInfo()
 	, _no_handshake (false)
 	, _is_qcon(false)
 	, _is_platformMp(false)
+	, _is_proG2(false)
 	, _has_qcon_second_lcd(false)
 	, _has_qcon_master_meters(false)
 	, _has_meters (true)
@@ -346,6 +347,12 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		_is_platformMp = false;
 	}
 
+	if ((child = node.child ("IsProG2")) != 0) {
+		child->get_property ("value", _is_proG2);
+	} else {
+		_is_proG2 = false;
+	}
+
 	if ((child = node.child ("HasQConSecondLCD")) != 0) {
 		child->get_property ("value", _has_qcon_second_lcd);
 	} else {
@@ -509,6 +516,11 @@ DeviceInfo::is_qcon () const
 bool DeviceInfo::is_platformMp () const
 {
 	return _is_platformMp;
+}
+
+bool DeviceInfo::is_proG2 () const
+{
+	return _is_proG2;
 }
 
 bool
