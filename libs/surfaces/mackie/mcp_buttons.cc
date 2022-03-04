@@ -111,8 +111,14 @@ MackieControlProtocol::left_press (Button &)
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank left with current initial = %1 nstrips = %2 tracks/busses = %3\n",
 							   _current_initial_bank, strip_cnt, sorted.size()));
+
 	if (_current_initial_bank > 0) {
-		(void) switch_banks ((_current_initial_bank - 1) / strip_cnt * strip_cnt);
+		uint32_t initial = (_current_initial_bank - 1) / strip_cnt * strip_cnt;
+		while (initial >= sorted.size())
+		{
+			initial -= strip_cnt;
+		}
+		(void) switch_banks (initial);
 	} else {
 		(void) switch_banks (0);
 	}
