@@ -495,6 +495,19 @@ MackieControlProtocol::marker_release (Button &)
 	return off;
 }
 
+LedState
+MackieControlProtocol::flip_window_press (Button &)
+{
+	access_action("Common/toggle-editor-and-mixer");
+	return on;
+}
+
+LedState
+MackieControlProtocol::flip_window_release (Button &)
+{
+	return off;
+}
+
 /////////////////////////////////////
 // Transport Buttons
 /////////////////////////////////////

@@ -1586,6 +1586,10 @@ MackieControlProtocol::build_device_specific_button_map()
 	
 #define DEFINE_BUTTON_HANDLER(b,p,r) button_map.insert (pair<Button::ID,ButtonHandlers> ((b), ButtonHandlers ((p),(r))));
 
+	if (_device_info.is_platformMp()) {
+		DEFINE_BUTTON_HANDLER (Button::Marker, &MackieControlProtocol::flip_window_press, &MackieControlProtocol::flip_window_release);
+	}
+
 }
 
 void
