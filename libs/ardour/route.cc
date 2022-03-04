@@ -4939,6 +4939,7 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, samplec
 	*/
 
 	LatencyRange all_connections;
+	bool connected = false;
 
 	if (from.empty()) {
 		all_connections.min = 0;
@@ -4963,6 +4964,7 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, samplec
 
 			all_connections.min = min (all_connections.min, range.min);
 			all_connections.max = max (all_connections.max, range.max);
+			connected = true;
 		}
 
 		if (all_connections.min == ~((pframes_t) 0)) {
@@ -4970,10 +4972,23 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, samplec
 		}
 	}
 
+	/* if the output is not connected, its latency is not relevant,
+	 * however stem-export uses the private latency of the port as alignment.
+	 * see PortExportChannel::common_port_playback_latency()
+	 * and PortExportChannel::prepare_export()
+	 *
+	 * So for correct alignment we use the Delivery's playback latency.
+	 */
+	LatencyRange outport_latency = all_connections;
+	if (playback && _main_outs && !connected) {
+		outport_latency.min = _main_outs->playback_offset () - _main_outs->input_latency ();
+		outport_latency.max = _main_outs->playback_offset () - _main_outs->input_latency ();
+	}
+
 	/* set the "from" port latencies to the max/min range of all their connections */
 
 	for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
-		p->set_private_latency_range (all_connections, playback);
+		p->set_private_latency_range (outport_latency, playback);
 	}
 
 	DEBUG_TRACE (DEBUG::LatencyRoute, string_compose ("%1: priv. port L(%2) = (%3, %4) + %5\n", _name, playback ? "playback" : "capture", all_connections.min, all_connections.max, our_latency));
