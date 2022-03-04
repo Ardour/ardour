@@ -1590,6 +1590,24 @@ MackieControlProtocol::build_device_specific_button_map()
 		DEFINE_BUTTON_HANDLER (Button::Marker, &MackieControlProtocol::flip_window_press, &MackieControlProtocol::flip_window_release);
 	}
 
+	if(_device_info.is_proG2()) {
+		DEFINE_BUTTON_HANDLER (Button::View, &MackieControlProtocol::user_press, &MackieControlProtocol::user_release);
+		DEFINE_BUTTON_HANDLER (Button::Trim, &MackieControlProtocol::send_press, &MackieControlProtocol::send_release);
+		DEFINE_BUTTON_HANDLER (Button::Touch, &MackieControlProtocol::open_press, &MackieControlProtocol::open_release);
+		DEFINE_BUTTON_HANDLER (Button::Latch, &MackieControlProtocol::flip_window_press, &MackieControlProtocol::flip_window_release);
+		DEFINE_BUTTON_HANDLER (Button::Save, &MackieControlProtocol::prog2_vst_press, &MackieControlProtocol::prog2_vst_release);
+		DEFINE_BUTTON_HANDLER (Button::Undo, &MackieControlProtocol::master_press, &MackieControlProtocol::master_release);
+		DEFINE_BUTTON_HANDLER (Button::Cancel, &MackieControlProtocol::prog2_clear_solo_press, &MackieControlProtocol::prog2_clear_solo_release);
+		DEFINE_BUTTON_HANDLER (Button::Enter, &MackieControlProtocol::shift_press, &MackieControlProtocol::shift_release);
+		DEFINE_BUTTON_HANDLER (Button::Marker, &MackieControlProtocol::prog2_left_press, &MackieControlProtocol::prog2_left_release);
+		DEFINE_BUTTON_HANDLER (Button::Nudge, &MackieControlProtocol::prog2_right_press, &MackieControlProtocol::prog2_right_release);
+		DEFINE_BUTTON_HANDLER (Button::Replace, &MackieControlProtocol::prev_marker_press, &MackieControlProtocol::prev_marker_release);
+		DEFINE_BUTTON_HANDLER (Button::Click, &MackieControlProtocol::prog2_marker_press, &MackieControlProtocol::prog2_marker_release);
+		DEFINE_BUTTON_HANDLER (Button::ClearSolo, &MackieControlProtocol::next_marker_press, &MackieControlProtocol::next_marker_release);
+		DEFINE_BUTTON_HANDLER (Button::Shift, &MackieControlProtocol::prog2_undo_press, &MackieControlProtocol::prog2_undo_release);
+		DEFINE_BUTTON_HANDLER (Button::Option, &MackieControlProtocol::redo_press, &MackieControlProtocol::redo_release);
+		DEFINE_BUTTON_HANDLER (Button::Ctrl, &MackieControlProtocol::prog2_save_press, &MackieControlProtocol::prog2_save_release);
+	}
 }
 
 void
