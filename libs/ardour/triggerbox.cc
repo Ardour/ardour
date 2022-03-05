@@ -1348,8 +1348,12 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 	*/
 
 	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk(transition_bbt, _follow_length));
-	samplepos_t end_by_beatcnt = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (0, round (_beatcnt), 0)));  //OK?
 	samplepos_t end_by_data_length = transition_sample + (data.length - _start_offset);
+	/* this could still blow up if the data is less than 1 tick long, but
+	   we should handle that elsewhere.
+	*/
+	const Temporal::Beats bc (Temporal::Beats::from_double (_beatcnt));
+	samplepos_t end_by_beatcnt = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (0, bc.get_beats(), bc.get_ticks())));
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 SO %9 @ %2 / %3 / %4 ends: FL %5 (from %6) BC %7 DL %8\n",
 	                                              index(), transition_sample, transition_beats, transition_bbt,
