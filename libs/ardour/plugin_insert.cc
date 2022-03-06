@@ -3301,10 +3301,6 @@ PluginInsert::add_sidechain_from_xml (const XMLNode& node, int version)
 		}
 	}
 
-	ChanCount in_cc = ChanCount();
-	in_cc.set (DataType::AUDIO, audio);
-	in_cc.set (DataType::MIDI, midi);
-
 	add_sidechain (audio, midi);
 }
 
