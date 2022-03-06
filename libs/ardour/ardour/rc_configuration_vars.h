@@ -273,7 +273,6 @@ CONFIG_VARIABLE (std::string, video_server_docroot, "video-server-docroot", "/")
 #else
 CONFIG_VARIABLE (std::string, video_server_docroot, "video-server-docroot", "C:\\")
 #endif
-CONFIG_VARIABLE (bool, show_video_export_info, "show-video-export-info", true)
 CONFIG_VARIABLE (bool, show_video_server_dialog, "show-video-server-dialog", false)
 
 /* export */
