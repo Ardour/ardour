@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2010 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2013-2017 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2013-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,11 @@
 #ifndef __ardour_unknown_processor_h__
 #define __ardour_unknown_processor_h__
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/processor.h"
 
 namespace ARDOUR {
+	class SideChain;
 
 /** A stub Processor that can be used in place of a `real' one that cannot be
  *  created for some reason; usually because it requires a plugin which is not
@@ -43,7 +45,7 @@ namespace ARDOUR {
 class LIBARDOUR_API UnknownProcessor : public Processor
 {
 public:
-	UnknownProcessor (Session &, XMLNode const &);
+	UnknownProcessor (Session&, XMLNode const&, SessionObject*);
 	virtual ~UnknownProcessor ();
 
 	bool can_support_io_configuration (const ChanCount &, ChanCount &);
@@ -54,9 +56,13 @@ protected:
 
 private:
 	XMLNode _state;
-	bool      have_ioconfig;
-	ChanCount *saved_input;
-	ChanCount *saved_output;
+
+	bool       have_ioconfig;
+	ChanCount* saved_input;
+	ChanCount* saved_output;
+
+	void add_sidechain_from_xml (const XMLNode& node, int version);
+	boost::shared_ptr<SideChain> _sidechain;
 };
 
 }

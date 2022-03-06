@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010-2011 Carl Hetherington <carl@carlh.net>
- * Copyright (C) 2013-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2022 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2016-2017 Paul Davis <paul@linuxaudiosystems.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/types_convert.h"
+#include "pbd/xml++.h"
+
 #include "ardour/audio_buffer.h"
+#include "ardour/sidechain.h"
+#include "ardour/io.h"
+#include "ardour/types_convert.h"
 #include "ardour/unknown_processor.h"
 
 #include "pbd/i18n.h"
@@ -51,13 +57,15 @@ proc_type_map (std::string const& str)
   }
 }
 
-UnknownProcessor::UnknownProcessor (Session& s, XMLNode const & state)
+UnknownProcessor::UnknownProcessor (Session&s, XMLNode const &state, SessionObject* o)
 	: Processor (s, "", Temporal::AudioTime)
 	, _state (state)
 	, have_ioconfig (false)
 	, saved_input (0)
 	, saved_output (0)
 {
+	set_owner (o);
+
 	XMLProperty const* pname = state.property (X_("name"));
 	if (pname) {
 		XMLProperty const* ptype = state.property (X_("type"));
@@ -79,6 +87,13 @@ UnknownProcessor::UnknownProcessor (Session& s, XMLNode const & state)
 		if ((*i)->name() == X_("ConfiguredOutput")) {
 			have_io |= 2;
 			saved_output = new ChanCount(**i);
+		}
+
+		/* sidechain is a Processor (IO)
+		 * add a SC port to retain connections
+		 */
+		if ((*i)->name () ==  Processor::state_node_name) {
+			add_sidechain_from_xml (**i, Stateful::loading_state_version);
 		}
 	}
 	have_ioconfig = (have_io == 3);
@@ -151,4 +166,43 @@ UnknownProcessor::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_
 	for (uint32_t i = saved_input->n_audio(); i < saved_output->n_audio(); ++i) {
 		bufs.get_audio (i).silence (nframes);
 	}
+}
+
+void
+UnknownProcessor::add_sidechain_from_xml (const XMLNode& node, int version)
+{
+	if (version < 3000) {
+		return;
+	}
+
+	XMLNodeList nlist = node.children();
+
+	if (nlist.size() == 0) {
+		return;
+	}
+
+	uint32_t n_audio = 0;
+	uint32_t n_midi = 0;
+
+	XMLNodeConstIterator it = nlist.front()->children().begin();
+	for ( ; it != nlist.front()->children().end(); ++ it) {
+		if ((*it)->name() == "Port") {
+			DataType type (DataType::NIL);
+			(*it)->get_property ("type", type);
+			if (type == DataType::AUDIO) {
+				++n_audio;
+			} else if (type == DataType::MIDI) {
+				++n_midi;
+			}
+		}
+	}
+
+	_sidechain.reset (new SideChain (_session, "toBeRenamed"));
+	for (uint32_t n = 0; n < n_audio; ++n) {
+		_sidechain->input()->add_port ("", owner(), DataType::AUDIO); // add a port, don't connect.
+	}
+	for (uint32_t n = 0; n < n_midi; ++n) {
+		_sidechain->input()->add_port ("", owner(), DataType::MIDI); // add a port, don't connect.
+	}
+	_sidechain->set_state (node, version);
 }
