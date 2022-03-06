@@ -48,7 +48,6 @@
 
 #include "add_video_dialog.h"
 #include "ardour_ui.h"
-#include "export_video_infobox.h"
 #include "export_video_dialog.h"
 #include "public_editor.h"
 #include "utils_videotl.h"
@@ -412,20 +411,6 @@ ARDOUR_UI::flush_videotimeline_cache (bool localcacheonly)
 void
 ARDOUR_UI::export_video (bool range)
 {
-	if (ARDOUR::Config->get_show_video_export_info()) {
-		ExportVideoInfobox infobox (_session);
-		Gtk::ResponseType rv = (Gtk::ResponseType) infobox.run();
-		if (infobox.show_again()) {
-			ARDOUR::Config->set_show_video_export_info(false);
-		}
-		switch (rv) {
-			case RESPONSE_YES:
-				PBD::open_uri (ARDOUR::Config->get_reference_manual_url() + "/video-timeline/operations/#export");
-				break;
-			default:
-				break;
-		}
-	}
 	export_video_dialog->set_session (_session);
 	export_video_dialog->apply_state(editor->get_selection().time, range);
 	export_video_dialog->run ();

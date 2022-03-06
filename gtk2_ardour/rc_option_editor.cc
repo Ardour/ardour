@@ -1773,19 +1773,12 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 	public:
 		VideoTimelineOptions (RCConfiguration* c)
 			: _rc_config (c)
-			, _show_video_export_info_button (_("Show Video Export Info before export"))
 			, _show_video_server_dialog_button (_("Show Video Server Startup Dialog"))
 			, _video_advanced_setup_button (_("Advanced Setup (remote video server)"))
 			, _xjadeo_browse_button (_("Browse..."))
 		{
 			Table* t = &table;
 			int n = table.property_n_rows();
-
-			t->attach (_show_video_export_info_button, 1, 4, n, n + 1);
-			_show_video_export_info_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_export_info_toggled));
-			Gtkmm2ext::UI::instance()->set_tip (_show_video_export_info_button,
-					_("<b>When enabled</b> an information window with details is displayed before the video-export dialog."));
-			++n;
 
 			t->attach (_show_video_server_dialog_button, 1, 4, n, n + 1);
 			_show_video_server_dialog_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_server_dialog_toggled));
@@ -1860,12 +1853,6 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 			_rc_config->set_video_server_docroot (_video_server_docroot_entry.get_text());
 		}
 
-		void show_video_export_info_toggled ()
-		{
-			bool const x = _show_video_export_info_button.get_active ();
-			_rc_config->set_show_video_export_info (x);
-		}
-
 		void show_video_server_dialog_toggled ()
 		{
 			bool const x = _show_video_server_dialog_button.get_active ();
@@ -1908,9 +1895,6 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 				_video_server_url_entry.set_text (_rc_config->get_video_server_url());
 			} else if (p == "video-server-docroot") {
 				_video_server_docroot_entry.set_text (_rc_config->get_video_server_docroot());
-			} else if (p == "show-video-export-info") {
-				bool const x = _rc_config->get_show_video_export_info();
-				_show_video_export_info_button.set_active (x);
 			} else if (p == "show-video-server-dialog") {
 				bool const x = _rc_config->get_show_video_server_dialog();
 				_show_video_server_dialog_button.set_active (x);
@@ -1929,7 +1913,6 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 			parameter_changed ("video-server-url");
 			parameter_changed ("video-server-docroot");
 			parameter_changed ("video-monitor-setup-dialog");
-			parameter_changed ("show-video-export-info");
 			parameter_changed ("show-video-server-dialog");
 			parameter_changed ("video-advanced-setup");
 			parameter_changed ("xjadeo-binary");
@@ -1940,7 +1923,6 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 		Entry _video_server_url_entry;
 		Entry _video_server_docroot_entry;
 		Entry _custom_xjadeo_path;
-		CheckButton _show_video_export_info_button;
 		CheckButton _show_video_server_dialog_button;
 		CheckButton _video_advanced_setup_button;
 		Button _xjadeo_browse_button;

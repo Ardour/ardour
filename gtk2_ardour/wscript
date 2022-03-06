@@ -342,8 +342,7 @@ gtk2_ardour_sources = [
         'transcode_video_dialog.cc',
         'video_server_dialog.cc',
         'utils_videotl.cc',
-        'export_video_dialog.cc',
-        'export_video_infobox.cc'
+        'export_video_dialog.cc'
 ]
 
 def enoify (major, minor):
