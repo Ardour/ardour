@@ -1419,7 +1419,7 @@ Route::clear_processors (Placement p)
 bool
 Route::is_internal_processor (boost::shared_ptr<Processor> p) const
 {
-	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim || p == _polarity || (_volume && p == _volume)) {
+	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim || p == _polarity || (_volume && p == _volume) || (_triggerbox && p == _triggerbox)) {
 		return true;
 	}
 #ifdef MIXBUS
