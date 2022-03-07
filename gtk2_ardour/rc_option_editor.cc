@@ -3340,6 +3340,15 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
+		     "show-grid-rulers",
+		     _("Grid mode selection may change ruler visibility"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_grids_ruler),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_grids_ruler)
+		     ));
+
+	// TODO toggle sensitivity of rulers-follow-grid when show-grid-rulers changes
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
 		     "rulers-follow-grid",
 		     _("Rulers automatically change to follow the Grid mode selection"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rulers_follow_grid),
