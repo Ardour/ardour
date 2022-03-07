@@ -1363,6 +1363,12 @@ Editor::set_session (Session *t)
 
 	refresh_location_display ();
 
+	/* restore rulers before calling set_state() which sets the grid,
+	 * which changes rulers and calls store_ruler_visibility() overriding
+	 * any settings saved with the session.
+	 */
+	restore_ruler_visibility ();
+
 	/* This must happen after refresh_location_display(), as (amongst other things) we restore
 	 * the selected Marker; this needs the LocationMarker list to be available.
 	 */
@@ -1414,7 +1420,6 @@ Editor::set_session (Session *t)
 	Config->map_parameters (pc);
 	_session->config.map_parameters (pc);
 
-	restore_ruler_visibility ();
 	//tempo_map_changed (PropertyChange (0));
 	TempoMap::Metrics metrics;
 	TempoMap::use()->get_metrics (metrics);
