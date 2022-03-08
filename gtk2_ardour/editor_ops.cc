@@ -6131,6 +6131,7 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 
 				} else {
 
+					playlist->freeze ();
 					std::vector<boost::shared_ptr<Region> >::iterator res = filter.results.begin ();
 
 					/* first region replaces the old one */
@@ -6142,6 +6143,7 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 						playlist->add_region (*res, (*res)->position());
 						++res;
 					}
+					playlist->thaw ();
 
 				}
 
