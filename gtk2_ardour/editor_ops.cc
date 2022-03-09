@@ -4022,6 +4022,7 @@ Editor::_freeze_thread (void* arg)
 void*
 Editor::freeze_thread ()
 {
+	TempoMap::SharedPtr tmap (TempoMap::fetch());
 	/* create event pool because we may need to talk to the session */
 	SessionEvent::create_per_thread_pool ("freeze events", 64);
 	/* create per-thread buffers for process() tree to use */
