@@ -1261,14 +1261,12 @@ MackieControlProtocol::prog2_clear_solo_press (Button &)
 
 		StripableList sl;
 		session->get_stripables (sl);
-		bool allmuted = true;
 		for (StripableList::const_iterator i = sl.begin(); i != sl.end(); ++i)
 		{
 			boost::shared_ptr<MuteControl> mc = (*i)->mute_control();
-			if (!mc->muted() && (!(*i)->is_master()))
+			if (!mc->muted() && (!(*i)->is_master()) && (!(*i)->is_monitor()))
 			{
 				mc->set_value(1.0, Controllable::UseGroup);
-				allmuted = false;
 			}
 		}
 
