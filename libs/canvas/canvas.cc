@@ -1559,7 +1559,18 @@ GtkCanvasViewport::on_size_request (Gtk::Requisition* req)
 	_canvas.root()->size_request (width, height);
 	_canvas.request_size (Duple (width, height));
 
-	req->width = width;
-	req->height = height;
-}
+	/* special case ArdourCanvas::COORD_MAX (really: no size constraint),
+	 * also limit to cairo constraints determined by coordinates of things
+	 * sent to pixman being in 16.16 format. */
 
+	if (width > 32767) {
+		width = 0;
+	}
+	if (height > 32767) {
+		height = 0;
+	}
+
+	req->width  = std::max<int>(1, width);
+	req->height = std::max<int>(1, height);
+
+}
