@@ -127,6 +127,7 @@ Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::M
 			} else if ((tp = dynamic_cast<Temporal::TempoPoint*>(*m)) != 0) {
 				if (tm->tempo() == *tp) {
 					tm->reset_tempo (*tp);
+					tm->curve().reset_point  (*tp);
 					break;
 				}
 			}

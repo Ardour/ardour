@@ -55,7 +55,8 @@ public:
 	void hide ();
 	void show ();
 
-	Temporal::TempoPoint const & tempo () const { return _tempo; }
+	Temporal::TempoPoint const & tempo () const { return *_tempo; }
+	void reset_point (Temporal::TempoPoint const &);
 
 	void set_max_tempo (const double& max) { _max_tempo = max; }
 	void set_min_tempo (const double& min) { _min_tempo = min; }
@@ -83,7 +84,7 @@ private:
 	double _min_tempo;
 	double _max_tempo;
 
-	Temporal::TempoPoint const & _tempo;
+	Temporal::TempoPoint const * _tempo;
 	ArdourCanvas::Text*   _start_text;
 	ArdourCanvas::Text*   _end_text;
 };
