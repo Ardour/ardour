@@ -376,7 +376,7 @@ ExportHandler::finish_timespan ()
 	 * take that into account.
 	 */
 	for (auto const& f : graph_builder->exported_files ()) {
-		Session::Exported (current_timespan->name(), f); /* EMIT SIGNAL */
+		Session::Exported (current_timespan->name(), f, config_map.begin()->second.format->reimport()); /* EMIT SIGNAL */
 	}
 
 	while (config_map.begin() != timespan_bounds.second) {

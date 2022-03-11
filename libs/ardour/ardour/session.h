@@ -862,7 +862,7 @@ public:
 	int start_audio_export (samplepos_t position, bool realtime = false, bool region_export = false);
 
 	PBD::Signal1<int, samplecnt_t> ProcessExport;
-	static PBD::Signal2<void,std::string, std::string> Exported;
+	static PBD::Signal3<void, std::string, std::string, bool> Exported;
 
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);
