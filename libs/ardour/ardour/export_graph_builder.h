@@ -83,11 +83,21 @@ class LIBARDOUR_API ExportGraphBuilder
 	void add_config (FileSpec const & config, bool rt);
 	void get_analysis_results (AnalysisResults& results);
 
+	std::vector<std::string> exported_files () const {
+		return _exported_files;
+	}
+
   private:
 
 	void add_analyser (const std::string& fn, AnalysisPtr ap) {
 		analysis_map.insert (std::make_pair (fn, ap));
 	}
+
+	void add_export_fn (std::string const& fn) {
+		_exported_files.push_back (fn);
+	}
+
+	std::vector<std::string> _exported_files;
 
 	void add_split_config (FileSpec const & config);
 

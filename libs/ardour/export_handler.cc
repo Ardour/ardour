@@ -371,14 +371,25 @@ ExportHandler::finish_timespan ()
 {
 	graph_builder->get_analysis_results (export_status->result_map);
 
+	/* work-around: split-channel will produce several files
+	 * for a single config, config_map iterator below does not yet
+	 * take that into account.
+	 */
+	for (auto const& f : graph_builder->exported_files ()) {
+		Session::Exported (current_timespan->name(), f); /* EMIT SIGNAL */
+	}
+
 	while (config_map.begin() != timespan_bounds.second) {
 
 		// XXX single timespan+format may produce multiple files
 		// e.g export selection == session
 		// -> TagLib::FileRef is null
 
-		ExportFormatSpecPtr fmt = config_map.begin()->second.format;
-		std::string filename = config_map.begin()->second.filename->get_path(fmt);
+		FileSpec& config = config_map.begin()->second;
+		ExportFormatSpecPtr fmt = config.format;
+		config.filename->set_channel_config (config.channel_config);
+		std::string filename = config.filename->get_path (fmt);
+
 		if (fmt->with_cue()) {
 			export_cd_marker_file (current_timespan, fmt, filename, CDMarkerCUE);
 		}
@@ -390,8 +401,6 @@ ExportHandler::finish_timespan ()
 		if (fmt->with_mp4chaps()) {
 			export_cd_marker_file (current_timespan, fmt, filename, MP4Chaps);
 		}
-
-		Session::Exported (current_timespan->name(), filename); /* EMIT SIGNAL */
 
 		/* close file first, otherwise TagLib enounters an ERROR_SHARING_VIOLATION
 		 * The process cannot access the file because it is being used.

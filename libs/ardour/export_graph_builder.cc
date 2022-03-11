@@ -140,6 +140,7 @@ ExportGraphBuilder::reset ()
 	channels.clear ();
 	intermediates.clear ();
 	analysis_map.clear();
+	_exported_files.clear();
 	_realtime = false;
 	_master_align = 0;
 }
@@ -447,6 +448,9 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 
 	boost::shared_ptr<AudioGrapher::ListedSource<float> > intermediate = limiter;
 
+	config.filename->set_channel_config (config.channel_config);
+	parent.add_export_fn (config.filename->get_path (config.format));
+
 	if (_analyse) {
 		samplecnt_t sample_rate = parent.session.nominal_sample_rate();
 		samplecnt_t sb = config.format->silence_beginning_at (parent.timespan->get_start(), sample_rate);
@@ -460,7 +464,6 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 		                              800 * ui_scale_factor, 200 * ui_scale_factor
 		                             ));
 
-		config.filename->set_channel_config (config.channel_config);
 		parent.add_analyser (config.filename->get_path (config.format), analyser);
 		limiter->set_result (analyser->result (true));
 
