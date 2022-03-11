@@ -367,6 +367,12 @@ ExportDialog::do_export ()
 				gui_context()
 				);
 #endif
+
+		_files_to_reimport.clear ();
+		Session::Exported.connect_same_thread (*this, sigc::bind (
+					[] (std::string, std::string fn, bool re, std::vector<std::string>* v) { if (re) { (*v).push_back (fn); } },
+					&_files_to_reimport));
+
 		handler->do_export ();
 		show_progress ();
 	} catch(std::exception & e) {
@@ -400,6 +406,12 @@ ExportDialog::show_progress ()
 	}
 
 	status->finish (TRS_UI);
+
+	if (!status->aborted() && !_files_to_reimport.empty ()) {
+		timepos_t pos (0);
+		Editing::ImportDisposition disposition = Editing::ImportDistinctFiles;
+		editor.do_import (_files_to_reimport, disposition, Editing::ImportAsTrack, SrcBest, SMFTrackNumber, SMFTempoIgnore, pos);
+	}
 
 	if (!status->aborted() && UIConfiguration::instance().get_save_export_mixer_screenshot ()) {
 		ExportProfileManager::TimespanStateList const& timespans = profile_manager->get_timespans();

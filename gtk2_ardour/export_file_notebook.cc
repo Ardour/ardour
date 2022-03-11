@@ -129,6 +129,19 @@ ExportFileNotebook::FilePage::update_analysis_button ()
 }
 
 void
+ExportFileNotebook::FilePage::reimport_changed ()
+{
+	format_state->format->set_reimport(reimport_button.get_active ());
+	profile_manager->save_format_to_disk (format_state->format);
+}
+
+void
+ExportFileNotebook::FilePage::update_reimport_button ()
+{
+	reimport_button.set_active (format_state->format->reimport ());
+}
+
+void
 ExportFileNotebook::update_example_filenames ()
 {
 	int i = 0;
@@ -209,6 +222,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	filename_label (_("Location"), Gtk::ALIGN_LEFT),
 	soundcloud_upload_button (_("Upload to Soundcloud")),
 	analysis_button (_("Analyze Exported Audio")),
+	reimport_button (_("Re-Import Exported Audio")),
 	tab_number (number)
 {
 	set_border_width (12);
@@ -224,6 +238,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	hbox->pack_start (soundcloud_upload_button, false, false, 0);
 #endif
 	hbox->pack_start (analysis_button, false, false, 0);
+	hbox->pack_start (reimport_button, false, false, 0);
 	pack_start (*hbox, false, false, 0);
 
 	format_align.add (format_selector);
@@ -244,6 +259,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	format_selector.set_state (format_state, s);
 	filename_selector.set_state (filename_state, s);
 	analysis_button.set_active (format_state->format->analyse());
+	reimport_button.set_active (format_state->format->reimport());
 	soundcloud_upload_button.set_active (format_state->format->soundcloud_upload());
 
 	/* Signals */
@@ -265,6 +281,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	soundcloud_upload_button.signal_toggled().connect (sigc::mem_fun (*parent, &ExportFileNotebook::update_soundcloud_upload));
 	soundcloud_button_connection = soundcloud_upload_button.signal_toggled().connect (sigc::mem_fun (*this, &ExportFileNotebook::FilePage::soundcloud_upload_changed));
 	analysis_button_connection = analysis_button.signal_toggled().connect (sigc::mem_fun (*this, &ExportFileNotebook::FilePage::analysis_changed));
+	reimport_button_connection = reimport_button.signal_toggled().connect (sigc::mem_fun (*this, &ExportFileNotebook::FilePage::reimport_changed));
 	/* Tab widget */
 
 	tab_close_button.add (*Gtk::manage (new Gtk::Image (::get_icon("close"))));
@@ -367,10 +384,13 @@ ExportFileNotebook::FilePage::critical_selection_changed ()
 
 	soundcloud_button_connection.block ();
 	analysis_button_connection.block ();
+	reimport_button_connection.block ();
 
 	update_analysis_button();
+	update_reimport_button();
 	update_soundcloud_upload_button();
 
+	reimport_button_connection.unblock ();
 	analysis_button_connection.unblock ();
 	soundcloud_button_connection.unblock ();
 

@@ -127,7 +127,7 @@ private:
 	PublicEditor &  editor;
 	StatusPtr       status;
 
-
+	std::vector<std::string> _files_to_reimport;
 
 	/* Warning area */
 
