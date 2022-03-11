@@ -3671,6 +3671,35 @@ Route::feeds_according_to_graph (boost::shared_ptr<Route> other)
 	return _session._current_route_graph.feeds (boost::dynamic_pointer_cast<Route> (shared_from_this ()), other);
 }
 
+bool
+Route::output_effectively_connected () const
+{
+	if (!_output->connected ()) {
+		return false;
+	}
+
+	if (is_master() || is_monitor ()) {
+		return _output->connected ();
+	}
+
+	if (_output->physically_connected ()) {
+		return true;
+	}
+
+	boost::shared_ptr<RouteList> routes = _session.get_routes ();
+	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+		if ((*i).get() == this) {
+			continue;
+		}
+		if ((*i)->input()->connected_to (_output)) {
+			if ((*i)->output_effectively_connected ()) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 /** Called from the (non-realtime) butler thread when the transport is stopped */
 void
 Route::non_realtime_transport_stop (samplepos_t now, bool flush)
@@ -4343,7 +4372,7 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 	 * Since the output is not used, Send::_thru_delay is not relevant, and
 	 * Send->effective_latency () should return zero.
 	 */
-	_output_latency = _output->connected () ? _output->latency () : (_session.master_out() ? _session.master_out()->output ()->latency () : 0);
+	_output_latency = output_effectively_connected () ? _output->latency () : (_session.master_out() ? _session.master_out()->output ()->latency () : 0);
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 

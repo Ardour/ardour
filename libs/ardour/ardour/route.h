@@ -453,6 +453,11 @@ public:
 
 	bool feeds_according_to_graph (boost::shared_ptr<Route>);
 
+	/** Follow output port connections and check if the output *port*
+	 * of any downstream routes is connected.
+	 */
+	bool output_effectively_connected () const;
+
 	struct FeedRecord {
 		boost::weak_ptr<Route> r;
 		bool sends_only;
