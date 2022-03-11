@@ -46,7 +46,7 @@ while [ $# -gt 0 ] ; do
 			PROGRAM_NAME=Mixbus
 			PROGRAM_KEY=Mixbus
 			PRODUCT_NAME=Mixbus
-			MANUAL_NAME="mixbus${major_version}-live-manual"
+			MANUAL_NAME="mixbus-live-manual"
 			shift ;;
 		--mixbus32c)
 			MIXBUS=1
@@ -57,7 +57,7 @@ while [ $# -gt 0 ] ; do
 			PROGRAM_KEY=Mixbus32C
 			PROGRAM_NAME=Mixbus32C-${PROGRAM_VERSION}
 			PROGRAM_VERSION=""
-			MANUAL_NAME="mixbus32c-${major_version}-live-manual"
+			MANUAL_NAME="mixbus32c-live-manual"
 			shift ;;
 		--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 	esac
@@ -422,10 +422,10 @@ if test -n "$MIXBUS"; then
 
 # TODO: proper welcome/finish text.
 	cat >> $NSISFILE << EOF
-!define MUI_FINISHPAGE_TITLE "Welcome to Harrison Mixbus"
-!define MUI_FINISHPAGE_TEXT "Thanks for your purchase of Mixbus!\$\\r\$\\nYou will find the Mixbus application in the Start Menu (or the All Apps panel for Windows 8) \$\\r\$\\nClick the link below to view the Mixbus manual, and learn ways to get involved with the Mixbus community."
-!define MUI_FINISHPAGE_LINK "Mixbus Manual"
-!define MUI_FINISHPAGE_LINK_LOCATION "http://www.harrisonconsoles.com/mixbus/${MANUAL_NAME}/"
+!define MUI_FINISHPAGE_TITLE "Welcome to Harrison ${PROGRAM_NAME}"
+!define MUI_FINISHPAGE_TEXT "Thanks for your purchase of ${PROGRAM_NAME}!\$\\r\$\\nYou will find the ${PROGRAM_NAME} application in the Start Menu (or the All Apps panel for Windows 8) \$\\r\$\\nClick the link below to view the ${PROGRAM_NAME} manual, and learn ways to get involved with the Mixbus community."
+!define MUI_FINISHPAGE_LINK "${PROGRAM_NAME} Manual"
+!define MUI_FINISHPAGE_LINK_LOCATION "https://rsrc.harrisonconsoles.com/mixbus/${MANUAL_NAME}/"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 EOF
 
