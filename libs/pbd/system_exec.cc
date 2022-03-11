@@ -431,7 +431,11 @@ SystemExec::wait (int options)
 	while (is_running()) {
 		WaitForSingleObject(pid->hProcess, 40);
 	}
-	return 0;
+	DWORD exit_code;
+	if (GetExitCodeProcess(pid->hProcess, &exit_code)) {
+		return exit_code;
+	}
+	return -1;
 }
 
 bool
@@ -707,7 +711,7 @@ SystemExec::wait (int options)
 			}
 		} /* else the process is still running */
 	}
-	return status;
+	return WEXITSTATUS (status);
 }
 
 bool
