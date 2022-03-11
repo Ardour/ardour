@@ -4367,12 +4367,23 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 	samplecnt_t play_lat_out = _output->connected_latency (true);
 	samplecnt_t in_latency   = _input->latency ();
 
-	/* When the track's output is not connected, align it to master-out.
+	/* When the track's output is not connected, align it to master-bus
+	 * (as if it would be connected to master-in).
 	 * Effectively we want to configure all latent-sends to not introduce any latency.
 	 * Since the output is not used, Send::_thru_delay is not relevant, and
 	 * Send->effective_latency () should return zero.
 	 */
-	_output_latency = output_effectively_connected () ? _output->latency () : (_session.master_out() ? _session.master_out()->output ()->latency () : 0);
+	if (output_effectively_connected ()) {
+		_output_latency = _output->latency ();
+	} else if (_session.master_out ()) {
+		/* We cannot use `_session.master_out()->input()->latency()` because that would return capture latency.
+		 * Also in case of Mixbus, the master-bus does not have any inputs.
+		 * So we propagate playback latency from master-out as Route::update_port_latencies() would do.
+		 */
+		_output_latency = _session.master_out()->output ()->latency () + _session.master_out()->signal_latency ();
+	} else {
+		_output_latency = 0;
+	}
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
