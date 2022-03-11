@@ -163,6 +163,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _demo_noise_interval (0)
 	, _command ("")
 	, _analyse (true)
+	, _reimport (false)
 	, _codec_quality (0)
 {
 	format_ids.insert (F_None);
@@ -203,6 +204,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 	, _demo_noise_interval (0)
 	, _command ("")
 	, _analyse (true)
+	, _reimport (false)
 	, _codec_quality (0)
 {
 	_silence_beginning.type = Time::Timecode;
@@ -225,6 +227,7 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 	, _demo_noise_interval (other._demo_noise_interval)
 	, _command (other._command)
 	, _analyse (other._analyse)
+	, _reimport (other._reimport)
 	, _codec_quality (other._codec_quality)
 {
 	if (modify_name) {
@@ -283,6 +286,7 @@ ExportFormatSpecification::get_state ()
 	root->set_property ("with-mp4chaps", _with_mp4chaps);
 	root->set_property ("command", _command);
 	root->set_property ("analyse", _analyse);
+	root->set_property ("reimport", _reimport);
 	root->set_property ("soundcloud-upload", _soundcloud_upload);
 
 	node = root->add_child ("Encoding");
@@ -378,6 +382,10 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 
 	if (!root.get_property ("analyse", _analyse)) {
 		_analyse = false;
+	}
+
+	if (!root.get_property ("reimport", _reimport)) {
+		_reimport = false;
 	}
 
 	if (!root.get_property ("soundcloud-upload", _soundcloud_upload)) {
