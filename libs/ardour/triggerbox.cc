@@ -1189,6 +1189,11 @@ AudioTrigger::set_stretch_mode (Trigger::StretchMode sm)
 void
 AudioTrigger::set_segment_tempo (double t)
 {
+	if (!_region) {
+		_segment_tempo = 0;
+		return;
+	}
+
 	if (t<=0.) {
 		/*special case: we're told the file has no defined tempo.
 		 * this can happen from crazy user input (0 beat length or somesuch), or if estimate_tempo() fails entirely
