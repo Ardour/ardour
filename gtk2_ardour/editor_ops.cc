@@ -4109,17 +4109,37 @@ Editor::freeze_route ()
 }
 
 void
-Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
+Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 {
 	if (selection->time.empty()) {
 		return;
 	}
 
 	/* you can't currently apply processing to a NewTrigger bounce */
-	assert (!(enable_processing && (target == NewTrigger)));
+	assert (!(with_processing && (target == NewTrigger)));
 
-	bool     copy_to_clip_library = false;
-	uint32_t trigger_slot         = 0;
+	/* if consolidating a range to this track with processing, make sure the track-count matches */
+	if (target == ReplaceRange) {
+		TrackSelection views = selection->tracks;
+		for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
+
+			if (with_processing) {
+
+				RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+
+				if (rtv && rtv->track() && !rtv->track()->bounceable (rtv->track()->main_outs(), false)) {
+					ArdourMessageDialog d (
+						_("You can't perform this operation because the processing of the signal "
+						  "will cause one or more of the tracks to end up with a region with more channels than this track has inputs.\n\n"
+						  "You can do this without processing, which is a different operation.")
+						);
+					d.set_title (_("Cannot bounce"));
+					d.run ();
+					return;
+				}
+			}
+		}
+	}
 
 	string bounce_name;
 	switch (target) {
@@ -4133,92 +4153,66 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 			bounce_name = "Unnamed Clip";
 			break;
 	}
-
-	TrackSelection views = selection->tracks;
-
-	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
-
-		if (enable_processing) {
-
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-
-			if (rtv && rtv->track() && target == ReplaceRange && !rtv->track()->bounceable (rtv->track()->main_outs(), false)) {
-				ArdourMessageDialog d (
-					_("You can't perform this operation because the processing of the signal "
-					  "will cause one or more of the tracks to end up with a region with more channels than this track has inputs.\n\n"
-					  "You can do this without processing, which is a different operation.")
-					);
-				d.set_title (_("Cannot bounce"));
-				d.run ();
-				return;
-			}
-		}
-	}
-
-	/*prompt the user for a new name*/
+	bool   copy_to_clip_library = false;
+	bool   copy_to_trigger = false;
+	uint32_t trigger_slot         = 0;
 	{
-		Prompter dialog (true);
-		ArdourDropdown* tslot = 0;
-		Gtk::CheckButton* cliplib = 0;
-		Gtk::Alignment *align = 0;
+		/*prompt the user for a new name*/
 
-		switch (target) {
-			case NewSource:
-				dialog.set_prompt (_("Name for Bounced Region:"));
-				dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
-				break;
-			case ReplaceRange:
-				dialog.set_prompt (_("Name for Consolidated Region:"));
-				dialog.add_button (_("Rename"), RESPONSE_ACCEPT);
-				break;
-			case NewTrigger:
-				dialog.set_prompt (_("Name for Trigger Clip:"));
-				dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
-				break;
-		}
+		ArdourWidgets::Prompter dialog (true);
+
+		dialog.set_prompt (_("Name for Bounced Range:"));
 
 		dialog.set_name ("BounceNameWindow");
 		dialog.set_size_request (400, -1);
 		dialog.set_position (Gtk::WIN_POS_MOUSE);
 
+		dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
 		dialog.set_initial_text (bounce_name);
 
-		if (target != ReplaceRange) {
-			cliplib = manage (new Gtk::CheckButton (_("Copy to Clip Libary")));
-			align = manage (new Gtk::Alignment (0, .5, 0, 0));
-			align->add (*cliplib);
-			cliplib->show ();
-		}
+		Table*  table  = manage (new Table);
+		table->set_spacings (4);
+		table->set_border_width (8);
+		table->set_homogeneous (true);
+		dialog.get_vbox()->pack_start (*table);
+		dialog.get_vbox()->set_spacing (4);
 
-		if (target == NewSource) {
-			Label* label = manage (new Label (_("Bounced Range will appear in the Source list.")));
-			dialog.get_vbox()->set_spacing (8);
-			dialog.get_vbox()->pack_start (*label);
-			dialog.get_vbox()->pack_start (*align);
-			label->show();
-		} else if (target == NewTrigger) {
-			Label* label = manage (new Label (_("Trigger Slot:")));
-			label->set_alignment(1.0, 0.5);
-			HBox*  tbox  = manage (new HBox);
-			tslot        = manage (new ArdourDropdown ());
+		/* copy to a slot on this track ? */
+		Gtk::CheckButton *to_slot = NULL;
+		if (!with_processing) {
+			to_slot = manage (new Gtk::CheckButton (_("Bounce to Trigger Slot:")));
+			Gtk::Alignment *slot_align = manage (new Gtk::Alignment (0, .5, 0, 0));
+			slot_align->add (*to_slot);
+
+			ArdourWidgets::ArdourDropdown *tslot = manage (new ArdourWidgets::ArdourDropdown ());
 
 			for (int c = 0; c < default_triggers_per_box; ++c) {
 				std::string lbl = cue_marker_name (c);
-				tslot->AddMenuElem (Menu_Helpers::MenuElem (lbl, sigc::bind ([] (uint32_t* t, uint32_t v, ArdourDropdown* s, std::string l) {*t = v; s->set_text (l);}, &trigger_slot, c, tslot, lbl)));
+				tslot->AddMenuElem (Menu_Helpers::MenuElem (lbl, sigc::bind ([] (uint32_t* t, uint32_t v, ArdourWidgets::ArdourDropdown* s, std::string l) {*t = v; s->set_text (l);}, &trigger_slot, c, tslot, lbl)));
 			}
 			tslot->set_active ("A");
 
-			tbox->set_homogeneous (false);
-			tbox->set_spacing (5);
-			tbox->set_border_width (10);
-			tbox->pack_start (*label, false, false);
-			tbox->pack_start (*tslot, false, false);
-			tbox->pack_start (*align, true, true);
-			tbox->show_all ();
-			dialog.get_vbox()->pack_start (*tbox);
-		} else {
-			dialog.get_vbox()->pack_start (*align);
+			HBox *tbox = manage (new HBox());
+			tbox->pack_start(*slot_align, false, false);
+			tbox->pack_start(*tslot, false, false);
+			table->attach (*tbox,       0, 2, 0,1, Gtk::FILL, Gtk::SHRINK);
+			if (target==NewTrigger) {
+				to_slot->set_active(true);
+			}
 		}
+
+		/* copy to the user's Clip Library ? */
+		Gtk::CheckButton *cliplib = manage (new Gtk::CheckButton (_("Bounce to Clip Libary")));
+		Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
+		align->add (*cliplib);
+		align->show_all ();
+		table->attach (*align,      0, 2, 1,2, Gtk::FILL, Gtk::SHRINK);
+
+		/* in all cases, the selected Range will appear in the Source list */
+		Label* s_label = manage (new Label (_("Bounced Range will appear in the Source list")));
+		table->attach (*s_label,      0, 2, 2,3, Gtk::FILL, Gtk::SHRINK);
+
+		dialog.get_vbox()->show_all ();
 
 		dialog.show ();
 
@@ -4228,23 +4222,24 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 		default:
 			return;
 		}
+		dialog.get_result(bounce_name);
 
-		dialog.get_result (bounce_name);
-
-		if (cliplib && cliplib->get_active ()) {
+		if (to_slot && to_slot->get_active()) {
+			copy_to_trigger = true;
+		}
+		if (cliplib->get_active ()) {
 			copy_to_clip_library = true;
 		}
 	}
 
 	/* prevent user from accidentally overwriting a slot that they can't see */
 	bool overwriting = false;
-	if (target == NewTrigger) {
-		for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-			if (!rtv) {
-				continue;
-			}
-			boost::shared_ptr<ARDOUR::Track> track = rtv->track();
+	if (copy_to_trigger) {
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+
+			boost::shared_ptr<Region> region ((*i)->region());
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
+			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (rtv->route());
 			if (!track) {
 				continue;
 			}
@@ -4252,13 +4247,13 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 				overwriting = true;
 			}
 		}
-	}
-	if (overwriting) {
-		ArdourMessageDialog msg (string_compose(_("Are you sure you want to overwrite the contents in slot %1?"),cue_marker_name(trigger_slot)), false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
-		msg.set_title (_("Overwriting slot"));
-		msg.set_secondary_text (_("One of your selected tracks has content in this slot."));
-		if (msg.run () != RESPONSE_YES) {
-			return;
+		if (overwriting) {
+			ArdourMessageDialog msg (string_compose(_("Are you sure you want to overwrite the contents in slot %1?"),cue_marker_name(trigger_slot)), false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
+			msg.set_title (_("Overwriting slot"));
+			msg.set_secondary_text (_("One of your selected tracks has content in this slot."));
+			if (msg.run () != RESPONSE_YES) {
+				return;
+			}
 		}
 	}
 
@@ -4270,6 +4265,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	double tempo = tmap->tempo_at(start).quarter_notes_per_minute();
 
+	TrackSelection views = selection->tracks;
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
 
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
@@ -4293,7 +4289,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 
 		/*make the "source" (whole-file region)*/
 		/*note: bounce_range() will append the playlist name to the resulting region and filename*/
-		if (enable_processing) {
+		if (with_processing) {
 			r = rtv->track()->bounce_range (start.samples(), (start+cnt).samples(), itt, rtv->track()->main_outs(), false, bounce_name);
 		} else {
 			r = rtv->track()->bounce_range (start.samples(), (start+cnt).samples(), itt, boost::shared_ptr<Processor>(), false, bounce_name);
@@ -4313,7 +4309,7 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 		}
 
 		if (target == ReplaceRange) {
-			/*remove the edxisting regions under the edit range*/
+			/*remove the existing regions under the edit range*/
 			list<TimelineRange> ranges;
 			ranges.push_back (TimelineRange (start, start+cnt, 0));
 			playlist->cut (ranges); // discard result
@@ -4324,13 +4320,19 @@ Editor::bounce_range_selection (BounceTarget target, bool enable_processing)
 			plist.add (ARDOUR::Properties::whole_file, false);
 			boost::shared_ptr<Region> copy (RegionFactory::create (r, plist));
 			playlist->add_region (copy, start);
-		} else if (target == NewTrigger) {
+		}
+
+		if (copy_to_trigger) {
 			boost::shared_ptr<Trigger::UIState> state (new Trigger::UIState());
 			state->name = bounce_name;
 			state->tempo = tempo;
 			rtv->track ()->triggerbox ()->enqueue_trigger_state_for_region(r, state);
 			rtv->track ()->triggerbox ()->set_from_selection (trigger_slot, r);
 			rtv->track ()->presentation_info ().set_trigger_track (true);
+		}
+
+		if (copy_to_clip_library) {
+			export_to_clip_library (r);
 		}
 
 		vector<Command*> cmds;

@@ -275,14 +275,19 @@ Editor::write_region_selection (RegionSelection& regions)
 void
 Editor::bounce_region_selection (bool with_processing)
 {
+	/* this code is largely similar to editor_ops ::bounce_range_selection */
+
 	/* no need to check for bounceable() because this operation never puts
 	 * its results back in the playlist (only in the region list).
 	 */
 
-	/*prompt the user for a new name*/
 	string bounce_name;
 	bool   copy_to_clip_library = false;
+	bool   copy_to_trigger = false;
+	uint32_t trigger_slot         = 0;
 	{
+		/*prompt the user for a new name*/
+
 		ArdourWidgets::Prompter dialog (true);
 
 		dialog.set_prompt (_("Name for Bounced Region:"));
@@ -294,15 +299,46 @@ Editor::bounce_region_selection (bool with_processing)
 		dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
 		dialog.set_initial_text (bounce_name);
 
-		Gtk::CheckButton cliplib (_("Copy to Clip Libary"));
-		dialog.get_vbox()->pack_start (cliplib);
-		cliplib.show ();
+		Table*  table  = manage (new Table);
+		table->set_spacings (4);
+		table->set_border_width (8);
+		table->set_homogeneous (true);
+		dialog.get_vbox()->pack_start (*table);
+		dialog.get_vbox()->set_spacing (4);
 
-		Label label;
-		label.set_text (_("Bounced Region will appear in the Source list."));
-		dialog.get_vbox()->set_spacing (8);
-		dialog.get_vbox()->pack_start (label);
-		label.show();
+		/* copy to a slot on this track ? */
+		Gtk::CheckButton *to_slot = NULL;
+		if (!with_processing) {
+			to_slot = manage (new Gtk::CheckButton (_("Bounce to Trigger Slot:")));
+			Gtk::Alignment *slot_align = manage (new Gtk::Alignment (0, .5, 0, 0));
+			slot_align->add (*to_slot);
+
+			ArdourWidgets::ArdourDropdown *tslot = manage (new ArdourWidgets::ArdourDropdown ());
+
+			for (int c = 0; c < default_triggers_per_box; ++c) {
+				std::string lbl = cue_marker_name (c);
+				tslot->AddMenuElem (Menu_Helpers::MenuElem (lbl, sigc::bind ([] (uint32_t* t, uint32_t v, ArdourWidgets::ArdourDropdown* s, std::string l) {*t = v; s->set_text (l);}, &trigger_slot, c, tslot, lbl)));
+			}
+			tslot->set_active ("A");
+
+			HBox *tbox = manage (new HBox());
+			tbox->pack_start(*slot_align, false, false);
+			tbox->pack_start(*tslot, false, false);
+			table->attach (*tbox,       0, 2, 0,1, Gtk::FILL, Gtk::SHRINK);
+		}
+
+		/* copy to the user's Clip Library ? */
+		Gtk::CheckButton *cliplib = manage (new Gtk::CheckButton (_("Bounce to Clip Libary")));
+		Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
+		align->add (*cliplib);
+		align->show_all ();
+		table->attach (*align,      0, 2, 1,2, Gtk::FILL, Gtk::SHRINK);
+
+		/* in all cases, the selected Range will appear in the Source list */
+		Label* s_label = manage (new Label (_("Bounced Region will appear in the Source list")));
+		table->attach (*s_label,      0, 2, 2,3, Gtk::FILL, Gtk::SHRINK);
+
+		dialog.get_vbox()->show_all ();
 
 		dialog.show ();
 
@@ -313,7 +349,38 @@ Editor::bounce_region_selection (bool with_processing)
 			return;
 		}
 		dialog.get_result(bounce_name);
-		copy_to_clip_library = cliplib.get_active ();
+
+		if (to_slot && to_slot->get_active()) {
+			copy_to_trigger = true;
+		}
+		if (cliplib->get_active ()) {
+			copy_to_clip_library = true;
+		}
+	}
+
+	/* prevent user from accidentally overwriting a slot that they can't see */
+	bool overwriting = false;
+	if (copy_to_trigger) {
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+
+			boost::shared_ptr<Region> region ((*i)->region());
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
+			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (rtv->route());
+			if (!track) {
+				continue;
+			}
+			if (track->triggerbox()->trigger(trigger_slot)->region()) {
+				overwriting = true;
+			}
+		}
+		if (overwriting) {
+			ArdourMessageDialog msg (string_compose(_("Are you sure you want to overwrite the contents in slot %1?"),cue_marker_name(trigger_slot)), false, MESSAGE_QUESTION, BUTTONS_YES_NO, true);
+			msg.set_title (_("Overwriting slot"));
+			msg.set_secondary_text (_("One of your selected tracks has content in this slot."));
+			if (msg.run () != RESPONSE_YES) {
+				return;
+			}
+		}
 	}
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
@@ -335,6 +402,16 @@ Editor::bounce_region_selection (bool with_processing)
 		if (copy_to_clip_library) {
 			export_to_clip_library (r);
 		}
+
+		if (copy_to_trigger) {
+			boost::shared_ptr<Trigger::UIState> state (new Trigger::UIState());
+			state->name = bounce_name;
+			//ToDo: can/should we get the tempo for this region?
+			track->triggerbox ()->enqueue_trigger_state_for_region(r, state);
+			track->triggerbox ()->set_from_selection (trigger_slot, r);
+			track->presentation_info ().set_trigger_track (true);
+		}
+
 	}
 }
 
