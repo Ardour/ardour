@@ -383,7 +383,7 @@ ARDOUR_UI::setup_transport ()
 	_cue_rec_enable.set_name ("record enable button");
 	_cue_rec_enable.signal_clicked.connect(sigc::mem_fun(*this, &ARDOUR_UI::cue_rec_state_clicked));
 
-	_cue_play_enable.set_name ("record enable button");
+	_cue_play_enable.set_name ("transport option button");
 	_cue_play_enable.signal_clicked.connect(sigc::mem_fun(*this, &ARDOUR_UI::cue_ffwd_state_clicked));
 
 	/* catch context clicks so that we can show a menu on these buttons */
