@@ -4373,7 +4373,7 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 	 * Since the output is not used, Send::_thru_delay is not relevant, and
 	 * Send->effective_latency () should return zero.
 	 */
-	if (output_effectively_connected ()) {
+	if (is_master() || output_effectively_connected ()) {
 		_output_latency = _output->latency ();
 	} else if (_session.master_out ()) {
 		/* We cannot use `_session.master_out()->input()->latency()` because that would return capture latency.
@@ -5020,7 +5020,10 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, samplec
 	 * So for correct alignment we use the Delivery's playback latency.
 	 */
 	LatencyRange outport_latency = all_connections;
-	if (playback && _main_outs && !connected) {
+	/* routes without latency delayline (master, monitor) always use the
+	 * actual connected latency.
+	 */
+	if (playback && _main_outs && !connected && _delayline) {
 		outport_latency.min = _main_outs->playback_offset () - _main_outs->input_latency ();
 		outport_latency.max = _main_outs->playback_offset () - _main_outs->input_latency ();
 	}
