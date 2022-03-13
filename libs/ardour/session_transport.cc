@@ -437,8 +437,14 @@ void
 Session::stop_all_triggers (bool now)
 {
 	boost::shared_ptr<RouteList> rl = routes.reader();
+
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		(*i)->stop_triggers (now);
+	}
+
+	if (TriggerBox::cue_recording()) {
+		CueRecord cr (INT32_MAX, _transport_sample);
+		TriggerBox::cue_records.write (&cr, 1);
 	}
 }
 
