@@ -1628,10 +1628,7 @@ Session::implement_master_strategy ()
 void
 Session::sync_cues ()
 {
-	std::cerr << "Need to sync cues!\n";
-
 	_locations->apply (*this, &Session::sync_cues_from_list);
-
 }
 
 struct LocationByTime

@@ -1384,6 +1384,7 @@ protected:
 	void set_transport_speed (double speed);
 	void set_default_play_speed (double spd);
 	bool need_declick_before_locate () const;
+	void tempo_map_changed ();
 
 private:
 	int  create (const std::string& mix_template, BusProfile const *, bool unnamed);
@@ -1891,8 +1892,6 @@ private:
 	void mtc_tx_resync_latency (bool);
 	int  send_full_time_code (samplepos_t, pframes_t nframes);
 	void send_song_position_pointer (samplepos_t);
-
-	void          tempo_map_changed ();
 
 	/* edit/mix groups */
 

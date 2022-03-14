@@ -476,8 +476,6 @@ Session::Session (AudioEngine &eng,
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, false));
 	config.ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, true));
 
-	TempoMap::MapChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this));
-
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
 	}
