@@ -312,8 +312,8 @@ Playlist::copy_regions (RegionList& newlist) const
 {
 	RegionReadLock rlock (const_cast<Playlist*> (this));
 
-	for (RegionList::const_iterator i = regions.begin (); i != regions.end (); ++i) {
-		newlist.push_back (RegionFactory::create (*i, true, true));
+	for (auto const & r : regions) {
+		newlist.push_back (RegionFactory::create (r, true, true));
 	}
 }
 
@@ -357,8 +357,8 @@ Playlist::~Playlist ()
 	{
 		RegionReadLock rl (this);
 
-		for (set<boost::shared_ptr<Region> >::iterator i = all_regions.begin (); i != all_regions.end (); ++i) {
-			(*i)->set_playlist (boost::shared_ptr<Playlist> ());
+		for (auto & r : all_regions) {
+			r->set_playlist (boost::shared_ptr<Playlist> ());
 		}
 	}
 
@@ -601,9 +601,9 @@ Playlist::flush_notifications (bool from_undo)
 
 	list<Temporal::Range> crossfade_ranges;
 
-	for (RegionList::iterator r = pending_bounds.begin (); r != pending_bounds.end (); ++r) {
-		crossfade_ranges.push_back ((*r)->last_range ());
-		crossfade_ranges.push_back ((*r)->range ());
+	for (auto const & r : pending_bounds) {
+		crossfade_ranges.push_back (r->last_range ());
+		crossfade_ranges.push_back (r->range ());
 	}
 
 	boost::shared_ptr<RegionList> rl (new RegionList);
@@ -691,8 +691,8 @@ Playlist::add_region (boost::shared_ptr<Region> region, timepos_t const & positi
 
 	if (times == 1 && auto_partition) {
 		partition_internal (pos.decrement(), (pos + region->length ()), true, rlock.thawlist);
-		for (RegionList::iterator i = rlock.thawlist.begin (); i != rlock.thawlist.end (); ++i) {
-			_session.add_command (new StatefulDiffCommand (*i));
+		for (auto const & r : rlock.thawlist) {
+			_session.add_command (new StatefulDiffCommand (r));
 		}
 	}
 
@@ -895,30 +895,30 @@ Playlist::get_equivalent_regions (boost::shared_ptr<Region> other, vector<boost:
 {
 	switch (Config->get_region_equivalence ()) {
 		case Exact:
-			for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
-				if ((*i)->exact_equivalent (other)) {
-					results.push_back (*i);
+			for (auto const & r : regions) {
+				if (r->exact_equivalent (other)) {
+					results.push_back (r);
 				}
 			}
 			break;
 		case LayerTime:
-			for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
-				if ((*i)->layer_and_time_equivalent (other)) {
-					results.push_back (*i);
+			for (auto const & r : regions) {
+				if (r->layer_and_time_equivalent (other)) {
+					results.push_back (r);
 				}
 			}
 			break;
 		case Enclosed:
-			for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
-				if ((*i)->enclosed_equivalent (other)) {
-					results.push_back (*i);
+			for (auto const & r : regions) {
+				if (r->enclosed_equivalent (other)) {
+					results.push_back (r);
 				}
 			}
 			break;
 		case Overlap:
-			for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
-				if ((*i)->overlap_equivalent (other)) {
-					results.push_back (*i);
+			for (auto const & r : regions) {
+				if (r->overlap_equivalent (other)) {
+					results.push_back (r);
 				}
 			}
 			break;
@@ -1268,14 +1268,14 @@ Playlist::paste (boost::shared_ptr<Playlist> other, timepos_t const & position, 
 		{
 			RegionWriteLock rl1 (this);
 			while (itimes--) {
-				for (RegionList::iterator i = other->regions.begin (); i != other->regions.end (); ++i) {
-					boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i, true, false, &rl1.thawlist);
+				for (auto const & r : other->regions) {
+					boost::shared_ptr<Region> copy_of_region = RegionFactory::create (r, true, false, &rl1.thawlist);
 
 					/* put these new regions on top of all existing ones, but preserve
 					   the ordering they had in the original playlist.
 					*/
 
-					add_region_internal (copy_of_region, (*i)->position() + pos, rl1.thawlist);
+					add_region_internal (copy_of_region, r->position() + pos, rl1.thawlist);
 					set_layer (copy_of_region, copy_of_region->layer() + top);
 				}
 				pos += shift;
@@ -1403,14 +1403,14 @@ Playlist::shift (timepos_t const & at, timecnt_t const & distance, bool move_int
 	RegionList copy (regions.rlist());
 	RegionList fixup;
 
-	for (RegionList::iterator r = copy.begin(); r != copy.end(); ++r) {
+	for (auto & r : copy) {
 
-		if ((*r)->nt_last() < at) {
+		if (r->nt_last() < at) {
 			/* too early */
 			continue;
 		}
 
-		if (at > (*r)->position() && at < (*r)->nt_last()) {
+		if (at > r->position() && at < r->nt_last()) {
 			/* intersected region */
 			if (!move_intersected) {
 				continue;
@@ -1421,18 +1421,18 @@ Playlist::shift (timepos_t const & at, timecnt_t const & distance, bool move_int
 		 * has to be done separately.
 		 */
 
-		if (!ignore_music_glue && (*r)->position().time_domain() != Temporal::AudioTime) {
-			fixup.push_back (*r);
+		if (!ignore_music_glue && r->position().time_domain() != Temporal::AudioTime) {
+			fixup.push_back (r);
 			continue;
 		}
 
-		rlock.thawlist.add (*r);
-		(*r)->set_position ((*r)->position() + distance);
+		rlock.thawlist.add (r);
+		r->set_position (r->position() + distance);
 	}
 
 	/* XXX: may not be necessary; Region::post_set should do this, I think */
-	for (RegionList::iterator r = fixup.begin(); r != fixup.end(); ++r) {
-		(*r)->recompute_position_from_time_domain ();
+	for (auto & r : fixup) {
+		r->recompute_position_from_time_domain ();
 	}
 }
 
@@ -1444,8 +1444,8 @@ Playlist::split (timepos_t const & at)
 
 	/* use a copy since this operation can modify the region list */
 
-	for (RegionList::iterator r = copy.begin (); r != copy.end (); ++r) {
-		_split_region (*r, at, rlock.thawlist);
+	for (auto & r : copy) {
+		_split_region (r, at, rlock.thawlist);
 	}
 }
 
@@ -1557,26 +1557,26 @@ Playlist::ripple_unlocked (timepos_t const & at, timecnt_t const & distance, Reg
 
 	_rippling               = true;
 	RegionListProperty copy = regions;
-	for (RegionList::iterator i = copy.begin (); i != copy.end (); ++i) {
-		assert (i != copy.end ());
+
+	for (auto & r : copy) {
 
 		if (exclude) {
-			if (std::find (exclude->begin (), exclude->end (), (*i)) != exclude->end ()) {
+			if (std::find (exclude->begin (), exclude->end (), r) != exclude->end ()) {
 				continue;
 			}
 		}
 
-		if ((*i)->position() >= at) {
-			timepos_t new_pos = (*i)->position() + distance;
-			timepos_t limit = timepos_t::max (new_pos.time_domain()).earlier ((*i)->length());
+		if (r->position() >= at) {
+			timepos_t new_pos = r->position() + distance;
+			timepos_t limit = timepos_t::max (new_pos.time_domain()).earlier (r->length());
 			if (new_pos < 0) {
 				new_pos = timepos_t (new_pos.time_domain());
 			} else if (new_pos >= limit ) {
 				new_pos = limit;
 			}
 
-			thawlist.add (*i);
-			(*i)->set_position (new_pos);
+			thawlist.add (r);
+			r->set_position (new_pos);
 		}
 	}
 
@@ -1713,8 +1713,8 @@ Playlist::sync_all_regions_with_regions ()
 
 	all_regions.clear ();
 
-	for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
-		all_regions.insert (*i);
+	for (auto & r: regions) {
+		all_regions.insert (r);
 	}
 }
 
@@ -1727,20 +1727,20 @@ Playlist::clear (bool with_signals)
 		region_state_changed_connections.drop_connections ();
 		region_drop_references_connections.drop_connections ();
 
-		for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
-			pending_removes.insert (*i);
+		for (auto & r : regions) {
+			pending_removes.insert (r);
 		}
 
 		regions.clear ();
 
-		for (set<boost::shared_ptr<Region> >::iterator s = pending_removes.begin (); s != pending_removes.end (); ++s) {
-			remove_dependents (*s);
+		for (auto & r : pending_removes) {
+			remove_dependents (r);
 		}
 	}
 
 	if (with_signals) {
-		for (set<boost::shared_ptr<Region> >::iterator s = pending_removes.begin (); s != pending_removes.end (); ++s) {
-			RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
+		for (auto & r : pending_removes) {
+			RegionRemoved (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
 		}
 
 		pending_removes.clear ();
@@ -1766,8 +1766,8 @@ Playlist::deep_sources (std::set<boost::shared_ptr<Source> >& sources) const
 {
 	RegionReadLock rlock (const_cast<Playlist*> (this));
 
-	for (RegionList::const_iterator i = regions.begin (); i != regions.end (); ++i) {
-		(*i)->deep_sources (sources);
+	for (auto const & r : regions){
+		r->deep_sources (sources);
 	}
 }
 
@@ -1784,8 +1784,8 @@ Playlist::count_regions_at (timepos_t const & pos) const
 	RegionReadLock rlock (const_cast<Playlist*> (this));
 	uint32_t       cnt = 0;
 
-	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->covers (pos)) {
+	for (auto const & r : regions) {
+		if (r->covers (pos)) {
 			cnt++;
 		}
 	}
@@ -1845,9 +1845,9 @@ Playlist::find_regions_at (timepos_t const & pos)
 
 	boost::shared_ptr<RegionList> rlist (new RegionList);
 
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->covers (pos)) {
-			rlist->push_back (*i);
+	for (auto & r : regions) {
+		if (r->covers (pos)) {
+			rlist->push_back (r);
 		}
 	}
 
@@ -1860,9 +1860,9 @@ Playlist::regions_with_start_within (Temporal::Range range)
 	RegionReadLock                rlock (this);
 	boost::shared_ptr<RegionList> rlist (new RegionList);
 
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->position() >= range.start() && (*i)->position() < range.end()) {
-			rlist->push_back (*i);
+	for (auto & r : regions) {
+		if (r->position() >= range.start() && r->position() < range.end()) {
+			rlist->push_back (r);
 		}
 	}
 
@@ -1875,9 +1875,9 @@ Playlist::regions_with_end_within (Temporal::Range range)
 	RegionReadLock                rlock (this);
 	boost::shared_ptr<RegionList> rlist (new RegionList);
 
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->nt_last() >= range.start() && (*i)->nt_last() < range.end()) {
-			rlist->push_back (*i);
+	for (auto & r : regions) {
+		if (r->nt_last() >= range.start() && r->nt_last() < range.end()) {
+			rlist->push_back (r);
 		}
 	}
 
@@ -1896,9 +1896,9 @@ Playlist::regions_touched_locked (timepos_t const & start, timepos_t const & end
 {
 	boost::shared_ptr<RegionList> rlist (new RegionList);
 
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->coverage (start, end) != Temporal::OverlapNone) {
-			rlist->push_back (*i);
+	for (auto & r : regions) {
+		if (r->coverage (start, end) != Temporal::OverlapNone) {
+			rlist->push_back (r);
 		}
 	}
 
@@ -1912,20 +1912,20 @@ Playlist::find_next_transient (timepos_t const & from, int dir)
 	AnalysisFeatureList points;
 	AnalysisFeatureList these_points;
 
-	for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
+	for (auto const & r : regions) {
 		if (dir > 0) {
-			if ((*i)->nt_last() < from) {
+			if (r->nt_last() < from) {
 				continue;
 			}
 		} else {
-			if ((*i)->position() > from) {
+			if (r->position() > from) {
 				continue;
 			}
 		}
 
-		(*i)->get_transients (these_points);
+		r->get_transients (these_points);
 
-		these_points.push_back ((*i)->position_sample());
+		these_points.push_back (r->position_sample());
 
 		points.insert (points.end (), these_points.begin (), these_points.end ());
 		these_points.clear ();
@@ -1972,12 +1972,11 @@ Playlist::find_next_region (timepos_t const & pos, RegionPoint point, int dir)
 
 	bool end_iter = false;
 
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+	for (auto const & r : regions) {
 
 		if(end_iter) break;
 
 		timecnt_t distance;
-		boost::shared_ptr<Region> r = (*i);
 		timepos_t rpos;
 
 		switch (point) {
@@ -2332,9 +2331,9 @@ Playlist::state (bool full_state)
 
 		node->set_property ("combine-ops", _combine_ops);
 
-		for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
-			assert ((*i)->sources ().size () > 0 && (*i)->master_sources ().size () > 0);
-			node->add_child_nocopy ((*i)->get_state ());
+		for (auto const & r : regions) {
+			assert (r->sources ().size () > 0 && r->master_sources ().size () > 0);
+			node->add_child_nocopy (r->get_state ());
 		}
 	}
 
@@ -2409,8 +2408,8 @@ Playlist::_get_extent () const
 
 	time_domain = regions.front()->position().time_domain();
 
-	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		pair<timepos_t, timepos_t> const e ((*i)->position(), (*i)->position() + (*i)->length());
+	for (auto const & r : regions) {
+		pair<timepos_t, timepos_t> const e (r->position(), r->position() + r->length());
 		if (e.first < ext.first) {
 			ext.first = e.first;
 		}
@@ -2440,8 +2439,8 @@ Playlist::top_layer () const
 	RegionReadLock rlock (const_cast<Playlist*> (this));
 	layer_t        top = 0;
 
-	for (RegionList::const_iterator i = regions.begin (); i != regions.end (); ++i) {
-		top = max (top, (*i)->layer ());
+	for (auto const & r : regions) {
+		top = max (top, r->layer ());
 	}
 	return top;
 }
@@ -2487,8 +2486,8 @@ Playlist::setup_layering_indices (RegionList const& regions)
 {
 	uint64_t j = 0;
 
-	for (RegionList::const_iterator k = regions.begin (); k != regions.end (); ++k) {
-		(*k)->set_layering_index (j++);
+	for (auto const & r : regions) {
+		r->set_layering_index (j++);
 	}
 }
 
@@ -2527,9 +2526,9 @@ Playlist::relayer ()
 	timepos_t start = timepos_t::max (regions.front()->position().time_domain());
 	timepos_t end = timepos_t (start.time_domain());
 
-	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		start = min (start, (*i)->position());
-		end = max (end, (*i)->position() + (*i)->length());
+	for (auto const & r : regions) {
+		start = min (start, r->position());
+		end = max (end, r->position() + r->length());
 	}
 
 	/* hence the size of each time division */
@@ -2550,11 +2549,11 @@ Playlist::relayer ()
 	}
 
 	DEBUG_TRACE (DEBUG::Layering, "relayer() using:\n");
-	for (RegionList::iterator i = copy.begin (); i != copy.end (); ++i) {
-		DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1 %2\n", (*i)->name (), (*i)->layering_index ()));
+	for (auto const & r : copy) {
+		DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1 %2\n", r->name (), r->layering_index ()));
 	}
 
-	for (RegionList::iterator i = copy.begin (); i != copy.end (); ++i) {
+	for (auto const & r : copy) {
 		/* find the time divisions that this region covers; if there are no regions on the list,
 		 * division_size will equal 0 and in this case we'll just say that
 		 * start_division = end_division = 0.
@@ -2563,8 +2562,8 @@ Playlist::relayer ()
 		int end_division   = 0;
 
 		if (division_size > 0) {
-			start_division = floor ( ((*i)->position_sample() - start.samples()) / division_size);
-			end_division = floor ( ((*i)->position_sample() + (*i)->length_samples() - start.samples()) / division_size );
+			start_division = floor ( (r->position_sample() - start.samples()) / division_size);
+			end_division = floor ( (r->position_sample() + r->length_samples() - start.samples()) / division_size );
 			if (end_division == divisions) {
 				end_division--;
 			}
@@ -2583,7 +2582,7 @@ Playlist::relayer ()
 			for (int k = start_division; k <= end_division; ++k) {
 				RegionList::iterator l = layers[j - 1][k].begin ();
 				while (l != layers[j - 1][k].end ()) {
-					if ((*l)->overlap_equivalent (*i)) {
+					if ((*l)->overlap_equivalent (r)) {
 						overlap = true;
 						break;
 					}
@@ -2610,10 +2609,10 @@ Playlist::relayer ()
 
 		/* put a reference to this region in each of the divisions that it exists in */
 		for (int k = start_division; k <= end_division; ++k) {
-			layers[j][k].push_back (*i);
+			layers[j][k].push_back (r);
 		}
 
-		(*i)->set_layer (j);
+		r->set_layer (j);
 	}
 
 	/* It's a little tricky to know when we could avoid calling this; e.g. if we are
@@ -2711,14 +2710,14 @@ Playlist::uses_source (boost::shared_ptr<const Source> src, bool shallow) const
 {
 	RegionReadLock rlock (const_cast<Playlist*> (this));
 
-	for (set<boost::shared_ptr<Region> >::const_iterator r = all_regions.begin (); r != all_regions.end (); ++r) {
+	for (auto const & r : all_regions) {
 		/* Note: passing the second argument as false can cause at best
 		 * incredibly deep and time-consuming recursion, and at worst
 		 * cycles if the user has managed to create cycles of reference
 		 * between compound regions. We generally only this during
 		 * cleanup, and @param shallow is passed as true.
 		 */
-		if ((*r)->uses_source (src, shallow)) {
+		if (r->uses_source (src, shallow)) {
 			return true;
 		}
 	}
@@ -2733,9 +2732,9 @@ Playlist::find_region (const ID& id) const
 
 	/* searches all regions currently in use by the playlist */
 
-	for (RegionList::const_iterator i = regions.begin (); i != regions.end (); ++i) {
-		if ((*i)->id () == id) {
-			return *i;
+	for (auto const & r : regions) {
+		if (r->id () == id) {
+			return r;
 		}
 	}
 
@@ -2786,9 +2785,9 @@ Playlist::region_by_id (const ID& id) const
 {
 	/* searches all regions ever added to this playlist */
 
-	for (set<boost::shared_ptr<Region> >::const_iterator i = all_regions.begin (); i != all_regions.end (); ++i) {
-		if ((*i)->id () == id) {
-			return *i;
+	for (auto const & r : all_regions) {
+		if (r->id () == id) {
+			return r;
 		}
 	}
 	return boost::shared_ptr<Region> ();
@@ -2803,8 +2802,7 @@ Playlist::dump () const
 	     << regions.size () << " regions "
 	     << endl;
 
-	for (RegionList::const_iterator i = regions.begin (); i != regions.end (); ++i) {
-		r = *i;
+	for (auto const & r : regions) {
 		cerr << "  " << r->name() << " ["
 		     << r->start() << "+" << r->length()
 		     << "] at "
@@ -2960,9 +2958,9 @@ Playlist::update_after_tempo_map_change ()
 
 		freeze_locked ();
 
-		for (RegionList::iterator i = copy.begin (); i != copy.end (); ++i) {
-			rlock.thawlist.add (*i);
-			(*i)->update_after_tempo_map_change ();
+		for (auto & r : copy) {
+			rlock.thawlist.add (r);
+			r->update_after_tempo_map_change ();
 		}
 	}
 	/* possibly causes a contents changed notification (flush_notifications()) */
@@ -2970,11 +2968,11 @@ Playlist::update_after_tempo_map_change ()
 }
 
 void
-Playlist::foreach_region (boost::function<void(boost::shared_ptr<Region>)> s)
+Playlist::foreach_region (boost::function<void(boost::shared_ptr<Region>)> func)
 {
 	RegionReadLock rl (this);
-	for (RegionList::iterator i = regions.begin (); i != regions.end (); ++i) {
-		s (*i);
+	for (auto & r : regions) {
+		func (r);
 	}
 }
 
@@ -3006,9 +3004,9 @@ Playlist::find_next_top_layer_position (timepos_t const & t) const
 	RegionList copy = regions.rlist ();
 	copy.sort (RegionSortByPosition ());
 
-	for (RegionList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
-		if ((*i)->position() >= t && (*i)->layer() == top) {
-			return (*i)->position();
+	for (auto const & r : copy) {
+		if (r->position() >= t && r->layer() == top) {
+			return r->position();
 		}
 	}
 
@@ -3045,8 +3043,8 @@ Playlist::combine (const RegionList& r)
 
 	boost::shared_ptr<Playlist> pl = PlaylistFactory::create (_type, _session, parent_name, true);
 
-	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
-		earliest_position = min (earliest_position, (*i)->position());
+	for (auto const & r : r) {
+		earliest_position = min (earliest_position, r->position());
 	}
 
 	/* enable this so that we do not try to create xfades etc. as we add
@@ -3062,11 +3060,10 @@ Playlist::combine (const RegionList& r)
 	RegionList sorted(r);
 	sorted.sort(RegionSortByLayerAndPosition());
 
-	for (RegionList::const_iterator i = sorted.begin(); i != sorted.end(); ++i) {
+	for (auto const & original_region : sorted) {
 
 		/* copy the region */
 
-		boost::shared_ptr<Region> original_region = (*i);
 		boost::shared_ptr<Region> copied_region   = RegionFactory::create (original_region, false, false, &thawlist);
 
 		old_and_new_regions.push_back (TwoRegions (original_region,copied_region));
@@ -3123,16 +3120,16 @@ Playlist::combine (const RegionList& r)
 
 	boost::shared_ptr<Region> compound_region = RegionFactory::create (parent_region, plist, true, &thawlist);
 
-	for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
-		boost::dynamic_pointer_cast<PlaylistSource>(*s)->set_owner (compound_region->id());
+	for (auto src : sources) {
+		boost::dynamic_pointer_cast<PlaylistSource>(src)->set_owner (compound_region->id());
 	}
 
 	/* remove all the selected regions from the current playlist */
 
 	freeze ();
 
-	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
-		remove_region (*i);
+	for (auto const & reg : r) {
+		remove_region (reg);
 	}
 
 	/* do type-specific stuff with the originals and the new compound region */
@@ -3206,10 +3203,9 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 	ThawList thawlist;
 
-	for (RegionList::const_iterator i = rl.begin (); i != rl.end (); ++i) {
-		boost::shared_ptr<Region> current (*i);
+	for (auto const & current : rl) {
 
-		RegionFactory::CompoundAssociations::iterator ca = cassocs.find (*i);
+		RegionFactory::CompoundAssociations::iterator ca = cassocs.find (current);
 
 		if (ca == cassocs.end()) {
 			continue;
@@ -3219,7 +3215,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 		bool modified_region;
 
-		if (i == rl.begin()) {
+		if (current == rl.front()) {
 			move_offset = original->position().distance (target->position()) - timecnt_t (target->start(), target->position());
 			adjusted_start = original->position() + target->start();
 			adjusted_end = adjusted_start + target->length();
@@ -3292,7 +3288,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 		 */
 
 		originals.push_back (original);
-		old_and_new_regions.push_back (TwoRegions (*i, original));
+		old_and_new_regions.push_back (TwoRegions (current, original));
 	}
 
 	pre_uncombine (originals, target);
