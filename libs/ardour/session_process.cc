@@ -1074,6 +1074,30 @@ Session::process_event (SessionEvent* ev)
 	}
 }
 
+void
+Session::handle_slots_empty_status (boost::weak_ptr<Route> const & wr)
+{
+	boost::shared_ptr<Route> r = wr.lock();
+
+	if (!r) {
+		return;
+	}
+
+	if (r->triggerbox()) {
+		if (r->triggerbox()->empty()) {
+			/* signal was emitted, and no slots are used now, so
+			   there was change from >0 slots to 0 slots
+			*/
+			tb_with_filled_slots--;
+		} else {
+			/* signal was emitted, some slots are used now, so
+			   there was a change from 0 slots to > 0
+			*/
+			tb_with_filled_slots++;
+		}
+	}
+}
+
 samplepos_t
 Session::compute_stop_limit () const
 {
@@ -1096,6 +1120,14 @@ Session::compute_stop_limit () const
 		return max_samplepos;
 	} else if (punching_in && punching_out && _locations->auto_punch_location()->end() > current_end_sample()) {
 		/* punching in and punching out after session end */
+		return max_samplepos;
+	}
+
+	/* if there are any triggerboxen with slots filled, we ignore the end
+	 * marker
+	 */
+
+	if (tb_with_filled_slots) {
 		return max_samplepos;
 	}
 

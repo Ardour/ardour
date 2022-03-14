@@ -2327,6 +2327,8 @@ private:
 	void maybe_find_pending_cue ();
 	void clear_active_cue ();
 
+	int tb_with_filled_slots;
+	void handle_slots_empty_status (boost::weak_ptr<Route> const &);
  };
 
 

@@ -323,6 +323,7 @@ Session::Session (AudioEngine &eng,
 	, _had_destructive_tracks (false)
 	, _pending_cue (-1)
 	, _active_cue (-1)
+	, tb_with_filled_slots (0)
 {
 	g_atomic_int_set (&_suspend_save, 0);
 	g_atomic_int_set (&_playback_load, 0);
@@ -3242,6 +3243,10 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 					mt->StepEditStatusChange.connect_same_thread (*this, boost::bind (&Session::step_edit_status_change, this, _1));
 					mt->presentation_info().PropertyChanged.connect_same_thread (*this, boost::bind (&Session::midi_track_presentation_info_changed, this, _1, boost::weak_ptr<MidiTrack>(mt)));
 				}
+			}
+
+			if (r->triggerbox()) {
+				r->triggerbox()->EmptyStatusChanged.connect_same_thread (*this, boost::bind (&Session::handle_slots_empty_status, this, wpr));
 			}
 
 			if (!r->presentation_info().special (false)) {
