@@ -5460,6 +5460,7 @@ void
 Session::tempo_map_changed ()
 {
 	clear_clicks ();
+	sync_cues ();
 
 	_playlists->update_after_tempo_map_change ();
 
