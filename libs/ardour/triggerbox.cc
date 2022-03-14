@@ -955,7 +955,7 @@ Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats cons
 		break;
 
 	default:
-		fatal << string_compose (_("programming error: %1"), "impossible trigger state in ::adjust_nframes()") << endmsg;
+		fatal << string_compose (_("programming error: %1 %2 %3"), "impossible trigger state (", enum_2_string (_state), ") in ::adjust_nframes()") << endmsg;
 		abort();
 	}
 
