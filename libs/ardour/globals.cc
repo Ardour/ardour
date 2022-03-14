@@ -529,8 +529,6 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 		return true;
 	}
 
-	Temporal::set_sample_rate_callback (AudioEngine::static_sample_rate);
-
 	running_from_gui = with_gui;
 
 #ifndef NDEBUG

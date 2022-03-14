@@ -38,12 +38,12 @@ typedef int64_t superclock_t;
 static inline superclock_t superclock_to_samples (superclock_t s, int sr) { return int_div_round (s * sr, superclock_ticks_per_second); }
 static inline superclock_t samples_to_superclock (int64_t samples, int sr) { return int_div_round (samples * superclock_ticks_per_second, superclock_t (sr)); }
 
-extern int (*sample_rate_callback)();
+extern int most_recent_engine_sample_rate;
 
-LIBTEMPORAL_API void set_sample_rate_callback (int (*function)());
+LIBTEMPORAL_API void set_sample_rate (int sr);
 
 }
 
-#define TEMPORAL_SAMPLE_RATE (sample_rate_callback ())
+#define TEMPORAL_SAMPLE_RATE (most_recent_engine_sample_rate)
 
 #endif /* __ardour_superclock_h__ */

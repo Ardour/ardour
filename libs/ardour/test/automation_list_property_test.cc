@@ -43,19 +43,14 @@ write_automation_list_xml (XMLNode* node, std::string filename)
 	CPPUNIT_ASSERT (write_ref (node, output_file));
 }
 
-static int
-static_sample_rate () { return 48000; }
-
 void
 AutomationListPropertyTest::setUp ()
 {
-	Temporal::set_sample_rate_callback (static_sample_rate);
 }
 
 void
 AutomationListPropertyTest::tearDown ()
 {
-	Temporal::set_sample_rate_callback (0);
 }
 
 void
