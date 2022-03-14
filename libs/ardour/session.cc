@@ -3245,6 +3245,9 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 
 			if (r->triggerbox()) {
 				r->triggerbox()->EmptyStatusChanged.connect_same_thread (*this, boost::bind (&Session::handle_slots_empty_status, this, wpr));
+				if (!r->triggerbox()->empty()) {
+					tb_with_filled_slots++;
+				}
 			}
 
 			if (!r->presentation_info().special (false)) {
