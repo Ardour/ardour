@@ -127,7 +127,8 @@ private:
 	PublicEditor &  editor;
 	StatusPtr       status;
 
-	std::vector<std::string> _files_to_reimport;
+	typedef std::map<samplepos_t, std::vector<std::string>> ReImportMap;
+	ReImportMap _files_to_reimport;
 
 	/* Warning area */
 

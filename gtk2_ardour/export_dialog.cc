@@ -370,7 +370,7 @@ ExportDialog::do_export ()
 
 		_files_to_reimport.clear ();
 		Session::Exported.connect_same_thread (*this, sigc::bind (
-					[] (std::string, std::string fn, bool re, std::vector<std::string>* v) { if (re) { (*v).push_back (fn); } },
+					[] (std::string, std::string fn, bool re, samplepos_t pos, ReImportMap* v) { if (re) { (*v)[pos].push_back (fn); } },
 					&_files_to_reimport));
 
 		handler->do_export ();
@@ -408,9 +408,11 @@ ExportDialog::show_progress ()
 	status->finish (TRS_UI);
 
 	if (!status->aborted() && !_files_to_reimport.empty ()) {
-		timepos_t pos (0);
-		Editing::ImportDisposition disposition = Editing::ImportDistinctFiles;
-		editor.do_import (_files_to_reimport, disposition, Editing::ImportAsTrack, SrcBest, SMFTrackNumber, SMFTempoIgnore, pos);
+		for (auto const& x : _files_to_reimport) {
+			timepos_t pos (x.first);
+			Editing::ImportDisposition disposition = Editing::ImportDistinctFiles;
+			editor.do_import (x.second, disposition, Editing::ImportAsTrack, SrcBest, SMFTrackNumber, SMFTempoIgnore, pos);
+		}
 	}
 
 	if (!status->aborted() && UIConfiguration::instance().get_save_export_mixer_screenshot ()) {
