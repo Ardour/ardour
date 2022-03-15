@@ -5016,6 +5016,52 @@ Editor::cut_copy_ranges (CutCopyOp op)
 	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 		(*i)->cut_copy_clear (*selection, op);
 	}
+
+	if (should_ripple_all() && (
+	     (op == Cut) ||
+	     (op == Delete) ||
+	     (op == Clear)) ){
+
+		//set up for undo
+		bool changed = false;
+		XMLNode &before = _session->locations()->get_state();
+
+		/* If markers are inside a deleted range, they must be removed */
+		/* TODO: currently we have no Cut-buffer for markers, we can only Delete them */
+		Locations::LocationList locs;
+		_session->locations()->find_all_between (selection->time.start_time(), selection->time.end_time(), locs, Location::Flags(0));
+		for (Locations::LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
+			if ((*i)->is_mark()) {
+				/* remove the marks in our Range */
+				_session->locations()->remove (*i);
+				changed = true;
+			} else if ((*i)->is_range_marker()) {
+				/* if a named-range is wholly incorporated in our Range: delete it */
+				if ((*i)->start() >= selection->time.start_time() && (*i)->end() <= selection->time.end_time() ) {
+					_session->locations()->remove (*i);
+					changed = true;
+				} else if ((*i)->start() >= selection->time.start_time() && (*i)->end() > selection->time.end_time() ) {
+					/* only the start of a named-range is incorporated in our Range: move it to the start of the selection */
+					(*i)->set_start(selection->time.start_time()) ;
+					changed = true;
+				} else if ((*i)->end() >= selection->time.start_time() && (*i)->end() > selection->time.end_time() ) {
+					/* only the end of a named-range is incorporated in our Range: move it to the start of the selection */
+					(*i)->set_end(selection->time.start_time()) ;
+					changed = true;
+				}
+			}
+		}
+
+		//store undo command
+		if (changed) {
+			XMLNode &after = _session->locations()->get_state();
+			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+		}
+
+		/* markers to the right of a deleted range should be rippled to the left */
+		/* this stores more undo memento commands */
+		ripple_marks(boost::shared_ptr<Playlist>(), selection->time.start_time(), -selection->time.length());
+	}
 }
 
 void
