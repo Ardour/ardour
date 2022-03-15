@@ -1927,10 +1927,14 @@ private:
 	Gtk::Button              automation_mode_button;
 
 	//edit mode menu stuff
+	ArdourWidgets::ArdourDropdown ripple_mode_selector;
 	ArdourWidgets::ArdourDropdown	edit_mode_selector;
 	void edit_mode_selection_done (ARDOUR::EditMode);
+	void ripple_mode_selection_done (ARDOUR::RippleMode);
 	void build_edit_mode_menu ();
 	Gtk::VBox edit_mode_box;
+
+	void set_ripple_mode (ARDOUR::RippleMode);
 
 	void set_edit_mode (ARDOUR::EditMode);
 	void cycle_edit_mode ();
@@ -2310,6 +2314,7 @@ private:
 	Glib::RefPtr<Gtk::RadioAction> edit_point_action (Editing::EditPoint);
 	std::vector<std::string> edit_point_strings;
 	std::vector<std::string> edit_mode_strings;
+	std::vector<std::string> ripple_mode_strings;
 
 	void selected_marker_moved (ARDOUR::Location*);
 

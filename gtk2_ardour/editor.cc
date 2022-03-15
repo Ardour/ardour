@@ -213,8 +213,14 @@ static const gchar *_edit_point_strings[] = {
 static const gchar *_edit_mode_strings[] = {
 	N_("Slide"),
 	N_("Ripple"),
-	N_("Ripple All"),
 	N_("Lock"),
+	0
+};
+
+static const gchar *_ripple_mode_strings[] = {
+	N_("Selected"),
+	N_("All"),
+	N_("Interview"),
 	0
 };
 
@@ -482,6 +488,7 @@ Editor::Editor ()
 	grid_type_strings =  I18N (_grid_type_strings);
 	zoom_focus_strings = I18N (_zoom_focus_strings);
 	edit_mode_strings = I18N (_edit_mode_strings);
+	ripple_mode_strings = I18N (_ripple_mode_strings);
 	edit_point_strings = I18N (_edit_point_strings);
 #ifdef USE_RUBBERBAND
 	rb_opt_strings = I18N (_rb_opt_strings);
@@ -3182,6 +3189,7 @@ Editor::setup_toolbar ()
 
 	mouse_mode_size_group->add_widget (edit_point_selector);
 	mouse_mode_size_group->add_widget (edit_mode_selector);
+	mouse_mode_size_group->add_widget (ripple_mode_selector);
 
 	mouse_mode_size_group->add_widget (*nudge_clock);
 	mouse_mode_size_group->add_widget (nudge_forward_button);
@@ -3210,9 +3218,11 @@ Editor::setup_toolbar ()
 
 	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
+	ripple_mode_selector.set_name ("mouse mode button");
 	edit_mode_selector.set_name ("mouse mode button");
 
 	mode_box->pack_start (edit_mode_selector, false, false);
+	mode_box->pack_start (ripple_mode_selector, false, false);
 	mode_box->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 	mode_box->pack_start (edit_point_selector, false, false);
 	mode_box->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
@@ -3404,11 +3414,16 @@ Editor::build_edit_mode_menu ()
 
 	edit_mode_selector.AddMenuElem (MenuElem (edit_mode_strings[(int)Slide], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Slide)));
 	edit_mode_selector.AddMenuElem (MenuElem (edit_mode_strings[(int)Ripple], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Ripple)));
-	edit_mode_selector.AddMenuElem (MenuElem (edit_mode_strings[(int)RippleAll], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) RippleAll)));
 	edit_mode_selector.AddMenuElem (MenuElem (edit_mode_strings[(int)Lock], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode)  Lock)));
 	/* Note: Splice was removed */
 
 	set_size_request_to_display_given_text (edit_mode_selector, edit_mode_strings, COMBO_TRIANGLE_WIDTH, 2);
+
+	ripple_mode_selector.AddMenuElem (MenuElem (ripple_mode_strings[(int)RippleSelected],  sigc::bind (sigc::mem_fun(*this, &Editor::ripple_mode_selection_done), (RippleMode) RippleSelected)));
+	ripple_mode_selector.AddMenuElem (MenuElem (ripple_mode_strings[(int)RippleAll],       sigc::bind (sigc::mem_fun(*this, &Editor::ripple_mode_selection_done), (RippleMode) RippleAll)));
+	ripple_mode_selector.AddMenuElem (MenuElem (ripple_mode_strings[(int)RippleInterview], sigc::bind (sigc::mem_fun(*this, &Editor::ripple_mode_selection_done), (RippleMode) RippleInterview)));
+
+	set_size_request_to_display_given_text (ripple_mode_selector, ripple_mode_strings, COMBO_TRIANGLE_WIDTH, 2);
 }
 
 void
@@ -3799,7 +3814,13 @@ Editor::duplicate_range (bool with_dialog)
 }
 
 void
-Editor::set_edit_mode (EditMode m)
+Editor::set_ripple_mode (RippleMode m) /* redundant with selection_done ? */
+{
+	Config->set_ripple_mode (m);
+}
+
+void
+Editor::set_edit_mode (EditMode m) /* redundant with selection_done ? */
 {
 	Config->set_edit_mode (m);
 }
@@ -3812,9 +3833,6 @@ Editor::cycle_edit_mode ()
 		Config->set_edit_mode (Ripple);
 		break;
 	case Ripple:
-		Config->set_edit_mode (RippleAll);
-		break;
-	case RippleAll:
 		Config->set_edit_mode (Lock);
 		break;
 	case Lock:
@@ -3827,6 +3845,12 @@ void
 Editor::edit_mode_selection_done (EditMode m)
 {
 	Config->set_edit_mode (m);
+}
+
+void
+Editor::ripple_mode_selection_done (RippleMode m)
+{
+	Config->set_ripple_mode (m);
 }
 
 void

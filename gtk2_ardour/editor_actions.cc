@@ -582,10 +582,13 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, "cycle-edit-point-with-marker", _("Change Edit Point Including Marker"), sigc::bind (sigc::mem_fun (*this, &Editor::cycle_edit_point), true));
 
 	ActionManager::register_action (editor_actions, "set-edit-ripple", _("Ripple"), bind (mem_fun (*this, &Editor::set_edit_mode), Ripple));
-	ActionManager::register_action (editor_actions, "set-edit-ripple-all", _("Ripple All"), bind (mem_fun (*this, &Editor::set_edit_mode), RippleAll));
 	ActionManager::register_action (editor_actions, "set-edit-slide", _("Slide"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Slide));
 	ActionManager::register_action (editor_actions, "set-edit-lock", S_("EditMode|Lock"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Lock));
 	ActionManager::register_action (editor_actions, "cycle-edit-mode", _("Cycle Edit Mode"), sigc::mem_fun (*this, &Editor::cycle_edit_mode));
+
+	ActionManager::register_action (editor_actions, "set-ripple-selected", _("Selected"), bind (mem_fun (*this, &Editor::set_ripple_mode), RippleSelected));
+	ActionManager::register_action (editor_actions, "set-ripple-all", _("All"), sigc::bind (sigc::mem_fun (*this, &Editor::set_ripple_mode), RippleAll));
+	ActionManager::register_action (editor_actions, "set-ripple-interview", S_("Interview"), sigc::bind (sigc::mem_fun (*this, &Editor::set_ripple_mode), RippleInterview));
 
 	ActionManager::register_action (editor_actions, X_("GridChoice"), _("Snap & Grid"));
 
@@ -1666,8 +1669,15 @@ Editor::parameter_changed (std::string p)
 		update_just_timecode ();
 	} else if (p == "show-region-fades") {
 		update_region_fade_visibility ();
+	} else if (p == "ripple-mode") {
+		ripple_mode_selector.set_text (ripple_mode_strings [Config->get_ripple_mode()]);
 	} else if (p == "edit-mode") {
-		edit_mode_selector.set_text (edit_mode_to_string (Config->get_edit_mode()));
+		edit_mode_selector.set_text (edit_mode_strings [Config->get_edit_mode()]);
+		if (Config->get_edit_mode()==Ripple) {
+			ripple_mode_selector.show();
+		} else {
+			ripple_mode_selector.hide();
+		}
 	} else if (p == "show-track-meters") {
 		toggle_meter_updating();
 	} else if (p == "show-summary") {
