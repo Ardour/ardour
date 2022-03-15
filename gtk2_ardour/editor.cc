@@ -1320,6 +1320,7 @@ void
 Editor::set_session (Session *t)
 {
 	SessionHandlePtr::set_session (t);
+	_trigger_clip_picker.set_session (_session);
 
 	if (!_session) {
 		return;
@@ -1336,7 +1337,6 @@ Editor::set_session (Session *t)
 	_route_groups->set_session (_session);
 	_regions->set_session (_session);
 	_sources->set_session (_session);
-	_trigger_clip_picker.set_session (_session);
 	_snapshots->set_session (_session);
 	_routes->set_session (_session);
 	_locations->set_session (_session);
