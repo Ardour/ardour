@@ -108,6 +108,7 @@ SlotPropertyTable::SlotPropertyTable ()
 	, _velocity_slider (&_velocity_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _gain_adjustment( 0.0, -20.0, +20.0, 1.0, 3.0, 0)
 	, _gain_spinner (_gain_adjustment)
+	, _allow_button (ArdourButton::Element (ArdourButton::led_default_elements))
 	, _follow_probability_adjustment(0,0,100,2,5)
 	, _follow_probability_slider (&_follow_probability_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _follow_count_adjustment (1, 1, 128, 1, 4)
@@ -251,6 +252,10 @@ SlotPropertyTable::SlotPropertyTable ()
 	_patch_button.set_name("FollowAction");
 	_patch_button.signal_clicked.connect (sigc::mem_fun (*this, (&SlotPropertyTable::patch_button_event)));
 
+	_allow_button.set_text (_("Send Patches"));
+	_allow_button.set_name("FollowAction");
+	_allow_button.signal_event().connect (sigc::mem_fun (*this, (&SlotPropertyTable::allow_button_event)));
+
 	set_spacings (8);  //match to TriggerPage::  table->set_spacings
 	set_border_width (0);  //change TriggerPage::  table->set_border_width   instead
 	set_homogeneous (false);
@@ -262,13 +267,14 @@ SlotPropertyTable::SlotPropertyTable ()
 	_trigger_table.set_border_width (8);
 	_trigger_table.set_homogeneous (false);
 
-	_trigger_table.attach(_name_frame,    0, 5, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK ); row++;
+	_trigger_table.attach(_name_frame,    0, 6, row, row+1, Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK ); row++;
 	_trigger_table.attach(_load_button,   0, 1, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
 	_trigger_table.attach(_color_label,   1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 	_trigger_table.attach(_color_button,  2, 3, row, row+1, Gtk::SHRINK,           Gtk::SHRINK );
-	_trigger_table.attach(_gain_label,    3, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
-	_trigger_table.attach(_gain_spinner,  4, 5, row, row + 1, Gtk::FILL, Gtk::SHRINK); row++;
-	_trigger_table.attach(_patch_button,  0, 5, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_trigger_table.attach(_gain_label,    3, 5, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_trigger_table.attach(_gain_spinner,  5, 6, row, row + 1, Gtk::FILL, Gtk::SHRINK); row++;
+	_trigger_table.attach(_allow_button,  0, 3, row, row + 1, Gtk::FILL, Gtk::SHRINK);
+	_trigger_table.attach(_patch_button,  3, 6, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 
 	/* ---- Launch settings ----- */
@@ -368,6 +374,7 @@ SlotPropertyTable::SlotPropertyTable ()
 	set_tooltip(_load_button, _("Load a new file into this clip"));
 	set_tooltip(_color_button, _("Pick a color for this clip"));
 	set_tooltip(_patch_button, _("View and edit the programs (patches) that this MIDI clip will send to a synth"));
+	set_tooltip(_allow_button, _("Allow this MIDI clip to send patches to a synth"));
 
 	set_tooltip(_follow_count_spinner, _("Number of times to repeat this clip's Follow Length before triggering the Follow-Action"));
 	set_tooltip(_use_follow_length_button, _("Click to use the Follow Length instead of the Clip Length"));
@@ -410,6 +417,25 @@ SlotPropertyTable::patch_button_event ()
 		_patch_change_window.reset (boost::dynamic_pointer_cast<Route> (stripable), boost::dynamic_pointer_cast<MIDITrigger> (trigr));
 		_patch_change_window.present ();
 	}
+}
+
+bool
+SlotPropertyTable::allow_button_event (GdkEvent* ev)
+{
+	if (_ignore_changes) {
+		return false;
+	}
+
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		trigger()->set_allow_patch_changes (!trigger()->allow_patch_changes());
+		return true;
+
+	default:
+		break;
+	}
+
+	return false;
 }
 
 
@@ -564,8 +590,10 @@ SlotPropertyTable::on_trigger_set ()
 		boost::shared_ptr<Stripable> stripable = obj->session().stripable_by_id (obj->id ());
 		_patch_change_window.reset (boost::dynamic_pointer_cast<Route> (stripable), boost::dynamic_pointer_cast<MIDITrigger> (trigr));
 		_patch_button.show();
+		_allow_button.show();
 	} else {
 		_patch_button.hide();
+		_allow_button.hide();
 	}
 }
 
@@ -622,6 +650,11 @@ SlotPropertyTable::on_trigger_changed (PropertyChange const& pc)
 
 	if (pc.contains (Properties::cue_isolated)) {
 		_isolate_button.set_active_state (trigger()->cue_isolated() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+	}
+
+	if (pc.contains (Properties::allow_patch_changes)) {
+		_patch_button.set_sensitive(trigger()->allow_patch_changes());
+		_allow_button.set_active_state (trigger()->allow_patch_changes() ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 
 	if (pc.contains (Properties::launch_style)) {

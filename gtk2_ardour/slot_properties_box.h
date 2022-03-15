@@ -81,6 +81,7 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 	Gtk::Label                    _gain_label;
 
 	ArdourWidgets::ArdourButton   _patch_button;
+	ArdourWidgets::ArdourButton   _allow_button;
 
 	Gtk::Label                    _beat_label;
 	Gtk::Label                    _follow_length_label;
@@ -121,6 +122,7 @@ class SlotPropertyTable : public TriggerUI, public Gtk::Table
 
 	void on_trigger_changed (PBD::PropertyChange const& );
 
+	bool allow_button_event (GdkEvent*);
 	bool legato_button_event (GdkEvent*);
 	void follow_count_event ();
 
