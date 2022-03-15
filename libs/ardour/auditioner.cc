@@ -416,7 +416,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region, bool loop)
 		/* TODO:  maybe round up to the nearest bar like it's done in import.cc write_midi_data_to_new_files */
 		samplecnt_t smpl = midi_region->length_samples();
 		double seconds = smpl/_session.sample_rate();
-		seconds = min (2.0, ceil(seconds));
+		seconds = max (2.0, ceil(seconds));
 		timecnt_t new_len( seconds * _session.sample_rate() );
 		midi_region->set_length(new_len);
 
