@@ -2305,6 +2305,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Lock", ARDOUR::EditMode(Lock))
 		.endNamespace ()
 
+		.beginNamespace ("RippleMode")
+		.addConst ("RippleSelected", ARDOUR::EditMode(RippleSelected))
+		.addConst ("RippleAll", ARDOUR::EditMode(RippleAll))
+		.addConst ("RippleInterview", ARDOUR::EditMode(RippleInterview))
+		.endNamespace ()
+
 		.beginNamespace ("AutoConnectOption")
 		.addConst ("ManualConnect", ARDOUR::AutoConnectOption(ManualConnect))
 		.addConst ("AutoConnectPhysical", ARDOUR::AutoConnectOption(AutoConnectPhysical))
