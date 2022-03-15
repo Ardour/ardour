@@ -827,8 +827,8 @@ ARDOUR_UI::post_engine ()
 
 	/* set default clock modes */
 
-	primary_clock->set_mode (AudioClock::Timecode);
-	secondary_clock->set_mode (AudioClock::BBT);
+	primary_clock->set_mode (AudioClock::BBT);
+	secondary_clock->set_mode (AudioClock::Timecode);
 
 	/* start the time-of-day-clock */
 
