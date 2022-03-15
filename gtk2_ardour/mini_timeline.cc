@@ -234,7 +234,7 @@ MiniTimeline::calculate_time_width ()
 			_layout->set_text (" 88:88:88,888 ");
 			break;
 		case AudioClock::BBT:
-			_layout->set_text ("888|88|8888");
+			_layout->set_text ("888|00|00");
 			break;
 		case AudioClock::MinSec:
 			_layout->set_text ("88:88:88,88");
@@ -279,8 +279,7 @@ MiniTimeline::format_time (samplepos_t when)
 			{
 				char buf[64];
 				Temporal::BBT_Time BBT = Temporal::TempoMap::use()->bbt_at (timepos_t (when));
-				snprintf (buf, sizeof (buf), "%03" PRIu32 BBT_BAR_CHAR "%02" PRIu32 BBT_BAR_CHAR "%04" PRIu32,
-				          BBT.bars, BBT.beats, BBT.ticks);
+				snprintf (buf, sizeof (buf), "%d" BBT_BAR_CHAR "00" BBT_BAR_CHAR "00", BBT.bars);
 				_layout->set_text (buf);
 			}
 			break;
@@ -603,6 +602,14 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	int dot_left = width * .5 + (lower - phead) * _px_per_sample;
 	for (int i = 0; i < 2 + _n_labels; ++i) {
 		samplepos_t when = lower + i * _time_granularity;
+
+		/* in BBT, we should round to the nearest bar */
+		if (_clock_mode == AudioClock::BBT) {
+			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+			timepos_t rounded = timepos_t (tmap->quarters_at (tmap->round_to_bar (tmap->bbt_at (timepos_t(when)))));
+			when = tmap->sample_at(rounded);
+		}
+		
 		double xpos = width * .5 + (when - phead) * _px_per_sample;
 
 		// TODO round to nearest display TC in +/- 1px
