@@ -91,6 +91,9 @@ private:
 
 	template <typename T, typename C1, typename C2, typename C3> void connect_3 (enum LuaSignal::LuaSignal, T, PBD::Signal3<void, C1, C2, C3>*);
 	template <typename T, typename C1, typename C2, typename C3> void proxy_3 (enum LuaSignal::LuaSignal, T, C1, C2, C3);
+
+	template <typename T, typename C1, typename C2, typename C3, typename C4> void connect_4 (enum LuaSignal::LuaSignal, T, PBD::Signal4<void, C1, C2, C3, C4>*);
+	template <typename T, typename C1, typename C2, typename C3, typename C4> void proxy_4 (enum LuaSignal::LuaSignal, T, C1, C2, C3, C4);
 };
 
 typedef boost::shared_ptr<LuaCallback> LuaCallbackPtr;
