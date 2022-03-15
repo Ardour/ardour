@@ -1580,18 +1580,7 @@ Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool includ
 
 	for (LocationList::iterator i = copy.begin(); i != copy.end(); ++i) {
 
-		/* keep session range markers covering entire region if
-		   a ripple "extends" the session.
-		*/
-		if (distance.is_positive() && (*i)->is_session_range()) {
-
-			/* Don't move start unless it occurs after the ripple point.
-			 */
-			if ((*i)->start() >= at) {
-				(*i)->set ((*i)->start() + distance, (*i)->end() + distance);
-			} else {
-				(*i)->set_end ((*i)->end() + distance);
-			}
+		if ( (*i)->is_session_range() || (*i)->is_auto_punch() || (*i)->is_auto_loop()  ) {
 			continue;
 		}
 
@@ -1606,11 +1595,13 @@ Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool includ
 		}
 
 		if ((*i)->start() >= at) {
-			(*i)->set_start ((*i)->start().earlier (distance));
+			(*i)->set_start ((*i)->start() + distance);
 
 			if (!(*i)->is_mark()) {
-				(*i)->set_end ((*i)->end().earlier (distance));
+				(*i)->set_end ((*i)->end() + distance);
 			}
+		} else if ((*i)->end() >= at) {
+			(*i)->set_end ((*i)->end() + distance);
 		}
 
 		if (locked) {
