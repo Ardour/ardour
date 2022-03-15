@@ -74,6 +74,35 @@ namespace ARDOUR {
 	}
 }
 
+PropertyChange
+TriggerBox::all_trigger_props()
+{
+	PropertyChange all;
+	all.add(Properties::name);
+	all.add(Properties::color);
+	all.add(Properties::legato);
+	all.add(Properties::use_follow_length);
+	all.add(Properties::quantization);
+	all.add(Properties::follow_length);
+	all.add(Properties::launch_style);
+	all.add(Properties::follow_action0);
+	all.add(Properties::follow_action1);
+	all.add(Properties::follow_action_probability);
+	all.add(Properties::velocity_effect);
+	all.add(Properties::gain);
+	all.add(Properties::stretchable);
+	all.add(Properties::cue_isolated);
+	all.add(Properties::allow_patch_changes);
+	all.add(Properties::stretch_mode);
+	all.add(Properties::tempo_meter);
+	all.add(Properties::stretchable);
+	all.add(Properties::patch_change);
+	all.add(Properties::channel_map);
+	all.add(Properties::used_channels);
+
+	return all;
+}
+
 std::string
 ARDOUR::cue_marker_name (int32_t index)
 {

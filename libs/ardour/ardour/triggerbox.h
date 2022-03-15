@@ -797,6 +797,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	static void start_transport_stop (Session&);
 
+	static PBD::PropertyChange all_trigger_props();
+
   private:
 	struct Requests {
 		std::atomic<bool> stop_all;
