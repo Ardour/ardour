@@ -3225,20 +3225,6 @@ These settings will only take effect after %1 is restarted.\n\
 	lm->add (Manual, _("manual layering"));
 	add_option (_("Editor"), lm);
 
-	bo = new BoolOption (
-		"interview-editing",
-		_("Improve editing behavior for editing multi-track voice interviews"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_interview_editing),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_interview_editing)
-		);
-	add_option (_("Editor"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-	                                    _("<b>When enabled</b>, range selection while in Ripple All will not propagate across all tracks.\n"
-	                                      "<b>When disabled</b>, range selection while in Ripple All will propagate across all tracks.\n"
-	                                      "This setting only has effect when in Ripple All mode.")
-		);
-
-
 	add_option (_("Editor"), new OptionEditorHeading (_("Split/Separate")));
 
 	ComboOption<RangeSelectionAfterSplit> *rras = new ComboOption<RangeSelectionAfterSplit> (
