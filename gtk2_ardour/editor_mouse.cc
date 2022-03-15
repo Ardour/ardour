@@ -2618,10 +2618,6 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 		return;
 	}
 
-	if (Config->get_edit_mode() == Lock) {
-		return;
-	}
-
 	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), copy));
 
 }
