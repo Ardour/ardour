@@ -413,8 +413,13 @@ enum MeterHold {
 enum EditMode {
 	Slide,
 	Ripple,
-	RippleAll,
 	Lock
+};
+
+enum RippleMode {
+	RippleSelected,
+	RippleAll,
+	RippleInterview
 };
 
 enum RegionSelectionAfterSplit {

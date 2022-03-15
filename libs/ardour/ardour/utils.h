@@ -82,6 +82,9 @@ LIBARDOUR_API void compute_equal_power_fades (ARDOUR::samplecnt_t nframes, float
 LIBARDOUR_API const char* edit_mode_to_string (ARDOUR::EditMode);
 LIBARDOUR_API ARDOUR::EditMode string_to_edit_mode (std::string);
 
+LIBARDOUR_API const char* ripple_mode_to_string (ARDOUR::RippleMode);
+LIBARDOUR_API ARDOUR::RippleMode string_to_ripple_mode (std::string);
+
 LIBARDOUR_API double gain_to_slider_position_with_max (double g, double max_gain = 2.0);
 LIBARDOUR_API double slider_position_to_gain_with_max (double g, double max_gain = 2.0);
 

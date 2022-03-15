@@ -80,6 +80,7 @@ setup_enum_writer ()
 	MeterLineUp _MeterLineUp;
 	InputMeterLayout _InputMeterLayout;
 	EditMode _EditMode;
+	RippleMode _RippleMode;
 	RegionPoint _RegionPoint;
 	Placement _Placement;
 	MonitorModel _MonitorModel;
@@ -304,9 +305,13 @@ setup_enum_writer ()
 	REGISTER_ENUM (LayoutAutomatic);
 	REGISTER (_InputMeterLayout);
 
+	REGISTER_ENUM (RippleSelected);
+	REGISTER_ENUM (RippleAll);  //enum had to be disambiguated from EditMode:RippleAll
+	REGISTER_ENUM (RippleInterview);
+	REGISTER (_RippleMode);
+
 	REGISTER_ENUM (Slide);
 	REGISTER_ENUM (Ripple);
-	REGISTER_ENUM (RippleAll);
 	REGISTER_ENUM (Lock);
 	REGISTER (_EditMode);
 	/*
