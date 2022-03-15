@@ -37,7 +37,7 @@ STATIC(FeedbackDetected, &ARDOUR::Session::FeedbackDetected, 0)
 STATIC(SuccessfulGraphSort, &ARDOUR::Session::SuccessfulGraphSort, 0)
 STATIC(StartTimeChanged, &ARDOUR::Session::StartTimeChanged, 1)
 STATIC(EndTimeChanged, &ARDOUR::Session::EndTimeChanged, 1)
-STATIC(Exported, &ARDOUR::Session::Exported, 3)
+STATIC(Exported, &ARDOUR::Session::Exported, 4)
 
 // stripable static globals
 STATIC(Change, &PresentationInfo::Change, 0)
