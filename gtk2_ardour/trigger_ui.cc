@@ -827,24 +827,7 @@ TriggerUI::set_trigger (ARDOUR::TriggerReference tr)
 
 	tref = tr;
 
-	PropertyChange pc;
-
-	pc.add (Properties::name);
-	pc.add (Properties::color);
-	pc.add (Properties::gain);
-	pc.add (Properties::stretch_mode);
-	pc.add (Properties::legato);
-	pc.add (Properties::quantization);
-	pc.add (Properties::launch_style);
-	pc.add (Properties::use_follow_length);
-	pc.add (Properties::follow_length);
-	pc.add (Properties::follow_count);
-	pc.add (Properties::follow_action0);
-	pc.add (Properties::follow_action1);
-	pc.add (Properties::velocity_effect);
-	pc.add (Properties::follow_action_probability);
-
-	trigger_changed (pc);
+	trigger_changed (TriggerBox::all_trigger_props());
 
 	trigger()->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context());
 	tref.box->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
