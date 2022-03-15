@@ -1823,7 +1823,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 
 	/* Ripple marks & ranges if appropriate */
 
-	if (Config->get_edit_mode() == RippleAll) {
+	if (_editor->should_ripple_all()) {
 		_editor->ripple_marks (_primary->region()->playlist(), extent_min, extent_min.distance (extent_max));
 	}
 
@@ -2042,7 +2042,7 @@ RegionMoveDrag::finished_no_copy (
 		(*p)->thaw();
 	}
 
-	if (Config->get_edit_mode() == RippleAll) {
+	if (_editor->should_ripple_all()) {
 		_editor->ripple_marks (_primary->region()->playlist(), extent_min, -drag_delta);
 	}
 
@@ -5704,7 +5704,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	if (first_move) {
-		if (Config->get_edit_mode() == RippleAll && !Config->get_interview_editing()) {
+		if (_editor->should_ripple_all()) {
 			_editor->selection->set (_editor->get_track_views());
 		}
 		_track_selection_at_start = _editor->selection->tracks;
@@ -5771,7 +5771,9 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		ArdourCanvas::Coord const top = grab_y();
 		ArdourCanvas::Coord const bottom = current_pointer_y();
 
-		if ((Config->get_edit_mode() != RippleAll || Config->get_interview_editing()) && top >= 0 && bottom >= 0) {
+		bool RippleAll = _editor->should_ripple_all();
+
+		if (!RippleAll && top >= 0 && bottom >= 0) {
 
 			//first, find the tracks that are covered in the y range selection
 			for (TrackViewList::const_iterator i = all_tracks.begin(); i != all_tracks.end(); ++i) {

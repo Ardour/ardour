@@ -608,6 +608,7 @@ public:
 	void edit_meter_section (Temporal::MeterPoint&);
 
 	bool should_ripple () const;
+	bool should_ripple_all () const;  /* RippleAll will ripple all similar regions and the timeline markers */
 	void do_ripple (boost::shared_ptr<ARDOUR::Playlist>, Temporal::timepos_t const &, Temporal::timecnt_t const &, ARDOUR::RegionList* exclude, bool add_to_command);
 	void do_ripple (boost::shared_ptr<ARDOUR::Playlist>, Temporal::timepos_t const &, Temporal::timecnt_t const &, boost::shared_ptr<ARDOUR::Region> exclude, bool add_to_command);
 	void ripple_marks (boost::shared_ptr<ARDOUR::Playlist> target_playlist, Temporal::timepos_t at, Temporal::timecnt_t const & distance);

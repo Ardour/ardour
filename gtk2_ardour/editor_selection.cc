@@ -677,7 +677,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 						 * permitted button release
 						 */
 
-						if (Config->get_edit_mode() == RippleAll) {
+						if (should_ripple_all()) {
 							get_all_equivalent_regions (clicked_regionview, all_equivalent_regions);
 							selection->remove (all_equivalent_regions);
 						} else {
@@ -697,7 +697,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 				if (press) {
 
-					if (Config->get_edit_mode() == RippleAll) {
+					if (should_ripple_all()) {
 						get_all_equivalent_regions (clicked_regionview, all_equivalent_regions);
 					} else {
 						if (selection->selected (clicked_routeview)) {
@@ -720,7 +720,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 		case Selection::Set:
 			if (!selection->selected (clicked_regionview)) {
-				if (Config->get_edit_mode() == RippleAll) {
+				if (should_ripple_all()) {
 					get_all_equivalent_regions (clicked_regionview, all_equivalent_regions);
 				} else {
 					get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
@@ -734,7 +734,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 				else {
 					if (selection->regions.size() > 1) {
 						/* collapse region selection down to just this one region (and its equivalents) */
-						if (Config->get_edit_mode() == RippleAll) {
+						if (should_ripple_all()) {
 							get_all_equivalent_regions (clicked_regionview, all_equivalent_regions);
 						} else {
 							get_equivalent_regions(clicked_regionview, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
@@ -847,7 +847,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 
 		set<RouteTimeAxisView*> relevant_tracks;
 
-		if (Config->get_edit_mode() == RippleAll) {
+		if (should_ripple_all()) {
 			for (TrackSelection::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 				RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
 				if (r) {

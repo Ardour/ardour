@@ -9374,8 +9374,30 @@ Editor::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_ga
 bool
 Editor::should_ripple () const
 {
-	return (Config->get_edit_mode() == Ripple ||
-	        (Config->get_edit_mode() == RippleAll && (selection->tracks.size() > 1 || !Config->get_interview_editing())));
+	/*only ripple if edit mode is Ripple (duh) */
+	if (Config->get_edit_mode() != Ripple) {
+		return false;
+	}
+
+	/* RippleInterview does not ripple if only one track is selected */
+	if (Config->get_ripple_mode() == RippleInterview && selection->tracks.size() == 1) {
+		return false;
+	}
+
+	return true;
+}
+
+bool
+Editor::should_ripple_all () const
+{
+	/*first check if ripple is engaged at all*/
+	if (!should_ripple()) {
+		return false;
+	}
+
+	/*TODO:  maybe if in RippleInterview and ALL tracks are selected, this means RippleAll? */
+
+	return (Config->get_ripple_mode() == RippleAll);
 }
 
 void
@@ -9396,7 +9418,7 @@ Editor::do_ripple (boost::shared_ptr<Playlist> target_playlist, timepos_t const 
 
 	playlists.insert (target_playlist);
 
-	if (Config->get_edit_mode() == RippleAll) {
+	if (should_ripple_all()) {
 
 		TrackViewList ts = track_views.filter_to_unique_playlists ();
 		boost::shared_ptr<Playlist> pl;
@@ -9455,13 +9477,9 @@ Editor::do_ripple (boost::shared_ptr<Playlist> target_playlist, timepos_t const 
 	}
 
 	/* Ripple marks & ranges if appropriate */
-
-	if (Config->get_edit_mode() != RippleAll) {
-		cerr << "out here\n";
-		return;
+	if (should_ripple_all()) {
+		ripple_marks (target_playlist, at, distance);
 	}
-
-	ripple_marks (target_playlist, at, distance);
 }
 
 timepos_t
