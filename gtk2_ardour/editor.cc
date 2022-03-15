@@ -694,6 +694,7 @@ Editor::Editor ()
 	add_notebook_page (_("Tracks & Busses"), _routes->widget ());
 	add_notebook_page (_("Sources"), _sources->widget ());
 	add_notebook_page (_("Regions"), _regions->widget ());
+	add_notebook_page (_("Clips"), _trigger_clip_picker);
 	add_notebook_page (_("Snapshots"), _snapshots->widget ());
 	add_notebook_page (_("Track & Bus Groups"), _route_groups->widget ());
 	add_notebook_page (_("Ranges & Marks"), _locations->widget ());
@@ -1335,6 +1336,7 @@ Editor::set_session (Session *t)
 	_route_groups->set_session (_session);
 	_regions->set_session (_session);
 	_sources->set_session (_session);
+	_trigger_clip_picker.set_session (_session);
 	_snapshots->set_session (_session);
 	_routes->set_session (_session);
 	_locations->set_session (_session);

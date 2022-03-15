@@ -73,6 +73,7 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "selection_memento.h"
+#include "trigger_clip_picker.h"
 #include "tempo_curve.h"
 
 #include "ptformat/ptformat.h"
@@ -1171,6 +1172,8 @@ private:
 	Gtk::VBox           track_canvas_vbox;
 	Gtk::VBox           edit_controls_vbox;
 	Gtk::HBox           edit_controls_hbox;
+
+	TriggerClipPicker    _trigger_clip_picker;
 
 	void control_vertical_zoom_in_all ();
 	void control_vertical_zoom_out_all ();
