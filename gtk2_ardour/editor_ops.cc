@@ -9557,7 +9557,10 @@ Editor::effective_ripple_mark_start (boost::shared_ptr<Playlist> target_playlist
 void
 Editor::ripple_marks (boost::shared_ptr<Playlist> target_playlist, timepos_t at, timecnt_t const & distance)
 {
-	at = effective_ripple_mark_start (target_playlist, at);
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	if (target_playlist) {
+		at = effective_ripple_mark_start (target_playlist, at);
+	}
 
 	XMLNode& before (_session->locations()->get_state());
 	/* do not move locked markers, do notify */
