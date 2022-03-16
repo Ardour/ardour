@@ -165,10 +165,8 @@ TempoCurve::set_duration (samplecnt_t duration)
 
 	snprintf (buf, sizeof (buf), "%.3f/%d", _tempo->note_types_per_minute(), _tempo->note_type());
 	_start_text->set (buf);
-	std::cerr << "new start text " << buf << std::endl;
 	snprintf (buf, sizeof (buf), "%.3f", _tempo->end_note_types_per_minute());
 	_end_text->set (buf);
-	std::cerr << "new end text " << buf << std::endl;
 
 	const double ui_scale  = UIConfiguration::instance ().get_ui_scale ();
 

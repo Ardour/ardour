@@ -245,8 +245,6 @@ Editor::draw_tempo_marks ()
 	double max_tempo = 0.0;
 	double min_tempo = DBL_MAX;
 
-	std::cerr << "**** BEGIN DRAW TEMPO\n";
-
 	while (t != tempi.end() && mm != tempo_marks.end()) {
 
 		Temporal::Point const & mark_point ((*mm)->point());
@@ -296,7 +294,6 @@ Editor::draw_tempo_marks ()
 
 	if ((mm == tempo_marks.end()) && (t != tempi.end())) {
 		while (t != tempi.end()) {
-			std::cerr << "\tmake new tempo marker @ " << t->time() << std::endl;
 			make_tempo_marker (&*t, min_tempo, max_tempo, prev_ts, tc_color, sr);
 			++t;
 		}

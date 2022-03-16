@@ -541,12 +541,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		bottom_button_table.remove (group_button);
 	}
 
-	if (rt != route()) {
-		if (rt && route()) {
-			std::cerr << "switching from " << rt->name() << " to " << route()->name() << std::endl;
-		}
-	}
-
 	RouteUI::set_route (rt);
 
 	set_trigger_display (rt->triggerbox());
