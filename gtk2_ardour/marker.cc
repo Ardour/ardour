@@ -207,6 +207,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		_label_offset = 12.0 * scale;
 		break;
 
+	case PunchIn:
+	case LoopStart:
 	case SessionStart:
 	case RangeStart:
 		points = new ArdourCanvas::Points ();
@@ -219,6 +221,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		_label_offset = 8.0 * scale;
 		break;
 
+	case PunchOut:
+	case LoopEnd:
 	case SessionEnd:
 	case RangeEnd:
 		points = new ArdourCanvas::Points (); // leaks
@@ -228,50 +232,6 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		points->push_back (ArdourCanvas::Duple ( M6, 0.0));
 
 		_shift = M6;
-		_label_offset = 0.0 * scale;
-		break;
-
-	case LoopStart:
-		points = new ArdourCanvas::Points ();
-		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (MH, MH));
-		points->push_back (ArdourCanvas::Duple (0.0, MH));
-		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-
-		_shift = 0 * scale;
-		_label_offset = MH;
-		break;
-
-	case LoopEnd:
-		points = new ArdourCanvas::Points ();
-		points->push_back (ArdourCanvas::Duple (MH,  0.0));
-		points->push_back (ArdourCanvas::Duple (MH, MH));
-		points->push_back (ArdourCanvas::Duple (0.0, MH));
-		points->push_back (ArdourCanvas::Duple (MH, 0.0));
-
-		_shift = MH;
-		_label_offset = 0.0 * scale;
-		break;
-
-	case PunchIn:
-		points = new ArdourCanvas::Points ();
-		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (MH, 0.0));
-		points->push_back (ArdourCanvas::Duple (0.0, MH));
-		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-
-		_shift = 0 * scale;
-		_label_offset = MH;
-		break;
-
-	case PunchOut:
-		points = new ArdourCanvas::Points ();
-		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (MH, 0.0));
-		points->push_back (ArdourCanvas::Duple (MH, MH));
-		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-
-		_shift = MH;
 		_label_offset = 0.0 * scale;
 		break;
 
