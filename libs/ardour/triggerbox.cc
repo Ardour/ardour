@@ -319,8 +319,6 @@ Trigger::update_properties ()
 
 		StretchMode old_stretch = _stretch_mode;
 
-		std::cerr << "prop copy for " << index() << endl;
-
 		_launch_style = ui_state.launch_style;
 		_follow_action0 = ui_state.follow_action0;
 		_follow_action1 = ui_state.follow_action1;
@@ -679,7 +677,6 @@ void
 Trigger::set_region_internal (boost::shared_ptr<Region> r)
 {
 	_region = r;
-	cerr << index() << " aka " << this << " region set to " << r << endl;
 }
 
 timepos_t
@@ -859,7 +856,6 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 stopped => %3\n", index(), enum_2_string (Stopped), enum_2_string (WaitingToStart)));
 			_box.queue_explict (index());
 			_cue_launched = (_box.active_scene() >= 0);
-			std::cerr << index() << " aka " << name() << " launched via cue ? " << _cue_launched << std::endl;
 			break;
 
 		case WaitingToStart:
@@ -1603,8 +1599,6 @@ AudioTrigger::estimate_tempo ()
 		string::size_type ni;
 		double text_tempo = -1.;
 
-		std::cerr << "Determine tempo for " << name() << std::endl;
-
 		if (((bi = str.find (" bpm")) != string::npos) ||
 		    ((bi = str.find ("bpm")) != string::npos)  ||
 		    ((bi = str.find (" BPM")) != string::npos) ||
@@ -1632,7 +1626,6 @@ AudioTrigger::estimate_tempo ()
 						text_tempo = -1.;
 					} else {
 						_estimated_tempo = text_tempo;
-						std::cerr << "from filename, tempo = " << _estimated_tempo << std::endl;
 					}
 				}
 			}
@@ -1652,7 +1645,7 @@ AudioTrigger::estimate_tempo ()
 
 			_estimated_tempo = mbpm.estimateTempoOfSamples (data[0], data.length);
 
-			cerr << name() << "MiniBPM Estimated: " << _estimated_tempo << " bpm from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
+			//cerr << name() << "MiniBPM Estimated: " << _estimated_tempo << " bpm from " << (double) data.length / _box.session().sample_rate() << " seconds\n";
 		}
 	}
 
@@ -1694,7 +1687,6 @@ AudioTrigger::probably_oneshot () const
 	if ((data.length < (_box.session().sample_rate()/2)) ||  //less than 1/2 second
         (_segment_tempo > 140) ||                            //minibpm thinks this is really fast
         (_segment_tempo < 60)) {                             //minibpm thinks this is really slow
-		std::cerr << "looks like a one-shot\n";
 		return true;
 	}
 
@@ -1747,7 +1739,6 @@ AudioTrigger::setup_stretcher ()
 
 	delete _stretcher;
 	_stretcher = new RubberBandStretcher (_box.session().sample_rate(), nchans, options, 1.0, 1.0);
-	cerr << index() << " Set up stretcher for " << nchans << " channels\n";
 	_stretcher->setMaxProcessSize (rb_blocksize);
 }
 
@@ -3908,7 +3899,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				if (_currently_playing->will_follow()) {
 					int n = determine_next_trigger (_currently_playing->index());
 					Temporal::BBT_Offset start_quantization;
-					std::cerr << "dnt = " << n << endl;
 					if (n < 0) {
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 finished, no next trigger\n", _currently_playing->name()));
 						_currently_playing = 0;
@@ -4272,10 +4262,8 @@ TriggerBox::process_request (BufferSet& bufs, Request* req)
 {
 	switch (req->type) {
 	case Request::Use:
-		std::cerr << "Use for " << req->slot << std::endl;
 		break;
 	case Request::Reload:
-		std::cerr << "Reload for " << req->slot << std::endl;
 		reload (bufs, req->slot, req->ptr);
 		break;
 	}
@@ -4289,7 +4277,6 @@ TriggerBox::reload (BufferSet& bufs, int32_t slot, void* ptr)
 	if (slot >= (int32_t) all_triggers.size()) {
 		return;
 	}
-	std::cerr << "reload slot " << slot << std::endl;
 	all_triggers[slot]->reload (bufs, ptr);
 }
 
