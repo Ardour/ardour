@@ -20,6 +20,6 @@ def build(bld):
     obj.source = [ 'abicheck.c' ]
     obj.target = 'gcc-glibmm-abi-check'
     obj.name = 'gcc-glibmm-abi-check'
-    if re.search ("bsd", sys.platform) == None:
+    if re.search ("bsd", sys.platform) is None:
         obj.lib = 'dl'
     obj.install_path = None

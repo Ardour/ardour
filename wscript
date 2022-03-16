@@ -419,21 +419,21 @@ int main() { return 0; }''',
 
     # OSX
     if platform == 'darwin':
-        if re.search ("^13[.]", version) != None:
+        if re.search ("^13[.]", version) is not None:
             conf.env['build_host'] = 'mavericks'
-        elif re.search ("^14[.]", version) != None:
+        elif re.search ("^14[.]", version) is not None:
             conf.env['build_host'] = 'yosemite'
-        elif re.search ("^15[.]", version) != None:
+        elif re.search ("^15[.]", version) is not None:
             conf.env['build_host'] = 'el_capitan'
-        elif re.search ("^16[.]", version) != None:
+        elif re.search ("^16[.]", version) is not None:
             conf.env['build_host'] = 'sierra'
-        elif re.search ("^17[.]", version) != None:
+        elif re.search ("^17[.]", version) is not None:
             conf.env['build_host'] = 'high_sierra'
-        elif re.search ("^18[.]", version) != None:
+        elif re.search ("^18[.]", version) is not None:
             conf.env['build_host'] = 'mojave'
-        elif re.search ("^19[.]", version) != None:
+        elif re.search ("^19[.]", version) is not None:
             conf.env['build_host'] = 'catalina'
-        elif re.search ("^20[.]", version) != None:
+        elif re.search ("^20[.]", version) is not None:
             conf.env['build_host'] = 'bigsur'
         else:
             conf.env['build_host'] = 'irrelevant'
@@ -442,33 +442,33 @@ int main() { return 0; }''',
     if opt.dist_target == 'auto':
         if platform == 'darwin':
             # The [.] matches to the dot after the major version, "." would match any character
-            if re.search ("^[0-7][.]", version) != None:
+            if re.search ("^[0-7][.]", version) is not None:
                 conf.env['build_target'] = 'panther'
-            elif re.search ("^8[.]", version) != None:
+            elif re.search ("^8[.]", version) is not None:
                 conf.env['build_target'] = 'tiger'
-            elif re.search ("^9[.]", version) != None:
+            elif re.search ("^9[.]", version) is not None:
                 conf.env['build_target'] = 'leopard'
-            elif re.search ("^10[.]", version) != None:
+            elif re.search ("^10[.]", version) is not None:
                 conf.env['build_target'] = 'snowleopard'
-            elif re.search ("^11[.]", version) != None:
+            elif re.search ("^11[.]", version) is not None:
                 conf.env['build_target'] = 'lion'
-            elif re.search ("^12[.]", version) != None:
+            elif re.search ("^12[.]", version) is not None:
                 conf.env['build_target'] = 'mountainlion'
-            elif re.search ("^13[.]", version) != None:
+            elif re.search ("^13[.]", version) is not None:
                 conf.env['build_target'] = 'mavericks'
-            elif re.search ("^14[.]", version) != None:
+            elif re.search ("^14[.]", version) is not None:
                 conf.env['build_target'] = 'yosemite'
-            elif re.search ("^15[.]", version) != None:
+            elif re.search ("^15[.]", version) is not None:
                 conf.env['build_target'] = 'el_capitan'
-            elif re.search ("^16[.]", version) != None:
+            elif re.search ("^16[.]", version) is not None:
                 conf.env['build_target'] = 'sierra'
-            elif re.search ("^17[.]", version) != None:
+            elif re.search ("^17[.]", version) is not None:
                 conf.env['build_target'] = 'high_sierra'
-            elif re.search ("^18[.]", version) != None:
+            elif re.search ("^18[.]", version) is not None:
                 conf.env['build_target'] = 'mojave'
-            elif re.search ("^19[.]", version) != None:
+            elif re.search ("^19[.]", version) is not None:
                 conf.env['build_target'] = 'catalina'
-            elif re.search ("^20[.]", version) != None:
+            elif re.search ("^20[.]", version) is not None:
                 conf.env['build_target'] = 'bigsur'
             else:
                 conf.env['build_target'] = 'catalina'
@@ -496,7 +496,7 @@ int main() { return 0; }''',
         if conf.env['build_target'] == 'armhf' or conf.env['build_target'] == 'aarch64':
             conf.define('ARM_NEON_SUPPORT', 1)
         elif conf.env['build_target'] == 'mingw':
-            if re.search ('x86_64-w64', str(conf.env['CC'])) != None:
+            if re.search ('x86_64-w64', str(conf.env['CC'])) is not None:
                 conf.define ('FPU_AVX_FMA_SUPPORT', 1)
         elif conf.env['build_target'] == 'i386' or conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
             conf.check_cxx(fragment = "#include <immintrin.h>\nint main(void) { __m128 a; _mm_fmadd_ss(a, a, a); return 0; }\n",
@@ -538,7 +538,7 @@ int main() { return 0; }''',
         c_flags.append("-Qunused-arguments")
         cxx_flags.append("-Qunused-arguments")
 
-    if (re.search ("(i[0-9]86|x86_64|AMD64)", cpu) != None) and conf.env['build_target'] != 'none':
+    if (re.search ("(i[0-9]86|x86_64|AMD64)", cpu) is not None) and conf.env['build_target'] != 'none':
 
         #
         # ARCH_X86 means anything in the x86 family from i386 to x86_64
@@ -577,7 +577,7 @@ int main() { return 0; }''',
             compiler_flags.extend ([ flags_dict['sse'], flags_dict['fpmath-sse'], flags_dict['xmmintrinsics'] ])
 
         if (conf.env['build_target'] == 'mingw'):
-            if (re.search ("(x86_64|AMD64)", cpu) != None):
+            if (re.search ("(x86_64|AMD64)", cpu) is not None):
                 # on Windows sse is supported by 64 bit platforms only
                 build_host_supports_sse = True
 
@@ -603,7 +603,7 @@ int main() { return 0; }''',
                 # usability of the 64 bit windows assembler depends on the compiler target,
                 # not the build host, which in turn can only be inferred from the name
                 # of the compiler.
-                if re.search ('x86_64-w64', str(conf.env['CC'])) != None:
+                if re.search ('x86_64-w64', str(conf.env['CC'])) is not None:
                         compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
@@ -671,7 +671,7 @@ int main() { return 0; }''',
     # ARCH="..." overrides all
     #
 
-    if opt.arch != None:
+    if opt.arch is not None:
         optimization_flags = opt.arch.split()
 
     #
@@ -699,7 +699,7 @@ int main() { return 0; }''',
     if opt.stl_debug:
         cxx_flags.append("-D_GLIBCXX_DEBUG")
 
-    if re.search ("bsd", sys.platform) != None:
+    if re.search ("bsd", sys.platform) is not None:
         linker_flags.append('-lexecinfo')
 
     if conf.env['DEBUG_RT_ALLOC']:
@@ -1076,7 +1076,7 @@ def configure(conf):
 
         if (
                 # osx up to and including 10.6 (uname 10.X.X)
-                (re.search ("^[1-9][0-9]\.", os.uname()[2]) == None or not re.search ("^10\.", os.uname()[2]) == None)
+                (re.search ("^[1-9][0-9]\.", os.uname()[2]) is None or not re.search ("^10\.", os.uname()[2]) is None)
                 and (Options.options.generic or Options.options.ppc)
                 and not Options.options.nocarbon
            ):
@@ -1122,8 +1122,8 @@ def configure(conf):
 
     # executing a test program is n/a when cross-compiling
     if Options.options.dist_target != 'mingw':
-        if Options.options.dist_target != 'msvc' and re.search ("(open|net)bsd", sys.platform) == None:
-            if re.search ("freebsd", sys.platform) != None:
+        if Options.options.dist_target != 'msvc' and re.search ("(open|net)bsd", sys.platform) is None:
+            if re.search ("freebsd", sys.platform) is not None:
                 conf.check_cc(
                         msg="Checking for function 'dlopen' in dlfcn.h",
                         fragment = "#include <dlfcn.h>\n int main(void) { dlopen (\"\", 0); return 0;}\n",
@@ -1141,13 +1141,13 @@ def configure(conf):
               okmsg = 'ok',
               errmsg = 'too old\nPlease install boost version 1.56 or higher.')
 
-    if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
+    if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw':
         autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
 
-    if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
+    if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw':
         autowaf.check_pkg(conf, 'libpulse', uselib_store='PULSEAUDIO', mandatory=False)
 
-    if re.search ("openbsd", sys.platform) != None:
+    if re.search ("openbsd", sys.platform) is not None:
         conf.env.append_value('LDFLAGS', '-L/usr/X11R6/lib')
 
     autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
@@ -1334,7 +1334,7 @@ int main () { return 0; }
         if conf.is_defined('HAVE_PULSEAUDIO'):
             backends += ['pulseaudio']
 
-        if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
+        if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw':
             backends += ['alsa']
         if sys.platform == 'darwin':
             backends += ['coreaudio']
@@ -1363,23 +1363,23 @@ int main () { return 0; }
 
 
     if (Options.options.use_lld):
-        if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
+        if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
                 conf.fatal("lld is only for Linux builds")
         else:
                 conf.find_program ('lld')
                 conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
 
-    if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
+    if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
         conf.fatal("PortAudio Backend is not for Linux")
 
 
     if sys.platform != 'darwin' and conf.env['BUILD_CORECRAPPITA']:
         conf.fatal("Coreaudio backend is only available for OSX")
 
-    if re.search ("linux", sys.platform) == None and conf.env['BUILD_ALSABACKEND']:
+    if re.search ("linux", sys.platform) is None and conf.env['BUILD_ALSABACKEND']:
         conf.fatal("ALSA Backend is only available on Linux")
 
-    if re.search ("linux", sys.platform) == None and conf.env['BUILD_PULSEAUDIO']:
+    if re.search ("linux", sys.platform) is None and conf.env['BUILD_PULSEAUDIO']:
         conf.fatal("Pulseaudio Backend is only available on Linux")
 
     if conf.env['BUILD_PULSEAUDIO'] and not conf.is_defined('HAVE_PULSEAUDIO'):
@@ -1394,7 +1394,7 @@ int main () { return 0; }
 
     if sys.platform == 'darwin':
         sub_config_and_use(conf, 'libs/appleutility')
-    elif re.search ("openbsd", sys.platform) != None:
+    elif re.search ("openbsd", sys.platform) is not None:
         pass
     elif Options.options.dist_target != 'mingw':
         sub_config_and_use(conf, 'tools/sanity_check')
@@ -1548,7 +1548,7 @@ def build(bld):
 
     if sys.platform == 'darwin':
         bld.recurse('libs/appleutility')
-    elif re.search ("openbsd", sys.platform) != None:
+    elif re.search ("openbsd", sys.platform) is not None:
         pass
     elif bld.env['build_target'] != 'mingw':
         bld.recurse('tools/sanity_check')
