@@ -283,14 +283,14 @@ def flac_supported():
                             stdout = subprocess.PIPE,
                             stderr = subprocess.STDOUT, shell = True)
     out = cmd.communicate()[0].decode('utf-8');
-    return re.search ('unknown format', out) == None
+    return re.search ('unknown format', out) is None
 
 def ogg_supported():
     cmd = subprocess.Popen ("sndfile-info testfile.ogg",
                             stdout = subprocess.PIPE,
                             stderr = subprocess.STDOUT, shell = True)
     out = cmd.communicate()[0].decode('utf-8');
-    return re.search ('unknown format', out) == None
+    return re.search ('unknown format', out) is None
 
 def options(opt):
     autowaf.set_options(opt)
