@@ -761,14 +761,18 @@ DiskReader::overwrite_existing_midi ()
 		MidiTrack* mt = dynamic_cast<MidiTrack*> (&_track);
 		MidiChannelFilter* filter = mt ? &mt->playback_filter () : 0;
 
+#ifdef PROFILE_MIDI_IO
 		PBD::Timing minsert;
 		minsert.start ();
+#endif
 
 		midi_playlist ()->render (filter);
-
-		minsert.update ();
 		assert (midi_playlist ()->rendered ());
+
+#ifdef PROFILE_MIDI_IO
+		minsert.update ();
 		cerr << "Reading " << name () << " took " << minsert.elapsed () << " microseconds, final size = " << midi_playlist ()->rendered ()->size () << endl;
+#endif
 	}
 
 	return true;

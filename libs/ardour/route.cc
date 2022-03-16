@@ -3161,7 +3161,6 @@ Route::set_processor_state (const XMLNode& node, int version)
 			_disk_writer->set_state (**niter, version);
 			new_order.push_back (_disk_writer);
 		} else if (prop->value() == "triggerbox") {
-			cerr << "Seen triggerbox!\n";
 			if (!_triggerbox) {
 				_triggerbox.reset (new TriggerBox (_session, _default_type));
 				_triggerbox->set_owner (this);

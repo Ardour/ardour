@@ -547,9 +547,11 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 
 		Tempo::superbeats_to_beats_ticks (superbeats, b, t);
 
+#ifndef NDEBUG
 		if (sc < _sclock) {
 			std::cout << string_compose ("%8 => \nsc %1 delta %9 = %2 secs rem = %3 rem snotes %4 sbeats = %5 => %6 : %7\n", sc, whole_seconds, remainder, supernotes, superbeats, b , t, *this, sc_delta);
 		}
+#endif
 
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%8 => \nsc %1 delta %9 = %2 secs rem = %3 rem snotes %4 sbeats = %5 => %6 : %7\n", sc, whole_seconds, remainder, supernotes, superbeats, b , t, *this, sc_delta));
 
@@ -2388,9 +2390,7 @@ TempoMap::get_state ()
 int
 TempoMap::set_state (XMLNode const & node, int version)
 {
-	cerr << "\n\n\n TMAP set state\n\n";
 	if (version <= 6000) {
-		cerr << "Old version " << version << "\n";
 		return set_state_3x (node);
 	}
 
@@ -2432,8 +2432,6 @@ TempoMap::set_state (XMLNode const & node, int version)
 
 	_points.sort (Point::sclock_comparator());
 
-	cerr << "MAP LOADED\n";
-	dump (cerr);
 	return 0;
 }
 
@@ -3204,8 +3202,6 @@ TempoMap::update (TempoMap::SharedPtr m)
 	if (!_map_mgr.update (m)) {
 		return -1;
 	}
-
-	cerr << "************** new tempo map @ " << m << endl;
 
 	/* update thread local map pointer in the calling thread */
 	update_thread_tempo_map ();

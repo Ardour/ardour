@@ -3465,7 +3465,7 @@ LV2World::load_bundled_plugins(bool verbose)
 {
 	if (!_bundle_checked) {
 		if (verbose) {
-			cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
+			info << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endmsg;
 		}
 
 		vector<string> plugin_objects;
