@@ -7304,7 +7304,7 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 
 	/* beats per minute = */
 
-	double beats_per_minute = (superclock_ticks_per_second * 60.0) / superclocks_per_beat;
+	double beats_per_minute = (superclock_ticks_per_second() * 60.0) / superclocks_per_beat;
 
 	/* now decide whether to:
 

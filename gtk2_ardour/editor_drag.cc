@@ -98,7 +98,7 @@ DragManager::DragManager (Editor* e)
 	, _ending (false)
 	, _current_pointer_x (0.0)
 	, _current_pointer_y (0.0)
-	, _current_pointer_time (0)
+	, _current_pointer_time (timepos_t::from_superclock (0)) /* avoid early use of superclock_ticks_per_second */
 	, _old_follow_playhead (false)
 {
 }
