@@ -561,7 +561,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginNamespace ("Temporal")
 
-		.addConst ("superclock_ticks_per_second", Temporal::superclock_ticks_per_second)
+		.addFunction ("superclock_ticks_per_second", Temporal::superclock_ticks_per_second)
 		.addConst ("ticks_per_beat", Temporal::ticks_per_beat)
 
 		.beginClass <Temporal::ratio_t> ("ratio")

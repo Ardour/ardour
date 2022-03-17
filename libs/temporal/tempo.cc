@@ -534,10 +534,10 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 		superclock_t sc_delta = sc - _sclock;
 
 		/* convert sc into superbeats, given that sc represents some number of seconds */
-		const superclock_t whole_seconds = sc_delta / superclock_ticks_per_second;
-		const superclock_t remainder = sc_delta - (whole_seconds * superclock_ticks_per_second);
+		const superclock_t whole_seconds = sc_delta / superclock_ticks_per_second();
+		const superclock_t remainder = sc_delta - (whole_seconds * superclock_ticks_per_second());
 
-		const int64_t supernotes = ((_super_note_type_per_second) * whole_seconds) + int_div_round (superclock_t ((_super_note_type_per_second) * remainder), superclock_ticks_per_second);
+		const int64_t supernotes = ((_super_note_type_per_second) * whole_seconds) + int_div_round (superclock_t ((_super_note_type_per_second) * remainder), superclock_ticks_per_second());
 		/* multiply after divide to reduce overflow risk */
 		const int64_t superbeats = int_div_round (supernotes, (superclock_t) _note_type) * 4;
 
@@ -2186,7 +2186,7 @@ std::operator<<(std::ostream& str, TempoMetric const & tm)
 std::ostream&
 std::operator<<(std::ostream& str, TempoMapPoint const & tmp)
 {
-	str << '@' << std::setw (12) << tmp.sclock() << ' ' << tmp.sclock() / (double) superclock_ticks_per_second
+	str << '@' << std::setw (12) << tmp.sclock() << ' ' << tmp.sclock() / (double) superclock_ticks_per_second()
 	    << " secs " << tmp.sample (TEMPORAL_SAMPLE_RATE) << " samples"
 	    << (tmp.is_explicit_tempo() ? " EXP-T" : " imp-t")
 	    << (tmp.is_explicit_meter() ? " EXP-M" : " imp-m")
@@ -2362,7 +2362,7 @@ TempoMap::get_state ()
 	XMLNode* node = new XMLNode (X_("TempoMap"));
 
 	node->set_property (X_("time-domain"), _time_domain);
-	node->set_property (X_("superclocks-per-second"), superclock_ticks_per_second);
+	node->set_property (X_("superclocks-per-second"), superclock_ticks_per_second());
 
 	XMLNode* children;
 
@@ -2397,7 +2397,9 @@ TempoMap::set_state (XMLNode const & node, int version)
 	/* global map properties */
 
 	/* XXX this should probably be at the global level in the session file because it affects a lot more than just the tempo map, potentially */
-	node.get_property (X_("superclocks-per-second"), superclock_ticks_per_second);
+	superclock_t sc;
+	node.get_property (X_("superclocks-per-second"), sc);
+	set_superclock_ticks_per_second (sc);
 
 	node.get_property (X_("time-domain"), _time_domain);
 
