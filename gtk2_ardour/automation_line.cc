@@ -783,49 +783,38 @@ bool
 AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 {
 	/* find out where the visual control point is.
-	   initial results are in canvas units. ask the
-	   line to convert them to something relevant.
-	*/
-
+	 * ControlPoint uses canvas-units. The origin
+	 * is the RegionView's top-left corner.
+	 */
 	double view_x = cp.get_x();
 	double view_y = 1.0 - cp.get_y() / (double)_height;
 
+	/* model time is relative to the Region (regardless of region->start offset) */
 	timepos_t model_time = (*cp.model())->when;
 
-	/* convert to absolute time by taking the origin of the line into
-	 * account.
-	 */
-
+	/* convert to absolute time on timeline */
 	const timepos_t absolute_time = model_time + get_origin();
 
-	/* convert the absolute time of the model event into unrounded pixels,
-	 * taking _offset into account.
-	 */
-
-	const double model_x = trackview.editor().time_to_pixel_unrounded (absolute_time.earlier (_offset));
+	/* now convert it back to match the view_x (RegioView pixel pos) */
+	const double model_x = trackview.editor().time_to_pixel_unrounded (absolute_time.earlier (_offset).earlier (get_origin ()));
 
 	if (view_x != model_x) {
 
 		/* convert the current position in the view (units: pixels)
 		 * into samples, then use that to create a timecnt_t that
 		 * measures the distance from the origin for this line.
+		 *
+		 * Note that the offset and origin is irrelevant here,
+		 * pixel_to_sample() islinear only depending on zoom level.
 		 */
 
-		const timecnt_t view_samples (trackview.editor().pixel_to_sample (view_x)); /* implicit zero origin */
+		const timecnt_t view_samples (trackview.editor().pixel_to_sample (view_x));
 
-		/* adjust to measure distance from origin (this preserves time domain) */
-		const timecnt_t distance_from_origin = get_origin().distance (timepos_t (view_samples));
+		/* measure distance from RegionView origin (this preserves time domain) */
+		model_time = timepos_t (the_list()->time_domain()).distance (timepos_t (view_samples));
 
-		/* now convert to relevant time domain, and use _offset.
-		 */
-
-		if (model_time.time_domain() == Temporal::AudioTime) {
-			model_time = timepos_t (distance_from_origin.samples()) + _offset;
-		} else {
-			model_time = timepos_t (distance_from_origin.beats()) + _offset;
-		}
-	} else {
-		model_time = model_time.earlier (_offset);
+		/* convert RegionView to Region position (account for region->start() _offset) */
+		model_time += _offset;
 	}
 
 	update_pending = true;
