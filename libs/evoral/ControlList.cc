@@ -1370,7 +1370,7 @@ ControlList::truncate_start (timecnt_t const & overall)
 
 			/* shrinking at front */
 
-			first_legal_coordinate = _events.back()->when.distance (overall_length);
+			first_legal_coordinate = _events.back()->when.earlier (overall_length);
 			first_legal_value = unlocked_eval (first_legal_coordinate);
 			first_legal_value = max ((double)_desc.lower, first_legal_value);
 			first_legal_value = min ((double)_desc.upper, first_legal_value);
