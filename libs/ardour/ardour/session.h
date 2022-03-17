@@ -1876,7 +1876,7 @@ private:
 	void non_realtime_start_scrub ();
 	void non_realtime_set_speed ();
 	void non_realtime_locate ();
-	void non_realtime_stop (bool abort, int entry_request_count, bool& finished);
+	void non_realtime_stop (bool abort, int entry_request_count, bool& finished, bool will_locate);
 	void non_realtime_overwrite (int entry_request_count, bool& finished, bool reset_loop_declicks);
 	void engine_halted ();
 	void engine_running ();

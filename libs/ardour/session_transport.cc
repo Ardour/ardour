@@ -1167,18 +1167,21 @@ Session::butler_transport_work (bool have_process_lock)
 		}
 	}
 
+	const int butler = g_atomic_int_get (&_butler_seek_counter);
+	const int rtlocates = g_atomic_int_get (&_seek_counter);
+	const bool will_locate = (butler != rtlocates);
+
 	if (ptw & PostTransportStop) {
-		non_realtime_stop (ptw & PostTransportAbort, on_entry, finished);
+		non_realtime_stop (ptw & PostTransportAbort, on_entry, finished, will_locate);
+
 		if (!finished) {
 			g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 			goto restart;
 		}
 	}
 
-	const int butler = g_atomic_int_get (&_butler_seek_counter);
-	const int rtlocates = g_atomic_int_get (&_seek_counter);
 
-	if (butler != rtlocates) {
+	if (will_locate) {
 		DEBUG_TRACE (DEBUG::Transport, string_compose ("nonrealtime locate invoked from BTW (butler has done %1, rtlocs %2)\n", butler, rtlocates));
 		non_realtime_locate ();
 	}
@@ -1332,7 +1335,7 @@ Session::follow_playhead_priority ()
 }
 
 void
-Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
+Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_locate)
 {
 	struct tm* now;
 	time_t     xnow;
@@ -1501,7 +1504,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	/* reset loop_changing so it does not affect next transport action */
 	loop_changing = false;
 
-	if (!_transport_fsm->declicking_for_locate()) {
+	if (!will_locate && !_transport_fsm->declicking_for_locate()) {
 
 		DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
 
