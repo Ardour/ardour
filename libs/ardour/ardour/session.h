@@ -826,8 +826,9 @@ public:
 	 *  playback speed is not zero, and count-in as well as latency-preroll is complete,
 	 *  and _transport_sample changes every process cycle.
 	 */
-	bool   transport_rolling() const;
-	bool   transport_will_roll_forwards() const;
+	bool transport_rolling() const;
+	bool transport_will_roll_forwards() const;
+	bool transport_locating() const;
 
 	bool silent () { return _silent; }
 

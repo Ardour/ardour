@@ -2046,6 +2046,12 @@ Session::transport_state_rolling() const
 }
 
 bool
+Session::transport_locating() const
+{
+	return _transport_fsm->locating();
+}
+
+bool
 Session::transport_rolling() const
 {
 	return _transport_fsm->transport_speed() != 0.0 && _count_in_samples == 0 && _remaining_latency_preroll == 0;
