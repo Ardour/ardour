@@ -3,7 +3,7 @@ ardour { ["type"] = "Snippet", name = "tempo map examples" }
 function factory () return function ()
 
 	-- query BPM at 00:00:10:00
-	local tp = Temporal.timepos_t.from_superclock (Temporal.superclock_ticks_per_second * Session:nominal_sample_rate () * 10)
+	local tp = Temporal.timepos_t.from_superclock (Temporal.superclock_ticks_per_second () * Session:nominal_sample_rate () * 10)
 	local tm = Temporal.TempoMap.use ()
 	print (tm:tempo_at (tp):quarter_notes_per_minute ())
 
