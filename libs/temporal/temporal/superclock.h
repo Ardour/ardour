@@ -19,9 +19,7 @@
 #ifndef __ardour_superclock_h__
 #define __ardour_superclock_h__
 
-#include <cstdlib>
 #include <stdint.h>
-#include <csignal>
 
 #include "pbd/integer_division.h"
 
@@ -40,6 +38,10 @@ typedef int64_t superclock_t;
 extern bool scts_set;
 
 #ifdef DEBUG_EARLY_SCTS_USE
+
+#include <cstdlib>
+#include <csignal>
+
 static inline superclock_t superclock_ticks_per_second() { if (!scts_set) { raise (SIGUSR2); } return _superclock_ticks_per_second; }
 #else
 static inline superclock_t superclock_ticks_per_second() { return _superclock_ticks_per_second; }
