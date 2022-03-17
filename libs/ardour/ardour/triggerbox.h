@@ -345,6 +345,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	   it says: start immediately
 	*/
 	void startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const & start_quantization = Temporal::BBT_Offset (9, 3,0));
+	void shutdown_from_fwd ();
 	virtual void shutdown (BufferSet& bufs, pframes_t dest_offset);
 	virtual void jump_start ();
 	virtual void jump_stop (BufferSet& bufs, pframes_t dest_offset);

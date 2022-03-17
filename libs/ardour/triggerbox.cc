@@ -739,7 +739,7 @@ Trigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset 
 }
 
 void
-Trigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
+Trigger::shutdown_from_fwd ()
 {
 	_state = Stopped;
 	_playout = false;
@@ -748,6 +748,12 @@ Trigger::shutdown (BufferSet& bufs, pframes_t dest_offset)
 	_pending_velocity_gain = _velocity_gain = 1.0;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
 	send_property_change (ARDOUR::Properties::running);
+}
+
+void
+Trigger::shutdown (BufferSet& /*bufs*/, pframes_t /*dest_offset*/)
+{
+	shutdown_from_fwd ();
 }
 
 void
