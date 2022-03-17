@@ -4316,6 +4316,15 @@ TriggerBox::non_realtime_locate (samplepos_t now)
 	fast_forward (_session.cue_events(), now);
 }
 
+void
+TriggerBox::dump (std::ostream & ostr) const
+{
+	ostr << "TriggerBox " << order() << std::endl;
+	for (auto const & t : all_triggers) {
+		ostr << "\tTrigger " << t->index() << " state " << enum_2_string (t->state()) << std::endl;
+	}
+}
+
 /* Thread */
 
 MultiAllocSingleReleasePool* TriggerBoxThread::Request::pool = 0;

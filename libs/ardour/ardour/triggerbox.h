@@ -800,6 +800,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	static PBD::PropertyChange all_trigger_props();
 
+	void dump (std::ostream &) const;
+
   private:
 	struct Requests {
 		std::atomic<bool> stop_all;
