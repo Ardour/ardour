@@ -432,16 +432,7 @@ TriggerUI::context_menu ()
 	MenuList& items = _context_menu->items ();
 	_context_menu->set_name ("ArdourContextMenu");
 
-	Menu*     load_menu = manage (new Menu);
-	MenuList& loitems (load_menu->items ());
-
-	loitems.push_back (MenuElem (_("from file"), sigc::bind(sigc::mem_fun (*this, (&TriggerUI::choose_sample)), true)));
-	loitems.push_back (MenuElem (_("from selection"), sigc::mem_fun (*this, &TriggerUI::set_from_selection)));
-
-	items.push_back (MenuElem (_("Load..."), *load_menu));
-#if DOUBLE_CLICK_IS_NOT_OBVIOUS_ENOUGH
-	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun (*this, &TriggerUI::edit_trigger)));
-#endif
+	items.push_back (MenuElem (_("Load..."), sigc::bind(sigc::mem_fun (*this, (&TriggerUI::choose_sample)), true)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &TriggerUI::choose_color)));
 	items.push_back (SeparatorElem());
