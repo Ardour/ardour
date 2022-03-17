@@ -272,9 +272,9 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trac
 	, _grab_y (0.0)
 	, _last_pointer_x (0.0)
 	, _last_pointer_y (0.0)
+	, _time_domain (td)
 	, _snap_delta (0)
 	, _constraint_pressed (false)
-	, _time_domain (td)
 	, _grab_button (-1)
 {
 
