@@ -77,7 +77,7 @@ UI_CONFIG_VARIABLE (bool, show_region_cue_markers, "show-region-cue-markers", tr
 UI_CONFIG_VARIABLE (bool, show_name_highlight, "show-name-highlight", false)
 UI_CONFIG_VARIABLE (ARDOUR::ClockDeltaMode, primary_clock_delta_mode, "primary-clock-delta-mode", NoDelta)
 UI_CONFIG_VARIABLE (ARDOUR::ClockDeltaMode, secondary_clock_delta_mode, "secondary-clock-delta-mode", NoDelta)
-UI_CONFIG_VARIABLE (ARDOUR::samplecnt_t, clock_display_limit, "clock-display-limit", 94576) /* seconds; default about 24hrs @ 96kHz limited by size of int62_t, 0 = unlimited */
+UI_CONFIG_VARIABLE (ARDOUR::samplecnt_t, clock_display_limit, "clock-display-limit", 8553600) /* seconds; default 99h, 0 = unlimited */
 UI_CONFIG_VARIABLE (bool, show_track_meters, "show-track-meters", true)
 UI_CONFIG_VARIABLE (bool, follow_edits, "follow-edits", false)
 UI_CONFIG_VARIABLE (bool, super_rapid_clock_update, "super-rapid-clock-update", false)
