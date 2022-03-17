@@ -3600,6 +3600,13 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		return;
 	}
 
+	if (_session.transport_locating()) {
+		/* nothing to do here at all. We do not run triggers while
+		   locate is still taking place.
+		*/
+		return;
+	}
+
 #ifndef NDEBUG
 	{
 		Temporal::TempoMap::SharedPtr __tmap (Temporal::TempoMap::use());
@@ -4307,12 +4314,24 @@ TriggerBox::realtime_handle_transport_stopped ()
 void
 TriggerBox::non_realtime_transport_stop (samplepos_t now, bool /*flush*/)
 {
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 (%3): non-realtime stop at %2\n", order(), now, this));
+
+	for (auto & t : all_triggers) {
+		t->shutdown_from_fwd ();
+	}
+
 	fast_forward (_session.cue_events(), now);
 }
 
 void
 TriggerBox::non_realtime_locate (samplepos_t now)
 {
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 (%3): non-realtime locate at %2\n", order(), now, this));
+
+	for (auto & t : all_triggers) {
+		t->shutdown_from_fwd ();
+	}
+
 	fast_forward (_session.cue_events(), now);
 }
 
