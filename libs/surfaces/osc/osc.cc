@@ -7,7 +7,7 @@
  * Copyright (C) 2015-2016 Ben Loftis <ben@harrisonconsoles.com>
  * Copyright (C) 2015-2018 John Emmas <john@creativepost.co.uk>
  * Copyright (C) 2015 Johannes Mueller <github@johannes-mueller.org>
- * Copyright (C) 2016-2018 Len Ovens <len@ovenwerks.net>
+ * Copyright (C) 2016-2022 Len Ovens <len@ovenwerks.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -3804,7 +3804,8 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 		if (!control_disabled && s->solo_control() && !s->is_master() && !s->is_monitor()) {
 			if (argc > (param_1)) {
 				if (s_int) {
-					s->solo_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
+					fake_touch (s->solo_control());
+					session->set_control (s->solo_control(), yn ? 1.0 : 0.0, sur->usegroup);
 					ret = 0;
 				}
 			} else {
@@ -3890,7 +3891,7 @@ OSC::_strip_parse (const char *path, const char *sub_path, const char* types, lo
 		if (argc > (param_1)) {
 			if (s_int) {
 				//ignore button release
-				if (!yn) return 0;
+				if (yn) return 0;
 				sur->expand_enable = false;
 				set_stripable_selection (s);
 				ret = 0;
