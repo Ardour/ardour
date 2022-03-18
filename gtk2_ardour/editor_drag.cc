@@ -6608,8 +6608,8 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 					 * relative to the line origin
 					*/
 
-					timepos_t p (j->line->get_origin().distance (i->start()).beats());
-					timepos_t q (j->line->get_origin().distance (a).beats());
+					timepos_t p (j->line->get_origin().distance (i->start()));
+					timepos_t q (j->line->get_origin().distance (a));
 
 					/* XXX arguably ControlList::editor_add() should do this */
 
