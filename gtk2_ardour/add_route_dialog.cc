@@ -81,6 +81,7 @@ AddRouteDialog::AddRouteDialog ()
 	, mode_label (_("Record Mode:"))
 	, instrument_label (_("Instrument:"))
 	, instrument_combo (InstrumentSelector::ForTrackSelector)
+	, show_on_cue_chkbox (_("Show on Cue Page"))
 	, last_route_count (1)
 	, route_count_set_by_template (false)
 	, name_edited_by_user (false)
@@ -320,6 +321,7 @@ AddRouteDialog::AddRouteDialog ()
 	insert_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 	outer_box->pack_start (insert_label, false, false);
 	outer_box->pack_start (insert_at_combo, false, false);
+	outer_box->pack_start (show_on_cue_chkbox, false, false);
 
 	/* quick-add button (add item but don't close dialog) */
 	Gtk::Button* addnoclose_button = manage (new Gtk::Button(_("Add selected items (and leave dialog open)")));
@@ -474,6 +476,7 @@ AddRouteDialog::trk_template_row_selected ()
 		name_label.set_sensitive (true);
 		group_label.set_sensitive (false);
 		strict_io_label.set_sensitive (false);
+		show_on_cue_chkbox.set_sensitive (false);
 		configuration_label.set_sensitive (false);
 		mode_label.set_sensitive (false);
 		instrument_label.set_sensitive (false);
@@ -495,6 +498,7 @@ AddRouteDialog::trk_template_row_selected ()
 		name_label.set_sensitive (true);
 		group_label.set_sensitive (true);
 		strict_io_label.set_sensitive (true);
+		show_on_cue_chkbox.set_sensitive (true);
 
 		routes_spinner.set_sensitive (true);
 		name_template_entry.set_sensitive (true);
@@ -643,6 +647,8 @@ AddRouteDialog::track_type_chosen ()
 		strict_io_label.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
 
+		show_on_cue_chkbox.set_sensitive (true);
+
 		insert_label.set_sensitive (true);
 		insert_at_combo.set_sensitive (true);
 
@@ -663,6 +669,8 @@ AddRouteDialog::track_type_chosen ()
 
 		strict_io_label.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
+
+		show_on_cue_chkbox.set_sensitive (true);
 
 		insert_label.set_sensitive (true);
 		insert_at_combo.set_sensitive (true);
@@ -685,6 +693,8 @@ AddRouteDialog::track_type_chosen ()
 		strict_io_label.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
 
+		show_on_cue_chkbox.set_sensitive (false);
+
 		insert_label.set_sensitive (true);
 		insert_at_combo.set_sensitive (true);
 
@@ -705,6 +715,8 @@ AddRouteDialog::track_type_chosen ()
 
 		strict_io_label.set_sensitive (false);
 		strict_io_combo.set_sensitive (false);
+
+		show_on_cue_chkbox.set_sensitive (false);
 
 		insert_label.set_sensitive (false);
 		insert_at_combo.set_sensitive (false);
@@ -727,6 +739,8 @@ AddRouteDialog::track_type_chosen ()
 		strict_io_label.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
 
+		show_on_cue_chkbox.set_sensitive (false);
+
 		insert_label.set_sensitive (true);
 		insert_at_combo.set_sensitive (true);
 
@@ -747,6 +761,8 @@ AddRouteDialog::track_type_chosen ()
 
 		strict_io_label.set_sensitive (false);
 		strict_io_combo.set_sensitive (false);
+
+		show_on_cue_chkbox.set_sensitive (false);
 
 		insert_label.set_sensitive (false);
 		insert_at_combo.set_sensitive (false);
@@ -1006,6 +1022,11 @@ AddRouteDialog::route_group ()
 bool
 AddRouteDialog::use_strict_io() {
 	return strict_io_combo.get_active_row_number () == 1;
+}
+
+bool
+AddRouteDialog::show_on_cue_page() {
+	return show_on_cue_chkbox.get_active();
 }
 
 void

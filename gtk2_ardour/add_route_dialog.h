@@ -90,6 +90,8 @@ public:
 	RouteDialogs::InsertAt insert_at();
 	bool use_strict_io();
 
+	bool show_on_cue_page();
+
 	std::string get_template_path();
 
 	void reset_name_edited () { name_edited_by_user = false; }
@@ -113,6 +115,7 @@ private:
 	InstrumentSelector instrument_combo;
 	Gtk::ComboBoxText insert_at_combo;
 	Gtk::ComboBoxText strict_io_combo;
+	Gtk::CheckButton show_on_cue_chkbox;
 
 	void track_type_chosen ();
 	void refill_channel_setups ();
