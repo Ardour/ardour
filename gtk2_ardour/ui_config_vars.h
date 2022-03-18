@@ -136,3 +136,7 @@ UI_CONFIG_VARIABLE (bool, show_region_name, "show-region-name", true)
 UI_CONFIG_VARIABLE (int, time_axis_name_ellipsize_mode, "time-axis-name-ellipsize-mode", 0)
 UI_CONFIG_VARIABLE (bool, show_triggers_inline, "show-triggers-inline", false)
 UI_CONFIG_VARIABLE (bool, one_plugin_window_only, "one-plugin-window-only", false)
+
+/* these are visibility-type selections in the New Track dialog that we should make persistent for the user's choices */
+UI_CONFIG_VARIABLE (bool, show_on_cue_page, "show-on-cue-page", true)
+UI_CONFIG_VARIABLE (uint32_t, insert_at_position, "insert-at-position", 3)

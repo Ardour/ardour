@@ -53,6 +53,7 @@
 #include "add_route_dialog.h"
 #include "ardour_ui.h"
 #include "route_group_dialog.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
@@ -177,11 +178,13 @@ AddRouteDialog::AddRouteDialog ()
 	insert_at_combo.append_text (_("Before Selection"));
 	insert_at_combo.append_text (_("After Selection"));
 	insert_at_combo.append_text (_("Last"));
-	insert_at_combo.set_active (3);
+	insert_at_combo.set_active (min(UIConfiguration::instance().get_insert_at_position (), (uint32_t)3));
 
 	strict_io_combo.append_text (_("Flexible-I/O"));
 	strict_io_combo.append_text (_("Strict-I/O"));
 	strict_io_combo.set_active (Config->get_strict_io () ? 1 : 0);
+
+	show_on_cue_chkbox.set_active (UIConfiguration::instance().get_show_on_cue_page ());
 
 	/* top-level VBox */
 	VBox* vbox = manage (new VBox);
@@ -365,6 +368,10 @@ AddRouteDialog::~AddRouteDialog ()
 void
 AddRouteDialog::on_response (int r)
 {
+	/* stash the user's visibility-settings in the config */
+	UIConfiguration::instance().set_show_on_cue_page (show_on_cue_page());
+	UIConfiguration::instance().set_insert_at_position ((int) insert_at());
+
 	reset_name_edited ();
 	/* Don't call ArdourDialog::on_response() because that will
 	   automatically hide the dialog.
