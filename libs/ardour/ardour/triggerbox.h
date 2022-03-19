@@ -281,7 +281,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	double position_as_fraction() const;
 
 	Temporal::BBT_Time compute_start (Temporal::TempoMap::SharedPtr const &, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start);
-	virtual timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t) = 0;
+	virtual timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t, Temporal::Beats &) = 0;
 	virtual void start_and_roll_to (samplepos_t start, samplepos_t position) = 0;
 
 	/* because follow actions involve probability is it easier to code the will-not-follow case */
@@ -504,7 +504,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	RubberBand::RubberBandStretcher* stretcher() { return (_stretcher); }
 
 	SegmentDescriptor get_segment_descriptor () const;
-	timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t);
+	timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t, Temporal::Beats &);
 	void start_and_roll_to (samplepos_t start, samplepos_t position);
 
 	bool stretching () const;
@@ -578,7 +578,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	int set_state (const XMLNode&, int version);
 
 	SegmentDescriptor get_segment_descriptor () const;
-	timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t);
+	timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t, Temporal::Beats &);
 	void start_and_roll_to (samplepos_t start, samplepos_t position);
 
 	void set_patch_change (Evoral::PatchChange<MidiBuffer::TimeType> const &);

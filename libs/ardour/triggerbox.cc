@@ -747,6 +747,7 @@ Trigger::shutdown_from_fwd ()
 	_cue_launched = false;
 	_pending_velocity_gain = _velocity_gain = 1.0;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
+	PBD::stacktrace (std::cerr, 10);
 	send_property_change (ARDOUR::Properties::running);
 }
 
@@ -958,7 +959,7 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 
 	}
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), possible_samples, start_beats, end_beats, q));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%6/%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), possible_samples, start_beats, end_beats, q, _box.order()));
 
 	/* See if this time falls within the range of time given to us */
 
@@ -1052,6 +1053,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	}
 
 	pframes_t extra_offset = 0;
+	Temporal::Beats elen_ignored;
 
 	/* transition time has arrived! let's figure out what're doing:
 	 * stopping, starting, retriggering
@@ -1084,7 +1086,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	case WaitingToStart:
 		retrigger ();
 		_state = Running;
-		(void) compute_end (tmap, transition_bbt, transition_samples);
+		(void) compute_end (tmap, transition_bbt, transition_samples, elen_ignored);
 		send_property_change (ARDOUR::Properties::running);
 
 		/* trigger will start somewhere within this process
@@ -1103,7 +1105,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 	case WaitingForRetrigger:
 		retrigger ();
 		_state = Running;
-		(void) compute_end (tmap, transition_bbt, transition_samples);
+		(void) compute_end (tmap, transition_bbt, transition_samples, elen_ignored);
 		send_property_change (ARDOUR::Properties::running);
 
 		/* trigger is just running normally, and will fill
@@ -1402,7 +1404,7 @@ AudioTrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position
 }
 
 timepos_t
-AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t transition_sample)
+AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t transition_sample, Temporal::Beats & effective_length)
 {
 	/* Our task here is to set:
 
@@ -1481,6 +1483,8 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 		timecnt_t len (Temporal::Beats (q.beats, q.ticks), timepos_t (Temporal::Beats()));
 		last_readable_sample = _start_offset + len.samples();
 	}
+
+	effective_length = tmap->quarters_at_sample (transition_sample + final_processed_sample) - tmap->quarters_at_sample (transition_sample);
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: final sample %2 vs ees %3 ls %4\n", index(), final_processed_sample, expected_end_sample, last_readable_sample));
 
@@ -2235,7 +2239,7 @@ MIDITrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position)
 }
 
 timepos_t
-MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t)
+MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t, Temporal::Beats & effective_length)
 {
 	Temporal::Beats end_by_follow_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length));
 	Temporal::Beats end_by_data_length = transition_beats + data_length;
@@ -2248,8 +2252,10 @@ MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::
 
 		if (internal_use_follow_length()) {
 			final_beat = end_by_follow_length;
+			effective_length = tmap->bbtwalk_to_quarters (transition_bbt, _follow_length);
 		} else {
 			final_beat = end_by_data_length;
+			effective_length = tmap->bbtwalk_to_quarters (transition_bbt, Temporal::BBT_Offset (0, data_length.get_beats(), data_length.get_ticks()));
 		}
 
 	} else {
@@ -2963,6 +2969,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	TriggerPtr prev;
 	Temporal::BBT_Time start_bbt;
 	samplepos_t start_samples;
+	Temporal::Beats elen;
 
 	while (pos < transport_position && c != cues.end() && c->time < transport_position) {
 
@@ -2982,6 +2989,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		if (trig->cue_isolated()) {
 			c = nxt_cue;
+			pos = c->time;
 			continue;
 		}
 
@@ -2993,6 +3001,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			*/
 			prev.reset ();
 			c = nxt_cue;
+			pos = c->time;
 			continue;
 		}
 
@@ -3015,15 +3024,11 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			continue;
 		}
 
-		/* XXX need to determine when the trigger will actually start
-		 * (due to its quantization)
-		 */
-
 		/* we now consider this trigger to be running. Let's see when
 		 * it ends...
 		 */
 
-		samplepos_t trig_ends_at = trig->compute_end (tmap, start_bbt, start_samples).samples();
+		samplepos_t trig_ends_at = trig->compute_end (tmap, start_bbt, start_samples, elen).samples();
 
 		if (nxt_cue != cues.end() && trig_ends_at >= nxt_cue->time) {
 			/* trigger will be interrupted by next cue .
@@ -3059,7 +3064,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 	if (pos >= transport_position || !prev) {
 		/* nothing to do */
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: no trigger to be rolled\n", order()));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: no trigger to be rolled (%2 >= %3, prev = %4)\n", order(), pos, transport_position, prev));
 		_currently_playing = 0;
 		_locate_armed = false;
 		if (tracker) {
@@ -3077,7 +3082,21 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	 * 2) for audio, the stretcher is in the correct state
 	 */
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: roll trigger %2 to %3\n", order(), prev->index(), transport_position));
+
+	/* find the closest start (retrigger) position for this trigger */
+
+	if (start_samples < transport_position) {
+		samplepos_t s = start_samples;
+		BBT_Time ns = start_bbt;
+
+		do {
+			start_samples = s;
+			ns = tmap->bbt_walk (ns, BBT_Offset (0, elen.get_beats(), elen.get_ticks()));
+			s = tmap->sample_at (ns);
+		} while (s < transport_position);
+	}
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: roll trigger %2 from %3 to %4\n", order(), prev->index(), start_samples, transport_position));
 	prev->start_and_roll_to (start_samples, transport_position);
 
 	_currently_playing = prev;
@@ -3741,6 +3760,11 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			_currently_playing = 0;
 			PropertyChanged (Properties::currently_playing);
 		}
+
+		_cancel_locate_armed = false;
+
+	} else if (!_locate_armed) {
+
 		_cancel_locate_armed = false;
 	}
 
@@ -4314,10 +4338,14 @@ TriggerBox::realtime_handle_transport_stopped ()
 void
 TriggerBox::non_realtime_transport_stop (samplepos_t now, bool /*flush*/)
 {
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 (%3): non-realtime stop at %2\n", order(), now, this));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 (%3): non-realtime stop at %2 (lat-adjusted to %4\n", order(), now, this, now + playback_offset()));
 
 	for (auto & t : all_triggers) {
 		t->shutdown_from_fwd ();
+	}
+
+	if (now) {
+		now += playback_offset();
 	}
 
 	fast_forward (_session.cue_events(), now);
@@ -4326,10 +4354,14 @@ TriggerBox::non_realtime_transport_stop (samplepos_t now, bool /*flush*/)
 void
 TriggerBox::non_realtime_locate (samplepos_t now)
 {
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 (%3): non-realtime locate at %2\n", order(), now, this));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 (%3): non-realtime locate at %2 (lat-adjusted to %4\n", order(), now, this, now + playback_offset()));
 
 	for (auto & t : all_triggers) {
 		t->shutdown_from_fwd ();
+	}
+
+	if (now) {
+		now += playback_offset();
 	}
 
 	fast_forward (_session.cue_events(), now);
