@@ -747,7 +747,6 @@ Trigger::shutdown_from_fwd ()
 	_cue_launched = false;
 	_pending_velocity_gain = _velocity_gain = 1.0;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 shuts down\n", name()));
-	PBD::stacktrace (std::cerr, 10);
 	send_property_change (ARDOUR::Properties::running);
 }
 
