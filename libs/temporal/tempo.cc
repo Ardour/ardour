@@ -1676,6 +1676,12 @@ TempoMap::bbtwalk_to_quarters (Beats const & pos, BBT_Offset const & distance) c
 	return quarters_at (bbt_walk (bbt_at (pos), distance)) - pos;
 }
 
+Temporal::Beats
+TempoMap::bbtwalk_to_quarters (BBT_Time const & pos, BBT_Offset const & distance) const
+{
+	return quarters_at (bbt_walk (pos, distance)) - quarters_at (pos);
+}
+
 void
 TempoMap::sample_rate_changed (samplecnt_t new_sr)
 {

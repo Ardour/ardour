@@ -839,6 +839,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API	timecnt_t bbt_duration_at (timepos_t const & pos, BBT_Offset const & bbt) const;
 	LIBTEMPORAL_API	Beats bbtwalk_to_quarters (Beats const & start, BBT_Offset const & distance) const;
+	LIBTEMPORAL_API	Beats bbtwalk_to_quarters (BBT_Time const & start, BBT_Offset const & distance) const;
 
 	LIBTEMPORAL_API	Temporal::timecnt_t convert_duration (Temporal::timecnt_t const & duration, Temporal::timepos_t const &, Temporal::TimeDomain domain) const;
 
