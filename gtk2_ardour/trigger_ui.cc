@@ -576,6 +576,7 @@ TriggerUI::follow_context_menu ()
 
 	_ignore_menu_action = true;
 
+	items.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::None)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::None))));
 	items.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Stop)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::Stop))));
 	items.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::Again)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::Again))));
 	items.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind(sigc::mem_fun (*this, &TriggerUI::set_follow_action), FollowAction (FollowAction::ForwardTrigger))));
@@ -747,7 +748,7 @@ TriggerUI::follow_action_to_string (FollowAction const & fa, bool with_targets)
 {
 	switch (fa.type) {
 	case FollowAction::None:
-		return _("Inhibit");
+		return _("None");
 	case FollowAction::Stop:
 		return _("Stop");
 	case FollowAction::Again:
