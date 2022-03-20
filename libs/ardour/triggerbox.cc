@@ -529,32 +529,12 @@ Trigger::name () const \
 TRIGGER_DIRECT_SET_CONST_REF (name, std::string)
 TRIGGER_DIRECT_SET (color, color_t)
 TRIGGER_DIRECT_SET (gain, gain_t)
+TRIGGER_DIRECT_SET (allow_patch_changes, bool)
 
 void
 Trigger::set_ui (void* p)
 {
 	_ui = p;
-}
-
-bool
-Trigger::allow_patch_changes () const
-{
-	return _allow_patch_changes;
-}
-
-void
-Trigger::set_allow_patch_changes (bool yn)
-{
-	if (_box.data_type() != DataType::MIDI) {
-		return;
-	}
-	if (_allow_patch_changes == yn) {
-		return;
-	}
-
-	_allow_patch_changes = yn;
-	send_property_change (Properties::allow_patch_changes);
-	_box.session().set_dirty();
 }
 
 void
