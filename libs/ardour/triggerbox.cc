@@ -344,7 +344,7 @@ Trigger::update_properties ()
 		}
 
 		/* during construction of a new trigger, the ui_state.name is initialized and queued
-		 *   ...but in the interim, we have likely been assigned a name from a region in a separate thread
+		 *   ...but in the interim, we have likely been assigned a name in a separate thread (importing the region)
 		 *   ...so don't overwrite our name if ui_state.name is empty
 		 */
 		if (ui_state.name != "" ) {
@@ -474,7 +474,7 @@ Trigger::name () const \
 	return val; \
 }
 
-/* some params do not appear here ... gain, patch-changes, name, allow-patch-changes, etc ... because they don't need to be queued */
+/* these params are central to the triggerbox behavior and must only be applied at ::retrigger() via ::update_properties()  */
 TRIGGER_UI_SET (cue_isolated,bool)
 TRIGGER_UI_SET (stretchable, bool)
 TRIGGER_UI_SET (velocity_effect, float)
@@ -526,10 +526,15 @@ Trigger::name () const \
 	return _ ## name; \
 }
 
+/* these params can take effect outside the scope of ::retrigger
+ * BUT they still need to set the ui_state variables as well as the associated member variable
+ * otherwise an incoming ui_state change will overwrite your changes
+ * */
 TRIGGER_DIRECT_SET_CONST_REF (name, std::string)
 TRIGGER_DIRECT_SET (color, color_t)
 TRIGGER_DIRECT_SET (gain, gain_t)
 TRIGGER_DIRECT_SET (allow_patch_changes, bool)
+/* patch_change[] is implemented manually but it needs to operate the same as above */
 
 void
 Trigger::set_ui (void* p)
