@@ -215,6 +215,7 @@ Trigger::Trigger (uint32_t n, TriggerBox& b)
 	, _pending_velocity_gain (1.0)
 	, _velocity_gain (1.0)
 	, _cue_launched (false)
+	, _used_channels (Evoral::SMF::UsedChannels())
 	, _estimated_tempo (0.)
 	, _segment_tempo (0.)
 	, _beatcnt (0.)
@@ -299,9 +300,6 @@ Trigger::set_ui_state (Trigger::UIState &state)
 	if (state.tempo > 0) {
 		set_segment_tempo(state.tempo);
 	}
-
-	set_used_channels(state.used_channels);
-	for (int chan = 0; chan<16; chan++) {
 		if (state.patch_change[chan].is_set()) {
 			set_patch_change(state.patch_change[chan]);
 		}
@@ -351,7 +349,7 @@ Trigger::update_properties ()
 			_name = ui_state.name;
 		}
 
-		set_used_channels(ui_state.used_channels);
+		_used_channels = ui_state.used_channels;
 
 		for (int chan = 0; chan<16; chan++) {
 			if (ui_state.patch_change[chan].is_set()) {
@@ -391,7 +389,7 @@ Trigger::copy_to_ui_state ()
 	ui_state.name = _name;
 	ui_state.color = _color;
 
-	ui_state.used_channels = used_channels();
+	ui_state.used_channels = _used_channels;
 	for (int i = 0; i<16; i++) {
 		if (patch_change(i).is_set()) {
 			ui_state.patch_change[i] = patch_change(i);
@@ -2085,7 +2083,6 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	, last_event_beats (Temporal::Beats())
 	, _start_offset (0, 0, 0)
 	, _legato_offset (0, 0, 0)
-	, _used_channels (Evoral::SMF::UsedChannels())
 {
 	_channel_map.assign (16, -1);
 }
@@ -2097,9 +2094,13 @@ MIDITrigger::~MIDITrigger ()
 void
 MIDITrigger::set_used_channels (Evoral::SMF::UsedChannels used)
 {
-	if (_used_channels != used) {
+	if (ui_state.used_channels != used) {
 
-		_used_channels = used;
+		/* increment ui_state generation so vals will get loaded when the trigger stops */
+		unsigned int g = ui_state.generation.load();
+		while (!ui_state.generation.compare_exchange_strong (g, g+1));
+
+		ui_state.used_channels = used;
 
 		send_property_change (ARDOUR::Properties::used_channels);
 		_box.session().set_dirty();
@@ -2529,8 +2530,11 @@ MIDITrigger::estimate_midi_patches ()
 
 		/* finally, store the used_channels so the UI can show patches only for those chans actually used */
 		DEBUG_TRACE (DEBUG::MidiTriggers, string_compose ("%1 estimate_midi_patches(), using channels %2\n", name(), smfs->used_channels().to_string().c_str()));
-		set_used_channels(smfs->used_channels());
+		_used_channels = smfs->used_channels();
 	}
+
+	//we've changed some of our internal values; the calling code must call copy_to_ui_state ... ::set_region_in_worker_thread  does it
+
 }
 
 int

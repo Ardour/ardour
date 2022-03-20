@@ -426,6 +426,11 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	gain_t                    _velocity_gain;
 	bool                      _cue_launched;
 
+	/* these are only used by midi triggers but the ui_state API needs them */
+	Evoral::SMF::UsedChannels _used_channels;
+	Evoral::PatchChange<MidiBuffer::TimeType> _patch_change[16];
+	std::vector<int> _channel_map;
+
 	void copy_to_ui_state ();
 
 
@@ -588,7 +593,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	bool patch_change_set (uint8_t channel) const;
 
 	/* It's possible that a portion of a midi file would use a subset of the total channels used, so store that info in the segment descriptor */
-	Evoral::SMF::UsedChannels used_channels() const { return _used_channels; }
+	Evoral::SMF::UsedChannels used_channels() const { return ui_state.used_channels; }
 	void set_used_channels (Evoral::SMF::UsedChannels);
 
 	/* theoretically, MIDI files can have a dedicated tempo outside the session tempo map (*un-stretched*) but this is currently unimplemented */
@@ -619,11 +624,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
 	boost::shared_ptr<MidiModel> model;
 	MidiModel::const_iterator iter;
-
-	Evoral::PatchChange<MidiBuffer::TimeType> _patch_change[16];
-	std::vector<int> _channel_map;
-
-	Evoral::SMF::UsedChannels _used_channels;
 
 	int load_data (boost::shared_ptr<MidiRegion>);
 	void compute_and_set_length ();
