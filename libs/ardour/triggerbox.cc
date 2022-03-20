@@ -278,8 +278,8 @@ Trigger::get_ui_state (Trigger::UIState &state) const
 
 	state.used_channels = used_channels();
 	for (int i = 0; i<16; i++) {
-		if (patch_change(i).is_set()) {
-			state.patch_change[i] = patch_change(i);
+		if (_patch_change[i].is_set()) {
+			state.patch_change[i] = _patch_change[i];
 		}
 	}
 
@@ -299,10 +299,6 @@ Trigger::set_ui_state (Trigger::UIState &state)
 	/* tempo is currently outside the scope of ui_state */
 	if (state.tempo > 0) {
 		set_segment_tempo(state.tempo);
-	}
-		if (state.patch_change[chan].is_set()) {
-			set_patch_change(state.patch_change[chan]);
-		}
 	}
 }
 
@@ -353,7 +349,7 @@ Trigger::update_properties ()
 
 		for (int chan = 0; chan<16; chan++) {
 			if (ui_state.patch_change[chan].is_set()) {
-				set_patch_change(ui_state.patch_change[chan]);
+				_patch_change[chan] = ui_state.patch_change[chan];
 			}
 		}
 
@@ -391,8 +387,8 @@ Trigger::copy_to_ui_state ()
 
 	ui_state.used_channels = _used_channels;
 	for (int i = 0; i<16; i++) {
-		if (patch_change(i).is_set()) {
-			ui_state.patch_change[i] = patch_change(i);
+		if (_patch_change[i].is_set()) {
+			ui_state.patch_change[i] = _patch_change[i];
 		}
 	}
 }
@@ -2149,41 +2145,60 @@ MIDITrigger::channel_map (int channel)
 void
 MIDITrigger::set_patch_change (Evoral::PatchChange<MidiBuffer::TimeType> const & pc)
 {
+	/* this must recreate the behavior of TRIGGER_SET, but it requires special handling because its an array */
+	/* specifically, we need to make sure and set the ui_state as well as the internal property, so the triggerbox won't overwrite these changes when it loads the trigger state */
 	assert (pc.is_set());
-	_patch_change[pc.channel()] = pc;
+
+	ui_state.patch_change[pc.channel()] = pc;
+
+	/* increment ui_state generation so vals will get loaded when the trigger stops */
+	unsigned int g = ui_state.generation.load();
+	while (!ui_state.generation.compare_exchange_strong (g, g+1));
+
 	send_property_change (Properties::patch_change);
 }
 
 void
 MIDITrigger::unset_all_patch_changes ()
 {
-	bool changed = false;
-
+	/* this must recreate the behavior of TRIGGER_SET, but it requires special handling because its an array */
+	/* specifically, we need to make sure and set the ui_state as well as the internal property, so the triggerbox won't overwrite these changes when it loads the trigger state */
 	for (uint8_t chn = 0; chn < 16; ++chn) {
-		changed |= _patch_change[chn].is_set();
-		_patch_change[chn].unset ();
+		if (ui_state.patch_change[chn].is_set ()) {
+			ui_state.patch_change[chn].unset ();
+		}
 	}
 
-	if (changed) {
-		send_property_change (Properties::patch_change);
-	}
+	/* increment ui_state generation so vals will get loaded when the trigger stops */
+	unsigned int g = ui_state.generation.load();
+	while (!ui_state.generation.compare_exchange_strong (g, g+1));
+
+	send_property_change (Properties::patch_change);
 }
 
 void
 MIDITrigger::unset_patch_change (uint8_t channel)
 {
+	/* this must recreate the behavior of TRIGGER_SET_DIRECT, but it requires special handling because its an array */
+	/* specifically, we need to make sure and set the ui_state as well as the internal property, so the triggerbox won't overwrite these changes when it loads the trigger state */
 	assert (channel < 16);
-	if (_patch_change[channel].is_set()) {
-		_patch_change[channel].unset ();
-		send_property_change (Properties::patch_change);
+
+	/* increment ui_state generation so vals will get loaded when the trigger stops */
+	unsigned int g = ui_state.generation.load();
+	while (!ui_state.generation.compare_exchange_strong (g, g+1));
+
+	if (ui_state.patch_change[channel].is_set()) {
+		ui_state.patch_change[channel].unset ();
 	}
+
+	send_property_change (Properties::patch_change);
 }
 
 bool
 MIDITrigger::patch_change_set (uint8_t channel) const
 {
 	assert (channel < 16);
-	return _patch_change[channel].is_set();
+	return ui_state.patch_change[channel].is_set();
 }
 
 Evoral::PatchChange<MidiBuffer::TimeType> const
@@ -2192,8 +2207,8 @@ MIDITrigger::patch_change (uint8_t channel) const
 	Evoral::PatchChange<MidiBuffer::TimeType> ret;
 
 	assert (channel < 16);
-	if (_patch_change[channel].is_set()) {
-		ret = _patch_change[channel];
+	if (ui_state.patch_change[channel].is_set()) {
+		ret = ui_state.patch_change[channel];
 	}
 
 	return ret;
