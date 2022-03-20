@@ -75,7 +75,6 @@ intptr_t Session::vst_callback (
 	static VstTimeInfo _timeinfo; // only uses as fallback
 	VstTimeInfo* timeinfo;
 	int32_t newflags = 0;
-	TempoMap::SharedPtr tmap (TempoMap::use());
 
 	if (effect && effect->ptr1) {
 		plug = (VSTPlugin *) (effect->ptr1);
@@ -183,6 +182,7 @@ intptr_t Session::vst_callback (
 		timeinfo->nanoSeconds = g_get_monotonic_time () * 1000;
 
 		if (plug && session) {
+			TempoMap::SharedPtr tmap (TempoMap::fetch());
 			samplepos_t now = plug->transport_sample();
 
 			timeinfo->samplePos = now;
@@ -316,6 +316,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("audioMasterTempoAt");
 		// returns tempo (in bpm * 10000) at sample sample location passed in <value>
 		if (session) {
+			TempoMap::SharedPtr tmap (TempoMap::fetch());
 			const Tempo& t (tmap->metric_at (value).tempo());
 			return t.quarter_notes_per_minute() * 1000;
 		} else {
