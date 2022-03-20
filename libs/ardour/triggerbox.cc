@@ -494,6 +494,10 @@ Trigger::set_ ## name (type val) \
 { \
 	if (_ ## name == val) { return; } \
 	_ ## name = val; \
+	ui_state.name = val; \
+	unsigned int g = ui_state.generation.load(); \
+	do { ui_state.name = val; } while (!ui_state.generation.compare_exchange_strong (g, g+1)); \
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 property& cas-set: %2 gen %3\n", index(), _ ## name.property_name(), ui_state.generation.load())); \
 	send_property_change (Properties::name); /* EMIT SIGNAL */ \
 	_box.session().set_dirty (); \
 } \
@@ -509,6 +513,10 @@ Trigger::set_ ## name (type const & val) \
 { \
 	if (_ ## name == val) { return; } \
 	_ ## name = val; \
+	ui_state.name = val; \
+	unsigned int g = ui_state.generation.load(); \
+	do { ui_state.name = val; } while (!ui_state.generation.compare_exchange_strong (g, g+1)); \
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 property& cas-set: %2 gen %3\n", index(), _ ## name.property_name(), ui_state.generation.load())); \
 	send_property_change (Properties::name); /* EMIT SIGNAL */ \
 	_box.session().set_dirty (); \
 } \
@@ -520,6 +528,7 @@ Trigger::name () const \
 
 TRIGGER_DIRECT_SET_CONST_REF (name, std::string)
 TRIGGER_DIRECT_SET (color, color_t)
+TRIGGER_DIRECT_SET (gain, gain_t)
 
 void
 Trigger::set_ui (void* p)
@@ -545,25 +554,6 @@ Trigger::set_allow_patch_changes (bool yn)
 
 	_allow_patch_changes = yn;
 	send_property_change (Properties::allow_patch_changes);
-	_box.session().set_dirty();
-}
-
-gain_t
-Trigger::gain () const
-{
-	return _gain;
-}
-
-
-void
-Trigger::set_gain (gain_t g)
-{
-	if (_gain == g) {
-		return;
-	}
-
-	_gain = g;
-	send_property_change (Properties::gain);
 	_box.session().set_dirty();
 }
 
