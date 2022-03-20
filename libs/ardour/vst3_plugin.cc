@@ -1103,15 +1103,13 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 		throw failed_constructor ();
 	}
 
-	if (!(_processor = FUnknownPtr<Vst::IAudioProcessor> (_component).take ())) {
+	if (!(_processor = FUnknownPtr<Vst::IAudioProcessor> (_component))) {
 		_controller->terminate ();
 		_controller->release ();
 		_component->terminate ();
 		_component->release ();
 		throw failed_constructor ();
 	}
-
-	_processor->addRef ();
 
 	/* prepare process context */
 	memset (&_context, 0, sizeof (Vst::ProcessContext));
@@ -1242,7 +1240,6 @@ VST3PI::terminate ()
 
 	deactivate ();
 
-	_processor->release ();
 	_processor = 0;
 
 	disconnect_components ();

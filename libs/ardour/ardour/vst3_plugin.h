@@ -237,8 +237,8 @@ private:
 	Linux::IRunLoop* _run_loop;
 #endif
 
-	FUnknownPtr<Vst::IAudioProcessor> _processor;
-	Vst::ProcessContext               _context;
+	IPtr<Vst::IAudioProcessor> _processor;
+	Vst::ProcessContext        _context;
 
 	/* Parameters */
 	Vst3ParameterChanges _input_param_changes;
