@@ -1545,7 +1545,8 @@ void
 TempoMap::remove_meter (MeterPoint const & mp)
 {
 	superclock_t sc = mp.sclock();
-
+	Meters::iterator m;
+	
 	/* the argument is likely to be a Point-derived object that doesn't
 	 * actually exist in this TempoMap, since the caller called
 	 * TempoMap::write_copy() in order to perform an RCU operation, but
@@ -1561,7 +1562,12 @@ TempoMap::remove_meter (MeterPoint const & mp)
 	 * _points list.
 	 */
 
-	Meters::iterator m = std::upper_bound (_meters.begin(), _meters.end(), mp, Point::sclock_comparator());
+	for (m = _meters.begin(); m != _meters.end() && m->sclock() < mp.sclock(); ++m);
+
+	if (m == _meters.end()) {
+		/* not found */
+		return;
+	}
 
 	if (m->sclock() != mp.sclock()) {
 		/* error ... no meter point at the time of mp */
