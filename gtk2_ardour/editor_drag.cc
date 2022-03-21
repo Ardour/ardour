@@ -2054,6 +2054,9 @@ RegionMoveDrag::finished_no_copy (
 		_editor->selection->set (new_views);
 	}
 
+	/* write commands for the accumulated diffs for all our modified playlists */
+	add_stateful_diff_commands_for_playlists (modified_playlists);
+
 	_editor->commit_reversible_command ();
 
 	/* We have futzed with the layering of canvas items on our streamviews.
