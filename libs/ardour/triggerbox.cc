@@ -3142,7 +3142,10 @@ TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
 		t->set_follow_action_probability(all_triggers[slot]->follow_action_probability());
 		t->set_quantization(all_triggers[slot]->quantization());
 		//color ?
-		//we could try to match the prior clip's length by playing with the follow_count and follow_length (?)
+
+		t->set_follow_count(all_triggers[slot]->follow_count());
+		t->set_follow_length(all_triggers[slot]->follow_length());
+		t->set_use_follow_length(all_triggers[slot]->use_follow_length());
 	}
 
 	/* XXX what happens if pending is already set? */
