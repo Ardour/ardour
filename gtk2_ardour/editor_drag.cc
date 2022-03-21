@@ -1923,8 +1923,6 @@ RegionMoveDrag::finished_no_copy (
 			extent_min = rv->region()->position ();
 		}
 
-		cerr << "drag emin " << extent_min << " emax " << drag_delta << endl;
-
 		if (changed_tracks) {
 
 			/* insert into new playlist */
