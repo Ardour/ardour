@@ -390,8 +390,6 @@ private:
 	void        forward_resize_view (int w, int h);
 	void        parameter_change_handler (Steinberg::VST3PI::ParameterChange, uint32_t, float);
 
-	PBD::Searchpath preset_search_path () const;
-
 	Steinberg::VST3PI* _plug;
 
 	PBD::ScopedConnectionList _connections;
@@ -413,6 +411,7 @@ public:
 	PluginPtr                         load (Session& session);
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 	bool                              is_instrument () const;
+	PBD::Searchpath                   preset_search_path () const;
 
 	boost::shared_ptr<VST3PluginModule> m;
 };

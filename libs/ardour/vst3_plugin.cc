@@ -803,8 +803,11 @@ VST3Plugin::load_preset (PresetRecord r)
 std::string
 VST3Plugin::do_save_preset (std::string name)
 {
-	assert (!preset_search_path ().empty ());
-	std::string dir = preset_search_path ().front ();
+	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
+	PBD::Searchpath psp = nfo->preset_search_path ();
+	assert (!psp.empty ());
+
+	std::string dir = psp.front ();
 	std::string fn  = Glib::build_filename (dir, legalize_for_universal_path (name) + ".vstpreset");
 
 	if (g_mkdir_with_parents (dir.c_str (), 0775)) {
@@ -832,8 +835,11 @@ VST3Plugin::do_save_preset (std::string name)
 void
 VST3Plugin::do_remove_preset (std::string name)
 {
-	assert (!preset_search_path ().empty ());
-	std::string dir = preset_search_path ().front ();
+	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
+	PBD::Searchpath psp = nfo->preset_search_path ();
+	assert (!psp.empty ());
+
+	std::string dir = psp.front ();
 	std::string fn  = Glib::build_filename (dir, legalize_for_universal_path (name) + ".vstpreset");
 	::g_unlink (fn.c_str ());
 	std::string uri = string_compose (X_("VST3-S:%1:%2"), unique_id (), PBD::basename_nosuffix (fn));
@@ -919,7 +925,9 @@ VST3Plugin::find_presets ()
 	// TODO check _plug->unit_data()
 	// IUnitData: programDataSupported -> setUnitProgramData (IBStream)
 
-	PBD::Searchpath          psp = preset_search_path ();
+	boost::shared_ptr<VST3PluginInfo> info = boost::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
+	PBD::Searchpath psp = info->preset_search_path ();
+
 	std::vector<std::string> preset_files;
 	find_paths_matching_filter (preset_files, psp, vst3_preset_filter, 0, false, true, false);
 
@@ -934,42 +942,6 @@ VST3Plugin::find_presets ()
 		_presets.insert (make_pair (uri, r));
 		_preset_uri_map[uri] = *i;
 	}
-}
-
-PBD::Searchpath
-VST3Plugin::preset_search_path () const
-{
-	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
-
-	std::string vendor = legalize_for_universal_path (nfo->creator);
-	std::string name   = legalize_for_universal_path (nfo->name);
-
-	/* first listed is used to save custom user-presets */
-	PBD::Searchpath preset_path;
-#ifdef __APPLE__
-	preset_path += Glib::build_filename (Glib::get_home_dir (), "Library/Audio/Presets", vendor, name);
-	preset_path += Glib::build_filename ("/Library/Audio/Presets", vendor, name);
-#elif defined PLATFORM_WINDOWS
-	std::string documents = PBD::get_win_special_folder_path (CSIDL_PERSONAL);
-	if (!documents.empty ()) {
-		preset_path += Glib::build_filename (documents, "VST3 Presets", vendor, name);
-		preset_path += Glib::build_filename (documents, "vst3 presets", vendor, name);
-	}
-
-	preset_path += Glib::build_filename (Glib::get_user_data_dir (), "VST3 Presets", vendor, name);
-
-	std::string appdata = PBD::get_win_special_folder_path (CSIDL_APPDATA);
-	if (!appdata.empty ()) {
-		preset_path += Glib::build_filename (appdata, "VST3 Presets", vendor, name);
-		preset_path += Glib::build_filename (appdata, "vst3 presets", vendor, name);
-	}
-#else
-	preset_path += Glib::build_filename (Glib::get_home_dir (), ".vst3", "presets", vendor, name);
-	preset_path += Glib::build_filename ("/usr/share/vst3/presets", vendor, name);
-	preset_path += Glib::build_filename ("/usr/local/share/vst3/presets", vendor, name);
-#endif
-
-	return preset_path;
 }
 
 /* ****************************************************************************/
@@ -1000,9 +972,32 @@ VST3PluginInfo::load (Session& session)
 }
 
 std::vector<Plugin::PresetRecord>
-VST3PluginInfo::get_presets (bool /*user_only*/) const
+VST3PluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
+
+	/* This only returns user-presets, which is sufficient for the time
+	 * being. So far only Mixer_UI::sync_treeview_from_favorite_order()
+	 * uses PluginInfo to query presets.
+	 *
+	 * see also VST3Plugin::find_presets
+	 */
+	assert (user_only);
+
+	PBD::Searchpath psp = preset_search_path ();
+	std::vector<std::string> preset_files;
+	find_paths_matching_filter (preset_files, psp, vst3_preset_filter, 0, false, true, false);
+
+	for (std::vector<std::string>::iterator i = preset_files.begin (); i != preset_files.end (); ++i) {
+		bool        is_user     = PBD::path_is_within (psp.front (), *i);
+		std::string preset_name = PBD::basename_nosuffix (*i);
+		std::string uri         = string_compose (X_("VST3-S:%1:%2"), unique_id, preset_name);
+		if (!is_user) {
+			continue;
+		}
+		p.push_back (Plugin::PresetRecord (uri, preset_name, is_user));
+	}
+
 	return p;
 }
 
@@ -1014,6 +1009,40 @@ VST3PluginInfo::is_instrument () const
 	}
 
 	return PluginInfo::is_instrument ();
+}
+
+PBD::Searchpath
+VST3PluginInfo::preset_search_path () const
+{
+	std::string vendor = legalize_for_universal_path (creator);
+	std::string pname  = legalize_for_universal_path (name);
+
+	/* first listed is used to save custom user-presets */
+	PBD::Searchpath preset_path;
+#ifdef __APPLE__
+	preset_path += Glib::build_filename (Glib::get_home_dir (), "Library/Audio/Presets", vendor, pname);
+	preset_path += Glib::build_filename ("/Library/Audio/Presets", vendor, pname);
+#elif defined PLATFORM_WINDOWS
+	std::string documents = PBD::get_win_special_folder_path (CSIDL_PERSONAL);
+	if (!documents.empty ()) {
+		preset_path += Glib::build_filename (documents, "VST3 Presets", vendor, pname);
+		preset_path += Glib::build_filename (documents, "vst3 presets", vendor, pname);
+	}
+
+	preset_path += Glib::build_filename (Glib::get_user_data_dir (), "VST3 Presets", vendor, pname);
+
+	std::string appdata = PBD::get_win_special_folder_path (CSIDL_APPDATA);
+	if (!appdata.empty ()) {
+		preset_path += Glib::build_filename (appdata, "VST3 Presets", vendor, pname);
+		preset_path += Glib::build_filename (appdata, "vst3 presets", vendor, pname);
+	}
+#else
+	preset_path += Glib::build_filename (Glib::get_home_dir (), ".vst3", "presets", vendor, pname);
+	preset_path += Glib::build_filename ("/usr/share/vst3/presets", vendor, pname);
+	preset_path += Glib::build_filename ("/usr/local/share/vst3/presets", vendor, pname);
+#endif
+
+	return preset_path;
 }
 
 /* ****************************************************************************/
