@@ -813,6 +813,10 @@ if test -n "$MIXBUS"; then
 	fi
 fi
 
+echo "Setting Bundled Media dir/file permissions"
+find "${MediaClips}" -type d -exec chmod 755 "{}" \;
+find "${MediaClips}" -type f -exec chmod 644 "{}" \;
+
 ################################################################################
 
 if test x$DEMO_SESSION_URL != x ; then
