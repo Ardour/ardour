@@ -1109,7 +1109,6 @@ TempoMap::reset_starting_at (superclock_t sc)
 {
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("reset starting at %1\n", sc));
 	cerr << "RESET starting at " << sc << endl;
-	PBD::stacktrace (cerr, 9);
 	dump (cerr);
 
 	assert (!_tempos.empty());
@@ -3518,7 +3517,6 @@ TempoMap::set_state_3x (const XMLNode& node)
 			if (index == initial_tempo_index) {
 				if (!initial_tempo_not_at_zero) {
 					/* already added */
-					cerr << "skip, since it is the initial\n";
 					continue;
 				}
 			}
@@ -3541,7 +3539,6 @@ TempoMap::set_state_3x (const XMLNode& node)
 			if (index == initial_meter_index) {
 				if (!initial_meter_not_at_zero) {
 					/* Add a BBT point to fix the meter location */
-					cerr << "Add bartime point for " << lms.bbt << " at " << lms.sample << endl;
 					set_bartime (lms.bbt, timepos_t (lms.sample));
 				} else {
 					continue;
