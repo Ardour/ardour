@@ -1109,51 +1109,23 @@ TempoMap::reset_starting_at (superclock_t sc)
 {
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("reset starting at %1\n", sc));
 	cerr << "RESET starting at " << sc << endl;
+	PBD::stacktrace (cerr, 9);
 	dump (cerr);
 
 	assert (!_tempos.empty());
 	assert (!_meters.empty());
 
-	TempoPoint* current_tempo;
-	MeterPoint* current_meter;
-
-	/* final argument = false means "return the _points iterator
-	   corresponding to the latter of the tempo or meter point used."
-	   (i.e. the point *at* the latter of the two, not the one after it)
-	*/
-	Points::iterator p = get_tempo_and_meter (current_tempo, current_meter, sc, true, false);
-
-	TempoMetric metric (*current_tempo, *current_meter);
-	cerr << "We begin with metric = " << metric << endl;
-
-	Tempos::iterator nxt_tempo;
-
-	for (nxt_tempo = _tempos.begin(); nxt_tempo != _tempos.end(); ++nxt_tempo) {
-		if (*nxt_tempo == *current_tempo) {
-			break;
-		}
-	}
-
-	assert (nxt_tempo != _tempos.end());
-	++nxt_tempo;
-
-	if (nxt_tempo != _tempos.end() && current_tempo->sclock() != sc) {
-		++nxt_tempo;
-	}
-
-	if (nxt_tempo != _tempos.end()) {
-		cerr << ":::: next tempo is " << *nxt_tempo << endl;
-	} else {
-		cerr << ";;;; next tempo at end\n";
-	}
 
 	TempoPoint*     tp;
+	TempoPoint*     nxt_tempo = 0;
 	MeterPoint*     mp;
 	MusicTimePoint* mtp;
+	TempoMetric metric (_tempos.front(), _meters.front());
+	Points::iterator p;
 
-	cerr << "after all that, p @ end ? " << (p == _points.end()) << endl;
+	cerr << "We begin at " << sc << " with metric = " << metric << endl;
 
-	for (; p != _points.end(); ++p) {
+	for (p = _points.begin(); p != _points.end(); ++p) {
 
 		bool reset_metric = false;
 		bool reset_point = false;
@@ -1164,41 +1136,52 @@ TempoMap::reset_starting_at (superclock_t sc)
 		if ((mtp = dynamic_cast<MusicTimePoint*> (&*p)) != 0) {
 
 			/* nothing to do here. We do not reset music time (bar
-			 * time) points since everything their position is set
+			 * time) points since everything about their position is set
 			 * by the user. The only time we would change them is
 			 * if we alter the time domain of the tempo map.
 			 */
 
-			cerr << "MTP!\n";
+			metric = TempoMetric (*mtp, *mtp);
+			cerr << "Bartime! " << metric << endl;
 
 		} else if ((tp = dynamic_cast<TempoPoint*> (&*p)) != 0) {
-			reset_metric = true;
 			reset_point = true;
 			is_tempo = true;
-			current_tempo = tp;
-			cerr << "Tempo! " << *tp << endl;
+			metric = TempoMetric (*tp, metric.meter());
+			cerr << "Tempo! " << metric << endl;
 		} else if ((mp = dynamic_cast<MeterPoint*> (&*p)) != 0) {
-			reset_metric = true;
 			reset_point = true;
-			current_meter = mp;
-			cerr << "Meter! " << *mp << endl;
+			metric = TempoMetric (metric.tempo(), *mp);
+			cerr << "Meter! " << metric << endl;
+		}
+
+		if (p->sclock() < sc) {
+			continue;
 		}
 
 		if (is_tempo) {
-			if (tp->ramped() && nxt_tempo != _tempos.end()) {
+
+			Points::iterator pp = p;
+			nxt_tempo = 0;
+
+			while (pp != _points.end()) {
+				++pp;
+				TempoPoint* nt = dynamic_cast<TempoPoint*> (&*pp);
+				if (nt) {
+					nxt_tempo = nt;
+					break;
+				}
+			}
+
+			if (tp->ramped() && nxt_tempo) {
 				tp->compute_omega (*nxt_tempo);
 			}
-			++nxt_tempo;
 		}
 
 		if (reset_point) {
 			superclock_t sc = metric.superclock_at (p->bbt());
 			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("\tbased on %1 move to %2,%3\n", p->bbt(), sc, p->beats()));
 			p->set (sc, p->beats(), p->bbt());
-		}
-
-		if (reset_metric) {
-			metric = TempoMetric (*current_tempo, *current_meter);
 		}
 	}
 
@@ -1546,7 +1529,7 @@ TempoMap::remove_meter (MeterPoint const & mp)
 {
 	superclock_t sc = mp.sclock();
 	Meters::iterator m;
-	
+
 	/* the argument is likely to be a Point-derived object that doesn't
 	 * actually exist in this TempoMap, since the caller called
 	 * TempoMap::write_copy() in order to perform an RCU operation, but
@@ -3437,6 +3420,8 @@ TempoMap::set_state_3x (const XMLNode& node)
 	int32_t initial_meter_index = -1;
 	int32_t index;
 	bool need_points_clear = true;
+	bool initial_tempo_not_at_zero = false;
+	bool initial_meter_not_at_zero = false;
 
 	for (niter = nlist.begin(), index = 0; niter != nlist.end(); ++niter, ++index) {
 		XMLNode* child = *niter;
@@ -3448,6 +3433,10 @@ TempoMap::set_state_3x (const XMLNode& node)
 			if (parse_tempo_state_3x (*child, lts)) {
 				error << _("Tempo map: could not set new state, restoring old one.") << endmsg;
 				break;
+			}
+
+			if (lts.sample != 0) {
+				initial_tempo_not_at_zero = true;
 			}
 
 			Tempo t (lts.note_types_per_minute,
@@ -3472,6 +3461,10 @@ TempoMap::set_state_3x (const XMLNode& node)
 			if (parse_meter_state_3x (*child, lms)) {
 				error << _("Tempo map: could not use old meter state, restoring old one.") << endmsg;
 				break;
+			}
+
+			if (lms.beat != 0) {
+				initial_meter_not_at_zero = true;
 			}
 
 			Meter m (lms.divisions_per_bar, lms.note_type);
@@ -3514,6 +3507,13 @@ TempoMap::set_state_3x (const XMLNode& node)
 				/* already added */
 				continue;
 			}
+			if (index == initial_tempo_index) {
+				if (!initial_tempo_not_at_zero) {
+					/* already added */
+					cerr << "skip, since it is the initial\n";
+					continue;
+				}
+			}
 
 			Tempo t (lts.note_types_per_minute,
 			         lts.end_note_types_per_minute,
@@ -3531,8 +3531,13 @@ TempoMap::set_state_3x (const XMLNode& node)
 			}
 
 			if (index == initial_meter_index) {
-				/* already added */
-				continue;
+				if (!initial_meter_not_at_zero) {
+					/* Add a BBT point to fix the meter location */
+					cerr << "Add bartime point for " << lms.bbt << " at " << lms.sample << endl;
+					set_bartime (lms.bbt, timepos_t (lms.sample));
+				} else {
+					continue;
+				}
 			}
 
 			Meter m (lms.divisions_per_bar, lms.note_type);
