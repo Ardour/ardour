@@ -1744,6 +1744,14 @@ TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
 
 	can_match = (can_match || arg == typename const_traits_t::time_type ());
 
+	/* Set return tempo and meter points by value using the starting tempo
+	 * and meter passed in.
+	 *
+	 * Then advance through all points, resetting either tempo and/or meter
+	 * until we find a point beyond (or equal to, if @param can_match is
+	 * true) the @param arg (end time)
+	 */
+
 	for (tp = tstart, mp = mstart, p = begini; p != endi; ++p) {
 
 		typename const_traits_t::tempo_point_type tpp;
