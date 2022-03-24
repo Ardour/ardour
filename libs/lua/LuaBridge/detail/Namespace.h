@@ -485,8 +485,8 @@ private:
     template <class T>
     static int ctorNilPtrPlacementProxy (lua_State* L)
     {
-      const T* newobject = new T ();
-      Stack<T>::push (L, *newobject);
+      const T newobject;
+      Stack<T>::push (L, newobject);
       return 1;
     }
 
