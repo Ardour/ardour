@@ -1162,14 +1162,15 @@ TempoMap::reset_starting_at (superclock_t sc)
 
 			Points::iterator pp = p;
 			nxt_tempo = 0;
+			++pp;
 
 			while (pp != _points.end()) {
-				++pp;
 				TempoPoint* nt = dynamic_cast<TempoPoint*> (&*pp);
 				if (nt) {
 					nxt_tempo = nt;
 					break;
 				}
+				++pp;
 			}
 
 			if (tp->ramped() && nxt_tempo) {
