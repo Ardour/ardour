@@ -82,7 +82,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
                                                Time                                t,
                                                bool                                force_discrete,
                                                const std::set<Evoral::Parameter>&  filtered,
-                                               std::set<WeakNotePtr> const *                 active_notes)
+                                               std::set<WeakNotePtr> const *       active_notes)
 	: _seq(&seq)
 	, _active_patch_change_message (0)
 	, _type(NIL)
