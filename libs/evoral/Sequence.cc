@@ -58,7 +58,7 @@ using namespace PBD;
     XXX: This is a hack.  The time should probably be expressed in
     seconds rather than beats, and should be configurable etc. etc.
 */
-static Temporal::Beats const time_between_interpolated_controller_outputs = Temporal::Beats::ticks (256);
+static Temporal::Beats const time_between_interpolated_controller_outputs = Temporal::Beats::ticks (8);
 
 namespace Evoral {
 
