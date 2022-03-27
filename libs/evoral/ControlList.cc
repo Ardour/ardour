@@ -1691,123 +1691,136 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 		}
 	}
 
+	/* No event between start and start + min_x_delta, so otherwise
+	 * interpolate at start + min_x_delta
+	 */
+
 	start += min_x_delta;
 
 	// Hack to avoid infinitely repeating the same event
 	build_search_cache_if_necessary (start);
 
-	if (_search_cache.first != _events.end()) {
+	if (_search_cache.first == _events.end()) {
+		/* No points in the future, so no steps (towards them) in the future */
+		return false;
+	}
 
-		const ControlEvent* first = NULL;
-		const ControlEvent* next = NULL;
+	const ControlEvent* first = NULL;
+	const ControlEvent* next = NULL;
 
-		if (_search_cache.first == _events.begin() || (*_search_cache.first)->when <= start) {
-			/* Step is after first */
-			first = *_search_cache.first;
-			++_search_cache.first;
-			if (_search_cache.first == _events.end()) {
-				return false;
-			}
-			next = *_search_cache.first;
-
-		} else {
-			/* Step is before first */
-			const_iterator prev = _search_cache.first;
-			--prev;
-			first = *prev;
-			next = *_search_cache.first;
-		}
-
-		if (inclusive && first->when == start) {
-			x = first->when;
-			y = first->value;
-			/* Move left of cache to this point
-			 * (Optimize for immediate call this cycle within range) */
-			_search_cache.left = first->when;
-			return true;
-		} else if (next->when < start || (!inclusive && next->when == start)) {
-			/* "Next" is before the start, no points left. */
+	if (_search_cache.first == _events.begin() || (*_search_cache.first)->when <= start) {
+		/* Start is after first */
+		first = *_search_cache.first;
+		++_search_cache.first;
+		if (_search_cache.first == _events.end()) {
+			/* no later events, nothing to interpolate towards */
 			return false;
 		}
+		next = *_search_cache.first;
 
-		if (fabs(first->value - next->value) <= 1) {
-			if (next->when > start) {
-				x = next->when;
-				y = next->value;
-				/* Move left of cache to this point
-				 * (Optimize for immediate call this cycle within range) */
-				_search_cache.left = next->when;
-				return true;
-			} else {
-				return false;
-			}
-		}
+	} else {
+		/* Start is before first */
+		assert (_search_cache.first != _events.begin());
+		const_iterator prev = _search_cache.first;
+		--prev;
+		first = *prev;
+		next = *_search_cache.first;
+	}
 
-		const double slope = (next->value - first->value) / (double) first->when.distance (next->when).distance().val();
-		//cerr << "start y: " << start_y << endl;
+	if (inclusive && first->when == start) {
+		/* existing point matches start */
 
-		//y = first->value + (slope * fabs(start - first->when));
+		x = first->when;
 		y = first->value;
+		/* Move left of cache to this point
+		 * (Optimize for immediate call this cycle within range)
+		 */
+		_search_cache.left = first->when;
+		return true;
+	} else if (next->when < start || (!inclusive && next->when == start)) {
+		/* "Next" is before the start, no points left. */
+		return false;
+	}
 
-		if (first->value < next->value) { // ramping up
-			y = ceil(y);
-		} else { // ramping down
-			y = floor(y);
+	if (fabs (first->value - next->value) <= 1) {
+
+		/* delta between the two spanning points is <= 1,
+		   consider the next point as the answer, but only if the next
+		   point is actually beyond @param start.
+		*/
+
+		if (next->when > start) {
+			x = next->when;
+			y = next->value;
+			/* Move left of cache to this point
+			 * (Optimize for immediate call this cycle within range) */
+			_search_cache.left = next->when;
+			return true;
+		} else {
+			/* no suitable point can be determined */
+			return false;
 		}
+	}
+
+	const double slope = (next->value - first->value) / (double) first->when.distance (next->when).distance().val();
+
+	//cerr << "start y: " << start_y << endl;
+
+	//y = first->value + (slope * fabs(start - first->when));
+	y = first->value;
+
+	if (first->value < next->value) { // ramping up
+		y = ceil(y);
+	} else { // ramping down
+		y = floor(y);
+	}
+
+	if (_time_domain == AudioTime) {
+		x = first->when + timepos_t (samplepos_t ((y - first->value) / (double)slope));
+	} else {
+		x = first->when + timepos_t::from_ticks ((y - first->value) / (double)slope);
+	}
+
+	/* Now iterate until x has a suitable relationship to start (depending
+	 * on the value of @param inclusive. Either less than @param start or
+	 * less-than-or-equal with y not yet reaching the value of the next
+	 * point.
+	 */
+
+	const double delta = (first->value < next->value) ? 1.0 /* ramping up */ : -1.0; /* ramping down */
+
+	while ((inclusive && x < start) || (x <= start && y != next->value)) {
+
+		y += delta;
 
 		if (_time_domain == AudioTime) {
 			x = first->when + timepos_t (samplepos_t ((y - first->value) / (double)slope));
 		} else {
-			x = first->when + timepos_t::from_ticks ((y - first->value) / (double)slope);
+			x = first->when + timepos_t::from_ticks (int64_t ((y - first->value) / (double)slope));
 		}
-
-		while ((inclusive && x < start_time) || (x <= start_time && y != next->value)) {
-
-			if (first->value < next->value) { // ramping up
-				y += 1.0;
-			} else { // ramping down
-				y -= 1.0;
-			}
-
-			if (_time_domain == AudioTime) {
-				x = first->when + timepos_t (samplepos_t ((y - first->value) / (double)slope));
-			} else {
-				x = first->when + timepos_t::from_ticks (int64_t ((y - first->value) / (double)slope));
-			}
-		}
-
-#if 0
-		cerr << first->value << " @ " << first->when << " ... "
-		  << next->value << " @ " << next->when
-		  << " = " << y << " @ " << x << endl;
-#endif
-
-		assert(    (y >= first->value && y <= next->value)
-		           || (y <= first->value && y >= next->value) );
-
-
-		const bool past_start = (inclusive ? x >= start_time : x > start_time);
-		if (past_start) {
-			/* Move left of cache to this point
-			 * (Optimize for immediate call this cycle within range) */
-			_search_cache.left = x;
-			assert(inclusive ? x >= start_time : x > start_time);
-			return true;
-		} else {
-			if (inclusive) {
-				x = next->when;
-				_search_cache.left = next->when;
-			} else {
-				x = start;
-				_search_cache.left = x;
-			}
-			return true;
-		}
-
-	} else {
-		/* No points in the future, so no steps (towards them) in the future */
-		return false;
 	}
+
+	assert ((y >= first->value && y <= next->value) || (y <= first->value && y >= next->value) );
+
+	const bool past_start = (inclusive ? x >= start : x > start);
+
+	if (past_start) {
+		/* Move left of cache to this point
+		 * (Optimize for immediate call this cycle within range) */
+		_search_cache.left = x;
+		assert(inclusive ? x >= start : x > start);
+		return true;
+	}
+
+	if (inclusive) {
+		x = next->when;
+		_search_cache.left = next->when;
+	} else {
+		x = start;
+		_search_cache.left = x;
+	}
+
+	return true;
 }
 
 
