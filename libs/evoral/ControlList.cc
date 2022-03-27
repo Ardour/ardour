@@ -1652,7 +1652,19 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 {
 	timepos_t start = start_time;
 
-	// cout << "earliest_event(start: " << start << ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ")" << endl;
+	/* the max value is given as an out-of-bounds default value, when the
+	   true default is zero, but the time-domain is not known at compile
+	   time. This allows us to reset it to zero with the correct time
+	   domain (equality comparisons across time domains where the actual
+	   scalar value is zero should always be cheap, but that's not true of
+	   other operators such as >, < etc.)
+	*/
+
+	if (min_x_delta == Temporal::timecnt_t::max()) {
+		min_x_delta = Temporal::timecnt_t (time_domain());
+	}
+
+	// cout << "earliest_event(start: " << start << ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ") mxd " << min_x_delta << endl;
 
 	const_iterator length_check_iter = _events.begin();
 	if (_events.empty()) { // 0 events
