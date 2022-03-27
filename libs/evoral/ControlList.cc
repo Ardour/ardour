@@ -1424,7 +1424,7 @@ ControlList::unlocked_eval (timepos_t const & xtime) const
 	double fraction;
 	double xx;
 	double ll;
-	
+
 	const_iterator length_check_iter = _events.begin();
 	for (npoints = 0; npoints < 4; ++npoints, ++length_check_iter) {
 		if (length_check_iter == _events.end()) {
@@ -1667,15 +1667,16 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 	// cout << "earliest_event(start: " << start << ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ") mxd " << min_x_delta << endl;
 
 	const_iterator length_check_iter = _events.begin();
-	if (_events.empty()) { // 0 events
+	if (_events.empty()) {
+		/* no events, so we cannot interpolate */
 		return false;
-	} else if (_events.end() == ++length_check_iter) { // 1 event
+	} else if (_events.end() == ++length_check_iter) {
+		/* one event, which decomposes to the same logic as the discrete one */
 		return rt_safe_earliest_event_discrete_unlocked (start + min_x_delta, x, y, inclusive);
 	}
 
 	if (min_x_delta > 0) {
-		/* if there is an event between [start and start + min_x_delta], use it,
-		 * otherwise interpolate at start + min_x_delta
+		/* if there is an event between [start ... start + min_x_delta], use it,
 		 */
 		build_search_cache_if_necessary (start);
 		const ControlEvent* first = *_search_cache.first;
