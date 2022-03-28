@@ -155,6 +155,10 @@ ExportFormatSelector::open_edit_dialog (bool new_dialog)
 {
 	ExportFormatDialog dialog (state->format, new_dialog);
 	dialog.set_session (_session);
+	Gtk::Widget* top = get_toplevel();
+	if (top) {
+		dialog.set_transient_for (*dynamic_cast<Gtk::Window*>(top));
+	}
 	Gtk::ResponseType response = (Gtk::ResponseType) dialog.run();
 	if (response == Gtk::RESPONSE_APPLY) {
 		update_format_description ();
