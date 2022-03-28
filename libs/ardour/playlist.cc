@@ -499,7 +499,7 @@ Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 void
 Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 {
-	Temporal::RangeMove move (r->nt_last (), r->length (), r->position ());
+	Temporal::RangeMove move (r->last_position (), r->last_length (), r->position ());
 
 	if (holding_state ()) {
 		pending_range_moves.push_back (move);
