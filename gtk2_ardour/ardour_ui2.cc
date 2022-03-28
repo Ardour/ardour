@@ -91,6 +91,7 @@ ARDOUR_UI::setup_tooltips ()
 	ArdourCanvas::Canvas::set_tooltip_timeout (Gtk::Settings::get_default()->property_gtk_tooltip_timeout ());
 
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
+	set_tip (layered_button, _("When active, new recordings will be added as regions on a layer atop existing regions.\nWhen disabled, the underlying region will be spliced and replaced with the newly recorded region."));
 	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	parameter_changed("click-gain");
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
