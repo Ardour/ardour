@@ -581,21 +581,7 @@ MidiTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 		_midi_controls_box.hide();
 	}
 
-	if (h >= KEYBOARD_MIN_HEIGHT) {
-		if (is_track() && _range_scroomer) {
-			_range_scroomer->show();
-		}
-		if (is_track() && _piano_roll_header) {
-			_piano_roll_header->show();
-		}
-	} else {
-		if (is_track() && _range_scroomer) {
-			_range_scroomer->hide();
-		}
-		if (is_track() && _piano_roll_header) {
-			_piano_roll_header->hide();
-		}
-	}
+	update_scroomer_visbility (h, layer_display ());
 
 	/* We need to do this after changing visibility of our stuff, as it will
 	 * eventually trigger a call to Editor::reset_controls_layout_width(),
@@ -603,6 +589,47 @@ MidiTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	 * piano roll.
 	 */
 	RouteTimeAxisView::set_height (h, m);
+}
+
+void
+MidiTimeAxisView::update_scroomer_visbility (uint32_t h, LayerDisplay d)
+{
+	if (!is_track ()) {
+		return;
+	}
+	if (h >= KEYBOARD_MIN_HEIGHT && d == Overlaid) {
+		if (_range_scroomer) {
+			_range_scroomer->show();
+		}
+		if (_piano_roll_header) {
+			_piano_roll_header->show();
+		}
+	} else {
+		if (_range_scroomer) {
+			_range_scroomer->hide();
+		}
+		if (_piano_roll_header) {
+			_piano_roll_header->hide();
+		}
+	}
+}
+
+void
+MidiTimeAxisView::set_layer_display (LayerDisplay d)
+{
+	LayerDisplay prev_layer_display = layer_display ();
+	RouteTimeAxisView::set_layer_display (d);
+	LayerDisplay curr_layer_display = layer_display ();
+
+	if (curr_layer_display == prev_layer_display) {
+		return;
+	}
+
+	uint32_t h = current_height ();
+	update_scroomer_visbility (h, curr_layer_display);
+
+	/* If visibility changed, trigger a call to Editor::reset_controls_layout_width() */
+	_stripable->gui_changed ("track_height", (void *) 0);
 }
 
 void

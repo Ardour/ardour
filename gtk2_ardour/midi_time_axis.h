@@ -86,6 +86,7 @@ public:
 	MidiStreamView* midi_view();
 
 	void set_height (uint32_t, TrackHeightMode m = OnlySelf);
+	void set_layer_display (LayerDisplay d);
 
 	boost::shared_ptr<ARDOUR::MidiRegion> add_region (Temporal::timepos_t const &, Temporal::timecnt_t const &, bool);
 
@@ -140,6 +141,8 @@ private:
 	void route_active_changed ();
 	void note_range_changed ();
 	void contents_height_changed ();
+
+	void update_scroomer_visbility (uint32_t, LayerDisplay);
 
 	void update_control_names ();
 	void update_midi_controls_visibility (uint32_t);
