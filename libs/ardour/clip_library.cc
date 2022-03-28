@@ -50,6 +50,7 @@ ARDOUR::clip_library_dir (bool create_if_missing)
 	if (p == X_("@default@")) {
 		const char* c = 0;
 		if ((c = getenv ("XDG_DATA_HOME")) != 0) {
+			/* default:  $HOME/.local/share */
 			p = c;
 			p = Glib::build_filename (p, "sounds", "clips");
 		} else {
@@ -66,7 +67,7 @@ ARDOUR::clip_library_dir (bool create_if_missing)
 			p = Glib::build_filename (Glib::get_user_data_dir (), "Clip Library");
 #else
 			/* Linux, *BSD: use XDG_DATA_HOME prefix, version-independent app folder */
-			p = Glib::build_filename (Glib::get_user_data_dir (), ".local", "share", "sounds", "clips");
+			p = Glib::build_filename (Glib::get_user_data_dir (), "sounds", "clips");
 #endif
 		}
 
