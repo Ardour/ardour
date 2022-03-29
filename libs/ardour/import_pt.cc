@@ -285,14 +285,12 @@ Session::import_pt_rest (PTFFormat& ptf)
 	uint16_t i;
 	uint16_t nth = 0;
 	uint16_t ntr = 0;
-	vector<struct ptflookup> usedtracks;
 	struct ptflookup utr;
 	vector<midipair> uniquetr;
 
 	vector<PlaylistState> playlists;
 	vector<PlaylistState>::iterator pl;
 
-	usedtracks.clear();
 	just_one_src.clear();
 	uniquetr.clear();
 	ptfregpair.clear();
@@ -375,42 +373,18 @@ Session::import_pt_rest (PTFFormat& ptf)
 
 				/* Matched a ptf active region to an ardour region */
 				boost::shared_ptr<Region> r = RegionFactory::region_by_id (p->id);
-				vector<struct ptflookup>::iterator lookuptr = usedtracks.begin ();
-				vector<struct ptflookup>::iterator found;
-				if ((found = std::find (lookuptr, usedtracks.end (), utr)) != usedtracks.end ()) {
-					DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) ptf_tr(%3) ard_tr(%4)\n", a->reg.wave.filename.c_str (), a->reg.index, found->index1, found->index2));
+				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, a->index));
 
-					/* Use existing track if possible */
-					existing_track = get_nth_audio_track (found->index2 + 1);
-					if (!existing_track) {
-						list<boost::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a->name.c_str(), PresentationInfo::max_order, Normal));
-						if (at.empty ()) {
-							return;
-						}
-						existing_track = at.back ();
-					}
-					/* Put on existing track */
-					boost::shared_ptr<Playlist> playlist = existing_track->playlist ();
-					boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
-					playlist->clear_changes ();
-					playlist->add_region (copy, timepos_t (a->reg.startpos));
-					//add_command (new StatefulDiffCommand (playlist));
-				} else {
-					/* Put on a new track */
-					DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) new_tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, nth));
-					list<boost::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a->name.c_str(), PresentationInfo::max_order, Normal));
-					if (at.empty ()) {
-						return;
-					}
-					existing_track = at.back ();
-					boost::shared_ptr<Playlist> playlist = existing_track->playlist();
-					boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
-					playlist->clear_changes ();
-					playlist->add_region (copy, timepos_t (a->reg.startpos));
-					//add_command (new StatefulDiffCommand (playlist));
-					nth++;
-					usedtracks.push_back (utr);
-				}
+				/* Use track we created earlier */
+				existing_track = get_nth_audio_track (a->index);
+				assert (existing_track);
+
+				/* Put on existing track */
+				boost::shared_ptr<Playlist> playlist = existing_track->playlist ();
+				boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
+				playlist->clear_changes ();
+				playlist->add_region (copy, timepos_t (a->reg.startpos));
+				//add_command (new StatefulDiffCommand (playlist));
 			}
 		}
 	}
