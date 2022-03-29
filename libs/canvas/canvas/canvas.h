@@ -107,6 +107,9 @@ public:
 		return &_root;
 	}
 
+	void freeze_queue_draw ();
+	void thaw_queue_draw ();
+
 	void set_background_color (Gtkmm2ext::Color);
 	Gtkmm2ext::Color background_color() const { return _bg_color; }
 
@@ -185,6 +188,8 @@ public:
 
 protected:
 	Root             _root;
+	uint32_t         _queue_draw_frozen;
+	Rect              frozen_area;
 	Gtkmm2ext::Color _bg_color;
 
 	mutable gint64 _last_render_start_timestamp;
@@ -192,6 +197,7 @@ protected:
 	static uint32_t tooltip_timeout_msecs;
 
 	void queue_draw_item_area (Item *, Rect);
+	Rect compute_draw_item_area (Item *, Rect);
 
 	virtual void pick_current_item (int state) = 0;
 	virtual void pick_current_item (Duple const &, int state) = 0;
