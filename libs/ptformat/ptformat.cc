@@ -1066,6 +1066,42 @@ PTFFormat::parserest(void) {
 			tr++;
 		}
 	}
+
+	if (_tracks.begin() == _tracks.end())
+		return found;
+
+	/* Sort track entries by index */
+	std::sort(_tracks.begin(), _tracks.end());
+
+	/* Renumber track entries to be gapless */
+	for (std::vector<track_t>::iterator tr = _tracks.begin() + 1;
+			tr != _tracks.end(); tr++) {
+		while ((*tr).index == (*(tr-1)).index) {
+			tr++;
+			if (tr == _tracks.end()) {
+				break;
+			}
+		}
+		if (tr == _tracks.end()) {
+			break;
+		}
+		int diffn = (*tr).index - (*(tr-1)).index - 1;
+		if (diffn) {
+			for (std::vector<track_t>::iterator rest = tr;
+					rest != _tracks.end(); rest++) {
+				(*rest).index -= diffn;
+			}
+		}
+	}
+
+	/* Renumber track entries to be zero based */
+	int first = _tracks[0].index;
+	if (first > 0) {
+		for (std::vector<track_t>::iterator tr = _tracks.begin();
+				tr != _tracks.end(); tr++) {
+			(*tr).index -= first;
+		}
+	}
 	return found;
 }
 
