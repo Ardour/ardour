@@ -89,7 +89,7 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, editor(0)
 	, current_visible_sync_position(0.0)
 	, valid(false)
-	, _disable_display (1)
+	, _disable_display (0)
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
@@ -170,7 +170,7 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, editor(0)
 	, current_visible_sync_position(0.0)
 	, valid(false)
-	, _disable_display (1)
+	, _disable_display (0)
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
@@ -237,10 +237,6 @@ RegionView::init (bool wfd)
 
 	_cue_markers_visible = false;
 	update_cue_markers ();
-
-	if (wfd) {
-		enable_display ();
-	}
 
 	/* derived class calls set_height () including RegionView::set_height() in ::init() */
 	//set_height (trackview.current_height());
@@ -1263,6 +1259,9 @@ RegionView::enable_display ()
 	std::cerr << "EnableDisplay " << this << " currently " << _disable_display << std::endl;
 	if (_disable_display) {
 		_disable_display--;
+		if (_disable_display == 0) {
+			redisplay ();
+		}
 	}
 }
 

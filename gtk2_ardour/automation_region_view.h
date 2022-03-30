@@ -67,6 +67,7 @@ public:
 
 	void set_height (double);
 	void reset_width_dependent_items(double pixel_width);
+	void redisplay () {}
 
 protected:
 	void create_line(boost::shared_ptr<ARDOUR::AutomationList> list);

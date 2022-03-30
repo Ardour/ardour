@@ -255,6 +255,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 void
 MidiRegionView::init (bool /*wfd*/)
 {
+	DisplaySuspender ds (*this);
+
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
 	_model = midi_region()->midi_source(0)->model();
@@ -271,10 +273,8 @@ MidiRegionView::init (bool /*wfd*/)
 	region_resized (ARDOUR::bounds_change);
 	//region_locked ();
 
-	disable_display ();
 	set_colors ();
 	reset_width_dependent_items (_pixel_width);
-	enable_display ();
 
 	display_model (_model);
 
@@ -1079,8 +1079,20 @@ MidiRegionView::get_events (Events& e, Evoral::Sequence<Temporal::Beats>::NoteOp
 }
 
 void
+MidiRegionView::redisplay ()
+{
+	redisplay_model ();
+}
+
+void
 MidiRegionView::redisplay_model()
 {
+	if (!display_enabled()) {
+		return;
+	}
+
+	// CALLGRIND_START_INSTRUMENTATION;
+
 	group->canvas()->freeze_queue_draw ();
 
 	if (_active_notes) {
@@ -1195,7 +1207,7 @@ MidiRegionView::redisplay_model()
 
 		for (set<Evoral::event_id_t>::iterator it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
 			if ((*it) == note->id()) {
-				add_to_selection (cne);
+				// add_to_selection (cne);
 			}
 		}
 	}
@@ -1215,6 +1227,9 @@ MidiRegionView::redisplay_model()
 	_pending_note_selection.clear ();
 
 	group->canvas()->thaw_queue_draw ();
+
+	// CALLGRIND_STOP_INSTRUMENTATION;
+	// CALLGRIND_DUMP_STATS;
 }
 
 void
@@ -1256,7 +1271,7 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 				p->update_name ();
 
 				p->show();
-			}
+		}
 
 		} else {
 			add_canvas_patch_change (*i);
@@ -1372,17 +1387,6 @@ void
 MidiRegionView::region_resized (const PropertyChange& what_changed)
 {
 	RegionView::region_resized(what_changed); // calls RegionView::set_duration()
-
-#if 0
-	/* catch end and start trim so we can update the view*/
-	if (!what_changed.contains (ARDOUR::Properties::start) &&
-	    what_changed.contains (ARDOUR::Properties::length)) {
-		enable_display ();
-	} else if (what_changed.contains (ARDOUR::Properties::start) &&
-	    what_changed.contains (ARDOUR::Properties::length)) {
-		enable_display ();
-	}
-#endif
 }
 
 void
@@ -4009,18 +4013,6 @@ MidiRegionView::color_handler ()
 	}
 
 	/* XXX probably more to do here */
-}
-
-void
-MidiRegionView::enable_display ()
-{
-	bool was_disabled = !display_enabled();
-
-	RegionView::enable_display ();
-
-	if (was_disabled && display_enabled()) {
-		redisplay_model ();
-	}
 }
 
 void

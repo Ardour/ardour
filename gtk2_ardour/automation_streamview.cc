@@ -105,8 +105,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 				arv->line()->set_list (list);
 			}
 			(*i)->set_valid (true);
-			(*i)->enable_display ();
-			display_region(arv);
+			display_region (arv);
 
 			return 0;
 		}
@@ -123,7 +122,6 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 
 	/* follow global waveform setting */
 
-	region_view->enable_display();
 	display_region (region_view);
 
 	/* catch regionview going away */
@@ -167,10 +165,12 @@ AutomationStreamView::set_automation_state (AutoState state)
 void
 AutomationStreamView::redisplay_track ()
 {
+	vector<RegionView::DisplaySuspender> vds;
 	// Flag region views as invalid and disable drawing
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
-		(*i)->disable_display ();
+		vds.push_back (RegionView::DisplaySuspender (**i));
+
 	}
 
 	// Add and display region views, and flag them as valid

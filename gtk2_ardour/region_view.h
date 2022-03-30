@@ -101,9 +101,19 @@ public:
 	virtual void entered () {}
 	virtual void exited () {}
 
-	virtual void enable_display();
-	virtual void disable_display();
 	bool display_enabled() const;
+	virtual void redisplay() = 0;
+
+	struct DisplaySuspender {
+		DisplaySuspender (RegionView& rv) : region_view (rv) {
+			region_view.disable_display ();
+		}
+		~DisplaySuspender () {
+			region_view.enable_display ();
+		}
+		RegionView& region_view;
+	};
+
 	virtual void update_coverage_frame (LayerDisplay);
 
 	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;
@@ -228,6 +238,11 @@ private:
 	typedef std::list<ViewCueMarker*> ViewCueMarkers;
 	ViewCueMarkers _cue_markers;
 	bool _cue_markers_visible;
+
+  private:
+	friend class DisplaySuspender;
+	void enable_display();
+	void disable_display();
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

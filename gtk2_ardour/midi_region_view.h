@@ -120,6 +120,7 @@ public:
 	void hide_step_edit_cursor ();
 	void set_step_edit_cursor_width (Temporal::Beats beats);
 
+	virtual void redisplay ();
 	void redisplay_model();
 
 	GhostRegion* add_ghost (TimeAxisView&);
@@ -296,8 +297,6 @@ public:
 	}
 
 	void selection_as_notelist (Notes& selected, bool allow_all_if_none_selected = false);
-
-	void enable_display ();
 
 	void set_channel_selector_scoped_note(NoteBase* note){ _channel_selection_scoped_note = note; }
 	NoteBase* channel_selector_scoped_note(){  return _channel_selection_scoped_note; }

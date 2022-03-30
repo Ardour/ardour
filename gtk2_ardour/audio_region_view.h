@@ -144,6 +144,8 @@ public:
 		return _end_xfade_visible;
 	}
 
+	void redisplay () {}
+
 protected:
 
 	/* this constructor allows derived types
