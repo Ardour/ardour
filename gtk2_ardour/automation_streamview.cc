@@ -73,7 +73,7 @@ AutomationStreamView::~AutomationStreamView ()
 
 
 RegionView*
-AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool wait_for_data, bool /*recording*/)
+AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool /*wait_for_data*/, bool /*recording*/)
 {
 	if (!region) {
 		return 0;
