@@ -1872,8 +1872,6 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 		);
 
 	_patch_changes.insert (make_pair (patch, patch_change));
-
-	display_patch_changes();
 }
 
 void
