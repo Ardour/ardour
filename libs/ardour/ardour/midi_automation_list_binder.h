@@ -32,7 +32,7 @@ class AutomationList;
 class LIBARDOUR_API MidiAutomationListBinder : public MementoCommandBinder<ARDOUR::AutomationList>
 {
 public:
-	MidiAutomationListBinder (boost::shared_ptr<ARDOUR::MidiSource>, Evoral::Parameter);
+	MidiAutomationListBinder (ARDOUR::MidiSource&, Evoral::Parameter);
 	MidiAutomationListBinder (XMLNode *, ARDOUR::Session::SourceMap const &);
 
 	void set_state (XMLNode const & node , int version) const;
@@ -41,9 +41,16 @@ public:
 
 	void add_state (XMLNode *);
 
+	void source_died () {
+		std::cerr << "Source died, drop binder\n";
+		/* The source we are binding died, so drop references to ourselves */
+		this->drop_references ();
+	}
+
 private:
-	boost::shared_ptr<ARDOUR::MidiSource> _source;
+	ARDOUR::MidiSource*  _source;
 	Evoral::Parameter _parameter;
+	PBD::ScopedConnection source_death_connection;
 };
 
 } // namespace ARDOUR
