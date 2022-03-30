@@ -186,7 +186,8 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 	region_view->enable_display (true);
 	region_view->set_height (child_height());
 
-	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
+	boost::shared_ptr<MidiSource> source (region_view->midi_region()->midi_source(0));
+
 	if (!source) {
 		error << _("attempt to display MIDI region with no source") << endmsg;
 		return;
@@ -202,9 +203,7 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 		return;
 	}
 
-	_range_dirty = update_data_note_range(
-		source->model()->lowest_note(),
-		source->model()->highest_note());
+	_range_dirty = update_data_note_range (source->model()->lowest_note(), source->model()->highest_note());
 
 	// Display region contents
 	region_view->display_model(source->model());
@@ -290,8 +289,7 @@ MidiStreamView::redisplay_track ()
 	}
 
 	// Add and display region views, and flag them as valid
-	_trackview.track()->playlist()->foreach_region(
-		sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view)));
+	_trackview.track()->playlist()->foreach_region (sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view)));
 
 	// Stack regions by layer, and remove invalid regions
 	layer_regions();

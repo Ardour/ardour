@@ -166,9 +166,7 @@ AudioStreamView::redisplay_track ()
 
 	// Add and display views, and flag them as valid
 	if (_trackview.is_audio_track()) {
-		_trackview.track()->playlist()->foreach_region(
-			sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
-			);
+		_trackview.track()->playlist()->foreach_region (sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view)));
 	}
 
 	// Stack regions by layer, and remove invalid regions

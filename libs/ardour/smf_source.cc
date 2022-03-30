@@ -770,7 +770,7 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 	_model->set_edited (false);
 	invalidate(lock);
 
-	free(buf);
+	free (buf);
 }
 
 Evoral::SMF::UsedChannels
