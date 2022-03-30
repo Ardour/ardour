@@ -579,7 +579,7 @@ Editor::nudge_backward (bool next, bool force_playhead)
 		}
 
 	} else {
-
+		distance = get_nudge_distance (timepos_t (playhead_cursor()->current_sample ()), next_distance);
 		if (_playhead_cursor->current_sample () > distance.samples()) {
 			_session->request_locate ((timepos_t (_playhead_cursor->current_sample ()).earlier (distance)).samples());
 		} else {
