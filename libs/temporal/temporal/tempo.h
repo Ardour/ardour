@@ -1045,12 +1045,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 #pragma warning(disable:4101)
 #endif
 
-namespace PBD {
-DEFINE_ENUM_CONVERT(Temporal::Tempo::Type);
-DEFINE_ENUM_CONVERT(Temporal::TimeDomain);
-} /* namespace PBD */
-
-
 namespace std {
 LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::TempoMapPoint const &);
 LIBTEMPORAL_API std::ostream& operator<<(std::ostream& str, Temporal::Tempo const &);

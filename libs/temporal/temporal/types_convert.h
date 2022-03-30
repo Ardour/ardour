@@ -26,9 +26,11 @@
 #include "pbd/enum_convert.h"
 
 #include "temporal/types.h"
+#include "temporal/tempo.h"
 
 namespace PBD {
 
+DEFINE_ENUM_CONVERT(Temporal::Tempo::Type);
 DEFINE_ENUM_CONVERT(Temporal::TimeDomain)
 
 } // namespace PBD

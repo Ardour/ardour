@@ -29,6 +29,7 @@
 
 #include "temporal/debug.h"
 #include "temporal/tempo.h"
+#include "temporal/types_convert.h"
 
 #include "pbd/i18n.h"
 
