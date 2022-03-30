@@ -219,10 +219,10 @@ void
 MidiStreamView::update_contents_metrics(boost::shared_ptr<Region> r)
 {
 	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(r);
+
 	if (mr) {
-		_range_dirty = update_data_note_range(
-			mr->model()->lowest_note(),
-			mr->model()->highest_note());
+		Source::ReaderLock lm (mr->midi_source(0)->mutex());
+		_range_dirty = update_data_note_range (mr->model()->lowest_note(), mr->model()->highest_note());
 	}
 }
 

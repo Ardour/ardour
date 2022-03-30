@@ -61,7 +61,7 @@ public:
 	virtual int update_header (samplepos_t when, struct tm&, time_t) = 0;
 	virtual int flush_header () = 0;
 
-	void mark_streaming_write_completed (const Lock& lock);
+	void mark_streaming_write_completed (const WriterLock& lock);
 
 	int setup_peakfile ();
 	void set_gain (float g, bool temporarily = false);

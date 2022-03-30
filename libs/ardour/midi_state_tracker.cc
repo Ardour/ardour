@@ -181,7 +181,7 @@ MidiNoteTracker::resolve_notes (Evoral::EventSink<samplepos_t> &dst, samplepos_t
 }
 
 void
-MidiNoteTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, Temporal::Beats time)
+MidiNoteTracker::resolve_notes (MidiSource& src, const MidiSource::WriterLock& lock, Temporal::Beats time)
 {
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 MS-resolve notes @ %2 on = %3\n", this, time, _on));
 

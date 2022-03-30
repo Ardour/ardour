@@ -218,13 +218,13 @@ SMFSource::close ()
 extern PBD::Timing minsert;
 
 timecnt_t
-SMFSource::read_unlocked (const Lock&                     lock,
+SMFSource::read_unlocked (const ReaderLock&               lock,
                           Evoral::EventSink<samplepos_t>& destination,
                           timepos_t const &               source_start,
                           timepos_t const &               start,
                           timecnt_t const &               duration,
                           Temporal::Range*                loop_range,
-                          MidiNoteTracker*               tracker,
+                          MidiNoteTracker*                tracker,
                           MidiChannelFilter*              filter) const
 {
 	int      ret  = 0;
@@ -320,7 +320,7 @@ SMFSource::read_unlocked (const Lock&                     lock,
 }
 
 timecnt_t
-SMFSource::write_unlocked (const Lock&                  lock,
+SMFSource::write_unlocked (const WriterLock&            lock,
                            MidiRingBuffer<samplepos_t>& source,
                            timepos_t const &            position,
                            timecnt_t const &            cnt)
@@ -411,7 +411,7 @@ SMFSource::update_length (timepos_t const & dur)
 
 /** Append an event with a timestamp in beats */
 void
-SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
+SMFSource::append_event_beats (const WriterLock&   lock,
                                const Evoral::Event<Temporal::Beats>& ev)
 {
 	if (!_writing || ev.size() == 0)  {
@@ -468,7 +468,7 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 
 /** Append an event with a timestamp in samples (samplepos_t) */
 void
-SMFSource::append_event_samples (const Glib::Threads::Mutex::Lock& lock,
+SMFSource::append_event_samples (const WriterLock& lock,
                                 const Evoral::Event<samplepos_t>&  ev,
                                 samplepos_t                        position)
 {
@@ -551,7 +551,7 @@ SMFSource::set_state (const XMLNode& node, int version)
 }
 
 void
-SMFSource::mark_streaming_midi_write_started (const Lock& lock, NoteMode mode)
+SMFSource::mark_streaming_midi_write_started (const WriterLock& lock, NoteMode mode)
 {
 	if (!_open && open_for_write()) {
 		error << string_compose (_("cannot open MIDI file %1 for write"), _path) << endmsg;
@@ -566,13 +566,13 @@ SMFSource::mark_streaming_midi_write_started (const Lock& lock, NoteMode mode)
 }
 
 void
-SMFSource::mark_streaming_write_completed (const Lock& lock)
+SMFSource::mark_streaming_write_completed (const WriterLock& lock)
 {
 	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Temporal::Beats>::DeleteStuckNotes);
 }
 
 void
-SMFSource::mark_midi_streaming_write_completed (const Lock& lm, Evoral::Sequence<Temporal::Beats>::StuckNoteOption stuck_notes_option, Temporal::Beats when)
+SMFSource::mark_midi_streaming_write_completed (const WriterLock& lm, Evoral::Sequence<Temporal::Beats>::StuckNoteOption stuck_notes_option, Temporal::Beats when)
 {
 	MidiSource::mark_midi_streaming_write_completed (lm, stuck_notes_option, when);
 
@@ -640,7 +640,7 @@ static bool compare_eventlist (
 }
 
 void
-SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload)
+SMFSource::load_model (const WriterLock& lock, bool force_reload)
 {
 	invalidate (lock);
 	load_model_unlocked (force_reload);
@@ -787,7 +787,7 @@ SMFSource::used_midi_channels()
 }
 
 void
-SMFSource::destroy_model (const Glib::Threads::Mutex::Lock& lock)
+SMFSource::destroy_model (const WriterLock& lock)
 {
 	//cerr << _name << " destroying model " << _model.get() << endl;
 	_model.reset();
@@ -795,7 +795,7 @@ SMFSource::destroy_model (const Glib::Threads::Mutex::Lock& lock)
 }
 
 void
-SMFSource::flush_midi (const Lock& lock)
+SMFSource::flush_midi (const WriterLock& lock)
 {
 	if (!writable() || _length.is_zero()) {
 		return;
@@ -818,7 +818,7 @@ SMFSource::set_path (const string& p)
 
 /** Ensure that this source has some file on disk, even if it's just a SMF header */
 void
-SMFSource::ensure_disk_file (const Lock& lock)
+SMFSource::ensure_disk_file (const WriterLock& lock)
 {
 	if (!writable()) {
 		return;

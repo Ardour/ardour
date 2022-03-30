@@ -36,6 +36,7 @@
 #include "ardour/automatable_sequence.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/libardour_visibility.h"
+#include "ardour/source.h"
 #include "ardour/types.h"
 #include "ardour/types.h"
 #include "ardour/variant.h"
@@ -280,13 +281,13 @@ public:
 	 */
 	void apply_command_as_subcommand (Session& session, Command* cmd);
 
-	bool sync_to_source (const Glib::Threads::Mutex::Lock& source_lock);
+	bool sync_to_source (const Source::WriterLock& source_lock);
 
 	bool write_to(boost::shared_ptr<MidiSource>     source,
-	              const Glib::Threads::Mutex::Lock& source_lock);
+	              const Source::WriterLock& source_lock);
 
 	bool write_section_to(boost::shared_ptr<MidiSource>     source,
-	                      const Glib::Threads::Mutex::Lock& source_lock,
+	                      const Source::WriterLock& source_lock,
 	                      Temporal::Beats                   begin = Temporal::Beats(),
 	                      Temporal::Beats                   end   = std::numeric_limits<Temporal::Beats>::max(),
 	                      bool                              offset_events = false);
@@ -331,7 +332,7 @@ public:
 		~WriteLockImpl() {
 			delete source_lock;
 		}
-		Glib::Threads::Mutex::Lock* source_lock;
+		Source::WriterLock* source_lock;
 	};
 
 public:

@@ -1224,10 +1224,9 @@ MidiModel::PatchChangeDiffCommand::get_state ()
  */
 bool
 MidiModel::write_to (boost::shared_ptr<MidiSource>     source,
-                     const Glib::Threads::Mutex::Lock& source_lock)
+                     const Source::WriterLock& source_lock)
 {
-	ReadLock lock(read_lock());
-
+	ReadLock lock (read_lock()); /* Sequence read-lock */
 
 	source->drop_model(source_lock);
 	/* as of March 2022 or long before , the note mode argument does nothing */
@@ -1250,7 +1249,7 @@ MidiModel::write_to (boost::shared_ptr<MidiSource>     source,
     of the model.
 */
 bool
-MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
+MidiModel::sync_to_source (const Source::WriterLock& source_lock)
 {
 	ReadLock lock(read_lock());
 
@@ -1281,7 +1280,7 @@ MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
  */
 bool
 MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
-                             const Glib::Threads::Mutex::Lock& source_lock,
+                             const Source::WriterLock&         source_lock,
                              TimeType                          begin_time,
                              TimeType                          end_time,
                              bool                              offset_events)
@@ -1414,17 +1413,15 @@ MidiModel::find_sysex (Evoral::event_id_t sysex_id)
 MidiModel::WriteLock
 MidiModel::edit_lock()
 {
-	Glib::Threads::Mutex::Lock*   source_lock = 0;
+	Source::WriterLock*   source_lock = 0;
 
-	if (ms) {
-		/* Take source lock and invalidate iterator to release its lock on model.
-		   Add currently active notes to _active_notes so we can restore them
-		   if playback resumes at the same point after the edit. */
-		source_lock = new Glib::Threads::Mutex::Lock(ms->mutex());
-		ms->invalidate(*source_lock);
-	}
-
-	return WriteLock(new WriteLockImpl(source_lock, _lock, _control_lock));
+	/* Take source lock and invalidate iterator to release its lock on model.
+	 * Add currently active notes to _active_notes so we can restore them
+	 * if playback resumes at the same point after the edit.
+	 */
+	source_lock = new Source::WriterLock (_midi_source.mutex());
+	_midi_source.invalidate(*source_lock);
+	return WriteLock (new WriteLockImpl (source_lock, _lock, _control_lock));
 }
 
 int

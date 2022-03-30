@@ -394,7 +394,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 				continue;  //should never happen.  The calling code should provide exactly the number of tracks&channels we need
 			}
 
-			Glib::Threads::Mutex::Lock source_lock(smfs->mutex());
+			Source::WriterLock source_lock(smfs->mutex());
 
 			smfs->drop_model (source_lock);
 			if (type0) {

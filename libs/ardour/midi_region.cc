@@ -109,8 +109,9 @@ MidiRegion::do_export (string const& path) const
 
 	{
 		/* Lock our source since we'll be reading from it.  write_to() will
-		   take a lock on newsrc. */
-		Source::Lock lm (midi_source(0)->mutex());
+		 * take a lock on newsrc.
+		 */
+		Source::ReaderLock lm (midi_source(0)->mutex());
 		if (midi_source(0)->export_write_to (lm, newsrc, _start.val().beats(), _start.val().beats() + _length.val().beats())) {
 			return false;
 		}
@@ -235,8 +236,7 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
 
-	Glib::Threads::Mutex::Lock lm(src->mutex());
-
+	Source::ReaderLock lm (src->mutex());
 
 #if 0
 	cerr << "MR " << name () << " read @ " << pos << " + " << to_read
@@ -298,8 +298,6 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
 
-	Glib::Threads::Mutex::Lock lm(src->mutex());
-
 
 #if 0
 	cerr << "MR " << name () << " render "
@@ -316,6 +314,8 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 	MidiNoteTracker tracker;
 
 	/* This call reads events from a source and writes them to `dst' timed in session samples */
+
+	Source::ReaderLock lm (src->mutex());
 
 	src->midi_read (
 		lm, // source lock
@@ -505,7 +505,7 @@ MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
 	   for a given set of filtered_parameters, so now that we've changed that list we must invalidate
 	   the iterator.
 	*/
-	Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex(), Glib::Threads::TRY_LOCK);
+	Source::WriterLock lm (midi_source(0)->mutex(), Glib::Threads::TRY_LOCK);
 	if (lm.locked()) {
 		/* TODO: This is too aggressive, we need more fine-grained invalidation. */
 		midi_source(0)->invalidate (lm);

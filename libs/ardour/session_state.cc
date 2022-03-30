@@ -1339,11 +1339,14 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 
 					/* use SMF-API to clone data (use the midi_model, not data on disk) */
 					boost::shared_ptr<SMFSource> newsrc (new SMFSource (*this, path, ms->flags()));
-					Source::Lock lm (ms->mutex());
+					{
+						Source::WriterLock lm (ms->mutex());
 
-					if (!ms->model()) {
-						ms->load_model (lm);
+						if (!ms->model()) {
+							ms->load_model (lm);
+						}
 					}
+					Source::ReaderLock lm (ms->mutex());
 					/* write_to() calls newsrc->flush_midi () to write the file to disk */
 					if (ms->write_to (lm, newsrc, Temporal::Beats(), std::numeric_limits<Temporal::Beats>::max())) {
 						error << string_compose (_("Session-Save: Failed to copy MIDI Source '%1' for snapshot"), ancestor_name) << endmsg;

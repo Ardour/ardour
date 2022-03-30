@@ -306,6 +306,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 	} else if (type == DataType::MIDI) {
 		try {
 			boost::shared_ptr<SMFSource> src (new SMFSource (s, path));
+			Source::WriterLock           lock (src->mutex ());
 			BOOST_MARK_SOURCE (src);
 
 			if (announce) {

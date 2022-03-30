@@ -167,23 +167,26 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 }
 
 void
-MidiSource::invalidate (const Lock& lock)
+MidiSource::invalidate (const WriterLock& lock)
 {
 	Invalidated(_session.transport_rolling());
 }
 
 timecnt_t
-MidiSource::midi_read (const Lock&                        lm,
+MidiSource::midi_read (const ReaderLock&                  lm,
                        Evoral::EventSink<samplepos_t>&    dst,
                        timepos_t const &                  source_start,
                        timepos_t const &                  start,
                        timecnt_t const &                  cnt,
                        Temporal::Range*                   loop_range,
                        MidiCursor&                        cursor,
-                       MidiNoteTracker*                  tracker,
+                       MidiNoteTracker*                   tracker,
                        MidiChannelFilter*                 filter,
                        const std::set<Evoral::Parameter>& filtered)
 {
+	Timing t;
+	uint32_t ecnt = 0;
+
 	DEBUG_TRACE (DEBUG::MidiSourceIO,
 	             string_compose ("MidiSource::midi_read() %5 sstart %1 start %2 cnt %3 tracker %4\n",
 	                             source_start, start, cnt, tracker, name()));
@@ -289,12 +292,14 @@ MidiSource::midi_read (const Lock&                        lm,
 			}
 		}
 	}
+	t.update ();
+	std::cout << "MIDI read added " << ecnt << " events and took " << t.elapsed_msecs() << std::endl;
 
 	return cnt;
 }
 
 timecnt_t
-MidiSource::midi_write (const Lock&                  lm,
+MidiSource::midi_write (const WriterLock&            lm,
                         MidiRingBuffer<samplepos_t>& source,
                         timepos_t const &            source_start,
                         timecnt_t const &            cnt)
@@ -311,7 +316,7 @@ MidiSource::midi_write (const Lock&                  lm,
 }
 
 void
-MidiSource::mark_streaming_midi_write_started (const Lock& lock, NoteMode mode)
+MidiSource::mark_streaming_midi_write_started (const WriterLock& lock, NoteMode mode)
 {
 	if (_model) {
 		/* XXX do something with note mode?  */
@@ -348,14 +353,14 @@ MidiSource::mark_write_starting_now (timepos_t const & position, samplecnt_t cap
 }
 
 void
-MidiSource::mark_streaming_write_started (const Lock& lock)
+MidiSource::mark_streaming_write_started (const WriterLock& lock)
 {
 	/* as of March 2022 or long before , the note mode argument does nothing */
 	mark_streaming_midi_write_started (lock, Sustained);
 }
 
 void
-MidiSource::mark_midi_streaming_write_completed (const Lock&                                        lock,
+MidiSource::mark_midi_streaming_write_completed (const WriterLock&                                  lock,
                                                  Evoral::Sequence<Temporal::Beats>::StuckNoteOption option,
                                                  Temporal::Beats                                    end)
 {
@@ -376,15 +381,15 @@ MidiSource::mark_midi_streaming_write_completed (const Lock&                    
 }
 
 void
-MidiSource::mark_streaming_write_completed (const Lock& lock)
+MidiSource::mark_streaming_write_completed (const WriterLock& lock)
 {
 	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Temporal::Beats>::DeleteStuckNotes);
 }
 
 int
-MidiSource::export_write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Temporal::Beats begin, Temporal::Beats end)
+MidiSource::export_write_to (const ReaderLock& lock, boost::shared_ptr<MidiSource> newsrc, Temporal::Beats begin, Temporal::Beats end)
 {
-	Lock newsrc_lock (newsrc->mutex ());
+	WriterLock newsrc_lock (newsrc->mutex ());
 
 	if (!_model) {
 		error << string_compose (_("programming error: %1"), X_("no model for MidiSource during export"));
@@ -399,9 +404,9 @@ MidiSource::export_write_to (const Lock& lock, boost::shared_ptr<MidiSource> new
 }
 
 int
-MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Temporal::Beats begin, Temporal::Beats end)
+MidiSource::write_to (const ReaderLock& lock, boost::shared_ptr<MidiSource> newsrc, Temporal::Beats begin, Temporal::Beats end)
 {
-	Lock newsrc_lock (newsrc->mutex ());
+	WriterLock newsrc_lock (newsrc->mutex ());
 
 	newsrc->set_natural_position (_natural_position);
 	newsrc->copy_interpolation_from (this);
@@ -440,7 +445,7 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Te
 void
 MidiSource::session_saved()
 {
-	Lock lm (_lock);
+	WriterLock lm (_lock);
 
 	/* this writes a copy of the data to disk.
 	   XXX do we need to do this every time?
@@ -467,7 +472,7 @@ MidiSource::session_saved()
 }
 
 void
-MidiSource::drop_model (const Lock& lock)
+MidiSource::drop_model (const WriterLock& lock)
 {
 	_model.reset();
 	invalidate(lock);
@@ -475,7 +480,7 @@ MidiSource::drop_model (const Lock& lock)
 }
 
 void
-MidiSource::set_model (const Lock& lock, boost::shared_ptr<MidiModel> m)
+MidiSource::set_model (const WriterLock& lock, boost::shared_ptr<MidiModel> m)
 {
 	_model = m;
 	invalidate(lock);

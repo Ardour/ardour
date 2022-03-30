@@ -25,6 +25,7 @@
 
 #include "temporal/beats.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/source.h"
 
 namespace Evoral {
 template <typename T> class EventSink;
@@ -52,7 +53,7 @@ public:
 	void remove (uint8_t note, uint8_t chn);
 	void resolve_notes (MidiBuffer& buffer, samplepos_t time, bool reset = true);
 	void resolve_notes (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
-	void resolve_notes (MidiSource& src, const Glib::Threads::Mutex::Lock& lock, Temporal::Beats time);
+	void resolve_notes (MidiSource& src, const Source::WriterLock& lock, Temporal::Beats time);
 
 	void flush_notes (MidiBuffer& buffer, samplepos_t time, bool reset = true);
 
