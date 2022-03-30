@@ -340,7 +340,6 @@ StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 	tr->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::update_coverage_frame, this), gui_context());
 }
 
-
 void
 StreamView::apply_color (Gdk::Color const& c, ColorTarget target)
 {

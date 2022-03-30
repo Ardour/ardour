@@ -146,7 +146,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 
 			(*i)->set_valid (true);
 
-			display_region(dynamic_cast<MidiRegionView*>(*i), wait_for_data);
+			display_region (dynamic_cast<MidiRegionView*>(*i), wait_for_data);
 
 			return 0;
 		}
@@ -296,7 +296,6 @@ MidiStreamView::redisplay_track ()
 	// Update note range (not regions which are correct) and draw note lines
 	apply_note_range(_lowest_note, _highest_note, false);
 }
-
 
 void
 MidiStreamView::update_contents_height ()
