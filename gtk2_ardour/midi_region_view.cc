@@ -1091,6 +1091,8 @@ MidiRegionView::get_events (Events& e, Evoral::Sequence<Temporal::Beats>::NoteOp
 void
 MidiRegionView::redisplay_model()
 {
+	group->canvas()->freeze_queue_draw ();
+
 	if (_active_notes) {
 		// Currently recording
 		const samplecnt_t zoom = trackview.editor().get_current_zoom();
@@ -1109,6 +1111,7 @@ MidiRegionView::redisplay_model()
 	}
 
 	if (!_model) {
+		group->canvas()->thaw_queue_draw ();
 		return;
 	}
 
@@ -1221,6 +1224,7 @@ MidiRegionView::redisplay_model()
 	_marked_for_velocity.clear ();
 	_pending_note_selection.clear ();
 
+	group->canvas()->thaw_queue_draw ();
 }
 
 void
