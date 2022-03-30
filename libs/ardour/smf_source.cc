@@ -94,6 +94,9 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 		_open = true;
 	}
 
+	/* there's no data to load into the model but create it anyway */
+
+	_model = boost::shared_ptr<MidiModel> (new MidiModel (*this));
 }
 
 /** Constructor used for external-to-session files.  File must exist. */
@@ -119,6 +122,9 @@ SMFSource::SMFSource (Session& s, const string& path)
 	}
 
 	_open = true;
+
+	/* no lock required since we do not actually exist yet */
+	load_model_unlocked (true);
 }
 
 /** Constructor used for existing internal-to-session files. */
@@ -180,6 +186,8 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 		/* no fd left open here */
 	}
 
+	/* no lock required since we do not actually exist yet */
+	load_model_unlocked (true);
 }
 
 SMFSource::~SMFSource ()
@@ -634,25 +642,25 @@ static bool compare_eventlist (
 void
 SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload)
 {
-	if (_writing) {
-		return;
-	}
+	invalidate (lock);
+	load_model_unlocked (force_reload);
+	invalidate (lock);
+}
 
-	if (_model && !force_reload) {
-		return;
-	}
+void
+SMFSource::load_model_unlocked (bool force_reload)
+{
+	std::cerr << "\n\n\n\n\n";
+	PBD::stacktrace (std::cerr, 8);
+
+	assert (!_writing);
+
+	std::cerr << "\n***** " << path() << " ACTUALLY LOADING, existing model: " << _model << std::endl;
 
 	if (!_model) {
-		boost::shared_ptr<SMFSource> smf = boost::dynamic_pointer_cast<SMFSource> ( shared_from_this () );
-		_model = boost::shared_ptr<MidiModel> (new MidiModel (smf));
+		_model = boost::shared_ptr<MidiModel> (new MidiModel (*this));
 	} else {
 		_model->clear();
-	}
-
-	invalidate(lock);
-
-	if (writable() && !_open) {
-		return;
 	}
 
 	_model->start_write();
@@ -768,7 +776,6 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 
 	_model->end_write (Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, _length.beats());
 	_model->set_edited (false);
-	invalidate(lock);
 
 	free (buf);
 }

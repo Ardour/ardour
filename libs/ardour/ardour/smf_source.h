@@ -67,8 +67,8 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	void load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload=false);
-	void destroy_model (const Glib::Threads::Mutex::Lock& lock);
+	void load_model (const WriterLock& lock, bool force_reload=false);
+	void destroy_model (const WriterLock& lock);
 
 	static bool safe_midi_file_extension (const std::string& path);
 	static bool valid_midi_file (const std::string& path);
@@ -109,6 +109,8 @@ public:
 	                          MidiRingBuffer<samplepos_t>& src,
 	                          timepos_t const &            position,
 	                          timecnt_t const &            cnt);
+
+	void load_model_unlocked (bool force_reload=false);
 
 };
 

@@ -193,11 +193,6 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 		return;
 	}
 
-	if (load_model) {
-		Glib::Threads::Mutex::Lock lm(source->mutex());
-		source->load_model(lm);
-	}
-
 	if (!source->model()) {
 		error << _("attempt to display MIDI region with no model") << endmsg;
 		return;
@@ -225,8 +220,6 @@ MidiStreamView::update_contents_metrics(boost::shared_ptr<Region> r)
 {
 	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(r);
 	if (mr) {
-		Glib::Threads::Mutex::Lock lm(mr->midi_source(0)->mutex());
-		mr->midi_source(0)->load_model(lm);
 		_range_dirty = update_data_note_range(
 			mr->model()->lowest_note(),
 			mr->model()->highest_note());

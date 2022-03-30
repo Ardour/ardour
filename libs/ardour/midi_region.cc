@@ -143,11 +143,6 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc, ThawList* tl) const
 
 	{
 		boost::shared_ptr<MidiSource> ms = midi_source(0);
-		Source::Lock lm (ms->mutex());
-
-		if (!ms->model()) {
-			ms->load_model (lm);
-		}
 
 		/* Lock our source since we'll be reading from it.  write_to() will
 		   take a lock on newsrc.

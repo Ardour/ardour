@@ -257,11 +257,6 @@ MidiRegionView::init (bool wfd)
 {
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
-	if (wfd) {
-		Glib::Threads::Mutex::Lock lm(midi_region()->midi_source(0)->mutex());
-		midi_region()->midi_source(0)->load_model(lm);
-	}
-
 	_model = midi_region()->midi_source(0)->model();
 	_enable_display = false;
 	fill_color_name = "midi frame base";

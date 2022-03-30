@@ -474,6 +474,14 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 				smfs->update_length (timepos_t (length_beats.round_up_to_multiple(Temporal::Beats(pulses_per_bar,0))));
 
 				smfs->mark_streaming_write_completed (source_lock);
+
+				/* the streaming write that we've just finished
+				 * only wrote data to the SMF object, which is
+				 * ultimately an on-disk data structure. So now
+				 * we pull the data back from disk to build our
+				 * in-memory MidiModel version.
+				 */
+
 				smfs->load_model (source_lock, true);
 
 				if (status.cancel) {

@@ -234,8 +234,6 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 	} else if (type == DataType::MIDI) {
 		try {
 			boost::shared_ptr<SMFSource> src (new SMFSource (s, node));
-			Source::Lock                 lock (src->mutex ());
-			src->load_model (lock, true);
 			BOOST_MARK_SOURCE (src);
 			src->check_for_analysis_data_on_disk ();
 			SourceCreated (src);
@@ -308,8 +306,6 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 	} else if (type == DataType::MIDI) {
 		try {
 			boost::shared_ptr<SMFSource> src (new SMFSource (s, path));
-			Source::Lock                 lock (src->mutex ());
-			src->load_model (lock, true);
 			BOOST_MARK_SOURCE (src);
 
 			if (announce) {
@@ -357,8 +353,6 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 
 			assert (src->writable ());
 
-			Source::Lock lock (src->mutex ());
-			src->load_model (lock, true);
 			BOOST_MARK_SOURCE (src);
 
 			// no analysis data - this is a new file
