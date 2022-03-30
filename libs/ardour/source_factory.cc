@@ -351,9 +351,7 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 		// XXX writable flags should belong to MidiSource too
 		try {
 			boost::shared_ptr<SMFSource> src (new SMFSource (s, path, SndFileSource::default_writable_flags));
-
 			assert (src->writable ());
-
 			BOOST_MARK_SOURCE (src);
 
 			// no analysis data - this is a new file
