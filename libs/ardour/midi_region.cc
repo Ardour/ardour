@@ -149,6 +149,7 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc, ThawList* tl) const
 		   take a lock on newsrc.
 		*/
 
+		Source::ReaderLock lm (ms->mutex());
 		if (ms->write_to (lm, newsrc, bbegin, bend)) {
 			return boost::shared_ptr<MidiRegion> ();
 		}
