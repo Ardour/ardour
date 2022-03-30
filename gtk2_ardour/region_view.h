@@ -101,7 +101,9 @@ public:
 	virtual void entered () {}
 	virtual void exited () {}
 
-	virtual void enable_display(bool yn) { _enable_display = yn; }
+	virtual void enable_display();
+	virtual void disable_display();
+	bool display_enabled() const;
 	virtual void update_coverage_frame (LayerDisplay);
 
 	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;
@@ -184,10 +186,10 @@ protected:
 	std::vector<ControlPoint *> control_points;
 	double current_visible_sync_position;
 
-	bool    valid; ///< see StreamView::redisplay_diskstream()
-	bool    _enable_display; ///< see StreamView::redisplay_diskstream()
-	double  _pixel_width;
-	bool    in_destructor;
+	bool      valid; ///< see StreamView::redisplay_diskstream()
+	uint32_t _disable_display; ///< see StreamView::redisplay_diskstream()
+	double   _pixel_width;
+	bool      in_destructor;
 
 	bool wait_for_data;
 

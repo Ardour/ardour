@@ -89,7 +89,7 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, editor(0)
 	, current_visible_sync_position(0.0)
 	, valid(false)
-	, _enable_display(false)
+	, _disable_display (1)
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
@@ -170,7 +170,7 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, editor(0)
 	, current_visible_sync_position(0.0)
 	, valid(false)
-	, _enable_display(false)
+	, _disable_display (1)
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
@@ -239,7 +239,7 @@ RegionView::init (bool wfd)
 	update_cue_markers ();
 
 	if (wfd) {
-		_enable_display = true;
+		enable_display ();
 	}
 
 	/* derived class calls set_height () including RegionView::set_height() in ::init() */
@@ -1256,3 +1256,26 @@ RegionView::drop_cue_marker (ArdourMarker* m)
 		}
 	}
 }
+
+void
+RegionView::enable_display ()
+{
+	std::cerr << "EnableDisplay " << this << " currently " << _disable_display << std::endl;
+	if (_disable_display) {
+		_disable_display--;
+	}
+}
+
+void
+RegionView::disable_display ()
+{
+	std::cerr << "DisableDisplay " << this << " currently " << _disable_display << std::endl;
+	_disable_display++;
+}
+
+bool
+RegionView::display_enabled() const
+{
+	return !_disable_display;
+}
+

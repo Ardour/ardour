@@ -297,7 +297,7 @@ public:
 
 	void selection_as_notelist (Notes& selected, bool allow_all_if_none_selected = false);
 
-	void enable_display (bool);
+	void enable_display ();
 
 	void set_channel_selector_scoped_note(NoteBase* note){ _channel_selection_scoped_note = note; }
 	NoteBase* channel_selector_scoped_note(){  return _channel_selection_scoped_note; }

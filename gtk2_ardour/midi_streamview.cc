@@ -158,14 +158,19 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 	}
 
 	region_views.push_front (region_view);
-
-	/* display events and find note range */
+	region_view->disable_display ();
 	display_region (region_view, wait_for_data);
 
 	/* fit note range if we are importing */
 	if (_trackview.session()->operation_in_progress (Operations::insert_file)) {
+		/* this will call display_region() */
 		set_note_range (ContentsRange);
+	} else {
+		/* display events and find note range */
+		region_view->redisplay_model ();
 	}
+
+	region_view->enable_display ();
 
 	/* catch regionview going away */
 	boost::weak_ptr<Region> wr (region); // make this explicit
@@ -177,13 +182,13 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 }
 
 void
-MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
+MidiStreamView::display_region (MidiRegionView* region_view, bool load_model)
 {
 	if (!region_view) {
 		return;
 	}
 
-	region_view->enable_display (true);
+	region_view->disable_display ();
 	region_view->set_height (child_height());
 
 	boost::shared_ptr<MidiSource> source (region_view->midi_region()->midi_source(0));
@@ -201,7 +206,8 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 	_range_dirty = update_data_note_range (source->model()->lowest_note(), source->model()->highest_note());
 
 	// Display region contents
-	region_view->display_model(source->model());
+	region_view->enable_display ();
+	region_view->display_model (source->model());
 }
 
 
@@ -278,7 +284,7 @@ MidiStreamView::redisplay_track ()
 	// Flag region views as invalid and disable drawing
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid(false);
-		(*i)->enable_display(false);
+		(*i)->disable_display ();
 	}
 
 	// Add and display region views, and flag them as valid

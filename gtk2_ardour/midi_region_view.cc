@@ -189,7 +189,7 @@ MidiRegionView::parameter_changed (std::string const & p)
 {
 	RegionView::parameter_changed (p);
 	if (p == "display-first-midi-bank-as-zero") {
-		if (_enable_display) {
+		if (display_enabled()) {
 			redisplay_model();
 		}
 	} else if (p == "color-regions-using-track-color") {
@@ -253,12 +253,13 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 }
 
 void
-MidiRegionView::init (bool wfd)
+MidiRegionView::init (bool /*wfd*/)
 {
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
 	_model = midi_region()->midi_source(0)->model();
-	_enable_display = false;
+	assert (_model);
+
 	fill_color_name = "midi frame base";
 
 	RegionView::init (false);
@@ -270,16 +271,12 @@ MidiRegionView::init (bool wfd)
 	region_resized (ARDOUR::bounds_change);
 	//region_locked ();
 
+	disable_display ();
 	set_colors ();
-
-	_enable_display = true;
-	if (_model) {
-		if (wfd) {
-			display_model (_model);
-		}
-	}
-
 	reset_width_dependent_items (_pixel_width);
+	enable_display ();
+
+	display_model (_model);
 
 	group->raise_to_top();
 
@@ -907,9 +904,7 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 	/* Don't signal as nobody else needs to know until selection has been altered. */
 	clear_events();
 
-	if (_enable_display) {
-		redisplay_model();
-	}
+	redisplay_model ();
 }
 
 void
@@ -1378,14 +1373,16 @@ MidiRegionView::region_resized (const PropertyChange& what_changed)
 {
 	RegionView::region_resized(what_changed); // calls RegionView::set_duration()
 
+#if 0
 	/* catch end and start trim so we can update the view*/
 	if (!what_changed.contains (ARDOUR::Properties::start) &&
 	    what_changed.contains (ARDOUR::Properties::length)) {
-		enable_display (true);
+		enable_display ();
 	} else if (what_changed.contains (ARDOUR::Properties::start) &&
 	    what_changed.contains (ARDOUR::Properties::length)) {
-		enable_display (true);
+		enable_display ();
 	}
+#endif
 }
 
 void
@@ -1393,7 +1390,7 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 {
 	RegionView::reset_width_dependent_items(pixel_width);
 
-	if (_enable_display) {
+	if (display_enabled()) {
 		redisplay_model();
 	}
 
@@ -1443,10 +1440,6 @@ MidiRegionView::set_height (double height)
 void
 MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 {
-	if (!_enable_display) {
-		return;
-	}
-
 	if (!force && _current_range_min == min && _current_range_max == max) {
 		return;
 	}
@@ -1482,7 +1475,6 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	}
 
 	ghosts.push_back (ghost);
-	enable_display (true);
 	return ghost;
 }
 
@@ -4022,9 +4014,15 @@ MidiRegionView::color_handler ()
 }
 
 void
-MidiRegionView::enable_display (bool yn)
+MidiRegionView::enable_display ()
 {
-	RegionView::enable_display (yn);
+	bool was_disabled = !display_enabled();
+
+	RegionView::enable_display ();
+
+	if (was_disabled && display_enabled()) {
+		redisplay_model ();
+	}
 }
 
 void

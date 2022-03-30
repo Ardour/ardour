@@ -161,7 +161,6 @@ AudioStreamView::redisplay_track ()
 	// Flag region views as invalid and disable drawing
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
-		(*i)->enable_display (false);
 	}
 
 	// Add and display views, and flag them as valid

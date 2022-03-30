@@ -105,7 +105,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 				arv->line()->set_list (list);
 			}
 			(*i)->set_valid (true);
-			(*i)->enable_display (wait_for_data);
+			(*i)->enable_display ();
 			display_region(arv);
 
 			return 0;
@@ -123,11 +123,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 
 	/* follow global waveform setting */
 
-	if (wait_for_data) {
-		region_view->enable_display(true);
-		// region_view->midi_region()->midi_source(0)->load_model();
-	}
-
+	region_view->enable_display();
 	display_region (region_view);
 
 	/* catch regionview going away */
@@ -174,7 +170,7 @@ AutomationStreamView::redisplay_track ()
 	// Flag region views as invalid and disable drawing
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
-		(*i)->enable_display(false);
+		(*i)->disable_display ();
 	}
 
 	// Add and display region views, and flag them as valid

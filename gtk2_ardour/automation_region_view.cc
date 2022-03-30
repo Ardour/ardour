@@ -79,8 +79,6 @@ AutomationRegionView::~AutomationRegionView ()
 void
 AutomationRegionView::init (bool /*wfd*/)
 {
-	_enable_display = false;
-
 	RegionView::init (false);
 
 	reset_width_dependent_items ((double) _region->length_samples() / samples_per_pixel);
@@ -90,7 +88,7 @@ AutomationRegionView::init (bool /*wfd*/)
 	fill_color_name = "midi frame base";
 	set_colors ();
 
-	_enable_display = true;
+	enable_display ();
 }
 
 void
