@@ -480,7 +480,6 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
 	, _writing(false)
 	, _type_map(type_map)
 	, _end_iter(*this, std::numeric_limits<Time>::max(), false, std::set<Evoral::Parameter> ())
-	, _percussive(false)
 	, _lowest_note(127)
 	, _highest_note(0)
 {
@@ -502,7 +501,6 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
 	, _writing(false)
 	, _type_map(other._type_map)
 	, _end_iter(*this, std::numeric_limits<Time>::max(), false, std::set<Evoral::Parameter> ())
-	, _percussive(other._percussive)
 	, _lowest_note(other._lowest_note)
 	, _highest_note(other._highest_note)
 {
@@ -641,7 +639,6 @@ template<typename Time>
 void
 Sequence<Time>::start_write()
 {
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 : start_write (percussive = %2)\n", this, _percussive));
 	WriteLock lock(write_lock());
 	_writing = true;
 	for (int i = 0; i < 16; ++i) {

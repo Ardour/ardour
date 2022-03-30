@@ -1229,17 +1229,15 @@ MidiModel::write_to (boost::shared_ptr<MidiSource>     source,
 {
 	ReadLock lock(read_lock());
 
-	const bool old_percussive = percussive();
-	set_percussive(false);
 
 	source->drop_model(source_lock);
-	source->mark_streaming_midi_write_started (source_lock, note_mode());
+	/* as of March 2022 or long before , the note mode argument does nothing */
+	source->mark_streaming_midi_write_started (source_lock, Sustained);
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
 		source->append_event_beats(source_lock, *i);
 	}
 
-	set_percussive(old_percussive);
 	source->mark_streaming_write_completed(source_lock);
 
 	set_edited(false);
@@ -1257,9 +1255,6 @@ MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
 {
 	ReadLock lock(read_lock());
 
-	const bool old_percussive = percussive();
-	set_percussive(false);
-
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	if (!ms) {
 		error << "MIDI model has no source to sync to" << endmsg;
@@ -1270,13 +1265,13 @@ MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
 	   on the next roll if time progresses linearly. */
 	ms->invalidate(source_lock);
 
-	ms->mark_streaming_midi_write_started (source_lock, note_mode());
+	/* as of March 2022 or long before , the note mode argument does nothing */
+	_midi_source.mark_streaming_midi_write_started (source_lock, Sustained);
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
 		ms->append_event_beats(source_lock, *i);
 	}
 
-	set_percussive (old_percussive);
 	ms->mark_streaming_write_completed (source_lock);
 
 	set_edited (false);
@@ -1301,11 +1296,9 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 	ReadLock lock(read_lock());
 	MidiNoteTracker mst;
 
-	const bool old_percussive = percussive();
-	set_percussive(false);
-
 	source->drop_model(source_lock);
-	source->mark_streaming_midi_write_started (source_lock, note_mode());
+	/* as of March 2022 or long before , the note mode argument does nothing */
+	source->mark_streaming_midi_write_started (source_lock, Sustained);
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
 		if (i->time() >= begin_time && i->time() < end_time) {
@@ -1343,7 +1336,6 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 	}
 	mst.resolve_notes (*source, source_lock, end_time);
 
-	set_percussive(old_percussive);
 	source->mark_streaming_write_completed(source_lock);
 
 	set_edited(false);

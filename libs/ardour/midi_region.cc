@@ -242,7 +242,6 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 
 	Glib::Threads::Mutex::Lock lm(src->mutex());
 
-	src->set_note_mode(lm, mode);
 
 #if 0
 	cerr << "MR " << name () << " read @ " << pos << " + " << to_read
@@ -306,7 +305,6 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 
 	Glib::Threads::Mutex::Lock lm(src->mutex());
 
-	src->set_note_mode(lm, mode);
 
 #if 0
 	cerr << "MR " << name () << " render "

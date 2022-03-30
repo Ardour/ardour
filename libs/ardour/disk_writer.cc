@@ -897,9 +897,6 @@ DiskWriter::set_note_mode (NoteMode m)
 	if (mp) {
 		mp->set_note_mode (m);
 	}
-
-	if (_midi_write_source && _midi_write_source->model())
-		_midi_write_source->model()->set_note_mode(m);
 }
 
 void

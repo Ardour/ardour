@@ -314,7 +314,7 @@ void
 MidiSource::mark_streaming_midi_write_started (const Lock& lock, NoteMode mode)
 {
 	if (_model) {
-		_model->set_note_mode (mode);
+		/* XXX do something with note mode?  */
 		_model->start_write ();
 	}
 
@@ -350,8 +350,8 @@ MidiSource::mark_write_starting_now (timepos_t const & position, samplecnt_t cap
 void
 MidiSource::mark_streaming_write_started (const Lock& lock)
 {
-	NoteMode note_mode = _model ? _model->note_mode() : Sustained;
-	mark_streaming_midi_write_started (lock, note_mode);
+	/* as of March 2022 or long before , the note mode argument does nothing */
+	mark_streaming_midi_write_started (lock, Sustained);
 }
 
 void
@@ -463,14 +463,6 @@ MidiSource::session_saved()
 
 	} else {
 		flush_midi(lm);
-	}
-}
-
-void
-MidiSource::set_note_mode(const Lock& lock, NoteMode mode)
-{
-	if (_model) {
-		_model->set_note_mode(mode);
 	}
 }
 
