@@ -796,7 +796,8 @@ lrdf_remove_preset (const char* /*source*/, const char *setting_uri)
 	char setting_uri_copy[64];
 	char buf[64];
 
-	strncpy(setting_uri_copy, setting_uri, sizeof(setting_uri_copy));
+	strncpy(setting_uri_copy, setting_uri, sizeof(setting_uri_copy) - 1);
+	setting_uri_copy[sizeof (setting_uri_copy) - 1] = '\0';
 
 	p.subject = setting_uri_copy;
 	strncpy(buf, LADSPA_BASE "hasPortValue", sizeof(buf));
