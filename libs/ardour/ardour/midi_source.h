@@ -105,7 +105,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	                             timecnt_t const &                  cnt,
 	                             Temporal::Range*                   loop_range,
 	                             MidiCursor&                        cursor,
-	                             MidiNoteTracker*                  tracker,
+	                             MidiNoteTracker*                   tracker,
 	                             MidiChannelFilter*                 filter,
 	                             const std::set<Evoral::Parameter>& filtered);
 
