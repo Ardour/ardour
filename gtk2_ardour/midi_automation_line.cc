@@ -48,7 +48,11 @@ MidiAutomationLine::MidiAutomationLine (
 MementoCommandBinder<ARDOUR::AutomationList>*
 MidiAutomationLine::memento_command_binder ()
 {
-	return new ARDOUR::MidiAutomationListBinder (_region->midi_source(), _parameter);
+	/* some weirdness here since _region->midi_source() returns a
+	 * shared_ptr<> but the binder accepts a reference.
+	 */
+
+	return new ARDOUR::MidiAutomationListBinder (*(_region->midi_source().get()), _parameter);
 }
 
 Temporal::timepos_t

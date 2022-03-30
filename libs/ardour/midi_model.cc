@@ -58,37 +58,36 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-MidiModel::MidiModel (boost::shared_ptr<MidiSource> s)
-	: AutomatableSequence<TimeType> (s->session(), Temporal::BeatTime)
+MidiModel::MidiModel (MidiSource& s)
+	: AutomatableSequence<TimeType> (s.session(), Temporal::BeatTime)
+	, _midi_source (s)
 {
-	set_midi_source (s);
+	_midi_source.InterpolationChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_interpolation_changed, this, _1, _2));
+	_midi_source.AutomationStateChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_automation_state_changed, this, _1, _2));
 }
 
 MidiModel::NoteDiffCommand*
 MidiModel::new_note_diff_command (const string& name)
 {
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
-
-	return new NoteDiffCommand (ms->model(), name);
+	/* return via the MidiSource to get a shared_ptr to
+	 *  ourselves. Probably faster than shared_from_this()
+	 */
+	return new NoteDiffCommand (_midi_source.model(), name);
 }
 
 MidiModel::SysExDiffCommand*
 MidiModel::new_sysex_diff_command (const string& name)
 {
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
-
-	return new SysExDiffCommand (ms->model(), name);
+	/* return via the MidiSource to get a shared_ptr to
+	 *  ourselves. Probably faster than shared_from_this()
+	 */
+	return new SysExDiffCommand (_midi_source.model(), name);
 }
 
 MidiModel::PatchChangeDiffCommand*
 MidiModel::new_patch_change_diff_command (const string& name)
 {
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
-
-	return new PatchChangeDiffCommand (ms->model(), name);
+	return new PatchChangeDiffCommand (_midi_source.model(), name);
 }
 
 
@@ -639,7 +638,7 @@ XMLNode&
 MidiModel::NoteDiffCommand::get_state ()
 {
 	XMLNode* diff_command = new XMLNode (NOTE_DIFF_COMMAND_ELEMENT);
-	diff_command->set_property("midi-source", _model->midi_source()->id().to_s());
+	diff_command->set_property("midi-source", _model->midi_source().id().to_s());
 
 	XMLNode* changes = diff_command->add_child(DIFF_NOTES_ELEMENT);
 	for_each(_changes.begin(), _changes.end(),
@@ -839,7 +838,7 @@ XMLNode&
 MidiModel::SysExDiffCommand::get_state ()
 {
 	XMLNode* diff_command = new XMLNode (SYSEX_DIFF_COMMAND_ELEMENT);
-	diff_command->set_property ("midi-source", _model->midi_source()->id().to_s());
+	diff_command->set_property ("midi-source", _model->midi_source().id().to_s());
 
 	XMLNode* changes = diff_command->add_child(DIFF_SYSEXES_ELEMENT);
 	for_each (_changes.begin(), _changes.end(),
@@ -1184,7 +1183,7 @@ XMLNode &
 MidiModel::PatchChangeDiffCommand::get_state ()
 {
 	XMLNode* diff_command = new XMLNode (PATCH_CHANGE_DIFF_COMMAND_ELEMENT);
-	diff_command->set_property("midi-source", _model->midi_source()->id().to_s());
+	diff_command->set_property("midi-source", _model->midi_source().id().to_s());
 
 	XMLNode* added = diff_command->add_child (ADDED_PATCH_CHANGES_ELEMENT);
 	for_each (_added.begin(), _added.end(),
@@ -1255,24 +1254,18 @@ MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
 {
 	ReadLock lock(read_lock());
 
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	if (!ms) {
-		error << "MIDI model has no source to sync to" << endmsg;
-		return false;
-	}
-
 	/* Invalidate and store active notes, which will be picked up by the iterator
 	   on the next roll if time progresses linearly. */
-	ms->invalidate(source_lock);
+	_midi_source.invalidate(source_lock);
 
 	/* as of March 2022 or long before , the note mode argument does nothing */
 	_midi_source.mark_streaming_midi_write_started (source_lock, Sustained);
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		ms->append_event_beats(source_lock, *i);
+		_midi_source.append_event_beats(source_lock, *i);
 	}
 
-	ms->mark_streaming_write_completed (source_lock);
+	_midi_source.mark_streaming_write_completed (source_lock);
 
 	set_edited (false);
 
@@ -1421,7 +1414,6 @@ MidiModel::find_sysex (Evoral::event_id_t sysex_id)
 MidiModel::WriteLock
 MidiModel::edit_lock()
 {
-	boost::shared_ptr<MidiSource> ms          = _midi_source.lock();
 	Glib::Threads::Mutex::Lock*   source_lock = 0;
 
 	if (ms) {
@@ -1631,33 +1623,7 @@ InsertMergePolicy
 MidiModel::insert_merge_policy () const
 {
 	/* XXX ultimately this should be a per-track or even per-model policy */
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
-
-	return ms->session().config.get_insert_merge_policy ();
-}
-
-void
-MidiModel::set_midi_source (boost::shared_ptr<MidiSource> s)
-{
-	boost::shared_ptr<MidiSource> old = _midi_source.lock ();
-
-	if (old) {
-		Source::Lock lm(old->mutex());
-		old->invalidate (lm);
-	}
-
-	_midi_source_connections.drop_connections ();
-
-	_midi_source = s;
-
-	s->InterpolationChanged.connect_same_thread (
-		_midi_source_connections, boost::bind (&MidiModel::source_interpolation_changed, this, _1, _2)
-		);
-
-	s->AutomationStateChanged.connect_same_thread (
-		_midi_source_connections, boost::bind (&MidiModel::source_automation_state_changed, this, _1, _2)
-		);
+	return _midi_source.session().config.get_insert_merge_policy ();
 }
 
 /** The source has signalled that the interpolation style for a parameter has changed.  In order to
@@ -1684,10 +1650,7 @@ MidiModel::source_interpolation_changed (Evoral::Parameter p, Evoral::ControlLis
 void
 MidiModel::control_list_interpolation_changed (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
 {
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
-
-	ms->set_interpolation_of (p, s);
+	_midi_source.set_interpolation_of (p, s);
 }
 
 void
@@ -1705,9 +1668,7 @@ MidiModel::source_automation_state_changed (Evoral::Parameter p, AutoState s)
 void
 MidiModel::automation_list_automation_state_changed (Evoral::Parameter p, AutoState s)
 {
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
-	ms->set_automation_state_of (p, s);
+	_midi_source.set_automation_state_of (p, s);
 }
 
 boost::shared_ptr<Evoral::Control>
@@ -1719,23 +1680,14 @@ MidiModel::control_factory (Evoral::Parameter const & p)
 	   automation state from our source.
 	*/
 
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
-
-	c->list()->set_interpolation (ms->interpolation_of (p));
+	c->list()->set_interpolation (_midi_source.interpolation_of (p));
 
 	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (c->list ());
 	assert (al);
 
-	al->set_automation_state (ms->automation_state_of (p));
+	al->set_automation_state (_midi_source.automation_state_of (p));
 
 	return c;
-}
-
-boost::shared_ptr<const MidiSource>
-MidiModel::midi_source ()
-{
-	return _midi_source.lock ();
 }
 
 /** Moves notes, patch changes, controllers and sys-ex to insert silence at the start of the model.
@@ -1744,9 +1696,6 @@ MidiModel::midi_source ()
 void
 MidiModel::insert_silence_at_start (TimeType t)
 {
-	boost::shared_ptr<MidiSource> s = _midi_source.lock ();
-	assert (s);
-
 	/* Notes */
 
 	if (!notes().empty ()) {
@@ -1756,7 +1705,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 			c->change (*i, NoteDiffCommand::StartTime, (*i)->time() + t);
 		}
 
-		apply_command_as_subcommand (s->session(), c);
+		apply_command_as_subcommand (_midi_source.session(), c);
 	}
 
 	/* Patch changes */
@@ -1768,7 +1717,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 			c->change_time (*i, (*i)->time() + t);
 		}
 
-		apply_command_as_subcommand (s->session(), c);
+		apply_command_as_subcommand (_midi_source.session(), c);
 	}
 
 	/* Controllers */
@@ -1778,7 +1727,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 		XMLNode& before = ac->alist()->get_state ();
 		i->second->list()->shift (timepos_t::zero (i->second->list()->time_domain()), timecnt_t (t));
 		XMLNode& after = ac->alist()->get_state ();
-		s->session().add_command (new MementoCommand<AutomationList> (new MidiAutomationListBinder (s, i->first), &before, &after));
+		_midi_source.session().add_command (new MementoCommand<AutomationList> (new MidiAutomationListBinder (_midi_source, i->first), &before, &after));
 	}
 
 	/* Sys-ex */
@@ -1790,7 +1739,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 			c->change (*i, (*i)->time() + t);
 		}
 
-		apply_command_as_subcommand (s->session(), c);
+		apply_command_as_subcommand (_midi_source.session(), c);
 	}
 
 	ContentsShifted (timecnt_t (t));
