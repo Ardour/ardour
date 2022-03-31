@@ -1207,7 +1207,7 @@ MidiRegionView::redisplay_model()
 
 		for (set<Evoral::event_id_t>::iterator it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
 			if ((*it) == note->id()) {
-				// add_to_selection (cne);
+				add_to_selection (cne);
 			}
 		}
 	}
