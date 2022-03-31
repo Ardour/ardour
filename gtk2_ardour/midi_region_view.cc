@@ -39,6 +39,7 @@
 
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
+#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include "ardour/debug.h"
@@ -1091,7 +1092,9 @@ MidiRegionView::redisplay_model()
 		return;
 	}
 
-	// CALLGRIND_START_INSTRUMENTATION;
+	// PBD::stacktrace (std::cerr, 8);
+
+	Timing t;
 
 	group->canvas()->freeze_queue_draw ();
 
@@ -1228,8 +1231,8 @@ MidiRegionView::redisplay_model()
 
 	group->canvas()->thaw_queue_draw ();
 
-	// CALLGRIND_STOP_INSTRUMENTATION;
-	// CALLGRIND_DUMP_STATS;
+	t.update ();
+	std::cerr << "REDISPLAY of " << region()->name() << " complete after " << t.elapsed_msecs() << std::endl;
 }
 
 void
