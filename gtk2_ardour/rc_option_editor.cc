@@ -3462,8 +3462,8 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_at_session_end)
 		     );
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    string_compose (_("<b>When enabled</b> if %1 is <b>not recording</b>, it will stop the transport "
-							      "when it reaches the current session end marker\n\n"
+					    string_compose (_("<b>When enabled</b> if %1 is <b>not recording</b>, and <b>all trigger-slots are unused</b> "
+							      "the transport is stopped when it reaches the current session end marker\n\n"
 							      "<b>When disabled</b> %1 will continue to roll past the session end marker at all times"),
 							    PROGRAM_NAME));
 	add_option (_("Transport"), bo);
