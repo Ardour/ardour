@@ -1387,10 +1387,11 @@ int main () { return 0; }
 
     set_compiler_flags (conf, Options.options)
 
-    if conf.env['build_host'] not in [ 'mojave', 'catalina', 'bigsur']:
-        conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
+    if sys.platform == 'darwin':
+        if conf.env['build_host'] not in [ 'mojave', 'catalina', 'bigsur']:
+            conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
 
-    conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
+        conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
 
     if sys.platform == 'darwin':
         sub_config_and_use(conf, 'libs/appleutility')
