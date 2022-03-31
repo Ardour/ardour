@@ -144,29 +144,37 @@ void
 RTTaskList::process (TaskList const& tl)
 {
 	Glib::Threads::Mutex::Lock pm (_process_mutex);
+
+#ifndef NDEBUG
+	/* must not be called while processing is already running */
 	Glib::Threads::Mutex::Lock tm (_tasklist_mutex, Glib::Threads::NOT_LOCK);
-
 	tm.acquire ();
-	_tasklist = tl;
+	assert (_tasklist.empty ());
 	tm.release ();
+#endif
 
+	_tasklist = tl;
 	process_tasklist ();
 
+#ifndef NDEBUG
+	/* ensure that all tasks are processed, and threads are in wait state */
 	tm.acquire ();
-	_tasklist.clear ();
+	assert (_tasklist.empty ());
 	tm.release ();
+#endif
 }
 
 void
 RTTaskList::process_tasklist ()
 {
-//	if (0 == g_atomic_int_get (&_threads_active) || _threads.size () == 0) {
+	if (0 == g_atomic_int_get (&_threads_active) || _threads.size () == 0) {
 
 		for (TaskList::iterator i = _tasklist.begin (); i != _tasklist.end(); ++i) {
 			(*i)();
 		}
+		_tasklist.clear ();
 		return;
-//	}
+	}
 
 	uint32_t nt = std::min (_threads.size (), _tasklist.size ());
 
