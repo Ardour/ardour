@@ -108,6 +108,11 @@ public:
 		DisplaySuspender (RegionView& rv) : region_view (rv) {
 			region_view.disable_display ();
 		}
+
+		DisplaySuspender (DisplaySuspender const & other) : region_view (other.region_view) {
+			region_view.disable_display ();
+		}
+
 		~DisplaySuspender () {
 			region_view.enable_display ();
 		}
