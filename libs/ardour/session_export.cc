@@ -165,7 +165,13 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		_butler->wait_until_finished ();
 
-	/* get everyone to the right position */
+		/* This method may be called from a thread start_timespan_bg(),
+		 * or from the GUI thread. We need to set/update the tempo-map
+		 * thread-local variable before calling Track::seek
+		 */
+		Temporal::TempoMap::update_thread_tempo_map ();
+
+		/* get everyone to the right position */
 
 		boost::shared_ptr<RouteList> rl = routes.reader();
 
