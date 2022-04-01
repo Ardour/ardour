@@ -82,22 +82,23 @@ class LIBPBD_API SystemExec
 		 * The alternative constructor below allows to specify quoted parameters
 		 * incl. whitespace.
 		 *
-		 * @param c program pathname that identifies the new process image file.
-		 * @param a string of commandline-arguments to be passed to the new program.
+		 * @param cmd program pathname that identifies the new process image file.
+		 * @param argv string of commandline-arguments to be passed to the new program.
+		 * @param supress_ld_env  On Linux, unset LD_LIBRARY_PATH environment variable
 		 */
-		SystemExec (std::string c, std::string a = "");
+		SystemExec (std::string cmd, std::string argv = "", bool supress_ld_env = false);
 		/** similar to \ref SystemExec but allows to specify custom arguments
 		 *
-		 * @param c program pathname that identifies the new process image file.
-		 * @param a array of argument strings passed to the new program as 'argv'.
+		 * @param cmd program pathname that identifies the new process image file.
+		 * @param argv array of argument strings passed to the new program as 'argv'.
 		 *          it must be terminated by a null pointer (see the 'evecve'
 		 *          POSIX-C documentation for more information)
 		 *          The array must be dynamically allocated using malloc or strdup.
 		 *          Unless they're NULL, the array itself and each of its content
 		 *          memory is freed() in the destructor.
-		 *
+		 * @param supress_ld_env  On Linux, unset LD_LIBRARY_PATH environment variable
 		 */
-		SystemExec (std::string c, char ** a);
+		SystemExec (std::string cmd, char **argv, bool supress_ld_env = false);
 
 		/** similar to \ref SystemExec but expects a whole command line, and
 		 * handles some simple escape sequences.
@@ -111,10 +112,9 @@ class LIBPBD_API SystemExec
 		 * "\ " is non-splitting space, "\\" (and "\" at end of command) as "\",
 		 * for "%<char>", \<char\> is looked up in subs and the corresponding string
 		 * substituted. "%%" (and "%" at end of command)
-		 *
-		 * @returns an argv array suitable for creating a new SystemExec with
+		 * @param supress_ld_env  On Linux, unset LD_LIBRARY_PATH environment variable
 		 */
-		SystemExec (std::string command, const std::map<char, std::string> subs);
+		SystemExec (std::string command, const std::map<char, std::string> subs, bool supress_ld_env = false);
 
 		virtual ~SystemExec ();
 
@@ -231,7 +231,7 @@ class LIBPBD_API SystemExec
 
 		void make_argp(std::string);
 		void make_argp_escaped(std::string command, const std::map<char, std::string> subs);
-		void make_envp();
+		void make_envp (bool supress_ld_env);
 
 		char **argp;
 		char **envp;

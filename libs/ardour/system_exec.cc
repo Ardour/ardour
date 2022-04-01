@@ -56,20 +56,20 @@ SystemExec::initialize ()
 	_initialized = true;
 }
 
-SystemExec::SystemExec (std::string c, char** a)
-	: PBD::SystemExec (c, a)
+SystemExec::SystemExec (std::string cmd, char** argv, bool supress_ld_env)
+	: PBD::SystemExec (cmd, argv, supress_ld_env)
 {
 	initialize ();
 }
 
-SystemExec::SystemExec (std::string c, std::string a)
-	: PBD::SystemExec (c, a)
+SystemExec::SystemExec (std::string cmd, std::string argv, bool supress_ld_env)
+	: PBD::SystemExec (cmd, argv, supress_ld_env)
 {
 	initialize ();
 }
 
-SystemExec::SystemExec (std::string c, const std::map<char, std::string> subs)
-	: PBD::SystemExec (c, subs)
+SystemExec::SystemExec (std::string cmd, const std::map<char, std::string> subs, bool supress_ld_env)
+	: PBD::SystemExec (cmd, subs, supress_ld_env)
 {
 	initialize ();
 }

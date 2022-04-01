@@ -28,9 +28,9 @@ namespace ARDOUR {
 class LIBARDOUR_API SystemExec : public PBD::SystemExec
 {
 public:
-	SystemExec (std::string c, std::string a = "");
-	SystemExec (std::string c, char** a);
-	SystemExec (std::string c, const std::map<char, std::string> subs);
+	SystemExec (std::string cmd, std::string argv = "", bool supress_ld_env = false);
+	SystemExec (std::string cmd, char** argv, bool supress_ld_env = false);
+	SystemExec (std::string cmd, const std::map<char, std::string> subs, bool supress_ld_env = false);
 	~SystemExec ();
 
 	int start (StdErrMode stderr_mode = IgnoreAndClose)
