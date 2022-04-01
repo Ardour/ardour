@@ -88,7 +88,7 @@ TranscodeFfmpeg::probe ()
 	argp[4] = strdup ("-show_streams");
 	argp[5] = strdup (infile.c_str ());
 	argp[6] = 0;
-	ffcmd   = new ARDOUR::SystemExec (ffprobe_exe, argp);
+	ffcmd   = new ARDOUR::SystemExec (ffprobe_exe, argp, true);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffprobeparse, this, _1, _2));
 	ffcmd->Terminated.connect (*this, invalidator (*this), boost::bind (&TranscodeFfmpeg::ffexit, this), gui_context ());
 	if (ffcmd->start (SystemExec::IgnoreAndClose)) {
@@ -401,7 +401,7 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 		printf ("\n");
 	}
 
-	ffcmd = new ARDOUR::SystemExec (ffmpeg_exe, argp);
+	ffcmd = new ARDOUR::SystemExec (ffmpeg_exe, argp, true);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffmpegparse_v, this, _1, _2));
 	ffcmd->Terminated.connect (*this, invalidator (*this), boost::bind (&TranscodeFfmpeg::ffexit, this), gui_context ());
 
@@ -452,7 +452,7 @@ TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::samplecnt_t /*sampl
 		printf ("\n");
 	}
 
-	ffcmd = new ARDOUR::SystemExec (ffmpeg_exe, argp);
+	ffcmd = new ARDOUR::SystemExec (ffmpeg_exe, argp, true);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffmpegparse_a, this, _1, _2));
 	ffcmd->Terminated.connect (*this, invalidator (*this), boost::bind (&TranscodeFfmpeg::ffexit, this), gui_context ());
 
@@ -524,7 +524,7 @@ TranscodeFfmpeg::transcode (std::string outfile, const int outw, const int outh,
 		printf ("\n");
 	}
 
-	ffcmd = new ARDOUR::SystemExec (ffmpeg_exe, argp);
+	ffcmd = new ARDOUR::SystemExec (ffmpeg_exe, argp, true);
 	ffcmd->ReadStdout.connect_same_thread (*this, boost::bind (&TranscodeFfmpeg::ffmpegparse_v, this, _1, _2));
 	ffcmd->Terminated.connect (*this, invalidator (*this), boost::bind (&TranscodeFfmpeg::ffexit, this), gui_context ());
 	if (ffcmd->start (SystemExec::MergeWithStdin)) {

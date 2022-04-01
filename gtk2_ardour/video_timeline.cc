@@ -723,7 +723,7 @@ VideoTimeLine::find_xjadeo () {
 	}
 
 	if (found_xjadeo ()) {
-		ARDOUR::SystemExec version_check(_xjadeo_bin, X_("--version"));
+		ARDOUR::SystemExec version_check (_xjadeo_bin, X_("--version"), true);
 		xjadeo_version = "";
 		version_check.ReadStdout.connect_same_thread (*this, boost::bind (&VideoTimeLine::xjadeo_readversion, this, _1 ,_2));
 		version_check.Terminated.connect_same_thread (*this, boost::bind (&VideoTimeLine::xjadeo_readversion, this, "\n" ,1));
@@ -792,7 +792,7 @@ VideoTimeLine::find_harvid () {
 	if (harvid_bin.empty ()) {
 		return;
 	}
-	ARDOUR::SystemExec version_check(harvid_bin, X_("--version"));
+	ARDOUR::SystemExec version_check (harvid_bin, X_("--version"), true);
 	harvid_version = "";
 	version_check.ReadStdout.connect_same_thread (*this, boost::bind (&VideoTimeLine::harvid_readversion, this, _1 ,_2));
 	version_check.Terminated.connect_same_thread (*this, boost::bind (&VideoTimeLine::harvid_readversion, this, "\n" ,1));

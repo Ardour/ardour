@@ -194,7 +194,7 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 			delete video_server_process;
 		}
 
-		video_server_process = new ARDOUR::SystemExec(icsd_exec, argp);
+		video_server_process = new ARDOUR::SystemExec(icsd_exec, argp, true);
 		if (video_server_process->start()) {
 			warning << _("Cannot launch the video-server") << endmsg;
 			continue;

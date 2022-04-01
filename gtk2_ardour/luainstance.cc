@@ -432,7 +432,7 @@ lua_forkexec (lua_State *L)
 	}
 	args[argc] = 0;
 
-	ARDOUR::SystemExec* x = new ARDOUR::SystemExec (args[0], args);
+	ARDOUR::SystemExec* x = new ARDOUR::SystemExec (args[0], args, true);
 	x->Terminated.connect (_luaexecs, MISSING_INVALIDATOR, boost::bind (&reaper, x), gui_context());
 
 	if (x->start()) {
@@ -455,7 +455,7 @@ lua_exec (std::string cmd)
 	args[1] = strdup ("-c");
 	args[2] = strdup (cmd.c_str());
 	args[3] = 0;
-	ARDOUR::SystemExec x ("/bin/sh", args);
+	ARDOUR::SystemExec x ("/bin/sh", args, true);
 	if (x.start()) {
 		return -1;
 	}
