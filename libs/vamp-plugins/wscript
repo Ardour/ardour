@@ -2,19 +2,6 @@
 from waflib.extras import autowaf as autowaf
 import os
 
-# Version of this package (even if built as a child)
-LIBARDOURVAMPPLUGINS_VERSION = '0.0.0'
-
-# Library version (UNIX style major, minor, micro)
-# major increment <=> incompatible changes
-# minor increment <=> compatible changes (additions)
-# micro increment <=> no interface changes
-LIBARDOURVAMPPLUGINS_LIB_VERSION = '0.0.0'
-
-# Variables for 'waf dist'
-APPNAME = 'libardourvampplugins'
-VERSION = LIBARDOURVAMPPLUGINS_VERSION
-
 # Mandatory variables
 top = '.'
 out = 'build'
@@ -64,7 +51,6 @@ def build(bld):
     elif bld.is_defined('HAVE_AUBIO'):
         obj.source += ' Onset.cpp '
         obj.uselib += ' AUBIO '
-    obj.vnum         = LIBARDOURVAMPPLUGINS_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'vamp')
 
 def shutdown():
