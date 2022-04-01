@@ -1096,8 +1096,6 @@ MidiRegionView::redisplay_model()
 
 	Timing t;
 
-	group->canvas()->freeze_queue_draw ();
-
 	if (_active_notes) {
 		// Currently recording
 		const samplecnt_t zoom = trackview.editor().get_current_zoom();
@@ -1116,7 +1114,6 @@ MidiRegionView::redisplay_model()
 	}
 
 	if (!_model) {
-		group->canvas()->thaw_queue_draw ();
 		return;
 	}
 
@@ -1228,8 +1225,6 @@ MidiRegionView::redisplay_model()
 	_marked_for_selection.clear ();
 	_marked_for_velocity.clear ();
 	_pending_note_selection.clear ();
-
-	group->canvas()->thaw_queue_draw ();
 
 	t.update ();
 	std::cerr << "REDISPLAY of " << region()->name() << " complete after " << t.elapsed_msecs() << std::endl;
