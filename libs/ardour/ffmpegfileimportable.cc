@@ -57,7 +57,7 @@ FFMPEGFileImportableSource::FFMPEGFileImportableSource (const std::string& path,
 	argp[a++] = strdup ("-of");
 	argp[a++] = strdup ("json");
 
-	ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffprobe_exe, argp);
+	ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffprobe_exe, argp, true);
 	PBD::info << "Probe command: { " << exec->to_s () << "}" << endmsg;
 
 	if (exec->start ()) {
@@ -186,7 +186,7 @@ FFMPEGFileImportableSource::start_ffmpeg ()
 #endif
 	argp[a++] = strdup ("-");
 
-	_ffmpeg_exec = new ARDOUR::SystemExec (ffmpeg_exe, argp);
+	_ffmpeg_exec = new ARDOUR::SystemExec (ffmpeg_exe, argp, true);
 	PBD::info << "Decode command: { " << _ffmpeg_exec->to_s () << "}" << endmsg;
 	if (_ffmpeg_exec->start ()) {
 		PBD::error << "FFMPEGFileImportableSource: External decoder (ffmpeg) cannot be started." << endmsg;

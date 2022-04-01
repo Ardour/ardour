@@ -463,7 +463,7 @@ ExportHandler::finish_timespan ()
 			subs.insert (std::pair<char, std::string> ('Y', year.str ()));
 			subs.insert (std::pair<char, std::string> ('Z', metadata.country ()));
 
-			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs);
+			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs, true);
 			info << "Post-export command line : {" << se->to_s () << "}" << endmsg;
 			se->ReadStdout.connect_same_thread(command_connection, boost::bind(&ExportHandler::command_output, this, _1, _2));
 			int ret = se->start (SystemExec::MergeWithStdin);
