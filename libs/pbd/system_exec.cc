@@ -596,19 +596,23 @@ extern char **environ;
 void
 SystemExec::make_envp (bool supress_ld_env)
 {
-	int i = 0;
-	envp = (char **) calloc(1, sizeof(char*));
+	int i = 0, j = 0;
+	envp = (char **) calloc (1, sizeof(char*));
 	/* copy current environment */
 	for (i = 0; environ[i]; ++i) {
-#ifndef __APPLE__
-		if (supress_ld_env && 0 == strncmp (environ[i], "LD_LIBRARY_PATH=", 17)) {
+#ifdef __APPLE__
+		if (supress_ld_env && 0 == strncmp (environ[i], "DYLD_FALLBACK_LIBRARY_PATH", 26)) {
+			continue;
+		}
+#else
+		if (supress_ld_env && 0 == strncmp (environ[i], "LD_LIBRARY_PATH", 15)) {
 			continue;
 		}
 #endif
-	  envp[i] = strdup(environ[i]);
-	  envp = (char **) realloc(envp, (i+2) * sizeof(char*));
+	  envp[j++] = strdup(environ[i]);
+	  envp = (char **) realloc(envp, (j + 1) * sizeof(char*));
 	}
-	envp[i] = 0;
+	envp[j] = 0;
 }
 
 void
