@@ -3110,7 +3110,6 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		i->view->region()->suspend_property_changes ();
-		suspenders.push_back (RegionView::DisplaySuspender (*i->view));
 	}
 }
 
@@ -3353,8 +3352,6 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		i->view->region()->resume_property_changes ();
 	}
-
-	suspenders.clear ();
 }
 
 void
