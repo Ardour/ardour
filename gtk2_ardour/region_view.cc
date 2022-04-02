@@ -1260,7 +1260,7 @@ RegionView::enable_display ()
 	if (_disable_display) {
 		_disable_display--;
 		if (_disable_display == 0) {
-			redisplay ();
+			redisplay (false);
 		}
 	}
 }

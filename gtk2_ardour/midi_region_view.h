@@ -120,9 +120,6 @@ public:
 	void hide_step_edit_cursor ();
 	void set_step_edit_cursor_width (Temporal::Beats beats);
 
-	virtual void redisplay ();
-	void redisplay_model();
-
 	GhostRegion* add_ghost (TimeAxisView&);
 
 	NoteBase* add_note(const boost::shared_ptr<NoteType> note, bool visible);
@@ -333,6 +330,7 @@ public:
 	void reset_width_dependent_items (double pixel_width);
 
 	void parameter_changed (std::string const & p);
+	void _redisplay (bool view_only);
 
   protected:
 	friend class Editor;
@@ -564,6 +562,11 @@ public:
 
 	double note_to_y (uint8_t note) const;
 	uint8_t y_to_note (double y) const;
+
+	void update_patch_changes ();
+	void update_sysexes ();
+	void view_changed ();
+	void model_changed ();
 };
 
 

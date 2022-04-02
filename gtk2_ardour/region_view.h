@@ -102,7 +102,9 @@ public:
 	virtual void exited () {}
 
 	bool display_enabled() const;
-	virtual void redisplay() = 0;
+	void redisplay (bool view_only = true) {
+		_redisplay (view_only);
+	}
 
 	struct DisplaySuspender {
 		DisplaySuspender (RegionView& rv) : region_view (rv) {
@@ -243,11 +245,13 @@ private:
 	typedef std::list<ViewCueMarker*> ViewCueMarkers;
 	ViewCueMarkers _cue_markers;
 	bool _cue_markers_visible;
+	virtual void _redisplay (bool) = 0;
 
   private:
 	friend class DisplaySuspender;
 	void enable_display();
 	void disable_display();
+
 };
 
 #endif /* __gtk_ardour_region_view_h__ */
