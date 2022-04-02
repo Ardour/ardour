@@ -902,8 +902,6 @@ MidiRegionView::display_model (boost::shared_ptr<MidiModel> model)
 	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiRegionView::model_changed, this), gui_context());
 	/* Don't signal as nobody else needs to know until selection has been altered. */
 	clear_events();
-	// PBD::stacktrace (std::cerr, 8);
-
 	model_changed ();
 }
 
@@ -1095,8 +1093,6 @@ MidiRegionView::model_changed()
 		return;
 	}
 
-	// PBD::stacktrace (std::cerr, 8);
-
 	Timing t;
 
 	if (_active_notes) {
@@ -1121,7 +1117,7 @@ MidiRegionView::model_changed()
 	}
 
 	for (_optimization_iterator = _events.begin(); _optimization_iterator != _events.end(); ++_optimization_iterator) {
-		// _optimization_iterator->second->invalidate();
+		_optimization_iterator->second->invalidate();
 	}
 
 	bool empty_when_starting = _events.empty();
@@ -1135,7 +1131,6 @@ MidiRegionView::model_changed()
 
 	NoteBase* cne;
 
-	if (empty_when_starting) {
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 
 		boost::shared_ptr<NoteType> note (*n);
@@ -1153,7 +1148,6 @@ MidiRegionView::model_changed()
 				missing_notes.insert (note);
 			}
 		}
-	}
 	}
 
 	if (!empty_when_starting) {
@@ -1196,8 +1190,6 @@ MidiRegionView::model_changed()
 		}
 	}
 
-	std::cerr << this << " Adding " << missing_notes.size() << " missing notes\n";
-
 	for (MidiModel::Notes::iterator n = missing_notes.begin(); n != missing_notes.end(); ++n) {
 		boost::shared_ptr<NoteType> note (*n);
 		NoteBase* cne;
@@ -1235,7 +1227,7 @@ MidiRegionView::model_changed()
 	_pending_note_selection.clear ();
 
 	t.update ();
-	std::cerr << "REDISPLAY of " << region()->name() << " complete after " << t.elapsed_msecs() << std::endl;
+	std::cerr << "REDISPLAY(model) of " << region()->name() << " complete after " << t.elapsed_msecs() << std::endl;
 }
 
 void
@@ -1244,8 +1236,6 @@ MidiRegionView::view_changed()
 	if (!display_enabled()) {
 		return;
 	}
-
-	// PBD::stacktrace (std::cerr, 8);
 
 	Timing t;
 
@@ -1277,20 +1267,12 @@ MidiRegionView::view_changed()
 
 		NoteBase* cne = i->second;
 
-		bool visible = cne->item()->visible();
-
-		if ((sus = dynamic_cast<Note*>(cne))) {
-
-			if (visible) {
+		if (cne->item()->visible()) {
+			if ((sus = dynamic_cast<Note*>(cne))) {
 				update_sustained (sus);
 			}
-
 		} else if ((hit = dynamic_cast<Hit*>(cne))) {
-
-			if (visible) {
-				update_hit (hit);
-			}
-
+			update_hit (hit);
 		}
 
 		++i;
@@ -1307,7 +1289,7 @@ MidiRegionView::view_changed()
 	update_patch_changes ();
 
 	t.update ();
-	std::cerr << "REDISPLAY of " << region()->name() << " complete after " << t.elapsed_msecs() << std::endl;
+	std::cerr << "REDISPLAY(view) of " << region()->name() << " complete after " << t.elapsed_msecs() << std::endl;
 }
 
 void
