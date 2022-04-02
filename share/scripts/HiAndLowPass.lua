@@ -174,10 +174,15 @@ function apply_params (ctrl)
 	cur[6] = low_pass_filter_param (cur[6], ctrl[6], 0.01) -- LP quality
 	cur[7] = ctrl[7]
 
+	hp[1][1]:compute (ARDOUR.DSP.BiquadType.HighPass, cur[2], cur[3], 0)
+	lp[1][1]:compute (ARDOUR.DSP.BiquadType.LowPass,  cur[5], cur[6], 0)
+
 	for c = 1, chn do
 		for k = 1,4 do
-			hp[c][k]:compute (ARDOUR.DSP.BiquadType.HighPass, cur[2], cur[3], 0)
-			lp[c][k]:compute (ARDOUR.DSP.BiquadType.LowPass,  cur[5], cur[6], 0)
+			if not (k == 1 and c == 1) then
+				hp[c][k]:configure (hp[1][1])
+				lp[c][k]:configure (hp[1][1])
+			end
 		end
 	end
 end
@@ -189,15 +194,16 @@ function dsp_run (ins, outs, n_samples)
 	assert (#ins == chn)
 	local ctrl = santize_params (CtrlPorts:array ())
 
-	local changed = false
+	local redraw = false
 	local siz = n_samples
 	local off = 0
 
 	-- if a parameter was changed, process at most lpf_chunk samples
 	-- at a time and interpolate parameters until the current settings
 	-- match the target values
-	if param_changed (ctrl) then
-		changed = true
+	local changed = param_changed (ctrl)
+	if changed then
+		redraw = true
 		siz = lpf_chunk
 	end
 
@@ -214,7 +220,14 @@ function dsp_run (ins, outs, n_samples)
 
 		-- process all channels
 	while n_samples > 0 do
-		if changed then apply_params (ctrl) end
+		if changed then
+			apply_params (ctrl)
+			changed = param_changed (ctrl)
+			if not changed then
+				siz = n_samples
+			end
+		end
+
 		if siz > n_samples then siz = n_samples end
 
 		local ho = math.floor(cur[1])
@@ -283,7 +296,7 @@ function dsp_run (ins, outs, n_samples)
 		off = off + siz
 	end
 
-	if changed then
+	if redraw then
 		-- notify display
 		self:queue_draw ()
 	end
