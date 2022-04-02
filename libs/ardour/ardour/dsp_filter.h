@@ -248,6 +248,9 @@ namespace ARDOUR { namespace DSP {
 			/** setup filter, set coefficients directly */
 			void configure (double a1, double a2, double b0, double b1, double b2);
 
+			/* copy coefficients from other instance, retain state */
+			void configure (Biquad const&);
+
 			/** filter transfer function (filter response for spectrum visualization)
 			 * @param freq frequency
 			 * @return gain at given frequency in dB (clamped to -120..+120)

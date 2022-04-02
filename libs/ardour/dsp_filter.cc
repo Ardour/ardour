@@ -197,6 +197,16 @@ Biquad::configure (double a1, double a2, double b0, double b1, double b2)
 }
 
 void
+Biquad::configure (Biquad const& other)
+{
+	_a1 = other._a1;
+	_a2 = other._a2;
+	_b0 = other._b0;
+	_b1 = other._b1;
+	_b2 = other._b2;
+}
+
+void
 Biquad::compute (Type type, double freq, double Q, double gain)
 {
 	if (Q <= .001)  { Q = 0.001; }
