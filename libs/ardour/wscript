@@ -116,6 +116,7 @@ libardour_sources = [
         'internal_send.cc',
         'interpolation.cc',
         'io.cc',
+        'io_plug.cc',
         'io_processor.cc',
         'kmeterdsp.cc',
         'ladspa_plugin.cc',

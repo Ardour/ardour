@@ -51,6 +51,7 @@ namespace ARDOUR
 class AudioEngine;
 class Session;
 class BufferSet;
+class IOPlug;
 class PluginInsert;
 class Plugin;
 class PluginInfo;
@@ -347,6 +348,7 @@ public:
 	PBD::Signal1<void, uint32_t> EndTouch;
 
 protected:
+	friend class IOPlug;
 	friend class PluginInsert;
 	friend class Session;
 
