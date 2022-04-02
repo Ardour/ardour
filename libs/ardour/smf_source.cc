@@ -650,12 +650,7 @@ SMFSource::load_model (const WriterLock& lock, bool force_reload)
 void
 SMFSource::load_model_unlocked (bool force_reload)
 {
-	std::cerr << "\n\n\n\n\n";
-	PBD::stacktrace (std::cerr, 8);
-
 	assert (!_writing);
-
-	std::cerr << "\n***** " << path() << " ACTUALLY LOADING, existing model: " << _model << std::endl;
 
 	if (!_model) {
 		_model = boost::shared_ptr<MidiModel> (new MidiModel (*this));
