@@ -747,6 +747,10 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("LEAVE %1/%2\n", _current_item->whatami(), _current_item->name));
 	}
 
+	if (_current_item == current_tooltip_item) {
+		hide_tooltip ();
+	}
+
 	leave_event.detail = GDK_NOTIFY_VIRTUAL;
 	enter_event.detail = GDK_NOTIFY_VIRTUAL;
 
@@ -1158,8 +1162,6 @@ GtkCanvas::get_mouse_position (Duple& winpos) const
 bool
 GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 {
-	hide_tooltip ();
-
 	/* translate event coordinates from window to canvas */
 
 	GdkEvent copy = *((GdkEvent*)ev);
@@ -1379,7 +1381,7 @@ GtkCanvas::start_tooltip_timeout (Item* item)
 {
 	stop_tooltip_timeout ();
 
-	if (item && Gtkmm2ext::PersistentTooltip::tooltips_enabled ()) {
+	if (item && !item->tooltip().empty() && Gtkmm2ext::PersistentTooltip::tooltips_enabled ()) {
 		current_tooltip_item = item;
 
 		/* wait for the first idle that happens after this is
