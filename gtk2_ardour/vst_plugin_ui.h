@@ -28,7 +28,7 @@ namespace ARDOUR {
 class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 {
 public:
-	VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>);
+	VSTPluginUI (boost::shared_ptr<ARDOUR::PlugInsertBase>, boost::shared_ptr<ARDOUR::VSTPlugin>);
 	virtual ~VSTPluginUI ();
 
 	virtual int get_preferred_height ();

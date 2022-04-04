@@ -25,8 +25,8 @@
 
 #include <gtkmm/stock.h>
 
-#include "ardour/auditioner.h"
 #include "ardour/lv2_plugin.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 #include "pbd/error.h"
 
@@ -73,9 +73,9 @@ LV2PluginUI::write_from_ui(void*       controller,
 		}
 	} else if (format == URIMap::instance().urids.atom_eventTransfer) {
 
-		const int cnt = me->_pi->get_count();
+		const int cnt = me->_pib->get_count();
 		for (int i=0; i < cnt; i++ ) {
-			boost::shared_ptr<LV2Plugin> lv2i = boost::dynamic_pointer_cast<LV2Plugin> (me->_pi->plugin(i));
+			boost::shared_ptr<LV2Plugin> lv2i = boost::dynamic_pointer_cast<LV2Plugin> (me->_pib->plugin(i));
 			lv2i->write_from_ui(port_index, format, buffer_size, (const uint8_t*)buffer);
 		}
 	}
@@ -296,10 +296,10 @@ LV2PluginUI::output_update()
 	_updates.clear ();
 }
 
-LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
+LV2PluginUI::LV2PluginUI(boost::shared_ptr<PlugInsertBase> pib,
                          boost::shared_ptr<LV2Plugin>    lv2p)
-	: PlugUIBase(pi)
-	, _pi(pi)
+	: PlugUIBase(pib)
+	, _pib(pib)
 	, _lv2(lv2p)
 	, _gui_widget(NULL)
 	, _values_last_sent_to_ui(NULL)
@@ -309,13 +309,7 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 	_ardour_buttons_box.set_spacing (6);
 	_ardour_buttons_box.set_border_width (6);
 
-	bool for_auditioner = false;
-	if (insert->session().the_auditioner()) {
-		for_auditioner = insert->session().the_auditioner()->the_instrument() == insert;
-	}
-	if (!for_auditioner) {
-		add_common_widgets (&_ardour_buttons_box);
-	}
+	add_common_widgets (&_ardour_buttons_box);
 
 	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&LV2PluginUI::queue_port_update, this), gui_context ());
 }
@@ -479,7 +473,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 
 			_values_last_sent_to_ui[port]        = _lv2->get_parameter(port);
 			_controllables[port] = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (
-				insert->control(Evoral::Parameter(PluginAutomation, 0, port)));
+				_pib->control(Evoral::Parameter(PluginAutomation, 0, port)));
 
 			if (_lv2->parameter_is_control(port) && _lv2->parameter_is_input(port)) {
 				if (_controllables[port]) {

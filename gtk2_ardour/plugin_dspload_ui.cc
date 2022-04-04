@@ -18,7 +18,7 @@
 
 #include "gtkmm2ext/utils.h"
 
-#include "ardour/session.h"
+#include "ardour/audioengine.h"
 
 #include "plugin_dspload_ui.h"
 #include "timers.h"
@@ -28,8 +28,8 @@
 using namespace Gtkmm2ext;
 using namespace Gtk;
 
-PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert> insert)
-	: _insert (insert)
+PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PlugInsertBase> pib)
+	: _pib (pib)
 	, _lbl_min ("", ALIGN_END, ALIGN_CENTER)
 	, _lbl_max ("", ALIGN_END, ALIGN_CENTER)
 	, _lbl_avg ("", ALIGN_END, ALIGN_CENTER)
@@ -81,7 +81,7 @@ PluginLoadStatsGui::stop_updating () {
 void
 PluginLoadStatsGui::update_cpu_label()
 {
-	if (_insert->get_stats (_min, _max, _avg, _dev)) {
+	if (_pib->get_stats (_min, _max, _avg, _dev)) {
 		_valid = true;
 		_lbl_min.set_text (string_compose (_("%1 [ms]"), rint (_min / 10.) / 100.));
 		_lbl_max.set_text (string_compose (_("%1 [ms]"), rint (_max / 10.) / 100.));
@@ -124,7 +124,7 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 
 	const int w = x1 - x0;
 	const int h = y1 - y0;
-	const double cycle_ms = 1000. * _insert->session().get_block_size() / (double)_insert->session().nominal_sample_rate();
+	const double cycle_ms = ARDOUR::AudioEngine::instance()->usecs_per_cycle () / 1000.0;
 
 	const double base_mult = std::max (1.0, cycle_ms / 2.0);
 	const double log_base = log1p (base_mult);

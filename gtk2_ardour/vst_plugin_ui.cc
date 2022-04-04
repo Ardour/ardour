@@ -35,21 +35,15 @@
 #include <gdk/gdkx.h>
 #endif
 
-VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost::shared_ptr<ARDOUR::VSTPlugin> plugin)
-	: PlugUIBase (insert)
+VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PlugInsertBase> pib, boost::shared_ptr<ARDOUR::VSTPlugin> plugin)
+	: PlugUIBase (pib)
 	, _vst (plugin)
 {
 	Gtk::HBox* box = manage (new Gtk::HBox);
 	box->set_spacing (6);
 	box->set_border_width (6);
 
-	bool for_auditioner =false;
-	if (insert->session().the_auditioner()) {
-		for_auditioner = insert->session().the_auditioner()->the_instrument() == insert;
-	}
-	if (!for_auditioner) {
-		add_common_widgets (box);
-	}
+	add_common_widgets (box);
 
 	pack_start (*box, false, false);
 	box->signal_size_allocate().connect (sigc::mem_fun (*this, &VSTPluginUI::top_box_allocated));

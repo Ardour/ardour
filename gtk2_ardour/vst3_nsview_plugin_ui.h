@@ -43,7 +43,7 @@
 class VST3NSViewPluginUI : public VST3PluginUI
 {
 public:
-	VST3NSViewPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VST3Plugin>);
+	VST3NSViewPluginUI (boost::shared_ptr<ARDOUR::PlugInsertBase>, boost::shared_ptr<ARDOUR::VST3Plugin>);
 	~VST3NSViewPluginUI ();
 
 	bool on_window_show(const std::string&);

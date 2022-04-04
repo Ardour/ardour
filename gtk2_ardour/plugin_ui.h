@@ -64,6 +64,7 @@
 
 namespace ARDOUR {
 	class PluginInsert;
+	class PlugInsertBase;
 	class Plugin;
 	class WindowsVSTPlugin;
 	class LXVSTPlugin;
@@ -90,7 +91,7 @@ class VSTPluginUI;
 class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionList
 {
 public:
-	PlugUIBase (boost::shared_ptr<ARDOUR::PluginInsert>);
+	PlugUIBase (boost::shared_ptr<ARDOUR::PlugInsertBase>);
 	virtual ~PlugUIBase();
 
 	virtual gint get_preferred_height () = 0;
@@ -117,7 +118,8 @@ public:
 	sigc::signal<void,bool> KeyboardFocused;
 
 protected:
-	boost::shared_ptr<ARDOUR::PluginInsert> insert;
+	boost::shared_ptr<ARDOUR::PlugInsertBase> _pib;
+	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
 
 	void add_common_widgets (Gtk::HBox*, bool with_focus = true);
@@ -208,7 +210,7 @@ private:
 class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 {
 public:
-	GenericPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
+	GenericPluginUI (boost::shared_ptr<ARDOUR::PlugInsertBase> plug, bool scrollable=false);
 	~GenericPluginUI ();
 
 	gint get_preferred_height () { return prefheight; }
@@ -342,9 +344,9 @@ private:
 class PluginUIWindow : public ArdourWindow
 {
 public:
-	PluginUIWindow (boost::shared_ptr<ARDOUR::PluginInsert> insert,
-	                bool scrollable=false,
-	                bool editor=true);
+	PluginUIWindow (boost::shared_ptr<ARDOUR::PlugInsertBase>,
+	                bool scrollable = false,
+	                bool editor = true);
 	~PluginUIWindow ();
 
 	PlugUIBase& pluginui() { return *_pluginui; }
@@ -377,12 +379,12 @@ private:
 	void app_activated (bool);
 	void plugin_going_away ();
 
-	bool create_windows_vst_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
-	bool create_lxvst_editor(boost::shared_ptr<ARDOUR::PluginInsert>);
-	bool create_mac_vst_editor(boost::shared_ptr<ARDOUR::PluginInsert>);
-	bool create_audiounit_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
-	bool create_lv2_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
-	bool create_vst3_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
+	bool create_windows_vst_editor (boost::shared_ptr<ARDOUR::PlugInsertBase>);
+	bool create_lxvst_editor(boost::shared_ptr<ARDOUR::PlugInsertBase>);
+	bool create_mac_vst_editor(boost::shared_ptr<ARDOUR::PlugInsertBase>);
+	bool create_audiounit_editor (boost::shared_ptr<ARDOUR::PlugInsertBase>);
+	bool create_lv2_editor (boost::shared_ptr<ARDOUR::PlugInsertBase>);
+	bool create_vst3_editor (boost::shared_ptr<ARDOUR::PlugInsertBase>);
 
 	static PluginUIWindow* the_plugin_window;
 };
@@ -391,12 +393,12 @@ private:
 /* this function has to be in a .mm file
  * because MacVSTPluginUI has Cocoa members
  */
-extern VSTPluginUI* create_mac_vst_gui (boost::shared_ptr<ARDOUR::PluginInsert>);
+extern VSTPluginUI* create_mac_vst_gui (boost::shared_ptr<ARDOUR::PlugInsertBase>);
 #endif
 
 #ifdef AUDIOUNIT_SUPPORT
 /* this function has to be in a .mm file */
-extern PlugUIBase* create_au_gui (boost::shared_ptr<ARDOUR::PluginInsert>, Gtk::VBox**);
+extern PlugUIBase* create_au_gui (boost::shared_ptr<ARDOUR::PlugInsertBase>, Gtk::VBox**);
 #endif
 
 #endif /* __ardour_plugin_ui_h__ */

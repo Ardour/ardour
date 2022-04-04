@@ -21,6 +21,8 @@
 #include <gtkmm/viewport.h>
 
 #include "ardour/session.h"
+#include "ardour/plugin_insert.h"
+
 #include "gtkmm2ext/gui_thread.h"
 
 #include "plugin_dspload_ui.h"

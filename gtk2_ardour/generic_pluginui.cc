@@ -47,7 +47,6 @@
 
 #include "midi++/midnam_patch.h"
 
-#include "ardour/auditioner.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_track.h"
 #include "ardour/plugin.h"
@@ -85,8 +84,8 @@ using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace ARDOUR_UI_UTILS;
 
-GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrollable)
-	: PlugUIBase (pi)
+GenericPluginUI::GenericPluginUI (boost::shared_ptr<PlugInsertBase> pib, bool scrollable)
+	: PlugUIBase (pib)
 	, automation_menu (0)
 	, is_scrollable(scrollable)
 	, _plugin_pianokeyboard_expander (_("MIDI Keyboard (audition only)"))
@@ -94,11 +93,6 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	, _piano_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
 	, _piano_channel (*manage (new Adjustment (0, 1, 16, 1, 1)))
 {
-	bool for_auditioner = false;
-	if (insert->session().the_auditioner()) {
-		for_auditioner = insert->session().the_auditioner()->the_instrument() == insert;
-	}
-
 	set_name ("PluginEditor");
 	set_border_width (6);
 	//set_homogeneous (false);
@@ -109,7 +103,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	smaller_hbox->set_spacing (6);
 	smaller_hbox->set_border_width (0);
 
-	if (for_auditioner) {
+	if (_pib->ui_elements () == PlugInsertBase::NoGUIToolbar) {
 		Gtk::Label* spacer = manage (new Gtk::Label());
 		smaller_hbox->pack_start(*spacer);
 	} else {
@@ -127,42 +121,40 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	automation_latch_all_button.set_text (GainMeterBase::astate_string (ARDOUR::Latch));
 	automation_latch_all_button.set_name (X_("generic button"));
 
-	if (!for_auditioner) { /*auditioner is not run when it isn't auditioning; so the piano keyboard, cpu usage, and other features are not applicable */
-		if (pi->is_instrument ()) {
-			_piano = new APianoKeyboard ();
-			_piano->set_can_focus ();
+	if (_pib->ui_elements () & PlugInsertBase::MIDIKeyboard) {
+		_piano = new APianoKeyboard ();
+		_piano->set_can_focus ();
 
-			_piano->NoteOn.connect (sigc::mem_fun (*this, &GenericPluginUI::note_on_event_handler));
-			_piano->NoteOff.connect (sigc::mem_fun (*this, &GenericPluginUI::note_off_event_handler));
+		_piano->NoteOn.connect (sigc::mem_fun (*this, &GenericPluginUI::note_on_event_handler));
+		_piano->NoteOff.connect (sigc::mem_fun (*this, &GenericPluginUI::note_off_event_handler));
 
-			HBox* box = manage (new HBox);
-			box->pack_start (*manage (new Label (_("Channel:"))), false, false);
-			box->pack_start (_piano_channel, false, false);
-			box->pack_start (*manage (new Label (_("Velocity:"))), false, false);
-			box->pack_start (_piano_velocity, false, false);
+		HBox* box = manage (new HBox);
+		box->pack_start (*manage (new Label (_("Channel:"))), false, false);
+		box->pack_start (_piano_channel, false, false);
+		box->pack_start (*manage (new Label (_("Velocity:"))), false, false);
+		box->pack_start (_piano_velocity, false, false);
 
-			Box* box2 = manage (new HBox ());
-			box2->pack_start (*box, true, false);
+		Box* box2 = manage (new HBox ());
+		box2->pack_start (*box, true, false);
 
-			_pianobox.set_spacing (4);
-			_pianobox.pack_start (*box2, true, true);
-			_pianobox.pack_start (*_piano, true, true);
+		_pianobox.set_spacing (4);
+		_pianobox.pack_start (*box2, true, true);
+		_pianobox.pack_start (*_piano, true, true);
 
-			_plugin_pianokeyboard_expander.set_expanded(false);
-			_plugin_pianokeyboard_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &GenericPluginUI::toggle_pianokeyboard));
+		_plugin_pianokeyboard_expander.set_expanded(false);
+		_plugin_pianokeyboard_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &GenericPluginUI::toggle_pianokeyboard));
 
-			pack_end (_plugin_pianokeyboard_expander, false, false);
-		} else {
-			pack_end (plugin_analysis_expander, false, false);
-		}
+		pack_end (_plugin_pianokeyboard_expander, false, false);
+	} else if (_pi && _pi->ui_elements () != PlugInsertBase::NoGUIToolbar) {
+		pack_end (plugin_analysis_expander, false, false);
+	}
 
-		if (insert->provides_stats ()) {
-			pack_end (cpuload_expander, false, false);
-		}
+	if (_pib->provides_stats ()) {
+		pack_end (cpuload_expander, false, false);
+	}
 
-		if (!plugin->get_docs().empty()) {
-			pack_end (description_expander, false, false);
-		}
+	if (!plugin->get_docs().empty()) {
+		pack_end (description_expander, false, false);
 	}
 
 	settings_box.set_homogeneous (false);
@@ -170,7 +162,31 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	settings_box.set_border_width (0);
 	settings_box.pack_start (*smaller_hbox, false, false);
 
-	if (pi->controls().size() > 0) {
+	bool has_automatables = false;
+
+	for (size_t i = 0; i < plugin->parameter_count(); ++i) {
+		if (!plugin->parameter_is_control (i)) {
+			continue;
+		}
+		if (!plugin->parameter_is_input (i)) {
+			continue;
+		}
+		const Evoral::Parameter param(PluginAutomation, 0, i);
+		boost::shared_ptr<ARDOUR::AutomationControl> c (boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(_pib->control (param)));
+		if (!c) {
+			continue;
+		}
+		if (c->flags () & Controllable::HiddenControl) {
+			continue;
+		}
+		if (c->flags () & Controllable::NotAutomatable) {
+			continue;
+		}
+		has_automatables = true;
+		break;
+	}
+
+	if (_pi && has_automatables) {
 		HBox* automation_hbox = manage (new HBox);
 		automation_hbox->set_spacing (6);
 		Label* l = manage (new Label (_("All Automation")));
@@ -185,8 +201,12 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	main_contents.pack_start (settings_box, false, false);
 
-	pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&GenericPluginUI::processor_active_changed, this, boost::weak_ptr<Processor>(pi)), gui_context());
-	_bypass_button.set_active (!pi->enabled());
+	if (_pi) {
+		_pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&GenericPluginUI::processor_active_changed, this, boost::weak_ptr<Processor>(_pi)), gui_context());
+		_bypass_button.set_active (!_pi->enabled());
+	} else {
+		_bypass_button.set_sensitive (false);
+	}
 
 	/* ScrolledWindow will wrap hpacker in a Viewport */
 	scroller.add (hpacker);
@@ -198,7 +218,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	prefheight = -1;
 	build ();
 
-	if (insert->plugin()->has_midnam() && insert->plugin()->knows_bank_patch()) {
+	if (_pib->plugin()->has_midnam() && _pib->plugin()->knows_bank_patch()) {
 		build_midi_table ();
 	}
 
@@ -336,9 +356,7 @@ GenericPluginUI::build ()
 
 			ControlUI* cui;
 
-			boost::shared_ptr<ARDOUR::AutomationControl> c
-				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-					insert->control(param));
+			boost::shared_ptr<ARDOUR::AutomationControl> c (boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(_pib->control (param)));
 
 			if (c && c->flags () & Controllable::HiddenControl) {
 				continue;
@@ -366,9 +384,7 @@ GenericPluginUI::build ()
 		const ParameterDescriptor& desc = d->second;
 		const Evoral::Parameter    param(PluginPropertyAutomation, 0, desc.key);
 
-		boost::shared_ptr<ARDOUR::AutomationControl> c
-			= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-				insert->control(param));
+		boost::shared_ptr<ARDOUR::AutomationControl> c (boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(_pib->control (param)));
 
 		if (!c) {
 			error << string_compose(_("Plugin Editor: no control for property %1"), desc.key) << endmsg;
@@ -396,9 +412,9 @@ GenericPluginUI::build ()
 		plugin->announce_property_values();
 	}
 
-	if (control_uis.empty ()) {
+	if (control_uis.empty () && _pi) {
 		if (has_descriptive_presets ()) {
-			preset_gui = new PluginPresetsUI (insert);
+			preset_gui = new PluginPresetsUI (_pi); // XXX
 			hpacker.pack_start (*preset_gui, true, true);
 		}
 	} else {
@@ -644,7 +660,7 @@ GenericPluginUI::build_midi_table ()
 
 	ArdourWidgets::Frame* frame = manage (new ArdourWidgets::Frame);
 	frame->set_name ("BaseFrame");
-	if (dynamic_cast<MidiTrack*> (insert->owner())) {
+	if (_pi && dynamic_cast<MidiTrack*> (_pi->owner())) {
 		frame->set_label (_("MIDI Programs (sent to track)"));
 	} else {
 		frame->set_label (_("MIDI Programs (volatile)"));
@@ -664,16 +680,16 @@ GenericPluginUI::build_midi_table ()
 		pgm_table->attach (*cui, col + 1, col + 2, row, row+1, SHRINK, SHRINK);
 	}
 
-	insert->plugin ()->read_midnam();
+	_pib->plugin ()->read_midnam();
 
 	midi_refill_patches ();
 
-	insert->plugin()->BankPatchChange.connect (
+	_pib->plugin()->BankPatchChange.connect (
 			midi_connections, invalidator (*this),
 			boost::bind (&GenericPluginUI::midi_bank_patch_change, this, _1),
 			gui_context());
 
-	insert->plugin()->UpdatedMidnam.connect (
+	_pib->plugin()->UpdatedMidnam.connect (
 			midi_connections, invalidator (*this),
 			boost::bind (&GenericPluginUI::midi_refill_patches, this),
 			gui_context());
@@ -686,7 +702,7 @@ GenericPluginUI::midi_refill_patches ()
 
 	pgm_names.clear ();
 
-	const std::string model = insert->plugin ()->midnam_model ();
+	const std::string model = _pib->plugin ()->midnam_model ();
 	std::string mode;
 	const std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance().custom_device_mode_names_by_model (model);
 	if (device_modes.size() > 0) {
@@ -722,7 +738,7 @@ void
 GenericPluginUI::midi_bank_patch_change (uint8_t chn)
 {
 	assert (chn < 16 && midi_pgmsel.size() == 16);
-	uint32_t bankpgm = insert->plugin()->bank_patch (chn);
+	uint32_t bankpgm = _pib->plugin()->bank_patch (chn);
 	if (bankpgm == UINT32_MAX) {
 		midi_pgmsel[chn]->set_text (_("--Unset--"));
 	} else {
@@ -742,7 +758,7 @@ GenericPluginUI::midi_bank_patch_select (uint8_t chn, uint32_t bankpgm)
 {
 	int bank = bankpgm >> 7;
 	int pgm = bankpgm & 127;
-	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
+	MidiTrack* mt = _pi ? dynamic_cast<MidiTrack*> (_pi->owner()) : NULL;
 	if (mt) {
 		/* send to track */
 		boost::shared_ptr<AutomationControl> bank_msb = mt->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
@@ -757,15 +773,15 @@ GenericPluginUI::midi_bank_patch_select (uint8_t chn, uint32_t bankpgm)
 		event[0] = (MIDI_CMD_CONTROL | chn);
 		event[1] = 0x00;
 		event[2] = bank >> 7;
-		insert->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
+		_pib->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 
 		event[1] = 0x20;
 		event[2] = bank & 127;
-		insert->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
+		_pib->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 
 		event[0] = (MIDI_CMD_PGM_CHANGE | chn);
 		event[1] = pgm;
-		insert->write_immediate_event (Evoral::MIDI_EVENT, 2, event);
+		_pib->write_immediate_event (Evoral::MIDI_EVENT, 2, event);
 	}
 }
 
@@ -817,12 +833,17 @@ GenericPluginUI::set_short_autostate (ControlUI* cui, bool value)
 void
 GenericPluginUI::automation_state_changed (ControlUI* cui)
 {
+	AutoState state;
+	if (_pi) {
+		/* don't lock to avoid deadlock because we're triggered by
+		 * AutomationControl::Changed() while the automation lock is taken
+		 */
+		state = _pi->get_parameter_automation_state (cui->parameter());
+	} else {
+		state = ARDOUR::Off;
+	}
+
 	/* update button label */
-
-	// don't lock to avoid deadlock because we're triggered by
-	// AutomationControl::Changed() while the automation lock is taken
-
-	AutoState state = insert->get_parameter_automation_state (cui->parameter());
 
 	cui->automate_button.set_active((state != ARDOUR::Off));
 
@@ -1014,7 +1035,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		}
 
 
-		if (mcontrol->flags () & Controllable::NotAutomatable) {
+		if (!_pi || mcontrol->flags () & Controllable::NotAutomatable) {
 			control_ui->automate_button.set_sensitive (false);
 			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
 		} else {
@@ -1130,6 +1151,7 @@ GenericPluginUI::knob_size_request(Gtk::Requisition* req, ControlUI* cui) {
 bool
 GenericPluginUI::astate_button_event (GdkEventButton* ev, ControlUI* cui)
 {
+	assert (_pi);
 	if (ev->button != 1) {
 		return true;
 	}
@@ -1157,7 +1179,7 @@ GenericPluginUI::astate_button_event (GdkEventButton* ev, ControlUI* cui)
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Latch, cui)));
 
 	anchored_menu_popup (automation_menu, &cui->automate_button,
-	                     GainMeterBase::astate_string (insert->get_parameter_automation_state (cui->parameter())),
+	                     GainMeterBase::astate_string (_pi->get_parameter_automation_state (cui->parameter())),
 	                     1, ev->time);
 
 	return true;
@@ -1174,7 +1196,9 @@ GenericPluginUI::set_all_automation (AutoState as)
 void
 GenericPluginUI::set_automation_state (AutoState state, ControlUI* cui)
 {
-	insert->set_parameter_automation_state (cui->parameter(), state);
+	if (_pi) {
+		_pi->set_parameter_automation_state (cui->parameter(), state);
+	}
 }
 
 void
@@ -1239,7 +1263,7 @@ void
 GenericPluginUI::control_combo_changed (ControlUI* cui, float value)
 {
 	if (!cui->ignore_change) {
-		insert->automation_control (cui->parameter())->set_value (value, Controllable::NoGroup);
+		cui->combo->get_controllable ()->set_value (value, Controllable::NoGroup);
 	}
 }
 
@@ -1268,7 +1292,7 @@ GenericPluginUI::output_update ()
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
 		float val = plugin->get_parameter ((*i)->parameter().id());
 		char buf[32];
-		boost::shared_ptr<ReadOnlyControl> c = insert->control_output ((*i)->parameter().id());
+		boost::shared_ptr<ReadOnlyControl> c = _pib->control_output ((*i)->parameter().id());
 		const std::string& str = ARDOUR::value_as_string(c->desc(), Variant(val));
 		size_t len = str.copy(buf, 31);
 		buf[len] = '\0';
@@ -1322,7 +1346,7 @@ GenericPluginUI::toggle_pianokeyboard ()
 void
 GenericPluginUI::note_on_event_handler (int note, int)
 {
-	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
+	MidiTrack* mt = _pi ? dynamic_cast<MidiTrack*> (_pi->owner()) : NULL;
 	_piano->grab_focus ();
 	uint8_t channel = _piano_channel.get_value_as_int () - 1;
 	uint8_t event[3];
@@ -1332,14 +1356,14 @@ GenericPluginUI::note_on_event_handler (int note, int)
 	if (mt) {
 		mt->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	} else {
-		insert->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
+		_pib->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	}
 }
 
 void
 GenericPluginUI::note_off_event_handler (int note)
 {
-	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
+	MidiTrack* mt = _pi ? dynamic_cast<MidiTrack*> (_pi->owner()) : NULL;
 	uint8_t channel = _piano_channel.get_value_as_int () - 1;
 	uint8_t event[3];
 	event[0] = (MIDI_CMD_NOTE_OFF | channel);
@@ -1348,6 +1372,6 @@ GenericPluginUI::note_off_event_handler (int note)
 	if (mt) {
 		mt->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	} else {
-		insert->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
+		_pib->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	}
 }

@@ -71,7 +71,7 @@
 #  include "vst3_hwnd_plugin_ui.h"
 # elif defined (__APPLE__)
 #  include "vst3_plugin_ui.h"
-extern VST3PluginUI* create_mac_vst3_gui (boost::shared_ptr<ARDOUR::PluginInsert>, Gtk::VBox**);
+extern VST3PluginUI* create_mac_vst3_gui (boost::shared_ptr<ARDOUR::PlugInsertBase>, Gtk::VBox**);
 # else
 #  include "vst3_x11_plugin_ui.h"
 # endif
@@ -106,9 +106,9 @@ using namespace Gtk;
 PluginUIWindow* PluginUIWindow::the_plugin_window = 0;
 
 PluginUIWindow::PluginUIWindow (
-	boost::shared_ptr<PluginInsert> insert,
-	bool                            scrollable,
-	bool                            editor)
+	boost::shared_ptr<PlugInsertBase> pib,
+	bool                              scrollable,
+	bool                              editor)
 	: ArdourWindow (string())
 	, was_visible (false)
 	, _keyboard_focused (false)
@@ -122,22 +122,22 @@ PluginUIWindow::PluginUIWindow (
 	Label* label = manage (new Label());
 	label->set_markup ("<b>THIS IS THE PLUGIN UI</b>");
 
-	if (editor && insert->plugin()->has_editor()) {
-		switch (insert->type()) {
+	if (editor && pib->plugin()->has_editor()) {
+		switch (pib->type()) {
 		case ARDOUR::Windows_VST:
-			have_gui = create_windows_vst_editor (insert);
+			have_gui = create_windows_vst_editor (pib);
 			break;
 
 		case ARDOUR::LXVST:
-			have_gui = create_lxvst_editor (insert);
+			have_gui = create_lxvst_editor (pib);
 			break;
 
 		case ARDOUR::MacVST:
-			have_gui = create_mac_vst_editor (insert);
+			have_gui = create_mac_vst_editor (pib);
 			break;
 
 		case ARDOUR::AudioUnit:
-			have_gui = create_audiounit_editor (insert);
+			have_gui = create_audiounit_editor (pib);
 			break;
 
 		case ARDOUR::LADSPA:
@@ -145,11 +145,11 @@ PluginUIWindow::PluginUIWindow (
 			break;
 
 		case ARDOUR::LV2:
-			have_gui = create_lv2_editor (insert);
+			have_gui = create_lv2_editor (pib);
 			break;
 
 		case ARDOUR::VST3:
-			have_gui = create_vst3_editor (insert);
+			have_gui = create_vst3_editor (pib);
 			break;
 
 		default:
@@ -166,7 +166,7 @@ PluginUIWindow::PluginUIWindow (
 	}
 
 	if (!have_gui) {
-		GenericPluginUI* pu = new GenericPluginUI (insert, scrollable);
+		GenericPluginUI* pu = new GenericPluginUI (pib, scrollable);
 
 		_pluginui = pu;
 		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
@@ -180,7 +180,7 @@ PluginUIWindow::PluginUIWindow (
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
-	insert->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PluginUIWindow::plugin_going_away, this), gui_context());
+	pib->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PluginUIWindow::plugin_going_away, this), gui_context());
 
 	gint h = _pluginui->get_preferred_height ();
 	gint w = _pluginui->get_preferred_width ();
@@ -260,9 +260,9 @@ PluginUIWindow::set_title(const std::string& title)
 
 bool
 #ifdef WINDOWS_VST_SUPPORT
-PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PluginInsert> insert)
+PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PlugInsertBase> pib)
 #else
-PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PluginInsert>)
+PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PlugInsertBase>)
 #endif
 {
 #ifndef WINDOWS_VST_SUPPORT
@@ -271,12 +271,12 @@ PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PluginInsert>)
 
 	boost::shared_ptr<WindowsVSTPlugin> vp;
 
-	if ((vp = boost::dynamic_pointer_cast<WindowsVSTPlugin> (insert->plugin())) == 0) {
+	if ((vp = boost::dynamic_pointer_cast<WindowsVSTPlugin> (pib->plugin())) == 0) {
 		error << string_compose (_("unknown type of editor-supplying plugin (note: no VST support in this version of %1)"), PROGRAM_NAME)
 		      << endmsg;
 		throw failed_constructor ();
 	} else {
-		WindowsVSTPluginUI* vpu = new WindowsVSTPluginUI (insert, vp, GTK_WIDGET(this->gobj()));
+		WindowsVSTPluginUI* vpu = new WindowsVSTPluginUI (pib, vp, GTK_WIDGET(this->gobj()));
 
 		_pluginui = vpu;
 		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
@@ -290,9 +290,9 @@ PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PluginInsert>)
 
 bool
 #ifdef LXVST_SUPPORT
-PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PluginInsert> insert)
+PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PlugInsertBase> pib)
 #else
-PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PluginInsert>)
+PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PlugInsertBase>)
 #endif
 {
 #ifndef LXVST_SUPPORT
@@ -301,12 +301,12 @@ PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PluginInsert>)
 
 	boost::shared_ptr<LXVSTPlugin> lxvp;
 
-	if ((lxvp = boost::dynamic_pointer_cast<LXVSTPlugin> (insert->plugin())) == 0) {
+	if ((lxvp = boost::dynamic_pointer_cast<LXVSTPlugin> (pib->plugin())) == 0) {
 		error << string_compose (_("unknown type of editor-supplying plugin (note: no linuxVST support in this version of %1)"), PROGRAM_NAME)
 		      << endmsg;
 		throw failed_constructor ();
 	} else {
-		LXVSTPluginUI* lxvpu = new LXVSTPluginUI (insert, lxvp);
+		LXVSTPluginUI* lxvpu = new LXVSTPluginUI (pib, lxvp);
 
 		_pluginui = lxvpu;
 		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
@@ -320,21 +320,21 @@ PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PluginInsert>)
 
 bool
 #ifdef MACVST_SUPPORT
-PluginUIWindow::create_mac_vst_editor (boost::shared_ptr<PluginInsert> insert)
+PluginUIWindow::create_mac_vst_editor (boost::shared_ptr<PlugInsertBase> pib)
 #else
-PluginUIWindow::create_mac_vst_editor (boost::shared_ptr<PluginInsert>)
+PluginUIWindow::create_mac_vst_editor (boost::shared_ptr<PlugInsertBase>)
 #endif
 {
 #ifndef MACVST_SUPPORT
 	return false;
 #else
 	boost::shared_ptr<MacVSTPlugin> mvst;
-	if ((mvst = boost::dynamic_pointer_cast<MacVSTPlugin> (insert->plugin())) == 0) {
+	if ((mvst = boost::dynamic_pointer_cast<MacVSTPlugin> (pib->plugin())) == 0) {
 		error << string_compose (_("unknown type of editor-supplying plugin (note: no MacVST support in this version of %1)"), PROGRAM_NAME)
 		      << endmsg;
 		throw failed_constructor ();
 	}
-	VSTPluginUI* vpu = create_mac_vst_gui (insert);
+	VSTPluginUI* vpu = create_mac_vst_gui (pib);
 	_pluginui = vpu;
 	_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
 	add (*vpu);
@@ -348,29 +348,29 @@ PluginUIWindow::create_mac_vst_editor (boost::shared_ptr<PluginInsert>)
 
 bool
 #ifdef VST3_SUPPORT
-PluginUIWindow::create_vst3_editor (boost::shared_ptr<PluginInsert> insert)
+PluginUIWindow::create_vst3_editor (boost::shared_ptr<PlugInsertBase> pib)
 #else
-PluginUIWindow::create_vst3_editor (boost::shared_ptr<PluginInsert>)
+PluginUIWindow::create_vst3_editor (boost::shared_ptr<PlugInsertBase>)
 #endif
 {
 #ifndef VST3_SUPPORT
 	return false;
 #else
 	boost::shared_ptr<VST3Plugin> vst3;
-	if ((vst3 = boost::dynamic_pointer_cast<VST3Plugin> (insert->plugin())) == 0) {
+	if ((vst3 = boost::dynamic_pointer_cast<VST3Plugin> (pib->plugin())) == 0) {
 		error << _("create_vst3_editor called on non-VST3 plugin") << endmsg;
 		throw failed_constructor ();
 	} else {
 #ifdef PLATFORM_WINDOWS
-		VST3HWNDPluginUI* pui = new VST3HWNDPluginUI (insert, vst3);
+		VST3HWNDPluginUI* pui = new VST3HWNDPluginUI (pib, vst3);
 		add (*pui);
 #elif defined (__APPLE__)
 		VBox* box;
-		VST3PluginUI* pui = create_mac_vst3_gui (insert, &box);
+		VST3PluginUI* pui = create_mac_vst3_gui (pib, &box);
 		add (*box);
 		Application::instance()->ActivationChanged.connect (mem_fun (*this, &PluginUIWindow::app_activated));
 #else
-		VST3X11PluginUI* pui = new VST3X11PluginUI (insert, vst3);
+		VST3X11PluginUI* pui = new VST3X11PluginUI (pib, vst3);
 		add (*pui);
 #endif
 		_pluginui = pui;
@@ -384,16 +384,16 @@ PluginUIWindow::create_vst3_editor (boost::shared_ptr<PluginInsert>)
 
 bool
 #ifdef AUDIOUNIT_SUPPORT
-PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
+PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PlugInsertBase> pib)
 #else
-PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert>)
+PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PlugInsertBase>)
 #endif
 {
 #ifndef AUDIOUNIT_SUPPORT
 	return false;
 #else
 	VBox* box;
-	_pluginui = create_au_gui (insert, &box);
+	_pluginui = create_au_gui (pib, &box);
 	_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
 	add (*box);
 
@@ -432,16 +432,16 @@ PluginUIWindow::app_activated (bool)
 }
 
 bool
-PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
+PluginUIWindow::create_lv2_editor(boost::shared_ptr<PlugInsertBase> pib)
 {
 #ifdef HAVE_SUIL
 	boost::shared_ptr<LV2Plugin> vp;
 
-	if ((vp = boost::dynamic_pointer_cast<LV2Plugin> (insert->plugin())) == 0) {
+	if ((vp = boost::dynamic_pointer_cast<LV2Plugin> (pib->plugin())) == 0) {
 		error << _("create_lv2_editor called on non-LV2 plugin") << endmsg;
 		throw failed_constructor ();
 	} else {
-		LV2PluginUI* lpu = new LV2PluginUI (insert, vp);
+		LV2PluginUI* lpu = new LV2PluginUI (pib, vp);
 		_pluginui = lpu;
 		add (*lpu);
 		lpu->package (*this);
@@ -523,9 +523,9 @@ PluginUIWindow::plugin_going_away ()
 	death_connection.disconnect ();
 }
 
-PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
-	: insert (pi)
-	, plugin (insert->plugin())
+PlugUIBase::PlugUIBase (boost::shared_ptr<PlugInsertBase> pib)
+	: _pib (pib)
+	, plugin (pib->plugin())
 	, _add_button (_("Add"))
 	, _save_button (_("Save"))
 	, _delete_button (_("Delete"))
@@ -543,10 +543,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, preset_gui (0)
 	, preset_dialog (0)
 {
-	bool for_auditioner = false;
-	if (insert->session().the_auditioner()) {
-		for_auditioner = insert->session().the_auditioner()->the_instrument() == insert;
-	}
+	_pi = boost::dynamic_pointer_cast<ARDOUR::PluginInsert> (_pib); /* may be NULL */
 
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.set_text("(default)");
@@ -593,14 +590,17 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	_pin_management_button.set_icon (ArdourIcon::PluginPinout);
 	_pin_management_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::manage_pins));
 
-
-	insert->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(insert)), gui_context());
-
 	_bypass_button.set_name ("plugin bypass button");
 	_bypass_button.set_text (_("Bypass"));
 	_bypass_button.set_icon (ArdourIcon::PluginBypass);
-	_bypass_button.set_active (!pi->enabled ());
 	_bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release), false);
+
+	if (_pi) {
+		_pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(_pi)), gui_context());
+		_bypass_button.set_active (!_pi->enabled ());
+	} else {
+		_bypass_button.set_sensitive (false);
+	}
 
 	_focus_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::focus_toggled));
 	_focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
@@ -624,18 +624,17 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	cpuload_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_cpuload_display));
 	cpuload_expander.set_expanded(false);
 
-	insert->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PlugUIBase::plugin_going_away, this), gui_context());
+	_pib->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PlugUIBase::plugin_going_away, this), gui_context());
 
-	if (!for_auditioner) { /*auditioner can skip these signal-callbacks because these widgets are not shown anyway */
+	if (_pib->ui_elements () & PlugInsertBase::PluginPreset) {
 		plugin->PresetAdded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
 		plugin->PresetRemoved.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
 		plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset, this), gui_context ());
 		plugin->PresetDirty.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset_modified, this), gui_context ());
-
-		insert->AutomationStateChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::automation_state_changed, this), gui_context());
-
-		insert->LatencyChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::set_latency_label, this), gui_context());
-
+	}
+	if (_pi && _pi->ui_elements () != PlugInsertBase::NoGUIToolbar) {
+		_pi->AutomationStateChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::automation_state_changed, this), gui_context());
+		_pi->LatencyChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::set_latency_label, this), gui_context());
 		automation_state_changed();
 	}
 }
@@ -658,40 +657,56 @@ PlugUIBase::plugin_going_away ()
 {
 	drop_connections ();
 	/* drop references to the plugin/insert */
-	insert.reset ();
+	_pib.reset ();
+	_pi.reset ();
 	plugin.reset ();
 }
 
 void
 PlugUIBase::add_common_widgets (Gtk::HBox* b, bool with_focus)
 {
+	PlugInsertBase::UIElements const ui_elements = _pib->ui_elements ();
+
+	if (ui_elements == PlugInsertBase::NoGUIToolbar) {
+		return;
+	}
 	if (with_focus) {
 		b->pack_end (_focus_button, false, false);
 	}
 
-	b->pack_end (_bypass_button, false, false, with_focus ? 4 : 0);
+	if (ui_elements & PlugInsertBase::BypassEnable) {
+		b->pack_end (_bypass_button, false, false, with_focus ? 4 : 0);
+	}
 
-	if (insert->controls().size() > 0) {
+	if (_pib->controls().size() > 0) {
 		b->pack_end (_reset_button, false, false, 4);
 	}
 	if (has_descriptive_presets ()) {
 		b->pack_end (_preset_browser_button, false, false);
 	}
-	b->pack_end (_delete_button, false, false);
-	b->pack_end (_save_button, false, false);
-	b->pack_end (_add_button, false, false);
-	b->pack_end (_preset_combo, false, false);
-	b->pack_end (_preset_modified, false, false);
-	b->pack_end (_pin_management_button, false, false);
 
-	b->pack_start (_latency_button, false, false, 4);
+	if (ui_elements & PlugInsertBase::PluginPreset) {
+		b->pack_end (_delete_button, false, false);
+		b->pack_end (_save_button, false, false);
+		b->pack_end (_add_button, false, false);
+		b->pack_end (_preset_combo, false, false);
+		b->pack_end (_preset_modified, false, false);
+	}
+
+	if (_pi) {
+		b->pack_end (_pin_management_button, false, false);
+		b->pack_start (_latency_button, false, false, 4);
+	}
 }
 
 void
 PlugUIBase::set_latency_label ()
 {
-	samplecnt_t const l = insert->effective_latency ();
-	float const sr = insert->session().sample_rate ();
+	if (!_pi) {
+		return;
+	}
+	samplecnt_t const l = _pi->effective_latency ();
+	float const sr = _pi->session().sample_rate ();
 
 	_latency_button.set_text (samples_as_time_string (l, sr, true));
 }
@@ -699,8 +714,9 @@ PlugUIBase::set_latency_label ()
 void
 PlugUIBase::latency_button_clicked ()
 {
+	assert (_pi);
 	if (!latency_gui) {
-		latency_gui = new LatencyGUI (*(insert.get()), insert->session().sample_rate(), insert->session().get_block_size());
+		latency_gui = new LatencyGUI (*(_pi.get()), _pi->session().sample_rate(), _pi->session().get_block_size());
 		latency_dialog = new ArdourWindow (_("Edit Latency"));
 		/* use both keep-above and transient for to try cover as many
 		   different WM's as possible.
@@ -735,7 +751,7 @@ PlugUIBase::preset_selected (Plugin::PresetRecord preset)
 		return;
 	}
 	if (!preset.label.empty()) {
-		insert->load_preset (preset);
+		_pib->load_preset (preset);
 	} else {
 		// blank selected = no preset
 		plugin->clear_preset();
@@ -786,19 +802,19 @@ PlugUIBase::delete_plugin_setting ()
 void
 PlugUIBase::automation_state_changed ()
 {
-	_reset_button.set_sensitive (insert->can_reset_all_parameters());
+	_reset_button.set_sensitive (_pib->can_reset_all_parameters());
 }
 
 void
 PlugUIBase::reset_plugin_parameters ()
 {
-	insert->reset_parameters_to_default ();
+	_pib->reset_parameters_to_default ();
 }
 
 bool
 PlugUIBase::has_descriptive_presets () const
 {
-	std::vector<Plugin::PresetRecord> presets = insert->plugin()->get_presets();
+	std::vector<Plugin::PresetRecord> presets = _pib->plugin()->get_presets();
 	for (std::vector<Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
 		if (i->valid && !i->description.empty()) {
 			return true;
@@ -810,6 +826,9 @@ PlugUIBase::has_descriptive_presets () const
 void
 PlugUIBase::browse_presets ()
 {
+	if (!_pi) {
+		return;
+	}
 	if (!preset_dialog) {
 		if (preset_gui) {
 			/* Do not allow custom window, if preset_gui is used.
@@ -823,7 +842,7 @@ PlugUIBase::browse_presets ()
 		if (win) {
 			preset_dialog->set_transient_for (*win);
 		}
-		preset_gui = new PluginPresetsUI (insert);
+		preset_gui = new PluginPresetsUI (_pi);
 		preset_dialog->add (*preset_gui);
 	}
 	preset_dialog->show_all ();
@@ -832,7 +851,8 @@ PlugUIBase::browse_presets ()
 void
 PlugUIBase::manage_pins ()
 {
-	PluginPinWindowProxy* proxy = insert->pinmgr_proxy ();
+	assert (_pi);
+	PluginPinWindowProxy* proxy = _pi->pinmgr_proxy ();
 	if (proxy) {
 		proxy->get (true);
 		proxy->present ();
@@ -843,10 +863,11 @@ PlugUIBase::manage_pins ()
 bool
 PlugUIBase::bypass_button_release (GdkEventButton*)
 {
+	assert (_pi);
 	bool view_says_bypassed = (_bypass_button.active_state() != 0);
 
-	if (view_says_bypassed != insert->enabled ()) {
-		insert->enable (view_says_bypassed);
+	if (view_says_bypassed != _pi->enabled ()) {
+		_pi->enable (view_says_bypassed);
 	}
 
 	return false;
@@ -910,11 +931,12 @@ PlugUIBase::toggle_description()
 void
 PlugUIBase::toggle_plugin_analysis()
 {
+	assert (_pi);
 	if (plugin_analysis_expander.get_expanded() &&
 	    !plugin_analysis_expander.get_child()) {
 		// Create the GUI
 		if (eqgui == 0) {
-			eqgui = new PluginEqGui (insert);
+			eqgui = new PluginEqGui (_pi);
 		}
 
 		plugin_analysis_expander.add (*eqgui);
@@ -944,7 +966,7 @@ PlugUIBase::toggle_cpuload_display()
 {
 	if (cpuload_expander.get_expanded() && !cpuload_expander.get_child()) {
 		if (stats_gui == 0) {
-			stats_gui = new PluginLoadStatsGui (insert);
+			stats_gui = new PluginLoadStatsGui (_pib);
 		}
 		cpuload_expander.add (*stats_gui);
 		cpuload_expander.show_all();
@@ -967,7 +989,6 @@ PlugUIBase::toggle_cpuload_display()
 			toplevel->resize (wr.width, wr.height);
 		}
 	}
-
 }
 
 void

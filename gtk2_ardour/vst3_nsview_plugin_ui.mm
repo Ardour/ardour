@@ -28,7 +28,7 @@
 #include "pbd/error.h"
 #include "pbd/unwind.h"
 
-#include "ardour/plugin_insert.h"
+#include "ardour/plug_insert_base.h"
 #include "ardour/vst3_plugin.h"
 
 #include "gtkmm2ext/gui_thread.h"
@@ -43,16 +43,16 @@ using namespace ARDOUR;
 using namespace Steinberg;
 
 VST3PluginUI*
-create_mac_vst3_gui (boost::shared_ptr<PluginInsert> plugin_insert, Gtk::VBox** box)
+create_mac_vst3_gui (boost::shared_ptr<PlugInsertBase> pib, Gtk::VBox** box)
 {
-	VST3NSViewPluginUI* v = new VST3NSViewPluginUI (plugin_insert, boost::dynamic_pointer_cast<VST3Plugin> (plugin_insert->plugin()));
+	VST3NSViewPluginUI* v = new VST3NSViewPluginUI (pib, boost::dynamic_pointer_cast<VST3Plugin> (pib->plugin()));
 	*box = v;
 	return v;
 }
 
 
-VST3NSViewPluginUI::VST3NSViewPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VST3Plugin> vst3)
-	: VST3PluginUI (pi, vst3)
+VST3NSViewPluginUI::VST3NSViewPluginUI (boost::shared_ptr<PlugInsertBase> pib, boost::shared_ptr<VST3Plugin> vst3)
+	: VST3PluginUI (pib, vst3)
 {
 	pack_start (_gui_widget, true, true);
 

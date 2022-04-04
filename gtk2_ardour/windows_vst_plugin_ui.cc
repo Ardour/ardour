@@ -22,7 +22,7 @@
 #include <gtk/gtksocket.h>
 #include "gtkmm2ext/gui_thread.h"
 #include "fst.h"
-#include "ardour/plugin_insert.h"
+#include "ardour/plug_insert_base.h"
 #include "ardour/windows_vst_plugin.h"
 
 #include "windows_vst_plugin_ui.h"
@@ -39,8 +39,8 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace PBD;
 
-WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VSTPlugin> vp, GtkWidget *parent)
-	: VSTPluginUI (pi, vp)
+WindowsVSTPluginUI::WindowsVSTPluginUI (boost::shared_ptr<PlugInsertBase> pib, boost::shared_ptr<VSTPlugin> vp, GtkWidget *parent)
+	: VSTPluginUI (pib, vp)
 {
 
 #ifdef GDK_WINDOWING_WIN32

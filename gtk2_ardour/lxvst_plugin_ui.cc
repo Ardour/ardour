@@ -33,8 +33,8 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace PBD;
 
-LXVSTPluginUI::LXVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VSTPlugin> lxvp)
-	: VSTPluginUI (pi, lxvp)
+LXVSTPluginUI::LXVSTPluginUI (boost::shared_ptr<PlugInsertBase> pib, boost::shared_ptr<VSTPlugin> lxvp)
+	: VSTPluginUI (pib, lxvp)
 {
 	vstfx_run_editor (_vst->state ());
 }

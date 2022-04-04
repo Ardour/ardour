@@ -54,7 +54,7 @@
 
 namespace ARDOUR {
 	class AUPlugin;
-	class PluginInsert;
+	class PlugInsertBase;
 	class IOProcessor;
 }
 
@@ -77,7 +77,7 @@ class AUPluginUI;
 class AUPluginUI : public PlugUIBase, public Gtk::VBox
 {
 public:
-	AUPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>);
+	AUPluginUI (boost::shared_ptr<ARDOUR::PlugInsertBase>);
 	~AUPluginUI ();
 
 	gint get_preferred_width () { return req_width; }

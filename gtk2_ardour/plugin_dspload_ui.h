@@ -27,12 +27,12 @@
 
 #include "widgets/ardour_button.h"
 
-#include "ardour/plugin_insert.h"
+#include "ardour/plug_insert_base.h"
 
 class PluginLoadStatsGui : public Gtk::Table
 {
 public:
-	PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert>);
+	PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PlugInsertBase>);
 
 	void start_updating ();
 	void stop_updating ();
@@ -44,10 +44,10 @@ private:
 	void update_cpu_label ();
 	bool draw_bar (GdkEventExpose*);
 	void clear_stats () {
-		_insert->clear_stats ();
+		_pib->clear_stats ();
 	}
 
-	boost::shared_ptr<ARDOUR::PluginInsert> _insert;
+	boost::shared_ptr<ARDOUR::PlugInsertBase> _pib;
 	sigc::connection update_cpu_label_connection;
 
 	Gtk::Label _lbl_min;

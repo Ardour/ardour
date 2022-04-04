@@ -18,9 +18,8 @@
 
 #include <glibmm/main.h>
 
-#include "ardour/auditioner.h"
+#include "ardour/plug_insert_base.h"
 #include "ardour/session.h"
-#include "ardour/plugin_insert.h"
 #include "ardour/vst3_plugin.h"
 
 #include "gtkmm2ext/gui_thread.h"
@@ -36,9 +35,8 @@ using namespace Steinberg;
 DEF_CLASS_IID (Presonus::IPlugInViewScaling)
 #endif
 
-VST3PluginUI::VST3PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VST3Plugin> vst3)
-	: PlugUIBase (pi)
-	, _pi (pi)
+VST3PluginUI::VST3PluginUI (boost::shared_ptr<PlugInsertBase> pib, boost::shared_ptr<VST3Plugin> vst3)
+	: PlugUIBase (pib)
 	, _vst3 (vst3)
 	, _req_width (0)
 	, _req_height (0)
@@ -48,16 +46,10 @@ VST3PluginUI::VST3PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_pt
 	_ardour_buttons_box.set_spacing (6);
 	_ardour_buttons_box.set_border_width (6);
 
-	bool for_auditioner =false;
-	if (insert->session().the_auditioner()) {
-		for_auditioner = insert->session().the_auditioner()->the_instrument() == insert;
-	}
-	if (!for_auditioner) {
-		add_common_widgets (&_ardour_buttons_box);
-	}
+	add_common_widgets (&_ardour_buttons_box);
 
 	_vst3->OnResizeView.connect (_resize_connection, invalidator (*this), boost::bind (&VST3PluginUI::resize_callback, this, _1, _2), gui_context());
-	//pi->plugin()->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&VST3PluginUI::queue_port_update, this), gui_context ());
+	//pib->plugin()->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&VST3PluginUI::queue_port_update, this), gui_context ());
 
 	pack_start (_ardour_buttons_box, false, false);
 	_ardour_buttons_box.show_all ();
