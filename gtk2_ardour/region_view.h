@@ -107,18 +107,19 @@ public:
 	}
 
 	struct DisplaySuspender {
-		DisplaySuspender (RegionView& rv) : region_view (rv) {
+		DisplaySuspender (RegionView& rv, bool just_view = false) : region_view (rv), view_only (just_view) {
 			region_view.disable_display ();
 		}
 
-		DisplaySuspender (DisplaySuspender const & other) : region_view (other.region_view) {
+		DisplaySuspender (DisplaySuspender const & other) : region_view (other.region_view), view_only (other.view_only) {
 			region_view.disable_display ();
 		}
 
 		~DisplaySuspender () {
-			region_view.enable_display ();
+			region_view.enable_display (view_only);
 		}
 		RegionView& region_view;
+		bool view_only;
 	};
 
 	virtual void update_coverage_frame (LayerDisplay);
@@ -249,7 +250,7 @@ private:
 
   private:
 	friend class DisplaySuspender;
-	void enable_display();
+	void enable_display (bool view_only);
 	void disable_display();
 
 };

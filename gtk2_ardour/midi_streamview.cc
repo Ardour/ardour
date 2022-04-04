@@ -160,7 +160,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 	region_views.push_front (region_view);
 
 	{
-		RegionView::DisplaySuspender ds (*region_view);
+		RegionView::DisplaySuspender ds (*region_view, false);
 
 		display_region (region_view, wait_for_data);
 
@@ -181,13 +181,13 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 }
 
 void
-MidiStreamView::display_region (MidiRegionView* region_view, bool load_model)
+MidiStreamView::display_region (MidiRegionView* region_view, bool)
 {
 	if (!region_view) {
 		return;
 	}
 
-	RegionView::DisplaySuspender ds (*region_view);
+	RegionView::DisplaySuspender ds (*region_view, false);
 
 	region_view->set_height (child_height());
 
@@ -285,7 +285,7 @@ MidiStreamView::redisplay_track ()
 	// Flag region views as invalid and disable drawing
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
-		vds.push_back (RegionView::DisplaySuspender (**i));
+		vds.push_back (RegionView::DisplaySuspender (**i, false));
 	}
 
 	// Add and display region views, and flag them as valid

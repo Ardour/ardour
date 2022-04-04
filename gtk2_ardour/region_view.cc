@@ -429,6 +429,8 @@ RegionView::lock_toggle ()
 void
 RegionView::region_changed (const PropertyChange& what_changed)
 {
+	DisplaySuspender ds (*this, false);
+
 	ENSURE_GUI_THREAD (*this, &RegionView::region_changed, what_changed);
 
 	if (what_changed.contains (ARDOUR::bounds_change)) {
@@ -1254,13 +1256,12 @@ RegionView::drop_cue_marker (ArdourMarker* m)
 }
 
 void
-RegionView::enable_display ()
+RegionView::enable_display (bool view_only)
 {
-	std::cerr << "EnableDisplay " << this << " currently " << _disable_display << std::endl;
 	if (_disable_display) {
 		_disable_display--;
 		if (_disable_display == 0) {
-			redisplay (false);
+			redisplay (view_only);
 		}
 	}
 }
@@ -1268,7 +1269,6 @@ RegionView::enable_display ()
 void
 RegionView::disable_display ()
 {
-	std::cerr << "DisableDisplay " << this << " currently " << _disable_display << std::endl;
 	_disable_display++;
 }
 
