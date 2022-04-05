@@ -1,13 +1,13 @@
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Edgar Aichinger <edgar.aichinger@aon.at>, 2013, 2014, 2015, 2016, 2020, 2021.
+# Edgar Aichinger <edgar.aichinger@aon.at>, 2013, 2014, 2015, 2016, 2020, 2021, 2022.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-13 09:41+0200\n"
-"PO-Revision-Date: 2021-08-13 10:33+0200\n"
+"PO-Revision-Date: 2022-04-05 21:01+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 21.04.3\n"
+"X-Generator: Lokalize 21.12.3\n"
 
 #: analyser.cc:127 audioregion.cc:1814
 msgid "Transient Analysis failed for %1."
@@ -2060,19 +2060,19 @@ msgstr "Cachedatei %1 ID Konflikt '%2' vs '%3'"
 
 #: plugin_manager.cc:1372
 msgid "Corrupt AUv2 cache file '%1'"
-msgstr ""
+msgstr "Korrupte AUv2 Cachedatei '%1'"
 
 #: plugin_manager.cc:1389 plugin_manager.cc:3244
 msgid "AUv2"
-msgstr ""
+msgstr "AUv2"
 
 #: plugin_manager.cc:1389
 msgid "Indexing"
-msgstr ""
+msgstr "Indiziere"
 
 #: plugin_manager.cc:1410 plugin_manager.cc:3242
 msgid "AUv2 (%1 / %2)"
-msgstr ""
+msgstr "AUv2 (%1 / %2)"
 
 #: plugin_manager.cc:1428
 msgid "Cannot write to VST2 blacklist file '%1'"
