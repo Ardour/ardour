@@ -91,7 +91,7 @@ ARDOUR_UI::setup_tooltips ()
 	ArdourCanvas::Canvas::set_tooltip_timeout (Gtk::Settings::get_default()->property_gtk_tooltip_timeout ());
 
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
-	set_tip (layered_button, _("When active, new recordings will be added as regions on a layer atop existing regions.\nWhen disabled, the underlying region will be spliced and replaced with the newly recorded region."));
+	set_tip (layered_button, _("<b>When active</b>, new recordings will be added as regions on a layer atop existing regions.\n<b>When disabled</b>, the underlying region will be spliced and replaced with the newly recorded region."));
 	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	parameter_changed("click-gain");
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
@@ -101,8 +101,8 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (editor_meter_peak_display, _("Reset All Peak Meters"));
 	set_tip (error_alert_button, _("Show Error Log and acknowledge warnings"));
-	set_tip (_cue_rec_enable, _("When enabled, triggering Cues will result in Cue Markers added to the timeline"));
-	set_tip (_cue_play_enable, _("When enabled, Cue Markers will trigger the associated Cue when passed on the timeline"));
+	set_tip (_cue_rec_enable, _("<b>When enabled</b>, triggering Cues will result in Cue Markers added to the timeline"));
+	set_tip (_cue_play_enable, _("<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed on the timeline"));
 
 	set_tip (latency_disable_button, _("Disable all Plugin Delay Compensation. This results in the shortest delay from live input to output, but any paths with delay-causing plugins will sound later than those without."));
 

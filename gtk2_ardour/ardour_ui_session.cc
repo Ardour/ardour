@@ -714,7 +714,7 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 		}
 
 		ArdourMessageDialog msg (string_compose(
-		                           _("Could not create session in \"%1\":.\nGlib Error\nDomain: %2\nCode: %3\nWhat: %4\n%5%6"),
+		                           _("Could not create session in \"%1\".\n\nGlib Error\nDomain: %2\nCode: %3\nWhat: %4\n%5%6"),
 		                           path,
 		                           g_quark_to_string(e.domain()), e.code(), glib_what.c_str(),
 		                           ss.str().empty() ? "" : "\n\n---", escaped_error_txt));

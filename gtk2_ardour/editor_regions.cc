@@ -101,9 +101,9 @@ EditorRegions::init ()
 	tvc = append_col (_columns.sync, bbt_width);
 	setup_col (tvc, -1, ALIGN_RIGHT, _("Sync"), _("Position of region sync point, relative to start of the region"));
 	tvc = append_col (_columns.fadein, bbt_width);
-	setup_col (tvc, -1, ALIGN_RIGHT, _("Fade In"), _("Length of region fade-in (units: secondary clock, () if disabled"));
+	setup_col (tvc, -1, ALIGN_RIGHT, _("Fade In"), _("Length of region fade-in (unit: secondary clock, enclosed in parenthesis if the fade is disabled)"));
 	tvc = append_col (_columns.fadeout, bbt_width);
-	setup_col (tvc, -1, ALIGN_RIGHT, _("Fade out"), _("Length of region fade-out (units: secondary clock, () if disabled"));
+	setup_col (tvc, -1, ALIGN_RIGHT, _("Fade out"), _("Length of region fade-out (unit: secondary clock, enclosed in parenthesis if the fade is disabled)"));
 #endif
 }
 
