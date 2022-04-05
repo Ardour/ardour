@@ -25,8 +25,7 @@
 namespace PBD {
 
 class LIBPBD_API Destructible {
-  public:
-        Destructible() {}
+public:
 	virtual ~Destructible () { Destroyed(); }
 
 	PBD::Signal0<void> Destroyed;
