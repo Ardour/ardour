@@ -459,6 +459,19 @@ PluginInsert::is_instrument() const
 	return (pip->is_instrument ());
 }
 
+PlugInsertBase::UIElements
+PluginInsert::ui_elements () const
+{
+	if (owner () == (ARDOUR::SessionObject*)(_session.the_auditioner().get())) {
+		return NoGUIToolbar;
+	}
+	UIElements rv = AllUIElements;
+	if (!is_instrument()) {
+		rv = static_cast<PlugInsertBase::UIElements> (static_cast <std::uint8_t>(rv) & ~static_cast<std::uint8_t> (PlugInsertBase::MIDIKeyboard));
+	}
+	return rv;
+}
+
 bool
 PluginInsert::has_output_presets (ChanCount in, ChanCount out)
 {
@@ -3387,6 +3400,9 @@ PluginInsert::provides_stats () const
 		return false;
 	}
 #endif
+	if (owner () == (ARDOUR::SessionObject*)(_session.the_auditioner().get())) {
+		return false;
+	}
 	return true;
 }
 

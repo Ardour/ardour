@@ -41,6 +41,7 @@
 #include "ardour/types.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/plugin.h"
+#include "ardour/plug_insert_base.h"
 #include "ardour/processor.h"
 #include "ardour/readonly_control.h"
 #include "ardour/sidechain.h"
@@ -56,7 +57,7 @@ class Plugin;
 
 /** Plugin inserts: send data through a plugin
  */
-class LIBARDOUR_API PluginInsert : public Processor
+class LIBARDOUR_API PluginInsert : public Processor, public PlugInsertBase
 {
 public:
 	PluginInsert (Session&, Temporal::TimeDomain td, boost::shared_ptr<Plugin> = boost::shared_ptr<Plugin>());
@@ -122,6 +123,8 @@ public:
 	bool inplace () const { return ! _no_inplace; }
 
 	bool is_channelstrip () const;
+
+	UIElements ui_elements () const;
 
 	void set_input_map (uint32_t, ChanMapping);
 	void set_output_map (uint32_t, ChanMapping);
@@ -360,7 +363,6 @@ private:
 	bool _strict_io;
 	bool _custom_cfg;
 	bool _maps_from_state;
-	bool _mapping_changed;
 
 	Match private_can_support_io_configuration (ChanCount const &, ChanCount &) const;
 	Match internal_can_support_io_configuration (ChanCount const &, ChanCount &) const;

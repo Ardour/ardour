@@ -155,6 +155,7 @@ Auditioner::load_synth ()
 
 	if (asynth) {
 		ProcessorStreams ps;
+		asynth->set_owner (this);
 		if (add_processor (asynth, PreFader, &ps, true)) {
 			error << _("Failed to load synth for MIDI-Audition.") << endmsg;
 		}
