@@ -92,9 +92,9 @@ MainClock::build_ops_menu ()
 	ops_items.push_back (SeparatorElem());
 
 	ops_items.push_back (MenuElem (_("Edit Tempo"), sigc::mem_fun(*this, &MainClock::edit_current_tempo)));
-	ops_items.push_back (MenuElem (_("Edit Meter"), sigc::mem_fun(*this, &MainClock::edit_current_meter)));
+	ops_items.push_back (MenuElem (_("Edit Time Signature"), sigc::mem_fun(*this, &MainClock::edit_current_meter)));
 	ops_items.push_back (MenuElem (_("Insert Tempo Change"), sigc::mem_fun(*this, &MainClock::insert_new_tempo)));
-	ops_items.push_back (MenuElem (_("Insert Meter Change"), sigc::mem_fun(*this, &MainClock::insert_new_meter)));
+	ops_items.push_back (MenuElem (_("Insert Time Signature Change"), sigc::mem_fun(*this, &MainClock::insert_new_meter)));
 }
 
 timepos_t

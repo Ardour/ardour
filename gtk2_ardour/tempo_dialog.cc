@@ -487,7 +487,7 @@ TempoDialog::tap_tempo_focus_out (GdkEventFocus* )
 }
 
 MeterDialog::MeterDialog (TempoMap::SharedPtr const & map, timepos_t const & pos, const string&)
-	: ArdourDialog (_("New Meter"))
+	: ArdourDialog (_("New Time Signature"))
 {
 	Temporal::BBT_Time when (map->round_to_bar (map->bbt_at (pos)));
 	Meter const & meter (map->meter_at (when));
@@ -496,7 +496,7 @@ MeterDialog::MeterDialog (TempoMap::SharedPtr const & map, timepos_t const & pos
 }
 
 MeterDialog::MeterDialog (Temporal::MeterPoint& section, const string&)
-	: ArdourDialog (_("Edit Meter"))
+	: ArdourDialog (_("Edit Time Signature"))
 {
 	init (section.bbt(), section.divisions_per_bar(), section.note_value(), section.map().is_initial(section), section.map().time_domain());
 }
@@ -579,7 +579,7 @@ MeterDialog::init (const Temporal::BBT_Time& when, double bpb, double divisor, b
 	when_bar_entry.set_alignment (1.0);
 
 	if (!initial) {
-		Label* when_label = manage (new Label(_("Meter begins at bar:"), ALIGN_LEFT, ALIGN_CENTER));
+		Label* when_label = manage (new Label(_("Time Signature begins at bar:"), ALIGN_LEFT, ALIGN_CENTER));
 
 		table->attach (*when_label, 0, 1, 2, 3, FILL | EXPAND, FILL | EXPAND);
 		table->attach (when_bar_entry, 1, 2, 2, 3, FILL | EXPAND, FILL | EXPAND);
