@@ -703,7 +703,7 @@ MeterDialog::get_note_type ()
 	NoteTypes::iterator x = note_types.find (note_type.get_active_text());
 
 	if (x == note_types.end()) {
-		error << string_compose(_("incomprehensible meter note type (%1)"), note_type.get_active_text()) << endmsg;
+		error << string_compose(_("incomprehensible time signature denominator (%1)"), note_type.get_active_text()) << endmsg;
 		return 0;
 	}
 
@@ -716,7 +716,7 @@ MeterDialog::get_lock_style ()
 	LockStyles::iterator x = lock_styles.find (lock_style.get_active_text());
 
 	if (x == lock_styles.end()) {
-		error << string_compose(_("incomprehensible meter lock style (%1)"), lock_style.get_active_text()) << endmsg;
+		error << string_compose(_("incomprehensible lock style (%1)"), lock_style.get_active_text()) << endmsg;
 		return BeatTime;
 	}
 

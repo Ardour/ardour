@@ -703,7 +703,7 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 
 	reassociate_metric_markers (tmap);
 
-	begin_reversible_command (_("replace meter mark"));
+	begin_reversible_command (_("replace time signature mark"));
 	XMLNode &before = tmap->get_state();
 
 	tmap->set_meter (meter, when);
