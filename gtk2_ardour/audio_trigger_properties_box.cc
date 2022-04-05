@@ -151,7 +151,7 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	_beat_spinner.set_can_focus(false);
 	_beat_spinner.signal_changed ().connect (sigc::mem_fun (*this, &AudioTriggerPropertiesBox::beats_changed));
 
-	set_tooltip(_stretch_toggle, _("If enabled, the clip will be stretched to match the current timeline tempo"));
+	set_tooltip(_stretch_toggle, _("<b>If enabled</b>, the clip will be stretched to match the current timeline tempo"));
 	set_tooltip(_stretch_selector, _("Select Crisp for drum loops, Smooth for sustained notes, or Mixed if the clip has both"));
 	set_tooltip(_beat_spinner, _("Length of the clip, in beats. Changing this will change the tempo"));
 	set_tooltip(_half_button, _("Click to halve the tempo for the clip. This will result in it playing faster when stretched on the timeline"));

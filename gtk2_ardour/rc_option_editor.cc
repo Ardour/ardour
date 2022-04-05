@@ -3452,7 +3452,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_name_new_markers)
 		);
 	add_option (_("Transport"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("<b>When enabled</b>, popup a dialog when a new marker is created to allow its name to be set as it is created."
 								"\n\nYou can always rename markers by right-clicking on them."));
 
 	bo = new BoolOption (
@@ -3813,7 +3813,7 @@ These settings will only take effect after %1 is restarted.\n\
 		);
 	add_option (_("Plugins"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    _("<b>When enabled</b> at most one plugin GUI window be on-screen at a time. When disabled, the number of visible plugin GUI windows is unlimited"));
+					    _("<b>When enabled</b> at most one plugin GUI window can be on-screen at a time. <b>When disabled</b>, the number of visible plugin GUI windows is unlimited"));
 
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT || defined VST3_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
@@ -4693,8 +4693,8 @@ These settings will only take effect after %1 is restarted.\n\
 
 	TriggerPortSelectOption* dtip  = new TriggerPortSelectOption (_rc_config, this);
 
-	set_tooltip (dtip->tip_widget(), _("If set, the identifies the input MIDI port that will be automatically connected to trigger boxes.\n\n"
-	                                   "It is intended to be either an NxN pad device such as the Ableton Push 2 or Novation Launchpad\n"
+	set_tooltip (dtip->tip_widget(), _("If set, this identifies the input MIDI port that will be automatically connected to trigger boxes.\n\n"
+	                                   "It is intended to be connected to a NxN pad device (such as the Ableton Push 2 or Novation Launchpad)\n"
 	                                   "or a regular MIDI device capable of sending sequential note numbers (like a typical keyboard)"));
 	add_option (_("Triggering"), dtip);
 
