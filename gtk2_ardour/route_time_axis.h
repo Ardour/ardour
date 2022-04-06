@@ -94,7 +94,7 @@ public:
 	void set_button_names ();
 
 	void set_samples_per_pixel (double);
-	void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
+	void set_height (uint32_t h, TrackHeightMode m = OnlySelf, bool from_idle = false);
 	void show_timestretch (Temporal::timepos_t const & start, Temporal::timepos_t const & end, int layers, int layer);
 	void hide_timestretch ();
 	void selection_click (GdkEventButton*);

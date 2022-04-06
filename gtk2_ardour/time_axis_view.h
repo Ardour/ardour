@@ -159,7 +159,7 @@ public:
 		HeightPerLane
 	};
 
-	virtual void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
+	virtual void set_height (uint32_t h, TrackHeightMode m = OnlySelf, bool from_idle = false);
 	void set_height_enum (Height, bool apply_to_selection = false);
 	void reset_height();
 

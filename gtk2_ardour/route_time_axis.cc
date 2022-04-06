@@ -959,7 +959,7 @@ RouteTimeAxisView::show_selection (TimeSelection& ts)
 }
 
 void
-RouteTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
+RouteTimeAxisView::set_height (uint32_t h, TrackHeightMode m, bool from_idle)
 {
 	int gmlen = h - 9;
 	bool height_changed = (height == 0) || (h != height);
@@ -970,7 +970,7 @@ RouteTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	}
 	gm.get_level_meter().setup_meters (gmlen, meter_width);
 
-	TimeAxisView::set_height (h, m);
+	TimeAxisView::set_height (h, m, from_idle);
 
 	if (_view) {
 		_view->set_height ((double) current_height());

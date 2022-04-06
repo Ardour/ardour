@@ -550,6 +550,8 @@ public:
 
 	virtual bool should_ripple () const = 0;
 
+	virtual void queue_redisplay_track_views () = 0;
+
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;

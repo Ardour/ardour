@@ -571,7 +571,7 @@ MidiTimeAxisView::update_midi_controls_visibility (uint32_t h)
 }
 
 void
-MidiTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
+MidiTimeAxisView::set_height (uint32_t h, TrackHeightMode m, bool from_idle)
 {
 	update_midi_controls_visibility (h);
 
@@ -588,7 +588,7 @@ MidiTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	 * which needs to know if we have just shown or hidden a scroomer /
 	 * piano roll.
 	 */
-	RouteTimeAxisView::set_height (h, m);
+	RouteTimeAxisView::set_height (h, m, from_idle);
 }
 
 void

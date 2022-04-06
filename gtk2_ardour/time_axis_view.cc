@@ -446,9 +446,8 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 void
 TimeAxisView::idle_resize (int32_t h)
 {
-	set_height (std::max(0, h));
+	set_height (std::max(0, h), OnlySelf, true);
 }
-
 
 bool
 TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
@@ -600,7 +599,7 @@ TimeAxisView::set_height_enum (Height h, bool apply_to_selection)
 }
 
 void
-TimeAxisView::set_height (uint32_t h, TrackHeightMode m)
+TimeAxisView::set_height (uint32_t h, TrackHeightMode m, bool from_idle)
 {
 	uint32_t lanes = 0;
 	if (m == TotalHeight) {
@@ -637,6 +636,10 @@ TimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	}
 
 	_editor.override_visible_track_count ();
+
+	if (!from_idle) {
+		_editor.queue_redisplay_track_views ();
+	}
 }
 
 void
