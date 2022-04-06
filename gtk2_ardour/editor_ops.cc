@@ -8616,7 +8616,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 	}
 
 	/* apply height changes, so that scrolling works */
-	process_redisplay_track_views ();
+	(void) process_redisplay_track_views ();
 
 	/*
 	   set the controls_layout height now, because waiting for its size
