@@ -454,6 +454,10 @@ Graph::run_one ()
 		DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 goes to sleep\n", pthread_name ()));
 		_execution_sem.wait ();
 
+		/* update the thread-local tempo map ptr */
+
+		Temporal::TempoMap::fetch ();
+
 		if (g_atomic_int_get (&_terminate)) {
 			return;
 		}
@@ -495,8 +499,10 @@ Graph::helper_thread ()
 
 	pt->get_buffers ();
 
+	/* just in case we need the thread local tempo map ptr before anything else */
+	Temporal::TempoMap::fetch ();
+
 	while (!g_atomic_int_get (&_terminate)) {
-		setup_thread_local_variables ();
 		run_one ();
 	}
 
@@ -550,18 +556,11 @@ again:
 
 	/* After setup, the main-thread just becomes a normal worker */
 	while (!g_atomic_int_get (&_terminate)) {
-		setup_thread_local_variables ();
 		run_one ();
 	}
 
 	pt->drop_buffers ();
 	delete (pt);
-}
-
-void
-Graph::setup_thread_local_variables ()
-{
-	Temporal::TempoMap::fetch ();
 }
 
 void
