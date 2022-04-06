@@ -5961,7 +5961,7 @@ Editor::redisplay_track_views ()
 void
 Editor::handle_gui_changes (string const & what, void*)
 {
-	if (what == "track_height" || what == "visible_tracks") {
+	if (what == "visible_tracks") {
 		queue_redisplay_track_views ();
 	}
 }
