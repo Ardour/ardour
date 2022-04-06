@@ -1093,8 +1093,6 @@ MidiRegionView::model_changed()
 		return;
 	}
 
-	Timing t;
-
 	if (_active_notes) {
 		// Currently recording
 		const samplecnt_t zoom = trackview.editor().get_current_zoom();
@@ -1225,9 +1223,6 @@ MidiRegionView::model_changed()
 	_marked_for_selection.clear ();
 	_marked_for_velocity.clear ();
 	_pending_note_selection.clear ();
-
-	t.update ();
-	std::cerr << "REDISPLAY(model) of " << region()->name() << " complete after " << t.elapsed_msecs() << std::endl;
 }
 
 void
@@ -1236,8 +1231,6 @@ MidiRegionView::view_changed()
 	if (!display_enabled()) {
 		return;
 	}
-
-	Timing t;
 
 	if (_active_notes) {
 		// Currently recording
@@ -1287,9 +1280,6 @@ MidiRegionView::view_changed()
 
 	update_sysexes();
 	update_patch_changes ();
-
-	t.update ();
-	std::cerr << "REDISPLAY(view) of " << region()->name() << " complete after " << t.elapsed_msecs() << std::endl;
 }
 
 void
