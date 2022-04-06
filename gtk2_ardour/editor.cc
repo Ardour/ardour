@@ -5462,6 +5462,7 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 		 * (This is done to ensure that any pending resizes are processed before any pending redraws, so that widgets are not redrawn twice unnecessarily.)
 		 */
 		resize_idle_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE + 10, _idle_resize, this, NULL);
+		queue_redisplay_track_views ();
 		_pending_resize_amount = 0;
 	}
 
