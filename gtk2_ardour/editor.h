@@ -1242,8 +1242,7 @@ private:
 	Gtk::VBox list_vpacker;
 
 	void queue_redisplay_track_views ();
-	void process_redisplay_track_views ();
-	void redisplay_track_views_now ();
+	bool process_redisplay_track_views ();
 	bool redisplay_track_views (); // do not call this directly, use above wrappers
 
 	bool             _tvl_no_redisplay;

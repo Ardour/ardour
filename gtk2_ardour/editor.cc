@@ -5621,20 +5621,15 @@ Editor::queue_redisplay_track_views ()
 	}
 }
 
-void
+bool
 Editor::process_redisplay_track_views ()
 {
 	if (_tvl_redisplay_connection.connected ()) {
 		_tvl_redisplay_connection.disconnect ();
 		redisplay_track_views ();
 	}
-}
 
-void
-Editor::redisplay_track_views_now ()
-{
-	_tvl_redisplay_connection.disconnect ();
-	redisplay_track_views ();
+	return false;
 }
 
 void
