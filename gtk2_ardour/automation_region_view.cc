@@ -79,7 +79,7 @@ AutomationRegionView::~AutomationRegionView ()
 void
 AutomationRegionView::init (bool /*wfd*/)
 {
-	_enable_display = false;
+	DisplaySuspender (*this);
 
 	RegionView::init (false);
 
@@ -89,8 +89,6 @@ AutomationRegionView::init (bool /*wfd*/)
 
 	fill_color_name = "midi frame base";
 	set_colors ();
-
-	_enable_display = true;
 }
 
 void

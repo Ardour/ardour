@@ -249,7 +249,7 @@ AudioFileSource::set_state (const XMLNode& node, int version)
 }
 
 void
-AudioFileSource::mark_streaming_write_completed (const Lock& lock)
+AudioFileSource::mark_streaming_write_completed (const WriterLock& lock)
 {
 	if (!writable()) {
 		return;

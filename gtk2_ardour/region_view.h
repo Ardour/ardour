@@ -101,7 +101,27 @@ public:
 	virtual void entered () {}
 	virtual void exited () {}
 
-	virtual void enable_display(bool yn) { _enable_display = yn; }
+	bool display_enabled() const;
+	void redisplay (bool view_only = true) {
+		_redisplay (view_only);
+	}
+
+	struct DisplaySuspender {
+		DisplaySuspender (RegionView& rv, bool just_view = false) : region_view (rv), view_only (just_view) {
+			region_view.disable_display ();
+		}
+
+		DisplaySuspender (DisplaySuspender const & other) : region_view (other.region_view), view_only (other.view_only) {
+			region_view.disable_display ();
+		}
+
+		~DisplaySuspender () {
+			region_view.enable_display (view_only);
+		}
+		RegionView& region_view;
+		bool view_only;
+	};
+
 	virtual void update_coverage_frame (LayerDisplay);
 
 	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;
@@ -184,10 +204,10 @@ protected:
 	std::vector<ControlPoint *> control_points;
 	double current_visible_sync_position;
 
-	bool    valid; ///< see StreamView::redisplay_diskstream()
-	bool    _enable_display; ///< see StreamView::redisplay_diskstream()
-	double  _pixel_width;
-	bool    in_destructor;
+	bool      valid; ///< see StreamView::redisplay_diskstream()
+	uint32_t _disable_display; ///< see StreamView::redisplay_diskstream()
+	double   _pixel_width;
+	bool      in_destructor;
 
 	bool wait_for_data;
 
@@ -226,6 +246,13 @@ private:
 	typedef std::list<ViewCueMarker*> ViewCueMarkers;
 	ViewCueMarkers _cue_markers;
 	bool _cue_markers_visible;
+	virtual void _redisplay (bool) = 0;
+
+  private:
+	friend class DisplaySuspender;
+	void enable_display (bool view_only);
+	void disable_display();
+
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

@@ -3323,7 +3323,6 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		} else {
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 				i->view->thaw_after_trim ();
-				i->view->enable_display (true);
 			}
 		}
 

@@ -247,8 +247,6 @@ StreamView::layer_regions()
 			region_views.erase (i);
 			i = tmp;
 			continue;
-		} else {
-			(*i)->enable_display(true);
 		}
 
 		if (copy.size() == 0) {
@@ -341,7 +339,6 @@ StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 	tr->playlist()->RegionRemoved.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::remove_region_view, this, _1), gui_context());
 	tr->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::update_coverage_frame, this), gui_context());
 }
-
 
 void
 StreamView::apply_color (Gdk::Color const& c, ColorTarget target)

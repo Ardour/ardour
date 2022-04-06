@@ -53,22 +53,22 @@ public:
 		return safe_midi_file_extension(path);
 	}
 
-	void append_event_beats (const Lock& lock, const Evoral::Event<Temporal::Beats>& ev);
-	void append_event_samples (const Lock& lock, const Evoral::Event<samplepos_t>& ev, samplepos_t source_start);
+	void append_event_beats (const WriterLock& lock, const Evoral::Event<Temporal::Beats>& ev);
+	void append_event_samples (const WriterLock& lock, const Evoral::Event<samplepos_t>& ev, samplepos_t source_start);
 
 	void update_length (timepos_t const & dur);
 
-	void mark_streaming_midi_write_started (const Lock& lock, NoteMode mode);
-	void mark_streaming_write_completed (const Lock& lock);
-	void mark_midi_streaming_write_completed (const Lock& lock,
+	void mark_streaming_midi_write_started (const WriterLock& lock, NoteMode mode);
+	void mark_streaming_write_completed (const WriterLock& lock);
+	void mark_midi_streaming_write_completed (const WriterLock& lock,
 	                                          Evoral::Sequence<Temporal::Beats>::StuckNoteOption,
 	                                          Temporal::Beats when = Temporal::Beats());
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	void load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload=false);
-	void destroy_model (const Glib::Threads::Mutex::Lock& lock);
+	void load_model (const WriterLock& lock, bool force_reload=false);
+	void destroy_model (const WriterLock& lock);
 
 	static bool safe_midi_file_extension (const std::string& path);
 	static bool valid_midi_file (const std::string& path);
@@ -81,7 +81,7 @@ public:
 
   protected:
 	void close ();
-	void flush_midi (const Lock& lock);
+	void flush_midi (const WriterLock& lock);
 
   private:
 	bool _open;
@@ -94,9 +94,9 @@ public:
 
 	int open_for_write ();
 
-	void ensure_disk_file (const Lock& lock);
+	void ensure_disk_file (const WriterLock& lock);
 
-	timecnt_t read_unlocked (const Lock&                     lock,
+	timecnt_t read_unlocked (const ReaderLock&               lock,
 	                         Evoral::EventSink<samplepos_t>& dst,
 	                         timepos_t const &               position,
 	                         timepos_t const &               start,
@@ -105,10 +105,12 @@ public:
 	                         MidiNoteTracker*               tracker,
 	                         MidiChannelFilter*              filter) const;
 
-	timecnt_t write_unlocked (const Lock&                  lock,
+	timecnt_t write_unlocked (const WriterLock&            lock,
 	                          MidiRingBuffer<samplepos_t>& src,
 	                          timepos_t const &            position,
 	                          timecnt_t const &            cnt);
+
+	void load_model_unlocked (bool force_reload=false);
 
 };
 

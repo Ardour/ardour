@@ -146,7 +146,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 
 			(*i)->set_valid (true);
 
-			display_region(dynamic_cast<MidiRegionView*>(*i), wait_for_data);
+			display_region (dynamic_cast<MidiRegionView*>(*i), wait_for_data);
 
 			return 0;
 		}
@@ -159,12 +159,16 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 
 	region_views.push_front (region_view);
 
-	/* display events and find note range */
-	display_region (region_view, wait_for_data);
+	{
+		RegionView::DisplaySuspender ds (*region_view, false);
 
-	/* fit note range if we are importing */
-	if (_trackview.session()->operation_in_progress (Operations::insert_file)) {
-		set_note_range (ContentsRange);
+		display_region (region_view, wait_for_data);
+
+		/* fit note range if we are importing */
+		if (_trackview.session()->operation_in_progress (Operations::insert_file)) {
+			/* this will call display_region() */
+			set_note_range (ContentsRange);
+		}
 	}
 
 	/* catch regionview going away */
@@ -177,24 +181,21 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 }
 
 void
-MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
+MidiStreamView::display_region (MidiRegionView* region_view, bool)
 {
 	if (!region_view) {
 		return;
 	}
 
-	region_view->enable_display (true);
+	RegionView::DisplaySuspender ds (*region_view, false);
+
 	region_view->set_height (child_height());
 
-	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
+	boost::shared_ptr<MidiSource> source (region_view->midi_region()->midi_source(0));
+
 	if (!source) {
 		error << _("attempt to display MIDI region with no source") << endmsg;
 		return;
-	}
-
-	if (load_model) {
-		Glib::Threads::Mutex::Lock lm(source->mutex());
-		source->load_model(lm);
 	}
 
 	if (!source->model()) {
@@ -202,12 +203,10 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 		return;
 	}
 
-	_range_dirty = update_data_note_range(
-		source->model()->lowest_note(),
-		source->model()->highest_note());
+	_range_dirty = update_data_note_range (source->model()->lowest_note(), source->model()->highest_note());
 
 	// Display region contents
-	region_view->display_model(source->model());
+	region_view->display_model (source->model());
 }
 
 
@@ -225,12 +224,10 @@ void
 MidiStreamView::update_contents_metrics(boost::shared_ptr<Region> r)
 {
 	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(r);
+
 	if (mr) {
-		Glib::Threads::Mutex::Lock lm(mr->midi_source(0)->mutex());
-		mr->midi_source(0)->load_model(lm);
-		_range_dirty = update_data_note_range(
-			mr->model()->lowest_note(),
-			mr->model()->highest_note());
+		Source::ReaderLock lm (mr->midi_source(0)->mutex());
+		_range_dirty = update_data_note_range (mr->model()->lowest_note(), mr->model()->highest_note());
 	}
 }
 
@@ -283,23 +280,23 @@ MidiStreamView::redisplay_track ()
 		_data_note_max = 71;
 	}
 
+	vector<RegionView::DisplaySuspender> vds;
+
 	// Flag region views as invalid and disable drawing
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		(*i)->set_valid(false);
-		(*i)->enable_display(false);
+		(*i)->set_valid (false);
+		vds.push_back (RegionView::DisplaySuspender (**i, false));
 	}
 
 	// Add and display region views, and flag them as valid
-	_trackview.track()->playlist()->foreach_region(
-		sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view)));
+	_trackview.track()->playlist()->foreach_region (sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view)));
 
 	// Stack regions by layer, and remove invalid regions
 	layer_regions();
 
 	// Update note range (not regions which are correct) and draw note lines
-	apply_note_range(_lowest_note, _highest_note, false);
+	apply_note_range (_lowest_note, _highest_note, false);
 }
-
 
 void
 MidiStreamView::update_contents_height ()

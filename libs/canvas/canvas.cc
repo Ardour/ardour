@@ -55,6 +55,7 @@ uint32_t Canvas::tooltip_timeout_msecs = 750;
 /** Construct a new Canvas */
 Canvas::Canvas ()
 	: _root (this)
+	, _queue_draw_frozen (0)
 	, _bg_color (Gtkmm2ext::rgba_to_color (0, 1.0, 0.0, 1.0))
 	, _last_render_start_timestamp(0)
 	, _use_intermediate_surface (false)
@@ -230,6 +231,25 @@ Canvas::dump (ostream& o) const
 	_root.dump (o);
 }
 
+void
+Canvas::freeze_queue_draw ()
+{
+	_queue_draw_frozen++;
+}
+
+void
+Canvas::thaw_queue_draw ()
+{
+	if (_queue_draw_frozen) {
+		_queue_draw_frozen--;
+
+		if (_queue_draw_frozen == 0 && !frozen_area.empty()) {
+			request_redraw (frozen_area);
+			frozen_area = Rect();
+		}
+	}
+}
+
 /** Called when an item has been shown or hidden.
  *  @param item Item that has been shown or hidden.
  */
@@ -238,6 +258,11 @@ Canvas::item_shown_or_hidden (Item* item)
 {
 	Rect bbox = item->bounding_box ();
 	if (bbox) {
+		if (_queue_draw_frozen) {
+			frozen_area = frozen_area.extend (compute_draw_item_area (item, bbox));
+			return;
+		}
+
 		if (item->item_to_window (bbox).intersection (visible_area ())) {
 			queue_draw_item_area (item, bbox);
 		}
@@ -416,41 +441,48 @@ Canvas::item_moved (Item* item, Rect pre_change_parent_bounding_box)
 void
 Canvas::queue_draw_item_area (Item* item, Rect area)
 {
+	request_redraw (compute_draw_item_area (item, area));
+}
+
+Rect
+Canvas::compute_draw_item_area (Item* item, Rect area)
+{
+	Rect r;
+
 	if ((area.width()) > 1.0 && (area.height() > 1.0)) {
 		/* item has a rectangular bounding box, which may fall
 		 * on non-integer locations. Expand it appropriately.
 		 */
-		Rect r = item->item_to_window (area, false);
+		r = item->item_to_window (area, false);
 		r.x0 = floor (r.x0);
 		r.y0 = floor (r.y0);
 		r.x1 = ceil (r.x1);
 		r.y1 = ceil (r.y1);
 		//std::cerr << "redraw box, adjust from " << area << " to " << r << std::endl;
-		request_redraw (r);
-		return;
 	} else if (area.width() > 1.0 && area.height() == 1.0) {
 		/* horizontal line, which may fall on non-integer
 		 * coordinates.
 		 */
-		Rect r = item->item_to_window (area, false);
+		r = item->item_to_window (area, false);
 		r.y0 = floor (r.y0);
 		r.y1 = ceil (r.y1);
 		//std::cerr << "redraw HLine, adjust from " << area << " to " << r << std::endl;
-		request_redraw (r);
 	} else if (area.width() == 1.0 && area.height() > 1.0) {
 		/* vertical single pixel line, which may fall on non-integer
 		 * coordinates
 		 */
-		Rect r = item->item_to_window (area, false);
+		r = item->item_to_window (area, false);
 		r.x0 = floor (r.x0);
 		r.x1 = ceil (r.x1);
 		//std::cerr << "redraw VLine, adjust from " << area << " to " << r << std::endl;
-		request_redraw (r);
+
 	} else {
 		/* impossible? one of width or height must be zero ... */
 		//std::cerr << "redraw IMPOSSIBLE of " << area  << std::endl;
-		request_redraw (item->item_to_window (area, false));
+		r =  item->item_to_window (area, false);
 	}
+
+	return r;
 }
 
 void

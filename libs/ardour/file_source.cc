@@ -584,7 +584,7 @@ FileSource::is_stub () const
 int
 FileSource::rename (const string& newpath)
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	WriterLock lm (_lock);
 	string oldpath = _path;
 
 	// Test whether newpath exists, if yes notify the user but continue.

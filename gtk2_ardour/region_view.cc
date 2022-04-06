@@ -89,7 +89,7 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, editor(0)
 	, current_visible_sync_position(0.0)
 	, valid(false)
-	, _enable_display(false)
+	, _disable_display (0)
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
@@ -170,7 +170,7 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
 	, editor(0)
 	, current_visible_sync_position(0.0)
 	, valid(false)
-	, _enable_display(false)
+	, _disable_display (0)
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
@@ -237,10 +237,6 @@ RegionView::init (bool wfd)
 
 	_cue_markers_visible = false;
 	update_cue_markers ();
-
-	if (wfd) {
-		_enable_display = true;
-	}
 
 	/* derived class calls set_height () including RegionView::set_height() in ::init() */
 	//set_height (trackview.current_height());
@@ -433,6 +429,8 @@ RegionView::lock_toggle ()
 void
 RegionView::region_changed (const PropertyChange& what_changed)
 {
+	DisplaySuspender ds (*this, false);
+
 	ENSURE_GUI_THREAD (*this, &RegionView::region_changed, what_changed);
 
 	if (what_changed.contains (ARDOUR::bounds_change)) {
@@ -1256,3 +1254,27 @@ RegionView::drop_cue_marker (ArdourMarker* m)
 		}
 	}
 }
+
+void
+RegionView::enable_display (bool view_only)
+{
+	if (_disable_display) {
+		_disable_display--;
+		if (_disable_display == 0) {
+			redisplay (view_only);
+		}
+	}
+}
+
+void
+RegionView::disable_display ()
+{
+	_disable_display++;
+}
+
+bool
+RegionView::display_enabled() const
+{
+	return !_disable_display;
+}
+

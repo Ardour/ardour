@@ -308,14 +308,14 @@ AudioSource::read (Sample *dst, samplepos_t start, samplecnt_t cnt, int /*channe
 {
 	assert (cnt >= 0);
 
-	Glib::Threads::Mutex::Lock lm (_lock);
+	ReaderLock lm (_lock);
 	return read_unlocked (dst, start, cnt);
 }
 
 samplecnt_t
 AudioSource::write (Sample *dst, samplecnt_t cnt)
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	WriterLock lm (_lock);
 	/* any write makes the file not removable */
 	_flags = Flag (_flags & ~Removable);
 	return write_unlocked (dst, cnt);
@@ -335,7 +335,7 @@ int
 AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos_t start, samplecnt_t cnt,
 				  double samples_per_visual_peak, samplecnt_t samples_per_file_peak) const
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	ReaderLock lm (_lock);
 
 #if 0 // DEBUG ONLY
 	/* Bypass peak-file cache, compute peaks using raw data from source */
@@ -762,7 +762,7 @@ AudioSource::build_peaks_from_scratch ()
 	{
 		/* hold lock while building peaks */
 
-		Glib::Threads::Mutex::Lock lp (_lock);
+		ReaderLock lp (_lock);
 
 		if (prepare_for_peakfile_writes ()) {
 			goto out;
@@ -827,7 +827,7 @@ AudioSource::build_peaks_from_scratch ()
 int
 AudioSource::close_peakfile ()
 {
-	Glib::Threads::Mutex::Lock lp (_lock);
+	WriterLock lp (_lock);
 	if (_peakfile_fd >= 0) {
 		close (_peakfile_fd);
 		_peakfile_fd = -1;
@@ -1117,7 +1117,7 @@ AudioSource::available_peaks (double zoom_factor) const
 }
 
 void
-AudioSource::mark_streaming_write_completed (const Lock& lock)
+AudioSource::mark_streaming_write_completed (const WriterLock& lock)
 {
 	Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
 

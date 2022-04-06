@@ -442,8 +442,15 @@ MidiGhostRegion::remove_note (NoteBase* note)
 
 	_optimization_iterator = events.end ();
 }
+
 void
-MidiGhostRegion::redisplay_model ()
+MidiGhostRegion::view_changed ()
+{
+	model_changed();
+}
+
+void
+MidiGhostRegion::model_changed ()
 {
 	/* we rely on the parent MRV having removed notes not in the model */
 	for (EventList::iterator i = events.begin(); i != events.end(); ) {

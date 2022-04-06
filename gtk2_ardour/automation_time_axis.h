@@ -78,7 +78,7 @@ public:
 
 	~AutomationTimeAxisView();
 
-	virtual void set_height (uint32_t, TrackHeightMode m = OnlySelf);
+	virtual void set_height (uint32_t, TrackHeightMode m = OnlySelf, bool from_idle = false);
 	void set_samples_per_pixel (double);
 	std::string name() const { return _name; }
 	Gdk::Color color () const;

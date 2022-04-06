@@ -63,7 +63,8 @@ public:
 		Missing = 0x400, /* used for MIDI only */
 	};
 
-	typedef Glib::Threads::Mutex::Lock Lock;
+	typedef Glib::Threads::RWLock::ReaderLock ReaderLock;
+	typedef Glib::Threads::RWLock::WriterLock WriterLock;
 
 	Source (Session&, DataType type, const std::string& name, Flag flags=Flag(0));
 	Source (Session&, const XMLNode&);
@@ -85,8 +86,8 @@ public:
 
 	void mark_for_remove();
 
-	virtual void mark_streaming_write_started (const Lock& lock) {}
-	virtual void mark_streaming_write_completed (const Lock& lock) = 0;
+	virtual void mark_streaming_write_started (const WriterLock& lock) {}
+	virtual void mark_streaming_write_completed (const WriterLock& lock) = 0;
 
 	virtual void session_saved() {}
 
@@ -129,7 +130,7 @@ public:
 
 	void set_allow_remove_if_empty (bool yn);
 
-	Glib::Threads::Mutex& mutex() { return _lock; }
+	Glib::Threads::RWLock& mutex() { return _lock; }
 	Flag flags() const { return _flags; }
 
 	virtual void inc_use_count ();
@@ -167,7 +168,7 @@ public:
 	typedef std::vector<SegmentDescriptor> SegmentDescriptors;
 	SegmentDescriptors segment_descriptors;
 
-	mutable Glib::Threads::Mutex _lock;
+	mutable Glib::Threads::RWLock _lock;
 	mutable Glib::Threads::Mutex _analysis_lock;
 
   private:

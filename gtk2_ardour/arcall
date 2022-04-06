@@ -3,6 +3,9 @@ TOP=`dirname "$0"`/..
 . $TOP/build/gtk2_ardour/ardev_common_waf.sh
 LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
+
+mkdir -p ./ardour_profile-$$
+
 exec valgrind \
 	--error-limit=no --num-callers=50 \
 	--tool=callgrind \
@@ -10,5 +13,7 @@ exec valgrind \
 	--separate-threads=yes \
 	--collect-systime=yes \
 	--collect-jumps=yes \
+	--dump-instr=yes \
 	--instr-atstart=no \
-	$TOP/$EXECUTABLE --novst "$@"
+	--callgrind-out-file=./ardour_profile-$$/ardour-%p.log \
+	$TOP/$EXECUTABLE "$@"

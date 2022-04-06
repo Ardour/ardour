@@ -70,26 +70,24 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 
 	/* create new sources */
 
-	if (make_new_sources (region, nsrcs, suffix))
+	if (make_new_sources (region, nsrcs, suffix)) {
 		return -1;
-
-	boost::shared_ptr<MidiSource> src = region->midi_source(0);
-	{
-		Source::Lock lock(src->mutex());
-		src->load_model(lock);
 	}
 
-	boost::shared_ptr<MidiModel> old_model = src->model();
+	boost::shared_ptr<MidiSource> src = region->midi_source(0);
+	Source::ReaderLock lock (src->mutex());
 
+	boost::shared_ptr<MidiModel> old_model = src->model();
 	boost::shared_ptr<MidiSource> new_src = boost::dynamic_pointer_cast<MidiSource>(nsrcs[0]);
+
 	if (!new_src) {
 		error << _("MIDI stretch created non-MIDI source") << endmsg;
 		return -1;
 	}
 
-	Glib::Threads::Mutex::Lock sl (new_src->mutex ());
+	Source::WriterLock sl (new_src->mutex ());
 
-	new_src->load_model(sl, true);
+	new_src->load_model (sl, true);
 	boost::shared_ptr<MidiModel> new_model = new_src->model();
 	new_model->start_write();
 

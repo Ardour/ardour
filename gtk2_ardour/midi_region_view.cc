@@ -39,6 +39,7 @@
 
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
+#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include "ardour/debug.h"
@@ -189,8 +190,8 @@ MidiRegionView::parameter_changed (std::string const & p)
 {
 	RegionView::parameter_changed (p);
 	if (p == "display-first-midi-bank-as-zero") {
-		if (_enable_display) {
-			redisplay_model();
+		if (display_enabled()) {
+			view_changed ();
 		}
 	} else if (p == "color-regions-using-track-color") {
 		set_colors ();
@@ -253,17 +254,15 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 }
 
 void
-MidiRegionView::init (bool wfd)
+MidiRegionView::init (bool /*wfd*/)
 {
+	DisplaySuspender ds (*this);
+
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
-	if (wfd) {
-		Glib::Threads::Mutex::Lock lm(midi_region()->midi_source(0)->mutex());
-		midi_region()->midi_source(0)->load_model(lm);
-	}
-
 	_model = midi_region()->midi_source(0)->model();
-	_enable_display = false;
+	assert (_model);
+
 	fill_color_name = "midi frame base";
 
 	RegionView::init (false);
@@ -276,14 +275,6 @@ MidiRegionView::init (bool wfd)
 	//region_locked ();
 
 	set_colors ();
-
-	_enable_display = true;
-	if (_model) {
-		if (wfd) {
-			display_model (_model);
-		}
-	}
-
 	reset_width_dependent_items (_pixel_width);
 
 	group->raise_to_top();
@@ -903,18 +894,15 @@ MidiRegionView::clear_events ()
 }
 
 void
-MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
+MidiRegionView::display_model (boost::shared_ptr<MidiModel> model)
 {
 	_model = model;
 
 	content_connection.disconnect ();
-	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiRegionView::redisplay_model, this), gui_context());
+	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiRegionView::model_changed, this), gui_context());
 	/* Don't signal as nobody else needs to know until selection has been altered. */
 	clear_events();
-
-	if (_enable_display) {
-		redisplay_model();
-	}
+	model_changed ();
 }
 
 void
@@ -1089,8 +1077,24 @@ MidiRegionView::get_events (Events& e, Evoral::Sequence<Temporal::Beats>::NoteOp
 }
 
 void
-MidiRegionView::redisplay_model()
+MidiRegionView::_redisplay (bool view_only)
 {
+	if (view_only) {
+		view_changed ();
+	} else {
+		model_changed ();
+	}
+}
+
+void
+MidiRegionView::model_changed()
+{
+	if (!display_enabled()) {
+		return;
+	}
+
+	Timing t;
+
 	if (_active_notes) {
 		// Currently recording
 		const samplecnt_t zoom = trackview.editor().get_current_zoom();
@@ -1126,6 +1130,7 @@ MidiRegionView::redisplay_model()
 	MidiModel::Notes& notes (_model->notes());
 
 	NoteBase* cne;
+
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 
 		boost::shared_ptr<NoteType> note (*n);
@@ -1210,7 +1215,7 @@ MidiRegionView::redisplay_model()
 	for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
 		MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
 		if (gr && !gr->trackview.hidden()) {
-			gr->redisplay_model ();
+			gr->model_changed ();
 		}
 	}
 
@@ -1221,6 +1226,70 @@ MidiRegionView::redisplay_model()
 	_marked_for_velocity.clear ();
 	_pending_note_selection.clear ();
 
+	t.update ();
+	std::cerr << "REDISPLAY(model) of " << region()->name() << " complete after " << t.elapsed_msecs() << std::endl;
+}
+
+void
+MidiRegionView::view_changed()
+{
+	if (!display_enabled()) {
+		return;
+	}
+
+	Timing t;
+
+	if (_active_notes) {
+		// Currently recording
+		const samplecnt_t zoom = trackview.editor().get_current_zoom();
+		if (zoom != _last_display_zoom) {
+			/* Update resolved canvas notes to reflect changes in zoom without
+			   touching model.  Leave active notes (with length max) alone since
+			   they are being extended. */
+			for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+				if (i->second->note()->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
+					update_note(i->second);
+				}
+			}
+			_last_display_zoom = zoom;
+		}
+		return;
+	}
+
+	if (!_model) {
+		return;
+	}
+
+	Note* sus = NULL;
+	Hit*  hit = NULL;
+
+	for (Events::iterator i = _events.begin(); i != _events.end(); ) {
+
+		NoteBase* cne = i->second;
+
+		if (cne->item()->visible()) {
+			if ((sus = dynamic_cast<Note*>(cne))) {
+				update_sustained (sus);
+			}
+		} else if ((hit = dynamic_cast<Hit*>(cne))) {
+			update_hit (hit);
+		}
+
+		++i;
+	}
+
+	for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
+		MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
+		if (gr && !gr->trackview.hidden()) {
+			gr->view_changed ();
+		}
+	}
+
+	update_sysexes();
+	update_patch_changes ();
+
+	t.update ();
+	std::cerr << "REDISPLAY(view) of " << region()->name() << " complete after " << t.elapsed_msecs() << std::endl;
 }
 
 void
@@ -1262,10 +1331,34 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 				p->update_name ();
 
 				p->show();
-			}
+		}
 
 		} else {
 			add_canvas_patch_change (*i);
+		}
+	}
+}
+
+void
+MidiRegionView::update_patch_changes ()
+{
+	for (PatchChanges::iterator p = _patch_changes.begin(); p != _patch_changes.end(); ++p) {
+
+		boost::shared_ptr<PatchChange> pc (p->second);
+
+		const timepos_t region_time = _region->source_beats_to_region_time (p->first->time());
+
+		if (region_time < timepos_t() || region_time >= _region->length()) {
+			pc->hide();
+		} else {
+			const timepos_t flag_time = _region->source_beats_to_absolute_time (p->first->time());
+			const double flag_x = trackview.editor().time_to_pixel (flag_time);
+
+			const double region_x = trackview.editor().time_to_pixel (_region->position());
+
+			pc->canvas_item()->set_position (ArdourCanvas::Duple (flag_x-region_x, 1.0));
+			pc->update_name ();
+			pc->show();
 		}
 	}
 }
@@ -1353,6 +1446,31 @@ MidiRegionView::display_sysexes()
 	}
 }
 
+void
+MidiRegionView::update_sysexes ()
+{
+	double height = midi_stream_view()->contents_height();
+
+	for (SysExes::iterator s = _sys_exes.begin(); s != _sys_exes.end(); ++s) {
+
+		const timepos_t time (s->first->time());
+		boost::shared_ptr<SysEx> sysex (s->second);
+
+		// Show unless message is beyond the region bounds
+		if (_region->source_relative_position (time) >= _region->length() || time < _region->start()) {
+			sysex->hide();
+			continue;
+		} else {
+			sysex->show();
+		}
+
+		const double x = trackview.editor().time_to_pixel (_region->source_beats_to_region_time (time.beats()));
+
+		sysex->set_height (height);
+		sysex->item().set_position (ArdourCanvas::Duple (x, 1.0));
+	}
+}
+
 MidiRegionView::~MidiRegionView ()
 {
 	in_destructor = true;
@@ -1378,15 +1496,6 @@ void
 MidiRegionView::region_resized (const PropertyChange& what_changed)
 {
 	RegionView::region_resized(what_changed); // calls RegionView::set_duration()
-
-	/* catch end and start trim so we can update the view*/
-	if (!what_changed.contains (ARDOUR::Properties::start) &&
-	    what_changed.contains (ARDOUR::Properties::length)) {
-		enable_display (true);
-	} else if (what_changed.contains (ARDOUR::Properties::start) &&
-	    what_changed.contains (ARDOUR::Properties::length)) {
-		enable_display (true);
-	}
 }
 
 void
@@ -1394,9 +1503,7 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 {
 	RegionView::reset_width_dependent_items(pixel_width);
 
-	if (_enable_display) {
-		redisplay_model();
-	}
+	view_changed ();
 
 	bool hide_all = false;
 	PatchChanges::iterator x = _patch_changes.begin();
@@ -1444,10 +1551,6 @@ MidiRegionView::set_height (double height)
 void
 MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 {
-	if (!_enable_display) {
-		return;
-	}
-
 	if (!force && _current_range_min == min && _current_range_max == max) {
 		return;
 	}
@@ -1455,7 +1558,7 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 	_current_range_min = min;
 	_current_range_max = max;
 
-	redisplay_model ();
+	view_changed ();
 }
 
 GhostRegion*
@@ -1483,7 +1586,6 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	}
 
 	ghosts.push_back (ghost);
-	enable_display (true);
 	return ghost;
 }
 
@@ -1881,8 +1983,6 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 		);
 
 	_patch_changes.insert (make_pair (patch, patch_change));
-
-	display_patch_changes();
 }
 
 void
@@ -3578,8 +3678,6 @@ MidiRegionView::midi_channel_mode_changed ()
 void
 MidiRegionView::instrument_settings_changed ()
 {
-	redisplay_model();
-
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
 		(*x).second->update_name ();
 	}
@@ -4023,12 +4121,6 @@ MidiRegionView::color_handler ()
 }
 
 void
-MidiRegionView::enable_display (bool yn)
-{
-	RegionView::enable_display (yn);
-}
-
-void
 MidiRegionView::show_step_edit_cursor (Temporal::Beats pos)
 {
 	if (_step_edit_cursor == 0) {
@@ -4211,7 +4303,7 @@ MidiRegionView::get_note_name (boost::shared_ptr<NoteType> n, uint8_t note_value
 	          name.empty() ? ParameterDescriptor::midi_note_name (note_value).c_str() : name.c_str(),
 	          (int) note_value,
 	          (int) n->channel() + 1,
-	          (int) n->velocity());  //we display velocity 0-based; velocity 0 is a 'note-off' so the user just sees values 1..127 which 'looks' 1-based 
+	          (int) n->velocity());  //we display velocity 0-based; velocity 0 is a 'note-off' so the user just sees values 1..127 which 'looks' 1-based
 
 	return buf;
 }

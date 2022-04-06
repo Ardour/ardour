@@ -122,7 +122,8 @@ public:
 	void update_hit (GhostEvent* hit);
 	void remove_note (NoteBase*);
 
-	void redisplay_model();
+	void model_changed();
+	void view_changed();
 	void clear_events();
 
 private:

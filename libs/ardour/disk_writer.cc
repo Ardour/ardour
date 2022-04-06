@@ -860,7 +860,7 @@ DiskWriter::prep_record_enable ()
 
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 		capturing_sources.push_back ((*chan)->write_source);
-		Source::Lock lock((*chan)->write_source->mutex());
+		Source::WriterLock lock ((*chan)->write_source->mutex());
 		(*chan)->write_source->mark_streaming_write_started (lock);
 	}
 
@@ -897,9 +897,6 @@ DiskWriter::set_note_mode (NoteMode m)
 	if (mp) {
 		mp->set_note_mode (m);
 	}
-
-	if (_midi_write_source && _midi_write_source->model())
-		_midi_write_source->model()->set_note_mode(m);
 }
 
 void
@@ -1037,7 +1034,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 		}
 
 		if ((total > _chunk_samples) || force_flush) {
-			Source::Lock lm(_midi_write_source->mutex());
+			Source::WriterLock lm(_midi_write_source->mutex());
 			if (_midi_write_source->midi_write (lm, *_midi_buf, timepos_t (get_capture_start_sample (0)), timecnt_t (to_write)) != to_write) {
 				error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 				return -1;
@@ -1069,7 +1066,7 @@ DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
 		if ((*chan)->write_source) {
 
 			if (mark_write_complete) {
-				Source::Lock lock((*chan)->write_source->mutex());
+				Source::WriterLock lock((*chan)->write_source->mutex());
 				(*chan)->write_source->mark_streaming_write_completed (lock);
 				(*chan)->write_source->done_with_peakfile_writes ();
 			}
@@ -1091,7 +1088,7 @@ DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 	if (_midi_write_source) {
 		if (mark_write_complete) {
-			Source::Lock lm(_midi_write_source->mutex());
+			Source::WriterLock lm(_midi_write_source->mutex());
 			_midi_write_source->mark_streaming_write_completed (lm);
 		}
 	}
@@ -1270,7 +1267,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 		/* phew, we have data */
 
-		Source::Lock source_lock(_midi_write_source->mutex());
+		Source::WriterLock source_lock(_midi_write_source->mutex());
 
 		/* figure out the name for this take */
 

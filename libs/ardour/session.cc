@@ -5717,7 +5717,7 @@ Session::freeze_all (InterThreadInfo& itt)
 struct MidiSourceLockMap
 {
 	boost::shared_ptr<MidiSource> src;
-	Source::Lock lock;
+	Source::WriterLock lock;
 
 	MidiSourceLockMap (boost::shared_ptr<MidiSource> midi_source) : src (midi_source), lock (src->mutex()) {}
 };
@@ -6013,7 +6013,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 				afs->flush_header ();
 				plist.add (Properties::start, timepos_t (0));
 			} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(*src))) {
-				Source::Lock lock(ms->mutex());
+				Source::WriterLock lock (ms->mutex());
 				ms->mark_streaming_write_completed(lock);
 				plist.add (Properties::start, timepos_t (Beats()));
 		}

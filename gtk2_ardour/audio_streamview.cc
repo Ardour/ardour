@@ -161,14 +161,11 @@ AudioStreamView::redisplay_track ()
 	// Flag region views as invalid and disable drawing
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
-		(*i)->enable_display (false);
 	}
 
 	// Add and display views, and flag them as valid
 	if (_trackview.is_audio_track()) {
-		_trackview.track()->playlist()->foreach_region(
-			sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
-			);
+		_trackview.track()->playlist()->foreach_region (sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view)));
 	}
 
 	// Stack regions by layer, and remove invalid regions

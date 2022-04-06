@@ -7929,6 +7929,12 @@ Editor::set_track_height (Height h)
 	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
 		(*x)->set_height_enum (h);
 	}
+
+	/* when not setting height from a drag, nothing will cause a redisplay
+	   of the non-altered tracks. Do that explicitly.
+	*/
+
+	queue_redisplay_track_views ();
 }
 
 void
@@ -8616,7 +8622,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 	}
 
 	/* apply height changes, so that scrolling works */
-	process_redisplay_track_views ();
+	(void) process_redisplay_track_views ();
 
 	/*
 	   set the controls_layout height now, because waiting for its size

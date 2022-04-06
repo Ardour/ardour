@@ -97,9 +97,6 @@ public:
 
 	void clear();
 
-	bool percussive() const     { return _percussive; }
-	void set_percussive(bool p) { _percussive = p; }
-
 	void start_write();
 	bool writing() const { return _writing; }
 

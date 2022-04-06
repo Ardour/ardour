@@ -2549,9 +2549,11 @@ Playlist::relayer ()
 	}
 
 	DEBUG_TRACE (DEBUG::Layering, "relayer() using:\n");
+#ifndef NDEBUG
 	for (auto const & r : copy) {
 		DEBUG_TRACE (DEBUG::Layering, string_compose ("\t%1 %2\n", r->name (), r->layering_index ()));
 	}
+#endif
 
 	for (auto const & r : copy) {
 		/* find the time divisions that this region covers; if there are no regions on the list,

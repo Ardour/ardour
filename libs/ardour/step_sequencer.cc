@@ -887,7 +887,7 @@ StepSequencer::fill_midi_source (boost::shared_ptr<SMFSource> src) const
 {
 	Temporal::Beats smf_beats;
 
-	Source::Lock lck (src->mutex());
+	Source::WriterLock lck (src->mutex());
 
 	/* first pass: run through the sequence one time to get all events, and
 	 * then sort them. We have no idea what order they are in when we pull

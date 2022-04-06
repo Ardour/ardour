@@ -73,18 +73,10 @@ AutomationStreamView::~AutomationStreamView ()
 
 
 RegionView*
-AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool wait_for_data, bool /*recording*/)
+AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool /*wait_for_data*/, bool /*recording*/)
 {
 	if (!region) {
 		return 0;
-	}
-
-	if (wait_for_data) {
-		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
-		if (mr) {
-			Source::Lock lock(mr->midi_source()->mutex());
-			mr->midi_source()->load_model(lock);
-		}
 	}
 
 	const boost::shared_ptr<AutomationControl> control = boost::dynamic_pointer_cast<AutomationControl> (
@@ -113,8 +105,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 				arv->line()->set_list (list);
 			}
 			(*i)->set_valid (true);
-			(*i)->enable_display (wait_for_data);
-			display_region(arv);
+			display_region (arv);
 
 			return 0;
 		}
@@ -130,11 +121,6 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	region_views.push_front (region_view);
 
 	/* follow global waveform setting */
-
-	if (wait_for_data) {
-		region_view->enable_display(true);
-		// region_view->midi_region()->midi_source(0)->load_model();
-	}
 
 	display_region (region_view);
 
@@ -179,10 +165,12 @@ AutomationStreamView::set_automation_state (AutoState state)
 void
 AutomationStreamView::redisplay_track ()
 {
+	vector<RegionView::DisplaySuspender> vds;
 	// Flag region views as invalid and disable drawing
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
-		(*i)->enable_display(false);
+		vds.push_back (RegionView::DisplaySuspender (**i));
+
 	}
 
 	// Add and display region views, and flag them as valid

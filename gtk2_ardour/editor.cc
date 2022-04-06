@@ -5462,6 +5462,7 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 		 * (This is done to ensure that any pending resizes are processed before any pending redraws, so that widgets are not redrawn twice unnecessarily.)
 		 */
 		resize_idle_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE + 10, _idle_resize, this, NULL);
+		queue_redisplay_track_views ();
 		_pending_resize_amount = 0;
 	}
 
@@ -5617,24 +5618,19 @@ void
 Editor::queue_redisplay_track_views ()
 {
 	if (!_tvl_redisplay_connection.connected ()) {
-		_tvl_redisplay_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &Editor::redisplay_track_views));
+		_tvl_redisplay_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &Editor::redisplay_track_views), Glib::PRIORITY_HIGH_IDLE+10);
 	}
 }
 
-void
+bool
 Editor::process_redisplay_track_views ()
 {
 	if (_tvl_redisplay_connection.connected ()) {
 		_tvl_redisplay_connection.disconnect ();
 		redisplay_track_views ();
 	}
-}
 
-void
-Editor::redisplay_track_views_now ()
-{
-	_tvl_redisplay_connection.disconnect ();
-	redisplay_track_views ();
+	return false;
 }
 
 void
@@ -5966,7 +5962,7 @@ Editor::redisplay_track_views ()
 void
 Editor::handle_gui_changes (string const & what, void*)
 {
-	if (what == "track_height" || what == "visible_tracks") {
+	if (what == "visible_tracks") {
 		queue_redisplay_track_views ();
 	}
 }

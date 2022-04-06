@@ -51,7 +51,7 @@ public:
 	Gdk::Color color () const;
 	std::string state_id() const;
 
-	void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
+	void set_height (uint32_t h, TrackHeightMode m = OnlySelf, bool from_idle = false);
 
 	bool marked_for_display () const;
 	bool set_marked_for_display (bool);

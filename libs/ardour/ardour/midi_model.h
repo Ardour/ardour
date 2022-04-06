@@ -36,6 +36,7 @@
 #include "ardour/automatable_sequence.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/libardour_visibility.h"
+#include "ardour/source.h"
 #include "ardour/types.h"
 #include "ardour/types.h"
 #include "ardour/variant.h"
@@ -59,10 +60,7 @@ class LIBARDOUR_API MidiModel : public AutomatableSequence<Temporal::Beats> {
 public:
 	typedef Temporal::Beats TimeType;
 
-	MidiModel (boost::shared_ptr<MidiSource>);
-
-	NoteMode note_mode() const { return (percussive() ? Percussive : Sustained); }
-	void set_note_mode(NoteMode mode) { set_percussive(mode == Percussive); };
+	MidiModel (MidiSource&);
 
 	class LIBARDOUR_API DiffCommand : public Command {
 	public:
@@ -283,13 +281,13 @@ public:
 	 */
 	void apply_command_as_subcommand (Session& session, Command* cmd);
 
-	bool sync_to_source (const Glib::Threads::Mutex::Lock& source_lock);
+	bool sync_to_source (const Source::WriterLock& source_lock);
 
 	bool write_to(boost::shared_ptr<MidiSource>     source,
-	              const Glib::Threads::Mutex::Lock& source_lock);
+	              const Source::WriterLock& source_lock);
 
 	bool write_section_to(boost::shared_ptr<MidiSource>     source,
-	                      const Glib::Threads::Mutex::Lock& source_lock,
+	                      const Source::WriterLock& source_lock,
 	                      Temporal::Beats                   begin = Temporal::Beats(),
 	                      Temporal::Beats                   end   = std::numeric_limits<Temporal::Beats>::max(),
 	                      bool                              offset_events = false);
@@ -301,9 +299,6 @@ public:
 
 	PBD::Signal0<void> ContentsChanged;
 	PBD::Signal1<void, Temporal::timecnt_t> ContentsShifted;
-
-	boost::shared_ptr<const MidiSource> midi_source ();
-	void set_midi_source (boost::shared_ptr<MidiSource>);
 
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
 	PatchChangePtr find_patch_change (Evoral::event_id_t);
@@ -318,19 +313,26 @@ public:
 	void insert_silence_at_start (TimeType);
 	void transpose (NoteDiffCommand *, const NotePtr, int);
 
-protected:
+  protected:
 	int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);
 
-private:
+  protected:
+	friend class NoteDiffCommand;
+	friend class SysExDiffCommand;
+	friend class PatchChangeDiffCommand;
+
+	MidiSource& midi_source() const { return _midi_source; }
+
+  private:
 	struct WriteLockImpl : public AutomatableSequence<TimeType>::WriteLockImpl {
-		WriteLockImpl(Glib::Threads::Mutex::Lock* slock, Glib::Threads::RWLock& s, Glib::Threads::Mutex& c)
+		WriteLockImpl(Source::WriterLock* slock, Glib::Threads::RWLock& s, Glib::Threads::Mutex& c)
 			: AutomatableSequence<TimeType>::WriteLockImpl(s, c)
 			, source_lock (slock)
 		{}
 		~WriteLockImpl() {
 			delete source_lock;
 		}
-		Glib::Threads::Mutex::Lock* source_lock;
+		Source::WriterLock* source_lock;
 	};
 
 public:
@@ -348,8 +350,7 @@ private:
 
 	PBD::ScopedConnectionList _midi_source_connections;
 
-	// We cannot use a boost::shared_ptr here to avoid a retain cycle
-	boost::weak_ptr<MidiSource> _midi_source;
+	MidiSource& _midi_source;
 	InsertMergePolicy _insert_merge_policy;
 };
 

@@ -21,7 +21,7 @@
 #include "pbd/i18n.h"
 #include "pbd/xml++.h"
 
-#include "temporal/tempo.h"
+#include "temporal/types_convert.h"
 
 #include "ardour/segment_descriptor.h"
 

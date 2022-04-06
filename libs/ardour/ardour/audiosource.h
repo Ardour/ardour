@@ -60,7 +60,7 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 
 	virtual float sample_rate () const = 0;
 
-	virtual void mark_streaming_write_completed (const Lock& lock);
+	virtual void mark_streaming_write_completed (const WriterLock& lock);
 
 	virtual bool can_truncate_peaks() const { return true; }
 

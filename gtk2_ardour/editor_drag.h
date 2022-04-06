@@ -27,6 +27,7 @@
 #define __gtk2_ardour_editor_drag_h_
 
 #include <list>
+#include <vector>
 
 #include <gdk/gdk.h>
 #include <stdint.h>
@@ -41,6 +42,7 @@
 #include "mouse_cursors.h"
 #include "editing.h"
 #include "track_selection.h"
+#include "region_view.h"
 
 namespace ARDOUR {
 	class Location;
@@ -65,7 +67,6 @@ class TimeAxisView;
 class MidiTimeAxisView;
 class Drag;
 class NoteBase;
-class RegionView;
 class TimeAxisView;
 class RouteTimeAxisView;
 class RegionSelection;
@@ -819,6 +820,8 @@ private:
 
 	bool _preserve_fade_anchor;
 	bool _jump_position_when_done;
+
+	std::vector<RegionView::DisplaySuspender> suspenders;
 };
 
 /** Meter marker drag */

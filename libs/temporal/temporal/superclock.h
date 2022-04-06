@@ -57,6 +57,6 @@ LIBTEMPORAL_API void set_superclock_ticks_per_second (superclock_t sc);
 
 }
 
-#define TEMPORAL_SAMPLE_RATE (most_recent_engine_sample_rate)
+#define TEMPORAL_SAMPLE_RATE (Temporal::most_recent_engine_sample_rate)
 
 #endif /* __ardour_superclock_h__ */

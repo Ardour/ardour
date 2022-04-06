@@ -354,9 +354,10 @@ VCATimeAxisView::color () const
 }
 
 void
-VCATimeAxisView::set_height (uint32_t h, TrackHeightMode m)
+VCATimeAxisView::set_height (uint32_t h, TrackHeightMode m, bool from_idle)
 {
-	TimeAxisView::set_height (h, m);
+	TimeAxisView::set_height (h, m, from_idle);
+
 	if (height >= preset_height (HeightNormal)) {
 		drop_button.show ();
 		automation_button.show ();
