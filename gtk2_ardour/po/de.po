@@ -20249,4 +20249,3 @@ msgstr ""
 #: export_video_dialog.cc:705
 msgid "Input Video File"
 msgstr "Quell-Videodatei"
-
