@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-05 09:02+0200\n"
-"PO-Revision-Date: 2022-04-05 10:44+0200\n"
+"POT-Creation-Date: 2022-04-06 01:02+0200\n"
+"PO-Revision-Date: 2022-04-06 10:11+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -1633,15 +1633,16 @@ msgstr "Bei Stopp zum letzten Wiedergabepunkt springen"
 
 #: ardour_ui2.cc:94
 msgid ""
-"When active, new recordings will be added as regions on a layer atop "
+"<b>When active</b>, new recordings will be added as regions on a layer atop "
 "existing regions.\n"
-"When disabled, the underlying region will be spliced and replaced with the "
-"newly recorded region."
+"<b>When disabled</b>, the underlying region will be spliced and replaced "
+"with the newly recorded region."
 msgstr ""
-"Wenn aktiv, werden neue Aufnahmen als Regionen in einer Schicht über "
+"<b>Wenn aktiv</b>, werden neue Aufnahmen als Regionen in einer Schicht über "
 "existierenden Regionen hinzugefügt.\n"
-"Wenn deaktiviert, wird die darunterliegende Region aufgetrennt und durch die "
-"neu aufgenommene Region ersetzt."
+"<b>Wenn deaktiviert</b>, wird die darunterliegende Region aufgetrennt und"
+" durch "
+"die neu aufgenommene Region ersetzt."
 
 #: ardour_ui2.cc:95
 msgid "Playhead follows Range tool clicks, and Range selections"
@@ -1716,19 +1717,21 @@ msgstr "Zeige Fehlermeldungen und bestätige Warnungen"
 
 #: ardour_ui2.cc:104
 msgid ""
-"When enabled, triggering Cues will result in Cue Markers added to the "
+"<b>When enabled</b>, triggering Cues will result in Cue Markers added to the "
 "timeline"
 msgstr ""
-"Wenn aktiviert, wird das Triggern von Cues entsprechende Cuemarker in der"
-" Zeitleiste hinzufügen"
+"<b>Wenn aktiviert</b>, wird das Triggern von Cues entsprechende Cuemarker in"
+" der "
+"Zeitleiste hinzufügen"
 
 #: ardour_ui2.cc:105
 msgid ""
-"When enabled, Cue Markers will trigger the associated Cue when passed on the "
-"timeline"
+"<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed "
+"on the timeline"
 msgstr ""
-"Wenn aktiviert, werden Cue-Marker den assoziierten Cue triggern, wenn sie auf"
-" der Zeitleiste erreicht werden"
+"<b>Wenn aktiviert</b>, werden Cue-Marker den assoziierten Cue triggern, wenn"
+" sie "
+"auf der Zeitleiste erreicht werden"
 
 #: ardour_ui2.cc:107
 msgid ""
@@ -2966,14 +2969,16 @@ msgstr "Konnte Projekt in \"%1\" nicht erzeugen: %2%3%4"
 
 #: ardour_ui_session.cc:717
 msgid ""
-"Could not create session in \"%1\":.\n"
+"Could not create session in \"%1\".\n"
+"\n"
 "Glib Error\n"
 "Domain: %2\n"
 "Code: %3\n"
 "What: %4\n"
 "%5%6"
 msgstr ""
-"Konnte Projekt in \"%1\" nicht erzeugen:.\n"
+"Konnte Projekt in \\"%1\\" nicht erzeugen.\n"
+"\n"
 "Glib Fehler\n"
 "Domain: %2\n"
 "Code: %3\n"
@@ -3514,18 +3519,19 @@ msgstr "Länge in Takten:"
 
 #: audio_trigger_properties_box.cc:154
 msgid ""
-"If enabled, the clip will be stretched to match the current timeline tempo"
+"<b>If enabled</b>, the clip will be stretched to match the current timeline "
+"tempo"
 msgstr ""
-"Wenn aktiviert, wird der Clip gedehnt, um das gegenwärtige Tempo der"
-" Zeitleiste zu erreichen"
+"<b>Wenn aktiviert</b>, wird der Clip gedehnt, um das gegenwärtige Tempo der "
+"Zeitleiste zu erreichen"
 
 #: audio_trigger_properties_box.cc:155
 msgid ""
 "Select Crisp for drum loops, Smooth for sustained notes, or Mixed if the "
 "clip has both"
 msgstr ""
-"Wählen Sie Klar für Schlagzeugloops, Weich für anhaltende Noten, oder"
-" Gemischt, wenn der Clip beides beinhaltet"
+"Wählen Sie Klar für Schlagzeugloops, Weich für anhaltende Noten, oder "
+"Gemischt, wenn der Clip beides beinhaltet"
 
 #: audio_trigger_properties_box.cc:156
 msgid "Length of the clip, in beats. Changing this will change the tempo"
@@ -3536,16 +3542,16 @@ msgid ""
 "Click to halve the tempo for the clip. This will result in it playing faster "
 "when stretched on the timeline"
 msgstr ""
-"Klick, um das Tempo des Clips zu halbieren. Dies führt dazu, dass "
-"der Clip, wenn gedehnt auf der Zeitleiste, schneller abgespielt wird"
+"Klick, um das Tempo des Clips zu halbieren. Dies führt dazu, dass der Clip, "
+"wenn gedehnt auf der Zeitleiste, schneller abgespielt wird"
 
 #: audio_trigger_properties_box.cc:158
 msgid ""
 "Click to double the tempo for the clip. This will result in it playing "
 "slower when stretched on the timeline"
 msgstr ""
-"Klick, um das Tempo des Clips zu verdoppeln. Dies führt dazu, dass "
-"der Clip, wenn gedehnt auf der Zeitleiste, langsamer abgespielt wird"
+"Klick, um das Tempo des Clips zu verdoppeln. Dies führt dazu, dass der Clip, "
+"wenn gedehnt auf der Zeitleiste, langsamer abgespielt wird"
 
 #: automation_controller.cc:315 automation_controller.cc:331
 msgid "Select Note..."
@@ -4152,8 +4158,8 @@ msgstr "Min:Sek"
 msgid "Tempo"
 msgstr "Tempo"
 
-#: editor.cc:341 editor_actions.cc:686
-msgid "Meter"
+#: editor.cc:341
+msgid "Time Signature"
 msgstr "Taktart"
 
 #: editor.cc:342
@@ -4555,8 +4561,7 @@ msgstr "Zeichenmodus (zeichne und editiere Lautstärken/Noten/Automationen)"
 #: editor.cc:3521
 msgid "Stretch Mode (time-stretch audio and midi regions, preserving pitch)"
 msgstr ""
-"Streckmodus (Audio- und MIDI-Regionen zeitdehnen, ohne die Tonhöhe zu "
-"ändern)"
+"Streckmodus (Audio- und MIDI-Regionen zeitdehnen, ohne die Tonhöhe zu ändern)"
 
 #: editor.cc:3522
 msgid "Audition Mode (listen to regions)"
@@ -5171,8 +5176,8 @@ msgid "Edit Current Tempo"
 msgstr "Bearbeite momentanes Tempo"
 
 #: editor_actions.cc:243
-msgid "Edit Current Meter"
-msgstr "Bearbeite Momentanes Metrum"
+msgid "Edit Current Time Signature"
+msgstr "Bearbeite momentane Taktart"
 
 #: editor_actions.cc:250
 msgid "Select All Overlapping Edit Range"
@@ -5674,6 +5679,10 @@ msgstr "Vorige Wahl des Quantisierungsrasters"
 #: editor_actions.cc:680
 msgid "Show Marker Lines"
 msgstr "Markerlinien anzeigen"
+
+#: editor_actions.cc:686
+msgid "Meter"
+msgstr "Taktart"
 
 #: editor_actions.cc:691
 msgid "Loop/Punch"
@@ -7649,16 +7658,24 @@ msgstr ""
 "Position des Regionen-Synchronisationspunktes, relativ zu Regionenanfang"
 
 #: editor_regions.cc:104
-msgid "Length of region fade-in (units: secondary clock, () if disabled"
-msgstr "Länge desEinblendens der Region (Einheit: Zweituhr, () wenn inaktiv)"
+msgid ""
+"Length of region fade-in (unit: secondary clock, enclosed in parenthesis if "
+"the fade is disabled)"
+msgstr ""
+"Länge des Einblendens der Region (Einheit: Zweituhr, in Klammern"
+" eingeschlossen, wenn inaktiv)"
 
 #: editor_regions.cc:106
 msgid "Fade out"
 msgstr "Ausfaden"
 
 #: editor_regions.cc:106
-msgid "Length of region fade-out (units: secondary clock, () if disabled"
-msgstr "Länge des Ausblendens der Region (Einheit: Zweituhr, () wenn inaktiv)"
+msgid ""
+"Length of region fade-out (unit: secondary clock, enclosed in parenthesis if "
+"the fade is disabled)"
+msgstr ""
+"Länge des Ausblendens der Region (Einheit: Zweituhr, in Klammern"
+" eingeschlossen, wenn inaktiv)"
 
 #: editor_regions.cc:276
 msgid ""
@@ -7745,8 +7762,8 @@ msgid "New Tempo"
 msgstr "Tempowechsel einfügen"
 
 #: editor_rulers.cc:261 tempo_dialog.cc:490
-msgid "New Meter"
-msgstr "Taktwechsel einfügen"
+msgid "New Time Signature"
+msgstr "Neue Taktart"
 
 #: editor_snapshots.cc:56
 msgid "Snapshot (click to load)"
@@ -7865,8 +7882,8 @@ msgid "done"
 msgstr "Fertig"
 
 #: editor_tempodisplay.cc:706
-msgid "replace meter mark"
-msgstr "ersetze Metrum-Marker"
+msgid "replace time signature mark"
+msgstr "ersetze Taktart-Marker"
 
 #: editor_tempodisplay.cc:743
 msgid "replace tempo mark"
@@ -7893,8 +7910,7 @@ msgstr "pitch-shift"
 #: editor_timefx.cc:329
 msgid "timefx cannot be started - thread creation error"
 msgstr ""
-"Zeitdehnung konnte nicht gestartet werden - Fehler beim erstellen des "
-"Threads"
+"Zeitdehnung konnte nicht gestartet werden - Fehler beim erstellen des Threads"
 
 #: engine_dialog.cc:97
 msgid "Device Control Panel"
@@ -10204,7 +10220,7 @@ msgid "Edit Tempo"
 msgstr "Tempo bearbeiten"
 
 #: main_clock.cc:95 tempo_dialog.cc:499
-msgid "Edit Meter"
+msgid "Edit Time Signature"
 msgstr "Taktart bearbeiten"
 
 #: main_clock.cc:96
@@ -10212,8 +10228,8 @@ msgid "Insert Tempo Change"
 msgstr "Tempowechsel einfügen"
 
 #: main_clock.cc:97
-msgid "Insert Meter Change"
-msgstr "Taktartwechsel einfügen"
+msgid "Insert Time Signature Change"
+msgstr "Taktwechsel einfügen"
 
 #: marker.cc:297 tempo_curve.cc:84 tempo_curve.cc:85
 msgid "MarkerText"
@@ -10650,10 +10666,10 @@ msgid ""
 "automation lanes which is not generally useful. This will take some time and "
 "also slow down the GUI significantly."
 msgstr ""
-"Es gibt 128 Control-Change Parameter mal 16 MIDI Kanäle, und das ohne weitere "
-"MIDI-Nachrichten. Diese alle anzuzeigen wird über 2000 Automationsspuren "
-"hinzufügen, was im Allgemeinen nicht sinnvoll ist. Das wird eine Weile dauern "
-"und auch die GUI verlangsamen."
+"Es gibt 128 Control-Change Parameter mal 16 MIDI Kanäle, und das ohne "
+"weitere MIDI-Nachrichten. Diese alle anzuzeigen wird über 2000 "
+"Automationsspuren hinzufügen, was im Allgemeinen nicht sinnvoll ist. Das "
+"wird eine Weile dauern und auch die GUI verlangsamen."
 
 #: midi_tracer.cc:54
 msgid "Line history: "
@@ -10849,9 +10865,8 @@ msgid ""
 "It is recommended that you install missing, re-scan updated plugins, and re-"
 "load the session.\n"
 msgstr ""
-"Es wird empfohle, fehlende Plugins zu installieren, neuerlich zu scannen,,"
-" und "
-"das Projekt neu zu laden.\n"
+"Es wird empfohle, fehlende Plugins zu installieren, neuerlich zu scannen,, "
+"und das Projekt neu zu laden.\n"
 
 #: missing_plugin_dialog.cc:55
 msgid "Third party plugins have not yet been indexed."
@@ -14845,13 +14860,13 @@ msgstr "Erfordere Namenseingabe bei neuen Markern"
 
 #: rc_option_editor.cc:3455
 msgid ""
-"If enabled, popup a dialog when a new marker is created to allow its name to "
-"be set as it is created.\n"
+"<b>When enabled</b>, popup a dialog when a new marker is created to allow "
+"its name to be set as it is created.\n"
 "\n"
 "You can always rename markers by right-clicking on them."
 msgstr ""
-"wenn aktiviert, wird be Erzeugen eines neuen Markers ein Dialog zm Ändern "
-"des Namens angezeigt.\n"
+"<b>wenn aktiviert</b>, wird beim Erzeugen eines neuen Markers ein Dialog zum "
+"Ändern des Namens angezeigt.\n"
 "\n"
 "Marker können jederzeit via Rechtsklick umbenannt werden."
 
@@ -15299,11 +15314,12 @@ msgstr "Nur ein Pluginfenster gleichzeitig anzeigen"
 
 #: rc_option_editor.cc:3816
 msgid ""
-"<b>When enabled</b> at most one plugin GUI window be on-screen at a time. "
-"When disabled, the number of visible plugin GUI windows is unlimited"
+"<b>When enabled</b> at most one plugin GUI window can be on-screen at a "
+"time. <b>When disabled</b>, the number of visible plugin GUI windows is "
+"unlimited"
 msgstr ""
-"<b>Wenn aktiviert</b>, kann höchstens ein Plugin-GUI Fenster gleichzeitig am "
-"Bildschirm sichtbar sein. <b>Wenn deaktiviert</b>, ist die Zahl der "
+"<b>Wenn aktiviert</b>, kann höchstens ein Plugin-GUI Fenster gleichzeitig "
+"am Bildschirm sichtbar sein. <b>Wenn deaktiviert</b>, ist die Zahl der "
 "sichtbaren Plugin GUI Fenster unbeschränkt"
 
 #: rc_option_editor.cc:3819 rc_option_editor.cc:3821 rc_option_editor.cc:3833
@@ -15999,21 +16015,21 @@ msgstr "Triggern"
 
 #: rc_option_editor.cc:4696
 msgid ""
-"If set, the identifies the input MIDI port that will be automatically "
+"If set, this identifies the input MIDI port that will be automatically "
 "connected to trigger boxes.\n"
 "\n"
-"It is intended to be either an NxN pad device such as the Ableton Push 2 or "
-"Novation Launchpad\n"
+"It is intended to be connected to a NxN pad device (such as the Ableton Push "
+"2 or Novation Launchpad)\n"
 "or a regular MIDI device capable of sending sequential note numbers (like a "
 "typical keyboard)"
 msgstr ""
 "Wenn gesetzt, bezeichnet dies den MIDI Eingangsport, der automatisch mit "
 "Triggerboxen verbunden wird.\n"
 "\n"
-"Das ist entweder für ein NxN Pad-Gerät wie das Ableton Push 2 oder Novation "
-"Launchpad\n"
-"oder für ein reguläres MIDI-Gerät, das sequentielle Notennummern senden kann "
-"(z.B. eine typische Tastatur) vorgesehen"
+"Das ist für den Anschluss eines NxN Pad-Geräts wie das Ableton Push 2 oder "
+"Novation Launchpad\n"
+"oder eines regulären MIDI-Geräts, das sequentielle Notennummern senden "
+"kann (wie eine typische Klaviatur) vorgesehen"
 
 #: rc_option_editor.cc:4701
 msgid "Clip Library"
@@ -18939,7 +18955,7 @@ msgstr "Unverständlicher Puls-Notentyp (%1)"
 msgid "incomprehensible tempo type (%1)"
 msgstr "unverständlicher Tempotyp (%1)"
 
-#: tempo_dialog.cc:392
+#: tempo_dialog.cc:392 tempo_dialog.cc:719
 msgid "incomprehensible lock style (%1)"
 msgstr "unverständlicher Sperrstil (%1)"
 
@@ -18956,16 +18972,12 @@ msgid "Beats per bar:"
 msgstr "Schläge pro Takt:"
 
 #: tempo_dialog.cc:582
-msgid "Meter begins at bar:"
+msgid "Time Signature begins at bar:"
 msgstr "Taktart beginnt bei Takt:"
 
 #: tempo_dialog.cc:706
-msgid "incomprehensible meter note type (%1)"
-msgstr "Unverständlicher Metrum-Notentyp (%1)"
-
-#: tempo_dialog.cc:719
-msgid "incomprehensible meter lock style (%1)"
-msgstr "unverständlicher Sperrstil für Metrum (%1)"
+msgid "incomprehensible time signature denominator (%1)"
+msgstr "Unverständlicher Taktart-Nenner (%1)"
 
 #: time_axis_view.cc:159
 msgid "Track/Bus name (double click to edit)"
