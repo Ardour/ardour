@@ -5617,7 +5617,7 @@ void
 Editor::queue_redisplay_track_views ()
 {
 	if (!_tvl_redisplay_connection.connected ()) {
-		_tvl_redisplay_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &Editor::redisplay_track_views));
+		_tvl_redisplay_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &Editor::redisplay_track_views), Glib::PRIORITY_HIGH_IDLE+10);
 	}
 }
 
