@@ -1314,8 +1314,18 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 			}
 
 			if (snapshot_type != NormalSave && fs->within_session ()) {
-#warning CONSTIFICATION maybe fix this
-				const_cast<Session*>(this)->maybe_copy_midifiles (snapshot_type, siter->second, child);
+				/* this copying of MIDI files should not really be occuring within a const scope like
+				   ::state(). However the copying is too intertwined with getting the current state of
+				   the Source, and so we can't move it to before ::state() is called. If we are not
+				   switching to a new snapshot (but are making a snapshot), we want the state from
+				   before the copy. If we are switching to a new snapshot, we want the state from after
+				   the copy. This makes it almost impossible to tease this apart. So for now (April
+				   2022) we use const_cast.
+				*/
+
+				if (const_cast<Session*>(this)->maybe_copy_midifile (snapshot_type, siter->second, child)) {
+					continue; /* state already added to child */
+				}
 			}
 
 			child->add_child_nocopy (siter->second->get_state());
@@ -1475,8 +1485,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 	return *node;
 }
 
-void
-Session::maybe_copy_midifiles (snapshot_t snapshot_type, boost::shared_ptr<Source> src, XMLNode* child)
+bool
+Session::maybe_copy_midifile (snapshot_t snapshot_type, boost::shared_ptr<Source> src, XMLNode* child)
 {
 	/* copy MIDI sources to new file
 	 *
@@ -1495,7 +1505,7 @@ Session::maybe_copy_midifiles (snapshot_t snapshot_type, boost::shared_ptr<Sourc
 	boost::shared_ptr<SMFSource> ms;
 
 	if ((ms = boost::dynamic_pointer_cast<SMFSource> (src)) == 0) {
-		return;
+		return false; /* No, it was not a MIDI source */
 	}
 
 	const std::string ancestor_name = ms->ancestor_name();
@@ -1547,8 +1557,9 @@ Session::maybe_copy_midifiles (snapshot_t snapshot_type, boost::shared_ptr<Sourc
 			child->add_child_nocopy (ms->get_state());
 		}
 	}
-}
 
+	return true; /* Yes, it was a MIDI file */
+}
 
 XMLNode&
 Session::get_control_protocol_state () const

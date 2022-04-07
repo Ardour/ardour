@@ -2103,7 +2103,7 @@ private:
 	int      set_state (const XMLNode& node, int version); // not idempotent
 	XMLNode& get_template ();
 
-	void maybe_copy_midifiles (snapshot_t, boost::shared_ptr<Source> src, XMLNode*);
+	bool maybe_copy_midifile (snapshot_t, boost::shared_ptr<Source> src, XMLNode*);
 
 	/* click track */
 	typedef std::list<Click*>     Clicks;
