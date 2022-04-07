@@ -2529,8 +2529,8 @@ XMLNode&
 Route::state (bool save_template) const
 {
 	if (!_session._template_state_dir.empty()) {
-#warning CONSTIFICATION fix this
-		// const_cast<Route*>(this)->foreach_processor (sigc::bind (sigc::mem_fun (*this, &Route::set_plugin_state_dir), _session._template_state_dir));
+		Route* ncthis = const_cast<Route*> (this);
+		foreach_processor (sigc::bind (sigc::mem_fun (*ncthis, &Route::set_plugin_state_dir), _session._template_state_dir));
 	}
 
 	XMLNode *node = new XMLNode("Route");
