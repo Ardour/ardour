@@ -18,7 +18,7 @@ function dsp_configure (ins, outs)
 	n_out = outs
 end
 
--- "dsp_runmap" uses Ardour's internal processor API, eqivalent to
+-- "dsp_runmap" uses Ardour's internal processor API, equivalent to
 -- 'connect_and_run()". There is no overhead (mapping, translating buffers).
 -- The lua implementation is responsible to map all the buffers directly.
 function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
@@ -76,7 +76,7 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	end
 	-- Clear unconnected output buffers.
 	-- In case we're processing in-place some buffers may be identical,
-	-- so this must be done *after* copying relvant data from that port.
+	-- so this must be done *after* copying relevant data from that port.
 	for c = 1, audio_outs do
 		local ib = in_map:get (ARDOUR.DataType ("audio"), c - 1)
 		local ob = out_map:get (ARDOUR.DataType ("audio"), c - 1)

@@ -50,7 +50,7 @@ function factory () return function ()
 
 	-- all done, commit the combined Undo Operation
 	if add_undo then
-		-- the 'nil' Commend here mean to use the collected diffs added above
+		-- the 'nil' Command here means to use the collected diffs added above
 		Session:commit_reversible_command (nil)
 	else
 		Session:abort_reversible_command ()

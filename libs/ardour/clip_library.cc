@@ -91,7 +91,7 @@ ARDOUR::clip_library_dir (bool create_if_missing)
 		XMLTree tree;
 		tree.set_root (root);
 		if (!tree.write (Glib::build_filename (p, ".daw-meta.xml"))) {
-			error << string_compose (_("Could not save Clip Libary meta-data in '%1'"), p) << endmsg;
+			error << string_compose (_("Could not save Clip Library meta-data in '%1'"), p) << endmsg;
 		}
 
 	} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {

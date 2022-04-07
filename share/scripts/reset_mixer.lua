@@ -196,7 +196,7 @@ function factory() return function()
 		if pref["sends"] then 
 			reset_send_controls(route, disp, auto)
 
-			-- Can't use reset() on this becuase ctrl:desc().normal 
+			-- Can't use reset() on this because ctrl:desc().normal 
 			-- for master_send_enable_controllable is 0, and we really 
 			-- want 1.
 			local msec = route:master_send_enable_controllable()

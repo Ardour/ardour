@@ -635,7 +635,7 @@ TempoMap::set_tempo_and_meter (Tempo const & tempo, Meter const & meter, supercl
 	}
 
 	if (e->metric().ramped()) {
-		/* need to adjust ramp constants for preceding explict point, since the new point will be positioned right after it
+		/* need to adjust ramp constants for preceding explicit point, since the new point will be positioned right after it
 		   and thus defines the new ramp distance.
 		*/
 		e->compute_c_superclock (_sample_rate, tempo.superclocks_per_quarter_note (), sc);
@@ -726,7 +726,7 @@ TempoMap::set_tempo (Tempo const & t, superclock_t sc, bool ramp)
 	}
 
 	if (e->metric().ramped()) {
-		/* need to adjust ramp constants for preceding explict point, since the new point will be positioned right after it
+		/* need to adjust ramp constants for preceding explicit point, since the new point will be positioned right after it
 		   and thus defines the new ramp distance.
 		*/
 		e->compute_c_superclock (_sample_rate, t.superclocks_per_quarter_note (), sc);

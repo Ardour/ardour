@@ -3,7 +3,7 @@
 # script for pulling together a Linux app bundle.
 #
 # This will create a bundle for a single architecture.
-# Execute this scirpt on both x86 and x86_64 and then use
+# Execute this script on both x86 and x86_64 and then use
 # package to merge the 2 bundles into a final package with the
 # installer. See "noderun" for a complete build script.
 
@@ -376,11 +376,11 @@ for x in $BUILD_ROOT/../share/scripts/*.lua ; do
     cp "$x" $LuaScripts
 done
 
-# recusively copy web-surface html/js
+# recursively copy web-surface html/js
 cp -a $BUILD_ROOT/../share/web_surfaces $WebSurfaces
 rm $WebSurfaces/wscript
 
-# recusively copy clips/media
+# recursively copy clips/media
 cp -a $BUILD_ROOT/../share/media $MediaClips
 rm $MediaClips/wscript
 
@@ -547,7 +547,7 @@ while [ true ] ; do
 		for dep in $deps ; do
 			if test "not" = ${dep}; then
 				echo ""
-				echo "!!! ERROR !!! - Missing dependant library for $file."
+				echo "!!! ERROR !!! - Missing dependent library for $file."
 				echo "Searched: " $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 				echo ""
 				(LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file)
@@ -562,7 +562,7 @@ while [ true ] ; do
 			if echo $dep | grep -qs "^/lib/" ; then continue; fi
 			if echo $dep | grep -qs "^/usr/lib/" ; then continue; fi
 			if echo $dep | grep -qs "^/usr/local/lib/" ; then continue; fi
-			## the following re likley redudant ##
+			## the following are likely redundant ##
 			# skip jack, ALSA & pulse
 			if echo $dep | grep -qs libjack ; then continue; fi
 			if echo $dep | grep -qs libasound ; then continue; fi
@@ -585,10 +585,10 @@ while [ true ] ; do
 			if ! test -f $Libraries/$base; then
 				parent=$(basename ${file})
 				if echo $dep | grep -sq '^libs' ; then
-					echo "Copying dependant lib $BUILD_ROOT/$dep    (required by ${parent})"
+					echo "Copying dependent lib $BUILD_ROOT/$dep    (required by ${parent})"
 					cp $BUILD_ROOT/$dep $Libraries
 				else
-					echo "Copying dependant lib $dep    (required by ${parent})"
+					echo "Copying dependent lib $dep    (required by ${parent})"
 					cp $dep $Libraries
 				fi
 				chmod 755 $Libraries/`basename $dep`

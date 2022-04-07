@@ -28,7 +28,7 @@ done
 exec 1>&2
 
 #-------------------------------------------------------------------------------
-# Check the copyright notice of all files to be commited.
+# Check the copyright notice of all files to be committed.
 
 user=`git config --global user.email`
 year=`date +"%Y"`

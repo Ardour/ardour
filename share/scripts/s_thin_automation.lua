@@ -27,7 +27,7 @@ function factory () return function ()
 		local before = al:get_state ()
 
 		-- remove dense events
-		al:thin (50) -- threashold of area below curve
+		al:thin (50) -- threshold of area below curve
 
 		-- save undo
 		local after = al:get_state ()
@@ -39,7 +39,7 @@ function factory () return function ()
 
 	-- all done, commit the combined Undo Operation
 	if add_undo then
-		-- the 'nil' Commend here mean to use the collected diffs added above
+		-- the 'nil' Command here means to use the collected diffs added above
 		Session:commit_reversible_command (nil)
 	else
 		Session:abort_reversible_command ()

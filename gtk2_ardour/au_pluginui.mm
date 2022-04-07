@@ -364,7 +364,7 @@ static void interposed_drawIfNeeded (id receiver, SEL selector, NSRect rect)
 
 - (void)auViewResized:(NSNotification *)notification
 {
-	(void) notification; // stop complaints about unusued argument
+	(void) notification; // stop complaints about unused argument
 	plugin_ui->cocoa_view_resized();
 }
 

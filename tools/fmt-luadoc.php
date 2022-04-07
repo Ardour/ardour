@@ -193,7 +193,7 @@ function canonical_ctor ($b) {
 function canonical_decl ($b) {
 	$rv = '';
 	$pfx = '';
-	# match clang's declatation format
+	# match clang's declaration format
 	if (preg_match('/[^(]*\(([^)*]*)\*\)\((.*)\)/', $b['decl'], $matches)) {
 		if (strpos ($b['type'], 'Free Function') !== false) {
 			$pfx = str_replace (':', '::', luafn2class ($b['lua'])) . '::';
@@ -473,7 +473,7 @@ foreach ($classlist as $ns => $cl) {
 # step 4c: merge free functions into classlist
 foreach ($funclist as $ns => $fl) {
 	if (isset ($classlist[$ns])) {
-		my_die ('Free Funcion in existing namespace: '.$ns.' '. print_r ($ns, true));
+		my_die ('Free Function in existing namespace: '.$ns.' '. print_r ($ns, true));
 	}
 	$classlist[$ns]['func'] = $fl;
 	$classlist[$ns]['free'] = true;
@@ -509,7 +509,7 @@ foreach (json_decode ($json, true) as $a) {
 $dox_found = 0;
 $dox_miss = 0;
 
-# retrive a value from $api
+# retrieve a value from $api
 function doxydoc ($canonical_declaration) {
 	global $api;
 	global $dox_found;
@@ -563,7 +563,7 @@ function varname ($a) {
 	return array_keys ($a)[0];
 }
 
-# recusively collect class parents (derived classes)
+# recursively collect class parents (derived classes)
 function traverse_parent ($ns, &$inherited) {
 	global $classlist;
 	$rv = '';
@@ -657,7 +657,7 @@ function name_sort_cb ($a, $b) {
 # main output function for every class
 function format_class_members ($ns, $cl, &$dups) {
 	$rv = '';
-	# print contructor - if any
+	# print constructor - if any
 	if (isset ($cl['ctor'])) {
 		usort ($cl['ctor'], 'name_sort_cb');
 		$rv.= ' <tr><th colspan="3">Constructor</th></tr>'.NL;

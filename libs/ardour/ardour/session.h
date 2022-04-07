@@ -1115,7 +1115,7 @@ public:
 	}
 
 	/**
-	 * Abort reversible commend IFF no undo changes
+	 * Abort reversible command IFF no undo changes
 	 * have been collected.
 	 * @return true if undo operation was aborted.
 	 */

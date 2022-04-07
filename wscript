@@ -543,7 +543,7 @@ int main() { return 0; }''',
         #
         # ARCH_X86 means anything in the x86 family from i386 to x86_64
         # the compile-time presence of the macro _LP64 is used to
-        # distingush 32 and 64 bit assembler
+        # distinguish 32 and 64 bit assembler
         #
 
 

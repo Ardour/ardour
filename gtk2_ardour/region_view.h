@@ -196,8 +196,8 @@ protected:
 
 	boost::shared_ptr<ARDOUR::Region> _region;
 
-	ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position
-	ArdourCanvas::Line* sync_line; ///< polgyon for sync position
+	ArdourCanvas::Polygon* sync_mark; ///< polygon for sync position
+	ArdourCanvas::Line* sync_line; ///< polygon for sync position
 
 	RegionEditor* editor;
 

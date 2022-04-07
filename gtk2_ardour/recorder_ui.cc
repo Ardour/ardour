@@ -692,7 +692,7 @@ RecorderUI::update_meters ()
 {
 	PortManager::AudioInputPorts const aip (AudioEngine::instance ()->audio_input_ports ());
 
-	/* scope data needs to be read contiously */
+	/* scope data needs to be read continuously */
 	for (PortManager::AudioInputPorts::const_iterator i = aip.begin (); i != aip.end (); ++i) {
 		InputPortMap::iterator im = _input_ports.find (i->first);
 		if (im != _input_ports.end()) {

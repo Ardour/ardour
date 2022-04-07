@@ -32,7 +32,7 @@ def include_config_h(self):
     self.env.append_value('INCPATHS', self.bld.bldnode.abspath())
 
 def set_options(opt, debug_by_default=False):
-    "Add standard autowaf options if they havn't been added yet"
+    "Add standard autowaf options if they haven't been added yet"
     global g_step
     if g_step > 0:
         return

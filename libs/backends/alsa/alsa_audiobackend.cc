@@ -2455,7 +2455,7 @@ AlsaDeviceReservation::acquire_device (const char* device_name)
 		return false;
 	}
 
-	/* wait to check if reservation suceeded. */
+	/* wait to check if reservation succeeded. */
 	int timeout = 500; // 5 sec
 	while (_device_reservation && !_reservation_succeeded && --timeout > 0) {
 		Glib::usleep (10000);
