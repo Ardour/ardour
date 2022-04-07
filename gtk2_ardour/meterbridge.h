@@ -133,7 +133,6 @@ private:
 	mutable int m_root_x, m_root_y, m_width, m_height;
 
 	void set_window_pos_and_size ();
-	void get_window_pos_and_size () const;
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
@@ -153,6 +152,8 @@ private:
 
 	int _mm_left, _mm_right;
 	ARDOUR::MeterType _mt_left, _mt_right;
+
+	bool on_configure_event (GdkEventConfigure* conf);
 };
 
 #endif
