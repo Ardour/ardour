@@ -1186,7 +1186,7 @@ AutomationLine::track_exited()
 }
 
 XMLNode &
-AutomationLine::get_state (void)
+AutomationLine::get_state () const
 {
 	/* function as a proxy for the model */
 	return alist->get_state();

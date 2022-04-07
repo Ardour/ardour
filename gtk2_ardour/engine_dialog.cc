@@ -2021,7 +2021,7 @@ EngineControl::maybe_display_saved_state ()
 }
 
 XMLNode&
-EngineControl::get_state ()
+EngineControl::get_state () const
 {
 	LocaleGuard lg;
 

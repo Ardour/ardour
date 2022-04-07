@@ -218,7 +218,7 @@ TriggerPage::use_own_window (bool and_fill_it)
 }
 
 XMLNode&
-TriggerPage::get_state ()
+TriggerPage::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("TriggerPage"));
 	node->add_child_nocopy (Tabbable::get_state ());

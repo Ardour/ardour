@@ -512,7 +512,7 @@ UIConfiguration::save_state()
 }
 
 XMLNode&
-UIConfiguration::get_state ()
+UIConfiguration::get_state () const
 {
 	XMLNode* root;
 
@@ -529,7 +529,7 @@ UIConfiguration::get_state ()
 }
 
 XMLNode&
-UIConfiguration::get_variables (std::string which_node)
+UIConfiguration::get_variables (std::string which_node) const
 {
 	XMLNode* node;
 

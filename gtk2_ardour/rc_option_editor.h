@@ -44,7 +44,7 @@ public:
 	void set_session (ARDOUR::Session*);
 
 	Gtk::Window* use_own_window (bool and_fill_it);
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
 	bool on_key_release_event (GdkEventKey*);
 

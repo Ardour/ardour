@@ -224,7 +224,7 @@ VideoTimeLine::set_state (const XMLNode& node, int /*version*/)
 }
 
 XMLNode&
-VideoTimeLine::get_state ()
+VideoTimeLine::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Videotimeline"));
 	node->set_property (X_("VideoOffset"), video_offset_p);

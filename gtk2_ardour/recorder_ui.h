@@ -65,7 +65,7 @@ public:
 	void set_session (ARDOUR::Session*);
 	void cleanup ();
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int /* version */);
 
 	Gtk::Window* use_own_window (bool and_fill_it);

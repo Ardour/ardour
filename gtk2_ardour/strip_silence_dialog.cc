@@ -361,7 +361,7 @@ StripSilenceDialog::update_progress_gui (float p)
 }
 
 XMLNode&
-StripSilenceDialog::get_state ()
+StripSilenceDialog::get_state () const
 {
 	XMLNode* node = new XMLNode(X_("StripSilence"));
 	node->set_property(X_("threshold"), threshold());

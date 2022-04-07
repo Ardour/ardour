@@ -229,7 +229,7 @@ ArdourKeyboard::setup_keybindings ()
 }
 
 XMLNode&
-ArdourKeyboard::get_state (void)
+ArdourKeyboard::get_state () const
 {
 	XMLNode* node = &Keyboard::get_state ();
 

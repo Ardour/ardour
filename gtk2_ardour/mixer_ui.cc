@@ -2564,7 +2564,7 @@ Mixer_UI::save_plugin_order_file ()
 }
 
 XMLNode&
-Mixer_UI::get_state ()
+Mixer_UI::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Mixer"));
 

@@ -103,7 +103,7 @@ public:
 	void  set_strip_width (Width, bool save = false);
 	Width get_strip_width () const { return _strip_width; }
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int /* version */);
 
 	void save_plugin_order_file ();

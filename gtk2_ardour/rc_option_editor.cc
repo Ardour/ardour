@@ -4874,7 +4874,7 @@ RCOptionEditor::use_own_window (bool and_fill_it)
 }
 
 XMLNode&
-RCOptionEditor::get_state ()
+RCOptionEditor::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Preferences"));
 	node->add_child_nocopy (Tabbable::get_state());

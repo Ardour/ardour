@@ -2037,7 +2037,7 @@ LuaCallback::~LuaCallback ()
 }
 
 XMLNode&
-LuaCallback::get_state (void)
+LuaCallback::get_state () const
 {
 	std::string saved;
 	{

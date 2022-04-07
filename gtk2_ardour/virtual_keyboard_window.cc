@@ -260,7 +260,7 @@ VirtualKeyboardWindow::parameter_changed (std::string const& p)
 }
 
 XMLNode&
-VirtualKeyboardWindow::get_state ()
+VirtualKeyboardWindow::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("VirtualKeyboard"));
 	node->set_property (X_("Channel"), _midi_channel.get_text ());

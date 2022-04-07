@@ -57,7 +57,7 @@ public:
 		Gtk::Dialog::on_response (response_id);
 	}
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	void set_state (const XMLNode &);
 
 private:

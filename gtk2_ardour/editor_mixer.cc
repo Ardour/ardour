@@ -260,7 +260,7 @@ Editor::current_mixer_strip_hidden ()
 }
 
 void
-Editor::maybe_add_mixer_strip_width (XMLNode& node)
+Editor::maybe_add_mixer_strip_width (XMLNode& node) const
 {
 	if (current_mixer_strip) {
 		node.set_property ("mixer-width", editor_mixer_strip_width);

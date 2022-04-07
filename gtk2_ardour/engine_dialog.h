@@ -51,7 +51,7 @@ public:
 
 	static bool need_setup ();
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	bool set_state (const XMLNode&);
 
 	void set_desired_sample_rate (uint32_t);

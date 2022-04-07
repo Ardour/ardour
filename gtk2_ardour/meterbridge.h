@@ -49,7 +49,7 @@ public:
 
 	void set_session (ARDOUR::Session *);
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode& );
 
 	void show_window ();
@@ -130,10 +130,10 @@ private:
 	void update_title ();
 
 	// for restoring window geometry.
-	int m_root_x, m_root_y, m_width, m_height;
+	mutable int m_root_x, m_root_y, m_width, m_height;
 
 	void set_window_pos_and_size ();
-	void get_window_pos_and_size ();
+	void get_window_pos_and_size () const;
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);

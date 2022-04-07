@@ -89,7 +89,7 @@ public:
 
 	void set_session (ARDOUR::Session*);
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	void     set_state (const XMLNode&);
 
 protected:

@@ -4588,7 +4588,7 @@ ProcessorWindowProxy::session_handle()
 }
 
 XMLNode&
-ProcessorWindowProxy::get_state ()
+ProcessorWindowProxy::get_state () const
 {
 	XMLNode *node;
 	node = &ProxyBase::get_state();

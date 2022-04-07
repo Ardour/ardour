@@ -364,7 +364,7 @@ RecorderUI::tabbed_changed (bool tabbed)
 }
 
 XMLNode&
-RecorderUI::get_state ()
+RecorderUI::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Recorder"));
 	node->add_child_nocopy (Tabbable::get_state ());

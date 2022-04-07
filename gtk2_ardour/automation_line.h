@@ -142,7 +142,7 @@ public:
 	bool is_last_point (ControlPoint &);
 	bool is_first_point (ControlPoint &);
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 	void set_colors();
 

@@ -32,7 +32,7 @@ SelectionMemento::~SelectionMemento ()
 }
 
 XMLNode&
-SelectionMemento::get_state () {
+SelectionMemento::get_state () const {
 
 	XMLNode* node = new XMLNode ("SelectionMemento");
 	PublicEditor& editor = PublicEditor::instance();

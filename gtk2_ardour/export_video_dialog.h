@@ -55,7 +55,7 @@ public:
 
 	void apply_state (TimeSelection& tme, bool range);
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	void     set_state (const XMLNode&);
 
 private:

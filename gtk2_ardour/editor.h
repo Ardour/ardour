@@ -207,7 +207,7 @@ public:
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	void set_mouse_mode (Editing::MouseMode, bool force = false);
@@ -358,7 +358,7 @@ public:
 	void get_onscreen_tracks (TrackViewList&);
 
 	Width editor_mixer_strip_width;
-	void maybe_add_mixer_strip_width (XMLNode&);
+	void maybe_add_mixer_strip_width (XMLNode&) const;
 	void show_editor_mixer (bool yn);
 	void create_editor_mixer ();
 	void show_editor_list (bool yn);

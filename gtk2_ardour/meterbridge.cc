@@ -245,8 +245,9 @@ Meterbridge::set_window_pos_and_size ()
 }
 
 void
-Meterbridge::get_window_pos_and_size ()
+Meterbridge::get_window_pos_and_size () const
 {
+#warning CONSTIFICATION this really needs to work some other way, since this supposed to be const
 	get_position(m_root_x, m_root_y);
 	get_size(m_width, m_height);
 }
@@ -491,7 +492,7 @@ Meterbridge::set_state (const XMLNode& node)
 }
 
 XMLNode&
-Meterbridge::get_state (void)
+Meterbridge::get_state () const
 {
 	XMLNode* node = new XMLNode ("Meterbridge");
 

@@ -103,7 +103,7 @@ public:
 	void set_custom_ui_mode(bool use_custom) { want_custom = use_custom; }
 
 	int set_state (const XMLNode&, int);
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
 private:
 	ProcessorBox* _processor_box;

@@ -282,7 +282,7 @@ ExportVideoDialog::apply_state (TimeSelection& tme, bool range)
 }
 
 XMLNode&
-ExportVideoDialog::get_state ()
+ExportVideoDialog::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Videoexport"));
 	node->set_property (X_("NormalizeAudio"), normalize_checkbox.get_active ());

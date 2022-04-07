@@ -62,8 +62,8 @@ public:
 	int load_color_theme (bool allow_own);
 
 	int set_state (const XMLNode&, int version);
-	XMLNode& get_state (void);
-	XMLNode& get_variables (std::string);
+	XMLNode& get_state () const;
+	XMLNode& get_variables (std::string) const;
 	void set_variables (const XMLNode&);
 
 	std::string  color_file_name (bool use_my, bool with_version) const;
@@ -133,7 +133,7 @@ private:
 #include "canvas_vars.h"
 #undef CANVAS_FONT_VARIABLE
 
-	XMLNode& state ();
+	XMLNode& state () const;
 	bool _dirty;
 	bool aliases_modified;
 	bool colors_modified;

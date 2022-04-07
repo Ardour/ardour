@@ -49,7 +49,7 @@ public:
 	LuaCallback (ARDOUR::Session*, XMLNode & node);
 	~LuaCallback ();
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	void set_session (ARDOUR::Session *);
 
 	const PBD::ID& id () const { return _id; }

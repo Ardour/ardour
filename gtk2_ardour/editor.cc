@@ -2634,7 +2634,7 @@ Editor::set_state (const XMLNode& node, int version)
 }
 
 XMLNode&
-Editor::get_state ()
+Editor::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Editor"));
 

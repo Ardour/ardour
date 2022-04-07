@@ -38,7 +38,7 @@ class ArdourKeyboard : public Gtkmm2ext::Keyboard
 public:
 	ArdourKeyboard(ARDOUR_UI&);
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	void setup_keybindings ();
