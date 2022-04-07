@@ -96,7 +96,7 @@ static int read_int(char* filename, int* value) {
 
 
 /**
- * This function determines wether any CPU core uses a variable clock speed if frequency
+ * This function determines whether any CPU core uses a variable clock speed if frequency
  * scaling is available. If the governor for all cores is either "powersave" or
  * "performance", the CPU frequency can be assumed to be static. This is also the case
  * if scaling_min_freq and scaling_max_freq are set to the same value.
@@ -152,7 +152,7 @@ static gid_t get_group_by_name(const char* name) {
 }
 
 /**
- * Tests wether the owner of this process is in the group 'name'.
+ * Tests whether the owner of this process is in the group 'name'.
  *
  * @returns 0 if the owner of this process is not in the group, non-0 otherwise
  **/
@@ -230,7 +230,7 @@ int system_has_group(const char * name) {
 
 
 /**
- * Tests wether the owner of this process is in the 'audio' group.
+ * Tests whether the owner of this process is in the 'audio' group.
  *
  * @returns 0 if the owner of this process is not in the audio group, non-0 otherwise
  **/
@@ -240,7 +240,7 @@ int system_user_in_audiogroup() {
 
 
 /**
- * Determines wether the owner of this process can enable rt priority.
+ * Determines whether the owner of this process can enable rt priority.
  *
  * @returns 0 if this process can not be switched to rt prio, non-0 otherwise
  **/
@@ -283,7 +283,7 @@ long long unsigned int system_memlock_amount() {
 
 
 /**
- * Checks wether the memlock limit is unlimited
+ * Checks whether the memlock limit is unlimited
  *
  * @returns - 0 if the memlock limit is limited, non-0 otherwise
  **/

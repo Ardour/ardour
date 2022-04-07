@@ -356,11 +356,11 @@ for x in $BUILD_ROOT/../share/scripts/*.lua ; do
 	cp "$x" $LuaScripts
 done
 
-# recusively copy web-surface html/js
+# recursively copy web-surface html/js
 cp -R $BUILD_ROOT/../share/web_surfaces $WebSurfaces
 rm $WebSurfaces/wscript
 
-# recusively copy clips/media
+# recursively copy clips/media
 cp -R $BUILD_ROOT/../share/media $MediaClips
 rm $MediaClips/wscript
 
@@ -769,7 +769,7 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 fi
 
 if test -d ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/; then
-	echo "Removing unused achitectures from LV plugins"
+	echo "Removing unused architectures from LV plugins"
 	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
 		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin 2>/dev/null && \
 		mv ${file}.thin ${file}
@@ -1088,7 +1088,7 @@ fi
 rm -rf ${PRODUCT_PKG_DIR}
 
 echo
-echo "packaging suceeded."
+echo "packaging succeeded."
 ls -l "$UC_DMG"
 
 echo "dmg: checking for signing credentials"

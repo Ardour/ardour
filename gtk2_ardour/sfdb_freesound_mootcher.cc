@@ -16,7 +16,7 @@
 
 	Includes:
 		curl.h    (version 7.14.0)
-	Librarys:
+	Libraries:
 		libcurl.lib
 
 	-----------------------------------------------------------------

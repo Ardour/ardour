@@ -28,7 +28,7 @@ libs/
 
  - libs/ardouralsautil/
    Utility Class for device-listing (used by the jack and  ALSA backends).
-   Device-reservation comandline tool (linked against libdbus), which is
+   Device-reservation commandline tool (linked against libdbus), which is
    also available from https://github.com/x42/alsa_request_device
 
  - libs/clearlooks-newer/
@@ -70,7 +70,7 @@ libs/
    VAMP plugins for audio analysis and offline processing (uses qm-dsp)
 
  - libs/vamp-pyin/
-   VAMP plugins for pitch and note-tracking (uses qm-dsp), offline analyis
+   VAMP plugins for pitch and note-tracking (uses qm-dsp), offline analysis
 
  - libs/vfork/
    A exec-wrapper which redirects file-descriptors to be used with vfork(2)
@@ -85,10 +85,10 @@ libs/
    independent (a-fluidsynth uses libfluidsynth).
    Most of them are custom version of existing plugins (zamaudio, x42),
    that have been customized to be bundled with Ardour on all platforms
-   tha ardour runs on.
+   that ardour runs on.
 
  - libs/zita-convolver/
-   convolution kernel, so far only avialable to Lua scripts.
+   convolution kernel, so far only available to Lua scripts.
 
  - libs/zita-resampler/
    Efficient resampler with variable rate, useful for adaptive resampling.

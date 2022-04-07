@@ -65,7 +65,7 @@ function factory () return function ()
 		--     f = vamp:plugin ():process (); callback (f)
 		vamp:analyze (r:to_readable (), 0, callback)
 
-		-- get remaining features (end of analyis)
+		-- get remaining features (end of analysis)
 		callback (vamp:plugin ():getRemainingFeatures ())
 
 		-- reset the plugin (prepare for next iteration)

@@ -71,7 +71,7 @@ end end
 
 
 -- render an icon for the toolbar action-button
--- this is genrally square width == height.
+-- this is generally square width == height.
 -- The background is set according to the theme (leave transparent when drawing).
 -- A foreground color is passed as parameter 'fg'
 --
