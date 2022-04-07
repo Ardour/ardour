@@ -108,7 +108,7 @@ Processor::~Processor ()
 }
 
 XMLNode&
-Processor::get_state (void)
+Processor::get_state () const
 {
 	return state ();
 }
@@ -128,7 +128,7 @@ Processor::get_state (void)
 */
 
 XMLNode&
-Processor::state ()
+Processor::state () const
 {
 	XMLNode* node = new XMLNode (state_node_name);
 

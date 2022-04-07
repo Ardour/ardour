@@ -242,7 +242,7 @@ Speakers::setup_default_speakers (uint32_t n)
 }
 
 XMLNode&
-Speakers::get_state ()
+Speakers::get_state () const
 {
         XMLNode* node = new XMLNode (X_("Speakers"));
 

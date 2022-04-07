@@ -552,7 +552,7 @@ CoreSelection::remove_stripable_by_id (PBD::ID const & id)
 }
 
 XMLNode&
-CoreSelection::get_state (void)
+CoreSelection::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Selection"));
 

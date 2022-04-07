@@ -88,7 +88,7 @@ public:
 
 	int set_active (bool yn);
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	void stripable_selection_changed () {}

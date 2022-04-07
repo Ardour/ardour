@@ -46,7 +46,7 @@ OSCControllable::~OSCControllable ()
 }
 
 XMLNode&
-OSCControllable::get_state ()
+OSCControllable::get_state () const
 {
 	XMLNode& root (controllable->get_state());
 	return root;

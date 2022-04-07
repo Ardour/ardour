@@ -519,13 +519,13 @@ IO::ensure_io (ChanCount count, bool clear, void* src)
 }
 
 XMLNode&
-IO::get_state ()
+IO::get_state () const
 {
 	return state ();
 }
 
 XMLNode&
-IO::state ()
+IO::state () const
 {
 	XMLNode* node = new XMLNode (state_node_name);
 	int n;
@@ -540,7 +540,7 @@ IO::state ()
 		node->set_property("pretty-name", _pretty_name_prefix);
 	}
 
-	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
+	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 
 		vector<string> connections;
 

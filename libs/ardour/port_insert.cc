@@ -158,7 +158,7 @@ PortInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 }
 
 XMLNode&
-PortInsert::state ()
+PortInsert::state () const
 {
 	XMLNode& node = IOProcessor::state ();
 	node.set_property ("type", "port");

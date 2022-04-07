@@ -47,7 +47,7 @@ public:
 	float sample_rate () const;
 	int setup_peakfile ();
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	bool can_truncate_peaks() const { return false; }

@@ -420,14 +420,14 @@ get_id_sorted_playlists (const List& playlists, IDSortedList& id_sorted_playlist
 } // anonymous namespace
 
 void
-SessionPlaylists::add_state (XMLNode* node, bool save_template, bool include_unused)
+SessionPlaylists::add_state (XMLNode* node, bool save_template, bool include_unused) const
 {
 	XMLNode* child = node->add_child ("Playlists");
 
 	IDSortedList id_sorted_playlists;
 	get_id_sorted_playlists (playlists, id_sorted_playlists);
 
-	for (IDSortedList::iterator i = id_sorted_playlists.begin (); i != id_sorted_playlists.end (); ++i) {
+	for (IDSortedList::const_iterator i = id_sorted_playlists.begin (); i != id_sorted_playlists.end (); ++i) {
 		if (!(*i)->hidden ()) {
 			if (save_template) {
 				child->add_child_nocopy ((*i)->get_template ());

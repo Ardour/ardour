@@ -367,7 +367,7 @@ DiskWriter::set_align_style (AlignStyle a, bool force)
 }
 
 XMLNode&
-DiskWriter::state ()
+DiskWriter::state () const
 {
 	XMLNode& node (DiskIOProcessor::state ());
 	node.set_property (X_("type"), X_("diskwriter"));

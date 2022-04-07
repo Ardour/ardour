@@ -163,7 +163,7 @@ Maschine2::set_active (bool yn)
 }
 
 XMLNode&
-Maschine2::get_state()
+Maschine2::get_state() const
 {
 	XMLNode& node (ControlProtocol::get_state());
 	return node;

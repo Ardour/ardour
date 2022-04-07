@@ -380,7 +380,7 @@ InternalSend::feeds (boost::shared_ptr<Route> other) const
 }
 
 XMLNode&
-InternalSend::state ()
+InternalSend::state () const
 {
 	XMLNode& node (Send::state ());
 

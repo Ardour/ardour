@@ -63,7 +63,7 @@ public:
 
 	/* Replicate the API of PBD::Stateful without the overhead */
 
-	XMLNode& get_state (void) const;
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 private:

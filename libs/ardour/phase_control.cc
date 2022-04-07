@@ -68,7 +68,7 @@ PhaseControl::resize (uint32_t n)
 }
 
 XMLNode&
-PhaseControl::get_state ()
+PhaseControl::get_state () const
 {
 	XMLNode& node (AutomationControl::get_state ());
 

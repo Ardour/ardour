@@ -117,7 +117,7 @@ VCA::full_name() const
 }
 
 XMLNode&
-VCA::get_state ()
+VCA::get_state () const
 {
 	XMLNode* node = new XMLNode (xml_node_name);
 	node->set_property (X_("name"), name());

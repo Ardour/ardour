@@ -1601,7 +1601,7 @@ private:
 
 	PBD::ReallocPool _mempool;
 	LuaState lua;
-	Glib::Threads::Mutex lua_lock;
+	mutable Glib::Threads::Mutex lua_lock;
 	luabridge::LuaRef * _lua_run;
 	luabridge::LuaRef * _lua_add;
 	luabridge::LuaRef * _lua_del;
@@ -2097,11 +2097,13 @@ private:
 
 	XMLNode& state (bool save_template,
 	                snapshot_t snapshot_type = NormalSave,
-	                bool only_used_assets = false);
+	                bool only_used_assets = false) const;
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int      set_state (const XMLNode& node, int version); // not idempotent
 	XMLNode& get_template ();
+
+	void maybe_copy_midifiles (snapshot_t, boost::shared_ptr<Source> src, XMLNode*);
 
 	/* click track */
 	typedef std::list<Click*>     Clicks;
@@ -2180,7 +2182,7 @@ private:
 
 	void config_changed (std::string, bool);
 
-	XMLNode& get_control_protocol_state ();
+	XMLNode& get_control_protocol_state () const;
 
 	void set_history_depth (uint32_t depth);
 
@@ -2329,7 +2331,7 @@ private:
 
 	int tb_with_filled_slots;
 	void handle_slots_empty_status (boost::weak_ptr<Route> const &);
- };
+};
 
 
 } // namespace ARDOUR

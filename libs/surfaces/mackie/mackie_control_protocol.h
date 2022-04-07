@@ -147,7 +147,7 @@ class MackieControlProtocol
 	void set_flip_mode (FlipMode);
 	void display_view_mode ();
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	/* Note: because Mackie control is inherently a duplex protocol,
@@ -328,7 +328,7 @@ class MackieControlProtocol
 	bool                      needs_ipmidi_restart;
 	bool                     _metering_active;
 	bool                     _initialized;
-	XMLNode*                 configuration_state;
+	mutable XMLNode*         configuration_state;
 	int                      state_version;
 	int                      _last_bank[9];
 	bool                     marker_modifier_consumed_by_button;
@@ -358,7 +358,7 @@ class MackieControlProtocol
 	int ipmidi_restart ();
         void initialize ();
         int set_device_info (const std::string& device_name);
-	void update_configuration_state ();
+	void update_configuration_state () const;
 
 	/* MIDI port connection management */
 

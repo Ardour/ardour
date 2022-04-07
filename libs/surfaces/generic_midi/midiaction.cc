@@ -52,7 +52,7 @@ MIDIAction::execute ()
 }
 
 XMLNode&
-MIDIAction::get_state ()
+MIDIAction::get_state () const
 {
 	XMLNode* node = new XMLNode ("MIDIAction");
 	return *node;

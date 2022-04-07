@@ -43,7 +43,7 @@ public: // Processor overrides
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 
 private:
 	void realloc_buffers();

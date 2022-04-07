@@ -46,7 +46,7 @@ public:
 	void set_playback_offset (samplecnt_t cnt);
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 
 private:
 	/** sends that we are receiving data from */

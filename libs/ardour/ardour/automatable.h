@@ -110,7 +110,7 @@ public:
 	static const std::string xml_node_name;
 
 	int set_automation_xml_state (const XMLNode&, Evoral::Parameter default_param);
-	XMLNode& get_automation_xml_state();
+	XMLNode& get_automation_xml_state() const;
 
 	PBD::Signal0<void> AutomationStateChanged;
 

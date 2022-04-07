@@ -35,7 +35,7 @@ class LIBARDOUR_API UserBundle : public Bundle, public PBD::Stateful {
 	UserBundle (std::string const &);
 	UserBundle (XMLNode const &, bool);
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
   private:
 	int set_state (XMLNode const &, int version);

@@ -844,7 +844,7 @@ US2400Protocol::close()
  *  contains a state node for the device, it will deleted and replaced.
  */
 void
-US2400Protocol::update_configuration_state ()
+US2400Protocol::update_configuration_state () const
 {
 	/* CALLER MUST HOLD SURFACES LOCK */
 
@@ -860,15 +860,15 @@ US2400Protocol::update_configuration_state ()
 
 	XMLNode* snode = new XMLNode (X_("Surfaces"));
 
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		snode->add_child_nocopy ((*s)->get_state());
+	for (auto const & s : surfaces) {
+		snode->add_child_nocopy (s->get_state());
 	}
 
 	devnode->add_child_nocopy (*snode);
 }
 
 XMLNode&
-US2400Protocol::get_state()
+US2400Protocol::get_state() const
 {
 	XMLNode& node (ControlProtocol::get_state());
 

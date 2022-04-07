@@ -54,7 +54,7 @@ public:
 
 	void setup_gain_automation (samplepos_t start_sample, samplepos_t end_sample, samplecnt_t nframes);
 
-	XMLNode& state ();
+	XMLNode& state () const;
 	int set_state (const XMLNode&, int version);
 
 	static gain_t apply_gain (BufferSet& bufs, samplecnt_t sample_rate, samplecnt_t nframes, gain_t initial, gain_t target, bool midi_amp = true);

@@ -158,7 +158,7 @@ PresentationInfo::PresentationInfo (PresentationInfo const& other)
 }
 
 XMLNode&
-PresentationInfo::get_state ()
+PresentationInfo::get_state () const
 {
 	XMLNode* node = new XMLNode (state_node_name);
 	node->set_property ("order", _order);

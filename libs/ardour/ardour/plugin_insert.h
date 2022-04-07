@@ -211,7 +211,7 @@ public:
 
 		double get_value (void) const;
 		void catch_up_with_external_value (double val);
-		XMLNode& get_state();
+		XMLNode& get_state() const;
 		std::string get_user_string() const;
 
 	private:
@@ -228,7 +228,7 @@ public:
 		                       boost::shared_ptr<AutomationList> list=boost::shared_ptr<AutomationList>());
 
 		double get_value (void) const;
-		XMLNode& get_state();
+		XMLNode& get_state() const;
 	protected:
 		void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 
@@ -316,7 +316,7 @@ public:
 	};
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 
 private:
 	/* disallow copy construction */

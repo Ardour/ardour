@@ -5945,7 +5945,7 @@ OSC::periodic (void)
 }
 
 XMLNode&
-OSC::get_state ()
+OSC::get_state () const
 {
 	XMLNode& node (ControlProtocol::get_state());
 	node.set_property (X_("debugmode"), (int32_t) _debugmode); // TODO: enum2str

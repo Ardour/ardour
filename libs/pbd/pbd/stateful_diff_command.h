@@ -44,7 +44,7 @@ public:
 	void operator() ();
 	void undo ();
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
 	bool empty () const;
 

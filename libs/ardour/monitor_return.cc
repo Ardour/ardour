@@ -68,7 +68,7 @@ MonitorReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_s
 }
 
 XMLNode&
-MonitorReturn::state ()
+MonitorReturn::state () const
 {
 	XMLNode& node (InternalReturn::state ());
 	node.set_property ("type", "monreturn");

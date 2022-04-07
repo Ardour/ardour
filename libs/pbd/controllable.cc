@@ -52,7 +52,7 @@ Controllable::Controllable (const string& name, Flag f)
 }
 
 XMLNode&
-Controllable::get_state ()
+Controllable::get_state () const
 {
 	XMLNode* node = new XMLNode (xml_node_name);
 

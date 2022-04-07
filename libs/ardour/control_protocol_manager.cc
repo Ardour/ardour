@@ -527,12 +527,12 @@ ControlProtocolManager::set_state (const XMLNode& node, int session_specific_sta
 }
 
 XMLNode&
-ControlProtocolManager::get_state ()
+ControlProtocolManager::get_state () const
 {
 	XMLNode* root = new XMLNode (state_node_name);
 	Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
 
-	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
+	for (list<ControlProtocolInfo*>::const_iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 
 		if ((*i)->protocol) {
 			XMLNode& child_state ((*i)->protocol->get_state());

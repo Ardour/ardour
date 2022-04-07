@@ -1057,7 +1057,7 @@ Session::save_default_options ()
 }
 
 XMLNode&
-Session::get_state ()
+Session::get_state () const
 {
 	/* this is not directly called, but required by PBD::Stateful */
 	assert (0);
@@ -1169,7 +1169,7 @@ struct route_id_compare {
 } // anon namespace
 
 XMLNode&
-Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_assets)
+Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_assets) const
 {
 	LocaleGuard lg;
 	XMLNode* node = new XMLNode("Session");
@@ -1210,8 +1210,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 
 			string p;
 
-			vector<space_and_path>::iterator i = session_dirs.begin();
-			vector<space_and_path>::iterator next;
+			vector<space_and_path>::const_iterator i = session_dirs.begin();
+			vector<space_and_path>::const_iterator next;
 
 			++i; /* skip the first one */
 			next = i;
@@ -1286,7 +1286,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 			_playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot), false);
 		}
 
-		for (SourceMap::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
+		for (SourceMap::const_iterator siter = sources.begin(); siter != sources.end(); ++siter) {
 
 			/* Don't save information about non-file Sources, or
 			 * about file sources that are empty
@@ -1314,73 +1314,10 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 			}
 
 			if (snapshot_type != NormalSave && fs->within_session ()) {
-				/* copy MIDI sources to new file
-				 *
-				 * We cannot replace the midi-source and MidiRegion::clobber_sources,
-				 * because the GUI (midi_region) has a direct pointer to the midi-model
-				 * of the source, as does UndoTransaction.
-				 *
-				 * On the upside, .mid files are not kept open. The file is only open
-				 * when reading the model initially and when flushing the model to disk:
-				 * source->session_saved () or export.
-				 *
-				 * We can change the _path of the existing source under the hood, keeping
-				 * all IDs, references and pointers intact.
-				 * */
-				boost::shared_ptr<SMFSource> ms;
-				if ((ms = boost::dynamic_pointer_cast<SMFSource> (siter->second)) != 0) {
-					const std::string ancestor_name = ms->ancestor_name();
-					const std::string base          = PBD::basename_nosuffix(ancestor_name);
-					const string path               = new_midi_source_path (base, false);
-
-					/* Session::save_state() will already have called
-					 * ms->session_saved ();
-					 */
-
-					/* use SMF-API to clone data (use the midi_model, not data on disk) */
-					boost::shared_ptr<SMFSource> newsrc (new SMFSource (*this, path, ms->flags()));
-					{
-						Source::WriterLock lm (ms->mutex());
-
-						if (!ms->model()) {
-							ms->load_model (lm);
-						}
-					}
-					Source::ReaderLock lm (ms->mutex());
-					/* write_to() calls newsrc->flush_midi () to write the file to disk */
-					if (ms->write_to (lm, newsrc, Temporal::Beats(), std::numeric_limits<Temporal::Beats>::max())) {
-						error << string_compose (_("Session-Save: Failed to copy MIDI Source '%1' for snapshot"), ancestor_name) << endmsg;
-					} else {
-						newsrc->session_saved (); /*< this sohuld be a no-op */
-
-						if (snapshot_type == SnapshotKeep) {
-							/* keep working on current session.
-							 *
-							 * Save snapshot-state with the original filename.
-							 * Switch to use new path for future saves of the main session.
-							 */
-							child->add_child_nocopy (ms->get_state());
-						}
-
-						/* swap file-paths.
-						 * ~SMFSource unlinks removable() files.
-						 */
-						std::string npath (ms->path ());
-						ms->replace_file (newsrc->path ());
-						newsrc->replace_file (npath);
-
-						if (snapshot_type == SwitchToSnapshot) {
-							/* save and switch to snapshot.
-							 *
-							 * Leave the old file in place (as is).
-							 * Snapshot uses new source directly
-							 */
-							child->add_child_nocopy (ms->get_state());
-						}
-					}
-					continue;
-				}
+#warning CONSTIFICATION maybe fix this
+				const_cast<Session*>(this)->maybe_copy_midifiles (snapshot_type, siter->second, child);
 			}
+
 			child->add_child_nocopy (siter->second->get_state());
 		}
 	}
@@ -1440,11 +1377,12 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 			node->add_child_nocopy (_locations->get_state());
 		}
 	} else {
-		Locations loc (*this);
+		Session* ncthis = const_cast<Session*> (this);
+		Locations loc (*ncthis);
 		const bool was_dirty = dirty();
 		// for a template, just create a new Locations, populate it
 		// with the default start and end, and get the state for that.
-		Location* range = new Location (*this, timepos_t (Temporal::AudioTime), timepos_t (Temporal::AudioTime), _("session"), Location::IsSessionRange);
+		Location* range = new Location (*ncthis, timepos_t (Temporal::AudioTime), timepos_t (Temporal::AudioTime), _("session"), Location::IsSessionRange);
 		range->set (timepos_t::max (Temporal::AudioTime), timepos_t (Temporal::AudioTime));
 		loc.add (range);
 		XMLNode& locations_state = loc.get_state();
@@ -1457,7 +1395,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		 */
 
 		if (!was_dirty) {
-			unset_dirty ();
+			ncthis->unset_dirty ();
 		}
 	}
 
@@ -1496,7 +1434,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 	_playlists->add_state (node, save_template, !only_used_assets);
 
 	child = node->add_child ("RouteGroups");
-	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
+	for (list<RouteGroup *>::const_iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
 		child->add_child_nocopy ((*i)->get_state());
 	}
 
@@ -1537,8 +1475,83 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 	return *node;
 }
 
+void
+Session::maybe_copy_midifiles (snapshot_t snapshot_type, boost::shared_ptr<Source> src, XMLNode* child)
+{
+	/* copy MIDI sources to new file
+	 *
+	 * We cannot replace the midi-source and MidiRegion::clobber_sources,
+	 * because the GUI (midi_region) has a direct pointer to the midi-model
+	 * of the source, as does UndoTransaction.
+	 *
+	 * On the upside, .mid files are not kept open. The file is only open
+	 * when reading the model initially and when flushing the model to disk:
+	 * source->session_saved () or export.
+	 *
+	 * We can change the _path of the existing source under the hood, keeping
+	 * all IDs, references and pointers intact.
+	 * */
+
+	boost::shared_ptr<SMFSource> ms;
+
+	if ((ms = boost::dynamic_pointer_cast<SMFSource> (src)) == 0) {
+		return;
+	}
+
+	const std::string ancestor_name = ms->ancestor_name();
+	const std::string base          = PBD::basename_nosuffix(ancestor_name);
+	const string path               = new_midi_source_path (base, false);
+
+	/* Session::save_state() will already have called
+	 * ms->session_saved ();
+	 */
+
+	/* use SMF-API to clone data (use the midi_model, not data on disk) */
+	boost::shared_ptr<SMFSource> newsrc (new SMFSource (*this, path, ms->flags()));
+	{
+		Source::WriterLock lm (ms->mutex());
+
+		if (!ms->model()) {
+			ms->load_model (lm);
+		}
+	}
+	Source::ReaderLock lm (ms->mutex());
+	/* write_to() calls newsrc->flush_midi () to write the file to disk */
+	if (ms->write_to (lm, newsrc, Temporal::Beats(), std::numeric_limits<Temporal::Beats>::max())) {
+		error << string_compose (_("Session-Save: Failed to copy MIDI Source '%1' for snapshot"), ancestor_name) << endmsg;
+	} else {
+		newsrc->session_saved (); /*< this sohuld be a no-op */
+
+		if (snapshot_type == SnapshotKeep) {
+			/* keep working on current session.
+			 *
+			 * Save snapshot-state with the original filename.
+			 * Switch to use new path for future saves of the main session.
+			 */
+			child->add_child_nocopy (ms->get_state());
+		}
+
+		/* swap file-paths.
+		 * ~SMFSource unlinks removable() files.
+		 */
+		std::string npath (ms->path ());
+		ms->replace_file (newsrc->path ());
+		newsrc->replace_file (npath);
+
+		if (snapshot_type == SwitchToSnapshot) {
+			/* save and switch to snapshot.
+			 *
+			 * Leave the old file in place (as is).
+			 * Snapshot uses new source directly
+			 */
+			child->add_child_nocopy (ms->get_state());
+		}
+	}
+}
+
+
 XMLNode&
-Session::get_control_protocol_state ()
+Session::get_control_protocol_state () const
 {
 	return ControlProtocolManager::instance().get_state ();
 }

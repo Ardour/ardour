@@ -58,7 +58,7 @@ class LIBARDOUR_API ExportFilename {
   public:
 	/* Serialization */
 
-	XMLNode & get_state ();
+	XMLNode & get_state () const;
 	int set_state (const XMLNode &);
 
 	/* data access */
@@ -122,9 +122,9 @@ class LIBARDOUR_API ExportFilename {
 
 	typedef std::pair<bool, std::string> FieldPair;
 
-	void add_field (XMLNode * node, std::string const & name, bool enabled, std::string const & value = "");
+	static void add_field (XMLNode * node, std::string const & name, bool enabled, std::string const & value = "");
 	FieldPair get_field (XMLNode const & node, std::string const & name);
-	FieldPair analyse_folder ();
+	FieldPair analyse_folder () const;
 };
 
 

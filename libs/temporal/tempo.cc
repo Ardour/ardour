@@ -2361,7 +2361,7 @@ TempoMap::quarters_at_superclock (superclock_t pos) const
 }
 
 XMLNode&
-TempoMap::get_state ()
+TempoMap::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("TempoMap"));
 

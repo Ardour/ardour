@@ -74,7 +74,7 @@ PolarityProcessor::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos
 }
 
 XMLNode&
-PolarityProcessor::state ()
+PolarityProcessor::state () const
 {
 	XMLNode& node (Processor::state ());
 	node.set_property("type", "polarity");

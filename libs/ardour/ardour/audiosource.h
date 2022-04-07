@@ -73,7 +73,7 @@ class LIBARDOUR_API AudioSource : virtual public Source, public ARDOUR::AudioRea
 	mutable PBD::Signal0<void>  PeaksReady;
 	mutable PBD::Signal2<void,samplepos_t,samplepos_t>  PeakRangeReady;
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	int rename_peakfile (std::string newpath);

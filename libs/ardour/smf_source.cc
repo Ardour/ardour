@@ -525,7 +525,7 @@ SMFSource::append_event_samples (const WriterLock& lock,
 }
 
 XMLNode&
-SMFSource::get_state ()
+SMFSource::get_state () const
 {
 	XMLNode& node = MidiSource::get_state();
 	node.set_property (X_("origin"), _origin);

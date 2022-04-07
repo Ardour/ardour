@@ -1016,7 +1016,7 @@ MackieControlProtocol::close()
  *  contains a state node for the device, it will deleted and replaced.
  */
 void
-MackieControlProtocol::update_configuration_state ()
+MackieControlProtocol::update_configuration_state () const
 {
 	/* CALLER MUST HOLD SURFACES LOCK */
 
@@ -1032,15 +1032,15 @@ MackieControlProtocol::update_configuration_state ()
 
 	XMLNode* snode = new XMLNode (X_("Surfaces"));
 
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		snode->add_child_nocopy ((*s)->get_state());
+	for (auto const & s : surfaces) {
+		snode->add_child_nocopy (s->get_state());
 	}
 
 	devnode->add_child_nocopy (*snode);
 }
 
 XMLNode&
-MackieControlProtocol::get_state()
+MackieControlProtocol::get_state() const
 {
 	XMLNode& node (ControlProtocol::get_state());
 

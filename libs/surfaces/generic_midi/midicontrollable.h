@@ -99,7 +99,7 @@ public:
 
 	std::string control_description() const { return _control_description; }
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	void bind_midi (MIDI::channel_t, MIDI::eventType, MIDI::byte);

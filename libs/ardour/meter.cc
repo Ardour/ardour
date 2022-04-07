@@ -461,7 +461,7 @@ PeakMeter::set_meter_type (MeterType t)
 }
 
 XMLNode&
-PeakMeter::state ()
+PeakMeter::state () const
 {
 	XMLNode& node (Processor::state ());
 	node.set_property ("type", "meter");

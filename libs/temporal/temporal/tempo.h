@@ -856,7 +856,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API static PBD::Signal0<void> MapChanged;
 
-	LIBTEMPORAL_API XMLNode& get_state();
+	LIBTEMPORAL_API XMLNode& get_state() const;
 
 	class MementoBinder : public MementoCommandBinder<TempoMap> {
   public:

@@ -32,7 +32,7 @@ using namespace std;
 using namespace PBD;
 
 void
-ConfigVariableBase::add_to_node (XMLNode& node)
+ConfigVariableBase::add_to_node (XMLNode& node) const
 {
 	const std::string v = get_as_string ();
 	DEBUG_TRACE (DEBUG::Configuration, string_compose ("Config variable %1 stored as [%2]\n", _name, v));

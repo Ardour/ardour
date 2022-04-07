@@ -83,7 +83,7 @@ ExportFilename::ExportFilename (Session & session) :
 }
 
 XMLNode &
-ExportFilename::get_state ()
+ExportFilename::get_state () const
 {
 	XMLNode * node = new XMLNode ("ExportFilename");
 	XMLNode * child;
@@ -399,7 +399,7 @@ ExportFilename::get_field (XMLNode const & node, string const & name)
 }
 
 ExportFilename::FieldPair
-ExportFilename::analyse_folder ()
+ExportFilename::analyse_folder () const
 {
 	FieldPair pair;
 

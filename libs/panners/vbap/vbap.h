@@ -57,7 +57,7 @@ public:
 
 	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
 	PBD::AngularVector          signal_position (uint32_t n) const;
 	boost::shared_ptr<Speakers> get_speakers () const;

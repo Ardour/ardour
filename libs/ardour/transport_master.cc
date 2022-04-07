@@ -294,7 +294,7 @@ TransportMaster::connect_port_using_state ()
 }
 
 XMLNode&
-TransportMaster::get_state ()
+TransportMaster::get_state () const
 {
 	XMLNode* node = new XMLNode (state_node_name);
 	node->set_property (X_("type"), _type);

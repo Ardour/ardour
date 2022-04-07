@@ -78,7 +78,7 @@ AudioPlaylistSource::~AudioPlaylistSource ()
 }
 
 XMLNode&
-AudioPlaylistSource::get_state ()
+AudioPlaylistSource::get_state () const
 {
 	XMLNode& node (AudioSource::get_state ());
 

@@ -77,7 +77,7 @@ SoloSafeControl::set_state (XMLNode const & node, int version)
 }
 
 XMLNode&
-SoloSafeControl::get_state ()
+SoloSafeControl::get_state () const
 {
 	XMLNode& node (SlavableAutomationControl::get_state());
 	node.set_property (X_("solo-safe"), _solo_safe);

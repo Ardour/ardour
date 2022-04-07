@@ -87,7 +87,7 @@ public:
 
 	void maybe_start_touch (boost::shared_ptr<PBD::Controllable>);
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	bool has_editor () const { return true; }
@@ -162,7 +162,7 @@ private:
 	};
 	typedef std::list<MIDIPendingControllable* > MIDIPendingControllables;
 	MIDIPendingControllables pending_controllables;
-	Glib::Threads::Mutex controllables_lock;
+	mutable Glib::Threads::Mutex controllables_lock;
 	Glib::Threads::Mutex pending_lock;
 
 	bool start_learning (boost::weak_ptr<PBD::Controllable>);

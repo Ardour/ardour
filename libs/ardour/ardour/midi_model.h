@@ -73,7 +73,7 @@ public:
 		virtual void undo () = 0;
 
 		virtual int set_state (const XMLNode&, int version) = 0;
-		virtual XMLNode & get_state () = 0;
+		virtual XMLNode & get_state () const = 0;
 
 		boost::shared_ptr<MidiModel> model() const { return _model; }
 
@@ -101,7 +101,7 @@ public:
 		void undo ();
 
 		int set_state (const XMLNode&, int version);
-		XMLNode & get_state ();
+		XMLNode & get_state () const;
 
 		void add (const NotePtr note);
 		void remove (const NotePtr note);
@@ -149,10 +149,10 @@ public:
 
 		std::set<NotePtr> side_effect_removals;
 
-		XMLNode &marshal_change(const NoteChange&);
+		XMLNode &marshal_change(const NoteChange&) const;
 		NoteChange unmarshal_change(XMLNode *xml_note);
 
-		XMLNode &marshal_note(const NotePtr note);
+		XMLNode &marshal_note(const NotePtr note) const;
 		NotePtr unmarshal_note(XMLNode *xml_note);
 	};
 
@@ -166,7 +166,7 @@ public:
 		};
 
 		int set_state (const XMLNode&, int version);
-		XMLNode & get_state ();
+		XMLNode & get_state () const;
 
 		void remove (SysExPtr sysex);
 		void operator() ();
@@ -189,7 +189,7 @@ public:
 
 		std::list<SysExPtr> _removed;
 
-		XMLNode & marshal_change (const Change &);
+		XMLNode & marshal_change (const Change &) const;
 		Change unmarshal_change (XMLNode *);
 	};
 
@@ -199,7 +199,7 @@ public:
 		PatchChangeDiffCommand (boost::shared_ptr<MidiModel>, const XMLNode &);
 
 		int set_state (const XMLNode &, int version);
-		XMLNode & get_state ();
+		XMLNode & get_state () const;
 
 		void operator() ();
 		void undo ();
@@ -245,10 +245,10 @@ public:
 		std::list<PatchChangePtr> _added;
 		std::list<PatchChangePtr> _removed;
 
-		XMLNode & marshal_change (const Change &);
+		XMLNode & marshal_change (const Change &) const;
 		Change unmarshal_change (XMLNode *);
 
-		XMLNode & marshal_patch_change (constPatchChangePtr);
+		XMLNode & marshal_patch_change (constPatchChangePtr) const;
 		PatchChangePtr unmarshal_patch_change (XMLNode *);
 	};
 
@@ -294,7 +294,7 @@ public:
 
 	// MidiModel doesn't use the normal AutomationList serialisation code
 	// since controller data is stored in the .mid
-	XMLNode& get_state();
+	XMLNode& get_state() const;
 	int set_state(const XMLNode&) { return 0; }
 
 	PBD::Signal0<void> ContentsChanged;

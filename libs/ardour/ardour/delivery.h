@@ -114,7 +114,7 @@ public:
 	virtual uint32_t pan_outs() const;
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 
 	Role        _role;
 	BufferSet*  _output_buffers;

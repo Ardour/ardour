@@ -146,7 +146,7 @@ public:
 	/** Emitted when a route has been removed from this group */
 	PBD::Signal2<void, RouteGroup *, boost::weak_ptr<ARDOUR::Route> > RouteRemoved;
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
 	int set_state (const XMLNode&, int version);
 

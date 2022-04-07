@@ -74,7 +74,7 @@ public:
 	void use_saved_master_ratios ();
 
 	int set_state (XMLNode const&, int);
-	XMLNode& get_state();
+	XMLNode& get_state() const;
 
 	bool find_next_event (Temporal::timepos_t const & n, Temporal::timepos_t const & e, Evoral::ControlEvent& ev) const
 	{

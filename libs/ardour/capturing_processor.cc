@@ -84,7 +84,7 @@ CapturingProcessor::realloc_buffers()
 }
 
 XMLNode &
-CapturingProcessor::state ()
+CapturingProcessor::state () const
 {
 	XMLNode& node = Processor::state ();
 

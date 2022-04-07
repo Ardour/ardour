@@ -24,7 +24,7 @@ class TranzportControlProtocol : public ARDOUR::ControlProtocol
 
 	static bool probe ();
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&);
 
   private:

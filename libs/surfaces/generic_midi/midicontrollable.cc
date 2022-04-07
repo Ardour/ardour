@@ -802,7 +802,7 @@ MIDIControllable::set_state (const XMLNode& node, int /*version*/)
 }
 
 XMLNode&
-MIDIControllable::get_state ()
+MIDIControllable::get_state () const
 {
 	char buf[32];
 

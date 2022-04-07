@@ -257,7 +257,7 @@ RouteGroup::set_rgba (uint32_t color) {
 }
 
 XMLNode&
-RouteGroup::get_state ()
+RouteGroup::get_state () const
 {
 	XMLNode *node = new XMLNode ("RouteGroup");
 

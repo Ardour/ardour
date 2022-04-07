@@ -715,7 +715,7 @@ CC121::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::Asyn
 
 
 XMLNode&
-CC121::get_state ()
+CC121::get_state () const
 {
 	XMLNode& node (ControlProtocol::get_state());
 

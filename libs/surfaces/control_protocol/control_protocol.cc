@@ -317,7 +317,7 @@ ControlProtocol::bundles ()
 }
 
 XMLNode&
-ControlProtocol::get_state ()
+ControlProtocol::get_state () const
 {
 	XMLNode* node = new XMLNode (state_node_name);
 

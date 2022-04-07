@@ -272,9 +272,9 @@ Stateful::apply_changes (const PropertyList& property_list)
  *  @param owner_state Node.
  */
 void
-Stateful::add_properties (XMLNode& owner_state)
+Stateful::add_properties (XMLNode& owner_state) const
 {
-	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
+	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
 		i->second->get_value (owner_state);
 	}
 }

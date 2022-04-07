@@ -50,7 +50,7 @@ class MIDIAction : public MIDIInvokable
 
 	const std::string& action_name() const { return _invokable_name; }
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
   private:

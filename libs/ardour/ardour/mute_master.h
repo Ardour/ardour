@@ -77,7 +77,7 @@ public:
 
 	PBD::Signal0<void> MutePointChanged;
 
-	XMLNode& get_state();
+	XMLNode& get_state() const;
 	int set_state(const XMLNode&, int version);
 	static const std::string xml_node_name;
 

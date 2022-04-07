@@ -40,7 +40,7 @@ class OSCControllable : public PBD::Stateful
 
 	lo_address address() const { return addr; }
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode& node, int version);
 
   protected:

@@ -62,7 +62,7 @@ public:
 	void undo ();
 	void redo ();
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
 	void set_timestamp (struct timeval& t)
 	{

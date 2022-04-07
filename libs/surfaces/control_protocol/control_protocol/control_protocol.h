@@ -133,7 +133,7 @@ public:
 	virtual void* get_gui () const { return 0; }
 	virtual void tear_down_gui () {}
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int version);
 
 	static const std::string state_node_name;

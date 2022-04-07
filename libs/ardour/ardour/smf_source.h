@@ -64,7 +64,7 @@ public:
 	                                          Evoral::Sequence<Temporal::Beats>::StuckNoteOption,
 	                                          Temporal::Beats when = Temporal::Beats());
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	void load_model (const WriterLock& lock, bool force_reload=false);

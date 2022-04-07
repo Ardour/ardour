@@ -221,9 +221,9 @@ public:
 
 	void flush_processors ();
 
-	void foreach_processor (boost::function<void(boost::weak_ptr<Processor>)> method) {
+	void foreach_processor (boost::function<void(boost::weak_ptr<Processor>)> method) const {
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			method (boost::weak_ptr<Processor> (*i));
 		}
 	}
@@ -413,7 +413,7 @@ public:
 	PBD::Signal0<void>       io_changed;
 
 	/* stateful */
-	XMLNode& get_state();
+	XMLNode& get_state() const;
 	XMLNode& get_template();
 	virtual int set_state (const XMLNode&, int version);
 
@@ -692,7 +692,7 @@ protected:
 
 	virtual ChanCount input_streams () const;
 
-	virtual XMLNode& state (bool save_template);
+	virtual XMLNode& state (bool save_template) const;
 
 	int configure_processors (ProcessorStreams*);
 

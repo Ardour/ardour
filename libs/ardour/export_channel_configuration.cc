@@ -40,7 +40,7 @@ ExportChannelConfiguration::ExportChannelConfiguration (Session & session)
 }
 
 XMLNode &
-ExportChannelConfiguration::get_state ()
+ExportChannelConfiguration::get_state () const
 {
 	XMLNode * root = new XMLNode ("ExportChannelConfiguration");
 	XMLNode * channel;

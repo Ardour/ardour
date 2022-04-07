@@ -235,7 +235,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	}
 
 	int set_state (XMLNode const&, int);
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
 	bool operator==(PresentationInfo const& other) {
 		return (_order == other.order()) && (_flags == other.flags());

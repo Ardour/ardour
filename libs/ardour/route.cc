@@ -2514,7 +2514,7 @@ Route::set_strict_io (const bool enable)
 }
 
 XMLNode&
-Route::get_state()
+Route::get_state() const
 {
 	return state (false);
 }
@@ -2526,10 +2526,11 @@ Route::get_template()
 }
 
 XMLNode&
-Route::state (bool save_template)
+Route::state (bool save_template) const
 {
 	if (!_session._template_state_dir.empty()) {
-		foreach_processor (sigc::bind (sigc::mem_fun (*this, &Route::set_plugin_state_dir), _session._template_state_dir));
+#warning CONSTIFICATION fix this
+		// const_cast<Route*>(this)->foreach_processor (sigc::bind (sigc::mem_fun (*this, &Route::set_plugin_state_dir), _session._template_state_dir));
 	}
 
 	XMLNode *node = new XMLNode("Route");
@@ -2600,8 +2601,8 @@ Route::state (bool save_template)
 
 	{
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-		for (i = _processors.begin(); i != _processors.end(); ++i) {
-			if (*i == _delayline) {
+		for (auto const & p : _processors) {
+			if (p == _delayline) {
 				continue;
 			}
 			if (save_template) {
@@ -2616,13 +2617,13 @@ Route::state (bool save_template)
 					 */
 				boost::shared_ptr<InternalSend> is;
 
-				if ((is = boost::dynamic_pointer_cast<InternalSend> (*i)) != 0) {
+				if ((is = boost::dynamic_pointer_cast<InternalSend> (p)) != 0) {
 					if (is->role() == Delivery::Listen) {
 						continue;
 					}
 				}
 			}
-			node->add_child_nocopy((*i)->get_state ());
+			node->add_child_nocopy (p->get_state ());
 		}
 	}
 
@@ -2638,7 +2639,8 @@ Route::state (bool save_template)
 	}
 
 	if (!_session._template_state_dir.empty()) {
-		foreach_processor (sigc::bind (sigc::mem_fun (*this, &Route::set_plugin_state_dir), ""));
+		Route* ncthis = const_cast<Route*> (this);
+		foreach_processor (sigc::bind (sigc::mem_fun (*ncthis, &Route::set_plugin_state_dir), ""));
 	}
 
 	node->add_child_copy (Slavable::get_state());

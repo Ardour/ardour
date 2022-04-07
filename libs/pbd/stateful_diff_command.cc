@@ -94,7 +94,7 @@ StatefulDiffCommand::undo ()
 }
 
 XMLNode&
-StatefulDiffCommand::get_state ()
+StatefulDiffCommand::get_state () const
 {
 	boost::shared_ptr<Stateful> s (_object.lock ());
 

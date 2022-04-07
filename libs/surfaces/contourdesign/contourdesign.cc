@@ -129,7 +129,7 @@ ContourDesignControlProtocol::set_active (bool yn)
 }
 
 XMLNode&
-ContourDesignControlProtocol::get_state ()
+ContourDesignControlProtocol::get_state () const
 {
 	XMLNode& node (ControlProtocol::get_state());
 	node.set_property (X_("keep-rolling"), _keep_rolling);

@@ -188,7 +188,7 @@ MIDIFunction::execute ()
 }
 
 XMLNode&
-MIDIFunction::get_state ()
+MIDIFunction::get_state () const
 {
 
 	XMLNode* node = new XMLNode ("MIDIFunction");

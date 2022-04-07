@@ -317,7 +317,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	samplepos_t transition_samples;
 	Temporal::Beats transition_beats;
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	void maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t& nframes, pframes_t& dest_offset);
@@ -503,7 +503,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 	void jump_start ();
 	void jump_stop (BufferSet& bufs, pframes_t dest_offset);
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	RubberBand::RubberBandStretcher* stretcher() { return (_stretcher); }
@@ -579,7 +579,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void shutdown (BufferSet& bufs, pframes_t dest_offset);
 	void jump_stop (BufferSet& bufs, pframes_t dest_offset);
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	SegmentDescriptor get_segment_descriptor () const;
@@ -726,7 +726,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void set_pending (uint32_t slot, Trigger*);
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	void set_from_path (uint32_t slot, std::string const & path);
@@ -813,7 +813,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	DataType _data_type;
 	int32_t _order;
-	Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
+	mutable Glib::Threads::RWLock trigger_lock; /* protects all_triggers */
 	Triggers all_triggers;
 
 	typedef std::vector<Trigger*> PendingTriggers;

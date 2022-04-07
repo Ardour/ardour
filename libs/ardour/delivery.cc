@@ -356,7 +356,7 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 }
 
 XMLNode&
-Delivery::state ()
+Delivery::state () const
 {
 	XMLNode& node (IOProcessor::state ());
 

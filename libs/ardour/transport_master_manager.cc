@@ -646,7 +646,7 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 }
 
 XMLNode&
-TransportMasterManager::get_state ()
+TransportMasterManager::get_state () const
 {
 	XMLNode* node = new XMLNode (state_node_name);
 
@@ -656,7 +656,7 @@ TransportMasterManager::get_state ()
 
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	for (TransportMasters::iterator t = _transport_masters.begin(); t != _transport_masters.end(); ++t) {
+	for (TransportMasters::const_iterator t = _transport_masters.begin(); t != _transport_masters.end(); ++t) {
 		node->add_child_nocopy ((*t)->get_state());
 	}
 

@@ -115,7 +115,7 @@ class Step : public PBD::Stateful {
 	int octave_shift() const { return _octave_shift; }
 	void set_octave_shift (int);
 
-	XMLNode& get_state();
+	XMLNode& get_state() const;
 	int set_state (XMLNode const &, int);
 
 	void dump (MusicTimeEvents&, Temporal::Beats const&) const;
@@ -208,7 +208,7 @@ class StepSequence : public PBD::Stateful
 
 	StepSequencer& sequencer() const { return _sequencer; }
 
-	XMLNode& get_state();
+	XMLNode& get_state() const;
 	int set_state (XMLNode const &, int);
 
 	void dump (MusicTimeEvents&, Temporal::Beats const &) const;
@@ -257,7 +257,7 @@ class StepSequencer : public PBD::Stateful
 
 	TempoMap& tempo_map() const { return _tempo_map; }
 
-	XMLNode& get_state();
+	XMLNode& get_state() const;
 	int set_state (XMLNode const &, int);
 
 	void queue_note_off (Temporal::Beats const &, uint8_t note, uint8_t velocity, uint8_t channel);

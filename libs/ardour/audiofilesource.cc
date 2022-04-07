@@ -221,7 +221,7 @@ AudioFileSource::get_soundfile_info (const string& path, SoundFileInfo& _info, s
 }
 
 XMLNode&
-AudioFileSource::get_state ()
+AudioFileSource::get_state () const
 {
 	XMLNode& root (AudioSource::get_state());
 	root.set_property (X_("channel"), _channel);

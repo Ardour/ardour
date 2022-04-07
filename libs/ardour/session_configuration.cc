@@ -54,7 +54,7 @@ SessionConfiguration::SessionConfiguration ()
 }
 
 XMLNode&
-SessionConfiguration::get_state ()
+SessionConfiguration::get_state () const
 {
 	XMLNode* root;
 
@@ -66,7 +66,7 @@ SessionConfiguration::get_state ()
 
 
 XMLNode&
-SessionConfiguration::get_variables ()
+SessionConfiguration::get_variables () const
 {
 	XMLNode* node;
 

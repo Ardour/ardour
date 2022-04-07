@@ -606,7 +606,7 @@ GenericMidiControlProtocol::check_used_event (int pos, int control_number)
 }
 
 XMLNode&
-GenericMidiControlProtocol::get_state ()
+GenericMidiControlProtocol::get_state () const
 {
 	XMLNode& node (ControlProtocol::get_state());
 
@@ -634,15 +634,15 @@ GenericMidiControlProtocol::get_state ()
 	node.add_child_nocopy (*children);
 
 	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
-	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
+	for (auto const & c : controllables) {
 
 		/* we don't care about bindings that come from a bindings map, because
 		   they will all be reset/recreated when we load the relevant bindings
 		   file.
 		*/
 
-		if ((*i)->get_controllable() && (*i)->learned()) {
-			children->add_child_nocopy ((*i)->get_state());
+		if (c->get_controllable() && c->learned()) {
+			children->add_child_nocopy (c->get_state());
 		}
 	}
 

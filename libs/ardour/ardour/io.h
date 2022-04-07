@@ -152,7 +152,7 @@ public:
 	 */
 	PBD::Signal2<void, IOChange, void *> changed;
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 
 	int set_state (const XMLNode&, int version);
 	int set_state_2X (const XMLNode&, int, bool);
@@ -198,7 +198,7 @@ public:
 	int set_ports (const std::string& str);
 
 protected:
-	virtual XMLNode& state ();
+	virtual XMLNode& state () const;
 
 	Direction _direction;
 	DataType _default_type;

@@ -164,7 +164,7 @@ Track::chan_count_changed ()
 }
 
 XMLNode&
-Track::state (bool save_template)
+Track::state (bool save_template) const
 {
 	XMLNode& root (Route::state (save_template));
 

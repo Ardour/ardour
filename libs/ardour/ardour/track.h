@@ -184,7 +184,7 @@ public:
 	PBD::Signal0<void> ChanCountChanged;
 
 protected:
-	XMLNode& state (bool save_template);
+	XMLNode& state (bool save_template) const;
 
 	boost::shared_ptr<Playlist>   _playlists[DataType::num_types];
 

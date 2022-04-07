@@ -87,7 +87,7 @@ MidiSource::~MidiSource ()
 }
 
 XMLNode&
-MidiSource::get_state ()
+MidiSource::get_state () const
 {
 	XMLNode& node (Source::get_state());
 

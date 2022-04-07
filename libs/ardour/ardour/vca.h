@@ -59,7 +59,7 @@ class LIBARDOUR_API VCA : public Stripable,
 	std::string full_name() const;
 
 	int init ();
-	XMLNode& get_state();
+	XMLNode& get_state() const;
 	int set_state (XMLNode const&, int version);
 
 	PBD::Signal0<void> Drop; /* signal to slaves to drop control by this VCA */

@@ -146,7 +146,7 @@ protected:
 		bool        initialized;
 	};
 
-	XMLNode& state ();
+	XMLNode& state () const;
 
 	void resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
 

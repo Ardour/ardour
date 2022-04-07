@@ -41,7 +41,7 @@ public:
 	int set_state(const XMLNode&, int version);
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 
 private:
 	/* disallow copy construction */

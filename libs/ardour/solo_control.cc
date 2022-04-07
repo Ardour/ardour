@@ -248,7 +248,7 @@ SoloControl::set_state (XMLNode const & node, int version)
 }
 
 XMLNode&
-SoloControl::get_state ()
+SoloControl::get_state () const
 {
 	XMLNode& node (SlavableAutomationControl::get_state());
 

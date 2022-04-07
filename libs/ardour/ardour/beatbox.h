@@ -55,8 +55,8 @@ class BeatBox : public ARDOUR::Processor {
 	void silence (samplecnt_t nframes, samplepos_t start_frame);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
-	XMLNode& state();
-	XMLNode& get_state(void);
+	XMLNode& state() const;
+	XMLNode& get_state () const;
 
 	bool fill_source (boost::shared_ptr<Source>);
 

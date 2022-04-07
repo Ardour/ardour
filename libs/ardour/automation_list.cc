@@ -323,13 +323,13 @@ AutomationList::memento_command (XMLNode* before, XMLNode* after)
 }
 
 XMLNode&
-AutomationList::get_state ()
+AutomationList::get_state () const
 {
 	return state (true, true);
 }
 
 XMLNode&
-AutomationList::state (bool save_auto_state, bool need_lock)
+AutomationList::state (bool save_auto_state, bool need_lock) const
 {
 	XMLNode* root = new XMLNode (X_("AutomationList"));
 
@@ -364,7 +364,7 @@ AutomationList::state (bool save_auto_state, bool need_lock)
 }
 
 XMLNode&
-AutomationList::serialize_events (bool need_lock)
+AutomationList::serialize_events (bool need_lock) const
 {
 	XMLNode* node = new XMLNode (X_("events"));
 	stringstream str;
@@ -373,7 +373,7 @@ AutomationList::serialize_events (bool need_lock)
 	if (need_lock) {
 		lm.acquire ();
 	}
-	for (iterator xx = _events.begin(); xx != _events.end(); ++xx) {
+	for (const_iterator xx = _events.begin(); xx != _events.end(); ++xx) {
 		str << PBD::to_string ((*xx)->when);
 		str << ' ';
 		str << PBD::to_string ((*xx)->value);

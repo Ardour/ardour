@@ -92,7 +92,7 @@ initialize_primary_key_from_commands (
 }
 
 XMLNode&
-Patch::get_state (void)
+Patch::get_state () const
 {
 	XMLNode* node = new XMLNode("Patch");
 
@@ -153,7 +153,7 @@ Patch::set_state (const XMLTree& tree, const XMLNode& node)
 }
 
 XMLNode&
-Note::get_state (void)
+Note::get_state () const
 {
 	XMLNode* node = new XMLNode("Note");
 	node->set_property("Number", _number);
@@ -182,7 +182,7 @@ Note::set_state (const XMLTree& tree, const XMLNode& node)
 }
 
 XMLNode&
-NoteNameList::get_state (void)
+NoteNameList::get_state () const
 {
 	XMLNode* node = new XMLNode("NoteNameList");
 	node->set_property("Name", _name);
@@ -236,7 +236,7 @@ NoteNameList::set_state (const XMLTree& tree, const XMLNode& node)
 }
 
 XMLNode&
-Control::get_state (void)
+Control::get_state () const
 {
 	XMLNode* node = new XMLNode("Control");
 	node->set_property("Type",   _type);
@@ -281,7 +281,7 @@ Control::set_state (const XMLTree& tree, const XMLNode& node)
 }
 
 XMLNode&
-ControlNameList::get_state (void)
+ControlNameList::get_state () const
 {
 	XMLNode* node = new XMLNode("ControlNameList");
 	node->set_property("Name", _name);
@@ -327,7 +327,7 @@ ControlNameList::control(uint16_t num) const
 }
 
 XMLNode&
-Value::get_state (void)
+Value::get_state () const
 {
 	XMLNode* node = new XMLNode("Value");
 	node->set_property("Number", _number);
@@ -347,7 +347,7 @@ Value::set_state (const XMLTree& tree, const XMLNode& node)
 }
 
 XMLNode&
-ValueNameList::get_state (void)
+ValueNameList::get_state () const
 {
 	XMLNode* node = new XMLNode("ValueNameList");
 	node->set_property("Name", _name);
@@ -412,12 +412,12 @@ ValueNameList::max_value_below(uint16_t num) const
 }
 
 XMLNode&
-PatchBank::get_state (void)
+PatchBank::get_state () const
 {
 	XMLNode* node = new XMLNode("PatchBank");
 	node->set_property("Name",   _name);
 	XMLNode* patch_name_list = node->add_child("PatchNameList");
-	for (PatchNameList::iterator patch = _patch_name_list.begin();
+	for (PatchNameList::const_iterator patch = _patch_name_list.begin();
 	    patch != _patch_name_list.end();
 	    ++patch) {
 		patch_name_list->add_child_nocopy((*patch)->get_state());
@@ -532,7 +532,7 @@ ChannelNameSet::use_patch_name_list (const PatchNameList& pnl)
 }
 
 XMLNode&
-ChannelNameSet::get_state (void)
+ChannelNameSet::get_state () const
 {
 	XMLNode* node = new XMLNode("ChannelNameSet");
 	node->set_property("Name",   _name);
@@ -553,7 +553,7 @@ ChannelNameSet::get_state (void)
 		}
 	}
 
-	for (PatchBanks::iterator patch_bank = _patch_banks.begin();
+	for (PatchBanks::const_iterator patch_bank = _patch_banks.begin();
 	    patch_bank != _patch_banks.end();
 	    ++patch_bank) {
 		node->add_child_nocopy((*patch_bank)->get_state());
@@ -627,7 +627,7 @@ CustomDeviceMode::set_state(const XMLTree& tree, const XMLNode& a_node)
 }
 
 XMLNode&
-CustomDeviceMode::get_state(void)
+CustomDeviceMode::get_state () const
 {
 	XMLNode* custom_device_mode = new XMLNode("CustomDeviceMode");
 	custom_device_mode->set_property("Name",   _name);
@@ -890,7 +890,7 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode&)
 }
 
 XMLNode&
-MasterDeviceNames::get_state(void)
+MasterDeviceNames::get_state () const
 {
 	static XMLNode nothing("<nothing>");
 	return nothing;
@@ -951,7 +951,7 @@ MIDINameDocument::set_state (const XMLTree& tree, const XMLNode&)
 }
 
 XMLNode&
-MIDINameDocument::get_state(void)
+MIDINameDocument::get_state () const
 {
 	static XMLNode nothing("<nothing>");
 	return nothing;

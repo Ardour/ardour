@@ -263,7 +263,7 @@ Pannerbalance::factory (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speaker
 }
 
 XMLNode&
-Pannerbalance::get_state ()
+Pannerbalance::get_state () const
 {
 	XMLNode& root (Panner::get_state ());
 	root.set_property (X_ ("uri"), _descriptor.panner_uri);

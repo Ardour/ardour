@@ -43,7 +43,7 @@ class LIBARDOUR_API MonitorControl : public SlavableAutomationControl
 	MonitorState monitoring_state () const { return _monitorable.monitoring_state(); }
 
 	int set_state (XMLNode const&, int);
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
   protected:
 	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);

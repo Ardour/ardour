@@ -55,7 +55,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 
 		/* Serialization */
 
-		XMLNode & get_state ();
+		XMLNode & get_state () const;
 		int set_state (const XMLNode & node);
 
 	  private:
@@ -201,7 +201,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 
 	/* Serialization */
 
-	XMLNode & get_state ();
+	XMLNode & get_state () const;
 	int set_state (const XMLNode & root);
 
 
@@ -256,8 +256,8 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 
 	/* serialization helpers */
 
-	void add_option (XMLNode * node, std::string const & name, std::string const & value);
-	std::string get_option (XMLNode const * node, std::string const & name);
+	static void add_option (XMLNode * node, std::string const & name, std::string const & value);
+	static std::string get_option (XMLNode const * node, std::string const & name);
 
 };
 

@@ -94,7 +94,7 @@ class LIBARDOUR_API SoloControl : public SlavableAutomationControl
 	void clear_all_solo_state ();
 
 	int set_state (XMLNode const&, int);
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
   protected:
 	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);

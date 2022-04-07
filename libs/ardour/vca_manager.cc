@@ -171,7 +171,7 @@ VCAManager::vca_by_name (std::string const& name) const
 }
 
 XMLNode&
-VCAManager::get_state ()
+VCAManager::get_state () const
 {
 	XMLNode* node = new XMLNode (xml_node_name);
 

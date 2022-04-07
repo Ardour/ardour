@@ -74,7 +74,7 @@ public:
 	Gtk::Notebook* tab_root_drop ();
 
 	int set_state (const XMLNode&, int version);
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
 	static std::string xml_node_name();
 

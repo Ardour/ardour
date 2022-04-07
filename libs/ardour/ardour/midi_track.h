@@ -146,7 +146,7 @@ public:
 
 protected:
 
-	XMLNode& state (bool save_template);
+	XMLNode& state (bool save_template) const;
 
 	void act_on_mute ();
 	void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);

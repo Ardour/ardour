@@ -105,7 +105,7 @@ UnknownProcessor::~UnknownProcessor () {
 }
 
 XMLNode &
-UnknownProcessor::state ()
+UnknownProcessor::state () const
 {
 	return *(new XMLNode (_state));
 }

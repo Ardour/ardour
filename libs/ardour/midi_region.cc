@@ -342,7 +342,7 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 
 
 XMLNode&
-MidiRegion::state ()
+MidiRegion::state () const
 {
 	return Region::state ();
 }

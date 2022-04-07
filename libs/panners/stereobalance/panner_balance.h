@@ -60,7 +60,7 @@ public:
 
 	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
 	void reset ();
 	void thaw ();

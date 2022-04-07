@@ -81,7 +81,7 @@ private:
 
 	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 	void update_after_tempo_map_change ();
-	void add_state (XMLNode*, bool save_template, bool include_unused);
+	void add_state (XMLNode*, bool save_template, bool include_unused) const;
 	bool maybe_delete_unused (boost::function<int(boost::shared_ptr<Playlist>)>);
 	int load (Session &, const XMLNode&);
 	int load_unused (Session &, const XMLNode&);

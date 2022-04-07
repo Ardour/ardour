@@ -52,7 +52,7 @@ protected:
 	                timepos_t const & begin, timepos_t const & len, Source::Flag flags);
 	PlaylistSource (Session&, const XMLNode&);
 
-	void add_state (XMLNode&);
+	void add_state (XMLNode&) const;
 };
 
 } /* namespace */

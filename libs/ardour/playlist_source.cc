@@ -86,7 +86,7 @@ PlaylistSource::set_owner (PBD::ID const &id)
 }
 
 void
-PlaylistSource::add_state (XMLNode& node)
+PlaylistSource::add_state (XMLNode& node) const
 {
 	node.set_property ("playlist", _playlist->id ());
 	node.set_property ("offset", _playlist_offset);

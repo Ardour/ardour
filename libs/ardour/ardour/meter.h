@@ -89,7 +89,7 @@ public:
 	PBD::Signal1<void, MeterType> MeterTypeChanged;
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 
 private:
 	friend class IO;

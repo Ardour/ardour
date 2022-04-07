@@ -173,7 +173,7 @@ Keyboard::~Keyboard ()
 }
 
 XMLNode&
-Keyboard::get_state (void)
+Keyboard::get_state () const
 {
 	XMLNode* node = new XMLNode ("Keyboard");
 

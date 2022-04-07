@@ -61,7 +61,7 @@ public:
 	~Pane();
 
 	void set_divider (std::vector<float>::size_type divider, float fract);
-	float get_divider (std::vector<float>::size_type divider = 0);
+	float get_divider (std::vector<float>::size_type divider = 0) const;
 	void set_child_minsize (Gtk::Widget const &, int32_t);
 
 	GType child_type_vfunc() const;

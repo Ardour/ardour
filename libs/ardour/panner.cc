@@ -42,7 +42,7 @@ Panner::~Panner ()
 }
 
 XMLNode&
-Panner::get_state ()
+Panner::get_state () const
 {
 	return *(new XMLNode (X_("Panner")));
 }

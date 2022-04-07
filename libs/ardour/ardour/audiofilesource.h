@@ -66,7 +66,7 @@ public:
 	int setup_peakfile ();
 	void set_gain (float g, bool temporarily = false);
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	bool can_truncate_peaks() const { return true; }

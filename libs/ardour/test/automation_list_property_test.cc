@@ -115,7 +115,7 @@ public:
 		add_property (_jim);
 	}
 
-	XMLNode & get_state () {
+	XMLNode & get_state () const {
 		XMLNode* n = new XMLNode ("State");
 		add_properties (*n);
 		return *n;

@@ -51,7 +51,7 @@ class LIBPBD_API Stateful {
 	Stateful ();
 	virtual ~Stateful();
 
-	virtual XMLNode& get_state (void) = 0;
+	virtual XMLNode& get_state () const = 0;
 	virtual int set_state (const XMLNode&, int version) = 0;
 
 	virtual bool apply_change (PropertyBase const &);
@@ -111,7 +111,7 @@ class LIBPBD_API Stateful {
 
 	void add_instant_xml (XMLNode&, const std::string& directory_path);
 	XMLNode *instant_xml (const std::string& str, const std::string& directory_path);
-	void add_properties (XMLNode &);
+	void add_properties (XMLNode &) const;
 
 	PropertyChange set_values (XMLNode const &);
 

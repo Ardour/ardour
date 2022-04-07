@@ -241,7 +241,7 @@ public:
 
 	void foreach_region (boost::function<void(boost::shared_ptr<Region>)>);
 
-	XMLNode&    get_state ();
+	XMLNode&    get_state () const;
 	virtual int set_state (const XMLNode&, int version);
 	XMLNode&    get_template ();
 
@@ -304,7 +304,7 @@ protected:
 	class RegionReadLock : public Glib::Threads::RWLock::ReaderLock
 	{
 	public:
-		RegionReadLock (Playlist* pl)
+		RegionReadLock (Playlist const * pl)
 		    : Glib::Threads::RWLock::ReaderLock (pl->region_lock)
 		{
 		}
@@ -424,7 +424,7 @@ protected:
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 	virtual void region_going_away (boost::weak_ptr<Region> /*region*/) {}
 
-	virtual XMLNode& state (bool);
+	virtual XMLNode& state (bool) const;
 
 	bool add_region_internal (boost::shared_ptr<Region>, timepos_t const & position, ThawList& thawlist);
 

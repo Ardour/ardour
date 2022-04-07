@@ -365,7 +365,7 @@ VBAPanner::distribute_one_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/,
 }
 
 XMLNode&
-VBAPanner::get_state ()
+VBAPanner::get_state () const
 {
 	XMLNode& node (Panner::get_state ());
 	node.set_property (X_ ("uri"), _descriptor.panner_uri);

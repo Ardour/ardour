@@ -52,7 +52,7 @@ public:
 	void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t /*nframes*/, bool /*result_required*/);
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 
 private:
 	XMLNode _state;

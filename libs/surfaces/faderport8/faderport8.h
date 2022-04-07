@@ -75,7 +75,7 @@ public:
 	static bool  probe() { return true; }
 	static void* request_factory (uint32_t);
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	/* configuration GUI */

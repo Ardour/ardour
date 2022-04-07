@@ -127,8 +127,8 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 
 	samplecnt_t read_raw_internal (Sample*, samplepos_t, samplecnt_t, int channel) const;
 
-	XMLNode& state ();
-	XMLNode& get_basic_state ();
+	XMLNode& state () const;
+	XMLNode& get_basic_state () const;
 	int set_state (const XMLNode&, int version);
 
 	void fade_range (samplepos_t, samplepos_t);

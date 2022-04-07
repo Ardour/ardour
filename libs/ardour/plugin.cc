@@ -541,7 +541,7 @@ Plugin::set_state (const XMLNode& node, int /*version*/)
 }
 
 XMLNode &
-Plugin::get_state ()
+Plugin::get_state () const
 {
 	XMLNode* root = new XMLNode (state_node_name ());
 

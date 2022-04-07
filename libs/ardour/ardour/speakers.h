@@ -52,7 +52,7 @@ public:
 
 	void dump_speakers (std::ostream&);
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	PBD::Signal0<void> Changed;

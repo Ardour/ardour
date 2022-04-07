@@ -49,7 +49,7 @@ class MIDISceneChange : public SceneChange
 	size_t get_bank_lsb_message (uint8_t* buf, size_t size) const;
 	size_t get_program_message (uint8_t* buf, size_t size) const;
 
-	XMLNode& get_state();
+	XMLNode& get_state() const;
 	int set_state (const XMLNode&, int version);
 
 	bool operator==(const MIDISceneChange& other) const;

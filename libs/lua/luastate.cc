@@ -72,7 +72,7 @@ LuaState::do_file (std::string fn) {
 }
 
 void
-LuaState::collect_garbage () {
+LuaState::collect_garbage () const {
 	lua_gc (L, LUA_GCCOLLECT, 0);
 }
 

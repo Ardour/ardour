@@ -107,7 +107,7 @@ Source::fix_writable_flags ()
 }
 
 XMLNode&
-Source::get_state ()
+Source::get_state () const
 {
 	XMLNode *node = new XMLNode (X_("Source"));
 

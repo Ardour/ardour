@@ -126,7 +126,7 @@ class LIBMIDIPP_API Port {
 	    Flags flags;
 
 	    Descriptor (const XMLNode&);
-	    XMLNode& get_state();
+	    XMLNode& get_state() const;
 	};
 
 	static std::string state_node_name;

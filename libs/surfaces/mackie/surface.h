@@ -193,7 +193,7 @@ public:
 
 	void master_monitor_may_have_changed ();
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	bool get_qcon_flag() { return is_qcon; }

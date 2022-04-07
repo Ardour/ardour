@@ -2290,7 +2290,7 @@ Playlist::set_state (const XMLNode& node, int version)
 }
 
 XMLNode&
-Playlist::get_state ()
+Playlist::get_state () const
 {
 	return state (true);
 }
@@ -2304,7 +2304,7 @@ Playlist::get_template ()
 /** @param full_state true to include regions in the returned state, otherwise false.
  */
 XMLNode&
-Playlist::state (bool full_state)
+Playlist::state (bool full_state) const
 {
 	XMLNode* node = new XMLNode (X_("Playlist"));
 

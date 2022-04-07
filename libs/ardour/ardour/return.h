@@ -61,7 +61,7 @@ public:
 	static std::string name_and_id_new_return (Session&, uint32_t&);
 
 protected:
-	XMLNode& state();
+	XMLNode& state() const;
 
 	bool _metering;
 	boost::shared_ptr<GainControl> _gain_control;

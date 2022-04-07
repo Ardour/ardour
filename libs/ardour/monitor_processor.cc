@@ -228,7 +228,7 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
 }
 
 XMLNode&
-MonitorProcessor::state ()
+MonitorProcessor::state () const
 {
 	XMLNode& node(Processor::state ());
 

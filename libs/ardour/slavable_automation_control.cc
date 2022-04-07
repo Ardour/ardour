@@ -656,7 +656,7 @@ SlavableAutomationControl::use_saved_master_ratios ()
 
 
 XMLNode&
-SlavableAutomationControl::get_state ()
+SlavableAutomationControl::get_state () const
 {
 	XMLNode& node (AutomationControl::get_state());
 
@@ -666,7 +666,7 @@ SlavableAutomationControl::get_state ()
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
 		if (!_masters.empty()) {
 			XMLNode* masters_node = new XMLNode (X_("masters"));
-			for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+			for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
 				XMLNode* mnode = new XMLNode (X_("master"));
 				mnode->set_property (X_("id"), mr->second.master()->id());
 

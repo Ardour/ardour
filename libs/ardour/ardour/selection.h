@@ -76,7 +76,7 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 
 	void get_stripables (StripableAutomationControls&) const;
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
   protected:

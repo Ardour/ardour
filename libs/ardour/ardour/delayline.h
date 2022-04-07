@@ -51,7 +51,7 @@ public:
 	void flush ();
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 
 private:
 	void allocate_pending_buffers (samplecnt_t, ChanCount const&);

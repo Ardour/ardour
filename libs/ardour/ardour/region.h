@@ -345,7 +345,7 @@ public:
 
 	/* serialization */
 
-	XMLNode&         get_state ();
+	XMLNode&         get_state () const;
 	virtual int      set_state (const XMLNode&, int version);
 
 	virtual bool do_export (std::string const&) const = 0;
@@ -422,7 +422,7 @@ public:
 	void rename_cue_marker (CueMarker&, std::string const &);
 
 protected:
-	virtual XMLNode& state ();
+	virtual XMLNode& state () const;
 
 	friend class RegionFactory;
 

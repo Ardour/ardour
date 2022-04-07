@@ -82,7 +82,7 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	static const std::string state_node_name;
 
 	int set_state (const XMLNode&, int version);
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 
         PBD::Signal1<void,ControlProtocolInfo*> ProtocolStatusChange;
 
@@ -93,7 +93,7 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	ControlProtocolManager ();
 	static ControlProtocolManager* _instance;
 
-	Glib::Threads::RWLock protocols_lock;
+	mutable Glib::Threads::RWLock protocols_lock;
 	std::list<ControlProtocol*>    control_protocols;
 
 	void session_going_away ();

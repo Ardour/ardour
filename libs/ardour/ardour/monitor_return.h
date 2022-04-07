@@ -34,7 +34,7 @@ public:
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 
 	uint32_t _nch;
 	gain_t   _gain;

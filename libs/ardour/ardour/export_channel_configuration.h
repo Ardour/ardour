@@ -48,7 +48,7 @@ class LIBARDOUR_API ExportChannelConfiguration : public boost::enable_shared_fro
 	bool operator== (ExportChannelConfiguration const & other) const { return channels == other.channels; }
 	bool operator!= (ExportChannelConfiguration const & other) const { return channels != other.channels; }
 
-	XMLNode & get_state ();
+	XMLNode & get_state () const;
 	int set_state (const XMLNode &);
 
 	typedef std::list<ExportChannelPtr> ChannelList;

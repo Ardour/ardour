@@ -154,7 +154,7 @@ MuteMaster::set_state (const XMLNode& node, int /*version*/)
 }
 
 XMLNode&
-MuteMaster::get_state()
+MuteMaster::get_state() const
 {
 	XMLNode* node = new XMLNode (xml_node_name);
 	node->set_property ("mute-point", _mute_point);

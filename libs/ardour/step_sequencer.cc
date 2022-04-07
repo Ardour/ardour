@@ -437,7 +437,7 @@ Step::reschedule (Temporal::Beats const & start, Temporal::Beats const & offset)
 }
 
 XMLNode&
-Step::get_state ()
+Step::get_state () const
 {
 	return *new XMLNode (X_("Step"));
 }
@@ -555,7 +555,7 @@ StepSequence::step (size_t n) const
 
 
 XMLNode&
-StepSequence::get_state()
+StepSequence::get_state() const
 {
 	return *new XMLNode (X_("StepSequence"));
 }
@@ -747,7 +747,7 @@ StepSequencer::set_end_step (size_t n)
 }
 
 XMLNode&
-StepSequencer::get_state()
+StepSequencer::get_state() const
 {
 	return *new XMLNode (X_("StepSequencer"));
 }

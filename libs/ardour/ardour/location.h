@@ -158,9 +158,9 @@ public:
 	/* CD Track / CD-Text info */
 
 	std::map<std::string, std::string> cd_info;
-	XMLNode& cd_info_node (const std::string &, const std::string &);
+	static XMLNode& cd_info_node (const std::string &, const std::string &);
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	Temporal::TimeDomain position_time_domain() const { return _start.time_domain(); }
@@ -216,7 +216,7 @@ public:
 
 	void ripple (timepos_t const & at, timecnt_t const & distance, bool include_locked, bool notify);
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 	Location *get_location_by_id(PBD::ID);
 

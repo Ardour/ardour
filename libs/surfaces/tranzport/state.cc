@@ -48,7 +48,7 @@ using namespace PBD;
 // FIXME: How to handle multiple tranzports in a system?
 
 XMLNode&
-TranzportControlProtocol::get_state ()
+TranzportControlProtocol::get_state () const
 {
 	return ControlProtocol::get_state();
 }

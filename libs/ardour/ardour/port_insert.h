@@ -81,7 +81,7 @@ public:
 	static std::string name_and_id_new_insert (Session&, uint32_t&);
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 private:
 	/* disallow copy construction */
 	PortInsert (const PortInsert&);

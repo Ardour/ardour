@@ -789,7 +789,7 @@ AudioRegion::read_from_sources (SourceList const & srcs, samplecnt_t limit, Samp
 }
 
 XMLNode&
-AudioRegion::get_basic_state ()
+AudioRegion::get_basic_state () const
 {
 	XMLNode& node (Region::state ());
 
@@ -799,7 +799,7 @@ AudioRegion::get_basic_state ()
 }
 
 XMLNode&
-AudioRegion::state ()
+AudioRegion::state () const
 {
 	XMLNode& node (get_basic_state());
 	XMLNode *child;

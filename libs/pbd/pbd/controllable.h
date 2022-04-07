@@ -146,7 +146,7 @@ public:
 	PBD::Signal2<void,bool,PBD::Controllable::GroupControlDisposition> Changed;
 
 	int set_state (const XMLNode&, int version);
-	virtual XMLNode& get_state ();
+	virtual XMLNode& get_state () const;
 
 	std::string name() const { return _name; }
 

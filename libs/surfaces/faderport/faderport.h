@@ -86,7 +86,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	static bool probe() { return true; }
 	static void* request_factory (uint32_t);
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	bool has_editor () const { return true; }

@@ -85,7 +85,7 @@ SurfacePort::~SurfacePort()
 }
 
 XMLNode&
-SurfacePort::get_state ()
+SurfacePort::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Port"));
 

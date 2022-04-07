@@ -45,7 +45,7 @@ MonitorControl::actually_set_value (double val, Controllable::GroupControlDispos
 }
 
 XMLNode&
-MonitorControl::get_state ()
+MonitorControl::get_state () const
 {
 	XMLNode& node (SlavableAutomationControl::get_state());
 	node.set_property (X_("monitoring"), _monitoring);

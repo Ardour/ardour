@@ -43,7 +43,7 @@ public:
 	virtual void undo() = 0;
 	virtual void redo() { (*this)(); }
 
-	virtual XMLNode &get_state();
+	virtual XMLNode& get_state() const;
 	virtual int set_state(const XMLNode&, int /*version*/) { /* noop */ return 0; }
 
 	virtual bool empty () const {

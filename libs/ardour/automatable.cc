@@ -308,7 +308,7 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 }
 
 XMLNode&
-Automatable::get_automation_xml_state ()
+Automatable::get_automation_xml_state () const
 {
 	Glib::Threads::Mutex::Lock lm (control_lock());
 	XMLNode* node = new XMLNode (Automatable::xml_node_name);
@@ -317,7 +317,7 @@ Automatable::get_automation_xml_state ()
 		return *node;
 	}
 
-	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
+	for (Controls::const_iterator li = controls().begin(); li != controls().end(); ++li) {
 		boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(li->second->list());
 		if (l) {
 			node->add_child_nocopy (l->get_state ());

@@ -2518,7 +2518,7 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const& inx, Chan
 
 
 XMLNode&
-PluginInsert::state ()
+PluginInsert::state () const
 {
 	XMLNode& node = Processor::state ();
 
@@ -2538,9 +2538,9 @@ PluginInsert::state ()
 	for (uint32_t pc = 0; pc < get_count(); ++pc) {
 		char tmp[128];
 		snprintf (tmp, sizeof(tmp), "InputMap-%d", pc);
-		node.add_child_nocopy (* _in_map[pc].state (tmp));
+		node.add_child_nocopy (* _in_map.p (pc).state (tmp));
 		snprintf (tmp, sizeof(tmp), "OutputMap-%d", pc);
-		node.add_child_nocopy (* _out_map[pc].state (tmp));
+		node.add_child_nocopy (* _out_map.p (pc).state (tmp));
 	}
 	node.add_child_nocopy (* _thru_map.state ("ThruMap"));
 
@@ -2551,7 +2551,7 @@ PluginInsert::state ()
 	_plugins[0]->set_insert_id(this->id());
 	node.add_child_nocopy (_plugins[0]->get_state());
 
-	for (Controls::iterator c = controls().begin(); c != controls().end(); ++c) {
+	for (Controls::const_iterator c = controls().begin(); c != controls().end(); ++c) {
 		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> ((*c).second);
 		if (ac) {
 			node.add_child_nocopy (ac->get_state());
@@ -3085,7 +3085,7 @@ PluginInsert::PluginControl::catch_up_with_external_value (double user_val)
 }
 
 XMLNode&
-PluginInsert::PluginControl::get_state ()
+PluginInsert::PluginControl::get_state () const
 {
 	XMLNode& node (AutomationControl::get_state());
 	node.set_property (X_("parameter"), parameter().id());
@@ -3155,7 +3155,7 @@ PluginInsert::PluginPropertyControl::actually_set_value (double user_val, Contro
 }
 
 XMLNode&
-PluginInsert::PluginPropertyControl::get_state ()
+PluginInsert::PluginPropertyControl::get_state () const
 {
 	XMLNode& node (AutomationControl::get_state());
 	node.set_property (X_("property"), parameter().id());

@@ -761,7 +761,7 @@ LaunchControlXL::notify_parameter_changed (std::string param)
 /* connection handling */
 
 XMLNode&
-LaunchControlXL::get_state()
+LaunchControlXL::get_state() const
 {
 	XMLNode& node (ControlProtocol::get_state());
 	XMLNode* child;

@@ -554,7 +554,7 @@ Location::cd_info_node(const string & name, const string & value)
 
 
 XMLNode&
-Location::get_state ()
+Location::get_state () const
 {
 	XMLNode *node = new XMLNode ("Location");
 
@@ -1105,14 +1105,13 @@ Locations::remove (Location *loc)
 }
 
 XMLNode&
-Locations::get_state ()
+Locations::get_state () const
 {
 	XMLNode *node = new XMLNode ("Locations");
-	LocationList::iterator iter;
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 
-	for (iter = locations.begin(); iter != locations.end(); ++iter) {
-		node->add_child_nocopy ((*iter)->get_state ());
+	for (auto const & l : locations) {
+		node->add_child_nocopy (l->get_state ());
 	}
 
 	return *node;

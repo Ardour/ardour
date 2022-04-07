@@ -138,8 +138,8 @@ class LIBARDOUR_API SessionMetadata : public PBD::StatefulDestructible
 	void av_export_tag (MetaDataMap&) const;
 
 	/*** Serialization ***/
-	XMLNode & get_state ();  //serializes stuff in the map, to be stored in session file
-	XMLNode & get_user_state ();  //serializes stuff in the user_map, to be stored in user's config file
+	XMLNode& get_state () const;  //serializes stuff in the map, to be stored in session file
+	XMLNode& get_user_state ();  //serializes stuff in the user_map, to be stored in user's config file
 	int set_state (const XMLNode &, int version_num);
 
   private:
@@ -151,7 +151,7 @@ class LIBARDOUR_API SessionMetadata : public PBD::StatefulDestructible
 	PropertyMap map;
 	PropertyMap user_map;
 
-	XMLNode * get_xml (const std::string & name);
+	XMLNode * get_xml (const std::string & name) const;
 
 	std::string get_value (const std::string & name) const;
 	uint32_t get_uint_value (const std::string & name) const;

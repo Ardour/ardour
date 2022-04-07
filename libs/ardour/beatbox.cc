@@ -78,13 +78,13 @@ BeatBox::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 }
 
 XMLNode&
-BeatBox::get_state(void)
+BeatBox::get_state () const
 {
 	return state ();
 }
 
 XMLNode&
-BeatBox::state()
+BeatBox::state() const
 {
 	XMLNode& node = Processor::state();
 	node.set_property ("type", "beatbox");

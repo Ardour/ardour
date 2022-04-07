@@ -756,7 +756,7 @@ FaderPort::midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::As
 
 
 XMLNode&
-FaderPort::get_state ()
+FaderPort::get_state () const
 {
 	XMLNode& node (ControlProtocol::get_state());
 

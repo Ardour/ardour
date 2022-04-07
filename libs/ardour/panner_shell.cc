@@ -159,7 +159,7 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 }
 
 XMLNode&
-PannerShell::get_state ()
+PannerShell::get_state () const
 {
 	XMLNode* node = new XMLNode ("PannerShell");
 

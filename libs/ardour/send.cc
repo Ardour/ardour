@@ -274,7 +274,7 @@ Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, do
 }
 
 XMLNode&
-Send::state ()
+Send::state () const
 {
 	XMLNode& node = Delivery::state ();
 

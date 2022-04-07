@@ -80,7 +80,7 @@ InternalReturn::set_playback_offset (samplecnt_t cnt)
 }
 
 XMLNode&
-InternalReturn::state ()
+InternalReturn::state () const
 {
 	XMLNode& node (Processor::state ());
 	/* override type */

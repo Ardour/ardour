@@ -557,7 +557,7 @@ Trigger::unbang ()
 }
 
 XMLNode&
-Trigger::get_state (void)
+Trigger::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Trigger"));
 
@@ -1312,7 +1312,7 @@ AudioTrigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
 }
 
 XMLNode&
-AudioTrigger::get_state (void)
+AudioTrigger::get_state () const
 {
 	XMLNode& node (Trigger::get_state());
 
@@ -2339,7 +2339,7 @@ MIDITrigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
 }
 
 XMLNode&
-MIDITrigger::get_state (void)
+MIDITrigger::get_state () const
 {
 	XMLNode& node (Trigger::get_state());
 
@@ -4143,7 +4143,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 }
 
 XMLNode&
-TriggerBox::get_state (void)
+TriggerBox::get_state () const
 {
 	XMLNode& node (Processor::get_state ());
 
@@ -4154,8 +4154,8 @@ TriggerBox::get_state (void)
 
 	{
 		Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
-		for (Triggers::iterator t = all_triggers.begin(); t != all_triggers.end(); ++t) {
-			trigger_child->add_child_nocopy ((*t)->get_state());
+		for (auto const & t : all_triggers) {
+			trigger_child->add_child_nocopy (t->get_state());
 		}
 	}
 

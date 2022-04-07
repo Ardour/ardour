@@ -33,7 +33,7 @@ public:
 
 	int do_command (std::string);
 	int do_file (std::string);
-	void collect_garbage ();
+	void collect_garbage () const;
 	void collect_garbage_step (int debt = 0);
 	void tweak_rt_gc ();
 	void sandbox (bool rt_safe = false);

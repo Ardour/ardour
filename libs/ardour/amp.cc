@@ -322,7 +322,7 @@ Amp::apply_simple_gain (AudioBuffer& buf, samplecnt_t nframes, gain_t target, sa
 }
 
 XMLNode&
-Amp::state ()
+Amp::state () const
 {
 	XMLNode& node (Processor::state ());
 	switch (_gain_control->parameter().type()) {

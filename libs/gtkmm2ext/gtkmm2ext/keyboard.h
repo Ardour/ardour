@@ -50,7 +50,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	Keyboard ();
 	~Keyboard ();
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	virtual void setup_keybindings () = 0;

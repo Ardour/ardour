@@ -330,7 +330,7 @@ Panner1in2out::factory (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speaker
 }
 
 XMLNode&
-Panner1in2out::get_state ()
+Panner1in2out::get_state () const
 {
 	XMLNode& root (Panner::get_state ());
 	root.set_property (X_ ("uri"), _descriptor.panner_uri);

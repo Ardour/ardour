@@ -232,7 +232,7 @@ Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, b
 }
 
 XMLNode&
-Surface::get_state()
+Surface::get_state() const
 {
 	XMLNode* node = new XMLNode (X_("Surface"));
 	node->set_property (X_("name"), _name);

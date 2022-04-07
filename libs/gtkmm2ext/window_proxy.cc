@@ -156,7 +156,7 @@ WindowProxy::xml_node_name()
 }
 
 XMLNode&
-WindowProxy::get_state ()
+WindowProxy::get_state () const
 {
 	XMLNode* node = new XMLNode (xml_node_name());
 

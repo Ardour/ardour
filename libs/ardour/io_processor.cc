@@ -116,7 +116,7 @@ IOProcessor::set_output (boost::shared_ptr<IO> io)
 }
 
 XMLNode&
-IOProcessor::state ()
+IOProcessor::state () const
 {
 	XMLNode& node (Processor::state ());
 

@@ -1218,7 +1218,7 @@ Region::set_layer (layer_t l)
 }
 
 XMLNode&
-Region::state ()
+Region::state () const
 {
 	XMLNode *node = new XMLNode ("Region");
 	char buf2[64];
@@ -1300,7 +1300,7 @@ Region::state ()
 }
 
 XMLNode&
-Region::get_state ()
+Region::get_state () const
 {
 	return state ();
 }

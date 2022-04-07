@@ -166,7 +166,7 @@ DiskReader::set_name (string const& str)
 }
 
 XMLNode&
-DiskReader::state ()
+DiskReader::state () const
 {
 	XMLNode& node (DiskIOProcessor::state ());
 	node.set_property (X_("type"), X_("diskreader"));

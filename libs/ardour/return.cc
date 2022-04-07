@@ -65,7 +65,7 @@ Return::~Return ()
 }
 
 XMLNode&
-Return::state()
+Return::state() const
 {
 	XMLNode& node = IOProcessor::state ();
 	node.set_property ("type", "return");

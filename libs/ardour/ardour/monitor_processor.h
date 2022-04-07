@@ -129,7 +129,7 @@ public:
 
 	void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t /*nframes*/, bool /*result_required*/);
 
-	XMLNode& state ();
+	XMLNode& state () const;
 	int set_state (const XMLNode&, int /* version */);
 
 	bool configure_io (ChanCount in, ChanCount out);

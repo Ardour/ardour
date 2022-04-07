@@ -975,7 +975,7 @@ Push2::notify_solo_active_changed (bool yn)
 }
 
 XMLNode&
-Push2::get_state()
+Push2::get_state() const
 {
 	XMLNode& node (ControlProtocol::get_state());
 	XMLNode* child;

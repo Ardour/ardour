@@ -65,7 +65,7 @@ public:
 	virtual Gtk::Window* get (bool create = false) = 0;
 
 	virtual int set_state (const XMLNode&, int version);
-	virtual XMLNode& get_state ();
+	virtual XMLNode& get_state () const;
 
 	enum StateMask {
 		Position = 0x1,

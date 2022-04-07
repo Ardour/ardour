@@ -72,13 +72,13 @@ public:
 	bool writing() const { return _auto_state == Write; }
 	bool touch_enabled() const { return _auto_state & (Touch | Latch); }
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	bool has_state() const { return _has_state; }
 
 protected:
-	virtual XMLNode& state ();
+	virtual XMLNode& state () const;
 
 	boost::weak_ptr<Panner> _panner;
 	AutoState _auto_state;

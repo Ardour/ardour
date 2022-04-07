@@ -432,7 +432,7 @@ DelayLine::flush ()
 }
 
 XMLNode&
-DelayLine::state ()
+DelayLine::state () const
 {
 	XMLNode& node (Processor::state ());
 	node.set_property ("type", "delay");

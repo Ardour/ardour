@@ -41,7 +41,7 @@ public:
 	}
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 
 private:
 	boost::shared_ptr<PhaseControl> _control;

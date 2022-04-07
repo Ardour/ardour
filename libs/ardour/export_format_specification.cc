@@ -68,7 +68,7 @@ ExportFormatSpecification::Time::get_samples_at (samplepos_t position, samplecnt
 }
 
 XMLNode &
-ExportFormatSpecification::Time::get_state ()
+ExportFormatSpecification::Time::get_state () const
 {
 
 	XMLNode * node = new XMLNode ("Duration");
@@ -274,7 +274,7 @@ ExportFormatSpecification::~ExportFormatSpecification ()
 }
 
 XMLNode &
-ExportFormatSpecification::get_state ()
+ExportFormatSpecification::get_state () const
 {
 	XMLNode * node;
 	XMLNode * root = new XMLNode ("ExportFormatSpecification");

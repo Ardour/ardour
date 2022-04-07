@@ -73,7 +73,7 @@ class Maschine2: public ARDOUR::ControlProtocol, public AbstractUI<Maschine2Requ
 #endif
 
 		int set_active (bool yn);
-		XMLNode& get_state ();
+	XMLNode& get_state () const;
 		int set_state (const XMLNode & node, int version);
 
 		Maschine2Canvas* canvas () const { return _canvas; }

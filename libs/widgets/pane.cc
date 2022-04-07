@@ -593,9 +593,9 @@ Pane::set_divider (Dividers::size_type div, float fract)
 }
 
 float
-Pane::get_divider (Dividers::size_type div)
+Pane::get_divider (Dividers::size_type div) const
 {
-	Dividers::iterator d = dividers.begin();
+	Dividers::const_iterator d = dividers.begin();
 
 	for (d = dividers.begin(); d != dividers.end() && div != 0; ++d, --div) {
 		/* relax */

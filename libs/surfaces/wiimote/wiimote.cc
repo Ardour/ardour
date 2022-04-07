@@ -85,7 +85,7 @@ WiimoteControlProtocol::set_active (bool yn)
 }
 
 XMLNode&
-WiimoteControlProtocol::get_state ()
+WiimoteControlProtocol::get_state () const
 {
 	XMLNode& node (ControlProtocol::get_state());
 	node.set_property (X_("feedback"), "0");

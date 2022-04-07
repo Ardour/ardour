@@ -150,7 +150,7 @@ public:
 		_global_port_buffer_offset += n;
 	}
 
-	virtual XMLNode& get_state (void) const;
+	virtual XMLNode& get_state () const;
 	virtual int set_state (const XMLNode&, int version);
 
 	static std::string state_node_name;

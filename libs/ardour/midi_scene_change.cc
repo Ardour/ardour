@@ -96,7 +96,7 @@ MIDISceneChange::get_program_message (uint8_t* buf, size_t size) const
 }
 
 XMLNode&
-MIDISceneChange::get_state ()
+MIDISceneChange::get_state () const
 {
 	XMLNode* node = new XMLNode (SceneChange::xml_node_name);
 

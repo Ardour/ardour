@@ -77,7 +77,7 @@ public:
 	Plugin (const Plugin&);
 	virtual ~Plugin ();
 
-	XMLNode&    get_state ();
+	XMLNode&    get_state () const;
 	virtual int set_state (const XMLNode&, int version);
 
 	virtual void set_insert_id (PBD::ID id) {}

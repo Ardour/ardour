@@ -179,13 +179,13 @@ Pannable::stop_touch (timepos_t const & when)
 }
 
 XMLNode&
-Pannable::get_state ()
+Pannable::get_state () const
 {
 	return state ();
 }
 
 XMLNode&
-Pannable::state ()
+Pannable::state () const
 {
 	XMLNode* node = new XMLNode (X_("Pannable"));
 

@@ -228,7 +228,7 @@ MidiTrack::set_state (const XMLNode& node, int version)
 }
 
 XMLNode&
-MidiTrack::state(bool save_template)
+MidiTrack::state(bool save_template) const
 {
 	XMLNode& root (Track::state (save_template));
 	XMLNode* freeze_node;
@@ -242,7 +242,7 @@ MidiTrack::state(bool save_template)
 		freeze_node->set_property ("playlist-id", _freeze_record.playlist->id().to_s());
 		freeze_node->set_property ("state", _freeze_record.state);
 
-		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
+		for (vector<FreezeRecordProcessorInfo*>::const_iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
 			inode = new XMLNode (X_("processor"));
 			inode->set_property (X_("id"), id());
 			inode->add_child_copy ((*i)->state);

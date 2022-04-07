@@ -163,7 +163,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 
 	virtual void session_saved();
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
 	bool length_mutable() const { return true; }

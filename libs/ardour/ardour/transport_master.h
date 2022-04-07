@@ -355,7 +355,7 @@ public:
 	void set_name (std::string const&);
 
 	int      set_state (XMLNode const&, int);
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
 	static const std::string state_node_name;
 	static void              make_property_quarks ();
@@ -435,7 +435,7 @@ protected:
 
 	boost::shared_ptr<Port> _port;
 
-	XMLNode port_node;
+	mutable XMLNode port_node;
 
 	virtual void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 

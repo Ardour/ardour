@@ -64,7 +64,7 @@ public:
 	static PBD::Signal1<void, pframes_t> CycleStart;
 
 protected:
-	XMLNode& state();
+	XMLNode& state() const;
 
 private:
 	BufferSet mixbufs;

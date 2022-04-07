@@ -114,7 +114,7 @@ public:
 	static std::string name_and_id_new_send (Session&, Delivery::Role r, uint32_t&, bool);
 
 protected:
-	XMLNode& state ();
+	XMLNode& state () const;
 
 	bool _metering;
 	boost::shared_ptr<GainControl> _gain_control;

@@ -131,7 +131,7 @@ AudioSource::~AudioSource ()
 }
 
 XMLNode&
-AudioSource::get_state ()
+AudioSource::get_state () const
 {
 	XMLNode& node (Source::get_state());
 

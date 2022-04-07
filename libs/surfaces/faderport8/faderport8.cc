@@ -760,7 +760,7 @@ FaderPort8::get_button_action (FP8Controls::ButtonId id, bool press)
  * Persistent State
  */
 XMLNode&
-FaderPort8::get_state ()
+FaderPort8::get_state () const
 {
 	DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::get_state\n");
 	XMLNode& node (ControlProtocol::get_state());

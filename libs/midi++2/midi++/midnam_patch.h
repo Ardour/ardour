@@ -110,7 +110,7 @@ public:
 
 	const PatchPrimaryKey&   patch_primary_key()   const { return _id; }
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
@@ -137,7 +137,7 @@ public:
 
 	int set_patch_name_list (const PatchNameList&);
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
@@ -206,7 +206,7 @@ public:
 	const std::string& note_list_name()    const { return _note_list_name; }
 	const std::string& control_list_name() const { return _control_list_name; }
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int      set_state (const XMLTree&, const XMLNode&);
 
 	void set_patch_banks (const PatchBanks&);
@@ -239,7 +239,7 @@ public:
 	uint8_t number() const             { return _number; }
 	void    set_number(uint8_t number) { _number = number; }
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
@@ -260,7 +260,7 @@ public:
 
 	void set_name(const std::string& name) { _name = name; }
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
@@ -284,7 +284,7 @@ public:
 	void set_number(uint16_t number)       { _number = number; }
 	void set_name(const std::string& name) { _name = name; }
 
-	XMLNode& get_state(void);
+	XMLNode& get_state () const;
 	int      set_state(const XMLTree&, const XMLNode&);
 
 private:
@@ -309,7 +309,7 @@ public:
 
 	const Values& values() const { return _values; }
 
-	XMLNode& get_state(void);
+	XMLNode& get_state () const;
 	int      set_state(const XMLTree&, const XMLNode&);
 
 private:
@@ -340,7 +340,7 @@ public:
 	void set_number(uint16_t number)       { _number = number; }
 	void set_name(const std::string& name) { _name = name; }
 
-	XMLNode& get_state(void);
+	XMLNode& get_state () const;
 	int      set_state(const XMLTree&, const XMLNode&);
 
 private:
@@ -368,7 +368,7 @@ public:
 
 	const Controls& controls() const { return _controls; }
 
-	XMLNode& get_state(void);
+	XMLNode& get_state () const;
 	int      set_state(const XMLTree&, const XMLNode&);
 
 private:
@@ -386,7 +386,7 @@ public:
 	void set_name(const std::string& name) { _name = name; }
 
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int      set_state (const XMLTree&, const XMLNode&);
 
 	/// Note: channel here is 0-based while in the MIDNAM-file it's 1-based
@@ -450,7 +450,7 @@ public:
 	                      uint8_t            program,
 	                      uint8_t            number);
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
@@ -487,7 +487,7 @@ public:
 
 	const MasterDeviceNames::Models& all_models() const { return _all_models; }
 
-	XMLNode& get_state (void);
+	XMLNode& get_state () const;
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:

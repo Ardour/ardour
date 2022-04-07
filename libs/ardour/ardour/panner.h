@@ -128,7 +128,7 @@ public:
 	                                   pan_t** buffers);
 
 	int set_state (const XMLNode&, int version);
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 
 	boost::shared_ptr<Pannable> pannable() const { return _pannable; }
 

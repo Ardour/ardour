@@ -136,7 +136,7 @@ protected:
 		void resize (samplecnt_t);
 	};
 
-	virtual XMLNode& state ();
+	virtual XMLNode& state () const;
 
 	int use_playlist (DataType, boost::shared_ptr<Playlist>);
 

@@ -312,7 +312,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void  tear_down_gui ();
 
 	int set_active (bool yn);
-	XMLNode& get_state();
+	XMLNode& get_state() const;
 	int set_state (const XMLNode & node, int version);
 
 	PBD::Signal0<void> ConnectionChange;

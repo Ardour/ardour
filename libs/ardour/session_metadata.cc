@@ -107,7 +107,7 @@ SessionMetadata::~SessionMetadata ()
 }
 
 XMLNode *
-SessionMetadata::get_xml (const string & name)
+SessionMetadata::get_xml (const string & name) const
 {
 	string value = get_value (name);
 	if (value.empty()) {
@@ -173,7 +173,7 @@ SessionMetadata::set_value (const string & name, uint32_t value)
 
 /*** Serialization ***/
 XMLNode &
-SessionMetadata::get_state ()
+SessionMetadata::get_state () const
 {
 	XMLNode * node = new XMLNode ("Metadata");
 	XMLNode * prop;
