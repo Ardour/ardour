@@ -44,7 +44,7 @@ std::string Tempo::xml_node_name = X_("Tempo");
 std::string Meter::xml_node_name = X_("Meter");
 
 SerializedRCUManager<TempoMap> TempoMap::_map_mgr (0);
-thread_local TempoMap::SharedPtr TempoMap::_tempo_map_p;
+thread_local TempoMap::WritableSharedPtr TempoMap::_tempo_map_p;
 PBD::Signal0<void> TempoMap::MapChanged;
 
 void
@@ -1802,7 +1802,7 @@ TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
 }
 
 void
-TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, uint32_t bar_mod)
+TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, uint32_t bar_mod) const
 {
 	/* note: @param bar_mod is "bar modulo", and describes the N in "give
 	   me every Nth bar". If the caller wants every 4th bar, bar_mod ==
@@ -2119,7 +2119,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 }
 
 uint32_t
-TempoMap::count_bars (Beats const & start, Beats const & end)
+TempoMap::count_bars (Beats const & start, Beats const & end) const
 {
 	TempoMapPoints bar_grid;
 	superclock_t s (superclock_at (start));
@@ -3181,7 +3181,7 @@ void
 TempoMap::MementoBinder::set_state (XMLNode const & node, int version) const
 {
 	/* fetch a writable copy of this thread's tempo map */
-	TempoMap::SharedPtr map (write_copy());
+	TempoMap::WritableSharedPtr map (write_copy());
 	/* change the state of the copy */
 	map->set_state (node, version);
 	/* do the update step of RCU. This will also update this thread's map pointer */
@@ -3191,19 +3191,19 @@ TempoMap::MementoBinder::set_state (XMLNode const & node, int version) const
 void
 TempoMap::init ()
 {
-	SharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
+	WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
 	_map_mgr.init (new_map);
 	fetch ();
 }
 
-TempoMap::SharedPtr
+TempoMap::WritableSharedPtr
 TempoMap::write_copy()
 {
 	return _map_mgr.write_copy();
 }
 
 int
-TempoMap::update (TempoMap::SharedPtr m)
+TempoMap::update (TempoMap::WritableSharedPtr m)
 {
 	if (!_map_mgr.update (m)) {
 		return -1;
@@ -3231,7 +3231,7 @@ TempoMap::abort_update ()
 }
 
 void
-TempoMap::midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_pos, uint32_t& clk_beat)
+TempoMap::midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_pos, uint32_t& clk_beat) const
 {
 	/* Sequences are always assumed to start on a MIDI Beat of 0 (ie, the downbeat).
 	 *

@@ -99,7 +99,7 @@ TempoMapImporter::_cancel_move ()
 void
 TempoMapImporter::_move ()
 {
-	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 	tmap->set_state (xml_tempo_map, Stateful::current_state_version);
 	TempoMap::update (tmap);
 }

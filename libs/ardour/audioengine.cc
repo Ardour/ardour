@@ -289,7 +289,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		thread_init_callback (NULL);
 	}
 
-	Temporal::TempoMap::SharedPtr current_map = Temporal::TempoMap::read ();
+	Temporal::TempoMap::WritableSharedPtr current_map = Temporal::TempoMap::read ();
 	if (current_map != Temporal::TempoMap::use()) {
 		Temporal::TempoMap::set (current_map);
 		if (_session) {

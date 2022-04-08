@@ -598,7 +598,7 @@ class /*LIBTEMPORAL_API*/ MusicTimePoint :  public bartime_hook, public virtual 
 class LIBTEMPORAL_API TempoMapPoint : public Point, public TempoMetric
 {
   public:
-	TempoMapPoint (TempoMap & map, TempoMetric const & tm, superclock_t sc, Beats const & q, BBT_Time const & bbt)
+	TempoMapPoint (TempoMap const & map, TempoMetric const & tm, superclock_t sc, Beats const & q, BBT_Time const & bbt)
 		: Point (map, sc, q, bbt), TempoMetric (tm), _floating (false) {}
 	~TempoMapPoint () {}
 
@@ -658,23 +658,34 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 *
 	 */
   public:
-	typedef boost::shared_ptr<TempoMap> SharedPtr;
+	typedef boost::shared_ptr<TempoMap const> SharedPtr;
+	typedef boost::shared_ptr<TempoMap> WritableSharedPtr;
   private:
-	static thread_local SharedPtr _tempo_map_p;
+	static thread_local WritableSharedPtr _tempo_map_p;
 	static SerializedRCUManager<TempoMap> _map_mgr;
   public:
 	LIBTEMPORAL_API static void init ();
 
-	LIBTEMPORAL_API static void update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
+	LIBTEMPORAL_API static void      update_thread_tempo_map() { _tempo_map_p = _map_mgr.reader(); }
 	LIBTEMPORAL_API static SharedPtr use() { assert (_tempo_map_p); return _tempo_map_p; }
-	LIBTEMPORAL_API static SharedPtr fetch() { update_thread_tempo_map(); return use(); }
-	LIBTEMPORAL_API static SharedPtr read() { return _map_mgr.reader(); }
-	LIBTEMPORAL_API static void      set (SharedPtr new_map) { _tempo_map_p = new_map; /* new_map must have been fetched with read() */ }
+	LIBTEMPORAL_API static SharedPtr fetch() { update_thread_tempo_map(); return _tempo_map_p; }
 
-	LIBTEMPORAL_API static SharedPtr write_copy();
-	LIBTEMPORAL_API static void fetch_writable() { _tempo_map_p = write_copy(); }
-	LIBTEMPORAL_API static int  update (SharedPtr m);
+	/* Used only by the ARDOUR::AudioEngine API to reset the process thread
+	 * tempo map only when it has changed.
+	 */
+
+	LIBTEMPORAL_API static WritableSharedPtr read() { return _map_mgr.reader(); }
+	LIBTEMPORAL_API static void              set (WritableSharedPtr new_map) { _tempo_map_p = new_map; /* new_map must have been fetched with read() */ }
+
+	/* API for typical tempo map changes */
+
+	LIBTEMPORAL_API static WritableSharedPtr write_copy();
+	LIBTEMPORAL_API static int  update (WritableSharedPtr m);
 	LIBTEMPORAL_API static void abort_update ();
+
+	/* API to be reviewed */
+
+	LIBTEMPORAL_API static WritableSharedPtr fetch_writable() { _tempo_map_p = write_copy(); return _tempo_map_p; }
 
 	/* and now on with the rest of the show ... */
 
@@ -727,11 +738,11 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 * offer one that uses an STL container instead.
 	 */
 
-	typedef std::list<Point*> Metrics;
+	typedef std::list<Point const *> Metrics;
 
-	void get_metrics (Metrics& m) {
-		for (Points::iterator t = _points.begin(); t != _points.end(); ++t) {
-			m.push_back (&*t);
+	void get_metrics (Metrics& m) const {
+		for (auto const & p : _points) {
+			m.push_back (&p);
 		}
 	}
 
@@ -845,8 +856,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API	BBT_Time bbt_walk (BBT_Time const &, BBT_Offset const &) const;
 
-	LIBTEMPORAL_API	void get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0);
-	LIBTEMPORAL_API	uint32_t count_bars (Beats const & start, Beats const & end);
+	LIBTEMPORAL_API	void get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0) const;
+	LIBTEMPORAL_API	uint32_t count_bars (Beats const & start, Beats const & end) const;
 
 	struct EmptyTempoMapException : public std::exception {
 		virtual const char* what() const throw() { return "TempoMap is empty"; }
@@ -879,7 +890,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
 	LIBTEMPORAL_API	Beats quarters_at_superclock (superclock_t sc) const;
 
-	LIBTEMPORAL_API	void midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_pos, uint32_t& clk_beat);
+	LIBTEMPORAL_API	void midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_pos, uint32_t& clk_beat) const;
 
   private:
 	Tempos       _tempos;

@@ -111,7 +111,9 @@ Session::memento_command_factory(XMLNode *n)
 	    return new MementoCommand<Locations>(*_locations, before, after);
 
     } else if (type_name == "Temporal::TempoMap") {
-	    return new MementoCommand<TempoMap>(*TempoMap::use(), before, after);
+
+#warning NUTEMPO how to reconstruct memento commands for a tempo map
+	    // return new MementoCommand<TempoMap>(*TempoMap::fetch(), before, after);
 
     } else if (type_name == "ARDOUR::Playlist" || type_name == "ARDOUR::AudioPlaylist" || type_name == "ARDOUR::MidiPlaylist") {
 	    if (boost::shared_ptr<Playlist> pl = _playlists->by_name(child->property("name")->value())) {

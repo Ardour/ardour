@@ -38,7 +38,7 @@ ArdourTransport::set_tempo (double bpm)
 {
 	bpm = std::max (0.01, bpm);
 
-	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 
 	Tempo tempo (bpm, tmap->metric_at (0).tempo().note_type ());
 

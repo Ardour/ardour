@@ -1589,7 +1589,7 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	} else {
 		try {
-			TempoMap::SharedPtr tmap = TempoMap::write_copy (); /* get writable copy of current tempo map */
+			TempoMap::WritableSharedPtr tmap = TempoMap::write_copy (); /* get writable copy of current tempo map */
 			tmap->set_state (*child, version); /* reset its state */
 			TempoMap::update (tmap); /* update the global tempo map manager */
 		} catch (...) {
