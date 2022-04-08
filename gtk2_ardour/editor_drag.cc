@@ -3525,7 +3525,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->set_snap_mode (_old_snap_mode);
 
 	XMLNode &after = map->get_state();
-	_editor->session()->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), before_state, &after));
+	_editor->session()->add_command (new Temporal::TempoCommand (_("move time signature"), before_state, &after));
 	_editor->commit_reversible_command ();
 
 	TempoMap::update (map);
@@ -3655,7 +3655,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	TempoMap::update (map);
 	XMLNode &after = map->get_state();
 
-	_editor->session()->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), _before_state, &after));
+	_editor->session()->add_command (new Temporal::TempoCommand (_("move tempo"), _before_state, &after));
 	_editor->commit_reversible_command ();
 }
 
@@ -3825,7 +3825,7 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	XMLNode &after = map->get_state();
 
-	_editor->session()->add_command(new MementoCommand<TempoMap>(new Temporal::TempoMap::MementoBinder(), _before_state, &after));
+	_editor->session()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
 	_editor->commit_reversible_command ();
 }
 
@@ -3957,7 +3957,7 @@ TempoTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	TempoMap& map (_editor->session()->tempo_map());
 	XMLNode &after = map.get_state();
-	_editor->session()->add_command(new MementoCommand<TempoMap>(map, _before_state, &after));
+	_editor->session()->add_command (new Temporal::TempoCommand (_("twist tempo"), _before_state, &after));
 	_editor->commit_reversible_command ();
 }
 
@@ -4058,7 +4058,7 @@ TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
 	TempoMap::update (map);
 
 	XMLNode &after = map->get_state();
-	_editor->session()->add_command(new MementoCommand<TempoMap>(new Temporal::TempoMap::MementoBinder(), _before_state, &after));
+	_editor->session()->add_command (new Temporal::TempoCommand (_("move tempo end"), _before_state, &after));
 	_editor->commit_reversible_command ();
 
 	TempoPoint const * prev = 0;

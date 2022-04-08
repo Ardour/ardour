@@ -1620,7 +1620,7 @@ Editor::toggle_tempo_type ()
 		tmap->set_ramped (const_cast<Temporal::TempoPoint&>(tempo), !tempo.ramped());
 
 		XMLNode &after = tmap->get_state();
-		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+		_session->add_command (new Temporal::TempoCommand (_("change tempo type"), &before, &after));
 		commit_reversible_command ();
 
 		TempoMap::update (tmap);
@@ -1646,7 +1646,7 @@ Editor::toggle_tempo_clamped ()
 		const_cast<Temporal::Tempo&>(tempo).set_clamped (!tempo.clamped());
 
 		XMLNode &after = tmap->get_state();
-		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+		_session->add_command (new Temporal::TempoCommand (_("change tempo clamp"), &before, &after));
 		commit_reversible_command ();
 
 		TempoMap::update (tmap);
@@ -1673,7 +1673,7 @@ Editor::ramp_to_next_tempo ()
 		tmap->set_ramped (const_cast<Temporal::TempoPoint&>(tempo), !tempo.ramped());
 
 		XMLNode &after = tmap->get_state();
-		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+		_session->add_command (new Temporal::TempoCommand (_("changed tempo ramp"), &before, &after));
 		commit_reversible_command ();
 
 		TempoMap::update (tmap);

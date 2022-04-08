@@ -602,7 +602,7 @@ Editor::mouse_add_new_tempo_event (timepos_t pos)
 
 		map->set_tempo (map->tempo_at (pos), pos);
 		XMLNode &after = map->get_state();
-		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+		_session->add_command (new Temporal::TempoCommand (_("add tempo"), &before, &after));
 		commit_reversible_command ();
 
 		TempoMap::update (map);
@@ -649,7 +649,7 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 
 	map->set_meter (Meter (bpb, note_type), pos);
 
-	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &map->get_state()));
+	_session->add_command (new Temporal::TempoCommand (_("add time signature"), &before, &map->get_state()));
 	commit_reversible_command ();
 
 	TempoMap::update (map);
@@ -709,7 +709,7 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 	tmap->set_meter (meter, when);
 
 	XMLNode &after = tmap->get_state();
-	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+	_session->add_command (new Temporal::TempoCommand (_("edit time signature"), &before, &after));
 	commit_reversible_command ();
 
 	TempoMap::update (tmap);
@@ -746,7 +746,7 @@ Editor::edit_tempo_section (TempoPoint& section)
 	tmap->set_tempo (tempo, when);
 
 	XMLNode &after = tmap->get_state();
-	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+	_session->add_command (new Temporal::TempoCommand (_("edit tempo"), &before, &after));
 	commit_reversible_command ();
 
 	TempoMap::update (tmap);
@@ -772,7 +772,7 @@ Editor::real_remove_tempo_marker (TempoPoint const * section)
 	XMLNode &before = tmap->get_state();
 	tmap->remove_tempo (*section);
 	XMLNode &after = tmap->get_state();
-	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+	_session->add_command (new Temporal::TempoCommand (_("remove tempo change"), &before, &after));
 	commit_reversible_command ();
 
 	TempoMap::update (tmap);
@@ -809,7 +809,7 @@ Editor::real_remove_meter_marker (Temporal::MeterPoint const * section)
 	XMLNode &before = tmap->get_state();
 	tmap->remove_meter (*section);
 	XMLNode &after = tmap->get_state();
-	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+	_session->add_command (new Temporal::TempoCommand (_("remove time signature change"), &before, &after));
 	commit_reversible_command ();
 
 	TempoMap::update (tmap);

@@ -7371,7 +7371,7 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 
 	XMLNode& after (tmap->get_state());
 
-	_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+	_session->add_command (new Temporal::TempoCommand (_("set tempo from range"), &before, &after));
 	commit_reversible_command ();
 
 	TempoMap::update (tmap);
@@ -8316,7 +8316,7 @@ Editor::insert_time (
 		XMLNode& before (tmap->get_state());
 		tmap->insert_time (pos, samples);
 		XMLNode& after (tmap->get_state());
-		_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+		_session->add_command (new Temporal::TempoCommand (_("insert time"), &before, &after));
 
 		TempoMap::update (tmap);
 	}
@@ -8498,7 +8498,7 @@ Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTi
 				in_command = true;
 			}
 			XMLNode& after (tmap->get_state());
-			_session->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), &before, &after));
+			_session->add_command (new Temporal::TempoCommand (_("remove time"), &before, &after));
 
 			TempoMap::update (tmap);
 		}
