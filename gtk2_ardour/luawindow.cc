@@ -133,9 +133,9 @@ LuaWindow::LuaWindow ()
 
 	// layout
 
-	Gtk::ScrolledWindow *scrollin = manage (new Gtk::ScrolledWindow);
-	scrollin->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-	scrollin->add (entry);
+	Gtk::ScrolledWindow *scrolling = manage (new Gtk::ScrolledWindow);
+	scrolling->set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	scrolling->add (entry);
 	scrollout.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_ALWAYS);
 	scrollout.add (outtext);
 
@@ -153,7 +153,7 @@ LuaWindow::LuaWindow ()
 	hbox->pack_start (script_select, false, false, 2);
 
 	Gtk::VBox *vbox = manage (new VBox());
-	vbox->pack_start (*scrollin, true, true, 0);
+	vbox->pack_start (*scrolling, true, true, 0);
 	vbox->pack_start (*hbox, false, false, 2);
 
 	ArdourWidgets::VPane *vpane = manage (new ArdourWidgets::VPane ());
