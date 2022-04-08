@@ -142,6 +142,7 @@ gtk2_ardour_sources = [
         'instrument_selector.cc',
         'interthread_progress_window.cc',
         'io_button.cc',
+        'io_plugin_window.cc',
         'io_selector.cc',
         'hit.cc',
         'keyboard.cc',

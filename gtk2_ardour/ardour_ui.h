@@ -141,6 +141,7 @@ class SessionOptionEditor;
 class SpeakerDialog;
 class GlobalPortMatrixWindow;
 class IdleOMeter;
+class IOPluginWindow;
 class PluginDSPLoadWindow;
 class PluginManagerUI;
 class DspStatisticsWindow;
@@ -740,6 +741,7 @@ private:
 	WM::Proxy<ExportVideoDialog> export_video_dialog;
 	WM::Proxy<LuaScriptManager> lua_script_window;
 	WM::Proxy<IdleOMeter> idleometer;
+	WM::Proxy<IOPluginWindow> io_plugin_window;
 	WM::Proxy<PluginManagerUI> plugin_manager_ui;
 	WM::Proxy<PluginDSPLoadWindow> plugin_dsp_load_window;
 	WM::Proxy<DspStatisticsWindow> dsp_statistics_window;
