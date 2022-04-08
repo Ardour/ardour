@@ -389,7 +389,7 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 	}
 
 	if (action) {
-		/* get_bindings_from_widget_heirarchy */
+		/* get_bindings_from_widget_hierarchy */
 		Widget* ww = w;
 		Bindings* bindings = NULL;
 		do {

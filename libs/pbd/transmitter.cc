@@ -49,7 +49,7 @@ Transmitter::Transmitter (Channel c)
 	case Throw:
 		/* we should never call Transmitter::deliver
 		   for thrown messages (because its overridden in the
-		   class heirarchy). force a segv if we do.
+		   class hierarchy). force a segv if we do.
 		*/
 		send = 0;
 		break;

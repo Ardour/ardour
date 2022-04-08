@@ -697,7 +697,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 		if (_current_item) {
 
 			/* no current item, so also send virtual leave events to the
-			 * entire heirarchy for the current item
+			 * entire hierarchy for the current item
 			 */
 
 			for (i = _current_item->parent(); i ; i = i->parent()) {
@@ -710,7 +710,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 		enter_detail = GDK_NOTIFY_UNKNOWN;
 
 		/* no current item, so also send virtual enter events to the
-		 * entire heirarchy for the new item
+		 * entire hierarchy for the new item
 		 */
 
 		for (i = _new_current_item->parent(); i ; i = i->parent()) {
@@ -723,7 +723,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 		 * inferior ("child") of _new_current_item")
 		 *
 		 * Deliver "virtual" leave notifications to all items in the
-		 * heirarchy between current and new_current.
+		 * hierarchy between current and new_current.
 		 */
 
 		for (i = _current_item->parent(); i && i != _new_current_item; i = i->parent()) {
@@ -738,7 +738,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 		 * an inferior ("child") of _current_item")
 		 *
 		 * Deliver "virtual" enter notifications to all items in the
-		 * heirarchy between current and new_current.
+		 * hierarchy between current and new_current.
 		 */
 
 		for (i = _new_current_item->parent(); i && i != _current_item; i = i->parent()) {
