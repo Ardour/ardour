@@ -35,7 +35,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*), std::string const & name)
+EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callback)(GdkEvent*,ArdourCanvas::Item*), std::string const & name)
 	: _editor (ed)
 	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_cursor_scroll_group()))
 {
@@ -48,7 +48,7 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 	_track_canvas_item->set_show_head (1, false); // head only
 	_track_canvas_item->set_data ("cursor", this);
 
-	_track_canvas_item->Event.connect (sigc::bind (sigc::mem_fun (ed, callbck), _track_canvas_item));
+	_track_canvas_item->Event.connect (sigc::bind (sigc::mem_fun (ed, callback), _track_canvas_item));
 
 	_track_canvas_item->set_y1 (ArdourCanvas::COORD_MAX);
 
