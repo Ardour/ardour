@@ -3180,17 +3180,6 @@ TempoMap::twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t fram
 #endif
 
 void
-TempoMap::MementoBinder::set_state (XMLNode const & node, int version) const
-{
-	/* fetch a writable copy of this thread's tempo map */
-	TempoMap::WritableSharedPtr map (write_copy());
-	/* change the state of the copy */
-	map->set_state (node, version);
-	/* do the update step of RCU. This will also update this thread's map pointer */
-	update (map);
-}
-
-void
 TempoMap::init ()
 {
 	WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));

@@ -870,15 +870,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API XMLNode& get_state() const;
 
-	class MementoBinder : public MementoCommandBinder<TempoMap> {
-  public:
-		LIBTEMPORAL_API MementoBinder () {}
-		LIBTEMPORAL_API void set_state (XMLNode const & node, int version) const;
-		LIBTEMPORAL_API XMLNode& get_state () const { return TempoMap::use()->get_state(); }
-		LIBTEMPORAL_API std::string type_name() const { return "Temporal::TempoMap"; }
-		LIBTEMPORAL_API void add_state (XMLNode*) {}
-	};
-
 	typedef boost::intrusive::list<TempoPoint, boost::intrusive::base_hook<tempo_hook>> Tempos;
 	typedef boost::intrusive::list<MeterPoint, boost::intrusive::base_hook<meter_hook>> Meters;
 	typedef boost::intrusive::list<MusicTimePoint, boost::intrusive::base_hook<bartime_hook>> MusicTimes;
