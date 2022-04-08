@@ -4045,6 +4045,10 @@ Session::restore_history (string snapshot_name)
 						ut->add_command(c);
 					}
 
+				} else if (n->name() == "TempoCommand") {
+
+					ut->add_command (new TempoCommand (*n));
+
 				} else if (n->name() == "NoteDiffCommand") {
 					PBD::ID id (n->property("midi-source")->value());
 					boost::shared_ptr<MidiSource> midi_source =
