@@ -105,9 +105,8 @@ Analyser::set_duration (samplecnt_t n_samples)
 	}
 	_n_samples = n_samples;
 
-	const float width = _result.width;
-	_spp = ceil ((_n_samples + 2.f) / width);
-	_fpp = ceil ((_n_samples + 2.f) / width);
+	_spp = (_n_samples + 1) / _result.width + 1;
+	_fpp = _spp;
 }
 
 void
