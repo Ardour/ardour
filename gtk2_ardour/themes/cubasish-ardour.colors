@@ -25,7 +25,7 @@
     <Color name="neutral:foreground" value="e5e5e5ff"/>  <!--gtk_foreground,  arrange base,  gtk_texts,  -->
     <Color name="neutral:foregroundest" value="ffffffff"/>  <!--grid line major,  recording waveform fill,  waveform fill-->
     <Color name="widget:bg" value="b3b4bbff"/>    <!--generic button,  mouse mode button: fill,  transport button: fill-->
-    <Color name="widget:blue" value="8193cbff"/>  <!--gtk_bright_color,  midi input button: fill activ,  selected time axis frame-->
+    <Color name="widget:blue" value="8193cbff"/>  <!--gtk_bright_color,  midi input button: fill active,  selected time axis frame-->
     <Color name="widget:blue darker" value="191c1fff"/>  <!--gtk_audio_bus,  audio bus base,  stereo panner inverted bg-->
     <Color name="widget:gray" value="e0e0e0ff"/>  <!--gtk_processor_fader,  processor fader: fill,  time stretch outline-->
     <Color name="widget:green" value="606773ff"/>  <!--gtk processor postfader,  gtk_midi_track,  processor postfader: fill-->
