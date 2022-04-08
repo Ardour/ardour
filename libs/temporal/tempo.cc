@@ -21,11 +21,13 @@
 
 #include <inttypes.h>
 
-#include "pbd/error.h"
 #include "pbd/compose.h"
+#include "pbd/convert.h"
 #include "pbd/enumwriter.h"
+#include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/stacktrace.h"
+#include "pbd/string_convert.h"
 
 #include "temporal/debug.h"
 #include "temporal/tempo.h"
@@ -3608,6 +3610,9 @@ TempoMap::set_state_3x (const XMLNode& node)
 
 	return 0;
 }
+
+
+
 #if 0
 void
 TempoMap::fix_legacy_session ()
@@ -3714,3 +3719,90 @@ TempoMap::fix_legacy_end_session ()
 }
 
 #endif
+
+TempoCommand::TempoCommand (XMLNode const & node)
+	: _before (0)
+	, _after (0)
+{
+	if (!node.get_property (X_("name"), _name)) {
+		throw failed_constructor();
+	}
+
+	XMLNodeList const & children (node.children());
+	for (XMLNodeList::const_iterator n = children.begin(); n != children.end(); ++n) {
+		if ((*n)->name() == X_("before")) {
+			if ((*n)->children().empty()) {
+				throw failed_constructor();
+			}
+			_before = new XMLNode (*(*n)->children().front());
+		} else if ((*n)->name() == X_("after")) {
+			if ((*n)->children().empty()) {
+				throw failed_constructor();
+			}
+			_before = new XMLNode (*(*n)->children().front());
+		}
+	}
+
+	if (!_before || !_after) {
+		throw failed_constructor();
+	}
+}
+
+TempoCommand::TempoCommand (std::string const & str, XMLNode const * before, XMLNode const * after)
+	: _name (str)
+	, _before (before)
+	, _after (after)
+{
+
+}
+
+TempoCommand::~TempoCommand ()
+{
+	delete _before;
+	delete _after;
+}
+
+XMLNode&
+TempoCommand::get_state() const
+{
+	XMLNode* node = new XMLNode (X_("TempoCommand"));
+	node->set_property (X_("name"), _name);
+
+	if (_before) {
+		XMLNode* b = new XMLNode (X_("before"));
+		b->add_child_copy (*_before);
+		node->add_child_nocopy (*b);
+	}
+
+	if (_after) {
+		XMLNode* a = new XMLNode (X_("after"));
+		a->add_child_copy (*_after);
+		node->add_child_nocopy (*a);
+	}
+
+	return *node;
+}
+
+void
+TempoCommand::undo ()
+{
+	if (!_before) {
+		return;
+	}
+
+	TempoMap::WritableSharedPtr map (TempoMap::write_copy());
+	map->set_state (*_before, Stateful::current_state_version);
+	TempoMap::update (map);
+}
+
+void
+TempoCommand::operator() ()
+{
+	if (!_after) {
+		return;
+	}
+
+	TempoMap::WritableSharedPtr map (TempoMap::write_copy());
+	map->set_state (*_after, Stateful::current_state_version);
+	TempoMap::update (map);
+}

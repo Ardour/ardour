@@ -29,6 +29,7 @@
 
 #include <glibmm/threads.h>
 
+#include "pbd/command.h"
 #include "pbd/enum_convert.h"
 #include "pbd/integer_division.h"
 #include "pbd/memento_command.h"
@@ -1048,6 +1049,26 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	int parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts);
 	int parse_meter_state_3x (const XMLNode& node, LegacyMeterState& lts);
 	int set_state_3x (XMLNode const &);
+};
+
+class LIBTEMPORAL_API TempoCommand : public Command {
+	public:
+
+	TempoCommand (std::string const & name, XMLNode const * before, XMLNode const * after);
+	TempoCommand (XMLNode const &);
+	~TempoCommand ();
+
+	const std::string& name () const { return _name; }
+
+	void operator() ();
+	void undo ();
+
+	XMLNode & get_state () const;
+
+  protected:
+	std::string _name;
+	XMLNode const * _before;
+	XMLNode const * _after;
 };
 
 } /* end of namespace Temporal */
