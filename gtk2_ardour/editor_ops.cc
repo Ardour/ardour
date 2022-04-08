@@ -7288,7 +7288,7 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 {
 	timecnt_t length = start.distance (end);
 
-	TempoMap::SharedPtr tmap (TempoMap::use());
+	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 	const Meter& m (tmap->meter_at (start));
 
 	/* length = 1 bar */
@@ -8311,7 +8311,7 @@ Editor::insert_time (
 			begin_reversible_command (_("insert time"));
 			in_command = true;
 		}
-		TempoMap::SharedPtr tmap (TempoMap::write_copy());
+		TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 
 		XMLNode& before (tmap->get_state());
 		tmap->insert_time (pos, samples);
@@ -8489,7 +8489,7 @@ Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTi
 	}
 
 	if (tempo_too) {
-		TempoMap::SharedPtr tmap (TempoMap::write_copy());
+		TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 		XMLNode& before (tmap->get_state());
 
 		if (tmap->remove_time (pos, duration)) {

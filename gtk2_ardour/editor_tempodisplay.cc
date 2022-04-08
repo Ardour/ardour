@@ -112,19 +112,19 @@ Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::M
 	MeterMarker* mm;
 	BBTMarker* bm;
 
-	Temporal::TempoPoint* tp;
-	Temporal::MeterPoint* mp;
-	Temporal::MusicTimePoint* mtp;
+	Temporal::TempoPoint const * tp;
+	Temporal::MeterPoint const * mp;
+	Temporal::MusicTimePoint const * mtp;
 
 	if ((tm = dynamic_cast<TempoMarker*> (&marker)) != 0) {
 
 		for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
-			if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
+			if ((mtp = dynamic_cast<Temporal::MusicTimePoint const *>(*m)) != 0) {
 				/* do nothing .. but we had to catch
 				   this first because MusicTimePoint
 				   IS-A TempoPoint
 				*/
-			} else if ((tp = dynamic_cast<Temporal::TempoPoint*>(*m)) != 0) {
+			} else if ((tp = dynamic_cast<Temporal::TempoPoint const *>(*m)) != 0) {
 				if (tm->tempo() == *tp) {
 					tm->reset_tempo (*tp);
 					tm->curve().reset_point  (*tp);
@@ -134,13 +134,13 @@ Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::M
 		}
 	} else if ((mm = dynamic_cast<MeterMarker*> (&marker)) != 0) {
 		for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
-			if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
+			if ((mtp = dynamic_cast<Temporal::MusicTimePoint const *>(*m)) != 0) {
 				/* do nothing .. but we had to catch
 				   this first because MusicTimePoint
 				   IS-A TempoPoint
 				*/
 
-			} else if ((mp = dynamic_cast<Temporal::MeterPoint*>(*m)) != 0) {
+			} else if ((mp = dynamic_cast<Temporal::MeterPoint const *>(*m)) != 0) {
 				if (mm->meter() == *mp) {
 					mm->reset_meter (*mp);
 					break;
@@ -151,7 +151,7 @@ Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::M
 	} else if ((bm = dynamic_cast<BBTMarker*> (&marker)) != 0) {
 
 		for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
-			if ((mtp = dynamic_cast<Temporal::MusicTimePoint*>(*m)) != 0) {
+			if ((mtp = dynamic_cast<Temporal::MusicTimePoint const *>(*m)) != 0) {
 				if (bm->point() == *mtp) {
 					bm->reset_point (*mtp);
 					break;
@@ -594,7 +594,7 @@ Editor::mouse_add_new_tempo_event (timepos_t pos)
 
 		begin_reversible_command (_("add tempo mark"));
 
-		TempoMap::SharedPtr map (TempoMap::write_copy());
+		TempoMap::WritableSharedPtr map (TempoMap::write_copy());
 
 		XMLNode &before = map->get_state();
 
@@ -627,7 +627,7 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 		return;
 	}
 
-	TempoMap::SharedPtr map (TempoMap::write_copy());
+	TempoMap::WritableSharedPtr map (TempoMap::write_copy());
 
 	double bpb = meter_dialog.get_bpb ();
 	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
@@ -699,7 +699,7 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 	Temporal::BBT_Time when;
 	meter_dialog.get_bbt_time (when);
 
-	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 
 	reassociate_metric_markers (tmap);
 
@@ -734,7 +734,7 @@ Editor::edit_tempo_section (TempoPoint& section)
 
 	const Tempo tempo (bpm, end_bpm, nt);
 
-	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 	reassociate_metric_markers (tmap);
 
 	Temporal::BBT_Time when;
@@ -768,7 +768,7 @@ gint
 Editor::real_remove_tempo_marker (TempoPoint const * section)
 {
 	begin_reversible_command (_("remove tempo mark"));
-	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 	XMLNode &before = tmap->get_state();
 	tmap->remove_tempo (*section);
 	XMLNode &after = tmap->get_state();
@@ -805,7 +805,7 @@ gint
 Editor::real_remove_meter_marker (Temporal::MeterPoint const * section)
 {
 	begin_reversible_command (_("remove tempo mark"));
-	TempoMap::SharedPtr tmap (TempoMap::write_copy());
+	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 	XMLNode &before = tmap->get_state();
 	tmap->remove_meter (*section);
 	XMLNode &after = tmap->get_state();
@@ -833,13 +833,6 @@ Editor::abort_tempo_map_edit ()
 
 	TempoMap::SharedPtr tmap (TempoMap::fetch());
 	reassociate_metric_markers (tmap);
-}
-
-void
-Editor::commit_tempo_map_edit ()
-{
-	TempoMap::SharedPtr tmap (TempoMap::use());
-	TempoMap::update (tmap);
 }
 
 void

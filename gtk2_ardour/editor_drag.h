@@ -847,6 +847,7 @@ public:
 
 private:
 	MeterMarker* _marker;
+	Temporal::TempoMap::WritableSharedPtr map;
 
 	bool _copy;
 	bool _movable;
@@ -879,6 +880,7 @@ public:
 private:
 	TempoMarker* _marker;
 	Temporal::TempoPoint const * _real_section;
+	Temporal::TempoMap::WritableSharedPtr map;
 
 	bool _copy;
 	bool _movable;
@@ -911,6 +913,8 @@ public:
 private:
 	Temporal::Beats _grab_qn;
 	Temporal::TempoPoint* _tempo;
+	Temporal::TempoMap::WritableSharedPtr map;
+
 	XMLNode* _before_state;
 	bool     _drag_valid;
 };
@@ -972,6 +976,8 @@ public:
 private:
 	Temporal::Beats _grab_qn;
 	Temporal::TempoPoint const * _tempo;
+	Temporal::TempoMap::WritableSharedPtr map;
+
 	XMLNode* _before_state;
 	bool _drag_valid;
 };

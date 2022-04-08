@@ -3416,9 +3416,11 @@ MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Drag::start_grab (event, cursor);
 	show_verbose_cursor_time (adjusted_current_time (event));
 
-	/* setup thread-local tempo map ptr as a writable copy */
+	/* setup thread-local tempo map ptr as a writable copy, and keep a
+	 * local reference
+	 */
 
-	TempoMap::fetch_writable ();
+	map = TempoMap::fetch_writable ();
 }
 
 void
@@ -3430,8 +3432,6 @@ MeterMarkerDrag::setup_pointer_offset ()
 void
 MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-	TempoMap::SharedPtr map (TempoMap::use());
-
 	if (first_move) {
 		// create a dummy marker to catch events, then hide it.
 
@@ -3524,9 +3524,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->set_grid_to (_old_grid_type);
 	_editor->set_snap_mode (_old_snap_mode);
 
-	TempoMap::SharedPtr map (TempoMap::use());
-
-	XMLNode &after = TempoMap::use()->get_state();
+	XMLNode &after = map->get_state();
 	_editor->session()->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), before_state, &after));
 	_editor->commit_reversible_command ();
 
@@ -3567,7 +3565,7 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 
 	_marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	_real_section = &_marker->tempo();
-	_movable = !TempoMap::use()->is_initial (_marker->tempo());
+	_movable = !map->is_initial (_marker->tempo());
 	_grab_bpm = Tempo (_real_section->note_types_per_minute(), _real_section->note_type(), _real_section->end_note_types_per_minute());
 	_grab_qn = _real_section->beats();
 	assert (_marker);
@@ -3600,8 +3598,6 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	if (!_marker->tempo().active()) {
 		return;
 	}
-
-	TempoMap::SharedPtr map (TempoMap::use());
 
 	if (first_move) {
 		/* get current state */
@@ -3656,8 +3652,8 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	/* push the current state of our writable map copy */
 
-	_editor->commit_tempo_map_edit ();
-	XMLNode &after = TempoMap::use()->get_state();
+	TempoMap::update (map);
+	XMLNode &after = map->get_state();
 
 	_editor->session()->add_command (new MementoCommand<Temporal::TempoMap> (new Temporal::TempoMap::MementoBinder(), _before_state, &after));
 	_editor->commit_reversible_command ();
@@ -3694,11 +3690,10 @@ BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 void
 BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
-	TempoMap::fetch_writable ();
+	map = TempoMap::fetch_writable ();
 
 	Drag::start_grab (event, cursor);
 
-	TempoMap::SharedPtr map (TempoMap::use());
 	_tempo = const_cast<TempoPoint*> (&map->metric_at (raw_grab_time().beats()).tempo());
 
 	if (adjusted_current_time (event, false) <= _tempo->time()) {
@@ -3723,7 +3718,6 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 void
 BBTRulerDrag::setup_pointer_offset ()
 {
-	TempoMap::SharedPtr map (TempoMap::use());
 	/* get current state */
 	_before_state = &map->get_state();
 
@@ -3750,7 +3744,6 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->begin_reversible_command (_("stretch tempo"));
 	}
 
-	TempoMap::SharedPtr map (TempoMap::use());
 	timepos_t pf;
 
 	if (_editor->grid_musical()) {
@@ -3784,8 +3777,6 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 		TempoMap::abort_update ();
 		return;
 	}
-
-	TempoMap::SharedPtr map (TempoMap::use());
 
 	if (!movement_occurred) {
 
@@ -3832,7 +3823,7 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	TempoMap::update (map);
 
-	XMLNode &after = TempoMap::use()->get_state();
+	XMLNode &after = map->get_state();
 
 	_editor->session()->add_command(new MementoCommand<TempoMap>(new Temporal::TempoMap::MementoBinder(), _before_state, &after));
 	_editor->commit_reversible_command ();
@@ -3996,12 +3987,10 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	TempoMap::fetch_writable();
-
-	TempoMap::SharedPtr tmap (TempoMap::use());
+	map = TempoMap::fetch_writable();
 
 	/* get current state */
-	_before_state = &tmap->get_state();
+	_before_state = &map->get_state();
 	if (_tempo->locked_to_meter()) {
 		_drag_valid = false;
 		return;
@@ -4010,10 +3999,10 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	ostringstream sstr;
 
 	TempoPoint const * prev = 0;
-	if ((prev = tmap->previous_tempo (*_tempo)) != 0) {
+	if ((prev = map->previous_tempo (*_tempo)) != 0) {
 		_editor->tempo_curve_selected (prev, true);
 		const samplecnt_t sr = AudioEngine::instance()->sample_rate();
-		sstr << "end: " << fixed << setprecision(3) << tmap->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute() << "\n";
+		sstr << "end: " << fixed << setprecision(3) << map->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute() << "\n";
 	}
 
 	if (_tempo->clamped()) {
@@ -4066,19 +4055,15 @@ TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	TempoMap::SharedPtr tmap (TempoMap::use());
+	TempoMap::update (map);
 
-	TempoMap::update (tmap);
-
-	tmap = TempoMap::use ();
-
-	XMLNode &after = tmap->get_state();
+	XMLNode &after = map->get_state();
 	_editor->session()->add_command(new MementoCommand<TempoMap>(new Temporal::TempoMap::MementoBinder(), _before_state, &after));
 	_editor->commit_reversible_command ();
 
 	TempoPoint const * prev = 0;
 
-	if ((prev = tmap->previous_tempo (*_tempo)) != 0) {
+	if ((prev = map->previous_tempo (*_tempo)) != 0) {
 		_editor->tempo_curve_selected (prev, false);
 	}
 

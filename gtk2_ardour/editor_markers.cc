@@ -1610,7 +1610,7 @@ Editor::toggle_tempo_type ()
 	if (tm) {
 
 		begin_reversible_command (_("set tempo to constant"));
-		TempoMap::SharedPtr tmap (TempoMap::write_copy());
+		TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 
 		reassociate_metric_markers (tmap);
 		Temporal::TempoPoint const & tempo = tm->tempo();
@@ -1637,7 +1637,7 @@ Editor::toggle_tempo_clamped ()
 	if (tm) {
 		begin_reversible_command (_("Clamp Tempo"));
 
-		TempoMap::SharedPtr tmap (TempoMap::write_copy());
+		TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 		XMLNode &before = tmap->get_state();
 
 		reassociate_metric_markers (tmap);
@@ -1664,7 +1664,7 @@ Editor::ramp_to_next_tempo ()
 	if (tm) {
 
 		begin_reversible_command (_("ramp to next tempo"));
-		TempoMap::SharedPtr tmap (TempoMap::write_copy());
+		TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 		XMLNode &before = tmap->get_state();
 
 		reassociate_metric_markers (tmap);

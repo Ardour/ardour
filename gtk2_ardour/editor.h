@@ -1740,7 +1740,6 @@ private:
 
 	void begin_tempo_map_edit ();
 	void abort_tempo_map_edit ();
-	void commit_tempo_map_edit ();
 	void mid_tempo_change ();
 
 private:
