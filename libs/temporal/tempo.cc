@@ -3728,7 +3728,7 @@ TempoCommand::TempoCommand (XMLNode const & node)
 			if ((*n)->children().empty()) {
 				throw failed_constructor();
 			}
-			_before = new XMLNode (*(*n)->children().front());
+			_after = new XMLNode (*(*n)->children().front());
 		}
 	}
 
