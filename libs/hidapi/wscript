@@ -5,9 +5,6 @@ import sys
 
 HIDAPI_VERSION = '0.8.0'
 
-# Variables for 'waf dist'
-APPNAME = 'hidapi'
-
 # Mandatory variables
 top = '.'
 out = 'build'

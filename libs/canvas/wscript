@@ -14,8 +14,6 @@ CANVAS_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # micro increment <=> no interface changes
 CANVAS_LIB_VERSION = '0.0.0'
 
-# Variables for 'waf dist'
-APPNAME = 'canvas'
 I18N_PACKAGE = 'libcanvas'
 
 # Mandatory variables

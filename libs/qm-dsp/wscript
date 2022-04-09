@@ -10,9 +10,6 @@ QM_DSP_VERSION = '1.7.1'
 # micro increment <=> no interface changes
 QM_DSP_LIB_VERSION = '1.7.1'
 
-# Variables for 'waf dist'
-APPNAME = 'qm-dsp'
-
 # Mandatory variables
 top = '.'
 out = 'build'
