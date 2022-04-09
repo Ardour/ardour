@@ -2,10 +2,7 @@
 from waflib.extras import autowaf as autowaf
 from waflib import Options, Task, Tools
 import os
-import sys
 import re
-import subprocess
-import sys
 
 # default state file version for this build
 CURRENT_SESSION_FILE_VERSION = 7002

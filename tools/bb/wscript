@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import waflib.Logs as Logs, waflib.Utils as Utils
+import waflib.Utils as Utils
 import os
 
 # Mandatory variables

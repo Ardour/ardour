@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-import os
 
 # Version of this package (even if built as a child)
 QM_DSP_VERSION = '1.7.1'

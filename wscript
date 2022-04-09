@@ -3,11 +3,9 @@ from waflib.extras import autowaf as autowaf
 from waflib import Options
 import os
 import re
-import string
 import subprocess
 import sys
 import platform as PLATFORM
-from waflib.Tools import winres
 from waflib.Build import Context
 from waflib.Build import BuildContext
 import waflib.Utils as Utils
