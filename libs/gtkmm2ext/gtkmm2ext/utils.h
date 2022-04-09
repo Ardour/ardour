@@ -139,7 +139,7 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API int physical_screen_height (Glib::RefPtr<Gdk::Window>);
 	LIBGTKMM2EXT_API int physical_screen_width (Glib::RefPtr<Gdk::Window>);
 
-	LIBGTKMM2EXT_API void container_clear (Gtk::Container&);
+	LIBGTKMM2EXT_API void container_clear (Gtk::Container&, bool and_delete = false);
 
 	/* C++ API for rounded rectangles */
 
