@@ -7,7 +7,6 @@ HIDAPI_VERSION = '0.8.0'
 
 # Variables for 'waf dist'
 APPNAME = 'hidapi'
-VERSION = HIDAPI_VERSION
 
 # Mandatory variables
 top = '.'

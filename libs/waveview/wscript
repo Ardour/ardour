@@ -15,7 +15,6 @@ WAVEVIEW_LIB_VERSION = '0.0.0'
 
 # Variables for 'waf dist'
 APPNAME = 'waveview'
-VERSION = WAVEVIEW_VERSION
 I18N_PACKAGE = 'libwaveview'
 
 # Mandatory variables

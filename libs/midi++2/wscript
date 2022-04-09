@@ -15,7 +15,6 @@ LIBMIDIPP_LIB_VERSION = '4.1.0'
 
 # Variables for 'waf dist'
 APPNAME = 'libmidipp'
-VERSION = LIBMIDIPP_VERSION
 
 # Mandatory variables
 top = '.'

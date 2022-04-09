@@ -15,7 +15,6 @@ LIBLTC_LIB_VERSION = '1.1.1'
 
 # Variables for 'waf dist'
 APPNAME = 'libltc'
-VERSION = LIBLTC_VERSION
 I18N_PACKAGE = 'libltc'
 
 # Mandatory variables

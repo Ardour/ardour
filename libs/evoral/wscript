@@ -16,7 +16,6 @@ EVORAL_LIB_VERSION = '0.0.0'
 
 # Variables for 'waf dist'
 APPNAME = 'evoral'
-VERSION = EVORAL_VERSION
 
 # Mandatory variables
 top = '.'

@@ -15,7 +15,6 @@ ZCONVOLVER_LIB_VERSION = '4.0.0'
 
 # Variables for 'waf dist'
 APPNAME = 'zita-convolver'
-VERSION = ZCONVOLVER_VERSION
 I18N_PACKAGE = 'libzita-convolver'
 
 # Mandatory variables

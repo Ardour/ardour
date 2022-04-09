@@ -3,7 +3,6 @@ from waflib.extras import autowaf as autowaf
 
 # Variables for 'waf dist'
 APPNAME = 'liblua'
-VERSION = "5.3.5"
 I18N_PACKAGE = 'liblua'
 
 # Mandatory variables
