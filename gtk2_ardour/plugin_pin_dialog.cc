@@ -545,8 +545,8 @@ PluginPinWidget::refill_output_presets ()
 std::string
 PluginPinWidget::port_label (const std::string& portname, bool strip)
 {
-	// compare to MixerStrip::update_io_button()
-	string lpn (PROGRAM_NAME);
+	// compare to IOButton::update
+	string lpn (AudioEngine::instance()->my_name());
 	boost::to_lower (lpn);
 	std::string program_port_prefix = lpn + ":"; // e.g. "ardour:"
 
