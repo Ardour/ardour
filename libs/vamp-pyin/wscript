@@ -8,9 +8,6 @@ import os
 # micro increment <=> no interface changes
 VAMP_PYIN_LIB_VERSION = '0.0.0'
 
-# Variables for 'waf dist'
-APPNAME = 'libardourvamppyin'
-
 # Mandatory variables
 top = '.'
 out = 'build'

@@ -18,7 +18,6 @@ TEMPORAL_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # micro increment <=> no interface changes
 TEMPORAL_LIB_VERSION = '0.0.0'
 
-# Variables for 'waf dist'
 APPNAME = 'temporal'
 I18N_PACKAGE = 'libtemporal'
 

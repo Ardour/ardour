@@ -13,8 +13,6 @@ ZRESAMPLER_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # micro increment <=> no interface changes
 ZRESAMPLER_LIB_VERSION = '1.6.0'
 
-# Variables for 'waf dist'
-APPNAME = 'zita-resampler'
 I18N_PACKAGE = 'libzita-resampler'
 
 # Mandatory variables

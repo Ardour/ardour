@@ -13,8 +13,6 @@ LIBLTC_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # micro increment <=> no interface changes
 LIBLTC_LIB_VERSION = '1.1.1'
 
-# Variables for 'waf dist'
-APPNAME = 'libltc'
 I18N_PACKAGE = 'libltc'
 
 # Mandatory variables

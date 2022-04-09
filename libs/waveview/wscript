@@ -13,8 +13,6 @@ WAVEVIEW_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # micro increment <=> no interface changes
 WAVEVIEW_LIB_VERSION = '0.0.0'
 
-# Variables for 'waf dist'
-APPNAME = 'waveview'
 I18N_PACKAGE = 'libwaveview'
 
 # Mandatory variables

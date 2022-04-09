@@ -15,8 +15,6 @@ GTKMM2EXT_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # micro increment <=> no interface changes
 GTKMM2EXT_LIB_VERSION = '0.8.3'
 
-# Variables for 'waf dist'
-APPNAME = 'gtkmm2ext'
 I18N_PACKAGE = 'gtkmm2ext3'
 
 gtkmm2ext_sources = [
