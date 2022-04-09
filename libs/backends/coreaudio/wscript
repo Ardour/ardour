@@ -2,8 +2,6 @@
 from waflib.extras import autowaf as autowaf
 from waflib import Options
 import os
-import sys
-import re
 
 I18N_PACKAGE = 'coreaudio-backend'
 

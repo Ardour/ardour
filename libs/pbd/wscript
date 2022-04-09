@@ -2,7 +2,6 @@
 from waflib.extras import autowaf as autowaf
 from waflib import Options
 from waflib import TaskGen
-import os
 import sys
 
 # Version of this package (even if built as a child)

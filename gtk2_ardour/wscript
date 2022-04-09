@@ -3,15 +3,10 @@ from waflib.extras import autowaf as autowaf
 from waflib import Options, TaskGen
 import waflib.Logs as Logs, waflib.Utils as Utils
 import os
-import shutil
 import sys
 import re
-import time
-from waflib.Task import Task
-from waflib.Tools import winres
 import subprocess
 import glob
-import copy
 
 # Mandatory variables
 top = '.'
