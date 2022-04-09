@@ -531,6 +531,7 @@ Graph::main_thread ()
 	resume_rt_malloc_checks ();
 
 	pt->get_buffers ();
+	Temporal::TempoMap::fetch ();
 
 	/* Wait for initial process callback */
 again:
