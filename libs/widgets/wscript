@@ -15,7 +15,6 @@ WIDGETS_LIB_VERSION = '0.0.0'
 
 # Variables for 'waf dist'
 APPNAME = 'widgets'
-VERSION = WIDGETS_VERSION
 I18N_PACKAGE = 'libwidgets'
 
 # Mandatory variables

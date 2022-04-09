@@ -12,7 +12,6 @@ QM_DSP_LIB_VERSION = '1.7.1'
 
 # Variables for 'waf dist'
 APPNAME = 'qm-dsp'
-VERSION = QM_DSP_VERSION
 
 # Mandatory variables
 top = '.'

@@ -15,7 +15,6 @@ ZRESAMPLER_LIB_VERSION = '1.6.0'
 
 # Variables for 'waf dist'
 APPNAME = 'zita-resampler'
-VERSION = ZRESAMPLER_VERSION
 I18N_PACKAGE = 'libzita-resampler'
 
 # Mandatory variables

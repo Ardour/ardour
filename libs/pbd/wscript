@@ -19,7 +19,6 @@ LIBPBD_MAJOR_VERSION = '4'
 
 # Variables for 'waf dist'
 APPNAME = 'libpbd'
-VERSION = LIBPBD_VERSION
 I18N_PACKAGE = 'libpbd4'
 
 # Mandatory variables

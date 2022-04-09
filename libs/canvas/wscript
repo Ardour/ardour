@@ -16,7 +16,6 @@ CANVAS_LIB_VERSION = '0.0.0'
 
 # Variables for 'waf dist'
 APPNAME = 'canvas'
-VERSION = CANVAS_VERSION
 I18N_PACKAGE = 'libcanvas'
 
 # Mandatory variables
