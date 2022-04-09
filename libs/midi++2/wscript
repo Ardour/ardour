@@ -26,7 +26,6 @@ out = 'build'
 
 path_prefix = 'libs/midi++2/'
 
-
 libmidi_sources = [
         'midi.cc',
         'channel.cc',

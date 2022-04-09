@@ -101,6 +101,5 @@ def build(bld):
         obj.cxxflags += [ bld.env['compiler_flags_dict']['pic'] ]
         obj.cflags   += [ bld.env['compiler_flags_dict']['pic'] ]
 
-
 def shutdown():
     autowaf.shutdown()

@@ -7,7 +7,6 @@ import os
 top = '.'
 out = 'build'
 
-
 def options(opt):
 
     autowaf.set_options(opt)

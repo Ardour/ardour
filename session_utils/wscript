@@ -68,7 +68,6 @@ def build_ardour_util(bld, util):
     if bld.is_defined('NEED_INTL'):
         obj.linkflags = ' -lintl'
 
-
 def build(bld):
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
     # session-utils depend on the dummy backend

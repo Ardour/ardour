@@ -80,7 +80,6 @@ def configure(conf):
     for i in children:
         sub_config_and_use(conf, i)
 
-
 def build(bld):
     bld.recurse('control_protocol')
     bld.recurse('generic_midi')

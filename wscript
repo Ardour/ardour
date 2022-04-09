@@ -530,7 +530,6 @@ int main() { return 0; }''',
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
             cxx_flags.append('-DBOOST_BIND_GLOBAL_PLACEHOLDERS')
 
-
     if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur' ]:
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
@@ -545,7 +544,6 @@ int main() { return 0; }''',
         # the compile-time presence of the macro _LP64 is used to
         # distinguish 32 and 64 bit assembler
         #
-
 
         if not (opt.arm64 or conf.env['build_target'] == 'armhf' and conf.env['build_target'] == 'aarch64'):
             compiler_flags.append ("-DARCH_X86")
@@ -1085,7 +1083,6 @@ def configure(conf):
         else:
             print ('No Carbon support available for this build\n')
 
-
     if Options.options.canvasui:
         conf.env['CANVASTESTUI'] = True
         conf.define ('CANVASTESTUI', 1)
@@ -1361,7 +1358,6 @@ int main () { return 0; }
             or conf.env['BUILD_PULSEAUDIO']):
         conf.fatal("Must configure and build at least one backend")
 
-
     if (Options.options.use_lld):
         if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
             conf.fatal("lld is only for Linux builds")
@@ -1371,7 +1367,6 @@ int main () { return 0; }
 
     if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
         conf.fatal("PortAudio Backend is not for Linux")
-
 
     if sys.platform != 'darwin' and conf.env['BUILD_CORECRAPPITA']:
         conf.fatal("Coreaudio backend is only available for OSX")

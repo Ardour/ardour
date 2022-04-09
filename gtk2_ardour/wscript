@@ -494,7 +494,6 @@ def _doPyp(infileName, deps = False):
     if fd != sys.stdin:
         fd.close()
 
-
     for line in inLines:
         bits = re_spaces.split(line)
         if bits[0] == '##include':
@@ -521,7 +520,6 @@ def include_processor(task):
     fdOut = open (outfileName, "w")
     fdOut.write (_doPyp(infileName))
     fdOut.close ()
-
 
 def build_color_scheme(path, prefix):
     f = open (path, 'r')
@@ -621,7 +619,6 @@ def build(bld):
 #        obj.uselib    = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML '
 #        # obj.source += [ 'canvas_test.cc', ]
 #        obj.source += [ 'toolbar_test.cc', 'enums.cc']
-
 
     # executable version of the GTK GUI
     if bld.env['build_target'] == 'mingw':

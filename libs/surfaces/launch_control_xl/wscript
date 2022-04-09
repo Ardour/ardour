@@ -6,14 +6,11 @@ import os
 top = '.'
 out = 'build'
 
-
 def options(opt):
     autowaf.set_options(opt)
 
-
 def configure(conf):
     pass
-
 
 def build(bld):
     obj = bld(features='cxx cxxshlib')
@@ -35,7 +32,6 @@ def build(bld):
     obj.uselib = 'GTKMM SIGCPP XML OSX'
     obj.use = 'libardour libardour_cp libpbd libevoral libcanvas libtemporal'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
-
 
 def shutdown():
     autowaf.shutdown()

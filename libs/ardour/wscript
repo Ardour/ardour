@@ -376,7 +376,6 @@ def configure(conf):
     if conf.env['WINDOWS_VST_SUPPORT'] == True:
         conf.check(compiler='cxx', lib='gdi32', mandatory=True, uselib_store='GDI32')
 
-
 def build(bld):
     # Library version (UNIX style major, minor, micro)
     # major increment <=> incompatible changes

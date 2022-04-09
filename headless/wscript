@@ -24,7 +24,6 @@ def options(opt):
 def configure(conf):
     conf.load('misc')
 
-
 def build(bld):
 
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
