@@ -328,7 +328,7 @@ Editor::bounce_region_selection (bool with_processing)
 		}
 
 		/* copy to the user's Clip Library ? */
-		Gtk::CheckButton *cliplib = manage (new Gtk::CheckButton (_("Bounce to Clip Libary")));
+		Gtk::CheckButton *cliplib = manage (new Gtk::CheckButton (_("Bounce to Clip Library")));
 		Gtk::Alignment *align = manage (new Gtk::Alignment (0, .5, 0, 0));
 		align->add (*cliplib);
 		align->show_all ();
