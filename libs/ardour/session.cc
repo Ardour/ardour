@@ -3261,17 +3261,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 				}
 			}
 
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
-			/* clang complains: 'operator<<' should be declared prior to the call site or in an associated namespace of one of its
-			 * arguments std::ostream& operator<<(std::ostream& o, ARDOUR::PresentationInfo const& rid)"
-			 */
-			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("added route %1, group order %2 type %3 (summary: %4)\n",
-			                                               r->name(),
-			                                               r->presentation_info().order(),
-			                                               enum_2_string (r->presentation_info().flags()),
-			                                               r->presentation_info()));
-#endif
-
+			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("added route %1, pi %2\n" r->name(), r->presentation_info()));
 
 			if (input_auto_connect || output_auto_connect) {
 				auto_connect_route (r, input_auto_connect, output_auto_connect, ChanCount (), ChanCount (), existing_inputs, existing_outputs);
