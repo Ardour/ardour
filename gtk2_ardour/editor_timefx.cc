@@ -359,13 +359,6 @@ Editor::do_timefx ()
 	uint32_t const N = current_timefx->regions.size ();
 
 	for (RegionList::const_iterator i = current_timefx->regions.begin(); i != current_timefx->regions.end(); ++i) {
-		boost::shared_ptr<Playlist> playlist = (*i)->playlist();
-		if (playlist) {
-			playlist->clear_changes ();
-		}
-	}
-
-	for (RegionList::const_iterator i = current_timefx->regions.begin(); i != current_timefx->regions.end(); ++i) {
 
 		boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (*i);
 		boost::shared_ptr<Playlist> playlist;
@@ -427,8 +420,9 @@ Editor::do_timefx ()
 			boost::shared_ptr<Region> region = i->first;
 			boost::shared_ptr<Region> new_region = i->second;
 			boost::shared_ptr<Playlist> playlist = region->playlist();
-			playlist->replace_region (region, new_region, region->position());
 
+			playlist->clear_changes ();
+			playlist->replace_region (region, new_region, region->position());
 			PBD::StatefulDiffCommand* cmd = new StatefulDiffCommand (playlist);
 			_session->add_command (cmd);
 			if (!cmd->empty ()) {
