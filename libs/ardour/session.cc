@@ -3261,7 +3261,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 				}
 			}
 
-			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("added route %1, pi %2\n" r->name(), r->presentation_info()));
+			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("added route %1, pi %2\n", r->name(), r->presentation_info()));
 
 			if (input_auto_connect || output_auto_connect) {
 				auto_connect_route (r, input_auto_connect, output_auto_connect, ChanCount (), ChanCount (), existing_inputs, existing_outputs);
