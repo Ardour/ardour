@@ -732,17 +732,17 @@ bool SendsSubview::handle_cursor_left_press()
 bool SendsSubview::handle_cursor_right_press()
 {
 	uint32_t num_sends = 0;
-	if(_subview_stripable->send_name(0).size() > 0) {
+	if (_subview_stripable->send_name(0).size() > 0) {
 		bool more_sends = true;
-		while(more_sends) {
-			if(_subview_stripable->send_name(num_sends).size() > 0) {
+		while (more_sends) {
+			if (_subview_stripable->send_name(num_sends).size() > 0) {
 				num_sends++;
 			} else {
 				more_sends = false;
 			}
 		}
 	}
-	if(num_sends > _current_bank + 1) {
+	if (num_sends > _current_bank + 1) {
 		_current_bank += 1;
 		mcp().redisplay_subview_mode();
 	}
