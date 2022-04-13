@@ -2093,5 +2093,9 @@ AudioRegion::do_export (std::string const& path) const
 		to_read -= this_time;
 		pos += this_time;
 	}
+
+	/* Drop references, close file */
+	interleaver.clear_outputs ();
+	sfw.reset ();
 	return to_read == 0;
 }
