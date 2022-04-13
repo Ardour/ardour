@@ -122,7 +122,7 @@ AudioSource::~AudioSource ()
 		cerr << "AudioSource destroyed with leftover peak data pending" << endl;
 	}
 
-	if ((-1) != _peakfile_fd) {
+	if (-1 != _peakfile_fd) {
 		close (_peakfile_fd);
 		_peakfile_fd = -1;
 	}
@@ -828,7 +828,7 @@ int
 AudioSource::close_peakfile ()
 {
 	WriterLock lp (_lock);
-	if (_peakfile_fd >= 0) {
+	if (-1 != _peakfile_fd) {
 		close (_peakfile_fd);
 		_peakfile_fd = -1;
 	}
@@ -846,7 +846,7 @@ AudioSource::prepare_for_peakfile_writes ()
 		return -1;
 	}
 
-	if ((_peakfile_fd = g_open (_peakpath.c_str(), O_CREAT|O_RDWR, 0664)) < 0) {
+	if ((_peakfile_fd = g_open (_peakpath.c_str(), O_CREAT|O_RDWR, 0664)) == -1) {
 		error << string_compose(_("AudioSource: cannot open _peakpath (c) \"%1\" (%2)"), _peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
@@ -857,7 +857,7 @@ void
 AudioSource::done_with_peakfile_writes (bool done)
 {
 	if (_session.deletion_in_progress() || _session.peaks_cleanup_in_progres()) {
-		if (_peakfile_fd) {
+		if (-1 != _peakfile_fd) {
 			close (_peakfile_fd);
 			_peakfile_fd = -1;
 		}
@@ -868,8 +868,10 @@ AudioSource::done_with_peakfile_writes (bool done)
 		compute_and_write_peaks (0, 0, 0, true, false, _FPP);
 	}
 
-	close (_peakfile_fd);
-	_peakfile_fd = -1;
+	if (-1 != _peakfile_fd) {
+		close (_peakfile_fd);
+		_peakfile_fd = -1;
+	}
 
 	if (done) {
 		Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
@@ -900,7 +902,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, sam
 	off_t first_peak_byte;
 	boost::scoped_array<Sample> buf2;
 
-	if (_peakfile_fd < 0) {
+	if (-1 == _peakfile_fd) {
 		if (prepare_for_peakfile_writes ()) {
 			return -1;
 		}
@@ -1079,7 +1081,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, sam
 void
 AudioSource::truncate_peakfile ()
 {
-	if (_peakfile_fd < 0) {
+	if (-1 == _peakfile_fd) {
 		error << string_compose (_("programming error: %1"), "AudioSource::truncate_peakfile() called without open peakfile descriptor")
 		      << endmsg;
 		return;
