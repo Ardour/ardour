@@ -35,6 +35,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/threads.h>
 
+#include "pbd/gstdio_compat.h"
 #include "pbd/basename.h"
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
@@ -2051,9 +2052,8 @@ bool
 AudioRegion::do_export (std::string const& path) const
 {
 	const uint32_t    n_chn      = n_channels ();
-	const samplepos_t chunk_size = 8192;
+	const samplecnt_t chunk_size = 8192;
 	Sample            buf[chunk_size];
-	gain_t            gain_buffer[chunk_size];
 
 	const int format = SF_FORMAT_FLAC | SF_FORMAT_PCM_24; // TODO preference or option
 
@@ -2072,15 +2072,16 @@ AudioRegion::do_export (std::string const& path) const
 	interleaver.init (n_channels (), chunk_size);
 	interleaver.add_output (sfw);
 
-	samplepos_t to_read = length_samples ();
-	samplepos_t pos     = position_sample ();
+	samplecnt_t to_read  = length_samples ();
+	samplepos_t pos      = position_sample ();
+	samplecnt_t lsamples = _length.val().samples();
 
 	while (to_read) {
-		samplepos_t this_time = min (to_read, chunk_size);
+		samplecnt_t this_time = min (to_read, chunk_size);
 
 		for (uint32_t chn = 0; chn < n_chn; ++chn) {
-			if (read_at (buf, buf, gain_buffer, pos, this_time, chn) != this_time) {
-				break;
+			if (read_from_sources (_sources, lsamples, buf, pos, this_time, chn) != this_time) {
+				goto errout;
 			}
 
 			AudioGrapher::ConstProcessContext<Sample> context (buf, this_time, 1);
@@ -2094,8 +2095,14 @@ AudioRegion::do_export (std::string const& path) const
 		pos += this_time;
 	}
 
+errout:
 	/* Drop references, close file */
 	interleaver.clear_outputs ();
 	sfw.reset ();
+
+	if (to_read != 0) {
+		::g_unlink (path.c_str());
+	}
+
 	return to_read == 0;
 }
