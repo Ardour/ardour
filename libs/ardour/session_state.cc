@@ -104,6 +104,7 @@
 #include "ardour/disk_reader.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
+#include "ardour/io_plug.h"
 #include "ardour/location.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/midi_model.h"
@@ -1482,6 +1483,15 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		node->add_child_nocopy (*script_node);
 	}
 
+	{
+		boost::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
+		XMLNode* iop_node = new XMLNode (X_("IOPlugins"));
+		for (auto const& i : *iop) {
+			iop_node->add_child_nocopy (i->get_state());
+		}
+		node->add_child_nocopy (*iop_node);
+	}
+
 	return *node;
 }
 
@@ -1868,6 +1878,24 @@ Session::set_state (const XMLNode& node, int version)
 				warning << "LuaException: " << e.what () << endmsg;
 			} catch (...) { }
 			g_free (buf);
+		}
+	}
+
+	if ((child = find_named_node (node, "IOPlugins"))) {
+		RCUWriter<IOPlugList> writer (_io_plugins);
+		boost::shared_ptr<IOPlugList> iopl = writer.get_copy ();
+		for (XMLNodeList::const_iterator n = child->children ().begin (); n != child->children ().end (); ++n) {
+			boost::shared_ptr<IOPlug> iop = boost::make_shared<IOPlug>(*this);
+			if (0 == iop->set_state (**n, version)) {
+				iopl->push_back (iop);
+				iop->LatencyChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, this, true, false));
+			} else {
+				/* TODO Unknown I/O Plugin, retain state */
+			}
+		}
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		for (auto const& i : *iopl) {
+			i->ensure_io ();
 		}
 	}
 

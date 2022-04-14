@@ -81,6 +81,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/gain_control.h"
 #include "ardour/graph.h"
+#include "ardour/io_plug.h"
 #include "ardour/luabindings.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/scene_changer.h"
@@ -92,6 +93,7 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/polarity_processor.h"
 #include "ardour/presentation_info.h"
 #include "ardour/process_thread.h"
@@ -246,6 +248,7 @@ Session::Session (AudioEngine &eng,
 	, _mempool ("Session", 3145728)
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 	, _n_lua_scripts (0)
+	, _io_plugins (new IOPlugList)
 	, _butler (new Butler (*this))
 	, _transport_fsm (new TransportFSM (*this))
 	, _locations (new Locations (*this))
@@ -704,6 +707,16 @@ Session::destroy ()
 	}
 	auditioner.reset ();
 
+	/* unregister IO Plugin */
+	{
+		RCUWriter<IOPlugList> writer (_io_plugins);
+		boost::shared_ptr<IOPlugList> iop = writer.get_copy ();
+		for (auto const& i : *iop) {
+			i->DropReferences ();
+		}
+		iop->clear ();
+	}
+
 	/* drop references to routes held by the monitoring section
 	 * specifically _monitor_out aux/listen references */
 	remove_monitor_section();
@@ -712,6 +725,7 @@ Session::destroy ()
 
 	routes.flush ();
 	_bundles.flush ();
+	_io_plugins.flush ();
 
 	DiskReader::free_working_buffers();
 
@@ -1350,8 +1364,7 @@ Session::hookup_io ()
 		delete _bundle_xml_node;
 	}
 
-	/* Get everything connected
-	*/
+	/* Get everything connected */
 
 	AudioEngine::instance()->reconnect_ports ();
 
@@ -2121,6 +2134,11 @@ Session::set_block_size (pframes_t nframes)
 	ensure_buffers ();
 
 	foreach_route (&Route::set_block_size, nframes);
+
+	boost::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
+	for (auto const& i : *iop) {
+		i->set_block_size (nframes);
+	}
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "Session::set_block_size -> update worst i/o latency\n");
 	/* when this is called from the auto-connect thread, the process-lock is held */
@@ -3938,6 +3956,13 @@ Session::io_name_is_legal (const std::string& name) const
 		}
 	}
 
+	boost::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
+	for (auto const& i : *iop) {
+		if (i->io_name () == name) {
+			return false;
+		}
+	}
+
 	return true;
 }
 
@@ -5033,6 +5058,38 @@ Session::audition_playlist ()
 	queue_event (ev);
 }
 
+void
+Session::load_io_plugin (boost::shared_ptr<IOPlug> ioplugin)
+{
+	{
+		RCUWriter<IOPlugList> writer (_io_plugins);
+		boost::shared_ptr<IOPlugList> iop = writer.get_copy ();
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		ioplugin->ensure_io ();
+		iop->push_back (ioplugin);
+		ioplugin->LatencyChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, this, true, false));
+	}
+	IOPluginsChanged (); /* EMIT SIGNAL */
+	set_dirty();
+}
+
+bool
+Session::unload_io_plugin (boost::shared_ptr<IOPlug> ioplugin)
+{
+	{
+		RCUWriter<IOPlugList> writer (_io_plugins);
+		boost::shared_ptr<IOPlugList> iop = writer.get_copy ();
+		auto i = find (iop->begin (), iop->end (), ioplugin);
+		if (i == iop->end ()) {
+			return false;
+		}
+		(*i)->drop_references ();
+		iop->erase (i);
+	}
+	IOPluginsChanged (); /* EMIT SIGNAL */
+	set_dirty();
+	return true;
+}
 
 void
 Session::register_lua_function (
@@ -6662,6 +6719,11 @@ Session::set_owned_port_public_latency (bool playback)
 		auditioner->set_public_port_latencies (latency, playback, true);
 	}
 	_click_io->set_public_port_latencies (_click_io->connected_latency (playback), playback);
+
+	boost::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
+	for (auto const& i : *iop) {
+		i->set_public_latency (playback);
+	}
 
 	if (_midi_ports) {
 		_midi_ports->set_public_latency (playback);

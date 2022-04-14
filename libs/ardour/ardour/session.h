@@ -143,6 +143,7 @@ class ExportStatus;
 class Graph;
 struct GraphChain;
 class IO;
+class IOPlug;
 class IOProcessor;
 class ImportStatus;
 class MidiClockTicker;
@@ -939,6 +940,24 @@ public:
 
 	PBD::Signal0<void> LuaScriptsChanged;
 
+	/* I/O Plugin */
+	PBD::Signal0<void> IOPluginsChanged;
+
+	void load_io_plugin (boost::shared_ptr<IOPlug>);
+	bool unload_io_plugin (boost::shared_ptr<IOPlug>);
+
+	boost::shared_ptr<IOPlug> nth_io_plug (uint32_t n) {
+		boost::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
+		if (n < iop->size ()) {
+			return (*iop)[n];
+		}
+		return boost::shared_ptr<IOPlug> ();
+	}
+
+	boost::shared_ptr<IOPlugList> io_plugs () const {
+		return _io_plugins.reader ();
+	}
+
 	/* flattening stuff */
 
 	boost::shared_ptr<Region> write_one_track (Track&, samplepos_t start, samplepos_t end,
@@ -1613,6 +1632,8 @@ private:
 
 	void setup_lua ();
 	void try_run_lua (pframes_t);
+
+	SerializedRCUManager<IOPlugList> _io_plugins;
 
 	Butler* _butler;
 

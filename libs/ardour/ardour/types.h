@@ -639,6 +639,9 @@ typedef std::list<boost::shared_ptr<VCA> > VCAList;
 class Bundle;
 typedef std::vector<boost::shared_ptr<Bundle> > BundleList;
 
+class IOPlug;
+typedef std::vector<boost::shared_ptr<IOPlug> > IOPlugList;
+
 enum RegionEquivalence {
 	Exact,
 	Enclosed,
