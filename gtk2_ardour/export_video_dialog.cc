@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2013-2015 John Emmas <john@creativepost.co.uk>
  * Copyright (C) 2013-2018 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2022 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2015 André Nusser <andre.nusser@googlemail.com>
  * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
  *
@@ -47,6 +47,8 @@
 #include "ardour/export_timespan.h"
 #include "ardour/session_metadata.h"
 
+#include "gtkmm2ext/utils.h"
+
 #include "ardour_message.h"
 #include "export_video_dialog.h"
 #include "utils_videotl.h"
@@ -73,6 +75,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	, abort_button (_("Abort"))
 	, progress_box (0)
 	, normalize_checkbox (_("Normalize Audio"))
+	, copy_video_codec_checkbox (_("Copy Video Codec"))
 	, meta_checkbox (_("Include Session Metadata"))
 	, debug_checkbox (_("Debug Mode: Print ffmpeg command and output to stdout."))
 {
@@ -102,7 +105,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	_transcoder = 0;
 
 	Gtk::Frame* f;
-	Table* t;
+	Table*      t;
 
 	f         = manage (new Gtk::Frame (_("Output (file extension defines format)")));
 	path_hbox = manage (new HBox);
@@ -134,17 +137,41 @@ ExportVideoDialog::ExportVideoDialog ()
 
 	outfn_path_entry.set_width_chars (38);
 
+	audio_bitrate_combo.append (_("(default for codec)"));
+	audio_bitrate_combo.append ("64k");
+	audio_bitrate_combo.append ("128k");
+	audio_bitrate_combo.append ("192k");
+	audio_bitrate_combo.append ("256k");
+	audio_bitrate_combo.append ("320k");
+
+	audio_sample_rate_combo.append (_("Session rate"));
+	audio_sample_rate_combo.append ("44100");
+	audio_sample_rate_combo.append ("48000");
+
 	f = manage (new Gtk::Frame (_("Settings")));
 	t = manage (new Table (3, 2));
 	t->set_border_width (2);
 	t->set_spacings (4);
 	int ty = 0;
-	l      = manage (new Label (_("Range:"), ALIGN_START, ALIGN_CENTER, false));
+
+	l = manage (new Label (_("Range:"), ALIGN_START, ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, ty, ty + 1);
 	t->attach (insnd_combo, 1, 2, ty, ty + 1);
 	ty++;
 
+	l = manage (new Label (_("Audio Rate:"), ALIGN_START, ALIGN_CENTER, false));
+	t->attach (*l, 0, 1, ty, ty + 1);
+	t->attach (audio_sample_rate_combo, 1, 2, ty, ty + 1);
+	ty++;
+
+	l = manage (new Label (_("Audio Quality:"), ALIGN_START, ALIGN_CENTER, false));
+	t->attach (*l, 0, 1, ty, ty + 1);
+	t->attach (audio_bitrate_combo, 1, 2, ty, ty + 1);
+	ty++;
+
 	t->attach (normalize_checkbox, 0, 2, ty, ty + 1);
+	ty++;
+	t->attach (copy_video_codec_checkbox, 0, 2, ty, ty + 1);
 	ty++;
 	t->attach (meta_checkbox, 0, 2, ty, ty + 1);
 	ty++;
@@ -223,15 +250,20 @@ ExportVideoDialog::apply_state (TimeSelection& tme, bool range)
 	if (!_export_range.empty ()) {
 		insnd_combo.append (_("Selected range")); // TODO show _export_range.start() -> _export_range.end_sample()
 	}
+
+	/* default settings */
 	if (range) {
 		insnd_combo.set_active (2);
 	} else {
-		insnd_combo.set_active (0);
+		insnd_combo.set_active (1);
 	}
-
+	audio_bitrate_combo.set_active (0);
+	audio_sample_rate_combo.set_active (0);
 	normalize_checkbox.set_active (false);
+	copy_video_codec_checkbox.set_active (false);
 	meta_checkbox.set_active (false);
 
+	/* set original video file */
 	XMLNode* node        = _session->extra_xml (X_("Videotimeline"));
 	bool     filenameset = false;
 	if (node) {
@@ -261,15 +293,36 @@ ExportVideoDialog::apply_state (TimeSelection& tme, bool range)
 		invid_path_entry.set_text (X_(""));
 	}
 
+	/* apply saved state, if any */
 	node = _session->extra_xml (X_("Videoexport"));
 	if (node) {
-		bool        yn;
+		bool   yn;
+		int    num;
 		string str;
 		if (node->get_property (X_("NormalizeAudio"), yn)) {
 			normalize_checkbox.set_active (yn);
 		}
+		if (node->get_property (X_("CopyVCodec"), yn)) {
+			copy_video_codec_checkbox.set_active (yn);
+		}
 		if (node->get_property (X_("Metadata"), yn)) {
 			meta_checkbox.set_active (yn);
+		}
+		if (node->get_property (X_("ExportRange"), num)) {
+			if (!range && num >= 0 && num < 1) {
+				insnd_combo.set_active (num);
+			}
+		}
+		if (node->get_property (X_("AudioSRChoice"), num)) {
+			if (num >= 0 && num < 3) {
+				audio_sample_rate_combo.set_active (num);
+			}
+		}
+		if (node->get_property (X_("OutputFile"), str)) {
+			outfn_path_entry.set_text (str);
+		}
+		if (node->get_property (X_("AudioBitrate"), str)) {
+			Gtkmm2ext::set_active_text_if_present (audio_bitrate_combo, str);
 		}
 	}
 
@@ -285,7 +338,12 @@ XMLNode&
 ExportVideoDialog::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Videoexport"));
+	node->set_property (X_("OutputFile"), outfn_path_entry.get_text ());
+	node->set_property (X_("ExportRange"), insnd_combo.get_active_row_number ());
+	node->set_property (X_("AudioSRChoice"), audio_sample_rate_combo.get_active_row_number ());
+	node->set_property (X_("AudioBitrate"), audio_bitrate_combo.get_active_text ());
 	node->set_property (X_("NormalizeAudio"), normalize_checkbox.get_active ());
+	node->set_property (X_("CopyVCodec"), copy_video_codec_checkbox.get_active ());
 	node->set_property (X_("Metadata"), meta_checkbox.get_active ());
 	return *node;
 }
@@ -326,7 +384,7 @@ gint
 ExportVideoDialog::audio_progress_display ()
 {
 	string status_text;
-	double      progress = -1.0;
+	double progress = -1.0;
 	switch (status->active_job) {
 		case ExportStatus::Normalizing:
 			pbar.set_text (_("Normalizing audio"));
@@ -367,7 +425,7 @@ ExportVideoDialog::finished (int status)
 	_transcoder = 0;
 	if (_aborted || status != 0) {
 		if (!_aborted) {
-			ARDOUR_UI::instance()->popup_error(_("Video transcoding failed."));
+			ARDOUR_UI::instance ()->popup_error (_("Video transcoding failed."));
 		}
 		::g_unlink (outfn_path_entry.get_text ().c_str ());
 		::g_unlink (_insnd.c_str ());
@@ -411,8 +469,20 @@ ExportVideoDialog::launch_export ()
 	boost::shared_ptr<AudioGrapher::BroadcastInfo> b;
 
 	XMLTree tree;
-	string  vtl_samplerate = "48000";
-	string  vtl_normalize  = _normalize ? "true" : "false";
+	string  vtl_normalize = _normalize ? "true" : "false";
+	string  vtl_samplerate;
+
+	switch (audio_sample_rate_combo.get_active_row_number ()) {
+		case 0:
+			vtl_samplerate = string_compose ("%1", _session->nominal_sample_rate ());
+			break;
+		case 1:
+			vtl_samplerate = "44100";
+			break;
+		default:
+			vtl_samplerate = "48000";
+			break;
+	}
 
 	tree.read_buffer (std::string (
 	                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
@@ -530,7 +600,7 @@ ExportVideoDialog::launch_export ()
 	status = _session->get_export_status ();
 
 	_audio_progress_connection = Glib::signal_timeout ().connect (sigc::mem_fun (*this, &ExportVideoDialog::audio_progress_display), 100);
-	_previous_progress        = 0.0;
+	_previous_progress         = 0.0;
 	while (status->running ()) {
 		if (_aborted) {
 			status->abort ();
@@ -658,6 +728,14 @@ ExportVideoDialog::encode_video ()
 
 	if (debug_checkbox.get_active ()) {
 		_transcoder->set_debug (true);
+	}
+
+	if (copy_video_codec_checkbox.get_active ()) {
+		ffs["-codec:v"] = "copy";
+	}
+
+	if (audio_bitrate_combo.get_active_text () != _("(default)")) {
+		ffs["-b:a"] = audio_bitrate_combo.get_active_text ();
 	}
 
 	_transcoder->Progress.connect (*this, invalidator (*this), boost::bind (&ExportVideoDialog::update_progress, this, _1, _2), gui_context ());

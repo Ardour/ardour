@@ -99,7 +99,11 @@ private:
 	Gtk::VBox*       progress_box;
 	Gtk::ProgressBar pbar;
 
+	Gtk::ComboBoxText audio_bitrate_combo;
+	Gtk::ComboBoxText audio_sample_rate_combo;
+
 	Gtk::CheckButton normalize_checkbox;
+	Gtk::CheckButton copy_video_codec_checkbox;
 	Gtk::CheckButton meta_checkbox;
 	Gtk::CheckButton debug_checkbox;
 };
