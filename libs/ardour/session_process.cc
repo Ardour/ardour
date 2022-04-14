@@ -44,8 +44,10 @@
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
 #include "ardour/graph.h"
+#include "ardour/io_plug.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
+#include "ardour/rt_tasklist.h"
 #include "ardour/scene_changer.h"
 #include "ardour/session.h"
 #include "ardour/transport_fsm.h"
@@ -108,7 +110,19 @@ Session::process (pframes_t nframes)
 
 	_engine.main_thread()->get_buffers ();
 
+	boost::shared_ptr<GraphChain> io_graph_chain = _io_graph_chain[0];
+	if (io_graph_chain) {
+		_process_graph->process_io_plugs (io_graph_chain, nframes, 0);
+		io_graph_chain.reset (); /* drop reference */
+	}
+
 	(this->*process_function) (nframes);
+
+	io_graph_chain = _io_graph_chain[1];
+	if (io_graph_chain) {
+		_process_graph->process_io_plugs (io_graph_chain, nframes, 0);
+		io_graph_chain.reset (); /* drop reference */
+	}
 
 	/* realtime-safe meter-position and processor-order changes
 	 *

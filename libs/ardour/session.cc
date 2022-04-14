@@ -485,6 +485,8 @@ Session::Session (AudioEngine &eng,
 
 	Location::cue_change.connect_same_thread (*this, boost::bind (&Session::cue_marker_change, this, _1));
 
+	IOPluginsChanged.connect_same_thread (*this, boost::bind (&Session::resort_io_plugs, this));
+
 	emit_thread_start ();
 	auto_connect_thread_start ();
 
@@ -675,6 +677,8 @@ Session::destroy ()
 
 	/* drop GraphNode references */
 	_graph_chain.reset ();
+	_io_graph_chain[0].reset ();
+	_io_graph_chain[1].reset ();
 
 	_butler->drop_references ();
 	delete _butler;
@@ -2201,11 +2205,35 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 		gnl.push_back (rt);
 	}
 
+	bool ok = true;
+
 	if (rechain_process_graph (gnl)) {
 		r->clear ();
 		for (auto const& nd : gnl) {
 			r->push_back (boost::dynamic_pointer_cast<Route> (nd));
 		}
+	} else {
+		ok = false;
+	}
+
+	/* now create IOPlugs graph-chains */
+	boost::shared_ptr<IOPlugList> io_plugins (_io_plugins.reader ());
+	GraphNodeList gnl_pre;
+	GraphNodeList gnl_post;
+	for (auto const& p : *io_plugins) {
+		if (p->is_pre ()) {
+			gnl_pre.push_back (p);
+		} else {
+			gnl_post.push_back (p);
+		}
+	}
+
+	if (!rechain_ioplug_graph (true)) {
+		ok = false;
+	}
+
+	if (!rechain_ioplug_graph (false)) {
+		ok = false;
 	}
 
 #ifndef NDEBUG
@@ -2214,6 +2242,30 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 		DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 (presentation order %2)\n", i->name(), i->presentation_info().order()));
 	}
 #endif
+
+	if (ok) {
+		SuccessfulGraphSort (); /* EMIT SIGNAL */
+		return;
+	}
+
+	/* The topological sort failed, so we have a problem.  Tell everyone
+	 * and stick to the old graph; this will continue to be processed, so
+	 * until the feedback is fixed, what is played back will not quite
+	 * reflect what is actually connected.
+	 */
+
+	FeedbackDetected (); /* EMIT SIGNAL */
+}
+
+void
+Session::resort_io_plugs ()
+{
+	bool ok_pre = rechain_ioplug_graph (true);
+	bool ok_post = rechain_ioplug_graph (false);
+
+	if (!ok_pre || !ok_post) {
+		FeedbackDetected (); /* EMIT SIGNAL */
+	}
 }
 
 bool
@@ -2249,17 +2301,35 @@ Session::rechain_process_graph (GraphNodeList& g)
 
 		_current_route_graph = edges;
 
-		SuccessfulGraphSort (); /* EMIT SIGNAL */
 		return true;
 	}
 
-	/* The topological sort failed, so we have a problem.  Tell everyone
-	 * and stick to the old graph; this will continue to be processed, so
-	 * until the feedback is fixed, what is played back will not quite
-	 * reflect what is actually connected.
-	 */
+	return false;
+}
 
-	FeedbackDetected (); /* EMIT SIGNAL */
+bool
+Session::rechain_ioplug_graph (bool pre)
+{
+	boost::shared_ptr<IOPlugList> io_plugins (_io_plugins.reader ());
+
+	if (io_plugins->empty ()) {
+		_io_graph_chain[pre ? 0 : 1].reset ();
+		return true;
+	}
+
+	GraphNodeList gnl;
+	for (auto const& p : *io_plugins) {
+		if (p->is_pre () == pre) {
+			gnl.push_back (p);
+		}
+	}
+
+	GraphEdges edges;
+
+	if (topological_sort (gnl, edges)) {
+		_io_graph_chain[pre ? 0 : 1] = boost::shared_ptr<GraphChain> (new GraphChain (gnl, edges), boost::bind (&rt_safe_delete<GraphChain>, this, _1));
+		return true;
+	}
 	return false;
 }
 

@@ -2278,9 +2278,13 @@ private:
 	friend class IOPlug;
 	boost::shared_ptr<Graph>      _process_graph;
 	boost::shared_ptr<GraphChain> _graph_chain;
+	boost::shared_ptr<GraphChain> _io_graph_chain[2];
 
 	void resort_routes_using (boost::shared_ptr<RouteList>);
+	void resort_io_plugs ();
+
 	bool rechain_process_graph (GraphNodeList&);
+	bool rechain_ioplug_graph (bool);
 
 	void ensure_route_presentation_info_gap (PresentationInfo::order_t, uint32_t gap_size);
 
