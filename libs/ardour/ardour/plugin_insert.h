@@ -415,7 +415,6 @@ private:
 	void create_automatable_parameters ();
 	void control_list_automation_state_changed (Evoral::Parameter, AutoState);
 	void set_parameter_state_2X (const XMLNode& node, int version);
-	void set_control_ids (const XMLNode&, int version);
 	void update_control_values (const XMLNode&, int version);
 
 	void enable_changed ();
@@ -441,8 +440,6 @@ private:
 
 	typedef std::map<uint32_t, boost::shared_ptr<ReadOnlyControl> >CtrlOutMap;
 	CtrlOutMap _control_outputs;
-
-	void preset_load_set_value (uint32_t, float);
 
 	PBD::TimingStats  _timing_stats;
 	GATOMIC_QUAL gint _stat_reset;

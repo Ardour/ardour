@@ -64,6 +64,13 @@ public:
 	virtual bool provides_stats () const = 0;
 	virtual bool get_stats (PBD::microseconds_t&, PBD::microseconds_t&, double&, double&) const = 0;
 	virtual void clear_stats () = 0;
+
+protected:
+	bool parse_plugin_type (XMLNode const&, PluginType&, std::string&) const;
+	boost::shared_ptr<Plugin> find_and_load_plugin (Session&, XMLNode const&, PluginType&, std::string const&, bool& any_vst);
+
+	void set_control_ids (const XMLNode&, int version);
+	void preset_load_set_value (uint32_t, float);
 };
 
 } // namespace ARDOUR

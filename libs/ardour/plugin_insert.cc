@@ -838,23 +838,6 @@ PluginInsert::write_immediate_event (Evoral::EventType event_type, size_t size, 
 }
 
 void
-PluginInsert::preset_load_set_value (uint32_t p, float v)
-{
-	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter(PluginAutomation, 0, p));
-	if (!ac) {
-		return;
-	}
-
-	if (ac->automation_state() & Play) {
-		return;
-	}
-
-	start_touch (p);
-	ac->set_value (v, Controllable::NoGroup);
-	end_touch (p);
-}
-
-void
 PluginInsert::inplace_silence_unconnected (BufferSet& bufs, const PinMappings& out_map, samplecnt_t nframes, samplecnt_t offset) const
 {
 	// TODO optimize: store "unconnected" in a fixed set.
@@ -2575,44 +2558,6 @@ PluginInsert::state () const
 }
 
 void
-PluginInsert::set_control_ids (const XMLNode& node, int version)
-{
-	const XMLNodeList& nlist = node.children();
-	for (XMLNodeConstIterator iter = nlist.begin(); iter != nlist.end(); ++iter) {
-		if ((*iter)->name() != Controllable::xml_node_name) {
-			continue;
-		}
-
-		uint32_t p = (uint32_t)-1;
-		std::string str;
-		if ((*iter)->get_property (X_("symbol"), str)) {
-			boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugins[0]);
-			if (lv2plugin) {
-				p = lv2plugin->port_index(str.c_str());
-			}
-		}
-		if (p == (uint32_t)-1) {
-			(*iter)->get_property (X_("parameter"), p);
-		}
-
-		if (p == (uint32_t)-1) {
-			continue;
-		}
-
-		/* this may create the new controllable */
-		boost::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p));
-
-		if (!c) {
-			continue;
-		}
-		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (c);
-		if (ac) {
-			ac->set_state (**iter, version);
-		}
-	}
-}
-
-void
 PluginInsert::update_control_values (const XMLNode& node, int version)
 {
 	const XMLNodeList& nlist = node.children();
@@ -2663,56 +2608,10 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	XMLNodeIterator niter;
 	XMLPropertyList plist;
 	ARDOUR::PluginType type;
+	std::string unique_id;
 
-	std::string str;
-	if (!node.get_property ("type", str)) {
-		error << _("XML node describing plugin is missing the `type' field") << endmsg;
+	if (! parse_plugin_type (node, type, unique_id)) {
 		return -1;
-	}
-
-	if (str == X_("ladspa") || str == X_("Ladspa")) { /* handle old school sessions */
-		type = ARDOUR::LADSPA;
-	} else if (str == X_("lv2")) {
-		type = ARDOUR::LV2;
-	} else if (str == X_("windows-vst")) {
-		type = ARDOUR::Windows_VST;
-	} else if (str == X_("lxvst")) {
-		type = ARDOUR::LXVST;
-	} else if (str == X_("mac-vst")) {
-		type = ARDOUR::MacVST;
-	} else if (str == X_("audiounit")) {
-		type = ARDOUR::AudioUnit;
-	} else if (str == X_("luaproc")) {
-		type = ARDOUR::Lua;
-	} else if (str == X_("vst3")) {
-		type = ARDOUR::VST3;
-	} else {
-		error << string_compose (_("unknown plugin type %1 in plugin insert state"), str) << endmsg;
-		return -1;
-	}
-
-	XMLProperty const* prop = node.property ("unique-id");
-
-	if (prop == 0) {
-#ifdef WINDOWS_VST_SUPPORT
-		/* older sessions contain VST plugins with only an "id" field.  */
-		if (type == ARDOUR::Windows_VST) {
-			prop = node.property ("id");
-		}
-#endif
-
-#ifdef LXVST_SUPPORT
-		/*There shouldn't be any older sessions with linuxVST support.. but anyway..*/
-		if (type == ARDOUR::LXVST) {
-			prop = node.property ("id");
-		}
-#endif
-
-		/* recheck  */
-		if (prop == 0) {
-			error << _("Plugin has no unique ID field") << endmsg;
-			return -1;
-		}
 	}
 
 	bool any_vst = false;
@@ -2720,55 +2619,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	node.get_property ("count", count);
 
 	if (_plugins.empty()) {
-		/* Find and load plugin module */
-		boost::shared_ptr<Plugin> plugin = find_plugin (_session, prop->value(), type);
-
-		/* treat VST plugins equivalent if they have the same uniqueID
-		 * allow to move sessions windows <> linux */
-#ifdef LXVST_SUPPORT
-		if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::MacVST)) {
-			type = ARDOUR::LXVST;
-			plugin = find_plugin (_session, prop->value(), type);
-			if (plugin) { any_vst = true; }
-		}
-#endif
-
-#ifdef WINDOWS_VST_SUPPORT
-		if (plugin == 0 && (type == ARDOUR::LXVST || type == ARDOUR::MacVST)) {
-			type = ARDOUR::Windows_VST;
-			plugin = find_plugin (_session, prop->value(), type);
-			if (plugin) { any_vst = true; }
-		}
-#endif
-
-#ifdef MACVST_SUPPORT
-		if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::LXVST)) {
-			type = ARDOUR::MacVST;
-			plugin = find_plugin (_session, prop->value(), type);
-			if (plugin) { any_vst = true; }
-		}
-#endif
-
-		if (plugin == 0 && type == ARDOUR::Lua) {
-			/* unique ID (sha1 of script) was not found,
-			 * load the plugin from the serialized version in the
-			 * session-file instead.
-			 */
-			boost::shared_ptr<LuaProc> lp (new LuaProc (_session.engine(), _session, ""));
-			XMLNode *ls = node.child (lp->state_node_name().c_str());
-			if (ls && lp) {
-				if (0 == lp->set_script_from_state (*ls)) {
-					plugin = lp;
-				}
-			}
-		}
-
-		if (plugin == 0) {
-			error << string_compose(
-					_("Found a reference to a plugin (\"%1\") that is unknown.\n"
-						"Perhaps it was removed or moved since it was last used."),
-					prop->value())
-				<< endmsg;
+		boost::shared_ptr<Plugin> plugin = find_and_load_plugin (_session, node, type, unique_id, any_vst);
+		if (!plugin) {
 			return -1;
 		}
 
@@ -2796,7 +2648,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			}
 		}
 	} else {
-		assert (_plugins[0]->unique_id() == prop->value());
+		assert (_plugins[0]->unique_id() == unique_id);
 		/* update controllable value only (copy plugin state) */
 		set_id (node);
 		update_control_values (node, version);
