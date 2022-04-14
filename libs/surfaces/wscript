@@ -89,6 +89,7 @@ def build(bld):
     bld.recurse('mackie')
     bld.recurse('us2400')
     bld.recurse('launch_control_xl')
+    bld.recurse('osc')
 
     if bld.is_defined('BUILD_WIIMOTE'):
         bld.recurse('wiimote')
