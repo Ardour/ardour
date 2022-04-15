@@ -48,6 +48,7 @@
 #include "ardour/session_metadata.h"
 
 #include "gtkmm2ext/utils.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_message.h"
 #include "export_video_dialog.h"
@@ -59,6 +60,7 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace VideoUtils;
 
 ExportVideoDialog::ExportVideoDialog ()
@@ -74,9 +76,9 @@ ExportVideoDialog::ExportVideoDialog ()
 	, transcode_button (_("Export"))
 	, abort_button (_("Abort"))
 	, progress_box (0)
-	, normalize_checkbox (_("Normalize Audio"))
-	, copy_video_codec_checkbox (_("Copy Video Codec"))
-	, meta_checkbox (_("Include Session Metadata"))
+	, normalize_checkbox (_("Normalize audio"))
+	, copy_video_codec_checkbox (_("Mux only - copy video codec"))
+	, meta_checkbox (_("Include session metadata"))
 	, debug_checkbox (_("Debug Mode: Print ffmpeg command and output to stdout."))
 {
 	set_name ("ExportVideoDialog");
@@ -159,7 +161,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	t->attach (insnd_combo, 1, 2, ty, ty + 1);
 	ty++;
 
-	l = manage (new Label (_("Audio Rate:"), ALIGN_START, ALIGN_CENTER, false));
+	l = manage (new Label (_("Sample rate:"), ALIGN_START, ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, ty, ty + 1);
 	t->attach (audio_sample_rate_combo, 1, 2, ty, ty + 1);
 	ty++;
@@ -188,6 +190,12 @@ ExportVideoDialog::ExportVideoDialog ()
 	progress_box->pack_start (pbar, false, false);
 	progress_box->pack_start (abort_button, false, false);
 	get_vbox ()->pack_start (*progress_box, false, false);
+
+	set_tooltip (normalize_checkbox, _("<b>When enabled</b>, the audio is normalized to 0dBFS during export."));
+	set_tooltip (copy_video_codec_checkbox, _("<b>When enabled</b>, the video is not re-encoded, but the original video codec is reused. In some cases this can lead to audio/video synchronization issues. This also only works if the exported range is not longer than the video. Adding black space at the start or end requires encoding.\n<b>When disabled</b>, the video is re-encoded, this may lead to quality loss, but this is the safer option and generally preferable."));
+	set_tooltip (meta_checkbox, _("<b>When enabled</b>, information from Menu > Session > Metadata is included in the video file."));
+	set_tooltip (audio_sample_rate_combo, _("Select the sample rate of the audio track. Prefer 48kHz."));
+	set_tooltip (audio_sample_rate_combo, _("Select the bitrate of the audio track in kbit/sec. Higher values result in better quality."));
 
 	outfn_browse_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportVideoDialog::open_outfn_dialog));
 	invid_browse_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportVideoDialog::open_invid_dialog));
@@ -484,6 +492,7 @@ ExportVideoDialog::launch_export ()
 			break;
 	}
 
+	/* clang-format off */
 	tree.read_buffer (std::string (
 	                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 	                  "<ExportFormatSpecification name=\"VTL-WAV-16\" id=\"3094591e-ccb9-4385-a93f-c9955ffeb1f0\">"
@@ -516,6 +525,7 @@ ExportVideoDialog::launch_export ()
 	                  "  </Processing>"
 	                  "</ExportFormatSpecification>")
 	                  .c_str ());
+	/* clang-format on */
 
 	boost::shared_ptr<ExportFormatSpecification> fmp = _session->get_export_handler ()->add_format (*tree.root ());
 
@@ -559,11 +569,33 @@ ExportVideoDialog::launch_export ()
 	const sampleoffset_t vend   = vstart + ARDOUR_UI::instance ()->video_timeline->get_duration ();
 
 	if ((start >= end) || (end < vstart) || (start > vend)) {
-		warning << _("Export Video: export-range does not include video.") << endmsg;
 		delete _transcoder;
 		_transcoder = 0;
+		ArdourMessageDialog msg (_("Export Video: The export-range does not include video."));
+		msg.run ();
 		Gtk::Dialog::response (RESPONSE_CANCEL);
 		return;
+	}
+
+	if ((start < vstart || end > vend) && copy_video_codec_checkbox.get_active ()) {
+		ArdourMessageDialog msg (
+				_("The export-range is longer than the video file. "
+				  "To add black frames the video has to be encoded. "
+				  "Copying the codec may fail or not produce the intended result.\n"
+				  "Continue anyway?"),
+				false,
+				Gtk::MESSAGE_INFO,
+				Gtk::BUTTONS_YES_NO,
+				true
+				);
+		msg.set_default_response (Gtk::RESPONSE_YES);
+
+		if (msg.run() != Gtk::RESPONSE_YES) {
+			delete _transcoder;
+			_transcoder = 0;
+			Gtk::Dialog::response (RESPONSE_CANCEL);
+			return;
+		}
 	}
 
 	tsp->set_range (start, end);
@@ -734,7 +766,7 @@ ExportVideoDialog::encode_video ()
 		ffs["-codec:v"] = "copy";
 	}
 
-	if (audio_bitrate_combo.get_active_text () != _("(default)")) {
+	if (audio_bitrate_combo.get_active_row_number () > 0) {
 		ffs["-b:a"] = audio_bitrate_combo.get_active_text ();
 	}
 
