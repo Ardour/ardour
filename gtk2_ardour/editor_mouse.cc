@@ -1875,7 +1875,17 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MouseDraw:
+			if (item_type == NoteItem) {
+				remove_midi_note (item, event);
+			}
 			return true;
+
+		case MouseContent:
+			if (item_type == NoteItem) {
+				remove_midi_note (item, event);
+				return true;
+			}
+			break;
 
 		case MouseRange:
 			// x_style_paste (where, 1.0);
@@ -1885,7 +1895,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		default:
 			break;
 		}
-
 		break;
 
 	case 3:
