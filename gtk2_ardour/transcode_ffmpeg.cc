@@ -344,37 +344,37 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 	if (m_lead_in != 0 && m_lead_out != 0) {
 		std::ostringstream osstream;
 		argp[a++] = strdup ("-vf");
-		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_in;
+		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps << ":d=" << m_lead_in;
 		if (!m_sar.empty ()) {
-			osstream << X_(":sar=") << m_sar;
+			osstream << ":sar=" << m_sar;
 		}
-		osstream << X_(" [pre]; ");
-		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_out;
+		osstream << " [pre]; ";
+		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps << ":d=" << m_lead_out;
 		if (!m_sar.empty ()) {
-			osstream << X_(":sar=") << m_sar;
+			osstream << ":sar=" << m_sar;
 		}
-		osstream << X_(" [post]; ");
-		osstream << X_("[pre] [in] [post] concat=n=3");
+		osstream << " [post]; ";
+		osstream << "[pre] [in] [post] concat=n=3";
 		argp[a++] = strdup (osstream.str ().c_str ());
 	} else if (m_lead_in != 0) {
 		std::ostringstream osstream;
 		argp[a++] = strdup ("-vf");
-		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_in;
+		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps << ":d=" << m_lead_in;
 		if (!m_sar.empty ()) {
-			osstream << X_(":sar=") << m_sar;
+			osstream << ":sar=" << m_sar;
 		}
-		osstream << X_(" [pre]; ");
-		osstream << X_("[pre] [in] concat=n=2");
+		osstream << " [pre]; ";
+		osstream << "[pre] [in] concat=n=2";
 		argp[a++] = strdup (osstream.str ().c_str ());
 	} else if (m_lead_out != 0) {
 		std::ostringstream osstream;
 		argp[a++] = strdup ("-vf");
-		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_out;
+		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps << ":d=" << m_lead_out;
 		if (!m_sar.empty ()) {
-			osstream << X_(":sar=") << m_sar;
+			osstream << ":sar=" << m_sar;
 		}
-		osstream << X_(" [post]; ");
-		osstream << X_("[in] [post] concat=n=2");
+		osstream << " [post]; ";
+		osstream << "[in] [post] concat=n=2";
 		argp[a++] = strdup (osstream.str ().c_str ());
 	}
 
