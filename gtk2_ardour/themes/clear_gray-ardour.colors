@@ -288,9 +288,9 @@
     <ColorAlias name="page switch button: fill" alias="widget:bg"/>
     <ColorAlias name="page switch button: fill active" alias="alert:orange"/>
     <ColorAlias name="patch change button unnamed: fill" alias="neutral:background2"/>
-    <ColorAlias name="patch change button unnamed: fill active" alias="widget:blue"/>
+    <ColorAlias name="patch change button unnamed: fill active" alias="neutral:foregroundest/>
     <ColorAlias name="patch change button: fill" alias="widget:bg"/>
-    <ColorAlias name="patch change button: fill active" alias="widget:blue"/>
+    <ColorAlias name="patch change button: fill active" alias="neutral:foregroundest"/>
     <ColorAlias name="piano roll black" alias="theme:bg"/>
     <ColorAlias name="piano roll black outline" alias="widget:gray"/>
     <ColorAlias name="piano roll white" alias="neutral:foreground2"/>
