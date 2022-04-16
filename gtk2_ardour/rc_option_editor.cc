@@ -53,6 +53,7 @@
 #include "ardour/clip_library.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/dB.h"
+#include "ardour/parameter_descriptor.h"
 #include "ardour/port_manager.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/profile.h"
@@ -3425,6 +3426,19 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("MIDI"), vkeybdlayout);
 
+	add_option (_("MIDI"), new OptionEditorHeading (_("Default Visible Note Range")));
+
+	mrl_option = new EntryOption ("lower-midi-note", _("Default lower visible MIDI note"),
+	                                           sigc::mem_fun (*this, &RCOptionEditor::get_default_lower_midi_note),
+	                                           sigc::mem_fun (*this, &RCOptionEditor::set_default_lower_midi_note));
+
+	mru_option = new EntryOption ("lower-midi-note", _("Default upper visible MIDI note"),
+	                                           sigc::mem_fun (*this, &RCOptionEditor::get_default_upper_midi_note),
+	                                           sigc::mem_fun (*this, &RCOptionEditor::set_default_upper_midi_note));
+
+	add_option (_("MIDI"), mrl_option);
+	add_option (_("MIDI"), mru_option);
+
 	/* MIDI PORTs */
 	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Port Options")));
 
@@ -4879,4 +4893,42 @@ RCOptionEditor::get_state () const
 	XMLNode* node = new XMLNode (X_("Preferences"));
 	node->add_child_nocopy (Tabbable::get_state());
 	return *node;
+}
+
+std::string
+RCOptionEditor::get_default_lower_midi_note ()
+{
+	return ParameterDescriptor::midi_note_name (UIConfiguration::instance().get_default_lower_midi_note());
+}
+
+bool
+RCOptionEditor::set_default_lower_midi_note (std::string str)
+{
+	int note = ParameterDescriptor::midi_note_num (str);
+
+	if (note < 0) {
+		mru_option->set_state_from_config ();
+		return false;
+	}
+
+	return UIConfiguration::instance().set_default_lower_midi_note (note);
+}
+
+std::string
+RCOptionEditor::get_default_upper_midi_note ()
+{
+	return ParameterDescriptor::midi_note_name (UIConfiguration::instance().get_default_upper_midi_note());
+}
+
+bool
+RCOptionEditor::set_default_upper_midi_note (std::string str)
+{
+	int note = ParameterDescriptor::midi_note_num (str);
+
+	if (note < 0) {
+		mru_option->set_state_from_config ();
+		return false;
+	}
+
+	return UIConfiguration::instance().set_default_upper_midi_note (note);
 }

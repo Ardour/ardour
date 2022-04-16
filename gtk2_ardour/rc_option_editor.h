@@ -70,6 +70,13 @@ private:
 
 	void reset_clip_library_dir ();
 
+	EntryOption* mrl_option;
+	EntryOption* mru_option;
+	std::string get_default_lower_midi_note ();
+	bool set_default_lower_midi_note (std::string);
+	std::string get_default_upper_midi_note ();
+	bool set_default_upper_midi_note (std::string);
+
 	/* plugin actions */
 	void plugin_scan_refresh ();
 	void plugin_reset_stats ();
