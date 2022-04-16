@@ -287,7 +287,7 @@
     <ColorAlias name="nudge clock: text" alias="theme:contrasting clock"/>
     <ColorAlias name="page switch button: fill" alias="widget:bg"/>
     <ColorAlias name="page switch button: fill active" alias="alert:green"/>
-    <ColorAlias name="patch change button unnamed: fill" alias="neutral:background2"/>
+    <ColorAlias name="patch change button unnamed: fill" alias="neutral:midground"/>
     <ColorAlias name="patch change button unnamed: fill active" alias="widget:blue"/>
     <ColorAlias name="patch change button: fill" alias="widget:bg"/>
     <ColorAlias name="patch change button: fill active" alias="widget:blue"/>
