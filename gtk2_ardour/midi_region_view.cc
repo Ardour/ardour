@@ -3211,7 +3211,7 @@ MidiRegionView::change_note_velocity(NoteBase* event, int8_t velocity, bool rela
 	note_diff_add_change (event, MidiModel::NoteDiffCommand::Velocity, new_velocity);
 }
 
-void
+uint8_t
 MidiRegionView::change_note_note (NoteBase* event, int8_t note, bool relative)
 {
 	uint8_t new_note;
@@ -3224,6 +3224,7 @@ MidiRegionView::change_note_note (NoteBase* event, int8_t note, bool relative)
 
 	clamp_to_0_127 (new_note);
 	note_diff_add_change (event, MidiModel::NoteDiffCommand::NoteNumber, new_note);
+	return new_note;
 }
 
 void

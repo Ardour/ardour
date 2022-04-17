@@ -420,7 +420,7 @@ public:
 
 	void change_note_channel (NoteBase *, int8_t, bool relative=false);
 	void change_note_velocity(NoteBase* ev, int8_t vel, bool relative=false);
-	void change_note_note(NoteBase* ev, int8_t note, bool relative=false);
+	uint8_t change_note_note(NoteBase* ev, int8_t note, bool relative=false);
 	void change_note_time(NoteBase* ev, ARDOUR::MidiModel::TimeType, bool relative=false);
 	void change_note_length (NoteBase *, ARDOUR::MidiModel::TimeType);
 	void trim_note(NoteBase* ev, ARDOUR::MidiModel::TimeType start_delta,
