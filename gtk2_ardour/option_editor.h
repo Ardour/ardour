@@ -278,6 +278,7 @@ public:
 	void add_to_page (OptionEditorPage*);
 	void set_sensitive (bool);
 	void set_invalid_chars (std::string i) { _invalid = i; }
+	void set_valid_chars (std::string i) { _valid = i; }
 
 	Gtk::Widget& tip_widget() { return *_entry; }
 
@@ -291,6 +292,7 @@ private:
 	Gtk::Label* _label; ///< UI label
 	Gtk::Entry* _entry; ///< UI entry
 	std::string _invalid;
+	std::string _valid;
 };
 
 

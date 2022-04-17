@@ -347,9 +347,21 @@ void
 EntryOption::filter_text (const Glib::ustring&, int*)
 {
 	std::string text = _entry->get_text ();
+
+	if (!_valid.empty()) {
+		for (std::string::const_iterator t = text.begin(); t != text.end(); ) {
+			if (_valid.find_first_of (*t) == std::string::npos) {
+				t = text.erase (t);
+			} else {
+				++t;
+			}
+		}
+	}
+
 	for (size_t i = 0; i < _invalid.length(); ++i) {
 		text.erase (std::remove(text.begin(), text.end(), _invalid.at(i)), text.end());
 	}
+
 	if (text != _entry->get_text ()) {
 		_entry->set_text (text);
 	}
