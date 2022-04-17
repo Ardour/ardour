@@ -1170,21 +1170,28 @@ MidiRegionView::model_changed()
 				i = _events.erase (i);
 
 			} else {
-				bool visible = cne->item()->visible();
 
-				if ((sus = dynamic_cast<Note*>(cne))) {
+				bool visible;
 
-					if (visible) {
-						update_sustained (sus);
-					}
-
-				} else if ((hit = dynamic_cast<Hit*>(cne))) {
+				if (note_in_region_range (cne->note(), visible)) {
 
 					if (visible) {
-						update_hit (hit);
+						cne->item()->show ();
+
+						if ((sus = dynamic_cast<Note*>(cne))) {
+							update_sustained (sus);
+						} else if ((hit = dynamic_cast<Hit*>(cne))) {
+							update_hit (hit);
+						}
+					} else {
+						cne->item()->hide ();
 					}
 
+				} else {
+
+					cne->item()->hide ();
 				}
+
 				++i;
 			}
 		}
@@ -1266,13 +1273,25 @@ MidiRegionView::view_changed()
 	for (Events::iterator i = _events.begin(); i != _events.end(); ) {
 
 		NoteBase* cne = i->second;
+		bool visible;
 
-		if (cne->item()->visible()) {
-			if ((sus = dynamic_cast<Note*>(cne))) {
-				update_sustained (sus);
+		if (note_in_region_range (cne->note(), visible)) {
+
+			if (visible) {
+				cne->item()->show ();
+
+				if ((sus = dynamic_cast<Note*>(cne))) {
+					update_sustained (sus);
+				} else if ((hit = dynamic_cast<Hit*>(cne))) {
+					update_hit (hit);
+				}
+			} else {
+				cne->item()->hide ();
 			}
-		} else if ((hit = dynamic_cast<Hit*>(cne))) {
-			update_hit (hit);
+
+		} else {
+
+			cne->item()->hide ();
 		}
 
 		++i;
