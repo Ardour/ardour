@@ -3445,14 +3445,25 @@ MidiRegionView::transpose (bool up, bool fine, bool allow_smush)
 
 	start_note_diff_command (_("transpose"));
 
+	uint8_t lowest = midi_stream_view()->lowest_note();
+	uint8_t highest = midi_stream_view()->highest_note();
+
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
 		Selection::iterator next = i;
 		++next;
-		change_note_note (*i, delta, true);
+		uint8_t new_note = change_note_note (*i, delta, true);
+		lowest = min (lowest, new_note);
+		highest = max (highest, new_note);
 		i = next;
 	}
 
 	apply_diff ();
+
+	if (lowest < midi_stream_view()->lowest_note() || highest > midi_stream_view()->highest_note()) {
+		midi_stream_view()->update_note_range (lowest);
+		midi_stream_view()->update_note_range (highest);
+		midi_stream_view()->apply_note_range (lowest, highest, true);
+	}
 }
 
 void
@@ -3767,6 +3778,7 @@ MidiRegionView::paste (timepos_t const & pos, const ::Selection& selection, Past
 	bool commit = false;
 	// Paste notes, if available
 	MidiNoteSelection::const_iterator m = selection.midi_notes.get_nth(ctx.counts.n_notes());
+
 	if (m != selection.midi_notes.end()) {
 		ctx.counts.increase_n_notes();
 		if (!(*m)->empty()) {
