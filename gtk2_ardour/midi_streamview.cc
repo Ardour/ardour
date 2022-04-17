@@ -421,8 +421,8 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region
 		}
 	}
 
-	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
-	note_range_adjustment.set_value(_lowest_note);
+	note_range_adjustment.set_page_size (_highest_note - _lowest_note);
+	note_range_adjustment.set_value (_lowest_note);
 
 	draw_note_lines();
 
