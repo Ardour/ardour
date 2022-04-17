@@ -3428,13 +3428,17 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("MIDI"), new OptionEditorHeading (_("Default Visible Note Range")));
 
+	const std::string legal_midi_name_chars = S_("legal characters for MIDI note names|ABCDEFG#1234567890");
+
 	mrl_option = new EntryOption ("lower-midi-note", _("Default lower visible MIDI note"),
 	                                           sigc::mem_fun (*this, &RCOptionEditor::get_default_lower_midi_note),
 	                                           sigc::mem_fun (*this, &RCOptionEditor::set_default_lower_midi_note));
+	mrl_option->set_valid_chars (legal_midi_name_chars);
 
 	mru_option = new EntryOption ("lower-midi-note", _("Default upper visible MIDI note"),
 	                                           sigc::mem_fun (*this, &RCOptionEditor::get_default_upper_midi_note),
 	                                           sigc::mem_fun (*this, &RCOptionEditor::set_default_upper_midi_note));
+	mru_option->set_valid_chars (legal_midi_name_chars);
 
 	add_option (_("MIDI"), mrl_option);
 	add_option (_("MIDI"), mru_option);
