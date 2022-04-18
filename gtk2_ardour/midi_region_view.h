@@ -96,6 +96,8 @@ public:
 
 	void init (bool wfd);
 
+	void set_selected (bool yn);
+
 	const boost::shared_ptr<ARDOUR::MidiRegion> midi_region() const;
 
 	inline MidiTimeAxisView* midi_view() const

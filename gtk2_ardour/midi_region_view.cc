@@ -2583,6 +2583,16 @@ MidiRegionView::remove_from_selection (NoteBase* ev)
 }
 
 void
+MidiRegionView::set_selected (bool selected)
+{
+	if (!selected) {
+		clear_selection_internal ();
+	}
+
+	RegionView::set_selected (selected);
+}
+
+void
 MidiRegionView::add_to_selection (NoteBase* ev)
 {
 	if (_selection.empty()) {
