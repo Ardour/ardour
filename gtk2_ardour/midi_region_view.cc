@@ -2440,16 +2440,14 @@ MidiRegionView::toggle_matching_notes (uint8_t notenum, uint16_t channel_mask)
 void
 MidiRegionView::note_selected (NoteBase* ev, bool add, bool extend)
 {
-	if (!add) {
-		clear_selection_internal ();
-		add_to_selection (ev);
-	}
-
 	if (!extend) {
 
-		if (!ev->selected()) {
-			add_to_selection (ev);
+		if (!add) {
+			clear_selection_internal ();
 		}
+
+		add_to_selection (ev);
+		return;
 
 	} else {
 		/* find end of latest note selected, select all between that and the start of "ev" */
