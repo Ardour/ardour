@@ -496,7 +496,12 @@ Bindings::activate (KeyboardKey kb, Operation op)
 	/* bindings cannot be used during drags */
 
 	if (_drag_active) {
-		return true;
+		/* sadly we need to special case one possible action, because
+		   Escape is used to break drags.
+		*/
+		if (!action || action->get_name() != _("Escape")) {
+			return true;
+		}
 	}
 
 	if (action) {
