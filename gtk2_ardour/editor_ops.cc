@@ -9042,6 +9042,13 @@ Editor::add_region_marker ()
 		return;
 	}
 
+	if (_session->actively_recording ()) {
+		CueMarker mark (str, position);
+		std::cerr << "queuing cue " << str << " at " << position << "\n";
+		_session->pending_source_markers.insert (mark);
+		ActionManager::get_action (X_("Region"), X_("add-region-cue-marker"))->set_sensitive(true);
+		return;
+	}
 
 	bool in_command = false;
 

@@ -1812,6 +1812,7 @@ ARDOUR_UI::transport_record (bool roll)
 			}
 			_session->maybe_enable_record ();
 			if (roll) {
+				ActionManager::get_action (X_("Region"), X_("add-region-cue-marker"))->set_sensitive(true);
 				transport_roll ();
 			}
 			break;
