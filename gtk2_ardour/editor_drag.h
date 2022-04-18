@@ -37,6 +37,8 @@
 
 #include "canvas/types.h"
 
+#include "gtkmm2ext/bindings.h"
+
 #include "cursor_context.h"
 #include "editor_items.h"
 #include "mouse_cursors.h"
@@ -332,6 +334,8 @@ private:
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
 	int _grab_button;
+
+	Gtkmm2ext::Bindings::DragsBlockBindings binding_blocker;
 };
 
 class RegionDrag;
