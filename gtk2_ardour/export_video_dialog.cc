@@ -194,8 +194,8 @@ ExportVideoDialog::ExportVideoDialog ()
 	set_tooltip (normalize_checkbox, _("<b>When enabled</b>, the audio is normalized to 0dBFS during export."));
 	set_tooltip (copy_video_codec_checkbox, _("<b>When enabled</b>, the video is not re-encoded, but the original video codec is reused. In some cases this can lead to audio/video synchronization issues. This also only works if the exported range is not longer than the video. Adding black space at the start or end requires encoding.\n<b>When disabled</b>, the video is re-encoded, this may lead to quality loss, but this is the safer option and generally preferable."));
 	set_tooltip (meta_checkbox, _("<b>When enabled</b>, information from Menu > Session > Metadata is included in the video file."));
-	set_tooltip (audio_sample_rate_combo, _("Select the sample rate of the audio track. Prefer 48kHz."));
-	set_tooltip (audio_sample_rate_combo, _("Select the bitrate of the audio track in kbit/sec. Higher values result in better quality."));
+	set_tooltip (audio_sample_rate_combo, _("Select the sample rate of the audio track. Prefer 48kHz, which is the standard for video files."));
+	set_tooltip (audio_bitrate_combo, _("Select the bitrate of the audio track in kbit/sec. Higher values result in better quality, but also a larger file."));
 
 	outfn_browse_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportVideoDialog::open_outfn_dialog));
 	invid_browse_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportVideoDialog::open_invid_dialog));
