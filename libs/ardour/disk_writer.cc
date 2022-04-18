@@ -1244,8 +1244,8 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 		(*chan)->write_source->stamp (twhen);
 		(*chan)->write_source->set_captured_xruns (capture_info.front()->xruns);
+		(*chan)->write_source->set_captured_marks (_session.pending_source_markers);
 	}
-
 
 	/* MIDI */
 

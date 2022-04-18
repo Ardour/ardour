@@ -1384,6 +1384,8 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_
 		}
 	}
 
+	pending_source_markers.clear();
+
 	if (abort && did_record) {
 		_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);
 	}

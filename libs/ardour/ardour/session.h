@@ -1994,6 +1994,7 @@ public:
 	}
 
 	bool playlist_is_active( boost::shared_ptr<Playlist>);
+	ARDOUR::CueMarkers pending_source_markers; // source markers created while recording
 
 private:
 	void reset_write_sources (bool mark_write_complete, bool force = false);

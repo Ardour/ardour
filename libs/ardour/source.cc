@@ -468,6 +468,15 @@ Source::writable () const
         return (_flags & Writable) && _session.writable();
 }
 
+void
+Source::set_captured_marks (CueMarkers const &marks)
+{
+	for (auto mark : marks) {
+		std::cerr << "adding " << mark.text() << " at " << mark.position() << "\n";
+		add_cue_marker(mark);
+	}
+}
+
 bool
 Source::add_cue_marker (CueMarker const & cm)
 {

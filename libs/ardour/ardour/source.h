@@ -114,6 +114,7 @@ public:
 	size_t n_captured_xruns () const { return _xruns.size (); }
 	XrunPositions const& captured_xruns () const { return _xruns; }
 	void set_captured_xruns (XrunPositions const& xruns) { _xruns = xruns; }
+	void set_captured_marks (CueMarkers const& marks);
 
 	CueMarkers const & cue_markers() const { return _cue_markers; }
 	bool add_cue_marker (CueMarker const &);
