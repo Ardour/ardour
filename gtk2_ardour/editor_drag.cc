@@ -2714,23 +2714,10 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	if (!(_was_selected = cnote->selected())) {
 
-		/* tertiary-click means extend selection - we'll do that on button release,
-		   so don't add it here, because otherwise we make it hard to figure
-		   out the "extend-to" range.
-		*/
+		const bool extend = Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier);
+		const bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
 
-		bool extend = Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier);
-
-		if (!extend) {
-			bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
-
-			if (add) {
-				region->note_selected (cnote, true);
-			} else {
-				_editor->get_selection().clear_points();
-				region->unique_select (cnote);
-			}
-		}
+		region->note_selected (cnote, add, extend);
 	}
 }
 
@@ -2802,25 +2789,10 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 					region->note_deselected (cnote);
 					changed = true;
 				} else {
-					_editor->get_selection().clear_points();
-					region->unique_select (cnote);
-					changed = true;
+					/* handled during button press */
 				}
 			} else {
-				bool extend = Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier);
-				bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
-
-				if (!extend && !add && region->selection_size() > 1) {
-					_editor->get_selection().clear_points();
-					region->unique_select (cnote);
-					changed = true;
-				} else if (extend) {
-					region->note_selected (cnote, true, true);
-					changed = true;
-				} else {
-					/* it was added during button press */
-					changed = true;
-				}
+				/* handled during button press */
 			}
 
 			if (changed) {
