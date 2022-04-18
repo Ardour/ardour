@@ -181,7 +181,7 @@ function apply_params (ctrl)
 		for k = 1,4 do
 			if not (k == 1 and c == 1) then
 				hp[c][k]:configure (hp[1][1])
-				lp[c][k]:configure (hp[1][1])
+				lp[c][k]:configure (lp[1][1])
 			end
 		end
 	end
