@@ -167,6 +167,15 @@ class LIBGTKMM2EXT_API Bindings {
 
 	static PBD::Signal1<void,Bindings*> BindingsChanged;
 
+	struct DragsBlockBindings {
+		DragsBlockBindings() { Bindings::_drag_active++; }
+		~DragsBlockBindings() {
+			if (Bindings::_drag_active--) {
+				Bindings::_drag_active--;
+			}
+		}
+	};
+
   private:
 	std::string  _name;
 	KeybindingMap press_bindings;
@@ -197,6 +206,8 @@ class LIBGTKMM2EXT_API Bindings {
 	 */
 	static std::string ardour_action_name (Glib::RefPtr<Gtk::Action>);
 
+	static int _drag_active;
+	friend struct DragsBlockBindings;
 };
 
 } // namespace

@@ -46,6 +46,7 @@ using namespace PBD;
 
 list<Bindings*> Bindings::bindings; /* global. Gulp */
 PBD::Signal1<void,Bindings*> Bindings::BindingsChanged;
+int Bindings::_drag_active = 0;
 
 template <typename IteratorValueType>
 struct ActionNameRegistered
@@ -490,6 +491,12 @@ Bindings::activate (KeyboardKey kb, Operation op)
 		action = k->second.action;
 	} else {
 		action = ActionManager::get_action (k->second.action_name, false);
+	}
+
+	/* bindings cannot be used during drags */
+
+	if (_drag_active) {
+		return true;
 	}
 
 	if (action) {
