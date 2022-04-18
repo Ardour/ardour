@@ -679,7 +679,27 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 	if (trackview.editor().drags()->active()) {
 		return false;
 	}
+
 	if (_selection.empty()) {
+		int step = (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) ? 1 : 12);
+
+		switch (ev->direction) {
+		case GDK_SCROLL_UP:
+			if (midi_stream_view()->highest_note() < 127 - step) {
+				midi_stream_view()->apply_note_range (midi_stream_view()->lowest_note() + step, midi_stream_view()->highest_note() + step, true);
+			}
+			return true;
+
+		case GDK_SCROLL_DOWN:
+			if (midi_stream_view()->lowest_note() >= step) {
+				midi_stream_view()->apply_note_range (midi_stream_view()->lowest_note() - step, midi_stream_view()->highest_note() - step, true);
+			}
+			return true;
+
+		default:
+			break;
+		}
+
 		return false;
 	}
 
