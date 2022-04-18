@@ -681,18 +681,19 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 	}
 
 	if (_selection.empty()) {
-		int step = (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) ? 1 : 12);
+		const int step = Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier) ? 12 : 1;
+		const bool just_one_edge = Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier);
 
 		switch (ev->direction) {
 		case GDK_SCROLL_UP:
 			if (midi_stream_view()->highest_note() < 127 - step) {
-				midi_stream_view()->apply_note_range (midi_stream_view()->lowest_note() + step, midi_stream_view()->highest_note() + step, true);
+				midi_stream_view()->apply_note_range (midi_stream_view()->lowest_note() + (just_one_edge ? 0 : step), midi_stream_view()->highest_note() + step, true);
 			}
 			return true;
 
 		case GDK_SCROLL_DOWN:
 			if (midi_stream_view()->lowest_note() >= step) {
-				midi_stream_view()->apply_note_range (midi_stream_view()->lowest_note() - step, midi_stream_view()->highest_note() - step, true);
+				midi_stream_view()->apply_note_range (midi_stream_view()->lowest_note() - step, midi_stream_view()->highest_note() - (just_one_edge ? 0 : step), true);
 			}
 			return true;
 
