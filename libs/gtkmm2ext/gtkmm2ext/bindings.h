@@ -170,7 +170,7 @@ class LIBGTKMM2EXT_API Bindings {
 	struct DragsBlockBindings {
 		DragsBlockBindings() { Bindings::_drag_active++; }
 		~DragsBlockBindings() {
-			if (Bindings::_drag_active--) {
+			if (Bindings::_drag_active) {
 				Bindings::_drag_active--;
 			}
 		}
