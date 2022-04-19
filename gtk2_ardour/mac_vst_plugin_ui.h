@@ -44,7 +44,7 @@ class MacVSTPluginUI;
 class MacVSTPluginUI : public VSTPluginUI
 {
 public:
-	MacVSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>);
+	MacVSTPluginUI (boost::shared_ptr<ARDOUR::PlugInsertBase>, boost::shared_ptr<ARDOUR::VSTPlugin>);
 	~MacVSTPluginUI ();
 
 	bool start_updating (GdkEventAny*) { return false; }

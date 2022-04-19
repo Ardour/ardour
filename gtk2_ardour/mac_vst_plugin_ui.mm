@@ -58,16 +58,16 @@ struct ERect{
 @end
 
 VSTPluginUI*
-create_mac_vst_gui (boost::shared_ptr<PluginInsert> insert)
+create_mac_vst_gui (boost::shared_ptr<PlugInsertBase> pib)
 {
 	/* PluginUIWindow::create_mac_vst_editor assures this cast works */
-	boost::shared_ptr<MacVSTPlugin> mvst =  boost::dynamic_pointer_cast<MacVSTPlugin> (insert->plugin());
-	return new MacVSTPluginUI (insert, mvst);
+	boost::shared_ptr<MacVSTPlugin> mvst =  boost::dynamic_pointer_cast<MacVSTPlugin> (pib->plugin());
+	return new MacVSTPluginUI (pib, mvst);
 }
 
 
-MacVSTPluginUI::MacVSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<VSTPlugin> vst)
-	: VSTPluginUI (pi, vst)
+MacVSTPluginUI::MacVSTPluginUI (boost::shared_ptr<PlugInsertBase> pib, boost::shared_ptr<VSTPlugin> vst)
+	: VSTPluginUI (pib, vst)
 	, _ns_view (0)
 {
 	low_box.add_events (Gdk::VISIBILITY_NOTIFY_MASK | Gdk::EXPOSURE_MASK);
