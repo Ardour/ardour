@@ -6155,60 +6155,58 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 		RegionSelection::iterator tmp = r;
 		++tmp;
 
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
-		if (arv) {
-			boost::shared_ptr<Playlist> playlist = arv->region()->playlist();
+		RegionView* const rv = *r;
+		boost::shared_ptr<Playlist> playlist = rv->region()->playlist();
 
-			if (progress) {
-				progress->descend (1.0 / N);
+		if (progress) {
+			progress->descend (1.0 / N);
+		}
+
+		if (rv->region()->apply (filter, progress) == 0) {
+
+			playlist->clear_changes ();
+			playlist->clear_owned_changes ();
+
+			if (!in_command) {
+				begin_reversible_command (command);
+				in_command = true;
 			}
 
-			if (arv->audio_region()->apply (filter, progress) == 0) {
+			if (filter.results.empty ()) {
 
-				playlist->clear_changes ();
-				playlist->clear_owned_changes ();
+				/* no regions returned; remove the old one */
+				// playlist->remove_region (rv->region ());
 
-				if (!in_command) {
-					begin_reversible_command (command);
-					in_command = true;
-				}
+			} else {
 
-				if (filter.results.empty ()) {
+				playlist->freeze ();
+				std::vector<boost::shared_ptr<Region> >::iterator res = filter.results.begin ();
 
-					/* no regions returned; remove the old one */
-					playlist->remove_region (arv->region ());
+				/* first region replaces the old one */
+				playlist->replace_region (rv->region(), *res, (*res)->position());
+				++res;
 
-				} else {
-
-					playlist->freeze ();
-					std::vector<boost::shared_ptr<Region> >::iterator res = filter.results.begin ();
-
-					/* first region replaces the old one */
-					playlist->replace_region (arv->region(), *res, (*res)->position());
+				/* add the rest */
+				while (res != filter.results.end()) {
+					playlist->add_region (*res, (*res)->position());
 					++res;
-
-					/* add the rest */
-					while (res != filter.results.end()) {
-						playlist->add_region (*res, (*res)->position());
-						++res;
-					}
-					playlist->thaw ();
-
 				}
+				playlist->thaw ();
 
-				/* We might have removed regions, which alters other regions' layering_index,
-				   so we need to do a recursive diff here.
-				*/
-				vector<Command*> cmds;
-				playlist->rdiff (cmds);
-				_session->add_commands (cmds);
-
-				_session->add_command(new StatefulDiffCommand (playlist));
 			}
 
-			if (progress) {
-				progress->ascend ();
-			}
+			/* We might have removed regions, which alters other regions' layering_index,
+			   so we need to do a recursive diff here.
+			*/
+			vector<Command*> cmds;
+			playlist->rdiff (cmds);
+			_session->add_commands (cmds);
+
+			_session->add_command(new StatefulDiffCommand (playlist));
+		}
+
+		if (progress) {
+			progress->ascend ();
 		}
 
 		r = tmp;

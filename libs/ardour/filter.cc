@@ -80,8 +80,6 @@ Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, s
 
 				if (aregion) {
 					sample_rate = aregion->audio_source()->sample_rate();
-				} else {
-					return -1;
 				}
 			}
 
