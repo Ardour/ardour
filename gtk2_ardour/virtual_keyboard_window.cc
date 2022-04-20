@@ -561,7 +561,7 @@ VirtualKeyboardWindow::note_off_event_handler (int note)
 	ev[0] = MIDI_CMD_NOTE_OFF | channel;
 	ev[1] = note;
 	ev[2] = 0;
-	_session->vkbd_output_port ()->write (ev, 3, 0);
+	_session->vkbd_output_port ()->write (ev, 3, 1);
 }
 
 void
