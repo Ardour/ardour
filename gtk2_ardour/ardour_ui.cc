@@ -2449,7 +2449,7 @@ ARDOUR_UI::meta_session_setup (const std::string& script_path)
 
 	LuaState lua;
 	lua.Print.connect (&_lua_print);
-	lua.sandbox (true);
+	lua.sandbox (false);
 
 	lua_State* L = lua.getState();
 	LuaInstance::register_classes (L);
