@@ -964,7 +964,7 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 		case 21:
 		case 22:
 		case 23:
-			pc = r->send_level_controllable (global_pos - 8);
+			pc = r->send_level_controllable (global_pos - 8 + (_surface->mcp().get_sends_bank() * 16));
 			break;
 	}
 #endif //ifdef MIXBUS

@@ -214,6 +214,8 @@ class US2400Protocol
 	void remove_down_select_button (int surface, int strip);
 	void select_range (uint32_t pressed);
 
+	int get_sends_bank ();
+
   protected:
 	// shut down the surface
 	void close();
@@ -302,6 +304,7 @@ class US2400Protocol
 	int                      _last_bank[9];
 	bool                     marker_modifier_consumed_by_button;
 	bool                     nudge_modifier_consumed_by_button;
+	int						 _sends_bank;
 
 	boost::shared_ptr<ArdourSurface::US2400::Surface>	_master_surface;
 
