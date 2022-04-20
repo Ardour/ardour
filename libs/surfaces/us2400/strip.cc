@@ -799,8 +799,9 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 
 	_vpot->set_mode(Pot::wrap);
 
-#ifdef MIXBUS
 	const uint32_t global_pos = _surface->mcp().global_index (*this);
+
+#ifdef MIXBUS
 
 	//Trim & dynamics
 	switch (global_pos) {
@@ -924,6 +925,48 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 		}  //global_pos switch
 
 	} //if input_strip
+
+#else
+
+	switch (global_pos) {
+		// Track view equivalent
+		case 0:
+			pc = r->trim_control ();
+			_vpot->set_mode(Pot::boost_cut);
+			break;
+		case 1:
+			pc = r->monitoring_control ();
+			break;
+		case 2:
+			pc = r->solo_isolate_control ();
+			break;
+		case 3:
+			pc = r->solo_safe_control ();
+			break;
+		case 4:
+			pc = r->phase_control ();
+			break;
+		
+		// Sends
+		case 8:
+		case 9:
+		case 10:
+		case 11:
+		case 12:
+		case 13:
+		case 14:
+		case 15:
+		case 16:
+		case 17:
+		case 18:
+		case 19:
+		case 20:
+		case 21:
+		case 22:
+		case 23:
+			pc = r->send_level_controllable (global_pos - 8);
+			break;
+	}
 #endif //ifdef MIXBUS
 
 	if (pc) {  //control found; set our knob to watch for changes in it
