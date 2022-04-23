@@ -3675,6 +3675,13 @@ Route::feeds_according_to_graph (boost::shared_ptr<Route> other)
 bool
 Route::output_effectively_connected () const
 {
+	_connection_cache.clear ();
+	return output_effectively_connected_real ();
+}
+
+bool
+Route::output_effectively_connected_real () const
+{
 	if (!_output->connected ()) {
 		return false;
 	}
@@ -3687,15 +3694,29 @@ Route::output_effectively_connected () const
 		return true;
 	}
 
+	/* now follow connections downstream */
 	boost::shared_ptr<RouteList> routes = _session.get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		if ((*i).get() == this) {
+		Route* rp = (*i).get();
+		if (rp == this) {
 			continue;
 		}
-		if ((*i)->input()->connected_to (_output)) {
-			if ((*i)->output_effectively_connected ()) {
-				return true;
-			}
+		if (!(*i)->input()->connected_to (_output)) {
+			continue;
+		}
+		if (_connection_cache.find (rp) != _connection_cache.end ()) {
+			return _connection_cache[rp];
+		}
+		/* First mark node a traversed to prevent endless recursion.
+		 * Othewise graph loops A -> B -> A will cause a stack overflow.
+		 */
+		_connection_cache[rp] = false;
+
+		/* recurse downstream, check connected route */
+		bool rv = (*i)->output_effectively_connected_real ();
+		_connection_cache[rp] = rv;
+		if (rv) {
+			return true;
 		}
 	}
 	return false;

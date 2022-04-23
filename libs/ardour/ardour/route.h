@@ -744,6 +744,9 @@ private:
 	bool input_port_count_changing (ChanCount);
 	bool output_port_count_changing (ChanCount);
 
+	bool output_effectively_connected_real () const;
+	mutable std::map<Route*, bool> _connection_cache;
+
 	int configure_processors_unlocked (ProcessorStreams*, Glib::Threads::RWLock::WriterLock*);
 	bool set_meter_point_unlocked ();
 	void apply_processor_order (const ProcessorList& new_order);
