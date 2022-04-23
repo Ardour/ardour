@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2014-2016 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2015-2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,21 +95,31 @@ CrossThreadChannel::deliver (char msg)
 bool
 CrossThreadChannel::poll_for_request()
 {
-	struct pollfd pfd[1];
-	pfd[0].fd = fds[0];
-	pfd[0].events = POLLIN|POLLERR|POLLHUP;
+	struct pollfd pfd;
+	pfd.fd = fds[0];
+	pfd.events = POLLIN|POLLERR|POLLHUP|POLLNVAL;
 	while(true) {
-		if (poll (pfd, 1, -1) < 0) {
+#ifdef __APPLE__
+		/* on macOS poll() will not return when the pipe
+		 * is closed in an EOF state. ork around with a timeout.
+		 */
+		int rv = poll (&pfd, 1, 1000);
+#else
+		int rv = poll (&pfd, 1, -1);
+#endif
+		if (rv == -1) {
+			/* error */
 			if (errno == EINTR) {
 				continue;
 			}
 			break;
 		}
-		if (pfd[0].revents & ~POLLIN) {
+
+		if (pfd.revents & ~POLLIN) {
 			break;
 		}
 
-		if (pfd[0].revents & POLLIN) {
+		if (rv > 0 && pfd.revents & POLLIN) {
 			return true;
 		}
 	}
