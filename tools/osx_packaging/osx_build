@@ -671,6 +671,7 @@ else
 fi
 
 if test x$WITH_HARRISON_LV2 != x ; then
+	echo "Bundling Harrison XT plugins"
 	curl -s -S --fail -#  \
 		-z "${CACHEDIR}/${HARRISONLV2}.${OSX_BENSID}.zip" \
 		-o "${CACHEDIR}/${HARRISONLV2}.${OSX_BENSID}.zip" \
@@ -769,7 +770,7 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 fi
 
 if test -d ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/; then
-	echo "Removing unused architectures from LV plugins"
+	echo "Removing unused architectures from LV2 plugins"
 	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
 		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin 2>/dev/null && \
 		mv ${file}.thin ${file}
