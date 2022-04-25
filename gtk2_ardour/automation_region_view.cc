@@ -198,17 +198,15 @@ AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, dou
 
 	_line->view_to_model_coord_y (y);
 
-	if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
-		if (c->list()->size () == 0) {
-			/* we need the MidiTrack::MidiControl, not the region's (midi model source) control */
-			boost::shared_ptr<ARDOUR::MidiTrack> mt = boost::dynamic_pointer_cast<ARDOUR::MidiTrack> (view->parent_stripable ());
-			assert (mt);
-			boost::shared_ptr<Evoral::Control> mc = mt->control(_parameter);
-			assert (mc);
-			y = mc->user_double ();
-		} else {
-			y = c->list()->eval (when);
-		}
+	if (c->list()->size () == 0) {
+		/* we need the MidiTrack::MidiControl, not the region's (midi model source) control */
+		boost::shared_ptr<ARDOUR::MidiTrack> mt = boost::dynamic_pointer_cast<ARDOUR::MidiTrack> (view->parent_stripable ());
+		assert (mt);
+		boost::shared_ptr<Evoral::Control> mc = mt->control(_parameter);
+		assert (mc);
+		y = mc->user_double ();
+	} else if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
+		y = c->list()->eval (when);
 	}
 
 	XMLNode& before = _line->the_list()->get_state();
