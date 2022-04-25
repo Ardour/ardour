@@ -628,8 +628,10 @@ MidiTimeAxisView::set_layer_display (LayerDisplay d)
 	uint32_t h = current_height ();
 	update_scroomer_visbility (h, curr_layer_display);
 
-	/* If visibility changed, trigger a call to Editor::reset_controls_layout_width() */
-	_stripable->gui_changed ("track_height", (void *) 0);
+	/* If visibility changed, trigger a call to Editor::reset_controls_layout_width()
+	 * by forcing a redraw via Editor::queue_redisplay_track_views ()
+	 */
+	_stripable->gui_changed ("visible_tracks", (void *) 0); /* EMIT SIGNAL */
 }
 
 void

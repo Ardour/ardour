@@ -211,7 +211,7 @@ void
 StripableTimeAxisView::request_redraw ()
 {
 	if (_stripable) {
-		_stripable->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		_stripable->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 	}
 }
 
