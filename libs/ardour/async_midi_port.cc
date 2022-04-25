@@ -105,11 +105,6 @@ AsyncMIDIPort::flush_output_fifo (MIDI::pframes_t nframes)
 	/* do this "atomically" after we're done pushing events into the
 	 * MidiBuffer
 	 */
-#ifndef NDEBUG
-	if (written > 0) {
-		cout << "AsyncMIDIPort::flush_output_fifo '" << MIDI::Port::name () << "' written " << written << " events\n";
-	}
-#endif
 
 	output_fifo.increment_read_idx (written);
 }
@@ -161,10 +156,7 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 				when = AudioEngine::instance()->sample_time_at_cycle_start() + timestamp;
 			}
 
-			uint32_t rv = input_fifo.write (when, Evoral::NO_EVENT, size, buf);
-#ifndef NDEBUG
-			cout << "AsyncMIDIPort::cycle_start '" << MIDI::Port::name () << "' add event, written " << rv << " / " << size << " bytes\n";
-#endif
+			input_fifo.write (when, Evoral::NO_EVENT, size, buf);
 		}
 
 		if (event_count) {
@@ -340,9 +332,6 @@ AsyncMIDIPort::read (MIDI::byte *, size_t)
 
 	while (input_fifo.read (&time, &type, &size, &buffer[0])) {
 		_parser->set_timestamp (time);
-#ifndef NDEBUG
-		cout << "AsyncMIDIPort::read '" << MIDI::Port::name () << "' bytes = " << size << "\n";
-#endif
 		for (uint32_t i = 0; i < size; ++i) {
 			_parser->scanner (buffer[i]);
 		}
