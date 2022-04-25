@@ -434,6 +434,8 @@ int main() { return 0; }''',
             conf.env['build_host'] = 'catalina'
         elif re.search ("^20[.]", version) is not None:
             conf.env['build_host'] = 'bigsur'
+        elif re.search ("^21[.]", version) is not None:
+            conf.env['build_host'] = 'monterey'
         else:
             conf.env['build_host'] = 'irrelevant'
 
@@ -469,6 +471,8 @@ int main() { return 0; }''',
                 conf.env['build_target'] = 'catalina'
             elif re.search ("^20[.]", version) is not None:
                 conf.env['build_target'] = 'bigsur'
+            elif re.search ("^21[.]", version) is not None:
+                conf.env['build_target'] = 'monterey'
             else:
                 conf.env['build_target'] = 'catalina'
         else:
@@ -512,7 +516,7 @@ int main() { return 0; }''',
         cxx_flags.append('--stdlib=libc++')
         linker_flags.append('--stdlib=libc++')
 
-    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur' ]:
+    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur', 'monterey' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
@@ -520,7 +524,7 @@ int main() { return 0; }''',
             # from requiring a full path to requiring just the header name.
             cxx_flags.append('-DCARBON_FLAT_HEADERS')
 
-            if not opt.use_libcpp and not conf.env['build_host'] in [ 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina', 'bigsur' ]:
+            if not opt.use_libcpp and not conf.env['build_host'] in [ 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina', 'bigsur', 'monterey' ]:
                 cxx_flags.append('--stdlib=libstdc++')
                 linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
@@ -529,7 +533,7 @@ int main() { return 0; }''',
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
             cxx_flags.append('-DBOOST_BIND_GLOBAL_PLACEHOLDERS')
 
-    if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur' ]:
+    if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur',  'monterey' ]:
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
         # generated and not needed with clang
@@ -654,6 +658,12 @@ int main() { return 0; }''',
         linker_flags.append("-mmacosx-version-min=10.9")
 
     elif conf.env['build_target'] in ['bigsur']:
+        compiler_flags.extend(
+                ("-DMAC_OS_X_VERSION_MAX_ALLOWED=110000",
+                 "-mmacosx-version-min=11.0"))
+        linker_flags.append("-mmacosx-version-min=11.0")
+
+    elif conf.env['build_target'] in ['monterey']:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=110000",
                  "-mmacosx-version-min=11.0"))
@@ -1382,7 +1392,7 @@ int main () { return 0; }
     set_compiler_flags (conf, Options.options)
 
     if sys.platform == 'darwin':
-        if conf.env['build_host'] not in [ 'mojave', 'catalina', 'bigsur']:
+        if conf.env['build_host'] not in [ 'mojave', 'catalina', 'bigsur', 'monterey']:
             conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
 
         conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
