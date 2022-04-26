@@ -335,7 +335,7 @@ int
 AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos_t start, samplecnt_t cnt,
 				  double samples_per_visual_peak, samplecnt_t samples_per_file_peak) const
 {
-	ReaderLock lm (_lock);
+	WriterLock lm (_lock);
 
 #if 0 // DEBUG ONLY
 	/* Bypass peak-file cache, compute peaks using raw data from source */
