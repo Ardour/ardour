@@ -762,7 +762,7 @@ AudioSource::build_peaks_from_scratch ()
 	{
 		/* hold lock while building peaks */
 
-		ReaderLock lp (_lock);
+		WriterLock lp (_lock);
 
 		if (prepare_for_peakfile_writes ()) {
 			goto out;
