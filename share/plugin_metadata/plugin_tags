@@ -17,11 +17,44 @@
   <Plugin type="AudioUnit" id="1635083896-1396991340-1414742864" tags="delay" name="#TStereo Delay"/>
   <Plugin type="AudioUnit" id="1635083896-1413768556-1414742864" tags="delay" name="#TTape Delay"/>
   <Plugin type="AudioUnit" id="1635083896-842158930-1414087749" tags="reverb" name="2016 Stereo Room"/>
+  <Plugin type="AudioUnit" id="aufx-HVIP-HRSN" tags="vocal channel-strip eq:filter dyn:compressor" name="32C Vocal Intensity Processor"/>
+  <Plugin type="AudioUnit" id="aufx-32CC-HRSN" tags="channel-strip eq:parametric dyn:compressor" name="32C Channel"/>
+  <Plugin type="AudioUnit" id="aufx-32CB-HRSN" tags="channel-strip eq:parametric dyn:compressor" name="32C Bus"/>
   <Plugin type="AudioUnit" id="1635083896-875573808-1298351184" tags="eq:parametric" name="4020 Retro EQ"/>
   <Plugin type="AudioUnit" id="1635083896-875574064-1298351184" tags="dyn:compressor" name="4030 Retro Compressor"/>
   <Plugin type="AudioUnit" id="1635083896-1298351184-1298351184" tags="dyn:limiter" name="4040 Retro Limiter"/>
   <Plugin type="AudioUnit" id="1635083896-1128420675-1298351184" tags="dyn:compressor" name="6030 Ultimate Comp"/>
   <Plugin type="AudioUnit" id="1635083896-1397766192-1315925348" tags="reverb" name="80s Spaces"/>
+  <Plugin type="AudioUnit" id="aufx-rogr-appl" tags="utility" name="AURogerBeep"/>
+  <Plugin type="AudioUnit" id="aufx-raac-appl" tags="utility" name="AURoundTripAAC"/>
+  <Plugin type="AudioUnit" id="aufx-nsnd-appl" tags="utility" name="AUNetSend"/>
+  <Plugin type="AudioUnit" id="aufx-tmpt-appl" tags="pitch-shift" name="AUPitch"/>
+  <Plugin type="AudioUnit" id="aufx-sdly-appl" tags="delay" name="AUSampleDelay"/>
+  <Plugin type="AudioUnit" id="aufx-rvb2-appl" tags="reverb" name="AUReverb2"/>
+  <Plugin type="AudioUnit" id="aufx-pmeq-appl" tags="eq:parametric" name="AUParametricEQ"/>
+  <Plugin type="AudioUnit" id="aufx-nutp-appl" tags="pitch-shift" name="AUNewPitch"/>
+  <Plugin type="AudioUnit" id="aufx-nbeq-appl" tags="eq:parametric" name="AUNBandEQ"/>
+  <Plugin type="AudioUnit" id="aufx-mrev-appl" tags="reverb" name="AUMatrixReverb"/>
+  <Plugin type="AudioUnit" id="aufx-mcmp-appl" tags="dyn:compressor multiband" name="AUMultibandCompressor"/>
+  <Plugin type="AudioUnit" id="aufx-lshf-appl" tags="eq:filter" name="AULowShelfFilter"/>
+  <Plugin type="AudioUnit" id="aufx-lpas-appl" tags="eq:filter" name="AULowpass"/>
+  <Plugin type="AudioUnit" id="aufx-lmtr-appl" tags="dyn:limiter" name="AUPeakLimiter"/>
+  <Plugin type="AudioUnit" id="aufx-hshf-appl" tags="eq:filter" name="AUHighShelfFilter"/>
+  <Plugin type="AudioUnit" id="aufx-hpas-appl" tags="eq:filter" name="AUHipass"/>
+  <Plugin type="AudioUnit" id="aufx-greq-appl" tags="eq:graphic" name="AUGraphicEQ"/>
+  <Plugin type="AudioUnit" id="aufx-filt-appl" tags="eq:parametric" name="AUFilter"/>
+  <Plugin type="AudioUnit" id="aufx-dist-appl" tags="guitar amp-sim delay distortion" name="AUDistortion"/>
+  <Plugin type="AudioUnit" id="aufx-dely-appl" tags="delay" name="AUDelay"/>
+  <Plugin type="AudioUnit" id="aufx-dcmp-appl" tags="dyn:compressor dyn:expander" name="AUDynamicsProcessor"/>
+  <Plugin type="AudioUnit" id="aufx-bpas-appl" tags="eq:filter" name="AUBandpass"/>
+  <Plugin type="AudioUnit" id="aufx-AVSC-HRSN" tags="dyn:compressor mastering multiband" name="AVA Spectral Compressor"/>
+  <Plugin type="AudioUnit" id="aufx-AVME-HRSN" tags="eq:graphic eq:parametric freeform mastering" name="AVA Mastering EQ"/>
+  <Plugin type="AudioUnit" id="aufx-AVMC-HRSN" tags="dyn:compressor mastering multiband" name="AVA Multiband Compressor"/>
+  <Plugin type="AudioUnit" id="aufx-AVLQ-HRSN" tags="eq:parametric" name="AVA LegacyQ"/>
+  <Plugin type="AudioUnit" id="aufx-AVDS-HRSN" tags="dyn:de-esser" name="AVA De-Esser"/>
+  <Plugin type="AudioUnit" id="aufx-AVDF-HRSN" tags="drums channel-strip dyn:compressor eq:dynamic" name="AVA Drum Flow"/>
+  <Plugin type="AudioUnit" id="aufx-AVBF-HRSN" tags="bass channel-strip eq:dynamic" name="AVA Bass Flow"/>
+  <Plugin type="AudioUnit" id="aufx-AVVF-HRSN" tags="vocal channel-strip eq:dynamic" name="AVA Vocal Flow"/>
   <Plugin type="AudioUnit" id="1635083896-1398031704-1802721110" tags="reverb" name="Abbey Road Chambers (m-&gt;s)"/>
   <Plugin type="AudioUnit" id="1635083896-1398031693-1802721110" tags="reverb" name="Abbey Road Chambers (m)"/>
   <Plugin type="AudioUnit" id="1635083896-1398031699-1802721110" tags="reverb" name="Abbey Road Chambers (s)"/>
@@ -2138,7 +2171,7 @@
   <Plugin type="LV2" id="http://gareus.org/oss/lv2/midifilter#onechannelfilter" tags="midi-effect" name="MIDI Simple Channel Filter"/>
   <Plugin type="LV2" id="http://gareus.org/oss/lv2/midifilter#sostenuto" tags="midi-effect" name="MIDI Sostenuto"/>
   <Plugin type="LV2" id="http://gareus.org/oss/lv2/stepseq#s8n8" tags="utility" name="MIDI Step Sequencer8x8"/>
-  <Plugin type="LV2" id="http://gareus.org/oss/lv2/midifilter#midistrum" tags="midi-effect" name="MIDI Strum"/>
+  <Plugin type="LV2" id="http://gareus.org/oss/lv2/midifilter#midistrum" tags="midi-effect arpeggiator" name="MIDI Strum"/>
   <Plugin type="LV2" id="http://gareus.org/oss/lv2/midifilter#passthru" tags="midi-effect" name="MIDI Thru"/>
   <Plugin type="LV2" id="http://gareus.org/oss/lv2/midifilter#velocityscale" tags="midi-effect" name="MIDI Velocity Adjust"/>
   <Plugin type="LV2" id="http://gareus.org/oss/lv2/midifilter#velocitygamma" tags="midi-effect" name="MIDI Velocity Gamma"/>
@@ -2200,6 +2233,8 @@
   <Plugin type="LV2" id="http://gareus.org/oss/lv2/fil4#mono" tags="eq:parametric" name="x42-eq - Parametric Equalizer Mono"/>
   <Plugin type="LV2" id="http://gareus.org/oss/lv2/fil4#stereo" tags="eq:parametric" name="x42-eq - Parametric Equalizer Stereo"/>
   <Plugin type="LV2" id="http://harrisonconsoles.com/lv2/BassEq/mono" tags="eq:dynamic bass" name="XT-BC Bass Character (Mono)"/>
+  <Plugin type="LV2" id="http://harrisonconsoles.com/lv2/xtComp/stereo" tags="dyn:compressor sidechain" name="XT-CC Console Compressor (Stereo)"/>
+  <Plugin type="LV2" id="http://harrisonconsoles.com/lv2/xtComp/mono" tags="dyn:compressor sidechain" name="XT-CC Console Compressor (Mono)"/>
   <Plugin type="LV2" id="http://harrisonconsoles.com/lv2/mbDrum/mono" tags="eq:dynamic dyn:transient-designer drums" name="XT-DC Drum Character (Mono)"/>
   <Plugin type="LV2" id="http://harrisonconsoles.com/lv2/mbDrumid/sidetereo" tags="eq:dynamic dyn:transient-designer drums" name="XT-DC Drum Character (Stereo)"/>
   <Plugin type="LV2" id="http://harrisonconsoles.com/lv2/mbDrum/stereo" tags="eq:dynamic dyn:transient-designer drums" name="XT-DC Drum Character (Stereo)"/>
@@ -2236,6 +2271,9 @@
   <Plugin type="LV2" id="http://zynaddsubfx.sourceforge.net/fx#Reverb" tags="reverb" name="Zyn Reverb"/>
   <Plugin type="LV2" id="http://home.gna.org/zyn/zynadd/1" tags="synth" name="zynadd"/>
   <Plugin type="LV2" id="http://zynaddsubfx.sourceforge.net" tags="synth" name="ZynAddSubFX"/>
+  <Plugin type="LXVST" id="1213614416" tags="vocal channel-strip eq:filter dyn:compressor" name="32C Vocal Intensity Processor"/>
+  <Plugin type="LXVST" id="858932035" tags="channel-strip eq:parametric dyn:compressor" name="32C Channel"/>
+  <Plugin type="LXVST" id="858932034" tags="channel-strip eq:parametric dyn:compressor" name="32C Bus"/>
   <Plugin type="LXVST" id="1098216559" tags="eq:filter" name="#TAuto Filter"/>
   <Plugin type="LXVST" id="1111715184" tags="dyn:compressor" name="#TBus Compressor"/>
   <Plugin type="LXVST" id="1130917746" tags="modulation" name="#TChorus"/>
@@ -3753,6 +3791,9 @@
   <Plugin type="LXVST" id="1397578034" tags="synth" name="Zebrify"/>
   <Plugin type="LXVST" id="1919243824" tags="reverb" name="ZRev"/>
   <Plugin type="LXVST" id="1514230598" tags="synth" name="ZynAddSubFX"/>
+  <Plugin type="VST3" id="5653544856495033326320766F63616C" tags="vocal channel-strip eq:filter dyn:compressor" name="32C Vocal Intensity Processor"/>
+  <Plugin type="VST3" id="56535433324343333263206368616E6E" tags="channel-strip eq:parametric dyn:compressor" name="32C Channel"/>
+  <Plugin type="VST3" id="56535433324342333263206275730000" tags="channel-strip eq:parametric dyn:compressor" name="32C Bus"/>
   <Plugin type="VST3" id="5653545354454D616262657920726F61" tags="reverb" name="Abbey Road Chambers Mono"/>
   <Plugin type="VST3" id="56535453544558616262657920726F61" tags="reverb" name="Abbey Road Chambers Mono/Stereo"/>
   <Plugin type="VST3" id="56535453544553616262657920726F61" tags="reverb" name="Abbey Road Chambers Stereo"/>
