@@ -1248,6 +1248,9 @@ AudioTrigger::set_segment_tempo (double t)
 		const double seconds = (double) data.length  / _box.session().sample_rate();
 		_beatcnt = _segment_tempo * (seconds/60.0);
 
+		/*initialize follow_length to match the length of the clip */
+		_follow_length = Temporal::BBT_Offset (0, _beatcnt, 0);
+
 		send_property_change (ARDOUR::Properties::tempo_meter);
 		_box.session().set_dirty();
 	}
@@ -2564,6 +2567,7 @@ MIDITrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
 	set_region_internal (r);
 	set_name (mr->name());
 	data_length = mr->length().beats();
+	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
 	set_length (mr->length());
 	model = mr->model ();
 
