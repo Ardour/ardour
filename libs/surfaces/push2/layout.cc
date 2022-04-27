@@ -47,7 +47,7 @@ Push2Layout::compute_bounding_box () const
 	 * child boxes do not.
 	 */
 	_bounding_box = Rect (0, 0, display_width(), display_height());
-	_bounding_box_dirty = false;
+	set_bbox_clean ();
 }
 
 int

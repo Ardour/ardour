@@ -202,7 +202,7 @@ WaveView::set_samples_per_pixel (double samples_per_pixel)
 		begin_change ();
 
 		_props->samples_per_pixel = samples_per_pixel;
-		_bounding_box_dirty = true;
+		set_bbox_dirty ();
 
 		end_change ();
 	}
@@ -1145,7 +1145,7 @@ WaveView::compute_bounding_box () const
 		_bounding_box = Rect ();
 	}
 
-	_bounding_box_dirty = false;
+	set_bbox_clean ();
 }
 
 void
@@ -1157,7 +1157,7 @@ WaveView::set_height (Distance height)
 		_props->height = height;
 		_draw_image_in_gui_thread = true;
 
-		_bounding_box_dirty = true;
+		set_bbox_dirty ();
 		end_change ();
 	}
 }
@@ -1169,7 +1169,7 @@ WaveView::set_channel (int channel)
 		begin_change ();
 		_props->channel = channel;
 		reset_cache_group ();
-		_bounding_box_dirty = true;
+		set_bbox_dirty ();
 		end_change ();
 	}
 }
@@ -1319,7 +1319,7 @@ WaveView::set_region_start (sampleoffset_t start)
 
 	begin_change ();
 	_props->region_start = start;
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -1336,7 +1336,7 @@ WaveView::region_resized ()
 	begin_change ();
 	_props->region_start = _region->start_sample();
 	_props->region_end = _region->start_sample() + _region->length_samples();
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
