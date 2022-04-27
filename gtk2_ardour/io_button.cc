@@ -222,7 +222,7 @@ IOButton::button_press (GdkEventButton* ev)
 		}
 	} else {
 		/* guess the user-intended main type of the route output */
-		DataType intended_type = guess_main_type ();
+		DataType intended_type = guess_main_type (_input ? _route->input () : _route->output ());
 
 		/* try adding the master bus first */
 		boost::shared_ptr<Route> master = _route->session ().master_out ();
@@ -248,7 +248,7 @@ IOButton::button_press (GdkEventButton* ev)
 			maybe_add_bundle_to_menu ((*i)->output ()->bundle (), current);
 		}
 	} else {
-		DataType intended_type = guess_main_type ();
+		DataType intended_type = guess_main_type (_input ? _route->input () : _route->output ());
 
 		/* other routes inputs */
 		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
@@ -309,7 +309,7 @@ IOButton::button_press (GdkEventButton* ev)
 }
 
 DataType
-IOButton::guess_main_type (bool favor_connected) const
+IOButton::guess_main_type (boost::shared_ptr<IO> io)
 {
 	/* The heuristic follows these principles:
 	 *  A) If all ports that the user connected are of the same type, then he
@@ -329,19 +329,15 @@ IOButton::guess_main_type (bool favor_connected) const
 	 * available ports if any (since if all ports are of the same type, the most
 	 * likely found will be that one obviously). */
 
-	boost::shared_ptr<IO> io = _input ? _route->input () : _route->output ();
-
 	/* Find most likely type among connected ports */
-	if (favor_connected) {
-		DataType type = DataType::NIL; /* NIL is always last so least likely */
-		for (PortSet::iterator p = io->ports ().begin (); p != io->ports ().end (); ++p) {
-			if (p->connected () && p->type () < type)
-				type = p->type ();
-		}
-		if (type != DataType::NIL) {
-			/* There has been a connected port (necessarily non-NIL) */
-			return type;
-		}
+	DataType type = DataType::NIL; /* NIL is always last so least likely */
+	for (PortSet::iterator p = io->ports ().begin (); p != io->ports ().end (); ++p) {
+		if (p->connected () && p->type () < type)
+			type = p->type ();
+	}
+	if (type != DataType::NIL) {
+		/* There has been a connected port (necessarily non-NIL) */
+		return type;
 	}
 
 	/* Find most likely type among available ports.
@@ -397,6 +393,19 @@ IOButton::guess_main_type (bool favor_connected) const
 void
 IOButton::update ()
 {
+	boost::shared_ptr<ARDOUR::Bundle> bundle;
+	_bundle_connections.drop_connections ();
+
+	set_label (*this, _route->session(), bundle, _input ? _route->input () : _route->output ());
+
+	if (bundle) {
+		bundle->Changed.connect (_bundle_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
+	}
+}
+
+void
+IOButton::set_label (ArdourWidgets::ArdourButton& self, ARDOUR::Session& session, boost::shared_ptr<ARDOUR::Bundle>& bndl, boost::shared_ptr<ARDOUR::IO> io)
+{
 	ostringstream tooltip;
 	ostringstream label;
 	bool          have_label = false;
@@ -405,48 +414,42 @@ IOButton::update ()
 	uint32_t typed_connection_count             = 0;
 	bool     each_typed_port_has_one_connection = true;
 
-	DataType              dt = guess_main_type ();
-	boost::shared_ptr<IO> io = _input ? _route->input () : _route->output ();
-
-	_bundle_connections.drop_connections ();
+	DataType dt  = guess_main_type (io);
+	bool input   = io->direction () == IO::Input;
+	string arrow = Gtkmm2ext::markup_escape_text (input ? " <- " : " -> ");
 
 	/* Fill in the tooltip. Also count:
 	 *  - The total number of connections.
 	 *  - The number of main-typed connections.
 	 *  - Whether each main-typed port has exactly one connection. */
-	if (_input) {
+	if (input) {
 		tooltip << string_compose (_("<b>INPUT</b> to %1"),
-		                           Gtkmm2ext::markup_escape_text (_route->name ()));
+		                           Gtkmm2ext::markup_escape_text (io->name ()));
 	} else {
 		tooltip << string_compose (_("<b>OUTPUT</b> from %1"),
-		                           Gtkmm2ext::markup_escape_text (_route->name ()));
+		                           Gtkmm2ext::markup_escape_text (io->name ()));
 	}
 
-	string         arrow = Gtkmm2ext::markup_escape_text (_input ? " <- " : " -> ");
 	vector<string> port_connections;
-	for (PortSet::iterator port = io->ports ().begin ();
-	     port != io->ports ().end ();
-	     ++port) {
+
+	for (auto const& port : io->ports ()) {
 		port_connections.clear ();
 		port->get_connections (port_connections);
 
 		uint32_t port_connection_count = 0;
 
-		for (vector<string>::iterator i = port_connections.begin ();
-		     i != port_connections.end ();
-		     ++i) {
+		for (auto const& i : port_connections) {
 			++port_connection_count;
 
 			if (port_connection_count == 1) {
 				tooltip << endl
-				        << Gtkmm2ext::markup_escape_text (
-				               port->name ().substr (port->name ().find ("/") + 1));
+				        << Gtkmm2ext::markup_escape_text (port->name ().substr (port->name ().find ("/") + 1));
 				tooltip << arrow;
 			} else {
 				tooltip << ", ";
 			}
 
-			tooltip << Gtkmm2ext::markup_escape_text (*i);
+			tooltip << Gtkmm2ext::markup_escape_text (i);
 		}
 
 		total_connection_count += port_connection_count;
@@ -468,12 +471,12 @@ IOButton::update ()
 
 	/* Are all main-typed channels connected to the same route ? */
 	if (!have_label) {
-		boost::shared_ptr<ARDOUR::RouteList> routes = _route->session ().get_routes ();
+		boost::shared_ptr<ARDOUR::RouteList> routes = session.get_routes ();
 		for (ARDOUR::RouteList::const_iterator route = routes->begin ();
 		     route != routes->end ();
 		     ++route) {
-			boost::shared_ptr<IO> dest_io = _input ? (*route)->output () : (*route)->input ();
-			if (io->bundle ()->connected_to (dest_io->bundle (), _route->session ().engine (), dt, true)) {
+			boost::shared_ptr<IO> dest_io = input ? (*route)->output () : (*route)->input ();
+			if (io->bundle ()->connected_to (dest_io->bundle (), session.engine (), dt, true)) {
 				label << Gtkmm2ext::markup_escape_text ((*route)->name ());
 				have_label = true;
 				break;
@@ -483,21 +486,19 @@ IOButton::update ()
 
 	/* Are all main-typed channels connected to the same (user) bundle ? */
 	if (!have_label) {
-		boost::shared_ptr<ARDOUR::BundleList> bundles       = _route->session ().bundles ();
-		boost::shared_ptr<ARDOUR::Port>       ap            = boost::dynamic_pointer_cast<ARDOUR::Port> (_route->session ().vkbd_output_port ());
+		boost::shared_ptr<ARDOUR::BundleList> bundles       = session.bundles ();
+		boost::shared_ptr<ARDOUR::Port>       ap            = boost::dynamic_pointer_cast<ARDOUR::Port> (session.vkbd_output_port ());
 		std::string                           vkbd_portname = AudioEngine::instance ()->make_port_name_non_relative (ap->name ());
-		for (ARDOUR::BundleList::iterator bundle = bundles->begin ();
-		     bundle != bundles->end ();
-		     ++bundle) {
-			if (boost::dynamic_pointer_cast<UserBundle> (*bundle) == 0) {
-				if (!(*bundle)->offers_port (vkbd_portname)) {
+		for (auto const& bundle : *bundles) {
+			if (boost::dynamic_pointer_cast<UserBundle> (bundle) == 0) {
+				if (!bundle->offers_port (vkbd_portname)) {
 					continue;
 				}
 			}
-			if (io->bundle ()->connected_to (*bundle, _route->session ().engine (), dt, true)) {
-				label << Gtkmm2ext::markup_escape_text ((*bundle)->name ());
+			if (io->bundle ()->connected_to (bundle, session.engine (), dt, true)) {
+				label << Gtkmm2ext::markup_escape_text (bundle->name ());
 				have_label = true;
-				(*bundle)->Changed.connect (_bundle_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
+				bndl = bundle;
 				break;
 			}
 		}
@@ -508,28 +509,26 @@ IOButton::update ()
 		ostringstream  temp_label;
 		vector<string> phys;
 		string         playorcapture;
-		if (_input) {
-			_route->session ().engine ().get_physical_inputs (dt, phys);
+		if (input) {
+			session.engine ().get_physical_inputs (dt, phys);
 			playorcapture = "capture_";
 		} else {
-			_route->session ().engine ().get_physical_outputs (dt, phys);
+			session.engine ().get_physical_outputs (dt, phys);
 			playorcapture = "playback_";
 		}
 		for (PortSet::iterator port = io->ports ().begin (dt);
 		     port != io->ports ().end (dt);
 		     ++port) {
 			string pn = "";
-			for (vector<string>::iterator s = phys.begin ();
-			     s != phys.end ();
-			     ++s) {
-				if (!port->connected_to (*s)) {
+			for (auto const& s : phys) {
+				if (!port->connected_to (s)) {
 					continue;
 				}
-				pn = AudioEngine::instance ()->get_pretty_name_by_name (*s);
+				pn = AudioEngine::instance ()->get_pretty_name_by_name (s);
 				if (pn.empty ()) {
-					string::size_type start = (*s).find (playorcapture);
+					string::size_type start = (s).find (playorcapture);
 					if (start != string::npos) {
-						pn = (*s).substr (start + playorcapture.size ());
+						pn = (s).substr (start + playorcapture.size ());
 					}
 				}
 				break;
@@ -539,8 +538,9 @@ IOButton::update ()
 				temp_label.str (""); /* erase the failed attempt */
 				break;
 			}
-			if (port != io->ports ().begin (dt))
+			if (port != io->ports ().begin (dt)) {
 				temp_label << "/";
+			}
 			temp_label << pn;
 		}
 
@@ -595,8 +595,8 @@ IOButton::update ()
 		label << "\u2295"; /* circled plus */
 	}
 
-	set_text (label.str ());
-	set_tooltip (this, tooltip.str ());
+	self.set_text (label.str ());
+	set_tooltip (&self, tooltip.str ());
 }
 
 void

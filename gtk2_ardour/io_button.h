@@ -46,6 +46,9 @@ public:
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>, RouteUI*);
 
+	static ARDOUR::DataType guess_main_type (boost::shared_ptr<ARDOUR::IO>);
+	static void set_label (ArdourWidgets::ArdourButton&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Bundle>&, boost::shared_ptr<ARDOUR::IO>);
+
 private:
 	void update ();
 	bool button_press (GdkEventButton*);
@@ -60,7 +63,6 @@ private:
 
 	boost::shared_ptr<ARDOUR::IO>    io () const;
 	boost::shared_ptr<ARDOUR::Track> track () const;
-	ARDOUR::DataType                 guess_main_type (bool favor_connected = true) const;
 
 	bool                                          _input;
 	boost::shared_ptr<ARDOUR::Route>              _route;
