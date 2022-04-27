@@ -171,6 +171,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _entered (false)
 	, _entered_note (0)
+	, _pasting (false)
 	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
@@ -1935,7 +1936,9 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 			}
 		}
 
-		if (_marked_for_selection.find(note) != _marked_for_selection.end()) {
+		if (_pasting) {
+			note_selected (event, true);
+		} else if (_marked_for_selection.find(note) != _marked_for_selection.end()) {
 			note_selected (event, false);
 		}
 
@@ -3800,20 +3803,61 @@ MidiRegionView::selection_as_cut_buffer () const
 	return cb;
 }
 
+void
+MidiRegionView::duplicate_selection ()
+{
+	std::cerr << "dup selection\n";
+
+	if (_selection.empty()) {
+		return;
+	}
+
+	/* find last selection position */
+	timepos_t dup_pos = timepos_t (Temporal::BeatTime);
+
+	for (Selection::const_iterator s = _selection.begin(); s != _selection.end(); ++s) {
+		dup_pos = std::max (dup_pos, _region->source_beats_to_absolute_time ((*s)->note()->end_time()));
+	}
+
+	PublicEditor& editor (trackview.editor());
+
+	/* Use a local Selection object that will not affect the global
+	 * selection. Possible ::paste() should accept a different kind of
+	 * object but that would conflict with the Editor API.
+	 */
+
+	::Selection local_selection (&editor, false);
+	MidiNoteSelection note_selection;
+
+	note_selection.push_back (selection_as_cut_buffer());
+
+	local_selection.set (note_selection);
+
+	PasteContext ctxt (0, 1, ItemCounts(), false);
+	paste (dup_pos, local_selection, ctxt);
+}
+
 /** This method handles undo */
 bool
 MidiRegionView::paste (timepos_t const & pos, const ::Selection& selection, PasteContext& ctx)
 {
 	bool commit = false;
+
 	// Paste notes, if available
 	MidiNoteSelection::const_iterator m = selection.midi_notes.get_nth(ctx.counts.n_notes());
 
 	if (m != selection.midi_notes.end()) {
+
 		ctx.counts.increase_n_notes();
+
 		if (!(*m)->empty()) {
 			commit = true;
 		}
-		paste_internal(pos, ctx.count, ctx.times, **m);
+
+		/* clear any current selection because we're going to select the duplicated ones */
+		clear_note_selection ();
+
+		paste_internal (pos, ctx.count, ctx.times, **m);
 	}
 
 	// Paste control points to automation children, if available
@@ -3841,6 +3885,8 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 	if (mcb.empty()) {
 		return;
 	}
+
+	PBD::Unwinder<bool> puw (_pasting, true);
 
 	start_note_diff_command (_("paste"));
 
@@ -3888,6 +3934,9 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 		_region->set_length (_region->position().distance (end));
 		trackview.session()->add_command (new StatefulDiffCommand (_region));
 	}
+
+	_marked_for_selection.clear ();
+	_pending_note_selection.clear ();
 
 	apply_diff (true);
 }

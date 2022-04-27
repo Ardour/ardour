@@ -208,6 +208,7 @@ public:
 	void   select_range(Temporal::timepos_t const & start, Temporal::timepos_t const & end);
 	void   invert_selection ();
 	void   extend_selection ();
+	void   duplicate_selection ();
 
 	Temporal::Beats earliest_in_selection ();
 	void move_selection(Temporal::timecnt_t const & dx, double dy, double cumulative_dy);
@@ -545,6 +546,7 @@ public:
 	double    _last_event_y;
 	bool      _entered;
 	NoteBase* _entered_note;
+	bool      _pasting;
 
 	bool _mouse_changed_selection;
 
