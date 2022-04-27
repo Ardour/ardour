@@ -6707,9 +6707,22 @@ Editor::duration_to_pixels_unrounded (timecnt_t const & dur) const
 Temporal::TimeDomain
 Editor::default_time_domain () const
 {
-	if (_grid_type == GridTypeNone || _snap_mode == SnapOff) {
+	if (_snap_mode == SnapOff) {
 		return AudioTime;
 	}
 
+	switch (_grid_type) {
+		case GridTypeNone:
+			/* fallthrough */
+		case GridTypeMinSec:
+			/* fallthrough */
+		case GridTypeCDFrame:
+			/* fallthrough */
+		case GridTypeTimecode:
+			/* fallthrough */
+			return AudioTime;
+		default:
+			break;
+	}
 	return BeatTime;
 }
