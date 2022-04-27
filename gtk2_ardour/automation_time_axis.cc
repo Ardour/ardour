@@ -770,7 +770,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, timepos_t const &
 	timepos_t when (pos);
 	_editor.snap_to_with_modifier (when, event);
 
-	if (UIConfiguration::instance().get_new_automation_points_on_lane() || _control->list()->size ()) {
+	if (UIConfiguration::instance().get_new_automation_points_on_lane() || _control->list()->size () == 0) {
 		if (_control->list()->size () == 0) {
 			y = _control->get_value ();
 		} else {
