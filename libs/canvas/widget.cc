@@ -131,5 +131,5 @@ Widget::compute_bounding_box () const
 		_bounding_box = Rect (0., 0., req.width, req.height);
 	}
 
-	bb_clean ();
+	set_bbox_clean ();
 }

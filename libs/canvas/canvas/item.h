@@ -335,7 +335,7 @@ public:
 	mutable Rect _bounding_box;
 	PackOptions _pack_options;
 
-	void bb_clean () const;
+	void set_bbox_clean () const;
 	void set_bbox_dirty () const;
 	bool bbox_dirty() const { return _bounding_box_dirty; }
 

@@ -110,7 +110,7 @@ Table::compute_bounding_box() const
 {
 	if (cells.empty()) {
 		_bounding_box = Rect();
-		bb_clean ();
+		set_bbox_clean ();
 		return;
 	}
 
@@ -125,7 +125,7 @@ Table::compute_bounding_box() const
 
 	DEBUG_TRACE (DEBUG::CanvasTable, string_compose ("bounding box computed as %1\n", _bounding_box));
 
-	bb_clean ();
+	set_bbox_clean ();
 
 }
 

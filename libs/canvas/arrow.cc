@@ -79,7 +79,7 @@ Arrow::compute_bounding_box () const
 	                     _line->x1() + (head_width / 2.0) + outline_pad,
 	                     _line->y1());
 
-	bb_clean ();
+	set_bbox_clean ();
 }
 
 /** Set whether to show an arrow head at one end or other

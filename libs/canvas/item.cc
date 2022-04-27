@@ -1334,7 +1334,7 @@ Item::set_layout_sensitive (bool yn)
 }
 
 void
-Item::bb_clean () const
+Item::set_bbox_clean () const
 {
 	_bounding_box_dirty = false;
 }

@@ -69,7 +69,7 @@ void
 Image::compute_bounding_box () const
 {
 	_bounding_box = Rect (0, 0, _width, _height);
-	bb_clean ();
+	set_bbox_clean ();
 }
 
 boost::shared_ptr<Image::Data>

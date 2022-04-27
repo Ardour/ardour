@@ -63,7 +63,7 @@ PolyItem::compute_bounding_box () const
 		_bounding_box = Rect ();
 	}
 
-	bb_clean ();
+	set_bbox_clean ();
 }
 
 void

@@ -254,7 +254,7 @@ Text::compute_bounding_box () const
 {
 	if (!_canvas || _text.empty()) {
 		_bounding_box = Rect ();
-		bb_clean ();
+		set_bbox_clean ();
 		return;
 	}
 
@@ -268,7 +268,7 @@ Text::compute_bounding_box () const
 			_redraw ();
 		}
 		_bounding_box = Rect (0, 0, min (_clamped_width, (double) _image->get_width() * retina_factor), _image->get_height() * retina_factor);
-		bb_clean ();
+		set_bbox_clean ();
 	}
 }
 

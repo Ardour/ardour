@@ -170,13 +170,13 @@ Meter::compute_bounding_box () const
 {
 	if (!_canvas) {
 		_bounding_box = Rect ();
-		bb_clean ();
+		set_bbox_clean ();
 		return;
 	}
 
 	Rect r (0, 0, pixwidth + 2, pixheight + 2);
 	_bounding_box = r;
-	bb_clean ();
+	set_bbox_clean ();
 }
 
 

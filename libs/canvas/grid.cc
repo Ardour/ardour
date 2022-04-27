@@ -88,7 +88,7 @@ Grid::compute_bounding_box () const
 	_bounding_box = Rect();
 
 	if (_items.empty()) {
-		bb_clean ();
+		set_bbox_clean ();
 		return;
 	}
 
@@ -103,7 +103,7 @@ Grid::compute_bounding_box () const
 		                          outline_width() + left_margin + left_padding);
 	}
 
-	bb_clean ();
+	set_bbox_clean ();
 }
 
 void

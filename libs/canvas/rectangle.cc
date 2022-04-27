@@ -175,7 +175,7 @@ Rectangle::compute_bounding_box () const
 		_bounding_box = _rect.fix().expand (_outline_width * 0.5);
 	}
 
-	bb_clean ();
+	set_bbox_clean ();
 }
 
 void

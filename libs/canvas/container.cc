@@ -54,5 +54,5 @@ Container::compute_bounding_box () const
 {
 	_bounding_box = Rect ();
 	/* nothing to do here; Item::bounding_box() will add all children for us */
-	bb_clean ();
+	set_bbox_clean ();
 }

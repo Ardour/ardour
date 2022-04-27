@@ -78,7 +78,7 @@ Box::compute_bounding_box () const
 	_bounding_box = Rect();
 
 	if (_items.empty()) {
-		bb_clean ();
+		set_bbox_clean ();
 		return;
 	}
 
@@ -93,7 +93,7 @@ Box::compute_bounding_box () const
 		                          left_padding + outline_width() + left_margin);
 	}
 
-	bb_clean ();
+	set_bbox_clean ();
 }
 
 void
