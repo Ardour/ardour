@@ -149,13 +149,13 @@ Maschine2Knob::compute_bounding_box () const
 {
 	if (!_canvas || _radius == 0) {
 		_bounding_box = Rect ();
-		_bounding_box_dirty = false;
+		set_bbox_clean ();
 		return;
 	}
 
 	if (bbox_dirty()) {
 		_bounding_box = Rect (- _radius, - _radius, _radius, _radius);
-		_bounding_box_dirty = false;
+		set_bbox_clean ();
 	}
 
 	/* Item::bounding_box() will add children */
