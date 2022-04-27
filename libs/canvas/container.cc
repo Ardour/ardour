@@ -46,27 +46,6 @@ Container::prepare_for_render (Rect const & area) const
 void
 Container::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	if (0 && (fill() || outline())) {
-
-		Rect bb (bounding_box());
-		Rect self (item_to_window (bb, false));
-		const Rect draw = self.intersection (area);
-
-		if (fill()) {
-
-			setup_fill_context (context);
-			context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
-			context->fill_preserve ();
-		}
-
-		if (outline()) {
-			if (!fill()) {
-				context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
-			}
-			setup_outline_context (context);
-			context->stroke ();
-		}
-	}
 	Item::render_children (area, context);
 }
 
