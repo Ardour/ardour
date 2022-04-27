@@ -86,7 +86,7 @@ Line::set (Duple a, Duple b)
 		_points[0] = a;
 		_points[1] = b;
 
-		_bounding_box_dirty = true;
+		set_bbox_dirty ();
 		end_change ();
 	}
 }
@@ -100,7 +100,7 @@ Line::set_x (Coord x0, Coord x1)
 		_points[0].x = x0;
 		_points[1].x = x1;
 
-		_bounding_box_dirty = true;
+		set_bbox_dirty ();
 		end_change ();
 	}
 }
@@ -113,7 +113,7 @@ Line::set_x0 (Coord x0)
 
 		_points[0].x = x0;
 
-		_bounding_box_dirty = true;
+		set_bbox_dirty ();
 		end_change ();
 	}
 }
@@ -126,7 +126,7 @@ Line::set_y0 (Coord y0)
 
 		_points[0].y = y0;
 
-		_bounding_box_dirty = true;
+		set_bbox_dirty ();
 		end_change ();
 	}
 
@@ -141,7 +141,7 @@ Line::set_x1 (Coord x1)
 
 		_points[1].x = x1;
 
-		_bounding_box_dirty = true;
+		set_bbox_dirty ();
 		end_change ();
 	}
 }
@@ -154,7 +154,7 @@ Line::set_y1 (Coord y1)
 
 		_points[1].y = y1;
 
-		_bounding_box_dirty = true;
+		set_bbox_dirty ();
 		end_change ();
 	}
 }

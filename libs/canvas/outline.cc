@@ -53,7 +53,7 @@ Outline::set_outline_width (Distance width)
 	if (width != _outline_width) {
 		_self.begin_change ();
 		_outline_width = width;
-		_self._bounding_box_dirty = true;
+		_self.set_bbox_dirty ();
 		_self.end_change ();
 	}
 }
@@ -64,7 +64,7 @@ Outline::set_outline (bool outline)
 	if (outline != _outline) {
 		_self.begin_change ();
 		_outline = outline;
-		_self._bounding_box_dirty = true;
+		_self.set_bbox_dirty ();
 		_self.end_change ();
 	}
 }

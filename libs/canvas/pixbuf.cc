@@ -61,7 +61,7 @@ Pixbuf::set (Glib::RefPtr<Gdk::Pixbuf> pixbuf)
 	begin_change ();
 
 	_pixbuf = pixbuf;
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 
 	end_change ();
 }

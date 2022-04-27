@@ -57,7 +57,7 @@ void
 PolyLine::set_fill_y1 (double y1)
 {
 	begin_change ();
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	_y1                 = y1;
 	end_change ();
 }

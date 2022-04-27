@@ -92,7 +92,7 @@ Text::set (string const & text)
 	_text = text;
 
 	_need_redraw = true;
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 
 	end_change ();
 }
@@ -245,7 +245,7 @@ Text::clamp_width (double w)
 	}
 	begin_change ();
 	_clamped_width = w;
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -258,7 +258,7 @@ Text::compute_bounding_box () const
 		return;
 	}
 
-	if (_bounding_box_dirty) {
+	if (bbox_dirty()) {
 #ifdef __APPLE__
 		const float retina_factor = 0.5;
 #else
@@ -283,7 +283,7 @@ Text::set_alignment (Pango::Alignment alignment)
 
 	_alignment = alignment;
 	_need_redraw = true;
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -296,7 +296,7 @@ Text::set_font_description (Pango::FontDescription font_description)
 	_need_redraw = true;
         _width_correction = -1.0;
 
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 

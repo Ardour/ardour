@@ -107,7 +107,7 @@ StepButton::set_size (double w, double h)
 	width = w;
 	height = h;
 
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 
 	create_patterns ();
 

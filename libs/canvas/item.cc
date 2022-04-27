@@ -26,6 +26,7 @@
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
 #include "canvas/item.h"
+#include "canvas/root_group.h"
 #include "canvas/scroll_group.h"
 
 using namespace std;
@@ -41,7 +42,6 @@ Item::Item (Canvas* canvas)
 	, _parent (0)
 	, _scroll_parent (0)
 	, _visible (true)
-	, _bounding_box_dirty (true)
 	, _pack_options (PackOptions (0))
 	, _layout_sensitive (false)
 	, _lut (0)
@@ -50,6 +50,7 @@ Item::Item (Canvas* canvas)
 	, _requested_height (-1)
 	, _ignore_events (false)
 	, _scroll_translation (true)
+	, _bounding_box_dirty (true)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 }
@@ -61,7 +62,6 @@ Item::Item (Item* parent)
 	, _parent (parent)
 	, _scroll_parent (0)
 	, _visible (true)
-	, _bounding_box_dirty (true)
 	, _pack_options (PackOptions (0))
 	, _layout_sensitive (false)
 	, _lut (0)
@@ -70,6 +70,7 @@ Item::Item (Item* parent)
 	, _requested_height (-1)
 	, _ignore_events (false)
 	, _scroll_translation (true)
+	, _bounding_box_dirty (true)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
@@ -88,7 +89,6 @@ Item::Item (Item* parent, Duple const& p)
 	, _scroll_parent (0)
 	, _position (p)
 	, _visible (true)
-	, _bounding_box_dirty (true)
 	, _pack_options (PackOptions (0))
 	, _layout_sensitive (false)
 	, _requested_width (-1.)
@@ -97,6 +97,7 @@ Item::Item (Item* parent, Duple const& p)
 	, _resize_queued (false)
 	, _ignore_events (false)
 	, _scroll_translation (true)
+	, _bounding_box_dirty (true)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
@@ -607,7 +608,7 @@ Item::size_allocate (Rect const & r)
 {
 	begin_change ();
 	_size_allocate (r);
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -661,7 +662,7 @@ Item::set_size_request (double w, double h)
 	begin_change ();
 	_requested_width = w;
 	_requested_height = h;
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -709,7 +710,7 @@ Item::set_size_request_to_display_given_text (const std::vector<std::string>& st
 ArdourCanvas::Rect
 Item::bounding_box () const
 {
-	if (_bounding_box_dirty) {
+	if (bbox_dirty()) {
 		compute_bounding_box ();
 		assert (!_bounding_box_dirty);
 		add_child_bounding_boxes ();
@@ -848,7 +849,7 @@ Item::covers (Duple const & point) const
 {
 	Duple p = window_to_item (point);
 
-	if (_bounding_box_dirty) {
+	if (bbox_dirty()) {
 		(void) bounding_box ();
 	}
 
@@ -1055,7 +1056,7 @@ Item::add (Item* i)
 	_items.push_back (i);
 	i->reparent (this, true);
 	invalidate_lut ();
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 }
 
 void
@@ -1066,7 +1067,7 @@ Item::add_front (Item* i)
 	_items.push_front (i);
 	i->reparent (this, true);
 	invalidate_lut ();
-	_bounding_box_dirty = true;
+	set_bbox_dirty();
 }
 
 void
@@ -1093,7 +1094,7 @@ Item::remove (Item* i)
 	i->set_layout_sensitive (false);
 	_items.remove (i);
 	invalidate_lut ();
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 
 	end_change ();
 }
@@ -1106,8 +1107,7 @@ Item::clear (bool with_delete)
 	clear_items (with_delete);
 
 	invalidate_lut ();
-	_bounding_box_dirty = true;
-
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -1207,7 +1207,7 @@ Item::child_changed (bool bbox_changed)
 	invalidate_lut ();
 
 	if (bbox_changed) {
-		_bounding_box_dirty = true;
+		set_bbox_dirty ();
 	}
 
 	if (_parent) {
@@ -1337,6 +1337,17 @@ void
 Item::bb_clean () const
 {
 	_bounding_box_dirty = false;
+}
+
+void
+Item::set_bbox_dirty () const
+{
+	_bounding_box_dirty = true;
+	Item* i = _parent;
+	while (i) {
+		i->set_bbox_dirty ();
+		i = i->parent ();
+	}
 }
 
 void

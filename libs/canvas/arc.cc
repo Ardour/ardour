@@ -102,7 +102,7 @@ Arc::set_center (Duple const & c)
 
 	_center = c;
 
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -113,7 +113,7 @@ Arc::set_radius (Coord r)
 
 	_radius = r;
 
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -124,7 +124,7 @@ Arc::set_arc (double deg)
 
 	_arc_degrees = deg;
 
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -136,7 +136,7 @@ Arc::set_start (double deg)
 
 	_start_degrees = deg;
 
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -166,5 +166,5 @@ Arc::_size_allocate (Rect const & r)
 	_radius = min (r.width(),r.height()) / 2.0;
 	_center = Duple ((r.width()/2.), (r.height() /2.));
 
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 }

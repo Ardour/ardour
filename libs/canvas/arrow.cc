@@ -101,7 +101,7 @@ Arrow::set_show_head (int which, bool show)
 		setup_polygon (which);
 	}
 
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -121,7 +121,7 @@ Arrow::set_head_outward (int which, bool outward)
 	_heads[which].outward = outward;
 
 	setup_polygon (which);
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -139,7 +139,7 @@ Arrow::set_head_height (int which, Distance height)
 	_heads[which].height = height;
 
 	setup_polygon (which);
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -157,7 +157,7 @@ Arrow::set_head_width (int which, Distance width)
 	_heads[which].width = width;
 
 	setup_polygon (which);
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -174,7 +174,7 @@ Arrow::set_outline_width (Distance width)
 	if (_heads[1].polygon) {
 		_heads[1].polygon->set_outline_width (width);
 	}
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 }
 
 /** Set the x position of our line.
@@ -190,7 +190,7 @@ Arrow::set_x (Coord x)
 			_heads[i].polygon->set_x_position (x - _heads[i].width / 2);
 		}
 	}
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 }
 
 /** Set the y position of end 0 of our line.
@@ -203,7 +203,7 @@ Arrow::set_y0 (Coord y0)
 	if (_heads[0].polygon) {
 		_heads[0].polygon->set_y_position (y0);
 	}
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 }
 
 /** Set the y position of end 1 of our line.
@@ -216,7 +216,7 @@ Arrow::set_y1 (Coord y1)
 	if (_heads[1].polygon) {
 		_heads[1].polygon->set_y_position (y1 - _heads[1].height);
 	}
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 }
 
 /** @return x position of our line in pixels (in our coordinate system) */

@@ -80,7 +80,7 @@ LineSet::set_extent (Distance e)
 	begin_change ();
 
 	_extent = e;
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 
 	end_change ();
 }
@@ -138,7 +138,7 @@ LineSet::add_coord (Coord y, Distance width, Gtkmm2ext::Color color)
 	_lines.push_back (Line (y, width, color));
 	sort (_lines.begin(), _lines.end(), LineSorter());
 
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 
@@ -147,7 +147,7 @@ LineSet::clear ()
 {
 	begin_change ();
 	_lines.clear ();
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	end_change ();
 }
 

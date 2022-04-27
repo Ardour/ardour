@@ -333,11 +333,11 @@ public:
 
 	/** our bounding box; may be out of date if _bounding_box_dirty is true */
 	mutable Rect _bounding_box;
-	/** true if _bounding_box might be out of date, false if its definitely not */
-	mutable bool _bounding_box_dirty;
 	PackOptions _pack_options;
 
 	void bb_clean () const;
+	void set_bbox_dirty () const;
+	bool bbox_dirty() const { return _bounding_box_dirty; }
 
 	Rect _allocation;
 	bool _layout_sensitive;
@@ -373,7 +373,9 @@ private:
 	std::string _tooltip;
 	bool _ignore_events;
 	bool _scroll_translation;
-	
+	/** true if _bounding_box might be out of date, false if its definitely not */
+	mutable bool _bounding_box_dirty;
+
 	void find_scroll_parent ();
 	void propagate_show_hide ();
 };

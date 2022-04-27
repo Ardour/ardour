@@ -161,7 +161,7 @@ Grid::set_margin (double t, double r, double b, double l)
 void
 Grid::reset_bg ()
 {
-	if (_bounding_box_dirty) {
+	if (bbox_dirty()) {
 		(void) bounding_box ();
 	}
 
@@ -331,7 +331,7 @@ Grid::reposition_children ()
 		(*i)->set_position (Duple (col_dimens[c->second.x], row_dimens[c->second.y]));
 	}
 
-	_bounding_box_dirty = true;
+	set_bbox_dirty ();
 	reset_bg ();
 }
 
