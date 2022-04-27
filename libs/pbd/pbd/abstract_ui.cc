@@ -43,6 +43,12 @@ DECLARE_DEFAULT_COMPARISONS(ptw32_handle_t)
 
 using namespace std;
 
+#ifndef NDEBUG
+#undef DEBUG_TRACE
+/* cannot use debug transmitter system here because it will cause recursion */
+#define DEBUG_TRACE(bits,str) if (((bits) & PBD::debug_bits).any()) { std::cout << # bits << ": " <<  str; }
+#endif
+
 template<typename RequestBuffer> void
 cleanup_request_buffer (void* ptr)
 {
