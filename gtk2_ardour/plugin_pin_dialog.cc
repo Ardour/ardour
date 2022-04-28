@@ -1871,7 +1871,8 @@ PluginPinWidget::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, Data
 		return added;
 	}
 
-	if (_route ()->feeds_according_to_graph (r)) {
+	if (_route ()->feeds (r)) {
+		/* do not allow connfeedback */
 		return added;
 	}
 

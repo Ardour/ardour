@@ -241,7 +241,7 @@ IOButton::button_press (GdkEventButton* ev)
 			if ((*i)->is_foldbackbus ()) {
 				continue;
 			}
-			if (_route->feeds_according_to_graph (*i)) {
+			if (_route->feeds (*i)) {
 				/* do not offer connections that would cause feedback */
 				continue;
 			}
@@ -255,7 +255,7 @@ IOButton::button_press (GdkEventButton* ev)
 			if ((*i)->is_foldbackbus () || _route->is_foldbackbus ()) {
 				continue;
 			}
-			if ((*i)->feeds_according_to_graph (_route)) {
+			if ((*i)->feeds (_route)) {
 				/* do not offer connections that would cause feedback */
 				continue;
 			}

@@ -656,6 +656,7 @@ FoldbackStrip::update_send_box ()
 	StripableList stripables;
 	stripables.clear ();
 
+#if 0
 	Route::FedBy fed_by = _route->fed_by ();
 	for (Route::FedBy::iterator i = fed_by.begin (); i != fed_by.end (); ++i) {
 		if (i->sends_only) {
@@ -664,6 +665,7 @@ FoldbackStrip::update_send_box ()
 			stripables.push_back (s);
 		}
 	}
+#endif
 	stripables.sort (StripableByPresentationOrder ());
 	for (StripableList::iterator it = stripables.begin (); it != stripables.end (); ++it) {
 		boost::shared_ptr<Stripable> s_sp = *it;
@@ -1076,6 +1078,7 @@ FoldbackStrip::duplicate_current_fb ()
 		double oldgain = old_fb->gain_control ()->get_value ();
 		new_fb->gain_control ()->set_value (oldgain * 0.25, PBD::Controllable::NoGroup);
 
+#if 0
 		Route::FedBy fed_by = old_fb->fed_by ();
 		for (Route::FedBy::iterator i = fed_by.begin (); i != fed_by.end (); ++i) {
 			if (i->sends_only) {
@@ -1091,6 +1094,7 @@ FoldbackStrip::duplicate_current_fb ()
 				}
 			}
 		}
+#endif
 		set_route (new_fb);
 		route_rename ();
 	} else {
