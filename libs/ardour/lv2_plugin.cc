@@ -2649,8 +2649,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 	if (_bpm_control_port) {
 
-		/* note that this is not necessarily quarter notes */
-		const double bpm = tmap->tempo_at (timepos_t (start0)).note_types_per_minute();
+		const double bpm = tmap->quarters_per_minute_at (timepos_t (start0));
 
 		if (*_bpm_control_port != bpm) {
 			AutomationCtrlPtr c = get_automation_control (_bpm_control_port_index);
