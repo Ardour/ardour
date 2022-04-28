@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012-2016 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2015-2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ardour/graph_edges.h"
 #include "ardour/route.h"
-#include "ardour/route_graph.h"
 #include "ardour/track.h"
 
 #include "pbd/i18n.h"
@@ -34,11 +34,16 @@ GraphEdges::add (GraphVertex from, GraphVertex to, bool via_sends_only)
 
 	EdgeMapWithSends::iterator i = find_in_from_to_with_sends (from, to);
 	if (i != _from_to_with_sends.end ()) {
-		i->second.second = via_sends_only;
+		i->second.second |= via_sends_only;
 	} else {
-		_from_to_with_sends.insert (
-			make_pair (from, make_pair (to, via_sends_only))
-			);
+		_from_to_with_sends.insert (make_pair (from, make_pair (to, via_sends_only)));
+	}
+
+	i = find_in_to_from_with_sends (to, from);
+	if (i != _to_from_with_sends.end ()) {
+		i->second.second |= via_sends_only;
+	} else {
+		_to_from_with_sends.insert (make_pair (to, make_pair (from, via_sends_only)));
 	}
 }
 
@@ -55,20 +60,32 @@ GraphEdges::find_in_from_to_with_sends (GraphVertex from, GraphVertex to)
 			return i;
 		}
 	}
-
 	return _from_to_with_sends.end ();
 }
 
 GraphEdges::EdgeMapWithSends::iterator
-GraphEdges::find_recursively_in_from_to_with_sends (GraphVertex from, GraphVertex to)
+GraphEdges::find_in_to_from_with_sends (GraphVertex to, GraphVertex from)
 {
 	typedef EdgeMapWithSends::iterator Iter;
+	pair<Iter, Iter> r = _to_from_with_sends.equal_range (to);
+	for (Iter i = r.first; i != r.second; ++i) {
+		if (i->second.first == from) {
+			return i;
+		}
+	}
+	return _to_from_with_sends.end ();
+}
+
+GraphEdges::EdgeMapWithSends::const_iterator
+GraphEdges::find_recursively_in_from_to_with_sends (GraphVertex from, GraphVertex to) const
+{
+	typedef EdgeMapWithSends::const_iterator Iter;
 	pair<Iter, Iter> r = _from_to_with_sends.equal_range (from);
 	for (Iter i = r.first; i != r.second; ++i) {
 		if (i->second.first == to) {
 			return i;
 		}
-		GraphEdges::EdgeMapWithSends::iterator t = find_recursively_in_from_to_with_sends (i->second.first, to);
+		Iter t = find_recursively_in_from_to_with_sends (i->second.first, to);
 		if (t != _from_to_with_sends.end ()) {
 			return t;
 		}
@@ -97,16 +114,15 @@ GraphEdges::has (GraphVertex from, GraphVertex to, bool* via_sends_only)
 }
 
 bool
-GraphEdges::feeds (GraphVertex from, GraphVertex to)
+GraphEdges::feeds (GraphVertex from, GraphVertex to) const
 {
-	EdgeMapWithSends::iterator i = find_recursively_in_from_to_with_sends (from, to);
+	EdgeMapWithSends::const_iterator i = find_recursively_in_from_to_with_sends (from, to);
 	if (i == _from_to_with_sends.end ()) {
 		return false;
 	}
 	return true;
 }
 
-/** @return the vertices that are fed from `r' */
 set<GraphVertex>
 GraphEdges::from (GraphVertex r) const
 {
@@ -116,6 +132,26 @@ GraphEdges::from (GraphVertex r) const
 	}
 
 	return i->second;
+}
+
+set<GraphVertex>
+GraphEdges::to (GraphVertex t, bool via_sends_only) const
+{
+	set<GraphVertex> rv;
+	typedef EdgeMapWithSends::const_iterator Iter;
+	pair<Iter, Iter> r = _to_from_with_sends.equal_range (t);
+	for (Iter i = r.first; i != r.second; ++i) {
+		if (via_sends_only) {
+			if (!i->second.second) {
+				continue;
+			}
+		}
+		rv.insert (i->second.first);
+		for (auto const& j: GraphEdges::to (i->second.first, i->second.second ? false : via_sends_only)) {
+			rv.insert (j);
+		}
+	}
+	return rv;
 }
 
 void
@@ -160,18 +196,18 @@ GraphEdges::empty () const
 void
 GraphEdges::dump () const
 {
-	for (EdgeMap::const_iterator i = _from_to.begin(); i != _from_to.end(); ++i) {
-		cout << "FROM: " << i->first->name() << " ";
-		for (set<GraphVertex>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
-			cout << (*j)->name() << " ";
+	for (auto const& i : _from_to) {
+		cout << "FROM: " << i.first->graph_node_name () << " ";
+		for (auto const& j : i.second) {
+			cout << j->graph_node_name () << " ";
 		}
 		cout << "\n";
 	}
 
-	for (EdgeMap::const_iterator i = _to_from.begin(); i != _to_from.end(); ++i) {
-		cout << "TO: " << i->first->name() << " ";
-		for (set<GraphVertex>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
-			cout << (*j)->name() << " ";
+	for (auto const& i : _to_from) {
+		cout << "TO: " << i.first->graph_node_name () << " ";
+		for (auto const& j : i.second) {
+			cout << j->graph_node_name () << " ";
 		}
 		cout << "\n";
 	}
@@ -193,12 +229,15 @@ GraphEdges::insert (EdgeMap& e, GraphVertex a, GraphVertex b)
 
 struct RouteRecEnabledComparator
 {
-	bool operator () (GraphVertex r1, GraphVertex r2) const
+	bool operator () (GraphVertex n1, GraphVertex n2) const
 	{
-		boost::shared_ptr<Track> t1 (boost::dynamic_pointer_cast<Track>(r1));
-		boost::shared_ptr<Track> t2 (boost::dynamic_pointer_cast<Track>(r2));
-		PresentationInfo::order_t r1o = r1->presentation_info().order();
-		PresentationInfo::order_t r2o = r2->presentation_info().order();
+		boost::shared_ptr<Track> t1 (boost::dynamic_pointer_cast<Track>(n1));
+		boost::shared_ptr<Track> t2 (boost::dynamic_pointer_cast<Track>(n2));
+		boost::shared_ptr<Route> r1 (boost::dynamic_pointer_cast<Route>(n1));
+		boost::shared_ptr<Route> r2 (boost::dynamic_pointer_cast<Route>(n2));
+
+		PresentationInfo::order_t r1o = r1 ? r1->presentation_info().order() : 0;
+		PresentationInfo::order_t r2o = r2 ? r2->presentation_info().order() : 0;
 
 		if (!t1) {
 			if (!t2) {
@@ -238,52 +277,70 @@ struct RouteRecEnabledComparator
 /** Perform a topological sort of a list of routes using a directed graph representing connections.
  *  @return Sorted list of routes, or 0 if the graph contains cycles (feedback loops).
  */
-boost::shared_ptr<RouteList>
-ARDOUR::topological_sort (
-	boost::shared_ptr<RouteList> routes,
-	GraphEdges edges
-	)
+bool
+ARDOUR::topological_sort (GraphNodeList& nodes, GraphEdges& edges)
 {
-	boost::shared_ptr<RouteList> sorted_routes (new RouteList);
+	/* Collect the edges of the  graph.  Each of these edges
+	 * is a pair of nodes, one of which directly feeds the other
+	 * either by a port connection or by an internal send.
+	 */
 
-	/* queue of routes to process */
-	RouteList queue;
+	for (auto const& i : nodes) {
+
+		for (auto const& j : nodes) {
+
+			bool via_sends_only = false;
+
+			/* See if this *j feeds *i according to the current state of
+			 * port connections and internal sends.
+			 */
+			if (j->direct_feeds_according_to_reality (i, &via_sends_only)) {
+				/* add the edge to the graph (part #1) */
+				edges.add (j, i, via_sends_only);
+			}
+		}
+	}
+
+	GraphNodeList queue;
 
 	/* initial queue has routes that are not fed by anything */
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		if (edges.has_none_to (*i)) {
-			queue.push_back (*i);
+	for (auto const& i : nodes) {
+		if (edges.has_none_to (i)) {
+			queue.push_back (i);
 		}
 	}
 
 	/* Sort the initial queue so that non-rec-enabled routes are run first.
-	   This is so that routes can record things coming from other routes
-	   via external connections.
-	*/
+	 * This is so that routes can record things coming from other routes
+	 * via external connections.
+	 */
 	queue.sort (RouteRecEnabledComparator ());
 
 	/* Do the sort: algorithm is Kahn's from Wikipedia.
-	   `Topological sorting of large networks', Communications of the ACM 5(11):558-562.
-	*/
+	 * `Topological sorting of large networks', Communications of the ACM 5(11):558-562.
+	 */
+
+	nodes.clear ();
+	GraphEdges remaining_edges (edges);
 
 	while (!queue.empty ()) {
 		GraphVertex r = queue.front ();
 		queue.pop_front ();
-		sorted_routes->push_back (r);
-		set<GraphVertex> e = edges.from (r);
+		nodes.push_back (r);
+		set<GraphVertex> e = remaining_edges.from (r);
 		for (set<GraphVertex>::iterator i = e.begin(); i != e.end(); ++i) {
-			edges.remove (r, *i);
-			if (edges.has_none_to (*i)) {
+			remaining_edges.remove (r, *i);
+			if (remaining_edges.has_none_to (*i)) {
 				queue.push_back (*i);
 			}
 		}
 	}
 
-	if (!edges.empty ()) {
-		edges.dump ();
+	if (!remaining_edges.empty ()) {
+		remaining_edges.dump ();
 		/* There are cycles in the graph, so we can't do a topological sort */
-		return boost::shared_ptr<RouteList> ();
+		return false;
 	}
 
-	return sorted_routes;
+	return true;
 }

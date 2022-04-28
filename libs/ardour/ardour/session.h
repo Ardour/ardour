@@ -88,7 +88,7 @@
 #include "ardour/plugin.h"
 #include "ardour/presentation_info.h"
 #include "ardour/route.h"
-#include "ardour/route_graph.h"
+#include "ardour/graph_edges.h"
 #include "ardour/transport_api.h"
 #include "ardour/triggerbox.h"
 
@@ -760,7 +760,6 @@ public:
 	void remove_route (boost::shared_ptr<Route>);
 
 	void resort_routes ();
-	void resort_routes_using (boost::shared_ptr<RouteList>);
 
 	AudioEngine & engine() { return _engine; }
 	AudioEngine const & engine () const { return _engine; }
@@ -1903,8 +1902,6 @@ private:
 
 	/* routes stuff */
 
-	boost::shared_ptr<Graph> _process_graph;
-
 	SerializedRCUManager<RouteList>  routes;
 
 	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, PresentationInfo::order_t);
@@ -2252,9 +2249,14 @@ private:
 	void load_nested_sources (const XMLNode& node);
 
 	/** The directed graph of routes that is currently being used for audio processing
-	    and solo/mute computations.
-	*/
+	 * and solo/mute computations.
+	 */
 	GraphEdges _current_route_graph;
+
+	boost::shared_ptr<Graph> _process_graph;
+
+	void resort_routes_using (boost::shared_ptr<RouteList>);
+	bool rechain_process_graph (GraphNodeList&);
 
 	void ensure_route_presentation_info_gap (PresentationInfo::order_t, uint32_t gap_size);
 

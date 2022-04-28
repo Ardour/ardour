@@ -65,6 +65,7 @@
 #include "ardour/disk_writer.h"
 #include "ardour/event_type_map.h"
 #include "ardour/gain_control.h"
+#include "ardour/graph.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
@@ -698,6 +699,12 @@ Route::monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t 
 }
 
 void
+Route::process ()
+{
+	_graph->process_one_route (this);
+}
+
+void
 Route::run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, bool gain_automation_ok, bool run_disk_reader)
 {
 	BufferSet& bufs (_session.get_route_buffers (n_process_buffers()));
@@ -780,10 +787,10 @@ void
 Route::push_solo_upstream (int delta)
 {
 	DEBUG_TRACE (DEBUG::Solo, string_compose("\t ... INVERT push from %1\n", _name));
-	for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
-		boost::shared_ptr<Route> sr (i->r.lock());
-		if (sr) {
-			sr->solo_control()->mod_solo_by_others_downstream (-delta);
+	for (auto const& i : _session._current_route_graph.to (boost::dynamic_pointer_cast<Route> (shared_from_this ()))) {
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (i);
+		if (r) {
+			r->solo_control()->mod_solo_by_others_downstream (-delta);
 		}
 	}
 }
@@ -3525,52 +3532,6 @@ Route::set_comment (string cmt, void *src)
 	_session.set_dirty ();
 }
 
-bool
-Route::add_fed_by (boost::shared_ptr<Route> other, bool via_sends_only)
-{
-	FeedRecord fr (other, via_sends_only);
-
-	pair<FedBy::iterator,bool> result =  _fed_by.insert (fr);
-
-	if (!result.second) {
-
-		/* already a record for "other" - make sure sends-only information is correct */
-		if (!via_sends_only && result.first->sends_only) {
-			FeedRecord* frp = const_cast<FeedRecord*>(&(*result.first));
-			frp->sends_only = false;
-		}
-	}
-
-	return result.second;
-}
-
-void
-Route::clear_fed_by ()
-{
-	_fed_by.clear ();
-}
-
-bool
-Route::feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
-{
-	const FedBy& fed_by (other->fed_by());
-
-	for (FedBy::const_iterator f = fed_by.begin(); f != fed_by.end(); ++f) {
-		boost::shared_ptr<Route> sr = f->r.lock();
-
-		if (sr && (sr.get() == this)) {
-
-			if (via_sends_only) {
-				*via_sends_only = f->sends_only;
-			}
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
 IOVector
 Route::all_inputs () const
 {
@@ -3614,8 +3575,11 @@ Route::all_outputs () const
 }
 
 bool
-Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* via_send_only)
+Route::direct_feeds_according_to_reality (boost::shared_ptr<GraphNode> node, bool* via_send_only)
 {
+	boost::shared_ptr<Route> other (boost::dynamic_pointer_cast<Route> (node));
+	assert (other);
+
 	DEBUG_TRACE (DEBUG::Graph, string_compose ("Feeds from %1 (-> %2)?\n", _name, other->name()));
 	if (other->all_inputs().fed_by (_output)) {
 		DEBUG_TRACE (DEBUG::Graph, string_compose ("\tdirect FEEDS to %1\n", other->name()));
@@ -3667,9 +3631,22 @@ Route::direct_feeds_according_to_graph (boost::shared_ptr<Route> other, bool* vi
 }
 
 bool
-Route::feeds_according_to_graph (boost::shared_ptr<Route> other)
+Route::feeds (boost::shared_ptr<Route> other)
 {
 	return _session._current_route_graph.feeds (boost::dynamic_pointer_cast<Route> (shared_from_this ()), other);
+}
+
+std::set<boost::shared_ptr<Route>>
+Route::signal_sources (bool via_sends_only)
+{
+	std::set<boost::shared_ptr<Route>> rv;
+	for (auto const& i : _session._current_route_graph.to (boost::dynamic_pointer_cast<Route> (shared_from_this ()), via_sends_only)) {
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (i);
+		if (r) {
+			rv.insert (r);
+		}
+	}
+	return rv;
 }
 
 bool

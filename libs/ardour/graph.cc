@@ -353,7 +353,7 @@ Graph::reached_terminal_node ()
  *  acyclic.
  */
 void
-Graph::rechain (boost::shared_ptr<RouteList> routelist, GraphEdges const& edges)
+Graph::rechain (GraphNodeList const& nodelist, GraphEdges const& edges)
 {
 	Glib::Threads::Mutex::Lock ls (_swap_mutex);
 
@@ -372,40 +372,38 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist, GraphEdges const& edges)
 
 	_nodes_rt[chain].clear ();
 
-	/* Clear things out, and make _nodes_rt[chain] a copy of routelist */
-	for (RouteList::iterator ri = routelist->begin (); ri != routelist->end (); ri++) {
-		(*ri)->_init_refcount[chain] = 0;
-		(*ri)->_activation_set[chain].clear ();
-		_nodes_rt[chain].push_back (*ri);
+	/* Clear things out, and make _nodes_rt[chain] a copy of nodelist */
+	for (auto const& ri : nodelist) {
+		ri->_init_refcount[chain] = 0;
+		ri->_activation_set[chain].clear ();
+		_nodes_rt[chain].push_back (ri);
 	}
 
 	// now add refs for the connections.
 
-	for (node_list_t::iterator ni = _nodes_rt[chain].begin (); ni != _nodes_rt[chain].end (); ni++) {
-		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (*ni);
-
+	for (auto const& ni : _nodes_rt[chain]) {
 		/* The routes that are directly fed by r */
-		set<GraphVertex> fed_from_r = edges.from (r);
+		set<GraphVertex> fed_from_r = edges.from (ni);
 
 		/* Hence whether r has an output */
 		bool const has_output = !fed_from_r.empty ();
 
 		/* Set up r's activation set */
 		for (set<GraphVertex>::iterator i = fed_from_r.begin (); i != fed_from_r.end (); ++i) {
-			r->_activation_set[chain].insert (*i);
+			ni->_activation_set[chain].insert (*i);
 		}
 
-		/* r has an input if there are some incoming edges to r in the graph */
-		bool const has_input = !edges.has_none_to (r);
+		/* ni has an input if there are some incoming edges to r in the graph */
+		bool const has_input = !edges.has_none_to (ni);
 
 		/* Increment the refcount of any route that we directly feed */
-		for (node_set_t::iterator ai = r->_activation_set[chain].begin (); ai != r->_activation_set[chain].end (); ai++) {
-			(*ai)->_init_refcount[chain] += 1;
+		for (auto const& ai : ni->_activation_set[chain]) {
+			ai->_init_refcount[chain] += 1;
 		}
 
 		if (!has_input) {
 			/* no input, so this node needs to be triggered initially to get things going */
-			_init_trigger_list[chain].push_back (*ni);
+			_init_trigger_list[chain].push_back (ni);
 		}
 
 		if (!has_output) {
@@ -574,17 +572,16 @@ Graph::dump (int chain) const
 	chain = _pending_chain;
 
 	DEBUG_TRACE (DEBUG::Graph, "--------------------------------------------Graph dump:\n");
-	for (ni = _nodes_rt[chain].begin (); ni != _nodes_rt[chain].end (); ni++) {
-		boost::shared_ptr<Route> rp = boost::dynamic_pointer_cast<Route> (*ni);
-		DEBUG_TRACE (DEBUG::Graph, string_compose ("GraphNode: %1  refcount: %2\n", rp->name ().c_str (), (*ni)->_init_refcount[chain]));
-		for (ai = (*ni)->_activation_set[chain].begin (); ai != (*ni)->_activation_set[chain].end (); ai++) {
-			DEBUG_TRACE (DEBUG::Graph, string_compose ("  triggers: %1\n", boost::dynamic_pointer_cast<Route> (*ai)->name ().c_str ()));
+	for (auto const& ni : _nodes_rt[chain]) {
+		DEBUG_TRACE (DEBUG::Graph, string_compose ("GraphNode: %1  refcount: %2\n", ni->graph_node_name (), ni->_init_refcount[chain]));
+		for (auto const& ai : ni->_activation_set[chain]) {
+			DEBUG_TRACE (DEBUG::Graph, string_compose ("  triggers: %1\n", ai->graph_node_name ()));
 		}
 	}
 
 	DEBUG_TRACE (DEBUG::Graph, "------------- trigger list:\n");
-	for (ni = _init_trigger_list[chain].begin (); ni != _init_trigger_list[chain].end (); ni++) {
-		DEBUG_TRACE (DEBUG::Graph, string_compose ("GraphNode: %1  refcount: %2\n", boost::dynamic_pointer_cast<Route> (*ni)->name ().c_str (), (*ni)->_init_refcount[chain]));
+	for (auto const& ni : _init_trigger_list[chain]) {
+		DEBUG_TRACE (DEBUG::Graph, string_compose ("GraphNode: %1  refcount: %2\n", ni->graph_node_name (), ni->_init_refcount[chain]));
 	}
 
 	DEBUG_TRACE (DEBUG::Graph, string_compose ("final activation refcount: %1\n", _n_terminal_nodes[chain]));
@@ -604,21 +601,19 @@ Graph::plot (std::string const& file_name) const
 	ss << "digraph {\n";
 	ss << "  node [shape = ellipse];\n";
 
-	for (ni = _nodes_rt[chain].begin (); ni != _nodes_rt[chain].end (); ni++) {
-		boost::shared_ptr<Route> sr = boost::dynamic_pointer_cast<Route> (*ni);
-		std::string sn = string_compose ("%1 (%2)", sr->name (), (*ni)->_init_refcount[chain]);
-		if ((*ni)->_init_refcount[chain] == 0 && (*ni)->_activation_set[chain].size() == 0) {
+	for (auto const& ni : _nodes_rt[chain]) {
+		std::string sn = string_compose ("%1 (%2)", ni->graph_node_name (), ni->_init_refcount[chain]);
+		if (ni->_init_refcount[chain] == 0 && ni->_activation_set[chain].size() == 0) {
 				ss << "  \"" << sn << "\"[style=filled,fillcolor=gold1];\n";
-		} else if ((*ni)->_init_refcount[chain] == 0) {
+		} else if (ni->_init_refcount[chain] == 0) {
 				ss << "  \"" << sn << "\"[style=filled,fillcolor=lightskyblue1];\n";
-		} else if ((*ni)->_activation_set[chain].size() == 0) {
+		} else if (ni->_activation_set[chain].size() == 0) {
 				ss << "  \"" << sn << "\"[style=filled,fillcolor=aquamarine2];\n";
 		}
-		for (ai = (*ni)->_activation_set[chain].begin (); ai != (*ni)->_activation_set[chain].end (); ai++) {
-			boost::shared_ptr<Route> dr = boost::dynamic_pointer_cast<Route> (*ai);
-			std::string dn = string_compose ("%1 (%2)", dr->name (), (*ai)->_init_refcount[chain]);
+		for (auto const& ai : ni->_activation_set[chain]) {
+			std::string dn = string_compose ("%1 (%2)", ai->graph_node_name (), ai->_init_refcount[chain]);
 			bool sends_only = false;
-			sr->direct_feeds_according_to_reality (dr, &sends_only);
+			ni->direct_feeds_according_to_reality (ai, &sends_only);
 			if (sends_only) {
 				ss << "  edge [style=dashed];\n";
 			}

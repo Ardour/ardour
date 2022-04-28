@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2010-2011 David Robillard <d@drobilla.net>
  * Copyright (C) 2011 Carl Hetherington <carl@carlh.net>
- * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,13 +65,20 @@ public:
 		finish (chain);
 	}
 
-private:
-	void finish (int chain);
-	void process ();
+	virtual std::string graph_node_name () const = 0;
+	virtual bool direct_feeds_according_to_reality (boost::shared_ptr<GraphNode>, bool* via_send_only = 0) = 0;
+
+protected:
+	virtual void process () = 0;
 
 	boost::shared_ptr<Graph> _graph;
-	GATOMIC_QUAL gint        _refcount;
+
+private:
+	void finish (int chain);
+
+	GATOMIC_QUAL gint _refcount;
 };
+
 }
 
 #endif

@@ -59,7 +59,7 @@ public:
 	Graph (Session& session);
 
 	void trigger (GraphNode* n);
-	void rechain (boost::shared_ptr<RouteList>, GraphEdges const&);
+	void rechain (GraphNodeList const&, GraphEdges const&);
 	bool plot (std::string const& file_name) const;
 
 	void plot (int chain);

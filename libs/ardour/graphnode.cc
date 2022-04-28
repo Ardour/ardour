@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2010-2011 David Robillard <d@drobilla.net>
  * Copyright (C) 2011 Carl Hetherington <carl@carlh.net>
- * Copyright (C) 2017-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,10 +73,4 @@ GraphNode::finish (int chain)
 		 * so notify the graph to decrement the the finished count */
 		_graph->reached_terminal_node ();
 	}
-}
-
-void
-GraphNode::process ()
-{
-	_graph->process_one_route (dynamic_cast<Route*> (this));
 }

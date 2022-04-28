@@ -432,52 +432,39 @@ public:
 	void remove_monitor_send ();
 
 	/**
-	 * return true if this route feeds the first argument via at least one
-	 * (arbitrarily long) signal pathway.
-	 */
-	bool feeds (boost::shared_ptr<Route>, bool* via_send_only = 0);
-
-	/**
 	 * return true if this route feeds the first argument directly, via
 	 * either its main outs or a send.  This is checked by the actual
 	 * connections, rather than by what the graph is currently doing.
 	 */
-	bool direct_feeds_according_to_reality (boost::shared_ptr<Route>, bool* via_send_only = 0);
+	bool direct_feeds_according_to_reality (boost::shared_ptr<GraphNode>, bool* via_send_only = 0);
+
+	std::string graph_node_name () const {
+		return name ();
+	}
 
 	/**
-	 * return true if this route feeds the first argument directly, via
+	 * @return true if this route feeds the first argument directly, via
 	 * either its main outs or a send, according to the graph that
 	 * is currently being processed.
 	 */
 	bool direct_feeds_according_to_graph (boost::shared_ptr<Route>, bool* via_send_only = 0);
 
-	bool feeds_according_to_graph (boost::shared_ptr<Route>);
+	/**
+	 * @return true if this node feeds the first argument via at least one
+	 * (arbitrarily long) signal pathway.
+	 */
+	bool feeds (boost::shared_ptr<Route>);
+
+	/**
+	 * @return a list of all routes that eventually may feed a signal
+	 * into this route.
+	 */
+	std::set<boost::shared_ptr<Route>> signal_sources (bool via_sends_only = false);
 
 	/** Follow output port connections and check if the output *port*
 	 * of any downstream routes is connected.
 	 */
 	bool output_effectively_connected () const;
-
-	struct FeedRecord {
-		boost::weak_ptr<Route> r;
-		bool sends_only;
-
-		FeedRecord (boost::shared_ptr<Route> rp, bool sendsonly)
-		: r (rp)
-		, sends_only (sendsonly) {}
-	};
-
-	struct FeedRecordCompare {
-		bool operator() (const FeedRecord& a, const FeedRecord& b) const {
-			return a.r < b.r;
-		}
-	};
-
-	typedef std::set<FeedRecord,FeedRecordCompare> FedBy;
-
-	const FedBy& fed_by() const { return _fed_by; }
-	void clear_fed_by ();
-	bool add_fed_by (boost::shared_ptr<Route>, bool sends_only);
 
 	/* Controls (not all directly owned by the Route) */
 
@@ -604,6 +591,8 @@ public:
 protected:
 	friend class Session;
 
+	void process ();
+
 	void catch_up_on_solo_mute_override ();
 	void set_listen (bool);
 
@@ -684,7 +673,6 @@ protected:
 	std::string    _comment;
 	bool           _have_internal_generator;
 	DataType       _default_type;
-	FedBy          _fed_by;
 
 	InstrumentInfo _instrument_info;
 	bool           _instrument_fanned_out;

@@ -101,7 +101,6 @@
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
 #include "ardour/revision.h"
-#include "ardour/route_graph.h"
 #include "ardour/route_group.h"
 #include "ardour/rt_tasklist.h"
 #include "ardour/rt_safe_delete.h"
@@ -2134,56 +2133,6 @@ Session::set_block_size (pframes_t nframes)
 }
 
 
-static void
-trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase, bool sends_only)
-{
-	boost::shared_ptr<Route> r2;
-
-	if (r1->feeds (rbase) && rbase->feeds (r1)) {
-		info << string_compose(_("feedback loop setup between %1 and %2"), r1->name(), rbase->name()) << endmsg;
-		return;
-	}
-
-	/* make a copy of the existing list of routes that feed r1 */
-
-	Route::FedBy existing (r1->fed_by());
-
-	/* for each route that feeds r1, recurse, marking it as feeding
-	   rbase as well.
-	*/
-
-	for (Route::FedBy::iterator i = existing.begin(); i != existing.end(); ++i) {
-		if (!(r2 = i->r.lock ())) {
-			/* (*i) went away, ignore it */
-			continue;
-		}
-
-		/* r2 is a route that feeds r1 which somehow feeds base. mark
-		   base as being fed by r2
-		*/
-
-		rbase->add_fed_by (r2, i->sends_only || sends_only);
-
-		if (r2 != rbase) {
-
-			/* 2nd level feedback loop detection. if r1 feeds or is fed by r2,
-			   stop here.
-			*/
-
-			if (r1->feeds (r2) && r2->feeds (r1)) {
-				continue;
-			}
-
-			/* now recurse, so that we can mark base as being fed by
-			   all routes that feed r2
-			*/
-
-			trace_terminal (r2, rbase, i->sends_only || sends_only);
-		}
-
-	}
-}
-
 void
 Session::resort_routes ()
 {
@@ -2212,22 +2161,16 @@ Session::resort_routes ()
 
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::Graph)) {
-		boost::shared_ptr<RouteList> rl = routes.reader ();
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			DEBUG_TRACE (DEBUG::Graph, string_compose ("%1 fed by ...\n", (*i)->name()));
-
-			const Route::FedBy& fb ((*i)->fed_by());
-
-			for (Route::FedBy::const_iterator f = fb.begin(); f != fb.end(); ++f) {
-				boost::shared_ptr<Route> sf = f->r.lock();
-				if (sf) {
-					DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 (sends only ? %2)\n", sf->name(), f->sends_only));
-				}
+		DEBUG_TRACE (DEBUG::Graph, "---- Session::resort_routes ----\n");
+		for (auto const& i : *routes.reader ()) {
+			DEBUG_TRACE (DEBUG::Graph, string_compose ("%1 fed by ...\n", i->name()));
+			for (auto const& f : i->signal_sources ()) {
+				DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1\n", f->graph_node_name ()));
 			}
 		}
+		DEBUG_TRACE (DEBUG::Graph, "---- EOF ----\n");
 	}
 #endif
-
 }
 
 /** This is called whenever we need to rebuild the graph of how we will process
@@ -2238,91 +2181,61 @@ Session::resort_routes ()
 void
 Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 {
-	/* We are going to build a directed graph of our routes;
-	   this is where the edges of that graph are put.
-	*/
+	GraphNodeList gnl;
+	for (auto const& rt : *r) {
+		gnl.push_back (rt);
+	}
 
-	GraphEdges edges;
-
-	/* Go through all routes doing two things:
-	 *
-	 * 1. Collect the edges of the route graph.  Each of these edges
-	 *    is a pair of routes, one of which directly feeds the other
-	 *    either by a JACK connection or by an internal send.
-	 *
-	 * 2. Begin the process of making routes aware of which other
-	 *    routes directly or indirectly feed them.  This information
-	 *    is used by the solo code.
-	 */
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-
-		/* Clear out the route's list of direct or indirect feeds */
-		(*i)->clear_fed_by ();
-
-		for (RouteList::iterator j = r->begin(); j != r->end(); ++j) {
-
-			bool via_sends_only = false;
-
-			/* See if this *j feeds *i according to the current state of the JACK
-			   connections and internal sends.
-			*/
-			if ((*j)->direct_feeds_according_to_reality (*i, &via_sends_only)) {
-				/* add the edge to the graph (part #1) */
-				edges.add (*j, *i, via_sends_only);
-				/* tell the route (for part #2) */
-				(*i)->add_fed_by (*j, via_sends_only);
-			}
+	if (rechain_process_graph (gnl)) {
+		r->clear ();
+		for (auto const& nd : gnl) {
+			r->push_back (boost::dynamic_pointer_cast<Route> (nd));
 		}
 	}
 
-	/* Attempt a topological sort of the route graph */
-	boost::shared_ptr<RouteList> sorted_routes = topological_sort (r, edges);
+#ifndef NDEBUG
+	DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
+	for (auto const& i : *r) {
+		DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 (presentation order %2)\n", i->name(), i->presentation_info().order()));
+	}
+#endif
+}
 
-	if (sorted_routes) {
+bool
+Session::rechain_process_graph (GraphNodeList& g)
+{
+	/* This may be called from the GUI thread (concurrrently with processing),
+	 * when a user adds/removes routes.
+	 *
+	 * Or it may be called from the engine when connections are changed.
+	 * In that case processing is blocked until the graph change is handled.
+	 */
+	GraphEdges edges;
+	if (topological_sort (g, edges)) {
 		/* We got a satisfactory topological sort, so there is no feedback;
-		   use this new graph.
-
-		   Note: the process graph rechain does not require a
-		   topologically-sorted list, but hey ho.
-		*/
+		 * use this new graph.
+		 *
+		 * Note: the process graph chain does not require a
+		 * topologically-sorted list, but hey ho.
+		 */
 		if (_process_graph) {
-			_process_graph->rechain (sorted_routes, edges);
+			_process_graph->rechain (g, edges);
 		}
 
 		_current_route_graph = edges;
 
-		/* Complete the building of the routes' lists of what directly
-		   or indirectly feeds them.
-		*/
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			trace_terminal (*i, *i, false);
-		}
-
-		*r = *sorted_routes;
-
-#ifndef NDEBUG
-		DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 presentation order %2\n", (*i)->name(), (*i)->presentation_info().order()));
-		}
-#endif
-
 		SuccessfulGraphSort (); /* EMIT SIGNAL */
-
-	} else {
-		/* The topological sort failed, so we have a problem.  Tell everyone
-		   and stick to the old graph; this will continue to be processed, so
-		   until the feedback is fixed, what is played back will not quite
-		   reflect what is actually connected.  Note also that we do not
-		   do trace_terminal here, as it would fail due to an endless recursion,
-		   so the solo code will think that everything is still connected
-		   as it was before.
-		*/
-
-		FeedbackDetected (); /* EMIT SIGNAL */
+		return true;
 	}
 
+	/* The topological sort failed, so we have a problem.  Tell everyone
+	 * and stick to the old graph; this will continue to be processed, so
+	 * until the feedback is fixed, what is played back will not quite
+	 * reflect what is actually connected.
+	 */
+
+	FeedbackDetected (); /* EMIT SIGNAL */
+	return false;
 }
 
 /** Find a route name starting with \a base, maybe followed by the
@@ -5412,6 +5325,10 @@ Session::graph_reordered (bool called_from_backend)
 
 	/* force all diskstreams to update their capture offset values to
 	 * reflect any changes in latencies within the graph.
+	 *
+	 * XXX: Is this required? When the graph-order callback
+	 * is initiated by the backend, it is always followed by
+	 * a latency callback.
 	 */
 	update_latency_compensation (true, called_from_backend);
 }

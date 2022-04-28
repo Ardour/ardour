@@ -69,6 +69,7 @@ namespace ARDOUR {
 
 class Source;
 class AudioSource;
+class GraphNode;
 class Route;
 class Region;
 class Stripable;
@@ -625,6 +626,7 @@ typedef std::list<samplepos_t> AnalysisFeatureList;
 typedef std::vector<samplepos_t> XrunPositions;
 
 typedef std::list<boost::shared_ptr<Route> > RouteList;
+typedef std::list<boost::shared_ptr<GraphNode> > GraphNodeList;
 typedef std::list<boost::shared_ptr<Stripable> > StripableList;
 typedef std::list<boost::weak_ptr  <Route> > WeakRouteList;
 typedef std::list<boost::weak_ptr  <Stripable> > WeakStripableList;
