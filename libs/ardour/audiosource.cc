@@ -308,7 +308,14 @@ AudioSource::read (Sample *dst, samplepos_t start, samplecnt_t cnt, int /*channe
 {
 	assert (cnt >= 0);
 
-	ReaderLock lm (_lock);
+	/* as odd as it may seem, given that this method is used to *read* the
+	 * source, that we would need a write lock here. The problem is that
+	 * the audio file API we use (libsndfile) does not allow concurrent use
+	 * of the same SNDFILE object, even for reading. Consequently, even
+	 * readers must be serialized.
+	 */
+
+	WriterLock lm (_lock);
 	return read_unlocked (dst, start, cnt);
 }
 
