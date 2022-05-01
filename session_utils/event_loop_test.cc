@@ -104,7 +104,7 @@ private:
 	bool static_xthread_handler (Glib::IOCondition ioc)
 	{
 		if (ioc & ~Glib::IO_IN) {
-			cout << "TestUI::static_xthread_handler ~IO_IN\n";
+			cout << "TestUI::static_xthread_handler ~IO_IN: " << ioc << "\n";
 			return false;
 		}
 		if (ioc & Glib::IO_IN) {
@@ -188,7 +188,8 @@ main (int argc, char* argv[])
 	static_signal (); /* EMIT SIGNAL */
 	Glib::usleep (2 * G_USEC_PER_SEC);
 	xthread.wakeup ();
-	//xthread.deliver ('x');
+	Glib::usleep (2 * G_USEC_PER_SEC);
+	xthread.wakeup ();
 	Glib::usleep (3 * G_USEC_PER_SEC);
 
 	delete test_ui;
