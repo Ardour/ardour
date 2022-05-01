@@ -531,11 +531,11 @@ Graph::main_thread ()
 	resume_rt_malloc_checks ();
 
 	pt->get_buffers ();
-	Temporal::TempoMap::fetch ();
 
 	/* Wait for initial process callback */
 again:
 	_callback_start_sem.wait ();
+	Temporal::TempoMap::fetch ();
 
 	DEBUG_TRACE (DEBUG::ProcessThreads, "main thread is awake\n");
 
