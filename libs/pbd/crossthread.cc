@@ -61,7 +61,7 @@ CrossThreadChannel::set_receive_handler (sigc::slot<bool,Glib::IOCondition> s)
 void
 CrossThreadChannel::attach (Glib::RefPtr<Glib::MainContext> context)
 {
-        receive_source = g_io_create_watch (receive_channel, GIOCondition(G_IO_IN|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL));
+        receive_source = g_io_create_watch (receive_channel, GIOCondition(G_IO_IN | G_IO_ERR | G_IO_HUP));
 
         g_source_set_callback (receive_source, G_SOURCE_FUNC(cross_thread_channel_call_receive_slot), this, NULL);
         g_source_attach (receive_source, context->gobj());
