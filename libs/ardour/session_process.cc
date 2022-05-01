@@ -203,9 +203,10 @@ Session::no_roll (pframes_t nframes)
 
 	_global_locate_pending = locate_pending ();
 
-	if (_process_graph) {
+	boost::shared_ptr<GraphChain> graph_chain = _graph_chain;
+	if (graph_chain) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
-		_process_graph->routes_no_roll( nframes, _transport_sample, end_sample, non_realtime_work_pending());
+		_process_graph->routes_no_roll(graph_chain, nframes, _transport_sample, end_sample, non_realtime_work_pending());
 	} else {
 		PT_TIMING_CHECK (10);
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -250,9 +251,10 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 
 	_global_locate_pending = locate_pending();
 
-	if (_process_graph) {
+	boost::shared_ptr<GraphChain> graph_chain = _graph_chain;
+	if (graph_chain) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
-		if (_process_graph->process_routes (nframes, start_sample, end_sample, need_butler) < 0) {
+		if (_process_graph->process_routes (graph_chain, nframes, start_sample, end_sample, need_butler) < 0) {
 			stop_transport ();
 			return -1;
 		}
@@ -745,10 +747,6 @@ Session::process_audition (pframes_t nframes)
 		if (!(*i)->is_auditioner()) {
 			(*i)->silence (nframes);
 		}
-	}
-
-	if (_process_graph) {
-		_process_graph->swap_process_chain ();
 	}
 
 	/* handle pending events */

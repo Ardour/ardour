@@ -141,6 +141,7 @@ class CoreSelection;
 class ExportHandler;
 class ExportStatus;
 class Graph;
+struct GraphChain;
 class IO;
 class IOProcessor;
 class ImportStatus;
@@ -2253,7 +2254,8 @@ private:
 	 */
 	GraphEdges _current_route_graph;
 
-	boost::shared_ptr<Graph> _process_graph;
+	boost::shared_ptr<Graph>      _process_graph;
+	boost::shared_ptr<GraphChain> _graph_chain;
 
 	void resort_routes_using (boost::shared_ptr<RouteList>);
 	bool rechain_process_graph (GraphNodeList&);

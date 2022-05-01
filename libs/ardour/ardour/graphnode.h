@@ -22,17 +22,21 @@
 #define __ardour_graphnode_h__
 
 #include <list>
+#include <map>
 #include <set>
-#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/g_atomic_compat.h"
+#include "pbd/rcu.h"
+
+#include "ardour/libardour_visibility.h"
 
 namespace ARDOUR
 {
 class Graph;
 class GraphNode;
+struct GraphChain;
 
 typedef boost::shared_ptr<GraphNode> node_ptr_t;
 typedef std::set<node_ptr_t>         node_set_t;
@@ -40,12 +44,23 @@ typedef std::list<node_ptr_t>        node_list_t;
 
 class LIBARDOUR_API GraphActivision
 {
+public:
+	GraphActivision ();
+	virtual ~GraphActivision () {}
+
+	typedef std::map<GraphChain const*, node_set_t> ActivationMap;
+	typedef std::map<GraphChain const*, int>        RefCntMap;
+
+	node_set_t const& activation_set (GraphChain const* const g) const;
+	int               init_refcount (GraphChain const* const g) const;
+
 protected:
-	friend class Graph;
+	friend struct GraphChain;
+
 	/** Nodes that we directly feed */
-	node_set_t _activation_set[2];
+	SerializedRCUManager<ActivationMap> _activation_set;
 	/** The number of nodes that we directly feed us (one count for each chain) */
-	gint _init_refcount[2];
+	SerializedRCUManager<RefCntMap> _init_refcount;
 };
 
 /** A node on our processing graph, ie a Route */
@@ -53,19 +68,15 @@ class LIBARDOUR_API GraphNode : public GraphActivision
 {
 public:
 	GraphNode (boost::shared_ptr<Graph> Graph);
-	virtual ~GraphNode ();
 
-	void prep (int chain);
+	/* API used by Graph */
+	void prep (GraphChain const*);
 	void trigger ();
+	void run (GraphChain const* chain);
 
-	void
-	run (int chain)
-	{
-		process ();
-		finish (chain);
-	}
-
+	/* API used to sort Nodes and create GraphChain */
 	virtual std::string graph_node_name () const = 0;
+
 	virtual bool direct_feeds_according_to_reality (boost::shared_ptr<GraphNode>, bool* via_send_only = 0) = 0;
 
 protected:
@@ -74,11 +85,11 @@ protected:
 	boost::shared_ptr<Graph> _graph;
 
 private:
-	void finish (int chain);
+	void finish (GraphChain const*);
 
 	GATOMIC_QUAL gint _refcount;
 };
 
-}
+} // namespace ARDOUR
 
 #endif

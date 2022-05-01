@@ -18,11 +18,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ardour/graph.h"
 #include "ardour/graphnode.h"
+#include "ardour/graph.h"
 #include "ardour/route.h"
 
 using namespace ARDOUR;
+
+GraphActivision::GraphActivision ()
+	: _activation_set (new ActivationMap)
+	, _init_refcount (new RefCntMap)
+{
+}
+
+node_set_t const&
+GraphActivision::activation_set (GraphChain const* const g) const
+{
+	boost::shared_ptr<ActivationMap> m (_activation_set.reader ());
+	return m->at (g);
+}
+
+int
+GraphActivision::init_refcount (GraphChain const* const g) const
+{
+	boost::shared_ptr<RefCntMap> m (_init_refcount.reader ());
+	return m->at (g);
+}
+
+/* ****************************************************************************/
 
 GraphNode::GraphNode (boost::shared_ptr<Graph> graph)
 	: _graph (graph)
@@ -30,15 +52,18 @@ GraphNode::GraphNode (boost::shared_ptr<Graph> graph)
 	g_atomic_int_set (&_refcount, 0);
 }
 
-GraphNode::~GraphNode ()
+void
+GraphNode::prep (GraphChain const* chain)
 {
+	/* This is the number of nodes that directly feed us */
+	g_atomic_int_set (&_refcount, init_refcount (chain));
 }
 
 void
-GraphNode::prep (int chain)
+GraphNode::run (GraphChain const* chain)
 {
-	/* This is the number of nodes that directly feed us */
-	g_atomic_int_set (&_refcount, _init_refcount[chain]);
+	process ();
+	finish (chain);
 }
 
 /** Called by an upstream node, when it has completed processing */
@@ -57,14 +82,14 @@ GraphNode::trigger ()
 }
 
 void
-GraphNode::finish (int chain)
+GraphNode::finish (GraphChain const* chain)
 {
 	node_set_t::iterator i;
 	bool                 feeds = false;
 
 	/* Notify downstream nodes that depend on this node */
-	for (i = _activation_set[chain].begin (); i != _activation_set[chain].end (); ++i) {
-		(*i)->trigger ();
+	for (auto const& i : activation_set (chain)) {
+		i->trigger ();
 		feeds = true;
 	}
 

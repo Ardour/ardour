@@ -547,13 +547,7 @@ Session::immediately_post_engine ()
 	 */
 
 	_rt_tasklist.reset (new RTTaskList ());
-
-	if (how_many_dsp_threads () > 1) {
-		/* For now, only create the graph if we are using >1 DSP threads, as
-		   it is a bit slower than the old code with 1 thread.
-		*/
-		_process_graph.reset (new Graph (*this));
-	}
+	_process_graph.reset (new Graph (*this));
 
 	/* every time we reconnect, recompute worst case output latencies */
 
@@ -675,6 +669,9 @@ Session::destroy ()
 
 	/* reset dynamic state version back to default */
 	Stateful::loading_state_version = 0;
+
+	/* drop GraphNode references */
+	_graph_chain.reset ();
 
 	_butler->drop_references ();
 	delete _butler;
@@ -2218,8 +2215,18 @@ Session::rechain_process_graph (GraphNodeList& g)
 		 * Note: the process graph chain does not require a
 		 * topologically-sorted list, but hey ho.
 		 */
-		if (_process_graph) {
-			_process_graph->rechain (g, edges);
+		if (_process_graph->n_threads () > 1) {
+			/* Ideally we'd use a memory pool to allocate the GraphChain, however node_lists
+			 * inside the change are STL list/set. It was never rt-safe to re-chain the graph.
+			 * Furthermore graph-changes are usually caused by connection changes, which are not
+			 * rt-safe either.
+			 *
+			 * However, the graph-chain may be in use (session process), and the last reference
+			 * be helf by the process-callback. So we delegate deletion to the butler thread.
+			 */
+			_graph_chain = boost::shared_ptr<GraphChain> (new GraphChain (g, edges), boost::bind (&rt_safe_delete<GraphChain>, this, _1));
+		} else {
+			_graph_chain.reset ();
 		}
 
 		_current_route_graph = edges;
@@ -3119,7 +3126,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		 * we will resort when done.
 		 */
 
-		if (!_monitor_out && !loading()) {
+		if (!_monitor_out && !loading() && !input_auto_connect && !output_auto_connect) {
 			resort_routes_using (r);
 		}
 	}
@@ -3443,10 +3450,6 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 
 	routes.flush (); // maybe unsafe, see below.
 	resort_routes ();
-
-	if (_process_graph && !deletion_in_progress() && _engine.running()) {
-		_process_graph->clear_other_chain ();
-	}
 
 	/* get rid of it from the dead wood collection in the route list manager */
 	/* XXX i think this is unsafe as it currently stands, but i am not sure. (pd, october 2nd, 2006) */
@@ -6115,7 +6118,7 @@ Session::nstripables (bool with_monitor) const
 
 bool
 Session::plot_process_graph (std::string const& file_name) const {
-	return _process_graph ? _process_graph->plot (file_name) : false;
+	return _graph_chain ? _graph_chain->plot (file_name) : false;
 }
 
 void

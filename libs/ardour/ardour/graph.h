@@ -30,9 +30,9 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/g_atomic_compat.h"
 #include "pbd/mpmc_queue.h"
 #include "pbd/semutils.h"
-#include "pbd/g_atomic_compat.h"
 
 #include "ardour/audio_backend.h"
 #include "ardour/libardour_visibility.h"
@@ -53,30 +53,37 @@ typedef boost::shared_ptr<GraphNode> node_ptr_t;
 typedef std::list<node_ptr_t> node_list_t;
 typedef std::set<node_ptr_t>  node_set_t;
 
+struct GraphChain {
+	GraphChain (GraphNodeList const&, GraphEdges const&);
+	~GraphChain ();
+	void dump () const;
+	bool plot (std::string const&) const;
+
+	node_list_t _nodes_rt;
+	/** Nodes that are not fed by any other nodes */
+	node_list_t _init_trigger_list;
+	/** The number of nodes that do not feed any other node */
+	int _n_terminal_nodes;
+};
+
 class LIBARDOUR_API Graph : public SessionHandleRef
 {
 public:
 	Graph (Session& session);
 
-	void trigger (GraphNode* n);
-	void rechain (GraphNodeList const&, GraphEdges const&);
-	bool plot (std::string const& file_name) const;
+	/* public API for use by session-process */
+	int process_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
+	int routes_no_roll (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool non_rt_pending);
 
-	void plot (int chain);
+	bool     in_process_thread () const;
+	uint32_t n_threads () const;
+
+	/* called by GraphNode */
+	void trigger (GraphNode* n);
 	void reached_terminal_node ();
 
-	void helper_thread ();
-
-	int process_routes (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
-
-	int routes_no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool non_rt_pending);
-
+	/* called by virtual GraphNode::process() */
 	void process_one_route (Route* route);
-
-	void clear_other_chain ();
-	void swap_process_chain ();
-
-	bool in_process_thread () const;
 
 protected:
 	virtual void session_going_away ();
@@ -87,10 +94,8 @@ private:
 	void run_one ();
 	void main_thread ();
 	void prep ();
-	void dump (int chain) const;
 
-	node_list_t _nodes_rt[2];
-	node_list_t _init_trigger_list[2];
+	void helper_thread ();
 
 	PBD::MPMCQueue<GraphNode*> _trigger_queue;      ///< nodes that can be processed
 	GATOMIC_QUAL guint         _trigger_queue_size; ///< number of entries in trigger-queue
@@ -108,9 +113,7 @@ private:
 	/** The number of unprocessed nodes that do not feed any other node; updated during processing */
 	GATOMIC_QUAL guint _terminal_refcnt;
 
-	/** The initial number of nodes that do not feed any other node (for each chain) */
-	guint _n_terminal_nodes[2];
-	bool  _graph_empty;
+	bool _graph_empty;
 
 	/* number of background worker threads >= 0 */
 	GATOMIC_QUAL guint _n_workers;
@@ -118,13 +121,8 @@ private:
 	/* flag to terminate background threads */
 	GATOMIC_QUAL gint _terminate;
 
-	/* chain swapping */
-	Glib::Threads::Cond  _cleanup_cond;
-	mutable Glib::Threads::Mutex _swap_mutex;
-
-	GATOMIC_QUAL gint _current_chain;
-	GATOMIC_QUAL gint _pending_chain;
-	GATOMIC_QUAL gint _setup_chain;
+	/* graph chain */
+	GraphChain const* _graph_chain;
 
 	/* parameter caches */
 	pframes_t   _process_nframes;
@@ -142,6 +140,6 @@ private:
 	void                      engine_stopped ();
 };
 
-} // namespace
+} // namespace ARDOUR
 
 #endif /* __ardour_graph_h__ */
