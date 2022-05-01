@@ -44,6 +44,7 @@ namespace ARDOUR
 class GraphNode;
 class Graph;
 
+class IOPlug;
 class Route;
 class Session;
 class GraphEdges;
@@ -74,6 +75,7 @@ public:
 	/* public API for use by session-process */
 	int process_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
 	int routes_no_roll (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool non_rt_pending);
+	int process_io_plugs (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample);
 
 	bool     in_process_thread () const;
 	uint32_t n_threads () const;
@@ -84,6 +86,7 @@ public:
 
 	/* called by virtual GraphNode::process() */
 	void process_one_route (Route* route);
+	void process_one_ioplug (IOPlug*);
 
 protected:
 	virtual void session_going_away ();

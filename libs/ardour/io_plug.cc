@@ -25,6 +25,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/audio_port.h"
 #include "ardour/event_type_map.h"
+#include "ardour/graph.h"
 #include "ardour/io.h"
 #include "ardour/io_plug.h"
 #include "ardour/lv2_plugin.h"
@@ -40,6 +41,7 @@ using namespace std;
 
 IOPlug::IOPlug (Session& s, boost::shared_ptr<Plugin> p, bool pre)
 	: SessionObject (s, "")
+	, GraphNode (s._process_graph)
 	, _plugin (p)
 	, _pre (pre)
 	, _plugin_signal_latency (0)
@@ -383,6 +385,12 @@ IOPlug::ensure_io ()
 }
 
 void
+IOPlug::process ()
+{
+	_graph->process_one_ioplug (this);
+}
+
+void
 IOPlug::run (samplepos_t start, pframes_t n_samples)
 {
 	Temporal::TempoMap::update_thread_tempo_map ();
@@ -507,6 +515,17 @@ IOPlug::describe_parameter (Evoral::Parameter param)
 		return string_compose ("Property %1", URIMap::instance ().id_to_uri (param.id()));
 	}
 	return EventTypeMap::instance ().to_symbol (param);
+}
+
+bool
+IOPlug::direct_feeds_according_to_reality (boost::shared_ptr<GraphNode> node, bool* via_send_only)
+{
+	boost::shared_ptr<IOPlug> other (boost::dynamic_pointer_cast<IOPlug> (node));
+	assert (other && other->_pre == _pre);
+	if (via_send_only) {
+		*via_send_only = false;
+	}
+	return other->input()->connected_to (_output);
 }
 
 /* ****************************************************************************/

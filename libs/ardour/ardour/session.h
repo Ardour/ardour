@@ -2275,6 +2275,7 @@ private:
 	 */
 	GraphEdges _current_route_graph;
 
+	friend class IOPlug;
 	boost::shared_ptr<Graph>      _process_graph;
 	boost::shared_ptr<GraphChain> _graph_chain;
 

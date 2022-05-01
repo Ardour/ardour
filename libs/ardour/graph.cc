@@ -33,6 +33,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/graph.h"
+#include "ardour/io_plug.h"
 #include "ardour/process_thread.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -477,6 +478,27 @@ Graph::routes_no_roll (boost::shared_ptr<GraphChain> chain, pframes_t nframes, s
 	return _process_retval;
 }
 
+int
+Graph::process_io_plugs (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample)
+{
+	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("IOPlug graph execution at %1 for %2\n", start_sample, nframes));
+
+	if (g_atomic_int_get (&_terminate)) {
+		return 0;
+	}
+
+	_graph_chain          = chain.get ();
+	_process_nframes      = nframes;
+	_process_start_sample = start_sample;
+
+	DEBUG_TRACE (DEBUG::ProcessThreads, "wake graph for IOPlug processing\n");
+	_callback_start_sem.signal ();
+	_callback_done_sem.wait ();
+	DEBUG_TRACE (DEBUG::ProcessThreads, "graph execution complete\n");
+
+	return _process_retval;
+}
+
 void
 Graph::process_one_route (Route* route)
 {
@@ -500,6 +522,12 @@ Graph::process_one_route (Route* route)
 	if (need_butler) {
 		_process_need_butler = true; // -> atomic
 	}
+}
+
+void
+Graph::process_one_ioplug (IOPlug* ioplug)
+{
+	ioplug->run (_process_start_sample, _process_nframes);
 }
 
 bool

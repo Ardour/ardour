@@ -28,6 +28,7 @@
 #include "ardour/automation_control.h"
 #include "ardour/buffer_set.h"
 #include "ardour/latent.h"
+#include "ardour/graphnode.h"
 #include "ardour/plugin.h"
 #include "ardour/session_object.h"
 #include "ardour/plug_insert_base.h"
@@ -41,7 +42,7 @@ namespace ARDOUR {
 class IO;
 class ReadOnlyControl;
 
-class LIBARDOUR_API IOPlug : public SessionObject, public PlugInsertBase, public Latent
+class LIBARDOUR_API IOPlug : public SessionObject, public PlugInsertBase, public Latent, public GraphNode
 {
 public:
 	IOPlug (Session&, boost::shared_ptr<Plugin> = boost::shared_ptr<Plugin>(), bool pre = true);
@@ -91,6 +92,13 @@ public:
 
 	/* ControlSet */
 	boost::shared_ptr<Evoral::Control> control_factory (const Evoral::Parameter& id);
+
+	/* GraphNode */
+	std::string graph_node_name () const {
+		return name ();
+	}
+	bool direct_feeds_according_to_reality (boost::shared_ptr<GraphNode>, bool* via_send_only = 0);
+	void process ();
 
 protected:
 	std::string describe_parameter (Evoral::Parameter);
