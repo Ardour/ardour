@@ -263,16 +263,34 @@ ControlList::x_scale (ratio_t const & factor)
 	_x_scale (factor);
 }
 
+timepos_t
+ControlList::ensure_time_domain (timepos_t const & val)
+{
+	if (val.time_domain() != _time_domain) {
+		switch (_time_domain) {
+		case Temporal::AudioTime:
+			return timepos_t (val.samples());
+			break;
+		case Temporal::BeatTime:
+			return timepos_t (val.beats());
+			break;
+		}
+	}
+	return val;
+}
+
 bool
 ControlList::extend_to (timepos_t const & end)
 {
+	timepos_t actual_end = ensure_time_domain (end);
+
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 
-	if (_events.empty() || _events.back()->when == end) {
+	if (_events.empty() || _events.back()->when == actual_end) {
 		return false;
 	}
 
-	ratio_t factor (end.val(), _events.back()->when.val());
+	ratio_t factor (actual_end.val(), _events.back()->when.val());
 	_x_scale (factor);
 
 	return true;
@@ -432,8 +450,8 @@ ControlList::fast_simple_add (timepos_t const & time, double value)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 	/* to be used only for loading pre-sorted data from saved state */
-	assert (time.time_domain() == _time_domain);
-	_events.insert (_events.end(), new ControlEvent (time, value));
+
+	_events.insert (_events.end(), new ControlEvent (ensure_time_domain (time), value));
 
 	mark_dirty ();
 	if (_frozen) {
@@ -476,7 +494,7 @@ void
 ControlList::start_write_pass (timepos_t const & time)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
-	timepos_t when = time;
+	timepos_t when = ensure_time_domain (time);
 
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("%1: setup write pass @ %2\n", this, when));
 
@@ -533,10 +551,10 @@ ControlList::set_in_write_pass (bool yn, bool add_point, timepos_t when)
 void
 ControlList::add_guard_point (timepos_t const & time, timecnt_t const & offset)
 {
-	assert (time.time_domain() == _time_domain);
+	/* we do not convert this yet */
 	assert (offset.time_domain() == _time_domain);
 
-	timepos_t when = time;
+	timepos_t when = ensure_time_domain (time);
 
 	// caller needs to hold writer-lock
 
@@ -628,7 +646,7 @@ ControlList::editor_add (timepos_t const & time, double value, bool with_guard)
 	/* this is for making changes from a graphical line editor */
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
-		timepos_t when = time;
+		timepos_t when = ensure_time_domain (time);
 
 		ControlEvent cp (when, 0.0f);
 		iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
@@ -677,7 +695,7 @@ ControlList::editor_add (timepos_t const & time, double value, bool with_guard)
 void
 ControlList::maybe_add_insert_guard (timepos_t const & time)
 {
-	timepos_t when = time;
+	timepos_t when = ensure_time_domain (time);
 	// caller needs to hold writer-lock
 	if (most_recent_insert_iterator != _events.end()) {
 		if ((*most_recent_insert_iterator)->when.earlier (when) > GUARD_POINT_DELTA) {
@@ -699,7 +717,7 @@ ControlList::maybe_add_insert_guard (timepos_t const & time)
 bool
 ControlList::maybe_insert_straight_line (timepos_t const & time, double value)
 {
-	timepos_t when = time;
+	timepos_t when = ensure_time_domain (time);
 
 	// caller needs to hold writer-lock
 	if (_events.empty()) {
@@ -730,7 +748,7 @@ ControlList::maybe_insert_straight_line (timepos_t const & time, double value)
 ControlList::iterator
 ControlList::erase_from_iterator_to (iterator iter, timepos_t const & time)
 {
-	timepos_t when = time;
+	timepos_t when = ensure_time_domain (time);
 
 	// caller needs to hold writer-lock
 	while (iter != _events.end()) {
@@ -753,9 +771,7 @@ ControlList::erase_from_iterator_to (iterator iter, timepos_t const & time)
 void
 ControlList::add (timepos_t const & time, double value, bool with_guards, bool with_initial)
 {
-	assert (time.time_domain() == _time_domain);
-
-	timepos_t when = time;
+	timepos_t when = ensure_time_domain (time);
 
 	/* clamp new value to allowed range */
 	value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, value));
@@ -941,7 +957,7 @@ ControlList::erase (timepos_t const & time, double value)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
-		timepos_t when = time;
+		timepos_t when = ensure_time_domain (time);
 
 		iterator i = begin ();
 		while (i != end() && ((*i)->when != when || (*i)->value != value)) {
@@ -1113,7 +1129,7 @@ ControlList::modify (iterator iter, timepos_t const & time, double val)
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
-		timepos_t when = time;
+		timepos_t when = ensure_time_domain (time);
 
 		(*iter)->when = when;
 		(*iter)->value = val;
