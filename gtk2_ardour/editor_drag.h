@@ -923,8 +923,6 @@ private:
 	bool     _drag_valid;
 };
 
-#warning NUTEMPO may or may not need this in the new world
-#if 0
 /** tempo curve twist drag */
 class TempoTwistDrag : public Drag
 {
@@ -948,13 +946,13 @@ public:
 
 private:
 	Temporal::Beats _grab_qn;
-	Temporal::Tempo  _grab_tempo;
 	Temporal::TempoPoint* _tempo;
-	Temporal::TempoPoint* _next_tempo;
+	Temporal::TempoPoint*  _grab_tempo;
+	Temporal::TempoPoint const * _next_tempo;
+	Temporal::TempoMap::WritableSharedPtr map;
 	bool _drag_valid;
 	XMLNode* _before_state;
 };
-#endif
 
 /** tempo curve twist drag */
 class TempoEndDrag : public Drag

@@ -733,6 +733,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API void set_time_domain (TimeDomain td);
 	LIBTEMPORAL_API int set_state (XMLNode const&, int version);
 
+	void twist_tempi (TempoPoint* ts, timepos_t const & start, timepos_t const & end);
+
 	/* END OF MODIFYING METHODS */
 
 	LIBTEMPORAL_API TimeDomain time_domain() const { return _time_domain; }

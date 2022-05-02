@@ -2492,6 +2492,7 @@ private:
 	friend class BBTRulerDrag;
 	friend class MeterMarkerDrag;
 	friend class TempoMarkerDrag;
+	friend class TempoTwistDrag;
 	friend class CursorDrag;
 	friend class FadeInDrag;
 	friend class FadeOutDrag;

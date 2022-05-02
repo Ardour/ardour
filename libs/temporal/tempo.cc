@@ -3026,200 +3026,53 @@ TempoMap::set_ramped (TempoPoint & tp, bool yn)
 	reset_starting_at (tp.sclock() + 1);
 }
 
-#if 0
-bool
-TempoMap::twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t frame, const framepos_t end_frame)
+void
+TempoMap::twist_tempi (TempoPoint* ts, timepos_t const & start, timepos_t const & end)
 {
-	TempoSection* next_t = 0;
-	TempoSection* next_to_next_t = 0;
-	Metrics future_map;
-	bool can_solve = false;
+	assert (start.time_domain() == end.time_domain());
 
-	/* minimum allowed measurement distance in frames */
-	framepos_t const min_dframe = 2;
+	TempoPoint* nxt = const_cast<TempoPoint*> (next_tempo (*ts));
+	assert (nxt);
 
-	if (!ts) {
-		return false;
-	}
+	superclock_t end_scpqn;
 
-	TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
-	TempoSection* prev_to_prev_t = 0;
-	const frameoffset_t fr_off = end_frame - frame;
-
-	if (!tempo_copy) {
-		return false;
-	}
-
-	if (tempo_copy->pulse() > 0.0) {
-		prev_to_prev_t = const_cast<TempoSection*>(&tempo_section_at_minute_locked (future_map, minute_at_frame (tempo_copy->frame() - 1)));
-	}
-
-	for (Metrics::const_iterator i = future_map.begin(); i != future_map.end(); ++i) {
-		if ((*i)->is_tempo() && (*i)->minute() >  tempo_copy->minute()) {
-			next_t = static_cast<TempoSection*> (*i);
-			break;
-		}
-	}
-
-	if (!next_t) {
-		return false;
-	}
-
-	for (Metrics::const_iterator i = future_map.begin(); i != future_map.end(); ++i) {
-		if ((*i)->is_tempo() && (*i)->minute() >  next_t->minute()) {
-			next_to_next_t = static_cast<TempoSection*> (*i);
-			break;
-		}
-	}
-
-	if (!next_to_next_t) {
-		return false;
-	}
-
-	double prev_contribution = 0.0;
-
-	if (next_t && prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
-		prev_contribution = (tempo_copy->frame() - prev_to_prev_t->frame()) / (double) (next_t->frame() - prev_to_prev_t->frame());
-	}
-
-	const frameoffset_t tempo_copy_frame_contribution = fr_off - (prev_contribution * (double) fr_off);
-
-
-	framepos_t old_tc_minute = tempo_copy->minute();
-	double old_next_minute = next_t->minute();
-	double old_next_to_next_minute = next_to_next_t->minute();
-
-	double new_bpm;
-	double new_next_bpm;
-	double new_copy_end_bpm;
-
-	if (frame > tempo_copy->frame() + min_dframe && (frame + tempo_copy_frame_contribution) > tempo_copy->frame() + min_dframe) {
-		new_bpm = tempo_copy->note_types_per_minute() * ((frame - tempo_copy->frame())
-		                                                 / (double) (end_frame - tempo_copy->frame()));
+	if (ts->clamped()) {
+		end_scpqn = ts->end_superclocks_per_quarter_note();
 	} else {
-		new_bpm = tempo_copy->note_types_per_minute();
+		end_scpqn = nxt->superclocks_per_quarter_note ();
 	}
 
-	/* don't clamp and proceed here.
-	   testing has revealed that this can go negative,
-	   which is an entirely different thing to just being too low.
-	*/
-	if (new_bpm < 0.5) {
-		return false;
+	if (!ts->ramped()) {
+		((Rampable*) ts)->set_ramped (true);
 	}
 
-	new_bpm = min (new_bpm, (double) 1000.0);
-
-	tempo_copy->set_note_types_per_minute (new_bpm);
-	if (tempo_copy->type() == TempoSection::Constant) {
-		tempo_copy->set_end_note_types_per_minute (new_bpm);
-	}
-
-	recompute_tempi (future_map);
-
-	if (check_solved (future_map)) {
-
-		if (!next_t) {
-			return false;
-		}
-
-		ts->set_note_types_per_minute (new_bpm);
-		if (ts->type() == TempoSection::Constant) {
-			ts->set_end_note_types_per_minute (new_bpm);
-		}
-
-		recompute_map (_metrics);
-
-		can_solve = true;
-	}
-
-	if (next_t->type() == TempoSection::Constant || next_t->c() == 0.0) {
-		if (frame > tempo_copy->frame() + min_dframe && end_frame > tempo_copy->frame() + min_dframe) {
-
-			new_next_bpm = next_t->note_types_per_minute() * ((next_to_next_t->minute() - old_next_minute)
-			                                                  / (double) ((old_next_to_next_minute) - old_next_minute));
-
-		} else {
-			new_next_bpm = next_t->note_types_per_minute();
-		}
-
-		next_t->set_note_types_per_minute (new_next_bpm);
-		recompute_tempi (future_map);
-
-		if (check_solved (future_map)) {
-			for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
-				if ((*i)->is_tempo() && (*i)->minute() >  ts->minute()) {
-					next_t = static_cast<TempoSection*> (*i);
-					break;
-				}
-			}
-
-			if (!next_t) {
-				return false;
-			}
-			next_t->set_note_types_per_minute (new_next_bpm);
-			recompute_map (_metrics);
-			can_solve = true;
-		}
+	if (start.time_domain() == Temporal::AudioTime) {
+		ts->compute_omega_from_audio_duration (end.samples() - start.samples(), end_scpqn);
 	} else {
-		double next_frame_ratio = 1.0;
-		double copy_frame_ratio = 1.0;
+		ts->compute_omega_from_quarter_duration (end.beats() - start.beats(), end_scpqn);
+	}
 
-		if (next_to_next_t) {
-			next_frame_ratio = (next_to_next_t->minute() - old_next_minute) / (old_next_to_next_minute -  old_next_minute);
+	return;
 
-			copy_frame_ratio = ((old_tc_minute - next_t->minute()) / (double) (old_tc_minute - old_next_minute));
-		}
+	nxt->set (samples_to_superclock (end.samples(), TEMPORAL_SAMPLE_RATE), nxt->beats(), nxt->bbt());
 
-		new_next_bpm = next_t->note_types_per_minute() * next_frame_ratio;
-		new_copy_end_bpm = tempo_copy->end_note_types_per_minute() * copy_frame_ratio;
+	if (nxt->ramped()) {
+		TempoPoint const * nxtnxt = next_tempo (*nxt);
+		assert (nxtnxt);
 
-		tempo_copy->set_end_note_types_per_minute (new_copy_end_bpm);
-
-		if (next_t->clamped()) {
-			next_t->set_note_types_per_minute (new_copy_end_bpm);
+		if (ts->clamped()) {
+			end_scpqn = nxt->end_superclocks_per_quarter_note();
 		} else {
-			next_t->set_note_types_per_minute (new_next_bpm);
+			end_scpqn = nxtnxt->superclocks_per_quarter_note ();
 		}
 
-		recompute_tempi (future_map);
-
-		if (check_solved (future_map)) {
-			for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
-				if ((*i)->is_tempo() && (*i)->minute() >  ts->minute()) {
-					next_t = static_cast<TempoSection*> (*i);
-					break;
-				}
-			}
-
-			if (!next_t) {
-				return false;
-			}
-
-			if (next_t->clamped()) {
-				next_t->set_note_types_per_minute (new_copy_end_bpm);
-			} else {
-				next_t->set_note_types_per_minute (new_next_bpm);
-			}
-
-			ts->set_end_note_types_per_minute (new_copy_end_bpm);
-			recompute_map (_metrics);
-			can_solve = true;
+		if (start.time_domain() == Temporal::AudioTime) {
+			nxt->compute_omega_from_audio_duration (superclock_to_samples (nxtnxt->sclock(), TEMPORAL_SAMPLE_RATE) - end.samples(), end_scpqn);
+		} else {
+			nxt->compute_omega_from_quarter_duration (nxtnxt->beats() - end.beats(), end_scpqn);
 		}
 	}
-
-	Metrics::const_iterator d = future_map.begin();
-	while (d != future_map.end()) {
-		delete (*d);
-		++d;
-	}
-
-	MetricPositionChanged (PropertyChange ()); // Emit Signal
-
-	return can_solve;
 }
-
-#endif
 
 void
 TempoMap::init ()

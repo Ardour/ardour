@@ -3807,15 +3807,9 @@ BBTRulerDrag::aborted (bool moved)
 	TempoMap::abort_update ();
 }
 
-#warning NUTEMPO fixme no tempo twist drag for now
-#if 0
-
 TempoTwistDrag::TempoTwistDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i, Temporal::BeatTime)
-	, _grab_qn (0.0)
-	, _grab_tempo (0.0)
 	, _tempo (0)
-	, _next_tempo (0)
 	, _drag_valid (true)
 	, _before_state (0)
 {
@@ -3827,120 +3821,97 @@ void
 TempoTwistDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-	TempoMap& map (_editor->session()->tempo_map());
-	/* get current state */
-	_before_state = &map.get_state();
-	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_sample (raw_grab_sample()));
-
-	if (_tempo->locked_to_meter()) {
-		_drag_valid = false;
-		return;
-	}
-
-	_next_tempo = map.next_tempo_section (_tempo);
-	if (_next_tempo) {
-		if (!map.next_tempo_section (_next_tempo)) {
-			_drag_valid = false;
-			finished (event, false);
-
-			return;
-		}
-		_editor->tempo_curve_selected (_tempo, true);
-		_editor->tempo_curve_selected (_next_tempo, true);
-
-		ostringstream sstr;
-		sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
-		sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute() << "\n";
-		sstr << "start: " << fixed << setprecision(3) << _next_tempo->note_types_per_minute();
-		show_verbose_cursor_text (sstr.str());
-	} else {
-		_drag_valid = false;
-	}
-
-	_grab_tempo = Tempo (_tempo->note_types_per_minute(), _tempo->note_type());
 }
 
 void
 TempoTwistDrag::setup_pointer_offset ()
 {
-	TempoMap& map (_editor->session()->tempo_map());
-	const double beat_at_sample = max (0.0, map.beat_at_sample (raw_grab_sample()));
-	const uint32_t divisions = _editor->get_grid_beat_divisions (0);
-	double beat = 0.0;
-
-	if (divisions > 0) {
-		beat = floor (beat_at_sample) + (floor (((beat_at_sample - floor (beat_at_sample)) * divisions)) / divisions);
-	} else {
-		/* while it makes some sense for the user to determine the division to 'grab',
-		   grabbing a bar often leads to confusing results wrt the actual tempo section being altered
-		   and the result over steep tempo curves. Use sixteenths.
-		*/
-		beat = floor (beat_at_sample) + (floor (((beat_at_sample - floor (beat_at_sample)) * 4)) / 4);
-	}
-
-	_grab_qn = map.quarters_at_beat (beat);
-
-	_pointer_offset = raw_grab_sample() - map.sample_at_quarter_note (_grab_qn);
-
+	// _pointer_offset = timepos_t (_grab_qn).distance (raw_grab_time());
 }
 
 void
 TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 {
-
-	if (!_next_tempo || !_drag_valid) {
+	if (!_drag_valid) {
 		return;
 	}
 
-	TempoMap& map (_editor->session()->tempo_map());
-
 	if (first_move) {
-		_editor->begin_reversible_command (_("twist tempo"));
+		map = _editor->begin_tempo_map_edit ();
+		/* Get the tempo point that starts this section */
+
+		_tempo = const_cast<TempoPoint*> (&map->tempo_at (raw_grab_time()));
+		assert (_tempo);
+
+		if (!(_next_tempo = const_cast<TempoPoint*> (map->next_tempo (*_tempo)))) {
+			_drag_valid = false;
+			return;
+		}
+
+		_grab_qn = _tempo->beats();
+
+		if (_tempo->locked_to_meter() || _next_tempo->locked_to_meter()) {
+			_drag_valid = false;
+			return;
+		}
 	}
 
-	samplepos_t pf;
+	/* get current state */
+	_before_state = &map->get_state();
+
+	_editor->tempo_curve_selected (_tempo, true);
+	if (_next_tempo) {
+		_editor->tempo_curve_selected (_next_tempo, true);
+	}
+
+	Beats mouse_beats;
 
 	if (_editor->grid_musical()) {
-		pf = adjusted_current_sample (event, false);
+		mouse_beats = adjusted_current_time (event, false).beats();
 	} else {
-		pf = adjusted_current_sample (event);
+		mouse_beats = adjusted_current_time (event).beats();
 	}
 
-	/* adjust this and the next tempi to match pointer sample */
-	double new_bpm = max (1.5, _grab_tempo.note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
-	_editor->session()->tempo_map().gui_twist_tempi (_tempo, new_bpm, map.sample_at_quarter_note (_grab_qn), pf);
+
+	map->twist_tempi (_tempo, timepos_t (_tempo->beats()), timepos_t (mouse_beats));
 
 	ostringstream sstr;
 	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
 	sstr << "end: " << fixed << setprecision(3) << _tempo->end_note_types_per_minute() << "\n";
-	sstr << "start: " << fixed << setprecision(3) << _next_tempo->note_types_per_minute();
+	if (_next_tempo) {
+		sstr << "start: " << fixed << setprecision(3) << _next_tempo->note_types_per_minute();
+	}
 	show_verbose_cursor_text (sstr.str());
+
+	_editor->mid_tempo_change ();
 }
 
 void
 TempoTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred || !_drag_valid) {
+		aborted (false);
 		return;
 	}
 
 	_editor->tempo_curve_selected (_tempo, false);
-	_editor->tempo_curve_selected (_next_tempo, false);
+	if (_next_tempo) {
+		_editor->tempo_curve_selected (_next_tempo, false);
+	}
 
-	TempoMap& map (_editor->session()->tempo_map());
-	XMLNode &after = map.get_state();
+	_editor->begin_reversible_command (_("twist tempo"));
+	XMLNode &after = map->get_state();
 	_editor->session()->add_command (new Temporal::TempoCommand (_("twist tempo"), _before_state, &after));
 	_editor->commit_reversible_command ();
+
+	TempoMap::update (map);
 }
 
 void
 TempoTwistDrag::aborted (bool moved)
 {
-	if (moved) {
-		_editor->session()->tempo_map().set_state (*_before_state, Stateful::current_state_version);
-	}
+	_editor->abort_tempo_map_edit ();
 }
-#endif
 
 TempoEndDrag::TempoEndDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i, Temporal::BeatTime)
