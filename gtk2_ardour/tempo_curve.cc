@@ -141,22 +141,29 @@ TempoCurve::set_duration (samplecnt_t duration)
 
 	} else {
 
+		/* we would like at least 5 points for the line, so divide the
+		   duration to give us that. If we're tiny (just a few samples,
+		   unlikely but ...), do the per-sample thing.
+		*/
 		const samplepos_t sample_step = std::max ((duration) / 5, (samplepos_t) 1);
-		samplepos_t current_sample = 0;
+		const samplepos_t start_sample = superclock_to_samples (_tempo->sclock(), TEMPORAL_SAMPLE_RATE);
+		const samplepos_t end = start_sample + duration;
+		samplepos_t current_sample = start_sample;
+		double tempo_at;
+		double y_pos;
 
-		while (current_sample < duration) {
-			const double tempo_at = _tempo->note_types_per_minute_at_DOUBLE (timepos_t (current_sample));
-			const double y_pos = std::max ((curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height), 0.0);
+		while (current_sample < end) {
+			tempo_at = _tempo->note_types_per_minute_at_DOUBLE (timepos_t (current_sample));
+			y_pos = std::max ((curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height), 0.0);
 
-			points.push_back (ArdourCanvas::Duple (editor.sample_to_pixel (current_sample), std::min (y_pos, curve_height)));
+			points.push_back (ArdourCanvas::Duple (editor.sample_to_pixel (current_sample - start_sample), std::min (y_pos, curve_height)));
 
 			current_sample += sample_step;
 		}
 
-		const double tempo_at = _tempo->note_types_per_minute();
-		const double y_pos = std::max ((curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height), 0.0);
-
-		points.push_back (ArdourCanvas::Duple (duration_pixels, std::min (y_pos, curve_height)));
+		tempo_at = _tempo->note_types_per_minute_at_DOUBLE (timepos_t (end));
+		y_pos = std::max ((curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height), 0.0);
+		points.push_back (ArdourCanvas::Duple (editor.sample_to_pixel (end), std::min (y_pos, curve_height)));
 	}
 
 	_curve->set (points);
