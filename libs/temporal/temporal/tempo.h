@@ -756,7 +756,9 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	uint32_t n_meters() const;
 	LIBTEMPORAL_API	uint32_t n_tempos() const;
 
-	LIBTEMPORAL_API Tempo const* next_tempo (Tempo const &) const;
+	LIBTEMPORAL_API TempoPoint const* previous_tempo (TempoPoint const &) const;
+	LIBTEMPORAL_API TempoPoint const* next_tempo (TempoPoint const &) const;
+
 	LIBTEMPORAL_API Meter const* next_meter (Meter const &) const;
 
 	LIBTEMPORAL_API	TempoMetric metric_at (timepos_t const &) const;
@@ -815,8 +817,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	TempoPoint const& tempo_at (superclock_t sc) const { return _tempo_at (sc, Point::sclock_comparator()); }
 	LIBTEMPORAL_API	TempoPoint const& tempo_at (Beats const & b) const { return _tempo_at (b, Point::beat_comparator()); }
 	LIBTEMPORAL_API TempoPoint const& tempo_at (BBT_Time const & bbt) const { return _tempo_at (bbt, Point::bbt_comparator()); }
-
-	LIBTEMPORAL_API TempoPoint const* previous_tempo (TempoPoint const &) const;
 
 	/* convenience function that hides some complexities behind fetching
 	 * the bpm at position

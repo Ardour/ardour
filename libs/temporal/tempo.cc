@@ -2636,28 +2636,6 @@ TempoMap::convert_duration (timecnt_t const & duration, timepos_t const & new_po
 
 }
 
-Tempo const *
-TempoMap::next_tempo (Tempo const & t) const
-{
-	Tempos::const_iterator p = _tempos.begin();
-
-	while (p != _tempos.end()) {
-		if (&t == &*p) {
-			break;
-		}
-		++p;
-	}
-
-	if (p != _tempos.end()) {
-		++p;
-
-		if (p != _tempos.end()) {
-			return &*p;;
-		}
-	}
-
-	return 0;
-}
 
 uint32_t
 TempoMap::n_meters () const
@@ -2868,6 +2846,29 @@ TempoMap::remove_time (timepos_t const & pos, timecnt_t const & duration)
 	}
 
 	return moved;
+}
+
+TempoPoint const *
+TempoMap::next_tempo (TempoPoint const & t) const
+{
+	Tempos::const_iterator p = _tempos.begin();
+
+	while (p != _tempos.end()) {
+		if (&t == &*p) {
+			break;
+		}
+		++p;
+	}
+
+	if (p != _tempos.end()) {
+		++p;
+
+		if (p != _tempos.end()) {
+			return &*p;;
+		}
+	}
+
+	return 0;
 }
 
 TempoPoint const *
