@@ -412,7 +412,7 @@ public:
 	void add_guard_point (Temporal::timepos_t const & when, Temporal::timecnt_t const & offset);
 
 	bool is_sorted () const;
-	Temporal::timepos_t ensure_time_domain (Temporal::timepos_t const & );
+	Temporal::timepos_t ensure_time_domain (Temporal::timepos_t const & ) const;
 
 };
 

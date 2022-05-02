@@ -264,7 +264,7 @@ ControlList::x_scale (ratio_t const & factor)
 }
 
 timepos_t
-ControlList::ensure_time_domain (timepos_t const & val)
+ControlList::ensure_time_domain (timepos_t const & val) const
 {
 	if (val.time_domain() != _time_domain) {
 		switch (_time_domain) {
