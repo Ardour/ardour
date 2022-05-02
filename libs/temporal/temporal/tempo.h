@@ -75,7 +75,7 @@ class /*LIBTEMPORAL_API*/ Point : public point_hook {
 
 	LIBTEMPORAL_API virtual ~Point() {}
 
-	LIBTEMPORAL_API virtual void set (superclock_t sc, Beats const & b, BBT_Time const & bbt) {
+	LIBTEMPORAL_API void set (superclock_t sc, Beats const & b, BBT_Time const & bbt) {
 		_sclock = sc;
 		_quarters = b;
 		_bbt = bbt;
