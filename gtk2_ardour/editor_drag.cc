@@ -3537,7 +3537,7 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 
 	_marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	_real_section = &_marker->tempo();
-	_movable = !map->is_initial (_marker->tempo());
+	_movable = !TempoMap::use()->is_initial (_marker->tempo());
 	_grab_bpm = Tempo (_real_section->note_types_per_minute(), _real_section->note_type(), _real_section->end_note_types_per_minute());
 	_grab_qn = _real_section->beats();
 	assert (_marker);
@@ -3554,7 +3554,7 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 		/* setup thread-local tempo map ptr as a writable copy */
 
-		_editor->begin_tempo_map_edit ();
+		map = _editor->begin_tempo_map_edit ();
 	}
 }
 
