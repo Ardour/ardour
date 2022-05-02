@@ -1875,6 +1875,7 @@ private:
 	void update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr);
 
 	void tempo_map_changed ();
+	void tempo_map_visual_update ();
 
 	void redisplay_grid (bool immediate_redraw);
 

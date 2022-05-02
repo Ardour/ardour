@@ -450,11 +450,18 @@ Editor::update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr)
 void
 Editor::tempo_map_changed ()
 {
+	TempoMap::fetch ();
+	tempo_map_visual_update ();
+}
+
+void
+Editor::tempo_map_visual_update ()
+{
 	TempoMap::Metrics metrics;
-	TempoMap::fetch()->get_metrics (metrics);
+	TempoMap::use()->get_metrics (metrics);
 
 	draw_metric_marks (metrics);
-	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+	draw_tempo_marks ();
 	update_tempo_based_rulers ();
 	maybe_draw_grid_lines ();
 }
@@ -839,5 +846,7 @@ void
 Editor::mid_tempo_change ()
 {
 	std::cerr << "============== MID TEMPO\n";
-	draw_tempo_marks ();
+	TempoMap::SharedPtr map (TempoMap::use());
+	map->dump (std::cerr);
+	tempo_map_visual_update ();
 }
