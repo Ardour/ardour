@@ -3392,7 +3392,7 @@ MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	 * local reference
 	 */
 
-	map = TempoMap::fetch_writable ();
+	map = _editor->begin_tempo_map_edit ();
 }
 
 void
