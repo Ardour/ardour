@@ -1738,7 +1738,7 @@ private:
 	PBD::Signal0<void> EditorFreeze;
 	PBD::Signal0<void> EditorThaw;
 
-	void begin_tempo_map_edit ();
+	Temporal::TempoMap::WritableSharedPtr begin_tempo_map_edit ();
 	void abort_tempo_map_edit ();
 	void mid_tempo_change ();
 

@@ -817,12 +817,12 @@ Editor::real_remove_meter_marker (Temporal::MeterPoint const * section)
 	return FALSE;
 }
 
-void
+Temporal::TempoMap::WritableSharedPtr
 Editor::begin_tempo_map_edit ()
 {
-	TempoMap::fetch_writable ();
-	TempoMap::SharedPtr tmap (TempoMap::use());
-	reassociate_metric_markers (tmap);
+	TempoMap::WritableSharedPtr wmap = TempoMap::fetch_writable ();
+	reassociate_metric_markers (wmap);
+	return wmap;
 }
 
 void
