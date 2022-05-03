@@ -3452,27 +3452,16 @@ Editor::separate_under_selected_regions ()
 void
 Editor::crop_region_to_selection ()
 {
-	if (!selection->time.empty()) {
+	timepos_t start;
+	timepos_t end;
 
-		begin_reversible_command (_("Crop Regions to Time Selection"));
-		for (std::list<TimelineRange>::iterator i = selection->time.begin(); i != selection->time.end(); ++i) {
-			crop_region_to ((*i).start(), (*i).end());
-		}
+	if (get_edit_op_range (start, end)) {
+		begin_reversible_command (_("Crop Regions to Edit Range"));
+
+		crop_region_to (start, end);
+
 		commit_reversible_command();
-	} else {
-
-		timepos_t start;
-		timepos_t end;
-
-		if (get_edit_op_range (start, end)) {
-			begin_reversible_command (_("Crop Regions to Edit Range"));
-
-			crop_region_to (start, end);
-
-			commit_reversible_command();
-		}
 	}
-
 }
 
 void
