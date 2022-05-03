@@ -3161,6 +3161,14 @@ Session::begin_reversible_command (const string& name)
 void
 Session::begin_reversible_command (GQuark q)
 {
+	if (_current_trans) {
+		cerr << "An UNDO transaction was started while a prior command was underway. Aborting command (" << g_quark_to_string (q) << ") and prior (" << _current_trans->name() << ")" << endl;
+		PBD::warning << "An UNDO transaction was started while a prior command was underway. Aborting command (" << g_quark_to_string (q) << ") and prior (" << _current_trans->name() << ")" << endmsg;
+		abort_reversible_command();
+		assert (false);
+		return;
+	}
+
 	/* If nested begin/commit pairs are used, we create just one UndoTransaction
 	   to hold all the commands that are committed.  This keeps the order of
 	   commands correct in the history.
