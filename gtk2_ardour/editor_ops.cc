@@ -2509,15 +2509,17 @@ Editor::set_mark ()
 void
 Editor::clear_markers ()
 {
-	if (_session) {
-		begin_reversible_command (_("clear markers"));
+	if (!_session) {
+		return;
+	}
 
-		XMLNode &before = _session->locations()->get_state();
-		if (_session->locations()->clear_markers ()) {
-			XMLNode &after = _session->locations()->get_state();
-			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-			commit_reversible_command ();
-		}
+	begin_reversible_command (_("clear markers"));
+
+	XMLNode &before = _session->locations()->get_state();
+	if (_session->locations()->clear_markers ()) {
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+		commit_reversible_command ();
 	} else {
 		abort_reversible_command ();
 	}
@@ -2526,16 +2528,18 @@ Editor::clear_markers ()
 void
 Editor::clear_xrun_markers ()
 {
-	if (_session) {
-		begin_reversible_command (_("clear xrun markers"));
+	if (!_session) {
+		return;
+	}
 
-		XMLNode &before = _session->locations()->get_state();
-		if (_session->locations()->clear_xrun_markers ()) {
-			XMLNode &after = _session->locations()->get_state();
-			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+	begin_reversible_command (_("clear xrun markers"));
 
-			commit_reversible_command ();
-		}
+	XMLNode &before = _session->locations()->get_state();
+	if (_session->locations()->clear_xrun_markers ()) {
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+
+		commit_reversible_command ();
 	} else {
 		abort_reversible_command ();
 	}
@@ -2544,18 +2548,20 @@ Editor::clear_xrun_markers ()
 void
 Editor::clear_ranges ()
 {
-	if (_session) {
-		begin_reversible_command (_("clear ranges"));
+	if (!_session) {
+		return;
+	}
 
-		XMLNode &before = _session->locations()->get_state();
+	begin_reversible_command (_("clear ranges"));
 
-		if (_session->locations()->clear_ranges ()) {
+	XMLNode &before = _session->locations()->get_state();
 
-			XMLNode &after = _session->locations()->get_state();
-			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+	if (_session->locations()->clear_ranges ()) {
 
-			commit_reversible_command ();
-		}
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+
+		commit_reversible_command ();
 	} else {
 		abort_reversible_command ();
 	}
