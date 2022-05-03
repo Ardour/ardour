@@ -2321,7 +2321,7 @@ Editor::set_session_end_from_playhead ()
 
 		XMLNode &after = loc->get_state();
 
-		begin_reversible_command (_("Set session start"));
+		begin_reversible_command (_("Set session end"));
 
 		_session->add_command (new MementoCommand<Location>(*loc, &before, &after));
 
