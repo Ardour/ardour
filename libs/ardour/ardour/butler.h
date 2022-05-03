@@ -28,16 +28,16 @@
 #include <glibmm/threads.h>
 
 #include "pbd/crossthread.h"
-#include "pbd/ringbuffer.h"
-#include "pbd/pool.h"
 #include "pbd/g_atomic_compat.h"
+#include "pbd/pool.h"
+#include "pbd/ringbuffer.h"
 
 #include "ardour/libardour_visibility.h"
-#include "ardour/types.h"
 #include "ardour/session_handle.h"
+#include "ardour/types.h"
 
-namespace ARDOUR {
-
+namespace ARDOUR
+{
 /**
  *  One of the Butler's functions is to clean up (ie delete) unused CrossThreadPools.
  *  When a thread with a CrossThreadPool terminates, its CTP is added to pool_trash.
@@ -47,28 +47,37 @@ namespace ARDOUR {
 
 class LIBARDOUR_API Butler : public SessionHandleRef
 {
-  public:
+public:
 	Butler (Session& session);
-	~Butler();
+	~Butler ();
 
-	int  start_thread();
-	void terminate_thread();
-	void schedule_transport_work();
-	void summon();
-	void stop();
-	void wait_until_finished();
-	bool transport_work_requested() const;
+	int  start_thread ();
+	void terminate_thread ();
+	void schedule_transport_work ();
+	void summon ();
+	void stop ();
+	void wait_until_finished ();
+	bool transport_work_requested () const;
 	void drop_references ();
 
-        void map_parameters ();
+	void map_parameters ();
 
-	samplecnt_t audio_capture_buffer_size() const { return _audio_capture_buffer_size; }
-	samplecnt_t audio_playback_buffer_size() const { return _audio_playback_buffer_size; }
-	uint32_t midi_buffer_size()  const { return _midi_buffer_size; }
+	samplecnt_t audio_capture_buffer_size () const
+	{
+		return _audio_capture_buffer_size;
+	}
+	samplecnt_t audio_playback_buffer_size () const
+	{
+		return _audio_playback_buffer_size;
+	}
+	uint32_t midi_buffer_size () const
+	{
+		return _midi_buffer_size;
+	}
 
-	static void* _thread_work(void *arg);
-	void*         thread_work();
+	mutable GATOMIC_QUAL gint should_do_transport_work;
 
+private:
 	struct Request {
 		enum Type {
 			Run,
@@ -77,33 +86,29 @@ class LIBARDOUR_API Butler : public SessionHandleRef
 		};
 	};
 
+
+	static void* _thread_work (void* arg);
+
+	void* thread_work ();
+
+	void empty_pool_trash ();
+	void config_changed (std::string);
+	bool flush_tracks_to_disk_normal (boost::shared_ptr<RouteList>, uint32_t& errors);
+	void queue_request (Request::Type r);
+
 	pthread_t thread;
 	bool      have_thread;
 
-	Glib::Threads::Mutex      request_lock;
-	Glib::Threads::Cond       paused;
-	bool                      should_run;
-	mutable GATOMIC_QUAL gint should_do_transport_work;
+	Glib::Threads::Mutex request_lock;
+	Glib::Threads::Cond  paused;
+	bool                 should_run;
 
 	samplecnt_t _audio_capture_buffer_size;
 	samplecnt_t _audio_playback_buffer_size;
 	uint32_t    _midi_buffer_size;
 
 	PBD::RingBuffer<CrossThreadPool*> pool_trash;
-
-private:
-	void empty_pool_trash ();
-	void config_changed (std::string);
-
-	bool flush_tracks_to_disk_normal (boost::shared_ptr<RouteList>, uint32_t& errors);
-
-	/**
-	 * Add request to butler thread request queue
-	 */
-	void queue_request (Request::Type r);
-
-	CrossThreadChannel _xthread;
-
+	CrossThreadChannel                _xthread;
 };
 
 } // namespace ARDOUR

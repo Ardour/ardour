@@ -34,6 +34,7 @@
 #include "temporal/superclock.h"
 #include "temporal/tempo.h"
 
+#include "ardour/auditioner.h"
 #include "ardour/butler.h"
 #include "ardour/debug.h"
 #include "ardour/disk_io.h"
@@ -41,22 +42,22 @@
 #include "ardour/io.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
-#include "ardour/auditioner.h"
 
 #include "pbd/i18n.h"
 
 using namespace PBD;
 
-namespace ARDOUR {
+namespace ARDOUR
+{
 
-Butler::Butler(Session& s)
+Butler::Butler (Session& s)
 	: SessionHandleRef (s)
-	, thread()
+	, thread ()
 	, have_thread (false)
-	, _audio_capture_buffer_size(0)
-	, _audio_playback_buffer_size(0)
-	, _midi_buffer_size(0)
-	, pool_trash(16)
+	, _audio_capture_buffer_size (0)
+	, _audio_playback_buffer_size (0)
+	, _midi_buffer_size (0)
+	, pool_trash (16)
 	, _xthread (true)
 {
 	g_atomic_int_set (&should_do_transport_work, 0);
@@ -66,7 +67,7 @@ Butler::Butler(Session& s)
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
 }
 
-Butler::~Butler()
+Butler::~Butler ()
 {
 	terminate_thread ();
 }
@@ -74,9 +75,9 @@ Butler::~Butler()
 void
 Butler::map_parameters ()
 {
-        /* use any current ones that we care about */
-        boost::function<void (std::string)> ff (boost::bind (&Butler::config_changed, this, _1));
-        Config->map_parameters (ff);
+	/* use any current ones that we care about */
+	boost::function<void (std::string)> ff (boost::bind (&Butler::config_changed, this, _1));
+	Config->map_parameters (ff);
 }
 
 void
@@ -84,27 +85,27 @@ Butler::config_changed (std::string p)
 {
 	if (p == "playback-buffer-seconds") {
 		_session.adjust_playback_buffering ();
-		if (Config->get_buffering_preset() == Custom) {
+		if (Config->get_buffering_preset () == Custom) {
 			/* size is in Samples, not bytes */
-			samplecnt_t audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
+			samplecnt_t audio_playback_buffer_size = (uint32_t)floor (Config->get_audio_playback_buffer_seconds () * _session.sample_rate ());
 			if (_audio_playback_buffer_size != audio_playback_buffer_size) {
 				_audio_playback_buffer_size = audio_playback_buffer_size;
 				_session.adjust_playback_buffering ();
 			}
 		}
 	} else if (p == "capture-buffer-seconds") {
-		if (Config->get_buffering_preset() == Custom) {
+		if (Config->get_buffering_preset () == Custom) {
 			/* size is in Samples, not bytes */
-			samplecnt_t audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
+			samplecnt_t audio_capture_buffer_size = (uint32_t)floor (Config->get_audio_capture_buffer_seconds () * _session.sample_rate ());
 			if (_audio_capture_buffer_size != audio_capture_buffer_size) {
 				_audio_capture_buffer_size = audio_capture_buffer_size;
 				_session.adjust_capture_buffering ();
 			}
 		}
 	} else if (p == "buffering-preset") {
-		DiskIOProcessor::set_buffering_parameters (Config->get_buffering_preset());
-		samplecnt_t audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
-		samplecnt_t audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
+		DiskIOProcessor::set_buffering_parameters (Config->get_buffering_preset ());
+		samplecnt_t audio_capture_buffer_size  = (uint32_t)floor (Config->get_audio_capture_buffer_seconds () * _session.sample_rate ());
+		samplecnt_t audio_playback_buffer_size = (uint32_t)floor (Config->get_audio_playback_buffer_seconds () * _session.sample_rate ());
 		if (_audio_capture_buffer_size != audio_capture_buffer_size) {
 			_audio_capture_buffer_size = audio_capture_buffer_size;
 			_session.adjust_capture_buffering ();
@@ -117,21 +118,21 @@ Butler::config_changed (std::string p)
 }
 
 int
-Butler::start_thread()
+Butler::start_thread ()
 {
 	// set up capture and playback buffering
-	DiskIOProcessor::set_buffering_parameters (Config->get_buffering_preset());
+	DiskIOProcessor::set_buffering_parameters (Config->get_buffering_preset ());
 
 	/* size is in Samples, not bytes */
-	const float rate = (float)_session.sample_rate();
-	_audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * rate);
-	_audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * rate);
+	const float rate            = (float)_session.sample_rate ();
+	_audio_capture_buffer_size  = (uint32_t)floor (Config->get_audio_capture_buffer_seconds () * rate);
+	_audio_playback_buffer_size = (uint32_t)floor (Config->get_audio_playback_buffer_seconds () * rate);
 
 	/* size is in bytes
 	 * XXX: AudioEngine needs to tell us the MIDI buffer size
 	 * (i.e. how many MIDI bytes we might see in a cycle)
 	 */
-	_midi_buffer_size = (uint32_t) floor (Config->get_midi_track_buffer_seconds() * rate);
+	_midi_buffer_size = (uint32_t)floor (Config->get_midi_track_buffer_seconds () * rate);
 
 	should_run = false;
 
@@ -155,54 +156,52 @@ Butler::terminate_thread ()
 {
 	if (have_thread) {
 		void* status;
-                DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: ask butler to quit @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: ask butler to quit @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time ()));
 		queue_request (Request::Quit);
 		pthread_join (thread, &status);
 	}
 }
 
-void *
+void*
 Butler::_thread_work (void* arg)
 {
 	SessionEvent::create_per_thread_pool ("butler events", 4096);
 	pthread_set_name (X_("butler"));
-	return ((Butler *) arg)->thread_work ();
+	return ((Butler*)arg)->thread_work ();
 }
 
-void *
+void*
 Butler::thread_work ()
 {
-	uint32_t err = 0;
-
-	bool disk_work_outstanding = false;
+	uint32_t            err                   = 0;
+	bool                disk_work_outstanding = false;
 	RouteList::iterator i;
 
 	while (true) {
-		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler main loop, disk work outstanding ? %2 @ %3\n", DEBUG_THREAD_SELF, disk_work_outstanding, g_get_monotonic_time()));
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler main loop, disk work outstanding ? %2 @ %3\n", DEBUG_THREAD_SELF, disk_work_outstanding, g_get_monotonic_time ()));
 
-		if(!disk_work_outstanding) {
-			DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler waits for requests @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+		if (!disk_work_outstanding) {
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler waits for requests @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time ()));
 
 			char msg;
 			/* empty the pipe of all current requests */
 			if (_xthread.receive (msg, true) >= 0) {
-				Request::Type req = (Request::Type) msg;
+				Request::Type req = (Request::Type)msg;
 				switch (req) {
-
 					case Request::Run:
-						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to run @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to run @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time ()));
 						should_run = true;
 						break;
 
 					case Request::Pause:
-						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to pause @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to pause @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time ()));
 						should_run = false;
 						break;
 
 					case Request::Quit:
-						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to quit @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to quit @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time ()));
 						return 0;
-						abort(); /*NOTREACHED*/
+						abort (); /*NOTREACHED*/
 						break;
 
 					default:
@@ -213,16 +212,16 @@ Butler::thread_work ()
 
 		Temporal::TempoMap::fetch ();
 
-	  restart:
+	restart:
 		DEBUG_TRACE (DEBUG::Butler, "at restart for disk work\n");
 		disk_work_outstanding = false;
 
-		if (transport_work_requested()) {
-			DEBUG_TRACE (DEBUG::Butler, string_compose ("do transport work @ %1\n", g_get_monotonic_time()));
+		if (transport_work_requested ()) {
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("do transport work @ %1\n", g_get_monotonic_time ()));
 			_session.butler_transport_work ();
-			DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttransport work complete @ %1, twr = %2\n", g_get_monotonic_time(), transport_work_requested()));
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttransport work complete @ %1, twr = %2\n", g_get_monotonic_time (), transport_work_requested ()));
 
-			if (_session.locate_initiated()) {
+			if (_session.locate_initiated ()) {
 				/* we have done the "stop" required for a
 				   locate (DeclickToLocate state in TFSM), but
 				   once that finishes we're going to do a locate,
@@ -230,30 +229,29 @@ Butler::thread_work ()
 				   time.
 				*/
 				Glib::Threads::Mutex::Lock lm (request_lock);
-				DEBUG_TRACE (DEBUG::Butler, string_compose ("\tlocate pending, so just pause @ %1 till woken again\n", g_get_monotonic_time()));
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("\tlocate pending, so just pause @ %1 till woken again\n", g_get_monotonic_time ()));
 				paused.signal ();
 				continue;
 			}
 		}
 
 		sampleoffset_t audition_seek;
-		if (should_run && _session.is_auditioning() && (audition_seek = _session.the_auditioner()->seek_sample()) >= 0) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session.the_auditioner());
+		if (should_run && _session.is_auditioning () && (audition_seek = _session.the_auditioner ()->seek_sample ()) >= 0) {
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session.the_auditioner ());
 			DEBUG_TRACE (DEBUG::Butler, "seek the auditioner\n");
-			tr->seek(audition_seek);
+			tr->seek (audition_seek);
 			tr->do_refill ();
-			_session.the_auditioner()->seek_response(audition_seek);
+			_session.the_auditioner ()->seek_response (audition_seek);
 		}
 
-		boost::shared_ptr<RouteList> rl = _session.get_routes();
+		boost::shared_ptr<RouteList> rl = _session.get_routes ();
 
 		RouteList rl_with_auditioner = *rl;
-		rl_with_auditioner.push_back (_session.the_auditioner());
+		rl_with_auditioner.push_back (_session.the_auditioner ());
 
-		DEBUG_TRACE (DEBUG::Butler, string_compose ("butler starts refill loop, twr = %1\n", transport_work_requested()));
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("butler starts refill loop, twr = %1\n", transport_work_requested ()));
 
-		for (i = rl_with_auditioner.begin(); !transport_work_requested() && should_run && i != rl_with_auditioner.end(); ++i) {
-
+		for (i = rl_with_auditioner.begin (); !transport_work_requested () && should_run && i != rl_with_auditioner.end (); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 
 			if (!tr) {
@@ -262,43 +260,42 @@ Butler::thread_work ()
 
 			boost::shared_ptr<IO> io = tr->input ();
 
-			if (io && !io->active()) {
+			if (io && !io->active ()) {
 				/* don't read inactive tracks */
 				// DEBUG_TRACE (DEBUG::Butler, string_compose ("butler skips inactive track %1\n", tr->name()));
 				continue;
 			}
 			// DEBUG_TRACE (DEBUG::Butler, string_compose ("butler refills %1, playback load = %2\n", tr->name(), tr->playback_buffer_load()));
 			switch (tr->do_refill ()) {
-			case 0:
-				//DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
-				break;
+				case 0:
+					//DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
+					break;
 
-			case 1:
-				DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill unfinished %1\n", tr->name()));
-				disk_work_outstanding = true;
-				break;
+				case 1:
+					DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill unfinished %1\n", tr->name ()));
+					disk_work_outstanding = true;
+					break;
 
-			default:
-				error << string_compose(_("Butler read ahead failure on dstream %1"), (*i)->name()) << endmsg;
-                                std::cerr << string_compose(_("Butler read ahead failure on dstream %1"), (*i)->name()) << std::endl;
-				break;
+				default:
+					error << string_compose (_("Butler read ahead failure on dstream %1"), (*i)->name ()) << endmsg;
+					std::cerr << string_compose (_("Butler read ahead failure on dstream %1"), (*i)->name ()) << std::endl;
+					break;
 			}
-
 		}
 
-		if (i != rl_with_auditioner.begin() && i != rl_with_auditioner.end()) {
+		if (i != rl_with_auditioner.begin () && i != rl_with_auditioner.end ()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
 
-		if (!err && transport_work_requested()) {
+		if (!err && transport_work_requested ()) {
 			DEBUG_TRACE (DEBUG::Butler, "transport work requested during refill, back to restart\n");
 			goto restart;
 		}
 
 		disk_work_outstanding = disk_work_outstanding || flush_tracks_to_disk_normal (rl, err);
 
-		if (err && _session.actively_recording()) {
+		if (err && _session.actively_recording ()) {
 			/* stop the transport and try to catch as much possible
 			   captured state as we can.
 			*/
@@ -306,7 +303,7 @@ Butler::thread_work ()
 			_session.request_stop ();
 		}
 
-		if (!err && transport_work_requested()) {
+		if (!err && transport_work_requested ()) {
 			DEBUG_TRACE (DEBUG::Butler, "transport work requested during flush, back to restart\n");
 			goto restart;
 		}
@@ -318,14 +315,14 @@ Butler::thread_work ()
 		{
 			Glib::Threads::Mutex::Lock lm (request_lock);
 
-			if (should_run && (disk_work_outstanding || transport_work_requested())) {
-                                DEBUG_TRACE (DEBUG::Butler, string_compose ("at end, should run %1 disk work %2 transport work %3 ... goto restart\n",
-                                                                            should_run, disk_work_outstanding, transport_work_requested()));
+			if (should_run && (disk_work_outstanding || transport_work_requested ())) {
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("at end, should run %1 disk work %2 transport work %3 ... goto restart\n",
+				                                            should_run, disk_work_outstanding, transport_work_requested ()));
 				goto restart;
 			}
 
-                        DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler signals pause @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
-			paused.signal();
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler signals pause @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time ()));
+			paused.signal ();
 		}
 
 		DEBUG_TRACE (DEBUG::Butler, "butler emptying pool trash\n");
@@ -340,8 +337,7 @@ Butler::flush_tracks_to_disk_normal (boost::shared_ptr<RouteList> rl, uint32_t& 
 {
 	bool disk_work_outstanding = false;
 
-	for (RouteList::iterator i = rl->begin(); !transport_work_requested() && should_run && i != rl->end(); ++i) {
-
+	for (RouteList::iterator i = rl->begin (); !transport_work_requested () && should_run && i != rl->end (); ++i) {
 		// cerr << "write behind for " << (*i)->name () << endl;
 
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
@@ -358,20 +354,20 @@ Butler::flush_tracks_to_disk_normal (boost::shared_ptr<RouteList> rl, uint32_t& 
 		// DEBUG_TRACE (DEBUG::Butler, string_compose ("butler flushes track %1 capture load %2\n", tr->name(), tr->capture_buffer_load()));
 		ret = tr->do_flush (ButlerContext, false);
 		switch (ret) {
-		case 0:
-			//DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush complete for %1\n", tr->name()));
-			break;
+			case 0:
+				//DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush complete for %1\n", tr->name()));
+				break;
 
-		case 1:
-			//DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush not finished for %1\n", tr->name()));
-			disk_work_outstanding = true;
-			break;
+			case 1:
+				//DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush not finished for %1\n", tr->name()));
+				disk_work_outstanding = true;
+				break;
 
-		default:
-			errors++;
-			error << string_compose(_("Butler write-behind failure on dstream %1"), (*i)->name()) << endmsg;
-			std::cerr << string_compose(_("Butler write-behind failure on dstream %1"), (*i)->name()) << std::endl;
-			/* don't break - try to flush all streams in case they
+			default:
+				errors++;
+				error << string_compose (_("Butler write-behind failure on dstream %1"), (*i)->name ()) << endmsg;
+				std::cerr << string_compose (_("Butler write-behind failure on dstream %1"), (*i)->name ()) << std::endl;
+				/* don't break - try to flush all streams in case they
 			   are split across disks.
 			*/
 		}
@@ -403,14 +399,14 @@ Butler::queue_request (Request::Type r)
 		 * TODO if ardour is freehweeling, wait & retry.
 		 * ditto for Request::Type Quit
 		 */
-		assert(1); // we're screwd
+		assert (1); // we're screwd
 	}
 }
 
 void
 Butler::summon ()
 {
-	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: summon butler to run @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: summon butler to run @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time ()));
 	queue_request (Request::Run);
 }
 
@@ -418,18 +414,18 @@ void
 Butler::stop ()
 {
 	Glib::Threads::Mutex::Lock lm (request_lock);
-	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: asking butler to stop @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: asking butler to stop @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time ()));
 	queue_request (Request::Pause);
-	paused.wait(request_lock);
+	paused.wait (request_lock);
 }
 
 void
 Butler::wait_until_finished ()
 {
 	Glib::Threads::Mutex::Lock lm (request_lock);
-	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: waiting for butler to finish @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: waiting for butler to finish @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time ()));
 	queue_request (Request::Pause);
-	paused.wait(request_lock);
+	paused.wait (request_lock);
 }
 
 bool
@@ -450,7 +446,7 @@ Butler::empty_pool_trash ()
 
 	for (int i = 0; i < 2; ++i) {
 		for (guint j = 0; j < vec.len[i]; ++j) {
-			if (vec.buf[i][j]->empty()) {
+			if (vec.buf[i][j]->empty ()) {
 				delete vec.buf[i][j];
 				++deleted;
 			} else {
@@ -474,6 +470,5 @@ Butler::drop_references ()
 	std::cerr << "Butler drops pool trash\n";
 	SessionEvent::pool->set_trash (0);
 }
-
 
 } // namespace ARDOUR
