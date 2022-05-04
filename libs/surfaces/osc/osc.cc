@@ -6613,17 +6613,11 @@ OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo
 {
 	Sorted sorted;
 
-#if 0
 	boost::shared_ptr<Route> aux_rt = boost::dynamic_pointer_cast<Route> (aux);
-	Route::FedBy fed_by = aux_rt->fed_by();
-	for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {
-		if (i->sends_only) {
-			boost::shared_ptr<Stripable> s (i->r.lock());
-			sorted.push_back (s);
-			s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::_cue_set, this, id, addr), this);
-		}
+	for (auto const& s : aux_rt->signal_sources (true)) {
+		sorted.push_back (s);
+		s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::_cue_set, this, id, addr), this);
 	}
-#endif
 	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
 
 	return sorted;
