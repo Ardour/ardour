@@ -104,6 +104,7 @@
 #include "ardour/route_graph.h"
 #include "ardour/route_group.h"
 #include "ardour/rt_tasklist.h"
+#include "ardour/rt_safe_delete.h"
 #include "ardour/silentfilesource.h"
 #include "ardour/send.h"
 #include "ardour/selection.h"

@@ -327,6 +327,7 @@ Butler::thread_work ()
 
 		DEBUG_TRACE (DEBUG::Butler, "butler emptying pool trash\n");
 		empty_pool_trash ();
+		process_delegated_work ();
 	}
 
 	return (0);
@@ -465,10 +466,20 @@ Butler::empty_pool_trash ()
 }
 
 void
+Butler::process_delegated_work ()
+{
+	sigc::slot<void> sl;
+	while (_delegated_work.pop_front (sl)) {
+		sl ();
+	}
+}
+
+void
 Butler::drop_references ()
 {
 	std::cerr << "Butler drops pool trash\n";
 	SessionEvent::pool->set_trash (0);
+	process_delegated_work ();
 }
 
 } // namespace ARDOUR

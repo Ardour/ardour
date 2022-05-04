@@ -31,6 +31,7 @@
 #include "pbd/g_atomic_compat.h"
 #include "pbd/pool.h"
 #include "pbd/ringbuffer.h"
+#include "pbd/mpmc_queue.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/session_handle.h"
@@ -62,6 +63,11 @@ public:
 
 	void map_parameters ();
 
+	bool delegate (sigc::slot<void> const& work) {
+		bool rv = _delegated_work.push_back (work);
+		summon ();
+		return rv;
+	}
 	samplecnt_t audio_capture_buffer_size () const
 	{
 		return _audio_capture_buffer_size;
@@ -92,6 +98,7 @@ private:
 	void* thread_work ();
 
 	void empty_pool_trash ();
+	void process_delegated_work ();
 	void config_changed (std::string);
 	bool flush_tracks_to_disk_normal (boost::shared_ptr<RouteList>, uint32_t& errors);
 	void queue_request (Request::Type r);
@@ -109,6 +116,7 @@ private:
 
 	PBD::RingBuffer<CrossThreadPool*> pool_trash;
 	CrossThreadChannel                _xthread;
+	PBD::MPMCQueue<sigc::slot<void> > _delegated_work;
 };
 
 } // namespace ARDOUR
