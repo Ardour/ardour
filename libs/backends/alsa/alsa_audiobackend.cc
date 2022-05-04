@@ -2222,18 +2222,33 @@ AlsaAudioBackend::AudioSlave::update_latencies (uint32_t play, uint32_t capt)
 {
 	LatencyRange lr;
 	lr.min = lr.max = (capt);
+	bool changed = false;
 	for (std::vector<BackendPortPtr>::const_iterator it = inputs.begin (); it != inputs.end (); ++it) {
+		LatencyRange lx;
+		lx = (*it)->latency_range (false);
+		if (lr == lx) {
+			continue;
+		}
 		(*it)->set_latency_range (lr, false);
+		changed = true;
 	}
 
 	lr.min = lr.max = play;
 	for (std::vector<BackendPortPtr>::const_iterator it = outputs.begin (); it != outputs.end (); ++it) {
+		LatencyRange lx;
+		lx = (*it)->latency_range (true);
+		if (lr == lx) {
+			continue;
+		}
 		(*it)->set_latency_range (lr, true);
+		changed = true;
 	}
 #ifndef NDEBUG
-	printf ("ALSA SLAVE-device latency play=%d capt=%d\n", play, capt); // XXX DEBUG
+	printf ("ALSA SLAVE-device latency play=%d capt=%d changed:%d\n", play, capt, changed); // XXX DEBUG
 #endif
-	UpdateLatency (); /* EMIT SIGNAL */
+	if (changed) {
+		UpdateLatency (); /* EMIT SIGNAL */
+	}
 }
 
 /******************************************************************************/
