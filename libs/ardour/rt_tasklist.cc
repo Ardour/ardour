@@ -64,7 +64,11 @@ RTTaskList::drop_threads ()
 RTTaskList::_thread_run (void *arg)
 {
 	RTTaskList *d = static_cast<RTTaskList *>(arg);
-	pthread_set_name ("RTTaskList");
+
+	char name[64];
+	snprintf (name, 64, "RTTask-%p", (void*)DEBUG_THREAD_SELF);
+	pthread_set_name (name);
+
 	d->run ();
 	pthread_exit (0);
 	return 0;
