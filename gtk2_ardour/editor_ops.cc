@@ -3890,11 +3890,8 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		RegionView* rv = (*x);
 
-		/* require region to span proposed trim */
-		switch (rv->region()->coverage (loc.start(), loc.end())) {
-		case Temporal::OverlapNone:
-			break;
-		default:
+		/* require selected region(s) to overlap with proposed trim */
+		if (rv->region()->coverage (loc.start(), loc.end())==Temporal::OverlapNone) {
 			continue;
 		}
 
