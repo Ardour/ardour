@@ -5688,41 +5688,6 @@ Editor::normalize_region ()
 	}
 }
 
-
-void
-Editor::reset_region_scale_amplitude ()
-{
-	if (!_session) {
-		return;
-	}
-
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	if (rs.empty()) {
-		return;
-	}
-
-	bool in_command = false;
-
-	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
-		if (!arv)
-			continue;
-		arv->region()->clear_changes ();
-		arv->audio_region()->set_scale_amplitude (1.0f);
-
-		if(!in_command) {
-				begin_reversible_command ("reset gain");
-				in_command = true;
-		}
-		_session->add_command (new StatefulDiffCommand (arv->region()));
-	}
-
-	if (in_command) {
-		commit_reversible_command ();
-	}
-}
-
 void
 Editor::adjust_region_gain (bool up)
 {

@@ -1576,7 +1576,7 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	}
 
 	if (!have_non_unity_scale_amplitude || !have_audio) {
-		_region_actions->get_action("reset-region-scale-amplitude")->set_sensitive (false);
+		_region_actions->get_action("reset-region-gain")->set_sensitive (false);
 	}
 
 	Glib::RefPtr<ToggleAction> a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock"));

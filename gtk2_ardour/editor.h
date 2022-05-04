@@ -1362,7 +1362,6 @@ private:
 	void reverse_region ();
 	void strip_region_silence ();
 	void normalize_region ();
-	void reset_region_scale_amplitude ();
 	void adjust_region_gain (bool up);
 	void reset_region_gain ();
 	void quantize_region ();
