@@ -4632,8 +4632,7 @@ OSC::sel_new_personal_send (char *foldback, lo_message msg)
 		//boost::shared_ptr<Route> rt_send = ;
 		if (rt && (lsn_rt != rt)) {
 			// make sure there isn't one already
-			bool s_only = true;
-			if (!rt->feeds (lsn_rt, &s_only)) {
+			if (!rt->feeds (lsn_rt)) {
 				// create send
 				rt->add_foldback_send (lsn_rt, false);
 				//boost::shared_ptr<Send> snd = rt->internal_send_for (aux);
@@ -6324,8 +6323,7 @@ OSC::cue_new_send (string rt_name, lo_message msg)
 			boost::shared_ptr<Route> rt_send = session->route_by_name (rt_name);
 			if (rt_send && (aux != rt_send)) {
 				// make sure there isn't one already
-				bool s_only = true;
-				if (!rt_send->feeds (aux, &s_only)) {
+				if (!rt_send->feeds (aux)) {
 					// create send
 					rt_send->add_foldback_send (aux, false);
 					boost::shared_ptr<Send> snd = rt_send->internal_send_for (aux);
@@ -6615,6 +6613,7 @@ OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo
 {
 	Sorted sorted;
 
+#if 0
 	boost::shared_ptr<Route> aux_rt = boost::dynamic_pointer_cast<Route> (aux);
 	Route::FedBy fed_by = aux_rt->fed_by();
 	for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {
@@ -6624,6 +6623,7 @@ OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo
 			s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::_cue_set, this, id, addr), this);
 		}
 	}
+#endif
 	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
 
 	return sorted;
