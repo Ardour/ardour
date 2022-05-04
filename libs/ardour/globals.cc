@@ -646,10 +646,14 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	*/
 	EventLoop::register_request_buffer_factory (X_("midiUI"), MidiControlUI::request_factory);
 
-	/* the + 4 is a bit of a handwave. i don't actually know
-	   how many more per-thread buffer sets we need above
-	   the h/w concurrency, but its definitely > 1 more.
-	*/
+	/* Every Process Graph thread (up to hardware_concurrency) keeps a buffer.
+	 * The main engine callback uses one (but returns it after use
+	 * each cycle). Session Export uses one, and the GUI requires
+	 * buffers (for plugin-analysis, auditioner updates) but not
+	 * concurrently.
+	 *
+	 * In theory (hw + 3) should be sufficient, let's add one for luck.
+	 */
 	BufferManager::init (hardware_concurrency () + 4);
 
 	PannerManager::instance ().discover_panners ();
