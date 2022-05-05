@@ -230,7 +230,7 @@ protected:
 
 	bool valid_port (BackendPortHandle port) const {
 		boost::shared_ptr<PortIndex> p = _ports.reader ();
-		return std::find (p->begin (), p->end (), port) != p->end ();
+		return p->find (port) != p->end ();
 	}
 
 	BackendPortPtr find_port (const std::string& port_name) const {
