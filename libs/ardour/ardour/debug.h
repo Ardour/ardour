@@ -97,6 +97,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits TXLTC;
 		LIBARDOUR_API extern DebugBits TempoMap;
 		LIBARDOUR_API extern DebugBits TempoMath;
+		LIBARDOUR_API extern DebugBits TopologyTiming;
 		LIBARDOUR_API extern DebugBits Transport;
 		LIBARDOUR_API extern DebugBits Triggers;
 		LIBARDOUR_API extern DebugBits US2400;

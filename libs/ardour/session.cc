@@ -2200,6 +2200,10 @@ Session::resort_routes ()
 void
 Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 {
+#ifndef NDEBUG
+	Timing t;
+#endif
+
 	GraphNodeList gnl;
 	for (auto const& rt : *r) {
 		gnl.push_back (rt);
@@ -2237,9 +2241,15 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 	}
 
 #ifndef NDEBUG
-	DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
-	for (auto const& i : *r) {
-		DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 (presentation order %2)\n", i->name(), i->presentation_info().order()));
+	if (DEBUG_ENABLED(DEBUG::TopologyTiming)) {
+		t.update ();
+		std::cerr << string_compose ("Session::resort_route took %1ms ; DSP %2 %%\n",
+				t.elapsed () / 1000., 100.0 * t.elapsed() / _engine.usecs_per_cycle ());
+
+		DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
+		for (auto const& i : *r) {
+			DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 (presentation order %2)\n", i->name(), i->presentation_info().order()));
+		}
 	}
 #endif
 
@@ -6822,6 +6832,10 @@ Session::update_latency (bool playback)
 		return;
 	}
 
+#ifndef NDEBUG
+	Timing t;
+#endif
+
 	/* Session::new_midi_track -> Route::add_processors -> Delivery::configure_io
 	 * -> IO::ensure_ports -> PortManager::register_output_port
 	 *  may run currently (adding many ports) while the backend
@@ -6920,6 +6934,15 @@ Session::update_latency (bool playback)
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "Engine latency callback: DONE\n");
 	LatencyUpdated (playback); /* EMIT SIGNAL */
+
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::TopologyTiming)) {
+		t.update ();
+		std::cerr << string_compose ("Session::update_latency for %1 took %2ms ; DSP %3 %%\n",
+				playback ? "playback" : "capture", t.elapsed () / 1000.,
+				100.0 * t.elapsed () / _engine.usecs_per_cycle ());
+	}
+#endif
 }
 
 void

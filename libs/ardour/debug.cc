@@ -92,6 +92,7 @@ PBD::DebugBits PBD::DEBUG::TFSMState = PBD::new_debug_bit ("tfsmstate");
 PBD::DebugBits PBD::DEBUG::TXLTC = PBD::new_debug_bit ("tx-ltc");
 PBD::DebugBits PBD::DEBUG::TempoMap = PBD::new_debug_bit ("tempomap");
 PBD::DebugBits PBD::DEBUG::TempoMath = PBD::new_debug_bit ("tempomath");
+PBD::DebugBits PBD::DEBUG::TopologyTiming = PBD::new_debug_bit ("topologytiming");
 PBD::DebugBits PBD::DEBUG::Transport = PBD::new_debug_bit ("transport");
 PBD::DebugBits PBD::DEBUG::Triggers = PBD::new_debug_bit ("triggers");
 PBD::DebugBits PBD::DEBUG::US2400 = PBD::new_debug_bit ("us2400");
