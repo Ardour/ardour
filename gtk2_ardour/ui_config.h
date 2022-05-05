@@ -46,11 +46,11 @@
 class UIConfiguration : public ArdourWidgets::UIConfigurationBase
 {
 private:
-	UIConfiguration();
-	~UIConfiguration();
+	UIConfiguration ();
+	~UIConfiguration ();
 
 public:
-	static UIConfiguration& instance();
+	static UIConfiguration& instance ();
 
 	static std::string color_file_suffix;
 
@@ -61,42 +61,40 @@ public:
 	int load_defaults ();
 	int load_color_theme (bool allow_own);
 
-	int set_state (const XMLNode&, int version);
+	int      set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
 	XMLNode& get_variables (std::string) const;
-	void set_variables (const XMLNode&);
+	void     set_variables (const XMLNode&);
 
-	std::string  color_file_name (bool use_my, bool with_version) const;
+	std::string color_file_name (bool use_my, bool with_version) const;
 
-	typedef std::map<std::string,Gtkmm2ext::Color> Colors;
-	typedef std::map<std::string,std::string> ColorAliases;
-	typedef std::map<std::string,Gtkmm2ext::SVAModifier> Modifiers;
+	typedef std::map<std::string, Gtkmm2ext::Color>       Colors;
+	typedef std::map<std::string, std::string>            ColorAliases;
+	typedef std::map<std::string, Gtkmm2ext::SVAModifier> Modifiers;
 
-	Colors         colors;
-	ColorAliases   color_aliases;
-	Modifiers      modifiers;
+	Colors       colors;
+	ColorAliases color_aliases;
+	Modifiers    modifiers;
 
-	void set_alias (std::string const & name, std::string const & alias);
+	void set_alias (std::string const& name, std::string const& alias);
 	void set_color (const std::string& name, Gtkmm2ext::Color);
-	void set_modifier (std::string const &, Gtkmm2ext::SVAModifier svam);
+	void set_modifier (std::string const&, Gtkmm2ext::SVAModifier svam);
 
-	std::string color_as_alias (Gtkmm2ext::Color c);
 	Gtkmm2ext::Color quantized (Gtkmm2ext::Color) const;
 
-	Gtkmm2ext::Color color (const std::string&, bool* failed = 0) const;
-	Gtkmm2ext::Color color_mod (std::string const & color, std::string const & modifier) const;
-	Gtkmm2ext::Color color_mod (const Gtkmm2ext::Color& color, std::string const & modifier) const;
-	Gtkmm2ext::HSV  color_hsv (const std::string&) const;
+	Gtkmm2ext::Color       color (const std::string&, bool* failed = 0) const;
+	Gtkmm2ext::Color       color_mod (std::string const& color, std::string const& modifier) const;
+	Gtkmm2ext::Color       color_mod (const Gtkmm2ext::Color& color, std::string const& modifier) const;
 	Gtkmm2ext::SVAModifier modifier (const std::string&) const;
 
 	static std::string color_to_hex_string (Gtkmm2ext::Color c);
 	static std::string color_to_hex_string_no_alpha (Gtkmm2ext::Color c);
 
-	void reset_dpi ();
+	void  reset_dpi ();
 	float get_ui_scale ();
 
-	sigc::signal<void,std::string> ParameterChanged;
-	void map_parameters (boost::function<void (std::string)>&);
+	sigc::signal<void, std::string> ParameterChanged;
+	void                            map_parameters (boost::function<void (std::string)>&);
 
 	void parameter_changed (std::string);
 
@@ -134,17 +132,17 @@ private:
 #undef CANVAS_FONT_VARIABLE
 
 	XMLNode& state () const;
-	bool _dirty;
-	bool aliases_modified;
-	bool colors_modified;
-	bool modifiers_modified;
+	bool     _dirty;
+	bool     aliases_modified;
+	bool     colors_modified;
+	bool     modifiers_modified;
 
 	int  store_color_theme ();
-	void load_color_aliases (XMLNode const &);
-	void load_colors (XMLNode const &);
-	void load_modifiers (XMLNode const &);
+	void load_color_aliases (XMLNode const&);
+	void load_colors (XMLNode const&);
+	void load_modifiers (XMLNode const&);
 	void reset_gtk_theme ();
-	int  load_color_file (std::string const &);
+	int  load_color_file (std::string const&);
 	void colors_changed ();
 
 	uint32_t block_save;

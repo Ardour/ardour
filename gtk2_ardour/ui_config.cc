@@ -21,18 +21,13 @@
  */
 
 #include <iostream>
-#include <sstream>
-#include <unistd.h>
 #include <cerrno>
 #include <cstdlib>
 #include <cstdio> /* for snprintf, grrr */
 #include <cstring>
 
 #include <glib.h>
-#include "pbd/gstdio_compat.h"
 #include <glibmm/miscutils.h>
-
-#include <cairo/cairo.h>
 
 #include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
 #include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
@@ -54,7 +49,6 @@
 #include "ardour/utils.h"
 #include "ardour/types_convert.h"
 
-#include "gtkmm2ext/rgb_macros.h"
 #include "gtkmm2ext/gtk_ui.h"
 
 #include "canvas/text.h"
