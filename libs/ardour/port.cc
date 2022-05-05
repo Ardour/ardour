@@ -219,7 +219,7 @@ Port::connected_to (std::string const & o) const
 		return false;
 	}
 
-	return port_engine.connected_to (_port_handle, AudioEngine::instance()->make_port_name_non_relative (o));
+	return port_engine.connected_to (_port_handle, AudioEngine::instance()->make_port_name_non_relative (o), true);
 }
 
 int

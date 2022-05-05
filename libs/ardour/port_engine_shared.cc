@@ -748,12 +748,12 @@ PortEngineSharedImpl::connected (PortEngine::PortHandle port_handle, bool /* pro
 }
 
 bool
-PortEngineSharedImpl::connected_to (PortEngine::PortHandle src, const std::string& dst, bool /*process_callback_safe*/)
+PortEngineSharedImpl::connected_to (PortEngine::PortHandle src, const std::string& dst, bool process_callback_safe)
 {
 	BackendPortPtr src_port = boost::dynamic_pointer_cast<BackendPort> (src);
 	BackendPortPtr dst_port = find_port (dst);
 #ifndef NDEBUG
-	if (!valid_port (src_port) || !dst_port) {
+	if (!process_callback_safe && (!valid_port (src_port) || !dst_port)) {
 		PBD::error << string_compose (_("%1::connected_to: Invalid Port"), _instance_name) << endmsg;
 		return false;
 	}

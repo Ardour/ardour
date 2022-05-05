@@ -1446,7 +1446,6 @@ PortAudioBackend::get_buffer (PortEngine::PortHandle port_handle, pframes_t nfra
 {
 	boost::shared_ptr<BackendPort> port = boost::dynamic_pointer_cast<BackendPort>(port_handle);
 	assert (port);
-	assert (valid_port (port));
 	if (!port || !valid_port (port)) return NULL; // XXX remove me
 	return port->get_buffer (nframes);
 }
