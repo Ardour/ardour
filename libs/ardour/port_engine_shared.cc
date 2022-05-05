@@ -542,7 +542,16 @@ PortEngineSharedImpl::set_port_name (PortEngine::PortHandle port_handle, const s
 	}
 
 	const std::string old_name = port->name();
-	int ret =  port->set_name (newname);
+
+	/* PortIndex std::set is sorted by name, using the name as key.
+	 * So name-changes need to update the set
+	 */
+	RCUWriter<PortIndex> index_writer (_ports);
+	boost::shared_ptr<PortIndex> ps = index_writer.get_copy ();
+
+	ps->erase (port);
+	int ret = port->set_name (newname);
+	ps->insert (port);
 
 	if (ret == 0) {
 
