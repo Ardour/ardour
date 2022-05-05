@@ -104,6 +104,10 @@ class LIBARDOUR_API BackendPort : public ProtoPort
 
 	void update_connected_latency (bool for_playback);
 
+	bool operator< (BackendPort const& rhs) const {
+		return PBD::naturally_less (name ().c_str (), rhs.name ().c_str ());
+	}
+
 protected:
 	PortEngineSharedImpl& _backend;
 
@@ -215,7 +219,7 @@ protected:
 
 	struct SortByPortName {
 		bool operator() (BackendPortHandle lhs, BackendPortHandle rhs) const {
-			return PBD::naturally_less (lhs->name ().c_str (), rhs->name ().c_str ());
+			return *lhs < *rhs;
 		}
 	};
 
