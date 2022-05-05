@@ -1624,10 +1624,10 @@ IO::connected_to (boost::shared_ptr<const IO> other) const
 
 	for (i = 0; i < no; ++i) {
 		for (j = 0; j < ni; ++j) {
-			if ((NULL != nth(i).get()) && (NULL != other->nth(j).get())) {
-				if (nth(i)->connected_to (other->nth(j)->name())) {
-					return true;
-				}
+			boost::shared_ptr<Port> pa (nth(i));
+			boost::shared_ptr<Port> pb (other->nth(j));
+			if (pa && pb && pa->connected_to (pb->name())) {
+				return true;
 			}
 		}
 	}

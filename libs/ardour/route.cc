@@ -3580,8 +3580,10 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<GraphNode> node, boo
 	boost::shared_ptr<Route> other (boost::dynamic_pointer_cast<Route> (node));
 	assert (other);
 
+	IOVector const& other_inputs (other->all_inputs());
+
 	DEBUG_TRACE (DEBUG::Graph, string_compose ("Feeds from %1 (-> %2)?\n", _name, other->name()));
-	if (other->all_inputs().fed_by (_output)) {
+	if (other_inputs.fed_by (_output)) {
 		DEBUG_TRACE (DEBUG::Graph, string_compose ("\tdirect FEEDS to %1\n", other->name()));
 		if (via_send_only) {
 			*via_send_only = false;
@@ -3608,7 +3610,7 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<GraphNode> node, boo
 				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does feed its own return (%2)\n", iop->name(), other->name()));
 				continue;
 			}
-			if ((iop_out && other->all_inputs().fed_by (iop_out)) || iop->feeds (other)) {
+			if (iop->feeds (other) || (iop_out && other_inputs.fed_by (iop_out))) {
 				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does feed %2\n", iop->name(), other->name()));
 				if (via_send_only) {
 					*via_send_only = true;
