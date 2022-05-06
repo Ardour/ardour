@@ -52,14 +52,12 @@
 #include "trigger_page.h"
 #include "keyboard.h"
 #include "keyeditor.h"
-#include "splash.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
 #include "time_info_box.h"
 #include "trigger_ui.h"
 #include "step_entry.h"
 #include "opts.h"
-#include "utils.h"
 
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
@@ -204,7 +202,9 @@ ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 bool
 ARDOUR_UI::idle_ask_about_quit ()
 {
-	if (_session && _session->dirty()) {
+	const auto ask_before_closing = UIConfiguration::instance ().get_ask_before_closing_last_window ();
+
+	if ((_session && _session->dirty ()) || !ask_before_closing) {
 		finish ();
 	} else {
 		/* no session or session not dirty, but still ask anyway */
@@ -216,7 +216,7 @@ ARDOUR_UI::idle_ask_about_quit ()
 		                         true); /* modal */
 		msg.set_default_response (Gtk::RESPONSE_YES);
 
-		if (msg.run() == Gtk::RESPONSE_YES) {
+		if (msg.run () == Gtk::RESPONSE_YES) {
 			finish ();
 		}
 	}

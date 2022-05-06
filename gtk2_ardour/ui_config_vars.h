@@ -138,6 +138,7 @@ UI_CONFIG_VARIABLE (bool, show_triggers_inline, "show-triggers-inline", false)
 UI_CONFIG_VARIABLE (bool, one_plugin_window_only, "one-plugin-window-only", false)
 UI_CONFIG_VARIABLE (int, default_lower_midi_note, "default-lower-midi-note", 60)
 UI_CONFIG_VARIABLE (int, default_upper_midi_note, "default-upper-midi-note", 71)
+UI_CONFIG_VARIABLE (bool, ask_before_closing_last_window, "ask-before-closing-last-window", true)
 
 /* these are visibility-type selections in the New Track dialog that we should make persistent for the user's choices */
 UI_CONFIG_VARIABLE (bool, show_on_cue_page, "show-on-cue-page", true)
