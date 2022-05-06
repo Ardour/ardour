@@ -31,6 +31,7 @@
 
 namespace ARDOUR {
 	class Processor;
+	class PlugInsertBase;
 }
 
 class PluginLoadStatsGui;
@@ -55,7 +56,9 @@ private:
 	void clear_all_stats ();
 	void sort_by_stats (bool);
 	void add_processor_to_display (boost::weak_ptr<ARDOUR::Processor>, std::string const&);
+	void add_pluginsert_to_display (boost::shared_ptr<ARDOUR::PlugInsertBase>, std::string const&);
 	void clear_processor_stats (boost::weak_ptr<ARDOUR::Processor>);
+	void clear_pluginsert_stats (boost::shared_ptr<ARDOUR::PlugInsertBase>);
 
 	Gtk::ScrolledWindow _scroller;
 	Gtk::VBox _box;
