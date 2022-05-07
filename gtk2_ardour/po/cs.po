@@ -2018,7 +2018,7 @@ msgstr "Odstranit obraz"
 
 #: ardour_ui_ed.cc:207
 msgid "Export to Video File..."
-msgstr "Vyvést jako soubor s obrazovým záznamem..."
+msgstr "Exportovat jako soubor s obrazovým záznamem..."
 
 #: ardour_ui_ed.cc:211
 msgid "Snapshot (& keep working on current version) ..."
@@ -2409,11 +2409,11 @@ msgstr "Zavést"
 
 #: ardour_ui_ed.cc:571
 msgid "Stem export..."
-msgstr "Vyvést vybranou stopu jako jeden soubor..."
+msgstr "Exportovat vybranou stopu jako jeden soubor..."
 
 #: ardour_ui_ed.cc:574
 msgid "Export to Audio File(s)..."
-msgstr "Vyvést jako zvukový soubor(y)..."
+msgstr "Exportovat jako zvukový soubor(y)..."
 
 #: ardour_ui_ed.cc:577
 msgid "Clean-up Unused Sources..."
@@ -3905,11 +3905,11 @@ msgstr "Odrazit rozsah do seznamu zdrojů se zpracováním signálu"
 
 #: editor.cc:1977 editor_markers.cc:970
 msgid "Export Range..."
-msgstr "Vyvést rozsah..."
+msgstr "Exportovat rozsah..."
 
 #: editor.cc:1979
 msgid "Export Video Range..."
-msgstr "Vyvést rozsah obrazového záznamu..."
+msgstr "Exportovat rozsah obrazového záznamu..."
 
 #: editor.cc:1995 editor.cc:2077 editor_actions.cc:349
 msgid "Play from Edit Point"
@@ -4866,11 +4866,11 @@ msgstr "Znovu změnu výběru"
 
 #: editor_actions.cc:373
 msgid "Export Audio"
-msgstr "Vyvést zvuk"
+msgstr "Exportovat zvuk"
 
 #: editor_actions.cc:374 export_dialog.cc:532
 msgid "Export Range"
-msgstr "Vyvést rozsah"
+msgstr "Exportovat rozsah"
 
 #: editor_actions.cc:379
 msgid "Separate Using Punch Range"
@@ -7743,11 +7743,11 @@ msgstr ""
 
 #: export_dialog.cc:547
 msgid "Export Selection"
-msgstr "Vyvést výběr"
+msgstr "Exportovat výběr"
 
 #: export_dialog.cc:561
 msgid "Export Region"
-msgstr "Vyvést oblast"
+msgstr "Exportovat oblast"
 
 #: export_dialog.cc:586
 msgid "Stem Export"
@@ -9384,7 +9384,7 @@ msgstr "Klepnout pro vynucení všech nahrávaných kanálů do %1"
 
 #: midi_export_dialog.cc:37
 msgid "Export MIDI: %1"
-msgstr "Vyvést jako MIDI: %1"
+msgstr "Exportovat jako MIDI: %1"
 
 #: midi_list_editor.cc:58
 msgid "Whole"
@@ -16561,7 +16561,7 @@ msgstr "Uložit popis"
 
 #: template_dialog.cc:227
 msgid "Export all"
-msgstr "Vyvést vše"
+msgstr "Exportovat vše"
 
 #: template_dialog.cc:233
 msgid "Template Name"
@@ -16614,7 +16614,7 @@ msgstr "Přepsat"
 
 #: template_dialog.cc:563
 msgid "Exporting templates"
-msgstr "Vyvádí se předlohy"
+msgstr "Exportují se předlohy"
 
 #: template_dialog.cc:576
 msgid "Import template archives"
@@ -17698,7 +17698,7 @@ msgstr "Nelze vytvořit složku pro obrazový záznam \"%1\" (%2)"
 
 #: export_video_dialog.cc:73
 msgid "Export Video File "
-msgstr "Vyvést soubor s obrazem "
+msgstr "Exportovat soubor s obrazem "
 
 #: export_video_dialog.cc:84
 msgid "Video:"
@@ -17835,7 +17835,7 @@ msgstr "Exportování zvuku"
 
 #: export_video_dialog.cc:660
 msgid "Exporting Audio..."
-msgstr "Vyvádí se zvuk..."
+msgstr "Exportuje se zvuk..."
 
 #: export_video_dialog.cc:717
 msgid ""
@@ -17847,7 +17847,7 @@ msgstr ""
 
 #: export_video_dialog.cc:747
 msgid "Export Video: export-range does not include video."
-msgstr "Vyvést obrazový záznam: Rozsah k vyvedení nezahrnuje obrazový záznam."
+msgstr "Exportovat obrazový záznam: Rozsah k vyvedení nezahrnuje obrazový záznam."
 
 #: export_video_dialog.cc:760
 msgid "Export Video: No Master Out Ports to Connect for Audio Export"
@@ -19638,7 +19638,7 @@ msgstr ""
 #~ msgstr "Otevřít obrazový záznam"
 
 #~ msgid "Export to Video File"
-#~ msgstr "Vyvést jako soubor s obrazovým záznamem"
+#~ msgstr "Exportovat jako soubor s obrazovým záznamem"
 
 #~ msgid "Show Toolbars"
 #~ msgstr "Ukázat nástrojové panely"
@@ -19866,13 +19866,13 @@ msgstr ""
 #~ "Klepnutím se poslech zastaví."
 
 #~ msgid "Export To Video File"
-#~ msgstr "Vyvést jako soubor s obrazovým záznamem"
+#~ msgstr "Exportovat jako soubor s obrazovým záznamem"
 
 #~ msgid "Snapshot..."
 #~ msgstr "Snímek obrazovky..."
 
 #~ msgid "Export To Audio File(s)..."
-#~ msgstr "Vyvést jako zvukový soubor(y)..."
+#~ msgstr "Exportovat jako zvukový soubor(y)..."
 
 #~ msgid "Reference"
 #~ msgstr "Odkaz"
@@ -20009,10 +20009,10 @@ msgstr ""
 #~ msgstr "Nečinné"
 
 #~ msgid "Export region contents"
-#~ msgstr "Vyvést obsah oblasti"
+#~ msgstr "Exportovat obsah oblasti"
 
 #~ msgid "Export track output"
-#~ msgstr "Vyvést výstup stopy"
+#~ msgstr "Exportovat výstup stopy"
 
 #~ msgid "Insert time on all the track's playlists"
 #~ msgstr "Vložit čas do všech seznamů skladeb stopy"
@@ -22120,10 +22120,10 @@ msgstr ""
 #~ msgstr "Barva háčku"
 
 #~ msgid "ardour: export ranges"
-#~ msgstr "ardour: vyvést oblasti do souboru"
+#~ msgstr "ardour: exportovat oblasti do souboru"
 
 #~ msgid "Export to Directory"
-#~ msgstr "Vyvést v podobě souboru do adresáře"
+#~ msgstr "Exportovat v podobě souboru do adresáře"
 
 #~ msgid "Please enter a valid target directory."
 #~ msgstr "Zadejte, prosím, platný cílový adresář."
@@ -22183,11 +22183,11 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "Export selection to audiofile..."
-#~ msgstr "Vyvést sezení jako zvukový soubor..."
+#~ msgstr "Exportovat sezení jako zvukový soubor..."
 
 #, fuzzy
 #~ msgid "Export range markers to audiofile..."
-#~ msgstr "Vyvést oblasti určené značkami jako zvukový soubor..."
+#~ msgstr "Exportovat oblasti určené značkami jako zvukový soubor..."
 
 #~ msgid "Track/Bus Inspector"
 #~ msgstr "Dohlížitel stopy/sběrnice"
@@ -22629,7 +22629,7 @@ msgstr ""
 #~ msgstr "Zřídit úryvek z oblasti"
 
 #~ msgid "Export range"
-#~ msgstr "Vyvést oblast do souboru"
+#~ msgstr "Exportovat oblast do souboru"
 
 #~ msgid "Play from edit point"
 #~ msgstr "Přehrávat od pracovního bodu"
@@ -22680,7 +22680,7 @@ msgstr ""
 #~ msgstr "Název (šablona; pro mixér)"
 
 #~ msgid "ardour: export region"
-#~ msgstr "ardour: vyvést oblast do souboru"
+#~ msgstr "ardour: exportovat oblast do souboru"
 
 #~ msgid "Varispeed"
 #~ msgstr "Vari rychlost"
@@ -22982,7 +22982,7 @@ msgstr ""
 #~ msgstr "Druh vložení šumu do signálu (ditheringu)"
 
 #~ msgid "Export CD Marker File Only"
-#~ msgstr "Vyvést pouze soubor značky na CD"
+#~ msgstr "Exportovat pouze soubor značky na CD"
 
 #~ msgid "Specific tracks ..."
 #~ msgstr "Určité stopy..."
@@ -23017,7 +23017,7 @@ msgstr ""
 #~ msgstr "TOC"
 
 #~ msgid "Ardour cannot export audio when disconnected"
-#~ msgstr "Ardour nemůže vyvést zvuk, když je odpojen od JACKu."
+#~ msgstr "Ardour nemůže exportova zvuk, když je odpojen od JACKu."
 
 #~ msgid "Please enter a valid filename."
 #~ msgstr "Zadejte, prosím, platný název souboru."
@@ -23306,7 +23306,7 @@ msgstr ""
 #~ msgstr "Naposledy použité..."
 
 #~ msgid "Export selected range to audiofile..."
-#~ msgstr "Vyvést oblast výběru jako zvukový soubor..."
+#~ msgstr "Exportovat oblast výběru jako zvukový soubor..."
 
 #~ msgid "Seamless Looping"
 #~ msgstr "Souvislá smyčka"
@@ -23348,7 +23348,7 @@ msgstr ""
 #~ msgstr "Rozdělit oblast"
 
 #~ msgid "Export selected regions to audiofile..."
-#~ msgstr "Vyvést vybrané oblasti jako zvukový soubor..."
+#~ msgstr "Exportovat vybrané oblasti jako zvukový soubor..."
 
 #~ msgid "Lock Region"
 #~ msgstr "Uzamknout oblast"
@@ -23724,7 +23724,7 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "ardour: rename region"
-#~ msgstr "ardour: vyvést oblast do souboru"
+#~ msgstr "ardour: exportovat oblast do souboru"
 
 #, fuzzy
 #~ msgid "set region sync position"
@@ -23794,7 +23794,7 @@ msgstr ""
 
 #, fuzzy
 #~ msgid "ardour: region "
-#~ msgstr "ardour: vyvést oblast do souboru"
+#~ msgstr "ardour: exportovat oblast do souboru"
 
 #, fuzzy
 #~ msgid "ardour: track/bus inspector: "
