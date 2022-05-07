@@ -98,15 +98,19 @@ Resampler::setup (unsigned int fs_inp,
 		}
 	}
 	clear ();
-	if (T) {
-		_table = T;
-		_buff  = B;
-		_nchan = nchan;
-		_inmax = k;
-		_pstep = s;
-		return reset ();
+
+	if (!T || !B) {
+		Resampler_table::destroy (T);
+		delete [] B;
+		return 1;
 	}
-	else return 1;
+
+	_table = T;
+	_buff  = B;
+	_nchan = nchan;
+	_inmax = k;
+	_pstep = s;
+	return reset ();
 }
 
 void
