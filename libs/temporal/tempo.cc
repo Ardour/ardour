@@ -2440,8 +2440,9 @@ TempoMap::set_state (XMLNode const & node, int version)
 
 	/* XXX this should probably be at the global level in the session file because it affects a lot more than just the tempo map, potentially */
 	superclock_t sc;
-	node.get_property (X_("superclocks-per-second"), sc);
-	set_superclock_ticks_per_second (sc);
+	if (node.get_property (X_("superclocks-per-second"), sc)) {
+		set_superclock_ticks_per_second (sc);
+	}
 
 	node.get_property (X_("time-domain"), _time_domain);
 
