@@ -7854,7 +7854,7 @@ msgstr "Vybrat složku pro vyvedení"
 
 #: export_format_dialog.cc:39
 msgid "New Export Format Profile"
-msgstr "Nový exportní profil formátu"
+msgstr "nový profil exportního formátu"
 
 #: export_format_dialog.cc:39
 msgid "Edit Export Format Profile"
@@ -10554,7 +10554,7 @@ msgstr "Již jsem podporovatelem!"
 
 #: nag.cc:45
 msgid "Ask about this the next time I export"
-msgstr "Zeptejte se mě na to, až příště budu něco exportovat do souboru"
+msgstr "Zeptat se i příště / při dalším exportu"
 
 #: nag.cc:46
 msgid "Never ever ask me about this again"
@@ -17472,7 +17472,7 @@ msgid ""
 msgstr ""
 "Instalace ffmpeg nebyla v tomto systému nalezena.\n"
 "%1 vyžaduje ffmpeg a ffprobe z ffmpeg.org - verze 1.1 nebo novější.\n"
-"Zavádění a exportování obrazu není možné, dokud nenainstalujete nástroje.\n"
+"Importování a exportování videa není možné, dokud nenainstalujete nástroje.\n"
 "\n"
 "Tyto nástroje jsou součástí vydání %1 ze stránek ardour.org a také "
 "dostupné s videoserverem na adrese http://x42.github.com/harvid/\n"
@@ -17487,7 +17487,7 @@ msgstr ""
 
 #: transcode_video_dialog.cc:59
 msgid "Transcode/Import Video File "
-msgstr "Překódovat/Zavést soubor s obrazem "
+msgstr "Překódovat/Zavést soubor s videem "
 
 #: transcode_video_dialog.cc:61
 msgid "Output File:"
@@ -17503,7 +17503,7 @@ msgstr "Výška = "
 
 #: transcode_video_dialog.cc:69
 msgid "Extract LTC from audio and align video"
-msgstr "Vytáhnout LTC ze zvuku a zarovnat obraz"
+msgstr "Vytáhnout LTC ze zvuku a zarovnat video"
 
 #: transcode_video_dialog.cc:70
 msgid "Manual Override"
@@ -17522,8 +17522,8 @@ msgid ""
 "ffmpeg installation was not found. Video Import is not possible. See the Log "
 "window for more information."
 msgstr ""
-"V tomto systému se nepodařilo najít žádnou instalaci ffmpeg. Zavádění "
-"obrazových záznamů není, dokud tyto nástroje nenainstalujete, možné. "
+"V tomto systému se nepodařilo najít žádnou instalaci ffmpeg. Import "
+"video záznamů není, dokud tyto nástroje nenainstalujete, možné. "
 "Podívejte se na okno se zápisem na další informace."
 
 #: transcode_video_dialog.cc:123
@@ -17532,7 +17532,7 @@ msgid ""
 "unsupported video codec or format."
 msgstr ""
 "Informace o souboru nelze přečíst. Zřejmě '%1' není platným souborem se "
-"záznamem obrazu, nebo obsahuje nepodporovaný kodek obrazu nebo formát obrazu."
+"záznamem obrazu, nebo obsahuje nepodporovaný kodek videa nebo formát videa."
 
 #: transcode_video_dialog.cc:140
 msgid "FPS:"
@@ -17560,19 +17560,19 @@ msgstr "Odkaz z nynějšího umístění (předtím jen pro překódované soubo
 
 #: transcode_video_dialog.cc:188
 msgid "Import/Transcode Video to Session"
-msgstr "Zavést/Překódovat obraz do sezení"
+msgstr "Zavést/Překódovat video do sezení"
 
 #: transcode_video_dialog.cc:191 transcode_video_dialog.cc:201
 msgid "Do Not Import Video (Audio Import Only)"
-msgstr "Nezavádět obraz (zavést pouze zvukový záznam)"
+msgstr "Nezavádět video (zavést pouze zvukový záznam)"
 
 #: transcode_video_dialog.cc:211
 msgid "Do Not Import Video"
-msgstr "Nezavádět obraz"
+msgstr "Nezavádět video"
 
 #: transcode_video_dialog.cc:227
 msgid "Scale Video: Width = "
-msgstr "Změna velikosti obrazu: Šířka = "
+msgstr "Změna velikosti videa: Šířka = "
 
 #: transcode_video_dialog.cc:233
 msgid "Original Width"
@@ -17604,7 +17604,7 @@ msgstr "Zvuk se nepodařilo vytáhnout."
 
 #: transcode_video_dialog.cc:407
 msgid "Transcoding Video.."
-msgstr "Překódovává se obrazový záznam..."
+msgstr "Překódovává se video záznam..."
 
 #: transcode_video_dialog.cc:441
 msgid "Transcoding Failed."
@@ -17612,11 +17612,11 @@ msgstr "Překódování se nezdařilo."
 
 #: transcode_video_dialog.cc:545
 msgid "Save Transcoded Video File"
-msgstr "Uložit překódovaný soubor s obrazem"
+msgstr "Uložit překódovaný soubor s videem"
 
 #: video_server_dialog.cc:57
 msgid "Launch Video Server"
-msgstr "Spustit obrazový server"
+msgstr "Spustit video server"
 
 #: video_server_dialog.cc:58
 msgid "Server Executable:"
@@ -17640,7 +17640,7 @@ msgid ""
 "\n"
 "see also http://manual.ardour.org/video-timeline/setup/"
 msgstr ""
-"Vnější obrazový server 'harvid' nelze najít.\n"
+"Vnější video server 'harvid' nelze najít.\n"
 "Nástroj je zahrnut v %1 vydání ardour.org, popřípadě jej můžete stáhnout z "
 "http://x42.github.com/harvid/ or acquire it from your distribution.\n"
 "\n"
@@ -17664,13 +17664,13 @@ msgid ""
 "The server configured in Edit -> Preferences -> Video is not reachable.\n"
 "Do you want %1 to launch 'harvid' on this machine?"
 msgstr ""
-"%1 potřebuje vnější obrazový server pro časovou osu obrazu.\n"
-"Server nastavovaný v Úpravy →  Nastavení  → Obraz není dosažitelný.\n"
+"%1 potřebuje vnější video server pro časovou osu videa.\n"
+"Server nastavovaný v Úpravy →  Nastavení  → Video není dosažitelný.\n"
 "Chcete, aby %1 spustil na tomto počítači \"harvid\"?"
 
 #: video_server_dialog.cc:191
 msgid "Set Video Server Executable"
-msgstr "Nastavit spustitelný soubor obrazového serveru"
+msgstr "Nastavit spustitelný soubor video serveru"
 
 #: video_server_dialog.cc:211
 msgid "Server docroot"
@@ -17678,15 +17678,15 @@ msgstr "Docroot serveru"
 
 #: utils_videotl.cc:67
 msgid "Destination is outside Video Server's docroot. "
-msgstr "Cíl se nachází vně docroot obrazového serveru. "
+msgstr "Cíl se nachází vně docroot video serveru. "
 
 #: utils_videotl.cc:68
 msgid ""
 "The destination file path is outside of the Video Server's docroot. The file "
 "will not be readable by the Video Server. Do you still want to continue?"
 msgstr ""
-"Cesta k cílovému souboru se nachází vně docroot obrazového serveru. Soubor "
-"nebude obrazový server moci přečíst. Stále ještě chcete pokračovat?"
+"Cesta k cílovému souboru se nachází vně docroot video serveru. Soubor "
+"nebude video server moci přečíst. Stále ještě chcete pokračovat?"
 
 #: utils_videotl.cc:83
 msgid "Confirm Overwrite"
@@ -17694,15 +17694,15 @@ msgstr "Potvrdit přepsání"
 
 #: utils_videotl.cc:93 utils_videotl.cc:109
 msgid "Cannot create video folder \"%1\" (%2)"
-msgstr "Nelze vytvořit složku pro obrazový záznam \"%1\" (%2)"
+msgstr "Nelze vytvořit složku pro video záznam \"%1\" (%2)"
 
 #: export_video_dialog.cc:73
 msgid "Export Video File "
-msgstr "Exportovat soubor s obrazem "
+msgstr "Exportovat video soubor"
 
 #: export_video_dialog.cc:84
 msgid "Video:"
-msgstr "Obrazový záznam:"
+msgstr "Video"
 
 #: export_video_dialog.cc:89
 msgid "Scale Video (W x H):"
