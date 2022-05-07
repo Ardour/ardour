@@ -7854,7 +7854,7 @@ msgstr "Vybrat složku pro vyvedení"
 
 #: export_format_dialog.cc:39
 msgid "New Export Format Profile"
-msgstr "nový profil exportního formátu"
+msgstr "Nový profil exportního formátu"
 
 #: export_format_dialog.cc:39
 msgid "Edit Export Format Profile"
