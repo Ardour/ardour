@@ -3116,7 +3116,7 @@ msgstr "Nebyl vybrán žádný obrazový soubor"
 
 #: ardour_ui_video.cc:355
 msgid "No LTC detected, video will not be aligned."
-msgstr "Nebyl zjištěn žádný LTC. Obrazový záznam nebude zarovnán."
+msgstr "Nebyl zjištěn žádný LTC. Video nebude zarovnáno."
 
 #: ardour_ui_video.cc:361
 msgid "Align video-start to %1 [samples]"
@@ -17393,7 +17393,7 @@ msgid ""
 msgstr ""
 "Nepodařilo se zpracovat informace o souboru s obrazovým záznamem. Běží "
 "obrazový server? Je soubor čitelný obrazovým serverem? Souhlasí docroot? Jde "
-"o soubor s obrazem? Je to obrazový záznam?"
+"o soubor s obrazem? Je to video?"
 
 #: video_timeline.cc:499
 msgid ""
@@ -17847,7 +17847,7 @@ msgstr ""
 
 #: export_video_dialog.cc:747
 msgid "Export Video: export-range does not include video."
-msgstr "Exportovat obrazový záznam: Rozsah k vyvedení nezahrnuje obrazový záznam."
+msgstr "Exportovat obrazový video: Rozsah k vyvedení nezahrnuje video."
 
 #: export_video_dialog.cc:760
 msgid "Export Video: No Master Out Ports to Connect for Audio Export"
@@ -17857,7 +17857,7 @@ msgstr ""
 
 #: export_video_dialog.cc:803
 msgid "Encoding Video..."
-msgstr "Kóduje se obrazový záznam..."
+msgstr "Kóduje se video..."
 
 #: export_video_dialog.cc:823
 msgid "Export Video: Video input file cannot be read."
@@ -17867,11 +17867,11 @@ msgstr ""
 
 #: export_video_dialog.cc:929
 msgid "Encoding Video.. Pass 1/2"
-msgstr "Překódovává se obrazový záznam... Průchod 1/2"
+msgstr "Překódovává se video... Průchod 1/2"
 
 #: export_video_dialog.cc:941
 msgid "Encoding Video.. Pass 2/2"
-msgstr "Překódovává se obrazový záznam... Průchod 2/2"
+msgstr "Překódovává se video... Průchod 2/2"
 
 #: export_video_dialog.cc:1025
 msgid "Transcoding failed."
@@ -18074,7 +18074,7 @@ msgstr ""
 #~ "Jedna nebo více oblastí zvuku\n"
 #~ "je zamknuta a zamknuta\n"
 #~ "k obrazovému záznamu.\n"
-#~ "Obrazový záznam nelze přesunout."
+#~ "Video nelze přesunout."
 
 #~ msgid ""
 #~ "<b>%1</b>\n"
@@ -19635,7 +19635,7 @@ msgstr ""
 #~ "Tato obrazovka není dostatečně velká na to, aby zobrazila okno směšovače"
 
 #~ msgid "Open Video"
-#~ msgstr "Otevřít obrazový záznam"
+#~ msgstr "Otevřít video"
 
 #~ msgid "Export to Video File"
 #~ msgstr "Exportovat jako soubor s obrazovým záznamem"
