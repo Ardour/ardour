@@ -7723,7 +7723,7 @@ msgstr "Nahrává se '%3' (časový úsek %1 z %2)"
 
 #: export_dialog.cc:481
 msgid "Running Post Export Command for '%1'"
-msgstr "Provádí se povyváděcí příkaz pro '%1'"
+msgstr "Provádí se exportní příkaz pro '%1'"
 
 #: export_dialog.cc:509 export_dialog.cc:511
 msgid "<span color=\"#ffa755\">Error: "
@@ -7854,11 +7854,11 @@ msgstr "Vybrat složku pro vyvedení"
 
 #: export_format_dialog.cc:39
 msgid "New Export Format Profile"
-msgstr "Nový vyváděcí profil formátu"
+msgstr "Nový exportní profil formátu"
 
 #: export_format_dialog.cc:39
 msgid "Edit Export Format Profile"
-msgstr "Upravit vyváděcí profil formátu"
+msgstr "Upravit exportní profil formátu"
 
 #: export_format_dialog.cc:46
 msgid "Label: "
@@ -10554,7 +10554,7 @@ msgstr "Již jsem podporovatelem!"
 
 #: nag.cc:45
 msgid "Ask about this the next time I export"
-msgstr "Zeptejte se mě na to, až příště budu něco vyvádět do souboru"
+msgstr "Zeptejte se mě na to, až příště budu něco exportovat do souboru"
 
 #: nag.cc:46
 msgid "Never ever ask me about this again"
@@ -17472,7 +17472,7 @@ msgid ""
 msgstr ""
 "Instalace ffmpeg nebyla v tomto systému nalezena.\n"
 "%1 vyžaduje ffmpeg a ffprobe z ffmpeg.org - verze 1.1 nebo novější.\n"
-"Zavádění a vyvádění obrazu není možné, dokud nenainstalujete nástroje.\n"
+"Zavádění a exportního obrazu není možné, dokud nenainstalujete nástroje.\n"
 "\n"
 "Tyto nástroje jsou součástí vydání %1 ze stránek ardour.org a také "
 "dostupné s videoserverem na adrese http://x42.github.com/harvid/\n"
@@ -17751,7 +17751,7 @@ msgid ""
 "ffmpeg installation was not found. Video Export is not possible. See the Log "
 "window for more information."
 msgstr ""
-"V tomto systému se nepodařilo najít žádnou instalaci ffmpeg. Vyvádění "
+"V tomto systému se nepodařilo najít žádnou instalaci ffmpeg. Exportování "
 "obrazových záznamů není, dokud tyto nástroje nenainstalujete, možné. "
 "Podívejte se na okno se zápisem na další informace."
 
@@ -17831,7 +17831,7 @@ msgstr "Normalizovámí zvuku"
 
 #: export_video_dialog.cc:594 export_video_dialog.cc:599
 msgid "Exporting audio"
-msgstr "Vyvádění zvuku"
+msgstr "Exportování zvuku"
 
 #: export_video_dialog.cc:660
 msgid "Exporting Audio..."
@@ -20241,7 +20241,7 @@ msgstr ""
 #~ "for more information."
 #~ msgstr ""
 #~ "V tomto systému se nepodařilo najít žádný spustitelný soubor pro ffprobe "
-#~ "nebo ffmpeg. Vyvádění obrazových záznamů není, dokud tyto nástroje "
+#~ "nebo ffmpeg. Exportování obrazových záznamů není, dokud tyto nástroje "
 #~ "nenainstalujete, možné. Podívejte se na okno se zápisem na další "
 #~ "informace."
 
