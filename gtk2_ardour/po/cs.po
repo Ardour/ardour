@@ -7723,7 +7723,7 @@ msgstr "Nahrává se '%3' (časový úsek %1 z %2)"
 
 #: export_dialog.cc:481
 msgid "Running Post Export Command for '%1'"
-msgstr "Provádí se exportní příkaz pro '%1'"
+msgstr "Provádí se post-exportní příkaz pro '%1'"
 
 #: export_dialog.cc:509 export_dialog.cc:511
 msgid "<span color=\"#ffa755\">Error: "
