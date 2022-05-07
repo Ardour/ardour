@@ -520,6 +520,8 @@ public:
 
 	if (acfLength < maxlag) {
 	    // Not enough data
+	    delete [] acf;
+	    delete [] temp;
 	    return 0.0;
 	}
 
