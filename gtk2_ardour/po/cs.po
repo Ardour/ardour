@@ -17698,11 +17698,11 @@ msgstr "Nelze vytvořit složku pro video záznam \"%1\" (%2)"
 
 #: export_video_dialog.cc:73
 msgid "Export Video File "
-msgstr "Exportovat video soubor"
+msgstr "Exportovat video soubor "
 
 #: export_video_dialog.cc:84
 msgid "Video:"
-msgstr "Video"
+msgstr "Video:"
 
 #: export_video_dialog.cc:89
 msgid "Scale Video (W x H):"
