@@ -40,8 +40,8 @@ namespace WM {
 class ArdourDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
 {
 public:
-	ArdourDialog (std::string title, bool modal = false, bool use_separator = false);
-	ArdourDialog (Gtk::Window& parent, std::string title, bool modal = false, bool use_separator = false);
+	explicit ArdourDialog (const std::string& title, bool modal = false, bool use_separator = false);
+	ArdourDialog (Gtk::Window& parent, const std::string& title, bool modal = false, bool use_separator = false);
 	~ArdourDialog();
 
 	bool on_focus_in_event (GdkEventFocus*);
