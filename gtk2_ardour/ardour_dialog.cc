@@ -30,7 +30,6 @@
 #include "keyboard.h"
 #include "splash.h"
 #include "ui_config.h"
-#include "utils.h"
 #include "window_manager.h"
 
 using namespace std;
@@ -38,21 +37,21 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR_UI_UTILS;
 
-ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
-	: Dialog (title, modal, use_seperator)
-	, _sensitive (true)
-	, proxy (0)
-	, _splash_pushed (false)
+ArdourDialog::ArdourDialog (const string& title, bool modal, bool use_seperator)
+        : Dialog (title, modal, use_seperator)
+        , _sensitive (true)
+        , proxy (nullptr)
+        , _splash_pushed (false)
 {
 	init ();
 	set_position (Gtk::WIN_POS_MOUSE);
 }
 
-ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool use_seperator)
-	: Dialog (title, parent, modal, use_seperator)
-	, _sensitive (true)
-	, proxy (0)
-	, _splash_pushed (false)
+ArdourDialog::ArdourDialog (Gtk::Window& parent, const string& title, bool modal, bool use_seperator)
+        : Dialog (title, parent, modal, use_seperator)
+        , _sensitive (true)
+        , proxy (nullptr)
+        , _splash_pushed (false)
 {
 	init ();
 	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
@@ -61,8 +60,8 @@ ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool 
 ArdourDialog::~ArdourDialog ()
 {
 	pop_splash ();
-	Keyboard::the_keyboard().focus_out_window (0, this);
-	WM::Manager::instance().remove (proxy);
+	Keyboard::the_keyboard ().focus_out_window (nullptr, this);
+	WM::Manager::instance ().remove (proxy);
 	proxy->explicit_delete ();
 }
 
@@ -90,7 +89,7 @@ void
 ArdourDialog::pop_splash ()
 {
 	if (_splash_pushed) {
-		Splash* spl = Splash::exists () ? Splash::instance() : NULL;
+		Splash* spl = Splash::exists () ? Splash::instance () : nullptr;
 
 		if (spl) {
 			spl->pop_front_for (*this);
@@ -100,17 +99,17 @@ ArdourDialog::pop_splash ()
 }
 
 bool
-ArdourDialog::on_focus_in_event (GdkEventFocus *ev)
+ArdourDialog::on_focus_in_event (GdkEventFocus* ev)
 {
-	Keyboard::the_keyboard().focus_in_window (ev, this);
+	Keyboard::the_keyboard ().focus_in_window (ev, this);
 	return Dialog::on_focus_in_event (ev);
 }
 
 bool
-ArdourDialog::on_focus_out_event (GdkEventFocus *ev)
+ArdourDialog::on_focus_out_event (GdkEventFocus* ev)
 {
-	if (!get_modal()) {
-		Keyboard::the_keyboard().focus_out_window (ev, this);
+	if (!get_modal ()) {
+		Keyboard::the_keyboard ().focus_out_window (ev, this);
 	}
 	return Dialog::on_focus_out_event (ev);
 }
@@ -118,7 +117,7 @@ ArdourDialog::on_focus_out_event (GdkEventFocus *ev)
 void
 ArdourDialog::on_unmap ()
 {
-	Keyboard::the_keyboard().leave_window (0, this);
+	Keyboard::the_keyboard ().leave_window (nullptr, this);
 	pop_splash ();
 	Dialog::on_unmap ();
 }
@@ -130,8 +129,8 @@ ArdourDialog::on_show ()
 
 	// never allow the splash screen to obscure any dialog
 
-	if (Splash::exists()) {
-		Splash* spl = Splash::instance();
+	if (Splash::exists ()) {
+		Splash* spl = Splash::instance ();
 
 		spl->pop_back_for (*this);
 		_splash_pushed = true;
@@ -156,14 +155,14 @@ ArdourDialog::init ()
 #ifdef __APPLE__
 	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 #else
-	if (UIConfiguration::instance().get_all_floating_windows_are_dialogs () || get_modal ()) {
+	if (UIConfiguration::instance ().get_all_floating_windows_are_dialogs () || get_modal ()) {
 		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 	} else {
 		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 	}
 #endif
 
-	Gtk::Window* parent = WM::Manager::instance().transient_parent();
+	Gtk::Window* parent = WM::Manager::instance ().transient_parent ();
 
 	if (parent) {
 		set_transient_for (*parent);
@@ -171,8 +170,8 @@ ArdourDialog::init ()
 
 	ARDOUR_UI::CloseAllDialogs.connect (sigc::mem_fun (*this, &ArdourDialog::close_self)); /* send a RESPONSE_CANCEL to self */
 
-	proxy = new WM::ProxyTemporary (get_title(), this);
-	WM::Manager::instance().register_window (proxy);
+	proxy = new WM::ProxyTemporary (get_title (), this);
+	WM::Manager::instance ().register_window (proxy);
 }
 
 void

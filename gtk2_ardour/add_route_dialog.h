@@ -74,63 +74,64 @@ public:
 		VCAMaster,
 		FoldbackBus,
 	};
-	TypeWanted type_wanted();
+	TypeWanted type_wanted ();
 
 	ARDOUR::ChanCount channels ();
-	uint32_t channel_count ();
-	int count ();
+	uint32_t          channel_count ();
+	int               count ();
 
-	std::string name_template () const;
-	bool name_template_is_default () const;
+	std::string           name_template () const;
+	bool                  name_template_is_default () const;
 	ARDOUR::PluginInfoPtr requested_instrument ();
 
-	ARDOUR::TrackMode mode();
+	ARDOUR::TrackMode   mode ();
 	ARDOUR::RouteGroup* route_group ();
 
-	RouteDialogs::InsertAt insert_at();
-	bool use_strict_io();
+	RouteDialogs::InsertAt insert_at ();
+	bool                   use_strict_io ();
 
-	bool show_on_cue_page();
+	bool show_on_cue_page ();
 
-	std::string get_template_path();
+	std::string get_template_path ();
 
 	void reset_name_edited () { name_edited_by_user = false; }
 
 private:
-	Gtk::Entry name_template_entry;
-	Gtk::Adjustment routes_adjustment;
-	Gtk::SpinButton routes_spinner;
-	Gtk::ComboBoxText channel_combo;
-	Gtk::Label configuration_label;
-	Gtk::Label manual_label;
-	Gtk::Label add_label;
-	Gtk::Label name_label;
-	Gtk::Label group_label;
-	Gtk::Label insert_label;
-	Gtk::Label strict_io_label;
-	Gtk::Label mode_label;
-	Gtk::Label instrument_label;
-	Gtk::ComboBoxText mode_combo;
-	Gtk::ComboBoxText route_group_combo;
+	Gtk::Entry         name_template_entry;
+	Gtk::Adjustment    routes_adjustment;
+	Gtk::SpinButton    routes_spinner;
+	Gtk::ComboBoxText  channel_combo;
+	Gtk::Label         configuration_label;
+	Gtk::Label         manual_label;
+	Gtk::Label         add_label;
+	Gtk::Label         name_label;
+	Gtk::Label         group_label;
+	Gtk::Label         insert_label;
+	Gtk::Label         strict_io_label;
+	Gtk::Label         mode_label;
+	Gtk::Label         instrument_label;
+	Gtk::ComboBoxText  mode_combo;
+	Gtk::ComboBoxText  route_group_combo;
 	InstrumentSelector instrument_combo;
-	Gtk::ComboBoxText insert_at_combo;
-	Gtk::ComboBoxText strict_io_combo;
-	Gtk::CheckButton show_on_cue_chkbox;
+	Gtk::ComboBoxText  insert_at_combo;
+	Gtk::ComboBoxText  strict_io_combo;
+	Gtk::CheckButton   show_on_cue_chkbox;
 
 	void track_type_chosen ();
 	void refill_channel_setups ();
 	void refill_route_groups ();
 	void refill_track_modes ();
-	void add_route_group (ARDOUR::RouteGroup *);
+	void add_route_group (ARDOUR::RouteGroup*);
 	void group_changed ();
 	void channel_combo_changed ();
-	bool channel_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i);
-	bool route_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i);
+	bool channel_separator (const Glib::RefPtr<Gtk::TreeModel>& m, const Gtk::TreeModel::iterator& i);
+	bool route_separator (const Glib::RefPtr<Gtk::TreeModel>& m, const Gtk::TreeModel::iterator& i);
 	void maybe_update_name_template_entry ();
 	void instrument_changed ();
 
 	struct TrackTemplateColumns : public Gtk::TreeModel::ColumnRecord {
-		TrackTemplateColumns () {
+		TrackTemplateColumns ()
+		{
 			add (name);
 			add (path);
 			add (description);
@@ -145,8 +146,8 @@ private:
 
 	TrackTemplateColumns track_template_columns;
 
-	Glib::RefPtr<Gtk::TreeStore>  trk_template_model;
-	Gtk::TreeView                 trk_template_chooser;
+	Glib::RefPtr<Gtk::TreeStore> trk_template_model;
+	Gtk::TreeView                trk_template_chooser;
 
 	void trk_template_row_selected ();
 
@@ -154,10 +155,9 @@ private:
 	Gtk::Frame    trk_template_outer_frame;
 	Gtk::Frame    trk_template_desc_frame;
 
-	void reset_template_option_visibility ();
 	void new_group_dialog_finished (int, RouteGroupDialog*);
-	void on_show ();
-	void on_response (int);
+	void on_show () override;
+	void on_response (int) override;
 
 	struct ChannelSetup {
 		std::string name;
@@ -165,17 +165,17 @@ private:
 	};
 
 	typedef std::vector<ChannelSetup> ChannelSetups;
-	ChannelSetups channel_setups;
+	ChannelSetups                     channel_setups;
 
-	int last_route_count;
+	int  last_route_count;
 	bool route_count_set_by_template;
 
-	static std::vector<std::pair<std::string, std::string> > builtin_types;
-	static std::vector<std::string> channel_combo_strings;
-	static std::vector<std::string> bus_mode_strings;
+	static std::vector<std::pair<std::string, std::string>> builtin_types;
+	static std::vector<std::string>                         channel_combo_strings;
+	static std::vector<std::string>                         bus_mode_strings;
 
 	bool name_edited_by_user;
-	void name_template_entry_insertion (Glib::ustring const &,int*);
+	void name_template_entry_insertion (Glib::ustring const&, int*);
 	void name_template_entry_deletion (int, int);
 };
 

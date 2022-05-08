@@ -23,7 +23,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <cstdio>
 #include <cmath>
 
 #include <sigc++/bind.h>
@@ -49,12 +48,10 @@
 
 #include "LuaBridge/LuaBridge.h"
 
-#include "ardour_message.h"
 #include "add_route_dialog.h"
 #include "ardour_ui.h"
 #include "route_group_dialog.h"
 #include "ui_config.h"
-#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -66,7 +63,7 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
 std::vector<std::string> AddRouteDialog::channel_combo_strings;
-std::vector<std::pair<std::string,std::string> > AddRouteDialog::builtin_types;
+std::vector<std::pair<std::string, std::string>> AddRouteDialog::builtin_types;
 
 AddRouteDialog::AddRouteDialog ()
 	: ArdourDialog (_("Add Track/Bus/VCA"))
@@ -100,8 +97,7 @@ AddRouteDialog::AddRouteDialog ()
 	refill_track_modes ();
 
 	if (builtin_types.empty()) {
-		builtin_types.push_back (
-		   std::pair<string,string> (_("Audio Tracks"), std::string () +
+		builtin_types.emplace_back(_("Audio Tracks"), std::string () +
 		     _("Use these settings to create one or more audio tracks.") + "\n\n" +
 		     _("You may select:") + "\n" +
 		     "* " + _("The number of tracks to add") + "\n" +
@@ -112,10 +108,9 @@ AddRouteDialog::AddRouteDialog ()
 		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
 #endif
 		     "\n" + _("The track(s) will be added at the location specified by \"Position\"")
-		     ));
+		     );
 
-		builtin_types.push_back (
-		   std::pair<string,string> (_("MIDI Tracks"), std::string () +
+		builtin_types.emplace_back(_("MIDI Tracks"), std::string () +
 		     _("Use these settings to create one or more MIDI tracks.") + "\n\n" +
 		     _("You may select:") + "\n" +
 		     "* " + _("The number of tracks to add") + "\n" +
@@ -126,10 +121,9 @@ AddRouteDialog::AddRouteDialog ()
 		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
 #endif
 		     "\n" + _("The track(s) will be added at the location specified by \"Position\"")
-		     ));
+		     );
 
-		builtin_types.push_back (
-		   std::pair<string,string> (_("Audio Busses"), std::string () +
+		builtin_types.emplace_back(_("Audio Busses"), std::string () +
 		     _("Use these settings to create one or more audio busses.") + "\n\n" +
 		     _("You may select:") + "\n" +
 		     "* " + _("The number of busses to add") + "\n" +
@@ -139,10 +133,9 @@ AddRouteDialog::AddRouteDialog ()
 		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
 #endif
 		     "\n" + _("The buss(es) will be added at the location specified by \"Position\"")
-		     ));
+		     );
 
-		builtin_types.push_back (
-		   std::pair<string,string> (_("MIDI Busses"), std::string () +
+		builtin_types.emplace_back(_("MIDI Busses"), std::string () +
 		     _("Use these settings to create one or more MIDI busses.") + "\n\n" +
 		     _("MIDI busses can combine the output of multiple tracks. They are sometimes used\nto host a single \"heavy\" instrument plugin which is fed from multiple MIDI tracks.") + "\n\n" +
 		     _("You may select:") + "\n" +
@@ -154,24 +147,22 @@ AddRouteDialog::AddRouteDialog ()
 		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
 #endif
 		     "\n" + _("The buss(es) will be added at the location specified by \"Position\"")
-		     ));
+		     );
 
-		builtin_types.push_back (
-		   std::pair<string,string> (_("VCA Masters"), std::string () +
+		builtin_types.emplace_back(_("VCA Masters"), std::string () +
 		     _("Use these settings to create one or more VCA masters.") + "\n\n" +
 		     _("You may select:") + "\n" +
 		     "* " + _("The number of VCAs to add") + "\n" +
 		     "* " + _("A name for the VCA(s). \"%n\" will be replaced by an index number for each VCA")
-		     ));
+		     );
 
-		builtin_types.push_back (
-		   std::pair<string,string> (_("Foldback Busses"), std::string () +
+		builtin_types.emplace_back(_("Foldback Busses"), std::string () +
 		     _("Use these settings to create one or more foldback busses.") + "\n\n" +
 		     _("Foldback busses are used as master outputs for monitor channels and are fed by\nhidden monitor sends.") + "\n\n" +
 		     _("You may select:") + "\n" +
 		     "* " + _("The number of busses to add") + "\n" +
 		     "* " + _("A name for the buss(es)")
-		     ));
+		     );
 	}
 
 	insert_at_combo.append (_("First"));
@@ -361,9 +352,7 @@ AddRouteDialog::AddRouteDialog ()
 	refill_channel_setups ();
 }
 
-AddRouteDialog::~AddRouteDialog ()
-{
-}
+AddRouteDialog::~AddRouteDialog () = default;
 
 void
 AddRouteDialog::on_response (int r)

@@ -147,7 +147,6 @@ class SelectionPropertiesBox;
 class SoundFileOmega;
 class StreamView;
 class GridLines;
-class TempoLines;
 class TimeAxisView;
 class TimeInfoBox;
 class TimeFXDialog;
@@ -452,9 +451,6 @@ public:
 	                                                 bool use_context_click = false,
 	                                                 bool from_outside_canvas = false);
 
-	bool update_mouse_speed ();
-	bool decelerate_mouse_speed ();
-
 	void toggle_meter_updating();
 
 	void show_rhythm_ferret();
@@ -462,15 +458,9 @@ public:
 	void goto_visual_state (uint32_t);
 	void save_visual_state (uint32_t);
 
-	void queue_draw_resize_line (int at);
-	void start_resize_line_ops ();
-	void end_resize_line_ops ();
-
 	TrackViewList const & get_track_views () const {
 		return track_views;
 	}
-
-	void do_ptimport(std::string path, ARDOUR::SrcQuality quality);
 
 	void do_import (std::vector<std::string>              paths,
 	                Editing::ImportDisposition            disposition,
