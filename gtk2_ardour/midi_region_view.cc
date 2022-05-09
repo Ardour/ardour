@@ -3837,7 +3837,7 @@ MidiRegionView::duplicate_selection ()
 	paste (dup_pos, local_selection, ctxt);
 }
 
-/** This method handles undo */
+/** undo commands were initiated at the 'action' level. ::paste and ::paste_internal should implement subcommands */
 bool
 MidiRegionView::paste (timepos_t const & pos, const ::Selection& selection, PasteContext& ctx)
 {
@@ -3865,17 +3865,11 @@ MidiRegionView::paste (timepos_t const & pos, const ::Selection& selection, Past
 	const ATracks& atracks = midi_view()->automation_tracks();
 	for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
 		if (a->second->paste(pos, selection, ctx)) {
-			if(!commit) {
-				trackview.editor().begin_reversible_command (Operations::paste);
-			}
 			commit = true;
 		}
 	}
 
-	if (commit) {
-		trackview.editor().commit_reversible_command ();
-	}
-	return true;
+	return commit;
 }
 
 /** undo commands were initiated at the 'action' level. ::paste and ::paste_internal should implement subcommands */

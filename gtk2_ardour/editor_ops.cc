@@ -5173,6 +5173,7 @@ Editor::paste_internal (timepos_t const & pos, float times)
 		   R1.A1, R1.A2, R2, R2.A1, ... */
 	}
 
+	bool commit = false;
 	begin_reversible_command (Operations::paste);
 
 	if (ts.size() == 1 && cut_buffer->lines.size() == 1 &&
@@ -5181,7 +5182,7 @@ Editor::paste_internal (timepos_t const & pos, float times)
 	       "greedy" paste from one automation type to another. */
 
 		PasteContext ctx(paste_count, times, ItemCounts(), true);
-		ts.front()->paste (position, *cut_buffer, ctx);
+		commit |= ts.front()->paste (position, *cut_buffer, ctx);
 
 	} else {
 
@@ -5189,13 +5190,17 @@ Editor::paste_internal (timepos_t const & pos, float times)
 
 		PasteContext ctx(paste_count, times, ItemCounts(), false);
 		for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
-			(*i)->paste (position, *cut_buffer, ctx);
+			commit |= (*i)->paste (position, *cut_buffer, ctx);
 		}
 	}
 
 	++paste_count;
 
-	commit_reversible_command ();
+	if (commit) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 void
