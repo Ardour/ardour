@@ -6909,11 +6909,8 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 		length = length.round_to_subdivision (div, RoundUpMaybe);
 	}
 
-#warning NUTEMPO ALERT not snapping correctly
-
-	_editor->begin_reversible_command (_("Create Note"));
+	/* create_note_at() implements UNDO for us */
 	_region_view->create_note_at (timepos_t (start), _drag_rect->y0(), length, ev->button.state, false);
-	_editor->commit_reversible_command ();
 }
 
 double
@@ -6962,8 +6959,9 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	const Temporal::Beats start = beats - _region_view->region()->position().beats ();
 	Temporal::Beats length = _region_view->get_draw_length_beats (pos);
 
-	_editor->begin_reversible_command (_("Create Hit"));
 	_region_view->clear_note_selection();
+
+	/* create_note_at() implements UNDO for us */
 	_region_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
 
 	_last_pos = timepos_t (start);
