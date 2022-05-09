@@ -362,7 +362,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 			}
 		}
 
-		m->apply_command (*_session, cmd);
+		m->apply_diff_command_as_commit (*_session, cmd);
 
 		/* reset selection to be as it was before we rebuilt */
 
@@ -465,7 +465,7 @@ MidiListEditor::key_release (GdkEventKey* ev)
 		note = (*iter)[columns._note];
 		copy.reset (new NoteType (*note.get()));
 		cmd->add (copy);
-		m->apply_command (*_session, cmd);
+		m->apply_diff_command_as_commit (*_session, cmd);
 		/* model has been redisplayed by now */
 		path.next ();
 		/* select, start editing column 2 (note) */
@@ -531,7 +531,7 @@ MidiListEditor::delete_selected_note ()
 		cmd->remove (*i);
 	}
 
-	m->apply_command (*_session, cmd);
+	m->apply_diff_command_as_commit (*_session, cmd);
 }
 
 void
@@ -729,7 +729,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 			}
 		}
 
-		m->apply_command (*_session, cmd);
+		m->apply_diff_command_as_commit (*_session, cmd);
 
 		/* model has been redisplayed by now */
 		/* keep selected row(s), move cursor there, don't continue editing */
