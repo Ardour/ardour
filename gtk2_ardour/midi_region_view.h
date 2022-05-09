@@ -182,14 +182,17 @@ public:
 
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
+	/* note_diff commands should start here; this initiates an undo record */
 	void start_note_diff_command (std::string name = "midi edit");
+
 	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, uint8_t val);
 	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, Temporal::Beats val);
 	void note_diff_add_note (const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity = false);
 	void note_diff_remove_note (NoteBase* ev);
 
-	void apply_diff (bool as_subcommand = false, bool was_copy = false);
-	void abort_command();
+	/* note_diff commands should be completed with one of these calls; they may (or may not) commit the undo record */
+	void apply_note_diff (bool as_subcommand = false, bool was_copy = false);
+	void abort_note_diff();
 
 	void   note_entered(NoteBase* ev);
 	void   note_left(NoteBase* ev);

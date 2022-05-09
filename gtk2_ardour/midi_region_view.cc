@@ -801,7 +801,7 @@ MidiRegionView::channel_edit ()
 		i = next;
 	}
 
-	apply_diff ();
+	apply_note_diff ();
 }
 
 void
@@ -837,7 +837,7 @@ MidiRegionView::velocity_edit ()
 		i = next;
 	}
 
-	apply_diff ();
+	apply_note_diff ();
 }
 
 void
@@ -888,10 +888,8 @@ MidiRegionView::create_note_at (timepos_t const & t, double y, Temporal::Beats l
 	view->update_note_range(new_note->note());
 
 	start_note_diff_command(_("add note"));
-
 	note_diff_add_note (new_note, true, false);
-
-	apply_diff();
+	apply_note_diff();
 
 	trackview.editor().set_selected_midi_region_view (*this);
 	list<Evoral::event_id_t> to_be_selected;
@@ -940,6 +938,8 @@ MidiRegionView::start_note_diff_command (string name)
 	if (!_note_diff_command) {
 		trackview.editor().begin_reversible_command (name);
 		_note_diff_command = _model->new_note_diff_command (name);
+	} else {
+		std::cerr << "ERROR: start_note_diff_command command called, but a note_diff_command was already underway" << std::endl;
 	}
 }
 
@@ -986,7 +986,7 @@ MidiRegionView::note_diff_add_change (NoteBase* ev,
 }
 
 void
-MidiRegionView::apply_diff (bool as_subcommand, bool was_copy)
+MidiRegionView::apply_note_diff (bool as_subcommand, bool was_copy)
 {
 	if (!_note_diff_command) {
 		return;
@@ -1018,7 +1018,7 @@ MidiRegionView::apply_diff (bool as_subcommand, bool was_copy)
 }
 
 void
-MidiRegionView::abort_command()
+MidiRegionView::abort_note_diff()
 {
 	delete _note_diff_command;
 	_note_diff_command = 0;
@@ -1999,7 +1999,7 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 	clear_selection_internal ();
 	note_diff_add_note (new_note, true, false);
 
-	apply_diff();
+	apply_note_diff();
 
 	// last_step_edit_note = new_note;
 }
@@ -2231,7 +2231,7 @@ MidiRegionView::delete_selection()
 
 	_selection.clear();
 
-	apply_diff ();
+	apply_note_diff ();
 
 	hide_verbose_cursor ();
 }
@@ -2241,7 +2241,7 @@ MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 {
 	start_note_diff_command (_("delete note"));
 	_note_diff_command->remove (n);
-	apply_diff ();
+	apply_note_diff ();
 
 	hide_verbose_cursor ();
 }
@@ -2919,7 +2919,8 @@ MidiRegionView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, b
 		_copy_drag_events.clear ();
 	}
 
-	apply_diff (false, copy);
+	apply_note_diff (true /*subcommand, we don't want this to start a new commit*/, copy);
+	trackview.editor().commit_reversible_command ();
 
 	// care about notes being moved beyond the upper/lower bounds on the canvas
 	if (lowest_note_in_selection  < midi_stream_view()->lowest_note() ||
@@ -3130,7 +3131,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 void
 MidiRegionView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
 {
-	_note_diff_command = _model->new_note_diff_command (_("resize notes"));
+	_note_diff_command = _model->new_note_diff_command (_("resize notes"));  /* we are a subcommand, so we don't want to use start_note_diff() which begins a new command */
 
 	/* XX why doesn't snap_pixel_to_sample() handle this properly? */
 	bool const ensure_snap = trackview.editor().snap_mode () != SnapMagnetic;
@@ -3211,7 +3212,7 @@ MidiRegionView::finish_resizing (NoteBase* primary, bool at_front, double delta_
 	}
 
 	_resize_data.clear();
-	apply_diff(true);
+	apply_note_diff(true/*subcommand*/);
 }
 
 void
@@ -3429,7 +3430,7 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush, bool al
 		i = next;
 	}
 
-	apply_diff();
+	apply_note_diff();
 
   cursor_label:
 	if (!_selection.empty()) {
@@ -3488,7 +3489,7 @@ MidiRegionView::transpose (bool up, bool fine, bool allow_smush)
 		i = next;
 	}
 
-	apply_diff ();
+	apply_note_diff ();
 
 	if (lowest < midi_stream_view()->lowest_note() || highest > midi_stream_view()->highest_note()) {
 		midi_stream_view()->update_note_range (lowest);
@@ -3527,7 +3528,7 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, Temporal::Beats de
 		i = next;
 	}
 
-	apply_diff ();
+	apply_note_diff ();
 
 }
 
@@ -3588,7 +3589,7 @@ MidiRegionView::nudge_notes (bool forward, bool fine)
 		i = next;
 	}
 
-	apply_diff ();
+	apply_note_diff ();
 }
 
 void
@@ -3599,7 +3600,7 @@ MidiRegionView::change_channel(uint8_t channel)
 		note_diff_add_change (*i, MidiModel::NoteDiffCommand::Channel, channel);
 	}
 
-	apply_diff();
+	apply_note_diff();
 }
 
 
@@ -3782,7 +3783,7 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
 			}
 		}
 
-		apply_diff();
+		apply_note_diff();
 	}
 }
 
@@ -3877,7 +3878,7 @@ MidiRegionView::paste (timepos_t const & pos, const ::Selection& selection, Past
 	return true;
 }
 
-/** This method handles undo */
+/** undo commands were initiated at the 'action' level. ::paste and ::paste_internal should implement subcommands */
 void
 MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, float times, const MidiCutBuffer& mcb)
 {
@@ -3887,7 +3888,7 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 
 	PBD::Unwinder<bool> puw (_pasting, true);
 
-	start_note_diff_command (_("paste"));
+	MidiModel::NoteDiffCommand* cmd = _model->new_note_diff_command (_("paste")); /* we are a subcommand, so we don't want to use start_note_diff */
 
 	const Temporal::Beats snap_beats    = get_grid_beats(pos);
 	const Temporal::Beats first_time    = (*mcb.notes().begin())->time();
@@ -3937,7 +3938,7 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 	_marked_for_selection.clear ();
 	_pending_note_selection.clear ();
 
-	apply_diff (true);
+	_model->apply_diff_command_as_subcommand(*trackview.session(), cmd);
 }
 
 struct EventNoteTimeEarlyFirstComparator {

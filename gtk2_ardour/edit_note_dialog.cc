@@ -245,11 +245,11 @@ EditNoteDialog::done (int r)
 
 	}
 
-	if (!had_change) {
-		_region_view->abort_command ();
+	if (had_change) {
+		_region_view->apply_note_diff ();
+	} else {
+		_region_view->abort_note_diff ();
 	}
-
-	_region_view->apply_diff ();
 
 	list<Evoral::event_id_t> notes;
 	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
