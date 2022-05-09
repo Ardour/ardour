@@ -1571,7 +1571,8 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <MidiModel, AutomatableSequence<Temporal::Beats> > ("MidiModel")
-		.addFunction ("apply_command", (void (MidiModel::*)(Session*, Command*))&MidiModel::apply_command)
+		.addFunction ("apply_command", (void (MidiModel::*)(Session*, Command*))&MidiModel::apply_diff_command_as_commit) /* deprecated: left here in case any extant scripts use apply_command */
+		.addFunction ("apply_diff_command_as_commit", (void (MidiModel::*)(Session*, Command*))&MidiModel::apply_diff_command_as_commit)
 		.addFunction ("new_note_diff_command", &MidiModel::new_note_diff_command)
 		.endClass ()
 

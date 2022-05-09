@@ -92,7 +92,7 @@ MidiModel::new_patch_change_diff_command (const string& name)
 
 
 void
-MidiModel::apply_command(Session& session, Command* cmd)
+MidiModel::apply_diff_command_as_commit(Session& session, Command* cmd)
 {
 	session.begin_reversible_command (cmd->name());
 	(*cmd)();
@@ -101,10 +101,17 @@ MidiModel::apply_command(Session& session, Command* cmd)
 }
 
 void
-MidiModel::apply_command_as_subcommand(Session& session, Command* cmd)
+MidiModel::apply_diff_command_as_subcommand(Session& session, Command* cmd)
 {
 	(*cmd)();
 	session.add_command (cmd);
+	set_edited (true);
+}
+
+void
+MidiModel::apply_diff_command_only(Session& session, Command* cmd)
+{
+	(*cmd)();
 	set_edited (true);
 }
 
@@ -1702,7 +1709,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 			c->change (*i, NoteDiffCommand::StartTime, (*i)->time() + t);
 		}
 
-		apply_command_as_subcommand (_midi_source.session(), c);
+		apply_diff_command_as_subcommand (_midi_source.session(), c);
 	}
 
 	/* Patch changes */
@@ -1714,7 +1721,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 			c->change_time (*i, (*i)->time() + t);
 		}
 
-		apply_command_as_subcommand (_midi_source.session(), c);
+		apply_diff_command_as_subcommand (_midi_source.session(), c);
 	}
 
 	/* Controllers */
@@ -1736,7 +1743,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 			c->change (*i, (*i)->time() + t);
 		}
 
-		apply_command_as_subcommand (_midi_source.session(), c);
+		apply_diff_command_as_subcommand (_midi_source.session(), c);
 	}
 
 	ContentsShifted (timecnt_t (t));
