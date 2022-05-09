@@ -2094,7 +2094,6 @@ void
 MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPrimaryKey& new_patch)
 {
 	string name = _("alter patch change");
-	trackview.editor().begin_reversible_command (name);
 
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
 
@@ -2107,8 +2106,7 @@ MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPri
 		c->change_bank (pc.patch (), new_bank);
 	}
 
-	_model->apply_command (*trackview.session(), c);
-	trackview.editor().commit_reversible_command ();
+	_model->apply_diff_command_as_commit (*trackview.session(), c);
 
 	remove_canvas_patch_change (&pc);
 	display_patch_changes ();
@@ -2118,7 +2116,7 @@ void
 MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const Evoral::PatchChange<Temporal::Beats> & new_change)
 {
 	string name = _("alter patch change");
-	trackview.editor().begin_reversible_command (name);
+
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
 
 	if (old_change->time() != new_change.time()) {
@@ -2137,8 +2135,7 @@ MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const
 		c->change_bank (old_change, new_change.bank());
 	}
 
-	_model->apply_command (*trackview.session(), c);
-	trackview.editor().commit_reversible_command ();
+	_model->apply_diff_command_as_commit (*trackview.session(), c);
 
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
 		if (x->second->patch() == old_change) {
@@ -2160,7 +2157,6 @@ MidiRegionView::add_patch_change (timecnt_t const & t, Evoral::PatchChange<Tempo
 {
 	string name = _("add patch change");
 
-	trackview.editor().begin_reversible_command (name);
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
 
 	c->add (MidiModel::PatchChangePtr (
@@ -2168,8 +2164,7 @@ MidiRegionView::add_patch_change (timecnt_t const & t, Evoral::PatchChange<Tempo
 		        (_region->source_relative_position (_region->position() + t).beats(),
 		         patch.channel(), patch.program(), patch.bank())));
 
-	_model->apply_command (*trackview.session(), c);
-	trackview.editor().commit_reversible_command ();
+	_model->apply_diff_command_as_commit (*trackview.session(), c);
 
 	display_patch_changes ();
 }
@@ -2177,11 +2172,9 @@ MidiRegionView::add_patch_change (timecnt_t const & t, Evoral::PatchChange<Tempo
 void
 MidiRegionView::move_patch_change (PatchChange& pc, Temporal::Beats t)
 {
-	trackview.editor().begin_reversible_command (_("move patch change"));
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("move patch change"));
 	c->change_time (pc.patch (), t);
-	_model->apply_command (*trackview.session(), c);
-	trackview.editor().commit_reversible_command ();
+	_model->apply_diff_command_as_commit (*trackview.session(), c);
 
 	display_patch_changes ();
 }
@@ -2189,12 +2182,9 @@ MidiRegionView::move_patch_change (PatchChange& pc, Temporal::Beats t)
 void
 MidiRegionView::delete_patch_change (PatchChange* pc)
 {
-	trackview.editor().begin_reversible_command (_("delete patch change"));
-
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("delete patch change"));
 	c->remove (pc->patch ());
-	_model->apply_command (*trackview.session(), c);
-	trackview.editor().commit_reversible_command ();
+	_model->apply_diff_command_as_commit (*trackview.session(), c);
 
 	remove_canvas_patch_change (pc);
 	display_patch_changes ();
