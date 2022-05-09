@@ -8708,7 +8708,7 @@ Editor::toggle_region_mute ()
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 
-		(*i)->region()->playlist()->clear_changes ();
+		(*i)->region()->clear_changes ();
 		(*i)->region()->set_muted (!(*i)->region()->muted ());
 		_session->add_command (new StatefulDiffCommand ((*i)->region()));
 
