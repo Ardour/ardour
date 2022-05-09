@@ -21,12 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef COMPILER_MSVC
-#include <io.h>      // Microsoft's nearest equivalent to <unistd.h>
-#else
-#include <unistd.h>
-#endif
-
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
@@ -34,7 +28,6 @@
 #include "pbd/stateful.h"
 #include "pbd/types_convert.h"
 #include "pbd/property_list.h"
-#include "pbd/properties.h"
 #include "pbd/destructible.h"
 #include "pbd/xml++.h"
 #include "pbd/error.h"
@@ -51,8 +44,8 @@ int Stateful::loading_state_version = 0;
 Glib::Threads::Private<bool> Stateful::_regenerate_xml_or_string_ids;
 
 Stateful::Stateful ()
-	: _extra_xml (0)
-	, _instant_xml (0)
+	: _extra_xml (nullptr)
+	, _instant_xml (nullptr)
 	, _properties (new OwnedPropertyList)
 {
 	g_atomic_int_set (&_stateful_frozen, 0);
@@ -71,7 +64,7 @@ Stateful::~Stateful ()
 void
 Stateful::add_extra_xml (XMLNode& node)
 {
-	if (_extra_xml == 0) {
+	if (_extra_xml == nullptr) {
 		_extra_xml = new XMLNode ("Extra");
 	}
 
@@ -82,7 +75,7 @@ Stateful::add_extra_xml (XMLNode& node)
 XMLNode *
 Stateful::extra_xml (const string& str, bool add_if_missing)
 {
-	XMLNode* node = 0;
+	XMLNode* node = nullptr;
 
 	if (_extra_xml) {
 		node = _extra_xml->child (str.c_str());
@@ -123,7 +116,7 @@ Stateful::add_instant_xml (XMLNode& node, const std::string& directory_path)
 		}
 	}
 
-	if (_instant_xml == 0) {
+	if (_instant_xml == nullptr) {
 		_instant_xml = new XMLNode ("instant");
 	}
 
@@ -145,7 +138,7 @@ Stateful::add_instant_xml (XMLNode& node, const std::string& directory_path)
 	   a deep copy), and hand that to the tree.
 	*/
 
-	XMLNode* copy = new XMLNode (*_instant_xml);
+	auto* copy = new XMLNode (*_instant_xml);
 	tree.set_root (copy);
 
 	if (!tree.write()) {
@@ -156,8 +149,7 @@ Stateful::add_instant_xml (XMLNode& node, const std::string& directory_path)
 XMLNode *
 Stateful::instant_xml (const string& str, const std::string& directory_path)
 {
-	if (_instant_xml == 0) {
-
+	if (_instant_xml == nullptr) {
 		std::string instant_xml_path = Glib::build_filename (directory_path, "instant.xml");
 
 		if (Glib::file_test (instant_xml_path, Glib::FILE_TEST_EXISTS)) {
@@ -166,10 +158,10 @@ Stateful::instant_xml (const string& str, const std::string& directory_path)
 				_instant_xml = new XMLNode(*(tree.root()));
 			} else {
 				warning << string_compose(_("Could not understand XML file %1"), instant_xml_path) << endmsg;
-				return 0;
+				return nullptr;
 			}
 		} else {
-			return 0;
+			return nullptr;
 		}
 	}
 
@@ -182,15 +174,15 @@ Stateful::instant_xml (const string& str, const std::string& directory_path)
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 /** Forget about any changes to this object's properties */
 void
 Stateful::clear_changes ()
 {
-	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		i->second->clear_changes ();
+	for (const auto& _property : *_properties) {
+		_property.second->clear_changes ();
 	}
 	_pending_changed.clear ();
 }
@@ -198,10 +190,10 @@ Stateful::clear_changes ()
 PropertyList *
 Stateful::get_changes_as_properties (Command* cmd) const
 {
-	PropertyList* pl = new PropertyList;
+	auto* pl = new PropertyList;
 
-	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		i->second->get_changes_as_properties (*pl, cmd);
+	for (const auto& _property : *_properties) {
+		_property.second->get_changes_as_properties (*pl, cmd);
 	}
 
 	return pl;
@@ -217,9 +209,9 @@ Stateful::set_values (XMLNode const & node)
 {
 	PropertyChange c;
 
-	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		if (i->second->set_value (node)) {
-			c.add (i->first);
+	for (const auto& _property : *_properties) {
+		if (_property.second->set_value (node)) {
+			c.add (_property.first);
 		}
 	}
 
@@ -236,11 +228,11 @@ Stateful::apply_changes (const PropertyList& property_list)
 
 	DEBUG_TRACE (DEBUG::Stateful, string_compose ("Stateful %1 setting properties from list of %2\n", this, property_list.size()));
 
-	for (PropertyList::const_iterator pp = property_list.begin(); pp != property_list.end(); ++pp) {
+	for (auto pp = property_list.begin(); pp != property_list.end(); ++pp) {
 		DEBUG_TRACE (DEBUG::Stateful, string_compose ("in plist: %1\n", pp->second->property_name()));
 	}
 
-	for (PropertyList::const_iterator i = property_list.begin(); i != property_list.end(); ++i) {
+	for (auto i = property_list.begin(); i != property_list.end(); ++i) {
 		if ((p = _properties->find (i->first)) != _properties->end()) {
 
 			DEBUG_TRACE (
@@ -274,8 +266,8 @@ Stateful::apply_changes (const PropertyList& property_list)
 void
 Stateful::add_properties (XMLNode& owner_state) const
 {
-	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		i->second->get_value (owner_state);
+	for (const auto& _property : *_properties) {
+		_property.second->get_value (owner_state);
 	}
 }
 
@@ -335,8 +327,8 @@ Stateful::resume_property_changes ()
 bool
 Stateful::changed() const
 {
-	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		if (i->second->changed()) {
+	for (const auto& _property : *_properties) {
+		if (_property.second->changed ()) {
 			return true;
 		}
 	}
@@ -359,10 +351,10 @@ Stateful::apply_change (const PropertyBase& prop)
 PropertyList*
 Stateful::property_factory (const XMLNode& history_node) const
 {
-	PropertyList* prop_list = new PropertyList;
+	auto* prop_list = new PropertyList;
 
-	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		PropertyBase* prop = i->second->clone_from_xml (history_node);
+	for (const auto& _property : *_properties) {
+		PropertyBase* prop = _property.second->clone_from_xml (history_node);
 
 		if (prop) {
 			prop_list->add (prop);
@@ -375,16 +367,16 @@ Stateful::property_factory (const XMLNode& history_node) const
 void
 Stateful::rdiff (vector<Command*>& cmds) const
 {
-	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		i->second->rdiff (cmds);
+	for (const auto& _property : *_properties) {
+		_property.second->rdiff (cmds);
 	}
 }
 
 void
 Stateful::clear_owned_changes ()
 {
-	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		i->second->clear_owned_changes ();
+	for (const auto& _property : *_properties) {
+		_property.second->clear_owned_changes ();
 	}
 }
 
