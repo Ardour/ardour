@@ -3806,7 +3806,7 @@ MidiRegionView::selection_as_cut_buffer () const
 void
 MidiRegionView::duplicate_selection ()
 {
-	std::cerr << "dup selection\n";
+	trackview.editor().begin_reversible_command (_("duplicate notes"));
 
 	if (_selection.empty()) {
 		return;
@@ -3834,7 +3834,12 @@ MidiRegionView::duplicate_selection ()
 	local_selection.set (note_selection);
 
 	PasteContext ctxt (0, 1, ItemCounts(), false);
-	paste (dup_pos, local_selection, ctxt);
+	bool commit = paste (dup_pos, local_selection, ctxt);
+	if (commit) {
+		trackview.editor().commit_reversible_command ();
+	} else {
+		trackview.editor().abort_reversible_command ();
+	}
 }
 
 /** undo commands were initiated at the 'action' level. ::paste and ::paste_internal should implement subcommands */
