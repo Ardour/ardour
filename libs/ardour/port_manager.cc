@@ -982,7 +982,7 @@ PortManager::update_input_ports (bool clear)
 	}
 
 	if (clear) {
-		/* don't send notifcation for initial setup.
+		/* don't send notification for initial setup.
 		 * Physical I/O is initially connected in
 		 * reconnect_ports(), it is too early to
 		 * do this when called from ::reestablish_ports()

@@ -222,7 +222,7 @@ mac_vst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 
 void mac_vst_close (VSTState* mac_vst)
 {
-	// assert that the GUI object is destoyed
+	// assert that the GUI object is destroyed
 
 	if (mac_vst->plugin)
 	{

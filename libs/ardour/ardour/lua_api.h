@@ -304,7 +304,7 @@ namespace ARDOUR { namespace LuaAPI {
 			 */
 			int analyze (boost::shared_ptr<ARDOUR::AudioReadable> r, uint32_t channel, luabridge::LuaRef fn);
 
-			/** call plugin():reset() and clear intialization flag */
+			/** call plugin():reset() and clear initialization flag */
 			void reset ();
 
 			/** initialize the plugin for use with analyze().

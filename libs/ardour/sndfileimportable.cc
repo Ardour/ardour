@@ -62,7 +62,7 @@ SndFileImportableSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binf
 	}
 
 	exists = true;
-	/* libsndfile reads eactly 4 bytes for high and low, but
+	/* libsndfile reads exactly 4 bytes for high and low, but
 	 * uses "unsigned int" which may or may not be 32 bit little
 	 * endian.
 	 */

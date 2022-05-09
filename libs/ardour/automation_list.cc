@@ -380,7 +380,7 @@ AutomationList::serialize_events (bool need_lock) const
 		str << '\n';
 	}
 
-	/* XML is a bit wierd */
+	/* XML is a bit weird */
 
 	XMLNode* content_node = new XMLNode (X_("foo")); /* it gets renamed by libxml when we set content */
 	content_node->set_content (str.str());

@@ -85,7 +85,7 @@ FluidSynth::load_sf2 (const std::string& fn)
 		return false;
 	}
 
-	/* boostrap synth engine. The first call re-initializes the chorus
+	/* bootstrap synth engine. The first call re-initializes the chorus
 	 * (fluid_rvoice_mixer_set_samplerate) which is not rt-safe.
 	 */
 	float l[1024];

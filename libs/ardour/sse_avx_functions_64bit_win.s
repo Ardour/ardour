@@ -559,7 +559,7 @@ x86_sse_avx_compute_peak:
 	vshufps $0xb1, %ymm0, %ymm0, %ymm1     #; shuffle the floats inside pairs (1234 => 2143) in each 128 bit half
 	vmaxps  %ymm1, %ymm0, %ymm0			   #; maximums of the four pairs, we had up to 4 unique elements was unique, 2 unique elements left now
 	vperm2f128 $0x01, %ymm0, %ymm0, %ymm1  #; swap 128 bit halfs
-	vmaxps  %ymm1, %ymm0, %ymm0			   #; the result will be - all 8 elemens are maximums
+	vmaxps  %ymm1, %ymm0, %ymm0			   #; the result will be - all 8 elements are maximums
 
 	#; now every float in %ymm0 is the same value, current maximum value
 

@@ -785,7 +785,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, timepos_t const
 	region->DropReferences.connect_same_thread (region_drop_references_connections, boost::bind (&Playlist::region_going_away, this, boost::weak_ptr<Region> (region)));
 
 	/* do not handle property changes of newly added regions.
-	 * Otherwise this would triggger Playlist::notify_region_moved()
+	 * Otherwise this would trigger Playlist::notify_region_moved()
 	 * -> RangesMoved() and move automation.
 	 */
 	region->clear_changes ();
@@ -1673,7 +1673,7 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 	}
 
 	/* since cc6c0f1263ab272707b0241ec333776036515fc2 can no longer distinguish between
-	 * position and length changes, so we have to assume that all have happpened :(
+	 * position and length changes, so we have to assume that all have happened :(
 	 */
 	if (what_changed.contains (Properties::length)) {
 		notify_region_moved (region);
@@ -3194,7 +3194,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	   the original regions that we find, and add them
 	   instead.
 
-	   3) target region is a copy of a compount region previously
+	   3) target region is a copy of a compound region previously
 	   created. In this case we will also need to make copies ot each of
 	   the original regions, and add them instead.
 	*/

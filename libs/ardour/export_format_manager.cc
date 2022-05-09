@@ -608,7 +608,7 @@ ExportFormatManager::select_format (ExportFormatPtr const & format)
 
 	if (format) {
 
-		/* Slect right quality for format */
+		/* Select right quality for format */
 
 		ExportFormatBase::Quality quality = format->get_quality();
 		for (QualityList::iterator it = qualities.begin (); it != qualities.end (); ++it) {

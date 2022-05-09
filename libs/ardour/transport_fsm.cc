@@ -337,7 +337,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 				 * This happens because we only need to do a
 				 * realtime locate and continue rolling. No
 				 * disk I/O is required - the loop is
-				 * automically present in buffers already.
+				 * automatically present in buffers already.
 				 *
 				 * Note that ev.ltd is ignored and
 				 * assumed to be true because we're looping.

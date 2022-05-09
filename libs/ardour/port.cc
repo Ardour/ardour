@@ -81,7 +81,7 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 		cerr << "Failed to register port \"" << _name << "\", reason is unknown from here\n";
 		throw failed_constructor ();
 	}
-	DEBUG_TRACE (DEBUG::Ports, string_compose ("registed port %1 handle %2\n", name(), _port_handle));
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("registered port %1 handle %2\n", name(), _port_handle));
 
 	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::session_global_drop, this));
 	PortSignalDrop.connect_same_thread (drop_connection, boost::bind (&Port::signal_drop, this));
@@ -259,7 +259,7 @@ Port::connect (std::string const & other)
 
 	if (r == 0) {
 		/* Connections can be saved on either or both sides. The code above works regardless
-		 * from which end the conneciton is initiated, and connecting already connected ports
+		 * from which end the connection is initiated, and connecting already connected ports
 		 * is idempotent.
 		 *
 		 * Only saving internal connection on the source-side would be preferable,

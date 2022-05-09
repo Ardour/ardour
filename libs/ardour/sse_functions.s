@@ -50,7 +50,7 @@ x86_sse_mix_buffers_with_gain:
 	movl 12(%ebp), %esi #; src
 
 	movl %edi, %eax
-	andl $12, %eax #; mask alignemnt offset
+	andl $12, %eax #; mask alignment offset
 
 	movl %esi, %ebx
 	andl $12, %ebx #; mask alignment offset
@@ -186,7 +186,7 @@ x86_sse_mix_buffers_no_gain:
 	movl 12(%ebp), %esi #; src
 
 	movl %edi, %eax
-	andl $12, %eax #; mask alignemnt offset
+	andl $12, %eax #; mask alignment offset
 
 	movl %esi, %ebx
 	andl $12, %ebx #; mask alignment offset

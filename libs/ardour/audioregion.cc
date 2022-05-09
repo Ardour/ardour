@@ -1626,7 +1626,7 @@ void
 AudioRegion::source_offset_changed ()
 {
 	/* XXX this fixes a crash that should not occur. It does occur
-	   becauses regions are not being deleted when a session
+	   because regions are not being deleted when a session
 	   is unloaded. That bug must be fixed.
 	*/
 

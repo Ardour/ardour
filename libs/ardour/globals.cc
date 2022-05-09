@@ -370,7 +370,7 @@ lotsa_files_please ()
 		error << string_compose (_("Could not get system open files limit (%1)"), strerror (errno)) << endmsg;
 	}
 #else
-	/* this only affects stdio. 2048 is the maxium possible (512 the default).
+	/* this only affects stdio. 2048 is the maximum possible (512 the default).
 	 *
 	 * If we want more, we'll have to replaces the POSIX I/O interfaces with
 	 * Win32 API calls (CreateFile, WriteFile, etc) which allows for 16K.

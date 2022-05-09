@@ -2208,7 +2208,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 	}
 
 	/* Do not call latency_compute_run() concurrently with connect_and_run().
-	 * So far this can only guarnteed when the session is loading,
+	 * So far this can only guaranteed when the session is loading,
 	 * and the plugin has not been added to the processor chain.
 	 *
 	 * Ideally this would clso be called when copying a plugin from another track,

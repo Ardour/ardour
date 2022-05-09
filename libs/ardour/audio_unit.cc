@@ -1847,7 +1847,7 @@ AUPlugin::parameter_is_control (uint32_t param) const
 {
 	assert(param < descriptors.size());
 	if (descriptors[param].automatable) {
-		/* corrently ardour expects all controls to be automatable
+		/* currently ardour expects all controls to be automatable
 		 * IOW ardour GUI elements mandate an Evoral::Parameter
 		 * for all input+control ports.
 		 */

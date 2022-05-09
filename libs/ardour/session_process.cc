@@ -114,7 +114,7 @@ Session::process (pframes_t nframes)
 	 *
 	 * ideally this would be done in
 	 * Route::process_output_buffers() but various functions
-	 * callig it hold a _processor_lock reader-lock
+	 * calling it hold a _processor_lock reader-lock
 	 */
 	bool one_or_more_routes_declicking = false;
 	{
@@ -1337,7 +1337,7 @@ Session::plan_master_strategy (pframes_t nframes, double master_speed, samplepos
 		return desired;
 	}
 
-	/* When calling TransportMasterStart, sould aim for
+	/* When calling TransportMasterStart, should aim for
 	 *   delta >= _remaining_latency_preroll
 	 * This way there can be silent pre-roll of exactly the delta time.
 	 *
