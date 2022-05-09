@@ -592,5 +592,5 @@ PluginInfo::is_utility () const
 bool
 PluginInfo::is_analyzer () const
 {
-	return (category == "Analyser" || category == "Anaylsis" || category == "Analyzer");
+	return (category == "Analyser" || category == "Analysis" || category == "Analyzer");
 }
