@@ -241,7 +241,7 @@ public:
 	void begin_resizing(bool at_front);
 
 	void update_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap);
-	void commit_resizing (NoteBase* primary, bool at_front, double delat_x, bool relative, double snap_delta, bool with_snap);
+	void finish_resizing (NoteBase* primary, bool at_front, double delat_x, bool relative, double snap_delta, bool with_snap);
 	void abort_resizing ();
 
 	/** Change the channel of the selection.

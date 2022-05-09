@@ -2831,7 +2831,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 				sd = _snap_delta;
 			}
 
-			mrv->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd, snap);
+			mrv->finish_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd, snap);
 		}
 	}
 

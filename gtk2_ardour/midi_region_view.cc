@@ -3134,7 +3134,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
  *  Parameters the same as for \a update_resizing().
  */
 void
-MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
+MidiRegionView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
 {
 	_note_diff_command = _model->new_note_diff_command (_("resize notes"));
 
