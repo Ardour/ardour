@@ -988,8 +988,6 @@ MidiRegionView::note_diff_add_change (NoteBase* ev,
 void
 MidiRegionView::apply_diff (bool as_subcommand, bool was_copy)
 {
-	bool commit = false;
-
 	if (!_note_diff_command) {
 		return;
 	}
@@ -1003,11 +1001,11 @@ MidiRegionView::apply_diff (bool as_subcommand, bool was_copy)
 		}
 	}
 
-	if (as_subcommand) {
-		_model->apply_command_as_subcommand (*trackview.session(), _note_diff_command);
-	} else {
-		_model->apply_command (*trackview.session(), _note_diff_command);
-		commit = true;
+	/*note that we don't use as_commit here, because that would BEGIN a new undo record; we already have one underway*/
+	_model->apply_diff_command_as_subcommand (*trackview.session(), _note_diff_command);
+
+	if (!as_subcommand) {
+		trackview.editor().commit_reversible_command ();  /*instead, we can explicitly commit the command in progress */
 	}
 
 	_note_diff_command = 0;
@@ -1017,10 +1015,6 @@ MidiRegionView::apply_diff (bool as_subcommand, bool was_copy)
 	}
 
 	_marked_for_velocity.clear();
-
-	if (commit) {
-		trackview.editor().commit_reversible_command ();
-	}
 }
 
 void
