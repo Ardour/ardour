@@ -174,4 +174,4 @@ PortSet::clear()
 	_all_ports.clear();
 }
 
-} // namepace ARDOUR
+} // namespace ARDOUR

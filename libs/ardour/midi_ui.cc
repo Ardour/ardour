@@ -91,7 +91,7 @@ MidiControlUI::midi_input_handler (IOCondition ioc, boost::weak_ptr<AsyncMIDIPor
 		return false;
 	}
 
-	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happend on  %1\n", boost::shared_ptr<ARDOUR::Port> (port)->name()));
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happened on  %1\n", boost::shared_ptr<ARDOUR::Port> (port)->name()));
 
 	if (ioc & ~IO_IN) {
 		return false;

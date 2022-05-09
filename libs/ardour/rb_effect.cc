@@ -244,7 +244,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 			stretcher.study (buffers, this_read, pos == read_duration);
 		}
 
-		/* done studing, start process */
+		/* done studying, start process */
 		pos = 0;
 
 		while (pos < read_duration && !tsr.cancel) {

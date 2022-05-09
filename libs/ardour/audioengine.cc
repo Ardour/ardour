@@ -687,7 +687,7 @@ AudioEngine::do_reset_backend()
 			// backup the device name
 			std::string name = _backend->device_name ();
 
-			std::cout << "AudioEngine::RESET::Reseting device..." << std::endl;
+			std::cout << "AudioEngine::RESET::Resetting device..." << std::endl;
 			if ( ( 0 == stop () ) &&
 					( 0 == _backend->reset_device () ) &&
 					( 0 == start () ) ) {
@@ -1195,7 +1195,7 @@ AudioEngine::client_real_time_priority ()
 		/* this is only an issue with the Dummy backend.
 		 * - with JACK, we require rt permissions.
 		 * - with ALSA/Pulseaudio this can only happen if rt permissions
-		 *   are n/a. Other atempts to get rt will fail likewise.
+		 *   are n/a. Other attempts to get rt will fail likewise.
 		 *
 		 * perhaps:
 		 * TODO: use is_realtime () ? PBD_SCHED_FIFO : PBD_SCHED_OTHER

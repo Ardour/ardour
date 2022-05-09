@@ -261,7 +261,7 @@ Route::init ()
 	}
 
 	_main_outs.reset (new Delivery (_session, _output, _pannable, _mute_master, _name, Delivery::Main));
-	/* master outut volume */
+	/* master output volume */
 	if (is_master()) {
 		_volume_control.reset (new GainControl (_session, MainOutVolume));
 		_volume_control->set_flag (Controllable::NotAutomatable);
@@ -413,11 +413,11 @@ Route::process_output_buffers (BufferSet& bufs,
 		end_sample += latency_offset;
 	}
 
-	/* Note: during intial pre-roll 'start_sample' as passed as argument can be negative.
+	/* Note: during initial pre-roll 'start_sample' as passed as argument can be negative.
 	 * Functions calling process_output_buffers() will set  "run_disk_reader"
 	 * to false if the pre-roll count-down is larger than playback_latency ().
 	 *
-	 * playback_latency() is guarnteed to be <= _signal_latency + _output->latency ()
+	 * playback_latency() is guaranteed to be <= _signal_latency + _output->latency ()
 	 */
 	assert (!_disk_reader || !run_disk_reader || start_sample >= 0 || speed < 0);
 
@@ -525,7 +525,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		 *
 		 * cycle 1: run (t): automation (t) = on: -> increase latency
 		 * cycle 2: run (t-latency): automation (t-latency) = off -> decrease latency
-		 * reapeat.
+		 * repeat.
 		 */
 
 		if ((*i)->active ()) {
@@ -3687,7 +3687,7 @@ Route::output_effectively_connected_real () const
 			return _connection_cache[rp];
 		}
 		/* First mark node a traversed to prevent endless recursion.
-		 * Othewise graph loops A -> B -> A will cause a stack overflow.
+		 * Otherwise graph loops A -> B -> A will cause a stack overflow.
 		 */
 		_connection_cache[rp] = false;
 

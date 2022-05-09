@@ -2513,7 +2513,7 @@ MIDITrigger::natural_length() const
 void
 MIDITrigger::estimate_midi_patches ()
 {
-	/* first, intialize all our slot's patches to GM defaults, to make playback deterministic */
+	/* first, initialize all our slot's patches to GM defaults, to make playback deterministic */
 	for (uint8_t chan = 0; chan < 16; ++chan) {
 		_patch_change[chan].set_channel(chan);
 		_patch_change[chan].set_bank( chan == 9 ? 120 : 0 );
@@ -2737,7 +2737,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		/* "final_beat" is an inclusive end of the trigger, not
 		 * exclusive, so we must use <= here. That is, any last event
-		 * (remeber, iter == model->end() here, so we have already read
+		 * (remember, iter == model->end() here, so we have already read
 		 * through the entire MIDI model) that is up to AND INCLUDING
 		 * final_beat counts as "haven't reached the end".
 		 */

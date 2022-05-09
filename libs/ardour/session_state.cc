@@ -1629,7 +1629,7 @@ Session::set_state (const XMLNode& node, int version)
 
 	setup_raid_path(_session_dir->root_path());
 
-	node.get_property (X_("end-is-free"), _session_range_is_free);  //deprectated, but use old values if they are in the config
+	node.get_property (X_("end-is-free"), _session_range_is_free);  //deprecated, but use old values if they are in the config
 
 	node.get_property (X_("session-range-is-free"), _session_range_is_free);
 

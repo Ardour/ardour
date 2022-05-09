@@ -597,7 +597,7 @@ Session::deinterlace_midi_region ( boost::shared_ptr<MidiRegion> mr )
 }
 
 // This function is still unable to cleanly update an existing source, even though
-// it is possible to set the ImportStatus flag accordingly. The functinality
+// it is possible to set the ImportStatus flag accordingly. The functionality
 // is disabled at the GUI until the Source implementations are able to provide
 // the necessary API.
 void

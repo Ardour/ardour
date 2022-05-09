@@ -960,7 +960,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, sam
 			goto restart;
 		}
 
-		/* else ... had leftovers, but they immediately preceed the new data, so just
+		/* else ... had leftovers, but they immediately precede the new data, so just
 		   merge them and compute.
 		*/
 

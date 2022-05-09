@@ -136,7 +136,7 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 				 *
 				 * But of course ... if
 				 * _global_port_buffer_offset is zero,
-				 * something wierd is happening.
+				 * something weird is happening.
 				 */
 #ifndef NDEBUG
 				if (_global_port_buffer_offset == 0) {

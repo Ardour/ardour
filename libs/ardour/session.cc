@@ -2671,7 +2671,7 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
 		return;
 	}
 
-	/* create a gap in the presentation info to accomodate @param how_many
+	/* create a gap in the presentation info to accommodate @param how_many
 	 * new objects.
 	 */
 	StripableList sl;
@@ -6909,7 +6909,7 @@ Session::update_latency (bool playback)
 		set_worst_output_latency ();
 		update_route_latency (true, /*apply_to_delayline*/ true, NULL);
 
-		/* relese before emiting signals */
+		/* release before emitting signals */
 		lm.release ();
 
 	} else {
@@ -7287,7 +7287,7 @@ Session::auto_connect (const AutoConnectRequest& ar)
 				}
 
 				if (!port.empty() && route->output()->connect (route->output()->ports().port(*t, i), port, this)) {
-					DEBUG_TRACE (DEBUG::PortConnectAuto, "Failed to auto-connect ouput.");
+					DEBUG_TRACE (DEBUG::PortConnectAuto, "Failed to auto-connect output.");
 					break;
 				}
 			}

@@ -346,7 +346,7 @@ SndFileSource::open ()
 // We really only want to use g_open for all platforms but because of this
 // method(SndfileSource::open), the compiler(or at least GCC) is confused
 // because g_open will expand to "open" on non-POSIX systems and needs the
-// global namespace qualifer. The problem is since since C99 ::g_open will
+// global namespace qualifier. The problem is since since C99 ::g_open will
 // apparently expand to ":: open"
 #ifdef PLATFORM_WINDOWS
 	int fd = g_open (_path.c_str(), writable() ? O_CREAT | O_RDWR : O_RDONLY, writable() ? 0644 : 0444);

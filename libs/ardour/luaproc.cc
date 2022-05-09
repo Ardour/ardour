@@ -71,7 +71,7 @@ LuaProc::LuaProc (AudioEngine& engine,
 {
 	init ();
 
-	/* when loading a session, or pasing a processor,
+	/* when loading a session, or passing a processor,
 	 * the script is set during set_state();
 	 */
 	if (!_script.empty () && load_script ()) {

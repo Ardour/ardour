@@ -163,7 +163,7 @@ luabridge::getIdentityKey ()
 
 /* ...and this is the ugly part of it.
  *
- * We need to foward declare classes from gtk2_ardour
+ * We need to forward declare classes from gtk2_ardour
  * AND explicily list classes which are used by gtk2_ardour's bindings.
  *
  * This is required because some of the GUI classes use objects from libardour
@@ -354,7 +354,7 @@ CLASSKEYS(LuaDialog::ProgressWindow);
 
 /* Some notes on Lua bindings for libardour and friends
  *
- * - Prefer factory methods over Contructors whenever possible.
+ * - Prefer factory methods over Constructors whenever possible.
  *   Don't expose the constructor method unless required.
  *
  *   e.g. Don't allow the script to construct a "Track" Object directly
@@ -2046,7 +2046,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <DataType> ("DataType")
 		.addConstructor <void (*) (std::string)> ()
-		.addStaticCFunction ("null",  &LuaAPI::datatype_ctor_null) // "nil" is a lua reseved word
+		.addStaticCFunction ("null",  &LuaAPI::datatype_ctor_null) // "nil" is a lua reserved word
 		.addStaticCFunction ("audio", &LuaAPI::datatype_ctor_audio)
 		.addStaticCFunction ("midi",  &LuaAPI::datatype_ctor_midi)
 		.addFunction ("to_string",  &DataType::to_string) // TODO Lua __tostring
@@ -2937,7 +2937,7 @@ LuaBindings::dsp (lua_State* L)
 		.endClass ()
 		.endNamespace ();
 
-	// dsp releated session functions
+	// dsp related session functions
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ARDOUR")
 		.beginClass <Session> ("Session")

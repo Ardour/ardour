@@ -328,7 +328,7 @@ ARDOUR::module_path_vst3 (string const& path)
 #ifdef __APPLE__
 	/* Check for "Contents/MacOS/" and "Context/Info.plist".
 	 * VST3MacModule calls CFBundleCreate() which handles Info.plist files.
-	 * (on macOS/X the binrary name may differ from the bundle name)
+	 * (on macOS/X the binary name may differ from the bundle name)
 	 */
 	string plist = Glib::build_filename (path, "Contents", "Info.plist");
 	if (Glib::file_test (Glib::path_get_dirname (module_path), Glib::FILE_TEST_IS_DIR) &&

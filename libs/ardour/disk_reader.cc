@@ -828,7 +828,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	/* There are two possible shortcuts we can take that will completely
 	 * skip reading from disk. However, they are invalid if we need to read
 	 * data in the opposite direction than we did last time, or if our need
-	 * for looped data has chaned since the last read. Both of these change
+	 * for looped data has changed since the last read. Both of these change
 	 * the semantics of a read from disk, even if the position we are
 	 * reading from is the same.
 	 */

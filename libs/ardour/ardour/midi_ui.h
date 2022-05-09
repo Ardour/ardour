@@ -32,7 +32,7 @@ class Session;
 class AsyncMIDIPort;
 
 /* this is mostly a placeholder because I suspect that at some
-   point we will want to add more members to accomodate
+   point we will want to add more members to accommodate
    certain types of requests to the MIDI UI
 */
 
