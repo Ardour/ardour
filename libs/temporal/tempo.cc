@@ -828,6 +828,7 @@ void
 TempoMap::change_tempo (TempoPoint & p, Tempo const & t)
 {
 	*((Tempo*)&p) = t;
+	reset_starting_at (p.sclock());
 }
 
 TempoPoint &
