@@ -187,49 +187,58 @@ def fetch_tarball_revision_date():
 
         return rev, date
 
-if os.path.isdir (os.path.join(os.getcwd(), '.git')):
-    rev, rev_date = fetch_git_revision_date()
-else:
-    rev, rev_date = fetch_tarball_revision_date()
+def set_version ():
+    def sanitize(s):
+        # round-trip to remove anything in the string that is not encodable in
+        # ASCII, yet still keep a real (utf8-encoded internally) string.
+        s = s.encode ('ascii', 'ignore').decode ("utf-8")
+        # In Python3, bytes is the class of binary content and encode() returns
+        # bytes to transform a string according to a text encoding; str is the
+        # class of normal strings (utf8-encoded internally) and decode() returns
+        # that type.
+        # Python 2 did not initially cater for encoding problems and can use str
+        # for both binary content and for (decoded) strings. The Unicode type was
+        # added to correspond to Python 3 str, and the Python 2 str type should
+        # only correspond to bytes. Alas, almost everything in the Python 2
+        # ecosystem has been written with str in mind and doesn't handle Unicode
+        # objects correctly. If Python 2 is in use, s will be a Unicode object and
+        # to avoid strange problems later we convert back to str, but in utf-8
+        # nonetheless.
+        if not isinstance(s, str):
+            s = s.encode("utf-8")
+        return s
 
-#
-# rev is now of the form MAJOR.MINOR[-rcX]-rev-commit
-# or, if right at the same rev as a release, MAJOR.MINOR[-rcX]
-#
+    global MAJOR
+    global MINOR
+    global MICRO
+    global VERSION
+    global PROGRAM_VERSION
+    global rev_date
 
-parts = rev.split ('.', 1)
-MAJOR = parts[0]
-other = parts[1].split('-', 1)
-MINOR = other[0]
-if len(other) > 1:
-    MICRO = other[1].rsplit('-',1)[0].replace('-','.')
-else:
-    MICRO = '0'
+    if os.path.isdir (os.path.join(os.getcwd(), '.git')):
+        rev, rev_date = fetch_git_revision_date()
+    else:
+        rev, rev_date = fetch_tarball_revision_date()
 
-V = MAJOR + '.' + MINOR + '.' + MICRO
+    #
+    # rev is now of the form MAJOR.MINOR[-rcX]-rev-commit
+    # or, if right at the same rev as a release, MAJOR.MINOR[-rcX]
+    #
 
-def sanitize(s):
-    # round-trip to remove anything in the string that is not encodable in
-    # ASCII, yet still keep a real (utf8-encoded internally) string.
-    s = s.encode ('ascii', 'ignore').decode ("utf-8")
-    # In Python3, bytes is the class of binary content and encode() returns
-    # bytes to transform a string according to a text encoding; str is the
-    # class of normal strings (utf8-encoded internally) and decode() returns
-    # that type.
-    # Python 2 did not initially cater for encoding problems and can use str
-    # for both binary content and for (decoded) strings. The Unicode type was
-    # added to correspond to Python 3 str, and the Python 2 str type should
-    # only correspond to bytes. Alas, almost everything in the Python 2
-    # ecosystem has been written with str in mind and doesn't handle Unicode
-    # objects correctly. If Python 2 is in use, s will be a Unicode object and
-    # to avoid strange problems later we convert back to str, but in utf-8
-    # nonetheless.
-    if not isinstance(s, str):
-        s = s.encode("utf-8")
-    return s
-VERSION = sanitize(V)
-PROGRAM_VERSION = sanitize(MAJOR)
-del sanitize
+    parts = rev.split ('.', 1)
+    MAJOR = parts[0]
+    other = parts[1].split('-', 1)
+    MINOR = other[0]
+    if len(other) > 1:
+        MICRO = other[1].rsplit('-',1)[0].replace('-','.')
+    else:
+        MICRO = '0'
+
+    V = MAJOR + '.' + MINOR + '.' + MICRO
+
+    VERSION = sanitize(V)
+    PROGRAM_VERSION = sanitize(MAJOR)
+
 
 if any(arg in ('dist', 'distcheck') for arg in sys.argv[1:]):
     if not 'APPNAME' in os.environ:
@@ -310,6 +319,7 @@ def fetch_gcc_version (CC):
     return version
 
 def create_stored_revision():
+    set_version ()
     rev = ""
     if os.path.exists('.git'):
         rev, rev_date = fetch_git_revision_date()
@@ -940,6 +950,7 @@ def sub_config_and_use(conf, name, has_objects = True):
     autowaf.set_local_lib(conf, name, has_objects)
 
 def configure(conf):
+    set_version ()
     conf.load('compiler_c')
     conf.load('compiler_cxx')
     if Options.options.dist_target == 'mingw':
@@ -1594,5 +1605,6 @@ def test(bld):
     subprocess.call("gtk2_ardour/artest")
 
 def help2man(bld):
+    set_version ()
     cmd = "help2man -s 1 -N -o ardour.1 -n Ardour --version-string='Ardour %s' gtk2_ardour/ardev" % PROGRAM_VERSION
     subprocess.call(cmd, shell=True)
