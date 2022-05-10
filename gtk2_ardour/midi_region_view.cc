@@ -684,6 +684,10 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
+	if (!trackview.editor().get_selection().selected (this)) {
+		return false;
+	}
+
 	if (_selection.empty()) {
 		const int step = Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier) ? 12 : 1;
 		const bool just_one_edge = Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier);
