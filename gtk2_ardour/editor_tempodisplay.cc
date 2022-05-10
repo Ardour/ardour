@@ -250,20 +250,16 @@ Editor::draw_tempo_marks ()
 		Temporal::Point const & mark_point ((*mm)->point());
 		Temporal::TempoPoint const & metric_point (*t);
 
-		std::cerr << "\tmark @ " << mark_point.sclock() << " tempo @ " << metric_point.sclock() << std::endl;
-
 		if (mark_point.sclock() < metric_point.sclock()) {
 
 			/* advance through markers, deleting the unused ones */
 
-			std::cerr << "\tDeleting marker that doesn't match a tempo point\n";
 			delete *mm;
 			mm = tempo_marks.erase (mm);
 
 
 		} else if (metric_point.sclock() < mark_point.sclock()) {
 
-			std::cerr << "\tCreating a marker for " << metric_point << " @ " << metric_point.sample (sr) << " next marker @ " << mark_point.sample (sr) << std::endl;
 			make_tempo_marker (&metric_point, min_tempo, max_tempo, prev_ts, tc_color, sr);
 			++t;
 
@@ -271,7 +267,6 @@ Editor::draw_tempo_marks ()
 			/* marker represents an existing point, update text, properties etc */
 			/* XXX left/right text stuff */
 			// (*mm)->set_name ((*m)->name());
-			std::cerr << "\tMoving marker to " << t->time() << std::endl;
 			(*mm)->set_position (t->time());
 
 			max_tempo = max (max_tempo, t->note_types_per_minute());
@@ -286,7 +281,6 @@ Editor::draw_tempo_marks ()
 
 	if ((t == tempi.end()) && (mm != tempo_marks.end())) {
 		while (mm != tempo_marks.end()) {
-			std::cerr << "\tdrop excess tempo marker @ " << (*mm)->point().time() << std::endl;
 			delete *mm;
 			mm = tempo_marks.erase (mm);
 		}
@@ -848,8 +842,8 @@ Editor::abort_tempo_map_edit ()
 void
 Editor::mid_tempo_change ()
 {
-	std::cerr << "============== MID TEMPO\n";
-	TempoMap::SharedPtr map (TempoMap::use());
-	map->dump (std::cerr);
+	 std::cerr << "============== MID TEMPO\n";
+	 TempoMap::SharedPtr map (TempoMap::use());
+	 map->dump (std::cerr);
 	tempo_map_visual_update ();
 }
