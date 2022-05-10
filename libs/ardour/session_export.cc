@@ -273,6 +273,9 @@ Session::process_export (pframes_t nframes)
 		if (ProcessExport (nframes).value_or (0) > 0) {
 			/* last cycle completed */
 			assert (_export_rolling);
+			if (!_realtime_export) {
+				_transport_fsm->hard_stop ();
+			}
 			stop_audio_export ();
 		}
 

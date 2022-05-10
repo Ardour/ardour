@@ -186,6 +186,11 @@ DiskReader::set_state (const XMLNode& node, int version)
 void
 DiskReader::realtime_handle_transport_stopped ()
 {
+
+	if (_session.exporting () && !_session.realtime_export ()) {
+		printf ("DR POST EXPORT DiskReader::realtime_handle_transport_stopped\n");
+		_declick_amp.set_gain (0);
+	}
 	/* can't do the resolve here because we don't have a place to put the
 	 * note resolving data. Defer to
 	 * MidiTrack::realtime_handle_transport_stopped() which will call
