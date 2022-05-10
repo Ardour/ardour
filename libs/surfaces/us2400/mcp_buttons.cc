@@ -130,18 +130,22 @@ LedState
 US2400Protocol::right_press (Button &)
 {
 	if (_subview_mode != None) {
-		bool hasNextSend = true;
-		int numSends = 0;
-		while (hasNextSend) {
-			if (first_selected_stripable()->send_name(numSends).length() < 1) {
-				hasNextSend = false;
-			} else {
-				numSends++;
+		boost::shared_ptr<Stripable> s = first_selected_stripable();
+
+		if (s) {
+			bool hasNextSend = true;
+			int numSends = 0;
+			while (hasNextSend) {
+				if (s->send_name(numSends).length() < 1) {
+					hasNextSend = false;
+				} else {
+					numSends++;
+				}
 			}
-		}
-		if (numSends > (_sends_bank + 1) * 16) {
-			_sends_bank++;
-			redisplay_subview_mode();
+			if (numSends > (_sends_bank + 1) * 16) {
+				_sends_bank++;
+				redisplay_subview_mode();
+			}
 		}
 		return none;
 	}
