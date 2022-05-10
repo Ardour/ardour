@@ -3576,27 +3576,24 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->begin_reversible_command (_("move tempo mark"));
 	}
 
-	if (ArdourKeyboard::indicates_constraint (event->button.state) && ArdourKeyboard::indicates_copy (event->button.state)) {
-		double new_bpm = max (1.5, _grab_bpm.end_note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
-		stringstream strs;
-		map->change_tempo (const_cast<TempoPoint&>(_marker->tempo()), Tempo (_marker->tempo().note_types_per_minute(), _marker->tempo().note_type(), new_bpm));
-		strs << "end:" << fixed << setprecision(3) << new_bpm;
-		show_verbose_cursor_text (strs.str());
 
-	} else if (ArdourKeyboard::indicates_constraint (event->button.state)) {
-		/* use vertical movement to alter tempo .. should be log */
+	if (ArdourKeyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+
 		double new_bpm = max (1.5, _grab_bpm.note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
 		stringstream strs;
-		map->change_tempo (const_cast<TempoPoint&>(_marker->tempo()), Tempo (new_bpm, _marker->tempo().note_type(), _marker->tempo().end_note_types_per_minute()));
-		strs << "start:" << fixed << setprecision(3) << new_bpm;
+		Temporal::Tempo new_tempo (new_bpm, _marker->tempo().note_type());
+		map->change_tempo (const_cast<TempoPoint&>(_marker->tempo()), new_tempo);
+		strs << "Tempo: " << fixed << setprecision(3) << new_bpm;
 		show_verbose_cursor_text (strs.str());
 
 	} else if (_movable) {
+
 		timepos_t pos = adjusted_current_time (event);
 		map->move_tempo (_marker->tempo(), pos, false);
 		show_verbose_cursor_time (_marker->tempo().time());
-		_editor->mid_tempo_change ();
 	}
+
+	_editor->mid_tempo_change ();
 }
 
 
