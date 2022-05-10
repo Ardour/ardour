@@ -42,6 +42,9 @@ public:
 	void cycle_end (pframes_t);
 	void cycle_split ();
 
+	/* reset SRC, clear out any state */
+	void reinit ();
+
 	Buffer& get_buffer (pframes_t nframes) {
 		return get_audio_buffer (nframes);
 	}
@@ -52,6 +55,7 @@ public:
 protected:
 	friend class PortManager;
 	AudioPort (std::string const &, PortFlags);
+
 
 	/* special access for PortManager only (hah, C++) */
 	Sample* engine_get_whole_audio_buffer ();

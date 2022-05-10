@@ -1483,6 +1483,9 @@ AudioEngine::freewheel_callback (bool onoff)
 {
 	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose (X_("freewheel callback onoff %1\n"), onoff));
 	_freewheeling = onoff;
+	if (!_freewheeling) {
+		PortManager::reinit ();
+	}
 }
 
 void

@@ -127,6 +127,12 @@ AudioPort::cycle_split ()
 {
 }
 
+void
+AudioPort::reinit ()
+{
+	_src.reset ();
+}
+
 AudioBuffer&
 AudioPort::get_audio_buffer (pframes_t nframes)
 {

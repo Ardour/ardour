@@ -121,6 +121,7 @@ public:
 	virtual void cycle_start (pframes_t);
 	virtual void cycle_end (pframes_t) = 0;
 	virtual void cycle_split () = 0;
+	virtual void reinit () {}
 	virtual Buffer& get_buffer (pframes_t nframes) = 0;
 	virtual void flush_buffers (pframes_t /*nframes*/) {}
 	virtual void transport_stopped () {}

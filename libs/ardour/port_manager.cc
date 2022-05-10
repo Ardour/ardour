@@ -1183,6 +1183,13 @@ PortManager::silence (pframes_t nframes, Session* s)
 		}
 	}
 }
+void
+PortManager::reinit ()
+{
+	for (auto const& p : *_ports.reader ()) {
+		p.second->reinit ();
+	}
+}
 
 void
 PortManager::silence_outputs (pframes_t nframes)

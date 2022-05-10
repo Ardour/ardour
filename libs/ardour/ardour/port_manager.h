@@ -293,6 +293,8 @@ protected:
 	 */
 	void cycle_end (pframes_t nframes, Session* s = 0);
 
+	void reinit ();
+
 	void cycle_end_fade_out (gain_t, gain_t, pframes_t, Session* s = 0);
 
 	static std::string port_info_file ();
