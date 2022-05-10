@@ -286,6 +286,9 @@ void
 Session::process_export_fw (pframes_t nframes)
 {
 	if (!_export_rolling) {
+		if (_realtime_export) {
+			fail_roll (nframes);
+		}
 		try {
 			ProcessExport (0);
 		} catch (std::exception & e) {
@@ -402,8 +405,10 @@ Session::stop_audio_export ()
 	   stuff that stop_transport() implements.
 	*/
 
-	realtime_stop (true, true);
-	flush_all_inserts ();
+	if (!_realtime_export) {
+		realtime_stop (true, true);
+		flush_all_inserts ();
+	}
 	_export_rolling = false;
 	_butler->schedule_transport_work ();
 	reset_xrun_count ();
