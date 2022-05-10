@@ -838,6 +838,9 @@ Editor::abort_tempo_map_edit ()
 	/* this drops the lock held while we have a writable copy in our per-thread pointer */
 	TempoMap::abort_update ();
 
+	/* Now update our own per-thread copy of the tempo map pointer to be
+	   the canonical one, and reconnect markers with elements of that map
+	*/
 	TempoMap::SharedPtr tmap (TempoMap::fetch());
 	reassociate_metric_markers (tmap);
 }
