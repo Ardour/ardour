@@ -2493,6 +2493,7 @@ private:
 	friend class MeterMarkerDrag;
 	friend class TempoMarkerDrag;
 	friend class TempoTwistDrag;
+	friend class TempoEndDrag;
 	friend class CursorDrag;
 	friend class FadeInDrag;
 	friend class FadeOutDrag;

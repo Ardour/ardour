@@ -3930,7 +3930,7 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	map = TempoMap::fetch_writable();
+	map = _editor->begin_tempo_map_edit ();
 
 	/* get current state */
 	_before_state = &map->get_state();
@@ -3994,7 +3994,7 @@ void
 TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred || !_drag_valid) {
-		TempoMap::abort_update ();
+		_editor->abort_tempo_map_edit ();
 		return;
 	}
 
