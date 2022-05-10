@@ -109,6 +109,7 @@
 #include "export_video_dialog.h"
 #include "global_port_matrix.h"
 #include "idleometer.h"
+#include "io_plugin_window.h"
 #include "keyeditor.h"
 #include "location_ui.h"
 #include "lua_script_manager.h"
