@@ -842,8 +842,8 @@ Editor::abort_tempo_map_edit ()
 void
 Editor::mid_tempo_change ()
 {
-	 std::cerr << "============== MID TEMPO\n";
-	 TempoMap::SharedPtr map (TempoMap::use());
-	 map->dump (std::cerr);
+	// std::cerr << "============== MID TEMPO\n";
+	// TempoMap::SharedPtr map (TempoMap::use());
+	// map->dump (std::cerr);
 	tempo_map_visual_update ();
 }
