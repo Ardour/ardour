@@ -112,6 +112,8 @@ struct TransportFSM
 
 	TransportFSM (TransportAPI& tapi);
 
+	void hard_stop ();
+
 	void start () {
 		init ();
 	}

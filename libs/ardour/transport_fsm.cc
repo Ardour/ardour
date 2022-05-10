@@ -99,6 +99,18 @@ TransportFSM::init ()
 }
 
 void
+TransportFSM::hard_stop ()
+{
+	_motion_state = Stopped;
+	_last_locate.target = max_samplepos;
+	current_roll_after_locate_status = boost::none;
+	_direction_state = Forwards;
+	_transport_speed = 0;
+	_reverse_after_declick = 0;
+	_butler_state = NotWaitingForButler;
+}
+
+void
 TransportFSM::process_events ()
 {
 	processing++;
