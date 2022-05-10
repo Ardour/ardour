@@ -864,7 +864,7 @@ private:
 class TempoMarkerDrag : public Drag
 {
 public:
-	TempoMarkerDrag (Editor *, ArdourCanvas::Item *, bool);
+	TempoMarkerDrag (Editor *, ArdourCanvas::Item *);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -886,7 +886,6 @@ private:
 	Temporal::TempoPoint const * _real_section;
 	Temporal::TempoMap::WritableSharedPtr map;
 
-	bool _copy;
 	bool _movable;
 	Temporal::Tempo _grab_bpm;
 	Temporal::Beats _grab_qn;

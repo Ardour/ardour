@@ -3527,9 +3527,8 @@ MeterMarkerDrag::aborted (bool moved)
 
 }
 
-TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
+TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i, Temporal::BeatTime)
-	, _copy (c)
 	, _grab_bpm (120.0, 4.0)
 	, _before_state (0)
 {

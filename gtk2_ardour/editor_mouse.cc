@@ -792,7 +792,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new TempoEndDrag (this, item), event);
 		} else {
-			_drags->set (new TempoMarkerDrag (this, item, ArdourKeyboard::indicates_copy (event->button.state)), event);
+			_drags->set (new TempoMarkerDrag (this, item), event);
 		}
 
 		return true;
