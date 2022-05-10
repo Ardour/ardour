@@ -552,11 +552,14 @@ MidiRegionView::button_release (GdkEventButton* ev)
 			break;
 
 		case MouseContent:
+			editor.get_selection().set (this);
+			/* fallthru */
 		case MouseTimeFX:
 			_mouse_changed_selection = true;
 			clear_selection_internal ();
 			break;
 		case MouseDraw:
+			editor.get_selection().set (this);
 			break;
 
 		default:
