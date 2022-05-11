@@ -4092,7 +4092,8 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	PublicEditor& editor = trackview.editor ();
 
 	samplepos_t const unsnapped_sample = editor.pixel_to_sample (global_x);
-	const Temporal::timepos_t snapped_pos = editor.snap_to_bbt (timepos_t (unsnapped_sample), RoundDownAlways, SnapToGrid_Unscaled);
+	Temporal::timepos_t snapped_pos = timepos_t (unsnapped_sample);
+	editor.snap_to (snapped_pos, RoundDownAlways, SnapToGrid_Unscaled);
 	const Temporal::Beats snapped_beats = _region->position().distance (snapped_pos).beats ();
 
 	/* prevent Percussive mode from displaying a ghost hit at region end */

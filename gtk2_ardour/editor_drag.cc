@@ -6839,7 +6839,9 @@ NoteCreateDrag::~NoteCreateDrag ()
 Temporal::Beats
 NoteCreateDrag::round_down_to_grid (timepos_t const & pos, GdkEvent const * event) const
 {
-	return _editor->snap_to_bbt (pos, RoundDownMaybe, SnapToGrid_Unscaled).beats ();
+	timepos_t snapped = pos;
+	_editor->snap_to (snapped, RoundDownMaybe, SnapToGrid_Unscaled);
+	return snapped.beats();
 }
 
 void
