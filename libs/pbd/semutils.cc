@@ -20,6 +20,13 @@
 #include "pbd/semutils.h"
 #include "pbd/failed_constructor.h"
 
+#ifdef USE_FUTEX_SEMAPHORE
+#include <errno.h>
+#include <linux/futex.h>
+#include <syscall.h>
+#include <unistd.h>
+#endif
+
 using namespace PBD;
 
 Semaphore::Semaphore (const char* name, int val)
@@ -41,6 +48,9 @@ Semaphore::Semaphore (const char* name, int val)
 		throw failed_constructor ();
 	}
 
+#elif defined USE_FUTEX_SEMAPHORE
+	(void)name; /* stop warning */
+	_value = val;
 #else
 	(void) name; /* stop gcc warning on !Apple systems */
 
@@ -85,6 +95,47 @@ Semaphore::reset ()
 		++rv;
 		result = WaitForSingleObject(_sem, 0);
 	} while (result == WAIT_OBJECT_0);
+	return rv;
+}
+
+#elif defined USE_FUTEX_SEMAPHORE
+
+int
+Semaphore::signal ()
+{
+	std::atomic_fetch_add_explicit (&_value, 1, std::memory_order_release);
+	return syscall (__NR_futex, &_value, FUTEX_WAKE_PRIVATE, 1, NULL, NULL, 0);
+}
+
+int
+Semaphore::wait ()
+{
+	unsigned int value = 1;
+	while (!std::atomic_compare_exchange_weak_explicit (&_value, &value, value - 1, std::memory_order_acquire, std::memory_order_relaxed)) {
+		if (value == 0) {
+			if (syscall (__NR_futex, &_value, FUTEX_WAIT_PRIVATE, 0, NULL, NULL, 0)) {
+				if (errno != EAGAIN && errno != EINTR) {
+					return 1;
+				}
+			}
+			value = 1;
+		}
+	}
+	return 0;
+}
+
+int
+Semaphore::reset ()
+{
+	int rv = 0;
+	unsigned int value = 1;
+
+	while (!std::atomic_compare_exchange_weak_explicit (&_value, &value, value - 1, std::memory_order_acquire, std::memory_order_relaxed)) {
+		if (value == 0) {
+			break;
+		}
+		++rv;
+	}
 	return rv;
 }
 
