@@ -361,6 +361,10 @@ AddRouteDialog::on_response (int r)
 	UIConfiguration::instance().set_show_on_cue_page (show_on_cue_page());
 	UIConfiguration::instance().set_insert_at_position ((int) insert_at());
 
+	/* save last route type */
+	auto* node = _session->extra_xml ("AddRouteDialog", true);
+	node->set_property (X_("LastRouteType"), enum_2_string (type_wanted ()));
+
 	reset_name_edited ();
 	/* Don't call ArdourDialog::on_response() because that will
 	   automatically hide the dialog.
@@ -567,7 +571,7 @@ AddRouteDialog::get_template_path ()
 AddRouteDialog::TypeWanted
 AddRouteDialog::type_wanted()
 {
-	if (trk_template_chooser.get_selection()->count_selected_rows() != 1) {
+	if (trk_template_chooser.get_selection ()->count_selected_rows () != 1) {
 		return AudioTrack;
 	}
 	TreeIter iter = trk_template_chooser.get_selection ()->get_selected ();
@@ -576,9 +580,9 @@ AddRouteDialog::type_wanted()
 	const string str = (*iter)[track_template_columns.name];
 	if (str == _("Audio Busses")) {
 		return AudioBus;
-	} else if (str == _("MIDI Busses")){
+	} else if (str == _("MIDI Busses")) {
 		return MidiBus;
-	} else if (str == _("MIDI Tracks")){
+	} else if (str == _("MIDI Tracks")) {
 		return MidiTrack;
 	} else if (str == _("Audio Tracks")) {
 		return AudioTrack;
@@ -587,8 +591,28 @@ AddRouteDialog::type_wanted()
 	} else if (str == _("Foldback Busses")) {
 		return FoldbackBus;
 	} else {
-		assert (0);
 		return AudioTrack;
+	}
+}
+
+std::string
+AddRouteDialog::type_wanted_to_localized_string (AddRouteDialog::TypeWanted type_wanted) {
+	switch(type_wanted) {
+		case AudioBus:
+			return _("Audio Busses");
+		case MidiBus:
+			return _("MIDI Busses");
+		case MidiTrack:
+			return _("MIDI Tracks");
+		case AudioTrack:
+			return _("Audio Tracks");
+		case VCAMaster:
+			return _("VCA Masters");
+		case FoldbackBus:
+			return _("Foldback Busses");
+		default:
+			return _("Audio Tracks");
+			break;
 	}
 }
 
@@ -988,6 +1012,26 @@ AddRouteDialog::refill_channel_setups ()
 		row[track_template_columns.path] = x->path;
 		row[track_template_columns.description] = x->description;
 		row[track_template_columns.modified_with] = x->modified_with;
+	}
+
+	/* load and select last route type */
+	if (_session) {
+		auto        node = _session->extra_xml (X_("AddRouteDialog"), false);
+		std::string last_route{};
+
+		if (node && node->get_property (X_ ("LastRouteType"), last_route)) {
+			auto type_wanted = static_cast<TypeWanted> (string_2_enum (last_route, TypeWanted));
+
+			for (const auto& row : trk_template_chooser.get_model ()->children ()) {
+				std::string node_value{};
+				row.get_value (0, node_value);
+
+				if (node_value == type_wanted_to_localized_string (type_wanted)) {
+					trk_template_chooser.get_selection ()->select (row);
+					break;
+				}
+			}
+		}
 	}
 
 	set_popdown_strings (channel_combo, channel_combo_strings);
