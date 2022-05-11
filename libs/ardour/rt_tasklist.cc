@@ -35,8 +35,7 @@ RTTaskList::RTTaskList ()
 	, _task_end_sem ("rt_task_done", 0)
 	, _n_tasks (0)
 	, _m_tasks (0)
-	, _queue_size (1024)
-	, _tasks (_queue_size)
+	, _tasks (256)
 {
 	g_atomic_int_set (&_threads_active, 0);
 	reset_thread_list ();
@@ -173,9 +172,8 @@ RTTaskList::process ()
 	}
 
 	/* re-allocate queue if needed */
-	if (_m_tasks >= _queue_size) {
-		_queue_size = _tasks.power_of_two_size (_m_tasks + 1);
-		_tasks.reserve (_queue_size);
+	if (_tasks.capacity () < _m_tasks) {
+		_tasks.reserve (_m_tasks);
 	}
 	_n_tasks = 0;
 	_m_tasks = 0;

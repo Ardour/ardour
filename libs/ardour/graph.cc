@@ -212,6 +212,10 @@ Graph::prep ()
 	assert (g_atomic_uint_get (&_trigger_queue_size) == 0);
 	assert (_graph_empty != (_graph_chain->_n_terminal_nodes > 0));
 
+	if (_trigger_queue.capacity () < _graph_chain->_nodes_rt.size ()) {
+		_trigger_queue.reserve (_graph_chain->_nodes_rt.size ());
+	}
+
 	g_atomic_int_set (&_terminal_refcnt, _graph_chain->_n_terminal_nodes);
 
 	/* Trigger the initial nodes for processing, which are the ones at the `input' end */

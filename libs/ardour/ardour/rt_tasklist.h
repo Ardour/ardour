@@ -58,7 +58,6 @@ private:
 
 	size_t _n_tasks;
 	size_t _m_tasks;
-	size_t _queue_size;
 
 	PBD::MPMCQueue<boost::function<void ()>> _tasks;
 };
