@@ -21,8 +21,6 @@
 #ifndef __pbd_semutils_h__
 #define __pbd_semutils_h__
 
-#define USE_FUTEX_SEMAPHORE
-
 #if (defined PLATFORM_WINDOWS && !defined USE_PTW32_SEMAPHORE)
 #define WINDOWS_SEMAPHORE 1
 #endif

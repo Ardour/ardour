@@ -936,6 +936,8 @@ def options(opt):
                     help='Turn on PT session import option')
     opt.add_option('--no-threaded-waveviews', action='store_true', default=False, dest='no_threaded_waveviews',
                     help='Disable threaded waveview rendering')
+    opt.add_option('--no-futex-semaphore', action='store_true', default=False, dest='no_futex_semaphore',
+                    help='Disable use of futex for semaphores (Linux only)')
     opt.add_option(
         '--qm-dsp-include', type='string', action='store',
         dest='qm_dsp_include', default='/usr/include/qm-dsp',
@@ -1340,6 +1342,10 @@ int main () { return 0; }
     if opts.no_threaded_waveviews:
         conf.define('NO_THREADED_WAVEVIEWS', 1)
         conf.env['NO_THREADED_WAVEVIEWS'] = True
+    if not opts.no_futex_semaphore:
+        if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw':
+            conf.define('USE_FUTEX_SEMAPHORE', 1)
+            conf.env['USE_FUTEX_SEMAPHORE'] = True
 
     backends = opts.with_backends.split(',')
 
@@ -1479,6 +1485,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
     write_config_text('FPU optimization',      opts.fpu_optimization)
     write_config_text('FPU AVX/FMA support',   conf.is_defined('FPU_AVX_FMA_SUPPORT'))
+    write_config_text('Futex Semaphore',       conf.is_defined('USE_FUTEX_SEMAPHORE'))
     write_config_text('Freedesktop files',     opts.freedesktop)
     write_config_text('Libjack linking',       conf.env['libjack_link'])
     write_config_text('Libjack metadata',      conf.is_defined ('HAVE_JACK_METADATA'))
