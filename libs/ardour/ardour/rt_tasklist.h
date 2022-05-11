@@ -19,30 +19,29 @@
 #ifndef _ardour_rt_tasklist_h_
 #define _ardour_rt_tasklist_h_
 
-#include <list>
 #include <boost/function.hpp>
+#include <list>
 
-#include "pbd/semutils.h"
 #include "pbd/g_atomic_compat.h"
+#include "pbd/mpmc_queue.h"
+#include "pbd/semutils.h"
 
-#include "ardour/libardour_visibility.h"
-#include "ardour/types.h"
 #include "ardour/audio_backend.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/session_handle.h"
+#include "ardour/types.h"
 
-namespace ARDOUR {
-
+namespace ARDOUR
+{
 class LIBARDOUR_API RTTaskList
 {
 public:
 	RTTaskList ();
 	~RTTaskList ();
 
-	// TODO use dedicated allocator of a boost::intrusive::list
-	typedef std::list<boost::function<void ()> > TaskList;
-
 	/** process tasks in list in parallel, wait for them to complete */
-	void process (TaskList const&);
+	void process ();
+	void push_back (boost::function<void ()> fn);
 
 private:
 	GATOMIC_QUAL gint      _threads_active;
@@ -50,18 +49,18 @@ private:
 
 	void reset_thread_list ();
 	void drop_threads ();
-
-	void process_tasklist ();
-
-	static void* _thread_run (void *arg);
 	void run ();
 
-	Glib::Threads::Mutex _process_mutex;
-	Glib::Threads::Mutex _tasklist_mutex;
+	static void* _thread_run (void* arg);
+
 	PBD::Semaphore _task_run_sem;
 	PBD::Semaphore _task_end_sem;
 
-	TaskList _tasklist;
+	size_t _n_tasks;
+	size_t _m_tasks;
+	size_t _queue_size;
+
+	PBD::MPMCQueue<boost::function<void ()>> _tasks;
 };
 
 } // namespace ARDOUR

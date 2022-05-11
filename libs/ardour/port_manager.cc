@@ -1112,15 +1112,18 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 	 *    A single external source-port may be connected to many ardour
 	 *    input-ports. Currently re-sampling is per input.
 	 */
-	if (s && s->rt_tasklist () && fabs (Port::speed_ratio ()) != 1.0) {
-		RTTaskList::TaskList tl;
+	boost::shared_ptr<RTTaskList> tl;
+	if (s) {
+		tl = s->rt_tasklist ();
+	}
+	if (tl && fabs (Port::speed_ratio ()) != 1.0) {
 		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
 			if (!(p->second->flags () & TransportSyncPort)) {
-				tl.push_back (boost::bind (&Port::cycle_start, p->second, nframes));
+				tl->push_back (boost::bind (&Port::cycle_start, p->second, nframes));
 			}
 		}
-		tl.push_back (boost::bind (&PortManager::run_input_meters, this, nframes, s ? s->nominal_sample_rate () : 0));
-		s->rt_tasklist ()->process (tl);
+		tl->push_back (boost::bind (&PortManager::run_input_meters, this, nframes, s ? s->nominal_sample_rate () : 0));
+		tl->process ();
 	} else {
 		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
 			if (!(p->second->flags () & TransportSyncPort)) {
@@ -1135,14 +1138,17 @@ void
 PortManager::cycle_end (pframes_t nframes, Session* s)
 {
 	// see optimzation note in ::cycle_start()
-	if (0 && s && s->rt_tasklist () && fabs (Port::speed_ratio ()) != 1.0) {
-		RTTaskList::TaskList tl;
+	boost::shared_ptr<RTTaskList> tl;
+	if (s) {
+		tl = s->rt_tasklist ();
+	}
+	if (tl && fabs (Port::speed_ratio ()) != 1.0) {
 		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
 			if (!(p->second->flags () & TransportSyncPort)) {
-				tl.push_back (boost::bind (&Port::cycle_end, p->second, nframes));
+				tl->push_back (boost::bind (&Port::cycle_end, p->second, nframes));
 			}
 		}
-		s->rt_tasklist ()->process (tl);
+		tl->process ();
 	} else {
 		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
 			if (!(p->second->flags () & TransportSyncPort)) {
@@ -1250,14 +1256,17 @@ void
 PortManager::cycle_end_fade_out (gain_t base_gain, gain_t gain_step, pframes_t nframes, Session* s)
 {
 	// see optimzation note in ::cycle_start()
-	if (0 && s && s->rt_tasklist () && fabs (Port::speed_ratio ()) != 1.0) {
-		RTTaskList::TaskList tl;
+	boost::shared_ptr<RTTaskList> tl;
+	if (s) {
+		tl = s->rt_tasklist ();
+	}
+	if (tl && fabs (Port::speed_ratio ()) != 1.0) {
 		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
 			if (!(p->second->flags () & TransportSyncPort)) {
-				tl.push_back (boost::bind (&Port::cycle_end, p->second, nframes));
+				tl->push_back (boost::bind (&Port::cycle_end, p->second, nframes));
 			}
 		}
-		s->rt_tasklist ()->process (tl);
+		tl->process ();
 	} else {
 		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
 			if (!(p->second->flags () & TransportSyncPort)) {
