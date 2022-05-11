@@ -6840,7 +6840,7 @@ Temporal::Beats
 NoteCreateDrag::round_down_to_grid (timepos_t const & pos, GdkEvent const * event) const
 {
 	timepos_t snapped = pos;
-	_editor->snap_to (snapped, RoundDownMaybe, SnapToGrid_Unscaled);
+	_editor->snap_to (snapped, RoundDownMaybe, SnapToGrid_Scaled);
 	return snapped.beats();
 }
 
