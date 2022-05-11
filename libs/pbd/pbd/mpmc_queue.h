@@ -26,6 +26,7 @@
 
 #include <cassert>
 #include <stdint.h>
+#include <stdlib.h>
 
 #ifdef MPMC_USE_STD_ATOMIC
 # include <atomic>
@@ -57,6 +58,10 @@ public:
 	~MPMCQueue ()
 	{
 		delete[] _buffer;
+	}
+
+	size_t capacity () const {
+		return _buffer_mask + 1;
 	}
 
 	static size_t
@@ -126,7 +131,6 @@ public:
 					break;
 				}
 			} else if (dif < 0) {
-				assert (0);
 				return false;
 			} else {
 #ifdef MPMC_USE_STD_ATOMIC
