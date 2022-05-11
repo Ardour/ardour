@@ -6881,6 +6881,10 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 	const timepos_t pos = _drags->current_pointer_time ();
 	Temporal::Beats aligned_beats = round_down_to_grid (pos, event);
 
+	//when the user clicks and starts a drag to define the note's length, require notes to be at least |this| long
+	const Temporal::Beats min_length (_region_view->get_draw_length_beats (pos));
+	aligned_beats = aligned_beats+min_length;
+
 	_note[1] = timepos_t (max (Temporal::Beats(), aligned_beats));
 
 	const timepos_t rrp1 (_region_view->region()->region_relative_position (_note[0]));
@@ -6901,13 +6905,6 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 
 	Beats const start = _region_view->region()->absolute_time_to_region_beats (min (_note[0], _note[1]));
 	Beats length = max (Beats (0, 1), (_note[0].distance (_note[1]).abs().beats()));
-
-	GridType grid_to_use = _editor->draw_length() == DRAW_LEN_AUTO ? _editor->grid_type() : _editor->draw_length();
-	int32_t div = _editor->get_grid_music_divisions (grid_to_use, ev->button.state);
-
-	if (div > 0) {
-		length = length.round_to_subdivision (div, RoundUpMaybe);
-	}
 
 	/* create_note_at() implements UNDO for us */
 	_region_view->create_note_at (timepos_t (start), _drag_rect->y0(), length, ev->button.state, false);
