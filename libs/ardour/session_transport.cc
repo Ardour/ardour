@@ -602,7 +602,7 @@ Session::start_transport (bool after_loop)
 		SessionEvent* ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Add, _transport_sample, _transport_sample, 1.0);
 		queue_event (ev);
 
-		samplepos_t roll_pos = _transport_sample + std::max (_count_in_samples, _remaining_latency_preroll) * (_transport_fsm->will_roll_fowards () ? 1 : -1);
+		samplepos_t roll_pos = _transport_sample + std::max (_count_in_samples, _remaining_latency_preroll) * (_transport_fsm->will_roll_forwards () ? 1 : -1);
 		if (roll_pos > 0 && roll_pos != _transport_sample) {
 			/* and when transport_rolling () == true */
 			SessionEvent* ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Add, roll_pos, roll_pos, 1.0);
@@ -2081,7 +2081,7 @@ Session::declick_in_progress () const
 bool
 Session::transport_will_roll_forwards () const
 {
-	return _transport_fsm->will_roll_fowards ();
+	return _transport_fsm->will_roll_forwards ();
 }
 
 double

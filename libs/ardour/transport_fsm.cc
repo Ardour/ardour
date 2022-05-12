@@ -842,7 +842,7 @@ TransportFSM::set_speed (Event const & ev)
 }
 
 bool
-TransportFSM::will_roll_fowards () const
+TransportFSM::will_roll_forwards () const
 {
 	if (reversing() || _reverse_after_declick) {
 		return most_recently_requested_speed >= 0; /* note: future speed of zero is equivalent to Forwards */

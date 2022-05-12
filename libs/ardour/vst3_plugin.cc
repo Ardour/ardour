@@ -2891,11 +2891,11 @@ VST3PI::psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl> ac, FIDSt
 	}
 
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::psl_subscribe_to: %1\n", ac->name ()));
-	ac->Changed.connect_same_thread (_ac_connection_list, boost::bind (&VST3PI::foward_signal, this, nfo2.get (), id));
+	ac->Changed.connect_same_thread (_ac_connection_list, boost::bind (&VST3PI::forward_signal, this, nfo2.get (), id));
 }
 
 void
-VST3PI::foward_signal (IContextInfoHandler2* handler, FIDString id) const
+VST3PI::forward_signal (IContextInfoHandler2* handler, FIDString id) const
 {
 	assert (handler);
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::psl_subscribtion AC changed %1\n", id));

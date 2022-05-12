@@ -722,7 +722,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void add_trigger (TriggerPtr);
 
 	void fast_forward (CueEvents const &, samplepos_t transport_postiion);
-	bool fast_forwarding() const { return _fast_fowarding; }
+	bool fast_forwarding() const { return _fast_forwarding; }
 
 	void set_pending (uint32_t slot, Trigger*);
 
@@ -827,7 +827,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int32_t                  _active_slots;
 	bool                     _locate_armed;
 	bool                     _cancel_locate_armed;
-	bool                     _fast_fowarding;
+	bool                     _fast_forwarding;
 
 	boost::shared_ptr<SideChain> _sidechain;
 

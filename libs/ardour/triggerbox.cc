@@ -2869,7 +2869,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _active_slots (0)
 	, _locate_armed (false)
 	, _cancel_locate_armed (false)
-	, _fast_fowarding (false)
+	, _fast_forwarding (false)
 
 	, requests (1024)
 {
@@ -2956,7 +2956,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		return;
 	}
 
-	PBD::Unwinder<bool> uw (_fast_fowarding, true);
+	PBD::Unwinder<bool> uw (_fast_forwarding, true);
 
 	using namespace Temporal;
 	TempoMap::SharedPtr tmap (TempoMap::use());

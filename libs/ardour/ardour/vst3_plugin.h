@@ -221,7 +221,7 @@ private:
 	void psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl>, FIDString);
 	void psl_stripable_property_changed (PBD::PropertyChange const&);
 
-	void foward_signal (Presonus::IContextInfoHandler2*, FIDString) const;
+	void forward_signal (Presonus::IContextInfoHandler2*, FIDString) const;
 
 	boost::shared_ptr<ARDOUR::VST3PluginModule> _module;
 
