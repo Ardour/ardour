@@ -303,7 +303,7 @@ public:
 	Temporal::Beats absolute_time_to_source_beats(Temporal::timepos_t const &) const;
 
 	Temporal::Beats absolute_time_to_region_beats (Temporal::timepos_t const & b) const {
-		return position().distance (b).beats ();
+		return position().distance (b+start()).beats ();
 	}
 
 	int apply (Filter &, Progress* progress = 0);
