@@ -24,6 +24,7 @@
 
 #include "ardour/export_handler.h"
 #include "ardour/export_analysis.h"
+#include "ardour/export_smf_writer.h"
 
 #include "audiographer/utils/identity_vertex.h"
 
@@ -53,6 +54,7 @@ namespace ARDOUR
 {
 
 class ExportTimespan;
+class MidiBuffer;
 class Session;
 
 class LIBARDOUR_API ExportGraphBuilder
@@ -61,10 +63,27 @@ class LIBARDOUR_API ExportGraphBuilder
 	typedef ExportHandler::FileSpec FileSpec;
 
 	typedef boost::shared_ptr<AudioGrapher::Sink<Sample> > FloatSinkPtr;
-	typedef boost::shared_ptr<AudioGrapher::IdentityVertex<Sample> > IdentityVertexPtr;
 	typedef boost::shared_ptr<AudioGrapher::Analyser> AnalysisPtr;
-	typedef std::map<ExportChannelPtr,  IdentityVertexPtr> ChannelMap;
 	typedef std::map<std::string, AnalysisPtr> AnalysisMap;
+
+	struct AnyExport {
+		/* Audio export */
+		AudioGrapher::IdentityVertex<Sample> audio;
+		void add_output (AudioGrapher::Source<Sample>::SinkPtr output) {
+			audio.add_output (output);
+		}
+		void process (AudioGrapher::ProcessContext<Sample> const& c) {
+			audio.process (c);
+		}
+		/* MIDI Export */
+		ExportSMFWriter midi;
+		void process (MidiBuffer const& buf, sampleoffset_t off, samplecnt_t cnt, bool last_cycle) {
+			midi.process (buf, off, cnt, last_cycle);
+		}
+	};
+
+	typedef boost::shared_ptr<AnyExport> AnyExportPtr;
+	typedef std::map<ExportChannelPtr, AnyExportPtr> ChannelMap;
 
   public:
 

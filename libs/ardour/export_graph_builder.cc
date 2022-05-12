@@ -86,12 +86,8 @@ ExportGraphBuilder::process (samplecnt_t samples, bool last_cycle)
 
 	sampleoffset_t off = 0;
 	for (ChannelMap::iterator it = channels.begin(); it != channels.end(); ++it) {
-		// TODO special case MIDI..
 		Buffer const* buf;
 		it->first->read (buf, samples);
-		AudioBuffer const* ab = dynamic_cast<AudioBuffer const*> (buf);
-		assert (ab);
-		Sample const* process_buffer = ab->data ();
 
 		if (session.remaining_latency_preroll () >= _master_align + samples) {
 			/* Skip processing during pre-roll, only read/write export ringbuffers */
@@ -104,9 +100,17 @@ ExportGraphBuilder::process (samplecnt_t samples, bool last_cycle)
 			assert (off < samples);
 		}
 
-		ConstProcessContext<Sample> context(&process_buffer[off], samples - off, 1);
-		if (last_cycle) { context().set_flag (ProcessContext<Sample>::EndOfInput); }
-		it->second->process (context);
+		AudioBuffer const* ab = dynamic_cast<AudioBuffer const*> (buf);
+		MidiBuffer const*  mb;
+		if (ab) {
+			Sample const* process_buffer = ab->data ();
+			ConstProcessContext<Sample> context(&process_buffer[off], samples - off, 1);
+			if (last_cycle) { context().set_flag (ProcessContext<Sample>::EndOfInput); }
+			it->second->process (context);
+		}
+		if  ((mb = dynamic_cast<MidiBuffer const*> (buf))) {
+			it->second->process (*mb, off, samples - off, last_cycle);
+		}
 	}
 
 	return samples - off;
@@ -940,18 +944,33 @@ ExportGraphBuilder::ChannelConfig::ChannelConfig (ExportGraphBuilder & parent, F
 
 	ChannelList const & channel_list = config.channel_config->get_channels();
 	unsigned chan = 0;
+	unsigned n_audio = 0;
 	for (ChannelList::const_iterator it = channel_list.begin(); it != channel_list.end(); ++it, ++chan) {
 		ChannelMap::iterator map_it = channel_map.find (*it);
 		if (map_it == channel_map.end()) {
 			std::pair<ChannelMap::iterator, bool> result_pair =
-				channel_map.insert (std::make_pair (*it, IdentityVertexPtr (new IdentityVertex<Sample> ())));
+				channel_map.insert (std::make_pair (*it, AnyExportPtr (new AnyExport ())));
 			assert (result_pair.second);
 			map_it = result_pair.first;
 		}
-		map_it->second->add_output (interleaver->input (chan));
+		if ((*it)->midi ()) {
+			config.filename->set_channel_config(config.channel_config);
+			std::string writer_filename = config.filename->get_path (ExportFormatSpecPtr ()) + ".mid";
+			map_it->second->midi.init (writer_filename, parent.timespan->get_start ());
+			parent.add_export_fn (writer_filename);
+		}
+		if ((*it)->audio ()) {
+			++n_audio;
+			map_it->second->add_output (interleaver->input (chan));
+		}
 	}
 
-	add_child (new_config);
+	if (n_audio > 0) {
+		add_child (new_config);
+	} else {
+		chunker.reset ();
+		interleaver.reset ();
+	}
 }
 
 void
