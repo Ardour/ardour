@@ -388,6 +388,9 @@ ExportTimespanSelector::set_selection_state_of_all_timespans (bool s)
 	for (Gtk::ListStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end(); ++it) {
 		it->set_value (range_cols.selected, s);
 	}
+
+	update_timespans ();
+	CriticalSelectionChanged ();
 }
 
 /*** ExportTimespanSelectorSingle ***/
