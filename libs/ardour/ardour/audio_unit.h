@@ -256,7 +256,7 @@ public:
 	bool is_utility () const;
 
 	bool reconfigurable_io() const { return true; }
-	uint32_t max_configurable_ouputs () const { return max_outputs; }
+	uint32_t max_configurable_outputs () const { return max_outputs; }
 
 	UInt32 version;
 	uint32_t max_outputs;

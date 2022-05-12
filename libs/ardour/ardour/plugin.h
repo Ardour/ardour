@@ -483,7 +483,7 @@ public:
 	virtual bool reconfigurable_io () const { return false; }
 
 	/* max [re]configurable outputs (if finite, 0 otherwise) */
-	virtual uint32_t max_configurable_ouputs () const
+	virtual uint32_t max_configurable_outputs () const
 	{
 		return n_outputs.n_audio();
 	}

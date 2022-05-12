@@ -385,7 +385,7 @@ PluginManager::detect_name_ambiguities (PluginInfoList* pil)
 				* by listing number of audio outputs.
 				* This is used in the instrument selector.
 				*/
-			 bool r = p->max_configurable_ouputs () != (*i)->max_configurable_ouputs ();
+			 bool r = p->max_configurable_outputs () != (*i)->max_configurable_outputs ();
 			 p->multichannel_name_ambiguity = r;
 			 (*i)->multichannel_name_ambiguity = r;
 		 }

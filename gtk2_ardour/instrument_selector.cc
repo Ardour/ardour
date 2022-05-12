@@ -142,7 +142,7 @@ InstrumentSelector::build_instrument_list()
 		std::string suffix;
 
 #ifdef MIXBUS
-		uint32_t n_outs = p->max_configurable_ouputs ();
+		uint32_t n_outs = p->max_configurable_outputs ();
 		if (n_outs > 2) {
 			if (p->reconfigurable_io ()) {
 				suffix = string_compose(_("\u2264 %1 outs"), n_outs);
@@ -152,7 +152,7 @@ InstrumentSelector::build_instrument_list()
 		}
 #else
 		if (p->multichannel_name_ambiguity) {
-			uint32_t n_outs = p->max_configurable_ouputs ();
+			uint32_t n_outs = p->max_configurable_outputs ();
 			if (n_outs > 2) {
 				if (p->reconfigurable_io ()) {
 					suffix = string_compose(_("\u2264 %1 outs"), n_outs);
