@@ -3658,7 +3658,7 @@ BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 void
 BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
-	map = TempoMap::fetch_writable ();
+	map = _editor->begin_tempo_map_edit ();
 
 	Drag::start_grab (event, cursor);
 
@@ -3722,8 +3722,8 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 		/* adjust previous tempo to match pointer sample */
-#warning NUTEMPO need to implement this
-		// _editor->session()->tempo_map().gui_stretch_tempo (_tempo, map.sample_at (_grab_qn), pf, _grab_qn, map.quarters_at_sample (pf));
+		map->stretch_tempo (_tempo, timepos_t (_grab_qn).samples(), pf.samples(), _grab_qn, pf.beats());
+		_editor->mid_tempo_change ();
 	}
 
 	ostringstream sstr;
