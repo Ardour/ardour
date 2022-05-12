@@ -32,6 +32,7 @@
 #include "pbd/ringbuffer.h"
 #include "pbd/signals.h"
 
+#include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/export_pointers.h"
 
@@ -52,7 +53,7 @@ public:
 	virtual samplecnt_t common_port_playback_latency () const { return 0; }
 	virtual void prepare_export (samplecnt_t max_samples, sampleoffset_t common_latency) {}
 
-	virtual void read (Sample const*& data, samplecnt_t samples) const = 0;
+	virtual void read (Buffer const*&, samplecnt_t samples) const = 0;
 
 	virtual bool empty () const = 0;
 
@@ -78,7 +79,7 @@ public:
 	samplecnt_t common_port_playback_latency () const;
 	void        prepare_export (samplecnt_t max_samples, sampleoffset_t common_latency);
 
-	void read (Sample const*& data, samplecnt_t samples) const;
+	void read (Buffer const*&, samplecnt_t samples) const;
 
 	bool empty () const { return ports.empty (); }
 
@@ -94,6 +95,7 @@ private:
 	PortSet                                               ports;
 	samplecnt_t                                           _buffer_size;
 	boost::scoped_array<Sample>                           _buffer;
+	mutable AudioBuffer                                   _buf;
 	std::list<boost::shared_ptr<PBD::RingBuffer<Sample>>> _delaylines;
 };
 
@@ -112,7 +114,7 @@ public:
 
 	ExportChannelPtr create (uint32_t channel);
 
-	void read (uint32_t channel, Sample const*& data, samplecnt_t samples_to_read);
+	void read (uint32_t channel, Buffer const*&, samplecnt_t samples_to_read);
 
 private:
 	int new_cycle_started (samplecnt_t)
@@ -145,9 +147,9 @@ class LIBARDOUR_API RegionExportChannel : public ExportChannel
 	friend class RegionExportChannelFactory;
 
 public:
-	void read (Sample const*& data, samplecnt_t samples_to_read) const
+	void read (Buffer const*& buf, samplecnt_t samples_to_read) const
 	{
-		factory.read (channel, data, samples_to_read);
+		factory.read (channel, buf, samples_to_read);
 	}
 
 	void get_state (XMLNode* /*node*/) const {};
@@ -188,7 +190,7 @@ public:
 public: // ExportChannel interface
 	void prepare_export (samplecnt_t max_samples, sampleoffset_t common_latency);
 
-	void read (Sample const*& data, samplecnt_t samples) const;
+	void read (Buffer const*&, samplecnt_t samples) const;
 
 	bool empty () const { return false; }
 

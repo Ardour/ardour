@@ -86,8 +86,12 @@ ExportGraphBuilder::process (samplecnt_t samples, bool last_cycle)
 
 	sampleoffset_t off = 0;
 	for (ChannelMap::iterator it = channels.begin(); it != channels.end(); ++it) {
-		Sample const * process_buffer = 0;
-		it->first->read (process_buffer, samples);
+		// TODO special case MIDI..
+		Buffer const* buf;
+		it->first->read (buf, samples);
+		AudioBuffer const* ab = dynamic_cast<AudioBuffer const*> (buf);
+		assert (ab);
+		Sample const* process_buffer = ab->data ();
 
 		if (session.remaining_latency_preroll () >= _master_align + samples) {
 			/* Skip processing during pre-roll, only read/write export ringbuffers */

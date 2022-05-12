@@ -38,6 +38,7 @@ using namespace ARDOUR;
 
 PortExportChannel::PortExportChannel ()
 	: _buffer_size (0)
+	, _buf (0)
 {
 }
 
@@ -101,7 +102,7 @@ PortExportChannel::operator< (ExportChannel const& other) const
 }
 
 void
-PortExportChannel::read (Sample const*& data, samplecnt_t samples) const
+PortExportChannel::read (Buffer const*& buf, samplecnt_t samples) const
 {
 	assert (_buffer);
 	assert (samples <= _buffer_size);
@@ -109,8 +110,8 @@ PortExportChannel::read (Sample const*& data, samplecnt_t samples) const
 	if (ports.size () == 1 && _delaylines.size () == 1 && _delaylines.front ()->bufsize () == _buffer_size + 1) {
 		boost::shared_ptr<AudioPort> p = ports.begin ()->lock ();
 		AudioBuffer&                 ab (p->get_audio_buffer (samples)); // unsets AudioBuffer::_written
-		data = ab.data ();
 		ab.set_written (true);
+		buf = &ab;
 		return;
 	}
 
@@ -143,7 +144,8 @@ PortExportChannel::read (Sample const*& data, samplecnt_t samples) const
 		++di;
 	}
 
-	data = _buffer.get ();
+	_buf.set_data (_buffer.get(), samples);
+	buf = &_buf;
 }
 
 void
@@ -217,7 +219,7 @@ RegionExportChannelFactory::create (uint32_t channel)
 }
 
 void
-RegionExportChannelFactory::read (uint32_t channel, Sample const*& data, samplecnt_t samples_to_read)
+RegionExportChannelFactory::read (uint32_t channel, Buffer const*& buf, samplecnt_t samples_to_read)
 {
 	assert (channel < n_channels);
 	assert (samples_to_read <= samples_per_cycle);
@@ -227,7 +229,7 @@ RegionExportChannelFactory::read (uint32_t channel, Sample const*& data, samplec
 		buffers_up_to_date = true;
 	}
 
-	data = buffers.get_audio (channel).data ();
+	buf = &buffers.get_audio (channel);
 }
 
 void
@@ -290,7 +292,7 @@ RouteExportChannel::prepare_export (samplecnt_t max_samples, sampleoffset_t)
 }
 
 void
-RouteExportChannel::read (Sample const*& data, samplecnt_t samples) const
+RouteExportChannel::read (Buffer const*& buf, samplecnt_t samples) const
 {
 	assert (processor);
 	AudioBuffer const& buffer = processor->get_capture_buffers ().get_audio (channel);
@@ -299,7 +301,7 @@ RouteExportChannel::read (Sample const*& data, samplecnt_t samples) const
 #else
 	assert (samples <= (samplecnt_t)buffer.capacity ());
 #endif
-	data = buffer.data ();
+	buf = &buffer;
 }
 
 void
