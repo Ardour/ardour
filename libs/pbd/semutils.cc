@@ -23,6 +23,7 @@
 #ifdef USE_FUTEX_SEMAPHORE
 #include <errno.h>
 #include <linux/futex.h>
+#include <sched.h>
 #include <syscall.h>
 #include <unistd.h>
 #endif
@@ -103,23 +104,19 @@ Semaphore::reset ()
 int
 Semaphore::signal ()
 {
-	std::atomic_fetch_add_explicit (&_value, 1, std::memory_order_release);
-	return syscall (__NR_futex, &_value, FUTEX_WAKE_PRIVATE, 1, NULL, NULL, 0);
+	if (std::atomic_fetch_add_explicit (&_value, 1, std::memory_order_relaxed) < 0) {
+		while (syscall (__NR_futex, &_futex, FUTEX_WAKE_PRIVATE, 1, NULL, NULL, 0) < 1) {
+			sched_yield();
+		}
+	}
+	return 0;
 }
 
 int
 Semaphore::wait ()
 {
-	unsigned int value = 1;
-	while (!std::atomic_compare_exchange_weak_explicit (&_value, &value, value - 1, std::memory_order_acquire, std::memory_order_relaxed)) {
-		if (value == 0) {
-			if (syscall (__NR_futex, &_value, FUTEX_WAIT_PRIVATE, 0, NULL, NULL, 0)) {
-				if (errno != EAGAIN && errno != EINTR) {
-					return 1;
-				}
-			}
-			value = 1;
-		}
+	if (std::atomic_fetch_sub_explicit (&_value, 1, std::memory_order_relaxed) <= 0) {
+		syscall(__NR_futex, &_futex, FUTEX_WAIT_PRIVATE, _futex, NULL, 0, 0);
 	}
 	return 0;
 }
@@ -127,16 +124,9 @@ Semaphore::wait ()
 int
 Semaphore::reset ()
 {
-	int rv = 0;
-	unsigned int value = 1;
-
-	while (!std::atomic_compare_exchange_weak_explicit (&_value, &value, value - 1, std::memory_order_acquire, std::memory_order_relaxed)) {
-		if (value == 0) {
-			break;
-		}
-		++rv;
-	}
-	return rv;
+	int value = _value;
+	_value = 0;
+	return value;
 }
 
 #endif

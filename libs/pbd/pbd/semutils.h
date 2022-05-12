@@ -47,7 +47,8 @@ class LIBPBD_API Semaphore {
 	sem_t* _sem;
 	sem_t* ptr_to_sem() const { return _sem; }
 #elif defined USE_FUTEX_SEMAPHORE
-	std::atomic<unsigned int> _value;
+	int              _futex;
+	std::atomic<int> _value;
 #else
 	mutable sem_t _sem;
 	sem_t* ptr_to_sem() const { return &_sem; }
