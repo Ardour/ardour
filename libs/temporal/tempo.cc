@@ -3028,6 +3028,92 @@ TempoMap::set_ramped (TempoPoint & tp, bool yn)
 	reset_starting_at (tp.sclock() + 1);
 }
 
+
+void
+TempoMap::stretch_tempo (TempoPoint* ts, const samplepos_t sample, const samplepos_t end_sample, Beats const & start_qnote, Beats const & end_qnote)
+{
+	/*
+	  Ts (future prev_t)   Tnext
+	  |                    |
+	  |     [drag^]        |
+	  |----------|----------
+	        e_f  qn_beats(sample)
+	*/
+
+	if (!ts) {
+		return;
+	}
+
+	superclock_t start_sclock = samples_to_superclock (sample, TEMPORAL_SAMPLE_RATE);
+	superclock_t end_sclock = samples_to_superclock (end_sample, TEMPORAL_SAMPLE_RATE);
+
+	/* minimum allowed measurement distance in samples */
+	const superclock_t min_delta_sclock = samples_to_superclock (2, TEMPORAL_SAMPLE_RATE);
+	double new_bpm;
+
+	if (ts->clamped()) {
+
+		/* this tempo point is required to start using the same bpm
+		 * that the previous tempo ended with.
+		 */
+
+		TempoPoint* next_t = const_cast<TempoPoint*> (next_tempo (*ts));
+		TempoPoint* prev_to_ts = const_cast<TempoPoint*> (previous_tempo (*ts));
+		assert (prev_to_ts);
+		/* the change in samples is the result of changing the slope of at most 2 previous tempo sections.
+		 * constant to constant is straightforward, as the tempo prev to ts has constant slope.
+		 */
+		double contribution = 0.0;
+		if (next_t && prev_to_ts->ramped()) {
+			const DoubleableBeats delta_tp = ts->beats() - prev_to_ts->beats();
+			const DoubleableBeats delta_np = next_t->beats() - prev_to_ts->beats();
+			contribution = delta_tp.to_double() / delta_np.to_double();
+		}
+		samplepos_t const fr_off = end_sclock - start_sclock;
+		sampleoffset_t const ts_sample_contribution = fr_off - (contribution * (double) fr_off);
+
+		if (start_sclock > prev_to_ts->sclock() + min_delta_sclock && (start_sclock + ts_sample_contribution) > prev_to_ts->sclock() + min_delta_sclock) {
+			DoubleableBeats delta_sp = start_qnote - prev_to_ts->beats();
+			DoubleableBeats delta_ep = end_qnote - prev_to_ts->beats();
+			new_bpm = ts->note_types_per_minute() * (delta_sp.to_double() / delta_ep.to_double());
+		} else {
+			new_bpm = ts->note_types_per_minute();
+		}
+
+	} else {
+
+		/* ts is free to have it's bpm changed to any value (within limits) */
+
+		if (start_sclock > ts->sclock() + min_delta_sclock && end_sclock > ts->sclock() + min_delta_sclock) {
+			new_bpm = ts->note_types_per_minute() * ((start_sclock - ts->sclock()) / (double) (end_sclock - ts->sclock()));
+		} else {
+			new_bpm = ts->note_types_per_minute();
+		}
+
+		new_bpm = std::min (new_bpm, 1000.0);
+	}
+	/* don't clamp and proceed here.
+	   testing has revealed that this can go negative,
+	   which is an entirely different thing to just being too low.
+	*/
+
+	if (new_bpm < 0.5) {
+		return;
+	}
+
+	ts->set_note_types_per_minute (new_bpm);
+
+	if (ts->clamped()) {
+		TempoPoint* prev = 0;
+		if ((prev = const_cast<TempoPoint*> (previous_tempo (*ts))) != 0) {
+			prev->set_end_note_types_per_minute (ts->note_types_per_minute());
+		}
+	}
+
+	reset_starting_at (ts->sclock() + 1);
+}
+
+
 void
 TempoMap::twist_tempi (TempoPoint* ts, timepos_t const & start, timepos_t const & end)
 {

@@ -216,7 +216,9 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 	double quarter_notes_per_minute() const { return (superclock_ticks_per_second() * 60.0 * 4.0) / (_note_type * _superclocks_per_note_type); }
 	double samples_per_note_type(samplecnt_t sr) const { return superclock_to_samples (superclocks_per_note_type (), sr); }
 	double samples_per_quarter_note(samplecnt_t sr) const { return superclock_to_samples (superclocks_per_quarter_note(), sr); }
+
 	void   set_note_types_per_minute (double npm) { _superclocks_per_note_type = double_npm_to_scpn (npm); }
+	void   set_end_note_types_per_minute (double npm) { _end_superclocks_per_note_type = double_npm_to_scpn (npm); }
 
 	int note_type () const { return _note_type; }
 	Beats note_type_as_beats () const { return Beats (0, (1920 * 4) / _note_type); }
@@ -734,6 +736,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API int set_state (XMLNode const&, int version);
 
 	LIBTEMPORAL_API void twist_tempi (TempoPoint* ts, timepos_t const & start, timepos_t const & end);
+	LIBTEMPORAL_API void stretch_tempo (TempoPoint* ts, const samplepos_t sample, const samplepos_t end_sample, Beats const & start_qnote, Beats const & end_qnote);
+	LIBTEMPORAL_API void stretch_tempo_end (TempoPoint* ts, const samplepos_t sample, const samplepos_t end_sample);
 
 	/* END OF MODIFYING METHODS */
 
