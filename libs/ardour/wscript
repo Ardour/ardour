@@ -91,6 +91,7 @@ libardour_sources = [
         'export_handler.cc',
         'export_preset.cc',
         'export_profile_manager.cc',
+        'export_smf_writer.cc',
         'export_status.cc',
         'export_timespan.cc',
         'ffmpegfileimportable.cc',
