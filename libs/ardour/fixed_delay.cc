@@ -131,6 +131,39 @@ FixedDelay::delay (
 	assert (id < _buffers[dt].size ());
 	DelayBuffer *db = _buffers[dt][id];
 
+	ARDOUR::MidiBuffer const* mb;
+	if ((mb = dynamic_cast<ARDOUR::MidiBuffer const*> (&in))) {
+		ARDOUR::MidiBuffer* mout =  dynamic_cast<ARDOUR::MidiBuffer*> (&out);
+		ARDOUR::MidiBuffer* mdly =  dynamic_cast<ARDOUR::MidiBuffer*> (db->buf);
+		assert (mout && mdly);
+
+		mout->clear ();
+
+		/* delay events from input buffer and append them to the
+		 * corresponding buffer.
+		 */
+		for (MidiBuffer::const_iterator m = mb->begin (); m != mb->end (); ++m) {
+			Evoral::Event<MidiBuffer::TimeType> ev (*m, false);
+			ev.set_time (ev.time () + _delay);
+			if (ev.time () < n_samples) {
+				mout->push_back (ev);
+			} else {
+				mdly->push_back (ev);
+			}
+		}
+
+		/* move events from the delay-buffer into output */
+		for (MidiBuffer::iterator m = mdly->begin (); m != mdly->end ();) {
+			const Evoral::Event<MidiBuffer::TimeType> ev (*m, false);
+			if (ev.time () >= n_samples) {
+				break;
+			}
+			mout->push_back (ev);
+			m = mdly->erase (m);
+		}
+		return;
+	}
+
 	if (db->pos + n_samples > _buf_size) {
 		uint32_t w0 = _buf_size - db->pos;
 		uint32_t w1 = db->pos + n_samples - _buf_size;

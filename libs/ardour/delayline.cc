@@ -231,30 +231,34 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 				dly->silence (n_samples);
 			}
 
-			// If the delay time changes, iterate over all events in the dly-buffer
-			// and adjust the time in-place. <= 0 becomes 0.
-			//
-			// iterate over all events in dly-buffer and subtract one cycle
-			// (n_samples) from the timestamp, bringing them closer to de-queue.
-			for (MidiBuffer::iterator m = dly->begin (); m != dly->end (); ++m) {
-				MidiBuffer::TimeType *t = m.timeptr ();
-				if (*t > n_samples + delay_diff) {
-					*t -= n_samples + delay_diff;
-				} else {
-					*t = 0;
+			if (delay_diff != 0) {
+				/* If the delay time changes, iterate over all events in the dly-buffer
+				 * and adjust the time in-place. <= 0 becomes 0.
+				 *
+				 * iterate over all events in dly-buffer and subtract one cycle
+				 * (n_samples) from the timestamp, bringing them closer to de-queue.
+				 */
+				for (MidiBuffer::iterator m = dly->begin (); m != dly->end (); ++m) {
+					MidiBuffer::TimeType *t = m.timeptr ();
+					if (*t > n_samples + delay_diff) {
+						*t -= n_samples + delay_diff;
+					} else {
+						*t = 0;
+					}
 				}
 			}
 
 			if (_delay != 0) {
-				// delay events in current-buffer, in place.
+				/* delay events in current-buffer, in place. */
 				for (MidiBuffer::iterator m = mb.begin (); m != mb.end (); ++m) {
 					MidiBuffer::TimeType *t = m.timeptr ();
 					*t += _delay;
 				}
 			}
 
-			// move events from dly-buffer into current-buffer until n_samples
-			// and remove them from the dly-buffer
+			/* move events from dly-buffer into current-buffer until n_samples
+			 * and remove them from the dly-buffer
+			 */
 			for (MidiBuffer::iterator m = dly->begin (); m != dly->end ();) {
 				const Evoral::Event<MidiBuffer::TimeType> ev (*m, false);
 				if (ev.time () >= n_samples) {
@@ -269,14 +273,19 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 			 * (ie '_global_port_buffer_offset + _port_buffer_offset' - midi_port.cc)
 			 */
 			if (_delay != 0) {
-				// move events after n_samples from current-buffer into dly-buffer
-				// and trim current-buffer after n_samples
+				/* move events after n_samples from current-buffer into dly-buffer
+				 * and trim current-buffer after n_samples
+				 */
 				for (MidiBuffer::iterator m = mb.begin (); m != mb.end ();) {
 					const Evoral::Event<MidiBuffer::TimeType> ev (*m, false);
 					if (ev.time () < n_samples) {
 						++m;
 						continue;
 					}
+					/* insert_event() is expensive, if delay_diff is zero, the
+					 * event must be later than the last event in the delay-buffer
+					 * and push_back() would be preferable.
+					 */
 					dly->insert_event (ev);
 					m = mb.erase (m);
 				}
