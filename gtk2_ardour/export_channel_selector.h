@@ -288,7 +288,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
 	ArdourWidgets::ArdourDropdown select_menu;
 	Gtk::CheckMenuItem*           exclude_hidden;
 	Gtk::CheckMenuItem*           exclude_muted;
-	void select_tracks ();
+	void select_tracks (int);
 	void select_busses ();
 	void select_none ();
 

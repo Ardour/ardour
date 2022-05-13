@@ -34,6 +34,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/export_channel_configuration.h"
 #include "ardour/io.h"
+#include "ardour/midi_track.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/selection.h"
@@ -578,7 +579,9 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 		select_menu.set_text (_("Selection Actions"));
 		select_menu.disable_scrolling ();
 
-		select_menu.AddMenuElem (MenuElem (_("Select tracks"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks)));
+		select_menu.AddMenuElem (MenuElem (_("Select all tracks"), sigc::bind (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks), 3)));
+		select_menu.AddMenuElem (MenuElem (_("Select audio tracks"), sigc::bind (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks), 1)));
+		select_menu.AddMenuElem (MenuElem (_("Select MIDI tracks"), sigc::bind (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks), 2)));
 		select_menu.AddMenuElem (MenuElem (_("Select busses"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_busses)));
 		select_menu.AddMenuElem (MenuElem (_("Deselect all"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_none)));
 		select_menu.AddMenuElem (SeparatorElem ());
@@ -631,7 +634,7 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 
 	track_output_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::track_outputs_selected));
 
-	fill_list();
+	fill_list ();
 
 	show_all_children ();
 }
@@ -650,7 +653,7 @@ TrackExportChannelSelector::sync_with_manager ()
 }
 
 void
-TrackExportChannelSelector::select_tracks ()
+TrackExportChannelSelector::select_tracks (int what)
 {
 	bool excl_hidden = exclude_hidden->get_active ();
 	bool excl_muted  = exclude_muted->get_active ();
@@ -658,15 +661,22 @@ TrackExportChannelSelector::select_tracks ()
 	for (Gtk::ListStore::Children::iterator it = track_list->children().begin(); it != track_list->children().end(); ++it) {
 		Gtk::TreeModel::Row row = *it;
 		boost::shared_ptr<Route> route = row[track_cols.route];
-		if (boost::dynamic_pointer_cast<Track> (route)) {
-			if (excl_muted && route->muted ()) {
-				continue;
-			}
-			if (excl_hidden && route->is_hidden ()) {
-				continue;
-			}
-			row[track_cols.selected] = true;
+		if (!boost::dynamic_pointer_cast<Track> (route)) {
+			continue;
 		}
+		if (0 == (what & 1) && boost::dynamic_pointer_cast<AudioTrack> (route)) {
+			continue;
+		}
+		if (0 == (what & 2) && boost::dynamic_pointer_cast<MidiTrack> (route)) {
+			continue;
+		}
+		if (excl_muted && route->muted ()) {
+			continue;
+		}
+		if (excl_hidden && route->is_hidden ()) {
+			continue;
+		}
+		row[track_cols.selected] = true;
 	}
 	update_config();
 }
@@ -733,7 +743,7 @@ TrackExportChannelSelector::fill_list()
 		}
 	}
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
-		if (boost::dynamic_pointer_cast<AudioTrack>(*it)) {
+		if (boost::dynamic_pointer_cast<AudioTrack>(*it) || boost::dynamic_pointer_cast<MidiTrack>(*it)) {
 			if (!(*it)->active ()) {
 				// don't include inactive tracks
 				continue;
@@ -772,8 +782,9 @@ TrackExportChannelSelector::update_config()
 		boost::shared_ptr<Route> route = row[track_cols.route];
 
 		if (track_output_button.get_active()) {
-			uint32_t outs = route->n_outputs().n_audio();
-			for (uint32_t i = 0; i < outs; ++i) {
+			uint32_t n_audio = route->n_outputs().n_audio();
+			uint32_t n_midi = route->n_outputs().n_midi();
+			for (uint32_t i = 0; i < n_audio; ++i) {
 				boost::shared_ptr<AudioPort> port = route->output()->audio (i);
 				if (port) {
 					ExportChannelPtr channel (new PortExportChannel ());
@@ -783,6 +794,22 @@ TrackExportChannelSelector::update_config()
 						state = manager->add_channel_config();
 					}
 					state->config->register_channel(channel);
+				}
+			}
+			/* ignore MIDI bypass */
+			if (n_audio > 0) {
+				n_midi = 0;
+			}
+			for (uint32_t i = 0; i < n_midi; ++i) {
+				boost::shared_ptr<MidiPort> port = route->output()->midi (i);
+				if (port) {
+					ExportChannelPtr channel (new PortExportMIDI ());
+					PortExportMIDI* pem = static_cast<PortExportMIDI*> (channel.get());
+					pem->set_port (port);
+					if (!state) {
+						state = manager->add_channel_config ();
+					}
+					state->config->register_channel (channel);
 				}
 			}
 		} else {
