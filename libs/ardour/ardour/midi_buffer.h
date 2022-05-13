@@ -50,8 +50,6 @@ public:
 	void copy(const MidiBuffer& copy);
 	void copy(MidiBuffer const * const);
 
-	void skip_to (TimeType when);
-
 	bool push_back(const Evoral::Event<TimeType>& event);
 	bool push_back(TimeType time, Evoral::EventType event_type, size_t size, const uint8_t* data);
 
