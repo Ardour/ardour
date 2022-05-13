@@ -237,13 +237,13 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, timepos_t const & s
 
 		case Temporal::OverlapInternal:
 			offset = region->position().distance (start);
-			position = timepos_t (start.time_domain());
+			position = timepos_t(start.time_domain());
 			len = timecnt_t (cnt);
 			break;
 
 		case Temporal::OverlapStart:
 			offset = timecnt_t (start.time_domain());
-			position = region->source_position();
+			position = start.distance(region->position());
 			len = region->position().distance (end);
 			break;
 
@@ -255,7 +255,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, timepos_t const & s
 
 		case Temporal::OverlapExternal:
 			offset = timecnt_t (start.time_domain());
-			position = region->source_position();
+			position = start.distance(region->position());
 			len = region->length();
 			break;
 		}
