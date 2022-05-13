@@ -3887,7 +3887,7 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 
 	PBD::Unwinder<bool> puw (_pasting, true);
 
-	MidiModel::NoteDiffCommand* cmd = _model->new_note_diff_command (_("paste")); /* we are a subcommand, so we don't want to use start_note_diff */
+	_note_diff_command = _model->new_note_diff_command (_("paste")); /* we are a subcommand, so we don't want to use start_note_diff */
 
 	const Temporal::Beats snap_beats    = get_grid_beats(pos);
 	const Temporal::Beats first_time    = (*mcb.notes().begin())->time();
@@ -3937,7 +3937,8 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 	_marked_for_selection.clear ();
 	_pending_note_selection.clear ();
 
-	_model->apply_diff_command_as_subcommand(*trackview.session(), cmd);
+	_model->apply_diff_command_as_subcommand(*trackview.session(), _note_diff_command);
+	_note_diff_command=0;
 }
 
 struct EventNoteTimeEarlyFirstComparator {
