@@ -152,8 +152,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	} while (_transport_fsm->waiting_for_butler() && --timeout > 0);
 
 	if (timeout == 0) {
-		error << _("Cannot prepare transport for export") << endmsg;
-		return -1;
+		_transport_fsm->hard_stop ();
 	}
 
 	/* We're about to call Track::seek, so the butler must have finished everything
