@@ -976,7 +976,8 @@ public:
 
 private:
 	Temporal::Beats _grab_qn;
-	Temporal::TempoPoint const * _tempo;
+	Temporal::TempoPoint * _tempo;
+	Temporal::TempoPoint * previous_tempo;
 	Temporal::TempoMap::WritableSharedPtr map;
 
 	XMLNode* _before_state;

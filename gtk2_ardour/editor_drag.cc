@@ -3911,12 +3911,20 @@ TempoTwistDrag::aborted (bool moved)
 TempoEndDrag::TempoEndDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i, Temporal::BeatTime)
 	, _tempo (0)
+	, previous_tempo (0)
 	, _before_state (0)
 	, _drag_valid (true)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoEndDrag\n");
-	TempoMarker* marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
-	_tempo = &marker->tempo();
+
+	map = _editor->begin_tempo_map_edit ();
+
+	/* have to do this after the map switch because we need to operate on
+	 * the TempoPoint accessed via marker in the new map, not the old one
+	 */
+
+	const TempoMarker* marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
+	_tempo = const_cast<TempoPoint*> (&marker->tempo());
 	_grab_qn = _tempo->beats();
 }
 
@@ -3925,10 +3933,8 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	map = _editor->begin_tempo_map_edit ();
 
 	/* get current state */
-	_before_state = &map->get_state();
 	if (_tempo->locked_to_meter()) {
 		_drag_valid = false;
 		return;
@@ -3964,15 +3970,21 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 		return;
 	}
 
-	TempoMap::SharedPtr map (TempoMap::use());
-
 	if (first_move) {
+		_before_state = &map->get_state();
 		_editor->begin_reversible_command (_("stretch end tempo"));
+
+		previous_tempo = const_cast<TempoPoint*> (map->previous_tempo (*_tempo));
+
+		if (!previous_tempo) {
+			_drag_valid = false;
+			return;
+		}
 	}
 
 	timepos_t const pos = adjusted_current_time (event, false);
-#warning NUTEMPO implement this
-	// map->gui_stretch_tempo_end (&map->tempo_section_at_sample (_tempo->sample() - 1), map.sample_at_quarter_note (_grab_qn), pf);
+	map->stretch_tempo_end (_tempo, timepos_t (_grab_qn).samples(), pos.samples());
+	_editor->mid_tempo_change ();
 
 	ostringstream sstr;
 	const samplecnt_t sr = AudioEngine::instance()->sample_rate();
