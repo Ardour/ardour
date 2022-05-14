@@ -3134,53 +3134,165 @@ TempoMap::stretch_tempo (TempoPoint* ts, samplepos_t sample, samplepos_t end_sam
 	reset_starting_at (ts->sclock() + 1);
 }
 
-
 void
-TempoMap::twist_tempi (TempoPoint* ts, timepos_t const & start, timepos_t const & end)
+TempoMap::stretch_tempo_end (TempoPoint* ts, samplepos_t sample, samplepos_t end_sample)
 {
-	assert (start.time_domain() == end.time_domain());
+	/*
+	  Ts (future prev_t)   Tnext
+	  |                    |
+	  |     [drag^]        |
+	  |----------|----------
+	        e_f  qn_beats(sample)
+	*/
 
-	TempoPoint* nxt = const_cast<TempoPoint*> (next_tempo (*ts));
-	assert (nxt);
+	if (!ts) {
+		return;
+	}
 
-	superclock_t end_scpqn;
+	const superclock_t start_sclock = samples_to_superclock (sample, TEMPORAL_SAMPLE_RATE);
+	const superclock_t end_sclock = samples_to_superclock (end_sample, TEMPORAL_SAMPLE_RATE);
+
+	TempoPoint * prev_t = const_cast<TempoPoint*> (previous_tempo (*ts));
+
+	if (!prev_t) {
+		return;
+	}
+
+	/* minimum allowed measurement distance in superclocks */
+	const superclock_t min_delta_sclock = samples_to_superclock (2, TEMPORAL_SAMPLE_RATE);
+	double new_bpm;
+
+	if (start_sclock > prev_t->sclock() + min_delta_sclock && end_sclock > prev_t->sclock() + min_delta_sclock) {
+		new_bpm = prev_t->end_note_types_per_minute() * ((prev_t->sclock() - start_sclock) / (double) (prev_t->sclock() - end_sclock));
+	} else {
+		new_bpm = prev_t->end_note_types_per_minute();
+	}
+
+	new_bpm = std::min (new_bpm, (double) 1000.0);
+
+	if (new_bpm < 0.5) {
+		return;
+	}
+
+	prev_t->set_end_npm (new_bpm);
 
 	if (ts->clamped()) {
-		end_scpqn = ts->end_superclocks_per_quarter_note();
+		ts->set_note_types_per_minute (prev_t->end_note_types_per_minute());
+	}
+
+	reset_starting_at (prev_t->sclock());
+}
+void
+TempoMap::twist_tempi (TempoPoint* ts, samplepos_t start_sample, samplepos_t end_sample)
+{
+	if (!ts) {
+		return;
+	}
+
+	TempoPoint* next_t = 0;
+	TempoPoint* next_to_next_t = 0;
+
+	/* minimum allowed measurement distance in superclocks */
+	const superclock_t min_delta_sclock = samples_to_superclock (2, TEMPORAL_SAMPLE_RATE);
+	const superclock_t start_sclock = samples_to_superclock (start_sample, TEMPORAL_SAMPLE_RATE);
+	const superclock_t end_sclock = samples_to_superclock (end_sample, TEMPORAL_SAMPLE_RATE);
+
+	TempoPoint* prev_t = 0;
+	const superclock_t sclock_offset = end_sclock - start_sclock;
+
+
+	if (ts->beats() > Beats()) {
+		prev_t = const_cast<TempoPoint*> (previous_tempo (*ts));
+	}
+
+	next_t = const_cast<TempoPoint*> (next_tempo (*ts));
+
+	if (!next_t) {
+		return;
+	}
+
+	next_to_next_t = const_cast<TempoPoint*> (next_tempo (*next_t));
+
+	if (!next_to_next_t) {
+		return;
+	}
+
+	double prev_contribution = 0.0;
+
+	if (next_t && prev_t && prev_t->type() == TempoPoint::Ramped) {
+		prev_contribution = (ts->sclock() - prev_t->sclock()) / (double) (next_t->sclock() - prev_t->sclock());
+	}
+
+	const sampleoffset_t ts_sclock_contribution = sclock_offset - (prev_contribution * (double) sclock_offset);
+
+	superclock_t old_tc_sclock = ts->sclock();
+	superclock_t old_next_sclock = next_t->sclock();
+	superclock_t old_next_to_next_sclock = next_to_next_t->sclock();
+
+	double new_bpm;
+	double new_next_bpm;
+	double new_copy_end_bpm;
+
+	if (start_sclock > ts->sclock() + min_delta_sclock && (start_sclock + ts_sclock_contribution) > ts->sclock() + min_delta_sclock) {
+		new_bpm = ts->note_types_per_minute() * ((start_sclock - ts->sclock()) / (double) (end_sclock - ts->sclock()));
 	} else {
-		end_scpqn = nxt->superclocks_per_quarter_note ();
+		new_bpm = ts->note_types_per_minute();
 	}
 
-	if (!ts->ramped()) {
-		((Rampable*) ts)->set_ramped (true);
+	/* don't clamp and proceed here.
+	   testing has revealed that this can go negative,
+	   which is an entirely different thing to just being too low.
+	*/
+
+	if (new_bpm < 0.5) {
+		return;
 	}
 
-	if (start.time_domain() == Temporal::AudioTime) {
-		ts->compute_omega_from_audio_duration (end.samples() - start.samples(), end_scpqn);
-	} else {
-		ts->compute_omega_from_quarter_duration (end.beats() - start.beats(), end_scpqn);
+	new_bpm = std::min (new_bpm, (double) 1000.0);
+
+	bool was_constant = (ts->type() == TempoPoint::Constant);
+
+	ts->set_note_types_per_minute (new_bpm);
+
+	if (was_constant) {
+		ts->set_end_npm (new_bpm);
 	}
 
-	return;
+	if (!next_t->actually_ramped()) {
 
-	nxt->set (samples_to_superclock (end.samples(), TEMPORAL_SAMPLE_RATE), nxt->beats(), nxt->bbt());
-
-	if (nxt->ramped()) {
-		TempoPoint const * nxtnxt = next_tempo (*nxt);
-		assert (nxtnxt);
-
-		if (ts->clamped()) {
-			end_scpqn = nxt->end_superclocks_per_quarter_note();
+		if (start_sclock > ts->sclock() + min_delta_sclock && end_sclock > ts->sclock() + min_delta_sclock) {
+			new_next_bpm = next_t->note_types_per_minute() * ((next_to_next_t->sclock() - old_next_sclock) / (double) ((old_next_to_next_sclock) - old_next_sclock));
 		} else {
-			end_scpqn = nxtnxt->superclocks_per_quarter_note ();
+			new_next_bpm = next_t->note_types_per_minute();
 		}
 
-		if (start.time_domain() == Temporal::AudioTime) {
-			nxt->compute_omega_from_audio_duration (superclock_to_samples (nxtnxt->sclock(), TEMPORAL_SAMPLE_RATE) - end.samples(), end_scpqn);
-		} else {
-			nxt->compute_omega_from_quarter_duration (nxtnxt->beats() - end.beats(), end_scpqn);
+		next_t->set_note_types_per_minute (new_next_bpm);
+
+	} else {
+
+		double next_sclock_ratio = 1.0;
+		double copy_sclock_ratio = 1.0;
+
+		if (next_to_next_t) {
+			next_sclock_ratio = (next_to_next_t->sclock() - old_next_sclock) / (old_next_to_next_sclock -  old_next_sclock);
+			copy_sclock_ratio = ((old_tc_sclock - next_t->sclock()) / (double) (old_tc_sclock - old_next_sclock));
 		}
+
+		new_next_bpm = next_t->note_types_per_minute() * next_sclock_ratio;
+		new_copy_end_bpm = ts->end_note_types_per_minute() * copy_sclock_ratio;
+
+		ts->set_end_npm (new_copy_end_bpm);
+
+		if (next_t->clamped()) {
+			next_t->set_note_types_per_minute (new_copy_end_bpm);
+		} else {
+			next_t->set_note_types_per_minute (new_next_bpm);
+		}
+
+		ts->set_end_npm (new_copy_end_bpm);
 	}
+
+	reset_starting_at (ts->sclock());
 }
 
 void
