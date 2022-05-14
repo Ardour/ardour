@@ -232,6 +232,7 @@ void
 MidiPort::cycle_split ()
 {
 	_data_fetched_for_cycle = false;
+	_buffer->clear ();
 }
 
 void
@@ -345,9 +346,13 @@ MidiPort::flush_buffers (pframes_t nframes)
 			}
 		}
 
-		/* done.. the data has moved to the port buffer, mark it so */
-
-		_buffer->clear ();
+		/* done.. the data has moved to the port buffer, mark it so,
+		 * unless we're exporting in which PortExportMIDI::read
+		 * needs to read it at the end of a process cycle.
+		 */
+		if (!AudioEngine::instance()->session()->exporting ()) {
+			_buffer->clear ();
+		}
 	}
 }
 

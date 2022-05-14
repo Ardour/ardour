@@ -3,7 +3,7 @@
  * Copyright (C) 2008-2011 Sakari Bergen <sakari.bergen@beatwaves.net>
  * Copyright (C) 2009-2011 David Robillard <d@drobilla.net>
  * Copyright (C) 2009-2017 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/capturing_processor.h"
 #include "ardour/export_failed.h"
+#include "ardour/midi_port.h"
 #include "ardour/session.h"
 
 #include "pbd/error.h"
@@ -107,7 +108,7 @@ PortExportChannel::read (Buffer const*& buf, samplecnt_t samples) const
 	assert (_buffer);
 	assert (samples <= _buffer_size);
 
-	if (ports.size () == 1 && _delaylines.size () == 1 && _delaylines.front ()->bufsize () == _buffer_size + 1) {
+	if (ports.size () == 1 && _delaylines.size () == 1 && !ports.begin ()->expired () && _delaylines.front ()->bufsize () == _buffer_size + 1) {
 		boost::shared_ptr<AudioPort> p = ports.begin ()->lock ();
 		AudioBuffer&                 ab (p->get_audio_buffer (samples)); // unsets AudioBuffer::_written
 		ab.set_written (true);
@@ -144,7 +145,7 @@ PortExportChannel::read (Buffer const*& buf, samplecnt_t samples) const
 		++di;
 	}
 
-	_buf.set_data (_buffer.get(), samples);
+	_buf.set_data (_buffer.get (), samples);
 	buf = &_buf;
 }
 
@@ -173,6 +174,91 @@ PortExportChannel::set_state (XMLNode* node, Session& session)
 			} else {
 				PBD::warning << string_compose (_("Could not get port for export channel \"%1\", dropping the channel"), name) << endmsg;
 			}
+		}
+	}
+}
+
+PortExportMIDI::PortExportMIDI ()
+	: _buf (8192)
+{
+}
+
+PortExportMIDI::~PortExportMIDI ()
+{
+}
+
+samplecnt_t
+PortExportMIDI::common_port_playback_latency () const
+{
+	boost::shared_ptr<MidiPort> p = _port.lock ();
+	if (!p) {
+		return 0;
+	}
+	return p->private_latency_range (true).max;
+}
+
+void
+PortExportMIDI::prepare_export (samplecnt_t max_samples, sampleoffset_t common_latency)
+{
+	boost::shared_ptr<MidiPort> p = _port.lock ();
+	if (!p) {
+		return;
+	}
+	samplecnt_t latency = p->private_latency_range (true).max - common_latency;
+	_delayline.set (ChanCount (DataType::MIDI, 1), latency);
+}
+
+bool
+PortExportMIDI::operator< (ExportChannel const& other) const
+{
+	PortExportMIDI const* pem;
+	if (!(pem = dynamic_cast<PortExportMIDI const*> (&other))) {
+		return this < &other;
+	}
+	return _port < pem->_port;
+}
+
+void
+PortExportMIDI::read (Buffer const*& buf, samplecnt_t samples) const
+{
+	boost::shared_ptr<MidiPort> p = _port.lock ();
+	if (!p) {
+		_buf.clear ();
+		buf = &_buf;
+	}
+	MidiBuffer& mb (p->get_midi_buffer (samples));
+	if (_delayline.delay () == 0) {
+		buf = &mb;
+	} else {
+		_delayline.delay (DataType::MIDI, 0, _buf, mb, samples);
+		buf = &_buf;
+	}
+}
+
+void
+PortExportMIDI::get_state (XMLNode* node) const
+{
+	XMLNode*                    port_node;
+	boost::shared_ptr<MidiPort> p = _port.lock ();
+	if (p && (port_node = node->add_child ("MIDIPort"))) {
+		port_node->set_property ("name", p->name ());
+	}
+}
+
+void
+PortExportMIDI::set_state (XMLNode* node, Session& session)
+{
+	XMLNode* xml_port = node->child ("MIDIPort");
+	if (!xml_port) {
+		return;
+	}
+	std::string name;
+	if (xml_port->get_property ("name", name)) {
+		boost::shared_ptr<MidiPort> port = boost::dynamic_pointer_cast<MidiPort> (session.engine ().get_port_by_name (name));
+		if (port) {
+			_port = port;
+		} else {
+			PBD::warning << string_compose (_("Could not get port for export channel \"%1\", dropping the channel"), name) << endmsg;
 		}
 	}
 }
@@ -258,11 +344,14 @@ RegionExportChannelFactory::update_buffers (samplecnt_t samples)
 	position += samples;
 }
 
-RouteExportChannel::RouteExportChannel (boost::shared_ptr<CapturingProcessor> processor, size_t channel,
-                                        boost::shared_ptr<ProcessorRemover> remover)
-	: processor (processor)
-	, channel (channel)
-	, remover (remover)
+RouteExportChannel::RouteExportChannel (boost::shared_ptr<CapturingProcessor> processor,
+                                        DataType                              type,
+                                        size_t                                channel,
+                                        boost::shared_ptr<ProcessorRemover>   remover)
+	: _processor (processor)
+	, _type (type)
+	, _channel (channel)
+	, _remover (remover)
 {
 }
 
@@ -274,34 +363,45 @@ void
 RouteExportChannel::create_from_route (std::list<ExportChannelPtr>& result, boost::shared_ptr<Route> route)
 {
 	boost::shared_ptr<CapturingProcessor> processor = route->add_export_point ();
-	uint32_t                              channels  = processor->input_streams ().n_audio ();
+	uint32_t                              n_audio   = processor->input_streams ().n_audio ();
+	uint32_t                              n_midi    = processor->input_streams ().n_midi ();
 
 	boost::shared_ptr<ProcessorRemover> remover (new ProcessorRemover (route, processor));
 	result.clear ();
-	for (uint32_t i = 0; i < channels; ++i) {
-		result.push_back (ExportChannelPtr (new RouteExportChannel (processor, i, remover)));
+	for (uint32_t i = 0; i < n_audio; ++i) {
+		result.push_back (ExportChannelPtr (new RouteExportChannel (processor, DataType::AUDIO, i, remover)));
 	}
+	for (uint32_t i = 0; i < n_midi; ++i) {
+		result.push_back (ExportChannelPtr (new RouteExportChannel (processor, DataType::MIDI, i, remover)));
+	}
+}
+
+bool
+RouteExportChannel::audio () const
+{
+	return _processor->input_streams ().n_audio () > 0;
+}
+
+bool
+RouteExportChannel::midi () const
+{
+	return _processor->input_streams ().n_midi () > 0;
 }
 
 void
 RouteExportChannel::prepare_export (samplecnt_t max_samples, sampleoffset_t)
 {
-	if (processor) {
-		processor->set_block_size (max_samples);
+	if (_processor) {
+		_processor->set_block_size (max_samples);
 	}
 }
 
 void
 RouteExportChannel::read (Buffer const*& buf, samplecnt_t samples) const
 {
-	assert (processor);
-	AudioBuffer const& buffer = processor->get_capture_buffers ().get_audio (channel);
-#ifndef NDEBUG
-	(void)samples;
-#else
-	assert (samples <= (samplecnt_t)buffer.capacity ());
-#endif
-	buf = &buffer;
+	assert (_processor);
+	Buffer const& buffer = _processor->get_capture_buffers ().get_available (_type, _channel);
+	buf                  = &buffer;
 }
 
 void
@@ -324,13 +424,17 @@ RouteExportChannel::operator< (ExportChannel const& other) const
 		return this < &other;
 	}
 
-	if (processor.get () == rec->processor.get ()) {
-		return channel < rec->channel;
+	if (_processor.get () == rec->_processor.get ()) {
+		if (_type == rec->_type) {
+			return _channel < rec->_channel;
+		} else {
+			return _type < rec->_type;
+		}
 	}
-	return processor.get () < rec->processor.get ();
+	return _processor.get () < rec->_processor.get ();
 }
 
 RouteExportChannel::ProcessorRemover::~ProcessorRemover ()
 {
-	route->remove_processor (processor);
+	_route->remove_processor (_processor);
 }

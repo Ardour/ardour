@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2009-2011 David Robillard <d@drobilla.net>
  * Copyright (C) 2009-2017 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2017-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,8 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/export_pointers.h"
+#include "ardour/fixed_delay.h"
+#include "ardour/midi_buffer.h"
 
 namespace ARDOUR {
 
@@ -43,6 +45,7 @@ class AudioTrack;
 class AudioPort;
 class AudioRegion;
 class CapturingProcessor;
+class MidiPort;
 
 /// Export channel base class interface for different source types
 class LIBARDOUR_API ExportChannel : public boost::less_than_comparable<ExportChannel>
@@ -56,6 +59,9 @@ public:
 	virtual void read (Buffer const*&, samplecnt_t samples) const = 0;
 
 	virtual bool empty () const = 0;
+
+	virtual bool audio () const { return true; }
+	virtual bool midi () const { return false; }
 
 	/// Adds state to node passed
 	virtual void get_state (XMLNode* node) const = 0;
@@ -89,7 +95,7 @@ public:
 	bool operator< (ExportChannel const& other) const;
 
 	void add_port (boost::weak_ptr<AudioPort> port) { ports.insert (port); }
-	PortSet const& get_ports () { return ports; }
+	PortSet const& get_ports () const { return ports; }
 
 private:
 	PortSet                                               ports;
@@ -97,6 +103,40 @@ private:
 	boost::scoped_array<Sample>                           _buffer;
 	mutable AudioBuffer                                   _buf;
 	std::list<boost::shared_ptr<PBD::RingBuffer<Sample>>> _delaylines;
+};
+
+/// Basic export channel that reads from MIDIPorts
+class LIBARDOUR_API PortExportMIDI : public ExportChannel
+{
+public:
+	PortExportMIDI ();
+	~PortExportMIDI ();
+
+	/* ExportChannel interface */
+	samplecnt_t common_port_playback_latency () const;
+	void        prepare_export (samplecnt_t max_samples, sampleoffset_t common_latency);
+
+	void read (Buffer const*&, samplecnt_t samples) const;
+
+	bool empty () const { return _port.expired (); }
+
+	bool audio () const { return false; }
+	bool midi () const { return true; }
+
+	void get_state (XMLNode* node) const;
+	void set_state (XMLNode* node, Session& session);
+
+	bool operator< (ExportChannel const& other) const;
+
+	void set_port (boost::weak_ptr<MidiPort> port)
+	{
+		_port = port;
+	}
+
+private:
+	boost::weak_ptr<MidiPort> _port;
+	mutable FixedDelay        _delayline;
+	mutable MidiBuffer        _buf;
 };
 
 /// Handles RegionExportChannels and does actual reading from region
@@ -181,8 +221,10 @@ class LIBARDOUR_API RouteExportChannel : public ExportChannel
 
 public:
 	RouteExportChannel (boost::shared_ptr<CapturingProcessor> processor,
-	                    size_t channel,
-	                    boost::shared_ptr<ProcessorRemover> remover);
+	                    DataType                              type,
+	                    size_t                                channel,
+	                    boost::shared_ptr<ProcessorRemover>   remover);
+
 	~RouteExportChannel ();
 
 	static void create_from_route (std::list<ExportChannelPtr>& result, boost::shared_ptr<Route> route);
@@ -193,6 +235,9 @@ public: // ExportChannel interface
 	void read (Buffer const*&, samplecnt_t samples) const;
 
 	bool empty () const { return false; }
+
+	bool audio () const;
+	bool midi () const;
 
 	void get_state (XMLNode* node) const;
 	void set_state (XMLNode* node, Session& session);
@@ -205,22 +250,25 @@ private:
 	{
 	public:
 		ProcessorRemover (boost::shared_ptr<Route> route, boost::shared_ptr<CapturingProcessor> processor)
-			: route (route)
-			, processor (processor)
+			: _route (route)
+			, _processor (processor)
 		{
 		}
 		~ProcessorRemover ();
 
 	private:
-		boost::shared_ptr<Route>              route;
-		boost::shared_ptr<CapturingProcessor> processor;
+		boost::shared_ptr<Route>              _route;
+		boost::shared_ptr<CapturingProcessor> _processor;
 	};
 
-	boost::shared_ptr<CapturingProcessor> processor;
-	size_t                                channel;
+	boost::shared_ptr<CapturingProcessor> _processor;
+
+	DataType _type;
+	size_t   _channel;
+
 	// Each channel keeps a ref to the remover. Last one alive
 	// will cause the processor to be removed on deletion.
-	boost::shared_ptr<ProcessorRemover> remover;
+	boost::shared_ptr<ProcessorRemover> _remover;
 };
 
 } // namespace ARDOUR
