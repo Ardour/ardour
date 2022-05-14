@@ -9497,6 +9497,7 @@ Editor::do_ripple (boost::shared_ptr<Playlist> target_playlist, timepos_t const 
 timepos_t
 Editor::effective_ripple_mark_start (boost::shared_ptr<Playlist> target_playlist, timepos_t pos)
 {
+#if 0  /* I do not agree with this behavior - at the very least it ignores regions on *other* tracks and the markers that might be associated with them -Ben */
 	/* in the target playlist, find the region before the target
 	 * (implicitly given by @param at. Allow all markers that occur between
 	 * the end of the region and @param at to move too. This is
@@ -9516,6 +9517,7 @@ Editor::effective_ripple_mark_start (boost::shared_ptr<Playlist> target_playlist
 	if (last_region_end_before_at < pos) {
 		pos = last_region_end_before_at.increment();
 	}
+#endif
 
 	return pos;
 }
