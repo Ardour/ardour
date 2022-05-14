@@ -1027,13 +1027,20 @@ RegionMotionDrag::collect_ripple_views ()
 
 	_editor->get_regionviews_at_or_after (_primary->region()->position(), copy);
 
+	TimeAxisView *primary_tav = &_primary->get_time_axis_view();
+
 	for (RegionSelection::reverse_iterator i = copy.rbegin(); i != copy.rend(); ++i) {
-		if (!_editor->selection->regions.contains (*i)) {
-			_views.push_back (DraggingView (*i, this, &(*i)->get_time_axis_view()));
+		TimeAxisView *tav = &(*i)->get_time_axis_view();
+		if (_editor->should_ripple_all() || tav == primary_tav) {
+			if (!_editor->selection->regions.contains (*i)) {
+				_views.push_back (DraggingView (*i, this, &(*i)->get_time_axis_view()));
+			}
 		}
 	}
 
-	_editor->get_markers_to_ripple (_primary->region()->playlist(), _primary->region()->position(), ripple_markers);
+	if (_editor->should_ripple_all()) {
+		_editor->get_markers_to_ripple (_primary->region()->playlist(), _primary->region()->position(), ripple_markers);
+	}
 }
 
 void
