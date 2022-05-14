@@ -1612,17 +1612,9 @@ AudioTrigger::estimate_tempo ()
 			}
 		}
 
-		/* We don't have too many good choices here. Triggers can fire at any
-		 * time, so there's no special place on the tempo map that we can use
-		 * to get the meter from and thus compute an estimated bar count for
-		 * this region. Our solution for now: just use the first meter.
-		 */
-
 		if (text_tempo < 0) {
 
 			breakfastquay::MiniBPM mbpm (_box.session().sample_rate());
-
-			mbpm.setBPMRange (metric.tempo().quarter_notes_per_minute () * 0.75, metric.tempo().quarter_notes_per_minute() * 1.5);
 
 			_estimated_tempo = mbpm.estimateTempoOfSamples (data[0], data.length);
 
@@ -1642,6 +1634,24 @@ AudioTrigger::estimate_tempo ()
 		/* fractional beatcnt */
 		double maybe_beats = (seconds / 60.) * _estimated_tempo;
 		double beatcount = round (maybe_beats);
+
+		/* the vast majority of third-party clips are 1,2,4,8, or 16-bar 'beats'.
+		 *  Given no other metadata, it makes things 'just work' if we assume 4/4 time signature, and power-of-2 bars  (1,2,4,8 or 16)
+		 *  TODO:  someday we could provide a widget for users who have unlabeled, un-metadata'd, clips that they *know* are 3/4 or 5/4 or 11/4 */
+		{
+			double barcount = round (beatcount/4);
+			if (barcount <= 18) {  /* why not 16 here? fuzzy logic allows minibpm to misjudge the clip a bit */
+				for (int pwr = 0; pwr <= 4; pwr++) {
+					float bc = pow(2,pwr);
+					if (barcount <= bc) {
+						barcount = bc;
+						break;
+					}
+				}
+			}
+			beatcount = round(barcount * 4);
+		}
+
 		double est = _estimated_tempo;
 		_estimated_tempo = beatcount / (seconds/60.);
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given original estimated tempo %1, rounded beatcnt is %2 : resulting in working bpm = %3\n", est, _beatcnt, _estimated_tempo));
@@ -1649,8 +1659,6 @@ AudioTrigger::estimate_tempo ()
 		/* initialize our follow_length to match the beatcnt ... user can later change this value to have the clip end sooner or later than its data length */
 		set_follow_length(Temporal::BBT_Offset( 0, rint(beatcount), 0));
 	}
-
-	/* use initial tempo in map (assumed for now to be the only one */
 
 #if 0
 	cerr << "estimated tempo: " << _estimated_tempo << endl;
