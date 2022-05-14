@@ -252,7 +252,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
 	TrackExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager);
 	~TrackExportChannelSelector ();
 
-	virtual void sync_with_manager ();
+	void sync_with_manager ();
 
 	bool track_output () const { return track_output_button.get_active(); }
 	bool channel_limit_reached () const { return false; }
@@ -260,6 +260,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
   private:
 
 	void fill_list();
+	bool sync_with_manager_state ();
 	void add_track (boost::shared_ptr<ARDOUR::Route> route, bool selected);
 	void update_config();
 	ChannelConfigList configs;
@@ -293,6 +294,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
 	void select_none ();
 
 	void track_outputs_selected ();
+	bool _syncing_with_manager;
 };
 
 #endif /* __export_channel_selector_h__ */
