@@ -56,19 +56,19 @@ class RegionView : public TimeAxisViewItem
 public:
 	RegionView (ArdourCanvas::Container*          parent,
 	            TimeAxisView&                     time_view,
-	            boost::shared_ptr<ARDOUR::Region> region,
+	            const boost::shared_ptr<ARDOUR::Region>& region,
 	            double                            samples_per_pixel,
 	            uint32_t                          base_color,
 	            bool                              automation = false);
 
 	RegionView (const RegionView& other);
-	RegionView (const RegionView& other, boost::shared_ptr<ARDOUR::Region> other_region);
+	RegionView (const RegionView& other, const boost::shared_ptr<ARDOUR::Region>& other_region);
 
 	~RegionView ();
 
 	void set_selected (bool yn);
 
-	virtual void init (bool wait_for_data);
+	virtual void init (bool what_changed);
 
 	boost::shared_ptr<ARDOUR::Region> region() const { return _region; }
 
@@ -162,7 +162,7 @@ protected:
 	 */
 	RegionView (ArdourCanvas::Container *,
 	            TimeAxisView&,
-	            boost::shared_ptr<ARDOUR::Region>,
+	            const boost::shared_ptr<ARDOUR::Region>&,
 	            double samples_per_pixel,
 	            uint32_t basic_color,
 	            bool recording,

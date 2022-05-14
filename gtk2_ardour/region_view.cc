@@ -33,8 +33,6 @@
 #include "temporal/tempo.h"
 
 #include "ardour/playlist.h"
-#include "ardour/profile.h"
-#include "ardour/session.h"
 #include "ardour/source.h"
 
 #include "gtkmm2ext/colors.h"
@@ -49,11 +47,9 @@
 #include "streamview.h"
 #include "region_view.h"
 #include "automation_region_view.h"
-#include "route_time_axis.h"
 #include "public_editor.h"
 #include "region_editor.h"
 #include "ghostregion.h"
-#include "route_time_axis.h"
 #include "ui_config.h"
 #include "utils.h"
 #include "rgb_macros.h"
@@ -73,43 +69,43 @@ static const int32_t sync_mark_width = 9;
 
 PBD::Signal1<void,RegionView*> RegionView::RegionViewGoingAway;
 
-RegionView::RegionView (ArdourCanvas::Container*          parent,
-                        TimeAxisView&                     tv,
-                        boost::shared_ptr<ARDOUR::Region> r,
-                        double                            spu,
-                        uint32_t                          basic_color,
-                        bool                              automation)
-	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false, automation,
+RegionView::RegionView (ArdourCanvas::Container*                 parent,
+                        TimeAxisView&                            tv,
+                        const boost::shared_ptr<ARDOUR::Region>& r,
+                        double                                   spu,
+                        uint32_t                                 basic_color,
+                        bool                                     automation)
+        : TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false, automation,
 			    (automation ? TimeAxisViewItem::ShowFrame :
 			     TimeAxisViewItem::Visibility ((UIConfiguration::instance().get_show_region_name() ? TimeAxisViewItem::ShowNameText : 0) |
 							   TimeAxisViewItem::ShowNameHighlight| TimeAxisViewItem::ShowFrame)))
-	, _region (r)
-	, sync_mark (0)
-	, sync_line (0)
-	, editor(0)
-	, current_visible_sync_position(0.0)
-	, valid(false)
-	, _disable_display (0)
-	, _pixel_width(1.0)
-	, in_destructor(false)
-	, wait_for_data(false)
-	, _silence_text (0)
-	, _xrun_markers_visible (false)
-	, _cue_markers_visible (false)
+        , _region (r)
+        , sync_mark (nullptr)
+        , sync_line (nullptr)
+        , editor (nullptr)
+        , current_visible_sync_position (0.0)
+        , valid (false)
+        , _disable_display (0)
+        , _pixel_width (1.0)
+        , in_destructor (false)
+        , wait_for_data (false)
+        , _silence_text (nullptr)
+        , _xrun_markers_visible (false)
+        , _cue_markers_visible (false)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
 
-	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
-		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
+	for (const auto& s : _region->sources ()) {
+		s->CueMarkersChanged.connect (*this, invalidator (*this), [this] { update_cue_markers (); }, gui_context ());
 	}
 }
 
 RegionView::RegionView (const RegionView& other)
 	: sigc::trackable(other)
 	, TimeAxisViewItem (other)
-	, sync_mark (0)
-	, sync_line (0)
-	, _silence_text (0)
+	, sync_mark (nullptr)
+	, sync_line (nullptr)
+	, _silence_text (nullptr)
 	, _xrun_markers_visible (false)
 	, _cue_markers_visible (false)
 {
@@ -122,17 +118,17 @@ RegionView::RegionView (const RegionView& other)
 	valid = false;
 	_pixel_width = other._pixel_width;
 
-	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
-		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
+	for (const auto& s : _region->sources ()) {
+		s->CueMarkersChanged.connect (*this, invalidator (*this), [this] { update_cue_markers (); }, gui_context ());
 	}
 }
 
-RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
+RegionView::RegionView (const RegionView& other, const boost::shared_ptr<Region>& other_region)
 	: sigc::trackable(other)
 	, TimeAxisViewItem (other)
-	, sync_mark (0)
-	, sync_line (0)
-	, _silence_text (0)
+	, sync_mark (nullptr)
+	, sync_line (nullptr)
+	, _silence_text (nullptr)
 	, _xrun_markers_visible (false)
 	, _cue_markers_visible (false)
 {
@@ -150,43 +146,42 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	valid = false;
 	_pixel_width = other._pixel_width;
 
-	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
-		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
+	for (const auto& s : _region->sources ()) {
+		s->CueMarkersChanged.connect (*this, invalidator (*this), [this] { update_cue_markers (); }, gui_context ());
 	}
 }
 
-
-RegionView::RegionView (ArdourCanvas::Container*          parent,
-                        TimeAxisView&                     tv,
-                        boost::shared_ptr<ARDOUR::Region> r,
-                        double                            spu,
-                        uint32_t                          basic_color,
-                        bool                              recording,
-                        TimeAxisViewItem::Visibility      visibility)
-	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), recording, false, visibility)
-	, _region (r)
-	, sync_mark(0)
-	, sync_line(0)
-	, editor(0)
-	, current_visible_sync_position(0.0)
-	, valid(false)
-	, _disable_display (0)
-	, _pixel_width(1.0)
-	, in_destructor(false)
-	, wait_for_data(false)
-	, _silence_text (0)
+RegionView::RegionView (ArdourCanvas::Container*                 parent,
+                        TimeAxisView&                            tv,
+                        const boost::shared_ptr<ARDOUR::Region>& r,
+                        double                                   spu,
+                        uint32_t                                 basic_color,
+                        bool                                     recording,
+                        TimeAxisViewItem::Visibility             visibility)
+        : TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), recording, false, visibility)
+        , _region (r)
+        , sync_mark (nullptr)
+        , sync_line (nullptr)
+        , editor (nullptr)
+        , current_visible_sync_position (0.0)
+        , valid (false)
+        , _disable_display (0)
+        , _pixel_width (1.0)
+        , in_destructor (false)
+        , wait_for_data (false)
+        , _silence_text (nullptr)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RegionView::parameter_changed));
 
-	for (SourceList::const_iterator s = _region->sources().begin(); s != _region->sources().end(); ++s) {
-		(*s)->CueMarkersChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::update_cue_markers, this), gui_context());
+	for (const auto& s : _region->sources ()) {
+		s->CueMarkersChanged.connect (*this, invalidator (*this), [this] { update_cue_markers (); }, gui_context ());
 	}
 }
 
 void
 RegionView::init (bool wfd)
 {
-	editor        = 0;
+	editor        = nullptr;
 	valid         = true;
 	in_destructor = false;
 	wait_for_data = wfd;
@@ -218,8 +213,8 @@ RegionView::init (bool wfd)
 	XrunPositions xrp;
 	_region->captured_xruns (xrp, true);
 	int arrow_size = (int)(7.0 * UIConfiguration::instance ().get_ui_scale ()) & ~1;
-	for (XrunPositions::const_iterator x = xrp.begin (); x != xrp.end (); ++x) {
-		ArdourCanvas::Arrow* canvas_item = new ArdourCanvas::Arrow(group);
+	for (long x : xrp) {
+		auto* canvas_item = new ArdourCanvas::Arrow(group);
 		canvas_item->set_color (UIConfiguration::instance().color ("neutral:background"));
 		canvas_item->set_show_head (1, true);
 		canvas_item->set_show_head (0, false);
@@ -229,7 +224,7 @@ RegionView::init (bool wfd)
 		canvas_item->set_y1 (arrow_size);
 		canvas_item->raise_to_top ();
 		canvas_item->hide ();
-		_xrun_markers.push_back (make_pair(*x, canvas_item));
+		_xrun_markers.emplace_back(x, canvas_item);
 	}
 
 	_xrun_markers_visible = false;
@@ -254,20 +249,20 @@ RegionView::~RegionView ()
 {
 	in_destructor = true;
 
-	for (vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
-		delete *g;
+	for (auto& ghost : ghosts) {
+		delete ghost;
 	}
 
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_frame.begin (); i != _coverage_frame.end (); ++i) {
-		delete *i;
+	for (auto& i : _coverage_frame) {
+		delete i;
 	}
 
-	for (list<std::pair<samplepos_t, ArdourCanvas::Arrow*> >::iterator i = _xrun_markers.begin(); i != _xrun_markers.end(); ++i) {
-		delete ((*i).second);
+	for (auto& _xrun_marker : _xrun_markers) {
+		delete (_xrun_marker.second);
 	}
 
-	for (ViewCueMarkers::iterator c = _cue_markers.begin(); c != _cue_markers.end(); ++c) {
-		delete (*c);
+	for (auto& _cue_marker : _cue_markers) {
+		delete _cue_marker;
 	}
 
 	drop_silent_frames ();
@@ -298,35 +293,34 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 
 	uint32_t const color = UIConfiguration::instance().color_mod ("silence", "silence");
 
-	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
-
-		ArdourCanvas::Rectangle* cr = new ArdourCanvas::Rectangle (group);
+	for (const auto& silence : silences) {
+		auto* cr = new ArdourCanvas::Rectangle (group);
 		cr->set_ignore_events (true);
 		_silent_frames.push_back (cr);
 
 		/* coordinates for the rect are relative to the regionview origin */
 
-		cr->set_x0 (trackview.editor().sample_to_pixel (i->first - _region->start_sample()));
-		cr->set_x1 (trackview.editor().sample_to_pixel (i->second - _region->start_sample()));
+		cr->set_x0 (trackview.editor ().sample_to_pixel (silence.first - _region->start_sample ()));
+		cr->set_x1 (trackview.editor ().sample_to_pixel (silence.second - _region->start_sample ()));
 		cr->set_y0 (1);
 		cr->set_y1 (_height - 2);
 		cr->set_outline (false);
 		cr->set_fill_color (color);
 
-		shortest = min (shortest, i->second - i->first);
+		shortest = min (shortest, silence.second - silence.first);
 	}
 
 	/* Find shortest audible segment */
 	samplecnt_t shortest_audible = max_samplecnt;
 
 	samplecnt_t s = _region->start_sample();
-	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
-		samplecnt_t const dur = i->first - s;
+	for (const auto& silence : silences) {
+		samplecnt_t const dur = silence.first - s;
 		if (dur > 0) {
 			shortest_audible = min (shortest_audible, dur);
 		}
 
-		s = i->second;
+		s = silence.second;
 	}
 
 	samplecnt_t const dur = _region->start_sample() + _region->length_samples() - 1 - s;
@@ -388,22 +382,22 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 void
 RegionView::hide_silent_frames ()
 {
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin (); i != _silent_frames.end (); ++i) {
-		(*i)->hide ();
+	for (auto& _silent_frame : _silent_frames) {
+		_silent_frame->hide ();
 	}
-	_silence_text->hide();
+	_silence_text->hide ();
 }
 
 void
 RegionView::drop_silent_frames ()
 {
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin (); i != _silent_frames.end (); ++i) {
-		delete *i;
+	for (auto& _silent_frame : _silent_frames) {
+		delete _silent_frame;
 	}
 	_silent_frames.clear ();
 
 	delete _silence_text;
-	_silence_text = 0;
+	_silence_text = nullptr;
 }
 
 gint
@@ -486,8 +480,8 @@ RegionView::region_resized (const PropertyChange& what_changed)
 
 		unit_length = _region->length_samples() / samples_per_pixel;
 
-		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-			(*i)->set_duration (unit_length);
+		for (auto& ghost : ghosts) {
+			ghost->set_duration (unit_length);
 		}
 
 		update_xrun_markers ();
@@ -502,9 +496,9 @@ RegionView::reset_width_dependent_items (double pixel_width)
 
 	if (_xrun_markers_visible) {
 		const samplepos_t start = _region->start_sample();
-		for (list<std::pair<samplepos_t, ArdourCanvas::Arrow*> >::iterator i = _xrun_markers.begin(); i != _xrun_markers.end(); ++i) {
-			float x_pos = trackview.editor().sample_to_pixel (i->first - start);
-			i->second->set_x (x_pos);
+		for (auto& _xrun_marker : _xrun_markers) {
+			float x_pos = trackview.editor ().sample_to_pixel (_xrun_marker.first - start);
+			_xrun_marker.second->set_x (x_pos);
 		}
 	}
 }
@@ -519,13 +513,13 @@ RegionView::update_xrun_markers ()
 
 	const samplepos_t start = _region->start_sample();
 	const samplepos_t length = _region->length_samples();
-	for (list<std::pair<samplepos_t, ArdourCanvas::Arrow*> >::iterator i = _xrun_markers.begin(); i != _xrun_markers.end(); ++i) {
-		float x_pos = trackview.editor().sample_to_pixel (i->first - start);
-		i->second->set_x (x_pos);
-		if (show_xruns_markers && (i->first >= start && i->first < start + length)) {
-			i->second->show ();
-		} else  {
-			i->second->hide ();
+	for (auto& _xrun_marker : _xrun_markers) {
+		float x_pos = trackview.editor ().sample_to_pixel (_xrun_marker.first - start);
+		_xrun_marker.second->set_x (x_pos);
+		if (show_xruns_markers && (_xrun_marker.first >= start && _xrun_marker.first < start + length)) {
+			_xrun_marker.second->show ();
+		} else {
+			_xrun_marker.second->hide ();
 		}
 	}
 	_xrun_markers_visible = show_xruns_markers;
@@ -561,8 +555,8 @@ RegionView::update_cue_markers ()
 	 * marker set
 	 */
 
-	for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ) {
-		if (model_markers.find ((*v)->model_marker) == model_markers.end()) {
+	for (auto v = _cue_markers.begin (); v != _cue_markers.end ();) {
+		if (model_markers.find ((*v)->model_marker) == model_markers.end ()) {
 			delete *v;
 			v = _cue_markers.erase (v);
 		} else {
@@ -576,27 +570,25 @@ RegionView::update_cue_markers ()
 	 * timestamps and some of them may be outside the Region.
 	 */
 
-	for (CueMarkers::const_iterator c = model_markers.begin(); c != model_markers.end(); c++) {
+	for (const auto& model_marker : model_markers) {
+		auto existing = _cue_markers.end ();
 
-		ViewCueMarkers::iterator existing = _cue_markers.end();
-
-		for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
-			if ((*v)->model_marker == *c) {
+		for (auto v = _cue_markers.begin (); v != _cue_markers.end (); ++v) {
+			if ((*v)->model_marker == model_marker) {
 				existing = v;
 				break;
 			}
 		}
 
-		if (existing == _cue_markers.end()) {
-
-			if (c->position() < start || c->position() >= end) {
+		if (existing == _cue_markers.end ()) {
+			if (model_marker.position () < start || model_marker.position () >= end) {
 				/* not within this region */
 				continue;
 			}
 
 			/* Create a new ViewCueMarker */
 
-			ArdourMarker* mark = new ArdourMarker (trackview.editor(), *group, color , c->text(), ArdourMarker::RegionCue, timepos_t (start.distance (c->position())), true, this);
+			auto* mark = new ArdourMarker (trackview.editor(), *group, color , model_marker.text(), ArdourMarker::RegionCue, timepos_t (start.distance (model_marker.position())), true, this);
 			mark->set_points_color (color);
 			mark->set_show_line (true);
 			/* make sure the line has a clean end, before the frame
@@ -611,11 +603,11 @@ RegionView::update_cue_markers ()
 				mark->hide ();
 			}
 
-			_cue_markers.push_back (new ViewCueMarker (mark, *c));
+			_cue_markers.push_back (new ViewCueMarker (mark, model_marker));
 
 		} else {
 
-			if (c->position() < start || c->position() >= end) {
+			if (model_marker.position() < start || model_marker.position() >= end) {
 				/* not within this region */
 				delete (*existing);
 				_cue_markers.erase (existing);
@@ -630,7 +622,7 @@ RegionView::update_cue_markers ()
 				(*existing)->view_marker->hide ();
 			}
 
-			(*existing)->view_marker->set_position (timepos_t (start.distance (c->position())));
+			(*existing)->view_marker->set_position (timepos_t (start.distance (model_marker.position ())));
 			(*existing)->view_marker->the_item().raise_to_top ();
 		}
 	}
@@ -678,8 +670,8 @@ RegionView::set_position (timepos_t const & pos, void* /*src*/, double* ignored)
 	}
 
 	if (delta) {
-		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-			(*i)->group->move (ArdourCanvas::Duple (delta, 0.0));
+		for (auto& ghost : ghosts) {
+			ghost->group->move (ArdourCanvas::Duple (delta, 0.0));
 		}
 	}
 
@@ -691,9 +683,9 @@ RegionView::set_samples_per_pixel (double fpp)
 {
 	TimeAxisViewItem::set_samples_per_pixel (fpp);
 
-	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_samples_per_pixel (fpp);
-		(*i)->set_duration (_region->length_samples() / fpp);
+	for (auto& ghost : ghosts) {
+		ghost->set_samples_per_pixel (fpp);
+		ghost->set_duration (_region->length_samples () / fpp);
 	}
 
 	region_sync_changed ();
@@ -706,8 +698,8 @@ RegionView::set_duration (timecnt_t const & dur, void *src)
 		return false;
 	}
 
-	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_duration (_region->length_samples() / samples_per_pixel);
+	for (auto& ghost : ghosts) {
+		ghost->set_duration (_region->length_samples () / samples_per_pixel);
 	}
 
 	return true;
@@ -722,8 +714,8 @@ RegionView::set_colors ()
 	const Gtkmm2ext::SVAModifier alpha = UIConfiguration::instance().modifier (X_("region mark"));
 	const uint32_t color = Gtkmm2ext::HSV (UIConfiguration::instance().color ("region mark")).mod (alpha).color();
 
-	for (ViewCueMarkers::iterator c = _cue_markers.begin(); c != _cue_markers.end(); ++c) {
-		(*c)->view_marker->set_color_rgba (color);
+	for (auto& _cue_marker : _cue_markers) {
+		_cue_marker->view_marker->set_color_rgba (color);
 	}
 }
 
@@ -766,7 +758,7 @@ RegionView::get_fill_color () const
 void
 RegionView::show_region_editor ()
 {
-	if (editor == 0) {
+	if (!editor) {
 		editor = new RegionEditor (trackview.session(), region());
 	}
 
@@ -915,17 +907,17 @@ RegionView::move (double x_delta, double y_delta)
 
 	/* note: ghosts never leave their tracks so y_delta for them is always zero */
 
-	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->group->move (ArdourCanvas::Duple (x_delta, 0.0));
+	for (auto& ghost : ghosts) {
+		ghost->group->move (ArdourCanvas::Duple (x_delta, 0.0));
 	}
 }
 
 void
 RegionView::remove_ghost_in (TimeAxisView& tv)
 {
-	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		if (&(*i)->trackview == &tv) {
-			delete *i;
+	for (auto& ghost : ghosts) {
+		if (&ghost->trackview == &tv) {
+			delete ghost;
 			break;
 		}
 	}
@@ -938,7 +930,7 @@ RegionView::remove_ghost (GhostRegion* ghost)
 		return;
 	}
 
-	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+	for (auto i = ghosts.begin(); i != ghosts.end(); ++i) {
 		if (*i == ghost) {
 			ghosts.erase (i);
 			break;
@@ -964,16 +956,16 @@ RegionView::set_height (double h)
 			);
 	}
 
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_frame.begin(); i != _coverage_frame.end(); ++i) {
-		(*i)->set_y1 (h + 1);
+	for (auto& i : _coverage_frame) {
+		i->set_y1 (h + 1);
 	}
 
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin(); i != _silent_frames.end(); ++i) {
-		(*i)->set_y1 (h + 1);
+	for (auto& _silent_frame : _silent_frames) {
+		_silent_frame->set_y1 (h + 1);
 	}
 
-	for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
-		(*v)->view_marker->set_line_height (h - (1.5 * UIConfiguration::instance().get_ui_scale()));
+	for (auto& _cue_marker : _cue_markers) {
+		_cue_marker->view_marker->set_line_height (h - (1.5 * UIConfiguration::instance ().get_ui_scale ()));
 	}
 }
 
@@ -983,8 +975,8 @@ void
 RegionView::update_coverage_frame (LayerDisplay d)
 {
 	/* remove old coverage frame */
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_frame.begin (); i != _coverage_frame.end (); ++i) {
-		delete *i;
+	for (auto& i : _coverage_frame) {
+		delete i;
 	}
 
 	_coverage_frame.clear ();
@@ -1003,7 +995,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 	timepos_t t (position);
 	timepos_t const end = _region->nt_last ();
 
-	ArdourCanvas::Rectangle* cr = 0;
+	ArdourCanvas::Rectangle* cr = nullptr;
 	bool me = false;
 
 	/* the color that will be used to show parts of regions that will not be heard */
@@ -1022,7 +1014,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 		}
 
 		/* start off any new rect, if required */
-		if (cr == 0 || me != new_me) {
+		if (!cr || me != new_me) {
 			cr = new ArdourCanvas::Rectangle (group);
 			_coverage_frame.push_back (cr);
 			cr->set_x0 (trackview.editor().duration_to_pixels (position.distance (t)));
@@ -1089,12 +1081,12 @@ RegionView::trim_front (timepos_t const & new_bound, bool no_overlap)
 
 		bool regions_touching = false;
 
-		if (region_left != 0 && (pos == region_left->end())) {
+		if (region_left && (pos == region_left->end())) {
 			regions_touching = true;
 		}
 
 		/* Only trim region on the left if the first sample has gone beyond the left region's last sample. */
-		if (region_left != 0 && (region_left->nt_last() > _region->position() || regions_touching)) {
+		if (region_left && (region_left->nt_last() > _region->position() || regions_touching)) {
 			region_left->trim_end (_region->position().decrement());
 		}
 	}
@@ -1122,12 +1114,12 @@ RegionView::trim_end (timepos_t const & new_bound, bool no_overlap)
 
 		bool regions_touching = false;
 
-		if (region_right != 0 && (last == region_right->position().decrement())) {
+		if (region_right && (last == region_right->position().decrement())) {
 			regions_touching = true;
 		}
 
 		/* Only trim region on the right if the last sample has gone beyond the right region's first sample. */
-		if (region_right != 0 && (region_right->position() < _region->nt_last() || regions_touching)) {
+		if (region_right && (region_right->position() < _region->nt_last() || regions_touching)) {
 			region_right->trim_front (_region->end());
 		}
 
@@ -1226,17 +1218,17 @@ RegionView::set_selected (bool yn)
 void
 RegionView::maybe_raise_cue_markers ()
 {
-	for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
-		(*v)->view_marker->the_item().raise_to_top ();
+	for (auto& _cue_marker : _cue_markers) {
+		_cue_marker->view_marker->the_item ().raise_to_top ();
 	}
 }
 
 CueMarker
 RegionView::find_model_cue_marker (ArdourMarker* m)
 {
-	for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
-		if ((*v)->view_marker == m) {
-			return (*v)->model_marker;
+	for (auto& _cue_marker : _cue_markers) {
+		if (_cue_marker->view_marker == m) {
+			return _cue_marker->model_marker;
 		}
 	}
 
@@ -1246,7 +1238,7 @@ RegionView::find_model_cue_marker (ArdourMarker* m)
 void
 RegionView::drop_cue_marker (ArdourMarker* m)
 {
-	for (ViewCueMarkers::iterator v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
+	for (auto v = _cue_markers.begin(); v != _cue_markers.end(); ++v) {
 		if ((*v)->view_marker == m) {
 			delete m;
 			_cue_markers.erase (v);
