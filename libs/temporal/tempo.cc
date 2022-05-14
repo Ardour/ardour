@@ -3051,7 +3051,7 @@ TempoMap::set_ramped (TempoPoint & tp, bool yn)
 
 
 void
-TempoMap::stretch_tempo (TempoPoint* ts, const samplepos_t sample, const samplepos_t end_sample, Beats const & start_qnote, Beats const & end_qnote)
+TempoMap::stretch_tempo (TempoPoint* ts, samplepos_t sample, samplepos_t end_sample, Beats const & start_qnote, Beats const & end_qnote)
 {
 	/*
 	  Ts (future prev_t)   Tnext
