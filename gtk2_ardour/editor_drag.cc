@@ -3817,12 +3817,30 @@ void
 TempoTwistDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
+
+	map = _editor->begin_tempo_map_edit ();
+	/* Get the tempo point that starts this section */
+
+	_tempo = const_cast<TempoPoint*> (&map->tempo_at (raw_grab_time()));
+	assert (_tempo);
+
+	if (!(_next_tempo = const_cast<TempoPoint*> (map->next_tempo (*_tempo)))) {
+		_drag_valid = false;
+		return;
+	}
+
+	_grab_qn = _tempo->beats();
+
+	if (_tempo->locked_to_meter() || _next_tempo->locked_to_meter()) {
+		_drag_valid = false;
+		return;
+	}
 }
 
 void
 TempoTwistDrag::setup_pointer_offset ()
 {
-	// _pointer_offset = timepos_t (_grab_qn).distance (raw_grab_time());
+	_pointer_offset = timecnt_t (Temporal::Beats());
 }
 
 void
@@ -3833,43 +3851,24 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	if (first_move) {
-		map = _editor->begin_tempo_map_edit ();
-		/* Get the tempo point that starts this section */
-
-		_tempo = const_cast<TempoPoint*> (&map->tempo_at (raw_grab_time()));
-		assert (_tempo);
-
-		if (!(_next_tempo = const_cast<TempoPoint*> (map->next_tempo (*_tempo)))) {
-			_drag_valid = false;
-			return;
-		}
-
-		_grab_qn = _tempo->beats();
-
-		if (_tempo->locked_to_meter() || _next_tempo->locked_to_meter()) {
-			_drag_valid = false;
-			return;
+		/* get current state */
+		_before_state = &map->get_state();
+		_editor->tempo_curve_selected (_tempo, true);
+		if (_next_tempo) {
+			_editor->tempo_curve_selected (_next_tempo, true);
 		}
 	}
 
-	/* get current state */
-	_before_state = &map->get_state();
-
-	_editor->tempo_curve_selected (_tempo, true);
-	if (_next_tempo) {
-		_editor->tempo_curve_selected (_next_tempo, true);
-	}
-
-	Beats mouse_beats;
+	samplepos_t mouse_pos;
 
 	if (_editor->grid_musical()) {
-		mouse_beats = adjusted_current_time (event, false).beats();
+		mouse_pos = adjusted_current_time (event, false).samples();
 	} else {
-		mouse_beats = adjusted_current_time (event).beats();
+		mouse_pos = adjusted_current_time (event).samples();
 	}
 
-
-	map->twist_tempi (_tempo, timepos_t (_tempo->beats()), timepos_t (mouse_beats));
+	/* adjust this and the next tempi to match pointer sample */
+	map->twist_tempi (_tempo, adjusted_time (grab_time(), 0, false).samples(), mouse_pos);
 
 	ostringstream sstr;
 	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";
