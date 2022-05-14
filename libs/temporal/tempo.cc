@@ -1140,6 +1140,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 
 	DEBUG_TRACE (DEBUG::MapReset, string_compose ("we begin at %1 with metric %2\n", sc, metric));
 
+	/* Setup the metric that is in effect at the starting point */
 
 	for (p = _points.begin(); p != _points.end(); ++p) {
 
@@ -1171,6 +1172,10 @@ TempoMap::reset_starting_at (superclock_t sc)
 			DEBUG_TRACE (DEBUG::MapReset, "Meter!\n");
 		}
 	}
+
+	/* Now iterate over remaining points and recompute their audio time
+	 * positions.
+	 */
 
 	for ( ; p != _points.end(); ++p) {
 
