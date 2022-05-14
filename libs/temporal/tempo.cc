@@ -1120,9 +1120,12 @@ TempoMap::remove_point (Point const & point)
 void
 TempoMap::reset_starting_at (superclock_t sc)
 {
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("reset starting at %1\n", sc));
-	// cerr << "RESET starting at " << sc << endl;
-	// dump (cerr);
+	DEBUG_TRACE (DEBUG::MapReset, string_compose ("reset starting at %1\n", sc));
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::MapReset)) {
+		dump (std::cerr);
+	}
+#endif
 
 	assert (!_tempos.empty());
 	assert (!_meters.empty());
@@ -1135,11 +1138,12 @@ TempoMap::reset_starting_at (superclock_t sc)
 	TempoMetric metric (_tempos.front(), _meters.front());
 	Points::iterator p;
 
-	// cerr << "We begin at " << sc << " with metric = " << metric << endl;
+	DEBUG_TRACE (DEBUG::MapReset, string_compose ("we begin at %1 with metric %2\n", sc, metric));
+
 
 	for (p = _points.begin(); p != _points.end(); ++p) {
 
-		// cerr << "Now looking at " << *p << endl;
+		DEBUG_TRACE (DEBUG::MapReset, string_compose ("Now looking at %1\n", *p));
 
 		if (p->sclock() >= sc) {
 			break;
@@ -1158,14 +1162,13 @@ TempoMap::reset_starting_at (superclock_t sc)
 			 */
 
 			metric = TempoMetric (*mtp, *mtp);
-			// cerr << "Bartime! " << metric << endl;
-			
+			DEBUG_TRACE (DEBUG::MapReset, "Bartime!\n");
 		} else if ((tp = dynamic_cast<TempoPoint*> (&*p)) != 0) {
 			metric = TempoMetric (*tp, metric.meter());
-			// cerr << "Tempo! " << metric << endl;
+			DEBUG_TRACE (DEBUG::MapReset, "Tempo!\n");
 		} else if ((mp = dynamic_cast<MeterPoint*> (&*p)) != 0) {
 			metric = TempoMetric (metric.tempo(), *mp);
-			// cerr << "Meter! " << metric << endl;
+			DEBUG_TRACE (DEBUG::MapReset, "Meter!\n");
 		}
 	}
 
@@ -1182,7 +1185,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 			}
 		}
 
-		// cerr << "====> working on it!\n";
+		DEBUG_TRACE (DEBUG::MapReset, string_compose ("workong on it! tp = %1\n", tp));
 
 		if (tp) {
 
@@ -1205,12 +1208,12 @@ TempoMap::reset_starting_at (superclock_t sc)
 		}
 
 		if (!mtp) {
-			// cerr << "recompute " << p->bbt() << " using " << metric << endl;
+			DEBUG_TRACE (DEBUG::MapReset, string_compose ("recompute %1 using %2\n", p->bbt(), metric));
 			superclock_t sc = metric.superclock_at (p->bbt());
-			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("\tbased on %1 move to %2,%3\n", p->bbt(), sc, p->beats()));
+			DEBUG_TRACE (DEBUG::MapReset, string_compose ("\tbased on %1 move to %2,%3\n", p->bbt(), sc, p->beats()));
 			p->set (sc, p->beats(), p->bbt());
 		} else {
-			// cerr << "not resetting this\n";
+			DEBUG_TRACE (DEBUG::MapReset, "\tnot recomputing this one\n");
 		}
 
 		/* Now ensure that metric is correct moving forward */
@@ -1224,8 +1227,12 @@ TempoMap::reset_starting_at (superclock_t sc)
 		}
 	}
 
-	// cerr << "RESET DONE\n\n\n";
-	// dump (cerr);
+	DEBUG_TRACE (DEBUG::MapReset, "RESET DONE\n");
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::MapReset)) {
+		dump (std::cerr);
+	}
+#endif
 }
 
 bool
