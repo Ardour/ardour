@@ -105,9 +105,7 @@ Tempo::Tempo (XMLNode const & node)
 	if (!node.get_property (X_("note-type"), _note_type)) {
 		throw failed_constructor ();
 	}
-	if (!node.get_property (X_("type"), _type)) {
-		throw failed_constructor ();
-	}
+
 	if (!node.get_property (X_("active"), _active)) {
 		throw failed_constructor ();
 	}
@@ -120,11 +118,7 @@ Tempo::Tempo (XMLNode const & node)
 }
 
 void
-Tempo::set_ramped (bool yn)
 {
-	_type = (yn ? Ramped : Constant);
-}
-
 void
 Tempo::set_end (uint64_t n, superclock_t s)
 {
@@ -170,7 +164,6 @@ Tempo::set_state (XMLNode const & node, int /*version*/)
 	_end_super_note_type_per_second = double_npm_to_snps (_enpm);
 
 	node.get_property (X_("note-type"), _note_type);
-	node.get_property (X_("type"), _type);
 	node.get_property (X_("active"), _active);
 
 	if (!node.get_property (X_("locked-to-meter"), _locked_to_meter)) {
@@ -462,8 +455,8 @@ TempoPoint::compute_omega_from_next_tempo (TempoPoint const & next)
 		end_scpqn = next.superclocks_per_quarter_note ();
 	}
 
-	if ((_type == Constant) || (superclocks_per_quarter_note () == end_scpqn)) {
 		_omega = 0.0;
+	if (superclocks_per_quarter_note () == end_scpqn) {
 		return;
 	}
 

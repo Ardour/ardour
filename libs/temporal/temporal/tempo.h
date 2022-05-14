@@ -193,7 +193,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 		, _active (true)
 		, _locked_to_meter (false)
 		, _clamped (false)
-		, _type (Tempo::Constant) {}
+		{}
 
 	Tempo (double npm, double enpm, int note_type)
 		: _npm (npm)
@@ -206,7 +206,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 		, _active (true)
 		, _locked_to_meter (false)
 		, _clamped (false)
-		, _type (npm != enpm ? Tempo::Ramped : Tempo::Constant) {}
+		{}
 
 	/* these five methods should only be used to show and collect information to the user (for whom
 	 * bpm as a floating point number is the obvious representation)
@@ -260,9 +260,8 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 	bool clamped() const { return _clamped; }
 	void set_clamped (bool yn);
 
-	Type type() const { return _type; }
-
-	bool ramped () const { return _type != Constant; }
+	Type type() const { return _superclocks_per_note_type == _end_superclocks_per_note_type ? Constant : Ramped; }
+	bool ramped () const { return _superclocks_per_note_type != _end_superclocks_per_note_type; }
 
 	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int version);
@@ -273,8 +272,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 			_note_type == other._note_type &&
 			_active == other._active &&
 			_locked_to_meter == other._locked_to_meter &&
-			_clamped == other._clamped &&
-			_type == other._type;
+		_clamped == other._clamped;
 	}
 
 	bool operator!= (Tempo const & other) const {
@@ -283,8 +281,7 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 			_note_type != other._note_type ||
 			_active != other._active ||
 			_locked_to_meter != other._locked_to_meter ||
-			_clamped != other._clamped ||
-			_type != other._type;
+			_clamped != other._clamped;
 	}
 
 	uint64_t super_note_type_per_second() const { return _super_note_type_per_second; }
@@ -301,7 +298,6 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 	bool         _active;
 	bool         _locked_to_meter; /* XXX name has unclear meaning with nutempo */
 	bool         _clamped;
-	Type         _type;
 
 	static inline uint64_t     double_npm_to_snps (double npm) { return (uint64_t) llround (npm * big_numerator / 60); }
 	static inline superclock_t double_npm_to_scpn (double npm) { return (superclock_t) llround ((60./npm) * superclock_ticks_per_second()); }
