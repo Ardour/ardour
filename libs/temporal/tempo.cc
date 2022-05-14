@@ -99,6 +99,7 @@ Tempo::Tempo (XMLNode const & node)
 
 	_superclocks_per_note_type = double_npm_to_scpn (_npm);
 	_end_superclocks_per_note_type = double_npm_to_scpn (_enpm);
+
 	_super_note_type_per_second = double_npm_to_snps (_npm);
 	_end_super_note_type_per_second = double_npm_to_snps (_enpm);
 
