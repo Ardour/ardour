@@ -30,6 +30,7 @@ namespace PBD {
 		LIBTEMPORAL_API extern DebugBits Grid;
 		LIBTEMPORAL_API extern DebugBits SnapBBT;
 		LIBTEMPORAL_API extern DebugBits Beats;
+		LIBTEMPORAL_API extern DebugBits MapReset;
 	}
 }
 
