@@ -142,24 +142,10 @@ class /*LIBTEMPORAL_API*/ Point : public point_hook {
 	void map_reset_set_sclock_for_sr_change (superclock_t sc) { _sclock = sc; }
 };
 
-/* this exists only to give the TempoMap the only access to ::set_ramped() in a
- * derived class
- */
-
-class LIBTEMPORAL_API Rampable {
-  protected:
-	virtual ~Rampable() {}
-
-  private:
-	friend class TempoMap;
-	virtual void set_ramped (bool yn) = 0;
-	virtual void set_end (uint64_t, superclock_t) = 0;
-};
-
 /** Tempo, the speed at which musical time progresses (BPM).
  */
 
-class LIBTEMPORAL_API Tempo : public Rampable {
+class LIBTEMPORAL_API Tempo {
   private:
 	/* beats per minute * big_numerator => rational number expressing (possibly fractional) bpm as superbeats-per-minute
 	 *
@@ -218,7 +204,6 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 	double samples_per_quarter_note(samplecnt_t sr) const { return superclock_to_samples (superclocks_per_quarter_note(), sr); }
 
 	void   set_note_types_per_minute (double npm) { _superclocks_per_note_type = double_npm_to_scpn (npm); }
-	void   set_end_note_types_per_minute (double npm) { _end_superclocks_per_note_type = double_npm_to_scpn (npm); }
 
 	int note_type () const { return _note_type; }
 	Beats note_type_as_beats () const { return Beats (0, (1920 * 4) / _note_type); }
@@ -302,9 +287,9 @@ class LIBTEMPORAL_API Tempo : public Rampable {
 	static inline uint64_t     double_npm_to_snps (double npm) { return (uint64_t) llround (npm * big_numerator / 60); }
 	static inline superclock_t double_npm_to_scpn (double npm) { return (superclock_t) llround ((60./npm) * superclock_ticks_per_second()); }
 
-  private:
-	void set_ramped (bool yn);
-	void set_end (uint64_t snps, superclock_t espn);
+  protected:
+	friend class TempoMap;
+	void set_end_npm (double);
 };
 
 /** Meter, or time signature (subdivisions per bar, and which note type is a single subdivision). */

@@ -118,12 +118,10 @@ Tempo::Tempo (XMLNode const & node)
 }
 
 void
+Tempo::set_end_npm (double npm)
 {
-void
-Tempo::set_end (uint64_t n, superclock_t s)
-{
-	_end_super_note_type_per_second = n;
-	_end_superclocks_per_note_type = s;
+	_end_super_note_type_per_second = double_npm_to_snps (npm);
+	_end_superclocks_per_note_type = double_npm_to_scpn (npm);
 }
 
 void
@@ -2997,8 +2995,6 @@ TempoMap::set_ramped (TempoPoint & tp, bool yn)
 {
 	assert (!_tempos.empty());
 
-	Rampable & r (tp);
-
 	if (tp.ramped() == yn) {
 		return;
 	}
@@ -3017,15 +3013,12 @@ TempoMap::set_ramped (TempoPoint & tp, bool yn)
 	}
 
 	if (yn) {
-		r.set_end (nxt->end_super_note_type_per_second(), nxt->end_superclocks_per_note_type());
+		tp.set_end_npm (nxt->end_note_types_per_minute());
 	} else {
-		r.set_end (tp.super_note_type_per_second(), tp.superclocks_per_note_type());
+		tp.set_end_npm (tp.note_types_per_minute());
 	}
 
-	r.set_ramped (yn);
-	tp.compute_omega_from_next_tempo (*nxt);
-
-	reset_starting_at (tp.sclock() + 1);
+	reset_starting_at (tp.sclock());
 }
 
 
@@ -3106,7 +3099,7 @@ TempoMap::stretch_tempo (TempoPoint* ts, const samplepos_t sample, const samplep
 	if (ts->clamped()) {
 		TempoPoint* prev = 0;
 		if ((prev = const_cast<TempoPoint*> (previous_tempo (*ts))) != 0) {
-			prev->set_end_note_types_per_minute (ts->note_types_per_minute());
+			prev->set_end_npm (ts->end_note_types_per_minute());
 		}
 	}
 
@@ -3625,7 +3618,7 @@ TempoMap::fix_legacy_session ()
 				continue;
 			}
 			/* Ramp type never existed in the era of this tempo section */
-			t->set_end_note_types_per_minute (t->note_types_per_minute());
+			t->set_end_npm (t->note_types_per_minute());
 
 			if (t->initial()) {
 				t->set_pulse (0.0);
@@ -3677,7 +3670,7 @@ TempoMap::fix_legacy_end_session ()
 
 			if (prev_t) {
 				if (prev_t->end_note_types_per_minute() < 0.0) {
-					prev_t->set_end_note_types_per_minute (t->note_types_per_minute());
+					prev_t->set_end_npm (t->note_types_per_minute());
 				}
 			}
 
@@ -3686,7 +3679,7 @@ TempoMap::fix_legacy_end_session ()
 	}
 
 	if (prev_t) {
-		prev_t->set_end_note_types_per_minute (prev_t->note_types_per_minute());
+		prev_t->set_end_npm (prev_t->note_types_per_minute());
 	}
 }
 
