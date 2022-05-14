@@ -785,7 +785,7 @@ RegionView::hide_region_editor()
 std::string
 RegionView::make_name () const
 {
-	std::string str;
+	std::string str{};
 
 	// XXX nice to have some good icons for this
 	if (_region->position_time_domain() == Temporal::BeatTime) {
@@ -807,7 +807,7 @@ RegionView::make_name () const
 	}
 
 	if (_region->muted()) {
-		str = string ("!") + str;
+		str = std::string("\U0001F507") + str; // SPEAKER WITH CANCELLATION STROKE
 	}
 
 	return str;
