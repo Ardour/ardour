@@ -997,8 +997,7 @@ TempoMap::remove_tempo (TempoPoint const & tp)
 	remove_point (*t);
 
 	if (prev != _tempos.end() && was_end) {
-		Rampable& r (*prev);
-		r.set_ramped (false);
+		prev->set_end_npm (prev->note_types_per_minute()); /* remove any ramp */
 	} else {
 		reset_starting_at (sc);
 	}
