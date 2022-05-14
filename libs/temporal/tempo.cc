@@ -1184,8 +1184,8 @@ TempoMap::reset_starting_at (superclock_t sc)
 		tp = 0;
 		mp = 0;
 
-		if ((mtp = dynamic_cast<MusicTimePoint*> (&*p)) != 0) {
-			if ((tp = dynamic_cast<TempoPoint*> (&*p)) != 0) {
+		if ((mtp = dynamic_cast<MusicTimePoint*> (&*p)) == 0) {
+			if ((tp = dynamic_cast<TempoPoint*> (&*p)) == 0) {
 				mp = dynamic_cast<MeterPoint*> (&*p);
 			}
 		}
