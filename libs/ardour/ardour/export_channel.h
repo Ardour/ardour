@@ -63,6 +63,8 @@ public:
 	virtual bool audio () const { return true; }
 	virtual bool midi () const { return false; }
 
+	virtual std::string state_node_name () const = 0;
+
 	/// Adds state to node passed
 	virtual void get_state (XMLNode* node) const = 0;
 
@@ -88,6 +90,8 @@ public:
 	void read (Buffer const*&, samplecnt_t samples) const;
 
 	bool empty () const { return ports.empty (); }
+
+	std::string state_node_name () const { return "PortExportChannel"; }
 
 	void get_state (XMLNode* node) const;
 	void set_state (XMLNode* node, Session& session);
@@ -123,10 +127,14 @@ public:
 	bool audio () const { return false; }
 	bool midi () const { return true; }
 
+	std::string state_node_name () const { return "PortExportMIDI"; }
+
 	void get_state (XMLNode* node) const;
 	void set_state (XMLNode* node, Session& session);
 
 	bool operator< (ExportChannel const& other) const;
+
+	boost::shared_ptr<MidiPort> port () const { return _port.lock (); }
 
 	void set_port (boost::weak_ptr<MidiPort> port)
 	{
@@ -192,6 +200,8 @@ public:
 		factory.read (channel, buf, samples_to_read);
 	}
 
+	std::string state_node_name () const { return "RegionExportChannel"; }
+
 	void get_state (XMLNode* /*node*/) const {};
 	void set_state (XMLNode* /*node*/, Session& /*session*/){};
 
@@ -228,6 +238,7 @@ public:
 	~RouteExportChannel ();
 
 	static void create_from_route (std::list<ExportChannelPtr>& result, boost::shared_ptr<Route> route);
+	static void create_from_state (std::list<ExportChannelPtr>& result, Session&, XMLNode*);
 
 public: // ExportChannel interface
 	void prepare_export (samplecnt_t max_samples, sampleoffset_t common_latency);
@@ -238,6 +249,10 @@ public: // ExportChannel interface
 
 	bool audio () const;
 	bool midi () const;
+
+	boost::shared_ptr<Route> route () const { return _remover->route (); }
+
+	std::string state_node_name () const { return "RouteExportChannel"; }
 
 	void get_state (XMLNode* node) const;
 	void set_state (XMLNode* node, Session& session);
@@ -255,6 +270,8 @@ private:
 		{
 		}
 		~ProcessorRemover ();
+
+		boost::shared_ptr<Route> route () const { return _route; }
 
 	private:
 		boost::shared_ptr<Route>              _route;

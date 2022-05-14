@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/types_convert.h"
+
 #include "ardour/export_channel.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/audio_port.h"
@@ -376,6 +378,23 @@ RouteExportChannel::create_from_route (std::list<ExportChannelPtr>& result, boos
 	}
 }
 
+void
+RouteExportChannel::create_from_state (std::list<ExportChannelPtr>& result, Session& s, XMLNode* node)
+{
+	XMLNode* xml_route = node->child ("Route");
+	if (!xml_route) {
+		return;
+	}
+	PBD::ID rid;
+	if (!xml_route->get_property ("id", rid)) {
+		return;
+	}
+	boost::shared_ptr<Route> rt = s.route_by_id (rid);
+	if (rt) {
+		create_from_route (result, rt);
+	}
+}
+
 bool
 RouteExportChannel::audio () const
 {
@@ -405,15 +424,16 @@ RouteExportChannel::read (Buffer const*& buf, samplecnt_t samples) const
 }
 
 void
-RouteExportChannel::get_state (XMLNode*) const
+RouteExportChannel::get_state (XMLNode* node) const
 {
-	// TODO
+	XMLNode* n = node->add_child ("Route");
+	n->set_property ("id", route()->id ().to_s ());
 }
 
 void
 RouteExportChannel::set_state (XMLNode*, Session&)
 {
-	// TODO
+	/* unused, see create_from_state() */
 }
 
 bool
