@@ -1207,6 +1207,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 				++pp;
 			}
 
+			DEBUG_TRACE (DEBUG::MapReset, string_compose ("considering omega comp for %1 with nxt = %2\n", *tp, nxt_tempo));
 			if (tp->ramped() && nxt_tempo) {
 				tp->compute_omega_from_next_tempo (*nxt_tempo, BeatTime);
 			}
