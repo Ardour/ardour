@@ -231,20 +231,18 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 				dly->silence (n_samples);
 			}
 
-			if (delay_diff != 0) {
-				/* If the delay time changes, iterate over all events in the dly-buffer
-				 * and adjust the time in-place. <= 0 becomes 0.
-				 *
-				 * iterate over all events in dly-buffer and subtract one cycle
-				 * (n_samples) from the timestamp, bringing them closer to de-queue.
-				 */
-				for (MidiBuffer::iterator m = dly->begin (); m != dly->end (); ++m) {
-					MidiBuffer::TimeType *t = m.timeptr ();
-					if (*t > n_samples + delay_diff) {
-						*t -= n_samples + delay_diff;
-					} else {
-						*t = 0;
-					}
+			/* If the delay time changes, iterate over all events in the dly-buffer
+			 * and adjust the time in-place. <= 0 becomes 0.
+			 *
+			 * iterate over all events in dly-buffer and subtract one cycle
+			 * (n_samples) from the timestamp, bringing them closer to de-queue.
+			 */
+			for (MidiBuffer::iterator m = dly->begin (); m != dly->end (); ++m) {
+				MidiBuffer::TimeType *t = m.timeptr ();
+				if (*t > n_samples + delay_diff) {
+					*t -= n_samples + delay_diff;
+				} else {
+					*t = 0;
 				}
 			}
 

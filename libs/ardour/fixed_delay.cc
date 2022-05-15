@@ -148,7 +148,7 @@ FixedDelay::delay (
 			if (ev.time () < n_samples) {
 				mout->push_back (ev);
 			} else {
-				mdly->push_back (ev);
+				mdly->insert_event (ev);
 			}
 		}
 
@@ -158,8 +158,15 @@ FixedDelay::delay (
 			if (ev.time () >= n_samples) {
 				break;
 			}
-			mout->push_back (ev);
+			mout->insert_event (ev);
 			m = mdly->erase (m);
+		}
+
+		/* prepare for next cycle */
+		for (MidiBuffer::iterator m = mdly->begin (); m != mdly->end (); ++m) {
+			MidiBuffer::TimeType *t = m.timeptr ();
+			assert (*t >= n_samples);
+			*t -= n_samples;
 		}
 		return;
 	}
