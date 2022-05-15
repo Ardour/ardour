@@ -1978,6 +1978,11 @@ ControlList::paste (const ControlList& alist, timepos_t const &  time)
 		return false;
 	}
 
+	/* when pasting a range of automation, first add guard points so the automation data before and after this range is retained */
+	const ControlEvent* last = alist.back();
+	add_guard_point (time, -GUARD_POINT_DELTA);
+	add_guard_point (time + last->when, GUARD_POINT_DELTA);
+
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 		iterator where;
