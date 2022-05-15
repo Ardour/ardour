@@ -2282,7 +2282,7 @@ void
 ARDOUR_UI::save_template_dialog_response (int response, SaveTemplateDialog* d)
 {
 	if (response == RESPONSE_ACCEPT) {
-		const string name = d->get_template_name ();
+		const string name = legalize_for_path (d->get_template_name ());
 		const string desc = d->get_description ();
 
 		int failed = _session->save_template (name, desc);
