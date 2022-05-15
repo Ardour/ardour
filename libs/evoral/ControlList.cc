@@ -1890,7 +1890,7 @@ ControlList::cut_copy_clear (timepos_t const & start_time, timepos_t const & end
 
 			double val = unlocked_eval (start);
 
-			if (op == 0) { // cut
+			if (op != 1) { // cut/clear
 				if (start > _events.front()->when) {
 					_events.insert (s, (new ControlEvent (start, val)));
 				}
@@ -1920,15 +1920,12 @@ ControlList::cut_copy_clear (timepos_t const & start_time, timepos_t const & end
 
 		if (e == _events.end() || (*e)->when != end) {
 
-			/* only add a boundary point if there is a point after "end"
-			 */
-
-			if (op == 0 && (e != _events.end() && end < (*e)->when)) { // cut
+			if (op != 1) { // cut/clear
 				_events.insert (e, new ControlEvent (end, end_value));
 			}
 
-			if (op != 2 && (e != _events.end() && end < (*e)->when)) { // cut/copy
-				nal->_events.push_back (new ControlEvent (timepos_t (start.distance (start)), end_value));
+			if (op != 2) { // cut/copy
+				nal->_events.push_back (new ControlEvent (timepos_t (start.distance (end)), end_value));
 			}
 		}
 
