@@ -6393,12 +6393,13 @@ NoteDrag::aborted (bool)
 }
 
 /** Make an AutomationRangeDrag for lines in an AutomationTimeAxisView */
-AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView* atv, list<TimelineRange> const & r)
+AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView* atv, float initial_value, list<TimelineRange> const & r)
 	: Drag (editor, atv->base_item (), editor->default_time_domain()) /* XXX NUTEMPO FIX TIME DOMAIN */
 	, _ranges (r)
 	, _y_origin (atv->y_position())
 	, _y_height (atv->effective_height()) // or atv->lines()->front()->height() ?!
 	, _nothing_to_drag (false)
+	, _initial_value (initial_value)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
 	setup (atv->lines ());
@@ -6486,6 +6487,10 @@ AutomationRangeDrag::y_fraction (double global_y) const
 double
 AutomationRangeDrag::value (boost::shared_ptr<AutomationList> list, timepos_t const & x) const
 {
+	if (list->size () == 0) {
+		return _initial_value;
+	}
+
 	const double v = list->eval(x);
 	return _integral ? rint(v) : v;
 }
@@ -6562,9 +6567,14 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 					p.set_time_domain (the_list->time_domain());
 					q.set_time_domain (the_list->time_domain());
 
+					/* get start&end values to use for guard points *before* we add points to the list */
+					/* in the case where no data exists on the line, p_value = q_value = initial_value */
+					float p_value = value (the_list, p);
+					float q_value = value (the_list, q);
+
 					XMLNode &before = the_list->get_state();
-					bool const add_p = the_list->editor_add (p, value (the_list, p), false);
-					bool const add_q = the_list->editor_add (q, value (the_list, q), false);
+					bool const add_p = the_list->editor_add (p, p_value, false);
+					bool const add_q = the_list->editor_add (q, q_value, false);
 
 					if (add_p || add_q) {
 						_editor->session()->add_command (

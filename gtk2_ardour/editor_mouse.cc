@@ -1214,8 +1214,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				/* handle automation lanes first */
 				AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
 				if (atv) {
-					/* smart "join" mode: drag automation */
-					_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
+					/* if there's no line yet, AutomationRangeDrag will need to be told what the initial value of this control is */
+					float init_value = atv->control()->get_value();
+
+					_drags->set (new AutomationRangeDrag (this, atv, init_value, selection->time), event, _cursors->up_down);
 					return true;
 				}
 				if (dynamic_cast<AutomationRegionView*>(clicked_regionview)) {

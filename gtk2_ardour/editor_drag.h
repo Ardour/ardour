@@ -1362,7 +1362,7 @@ private:
 class AutomationRangeDrag : public Drag
 {
 public:
-	AutomationRangeDrag (Editor *, AutomationTimeAxisView *, std::list<ARDOUR::TimelineRange> const &);
+	AutomationRangeDrag (Editor *, AutomationTimeAxisView *, float initial_value, std::list<ARDOUR::TimelineRange> const &);
 	AutomationRangeDrag (Editor *, std::list<RegionView*> const &, std::list<ARDOUR::TimelineRange> const &, double y_origin, double y_height);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -1394,6 +1394,7 @@ private:
 	double          _y_height;
 	bool            _nothing_to_drag;
 	bool            _integral;
+	float_t			_initial_value;
 };
 
 /** Drag of one edge of an xfade
