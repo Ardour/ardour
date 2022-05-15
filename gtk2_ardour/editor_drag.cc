@@ -277,8 +277,8 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trac
 	, _constraint_pressed (false)
 	, _grab_button (-1)
 {
-
 }
+
 timepos_t
 Drag::pixel_to_time (double x) const
 {
