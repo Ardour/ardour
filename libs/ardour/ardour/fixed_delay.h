@@ -83,6 +83,9 @@ public:
 	/** zero all buffers */
 	void flush();
 
+	/** @return configured delay time in samples */
+	samplecnt_t delay () const { return _delay; }
+
 private:
 	samplecnt_t _max_delay;
 	samplecnt_t _buf_size;
