@@ -90,6 +90,9 @@ ExportFormatSelector::update_format_list ()
 		tree_it = format_list->append();
 		tree_it->set_value (format_cols.format, *it);
 		tree_it->set_value (format_cols.label, (*it)->description());
+		if (!format_to_select && (*it)->id ().to_s () == "dd4f6f30-f054-4e0a-8d91-67eed5d79153" /* "Wav (Tagged)" */) {
+			format_to_select = *it;
+		}
 	}
 
 	if (format_combo.get_active_row_number() == -1 && format_combo.get_model()->children().size() > 0) {
