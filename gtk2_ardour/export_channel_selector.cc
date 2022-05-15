@@ -139,7 +139,9 @@ PortExportChannelSelector::fill_route_list ()
 		if ((*it)->is_master () || (*it)->is_monitor ()) {
 			continue;
 		}
-		channel_view.add_route ((*it)->output().get());
+		if ((*it)->output()->n_ports ().n_audio () > 0) {
+			channel_view.add_route ((*it)->output().get());
+		}
 	}
 
 	update_channel_count ();
