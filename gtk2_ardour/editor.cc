@@ -438,6 +438,7 @@ Editor::Editor ()
 	, autoscroll_cnt (0)
 	, autoscroll_widget (0)
 	, show_gain_after_trim (false)
+	, _no_not_select_reimported_tracks (false)
 	, selection_op_cmd_depth (0)
 	, selection_op_history_it (0)
 	, no_save_instant (false)
@@ -5742,7 +5743,7 @@ Editor::add_stripables (StripableList& sl)
 	 * than just VCAs
 	 */
 
-	if (!from_scratch && !new_selection.empty()) {
+	if (!from_scratch && !_no_not_select_reimported_tracks && !new_selection.empty()) {
 		selection->set (new_selection);
 		begin_selection_op_history();
 	}

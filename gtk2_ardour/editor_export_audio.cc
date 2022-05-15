@@ -34,6 +34,7 @@
 #include "pbd/gstdio_compat.h"
 
 #include "pbd/pthread_utils.h"
+#include "pbd/unwind.h"
 
 #include "ardour/audio_track.h"
 #include "ardour/audiofilesource.h"
@@ -83,6 +84,7 @@ void
 Editor::stem_export ()
 {
 	StemExportDialog dialog (*this);
+	PBD::Unwinder<bool> uw (_no_not_select_reimported_tracks, true);
 	dialog.set_session (_session);
 	dialog.run();
 }

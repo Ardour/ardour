@@ -2133,6 +2133,8 @@ private:
 
 	/* audio export */
 
+	bool _no_not_select_reimported_tracks;
+
 	enum BounceTarget {
 		NewSource,
 		NewTrigger,
