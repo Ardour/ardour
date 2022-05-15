@@ -562,9 +562,7 @@ ControlList::add_guard_point (timepos_t const & time, timecnt_t const & offset)
 		return;
 	}
 
-	assert (offset <= timecnt_t());
-
-	if (!offset.is_zero()) {
+	if (offset.is_negative()) {
 		/* check if there are points between when + offset .. when */
 		ControlEvent cp (when + offset, 0.0);
 		iterator s;
@@ -572,6 +570,19 @@ ControlList::add_guard_point (timepos_t const & time, timecnt_t const & offset)
 		if ((s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator)) != _events.end()) {
 			cp.when = when;
 			e = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+			if (s != e) {
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 add_guard_point, none added, found event between %2 and %3\n", this, when.earlier (offset), when));
+				return;
+			}
+		}
+	} else {
+		/* check if there are points between when + offset .. when */
+		ControlEvent cp (when + offset, 0.0);
+		iterator s;
+		iterator e;
+		if ((s = upper_bound (_events.begin(), _events.end(), &cp, time_comparator)) != _events.end()) {
+			cp.when = when;
+			e = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
 			if (s != e) {
 				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 add_guard_point, none added, found event between %2 and %3\n", this, when.earlier (offset), when));
 				return;
