@@ -4,7 +4,7 @@
  * Copyright (C) 2009-2011 David Robillard <d@drobilla.net>
  * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2012-2016 Tim Mayberry <mojofunk@gmail.com>
- * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2022 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2014 Nick Mainsbridge <mainsbridge@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -452,10 +452,14 @@ ExportProfileManager::deserialize_timespan (XMLNode& root)
 			continue;
 		}
 
+		bool rt = false;
+		(*node_it)->get_property ("realtime", rt);
+
 		ExportTimespanPtr timespan = handler->add_timespan ();
 		timespan->set_name (location->name ());
 		timespan->set_range_id (location->id ().to_s ());
 		timespan->set_range (location->start_sample (), location->end_sample ());
+		timespan->set_realtime (rt);
 		state->timespans->push_back (timespan);
 	}
 
@@ -478,6 +482,7 @@ ExportProfileManager::serialize_timespan (TimespanStatePtr state)
 	for (TimespanList::iterator it = state->timespans->begin (); it != state->timespans->end (); ++it) {
 		if ((span = root.add_child ("Range"))) {
 			span->set_property ("id", (*it)->range_id ());
+			span->set_property ("realtime", (*it)->realtime ());
 		}
 	}
 
