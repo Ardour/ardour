@@ -1942,7 +1942,7 @@ RouteUI::save_as_template_dialog_response (int response, SaveTemplateDialog* d)
 	if (response == RESPONSE_ACCEPT) {
 		const string name = d->get_template_name ();
 		const string desc = d->get_description ();
-		const string path = Glib::build_filename(ARDOUR::user_route_template_directory (), name + ARDOUR::template_suffix);
+		const string path = Glib::build_filename(ARDOUR::user_route_template_directory (), legalize_for_path (name) + ARDOUR::template_suffix);
 
 		if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) { /* file already exists. */
 			bool overwrite = overwrite_file_dialog (*d,
