@@ -2916,21 +2916,11 @@ TempoMap::remove_time (timepos_t const & pos, timecnt_t const & duration)
 TempoPoint const *
 TempoMap::next_tempo (TempoPoint const & t) const
 {
-	Tempos::const_iterator p = _tempos.begin();
+	Tempos::const_iterator i = _tempos.iterator_to (t);
+	++i;
 
-	while (p != _tempos.end()) {
-		if (&t == &*p) {
-			break;
-		}
-		++p;
-	}
-
-	if (p != _tempos.end()) {
-		++p;
-
-		if (p != _tempos.end()) {
-			return &*p;;
-		}
+	if (i != _tempos.end()) {
+		return &(*i);
 	}
 
 	return 0;
@@ -2939,20 +2929,13 @@ TempoMap::next_tempo (TempoPoint const & t) const
 TempoPoint const *
 TempoMap::previous_tempo (TempoPoint const & point) const
 {
-	Tempos::const_iterator t = _tempos.begin();
-	Tempos::const_iterator prev = _tempos.end();
+	Tempos::const_iterator i = _tempos.iterator_to (point);
 
-	while (t != _tempos.end()) {
-		if (t->sclock() == point.sclock()) {
-			if (prev != _tempos.end()) {
-				return &*prev;
-			}
-		}
-		prev = t;
-		++t;
+	if (i == _tempos.begin()) {
+		return 0;
 	}
 
-	return 0;
+	return &(*i);
 }
 
 double
