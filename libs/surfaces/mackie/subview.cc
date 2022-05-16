@@ -673,6 +673,11 @@ SendsSubview::notify_send_level_change (uint32_t global_strip_position, bool for
 
 void SendsSubview::handle_vselect_event(uint32_t global_strip_position)
 {
+	/* adjust global_strip_position to make sure we're accessing the
+	 * correct controllable since we might be banked within the subview.
+	 */
+	global_strip_position += _current_bank;
+
 	/* Send mode: press enables/disables the relevant
 		* send, but the vpot is bound to the send-level so we
 		* need to lookup the enable/disable control
@@ -1086,6 +1091,11 @@ void PluginSelect::setup_vpot(
 void PluginSelect::handle_vselect_event(uint32_t global_strip_position,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
+	/* adjust global_strip_position to make sure we're accessing the
+	 * correct controllable since we might be banked within the subview.
+	 */
+	global_strip_position += _current_bank;
+
 	/* PluginSelect mode: press selects the plugin shown on the strip's LCD */
 	if (!subview_stripable) {
 		return;
