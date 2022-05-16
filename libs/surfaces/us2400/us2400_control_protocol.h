@@ -216,6 +216,8 @@ class US2400Protocol
 
 	int get_sends_bank ();
 
+	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
+
   protected:
 	// shut down the surface
 	void close();

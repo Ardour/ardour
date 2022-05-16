@@ -162,6 +162,8 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
 
+	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
+
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _current_stripable;
 	boost::weak_ptr<ARDOUR::Stripable> pre_master_stripable;

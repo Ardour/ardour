@@ -362,6 +362,8 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	libusb_device_handle* usb_handle() const { return handle; }
 
+	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
+
   private:
 	libusb_device_handle *handle;
 	bool in_use;

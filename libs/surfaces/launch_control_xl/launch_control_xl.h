@@ -411,6 +411,8 @@ public:
 	void send_bank_switch(bool up);
 	int send_bank_base () const { return _send_bank_base; }
 
+	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
+
 private:
 	bool in_use;
 	TrackMode _track_mode;

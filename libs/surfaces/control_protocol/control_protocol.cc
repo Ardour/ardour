@@ -21,6 +21,7 @@
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
+#include "pbd/pthread_utils.h"
 
 #include "temporal/superclock.h"
 #include "temporal/tempo.h"
@@ -65,6 +66,7 @@ const std::string ControlProtocol::state_node_name ("Protocol");
 ControlProtocol::ControlProtocol (Session& s, string str)
 	: BasicUI (s)
 	, _name (str)
+	, glib_event_callback (boost::bind (&ControlProtocol::event_loop_precall, this))
 	, _active (false)
 {
 	if (!selection_connected) {
@@ -76,6 +78,19 @@ ControlProtocol::ControlProtocol (Session& s, string str)
 
 ControlProtocol::~ControlProtocol ()
 {
+}
+
+void
+ControlProtocol::event_loop_precall ()
+{
+	/* reload the thread-local ptr to the tempo map */
+	Temporal::TempoMap::fetch ();
+}
+
+void
+ControlProtocol::install_precall_handler (Glib::RefPtr<Glib::MainContext> context)
+{
+	glib_event_callback.attach (context);
 }
 
 int

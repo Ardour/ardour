@@ -30,6 +30,7 @@
 
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
+#include "pbd/glib_event_source.h"
 
 #include "control_protocol/basic_ui.h"
 #include "control_protocol/types.h"
@@ -147,6 +148,9 @@ protected:
 
 	std::vector<boost::shared_ptr<ARDOUR::Route> > route_table;
 	std::string _name;
+	GlibEventLoopCallback glib_event_callback;
+	virtual void event_loop_precall ();
+	void install_precall_handler (Glib::RefPtr<Glib::MainContext>);
 
 private:
 	LIBCONTROLCP_LOCAL ControlProtocol (const ControlProtocol&); /* noncopyable */
@@ -183,5 +187,18 @@ public:
 };
 }
 }
+
+/* this is where the strange inheritance pattern hits the wall. A control
+   protocol thread/event loop is inherited from AbstractUI, but the precall
+   handler is inherited from ControlProtocol. When the AbstractUI sets up the
+   event loop, it will call attach_request_source() which will in turn pass a
+   Glib::MainContext to maybe_install_precall_handler(). We override the
+   definition of that method here to make it actuall install the
+   ControlProtocol's handler.
+*/
+
+#define CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL() \
+	void maybe_install_precall_handler (Glib::RefPtr<Glib::MainContext> ctxt) { install_precall_handler (ctxt); }
+
 
 #endif // ardour_control_protocols_h

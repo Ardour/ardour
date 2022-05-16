@@ -128,6 +128,8 @@ public:
 
 	PBD::Signal0<void> ConnectionChange;
 
+	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
+
 private:
 	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
 	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;

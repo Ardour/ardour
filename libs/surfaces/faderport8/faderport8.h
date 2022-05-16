@@ -108,6 +108,8 @@ public:
 
 	size_t tx_midi (std::vector<uint8_t> const&) const;
 
+	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
+
 private:
 	void close ();
 

@@ -85,6 +85,8 @@ class Maschine2: public ARDOUR::ControlProtocol, public AbstractUI<Maschine2Requ
 			Studio
 		} Maschine2Type;
 
+	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
+
 	private:
 		void do_request (Maschine2Request*);
 

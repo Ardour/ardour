@@ -85,6 +85,8 @@ public:
 	/* ControlProtocol */
 	void stripable_selection_changed () {}
 
+	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
+
 protected:
 	/* BaseUI */
 	void thread_init ();

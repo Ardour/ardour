@@ -55,6 +55,8 @@ public:
 
 	void stripable_selection_changed () {}
 
+	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
+
 protected:
 	void do_request (WiimoteControlUIRequest*);
 	int start ();
