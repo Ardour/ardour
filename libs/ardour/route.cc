@@ -5339,25 +5339,7 @@ Route::setup_invisible_processors ()
 		}
 	}
 
-	/* EXPORT PROCESSOR */
-	if (_capturing_processor) {
-		assert (!_capturing_processor->display_to_user ());
-		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
-		if (reader_pos != new_processors.end()) {
-			/* insert after disk-reader */
-			new_processors.insert (++reader_pos, _capturing_processor);
-		} else {
-			ProcessorList::iterator return_pos = find (new_processors.begin(), new_processors.end(), _intreturn);
-			/* insert after return */
-			if (return_pos != new_processors.end()) {
-				new_processors.insert (++return_pos, _capturing_processor);
-			} else {
-				new_processors.push_front (_capturing_processor);
-			}
-		}
-	}
-
-	/* Polarity Invert */
+	/* Polarity Invert (always present) */
 	if (_polarity) {
 		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
 		ProcessorList::iterator polarity_pos;
@@ -5378,6 +5360,24 @@ Route::setup_invisible_processors ()
 		if (_triggerbox && (_disk_io_point != DiskIOCustom)) {
 			/* BEFORE polarity */
 			new_processors.insert (polarity_pos, _triggerbox);
+		}
+	}
+
+	/* EXPORT PROCESSOR */
+	if (_capturing_processor) {
+		assert (!_capturing_processor->display_to_user ());
+		ProcessorList::iterator capture_pos;
+		if (_triggerbox && (capture_pos = find (new_processors.begin(), new_processors.end(), _triggerbox)) != new_processors.end ()) {
+			/* insert after triggerbox (which is just after disk-reader) */
+			new_processors.insert (++capture_pos, _capturing_processor);
+		} else if ((capture_pos = find (new_processors.begin(), new_processors.end(), _disk_reader)) != new_processors.end ()) {
+			/* insert after disk-reader */
+			new_processors.insert (++capture_pos, _capturing_processor);
+		} else if ((capture_pos = find (new_processors.begin(), new_processors.end(), _intreturn)) != new_processors.end ()) {
+			/* insert after return (busses) */
+				new_processors.insert (++capture_pos, _capturing_processor);
+		} else {
+			new_processors.push_front (_capturing_processor);
 		}
 	}
 
