@@ -89,7 +89,7 @@ class _ratio_t {
 
 	int64_t operator* (int64_t v) const { return int_div_round (v * _numerator, _denominator); }
 
-                                        private:
+  private:
 	T _numerator;
 	T _denominator;
 };
