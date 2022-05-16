@@ -791,7 +791,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	// freesound_list_view.append_column(_("URI")     , freesound_list_columns.uri);
 	freesound_list_view.append_column(_("Duration"), freesound_list_columns.duration);
 	freesound_list_view.append_column(_("Size"), freesound_list_columns.filesize);
-	freesound_list_view.append_column(_("Samplerate"), freesound_list_columns.smplrate);
+	freesound_list_view.append_column(_("Sample rate"), freesound_list_columns.smplrate);
 	freesound_list_view.append_column(_("License"), freesound_list_columns.license);
 	freesound_list_view.get_column(0)->set_alignment(0.5);
 	freesound_list_view.get_column(1)->set_expand(true); // filename
