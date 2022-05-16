@@ -57,26 +57,26 @@ struct SfdbMemoryStruct {
 };
 
 enum sortMethod {
-	sort_none,           // no sort
-	sort_duration_desc,  // Sort by the duration of the sounds, longest sounds first.
-	sort_duration_asc,   // Same as above, but shortest sounds first.
-	sort_created_desc,   // Sort by the date of when the sound was added. newest sounds first.
-	sort_created_asc,    // Same as above, but oldest sounds first.
-	sort_downloads_desc, // Sort by the number of downloads, most downloaded sounds first.
-	sort_downloads_asc,  // Same as above, but least downloaded sounds first.
-	sort_rating_desc,    // Sort by the average rating given to the sounds, highest rated first.
-	sort_rating_asc      // Same as above, but lowest rated sounds first.
+	sort_none,			// no sort
+	sort_duration_descending,	// Sort by the duration of the sounds, longest sounds first.
+	sort_duration_ascending, 	// Same as above, but shortest sounds first.
+	sort_created_descending, 	// Sort by the date of when the sound was added. newest sounds first.
+	sort_created_ascending, 	// Same as above, but oldest sounds first.
+	sort_downloads_descending, 	// Sort by the number of downloads, most downloaded sounds first.
+	sort_downloads_ascending, 	// Same as above, but least downloaded sounds first.
+	sort_rating_descending, 	// Sort by the average rating given to the sounds, highest rated first.
+	sort_rating_ascending 		// Same as above, but lowest rated sounds first.
 };
 
 
 class Mootcher: public sigc::trackable, public PBD::ScopedConnectionList
 {
 public:
-	Mootcher();
+	Mootcher(const std::string &token);
 	~Mootcher();
 
 	bool checkAudioFile(std::string originalFileName, std::string ID);
-	bool fetchAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller);
+	bool fetchAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller, std::string &token);
 	std::string searchText(std::string query, int page, std::string filter, enum sortMethod sort);
 	std::string searchSimilar(std::string id);
 	void* threadFunc();
@@ -95,8 +95,11 @@ public:
 private:
 	void ensureWorkingDir ();
 
-	std::string doRequest (std::string uri, std::string params);
-	void setcUrlOptions ();
+	bool get_oauth_token();
+	std::string auth_code_to_oauth_token(const std::string &auth_code);
+
+	std::string doRequest(std::string uri, std::string params);
+	void setcUrlOptions();
 
 	static size_t WriteMemoryCallback (void *ptr, size_t size, size_t nmemb, void *data);
 	static int progress_callback (void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
@@ -110,6 +113,7 @@ private:
 
 	void updateProgress(double dlnow, double dltotal);
 	void doneWithMootcher();
+	void report_login_error(const std::string &msg);
 
 	Gtk::HBox progress_hbox;
 	Gtk::ProgressBar progress_bar;
@@ -123,6 +127,8 @@ private:
 
 	std::string basePath;
 	std::string xmlLocation;
+	std::string oauth_token;
+	struct curl_slist *custom_headers;
 };
 
 #endif // __gtk_ardour_sfdb_freesound_mootcher_h__
