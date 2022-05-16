@@ -1070,7 +1070,7 @@ SoundFileBrowser::freesound_get_audio_file(Gtk::TreeIter iter)
 
 	string id  = (*iter)[freesound_list_columns.id];
 	string uri = (*iter)[freesound_list_columns.uri];
-	string filename = (*iter)[freesound_list_columns.filename];
+	string filename = ARDOUR::legalize_for_path((*iter)[freesound_list_columns.filename]);
 
 	if (mootcher->checkAudioFile(filename, id)) {
 		// file already exists, no need to download it again
