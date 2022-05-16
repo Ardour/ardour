@@ -102,12 +102,17 @@ public:
 		AudioInputPort (samplecnt_t);
 		AudioPortScope scope;
 		AudioPortMeter meter;
+		void apply_falloff (pframes_t, samplecnt_t sr, bool reset = false);
+		void silence (pframes_t);
+		void process (Sample const*, pframes_t, bool reset = false);
 	};
 
 	struct MIDIInputPort {
 		MIDIInputPort (samplecnt_t);
 		MIDIPortMonitor monitor;
 		MIDIPortMeter   meter;
+		void apply_falloff (pframes_t, samplecnt_t sr, bool reset = false);
+		void process_event (uint8_t const*, size_t);
 	};
 
 	typedef std::map<std::string, AudioInputPort, SortByPortName> AudioInputPorts;
@@ -117,6 +122,8 @@ public:
 	virtual ~PortManager () {}
 
 	PortEngine& port_engine ();
+
+	static void falloff_cache_calc (pframes_t, samplecnt_t);
 
 	uint32_t    port_name_size () const;
 	std::string my_name () const;

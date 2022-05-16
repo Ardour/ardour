@@ -56,16 +56,127 @@ using namespace PBD;
 using std::string;
 using std::vector;
 
+/* Cache dB -> coefficient calculation for dB/sec falloff.
+ * @n_samples engine-buffer-size
+ * @rate engine sample-rate
+ * @return coefficiant taking user preferences meter_falloff (dB/sec) into account
+ */
+struct FallOffCache {
+	FallOffCache ()
+		: _falloff (1.0)
+		, _cfg_db_s (0)
+		, _n_samples (0)
+		, _rate (0)
+	{
+	}
+
+	float calc (pframes_t n_samples, samplecnt_t rate)
+	{
+		if (n_samples == 0 || rate == 0) {
+			return 1.0;
+		}
+
+		if (Config->get_meter_falloff () != _cfg_db_s || n_samples != _n_samples || rate != _rate) {
+			_cfg_db_s  = Config->get_meter_falloff ();
+			_n_samples = n_samples;
+			_rate      = rate;
+#ifdef _GNU_SOURCE
+			_falloff = exp10f (-0.05f * _cfg_db_s * _n_samples / _rate);
+#else
+			_falloff = powf (10.f, -0.05f * _cfg_db_s * _n_samples / _rate);
+#endif
+		}
+
+		return _falloff;
+	}
+
+private:
+	float       _falloff;
+	float       _cfg_db_s;
+	pframes_t   _n_samples;
+	samplecnt_t _rate;
+};
+
+static FallOffCache falloff_cache;
+
+void
+PortManager::falloff_cache_calc (pframes_t n_samples, samplecnt_t rate)
+{
+	falloff_cache.calc (n_samples, rate);
+}
+
 PortManager::AudioInputPort::AudioInputPort (samplecnt_t sz)
 	: scope (AudioPortScope (new CircularSampleBuffer (sz)))
 	, meter (AudioPortMeter (new DPM))
 {
 }
 
+void
+PortManager::AudioInputPort::apply_falloff (pframes_t n_samples, samplecnt_t rate, bool reset)
+{
+	if (reset) {
+		meter->reset ();
+	}
+
+	if (meter->level > 1e-10) {
+		meter->level *= falloff_cache.calc (n_samples, rate);
+	} else {
+		meter->level = 0;
+	}
+}
+
+void
+PortManager::AudioInputPort::silence (pframes_t n_samples)
+{
+	meter->level = 0;
+	scope->silence (n_samples);
+}
+
+void
+PortManager::AudioInputPort::process (Sample const* buf, pframes_t n_samples, bool reset)
+{
+	scope->write (buf, n_samples);
+
+	float level  = reset ? 0 : meter->level;
+	level        = compute_peak (buf, n_samples, level);
+	meter->level = std::min (level, 100.f); // cut off at +40dBFS for falloff.
+	meter->peak  = std::max (meter->peak, level);
+}
+
 PortManager::MIDIInputPort::MIDIInputPort (samplecnt_t sz)
 	: monitor (MIDIPortMonitor (new CircularEventBuffer (sz)))
 	, meter (MIDIPortMeter (new MPM))
 {
+}
+
+void
+PortManager::MIDIInputPort::apply_falloff (pframes_t n_samples, samplecnt_t rate, bool reset)
+{
+	for (size_t i = 0; i < 17; ++i) {
+		/* falloff */
+		if (!reset && meter->chn_active[i] > 1e-10) {
+			meter->chn_active[i] *= falloff_cache.calc (n_samples, rate);
+		} else {
+			meter->chn_active[i] = 0;
+		}
+	}
+}
+
+void
+PortManager::MIDIInputPort::process_event (uint8_t const* buf, size_t size)
+{
+	if (size == 0 || buf[0] == 0xfe) {
+		/* ignore active sensing */
+		return;
+	}
+
+	if ((buf[0] & 0xf0) == 0xf0) {
+		meter->chn_active[16] = 1.0;
+	} else {
+		int chn                   = (buf[0] & 0x0f);
+		meter->chn_active[chn] = 1.0;
+	}
+	monitor->write (buf, size);
 }
 
 PortManager::PortID::PortID (boost::shared_ptr<AudioBackend> b, DataType dt, bool in, std::string const& pn)
@@ -1093,6 +1204,9 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 
 	_cycle_ports = _ports.reader ();
 
+	/* pre-calc/cache value */
+	falloff_cache.calc (nframes, s ? s->nominal_sample_rate () : 0);
+
 	/* TODO optimize
 	 *  - when speed == 1.0, the resampler copies data without processing
 	 *   it may (or may not) be more efficient to just run all in sequence.
@@ -1793,49 +1907,6 @@ PortManager::midi_input_ports () const
 	return *p;
 }
 
-/* Cache dB -> coefficient calculation for dB/sec falloff.
- * @n_samples engine-buffer-size
- * @rate engine sample-rate
- * @return coefficiant taking user preferences meter_falloff (dB/sec) into account
- */
-struct FallOffCache {
-	FallOffCache ()
-		: _falloff (1.0)
-		, _cfg_db_s (0)
-		, _n_samples (0)
-		, _rate (0)
-	{
-	}
-
-	float calc (pframes_t n_samples, samplecnt_t rate)
-	{
-		if (n_samples == 0 || rate == 0) {
-			return 1.0;
-		}
-
-		if (Config->get_meter_falloff () != _cfg_db_s || n_samples != _n_samples || rate != _rate) {
-			_cfg_db_s  = Config->get_meter_falloff ();
-			_n_samples = n_samples;
-			_rate      = rate;
-#ifdef _GNU_SOURCE
-			_falloff = exp10f (-0.05f * _cfg_db_s * _n_samples / _rate);
-#else
-			_falloff = powf (10.f, -0.05f * _cfg_db_s * _n_samples / _rate);
-#endif
-		}
-
-		return _falloff;
-	}
-
-private:
-	float       _falloff;
-	float       _cfg_db_s;
-	pframes_t   _n_samples;
-	samplecnt_t _rate;
-};
-
-static FallOffCache falloff_cache;
-
 void
 PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 {
@@ -1843,8 +1914,7 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		return;
 	}
 
-	const bool  reset   = g_atomic_int_compare_and_exchange (&_reset_meters, 1, 0);
-	const float falloff = falloff_cache.calc (n_samples, rate);
+	const bool reset = g_atomic_int_compare_and_exchange (&_reset_meters, 1, 0);
 
 	_monitor_port.monitor (port_engine (), n_samples);
 
@@ -1855,9 +1925,7 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		assert (!port_is_mine (p->first));
 		AudioInputPort& ai (p->second);
 
-		if (reset) {
-			ai.meter->reset ();
-		}
+		ai.apply_falloff (n_samples, rate, reset);
 
 		PortEngine::PortHandle ph = _backend->get_port_by_name (p->first);
 		if (!ph) {
@@ -1867,24 +1935,11 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		Sample* buf = (Sample*)_backend->get_buffer (ph, n_samples);
 		if (!buf) {
 			/* can this happen? */
-			ai.meter->level = 0;
-			ai.scope->silence (n_samples);
+			ai.silence (n_samples);
 			continue;
 		}
 
-		ai.scope->write (buf, n_samples);
-
-		/* falloff */
-		if (ai.meter->level > 1e-10) {
-			ai.meter->level *= falloff;
-		} else {
-			ai.meter->level = 0;
-		}
-
-		float level     = ai.meter->level;
-		level           = compute_peak (buf, n_samples, reset ? 0 : level);
-		ai.meter->level = std::min (level, 100.f); // cut off at +40dBFS for falloff.
-		ai.meter->peak  = std::max (ai.meter->peak, level);
+		ai.process (buf, n_samples, reset);
 	}
 
 	/* MIDI */
@@ -1898,15 +1953,7 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		}
 
 		MIDIInputPort& mi (p->second);
-
-		for (size_t i = 0; i < 17; ++i) {
-			/* falloff */
-			if (mi.meter->chn_active[i] > 1e-10) {
-				mi.meter->chn_active[i] *= falloff;
-			} else {
-				mi.meter->chn_active[i] = 0;
-			}
-		}
+		mi.apply_falloff (n_samples, rate, reset);
 
 		void*           buffer      = _backend->get_buffer (ph, n_samples);
 		const pframes_t event_count = _backend->get_midi_event_count (buffer);
@@ -1916,17 +1963,7 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 			size_t         size;
 			uint8_t const* buf;
 			_backend->midi_event_get (timestamp, size, &buf, buffer, i);
-			if (buf[0] == 0xfe) {
-				/* ignore active sensing */
-				continue;
-			}
-			if ((buf[0] & 0xf0) == 0xf0) {
-				mi.meter->chn_active[16] = 1.0;
-			} else {
-				int chn                   = (buf[0] & 0x0f);
-				mi.meter->chn_active[chn] = 1.0;
-			}
-			mi.monitor->write (buf, size);
+			mi.process_event (buf, size);
 		}
 	}
 }
