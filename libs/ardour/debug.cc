@@ -102,3 +102,4 @@ PBD::DebugBits PBD::DEBUG::VST3Config = PBD::new_debug_bit ("VST3Config");
 PBD::DebugBits PBD::DEBUG::VST3Process = PBD::new_debug_bit ("VST3Process");
 PBD::DebugBits PBD::DEBUG::VSTCallbacks = PBD::new_debug_bit ("vstcallbacks");
 PBD::DebugBits PBD::DEBUG::WiimoteControl = PBD::new_debug_bit ("wiimotecontrol");
+PBD::DebugBits PBD::DEBUG::Freesound = PBD::new_debug_bit ("freesound");
