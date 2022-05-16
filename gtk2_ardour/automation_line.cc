@@ -503,13 +503,7 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 
 		if (front()->view_index() > 0) {
 			before_x = line.nth (front()->view_index() - 1)->get_x();
-
-			const samplepos_t pos = e.pixel_to_sample(before_x);
-			const TempoMetric& metric = map->metric_at (pos);
-			const samplecnt_t len = ceil (metric.samples_per_bar (pos) / (Temporal::ticks_per_beat * metric.meter().divisions_per_bar()));
-			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
-
-			before_x += one_tick_in_pixels;
+			before_x += e.sample_to_pixel_unrounded (64);
 		}
 
 		/* if our last point has a point after it in the line,
@@ -518,13 +512,7 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 
 		if (back()->view_index() < (line.npoints() - 1)) {
 			after_x = line.nth (back()->view_index() + 1)->get_x();
-
-			const samplepos_t pos = e.pixel_to_sample(after_x);
-			const TempoMetric& metric = map->metric_at (pos);
-			const samplecnt_t len = ceil (metric.samples_per_bar (pos) / (Temporal::ticks_per_beat * metric.meter().divisions_per_bar()));
-			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
-
-			after_x -= one_tick_in_pixels;
+			after_x -= e.sample_to_pixel_unrounded (64);
 		}
 	}
 }
@@ -650,10 +638,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 
 	if (dx < 0 || ((dx > 0) && !with_push)) {
 		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
-			double dxt = (*ccp)->clamp_dx (dx);
-			if (fabs (dxt) < fabs (dx)) {
-				dx = dxt;
-			}
+			dx = (*ccp)->clamp_dx (dx);
 		}
 	}
 
