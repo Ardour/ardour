@@ -105,6 +105,8 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	void signal_new_request ();
 	void attach_request_source ();
 
+	virtual void maybe_install_precall_handler (Glib::RefPtr<Glib::MainContext>) {}
+
 	/** Derived UI objects must implement this method,
 	 * which will be called whenever there are requests
 	 * to be dealt with.

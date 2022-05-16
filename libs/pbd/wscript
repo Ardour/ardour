@@ -51,6 +51,7 @@ libpbd_sources = [
     'file_archive.cc',
     'file_utils.cc',
     'fpu.cc',
+    'glib_event_source.cc',
     'id.cc',
     'locale_guard.cc',
     'localtime_r.cc',

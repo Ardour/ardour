@@ -175,5 +175,6 @@ BaseUI::attach_request_source ()
 {
 	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: attach request source\n", event_loop_name()));
 	request_channel.attach (m_context);
+	maybe_install_precall_handler (m_context);
 }
 
