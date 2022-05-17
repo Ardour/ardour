@@ -145,6 +145,17 @@ Controllable::by_id (const ID& id)
 	return boost::shared_ptr<Controllable>();
 }
 
+Controllable::ControllableSet
+Controllable::registered_controllables ()
+{
+	ControllableSet rv;
+	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
+	for (auto const& i : registry) {
+		rv.insert (i->shared_from_this ());
+	}
+	return rv;
+}
+
 void
 Controllable::dump_registry ()
 {
