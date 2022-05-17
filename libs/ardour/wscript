@@ -153,6 +153,7 @@ libardour_sources = [
         'midiport_manager.cc',
         'minibpm.cc',
         'mix.cc',
+        'mixer_scene.cc',
         'mode.cc',
         'monitor_control.cc',
         'monitor_port.cc',
