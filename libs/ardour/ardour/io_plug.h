@@ -30,6 +30,7 @@
 #include "ardour/latent.h"
 #include "ardour/graphnode.h"
 #include "ardour/plugin.h"
+#include "ardour/port_manager.h"
 #include "ardour/session_object.h"
 #include "ardour/plug_insert_base.h"
 
@@ -67,6 +68,11 @@ public:
 
 	Gtkmm2ext::WindowProxy* window_proxy () const { return _window_proxy; }
 	void set_window_proxy (Gtkmm2ext::WindowProxy* wp) { _window_proxy = wp; }
+
+	PortManager::AudioInputPorts audio_input_ports () const { return _audio_input_ports; }
+	PortManager::MIDIInputPorts  midi_input_ports () const { return _midi_input_ports; }
+
+	void reset_input_meters ();
 
 	/* Latent */
 	samplecnt_t signal_latency () const;
@@ -157,10 +163,14 @@ private:
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;
 
+	PortManager::AudioInputPorts _audio_input_ports;
+	PortManager::MIDIInputPorts  _midi_input_ports;
+
 	Gtkmm2ext::WindowProxy* _window_proxy;
 
 	PBD::TimingStats  _timing_stats;
 	GATOMIC_QUAL gint _stat_reset;
+	GATOMIC_QUAL gint _reset_meters;
 };
 
 }

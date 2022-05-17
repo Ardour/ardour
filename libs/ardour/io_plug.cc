@@ -22,6 +22,7 @@
 
 #include "temporal/tempo.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/audio_port.h"
 #include "ardour/event_type_map.h"
@@ -48,6 +49,7 @@ IOPlug::IOPlug (Session& s, boost::shared_ptr<Plugin> p, bool pre)
 	, _window_proxy (0)
 {
 	g_atomic_int_set (&_stat_reset, 0);
+	g_atomic_int_set (&_reset_meters, 0);
 
 	if (_plugin) {
 		setup ();
@@ -67,7 +69,7 @@ IOPlug::~IOPlug ()
 std::string
 IOPlug::io_name (std::string const& n) const
 {
-	return (string_compose ("%1/%2/%3", _("IO"), _pre ? _("Pre"): _("Post"), n.empty () ? name() : n));
+	return (string_compose ("%1/%2/%3", _("IO"), _pre ? _("Pre"): _("Post"), n.empty () ? name () : n));
 }
 
 std::string
@@ -381,6 +383,38 @@ IOPlug::ensure_io ()
 	}
 
 	_bufs.ensure_buffers (ChanCount::max (_n_in, _n_out), _session.get_block_size ());
+
+	for (uint32_t i = 0; i < _n_in.n_audio (); ++i) {
+		const auto& pd (_plugin->describe_io_port (DataType::AUDIO, true, i));
+		std::string const pn = string_compose ("%1 %2 - %3", _("IO"), name (), pd.name);
+		_input->audio (i)->set_pretty_name (pn);
+	}
+	for (uint32_t i = 0; i < _n_in.n_midi (); ++i) {
+		const auto& pd (_plugin->describe_io_port (DataType::MIDI, true, i));
+		std::string const pn = string_compose ("%1 %2 - %3", _("IO"), name (), pd.name);
+		_input->midi (i)->set_pretty_name (pn);
+	}
+	for (uint32_t i = 0; i < _n_out.n_audio (); ++i) {
+		const auto& pd (_plugin->describe_io_port (DataType::AUDIO, false, i));
+		std::string const pn = string_compose ("%1 %2 - %3", _("IO"), name (), pd.name);
+		_output->audio (i)->set_pretty_name (pn);
+	}
+	for (uint32_t i = 0; i < _n_out.n_midi (); ++i) {
+		const auto& pd (_plugin->describe_io_port (DataType::MIDI, false, i));
+		std::string const pn = string_compose ("%1 %2 - %3", _("IO"), name (), pd.name);
+		_output->midi (i)->set_pretty_name (pn);
+	}
+
+	 if (_pre) {
+		 for (uint32_t i = 0; i < _n_out.n_audio (); ++i) {
+			 std::string const& n = AudioEngine::instance ()->make_port_name_non_relative (_output->audio (i)->name ());
+			 _audio_input_ports.insert (make_pair (n, PortManager::AudioInputPort (24288))); // 2^19 ~ 1MB / port
+		 }
+		 for (uint32_t i = 0; i < _n_out.n_midi (); ++i) {
+			 std::string const& n = AudioEngine::instance ()->make_port_name_non_relative (_output->midi (i)->name ());
+			 _midi_input_ports.insert (make_pair (n, PortManager::MIDIInputPort (32)));
+		 }
+	 }
 	return true;
 }
 
@@ -431,6 +465,28 @@ IOPlug::run (samplepos_t start, pframes_t n_samples)
 	}
 
 	PortSet& ports (_output->ports());
+	if (_pre) {
+		const bool reset       = g_atomic_int_compare_and_exchange (&_reset_meters, 1, 0);
+		samplecnt_t const rate = _session.nominal_sample_rate ();
+
+		auto a = _audio_input_ports.begin ();
+		auto m = _midi_input_ports.begin ();
+		for (auto p = _bufs.audio_begin (); p != _bufs.audio_end (); ++p, ++a) {
+			AudioBuffer const& ab (*p);
+			PortManager::AudioInputPort& ai (a->second);
+			ai.apply_falloff (n_samples, rate, reset);
+			ai.process (ab.data (), n_samples, reset);
+		}
+		for (auto p = _bufs.midi_begin (); p != _bufs.midi_end (); ++p, ++m) {
+			PortManager::MIDIInputPort& mi (m->second);
+			MidiBuffer const& mb (*p);
+			mi.apply_falloff (n_samples, rate, reset);
+			for (MidiBuffer::const_iterator i = mb.begin (); i != mb.end (); ++i) {
+				Evoral::Event<samplepos_t> ev (*i, false);
+				mi.process_event (ev.buffer (), ev.size ());
+			}
+		}
+	}
 	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
 		i->flush_buffers (n_samples);
 	}
@@ -442,6 +498,12 @@ IOPlug::run (samplepos_t start, pframes_t n_samples)
 	}
 
 	_timing_stats.update ();
+}
+
+void
+IOPlug::reset_input_meters ()
+{
+	g_atomic_int_set (&_reset_meters, 1);
 }
 
 bool

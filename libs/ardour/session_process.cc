@@ -112,6 +112,7 @@ Session::process (pframes_t nframes)
 
 	boost::shared_ptr<GraphChain> io_graph_chain = _io_graph_chain[0];
 	if (io_graph_chain) {
+		PortManager::falloff_cache_calc (nframes, _nominal_sample_rate);
 		_process_graph->process_io_plugs (io_graph_chain, nframes, 0);
 		io_graph_chain.reset (); /* drop reference */
 	}
