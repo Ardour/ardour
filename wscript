@@ -187,7 +187,7 @@ def fetch_tarball_revision_date():
 
         return rev, date
 
-def set_version ():
+def set_version (from_file = False):
     def sanitize(s):
         # round-trip to remove anything in the string that is not encodable in
         # ASCII, yet still keep a real (utf8-encoded internally) string.
@@ -215,7 +215,7 @@ def set_version ():
     global PROGRAM_VERSION
     global rev_date
 
-    if os.path.isdir (os.path.join(os.getcwd(), '.git')):
+    if not from_file and os.path.isdir (os.path.join(os.getcwd(), '.git')):
         rev, rev_date = fetch_git_revision_date()
     else:
         rev, rev_date = fetch_tarball_revision_date()
@@ -1539,7 +1539,10 @@ const char* const ardour_config_info = "\\n\\
         create_resource_file(Options.options.program_name)
 
 def build(bld):
-    create_stored_revision()
+    if bld.is_install:
+        set_version (True)
+    else:
+        create_stored_revision()
 
     bld.env['DATE'] = rev_date
 
