@@ -785,7 +785,10 @@ bool
 RecorderUI::update_meters ()
 {
 	PortManager::AudioInputPorts const aip (AudioEngine::instance ()->audio_input_ports ());
-	boost::shared_ptr<IOPlugList>      iop (_session->io_plugs ());
+	boost::shared_ptr<IOPlugList>      iop;
+	if (_session) {
+		iop = _session->io_plugs ();
+	}
 
 	/* scope data needs to be read continuously */
 	for (PortManager::AudioInputPorts::const_iterator i = aip.begin (); i != aip.end (); ++i) {
@@ -795,12 +798,14 @@ RecorderUI::update_meters ()
 		}
 	}
 
-	for (auto& p : *iop) {
-		PortManager::AudioInputPorts const& aip (p->audio_input_ports ());
-		for (auto i = aip.begin (); i != aip.end (); ++i) {
-			InputPortMap::iterator im = _input_ports.find (i->first);
-			if (im != _input_ports.end()) {
-				im->second->update (*(i->second.scope));
+	if (iop) {
+		for (auto const& p : *iop) {
+			PortManager::AudioInputPorts const& aip (p->audio_input_ports ());
+			for (auto i = aip.begin (); i != aip.end (); ++i) {
+				InputPortMap::iterator im = _input_ports.find (i->first);
+				if (im != _input_ports.end()) {
+					im->second->update (*(i->second.scope));
+				}
 			}
 		}
 	}
@@ -825,20 +830,22 @@ RecorderUI::update_meters ()
 		}
 	}
 
-	for (auto& p : *iop) {
-		PortManager::AudioInputPorts const& aip (p->audio_input_ports ());
-		PortManager::MIDIInputPorts const& mip (p->midi_input_ports ());
-		for (auto i = aip.begin (); i != aip.end (); ++i) {
-			InputPortMap::iterator im = _input_ports.find (i->first);
-			if (im != _input_ports.end()) {
-				im->second->update (accurate_coefficient_to_dB (i->second.meter->level), accurate_coefficient_to_dB (i->second.meter->peak));
+	if (iop) {
+		for (auto const& p : *iop) {
+			PortManager::AudioInputPorts const& aip (p->audio_input_ports ());
+			PortManager::MIDIInputPorts const& mip (p->midi_input_ports ());
+			for (auto i = aip.begin (); i != aip.end (); ++i) {
+				InputPortMap::iterator im = _input_ports.find (i->first);
+				if (im != _input_ports.end()) {
+					im->second->update (accurate_coefficient_to_dB (i->second.meter->level), accurate_coefficient_to_dB (i->second.meter->peak));
+				}
 			}
-		}
-		for (PortManager::MIDIInputPorts::const_iterator i = mip.begin (); i != mip.end (); ++i) {
-			InputPortMap::iterator im = _input_ports.find (i->first);
-			if (im != _input_ports.end()) {
-				im->second->update ((float const*)i->second.meter->chn_active);
-				im->second->update (*(i->second.monitor));
+			for (PortManager::MIDIInputPorts::const_iterator i = mip.begin (); i != mip.end (); ++i) {
+				InputPortMap::iterator im = _input_ports.find (i->first);
+				if (im != _input_ports.end()) {
+					im->second->update ((float const*)i->second.meter->chn_active);
+					im->second->update (*(i->second.monitor));
+				}
 			}
 		}
 	}
