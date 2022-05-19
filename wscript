@@ -162,6 +162,8 @@ clang_darwin_dict['cxx-strict'] = [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded
 clang_darwin_dict['full-optimization'] = [ '-O3', '-ffast-math']
 compiler_flags_dictionaries['clang-darwin'] = clang_darwin_dict
 
+# Version stuff
+
 def fetch_git_revision_date ():
     cmd = ["git", "describe", "HEAD"]
     output = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
@@ -239,8 +241,53 @@ def set_version (from_file = False):
     VERSION = sanitize(V)
     PROGRAM_VERSION = sanitize(MAJOR)
 
+def fetch_gcc_version (CC):
+    cmd = "%s --version" % CC
+    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+    o = output[0].decode('utf-8')
+    version = o.split(' ')[2].split('.')
+    return version
+
+def create_stored_revision():
+    set_version ()
+    rev = ""
+    if os.path.exists('.git'):
+        rev, rev_date = fetch_git_revision_date()
+        print("Git version: " + rev + "\n")
+    elif os.path.exists('libs/ardour/revision.cc'):
+        print("Using packaged revision")
+        return
+    else:
+        print("Missing libs/ardour/revision.cc.  Blame the packager.")
+        sys.exit(-1)
+
+    try:
+        #
+        # if you change the format of this, be sure to fix fetch_tarball_revision_date()
+        # above so that  it still works.
+        #
+        text =  '#include "ardour/revision.h"\n'
+        text += (
+            'namespace ARDOUR { const char* revision = \"%s\"; '
+            'const char* date = \"%s\"; }\n'
+        ) % (rev, rev_date)
+        print('Writing revision info to libs/ardour/revision.cc using ' + rev + ', ' + rev_date)
+        o = open('libs/ardour/revision.cc', 'w')
+        o.write(text)
+        o.close()
+    except IOError:
+        print('Could not open libs/ardour/revision.cc for writing\n')
+        sys.exit(-1)
+
+def get_depstack_rev(depstack_root):
+    try:
+        with open(depstack_root + '/../.vers', 'r') as f:
+            return f.readline().decode('utf-8').strip()[:7]
+    except IOError:
+        return '-unknown-'
 
 if any(arg in ('dist', 'distcheck') for arg in sys.argv[1:]):
+    create_stored_revision ()
     if not 'APPNAME' in os.environ:
         print ("You must define APPNAME in the environment when running ./waf dist/distcheck")
         sys.exit (1)
@@ -308,53 +355,6 @@ i18n_children = [
         'libs/ardour',
         'libs/gtkmm2ext',
 ]
-
-# Version stuff
-
-def fetch_gcc_version (CC):
-    cmd = "%s --version" % CC
-    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
-    o = output[0].decode('utf-8')
-    version = o.split(' ')[2].split('.')
-    return version
-
-def create_stored_revision():
-    set_version ()
-    rev = ""
-    if os.path.exists('.git'):
-        rev, rev_date = fetch_git_revision_date()
-        print("Git version: " + rev + "\n")
-    elif os.path.exists('libs/ardour/revision.cc'):
-        print("Using packaged revision")
-        return
-    else:
-        print("Missing libs/ardour/revision.cc.  Blame the packager.")
-        sys.exit(-1)
-
-    try:
-        #
-        # if you change the format of this, be sure to fix fetch_tarball_revision_date()
-        # above so that  it still works.
-        #
-        text =  '#include "ardour/revision.h"\n'
-        text += (
-            'namespace ARDOUR { const char* revision = \"%s\"; '
-            'const char* date = \"%s\"; }\n'
-        ) % (rev, rev_date)
-        print('Writing revision info to libs/ardour/revision.cc using ' + rev + ', ' + rev_date)
-        o = open('libs/ardour/revision.cc', 'w')
-        o.write(text)
-        o.close()
-    except IOError:
-        print('Could not open libs/ardour/revision.cc for writing\n')
-        sys.exit(-1)
-
-def get_depstack_rev(depstack_root):
-    try:
-        with open(depstack_root + '/../.vers', 'r') as f:
-            return f.readline().decode('utf-8').strip()[:7]
-    except IOError:
-        return '-unknown-'
 
 def set_compiler_flags (conf,opt):
     #
