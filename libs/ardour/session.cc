@@ -88,6 +88,7 @@
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
+#include "ardour/mixer_scene.h"
 #include "ardour/operations.h"
 #include "ardour/playlist.h"
 #include "ardour/playlist_factory.h"
@@ -7482,3 +7483,59 @@ Session::had_destructive_tracks() const
 	return _had_destructive_tracks;
 }
 
+bool
+Session::nth_mixer_scene_valid (size_t nth) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+	if (_mixer_scenes.size () <= nth) {
+		return false;
+	}
+	if (!_mixer_scenes[nth]) {
+		return false;
+	}
+	return !_mixer_scenes[nth]->empty ();
+}
+
+bool
+Session::apply_nth_mixer_scene (size_t nth)
+{
+	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+	if (_mixer_scenes.size () <= nth) {
+		return false;
+	}
+	if (!_mixer_scenes[nth]) {
+		return false;
+	}
+	return _mixer_scenes[nth]->apply ();
+}
+
+void
+Session::store_nth_mixer_scene (size_t nth)
+{
+	nth_mixer_scene (nth, true)->snapshot ();
+}
+
+boost::shared_ptr<MixerScene>
+Session::nth_mixer_scene (size_t nth, bool create_if_missing)
+{
+	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+	if (create_if_missing && _mixer_scenes.size () <= nth) {
+		lm.release ();
+		Glib::Threads::RWLock::WriterLock lw (_mixer_scenes_lock);
+		_mixer_scenes.resize (nth + 1);
+		_mixer_scenes[nth] = boost::shared_ptr<MixerScene> (new MixerScene (*this));
+		set_dirty ();
+		return _mixer_scenes[nth];
+	}
+	if (_mixer_scenes.size () <= nth) {
+		return boost::shared_ptr<MixerScene> ();
+	}
+	return _mixer_scenes[nth];
+}
+
+std::vector<boost::shared_ptr<MixerScene>>
+Session::mixer_scenes () const
+{
+	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+	return _mixer_scenes;
+}

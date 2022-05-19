@@ -153,6 +153,7 @@ class MidiPort;
 class MidiRegion;
 class MidiSource;
 class MidiTrack;
+class MixerScene;
 class Playlist;
 class PluginInsert;
 class PluginInfo;
@@ -1228,6 +1229,13 @@ public:
 	boost::shared_ptr<PBD::Controllable> solo_cut_control() const;
 	boost::shared_ptr<PBD::Controllable> recently_touched_controllable () const;
 
+	bool apply_nth_mixer_scene (size_t);
+	void store_nth_mixer_scene (size_t);
+	bool nth_mixer_scene_valid (size_t) const;
+
+	boost::shared_ptr<MixerScene>              nth_mixer_scene (size_t, bool create_if_missing = false);
+	std::vector<boost::shared_ptr<MixerScene>> mixer_scenes () const;
+
 	SessionConfiguration config;
 
 	SessionConfiguration* cfg () { return &config; }
@@ -1634,6 +1642,9 @@ private:
 	void try_run_lua (pframes_t);
 
 	SerializedRCUManager<IOPlugList> _io_plugins;
+
+	std::vector<boost::shared_ptr<MixerScene>> _mixer_scenes;
+	mutable Glib::Threads::RWLock              _mixer_scenes_lock;
 
 	Butler* _butler;
 

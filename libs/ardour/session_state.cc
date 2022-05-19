@@ -112,6 +112,7 @@
 #include "ardour/midi_scene_changer.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
+#include "ardour/mixer_scene.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/playlist_source.h"
 #include "ardour/port.h"
@@ -1484,6 +1485,34 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 	}
 
 	{
+		Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+		size_t idx = 0;
+		size_t last = 0;
+		for (auto const& i : _mixer_scenes) {
+			++idx;
+			if (i && !i->empty ()) {
+				last = idx;
+			}
+		}
+		if (last > 0) {
+			idx = 0;
+			XMLNode* ms_node = new XMLNode (X_("MixerScenes"));
+			ms_node->set_property ("n_scenes", _mixer_scenes.size ());
+			for (auto const& i : _mixer_scenes) {
+				if (i && !i->empty ()) {
+					XMLNode& ms_state (i->get_state ());
+					ms_state.set_property ("index", idx);
+					ms_node->add_child_nocopy (ms_state);
+				}
+				if (++idx >= last) {
+					break;
+				}
+			}
+			node->add_child_nocopy (*ms_node);
+		}
+	}
+
+	{
 		boost::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
 		XMLNode* iop_node = new XMLNode (X_("IOPlugins"));
 		for (auto const& i : *iop) {
@@ -1878,6 +1907,20 @@ Session::set_state (const XMLNode& node, int version)
 				warning << "LuaException: " << e.what () << endmsg;
 			} catch (...) { }
 			g_free (buf);
+		}
+	}
+
+	if ((child = find_named_node (node, "MixerScenes"))) {
+		Glib::Threads::RWLock::WriterLock lm (_mixer_scenes_lock);
+		size_t n_scenes = 0;
+		child->get_property("n_scenes", n_scenes);
+		_mixer_scenes.resize (n_scenes);
+		for (auto const n : child->children () ) {
+			size_t index = 0;
+			if (n->get_property("index", index)) {
+				_mixer_scenes[index] = boost::shared_ptr<MixerScene> (new MixerScene (*this));
+				_mixer_scenes[index]->set_state (*n, version);
+			}
 		}
 	}
 
