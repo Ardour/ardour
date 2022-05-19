@@ -68,6 +68,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
+#include "ardour/mixer_scene.h"
 #include "ardour/monitor_control.h"
 #include "ardour/panner_shell.h"
 #include "ardour/phase_control.h"
@@ -476,6 +477,7 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <PBD::Controllable, PBD::StatefulDestructible> ("Controllable")
 		.addFunction ("name", &PBD::Controllable::name)
 		.addFunction ("get_value", &PBD::Controllable::get_value)
+		.addStaticFunction ("dump_registry", &PBD::Controllable::dump_registry)
 		.endClass ()
 
 		.beginClass <PBD::RingBufferNPT <uint8_t> > ("RingBuffer8")
@@ -1698,6 +1700,15 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <InternalReturn, Return> ("InternalReturn")
 		.endClass ()
+
+		.beginWSPtrClass <MixerScene> ("MixerScene")
+		.addFunction ("apply", &MixerScene::apply)
+		.addFunction ("snapshot", &MixerScene::snapshot)
+		.addFunction ("clear", &MixerScene::clear)
+		.addFunction ("empty", &MixerScene::empty)
+		.addFunction ("name", &MixerScene::name)
+		.addFunction ("set_name", &MixerScene::set_name)
+		.endClass ()
 		.endNamespace (); // end ARDOUR
 
 	/* take a breath */
@@ -2609,6 +2620,11 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("plot_process_graph", &Session::plot_process_graph)
 
 		.addFunction ("bundles", &Session::bundles)
+
+		.addFunction ("apply_nth_mixer_scene", &Session::apply_nth_mixer_scene)
+		.addFunction ("store_nth_mixer_scene", &Session::store_nth_mixer_scene)
+		.addFunction ("nth_mixer_scene_valid", &Session::nth_mixer_scene_valid)
+		.addFunction ("nth_mixer_scene", &Session::nth_mixer_scene)
 
 		.addFunction ("name", &Session::name)
 		.addFunction ("path", &Session::path)
