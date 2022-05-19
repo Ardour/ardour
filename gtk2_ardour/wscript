@@ -520,7 +520,7 @@ def configure(conf):
     conf.env['define_key'] = bak
 
 def build(bld):
-    I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+    I18N_PACKAGE = 'gtk2_' + bld.env['INTERNAL_NAME']
 
     # Tool to dump lua-bindings (of gtk2ardour + libs)
     if re.search ("linux", sys.platform) != None and bld.env['LUABINDINGDOC']:
@@ -754,7 +754,7 @@ def build(bld):
 
     obj              = bld(features = 'subst')
     obj.source       = 'ardour.sh.in'
-    obj.target       = 'ardour' + bld.env['MAJOR']
+    obj.target       = bld.env['INTERNAL_NAME']
     obj.chmod        = Utils.O755
     obj.dict         = wrapper_subst_dict
     obj.install_path = bld.env['BINDIR']
@@ -969,7 +969,7 @@ def build(bld):
                             mo)
 
 def i18n_func(bld):
-    I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+    I18N_PACKAGE = 'gtk2_' + bld.env['INTERNAL_NAME']
     autowaf.build_i18n(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                        'Paul Davis')
     appdata_i18n_pot(bld)
@@ -977,19 +977,19 @@ def i18n_func(bld):
     appdata_i18n_mo(bld)
 
 def i18n_pot_func(bld):
-    I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+    I18N_PACKAGE = 'gtk2_' + bld.env['INTERNAL_NAME']
     autowaf.build_i18n_pot(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                            'Paul Davis')
     appdata_i18n_pot(bld)
 
 def i18n_po_func(bld):
-    I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+    I18N_PACKAGE = 'gtk2_' + bld.env['INTERNAL_NAME']
     autowaf.build_i18n_po(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                           'Paul Davis')
     appdata_i18n_po(bld)
 
 def i18n_mo_func(bld):
-    I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+    I18N_PACKAGE = 'gtk2_' + bld.env['INTERNAL_NAME']
     autowaf.build_i18n_mo(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                           'Paul Davis')
 

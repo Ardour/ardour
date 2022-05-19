@@ -1032,7 +1032,7 @@ def configure(conf):
     if Options.options.lv2dir:
         conf.env['LV2DIR'] = Options.options.lv2dir
     else:
-        conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], 'ardour' + conf.env['MAJOR'], 'LV2')
+        conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], conf.env['INTERNAL_NAME'], 'LV2')
 
     conf.env['LV2DIR'] = os.path.normpath(conf.env['LV2DIR'])
 
