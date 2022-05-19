@@ -35,7 +35,9 @@ PhaseControl::PhaseControl (Session& session, std::string const & name, Temporal
 void
 PhaseControl::actually_set_value (double val, Controllable::GroupControlDisposition gcd)
 {
+	size_t s = _phase_invert.size ();
 	_phase_invert = boost::dynamic_bitset<> (std::numeric_limits<double>::digits, (unsigned long) val);
+	_phase_invert.resize (s);
 
 	AutomationControl::actually_set_value (val, gcd);
 }
