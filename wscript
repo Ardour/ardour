@@ -971,6 +971,7 @@ def configure(conf):
     conf.env['MAJOR'] = MAJOR
     conf.env['MINOR'] = MINOR
     conf.env['MICRO'] = MICRO
+    conf.env['INTERNAL_NAME'] = 'ardour' + MAJOR
     conf.line_just = 52
     autowaf.set_recursive()
     autowaf.configure(conf)
@@ -1590,18 +1591,14 @@ def build(bld):
     #if bld.is_defined('YTK'):
     #    bld.path.find_dir ('libs/tk/ztkmm')
 
-    # set up target directories
-    lwrcase_dirname = 'ardour' + bld.env['MAJOR']
-
     # configuration files go here
-    bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], lwrcase_dirname)
+    bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], bld.env['INTERNAL_NAME'])
     # data files loaded at run time go here
-    bld.env['DATADIR'] = os.path.join(bld.env['DATADIR'], lwrcase_dirname)
+    bld.env['DATADIR'] = os.path.join(bld.env['DATADIR'], bld.env['INTERNAL_NAME'])
     # shared objects loaded at runtime go here (two aliases)
-    bld.env['DLLDIR'] = os.path.join(bld.env['LIBDIR'], lwrcase_dirname)
+    bld.env['DLLDIR'] = os.path.join(bld.env['LIBDIR'], bld.env['INTERNAL_NAME'])
     bld.env['LIBDIR'] = bld.env['DLLDIR']
     bld.env['LOCALEDIR'] = os.path.join(bld.env['DATADIR'], 'locale')
-    bld.env['lwrcase_dirname'] = lwrcase_dirname
 
     autowaf.set_recursive()
 

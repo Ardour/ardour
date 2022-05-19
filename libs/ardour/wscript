@@ -425,7 +425,7 @@ def build(bld):
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
-        'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"'
+        'LIBARDOUR="' + bld.env['INTERNAL_NAME'] + '"'
         ]
 
     if bld.is_defined('HAVE_SOUNDTOUCH'):

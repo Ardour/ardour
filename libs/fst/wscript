@@ -23,7 +23,7 @@ def build(bld):
             'VST3_SCANNER_APP',
             'VERSIONSTRING="' + bld.env['VERSION'] + '"',
             'PACKAGE="' + I18N_PACKAGE + bld.env['MAJOR'] + '"',
-            'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
+            'LIBARDOUR="' + bld.env['INTERNAL_NAME'] + '"',
             'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
             ]
         obj.use = [ 'libpbd' ]
@@ -65,7 +65,7 @@ def build(bld):
             'USE_WS_PREFIX',
             'VST_SCANNER_APP',
             'PACKAGE="' + I18N_PACKAGE + bld.env['MAJOR'] + '"',
-            'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
+            'LIBARDOUR="' + bld.env['INTERNAL_NAME'] + '"',
             'VERSIONSTRING="' + bld.env['VERSION'] + '"',
             ]
         if re.search ("bsd", sys.platform) != None:

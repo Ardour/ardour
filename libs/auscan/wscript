@@ -20,7 +20,7 @@ def build(bld):
             'AU_SCANNER_APP',
             'VERSIONSTRING="' + bld.env['VERSION'] + '"',
             'PACKAGE="' + I18N_PACKAGE + bld.env['MAJOR'] + '"',
-            'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
+            'LIBARDOUR="' + bld.env['INTERNAL_NAME'] + '"',
             'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
             ]
         obj.use = [ 'libpbd', 'libappleutility', 'libtemporal', 'libevoral' ]
