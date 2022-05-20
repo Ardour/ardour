@@ -21,13 +21,14 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "pbd/controllable.h"
-#include "pbd/properties.h"
 #include "pbd/stateful.h"
 
-#include "ardour/automation_control.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/session_handle.h"
+
+namespace PBD {
+	class Controllable;
+}
 
 namespace ARDOUR {
 
@@ -49,6 +50,8 @@ public:
 
 private:
 	typedef std::map<PBD::ID, double> ControllableValueMap;
+
+	bool recurse_to_master (boost::shared_ptr<PBD::Controllable>, std::set <PBD::ID>&) const;
 
 	ControllableValueMap       _ctrl_map;
 	std::string                _name;

@@ -16,9 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/controllable.h"
 #include "pbd/types_convert.h"
 
+#include "ardour/automation_control.h"
 #include "ardour/mixer_scene.h"
+#include "ardour/slavable_automation_control.h"
 #include "ardour/session.h"
 
 #include "pbd/i18n.h"
@@ -56,24 +59,68 @@ MixerScene::snapshot ()
 		if (!boost::dynamic_pointer_cast<AutomationControl> (c)) {
 			continue;
 		}
+		if (c->flags () & Controllable::HiddenControl) {
+			continue;
+		}
 		_ctrl_map[c->id ()] = c->get_save_value ();
 	}
 	_session.set_dirty ();
 }
 
 bool
+MixerScene::recurse_to_master (boost::shared_ptr<PBD::Controllable> c, std::set <PBD::ID>& done) const
+{
+	if (done.find (c->id()) != done.end ()) {
+		return false;
+	}
+
+#if 1 /* ignore controls in Write, or Touch + touching() state */
+	auto ac = boost::dynamic_pointer_cast<AutomationControl> (c);
+	if (ac && ac->automation_write ()) {
+		done.insert (c->id ());
+		return false;
+	}
+#endif
+
+	auto sc = boost::dynamic_pointer_cast<SlavableAutomationControl> (c);
+	if (sc && sc->slaved ()) {
+		/* first set masters, then set own value */
+		for (auto const& m : sc->masters ()) {
+			recurse_to_master (m, done);
+		}
+	}
+
+	ControllableValueMap::const_iterator it = _ctrl_map.find (c->id ());
+	if (it == _ctrl_map.end ()) {
+		done.insert (c->id ());
+		return false;
+	}
+
+	if (sc && sc->slaved ()) {
+		double x = sc->reduce_by_masters (1.0);
+		if (x <= 0) {
+			c->set_value (0, Controllable::NoGroup);
+		} else {
+			c->set_value (it->second / x, Controllable::NoGroup);
+		}
+	} else {
+		c->set_value (it->second, Controllable::NoGroup);
+	}
+
+	done.insert (it->first);
+	return true;
+}
+
+bool
 MixerScene::apply () const
 {
 	bool rv = false;
-	// TODO special-case solo-iso, and solo (restore order, or ignore)
+	std::set<PBD::ID> done;
+
 	for (auto const& c : Controllable::registered_controllables ()) {
-		ControllableValueMap::const_iterator it = _ctrl_map.find (c->id ());
-		if (it == _ctrl_map.end ()) {
-			continue;
-		}
-		rv = true;
-		c->set_value (it->second, Controllable::NoGroup);
+		rv |= recurse_to_master (c, done);
 	}
+
 	return rv;
 }
 
