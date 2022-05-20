@@ -503,11 +503,12 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 	}
 
 	superclock_t r;
+	const double log_expr = superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double();
 
-	if (_omega < -1) {
-		r = _sclock + llrint (log (-(superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double()) - 1.0) / -_omega);
+	if (log_expr < -1) {
+		r = _sclock + llrint (log (-log_expr - 1.0) / -_omega);
 	} else {
-		r = _sclock + llrint (log1p (superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double()) / _omega);
+		r = _sclock + llrint (log1p (log_expr) / _omega);
 	}
 
 	if (r < 0) {
