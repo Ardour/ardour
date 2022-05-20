@@ -53,6 +53,20 @@ const char* HttpGet::ca_path = NULL;
 const char* HttpGet::ca_info = NULL;
 
 void
+HttpGet::ca_setopt (CURL* c)
+{
+	if (ca_info) {
+		curl_easy_setopt (c, CURLOPT_CAINFO, ca_info);
+	}
+	if (ca_path) {
+		curl_easy_setopt (c, CURLOPT_CAPATH, ca_path);
+	}
+	if (ca_info || ca_path) {
+		curl_easy_setopt (c, CURLOPT_SSL_VERIFYPEER, 1);
+	}
+}
+
+void
 HttpGet::setup_certificate_paths ()
 {
 	/* this is only needed for Linux Bundles.
@@ -162,15 +176,8 @@ HttpGet::HttpGet (bool p, bool ssl)
 	// cc= curl_easy_setopt (_curl, CURLOPT_FOLLOWLOCATION, 1); CCERR ("CURLOPT_FOLLOWLOCATION");
 
 	// by default use curl's default.
-	if (ssl && ca_info) {
-		curl_easy_setopt (_curl, CURLOPT_CAINFO, ca_info);
-	}
-	if (ssl && ca_path) {
-		curl_easy_setopt (_curl, CURLOPT_CAPATH, ca_path);
-	}
-
-	if (ssl && (ca_info || ca_path)) {
-		curl_easy_setopt (_curl, CURLOPT_SSL_VERIFYPEER, 1);
+	if (ssl) {
+		ca_setopt (_curl);
 	}
 }
 

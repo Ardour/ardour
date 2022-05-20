@@ -26,7 +26,7 @@
 namespace ArdourCurl {
 
 class HttpGet {
-	public:
+public:
 	HttpGet (bool persist = false, bool ssl = true);
 	~HttpGet ();
 
@@ -75,7 +75,9 @@ class HttpGet {
 	// called from fixup_bundle_environment
 	static void setup_certificate_paths ();
 
-	private:
+	static void ca_setopt (CURL*);
+
+private:
 	CURL* _curl;
 	bool  persist;
 
@@ -93,8 +95,6 @@ class HttpGet {
 
 char* http_get (const char* url, int* status, bool with_error_logging);
 std::string http_get (const std::string& url, bool with_error_logging);
-
-
 
 } // namespace
 
