@@ -21,31 +21,29 @@
 
 #include <boost/function.hpp>
 
+#include <glib.h>
 #include <glibmm/main.h>
 #include "pbd/libpbd_visibility.h"
 
-class LIBPBD_API GlibEventLoopSource : public Glib::Source
+class LIBPBD_API GlibEventLoopCallback
 {
   public:
-	GlibEventLoopSource () {};
+	GlibEventLoopCallback (boost::function<void()> callback);
+	~GlibEventLoopCallback();
 
-	bool prepare (int& timeout);
-	bool check();
-	bool dispatch (sigc::slot_base*);
-};
-
-
-class LIBPBD_API GlibEventLoopCallback : public GlibEventLoopSource
-{
-  public:
-	GlibEventLoopCallback (boost::function<void()> callback) : _callback (callback) {}
-
-	bool check() {
-		_callback();
-		return false;
-	}
+	static gboolean c_prepare (GSource*, gint* timeout);
+	void attach (Glib::RefPtr<Glib::MainContext>);
 
   private:
+	struct GSourceWithParent {
+		GSource c;
+		GlibEventLoopCallback* cpp;
+	};
+
+	bool cpp_prepare();
+
+	GSourceWithParent* gsource;
+	GSourceFuncs funcs;
 	boost::function<void()> _callback;
 };
 

@@ -18,20 +18,41 @@
 
 #include "pbd/glib_event_source.h"
 
-bool
-GlibEventLoopSource::prepare (int& timeout)
+GlibEventLoopCallback::GlibEventLoopCallback (boost::function<void()> callback)
+	: _callback (callback)
 {
-	return false;
+	funcs.prepare = c_prepare;;
+	funcs.check = NULL;
+	funcs.dispatch = NULL;
+	funcs.finalize = NULL;
+
+	gsource = (GSourceWithParent*) g_source_new (&funcs, sizeof (GSourceWithParent));
+	gsource->cpp = this;
+}
+
+GlibEventLoopCallback::~GlibEventLoopCallback ()
+{
+	g_source_destroy ((GSource*) gsource);
+}
+
+void
+GlibEventLoopCallback::attach (Glib::RefPtr<Glib::MainContext> ctxt)
+{
+	g_source_attach ((GSource*) gsource, ctxt->gobj());
+}
+
+gboolean
+GlibEventLoopCallback::c_prepare (GSource* gsrc, int* timeout)
+{
+	GSourceWithParent* gwp = reinterpret_cast<GSourceWithParent*> (gsrc);
+	GlibEventLoopCallback* cpp = gwp->cpp;
+	return cpp->cpp_prepare ();
 }
 
 bool
-GlibEventLoopSource::check ()
+GlibEventLoopCallback::cpp_prepare ()
 {
+	_callback();
 	return false;
 }
 
-bool
-GlibEventLoopSource::dispatch (sigc::slot_base*)
-{
-	return false;
-}
