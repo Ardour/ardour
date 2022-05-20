@@ -59,6 +59,7 @@
 #include "widgets/prompter.h"
 
 #include "ardour_dialog.h"
+#include "ardour_http.h"
 #include "sfdb_freesound_mootcher.h"
 #include "gui_thread.h"
 #include "ui_config.h"
@@ -175,6 +176,9 @@ void Mootcher::setcUrlOptions()
 	// Allow connections to time out (without using signals)
 	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 30);
+
+	/* set ca-certificates to use for bundled versions of ardour */
+	ArdourCurl::HttpGet::ca_setopt (curl);
 }
 
 std::string Mootcher::doRequest(std::string uri, std::string params)
