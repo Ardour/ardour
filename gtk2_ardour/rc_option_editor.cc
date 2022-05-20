@@ -2430,6 +2430,15 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_only_copy_imported_files)
 		     ));
 
+
+	add_option (_("General"),
+			new DirectoryOption (
+				X_("freesound-dir"),
+				_("Cache Folder for downloaded Freesound clips:"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_freesound_dir),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_freesound_dir)
+				));
+
 	add_option (_("General"), new OptionEditorHeading (_("Export")));
 
 	add_option (_("General"),

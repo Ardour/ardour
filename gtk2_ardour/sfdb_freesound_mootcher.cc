@@ -106,7 +106,7 @@ Mootcher:: ~Mootcher()
 
 void Mootcher::ensureWorkingDir ()
 {
-	std::string p = ARDOUR::Config->get_freesound_download_dir();
+	std::string const& p = UIConfiguration::instance ().get_freesound_dir ();
 
 	DEBUG_TRACE(PBD::DEBUG::Freesound, "ensureWorkingDir() - " + p + "\n");
 	if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {

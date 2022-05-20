@@ -94,6 +94,15 @@ UIConfiguration::UIConfiguration ()
 {
 	load_state();
 
+	/* Setup defaults */
+	if (get_freesound_dir ().empty ()) {
+		std::string const& d (Glib::build_filename (ARDOUR::user_cache_directory (), "freesound"));
+		set_freesound_dir (d);
+		if (!Glib::file_test (d, Glib::FILE_TEST_EXISTS)) {
+			g_mkdir_with_parents (d.c_str (), 0755);
+		}
+	}
+
 	ColorsChanged.connect (boost::bind (&UIConfiguration::colors_changed, this));
 
 	ParameterChanged.connect (sigc::mem_fun (*this, &UIConfiguration::parameter_changed));
