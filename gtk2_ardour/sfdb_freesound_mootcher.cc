@@ -39,30 +39,31 @@
 
 
 *************************************************************************************/
-#include "sfdb_freesound_mootcher.h"
 
-#include "pbd/xml++.h"
-#include "pbd/error.h"
-
+#include <iostream>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <iostream>
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
-#include "pbd/i18n.h"
+#include "pbd/error.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/openuri.h"
+#include "pbd/xml++.h"
 
 #include "ardour/audio_library.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
-#include "ardour/rc_configuration.h"
-#include "pbd/pthread_utils.h"
-#include "pbd/openuri.h"
+
+#include "widgets/prompter.h"
 
 #include "ardour_dialog.h"
+#include "sfdb_freesound_mootcher.h"
 #include "gui_thread.h"
-#include "widgets/prompter.h"
+#include "ui_config.h"
+
+#include "pbd/i18n.h"
 
 using namespace PBD;
 
