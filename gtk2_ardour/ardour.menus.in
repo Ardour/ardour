@@ -658,7 +658,9 @@
 
       <separator/><!-- Plugin Related !-->
       <menuitem action='toggle-plugin-manager'/>
+#ifndef MIXBUS
       <menuitem action='toggle-io-plugins'/>
+#endif
 #ifdef MIXBUS
       <separator/>
       <menuitem action='license-manager'/>
