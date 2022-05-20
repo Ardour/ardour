@@ -372,8 +372,8 @@ typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct tempo_tag>
 class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public virtual Point
 {
   public:
-	LIBTEMPORAL_API TempoPoint (TempoMap const & map, Tempo const & t, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Tempo (t), _omega_beats (0), _omega_sclocks (0) {}
-	LIBTEMPORAL_API TempoPoint (Tempo const & t, Point const & p) : Point (p), Tempo (t), _omega_beats (0), _omega_sclocks (0) {}
+	LIBTEMPORAL_API TempoPoint (TempoMap const & map, Tempo const & t, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Tempo (t), _omega (0.) {}
+	LIBTEMPORAL_API TempoPoint (Tempo const & t, Point const & p) : Point (p), Tempo (t), _omega (0.) {}
 	LIBTEMPORAL_API TempoPoint (TempoMap const & map, XMLNode const &);
 
 	/* just change the tempo component, without moving */
@@ -403,10 +403,9 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
 		return (superclock_ticks_per_second() * 60.0) / superclocks_per_note_type_at (pos);
 	}
 
-	LIBTEMPORAL_API double omega_beats() const { return _omega_beats; }
-	LIBTEMPORAL_API double omega_sclocks() const { return _omega_sclocks; }
-	LIBTEMPORAL_API void compute_omega_from_next_tempo (TempoPoint const & next_tempo, TimeDomain);
-	LIBTEMPORAL_API bool actually_ramped () const { return Tempo::ramped() && (( _omega_beats != 0) || (_omega_sclocks != 0)); }
+	LIBTEMPORAL_API double omega() const { return _omega; }
+	LIBTEMPORAL_API void compute_omega_from_next_tempo (TempoPoint const & next_tempo);
+	LIBTEMPORAL_API bool actually_ramped () const { return Tempo::ramped() && ( _omega != 0); }
 
 	LIBTEMPORAL_API XMLNode& get_state () const;
 	LIBTEMPORAL_API int set_state (XMLNode const&, int version);
@@ -422,8 +421,7 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
 	LIBTEMPORAL_API Beats quarters_at_superclock (superclock_t sc) const;
 
   private:
-	double _omega_beats;
-	double _omega_sclocks;
+	double _omega;
 
 	void compute_omega_from_quarter_duration (Beats const & quarter_duration, superclock_t end_scpqn);
 	void compute_omega_from_audio_duration (samplecnt_t audio_duration, superclock_t end_scpqn);
@@ -491,7 +489,7 @@ class LIBTEMPORAL_API TempoMetric {
 		if (!_tempo->actually_ramped()) {
 			return _tempo->superclocks_per_note_type ();
 		}
-		return _tempo->superclocks_per_note_type() * exp (-_tempo->omega_sclocks() * (sc - _tempo->sclock()));
+		return _tempo->superclocks_per_note_type() * exp (-_tempo->omega() * (sc - _tempo->sclock()));
 	}
 
 	superclock_t superclocks_per_grid_at (superclock_t sc) const {
