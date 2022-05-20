@@ -46,6 +46,8 @@ public:
 	bool slaved_to (boost::shared_ptr<AutomationControl>) const;
 	bool slaved () const;
 
+	std::set<boost::shared_ptr<AutomationControl>> masters () const;
+
 	virtual void automation_run (samplepos_t start, pframes_t nframes);
 
 	double get_masters_value () const {

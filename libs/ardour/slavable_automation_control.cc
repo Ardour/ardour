@@ -615,6 +615,20 @@ SlavableAutomationControl::slaved () const
 	return !_masters.empty();
 }
 
+std::set<boost::shared_ptr<AutomationControl>>
+SlavableAutomationControl::masters () const
+{
+	std::set<boost::shared_ptr<AutomationControl>> rv;
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	for (auto const& m : _masters) {
+		boost::shared_ptr<AutomationControl> ac (m.second.master ());
+		if (ac) {
+			rv.insert (ac);
+		}
+	}
+	return rv;
+}
+
 int
 SlavableAutomationControl::MasterRecord::set_state (XMLNode const& n, int)
 {
