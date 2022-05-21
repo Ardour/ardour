@@ -1698,6 +1698,26 @@ LV2Plugin::has_editor() const
 	return _impl->ui != NULL;
 }
 
+void
+LV2Plugin::add_slave (boost::shared_ptr<Plugin> p, bool)
+{
+	boost::shared_ptr<LV2Plugin> lv2 = boost::dynamic_pointer_cast<LV2Plugin> (p);
+	if (lv2) {
+		Glib::Threads::Mutex::Lock lm (_slave_lock);
+		_slaves.insert (lv2);
+	}
+}
+
+void
+LV2Plugin::remove_slave (boost::shared_ptr<Plugin> p)
+{
+	boost::shared_ptr<LV2Plugin> lv2 = boost::dynamic_pointer_cast<LV2Plugin> (p);
+	if (lv2) {
+		Glib::Threads::Mutex::Lock lm (_slave_lock);
+		_slaves.erase (lv2);
+	}
+}
+
 bool
 LV2Plugin::has_message_output() const
 {
@@ -1761,6 +1781,14 @@ LV2Plugin::write_from_ui(uint32_t       index,
 		error << string_compose (_("LV2<%1>: Error writing from UI to plugin"), name()) << endmsg;
 		return false;
 	}
+
+	Glib::Threads::Mutex::Lock lm (_slave_lock, Glib::Threads::TRY_LOCK);
+	if (lm.locked()) {
+		for (auto const& i : _slaves) {
+			i->write_from_ui (index, protocol, size, body);
+		}
+	}
+
 	return true;
 }
 

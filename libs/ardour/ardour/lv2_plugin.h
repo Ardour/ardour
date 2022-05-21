@@ -144,6 +144,9 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	bool has_editor () const;
 	bool has_message_output () const;
 
+	void add_slave (boost::shared_ptr<Plugin>, bool);
+	void remove_slave (boost::shared_ptr<Plugin>);
+
 	bool write_from_ui(uint32_t       index,
 	                   uint32_t       protocol,
 	                   uint32_t       size,
@@ -298,6 +301,9 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	PBD::RingBuffer<uint8_t>* _from_ui;
 
 	Glib::Threads::Mutex _work_mutex;
+
+	Glib::Threads::Mutex                   _slave_lock;
+	std::set<boost::shared_ptr<LV2Plugin>> _slaves;
 
 #ifdef LV2_EXTENDED
 	static void queue_draw (LV2_Inline_Display_Handle);
