@@ -1151,6 +1151,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 	MusicTimePoint* mtp;
 	TempoMetric metric (_tempos.front(), _meters.front());
 	Points::iterator p;
+	bool need_initial_ramp_reset = false;
 
 	DEBUG_TRACE (DEBUG::MapReset, string_compose ("we begin at %1 with metric %2\n", sc, metric));
 
@@ -1180,6 +1181,11 @@ TempoMap::reset_starting_at (superclock_t sc)
 			DEBUG_TRACE (DEBUG::MapReset, "Bartime!\n");
 		} else if ((tp = dynamic_cast<TempoPoint*> (&*p)) != 0) {
 			metric = TempoMetric (*tp, metric.meter());
+			if (tp->ramped()) {
+				need_initial_ramp_reset = true;
+			} else {
+				need_initial_ramp_reset = true;
+			}
 			DEBUG_TRACE (DEBUG::MapReset, "Tempo!\n");
 		} else if ((mp = dynamic_cast<MeterPoint*> (&*p)) != 0) {
 			metric = TempoMetric (metric.tempo(), *mp);
@@ -1207,6 +1213,11 @@ TempoMap::reset_starting_at (superclock_t sc)
 		DEBUG_TRACE (DEBUG::MapReset, string_compose ("workong on it! tp = %1\n", tp));
 
 		if (tp) {
+
+			if (need_initial_ramp_reset) {
+				const_cast<TempoPoint*> (&metric.tempo())->compute_omega_from_next_tempo (*tp);
+				need_initial_ramp_reset = false;
+			}
 
 			Points::iterator pp = p;
 			nxt_tempo = 0;
