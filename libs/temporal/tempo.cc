@@ -1,4 +1,3 @@
-
 /*
     Copyright (C) 2017 Paul Davis
 
@@ -1187,6 +1186,21 @@ TempoMap::reset_starting_at (superclock_t sc)
 		}
 	}
 
+	/* if the tempo point the defines our starting metric for position
+	 * @param sc is ramped, recompute its omega value based on the beat
+	 * time of the following tempo point. If we do not do this before we
+	 * start, then ::superclock_at() for subsequent points will be
+	 * incorrect.
+	 */
+
+	if (need_initial_ramp_reset) {
+		const TempoPoint *nxt = next_tempo (metric.tempo());
+		if (nxt) {
+			const_cast<TempoPoint*> (&metric.tempo())->compute_omega_from_next_tempo (*nxt);
+		}
+		need_initial_ramp_reset = false;
+	}
+
 	/* Now iterate over remaining points and recompute their audio time
 	 * positions.
 	 */
@@ -1207,11 +1221,6 @@ TempoMap::reset_starting_at (superclock_t sc)
 		DEBUG_TRACE (DEBUG::MapReset, string_compose ("workong on it! tp = %1\n", tp));
 
 		if (tp) {
-
-			if (need_initial_ramp_reset) {
-				const_cast<TempoPoint*> (&metric.tempo())->compute_omega_from_next_tempo (*tp);
-				need_initial_ramp_reset = false;
-			}
 
 			Points::iterator pp = p;
 			nxt_tempo = 0;
