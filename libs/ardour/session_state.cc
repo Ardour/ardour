@@ -1486,8 +1486,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 
 	{
 		Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
-		size_t idx = 0;
-		size_t last = 0;
+		uint64_t idx = 0;
+		uint64_t last = 0;
 		for (auto const& i : _mixer_scenes) {
 			++idx;
 			if (i && !i->empty ()) {
@@ -1916,7 +1916,7 @@ Session::set_state (const XMLNode& node, int version)
 		child->get_property("n_scenes", n_scenes);
 		_mixer_scenes.resize (n_scenes);
 		for (auto const n : child->children () ) {
-			size_t index = 0;
+			uint64_t index = 0;
 			if (n->get_property("index", index)) {
 				_mixer_scenes[index] = boost::shared_ptr<MixerScene> (new MixerScene (*this));
 				_mixer_scenes[index]->set_state (*n, version);
