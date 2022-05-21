@@ -1497,7 +1497,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		if (last > 0) {
 			idx = 0;
 			XMLNode* ms_node = new XMLNode (X_("MixerScenes"));
-			ms_node->set_property ("n_scenes", _mixer_scenes.size ());
+			ms_node->set_property ("n_scenes", (uint64_t) _mixer_scenes.size ());
 			for (auto const& i : _mixer_scenes) {
 				if (i && !i->empty ()) {
 					XMLNode& ms_state (i->get_state ());
@@ -1912,7 +1912,7 @@ Session::set_state (const XMLNode& node, int version)
 
 	if ((child = find_named_node (node, "MixerScenes"))) {
 		Glib::Threads::RWLock::WriterLock lm (_mixer_scenes_lock);
-		size_t n_scenes = 0;
+		uint64_t n_scenes = 0;
 		child->get_property("n_scenes", n_scenes);
 		_mixer_scenes.resize (n_scenes);
 		for (auto const n : child->children () ) {
