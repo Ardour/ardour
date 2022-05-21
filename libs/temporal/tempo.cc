@@ -893,7 +893,11 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 	}
 
-	dump (cerr);
+#ifndef NDEBUG
+	if (DEBUG_ENABLED (DEBUG::TemporalMap)) {
+		dump (cerr);
+	}
+#endif
 
 	return *ret;
 }
@@ -1876,7 +1880,11 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	assert (!_meters.empty());
 	assert (!_points.empty());
 
-	dump (std::cout);
+#ifndef NDEBUG
+	if (DEBUG_ENABLED (DEBUG::Grid)) {
+		dump (std::cout);
+	}
+#endif
 	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID START %1 .. %2 (barmod = %3)\n", start, end, bar_mod));
 
 	TempoPoint const * tp = 0;
