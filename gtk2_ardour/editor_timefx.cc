@@ -439,6 +439,7 @@ void*
 Editor::timefx_thread (void *arg)
 {
 	SessionEvent::create_per_thread_pool ("timefx events", 64);
+	Temporal::TempoMap::fetch ();
 
 	TimeFXDialog* tsd = static_cast<TimeFXDialog*>(arg);
 
