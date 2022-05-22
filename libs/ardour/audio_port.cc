@@ -69,7 +69,6 @@ AudioPort::cycle_start (pframes_t nframes)
 		_buffer->prepare ();
 	} else if (!externally_connected ()) {
 		/* ardour internal port, just silence input, don't resample */
-		// TODO reset resampler only once
 		_src.reset ();
 		memset (_data, 0, _cycle_nframes * sizeof (float));
 	} else {

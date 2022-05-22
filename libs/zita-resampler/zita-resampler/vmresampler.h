@@ -66,6 +66,7 @@ private:
 	float               *_buff;
 	float               *_c1;
 	float               *_c2;
+	bool                 _reset;
 };
 
 };

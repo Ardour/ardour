@@ -33,6 +33,7 @@ VMResampler::VMResampler (void)
   , _buff  (0)
   , _c1 (0)
   , _c2 (0)
+  , _reset (false)
 {
 	reset ();
 }
@@ -91,6 +92,7 @@ VMResampler::clear (void)
 	_pstep = 0;
 	_qstep = 0;
 	_wstep = 1;
+	_reset = false;
 	reset ();
 }
 
@@ -144,6 +146,7 @@ int
 VMResampler::reset (void)
 {
 	if (!_table) return 1;
+	if (_reset) return 0;
 
 	inp_count = 0;
 	out_count = 0;
@@ -155,6 +158,7 @@ VMResampler::reset (void)
 
 	memset (_buff, 0, sizeof(float) * (_nread + 249));
 	_nread -= _table->_hl - 1;
+	_reset = true;
 	return 0;
 }
 
@@ -174,6 +178,8 @@ VMResampler::process (void)
 	ph = _phase;
 	dp = _pstep;
 	n = 2 * hl - nr;
+
+	_reset = false;
 
 #if 1
 	/* optimized full-cycle no-resampling */
