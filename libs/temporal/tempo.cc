@@ -2963,6 +2963,8 @@ TempoMap::previous_tempo (TempoPoint const & point) const
 		return 0;
 	}
 
+	--i;
+
 	return &(*i);
 }
 
