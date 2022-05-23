@@ -49,6 +49,7 @@
 #include "ardour/audio_port.h"
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
+#include "ardour/mixer_scene.h"
 #include "ardour/monitor_control.h"
 #include "ardour/panner_shell.h"
 #include "ardour/plugin_manager.h"
@@ -3608,6 +3609,23 @@ Mixer_UI::register_actions ()
 
 	ActionManager::register_toggle_action (group, X_("toggle-disk-monitor"), _("Toggle Disk Monitoring"), sigc::bind (sigc::mem_fun (*this, &Mixer_UI::toggle_monitor_action), MonitorDisk, false, false));
 	ActionManager::register_toggle_action (group, X_("toggle-input-monitor"), _("Toggle Input Monitoring"), sigc::bind (sigc::mem_fun (*this, &Mixer_UI::toggle_monitor_action), MonitorInput, false, false));
+
+	for (size_t i = 0; i < 12; ++i) {
+		std::string a = string_compose (X_("store-mixer-scene-%1"), i);
+		std::string n = string_compose (_("Store Mixer Scene Slot #%1"), i + 1);
+		ActionManager::register_action (group, a.c_str (), n.c_str (),
+		                                sigc::bind (sigc::mem_fun (*this, &Mixer_UI::store_mixer_scene), i));
+
+		a = string_compose (X_("recall-mixer-scene-%1"), i);
+		n = string_compose (_("Recall Mixer Scene Slot #%1"), i + 1);
+		ActionManager::register_action (group, a.c_str (), n.c_str (),
+		                                sigc::bind (sigc::mem_fun (*this, &Mixer_UI::recall_mixer_scene), i));
+
+		a = string_compose (X_("clear-mixer-scene-%1"), i);
+		n = string_compose (_("Clear Mixer Scene Slot #%1"), i + 1);
+		ActionManager::register_action (group, a.c_str (), n.c_str (),
+		                                sigc::bind (sigc::mem_fun (*this, &Mixer_UI::clear_mixer_scene), i));
+	}
 }
 
 void
@@ -3812,6 +3830,33 @@ Mixer_UI::vca_unassign (boost::shared_ptr<VCA> vca)
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			ms->vca_unassign (vca);
+		}
+	}
+}
+
+void
+Mixer_UI::store_mixer_scene (size_t n)
+{
+	if (_session) {
+		_session->store_nth_mixer_scene (n);
+	}
+}
+
+void
+Mixer_UI::recall_mixer_scene (size_t n)
+{
+	if (_session) {
+		_session->apply_nth_mixer_scene (n);
+	}
+}
+
+void
+Mixer_UI::clear_mixer_scene (size_t n)
+{
+	if (_session) {
+		boost::shared_ptr<MixerScene> ms = _session->nth_mixer_scene (n, false);
+		if (ms) {
+			ms->clear ();
 		}
 	}
 }
