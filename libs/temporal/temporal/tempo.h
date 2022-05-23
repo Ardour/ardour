@@ -86,7 +86,7 @@ class /*LIBTEMPORAL_API*/ Point : public point_hook {
 	LIBTEMPORAL_API BBT_Time const & bbt() const { return _bbt; }
 	LIBTEMPORAL_API samplepos_t sample(samplecnt_t sr) const { return superclock_to_samples (sclock(), sr); }
 
-	LIBTEMPORAL_API timepos_t time() const;
+	LIBTEMPORAL_API virtual timepos_t time() const = 0;
 
 	struct LIBTEMPORAL_API sclock_comparator {
 		bool operator() (Point const & a, Point const & b) const {
@@ -360,6 +360,8 @@ class /*LIBTEMPORAL_API*/ MeterPoint : public Meter, public meter_hook, public v
 	}
 
 	LIBTEMPORAL_API XMLNode& get_state () const;
+
+	LIBTEMPORAL_API timepos_t time() const { return timepos_t (beats()); }
 };
 
 /* A TempoPoint is a combination of a Tempo with a Point. However, if the temp
@@ -419,6 +421,8 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
 
 	LIBTEMPORAL_API Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
 	LIBTEMPORAL_API Beats quarters_at_superclock (superclock_t sc) const;
+
+	LIBTEMPORAL_API timepos_t time() const { return timepos_t (beats()); }
 
   private:
 	double _omega;
@@ -529,6 +533,8 @@ class /*LIBTEMPORAL_API*/ MusicTimePoint :  public bartime_hook, public virtual 
 		return TempoPoint::operator== (other) && MeterPoint::operator== (other);
 	}
 
+	LIBTEMPORAL_API timepos_t time() const { return timepos_t::from_superclock (TempoPoint::sclock()); }
+
 	LIBTEMPORAL_API XMLNode & get_state () const;
 };
 
@@ -597,6 +603,8 @@ class LIBTEMPORAL_API TempoMapPoint : public Point, public TempoMetric
 	bool is_explicit_tempo() const { return _tempo->sclock() == sclock(); }
 	bool is_explicit_position() const { return false; }
 	bool is_explicit () const { return is_explicit_meter() || is_explicit_tempo() || is_explicit_position(); }
+
+	timepos_t time() const { if (is_explicit_meter()) { return _meter->time(); } else if (is_explicit_tempo()) { return _tempo->time(); } else { return timepos_t::from_superclock (sclock()); } }
 
   private:
 	bool         _floating;
@@ -714,7 +722,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API bool move_tempo (TempoPoint const & point, timepos_t const & destination, bool push = false);
 	LIBTEMPORAL_API bool move_meter (MeterPoint const & point, timepos_t const & destination, bool push = false);
 
-	LIBTEMPORAL_API void set_time_domain (TimeDomain td);
 	LIBTEMPORAL_API int set_state (XMLNode const&, int version);
 
 	LIBTEMPORAL_API void twist_tempi (TempoPoint* ts, samplepos_t start_sample, samplepos_t end_sample);
@@ -722,8 +729,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API void stretch_tempo_end (TempoPoint* ts, samplepos_t sample, samplepos_t end_sample);
 
 	/* END OF MODIFYING METHODS */
-
-	LIBTEMPORAL_API TimeDomain time_domain() const { return _time_domain; }
 
 	/* rather than giving direct access to the intrusive list members,
 	 * offer one that uses an STL container instead.
@@ -879,8 +884,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	Meters       _meters;
 	MusicTimes   _bartimes;
 	Points       _points;
-
-	TimeDomain _time_domain;
 
 	int set_tempos_from_state (XMLNode const &);
 	int set_meters_from_state (XMLNode const &);

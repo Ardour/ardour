@@ -2121,13 +2121,7 @@ Session::flush_cue_recording ()
 		BBT_Time bbt = tmap->bbt_at (timepos_t (cr.when));
 		bbt = bbt.round_up_to_bar ();
 
-		timepos_t when;
-
-		if (tmap->time_domain() == Temporal::AudioTime) {
-			when = timepos_t (tmap->sample_at (bbt));
-		} else {
-			when = timepos_t (tmap->quarters_at (bbt));
-		}
+		const timepos_t when (tmap->quarters_at (bbt));
 
 		Location* l = new Location (*this, when, when, std::string(), Location::Flags (Location::IsMark|Location::IsCueMarker), cr.cue_number);
 		_locations->add (l);
