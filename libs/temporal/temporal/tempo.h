@@ -526,7 +526,6 @@ class /*LIBTEMPORAL_API*/ MusicTimePoint :  public bartime_hook, public virtual 
 {
   public:
 	LIBTEMPORAL_API MusicTimePoint (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt, Tempo const & t, Meter const & m) : Point (map, sc, b, bbt), TempoPoint (t, *this), MeterPoint (m, *this)  {}
-	// MusicTimePoint (BBT_Time const & bbt_time, Point const & p) : Point (p), TempoPoint (p.map().tempo_at (p.sclock()), p), MeterPoint (p.map().meter_at (p.sclock()), p) { _bbt = bbt_time; }
 	LIBTEMPORAL_API MusicTimePoint (TempoMap const & map, XMLNode const &);
 
 	LIBTEMPORAL_API bool operator== (MusicTimePoint const & other) const {
