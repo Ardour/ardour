@@ -746,15 +746,20 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	passbox = manage(new HBox);
 	passbox->set_spacing (6);
 
+	vbox = manage (new VBox);
 	label = manage (new Label);
+	label->set_alignment (Gtk::ALIGN_START);
 	label->set_text (_("Tags:"));
-	passbox->pack_start (*label, false, false);
-	passbox->pack_start (freesound_entry, true, true);
+	vbox->pack_start (*label, false, false);
+	vbox->pack_start (freesound_entry, true, true);
+	passbox->pack_start(*vbox, true, true);
 
+	vbox = manage (new VBox);
 	label = manage (new Label);
 	label->set_text (_("Sort:"));
-	passbox->pack_start (*label, false, false);
-	passbox->pack_start (freesound_sort, false, false);
+	label->set_alignment (Gtk::ALIGN_START);
+	vbox->pack_start (*label, false, false);
+	vbox->pack_start (freesound_sort, false, false);
 	freesound_sort.clear_items();
 
 	// Order of the following must correspond with enum sortMethod
@@ -769,6 +774,23 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	freesound_sort.append(_("Highest rated"));
 	freesound_sort.append(_("Lowest rated"));
 	freesound_sort.set_active(0);
+	passbox->pack_start(*vbox, false, false);
+
+	vbox = manage (new VBox);
+	label = manage (new Label);
+	label->set_text (_("Licence:"));
+	label->set_alignment (Gtk::ALIGN_START);
+	vbox->pack_start (*label, false, false);
+
+	vbox->pack_start (freesound_licence, false, false);
+	freesound_licence.clear_items();
+	freesound_licence.append(_("Any"));
+	freesound_licence.append(_("CC-BY"));
+	freesound_licence.append(_("CC-BY-NC"));
+	freesound_licence.append(_("PD"));
+	freesound_licence.set_active(0);
+
+	passbox->pack_start(*vbox, false, false);
 
 	passbox->pack_start (freesound_search_btn, false, false);
 	passbox->pack_start (freesound_more_btn, false, false);
@@ -801,7 +823,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	freesound_list_view.get_column(2)->set_alignment(0.5);
 	freesound_list_view.get_column(3)->set_alignment(0.5);
 	freesound_list_view.get_column(4)->set_alignment(0.5);
-	freesound_list_view.get_column(5)->set_alignment(0.5);
+	freesound_list_view.get_column(5)->set_alignment(0.0);
 
 	freesound_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
 	freesound_list_view.set_tooltip_column(1);
@@ -1199,6 +1221,21 @@ SoundFileBrowser::freesound_similar_clicked ()
 	}
 }
 
+std::string SoundFileBrowser::freesound_licence_filter()
+{
+	/* Return a filter string corresponding to the chosen licence filter
+	 * type: see https://freesound.org/docs/api/resources_apiv2.html#text-search
+	 * Note that values containing spaces need to be enclosed in
+	 * double-quotes, though the documentation doesn't mention this.
+	 */
+	switch (freesound_licence.get_active_row_number()) {
+		case 1: return "license: Attribution"; // CC-BY
+		case 2: return "license: \"Attribution Noncommercial\""; // CC-BY-NC
+		case 3: return "license: \"Creative Commons 0\""; // PD
+		default: return "";
+	}
+}
+
 void
 SoundFileBrowser::freesound_search()
 {
@@ -1215,7 +1252,7 @@ SoundFileBrowser::freesound_search()
 	std::string theString = mootcher.searchText(
 			search_string,
 			freesound_page,
-			"",
+			freesound_licence_filter(),
 			sort_method
 			);
 

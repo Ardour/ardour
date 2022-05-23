@@ -181,7 +181,7 @@ private:
 	Gtk::Button freesound_similar_btn;
 
 	void handle_freesound_results(std::string theString);
-
+	std::string freesound_licence_filter();
 public:
 	SoundFileBrowser (std::string title, ARDOUR::Session* _s, bool persistent);
 	virtual ~SoundFileBrowser ();
@@ -204,6 +204,7 @@ public:
 
 	Gtk::Entry freesound_entry;
 	Gtk::ComboBoxText freesound_sort;
+	Gtk::ComboBoxText freesound_licence;
 
 	Gtk::Button freesound_search_btn;
 	Gtk::TreeView freesound_list_view;
