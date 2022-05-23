@@ -122,10 +122,19 @@ Tempo::Tempo (XMLNode const & node)
 }
 
 void
+Tempo::set_note_types_per_minute (double npm)
+{
+	_npm = npm;
+	_superclocks_per_note_type = double_npm_to_scpn (_npm);
+	_super_note_type_per_second = double_npm_to_snps (_npm);
+}
+
+void
 Tempo::set_end_npm (double npm)
 {
-	_end_super_note_type_per_second = double_npm_to_snps (npm);
-	_end_superclocks_per_note_type = double_npm_to_scpn (npm);
+	_enpm = npm;
+	_end_super_note_type_per_second = double_npm_to_snps (_enpm);
+	_end_superclocks_per_note_type = double_npm_to_scpn (_enpm);
 }
 
 void

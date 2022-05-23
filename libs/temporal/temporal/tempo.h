@@ -203,7 +203,7 @@ class LIBTEMPORAL_API Tempo {
 	double samples_per_note_type(samplecnt_t sr) const { return superclock_to_samples (superclocks_per_note_type (), sr); }
 	double samples_per_quarter_note(samplecnt_t sr) const { return superclock_to_samples (superclocks_per_quarter_note(), sr); }
 
-	void   set_note_types_per_minute (double npm) { _superclocks_per_note_type = double_npm_to_scpn (npm); }
+	void   set_note_types_per_minute (double npm);
 
 	int note_type () const { return _note_type; }
 	Beats note_type_as_beats () const { return Beats (0, (1920 * 4) / _note_type); }
