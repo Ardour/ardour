@@ -3046,13 +3046,13 @@ TempoMap::metric_at (BBT_Time const & bbt, bool can_match) const
 	return TempoMetric (*tp, *mp);
 }
 
-void
+bool
 TempoMap::set_ramped (TempoPoint & tp, bool yn)
 {
 	assert (!_tempos.empty());
 
 	if (tp.ramped() == yn) {
-		return;
+		return false;
 	}
 
 	Tempos::iterator nxt = _tempos.begin();
@@ -3065,7 +3065,7 @@ TempoMap::set_ramped (TempoPoint & tp, bool yn)
 	}
 
 	if (nxt == _tempos.end()) {
-		return;
+		return false;
 	}
 
 	if (yn) {
@@ -3075,8 +3075,28 @@ TempoMap::set_ramped (TempoPoint & tp, bool yn)
 	}
 
 	reset_starting_at (tp.sclock());
+
+	return true;
 }
 
+bool
+TempoMap::set_continuing (TempoPoint& tp, bool yn)
+{
+	if (!yn) {
+		tp.set_continuing (false);
+		return true; /* change made */
+	}
+
+	TempoPoint const * prev = previous_tempo (tp);
+
+	if (!prev) {
+		return false;
+	}
+
+	tp.set_note_types_per_minute (prev->note_types_per_minute());
+
+	return true;
+}
 
 void
 TempoMap::stretch_tempo (TempoPoint* ts, samplepos_t sample, samplepos_t end_sample, Beats const & start_qnote, Beats const & end_qnote)
