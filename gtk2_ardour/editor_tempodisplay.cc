@@ -229,8 +229,13 @@ Editor::draw_tempo_marks ()
 
 	while (t != tempi.end() && mm != tempo_marks.end()) {
 
-		Temporal::Point const & mark_point ((*mm)->point());
 		Temporal::TempoPoint const & metric_point (*t);
+
+		if (dynamic_cast<Temporal::MusicTimePoint const *> (&metric_point)) {
+			continue;
+		}
+
+		Temporal::Point const & mark_point ((*mm)->point());
 
 		if (mark_point.sclock() < metric_point.sclock()) {
 
@@ -292,8 +297,13 @@ Editor::draw_meter_marks ()
 
 	while (m != meters.end() && mm != meter_marks.end()) {
 
-		Temporal::Point const & mark_point ((*mm)->point());
 		Temporal::MeterPoint const & metric_point (*m);
+
+		if (dynamic_cast<Temporal::MusicTimePoint const *> (&metric_point)) {
+			continue;
+		}
+
+		Temporal::Point const & mark_point ((*mm)->point());
 
 		if (mark_point.sclock() < metric_point.sclock()) {
 
