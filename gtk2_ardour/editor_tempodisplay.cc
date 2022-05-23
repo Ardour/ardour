@@ -164,11 +164,7 @@ Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::M
 void
 Editor::make_bbt_marker (MusicTimePoint const  * mtp)
 {
-	if (mtp->map().time_domain() == BeatTime) {
-		bbt_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker music"), "bar!", *mtp));
-	} else {
-		bbt_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker"), "foo!", *mtp));
-	}
+	bbt_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker"), "foo!", *mtp));
 }
 
 void
@@ -177,11 +173,7 @@ Editor::make_meter_marker (Temporal::MeterPoint const * ms)
 	char buf[64];
 
 	snprintf (buf, sizeof(buf), "%d/%d", ms->divisions_per_bar(), ms->note_value ());
-	if (ms->map().time_domain() == BeatTime) {
-		meter_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker music"), buf, *ms));
-	} else {
-		meter_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf, *ms));
-	}
+	meter_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf, *ms));
 }
 
 void
@@ -193,17 +185,7 @@ Editor::make_tempo_marker (Temporal::TempoPoint const * ts, double& min_tempo, d
 	min_tempo = min (min_tempo, ts->end_note_types_per_minute());
 
 	const std::string tname (X_(""));
-	char const * color_name;
-
-	/* XXX not sure this is the right thing to do here (differentiate time
-	 * domains with color).
-	 */
-
-	if (ts->map().time_domain() == BeatTime) {
-		color_name = X_("tempo marker music");
-	} else {
-		color_name = X_("tempo marker music");
-	}
+	char const * color_name = X_("tempo marker");
 
 	tempo_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color (color_name), tname, *ts, ts->sample (sr), tc_color));
 
@@ -642,11 +624,7 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 
 	XMLNode &before = map->get_state();
 
-	if (map->time_domain() == BeatTime) {
-		pos = timepos_t (map->quarters_at (requested));
-	} else {
-		pos = timepos_t (map->sample_at (requested));
-	}
+	pos = timepos_t (map->quarters_at (requested));
 
 	map->set_meter (Meter (bpb, note_type), pos);
 

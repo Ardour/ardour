@@ -79,7 +79,7 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, TempoPoint& point, co
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Temporal::BBT_Time when (map->bbt_at (point.time()));
-	init (when, _section->note_types_per_minute(), _section->end_note_types_per_minute(), _section->note_type(), _section->type(), map->is_initial (point), map->time_domain());
+	init (when, _section->note_types_per_minute(), _section->end_note_types_per_minute(), _section->note_type(), _section->type(), map->is_initial (point), Temporal::BeatTime);
 }
 
 void
@@ -498,7 +498,7 @@ MeterDialog::MeterDialog (TempoMap::SharedPtr const & map, timepos_t const & pos
 MeterDialog::MeterDialog (Temporal::MeterPoint& section, const string&)
 	: ArdourDialog (_("Edit Time Signature"))
 {
-	init (section.bbt(), section.divisions_per_bar(), section.note_value(), section.map().is_initial(section), section.map().time_domain());
+	init (section.bbt(), section.divisions_per_bar(), section.note_value(), section.map().is_initial(section), Temporal::BeatTime);
 }
 
 void

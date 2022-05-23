@@ -3449,22 +3449,15 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 			_editor->begin_reversible_command (_("copy meter mark"));
 
-			timepos_t pos;
-
-			if (map->time_domain() == AudioTime) {
-				pos = timepos_t (map->sample_at (bbt));
-			} else {
-				pos = timepos_t (map->quarters_at (bbt));
-			}
+			const timepos_t pos (map->quarters_at (bbt));
 
 			_marker->reset_meter (map->set_meter (meter, pos));
 		}
 
-		/* only snap to bars. leave snap mode alone for audio locked meters.*/
-		if (map->time_domain() != AudioTime) {
-			_editor->set_grid_to (GridTypeBar);
-			_editor->set_snap_mode (SnapMagnetic);
-		}
+		/* only snap to bars. */
+
+		_editor->set_grid_to (GridTypeBar);
+		_editor->set_snap_mode (SnapMagnetic);
 	}
 
 	if (_movable && (!first_move || !_copy)) {

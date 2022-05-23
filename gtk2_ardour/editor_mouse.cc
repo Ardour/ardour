@@ -1980,11 +1980,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			break;
 		}
 		entered_marker = m_marker;
-		if (m_marker->meter().map().time_domain() == BeatTime) {
-			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker"));
-		} else {
-			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker music"));
-		}
+		/* "music" currently serves as a stand-in for "entered". */
+		m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker music"));
 		break;
 
 	case TempoMarkerItem:
@@ -1992,11 +1989,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			break;
 		}
 		entered_marker = t_marker;
-		if (t_marker->tempo().map().time_domain() == BeatTime) {
-			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker"));
-		} else {
-			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker music"));
-		}
+		/* "music" currently serves as a stand-in for "entered". */
+		t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker music"));
 		break;
 
 	case FadeInHandleItem:
@@ -2107,24 +2101,16 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		if ((m_marker = static_cast<MeterMarker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
+		m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker"));
 		entered_marker = 0;
-		if (m_marker->meter().map().time_domain() == BeatTime) {
-			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker music"));
-		} else {
-			m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker"));
-		}
 		break;
 
 	case TempoMarkerItem:
 		if ((t_marker = static_cast<TempoMarker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
+		t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker"));
 		entered_marker = 0;
-		if (t_marker->tempo().map().time_domain() == BeatTime) {
-			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker music"));
-		} else {
-			t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker"));
-		}
 		break;
 
 	case FadeInTrimHandleItem:
