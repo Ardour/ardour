@@ -1345,13 +1345,13 @@ SoundFileBrowser::handle_freesound_results(std::string theString) {
 
 			/* see http://www.freesound.org/help/faq/#licenses */
 			char shortlicense[64];
-			if(!licence.compare(0, 42, "http://creativecommons.org/licenses/by-nc/")){
+			if (licence.find("://creativecommons.org/licenses/by-nc/") != std::string::npos){
 				sprintf(shortlicense, "CC-BY-NC");
-			} else if(!licence.compare(0, 39, "http://creativecommons.org/licenses/by/")) {
+			} else if (licence.find ("://creativecommons.org/licenses/by/") != std::string::npos) {
 				sprintf(shortlicense, "CC-BY");
-			} else if(!licence.compare("http://creativecommons.org/licenses/sampling+/1.0/")) {
+			} else if (licence.find ("://creativecommons.org/licenses/sampling+/1.0/") != std::string::npos) {
 				sprintf(shortlicense, "sampling+");
-			} else if(!licence.compare(0, 40, "http://creativecommons.org/publicdomain/")) {
+			} else if (licence.find ("://creativecommons.org/publicdomain/") != std::string::npos) {
 				sprintf(shortlicense, "PD");
 			} else {
 				snprintf(shortlicense, 64, "%s", licence.c_str());
