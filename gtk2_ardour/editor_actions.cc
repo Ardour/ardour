@@ -873,7 +873,7 @@ static void _lua_print (std::string s) {
 }
 
 void
-Editor::trigger_script_by_name (const std::string script_name)
+Editor::trigger_script_by_name (const std::string script_name, const std::string in_args)
 {
 	string script_path;
 	ARDOUR::LuaScriptList scr = LuaScripting::instance ().scripts(LuaScriptInfo::EditorAction);
@@ -900,6 +900,8 @@ Editor::trigger_script_by_name (const std::string script_name)
 			lua.do_command ("function ardour () end");
 			lua.do_file (script_path);
 			luabridge::LuaRef args (luabridge::newTable (L));
+
+			args[1] = in_args;
 
 			try {
 				luabridge::LuaRef fn = luabridge::getGlobal (L, "factory");

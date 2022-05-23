@@ -712,7 +712,7 @@ private:
 	gint really_remove_region_marker (ArdourMarker*);
 	void goto_nth_marker (int nth);
 	void trigger_script (int nth);
-	void trigger_script_by_name (const std::string script_name);
+	void trigger_script_by_name (const std::string script_name, const std::string args = "");
 	void toggle_marker_lines ();
 	void set_marker_line_visibility (bool);
 
