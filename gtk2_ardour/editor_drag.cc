@@ -3583,10 +3583,9 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->begin_reversible_command (_("move tempo mark"));
 	}
 
-
 	if (ArdourKeyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 
-		double new_bpm = max (1.5, _grab_bpm.note_types_per_minute() + ((grab_y() - min (-1.0, current_pointer_y())) / 5.0));
+		double new_bpm = std::max (1.5, _grab_bpm.note_types_per_minute() - ((current_pointer_x() - grab_x()) / 5.0));
 		stringstream strs;
 		Temporal::Tempo new_tempo (new_bpm, _marker->tempo().note_type());
 		map->change_tempo (const_cast<TempoPoint&>(_marker->tempo()), new_tempo);
