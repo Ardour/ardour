@@ -118,6 +118,7 @@ function factory (params)
 			--print(i, l)
 
 			local create_groups = dry_run["create_groups"]
+			local set_names = dry_run["set_names"]
 			local skip_line = false
 
 			local plugin, route, group = false, false, false
@@ -180,6 +181,8 @@ function factory (params)
 				local rt = Session:route_by_id(r_id)
 				if rt:isnil() then rt = Session:route_by_name(name) end
 				if rt:isnil() then goto nextline end
+
+				if (set_names) then rt:set_name(name) end
 
 				if sends then
 					for i, data in pairs(sends) do
@@ -413,6 +416,9 @@ function factory (params)
 				type = "checkbox", col=0, colspan=2, align="left",  key = "create_groups", default = true, title = "Create Groups if necessary?"
 			})
 		end
+		table.insert(dry_table, {
+			type = "checkbox", col=0, colspan=2, align="left",  key = "set_names", default = true, title = "Set Names from File"
+		})
 		return dry_table
 	end
 
