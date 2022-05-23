@@ -178,7 +178,7 @@ class LIBTEMPORAL_API Tempo {
 		, _note_type (note_type)
 		, _active (true)
 		, _locked_to_meter (false)
-		, _clamped (false)
+		, _continuing (false)
 		{}
 
 	Tempo (double npm, double enpm, int note_type)
@@ -191,7 +191,7 @@ class LIBTEMPORAL_API Tempo {
 		, _note_type (note_type)
 		, _active (true)
 		, _locked_to_meter (false)
-		, _clamped (false)
+		, _continuing (false)
 		{}
 
 	/* these five methods should only be used to show and collect information to the user (for whom
@@ -242,8 +242,8 @@ class LIBTEMPORAL_API Tempo {
 	bool locked_to_meter ()  const { return _locked_to_meter; }
 	void set_locked_to_meter (bool yn) { _locked_to_meter = yn; }
 
-	bool clamped() const { return _clamped; }
-	void set_clamped (bool yn);
+	bool continuing() const { return _continuing; }
+	void set_continuing (bool yn);
 
 	Type type() const { return _superclocks_per_note_type == _end_superclocks_per_note_type ? Constant : Ramped; }
 	bool ramped () const { return _superclocks_per_note_type != _end_superclocks_per_note_type; }
@@ -253,11 +253,11 @@ class LIBTEMPORAL_API Tempo {
 
 	bool operator== (Tempo const & other) const {
 		return _superclocks_per_note_type == other._superclocks_per_note_type &&
-			_end_superclocks_per_note_type == other._end_superclocks_per_note_type &&
-			_note_type == other._note_type &&
-			_active == other._active &&
-			_locked_to_meter == other._locked_to_meter &&
-		_clamped == other._clamped;
+		_end_superclocks_per_note_type == other._end_superclocks_per_note_type &&
+		_note_type == other._note_type &&
+		_active == other._active &&
+		_locked_to_meter == other._locked_to_meter &&
+		_continuing == other._continuing;
 	}
 
 	bool operator!= (Tempo const & other) const {
@@ -266,7 +266,7 @@ class LIBTEMPORAL_API Tempo {
 			_note_type != other._note_type ||
 			_active != other._active ||
 			_locked_to_meter != other._locked_to_meter ||
-			_clamped != other._clamped;
+			_continuing != other._continuing;
 	}
 
 	uint64_t super_note_type_per_second() const { return _super_note_type_per_second; }
@@ -282,7 +282,7 @@ class LIBTEMPORAL_API Tempo {
 	int8_t       _note_type;
 	bool         _active;
 	bool         _locked_to_meter; /* XXX name has unclear meaning with nutempo */
-	bool         _clamped;
+	bool         _continuing;
 
 	static inline uint64_t     double_npm_to_snps (double npm) { return (uint64_t) llround (npm * big_numerator / 60); }
 	static inline superclock_t double_npm_to_scpn (double npm) { return (superclock_t) llround ((60./npm) * superclock_ticks_per_second()); }
@@ -1013,7 +1013,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 		double note_types_per_minute;
 		double end_note_types_per_minute;
 		double note_type;
-		bool clamped;
+		bool continuing; /* "clamped" in actual legacy stuff */
 		bool active;
 	};
 

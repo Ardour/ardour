@@ -113,8 +113,11 @@ Tempo::Tempo (XMLNode const & node)
 	if (!node.get_property (X_("locked-to-meter"), _locked_to_meter)) {
 		_locked_to_meter = true;
 	}
-	if (!node.get_property (X_("clamped"), _clamped)) {
-		_clamped = false;
+
+	/* older versions used "clamped" as the property name here */
+
+	if (!node.get_property (X_("continuing"), _continuing) && !node.get_property (X_("clamped"), _continuing)) {
+		_continuing = false;
 	}
 }
 
@@ -126,9 +129,9 @@ Tempo::set_end_npm (double npm)
 }
 
 void
-Tempo::set_clamped (bool yn)
+Tempo::set_continuing (bool yn)
 {
-	_clamped = yn;
+	_continuing = yn;
 }
 
 XMLNode&
@@ -142,7 +145,7 @@ Tempo::get_state () const
 	node->set_property (X_("type"), type());
 	node->set_property (X_("active"), active());
 	node->set_property (X_("locked-to-meter"), _locked_to_meter);
-	node->set_property (X_("clamped"), _clamped);
+	node->set_property (X_("continuing"), _continuing);
 
 	return *node;
 }
@@ -169,8 +172,10 @@ Tempo::set_state (XMLNode const & node, int /*version*/)
 		_locked_to_meter = true;
 	}
 
-	if (!node.get_property (X_("clamped"), _clamped)) {
-		_clamped = false;
+	/* older versions used "clamped" as the property name here */
+
+	if (!node.get_property (X_("continuing"), _continuing) && !node.get_property (X_("continuing"), _continuing)) {
+		_continuing = false;
 	}
 
 	return 0;
@@ -450,7 +455,7 @@ TempoPoint::compute_omega_from_next_tempo (TempoPoint const & next)
 {
 	superclock_t end_scpqn;
 
-	if (!_clamped) {
+	if (!_continuing) {
 		/* tempo is defined by our own start and end */
 		end_scpqn = end_superclocks_per_quarter_note();
 	} else {
@@ -3086,7 +3091,7 @@ TempoMap::stretch_tempo (TempoPoint* ts, samplepos_t sample, samplepos_t end_sam
 	const superclock_t min_delta_sclock = samples_to_superclock (2, TEMPORAL_SAMPLE_RATE);
 	double new_bpm;
 
-	if (ts->clamped()) {
+	if (ts->continuing()) {
 
 		/* this tempo point is required to start using the same bpm
 		 * that the previous tempo ended with.
@@ -3138,7 +3143,7 @@ TempoMap::stretch_tempo (TempoPoint* ts, samplepos_t sample, samplepos_t end_sam
 
 	ts->set_note_types_per_minute (new_bpm);
 
-	if (ts->clamped()) {
+	if (ts->continuing()) {
 		TempoPoint* prev = 0;
 		if ((prev = const_cast<TempoPoint*> (previous_tempo (*ts))) != 0) {
 			prev->set_end_npm (ts->end_note_types_per_minute());
@@ -3190,7 +3195,7 @@ TempoMap::stretch_tempo_end (TempoPoint* ts, samplepos_t sample, samplepos_t end
 
 	prev_t->set_end_npm (new_bpm);
 
-	if (ts->clamped()) {
+	if (ts->continuing()) {
 		ts->set_note_types_per_minute (prev_t->end_note_types_per_minute());
 	}
 
@@ -3297,7 +3302,7 @@ TempoMap::twist_tempi (TempoPoint* ts, samplepos_t start_sample, samplepos_t end
 
 		ts->set_end_npm (new_copy_end_bpm);
 
-		if (next_t->clamped()) {
+		if (next_t->continuing()) {
 			next_t->set_note_types_per_minute (new_copy_end_bpm);
 		} else {
 			next_t->set_note_types_per_minute (new_next_bpm);
@@ -3439,8 +3444,10 @@ TempoMap::parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts)
 		lts.note_type = 4.0;
 	}
 
-	if (!node.get_property ("clamped", lts.clamped)) {
-		lts.clamped = false;
+	/* older versions used "clamped" as the property name here */
+
+	if (!node.get_property ("clamped", lts.continuing)) {
+		lts.continuing = false;
 	}
 
 	if (node.get_property ("end-beats-per-minute", lts.end_note_types_per_minute)) {
@@ -3573,6 +3580,9 @@ TempoMap::set_state_3x (const XMLNode& node)
 			         lts.end_note_types_per_minute,
 			         lts.note_type);
 			TempoPoint* tp = new TempoPoint (*this, t, samples_to_superclock (0, TEMPORAL_SAMPLE_RATE), Beats(), BBT_Time());
+
+			tp->set_continuing (lts.continuing);
+
 			_tempos.clear ();
 			if (need_points_clear) {
 				_points.clear ();
