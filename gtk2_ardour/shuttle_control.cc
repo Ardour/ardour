@@ -31,6 +31,7 @@
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/port.h"
 #include "ardour/session.h"
 
 #include "gtkmm2ext/colors.h"
@@ -765,7 +766,7 @@ ShuttleControl::parameter_changed (std::string p)
 		delete shuttle_context_menu;
 		shuttle_context_menu = 0;
 	} else if (p == "external-sync") {
-		if (_session->config.get_external_sync()) {
+		if (_session->config.get_external_sync() || !Port::can_varispeed ()) {
 			_vari_dialog.hide ();
 			_vari_button.set_sensitive (false);
 			if (shuttle_grabbed) {
