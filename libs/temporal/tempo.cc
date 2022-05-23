@@ -3225,7 +3225,7 @@ TempoMap::stretch_tempo_end (TempoPoint* ts, samplepos_t sample, samplepos_t end
 	prev_t->set_end_npm (new_bpm);
 
 	if (ts->continuing()) {
-		ts->set_note_types_per_minute (prev_t->end_note_types_per_minute());
+		ts->set_note_types_per_minute (prev_t->note_types_per_minute());
 	}
 
 	reset_starting_at (prev_t->sclock());
