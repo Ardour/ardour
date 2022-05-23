@@ -704,7 +704,7 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 
 	reassociate_metric_markers (tmap);
 
-	begin_reversible_command (_("replace time signature mark"));
+	begin_reversible_command (_("Edit Time Signature"));
 	XMLNode &before = tmap->get_state();
 
 	tmap->set_meter (meter, when);
@@ -741,7 +741,7 @@ Editor::edit_tempo_section (TempoPoint& section)
 	Temporal::BBT_Time when;
 	tempo_dialog.get_bbt_time (when);
 
-	begin_reversible_command (_("replace tempo mark"));
+	begin_reversible_command (_("Edit Tempo"));
 	XMLNode &before = tmap->get_state();
 
 	tmap->set_tempo (tempo, when);
