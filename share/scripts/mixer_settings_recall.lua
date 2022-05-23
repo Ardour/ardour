@@ -3,7 +3,7 @@ ardour {
 	name        = "Recall Mixer Settings",
 	author      = "Mixbus Team",
 	description = [[
-	Recalls mixer settings outined by files
+	Recalls mixer settings files
 	created by Store Mixer Settings.
 
 	Allows for some room to change Source
@@ -11,15 +11,25 @@ ardour {
 	]]
 }
 
-function factory ()
-
-	local acoraida_monicas_last_used_recall_file
+function factory (params)
 
 	return function ()
 
 	local user_cfg = ARDOUR.user_config_directory(-1)
-	local local_path = ARDOUR.LuaAPI.build_filename(Session:path(), 'mixer_settings')
-	local global_path = ARDOUR.LuaAPI.build_filename(user_cfg, 'mixer_settings')
+	local folder_path = ARDOUR.LuaAPI.build_filename(Session:path(), 'mixer_settings')
+
+	local p = params or {}
+	local args = p[1] or ""
+	if args=="global_path" then
+		folder_path = ARDOUR.LuaAPI.build_filename(user_cfg, 'mixer_settings')
+	end
+
+	local snap_num = 0
+	for test = 0, 12, 1 do
+		if string.find(args, string.format("Scene_%d", test)) then
+			snap_num = test
+		end
+	end
 
 	local invalidate = {}
 
@@ -370,27 +380,27 @@ function factory ()
 			if do_route then
 				local route_id   = instance["route_id"]
 				local route_name = instance["route_name"]
-				local dlg_title = ""
+				local src_name = string.format("%s", route_name)
 
 				local route_ptr = Session:route_by_id(PBD.ID(route_id))
 
-				if route_ptr:isnil() then
-					route_ptr = Session:route_by_name(route_name)
-					if not(route_ptr:isnil()) then
-						dlg_title = string.format("%s", route_ptr:name())
-						--action_title = "will use route settings"
-					else
-						dlg_title = string.format("%s", route_name)
-						--action_title = "will be ignored"
-					end
-				else
-					dlg_title = string.format("%s", route_ptr:name())
+--				if route_ptr:isnil() then
+--					route_ptr = Session:route_by_name(route_name)
+--					if not(route_ptr:isnil()) then
+--						dlg_title = string.format("%s", route_ptr:name())
+--						--action_title = "will use route settings"
+--					else
+--						dlg_title = string.format("%s", route_name)
+--						--action_title = "will be ignored"
+--					end
+--				else
+--					dlg_title = string.format("%s", route_ptr:name())
 					--action_title = "will use route settings"
-				end
+--				end
 				if route_ptr:isnil() then name = route_name else name = route_ptr:name() end
 
 				table.insert(dry_table, {
-					order=instance['pi_order']+pad, type = "label",    align="right", key = "route-"..i , col = 0, colspan = 1, title = dlg_title
+					order=instance['pi_order']+pad, type = "label",    align="right", key = "route-"..i , col = 0, colspan = 1, title = src_name
 				})
 				table.insert(dry_table, {
 					type = "dropdown", align="left", key = "destination-"..i, col = 1, colspan = 1, title = "", values = route_values, default = name or "----"
@@ -398,23 +408,13 @@ function factory ()
 			end
 			i = i + 1
 		end
-		table.insert(dry_table, {
-			type = "checkbox", col=0, colspan=2, align="left",  key = "create_groups", default = true, title = "Create Groups if necessary?"
-		})
+		if (snap_num==0) then
+			table.insert(dry_table, {
+				type = "checkbox", col=0, colspan=2, align="left",  key = "create_groups", default = true, title = "Create Groups if necessary?"
+			})
+		end
 		return dry_table
 	end
-
-	local global_vs_local_dlg = {
-		{ type = "label", col=0, colspan=20, align="left", title = "" },
-		{
-			type = "radio", col=0, colspan=20, align="left", key = "recall-dir", title = "", values =
-			{
-				['Pick from Global Settings'] = 1, ['Pick from Local Settings'] = 2, ['Last Used Recall File'] = 3,
-			},
-			default = 'Last Used Recall File'
-		},
-		{ type = "label", col=0, colspan=20, align="left", title = ""},
-	}
 
 	local recall_options = {
 		{ type = "label", col=0, colspan=10, align="left", title = "" },
@@ -422,68 +422,33 @@ function factory ()
 		{ type = "label", col=0, colspan=10, align="left", title = "" },
 	}
 
-	local gvld = LuaDialog.Dialog("Recall Mixer Settings:", global_vs_local_dlg):run()
-
-	if not(gvld) then
-		return
+	local default_path = ARDOUR.LuaAPI.build_filename(folder_path, 'asdf')
+	local file_name = "Scene_" .. snap_num
+	local file_path = ARDOUR.LuaAPI.build_filename(folder_path, string.format("%s-%s.lua", file_name, whoami()))
+	if exists(folder_path) then
+		recall_options[2]['path'] = default_path
+		if (snap_num==0) then
+			local rv = LuaDialog.Dialog("Recall Mixer Settings:", recall_options):run()
+			if not(rv) then return end
+			file_name = rv['file']
+			file_path = rv['file']
+			print("About to load path " .. file_path)
+		end
+		local dry_return = LuaDialog.Dialog("Recall Mixer Settings:", dry_run(false, file_path)):run()
+		if dry_return then
+			recall(false, file_path, dry_return)  --set first arg TRUE for debug
+		else
+			return
+		end
 	else
-		if gvld['recall-dir'] == 1 then
-			local global_ok = isdir(global_path)
-			local global_default_path = ARDOUR.LuaAPI.build_filename(global_path, string.format("FactoryDefault-%s.lua", whoami()))
-			print(global_default_path)
-			if global_ok then
-				recall_options[2]['path'] = global_default_path
-				local rv = LuaDialog.Dialog("Recall Mixer Settings:", recall_options):run()
-				if not(rv) then return end
-				local dry_return = LuaDialog.Dialog("Recall Mixer Settings:", dry_run(false, rv['file'])):run()
-				if dry_return then
-					acoraida_monicas_last_used_recall_file = rv['file']
-					recall(false, rv['file'], dry_return)
-				else
-					return
-				end
-			else
-				LuaDialog.Message ("Recall Mixer Settings:",
-					global_path .. ' does not exist!\nPlease run Store Mixer Settings first.',
-					LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
-			end
-		end
-
-		if gvld['recall-dir'] == 2 then
-			local local_ok = isdir(local_path)
-			local local_default_path = ARDOUR.LuaAPI.build_filename(local_path, 'asdf')
-			print(local_default_path)
-			if local_ok then
-				recall_options[2]['path'] = local_default_path
-				local rv = LuaDialog.Dialog("Recall Mixer Settings:", recall_options):run()
-				if not(rv) then return end
-				local dry_return = LuaDialog.Dialog("Recall Mixer Settings:", dry_run(false, rv['file'])):run()
-				if dry_return then
-					acoraida_monicas_last_used_recall_file = rv['file']
-					recall(true, rv['file'], dry_return)
-				else
-					return
-				end
-			else
-				LuaDialog.Message ("Recall Mixer Settings:",
-					local_path .. 'does not exist!\nPlease run Store Mixer Settings first.',
-					LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
-			end
-		end
-
-		if gvld['recall-dir'] == 3 then
-			if acoraida_monicas_last_used_recall_file then
-				local dry_return = LuaDialog.Dialog("Recall Mixer Settings:", dry_run(false, acoraida_monicas_last_used_recall_file)):run()
-				if dry_return then
-					recall(true, acoraida_monicas_last_used_recall_file, dry_return)
-				else
-					return
-				end
-			else
-				LuaDialog.Message ("Script has no record of last used file:",
-					'Please pick a recall file and then this option will be available',
-					LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
-			end
+		if (snap_num==0) then
+			LuaDialog.Message ("Recall Mixer Settings:",
+				local_path .. 'does not exist!\nPlease run Store Mixer Settings first.',
+				LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
+		else
+			LuaDialog.Message ("Recall Mixer Settings:",
+				"Mixer Snap " .. snap_num .. " does not exist yet.",
+				LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
 		end
 	end
 

@@ -5,7 +5,7 @@ ardour {
 	description = [[
 	Stores the current Mixer state as a file
 	that can be read and recalled arbitrarily
-	by it's companion script, Recall Mixer Settings.
+	by its companion script, Recall Mixer Settings.
 
 	Supports: processor settings, grouping,
 	mute, solo, gain, trim, pan and processor ordering,
@@ -13,11 +13,18 @@ ardour {
 	]]
 }
 
-function factory () return function ()
+function factory (params)
+
+	return function ()
 
 	local user_cfg = ARDOUR.user_config_directory(-1)
-	local local_path = ARDOUR.LuaAPI.build_filename(Session:path(), 'mixer_settings')
-	local global_path = ARDOUR.LuaAPI.build_filename(user_cfg, 'mixer_settings')
+	local folder_path = ARDOUR.LuaAPI.build_filename(Session:path(), 'mixer_settings')
+
+	local p = params or {}
+	local args = p[1] or ""
+	if args=="global_path" then
+		folder_path = ARDOUR.LuaAPI.build_filename(user_cfg, 'mixer_settings')
+	end
 
 	function exists(file)
 		local ok, err, code = os.rename(file, file)
@@ -46,25 +53,17 @@ function factory () return function ()
 	end
 
 	function setup_paths()
-		local global_ok, local_ok = false, false
+		local local_ok = false
 
-		if not(isdir(global_path)) then
-			global_ok, _, _ = os.execute('mkdir '.. global_path)
-			if global_ok == 0 then
-				global_ok = true
-			end
-		else
-			global_ok = true
-		end
-		if not(isdir(local_path)) then
-			local_ok, _, _ = os.execute('mkdir '.. local_path)
+		if not(isdir(folder_path)) then
+			local_ok, _, _ = os.execute('mkdir '.. folder_path)
 			if local_ok == 0 then
 				local_ok = true
 			end
 		else
 			local_ok = true
 		end
-		return global_ok, local_ok
+		return local_ok
 	end
 
 	function get_processor_by_name(track, name)
@@ -351,42 +350,38 @@ function factory () return function ()
 	local store_options = {
 		{ type = "label",    col=0, colspan=1, align="right", title = "Name:" },
 		{ type = "entry",    col=1, colspan=1, align="left" , key = "filename", default = Session:name(), title=""},
-		{ type = "label",    col=0, colspan=1, align="right", title = "Location:" },
-		{
-			type = "radio",  col=1, colspan=3, align="left", key = "store-dir", title = "", values =
-			{
-				['Global (accessible from any session)'] = 1, ['Local (this session only)'] = 2
-			},
-			default = 'Locally (this session only)'
-		},
 		{ type = "hseparator", title="", col=0, colspan = 3},
 		{ type = "label",    col=0, colspan=1, align="right", title = "Selected Tracks Only:" },
 		{ type = "checkbox", col=1, colspan=1, align="left",  key = "selected", default = false, title = ""},
 		--{ type = "label", col=0, colspan=2, align="left", title = ''},
 		--{ type = "label", col=0, colspan=2, align="left", title = "Global Path: " .. global_path},
-		--{ type = "label", col=0, colspan=2, align="left", title = "Local Path: "  .. local_path},
+		--{ type = "label", col=0, colspan=2, align="left", title = "Local Path: "  .. folder_path},
 	}
 
-	local global_ok, local_ok = setup_paths()
+	local snap_num = 0
+	for test = 0, 12, 1 do
+		if string.find(args, string.format("Scene_%d", test)) then
+			snap_num = test
+		end
+	end
 
-	if global_ok and local_ok then
-		local rv = LuaDialog.Dialog("Store Mixer Settings:", store_options):run()
-
-		if not(rv) then return end
-
-		local filename = rv['filename']
-		if rv['store-dir'] == 1 then
-			local store_path = ARDOUR.LuaAPI.build_filename(global_path, string.format("%s-%s.lua", filename, whoami()))
-			local selected = rv['selected']
-			mark_tracks(selected, store_path)
+	local paths_ok = setup_paths()
+	local filename = "Scene_" .. snap_num
+	local selected = false  --we store 'all' routes and let the user pick what to recall later
+	if paths_ok then
+		if (snap_num==0) then
+			local rv = LuaDialog.Dialog("Store Mixer Settings:", store_options):run()
+			if not(rv) then return end
+			filename = rv['filename']
+			selected = rv['selected']
 		end
 
-		if rv['store-dir'] == 2 then
-			local store_path = ARDOUR.LuaAPI.build_filename(local_path, string.format("%s-%s.lua", filename, whoami()))
-			print(store_path)
-			local selected = rv['selected']
-			mark_tracks(selected, store_path)
-		end
+		local store_path = ARDOUR.LuaAPI.build_filename(folder_path, string.format("%s-%s.lua", filename, whoami()))
+		mark_tracks(selected, store_path)
+		if (snap_num ~= 0) then
+			LuaDialog.Message ("Mixer Scenes: Store", "Stored mixer settings to: " .. store_path,
+				LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
+		end			
 	end
 
 end end
