@@ -1801,7 +1801,7 @@ private:
 	void marker_menu_remove ();
 	void marker_menu_rename ();
 	void rename_marker (ArdourMarker* marker);
-	void toggle_tempo_clamped ();
+	void toggle_tempo_continues ();
 	void toggle_tempo_type ();
 	void ramp_to_next_tempo ();
 	void toggle_marker_menu_lock ();

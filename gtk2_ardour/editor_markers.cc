@@ -1151,10 +1151,10 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 	tempo_marker_menu->set_name ("ArdourContextMenu");
 
 	if (!loc->tempo().map().is_initial(loc->tempo())) {
-		if (loc->tempo().clamped()) {
-			items.push_back (MenuElem (_("Don't Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_clamped)));
+		if (loc->tempo().continuing()) {
+			items.push_back (MenuElem (_("Don't Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_continues)));
 		} else {
-			items.push_back (MenuElem (_("Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_clamped)));
+			items.push_back (MenuElem (_("Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_continues)));
 		}
 	}
 
@@ -1626,9 +1626,10 @@ Editor::toggle_tempo_type ()
 		TempoMap::update (tmap);
 	}
 }
-/* clamped locks the previous section end tempo to the start tempo */
+
+/* "continues" locks the start tempo to the previous section end tempo */
 void
-Editor::toggle_tempo_clamped ()
+Editor::toggle_tempo_continues ()
 {
 	TempoMarker* tm;
 	MeterMarker* mm;
@@ -1643,7 +1644,7 @@ Editor::toggle_tempo_clamped ()
 		reassociate_metric_markers (tmap);
 		Temporal::Tempo const & tempo (tm->tempo());
 
-		const_cast<Temporal::Tempo&>(tempo).set_clamped (!tempo.clamped());
+		const_cast<Temporal::Tempo&>(tempo).set_continuing (!tempo.continuing());
 
 		XMLNode &after = tmap->get_state();
 		_session->add_command (new Temporal::TempoCommand (_("change tempo clamp"), &before, &after));

@@ -3679,7 +3679,7 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_editor->tempo_curve_selected (_tempo, true);
 
 	ostringstream sstr;
-	if (_tempo->clamped()) {
+	if (_tempo->continuing()) {
 		TempoPoint const * prev = map->previous_tempo (*_tempo);
 		if (prev) {
 			sstr << "end: " << fixed << setprecision(3) << prev->end_note_types_per_minute() << "\n";
@@ -3734,7 +3734,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	ostringstream sstr;
-	if (_tempo->clamped()) {
+	if (_tempo->continuing()) {
 		TempoPoint const * prev = map->previous_tempo (*_tempo);
 		if (prev) {
 			_editor->tempo_curve_selected (prev, true);
@@ -3786,7 +3786,7 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		_editor->tempo_curve_selected (_tempo, false);
 
-		if (_tempo->clamped()) {
+		if (_tempo->continuing()) {
 
 			TempoPoint const * prev_tempo = map->previous_tempo (*_tempo);
 
@@ -3956,7 +3956,7 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		sstr << "end: " << fixed << setprecision(3) << map->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute() << "\n";
 	}
 
-	if (_tempo->clamped()) {
+	if (_tempo->continuing()) {
 		_editor->tempo_curve_selected (_tempo, true);
 		sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
 	}
@@ -3997,7 +3997,7 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 	const samplecnt_t sr = AudioEngine::instance()->sample_rate();
 	sstr << "end: " << fixed << setprecision(3) << map->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute() << "\n";
 
-	if (_tempo->clamped()) {
+	if (_tempo->continuing()) {
 		sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
 	}
 
@@ -4024,7 +4024,7 @@ TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->tempo_curve_selected (prev, false);
 	}
 
-	if (_tempo->clamped()) {
+	if (_tempo->continuing()) {
 		_editor->tempo_curve_selected (_tempo, false);
 
 	}
