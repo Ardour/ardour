@@ -1215,11 +1215,7 @@ SoundFileBrowser::freesound_search()
 	std::string theString = mootcher.searchText(
 			search_string,
 			freesound_page,
-#ifdef __APPLE__
-			"", // OSX eats anything incl mp3
-#else
-			"type:(wav OR aiff OR flac OR aif OR ogg OR oga)",
-#endif
+			"",
 			sort_method
 			);
 
