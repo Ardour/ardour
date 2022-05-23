@@ -888,6 +888,10 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	int set_meters_from_state (XMLNode const &);
 	int set_music_times_from_state (XMLNode const &);
 
+	TempoPoint* core_add_tempo (TempoPoint*, bool&);
+	MeterPoint* core_add_meter (MeterPoint*, bool&);
+	void        core_add_point (Point*);
+
 	MeterPoint & set_meter (Meter const &, superclock_t);
 
 	TempoPoint* add_tempo (TempoPoint*);

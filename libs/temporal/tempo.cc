@@ -758,34 +758,14 @@ TempoMap::copy_points (TempoMap const & other)
 MeterPoint*
 TempoMap::add_meter (MeterPoint* mp)
 {
-	Meters::iterator m;
-	Points::iterator p;
-	const superclock_t sclock_limit = mp->sclock();
-	const Beats beats_limit = mp->beats ();
-
-	for (m = _meters.begin(); m != _meters.end() && m->beats() < beats_limit; ++m);
-	for (p = _points.begin(); p != _points.end() && p->beats() < beats_limit; ++p);
-
-	bool replaced = false;
-	MeterPoint* ret = 0;
-
-	if (m != _meters.end()) {
-		if (m->sclock() == sclock_limit) {
-			/* overwrite Meter part of this point */
-			*((Meter*)&(*m)) = *mp;
-			delete mp;
-			ret = &(*m);
-			replaced = true;
-		}
-	}
+	bool replaced;
+	MeterPoint* ret = core_add_meter (mp, replaced);
 
 	if (!replaced) {
-		ret = &(*(_meters.insert (m, *mp)));
-		_points.insert (p, *mp);
+		core_add_point (mp);
 	}
 
-	reset_starting_at (sclock_limit);
-
+	reset_starting_at (mp->sclock());
 	return ret;
 }
 
@@ -856,50 +836,75 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 	return *ret;
 }
 
+void
+TempoMap::core_add_point (Point* pp)
+{
+	Points::iterator p;
+	const Beats beats_limit = pp->beats();
+
+	for (p = _points.begin(); p != _points.end() && p->beats() < beats_limit; ++p);
+	_points.insert (p, *pp);
+}
+
 TempoPoint*
-TempoMap::add_tempo (TempoPoint * tp)
+TempoMap::core_add_tempo (TempoPoint* tp, bool& replaced)
 {
 	Tempos::iterator t;
-	Points::iterator p;
 	const superclock_t sclock_limit = tp->sclock();
 	const Beats beats_limit = tp->beats ();
 
 	for (t = _tempos.begin(); t != _tempos.end() && t->beats() < beats_limit; ++t);
-	for (p = _points.begin(); p != _points.end() && p->beats() < beats_limit; ++p);
-
-	bool replaced = false;
-	TempoPoint* ret = 0;
 
 	if (t != _tempos.end()) {
 		if (t->sclock() == sclock_limit) {
 			/* overwrite Tempo part of this point */
 			*((Tempo*)&(*t)) = *tp;
 			delete tp;
-			ret = &(*t);
 			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("overwrote old tempo with %1\n", tp));
 			replaced = true;
+			return &(*t);
 		}
 	}
 
-	if (!replaced) {
-		t = _tempos.insert (t, *tp);
-		p = _points.insert (p, *tp);
-		ret = &*t;
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("inserted tempo %1\n", tp));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("inserted tempo %1\n", tp));
+
+	replaced = false;
+	return &(* _tempos.insert (t, *tp));
+}
+
+MeterPoint*
+TempoMap::core_add_meter (MeterPoint* mp, bool& replaced)
+{
+	Meters::iterator m;
+	const superclock_t sclock_limit = mp->sclock();
+	const Beats beats_limit = mp->beats ();
+
+	for (m = _meters.begin(); m != _meters.end() && m->beats() < beats_limit; ++m);
+
+	if (m != _meters.end()) {
+		if (m->sclock() == sclock_limit) {
+			/* overwrite Meter part of this point */
+			*((Meter*)&(*m)) = *mp;
+			delete mp;
+			replaced = true;
+			return &(*m);
+		}
 	}
 
-	/* t is guaranteed not to be _tempos.end() : it was either the
-	 * TempoPoint we overwrote, or its the one we inserted.
-	 */
+	replaced = false;
+	return &(*(_meters.insert (m, *mp)));
+}
 
-	assert (t != _tempos.end());
-	assert (p != _points.end());
+TempoPoint*
+TempoMap::add_tempo (TempoPoint * tp)
+{
+	bool replaced;
+	TempoPoint* ret = core_add_tempo (tp, replaced);
 
-	Tempos::iterator nxt = t;
-	++nxt;
-
-	reset_starting_at (sclock_limit);
-
+	if (!replaced) {
+		core_add_point (tp);
+	}
+	reset_starting_at (tp->sclock());
 	return ret;
 }
 
