@@ -42,7 +42,7 @@ AudioPort::AudioPort (const std::string& name, PortFlags flags)
 	, _data (0)
 {
 	assert (name.find_first_of (':') == string::npos);
-	_src.setup (_resampler_quality);
+	_src.setup (resampler_quality ());
 	_src.set_rrfilt (10);
 }
 

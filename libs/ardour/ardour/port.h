@@ -158,7 +158,11 @@ public:
 
 	static pframes_t cycle_nframes () { return _cycle_nframes; }
 	static double speed_ratio () { return _speed_ratio; }
+
 	static uint32_t resampler_quality () { return _resampler_quality; }
+	static uint32_t resampler_latency () { return _resampler_latency; }
+	static bool     can_varispeed ()     { return _resampler_latency > 0; }
+	static void     setup_resampler (uint32_t q = 17);
 
 protected:
 
@@ -175,7 +179,6 @@ protected:
 	LatencyRange _private_capture_latency;
 
 	static double _speed_ratio;
-	static const uint32_t _resampler_quality; /* also latency of the resampler */
 
 private:
 	std::string _name;  ///< port short name
@@ -187,6 +190,9 @@ private:
 	    reconnect to the backend when required
 	*/
 	std::set<std::string> _connections;
+
+	static uint32_t _resampler_quality; // 8 <= q <= 96
+	static uint32_t _resampler_latency; // = _resampler_quality - 1
 
 	void port_connected_or_disconnected (boost::weak_ptr<Port>, boost::weak_ptr<Port>, bool);
 	void signal_drop ();

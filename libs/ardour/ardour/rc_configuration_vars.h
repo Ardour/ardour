@@ -40,6 +40,9 @@ CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", 
 CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", AutoConnectPhysical)
 CONFIG_VARIABLE (bool, strict_io, "strict-io", true)
 
+/* 0: off, no varispeed, q: 8..96 */
+CONFIG_VARIABLE (uint32_t, port_resampler_quality, "port-resampler-quality,", 17)
+
 /* Connect all physical inputs to a dummy port, this makes raw input data available.
  * `jack_port_get_buffer (jack_port_by_name (c, "system:capture_1") , n_samples);`
  * nees to work for input-monitoring (recorder page).

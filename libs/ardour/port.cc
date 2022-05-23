@@ -47,7 +47,8 @@ pframes_t    Port::_global_port_buffer_offset = 0;
 pframes_t    Port::_cycle_nframes = 0;
 double       Port::_speed_ratio = 1.0;
 std::string  Port::state_node_name = X_("Port");
-const uint32_t Port::_resampler_quality = 17;
+uint32_t     Port::_resampler_quality = 17;
+uint32_t     Port::_resampler_latency = 16; // = _resampler_quality - 1;
 
 /* a handy define to shorten what would otherwise be a needlessly verbose
  * repeated phrase
@@ -388,13 +389,9 @@ Port::set_public_latency_range (LatencyRange const& range, bool playback) const
 	if (_port_handle) {
 		LatencyRange r (range);
 		if (externally_connected () && 0 == (_flags & TransportSyncPort) && sends_output () == playback) {
-#if 0
-			r.min *= _speed_ratio;
-			r.max *= _speed_ratio;
-#endif
 			if (type () == DataType::AUDIO) {
-				r.min += (_resampler_quality - 1);
-				r.max += (_resampler_quality - 1);
+				r.min += (_resampler_latency);
+				r.max += (_resampler_latency);
 			}
 		}
 		port_engine.set_latency_range (_port_handle, playback, r);
@@ -449,19 +446,6 @@ Port::public_latency_range (bool playback) const
 
 	if (_port_handle) {
 		r = port_engine.get_latency_range (_port_handle, playback);
-		if (externally_connected () && 0 == (_flags & TransportSyncPort) && sends_output () == playback) {
-#if 0
-			r.min /= _speed_ratio;
-			r.max /= _speed_ratio;
-#endif
-#if 0
-			/* use value as set by set_public_latency_range */
-			if (type () == DataType::AUDIO) {
-				r.min += (_resampler_quality - 1);
-				r.max += (_resampler_quality - 1);
-			}
-#endif
-		}
 
 		DEBUG_TRACE (DEBUG::LatencyIO, string_compose (
 				     "GET PORT %1: %4 PUBLIC latency range %2 .. %3\n",
@@ -493,8 +477,8 @@ Port::collect_latency_from_backend (LatencyRange& range, bool playback) const
 		if (!AudioEngine::instance()->port_is_mine (*c)) {
 			if (externally_connected () && 0 == (_flags & TransportSyncPort) && sends_output () == playback) {
 				if (type () == DataType::AUDIO) {
-					lr.min += (_resampler_quality - 1);
-					lr.max += (_resampler_quality - 1);
+					lr.min += (_resampler_latency);
+					lr.max += (_resampler_latency);
 				}
 			}
 		}
@@ -542,13 +526,9 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 				if (remote_port) {
 					lr = port_engine.get_latency_range (remote_port, playback);
 					if (externally_connected () && 0 == (_flags & TransportSyncPort) && sends_output () == playback) {
-#if 0
-						lr.min /= _speed_ratio;
-						lr.max /= _speed_ratio;
-#endif
 						if (type () == DataType::AUDIO) {
-							lr.min += (_resampler_quality - 1);
-							lr.max += (_resampler_quality - 1);
+							lr.min += (_resampler_latency);
+							lr.max += (_resampler_latency);
 						}
 					}
 
@@ -726,13 +706,40 @@ Port::set_state (const XMLNode& node, int)
 	return 0;
 }
 
+/* static */ void
+Port::setup_resampler (uint32_t q)
+{
+	/* configure at application start (Ardour::init) */
+	static bool setup_done = false;
+	if (setup_done) {
+		return;
+	}
+	setup_done = true;
+	if (q == 0) {
+		/* no vari-speed */
+		_resampler_quality = 0;
+		_resampler_latency = 0;
+		return;
+	}
+	// range constrained in VMResampler::setup
+	if (q < 8) {
+		q = 8;
+	}
+	if (q > 96) {
+		q = 96;
+	}
+	_resampler_quality = q;
+	_resampler_latency = q - 1;
+}
+
+
 /*static*/ void
 Port::set_speed_ratio (double s) {
-	/* see VMResampler::set_rratio() for min/max range */
-	if (s == 0.0) {
+	if (s == 0.0 || !can_varispeed ()) {
 		/* no resampling when stopped */
 		_speed_ratio = 1.0;
 	} else {
+		/* see VMResampler::set_rratio() for min/max range */
 		_speed_ratio = std::min ((double) Config->get_max_transport_speed(), std::max (0.02, fabs (s)));
 	}
 }

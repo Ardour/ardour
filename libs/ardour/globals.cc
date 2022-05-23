@@ -613,6 +613,8 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	}
 #endif
 
+	Port::setup_resampler (Config->get_port_resampler_quality ());
+
 	setup_hardware_optimization (try_optimization);
 
 	if (Config->get_cpu_dma_latency () >= 0) {
