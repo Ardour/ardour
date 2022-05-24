@@ -36,6 +36,7 @@ class LIBARDOUR_API MixerScene : public SessionHandleRef, public PBD::Stateful
 {
 public:
 	MixerScene (Session&);
+	~MixerScene ();
 
 	void snapshot ();
 	bool apply () const;
@@ -47,6 +48,8 @@ public:
 
 	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int version);
+
+	static PBD::Signal0<void> Change;
 
 private:
 	typedef std::map<PBD::ID, double> ControllableValueMap;

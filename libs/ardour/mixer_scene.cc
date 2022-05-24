@@ -29,9 +29,17 @@
 using namespace PBD;
 using namespace ARDOUR;
 
-MixerScene::MixerScene(Session& s)
+PBD::Signal0<void> MixerScene::Change;
+
+MixerScene::MixerScene (Session& s)
 	: SessionHandleRef (s)
 {
+	Change (); /* EMIT SIGNAL */
+}
+
+MixerScene::~MixerScene ()
+{
+	Change (); /* EMIT SIGNAL */
 }
 
 bool
@@ -40,6 +48,7 @@ MixerScene::set_name (std::string const& name)
 	if (_name != name) {
 		_name = name;
 		_session.set_dirty ();
+		Change (); /* EMIT SIGNAL */
 	}
 	return true;
 }
@@ -49,6 +58,7 @@ MixerScene::clear ()
 {
 	_ctrl_map.clear ();
 	_name.clear ();
+	Change (); /* EMIT SIGNAL */
 }
 
 void
@@ -65,6 +75,7 @@ MixerScene::snapshot ()
 		_ctrl_map[c->id ()] = c->get_save_value ();
 	}
 	_session.set_dirty ();
+	Change (); /* EMIT SIGNAL */
 }
 
 bool
