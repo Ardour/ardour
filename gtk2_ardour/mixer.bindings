@@ -26,5 +26,32 @@
    <Binding key="Tertiary-l" action="Mixer/ToggleMixerList" group="Window Visibility"/>
    <Binding key="Tertiary-v" action="Mixer/ToggleVCAPane" group="Window Visibility"/>
    <Binding key="Tertiary-m" action="Mixer/ToggleMonitorSection" group="Window Visibility"/>
+
+   <Binding key="Primary-F1" action="Mixer/store-mixer-scene-1" group="Mixer Scenes"/>
+   <Binding key="Primary-F2" action="Mixer/store-mixer-scene-2" group="Mixer Scenes"/>
+   <Binding key="Primary-F3" action="Mixer/store-mixer-scene-3" group="Mixer Scenes"/>
+   <Binding key="Primary-F4" action="Mixer/store-mixer-scene-4" group="Mixer Scenes"/>
+   <Binding key="Primary-F5" action="Mixer/store-mixer-scene-5" group="Mixer Scenes"/>
+   <Binding key="Primary-F6" action="Mixer/store-mixer-scene-6" group="Mixer Scenes"/>
+   <Binding key="Primary-F7" action="Mixer/store-mixer-scene-7" group="Mixer Scenes"/>
+   <Binding key="Primary-F8" action="Mixer/store-mixer-scene-8" group="Mixer Scenes"/>
+   <Binding key="Primary-F9" action="Mixer/store-mixer-scene-9" group="Mixer Scenes"/>
+   <Binding key="Primary-F10" action="Mixer/store-mixer-scene-10" group="Mixer Scenes"/>
+   <Binding key="Primary-F11" action="Mixer/store-mixer-scene-11" group="Mixer Scenes"/>
+   <Binding key="Primary-F12" action="Mixer/store-mixer-scene-12" group="Mixer Scenes"/>
+
+   <Binding key="F1" action="Mixer/recall-mixer-scene-1" group="Mixer Scenes"/>
+   <Binding key="F2" action="Mixer/recall-mixer-scene-2" group="Mixer Scenes"/>
+   <Binding key="F3" action="Mixer/recall-mixer-scene-3" group="Mixer Scenes"/>
+   <Binding key="F4" action="Mixer/recall-mixer-scene-4" group="Mixer Scenes"/>
+   <Binding key="F5" action="Mixer/recall-mixer-scene-5" group="Mixer Scenes"/>
+   <Binding key="F6" action="Mixer/recall-mixer-scene-6" group="Mixer Scenes"/>
+   <Binding key="F7" action="Mixer/recall-mixer-scene-7" group="Mixer Scenes"/>
+   <Binding key="F8" action="Mixer/recall-mixer-scene-8" group="Mixer Scenes"/>
+   <Binding key="F9" action="Mixer/recall-mixer-scene-9" group="Mixer Scenes"/>
+   <Binding key="F10" action="Mixer/recall-mixer-scene-10" group="Mixer Scenes"/>
+   <Binding key="F11" action="Mixer/recall-mixer-scene-11" group="Mixer Scenes"/>
+   <Binding key="F12" action="Mixer/recall-mixer-scene-12" group="Mixer Scenes"/>
+
   </Press>
  </Bindings>
