@@ -101,11 +101,14 @@ public:
 	}
 
 public:
-	static int speed_as_semitones (float, bool&);
-	static int fract_as_semitones (float, bool&);
+	int   fract_as_semitones (float, bool&) const;
+	float semitones_as_fract (int, bool) const;
 
+	float speed_as_fract (float) const;
+	float fract_as_speed (float) const;
+
+	static int   speed_as_semitones (float, bool&);
 	static float semitones_as_speed (int, bool);
-	static float semitones_as_fract (int, bool);
 
 	static int   speed_as_cents (float, bool&);
 	static float cents_as_speed (int, bool);

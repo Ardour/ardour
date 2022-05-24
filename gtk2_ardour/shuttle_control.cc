@@ -21,6 +21,7 @@
  */
 
 #define BASELINESTRETCH (1.25)
+#define MARKER_SIZE (0.5) // * height
 
 #include <algorithm>
 
@@ -331,7 +332,7 @@ ShuttleControl::map_transport_state ()
 			semi          = std::max (-24, std::min (24, semi));
 			shuttle_fract = semitones_as_fract (semi, reverse);
 		} else {
-			shuttle_fract = speed / shuttle_max_speed;
+			shuttle_fract = speed_as_fract (speed);
 		}
 	}
 
@@ -348,40 +349,57 @@ ShuttleControl::build_shuttle_context_menu ()
 	shuttle_context_menu = new Menu ();
 	MenuList& items      = shuttle_context_menu->items ();
 
-	{
-		RadioMenuItem::Group speed_group;
+	float max_transport_speed = Config->get_max_transport_speed ();
 
-		/* XXX this code assumes that Config->get_max_transport_speed() returns 8 */
-		Menu*     speed_menu  = manage (new Menu ());
-		MenuList& speed_items = speed_menu->items ();
+	RadioMenuItem::Group speed_group;
 
+	Menu*     speed_menu  = manage (new Menu ());
+	MenuList& speed_items = speed_menu->items ();
+
+	if (max_transport_speed >= 8) {
 		speed_items.push_back (RadioMenuElem (speed_group, "8", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 8.0f)));
 		if (shuttle_max_speed == 8.0) {
 			static_cast<RadioMenuItem*> (&speed_items.back ())->set_active ();
 		}
+	}
+	if (max_transport_speed >= 6) {
 		speed_items.push_back (RadioMenuElem (speed_group, "6", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 6.0f)));
 		if (shuttle_max_speed == 6.0) {
 			static_cast<RadioMenuItem*> (&speed_items.back ())->set_active ();
 		}
+	}
+	if (max_transport_speed >= 4) {
 		speed_items.push_back (RadioMenuElem (speed_group, "4", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 4.0f)));
 		if (shuttle_max_speed == 4.0) {
 			static_cast<RadioMenuItem*> (&speed_items.back ())->set_active ();
 		}
+	}
+	if (max_transport_speed >= 3) {
 		speed_items.push_back (RadioMenuElem (speed_group, "3", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 3.0f)));
 		if (shuttle_max_speed == 3.0) {
 			static_cast<RadioMenuItem*> (&speed_items.back ())->set_active ();
 		}
+	}
+	if (max_transport_speed >= 2) {
 		speed_items.push_back (RadioMenuElem (speed_group, "2", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 2.0f)));
 		if (shuttle_max_speed == 2.0) {
 			static_cast<RadioMenuItem*> (&speed_items.back ())->set_active ();
 		}
+	}
+	if (max_transport_speed >= 1.5) {
 		speed_items.push_back (RadioMenuElem (speed_group, "1.5", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 1.5f)));
 		if (shuttle_max_speed == 1.5) {
 			static_cast<RadioMenuItem*> (&speed_items.back ())->set_active ();
 		}
-
-		items.push_back (MenuElem (_("Maximum speed"), *speed_menu));
+	} else {
+		assert (max_transport_speed >= 1);
+		speed_items.push_back (RadioMenuElem (speed_group, "1", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 1.f)));
+		if (shuttle_max_speed == 1) {
+			static_cast<RadioMenuItem*> (&speed_items.back ())->set_active ();
+		}
 	}
+
+	items.push_back (MenuElem (_("Maximum speed"), *speed_menu));
 }
 
 void
@@ -390,6 +408,9 @@ ShuttleControl::set_shuttle_max_speed (float speed)
 	if (_ignore_change) {
 		return;
 	}
+
+	assert (speed <= Config->get_max_transport_speed ());
+
 	Config->set_shuttle_max_speed (speed);
 }
 
@@ -502,7 +523,10 @@ ShuttleControl::mouse_shuttle (double x, bool force)
 	   center, negative values indicate left of center
 	*/
 
-	shuttle_fract = distance_from_center / center; // center == half the width
+	float marker_size = round (get_height () * MARKER_SIZE);
+	float avail_width = get_width () - marker_size;
+
+	shuttle_fract = 2 * distance_from_center / avail_width;
 	use_shuttle_fract (force);
 	return true;
 }
@@ -563,17 +587,38 @@ ShuttleControl::semitones_as_speed (int semi, bool reverse)
 }
 
 float
-ShuttleControl::semitones_as_fract (int semi, bool reverse)
+ShuttleControl::semitones_as_fract (int semi, bool reverse) const
 {
-	float speed = semitones_as_speed (semi, reverse);
-	return speed / 4.0; /* 4.0 is the maximum speed for a 24 semitone shift */
+	return semitones_as_speed (semi, reverse) / shuttle_max_speed;
 }
 
 int
-ShuttleControl::fract_as_semitones (float fract, bool& reverse)
+ShuttleControl::fract_as_semitones (float fract, bool& reverse) const
 {
+	/* -1 <= fract <= 1 */
 	assert (fract != 0.0);
-	return speed_as_semitones (fract * 4.0, reverse);
+	return speed_as_semitones (fract * shuttle_max_speed, reverse);
+}
+
+float
+ShuttleControl::speed_as_fract (float speed) const
+{
+	float fract = speed / shuttle_max_speed;
+	if (fract < 0) {
+		return -sqrtf (-fract);
+	} else {
+		return sqrtf (fract);
+	}
+}
+
+float
+ShuttleControl::fract_as_speed (float fract) const
+{
+	if (fract < 0) {
+		return -fract * fract * shuttle_max_speed;
+	} else {
+		return fract * fract * shuttle_max_speed;
+	}
 }
 
 void
@@ -595,6 +640,7 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 	last_shuttle_request = now;
 
 	double speed = 0;
+	float warped_fract = shuttle_fract * shuttle_fract;
 
 	if (Config->get_shuttle_units () == Semitones) {
 		if (shuttle_fract != 0.0) {
@@ -605,8 +651,7 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 			speed = 0.0;
 		}
 	} else {
-		shuttle_fract = shuttle_fract * shuttle_fract * shuttle_fract; // ^3 preserves the sign;
-		speed         = shuttle_max_speed * shuttle_fract;
+		speed = fract_as_speed (shuttle_fract);
 	}
 
 	requested_speed = speed;
@@ -673,7 +718,7 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 
 	/* marker */
 	float visual_fraction = std::max (-1.0f, std::min (1.0f, speed / shuttle_max_speed));
-	float marker_size     = round (get_height () * 0.66);
+	float marker_size     = round (get_height () * MARKER_SIZE);
 	float avail_width     = get_width () - marker_size;
 	float x               = 0.5 * (get_width () + visual_fraction * avail_width - marker_size);
 
