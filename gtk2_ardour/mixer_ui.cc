@@ -80,6 +80,7 @@
 #include "route_sorter.h"
 #include "actions.h"
 #include "gui_thread.h"
+#include "ardour_message.h"
 #include "mixer_group_tabs.h"
 #include "plugin_utils.h"
 #include "route_sorter.h"
@@ -3611,18 +3612,18 @@ Mixer_UI::register_actions ()
 	ActionManager::register_toggle_action (group, X_("toggle-input-monitor"), _("Toggle Input Monitoring"), sigc::bind (sigc::mem_fun (*this, &Mixer_UI::toggle_monitor_action), MonitorInput, false, false));
 
 	for (size_t i = 0; i < 12; ++i) {
-		std::string a = string_compose (X_("store-mixer-scene-%1"), i);
-		std::string n = string_compose (_("Store Mixer Scene Slot #%1"), i + 1);
+		std::string a = string_compose (X_("store-mixer-scene-%1"), i + 1);
+		std::string n = string_compose (_("Store Mixer Scene #%1"), i + 1);
 		ActionManager::register_action (group, a.c_str (), n.c_str (),
 		                                sigc::bind (sigc::mem_fun (*this, &Mixer_UI::store_mixer_scene), i));
 
-		a = string_compose (X_("recall-mixer-scene-%1"), i);
-		n = string_compose (_("Recall Mixer Scene Slot #%1"), i + 1);
+		a = string_compose (X_("recall-mixer-scene-%1"), i + 1);
+		n = string_compose (_("Recall Mixer Scene #%1"), i + 1);
 		ActionManager::register_action (group, a.c_str (), n.c_str (),
 		                                sigc::bind (sigc::mem_fun (*this, &Mixer_UI::recall_mixer_scene), i));
 
-		a = string_compose (X_("clear-mixer-scene-%1"), i);
-		n = string_compose (_("Clear Mixer Scene Slot #%1"), i + 1);
+		a = string_compose (X_("clear-mixer-scene-%1"), i + 1);
+		n = string_compose (_("Clear Mixer Scene #%1"), i + 1);
 		ActionManager::register_action (group, a.c_str (), n.c_str (),
 		                                sigc::bind (sigc::mem_fun (*this, &Mixer_UI::clear_mixer_scene), i));
 	}
@@ -3838,6 +3839,13 @@ void
 Mixer_UI::store_mixer_scene (size_t n)
 {
 	if (_session) {
+		boost::shared_ptr<MixerScene> ms = _session->nth_mixer_scene (n, false);
+		if (ms && !ms->empty ()) {
+			ArdourMessageDialog md (_("Scene is already set. Overwrite it?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO);
+			if (md.run () != RESPONSE_YES) {
+				return;
+			}
+		}
 		_session->store_nth_mixer_scene (n);
 	}
 }
