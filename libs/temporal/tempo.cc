@@ -1608,21 +1608,34 @@ TempoMap::sample_rate_changed (samplecnt_t new_sr)
 void
 TempoMap::dump (std::ostream& ostr) const
 {
-	ostr << "\n\nTEMPO MAP @ " << this << ":\n";
+	ostr << "\n\nTEMPO MAP @ " << this << ":\n" << std::dec;
+	ostr << "... tempos...\n";
 	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
 		ostr << &*t << ' ' << *t << endl;
 	}
 
+	ostr << "... meters...\n";
 	for (Meters::const_iterator m = _meters.begin(); m != _meters.end(); ++m) {
 		ostr << &*m << ' ' << *m << endl;
 	}
 
+	ostr << "... bartimes...\n";
 	for (MusicTimes::const_iterator m = _bartimes.begin(); m != _bartimes.end(); ++m) {
 		ostr << &*m << ' ' << *m << endl;
 	}
 	ostr << "... all points ...\n";
 	for (Points::const_iterator p = _points.begin(); p != _points.end(); ++p) {
-		ostr << &*p << ' ' << *p << endl;
+		ostr << &*p << ' ' << *p;
+		if (dynamic_cast<MusicTimePoint const *> (&(*p))) {
+			ostr << " BarTime";
+		} else if (dynamic_cast<TempoPoint const *> (&(*p))) {
+			ostr << " Tempo";
+		} else if (dynamic_cast<MeterPoint const *> (&(*p))) {
+			ostr << " Meter";
+		} else {
+			ostr << " ???";
+		}
+		ostr << endl;
 	}
 	ostr << "------------\n\n\n";
 }
