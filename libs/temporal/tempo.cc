@@ -510,18 +510,30 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 
 	if (log_expr < -1) {
 		r = _sclock + llrint (log (-log_expr - 1.0) / -_omega);
+
+		if (r < 0) {
+			std::cerr << "CASE 1: " << *this << endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
+			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log (" << log_expr << ") "
+			          << log (-log_expr - 1.0)
+			          << " - omega = " << -_omega
+			          << " => "
+			          << r << std::endl;
+			abort ();
+		}
+
 	} else {
 		r = _sclock + llrint (log1p (log_expr) / _omega);
+
+		if (r < 0) {
+			std::cerr << "CASE 2: scpqn = " << superclocks_per_quarter_note() << std::endl;
+			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log1p (" << superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double() << " = "
+			          << log1p (superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double())
+			          << " => "
+			          << r << std::endl;
+			abort ();
+		}
 	}
 
-	if (r < 0) {
-		std::cerr << "scpqn = " << superclocks_per_quarter_note() << std::endl;
-		std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log1p (" << superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double() << " = "
-		          << log1p (superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double())
-		          << " => "
-		          << r << std::endl;
-		abort ();
-	}
 	return r;
 }
 
