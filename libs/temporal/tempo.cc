@@ -2363,7 +2363,10 @@ TempoMap::set_state (XMLNode const & node, int version)
 
 	/* global map properties */
 
-	/* XXX this should probably be at the global level in the session file because it is the basic time unit in session files and affects a lot more than just the tempo map */
+	/* XXX this should probably be at the global level in the session file
+	 * because it is the time unit for anything in the audio time domain,
+	 * and affects a lot more than just the tempo map
+	 */
 	superclock_t sc;
 	if (node.get_property (X_("superclocks-per-second"), sc)) {
 		set_superclock_ticks_per_second (sc);
