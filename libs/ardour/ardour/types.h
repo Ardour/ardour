@@ -674,12 +674,16 @@ struct CleanupReport {
 /** A struct used to describe changes to processors in a route.
  *  This is useful because objects that respond to a change in processors
  *  can optimise what work they do based on details of what has changed.
+ *
+ *  While the signal themselves are distinct values, the Session
+ *  can accumulate then via ProcessorChangeBlocker and batch process
+ *  them.
  */
 struct RouteProcessorChange {
 	enum Type {
-		GeneralChange = 0x0,
 		MeterPointChange = 0x1,
-		RealTimeChange = 0x2
+		RealTimeChange   = 0x2,
+		GeneralChange    = 0x4
 	};
 
 	RouteProcessorChange () : type (GeneralChange), meter_visibly_changed (true)

@@ -686,23 +686,9 @@ public:
 
 	class ProcessorChangeBlocker {
 	public:
-		ProcessorChangeBlocker (Session* s, bool rc = true)
-			: _session (s)
-			, _reconfigure_on_delete (rc)
-		{
-			g_atomic_int_inc (&s->_ignore_route_processor_changes);
-		}
+		ProcessorChangeBlocker (Session* s, bool rc = true);
+		~ProcessorChangeBlocker ();
 
-		~ProcessorChangeBlocker ()
-		{
-			if (g_atomic_int_dec_and_test (&_session->_ignore_route_processor_changes)) {
-				if (g_atomic_int_compare_and_exchange (&_session->_ignored_a_processor_change, 1, 0)) {
-					if (_reconfigure_on_delete) {
-						_session->route_processors_changed (RouteProcessorChange ());
-					}
-				}
-			}
-		}
 	private:
 		Session* _session;
 		bool _reconfigure_on_delete;

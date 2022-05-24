@@ -7539,3 +7539,29 @@ Session::mixer_scenes () const
 	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
 	return _mixer_scenes;
 }
+
+Session::ProcessorChangeBlocker::ProcessorChangeBlocker (Session* s, bool rc)
+	: _session (s)
+	, _reconfigure_on_delete (rc)
+{
+	g_atomic_int_inc (&s->_ignore_route_processor_changes);
+}
+
+Session::ProcessorChangeBlocker::~ProcessorChangeBlocker ()
+{
+	if (g_atomic_int_dec_and_test (&_session->_ignore_route_processor_changes)) {
+		gint type = g_atomic_int_and (&_session->_ignored_a_processor_change, 0);
+		if (_reconfigure_on_delete) {
+			if (type & RouteProcessorChange::GeneralChange) {
+				_session->route_processors_changed (RouteProcessorChange ());
+			} else {
+				if (type & RouteProcessorChange::MeterPointChange) {
+					_session->route_processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange));
+				}
+				if (type & RouteProcessorChange::RealTimeChange) {
+					_session->route_processors_changed (RouteProcessorChange (RouteProcessorChange::RealTimeChange));
+				}
+			}
+		}
+	}
+}
