@@ -777,7 +777,7 @@ TempoMap::add_meter (MeterPoint* mp)
 		core_add_point (mp);
 	}
 
-	reset_starting_at (mp->sclock());
+	reset_starting_at (ret->sclock());
 	return ret;
 }
 
@@ -872,13 +872,15 @@ TempoMap::core_add_tempo (TempoPoint* tp, bool& replaced)
 			/* overwrite Tempo part of this point */
 			*((Tempo*)&(*t)) = *tp;
 			delete tp;
-			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("overwrote old tempo with %1\n", tp));
+			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("overwrote old tempo with %1\n", *tp));
+			std::cerr << string_compose ("overwrote old tempo with %1\n", *tp);
 			replaced = true;
 			return &(*t);
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("inserted tempo %1\n", tp));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("inserted tempo %1\n", *tp));
+	std::cerr << string_compose ("inserted tempo %1\n", *tp);
 
 	replaced = false;
 	return &(* _tempos.insert (t, *tp));
@@ -907,6 +909,31 @@ TempoMap::core_add_meter (MeterPoint* mp, bool& replaced)
 	return &(*(_meters.insert (m, *mp)));
 }
 
+MusicTimePoint*
+TempoMap::core_add_bartime (MusicTimePoint* mtp, bool& replaced)
+{
+	MusicTimes::iterator m;
+	const superclock_t sclock_limit = mtp->sclock();
+
+	for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < sclock_limit; ++m);
+
+	if (m != _bartimes.end()) {
+		if (m->sclock() == sclock_limit) {
+			/* overwrite Tempo part of this point */
+			*m = *mtp;
+			delete mtp;
+			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("overwrote old bartime with %1\n", mtp));
+			replaced = true;
+			return &(*m);
+		}
+	}
+
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("inserted bartime %1\n", mtp));
+
+	replaced = false;
+	return &(* _bartimes.insert (m, *mtp));
+}
+
 TempoPoint*
 TempoMap::add_tempo (TempoPoint * tp)
 {
@@ -916,7 +943,7 @@ TempoMap::add_tempo (TempoPoint * tp)
 	if (!replaced) {
 		core_add_point (tp);
 	}
-	reset_starting_at (tp->sclock());
+	reset_starting_at (ret->sclock());
 	return ret;
 }
 
@@ -991,49 +1018,28 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos)
 	TempoMetric metric (metric_at (sc));
 	MusicTimePoint* tp = new MusicTimePoint (*this, sc, metric.quarters_at_superclock (sc), bbt, metric.tempo(), metric.meter());
 
-	ret = add_or_replace_bartime (*tp);
+	ret = add_or_replace_bartime (tp);
 
 	return *ret;
 }
 
 MusicTimePoint*
-TempoMap::add_or_replace_bartime (MusicTimePoint & tp)
+TempoMap::add_or_replace_bartime (MusicTimePoint* mtp)
 {
-	MusicTimes::iterator m;
-	Points::iterator p;
-	superclock_t sclock_limit = tp.sclock();
+	bool replaced;
+	MusicTimePoint* ret = core_add_bartime (mtp, replaced);
 
-	for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < sclock_limit; ++m);
-	for (p = _points.begin(); p != _points.end() && p->sclock() < sclock_limit; ++p);
-
-	bool replaced = false;
-	MusicTimePoint* ret = 0;
-
-	if (m != _bartimes.end()) {
-		if (m->sclock() == tp.sclock()) {
-			/* overwrite the point with */
-			*m = tp;
-			ret = &(*m);
-			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("overwrote old bartime with %1\n", tp));
-			replaced = true;
-		}
-	}
-
+	std::cerr << "Added bartime " << *mtp << "\nreplaced ? " << replaced << std::endl;
+	dump (std::cerr);
 	if (!replaced) {
-		m = _bartimes.insert (m, tp);
-		_points.insert (p, tp);
-
-		ret = &*m;
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("inserted bartime %1\n", tp));
+		bool ignore;
+		(void) core_add_tempo (mtp, ignore);
+		(void) core_add_meter (mtp, ignore);
+		core_add_point (mtp);
+		dump (std::cerr);
 	}
 
-	/* m is guaranteed not to be _bartimes.end() : it was either the
-	 * TempoPoint we overwrote, or its the one we inserted.
-	 */
-
-	assert (m != _bartimes.end());
-
-	reset_starting_at (tp.sclock());
+	reset_starting_at (ret->sclock());
 
 	return ret;
 }
@@ -1122,9 +1128,9 @@ TempoMap::reset_starting_at (superclock_t sc)
 
 	for (p = _points.begin(); p != _points.end(); ++p) {
 
-		DEBUG_TRACE (DEBUG::MapReset, string_compose ("Now looking at %1\n", *p));
+		DEBUG_TRACE (DEBUG::MapReset, string_compose ("Now looking at %1 => %2 \n", &(*p), *p));
 
-		if (p->sclock() >= sc) {
+		if (p->sclock() > sc) {
 			break;
 		}
 
@@ -1141,7 +1147,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 			 */
 
 			metric = TempoMetric (*mtp, *mtp);
-			DEBUG_TRACE (DEBUG::MapReset, "Bartime!\n");
+			DEBUG_TRACE (DEBUG::MapReset, string_compose ("Bartime!, used tempo @ %1\n", (TempoPoint*) mtp));
 		} else if ((tp = dynamic_cast<TempoPoint*> (&*p)) != 0) {
 			metric = TempoMetric (*tp, metric.meter());
 			if (tp->ramped()) {
@@ -1149,7 +1155,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 			} else {
 				need_initial_ramp_reset = true;
 			}
-			DEBUG_TRACE (DEBUG::MapReset, "Tempo!\n");
+			DEBUG_TRACE (DEBUG::MapReset, string_compose ("Tempo! @ %1, metric's tempo is %2\n", tp, &metric.tempo()));
 		} else if ((mp = dynamic_cast<MeterPoint*> (&*p)) != 0) {
 			metric = TempoMetric (metric.tempo(), *mp);
 			DEBUG_TRACE (DEBUG::MapReset, "Meter!\n");
@@ -2326,13 +2332,17 @@ TempoMap::get_state () const
 	children = new XMLNode (X_("Tempos"));
 	node->add_child_nocopy (*children);
 	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
-		children->add_child_nocopy (t->get_state());
+		if (!dynamic_cast<MusicTimePoint const *> (&(*t))) {
+			children->add_child_nocopy (t->get_state());
+		}
 	}
 
 	children = new XMLNode (X_("Meters"));
 	node->add_child_nocopy (*children);
 	for (Meters::const_iterator m = _meters.begin(); m != _meters.end(); ++m) {
-		children->add_child_nocopy (m->get_state());
+		if (!dynamic_cast<MusicTimePoint const *> (& (*m))) {
+			children->add_child_nocopy (m->get_state());
+		}
 	}
 
 	children = new XMLNode (X_("MusicTimes"));
@@ -2384,12 +2394,6 @@ TempoMap::set_state (XMLNode const & node, int version)
 		}
 	}
 
-	for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) { _points.push_back (*t); }
-	for (Meters::iterator m = _meters.begin(); m != _meters.end(); ++m) { _points.push_back (*m); }
-	for (MusicTimes::iterator b = _bartimes.begin(); b != _bartimes.end(); ++b) { _points.push_back (*b); }
-
-	_points.sort (Point::sclock_comparator());
-
 	return 0;
 }
 
@@ -2402,7 +2406,7 @@ TempoMap::set_music_times_from_state (XMLNode const& mt_node)
 		_bartimes.clear ();
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 			MusicTimePoint* mp = new MusicTimePoint (*this, **c);
-			_bartimes.push_back (*mp);
+			add_or_replace_bartime (mp);
 		}
 	} catch (...) {
 		_bartimes.clear (); /* remove any that were created */
@@ -2416,12 +2420,14 @@ int
 TempoMap::set_tempos_from_state (XMLNode const& tempos_node)
 {
 	XMLNodeList const & children (tempos_node.children());
+	bool ignore;
 
 	try {
 		_tempos.clear ();
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 			TempoPoint* tp = new TempoPoint (*this, **c);
-			_tempos.push_back (*tp);
+			core_add_tempo (tp, ignore);
+			core_add_point (tp);
 		}
 	} catch (...) {
 		_tempos.clear (); /* remove any that were created */
@@ -2435,12 +2441,14 @@ int
 TempoMap::set_meters_from_state (XMLNode const& meters_node)
 {
 	XMLNodeList const & children (meters_node.children());
+	bool ignore;
 
 	try {
 		_meters.clear ();
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 			MeterPoint* mp = new MeterPoint (*this, **c);
-			_meters.push_back (*mp);
+			core_add_meter (mp, ignore);
+			core_add_point (mp);
 		}
 	} catch (...) {
 		_meters.clear (); /* remove any that were created */
@@ -3492,8 +3500,6 @@ TempoMap::set_state_3x (const XMLNode& node)
 		}
 
 		if (initial_tempo_index >= 0 && initial_meter_index >= 0) {
-			cerr << "Post initial tempo & meter:";
-			dump (cerr);
 			break;
 		}
 	}

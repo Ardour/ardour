@@ -890,13 +890,14 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	TempoPoint* core_add_tempo (TempoPoint*, bool&);
 	MeterPoint* core_add_meter (MeterPoint*, bool&);
+	MusicTimePoint* core_add_bartime (MusicTimePoint*, bool&);
 	void        core_add_point (Point*);
 
 	MeterPoint & set_meter (Meter const &, superclock_t);
 
 	TempoPoint* add_tempo (TempoPoint*);
 	MeterPoint* add_meter (MeterPoint*);
-	MusicTimePoint* add_or_replace_bartime (MusicTimePoint &);
+	MusicTimePoint* add_or_replace_bartime (MusicTimePoint*);
 
 	void add_point (Point &);
 
