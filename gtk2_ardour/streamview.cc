@@ -31,10 +31,8 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 
-#include "ardour/playlist.h"
 #include "ardour/region.h"
 #include "ardour/track.h"
-#include "ardour/session.h"
 
 #include "pbd/compose.h"
 
@@ -48,7 +46,6 @@
 #include "selection.h"
 #include "public_editor.h"
 #include "timers.h"
-#include "rgb_macros.h"
 #include "gui_thread.h"
 #include "ui_config.h"
 #include "utils.h"

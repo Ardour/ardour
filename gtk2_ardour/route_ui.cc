@@ -32,7 +32,6 @@
 
 #include <gtkmm/stock.h>
 
-#include "pbd/memento_command.h"
 #include "pbd/controllable.h"
 #include "pbd/enumwriter.h"
 
@@ -61,22 +60,18 @@
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/doi.h"
-#include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_button.h"
 #include "widgets/binding_proxy.h"
 #include "widgets/prompter.h"
 
-#include "ardour_dialog.h"
 #include "ardour_ui.h"
-#include "automation_time_axis.h"
 #include "editor.h"
 #include "group_tabs.h"
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "keyboard.h"
-#include "latency_gui.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "patch_change_widget.h"

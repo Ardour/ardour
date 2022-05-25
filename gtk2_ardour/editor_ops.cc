@@ -35,7 +35,6 @@
 #include <cstdlib>
 #include <cmath>
 #include <string>
-#include <limits>
 #include <map>
 #include <set>
 
@@ -84,15 +83,12 @@
 #include "ardour/triggerbox.h"
 #include "ardour/vca_manager.h"
 
-#include "canvas/canvas.h"
-
 #include "actions.h"
 #include "ardour_message.h"
 #include "ardour_ui.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
 #include "audio_time_axis.h"
-#include "automation_region_view.h"
 #include "automation_time_axis.h"
 #include "control_point.h"
 #include "debug.h"
@@ -111,14 +107,12 @@
 #include "midi_region_view.h"
 #include "mixer_ui.h"
 #include "mixer_strip.h"
-#include "mouse_cursors.h"
 #include "normalize_dialog.h"
 #include "note.h"
 #include "paste_context.h"
 #include "patch_change_dialog.h"
 #include "quantize_dialog.h"
 #include "region_gain_line.h"
-#include "rgb_macros.h"
 #include "route_time_axis.h"
 #include "selection.h"
 #include "selection_templates.h"

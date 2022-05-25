@@ -37,9 +37,7 @@
 
 #include "midi++/midnam_patch.h"
 
-#include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
-#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include "ardour/debug.h"
@@ -57,7 +55,6 @@
 #include "evoral/midi_util.h"
 
 #include "canvas/debug.h"
-#include "canvas/text.h"
 
 #include "automation_region_view.h"
 #include "automation_time_axis.h"
@@ -77,7 +74,6 @@
 #include "midi_time_axis.h"
 #include "midi_util.h"
 #include "midi_velocity_dialog.h"
-#include "mouse_cursors.h"
 #include "note_player.h"
 #include "paste_context.h"
 #include "public_editor.h"

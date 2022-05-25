@@ -70,7 +70,6 @@ class RegionSelection;
 class Selectable;
 class AutomationTimeAxisView;
 class AutomationLine;
-class ProcessorAutomationLine;
 class TimeSelection;
 class RouteGroupMenu;
 class ItemCounts;

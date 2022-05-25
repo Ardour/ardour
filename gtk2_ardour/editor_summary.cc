@@ -25,13 +25,10 @@
 
 #include "ardour/session.h"
 
-#include "canvas/debug.h"
-
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
 
 #include "context_menu_helper.h"
-#include "time_axis_view.h"
 #include "streamview.h"
 #include "editor_summary.h"
 #include "gui_thread.h"

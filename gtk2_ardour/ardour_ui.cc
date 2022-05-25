@@ -39,13 +39,8 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <cerrno>
 
 #include <stdarg.h>
-
-#ifndef PLATFORM_WINDOWS
-#include <sys/resource.h>
-#endif
 
 #ifdef __FreeBSD__
 #include <sys/types.h>
@@ -54,7 +49,6 @@
 
 #include <stdint.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <unistd.h>
 #include <time.h>
 
@@ -67,25 +61,17 @@
 #include <gtkmm/uimanager.h>
 
 #include "pbd/error.h"
-#include "pbd/basename.h"
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 #include "pbd/failed_constructor.h"
-#include "pbd/file_archive.h"
-#include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
 #include "pbd/openuri.h"
-#include "pbd/stl_delete.h"
 #include "pbd/types_convert.h"
-#include "pbd/unwind.h"
 #include "pbd/file_utils.h"
-#include "pbd/localtime_r.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/replace_all.h"
 #include "pbd/scoped_file_descriptor.h"
 #include "pbd/xml++.h"
-
-#include "temporal/tempo.h"
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/bindings.h"
@@ -102,30 +88,22 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
-#include "ardour/automation_watch.h"
 #include "ardour/disk_reader.h"
 #include "ardour/disk_writer.h"
-#include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
-#include "ardour/ltc_file_reader.h"
 #include "ardour/monitor_control.h"
 #include "ardour/midi_track.h"
 #include "ardour/port.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
-#include "ardour/recent_sessions.h"
-#include "ardour/record_enable_control.h"
 #include "ardour/revision.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_route.h"
-#include "ardour/session_state_utils.h"
-#include "ardour/session_utils.h"
 #include "ardour/source_factory.h"
 #include "ardour/transport_master.h"
 #include "ardour/transport_master_manager.h"
 #include "ardour/triggerbox.h"
-#include "ardour/system_exec.h"
 #include "ardour/track.h"
 #include "ardour/vca_manager.h"
 #include "ardour/utils.h"
@@ -147,11 +125,9 @@
 #include "temporal/time.h"
 
 #include "about.h"
-#include "editing.h"
 #include "enums_convert.h"
 #include "actions.h"
 #include "add_route_dialog.h"
-#include "ambiguous_file_dialog.h"
 #include "ardour_message.h"
 #include "ardour_ui.h"
 #include "audio_clock.h"
@@ -164,7 +140,6 @@
 #include "debug.h"
 #include "engine_dialog.h"
 #include "export_video_dialog.h"
-#include "gain_meter.h"
 #include "global_port_matrix.h"
 #include "gui_object.h"
 #include "gui_thread.h"
@@ -176,15 +151,12 @@
 #include "lua_script_manager.h"
 #include "luawindow.h"
 #include "main_clock.h"
-#include "missing_file_dialog.h"
 #include "missing_plugin_dialog.h"
 #include "mixer_ui.h"
 #include "meterbridge.h"
-#include "meter_patterns.h"
 #include "mouse_cursors.h"
 #include "nsm.h"
 #include "opts.h"
-#include "pingback.h"
 #include "plugin_dspload_window.h"
 #include "plugin_manager_ui.h"
 #include "processor_box.h"
@@ -210,11 +182,8 @@
 #include "trigger_page.h"
 #include "triggerbox_ui.h"
 #include "utils.h"
-#include "utils_videotl.h"
-#include "video_server_dialog.h"
 #include "virtual_keyboard_window.h"
 #include "add_video_dialog.h"
-#include "transcode_video_dialog.h"
 #include "plugin_selector.h"
 
 #include "pbd/i18n.h"

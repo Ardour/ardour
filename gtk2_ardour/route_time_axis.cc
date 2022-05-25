@@ -27,7 +27,6 @@
  */
 
 #include <cstdlib>
-#include <cmath>
 #include <cassert>
 
 #include <algorithm>
@@ -43,9 +42,7 @@
 #include <gtkmm/stock.h>
 
 #include "pbd/error.h"
-#include "pbd/stl_delete.h"
 #include "pbd/whitespace.h"
-#include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
 #include "pbd/stateful_diff_command.h"
 
@@ -53,7 +50,6 @@
 
 #include "ardour/amp.h"
 #include "ardour/meter.h"
-#include "ardour/event_type_map.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/plugin_insert.h"
@@ -87,7 +83,6 @@
 #include "point_selection.h"
 #include "public_editor.h"
 #include "region_view.h"
-#include "rgb_macros.h"
 #include "selection.h"
 #include "streamview.h"
 #include "ui_config.h"
