@@ -19,8 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "gtkmm2ext/utils.h"
-
 #include "ardour/route_group.h"
 
 #include "gtkmm2ext/colors.h"
@@ -29,10 +27,8 @@
 #include "editor_group_tabs.h"
 #include "editor_route_groups.h"
 #include "editor_routes.h"
-#include "rgb_macros.h"
 #include "route_time_axis.h"
 #include "ui_config.h"
-#include "utils.h"
 
 #include "pbd/i18n.h"
 

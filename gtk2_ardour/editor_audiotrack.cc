@@ -18,13 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ardour/rc_configuration.h"
-
 #include "canvas/canvas.h"
 
 #include "editor.h"
-#include "editing.h"
-#include "audio_time_axis.h"
 #include "route_time_axis.h"
 #include "audio_region_view.h"
 #include "selection.h"

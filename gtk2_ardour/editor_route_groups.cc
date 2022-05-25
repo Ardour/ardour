@@ -19,14 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef WAF_BUILD
-#include "gtk2ardour-config.h"
-#endif
-
 #include <cstdlib>
-#include <cmath>
-
-#include "fix_carbon.h"
 
 #include <gtkmm/stock.h>
 
@@ -37,7 +30,6 @@
 #include "widgets/tooltips.h"
 
 #include "ardour/route_group.h"
-#include "ardour/route.h"
 #include "ardour/session.h"
 
 #include "ardour_ui.h"
@@ -47,9 +39,7 @@
 #include "editor_routes.h"
 #include "gui_thread.h"
 #include "keyboard.h"
-#include "marker.h"
 #include "route_group_dialog.h"
-#include "route_time_axis.h"
 #include "time_axis_view.h"
 
 #include "pbd/i18n.h"
