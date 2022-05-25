@@ -684,7 +684,7 @@ public:
 			Session * _session;
 	};
 
-	class ProcessorChangeBlocker {
+	class LIBARDOUR_API ProcessorChangeBlocker {
 	public:
 		ProcessorChangeBlocker (Session* s, bool rc = true);
 		~ProcessorChangeBlocker ();
