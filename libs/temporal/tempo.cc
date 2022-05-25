@@ -873,14 +873,12 @@ TempoMap::core_add_tempo (TempoPoint* tp, bool& replaced)
 			*((Tempo*)&(*t)) = *tp;
 			delete tp;
 			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("overwrote old tempo with %1\n", *tp));
-			std::cerr << string_compose ("overwrote old tempo with %1\n", *tp);
 			replaced = true;
 			return &(*t);
 		}
 	}
 
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("inserted tempo %1\n", *tp));
-	std::cerr << string_compose ("inserted tempo %1\n", *tp);
 
 	replaced = false;
 	return &(* _tempos.insert (t, *tp));
