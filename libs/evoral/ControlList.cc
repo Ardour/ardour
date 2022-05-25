@@ -359,9 +359,8 @@ ControlList::list_merge (ControlList const& other, boost::function<double(double
 void
 ControlList::_x_scale (ratio_t const & factor)
 {
-	double double_factor = (double)factor;
 	for (iterator i = _events.begin(); i != _events.end(); ++i) {
-		(*i)->when = timepos_t::from_superclock ((*i)->when.val() * double_factor + 0.5);
+		(*i)->when = (*i)->when.operator* (factor);
 	}
 
 	mark_dirty ();

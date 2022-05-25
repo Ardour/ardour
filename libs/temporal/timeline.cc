@@ -21,6 +21,8 @@
 #include <exception>
 #include <sstream>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/compose.h"
@@ -200,8 +202,23 @@ timecnt_t::compute_beats() const
 timecnt_t
 timecnt_t::operator*(ratio_t const & r) const
 {
-	const int62_t v (_distance.flagged(), int_div_round (_distance.val() * r.numerator(), r.denominator()));
-	return timecnt_t (v, _position);
+	boost::multiprecision::int512_t bignum = _distance.val();
+
+	bignum *= r.numerator ();
+	bignum /= r.denominator ();
+
+	try {
+
+		int64_t midnum = bignum.convert_to<int64_t> ();
+		assert (midnum < int62_t::max);
+		const int62_t v (_distance.flagged(), midnum);
+		return timecnt_t (v, _position);
+
+	} catch (...) {
+		fatal << X_("arithmetic overflow in timeline math\n") << endmsg;
+		/* NOTREACHED */
+		return timecnt_t ();
+	}
 }
 
 ratio_t
@@ -589,7 +606,22 @@ timepos_t
 timepos_t::operator*(ratio_t const & n) const
 {
 	/* this cannot make the value negative, since ratio_t is always positive */
-	return timepos_t (is_beats(), int_div_round (val() * n.numerator(), n.denominator()));
+	boost::multiprecision::int512_t bignum = val();
+
+	bignum *= n.numerator ();
+	bignum /= n.denominator ();
+
+	try {
+
+		int64_t midnum = bignum.convert_to<int64_t> ();
+		assert (midnum < int62_t::max);
+		return timepos_t (is_beats(), midnum);
+
+	} catch (...) {
+		fatal << X_("arithmetic overflow in timepos_t::operator* (ratio_t)\n") << endmsg;
+		/* NOTREACHED */
+		return timepos_t();
+	}
 }
 
 timepos_t &
