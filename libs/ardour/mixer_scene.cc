@@ -34,12 +34,10 @@ PBD::Signal0<void> MixerScene::Change;
 MixerScene::MixerScene (Session& s)
 	: SessionHandleRef (s)
 {
-	Change (); /* EMIT SIGNAL */
 }
 
 MixerScene::~MixerScene ()
 {
-	Change (); /* EMIT SIGNAL */
 }
 
 bool

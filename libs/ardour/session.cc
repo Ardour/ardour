@@ -7499,14 +7499,19 @@ Session::nth_mixer_scene_valid (size_t nth) const
 bool
 Session::apply_nth_mixer_scene (size_t nth)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
-	if (_mixer_scenes.size () <= nth) {
-		return false;
+	boost::shared_ptr<MixerScene> scene;
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+		if (_mixer_scenes.size () <= nth) {
+			return false;
+		}
+		if (!_mixer_scenes[nth]) {
+			return false;
+		}
+		scene = _mixer_scenes[nth];
 	}
-	if (!_mixer_scenes[nth]) {
-		return false;
-	}
-	return _mixer_scenes[nth]->apply ();
+	assert (scene);
+	return scene->apply ();
 }
 
 void
@@ -7524,7 +7529,6 @@ Session::nth_mixer_scene (size_t nth, bool create_if_missing)
 		Glib::Threads::RWLock::WriterLock lw (_mixer_scenes_lock);
 		_mixer_scenes.resize (nth + 1);
 		_mixer_scenes[nth] = boost::shared_ptr<MixerScene> (new MixerScene (*this));
-		set_dirty ();
 		return _mixer_scenes[nth];
 	}
 	if (_mixer_scenes.size () <= nth) {
