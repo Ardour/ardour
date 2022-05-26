@@ -158,7 +158,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 		table->attach (*clock_align, 1, 2, row, row+1, Gtk::AttachOptions (Gtk::EXPAND|Gtk::FILL), Gtk::FILL, 0, 0);
 		row++;
 
-		const double fract = (double) (new_length / original_length);
+		const double fract = (new_length / original_length).to_double();
 		/* note the *100.0 to convert fract into a percentage */
 		duration_adjustment.set_value (fract*100.0);
 		Gtk::SpinButton* spinner = manage (new Gtk::SpinButton (duration_adjustment, 1.0, 3));
@@ -313,5 +313,5 @@ TimeFXDialog::duration_clock_changed ()
 
 	PBD::Unwinder<bool> uw (ignore_adjustment_change, true);
 
-	duration_adjustment.set_value (100.0 * (double) (duration_clock->current_duration() / original_length));
+	duration_adjustment.set_value (100.0 * (duration_clock->current_duration() / original_length).to_double());
 }

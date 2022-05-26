@@ -187,7 +187,7 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching)
 	current_timefx->request.time_fraction = current_timefx->get_time_fraction ();
 	current_timefx->request.pitch_fraction = current_timefx->get_pitch_fraction ();
 
-	if (current_timefx->request.time_fraction == 1.0 &&
+	if (current_timefx->request.time_fraction.to_double() == 1.0 &&
 	    current_timefx->request.pitch_fraction == 1.0) {
 		/* nothing to do */
 		current_timefx->hide ();
@@ -269,7 +269,7 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching)
 			transients = NoTransients;
 			precise = true;
 			preserve_formants = false;
-			current_timefx->request.pitch_fraction = 1.0 / current_timefx->request.time_fraction;
+			current_timefx->request.pitch_fraction = 1.0 / current_timefx->request.time_fraction.to_double();
 			shortwin = true;
 			// peaklock = false;
 			break;
