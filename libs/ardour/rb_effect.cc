@@ -148,7 +148,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	 * I hope this is clear.
 	 */
 
-	double stretch = region->stretch() * tsr.time_fraction;
+	double stretch = region->stretch() * tsr.time_fraction.to_double();
 	double shift   = region->shift() * tsr.pitch_fraction;
 
 	samplecnt_t read_start = region->ancestral_start_sample () +
@@ -360,7 +360,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 		/* multiply the old (possibly previously stretched) region length by the extra
 		 * stretch this time around to get its new length. this is a non-music based edit atm.
 		 */
-		(*x)->set_length (timecnt_t (tsr.time_fraction * (*x)->length_samples (), (*x)->position()));
+		(*x)->set_length (timecnt_t (tsr.time_fraction.to_double() * (*x)->length_samples (), (*x)->position()));
 	}
 
 	/* stretch region gain envelope */

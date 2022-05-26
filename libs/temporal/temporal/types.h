@@ -76,18 +76,7 @@ class _ratio_t {
 	bool is_unity() const { return _numerator == _denominator; }
 	bool is_zero() const { return _numerator == 0; }
 
-	operator double() const { return (double) _numerator / _denominator; };
-
-	/* provide an easy way to multiply double by ratio_t. Note that this
-	   must be written as ratio_t * double, not the other way around. We
-	   are not trying to duplicate boost::rational here (which also doesn't
-	   allow this without a lot of syntactic fluff.
-	*/
-	double operator* (double v) const { return (v * (double) _numerator) / (double) _denominator; }
-
-	/* ditto for int64_t */
-
-	int64_t operator* (int64_t v) const { return int_div_round (v * _numerator, _denominator); }
+	double to_double() const { return (double) _numerator / _denominator; };
 
   private:
 	T _numerator;
