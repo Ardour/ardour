@@ -3438,8 +3438,8 @@ TempoMap::set_state_3x (const XMLNode& node)
 	int32_t initial_meter_index = -1;
 	int32_t index;
 	bool need_points_clear = true;
-	bool initial_tempo_not_at_zero = false;
-	bool initial_meter_not_at_zero = false;
+	bool initial_tempo_at_zero = true;
+	bool initial_meter_at_zero = true;
 
 	for (niter = nlist.begin(), index = 0; niter != nlist.end(); ++niter, ++index) {
 		XMLNode* child = *niter;
@@ -3454,7 +3454,7 @@ TempoMap::set_state_3x (const XMLNode& node)
 			}
 
 			if (lts.sample != 0) {
-				initial_tempo_not_at_zero = true;
+				initial_tempo_at_zero = false;
 			}
 
 			Tempo t (lts.note_types_per_minute,
@@ -3485,7 +3485,7 @@ TempoMap::set_state_3x (const XMLNode& node)
 			}
 
 			if (lms.beat != 0) {
-				initial_meter_not_at_zero = true;
+				initial_meter_at_zero = false;
 			}
 
 			Meter m (lms.divisions_per_bar, lms.note_type);
@@ -3527,7 +3527,7 @@ TempoMap::set_state_3x (const XMLNode& node)
 				continue;
 			}
 			if (index == initial_tempo_index) {
-				if (!initial_tempo_not_at_zero) {
+				if (!initial_tempo_at_zero) {
 					/* already added */
 					continue;
 				}
@@ -3549,7 +3549,7 @@ TempoMap::set_state_3x (const XMLNode& node)
 			}
 
 			if (index == initial_meter_index) {
-				if (!initial_meter_not_at_zero) {
+				if (!initial_meter_at_zero) {
 					/* Add a BBT point to fix the meter location */
 					set_bartime (lms.bbt, timepos_t (lms.sample));
 				} else {
