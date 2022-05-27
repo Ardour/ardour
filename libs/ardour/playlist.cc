@@ -717,7 +717,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, timepos_t const & positi
 	timecnt_t length;
 
 	if (floor (times) != times) {
-		length = region->length() * (times - floor (times));
+		length = region->length().scale (times - floor (times));
 		string name;
 		RegionFactory::region_name (name, region->name (), false);
 
@@ -1308,7 +1308,7 @@ Playlist::duplicate (boost::shared_ptr<Region> region, timepos_t & position, tim
 	}
 
 	if (floor (times) != times) {
-		timecnt_t length = region->length() * (times - floor (times));
+		timecnt_t length = region->length().scale (times - floor (times));
 		string name;
 		RegionFactory::region_name (name, region->name(), false);
 
@@ -1389,7 +1389,7 @@ Playlist::duplicate_ranges (std::list<TimelineRange>& ranges, float times)
 	while (itimes--) {
 		for (list<TimelineRange>::iterator i = ranges.begin (); i != ranges.end (); ++i) {
 			boost::shared_ptr<Playlist> pl = copy ((*i).start(), (*i).length (), true);
-			paste (pl, (*i).start() + (offset * count), 1.0f);
+			paste (pl, (*i).start() + (offset.scale (count)), 1.0f);
 		}
 		++count;
 	}

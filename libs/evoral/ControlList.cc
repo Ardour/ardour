@@ -360,7 +360,7 @@ void
 ControlList::_x_scale (ratio_t const & factor)
 {
 	for (iterator i = _events.begin(); i != _events.end(); ++i) {
-		(*i)->when = (*i)->when.operator* (factor);
+		(*i)->when = (*i)->when.scale (factor);
 	}
 
 	mark_dirty ();

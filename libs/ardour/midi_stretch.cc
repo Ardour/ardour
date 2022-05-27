@@ -121,7 +121,7 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 
 	/* set length of new region to precisely match source length */
 
-	results[0]->set_length (region->length() * _request.time_fraction);
+	results[0]->set_length (region->length().scale (_request.time_fraction));
 
 	return ret;
 }

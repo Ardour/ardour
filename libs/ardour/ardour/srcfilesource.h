@@ -42,7 +42,7 @@ public:
 
 	float sample_rate () const { return _session.nominal_sample_rate(); }
 
-	timepos_t natural_position() const { return _source->natural_position() * _ratio;}
+	timepos_t natural_position() const { return _source->natural_position().scale (_ratio); }
 	samplecnt_t readable_length_samples() const { assert (_source->length().time_domain() == Temporal::AudioTime); return _source->length().samples () * _ratio; }
 	timepos_t length () const { assert (_source->length().time_domain() == Temporal::AudioTime); return timepos_t ((samplepos_t) (_source->length().samples () * _ratio)); }
 
