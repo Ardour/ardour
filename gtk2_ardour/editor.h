@@ -2474,6 +2474,16 @@ private:
 
 	void remove_gap_marker_callback (Temporal::timepos_t at, Temporal::timecnt_t distance);
 
+	template<typename T>
+	Temporal::TimeDomain drag_time_domain (T* thing_with_time_domain) {
+		return thing_with_time_domain ? thing_with_time_domain->time_domain() : Temporal::AudioTime;
+	}
+
+	template<typename T>
+	Temporal::TimeDomain drag_time_domain (boost::shared_ptr<T> thing_with_time_domain) {
+		return thing_with_time_domain ? thing_with_time_domain->time_domain() : Temporal::AudioTime;
+	}
+
 	friend class Drag;
 	friend class RegionCutDrag;
 	friend class RegionDrag;
