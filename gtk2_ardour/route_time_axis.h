@@ -260,7 +260,6 @@ protected:
 
 	Gtk::Menu           subplugin_menu;
 	Gtk::Menu*          automation_action_menu;
-	Gtk::MenuItem*      plugins_submenu_item;
 	RouteGroupMenu*     route_group_menu;
 	Gtk::MenuItem*      overlaid_menu_item;
 	Gtk::MenuItem*      stacked_menu_item;
