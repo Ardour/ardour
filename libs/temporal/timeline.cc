@@ -21,8 +21,6 @@
 #include <exception>
 #include <sstream>
 
-#include <boost/multiprecision/cpp_int.hpp>
-
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/compose.h"
@@ -200,25 +198,9 @@ timecnt_t::compute_beats() const
 }
 
 timecnt_t
-timecnt_t::operator*(ratio_t const & r) const
+timecnt_t::scale (ratio_t const & r) const
 {
-	boost::multiprecision::int512_t bignum = _distance.val();
-
-	bignum *= r.numerator ();
-	bignum /= r.denominator ();
-
-	try {
-
-		int64_t midnum = bignum.convert_to<int64_t> ();
-		assert (midnum < int62_t::max);
-		const int62_t v (_distance.flagged(), midnum);
-		return timecnt_t (v, _position);
-
-	} catch (...) {
-		fatal << X_("arithmetic overflow in timeline math\n") << endmsg;
-		/* NOTREACHED */
-		return timecnt_t ();
-	}
+	return timecnt_t (PBD::muldiv (_distance.val(), r.numerator(), r.denominator()), _position);
 }
 
 ratio_t
@@ -233,15 +215,6 @@ timecnt_t::operator/ (timecnt_t const & other) const
 	}
 
 	return ratio_t (beats().to_ticks(), other.beats().to_ticks());
-}
-
-timecnt_t
-timecnt_t::operator/(ratio_t const & r) const
-{
-	/* note: x / (N/D) => x * (D/N) => (x * D) / N */
-
-	const int62_t v (_distance.flagged(), int_div_round (_distance.val() * r.denominator(), r.numerator()));
-	return timecnt_t (v, _position);
 }
 
 timecnt_t
@@ -594,50 +567,9 @@ timepos_t::_ticks () const
 }
 
 timepos_t
-timepos_t::operator/(ratio_t const & n) const
+timepos_t::scale (ratio_t const & n) const
 {
-	/* this cannot make the value negative, since ratio_t is always positive */
-	/* note: v / (N/D) = (v * D) / N */
-
-	return timepos_t (is_beats(), int_div_round (val() * n.denominator(), n.numerator()));
-}
-
-timepos_t
-timepos_t::operator*(ratio_t const & n) const
-{
-	/* this cannot make the value negative, since ratio_t is always positive */
-	boost::multiprecision::int512_t bignum = val();
-
-	bignum *= n.numerator ();
-	bignum /= n.denominator ();
-
-	try {
-
-		int64_t midnum = bignum.convert_to<int64_t> ();
-		assert (midnum < int62_t::max);
-		return timepos_t (is_beats(), midnum);
-
-	} catch (...) {
-		fatal << X_("arithmetic overflow in timepos_t::operator* (ratio_t)\n") << endmsg;
-		/* NOTREACHED */
-		return timepos_t();
-	}
-}
-
-timepos_t &
-timepos_t::operator/=(ratio_t const & n)
-{
-	/* this cannot make the value negative, since ratio_t is always positive */
-	v = build (flagged(), int_div_round (val() * n.numerator(), n.denominator()));
-	return *this;
-}
-
-timepos_t &
-timepos_t::operator*=(ratio_t const & n)
-{
-	/* this cannot make the value negative, since ratio_t is always positive */
-	v = build (flagged(), int_div_round (val() * n.denominator(), n.numerator()));
-	return *this;
+	return timepos_t (PBD::muldiv (val(), n.numerator(), n.denominator()));
 }
 
 timepos_t

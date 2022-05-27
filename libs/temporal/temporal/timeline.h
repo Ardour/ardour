@@ -193,10 +193,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	 * along the x (time) axis.
 	 */
 
-	timepos_t   operator/  (ratio_t const & n) const;
-	timepos_t   operator*  (ratio_t const & n) const;
-	timepos_t & operator/= (ratio_t const & n);
-	timepos_t & operator*= (ratio_t const & n);
+	timepos_t   scale  (ratio_t const & n) const;
 
 	bool operator<  (samplepos_t s) { return samples() < s; }
 	bool operator<  (Temporal::Beats const & b) { return beats() < b; }
@@ -357,8 +354,7 @@ class LIBTEMPORAL_API timecnt_t {
 	timecnt_t operator++ () { _distance += 1; return *this; }
 	timecnt_t operator-- () { _distance -= 1; return *this; }
 
-	timecnt_t operator*(ratio_t const &) const;
-	timecnt_t operator/(ratio_t const &) const;
+	timecnt_t scale (ratio_t const &) const;
 
 	ratio_t operator/ (timecnt_t const &) const;
 
