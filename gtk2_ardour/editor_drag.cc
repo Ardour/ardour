@@ -600,9 +600,8 @@ struct TimeAxisViewStripableSorter {
 	}
 };
 
-RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-#warning nutempo un-hardcode time-domain, see fa7e7a462c8
-	: Drag (e, i, p && p->region () ? p->region()->position().time_domain() : Temporal::AudioTime)
+RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, Temporal::TimeDomain td)
+	: Drag (e, i, td)
 	, _primary (p)
 	, _ntracks (0)
 {
@@ -695,8 +694,8 @@ RegionDrag::add_stateful_diff_commands_for_playlists (PlaylistSet const & playli
 }
 
 
-RegionSlipContentsDrag::RegionSlipContentsDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: RegionDrag (e, i, p, v)
+RegionSlipContentsDrag::RegionSlipContentsDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, TimeDomain td)
+	: RegionDrag (e, i, p, v, td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionSlipContentsDrag\n");
 }
@@ -754,8 +753,8 @@ RegionSlipContentsDrag::aborted (bool movement_occurred)
 }
 
 
-RegionBrushDrag::RegionBrushDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: RegionDrag (e, i, p, v)
+RegionBrushDrag::RegionBrushDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, TimeDomain td)
+	: RegionDrag (e, i, p, v, td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionBrushDrag\n");
 	_y_constrained = true;
@@ -806,8 +805,8 @@ RegionBrushDrag::aborted (bool movement_occurred)
 	_editor->abort_reversible_command ();
 }
 
-RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: RegionDrag (e, i, p, v)
+RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, TimeDomain td)
+	: RegionDrag (e, i, p, v, td)
 	, _ignore_video_lock (false)
 	, _total_x_delta (0)
 	, _last_pointer_time_axis_view (0)
@@ -892,7 +891,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, Temporal::timepos_t &
 		pending_region_position = _last_position;
 	}
 
-	if (pending_region_position > timepos_t::max (pending_region_position.time_domain()).earlier (_primary->region()->length())) {
+	if (pending_region_position > timepos_t::max (time_domain()).earlier (_primary->region()->length())) {
 		pending_region_position = _last_position;
 	}
 
@@ -917,7 +916,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, Temporal::timepos_t &
 			const timepos_t off = i->view->region()->position() + total_dx;
 			if (off.is_negative()) {
 				dx = dx - _editor->time_to_pixel_unrounded (off);
-				pending_region_position = pending_region_position.earlier (timecnt_t (off, timepos_t (pending_region_position.time_domain())));
+				pending_region_position = pending_region_position.earlier (timecnt_t (off, timepos_t (time_domain())));
 				break;
 			}
 		}
@@ -2211,8 +2210,8 @@ RegionMotionDrag::aborted (bool)
 /** @param b true to brush, otherwise false.
  *  @param c true to make copies of the regions being moved, otherwise false.
  */
-RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool c)
-	: RegionMotionDrag (e, i, p, v)
+RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool c, TimeDomain td)
+	: RegionMotionDrag (e, i, p, v, td)
 	, _copy (c)
 	, _new_region_view (0)
 {
@@ -2227,9 +2226,8 @@ RegionMoveDrag::setup_pointer_offset ()
 	_pointer_offset = timecnt_t (_last_position.distance (raw_grab_time()), _last_position);
 }
 
-RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, RouteTimeAxisView* v, timepos_t const & pos)
-#warning nutempo pass pos.time_domain () up to Drag's c'tor
-	: RegionMotionDrag (e, 0, 0, list<RegionView*> ())
+RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, RouteTimeAxisView* v, timepos_t const & pos, Temporal::TimeDomain td)
+	: RegionMotionDrag (e, 0, 0, list<RegionView*> (), td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionInsertDrag\n");
 
@@ -2386,8 +2384,8 @@ RegionRippleDrag::y_movement_allowed (int delta_track, double delta_layer, int s
 	return false;
 }
 
-RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: RegionMoveDrag (e, i, p, v, false)
+RegionRippleDrag::RegionRippleDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, TimeDomain td)
+	: RegionMoveDrag (e, i, p, v, false, td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionRippleDrag\n");
 	// compute length of selection
@@ -3038,8 +3036,8 @@ VideoTimeLineDrag::aborted (bool)
 	}
 }
 
-TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool preserve_fade_anchor)
-	: RegionDrag (e, i, p, v)
+TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, Temporal::TimeDomain td, bool preserve_fade_anchor)
+	: RegionDrag (e, i, p, v, td)
 	, _operation (StartTrim)
 	, _preserve_fade_anchor (preserve_fade_anchor)
 	, _jump_position_when_done (false)
@@ -4207,8 +4205,8 @@ CursorDrag::aborted (bool)
 	_editor->playhead_cursor()->set_position (adjusted_time (grab_time (), 0, false).samples());
 }
 
-FadeInDrag::FadeInDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: RegionDrag (e, i, p, v)
+FadeInDrag::FadeInDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, Temporal::TimeDomain td)
+	: RegionDrag (e, i, p, v, td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New FadeInDrag\n");
 }
@@ -4338,8 +4336,8 @@ FadeInDrag::aborted (bool)
 	}
 }
 
-FadeOutDrag::FadeOutDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: RegionDrag (e, i, p, v)
+FadeOutDrag::FadeOutDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, Temporal::TimeDomain td)
+	: RegionDrag (e, i, p, v, td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New FadeOutDrag\n");
 }
@@ -5415,8 +5413,8 @@ RubberbandSelectDrag::aborted (bool)
 	_editor->rubberband_rect->hide ();
 }
 
-TimeFXDrag::TimeFXDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, std::list<RegionView*> const & v)
-	: RegionDrag (e, i, p, v)
+TimeFXDrag::TimeFXDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, std::list<RegionView*> const & v, Temporal::TimeDomain td)
+	: RegionDrag (e, i, p, v, td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TimeFXDrag\n");
 	_preview_video = false;

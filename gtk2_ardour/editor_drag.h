@@ -368,7 +368,7 @@ public:
 class RegionDrag : public Drag, public sigc::trackable
 {
 public:
-	RegionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	RegionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain);
 	virtual ~RegionDrag () {}
 
 protected:
@@ -404,7 +404,7 @@ class RegionSlipContentsDrag : public RegionDrag
 {
 public:
 
-	RegionSlipContentsDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	RegionSlipContentsDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain td);
 	virtual ~RegionSlipContentsDrag () {}
 
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
@@ -417,7 +417,7 @@ public:
 class RegionBrushDrag : public RegionDrag
 {
 public:
-	RegionBrushDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	RegionBrushDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain td);
 	virtual ~RegionBrushDrag () {}
 
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
@@ -434,7 +434,7 @@ class RegionMotionDrag : public RegionDrag
 {
 public:
 
-	RegionMotionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	RegionMotionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain td);
 	virtual ~RegionMotionDrag () {}
 
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
@@ -473,7 +473,7 @@ private:
 class RegionMoveDrag : public RegionMotionDrag
 {
 public:
-	RegionMoveDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, bool);
+	RegionMoveDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, bool, Temporal::TimeDomain);
 	virtual ~RegionMoveDrag () {}
 
 	void motion (GdkEvent *, bool);
@@ -534,7 +534,7 @@ private:
 class RegionInsertDrag : public RegionMotionDrag
 {
 public:
-	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, Temporal::timepos_t const &);
+	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, Temporal::timepos_t const &, Temporal::TimeDomain);
 
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
@@ -549,7 +549,7 @@ public:
 class RegionRippleDrag : public RegionMoveDrag
 {
 public:
-	RegionRippleDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	RegionRippleDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain Td);
 	~RegionRippleDrag () { delete exclude; }
 
 	void motion (GdkEvent *, bool);
@@ -801,7 +801,7 @@ public:
 		EndTrim
 	};
 
-	TrimDrag (Editor *, ArdourCanvas::Item *, RegionView*, std::list<RegionView*> const &, bool preserve_fade_anchor = false);
+	TrimDrag (Editor *, ArdourCanvas::Item *, RegionView*, std::list<RegionView*> const &, Temporal::TimeDomain td, bool preserve_fade_anchor = false);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -1021,7 +1021,7 @@ private:
 class FadeInDrag : public RegionDrag
 {
 public:
-	FadeInDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	FadeInDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -1043,7 +1043,7 @@ public:
 class FadeOutDrag : public RegionDrag
 {
 public:
-	FadeOutDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	FadeOutDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain td);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -1252,7 +1252,7 @@ private:
 class TimeFXDrag : public RegionDrag
 {
 public:
-	TimeFXDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	TimeFXDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain td);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);

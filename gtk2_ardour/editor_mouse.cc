@@ -944,7 +944,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case RegionViewNameHighlight:
 			if (!clicked_regionview->region()->locked()) {
-				_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
+				_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region())), event);
 				return true;
 			}
 			break;
@@ -1041,13 +1041,17 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			switch (item_type) {
 			case FadeInHandleItem:
 			{
-				_drags->set (new FadeInDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), selection->regions), event, _cursors->fade_in);
+				RegionView* rv = reinterpret_cast<RegionView*> (item->get_data("regionview"));
+				assert (rv);
+				_drags->set (new FadeInDrag (this, item, rv, selection->regions, drag_time_domain (rv->region())), event, _cursors->fade_in);
 				return true;
 			}
 
 			case FadeOutHandleItem:
 			{
-				_drags->set (new FadeOutDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), selection->regions), event, _cursors->fade_out);
+				RegionView* rv = reinterpret_cast<RegionView*> (item->get_data("regionview"));
+				assert (rv);
+				_drags->set (new FadeOutDrag (this, item, rv, selection->regions,  drag_time_domain (rv->region())), event, _cursors->fade_out);
 				return true;
 			}
 
@@ -1087,7 +1091,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 				if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::slip_contents_modifier ())) {
 					if (!clicked_regionview->region()->locked() && (Config->get_edit_mode() != Lock)) {
-						_drags->add (new RegionSlipContentsDrag (this, item, clicked_regionview, selection->regions.by_layer()));
+						_drags->add (new RegionSlipContentsDrag (this, item, clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region())));
 					}
 				} else if (ArdourKeyboard::indicates_copy (event->button.state)) {
 					add_region_drag (item, event, clicked_regionview, true);
@@ -1106,7 +1110,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case LeftFrameHandle:
 			case RightFrameHandle:
 				if (!clicked_regionview->region()->locked()) {
-					_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
+					_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region()), false), event);
 					return true;
 				}
 				break;
@@ -1114,7 +1118,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case FadeInTrimHandleItem:
 			case FadeOutTrimHandleItem:
 				if (!clicked_regionview->region()->locked()) {
-					_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer(), true), event);
+					_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region()), true), event);
 					return true;
 				}
 				break;
@@ -1123,7 +1127,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			{
 				/* rename happens on edit clicks */
 				if (clicked_regionview->get_name_highlight()) {
-					_drags->set (new TrimDrag (this, clicked_regionview->get_name_highlight(), clicked_regionview, selection->regions.by_layer()), event);
+					_drags->set (new TrimDrag (this, clicked_regionview->get_name_highlight(), clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region())), event);
 					return true;
 				}
 				break;
@@ -1328,7 +1332,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 		} else if (clicked_regionview) {
 			/* do time-FX  */
-			_drags->set (new TimeFXDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
+			_drags->set (new TimeFXDrag (this, item, clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region())), event);
 			return true;
 		}
 		break;
@@ -1376,18 +1380,18 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		switch (item_type) {
 		case RegionViewNameHighlight:
-			_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
+			_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region())), event);
 			return true;
 			break;
 
 		case LeftFrameHandle:
 		case RightFrameHandle:
-			_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
+			_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region())), event);
 			return true;
 			break;
 
 		case RegionViewName:
-			_drags->set (new TrimDrag (this, clicked_regionview->get_name_highlight(), clicked_regionview, selection->regions.by_layer()), event);
+			_drags->set (new TrimDrag (this, clicked_regionview->get_name_highlight(), clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region())), event);
 			return true;
 			break;
 
@@ -2615,8 +2619,7 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 		return;
 	}
 
-	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), copy));
-
+	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), copy, drag_time_domain (region_view->region())));
 }
 
 void
@@ -2633,7 +2636,7 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 	}
 
 	std::list<RegionView*> empty;
-	_drags->add (new RegionBrushDrag (this, item, region_view, empty));
+	_drags->add (new RegionBrushDrag (this, item, region_view, empty, drag_time_domain (region_view->region())));
 }
 
 /** Start a grab where a time range is selected, track(s) are selected, and the
@@ -2697,7 +2700,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 
 	commit_reversible_command ();
 
-	_drags->set (new RegionMoveDrag (this, latest_regionviews.front()->get_canvas_group(), latest_regionviews.front(), latest_regionviews, false), event);
+	_drags->set (new RegionMoveDrag (this, latest_regionviews.front()->get_canvas_group(), latest_regionviews.front(), latest_regionviews, false, drag_time_domain (latest_regionviews.front()->region())), event);
 }
 
 void
