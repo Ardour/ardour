@@ -112,6 +112,8 @@ public:
 	bool set_name (const std::string& str);
 	void set_region_ownership ();
 
+	Temporal::TimeDomain time_domain() const;
+
 	/*playlist group IDs (pgroup_id) is a group identifier that is implicitly
 	 * or explicitly assigned to playlists so they can be associated with each other.
 	 *

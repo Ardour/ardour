@@ -3446,3 +3446,16 @@ Playlist::rdiff_and_add_command (Session* session)
 	session->add_commands (cmds);
 	session->add_command (new StatefulDiffCommand (shared_from_this ()));
 }
+
+Temporal::TimeDomain
+Playlist::time_domain() const
+{
+	switch (_type) {
+	case DataType::AUDIO:
+		return Temporal::AudioTime;
+	default:
+		break;
+	}
+
+	return Temporal::BeatTime;
+}

@@ -108,6 +108,7 @@ public:
 	bool set_name (const std::string& str);
 
 	const DataType& data_type () const { return _type; }
+	Temporal::TimeDomain time_domain() const;
 
 	/** How the region parameters play together:
 	 *

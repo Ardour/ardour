@@ -2068,3 +2068,22 @@ Region::region_relative_position (timepos_t const & p) const
 	*/
 	return p.earlier (position());
 }
+
+Temporal::TimeDomain
+Region::time_domain() const
+{
+	boost::shared_ptr<Playlist> pl (_playlist.lock());
+
+	if (pl) {
+		return pl->time_domain ();
+	}
+
+	switch (_type) {
+	case DataType::AUDIO:
+		return Temporal::AudioTime;
+	default:
+		break;
+	}
+
+	return Temporal::BeatTime;
+}
