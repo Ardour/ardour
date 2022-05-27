@@ -157,6 +157,7 @@ private:
 		Gtk::TreeModelColumn<std::string> filesize;
 		Gtk::TreeModelColumn<std::string> smplrate;
 		Gtk::TreeModelColumn<std::string> license;
+		Gtk::TreeModelColumn<std::string> tooltip;
 		Gtk::TreeModelColumn<bool>        downloading;
 
 		FreesoundColumns() {
@@ -167,6 +168,7 @@ private:
 			add(filesize);
 			add(smplrate);
 			add(license);
+			add(tooltip);
 			add(downloading);
 		}
 	};
@@ -251,6 +253,7 @@ protected:
 	void freesound_search_clicked ();
 	void freesound_more_clicked ();
 	void freesound_similar_clicked ();
+	void freesound_search_params_changed ();
 	int freesound_page;
 	std::string freesound_token; // keep oauth token while ardour is running
 

@@ -810,28 +810,37 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	vbox->pack_start (*passbox, PACK_SHRINK);
 	vbox->pack_start (*scroll);
 
-	freesound_list_view.append_column(_("ID")      , freesound_list_columns.id);
-	freesound_list_view.append_column(_("Filename"), freesound_list_columns.filename);
-	// freesound_list_view.append_column(_("URI")     , freesound_list_columns.uri);
-	freesound_list_view.append_column(_("Duration"), freesound_list_columns.duration);
-	freesound_list_view.append_column(_("Size"), freesound_list_columns.filesize);
+	freesound_list_view.append_column(_("ID")      ,    freesound_list_columns.id);
+	freesound_list_view.append_column(_("Filename"),    freesound_list_columns.filename);
+	freesound_list_view.append_column(_("Duration"),    freesound_list_columns.duration);
+	freesound_list_view.append_column(_("Size"),        freesound_list_columns.filesize);
 	freesound_list_view.append_column(_("Sample rate"), freesound_list_columns.smplrate);
-	freesound_list_view.append_column(_("License"), freesound_list_columns.license);
-	freesound_list_view.get_column(0)->set_alignment(0.5);
-	freesound_list_view.get_column(1)->set_expand(true); // filename
-	freesound_list_view.get_column(1)->set_resizable(true); // filename
-	freesound_list_view.get_column(2)->set_alignment(0.5);
-	freesound_list_view.get_column(3)->set_alignment(0.5);
-	freesound_list_view.get_column(4)->set_alignment(0.5);
-	freesound_list_view.get_column(5)->set_alignment(0.0);
+	freesound_list_view.append_column(_("License"),     freesound_list_columns.license);
+
+	// filename
+	freesound_list_view.get_column(1)->set_expand(true);
+	freesound_list_view.get_column(1)->set_resizable(true);
+	freesound_list_view.get_column(1)->set_sizing(Gtk::TREE_VIEW_COLUMN_FIXED);
+
+	// duration: justify contents right
+	CellRendererText* renderer = dynamic_cast<CellRendererText*> (freesound_list_view.get_column(2)->get_first_cell ());
+	if (renderer) {
+		renderer->property_xalign () = 1.0;
+	}
 
 	freesound_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
-	freesound_list_view.set_tooltip_column(1);
+	freesound_list_view.set_tooltip_column(7);
 
 	freesound_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
 	freesound_list_view.signal_row_activated().connect (sigc::mem_fun (*this, &SoundFileBrowser::freesound_list_view_activated));
 	freesound_search_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
 	freesound_entry.signal_activate().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
+
+	/* disable "More" button when search parameters change */
+	freesound_entry.signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_params_changed));
+	freesound_sort.signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_params_changed));
+	freesound_licence.signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_params_changed));
+
 	freesound_more_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_more_clicked));
 	freesound_similar_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_similar_clicked));
 	notebook.append_page (*vbox, _("Search Freesound"));
@@ -1199,6 +1208,13 @@ SoundFileBrowser::freesound_more_clicked ()
 }
 
 void
+SoundFileBrowser::freesound_search_params_changed ()
+{
+	freesound_page = 1;
+	freesound_more_btn.set_sensitive(false);
+}
+
+void
 SoundFileBrowser::freesound_similar_clicked ()
 {
 	ListPath rows = freesound_list_view.get_selection()->get_selected_rows ();
@@ -1357,9 +1373,13 @@ SoundFileBrowser::handle_freesound_results(std::string theString) {
 			} else {
 				s = modf(duration_seconds/60, &m) * 60;
 				m = modf(m/60, &h) * 60;
-				sprintf(duration_hhmmss, "%02.fh:%02.fm:%04.1fs",
-						h, m, s
-				       );
+				if (h > 0) {
+					sprintf(duration_hhmmss, "%2.fh:%02.fm:%04.1fs", h, m, s);
+				} else if (m > 0) {
+					sprintf(duration_hhmmss, "%2.fm:%04.1fs", m, s);
+				} else {
+					sprintf(duration_hhmmss, "%4.1fs", s);
+				}
 			}
 
 			double size_bytes = atof(filesize);
@@ -1401,6 +1421,7 @@ SoundFileBrowser::handle_freesound_results(std::string theString) {
 			row[freesound_list_columns.filesize] = bsize;
 			row[freesound_list_columns.smplrate] = samplerate;
 			row[freesound_list_columns.license ] = shortlicense;
+			row[freesound_list_columns.tooltip ] = Gtkmm2ext::markup_escape_text(filename) + "\n" + licence;
 			matches++;
 		} else {
 			error << _("Failed to retrieve XML for file") << std::endl;
