@@ -4250,7 +4250,7 @@ Editor::get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count,
 	}
 
 	/* calculate basic unsnapped multi-paste offset */
-	Temporal::timecnt_t offset = duration * paste_count;
+	Temporal::timecnt_t offset = duration.scale (paste_count);
 
 	/* snap offset so pos + offset is aligned to the grid */
 	Temporal::timepos_t snap_pos (pos + offset);

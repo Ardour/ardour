@@ -169,7 +169,7 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching)
 	}
 
 	const timecnt_t oldlen = regions.front()->length();
-	const timecnt_t newlen = regions.front()->length() * ratio;
+	const timecnt_t newlen = regions.front()->length().scale (ratio);
 	const timepos_t pos = regions.front()->position ();
 
 	current_timefx = new TimeFXDialog (*this, pitching, oldlen, newlen, pos);

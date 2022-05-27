@@ -301,7 +301,7 @@ TimeFXDialog::duration_adjustment_changed ()
 
 	PBD::Unwinder<bool> uw (ignore_clock_change, true);
 
-	duration_clock->set_duration (original_length * Temporal::ratio_t (1.0, (duration_adjustment.get_value() / 100.0)));
+	duration_clock->set_duration (original_length.scale (Temporal::ratio_t (1.0, (duration_adjustment.get_value() / 100.0))));
 }
 
 void

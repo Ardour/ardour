@@ -1363,7 +1363,7 @@ RouteTimeAxisView::paste (timepos_t const & pos, const Selection& selection, Pas
 	if (_editor.should_ripple()) {
 		std::pair<timepos_t, timepos_t> extent = (*p)->get_extent_with_endspace();
 		timecnt_t amount = extent.first.distance (extent.second);
-		pl->ripple (ppos, amount * ctx.times, boost::shared_ptr<Region>());
+		pl->ripple (ppos, amount.scale (ctx.times), boost::shared_ptr<Region>());
 	}
 	pl->paste (*p, ppos, ctx.times);
 

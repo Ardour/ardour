@@ -1542,7 +1542,7 @@ Editor::marker_menu_zoom_to_range ()
 		return;
 	}
 
-	timepos_t const extra = timepos_t (l->length() * Temporal::ratio_t (5, 100));
+	timepos_t const extra = timepos_t (l->length().scale (Temporal::ratio_t (5, 100)));
 	timepos_t a = l->start ();
 	if (a >= extra) {
 		a.shift_earlier (extra);

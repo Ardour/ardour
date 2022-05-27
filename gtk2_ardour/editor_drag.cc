@@ -876,7 +876,12 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, Temporal::timepos_t &
 	if (sync_dir >= 0 || (sync_dir < 0 && pending_region_position >= sync_offset)) {
 
 		timecnt_t const sd = snap_delta (event->button.state);
-		timepos_t sync_snap (pending_region_position + (sync_offset * sync_dir) + sd);
+		timepos_t sync_snap;
+		if (sync_dir > 0) {
+			sync_snap = pending_region_position + sync_offset + sd;
+		} else {
+			sync_snap = pending_region_position.earlier (sync_offset) + sd;
+		}
 		_editor->snap_to_with_modifier (sync_snap, event);
 		if (sync_offset.is_zero () && sd.is_zero ()) {
 			pending_region_position = sync_snap;
@@ -3053,7 +3058,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	setup_snap_delta (region_start);
 
 	/* These will get overridden for a point trim.*/
-	if (pf < (region_start + region_length/2)) {
+	if (pf < (region_start + region_length.scale (ratio_t (1, 2)))) {
 		/* closer to front */
 		_operation = StartTrim;
 		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_anchored_modifier ())) {
@@ -6529,7 +6534,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 			/* add guard points */
 			for (list<TimelineRange>::const_iterator i = _ranges.begin(); i != _ranges.end(); ++i) {
 
-				timepos_t const half = (i->start() + i->end()) / 2;
+				timepos_t const half = (i->start() + i->end()).scale (ratio_t (1, 2));
 
 				for (list<Line>::iterator j = _lines.begin(); j != _lines.end(); ++j) {
 					if (j->range.first > i->start() || j->range.second < i->start()) {

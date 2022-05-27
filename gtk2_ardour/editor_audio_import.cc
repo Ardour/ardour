@@ -932,7 +932,7 @@ Editor::add_sources (vector<string>            paths,
 			cerr << "for " << (*x)->name() << " source length appears to be " << len << endl;
 			if (len.is_zero()) {
 				if ((*x)->type() == DataType::AUDIO) {
-					len = timepos_t (_session->sample_rate ()) / 2;
+					len = timepos_t (_session->sample_rate () / 2);
 				} else {
 					len = timepos_t (Beats (1, 0));
 				}

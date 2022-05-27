@@ -2643,7 +2643,7 @@ Editor::insert_source_list_selection (float times)
 	playlist->add_region ((RegionFactory::create (region, true)), get_preferred_edit_position(), times, _session->config.get_layered_record_mode());  //ToDo:  insert_mode ?
 
 	if (should_ripple()) {
-		do_ripple (playlist, get_preferred_edit_position(), region->length() * times, boost::shared_ptr<Region>(), true);
+		do_ripple (playlist, get_preferred_edit_position(), region->length().scale (times), boost::shared_ptr<Region>(), true);
 	} else {
 		playlist->rdiff_and_add_command (_session);
 	}
@@ -5241,7 +5241,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		}
 
 		for (set<boost::shared_ptr<Playlist> >::iterator p = playlists.begin(); p != playlists.end(); ++p) {
-			do_ripple ((*p), start_sample, span * times, &exclude, false);
+			do_ripple ((*p), start_sample, span.scale (times), &exclude, false);
 		}
 	}
 
