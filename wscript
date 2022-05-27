@@ -1262,6 +1262,20 @@ int main () { return 0; }
         # MORE STUFF PROBABLY NEEDED HERE
         conf.define ('WINDOWS', 1)
 
+    have_int128_support = conf.check_cc(fragment = '''
+int main () { __int128 x = 0; return 0; }
+''',
+                                           features  = 'c',
+                                           mandatory = False,
+                                           execute   = False,
+                                           msg       = 'Checking for int128 support',
+                                           okmsg = 'lots of bits found.',
+                                           errmsg = 'Not found, no int128 support.')
+
+    if have_int128_support:
+        conf.env.append_value('CXXFLAGS', "-DCOMPILER_INT128_SUPPORT")
+        conf.env.append_value('CFLAGS', "-DCOMPILER_INT128_SUPPORT")
+
     # Tell everyone that this is a waf build
 
     conf.env.append_value('CFLAGS', '-DWAF_BUILD')
