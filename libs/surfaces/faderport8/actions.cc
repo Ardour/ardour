@@ -309,7 +309,7 @@ FaderPort8::button_varispeed (bool ffw)
 		// stop key-repeat
 		dynamic_cast<FP8RepeatButton*>(&b_ffw)->stop_repeat();
 		dynamic_cast<FP8RepeatButton*>(&b_rew)->stop_repeat();
-		session->request_locate (0, MustStop);
+		session->request_locate (0, false, MustStop);
 		return;
 	}
 

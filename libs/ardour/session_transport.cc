@@ -489,7 +489,7 @@ Session::start_transport (bool after_loop)
 
 				/* jump to start and then roll from there */
 
-				request_locate (location->start_sample(), MustRoll);
+				request_locate (location->start_sample(), false, MustRoll);
 				return;
 			}
 		}
@@ -907,7 +907,7 @@ Session::request_stop (bool abort, bool clear_state, TransportRequestSource orig
 }
 
 void
-Session::request_locate (samplepos_t target_sample, LocateTransportDisposition ltd, TransportRequestSource origin)
+Session::request_locate (samplepos_t target_sample, bool force, LocateTransportDisposition ltd, TransportRequestSource origin)
 {
 	if (synced_to_engine()) {
 		_engine.transport_locate (target_sample);
@@ -936,7 +936,7 @@ Session::request_locate (samplepos_t target_sample, LocateTransportDisposition l
 		break;
 	}
 
-	SessionEvent *ev = new SessionEvent (type, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, false);
+	SessionEvent *ev = new SessionEvent (type, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, force);
 	ev->locate_transport_disposition = ltd;
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request locate to %1 ltd = %2\n", target_sample, enum_2_string (ltd)));
 	queue_event (ev);
@@ -971,7 +971,7 @@ Session::request_preroll_record_trim (samplepos_t rec_in, samplecnt_t preroll)
 	samplepos_t pos = std::max ((samplepos_t)0, rec_in - preroll);
 	_preroll_record_trim_len = rec_in - pos;
 	maybe_enable_record ();
-	request_locate (pos, MustRoll);
+	request_locate (pos, false, MustRoll);
 	set_requested_return_sample (rec_in);
 
 	if (pos < rec_in) {

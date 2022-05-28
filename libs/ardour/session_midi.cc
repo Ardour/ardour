@@ -306,7 +306,7 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 		mtcs->handle_locate (mmc_tc);
 	} else {
 		// cerr << "Locate without MTC slave\n";
-		request_locate (target_sample, MustStop);
+		request_locate (target_sample, false, MustStop);
 	}
 }
 

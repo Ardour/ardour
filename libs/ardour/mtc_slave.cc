@@ -407,7 +407,7 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 		boost::shared_ptr<TransportMaster> c = TransportMasterManager::instance().current();
 		if (c && c.get() == this && _session->config.get_external_sync()) {
 			_session->set_requested_return_sample (-1);
-			_session->request_locate (mtc_frame, MustStop, TRS_MTC);
+			_session->request_locate (mtc_frame, false, MustStop, TRS_MTC);
 		}
 		update_mtc_status (MIDI::MTC_Stopped);
 		reset (false);

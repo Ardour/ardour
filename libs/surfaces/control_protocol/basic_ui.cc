@@ -521,13 +521,13 @@ BasicUI::transport_sample ()
 void
 BasicUI::locate (samplepos_t where, LocateTransportDisposition ltd)
 {
-	session->request_locate (where, ltd);
+	session->request_locate (where, false, ltd);
 }
 
 void
 BasicUI::locate (samplepos_t where, bool roll)
 {
-	session->request_locate (where, roll ? MustRoll : RollIfAppropriate);
+	session->request_locate (where, false, roll ? MustRoll : RollIfAppropriate);
 }
 
 void
@@ -542,7 +542,7 @@ BasicUI::jump_by_seconds (double secs, LocateTransportDisposition ltd)
 	}
 	s = s * session->nominal_sample_rate();
 
-	session->request_locate (floor(s), ltd);
+	session->request_locate (floor(s), false, ltd);
 }
 
 void
@@ -556,7 +556,7 @@ BasicUI::jump_by_bars (int bars, LocateTransportDisposition ltd)
 		bbt.bars = 1;
 	}
 
-	session->request_locate (tmap->sample_at (bbt), ltd);
+	session->request_locate (tmap->sample_at (bbt), false, ltd);
 }
 
 void
@@ -678,7 +678,7 @@ BasicUI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 	} else { /* not rolling */
 
 		if (session->get_play_loop() && Config->get_loop_is_mode()) {
-			session->request_locate (session->locations()->auto_loop_location()->start().samples(), MustRoll);
+			session->request_locate (session->locations()->auto_loop_location()->start().samples(), false, MustRoll);
 		} else {
 			session->request_roll (TRS_UI);
 		}
