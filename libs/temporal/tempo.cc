@@ -1948,26 +1948,22 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			if (bar_mod != 0) {
 				if (p->bbt().is_bar() && (bar_mod == 1 || ((p->bbt().bars % bar_mod == 0)))) {
 					ret.push_back (TempoMapPoint (*this, metric, p->sclock(), p->beats(), p->bbt()));
-
-					/* reset our notion of where we are */
-
-					start = p->sclock();
-					bbt = p->bbt();
-					beats = p->beats();
-
 					DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
 				} else {
-					DEBUG_TRACE (DEBUG::Grid, string_compose ("-- skip %1 not on bar_mod %2\n", bbt, bar_mod));
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("-- skip %1 not on bar_mod %2\n", p->bbt(), bar_mod));
 				}
+
 			} else {
 
-				start = p->sclock();
-				bbt = p->bbt();
-				beats = p->beats();
-
-				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+				ret.push_back (TempoMapPoint (*this, metric, p->sclock(), p->beats(), p->bbt()));
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
 			}
+
+			/* reset our notion of where we are */
+
+			start = p->sclock();
+			bbt = p->bbt();
+			beats = p->beats();
 
 			/* But there may be multiple points here, and we have
 			 * to check them all (Tempo/Meter/MusicTime ... which
