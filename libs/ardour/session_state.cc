@@ -4415,6 +4415,12 @@ Session::config_changed (std::string p, bool ours)
 			_master_out->set_volume_applies_to_output (true);
 			master_volume ()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
 		}
+	} else if (p == "cue-behavior") {
+		bool follow = (config.get_cue_behavior() & FollowCues);
+		std::cerr << "cue behavior changed, follow = " << follow << std::endl;
+		if (follow && !transport_state_rolling() && !loading()) {
+			request_locate (transport_sample(), true);
+		}
 	}
 
 	set_dirty ();

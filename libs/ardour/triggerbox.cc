@@ -2900,6 +2900,7 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	}
 
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
+	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&TriggerBox::parameter_changed, this, _1));
 }
 
 void
@@ -2919,21 +2920,8 @@ TriggerBox::parameter_changed (std::string const & param)
 		reconnect_to_default ();
 
 	} else if (param == "cue-behavior") {
-		bool follow = (_session.config.get_cue_behavior() & FollowCues);
-		if (follow) {
-
-			/* XXX this is all wrong. We have to do the
-			 * fast_forward() call from something like the butler
-			 * thread, as we do when a locate happens (and we are
-			 * following cues).
-			 *
-			 * FIX ME.
-			 */
-
-			if (!_session.transport_state_rolling()) {
-				fast_forward (_session.cue_events(), _session.transport_sample());
-			}
-		} else {
+		const bool follow = (_session.config.get_cue_behavior() & FollowCues);
+		if (!follow) {
 			cancel_locate_armed ();
 		}
 	}
