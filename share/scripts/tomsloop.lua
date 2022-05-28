@@ -258,7 +258,7 @@ function factory (params) return function ()
 
 	--advance playhead so it's just after the newly added regions
 	if n_regions_created > 0 then
-		Session:request_locate (playhead + loop:length() * n_paste, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
+		Session:request_locate (playhead + loop:length() * n_paste, false, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
 	end
 
 	-- all done, commit the combined Undo Operation

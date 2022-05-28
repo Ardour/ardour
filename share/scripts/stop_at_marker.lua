@@ -43,7 +43,7 @@ function factory ()
 		if (pos + n_samples >= m) then
 			-- asking to locate to "m" ensures that playback continues at "m"
 			-- and the same marker will not be taken into account.
-			Session:request_locate (m, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_Engine)
+			Session:request_locate (m, false, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_Engine)
 		end
 	end
 end

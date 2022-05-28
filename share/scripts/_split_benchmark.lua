@@ -48,7 +48,7 @@ function factory (params) return function ()
 		end
 		local t_end = ARDOUR.LuaAPI.monotonic_time ()
 
-		Session:request_locate((playhead + step * n_steps), ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
+		Session:request_locate((playhead + step * n_steps), false, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
 		print (count_regions (), (t_end - t_start) / 1000 / n_steps)
 		collectgarbage ();
 		ARDOUR.LuaAPI.usleep(500000)

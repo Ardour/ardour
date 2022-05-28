@@ -27,7 +27,7 @@ function factory () return function ()
 
 	for l in Session:locations():list():iter() do
 		if l:is_mark() and string.find (l:name(), "^" .. rv['marker'] .. ".*$") then
-			Session:request_locate (l:start (), ARDOUR.LocateTransportDisposition.RollIfAppropriate, ARDOUR.TransportRequestSource.TRS_UI)
+			Session:request_locate (l:start (), false, ARDOUR.LocateTransportDisposition.RollIfAppropriate, ARDOUR.TransportRequestSource.TRS_UI)
 			if keep then goto restart end
 			return
 		end
