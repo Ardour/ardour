@@ -390,6 +390,12 @@ ExportHandler::finish_timespan ()
 		config.filename->set_channel_config (config.channel_config);
 		std::string filename = config.filename->get_path (fmt);
 
+		if (fmt->type () == ExportFormatBase::T_None) {
+			graph_builder->reset ();
+			config_map.erase (config_map.begin());
+			continue;
+		}
+
 		if (fmt->with_cue()) {
 			export_cd_marker_file (current_timespan, fmt, filename, CDMarkerCUE);
 		}
