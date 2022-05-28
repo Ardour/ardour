@@ -447,13 +447,11 @@ LoudnessDialog::analyze ()
 	boost::shared_ptr<ExportFormatSpecification>  fmp = _session->get_export_handler ()->add_format ();
 
 	/* setup format */
-	fmp->set_tag (false);
 	fmp->set_sample_format (ExportFormatBase::SF_Float);
 	fmp->set_sample_rate (ExportFormatBase::SR_Session);
 	fmp->set_format_id (ExportFormatBase::F_None);
 	fmp->set_type (ExportFormatBase::T_None);
 	fmp->set_extension ("wav");
-	fmp->set_soundcloud_upload (false);
 	fmp->set_analyse (true);
 
 	/* setup range */
