@@ -2697,13 +2697,13 @@ Editor::transition_to_rolling (bool fwd)
 void
 Editor::play_from_start ()
 {
-	_session->request_locate (_session->current_start_sample(), MustRoll);
+	_session->request_locate (_session->current_start_sample(), false, MustRoll);
 }
 
 void
 Editor::play_from_edit_point ()
 {
-	_session->request_locate (get_preferred_edit_position().samples(), MustRoll);
+	_session->request_locate (get_preferred_edit_position().samples(), false, MustRoll);
 }
 
 void
@@ -2715,7 +2715,7 @@ Editor::play_from_edit_point_and_return ()
 	start_sample = get_preferred_edit_position (EDIT_IGNORE_PHEAD).samples();
 
 	if (_session->transport_rolling()) {
-		_session->request_locate (start_sample, MustStop);
+		_session->request_locate (start_sample, false, MustStop);
 		return;
 	}
 
@@ -2801,7 +2801,7 @@ Editor::play_with_preroll ()
 		} else {
 			start = 0;
 		}
-		_session->request_locate (start, MustRoll);
+		_session->request_locate (start, false, MustRoll);
 		_session->set_requested_return_sample (ph);  //force auto-return to return to playhead location, without the preroll
 	}
 }
@@ -2843,7 +2843,7 @@ Editor::loop_location (Location& location)
 		tll->set (location.start(), location.end());
 
 		// enable looping, reposition and start rolling
-		_session->request_locate (tll->start().samples(), MustRoll);
+		_session->request_locate (tll->start().samples(), false, MustRoll);
 		_session->request_play_loop (true);
 	}
 }

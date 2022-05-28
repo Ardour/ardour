@@ -1932,7 +1932,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		}
 
 		if (_session->get_play_loop() && Config->get_loop_is_mode()) {
-			_session->request_locate (_session->locations()->auto_loop_location()->start().samples(), MustRoll);
+			_session->request_locate (_session->locations()->auto_loop_location()->start().samples(), false, MustRoll);
 		} else {
 			if (UIConfiguration::instance().get_follow_edits()) {
 				list<TimelineRange>& range = editor->get_selection().time;

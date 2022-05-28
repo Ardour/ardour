@@ -1393,7 +1393,7 @@ Editor::set_session (Session *t)
 
 	/* catch up with the playhead */
 
-	_session->request_locate (_playhead_cursor->current_sample (), MustStop);
+	_session->request_locate (_playhead_cursor->current_sample (), false, MustStop);
 	_pending_initial_locate = true;
 
 	update_title ();
@@ -4331,6 +4331,7 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 			return Temporal::Beats::from_double ((4.0 * m.divisions_per_bar()) / m.note_value());
 		}
 		break;
+
 	default:
 #warning NUTEMPO need to implement all other subdivs
 		success = false;

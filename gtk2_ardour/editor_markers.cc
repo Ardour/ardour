@@ -1315,15 +1315,15 @@ Editor::marker_menu_play_from ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start_sample(), MustRoll);
+			_session->request_locate (l->start_sample(), false, MustRoll);
 		}
 		else {
 			//_session->request_bounded_roll (l->start_sample(), l->end());
 
 			if (is_start) {
-				_session->request_locate (l->start_sample(), MustRoll);
+				_session->request_locate (l->start_sample(), false, MustRoll);
 			} else {
-				_session->request_locate (l->end_sample(), MustRoll);
+				_session->request_locate (l->end_sample(), false, MustRoll);
 			}
 		}
 	}
@@ -1345,13 +1345,13 @@ Editor::marker_menu_set_playhead ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start_sample(), MustStop);
+			_session->request_locate (l->start_sample(), false, MustStop);
 		}
 		else {
 			if (is_start) {
-				_session->request_locate (l->start_sample(), MustStop);
+				_session->request_locate (l->start_sample(), false, MustStop);
 			} else {
-				_session->request_locate (l->end_sample(), MustStop);
+				_session->request_locate (l->end_sample(), false, MustStop);
 			}
 		}
 	}
@@ -1496,7 +1496,7 @@ Editor::marker_menu_play_range ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start().samples(), MustRoll);
+			_session->request_locate (l->start().samples(), false, MustRoll);
 		}
 		else {
 			_session->request_bounded_roll (l->start().samples(), l->end().samples());

@@ -1462,7 +1462,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 		timepos_t where (canvas_event_sample (event));
 		snap_to (where);
-		_session->request_locate (where.samples(), MustStop);
+		_session->request_locate (where.samples(), false, MustStop);
 	}
 
 	switch (event->button.button) {
@@ -2153,7 +2153,7 @@ Editor::scrub (samplepos_t sample, double current_x)
 
 	if (scrubbing_direction == 0) {
 		/* first move */
-		_session->request_locate (sample, MustStop);
+		_session->request_locate (sample, false, MustStop);
 		_session->request_transport_speed (0.1);
 		scrubbing_direction = 1;
 
