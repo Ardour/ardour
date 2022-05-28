@@ -37,6 +37,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_format_specification.h"
+#include "ardour/export_format_manager.h"
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
 #include "ardour/profile.h"
@@ -63,6 +64,7 @@ ExportDialog::ExportDialog (PublicEditor & editor, std::string title, ARDOUR::Ex
   , list_files_button (_("List files"))
   , previous_progress (0)
   , _initialized (false)
+  , _analysis_only (false)
 { }
 
 ExportDialog::~ExportDialog ()
@@ -156,13 +158,16 @@ ExportDialog::init ()
 	progress_widget.pack_start (progress_bar, false, false, 6);
 
 	/* Buttons */
-
 	cancel_button = add_button (Gtk::Stock::CANCEL, RESPONSE_CANCEL);
 	export_button = add_button (_("Export"), RESPONSE_FAST);
+	analyze_button = add_button (_("Only Analyze"), RESPONSE_ANALYZE);
+	get_action_area ()->set_child_secondary (*analyze_button);
+
 	set_default_response (RESPONSE_FAST);
 
 	cancel_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::close_dialog));
-	export_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::do_export));
+	export_button->signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &ExportDialog::do_export), false));
+	analyze_button->signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &ExportDialog::do_export), true));
 
 	file_notebook->soundcloud_export_selector = soundcloud_selector;
 
@@ -261,6 +266,7 @@ ExportDialog::update_warnings_and_example_filename ()
 	list_files_string = "";
 
 	export_button->set_sensitive (true);
+	analyze_button->set_sensitive (true);
 
 	/* Add new warnings */
 
@@ -346,8 +352,18 @@ ExportDialog::soundcloud_upload_progress(double total, double now, std::string t
 }
 
 void
-ExportDialog::do_export ()
+ExportDialog::do_export (bool analysis_only)
 {
+	_analysis_only = analysis_only;
+	if (analysis_only) {
+		for (auto const& fmt : profile_manager->get_formats ()) {
+			boost::shared_ptr<ExportFormatSpecification> fmp = fmt->format;
+			fmp->set_format_id (ExportFormatBase::F_None);
+			fmp->set_type (ExportFormatBase::T_None);
+			fmp->set_analyse (true);
+		}
+	}
+
 	try {
 		profile_manager->prepare_for_export ();
 		handler->soundcloud_username     = soundcloud_selector->username ();
@@ -388,6 +404,7 @@ ExportDialog::show_progress ()
 
 	cancel_button->set_label (_("Stop Export"));
 	export_button->set_sensitive (false);
+	analyze_button->set_sensitive (false);
 
 	progress_bar.set_fraction (0.0);
 	warning_widget.hide_all();
@@ -454,8 +471,13 @@ ExportDialog::show_progress ()
 
 	if (!status->aborted() && status->result_map.size() > 0) {
 		hide();
-		ExportReport er (_session, status);
-		er.run();
+		if (_analysis_only) {
+			ExportReport er (_("Export Report/Analysis"), status->result_map);
+			er.run();
+		} else {
+			ExportReport er (_session, status);
+			er.run();
+		}
 	}
 
 	if (!status->aborted()) {
@@ -478,33 +500,50 @@ ExportDialog::progress_timeout ()
 {
 	std::string status_text;
 	float progress = -1;
-	switch (status->active_job) {
-	case ExportStatus::Exporting:
-		status_text = string_compose (_("Exporting '%3' (timespan %1 of %2)"),
-		                              status->timespan, status->total_timespans, status->timespan_name);
-		progress = ((float) status->processed_samples_current_timespan) / status->total_samples_current_timespan;
-		break;
-	case ExportStatus::Normalizing:
-		status_text = string_compose (_("Normalizing '%3' (timespan %1 of %2)"),
-		                              status->timespan, status->total_timespans, status->timespan_name);
-		progress = ((float) status->current_postprocessing_cycle) / status->total_postprocessing_cycles;
-		break;
-	case ExportStatus::Encoding:
-		status_text = string_compose (_("Encoding '%3' (timespan %1 of %2)"),
-		                              status->timespan, status->total_timespans, status->timespan_name);
-		progress = ((float) status->current_postprocessing_cycle) / status->total_postprocessing_cycles;
-		break;
-	case ExportStatus::Tagging:
-		status_text = string_compose (_("Tagging '%3' (timespan %1 of %2)"),
-		                              status->timespan, status->total_timespans, status->timespan_name);
-		break;
-	case ExportStatus::Uploading:
-		status_text = string_compose (_("Uploading '%3' (timespan %1 of %2)"),
-		                              status->timespan, status->total_timespans, status->timespan_name);
-		break;
-	case ExportStatus::Command:
-		status_text = string_compose (_("Running Post Export Command for '%1'"), status->timespan_name);
-		break;
+
+	if (_analysis_only) {
+		switch (status->active_job) {
+			case ExportStatus::Exporting:
+				status_text = string_compose (_("Export for Analysis '%3' (timespan %1 of %2)"),
+				                              status->timespan, status->total_timespans, status->timespan_name);
+				progress = ((float) status->processed_samples_current_timespan) / status->total_samples_current_timespan;
+				break;
+			default:
+				status_text = string_compose (_("Analyzing '%3' (timespan %1 of %2)"),
+				                              status->timespan, status->total_timespans, status->timespan_name);
+				progress = ((float) status->current_postprocessing_cycle) / status->total_postprocessing_cycles;
+				break;
+		}
+	} else {
+
+		switch (status->active_job) {
+			case ExportStatus::Exporting:
+				status_text = string_compose (_("Exporting '%3' (timespan %1 of %2)"),
+				                              status->timespan, status->total_timespans, status->timespan_name);
+				progress = ((float) status->processed_samples_current_timespan) / status->total_samples_current_timespan;
+				break;
+			case ExportStatus::Normalizing:
+				status_text = string_compose (_("Normalizing '%3' (timespan %1 of %2)"),
+				                              status->timespan, status->total_timespans, status->timespan_name);
+				progress = ((float) status->current_postprocessing_cycle) / status->total_postprocessing_cycles;
+				break;
+			case ExportStatus::Encoding:
+				status_text = string_compose (_("Encoding '%3' (timespan %1 of %2)"),
+				                              status->timespan, status->total_timespans, status->timespan_name);
+				progress = ((float) status->current_postprocessing_cycle) / status->total_postprocessing_cycles;
+				break;
+			case ExportStatus::Tagging:
+				status_text = string_compose (_("Tagging '%3' (timespan %1 of %2)"),
+				                              status->timespan, status->total_timespans, status->timespan_name);
+				break;
+			case ExportStatus::Uploading:
+				status_text = string_compose (_("Uploading '%3' (timespan %1 of %2)"),
+				                              status->timespan, status->total_timespans, status->timespan_name);
+				break;
+			case ExportStatus::Command:
+				status_text = string_compose (_("Running Post Export Command for '%1'"), status->timespan_name);
+				break;
+		}
 	}
 
 	progress_bar.set_text (status_text);
@@ -529,6 +568,7 @@ void
 ExportDialog::add_error (string const & text)
 {
 	export_button->set_sensitive (false);
+	analyze_button->set_sensitive (false);
 
 	if (warn_string.empty()) {
 		warn_string = _("<span color=\"#ffa755\">Error: ") + text + "</span>";

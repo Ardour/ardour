@@ -66,6 +66,7 @@ public:
 	enum Responses {
 		RESPONSE_RT,
 		RESPONSE_FAST,
+		RESPONSE_ANALYZE,
 		RESPONSE_CANCEL
 	};
 
@@ -112,7 +113,7 @@ private:
 	void update_warnings_and_example_filename ();
 	void show_conflicting_files ();
 
-	void do_export ();
+	void do_export (bool analysis_only);
 
 	void maybe_set_session_dirty ();
 
@@ -152,13 +153,15 @@ private:
 	float previous_progress; // Needed for gtk bug workaround
 
 	bool _initialized;
+	bool _analysis_only;
 
 	void soundcloud_upload_progress(double total, double now, std::string title);
 
 	/* Buttons */
 
-	Gtk::Button *           cancel_button;
-	Gtk::Button *           export_button;
+	Gtk::Button* cancel_button;
+	Gtk::Button* export_button;
+	Gtk::Button* analyze_button;
 
 };
 
