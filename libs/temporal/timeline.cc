@@ -200,7 +200,11 @@ timecnt_t::compute_beats() const
 timecnt_t
 timecnt_t::scale (ratio_t const & r) const
 {
-	return timecnt_t (PBD::muldiv (_distance.val(), r.numerator(), r.denominator()), _position);
+	if (time_domain() == AudioTime) {
+		return timecnt_t::from_superclock (PBD::muldiv (_distance.val(), r.numerator(), r.denominator()), _position);
+	} else {
+		return timecnt_t::from_ticks (PBD::muldiv (_distance.val(), r.numerator(), r.denominator()), _position);
+	}
 }
 
 ratio_t
@@ -569,7 +573,11 @@ timepos_t::_ticks () const
 timepos_t
 timepos_t::scale (ratio_t const & n) const
 {
-	return timepos_t (PBD::muldiv (val(), n.numerator(), n.denominator()));
+	if (time_domain() == AudioTime) {
+		return timepos_t::from_superclock (PBD::muldiv (val(), n.numerator(), n.denominator()));
+	} else {
+		return timepos_t::from_ticks (PBD::muldiv (val(), n.numerator(), n.denominator()));
+	}
 }
 
 timepos_t
