@@ -153,7 +153,7 @@ ControlProtocol::set_route_table (uint32_t table_index, uint32_t remote_control_
 void
 ControlProtocol::route_set_rec_enable (uint32_t table_index, bool yn)
 {
-	if (table_index > route_table.size()) {
+	if (table_index >= route_table.size()) {
 		return;
 	}
 
@@ -169,7 +169,7 @@ ControlProtocol::route_set_rec_enable (uint32_t table_index, bool yn)
 bool
 ControlProtocol::route_get_rec_enable (uint32_t table_index)
 {
-	if (table_index > route_table.size()) {
+	if (table_index >= route_table.size()) {
 		return false;
 	}
 
@@ -188,7 +188,7 @@ ControlProtocol::route_get_rec_enable (uint32_t table_index)
 float
 ControlProtocol::route_get_gain (uint32_t table_index)
 {
-	if (table_index > route_table.size()) {
+	if (table_index >= route_table.size()) {
 		return 0.0f;
 	}
 
@@ -204,7 +204,7 @@ ControlProtocol::route_get_gain (uint32_t table_index)
 void
 ControlProtocol::route_set_gain (uint32_t table_index, float gain)
 {
-	if (table_index > route_table.size()) {
+	if (table_index >= route_table.size()) {
 		return;
 	}
 
@@ -218,7 +218,7 @@ ControlProtocol::route_set_gain (uint32_t table_index, float gain)
 float
 ControlProtocol::route_get_effective_gain (uint32_t table_index)
 {
-	if (table_index > route_table.size()) {
+	if (table_index >= route_table.size()) {
 		return 0.0f;
 	}
 
@@ -235,7 +235,7 @@ ControlProtocol::route_get_effective_gain (uint32_t table_index)
 float
 ControlProtocol::route_get_peak_input_power (uint32_t table_index, uint32_t which_input)
 {
-	if (table_index > route_table.size()) {
+	if (table_index >= route_table.size()) {
 		return 0.0f;
 	}
 
@@ -251,7 +251,7 @@ ControlProtocol::route_get_peak_input_power (uint32_t table_index, uint32_t whic
 bool
 ControlProtocol::route_get_muted (uint32_t table_index)
 {
-	if (table_index > route_table.size()) {
+	if (table_index >= route_table.size()) {
 		return false;
 	}
 
@@ -267,7 +267,7 @@ ControlProtocol::route_get_muted (uint32_t table_index)
 void
 ControlProtocol::route_set_muted (uint32_t table_index, bool yn)
 {
-	if (table_index > route_table.size()) {
+	if (table_index >= route_table.size()) {
 		return;
 	}
 
@@ -282,7 +282,7 @@ ControlProtocol::route_set_muted (uint32_t table_index, bool yn)
 bool
 ControlProtocol::route_get_soloed (uint32_t table_index)
 {
-	if (table_index > route_table.size()) {
+	if (table_index >= route_table.size()) {
 		return false;
 	}
 
@@ -298,7 +298,7 @@ ControlProtocol::route_get_soloed (uint32_t table_index)
 void
 ControlProtocol::route_set_soloed (uint32_t table_index, bool yn)
 {
-	if (table_index > route_table.size()) {
+	if (table_index >= route_table.size()) {
 		return;
 	}
 
@@ -312,7 +312,7 @@ ControlProtocol::route_set_soloed (uint32_t table_index, bool yn)
 string
 ControlProtocol:: route_get_name (uint32_t table_index)
 {
-	if (table_index > route_table.size()) {
+	if (table_index >= route_table.size()) {
 		return "";
 	}
 
