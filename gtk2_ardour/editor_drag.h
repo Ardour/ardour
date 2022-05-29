@@ -76,6 +76,7 @@ class MidiRegionView;
 class MeterMarker;
 class ArdourMarker;
 class TempoMarker;
+class TempoCurve;
 class ControlPoint;
 class AudioRegionView;
 class AutomationLine;
@@ -858,6 +859,24 @@ private:
 	Editing::GridType _old_grid_type;
 	Editing::SnapMode _old_snap_mode;
 	XMLNode* before_state;
+};
+
+/** Tempo curve drag */
+class TempoCurveDrag : public Drag
+{
+public:
+	TempoCurveDrag (Editor*, ArdourCanvas::Item*);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+private:
+	Temporal::TempoPoint* point;
+	double initial_bpm;
+	Temporal::TempoMap::WritableSharedPtr map;
+	XMLNode* _before_state;
 };
 
 /** Tempo marker drag */

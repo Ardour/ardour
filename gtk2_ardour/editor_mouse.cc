@@ -816,9 +816,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
-	case MarkerBarItem:
 	case TempoBarItem:
 	case TempoCurveItem:
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+			_drags->set (new TempoCurveDrag (this, item), event);
+			return true;
+		}
+		/* fallthru */
+	case MarkerBarItem:
 	case MeterBarItem:
 	case TimecodeRulerItem:
 	case SamplesRulerItem:

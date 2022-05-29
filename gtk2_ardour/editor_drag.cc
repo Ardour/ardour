@@ -3530,6 +3530,83 @@ MeterMarkerDrag::aborted (bool moved)
 
 }
 
+TempoCurveDrag::TempoCurveDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i, Temporal::BeatTime)
+{
+}
+
+void
+TempoCurveDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, cursor);
+	/* setup thread-local tempo map ptr as a writable copy */
+	map = _editor->begin_tempo_map_edit ();
+	TempoCurve* tc = reinterpret_cast<TempoCurve*> (_item->get_data (X_("tempo curve")));
+	if (!tc) {
+		point = const_cast<TempoPoint*> (&map->tempo_at (raw_grab_time()));
+	} else {
+		point = const_cast<TempoPoint*> (&tc->tempo());
+	}
+	initial_bpm = point->note_types_per_minute();
+}
+
+void
+TempoCurveDrag::motion (GdkEvent* event, bool first_move)
+{
+	if (first_move) {
+		/* get current state */
+		_before_state = &map->get_state();
+		_editor->begin_reversible_command (_("change tempo"));
+	}
+
+	double new_bpm = std::max (1.5, initial_bpm - ((current_pointer_x() - grab_x()) / 5.0));
+	stringstream strs;
+	Temporal::Tempo new_tempo (new_bpm, point->note_type());
+	map->change_tempo (*point, new_tempo);
+	strs << "Tempo: " << fixed << setprecision(3) << new_bpm;
+	show_verbose_cursor_text (strs.str());
+
+	_editor->mid_tempo_change ();
+}
+
+
+void
+TempoCurveDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	if (!movement_occurred) {
+		/* reset the per-thread tempo map ptr back to the current
+		 * official version
+		 */
+
+		_editor->abort_tempo_map_edit ();
+
+		if (was_double_click()) {
+			// XXX would be nice to do this
+			// _editor->edit_tempo_marker (*_marker);
+		}
+
+		return;
+	}
+
+	/* push the current state of our writable map copy */
+
+	TempoMap::update (map);
+	XMLNode &after = map->get_state();
+
+	_editor->session()->add_command (new Temporal::TempoCommand (_("change tempo"), _before_state, &after));
+	_editor->commit_reversible_command ();
+}
+
+void
+TempoCurveDrag::aborted (bool moved)
+{
+	/* reset the per-thread tempo map ptr back to the current
+	 * official version
+	 */
+
+	_editor->abort_tempo_map_edit ();
+}
+
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i, Temporal::BeatTime)
 	, _grab_bpm (120.0, 4.0)

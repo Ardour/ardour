@@ -2493,6 +2493,7 @@ private:
 	friend class BBTRulerDrag;
 	friend class MeterMarkerDrag;
 	friend class TempoMarkerDrag;
+	friend class TempoCurveDrag;
 	friend class TempoTwistDrag;
 	friend class TempoEndDrag;
 	friend class CursorDrag;
