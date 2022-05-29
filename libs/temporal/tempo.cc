@@ -775,6 +775,8 @@ TempoMap::add_meter (MeterPoint* mp)
 
 	if (!replaced) {
 		core_add_point (mp);
+	} else {
+		delete mp;
 	}
 
 	reset_starting_at (ret->sclock());
@@ -871,7 +873,7 @@ TempoMap::core_add_tempo (TempoPoint* tp, bool& replaced)
 		if (t->sclock() == sclock_limit) {
 			/* overwrite Tempo part of this point */
 			*((Tempo*)&(*t)) = *tp;
-			delete tp;
+			/* caller must delete tp when replaced is true */
 			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("overwrote old tempo with %1\n", *tp));
 			replaced = true;
 			return &(*t);
@@ -897,7 +899,7 @@ TempoMap::core_add_meter (MeterPoint* mp, bool& replaced)
 		if (m->sclock() == sclock_limit) {
 			/* overwrite Meter part of this point */
 			*((Meter*)&(*m)) = *mp;
-			delete mp;
+			/* caller must delete mp when replaced is true */
 			replaced = true;
 			return &(*m);
 		}
@@ -919,7 +921,7 @@ TempoMap::core_add_bartime (MusicTimePoint* mtp, bool& replaced)
 		if (m->sclock() == sclock_limit) {
 			/* overwrite Tempo part of this point */
 			*m = *mtp;
-			delete mtp;
+			/* caller must delete mtp when replaced is true */
 			DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("overwrote old bartime with %1\n", mtp));
 			replaced = true;
 			return &(*m);
@@ -940,7 +942,10 @@ TempoMap::add_tempo (TempoPoint * tp)
 
 	if (!replaced) {
 		core_add_point (tp);
+	} else {
+		delete tp;
 	}
+
 	reset_starting_at (ret->sclock());
 	return ret;
 }
@@ -1035,6 +1040,8 @@ TempoMap::add_or_replace_bartime (MusicTimePoint* mtp)
 		(void) core_add_meter (mtp, ignore);
 		core_add_point (mtp);
 		dump (std::cerr);
+	} else {
+		delete mtp;
 	}
 
 	reset_starting_at (ret->sclock());
