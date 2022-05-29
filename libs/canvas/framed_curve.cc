@@ -289,24 +289,3 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 #endif
 }
 
-bool
-FramedCurve::covers (Duple const & pc) const
-{
-	Duple point = window_to_item (pc);
-
-	/* O(N) N = number of points, and not accurate */
-
-	for (Points::const_iterator p = _points.begin(); p != _points.end(); ++p) {
-
-		const Coord dx = point.x - (*p).x;
-		const Coord dy = point.y - (*p).y;
-		const Coord dx2 = dx * dx;
-		const Coord dy2 = dy * dy;
-
-		if ((dx2 < 2.0 && dy2 < 2.0) || (dx2 + dy2 < 4.0)) {
-			return true;
-		}
-	}
-
-	return false;
-}

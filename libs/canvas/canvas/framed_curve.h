@@ -49,7 +49,6 @@ class LIBCANVAS_API FramedCurve : public PolyItem, public InterpolatedCurve
 
     void set_points_per_segment (uint32_t n);
 
-    bool covers (Duple const &) const;
     void set_fill_mode (CurveFill cf) { curve_fill = cf; }
 
   private:
