@@ -1035,7 +1035,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		delete cp;
 	}
 
-	if (!terminal_points_can_slide) {
+	if (!terminal_points_can_slide && !control_points.empty()) {
 		control_points.back()->set_can_slide(false);
 	}
 
