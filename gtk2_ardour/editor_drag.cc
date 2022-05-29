@@ -3849,6 +3849,7 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 		default:
 			delete marker_dialog;
 			TempoMap::abort_update ();
+			_editor->abort_reversible_command ();
 			return;
 		}
 
