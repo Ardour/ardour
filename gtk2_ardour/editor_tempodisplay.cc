@@ -232,6 +232,7 @@ Editor::draw_tempo_marks ()
 		Temporal::TempoPoint const & metric_point (*t);
 
 		if (dynamic_cast<Temporal::MusicTimePoint const *> (&metric_point)) {
+			++t;
 			continue;
 		}
 
@@ -274,8 +275,13 @@ Editor::draw_tempo_marks ()
 	}
 
 	if ((mm == tempo_marks.end()) && (t != tempi.end())) {
+
 		while (t != tempi.end()) {
-			make_tempo_marker (&*t, min_tempo, max_tempo, prev_ts, tc_color, sr);
+
+			if (!dynamic_cast<Temporal::MusicTimePoint const *> (&(*t))) {
+				make_tempo_marker (&*t, min_tempo, max_tempo, prev_ts, tc_color, sr);
+			}
+
 			++t;
 		}
 	}
@@ -300,6 +306,7 @@ Editor::draw_meter_marks ()
 		Temporal::MeterPoint const & metric_point (*m);
 
 		if (dynamic_cast<Temporal::MusicTimePoint const *> (&metric_point)) {
+			++m;
 			continue;
 		}
 
@@ -335,8 +342,13 @@ Editor::draw_meter_marks ()
 	}
 
 	if ((mm == meter_marks.end()) && (m != meters.end())) {
+
 		while (m != meters.end()) {
-			make_meter_marker (&*m);
+
+			if (!dynamic_cast<Temporal::MusicTimePoint const *> (&(*m))) {
+				make_meter_marker (&*m);
+			}
+
 			++m;
 		}
 	}
@@ -357,7 +369,7 @@ Editor::draw_bbt_marks ()
 	while (m != bartimes.end() && mm != bbt_marks.end()) {
 
 		Temporal::Point const & mark_point ((*mm)->point());
-		Temporal::MeterPoint const & metric_point (*m);
+		Temporal::MusicTimePoint const & metric_point (*m);
 
 		if (mark_point.sclock() < metric_point.sclock()) {
 
@@ -368,7 +380,7 @@ Editor::draw_bbt_marks ()
 
 		} else if (metric_point.sclock() < mark_point.sclock()) {
 
-			make_meter_marker (&metric_point);
+			make_bbt_marker (&metric_point);
 			++m;
 
 		} else {
@@ -390,7 +402,7 @@ Editor::draw_bbt_marks ()
 
 	if ((mm == bbt_marks.end()) && (m != bartimes.end())) {
 		while (m != bartimes.end()) {
-			make_meter_marker (&*m);
+			make_bbt_marker (&*m);
 			++m;
 		}
 	}
