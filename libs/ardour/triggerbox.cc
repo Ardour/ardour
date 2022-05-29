@@ -1954,7 +1954,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 				if (transition_samples + retrieved > expected_end_sample) {
 					/* final pull from stretched data into output buffers */
 					// cerr << "FS#2 from ees " << final_processed_sample << " - " << process_index << " & " << from_stretcher;
-					from_stretcher = std::min ((samplecnt_t) from_stretcher, final_processed_sample - process_index);
+					from_stretcher = std::min<samplecnt_t> (from_stretcher, std::max<samplecnt_t> (0, final_processed_sample - process_index));
 					// cerr << " => " << from_stretcher << endl;
 
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 total retrieved data %2 exceeds theoretical size %3, truncate from_stretcher to %4\n",
@@ -1979,7 +1979,8 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 		} else {
 			/* no stretch */
-			from_stretcher = (pframes_t) std::min ((samplecnt_t) nframes, (last_readable_sample - read_index));
+			assert (last_readable_sample >= read_index);
+			from_stretcher = std::min<samplecnt_t> (nframes, last_readable_sample - read_index);
 			// cerr << "FS#3 from lrs " << last_readable_sample <<  " - " << read_index << " = " << from_stretcher << endl;
 
 		}
