@@ -1358,8 +1358,16 @@ int main () { __int128 x = 0; return 0; }
         conf.env['NO_THREADED_WAVEVIEWS'] = True
     if not opts.no_futex_semaphore:
         if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw':
-            conf.define('USE_FUTEX_SEMAPHORE', 1)
-            conf.env['USE_FUTEX_SEMAPHORE'] = True
+            have_sys_futex = conf.check_cc(
+                    msg="Checking for 'futex' syscall support",
+                    features  = 'c',
+                    mandatory = False,
+                    execute   = False,
+                    fragment = "#include <sys/syscall.h>\n#include <linux/futex.h>\nint main () { int x = SYS_futex | FUTEX_WAKE_PRIVATE; return 0; }")
+
+            if have_sys_futex:
+                    conf.define('USE_FUTEX_SEMAPHORE', 1)
+                    conf.env['USE_FUTEX_SEMAPHORE'] = True
 
     backends = opts.with_backends.split(',')
 

@@ -105,7 +105,7 @@ int
 Semaphore::signal ()
 {
 	if (std::atomic_fetch_add_explicit (&_value, 1, std::memory_order_relaxed) < 0) {
-		while (syscall (__NR_futex, &_futex, FUTEX_WAKE_PRIVATE, 1, NULL, NULL, 0) < 1) {
+		while (syscall (SYS_futex, &_futex, FUTEX_WAKE_PRIVATE, 1, NULL, NULL, 0) < 1) {
 			sched_yield();
 		}
 	}
@@ -116,7 +116,7 @@ int
 Semaphore::wait ()
 {
 	if (std::atomic_fetch_sub_explicit (&_value, 1, std::memory_order_relaxed) <= 0) {
-		syscall(__NR_futex, &_futex, FUTEX_WAIT_PRIVATE, _futex, NULL, 0, 0);
+		syscall(SYS_futex, &_futex, FUTEX_WAIT_PRIVATE, _futex, NULL, 0, 0);
 	}
 	return 0;
 }
