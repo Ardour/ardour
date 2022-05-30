@@ -6079,6 +6079,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 			if (afs) {
 				afs->update_header (position, *xnow, now);
 				afs->flush_header ();
+				afs->mark_immutable ();
 				plist.add (Properties::start, timepos_t (0));
 			} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(*src))) {
 				Source::WriterLock lock (ms->mutex());
