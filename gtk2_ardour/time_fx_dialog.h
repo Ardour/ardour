@@ -42,7 +42,7 @@ class TimeFXDialog : public ArdourDialog, public ProgressReporter
 {
 public:
 	/* We need a position so that BBT mode in the clock can function */
-	TimeFXDialog (Editor& e, bool for_pitch, Temporal::timecnt_t const & old_length, Temporal::timecnt_t const & new_length, Temporal::timepos_t const & position);
+	TimeFXDialog (Editor& e, bool for_pitch, Temporal::timecnt_t const & old_length, Temporal::timecnt_t const & new_length, Temporal::ratio_t const &, Temporal::timepos_t const & position);
 
 	ARDOUR::TimeFXRequest request;
 	Editor&               editor;
@@ -93,6 +93,7 @@ private:
 	Gtk::SpinButton     pitch_octave_spinner;
 	Gtk::SpinButton     pitch_semitone_spinner;
 	Gtk::SpinButton     pitch_cent_spinner;
+	Temporal::ratio_t   duration_ratio;
 	Gtk::Adjustment     duration_adjustment;
 	AudioClock*         duration_clock;
 	bool                ignore_adjustment_change;

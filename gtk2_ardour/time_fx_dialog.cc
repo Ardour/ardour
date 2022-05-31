@@ -55,7 +55,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, timecnt_t const & new_length, timepos_t const & position)
+TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, timecnt_t const & new_length, Temporal::ratio_t const & ratio, timepos_t const & position)
 	: ArdourDialog (X_("time fx dialog"))
 	, editor (e)
 	, pitching (pitch)
@@ -71,6 +71,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 	, pitch_octave_spinner (pitch_octave_adjustment)
 	, pitch_semitone_spinner (pitch_semitone_adjustment)
 	, pitch_cent_spinner (pitch_cent_adjustment)
+	, duration_ratio (ratio)
 	, duration_adjustment (100.0, -1000.0, 1000.0, 1.0, 10.0)
 	, duration_clock (0)
 	, ignore_adjustment_change (false)
@@ -104,6 +105,8 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 	l->set_use_markup ();
 
 	upper_button_box.pack_start (*l, false, false);
+
+	/* if the ratio is already set, do not allow adjustment */
 
 	if (pitching) {
 		Table* table = manage (new Table (4, 3, false));
@@ -158,10 +161,14 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 		table->attach (*clock_align, 1, 2, row, row+1, Gtk::AttachOptions (Gtk::EXPAND|Gtk::FILL), Gtk::FILL, 0, 0);
 		row++;
 
-		const double fract = (new_length / original_length).to_double();
 		/* note the *100.0 to convert fract into a percentage */
-		duration_adjustment.set_value (fract*100.0);
+		duration_adjustment.set_value (duration_ratio.to_double() * 100.0);
+
 		Gtk::SpinButton* spinner = manage (new Gtk::SpinButton (duration_adjustment, 1.0, 3));
+
+		if (duration_ratio != Temporal::ratio_t (1, 1)) {
+			spinner->set_sensitive (false);
+		}
 
 		l = manage (new Gtk::Label (_("Percent")));
 		table->attach (*l, 0, 1, row, row+1, Gtk::FILL, Gtk::FILL, 0, 0);
@@ -264,6 +271,10 @@ TimeFXDialog::get_time_fraction () const
 {
 	if (pitching) {
 		return Temporal::ratio_t (1, 1);
+	}
+
+	if (duration_ratio != Temporal::ratio_t (1, 1)) {
+		return duration_ratio;
 	}
 
 	return Temporal::ratio_t (duration_adjustment.get_value(), 100);

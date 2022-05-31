@@ -5517,48 +5517,58 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	   parameters for the timestretch.
 	*/
 
-	ratio_t ratio (1, 1);
-
-	if (movement_occurred) {
-
-		motion (event, false);
-
+	if (_editor->get_selection().regions.empty()) {
 		_primary->get_time_axis_view().hide_timestretch ();
-
-		timepos_t adjusted_pos = adjusted_current_time (event);
-
-		if (adjusted_pos < _primary->region()->position()) {
-			/* backwards drag of the left edge - not usable */
-			return;
-		}
-
-		timecnt_t newlen = _primary->region()->position().distance (adjusted_pos);
-
-		if (_primary->region()->length().time_domain() == Temporal::BeatTime) {
-			ratio = ratio_t (newlen.ticks(), _primary->region()->length().ticks());
-		} else {
-			ratio = ratio_t (newlen.samples(), _primary->region()->length().samples());
-		}
-
-#ifndef USE_RUBBERBAND
-		// Soundtouch uses fraction / 100 instead of normal (/ 1)
-#warning NUTEMPO timefx request now uses a rational type so this needs revisiting
-		if (_primary->region()->data_type() == DataType::AUDIO) {
-			ratio = ((newlen - _primary->region()->length()) / newlen) * 100;
-		}
-#endif
+		return;
 	}
 
-	if (!_editor->get_selection().regions.empty()) {
-		/* primary will already be included in the selection, and edit
-		   group shared editing will propagate selection across
-		   equivalent regions, so just use the current region
-		   selection.
-		*/
+	if (!movement_occurred) {
+		_primary->get_time_axis_view().hide_timestretch ();
 
-		if (_editor->time_stretch (_editor->get_selection().regions, ratio) == -1) {
+		if (_editor->time_stretch (_editor->get_selection().regions, ratio_t (1, 1)) == -1) {
 			error << _("An error occurred while executing time stretch operation") << endmsg;
 		}
+		return;
+	}
+
+
+	ratio_t ratio (1, 1);
+
+	motion (event, false);
+
+	_primary->get_time_axis_view().hide_timestretch ();
+
+	timepos_t adjusted_pos = adjusted_current_time (event);
+
+	if (adjusted_pos < _primary->region()->position()) {
+		/* backwards drag of the left edge - not usable */
+		return;
+	}
+
+	timecnt_t newlen = _primary->region()->position().distance (adjusted_pos);
+
+	if (_primary->region()->length().time_domain() == Temporal::BeatTime) {
+		ratio = ratio_t (newlen.ticks(), _primary->region()->length().ticks());
+	} else {
+		ratio = ratio_t (newlen.samples(), _primary->region()->length().samples());
+	}
+
+#ifndef USE_RUBBERBAND
+	// Soundtouch uses fraction / 100 instead of normal (/ 1)
+#warning NUTEMPO timefx request now uses a rational type so this needs revisiting
+	if (_primary->region()->data_type() == DataType::AUDIO) {
+		ratio = ((newlen - _primary->region()->length()) / newlen) * 100;
+	}
+#endif
+
+	/* primary will already be included in the selection, and edit
+	   group shared editing will propagate selection across
+	   equivalent regions, so just use the current region
+	   selection.
+	*/
+
+	if (_editor->time_stretch (_editor->get_selection().regions, ratio) == -1) {
+		error << _("An error occurred while executing time stretch operation") << endmsg;
 	}
 }
 
