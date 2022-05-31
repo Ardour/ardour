@@ -1710,9 +1710,11 @@ Editor::region_selection_changed ()
 
 		/* if in MouseAudition and there's just 1 region selected
 		 * (i.e. we just clicked on it), leave things as they are
+		 *
+		 * Ditto for TimeFX mode
 		 */
 
-		if (selection->regions.size() > 1 || mouse_mode != Editing::MouseAudition) {
+		if (selection->regions.size() > 1 || (mouse_mode != Editing::MouseAudition && mouse_mode != Editing::MouseTimeFX)) {
 			set_mouse_mode (MouseObject, false);
 		}
 	}
