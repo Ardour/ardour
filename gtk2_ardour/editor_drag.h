@@ -853,8 +853,8 @@ public:
 private:
 	MeterMarker* _marker;
 	Temporal::TempoMap::WritableSharedPtr map;
+	Temporal::superclock_t initial_sclock;
 
-	bool _copy;
 	bool _movable;
 	Editing::GridType _old_grid_type;
 	Editing::SnapMode _old_snap_mode;
