@@ -1251,7 +1251,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 }
 
 bool
-TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
+TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlier, bool push)
 {
 	assert (!_tempos.empty());
 	assert (!_meters.empty());
@@ -1268,10 +1268,10 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 
 	beats = when.beats ();
 
-	if (beats > mp.beats ()) {
-		round_up = true;
-	} else {
+	if (earlier) {
 		round_up = false;
+	} else {
+		round_up = true;
 	}
 
 	/* Do not allow moving a meter marker to the same position as
@@ -1284,21 +1284,38 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 	/* meter changes must be on bar */
 	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->beats() < beats; ++t) { prev_t = t; }
 	for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->beats() < beats && *m != mp; ++m) { prev_m = m; }
-	assert (prev_m != _meters.end());
-	if (prev_t == _tempos.end()) { prev_t = _tempos.begin(); }
+
+	if (prev_m == _meters.end()) {
+		return false;
+	}
+
+	if (prev_t == _tempos.end()) {
+		prev_t = _tempos.begin();
+	}
+
 	TempoMetric metric (*prev_t, *prev_m);
 	bbt = metric.bbt_at (beats);
+
 	if (round_up) {
 		bbt = metric.meter().round_up_to_bar (bbt);
 	} else {
 		bbt = metric.meter().round_down_to_bar (bbt);
 	}
+
 	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->bbt() < bbt; ++t) { prev_t = t; }
 	for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->bbt() < bbt && *m != mp; ++m) { prev_m = m; }
-	assert (prev_m != _meters.end());
-	if (prev_t == _tempos.end()) { prev_t = _tempos.begin(); }
+
+	if (prev_m == _meters.end()) {
+		return false;
+	}
+
+	if (prev_t == _tempos.end()) {
+		prev_t = _tempos.begin();
+	}
+
 	metric = TempoMetric (*prev_t, *prev_m);
 	beats = metric.quarters_at (bbt);
+
 	for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end(); ++m) {
 		if (&*m != &mp) {
 			if (m->beats() == beats) {
