@@ -559,13 +559,16 @@ RecorderUI::start_updating ()
 	PortManager::MIDIInputPorts const mip (AudioEngine::instance ()->midi_input_ports ());
 
 	size_t iop_audio = 0;
-	size_t iop_midi = 0;
-	boost::shared_ptr<IOPlugList> iop (_session->io_plugs ());
-	for (auto& p : *iop) {
-		PortManager::AudioInputPorts const& aip (p->audio_input_ports ());
-		PortManager::MIDIInputPorts const& mip (p->midi_input_ports ());
-		iop_audio += aip.size ();
-		iop_midi += mip.size ();
+	size_t iop_midi  = 0;
+	boost::shared_ptr<IOPlugList> iop;
+	if (_session) {
+		iop = _session->io_plugs ();
+		for (auto& p : *iop) {
+			PortManager::AudioInputPorts const& aip (p->audio_input_ports ());
+			PortManager::MIDIInputPorts const& mip (p->midi_input_ports ());
+			iop_audio += aip.size ();
+			iop_midi += mip.size ();
+		}
 	}
 
 	if (aip.size () + mip.size () + iop_audio + iop_midi == 0) {
@@ -604,8 +607,10 @@ RecorderUI::start_updating ()
 		set_connections (i->first);
 	}
 
-	for (auto& p : *iop) {
-		io_plugin_add (p);
+	if (iop) {
+		for (auto const& p : *iop) {
+			io_plugin_add (p);
+		}
 	}
 
 	update_io_widget_labels ();
