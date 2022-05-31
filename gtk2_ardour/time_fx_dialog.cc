@@ -310,9 +310,14 @@ TimeFXDialog::duration_adjustment_changed ()
 		return;
 	}
 
-	PBD::Unwinder<bool> uw (ignore_clock_change, true);
+	if (duration_adjustment.get_value() == 0.0) {
+		return;
+	}
 
-	duration_clock->set_duration (original_length.scale (Temporal::ratio_t (1.0, (duration_adjustment.get_value() / 100.0))));
+	PBD::Unwinder<bool> uw (ignore_clock_change, true);
+	timecnt_t dur = original_length.scale (Temporal::ratio_t (duration_adjustment.get_value(), 100.0));
+
+	duration_clock->set_duration (dur);
 }
 
 void
