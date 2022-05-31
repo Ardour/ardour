@@ -78,6 +78,14 @@ class _ratio_t {
 
 	double to_double() const { return (double) _numerator / _denominator; };
 
+	bool operator== (_ratio_t<T> const & other) const {
+		return _numerator == other._numerator && _denominator == other._denominator;
+	}
+
+	bool operator!= (_ratio_t<T> const & other) const {
+		return _numerator != other._numerator || _denominator != other._denominator;
+	}
+
   private:
 	T _numerator;
 	T _denominator;
