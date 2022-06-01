@@ -1234,13 +1234,13 @@ Mixer_UI::set_session (Session* sess)
 
 	_group_tabs->set_session (sess);
 
+	update_scene_buttons();
+
 	if (!_session) {
 		favorite_plugins_model->clear ();
 		_selection.clear ();
 		return;
 	}
-
-	update_scene_buttons();
 
 	refill_favorite_plugins();
 
@@ -4138,7 +4138,11 @@ Mixer_UI::update_scene_buttons ()
 {
 	bool all_unset = true;
 	for (size_t idx = 0; idx < _mixer_scene_buttons.size (); ++idx) {
-		boost::shared_ptr<MixerScene> scn = _session->nth_mixer_scene (idx);
+		boost::shared_ptr<MixerScene> scn;
+
+		if (_session) {
+			scn = _session->nth_mixer_scene (idx);
+		}
 
 		Gtk::Label* l = _mixer_scene_labels[idx];
 		l->set_alignment (0, 0.5);
@@ -4151,6 +4155,10 @@ Mixer_UI::update_scene_buttons ()
 		} else {
 			l->set_text((""));
 		}
+	}
+
+	if (!_session) {
+		return;
 	}
 
 	if (_mixer_scene_buttons.size () > 0 && all_unset) {
