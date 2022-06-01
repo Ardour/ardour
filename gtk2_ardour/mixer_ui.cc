@@ -38,11 +38,14 @@
 #include <glibmm/threads.h>
 
 #include <gtkmm/accelmap.h>
+#include <gtkmm/menu.h>
 #include <gtkmm/offscreenwindow.h>
 #include <gtkmm/stock.h>
 
 #include "pbd/convert.h"
 #include "pbd/unwind.h"
+
+#include "context_menu_helper.h"
 
 #include "ardour/amp.h"
 #include "ardour/debug.h"
@@ -65,7 +68,9 @@
 #include "gtkmm2ext/window_title.h"
 #include "gtkmm2ext/doi.h"
 
+#include "widgets/prompter.h"
 #include "widgets/tearoff.h"
+#include "widgets/tooltips.h"
 
 #include "foldback_strip.h"
 #include "keyboard.h"
@@ -93,6 +98,7 @@
 #define PX_SCALE(px) std::max ((float)px, rintf ((float)px* UIConfiguration::instance ().get_ui_scale ()))
 
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace ARDOUR_PLUGIN_UTILS;
 using namespace PBD;
@@ -281,6 +287,43 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_vbox.pack_start (favorite_plugins_scroller, true, true);
 	favorite_plugins_vbox.pack_start (favorite_plugins_search_hbox, false, false);
 
+	Gtk::Label *l = manage (new Label (_("Mixer Scenes (F1...F8 to recall)")));
+	l->set_alignment(0, 0.5);
+	Gtk::Table *padder = manage (new Table ());
+	padder->set_border_width(4);
+	padder->attach (*l, 0,1,0,1, Gtk::FILL, Gtk::FILL);
+
+	_mixer_scene_vbox.pack_start(*padder, false, false);
+
+	_mixer_scene_table.set_border_width(4);
+	_mixer_scene_table.set_spacings(4);
+	_mixer_scene_table.set_homogeneous(false);
+	for (int column=0; column<1;column++) {
+		for (int row=0; row<8;row++) {
+			int col = column*2;
+			int scn_index = col*2+row;
+
+			ArdourButton* b = manage (new ArdourButton (ArdourButton::default_elements));
+			b->set_text(string_compose("%1", 1+ scn_index));
+			b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::scene_button_pressed), scn_index), false);
+
+			_mixer_scene_buttons.push_back(b);
+
+			Gtk::Label* l = manage (new Gtk::Label (""));
+			Gtk::EventBox* namebox = manage (new Gtk::EventBox ());  //must put the labe in a EventBox to capture double-click
+			namebox->add (*l);
+			namebox->add_events (Gdk::BUTTON_PRESS_MASK);
+			namebox->signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::scene_label_pressed), scn_index), false);
+
+			_mixer_scene_labels.push_back(l);
+
+			_mixer_scene_table.attach (*b, col, col+1, row, row+1, Gtk::FILL, Gtk::FILL); col++;
+
+			_mixer_scene_table.attach (*namebox, col, col+1, row, row+1, Gtk::FILL, Gtk::FILL); col++;
+		}
+	}
+	_mixer_scene_vbox.pack_start(_mixer_scene_table, false, false);
+
 	rhs_pane1.add (favorite_plugins_frame);
 	rhs_pane1.add (track_display_frame);
 
@@ -288,6 +331,13 @@ Mixer_UI::Mixer_UI ()
 	rhs_pane2.add (group_display_frame);
 
 	list_vpacker.pack_start (rhs_pane2, true, true);
+
+	//add a spacer; this fills the area that is normally taken by the pane resizers
+	_mixer_scene_spacer.set_size_request (-1, 6);
+	list_vpacker.pack_start (_mixer_scene_spacer, false, false);
+
+	_mixer_scene_frame.add(_mixer_scene_vbox);
+	list_vpacker.pack_start (_mixer_scene_frame, false, false);
 
 	vca_label_bar.set_size_request (-1, 16 + 1); /* must match height in GroupTabs::set_size_request()  + 1 border px*/
 	vca_vpacker.pack_start (vca_label_bar, false, false);
@@ -404,7 +454,6 @@ struct MixerStripSorter {
 		return ARDOUR::Stripable::Sorter(true)(a, b);
 	}
 };
-
 
 void
 Mixer_UI::escape ()
@@ -1190,6 +1239,9 @@ Mixer_UI::set_session (Session* sess)
 		_selection.clear ();
 		return;
 	}
+
+	update_scene_buttons();
+	MixerScene::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::update_scene_buttons, this), gui_context());
 
 	refill_favorite_plugins();
 
@@ -3838,22 +3890,103 @@ Mixer_UI::vca_unassign (boost::shared_ptr<VCA> vca)
 void
 Mixer_UI::store_mixer_scene (size_t n)
 {
-	if (_session) {
-		boost::shared_ptr<MixerScene> ms = _session->nth_mixer_scene (n, false);
-		if (ms && !ms->empty ()) {
-			ArdourMessageDialog md (_("Scene is already set. Overwrite it?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO);
-			if (md.run () != RESPONSE_YES) {
-				return;
-			}
+	if (!_session) {
+		return;
+	}
+
+	std::string str;
+
+	/* if it already exists, prompt the user to overwrite an existing scene */
+	boost::shared_ptr<MixerScene> ms = _session->nth_mixer_scene (n, false);
+	if (ms && !ms->empty ()) {
+		ArdourMessageDialog md (_("Scene is already set. Overwrite it?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO);
+		if (md.run () != RESPONSE_YES) {
+			return;
 		}
-		_session->store_nth_mixer_scene (n);
+		str = ms->name();
+	} else {
+		time_t now;
+		time (&now);
+		Glib::DateTime tm (Glib::DateTime::create_now_local (now));
+		str = Glib::DateTime::create_now_local().format ("%FT%H.%M.%S");
+	}
+
+	/* prompt the user for a scene name */
+	ArdourWidgets::Prompter name_prompter (true);
+	string result;
+	bool done = false;
+	name_prompter.set_title (_("Store Scene"));
+	name_prompter.set_prompt (_("Scene name:"));
+	name_prompter.set_initial_text (str);
+	name_prompter.add_button (_("Store"), Gtk::RESPONSE_ACCEPT);
+	name_prompter.show_all ();
+
+	while (!done) {
+		switch (name_prompter.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			name_prompter.get_result (result);
+			name_prompter.hide ();
+			if (result.length()) {
+				_session->store_nth_mixer_scene (n);
+				boost::shared_ptr<MixerScene> ms = _session->nth_mixer_scene (n, false);
+				ms->set_name(result);
+				done = true;
+			} else {
+				/* nothing entered, just get out of here */
+				done = true;
+			}
+			break;
+		default:
+			done = true;
+			break;
+		}
 	}
 }
 
 void
 Mixer_UI::recall_mixer_scene (size_t n)
 {
-	if (_session) {
+	if (!_session) {
+		return;
+	}
+
+	boost::shared_ptr<MixerScene> ms = _session->nth_mixer_scene (n, false);
+	if (!ms) {
+		return;
+	}
+
+	bool do_recall = true;
+
+	XMLNode* memory_warning_node = Config->instant_xml (X_("no-scene-warning"));
+	if (memory_warning_node == 0) {
+		ArdourMessageDialog msg (string_compose ( _("Recall mixer scene \"%1\"?\n"
+		                                             "This will overwrite your mixer settings!\n"
+		                                             "This operation cannot be undone."), ms->name()));
+
+		msg.add_button (_("Cancel"), Gtk::RESPONSE_NO);
+
+		msg.set_default_response (RESPONSE_OK);
+
+		VBox* vbox = msg.get_vbox();
+		HBox hbox;
+		CheckButton cb (_("Do not show this window again"));
+		hbox.pack_start (cb, true, false);
+		vbox->pack_start (hbox);
+		cb.show();
+		vbox->show();
+		hbox.show ();
+
+		if (msg.run () != Gtk::RESPONSE_OK) {
+			do_recall = false;
+		}
+
+		if (cb.get_active()) {
+			XMLNode node (X_("no-scene-warning"));
+			Config->add_instant_xml (node);
+		}
+	}
+
+	if (do_recall) {
 		_session->apply_nth_mixer_scene (n);
 	}
 }
@@ -3861,10 +3994,169 @@ Mixer_UI::recall_mixer_scene (size_t n)
 void
 Mixer_UI::clear_mixer_scene (size_t n)
 {
-	if (_session) {
-		boost::shared_ptr<MixerScene> ms = _session->nth_mixer_scene (n, false);
-		if (ms) {
-			ms->clear ();
+	if (!_session) {
+		return;
+	}
+
+	boost::shared_ptr<MixerScene> ms = _session->nth_mixer_scene (n, false);
+	if (!ms) {
+		return;
+	}
+
+	bool do_clear = false;
+	XMLNode* memory_warning_node = Config->instant_xml (X_("no-clear-warning"));
+	if (memory_warning_node == 0) {
+		ArdourMessageDialog msg (string_compose ( _("Clear mixer scene \"%1\"?\n"
+		                                             "This operation cannot be undone."), ms->name()));
+
+		msg.add_button (_("Cancel"), Gtk::RESPONSE_NO);
+
+		msg.set_default_response (RESPONSE_OK);
+
+		VBox* vbox = msg.get_vbox();
+		HBox hbox;
+		CheckButton cb (_("Do not show this window again"));
+		hbox.pack_start (cb, true, false);
+		vbox->pack_start (hbox);
+		cb.show();
+		vbox->show();
+		hbox.show ();
+
+		if (msg.run () == Gtk::RESPONSE_OK) {
+			do_clear = true;
+		}
+
+		if (cb.get_active()) {
+			XMLNode node (X_("no-clear-warning"));
+			Config->add_instant_xml (node);
+		}
+	}
+
+	if (do_clear) {
+		ms->clear ();
+	}
+}
+
+void
+Mixer_UI::rename_mixer_scene (size_t n)
+{
+	if (!_session) {
+		return;
+	}
+
+	boost::shared_ptr<MixerScene> ms = _session->nth_mixer_scene (n, false);
+	if (!ms) {
+		return;
+	}
+
+	/* prompt the user for a scene name */
+	ArdourWidgets::Prompter name_prompter (true);
+	string result;
+	bool done = false;
+	name_prompter.set_title (_("Rename Scene"));
+	name_prompter.set_prompt (_("Scene name:"));
+	name_prompter.set_initial_text (ms->name());
+	name_prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
+	name_prompter.show_all ();
+
+	while (!done) {
+		switch (name_prompter.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			name_prompter.get_result (result);
+			name_prompter.hide ();
+			if (result.length()) {
+				boost::shared_ptr<MixerScene> ms = _session->nth_mixer_scene (n, false);
+				ms->set_name(result);
+				done = true;
+			} else {
+				/* nothing entered, just get out of here */
+				done = true;
+			}
+			break;
+		default:
+			done = true;
+			break;
+		}
+	}
+}
+
+void
+Mixer_UI::popup_scene_menu (GdkEventButton* ev, int scn_idx)
+{
+	Gtk::Menu* menu  = ARDOUR_UI_UTILS::shared_popup_menu ();
+	Gtk::Menu_Helpers::MenuList&  items = menu->items();
+
+	items.push_back(Gtk::Menu_Helpers::MenuElem(_("Store"), sigc::bind(sigc::mem_fun(*this, &Mixer_UI::store_mixer_scene), scn_idx)));
+
+	boost::shared_ptr<MixerScene> ms = _session->nth_mixer_scene (scn_idx);
+	if(ms && !ms->empty()) {
+		items.push_back(Gtk::Menu_Helpers::MenuElem(_("Clear"), sigc::bind(sigc::mem_fun(*this, &Mixer_UI::clear_mixer_scene), scn_idx)));
+		items.push_back(Gtk::Menu_Helpers::MenuElem(_("Rename"), sigc::bind(sigc::mem_fun(*this, &Mixer_UI::rename_mixer_scene), scn_idx)));
+	}
+
+	menu->popup(1, ev->time);
+}
+
+bool
+Mixer_UI::scene_button_pressed (GdkEventButton *ev, int idx)
+{
+	if (!_session) {
+		return false;
+	}
+
+	boost::shared_ptr<MixerScene> scn = _session->nth_mixer_scene (idx);
+
+	if (ev->button == 1 && (scn && !scn->empty())) {
+		recall_mixer_scene(idx);
+	} else if (scn && (ev->button == 3) && Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::TertiaryModifier)) {
+		clear_mixer_scene(idx);
+	} else if (Keyboard::is_context_menu_event (ev)) {
+		popup_scene_menu (ev, idx);
+	}
+
+	return true;
+}
+
+bool
+Mixer_UI::scene_label_pressed (GdkEventButton* ev, int idx)
+{
+	boost::shared_ptr<MixerScene> scn = _session->nth_mixer_scene (idx);
+	if (!scn || scn->empty()) {
+		return false;
+	}
+
+	if ((ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (ev)) {
+		rename_mixer_scene(idx);
+		return true;
+	}
+	return false;
+}
+
+void
+Mixer_UI::update_scene_buttons ()
+{
+	for (size_t idx=0; idx<12;idx++) {
+		if (!_mixer_scene_buttons.empty() && idx < _mixer_scene_buttons.size()) {
+
+			boost::shared_ptr<MixerScene> scn = _session->nth_mixer_scene (idx);
+
+			ArdourButton *b = _mixer_scene_buttons[idx];
+			if (scn && !scn->empty()) {
+				ArdourWidgets::set_tooltip (b, _("Click to recall this mixer scene\nRight-Click for context menu"));
+			}
+
+			Gtk::Label *l = _mixer_scene_labels[idx];
+			l->set_alignment(0, 0.5);
+
+			if (scn && !scn->empty()) {
+				l->set_text(scn->name());
+			} else {
+				if (idx==0 && scn->empty()) {
+					l->set_text(_("(Right-Click to Store)"));
+				} else {
+					l->set_text((""));
+				}
+			}
 		}
 	}
 }

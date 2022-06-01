@@ -126,6 +126,7 @@ public:
 	void store_mixer_scene (size_t);
 	void recall_mixer_scene (size_t);
 	void clear_mixer_scene (size_t);
+	void rename_mixer_scene (size_t n);
 
 	void do_vca_assign (boost::shared_ptr<ARDOUR::VCA>);
 	void do_vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
@@ -207,6 +208,17 @@ private:
 	Gtk::HBox             out_packer;
 	ArdourWidgets::HPane  list_hpane;
 
+	Gtk::EventBox         _mixer_scene_spacer;
+	Gtk::Frame            _mixer_scene_frame;
+	Gtk::Table            _mixer_scene_table;
+	Gtk::VBox             _mixer_scene_vbox;
+	std::vector<ArdourWidgets::ArdourButton *>  _mixer_scene_buttons;
+	std::vector<Gtk::Label *>                   _mixer_scene_labels;
+
+	void popup_scene_menu (GdkEventButton* ev, int);
+	bool scene_button_pressed (GdkEventButton*, int);
+	bool scene_label_pressed (GdkEventButton* ev, int);
+
 	MixerGroupTabs* _group_tabs;
 
 	bool on_scroll_event (GdkEventScroll*);
@@ -227,6 +239,8 @@ private:
 	void move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable>);
 
 	void add_stripables (ARDOUR::StripableList&);
+
+	void update_scene_buttons ();
 
 	void add_routes (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
