@@ -4135,29 +4135,26 @@ Mixer_UI::scene_label_pressed (GdkEventButton* ev, int idx)
 void
 Mixer_UI::update_scene_buttons ()
 {
-	for (size_t idx=0; idx<12;idx++) {
-		if (!_mixer_scene_buttons.empty() && idx < _mixer_scene_buttons.size()) {
+	bool all_unset = true;
+	for (size_t idx = 0; idx < _mixer_scene_buttons.size (); ++idx) {
+		boost::shared_ptr<MixerScene> scn = _session->nth_mixer_scene (idx);
 
-			boost::shared_ptr<MixerScene> scn = _session->nth_mixer_scene (idx);
+		Gtk::Label* l = _mixer_scene_labels[idx];
+		l->set_alignment (0, 0.5);
 
-			ArdourButton *b = _mixer_scene_buttons[idx];
-			if (scn && !scn->empty()) {
-				ArdourWidgets::set_tooltip (b, _("Click to recall this mixer scene\nRight-Click for context menu"));
-			}
-
-			Gtk::Label *l = _mixer_scene_labels[idx];
-			l->set_alignment(0, 0.5);
-
-			if (scn && !scn->empty()) {
-				l->set_text(scn->name());
-			} else {
-				if (idx==0 && scn->empty()) {
-					l->set_text(_("(Right-Click to Store)"));
-				} else {
-					l->set_text((""));
-				}
-			}
+		if (scn && !scn->empty()) {
+			ArdourButton* b = _mixer_scene_buttons[idx];
+			ArdourWidgets::set_tooltip (b, _("Click to recall this mixer scene\nRight-Click for context menu"));
+			l->set_text (scn->name());
+			all_unset = false;
+		} else {
+			l->set_text((""));
 		}
+	}
+
+	if (_mixer_scene_buttons.size () > 0 && all_unset) {
+		Gtk::Label* l = _mixer_scene_labels[0];
+		l->set_markup(string_compose ("<i>%1</i>", _("(Right-Click to Store)")));
 	}
 }
 
