@@ -4305,7 +4305,7 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 			} else if (strp->mute_control ()) {
 				control = strp->mute_control ();
 			} else {
-				PBD::warning << "No trim for this strip" << endmsg;
+				PBD::warning << "No mute for this strip" << endmsg;
 			}
 
 		} else {
