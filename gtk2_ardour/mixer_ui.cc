@@ -1241,7 +1241,6 @@ Mixer_UI::set_session (Session* sess)
 	}
 
 	update_scene_buttons();
-	MixerScene::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::update_scene_buttons, this), gui_context());
 
 	refill_favorite_plugins();
 
@@ -1270,6 +1269,8 @@ Mixer_UI::set_session (Session* sess)
 
 	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_masters, this, _1), gui_context());
 	_session->vca_manager().VCACreated.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::new_masters_created, this), gui_context());
+
+	MixerScene::Change.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_scene_buttons, this), gui_context());
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::parameter_changed, this, _1), gui_context ());
 
