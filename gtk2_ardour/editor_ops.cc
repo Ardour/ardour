@@ -7437,7 +7437,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	pl->freeze ();
 	pl->remove_region (r);
 
-	timepos_t pos;
+	timepos_t pos (AudioTime);
 
 	const timepos_t rstart = r->position ();
 	const samplepos_t start_sample = r->position_sample();
@@ -7456,16 +7456,21 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 		timepos_t file_start = r->start() + pos;
 
-		/* length = next position - current position */
+		/* length = next position - current position
+		 * len = (*x) - pos - rstart;
+		 */
 
 		timecnt_t len = pos.distance (timepos_t (*x)) - rstart;
 
-		/* XXX we do we really want to allow even single-sample regions?
-		 * shouldn't we have some kind of lower limit on region size?
+		/* Transient and Onset analysis has a min gap size, but
+		 * user placed transients can be placed every sample.
+		 *
+		 * We might want to have a lower limit on the region size.
 		 */
 
-		if (len.is_zero () || len.is_negative()) {
-			break;
+		if (!len.is_positive ()) {
+			++x;
+			continue;
 		}
 
 		string new_name;
