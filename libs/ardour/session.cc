@@ -7525,10 +7525,12 @@ boost::shared_ptr<MixerScene>
 Session::nth_mixer_scene (size_t nth, bool create_if_missing)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
-	if (create_if_missing && _mixer_scenes.size () <= nth) {
+	if (create_if_missing && (!_mixer_scenes[nth] || _mixer_scenes.size() <= nth) ) {
 		lm.release ();
 		Glib::Threads::RWLock::WriterLock lw (_mixer_scenes_lock);
-		_mixer_scenes.resize (nth + 1);
+		if (_mixer_scenes.size() <= nth) {
+			_mixer_scenes.resize (nth + 1);
+		}
 		_mixer_scenes[nth] = boost::shared_ptr<MixerScene> (new MixerScene (*this));
 		return _mixer_scenes[nth];
 	}
