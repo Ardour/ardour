@@ -771,6 +771,14 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 	_scroller.add (*table);
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
 
+	/* remove shadow from scrollWindow's viewport
+	 * see http://www.mail-archive.com/gtkmm-list@gnome.org/msg03509.html
+	 * and gtk2_ardour/meterbridge.cc
+	 */
+	Gtk::Viewport* viewport = (Gtk::Viewport*) _scroller.get_child();
+	viewport->set_shadow_type(Gtk::SHADOW_NONE);
+	viewport->set_border_width(0);
+
 	_ad.get_vbox ()->pack_start (_scroller);
 
 	int row = 0;
