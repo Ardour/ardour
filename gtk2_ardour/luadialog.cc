@@ -600,9 +600,6 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 	if (!lr.isTable ()) {
 		return;
 	}
-
-	int row_count = 0;
-
 	for (luabridge::Iterator i (lr); !i.isNil (); ++i) {
 		if (!i.key ().isNumber ())  { continue; }
 		if (!i.value ().isTable ()) { continue; }
@@ -758,7 +755,6 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 			}
 			_widgets.push_back(w);
 		}
-		row_count++;
 	}
 
 	_ad.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -767,18 +763,14 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 	Gtk::Table* table = Gtk::manage (new Gtk::Table ());
 	table->set_col_spacings (20);
 	table->set_row_spacings (8);
-	table->set_border_width (8);
 	table->signal_size_allocate ().connect (sigc::mem_fun (this, &Dialog::table_size_alloc));
 
-	if (row_count>16) {
-		_scroller.set_shadow_type(Gtk::SHADOW_NONE);
-		_scroller.set_border_width(0);
-		_scroller.add (*table);
-		_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
-		_ad.get_vbox ()->pack_start (_scroller);
-	} else {
-		_ad.get_vbox ()->pack_start (*table);
-	}
+	_scroller.set_shadow_type(Gtk::SHADOW_NONE);
+	_scroller.set_border_width(0);
+	_scroller.add (*table);
+	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
+
+	_ad.get_vbox ()->pack_start (_scroller);
 
 	int row = 0;
 	int last_end = -1;
