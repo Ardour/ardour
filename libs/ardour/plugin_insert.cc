@@ -1256,26 +1256,40 @@ PluginInsert::silence (samplecnt_t nframes, samplepos_t start_sample)
 {
 	automation_run (start_sample, nframes, true); // evaluate automation only
 
-	if (!_active) {
+	if (!_pending_active) {
 		// XXX delaybuffers need to be offset by nframes
 		return;
 	}
 
 	_delaybuffers.flush ();
 
+	/* TODO use mapping, do not change I/O -- this can
+	 * cause VST3 to perform activateBus, setBusArrangements calls
+	 * which may cause causes a DSP spike (!)
+	 */
 	const ChanMapping in_map (natural_input_streams ());
 	const ChanMapping out_map (natural_output_streams ());
+
 	ChanCount maxbuf = ChanCount::max (natural_input_streams (), natural_output_streams());
+	_session.get_scratch_buffers (maxbuf, true).silence (nframes, 0);
+
+	if (g_atomic_int_compare_and_exchange (&_stat_reset, 1, 0)) {
+		_timing_stats.reset ();
+	}
+
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
 		if (_configured_in.n_audio() > 0) {
 			_plugins.front()->connect_and_run (_session.get_scratch_buffers (maxbuf, true), start_sample, start_sample + nframes, 1.0, in_map, out_map, nframes, 0);
 		}
-	} else
+		return;
+	}
 #endif
+	_timing_stats.start ();
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->connect_and_run (_session.get_scratch_buffers (maxbuf, true), start_sample, start_sample + nframes, 1.0, in_map, out_map, nframes, 0);
 	}
+	_timing_stats.update ();
 }
 
 void
