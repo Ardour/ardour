@@ -4110,8 +4110,9 @@ Mixer_UI::scene_button_press (GdkEventButton* ev, int idx)
 		_mixer_scene_release = new MixerScene (*_session);
 		_mixer_scene_release->snapshot (); // TODO; prevent changed signal
 		recall_mixer_scene (idx, false);
+		return false;
 	} else if (ev->button == 1) {
-		recall_mixer_scene (idx, true);
+		return false;
 	}
 
 	return true;
@@ -4124,6 +4125,8 @@ Mixer_UI::scene_button_release (GdkEventButton* ev, int idx)
 		_mixer_scene_release->apply ();
 		delete _mixer_scene_release;
 		_mixer_scene_release = 0;
+	} else if (ev->button == 1) {
+		recall_mixer_scene (idx, true);
 	}
 	return false;
 }
