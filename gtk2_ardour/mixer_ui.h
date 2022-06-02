@@ -124,8 +124,8 @@ public:
 	void select_prev_strip ();
 
 	void store_mixer_scene (size_t);
-	void recall_mixer_scene (size_t);
-	void clear_mixer_scene (size_t);
+	void recall_mixer_scene (size_t, bool interactive = true);
+	void clear_mixer_scene (size_t, bool interactive = true);
 	void rename_mixer_scene (size_t n);
 
 	void do_vca_assign (boost::shared_ptr<ARDOUR::VCA>);
@@ -212,12 +212,15 @@ private:
 	Gtk::Frame            _mixer_scene_frame;
 	Gtk::Table            _mixer_scene_table;
 	Gtk::VBox             _mixer_scene_vbox;
-	std::vector<ArdourWidgets::ArdourButton *>  _mixer_scene_buttons;
-	std::vector<Gtk::Label *>                   _mixer_scene_labels;
+
+	std::vector<ArdourWidgets::ArdourButton*> _mixer_scene_buttons;
+	std::vector<Gtk::Label*>                  _mixer_scene_labels;
+	ARDOUR::MixerScene*                       _mixer_scene_release;
 
 	void popup_scene_menu (GdkEventButton* ev, int);
-	bool scene_button_pressed (GdkEventButton*, int);
-	bool scene_label_pressed (GdkEventButton* ev, int);
+	bool scene_button_press (GdkEventButton*, int);
+	bool scene_button_release (GdkEventButton*, int);
+	bool scene_label_press (GdkEventButton* ev, int);
 
 	MixerGroupTabs* _group_tabs;
 
