@@ -30,9 +30,10 @@
 #include "widgets/slider_controller.h"
 
 #include "stripable_colorpicker.h"
-#include "ardour_dialog.h"
 #include "luadialog.h"
+#include "public_editor.h"
 #include "splash.h"
+#include "ui_config.h"
 #include "utils.h"
 
 using namespace LuaDialog;
@@ -763,7 +764,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 	Gtk::Table* table = Gtk::manage (new Gtk::Table ());
 	table->set_col_spacings (20);
 	table->set_row_spacings (8);
-	table->signal_size_allocate ().connect (sigc::mem_fun (this, &Dialog::table_size_alloc));
+	table->signal_size_request ().connect (sigc::mem_fun (this, &Dialog::table_size_request));
 
 	_scroller.set_shadow_type(Gtk::SHADOW_NONE);
 	_scroller.set_border_width(0);
@@ -833,12 +834,15 @@ Dialog::run (lua_State *L)
 }
 
 void
-Dialog::table_size_alloc (Gtk::Allocation& allocation)
+Dialog::table_size_request (Gtk::Requisition* req)
 {
-	/* XXX: consider using 0.75 * screen-height instead of 512 */
-	if (allocation.get_height () > 512) {
+	int h = Gtkmm2ext::physical_screen_height (PublicEditor::instance ().current_toplevel()->get_window());
+
+	int max_height = std::max (400., std::min (768.0 * UIConfiguration::instance().get_ui_scale(), h * .7));
+
+	if (req->height > max_height) {
 		_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-		_ad.set_size_request (-1, 512);
+		_ad.set_size_request (-1, max_height);
 	}
 }
 

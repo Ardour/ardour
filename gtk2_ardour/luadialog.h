@@ -20,11 +20,13 @@
 #define _gtk2ardour_luadialog_h_
 
 #include <cassert>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/table.h>
 #include <gtkmm/progressbar.h>
 
 #include "LuaBridge/LuaBridge.h"
 
+#include "ardour_dialog.h"
 #include "ardour_message.h"
 
 namespace LuaDialog {
@@ -91,7 +93,7 @@ public:
 
 private:
 	Dialog (Dialog const&); // prevent copy construction
-	void table_size_alloc (Gtk::Allocation&);
+	void table_size_request (Gtk::Requisition*);
 
 	ArdourDialog _ad;
 	Gtk::ScrolledWindow _scroller;
