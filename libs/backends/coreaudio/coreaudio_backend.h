@@ -388,6 +388,7 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		CoreAudioBackend* engine;
 		boost::function<void ()> f;
 		size_t stacksize;
+		double period_ns;
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
 		bool                      _joined_workgroup;
@@ -395,8 +396,8 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		os_workgroup_join_token_s _join_token;
 #endif
 
-		ThreadData (CoreAudioBackend* e, boost::function<void ()> fp, size_t stacksz)
-			: engine (e) , f (fp) , stacksize (stacksz) {}
+		ThreadData (CoreAudioBackend* e, boost::function<void ()> fp, size_t stacksz, double period)
+			: engine (e) , f (fp) , stacksize (stacksz), period_ns {}
 	};
 
 	/* port engine */

@@ -830,6 +830,11 @@ void *
 CoreAudioBackend::coreaudio_process_thread (void *arg)
 {
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
+
+	if (pbd_mach_set_realtime_policy (pthread_self (), period_ns, false)) {
+		PBD::warning << _("AudioEngine: process thread failed to set mach realtime policy.") << endmsg;
+	}
+
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
 	if (td->_joined_workgroup) {
 		/* have WG */
@@ -871,7 +876,7 @@ int
 CoreAudioBackend::create_process_thread (boost::function<void()> func)
 {
 	pthread_t   thread_id;
-	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
+	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC, 1e9 * _samples_per_period / _samplerate);
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
 	if (_pcmio->workgroup (td->_workgroup)) {
@@ -888,10 +893,6 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 			return -1;
 		}
 		PBD::warning << _("AudioEngine: process thread failed to acquire realtime permissions.") << endmsg;
-	}
-
-	if (pbd_mach_set_realtime_policy (thread_id, 1e9 * _samples_per_period / _samplerate, false)) {
-		PBD::warning << _("AudioEngine: process thread failed to set mach realtime policy.") << endmsg;
 	}
 
 	_threads.push_back (thread_id);
