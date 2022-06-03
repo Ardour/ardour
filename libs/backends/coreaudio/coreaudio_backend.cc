@@ -21,9 +21,6 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 
-#include <mach/thread_policy.h>
-#include <mach/thread_act.h>
-
 #undef nil
 
 #include <glibmm.h>
