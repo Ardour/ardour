@@ -423,7 +423,7 @@ pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns, bool main)
 	tcp.preemptible = true;
 
 #ifndef NDEBUG
-	printf ("period_ns=%f period_clk=%d timebase.num=%d timebase_den=%d ticks_per_ns=%f\n", period_ns, period_clk, timebase.numer, timebase.denom, ticks_per_ns);
+	printf ("period_ns=%f period_clk=%f timebase.num=%d timebase_den=%d ticks_per_ns=%f\n", period_ns, period_clk, timebase.numer, timebase.denom, ticks_per_ns);
 	printf ("Mach Thread(%p) request: period=%d comp=%d constraint=%d preemt=%d\n", thread_id, tcp.period, tcp.computation, tcp.constraint, tcp.preemptible);
 #endif
 
