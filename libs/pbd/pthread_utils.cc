@@ -400,7 +400,7 @@ pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns, bool main)
 	double ticks_per_ns = 1.;
 	mach_timebase_info_data_t timebase;
 	if (KERN_SUCCESS == mach_timebase_info (&timebase)) {
-		ticks_per_ns = timebase.denom / timebase.numer;
+		ticks_per_ns = (double)timebase.denom / (double)timebase.numer;
 	}
 
 	thread_time_constraint_policy_data_t tcp;
@@ -415,17 +415,15 @@ pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns, bool main)
 	printf ("Mach Thread(%p) get: period=%d comp=%d constraint=%d preemt=%d OK: %d\n", thread_id, tcp.period, tcp.computation, tcp.constraint, tcp.preemptible, rv == KERN_SUCCESS);
 #endif
 
-	mach_timebase_info_data_t timebase_info;
-	mach_timebase_info (&timebase_info);
-	const double period_clk = period_ns * (double)timebase_info.denom / (double)timebase_info.numer;
+	const double period_clk = period_ns * ticks_per_ns;
 
-	tcp.period      = ticks_per_ns * period_clk;
-	tcp.computation = ticks_per_ns * period_clk * .9;
-	tcp.constraint  = ticks_per_ns * period_clk * .95;
+	tcp.period      = period_clk;
+	tcp.computation = period_clk * .9;
+	tcp.constraint  = period_clk * .95;
 	tcp.preemptible = true;
 
 #ifndef NDEBUG
-	printf ("period_ns=%f timebase.num=%d timebase_den=%d\n", period_ns, timebase_info.numer, timebase_info.denom);
+	printf ("period_ns=%f period_clk=%d timebase.num=%d timebase_den=%d ticks_per_ns=%f\n", period_ns, period_clk, timebase.numer, timebase.denom, ticks_per_ns);
 	printf ("Mach Thread(%p) request: period=%d comp=%d constraint=%d preemt=%d\n", thread_id, tcp.period, tcp.computation, tcp.constraint, tcp.preemptible);
 #endif
 
