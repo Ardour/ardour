@@ -1254,13 +1254,6 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 void
 PluginInsert::silence (samplecnt_t nframes, samplepos_t start_sample)
 {
-#if 1
-	/* use actual process function with silent scratch buffers */
-	BufferSet& bufs = _session.get_scratch_buffers (_required_buffers, true);
-	bufs.silence (nframes, 0);
-	bool roll = _session.transport_rolling ();
-	run (bufs, start_sample, start_sample + (roll ? nframes : 0), roll ? 1 : 0, nframes, true);
-#else
 	automation_run (start_sample, nframes, true); // evaluate automation only
 
 	if (!_pending_active) {
@@ -1297,7 +1290,6 @@ PluginInsert::silence (samplecnt_t nframes, samplepos_t start_sample)
 		(*i)->connect_and_run (_session.get_scratch_buffers (maxbuf, true), start_sample, start_sample + nframes, 1.0, in_map, out_map, nframes, 0);
 	}
 	_timing_stats.update ();
-#endif
 }
 
 void
