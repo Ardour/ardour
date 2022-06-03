@@ -831,7 +831,7 @@ CoreAudioBackend::coreaudio_process_thread (void *arg)
 {
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
 
-	if (pbd_mach_set_realtime_policy (pthread_self (), period_ns, false)) {
+	if (pbd_mach_set_realtime_policy (pthread_self (), td->period_ns, false)) {
 		PBD::warning << _("AudioEngine: process thread failed to set mach realtime policy.") << endmsg;
 	}
 
