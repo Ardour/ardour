@@ -254,6 +254,7 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		break;
 
 	case TempoBarItem:
+	case TempoCurveItem:
 		ruler_items.push_back (MenuElem (_("New Tempo"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
 		break;
 
