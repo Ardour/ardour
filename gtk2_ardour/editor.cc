@@ -4323,8 +4323,6 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 	TempoMap::SharedPtr tmap (TempoMap::use());
 
 	switch (_grid_type) {
-	case GridTypeBeat:
-		return Temporal::Beats::from_double (4.0 / tmap->meter_at (position).note_value());
 	case GridTypeBar:
 		if (_session) {
 			const Meter& m = tmap->meter_at (position);
@@ -4332,8 +4330,54 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 		}
 		break;
 
+	case GridTypeBeat:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 4.0);
+
+	case GridTypeBeatDiv2:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 8.0);
+
+	case GridTypeBeatDiv4:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 16.0);
+
+	case GridTypeBeatDiv8:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 32.0);
+
+	case GridTypeBeatDiv16:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 64.0);
+
+	case GridTypeBeatDiv32:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 128.0);
+
+	case GridTypeBeatDiv3:  //Triplet eighth
+
+	case GridTypeBeatDiv6:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 24.0);
+
+	case GridTypeBeatDiv12:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 48.0);
+
+	case GridTypeBeatDiv24:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 96.0);
+
+	case GridTypeBeatDiv5:  //Quintuplet //eighth
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 20.0);
+
+	case GridTypeBeatDiv10:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 40.0);
+
+	case GridTypeBeatDiv20:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 80.0);
+
+	case GridTypeBeatDiv7:  //Septuplet eighth
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 28.0);
+
+	case GridTypeBeatDiv14:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 56.0);
+
+	case GridTypeBeatDiv28:
+		return Temporal::Beats::from_double (tmap->meter_at (position).note_value() / 112.0);
+
 	default:
-#warning NUTEMPO need to implement all other subdivs
 		success = false;
 		break;
 	}
