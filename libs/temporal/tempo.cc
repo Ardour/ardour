@@ -1668,12 +1668,14 @@ TempoMap::dump (std::ostream& ostr) const
 		ostr << &*p << ' ' << *p;
 		if (dynamic_cast<MusicTimePoint const *> (&(*p))) {
 			ostr << " BarTime";
-		} else if (dynamic_cast<TempoPoint const *> (&(*p))) {
+		}
+
+		if (dynamic_cast<TempoPoint const *> (&(*p))) {
 			ostr << " Tempo";
-		} else if (dynamic_cast<MeterPoint const *> (&(*p))) {
+		}
+
+		if (dynamic_cast<MeterPoint const *> (&(*p))) {
 			ostr << " Meter";
-		} else {
-			ostr << " ???";
 		}
 		ostr << endl;
 	}
