@@ -152,7 +152,7 @@ public:
 
 	int no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing);
 
-	int silent_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
+	int silence (pframes_t);
 
 	virtual bool declick_in_progress () const { return false; }
 	virtual bool can_record() { return false; }
@@ -684,8 +684,7 @@ protected:
 
 	int configure_processors (ProcessorStreams*);
 
-	void silence (samplecnt_t);
-	void silence_unlocked (samplecnt_t);
+	void silence_unlocked (pframes_t);
 
 	ChanCount processor_max_streams;
 	ChanCount processor_out_streams;

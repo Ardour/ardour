@@ -3328,19 +3328,20 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 	return true;
 }
 
-void
-Route::silence (samplecnt_t nframes)
+int
+Route::silence (pframes_t nframes)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
-		return;
+		return 1;
 	}
 
 	silence_unlocked (nframes);
+	return 0;
 }
 
 void
-Route::silence_unlocked (samplecnt_t nframes)
+Route::silence_unlocked (pframes_t nframes)
 {
 	/* Must be called with the processor lock held */
 
@@ -4051,14 +4052,6 @@ Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_
 	}
 
 	run_route (start_sample, end_sample, nframes, false, false);
-	return 0;
-}
-
-int
-Route::silent_roll (pframes_t nframes, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, bool& /* need_butler */)
-{
-	silence (nframes);
-	flush_processor_buffers_locked (nframes);
 	return 0;
 }
 
