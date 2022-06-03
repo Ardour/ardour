@@ -1340,25 +1340,53 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlie
 
 	const superclock_t old_sc = mp.sclock();
 
-	Meters::iterator current = _meters.end();
-	Meters::iterator insert_before = _meters.end();
+	/* reset position of this meter */
+	const_cast<MeterPoint*> (&mp)->set (sc, beats, bbt);
 
-	for (Meters::iterator m = _meters.begin(); m != _meters.end(); ++m) {
-		if (*m == mp) {
-			current = m;
+	{
+
+		Meters::iterator current = _meters.end();
+		Meters::iterator insert_before = _meters.end();
+
+		for (Meters::iterator m = _meters.begin(); m != _meters.end(); ++m) {
+			if (*m == mp) {
+				current = m;
+			}
+			if (insert_before == _meters.end() && (m->sclock() > sc)) {
+				insert_before = m;
+			}
 		}
-		if (insert_before == _meters.end() && (m->sclock() > sc)) {
-			insert_before = m;
-		}
+
+		/* existing meter must have been found */
+		assert (current != _meters.end());
+
+		/* reposition in list */
+		_meters.splice (insert_before, _meters, current);
+
 	}
 
-	/* existing meter must have been found */
-	assert (current != _meters.end());
+	{
 
-	/* reset position of this meter */
-	current->set (sc, beats, bbt);
-	/* reposition in list */
-	_meters.splice (insert_before, _meters, current);
+		Points::iterator current = _points.end();
+		Points::iterator insert_before = _points.end();
+
+		for (Points::iterator m = _points.begin(); m != _points.end(); ++m) {
+			if (*m == mp) {
+				current = m;
+			}
+			if (insert_before == _points.end() && (m->sclock() > sc)) {
+				insert_before = m;
+			}
+		}
+
+		/* existing meter must have been found */
+		assert (current != _points.end());
+
+		/* reposition in list */
+		_points.splice (insert_before, _points, current);
+
+	}
+
 	/* recompute 3 domain positions for everything after this */
 	reset_starting_at (std::min (sc, old_sc));
 
@@ -1404,26 +1432,51 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	}
 
 	const superclock_t old_sc = tp.sclock();
+	/* reset position of this tempo */
+	const_cast<TempoPoint*> (&tp)->set (sc, beats, bbt);
 
-	Tempos::iterator current = _tempos.end();
-	Tempos::iterator insert_before = _tempos.end();
+	/* move to correct position in tempo list */
 
-	for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
-		if (*t == tp) {
-			current = t;
+	{
+		Tempos::iterator current = _tempos.end();
+		Tempos::iterator insert_before = _tempos.end();
+
+		for (Tempos::iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
+			if (*t == tp) {
+				current = t;
+			}
+			if (insert_before == _tempos.end() && (t->sclock() > sc)) {
+				insert_before = t;
+			}
 		}
-		if (insert_before == _tempos.end() && (t->sclock() > sc)) {
-			insert_before = t;
-		}
+
+		/* existing tempo must have been found */
+		assert (current != _tempos.end());
+		/* reposition in list */
+		_tempos.splice (insert_before, _tempos, current);
 	}
 
-	/* existing tempo must have been found */
-	assert (current != _tempos.end());
+	/* move to correct position in points list */
 
-	/* reset position of this tempo */
-	current->set (sc, beats, bbt);
-	/* reposition in list */
-	_tempos.splice (insert_before, _tempos, current);
+	{
+		Points::iterator current = _points.end();
+		Points::iterator insert_before = _points.end();
+
+		for (Points::iterator t = _points.begin(); t != _points.end(); ++t) {
+			if (*t == tp) {
+				current = t;
+			}
+			if (insert_before == _points.end() && (t->sclock() > sc)) {
+				insert_before = t;
+			}
+		}
+
+		/* existing tempo must have been found */
+		assert (current != _points.end());
+
+		/* reposition in list */
+		_points.splice (insert_before, _points, current);
+	}
 
 	/* recompute 3 domain positions for everything after this */
 	reset_starting_at (std::min (sc, old_sc));
