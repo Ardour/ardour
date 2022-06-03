@@ -743,12 +743,18 @@ TempoMap::copy_points (TempoMap const & other)
 	p.reserve (other._meters.size() + other._tempos.size() + other._bartimes.size());
 
 	for (Meters::const_iterator m = other._meters.begin(); m != other._meters.end(); ++m) {
+		if (dynamic_cast<MusicTimePoint const *> (&*m)) {
+			continue;
+		}
 		MeterPoint* mp = new MeterPoint (*m);
 		_meters.push_back (*mp);
 		p.push_back (mp);
 	}
 
 	for (Tempos::const_iterator t = other._tempos.begin(); t != other._tempos.end(); ++t) {
+		if (dynamic_cast<MusicTimePoint const *> (&*t)) {
+			continue;
+		}
 		TempoPoint* tp = new TempoPoint (*t);
 		_tempos.push_back (*tp);
 		p.push_back (tp);
@@ -757,6 +763,8 @@ TempoMap::copy_points (TempoMap const & other)
 	for (MusicTimes::const_iterator mt = other._bartimes.begin(); mt != other._bartimes.end(); ++mt) {
 		MusicTimePoint* mtp = new MusicTimePoint (*mt);
 		_bartimes.push_back (*mtp);
+		_tempos.push_back (*mtp);
+		_meters.push_back (*mtp);
 		p.push_back (mtp);
 	}
 
