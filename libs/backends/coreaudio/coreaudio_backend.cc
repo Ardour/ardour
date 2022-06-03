@@ -830,9 +830,40 @@ void *
 CoreAudioBackend::coreaudio_process_thread (void *arg)
 {
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+	if (td->_joined_workgroup) {
+		/* have WG */
+		int res = os_workgroup_join (td->_workgroup, &td->_join_token);
+		switch (res) {
+			case 0:
+				PBD::info << _("AudioEngine: process thread joined AUHAL workgroup.") << endmsg;
+				break;
+			case EALREADY:
+				PBD::warning << _("AudioEngine: process thread is already in a workgroup.") << endmsg;
+				td->_joined_workgroup = false;
+				break;
+			case EINVAL:
+				PBD::warning << _("AudioEngine: invalid workgroup for process thread.") << endmsg;
+				td->_joined_workgroup = false;
+				break;
+			default:
+				td->_joined_workgroup = false;
+				PBD::warning << _("AudioEngine: process thread failed to join AUHAL workgroup.") << endmsg;
+				break;
+
+		}
+	}
+#endif
+
 	boost::function<void ()> f = td->f;
-	delete td;
 	f ();
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+	if (td->_joined_workgroup) {
+		os_workgroup_leave (td->_workgroup, &td->_join_token);
+	}
+#endif
+	delete td;
 	return 0;
 }
 
@@ -841,6 +872,14 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 {
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+	if (_pcmio->workgroup (td->_workgroup)) {
+		td->_joined_workgroup = true;
+	} else {
+		td->_joined_workgroup = false;
+	}
+#endif
 
 	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC,
 	                              &thread_id, coreaudio_process_thread, td)) {

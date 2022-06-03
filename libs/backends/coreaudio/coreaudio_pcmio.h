@@ -23,6 +23,10 @@
 #include <CoreAudio/CoreAudio.h>
 #include <AudioUnit/AudioUnit.h>
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+# include <AudioToolbox/AudioToolbox.h>
+#endif
+
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioToolbox.h>
 
@@ -73,6 +77,10 @@ public:
 	int      set_samples_per_period (uint32_t);
 
 	void     launch_control_app (uint32_t device_id);
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+	bool workgroup (os_workgroup_t&);
+#endif
 
 	void     pcm_stop (void);
 	int      pcm_start (

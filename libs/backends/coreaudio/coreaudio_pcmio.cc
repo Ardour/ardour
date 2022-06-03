@@ -1209,6 +1209,15 @@ CoreAudioPCM::set_playback_channel (uint32_t chn, const float *output, uint32_t 
 	return 0;
 }
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+bool
+CoreAudioPCM::workgroup (os_workgroup_t& workgroup)
+{
+	assert (_auhal);
+	UInt32 size = sizeof (os_workgroup_t);
+	return noErr == AudioUnitGetProperty (_auhal, kAudioOutputUnitProperty_OSWorkgroup, kAudioUnitScope_Output, 0, &workgroup, &size);
+}
+#endif
 
 void
 CoreAudioPCM::launch_control_app (uint32_t device_id)
