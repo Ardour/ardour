@@ -164,7 +164,7 @@ Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::M
 void
 Editor::make_bbt_marker (MusicTimePoint const  * mtp)
 {
-	bbt_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker"), "foo!", *mtp));
+	bbt_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker"), *mtp));
 }
 
 void

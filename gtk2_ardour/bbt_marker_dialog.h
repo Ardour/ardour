@@ -20,6 +20,7 @@
 #define __ardour_gtk_bbt_marker_dialog_h__
 
 #include <gtkmm/box.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/label.h>
 #include <gtkmm/spinbutton.h>
 
@@ -37,6 +38,7 @@ public:
 
 	Temporal::timepos_t position() const;
 	Temporal::BBT_Time  bbt_value () const;
+	std::string         name() const;
 
 private:
 	void init ();
@@ -47,6 +49,10 @@ private:
 	Gtk::SpinButton bar_entry;
 	Gtk::SpinButton beat_entry;
 	Gtk::Label      entry_label;
+
+	Gtk::HBox       name_box;
+	Gtk::Entry      name_entry;
+	Gtk::Label      name_label;
 };
 
 #endif /* __ardour_gtk_bbt_marker_dialog_h__ */

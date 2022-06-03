@@ -34,6 +34,7 @@ BBTMarkerDialog::BBTMarkerDialog (timepos_t const & pos)
 	, _point (0)
 	, _position (pos)
 	, entry_label (_("Position"))
+	, name_label (_("Name"))
 
 {
 	BBT_Time bbt = TempoMap::use()->bbt_at (pos).round_to_beat ();
@@ -50,11 +51,22 @@ BBTMarkerDialog::BBTMarkerDialog (timepos_t const & pos)
 	bar_entry.set_value (bbt.bars);
 	beat_entry.set_value (bbt.beats);
 
+	name_box.pack_start (name_label);
+	name_box.pack_start (name_entry);
+
+	name_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &BBTMarkerDialog::response), Gtk::RESPONSE_OK));
+
+	get_vbox()->pack_start (name_box);
 	get_vbox()->pack_start (bbt_box);
+
 	bbt_box.show_all ();
+	name_box.show_all ();
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (_("Add Marker"), RESPONSE_OK);
+
+	get_vbox()->set_border_width (12);
+	get_vbox()->set_spacing (12);
 }
 
 BBT_Time
@@ -70,4 +82,10 @@ timepos_t
 BBTMarkerDialog::position() const
 {
 	return _position;
+}
+
+std::string
+BBTMarkerDialog::name () const
+{
+	return name_entry.get_text();
 }

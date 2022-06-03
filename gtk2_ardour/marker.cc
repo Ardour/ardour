@@ -721,8 +721,8 @@ MeterMarker::point() const
 
 /***********************************************************************/
 
-BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 rgba, const string& text, Temporal::MusicTimePoint const & p)
-	: MetricMarker (editor, parent, rgba, text, BBTPosition, p.time(), false)
+BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 rgba, Temporal::MusicTimePoint const & p)
+	: MetricMarker (editor, parent, rgba, p.name(), BBTPosition, p.time(), false)
 	, _point (&p)
 {
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_bbt_marker_event), group, this));

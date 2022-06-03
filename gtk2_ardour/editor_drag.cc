@@ -3817,12 +3817,14 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		int result = marker_dialog->run ();
 		BBT_Time bbt;
+		std::string name;
 
 		switch (result) {
 		case RESPONSE_ACCEPT:
 		case RESPONSE_OK:
 			bbt = marker_dialog->bbt_value ();
-			map->set_bartime (bbt, marker_dialog->position());
+			name = marker_dialog->name();
+			map->set_bartime (bbt, marker_dialog->position(), name);
 			delete marker_dialog;
 			break;
 		default:

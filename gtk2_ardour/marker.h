@@ -211,7 +211,7 @@ class MeterMarker : public MetricMarker
 class BBTMarker : public MetricMarker
 {
   public:
-	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, const std::string& text, Temporal::MusicTimePoint const &);
+	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, Temporal::MusicTimePoint const &);
 	~BBTMarker ();
 
 	void reset_point (Temporal::MusicTimePoint const &);
