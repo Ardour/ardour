@@ -67,12 +67,19 @@ RTTaskList::drop_threads ()
 RTTaskList::_thread_run (void* arg)
 {
 	RTTaskList* d = static_cast<RTTaskList*> (arg);
+	pbd_mach_set_realtime_policy (pthread_self (), 5. * 1e-5, false);
 
 	char name[64];
 	snprintf (name, 64, "RTTask-%p", (void*)DEBUG_THREAD_SELF);
 	pthread_set_name (name);
 
+	/* TODO: join macOS workgroup (needs backend API update).
+	 * also rt-tasks need to be re-initialized when the engine is restarted
+	 */
+
 	d->run ();
+
+	// TODO: leave macOS workgroup
 	pthread_exit (0);
 	return 0;
 }
@@ -101,7 +108,6 @@ RTTaskList::reset_thread_list ()
 			PBD::fatal << _("Cannot create thread for TaskList!") << " (" << strerror (rv) << ")" << endmsg;
 			/* NOT REACHED */
 		}
-		pbd_mach_set_realtime_policy (thread_id, 5. * 1e-5, false);
 		_threads.push_back (thread_id);
 	}
 }
