@@ -1215,7 +1215,7 @@ CoreAudioPCM::workgroup (os_workgroup_t& workgroup)
 {
 	assert (_auhal);
 	UInt32 size = sizeof (os_workgroup_t);
-	return noErr == AudioUnitGetProperty (_auhal, kAudioOutputUnitProperty_OSWorkgroup, kAudioUnitScope_Global, 0, &workgroup, &size);
+	return noErr == AudioUnitGetProperty (_auhal, kAudioDevicePropertyIOThreadOSWorkgroup, kAudioUnitScope_Global, 0, &workgroup, &size);
 }
 #endif
 
