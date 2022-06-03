@@ -673,6 +673,7 @@ MusicTimePoint::MusicTimePoint (TempoMap const & map, XMLNode const & node)
 	, TempoPoint (map, *node.child (Tempo::xml_node_name.c_str()))
 	, MeterPoint (map, *node.child (Meter::xml_node_name.c_str()))
 {
+	node.get_property (X_("name"), _name); /* may fail, leaves name empty */
 }
 
 XMLNode&
@@ -685,8 +686,18 @@ MusicTimePoint::get_state () const
 	node->add_child_nocopy (Tempo::get_state());
 	node->add_child_nocopy (Meter::get_state());
 
+	node->set_property (X_("name"), _name); /* failure is OK */
+
 	return *node;
 }
+
+void
+MusicTimePoint::set_name (std::string const & str)
+{
+	_name = str;
+	/* XXX need a signal or something to announce change */
+}
+
 
 void
 TempoMapPoint::start_float ()
@@ -1018,20 +1029,16 @@ TempoMap::remove_tempo (TempoPoint const & tp)
 	}
 }
 
-MusicTimePoint &
-TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos)
+void
+TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos, std::string name)
 {
-	MusicTimePoint * ret;
-
 	assert (pos.time_domain() == AudioTime);
 
 	superclock_t sc (pos.superclocks());
 	TempoMetric metric (metric_at (sc));
-	MusicTimePoint* tp = new MusicTimePoint (*this, sc, metric.quarters_at_superclock (sc), bbt, metric.tempo(), metric.meter());
+	MusicTimePoint* tp = new MusicTimePoint (*this, sc, metric.quarters_at_superclock (sc), bbt, metric.tempo(), metric.meter(), name);
 
-	ret = add_or_replace_bartime (tp);
-
-	return *ret;
+	add_or_replace_bartime (tp);
 }
 
 MusicTimePoint*

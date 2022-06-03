@@ -525,7 +525,9 @@ typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct bartime_ta
 class /*LIBTEMPORAL_API*/ MusicTimePoint :  public bartime_hook, public virtual TempoPoint, public virtual MeterPoint
 {
   public:
-	LIBTEMPORAL_API MusicTimePoint (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt, Tempo const & t, Meter const & m) : Point (map, sc, b, bbt), TempoPoint (t, *this), MeterPoint (m, *this)  {}
+	LIBTEMPORAL_API MusicTimePoint (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt, Tempo const & t, Meter const & m, std::string name = std::string())
+		: Point (map, sc, b, bbt), TempoPoint (t, *this), MeterPoint (m, *this),  _name (name) {}
+
 	LIBTEMPORAL_API MusicTimePoint (TempoMap const & map, XMLNode const &);
 
 	LIBTEMPORAL_API bool operator== (MusicTimePoint const & other) const {
@@ -534,7 +536,13 @@ class /*LIBTEMPORAL_API*/ MusicTimePoint :  public bartime_hook, public virtual 
 
 	LIBTEMPORAL_API timepos_t time() const { return timepos_t::from_superclock (TempoPoint::sclock()); }
 
+	LIBTEMPORAL_API std::string name() const { return _name; }
+	LIBTEMPORAL_API void set_name (std::string const &);
+
 	LIBTEMPORAL_API XMLNode & get_state () const;
+
+ private:
+	std::string _name;
 };
 
 /** Tempo Map - mapping of timecode to musical time.
@@ -705,7 +713,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API	void change_tempo (TempoPoint&, Tempo const&);
 
-	LIBTEMPORAL_API MusicTimePoint& set_bartime (BBT_Time const &, timepos_t const &);
+	LIBTEMPORAL_API void set_bartime (BBT_Time const &, timepos_t const &, std::string name = std::string());
 	LIBTEMPORAL_API void remove_bartime (MusicTimePoint const & tp);
 
 	LIBTEMPORAL_API TempoPoint& set_tempo (Tempo const &, BBT_Time const &);
