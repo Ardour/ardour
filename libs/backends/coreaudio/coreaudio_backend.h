@@ -397,7 +397,7 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 #endif
 
 		ThreadData (CoreAudioBackend* e, boost::function<void ()> fp, size_t stacksz, double period)
-			: engine (e) , f (fp) , stacksize (stacksz), period_ns {}
+			: engine (e) , f (fp) , stacksize (stacksz), period_ns (period) {}
 	};
 
 	/* port engine */
