@@ -441,7 +441,7 @@ Graph::process_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes, s
 	_process_start_sample = start_sample;
 	_process_end_sample   = end_sample;
 
-	_process_noroll      = false;
+	_process_mode        = Roll;
 	_process_retval      = 0;
 	_process_need_butler = false;
 
@@ -468,13 +468,35 @@ Graph::routes_no_roll (boost::shared_ptr<GraphChain> chain, pframes_t nframes, s
 	_process_nframes        = nframes;
 	_process_start_sample   = start_sample;
 	_process_end_sample     = end_sample;
-	_process_non_rt_pending = non_rt_pending;
 
-	_process_noroll      = true;
+	_process_mode        = NoRoll;
 	_process_retval      = 0;
 	_process_need_butler = false;
 
 	DEBUG_TRACE (DEBUG::ProcessThreads, "wake graph for no-roll process\n");
+	_callback_start_sem.signal ();
+	_callback_done_sem.wait ();
+	DEBUG_TRACE (DEBUG::ProcessThreads, "graph execution complete\n");
+
+	return _process_retval;
+}
+
+int
+Graph::silence_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes)
+{
+	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("silence graph execution from %1 for = %2\n", nframes));
+
+	if (g_atomic_int_get (&_terminate)) {
+		return 0;
+	}
+
+	_graph_chain         = chain.get ();
+	_process_nframes     = nframes;
+	_process_mode        = Silence;
+	_process_retval      = 0;
+	_process_need_butler = false;
+
+	DEBUG_TRACE (DEBUG::ProcessThreads, "wake graph for silence process\n");
 	_callback_start_sem.signal ();
 	_callback_done_sem.wait ();
 	DEBUG_TRACE (DEBUG::ProcessThreads, "graph execution complete\n");
@@ -513,10 +535,17 @@ Graph::process_one_route (Route* route)
 
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 runs route %2\n", pthread_name (), route->name ()));
 
-	if (_process_noroll) {
-		retval = route->no_roll (_process_nframes, _process_start_sample, _process_end_sample, _process_non_rt_pending);
-	} else {
-		retval = route->roll (_process_nframes, _process_start_sample, _process_end_sample, need_butler);
+	switch (_process_mode) {
+		case Roll:
+			retval = route->roll (_process_nframes, _process_start_sample, _process_end_sample, need_butler);
+			break;
+		case NoRoll:
+			retval = route->no_roll (_process_nframes, _process_start_sample, _process_end_sample, _process_non_rt_pending);
+			break;
+		case Silence:
+			retval = 0;
+			route->silence (_process_nframes);
+			break;
 	}
 
 	if (retval) {

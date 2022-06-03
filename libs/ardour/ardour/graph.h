@@ -75,6 +75,7 @@ public:
 	/* public API for use by session-process */
 	int process_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
 	int routes_no_roll (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool non_rt_pending);
+	int silence_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes);
 	int process_io_plugs (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample);
 
 	bool     in_process_thread () const;
@@ -133,6 +134,10 @@ private:
 	samplepos_t _process_end_sample;
 	bool        _process_can_record;
 	bool        _process_non_rt_pending;
+
+	enum ProcessMode {
+		Roll, NoRoll, Silence
+	} _process_mode;
 
 	bool _process_noroll;
 	int  _process_retval;
