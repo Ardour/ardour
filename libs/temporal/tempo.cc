@@ -2586,7 +2586,7 @@ TempoMap::bbt_duration_at (timepos_t const & pos, BBT_Offset const & dur) const
 	if (pos.time_domain() == AudioTime) {
 		return timecnt_t::from_superclock (superclock_at (bbt_walk (bbt_at (pos), dur)) - pos.superclocks(), pos);
 	}
-	return timecnt_t (bbtwalk_to_quarters (pos.beats(), dur) - pos.beats(), pos);
+	return timecnt_t (bbtwalk_to_quarters (pos.beats(), dur), pos);
 
 }
 
