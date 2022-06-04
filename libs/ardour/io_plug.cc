@@ -425,7 +425,7 @@ IOPlug::process ()
 }
 
 void
-IOPlug::run (samplepos_t start, pframes_t n_samples)
+IOPlug::connect_and_run (samplepos_t start, pframes_t n_samples)
 {
 	Temporal::TempoMap::update_thread_tempo_map ();
 	assert (n_samples > 0);

@@ -56,7 +56,7 @@ public:
 	XMLNode& get_state (void) const;
 	int set_state (const XMLNode&, int version);
 
-	void run (samplepos_t, pframes_t);
+	void connect_and_run (samplepos_t, pframes_t);
 	int  set_block_size (pframes_t);
 	void set_public_latency (bool);
 	bool ensure_io ();

@@ -560,7 +560,7 @@ Graph::process_one_route (Route* route)
 void
 Graph::process_one_ioplug (IOPlug* ioplug)
 {
-	ioplug->run (_process_start_sample, _process_nframes);
+	ioplug->connect_and_run (_process_start_sample, _process_nframes);
 }
 
 bool
