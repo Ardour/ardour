@@ -6614,9 +6614,6 @@ Editor::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
 
 	items.push_back(MenuElem(_("Edit..."),
 				 sigc::bind(sigc::mem_fun(*this, &Editor::edit_notes), &mrv)));
-	if (sel_size != 1) {
-		items.back().set_sensitive (false);
-	}
 
 	items.push_back(MenuElem(_("Transpose..."),
 	                         sigc::bind(sigc::mem_fun(*this, &Editor::transpose_regions), rs)));

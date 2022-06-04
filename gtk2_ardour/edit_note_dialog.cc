@@ -118,7 +118,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	offset = timecnt_t (_region_view->region()->position(), timepos_t()) + dur;
 
 	_length_clock.set_is_duration (true, pos);
-	_length_clock.set_duration (offset, true);
+	_length_clock.set (pos, true, offset);
 
 	/* Set up `set all notes...' buttons' sensitivity */
 
@@ -226,17 +226,10 @@ EditNoteDialog::done (int r)
 			}
 		}
 	}
+
 	if (!_length_all.get_sensitive() || _length_all.get_active ()) {
-
-
-		/* get current note duration, interpreted as beats at the time indicated by the _time_clock (the new note position) */
-		Beats const duration = _length_clock.current_duration (_time_clock.current_time()).beats ();
-
-		/* compute end of note */
-		Beats const new_note_end_source_relative_beats = new_note_time_source_relative_beats + duration;
-
+		Beats const new_note_length_beats = _length_clock.current_duration ().beats ();
 		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
-			Beats const new_note_length_beats = new_note_end_source_relative_beats - (*i)->note()->time();
 			if (new_note_length_beats != (*i)->note()->length()) {
 				_region_view->change_note_length (*i, new_note_length_beats);
 				had_change = true;
