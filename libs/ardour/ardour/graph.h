@@ -47,6 +47,7 @@ class Graph;
 
 class IOPlug;
 class Route;
+class RTTaskList;
 class Session;
 class GraphEdges;
 
@@ -89,6 +90,9 @@ public:
 	/* called by virtual GraphNode::process() */
 	void process_one_route (Route* route);
 	void process_one_ioplug (IOPlug*);
+
+	/* RTTasks */
+	void process_tasklist (RTTaskList const&);
 
 protected:
 	virtual void session_going_away ();

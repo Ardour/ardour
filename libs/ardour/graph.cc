@@ -36,6 +36,8 @@
 #include "ardour/io_plug.h"
 #include "ardour/process_thread.h"
 #include "ardour/route.h"
+#include "ardour/rt_task.h"
+#include "ardour/rt_tasklist.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
 
@@ -200,7 +202,9 @@ Graph::drop_threads ()
 void
 Graph::prep ()
 {
-	assert (_graph_chain);
+	if (!_graph_chain) {
+		return;
+	}
 	_graph_empty = true;
 
 	node_list_t::iterator i;
@@ -567,6 +571,33 @@ bool
 Graph::in_process_thread () const
 {
 	return AudioEngine::instance ()->in_process_thread ();
+}
+
+/* ****************************************************************************/
+
+void
+Graph::process_tasklist (RTTaskList const& rt)
+{
+	assert (g_atomic_uint_get (&_trigger_queue_size) == 0);
+
+	std::vector<RTTask> const& tasks = rt.tasks ();
+	if (tasks.empty ()) {
+		return;
+	}
+
+	g_atomic_int_set (&_trigger_queue_size, tasks.size ());
+	g_atomic_int_set (&_terminal_refcnt, tasks.size ());
+	_graph_empty = false;
+
+	for (auto const& t : tasks) {
+		_trigger_queue.push_back (const_cast<RTTask*>(&t));
+	}
+
+	_graph_chain = 0;
+	DEBUG_TRACE (DEBUG::ProcessThreads, "wake graph for RTTask processing\n");
+	_callback_start_sem.signal ();
+	_callback_done_sem.wait ();
+	DEBUG_TRACE (DEBUG::ProcessThreads, "graph execution complete\n");
 }
 
 /* ****************************************************************************/

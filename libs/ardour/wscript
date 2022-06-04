@@ -210,6 +210,7 @@ libardour_sources = [
         'route_group.cc',
         'route_group_member.cc',
         'rb_effect.cc',
+        'rt_task.cc',
         'rt_tasklist.cc',
         'scene_change.cc',
         'search_paths.cc',

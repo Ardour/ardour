@@ -760,10 +760,7 @@ Session::process_audition (pframes_t nframes)
 
 	boost::shared_ptr<GraphChain> graph_chain = _graph_chain;
 	if (graph_chain) {
-		/* Ideally we'd use Session::rt_tasklist, since dependency is irrelevant.
-		 * However the RTTaskList process threads have no ProcessThread buffers
-		 * nor a SessioEvent thread_pool.
-		 */
+		/* Ideally we'd use Session::rt_tasklist, since dependency is irrelevant. */
 		_process_graph->silence_routes (graph_chain, nframes);
 	} else {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {

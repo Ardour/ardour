@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017,2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,34 +16,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _ardour_rt_tasklist_h_
-#define _ardour_rt_tasklist_h_
+#ifndef _ardour_rt_task_h_
+#define _ardour_rt_task_h_
 
 #include <boost/function.hpp>
-#include <vector>
 
-#include "ardour/libardour_visibility.h"
-#include "ardour/rt_task.h"
+#include "ardour/graphnode.h"
 
 namespace ARDOUR
 {
 class Graph;
+class RTTaskList;
 
-class LIBARDOUR_API RTTaskList
+class LIBARDOUR_API RTTask : public ProcessNode
 {
 public:
-	RTTaskList (boost::shared_ptr<Graph>);
+	RTTask (Graph* g, boost::function<void ()> const& fn);
 
-	/** process tasks in list in parallel, wait for them to complete */
-	void process ();
-	void push_back (boost::function<void ()> fn);
-
-	std::vector<RTTask> const& tasks () const { return _tasks; }
+	void prep (GraphChain const*) {}
+	void run (GraphChain const*);
 
 private:
-	std::vector<RTTask>      _tasks;
-	boost::shared_ptr<Graph> _graph;
+	friend class RTTaskList;
+	boost::function<void ()> _f;
+	Graph*                   _graph;
 };
 
-} // namespace ARDOUR
+}
+
 #endif

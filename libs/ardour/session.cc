@@ -552,8 +552,8 @@ Session::immediately_post_engine ()
 	 * session or set state for an existing one.
 	 */
 
-	_rt_tasklist.reset (new RTTaskList ());
 	_process_graph.reset (new Graph (*this));
+	_rt_tasklist.reset (new RTTaskList (_process_graph));
 
 	/* every time we reconnect, recompute worst case output latencies */
 
