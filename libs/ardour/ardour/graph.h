@@ -41,6 +41,7 @@
 
 namespace ARDOUR
 {
+class ProcessNode;
 class GraphNode;
 class Graph;
 
@@ -82,7 +83,7 @@ public:
 	uint32_t n_threads () const;
 
 	/* called by GraphNode */
-	void trigger (GraphNode* n);
+	void trigger (ProcessNode* n);
 	void reached_terminal_node ();
 
 	/* called by virtual GraphNode::process() */
@@ -101,8 +102,8 @@ private:
 
 	void helper_thread ();
 
-	PBD::MPMCQueue<GraphNode*> _trigger_queue;      ///< nodes that can be processed
-	GATOMIC_QUAL guint         _trigger_queue_size; ///< number of entries in trigger-queue
+	PBD::MPMCQueue<ProcessNode*> _trigger_queue;      ///< nodes that can be processed
+	GATOMIC_QUAL guint           _trigger_queue_size; ///< number of entries in trigger-queue
 
 	/** Start worker threads */
 	PBD::Semaphore _execution_sem;

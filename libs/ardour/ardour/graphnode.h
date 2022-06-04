@@ -42,6 +42,14 @@ typedef boost::shared_ptr<GraphNode> node_ptr_t;
 typedef std::set<node_ptr_t>         node_set_t;
 typedef std::list<node_ptr_t>        node_list_t;
 
+class LIBARDOUR_API ProcessNode
+{
+public:
+	virtual ~ProcessNode() {}
+	virtual void prep (GraphChain const*) = 0;
+	virtual void run (GraphChain const*) = 0;
+};
+
 class LIBARDOUR_API GraphActivision
 {
 public:
@@ -64,15 +72,14 @@ protected:
 };
 
 /** A node on our processing graph, ie a Route */
-class LIBARDOUR_API GraphNode : public GraphActivision
+class LIBARDOUR_API GraphNode : public ProcessNode, public GraphActivision
 {
 public:
 	GraphNode (boost::shared_ptr<Graph> Graph);
 
 	/* API used by Graph */
 	void prep (GraphChain const*);
-	void trigger ();
-	void run (GraphChain const* chain);
+	void run (GraphChain const*);
 
 	/* API used to sort Nodes and create GraphChain */
 	virtual std::string graph_node_name () const = 0;
@@ -80,6 +87,7 @@ public:
 	virtual bool direct_feeds_according_to_reality (boost::shared_ptr<GraphNode>, bool* via_send_only = 0) = 0;
 
 protected:
+	void trigger ();
 	virtual void process () = 0;
 
 	boost::shared_ptr<Graph> _graph;

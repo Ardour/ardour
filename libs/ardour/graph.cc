@@ -226,7 +226,7 @@ Graph::prep ()
 }
 
 void
-Graph::trigger (GraphNode* n)
+Graph::trigger (ProcessNode* n)
 {
 	g_atomic_int_inc (&_trigger_queue_size);
 	_trigger_queue.push_back (n);
@@ -274,7 +274,7 @@ Graph::reached_terminal_node ()
 		 *  - Reset terminal reference count
 		 *  - queue initial nodes
 		 */
-		prep (); // XXX
+		prep ();
 
 		if (_graph_empty && !g_atomic_int_get (&_terminate)) {
 			goto again;
@@ -287,7 +287,7 @@ Graph::reached_terminal_node ()
 void
 Graph::run_one ()
 {
-	GraphNode* to_run = NULL;
+	ProcessNode* to_run = NULL;
 
 	if (g_atomic_int_get (&_terminate)) {
 		return;
