@@ -26,6 +26,8 @@
 #include "pbd/compose.h"
 
 #include "ardour/debug.h"
+#include "ardour/stripable.h"
+#include "ardour/session.h"
 
 using namespace MIDI;
 using namespace PBD;
@@ -167,8 +169,7 @@ MIDIFunction::execute ()
 		if (!_argument.empty()) {
 			uint32_t rid;
 			sscanf (_argument.c_str(), "%d", &rid);
-			// XX fix me ... need to get stripable, not RID
-			//_ui->toggle_selection (rid, ARDOUR::PresentationInfo::Flag (ARDOUR::PresentationInfo::Route|ARDOUR::PresentationInfo::VCA));
+			_ui->set_rid_selection (rid);
 			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Function: SetRouteSelection = %1\n", rid));
 		}
 		break;
