@@ -25,6 +25,11 @@
 
 #include "temporal/visibility.h"
 
+#ifdef DEBUG_EARLY_SCTS_USE
+#include <cstdlib>
+#include <csignal>
+#endif
+
 namespace Temporal {
 
 typedef int64_t superclock_t;
@@ -38,10 +43,6 @@ typedef int64_t superclock_t;
 extern bool scts_set;
 
 #ifdef DEBUG_EARLY_SCTS_USE
-
-#include <cstdlib>
-#include <csignal>
-
 static inline superclock_t superclock_ticks_per_second() { if (!scts_set) { raise (SIGUSR2); } return _superclock_ticks_per_second; }
 #else
 static inline superclock_t superclock_ticks_per_second() { return _superclock_ticks_per_second; }
