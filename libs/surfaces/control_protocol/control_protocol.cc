@@ -384,6 +384,42 @@ ControlProtocol::remove_stripable_from_selection (boost::shared_ptr<ARDOUR::Stri
 }
 
 void
+ControlProtocol::add_rid_to_selection (int rid)
+{
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
+	if (s) {
+		session->selection().add (s, boost::shared_ptr<AutomationControl>());
+	}
+}
+
+void
+ControlProtocol::set_rid_selection (int rid)
+{
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
+	if (s) {
+		session->selection().select_stripable_and_maybe_group (s, true, true, 0);
+	}
+}
+
+void
+ControlProtocol::toggle_rid_selection (int rid)
+{
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
+	if (s) {
+		session->selection().toggle (s, boost::shared_ptr<AutomationControl>());
+	}
+}
+
+void
+ControlProtocol::remove_rid_from_selection (int rid)
+{
+	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
+	if (s) {
+		session->selection().remove (s, boost::shared_ptr<AutomationControl>());
+	}
+}
+
+void
 ControlProtocol::clear_stripable_selection ()
 {
 	session->selection().clear_stripables ();

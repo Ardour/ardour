@@ -89,6 +89,11 @@ public:
 	void remove_stripable_from_selection (boost::shared_ptr<ARDOUR::Stripable>);
 	void clear_stripable_selection ();
 
+	void add_rid_to_selection (int rid);
+	void set_rid_selection (int rid);
+	void toggle_rid_selection (int rid);
+	void remove_rid_from_selection (int rid);
+
 	boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable () const;
 
 	/* the model here is as follows:
