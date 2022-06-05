@@ -327,10 +327,7 @@ ShuttleControl::map_transport_state ()
 		shuttle_fract = 0;
 	} else {
 		if (Config->get_shuttle_units () == Semitones) {
-			bool reverse;
-			int  semi     = speed_as_semitones (speed, reverse);
-			semi          = std::max (-24, std::min (24, semi));
-			shuttle_fract = semitones_as_fract (semi, reverse);
+			shuttle_fract = speed / shuttle_max_speed;
 		} else {
 			shuttle_fract = speed_as_fract (speed);
 		}
@@ -567,40 +564,6 @@ ShuttleControl::speed_as_cents (float speed, bool& reverse)
 }
 
 float
-ShuttleControl::cents_as_speed (int cents, bool reverse)
-{
-	if (reverse) {
-		return -pow (2.0, (cents / 1200.0));
-	} else {
-		return pow (2.0, (cents / 1200.0));
-	}
-}
-
-float
-ShuttleControl::semitones_as_speed (int semi, bool reverse)
-{
-	if (reverse) {
-		return -pow (2.0, (semi / 12.0));
-	} else {
-		return pow (2.0, (semi / 12.0));
-	}
-}
-
-float
-ShuttleControl::semitones_as_fract (int semi, bool reverse) const
-{
-	return semitones_as_speed (semi, reverse) / shuttle_max_speed;
-}
-
-int
-ShuttleControl::fract_as_semitones (float fract, bool& reverse) const
-{
-	/* -1 <= fract <= 1 */
-	assert (fract != 0.0);
-	return speed_as_semitones (fract * shuttle_max_speed, reverse);
-}
-
-float
 ShuttleControl::speed_as_fract (float speed) const
 {
 	float fract = speed / shuttle_max_speed;
@@ -640,16 +603,9 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 	last_shuttle_request = now;
 
 	double speed = 0;
-	float warped_fract = shuttle_fract * shuttle_fract;
 
 	if (Config->get_shuttle_units () == Semitones) {
-		if (shuttle_fract != 0.0) {
-			bool reverse;
-			int  semi = fract_as_semitones (shuttle_fract, reverse);
-			speed     = semitones_as_speed (semi, reverse);
-		} else {
-			speed = 0.0;
-		}
+		speed = shuttle_fract * shuttle_max_speed;
 	} else {
 		speed = fract_as_speed (shuttle_fract);
 	}
@@ -717,7 +673,8 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	}
 
 	/* marker */
-	float visual_fraction = std::max (-1.0f, std::min (1.0f, speed / shuttle_max_speed));
+	float visual_fraction = std::max (-1.0f, std::min (1.0f, shuttle_fract));
+
 	float marker_size     = round (get_height () * MARKER_SIZE);
 	float avail_width     = get_width () - marker_size;
 	float x               = 0.5 * (get_width () + visual_fraction * avail_width - marker_size);
