@@ -1663,3 +1663,32 @@ GenericMidiControlProtocol::midi_input_handler (Glib::IOCondition ioc, boost::we
 
 	return true;
 }
+
+void
+GenericMidiControlProtocol::add_rid_to_selection (int rid)
+{
+	int id = rid + (_current_bank * _bank_size);
+	ControlProtocol::add_rid_to_selection (id);
+}
+
+void
+GenericMidiControlProtocol::set_rid_selection (int rid)
+{
+	int id = rid + (_current_bank * _bank_size);
+	ControlProtocol::set_rid_selection (id);
+}
+
+void
+GenericMidiControlProtocol::toggle_rid_selection (int rid)
+{
+	int id = rid + (_current_bank * _bank_size);
+	ControlProtocol::toggle_rid_selection (id);
+}
+
+void
+GenericMidiControlProtocol::remove_rid_from_selection (int rid)
+{
+	int id = rid + (_current_bank * _bank_size);
+	ControlProtocol::remove_rid_from_selection (id);
+}
+

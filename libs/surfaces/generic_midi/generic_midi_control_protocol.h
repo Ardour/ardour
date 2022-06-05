@@ -126,6 +126,11 @@ public:
 		return _threshold;
 	}
 
+	void add_rid_to_selection (int rid);
+	void set_rid_selection (int rid);
+	void toggle_rid_selection (int rid);
+	void remove_rid_from_selection (int rid);
+
 	PBD::Signal0<void> ConnectionChange;
 
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();

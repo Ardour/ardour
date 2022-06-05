@@ -52,8 +52,11 @@ class MIDIFunction : public MIDIInvokable
 		TransportRecordToggle,
 		TransportRecordEnable,
 		TransportRecordDisable,
-		/* 1 argument functions: RID */
-		Select,
+		/* 1 argument functions: RID, bank relative */
+		SelectAdd,
+		SelectRemove,
+		SelectToggle,
+		SelectSet,
 		SetBank,
 		/* 2 argument functions: RID, value */
 		TrackSetSolo,
