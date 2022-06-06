@@ -257,6 +257,12 @@
         <menuitem action='toggle-region-fade-out'/>
       </menu>
       <separator/>
+      <menu action="AnalyzeMenu">
+        <menuitem action='editor-analyze-spectrum'/>
+        <menuitem action='editor-analyze-loudness'/>
+        <menuitem action='editor-loudness-assistant'/>
+      </menu>
+     <separator/>
       <menuitem action='tag-last-capture'/>
       <menuitem action='remove-last-capture'/>
       <separator/>

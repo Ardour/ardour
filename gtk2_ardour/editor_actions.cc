@@ -170,6 +170,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("SelectMenu"), _("Select"));
 	ActionManager::register_action (editor_menu_actions, X_("SeparateMenu"), _("Separate"));
 	ActionManager::register_action (editor_menu_actions, X_("ConsolidateMenu"), _("Consolidate"));
+	ActionManager::register_action (editor_menu_actions, X_("AnalyzeMenu"), _("Analyze"));
 	ActionManager::register_action (editor_menu_actions, X_("SetLoopMenu"), _("Loop"));
 	ActionManager::register_action (editor_menu_actions, X_("SetPunchMenu"), _("Punch"));
 	ActionManager::register_action (editor_menu_actions, X_("Solo"), _("Solo"));
@@ -400,6 +401,13 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, "editor-consolidate-with-processing", _("Consolidate Range (with processing)"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, true));
 	ActionManager::time_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "editor-consolidate", _("Consolidate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, false));
+	ActionManager::time_selection_sensitive_actions.push_back (act);
+
+	act = reg_sens (editor_actions, "editor-analyze-loudness", _("Loudness Analysis"), sigc::mem_fun(*this, &Editor::loudness_analyze_range_selection));
+	ActionManager::time_selection_sensitive_actions.push_back (act);
+	act = reg_sens (editor_actions, "editor-analyze-spectrum", _("Spectral Analysis"), sigc::mem_fun(*this, &Editor::spectral_analyze_range_selection));
+	ActionManager::time_selection_sensitive_actions.push_back (act);
+	act = reg_sens (editor_actions, "editor-loudness-assistant", _("Loudness Assistant"), sigc::bind (sigc::mem_fun(*this, &Editor::loudness_assistant), true));
 	ActionManager::time_selection_sensitive_actions.push_back (act);
 
 	reg_sens (editor_actions, "editor-cut", _("Cut"), sigc::mem_fun(*this, &Editor::cut));
