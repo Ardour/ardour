@@ -232,7 +232,14 @@
         <menuitem action='separate-under-region'/>
         <menuitem action='separate-from-loop'/>
         <menuitem action='separate-from-punch'/>
-        <separator/>
+      </menu>
+      <menu action="ConsolidateMenu">
+        <menuitem action='editor-consolidate'/>
+#ifndef MIXBUS
+        <menuitem action='editor-consolidate-with-processing'/>
+#endif
+        <menuitem action='combine-regions'/>
+        <menuitem action='uncombine-regions'/>
       </menu>
       <menu action="AlignMenu">
         <menuitem action='align-regions-start'/>
