@@ -3500,43 +3500,52 @@ Editor::crop_region_to (timepos_t const & start, timepos_t const & end)
 		return;
 	}
 
-	timepos_t pos;
-	timepos_t new_start;
-	timepos_t new_end;
-	timecnt_t new_length;
-
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 
-		/* Only the top regions at start and end have to be cropped */
-		boost::shared_ptr<Region> region_at_start = (*i)->top_region_at(start);
-		boost::shared_ptr<Region> region_at_end = (*i)->top_region_at(end);
-
-		vector<boost::shared_ptr<Region> > regions;
-
-		if (region_at_start != 0) {
-			regions.push_back (region_at_start);
-		}
-		if (region_at_end != 0) {
-			regions.push_back (region_at_end);
-		}
-
-		/* now adjust lengths */
-		for (vector<boost::shared_ptr<Region> >::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-			pos = (*i)->position();
-			new_start = max (start, pos);
-			if (timepos_t::max (pos.time_domain()).earlier (pos) > (*i)->length()) {
-				new_end = (*i)->end();
-			} else {
-				new_end = timepos_t::max (pos.time_domain());
+		boost::shared_ptr<RegionList> regions_at_start = (*i)->regions_at(start);
+		for (RegionList::const_iterator r = regions_at_start->begin(); r != regions_at_start->end(); ++r) {
+			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(*r);
+			if (ar) {
+				//if we cut an audio region during the fade, keep the fade handle at the same spot
+				ar->playlist()->clear_owned_changes ();
+				samplepos_t pos = start.samples ();
+				samplecnt_t fade_length;
+				samplepos_t fade_start = ar->position_sample() + ar->fade_in()->back()->when.samples();
+				if (pos <= fade_start) {
+					fade_length = fade_start - pos;
+					ar->set_fade_in_length (fade_length);
+				}
+				vector<Command*> cmds;
+				ar->playlist()->rdiff (cmds);
+				_session->add_commands (cmds);
 			}
-			new_end = min (end, new_end);
-			new_length = new_start.distance (new_end);
 
-			(*i)->clear_changes ();
-			(*i)->trim_to (new_start, new_length);
-			_session->add_command (new StatefulDiffCommand (*i));
+			(*r)->trim_front (start);
+			_session->add_command (new StatefulDiffCommand (*r));
 		}
+
+		boost::shared_ptr<RegionList> regions_at_end = (*i)->regions_at(end);
+		for (RegionList::const_iterator r = regions_at_end->begin(); r != regions_at_end->end(); ++r) {
+			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(*r);
+			if (ar) {
+				//if we cut an audio region during the fade, keep the fade handle at the same spot
+				ar->playlist()->clear_owned_changes ();
+				samplepos_t pos = end.samples ();
+				samplecnt_t fade_length;
+				samplepos_t fade_end = ar->position_sample() + ar->length_samples() - ar->fade_out()->back()->when.samples();
+				if (pos >= fade_end) {
+					fade_length = pos - fade_end ;
+					ar->set_fade_out_length (fade_length);
+				}
+				vector<Command*> cmds;
+				ar->playlist()->rdiff (cmds);
+				_session->add_commands (cmds);
+			}
+
+			(*r)->trim_end (end);
+			_session->add_command (new StatefulDiffCommand (*r));
+		}
+
 	}
 }
 
