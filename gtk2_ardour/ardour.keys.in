@@ -107,6 +107,8 @@ This mode provides many different operations on both regions and control points,
 
 @vis|Editor/temporal-zoom-in|                                           equal|zoom in
 @vis|Editor/temporal-zoom-out|                                          minus|zoom out
+@vis|Editor/expand-tracks|                                   <@TERTIARY@>plus|expand track height
+@vis|Editor/shrink-tracks|                                  <@TERTIARY@>equal|shrink track height
 @vis|Editor/zoom-to-session|                           <@TERTIARY@>underscore|zoom to session
 @eep|Editor/edit-cursor-to-previous-region-sync|                   apostrophe|EP to prev region sync
 @eep|Editor/edit-cursor-to-next-region-sync|                        semicolon|EP to next region sync
@@ -159,16 +161,20 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/select-all-before-edit-cursor|               <@PRIMARY@>e|select all before EP
 @rop|Region/export-region|                     <@PRIMARY@><@SECONDARY@>e|export selected region(s)
 @sess|Main/ExportAudio|                                   <@SECONDARY@>e|export session
+@sess|Main/StemExport|                        <@SECONDARY@><@TERTIARY@>e|stem export selected tracks
 @select|Editor/select-all-after-edit-cursor|    <@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|                             <@TERTIARY@>e|toggle editor window mixer
 @mmode|MouseMode/set-mouse-mode-range|                                 r|range mode
 @edit|Editor/redo|                                          <@PRIMARY@>r|redo
+@edit|Editor/select-from-regions|               <@PRIMARY@><@TERTIARY@>r|set Range to selected regions
+@rop|Region/add-range-marker-from-region|     <@SECONDARY@><@TERTIARY@>r|Add single Range marker from selection
 @trans|Transport/Record|                                   <@TERTIARY@>r|engage record
 @mmode|MouseMode/set-mouse-mode-timefx|                                t|timefx mode
 @gselect|Common/select-all-visible-lanes|                   <@PRIMARY@>t|select all visible lanes
 @edit|Editor/alternate-redo|                                <@PRIMARY@>y|redo
 @select|Editor/select-all-between-cursors|                  <@PRIMARY@>u|select all regions enclosed by Range
 @select|Editor/select-all-within-cursors|                              u|select all regions touched by Range
+@rop|Region/fork-region|                                   <@TERTIARY@>u|unlink midi from other regions
 @eep|Region/insert-region-from-source-list|                            i|insert from region list
 @sess|Common/addExistingAudioFiles|                         <@PRIMARY@>i|import audio files
 @gselect|Common/invert-selection|               <@PRIMARY@><@TERTIARY@>i|invert selection
@@ -177,7 +183,6 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/Recent|                              <@PRIMARY@><@TERTIARY@>o|open a recent session
 @wvis|Window/toggle-session-options-editor|               <@SECONDARY@>o|toggle preferences dialog
 @edit|Editor/set-playhead|                                             p|set playhead position
-@wvis|Window/toggle-audio-connection-manager|             <@SECONDARY@>p|toggle global audio patchbay
 
 ;; MIDDLE ROW
 
@@ -187,6 +192,7 @@ This mode provides many different operations on both regions and control points,
 @aep|Region/align-regions-sync|                            <@TERTIARY@>a|align sync points
 @aep|Region/align-regions-start|               <@PRIMARY@><@SECONDARY@>a|align start(s)
 @aep|Region/align-regions-start-relative|       <@PRIMARY@><@TERTIARY@>a|align start(s) relative
+@wvis|Window/toggle-audio-connection-manager| <@SECONDARY@><@TERTIARY@>a|toggle audio patchbay
 @rop|Editor/split-region|                                              s|split/separate
 @sess|Common/Save|                                          <@PRIMARY@>s|save session
 @sess|Main/SnapshotStay|                        <@PRIMARY@><@TERTIARY@>s|snapshot session
@@ -206,7 +212,6 @@ This mode provides many different operations on both regions and control points,
 @edit|Region/play-selected-regions|                                    h|play selected region(s)
 @eep|Region/trim-front|                                                j|trim front
 @eep|Region/trim-back|                                                 k|trim back
-@wvis|Window/toggle-key-editor|                           <@SECONDARY@>k|toggle key bindings editor
 @trans|Transport/Loop|                                                 l|loop play (the loop range)
 @select|Editor/select-all-in-loop-range|                    <@PRIMARY@>l|select all in loop range
 @wvis|Window/toggle-locations|                            <@SECONDARY@>l| toggle locations dialog
@@ -223,7 +228,8 @@ This mode provides many different operations on both regions and control points,
 @mmode|MouseMode/set-mouse-mode-cut|                                   c|cut mode
 @edit|Editor/editor-copy|                                   <@PRIMARY@>c|copy
 @wvis|Window/toggle-big-clock|                            <@SECONDARY@>c|toggle big clock
-@-edit|Editor/crop|                             <@PRIMARY@><@TERTIARY@>c|crop
+@edit|Editor/editor-crop|                       <@PRIMARY@><@TERTIARY@>c|crop range
+@edit|Editor/editor-consolidate|              <@SECONDARY@><@TERTIARY@>c|consolidate range
 @rop|Region/set-region-sync-position|                                  v|set region sync point
 @edit|Editor/editor-paste|                                  <@PRIMARY@>v|paste
 @edit|Editor/ToggleJadeo|                                 <@SECONDARY@>v|video window
@@ -232,7 +238,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/AddTrackBus|                         <@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|                                             <@PRIMARY@>n|open a new session
 @rop|Region/add-region-cue-marker|                                     m|add a region/cue marker
-@wvis|Window/toggle-midi-connection-manager|  <@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
+@wvis|Window/toggle-midi-connection-manager|  <@SECONDARY@><@TERTIARY@>m|toggle midi patchbay
 @wvis|Common/show-mixer|                                  <@SECONDARY@>m|show mixer window
 
 @gmon|Monitor Section/monitor-cut-all|                      <@PRIMARY@>m|monitor cut all
