@@ -713,8 +713,13 @@ TempoMapPoint::end_float ()
 
 /* TEMPOMAP */
 
-TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)
+void
+TempoMap::set_initial (Tempo const & initial_tempo, Meter const & initial_meter)
 {
+	assert (_tempos.size() == 0);
+	assert (_meters.size() == 0);
+	assert (_points.size() == 0);
+
 	TempoPoint* tp = new TempoPoint (*this, initial_tempo, 0, Beats(), BBT_Time());
 	MeterPoint* mp = new MeterPoint (*this, initial_meter, 0, Beats(), BBT_Time());
 
@@ -3288,7 +3293,7 @@ TempoMap::twist_tempi (TempoPoint* ts, samplepos_t start_sample, samplepos_t end
 void
 TempoMap::init ()
 {
-	WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
+	WritableSharedPtr new_map (new TempoMap ());
 	_map_mgr.init (new_map);
 	fetch ();
 }

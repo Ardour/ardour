@@ -691,10 +691,13 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	/* and now on with the rest of the show ... */
 
   public:
-	LIBTEMPORAL_API TempoMap (Tempo const& initial_tempo, Meter const& initial_meter);
+	LIBTEMPORAL_API TempoMap () {}
 	LIBTEMPORAL_API TempoMap (TempoMap const&);
 	LIBTEMPORAL_API TempoMap (XMLNode const&, int version);
 	LIBTEMPORAL_API ~TempoMap();
+
+	/* must (and can only) be used after using the empty constructor, and before the map can be used */
+	LIBTEMPORAL_API void set_initial (Tempo const & initial_tempo, Meter const & initial_meter);
 
 	LIBTEMPORAL_API TempoMap& operator= (TempoMap const&);
 

@@ -296,7 +296,10 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 	   values for tempo and meter, then overwrite them.
 	*/
 
-	TempoMap::WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
+	TempoMap::WritableSharedPtr new_map (new TempoMap ());
+	new_map->set_initial(Tempo (120, 4), Meter (4, 4));
+	TempoMap::update (new_map);
+
 	Meter last_meter (4.0, 4.0);
 	bool have_initial_meter = false;
 

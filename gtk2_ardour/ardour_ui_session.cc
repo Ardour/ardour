@@ -45,6 +45,9 @@
 #include "pbd/localtime_r.h"
 #include "pbd/unwind.h"
 
+#include "temporal/superclock.h"
+#include "temporal/tempo.h"
+
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/doi.h"
 
@@ -387,6 +390,8 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 	Session *new_session;
 	int retval = -1;
 
+	// Note: for this code path, superclock and TempoMap will be initialized soon when the Session is loaded
+
 	BootMessage (string_compose (_("Please wait while %1 loads your session"), PROGRAM_NAME));
 
 	try {
@@ -675,6 +680,13 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 	Session* new_session;
 
 	bool meta_session = !session_template.empty() && session_template.substr (0, 11) == "urn:ardour:";
+
+	Temporal::set_superclock_ticks_per_second (56448000);
+
+	Temporal::TempoMap::WritableSharedPtr tmap (Temporal::TempoMap::write_copy());
+	assert (tmap->n_tempos() == 0);
+	tmap->set_initial (Temporal::Tempo (120, 4), Temporal::Meter (4, 4));
+	Temporal::TempoMap::update (tmap);
 
 	try {
 		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, meta_session ? "" : session_template, unnamed);
