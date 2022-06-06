@@ -4332,10 +4332,6 @@ Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 			rtv->track ()->presentation_info ().set_trigger_track (true);
 		}
 
-		if (copy_to_clip_library) {
-			export_to_clip_library (r);
-		}
-
 		vector<Command*> cmds;
 		playlist->rdiff (cmds);
 		_session->add_commands (cmds);
