@@ -19,6 +19,8 @@
 #ifndef __ardour_superclock_h__
 #define __ardour_superclock_h__
 
+#define DEBUG_EARLY_SCTS_USE
+
 #include <stdint.h>
 
 #include "pbd/integer_division.h"
