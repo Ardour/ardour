@@ -4258,8 +4258,8 @@ Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 		}
 	}
 
-	timepos_t start = selection->time[clicked_selection].start();
-	timepos_t end = selection->time[clicked_selection].end();
+	timepos_t start = selection->time.start_time();
+	timepos_t end = selection->time.end_time();
 	timecnt_t cnt = start.distance (end);
 	bool in_command = false;
 

@@ -169,6 +169,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("Select"), _("Select"));
 	ActionManager::register_action (editor_menu_actions, X_("SelectMenu"), _("Select"));
 	ActionManager::register_action (editor_menu_actions, X_("SeparateMenu"), _("Separate"));
+	ActionManager::register_action (editor_menu_actions, X_("ConsolidateMenu"), _("Consolidate"));
 	ActionManager::register_action (editor_menu_actions, X_("SetLoopMenu"), _("Loop"));
 	ActionManager::register_action (editor_menu_actions, X_("SetPunchMenu"), _("Punch"));
 	ActionManager::register_action (editor_menu_actions, X_("Solo"), _("Solo"));
@@ -394,6 +395,11 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, "separate-from-loop", _("Separate Using Loop Range"), sigc::mem_fun(*this, &Editor::separate_region_from_loop));
 
 	act = reg_sens (editor_actions, "editor-crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
+	ActionManager::time_selection_sensitive_actions.push_back (act);
+
+	act = reg_sens (editor_actions, "editor-consolidate-with-processing", _("Consolidate Range (with processing)"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, true));
+	ActionManager::time_selection_sensitive_actions.push_back (act);
+	act = reg_sens (editor_actions, "editor-consolidate", _("Consolidate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, false));
 	ActionManager::time_selection_sensitive_actions.push_back (act);
 
 	reg_sens (editor_actions, "editor-cut", _("Cut"), sigc::mem_fun(*this, &Editor::cut));
