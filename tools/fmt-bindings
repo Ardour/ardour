@@ -258,6 +258,9 @@ while (<SOURCE>) {
 	$gkey =~ s/^-//;
 	$owner = $group_owners{$gkey};
 
+	# strip white space from the binding; this allows reformatting the input file for legibility
+	$binding =~ s/^\s+|\s+$//g;
+
 	# substitute bindings
 
 	$gtk_binding = $binding;
