@@ -108,8 +108,8 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/temporal-zoom-in|                                           equal|zoom in
 @vis|Editor/temporal-zoom-out|                                          minus|zoom out
 @vis|Editor/expand-tracks|                                   <@TERTIARY@>plus|expand track height
-@vis|Editor/shrink-tracks|                                  <@TERTIARY@>equal|shrink track height
-@vis|Editor/zoom-to-session|                           <@TERTIARY@>underscore|zoom to session
+@vis|Editor/shrink-tracks|                      <@SECONDARY@><@TERTIARY@>plus|shrink track height
+@vis|Editor/zoom-to-session|              <@SECONDARY@><@TERTIARY@>underscore|zoom to session
 @eep|Editor/edit-cursor-to-previous-region-sync|                   apostrophe|EP to prev region sync
 @eep|Editor/edit-cursor-to-next-region-sync|                        semicolon|EP to next region sync
 
@@ -165,6 +165,7 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/select-all-after-edit-cursor|    <@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|                             <@TERTIARY@>e|toggle editor window mixer
 @mmode|MouseMode/set-mouse-mode-range|                                 r|range mode
+@wvis|Common/show-recorder|                               <@SECONDARY@>r|show recorder page
 @edit|Editor/redo|                                          <@PRIMARY@>r|redo
 @edit|Editor/select-from-regions|               <@PRIMARY@><@TERTIARY@>r|set Range to selected regions
 @rop|Region/add-range-marker-from-region|     <@SECONDARY@><@TERTIARY@>r|Add single Range marker from selection
@@ -212,6 +213,7 @@ This mode provides many different operations on both regions and control points,
 @edit|Region/play-selected-regions|                                    h|play selected region(s)
 @eep|Region/trim-front|                                                j|trim front
 @eep|Region/trim-back|                                                 k|trim back
+@wvis|Window/toggle-virtual-keyboard|                     <@SECONDARY@>k|show virtual MIDI keyboard
 @trans|Transport/Loop|                                                 l|loop play (the loop range)
 @select|Editor/select-all-in-loop-range|                    <@PRIMARY@>l|select all in loop range
 @wvis|Window/toggle-locations|                            <@SECONDARY@>l| toggle locations dialog
@@ -227,7 +229,7 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/editor-cut|                                    <@PRIMARY@>x|cut
 @mmode|MouseMode/set-mouse-mode-cut|                                   c|cut mode
 @edit|Editor/editor-copy|                                   <@PRIMARY@>c|copy
-@wvis|Window/toggle-big-clock|                            <@SECONDARY@>c|toggle big clock
+@wvis|Common/show-trigger|                                <@SECONDARY@>c|show cues page
 @edit|Editor/editor-crop|                       <@PRIMARY@><@TERTIARY@>c|crop range
 @edit|Editor/editor-consolidate|              <@SECONDARY@><@TERTIARY@>c|consolidate range
 @rop|Region/set-region-sync-position|                                  v|set region sync point
