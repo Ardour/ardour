@@ -687,16 +687,17 @@ AUPluginUI::create_cocoa_view ()
 
 	// Get the initial size of the new AU View's frame
 	NSRect  frame = [au_view frame];
-	req_width  = frame.size.width;
-	req_height = frame.size.height;
+	if (frame.size.width > 1 && frame.size.height > 1) {
+		req_width  = frame.size.width;
+		req_height = frame.size.height;
+		low_box.queue_resize ();
+	}
 
 #if 1
 	std::cerr << "NSView initial size: " << req_width << " x " << req_height << "\n";
 #endif
 
 	resizable  = [au_view autoresizingMask];
-
-	low_box.queue_resize ();
 
 	return 0;
 }
@@ -1223,17 +1224,26 @@ AUPluginUI::lower_box_map ()
 {
 	[au_view setHidden:0];
 	update_view_size ();
+#if 1
+	std::cerr << "AUPluginUI::lower_box_map\n";
+#endif
 }
 
 void
 AUPluginUI::lower_box_unmap ()
 {
 	[au_view setHidden:1];
+#if 1
+	std::cerr << "AUPluginUI::lower_box_unmap\n";
+#endif
 }
 
 void
 AUPluginUI::lower_box_size_request (GtkRequisition* requisition)
 {
+#if 1
+	std::cerr << "AUPluginUI::lower_box_size_request: " << req_width << " x " << req_height << "\n";
+#endif
 	requisition->width  = req_width;
 	requisition->height = req_height;
 }
@@ -1261,6 +1271,9 @@ AUPluginUI::on_window_hide ()
 		id win = [wins objectAtIndex:i];
 	}
 #endif
+#if 1
+	std::cerr << "AUPluginUI::on_window_hide\n";
+#endif
 }
 
 bool
@@ -1277,6 +1290,9 @@ AUPluginUI::on_window_show (const string& /*title*/)
 		ShowWindow (carbon_window);
 		ActivateWindow (carbon_window, TRUE);
 	}
+#endif
+#if 1
+	std::cerr << "AUPluginUI::on_window_show\n";
 #endif
 
 	return true;
