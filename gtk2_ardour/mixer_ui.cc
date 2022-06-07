@@ -4162,7 +4162,13 @@ Mixer_UI::update_scene_buttons ()
 
 		if (scn && !scn->empty()) {
 			ArdourButton* b = _mixer_scene_buttons[idx];
-			ArdourWidgets::set_tooltip (b, _("Click to recall this mixer scene\nMiddle-Click for temporary restore\nRight-Click for context menu"));
+			ArdourWidgets::set_tooltip (b, _("Click to recall this mixer scene\n"
+#ifdef __APPLE__
+			                                  "Middle-Click (or Ctrl+Alt click) for momentary restore\n"
+#else
+			                                  "Middle-Click for momentary restore\n"
+#endif
+			                                  "Right-Click for context menu"));
 			l->set_text (scn->name());
 			all_unset = false;
 		} else {
