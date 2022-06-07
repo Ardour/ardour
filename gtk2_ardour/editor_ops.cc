@@ -2435,7 +2435,7 @@ Editor::add_location_from_region ()
 		markername = region->name();
 	}
 
-	if (!choose_new_marker_name(markername)) {
+	if (!choose_new_marker_name(markername, true)) {
 		return;
 	}
 
