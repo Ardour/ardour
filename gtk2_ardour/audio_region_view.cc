@@ -391,11 +391,6 @@ AudioRegionView::region_renamed ()
 		str = string ("*") + str;
 	}
 
-	if (_region->muted()) {
-		str = string ("!") + str;
-	}
-
-
 	boost::shared_ptr<AudioRegion> ar (audio_region());
 	if (ar->scale_amplitude() != 1.0) {
 		char tmp[32];
