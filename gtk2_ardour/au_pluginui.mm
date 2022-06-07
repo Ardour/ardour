@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#define AU_DEBUG_PRINT
+
 #undef  Marker
 #define Marker FuckYouAppleAndYourLackOfNameSpaces
 
@@ -235,10 +237,12 @@ static uint32_t block_plugin_redraws = 0;
 static const uint32_t minimum_redraw_rate = 30; /* frames per second */
 static const uint32_t block_plugin_redraw_count = 15; /* number of combined plugin redraws to block, if blocking */
 
-#ifdef __ppc__
+#if (defined __ppc__ || MAC_OS_X_VERSION_MAX_ALLOWED >= 110000)
 
 /* PowerPC versions of OS X do not support libdispatch, which we use below when swizzling objective C. But they also don't have Retina
  * which is the underlying reason for this code. So just skip it on those CPUs.
+ *
+ * Also this is probably not relevant anymore on M1/BigSur, let's see
  */
 
 
@@ -688,6 +692,10 @@ AUPluginUI::create_cocoa_view ()
 	req_width  = frame.size.width;
 	req_height = frame.size.height;
 
+#ifdef AU_DEBUG_PRINT
+		std::cerr << "NSView initial size: " << req_width << " x " << req_height << "\n";
+#endif
+
 	resizable  = [au_view autoresizingMask];
 
 	low_box.queue_resize ();
@@ -900,6 +908,12 @@ AUPluginUI::cocoa_view_resized ()
 	last_au_frame = new_frame;
 	req_width  = new_frame.size.width;
 	req_height = new_frame.size.height;
+
+#ifdef AU_DEBUG_PRINT
+	std::cerr << "NSView resized: " << req_width << " x " << req_height << "\n";
+#endif
+
+	//low_box.queue_resize ();
 
 	plugin_requested_resize = 0;
 }
