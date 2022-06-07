@@ -150,7 +150,7 @@ ARDOUR_UI::set_session (Session *s)
 	mini_timeline.set_session (s);
 	time_info_box->set_session (s);
 
-	primary_clock->set_session (s);
+	primary_clock->set_session (s);  // this is first time a new session will need a populated TempoMap (so it can be shown in the primary clock)
 	secondary_clock->set_session (s);
 	big_clock->set_session (s);
 	video_timeline->set_session (s);
@@ -382,6 +382,11 @@ ARDOUR_UI::unload_session (bool hide_stuff, bool force_unload)
 	delete session_to_delete;
 
 	update_title ();
+
+	// TODO: clear singletons and globals (statics) so we are ready to load
+	// a new session - for example the global _superclock_ticks_per_second
+	// that might be set differently by next session, and the global
+	// TempoMap which contain entries that depend on the superclock.
 
 	return 0;
 }

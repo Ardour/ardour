@@ -1298,7 +1298,7 @@ AudioClock::set_bbt (timepos_t const & w, timecnt_t const & o, bool /*force*/)
 			pos = bbt_reference_time;
 		}
 
-		TempoMetric m (TempoMap::use()->metric_at (pos));
+		TempoMetric m (TempoMap::use()->metric_at (pos));  // first time we need a populated TempoMap
 
 #ifndef PLATFORM_WINDOWS
 		/* UTF8 1/4 note and 1/8 note ♩ (\u2669) and ♪ (\u266a) are n/a on Windows */

@@ -349,7 +349,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 		Session::get_info_from_path (Glib::build_filename (path, snap_name + statefile_suffix), sr, sf, pv);
 
-		/* this will stop the engine if the SR is different */
+		/* this will stop the engine if the SR is different */ // TODO: also if superclock is different?
 
 		audio_midi_setup->set_desired_sample_rate (sr);
 
