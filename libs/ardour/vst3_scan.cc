@@ -350,7 +350,11 @@ ARDOUR::module_path_vst3 (string const& path)
 static string
 vst3_info_cache_dir ()
 {
+#if defined __APPLE__ && defined __aarch64__
+	string dir = Glib::build_filename (ARDOUR::user_cache_directory (), "vst-arm64");
+#else
 	string dir = Glib::build_filename (ARDOUR::user_cache_directory (), "vst");
+#endif
 	/* if the directory doesn't exist, try to create it */
 	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 		if (g_mkdir (dir.c_str (), 0700)) {

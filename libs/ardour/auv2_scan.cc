@@ -418,7 +418,11 @@ discover_auv2 (CAComponentDescription& desc, std::vector<ARDOUR::AUv2Info>& rv, 
 static string
 auv2_info_cache_dir ()
 {
+#ifdef __aarch64__
+	string dir = Glib::build_filename (ARDOUR::user_cache_directory (), "auv2-arm64");
+#else
 	string dir = Glib::build_filename (ARDOUR::user_cache_directory (), "auv2");
+#endif
 	/* if the directory doesn't exist, try to create it */
 	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
 		if (g_mkdir (dir.c_str (), 0700)) {

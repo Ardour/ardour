@@ -164,7 +164,11 @@ std::string PluginManager::vst3_scanner_bin_path = "";
 # endif
 #endif
 
-#define AUV2_BLACKLIST  "auv2_blacklist.txt"
+#ifdef __aarch64__
+# define AUV2_BLACKLIST  "auv2_a64_blacklist.txt"
+#else
+# define AUV2_BLACKLIST  "auv2_blacklist.txt"
+#endif
 
 PluginManager&
 PluginManager::instance()
@@ -1945,7 +1949,11 @@ void
 PluginManager::clear_vst3_cache ()
 {
 #ifdef VST3_SUPPORT
+# if defined __APPLE__ && defined __aarch64__
+	string dn = Glib::build_filename (ARDOUR::user_cache_directory(), "vst-arm64");
+# else
 	string dn = Glib::build_filename (ARDOUR::user_cache_directory(), "vst");
+# endif
 	vector<string> v3i_files;
 	find_files_matching_regex (v3i_files, dn, "\\.v3i$", false);
 	for (vector<string>::iterator i = v3i_files.begin(); i != v3i_files.end (); ++i) {
