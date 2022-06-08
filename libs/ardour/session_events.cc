@@ -43,6 +43,15 @@ SessionEvent::init_event_pool ()
 	pool = new PerThreadPool;
 }
 
+guint
+SessionEvent::pool_available ()
+{
+	if (!pool || !pool->per_thread_pool (false)) {
+		return 0;
+	}
+	return pool->per_thread_pool()->available ();
+}
+
 bool
 SessionEvent::has_per_thread_pool ()
 {
