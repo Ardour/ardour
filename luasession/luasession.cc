@@ -109,7 +109,7 @@ public:
 		run_loop_thread = Glib::Threads::Thread::self ();
 	}
 
-	void call_slot (InvalidationRecord* ir, const boost::function<void()>& f)
+	bool call_slot (InvalidationRecord* ir, const boost::function<void()>& f)
 	{
 		if (Glib::Threads::Thread::self () == run_loop_thread) {
 			cout << string_compose ("%1/%2 direct dispatch of call slot via functor @ %3, invalidation %4\n", event_loop_name (), pthread_name (), &f, ir);
@@ -119,6 +119,7 @@ public:
 			assert (!ir);
 			f (); // XXX TODO, queue and process during run ()
 		}
+		return true;
 	}
 
 	void run ()

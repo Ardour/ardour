@@ -431,13 +431,13 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 	}
 }
 
-template<typename RequestObject> void
+template<typename RequestObject> bool
 AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const boost::function<void()>& f)
 {
 	if (caller_is_self()) {
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 direct dispatch of call slot via functor @ %3, invalidation %4\n", event_loop_name(), pthread_name(), &f, invalidation));
 		f ();
-		return;
+		return true;
 	}
 
 	/* object destruction may race with realtime signal emission.
@@ -453,7 +453,7 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 	if (invalidation) {
 		if (!invalidation->valid()) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 ignoring call-slot using functor @ %3, dead invalidation %4\n", event_loop_name(), pthread_name(), &f, invalidation));
-			return;
+			return true;
 		}
 		invalidation->ref ();
 		invalidation->event_loop = this;
@@ -465,7 +465,10 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 		if (invalidation) {
 			invalidation->unref ();
 		}
-		return;
+		/* event is lost, this can be critical in some cases, so
+		 * inform the caller. See also Session::process_rtop
+		 */
+		return false;
 	}
 
 	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 queue call-slot using functor @ %3, invalidation %4\n", event_loop_name(), pthread_name(), &f, invalidation));
@@ -485,6 +488,7 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 	req->invalidation = invalidation;
 
 	send_request (req);
+	return true;
 }
 
 template<typename RequestObject> void*

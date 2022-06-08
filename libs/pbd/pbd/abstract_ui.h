@@ -60,7 +60,7 @@ public:
 	virtual ~AbstractUI();
 
 	void register_thread (pthread_t, std::string, uint32_t num_requests);
-	void call_slot (EventLoop::InvalidationRecord*, const boost::function<void()>&);
+	bool call_slot (EventLoop::InvalidationRecord*, const boost::function<void()>&);
 	Glib::Threads::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
 
 	Glib::Threads::Mutex request_buffer_map_lock;
@@ -98,7 +98,7 @@ protected:
 
 	RequestObject* get_request (RequestType);
 	void handle_ui_requests ();
-	void send_request (RequestObject *);
+	void send_request (RequestObject*);
 
 	virtual void do_request (RequestObject *) = 0;
 	PBD::ScopedConnection new_thread_connection;

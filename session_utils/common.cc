@@ -96,10 +96,11 @@ class MyEventLoop : public sigc::trackable, public EventLoop
 			run_loop_thread = Glib::Threads::Thread::self();
 		}
 
-		void call_slot (InvalidationRecord*, const boost::function<void()>& f) {
+		bool call_slot (InvalidationRecord*, const boost::function<void()>& f) {
 			if (Glib::Threads::Thread::self() == run_loop_thread) {
 				f ();
 			}
+			return true;
 		}
 
 		Glib::Threads::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
