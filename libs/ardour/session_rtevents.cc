@@ -19,6 +19,7 @@
  */
 
 #include <boost/bind.hpp>
+#include <glibmm/timer.h>
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
@@ -58,13 +59,12 @@ Session::set_controls (boost::shared_ptr<ControlList> cl, double val, Controllab
 	 * Ideally the EventLoop RequestBuffer would be at least twice the size
 	 * of the the SessionEvent Pool, but it isn't, and even then there may
 	 * still be other signals scheduling events...
-	 *
 	 */
 	if (SessionEvent::pool_available () < 8) {
 		int sleeptm = std::max (40000, engine().usecs_per_cycle ());
 		int timeout = std::max (10, 1000000 / sleeptm);
 		do {
-			usleep (sleeptm);
+			Glib::usleep (sleeptm);
 			ARDOUR::GUIIdle ();
 		}
 		while (SessionEvent::pool_available () < 8 && --timeout > 0);
