@@ -24,6 +24,7 @@
 #include "pbd/compose.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/butler.h"
 #include "ardour/monitor_control.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -160,7 +161,12 @@ Session::process_rtop (SessionEvent* ev)
 	ev->rt_slot ();
 
 	if (ev->event_loop) {
-		ev->event_loop->call_slot (MISSING_INVALIDATOR, boost::bind (ev->rt_return, ev));
+		if (!ev->event_loop->call_slot (MISSING_INVALIDATOR, boost::bind (ev->rt_return, ev))) {
+			/* The event must be deleted, otherwise the SessionEvent Pool may fill up */
+			if (!butler ()->delegate (boost::bind (ev->rt_return, ev))) {
+				ev->rt_return (ev);
+			}
+		}
 	} else {
 		warning << string_compose ("programming error: %1", X_("Session RT event queued from thread without a UI - cleanup in RT thread!")) << endmsg;
 		ev->rt_return (ev);
