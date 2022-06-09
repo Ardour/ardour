@@ -105,14 +105,19 @@ MixerScene::recurse_to_master (boost::shared_ptr<PBD::Controllable> c, std::set 
 		return false;
 	}
 
+	double old_value = ac ? ac->user_double () : c->get_value ();
+
 	if (sc && sc->slaved ()) {
 		double x = sc->reduce_by_masters (1.0);
-		if (x <= 0) {
-			c->set_value (0, Controllable::NoGroup);
+		if (x == 0) {
+			x = 0;
 		} else {
-			c->set_value (it->second / x, Controllable::NoGroup);
+			x = it->second / x;
 		}
-	} else {
+		if (x != old_value) {
+			c->set_value (x, Controllable::NoGroup);
+		}
+	} else if (it->second != old_value) {
 		c->set_value (it->second, Controllable::NoGroup);
 	}
 
