@@ -447,6 +447,7 @@ Mixer_UI::~Mixer_UI ()
 	delete _plugin_selector;
 	delete track_menu;
 	delete _group_tabs;
+	delete _mixer_scene_release;
 }
 
 struct MixerStripSorter {
@@ -4097,7 +4098,7 @@ Mixer_UI::popup_scene_menu (GdkEventButton* ev, int scn_idx)
 bool
 Mixer_UI::scene_button_press (GdkEventButton* ev, int idx)
 {
-	if (!_session) {
+	if (!_session || ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
 		return false;
 	}
 
@@ -4107,6 +4108,7 @@ Mixer_UI::scene_button_press (GdkEventButton* ev, int idx)
 		clear_mixer_scene (idx, true);
 	} else if (Keyboard::is_button2_event (ev)) {
 		/* momentary */
+		delete _mixer_scene_release; // .. or keep existing?
 		_mixer_scene_release = new MixerScene (*_session);
 		_mixer_scene_release->snapshot (); // TODO; prevent changed signal
 		recall_mixer_scene (idx, false);
