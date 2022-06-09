@@ -46,6 +46,31 @@ Session::set_controls (boost::shared_ptr<ControlList> cl, double val, Controllab
 		return;
 	}
 
+#if 1
+	/* This is called by the GUI thread, so we can wait if neccessary to prevent
+	 * "POOL OUT OF MEMORY" fatal errors.
+	 *
+	 * This is not a good solution, because if this happens
+	 * event_loop->call_slot() will most likely also fail to queue a request
+	 * to delete the Events. There is likely an additional Changed() signal
+	 * which needds a EventLoop RequestBuffer slot.
+	 *
+	 * Ideally the EventLoop RequestBuffer would be at least twice the size
+	 * of the the SessionEvent Pool, but it isn't, and even then there may
+	 * still be other signals scheduling events...
+	 *
+	 */
+	if (SessionEvent::pool_available () < 8) {
+		int sleeptm = std::max (40000, engine().usecs_per_cycle ());
+		int timeout = std::max (10, 1000000 / sleeptm);
+		do {
+			usleep (sleeptm);
+			ARDOUR::GUIIdle ();
+		}
+		while (SessionEvent::pool_available () < 8 && --timeout > 0);
+	}
+#endif
+
 	for (ControlList::iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 		/* as of july 2017 this is a no-op for everything except record enable */
 		(*ci)->pre_realtime_queue_stuff (val, gcd);
