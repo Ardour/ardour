@@ -401,6 +401,7 @@ Session::process_with_events (pframes_t nframes)
 		immediate_events.pop_front ();
 		process_event (ev);
 	}
+
 	/* only count-in when going to roll at speed 1.0 */
 	if (_transport_fsm->transport_speed() != 1.0 && _count_in_samples > 0) {
 		_count_in_samples = 0;
@@ -413,6 +414,7 @@ Session::process_with_events (pframes_t nframes)
 
 	// DEBUG_TRACE (DEBUG::Transport, string_compose ("Running count in/latency preroll of %1 & %2\n", _count_in_samples, _remaining_latency_preroll));
 
+	TriggerBox::begin_process_cycle();
 	maybe_find_pending_cue ();
 
 	while (_count_in_samples > 0 || _remaining_latency_preroll > 0) {
@@ -720,6 +722,7 @@ Session::process_without_events (pframes_t nframes)
 
 	click (_transport_sample, nframes);
 
+	TriggerBox::begin_process_cycle();
 	maybe_find_pending_cue ();
 
 	if (process_routes (nframes, session_needs_butler)) {
@@ -1721,6 +1724,7 @@ void
 Session::cue_bang (int32_t cue)
 {
 	_pending_cue.store (cue);
+	request_transport_speed (1.0);
 }
 
 void

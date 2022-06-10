@@ -793,6 +793,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void set_first_midi_note (int n);
 
 	static void init ();
+	static void begin_process_cycle ();
 
 	static TriggerBoxThread* worker;
 
@@ -895,6 +896,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	static std::atomic<int> active_trigger_boxes;
 	static std::atomic<bool> _cue_recording;
+	static bool roll_requested;
+	static void maybe_request_roll (Session&);
 };
 
 class TriggerReference

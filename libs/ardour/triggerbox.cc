@@ -2854,6 +2854,7 @@ TriggerBoxThread* TriggerBox::worker = 0;
 CueRecords TriggerBox::cue_records (256);
 std::atomic<bool> TriggerBox::_cue_recording (false);
 PBD::Signal0<void> TriggerBox::CueRecordingChanged;
+bool TriggerBox::roll_requested = false;
 
 typedef std::map <boost::shared_ptr<Region>, boost::shared_ptr<Trigger::UIState>> RegionStateMap;
 RegionStateMap enqueued_state_map;
@@ -3604,6 +3605,21 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 }
 
 void
+TriggerBox::maybe_request_roll (Session& s)
+{
+	if (!roll_requested) {
+		s.request_roll ();
+	}
+}
+
+void
+TriggerBox::begin_process_cycle ()
+{
+	roll_requested = false;
+}
+
+
+void
 TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
 {
 	/* XXX a test to check if we have no usable slots would be good
@@ -3672,11 +3688,11 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				_currently_playing->unbang ();
 			}
 
-			_locate_armed = 0;
+			_locate_armed = false;
 
 		} else if (cue_bang >= 0) {
 			_active_scene = cue_bang;
-			_locate_armed = 0;
+			_locate_armed = false;
 		}
 	}
 
@@ -3797,7 +3813,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (!_locate_armed) {
 		if (!_session.transport_state_rolling() && !allstop) {
-			_session.start_transport_from_trigger ();
+			assert (_currently_playing->state() == Trigger::WaitingToStart);
+			maybe_request_roll (_session);
+			return;
 		}
 	} else {
 

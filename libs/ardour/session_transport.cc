@@ -464,14 +464,6 @@ Session::stop_transport (bool abort, bool clear_state)
 
 /** Called from the process thread */
 void
-Session::start_transport_from_trigger ()
-{
-	ENSURE_PROCESS_THREAD;
-	TFSM_ROLL();
-}
-
-/** Called from the process thread */
-void
 Session::start_transport (bool after_loop)
 {
 	ENSURE_PROCESS_THREAD;
