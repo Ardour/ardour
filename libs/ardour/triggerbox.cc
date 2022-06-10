@@ -3813,7 +3813,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (!_locate_armed) {
 		if (!_session.transport_state_rolling() && !allstop) {
-			assert (_currently_playing->state() == Trigger::WaitingToStart);
+			if (_currently_playing->state() != Trigger::WaitingToStart) {
+				std::cerr <<"transport not rolling and trigger in state " << enum_2_string (_currently_playing->state()) << std::endl;
+			}
 			maybe_request_roll (_session);
 			return;
 		}
