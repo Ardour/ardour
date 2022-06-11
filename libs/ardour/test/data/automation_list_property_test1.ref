@@ -2,12 +2,12 @@
 <test>
   <FadeIn>
     <from>
-      <AutomationList automation-id="fadein" id="164" interpolation-style="Linear" state="Off"/>
+      <AutomationList automation-id="fadein" id="164" interpolation-style="Linear" time-domain="AudioTime" state="Off"/>
     </from>
     <to>
-      <AutomationList automation-id="fadein" id="163" interpolation-style="Linear" state="Off">
-        <events>1 0.5
-3 2
+      <AutomationList automation-id="fadein" id="163" interpolation-style="Linear" time-domain="AudioTime" state="Off">
+        <events>a1176 0.5
+a3528 2
 </events>
       </AutomationList>
     </to>

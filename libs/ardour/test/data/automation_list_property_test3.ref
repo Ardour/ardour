@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <State>
   <FadeIn>
-    <AutomationList automation-id="fadein" id="167" interpolation-style="Linear" state="Off">
-      <events>0 1
-1 2
+    <AutomationList automation-id="fadein" id="167" interpolation-style="Linear" time-domain="AudioTime" state="Off">
+      <events>a0 1
+a1176 2
 </events>
     </AutomationList>
   </FadeIn>
