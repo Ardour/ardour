@@ -15,14 +15,14 @@ run_tests () {
 	RUN=run-tests
 	if test -n "$2"; then
 		RUN=$2
-		echo "Running test $2 of $1..."
+		echo "Running test $2 of libs/$1..."
 	else
-		echo "Running tests for $1..."
+		echo "Running tests for libs/$1..."
 	fi
 	echo "-------------------------------------------"
 	echo ""
-  $3 $LIBS_DIR/$1/$RUN || ALLGOOD=no
-  echo ""
+	$3 $LIBS_DIR/$1/$RUN || ALLGOOD=no
+	echo ""
 }
 
 if [ $# -gt 0 ]; then
