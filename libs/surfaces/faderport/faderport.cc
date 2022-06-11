@@ -194,8 +194,6 @@ FaderPort::FaderPort (Session& s)
 
 FaderPort::~FaderPort ()
 {
-	cerr << "~FP\n";
-
 	close ();
 
 	if (_input_port) {
