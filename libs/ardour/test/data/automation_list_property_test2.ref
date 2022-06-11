@@ -2,18 +2,18 @@
 <test>
   <FadeIn>
     <from>
-      <AutomationList automation-id="fadein" id="165" interpolation-style="Linear" state="Off">
-        <events>1 0.5
-3 2
+      <AutomationList automation-id="fadein" id="165" interpolation-style="Linear" time-domain="AudioTime" state="Off">
+        <events>a1176 0.5
+a3528 2
 </events>
       </AutomationList>
     </from>
     <to>
-      <AutomationList automation-id="fadein" id="163" interpolation-style="Linear" state="Off">
-        <events>1 0.5
-3 2
-5 1.5
-7 1
+      <AutomationList automation-id="fadein" id="163" interpolation-style="Linear" time-domain="AudioTime" state="Off">
+        <events>a1176 0.5
+a3528 2
+a5880 1.5
+a8232 1
 </events>
       </AutomationList>
     </to>
