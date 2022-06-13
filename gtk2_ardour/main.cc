@@ -173,6 +173,19 @@ Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_n
 	return false; /* do not call again */
 }
 
+#ifndef NDEBUG
+static void
+sigusr1_handler (int /* signal */)
+{
+	cerr << "SIGUSR1 received in thread " << pthread_name() << endl;
+	char const * adf = g_getenv ("ARDOUR_DEBUG_FLAGS");
+	if (!adf) {
+		return;
+	}
+	PBD::parse_debug_options (adf);
+}
+#endif
+
 #ifndef PLATFORM_WINDOWS
 static void
 sigpipe_handler (int /*signal*/)
@@ -309,9 +322,11 @@ int main (int argc, char *argv[])
 
 	{
 #ifndef NDEBUG
-		const char *adf;
+		const char * adf;
 		if ((adf = g_getenv ("ARDOUR_DEBUG_FLAGS"))) {
-			PBD::parse_debug_options (adf);
+			if (!g_getenv ("ARDOUR_DEBUG_ON_SIGUSR1")) {
+				PBD::parse_debug_options (adf);
+			}
 		}
 #endif /* NDEBUG */
 	}
@@ -399,6 +414,16 @@ int main (int argc, char *argv[])
 #ifndef PLATFORM_WINDOWS
 	if (::signal (SIGPIPE, sigpipe_handler)) {
 		cerr << _("Cannot xinstall SIGPIPE error handler") << endl;
+	}
+#endif
+
+#ifndef NDEBUG
+	if (g_getenv ("ARDOUR_DEBUG_ON_SIGUSR1")) {
+		if (::signal (SIGUSR1, sigusr1_handler)) {
+			cerr << _("Cannot install SIGUSR1 error handler") << endl;
+		} else {
+			cerr << _("Installed SIGUSR1 debug handler") << endl;
+		}
 	}
 #endif
 
