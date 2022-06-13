@@ -24,6 +24,7 @@
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
+#include "pbd/unwind.h"
 
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
@@ -113,7 +114,7 @@ TransportFSM::hard_stop ()
 void
 TransportFSM::process_events ()
 {
-	processing++;
+	ExceptionSafeIncDec<int> esid (processing);
 
 	while (!queued_events.empty()) {
 
@@ -172,8 +173,6 @@ TransportFSM::process_events ()
 			delete ev;
 		}
 	}
-
-	processing--;
 }
 
 /* This is the transition table from the original boost::msm
