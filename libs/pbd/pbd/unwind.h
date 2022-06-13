@@ -34,6 +34,16 @@ class /*LIBPBD_API*/ Unwinder {
     T  _old_val;
 };
 
+template <typename T>
+class /*LIBPBD_API*/ ExceptionSafeIncDec {
+  public:
+	ExceptionSafeIncDec (T& var) : _var (var) { _var++; }
+	~ExceptionSafeIncDec () { _var--; }
+
+  private:
+    T& _var;
+};
+
 }
 
 #endif /* __libpbd_unwinder_h__ */
