@@ -163,7 +163,9 @@ BaseUI::request_handler (Glib::IOCondition ioc)
 void
 BaseUI::signal_new_request ()
 {
-	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: signal_new_request\n", event_loop_name()));
+	if ((DEBUG::EventLoop & PBD::debug_bits).any()) {
+		std::cout << "DEBUG::EventLoop: " <<  string_compose ("%1: signal_new_request\n", event_loop_name());
+	}
 	request_channel.wakeup ();
 }
 
