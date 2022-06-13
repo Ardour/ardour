@@ -110,8 +110,8 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	if (synced_to_engine ()) {
 		if (clear_state) {
-			/* do this here because our response to the slave won't
-			   take care of it.
+			/* do this here because our response to the engine
+			   transport master won't take care of it.
 			*/
 			_play_range = false;
 			_count_in_once = false;
