@@ -693,7 +693,7 @@ AUPluginUI::create_cocoa_view ()
 		low_box.queue_resize ();
 	}
 
-#if 1
+#ifdef AU_DEBUG_M1UI
 	std::cerr << "NSView initial size: " << req_width << " x " << req_height << "\n";
 #endif
 
@@ -908,7 +908,7 @@ AUPluginUI::cocoa_view_resized ()
 	req_width  = new_frame.size.width;
 	req_height = new_frame.size.height;
 
-#if 1
+#ifdef AU_DEBUG_M1UI
 	std::cerr << "NSView resized: " << req_width << " x " << req_height << "\n";
 #endif
 
@@ -1224,7 +1224,7 @@ AUPluginUI::lower_box_map ()
 {
 	[au_view setHidden:0];
 	update_view_size ();
-#if 1
+#ifdef AU_DEBUG_M1UI
 	std::cerr << "AUPluginUI::lower_box_map\n";
 #endif
 }
@@ -1233,7 +1233,7 @@ void
 AUPluginUI::lower_box_unmap ()
 {
 	[au_view setHidden:1];
-#if 1
+#ifdef AU_DEBUG_M1UI
 	std::cerr << "AUPluginUI::lower_box_unmap\n";
 #endif
 }
@@ -1241,7 +1241,7 @@ AUPluginUI::lower_box_unmap ()
 void
 AUPluginUI::lower_box_size_request (GtkRequisition* requisition)
 {
-#if 1
+#ifdef AU_DEBUG_M1UI
 	std::cerr << "AUPluginUI::lower_box_size_request: " << req_width << " x " << req_height << "\n";
 #endif
 	requisition->width  = req_width;
@@ -1271,7 +1271,7 @@ AUPluginUI::on_window_hide ()
 		id win = [wins objectAtIndex:i];
 	}
 #endif
-#if 1
+#ifdef AU_DEBUG_M1UI
 	std::cerr << "AUPluginUI::on_window_hide\n";
 #endif
 }
@@ -1291,7 +1291,7 @@ AUPluginUI::on_window_show (const string& /*title*/)
 		ActivateWindow (carbon_window, TRUE);
 	}
 #endif
-#if 1
+#ifdef AU_DEBUG_M1UI
 	std::cerr << "AUPluginUI::on_window_show\n";
 #endif
 
