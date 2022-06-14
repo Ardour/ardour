@@ -173,7 +173,7 @@ Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_n
 	return false; /* do not call again */
 }
 
-#ifndef NDEBUG
+#if !(defined NDEBUG || defined PLATFORM_WINDOWS)
 static void
 sigusr1_handler (int /* signal */)
 {
@@ -320,16 +320,16 @@ int main (int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
+#if !(defined NDEBUG || defined PLATFORM_WINDOWS)
 	{
-#ifndef NDEBUG
 		const char * adf;
 		if ((adf = g_getenv ("ARDOUR_DEBUG_FLAGS"))) {
 			if (!g_getenv ("ARDOUR_DEBUG_ON_SIGUSR1")) {
 				PBD::parse_debug_options (adf);
 			}
 		}
-#endif /* NDEBUG */
 	}
+#endif
 
 	cout << PROGRAM_NAME
 	     << VERSIONSTRING
@@ -417,7 +417,7 @@ int main (int argc, char *argv[])
 	}
 #endif
 
-#ifndef NDEBUG
+#if !(defined NDEBUG || defined PLATFORM_WINDOWS)
 	if (g_getenv ("ARDOUR_DEBUG_ON_SIGUSR1")) {
 		if (::signal (SIGUSR1, sigusr1_handler)) {
 			cerr << _("Cannot install SIGUSR1 error handler") << endl;
