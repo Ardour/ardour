@@ -163,6 +163,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static bool is_insert_note_event (GdkEventButton*);
 	static bool is_context_menu_event (GdkEventButton*);
 	static bool is_button2_event (GdkEventButton*);
+	static bool is_momentary_push_event (GdkEventButton*);
 
 	static Keyboard& the_keyboard() { return *_the_keyboard; }
 
@@ -209,6 +210,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static guint     snap_mod;
 	static guint     snap_delta_mod;
 	static guint     button2_modifiers;
+	static guint     momentary_push_modifiers;
 	static Gtk::Window* current_window;
 	static std::string user_keybindings_path;
 	static bool can_save_keybindings;

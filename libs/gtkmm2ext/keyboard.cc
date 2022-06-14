@@ -71,6 +71,7 @@ guint Keyboard::Level4Modifier = GDK_MOD1_MASK; // Alt/Option
 guint Keyboard::CopyModifier = GDK_CONTROL_MASK;      // Control
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
+guint Keyboard::momentary_push_modifiers = Keyboard::TertiaryModifier;
 
 const char* Keyboard::primary_modifier_name() { return _("Command"); }
 const char* Keyboard::secondary_modifier_name() { return _("Control"); }
@@ -96,6 +97,7 @@ guint Keyboard::Level4Modifier = GDK_MOD4_MASK|GDK_SUPER_MASK; // Mod4/Windows
 guint Keyboard::CopyModifier = GDK_CONTROL_MASK;
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = 0; /* not used */
+guint Keyboard::momentary_push_modifiers = Keyboard::TertiaryModifier;
 
 const char* Keyboard::primary_modifier_name() { return _("Control"); }
 const char* Keyboard::secondary_modifier_name() { return _("Alt"); }
@@ -544,6 +546,14 @@ Keyboard::is_button2_event (GdkEventButton* ev)
 #else
 	return ev->button == 2;
 #endif
+}
+
+bool
+Keyboard::is_momentary_push_event (GdkEventButton* ev)
+{
+	return (is_button2_event(ev)) ||
+		((ev->button == 1) &&
+		 ((ev->state & RelevantModifierKeyMask) == Keyboard::momentary_push_modifiers));
 }
 
 bool
