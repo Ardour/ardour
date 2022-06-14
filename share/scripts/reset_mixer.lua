@@ -203,7 +203,7 @@ function factory() return function()
 			if not(msec:isnil()) then
 				msec:set_value(1, disp)
 				if auto then
-					ctrl:set_automation_state(auto)
+					msec:set_automation_state(auto)
 				end
 			end
 		end
