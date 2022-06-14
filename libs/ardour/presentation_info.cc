@@ -71,7 +71,7 @@ PresentationInfo::unsuspend_change_signal ()
 {
 	Glib::Threads::Mutex::Lock lm (static_signal_lock);
 
-	if (g_atomic_int_get (&_change_signal_suspended) == 1) {
+	if (g_atomic_int_dec_and_test (&_change_signal_suspended)) {
 
 		/* atomically grab currently pending flags */
 
@@ -92,8 +92,6 @@ PresentationInfo::unsuspend_change_signal ()
 			lm.acquire ();
 		}
 	}
-
-	g_atomic_int_add (&_change_signal_suspended, -1);
 }
 
 void
