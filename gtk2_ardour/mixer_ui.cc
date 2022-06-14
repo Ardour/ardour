@@ -4116,7 +4116,7 @@ Mixer_UI::scene_button_press (GdkEventButton* ev, int idx)
 		popup_scene_menu (ev, idx);
 	} else if (Keyboard::is_delete_event (ev)) {
 		clear_mixer_scene (idx, true);
-	} else if (Keyboard::is_button2_event (ev)) {
+	} else if (Keyboard::is_momentary_push_event (ev)) {
 		/* momentary */
 		delete _mixer_scene_release; // .. or keep existing?
 		_mixer_scene_release = new MixerScene (*_session);

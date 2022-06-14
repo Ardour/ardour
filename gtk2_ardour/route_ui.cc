@@ -475,7 +475,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 	} else {
 
-		if (Keyboard::is_button2_event (ev)) {
+		if (Keyboard::is_momentary_push_event (ev)) {
 			// button2-click is "momentary"
 
 			_mute_release = new SoloMuteRelease (_route->mute_control()->muted ());
@@ -647,7 +647,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 	} else {
 
-		if (Keyboard::is_button2_event (ev)) {
+		if (Keyboard::is_momentary_push_event (ev)) {
 
 			// button2-click is "momentary"
 			_solo_release = new SoloMuteRelease (_route->self_soloed());
@@ -787,7 +787,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 	if (is_track() && rec_enable_button) {
 
-		if (Keyboard::is_button2_event (ev)) {
+		if (Keyboard::is_momentary_push_event (ev)) {
 
 			//rec arm does not have a momentary mode
 			return false;

@@ -1669,7 +1669,7 @@ RecorderUI::InputPort::monitor_press (GdkEventButton* ev)
 	if (Keyboard::is_context_menu_event (ev)) {
 		return false;
 	}
-	if (ev->button != 1 && !Keyboard::is_button2_event (ev)) {
+	if (ev->button != 1 && !Keyboard::is_momentary_push_event (ev)) {
 		return false;
 	}
 
@@ -1677,7 +1677,7 @@ RecorderUI::InputPort::monitor_press (GdkEventButton* ev)
 	Session* s = AudioEngine::instance()->session ();
 	assert (s);
 
-	if (Keyboard::is_button2_event (ev)) {
+	if (Keyboard::is_momentary_push_event (ev)) {
 		/* momentary */
 		_solo_release = new SoloMuteRelease (mp.monitoring (_port_name));
 	}
