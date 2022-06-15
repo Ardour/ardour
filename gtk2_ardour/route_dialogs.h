@@ -22,9 +22,9 @@
 namespace RouteDialogs {
 
 enum InsertAt {
+	First,
 	BeforeSelection,
 	AfterSelection,
-	First,
 	Last
 };
 

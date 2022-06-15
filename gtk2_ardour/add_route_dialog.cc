@@ -165,6 +165,7 @@ AddRouteDialog::AddRouteDialog ()
 		     );
 	}
 
+	/* order needs to match enum InsertAt */
 	insert_at_combo.append (_("First"));
 	insert_at_combo.append (_("Before Selection"));
 	insert_at_combo.append (_("After Selection"));
