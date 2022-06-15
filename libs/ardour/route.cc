@@ -118,6 +118,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, Muteable (sess, name)
 	, _active (true)
 	, _signal_latency (0)
+	, _output_latency (0)
 	, _disk_io_point (DiskIOPreFader)
 	, _meter_point (MeterPostFader)
 	, _pending_meter_point (MeterPostFader)
@@ -403,7 +404,7 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	const double speed = (is_auditioner() ? 1.0 : _session.transport_speed ());
 
-	const sampleoffset_t latency_offset = _signal_latency + output_latency ();
+	const sampleoffset_t latency_offset = _signal_latency + _output_latency;
 	if (speed < 0) {
 		/* when rolling backwards this can become negative */
 		start_sample -= latency_offset;
