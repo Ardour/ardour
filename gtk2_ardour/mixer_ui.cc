@@ -677,6 +677,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 				}
 
 				strip = new MixerStrip (*this, _session, route);
+				strip->set_selected (route->is_selected ());
 				strips.push_back (strip);
 
 				UIConfiguration::instance().get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
@@ -716,14 +717,20 @@ Mixer_UI::add_stripables (StripableList& slist)
 
 	track_display.set_model (track_model);
 
-	/* catch up on selection state, which we left to the editor to set */
-	sync_treeview_from_presentation_info (PropertyChange (Properties::selected));
-
 	if (!from_scratch) {
 		sync_presentation_info_from_treeview ();
 	}
 
 	redisplay_track_list ();
+
+	if (!from_scratch) {
+		/* Mixer_UI::move_stripable_into_view() can only correctly calculate
+		 * the scroll offset after the layout was updated.
+		 * We update update after the resize operation (+10), but before drawing (+20)
+		 * https://docs.gtk.org/glib/const.PRIORITY_HIGH_IDLE.html
+		 */
+		Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &Mixer_UI::sync_treeview_from_presentation_info), PropertyChange (Properties::selected)), false), G_PRIORITY_HIGH_IDLE + 15);
+	}
 }
 
 void
@@ -891,44 +898,49 @@ Mixer_UI::sync_treeview_from_presentation_info (PropertyChange const & what_chan
 	 * order for the GUI, so reorder the treeview model to match it.
 	 */
 
-	vector<int> neworder;
-	TreeModel::Children rows = track_model->children();
-	uint32_t old_order = 0;
-	bool changed = false;
+	if (what_changed.contains (Properties::order)) {
+		vector<int> neworder;
+		TreeModel::Children rows = track_model->children();
+		uint32_t old_order = 0;
+		bool changed = false;
 
-	if (rows.empty()) {
-		return;
-	}
+		if (rows.empty()) {
+			return;
+		}
 
-	TreeOrderKeys sorted;
-	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
-		boost::shared_ptr<Stripable> stripable = (*ri)[stripable_columns.stripable];
-		sorted.push_back (TreeOrderKey (old_order, stripable));
-	}
+		TreeOrderKeys sorted;
+		for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
+			boost::shared_ptr<Stripable> stripable = (*ri)[stripable_columns.stripable];
+			sorted.push_back (TreeOrderKey (old_order, stripable));
+		}
 
-	TreeOrderKeySorter cmp;
+		TreeOrderKeySorter cmp;
 
-	sort (sorted.begin(), sorted.end(), cmp);
-	neworder.assign (sorted.size(), 0);
+		sort (sorted.begin(), sorted.end(), cmp);
+		neworder.assign (sorted.size(), 0);
 
-	uint32_t n = 0;
+		uint32_t n = 0;
 
-	for (TreeOrderKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+		for (TreeOrderKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
 
-		neworder[n] = sr->old_display_order;
+			neworder[n] = sr->old_display_order;
 
-		if (sr->old_display_order != n) {
-			changed = true;
+			if (sr->old_display_order != n) {
+				changed = true;
+			}
+		}
+
+		if (changed) {
+			Unwinder<bool> uw (ignore_track_reorder, true);
+			track_model->reorder (neworder);
 		}
 	}
 
-	if (changed) {
-		Unwinder<bool> uw (ignore_track_reorder, true);
-		track_model->reorder (neworder);
+	if (what_changed.contains (Properties::order) || what_changed.contains (Properties::hidden)) {
+		redisplay_track_list ();
 	}
 
 	if (what_changed.contains (Properties::selected)) {
-
 		PresentationInfo::ChangeSuspender cs;
 
 		for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
@@ -958,8 +970,6 @@ Mixer_UI::sync_treeview_from_presentation_info (PropertyChange const & what_chan
 			}
 		}
 	}
-
-	redisplay_track_list ();
 }
 
 void
