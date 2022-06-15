@@ -911,12 +911,13 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 
 				string::size_type pos;
 
-				char const *targets[] = { X_("Separator"), X_("Add"), X_("Subtract"), X_("Decimal"), X_("Divide"),
-				                          X_("grave"), X_("comma"), X_("period"), X_("asterisk"), X_("backslash"),
-				                          X_("apostrophe"), X_("minus"), X_("plus"), X_("slash"), X_("semicolon"),
-				                          X_("colon"), X_("equal"), X_("bracketleft"), X_("bracketright"),
-				                          X_("ampersand"), X_("numbersign"), X_("parenleft"), X_("parenright"),
-				                          X_("quoteright"), X_("quoteleft"), X_("exclam"), X_("quotedbl"),
+				char const *targets[] = { X_("Separator"),  X_("Add"),        X_("Subtract"),    X_("Decimal"),      X_("Divide"),
+				                          X_("grave"),      X_("comma"),      X_("period"),      X_("asterisk"),     X_("backslash"),
+				                          X_("apostrophe"), X_("minus"),      X_("plus"),        X_("slash"),        X_("semicolon"),
+				                          X_("colon"),      X_("equal"),      X_("bracketleft"), X_("bracketright"),
+				                          X_("ampersand"),  X_("numbersign"), X_("parenleft"),   X_("parenright"),
+				                          X_("quoteright"), X_("quoteleft"),  X_("exclam"),      X_("quotedbl"),
+				                          X_("braceleft"),  X_("braceright"),
 				                          0
 				};
 
@@ -926,6 +927,8 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 				                               X_(":"), X_("="), X_("["), X_("]"),
 				                               X_("&"), X_("#"), X_("("), X_(")"),
 				                               X_("`"), X_("'"), X_("!"), X_("\""),
+				                               X_("{"), X_("}"),
+				                               0
 				};
 
 				for (size_t n = 0; targets[n]; ++n) {
