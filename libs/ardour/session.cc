@@ -2213,6 +2213,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 	bool ok = true;
 
 	if (rechain_process_graph (gnl)) {
+		/* Update routelist for single-threaded processing, use topologically sorted nodelist */
 		r->clear ();
 		for (auto const& nd : gnl) {
 			r->push_back (boost::dynamic_pointer_cast<Route> (nd));

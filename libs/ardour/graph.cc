@@ -610,22 +610,15 @@ GraphChain::GraphChain (GraphNodeList const& nodelist, GraphEdges const& edges)
 	 */
 	_n_terminal_nodes = 0;
 
-	/* This will become a list of nodes that are not fed by another node, ie
-	 * those at the `input' end.
-	 */
-	_init_trigger_list.clear ();
-
-	_nodes_rt.clear ();
-
 	/* copy nodelist to _nodes_rt, prepare GraphNodes for this graph */
-	for (auto const& ri : nodelist) {
-		RCUWriter<GraphActivision::ActivationMap>         wa (ri->_activation_set);
-		RCUWriter<GraphActivision::RefCntMap>             wr (ri->_init_refcount);
+	for (auto const& ni : nodelist) {
+		RCUWriter<GraphActivision::ActivationMap>         wa (ni->_activation_set);
+		RCUWriter<GraphActivision::RefCntMap>             wr (ni->_init_refcount);
 		boost::shared_ptr<GraphActivision::ActivationMap> ma (wa.get_copy ());
 		boost::shared_ptr<GraphActivision::RefCntMap>     mr (wr.get_copy ());
 		(*mr)[this] = 0;
 		(*ma)[this].clear ();
-		_nodes_rt.push_back (ri);
+		_nodes_rt.push_back (ni);
 	}
 
 	/* now add refs for the connections. */
