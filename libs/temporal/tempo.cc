@@ -2462,6 +2462,15 @@ TempoMap::set_state (XMLNode const & node, int version)
 
 	XMLNodeList const & children (node.children());
 
+	/* XXX might be good to have a recovery mechanism in case setting
+	 * things from XML fails. Not very likely, however.
+	 */
+
+	_tempos.clear ();
+	_meters.clear ();
+	_bartimes.clear ();
+	_points.clear ();
+
 	for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 		if ((*c)->name() == X_("Tempos")) {
 			if (set_tempos_from_state (**c)) {
@@ -2494,7 +2503,6 @@ TempoMap::set_music_times_from_state (XMLNode const& mt_node)
 	XMLNodeList const & children (mt_node.children());
 
 	try {
-		_bartimes.clear ();
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 			MusicTimePoint* mp = new MusicTimePoint (*this, **c);
 			add_or_replace_bartime (mp);
@@ -2514,11 +2522,16 @@ TempoMap::set_tempos_from_state (XMLNode const& tempos_node)
 	bool ignore;
 
 	try {
-		_tempos.clear ();
+		std::cerr << " before adding tempo, map is\n";
+		dump (std::cerr);
+
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 			TempoPoint* tp = new TempoPoint (*this, **c);
 			core_add_tempo (tp, ignore);
 			core_add_point (tp);
+
+			std::cerr << "Added a tempo " << *tp << " map now\n";
+			dump (std::cerr);
 		}
 	} catch (...) {
 		_tempos.clear (); /* remove any that were created */
@@ -2535,7 +2548,6 @@ TempoMap::set_meters_from_state (XMLNode const& meters_node)
 	bool ignore;
 
 	try {
-		_meters.clear ();
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 			MeterPoint* mp = new MeterPoint (*this, **c);
 			core_add_meter (mp, ignore);
