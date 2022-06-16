@@ -1047,8 +1047,6 @@ TempoMap::add_or_replace_bartime (MusicTimePoint* mtp)
 	bool replaced;
 	MusicTimePoint* ret = core_add_bartime (mtp, replaced);
 
-	std::cerr << "Added bartime " << *mtp << "\nreplaced ? " << replaced << std::endl;
-	dump (std::cerr);
 	if (!replaced) {
 		bool ignore;
 		(void) core_add_tempo (mtp, ignore);
@@ -2522,16 +2520,10 @@ TempoMap::set_tempos_from_state (XMLNode const& tempos_node)
 	bool ignore;
 
 	try {
-		std::cerr << " before adding tempo, map is\n";
-		dump (std::cerr);
-
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 			TempoPoint* tp = new TempoPoint (*this, **c);
 			core_add_tempo (tp, ignore);
 			core_add_point (tp);
-
-			std::cerr << "Added a tempo " << *tp << " map now\n";
-			dump (std::cerr);
 		}
 	} catch (...) {
 		_tempos.clear (); /* remove any that were created */
