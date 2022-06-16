@@ -448,7 +448,8 @@ Editor::update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr)
 void
 Editor::tempo_map_changed ()
 {
-	TempoMap::fetch ();
+	TempoMap::SharedPtr current_map = TempoMap::fetch ();
+	reassociate_metric_markers (current_map);
 	tempo_map_visual_update ();
 }
 
