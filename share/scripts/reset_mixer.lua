@@ -152,7 +152,9 @@ function factory() return function()
 				if prefs["io"] then
 					local io_proc = proc:to_ioprocessor()
 					if not(io_proc:isnil()) then
-						queue[#queue + 1] = proc
+						if insert:is_channelstrip() or not(insert:display_to_user()) then
+							queue[#queue + 1] = proc
+						end
 					end
 				end
 			end
