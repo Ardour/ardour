@@ -692,7 +692,7 @@ void SendsSubview::handle_vselect_event(uint32_t global_strip_position)
 	Strip* strip = 0;
 	Pot* vpot = 0;
 	std::string* pending_display = 0;
-	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position))
+	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position - _current_bank))
 	{
 		return;
 	}
