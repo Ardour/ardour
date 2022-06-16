@@ -3667,8 +3667,17 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	_playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot));
 
-	/*  add our current source list
-	*/
+	{
+		boost::shared_ptr<RouteList> rl = routes.reader();
+		for (auto const& r : *rl) {
+			boost::shared_ptr<TriggerBox> tb = r->triggerbox ();
+			if (tb) {
+				tb->deep_sources (sources_used_by_this_snapshot);
+			}
+		}
+	}
+
+	/*  add our current source list */
 
 	ls.acquire ();
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {

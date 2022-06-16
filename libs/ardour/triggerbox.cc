@@ -3251,6 +3251,17 @@ TriggerBox::trigger_by_id (PBD::ID check)
 }
 
 void
+TriggerBox::deep_sources (std::set<boost::shared_ptr<Source> >& sources)
+{
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		boost::shared_ptr<Region> r (trigger(n)->region ());
+		if (r) {
+			r->deep_sources (sources);
+		}
+	}
+}
+
+void
 TriggerBox::enqueue_trigger_state_for_region (boost::shared_ptr<Region> region, boost::shared_ptr<Trigger::UIState> state)
 {
 	enqueued_state_map.insert (std::make_pair(region, state));

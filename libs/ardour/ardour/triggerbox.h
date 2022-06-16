@@ -729,6 +729,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
+	void deep_sources (std::set<boost::shared_ptr<Source>>&);
+
 	void set_from_path (uint32_t slot, std::string const & path);
 	void set_from_selection (uint32_t slot, boost::shared_ptr<Region>);
 
