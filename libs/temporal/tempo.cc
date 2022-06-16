@@ -3309,6 +3309,12 @@ TempoMap::update (TempoMap::WritableSharedPtr m)
 	/* update thread local map pointer in the calling thread */
 	update_thread_tempo_map ();
 
+#ifndef NDEBUG
+	if (DEBUG_ENABLED (DEBUG::TemporalMap)) {
+		m->dump (std::cerr);
+	}
+#endif
+
 	MapChanged (); /* EMIT SIGNAL */
 
 	return 0;
