@@ -642,6 +642,10 @@ Session::create (const string& session_template, BusProfile const * bus_profile,
 			return -1;
 		}
 
+	} else {
+		(void) TempoMap::write_copy(); /* we are going to throw away the return value and replace the map entirely */
+		TempoMap::WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
+		TempoMap::update (new_map);;
 	}
 
 	/* set up Master Out and Monitor Out if necessary */
