@@ -635,15 +635,11 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 	if (Keyboard::is_context_menu_event (ev)) {
 
-		if (! (solo_isolated_led && solo_isolated_led->get_visible()) ||
-		    ! (solo_safe_led && solo_safe_led->get_visible())) {
-
-			if (solo_menu == 0) {
-				build_solo_menu ();
-			}
-
-			solo_menu->popup (1, ev->time);
+		if (solo_menu == 0) {
+			build_solo_menu ();
 		}
+
+		solo_menu->popup (1, ev->time);
 
 	} else {
 
