@@ -60,6 +60,20 @@ namespace Temporal {
 class Meter;
 class TempoMap;
 
+class MapOwned {
+ protected:
+	MapOwned (TempoMap const & map) : _map (&map) {}
+	~MapOwned () {}
+
+ public:
+	TempoMap const & map() const { return *_map; }
+
+ protected:
+	friend class TempoMap;
+	void set_map (TempoMap const & map) { _map = &map; }
+	TempoMap const * _map;
+};
+
 /* Conceptually, Point is similar to timepos_t. However, whereas timepos_t can
  * use the TempoMap to translate between time domains, Point cannot. Why not?
  * Because Point is foundational in building the tempo map, and we cannot
@@ -68,9 +82,9 @@ class TempoMap;
  */
 
 typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct point_tag>> point_hook;
-class /*LIBTEMPORAL_API*/ Point : public point_hook {
+class /*LIBTEMPORAL_API*/ Point : public point_hook, public MapOwned  {
   public:
-	LIBTEMPORAL_API Point (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt) : _sclock (sc), _quarters (b), _bbt (bbt), _map (&map) {}
+	LIBTEMPORAL_API Point (TempoMap const & map, superclock_t sc, Beats const & b, BBT_Time const & bbt) : MapOwned (map), _sclock (sc), _quarters (b), _bbt (bbt)  {}
 	LIBTEMPORAL_API Point (TempoMap const & map, XMLNode const &);
 
 	LIBTEMPORAL_API virtual ~Point() {}
@@ -127,13 +141,10 @@ class /*LIBTEMPORAL_API*/ Point : public point_hook {
 	LIBTEMPORAL_API inline bool operator== (Point const & other) const { return _sclock == other._sclock; }
 	LIBTEMPORAL_API inline bool operator!= (Point const & other) const { return _sclock != other._sclock; }
 
-	LIBTEMPORAL_API TempoMap const & map() const { return *_map; }
-
   protected:
 	superclock_t     _sclock;
 	Beats            _quarters;
 	BBT_Time         _bbt;
-	TempoMap const * _map;
 
 	void add_state (XMLNode &) const;
 

@@ -58,7 +58,7 @@ Point::add_state (XMLNode & node) const
 }
 
 Point::Point (TempoMap const & map, XMLNode const & node)
-	: _map (&map)
+	: MapOwned (map)
 {
 	if (!node.get_property (X_("sclock"), _sclock)) {
 		throw failed_constructor();
@@ -781,8 +781,9 @@ TempoMap::copy_points (TempoMap const & other)
 
 	sort (p.begin(), p.end(), Point::ptr_sclock_comparator());
 
-	for (std::vector<Point*>::iterator pi = p.begin(); pi != p.end(); ++pi) {
-		_points.push_back (**pi);
+	for (auto & pi : p) {
+		pi->set_map (*this);
+		_points.push_back (*pi);
 	}
 }
 
