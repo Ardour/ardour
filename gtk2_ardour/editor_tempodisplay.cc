@@ -449,7 +449,6 @@ void
 Editor::tempo_map_changed ()
 {
 	TempoMap::SharedPtr current_map = TempoMap::fetch ();
-	reassociate_metric_markers (current_map);
 	/* If the tempo map was changed by something other than the Editor, we
 	 * will need to reassociate all visual elements used for tempo display
 	 * with the new map.
