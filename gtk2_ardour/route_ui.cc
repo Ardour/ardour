@@ -1428,7 +1428,7 @@ RouteUI::build_solo_menu (void)
 	solo_isolated_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
 
-	check = new Gtk::CheckMenuItem(_("Solo Safe"));
+	check = new Gtk::CheckMenuItem(_("Solo Safe (Locked)"));
 	check->set_active (_route->solo_safe_control()->solo_safe());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_safe), check));
 	items.push_back (CheckMenuElem(*check));
