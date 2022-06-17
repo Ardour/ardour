@@ -450,6 +450,24 @@ Editor::tempo_map_changed ()
 {
 	TempoMap::SharedPtr current_map = TempoMap::fetch ();
 	reassociate_metric_markers (current_map);
+	/* If the tempo map was changed by something other than the Editor, we
+	 * will need to reassociate all visual elements used for tempo display
+	 * with the new map.
+	 */
+
+	if (!tempo_marks.empty()) {
+		/* a little awkward using shared_ptr<T>::get() but better than every
+		 * point in the map holding a shared_ptr ref to the map that owns it.
+		 */
+
+		if (&tempo_marks.front()->point().map() != current_map.get()) {
+			std::cerr << "Map changed, need marker reassoc; point using " << &tempo_marks.front()->point().map() << " vs. " << current_map.get() << std::endl;
+			reassociate_metric_markers (current_map);
+		} else {
+			std::cerr << "Map changed, no reassoc reqd\n";
+		}
+	}
+
 	tempo_map_visual_update ();
 }
 
