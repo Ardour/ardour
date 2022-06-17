@@ -460,10 +460,7 @@ Editor::tempo_map_changed ()
 		 */
 
 		if (&tempo_marks.front()->point().map() != current_map.get()) {
-			std::cerr << "Map changed, need marker reassoc; point using " << &tempo_marks.front()->point().map() << " vs. " << current_map.get() << std::endl;
 			reassociate_metric_markers (current_map);
-		} else {
-			std::cerr << "Map changed, no reassoc reqd\n";
 		}
 	}
 
