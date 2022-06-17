@@ -207,7 +207,13 @@ RouteUI::init ()
 
 	mute_button = manage (new ArdourButton);
 	mute_button->set_name ("mute button");
-	UI::instance()->set_tip (mute_button, _("Mute this track"), "");
+	std::string tip = string_compose( _("Mute this track\n"
+							            "%1+Click to Override Group\n"
+							            "%1+%3+Click to toggle ALL tracks\n"
+							            "%4 for Momentary mute\n"
+							            "Right-Click for Context menu")
+									  , Keyboard::primary_modifier_short_name(), Keyboard::secondary_modifier_short_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::button2_name() );
+	UI::instance()->set_tip (mute_button, tip.c_str(), "");
 
 	solo_button = manage (new ArdourButton);
 	solo_button->set_name ("solo button");
@@ -216,7 +222,12 @@ RouteUI::init ()
 	rec_enable_button = manage (new ArdourButton);
 	rec_enable_button->set_name ("record enable button");
 	rec_enable_button->set_icon (ArdourIcon::RecButton);
-	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
+	tip = string_compose( _("Enable Recording on this track\n"
+				            "%1+Click to Override group\n"
+				            "%1+%3+Click to toggle ALL tracks\n"
+				            "Right-Click for Context menu")
+						    , Keyboard::primary_modifier_short_name(), Keyboard::secondary_modifier_short_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::button2_name() );
+	UI::instance()->set_tip (rec_enable_button, tip.c_str(), "");
 
 	if (UIConfiguration::instance().get_blink_rec_arm()) {
 		rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
@@ -1996,12 +2007,25 @@ void
 RouteUI::update_solo_button ()
 {
 	set_button_names ();
+	std::string tip;
 
 	if (Config->get_solo_control_is_listen_control()) {
-		UI::instance()->set_tip (solo_button, _("Listen to this track"), "");
+			tip = string_compose( _("Listen to this track\n"
+			                                  "%1+Click to Override Group\n"
+			                                  "%1+%3+Click to toggle ALL tracks\n"
+			                                  "%4 for Momentary listen\n"
+			                                  "Right-Click for Context menu")
+			                                  , Keyboard::primary_modifier_short_name(), Keyboard::secondary_modifier_short_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::button2_name() );
 	} else {
-		UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
+			tip = string_compose( _("Solo this track\n"
+			                                  "%1+Click to Override Group\n"
+			                                  "%1+%2+Click for Exclusive solo\n"
+			                                  "%1+%3+Click to toggle ALL tracks\n"
+			                                  "%4 for Momentary solo\n"
+			                                  "Right-Click for Context menu")
+			                                  , Keyboard::primary_modifier_short_name(), Keyboard::secondary_modifier_short_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::button2_name() );
 	}
+	UI::instance()->set_tip (solo_button, tip.c_str());
 }
 
 void
