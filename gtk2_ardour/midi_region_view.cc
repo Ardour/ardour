@@ -1808,11 +1808,10 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	 * note, then subtract the start of the region
 	 */
 
-	const samplepos_t note_start_samples = (note_start + session_source_start).earlier ( _region->position()).samples();
+	const samplepos_t note_start_samples = _region->position().distance ((note_start + session_source_start)).samples();
 
 	const double x0 = trackview.editor().sample_to_pixel (note_start_samples);
 	double x1;
-
 
 	const double y0 = 1 + floor(note_to_y(note->note()));
 	double y1;
