@@ -79,6 +79,7 @@ const char* Keyboard::tertiary_modifier_name() { return S_("Key|Shift"); }
 const char* Keyboard::level4_modifier_name() { return _("Option"); }
 
 const char* Keyboard::button2_name() { return _("Middle Click (or Ctrl+Alt+Click)"); }
+const char* Keyboard::momentary_push_name() { return _("Shift+Click (or Middle-Click)"); }
 
 const char* Keyboard::primary_modifier_short_name() { return _("Cmd"); }
 const char* Keyboard::secondary_modifier_short_name() { return _("Ctrl"); }
@@ -105,6 +106,7 @@ const char* Keyboard::tertiary_modifier_name() { return S_("Key|Shift"); }
 const char* Keyboard::level4_modifier_name() { return _("Windows"); }
 
 const char* Keyboard::button2_name() { return _("Middle-Click"); }
+const char* Keyboard::momentary_push_name() { return _("Middle-Click (or Shift+Click)"); }
 
 const char* Keyboard::primary_modifier_short_name() { return _("Ctrl"); }
 const char* Keyboard::secondary_modifier_short_name() { return _("Alt"); }
