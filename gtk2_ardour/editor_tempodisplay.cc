@@ -125,7 +125,7 @@ Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::M
 				   IS-A TempoPoint
 				*/
 			} else if ((tp = dynamic_cast<Temporal::TempoPoint const *>(*m)) != 0) {
-				if (tm->tempo() == *tp) {
+				if (tm->tempo().sclock() == tp->sclock()) {
 					tm->reset_tempo (*tp);
 					tm->curve().reset_point  (*tp);
 					break;
@@ -141,7 +141,7 @@ Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::M
 				*/
 
 			} else if ((mp = dynamic_cast<Temporal::MeterPoint const *>(*m)) != 0) {
-				if (mm->meter() == *mp) {
+				if (mm->meter().sclock() == mp->sclock()) {
 					mm->reset_meter (*mp);
 					break;
 				}
@@ -152,7 +152,7 @@ Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::M
 
 		for (TempoMap::Metrics::iterator m = metrics.begin(); m != metrics.end(); ++m) {
 			if ((mtp = dynamic_cast<Temporal::MusicTimePoint const *>(*m)) != 0) {
-				if (bm->point() == *mtp) {
+				if (bm->point().sclock() == mtp->sclock()) {
 					bm->reset_point (*mtp);
 					break;
 				}
