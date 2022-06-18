@@ -32,7 +32,7 @@ typedef int64_t superclock_t;
 #ifndef COMPILER_MSVC
 	extern superclock_t _superclock_ticks_per_second;
 #else
-	static superclock_t _superclock_ticks_per_second = 282240000; /* 2^10 * 3^2 * 5^4 * 7^2 */
+	static superclock_t _superclock_ticks_per_second = 0;
 #endif
 
 extern bool scts_set;
