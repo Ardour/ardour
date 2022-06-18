@@ -37,13 +37,11 @@ typedef int64_t superclock_t;
 #ifndef COMPILER_MSVC
 	extern superclock_t _superclock_ticks_per_second;
 #else
-	static superclock_t _superclock_ticks_per_second = 56448000; /* 2^10 * 3^2 * 5^3 * 7^2 */
+	static superclock_t _superclock_ticks_per_second = 0;
 #endif
 
-extern bool scts_set;
-
 #ifdef DEBUG_EARLY_SCTS_USE
-static inline superclock_t superclock_ticks_per_second() { if (!scts_set) { raise (SIGUSR2); } return _superclock_ticks_per_second; }
+static inline superclock_t superclock_ticks_per_second() { if (_superclock_ticks_per_second == 0) { raise (SIGUSR2); } return _superclock_ticks_per_second; }
 #else
 static inline superclock_t superclock_ticks_per_second() { return _superclock_ticks_per_second; }
 #endif
