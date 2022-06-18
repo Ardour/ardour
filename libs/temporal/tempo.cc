@@ -3274,7 +3274,7 @@ TempoMap::twist_tempi (TempoPoint* ts, samplepos_t start_sample, samplepos_t end
 void
 TempoMap::init ()
 {
-	WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
+	WritableSharedPtr new_map (new TempoMap ());
 	_map_mgr.init (new_map);
 	fetch ();
 }
