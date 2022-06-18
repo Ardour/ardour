@@ -270,6 +270,7 @@ PortEngineSharedImpl::PortEngineSharedImpl (PortManager& mgr, std::string const 
 	: _instance_name (str)
 	, _portmap (new PortMap)
 	, _ports (new PortIndex)
+	, _portregistry (new PortRegistry)
 {
 	g_atomic_int_set (&_port_change_flag, 0);
 	pthread_mutex_init (&_port_callback_mutex, 0);
@@ -415,13 +416,16 @@ PortEngineSharedImpl::add_port (const std::string& name, ARDOUR::DataType type, 
 	}
 
 	{
-		RCUWriter<PortIndex> index_writer (_ports);
-		RCUWriter<PortMap> map_writer (_portmap);
+		RCUWriter<PortIndex>    index_writer (_ports);
+		RCUWriter<PortMap>      map_writer (_portmap);
+		RCUWriter<PortRegistry> registry_writer (_portregistry);
 
-		boost::shared_ptr<PortIndex> ps = index_writer.get_copy ();
-		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
+		boost::shared_ptr<PortIndex> ps    = index_writer.get_copy ();
+		boost::shared_ptr<PortMap> pm      = map_writer.get_copy ();
+		boost::shared_ptr<PortRegistry> pr = registry_writer.get_copy ();
 
 		ps->insert (port);
+		pr->insert (port);
 		pm->insert (make_pair (name, port));
 	}
 
@@ -434,11 +438,13 @@ PortEngineSharedImpl::unregister_port (PortEngine::PortHandle port_handle)
 	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort>(port_handle);
 
 	{
-		RCUWriter<PortIndex> index_writer (_ports);
-		RCUWriter<PortMap> map_writer (_portmap);
+		RCUWriter<PortIndex>    index_writer (_ports);
+		RCUWriter<PortMap>      map_writer (_portmap);
+		RCUWriter<PortRegistry> registry_writer (_portregistry);
 
-		boost::shared_ptr<PortIndex> ps = index_writer.get_copy ();
-		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
+		boost::shared_ptr<PortIndex> ps    = index_writer.get_copy ();
+		boost::shared_ptr<PortMap> pm      = map_writer.get_copy ();
+		boost::shared_ptr<PortRegistry> pr = registry_writer.get_copy ();
 
 		PortIndex::iterator i = std::find (ps->begin(), ps->end(), boost::dynamic_pointer_cast<BackendPort> (port_handle));
 
@@ -451,10 +457,12 @@ PortEngineSharedImpl::unregister_port (PortEngine::PortHandle port_handle)
 
 		pm->erase (port->name());
 		ps->erase (i);
+		pr->erase (*i);
 	}
 
 	_ports.flush ();
 	_portmap.flush ();
+	_portregistry.flush ();
 }
 
 
@@ -467,12 +475,13 @@ PortEngineSharedImpl::unregister_ports (bool system_only)
 	_system_midi_out.clear();
 
 	{
-		RCUWriter<PortIndex> index_writer (_ports);
-		RCUWriter<PortMap> map_writer (_portmap);
+		RCUWriter<PortIndex>    index_writer (_ports);
+		RCUWriter<PortMap>      map_writer (_portmap);
+		RCUWriter<PortRegistry> registry_writer (_portregistry);
 
-		boost::shared_ptr<PortIndex> ps = index_writer.get_copy ();
-		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
-
+		boost::shared_ptr<PortIndex> ps    = index_writer.get_copy ();
+		boost::shared_ptr<PortMap> pm      = map_writer.get_copy ();
+		boost::shared_ptr<PortRegistry> pr = registry_writer.get_copy ();
 
 		for (PortIndex::iterator i = ps->begin (); i != ps->end ();) {
 			PortIndex::iterator cur = i++;
@@ -481,25 +490,29 @@ PortEngineSharedImpl::unregister_ports (bool system_only)
 				port->disconnect_all (port);
 				pm->erase (port->name());
 				ps->erase (cur);
+				pr->erase (port);
 			}
 		}
 	}
 
 	_ports.flush ();
 	_portmap.flush ();
+	_portregistry.flush ();
 }
 
 void
 PortEngineSharedImpl::clear_ports ()
 {
 	{
-		RCUWriter<PortIndex> index_writer (_ports);
-		RCUWriter<PortMap> map_writer (_portmap);
+		RCUWriter<PortIndex>    index_writer (_ports);
+		RCUWriter<PortMap>      map_writer (_portmap);
+		RCUWriter<PortRegistry> registry_writer (_portregistry);
 
-		boost::shared_ptr<PortIndex> ps = index_writer.get_copy();
-		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
+		boost::shared_ptr<PortIndex> ps    = index_writer.get_copy ();
+		boost::shared_ptr<PortMap> pm      = map_writer.get_copy ();
+		boost::shared_ptr<PortRegistry> pr = registry_writer.get_copy ();
 
-		if (ps->size () || pm->size ()) {
+		if (ps->size () || pm->size () || pr->size ()) {
 			PBD::warning << _("PortEngineSharedImpl: recovering from unclean shutdown, port registry is not empty.") << endmsg;
 			_system_inputs.clear();
 			_system_outputs.clear();
@@ -507,11 +520,13 @@ PortEngineSharedImpl::clear_ports ()
 			_system_midi_out.clear();
 			ps->clear();
 			pm->clear();
+			pr->clear();
 		}
 	}
 
 	_ports.flush ();
 	_portmap.flush ();
+	_portregistry.flush ();
 
 	g_atomic_int_set (&_port_change_flag, 0);
 	pthread_mutex_lock (&_port_callback_mutex);
@@ -544,20 +559,20 @@ PortEngineSharedImpl::set_port_name (PortEngine::PortHandle port_handle, const s
 	const std::string old_name = port->name();
 
 	/* PortIndex std::set is sorted by name, using the name as key.
-	 * So name-changes need to update the set
+	 * So name-changes need to update the set.
+	 * PortRegistry does not change
 	 */
 	RCUWriter<PortIndex> index_writer (_ports);
+	RCUWriter<PortMap>   map_writer (_portmap);
+
 	boost::shared_ptr<PortIndex> ps = index_writer.get_copy ();
+	boost::shared_ptr<PortMap>   pm = map_writer.get_copy ();
 
 	ps->erase (port);
 	int ret = port->set_name (newname);
 	ps->insert (port);
 
 	if (ret == 0) {
-
-		RCUWriter<PortMap> map_writer (_portmap);
-		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
-
 		pm->erase (old_name);
 		pm->insert (make_pair (newname, port));
 	}

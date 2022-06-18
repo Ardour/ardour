@@ -104,10 +104,6 @@ class LIBARDOUR_API BackendPort : public ProtoPort
 
 	void update_connected_latency (bool for_playback);
 
-	bool operator< (BackendPort const& rhs) const {
-		return PBD::naturally_less (name ().c_str (), rhs.name ().c_str ());
-	}
-
 protected:
 	PortEngineSharedImpl& _backend;
 
@@ -219,17 +215,20 @@ protected:
 
 	struct SortByPortName {
 		bool operator() (BackendPortHandle lhs, BackendPortHandle rhs) const {
-			return *lhs < *rhs;
+			return PBD::naturally_less (lhs->name ().c_str (), rhs->name ().c_str ());
 		}
 	};
 
-	typedef std::map<std::string, BackendPortPtr>    PortMap;   // fast lookup in _ports
-	typedef std::set<BackendPortPtr, SortByPortName> PortIndex; // fast lookup in _ports
-	SerializedRCUManager<PortMap>                  _portmap;
-	SerializedRCUManager<PortIndex>                _ports;
+	typedef std::map<std::string, BackendPortPtr>    PortMap;       // fast-lookup by name
+	typedef std::set<BackendPortPtr, SortByPortName> PortIndex;     // name-based
+	typedef std::set<BackendPortPtr>                 PortRegistry;  // std::less<>, safe during rename
+
+	SerializedRCUManager<PortMap>      _portmap;
+	SerializedRCUManager<PortIndex>    _ports;
+	SerializedRCUManager<PortRegistry> _portregistry;
 
 	bool valid_port (BackendPortHandle port) const {
-		boost::shared_ptr<PortIndex> p = _ports.reader ();
+		boost::shared_ptr<PortRegistry> p = _portregistry.reader ();
 		return p->find (port) != p->end ();
 	}
 
