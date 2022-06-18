@@ -650,6 +650,8 @@ Session::create (const string& session_template, BusProfile const * bus_profile,
 		}
 
 	} else {
+		set_superclock_ticks_per_second (56448000); /* 2^10 * 3^2 * 5^3 * 7^2 */
+
 		(void) TempoMap::write_copy(); /* we are going to throw away the return value and replace the map entirely */
 		TempoMap::WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
 		TempoMap::update (new_map);;
