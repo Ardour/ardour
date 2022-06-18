@@ -321,7 +321,7 @@ StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 	/* disconnect from old playlist */
 
 	playlist_connections.drop_connections ();
-	//undisplay_track ();
+	undisplay_track ();
 
 	/* draw it */
 	tr->playlist()->freeze();
