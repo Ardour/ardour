@@ -10,6 +10,7 @@
 #include <cppunit/BriefTestProgressListener.h>
 
 #include "pbd/debug.h"
+#include "temporal/tempo.h"
 #include "ardour/ardour.h"
 #include "test_ui.h"
 
@@ -50,6 +51,12 @@ main(int argc, char* argv[])
 	}
 
 	CPPUNIT_ASSERT (ARDOUR::init (true, localedir));
+
+	Temporal::set_superclock_ticks_per_second (56448000); /* 2^10 * 3^2 * 5^3 * 7^2 */
+
+	(void) Temporal::TempoMap::write_copy(); /* we are going to throw away the return value and replace the map entirely */
+	Temporal::TempoMap::WritableSharedPtr new_map (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
+	Temporal::TempoMap::update (new_map);;
 
 	TestUI* test_ui = new TestUI();
 

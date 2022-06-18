@@ -284,7 +284,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		return;
 	}
 
-	/* we have to create this in order to start the update process, but
+	/* we have to create this in order to get a write lock, but
 	   we're going to throw it away by creating our own new map and
 	   populating it. This will go out of scope when we return from this
 	   method.

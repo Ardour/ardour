@@ -13,6 +13,7 @@
 #include "pbd/debug.h"
 #include "pbd/pbd.h"
 #include "temporal/types.h"
+#include "temporal/tempo.h"
 
 int
 main(int argc, char* argv[])
@@ -51,9 +52,11 @@ main(int argc, char* argv[])
 	if (!PBD::init ()) return 1;
 	Temporal::init ();
 
-	// TempoMap::SharedPtr tmap = TempoMap::write_copy (); /* get writable copy of current tempo map */
-	// change it
-	// TempoMap::update (tmap); /* update the global tempo map manager */
+	Temporal::set_superclock_ticks_per_second (56448000); /* 2^10 * 3^2 * 5^3 * 7^2 */
+
+	(void) Temporal::TempoMap::write_copy(); /* we are going to throw away the return value and replace the map entirely */
+	Temporal::TempoMap::WritableSharedPtr new_map (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
+	Temporal::TempoMap::update (new_map);;
 
 	CppUnit::TestResult testresult;
 
