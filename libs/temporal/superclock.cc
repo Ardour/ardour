@@ -25,7 +25,7 @@ Temporal::superclock_t Temporal::_superclock_ticks_per_second = 0;
 int Temporal::most_recent_engine_sample_rate = 48000; /* have to pick something as a default */
 
 void
-Temporal::set_sample_rate (int sr)
+Temporal::set_most_recent_engine_sample_rate (int sr)
 {
 	most_recent_engine_sample_rate = sr;
 }

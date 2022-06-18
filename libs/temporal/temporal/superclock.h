@@ -51,7 +51,7 @@ static inline superclock_t samples_to_superclock (int64_t samples, int sr) { ret
 
 LIBTEMPORAL_API extern int most_recent_engine_sample_rate;
 
-LIBTEMPORAL_API void set_sample_rate (int sr);
+LIBTEMPORAL_API void set_most_recent_engine_sample_rate (int sr);
 LIBTEMPORAL_API void set_superclock_ticks_per_second (superclock_t sc);
 
 }
