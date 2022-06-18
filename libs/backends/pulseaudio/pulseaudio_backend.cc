@@ -979,9 +979,7 @@ void*
 PulseAudioBackend::get_buffer (PortEngine::PortHandle port_handle, pframes_t nframes)
 {
 	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
-
 	assert (port);
-
 	return port->get_buffer (nframes);
 }
 
