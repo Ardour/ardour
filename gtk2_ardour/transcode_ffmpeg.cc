@@ -18,18 +18,20 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <glib.h>
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 
-#include "gui_thread.h"
 #include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 
 #include "ardour/filesystem_paths.h"
 
+#include "gui_thread.h"
 #include "transcode_ffmpeg.h"
 #include "utils_videotl.h"
 
@@ -438,7 +440,11 @@ TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::samplecnt_t /*sampl
 	snprintf (argp[i++], 8, "0:%s", m_audio.at (stream).stream_id.c_str ());
 	argp[i++] = strdup ("-vn");
 	argp[i++] = strdup ("-acodec");
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
 	argp[i++] = strdup ("pcm_f32le");
+#else
+	argp[i++] = strdup ("pcm_f32be");
+#endif
 	argp[i++] = strdup ("-y");
 	argp[i++] = strdup (outfile.c_str ());
 	argp[i++] = (char*)0;
