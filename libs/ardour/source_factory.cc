@@ -27,6 +27,8 @@
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
+#include "temporal/tempo.h"
+
 #include "ardour/audio_playlist_source.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/boost_debug.h"
@@ -71,6 +73,7 @@ peak_thread_work ()
 	wait:
 		if (SourceFactory::files_with_peaks.empty () && SourceFactory::peak_thread_run) {
 			SourceFactory::PeaksToBuild.wait (SourceFactory::peak_building_lock);
+			(void) Temporal::TempoMap::fetch();
 		}
 
 		if (!SourceFactory::peak_thread_run) {

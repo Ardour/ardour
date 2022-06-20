@@ -32,6 +32,8 @@
 #include "pbd/convert.h"
 #include "pbd/signals.h"
 
+#include "temporal/tempo.h"
+
 #include "ardour/types.h"
 #include "ardour/dB.h"
 #include "ardour/lmath.h"
@@ -883,6 +885,8 @@ WaveView::process_draw_request (boost::shared_ptr<WaveViewDrawRequest> req)
 	if (req->stopped()) {
 		return;
 	}
+
+	(void) Temporal::TempoMap::fetch();
 
 	WaveViewProperties const& props = req->image->props;
 
