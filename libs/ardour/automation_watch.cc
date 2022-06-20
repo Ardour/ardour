@@ -163,6 +163,8 @@ AutomationWatch::timer ()
 		return TRUE;
 	}
 
+	(void) Temporal::TempoMap::fetch ();
+
 	{
 		Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 
