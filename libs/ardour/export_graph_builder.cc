@@ -378,9 +378,15 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 	char tmp[64];
 	argp[a++] = strdup(ffmpeg_exe.c_str());
 	argp[a++] = strdup ("-f");
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
 	argp[a++] = strdup ("f32le");
 	argp[a++] = strdup ("-acodec");
 	argp[a++] = strdup ("pcm_f32le");
+#else
+	argp[a++] = strdup ("f32be");
+	argp[a++] = strdup ("-acodec");
+	argp[a++] = strdup ("pcm_f32be");
+#endif
 	argp[a++] = strdup ("-ac");
 	snprintf (tmp, sizeof(tmp), "%d", channels);
 	argp[a++] = strdup (tmp);
