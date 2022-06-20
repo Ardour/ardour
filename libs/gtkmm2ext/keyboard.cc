@@ -78,8 +78,8 @@ const char* Keyboard::secondary_modifier_name() { return _("Control"); }
 const char* Keyboard::tertiary_modifier_name() { return S_("Key|Shift"); }
 const char* Keyboard::level4_modifier_name() { return _("Option"); }
 
-const char* Keyboard::button2_name() { return _("Middle Click (or Ctrl+Alt+Click)"); }
-const char* Keyboard::momentary_push_name() { return _("Shift+Click (or Middle-Click)"); }
+const char* Keyboard::button2_name() { return _("Middle Click (or Ctrl+Alt+Click)"); } // TODO build dynamically depending on Keyboard::button2_modifiers
+const char* Keyboard::momentary_push_name() { return _("Shift+Click (or Middle-Click)"); } // TODO formay dynamically depending on Keyboard::momentary_push_modifiers -- Keyboard::tertiary_modifier_name
 
 const char* Keyboard::primary_modifier_short_name() { return _("Cmd"); }
 const char* Keyboard::secondary_modifier_short_name() { return _("Ctrl"); }
@@ -98,7 +98,7 @@ guint Keyboard::Level4Modifier = GDK_MOD4_MASK|GDK_SUPER_MASK; // Mod4/Windows
 guint Keyboard::CopyModifier = GDK_CONTROL_MASK;
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = 0; /* not used */
-guint Keyboard::momentary_push_modifiers = Keyboard::TertiaryModifier;
+guint Keyboard::momentary_push_modifiers = 0; /* not used */
 
 const char* Keyboard::primary_modifier_name() { return _("Control"); }
 const char* Keyboard::secondary_modifier_name() { return _("Alt"); }
@@ -106,7 +106,7 @@ const char* Keyboard::tertiary_modifier_name() { return S_("Key|Shift"); }
 const char* Keyboard::level4_modifier_name() { return _("Windows"); }
 
 const char* Keyboard::button2_name() { return _("Middle-Click"); }
-const char* Keyboard::momentary_push_name() { return _("Middle-Click (or Shift+Click)"); }
+const char* Keyboard::momentary_push_name() { return _("Middle-Click"); }
 
 const char* Keyboard::primary_modifier_short_name() { return _("Ctrl"); }
 const char* Keyboard::secondary_modifier_short_name() { return _("Alt"); }
@@ -541,20 +541,16 @@ Keyboard::is_insert_note_event (GdkEventButton *ev)
 bool
 Keyboard::is_button2_event (GdkEventButton* ev)
 {
-#ifdef __APPLE__
 	return (ev->button == 2) ||
-		((ev->button == 1) &&
+		((ev->button == 1) && Keyboard::button2_modifiers != 0 &&
 		 ((ev->state & Keyboard::button2_modifiers) == Keyboard::button2_modifiers));
-#else
-	return ev->button == 2;
-#endif
 }
 
 bool
 Keyboard::is_momentary_push_event (GdkEventButton* ev)
 {
 	return (is_button2_event(ev)) ||
-		((ev->button == 1) &&
+		((ev->button == 1) && Keyboard::momentary_push_modifiers != 0 &&
 		 ((ev->state & RelevantModifierKeyMask) == Keyboard::momentary_push_modifiers));
 }
 
