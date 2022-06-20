@@ -2063,6 +2063,8 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 		MidiPortOptions()
 			: input_heading (_("MIDI Inputs"))
 			, output_heading (_("MIDI Outputs"))
+			, no_input_label (_("No MIDI Input (capture) devices found."), Gtk::ALIGN_START)
+			, no_output_label (_("No MIDI Output (playback) devices found."), Gtk::ALIGN_START)
 		{
 			setup_midi_port_view (midi_output_view, false);
 			setup_midi_port_view (midi_input_view, true);
@@ -2076,6 +2078,7 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 
 			int n = table.property_n_rows();
 			table.attach (input_scroller, 0, 3, n, n + 1, FILL | EXPAND);
+			table.attach (no_input_label, 1, 3, n + 1, n + 2, FILL | EXPAND);
 
 			output_heading.add_to_page (this);
 
@@ -2086,6 +2089,7 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 
 			n = table.property_n_rows();
 			table.attach (output_scroller, 0, 3, n, n + 1, FILL | EXPAND);
+			table.attach (no_output_label, 1, 3, n + 1, n + 2, FILL | EXPAND);
 
 			midi_output_view.show ();
 			midi_input_view.show ();
@@ -2120,17 +2124,17 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 
 		void refill () {
 			if (refill_midi_ports (true, midi_input_view)) {
-				input_heading.tip_widget ().show ();
+				no_input_label.hide ();
 				input_scroller.show ();
 			} else {
-				input_heading.tip_widget ().hide ();
+				no_input_label.show ();
 				input_scroller.hide ();
 			}
 			if (refill_midi_ports (false, midi_output_view)) {
-				output_heading.tip_widget ().show ();
+				no_output_label.hide ();
 				output_scroller.show ();
 			} else {
-				output_heading.tip_widget ().hide ();
+				no_output_label.show ();
 				output_scroller.hide ();
 			}
 		}
@@ -2168,6 +2172,9 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 		Gtk::ScrolledWindow output_scroller;
 		OptionEditorHeading input_heading;
 		OptionEditorHeading output_heading;
+
+		Gtk::Label no_input_label;
+		Gtk::Label no_output_label;
 
 		void setup_midi_port_view (Gtk::TreeView&, bool with_selection);
 		bool refill_midi_ports (bool for_input, Gtk::TreeView&);
