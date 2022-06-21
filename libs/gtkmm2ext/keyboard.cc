@@ -64,10 +64,11 @@ guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
 
 #ifdef __APPLE__
 
-guint Keyboard::PrimaryModifier          = GDK_MOD2_MASK;    // Command
-guint Keyboard::SecondaryModifier        = GDK_CONTROL_MASK; // Control
-guint Keyboard::TertiaryModifier         = GDK_SHIFT_MASK;   // Shift
-guint Keyboard::Level4Modifier           = GDK_MOD1_MASK;    // Alt/Option
+guint const Keyboard::PrimaryModifier   = GDK_MOD2_MASK;    // Command
+guint const Keyboard::SecondaryModifier = GDK_CONTROL_MASK; // Control
+guint const Keyboard::TertiaryModifier  = GDK_SHIFT_MASK;   // Shift
+guint const Keyboard::Level4Modifier    = GDK_MOD1_MASK;    // Alt/Option
+
 guint Keyboard::CopyModifier             = GDK_CONTROL_MASK; // Control
 guint Keyboard::RangeSelectModifier      = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers        = Keyboard::SecondaryModifier | Keyboard::Level4Modifier;
@@ -129,10 +130,11 @@ guint Keyboard::snap_delta_mod = Keyboard::Level4Modifier;
 
 #else
 
-guint Keyboard::PrimaryModifier          = GDK_CONTROL_MASK;               // Control
-guint Keyboard::SecondaryModifier        = GDK_MOD1_MASK;                  // Alt/Option
-guint Keyboard::TertiaryModifier         = GDK_SHIFT_MASK;                 // Shift
-guint Keyboard::Level4Modifier           = GDK_MOD4_MASK | GDK_SUPER_MASK; // Mod4/Windows
+guint const Keyboard::PrimaryModifier   = GDK_CONTROL_MASK;               // Control
+guint const Keyboard::SecondaryModifier = GDK_MOD1_MASK;                  // Alt/Option
+guint const Keyboard::TertiaryModifier  = GDK_SHIFT_MASK;                 // Shift
+guint const Keyboard::Level4Modifier    = GDK_MOD4_MASK | GDK_SUPER_MASK; // Mod4/Windows
+
 guint Keyboard::CopyModifier             = GDK_CONTROL_MASK;
 guint Keyboard::RangeSelectModifier      = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers        = 0; /* not used */

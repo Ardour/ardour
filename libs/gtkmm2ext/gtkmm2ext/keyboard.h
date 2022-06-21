@@ -60,10 +60,11 @@ public:
 	typedef std::vector<uint32_t> State;
 	typedef uint32_t              ModifierMask;
 
-	static uint32_t PrimaryModifier;
-	static uint32_t SecondaryModifier;
-	static uint32_t TertiaryModifier;
-	static uint32_t Level4Modifier;
+	static const uint32_t PrimaryModifier;
+	static const uint32_t SecondaryModifier;
+	static const uint32_t TertiaryModifier;
+	static const uint32_t Level4Modifier;
+
 	static uint32_t CopyModifier;
 	static uint32_t RangeSelectModifier;
 	static uint32_t GainFineScaleModifier;
@@ -88,30 +89,6 @@ public:
 	static const char* tertiary_modifier_short_name ();
 	static const char* level4_modifier_short_name ();
 
-	static void set_primary_modifier (uint32_t newval)
-	{
-		set_modifier (newval, PrimaryModifier);
-	}
-	static void set_secondary_modifier (uint32_t newval)
-	{
-		set_modifier (newval, SecondaryModifier);
-	}
-	static void set_tertiary_modifier (uint32_t newval)
-	{
-		set_modifier (newval, TertiaryModifier);
-	}
-	static void set_level4_modifier (uint32_t newval)
-	{
-		set_modifier (newval, Level4Modifier);
-	}
-	static void set_copy_modifier (uint32_t newval)
-	{
-		set_modifier (newval, CopyModifier);
-	}
-	static void set_range_select_modifier (uint32_t newval)
-	{
-		set_modifier (newval, RangeSelectModifier);
-	}
 
 	bool  key_is_down (uint32_t keyval);
 	guint modifier_state ();
@@ -137,6 +114,15 @@ public:
 	static bool modifier_state_equals (guint state, ModifierMask);
 
 	static bool no_modifiers_active (guint state);
+
+	static void set_copy_modifier (uint32_t newval)
+	{
+		set_modifier (newval, CopyModifier);
+	}
+	static void set_range_select_modifier (uint32_t newval)
+	{
+		set_modifier (newval, RangeSelectModifier);
+	}
 
 	static void set_snap_modifier (guint);
 	static void set_snap_delta_modifier (guint);
