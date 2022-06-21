@@ -71,7 +71,6 @@ guint Keyboard::Level4Modifier = GDK_MOD1_MASK; // Alt/Option
 guint Keyboard::CopyModifier = GDK_CONTROL_MASK;      // Control
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
-guint Keyboard::momentary_push_modifiers = Keyboard::TertiaryModifier;
 
 const char* Keyboard::primary_modifier_name() { return _("Command"); }
 const char* Keyboard::secondary_modifier_name() { return _("Control"); }
@@ -79,7 +78,7 @@ const char* Keyboard::tertiary_modifier_name() { return S_("Key|Shift"); }
 const char* Keyboard::level4_modifier_name() { return _("Option"); }
 
 const char* Keyboard::button2_name() { return _("Middle Click (or Ctrl+Alt+Click)"); } // TODO build dynamically depending on Keyboard::button2_modifiers
-const char* Keyboard::momentary_push_name() { return _("Shift+Click (or Middle-Click)"); } // TODO formay dynamically depending on Keyboard::momentary_push_modifiers -- Keyboard::tertiary_modifier_name
+const char* Keyboard::momentary_push_name() { return _("Cmd+Click (or Middle-Click)"); } // TODO formay dynamically depending on Keyboard::momentary_push_modifiers -- Keyboard::tertiary_modifier_name
 
 const char* Keyboard::primary_modifier_short_name() { return _("Cmd"); }
 const char* Keyboard::secondary_modifier_short_name() { return _("Ctrl"); }
@@ -98,7 +97,6 @@ guint Keyboard::Level4Modifier = GDK_MOD4_MASK|GDK_SUPER_MASK; // Mod4/Windows
 guint Keyboard::CopyModifier = GDK_CONTROL_MASK;
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = 0; /* not used */
-guint Keyboard::momentary_push_modifiers = 0; /* not used */
 
 const char* Keyboard::primary_modifier_name() { return _("Control"); }
 const char* Keyboard::secondary_modifier_name() { return _("Alt"); }
@@ -106,7 +104,7 @@ const char* Keyboard::tertiary_modifier_name() { return S_("Key|Shift"); }
 const char* Keyboard::level4_modifier_name() { return _("Windows"); }
 
 const char* Keyboard::button2_name() { return _("Middle-Click"); }
-const char* Keyboard::momentary_push_name() { return _("Middle-Click"); }
+const char* Keyboard::momentary_push_name() { return _("Cmd+Click or Middle-Click"); }
 
 const char* Keyboard::primary_modifier_short_name() { return _("Ctrl"); }
 const char* Keyboard::secondary_modifier_short_name() { return _("Alt"); }
@@ -117,6 +115,11 @@ guint Keyboard::snap_mod = Keyboard::SecondaryModifier;
 guint Keyboard::snap_delta_mod = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
 
 #endif
+
+guint Keyboard::momentary_push_modifiers = Keyboard::PrimaryModifier;
+
+guint Keyboard::group_override_modifiers = Keyboard::TertiaryModifier;
+const char* Keyboard::group_override_event_name() { return tertiary_modifier_name(); }
 
 guint Keyboard::GainFineScaleModifier = Keyboard::PrimaryModifier;
 guint Keyboard::GainExtraFineScaleModifier = Keyboard::SecondaryModifier;
@@ -552,6 +555,12 @@ Keyboard::is_momentary_push_event (GdkEventButton* ev)
 	return (is_button2_event(ev)) ||
 		((ev->button == 1) && Keyboard::momentary_push_modifiers != 0 &&
 		 ((ev->state & RelevantModifierKeyMask) == Keyboard::momentary_push_modifiers));
+}
+
+bool
+Keyboard::is_group_override_event (GdkEventButton* ev)
+{
+	return ((ev->button == 1) && ((ev->state & RelevantModifierKeyMask) == Keyboard::group_override_modifiers));
 }
 
 bool

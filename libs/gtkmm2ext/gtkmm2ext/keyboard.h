@@ -80,6 +80,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 
 	static const char* button2_name ();
 	static const char* momentary_push_name ();
+	static const char* group_override_event_name ();
 
 	static const char* primary_modifier_short_name ();
 	static const char* secondary_modifier_short_name ();
@@ -165,6 +166,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static bool is_context_menu_event (GdkEventButton*);
 	static bool is_button2_event (GdkEventButton*);
 	static bool is_momentary_push_event (GdkEventButton*);
+	static bool is_group_override_event (GdkEventButton*);
 
 	static Keyboard& the_keyboard() { return *_the_keyboard; }
 
@@ -212,6 +214,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static guint     snap_delta_mod;
 	static guint     button2_modifiers;
 	static guint     momentary_push_modifiers;
+	static guint     group_override_modifiers;
 	static Gtk::Window* current_window;
 	static std::string user_keybindings_path;
 	static bool can_save_keybindings;
