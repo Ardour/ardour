@@ -587,7 +587,18 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%8 => \nsc %1 delta %9 = %2 secs rem = %3 rem snotes %4 sbeats = %5 => %6 : %7\n", sc, whole_seconds, remainder, supernotes, superbeats, b , t, *this, sc_delta));
 
-		return _quarters + Beats (b, t);
+		const Beats ret = _quarters + Beats (b, t);
+
+		/* positive superclock can never generate negative beats unless
+		 * it is too large. If that happens, handle it the same way as
+		 * the opening special case in this method.
+		 */
+
+		if (sc >= 0 && ret < Beats()) {
+			return std::numeric_limits<Beats>::max();
+		}
+
+		return ret;
 	}
 
 	const double b = (exp (_omega * (sc - _sclock)) - 1) / (superclocks_per_quarter_note() * _omega);
