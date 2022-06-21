@@ -44,7 +44,7 @@
 #ifdef ARDOURCURLDEBUG
 #define CCERR(msg) do { if (cc != CURLE_OK) { std::cerr << string_compose ("curl_easy_setopt(%1) failed: %2", msg, cc) << std::endl; } } while (0)
 #else
-#define CCERR(msg) do { (void) cc; } while (0)
+#define CCERR(msg) (void) cc;
 #endif
 
 using namespace ArdourCurl;
