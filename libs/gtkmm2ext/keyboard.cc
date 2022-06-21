@@ -29,23 +29,23 @@
 
 #include "pbd/gstdio_compat.h"
 
+#include <gdk/gdkkeysyms.h>
+#include <gtkmm/accelmap.h>
 #include <gtkmm/widget.h>
 #include <gtkmm/window.h>
-#include <gtkmm/accelmap.h>
-#include <gdk/gdkkeysyms.h>
 
-#include "pbd/error.h"
 #include "pbd/convert.h"
+#include "pbd/debug.h"
+#include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/search_path.h"
-#include "pbd/xml++.h"
-#include "pbd/debug.h"
 #include "pbd/unwind.h"
+#include "pbd/xml++.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
-#include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/debug.h"
+#include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
 
 #include "pbd/i18n.h"
@@ -55,98 +55,178 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace std;
 
-guint Keyboard::edit_but = 3;
-guint Keyboard::edit_mod = GDK_CONTROL_MASK;
-guint Keyboard::delete_but = 3;
-guint Keyboard::delete_mod = GDK_SHIFT_MASK;
+guint Keyboard::edit_but        = 3;
+guint Keyboard::edit_mod        = GDK_CONTROL_MASK;
+guint Keyboard::delete_but      = 3;
+guint Keyboard::delete_mod      = GDK_SHIFT_MASK;
 guint Keyboard::insert_note_but = 1;
 guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
 
 #ifdef __APPLE__
 
-guint Keyboard::PrimaryModifier = GDK_MOD2_MASK;   // Command
-guint Keyboard::SecondaryModifier = GDK_CONTROL_MASK; // Control
-guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
-guint Keyboard::Level4Modifier = GDK_MOD1_MASK; // Alt/Option
-guint Keyboard::CopyModifier = GDK_CONTROL_MASK;      // Control
-guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
-guint Keyboard::button2_modifiers = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
+guint Keyboard::PrimaryModifier          = GDK_MOD2_MASK;    // Command
+guint Keyboard::SecondaryModifier        = GDK_CONTROL_MASK; // Control
+guint Keyboard::TertiaryModifier         = GDK_SHIFT_MASK;   // Shift
+guint Keyboard::Level4Modifier           = GDK_MOD1_MASK;    // Alt/Option
+guint Keyboard::CopyModifier             = GDK_CONTROL_MASK; // Control
+guint Keyboard::RangeSelectModifier      = GDK_SHIFT_MASK;
+guint Keyboard::button2_modifiers        = Keyboard::SecondaryModifier | Keyboard::Level4Modifier;
 guint Keyboard::momentary_push_modifiers = Keyboard::PrimaryModifier;
 
-const char* Keyboard::primary_modifier_name() { return _("Command"); }
-const char* Keyboard::secondary_modifier_name() { return _("Control"); }
-const char* Keyboard::tertiary_modifier_name() { return S_("Key|Shift"); }
-const char* Keyboard::level4_modifier_name() { return _("Option"); }
+const char*
+Keyboard::primary_modifier_name ()
+{
+	return _("Command");
+}
+const char*
+Keyboard::secondary_modifier_name ()
+{
+	return _("Control");
+}
+const char*
+Keyboard::tertiary_modifier_name ()
+{
+	return S_("Key|Shift");
+}
+const char*
+Keyboard::level4_modifier_name ()
+{
+	return _("Option");
+}
+const char*
+Keyboard::button2_name ()
+{
+	return _("Middle Click (or Ctrl+Alt+Click)");
+}
+const char*
+Keyboard::momentary_push_name ()
+{
+	return _("Cmd+Click (or Middle-Click)");
+}
+const char*
+Keyboard::primary_modifier_short_name ()
+{
+	return _("Cmd");
+}
+const char*
+Keyboard::secondary_modifier_short_name ()
+{
+	return _("Ctrl");
+}
+const char*
+Keyboard::tertiary_modifier_short_name ()
+{
+	return S_("Key|Shift");
+}
+const char*
+Keyboard::level4_modifier_short_name ()
+{
+	return _("Opt");
+}
 
-const char* Keyboard::button2_name() { return _("Middle Click (or Ctrl+Alt+Click)"); } // TODO build dynamically depending on Keyboard::button2_modifiers
-const char* Keyboard::momentary_push_name() { return _("Cmd+Click (or Middle-Click)"); } // TODO formay dynamically depending on Keyboard::momentary_push_modifiers -- Keyboard::tertiary_modifier_name
-
-const char* Keyboard::primary_modifier_short_name() { return _("Cmd"); }
-const char* Keyboard::secondary_modifier_short_name() { return _("Ctrl"); }
-const char* Keyboard::tertiary_modifier_short_name() { return S_("Key|Shift"); }
-const char* Keyboard::level4_modifier_short_name() { return _("Opt"); }
-
-guint Keyboard::snap_mod = Keyboard::Level4Modifier|Keyboard::TertiaryModifier; // XXX this is probably completely wrong
+guint Keyboard::snap_mod       = Keyboard::Level4Modifier | Keyboard::TertiaryModifier; // XXX this is probably completely wrong
 guint Keyboard::snap_delta_mod = Keyboard::Level4Modifier;
 
 #else
 
-guint Keyboard::PrimaryModifier = GDK_CONTROL_MASK; // Control
-guint Keyboard::SecondaryModifier = GDK_MOD1_MASK;  // Alt/Option
-guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK;  // Shift
-guint Keyboard::Level4Modifier = GDK_MOD4_MASK|GDK_SUPER_MASK; // Mod4/Windows
-guint Keyboard::CopyModifier = GDK_CONTROL_MASK;
-guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
-guint Keyboard::button2_modifiers = 0; /* not used */
+guint Keyboard::PrimaryModifier          = GDK_CONTROL_MASK;               // Control
+guint Keyboard::SecondaryModifier        = GDK_MOD1_MASK;                  // Alt/Option
+guint Keyboard::TertiaryModifier         = GDK_SHIFT_MASK;                 // Shift
+guint Keyboard::Level4Modifier           = GDK_MOD4_MASK | GDK_SUPER_MASK; // Mod4/Windows
+guint Keyboard::CopyModifier             = GDK_CONTROL_MASK;
+guint Keyboard::RangeSelectModifier      = GDK_SHIFT_MASK;
+guint Keyboard::button2_modifiers        = 0; /* not used */
 guint Keyboard::momentary_push_modifiers = 0; /* not used */
 
-const char* Keyboard::primary_modifier_name() { return _("Control"); }
-const char* Keyboard::secondary_modifier_name() { return _("Alt"); }
-const char* Keyboard::tertiary_modifier_name() { return S_("Key|Shift"); }
-const char* Keyboard::level4_modifier_name() { return _("Windows"); }
+const char*
+Keyboard::primary_modifier_name ()
+{
+	return _("Control");
+}
+const char*
+Keyboard::secondary_modifier_name ()
+{
+	return _("Alt");
+}
+const char*
+Keyboard::tertiary_modifier_name ()
+{
+	return S_("Key|Shift");
+}
+const char*
+Keyboard::level4_modifier_name ()
+{
+	return _("Windows");
+}
+const char*
+Keyboard::button2_name ()
+{
+	return _("Middle-Click");
+}
+const char*
+Keyboard::momentary_push_name ()
+{
+	return _("Middle-Click");
+}
+const char*
+Keyboard::primary_modifier_short_name ()
+{
+	return _("Ctrl");
+}
+const char*
+Keyboard::secondary_modifier_short_name ()
+{
+	return _("Alt");
+}
+const char*
+Keyboard::tertiary_modifier_short_name ()
+{
+	return S_("Key|Shift");
+}
+const char*
+Keyboard::level4_modifier_short_name ()
+{
+	return _("Win");
+}
 
-const char* Keyboard::button2_name() { return _("Middle-Click"); }
-const char* Keyboard::momentary_push_name() { return _("Middle-Click"); }
-
-const char* Keyboard::primary_modifier_short_name() { return _("Ctrl"); }
-const char* Keyboard::secondary_modifier_short_name() { return _("Alt"); }
-const char* Keyboard::tertiary_modifier_short_name() { return S_("Key|Shift"); }
-const char* Keyboard::level4_modifier_short_name() { return _("Win"); }
-
-guint Keyboard::snap_mod = Keyboard::SecondaryModifier;
-guint Keyboard::snap_delta_mod = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
+guint Keyboard::snap_mod       = Keyboard::SecondaryModifier;
+guint Keyboard::snap_delta_mod = Keyboard::SecondaryModifier | Keyboard::Level4Modifier;
 
 #endif
 
 guint Keyboard::group_override_modifiers = Keyboard::TertiaryModifier;
-const char* Keyboard::group_override_event_name() { return tertiary_modifier_name(); }
+const char*
+Keyboard::group_override_event_name ()
+{
+	return tertiary_modifier_name ();
+}
 
-guint Keyboard::GainFineScaleModifier = Keyboard::PrimaryModifier;
+guint Keyboard::GainFineScaleModifier      = Keyboard::PrimaryModifier;
 guint Keyboard::GainExtraFineScaleModifier = Keyboard::SecondaryModifier;
 
-guint Keyboard::ScrollZoomVerticalModifier = Keyboard::SecondaryModifier;
+guint Keyboard::ScrollZoomVerticalModifier   = Keyboard::SecondaryModifier;
 guint Keyboard::ScrollZoomHorizontalModifier = Keyboard::PrimaryModifier;
-guint Keyboard::ScrollHorizontalModifier = Keyboard::TertiaryModifier;
+guint Keyboard::ScrollHorizontalModifier     = Keyboard::TertiaryModifier;
 
-Keyboard*    Keyboard::_the_keyboard = 0;
-Gtk::Window* Keyboard::current_window = 0;
+Keyboard*    Keyboard::_the_keyboard                = 0;
+Gtk::Window* Keyboard::current_window               = 0;
 bool         Keyboard::_some_magic_widget_has_focus = false;
 
-const int    Keyboard::close_window_key = GDK_w;
-guint  Keyboard::close_window_modifier = Keyboard::PrimaryModifier;
+const int Keyboard::close_window_key      = GDK_w;
+guint     Keyboard::close_window_modifier = Keyboard::PrimaryModifier;
 
-std::string Keyboard::user_keybindings_path;
-bool Keyboard::can_save_keybindings = false;
-bool Keyboard::bindings_changed_after_save_became_legal = false;
-map<string,string> Keyboard::binding_files;
-string Keyboard::_current_binding_name;
-string Keyboard::binding_filename_suffix = X_(".keys");
-Gtk::Window* Keyboard::pre_dialog_active_window = 0;
+std::string         Keyboard::user_keybindings_path;
+bool                Keyboard::can_save_keybindings                     = false;
+bool                Keyboard::bindings_changed_after_save_became_legal = false;
+map<string, string> Keyboard::binding_files;
+string              Keyboard::_current_binding_name;
+string              Keyboard::binding_filename_suffix  = X_(".keys");
+Gtk::Window*        Keyboard::pre_dialog_active_window = 0;
 
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
-GdkModifierType Keyboard::RelevantModifierKeyMask;
-sigc::signal0<void> Keyboard::RelevantModifierKeysChanged;
-sigc::signal1<void,Gtk::Window*> Keyboard::HideMightMeanQuit;
+GdkModifierType                   Keyboard::RelevantModifierKeyMask;
+sigc::signal0<void>               Keyboard::RelevantModifierKeysChanged;
+sigc::signal1<void, Gtk::Window*> Keyboard::HideMightMeanQuit;
 
 void
 Keyboard::magic_widget_grab_focus ()
@@ -169,13 +249,13 @@ Keyboard::some_magic_widget_has_focus ()
 Keyboard::Keyboard ()
 {
 	if (_the_keyboard == 0) {
-		_the_keyboard = this;
-                _current_binding_name = _("Unknown");
+		_the_keyboard         = this;
+		_current_binding_name = _("Unknown");
 	}
 
-	reset_relevant_modifier_key_mask();
+	reset_relevant_modifier_key_mask ();
 
-	snooper_id = gtk_key_snooper_install (_snooper, (gpointer) this);
+	snooper_id = gtk_key_snooper_install (_snooper, (gpointer)this);
 }
 
 Keyboard::~Keyboard ()
@@ -218,26 +298,23 @@ Keyboard::set_state (const XMLNode& node, int /*version*/)
 }
 
 gint
-Keyboard::_snooper (GtkWidget *widget, GdkEventKey *event, gpointer data)
+Keyboard::_snooper (GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
-	return ((Keyboard *) data)->snooper (widget, event);
+	return ((Keyboard*)data)->snooper (widget, event);
 }
 
-
 gint
-Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
+Keyboard::snooper (GtkWidget* widget, GdkEventKey* event)
 {
 	uint32_t keyval;
-	bool ret = false;
+	bool     ret = false;
 
 	DEBUG_TRACE (
-		DEBUG::Keyboard,
-		string_compose (
-			"Snoop widget %1 name: [%6] key %2 [%8] type %3 state %4 [%7] magic %5\n",
-			widget, event->keyval, event->type, event->state, _some_magic_widget_has_focus,
-			gtk_widget_get_name (widget), show_gdk_event_state (event->state), gdk_keyval_name (event->keyval)
-			)
-		);
+	    DEBUG::Keyboard,
+	    string_compose (
+	        "Snoop widget %1 name: [%6] key %2 [%8] type %3 state %4 [%7] magic %5\n",
+	        widget, event->keyval, event->type, event->state, _some_magic_widget_has_focus,
+	        gtk_widget_get_name (widget), show_gdk_event_state (event->state), gdk_keyval_name (event->keyval)));
 
 	if (event->keyval == GDK_Shift_R) {
 		keyval = GDK_Shift_L;
@@ -261,13 +338,11 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 	}
 
 	if (event->type == GDK_KEY_PRESS) {
-
-		if (find (state.begin(), state.end(), keyval) == state.end()) {
+		if (find (state.begin (), state.end (), keyval) == state.end ()) {
 			state.push_back (keyval);
-			sort (state.begin(), state.end());
+			sort (state.begin (), state.end ());
 
 		} else {
-
 			/* key is already down. if its also used for release,
 			   prevent auto-repeat events.
 			*/
@@ -291,43 +366,41 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 	}
 
 	if (event->type == GDK_KEY_RELEASE) {
+		State::iterator k = find (state.begin (), state.end (), keyval);
 
-		State::iterator k = find (state.begin(), state.end(), keyval);
-
-		if (k != state.end()) {
+		if (k != state.end ()) {
 			/* this cannot change the ordering, so need to sort */
 			state.erase (k);
-			if (state.empty()) {
+			if (state.empty ()) {
 				DEBUG_TRACE (DEBUG::Keyboard, "no keys down\n");
 			} else {
 #ifndef NDEBUG
-				if (DEBUG_ENABLED(DEBUG::Keyboard)) {
-					DEBUG_STR_DECL(a);
-					DEBUG_STR_APPEND(a, "keyboard, keys still down: ");
-					for (State::iterator i = state.begin(); i != state.end(); ++i) {
-						DEBUG_STR_APPEND(a, gdk_keyval_name (*i));
-						DEBUG_STR_APPEND(a, ',');
+				if (DEBUG_ENABLED (DEBUG::Keyboard)) {
+					DEBUG_STR_DECL (a);
+					DEBUG_STR_APPEND (a, "keyboard, keys still down: ");
+					for (State::iterator i = state.begin (); i != state.end (); ++i) {
+						DEBUG_STR_APPEND (a, gdk_keyval_name (*i));
+						DEBUG_STR_APPEND (a, ',');
 					}
-					DEBUG_STR_APPEND(a, '\n');
-					DEBUG_TRACE (DEBUG::Keyboard, DEBUG_STR(a).str());
+					DEBUG_STR_APPEND (a, '\n');
+					DEBUG_TRACE (DEBUG::Keyboard, DEBUG_STR (a).str ());
 				}
 #endif /* NDEBUG */
 			}
 		}
 
 		if (modifier_state_equals (event->state, PrimaryModifier)) {
-
 			/* Special keys that we want to handle in
 			   any dialog, no matter whether it uses
 			   the regular set of accelerators or not
 			*/
 
 			switch (event->keyval) {
-			case close_window_key:
-				if (close_current_dialog ()) {
-					ret = true;
-				}
-				break;
+				case close_window_key:
+					if (close_current_dialog ()) {
+						ret = true;
+					}
+					break;
 			}
 		}
 	}
@@ -340,7 +413,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 void
 Keyboard::reset_relevant_modifier_key_mask ()
 {
-	RelevantModifierKeyMask = (GdkModifierType) gtk_accelerator_get_default_mod_mask ();
+	RelevantModifierKeyMask = (GdkModifierType)gtk_accelerator_get_default_mod_mask ();
 
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | PrimaryModifier);
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | SecondaryModifier);
@@ -351,25 +424,24 @@ Keyboard::reset_relevant_modifier_key_mask ()
 
 	gtk_accelerator_set_default_mod_mask (RelevantModifierKeyMask);
 
-	RelevantModifierKeysChanged(); /* EMIT SIGNAL */
+	RelevantModifierKeysChanged (); /* EMIT SIGNAL */
 }
 
 bool
 Keyboard::close_current_dialog ()
 {
 	if (current_window) {
-
 		HideMightMeanQuit (current_window); /* EMIT SIGNAL */
 
 		current_window->hide ();
 		current_window = 0;
 
-                if (pre_dialog_active_window) {
-                        pre_dialog_active_window->present ();
-                        pre_dialog_active_window = 0;
-                }
+		if (pre_dialog_active_window) {
+			pre_dialog_active_window->present ();
+			pre_dialog_active_window = 0;
+		}
 
-                return true;
+		return true;
 	}
 
 	return false;
@@ -378,58 +450,58 @@ Keyboard::close_current_dialog ()
 bool
 Keyboard::catch_user_event_for_pre_dialog_focus (GdkEvent* ev, Gtk::Window* w)
 {
-        switch (ev->type) {
-        case GDK_BUTTON_PRESS:
-        case GDK_BUTTON_RELEASE:
-        case GDK_KEY_PRESS:
-        case GDK_KEY_RELEASE:
-                pre_dialog_active_window = w;
-                break;
+	switch (ev->type) {
+		case GDK_BUTTON_PRESS:
+		case GDK_BUTTON_RELEASE:
+		case GDK_KEY_PRESS:
+		case GDK_KEY_RELEASE:
+			pre_dialog_active_window = w;
+			break;
 
-        case GDK_FOCUS_CHANGE:
-                if (ev->focus_change.in) {
-                        pre_dialog_active_window = w;
-                }
-                break;
+		case GDK_FOCUS_CHANGE:
+			if (ev->focus_change.in) {
+				pre_dialog_active_window = w;
+			}
+			break;
 
-        default:
-                break;
-        }
-        return false;
+		default:
+			break;
+	}
+	return false;
 }
 
 bool
 Keyboard::key_is_down (uint32_t keyval)
 {
-	return find (state.begin(), state.end(), keyval) != state.end();
+	return find (state.begin (), state.end (), keyval) != state.end ();
 }
 
 bool
-Keyboard::enter_window (GdkEventCrossing *, Gtk::Window* win)
+Keyboard::enter_window (GdkEventCrossing*, Gtk::Window* win)
 {
 	current_window = win;
-	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Entering window, title = %1\n", win->get_title()));
+	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Entering window, title = %1\n", win->get_title ()));
 	return false;
 }
 
 bool
-Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* /*win*/)
+Keyboard::leave_window (GdkEventCrossing* ev, Gtk::Window* /*win*/)
 {
 	if (ev) {
 		switch (ev->detail) {
-		case GDK_NOTIFY_INFERIOR:
-			DEBUG_TRACE (DEBUG::Keyboard, "INFERIOR crossing ... out\n");
-			break;
+			case GDK_NOTIFY_INFERIOR:
+				DEBUG_TRACE (DEBUG::Keyboard, "INFERIOR crossing ... out\n");
+				break;
 
-		case GDK_NOTIFY_VIRTUAL:
-			DEBUG_TRACE (DEBUG::Keyboard, "VIRTUAL crossing ... out\n");
-			/* fallthrough */
+			case GDK_NOTIFY_VIRTUAL:
+				DEBUG_TRACE (DEBUG::Keyboard, "VIRTUAL crossing ... out\n");
+				/* fallthrough */
 
-		default:
-			DEBUG_TRACE (DEBUG::Keyboard, "REAL crossing ... out\n");
-			DEBUG_TRACE (DEBUG::Keyboard, "Clearing current target\n");
-			state.clear ();
-			current_window = 0;
+			default:
+				DEBUG_TRACE (DEBUG::Keyboard, "REAL crossing ... out\n");
+				DEBUG_TRACE (DEBUG::Keyboard, "Clearing current target\n");
+				state.clear ();
+				current_window = 0;
 		}
 	} else {
 		DEBUG_TRACE (DEBUG::Keyboard, "LEAVE window without event\n");
@@ -440,26 +512,26 @@ Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* /*win*/)
 }
 
 bool
-Keyboard::focus_in_window (GdkEventFocus *, Gtk::Window* win)
+Keyboard::focus_in_window (GdkEventFocus*, Gtk::Window* win)
 {
 	current_window = win;
-	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Focusing in window, title = %1\n", win->get_title()));
+	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Focusing in window, title = %1\n", win->get_title ()));
 	return false;
 }
 
 bool
-Keyboard::focus_out_window (GdkEventFocus * ev, Gtk::Window* win)
+Keyboard::focus_out_window (GdkEventFocus* ev, Gtk::Window* win)
 {
 	if (ev) {
 		state.clear ();
 		current_window = 0;
-	}  else {
+	} else {
 		if (win == current_window) {
 			current_window = 0;
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Foucusing out window, title = %1\n", win->get_title()));
+	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Foucusing out window, title = %1\n", win->get_title ()));
 
 	return false;
 }
@@ -474,7 +546,7 @@ void
 Keyboard::set_edit_modifier (guint mod)
 {
 	edit_mod = mod;
-	reset_relevant_modifier_key_mask();
+	reset_relevant_modifier_key_mask ();
 }
 
 void
@@ -487,7 +559,7 @@ void
 Keyboard::set_delete_modifier (guint mod)
 {
 	delete_mod = mod;
-	reset_relevant_modifier_key_mask();
+	reset_relevant_modifier_key_mask ();
 }
 
 void
@@ -500,61 +572,60 @@ void
 Keyboard::set_insert_note_modifier (guint mod)
 {
 	insert_note_mod = mod;
-	reset_relevant_modifier_key_mask();
+	reset_relevant_modifier_key_mask ();
 }
-
 
 void
 Keyboard::set_modifier (uint32_t newval, uint32_t& var)
 {
 	var = newval;
-	reset_relevant_modifier_key_mask();
+	reset_relevant_modifier_key_mask ();
 }
 
 void
 Keyboard::set_snap_modifier (guint mod)
 {
 	snap_mod = mod;
-	reset_relevant_modifier_key_mask();
+	reset_relevant_modifier_key_mask ();
 }
 
 void
 Keyboard::set_snap_delta_modifier (guint mod)
 {
 	snap_delta_mod = mod;
-	reset_relevant_modifier_key_mask();
+	reset_relevant_modifier_key_mask ();
 }
 
 bool
-Keyboard::is_edit_event (GdkEventButton *ev)
+Keyboard::is_edit_event (GdkEventButton* ev)
 {
 	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) &&
-		(ev->button == Keyboard::edit_button()) &&
-		((ev->state & RelevantModifierKeyMask) == Keyboard::edit_modifier());
+	       (ev->button == Keyboard::edit_button ()) &&
+	       ((ev->state & RelevantModifierKeyMask) == Keyboard::edit_modifier ());
 }
 
 bool
-Keyboard::is_insert_note_event (GdkEventButton *ev)
+Keyboard::is_insert_note_event (GdkEventButton* ev)
 {
 	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) &&
-		(ev->button == Keyboard::insert_note_button()) &&
-		((ev->state & RelevantModifierKeyMask) == Keyboard::insert_note_modifier());
+	       (ev->button == Keyboard::insert_note_button ()) &&
+	       ((ev->state & RelevantModifierKeyMask) == Keyboard::insert_note_modifier ());
 }
 
 bool
 Keyboard::is_button2_event (GdkEventButton* ev)
 {
 	return (ev->button == 2) ||
-		((ev->button == 1) && Keyboard::button2_modifiers != 0 &&
-		 ((ev->state & Keyboard::button2_modifiers) == Keyboard::button2_modifiers));
+	       ((ev->button == 1) && Keyboard::button2_modifiers != 0 &&
+	        ((ev->state & Keyboard::button2_modifiers) == Keyboard::button2_modifiers));
 }
 
 bool
 Keyboard::is_momentary_push_event (GdkEventButton* ev)
 {
-	return (is_button2_event(ev)) ||
-		((ev->button == 1) && Keyboard::momentary_push_modifiers != 0 &&
-		 ((ev->state & RelevantModifierKeyMask) == Keyboard::momentary_push_modifiers));
+	return (is_button2_event (ev)) ||
+	       ((ev->button == 1) && Keyboard::momentary_push_modifiers != 0 &&
+	        ((ev->state & RelevantModifierKeyMask) == Keyboard::momentary_push_modifiers));
 }
 
 bool
@@ -564,19 +635,19 @@ Keyboard::is_group_override_event (GdkEventButton* ev)
 }
 
 bool
-Keyboard::is_delete_event (GdkEventButton *ev)
+Keyboard::is_delete_event (GdkEventButton* ev)
 {
 	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) &&
-		(ev->button == Keyboard::delete_button()) &&
-		((ev->state & RelevantModifierKeyMask) == Keyboard::delete_modifier());
+	       (ev->button == Keyboard::delete_button ()) &&
+	       ((ev->state & RelevantModifierKeyMask) == Keyboard::delete_modifier ());
 }
 
 bool
-Keyboard::is_context_menu_event (GdkEventButton *ev)
+Keyboard::is_context_menu_event (GdkEventButton* ev)
 {
 	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) &&
-		(ev->button == 3) &&
-		((ev->state & RelevantModifierKeyMask) == 0);
+	       (ev->button == 3) &&
+	       ((ev->state & RelevantModifierKeyMask) == 0);
 }
 
 bool
@@ -588,13 +659,13 @@ Keyboard::no_modifiers_active (guint state)
 bool
 Keyboard::modifier_state_contains (guint state, ModifierMask mask)
 {
-	return (state & mask) == (guint) mask;
+	return (state & mask) == (guint)mask;
 }
 
 bool
 Keyboard::modifier_state_equals (guint state, ModifierMask mask)
 {
-	return (state & RelevantModifierKeyMask) == (guint) mask;
+	return (state & RelevantModifierKeyMask) == (guint)mask;
 }
 
 void
@@ -623,7 +694,7 @@ Keyboard::save_keybindings ()
 }
 
 bool
-Keyboard::load_keybindings (string const & path)
+Keyboard::load_keybindings (string const& path)
 {
 	try {
 		info << "Loading bindings from " << path << endl;
@@ -633,13 +704,12 @@ Keyboard::load_keybindings (string const & path)
 
 		_current_binding_name = _("Unknown");
 
-		for (map<string,string>::iterator x = binding_files.begin(); x != binding_files.end(); ++x) {
+		for (map<string, string>::iterator x = binding_files.begin (); x != binding_files.end (); ++x) {
 			if (path == x->second) {
 				_current_binding_name = x->first;
 				break;
 			}
 		}
-
 
 	} catch (...) {
 		error << string_compose (_("key bindings file not found at \"%2\" or contains errors."), path)
@@ -651,47 +721,47 @@ Keyboard::load_keybindings (string const & path)
 }
 
 int
-Keyboard::read_keybindings (string const & path)
+Keyboard::read_keybindings (string const& path)
 {
 	XMLTree tree;
 
-	if (!tree.read (path.c_str())) {
+	if (!tree.read (path.c_str ())) {
 		return -1;
 	}
 
 	/* toplevel node is "BindingSet; children are "Bindings" */
 
-	XMLNodeList const& children = tree.root()->children();
+	XMLNodeList const& children = tree.root ()->children ();
 
-	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-		XMLNode const * child = *i;
-		if (child->name() == X_("Bindings")) {
-		        XMLProperty const* name = child->property (X_("name"));
-		        if (!name) {
-			        warning << _("Keyboard binding found without a name") << endmsg;
-			        continue;
-		        }
+	for (XMLNodeList::const_iterator i = children.begin (); i != children.end (); ++i) {
+		XMLNode const* child = *i;
+		if (child->name () == X_("Bindings")) {
+			XMLProperty const* name = child->property (X_("name"));
+			if (!name) {
+				warning << _("Keyboard binding found without a name") << endmsg;
+				continue;
+			}
 
-		        Bindings* b = new Bindings (name->value());
-		        b->load (**i);
-	        }
-        }
+			Bindings* b = new Bindings (name->value ());
+			b->load (**i);
+		}
+	}
 
 	return 0;
 }
 
 int
-Keyboard::store_keybindings (string const & path)
+Keyboard::store_keybindings (string const& path)
 {
 	XMLNode* node = new XMLNode (X_("BindingSet"));
 	XMLNode* bnode;
-	int ret = 0;
+	int      ret = 0;
 
 	DEBUG_TRACE (DEBUG::Bindings, string_compose ("save bindings to %1\n", path));
 
-	for (list<Bindings*>::const_iterator b = Bindings::bindings.begin(); b != Bindings::bindings.end(); ++b) {
+	for (list<Bindings*>::const_iterator b = Bindings::bindings.begin (); b != Bindings::bindings.end (); ++b) {
 		bnode = new XMLNode (X_("Bindings"));
-		bnode->set_property (X_("name"), (*b)->name());
+		bnode->set_property (X_("name"), (*b)->name ());
 		(*b)->save (*bnode);
 		node->add_child_nocopy (*bnode);
 	}
@@ -710,12 +780,11 @@ Keyboard::store_keybindings (string const & path)
 int
 Keyboard::reset_bindings ()
 {
-	if (Glib::file_test (user_keybindings_path,  Glib::FILE_TEST_EXISTS)) {
-
+	if (Glib::file_test (user_keybindings_path, Glib::FILE_TEST_EXISTS)) {
 		string new_path = user_keybindings_path;
 		new_path += ".old";
 
-		if (::g_rename (user_keybindings_path.c_str(), new_path.c_str())) {
+		if (::g_rename (user_keybindings_path.c_str (), new_path.c_str ())) {
 			error << string_compose (_("Cannot rename your own keybinding file (%1)"), strerror (errno)) << endmsg;
 			return -1;
 		}
