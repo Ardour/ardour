@@ -211,8 +211,7 @@ public:
 	Beats operator% (Beats const & b) { return Beats::ticks (_ticks % b.to_ticks());}
 
 	Beats operator%= (Beats const & b) {
-		const Beats B (Beats::ticks (to_ticks() % b.to_ticks()));
-		_ticks = B._ticks;
+		_ticks = _ticks % b.to_ticks();
 		return *this;
 	}
 
