@@ -264,6 +264,8 @@ LTC_TransportMaster::equal_ltc_sample_time(LTCFrame *a, LTCFrame *b) {
 	}
 	return true;
 }
+
+#if 0
 static ostream& operator<< (ostream& ostr, LTCFrame& a)
 {
 	ostr
@@ -279,7 +281,9 @@ static ostream& operator<< (ostream& ostr, LTCFrame& a)
 		    ;
 	return ostr;
 }
+#endif
 
+#if 0
 static ostream& operator<< (ostream& ostr, SMPTETimecode& t)
 {
 	for (size_t i = 0; i < sizeof (t.timezone); ++i) {
@@ -296,6 +300,7 @@ static ostream& operator<< (ostream& ostr, SMPTETimecode& t)
 		;
 	return ostr;
 }
+#endif
 
 bool
 LTC_TransportMaster::detect_discontinuity(LTCFrameExt *sample, int fps, bool fuzzy)
