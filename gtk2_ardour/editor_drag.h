@@ -545,34 +545,6 @@ public:
 	}
 };
 
-/** Region drag in ripple mode */
-
-class RegionRippleDrag : public RegionMoveDrag
-{
-public:
-	RegionRippleDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain Td);
-	~RegionRippleDrag () { delete exclude; }
-
-	void motion (GdkEvent *, bool);
-	void finished (GdkEvent *, bool);
-	void aborted (bool);
-protected:
-	bool y_movement_allowed (int delta_track, double delta_layer, int skip_invisible = 0) const;
-
-private:
-	TimeAxisView *prev_tav; // where regions were most recently dragged from
-	TimeAxisView *orig_tav; // where drag started
-	Temporal::timecnt_t prev_amount;
-	Temporal::timepos_t prev_position;
-	Temporal::timecnt_t selection_length;
-	bool allow_moves_across_tracks; // only if all selected regions are on one track
-	ARDOUR::RegionList *exclude;
-	void add_all_after_to_views (TimeAxisView *tav, Temporal::timepos_t const & where, const RegionSelection &exclude, bool drag_in_progress);
-	void remove_unselected_from_views (Temporal::timecnt_t const & amount, bool move_regions);
-
-	std::list<boost::shared_ptr<ARDOUR::Region> > _orig_tav_ripples;
-};
-
 /** "Drag" to cut a region (action only on button release) */
 class RegionCutDrag : public Drag
 {
