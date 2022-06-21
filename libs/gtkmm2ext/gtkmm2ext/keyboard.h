@@ -89,6 +89,7 @@ public:
 	static const char* momentary_push_name ();
 	static const char* group_override_event_name ();
 
+	static std::string format_modifier (uint32_t);
 
 	bool  key_is_down (uint32_t keyval);
 	guint modifier_state ();

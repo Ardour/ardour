@@ -204,6 +204,37 @@ Keyboard::group_override_event_name ()
 	return tertiary_modifier_name ();
 }
 
+std::string
+Keyboard::format_modifier (uint32_t mod)
+{
+	std::string rv = "";
+	if (mod & PrimaryModifier) {
+		rv += primary_modifier_short_name ();
+	}
+	if (mod & SecondaryModifier) {
+		if (!rv.empty ()) {
+			rv += "+";
+		}
+		rv += secondary_modifier_short_name ();
+	}
+	if (mod & TertiaryModifier) {
+		if (!rv.empty ()) {
+			rv += "+";
+		}
+		rv += tertiary_modifier_short_name ();
+	}
+	if (mod & Level4Modifier) {
+		if (!rv.empty ()) {
+			rv += "+";
+		}
+		rv += level4_modifier_short_name ();
+	}
+	if (!rv.empty ()) {
+		rv += "+";
+	}
+	return rv;
+}
+
 guint Keyboard::GainFineScaleModifier      = Keyboard::PrimaryModifier;
 guint Keyboard::GainExtraFineScaleModifier = Keyboard::SecondaryModifier;
 
