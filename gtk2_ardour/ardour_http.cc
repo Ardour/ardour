@@ -44,7 +44,7 @@
 #ifdef ARDOURCURLDEBUG
 #define CCERR(msg) do { if (cc != CURLE_OK) { std::cerr << string_compose ("curl_easy_setopt(%1) failed: %2", msg, cc) << std::endl; } } while (0)
 #else
-#define CCERR(msg)
+#define CCERR(msg) do { (void) cc; } while (0)
 #endif
 
 using namespace ArdourCurl;
@@ -173,7 +173,7 @@ HttpGet::HttpGet (bool p, bool ssl)
 	cc = curl_easy_setopt (_curl, CURLOPT_TIMEOUT, ARDOUR_CURL_TIMEOUT); CCERR ("CURLOPT_TIMEOUT");
 	cc = curl_easy_setopt (_curl, CURLOPT_NOSIGNAL, 1); CCERR ("CURLOPT_NOSIGNAL");
 	cc = curl_easy_setopt (_curl, CURLOPT_ERRORBUFFER, error_buffer); CCERR ("CURLOPT_ERRORBUFFER");
-	// cc= curl_easy_setopt (_curl, CURLOPT_FOLLOWLOCATION, 1); CCERR ("CURLOPT_FOLLOWLOCATION");
+	// cc = curl_easy_setopt (_curl, CURLOPT_FOLLOWLOCATION, 1); CCERR ("CURLOPT_FOLLOWLOCATION");
 
 	// by default use curl's default.
 	if (ssl) {
