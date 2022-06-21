@@ -243,9 +243,11 @@ ArdourGraphs::draw_spectrum (Glib::RefPtr<Pango::Context> pctx, ExportAnalysisPt
 	int w, h, anw;
 	const size_t width = p->width;
 
-	assert (height == p->spectrum[0].size ());
+	typedef std::vector<double> Dashes;
+	Dashes dashes;
 
-	std::vector<double> dashes;
+	assert ((Dashes::size_type) height == p->spectrum[0].size ());
+
 	dashes.push_back (3.0);
 	dashes.push_back (5.0);
 
