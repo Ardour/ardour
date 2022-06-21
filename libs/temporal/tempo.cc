@@ -3369,6 +3369,7 @@ TempoMap::midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_p
 
 /******** OLD STATE LOADING CODE SECTION *************/
 
+#if 0
 static bool
 bbt_time_to_string (const BBT_Time& bbt, std::string& str)
 {
@@ -3383,6 +3384,7 @@ bbt_time_to_string (const BBT_Time& bbt, std::string& str)
 	str = buf;
 	return true;
 }
+#endif
 
 static bool
 string_to_bbt_time (const std::string& str, BBT_Time& bbt)
