@@ -203,12 +203,12 @@ public:
 		return ticks (-_ticks);
 	}
 
-	Beats operator*(int32_t factor) const {return ticks (to_ticks() * factor); }
-	Beats operator/(int32_t factor) const { return ticks (to_ticks() / factor);}
-	Beats operator*(ratio_t const & factor) const {return ticks (int_div_round (to_ticks() * factor.numerator(), factor.denominator())); }
-	Beats operator/(ratio_t const & factor) const {return ticks (int_div_round (to_ticks() * factor.denominator(), factor.numerator())); }
+	Beats operator*(int32_t factor) const {return ticks (_ticks * factor); }
+	Beats operator/(int32_t factor) const { return ticks (_ticks / factor);}
+	Beats operator*(ratio_t const & factor) const {return ticks (PBD::muldiv (_ticks, factor.numerator(), factor.denominator())); }
+	Beats operator/(ratio_t const & factor) const {return ticks (PBD::muldiv (_ticks, factor.denominator(), factor.numerator())); }
 
-	Beats operator% (Beats const & b) { return Beats::ticks (to_ticks() % b.to_ticks());}
+	Beats operator% (Beats const & b) { return Beats::ticks (_ticks % b.to_ticks());}
 
 	Beats operator%= (Beats const & b) {
 		const Beats B (Beats::ticks (to_ticks() % b.to_ticks()));
