@@ -217,7 +217,6 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 
 	// always build from scratch
 	MenuList& ruler_items = editor_ruler_menu->items();
-	Gtk::CheckMenuItem* cme;
 
 	editor_ruler_menu->set_name ("ArdourContextMenu");
 	ruler_items.clear();
