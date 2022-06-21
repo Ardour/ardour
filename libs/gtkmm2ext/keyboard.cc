@@ -476,6 +476,38 @@ Keyboard::key_is_down (uint32_t keyval)
 	return find (state.begin (), state.end (), keyval) != state.end ();
 }
 
+guint
+Keyboard::modifier_state ()
+{
+	int mask = 0;
+	for (auto const& keyval : state) {
+		switch (keyval) {
+			case GDK_Meta_R:
+			case GDK_Meta_L:
+				mask |= GDK_MOD2_MASK;
+				break;
+			case GDK_Shift_R:
+			case GDK_Shift_L:
+				mask |= GDK_SHIFT_MASK;
+				break;
+			case GDK_Caps_Lock:
+				mask |= GDK_LOCK_MASK;
+				break;
+			case GDK_Alt_R:
+			case GDK_Alt_L:
+				mask |= GDK_MOD1_MASK;
+				break;
+			case GDK_Control_R:
+			case GDK_Control_L:
+				mask |= GDK_CONTROL_MASK;
+				break;
+			default:
+				break;
+		}
+	}
+	return mask & RelevantModifierKeyMask;
+}
+
 bool
 Keyboard::enter_window (GdkEventCrossing*, Gtk::Window* win)
 {

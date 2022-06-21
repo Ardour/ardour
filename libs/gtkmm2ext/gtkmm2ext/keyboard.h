@@ -113,7 +113,8 @@ public:
 		set_modifier (newval, RangeSelectModifier);
 	}
 
-	bool key_is_down (uint32_t keyval);
+	bool  key_is_down (uint32_t keyval);
+	guint modifier_state ();
 
 	static GdkModifierType RelevantModifierKeyMask;
 
