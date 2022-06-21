@@ -197,6 +197,7 @@ guint Keyboard::snap_delta_mod = Keyboard::SecondaryModifier | Keyboard::Level4M
 #endif
 
 guint Keyboard::group_override_modifiers = Keyboard::TertiaryModifier;
+
 const char*
 Keyboard::group_override_event_name ()
 {
@@ -651,7 +652,7 @@ Keyboard::is_button2_event (GdkEventButton* ev)
 {
 	return (ev->button == 2) ||
 	       ((ev->button == 1) && Keyboard::button2_modifiers != 0 &&
-	        ((ev->state & Keyboard::button2_modifiers) == Keyboard::button2_modifiers));
+	        ((ev->state & Keyboard::button2_modifiers) == Keyboard::button2_modifier ()));
 }
 
 bool
@@ -659,7 +660,7 @@ Keyboard::is_momentary_push_event (GdkEventButton* ev)
 {
 	return (is_button2_event (ev)) ||
 	       ((ev->button == 1) && Keyboard::momentary_push_modifiers != 0 &&
-	        ((ev->state & RelevantModifierKeyMask) == Keyboard::momentary_push_modifiers));
+	        ((ev->state & RelevantModifierKeyMask) == Keyboard::momentary_push_modifier ()));
 }
 
 bool

@@ -80,14 +80,14 @@ public:
 	static const char* tertiary_modifier_name ();
 	static const char* level4_modifier_name ();
 
-	static const char* button2_name ();
-	static const char* momentary_push_name ();
-	static const char* group_override_event_name ();
-
 	static const char* primary_modifier_short_name ();
 	static const char* secondary_modifier_short_name ();
 	static const char* tertiary_modifier_short_name ();
 	static const char* level4_modifier_short_name ();
+
+	static const char* button2_name ();
+	static const char* momentary_push_name ();
+	static const char* group_override_event_name ();
 
 
 	bool  key_is_down (uint32_t keyval);
