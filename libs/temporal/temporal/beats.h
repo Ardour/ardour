@@ -70,7 +70,7 @@ public:
 	Beats(const Beats& other) : _ticks(other._ticks) {}
 
 	/** Create from a precise beats:ticks pair. */
-	explicit Beats(int32_t b, int32_t t) : _ticks ((b*PPQN) + t) {}
+	explicit Beats(int64_t b, int64_t t) : _ticks ((b*PPQN) + t) {}
 
 	/** Create from a real number of beats. */
 	static Beats from_double (double beats) {
