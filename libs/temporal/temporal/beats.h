@@ -80,8 +80,8 @@ public:
 	}
 
 	/** Create from an integer number of beats. */
-	static Beats beats(int32_t beats) {
-		return Beats(beats, 0);
+	static Beats beats(int64_t beats) {
+		return Beats (beats, 0);
 	}
 
 	/** Create from ticks at the standard PPQN. */
