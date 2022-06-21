@@ -66,45 +66,11 @@ class /*LIBTEMPORAL_API*/ Beats {
 public:
 	LIBTEMPORAL_API static const int32_t PPQN = Temporal::ticks_per_beat;
 
-	Beats() : _beats(0), _ticks(0) {}
-	Beats(const Beats& other) : _beats(other._beats), _ticks(other._ticks) {}
-
-	/** Normalize so ticks is within PPQN. */
-	void normalize() {
-		// First, fix negative ticks with positive beats
-		while (_beats > 0 && _ticks < 0) {
-			--_beats;
-			_ticks += PPQN;
-		}
-
-		// Now fix positive ticks with negative beats
-		while (_beats < 0 && _ticks > 0) {
-			++_beats;
-			_ticks -= PPQN;
-		}
-
-		assert ((_beats < 0 && _ticks <= 0) || (_beats > 0 && _ticks >= 0) || _beats == 0);
-
-		// Work with positive beats and ticks to normalize
-		const int32_t sign  = _beats < 0 ? -1 : _ticks < 0 ? -1 : 1;
-		int32_t       beats = ::abs(_beats);
-		int32_t       ticks = ::abs(_ticks);
-
-		// Fix ticks greater than 1 beat
-		while (ticks >= PPQN) {
-			++beats;
-			ticks -= PPQN;
-		}
-
-		// Set fields with appropriate sign
-		_beats = sign * beats;
-		_ticks = sign * ticks;
-	}
+	Beats() : _ticks(0) {}
+	Beats(const Beats& other) : _ticks(other._ticks) {}
 
 	/** Create from a precise beats:ticks pair. */
-	explicit Beats(int32_t b, int32_t t) : _beats(b), _ticks(t) {
-		normalize();
-	}
+	explicit Beats(int32_t b, int32_t t) : _ticks ((b*PPQN) + t) {}
 
 	/** Create from a real number of beats. */
 	static Beats from_double (double beats) {
@@ -120,8 +86,7 @@ public:
 
 	/** Create from ticks at the standard PPQN. */
 	static Beats ticks(int64_t ticks) {
-		assert (ticks/PPQN < std::numeric_limits<int32_t>::max());
-		return Beats (ticks / PPQN, ticks % PPQN);
+		return Beats (0, ticks);
 	}
 
 	/** Create from ticks at a given rate.
@@ -135,25 +100,18 @@ public:
 		return Beats(ticks / ppqn, (ticks % ppqn) * PPQN / ppqn);
 	}
 
-	static int64_t make_ticks (Beats const & b) { return b.get_beats() * ticks_per_beat + b.get_ticks(); }
+	int64_t to_ticks ()               const { return _ticks; }
+	int64_t to_ticks (uint32_t ppqn)  const { return (_ticks * ppqn) / PPQN; }
 
-	int64_t to_ticks()               const { return (int64_t)_beats * PPQN + _ticks; }
-	int64_t to_ticks(uint32_t ppqn)  const { return (int64_t)_beats * ppqn + (_ticks * ppqn / PPQN); }
-
-	int32_t get_beats() const { return _beats; }
-	int32_t get_ticks() const { return _ticks; }
+	int64_t get_beats () const { return _ticks / PPQN; }
+	int32_t get_ticks () const { return _ticks % PPQN; }
 
 	Beats& operator=(double time) {
-		double       whole;
-		const double frac = modf(time, &whole);
-
-		_beats = whole;
-		_ticks = frac * PPQN;
+		*this = from_double (time);
 		return *this;
 	}
 
 	Beats& operator=(const Beats& other) {
-		_beats = other._beats;
 		_ticks = other._ticks;
 		return *this;
 	}
@@ -170,32 +128,32 @@ public:
 	}
 
 	Beats round_to_beat() const {
-		return (_ticks >= (PPQN/2)) ? Beats (_beats + 1, 0) : Beats (_beats, 0);
+		return (get_ticks() >= (PPQN/2)) ? Beats (get_beats() + 1, 0) : Beats (get_beats(), 0);
 	}
 
 	Beats round_up_to_beat() const {
-		return (_ticks == 0) ? *this : Beats(_beats + 1, 0);
+		return (get_ticks() == 0) ? *this : Beats(get_beats() + 1, 0);
 	}
 
 	Beats round_down_to_beat() const {
-		return Beats(_beats, 0);
+		return Beats(get_beats(), 0);
 	}
 
 
 	Beats prev_beat() const {
 		/* always moves backwards even if currently on beat */
-		return Beats (_beats-1, 0);
+		return Beats (get_beats()-1, 0);
 	}
 
 	Beats next_beat() const {
 		/* always moves forwards even if currently on beat */
-		return Beats (_beats+1, 0);
+		return Beats (get_beats()+1, 0);
 	}
 
 	LIBTEMPORAL_API Beats round_to_subdivision (int subdivision, RoundMode dir) const;
 
 	Beats abs () const {
-		return Beats (::abs (_beats), ::abs (_ticks));
+		return ticks (::abs (_ticks));
 	}
 
 	Beats diff (Beats const & other) const {
@@ -206,11 +164,11 @@ public:
 	}
 
 	inline bool operator==(const Beats& b) const {
-		return _beats == b._beats && _ticks == b._ticks;
+		return _ticks == b._ticks;
 	}
 
 	inline bool operator==(int beats) const {
-		return _beats == beats;
+		return get_beats() == beats;
 	}
 
 	inline bool operator!=(const Beats& b) const {
@@ -218,38 +176,31 @@ public:
 	}
 
 	inline bool operator<(const Beats& b) const {
-		return _beats < b._beats || (_beats == b._beats && _ticks < b._ticks);
+		return _ticks < b._ticks;
 	}
 
 	inline bool operator<=(const Beats& b) const {
-		return _beats < b._beats || (_beats == b._beats && _ticks <= b._ticks);
+		return _ticks <= b._ticks;
 	}
 
 	inline bool operator>(const Beats& b) const {
-		return _beats > b._beats || (_beats == b._beats && _ticks > b._ticks);
+		return _ticks > b._ticks;
 	}
 
 	inline bool operator>=(const Beats& b) const {
-		return _beats > b._beats || (_beats == b._beats && _ticks >= b._ticks);
+		return _ticks >= b._ticks;
 	}
 
 	Beats operator+(const Beats& b) const {
-		return Beats(_beats + b._beats, _ticks + b._ticks);
+		return ticks (_ticks + b._ticks);
 	}
 
 	Beats operator-(const Beats& b) const {
-		return Beats(_beats - b._beats, _ticks - b._ticks);
+		return ticks (_ticks - b._ticks);
 	}
 
 	Beats operator-() const {
-		/* must avoid normalization here, which will convert a negative
-		   value into a valid beat position before zero, which is not
-		   we want here.
-		*/
-		Beats b (_beats, _ticks);
-		b._beats = -b._beats;
-		b._ticks = -b._ticks;
-		return b;
+		return ticks (-_ticks);
 	}
 
 	Beats operator*(int32_t factor) const {return ticks (to_ticks() * factor); }
@@ -261,7 +212,6 @@ public:
 
 	Beats operator%= (Beats const & b) {
 		const Beats B (Beats::ticks (to_ticks() % b.to_ticks()));
-		_beats = B._beats;
 		_ticks = B._ticks;
 		return *this;
 	}
@@ -275,27 +225,22 @@ public:
 	}
 
 	Beats& operator+=(const Beats& b) {
-		_beats += b._beats;
 		_ticks += b._ticks;
-		normalize();
 		return *this;
 	}
 
 	Beats& operator-=(const Beats& b) {
-		_beats -= b._beats;
 		_ticks -= b._ticks;
-		normalize();
 		return *this;
 	}
 
-	bool operator!() const { return _beats == 0 && _ticks == 0; }
-	explicit operator bool () const { return _beats != 0 || _ticks != 0; }
+	bool operator!() const { return _ticks == 0; }
+	explicit operator bool () const { return _ticks != 0; }
 
 	static Beats one_tick() { return Beats(0, 1); }
 
   protected:
-	int32_t _beats;
-	int32_t _ticks;
+	int64_t _ticks;
 
 };
 
@@ -307,7 +252,7 @@ class DoubleableBeats : public Beats
 {
      public:
 	DoubleableBeats (Beats const & b) : Beats (b) {}
-	double to_double() const { return (double)_beats + (_ticks / (double)PPQN); }
+	double to_double() const { return (double)get_beats() + (get_ticks() / (double)PPQN); }
 };
 
 

@@ -662,7 +662,7 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 	   the current meter, which we'll call "grid"
 	*/
 
-	const int64_t note_value_count = int_div_round (dq.get_beats() * _meter->note_value(), 4);
+	const int64_t note_value_count = int_div_round (dq.get_beats() * _meter->note_value(), int64_t (4));
 
 	/* now construct a BBT_Offset using the count in grid units */
 
