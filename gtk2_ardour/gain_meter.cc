@@ -583,10 +583,7 @@ GainMeterBase::fader_moved ()
 			value = gain_adjustment.get_value();
 		}
 
-		// XXX hack allow to override group
-		// (this breaks group'ed  shift+click reset)
-		if (Keyboard::the_keyboard().key_is_down (GDK_Shift_R)
-				|| Keyboard::the_keyboard().key_is_down (GDK_Shift_L)) {
+		if (Keyboard::the_keyboard().modifier_state() == Keyboard::group_override_modifier ()) {
 			_control->set_value (value, Controllable::InverseGroup);
 		} else {
 			_control->set_value (value, Controllable::UseGroup);
