@@ -131,7 +131,7 @@ Analyser::process (ProcessContext<float> const & ctx)
 	for (s = 0; s < n_samples; ++s) {
 		_fft_data_in[s] = 0;
 		const samplecnt_t pbin = (_pos + s) / _spp;
-		assert (pbin >= 0 && pbin < _result.width);
+		assert (pbin >= 0 && pbin < (samplecnt_t) _result.width);
 		for (unsigned int c = 0; c < _channels; ++c) {
 			const float v = *d;
 			if (fabsf(v) > _result.peak) { _result.peak = fabsf(v); }
@@ -159,7 +159,7 @@ Analyser::process (ProcessContext<float> const & ctx)
 			const samplecnt_t p0 = _pos / _spp;
 			const samplecnt_t p1 = (_pos + n_samples -1) / _spp;
 			for (samplecnt_t p = p0; p <= p1; ++p) {
-				assert (p >= 0 && p < _result.width);
+				assert (p >= 0 && p < (samplecnt_t) _result.width);
 				_result.lgraph_i[p] = features[0][0].values[0];
 				_result.lgraph_s[p] = features[0][1].values[0];
 				_result.lgraph_m[p] = features[0][2].values[0];
