@@ -1987,8 +1987,9 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 
 	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: n_bus_in = %1 n_bus_in = %2\n", _n_bus_in, _n_bus_out));
 
-	std::vector<Vst::SpeakerArrangement> sa_in;
-	std::vector<Vst::SpeakerArrangement> sa_out;
+	typedef std::vector<Vst::SpeakerArrangement> VSTSpeakerArrangements;
+	VSTSpeakerArrangements sa_in;
+	VSTSpeakerArrangements sa_out;
 
 	bool                    enable = false;
 	Vst::SpeakerArrangement sa     = 0;
@@ -2020,7 +2021,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 	}
 
 	/* disable remaining input busses and set their speaker-count to zero */
-	while (sa_in.size () < _n_bus_in) {
+	while (sa_in.size () < (VSTSpeakerArrangements::size_type) _n_bus_in) {
 		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kInput, %1, false)\n", sa_in.size ()));
 		_component->activateBus (Vst::kAudio, Vst::kInput, sa_in.size (), false);
 		sa_in.push_back (0);
@@ -2055,7 +2056,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		sa_out.push_back (sa);
 	}
 
-	while (sa_out.size () < _n_bus_out) {
+	while (sa_out.size () < (VSTSpeakerArrangements::size_type) _n_bus_out) {
 		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kOutput, %1, false)\n", sa_out.size ()));
 		_component->activateBus (Vst::kAudio, Vst::kOutput, sa_out.size (), false);
 		sa_out.push_back (0);
