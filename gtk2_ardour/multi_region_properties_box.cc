@@ -82,8 +82,8 @@ MultiRegionPropertiesBox::set_session (Session* s)
 void
 MultiRegionPropertiesBox::region_selection_changed ()
 {
-	timepos_t s, e;
-	Selection& selection (Editor::instance().get_selection());
+	// timepos_t s, e;
+	// Selection& selection (Editor::instance().get_selection());
 }
 
 
