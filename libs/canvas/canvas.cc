@@ -110,7 +110,13 @@ Canvas::zoomed ()
 }
 
 static bool debug_render = false;
+
+#ifndef NDEBUG
+#ifdef CANVAS_DEBUG
+#undef CANVAS_DEBUG
 #define CANVAS_DEBUG
+#endif
+#endif
 
 /** Render an area of the canvas.
  *  @param area Area in window coordinates.
