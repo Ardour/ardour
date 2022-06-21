@@ -1428,7 +1428,8 @@ Sequence<Time>::dump (ostream& str, typename Sequence<Time>::const_iterator x, u
 		str << " from " << i->time();
 	}
 	str << endl;
-	for (; i != end() && (limit >= 0); ++i) {
+
+	for (; i != end(); ++i) {
 		str << *i << endl;
 		if (limit) {
 			if (--limit == 0) {
