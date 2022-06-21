@@ -24,6 +24,7 @@
 #ifdef HAVE_WAFBUILD
 #include "libpbd-config.h"
 #endif
+#include <cstddef>
 
 #include <iostream>
 #include <ostream>
@@ -40,7 +41,7 @@
 
 namespace PBD {
 
-	LIBPBD_API void stacktrace (std::ostream& out, int levels = 0, int start_level = 0);
+	LIBPBD_API void stacktrace (std::ostream& out, int levels = 0, size_t start_level = 0);
 	LIBPBD_API void trace_twb();
 
 template<typename T>

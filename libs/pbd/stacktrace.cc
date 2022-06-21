@@ -49,7 +49,7 @@ PBD::trace_twb ()
 #include <execinfo.h>
 
 void
-PBD::stacktrace (std::ostream& out, int levels, int start)
+PBD::stacktrace (std::ostream& out, int levels, size_t start)
 {
 	void *array[200];
 	size_t size;
