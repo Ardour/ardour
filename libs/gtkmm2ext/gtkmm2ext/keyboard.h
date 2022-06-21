@@ -192,6 +192,18 @@ public:
 	{
 		return insert_note_mod;
 	}
+	static guint button2_modifier ()
+	{
+		return button2_modifiers;
+	}
+	static guint momentary_push_modifier ()
+	{
+		return momentary_push_modifiers;
+	}
+	static guint group_override_modifier ()
+	{
+		return group_override_modifiers;
+	}
 
 	static bool is_edit_event (GdkEventButton*);
 	static bool is_delete_event (GdkEventButton*);
