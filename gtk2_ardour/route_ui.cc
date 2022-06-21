@@ -208,11 +208,11 @@ RouteUI::init ()
 	mute_button = manage (new ArdourButton);
 	mute_button->set_name ("mute button");
 	std::string tip = string_compose( _("Mute this track\n"
-							            "%1+Click to Override Group\n"
+							            "%2+Click to Override Group\n"
 							            "%1+%3+Click to toggle ALL tracks\n"
 							            "%4 for Momentary mute\n"
 							            "Right-Click for Context menu")
-									  , Keyboard::primary_modifier_short_name(), Keyboard::secondary_modifier_short_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::button2_name() );
+									  , Keyboard::primary_modifier_short_name(), Keyboard::group_override_event_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::momentary_push_name() );
 	UI::instance()->set_tip (mute_button, tip.c_str(), "");
 
 	solo_button = manage (new ArdourButton);
@@ -223,10 +223,10 @@ RouteUI::init ()
 	rec_enable_button->set_name ("record enable button");
 	rec_enable_button->set_icon (ArdourIcon::RecButton);
 	tip = string_compose( _("Enable Recording on this track\n"
-				            "%1+Click to Override group\n"
+				            "%2+Click to Override group\n"
 				            "%1+%3+Click to toggle ALL tracks\n"
 				            "Right-Click for Context menu")
-						    , Keyboard::primary_modifier_short_name(), Keyboard::secondary_modifier_short_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::button2_name() );
+						    , Keyboard::primary_modifier_short_name(), Keyboard::group_override_event_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::momentary_push_name() );
 	UI::instance()->set_tip (rec_enable_button, tip.c_str(), "");
 
 	if (UIConfiguration::instance().get_blink_rec_arm()) {
@@ -522,9 +522,9 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 				_session->set_controls (route_list_to_control_list (copy, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::UseGroup);
 
-			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			} else if (Keyboard::is_group_override_event (ev)) {
 
-				/* Primary-button1 inverts the implication of
+				/* Tertiary-button1 inverts the implication of
 				   the group being active. If the group is
 				   active (for mute), then this modifier means
 				   "do not apply to mute". If the group is
@@ -686,15 +686,13 @@ RouteUI::solo_press(GdkEventButton* ev)
 				DisplaySuspender ds;
 				_route->solo_control()->set_value (1.0, Controllable::NoGroup);
 
-/*			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {   do not explicitly implement Tertiary Modifier; this is the default for Momentary */
+/*			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {   do not explicitly implement Primary Modifier; this is the default for Momentary */
 
-			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+/*			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {   do not explicitly implement Tertiary Modifier; this is the default for Group-Override */
 
-				/* Primary-button1: solo mix group.
-				   NOTE: Primary-button2 is MIDI learn.
-				*/
+			} else if (Keyboard::is_group_override_event (ev)) {
 
-				/* Primary-button1 applies change to the mix group even if it is not active
+				/* Tertiary-button1: override mix group.
 				   NOTE: Primary-button2 is MIDI learn.
 				*/
 
@@ -702,7 +700,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 				if (ev->button == 1) {
 
-					/* Primary-button1 inverts the implication of
+					/* Tertiary-button1 inverts the implication of
 					   the group being active. If the group is
 					   active (for solo), then this modifier means
 					   "do not apply to solo". If the group is
@@ -717,12 +715,6 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 					rl.reset (new RouteList);
 					rl->push_back (_route);
-
-#if 0 // XX why? _solo_release is deleted below
-					if (_solo_release) {
-						_solo_release->set (rl);
-					}
-#endif
 
 					_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_control), !_route->self_soloed(), Controllable::InverseGroup);
 				}
@@ -797,9 +789,9 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 			_session->set_controls (route_list_to_control_list (_session->get_routes(), &Stripable::rec_enable_control), !track()->rec_enable_control()->get_value(), Controllable::NoGroup);
 
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		} else if (Keyboard::is_group_override_event (ev)) {
 
-			/* Primary-button1 applies change to the route group (even if it is not active)
+			/* Tertiary-button1 applies change to the route group (even if it is not active)
 			   NOTE: Primary-button2 is MIDI learn.
 			*/
 
@@ -913,8 +905,8 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 		/* Primary-Tertiary-click applies change to all routes */
 		rl = _session->get_routes ();
 		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::NoGroup);
-	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		/* Primary-click overrides group */
+	} else if (Keyboard::is_group_override_event (ev)) {
+		/* Tertiary-click overrides group */
 		rl.reset (new RouteList);
 		rl->push_back (route());
 		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::InverseGroup);
@@ -2011,19 +2003,19 @@ RouteUI::update_solo_button ()
 
 	if (Config->get_solo_control_is_listen_control()) {
 			tip = string_compose( _("Listen to this track\n"
-			                                  "%1+Click to Override Group\n"
+			                                  "%2+Click to Override Group\n"
 			                                  "%1+%3+Click to toggle ALL tracks\n"
 			                                  "%4 for Momentary listen\n"
 			                                  "Right-Click for Context menu")
-			                                  , Keyboard::primary_modifier_short_name(), Keyboard::secondary_modifier_short_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::button2_name() );
+			                                  , Keyboard::primary_modifier_short_name(), Keyboard::group_override_event_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::momentary_push_name() );
 	} else {
 			tip = string_compose( _("Solo this track\n"
-			                                  "%1+Click to Override Group\n"
-			                                  "%1+%2+Click for Exclusive solo\n"
+			                                  "%2+Click to Override Group\n"
+			                                  "%1+%5+Click for Exclusive solo\n"
 			                                  "%1+%3+Click to toggle ALL tracks\n"
 			                                  "%4 for Momentary solo\n"
 			                                  "Right-Click for Context menu")
-			                                  , Keyboard::primary_modifier_short_name(), Keyboard::secondary_modifier_short_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::button2_name() );
+			                                  , Keyboard::primary_modifier_short_name(), Keyboard::group_override_event_name(), Keyboard::tertiary_modifier_short_name(), Keyboard::momentary_push_name(), Keyboard::secondary_modifier_short_name() );
 	}
 	UI::instance()->set_tip (solo_button, tip.c_str());
 }
