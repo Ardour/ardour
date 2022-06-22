@@ -674,9 +674,9 @@ public:
 	~HitCreateDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *, bool);
+	void motion (GdkEvent *, bool) {}
 	void finished (GdkEvent *, bool);
-	void aborted (bool);
+	void aborted (bool) {}
 
 	bool active (Editing::MouseMode mode) {
 		return mode == Editing::MouseDraw || mode == Editing::MouseContent;

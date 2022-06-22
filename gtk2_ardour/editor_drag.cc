@@ -6706,8 +6706,11 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_y = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
 
 	const timepos_t pos = _drags->current_pointer_time ();
-
 	const Beats beats = pos.beats ();
+
+	/* XXX Fix this some day to use next-earliest region and extend to new
+	   position if necessary.
+	*/
 
 	boost::shared_ptr<MidiRegion> mr = _region_view->midi_region();
 
@@ -6716,54 +6719,46 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	const Temporal::Beats start = beats - _region_view->region()->position().beats ();
-	Temporal::Beats length = _region_view->get_draw_length_beats (pos);
 
 	_region_view->clear_note_selection();
 
-	/* create_note_at() implements UNDO for us */
-	_region_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
-
 	_last_pos = timepos_t (start);
 }
 
 void
-HitCreateDrag::motion (GdkEvent* event, bool)
+HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 {
-	const timepos_t pos = _drags->current_pointer_time ();
-
-	GridType grid_to_use = _editor->draw_length() == DRAW_LEN_AUTO ? _editor->grid_type() : _editor->draw_length();
-	int32_t divisions = _editor->get_grid_music_divisions (grid_to_use, event->button.state);
-	if (divisions <= 0) {
+	if (had_movement) {
 		return;
 	}
-
-	const Beats beats = pos.beats ();
-	const Temporal::Beats start = beats - _region_view->region()->position ().beats();
-
-	if (_last_pos == start) {
-		return;
-	}
-
-	Temporal::Beats length = _region_view->get_draw_length_beats (pos);
 
 	boost::shared_ptr<MidiRegion> mr = _region_view->midi_region();
+	const timepos_t pos (_drags->current_pointer_time());
+	const Beats beats = pos.beats();
 
 	if (beats > mr->nt_last().beats()) {
+		/* past end of region */
 		return;
 	}
 
-#warning NUTEMPO ALERT not snapping correctly
+	timepos_t snapped (beats);
+	_editor->snap_to (snapped, RoundDownMaybe, SnapToGrid_Scaled);
+	const timepos_t region_offset (snapped.beats() - _region_view->region()->position ().beats());
 
-	_region_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
+	/* This code is like MidiRegionView::get_draw_length_beats() but
+	 * defaults to 1/64th note rather than a 1/4 note, since we're in
+	 * percussive mode.
+	 */
 
-	_last_pos = timepos_t (start);
-}
+	bool success;
+	Beats length = _editor->get_draw_length_as_beats (success, pos);
 
-void
-HitCreateDrag::finished (GdkEvent* /* ev */, bool /* had_movement */)
-{
-	_editor->commit_reversible_command ();
+	if (!success) {
+		length = Beats::ticks (Beats::PPQN/64);
+	}
 
+	/* create_note_at() implements UNDO for us */
+	_region_view->create_note_at (region_offset, _y, length, event->button.state, false);
 }
 
 double
@@ -6772,12 +6767,6 @@ HitCreateDrag::y_to_region (double y) const
 	double x = 0;
 	_region_view->get_canvas_group()->canvas_to_item (x, y);
 	return y;
-}
-
-void
-HitCreateDrag::aborted (bool)
-{
-	// umm..
 }
 
 CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor* e, AudioRegionView* rv, ArdourCanvas::Item* i, bool start_yn)
