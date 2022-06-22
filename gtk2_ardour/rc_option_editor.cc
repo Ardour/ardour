@@ -2190,7 +2190,7 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 	int pretty_name_column;
 	int music_column;
 	int control_column;
-	int selection_column;
+	int selection_column = 0;
 	TreeViewColumn* col;
 	Gtk::Label* l;
 
