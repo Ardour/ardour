@@ -92,7 +92,13 @@ namespace PBD {
 #define DEBUG_TIMING_ADD_ELAPSED(bits,td) if (DEBUG_ENABLED (bits)) { td.add_elapsed (); }
 #define DEBUG_TIMING_RESET(bits,td) if (DEBUG_ENABLED (bits)) { td.reset (); }
 
+#define DEBUG_RESULT(type,var,...) type var = __VA_ARGS__
+#define DEBUG_RESULT_CAST(type,var,cast_expr,...) type var = cast_expr __VA_ARGS__
+#define DEBUG_ASSIGN(var,expr) var = expr
+
 #else
+
+
 #define DEBUG_TRACE(bits,fmt,...) /*empty*/
 #define DEBUG_STR(a) /* empty */
 #define DEBUG_STR_APPEND(a,b) /* empty */
@@ -103,6 +109,9 @@ namespace PBD {
 #define DEBUG_TIMING_ADD_ELAPSED(bits,td) /*empty*/
 #define DEBUG_TIMING_RESET(bits,td) /*empty*/
 
+#define DEBUG_RESULT(type,var,...) __VA_ARGS__
+#define DEBUG_RESULT_CAST(type,var,cast_expr,...) __VA_ARGS__
+#define DEBUG_ASSIGN(var,expr)
 #endif
 #endif /* __libpbd_debug_h__ */
 
