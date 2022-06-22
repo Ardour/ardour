@@ -2004,8 +2004,6 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
 			}
 
-			superclock_t step;
-
 			if (bar_mod == 0) {
 
 				/* Advance beats by the meter note value size, and
@@ -2016,7 +2014,6 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 				beats += metric.tempo().note_type_as_beats ();
 				bbt = metric.bbt_at (beats);
 				start = metric.superclock_at (beats);
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("step at %3 for note type was %1, now @ %2 beats = %4\n", step, start, bbt, beats));
 
 			} else {
 
