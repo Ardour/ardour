@@ -428,6 +428,8 @@ TrackMixLayout::monitoring_change ()
 		b1_color = selection_color;
 		b2_color = selection_color;
 		break;
+	default:
+		return; /* stupid compilers */
 	}
 
 	b1->set_color (b1_color);
