@@ -30,11 +30,10 @@
      x_assert (foo, foo == 0);
 */
 
-#define x_assert(VAR, EXPR)  \
-# ifndef NDEBUG              \
-assert (EXPR);               \
-# else                       \
-(void) (VAR)                 \
+# ifndef NDEBUG
+#define x_assert(VAR, EXPR) assert (EXPR)
+# else
+#define x_assert(VAR, EXPR) (void) (VAR)
 # endif
 
 #endif /* __libpbd_assert_h__ */
