@@ -2625,7 +2625,9 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+#ifndef NDEBUG
 	samplepos_t last_event_samples = max_samplepos;
+#endif
 
 	/* see if we're going to start or stop or retrigger in this run() call */
 	pframes_t ignore_computed_dest_offset = 0;
@@ -2729,7 +2731,9 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		last_event_beats = event.time();
 		last_event_timeline_beats = maybe_last_event_timeline_beats;
+#ifndef NDEBUG
 		last_event_samples = timeline_samples;
+#endif
 
 		++iter;
 	}
