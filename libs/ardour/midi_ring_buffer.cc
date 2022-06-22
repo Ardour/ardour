@@ -23,6 +23,7 @@
 #include "pbd/compose.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/i18n.h"
 
 #include "ardour/debug.h"
 #include "ardour/midi_ring_buffer.h"
@@ -95,7 +96,10 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, sa
 
 		uint8_t status;
 		bool r = this->peek (&status, sizeof(uint8_t));
-		assert (r); // If this failed, buffer is corrupt, all hope is lost
+		if (!r) {
+			fatal << string_compose (_("programming error: %1\n"), X_("MIDI buffer corrupt in MidiRingBuffer::read()")) << endmsg;
+			abort(); // If this failed, buffer is corrupt, all hope is lost
+		}
 
 		/* lets see if we are going to be able to write this event into dst.
 		 */
@@ -159,7 +163,10 @@ MidiRingBuffer<T>::skip_to(samplepos_t start)
 
 		uint8_t peekbuf[prefix_size];
 		bool r = this->peek (peekbuf, prefix_size);
-		assert (r);
+		if (!r) {
+			fatal << string_compose (_("programming error: %1\n"), X_("MIDI buffer corrupt in MidiRingBuffer::skip_to()")) << endmsg;
+			abort ();
+		}
 
 		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
 		ev_size = *(reinterpret_cast<uint32_t*>((uintptr_t)(peekbuf + sizeof(T) + sizeof (Evoral::EventType))));
