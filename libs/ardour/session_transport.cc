@@ -926,6 +926,9 @@ Session::request_locate (samplepos_t target_sample, bool force, LocateTransportD
 			type = SessionEvent::Locate;
 		}
 		break;
+	default:
+		/* impossible, but gcc -O3 can't figure it out */
+		return;
 	}
 
 	SessionEvent *ev = new SessionEvent (type, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, force);
