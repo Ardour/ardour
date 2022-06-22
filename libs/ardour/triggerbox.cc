@@ -1718,7 +1718,7 @@ AudioTrigger::setup_stretcher ()
 	const uint32_t nchans = std::min (_box.input_streams().n_audio(), ar->n_channels());
 
 	//map our internal enum to a rubberband option
-	RubberBandStretcher::Option ro;
+	RubberBandStretcher::Option ro = RubberBandStretcher::Option (0);
 	switch (_stretch_mode) {
 		case Trigger::Crisp  : ro = RubberBandStretcher::OptionTransientsCrisp; break;
 		case Trigger::Mixed  : ro = RubberBandStretcher::OptionTransientsMixed; break;
