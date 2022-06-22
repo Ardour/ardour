@@ -457,7 +457,9 @@ CURLcode res;
 		DEBUG_TRACE(PBD::DEBUG::Freesound, string_compose("renaming %1.part to %1\n", audioFileName));
 		int r = rename ( (audioFileName+".part").c_str(), audioFileName.c_str() );
 		if (r != 0) {
+#ifndef NDEBUG
 			const char *err = strerror(errno);
+#endif
 			DEBUG_TRACE(PBD::DEBUG::Freesound, string_compose("rename() failed: %1\n", err));
 			assert(0);
 		} else {
