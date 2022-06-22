@@ -460,7 +460,7 @@ Mootcher::threadFunc()
 		if (r != 0) {
 			const char * err = strerror(errno);
 			fatal << string_compose (_("programming error: %1\n"), string_compose (X_("freesound rename failed %1"), err));
-			abort (); /* XXX probably not appropriat */
+			abort (); /* NOTREACHED */
 		} else {
 			// now download the tags &c.
 			getSoundResourceFile(ID);
