@@ -85,7 +85,7 @@ TempoCurve::TempoCurve (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rg
 	_end_text->set_font_description (ARDOUR_UI_UTILS::get_font_for_style (N_("MarkerText")));
 	_start_text->set_color (RGBA_TO_UINT (255,255,255,255));
 	_end_text->set_color (RGBA_TO_UINT (255,255,255,255));
-	char buf[10];
+	char buf[128];
 	snprintf (buf, sizeof (buf), "%.3f/%d", _tempo->note_types_per_minute(), _tempo->note_type());
 	_start_text->set (buf);
 	snprintf (buf, sizeof (buf), "%.3f", _tempo->end_note_types_per_minute());
@@ -169,7 +169,7 @@ TempoCurve::set_duration (samplecnt_t duration)
 
 	_curve->set (points);
 
-	char buf[10];
+	char buf[129];
 
 	snprintf (buf, sizeof (buf), "%.3f/%d", _tempo->note_types_per_minute(), _tempo->note_type());
 	_start_text->set (buf);
