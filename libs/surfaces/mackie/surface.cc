@@ -430,7 +430,7 @@ Surface::toggle_master_monitor ()
 	{
 		_master_stripable = _mcp.get_session().monitor_out();
 	} else { return; }
-	
+
 	_master_fader->set_control (_master_stripable->gain_control());
 	_master_stripable->gain_control()->Changed.connect (master_connection, MISSING_INVALIDATOR, boost::bind (&Surface::master_gain_changed, this), ui_context());
 	_last_master_gain_written = FLT_MAX;
@@ -467,13 +467,16 @@ Surface::setup_master ()
 		_master_fader = dynamic_cast<Fader*> (Fader::factory (*this, device_info.strip_cnt(), "master", *master_group));
 
 		GlobalButtonInfo master_button = device_info.get_global_button(Button::MasterFaderTouch);
-		Button* bb = dynamic_cast<Button*> (Button::factory (
-			                                    *this,
-			                                    Button::MasterFaderTouch,
-			                                    master_button.id,
-			                                    master_button.label,
-			                                    *(group_it->second)
-			                                    ));
+#ifndef NDEBUG
+		Button* bb =
+#endif
+			dynamic_cast<Button*> (Button::factory (
+				                       *this,
+				                       Button::MasterFaderTouch,
+				                       master_button.id,
+				                       master_button.label,
+				                       *(group_it->second)
+				                       ));
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface %1 Master Fader new button BID %2 id %3\n",
 		                                                   number(), Button::MasterFaderTouch, bb->id()));
