@@ -198,7 +198,9 @@ MIDIClock_TransportMaster::calculate_filter_coefficients (double qpm)
 void
 MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t timestamp)
 {
+#ifndef NDEBUG
 	samplepos_t elapsed_since_start = timestamp - first_timestamp;
+#endif
 
 	calculate_one_ppqn_in_samples_at (current.position);
 
