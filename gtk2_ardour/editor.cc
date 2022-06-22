@@ -4317,7 +4317,8 @@ Editor::get_grid_type_as_beats (bool& success, timepos_t const & position)
 	int32_t const divisions = get_grid_beat_divisions (_grid_type);
 	/* Beat (+1), and Bar (-1) are handled below */
 	if (divisions > 1) {
-		return Temporal::Beats::from_double (1.0 / (double) divisions);
+		/* grid divisions are divisions of a 1/4 note */
+		return Temporal::Beats::ticks(Temporal::Beats::PPQN / divisions);
 	}
 
 	TempoMap::SharedPtr tmap (TempoMap::use());
@@ -4389,11 +4390,11 @@ Temporal::Beats
 Editor::get_draw_length_as_beats (bool& success, timepos_t const & position)
 {
 	success = true;
-
 	GridType grid_to_use = draw_length() == DRAW_LEN_AUTO ? grid_type() : draw_length();
 	int32_t const divisions = get_grid_beat_divisions (grid_to_use);
+
 	if (divisions != 0) {
-		return Temporal::Beats::from_double (1.0 / fabs (divisions));
+		return Temporal::Beats::ticks (Temporal::Beats::PPQN / divisions);
 	}
 
 	success = false;
