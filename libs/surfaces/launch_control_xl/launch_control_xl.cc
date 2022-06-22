@@ -1284,20 +1284,20 @@ void LaunchControlXL::set_track_mode (TrackMode mode) {
 
 	LEDColor color_on, color_off;
 	switch(mode) {
-		case TrackMute:
-			color_on = YellowFull;
-			color_off = YellowLow;
-			break;
-		case TrackSolo:
-			color_on = GreenFull;
-			color_off = GreenLow;
-			break;
-		case TrackRecord:
-			color_on = RedFull;
-			color_off = RedLow;
-			break;
-	default:
+	case TrackMute:
+		color_on = YellowFull;
+		color_off = YellowLow;
 		break;
+	case TrackSolo:
+		color_on = GreenFull;
+		color_off = GreenLow;
+		break;
+	case TrackRecord:
+		color_on = RedFull;
+		color_off = RedLow;
+		break;
+	default:
+		return; /* stupid compilers */
 	}
 
 	for ( size_t n = 0 ; n < sizeof (trk_cntrl_btns) / sizeof (trk_cntrl_btns[0]); ++n) {
