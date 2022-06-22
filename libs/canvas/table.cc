@@ -508,7 +508,7 @@ Table::compute (Rect const & within)
 	 */
 
 	Distance vpos = padding.up;
-	Distance hpos;
+	Distance hpos = 0;
 
 	for (uint32_t r = 0; r < rows; ++r) {
 
