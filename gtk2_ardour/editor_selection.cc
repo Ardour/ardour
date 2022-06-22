@@ -547,6 +547,11 @@ Editor::mapover_all_tracks_with_unique_playlists (sigc::slot<void, RouteTimeAxis
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*> (*i);
 
+		if (!v) {
+			/* Ignore VCAs */
+			continue;
+		}
+
 		boost::shared_ptr<Track> t = v->track();
 		if (t) {
 			if (playlists.insert (t->playlist()).second) {
