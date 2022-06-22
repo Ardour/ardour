@@ -187,7 +187,7 @@ smf_format_vlq(unsigned char *buf, int length, unsigned long value)
 smf_event_t *
 smf_event_new_textual(int type, const char *text)
 {
-	int vlq_length, text_length, copied_length;
+	int vlq_length, text_length;
 	smf_event_t *event;
 
 	assert(type >= 1 && type <= 9);
@@ -212,13 +212,12 @@ smf_event_new_textual(int type, const char *text)
 	event->midi_buffer[1] = type;
 
 	vlq_length = smf_format_vlq(event->midi_buffer + 2, MAX_VLQ_LENGTH - 2, text_length);
-	copied_length = snprintf((char *)event->midi_buffer + vlq_length + 2, event->midi_buffer_length - vlq_length - 2, "%s", text);
-
 #ifndef NDEBUG
-	(void) copied_length; /* stop gcc warning about unusued vars for non-debug build */
-#else
-	assert(copied_length == text_length);
+	int copied_length =
 #endif
+		snprintf((char *)event->midi_buffer + vlq_length + 2, event->midi_buffer_length - vlq_length - 2, "%s", text);
+
+	assert(copied_length == text_length);
 
 	event->midi_buffer_length = 2 + vlq_length + text_length;
 
