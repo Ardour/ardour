@@ -756,7 +756,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 	len = strlen (path);
 	OSCSurface *sur = get_surface(get_address (msg), true);
-	LinkSet *set;
+	LinkSet *set = 0;
 	uint32_t ls = sur->linkset;
 
 	if (ls) {
@@ -771,12 +771,10 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	if (strstr (path, X_("/automation"))) {
 		ret = set_automation (path, types, argv, argc, msg);
 
-	} else
-	if (strstr (path, X_("/touch"))) {
+	} else if (strstr (path, X_("/touch"))) {
 		ret = touch_detect (path, types, argv, argc, msg);
 
-	} else
-	if (strstr (path, X_("/toggle_roll"))) {
+	} else if (strstr (path, X_("/toggle_roll"))) {
 		if (!argc) {
 			ret = osc_toggle_roll (false);
 		} else {
@@ -786,27 +784,22 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 				ret = osc_toggle_roll (false);
 			}
 		}
-	} else
-	if (strstr (path, X_("/spill"))) {
+	} else if (strstr (path, X_("/spill"))) {
 		ret = spill (path, types, argv, argc, msg);
 
-	} else
-	if (len >= 17 && !strcmp (&path[len-15], X_("/#current_value"))) {
+	} else if (len >= 17 && !strcmp (&path[len-15], X_("/#current_value"))) {
 		current_value_query (path, len, argv, argc, msg);
 		ret = 0;
 
-	} else
-	if (!strncmp (path, X_("/cue/"), 5)) {
+	} else if (!strncmp (path, X_("/cue/"), 5)) {
 
 		ret = cue_parse (path, types, argv, argc, msg);
 
-	} else
-	if (!strncmp (path, X_("/select/plugin/parameter"), 24)) {
+	} else if (!strncmp (path, X_("/select/plugin/parameter"), 24)) {
 
 		ret = select_plugin_parameter (path, types, argv, argc, msg);
 
-	} else
-	if (!strncmp (path, X_("/access_action/"), 15)) {
+	} else if (!strncmp (path, X_("/access_action/"), 15)) {
 		check_surface (msg);
 		if (!(argc && !argv[0]->i)) {
 			std::string action_path = path;
@@ -815,8 +808,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		}
 
 		ret = 0;
-	} else
-	if (strcmp (path, X_("/strip/listen")) == 0) {
+	} else if (strcmp (path, X_("/strip/listen")) == 0) {
 		if (argc <= 0) {
 			PBD::warning << "OSC: Wrong number of parameters." << endmsg;
 		} else if (sur->custom_mode && !sur->temp_mode) {
@@ -833,13 +825,12 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 					sur->custom_strips.push_back (s);
 				}
 			}
-			if (ls) {
+			if (set) {
 				set->custom_strips = sur->custom_strips;
 			}
 		}
 		ret = 0;
-	} else
-	if (strcmp (path, X_("/strip/ignore")) == 0) {
+	} else if (strcmp (path, X_("/strip/ignore")) == 0) {
 		if (argc <= 0) {
 			PBD::warning << "OSC: Wrong number of parameters." << endmsg;
 		} else if (!sur->custom_mode || sur->temp_mode) {
@@ -863,26 +854,19 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		}
 
 		ret = 0;
-	}
-	else if (!strncmp (path, X_("/set_surface"), 12)) {
+	} else if (!strncmp (path, X_("/set_surface"), 12)) {
 		ret = surface_parse (path, types, argv, argc, msg);
-	}
-	else if (strstr (path, X_("/strip"))) {
+	} else if (strstr (path, X_("/strip"))) {
 		ret = strip_parse (path, types, argv, argc, msg);
-	}
-	else if (strstr (path, X_("/master"))) {
+	} else if (strstr (path, X_("/master"))) {
 		ret = master_parse (path, types, argv, argc, msg);
-	}
-	else if (strstr (path, X_("/monitor"))) {
+	} else if (strstr (path, X_("/monitor"))) {
 		ret = monitor_parse (path, types, argv, argc, msg);
-	}
-	else if (strstr (path, X_("/select"))) {
+	} else if (strstr (path, X_("/select"))) {
 		ret = select_parse (path, types, argv, argc, msg);
-	}
-	else if (!strncmp (path, X_("/marker"), 7)) {
+	} else if (!strncmp (path, X_("/marker"), 7)) {
 		ret = set_marker (types, argv, argc, msg);
-	}
-	else if (strstr (path, X_("/link"))) {
+	} else if (strstr (path, X_("/link"))) {
 		ret = parse_link (path, types, argv, argc, msg);
 	}
 	if (ret) {
@@ -1240,7 +1224,7 @@ OSC::_custom_mode (uint32_t state, lo_address addr)
 		return 0;
 	}
 	OSCSurface *sur = get_surface(addr, true);
-	LinkSet *set;
+	LinkSet *set = 0;
 	uint32_t ls = sur->linkset;
 
 	if (ls) {
@@ -1271,7 +1255,7 @@ OSC::_custom_mode (uint32_t state, lo_address addr)
 		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 0, sur->custom_strips);
 		sur->nstrips = sur->strips.size();
 	}
-	if (ls) {
+	if (set) {
 		set->custom_mode = sur->custom_mode;
 		set->strips = sur->strips;
 		set->temp_mode = sur->temp_mode;
@@ -2105,7 +2089,7 @@ OSC::global_feedback (OSCSurface* sur)
 void
 OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 {
-	LinkSet *set;
+	LinkSet *set = 0;
 	uint32_t ls = sur->linkset;
 
 	if (ls) {
@@ -2130,7 +2114,7 @@ OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 		new_bank_size = true;
 	}
 
-	if (ls) {
+	if (set) {
 		set->strips = sur->strips;
 	}
 
@@ -6622,4 +6606,3 @@ OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo
 
 	return sorted;
 }
-
