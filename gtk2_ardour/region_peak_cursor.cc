@@ -97,6 +97,8 @@ RegionPeakCursor::set (AudioRegionView* arv, samplepos_t when, samplecnt_t sampl
 	s += ar->start_sample ();
 
 	PeakData p;
+	p.min = 0;
+	p.max = 0;
 	for (uint32_t chn = 0; chn < ar->n_channels (); ++chn) {
 		PeakData pc;
 		ar->read_peaks (&pc, 1, s, samples_per_pixel, chn, samples_per_pixel);
