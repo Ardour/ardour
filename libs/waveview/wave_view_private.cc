@@ -207,7 +207,10 @@ WaveViewCache::get_cache_group (boost::shared_ptr<ARDOUR::AudioSource> source)
 
 	boost::shared_ptr<WaveViewCacheGroup> new_group (new WaveViewCacheGroup (*this));
 
-	bool inserted = cache_group_map.insert (std::make_pair (source, new_group)).second;
+#ifndef NDEBUG
+	bool inserted =
+#endif
+		cache_group_map.insert (std::make_pair (source, new_group)).second;
 
 	assert (inserted);
 
