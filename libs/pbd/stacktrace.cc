@@ -92,7 +92,7 @@ extern "C" {
 #endif
 
 void
-PBD::stacktrace (std::ostream& out, int levels, int start)
+PBD::stacktrace (std::ostream& out, int levels, size_t start)
 {
 	void*          stack[62]; // does not support more then 62 levels of stacktrace
 	unsigned short frames;
@@ -125,7 +125,7 @@ PBD::stacktrace (std::ostream& out, int levels, int start)
 #else
 
 void
-PBD::stacktrace (std::ostream& out, int, int)
+PBD::stacktrace (std::ostream& out, int, size_t)
 {
 	out << "stack tracing is not enabled on this platform" << std::endl;
 }
