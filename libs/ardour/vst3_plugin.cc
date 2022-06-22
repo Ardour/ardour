@@ -2565,7 +2565,6 @@ VST3PI::automation_state_changed (uint32_t port, AutoState s, boost::weak_ptr<Au
 			am = kAutomationLatch;
 			break;
 		default:
-			assert (0);
 			return;
 	}
 	extra_ctrl->setParamAutomationMode (id, am);
