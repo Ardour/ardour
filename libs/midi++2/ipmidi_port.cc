@@ -116,7 +116,7 @@ get_address (int sock, struct in_addr *inaddr, const string& ifname )
 	// Get interface address from supplied name.
 
 	struct ifreq ifr;
-	::strncpy(ifr.ifr_name, ifname.c_str(), sizeof(ifr.ifr_name));
+	::strncpy(ifr.ifr_name, ifname.c_str(), sizeof(ifr.ifr_name) - 1);
 
 	if (::ioctl(sock, SIOCGIFFLAGS, (char *) &ifr)) {
 		::perror("ioctl(SIOCGIFFLAGS)");
