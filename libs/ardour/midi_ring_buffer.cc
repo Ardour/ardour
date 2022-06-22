@@ -223,11 +223,14 @@ MidiRingBuffer<T>::flush (samplepos_t /*start*/, samplepos_t end)
 
 	while (this->read_space() >= prefix_size) {
 		uint8_t  peekbuf[prefix_size];
-		bool     success;
 		uint32_t ev_size;
 		T        ev_time;
 
-		success = this->peek (peekbuf, prefix_size);
+#ifndef NDEBUG
+		bool     success =
+#endif
+			this->peek (peekbuf, prefix_size);
+
 		/* this cannot fail, because we've already verified that there
 		   is prefix_space to read
 		*/
