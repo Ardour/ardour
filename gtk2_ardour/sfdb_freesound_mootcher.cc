@@ -439,8 +439,9 @@ int audioFileWrite(void *buffer, size_t size, size_t nmemb, void *file)
 //------------------------------------------------------------------------
 
 void *
-Mootcher::threadFunc() {
-CURLcode res;
+Mootcher::threadFunc()
+{
+	CURLcode res;
 
 	DEBUG_TRACE(PBD::DEBUG::Freesound, "threadFunc\n");
 	res = curl_easy_perform (curl);
@@ -457,11 +458,9 @@ CURLcode res;
 		DEBUG_TRACE(PBD::DEBUG::Freesound, string_compose("renaming %1.part to %1\n", audioFileName));
 		int r = rename ( (audioFileName+".part").c_str(), audioFileName.c_str() );
 		if (r != 0) {
-#ifndef NDEBUG
-			const char *err = strerror(errno);
-#endif
-			DEBUG_TRACE(PBD::DEBUG::Freesound, string_compose("rename() failed: %1\n", err));
-			assert(0);
+			const char * err = strerror(errno);
+			fatal << string_compose (_("programming error: %1\n"), string_compose (X_("freesound rename failed %1"), err));
+			abort (); /* XXX probably not appropriat */
 		} else {
 			// now download the tags &c.
 			getSoundResourceFile(ID);
