@@ -1717,9 +1717,9 @@ DiskReader::Declicker::reset (samplepos_t loop_start, samplepos_t loop_end, bool
 void
 DiskReader::Declicker::run (Sample* buf, samplepos_t read_start, samplepos_t read_end)
 {
-	samplecnt_t    n;  /* how many samples to process */
-	sampleoffset_t bo; /* offset into buffer */
-	sampleoffset_t vo; /* offset into gain vector */
+	samplecnt_t    n  = 0; /* how many samples to process */
+	sampleoffset_t bo = 0; /* offset into buffer */
+	sampleoffset_t vo = 0; /* offset into gain vector */
 
 	if (fade_start == fade_end) {
 		return;
@@ -1793,9 +1793,9 @@ DiskReader::Declicker::run (Sample* buf, samplepos_t read_start, samplepos_t rea
 void
 DiskReader::maybe_xfade_loop (Sample* buf, samplepos_t read_start, samplepos_t read_end, ReaderChannelInfo* chan)
 {
-	samplecnt_t    n;  /* how many samples to process */
-	sampleoffset_t bo; /* offset into buffer */
-	sampleoffset_t vo; /* offset into gain vector */
+	samplecnt_t    n  = 0;  /* how many samples to process */
+	sampleoffset_t bo = 0; /* offset into buffer */
+	sampleoffset_t vo = 0; /* offset into gain vector */
 
 	const samplepos_t fade_start = loop_declick_out.fade_start;
 	const samplepos_t fade_end   = loop_declick_out.fade_end;
