@@ -673,6 +673,8 @@ FaderPort::map_recenable_state ()
 			onoff = blink_state;
 		}
 		break;
+	default:
+		return; /* stupid compilers */
 	}
 
 	if (onoff != rec_enable_state) {
