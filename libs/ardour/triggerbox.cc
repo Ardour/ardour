@@ -1652,9 +1652,7 @@ AudioTrigger::estimate_tempo ()
 			beatcount = round(barcount * 4);
 		}
 
-#ifndef NDEBUG
-		double est = _estimated_tempo;
-#endif
+		DEBUG_RESULT (double, est, _estimated_tempo);
 		_estimated_tempo = beatcount / (seconds/60.);
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given original estimated tempo %1, rounded beatcnt is %2 : resulting in working bpm = %3\n", est, _beatcnt, _estimated_tempo));
 
@@ -2625,9 +2623,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-#ifndef NDEBUG
-	samplepos_t last_event_samples = max_samplepos;
-#endif
+	DEBUG_RESULT (samplepos_t, last_event_samples, max_samplepos);
 
 	/* see if we're going to start or stop or retrigger in this run() call */
 	pframes_t ignore_computed_dest_offset = 0;
@@ -2731,9 +2727,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		last_event_beats = event.time();
 		last_event_timeline_beats = maybe_last_event_timeline_beats;
-#ifndef NDEBUG
-		last_event_samples = timeline_samples;
-#endif
+		DEBUG_ASSIGN (last_event_samples, timeline_samples);
 
 		++iter;
 	}

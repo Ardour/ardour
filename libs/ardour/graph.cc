@@ -533,7 +533,7 @@ void
 Graph::process_one_route (Route* route)
 {
 	bool need_butler = false;
-	int  retval = 0;
+	int  retval;
 
 	assert (route);
 

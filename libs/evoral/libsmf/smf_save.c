@@ -39,6 +39,9 @@
 #include <assert.h>
 #include <math.h>
 #include <errno.h>
+
+#include "pbd/assert.h"
+
 #include "smf.h"
 #include "smf_private.h"
 
@@ -212,12 +215,9 @@ smf_event_new_textual(int type, const char *text)
 	event->midi_buffer[1] = type;
 
 	vlq_length = smf_format_vlq(event->midi_buffer + 2, MAX_VLQ_LENGTH - 2, text_length);
-#ifndef NDEBUG
-	int copied_length =
-#endif
-		snprintf((char *)event->midi_buffer + vlq_length + 2, event->midi_buffer_length - vlq_length - 2, "%s", text);
-
-	assert(copied_length == text_length);
+	int copied_length;
+	copied_length = snprintf((char *)event->midi_buffer + vlq_length + 2, event->midi_buffer_length - vlq_length - 2, "%s", text);
+	x_assert (copied_length, copied_length == text_length);
 
 	event->midi_buffer_length = 2 + vlq_length + text_length;
 

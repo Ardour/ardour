@@ -20,6 +20,7 @@
 #include <cmath>
 #include "ardour/lmath.h"
 
+#include "pbd/assert.h"
 #include "pbd/cpus.h"
 #include "pbd/pthread_utils.h"
 
@@ -207,12 +208,8 @@ WaveViewCache::get_cache_group (boost::shared_ptr<ARDOUR::AudioSource> source)
 
 	boost::shared_ptr<WaveViewCacheGroup> new_group (new WaveViewCacheGroup (*this));
 
-#ifndef NDEBUG
-	bool inserted =
-#endif
-		cache_group_map.insert (std::make_pair (source, new_group)).second;
-
-	assert (inserted);
+	bool inserted = cache_group_map.insert (std::make_pair (source, new_group)).second;
+	x_assert (inserted, inserted);
 
 	return new_group;
 }

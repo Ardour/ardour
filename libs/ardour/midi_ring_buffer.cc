@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/assert.h"
 #include "pbd/compose.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
@@ -226,15 +227,11 @@ MidiRingBuffer<T>::flush (samplepos_t /*start*/, samplepos_t end)
 		uint32_t ev_size;
 		T        ev_time;
 
-#ifndef NDEBUG
-		bool     success =
-#endif
-			this->peek (peekbuf, prefix_size);
-
+		bool     success = this->peek (peekbuf, prefix_size);
 		/* this cannot fail, because we've already verified that there
 		   is prefix_space to read
 		*/
-		assert (success);
+		x_assert (success, success);
 
 		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
 

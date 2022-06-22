@@ -724,9 +724,7 @@ TransportFSM::defer (Event& ev)
 void
 TransportFSM::transition (MotionState ms)
 {
-#ifndef NDEBUG
-	const MotionState old = _motion_state;
-#endif
+	DEBUG_RESULT (const MotionState, old, _motion_state);
 	_motion_state = ms;
 	_transport_speed = compute_transport_speed ();
 	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (old), current_state()));
@@ -735,9 +733,7 @@ TransportFSM::transition (MotionState ms)
 void
 TransportFSM::transition (ButlerState bs)
 {
-#ifndef NDEBUG
-	const ButlerState old = _butler_state;
-#endif
+	DEBUG_RESULT (const ButlerState, old, _butler_state);
 	_butler_state = bs;
 	_transport_speed = compute_transport_speed ();
 	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (old), current_state()));
@@ -746,9 +742,7 @@ TransportFSM::transition (ButlerState bs)
 void
 TransportFSM::transition (DirectionState ds)
 {
-#ifndef NDEBUG
-	const DirectionState old = _direction_state;
-#endif
+	DEBUG_RESULT (const DirectionState, old, _direction_state);
 	_direction_state = ds;
 	_transport_speed = compute_transport_speed ();
 	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (old), current_state()));

@@ -30,6 +30,8 @@
 
 #include <glibmm/convert.h>
 
+#include "pbd/debug.h"
+
 #include "midi++/port.h"
 
 #include "ardour/audioengine.h"
@@ -467,17 +469,13 @@ Surface::setup_master ()
 		_master_fader = dynamic_cast<Fader*> (Fader::factory (*this, device_info.strip_cnt(), "master", *master_group));
 
 		GlobalButtonInfo master_button = device_info.get_global_button(Button::MasterFaderTouch);
-#ifndef NDEBUG
-		Button* bb =
-#endif
-			dynamic_cast<Button*> (Button::factory (
-				                       *this,
-				                       Button::MasterFaderTouch,
-				                       master_button.id,
-				                       master_button.label,
-				                       *(group_it->second)
-				                       ));
-
+		DEBUG_RESULT_CAST (Button*, bb, dynamic_cast<Button*>, (Button::factory (
+			                                                        *this,
+			                                                        Button::MasterFaderTouch,
+			                                                        master_button.id,
+			                                                        master_button.label,
+			                                                        *(group_it->second)
+			                                                        )));
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface %1 Master Fader new button BID %2 id %3\n",
 		                                                   number(), Button::MasterFaderTouch, bb->id()));
 	} else {

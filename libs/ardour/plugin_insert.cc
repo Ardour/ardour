@@ -28,6 +28,7 @@
 
 #include <string>
 
+#include "pbd/assert.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
 #include "pbd/types_convert.h"
@@ -912,10 +913,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 			for (uint32_t i = 1; i < natural_input_streams ().get (*t); ++i) {
 				uint32_t idx = in_map.p(0).get (*t, i, &valid);
 				if (valid) {
-#ifdef NDEBUG
-					(void) idx;
-#endif
-					assert (idx == 0);
+					x_assert (idx, idx == 0);
 					bufs.get_available (*t, i).read_from (bufs.get_available (*t, first_idx), nframes, offset, offset);
 				}
 			}
@@ -1225,10 +1223,7 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 				for (uint32_t i = 1; i < natural_input_streams ().get (*t); ++i) {
 					uint32_t idx = in_map.get (*t, i, &valid);
 					if (valid) {
-#ifdef NDEBUG
-						(void) idx;
-#endif
-						assert (idx == 0);
+						x_assert (idx, idx == 0);
 						bufs.get_available (*t, i).read_from (bufs.get_available (*t, first_idx), nframes, 0, 0);
 					}
 				}
@@ -2031,11 +2026,8 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			}
 			//if (dout.n_audio () == 0) { dout.set (DataType::AUDIO, 1); } // XXX why?
 			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate lookup: %2 %3 %4\n", name(), din, daux, dout));
-			bool const r = _plugins.front()->match_variable_io (din, daux, dout);
-#ifdef NDEBUG
-			(void) r;
-#endif
-			assert (r);
+			bool const r =  _plugins.front()->match_variable_io (din, daux, dout);
+			x_assert (r, r);
 			DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: Delegate configuration: %2 %3 %4\n", name(), din, daux, dout));
 			if (_plugins.front()->reconfigure_io (din, daux, dout) == false) {
 				PluginIoReConfigure (); /* EMIT SIGNAL */

@@ -135,12 +135,9 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	}
 
 	for (map<Button::ID,StripButtonInfo>::const_iterator b = strip_buttons.begin(); b != strip_buttons.end(); ++b) {
-#ifndef NDEBUG
-		Button* bb = dynamic_cast<Button*>
-#endif
-			(Button::factory (*_surface, b->first, b->second.base_id + index, b->second.name, *this));
+		DEBUG_RESULT_CAST (Button*, bb, dynamic_cast<Button*> (Button::factory (*_surface, b->first, b->second.base_id + index, b->second.name, *this)));
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("surface %1 strip %2 new button BID %3 id %4 from base %5\n",
-								   _surface->number(), index, Button::id_to_name (bb->bid()),
+		                                                   _surface->number(), index, Button::id_to_name (bb->bid()),
 								   bb->id(), b->second.base_id));
 	}
 }

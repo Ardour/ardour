@@ -44,6 +44,9 @@
 #else
 #include <arpa/inet.h>
 #endif
+
+#include "pbd/assert.h"
+
 #include "smf.h"
 #include "smf_private.h"
 
@@ -182,12 +185,7 @@ smf_add_track(smf_t *smf, smf_track_t *track)
 
 	if (smf->number_of_tracks > 1) {
 		cantfail = smf_set_format(smf, 1);
-#ifndef NDEBUG
-		assert(!cantfail);
-#else
-		(void) cantfail;
-#endif
-
+		x_assert (cantfail, !cantfail);
 	}
 }
 
