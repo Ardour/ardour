@@ -472,8 +472,8 @@ FileArchive::create (const std::map<std::string, std::string>& filemap, Compress
 
 	if (compression_level != CompressNone) {
 		archive_write_add_filter_lzma (a);
-		char buf[48];
-		sprintf (buf, "lzma:compression-level=%u,lzma:threads=0", (uint32_t) compression_level);
+		char buf[64];
+		snprintf (buf, sizeof (buf), "lzma:compression-level=%u,lzma:threads=0", (uint32_t) compression_level);
 		archive_write_set_options (a, buf);
 	}
 
