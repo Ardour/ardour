@@ -1652,7 +1652,9 @@ AudioTrigger::estimate_tempo ()
 			beatcount = round(barcount * 4);
 		}
 
+#ifndef NDEBUG
 		double est = _estimated_tempo;
+#endif
 		_estimated_tempo = beatcount / (seconds/60.);
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("given original estimated tempo %1, rounded beatcnt is %2 : resulting in working bpm = %3\n", est, _beatcnt, _estimated_tempo));
 
