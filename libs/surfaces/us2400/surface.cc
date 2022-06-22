@@ -398,13 +398,16 @@ Surface::setup_master ()
 
 		DeviceInfo device_info = _mcp.device_info();
 		GlobalButtonInfo master_button = device_info.get_global_button(Button::MasterFaderTouch);
-		Button* bb = dynamic_cast<Button*> (Button::factory (
-		                                    *this,
-		                                    Button::MasterFaderTouch,
-		                                    master_button.id,
-		                                    master_button.label,
-		                                    *(group_it->second)
-		                                    ));
+#ifndef NDEBUG
+		Button* bb = dynamic_cast<Button*>
+#endif
+			(Button::factory (
+				*this,
+				Button::MasterFaderTouch,
+				master_button.id,
+				master_button.label,
+				*(group_it->second)
+				));
 
 		DEBUG_TRACE (DEBUG::US2400, string_compose ("surface %1 Master Fader new button BID %2 id %3\n",
 		                                                   number(), Button::MasterFaderTouch, bb->id()));
