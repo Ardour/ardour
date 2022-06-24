@@ -35,6 +35,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/pthread_utils.h"
 
+#include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/port_manager.h"
 #include "ardouralsautil/devicelist.h"
@@ -1730,7 +1731,7 @@ AlsaAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool fo
 {
 	BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
-		PBD::error << _("AlsaPort::set_latency_range (): invalid port.") << endmsg;
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "AlsaPort::set_latency_range (): invalid port.");
 	}
 	port->set_latency_range (latency_range, for_playback);
 }
@@ -1742,7 +1743,7 @@ AlsaAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool fo
 	LatencyRange   r;
 
 	if (!valid_port (port)) {
-		PBD::error << _("AlsaPort::get_latency_range (): invalid port.") << endmsg;
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "AlsaPort::get_latency_range (): invalid port.");
 		r.min = 0;
 		r.max = 0;
 		return r;

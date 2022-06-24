@@ -31,6 +31,8 @@
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/pthread_utils.h"
+
+#include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/port_manager.h"
 #include "pbd/i18n.h"
@@ -832,7 +834,7 @@ CoreAudioBackend::coreaudio_process_thread (void *arg)
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
 
 	if (pbd_mach_set_realtime_policy (pthread_self (), td->period_ns, false)) {
-		PBD::warning << _("AudioEngine: process thread failed to set mach realtime policy.") << endmsg;
+		DEBUG_TRACE (PBD::DEBUG::BackendThreads, "AudioEngine: process thread failed to set mach realtime policy.\n");
 	}
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
@@ -841,21 +843,20 @@ CoreAudioBackend::coreaudio_process_thread (void *arg)
 		int res = os_workgroup_join (td->_workgroup, &td->_join_token);
 		switch (res) {
 			case 0:
-				PBD::info << _("AudioEngine: process thread joined AUHAL workgroup.") << endmsg;
+				DEBUG_TRACE (PBD::DEBUG::BackendThreads, "AudioEngine: process thread joined AUHAL workgroup.");
 				break;
 			case EALREADY:
-				PBD::warning << _("AudioEngine: process thread is already in a workgroup.") << endmsg;
+				DEBUG_TRACE (PBD::DEBUG::BackendThreads, "AudioEngine: process thread is already in a workgroup.");
 				td->_joined_workgroup = false;
 				break;
 			case EINVAL:
-				PBD::warning << _("AudioEngine: invalid workgroup for process thread.") << endmsg;
+				DEBUG_TRACE (PBD::DEBUG::BackendThreads, "AudioEngine: invalid workgroup for process thread.");
 				td->_joined_workgroup = false;
 				break;
 			default:
 				td->_joined_workgroup = false;
-				PBD::warning << _("AudioEngine: process thread failed to join AUHAL workgroup.") << endmsg;
+				DEBUG_TRACE (PBD::DEBUG::BackendThreads, "AudioEngine: process thread failed to join AUHAL workgroup.");
 				break;
-
 		}
 	}
 #endif
@@ -1216,7 +1217,7 @@ CoreAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool fo
 {
 	boost::shared_ptr<BackendPort> port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
-		PBD::warning << _("BackendPort::set_latency_range (): invalid port.") << endmsg;
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "BackendPort::set_latency_range (): invalid port.");
 		return;
 	}
 	port->set_latency_range (latency_range, for_playback);
@@ -1228,7 +1229,7 @@ CoreAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool fo
 	boost::shared_ptr<BackendPort> port = boost::dynamic_pointer_cast<BackendPort> (port_handle);
 	LatencyRange r;
 	if (!valid_port (port)) {
-		PBD::warning << _("BackendPort::get_latency_range (): invalid port.") << endmsg;
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "BackendPort::get_latency_range (): invalid port.");
 		r.min = 0;
 		r.max = 0;
 		return r;
