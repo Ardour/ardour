@@ -1454,70 +1454,72 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		target = &dst;
 	}
 
-	if (!g_atomic_int_get (&_no_disk_output)) {
-		const samplecnt_t nframes = abs (end_sample - start_sample);
+	if (g_atomic_int_get (&_no_disk_output)) {
+		return;
+	}
 
-		if (ms & MonitoringDisk) {
-			/* disk data needed */
+	const samplecnt_t nframes = abs (end_sample - start_sample);
 
-			Location* loc = _loop_location;
+	if (ms & MonitoringDisk) {
+		/* disk data needed */
 
-			if (loc) {
-				/* Evoral::Range has inclusive range semantics. Ugh. Hence the -1 */
-				const Temporal::Range loop_range (loc->start (), loc->end ());
-				samplepos_t           effective_start = start_sample;
-				samplecnt_t           cnt             = nframes;
-				sampleoffset_t        offset          = 0;
-				const samplepos_t     loop_end        = loc->end_sample();
+		Location* loc = _loop_location;
 
-				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("LOOP read, loop is %1..%2 range is %3..%4 nf %5\n", loc->start (), loc->end (), start_sample, end_sample, nframes));
+		if (loc) {
+			/* Evoral::Range has inclusive range semantics. Ugh. Hence the -1 */
+			const Temporal::Range loop_range (loc->start (), loc->end ());
+			samplepos_t           effective_start = start_sample;
+			samplecnt_t           cnt             = nframes;
+			sampleoffset_t        offset          = 0;
+			const samplepos_t     loop_end        = loc->end_sample();
 
-				do {
-					samplepos_t effective_end;
+			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("LOOP read, loop is %1..%2 range is %3..%4 nf %5\n", loc->start (), loc->end (), start_sample, end_sample, nframes));
 
-					effective_start = loop_range.squish (timepos_t (effective_start)).samples();
-					effective_end   = min (effective_start + cnt, loop_end);
-					assert (effective_end > effective_start);
+			do {
+				samplepos_t effective_end;
 
-					const samplecnt_t this_read = effective_end - effective_start;
+				effective_start = loop_range.squish (timepos_t (effective_start)).samples();
+				effective_end   = min (effective_start + cnt, loop_end);
+				assert (effective_end > effective_start);
 
-					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer LOOP read, from %1 to %2 (%3)\n", effective_start, effective_end, this_read));
+				const samplecnt_t this_read = effective_end - effective_start;
+
+				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer LOOP read, from %1 to %2 (%3)\n", effective_start, effective_end, this_read));
 
 #ifndef NDEBUG
-					size_t events_read =
+				size_t events_read =
 #endif
-						rtmb->read (*target, effective_start, effective_end, _tracker, offset);
+					rtmb->read (*target, effective_start, effective_end, _tracker, offset);
 
-					cnt -= this_read;
-					effective_start += this_read;
-					offset += this_read;
+				cnt -= this_read;
+				effective_start += this_read;
+				offset += this_read;
 
-					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events LOOP read %2 cnt now %3\n", _name, events_read, cnt));
+				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events LOOP read %2 cnt now %3\n", _name, events_read, cnt));
 
-					if (cnt) {
-						/* We re going to have to read across the loop end. Resolve any notes the extend across the loop end.
-						 * Time is relative to start_sample.
-						 */
-						DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("read crosses loop end, resolve @ %1\n", effective_end - start_sample));
-						_tracker.resolve_notes (*target, effective_end - start_sample);
-					}
+				if (cnt) {
+					/* We re going to have to read across the loop end. Resolve any notes the extend across the loop end.
+					 * Time is relative to start_sample.
+					 */
+					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("read crosses loop end, resolve @ %1\n", effective_end - start_sample));
+					_tracker.resolve_notes (*target, effective_end - start_sample);
+				}
 
-				} while (cnt);
+			} while (cnt);
 
-			} else {
-				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)\n", start_sample, end_sample, nframes));
-				DEBUG_RESULT (size_t, events_read, rtmb->read (*target, start_sample, end_sample, _tracker));
-				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
-			}
+		} else {
+			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)\n", start_sample, end_sample, nframes));
+			DEBUG_RESULT (size_t, events_read, rtmb->read (*target, start_sample, end_sample, _tracker));
+			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
 		}
+	}
 
-		if (ms & MonitoringInput) {
-			/* merges data from disk (in "target", which is a scratch
-			 * buffer in this case) into the actual destination buffer
-			 * (which holds existing input data).
-			 */
-			dst.merge_from (*target, nframes);
-		}
+	if (ms & MonitoringInput) {
+		/* merges data from disk (in "target", which is a scratch
+		 * buffer in this case) into the actual destination buffer
+		 * (which holds existing input data).
+		 */
+		dst.merge_from (*target, nframes);
 	}
 
 #if 0
