@@ -1857,7 +1857,7 @@ private:
 	void compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t left, samplepos_t right);
 
 	void reassociate_metric_markers (Temporal::TempoMap::SharedPtr const &);
-	void reassociate_metric_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::TempoMap::Metrics & metric, MetricMarker& marker);
+	void reassociate_metric_marker (Temporal::TempoMap::SharedPtr const& tmap, Temporal::TempoMap::Metrics const& metric, MetricMarker& marker);
 	void make_bbt_marker (Temporal::MusicTimePoint const *, Marks::iterator before);
 	void make_meter_marker (Temporal::MeterPoint const *, Marks::iterator before);
 	void make_tempo_marker (Temporal::TempoPoint const * ts, double& min_tempo, double& max_tempo, Temporal::TempoPoint const *& prev_ts, uint32_t tc_color, samplecnt_t sr3, Marks::iterator before);
