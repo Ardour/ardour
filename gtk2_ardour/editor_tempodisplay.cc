@@ -162,22 +162,22 @@ Editor::reassociate_metric_marker (TempoMap::SharedPtr const & tmap, TempoMap::M
 }
 
 void
-Editor::make_bbt_marker (MusicTimePoint const  * mtp)
+Editor::make_bbt_marker (MusicTimePoint const  * mtp, Marks::iterator before)
 {
-	bbt_marks.push_back (new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker"), *mtp));
+	bbt_marks.insert (before, new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker"), *mtp));
 }
 
 void
-Editor::make_meter_marker (Temporal::MeterPoint const * ms)
+Editor::make_meter_marker (Temporal::MeterPoint const * ms, Marks::iterator before)
 {
 	char buf[64];
 
 	snprintf (buf, sizeof(buf), "%d/%d", ms->divisions_per_bar(), ms->note_value ());
-	meter_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf, *ms));
+	meter_marks.insert (before, new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf, *ms));
 }
 
 void
-Editor::make_tempo_marker (Temporal::TempoPoint const * ts, double& min_tempo, double& max_tempo, TempoPoint const *& prev_ts, uint32_t tc_color, samplecnt_t sr)
+Editor::make_tempo_marker (Temporal::TempoPoint const * ts, double& min_tempo, double& max_tempo, TempoPoint const *& prev_ts, uint32_t tc_color, samplecnt_t sr, Marks::iterator before)
 {
 	max_tempo = max (max_tempo, ts->note_types_per_minute());
 	max_tempo = max (max_tempo, ts->end_note_types_per_minute());
@@ -187,7 +187,7 @@ Editor::make_tempo_marker (Temporal::TempoPoint const * ts, double& min_tempo, d
 	const std::string tname (X_(""));
 	char const * color_name = X_("tempo marker");
 
-	tempo_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color (color_name), tname, *ts, ts->sample (sr), tc_color));
+	tempo_marks.insert (before, new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color (color_name), tname, *ts, ts->sample (sr), tc_color));
 
 	/* XXX the point of this code was "a jump in tempo by more than 1 ntpm results in a red
 	   tempo mark pointer."  (3a7bc1fd3f32f0)
@@ -236,9 +236,12 @@ Editor::draw_tempo_marks ()
 			continue;
 		}
 
+		/* catch BBT position elements that are both tempo & meter points */
+
 		Temporal::Point const & mark_point ((*mm)->point());
 
 		if (mark_point.sclock() < metric_point.sclock()) {
+
 
 			/* advance through markers, deleting the unused ones */
 
@@ -248,7 +251,7 @@ Editor::draw_tempo_marks ()
 
 		} else if (metric_point.sclock() < mark_point.sclock()) {
 
-			make_tempo_marker (&metric_point, min_tempo, max_tempo, prev_ts, tc_color, sr);
+			make_tempo_marker (&metric_point, min_tempo, max_tempo, prev_ts, tc_color, sr, mm);
 			++t;
 
 		} else {
@@ -274,12 +277,12 @@ Editor::draw_tempo_marks ()
 		}
 	}
 
-	if ((mm == tempo_marks.end()) && (t != tempi.end())) {
+	if ((mm == tempo_marks.end())) {
 
 		while (t != tempi.end()) {
 
 			if (!dynamic_cast<Temporal::MusicTimePoint const *> (&(*t))) {
-				make_tempo_marker (&*t, min_tempo, max_tempo, prev_ts, tc_color, sr);
+				make_tempo_marker (&*t, min_tempo, max_tempo, prev_ts, tc_color, sr, tempo_marks.end());
 			}
 
 			++t;
@@ -321,7 +324,7 @@ Editor::draw_meter_marks ()
 
 		} else if (metric_point.sclock() < mark_point.sclock()) {
 
-			make_meter_marker (&metric_point);
+			make_meter_marker (&metric_point, mm);
 			++m;
 
 		} else {
@@ -346,7 +349,7 @@ Editor::draw_meter_marks ()
 		while (m != meters.end()) {
 
 			if (!dynamic_cast<Temporal::MusicTimePoint const *> (&(*m))) {
-				make_meter_marker (&*m);
+				make_meter_marker (&*m, meter_marks.end());
 			}
 
 			++m;
@@ -380,7 +383,7 @@ Editor::draw_bbt_marks ()
 
 		} else if (metric_point.sclock() < mark_point.sclock()) {
 
-			make_bbt_marker (&metric_point);
+			make_bbt_marker (&metric_point, mm);
 			++m;
 
 		} else {
@@ -402,7 +405,7 @@ Editor::draw_bbt_marks ()
 
 	if ((mm == bbt_marks.end()) && (m != bartimes.end())) {
 		while (m != bartimes.end()) {
-			make_bbt_marker (&*m);
+			make_bbt_marker (&*m, bbt_marks.end());
 			++m;
 		}
 	}
@@ -449,6 +452,7 @@ void
 Editor::tempo_map_changed ()
 {
 	TempoMap::SharedPtr current_map = TempoMap::fetch ();
+
 	/* If the tempo map was changed by something other than the Editor, we
 	 * will need to reassociate all visual elements used for tempo display
 	 * with the new map.
