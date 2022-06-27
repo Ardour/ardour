@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Roland A-30">
+
+<!-- Standard Start/Stop commands.  Should work with many more MIDI devices. -->
+
+  <Binding msg="fa" function="transport-roll"/>
+  <Binding msg="fc" function="transport-stop"/>
+
+</ArdourMIDIBindings>
