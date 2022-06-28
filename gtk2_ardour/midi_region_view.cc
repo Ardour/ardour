@@ -1104,7 +1104,25 @@ void
 MidiRegionView::_redisplay (bool view_only)
 {
 	if (view_only) {
-		view_changed ();
+		PropertyChange what_changed;
+
+		/* any or none of these may have changed due to a tempo map change,
+		   but we have no way to establish which have changed and which have
+		   not. So we have to mention all 3 to be certain that listeners pay
+		   attention. We can't verify because we have no cache of our old
+		   start/length/position values in the audio domain, so we can't
+		   compare the new values in the audio domain. The beat domain values
+		   haven't changed (just the tempo map that connects beat and audio
+		   time)
+		*/
+
+		what_changed.add (Properties::start);
+		what_changed.add (Properties::length);
+
+		/* this calls reset_width_dependent_items() which calls
+		   view_changed() in the right way.
+		*/
+		region_resized (what_changed);
 	} else {
 		model_changed ();
 	}
