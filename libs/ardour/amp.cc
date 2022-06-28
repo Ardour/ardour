@@ -87,7 +87,9 @@ Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sampl
 		assert (gab);
 
 		/* see note in PluginInsert::connect_and_run -- effectively emit Changed signal */
-		_gain_control->set_value_unchecked (gab[0]);
+		if (nframes > 0) {
+			_gain_control->set_value_unchecked (gab[nframes -1]);
+		}
 
 		if (_midi_amp) {
 			for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
