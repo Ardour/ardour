@@ -67,7 +67,7 @@ TempoCurve::TempoCurve (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rg
 	, _end_text (0)
 {
 	/* XXX x arg for Duple should probably be marker width, passed in from owner */
-	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (marker_width, 1));
+	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (marker_width + 1, 1));
 #ifdef CANVAS_DEBUG
 	group->name = string_compose ("TempoCurve::group for %1", _tempo->note_types_per_minute());
 #endif
@@ -138,7 +138,7 @@ TempoCurve::set_duration (samplecnt_t duration)
 		const double y_pos =  (curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height);
 
 		points.push_back (ArdourCanvas::Duple (0.0, y_pos));
-		points.push_back (ArdourCanvas::Duple (duration_pixels, y_pos));
+		points.push_back (ArdourCanvas::Duple (duration_pixels - _marker_width - 1, y_pos));
 
 	} else {
 
@@ -164,7 +164,7 @@ TempoCurve::set_duration (samplecnt_t duration)
 
 		tempo_at = _tempo->note_types_per_minute_at_DOUBLE (timepos_t (end));
 		y_pos = std::max ((curve_height) - (((tempo_at - _min_tempo) / (_max_tempo - _min_tempo)) * curve_height), 0.0);
-		points.push_back (ArdourCanvas::Duple (editor.sample_to_pixel (end), std::min (y_pos, curve_height)));
+		points.push_back (ArdourCanvas::Duple (editor.sample_to_pixel (end) - _marker_width - 1, std::min (y_pos, curve_height)));
 	}
 
 	_curve->set (points);
