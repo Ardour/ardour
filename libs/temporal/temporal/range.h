@@ -169,12 +169,7 @@ class LIBTEMPORAL_API Range {
 	 * looping). If the argument is earlier than or equal to the end of
 	 * this range, do nothing.
 	 */
-	timepos_t squish (timepos_t const & t) const {
-		if (t >= _end) {
-			return _start + (_start.distance (t) % length());
-		}
-		return t;
-	}
+	timepos_t squish (timepos_t const & t) const;
 
 	/* end is exclusive */
 	OverlapType coverage (timepos_t const & s, timepos_t const & e) const {
