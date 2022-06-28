@@ -1730,6 +1730,8 @@ private:
 	Temporal::TempoMap::WritableSharedPtr begin_tempo_map_edit ();
 	void abort_tempo_map_edit ();
 	void commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&);
+	void mid_tempo_per_track_update (TimeAxisView&);
+	void mid_tempo_per_region_update (RegionView*);
 	bool ignore_map_change;
 
 	enum MidTempoChanges {

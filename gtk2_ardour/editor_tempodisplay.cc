@@ -57,6 +57,7 @@
 #include "gui_thread.h"
 #include "time_axis_view.h"
 #include "grid_lines.h"
+#include "region_view.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -761,4 +762,31 @@ Editor::mid_tempo_change (MidTempoChanges what_changed)
 
 	update_tempo_based_rulers ();
 	maybe_draw_grid_lines ();
+
+	foreach_time_axis_view (sigc::mem_fun (*this, &Editor::mid_tempo_per_track_update));
+
+}
+
+void
+Editor::mid_tempo_per_track_update (TimeAxisView& tav)
+{
+	MidiTimeAxisView* mtav = dynamic_cast<MidiTimeAxisView*> (&tav);
+
+	if (!mtav) {
+		return;
+	}
+
+	MidiStreamView* msv = mtav->midi_view();
+
+	if (!msv) {
+		return;
+	}
+
+	msv->foreach_regionview (sigc::mem_fun (*this, &Editor::mid_tempo_per_region_update));
+}
+
+void
+Editor::mid_tempo_per_region_update (RegionView* rv)
+{
+	rv->redisplay (true);
 }
