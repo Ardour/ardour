@@ -305,8 +305,6 @@ Editor::update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr)
 		++tmp;
 
 		TempoCurve& curve (tm->curve());
-		// std::cerr << "loworing [" << curve.the_item().whoami() << " to bottom\n";
-		// curve.the_item().lower_to_bottom ();
 
 		curve.set_max_tempo (max_tempo);
 		curve.set_min_tempo (min_tempo);
