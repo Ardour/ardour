@@ -86,7 +86,7 @@ SlavableAutomationControl::get_value_locked() const
 	/* read or write masters lock must be held */
 
 	if (_masters.empty()) {
-		return Control::get_double (false, timepos_t (_session.transport_sample()));
+		return Control::get_double ();
 	}
 
 	if (_desc.toggled) {
@@ -94,7 +94,7 @@ SlavableAutomationControl::get_value_locked() const
 		 * enabled, this slave is enabled. So check our own value
 		 * first, because if we are enabled, we can return immediately.
 		 */
-		if (Control::get_double (false, timepos_t (_session.transport_sample()))) {
+		if (Control::get_double ()) {
 			return _desc.upper;
 		}
 	}
