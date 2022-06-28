@@ -195,7 +195,7 @@ AutomationController::value_adjusted ()
 {
 	if (!_ignore_change) {
 		const double new_val = _controllable->interface_to_internal(_adjustment->get_value(), true);
-		if (_controllable->user_double() != new_val) {
+		if (_controllable->get_double() != new_val) {
 			_controllable->set_value (new_val, Controllable::NoGroup);
 		}
 	}

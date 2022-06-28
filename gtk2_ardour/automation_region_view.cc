@@ -204,7 +204,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, dou
 		assert (mt);
 		boost::shared_ptr<Evoral::Control> mc = mt->control(_parameter);
 		assert (mc);
-		y = mc->user_double ();
+		y = mc->get_double ();
 	} else if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
 		y = c->list()->eval (when);
 	}
