@@ -95,12 +95,14 @@ AutomationControl::writable() const
 	return true;
 }
 
-/** Get the current effective `user' value based on automation state */
 double
 AutomationControl::get_value() const
 {
-	bool from_list = alist() && alist()->automation_playback();
-	return Control::get_double (from_list, timepos_t (_session.transport_sample()));
+	/* automation_run() will have updated the value
+	 * (possibly ahead of time, according to latency compensation),
+	 * and actually_set_value() will have set the user-value accordingly.
+	 */
+	return Control::user_double();
 }
 
 double

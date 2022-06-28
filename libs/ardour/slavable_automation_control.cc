@@ -106,18 +106,12 @@ SlavableAutomationControl::get_value_locked() const
 double
 SlavableAutomationControl::get_value() const
 {
-	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
-
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
-	if (!from_list) {
-		if (!_masters.empty() && automation_write ()) {
-			/* writing automation takes the fader value as-is, factor out the master */
-			return Control::user_double ();
-		}
-		return get_value_locked ();
-	} else {
-		return Control::get_double (true, timepos_t (_session.transport_sample())) * get_masters_value_locked();
+	if (!_masters.empty() && automation_write ()) {
+		/* writing automation takes the fader value as-is, factor out the master */
+		return Control::user_double ();
 	}
+	return get_value_locked ();
 }
 
 bool
