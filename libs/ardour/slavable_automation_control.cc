@@ -86,7 +86,7 @@ SlavableAutomationControl::get_value_locked() const
 	/* read or write masters lock must be held */
 
 	if (_masters.empty()) {
-		return Control::user_double ();
+		return Control::get_double ();
 	}
 
 	if (_desc.toggled) {
@@ -94,12 +94,12 @@ SlavableAutomationControl::get_value_locked() const
 		 * enabled, this slave is enabled. So check our own value
 		 * first, because if we are enabled, we can return immediately.
 		 */
-		if (Control::user_double ()) {
+		if (Control::get_double ()) {
 			return _desc.upper;
 		}
 	}
 
-	return Control::user_double () * get_masters_value_locked ();
+	return Control::get_double () * get_masters_value_locked ();
 }
 
 /** Get the current effective `user' value based on automation state */
@@ -109,7 +109,7 @@ SlavableAutomationControl::get_value() const
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	if (!_masters.empty() && automation_write ()) {
 		/* writing automation takes the fader value as-is, factor out the master */
-		return Control::user_double ();
+		return Control::get_double ();
 	}
 	return get_value_locked ();
 }
@@ -137,7 +137,7 @@ SlavableAutomationControl::masters_curve_multiply (timepos_t const & start, time
 			vec[i] *= scratch[i];
 		}
 	} else {
-		apply_gain_to_buffer (vec, veclen, Control::user_double ());
+		apply_gain_to_buffer (vec, veclen, Control::get_double ());
 	}
 	if (_masters.empty()) {
 		return rv;
@@ -332,7 +332,7 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 
 	pre_remove_master (m);
 
-	const double old_val = AutomationControl::user_double();
+	const double old_val = AutomationControl::get_double ();
 
 	bool update_value = false;
 	double master_ratio = 0;
@@ -400,7 +400,7 @@ SlavableAutomationControl::clear_masters ()
 		return;
 	}
 
-	const double old_val = AutomationControl::user_double ();
+	const double old_val = AutomationControl::get_double ();
 
 	ControlList masters;
 	bool update_value = false;

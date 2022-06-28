@@ -63,6 +63,7 @@ public:
 	 * and adding it to the ControlList.
 	 */
 	double user_double() const { return _user_value; }
+	virtual double get_double () const { return _user_value; }
 
 	void set_list(boost::shared_ptr<ControlList>);
 

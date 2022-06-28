@@ -102,14 +102,14 @@ AutomationControl::get_value() const
 	 * (possibly ahead of time, according to latency compensation),
 	 * and actually_set_value() will have set the user-value accordingly.
 	 */
-	return Control::user_double();
+	return Control::get_double();
 }
 
 double
 AutomationControl::get_save_value() const
 {
 	/* save user-value, not incl masters */
-	return Control::user_double ();
+	return Control::get_double ();
 }
 
 void
@@ -210,7 +210,7 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 	   anything has changed) is the one derived from the automation event
 	   list.
 	*/
-	float old_value = Control::user_double();
+	float old_value = Control::get_double();
 
 	if (al && al->automation_write ()) {
 		to_list = true;
