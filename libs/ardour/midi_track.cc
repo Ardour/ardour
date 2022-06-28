@@ -373,7 +373,7 @@ MidiTrack::update_controls (BufferSet const& bufs)
 		const Evoral::Parameter                  param   = midi_parameter(ev.buffer(), ev.size());
 		const boost::shared_ptr<AutomationControl> control = automation_control (param);
 		if (control) {
-			double old = control->get_double ();
+			double old = control->user_double ();
 			control->set_double (ev.value(), timepos_t::zero (false), false);
 			if (old != ev.value()) {
 				control->Changed (false, Controllable::NoGroup);

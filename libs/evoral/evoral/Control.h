@@ -55,7 +55,6 @@ public:
 	virtual ~Control() {}
 
 	virtual void   set_double (double val, Temporal::timepos_t const & when = Temporal::timepos_t (), bool to_list = false);
-	virtual double get_double (bool from_list = false, Temporal::timepos_t const & when = Temporal::timepos_t ()) const;
 
 	/** Get the latest user-set value
 	 * (which may not equal get_value() when automation is playing back).

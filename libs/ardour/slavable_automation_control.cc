@@ -86,7 +86,7 @@ SlavableAutomationControl::get_value_locked() const
 	/* read or write masters lock must be held */
 
 	if (_masters.empty()) {
-		return Control::get_double ();
+		return Control::user_double ();
 	}
 
 	if (_desc.toggled) {
@@ -94,12 +94,12 @@ SlavableAutomationControl::get_value_locked() const
 		 * enabled, this slave is enabled. So check our own value
 		 * first, because if we are enabled, we can return immediately.
 		 */
-		if (Control::get_double ()) {
+		if (Control::user_double ()) {
 			return _desc.upper;
 		}
 	}
 
-	return Control::get_double () * get_masters_value_locked ();
+	return Control::user_double () * get_masters_value_locked ();
 }
 
 /** Get the current effective `user' value based on automation state */
@@ -137,7 +137,7 @@ SlavableAutomationControl::masters_curve_multiply (timepos_t const & start, time
 			vec[i] *= scratch[i];
 		}
 	} else {
-		apply_gain_to_buffer (vec, veclen, Control::get_double ());
+		apply_gain_to_buffer (vec, veclen, Control::user_double ());
 	}
 	if (_masters.empty()) {
 		return rv;
@@ -332,7 +332,7 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 
 	pre_remove_master (m);
 
-	const double old_val = AutomationControl::get_double();
+	const double old_val = AutomationControl::user_double();
 
 	bool update_value = false;
 	double master_ratio = 0;
@@ -400,7 +400,7 @@ SlavableAutomationControl::clear_masters ()
 		return;
 	}
 
-	const double old_val = AutomationControl::get_double();
+	const double old_val = AutomationControl::user_double ();
 
 	ControlList masters;
 	bool update_value = false;

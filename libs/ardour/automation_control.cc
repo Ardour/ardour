@@ -109,7 +109,7 @@ double
 AutomationControl::get_save_value() const
 {
 	/* save user-value, not incl masters */
-	return Control::get_double ();
+	return Control::user_double ();
 }
 
 void
