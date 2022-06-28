@@ -55,14 +55,6 @@ public:
 	virtual ~Control() {}
 
 	virtual void   set_double (double val, Temporal::timepos_t const & when = Temporal::timepos_t (), bool to_list = false);
-
-	/** Get the latest user-set value
-	 * (which may not equal get_value() when automation is playing back).
-	 *
-	 * Automation write/touch works by periodically sampling this value
-	 * and adding it to the ControlList.
-	 */
-	double user_double() const { return _user_value; }
 	virtual double get_double () const { return _user_value; }
 
 	void set_list(boost::shared_ptr<ControlList>);
