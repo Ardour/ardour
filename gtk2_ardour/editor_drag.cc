@@ -3123,7 +3123,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (map->move_meter (_marker->meter(), pos, leftward_earlier, false)) {
 		/* it was moved */
-		_editor->mid_tempo_change ();
+		_editor->mid_tempo_change (Editor::MeterChanged);
 		show_verbose_cursor_time (timepos_t (_marker->meter().beats()));
 		_editor->set_snapped_cursor_position (timepos_t (_marker->meter().sample(_editor->session()->sample_rate())));
 	}
@@ -3213,7 +3213,7 @@ TempoCurveDrag::motion (GdkEvent* event, bool first_move)
 	strs << "Tempo: " << fixed << setprecision(3) << new_bpm;
 	show_verbose_cursor_text (strs.str());
 
-	_editor->mid_tempo_change ();
+	_editor->mid_tempo_change (Editor::TempoChanged);
 }
 
 
@@ -3319,7 +3319,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		show_verbose_cursor_time (_marker->tempo().time());
 	}
 
-	_editor->mid_tempo_change ();
+	_editor->mid_tempo_change (Editor::TempoChanged);
 }
 
 
@@ -3449,7 +3449,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 		/* adjust previous tempo to match pointer sample */
 		map->stretch_tempo (_tempo, timepos_t (_grab_qn).samples(), pf.samples(), _grab_qn, pf.beats());
-		_editor->mid_tempo_change ();
+		_editor->mid_tempo_change (Editor::BBTChanged);
 	}
 
 	ostringstream sstr;
@@ -3607,7 +3607,7 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 	}
 	show_verbose_cursor_text (sstr.str());
 
-	_editor->mid_tempo_change ();
+	_editor->mid_tempo_change (Editor::TempoChanged);
 }
 
 void
@@ -3713,7 +3713,7 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 
 	timepos_t const pos = adjusted_current_time (event, false);
 	map->stretch_tempo_end (_tempo, timepos_t (_grab_qn).samples(), pos.samples());
-	_editor->mid_tempo_change ();
+	_editor->mid_tempo_change (Editor::TempoChanged);
 
 	ostringstream sstr;
 	const samplecnt_t sr = AudioEngine::instance()->sample_rate();

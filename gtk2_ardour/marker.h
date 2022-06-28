@@ -173,6 +173,7 @@ class MetricMarker : public ArdourMarker
   public:
 	MetricMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rgba, const std::string& annotation, Type type, Temporal::timepos_t const & pos, bool handle_events);
 	virtual Temporal::Point const & point() const = 0;
+	virtual void update() = 0;
 };
 
 class TempoMarker : public MetricMarker
@@ -182,6 +183,7 @@ class TempoMarker : public MetricMarker
 	~TempoMarker ();
 
 	void reset_tempo (Temporal::TempoPoint const & t);
+	void update ();
 
 	Temporal::TempoPoint const & tempo() const { return *_tempo; }
 	Temporal::Point const & point() const;
@@ -200,6 +202,7 @@ class MeterMarker : public MetricMarker
 	~MeterMarker ();
 
 	void reset_meter (Temporal::MeterPoint const & m);
+	void update ();
 
 	Temporal::MeterPoint const & meter() const { return *_meter; }
 	Temporal::Point const & point() const;
@@ -215,6 +218,7 @@ class BBTMarker : public MetricMarker
 	~BBTMarker ();
 
 	void reset_point (Temporal::MusicTimePoint const &);
+	void update ();
 
 	Temporal::MusicTimePoint const & mt_point() const { return *_point; }
 	Temporal::Point const & point() const;

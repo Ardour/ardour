@@ -292,7 +292,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		_pcue->hide();
 		_pmark->show();
 	}
-	
+
 	/* setup name pixbuf sizes */
 	name_font = get_font_for_style (N_("MarkerText"));
 
@@ -669,11 +669,18 @@ TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guin
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), group, this));
 	/* points[1].x gives the width of the marker */
 	_curve = new TempoCurve (editor, *group, curve_color, temp, true, (*points)[1].x);
+	_curve->the_item().lower_to_bottom ();
 }
 
 TempoMarker::~TempoMarker ()
 {
 	delete _curve;
+}
+
+void
+TempoMarker::update ()
+{
+	set_position (_tempo->time());
 }
 
 TempoCurve&
@@ -708,6 +715,12 @@ MeterMarker::~MeterMarker ()
 }
 
 void
+MeterMarker::update ()
+{
+	set_position (_meter->time());
+}
+
+void
 MeterMarker::reset_meter (Temporal::MeterPoint const & m)
 {
 	_meter = &m;
@@ -730,6 +743,12 @@ BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 
 
 BBTMarker::~BBTMarker ()
 {
+}
+
+void
+BBTMarker::update ()
+{
+	set_position (_point->time());
 }
 
 void

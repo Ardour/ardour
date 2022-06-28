@@ -1729,7 +1729,14 @@ private:
 
 	Temporal::TempoMap::WritableSharedPtr begin_tempo_map_edit ();
 	void abort_tempo_map_edit ();
-	void mid_tempo_change ();
+
+	enum MidTempoChanges {
+		TempoChanged = 0x1,
+		MeterChanged = 0x2,
+		BBTChanged   = 0x4
+	};
+
+	void mid_tempo_change (MidTempoChanges);
 
 private:
 	friend class DragManager;
@@ -1849,22 +1856,26 @@ private:
 	Marks bbt_marks;
 
 	void remove_metric_marks ();
-	void draw_metric_marks (Temporal::TempoMap::Metrics const & metrics);
-	void draw_tempo_marks ();
-	void draw_meter_marks ();
-	void draw_bbt_marks ();
+	void reset_metric_marks ();
+	void reset_tempo_marks ();
+	void reset_meter_marks ();
+	void reset_bbt_marks ();
 
 	void compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t left, samplepos_t right);
 
 	void reassociate_metric_markers (Temporal::TempoMap::SharedPtr const &);
-	void reassociate_metric_marker (Temporal::TempoMap::SharedPtr const& tmap, Temporal::TempoMap::Metrics const& metric, MetricMarker& marker);
+
+	void reassociate_tempo_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::TempoMap::Tempos const &, TempoMarker& marker);
+	void reassociate_meter_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::TempoMap::Meters const &, MeterMarker& marker);
+	void reassociate_bartime_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::TempoMap::MusicTimes const &, BBTMarker& marker);
+
 	void make_bbt_marker (Temporal::MusicTimePoint const *, Marks::iterator before);
 	void make_meter_marker (Temporal::MeterPoint const *, Marks::iterator before);
 	void make_tempo_marker (Temporal::TempoPoint const * ts, double& min_tempo, double& max_tempo, Temporal::TempoPoint const *& prev_ts, uint32_t tc_color, samplecnt_t sr3, Marks::iterator before);
 	void update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr);
 
 	void tempo_map_changed ();
-	void tempo_map_visual_update ();
+	void tempo_map_model_update ();
 
 	void redisplay_grid (bool immediate_redraw);
 

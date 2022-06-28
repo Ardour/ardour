@@ -1431,9 +1431,7 @@ Editor::set_session (Session *t)
 	_session->config.map_parameters (pc);
 
 	//tempo_map_changed (PropertyChange (0));
-	TempoMap::Metrics metrics;
-	TempoMap::use()->get_metrics (metrics);
-	draw_metric_marks (metrics);
+	reset_metric_marks ();
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_pixel (samples_per_pixel);
