@@ -388,6 +388,7 @@ Editor::Editor ()
 	, lock_dialog (0)
 	  /* , last_event_time { 0, 0 } */ /* this initialization style requires C++11 */
 	, _dragging_playhead (false)
+	, ignore_map_change (false)
 	, _follow_playhead (true)
 	, _stationary_playhead (false)
 	, _maximised (false)

@@ -3145,7 +3145,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->set_grid_to (_old_grid_type);
 	_editor->set_snap_mode (_old_snap_mode);
 
-	TempoMap::update (map);
+	_editor->commit_tempo_map_edit (map);
 	XMLNode &after = map->get_state();
 
 	_editor->session()->add_command (new Temporal::TempoCommand (_("move time signature"), before_state, &after));
@@ -3237,7 +3237,7 @@ TempoCurveDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	/* push the current state of our writable map copy */
 
-	TempoMap::update (map);
+	_editor->commit_tempo_map_edit (map);
 	XMLNode &after = map->get_state();
 
 	_editor->session()->add_command (new Temporal::TempoCommand (_("change tempo"), _before_state, &after));
@@ -3346,7 +3346,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	/* push the current state of our writable map copy */
 
-	TempoMap::update (map);
+	_editor->commit_tempo_map_edit (map);
 	XMLNode &after = map->get_state();
 
 	_editor->session()->add_command (new Temporal::TempoCommand (_("move tempo"), _before_state, &after));
@@ -3518,7 +3518,7 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 	}
 
-	TempoMap::update (map);
+	_editor->commit_tempo_map_edit (map);
 
 	XMLNode &after = map->get_state();
 
@@ -3628,7 +3628,7 @@ TempoTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->session()->add_command (new Temporal::TempoCommand (_("twist tempo"), _before_state, &after));
 	_editor->commit_reversible_command ();
 
-	TempoMap::update (map);
+	_editor->commit_tempo_map_edit (map);
 }
 
 void
@@ -3734,7 +3734,7 @@ TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	TempoMap::update (map);
+	_editor->commit_tempo_map_edit (map);
 
 	XMLNode &after = map->get_state();
 	_editor->session()->add_command (new Temporal::TempoCommand (_("move tempo end"), _before_state, &after));

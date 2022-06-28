@@ -36,6 +36,7 @@
 
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
+#include "pbd/unwind.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/gtk_ui.h>
@@ -327,6 +328,10 @@ Editor::update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr)
 void
 Editor::tempo_map_changed ()
 {
+	if (ignore_map_change) {
+		return;
+	}
+
 	TempoMap::SharedPtr current_map = TempoMap::fetch ();
 
 	/* If the tempo map was changed by something other than the Editor, we
@@ -334,25 +339,9 @@ Editor::tempo_map_changed ()
 	 * with the new map.
 	 */
 
-	if (!tempo_marks.empty()) {
-		/* a little awkward using shared_ptr<T>::get() but better than every
-		 * point in the map holding a shared_ptr ref to the map that owns it.
-		 */
-
-		if (&tempo_marks.front()->point().map() != current_map.get()) {
-			reassociate_metric_markers (current_map);
-		}
-	}
-
-	tempo_map_model_update ();
-}
-
-void
-Editor::tempo_map_model_update ()
-{
-	reset_metric_marks ();
-	update_tempo_based_rulers ();
-	maybe_draw_grid_lines ();
+	 reset_metric_marks ();
+	 update_tempo_based_rulers ();
+	 maybe_draw_grid_lines ();
 }
 
 void
@@ -728,6 +717,13 @@ Editor::abort_tempo_map_edit ()
 	*/
 	TempoMap::SharedPtr tmap (TempoMap::fetch());
 	reassociate_metric_markers (tmap);
+}
+
+void
+Editor::commit_tempo_map_edit (TempoMap::WritableSharedPtr& new_map)
+{
+	PBD::Unwinder<bool> uw (ignore_map_change, true);
+	TempoMap::update (new_map);
 }
 
 void

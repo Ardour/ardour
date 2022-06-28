@@ -1729,6 +1729,8 @@ private:
 
 	Temporal::TempoMap::WritableSharedPtr begin_tempo_map_edit ();
 	void abort_tempo_map_edit ();
+	void commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&);
+	bool ignore_map_change;
 
 	enum MidTempoChanges {
 		TempoChanged = 0x1,
@@ -1875,7 +1877,6 @@ private:
 	void update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr);
 
 	void tempo_map_changed ();
-	void tempo_map_model_update ();
 
 	void redisplay_grid (bool immediate_redraw);
 
