@@ -539,3 +539,45 @@ MidiRegion::set_name (const std::string& str)
 
 	return Region::set_name (str);
 }
+
+void
+MidiRegion::merge (boost::shared_ptr<MidiRegion const> other_region)
+{
+	Temporal::Beats last_event_time;
+
+	{
+		Source::WriterLock lm (midi_source(0)->mutex());
+		boost::shared_ptr<MidiModel const> other = other_region->model();
+		boost::shared_ptr<MidiModel> self = model();
+
+		Temporal::Beats other_region_start (other_region->start().beats());
+		Temporal::Beats other_region_end ((other_region->start() + other_region->length()).beats());
+
+		midi_source (0)->mark_streaming_midi_write_started (lm, Sustained);
+
+		for (Evoral::Sequence<Temporal::Beats>::const_iterator e = other->begin(); e != other->end(); ++e) {
+
+			if (e->time() < other_region_start) {
+				continue;
+			}
+
+			if (e->time() >= other_region_end) {
+				break;
+			}
+
+			Evoral::Event<Temporal::Beats> ev (*e, true);
+
+			Temporal::Beats abs_time = other_region->source_beats_to_absolute_time (ev.time()).beats ();
+			Temporal::Beats srt = absolute_time_to_source_beats (timepos_t (abs_time));
+			ev.set_time (srt);
+			self->append (ev, Evoral::next_event_id());
+			last_event_time = abs_time;
+		}
+
+		midi_source (0)->mark_streaming_write_completed (lm);
+	}
+
+	Temporal::Beats len = last_event_time - position().beats();
+
+	set_length (timecnt_t (len, position()));
+}

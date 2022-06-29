@@ -1518,14 +1518,10 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);
 		_region_actions->get_action("show-region-properties")->set_sensitive (false);
 		_region_actions->get_action("rename-region")->set_sensitive (false);
-		if (have_audio) {
-			/* XXX need to check whether there is than 1 per
-			   playlist, because otherwise this makes no sense.
-			*/
-			_region_actions->get_action("combine-regions")->set_sensitive (true);
-		} else {
-			_region_actions->get_action("combine-regions")->set_sensitive (false);
-		}
+		/* XXX need to check whether there is than 1 per
+		   playlist, because otherwise this makes no sense.
+		*/
+		_region_actions->get_action("combine-regions")->set_sensitive (true);
 	} else if (rs.size() == 1) {
 		_region_actions->get_action("add-range-markers-from-region")->set_sensitive (false);
 		_region_actions->get_action("close-region-gaps")->set_sensitive (false);

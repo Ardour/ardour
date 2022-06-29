@@ -84,6 +84,9 @@ public:
 
 	std::set<Evoral::Parameter> contained_automation();
 
+	boost::shared_ptr<Region> combine (const RegionList&);
+	void uncombine (boost::shared_ptr<Region>);
+
   protected:
 	void remove_dependents (boost::shared_ptr<Region> region);
 	void region_going_away (boost::weak_ptr<Region> region);

@@ -35,6 +35,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/region_factory.h"
+#include "ardour/region_sorters.h"
 #include "ardour/rt_midibuffer.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -373,4 +374,53 @@ RTMidiBuffer*
 MidiPlaylist::rendered ()
 {
 	return &_rendered;
+}
+
+boost::shared_ptr<Region>
+MidiPlaylist::combine (RegionList const & rl)
+{
+	RegionWriteLock rwl (this, true);
+
+	std::cerr << "combine " << rl.size() << " regions\n";
+
+	if (rl.size() < 2) {
+		return boost::shared_ptr<Region> ();
+	}
+
+	RegionList sorted (rl);
+	sorted.sort (RegionSortByLayerAndPosition());
+
+	boost::shared_ptr<Region> first = sorted.front();
+	RegionList::const_iterator i = sorted.begin();
+	++i;
+
+#ifndef NDEBUG
+	for (auto const & r : rl) {
+		assert (boost::dynamic_pointer_cast<MidiRegion> (r));
+	}
+#endif
+
+	boost::shared_ptr<MidiRegion> new_region = boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (first, true, true, &rwl.thawlist));
+
+	timepos_t pos (first->position());
+
+	remove_region_internal (first, rwl.thawlist);
+	std::cerr << "Remove " << first->name() << std::endl;
+
+	while (i != sorted.end()) {
+		new_region->merge (boost::dynamic_pointer_cast<MidiRegion> (*i));
+		remove_region_internal (*i, rwl.thawlist);
+		std::cerr << "Remove " << (*i)->name() << std::endl;
+		++i;
+	}
+
+	add_region_internal (new_region, pos, rwl.thawlist);
+	std::cerr << "Add " << new_region->name() << std::endl;
+
+	return new_region;
+}
+
+void
+MidiPlaylist::uncombine (boost::shared_ptr<Region> r)
+{
 }

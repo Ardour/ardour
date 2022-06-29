@@ -82,6 +82,8 @@ class LIBARDOUR_API MidiRegion : public Region
 	                          uint32_t  chan_n = 0,
 	                          NoteMode  mode = Sustained) const;
 
+	void merge (boost::shared_ptr<MidiRegion const>);
+
 	XMLNode& state () const;
 	int      set_state (const XMLNode&, int version);
 
