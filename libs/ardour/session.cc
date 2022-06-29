@@ -6523,7 +6523,7 @@ Session::start_time_changed (samplepos_t old)
 
 	Location* l = _locations->auto_loop_location ();
 
-	if (l && l->start() == old) {
+	if (l && l->start() == old && l->end() > s->start()) {
 		l->set_start (s->start(), true);
 	}
 	set_dirty ();
@@ -6543,7 +6543,7 @@ Session::end_time_changed (samplepos_t old)
 
 	Location* l = _locations->auto_loop_location ();
 
-	if (l && l->end() == old) {
+	if (l && l->end() == old && l->start () < s->end()) {
 		l->set_end (s->end(), true);
 	}
 	set_dirty ();
