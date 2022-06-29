@@ -185,8 +185,10 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 
 	timepos_t & operator+=(Temporal::BBT_Offset const &);
 
+#if 0 // not implemented, not used
 	timepos_t   operator% (timecnt_t const &) const;
 	timepos_t & operator%=(timecnt_t const &);
+#endif
 
 	/* Although multiplication and division of positions seems unusual,
 	 * these are used in Evoral::Curve when scaling a list of timed events
