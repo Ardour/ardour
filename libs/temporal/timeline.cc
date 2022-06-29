@@ -224,12 +224,28 @@ timecnt_t::operator/ (timecnt_t const & other) const
 timecnt_t
 timecnt_t::operator% (timecnt_t const & d) const
 {
-	return timecnt_t (_distance % d.distance(), _position);
+	if (time_domain() == d.time_domain()) {
+		return timecnt_t (_distance % d.distance(), _position);
+	} else if (time_domain() == AudioTime) {
+		timecnt_t dd = d;
+		dd.set_time_domain (AudioTime);
+		return timecnt_t (_distance % dd.distance(), _position);
+	} else {
+		assert (0); // This path should never be used because..
+		timecnt_t self = *this;
+		self.set_time_domain (AudioTime);
+		timecnt_t rv (self.distance() % d.distance(), _position);
+		rv.set_time_domain (BeatTime); // it looses precision
+		return rv;
+	}
 }
 
 timecnt_t &
 timecnt_t::operator%= (timecnt_t const & d)
 {
+	if (time_domain() != d.time_domain()) {
+		assert (0); // TODO FIXME
+	}
 	_distance %= d.distance();
 	return *this;
 }
