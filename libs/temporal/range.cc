@@ -106,36 +106,10 @@ Range::squish (timepos_t const & t) const
 	if (t < _end) {
 		return t;
 	}
-#if 1
-#ifndef NDEBUG
-	std::stringstream dbg;
-	dbg << "Range::squish start: " << _start << " end: " << _end << " squish: " << t << "\n";
-#endif
-
-	timepos_t rv = t;
-	while (rv >= _end) {
-		rv = rv.earlier (length ());
-	}
-
-#ifndef NDEBUG
-	timepos_t sq = _start + (_start.distance (t) % length());
-	dbg << "Range::squish using modulo:       " << sq << " = ";
-	sq.set_time_domain (t.time_domain());
-	dbg << sq << "\n";
 
 	timepos_t start = _start;
 	start.set_time_domain (t.time_domain());
-	timepos_t sqt = start + (start.distance (t) % length());
-
-	dbg << "Range::squish using modulo in TD: " << sqt << "\n";
-	dbg << "Range::squish using earlier():    " << rv << "\n";
-	std::cout << dbg.str ();
-#endif
-
-	return rv;
-#else
-	return _start + (_start.distance (t) % length());
-#endif
+	return start + (start.distance (t) % length());
 }
 
 template<> OverlapType Temporal::coverage_exclusive_ends<int64_t> (int64_t sa, int64_t eaE, int64_t sb, int64_t ebE)
