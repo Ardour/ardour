@@ -156,10 +156,7 @@ Strip::add (Control & control)
 
 	/* fader, vpot, meter were all set explicitly */
 
-std::cout << "Strip::add  adding control: " << control.name();
-
 	if ((button = dynamic_cast<Button*>(&control)) != 0) {
-std::cout << ";  button name: " <<  Button::id_to_name (button->bid());
 		switch (button->bid()) {
 		case Button::RecEnable:
 			_recenable = button;
@@ -184,7 +181,6 @@ std::cout << ";  button name: " <<  Button::id_to_name (button->bid());
 		}
 	}
 
- std::cout << std::endl;
  }
 
 void
@@ -201,8 +197,6 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 	_fader->set_control (boost::shared_ptr<AutomationControl>());
 	_vpot->set_control (boost::shared_ptr<AutomationControl>());
 
-std::cout << "Strip::set_stripable  initializing buttons" << std::endl;
-
 	if (_select) {
 		_select->set_control (boost::shared_ptr<AutomationControl>());
 	}
@@ -215,8 +209,6 @@ std::cout << "Strip::set_stripable  initializing buttons" << std::endl;
 	if (_recenable) {
 		_recenable->set_control (boost::shared_ptr<AutomationControl>());
 	}
-
-std::cout << "Strip::set_stripable  initializing buttons DONE" << std::endl;
 
 	_stripable = r;
 
@@ -237,8 +229,6 @@ std::cout << "Strip::set_stripable  initializing buttons DONE" << std::endl;
 	if (_mute) {
 		_mute->set_control (_stripable->mute_control());
 	}
-
-std::cout << "Strip::set_stripable  assigning mute+solo DONE" << std::endl;
 
 	_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
 	_stripable->mute_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
@@ -295,7 +285,6 @@ std::cout << "Strip::set_stripable  assigning mute+solo DONE" << std::endl;
 		set_vpot_parameter (_pan_mode);
 	}
 
-std::cout << "Strip::set_stripable  assigning fader" << std::endl;
 	if (_fader) {
 		_fader->set_control (_stripable->gain_control());
 	}
@@ -424,7 +413,7 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 		show_stripable_name ();
 	}
 
-	if (what_changed.contains (ARDOUR::Properties::selected)) {
+	if (_select && what_changed.contains (ARDOUR::Properties::selected)) {
 		_surface->write (_select->set_state (_stripable->is_selected()));
 	}
 }
@@ -432,7 +421,7 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 void
 Strip::update_selection_state ()
 {
-	if(_stripable) {
+	if(_select && _stripable) {
 		_surface->write (_select->set_state (_stripable->is_selected()));
 	}
 }
