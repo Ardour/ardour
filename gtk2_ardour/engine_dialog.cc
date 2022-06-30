@@ -510,6 +510,13 @@ EngineControl::build_notebook ()
 		control_app_button.get_parent()->remove (control_app_button);
 	}
 
+	if (start_stop_button.get_parent()) {
+		start_stop_button.get_parent()->remove (start_stop_button);
+	}
+	if (connect_disconnect_button.get_parent()) {
+		connect_disconnect_button.get_parent()->remove (connect_disconnect_button);
+	}
+
 	label = manage (left_aligned_label (_("Audio System:")));
 	basic_packer.attach (*label, 0, 1, 0, 1, xopt, (AttachOptions) 0);
 	basic_packer.attach (backend_combo, 1, 2, 0, 1, xopt, (AttachOptions) 0);
@@ -517,16 +524,16 @@ EngineControl::build_notebook ()
 	basic_packer.attach (engine_status, 2, 3, 0, 1, xopt, (AttachOptions) 0);
 	engine_status.show();
 
-	basic_packer.attach (start_stop_button, 3, 4, 0, 1, xopt, xopt);
-
 	lm_button_audio.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_audio_latency));
 	lm_button_audio.set_name ("generic button");
 	lm_button_audio.set_can_focus(true);
 
 	if (_have_control) {
 		build_full_control_notebook ();
+		get_action_area()->add (start_stop_button);
 	} else {
 		build_no_control_notebook ();
+		get_action_area()->add (connect_disconnect_button);
 	}
 
 	basic_vbox.pack_start (basic_hbox, false, false);
@@ -731,9 +738,6 @@ EngineControl::build_no_control_notebook ()
 		basic_packer.attach (buffer_size_duration_label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 		row++;
 	}
-
-	basic_packer.attach (connect_disconnect_button, 0, 2, row, row+1, FILL, AttachOptions (0));
-	row++;
 }
 
 EngineControl::~EngineControl ()
