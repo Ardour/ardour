@@ -81,6 +81,7 @@ private:
 	Gtk::SpinButton input_latency;
 	Gtk::Adjustment output_latency_adjustment;
 	Gtk::SpinButton output_latency;
+	Gtk::ComboBoxText monitor_model_combo;
 
 	Gtk::Label                  have_control_text;
 	ArdourWidgets::ArdourButton control_app_button;
@@ -150,6 +151,7 @@ private:
 	void nperiods_changed ();
 	void latency_changed ();
 	void midi_option_changed ();
+	void monitor_model_changed ();
 
 	void setup_midi_tab_for_backend ();
 	void setup_midi_tab_for_jack ();
@@ -313,6 +315,7 @@ private:
 	sigc::connection midi_option_combo_connection;
 	sigc::connection input_latency_connection;
 	sigc::connection output_latency_connection;
+	sigc::connection monitor_model_connection;
 
 	void on_show ();
 	void on_map ();

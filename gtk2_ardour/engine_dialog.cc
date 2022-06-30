@@ -89,7 +89,7 @@ EngineControl::EngineControl ()
 	, output_latency_adjustment (0, 0, 99999, 1)
 	, output_latency (output_latency_adjustment)
 	, control_app_button (_("Device Control Panel"))
-	, midi_devices_button (_("Midi Device Setup"))
+	, midi_devices_button (_("MIDI Device Setup"))
 	, start_stop_button (_("Stop"))
 	, update_devices_button (_("Refresh Devices"))
 	, use_buffered_io_button (_("Use Buffered I/O"), ArdourButton::led_default_elements)
@@ -133,6 +133,17 @@ EngineControl::EngineControl ()
 	}
 
 	set_popdown_strings (backend_combo, backend_names);
+
+	/* setup HW monitoring */
+
+	monitor_model_combo.append_text (PROGRAM_NAME);
+	monitor_model_combo.append_text (_("audio hardware"));
+	if (ARDOUR::HardwareMonitoring == ARDOUR::Config->get_monitoring_model ()) {
+		/* this really depends on running backend, check
+		 * AudioEngine::instance()->port_engine().can_monitor_input()
+		 */
+		monitor_model_combo.append_text (_("via Audio Driver"));
+	}
 
 	/* setup basic packing characteristics for the table used on the main
 	 * tab of the notebook
@@ -303,7 +314,7 @@ EngineControl::EngineControl ()
 	try_autostart_button.signal_clicked.connect (mem_fun (*this, &EngineControl::try_autostart_button_clicked));
 	try_autostart_button.set_name ("generic button");
 	try_autostart_button.set_can_focus(true);
-	config_parameter_changed ("try-autostart-engine");
+
 	set_tooltip (try_autostart_button,
 			string_compose (_("Always try these settings when starting %1, if the same device is available"), PROGRAM_NAME));
 
@@ -317,6 +328,9 @@ EngineControl::EngineControl ()
 	ARDOUR::AudioEngine::instance()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
 	ARDOUR::AudioEngine::instance()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
 	ARDOUR::AudioEngine::instance()->DeviceListChanged.connect (devicelist_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::device_list_changed, this), gui_context());
+
+	config_parameter_changed ("try-autostart-engine");
+	config_parameter_changed ("monitoring-model");
 
 	if (audio_setup) {
 		if (!set_state (*audio_setup)) {
@@ -364,6 +378,9 @@ EngineControl::connect_changed_signals ()
 	    sigc::mem_fun (*this, &EngineControl::latency_changed));
 	output_latency_connection = output_latency.signal_changed ().connect (
 	    sigc::mem_fun (*this, &EngineControl::latency_changed));
+
+	monitor_model_connection = monitor_model_combo.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::monitor_model_changed));
 }
 
 void
@@ -449,6 +466,19 @@ EngineControl::config_parameter_changed (std::string const & p)
 {
 	if (p == "try-autostart-engine") {
 		try_autostart_button.set_active (ARDOUR::Config->get_try_autostart_engine ());
+	} else if (p == "monitoring-model") {
+		switch (ARDOUR::Config->get_monitoring_model ()) {
+			case ARDOUR::SoftwareMonitoring:
+				monitor_model_combo.set_active (0);
+				break;
+			case ARDOUR::ExternalMonitoring:
+				monitor_model_combo.set_active (1);
+				break;
+			case ARDOUR::HardwareMonitoring:
+				// TODO  check if "via Audio Driver" is present, add it
+				monitor_model_combo.set_active (2);
+				break;
+		}
 	}
 }
 
@@ -655,6 +685,11 @@ EngineControl::build_full_control_notebook ()
 	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
 	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	basic_packer.attach (midi_devices_button, 3, 4, row, row+1, xopt, xopt);
+	row++;
+
+	label = manage (left_aligned_label (_("Record monitoring handled by:")));
+	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+	basic_packer.attach (monitor_model_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	row++;
 
 	if (!autostart_packed) {
@@ -1756,6 +1791,29 @@ EngineControl::latency_changed ()
 	backend->set_systemic_input_latency (get_input_latency ());
 	backend->set_systemic_output_latency (get_output_latency ());
 	post_push ();
+}
+
+void
+EngineControl::monitor_model_changed ()
+{
+	ARDOUR::MonitorModel mm = ARDOUR::Config->get_monitoring_model ();
+
+	switch (monitor_model_combo.get_active_row_number()) {
+		case 0:
+			mm = ARDOUR::SoftwareMonitoring;
+			break;
+		case 1:
+			mm = ARDOUR::ExternalMonitoring;
+			break;
+		case 2:
+			mm = ARDOUR::HardwareMonitoring;
+			break;
+	}
+	if (mm == ARDOUR::Config->get_monitoring_model ()) {
+		return;
+	}
+	ARDOUR::Config->set_monitoring_model (mm);
+	ARDOUR::Config->save_state ();
 }
 
 bool
