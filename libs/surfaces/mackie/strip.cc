@@ -196,9 +196,11 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 	_solo->set_control (boost::shared_ptr<AutomationControl>());
 	_mute->set_control (boost::shared_ptr<AutomationControl>());
 	_select->set_control (boost::shared_ptr<AutomationControl>());
-	_recenable->set_control (boost::shared_ptr<AutomationControl>());
 	_fader->set_control (boost::shared_ptr<AutomationControl>());
 	_vpot->set_control (boost::shared_ptr<AutomationControl>());
+	if (_recenable) {
+		_recenable->set_control (boost::shared_ptr<AutomationControl>());
+	}
 
 	_stripable = r;
 
@@ -235,7 +237,7 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 
 	boost::shared_ptr<AutomationControl> rec_enable_control = _stripable->rec_enable_control ();
 
-	if (rec_enable_control) {
+	if (_recenable && rec_enable_control) {
 		_recenable->set_control (rec_enable_control);
 		rec_enable_control->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_record_enable_changed, this), ui_context());
 	}
