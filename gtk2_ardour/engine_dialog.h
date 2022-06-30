@@ -81,12 +81,6 @@ private:
 	Gtk::SpinButton input_latency;
 	Gtk::Adjustment output_latency_adjustment;
 	Gtk::SpinButton output_latency;
-	Gtk::Adjustment input_channels_adjustment;
-	Gtk::SpinButton input_channels;
-	Gtk::Adjustment output_channels_adjustment;
-	Gtk::SpinButton output_channels;
-	Gtk::Adjustment ports_adjustment;
-	Gtk::SpinButton ports_spinner;
 
 	Gtk::Label                  have_control_text;
 	ArdourWidgets::ArdourButton control_app_button;
@@ -154,7 +148,6 @@ private:
 	void sample_rate_changed ();
 	void buffer_size_changed ();
 	void nperiods_changed ();
-	void channels_changed ();
 	void latency_changed ();
 	void midi_option_changed ();
 
@@ -176,8 +169,6 @@ private:
 	float get_rate() const;
 	uint32_t get_buffer_size() const;
 	uint32_t get_nperiods() const;
-	uint32_t get_input_channels() const;
-	uint32_t get_output_channels() const;
 	uint32_t get_input_latency() const;
 	uint32_t get_output_latency() const;
 	std::string get_device_name() const;
@@ -244,8 +235,6 @@ private:
 		uint32_t n_periods;
 		uint32_t input_latency;
 		uint32_t output_latency;
-		uint32_t input_channels;
-		uint32_t output_channels;
 		bool active;
 		bool use_buffered_io;
 		std::string midi_option;
@@ -259,8 +248,6 @@ private:
 			, buffer_size (1024)
 			, input_latency (0)
 			, output_latency (0)
-			, input_channels (0)
-			, output_channels (0)
 			, active (false)
 			, use_buffered_io (false)
 			, lru (0)
@@ -292,8 +279,6 @@ private:
 	void set_default_state ();
 
 	bool  _have_control;
-
-	static bool print_channel_count (Gtk::SpinButton*);
 
 	void build_notebook ();
 	void build_full_control_notebook ();
@@ -328,8 +313,6 @@ private:
 	sigc::connection midi_option_combo_connection;
 	sigc::connection input_latency_connection;
 	sigc::connection output_latency_connection;
-	sigc::connection input_channels_connection;
-	sigc::connection output_channels_connection;
 
 	void on_show ();
 	void on_map ();

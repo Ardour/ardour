@@ -88,12 +88,6 @@ EngineControl::EngineControl ()
 	, input_latency (input_latency_adjustment)
 	, output_latency_adjustment (0, 0, 99999, 1)
 	, output_latency (output_latency_adjustment)
-	, input_channels_adjustment (0, 0, 256, 1)
-	, input_channels (input_channels_adjustment)
-	, output_channels_adjustment (0, 0, 256, 1)
-	, output_channels (output_channels_adjustment)
-	, ports_adjustment (128, 8, 1024, 1, 16)
-	, ports_spinner (ports_adjustment)
 	, control_app_button (_("Device Control Panel"))
 	, midi_devices_button (_("Midi Device Setup"))
 	, start_stop_button (_("Stop"))
@@ -280,9 +274,6 @@ EngineControl::EngineControl ()
 	 * channel counts hit zero.
 	 */
 
-	input_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &input_channels));
-	output_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &output_channels));
-
 	midi_devices_button.signal_clicked.connect (mem_fun (*this, &EngineControl::configure_midi_devices));
 	midi_devices_button.set_name ("generic button");
 	midi_devices_button.set_can_focus(true);
@@ -373,10 +364,6 @@ EngineControl::connect_changed_signals ()
 	    sigc::mem_fun (*this, &EngineControl::latency_changed));
 	output_latency_connection = output_latency.signal_changed ().connect (
 	    sigc::mem_fun (*this, &EngineControl::latency_changed));
-	input_channels_connection = input_channels.signal_changed ().connect (
-	    sigc::mem_fun (*this, &EngineControl::channels_changed));
-	output_channels_connection = output_channels.signal_changed ().connect (
-	    sigc::mem_fun (*this, &EngineControl::channels_changed));
 }
 
 void
@@ -395,8 +382,6 @@ EngineControl::block_changed_signals ()
 		midi_option_combo_connection.block ();
 		input_latency_connection.block ();
 		output_latency_connection.block ();
-		input_channels_connection.block ();
-		output_channels_connection.block ();
 	}
 }
 
@@ -416,8 +401,6 @@ EngineControl::unblock_changed_signals ()
 		midi_option_combo_connection.unblock ();
 		input_latency_connection.unblock ();
 		output_latency_connection.unblock ();
-		input_channels_connection.unblock ();
-		output_channels_connection.unblock ();
 	}
 }
 
@@ -630,32 +613,6 @@ EngineControl::build_full_control_notebook ()
 	/* button spans 2 or 3 rows: Sample rate, Buffer size, Periods */
 	basic_packer.attach (control_app_button, 3, 4, row - ctrl_btn_span, row + 1, xopt, xopt);
 	row++;
-
-	input_channels.set_name ("InputChannels");
-	input_channels.set_can_focus ();
-	input_channels.set_digits (0);
-	input_channels.set_wrap (false);
-	output_channels.set_editable (true);
-
-	if (!ARDOUR::Profile->get_mixbus()) {
-		label = manage (left_aligned_label (_("Input channels:")));
-		basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
-		basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
-		++row;
-	}
-
-	output_channels.set_name ("OutputChannels");
-	output_channels.set_can_focus ();
-	output_channels.set_digits (0);
-	output_channels.set_wrap (false);
-	output_channels.set_editable (true);
-
-	if (!ARDOUR::Profile->get_mixbus()) {
-		label = manage (left_aligned_label (_("Output channels:")));
-		basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
-		basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
-		++row;
-	}
 
 	/* Prefer next available vertical slot, 1 row */
 	if (btn < row && !autostart_packed) {
@@ -872,13 +829,9 @@ EngineControl::update_sensitivity ()
 		valid = false;
 		input_latency.set_sensitive (false);
 		output_latency.set_sensitive (false);
-		input_channels.set_sensitive (false);
-		output_channels.set_sensitive (false);
 	} else {
 		input_latency.set_sensitive (true);
 		output_latency.set_sensitive (true);
-		input_channels.set_sensitive (!engine_running);
-		output_channels.set_sensitive (!engine_running);
 	}
 
 	if (get_popdown_string_count (buffer_size_combo) > 0) {
@@ -1162,24 +1115,6 @@ EngineControl::update_midi_options ()
 		set_popdown_strings (midi_option_combo, midi_options);
 		midi_option_combo.set_active_text (midi_options.front());
 	}
-}
-
-bool
-EngineControl::print_channel_count (Gtk::SpinButton* sb)
-{
-	if (ARDOUR::Profile->get_mixbus()) {
-		return true;
-	}
-
-	uint32_t cnt = (uint32_t) sb->get_value();
-	if (cnt == 0) {
-		sb->set_text (_("all available channels"));
-	} else {
-		char buf[32];
-		snprintf (buf, sizeof (buf), "%d", cnt);
-		sb->set_text (buf);
-	}
-	return true;
 }
 
 // @return true if there are drivers available
@@ -1823,11 +1758,6 @@ EngineControl::latency_changed ()
 	post_push ();
 }
 
-void
-EngineControl::channels_changed ()
-{
-}
-
 bool
 EngineControl::set_state_for_backend (const string& backend)
 {
@@ -1973,8 +1903,6 @@ EngineControl::store_state (State state)
 	state->n_periods = get_nperiods ();
 	state->input_latency = get_input_latency ();
 	state->output_latency = get_output_latency ();
-	state->input_channels = get_input_channels ();
-	state->output_channels = get_output_channels ();
 	state->midi_option = get_midi_option ();
 	state->midi_devices = _midi_devices;
 	state->use_buffered_io = get_use_buffered_io ();
@@ -2049,8 +1977,6 @@ EngineControl::get_state () const
 			node->set_property ("n-periods", (*i)->n_periods);
 			node->set_property ("input-latency", (*i)->input_latency);
 			node->set_property ("output-latency", (*i)->output_latency);
-			node->set_property ("input-channels", (*i)->input_channels);
-			node->set_property ("output-channels", (*i)->output_channels);
 			node->set_property ("lm-input", (*i)->lm_input);
 			node->set_property ("lm-output", (*i)->lm_output);
 			node->set_property ("active", (*i)->active);
@@ -2144,8 +2070,6 @@ EngineControl::set_state (const XMLNode& root)
 			    !grandchild->get_property ("buffer-size", state->buffer_size) ||
 			    !grandchild->get_property ("input-latency", state->input_latency) ||
 			    !grandchild->get_property ("output-latency", state->output_latency) ||
-			    !grandchild->get_property ("input-channels", state->input_channels) ||
-			    !grandchild->get_property ("output-channels", state->output_channels) ||
 			    !grandchild->get_property ("active", state->active) ||
 			    !grandchild->get_property ("use-buffered-io", state->use_buffered_io) ||
 			    !grandchild->get_property ("midi-option", state->midi_option)) {
@@ -2377,12 +2301,8 @@ EngineControl::push_state_to_backend (bool start)
 	bool change_bufsize = false;
 	bool change_nperiods = false;
 	bool change_latency = false;
-	bool change_channels = false;
 	bool change_midi = false;
 	bool change_buffered_io = false;
-
-	uint32_t ochan = get_output_channels ();
-	uint32_t ichan = get_input_channels ();
 
 	if (_have_control) {
 
@@ -2436,24 +2356,6 @@ EngineControl::push_state_to_backend (bool start)
 				}
 			}
 
-			/* zero-requested channels means "all available" */
-
-			if (ichan == 0) {
-				ichan = backend->input_channels();
-			}
-
-			if (ochan == 0) {
-				ochan = backend->output_channels();
-			}
-
-			if (ichan != backend->input_channels()) {
-				change_channels = true;
-			}
-
-			if (ochan != backend->output_channels()) {
-				change_channels = true;
-			}
-
 			if (get_input_latency() != backend->systemic_input_latency() ||
 					get_output_latency() != backend->systemic_output_latency()) {
 				change_latency = true;
@@ -2468,11 +2370,9 @@ EngineControl::push_state_to_backend (bool start)
 			}
 			change_rate = true;
 			change_bufsize = true;
-			change_channels = true;
 			change_latency = true;
 			change_midi = true;
 			change_buffered_io = backend->can_use_buffered_io();
-			change_channels = true;
 			change_nperiods = backend->can_set_period_size() && get_popdown_string_count (nperiods_combo) > 0;
 		}
 
@@ -2531,7 +2431,7 @@ EngineControl::push_state_to_backend (bool start)
 
 	/* determine if we need to stop the backend before changing parameters */
 
-	if (change_driver || change_device || change_channels || change_nperiods ||
+	if (change_driver || change_device || change_nperiods ||
 			(change_latency && !backend->can_change_systemic_latency_when_running ()) ||
 			(change_rate && !backend->can_change_sample_rate_when_running()) ||
 			change_midi || change_buffered_io ||
@@ -2582,16 +2482,6 @@ EngineControl::push_state_to_backend (bool start)
 		return 1;
 	}
 
-	if (change_channels || get_input_channels() == 0 || get_output_channels() == 0) {
-		if (backend->set_input_channels (get_input_channels())) {
-			error << string_compose (_("Cannot set input channels to %1"), get_input_channels()) << endmsg;
-			return 1;
-		}
-		if (backend->set_output_channels (get_output_channels())) {
-			error << string_compose (_("Cannot set output channels to %1"), get_output_channels()) << endmsg;
-			return 1;
-		}
-	}
 	if (change_latency) {
 		if (backend->set_systemic_input_latency (get_input_latency())) {
 			error << string_compose (_("Cannot set input latency to %1"), get_input_latency()) << endmsg;
@@ -2726,28 +2616,6 @@ bool
 EngineControl::get_use_buffered_io () const
 {
 	return use_buffered_io_button.get_active();
-}
-
-uint32_t
-EngineControl::get_input_channels() const
-{
-	if (ARDOUR::Profile->get_mixbus()) {
-		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-		if (!backend) return 0;
-		return backend->input_channels();
-	}
-	return (uint32_t) input_channels_adjustment.get_value();
-}
-
-uint32_t
-EngineControl::get_output_channels() const
-{
-	if (ARDOUR::Profile->get_mixbus()) {
-		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-		if (!backend) return 0;
-		return backend->input_channels();
-	}
-	return (uint32_t) output_channels_adjustment.get_value();
 }
 
 uint32_t
