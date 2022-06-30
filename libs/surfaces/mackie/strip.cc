@@ -156,7 +156,10 @@ Strip::add (Control & control)
 
 	/* fader, vpot, meter were all set explicitly */
 
+std::cout << "Strip::add  adding control: " << control.name();
+
 	if ((button = dynamic_cast<Button*>(&control)) != 0) {
+std::cout << ";  button name: " <<  Button::id_to_name (button->bid());
 		switch (button->bid()) {
 		case Button::RecEnable:
 			_recenable = button;
@@ -180,7 +183,9 @@ Strip::add (Control & control)
 			break;
 		}
 	}
-}
+
+ std::cout << std::endl;
+ }
 
 void
 Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
@@ -193,14 +198,25 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 
 	stripable_connections.drop_connections ();
 
-	_solo->set_control (boost::shared_ptr<AutomationControl>());
-	_mute->set_control (boost::shared_ptr<AutomationControl>());
-	_select->set_control (boost::shared_ptr<AutomationControl>());
 	_fader->set_control (boost::shared_ptr<AutomationControl>());
 	_vpot->set_control (boost::shared_ptr<AutomationControl>());
+
+std::cout << "Strip::set_stripable  initializing buttons" << std::endl;
+
+	if (_select) {
+		_select->set_control (boost::shared_ptr<AutomationControl>());
+	}
+	if (_solo) {
+		_solo->set_control (boost::shared_ptr<AutomationControl>());
+	}
+	if (_mute) {
+		_mute->set_control (boost::shared_ptr<AutomationControl>());
+	}
 	if (_recenable) {
 		_recenable->set_control (boost::shared_ptr<AutomationControl>());
 	}
+
+std::cout << "Strip::set_stripable  initializing buttons DONE" << std::endl;
 
 	_stripable = r;
 
@@ -215,8 +231,14 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 strip %2 now mapping stripable %3\n",
 							   _surface->number(), _index, _stripable->name()));
 
-	_solo->set_control (_stripable->solo_control());
-	_mute->set_control (_stripable->mute_control());
+	if (_solo) {
+		_solo->set_control (_stripable->solo_control());
+	}
+	if (_mute) {
+		_mute->set_control (_stripable->mute_control());
+	}
+
+std::cout << "Strip::set_stripable  assigning mute+solo DONE" << std::endl;
 
 	_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
 	_stripable->mute_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
@@ -273,7 +295,10 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 		set_vpot_parameter (_pan_mode);
 	}
 
-	_fader->set_control (_stripable->gain_control());
+std::cout << "Strip::set_stripable  assigning fader" << std::endl;
+	if (_fader) {
+		_fader->set_control (_stripable->gain_control());
+	}
 
 	notify_all ();
 }
