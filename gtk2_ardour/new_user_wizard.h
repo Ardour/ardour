@@ -73,7 +73,6 @@ private:
 	Glib::RefPtr<Gdk::Pixbuf> splash_pixbuf;
 
 	void setup_first_time_config_page ();
-	void config_changed ();
 
 	/* Welcome */
 	Gtk::ComboBoxText ui_font_scale;
@@ -86,40 +85,13 @@ private:
 	void setup_first_page ();
 	Gtk::FileChooserButton new_folder_chooser;
 
-	/* monitoring choices */
-
-	Gtk::VBox mon_vbox;
-	Gtk::Label monitor_label;
-	Gtk::RadioButton monitor_via_hardware_button;
-	Gtk::RadioButton monitor_via_ardour_button;
-	void setup_monitoring_choice_page ();
-
-	/* monitor section choices */
-
-	Gtk::VBox mon_sec_vbox;
-	Gtk::Label monitor_section_label;
-	Gtk::RadioButton use_monitor_section_button;
-	Gtk::RadioButton no_monitor_section_button;
-	void setup_monitor_section_choice_page ();
-
 	/* final page */
-
 	void setup_final_page ();
+	void move_along_now ();
 
 	/* always there */
-
 	Glib::RefPtr<Pango::Layout> layout;
 
-	/* page indices */
-
-	gint audio_page_index;
-	gint new_user_page_index;
-	gint default_folder_page_index;
-	gint monitoring_page_index;
-	gint monitor_section_page_index;
-	gint final_page_index;
-
-	void move_along_now ();
 
 	sigc::signal1<void,int> _signal_response;
 };

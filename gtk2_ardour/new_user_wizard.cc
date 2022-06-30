@@ -74,14 +74,6 @@ NewUserWizard::NewUserWizard ()
 	: _splash_pushed (false)
 	, config_modified (false)
 	, default_dir_chooser (0)
-	, monitor_via_hardware_button (string_compose (_("Use an external mixer or the hardware mixer of your audio interface.\n"
-							 "%1 will play NO role in monitoring"), PROGRAM_NAME))
-	, monitor_via_ardour_button (string_compose (_("Ask %1 to play back material as it is being recorded"), PROGRAM_NAME))
-	, audio_page_index (-1)
-	, new_user_page_index (-1)
-	, default_folder_page_index (-1)
-	, monitoring_page_index (-1)
-	, final_page_index (-1)
 {
 	set_position (WIN_POS_CENTER);
 	set_border_width (12);
@@ -111,8 +103,6 @@ NewUserWizard::NewUserWizard ()
 
 	setup_new_user_page ();
 	setup_first_time_config_page ();
-	setup_monitoring_choice_page ();
-	setup_monitor_section_choice_page ();
 	setup_final_page ();
 }
 
@@ -188,7 +178,7 @@ using the program.</span> \
 	foomatic->show ();
 	vbox->show ();
 
-	new_user_page_index = append_page (*vbox);
+	append_page (*vbox);
 	set_page_type (*vbox, ASSISTANT_PAGE_INTRO);
 	set_page_title (*vbox, string_compose (_("Welcome to %1"), PROGRAM_NAME));
 	set_page_header_image (*vbox, icon_pixbuf);
@@ -248,12 +238,6 @@ NewUserWizard::default_dir_changed ()
 	Config->set_default_session_parent_dir (default_dir_chooser->get_filename());
 	// make new session folder chooser point to the new default
 	new_folder_chooser.set_current_folder (Config->get_default_session_parent_dir());
-	config_changed ();
-}
-
-void
-NewUserWizard::config_changed ()
-{
 	config_modified = true;
 }
 
@@ -289,7 +273,7 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 
 	vbox->show_all ();
 
-	default_folder_page_index = append_page (*vbox);
+	append_page (*vbox);
 	set_page_title (*vbox, _("Default folder for new sessions"));
 	set_page_header_image (*vbox, icon_pixbuf);
 	set_page_type (*vbox, ASSISTANT_PAGE_CONTENT);
@@ -297,122 +281,6 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	/* user can just skip all these settings if they want to */
 
 	set_page_complete (*vbox, true);
-}
-
-void
-NewUserWizard::setup_monitoring_choice_page ()
-{
-	mon_vbox.set_spacing (18);
-	mon_vbox.set_border_width (24);
-
-	HBox* hbox = manage (new HBox);
-	VBox* vbox = manage (new VBox);
-	/* first button will be on by default */
-	RadioButton::Group g (monitor_via_ardour_button.get_group());
-	monitor_via_hardware_button.set_group (g);
-
-	monitor_label.set_markup(_("\
-While recording instruments or vocals, you probably want to listen to the\n\
-signal as well as record it. This is called \"monitoring\". There are\n\
-different ways to do this depending on the equipment you have and the\n\
-configuration of that equipment. The two most common are presented here.\n\
-Please choose whichever one is right for your setup.\n\n\
-<i>(You can change this preference at any time, via the Preferences dialog)</i>\n\n\
-<i>If you do not understand what this is about, just accept the default.</i>"));
-	monitor_label.set_alignment (0.0, 0.0);
-
-	vbox->set_spacing (6);
-
-	vbox->pack_start (monitor_via_hardware_button, false, true);
-	vbox->pack_start (monitor_via_ardour_button, false, true);
-	hbox->pack_start (*vbox, true, true, 8);
-	mon_vbox.pack_start (monitor_label, false, false);
-	mon_vbox.pack_start (*hbox, false, false);
-
-	mon_vbox.show_all ();
-
-	monitoring_page_index = append_page (mon_vbox);
-	set_page_title (mon_vbox, _("Monitoring Choices"));
-	set_page_header_image (mon_vbox, icon_pixbuf);
-
-	monitor_via_hardware_button.signal_toggled().connect (sigc::mem_fun (*this, &NewUserWizard::config_changed));
-	monitor_via_ardour_button.signal_toggled().connect (sigc::mem_fun (*this, &NewUserWizard::config_changed));
-
-	/* user could just click on "Forward" if default
-	 * choice is correct.
-	 */
-
-	set_page_complete (mon_vbox, true);
-}
-
-void
-NewUserWizard::setup_monitor_section_choice_page ()
-{
-	mon_sec_vbox.set_spacing (18);
-	mon_sec_vbox.set_border_width (24);
-
-	HBox* hbox = manage (new HBox);
-	VBox* main_vbox = manage (new VBox);
-	VBox* vbox;
-	Label* l = manage (new Label);
-
-	main_vbox->set_spacing (32);
-
-	no_monitor_section_button.set_label (_("Use a Master bus directly"));
-	l->set_alignment (0.0, 1.0);
-	l->set_markup(_("Connect the Master bus directly to your hardware outputs. This is preferable for simple usage."));
-
-	vbox = manage (new VBox);
-	vbox->set_spacing (6);
-	vbox->pack_start (no_monitor_section_button, false, true);
-	vbox->pack_start (*l, false, true);
-
-	main_vbox->pack_start (*vbox, false, false);
-
-	use_monitor_section_button.set_label (_("Use an additional Monitor bus"));
-	l = manage (new Label);
-	l->set_alignment (0.0, 1.0);
-	l->set_text (_("Use a Monitor bus between Master bus and hardware outputs for \n\
-greater control in monitoring without affecting the mix."));
-
-	vbox = manage (new VBox);
-	vbox->set_spacing (6);
-	vbox->pack_start (use_monitor_section_button, false, true);
-	vbox->pack_start (*l, false, true);
-
-	main_vbox->pack_start (*vbox, false, false);
-
-	RadioButton::Group g (use_monitor_section_button.get_group());
-	no_monitor_section_button.set_group (g);
-
-	if (Config->get_use_monitor_bus()) {
-		use_monitor_section_button.set_active (true);
-	} else {
-		no_monitor_section_button.set_active (true);
-	}
-
-	use_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &NewUserWizard::config_changed));
-	no_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &NewUserWizard::config_changed));
-
-	monitor_section_label.set_markup(_("<i>You can change this preference at any time via the Preferences dialog.\nYou can also add or remove the monitor section to/from any session.</i>\n\n\
-<i>If you do not understand what this is about, just accept the default.</i>"));
-	monitor_section_label.set_alignment (0.0, 0.0);
-
-	hbox->pack_start (*main_vbox, true, true, 8);
-	mon_sec_vbox.pack_start (*hbox, false, false);
-	mon_sec_vbox.pack_start (monitor_section_label, false, false);
-
-	mon_sec_vbox.show_all ();
-
-	monitor_section_page_index = append_page (mon_sec_vbox);
-	set_page_title (mon_sec_vbox, _("Monitor Section"));
-	set_page_header_image (mon_sec_vbox, icon_pixbuf);
-
-	/* user could just click on "Forward" if default
-	 * choice is correct.
-	 */
-
-	set_page_complete (mon_sec_vbox, true);
 }
 
 void
@@ -428,7 +296,7 @@ NewUserWizard::setup_final_page ()
 	vbox->pack_start (*final_label, true, true);
 	vbox->show ();
 
-	final_page_index = append_page (*vbox);
+	append_page (*vbox);
 	set_page_complete (*vbox, true);
 	set_page_header_image (*vbox, icon_pixbuf);
 	set_page_type (*vbox, ASSISTANT_PAGE_CONFIRM);
@@ -464,16 +332,7 @@ NewUserWizard::on_apply ()
 			Config->set_default_session_parent_dir (default_dir_chooser->get_filename());
 		}
 
-		if (monitor_via_hardware_button.get_active()) {
-			Config->set_monitoring_model (ExternalMonitoring);
-		} else if (monitor_via_ardour_button.get_active()) {
-			Config->set_monitoring_model (SoftwareMonitoring);
-		}
-
-		Config->set_use_monitor_bus (use_monitor_section_button.get_active());
-
 		Config->save_state ();
-
 	}
 
 	{
