@@ -12,6 +12,7 @@ function factory () return function ()
 		chn = mst:n_inputs ():n_audio ()
 	end
 	mst = nil -- explicitly drop reference
+	if chn = 0  then chn = 2; end
 
 	local sel = Editor:get_selection () -- get selection
 	local tracks = ARDOUR.RouteListPtr () -- create a new list
