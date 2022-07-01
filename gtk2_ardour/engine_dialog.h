@@ -77,7 +77,6 @@ private:
 	Gtk::ComboBoxText sample_rate_combo;
 	Gtk::ComboBoxText midi_option_combo;
 	Gtk::ComboBoxText buffer_size_combo;
-	Gtk::Label        buffer_size_duration_label;
 	Gtk::ComboBoxText nperiods_combo;
 	Gtk::Adjustment   input_latency_adjustment;
 	Gtk::SpinButton   input_latency;
@@ -85,7 +84,23 @@ private:
 	Gtk::SpinButton   output_latency;
 	Gtk::ComboBoxText monitor_model_combo;
 
-	Gtk::Label                  have_control_text;
+	Gtk::Label lbl_audio_system;
+	Gtk::Label lbl_midi_system;
+	Gtk::Label lbl_driver;
+	Gtk::Label lbl_device;
+	Gtk::Label lbl_input_device;
+	Gtk::Label lbl_output_device;
+	Gtk::Label lbl_sample_rate;
+	Gtk::Label lbl_buffer_size;
+	Gtk::Label lbl_nperiods;
+	Gtk::Label lbl_input_latency;
+	Gtk::Label lbl_output_latency;
+	Gtk::Label lbl_monitor_model;
+	Gtk::Label lbl_jack_msg;
+	Gtk::Label unit_samples_text;
+	Gtk::Label buffer_size_duration_label;
+	Gtk::Label have_control_text;
+
 	ArdourWidgets::ArdourButton control_app_button;
 	ArdourWidgets::ArdourButton midi_devices_button;
 	ArdourWidgets::ArdourButton start_stop_button;

@@ -88,6 +88,20 @@ EngineControl::EngineControl ()
 	, input_latency (input_latency_adjustment)
 	, output_latency_adjustment (0, 0, 99999, 1)
 	, output_latency (output_latency_adjustment)
+	, lbl_audio_system (_("Audio System:"), Gtk::ALIGN_START)
+	, lbl_midi_system (_("MIDI System:"), Gtk::ALIGN_START)
+	, lbl_driver (_("Driver:"), Gtk::ALIGN_START)
+	, lbl_device (_("Device:"), Gtk::ALIGN_START)
+	, lbl_input_device (_("Input Device:"), Gtk::ALIGN_START)
+	, lbl_output_device (_("Output Device:"), Gtk::ALIGN_START)
+	, lbl_sample_rate (_("Sample rate:"), Gtk::ALIGN_START)
+	, lbl_buffer_size (_("Buffer size:"), Gtk::ALIGN_START)
+	, lbl_nperiods (_("Periods:"), Gtk::ALIGN_START)
+	, lbl_input_latency (_("Hardware input latency:"), Gtk::ALIGN_START)
+	, lbl_output_latency (_("Hardware output latency:"), Gtk::ALIGN_START)
+	, lbl_monitor_model (_("Record monitoring handled by:"), Gtk::ALIGN_START)
+	, lbl_jack_msg ("", Gtk::ALIGN_START)
+	, unit_samples_text (_("samples"), Gtk::ALIGN_START)
 	, control_app_button (_("Device Control Panel"))
 	, midi_devices_button (_("MIDI Device Setup"))
 	, start_stop_button (_("Stop"))
@@ -144,6 +158,17 @@ EngineControl::EngineControl ()
 		 */
 		monitor_model_combo.append_text (_("via Audio Driver"));
 	}
+
+	/* setup latency spinbox behavior */
+	input_latency.set_can_focus ();
+	input_latency.set_digits (0);
+	input_latency.set_wrap (false);
+	input_latency.set_editable (true);
+
+	output_latency.set_can_focus ();
+	output_latency.set_digits (0);
+	output_latency.set_wrap (false);
+	output_latency.set_editable (true);
 
 	/* setup basic packing characteristics for the table used on the main
 	 * tab of the notebook
@@ -423,8 +448,8 @@ EngineControl::unblock_changed_signals ()
 
 EngineControl::SignalBlocker::SignalBlocker (EngineControl&     engine_control,
                                              const std::string& reason)
-    : ec (engine_control)
-    , m_reason (reason)
+	: ec (engine_control)
+	, m_reason (reason)
 {
 	DEBUG_ECONTROL (string_compose ("SignalBlocker: %1", m_reason));
 	ec.block_changed_signals ();
@@ -511,7 +536,6 @@ EngineControl::stop_engine (bool for_latency)
 void
 EngineControl::build_notebook ()
 {
-	Label*        label;
 	AttachOptions xopt = AttachOptions (FILL | EXPAND);
 
 	/* clear the table */
@@ -530,8 +554,7 @@ EngineControl::build_notebook ()
 		connect_disconnect_button.get_parent ()->remove (connect_disconnect_button);
 	}
 
-	label = manage (left_aligned_label (_("Audio System:")));
-	basic_packer.attach (*label, 0, 1, 0, 1, xopt, (AttachOptions)0);
+	basic_packer.attach (lbl_audio_system, 0, 1, 0, 1, xopt, (AttachOptions)0);
 	basic_packer.attach (backend_combo, 1, 2, 0, 1, xopt, (AttachOptions)0);
 
 	basic_packer.attach (engine_status, 2, 3, 0, 1, xopt, (AttachOptions)0);
@@ -564,7 +587,6 @@ EngineControl::build_full_control_notebook ()
 	assert (backend);
 
 	using namespace Notebook_Helpers;
-	Label*         label;
 	vector<string> strings;
 	AttachOptions  xopt             = AttachOptions (FILL | EXPAND);
 	int            row              = 1; // row zero == backend combo
@@ -574,29 +596,25 @@ EngineControl::build_full_control_notebook ()
 	/* start packing it up */
 
 	if (backend->requires_driver_selection ()) {
-		label = manage (left_aligned_label (_("Driver:")));
-		basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+		basic_packer.attach (lbl_driver, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 		basic_packer.attach (driver_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
 		row++;
 	}
 
 	if (backend->use_separate_input_and_output_devices ()) {
-		label = manage (left_aligned_label (_("Input Device:")));
-		basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+		basic_packer.attach (lbl_input_device, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 		basic_packer.attach (input_device_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
 		row++;
-		label = manage (left_aligned_label (_("Output Device:")));
-		basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+		basic_packer.attach (lbl_output_device, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 		basic_packer.attach (output_device_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
 		row++;
-		// reset so it isn't used in state comparisons
+		/* reset so it isn't used in state comparisons */
 		device_combo.set_active_text ("");
 	} else {
-		label = manage (left_aligned_label (_("Device:")));
-		basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+		basic_packer.attach (lbl_device, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 		basic_packer.attach (device_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
 		row++;
-		// reset these so they don't get used in state comparisons
+		/* reset these so they don't get used in state comparisons */
 		input_device_combo.set_active_text ("");
 		output_device_combo.set_active_text ("");
 	}
@@ -620,13 +638,11 @@ EngineControl::build_full_control_notebook ()
 		autostart_packed = true;
 	}
 
-	label = manage (left_aligned_label (_("Sample rate:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+	basic_packer.attach (lbl_sample_rate, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 	basic_packer.attach (sample_rate_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
 	row++;
 
-	label = manage (left_aligned_label (_("Buffer size:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+	basic_packer.attach (lbl_buffer_size, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 	basic_packer.attach (buffer_size_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
 	buffer_size_duration_label.set_alignment (0.0); /* left-align */
 	basic_packer.attach (buffer_size_duration_label, 2, 3, row, row + 1, SHRINK, (AttachOptions)0);
@@ -634,8 +650,7 @@ EngineControl::build_full_control_notebook ()
 	int ctrl_btn_span = 1;
 	if (backend->can_set_period_size ()) {
 		row++;
-		label = manage (left_aligned_label (_("Periods:")));
-		basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+		basic_packer.attach (lbl_nperiods, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 		basic_packer.attach (nperiods_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
 		++ctrl_btn_span;
 	}
@@ -651,44 +666,25 @@ EngineControl::build_full_control_notebook ()
 		autostart_packed = true;
 	}
 
-	input_latency.set_name ("InputLatency");
-	input_latency.set_can_focus ();
-	input_latency.set_digits (0);
-	input_latency.set_wrap (false);
-	input_latency.set_editable (true);
-
-	label = manage (left_aligned_label (_("Hardware input latency:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+	basic_packer.attach (lbl_input_latency, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 	basic_packer.attach (input_latency, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-	label = manage (left_aligned_label (_("samples")));
-	basic_packer.attach (*label, 2, 3, row, row + 1, SHRINK, (AttachOptions)0);
+	basic_packer.attach (unit_samples_text, 2, 3, row, row + 1, SHRINK, (AttachOptions)0);
 	++row;
 
-	output_latency.set_name ("OutputLatency");
-	output_latency.set_can_focus ();
-	output_latency.set_digits (0);
-	output_latency.set_wrap (false);
-	output_latency.set_editable (true);
-
-	label = manage (left_aligned_label (_("Hardware output latency:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+	basic_packer.attach (lbl_output_latency, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 	basic_packer.attach (output_latency, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-	label = manage (left_aligned_label (_("samples")));
-	basic_packer.attach (*label, 2, 3, row, row + 1, SHRINK, (AttachOptions)0);
+	//basic_packer.attach (unit_samples_text, 2, 3, row, row + 1, SHRINK, (AttachOptions)0);
 
 	/* button spans 2 rows */
-
 	basic_packer.attach (lm_button_audio, 3, 4, row - 1, row + 1, xopt, xopt);
 	++row;
 
-	label = manage (left_aligned_label (_("MIDI System:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+	basic_packer.attach (lbl_midi_system, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
 	basic_packer.attach (midi_devices_button, 3, 4, row, row + 1, xopt, xopt);
 	row++;
 
-	label = manage (left_aligned_label (_("Record monitoring handled by:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+	basic_packer.attach (lbl_monitor_model, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 	basic_packer.attach (monitor_model_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
 	row++;
 
@@ -704,27 +700,24 @@ EngineControl::build_no_control_notebook ()
 	assert (backend);
 
 	using namespace Notebook_Helpers;
-	Label*         label;
+
 	vector<string> strings;
 	AttachOptions  xopt = AttachOptions (FILL | EXPAND);
 	int            row  = 1; // row zero == backend combo
 	const string   msg  = string_compose (_("%1 is already running. %2 will connect to it and use the existing settings."), backend->name (), PROGRAM_NAME);
 
-	label = manage (new Label);
-	label->set_markup (string_compose ("<span weight=\"bold\" foreground=\"red\">%1</span>", msg));
-	basic_packer.attach (*label, 0, 2, row, row + 1, xopt, (AttachOptions)0);
+	lbl_jack_msg.set_markup (string_compose ("<span weight=\"bold\" foreground=\"red\">%1</span>", msg));
+	basic_packer.attach (lbl_jack_msg, 0, 2, row, row + 1, xopt, (AttachOptions)0);
 	row++;
 
 	if (backend->can_change_sample_rate_when_running ()) {
-		label = manage (left_aligned_label (_("Sample rate:")));
-		basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+		basic_packer.attach (lbl_sample_rate, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 		basic_packer.attach (sample_rate_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
 		row++;
 	}
 
 	if (backend->can_change_buffer_size_when_running ()) {
-		label = manage (left_aligned_label (_("Buffer size:")));
-		basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+		basic_packer.attach (lbl_buffer_size, 0, 1, row, row + 1, xopt, (AttachOptions)0);
 		basic_packer.attach (buffer_size_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
 		buffer_size_duration_label.set_alignment (0.0); /* left-align */
 		basic_packer.attach (buffer_size_duration_label, 2, 3, row, row + 1, xopt, (AttachOptions)0);
