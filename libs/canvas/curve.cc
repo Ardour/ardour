@@ -46,7 +46,7 @@ Curve::Curve (Item* parent)
 
 /** When rendering the curve, we will always draw a fixed number of straight
  * line segments to span the x-axis extent of the curve. More segments:
- * smoother visual rendering. Less rendering: closer to a visibily poly-line
+ * smoother visual rendering. Less rendering: closer to a visibly poly-line
  * render.
  */
 void

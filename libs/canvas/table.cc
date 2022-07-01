@@ -345,7 +345,7 @@ Table::compute (Rect const & within)
 	}
 
 	if (row_homogenous) {
-		/* reset total height using the heighest, multiplied by the
+		/* reset total height using the highest, multiplied by the
 		   number of rows, since they wll all be the same height. the
 		   values before we do this are cumulative, and do not
 		   (necessarily) reflect homogeneity
@@ -402,7 +402,7 @@ Table::compute (Rect const & within)
 	 * iterate. Allocate expanders the per-cell size plus the extra for
 	 * expansion. Allocate shrinkers/default just the per-cell size.
 	 *
-	 * If the natural size if greated than the allocated size, find the
+	 * If the natural size if greater than the allocated size, find the
 	 * difference, divide it by the number of shrinking items per
 	 * (row|col). Divide the total size by the number of (rows|cols), then
 	 * iterate. Allocate shrinkers the per-cell size minus the excess for

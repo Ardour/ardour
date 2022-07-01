@@ -96,7 +96,7 @@ protected:
 			double x1 = vertices[0].x - dx;
 			double y1 = vertices[0].y - dy;
 
-			// Actaully create the start point from the extrapolated values.
+			// Actually create the start point from the extrapolated values.
 			Duple start (x1, y1);
 
 			// Repeat for the end control point.
@@ -168,7 +168,7 @@ private:
 	 * points spaced uniformly along the resulting Catmull-Rom curve.
 	 *
 	 * @param points The list of control points, leading and ending with a
-	 * coordinate that is only used for controling the spline and is not visualized.
+	 * coordinate that is only used for controlling the spline and is not visualized.
 	 * @param index The index of control point p0, where p0, p1, p2, and p3 are
 	 * used in order to create a curve between p1 and p2.
 	 * @param points_per_segment The total number of uniformly spaced interpolated
