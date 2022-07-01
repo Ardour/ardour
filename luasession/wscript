@@ -45,7 +45,7 @@ def build(bld):
     obj.source       = 'luasession.cc'
     obj.target       = 'luasession'
     obj.includes     = ['../libs']
-    obj.use          = ['liblua'
+    obj.use          = ['liblua',
                         'libpbd',
                         'libardour',
                         'libardour_cp',
