@@ -3,7 +3,7 @@
  * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2008-2012 David Robillard <d@drobilla.net>
  * Copyright (C) 2013-2014 Colin Fletcher <colin.m.fletcher@googlemail.com>
- * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2022 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2015-2016 Tim Mayberry <mojofunk@gmail.com>
  * Copyright (C) 2015 Ben Loftis <ben@harrisonconsoles.com>
  *
@@ -83,7 +83,9 @@ static const char* results_markup = X_("<span weight=\"bold\" size=\"larger\">%1
 EngineControl::EngineControl ()
 	: ArdourDialog (_("Audio/MIDI Setup"))
 	, engine_status ("")
-	, basic_packer (9, 4)
+	, settings_table (4, 4)
+	, latency_expander (_("Advanced Settings"))
+	, monitor_expander (_("Hardware Monitoring"))
 	, input_latency_adjustment (0, 0, 99999, 1)
 	, input_latency (input_latency_adjustment)
 	, output_latency_adjustment (0, 0, 99999, 1)
@@ -101,16 +103,17 @@ EngineControl::EngineControl ()
 	, lbl_output_latency (_("Hardware output latency:"), Gtk::ALIGN_START)
 	, lbl_monitor_model (_("Record monitoring handled by:"), Gtk::ALIGN_START)
 	, lbl_jack_msg ("", Gtk::ALIGN_START)
-	, unit_samples_text (_("samples"), Gtk::ALIGN_START)
+	, unit_samples_txt1 (_("samples"), Gtk::ALIGN_START)
+	, unit_samples_txt2 (_("samples"), Gtk::ALIGN_START)
 	, control_app_button (_("Device Control Panel"))
-	, midi_devices_button (_("MIDI Device Setup"))
+	, midi_devices_button (_("MIDI Device Setup & Calibration"))
 	, start_stop_button (_("Stop"))
 	, update_devices_button (_("Refresh Devices"))
 	, use_buffered_io_button (_("Use Buffered I/O"), ArdourButton::led_default_elements)
 	, try_autostart_button (_("Autostart"), ArdourButton::led_default_elements)
 	, lm_measure_label (_("Measure"))
 	, lm_use_button (_("Use results"))
-	, lm_back_button (_("Back to settings ... (ignore results)"))
+	, lm_back_button (_("Back to settings (ignore results)"))
 	, lm_button_audio (_("Calibrate Audio"))
 	, lm_table (12, 3)
 	, have_lm_results (false)
@@ -149,14 +152,16 @@ EngineControl::EngineControl ()
 	set_popdown_strings (backend_combo, backend_names);
 
 	/* setup HW monitoring */
+	monitor_expander.set_expanded (true);
+	monitor_expander.property_expanded ().signal_changed ().connect (sigc::mem_fun (*this, &EngineControl::on_monitor_expand));
 
 	monitor_model_combo.append_text (PROGRAM_NAME);
-	monitor_model_combo.append_text (_("audio hardware"));
+	monitor_model_combo.append_text (_("Audio Hardware"));
 	if (ARDOUR::HardwareMonitoring == ARDOUR::Config->get_monitoring_model ()) {
 		/* this really depends on running backend, check
 		 * AudioEngine::instance()->port_engine().can_monitor_input()
 		 */
-		monitor_model_combo.append_text (_("via Audio Driver"));
+		monitor_model_combo.append_text (_("Audio Driver"));
 	}
 
 	/* setup latency spinbox behavior */
@@ -174,114 +179,82 @@ EngineControl::EngineControl ()
 	 * tab of the notebook
 	 */
 
-	basic_packer.set_spacings (6);
-	basic_packer.set_border_width (12);
-	basic_packer.set_homogeneous (false);
+	settings_table.set_spacings (6);
+	settings_table.set_border_width (12);
+
+	buffer_size_duration_label.set_alignment (0.0); /* left-align */
 
 	/* pack it in */
 
-	basic_hbox.pack_start (basic_packer, false, false);
+	main_hbox.pack_start (settings_table, false, false);
+	main_vbox.pack_start (main_hbox, false, false);
+
+	midi_vbox.set_border_width (12);
+	midi_device_table.set_border_width (12);
+	midi_vbox.pack_start (midi_device_table, true, true);
+
+	latency_expander.property_expanded ().signal_changed ().connect (sigc::mem_fun (*this, &EngineControl::on_latency_expand));
+	latency_expander.set_expanded (false);
 
 	/* latency measurement tab */
-
-	lm_title.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Latency Measurement Tool")));
 
 	row = 0;
 	lm_table.set_row_spacings (12);
 	lm_table.set_col_spacings (6);
 	lm_table.set_homogeneous (false);
 
-	lm_table.attach (lm_title, 0, 3, row, row + 1, xopt, (AttachOptions)0);
+	lm_title.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Latency Measurement Tool")));
+	lm_table.attach (lm_title, 0, 4, row, row + 1, xopt, SHRINK);
 	row++;
 
-	lm_preamble.set_width_chars (60);
-	lm_preamble.set_line_wrap (true);
+	lm_preamble.set_alignment (ALIGN_CENTER);
 	lm_preamble.set_markup (_("<span weight=\"bold\">Turn down the volume on your audio equipment to a very low level.</span>"));
 
-	lm_table.attach (lm_preamble, 0, 3, row, row + 1, AttachOptions (FILL | EXPAND), (AttachOptions)0);
+	lm_table.attach (lm_preamble, 0, 4, row, row + 1, xopt, SHRINK);
 	row++;
 
 	Gtk::Label* preamble;
 	preamble = manage (new Label);
-	preamble->set_width_chars (60);
-	preamble->set_line_wrap (true);
+	preamble->set_alignment (ALIGN_CENTER);
 	preamble->set_markup (_("Select two channels below and connect them using a cable."));
 
-	lm_table.attach (*preamble, 0, 3, row, row + 1, AttachOptions (FILL | EXPAND), (AttachOptions)0);
+	lm_table.attach (*preamble, 0, 4, row, row + 1, xopt, SHRINK);
 	row++;
 
-	label = manage (new Label (_("Output channel:")));
-	lm_table.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+	label = manage (new Label (_("Playback channel:"), ALIGN_START));
+	lm_table.attach (*label, 1, 2, row, row + 1, FILL, SHRINK);
 
 	lm_output_channel_list = Gtk::ListStore::create (lm_output_channel_cols);
 	lm_output_channel_combo.set_model (lm_output_channel_list);
 	lm_output_channel_combo.pack_start (lm_output_channel_cols.pretty_name);
 
-	Gtk::Alignment* misc_align = manage (new Alignment (0.0, 0.5));
-	misc_align->add (lm_output_channel_combo);
-	lm_table.attach (*misc_align, 1, 3, row, row + 1, xopt, (AttachOptions)0);
+	lm_table.attach (lm_output_channel_combo, 2, 3, row, row + 1, FILL, SHRINK);
 	++row;
 
-	label = manage (new Label (_("Input channel:")));
-	lm_table.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions)0);
+	label = manage (new Label (_("Capture channel:"), ALIGN_START));
+	lm_table.attach (*label, 1, 2, row, row + 1, FILL, SHRINK);
 
 	lm_input_channel_list = Gtk::ListStore::create (lm_input_channel_cols);
 	lm_input_channel_combo.set_model (lm_input_channel_list);
 	lm_input_channel_combo.pack_start (lm_input_channel_cols.pretty_name);
 
-	misc_align = manage (new Alignment (0.0, 0.5));
-	misc_align->add (lm_input_channel_combo);
-	lm_table.attach (*misc_align, 1, 3, row, row + 1, FILL, (AttachOptions)0);
+	lm_table.attach (lm_input_channel_combo, 2, 3, row, row + 1, FILL, SHRINK);
 	++row;
 
-	lm_measure_label.set_padding (10, 10);
 	lm_measure_button.add (lm_measure_label);
 	lm_measure_button.signal_clicked ().connect (sigc::mem_fun (*this, &EngineControl::latency_button_clicked));
 	lm_use_button.signal_clicked ().connect (sigc::mem_fun (*this, &EngineControl::use_latency_button_clicked));
-	lm_back_button_signal = lm_back_button.signal_clicked ().connect (
-	    sigc::mem_fun (*this, &EngineControl::latency_back_button_clicked));
+	lm_back_button_signal = lm_back_button.signal_clicked ().connect (sigc::mem_fun (*this, &EngineControl::latency_back_button_clicked));
 
 	lm_use_button.set_sensitive (false);
 
-	/* Increase the default spacing around the labels of these three
-	 * buttons
-	 */
-
-	Gtk::Misc* l;
-
-	if ((l = dynamic_cast<Gtk::Misc*> (lm_use_button.get_child ())) != 0) {
-		l->set_padding (10, 10);
-	}
-
-	if ((l = dynamic_cast<Gtk::Misc*> (lm_back_button.get_child ())) != 0) {
-		l->set_padding (10, 10);
-	}
-
 	preamble = manage (new Label);
-	preamble->set_width_chars (60);
-	preamble->set_line_wrap (true);
-	preamble->set_markup (_("Once the channels are connected, click the \"Measure\" button."));
-	lm_table.attach (*preamble, 0, 3, row, row + 1, AttachOptions (FILL | EXPAND), (AttachOptions)0);
+	preamble->set_alignment (ALIGN_CENTER);
+	preamble->set_markup (_("Once the channels are connected, click the \"Measure\" button.\nWhen satisfied with the results, click the \"Use results\" button."));
+	lm_table.attach (*preamble, 0, 4, row, row + 1, xopt, SHRINK);
 	row++;
 
-	preamble = manage (new Label);
-	preamble->set_width_chars (60);
-	preamble->set_line_wrap (true);
-	preamble->set_markup (_("When satisfied with the results, click the \"Use results\" button."));
-	lm_table.attach (*preamble, 0, 3, row, row + 1, AttachOptions (FILL | EXPAND), (AttachOptions)0);
-
-	++row; // skip a row in the table
-	++row; // skip a row in the table
-
-	lm_table.attach (lm_results, 0, 3, row, row + 1, AttachOptions (FILL | EXPAND), (AttachOptions)0);
-
-	++row; // skip a row in the table
-	++row; // skip a row in the table
-
-	lm_table.attach (lm_measure_button, 0, 1, row, row + 1, AttachOptions (FILL | EXPAND), (AttachOptions)0);
-	lm_table.attach (lm_use_button, 1, 2, row, row + 1, AttachOptions (FILL | EXPAND), (AttachOptions)0);
-	lm_table.attach (lm_back_button, 2, 3, row, row + 1, AttachOptions (FILL | EXPAND), (AttachOptions)0);
-
+	lm_table.attach (lm_results, 0, 4, row, row + 1, xopt, SHRINK);
 	lm_results.set_markup (string_compose (results_markup, _("No measurement results yet")));
 
 	lm_vbox.set_border_width (12);
@@ -291,7 +264,7 @@ EngineControl::EngineControl ()
 
 	/* pack it all up */
 
-	notebook.pages ().push_back (TabElem (basic_vbox, _("Audio")));
+	notebook.pages ().push_back (TabElem (main_vbox, _("Audio")));
 	notebook.pages ().push_back (TabElem (lm_vbox, _("Latency")));
 	notebook.pages ().push_back (TabElem (midi_vbox, _("MIDI")));
 	notebook.set_border_width (12);
@@ -306,9 +279,11 @@ EngineControl::EngineControl ()
 	get_vbox ()->set_border_width (12);
 	get_vbox ()->pack_start (notebook);
 
-	/* need a special function to print "all available channels" when the
-	 * channel counts hit zero.
-	 */
+	/* Setup buttons and signals */
+
+	lm_button_audio.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_audio_latency));
+	lm_button_audio.set_name ("generic button");
+	lm_button_audio.set_can_focus (true);
 
 	midi_devices_button.signal_clicked.connect (mem_fun (*this, &EngineControl::configure_midi_devices));
 	midi_devices_button.set_name ("generic button");
@@ -374,6 +349,16 @@ EngineControl::EngineControl ()
 
 	connect_disconnect_button.set_no_show_all ();
 	start_stop_button.set_no_show_all ();
+	lbl_monitor_model.set_no_show_all ();
+	monitor_model_combo.set_no_show_all ();
+	lbl_input_latency.set_no_show_all ();
+	lbl_output_latency.set_no_show_all ();
+	input_latency.set_no_show_all ();
+	output_latency.set_no_show_all ();
+	unit_samples_txt1.set_no_show_all ();
+	unit_samples_txt2.set_no_show_all ();
+	lm_button_audio.set_no_show_all ();
+	midi_devices_button.set_no_show_all ();
 }
 
 void
@@ -539,45 +524,27 @@ EngineControl::build_notebook ()
 	AttachOptions xopt = AttachOptions (FILL | EXPAND);
 
 	/* clear the table */
+	Gtkmm2ext::container_clear (settings_table);
 
-	Gtkmm2ext::container_clear (basic_vbox);
-	Gtkmm2ext::container_clear (basic_packer);
-
-	if (control_app_button.get_parent ()) {
-		control_app_button.get_parent ()->remove (control_app_button);
-	}
-
-	if (start_stop_button.get_parent ()) {
-		start_stop_button.get_parent ()->remove (start_stop_button);
-	}
-	if (connect_disconnect_button.get_parent ()) {
-		connect_disconnect_button.get_parent ()->remove (connect_disconnect_button);
-	}
-
-	basic_packer.attach (lbl_audio_system, 0, 1, 0, 1, xopt, (AttachOptions)0);
-	basic_packer.attach (backend_combo, 1, 2, 0, 1, xopt, (AttachOptions)0);
-
-	basic_packer.attach (engine_status, 2, 3, 0, 1, xopt, (AttachOptions)0);
+	settings_table.attach (lbl_audio_system, 0, 1, 0, 1, xopt, SHRINK);
+	settings_table.attach (backend_combo,    1, 2, 0, 1, xopt, SHRINK);
+	settings_table.attach (engine_status,    2, 3, 0, 1, xopt, SHRINK);
 	engine_status.show ();
-
-	lm_button_audio.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_audio_latency));
-	lm_button_audio.set_name ("generic button");
-	lm_button_audio.set_can_focus (true);
 
 	if (_have_control) {
 		build_full_control_notebook ();
-		get_action_area ()->add (start_stop_button);
 	} else {
 		build_no_control_notebook ();
-		get_action_area ()->add (connect_disconnect_button);
 	}
-
-	basic_vbox.pack_start (basic_hbox, false, false);
 
 	{
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
-		basic_vbox.show_all ();
+		main_vbox.show_all ();
 	}
+	notebook.set_current_page (0);
+	populate_action_area (0);
+	on_latency_expand ();
+	on_monitor_expand ();
 }
 
 void
@@ -588,109 +555,107 @@ EngineControl::build_full_control_notebook ()
 
 	using namespace Notebook_Helpers;
 	vector<string> strings;
-	AttachOptions  xopt             = AttachOptions (FILL | EXPAND);
-	int            row              = 1; // row zero == backend combo
-	int            btn              = 1; // row zero == start_stop_button
-	bool           autostart_packed = false;
+	AttachOptions  xopt = AttachOptions (FILL | EXPAND);
+	int            row  = 1; // row zero == backend combo
+	int            btn  = 0;
 
-	/* start packing it up */
+	settings_table.attach (try_autostart_button, 3, 4, btn, btn + 1, xopt, xopt);
+	++btn;
+
+	settings_table.attach (lbl_midi_system,   0, 1, row, row + 1, xopt, SHRINK);
+	settings_table.attach (midi_option_combo, 1, 2, row, row + 1, xopt, SHRINK);
+	++row;
+	++btn;
+
+	/* Interface */
+
+	if (backend->can_use_buffered_io ()) {
+		/* same line as driver */
+		settings_table.attach (use_buffered_io_button, 3, 4, btn, btn + 1, xopt, xopt);
+		++btn;
+	} else if (backend->requires_driver_selection ()) {
+		/* push `update_devices_button` down */
+		++btn;
+	}
+
+	if (backend->can_request_update_devices ()) {
+		/* same line and height as Device(s) */
+		int ht = backend->use_separate_input_and_output_devices () ? 2 : 1;
+		settings_table.attach (update_devices_button, 3, 4, btn, btn + ht, xopt, xopt);
+	}
 
 	if (backend->requires_driver_selection ()) {
-		basic_packer.attach (lbl_driver, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-		basic_packer.attach (driver_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-		row++;
+		settings_table.attach (lbl_driver,   0, 1, row, row + 1, xopt, SHRINK);
+		settings_table.attach (driver_combo, 1, 2, row, row + 1, xopt, SHRINK);
+		++row;
 	}
 
 	if (backend->use_separate_input_and_output_devices ()) {
-		basic_packer.attach (lbl_input_device, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-		basic_packer.attach (input_device_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-		row++;
-		basic_packer.attach (lbl_output_device, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-		basic_packer.attach (output_device_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-		row++;
+		settings_table.attach (lbl_input_device,   0, 1, row, row + 1, xopt, SHRINK);
+		settings_table.attach (input_device_combo, 1, 2, row, row + 1, xopt, SHRINK);
+		++row;
+		settings_table.attach (lbl_output_device,   0, 1, row, row + 1, xopt, SHRINK);
+		settings_table.attach (output_device_combo, 1, 2, row, row + 1, xopt, SHRINK);
 		/* reset so it isn't used in state comparisons */
 		device_combo.set_active_text ("");
+		++row;
+		btn += 2;
 	} else {
-		basic_packer.attach (lbl_device, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-		basic_packer.attach (device_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-		row++;
+		settings_table.attach (lbl_device,   0, 1, row, row + 1, xopt, SHRINK);
+		settings_table.attach (device_combo, 1, 2, row, row + 1, xopt, SHRINK);
 		/* reset these so they don't get used in state comparisons */
 		input_device_combo.set_active_text ("");
 		output_device_combo.set_active_text ("");
+		++row;
+		++btn;
 	}
 
-	/* same line as Driver */
-	if (backend->can_use_buffered_io ()) {
-		basic_packer.attach (use_buffered_io_button, 3, 4, btn, btn + 1, xopt, xopt);
-		btn++;
-	}
+	/* HW settings */
 
-	/* same line as Device(s) */
-	if (backend->can_request_update_devices ()) {
-		basic_packer.attach (update_devices_button, 3, 4, btn, btn + 1, xopt, xopt);
-		btn++;
-	}
-
-	/* prefer "try autostart" below "Start" if possible */
-	if (btn < row) {
-		basic_packer.attach (try_autostart_button, 3, 4, btn, btn + 1, xopt, xopt);
-		btn++;
-		autostart_packed = true;
-	}
-
-	basic_packer.attach (lbl_sample_rate, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-	basic_packer.attach (sample_rate_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
+	settings_table.attach (lbl_sample_rate,   0, 1, row, row + 1, xopt, SHRINK);
+	settings_table.attach (sample_rate_combo, 1, 2, row, row + 1, xopt, SHRINK);
 	row++;
 
-	basic_packer.attach (lbl_buffer_size, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-	basic_packer.attach (buffer_size_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-	buffer_size_duration_label.set_alignment (0.0); /* left-align */
-	basic_packer.attach (buffer_size_duration_label, 2, 3, row, row + 1, SHRINK, (AttachOptions)0);
+	settings_table.attach (lbl_buffer_size,            0, 1, row, row + 1, xopt, SHRINK);
+	settings_table.attach (buffer_size_combo,          1, 2, row, row + 1, xopt, SHRINK);
+	settings_table.attach (buffer_size_duration_label, 2, 3, row, row + 1, SHRINK, SHRINK);
 
 	int ctrl_btn_span = 1;
 	if (backend->can_set_period_size ()) {
-		row++;
-		basic_packer.attach (lbl_nperiods, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-		basic_packer.attach (nperiods_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
+		++row;
+		settings_table.attach (lbl_nperiods,   0, 1, row, row + 1, xopt, SHRINK);
+		settings_table.attach (nperiods_combo, 1, 2, row, row + 1, xopt, SHRINK);
 		++ctrl_btn_span;
 	}
 
 	/* button spans 2 or 3 rows: Sample rate, Buffer size, Periods */
-	basic_packer.attach (control_app_button, 3, 4, row - ctrl_btn_span, row + 1, xopt, xopt);
-	row++;
-
-	/* Prefer next available vertical slot, 1 row */
-	if (btn < row && !autostart_packed) {
-		basic_packer.attach (try_autostart_button, 3, 4, btn, btn + 1, xopt, xopt);
-		btn++;
-		autostart_packed = true;
-	}
-
-	basic_packer.attach (lbl_input_latency, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-	basic_packer.attach (input_latency, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-	basic_packer.attach (unit_samples_text, 2, 3, row, row + 1, SHRINK, (AttachOptions)0);
+	settings_table.attach (control_app_button, 3, 4, row - ctrl_btn_span, row + 1, xopt, xopt);
 	++row;
 
-	basic_packer.attach (lbl_output_latency, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-	basic_packer.attach (output_latency, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-	//basic_packer.attach (unit_samples_text, 2, 3, row, row + 1, SHRINK, (AttachOptions)0);
-
-	/* button spans 2 rows */
-	basic_packer.attach (lm_button_audio, 3, 4, row - 1, row + 1, xopt, xopt);
+	/* Monitor settings */
+	settings_table.attach (monitor_expander, 0, 4, row, row + 1, xopt, SHRINK);
+	++row;
+	settings_table.attach (lbl_monitor_model,   0, 1, row, row + 1, xopt, SHRINK);
+	settings_table.attach (monitor_model_combo, 1, 2, row, row + 1, xopt, SHRINK);
 	++row;
 
-	basic_packer.attach (lbl_midi_system, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-	basic_packer.attach (midi_devices_button, 3, 4, row, row + 1, xopt, xopt);
-	row++;
+	settings_table.attach (latency_expander, 0, 4, row, row + 1, xopt, SHRINK);
+	++row;
 
-	basic_packer.attach (lbl_monitor_model, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-	basic_packer.attach (monitor_model_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-	row++;
+	/* Systemic Latency */
 
-	if (!autostart_packed) {
-		basic_packer.attach (try_autostart_button, 3, 4, row, row + 1, xopt, xopt);
-	}
+	settings_table.attach (lbl_input_latency, 0, 1, row, row + 1, xopt, SHRINK);
+	settings_table.attach (input_latency,     1, 2, row, row + 1, xopt, SHRINK);
+	settings_table.attach (unit_samples_txt1, 2, 3, row, row + 1, SHRINK, SHRINK);
+	settings_table.attach (lm_button_audio,   3, 4, row, row + 2, xopt, xopt);
+	++row;
+
+	settings_table.attach (lbl_output_latency, 0, 1, row, row + 1, xopt, SHRINK);
+	settings_table.attach (output_latency,     1, 2, row, row + 1, xopt, SHRINK);
+	settings_table.attach (unit_samples_txt2,  2, 3, row, row + 1, SHRINK, SHRINK);
+
+	++row;
+	settings_table.attach (midi_devices_button, 1, 4, row, row + 1, xopt, SHRINK);
 }
 
 void
@@ -707,21 +672,19 @@ EngineControl::build_no_control_notebook ()
 	const string   msg  = string_compose (_("%1 is already running. %2 will connect to it and use the existing settings."), backend->name (), PROGRAM_NAME);
 
 	lbl_jack_msg.set_markup (string_compose ("<span weight=\"bold\" foreground=\"red\">%1</span>", msg));
-	basic_packer.attach (lbl_jack_msg, 0, 2, row, row + 1, xopt, (AttachOptions)0);
-	row++;
+	settings_table.attach (lbl_jack_msg, 0, 2, row, row + 1, xopt, SHRINK);
+	++row;
 
 	if (backend->can_change_sample_rate_when_running ()) {
-		basic_packer.attach (lbl_sample_rate, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-		basic_packer.attach (sample_rate_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-		row++;
+		settings_table.attach (lbl_sample_rate,   0, 1, row, row + 1, xopt, SHRINK);
+		settings_table.attach (sample_rate_combo, 1, 2, row, row + 1, xopt, SHRINK);
+		++row;
 	}
 
 	if (backend->can_change_buffer_size_when_running ()) {
-		basic_packer.attach (lbl_buffer_size, 0, 1, row, row + 1, xopt, (AttachOptions)0);
-		basic_packer.attach (buffer_size_combo, 1, 2, row, row + 1, xopt, (AttachOptions)0);
-		buffer_size_duration_label.set_alignment (0.0); /* left-align */
-		basic_packer.attach (buffer_size_duration_label, 2, 3, row, row + 1, xopt, (AttachOptions)0);
-		row++;
+		settings_table.attach (lbl_buffer_size,            0, 1, row, row + 1, xopt, SHRINK);
+		settings_table.attach (buffer_size_combo,          1, 2, row, row + 1, xopt, SHRINK);
+		settings_table.attach (buffer_size_duration_label, 2, 3, row, row + 1, xopt, SHRINK);
 	}
 }
 
@@ -768,8 +731,7 @@ EngineControl::enable_latency_tab ()
 		lm_back_button_signal = lm_back_button.signal_clicked ().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), midi_tab));
 		lm_preamble.hide ();
 	} else {
-		lm_back_button_signal = lm_back_button.signal_clicked ().connect (
-		    sigc::mem_fun (*this, &EngineControl::latency_back_button_clicked));
+		lm_back_button_signal = lm_back_button.signal_clicked ().connect (sigc::mem_fun (*this, &EngineControl::latency_back_button_clicked));
 		lm_preamble.show ();
 	}
 
@@ -811,25 +773,6 @@ EngineControl::enable_latency_tab ()
 	lm_input_channel_combo.set_sensitive (true);
 
 	lm_measure_button.set_sensitive (true);
-}
-
-void
-EngineControl::setup_midi_tab_for_backend ()
-{
-	string backend = backend_combo.get_active_text ();
-
-	Gtkmm2ext::container_clear (midi_vbox);
-
-	midi_vbox.set_border_width (12);
-	midi_device_table.set_border_width (12);
-
-	if (backend == "JACK") {
-		setup_midi_tab_for_jack ();
-	}
-
-	midi_vbox.pack_start (midi_device_table, true, true);
-	midi_vbox.pack_start (midi_back_button, false, false);
-	midi_vbox.show_all ();
 }
 
 void
@@ -943,11 +886,6 @@ EngineControl::update_sensitivity ()
 	}
 
 	midi_option_combo.set_sensitive (!engine_running);
-}
-
-void
-EngineControl::setup_midi_tab_for_jack ()
-{
 }
 
 void
@@ -1098,7 +1036,6 @@ EngineControl::backend_changed ()
 	_have_control = ARDOUR::AudioEngine::instance ()->setup_required ();
 
 	build_notebook ();
-	setup_midi_tab_for_backend ();
 	_midi_devices.clear ();
 
 	if (backend->requires_driver_selection ()) {
@@ -1144,6 +1081,7 @@ EngineControl::backend_changed ()
 	if (!ignore_changes) {
 		maybe_display_saved_state ();
 	}
+	resize (1, 1); // shrink window
 }
 
 void
@@ -1154,7 +1092,12 @@ EngineControl::update_midi_options ()
 
 	if (midi_options.size () == 1 || _have_control) {
 		set_popdown_strings (midi_option_combo, midi_options);
-		midi_option_combo.set_active_text (midi_options.front ());
+
+		if (backend->midi_option ().empty ()) {
+			midi_option_combo.set_active_text (midi_options.front ());
+		} else {
+			midi_option_combo.set_active_text (backend->midi_option ());
+		}
 	}
 }
 
@@ -2827,8 +2770,10 @@ EngineControl::manage_control_app_sensitivity ()
 
 	if (appname.empty ()) {
 		control_app_button.set_sensitive (false);
+		control_app_button.hide ();
 	} else {
 		control_app_button.set_sensitive (true);
+		control_app_button.show ();
 	}
 
 	lm_button_audio.set_sensitive (backend->can_measure_systemic_latency ());
@@ -2844,6 +2789,50 @@ EngineControl::set_desired_sample_rate (uint32_t sr)
 	}
 
 	device_changed ();
+}
+void
+EngineControl::on_monitor_expand ()
+{
+	if (monitor_expander.get_expanded ()) {
+		lbl_monitor_model.show ();
+		monitor_model_combo.show ();
+	} else {
+#if 1 // always keep expanded
+		/* This helps overall layout. The text "Record monitoring handled by:"
+		 * is the longest label. Hiding it changes the layout significantly.
+		 */
+		monitor_expander.set_expanded (true);
+#else
+		lbl_monitor_model.hide ();
+		monitor_model_combo.hide ();
+		resize (1, 1); // shrink window
+#endif
+	}
+}
+
+void
+EngineControl::on_latency_expand ()
+{
+	if (latency_expander.get_expanded ()) {
+		lbl_input_latency.show ();
+		lbl_output_latency.show ();
+		input_latency.show ();
+		output_latency.show ();
+		unit_samples_txt1.show ();
+		unit_samples_txt2.show ();
+		lm_button_audio.show ();
+		midi_devices_button.show ();
+	} else {
+		lbl_input_latency.hide ();
+		lbl_output_latency.hide ();
+		input_latency.hide ();
+		output_latency.hide ();
+		unit_samples_txt1.hide ();
+		unit_samples_txt2.hide ();
+		lm_button_audio.hide ();
+		midi_devices_button.hide ();
+		resize (1, 1); // shrink window
+	}
 }
 
 void
@@ -2871,6 +2860,7 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 			}
 		}
 		_measure_midi.reset ();
+		midi_vbox.show_all ();
 	}
 
 	if (page_num == latency_tab) {
@@ -2919,6 +2909,43 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 			end_latency_detection ();
 		}
 	}
+	populate_action_area (page_num);
+}
+
+static void
+unparent_widget (Gtk::Widget& w)
+{
+	if (w.get_parent ()) {
+		w.get_parent ()->remove (w);
+	}
+}
+
+void
+EngineControl::populate_action_area (int page_num)
+{
+	/* re-populate action area */
+	unparent_widget (start_stop_button);
+	unparent_widget (connect_disconnect_button);
+	unparent_widget (lm_measure_button);
+	unparent_widget (lm_use_button);
+	unparent_widget (lm_back_button);
+	unparent_widget (midi_back_button);
+
+	if (page_num == 0) {
+		if (_have_control) {
+			get_action_area ()->add (start_stop_button);
+		} else {
+			get_action_area ()->add (connect_disconnect_button);
+		}
+	} else if (page_num == latency_tab) {
+		get_action_area ()->add (lm_measure_button);
+		get_action_area ()->add (lm_use_button);
+		get_action_area ()->add (lm_back_button);
+		get_action_area ()->show_all ();
+	} else if (page_num == midi_tab) {
+		get_action_area ()->add (midi_back_button);
+		midi_back_button.show ();
+	}
 }
 
 /* latency measurement */
@@ -2966,8 +2993,8 @@ EngineControl::check_audio_latency_measurement ()
 	bool solid = true;
 
 	if (mtdm->err () > 0.2) {
-		strcat (buf, " ");
-		strcat (buf, _("(signal detection error)"));
+		strcat (buf, "\n");
+		strcat (buf, _("Large mesurement deviation. Invalid result."));
 		solid = false;
 	}
 
@@ -2975,8 +3002,8 @@ EngineControl::check_audio_latency_measurement ()
 		/* only warn user, in some cases the measured value is correct,
 		 * regardless of the warning - https://github.com/Ardour/ardour/pull/656
 		 */
-		strcat (buf, " ");
-		strcat (buf, _("(inverted - bad wiring)"));
+		strcat (buf, "\n");
+		strcat (buf, _("Signal polarity inverted (bad wiring)."));
 	}
 
 	lm_results.set_markup (string_compose (results_markup, buf));

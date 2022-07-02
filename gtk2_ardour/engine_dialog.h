@@ -2,7 +2,7 @@
  * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2007-2016 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2008-2009 David Robillard <d@drobilla.net>
- * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2022 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2015-2016 Tim Mayberry <mojofunk@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -65,9 +65,13 @@ private:
 
 	/* core fields used by all backends */
 
-	Gtk::Table basic_packer;
-	Gtk::HBox  basic_hbox;
-	Gtk::VBox  basic_vbox;
+	Gtk::VBox main_vbox;
+	Gtk::HBox main_hbox;
+
+	Gtk::Table    settings_table;
+	Gtk::Table    latency_table;
+	Gtk::Expander latency_expander;
+	Gtk::Expander monitor_expander;
 
 	Gtk::ComboBoxText backend_combo;
 	Gtk::ComboBoxText driver_combo;
@@ -97,9 +101,10 @@ private:
 	Gtk::Label lbl_output_latency;
 	Gtk::Label lbl_monitor_model;
 	Gtk::Label lbl_jack_msg;
-	Gtk::Label unit_samples_text;
+
+	Gtk::Label unit_samples_txt1;
+	Gtk::Label unit_samples_txt2;
 	Gtk::Label buffer_size_duration_label;
-	Gtk::Label have_control_text;
 
 	ArdourWidgets::ArdourButton control_app_button;
 	ArdourWidgets::ArdourButton midi_devices_button;
@@ -171,8 +176,6 @@ private:
 	void midi_option_changed ();
 	void monitor_model_changed ();
 
-	void setup_midi_tab_for_backend ();
-	void setup_midi_tab_for_jack ();
 	void refresh_midi_display (std::string focus = "");
 
 	void update_midi_options ();
@@ -307,6 +310,7 @@ private:
 	void build_notebook ();
 	void build_full_control_notebook ();
 	void build_no_control_notebook ();
+	void populate_action_area (int);
 
 	void connect_changed_signals ();
 	void block_changed_signals ();
@@ -342,6 +346,8 @@ private:
 
 	void on_show ();
 	void on_map ();
+	void on_monitor_expand ();
+	void on_latency_expand ();
 	void config_parameter_changed (std::string const&);
 	void control_app_button_clicked ();
 	void start_stop_button_clicked ();
