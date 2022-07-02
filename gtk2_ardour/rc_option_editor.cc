@@ -1170,7 +1170,7 @@ class ClipLevelOptions : public HSliderOption
 public:
 	ClipLevelOptions ()
 		: HSliderOption (X_("waveform-clip-level"),
-		                 _("Waveform Clip Level (dBFS):"),
+		                 _("Waveform Clip Level (dBFS)"),
 		                 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_clip_level),
 		                 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_clip_level),
 		                 -50.0, -0.5, 0.1, 1.0, /* units of dB */
@@ -4559,7 +4559,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 		ComboOption<int32_t>* cpudma = new ComboOption<int32_t> (
 				"cpu-dma-latency",
-				_("Power Management, CPU DMA latency:"),
+				_("Power Management, CPU DMA latency"),
 				sigc::mem_fun (*_rc_config, &RCConfiguration::get_cpu_dma_latency),
 				sigc::mem_fun (*_rc_config, &RCConfiguration::set_cpu_dma_latency)
 				);
