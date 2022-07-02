@@ -3279,6 +3279,7 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 		} else if (prop->value() == "port") {
 
 			processor.reset (new PortInsert (_session, _pannable, _mute_master));
+			processor->set_owner (this);
 
 		} else if (prop->value() == "send") {
 

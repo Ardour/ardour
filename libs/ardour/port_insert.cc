@@ -88,7 +88,13 @@ PortInsert::stop_latency_detection ()
 void
 PortInsert::set_measured_latency (samplecnt_t n)
 {
+	if (_measured_latency == n) {
+		return;
+	}
 	_measured_latency = n;
+	LatencyChanged (); /* EMIT SIGNAL */
+	assert (owner ());
+	static_cast<Route*>(owner ())->processor_latency_changed (); /* EMIT SIGNAL */
 }
 
 samplecnt_t
