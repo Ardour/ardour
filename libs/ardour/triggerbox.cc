@@ -3650,6 +3650,15 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		return;
 	}
 
+	/* STEP TWO: if latency compensation tells us that we haven't really
+	 * started yet, do nothing, because we can't make sense of a negative
+	 * start sample time w.r.t the tempo map.
+	 */
+
+	if (start_sample < 0) {
+		return;
+	}
+
 #ifndef NDEBUG
 	{
 		Temporal::TempoMap::SharedPtr __tmap (Temporal::TempoMap::use());
@@ -3663,14 +3672,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	bool allstop = _requests.stop_all.exchange (false);
 
-	/* STEP TWO: if latency compensation tells us that we haven't really
-	 * started yet, do nothing, because we can't make sense of a negative
-	 * start sample time w.r.t the tempo map.
-	 */
-
-	if (start_sample < 0) {
-		return;
-	}
 
 	/* STEP THREE: triggers in audio tracks need a MIDI sidechain to be
 	 * able to receive inbound MIDI for triggering etc. This needs to run
