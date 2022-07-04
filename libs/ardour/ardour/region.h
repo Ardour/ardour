@@ -129,7 +129,7 @@ public:
 
 	samplepos_t position_sample ()  const { return position().samples(); }
 	samplecnt_t start_sample ()     const { return _start.val().samples(); }
-	samplecnt_t length_samples ()    const { return _length.val().samples(); }
+	samplecnt_t length_samples ()   const { return _length.val().samples(); }
 
 	layer_t    layer ()     const { return _layer; }
 
@@ -455,6 +455,9 @@ protected:
 	virtual void set_start_internal (timepos_t const &);
 	bool verify_start_and_length (timepos_t const &, timecnt_t&);
 	void first_edit ();
+
+	/* This is always using AudioTime. convenient for evenlopes in AudioRegion */
+	timepos_t len_as_tpos () const { return timepos_t((samplepos_t)_length.val().samples()); }
 
 	DataType _type;
 

@@ -278,7 +278,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
 		 * to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
 		 */
-	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), timepos_t (Temporal::AudioTime), timepos_t ((samplepos_t)other->length().samples()))))
+	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), timepos_t (Temporal::AudioTime), other->len_as_tpos ())))
 	, _automatable (other->session(), Temporal::AudioTime)
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
@@ -300,7 +300,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, timecnt_t 
 	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
 	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
 	  */
-	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), timepos_t (offset.samples()), timepos_t ((samplepos_t)other->length().samples()))))
+	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), timepos_t (offset.samples()), other->len_as_tpos ())))
 	, _automatable (other->session(), Temporal::AudioTime)
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
@@ -380,7 +380,7 @@ AudioRegion::post_set (const PropertyChange& /*ignored*/)
 	}
 
 	/* If _length changed, adjust our gain envelope accordingly */
-	_envelope->truncate_end (timepos_t ((samplepos_t)length ().samples ()));
+	_envelope->truncate_end (len_as_tpos ());
 }
 
 void
@@ -815,7 +815,7 @@ AudioRegion::state () const
 	if (_envelope->size() == 2 &&
 	    _envelope->front()->value == GAIN_COEFF_UNITY &&
 	    _envelope->back()->value==GAIN_COEFF_UNITY) {
-		if (_envelope->front()->when == 0 && _envelope->back()->when == timepos_t ((samplepos_t)length ().samples ())) {
+		if (_envelope->front()->when == 0 && _envelope->back()->when == len_as_tpos ()) {
 			default_env = true;
 		}
 	}
@@ -900,7 +900,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				set_default_envelope ();
 			}
 
-			_envelope->truncate_end (timepos_t ((samplepos_t)length ().samples ()));
+			_envelope->truncate_end (len_as_tpos ());
 
 
 		} else if (child->name() == "FadeIn") {
@@ -1294,9 +1294,7 @@ AudioRegion::set_default_envelope ()
 	 * XXX this needs some thought 
 	 */
 
-	timepos_t alen ((samplepos_t)length ().samples ());
-
-	_envelope->fast_simple_add (alen, GAIN_COEFF_UNITY);
+	_envelope->fast_simple_add (len_as_tpos (), GAIN_COEFF_UNITY);
 	_envelope->thaw ();
 }
 
@@ -1308,7 +1306,7 @@ AudioRegion::recompute_at_end ()
 	*/
 
 	_envelope->freeze ();
-	_envelope->truncate_end (timepos_t ((samplepos_t)length ().samples ()));
+	_envelope->truncate_end (len_as_tpos ());
 	_envelope->thaw ();
 
 	suspend_property_changes();
