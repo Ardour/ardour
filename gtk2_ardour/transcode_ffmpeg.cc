@@ -452,7 +452,7 @@ TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::samplecnt_t /*sampl
 
 	if (debug_enable) {
 		printf ("EXTRACT AUDIO:\n");
-		for (int i = 0; i < 14; ++i) {
+		for (int i = 0; i < 14 && argp[i]; ++i) {
 			printf ("%s ", argp[i]);
 		}
 		printf ("\n");
@@ -524,7 +524,7 @@ TranscodeFfmpeg::transcode (std::string outfile, const int outw, const int outh,
 
 	if (debug_enable) {
 		printf ("TRANSCODE VIDEO:\n");
-		for (int i = 0; i < 15; ++i) {
+		for (int i = 0; i < 15 && argp[i]; ++i) {
 			printf ("%s ", argp[i]);
 		}
 		printf ("\n");
