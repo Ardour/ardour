@@ -112,7 +112,7 @@ generate_inverse_power_curve (boost::shared_ptr<Evoral::ControlList> dst, boost:
 		float value = (*it)->value;
 		value = 1 - powf(value,2);
 		value = sqrtf(value);
-		dst->fast_simple_add ( (*it)->when, value );
+		dst->fast_simple_add ((*it)->when, value );
 	}
 }
 
@@ -127,10 +127,10 @@ generate_db_fade (boost::shared_ptr<Evoral::ControlList> dst, double len, int nu
 	float coeff = GAIN_COEFF_UNITY;
 	for (int i = 1; i < (num_steps-1); i++) {
 		coeff *= fade_speed;
-		dst->fast_simple_add (timepos_t (len*(double)i/(double)num_steps), coeff);
+		dst->fast_simple_add (timepos_t (samplepos_t (len*(double)i/(double)num_steps)), coeff);
 	}
 
-	dst->fast_simple_add (timepos_t (len), GAIN_COEFF_SMALL);
+	dst->fast_simple_add (timepos_t ((samplepos_t)len), GAIN_COEFF_SMALL);
 }
 
 static void
@@ -155,7 +155,7 @@ merge_curves (boost::shared_ptr<Evoral::ControlList> dst,
 		interp += v2 * ( (double)count / (double)size );
 
 		interp = dB_to_coefficient(interp);
-		dst->fast_simple_add ( (*c1)->when, interp );
+		dst->fast_simple_add ((*c1)->when, interp );
 		c1++;
 		count++;
 	}
@@ -363,7 +363,7 @@ AudioRegion::post_set (const PropertyChange& /*ignored*/)
 	/* return to default fades if the existing ones are too long */
 
 	if (_left_of_split) {
-		if (_fade_in->when(false) >= _length) {
+		if (_fade_in->when(false) >= len_as_tpos ()) {
 			set_default_fade_in ();
 		}
 		set_default_fade_out ();
@@ -371,7 +371,7 @@ AudioRegion::post_set (const PropertyChange& /*ignored*/)
 	}
 
 	if (_right_of_split) {
-		if (_fade_out->when(false) >= _length) {
+		if (_fade_out->when(false) >= len_as_tpos ()) {
 			set_default_fade_out ();
 		}
 
@@ -670,7 +670,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 	if (fade_out_limit != 0) {
 
-		samplecnt_t const curve_offset = fade_interval_start - _fade_out->when(false).distance (timepos_t (_length)).samples();
+		samplecnt_t const curve_offset = fade_interval_start - _fade_out->when(false).distance (len_as_tpos ()).samples();
 
 		if (is_opaque) {
 			if (_inverse_fade_out) {
@@ -1045,7 +1045,7 @@ AudioRegion::set_fade_in (FadeShape shape, samplecnt_t len)
 	switch (shape) {
 	case FadeLinear:
 		_fade_in->fast_simple_add (timepos_t (Temporal::AudioTime), GAIN_COEFF_SMALL);
-		_fade_in->fast_simple_add (timepos_t (len), GAIN_COEFF_UNITY);
+		_fade_in->fast_simple_add (timepos_t ((samplepos_t)len), GAIN_COEFF_UNITY);
 		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
 
@@ -1069,23 +1069,23 @@ AudioRegion::set_fade_in (FadeShape shape, samplecnt_t len)
 		_fade_in->fast_simple_add (timepos_t (Temporal::AudioTime), GAIN_COEFF_SMALL);
 		for (int i = 1; i < num_steps; ++i) {
 			const float dist = i / (num_steps + 1.f);
-			_fade_in->fast_simple_add (timepos_t (len * dist), sin (dist * M_PI / 2.0));
+			_fade_in->fast_simple_add (timepos_t ((samplepos_t)(len * dist)), sin (dist * M_PI / 2.0));
 		}
-		_fade_in->fast_simple_add (timepos_t (len), GAIN_COEFF_UNITY);
+		_fade_in->fast_simple_add (timepos_t ((samplepos_t)len), GAIN_COEFF_UNITY);
 		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
 
 	case FadeSymmetric:
 		//start with a nearly linear cuve
 		_fade_in->fast_simple_add (timepos_t (Temporal::AudioTime), 1);
-		_fade_in->fast_simple_add (timepos_t (0.5 * len), 0.6);
+		_fade_in->fast_simple_add (timepos_t ((samplepos_t)(0.5 * len)), 0.6);
 		//now generate a fade-out curve by successively applying a gain drop
 		const double breakpoint = 0.7;  //linear for first 70%
 		for (int i = 2; i < 9; ++i) {
 			const float coeff = (1.f - breakpoint) * powf (0.5, i);
-			_fade_in->fast_simple_add (timepos_t (len * (breakpoint + ((GAIN_COEFF_UNITY - breakpoint) * (double)i / 9.0))), coeff);
+			_fade_in->fast_simple_add (timepos_t ((samplepos_t)(len * (breakpoint + ((GAIN_COEFF_UNITY - breakpoint) * (double)i / 9.0)))), coeff);
 		}
-		_fade_in->fast_simple_add (timepos_t (len), GAIN_COEFF_SMALL);
+		_fade_in->fast_simple_add (timepos_t ((samplepos_t)len), GAIN_COEFF_SMALL);
 		reverse_curve (c3, _fade_in.val());
 		_fade_in->copy_events (*c3);
 		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
@@ -1127,7 +1127,7 @@ AudioRegion::set_fade_out (FadeShape shape, samplecnt_t len)
 	switch (shape) {
 	case FadeLinear:
 		_fade_out->fast_simple_add (timepos_t (Temporal::AudioTime), GAIN_COEFF_UNITY);
-		_fade_out->fast_simple_add (timepos_t (len), GAIN_COEFF_SMALL);
+		_fade_out->fast_simple_add (timepos_t ((samplepos_t)len), GAIN_COEFF_SMALL);
 		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 
@@ -1149,7 +1149,7 @@ AudioRegion::set_fade_out (FadeShape shape, samplecnt_t len)
 		_fade_out->fast_simple_add (timepos_t (Temporal::AudioTime), GAIN_COEFF_UNITY);
 		for (int i = 1; i < num_steps; ++i) {
 			const float dist = i / (num_steps + 1.f);
-			_fade_out->fast_simple_add (timepos_t (len * dist), cos (dist * M_PI / 2.0));
+			_fade_out->fast_simple_add (timepos_t ((samplepos_t)(len * dist)), cos (dist * M_PI / 2.0));
 		}
 		_fade_out->fast_simple_add (timepos_t (len), GAIN_COEFF_SMALL);
 		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
@@ -1158,14 +1158,14 @@ AudioRegion::set_fade_out (FadeShape shape, samplecnt_t len)
 	case FadeSymmetric:
 		//start with a nearly linear cuve
 		_fade_out->fast_simple_add (timepos_t (Temporal::AudioTime), 1);
-		_fade_out->fast_simple_add (timepos_t (0.5 * len), 0.6);
+		_fade_out->fast_simple_add (timepos_t ((samplepos_t)(0.5 * len)), 0.6);
 		//now generate a fade-out curve by successively applying a gain drop
 		const double breakpoint = 0.7;  //linear for first 70%
 		for (int i = 2; i < 9; ++i) {
 			const float coeff = (1.f - breakpoint) * powf (0.5, i);
-			_fade_out->fast_simple_add (timepos_t (len * (breakpoint + ((GAIN_COEFF_UNITY - breakpoint) * (double)i / 9.0))), coeff);
+			_fade_out->fast_simple_add (timepos_t ((samplepos_t)(len * (breakpoint + ((GAIN_COEFF_UNITY - breakpoint) * (double)i / 9.0)))), coeff);
 		}
-		_fade_out->fast_simple_add (timepos_t (len), GAIN_COEFF_SMALL);
+		_fade_out->fast_simple_add (timepos_t ((samplepos_t)len), GAIN_COEFF_SMALL);
 		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 	}
@@ -1189,11 +1189,13 @@ AudioRegion::set_fade_in_length (samplecnt_t len)
 		len = 64;
 	}
 
-	bool changed = _fade_in->extend_to (timepos_t (len));
+	timepos_t const tlen = timepos_t ((samplepos_t)len);
+
+	bool changed = _fade_in->extend_to (tlen);
 
 	if (changed) {
 		if (_inverse_fade_in) {
-			_inverse_fade_in->extend_to (timepos_t (len));
+			_inverse_fade_in->extend_to (tlen);
 		}
 
 		_default_fade_in = false;
@@ -1212,12 +1214,14 @@ AudioRegion::set_fade_out_length (samplecnt_t len)
 		len = 64;
 	}
 
-	bool changed = _fade_out->extend_to (timepos_t (len));
+	timepos_t const tlen = timepos_t ((samplepos_t)len);
+
+	bool changed = _fade_out->extend_to (tlen);
 
 	if (changed) {
 
 		if (_inverse_fade_out) {
-			_inverse_fade_out->extend_to (timepos_t (len));
+			_inverse_fade_out->extend_to (tlen);
 		}
 		_default_fade_out = false;
 
@@ -1249,13 +1253,13 @@ AudioRegion::set_fade_out_active (bool yn)
 bool
 AudioRegion::fade_in_is_default () const
 {
-	return _fade_in->size() == 2 && _fade_in->when(true) == 0 && _fade_in->when(false) == 64;
+	return _fade_in->size() == 2 && _fade_in->when(true) == 0 && _fade_in->when(false).samples () == 64;
 }
 
 bool
 AudioRegion::fade_out_is_default () const
 {
-	return _fade_out->size() == 2 && _fade_out->when(true) == 0 && _fade_out->when(false) == 64;
+	return _fade_out->size() == 2 && _fade_out->when(true) == 0 && _fade_out->when(false).samples () == 64;
 }
 
 void
@@ -1315,12 +1319,12 @@ AudioRegion::recompute_at_end ()
 		set_default_fade_out ();
 		_left_of_split = false;
 	} else if (_fade_out->when(false) > _length) {
-		_fade_out->extend_to (timepos_t (_length));
+		_fade_out->extend_to (len_as_tpos ());
 		send_change (PropertyChange (Properties::fade_out));
 	}
 
 	if (_fade_in->when(false) > _length) {
-		_fade_in->extend_to (timepos_t (_length));
+		_fade_in->extend_to (len_as_tpos ());
 		send_change (PropertyChange (Properties::fade_in));
 	}
 
@@ -1339,13 +1343,13 @@ AudioRegion::recompute_at_start ()
 	if (_right_of_split) {
 		set_default_fade_in ();
 		_right_of_split = false;
-	} else if (_fade_in->when(false) > _length) {
-		_fade_in->extend_to (timepos_t (_length));
+	} else if (_fade_in->when(false) > len_as_tpos ()) {
+		_fade_in->extend_to (len_as_tpos ());
 		send_change (PropertyChange (Properties::fade_in));
 	}
 
-	if (_fade_out->when(false) > _length) {
-		_fade_out->extend_to (timepos_t (_length));
+	if (_fade_out->when(false) > len_as_tpos ()) {
+		_fade_out->extend_to (len_as_tpos ());
 		send_change (PropertyChange (Properties::fade_out));
 	}
 
