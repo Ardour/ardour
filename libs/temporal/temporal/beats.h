@@ -76,7 +76,7 @@ public:
 	static Beats from_double (double beats) {
 		double       whole;
 		const double frac = modf (beats, &whole);
-		return Beats (whole, (int32_t) rint (frac * PPQN));
+		return Beats ((int64_t) whole, (int64_t) rint (frac * PPQN));
 	}
 
 	/** Create from an integer number of beats. */
@@ -104,7 +104,7 @@ public:
 	int64_t to_ticks (uint32_t ppqn)  const { return (_ticks * ppqn) / PPQN; }
 
 	int64_t get_beats () const { return _ticks / PPQN; }
-	int32_t get_ticks () const { return _ticks % PPQN; }
+	int32_t get_ticks () const { return (int32_t) (_ticks % PPQN); }
 
 	Beats& operator=(double time) {
 		*this = from_double (time);

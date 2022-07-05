@@ -33,8 +33,8 @@ BBT_Offset::BBT_Offset (double dbeats)
 	assert (dbeats >= 0);
 
 	bars = 0;
-	beats = lrint (floor (dbeats));
-	ticks = lrint (floor (Temporal::ticks_per_beat * fmod (dbeats, 1.0)));
+	beats = (int32_t) lrint (floor (dbeats));
+	ticks = (int32_t) lrint (floor (Temporal::ticks_per_beat * fmod (dbeats, 1.0)));
 }
 
 std::ostream&

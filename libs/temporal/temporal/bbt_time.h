@@ -188,9 +188,9 @@ struct LIBTEMPORAL_API BBT_Offset
 	}
 
 	BBT_Offset & operator*=(double factor) {
-		bars = lrint (bars * factor);
-		beats = lrint (beats * factor);
-		ticks = lrint (ticks * factor);
+		bars = (int32_t) lrint (bars * factor);
+		beats = (int32_t) lrint (beats * factor);
+		ticks = (int32_t) lrint (ticks * factor);
 		return *this;
 	}
 
@@ -202,9 +202,9 @@ struct LIBTEMPORAL_API BBT_Offset
 	}
 
 	BBT_Offset & operator/=(double factor) {
-		bars = lrint (bars / factor);
-		beats = lrint (beats / factor);
-		ticks = lrint (ticks / factor);
+		bars = (int32_t) lrint (bars / factor);
+		beats = (int32_t) lrint (beats / factor);
+		ticks = (int32_t) lrint (ticks / factor);
 		return *this;
 	}
 

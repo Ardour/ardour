@@ -186,7 +186,7 @@ public:
 		min = _min;
 		max = _max;
 		avg = _avg / (double)_cnt;
-		dev = sqrt (_vs / (_cnt - 1.0));
+		dev = sqrt (_vs / ((double) _cnt - 1.0));
 		return true;
 	}
 
@@ -195,7 +195,7 @@ private:
 	{
 		const microseconds_t diff = elapsed ();
 
-		_avg += diff;
+		_avg += (double) diff;
 
 		if (diff > _max) {
 			_max = diff;
@@ -205,11 +205,11 @@ private:
 		}
 
 		if (_cnt == 0) {
-			_vm = diff;
+			_vm = (double) diff;
 		} else {
-			const double ela = diff;
+			const double ela = (double) diff;
 			const double var_m1 = _vm;
-			_vm = _vm + (ela - _vm) / (1.0 + _cnt);
+			_vm = _vm + (ela - _vm) / (1.0 + (double) _cnt);
 			_vs = _vs + (ela - _vm) * (ela - var_m1);
 		}
 		++_cnt;
@@ -289,7 +289,7 @@ public:
 	void reserve (uint32_t reserve_size)
 	{ m_reserve_size = reserve_size; reset (); }
 
-	uint32_t size () const
+	std::vector<microseconds_t>::size_type size () const
 	{ return m_elapsed_values.size(); }
 
 private:

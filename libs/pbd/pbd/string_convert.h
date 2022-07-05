@@ -349,7 +349,7 @@ inline int8_t string_to (const std::string& str)
 {
 	int16_t tmp;
 	string_to_int16 (str, tmp);
-	return tmp;
+	return (int8_t) tmp;
 }
 
 template <>
@@ -357,7 +357,7 @@ inline uint8_t string_to (const std::string& str)
 {
 	uint16_t tmp;
 	string_to_uint16 (str, tmp);
-	return tmp;
+	return (uint8_t) tmp;
 }
 
 template <>

@@ -63,7 +63,7 @@ uint16_t
 SMF::num_tracks() const
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
-	return _smf ? _smf->number_of_tracks : 0;
+	return (uint16_t) (_smf ? _smf->number_of_tracks : 0);
 }
 
 uint16_t
@@ -304,7 +304,7 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
 			return 0; /* this is a meta-event */
 		}
 
-		int event_size = event->midi_buffer_length;
+		uint32_t event_size = (uint32_t) event->midi_buffer_length;
 		assert(event_size > 0);
 
 		// Make sure we have enough scratch buffer

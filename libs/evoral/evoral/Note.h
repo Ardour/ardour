@@ -72,8 +72,10 @@ public:
 private:
 	const Note<Time>& operator=(const Note<Time>& copy);  // undefined (unsafe)
 
-	inline int clamp(int val, int low, int high) {
-		return std::min (std::max (val, low), high);
+	inline uint8_t clamp(int val, int low, int high) {
+		const int r = std::min (std::max (val, low), high);
+		assert (r < 256 && r >= 0);
+		return (uint8_t) r;
 	}
 
 public:

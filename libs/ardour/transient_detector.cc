@@ -94,7 +94,7 @@ TransientDetector::set_sensitivity (uint32_t mode, float val)
 		// see libs/vamp-plugins/OnsetDetect.cpp
 		//plugin->selectProgram ("General purpose"); // dftype = 3, sensitivity = 50, whiten = 0 (default)
 		//plugin->selectProgram ("Percussive onsets"); // dftype = 4, sensitivity = 40, whiten = 0
-		plugin->setParameter ("dftype", mode);
+		plugin->setParameter ("dftype", (float) mode);
 		plugin->setParameter ("sensitivity", std::min (100.f, std::max (0.f, val)));
 		plugin->setParameter ("whiten", 0);
 	}

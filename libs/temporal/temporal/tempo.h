@@ -98,7 +98,7 @@ class /*LIBTEMPORAL_API*/ Point : public point_hook, public MapOwned  {
 	LIBTEMPORAL_API superclock_t sclock() const  { return _sclock; }
 	LIBTEMPORAL_API Beats const & beats() const  { return _quarters; }
 	LIBTEMPORAL_API BBT_Time const & bbt() const { return _bbt; }
-	LIBTEMPORAL_API samplepos_t sample(samplecnt_t sr) const { return superclock_to_samples (sclock(), sr); }
+	LIBTEMPORAL_API samplepos_t sample (int sr) const { return superclock_to_samples (sclock(), sr); }
 
 	LIBTEMPORAL_API virtual timepos_t time() const = 0;
 
@@ -179,7 +179,7 @@ class LIBTEMPORAL_API Tempo {
 	 * @param npm Note Types per minute
 	 * @param note_type Note Type (default `4': quarter note)
 	 */
-	Tempo (double npm, int note_type)
+	Tempo (double npm, int8_t note_type)
 		: _npm (npm)
 		, _enpm (npm)
 		, _superclocks_per_note_type (double_npm_to_scpn (npm))
@@ -192,7 +192,7 @@ class LIBTEMPORAL_API Tempo {
 		, _continuing (false)
 		{}
 
-	Tempo (double npm, double enpm, int note_type)
+	Tempo (double npm, double enpm, int8_t note_type)
 		: _npm (npm)
 		, _enpm (npm)
 		, _superclocks_per_note_type (double_npm_to_scpn (npm))
@@ -208,11 +208,11 @@ class LIBTEMPORAL_API Tempo {
 	/* these five methods should only be used to show and collect information to the user (for whom
 	 * bpm as a floating point number is the obvious representation)
 	 */
-	double note_types_per_minute () const { return (superclock_ticks_per_second() * 60.0) / _superclocks_per_note_type; }
-	double end_note_types_per_minute () const { return (superclock_ticks_per_second() * 60.0) / _end_superclocks_per_note_type; }
-	double quarter_notes_per_minute() const { return (superclock_ticks_per_second() * 60.0 * 4.0) / (_note_type * _superclocks_per_note_type); }
-	double samples_per_note_type(samplecnt_t sr) const { return superclock_to_samples (superclocks_per_note_type (), sr); }
-	double samples_per_quarter_note(samplecnt_t sr) const { return superclock_to_samples (superclocks_per_quarter_note(), sr); }
+	double note_types_per_minute () const { return ((double) superclock_ticks_per_second() * 60.0) / (double) _superclocks_per_note_type; }
+	double end_note_types_per_minute () const { return ((double) superclock_ticks_per_second() * 60.0) / (double) _end_superclocks_per_note_type; }
+	double quarter_notes_per_minute() const { return ((double) superclock_ticks_per_second() * 60.0 * 4.0) / (_note_type * (double) _superclocks_per_note_type); }
+	double samples_per_note_type(int sr) const { return superclock_to_samples (superclocks_per_note_type (), sr); }
+	double samples_per_quarter_note(int sr) const { return superclock_to_samples (superclocks_per_quarter_note(), sr); }
 
 	void   set_note_types_per_minute (double npm);
 
