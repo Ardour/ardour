@@ -356,7 +356,7 @@ Editor::move_range_selection_start_or_end_to_region_boundary (bool move_end, boo
 
 	/* so we don't find the current region again */
 	if (dir > 0 || pos.is_positive()) {
-		pos.increment ();
+		pos = pos.increment ();
 	}
 
 	timepos_t const target = get_region_boundary (pos, dir, true, false);
@@ -1204,8 +1204,9 @@ Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 	pos = loc->start();
 
 	// so we don't find the current region again..
-	if (dir>0 || pos>0)
-		pos.increment();
+	if (dir > 0 || pos > 0) {
+		pos = pos.increment();
+	}
 
 	if (!selection->tracks.empty()) {
 
