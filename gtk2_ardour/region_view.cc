@@ -1008,7 +1008,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 
 	while (t < end) {
 
-		t.increment();
+		t = t.increment ();
 
 		/* is this region is on top at time t? */
 		bool const new_me = (pl->top_unmuted_region_at (t) == _region);
@@ -1033,13 +1033,11 @@ RegionView::update_coverage_frame (LayerDisplay d)
 			}
 		}
 		t = pl->find_next_region_boundary (t, 1);
-		if (t.is_negative()) {
+		if (t == timepos_t::max (t.time_domain())) {
 			break;
 		}
 		me = new_me;
 	}
-
-	t = pl->find_next_region_boundary (t, 1);
 
 	if (cr) {
 		/* finish off the last rectangle */
