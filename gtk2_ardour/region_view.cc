@@ -1015,10 +1015,11 @@ RegionView::update_coverage_frame (LayerDisplay d)
 		/* finish off any old rect, if required */
 		if (cr && me != new_me) {
 			cr->set_x1 (trackview.editor().duration_to_pixels (position.distance (t)));
+			cr = 0;
 		}
 
 		/* start off any new rect, if required */
-		if (!cr || me != new_me) {
+		if (!cr && !new_me) {
 			cr = new ArdourCanvas::Rectangle (group);
 			_coverage_frame.push_back (cr);
 			cr->set_x0 (trackview.editor().duration_to_pixels (position.distance (t)));
@@ -1026,11 +1027,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 			cr->set_y1 (_height + 1);
 			cr->set_outline (false);
 			cr->set_ignore_events (true);
-			if (new_me) {
-				cr->set_fill_color (UINT_RGBA_CHANGE_A (non_playing_color, 0));
-			} else {
-				cr->set_fill_color (non_playing_color);
-			}
+			cr->set_fill_color (non_playing_color);
 		}
 		t = pl->find_next_region_boundary (t, 1);
 		if (t == timepos_t::max (t.time_domain())) {
