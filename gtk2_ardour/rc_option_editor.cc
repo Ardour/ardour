@@ -4124,13 +4124,13 @@ These settings will only take effect after %1 is restarted.\n\
 		);
 
 	if (AudioEngine::instance()->port_engine().can_monitor_input()) {
-		mm->add (HardwareMonitoring, _("via Audio Driver"));
+		mm->add (HardwareMonitoring, _("Audio Driver"));
 	}
 
 	string prog (PROGRAM_NAME);
 	boost::algorithm::to_lower (prog);
 	mm->add (SoftwareMonitoring, string_compose (_("%1"), prog));
-	mm->add (ExternalMonitoring, _("audio hardware"));
+	mm->add (ExternalMonitoring, _("Audio Hardware"));
 
 	add_option (_("Monitoring"), mm);
 
