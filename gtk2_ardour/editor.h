@@ -1045,6 +1045,7 @@ private:
 	ArdourCanvas::Rectangle* transport_marker_bar;
 	ArdourCanvas::Rectangle* cd_marker_bar;
 	ArdourCanvas::Rectangle* cue_marker_bar;
+	ArdourCanvas::Line*      ruler_separator;
 
 	void toggle_cue_behavior ();
 
@@ -1061,8 +1062,8 @@ private:
 	Gtk::Label  cue_mark_label;
 
 	/* videtimline related actions */
-	Gtk::Label                videotl_label;
-	ArdourCanvas::Container*      videotl_group;
+	Gtk::Label                      videotl_label;
+	ArdourCanvas::Container*        videotl_group;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_video_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_proc_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_ontop_action;

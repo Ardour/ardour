@@ -534,8 +534,6 @@ Editor::update_ruler_visibility ()
 		tempo_label.hide();
 	}
 
-	ArdourCanvas::Rectangle *last_marker_bar = 0;
-
 	if (ruler_range_action->get_active()) {
 		old_unit_pos = range_marker_group->position().y;
 		if (tbpos != old_unit_pos) {
@@ -545,7 +543,6 @@ Editor::update_ruler_visibility ()
 		range_mark_label.show();
 
 		range_marker_bar->set_outline(false);
-		last_marker_bar = range_marker_bar;
 
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
@@ -564,7 +561,6 @@ Editor::update_ruler_visibility ()
 		transport_mark_label.show();
 
 		transport_marker_bar->set_outline(false);
-		last_marker_bar = transport_marker_bar;
 
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
@@ -583,7 +579,6 @@ Editor::update_ruler_visibility ()
 		cd_mark_label.show();
 
 		cd_marker_bar->set_outline(false);
-		last_marker_bar = cd_marker_bar;
 
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
@@ -606,7 +601,6 @@ Editor::update_ruler_visibility ()
 		mark_label.show();
 
 		marker_bar->set_outline(false);
-		last_marker_bar = marker_bar;
 
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
@@ -625,7 +619,6 @@ Editor::update_ruler_visibility ()
 		cue_mark_label.show();
 
 		cue_marker_bar->set_outline(false);
-		last_marker_bar = cue_marker_bar;
 
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
@@ -637,12 +630,6 @@ Editor::update_ruler_visibility ()
 		cue_mark_label.hide();
 		// make sure all cd markers show up in their respective places
 		update_cue_marker_display();
-	}
-
-	//the bottom ruler needs a black outline to separate it from the editor canvas
-	if ( last_marker_bar ) {
-		last_marker_bar->set_outline(true);
-		last_marker_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 	}
 
 	if (ruler_video_action->get_active()) {
@@ -662,12 +649,13 @@ Editor::update_ruler_visibility ()
 		update_video_timeline(true);
 	}
 
-	time_bars_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
+	ruler_separator->set_y_position ((int)(timebar_height * visible_timebars));
 
-	/* move hv_scroll_group (trackviews) to the end of the timebars
-	 */
+	time_bars_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 1);
 
-	hv_scroll_group->set_y_position (timebar_height * visible_timebars);
+	/* move hv_scroll_group (trackviews) to the end of the timebars */
+
+	hv_scroll_group->set_y_position ((int)(timebar_height * visible_timebars));
 
 	compute_fixed_ruler_scale ();
 	update_fixed_rulers();

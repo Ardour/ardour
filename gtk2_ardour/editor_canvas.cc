@@ -190,6 +190,13 @@ Editor::initialize_canvas ()
 	cue_marker_bar = new ArdourCanvas::Rectangle (cue_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (cue_marker_bar, "Cue Marker Bar");
 
+	ruler_separator = new ArdourCanvas::Line(_time_markers_group);
+	CANVAS_DEBUG_NAME (ruler_separator, "separator between ruler and main canvas");
+	ruler_separator->set (ArdourCanvas::Duple(0.0, 0.0), ArdourCanvas::Duple(ArdourCanvas::COORD_MAX, 0.0));
+	ruler_separator->set_outline_color(Gtkmm2ext::rgba_to_color (0, 0, 0, 1.0));
+	ruler_separator->set_outline_width(1.0);
+	ruler_separator->show();
+
 	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_group, (timebar_height * videotl_bar_height));
 
 	cd_marker_bar_drag_rect = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
