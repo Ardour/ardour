@@ -53,6 +53,9 @@ ScrollGroup::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 		return;
 	}
 
+	r.x0 = max (r.x0, 0.);
+	r.y0 = max (r.y0, 0.);
+
 	Rect self (_position.x + r.x0,
 	           _position.y + r.y0,
 	           _position.x + r.x1,
