@@ -28,6 +28,8 @@
 #include "pbd/stateful_diff_command.h"
 #include "pbd/pthread_utils.h"
 
+#include "temporal/tempo.h"
+
 #include "ardour/audioregion.h"
 #include "ardour/session_event.h"
 #include "ardour/dB.h"
@@ -153,6 +155,10 @@ AudioRegionEditor::peak_amplitude_thread ()
 		if (msg == 't') {
 			break;
 		}
+
+		/* update thread-local tempo map */
+
+		Temporal::TempoMap::fetch ();
 
 		/* compute peak amplitude and signal the fact */
 		PeakAmplitudeFound (accurate_coefficient_to_dB (_audio_region->maximum_amplitude ())); /* EMIT SIGNAL */
