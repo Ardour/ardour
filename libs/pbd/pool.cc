@@ -86,13 +86,12 @@ Pool::alloc ()
 
 	if (free_list.read (&ptr, 1) < 1) {
 		PBD::stacktrace (std::cerr, 20);
-
 		if (_dump) {
+			printf ("RingBuffer write-idx: %u read-idx: %u\n", free_list.get_write_idx (), free_list.get_read_idx ());
 			void** _block = free_list.buffer ();
 			for (size_t i = 0; i < free_list.bufsize (); ++i) {
 				_dump (i, _block[i]);
 			}
-			printf ("RingBuffer write-idx: %u read-idx: %u\n", free_list.get_write_idx (), free_list.get_read_idx ());
 		}
 
 		fatal << "CRITICAL: " << _name << " POOL OUT OF MEMORY - RECOMPILE WITH LARGER SIZE!!" << endmsg;

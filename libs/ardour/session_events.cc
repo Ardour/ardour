@@ -67,7 +67,13 @@ SessionEvent::create_per_thread_pool (const std::string& name, uint32_t nitems)
 	   a CrossThreadPool for use by this thread whenever events are allocated/released
 	   from SessionEvent::pool()
 	*/
-	pool->create_per_thread_pool (name, sizeof (SessionEvent), nitems, [](size_t i, void*p) { std::cout << i << " " << *static_cast<SessionEvent*> (p) << "\n";});
+	pool->create_per_thread_pool (name, sizeof (SessionEvent), nitems,
+#ifndef NDEBUG
+			[](size_t i, void*p) { std::cout << i << " " << *static_cast<SessionEvent*> (p) << "\n"; }
+#else
+			NULL
+#endif
+			);
 }
 
 SessionEvent::SessionEvent (Type t, Action a, samplepos_t when, samplepos_t where, double spd, bool yn, bool yn2, bool yn3)
