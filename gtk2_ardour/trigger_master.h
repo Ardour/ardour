@@ -59,7 +59,7 @@ private:
 	float _fraction;
 };
 
-class TriggerMaster : public ArdourCanvas::Rectangle
+class TriggerMaster : public ArdourCanvas::Rectangle, public sigc::trackable
 {
 public:
 	TriggerMaster (ArdourCanvas::Item* canvas);
