@@ -151,7 +151,12 @@ Controllable::registered_controllables ()
 	ControllableSet rv;
 	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
 	for (auto const& i : registry) {
-		rv.insert (i->shared_from_this ());
+		try {
+			rv.insert (i->shared_from_this ());
+		} catch (...) {
+			/* ignore boost::bad_weak_ptr */
+			// cout << "No shared ctrl: " << i->name() << "\n";
+		}
 	}
 	return rv;
 }
