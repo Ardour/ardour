@@ -1016,7 +1016,7 @@ Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats cons
 }
 
 void
-Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t& nframes, pframes_t&  dest_offset)
+Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t& nframes, pframes_t&  quantize_offset)
 {
 	using namespace Temporal;
 
@@ -1038,7 +1038,6 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		return;
 	}
 
-	pframes_t extra_offset = 0;
 	Temporal::Beats elen_ignored;
 
 	/* transition time has arrived! let's figure out what're doing:
@@ -1080,12 +1079,9 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		 * should end up, and the number of samples it should generate.
 		 */
 
-		extra_offset = std::max (samplepos_t (0), transition_samples - start_sample);
+		quantize_offset = std::max (samplepos_t (0), transition_samples - start_sample);
+		nframes -= quantize_offset;
 
-		nframes -= extra_offset;
-		dest_offset += extra_offset;
-
-		/* XXX need to silence start of buffers up to dest_offset */
 		break;
 
 	case WaitingForRetrigger:
@@ -1162,7 +1158,7 @@ void
 Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, TriggerType& trigger,
                             pframes_t (TriggerType::*run_method) (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
                                                                   Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
-                                                                  pframes_t nframes, pframes_t dest_offset, double bpm))
+                                                                  pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t&))
 {
 	const pframes_t block_size = AudioEngine::instance()->samples_per_cycle ();
 	BufferSet bufs;
@@ -1180,6 +1176,7 @@ Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, Tri
 
 	samplepos_t pos = start_pos;
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	pframes_t quantize_offset;
 
 	while (pos < end_position) {
 		pframes_t nframes = std::min (block_size, (pframes_t) (end_position - pos));
@@ -1187,7 +1184,7 @@ Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, Tri
 		Temporal::Beats end_beats = tmap->quarters_at (timepos_t (pos+nframes));
 		const double bpm = tmap->quarters_per_minute_at (timepos_t (start_beats));
 
-		pframes_t n = (trigger.*run_method) (bufs, pos, pos+nframes, start_beats, end_beats, nframes, 0, bpm);
+		pframes_t n = (trigger.*run_method) (bufs, pos, pos+nframes, start_beats, end_beats, nframes, 0, bpm, quantize_offset);
 
 		/* We could have reached the end. Check and restart, because
 		 * TriggerBox::fast_forward() already determined that we are
@@ -1201,6 +1198,7 @@ Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, Tri
 		}
 
 		pos += n;
+		pos += quantize_offset;
 	}
 }
 
@@ -1801,7 +1799,7 @@ template<bool in_process_context>
 pframes_t
 AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
                          Temporal::Beats const & start, Temporal::Beats const & end,
-                         pframes_t nframes, pframes_t dest_offset, double bpm)
+                         pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
 	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
@@ -1812,11 +1810,14 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 	std::vector<Sample*> bufp(nchans);
 	const bool do_stretch = stretching() && _segment_tempo > 1;
 
-	/* see if we're going to start or stop or retrigger in this run() call */
-	maybe_compute_next_transition (start_sample, start, end, nframes, dest_offset);
-	const pframes_t orig_nframes = nframes;
+	quantize_offset = 0;
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 after checking for transition, state = %3, will stretch %4, nf will be %5 of %6\n", index(), name(), enum_2_string (_state), do_stretch, nframes));
+	/* see if we're going to start or stop or retrigger in this run() call */
+	maybe_compute_next_transition (start_sample, start, end, nframes, quantize_offset);
+	const pframes_t orig_nframes = nframes;
+	dest_offset += quantize_offset;
+
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 after checking for transition, state = %3, will stretch %4, nf will be %5 of %6, dest_offset %7\n", index(), name(), enum_2_string (_state), do_stretch, nframes,  orig_nframes, dest_offset));
 
 	switch (_state) {
 	case Stopped:
@@ -2634,7 +2635,7 @@ template<bool in_process_context>
 pframes_t
 MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
                        Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
-                       pframes_t nframes, pframes_t dest_offset, double bpm)
+                       pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset)
 {
 	MidiBuffer* mb (in_process_context? &bufs.get_midi (0) : 0);
 	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
@@ -2644,8 +2645,8 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	DEBUG_RESULT (samplepos_t, last_event_samples, max_samplepos);
 
 	/* see if we're going to start or stop or retrigger in this run() call */
-	pframes_t ignore_computed_dest_offset = 0;
-	maybe_compute_next_transition (start_sample, start_beats, end_beats, nframes, ignore_computed_dest_offset);
+	quantize_offset = 0;
+	maybe_compute_next_transition (start_sample, start_beats, end_beats, nframes, quantize_offset);
 	const pframes_t orig_nframes = nframes;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2\n", name(), enum_2_string (_state)));
@@ -4024,8 +4025,23 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			max_chans = std::max (ar->n_channels(), max_chans);
 		}
 
-		frames_covered = _currently_playing->run (bufs, start_sample, end_sample, start_beats, end_beats, nframes, dest_offset, bpm);
+		/* Quantize offset will generally be zero, but if non-zero, it
+		 * represents an initial "skip" in the output buffers required
+		 * to align the trigger output with its quantization. This
+		 * means that the total portion of the buffer covered by the
+		 * trigger is the sum of the quantize offset and "frames
+		 * covered".
+		 *
+		 * Quantize offset will only be non-zero for a trigger that is
+		 * actually going to output its initial samples somewhere in
+		 * this process cycle (but after the beginning of the cycle).
+		 */
 
+		pframes_t quantize_offset;
+
+		frames_covered = _currently_playing->run (bufs, start_sample, end_sample, start_beats, end_beats, nframes, dest_offset, bpm, quantize_offset);
+
+		nframes -= quantize_offset;
 		nframes -= frames_covered;
 		start_sample += frames_covered;
 		dest_offset += frames_covered;

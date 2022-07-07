@@ -269,7 +269,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 	virtual pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample,
 	                       Temporal::Beats const & start, Temporal::Beats const & end,
-	                       pframes_t nframes, pframes_t offset, double bpm) = 0;
+	                       pframes_t nframes, pframes_t offset, double bpm, pframes_t& quantize_offset) = 0;
 	virtual void set_start (timepos_t const &) = 0;
 	virtual void set_end (timepos_t const &) = 0;
 	virtual void set_length (timecnt_t const &) = 0;
@@ -336,7 +336,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 		void start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, TriggerType& trigger,
 		                        pframes_t (TriggerType::*run_method) (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
 		                                                              Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
-		                                                              pframes_t nframes, pframes_t dest_offset, double bpm));
+		                                                              pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t&));
 	void set_next_trigger (int n);
 	int next_trigger() const { return _next_trigger; }
 
@@ -473,10 +473,10 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	template<bool actually_run>  pframes_t audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
 	                                                  Temporal::Beats const & start, Temporal::Beats const & end,
-	                                                  pframes_t nframes, pframes_t dest_offset, double bpm);
+	                                                  pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset);
 
-	pframes_t run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t dest_offset, double bpm) {
-		return audio_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm);
+	pframes_t run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset) {
+		return audio_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm, quantize_offset);
 	}
 
 	StretchMode stretch_mode() const { return _stretch_mode; }
@@ -555,10 +555,10 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	~MIDITrigger ();
 
 	template<bool actually_run> pframes_t midi_run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample,
-	                                                Temporal::Beats const & start_beats, Temporal::Beats const & end_beats, pframes_t nframes, pframes_t offset, double bpm);
+	                                                Temporal::Beats const & start_beats, Temporal::Beats const & end_beats, pframes_t nframes, pframes_t offset, double bpm, pframes_t& quantize_offset);
 
-	pframes_t run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t dest_offset, double bpm) {
-		return midi_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm);
+	pframes_t run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset) {
+		return midi_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm, quantize_offset);
 	}
 
 	void set_start (timepos_t const &);
