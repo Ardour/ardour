@@ -3,7 +3,7 @@
  * Copyright (C) 2008-2009 David Robillard <d@drobilla.net>
  * Copyright (C) 2008-2011 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 1998-2015 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2014-2015 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdio>
 #include <cstdlib>
 #include <vector>
 #include <cstdlib>
@@ -30,30 +31,34 @@
 #include "pbd/error.h"
 #include "pbd/debug.h"
 #include "pbd/compose.h"
+#include "pbd/stacktrace.h"
 
 using namespace std;
 using namespace PBD;
 
-Pool::Pool (string n, unsigned long item_size, unsigned long nitems)
+Pool::Pool (string n, unsigned long item_size, unsigned long nitems, PoolDumpCallback cb)
 	: free_list (nitems)
 	, _name (n)
+	, _dump (cb)
 #ifndef NDEBUG
 	, max_usage (0)
 #endif
 {
 	_name = n;
+	/* adjust to actual size (power-of-two) */
+	nitems = free_list.bufsize ();
 
 	/* since some overloaded ::operator new() might use this,
 	   its important that we use a "lower level" allocator to
 	   get more space.
 	*/
 
-	block = malloc (nitems * item_size);
+	_block = malloc (nitems * item_size);
 
-	void **ptrlist = (void **) malloc (sizeof (void *)  * nitems);
+	void **ptrlist = (void **) calloc (nitems, sizeof (void *));
 
 	for (unsigned long i = 0; i < nitems; i++) {
-		ptrlist[i] = static_cast<void *> (static_cast<char*>(block) + (i * item_size));
+		ptrlist[i] = static_cast<void *> (static_cast<char*>(_block) + (i * item_size));
 	}
 
 	free_list.write (ptrlist, nitems);
@@ -63,7 +68,7 @@ Pool::Pool (string n, unsigned long item_size, unsigned long nitems)
 Pool::~Pool ()
 {
 	DEBUG_TRACE (DEBUG::Pool, string_compose ("Pool: '%1' max: %2 / %3\n", name(), max_usage, total()));
-	free (block);
+	free (_block);
 }
 
 /** Allocate an item's worth of memory in the Pool by taking one from the free list.
@@ -81,6 +86,16 @@ Pool::alloc ()
 #endif
 
 	if (free_list.read (&ptr, 1) < 1) {
+		PBD::stacktrace (std::cerr, 20);
+
+		if (_dump) {
+			void** _block = free_list.buffer ();
+			for (size_t i = 0; i < free_list.bufsize (); ++i) {
+				_dump (i, _block[i]);
+			}
+			printf ("RingBuffer write-idx: %u read-idx: %u\n", free_list.get_write_idx (), free_list.get_read_idx ());
+		}
+
 		fatal << "CRITICAL: " << _name << " POOL OUT OF MEMORY - RECOMPILE WITH LARGER SIZE!!" << endmsg;
 		abort(); /*NOTREACHED*/
 		return 0;
@@ -182,9 +197,9 @@ PerThreadPool::PerThreadPool ()
  *  @param nitems Number of items in the pool.
  */
 void
-PerThreadPool::create_per_thread_pool (string n, unsigned long isize, unsigned long nitems)
+PerThreadPool::create_per_thread_pool (string n, unsigned long isize, unsigned long nitems, PoolDumpCallback cb)
 {
-	_key.set (new CrossThreadPool (n, isize, nitems, this));
+	_key.set (new CrossThreadPool (n, isize, nitems, this, cb));
 }
 
 /** @return True if CrossThreadPool for the current thread exists,
@@ -240,8 +255,8 @@ PerThreadPool::add_to_trash (CrossThreadPool* p)
 	_trash->write (&p, 1);
 }
 
-CrossThreadPool::CrossThreadPool  (string n, unsigned long isize, unsigned long nitems, PerThreadPool* p)
-	: Pool (n, isize, nitems)
+CrossThreadPool::CrossThreadPool  (string n, unsigned long isize, unsigned long nitems, PerThreadPool* p, PoolDumpCallback cb)
+	: Pool (n, isize, nitems, cb)
 	, pending (nitems)
 	, _parent (p)
 {

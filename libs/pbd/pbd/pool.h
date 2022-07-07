@@ -2,7 +2,7 @@
  * Copyright (C) 1998-2015 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2009-2014 David Robillard <d@drobilla.net>
  * Copyright (C) 2010 Carl Hetherington <carl@carlh.net>
- * Copyright (C) 2015-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,13 +30,15 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/ringbuffer.h"
 
+typedef void (*PoolDumpCallback)(size_t, void*);
+
 /** A pool of data items that can be allocated, read from and written to
  *  without system memory allocation or locking.
  */
 class LIBPBD_API Pool
 {
   public:
-	Pool (std::string name, unsigned long item_size, unsigned long nitems);
+	Pool (std::string name, unsigned long item_size, unsigned long nitems, PoolDumpCallback cb = NULL);
 	virtual ~Pool ();
 
 	virtual void *alloc ();
@@ -48,11 +50,14 @@ class LIBPBD_API Pool
 	guint total() const { return free_list.bufsize(); }
 
   protected:
+
 	PBD::RingBuffer<void*> free_list; ///< a list of pointers to free items within block
+
 	std::string _name;
 
   private:
-	void *block; ///< data storage area
+	void*            _block; ///< data storage area
+	PoolDumpCallback _dump; ///< callback to print pool contents
 #ifndef NDEBUG
 	unsigned long max_usage;
 #endif
@@ -102,7 +107,7 @@ class LIBPBD_API PerThreadPool;
 class LIBPBD_API CrossThreadPool : public Pool
 {
   public:
-	CrossThreadPool (std::string n, unsigned long isize, unsigned long nitems, PerThreadPool *);
+	CrossThreadPool (std::string n, unsigned long isize, unsigned long nitems, PerThreadPool*, PoolDumpCallback);
 
 	void* alloc ();
 	void push (void *);
@@ -132,7 +137,8 @@ public:
 
 	const Glib::Threads::Private<CrossThreadPool>& key() const { return _key; }
 
-	void  create_per_thread_pool (std::string name, unsigned long item_size, unsigned long nitems);
+	void create_per_thread_pool (std::string name, unsigned long item_size, unsigned long nitems, PoolDumpCallback cb = NULL);
+
 	CrossThreadPool* per_thread_pool (bool must_exist = true);
 	bool has_per_thread_pool ();
 	void set_trash (PBD::RingBuffer<CrossThreadPool*>* t);
