@@ -73,7 +73,7 @@ private:
 	GATOMIC_QUAL gint _update_queued;
 
 	PBD::RingBuffer<char *> fifo;
-	Pool buffer_pool;
+	PBD::Pool buffer_pool;
 	static const size_t buffer_size = 256;
 
 	void tracer (MIDI::Parser&, MIDI::byte*, size_t, MIDI::samplecnt_t);

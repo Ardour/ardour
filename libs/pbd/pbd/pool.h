@@ -30,6 +30,8 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/ringbuffer.h"
 
+namespace PBD {
+
 typedef void (*PoolDumpCallback) (size_t, void*);
 
 /** A pool of data items that can be allocated, read from and written to
@@ -170,5 +172,7 @@ private:
 	Glib::Threads::Mutex               _trash_mutex;
 	PBD::RingBuffer<CrossThreadPool*>* _trash;
 };
+
+} // namespace PBD
 
 #endif // __qm_pool_h__

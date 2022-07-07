@@ -150,11 +150,11 @@ public:
 	static void init_event_pool ();
 	static guint pool_available ();
 
-	CrossThreadPool* event_pool() const { return own_pool; }
+	PBD::CrossThreadPool* event_pool() const { return own_pool; }
 
 private:
-	static PerThreadPool* pool;
-	CrossThreadPool* own_pool;
+	static PBD::PerThreadPool* pool;
+	PBD::CrossThreadPool*      own_pool;
 
 	friend class Butler;
 };

@@ -670,7 +670,7 @@ class LIBARDOUR_API TriggerBoxThread
 		void* operator new (size_t);
 		void  operator delete (void* ptr, size_t);
 
-		static MultiAllocSingleReleasePool* pool;
+		static PBD::MultiAllocSingleReleasePool* pool;
 		static void init_pool ();
 	};
 
@@ -875,7 +875,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 		Request (Type t) : type (t) {}
 
-		static MultiAllocSingleReleasePool* pool;
+		static PBD::MultiAllocSingleReleasePool* pool;
 		static void init_pool();
 
 		void* operator new (size_t);

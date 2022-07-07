@@ -114,9 +114,9 @@ private:
 	samplecnt_t _audio_playback_buffer_size;
 	uint32_t    _midi_buffer_size;
 
-	PBD::RingBuffer<CrossThreadPool*> pool_trash;
-	CrossThreadChannel                _xthread;
-	PBD::MPMCQueue<sigc::slot<void> > _delegated_work;
+	PBD::RingBuffer<PBD::CrossThreadPool*> pool_trash;
+	CrossThreadChannel                    _xthread;
+	PBD::MPMCQueue<sigc::slot<void> >     _delegated_work;
 };
 
 } // namespace ARDOUR

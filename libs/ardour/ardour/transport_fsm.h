@@ -105,8 +105,8 @@ struct TransportFSM
 
 		static void init_pool ();
 
-          private:
-		static Pool* pool;
+	private:
+		static PBD::Pool* pool;
 
 	};
 

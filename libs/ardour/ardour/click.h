@@ -48,7 +48,7 @@ public:
 	}
 
 private:
-	static Pool pool;
+	static PBD::Pool pool;
 };
 
 class LIBARDOUR_API ClickIO : public IO
