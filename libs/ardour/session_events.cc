@@ -28,6 +28,8 @@
 
 #include "ardour/debug.h"
 #include "ardour/session_event.h"
+#include "ardour/track.h"
+#include "ardour/region.h"
 
 #include "pbd/i18n.h"
 
@@ -65,7 +67,7 @@ SessionEvent::create_per_thread_pool (const std::string& name, uint32_t nitems)
 	   a CrossThreadPool for use by this thread whenever events are allocated/released
 	   from SessionEvent::pool()
 	*/
-	pool->create_per_thread_pool (name, sizeof (SessionEvent), nitems);
+	pool->create_per_thread_pool (name, sizeof (SessionEvent), nitems, [](size_t i, void*p) { std::cout << i << " " << *static_cast<SessionEvent*> (p) << "\n";});
 }
 
 SessionEvent::SessionEvent (Type t, Action a, samplepos_t when, samplepos_t where, double spd, bool yn, bool yn2, bool yn3)
@@ -363,4 +365,46 @@ SessionEventManager::_clear_event_type (SessionEvent::Type type)
 	}
 
 	set_next_event ();
+}
+
+std::ostream& operator<<(std::ostream& o, ARDOUR::SessionEvent const& ev) {
+  o << "SessionEvent"
+		<< " type: " << enum_2_string (ev.type)
+		<< " action: " << enum_2_string (ev.action)
+		<< " atime: " << ev.action_sample
+		<< " ttime: " << ev.target_sample;
+
+	switch (ev.type) {
+		case SessionEvent::Locate:
+			o << " disposition: " << ev.locate_transport_disposition;
+			o << " force: " << ev.yes_or_no;
+			break;
+		case SessionEvent::LocateRoll:
+			o << " force: " << ev.yes_or_no;
+			break;
+		case SessionEvent::SetDefaultPlaySpeed:
+			/* fallthrough */
+		case SessionEvent::SetTransportSpeed:
+			o << " speed: " << ev.speed;
+			break;
+		case SessionEvent::EndRoll:
+			o << " abort: " << ev.yes_or_no;
+			o << " clear: " << ev.second_yes_or_no;
+			break;
+		case SessionEvent::OverwriteAll:
+			o << " reason: " << ev.overwrite;
+			break;
+		case SessionEvent::Audition:
+			o << " region: '" << ev.region->name () << "'";
+			break;
+		case SessionEvent::Overwrite:
+			if (boost::shared_ptr<Track> track = ev.track.lock ()) {
+				o << " track: '" << track->name () << "'";
+			}
+			o << " reason: " << ev.overwrite;
+			break;
+		default:
+			break;
+	}
+	return o;
 }

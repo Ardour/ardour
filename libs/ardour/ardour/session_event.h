@@ -200,4 +200,6 @@ protected:
 
 } /* namespace */
 
+LIBARDOUR_API std::ostream& operator<<(std::ostream&, const ARDOUR::SessionEvent&);
+
 #endif /* __ardour_session_event_h__ */
