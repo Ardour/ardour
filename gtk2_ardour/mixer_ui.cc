@@ -4032,7 +4032,7 @@ Mixer_UI::clear_mixer_scene (size_t n, bool interactive)
 		vbox->show();
 		hbox.show ();
 
-		if (msg.run () == Gtk::RESPONSE_OK) {
+		if (msg.run () != Gtk::RESPONSE_OK) {
 			return;
 		}
 
