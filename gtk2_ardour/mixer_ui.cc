@@ -3974,11 +3974,10 @@ Mixer_UI::recall_mixer_scene (size_t n, bool interactive)
 	if (interactive && 0 == Config->instant_xml (X_("no-scene-recall-warning"))) {
 			ArdourMessageDialog msg (string_compose (_("Recall mixer scene \"%1\"?\n"
 		                                           "This will overwrite your mixer settings!\n"
-		                                           "This operation cannot be undone."), ms->name()));
+		                                           "This operation cannot be undone."), ms->name()),
+			                         false, MESSAGE_QUESTION, BUTTONS_YES_NO);
 
-		msg.add_button (_("Cancel"), Gtk::RESPONSE_NO);
-
-		msg.set_default_response (RESPONSE_OK);
+		msg.set_default_response (RESPONSE_YES);
 
 		VBox* vbox = msg.get_vbox();
 		HBox hbox;
@@ -3989,7 +3988,7 @@ Mixer_UI::recall_mixer_scene (size_t n, bool interactive)
 		vbox->show();
 		hbox.show ();
 
-		if (msg.run () != Gtk::RESPONSE_OK) {
+		if (msg.run () != RESPONSE_YES) {
 			return;
 		}
 
@@ -4017,11 +4016,10 @@ Mixer_UI::clear_mixer_scene (size_t n, bool interactive)
 	// XXX this is really bad UX. Ardour should not have any "don't show this again" options.
 	if (interactive && 0 == Config->instant_xml (X_("no-scene-clear-warning"))) {
 		ArdourMessageDialog msg (string_compose (_("Clear mixer scene \"%1\"?\n"
-		                                           "This operation cannot be undone."), ms->name()));
+		                                           "This operation cannot be undone."), ms->name()),
+		                         false, MESSAGE_QUESTION, BUTTONS_YES_NO);
 
-		msg.add_button (_("Cancel"), Gtk::RESPONSE_NO);
-
-		msg.set_default_response (RESPONSE_OK);
+		msg.set_default_response (RESPONSE_YES);
 
 		VBox* vbox = msg.get_vbox();
 		HBox hbox;
@@ -4032,7 +4030,7 @@ Mixer_UI::clear_mixer_scene (size_t n, bool interactive)
 		vbox->show();
 		hbox.show ();
 
-		if (msg.run () != Gtk::RESPONSE_OK) {
+		if (msg.run () != RESPONSE_YES) {
 			return;
 		}
 
