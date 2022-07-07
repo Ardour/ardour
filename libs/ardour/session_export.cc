@@ -346,6 +346,16 @@ Session::process_export_fw (pframes_t nframes)
 		butler_completed_transport_work ();
 	}
 
+	{
+		SessionEvent* ev;
+		while (pending_events.read (&ev, 1) == 1) {
+			merge_event (ev);
+		}
+		/* remove TransportStateChange events (which otherwise accumulate with each exported range) */
+		ev = new SessionEvent (SessionEvent::TransportStateChange, SessionEvent::Clear, SessionEvent::Immediate, 0, 0);
+		merge_event (ev);
+	}
+
 	if (_remaining_latency_preroll > 0) {
 		samplepos_t remain = std::min ((samplepos_t)nframes, _remaining_latency_preroll);
 
