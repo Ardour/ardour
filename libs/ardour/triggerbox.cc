@@ -102,6 +102,7 @@ TriggerBox::all_trigger_props()
 	all.add(Properties::use_follow_length);
 	all.add(Properties::quantization);
 	all.add(Properties::follow_length);
+	all.add(Properties::follow_count);
 	all.add(Properties::launch_style);
 	all.add(Properties::follow_action0);
 	all.add(Properties::follow_action1);
