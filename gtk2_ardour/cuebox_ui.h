@@ -41,7 +41,7 @@ namespace ArdourCanvas
 	class Circle;
 }
 
-class CueEntry : public ArdourCanvas::Rectangle
+class CueEntry : public ArdourCanvas::Rectangle, public sigc::trackable
 {
 public:
 	CueEntry (ArdourCanvas::Item* item, uint64_t cue_index);
