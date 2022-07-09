@@ -2982,13 +2982,18 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	CueEvents::const_iterator c = cues.begin();
 	samplepos_t pos = c->time;
 	TriggerPtr prev;
+	TriggerPtr trig;
 	Temporal::BBT_Time start_bbt;
 	samplepos_t start_samples;
 	Temporal::Beats elen;
+	bool will_start;
 
 	while (pos < transport_position && c != cues.end() && c->time < transport_position) {
 
-		CueEvents::const_iterator nxt_cue = c; ++nxt_cue;
+		CueEvents::const_iterator nxt_cue = c;
+		int trig_index = -1;
+
+		std::cerr << "Considering cue " << c->cue << std::endl;
 
 		if (c->cue == INT32_MAX) {
 			/* "stop all cues" marker encountered.  This ends the
@@ -3000,11 +3005,13 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			continue;
 		}
 
-		TriggerPtr trig (all_triggers[c->cue]);
+		trig = all_triggers[c->cue];
 
 		if (trig->cue_isolated()) {
-			c = nxt_cue;
-			pos = c->time;
+			if (c != cues.end()) {
+				c = nxt_cue;
+				pos = c->time;
+			}
 			continue;
 		}
 
@@ -3014,7 +3021,6 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			   whatever slot might have been running when we hit
 			   the cue.
 			*/
-			prev.reset ();
 			c = nxt_cue;
 			pos = c->time;
 			continue;
@@ -3028,12 +3034,12 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			limit = nxt_cue->time;
 		}
 
-		bool will_start = true;
-
+		will_start = true;
 		start_bbt = trig->compute_start (tmap, pos, limit, trig->quantization(), start_samples, will_start);
 
 		if (!will_start) {
 			/* trigger will not start between this cue and the next */
+			std::cerr << "cue " << c->cue << " will not start before cue " << nxt_cue->cue << std::endl;
 			c = nxt_cue;
 			pos = limit;
 			continue;
@@ -3050,16 +3056,19 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			 *
 			 */
 			trig_ends_at = tmap->sample_at (tmap->bbt_at (timepos_t (nxt_cue->time)).round_up_to_bar ());
+			std::cerr << "checked trig end due to " << nxt_cue->cue << " => " << trig_ends_at << std::endl;
 		}
 
 		if (trig_ends_at >= transport_position) {
-			prev = trig;
-			/* we're done. prev now indicates the trigger that
+			/* we're done. trig now references the trigger that
 			   would have started most recently before the
 			   transport position.
 			*/
+			std::cerr << "trigger " << trig->index() << " ends after " << transport_position << std::endl;
 			break;
 		}
+
+		/* this cue-driven trigger ends before the transport position */
 
 		int dnt = determine_next_trigger (trig->index());
 
@@ -3067,14 +3076,18 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			/* no trigger follows the current one. Back to
 			   looking for another cue.
 			*/
+			std::cerr << "no trigger after cue " << c->cue << " move to " << (nxt_cue == cues.end() ? -934 : nxt_cue->cue) << std::endl;
 			c = nxt_cue;
 			continue;
+		} else {
+			std::cerr << "next trigger set to " << dnt << std::endl;
 		}
 
-		prev = trig;
+
 		pos = trig_ends_at;
 		trig = all_triggers[dnt];
 		c = nxt_cue;
+		std::cerr << "moved on to consider " << (c == cues.end() ? -781 : c->cue) << endl;
 	}
 
 	if (pos >= transport_position || !prev) {
@@ -3089,7 +3102,81 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	}
 
 	/* prev now points to a trigger that would start before
-	 * transport_position and would still be running at
+	 * transport_position. We now need to move forward in time through
+	 * possible follow actions. Switch vars to "trig" to make it slightly
+	 * more readable.
+	 */
+
+	trig = prev;
+
+	while (trig && (pos < transport_position)) {
+
+		/* Need to recompute trigger start even on first iteration,
+		 * because in the loop, we computed it two iterations ago.
+		 */
+
+		std::cerr << "trigger-ffwd, consider trig " << trig->name();
+
+		will_start = true;
+		start_bbt = trig->compute_start (tmap, pos, transport_position, trig->quantization(), start_samples, will_start);
+
+		if (!will_start) {
+			trig.reset();
+			break;
+		}
+
+		samplepos_t trig_ends_at = trig->compute_end (tmap, start_bbt, start_samples, elen).samples();
+
+		std::cerr << " starts at " << start_samples << " aka " << start_bbt << " ends at " << trig_ends_at << " vs. " << transport_position << std::endl;
+
+		if (trig_ends_at >= transport_position) {
+			/* we're done. trig now indicates the trigger that
+			   would have started most recently before the
+			   transport position.
+			*/
+			std::cerr << "trig ends after tpos, done\n";
+			break;
+		}
+
+		int dnt = determine_next_trigger (trig->index());
+
+		if (dnt < 0) {
+
+			/* no trigger follows the current one. Back to
+			   looking for another cue.
+			*/
+			std::cerr << "no next trigger\n";
+			trig.reset ();
+			break;
+
+		} else {
+
+			trig = all_triggers[dnt];
+
+			if (!trig) {
+				break;
+			}
+
+			std::cerr << "next trigger is " << dnt << " aka " << trig->name() << std::endl;
+		}
+
+		/* move forward to the end of this trigger */
+		pos = trig_ends_at;
+		std::cerr << " now at " << pos << std::endl;
+	}
+
+	if (!trig) {
+		/* nothing to do */
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: no trigger(2) to be rolled (%2 >= %3, prev = %4)\n", order(), pos, transport_position, prev));
+		_currently_playing = 0;
+		_locate_armed = false;
+		if (tracker) {
+			tracker->reset ();
+		}
+		return;
+	}
+
+	/* trig is the trigger that would still be running at
 	 * transport_position. We need to run it in a special mode that ensures
 	 * that
 	 *
@@ -3111,10 +3198,10 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		} while (s < transport_position);
 	}
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: roll trigger %2 from %3 to %4\n", order(), prev->index(), start_samples, transport_position));
-	prev->start_and_roll_to (start_samples, transport_position);
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: roll trigger %2 from %3 to %4\n", order(), trig->index(), start_samples, transport_position));
+	trig->start_and_roll_to (start_samples, transport_position);
 
-	_currently_playing = prev;
+	_currently_playing = trig;
 	_locate_armed = true;
 	/* currently playing is now ready to keep running at transport position
 	 *
