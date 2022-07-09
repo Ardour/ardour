@@ -106,7 +106,7 @@ EngineControl::EngineControl ()
 	, unit_samples_txt1 (_("samples"), Gtk::ALIGN_START)
 	, unit_samples_txt2 (_("samples"), Gtk::ALIGN_START)
 	, control_app_button (_("Device Control Panel"))
-	, midi_devices_button (_("MIDI Device Setup & Calibration"))
+	, midi_devices_button (_("Setup & Calibration"))
 	, start_stop_button (_("Stop"))
 	, update_devices_button (_("Refresh Devices"))
 	, use_buffered_io_button (_("Use Buffered I/O"), ArdourButton::led_default_elements)
@@ -359,6 +359,8 @@ EngineControl::EngineControl ()
 	unit_samples_txt2.set_no_show_all ();
 	lm_button_audio.set_no_show_all ();
 	midi_devices_button.set_no_show_all ();
+	lbl_midi_system.set_no_show_all ();
+	midi_option_combo.set_no_show_all ();
 }
 
 void
@@ -562,11 +564,6 @@ EngineControl::build_full_control_notebook ()
 	settings_table.attach (try_autostart_button, 3, 4, btn, btn + 1, xopt, xopt);
 	++btn;
 
-	settings_table.attach (lbl_midi_system,   0, 1, row, row + 1, xopt, SHRINK);
-	settings_table.attach (midi_option_combo, 1, 2, row, row + 1, xopt, SHRINK);
-	++row;
-	++btn;
-
 	/* Interface */
 
 	if (backend->can_use_buffered_io ()) {
@@ -642,7 +639,11 @@ EngineControl::build_full_control_notebook ()
 	settings_table.attach (latency_expander, 0, 4, row, row + 1, xopt, SHRINK);
 	++row;
 
-	/* Systemic Latency */
+	/* Advanced: Systemic Latency, MIDI */
+	settings_table.attach (lbl_midi_system,     0, 1, row, row + 1, xopt, SHRINK);
+	settings_table.attach (midi_option_combo,   1, 2, row, row + 1, xopt, SHRINK);
+	settings_table.attach (midi_devices_button, 3, 4, row, row + 1, xopt, SHRINK);
+	++row;
 
 	settings_table.attach (lbl_input_latency, 0, 1, row, row + 1, xopt, SHRINK);
 	settings_table.attach (input_latency,     1, 2, row, row + 1, xopt, SHRINK);
@@ -653,9 +654,6 @@ EngineControl::build_full_control_notebook ()
 	settings_table.attach (lbl_output_latency, 0, 1, row, row + 1, xopt, SHRINK);
 	settings_table.attach (output_latency,     1, 2, row, row + 1, xopt, SHRINK);
 	settings_table.attach (unit_samples_txt2,  2, 3, row, row + 1, SHRINK, SHRINK);
-
-	++row;
-	settings_table.attach (midi_devices_button, 1, 4, row, row + 1, xopt, SHRINK);
 }
 
 void
@@ -2821,6 +2819,8 @@ EngineControl::on_latency_expand ()
 		unit_samples_txt1.show ();
 		unit_samples_txt2.show ();
 		lm_button_audio.show ();
+		lbl_midi_system.show ();
+		midi_option_combo.show ();
 		midi_devices_button.show ();
 	} else {
 		lbl_input_latency.hide ();
@@ -2830,6 +2830,8 @@ EngineControl::on_latency_expand ()
 		unit_samples_txt1.hide ();
 		unit_samples_txt2.hide ();
 		lm_button_audio.hide ();
+		lbl_midi_system.hide ();
+		midi_option_combo.hide ();
 		midi_devices_button.hide ();
 		resize (1, 1); // shrink window
 	}
