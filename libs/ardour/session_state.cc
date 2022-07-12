@@ -1240,7 +1240,6 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 			child = node->add_child ("Path");
 			child->add_content (p);
 		}
-		node->set_property ("end-is-free", _session_range_is_free);  //deprecated, but keep storing this value for compatibility with prior v5.
 		node->set_property ("session-range-is-free", _session_range_is_free);
 	}
 
