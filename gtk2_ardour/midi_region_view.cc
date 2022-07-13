@@ -3762,28 +3762,24 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
 		break;
 	}
 
-	if (op != Copy) {
-
-		bool as_subcommand = false;
-
-		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-			switch (op) {
-			case Copy:
-				break;
-			case Delete:
-			case Clear:
-			case Cut:
-				if (!_note_diff_command) {
-					_note_diff_command = _model->new_note_diff_command ("Cut");
-					as_subcommand = true;
-				}
-				note_diff_remove_note (*i);
-				break;
-			}
-		}
-
-		apply_note_diff (as_subcommand);
+	if (op == Copy) {
+		return;
 	}
+
+	bool as_subcommand = false;
+
+	/* Editor::cut_copy already started an undo operation,
+	 * so we cannot call start_note_diff_command ()
+	 */
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		if (!_note_diff_command) {
+			_note_diff_command = _model->new_note_diff_command ("Cut");
+			as_subcommand = true;
+		}
+		note_diff_remove_note (*i);
+	}
+
+	apply_note_diff (as_subcommand);
 }
 
 MidiCutBuffer*
