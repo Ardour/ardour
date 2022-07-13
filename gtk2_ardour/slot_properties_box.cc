@@ -369,12 +369,12 @@ SlotPropertyTable::SlotPropertyTable ()
 	attach(*eLaunchBox,     1,2, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 	attach(*eFollowBox,     2,3, 0,1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 
-	set_tooltip(_name_frame, _("Double-click to rename this Clip"));
-	set_tooltip(_gain_spinner, _("Adjust audio gain (or MIDI velocity) for this clip"));
-	set_tooltip(_load_button, _("Load a new file into this clip"));
+	set_tooltip(_name_frame, _("Double-click to rename this clip"));
+	set_tooltip(_gain_spinner, _("Adjust audio gain (or MIDI velocity) for this slot"));
+	set_tooltip(_load_button, _("Load a new file into this slot"));
 	set_tooltip(_color_button, _("Pick a color for this clip"));
 	set_tooltip(_patch_button, _("View and edit the programs (patches) that this MIDI clip will send to a synth"));
-	set_tooltip(_allow_button, _("Allow this MIDI clip to send patches to a synth"));
+	set_tooltip(_allow_button, _("Allow this slot to send MIDI patches to a synth"));
 
 	set_tooltip(_follow_count_spinner, _("Number of times to repeat this clip's Follow Length before triggering the Follow-Action"));
 	set_tooltip(_use_follow_length_button, _("Click to use the Follow Length instead of the Clip Length"));

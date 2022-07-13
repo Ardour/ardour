@@ -62,7 +62,7 @@ using namespace PBD;
 using namespace ARDOUR;
 
 TriggerClipPicker::TriggerClipPicker ()
-	: _fcd (_("Select Sample Folder"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
+	: _fcd (_("Select clip folder"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, _seek_slider (0, 1000, 1)
 	, _autoplay_btn (_("Auto-play"))
 	, _auditioner_combo (InstrumentSelector::ForAuditioner)

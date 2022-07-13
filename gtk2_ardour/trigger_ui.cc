@@ -205,7 +205,7 @@ void
 TriggerUI::choose_sample (bool allow_multiple_select)
 {
 	if (!_file_chooser) {
-		_file_chooser = new Gtk::FileChooserDialog (_("Select sample"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+		_file_chooser = new Gtk::FileChooserDialog (_("Select file to load into slot"), Gtk::FILE_CHOOSER_ACTION_OPEN);
 		_file_chooser->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 		_file_chooser->add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
