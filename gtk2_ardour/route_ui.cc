@@ -108,6 +108,8 @@ std::string RouteUI::program_port_prefix;
 RouteUI::IOSelectorMap RouteUI::input_selectors;
 RouteUI::IOSelectorMap RouteUI::output_selectors;
 
+#define GROUP_ACTION (Config->get_group_override_inverts () ? Controllable::InverseGroup : Controllable::NoGroup)
+
 void
 RouteUI::delete_ioselector (IOSelectorMap& m, boost::shared_ptr<ARDOUR::Route> r)
 {
@@ -802,7 +804,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 				rl.reset (new RouteList);
 				rl->push_back (_route);
 
-				_session->set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), !track()->rec_enable_control()->get_value(), Controllable::InverseGroup);
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), !track()->rec_enable_control()->get_value(), GROUP_ACTION);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -909,7 +911,7 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 		/* Tertiary-click overrides group */
 		rl.reset (new RouteList);
 		rl->push_back (route());
-		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::InverseGroup);
+		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, GROUP_ACTION);
 	} else {
 		rl.reset (new RouteList);
 		rl->push_back (route());

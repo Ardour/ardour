@@ -584,7 +584,11 @@ GainMeterBase::fader_moved ()
 		}
 
 		if (Keyboard::the_keyboard().modifier_state() == Keyboard::group_override_modifier ()) {
-			_control->set_value (value, Controllable::InverseGroup);
+			if (Config->get_group_override_inverts ()) {
+				_control->set_value (value, Controllable::InverseGroup);
+			} else {
+				_control->set_value (value, Controllable::NoGroup);
+			}
 		} else {
 			_control->set_value (value, Controllable::UseGroup);
 		}
