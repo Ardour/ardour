@@ -5388,6 +5388,12 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		_track_selection_at_start = _editor->selection->tracks;
 	}
 
+	/* in the case where there was no existing selection, we can check the group_ovveride */
+	PBD::Controllable::GroupControlDisposition gcd = PBD::Controllable::UseGroup;
+	if (ArdourKeyboard::is_group_override_event((GdkEventButton*)event) && _track_selection_at_start.empty()) {
+		gcd = PBD::Controllable::NoGroup;
+	}
+
 	switch (_operation) {
 	case CreateSelection:
 	{
@@ -5416,18 +5422,16 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		if (first_move) {
 
 			if (_add) {
-
 				/* adding to the selection */
-				_editor->set_selected_track_as_side_effect (Selection::Add);
+				_editor->set_selected_track_as_side_effect (Selection::Add, gcd);
 				_editor->clicked_selection = _editor->selection->add (start, end);
 				_add = false;
 
 			} else {
-
 				/* new selection */
 
 				if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
-					_editor->set_selected_track_as_side_effect (Selection::Set);
+					_editor->set_selected_track_as_side_effect (Selection::Set, gcd);
 				}
 
 				_editor->clicked_selection = _editor->selection->set (start, end);
@@ -5472,7 +5476,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 						tracks_to_remove.push_back (*i);
 					} else {
 						RouteGroup* rg = (*i)->route_group();
-						if (rg && rg->is_active() && rg->is_select()) {
+						if (rg && rg->is_active() && rg->is_select() && gcd != Controllable::NoGroup) {
 							selected_route_groups.push_back (rg);
 						}
 					}
@@ -5484,7 +5488,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 					tracks_to_add.push_back (*i);
 					RouteGroup* rg = (*i)->route_group();
 
-					if (rg && rg->is_active() && rg->is_select()) {
+					if (rg && rg->is_active() && rg->is_select() && gcd != Controllable::NoGroup) {
 						selected_route_groups.push_back (rg);
 					}
 				}

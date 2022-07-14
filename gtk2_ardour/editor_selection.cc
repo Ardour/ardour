@@ -205,7 +205,7 @@ Editor::select_all_visible_lanes ()
  *  tracks, in which case nothing will happen unless `force' is true.
  */
 void
-Editor::set_selected_track_as_side_effect (Selection::Operation op)
+Editor::set_selected_track_as_side_effect (Selection::Operation op, Controllable::GroupControlDisposition gcd)
 {
 	if (!clicked_axisview) {
 		return;
@@ -223,7 +223,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 		if (selection->selected (clicked_axisview)) {
 			if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					if ((*i)->route_group() == group) {
+					if ((*i)->route_group() == group && gcd != Controllable::NoGroup) {
 						selection->remove(*i);
 					}
 				}
@@ -233,7 +233,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 		} else {
 			if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					if ((*i)->route_group() == group) {
+					if ((*i)->route_group() == group && gcd != Controllable::NoGroup) {
 						selection->add(*i);
 					}
 				}
@@ -246,7 +246,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 	case Selection::Add:
 		if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
-				if ((*i)->route_group() == group) {
+				if ((*i)->route_group() == group && gcd != Controllable::NoGroup) {
 					selection->add(*i);
 				}
 			}
@@ -259,7 +259,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 		selection->clear();
 		if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
-				if ((*i)->route_group() == group) {
+				if ((*i)->route_group() == group && gcd != Controllable::NoGroup) {
 					selection->add(*i);
 				}
 			}

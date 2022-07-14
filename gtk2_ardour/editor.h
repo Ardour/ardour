@@ -51,6 +51,7 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/dndtreeview.h"
 
+#include "pbd/controllable.h"
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
 
@@ -830,7 +831,7 @@ private:
 
 	bool set_selected_control_point_from_click (bool press, Selection::Operation op = Selection::Set);
 	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
-	void set_selected_track_as_side_effect (Selection::Operation op);
+	void set_selected_track_as_side_effect (Selection::Operation op, PBD::Controllable::GroupControlDisposition gcd = PBD::Controllable::UseGroup);
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set);
 
 	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::weak_ptr<ARDOUR::Region>);

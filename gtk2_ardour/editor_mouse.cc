@@ -937,7 +937,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case StreamItem:
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier) && !selection->time.empty()) {
 				_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
 			} else {
 				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
@@ -953,7 +953,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		default:
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier) && !selection->time.empty()) {
 				_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
 			} else {
 				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
