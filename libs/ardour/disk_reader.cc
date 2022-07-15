@@ -1466,8 +1466,13 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		Location* loc = _loop_location;
 
 		if (loc) {
-			/* Evoral::Range has inclusive range semantics. Ugh. Hence the -1 */
-			const Temporal::Range loop_range (loc->start (), loc->end ());
+			/* squish() operates in the location's time-domain. When the location was created
+			 * using music-time, and later converted to audio-time, it can happen that the
+			 * corresponding super-clock is "between samples". e.g loop-end is at sample 1000.12.
+			 * if start_sample = 1000; squish() does nothing because 1000 < 1000.12.
+			 * This is solved by creating the range using (rounded) sample-times.
+			 */
+			const Temporal::Range loop_range (loc->start ().samples(), loc->end ().samples());
 			samplepos_t           effective_start = start_sample;
 			samplecnt_t           cnt             = nframes;
 			sampleoffset_t        offset          = 0;

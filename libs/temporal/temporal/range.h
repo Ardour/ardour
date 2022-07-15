@@ -150,6 +150,7 @@ class LIBTEMPORAL_API Range {
 	 */
 
 	Range (timepos_t const & s, timepos_t const & e) : _start (s), _end (e) {}
+	Range (samplepos_t const s, samplepos_t const e) : _start (s), _end (e) {}
 	bool empty() const { return _start == _end; }
 	timecnt_t length() const { return _start.distance (_end); }
 
@@ -163,6 +164,11 @@ class LIBTEMPORAL_API Range {
 
 	bool operator== (Range const & other) const {
 		return other._start == _start && other._end == _end;
+	}
+
+	void force_to_samples () {
+		_start = timepos_t((samplepos_t)_start.samples ());
+		_end   = timepos_t((samplepos_t)_end.samples ());
 	}
 
 	/** for a T, return a mapping of it into the range (used for
