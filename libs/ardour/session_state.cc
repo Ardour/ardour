@@ -3179,6 +3179,10 @@ void
 Session::add_command (Command* const cmd)
 {
 	assert (_current_trans);
+	if (!_current_trans) {
+		error << "Attempted to add an UNDO command without a current transaction.  ignoring command (" << cmd->name() <<  ")" << endl;
+		return;
+	}
 	DEBUG_UNDO_HISTORY (
 	    string_compose ("Current Undo Transaction %1, adding command: %2",
 	                    _current_trans->name (),

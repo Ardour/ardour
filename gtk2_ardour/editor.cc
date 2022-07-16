@@ -3704,6 +3704,8 @@ Editor::abort_reversible_command ()
 	}
 }
 
+#include "pbd/stacktrace.h"
+
 void
 Editor::commit_reversible_command ()
 {
@@ -3716,6 +3718,7 @@ Editor::commit_reversible_command ()
 		}
 
 		if (before.empty()) {
+			PBD::stacktrace(cerr, 30);
 			cerr << "Please call begin_reversible_command() before commit_reversible_command()." << endl;
 		} else {
 			before.pop_back();
