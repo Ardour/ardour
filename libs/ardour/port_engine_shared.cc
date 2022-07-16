@@ -457,7 +457,7 @@ PortEngineSharedImpl::unregister_port (PortEngine::PortHandle port_handle)
 
 		pm->erase (port->name());
 		ps->erase (i);
-		pr->erase (*i);
+		pr->erase (port);
 	}
 
 	_ports.flush ();
