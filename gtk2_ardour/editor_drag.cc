@@ -3014,7 +3014,7 @@ TrimDrag::aborted (bool movement_occurred)
 
 	GdkEvent ev;
 	memset (&ev, 0, sizeof (GdkEvent));
-	finished (&ev, true);
+	finished (&ev, movement_occurred);
 
 	if (movement_occurred) {
 		_editor->session()->undo (1);
