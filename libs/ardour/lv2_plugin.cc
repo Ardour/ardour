@@ -137,6 +137,7 @@ uint32_t      LV2Plugin::_ui_foreground_color  = 0xffffffff; // RGBA
 uint32_t      LV2Plugin::_ui_contrasting_color = 0x33ff33ff; // RGBA
 unsigned long LV2Plugin::_ui_transient_win_id  = 0;
 
+
 class LV2World : boost::noncopyable {
 public:
 	LV2World ();
@@ -481,6 +482,8 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_work_schedule_feature.data  = NULL;
 	_def_state_feature.URI       = LV2_STATE_PREFIX "loadDefaultState";  // Post LV2-1.2.0
 	_def_state_feature.data      = NULL;
+	_block_length_feature.URI    = LV2_BUF_SIZE__boundedBlockLength;
+	_block_length_feature.data   = NULL;
 
 	const LilvPlugin* plugin = _impl->plugin;
 
@@ -494,16 +497,17 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	lilv_node_free(state_uri);
 	lilv_node_free(state_iface_uri);
 
-	_features    = (LV2_Feature**)calloc(14, sizeof(LV2_Feature*));
+	_features    = (LV2_Feature**)calloc (15, sizeof(LV2_Feature*));
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_make_path_feature;
 	_features[3] = _uri_map.urid_map_feature();
 	_features[4] = _uri_map.urid_unmap_feature();
 	_features[5] = &_log_feature;
+	_features[6] = &_def_state_feature;
+	_features[7] = &_block_length_feature;
 
-	unsigned n_features = 6;
-	_features[n_features++] = &_def_state_feature;
+	unsigned n_features = 8;
 
 	lv2_atom_forge_init(&_impl->forge, _uri_map.urid_map());
 	lv2_atom_forge_init(&_impl->ui_forge, _uri_map.urid_map());

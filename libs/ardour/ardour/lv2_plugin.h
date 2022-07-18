@@ -336,6 +336,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature    _work_schedule_feature;
 	LV2_Feature    _options_feature;
 	LV2_Feature    _def_state_feature;
+	LV2_Feature    _block_length_feature;
 #ifdef LV2_EXTENDED
 	LV2_Feature    _queue_draw_feature;
 	LV2_Feature    _midnam_feature;
