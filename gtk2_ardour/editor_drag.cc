@@ -369,12 +369,12 @@ Drag::end_grab (GdkEvent* event)
 
 	_item->ungrab ();
 
-	finished (event, _move_threshold_passed);
+	finished (event, _starting_point_passed);
 
 	_editor->verbose_cursor()->hide ();
 	_cursor_ctx.reset();
 
-	return _move_threshold_passed;
+	return _starting_point_passed;
 }
 
 timepos_t
