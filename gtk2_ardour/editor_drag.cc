@@ -4433,9 +4433,8 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			/* now move it */
 
 			if (copy_location->is_cue_marker()) {
-				/* cue marks should always move with snapping */
 				timepos_t s (copy_location->start() + f_delta);
-				_editor->snap_to (s, Temporal::RoundNearest, SnapToGrid_Scaled, true);
+				_editor->snap_to_with_modifier (s, event, RoundNearest, SnapToGrid_Scaled);
 				copy_location->set_start (s, false);
 			} else {
 				copy_location->set_start (copy_location->start() + f_delta, false);
