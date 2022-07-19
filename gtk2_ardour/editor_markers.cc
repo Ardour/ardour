@@ -538,6 +538,9 @@ Editor::get_markers_to_ripple (boost::shared_ptr<Playlist> target_playlist, time
 	const timepos_t ripple_start = effective_ripple_mark_start (target_playlist, pos);
 
 	for (LocationMarkerMap::const_iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		if ( i->first->is_session_range() || i->first->is_auto_punch() || i->first->is_auto_loop()  ) {
+			continue;
+		}
 		if (i->first->start() >= ripple_start) {
 			cerr << "Add markers for " << i->first->name() << endl;
 			markers.push_back (i->second->start);
