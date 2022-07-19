@@ -1028,14 +1028,21 @@ void
 RegionMotionDrag::collect_ripple_views ()
 {
 	RegionSelection copy;
+	TrackViewList tracklist;
 
+	/* find all regions that we *might* ripple */
 	_editor->get_regionviews_at_or_after (_primary->region()->position(), copy);
 
-	TimeAxisView *primary_tav = &_primary->get_time_axis_view();
+	/* if we aren't in ripple-all, find which tracks we will be rippling, based on the current region selection */
+	if (!_editor->should_ripple_all()) {
+		for (RegionSelection::iterator r = _editor->selection->regions.begin(); r != _editor->selection->regions.end(); ++r) {
+			tracklist.push_back (&(*r)->get_time_axis_view ());
+		}
+	}
 
 	for (RegionSelection::reverse_iterator i = copy.rbegin(); i != copy.rend(); ++i) {
 		TimeAxisView *tav = &(*i)->get_time_axis_view();
-		if (_editor->should_ripple_all() || tav == primary_tav) {
+		if (_editor->should_ripple_all() || tracklist.contains(tav)) {
 			if (!_editor->selection->regions.contains (*i)) {
 				_views.push_back (DraggingView (*i, this, &(*i)->get_time_axis_view()));
 			}
