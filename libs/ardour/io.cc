@@ -65,11 +65,18 @@ using namespace PBD;
 const string                 IO::state_node_name = "IO";
 PBD::Signal1<void,ChanCount> IO::PortCountChanged;
 
+static std::string
+legalize_io_name (std::string n)
+{
+	replace_all (n, ":", "-");
+	return n;
+}
+
 /** @param default_type The type of port that will be created by ensure_io
  * and friends if no type is explicitly requested (to avoid breakage).
  */
 IO::IO (Session& s, const string& name, Direction dir, DataType default_type, bool sendish)
-	: SessionObject (s, name)
+	: SessionObject (s, legalize_io_name (name))
 	, _direction (dir)
 	, _default_type (default_type)
 	, _sendish (sendish)
@@ -1137,7 +1144,7 @@ IO::set_name (const string& requested_name)
 
 	/* replace all colons in the name. i wish we didn't have to do this */
 
-	replace_all (name, ":", "-");
+	name = legalize_io_name (name);
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		string current_name = i->name();
@@ -1402,8 +1409,7 @@ IO::build_legal_port_name (DataType type)
 
 	/* colons are illegal in port names, so fix that */
 
-	string nom = _name.val();
-	replace_all (nom, ":", ";");
+	string nom = legalize_io_name (_name.val());
 
 	snprintf (&buf1[0], name_size+1, ("%.*s/%s"), limit, nom.c_str(), suffix.c_str());
 
