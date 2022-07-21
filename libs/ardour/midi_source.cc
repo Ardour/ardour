@@ -104,7 +104,7 @@ MidiSource::get_state () const
 	for (AutomationStateMap::const_iterator i = _automation_state.begin(); i != _automation_state.end(); ++i) {
 		XMLNode* child = node.add_child (X_("AutomationState"));
 		child->set_property (X_("parameter"), EventTypeMap::instance().to_symbol (i->first));
-		child->set_property (X_("state"), enum_2_string (i->second));
+		child->set_property (X_("state"), i->second);
 	}
 
 	return node;
@@ -154,11 +154,19 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 			}
 			Evoral::Parameter p = EventTypeMap::instance().from_symbol (str);
 
-			if (!(*i)->get_property (X_("state"), str)) {
+			/* backwards compat, older versions (<= 7000) saved an empty string for "off" */
+			if ((*i)->get_property (X_("state"), str)) {
+				if (str.empty ()) {
+					set_automation_state_of (p, Off);
+					continue;
+				}
+			}
+
+			AutoState s;
+			if (!(*i)->get_property (X_("state"), s)) {
 				error << _("Missing state property on AutomationState") << endmsg;
 				return -1;
 			}
-			AutoState s = static_cast<AutoState>(string_2_enum (str, s));
 			set_automation_state_of (p, s);
 		}
 	}
