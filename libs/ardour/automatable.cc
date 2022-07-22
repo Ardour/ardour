@@ -490,7 +490,7 @@ Automatable::automation_run (samplepos_t start, pframes_t nframes, bool only_act
 }
 
 void
-Automatable::automation_list_automation_state_changed (Evoral::Parameter param, AutoState as)
+Automatable::automation_list_automation_state_changed (Evoral::Parameter const& param, AutoState as)
 {
 	{
 		boost::shared_ptr<AutomationControl> c (automation_control(param));

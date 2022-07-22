@@ -35,6 +35,7 @@
 #include "temporal/range.h"
 
 #include "ardour/ardour.h"
+#include "ardour/automation_list.h"
 #include "ardour/buffer.h"
 #include "ardour/midi_cursor.h"
 #include "ardour/source.h"
@@ -185,20 +186,20 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	void set_model(const WriterLock& lock, boost::shared_ptr<MidiModel>);
 	void drop_model(const WriterLock& lock);
 
-	Evoral::ControlList::InterpolationStyle interpolation_of (Evoral::Parameter) const;
-	void set_interpolation_of (Evoral::Parameter, Evoral::ControlList::InterpolationStyle);
+	AutomationList::InterpolationStyle interpolation_of (Evoral::Parameter const&) const;
+	void set_interpolation_of (Evoral::Parameter const&, AutomationList::InterpolationStyle);
 	void copy_interpolation_from (boost::shared_ptr<MidiSource>);
 	void copy_interpolation_from (MidiSource *);
 
-	AutoState automation_state_of (Evoral::Parameter) const;
-	void set_automation_state_of (Evoral::Parameter, AutoState);
+	AutoState automation_state_of (Evoral::Parameter const&) const;
+	void set_automation_state_of (Evoral::Parameter const&, AutoState);
 	void copy_automation_state_from (boost::shared_ptr<MidiSource>);
 	void copy_automation_state_from (MidiSource *);
 
 	/** Emitted when a different MidiModel is set */
 	PBD::Signal0<void> ModelChanged;
 	/** Emitted when a parameter's interpolation style is changed */
-	PBD::Signal2<void, Evoral::Parameter, Evoral::ControlList::InterpolationStyle> InterpolationChanged;
+	PBD::Signal2<void, Evoral::Parameter, AutomationList::InterpolationStyle> InterpolationChanged;
 	/** Emitted when a parameter's automation state is changed */
 	PBD::Signal2<void, Evoral::Parameter, AutoState> AutomationStateChanged;
 
@@ -234,7 +235,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	/** Map of interpolation styles to use for Parameters; if they are not in this map,
 	 *  the correct interpolation style can be obtained from EventTypeMap::interpolation_of ()
 	 */
-	typedef std::map<Evoral::Parameter, Evoral::ControlList::InterpolationStyle> InterpolationStyleMap;
+	typedef std::map<Evoral::Parameter, AutomationList::InterpolationStyle> InterpolationStyleMap;
 	InterpolationStyleMap _interpolation_style;
 
 	/** Map of automation states to use for Parameters; if they are not in this map,

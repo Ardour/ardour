@@ -1638,7 +1638,7 @@ MidiModel::insert_merge_policy () const
  *  or the other is listened to by the GUI.
  */
 void
-MidiModel::source_interpolation_changed (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
+MidiModel::source_interpolation_changed (Evoral::Parameter const& p, AutomationList::InterpolationStyle s)
 {
 	{
 		Glib::Threads::Mutex::Lock lm (_control_lock);
@@ -1652,13 +1652,13 @@ MidiModel::source_interpolation_changed (Evoral::Parameter p, Evoral::ControlLis
  *  MidiSource and ControlList interpolation state in sync, we pass this change onto our MidiSource.
  */
 void
-MidiModel::control_list_interpolation_changed (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
+MidiModel::control_list_interpolation_changed (Evoral::Parameter const& p, AutomationList::InterpolationStyle s)
 {
 	_midi_source.set_interpolation_of (p, s);
 }
 
 void
-MidiModel::source_automation_state_changed (Evoral::Parameter p, AutoState s)
+MidiModel::source_automation_state_changed (Evoral::Parameter const& p, AutoState s)
 {
 	{
 		Glib::Threads::Mutex::Lock lm (_control_lock);
@@ -1670,7 +1670,7 @@ MidiModel::source_automation_state_changed (Evoral::Parameter p, AutoState s)
 }
 
 void
-MidiModel::automation_list_automation_state_changed (Evoral::Parameter p, AutoState s)
+MidiModel::automation_list_automation_state_changed (Evoral::Parameter const& p, AutoState s)
 {
 	_midi_source.set_automation_state_of (p, s);
 }

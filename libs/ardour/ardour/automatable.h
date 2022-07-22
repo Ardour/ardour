@@ -121,7 +121,7 @@ protected:
 
 	void can_automate(Evoral::Parameter);
 
-	virtual void automation_list_automation_state_changed (Evoral::Parameter, AutoState);
+	virtual void automation_list_automation_state_changed (Evoral::Parameter const&, AutoState);
 	SerializedRCUManager<ControlList> _automated_controls;
 
 	int load_automation (const std::string& path);

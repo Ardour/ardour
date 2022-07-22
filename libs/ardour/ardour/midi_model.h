@@ -33,9 +33,9 @@
 
 #include "pbd/command.h"
 
+#include "ardour/libardour_visibility.h"
+#include "ardour/automation_list.h"
 #include "ardour/automatable_sequence.h"
-#include "ardour/libardour_visibility.h"
-#include "ardour/libardour_visibility.h"
 #include "ardour/source.h"
 #include "ardour/types.h"
 #include "ardour/types.h"
@@ -348,10 +348,10 @@ public:
 private:
 	friend class DeltaCommand;
 
-	void source_interpolation_changed (Evoral::Parameter, Evoral::ControlList::InterpolationStyle);
-	void source_automation_state_changed (Evoral::Parameter, AutoState);
-	void control_list_interpolation_changed (Evoral::Parameter, Evoral::ControlList::InterpolationStyle);
-	void automation_list_automation_state_changed (Evoral::Parameter, AutoState);
+	void source_interpolation_changed (Evoral::Parameter const&, AutomationList::InterpolationStyle);
+	void source_automation_state_changed (Evoral::Parameter const&, AutoState);
+	void control_list_interpolation_changed (Evoral::Parameter const&, AutomationList::InterpolationStyle);
+	void automation_list_automation_state_changed (Evoral::Parameter const&, AutoState);
 
 	void control_list_marked_dirty ();
 

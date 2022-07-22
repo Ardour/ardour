@@ -54,6 +54,8 @@
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
 #include "ardour/tempo.h"
+#include "ardour/evoral_types_convert.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 
@@ -98,7 +100,7 @@ MidiSource::get_state () const
 	for (InterpolationStyleMap::const_iterator i = _interpolation_style.begin(); i != _interpolation_style.end(); ++i) {
 		XMLNode* child = node.add_child (X_("InterpolationStyle"));
 		child->set_property (X_("parameter"), EventTypeMap::instance().to_symbol (i->first));
-		child->set_property (X_("style"), enum_2_string (i->second));
+		child->set_property (X_("style"), i->second);
 	}
 
 	for (AutomationStateMap::const_iterator i = _automation_state.begin(); i != _automation_state.end(); ++i) {
@@ -139,12 +141,18 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 				continue;
 			}
 
-			if (!(*i)->get_property (X_("style"), str)) {
+			/* backwards compat, older versions (<= 7000) saved an empty string for non default */
+			if ((*i)->get_property (X_("style"), str)) {
+				if (str.empty ()) {
+					set_interpolation_of (p, EventTypeMap::instance().interpolation_of (p) == AutomationList::Discrete ? AutomationList::Linear : AutomationList::Discrete);
+					continue;
+				}
+			}
+			AutomationList::InterpolationStyle s;
+			if (!(*i)->get_property (X_("style"), s)) {
 				error << _("Missing style property on InterpolationStyle") << endmsg;
 				return -1;
 			}
-			Evoral::ControlList::InterpolationStyle s =
-			    static_cast<Evoral::ControlList::InterpolationStyle>(string_2_enum (str, s));
 			set_interpolation_of (p, s);
 
 		} else if ((*i)->name() == X_("AutomationState")) {
@@ -378,8 +386,8 @@ MidiSource::mark_midi_streaming_write_completed (const WriterLock&              
 		/* Make captured controls discrete to play back user input exactly. */
 		for (MidiModel::Controls::iterator i = _model->controls().begin(); i != _model->controls().end(); ++i) {
 			if (i->second->list()) {
-				i->second->list()->set_interpolation(Evoral::ControlList::Discrete);
-				_interpolation_style.insert(std::make_pair(i->second->parameter(), Evoral::ControlList::Discrete));
+				i->second->list()->set_interpolation (AutomationList::Discrete);
+				_interpolation_style.insert(std::make_pair(i->second->parameter(), AutomationList::Discrete));
 			}
 		}
 	}
@@ -495,8 +503,8 @@ MidiSource::set_model (const WriterLock& lock, boost::shared_ptr<MidiModel> m)
 	ModelChanged (); /* EMIT SIGNAL */
 }
 
-Evoral::ControlList::InterpolationStyle
-MidiSource::interpolation_of (Evoral::Parameter p) const
+AutomationList::InterpolationStyle
+MidiSource::interpolation_of (Evoral::Parameter const& p) const
 {
 	InterpolationStyleMap::const_iterator i = _interpolation_style.find (p);
 	if (i == _interpolation_style.end()) {
@@ -507,7 +515,7 @@ MidiSource::interpolation_of (Evoral::Parameter p) const
 }
 
 AutoState
-MidiSource::automation_state_of (Evoral::Parameter p) const
+MidiSource::automation_state_of (Evoral::Parameter const& p) const
 {
 	AutomationStateMap::const_iterator i = _automation_state.find (p);
 	if (i == _automation_state.end()) {
@@ -525,7 +533,7 @@ MidiSource::automation_state_of (Evoral::Parameter p) const
  *  propagated to anyone who needs to know.
  */
 void
-MidiSource::set_interpolation_of (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
+MidiSource::set_interpolation_of (Evoral::Parameter const& p, AutomationList::InterpolationStyle s)
 {
 	if (interpolation_of (p) == s) {
 		return;
@@ -542,7 +550,7 @@ MidiSource::set_interpolation_of (Evoral::Parameter p, Evoral::ControlList::Inte
 }
 
 void
-MidiSource::set_automation_state_of (Evoral::Parameter p, AutoState s)
+MidiSource::set_automation_state_of (Evoral::Parameter const& p, AutoState s)
 {
 	if (automation_state_of (p) == s) {
 		return;

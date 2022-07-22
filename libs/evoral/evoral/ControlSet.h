@@ -72,7 +72,7 @@ public:
 
 protected:
 	virtual void control_list_marked_dirty () {}
-	virtual void control_list_interpolation_changed (Parameter, ControlList::InterpolationStyle) {}
+	virtual void control_list_interpolation_changed (Parameter const&, ControlList::InterpolationStyle) {}
 
 	mutable Glib::Threads::Mutex _control_lock;
 	Controls            _controls;
