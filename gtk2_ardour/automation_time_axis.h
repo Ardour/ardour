@@ -134,6 +134,8 @@ public:
 		return _show_regions;
 	}
 
+	void set_automation_state (ARDOUR::AutoState);
+
 protected:
 	/* Note that for MIDI controller "automation" (in regions), all of these
 	 * may be set.  In this case, _automatable is likely _route so the
@@ -190,7 +192,6 @@ protected:
 	bool paste_one (Temporal::timepos_t const &, unsigned, float times, const Selection&, ItemCounts& counts, bool greedy=false);
 	void route_going_away ();
 
-	void set_automation_state (ARDOUR::AutoState);
 	bool ignore_state_request;
 	bool ignore_mode_request;
 

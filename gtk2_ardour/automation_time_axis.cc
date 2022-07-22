@@ -791,8 +791,9 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, timepos_t const &
 	if (list->editor_add (when, y, with_guard_points)) {
 
 		if (_control->automation_state () == ARDOUR::Off) {
-			_control->set_automation_state (ARDOUR::Play);
+			set_automation_state (ARDOUR::Play);
 		}
+
 		if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && _control == _session->recently_touched_controllable ()) {
 			RouteTimeAxisView::signal_ctrl_touched (false);
 		}
