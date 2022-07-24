@@ -3283,42 +3283,54 @@ LV2Plugin::latency_compute_run()
 		return;
 	}
 
-	// Run the plugin so that it can set its latency parameter
+	/* Run the plugin so that it can set its latency parameter
+	 * Note: since Ardour 5, plugins can dynamically change latency
+	 * so this call is not required anymore, but doing
+	 * an intial silent-run is likely a good idea regardless.
+	 */
 
 	bool was_activated = _was_activated;
 	activate();
-
-	uint32_t port_index = 0;
-	uint32_t in_index   = 0;
-	uint32_t out_index  = 0;
 
 	// this is done in the main thread. non realtime.
 	const samplecnt_t bufsize = _engine.samples_per_cycle();
 	float*            buffer  = (float*) malloc(_engine.samples_per_cycle() * sizeof(float));
 
+	std::vector<LV2_Evbuf*> ev_buffers;
 	memset(buffer, 0, sizeof(float) * bufsize);
 
 	// FIXME: Ensure plugins can handle in-place processing
 
-	port_index = 0;
-
-	while (port_index < parameter_count()) {
-		if (parameter_is_audio(port_index)) {
-			if (parameter_is_input(port_index)) {
-				lilv_instance_connect_port(_impl->instance, port_index, buffer);
-				in_index++;
-			} else if (parameter_is_output(port_index)) {
-				lilv_instance_connect_port(_impl->instance, port_index, buffer);
-				out_index++;
+	for (uint32_t port_index = 0; port_index < parameter_count (); ++port_index) {
+		PortFlags flags = _port_flags[port_index];
+		if (flags & PORT_AUDIO) {
+			lilv_instance_connect_port(_impl->instance, port_index, buffer);
+		} else if (flags & PORT_SEQUENCE) {
+			int buf_size = 8192;
+#if 1 /* honor the min port-size here */
+			const LilvPort* port  = lilv_plugin_get_port_by_index(_impl->plugin, port_index);
+			LilvNodes* min_size_v = lilv_port_get_value(_impl->plugin, port, _world.rsz_minimumSize);
+			LilvNode* min_size = min_size_v ? lilv_nodes_get_first(min_size_v) : NULL;
+			if (min_size && lilv_node_is_int(min_size)) {
+				buf_size = std::max (buf_size, lilv_node_as_int (min_size));
 			}
+			lilv_nodes_free(min_size_v);
+#endif
+			ev_buffers.push_back (lv2_evbuf_new (buf_size, _uri_map.urids.atom_Chunk, _uri_map.urids.atom_Sequence));
+			void* buf = lv2_evbuf_get_buffer (ev_buffers.back ());
+			lilv_instance_connect_port(_impl->instance, port_index, buf);
 		}
-		port_index++;
 	}
 
-	run(bufsize, true);
+	run (bufsize, true); // XXX prefer run (0, true)
+
 	deactivate();
 	if (was_activated) {
 		activate();
+	}
+	while (!ev_buffers.empty ()) {
+		lv2_evbuf_free (ev_buffers.back ());
+		ev_buffers.pop_back ();
 	}
 	free(buffer);
 }
