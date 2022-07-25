@@ -26,6 +26,8 @@
 
 #include "midi++/mmc.h"
 
+#include "pbd/natsort.h"
+
 #include "ardour/audio_port.h"
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
@@ -582,6 +584,14 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	}
 
 	if (ports.size () > 0) {
+
+		struct SortByPortName {
+			bool operator() (std::string const& lhs, std::string const& rhs) const {
+				return PBD::naturally_less (lhs.c_str (), rhs.c_str ());
+			}
+		} port_sorter;
+
+		std::sort (ports.begin (), ports.end (), port_sorter);
 
 		for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ++s) {
 
