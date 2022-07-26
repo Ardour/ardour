@@ -2111,6 +2111,7 @@ private:
 
 	XMLNode& state (bool save_template,
 	                snapshot_t snapshot_type = NormalSave,
+	                bool for_archive = false,
 	                bool only_used_assets = false) const;
 
 	XMLNode& get_state () const;

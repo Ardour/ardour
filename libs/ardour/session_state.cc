@@ -834,7 +834,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		mark_as_clean = false;
 		tree.set_root (&get_template());
 	} else {
-		tree.set_root (&state (false, fork_state, only_used_assets));
+		tree.set_root (&state (false, fork_state, for_archive, only_used_assets));
 	}
 
 	if (snapshot_name.empty()) {
@@ -1175,7 +1175,7 @@ struct route_id_compare {
 } // anon namespace
 
 XMLNode&
-Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_assets) const
+Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, bool only_used_assets) const
 {
 	LocaleGuard lg;
 	XMLNode* node = new XMLNode("Session");
@@ -1200,7 +1200,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 
 		/* store the last engine device we we can avoid autostarting on a different device with wrong i/o count */
 		boost::shared_ptr<AudioBackend> backend = _engine.current_backend();
-		if (_engine.running () && backend && _engine.setup_required ()) {
+		if (!for_archive && _engine.running () && backend && _engine.setup_required ()) {
 			child = node->add_child ("EngineHints");
 			child->set_property ("backend", backend-> name ());
 			if (backend->use_separate_input_and_output_devices()) {
