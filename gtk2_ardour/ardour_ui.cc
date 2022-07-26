@@ -384,6 +384,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 			/* "touch" the been-here-before path now that config has been migrated */
 			PBD::ScopedFileDescriptor fout (g_open (been_here_before_path ().c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
 		}
+
+		{
+			Config->load_state (); // need session-parent folder
+			copy_demo_sessions ();
+		}
+
 		ArdourMessageDialog msg (string_compose (_("Your configuration files were copied. You can now restart %1."), PROGRAM_NAME), true);
 		msg.run ();
 		/* configuration was modified, exit immediately */

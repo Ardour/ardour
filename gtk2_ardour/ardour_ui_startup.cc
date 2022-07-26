@@ -57,6 +57,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
+#include "ardour/recent_sessions.h"
 
 #include "gtkmm2ext/application.h"
 
@@ -579,6 +580,53 @@ ARDOUR_UI::starting ()
 	}
 
 	return 0;
+}
+
+int
+ARDOUR_UI::copy_demo_sessions ()
+{
+	int copied = 0;
+	if (ARDOUR::Profile->get_mixbus () && Config->get_copy_demo_sessions ()) {
+		std::string dspd (Config->get_default_session_parent_dir());
+		Searchpath ds (ARDOUR::ardour_data_search_path());
+		ds.add_subdirectory_to_paths ("sessions");
+		vector<string> demos;
+		find_files_matching_pattern (demos, ds, string_compose ("*%1", ARDOUR::session_archive_suffix));
+
+		ARDOUR::RecentSessions rs;
+		ARDOUR::read_recent_sessions (rs);
+
+		for (vector<string>::iterator i = demos.begin(); i != demos.end (); ++i) {
+			/* "demo-session" must be inside "demo-session.<session_archive_suffix>" */
+			std::string name = basename_nosuffix (basename_nosuffix (*i));
+			std::string path = Glib::build_filename (dspd, name);
+			/* skip if session-dir already exists */
+			if (Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_DIR)) {
+				/* ..but add it to recent-list */
+				store_recent_sessions (name, path);
+				continue;
+			}
+			/* skip sessions that are already in 'recent'.
+			 * eg. a new user changed <session-default-dir> shortly after installation
+			 */
+			for (ARDOUR::RecentSessions::iterator r = rs.begin(); r != rs.end(); ++r) {
+				if ((*r).first == name) {
+					continue;
+				}
+			}
+			try {
+				PBD::FileArchive ar (*i);
+				if (0 == ar.inflate (dspd)) {
+					store_recent_sessions (name, path);
+					info << string_compose (_("Copied demo session `%1'."), name) << endmsg;
+					++copied;
+				}
+			} catch (...) {
+					info << string_compose (_("Failed to extract demo session `%1'."), name) << endmsg;
+			}
+		}
+	}
+	return copied;
 }
 
 int
