@@ -87,8 +87,8 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, time
 
 	RegionList::iterator ours = regions.begin ();
 
-	for (RegionList::const_iterator i = other->regions.begin(); i != other->regions.end(); ++i) {
-		boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (*i);
+	for (auto const & r : other->regions) {
+		boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
 		assert (region);
 
 		samplecnt_t fade_in = 64;
