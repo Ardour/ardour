@@ -3017,6 +3017,31 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			}
 
 			trig = all_triggers[c->cue];
+
+			/* Since we are only concerned with things that could
+			 * be cue-launched, ignore a trigger driven by a cue if
+			 * it is cue-isolated.
+			 */
+
+			if (trig->cue_isolated()) {
+
+				/* Act as if this trigger was never found */
+
+				trig = 0;
+
+				/* Either move on to the next cue, or if there
+				 * is none, we're done
+				 */
+
+				if (nxt_cue != cues.end()) {
+					c = nxt_cue;
+					pos = c->time;
+					continue;
+				} else {
+					break;
+				}
+			}
+
 			cnt = 0;
 
 		} else {
@@ -3045,18 +3070,6 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			break;
 		}
 
-		/* Since we are only concerned with things that could be
-		 * cue-launched, ignore a trigger if it is cue-isolated
-		 */
-
-		if (trig->cue_isolated()) {
-			if (c != cues.end()) {
-				c = nxt_cue;
-				pos = c->time;
-			}
-			continue;
-		}
-
 		if (!trig->region()) {
 			/* the cue-identified slot is empty for this
 			   triggerbox. This effectively ends the duration of
@@ -3064,14 +3077,21 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			   the cue.
 			*/
 			prev.reset ();
+			if (nxt_cue == cues.end()) {
+				trig = 0;
+				break;
+			}
 			c = nxt_cue;
 			pos = c->time;
 			continue;
 		}
 
-		/* trigger could be interrupted by the next cue, or could
-		 * extend across the target transport position, or could finish
-		 * before either.
+		/* trigger could
+		 *
+		 * 1. not start before the current transport position
+		 * 2. not start before the next cue
+		 * 3. finish before the current transport position
+		 * 4. finish before the next cue
 		 */
 
 		samplepos_t limit;
@@ -3088,8 +3108,11 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		start_bbt = trig->compute_start (tmap, pos, limit, trig->quantization(), start_samples, will_start);
 
 		if (!will_start) {
-			/* trigger will not start between this cue and the next */
+			/* trigger will not start between this cue and the next
+			 * and/or the current position
+			 */
 			std::cerr << "cue " << c->cue << " will not start before cue " << nxt_cue->cue << std::endl;
+			trig = 0;
 			c = nxt_cue;
 			pos = limit;
 			continue;
@@ -3134,7 +3157,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		return;
 	}
 
-	/* trig is the trigger that would still be running at
+	/* trig is the trigger that would start or still be running at
 	 * transport_position. We need to run it in a special mode that ensures
 	 * that
 	 *
@@ -3153,19 +3176,20 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			ns = tmap->bbt_walk (ns, BBT_Offset (0, elen.get_beats(), elen.get_ticks()));
 			s = tmap->sample_at (ns);
 		} while (s < transport_position);
+
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: roll trigger %2 from %3 to %4 with cnt = %5\n", order(), trig->index(), start_samples, transport_position, cnt));
+
+		trig->start_and_roll_to (start_samples, transport_position, cnt);
+
+		_currently_playing = trig;
+		_locate_armed = true;
+		/* currently playing is now ready to keep running at transport position
+		 *
+		 * Note that a MIDITrigger will have set a flag so that when we call
+		 * ::run() again, it will dump its current MIDI state before anything
+		 * else.
+		 */
 	}
-
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: roll trigger %2 from %3 to %4 with cnt = %5\n", order(), trig->index(), start_samples, transport_position, cnt));
-	trig->start_and_roll_to (start_samples, transport_position, cnt);
-
-	_currently_playing = trig;
-	_locate_armed = true;
-	/* currently playing is now ready to keep running at transport position
-	 *
-	 * Note that a MIDITrigger will have set a flag so that when we call
-	 * ::run() again, it will dump its current MIDI state before anything
-	 * else.
-	 */
 }
 
 void
