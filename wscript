@@ -753,7 +753,7 @@ int main() { return 0; }''',
 
     # need ISOC9X for llabs()
     compiler_flags.extend(
-        ('-DBOOST_SYSTEM_NO_DEPRECATED', '-D_ISOC9X_SOURCE',
+        ('-DBOOST_SYSTEM_NO_DEPRECATED', '-DBOOST_BIND_GLOBAL_PLACEHOLDERS', '-D_ISOC9X_SOURCE',
          '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64'))
     cxx_flags.extend(
         ('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS',
