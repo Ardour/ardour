@@ -4176,7 +4176,7 @@ Mixer_UI::update_scene_buttons ()
 			                                _("Click to recall this mixer scene\n"
 			                                  "%1 for Momentary Restore\n"
 			                                  "Right-Click for Context menu")
-			                                  , Keyboard::button2_name() ) );
+			                                  , Keyboard::momentary_push_name() ) );
 			l->set_text (scn->name());
 			all_unset = false;
 		} else {
