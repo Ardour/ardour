@@ -402,6 +402,8 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PlugInsertBase> pib)
 	, resizable (false)
 	, req_width (0)
 	, req_height (0)
+	, alloc_width (0)
+	, alloc_height (0)
 	, cocoa_window (0)
 	, au_view (0)
 	, in_live_resize (false)
@@ -835,6 +837,9 @@ AUPluginUI::cocoa_view_resized ()
 	}
 
 	NSRect new_frame = [au_view frame];
+#ifdef AU_DEBUG_PRINT
+	std::cerr << plugin->name() << " resized to " << new_frame.size.width << " x " <<  new_frame.size.height << "\n";
+#endif
 
 	/* from here on, we know that we've been called because the plugin
 	 * decided to change the NSView frame itself.
@@ -846,6 +851,20 @@ AUPluginUI::cocoa_view_resized ()
 	float dy = new_frame.size.height - last_au_frame.size.height;
 	float dx = new_frame.size.width - last_au_frame.size.width;
 
+	/* If the nsview initially reported its size as zero, the lower-box may
+	 * still have a width (due to the plugin-toolbar above), and 1px height.
+	 * The window only needs to grow relative to that.
+	 * This is usually the case with Rosetta bridges AU Plugins.
+	 *
+	 * Note: this may also be relevant for tiny AU plugins where the initial
+	 * width is smaller than the top_box toolbar. This rare case is left to
+	 * be solved at another time.
+	 */
+	if (last_au_frame.size.height == 0 && last_au_frame.size.width == 0) {
+		dy = new_frame.size.height - alloc_height - 1;
+		dx = new_frame.size.width - alloc_width;
+	}
+
 	NSWindow* window = get_nswindow ();
 	NSRect windowFrame= [window frame];
 
@@ -855,10 +874,20 @@ AUPluginUI::cocoa_view_resized ()
 	 * origin toward (x,0). This will leave the top edge in the same place.
 	 */
 
+#ifdef AU_DEBUG_M1UI
+	printf ("WINDOW %f x %f + %f %f\n",  windowFrame.size.width,  windowFrame.size.height, windowFrame.origin.x, windowFrame.origin.y);
+	printf ("Lower Box Allocation %d x %d, alloc_width, alloc_height);
+	printf ("DX %.1f  DY %.1f\n", dx, dy);
+#endif
+
 	windowFrame.origin.y    -= dy;
 	windowFrame.origin.x    -= dx;
 	windowFrame.size.height += dy;
 	windowFrame.size.width  += dx;
+
+#ifdef AU_DEBUG_M1UI
+	printf ("New WINDOW %f x %f + %f %f\n",  windowFrame.size.width,  windowFrame.size.height, windowFrame.origin.x, windowFrame.origin.y);
+#endif
 
 	NSUInteger old_auto_resize = [au_view autoresizingMask];
 
@@ -1251,6 +1280,11 @@ AUPluginUI::lower_box_size_request (GtkRequisition* requisition)
 void
 AUPluginUI::lower_box_size_allocate (Gtk::Allocation& allocation)
 {
+#ifdef AU_DEBUG_M1UI
+	std::cerr << "AUPluginUI::lower_box_size_alloc: " << allocation.get_width() << " x " << allocation.get_height () << "\n";
+#endif
+	alloc_width =  allocation.get_width();
+	alloc_height =  allocation.get_height();
 	update_view_size ();
 }
 

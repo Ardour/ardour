@@ -129,6 +129,8 @@ private:
 	bool resizable;
 	int  req_width;
 	int  req_height;
+	int  alloc_width;
+	int  alloc_height;
 
 	/* Cocoa */
 
