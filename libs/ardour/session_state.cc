@@ -1357,6 +1357,35 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 					}
 				}
 			}
+		} else {
+			/* save used nested sources of unused regions compounds. Those sources
+			 * are not FileSource, and hence not saved when iterating over
+			 * `sources_used_by_this_snapshot'. They also must be saved as "Region"
+			 */
+			auto const& used_pl (_playlists->get_used ());
+			const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
+			for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
+				boost::shared_ptr<Region> r = i->second;
+				if (r->max_source_level () == 0 || ! r->whole_file ()) {
+					continue;
+				}
+				if (!_playlists->region_use_count (r)) {
+					/* nested source is not used */
+					continue;
+				}
+				/* Check is region was already saved as part of a playlist */
+				bool found = false;
+				for (auto const& pl : used_pl) {
+					auto const& rlist (pl->region_list ());
+					if (find (rlist->begin(), rlist->end(), r) != rlist->end()) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					child->add_child_nocopy (r->get_state ());
+				}
+			}
 		}
 
 		RegionFactory::CompoundAssociations& cassocs (RegionFactory::compound_associations());
