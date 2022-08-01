@@ -458,15 +458,20 @@ def configure(conf):
                     conf.env.append_value(var, ['-isystem', d])
 
     if sys.platform == 'darwin':
-        conf.check(
-                msg              ='Checking for Cocoa live resizing constants',
-                fragment         = '#include <AppKit/NSWindow.h>\n int main(void) { (void) NSWindowWillStartLiveResizeNotification; return 0; }\n',
-                define_name      = 'HAVE_COCOA_LIVE_RESIZING',
-                uselib_store     = 'COCOA_LIVE_RESIZING',
-                compiler         = 'cc',
-                compile_filename = 'test.m',
-                execute          = True,
-                mandatory        = False)
+        if conf.env['build_target'] in ['bigsur', 'monterey']:
+            # we cannot execute test code when x-compiling ARM on Intel,
+            # besides, NSWindowWillStartLiveResizeNotification is definitly available
+            conf.define('HAVE_COCOA_LIVE_RESIZING', 1)
+        else:
+            conf.check(
+                    msg              ='Checking for Cocoa live resizing constants',
+                    fragment         = '#include <AppKit/NSWindow.h>\n int main(void) { (void) NSWindowWillStartLiveResizeNotification; return 0; }\n',
+                    define_name      = 'HAVE_COCOA_LIVE_RESIZING',
+                    uselib_store     = 'COCOA_LIVE_RESIZING',
+                    compiler         = 'cc',
+                    compile_filename = 'test.m',
+                    execute          = True,
+                    mandatory        = False)
 
     conf.write_config_header('gtk2ardour-config.h', remove=False)
 

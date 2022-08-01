@@ -50,6 +50,8 @@
 #include <gtkmm/button.h>
 #include <gtkmm/label.h>
 
+#include "widgets/eventboxext.h"
+
 #include "plugin_ui.h"
 
 namespace ARDOUR {
@@ -117,8 +119,8 @@ private:
 	int prefheight;
 	int prefwidth;
 
-	Gtk::HBox     top_box;
-	Gtk::EventBox low_box;
+	Gtk::HBox top_box;
+	ArdourWidgets::EventBoxExt low_box;
 	Gtk::VBox vpacker;
 	Gtk::Label automation_mode_label;
 	Gtk::ComboBoxText automation_mode_selector;

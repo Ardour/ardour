@@ -693,6 +693,9 @@ AUPluginUI::create_cocoa_view ()
 		req_width  = frame.size.width;
 		req_height = frame.size.height;
 		low_box.queue_resize ();
+	} else {
+		req_width  = 0;
+		req_height = 0;
 	}
 
 #ifdef AU_DEBUG_SIZE
@@ -1150,7 +1153,7 @@ AUPluginUI::parent_cocoa_window ()
 
 	// catch notifications that live resizing is about to start
 
-#if HAVE_COCOA_LIVE_RESIZING
+#ifdef HAVE_COCOA_LIVE_RESIZING
 	_resize_notify = [ [ LiveResizeNotificationObject alloc] initWithPluginUI:this ];
 
 	[[NSNotificationCenter defaultCenter] addObserver:_resize_notify
