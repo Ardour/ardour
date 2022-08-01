@@ -108,17 +108,17 @@ dump_view_tree (NSView* view, int depth, int maxdepth)
 		NSView* su = [view superview];
 		if (su) {
 			NSRect sf = [su frame];
-			cerr << " PARENT view " << su << " @ " <<  sf.origin.x << ", " << sf.origin.y
+			cout << " PARENT view " << su << " @ " <<  sf.origin.x << ", " << sf.origin.y
 			     << ' ' << sf.size.width << " x " << sf.size.height
 			     << endl;
 		}
 	}
 
 	for (int d = 0; d < depth; d++) {
-		cerr << '\t';
+		cout << '\t';
 	}
 	NSRect frame = [view frame];
-	cerr << " view " << view << " @ " <<  frame.origin.x << ", " << frame.origin.y
+	cout << " view " << view << " @ " <<  frame.origin.x << ", " << frame.origin.y
 		<< ' ' << frame.size.width << " x " << frame.size.height
 		<< endl;
 
@@ -277,8 +277,8 @@ static void interposed_drawIfNeeded (id receiver, SEL selector, NSRect rect)
 {
 	if (block_plugin_redraws && (find (plugin_views.begin(), plugin_views.end(), receiver) != plugin_views.end())) {
 		block_plugin_redraws--;
-#ifdef AU_DEBUG_PRINT
-		std::cerr << "Plugin redraw blocked\n";
+#ifdef AU_DEBUG_DRAW
+		std::cout << "Plugin redraw blocked\n";
 #endif
 		/* YOU ... SHALL .... NOT ... DRAW!!!! */
 		return;
@@ -695,8 +695,8 @@ AUPluginUI::create_cocoa_view ()
 		low_box.queue_resize ();
 	}
 
-#ifdef AU_DEBUG_M1UI
-	std::cerr << "NSView initial size: " << req_width << " x " << req_height << "\n";
+#ifdef AU_DEBUG_SIZE
+	std::cout << "NSView initial size: " << req_width << " x " << req_height << "\n";
 #endif
 
 	resizable  = [au_view autoresizingMask];
@@ -714,7 +714,7 @@ bool
 AUPluginUI::timer_callback ()
 {
 	block_plugin_redraws = 0;
-#ifdef AU_DEBUG_PRINT
+#ifdef AU_DEBUG_DRAW
 	std::cerr << "Resume redraws after idle\n";
 #endif
 	return false;
@@ -738,7 +738,7 @@ AUPluginUI::cf_timer_callback ()
 
 	const int64_t usecs_slop = (1400000 / minimum_redraw_rate); // 140%
 
-#ifdef AU_DEBUG_PRINT
+#ifdef AU_DEBUG_DRAW
 	std::cerr << "Timer elapsed : " << now - last_timer << std::endl;
 #endif
 
@@ -746,7 +746,7 @@ AUPluginUI::cf_timer_callback ()
 		block_plugin_redraws = block_plugin_redraw_count;
 		timer_connection.disconnect ();
 		timer_connection = Glib::signal_timeout().connect (&AUPluginUI::timer_callback, 40);
-#ifdef AU_DEBUG_PRINT
+#ifdef AU_DEBUG_DRAW
 		std::cerr << "Timer too slow, block plugin redraws\n";
 #endif
 	}
@@ -814,8 +814,8 @@ AUPluginUI::cocoa_view_resized ()
 		 * NSView, resulting in a reentrant call to the FrameDidChange
 		 * handler (this method). Ignore this reentrant call.
 		 */
-#ifdef AU_DEBUG_PRINT
-		std::cerr << plugin->name() << " re-entrant call to cocoa_view_resized, ignored\n";
+#ifdef AU_DEBUG_SIZE
+		std::cout << plugin->name() << " re-entrant call to cocoa_view_resized, ignored\n";
 #endif
 		return;
 	}
@@ -837,8 +837,8 @@ AUPluginUI::cocoa_view_resized ()
 	}
 
 	NSRect new_frame = [au_view frame];
-#ifdef AU_DEBUG_PRINT
-	std::cerr << plugin->name() << " resized to " << new_frame.size.width << " x " <<  new_frame.size.height << "\n";
+#ifdef AU_DEBUG_SIZE
+	std::cout << plugin->name() << " resized to " << new_frame.size.width << " x " <<  new_frame.size.height << "\n";
 #endif
 
 	/* from here on, we know that we've been called because the plugin
@@ -874,9 +874,9 @@ AUPluginUI::cocoa_view_resized ()
 	 * origin toward (x,0). This will leave the top edge in the same place.
 	 */
 
-#ifdef AU_DEBUG_M1UI
+#ifdef AU_DEBUG_SIZE
 	printf ("WINDOW %f x %f + %f %f\n",  windowFrame.size.width,  windowFrame.size.height, windowFrame.origin.x, windowFrame.origin.y);
-	printf ("Lower Box Allocation %d x %d, alloc_width, alloc_height);
+	printf ("Lower Box Allocation %d x %d\n", alloc_width, alloc_height);
 	printf ("DX %.1f  DY %.1f\n", dx, dy);
 #endif
 
@@ -885,7 +885,7 @@ AUPluginUI::cocoa_view_resized ()
 	windowFrame.size.height += dy;
 	windowFrame.size.width  += dx;
 
-#ifdef AU_DEBUG_M1UI
+#ifdef AU_DEBUG_SIZE
 	printf ("New WINDOW %f x %f + %f %f\n",  windowFrame.size.width,  windowFrame.size.height, windowFrame.origin.x, windowFrame.origin.y);
 #endif
 
@@ -937,8 +937,8 @@ AUPluginUI::cocoa_view_resized ()
 	req_width  = new_frame.size.width;
 	req_height = new_frame.size.height;
 
-#ifdef AU_DEBUG_M1UI
-	std::cerr << "NSView resized: " << req_width << " x " << req_height << "\n";
+#ifdef AU_DEBUG_SIZE
+	std::cout << "NSView resized: " << req_width << " x " << req_height << "\n";
 #endif
 
 	low_box.queue_resize ();
@@ -1253,8 +1253,8 @@ AUPluginUI::lower_box_map ()
 {
 	[au_view setHidden:0];
 	update_view_size ();
-#ifdef AU_DEBUG_M1UI
-	std::cerr << "AUPluginUI::lower_box_map\n";
+#ifdef AU_DEBUG_SIZE
+	std::cout << "AUPluginUI::lower_box_map\n";
 #endif
 }
 
@@ -1262,16 +1262,16 @@ void
 AUPluginUI::lower_box_unmap ()
 {
 	[au_view setHidden:1];
-#ifdef AU_DEBUG_M1UI
-	std::cerr << "AUPluginUI::lower_box_unmap\n";
+#ifdef AU_DEBUG_SIZE
+	std::cout << "AUPluginUI::lower_box_unmap\n";
 #endif
 }
 
 void
 AUPluginUI::lower_box_size_request (GtkRequisition* requisition)
 {
-#ifdef AU_DEBUG_M1UI
-	std::cerr << "AUPluginUI::lower_box_size_request: " << req_width << " x " << req_height << "\n";
+#ifdef AU_DEBUG_SIZE
+	std::cout << "AUPluginUI::lower_box_size_request: " << req_width << " x " << req_height << "\n";
 #endif
 	requisition->width  = req_width;
 	requisition->height = req_height;
@@ -1280,8 +1280,8 @@ AUPluginUI::lower_box_size_request (GtkRequisition* requisition)
 void
 AUPluginUI::lower_box_size_allocate (Gtk::Allocation& allocation)
 {
-#ifdef AU_DEBUG_M1UI
-	std::cerr << "AUPluginUI::lower_box_size_alloc: " << allocation.get_width() << " x " << allocation.get_height () << "\n";
+#ifdef AU_DEBUG_SIZE
+	std::cout << "AUPluginUI::lower_box_size_alloc: " << allocation.get_width() << " x " << allocation.get_height () << "\n";
 #endif
 	alloc_width =  allocation.get_width();
 	alloc_height =  allocation.get_height();
@@ -1305,8 +1305,8 @@ AUPluginUI::on_window_hide ()
 		id win = [wins objectAtIndex:i];
 	}
 #endif
-#ifdef AU_DEBUG_M1UI
-	std::cerr << "AUPluginUI::on_window_hide\n";
+#ifdef AU_DEBUG_SIZE
+	std::cout << "AUPluginUI::on_window_hide\n";
 #endif
 }
 
@@ -1325,8 +1325,8 @@ AUPluginUI::on_window_show (const string& /*title*/)
 		ActivateWindow (carbon_window, TRUE);
 	}
 #endif
-#ifdef AU_DEBUG_M1UI
-	std::cerr << "AUPluginUI::on_window_show\n";
+#ifdef AU_DEBUG_SIZE
+	std::cout << "AUPluginUI::on_window_show\n";
 #endif
 
 	return true;
