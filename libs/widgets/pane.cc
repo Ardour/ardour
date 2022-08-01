@@ -221,7 +221,7 @@ Pane::on_size_allocate (Gtk::Allocation& alloc)
 	reallocate (alloc);
 	Container::on_size_allocate (alloc);
 
-	/* minumum pane size constraints */
+	/* minimum pane size constraints */
 	Dividers::size_type div = 0;
 	for (Dividers::const_iterator d = dividers.begin(); d != dividers.end(); ++d, ++div) {
 		// XXX skip dividers that were just hidden in reallocate()

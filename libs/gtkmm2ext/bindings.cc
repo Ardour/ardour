@@ -65,7 +65,7 @@ MouseButton::MouseButton (uint32_t state, uint32_t keycode)
 {
 	uint32_t ignore = ~Keyboard::RelevantModifierKeyMask;
 
-	/* this is a slightly wierd test that relies on
+	/* this is a slightly weird test that relies on
 	 * gdk_keyval_is_{upper,lower}() returning true for keys that have no
 	 * case-sensitivity. This covers mostly non-alphanumeric keys.
 	 */

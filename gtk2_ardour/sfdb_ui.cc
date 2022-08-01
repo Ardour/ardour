@@ -1116,7 +1116,7 @@ SoundFileBrowser::freesound_get_audio_file(Gtk::TreeIter iter)
 		DEBUG_TRACE(PBD::DEBUG::Freesound, string_compose("downloading %1 (id %2) from %3...\n", filename, id, uri));
 		(*iter)[freesound_list_columns.downloading] = true;
 		// if we don't already have a token, fetchAudioFile() will get
-		// one: otherwse it'll return the one we already gave it.
+		// one: otherwise it'll return the one we already gave it.
 		if (!mootcher->fetchAudioFile(filename, id, uri, this, freesound_token)) {
 			// download cancelled or failed
 			(*iter)[freesound_list_columns.downloading] = false;

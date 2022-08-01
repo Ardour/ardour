@@ -513,7 +513,7 @@ FaderPort8::midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::A
 	}
 
 #ifdef VERBOSE_DEBUG
-	DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("something happend on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
+	DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("something happened on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
 #endif
 
 	if (ioc & ~IO_IN) {

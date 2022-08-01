@@ -698,7 +698,7 @@ CC121::connect_session_signals()
 bool
 CC121::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::AsyncMIDIPort> port)
 {
-	DEBUG_TRACE (DEBUG::CC121, string_compose ("something happend on  %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
+	DEBUG_TRACE (DEBUG::CC121, string_compose ("something happened on  %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
 
 	if (ioc & ~IO_IN) {
 		return false;

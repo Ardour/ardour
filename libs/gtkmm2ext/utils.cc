@@ -398,7 +398,7 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 	 *  e) if there is no selected menu item, align the menu above the button or
 	 *     below the button, depending on where there is more space.
 	 * For the d) and e) cases, the menu contents will be aligned as told, but
-	 * the menu itself will be bigger than that to accomodate the menu items
+	 * the menu itself will be bigger than that to accommodate the menu items
 	 * that are scrolled out of view, thanks to |push_in = true|.
 	 */
 

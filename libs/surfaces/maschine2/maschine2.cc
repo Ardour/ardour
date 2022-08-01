@@ -224,12 +224,12 @@ Maschine2::start ()
 		case Mikro:
 			_hw = new Maschine2Mikro ();
 			_ctrl = new M2MapMikro ();
-			info << _("Maschine2 Mikro control surface intialized");
+			info << _("Maschine2 Mikro control surface initialized");
 			break;
 		case Maschine:
 			_hw = new Maschine2Mk2 ();
 			_ctrl = new M2MapMk2 ();
-			info << _("Maschine2 control surface intialized");
+			info << _("Maschine2 control surface initialized");
 			break;
 		case Studio:
 			error << _("Maschine2 Studio is not yet supported");

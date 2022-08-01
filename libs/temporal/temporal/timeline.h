@@ -108,7 +108,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	timepos_t operator+(timecnt_t const & d) const;
 	timepos_t operator+(timepos_t const & d) const { if (is_beats() == d.is_beats()) return timepos_t (is_beats(), val() + d.val()); return expensive_add (d); }
 
-	/* donn't provide operator+(samplepos_t) or operator+(superclock_t)
+	/* don't provide operator+(samplepos_t) or operator+(superclock_t)
 	 * because the compiler can't disambiguate them and neither can we.
 	 * to add such types, create a timepo_t and then add that.
 	 */
@@ -228,7 +228,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 
 	/* these can only be called after verifying that the time domain does
 	 * not match the relevant one i.e. call _beats() to get a Beats value
-	 * when this is using the audio time doamin
+	 * when this is using the audio time domain
 	 */
 
 	/* these three methods are to be called ONLY when we have already that
