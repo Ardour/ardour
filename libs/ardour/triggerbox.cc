@@ -3340,6 +3340,8 @@ TriggerBox::trigger_by_id (PBD::ID check)
 void
 TriggerBox::deep_sources (std::set<boost::shared_ptr<Source> >& sources)
 {
+	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
+
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
 		boost::shared_ptr<Region> r (trigger(n)->region ());
 		if (r) {
@@ -3347,6 +3349,20 @@ TriggerBox::deep_sources (std::set<boost::shared_ptr<Source> >& sources)
 		}
 	}
 }
+
+void
+TriggerBox::used_regions (std::set<boost::shared_ptr<Region> >& regions)
+{
+	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
+
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		boost::shared_ptr<Region> r (trigger(n)->region ());
+		if (r) {
+			regions.insert (r);
+		}
+	}
+}
+
 
 void
 TriggerBox::enqueue_trigger_state_for_region (boost::shared_ptr<Region> region, boost::shared_ptr<Trigger::UIState> state)

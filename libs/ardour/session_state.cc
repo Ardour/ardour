@@ -3500,9 +3500,25 @@ Session::cleanup_regions ()
 	bool removed = false;
 	const RegionFactory::RegionMap& regions (RegionFactory::regions());
 
+	/* collect Regions used by Triggers */
+	std::set<boost::shared_ptr<Region>> tr;
+	{
+		boost::shared_ptr<RouteList> rl = routes.reader();
+		for (auto const& r : *rl) {
+			boost::shared_ptr<TriggerBox> tb = r->triggerbox ();
+			if (tb) {
+				tb->used_regions (tr);
+			}
+		}
+	}
+
 	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end();) {
 
 		uint32_t used = _playlists->region_use_count (i->second);
+
+		if (tr.find (i->second) != tr.end()) {
+			++used;
+		}
 
 		if (used == 0 && !i->second->automatic ()) {
 			boost::weak_ptr<Region> w = i->second;
