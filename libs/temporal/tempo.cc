@@ -2317,7 +2317,7 @@ TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
 		}
 	}
 
-	/* may have found tempo and/or meter precisely at the tiem given */
+	/* may have found tempo and/or meter precisely at the time given */
 
 	if (t != _tempos.end() && t->bbt() == bbt) {
 		prev_t = t;

@@ -2996,7 +2996,7 @@ EngineControl::check_audio_latency_measurement ()
 
 	if (mtdm->err () > 0.2) {
 		strcat (buf, "\n");
-		strcat (buf, _("Large mesurement deviation. Invalid result."));
+		strcat (buf, _("Large measurement deviation. Invalid result."));
 		solid = false;
 	}
 

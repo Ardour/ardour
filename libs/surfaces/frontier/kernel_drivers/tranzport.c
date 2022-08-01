@@ -880,7 +880,7 @@ static int usb_tranzport_probe(struct usb_interface *intf, const struct usb_devi
 	int true_size;
 	int retval = -ENOMEM;
 
-	/* allocate memory for our device state and intialize it */
+	/* allocate memory for our device state and initialize it */
 
 	dev = kzalloc(sizeof(*dev), GFP_KERNEL);
 	if (dev == NULL) {

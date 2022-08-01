@@ -552,7 +552,7 @@ Push2::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 	if (ioc & IO_IN) {
 
-		DEBUG_TRACE (DEBUG::Push2, string_compose ("something happend on  %1\n", port->name()));
+		DEBUG_TRACE (DEBUG::Push2, string_compose ("something happened on  %1\n", port->name()));
 
 		AsyncMIDIPort* asp = dynamic_cast<AsyncMIDIPort*>(port);
 		if (asp) {

@@ -1647,7 +1647,7 @@ GenericMidiControlProtocol::midi_input_handler (Glib::IOCondition ioc, boost::we
 		return false;
 	}
 
-	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("something happend on  %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
+	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("something happened on  %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
 
 	if (ioc & ~IO_IN) {
 		return false;

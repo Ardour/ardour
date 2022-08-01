@@ -854,7 +854,7 @@ Editor::set_timecode_ruler_scale (samplepos_t lower, samplepos_t upper)
 		   to set the ruler scale, because the caller has already determined
 		   the width and set lower + upper arguments to this function to match that.
 
-		   But in this case, where the range defined by lower and uppper can vary
+		   But in this case, where the range defined by lower and upper can vary
 		   substantially (basically anything from 24hrs+ to several billion years)
 		   trying to decide which tick marks to show does require us to know
 		   about the available width.
@@ -1652,7 +1652,7 @@ Editor::set_minsec_ruler_scale (samplepos_t lower, samplepos_t upper)
 		   to set the ruler scale, because the caller has already determined
 		   the width and set lower + upper arguments to this function to match that.
 
-		   But in this case, where the range defined by lower and uppper can vary
+		   But in this case, where the range defined by lower and upper can vary
 		   substantially (anything from 24hrs+ to several billion years)
 		   trying to decide which tick marks to show does require us to know
 		   about the available width.

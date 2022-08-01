@@ -1723,7 +1723,7 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 	if (ioc & IO_IN) {
 
-		// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("something happend on  %1\n", port->name()));
+		// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("something happened on  %1\n", port->name()));
 
 		/* Devices using regular JACK MIDI ports will need to have
 		   the x-thread FIFO drained to avoid burning endless CPU.
