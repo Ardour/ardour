@@ -2265,9 +2265,9 @@ timepos_t
 MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t, Temporal::Beats & effective_length)
 {
 	Temporal::Beats end_by_follow_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length));
-	Temporal::Beats end_by_data_length = transition_beats + data_length;
+	Temporal::Beats end_by_data_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, Temporal::BBT_Offset (0, data_length.get_beats(), data_length.get_ticks())));
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ends: FL %2 DL %3 tbbt %4 fl %5\n", index(), end_by_follow_length, end_by_data_length, transition_bbt, _follow_length));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ends: TB %2 FL %3 EBFL %4 DL %5 EBDL %6 tbbt %7 fl %8\n", index(), transition_beats, _follow_length, end_by_follow_length, data_length, end_by_data_length, transition_bbt, _follow_length));
 
 	Temporal::BBT_Offset q (_quantization);
 
