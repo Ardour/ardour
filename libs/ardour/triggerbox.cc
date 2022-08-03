@@ -131,7 +131,7 @@ ARDOUR::cue_marker_name (int32_t index)
 
 	using std::string;
 
-	if (index == INT32_MAX) {
+	if (index == CueRecord::stop_all) {
 		/* this is a reasonable "stop" icon */
 		return string (X_("\u25a1"));
 	}
@@ -3009,7 +3009,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		if (c->time <= transport_position) {
 
-			if (c->cue == INT32_MAX) {
+			if (c->cue == CueRecord::stop_all) {
 				std::cerr << "Found stop-all cues at " << c->time << std::endl;
 				break;
 			}
@@ -3027,7 +3027,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	 * cue is precisely at the transport position, there is nothing to do
 	 */
 
-	if (c == cues.rend() || (c->cue == INT32_MAX) | (c->time == transport_position)) {
+	if (c == cues.rend() || (c->cue == CueRecord::stop_all) | (c->time == transport_position)) {
 		goto nothing_to_do;
 	}
 
@@ -3779,7 +3779,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (!_cue_recording || !was_recorded) {
 
-		if (cue_bang == INT32_MAX) {
+		if (cue_bang == CueRecord::stop_all) {
 
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 sees STOP ALL!\n", order()));
 

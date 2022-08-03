@@ -689,6 +689,8 @@ struct CueRecord {
 
 	CueRecord (int32_t cn, samplepos_t t): cue_number (cn), when (t) {}
 	CueRecord () : cue_number (0), when (0) {}
+
+	static const int32_t stop_all = INT32_MAX;
 };
 
 typedef PBD::RingBuffer<CueRecord> CueRecords;
