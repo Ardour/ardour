@@ -705,6 +705,14 @@ Trigger::startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset c
 }
 
 void
+Trigger::startup_from_ffwd (BufferSet& bufs, uint32_t loop_cnt)
+{
+	_startup (bufs, 0, _quantization);
+	_loop_cnt = loop_cnt;
+	_cue_launched = true;
+}
+
+void
 Trigger::_startup (BufferSet& bufs, pframes_t dest_offset, Temporal::BBT_Offset const & start_quantization)
 {
 	_state = WaitingToStart;
@@ -922,6 +930,8 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 	Temporal::Beats possible_beats;
 	samplepos_t possible_samples;
 
+	std::cerr << "for ss " << start_sample << " sb " << start_beats << " bbt " << tmap->bbt_at (timepos_t (start_sample)) << std::endl;
+
 	if (q < Temporal::BBT_Offset (0, 0, 0)) {
 		/* negative quantization == do not quantize */
 
@@ -938,20 +948,25 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 	} else {
 
 		possible_bbt = tmap->bbt_at (timepos_t (start_beats));
+		std::cerr << "start is " << possible_bbt;
 		possible_bbt = possible_bbt.round_up_to_bar ();
+		std::cerr << " round up to " << possible_bbt;
 		/* bars are 1-based; 'every 4 bars' means 'on bar 1, 5, 9, ...' */
 		possible_bbt.bars = 1 + ((possible_bbt.bars-1) / q.bars * q.bars);
+		std::cerr << " after 1-adj " << possible_bbt;
 		possible_beats = tmap->quarters_at (possible_bbt);
+		std::cerr << " beats = " << possible_beats << std::endl;
 		possible_samples = tmap->sample_at (possible_bbt);
 
 	}
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%6/%1 quantized with %5 transition at %2, sb %3 eb %4\n", index(), possible_samples, start_beats, end_beats, q, _box.order()));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%6/%1 quantized with %5 transition at %2, sb %3 eb %4 (would be %7 aka %8)\n", index(), possible_samples, start_beats, end_beats, q, _box.order(), possible_bbt, possible_beats));
 
 	/* See if this time falls within the range of time given to us */
 
 	if (possible_beats < start_beats || possible_beats > end_beats) {
 		/* transition time not reached */
+		std::cerr << "pb " << possible_beats << " < " << start_beats << " || > " << end_beats << std::endl;
 		return false;
 	}
 
@@ -1172,7 +1187,7 @@ Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, Tri
 	   for both, even though only the MIDI case needs the BufferSet).
 	*/
 
-	startup (bufs, 0, _quantization);
+	startup_from_ffwd (bufs, 0);
 	_loop_cnt = cnt;
 	_cue_launched = true;
 
@@ -2267,8 +2282,8 @@ MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::
 	Temporal::Beats end_by_follow_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length));
 	Temporal::Beats end_by_data_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, Temporal::BBT_Offset (0, data_length.get_beats(), data_length.get_ticks())));
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ends: TB %2 FL %3 EBFL %4 DL %5 EBDL %6 tbbt %7 fl %8\n", index(), transition_beats, _follow_length, end_by_follow_length, data_length, end_by_data_length, transition_bbt, _follow_length));
-
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ends: TB %2 FL %3 EBFL %4 DL %5 EBDL %6 tbbt %7 fl %8\n",
+	                                              index(), transition_beats, _follow_length, end_by_follow_length, data_length, end_by_data_length, transition_bbt, _follow_length));
 	Temporal::BBT_Offset q (_quantization);
 
 	if (launch_style() != Repeat || (q == Temporal::BBT_Offset())) {
@@ -2966,188 +2981,143 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		return;
 	}
 
-	if (cues.empty() || (cues.front().time > transport_position)) {
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: nothing to be done, cp = %2\n", order(), _currently_playing));
-		cancel_locate_armed ();
-		if (tracker) {
-			tracker->reset ();
-		}
-		return;
-	}
-
 	PBD::Unwinder<bool> uw (_fast_forwarding, true);
 
 	using namespace Temporal;
 	TempoMap::SharedPtr tmap (TempoMap::use());
 
-	CueEvents::const_iterator c = cues.begin();
+	CueEvents::const_reverse_iterator c = cues.rbegin();
 	samplepos_t pos = c->time;
-	TriggerPtr prev;
 	TriggerPtr trig;
 	Temporal::BBT_Time start_bbt;
 	samplepos_t start_samples;
-	Temporal::Beats elen;
+	Temporal::Beats effective_length;
 	bool will_start;
 	uint32_t cnt = 0;
 
-	while (pos < transport_position) {
+	if (cues.empty() || (cues.front().time > transport_position)) {
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: nothing to be done, cp = %2\n", order(), _currently_playing));
+		goto nothing_to_do;
+	}
 
-		CueEvents::const_iterator nxt_cue = c;
+	/* Walk backwards through cues to find the first one that is either a
+	 * stop-all cue or references a non-cue-isolated trigger, and is
+	 * positioned before transport_position
+	 */
 
-		/* the next trigger could be determined by either an upcoming
-		 * cue or by a follow action from the current triggger.
-		 *
-		 * As long as there is a cue to consider, that takes priority
-		 * over any other means of determining the next (possible)
-		 * trigger as we move forward in time.
-		 */
+	while (c != cues.rend()) {
 
-		if (c != cues.end()) {
-			++nxt_cue;
-
-			std::cerr << "Considering cue " << c->cue << std::endl;
+		if (c->time <= transport_position) {
 
 			if (c->cue == INT32_MAX) {
-				/* "stop all cues" marker encountered.  This ends the
-				   duration of whatever slot might have been running
-				   when we hit the cue.
-				*/
-				c = nxt_cue;
-				continue;
-			}
-
-			trig = all_triggers[c->cue];
-
-			/* Since we are only concerned with things that could
-			 * be cue-launched, ignore a trigger driven by a cue if
-			 * it is cue-isolated.
-			 */
-
-			if (trig->cue_isolated()) {
-
-				/* Act as if this trigger was never found */
-
-				trig = 0;
-
-				/* Either move on to the next cue, or if there
-				 * is none, we're done
-				 */
-
-				if (nxt_cue != cues.end()) {
-					c = nxt_cue;
-					pos = c->time;
-					continue;
-				} else {
-					break;
-				}
-			}
-
-			cnt = 0;
-
-		} else {
-
-			if (trig) {
-				/* one iteration of an existing trigger is
-				 * complete, but it may have a follow count set.
-				 */
-
-				cnt++;
-
-				if (cnt >= trig->follow_count()) {
-					int dnt = determine_next_trigger (trig->index());
-					if (dnt >= 0) {
-						trig = all_triggers[dnt];
-						cnt = 0;
-					}
-				} else {
-					/* just let it play again */
-					std::cerr << "have not reached follow count yet, play " << trig->index() << " again\n";
-				}
-			}
-		}
-
-		if (!trig) {
-			break;
-		}
-
-		if (!trig->region()) {
-			/* the slot is empty. This effectively ends the duration of
-			   whatever slot might have been running when we hit
-			   the cue.
-			*/
-			prev.reset ();
-			if (nxt_cue == cues.end()) {
-				trig = 0;
+				std::cerr << "Found stop-all cues at " << c->time << std::endl;
 				break;
 			}
-			c = nxt_cue;
-			pos = c->time;
-			continue;
+
+			if (!all_triggers[c->cue]->cue_isolated()) {
+				std::cerr << "Found first non-CI cue for " << c->cue << " at " << c->time << std::endl;
+				break;
+			}
 		}
 
-		/* trigger could
-		 *
-		 * 1. not start before the current transport position
-		 * 2. not start before the next cue
-		 * 3. finish before the current transport position
-		 * 4. finish before the next cue
-		 */
+		++c;
+	}
 
-		samplepos_t limit;
+	/* if we reach the rend (beginning), or the cue is a stop-all, or the
+	 * cue is precisely at the transport position, there is nothing to do
+	 */
 
-		if (nxt_cue == cues.end()) {
-			limit = transport_position;
+	if (c == cues.rend() || (c->cue == INT32_MAX) | (c->time == transport_position)) {
+		goto nothing_to_do;
+	}
+
+	trig = all_triggers[c->cue];
+	pos = c->time;
+	cnt = 0;
+
+	if (!trig->region()) {
+		goto nothing_to_do;
+	}
+
+	while (pos < transport_position) {
+
+		if (cnt >= trig->follow_count()) {
+
+			/* trigger has completed follow-count
+			 * iterations, and it is time to decide what to
+			 * do next.
+			 */
+
+			int dnt = determine_next_trigger (trig->index());
+			std::cerr << order() << " selected next as " << dnt << std::endl;
+			if (dnt >= 0) {
+				/* new trigger, reset the counter used
+				 * to track iterations run.
+				 */
+				trig = all_triggers[dnt];
+				cnt = 0;
+			} else {
+				/* for whatever reason, there's no
+				   subsequent trigger to follow this
+				   one.
+				*/
+				goto nothing_to_do;
+			}
+
 		} else {
-			limit = nxt_cue->time;
+			/* this trigger has not reached its follow count yet: just let it play again */
+			std::cerr << "have not reached follow count yet, play " << trig->index() << " again\n";
 		}
 
 		/* determine when it starts */
 
 		will_start = true;
-		start_bbt = trig->compute_start (tmap, pos, limit, trig->quantization(), start_samples, will_start);
+		std::cerr << order() << '/' << trig->index() << " compute start give pos " << pos << " limit " << transport_position << " ss " << start_samples << " q " << trig->quantization() << std::endl;
+
+		/* we don't care when it actually starts, so we give a "far
+		 * off" time to ::compute_start(). It is entirely possible that
+		 * due to quantization, the trigger will not actually start
+		 * before the transport position, but that doesn't mean it
+		 * should not be considered as "started" and merely in the
+		 * WaitingToStart state.
+		 */
+
+		const samplepos_t far_off = transport_position + (10.0 * _session.sample_rate());
+		start_bbt = trig->compute_start (tmap, pos, far_off, trig->quantization(), start_samples, will_start);
 
 		if (!will_start) {
-			/* trigger will not start between this cue and the next
-			 * and/or the current position
+			/* nothing to do. This suggests something very weird
+			 * about the trigger, but we don't address that here
 			 */
-			std::cerr << "cue " << c->cue << " will not start before cue " << nxt_cue->cue << std::endl;
-			trig = 0;
-			c = nxt_cue;
-			pos = limit;
-			continue;
+			std::cerr << "trig " << trig->index() << " will not start even far from " << transport_position << std::endl;
+			return;
 		}
 
 		/* we now consider this trigger to be running. Let's see when
 		 * it ends...
 		 */
 
-		samplepos_t trig_ends_at = trig->compute_end (tmap, start_bbt, start_samples, elen).samples();
-
-		if (nxt_cue != cues.end() && trig_ends_at >= nxt_cue->time) {
-			/* trigger will be interrupted by next cue .
-			 *
-			 */
-			trig_ends_at = tmap->sample_at (tmap->bbt_at (timepos_t (nxt_cue->time)).round_up_to_bar ());
-			std::cerr << "checked trig end due to " << nxt_cue->cue << " => " << trig_ends_at << std::endl;
-		}
+		samplepos_t trig_ends_at = trig->compute_end (tmap, start_bbt, start_samples, effective_length).samples();
 
 		if (trig_ends_at >= transport_position) {
 			/* we're done. trig now references the trigger that
 			   would have started most recently before the
-			   transport position.
+			   transport position (which could be null).
 			*/
 			std::cerr << "trigger " << trig->index() << " ends after " << transport_position << std::endl;
 			break;
+		} else {
+			std::cerr << "trigger ends before transport pos\n";
+			cnt++;
 		}
 
 		pos = trig_ends_at;
-		c = nxt_cue;
-		std::cerr << "moved on to consider " << (c == cues.end() ? -781 : c->cue) << " with pos " << pos << endl;
 	}
 
 	if (pos >= transport_position || !trig) {
 		/* nothing to do */
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: no trigger to be rolled (%2 >= %3, prev = %4)\n", order(), pos, transport_position, trig));
+		std::cerr << "no trigger to roll\n";
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: no trigger to be rolled (%2 >= %3, trigger = %4)\n", order(), pos, transport_position, trig));
 		_currently_playing = 0;
 		_locate_armed = false;
 		if (tracker) {
@@ -3166,13 +3136,15 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 	/* find the closest start (retrigger) position for this trigger */
 
+	std::cerr << "trig " << trig->index() << " should be rolling at " << transport_position << " ss = " << start_samples << std::endl;
+
 	if (start_samples < transport_position) {
 		samplepos_t s = start_samples;
 		BBT_Time ns = start_bbt;
 
 		do {
 			start_samples = s;
-			ns = tmap->bbt_walk (ns, BBT_Offset (0, elen.get_beats(), elen.get_ticks()));
+			ns = tmap->bbt_walk (ns, BBT_Offset (0, effective_length.get_beats(), effective_length.get_ticks()));
 			s = tmap->sample_at (ns);
 		} while (s < transport_position);
 
@@ -3188,7 +3160,23 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		 * ::run() again, it will dump its current MIDI state before anything
 		 * else.
 		 */
+	} else {
+		std::cerr << "trig " << trig->index() << " will start after transport position, so just start it up for now\n";
+		BufferSet bufs;
+		trig->startup_from_ffwd (bufs, cnt);
+		_currently_playing = trig;
+		_locate_armed = true;
 	}
+
+	return;
+
+  nothing_to_do:
+	cancel_locate_armed ();
+	if (tracker) {
+		tracker->reset ();
+	}
+	return;
+
 }
 
 void
