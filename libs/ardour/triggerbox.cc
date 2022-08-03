@@ -930,8 +930,6 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 	Temporal::Beats possible_beats;
 	samplepos_t possible_samples;
 
-	std::cerr << "for ss " << start_sample << " sb " << start_beats << " bbt " << tmap->bbt_at (timepos_t (start_sample)) << std::endl;
-
 	if (q < Temporal::BBT_Offset (0, 0, 0)) {
 		/* negative quantization == do not quantize */
 
@@ -948,14 +946,10 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 	} else {
 
 		possible_bbt = tmap->bbt_at (timepos_t (start_beats));
-		std::cerr << "start is " << possible_bbt;
 		possible_bbt = possible_bbt.round_up_to_bar ();
-		std::cerr << " round up to " << possible_bbt;
 		/* bars are 1-based; 'every 4 bars' means 'on bar 1, 5, 9, ...' */
 		possible_bbt.bars = 1 + ((possible_bbt.bars-1) / q.bars * q.bars);
-		std::cerr << " after 1-adj " << possible_bbt;
 		possible_beats = tmap->quarters_at (possible_bbt);
-		std::cerr << " beats = " << possible_beats << std::endl;
 		possible_samples = tmap->sample_at (possible_bbt);
 
 	}
@@ -966,7 +960,6 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 
 	if (possible_beats < start_beats || possible_beats > end_beats) {
 		/* transition time not reached */
-		std::cerr << "pb " << possible_beats << " < " << start_beats << " || > " << end_beats << std::endl;
 		return false;
 	}
 
@@ -3010,12 +3003,12 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		if (c->time <= transport_position) {
 
 			if (c->cue == CueRecord::stop_all) {
-				std::cerr << "Found stop-all cues at " << c->time << std::endl;
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("Found stop-all cues at %1\n", c->time));
 				break;
 			}
 
 			if (!all_triggers[c->cue]->cue_isolated()) {
-				std::cerr << "Found first non-CI cue for " << c->cue << " at " << c->time << std::endl;
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("Found first non-CI cue for %1 at %2\n", c->cue, c->time));
 				break;
 			}
 		}
@@ -3049,7 +3042,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			 */
 
 			int dnt = determine_next_trigger (trig->index());
-			std::cerr << order() << " selected next as " << dnt << std::endl;
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 selected next as %2\n",  order(), dnt));
 			if (dnt >= 0) {
 				/* new trigger, reset the counter used
 				 * to track iterations run.
@@ -3066,13 +3059,14 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		} else {
 			/* this trigger has not reached its follow count yet: just let it play again */
-			std::cerr << "have not reached follow count yet, play " << trig->index() << " again\n";
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("have not reached follow count yet, play %1 again\n", trig->index()));
 		}
 
 		/* determine when it starts */
 
 		will_start = true;
-		std::cerr << order() << '/' << trig->index() << " compute start give pos " << pos << " limit " << transport_position << " ss " << start_samples << " q " << trig->quantization() << std::endl;
+
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 compite start give pos %3 transport position %4 ss %5 q %6\n", order(), trig->index(), pos, transport_position, start_samples, trig->quantization()));
 
 		/* we don't care when it actually starts, so we give a "far
 		 * off" time to ::compute_start(). It is entirely possible that
@@ -3089,7 +3083,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			/* nothing to do. This suggests something very weird
 			 * about the trigger, but we don't address that here
 			 */
-			std::cerr << "trig " << trig->index() << " will not start even far from " << transport_position << std::endl;
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 will not start even far from %2\n", trig->index(), transport_position));
 			return;
 		}
 
@@ -3104,10 +3098,11 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 			   would have started most recently before the
 			   transport position (which could be null).
 			*/
-			std::cerr << "trigger " << trig->index() << " ends after " << transport_position << std::endl;
+
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("trigger %1 ends after %2\n", trig->index(), transport_position));
 			break;
 		} else {
-			std::cerr << "trigger ends before transport pos\n";
+			DEBUG_TRACE (DEBUG::Triggers,  "trigger ends before transport pos\n");
 			cnt++;
 		}
 
@@ -3116,7 +3111,6 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 	if (pos >= transport_position || !trig) {
 		/* nothing to do */
-		std::cerr << "no trigger to roll\n";
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: no trigger to be rolled (%2 >= %3, trigger = %4)\n", order(), pos, transport_position, trig));
 		_currently_playing = 0;
 		_locate_armed = false;
@@ -3136,7 +3130,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 	/* find the closest start (retrigger) position for this trigger */
 
-	std::cerr << "trig " << trig->index() << " should be rolling at " << transport_position << " ss = " << start_samples << std::endl;
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("trig %1 should be rolling at %2 ss = %3\n", trig->index(), transport_position, start_samples));
 
 	if (start_samples < transport_position) {
 		samplepos_t s = start_samples;
@@ -3161,7 +3155,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		 * else.
 		 */
 	} else {
-		std::cerr << "trig " << trig->index() << " will start after transport position, so just start it up for now\n";
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("trig %1 will start after transport position, so just start it up for now\n", trig->index()));
 		BufferSet bufs;
 		trig->startup_from_ffwd (bufs, cnt);
 		_currently_playing = trig;
@@ -3428,7 +3422,7 @@ TriggerBox::set_from_path (uint32_t slot, std::string const & path)
 		all_triggers[slot]->set_region (the_region);
 
 	} catch (std::exception& e) {
-		cerr << "loading sample from " << path << " failed: " << e.what() << endl;
+		error << string_compose ("loading sample from %1 failed (%2)\n", path, e.what()) << endmsg;
 		return;
 	}
 }
