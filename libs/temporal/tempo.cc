@@ -356,33 +356,6 @@ Meter::round_to_bar (Temporal::BBT_Time const & bbt) const
 }
 
 Temporal::BBT_Time
-Meter::round_up_to_bar (Temporal::BBT_Time const & bbt) const
-{
-	if (bbt.ticks == 0 && bbt.beats == 1) {
-		return bbt;
-	}
-	BBT_Time b = bbt.round_up_to_beat ();
-	if (b.beats > 1) {
-		b.bars += 1;
-		b.beats = 1;
-	}
-	return b;
-}
-
-Temporal::BBT_Time
-Meter::round_down_to_bar (Temporal::BBT_Time const & bbt) const
-{
-	if (bbt.ticks == 0 && bbt.beats == 1) {
-		return bbt;
-	}
-	BBT_Time b = bbt.round_down_to_beat ();
-	if (b.beats > 1) {
-		b.beats = 1;
-	}
-	return b;
-}
-
-Temporal::BBT_Time
 Meter::round_up_to_beat (Temporal::BBT_Time const & bbt) const
 {
 	Temporal::BBT_Time b = bbt.round_up_to_beat ();
@@ -1322,9 +1295,9 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlie
 	bbt = metric.bbt_at (beats);
 
 	if (round_up) {
-		bbt = metric.meter().round_up_to_bar (bbt);
+		bbt = bbt.round_up_to_bar ();
 	} else {
-		bbt = metric.meter().round_down_to_bar (bbt);
+		bbt = bbt.round_down_to_bar ();
 	}
 
 	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->bbt() < bbt; ++t) { prev_t = t; }

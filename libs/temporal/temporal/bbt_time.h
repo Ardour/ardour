@@ -119,7 +119,7 @@ struct LIBTEMPORAL_API BBT_Time
 	 * next bar time.
 	 */
 
-	BBT_Time round_up_to_bar () const { return beats > 1 ? BBT_Time (bars+1, 1, 0) : BBT_Time (bars, 1, 0); }
+	BBT_Time round_up_to_bar () const;
 	BBT_Time round_down_to_bar () const { return BBT_Time (bars, 1, 0); }
 	BBT_Time next_bar () const { return (bars == -1) ? BBT_Time (1, 1, 0) : BBT_Time (bars+1, 1, 0); }
 	BBT_Time prev_bar () const { return (bars == 1)  ? BBT_Time (-1, 1, 0) : BBT_Time (bars-1, 1, 0); }

@@ -23,6 +23,20 @@
 
 using namespace Temporal;
 
+BBT_Time
+BBT_Time::round_up_to_bar() const
+{
+	if (ticks == 0 && beats == 1) {
+		return *this;
+	}
+	BBT_Time b = round_up_to_beat ();
+	if (b.beats > 1) {
+		b.bars += 1;
+		b.beats = 1;
+	}
+	return b;
+}
+
 BBT_Offset::BBT_Offset (double dbeats)
 {
 	/* NOTE: this does not construct a BBT time in a canonical form,
