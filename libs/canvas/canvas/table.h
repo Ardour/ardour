@@ -81,7 +81,8 @@ public:
 	void attach (Item*, uint32_t upper_left_x, uint32_t upper_right_y, PackOptions row_options = PackOptions (0), PackOptions col_options = PackOptions (0), FourDimensions padding = FourDimensions (0.));
 	void attach_with_span (Item*, uint32_t upper_left_x, uint32_t upper_left_y, uint32_t hspan, uint32_t vspan, PackOptions row_options = PackOptions (0), PackOptions col_options = PackOptions (0), FourDimensions padding = FourDimensions (0.));
 
-	void detach (Item*);
+	// Not implemented, but also not needed thus far
+	// void detach (Item*);
 
 	void set_row_size (uint32_t row, Distance);
 	void set_col_size (uint32_t row, Distance);
