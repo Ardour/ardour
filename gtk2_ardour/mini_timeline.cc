@@ -424,14 +424,14 @@ MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int next_cue_left_edge, int
 	};
 
 	// draw a bar to show that the Cue continues forever
-	if (cue_index!=INT32_MAX) {
+	if (cue_index!=CueRecord::stop_all) {
 		cairo_rectangle (cr, marker_loc, y_center-2*scale, next_cue_left_edge - marker_loc, 4*scale);
 		set_source_rgba (cr, color);
 		cairo_fill (cr);
 	}
 
 	// draw the Cue
-	if (cue_index!=INT32_MAX) {  //regular cues are a circle
+	if (cue_index!=CueRecord::stop_all) {  //regular cues are a circle
 		cairo_arc(cr, marker_loc, y_center, (h/2), 0, 2*M_PI);
 		cairo_set_source_rgb (cr, 0, 0, 0);  //black
 		cairo_fill (cr);
@@ -450,7 +450,7 @@ MiniTimeline::draw_cue (cairo_t* cr, int marker_loc, int next_cue_left_edge, int
 	}
 
 	//draw cue letter
-	if (cue_index!=INT32_MAX) {
+	if (cue_index!=CueRecord::stop_all) {
 		_layout->set_text (cue_marker_name (cue_index));
 		cairo_set_source_rgb (cr, 0, 0, 0);  //black
 		cairo_move_to (cr, marker_loc, y_center);  //move to center of circle

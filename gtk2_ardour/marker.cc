@@ -500,7 +500,7 @@ ArdourMarker::setup_name_display ()
 		_name_item->clamp_width (name_width);
 
 		if (_type == Cue) {
-			if (_cue_index != INT32_MAX) {
+			if (_cue_index != CueRecord::stop_all) {
 				_name_item->set (cue_marker_name (_cue_index));
 				_pcue->show();  //show the circle
 				_pmark->hide();
