@@ -48,8 +48,7 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-EditorSnapshots::EditorSnapshots (Editor* e)
-	: EditorComponent (e)
+EditorSnapshots::EditorSnapshots ()
 {
 	_snapshot_model = ListStore::create (_columns);
 	_snapshot_display.set_model (_snapshot_model);

@@ -681,7 +681,7 @@ Editor::Editor ()
 	_routes = new EditorRoutes ();
 	_regions = new EditorRegions (this);
 	_sources = new EditorSources (this);
-	_snapshots = new EditorSnapshots (this);
+	_snapshots = new EditorSnapshots ();
 	_locations = new EditorLocations (this);
 	_properties_box = new SelectionPropertiesBox ();
 
