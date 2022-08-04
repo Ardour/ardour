@@ -42,7 +42,7 @@
 
 #include "lv2_external_ui.h"
 
-#include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
+#include "lv2/ui/ui.h"
 
 namespace ARDOUR {
 	class LV2Plugin;

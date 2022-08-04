@@ -76,23 +76,23 @@
 
 #include <lilv/lilv.h>
 
-#include "lv2/lv2plug.in/ns/ext/atom/atom.h"
-#include "lv2/lv2plug.in/ns/ext/atom/forge.h"
-#include "lv2/lv2plug.in/ns/ext/log/log.h"
-#include "lv2/lv2plug.in/ns/ext/midi/midi.h"
-#include "lv2/lv2plug.in/ns/ext/port-props/port-props.h"
-#include "lv2/lv2plug.in/ns/ext/presets/presets.h"
-#include "lv2/lv2plug.in/ns/ext/state/state.h"
-#include "lv2/lv2plug.in/ns/ext/time/time.h"
-#include "lv2/lv2plug.in/ns/ext/worker/worker.h"
-#include "lv2/lv2plug.in/ns/ext/resize-port/resize-port.h"
-#include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
-#include "lv2/lv2plug.in/ns/extensions/units/units.h"
-#include "lv2/lv2plug.in/ns/ext/patch/patch.h"
-#include "lv2/lv2plug.in/ns/ext/port-groups/port-groups.h"
-#include "lv2/lv2plug.in/ns/ext/parameters/parameters.h"
-#include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
-#include "lv2/lv2plug.in/ns/ext/options/options.h"
+#include "lv2/atom/atom.h"
+#include "lv2/atom/forge.h"
+#include "lv2/buf-size/buf-size.h"
+#include "lv2/log/log.h"
+#include "lv2/midi/midi.h"
+#include "lv2/options/options.h"
+#include "lv2/parameters/parameters.h"
+#include "lv2/patch/patch.h"
+#include "lv2/port-groups/port-groups.h"
+#include "lv2/port-props/port-props.h"
+#include "lv2/presets/presets.h"
+#include "lv2/resize-port/resize-port.h"
+#include "lv2/state/state.h"
+#include "lv2/time/time.h"
+#include "lv2/ui/ui.h"
+#include "lv2/units/units.h"
+#include "lv2/worker/worker.h"
 
 #include "lv2_evbuf.h"
 
@@ -1888,17 +1888,10 @@ LV2Plugin::set_property(uint32_t key, const Variant& value)
 	lv2_atom_forge_set_buffer(forge, buf, sizeof(buf));
 
 	// Serialize patch:Set message to set property
-#ifdef HAVE_LV2_1_10_0
 	lv2_atom_forge_object(forge, &frame, 0, _uri_map.urids.patch_Set);
 	lv2_atom_forge_key(forge, _uri_map.urids.patch_property);
 	lv2_atom_forge_urid(forge, key);
 	lv2_atom_forge_key(forge, _uri_map.urids.patch_value);
-#else
-	lv2_atom_forge_blank(forge, &frame, 0, _uri_map.urids.patch_Set);
-	lv2_atom_forge_property_head(forge, _uri_map.urids.patch_property, 0);
-	lv2_atom_forge_urid(forge, key);
-	lv2_atom_forge_property_head(forge, _uri_map.urids.patch_value, 0);
-#endif
 
 	forge_variant(forge, value);
 
@@ -2063,11 +2056,7 @@ LV2Plugin::announce_property_values()
 	lv2_atom_forge_set_buffer(forge, buf, sizeof(buf));
 
 	// Serialize patch:Get message with no subject (implicitly plugin instance)
-#ifdef HAVE_LV2_1_10_0
 	lv2_atom_forge_object(forge, &frame, 0, _uri_map.urids.patch_Get);
-#else
-	lv2_atom_forge_blank(forge, &frame, 0, _uri_map.urids.patch_Get);
-#endif
 
 	// Write message to UI=>Plugin ring
 	const LV2_Atom* const atom = (const LV2_Atom*)buf;
@@ -2601,8 +2590,8 @@ write_position(LV2_Atom_Forge*     forge,
 
 	uint8_t pos_buf[256];
 	lv2_atom_forge_set_buffer(forge, pos_buf, sizeof(pos_buf));
+
 	LV2_Atom_Forge_Frame frame;
-#ifdef HAVE_LV2_1_10_0
 	lv2_atom_forge_object(forge, &frame, 0, urids.time_Position);
 	lv2_atom_forge_key(forge, urids.time_frame);
 	lv2_atom_forge_long(forge, position);
@@ -2620,25 +2609,6 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_float(forge, bpm);
 	lv2_atom_forge_key(forge, urids.time_scale);
 	lv2_atom_forge_float(forge, time_scale);
-#else
-	lv2_atom_forge_blank(forge, &frame, 1, urids.time_Position);
-	lv2_atom_forge_property_head(forge, urids.time_frame, 0);
-	lv2_atom_forge_long(forge, position);
-	lv2_atom_forge_property_head(forge, urids.time_speed, 0);
-	lv2_atom_forge_float(forge, speed);
-	lv2_atom_forge_property_head(forge, urids.time_barBeat, 0);
-	lv2_atom_forge_float(forge, bbt.beats - 1 + (bbt.ticks / (float) Temporal::ticks_per_beat));
-	lv2_atom_forge_property_head(forge, urids.time_bar, 0);
-	lv2_atom_forge_long(forge, bbt.bars - 1);
-	lv2_atom_forge_property_head(forge, urids.time_beatUnit, 0);
-	lv2_atom_forge_int(forge, t.meter().note_divisor());
-	lv2_atom_forge_property_head(forge, urids.time_beatsPerBar, 0);
-	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
-	lv2_atom_forge_property_head(forge, urids.time_beatsPerMinute, 0);
-	lv2_atom_forge_float(forge, bpm);
-	lv2_atom_forge_key(forge, urids.time_scale);
-	lv2_atom_forge_float(forge, time_scale);
-#endif
 
 	LV2_Evbuf_Iterator    end  = lv2_evbuf_end(buf);
 	const LV2_Atom* const atom = (const LV2_Atom*)pos_buf;

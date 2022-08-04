@@ -320,9 +320,7 @@ def configure(conf):
                       atleast_version='2.0')
 
     autowaf.check_pkg(conf, 'lv2', uselib_store='LV2',
-                      atleast_version='1.2.0', mandatory=True)
-    autowaf.check_pkg(conf, 'lv2', uselib_store='LV2_1_10_0',
-                      atleast_version='1.10.0', mandatory=False)
+                      atleast_version='1.16.0', mandatory=True)
     autowaf.check_pkg(conf, 'lv2', uselib_store='LV2_1_17_2',
                       atleast_version='1.17.2', mandatory=False)
     autowaf.check_pkg(conf, 'serd-0', uselib_store='SERD',
@@ -338,7 +336,7 @@ def configure(conf):
     conf.define ('LV2_SUPPORT', 1)
 
     # non-standard LV2 extention -- TODO: add option to disable??
-    if conf.is_defined ('HAVE_LV2_1_10_0'):
+    if conf.is_defined ('HAVE_LV2'):
         conf.define ('LV2_EXTENDED', 1)
 
     #autowaf.check_pkg(conf, 'soundtouch', uselib_store='SOUNDTOUCH',

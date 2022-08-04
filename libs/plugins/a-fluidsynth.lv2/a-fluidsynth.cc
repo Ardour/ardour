@@ -32,28 +32,22 @@
 
 #define AFS_URN "urn:ardour:a-fluidsynth"
 
-#ifdef HAVE_LV2_1_10_0
-#define x_forge_object lv2_atom_forge_object
-#else
-#define x_forge_object lv2_atom_forge_blank
-#endif
-
 #ifdef LV2_EXTENDED
 #include "../../ardour/ardour/lv2_extensions.h"
 #endif
 
 #include "fluidsynth.h"
 
-#include <lv2/lv2plug.in/ns/ext/atom/atom.h>
-#include <lv2/lv2plug.in/ns/ext/atom/forge.h>
-#include <lv2/lv2plug.in/ns/ext/atom/util.h>
-#include <lv2/lv2plug.in/ns/ext/log/logger.h>
-#include <lv2/lv2plug.in/ns/ext/midi/midi.h>
-#include <lv2/lv2plug.in/ns/ext/patch/patch.h>
-#include <lv2/lv2plug.in/ns/ext/state/state.h>
-#include <lv2/lv2plug.in/ns/ext/urid/urid.h>
-#include <lv2/lv2plug.in/ns/ext/worker/worker.h>
-#include <lv2/lv2plug.in/ns/lv2core/lv2.h>
+#include <lv2/atom/atom.h>
+#include <lv2/atom/forge.h>
+#include <lv2/atom/util.h>
+#include <lv2/core/lv2.h>
+#include <lv2/log/logger.h>
+#include <lv2/midi/midi.h>
+#include <lv2/patch/patch.h>
+#include <lv2/state/state.h>
+#include <lv2/urid/urid.h>
+#include <lv2/worker/worker.h>
 
 enum {
 	FS_PORT_CONTROL = 0,
@@ -254,7 +248,7 @@ inform_ui (AFluidSynth* self)
 
 	LV2_Atom_Forge_Frame frame;
 	lv2_atom_forge_frame_time (&self->forge, 0);
-	x_forge_object (&self->forge, &frame, 1, self->patch_Set);
+	lv2_atom_forge_object (&self->forge, &frame, 1, self->patch_Set);
 	lv2_atom_forge_property_head (&self->forge, self->patch_property, 0);
 	lv2_atom_forge_urid (&self->forge, self->afs_sf2file);
 	lv2_atom_forge_property_head (&self->forge, self->patch_value, 0);
@@ -689,7 +683,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 		/* emit stateChanged */
 		LV2_Atom_Forge_Frame frame;
 		lv2_atom_forge_frame_time (&self->forge, 0);
-		x_forge_object (&self->forge, &frame, 1, self->state_Changed);
+		lv2_atom_forge_object (&self->forge, &frame, 1, self->state_Changed);
 		lv2_atom_forge_pop (&self->forge, &frame);
 
 		/* send .sf2 filename */

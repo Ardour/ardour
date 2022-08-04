@@ -28,7 +28,7 @@
 #include "ardour/lv2_extensions.h"
 #endif
 
-#include "lv2/lv2plug.in/ns/lv2core/lv2.h"
+#include "lv2/core/lv2.h"
 
 #define ACOMP_URI		"urn:ardour:a-comp"
 #define ACOMP_STEREO_URI	"urn:ardour:a-comp#stereo"

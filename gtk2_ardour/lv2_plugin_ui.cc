@@ -36,7 +36,7 @@
 
 #include "gtkmm2ext/utils.h"
 
-#include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
+#include "lv2/ui/ui.h"
 
 #include <lilv/lilv.h>
 #include <suil/suil.h>

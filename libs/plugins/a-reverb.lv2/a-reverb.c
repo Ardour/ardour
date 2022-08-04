@@ -249,7 +249,7 @@ reverb (b_reverb* r,
  * LV2 wrapper
  */
 
-#include "lv2/lv2plug.in/ns/lv2core/lv2.h"
+#include "lv2/core/lv2.h"
 
 typedef enum {
 	AR_INPUT0     = 0,

@@ -24,10 +24,10 @@
 #include <time.h>
 
 /* LV2 */
-#include "lv2/lv2plug.in/ns/lv2core/lv2.h"
-#include "lv2/lv2plug.in/ns/ext/atom/atom.h"
-#include "lv2/lv2plug.in/ns/ext/urid/urid.h"
-#include "lv2/lv2plug.in/ns/ext/midi/midi.h"
+#include "lv2/atom/atom.h"
+#include "lv2/core/lv2.h"
+#include "lv2/midi/midi.h"
+#include "lv2/urid/urid.h"
 
 #define RSY_URI "https://community.ardour.org/node/7596"
 

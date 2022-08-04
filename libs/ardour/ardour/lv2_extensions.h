@@ -17,7 +17,7 @@
 #ifndef _ardour_lv2_extensions_h_
 #define _ardour_lv2_extensions_h_
 
-#include "lv2/lv2plug.in/ns/lv2core/lv2.h"
+#include "lv2/core/lv2.h"
 
 /**
    @defgroup lv2inlinedisplay Inline-Display

@@ -35,7 +35,7 @@
 #define isfinite_local isfinite
 #endif
 
-#include "lv2/lv2plug.in/ns/lv2core/lv2.h"
+#include "lv2/core/lv2.h"
 
 #ifdef LV2_EXTENDED
 #include <cairo/cairo.h>
