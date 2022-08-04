@@ -139,7 +139,7 @@ LV2PluginUI::set_path_property (int response,
 	active_parameter_requests.erase (desc.key);
 }
 
-#ifdef HAVE_LV2_1_17_2
+#ifdef HAVE_LV2_1_18_0
 LV2UI_Request_Value_Status
 LV2PluginUI::request_value(void*                     handle,
                            LV2_URID                  key,
@@ -336,7 +336,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		features[fi] = features_src[fi];
 	}
 
-#ifdef HAVE_LV2_1_17_2
+#ifdef HAVE_LV2_1_18_0
 	_lv2ui_request_value.handle  = this;
 	_lv2ui_request_value.request = LV2PluginUI::request_value;
 	_lv2ui_request_feature.URI   = LV2_UI__requestValue;
@@ -376,7 +376,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	features[fi] = NULL;
-#ifdef HAVE_LV2_1_17_2
+#ifdef HAVE_LV2_1_18_0
 	assert (fi == features_count + (is_external_ui ? 3 : 2));
 #else
 	assert (fi == features_count + (is_external_ui ? 2 : 1));

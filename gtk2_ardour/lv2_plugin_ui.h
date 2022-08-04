@@ -84,7 +84,7 @@ private:
 	struct lv2_external_ui_host               _external_ui_host;
 	LV2_Feature                               _external_ui_feature;
 	LV2_Feature                               _external_kxui_feature;
-#ifdef HAVE_LV2_1_17_2
+#ifdef HAVE_LV2_1_18_0
 	LV2UI_Request_Value                       _lv2ui_request_value;
 	LV2_Feature                               _lv2ui_request_feature;
 #endif
@@ -115,7 +115,7 @@ private:
 	                  uint32_t port_index,
 	                  bool     grabbed);
 
-#ifdef HAVE_LV2_1_17_2
+#ifdef HAVE_LV2_1_18_0
 	static LV2UI_Request_Value_Status
 	request_value(void*                     handle,
 	              LV2_URID                  key,
