@@ -1346,7 +1346,14 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 	 */
 
 	if (!_sources.empty() && _type == DataType::AUDIO) {
-		if ((length().time_domain() == Temporal::AudioTime) && (length().distance() > _sources.front()->length())) {
+		/* both region and source length must be audio time for this to
+		   actually be a case of a destructive track/region. And also
+		   for the operator>() in the 3rd conditional clause to be
+		   legal, since these values are timepos_t IS-A int62_t and
+		   that requires the same "flagged" status (i.e. domain) to be
+		   match.
+		*/
+		if ((length().time_domain() == Temporal::AudioTime) && (_sources.front()->length().time_domain() == Temporal::AudioTime) && (length().distance() > _sources.front()->length())) {
 			_length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
 		 }
 	}
