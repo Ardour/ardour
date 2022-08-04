@@ -95,6 +95,8 @@ Plugin::Plugin (AudioEngine& e, Session& s)
 	, _have_pending_stop_events (false)
 	, _parameter_changed_since_last_preset (false)
 	, _immediate_events(6096) // FIXME: size?
+	, _pi (0)
+	, _num (0)
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
 	PresetsChanged.connect_same_thread(_preset_connection, boost::bind (&Plugin::invalidate_preset_cache, this, _1, _2, _3));
@@ -114,6 +116,8 @@ Plugin::Plugin (const Plugin& other)
 	, _last_preset (other._last_preset)
 	, _parameter_changed_since_last_preset (false)
 	, _immediate_events(6096) // FIXME: size?
+	, _pi (other._pi)
+	, _num (other._num)
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
 
