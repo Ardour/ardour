@@ -204,12 +204,6 @@ public:
 	LilvNode* bufz_nominalBlockLength;
 	LilvNode* bufz_coarseBlockLength;
 
-#ifdef HAVE_LV2_1_10_0
-	LilvNode* atom_int;
-	LilvNode* atom_float;
-	LilvNode* atom_object; // new in 1.8
-	LilvNode* atom_vector;
-#endif
 #ifdef LV2_EXTENDED
 	LilvNode* lv2_noSampleAccurateCtrl;
 	LilvNode* routing_connectAllOutputs; // lv2:optionalFeature
