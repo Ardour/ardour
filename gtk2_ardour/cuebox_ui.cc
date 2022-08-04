@@ -74,6 +74,13 @@ CueEntry::CueEntry (Item* item, uint64_t cue_index)
 	name_button->name = ("slot_selector_button");
 	name_button->show ();
 
+	jump_text = new ArdourCanvas::Text (this);
+	jump_text->set_outline (false);
+	jump_text->set_fill (true);
+	jump_text->name = ("slot_selector_button");
+	jump_text->set (cue_marker_name (_cue_idx));
+	jump_text->show ();
+
 	set_tooltip (_("Click to launch all clips in this row\nRight-click to select properties for all clips in this row"));
 
 	/* watch for cue-recording state */
@@ -124,12 +131,24 @@ CueEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 {
 	ArdourCanvas::Rectangle::_size_allocate (alloc);
 
+	const Distance width = _rect.width ();
 	const Distance height = _rect.height ();
 
 	const double scale = UIConfiguration::instance ().get_ui_scale ();
 
 	name_button->set_center ( Duple(height/2, height/2) );
-	name_button->set_radius ( (height/2)- 2*scale );
+	name_button->set_radius ( (height/2)- 1*scale );
+
+	/* have to do this in the size-allocate if we want to dynmaically respond to scale-changes */
+	jump_text->set_font_description (UIConfiguration::instance().get_NormalFont());
+	jump_text->set_alignment (Pango::ALIGN_CENTER);
+
+	/* calculate centering offset */
+	int cx = (width-jump_text->text_width())/2;
+	int cy = (0.5+height-jump_text->text_height())/2;
+
+	jump_text->set_position ( Duple(cx,cy) );
+	jump_text->set_size_request ( width, height );
 }
 
 void
@@ -159,51 +178,6 @@ CueEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 	}
 
 	render_children (area, context);
-
-	if (false) { //Play triangle, needs to match TriggerEntry buttons exactly
-		context->set_line_width (1 * scale);
-
-		float margin = 4 * scale;
-		float size   = height - 2 * margin;
-
-		context->set_identity_matrix ();
-		context->translate (self.x0, self.y0 - 0.5);
-		context->move_to (height + margin, margin);
-		context->rel_line_to (0, size);
-		context->rel_line_to (size, -size / 2);
-		context->close_path ();
-		set_source_rgba (context, UIConfiguration::instance ().color ("neutral:midground"));
-		context->stroke ();
-		context->set_identity_matrix ();
-
-		context->set_line_width (1);
-	}
-
-	//draw cue letter
-	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
-	int font_size = 8 * scale;
-	char font_name[128];
-	snprintf (font_name, sizeof (font_name), "ArdourMono %d", font_size);
-	Pango::FontDescription pfd (font_name);
-	layout->set_font_description (pfd);
-	layout->set_text (cue_marker_name (_cue_idx));
-	int tw, th;
-	layout->get_pixel_size (tw, th);
-	context->translate (self.x0 - 0.5*scale, self.y0 - 0.5*scale);
-	context->move_to (width/2,height/2);  //move to center
-	context->rel_move_to (-tw/2, -th/2);  //rel move to top-left of text
-	context->set_source_rgb (0, 0, 0);  //black
-	layout->show_in_cairo_context (context);
-	context->set_identity_matrix ();
-
-	if (false /*_cue_idx == 0*/) {
-		Cairo::RefPtr<Cairo::LinearGradient> drop_shadow_pattern = Cairo::LinearGradient::create (0.0, 0.0, 0.0, 6 * scale);
-		drop_shadow_pattern->add_color_stop_rgba (0, 0, 0, 0, 0.7);
-		drop_shadow_pattern->add_color_stop_rgba (1, 0, 0, 0, 0.0);
-		context->set_source (drop_shadow_pattern);
-		context->rectangle (0, 0, width, 6 * scale);
-		context->fill ();
-	}
 }
 
 void

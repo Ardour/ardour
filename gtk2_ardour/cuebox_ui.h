@@ -48,6 +48,7 @@ public:
 	~CueEntry ();
 
 	ArdourCanvas::Circle*    name_button;
+	ArdourCanvas::Text*      jump_text;
 
 	void render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> context) const;
 
