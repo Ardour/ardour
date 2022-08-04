@@ -77,7 +77,7 @@ private:
 	sigc::connection                          _screen_update_connection;
 	sigc::connection                          _message_update_connection;
 	Gtk::Widget*                              _gui_widget;
-	/** a box containing the focus, bypa      s, delete, save / add preset buttons etc. */
+	/** a box containing the focus, bypass, delete, save / add preset buttons etc. */
 	Gtk::HBox                                 _ardour_buttons_box;
 	float*                                    _values_last_sent_to_ui;
 	std::vector<ControllableRef>              _controllables;
