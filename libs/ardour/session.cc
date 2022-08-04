@@ -6969,7 +6969,9 @@ Session::set_worst_output_latency ()
 		_io_latency = max (_io_latency, (*i)->output()->latency() + (*i)->input()->latency());
 	}
 
-	_worst_output_latency = max (_worst_output_latency, _click_io->latency());
+	if (_click_io) {
+		_worst_output_latency = max (_worst_output_latency, _click_io->latency());
+	}
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("Worst output latency: %1\n", _worst_output_latency));
 }
