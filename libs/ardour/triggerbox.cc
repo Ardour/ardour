@@ -2965,6 +2965,15 @@ TriggerBox::cancel_locate_armed ()
 }
 
 void
+TriggerBox::fast_forward_nothing_to_do ()
+{
+	cancel_locate_armed ();
+	if (tracker) {
+		tracker->reset ();
+	}
+}
+
+void
 TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position)
 {
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: ffwd to %2\n", order(), transport_position));
@@ -2974,12 +2983,13 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		return;
 	}
 
-	PBD::Unwinder<bool> uw (_fast_forwarding, true);
+	if (cues.empty() || (cues.front().time > transport_position)) {
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: nothing to be done, cp = %2\n", order(), _currently_playing));
+		fast_forward_nothing_to_do ();
+		return;
+	}
 
-	using namespace Temporal;
-	TempoMap::SharedPtr tmap (TempoMap::use());
-
-	CueEvents::const_reverse_iterator c = cues.rbegin();
+	CueEvents::const_reverse_iterator c = cues.rbegin ();
 	samplepos_t pos = c->time;
 	TriggerPtr trig;
 	Temporal::BBT_Time start_bbt;
@@ -2988,10 +2998,10 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	bool will_start;
 	uint32_t cnt = 0;
 
-	if (cues.empty() || (cues.front().time > transport_position)) {
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: nothing to be done, cp = %2\n", order(), _currently_playing));
-		goto nothing_to_do;
-	}
+	using namespace Temporal;
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
+	PBD::Unwinder<bool> uw (_fast_forwarding, true);
 
 	/* Walk backwards through cues to find the first one that is either a
 	 * stop-all cue or references a non-cue-isolated trigger, and is
@@ -3021,7 +3031,8 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	 */
 
 	if (c == cues.rend() || (c->cue == CueRecord::stop_all) | (c->time == transport_position)) {
-		goto nothing_to_do;
+		fast_forward_nothing_to_do ();
+		return;
 	}
 
 	trig = all_triggers[c->cue];
@@ -3029,7 +3040,8 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	cnt = 0;
 
 	if (!trig->region()) {
-		goto nothing_to_do;
+		fast_forward_nothing_to_do ();
+		return;
 	}
 
 	while (pos < transport_position) {
@@ -3054,7 +3066,8 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 				   subsequent trigger to follow this
 				   one.
 				*/
-				goto nothing_to_do;
+				fast_forward_nothing_to_do ();
+				return;
 			}
 
 		} else {
@@ -3113,10 +3126,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		/* nothing to do */
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: no trigger to be rolled (%2 >= %3, trigger = %4)\n", order(), pos, transport_position, trig));
 		_currently_playing = 0;
-		_locate_armed = false;
-		if (tracker) {
-			tracker->reset ();
-		}
+		fast_forward_nothing_to_do ();
 		return;
 	}
 
@@ -3163,14 +3173,6 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	}
 
 	return;
-
-  nothing_to_do:
-	cancel_locate_armed ();
-	if (tracker) {
-		tracker->reset ();
-	}
-	return;
-
 }
 
 void

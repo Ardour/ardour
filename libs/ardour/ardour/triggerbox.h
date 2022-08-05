@@ -895,6 +895,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	void reload (BufferSet& bufs, int32_t slot, void* ptr);
 
 	void cancel_locate_armed ();
+	void fast_forward_nothing_to_do ();
 
 	PBD::ScopedConnection stop_all_connection;
 
