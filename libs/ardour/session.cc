@@ -6801,7 +6801,9 @@ Session::set_owned_port_public_latency (bool playback)
 		samplecnt_t latency = auditioner->set_private_port_latencies (playback);
 		auditioner->set_public_port_latencies (latency, playback, true);
 	}
-	_click_io->set_public_port_latencies (_click_io->connected_latency (playback), playback);
+	if (_click_io) {
+		_click_io->set_public_port_latencies (_click_io->connected_latency (playback), playback);
+	}
 
 	boost::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
 	for (auto const& i : *iop) {
