@@ -362,7 +362,12 @@ Session::Session (AudioEngine &eng,
 
 	setup_lua ();
 
-	assert (AudioEngine::instance()->running());
+	/* The engine sould be running at this point */
+	if (!AudioEngine::instance()->running()) {
+		destroy ();
+		throw SessionException (_("Session initialization failed because Audio/MIDI engine is not running."));
+	}
+
 	immediately_post_engine ();
 
 	bool need_template_resave = false;
