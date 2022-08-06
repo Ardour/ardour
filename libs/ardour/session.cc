@@ -396,9 +396,11 @@ Session::Session (AudioEngine &eng,
 		if (!mix_template.empty()) {
 			try {
 				if (load_state (_current_snapshot_name, /* from_template = */ true)) {
+					destroy ();
 					throw SessionException (_("Failed to load template/snapshot state"));
 				}
 			} catch (PBD::unknown_enumeration& e) {
+				destroy ();
 				throw SessionException (_("Failed to parse template/snapshot state"));
 			}
 
@@ -419,6 +421,7 @@ Session::Session (AudioEngine &eng,
 	} else {
 
 		if (load_state (_current_snapshot_name)) {
+			destroy ();
 			throw SessionException (_("Failed to load state"));
 		}
 	}
