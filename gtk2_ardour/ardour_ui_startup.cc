@@ -193,6 +193,10 @@ audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
 	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
 	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
+
+	if (ARDOUR::AudioEngine::instance ()->setup_required ()) {
+		dialog.add_button (_("Reconfigure Engine"), RESPONSE_YES);
+	}
 	dialog.add_button (_("Do not load session"), RESPONSE_REJECT);
 	dialog.add_button (_("Load session anyway"), RESPONSE_ACCEPT);
 	dialog.set_default_response (RESPONSE_ACCEPT);
@@ -202,6 +206,11 @@ audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual
 	hbox->show();
 
 	switch (dialog.run()) {
+	case RESPONSE_YES:
+		ARDOUR::AudioEngine::instance ()->stop ();
+		(dynamic_cast<EngineControl*> (audio_midi_setup.get (true)))->run ();
+		(dynamic_cast<EngineControl*> (audio_midi_setup.get (true)))->hide ();
+		return AudioEngine::instance()->running () ? -1 : 1;
 	case RESPONSE_ACCEPT:
 		return 0;
 	default:
