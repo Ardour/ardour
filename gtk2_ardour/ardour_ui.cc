@@ -593,8 +593,13 @@ ARDOUR_UI::create_global_port_matrix (ARDOUR::DataType type)
 void
 ARDOUR_UI::attach_to_engine ()
 {
+	static bool first_time = true;
+	if (!first_time) {
+		return;
+	}
 	AudioEngine::instance()->Running.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_running, this, _1), gui_context());
 	engine_running (0);
+	first_time = false;
 }
 
 void
