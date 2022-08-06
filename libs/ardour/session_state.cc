@@ -282,9 +282,16 @@ Session::post_engine_init ()
 
 		if (state_tree) {
 			try {
-				if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
-					error << _("Could not set session state from XML") << endmsg;
-					return -4;
+				switch (set_state (*state_tree->root(), Stateful::loading_state_version)) {
+					case 0:
+						/* OK */
+						break;
+					case -2:
+						/* SR mismatch */
+						return -6;
+					default:
+						error << _("Could not set session state from XML") << endmsg;
+						return -4;
 				}
 			} catch (PBD::unknown_enumeration& e) {
 				error << _("Session state: ") << e.what() << endmsg;
@@ -1674,11 +1681,29 @@ Session::set_state (const XMLNode& node, int version)
 
 		_nominal_sample_rate = _base_sample_rate;
 
-		assert (AudioEngine::instance()->running ());
-		if (_base_sample_rate != AudioEngine::instance()->sample_rate ()) {
+		while (!AudioEngine::instance()->running () || _base_sample_rate != AudioEngine::instance()->sample_rate ()) {
 			boost::optional<int> r = AskAboutSampleRateMismatch (_base_sample_rate, _current_sample_rate);
-			if (r.value_or (0)) {
-				goto out;
+			switch (r.value_or (0)) {
+				case 0:
+					if (AudioEngine::instance()->running ()) {
+						/* continue with rate mismatch */
+						break;
+					}
+					/* fallthrough */
+				case -1:
+					if (AudioEngine::instance()->running ()) {
+						/* retry */
+						continue;
+					}
+					/* fallthrough */
+				default:
+					if (AudioEngine::instance()->running ()) {
+						error << _("Session: Load aborted due to sample-rate mismatch") << endmsg;
+					} else {
+						error << _("Session: Load aborted since engine if offline") << endmsg;
+					}
+					ret = -2;
+					goto out;
 			}
 		}
 	}
