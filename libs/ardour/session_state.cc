@@ -1660,21 +1660,6 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
-	/* need the tempo map setup ASAP */
-
-	if ((child = find_named_node (node, "TempoMap")) == 0) {
-		error << _("Session: XML state has no Tempo Map section") << endmsg;
-		goto out;
-	} else {
-		try {
-			TempoMap::WritableSharedPtr tmap = TempoMap::write_copy (); /* get writable copy of current tempo map */
-			tmap->set_state (*child, version); /* reset its state */
-			TempoMap::update (tmap); /* update the global tempo map manager */
-		} catch (...) {
-			goto out;
-		}
-	}
-
 	node.get_property ("name", _name);
 
 	if (node.get_property (X_("sample-rate"), _base_sample_rate)) {
@@ -1707,6 +1692,22 @@ Session::set_state (const XMLNode& node, int version)
 			}
 		}
 	}
+
+	/* need the tempo map setup ASAP */
+
+	if ((child = find_named_node (node, "TempoMap")) == 0) {
+		error << _("Session: XML state has no Tempo Map section") << endmsg;
+		goto out;
+	} else {
+		try {
+			TempoMap::WritableSharedPtr tmap = TempoMap::write_copy (); /* get writable copy of current tempo map */
+			tmap->set_state (*child, version); /* reset its state */
+			TempoMap::update (tmap); /* update the global tempo map manager */
+		} catch (...) {
+			goto out;
+		}
+	}
+
 
 	created_with = "unknown";
 	if ((child = find_named_node (node, "ProgramVersion")) != 0) {
