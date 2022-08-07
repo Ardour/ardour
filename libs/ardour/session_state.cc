@@ -1677,6 +1677,8 @@ Session::set_state (const XMLNode& node, int version)
 					/* fallthrough */
 				case -1:
 					if (AudioEngine::instance()->running ()) {
+						set_block_size (_engine.samples_per_cycle());
+						set_sample_rate (_engine.sample_rate());
 						/* retry */
 						continue;
 					}
