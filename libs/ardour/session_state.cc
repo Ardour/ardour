@@ -1668,30 +1668,28 @@ Session::set_state (const XMLNode& node, int version)
 
 		while (!AudioEngine::instance()->running () || _base_sample_rate != AudioEngine::instance()->sample_rate ()) {
 			boost::optional<int> r = AskAboutSampleRateMismatch (_base_sample_rate, _current_sample_rate);
-			switch (r.value_or (0)) {
-				case 0:
-					if (AudioEngine::instance()->running ()) {
-						/* continue with rate mismatch */
-						break;
-					}
-					/* fallthrough */
-				case -1:
-					if (AudioEngine::instance()->running ()) {
-						set_block_size (_engine.samples_per_cycle());
-						set_sample_rate (_engine.sample_rate());
-						/* retry */
-						continue;
-					}
-					/* fallthrough */
-				default:
-					if (AudioEngine::instance()->running ()) {
-						error << _("Session: Load aborted due to sample-rate mismatch") << endmsg;
-					} else {
-						error << _("Session: Load aborted since engine if offline") << endmsg;
-					}
-					ret = -2;
-					goto out;
+			int rv = r.value_or (0);
+			if (rv == 0 && AudioEngine::instance()->running ()) {
+				/* continue with rate mismatch */
+				break;
+			} else if (rv == -1 && AudioEngine::instance()->running ()) {
+				/* retry */
+				set_block_size (_engine.samples_per_cycle());
+				/* retry */
+				continue;
+			} else {
+				if (AudioEngine::instance()->running ()) {
+					error << _("Session: Load aborted due to sample-rate mismatch") << endmsg;
+				} else {
+					error << _("Session: Load aborted since engine if offline") << endmsg;
+				}
+				ret = -2;
+				goto out;
 			}
+		}
+
+		if (_base_sample_rate != _engine.sample_rate ()) {
+			set_sample_rate (_engine.sample_rate());
 		}
 	}
 
