@@ -710,6 +710,8 @@ Trigger::startup_from_ffwd (BufferSet& bufs, uint32_t loop_cnt)
 	_startup (bufs, 0, _quantization);
 	_loop_cnt = loop_cnt;
 	_cue_launched = true;
+	/* if we just fast-forwarded, any pending stop request is irrelevant */
+	_requests.stop = false;
 }
 
 void
@@ -3158,6 +3160,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		_currently_playing = trig;
 		_locate_armed = true;
+		_cancel_locate_armed = false;
 		/* currently playing is now ready to keep running at transport position
 		 *
 		 * Note that a MIDITrigger will have set a flag so that when we call
@@ -3170,7 +3173,10 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 		trig->startup_from_ffwd (bufs, cnt);
 		_currently_playing = trig;
 		_locate_armed = true;
+		_cancel_locate_armed = false;
 	}
+
+	_stop_all = false;
 
 	return;
 }
@@ -4475,10 +4481,6 @@ TriggerBox::non_realtime_transport_stop (samplepos_t now, bool /*flush*/)
 		t->shutdown_from_fwd ();
 	}
 
-	if (now) {
-		now += playback_offset();
-	}
-
 	fast_forward (_session.cue_events(), now);
 }
 
@@ -4489,10 +4491,6 @@ TriggerBox::non_realtime_locate (samplepos_t now)
 
 	for (auto & t : all_triggers) {
 		t->shutdown_from_fwd ();
-	}
-
-	if (now) {
-		now += playback_offset();
 	}
 
 	fast_forward (_session.cue_events(), now);
