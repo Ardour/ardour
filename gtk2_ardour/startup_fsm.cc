@@ -461,7 +461,7 @@ StartupFSM::start_audio_midi_setup ()
 		}
 	}
 
-	bool try_autostart = (Config->get_try_autostart_engine () || g_getenv ("ARDOUR_TRY_AUTOSTART_ENGINE"));
+	bool try_autostart = !new_user && (Config->get_try_autostart_engine () || g_getenv ("ARDOUR_TRY_AUTOSTART_ENGINE"));
 	if (session_is_new) {
 		try_autostart = false;
 	} else if (!backend) {
