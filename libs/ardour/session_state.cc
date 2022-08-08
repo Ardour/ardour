@@ -1170,6 +1170,21 @@ merge_all_sources (boost::shared_ptr<const Playlist> pl, std::set<boost::shared_
 	pl->deep_sources (*all_sources);
 }
 
+void
+Session::collect_sources_of_this_snapshot (set<boost::shared_ptr<Source>>& s, bool incl_unused) const
+{
+	_playlists->sync_all_regions_with_regions ();
+	_playlists->foreach (boost::bind (merge_all_sources, _1, &s), incl_unused);
+
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (auto const& r : *rl) {
+		boost::shared_ptr<TriggerBox> tb = r->triggerbox ();
+		if (tb) {
+			tb->deep_sources (s);
+		}
+	}
+}
+
 namespace
 {
 struct route_id_compare {
@@ -1294,8 +1309,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 		set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
 
 		if (only_used_assets) {
-			_playlists->sync_all_regions_with_regions ();
-			_playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot), false);
+			collect_sources_of_this_snapshot (sources_used_by_this_snapshot, false);
 		}
 
 		for (SourceMap::const_iterator siter = sources.begin(); siter != sources.end(); ++siter) {
@@ -1368,11 +1382,32 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 			/* save used nested sources of unused regions compounds. Those sources
 			 * are not FileSource, and hence not saved when iterating over
 			 * `sources_used_by_this_snapshot'. They also must be saved as "Region"
+			 *
+			 * Furthermore we need to collect Regions used by Triggers, since
+			 * they are not in any Playlist.
 			 */
+			std::set<boost::shared_ptr<Region>> tr;
+			{
+				boost::shared_ptr<RouteList> rl = routes.reader();
+				for (auto const& r : *rl) {
+					boost::shared_ptr<TriggerBox> tb = r->triggerbox ();
+					if (tb) {
+						tb->used_regions (tr);
+					}
+				}
+			}
+
 			auto const& used_pl (_playlists->get_used ());
 			const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
 			for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
 				boost::shared_ptr<Region> r = i->second;
+
+				if (tr.find (r) != tr.end()) {
+					child->add_child_nocopy (r->get_state ());
+					continue;
+				}
+
+				/* check for compounds */
 				if (r->max_source_level () == 0 || ! r->whole_file ()) {
 					continue;
 				}
@@ -3739,17 +3774,7 @@ Session::cleanup_sources (CleanupReport& rep)
 	 * This will include the playlists used within compound regions.
 	 */
 
-	_playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot));
-
-	{
-		boost::shared_ptr<RouteList> rl = routes.reader();
-		for (auto const& r : *rl) {
-			boost::shared_ptr<TriggerBox> tb = r->triggerbox ();
-			if (tb) {
-				tb->deep_sources (sources_used_by_this_snapshot);
-			}
-		}
-	}
+	collect_sources_of_this_snapshot (sources_used_by_this_snapshot );
 
 	/*  add our current source list */
 
@@ -5637,8 +5662,7 @@ Session::archive_session (const std::string& dest,
 
 	set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
 	if (only_used_sources) {
-		_playlists->sync_all_regions_with_regions ();
-		_playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot), false);
+		collect_sources_of_this_snapshot (sources_used_by_this_snapshot, false);
 	}
 
 	/* collect audio sources for this session, calc total size for encoding

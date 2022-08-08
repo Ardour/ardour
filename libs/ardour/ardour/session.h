@@ -2120,6 +2120,8 @@ private:
 
 	bool maybe_copy_midifile (snapshot_t, boost::shared_ptr<Source> src, XMLNode*);
 
+	void collect_sources_of_this_snapshot (std::set<boost::shared_ptr<Source>>&, bool incl_unused = true) const;
+
 	/* click track */
 	typedef std::list<Click*>     Clicks;
 	Clicks                        clicks;
