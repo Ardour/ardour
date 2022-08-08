@@ -5647,6 +5647,7 @@ Session::archive_session (const std::string& dest,
 	do_not_copy_extensions.push_back (backup_suffix);
 	do_not_copy_extensions.push_back (temp_suffix);
 	do_not_copy_extensions.push_back (history_suffix);
+	do_not_copy_extensions.push_back (".DS_Store");
 
 	vector<string> blacklist_dirs;
 	blacklist_dirs.push_back (string (peak_dir_name) + G_DIR_SEPARATOR);
