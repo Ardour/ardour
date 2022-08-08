@@ -1355,7 +1355,7 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		*/
 		if ((length().time_domain() == Temporal::AudioTime) && (_sources.front()->length().time_domain() == Temporal::AudioTime) && (length().distance() > _sources.front()->length())) {
 			_length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
-		 }
+		}
 	}
 
 	set_id (node);
