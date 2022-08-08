@@ -1827,9 +1827,11 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 	/* see if we're going to start or stop or retrigger in this run() call */
 	maybe_compute_next_transition (start_sample, start, end, nframes, quantize_offset);
 	const pframes_t orig_nframes = nframes;
-	dest_offset += quantize_offset;
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 after checking for transition, state = %3, will stretch %4, nf will be %5 of %6, dest_offset %7\n", index(), name(), enum_2_string (_state), do_stretch, nframes,  orig_nframes, dest_offset));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1/%2 after checking for transition, state = %3, start = %9 will stretch %4, nf will be %5 of %6, dest_offset %7 q-offset %8\n",
+	                                              index(), name(), enum_2_string (_state), do_stretch, nframes,  orig_nframes, dest_offset, quantize_offset, start_sample));
+
+	dest_offset += quantize_offset;
 
 	switch (_state) {
 	case Stopped:
@@ -4475,7 +4477,7 @@ TriggerBox::realtime_handle_transport_stopped ()
 void
 TriggerBox::non_realtime_transport_stop (samplepos_t now, bool /*flush*/)
 {
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 (%3): non-realtime stop at %2 (lat-adjusted to %4\n", order(), now, this, now + playback_offset()));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 (%3): non-realtime stop at %2 (lat-adjusted to %4) PO %5 OL %6\n", order(), now, this, now + playback_offset(), playback_offset(), output_latency()));
 
 	for (auto & t : all_triggers) {
 		t->shutdown_from_fwd ();
@@ -4487,7 +4489,7 @@ TriggerBox::non_realtime_transport_stop (samplepos_t now, bool /*flush*/)
 void
 TriggerBox::non_realtime_locate (samplepos_t now)
 {
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 (%3): non-realtime locate at %2 (lat-adjusted to %4\n", order(), now, this, now + playback_offset()));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 (%3): non-realtime locate at %2 (lat-adjusted to %4) PO %5 OL %6\n", order(), now, this, now + playback_offset(), playback_offset(), output_latency()));
 
 	for (auto & t : all_triggers) {
 		t->shutdown_from_fwd ();
