@@ -3925,9 +3925,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (!_locate_armed) {
 		if (speed == 0.0 && !allstop) {
-			if (_currently_playing->state() != Trigger::WaitingToStart) {
-				std::cerr <<"transport not rolling and trigger in state " << enum_2_string (_currently_playing->state()) << std::endl;
-			}
+			// if (_currently_playing->state() != Trigger::WaitingToStart) {
+			// std::cerr <<"transport not rolling and trigger in state " << enum_2_string (_currently_playing->state()) << std::endl;
+			//}
 			maybe_request_roll (_session);
 			return;
 		}
@@ -4220,12 +4220,10 @@ TriggerBox::determine_next_trigger (uint32_t current)
 			++n;
 
 			if (n >= all_triggers.size()) {
-				cerr << "loop with n = " << n << " of " << all_triggers.size() << endl;
 				n = 0;
 			}
 
 			if (n == current) {
-				cerr << "outa here\n";
 				break;
 			}
 
