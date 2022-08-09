@@ -497,6 +497,8 @@ RouteTimeAxisView::parameter_changed (string const & p)
 		} else {
 			gm.get_level_meter().set_max_audio_meter_count (0);
 		}
+	} else if (p == "use-route-color-for-bg") {
+		route_color_changed ();
 	}
 }
 
@@ -1034,6 +1036,8 @@ RouteTimeAxisView::route_color_changed ()
 		_view->apply_color (color(), StreamView::RegionColor);
 	}
 	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
+
+	set_bg_color_from_route (controls_ebox, UIConfiguration::instance().get_use_route_color_for_bg());
 }
 
 void

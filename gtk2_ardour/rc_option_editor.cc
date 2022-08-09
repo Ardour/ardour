@@ -2522,6 +2522,13 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance"), new OptionEditorHeading (_("Theme")));
 
 	add_option (_("Appearance"), new BoolOption (
+		            "use-route-color-for-bg",
+		            _("Use track/bus colors in backgrounds"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_route_color_for_bg),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_route_color_for_bg)
+		            ));
+
+	add_option (_("Appearance"), new BoolOption (
 				"flat-buttons",
 				_("Draw \"flat\" buttons"),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_flat_buttons),

@@ -241,6 +241,7 @@ protected:
 	bool verify_new_route_name (const std::string& name);
 	void check_rec_enable_sensitivity ();
 	void route_gui_changed (PBD::PropertyChange const&);
+	void set_bg_color_from_route (Gtk::Widget&, bool yn);
 
 	PatchChangeGridDialog* patch_change_dialog () const;
 

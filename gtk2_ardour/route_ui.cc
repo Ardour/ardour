@@ -2743,3 +2743,37 @@ RouteUI::rename_current_playlist ()
 		}
 	}
 }
+
+void
+RouteUI::set_bg_color_from_route (Gtk::Widget& w, bool yn)
+{
+	using namespace ARDOUR_UI_UTILS;
+
+	Glib::RefPtr<Gtk::RcStyle> rc = w.get_modifier_style ();
+
+	if (yn) {
+		Gdk::Color lighter_bg;
+
+		HSV l (gdk_color_to_rgba (route_color()));
+		l.h += std::min (l.h + 0.08, 1.0);
+		l.s = 0.15;
+		l.v -= std::max (0.0, 0.05);
+		set_color_from_rgba (lighter_bg, l.color ());
+
+		rc->set_bg (Gtk::STATE_PRELIGHT, lighter_bg);
+		rc->set_bg (Gtk::STATE_NORMAL, lighter_bg);
+		rc->set_bg (Gtk::STATE_SELECTED, lighter_bg);
+		rc->set_bg (Gtk::STATE_ACTIVE, lighter_bg);
+		rc->set_color_flags (Gtk::STATE_PRELIGHT, Gtk::RC_BG);
+		rc->set_color_flags (Gtk::STATE_NORMAL, Gtk::RC_BG);
+		rc->set_color_flags (Gtk::STATE_SELECTED, Gtk::RC_BG);
+		rc->set_color_flags (Gtk::STATE_ACTIVE, Gtk::RC_BG);
+	} else {
+		rc->unset_color_flags (Gtk::STATE_PRELIGHT, Gtk::RC_BG);
+		rc->unset_color_flags (Gtk::STATE_NORMAL, Gtk::RC_BG);
+		rc->unset_color_flags (Gtk::STATE_SELECTED, Gtk::RC_BG);
+		rc->unset_color_flags (Gtk::STATE_ACTIVE, Gtk::RC_BG);
+	}
+
+	w.modify_style (rc);
+}
