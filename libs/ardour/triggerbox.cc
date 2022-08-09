@@ -3745,6 +3745,11 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		return;
 	}
 
+	if (speed < 0.) {
+		/* do absolutely nothing when in reverse playback */
+		return;
+	}
+
 	/* STEP TWO: if latency compensation tells us that we haven't really
 	 * started yet, do nothing, because we can't make sense of a negative
 	 * start sample time w.r.t the tempo map.
