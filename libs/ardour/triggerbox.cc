@@ -3946,9 +3946,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				tracker->flush (bufs.get_midi (0), 0, true);
 			}
 			_locate_armed = false;
-			std::cerr << "speed-non-zero, ready to roll after locate\n";
 		} else {
-			std::cerr << "speed zero, waiting to do something\n";
 			return;
 		}
 	}
