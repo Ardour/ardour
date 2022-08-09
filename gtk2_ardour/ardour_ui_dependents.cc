@@ -372,38 +372,41 @@ ARDOUR_UI::apply_window_settings (bool with_size)
 		return 0;
 	}
 
-	XMLProperty const * prop;
-	gint x = -1;
-	gint y = -1;
-	gint w = -1;
-	gint h = -1;
+	XMLProperty const* prop;
 
-	if ((prop = mnode->property (X_("x"))) != 0) {
-		x = atoi (prop->value());
-	}
+	if (with_size) {
+		gint x = -1;
+		gint y = -1;
+		gint w = -1;
+		gint h = -1;
 
-	if ((prop = mnode->property (X_("y"))) != 0) {
-		y = atoi (prop->value());
-	}
+		if ((prop = mnode->property (X_("x"))) != 0) {
+			x = atoi (prop->value());
+		}
 
-	if ((prop = mnode->property (X_("w"))) != 0) {
-		w = atoi (prop->value());
-	}
+		if ((prop = mnode->property (X_("y"))) != 0) {
+			y = atoi (prop->value());
+		}
 
-	if ((prop = mnode->property (X_("h"))) != 0) {
-		h = atoi (prop->value());
-	}
+		if ((prop = mnode->property (X_("w"))) != 0) {
+			w = atoi (prop->value());
+		}
 
-	if (x >= 0 && y >= 0 && w >= 0 && h >= 0) {
-		_main_window.set_position (Gtk::WIN_POS_NONE);
-	}
+		if ((prop = mnode->property (X_("h"))) != 0) {
+			h = atoi (prop->value());
+		}
 
-	if (x >= 0 && y >= 0) {
-		_main_window.move (x, y);
-	}
+		if (x >= 0 && y >= 0 && w >= 0 && h >= 0) {
+			_main_window.set_position (Gtk::WIN_POS_NONE);
+		}
 
-	if (w > 0 && h > 0) {
-		_main_window.set_default_size (w, h);
+		if (x >= 0 && y >= 0) {
+			_main_window.move (x, y);
+		}
+
+		if (w > 0 && h > 0) {
+			_main_window.set_default_size (w, h);
+		}
 	}
 
 	std::string current_tab;
@@ -413,9 +416,6 @@ ARDOUR_UI::apply_window_settings (bool with_size)
 	} else {
 		current_tab = "editor";
 	}
-
-	std::cout << "CURRENT TAB: " << current_tab << "\n";
-
 
 	if (mixer && current_tab == "mixer") {
 		_tabs.set_current_page (_tabs.page_num (mixer->contents()));
