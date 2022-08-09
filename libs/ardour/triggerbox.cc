@@ -3924,7 +3924,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	/* transport must be active for triggers */
 
 	if (!_locate_armed) {
-		if (!_session.transport_state_rolling() && !allstop) {
+		if (speed == 0.0 && !allstop) {
 			if (_currently_playing->state() != Trigger::WaitingToStart) {
 				std::cerr <<"transport not rolling and trigger in state " << enum_2_string (_currently_playing->state()) << std::endl;
 			}
@@ -3941,12 +3941,14 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		   played the trigger/slot from the start.
 		*/
 
-		if (_session.transport_state_rolling()) {
+		if (speed != 0.0) {
 			if (tracker && bufs.count().n_midi()) {
 				tracker->flush (bufs.get_midi (0), 0, true);
 			}
 			_locate_armed = false;
+			std::cerr << "speed-non-zero, ready to roll after locate\n";
 		} else {
+			std::cerr << "speed zero, waiting to do something\n";
 			return;
 		}
 	}

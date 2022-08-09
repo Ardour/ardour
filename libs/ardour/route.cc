@@ -510,7 +510,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 
 		double pspeed = speed;
-		if ((!run_disk_reader && (*i) == _disk_reader) || (!run_disk_writer && (*i) == _disk_writer)) {
+		if ((!run_disk_reader && (((*i) == _disk_reader) || ((*i) == _triggerbox))) || (!run_disk_writer && (*i) == _disk_writer)) {
 			/* run with speed 0, no-roll */
 			pspeed = 0;
 		}
@@ -537,21 +537,10 @@ Route::process_output_buffers (BufferSet& bufs,
 			}
 		}
 
-		/* run_disk_reader being false means we are still inside
-		 * latency_preroll, and during this time we do not want to run
-		 * the triggerbox at all. The disk reader looks at the speed
-		 * (pspeed) that was reset to zero as a indication of how it
-		 * should behave. The triggerbox is not speed-sensitive in the
-		 * same way, so we need a more explicit test here to avoid
-		 * running it.
-		 */
-
-		if (run_disk_reader || ((*i) != _triggerbox) || speed == 0) {
-			if (speed < 0) {
-				(*i)->run (bufs, start_sample + latency, end_sample + latency, pspeed, nframes, *i != _processors.back());
-			} else {
-				(*i)->run (bufs, start_sample - latency, end_sample - latency, pspeed, nframes, *i != _processors.back());
-			}
+		if (speed < 0) {
+			(*i)->run (bufs, start_sample + latency, end_sample + latency, pspeed, nframes, *i != _processors.back());
+		} else {
+			(*i)->run (bufs, start_sample - latency, end_sample - latency, pspeed, nframes, *i != _processors.back());
 		}
 
 		bufs.set_count ((*i)->output_streams());
