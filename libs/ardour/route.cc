@@ -546,7 +546,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		 * running it.
 		 */
 
-		if (run_disk_reader || ((*i) != _triggerbox)) {
+		if (run_disk_reader || ((*i) != _triggerbox) || speed == 0) {
 			if (speed < 0) {
 				(*i)->run (bufs, start_sample + latency, end_sample + latency, pspeed, nframes, *i != _processors.back());
 			} else {
