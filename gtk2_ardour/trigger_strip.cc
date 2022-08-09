@@ -422,7 +422,8 @@ TriggerStrip::set_selected (bool yn)
 void
 TriggerStrip::route_color_changed ()
 {
-	_name_button.modify_bg (STATE_NORMAL, color ());
+	Gtkmm2ext::Color c = gdk_color_to_rgba (route_color());
+	_name_button.set_fixed_colors (c, c);
 }
 
 void
