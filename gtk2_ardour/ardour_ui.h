@@ -445,6 +445,7 @@ private:
 	void toggle_meterbridge ();
 
 	int  setup_windows ();
+	int  apply_window_settings (bool);
 	void setup_transport ();
 	void setup_clock ();
 

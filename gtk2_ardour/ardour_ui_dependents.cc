@@ -344,62 +344,6 @@ ARDOUR_UI::setup_windows ()
 	_main_window.add (main_vpacker);
 	transport_frame.show_all ();
 
-	const XMLNode* mnode = main_window_settings ();
-
-	if (mnode) {
-		XMLProperty const * prop;
-		gint x = -1;
-		gint y = -1;
-		gint w = -1;
-		gint h = -1;
-
-		if ((prop = mnode->property (X_("x"))) != 0) {
-			x = atoi (prop->value());
-		}
-
-		if ((prop = mnode->property (X_("y"))) != 0) {
-			y = atoi (prop->value());
-		}
-
-		if ((prop = mnode->property (X_("w"))) != 0) {
-			w = atoi (prop->value());
-		}
-
-		if ((prop = mnode->property (X_("h"))) != 0) {
-			h = atoi (prop->value());
-		}
-
-		if (x >= 0 && y >= 0 && w >= 0 && h >= 0) {
-			_main_window.set_position (Gtk::WIN_POS_NONE);
-		}
-
-		if (x >= 0 && y >= 0) {
-			_main_window.move (x, y);
-		}
-
-		if (w > 0 && h > 0) {
-			_main_window.set_default_size (w, h);
-		}
-
-		std::string current_tab;
-
-		if ((prop = mnode->property (X_("current-tab"))) != 0) {
-			current_tab = prop->value();
-		} else {
-			current_tab = "editor";
-		}
-		if (mixer && current_tab == "mixer") {
-			_tabs.set_current_page (_tabs.page_num (mixer->contents()));
-		} else if (rc_option_editor && current_tab == "preferences") {
-			_tabs.set_current_page (_tabs.page_num (rc_option_editor->contents()));
-		} else if (recorder && current_tab == "recorder") {
-			_tabs.set_current_page (_tabs.page_num (recorder->contents()));
-		} else if (recorder && current_tab == "trigger") {
-			_tabs.set_current_page (_tabs.page_num (trigger_page->contents()));
-		} else if (editor) {
-			_tabs.set_current_page (_tabs.page_num (editor->contents()));
-		}
-	}
 
 	setup_toplevel_window (_main_window, "", this);
 	_main_window.show_all ();
@@ -416,6 +360,74 @@ ARDOUR_UI::setup_windows ()
 	LV2Plugin::set_main_window_id (GDK_DRAWABLE_XID(_main_window.get_window()->gobj()));
 #endif
 
+	return apply_window_settings (true);
+}
+
+int
+ARDOUR_UI::apply_window_settings (bool with_size)
+{
+	const XMLNode* mnode = main_window_settings ();
+
+	if (!mnode) {
+		return 0;
+	}
+
+	XMLProperty const * prop;
+	gint x = -1;
+	gint y = -1;
+	gint w = -1;
+	gint h = -1;
+
+	if ((prop = mnode->property (X_("x"))) != 0) {
+		x = atoi (prop->value());
+	}
+
+	if ((prop = mnode->property (X_("y"))) != 0) {
+		y = atoi (prop->value());
+	}
+
+	if ((prop = mnode->property (X_("w"))) != 0) {
+		w = atoi (prop->value());
+	}
+
+	if ((prop = mnode->property (X_("h"))) != 0) {
+		h = atoi (prop->value());
+	}
+
+	if (x >= 0 && y >= 0 && w >= 0 && h >= 0) {
+		_main_window.set_position (Gtk::WIN_POS_NONE);
+	}
+
+	if (x >= 0 && y >= 0) {
+		_main_window.move (x, y);
+	}
+
+	if (w > 0 && h > 0) {
+		_main_window.set_default_size (w, h);
+	}
+
+	std::string current_tab;
+
+	if ((prop = mnode->property (X_("current-tab"))) != 0) {
+		current_tab = prop->value();
+	} else {
+		current_tab = "editor";
+	}
+
+	std::cout << "CURRENT TAB: " << current_tab << "\n";
+
+
+	if (mixer && current_tab == "mixer") {
+		_tabs.set_current_page (_tabs.page_num (mixer->contents()));
+	} else if (rc_option_editor && current_tab == "preferences") {
+		_tabs.set_current_page (_tabs.page_num (rc_option_editor->contents()));
+	} else if (recorder && current_tab == "recorder") {
+		_tabs.set_current_page (_tabs.page_num (recorder->contents()));
+	} else if (recorder && current_tab == "trigger") {
+		_tabs.set_current_page (_tabs.page_num (trigger_page->contents()));
+	} else if (editor) {
+		_tabs.set_current_page (_tabs.page_num (editor->contents()));
+	}
 	return 0;
 }
 

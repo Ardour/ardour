@@ -143,6 +143,7 @@ ARDOUR_UI::set_session (Session *s)
 	}
 
 	WM::Manager::instance().set_session (s);
+	apply_window_settings (false);
 
 	AutomationWatch::instance().set_session (s);
 
