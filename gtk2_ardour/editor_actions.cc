@@ -1741,6 +1741,8 @@ Editor::parameter_changed (std::string p)
 		if (tact->get_active () != s) {
 			tact->set_active (s);
 		}
+	} else if (p == "track-name-number") {
+		queue_redisplay_track_views ();
 	}
 }
 
