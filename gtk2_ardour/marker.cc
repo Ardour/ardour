@@ -502,6 +502,10 @@ ArdourMarker::setup_name_display ()
 		if (_type == Cue) {
 			if (_cue_index != CueRecord::stop_all) {
 				_name_item->set (cue_marker_name (_cue_index));
+				int tw = _name_item->text_width();
+				int th = _name_item->text_height();
+				_name_item->set_position (ArdourCanvas::Duple (_pcue->width()/2 - tw/2 - 1*scale, _pcue->height()/2 - th/2 - 1*scale ));
+
 				_pcue->show();  //show the circle
 				_pmark->hide();
 			} else {
