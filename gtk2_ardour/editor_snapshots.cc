@@ -145,10 +145,9 @@ EditorSnapshots::popup_context_menu (int button, int32_t time, std::string snaps
 	MenuList& items (_menu.items());
 	items.clear ();
 
-	const bool modification_allowed = (_session->snap_name() != snapshot_name && _session->name() != snapshot_name);
+	const bool modification_allowed = (_session->snap_name() != snapshot_name && _session->name() != snapshot_name && _snapshot_model->children().size () > 1);
 
 	add_item_with_sensitivity (items, MenuElem (_("Remove"), sigc::bind (sigc::mem_fun (*this, &EditorSnapshots::remove), snapshot_name)), modification_allowed);
-
 	add_item_with_sensitivity (items, MenuElem (_("Rename..."), sigc::bind (sigc::mem_fun (*this, &EditorSnapshots::rename), snapshot_name)), modification_allowed);
 
 	_menu.popup (button, time);
