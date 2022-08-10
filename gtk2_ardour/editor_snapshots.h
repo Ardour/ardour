@@ -21,11 +21,12 @@
 #ifndef __gtk_ardour_editor_snapshots_h__
 #define __gtk_ardour_editor_snapshots_h__
 
-#include <gtkmm/widget.h>
+#include "ardour/session_handle.h"
+
+#include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
-#include "editor_component.h"
 
 class EditorSnapshots : public ARDOUR::SessionHandlePtr
 {
@@ -46,10 +47,12 @@ private:
 
 	struct Columns : public Gtk::TreeModel::ColumnRecord {
 		Columns () {
+			add (current_active);
 			add (visible_name);
 			add (real_name);
 			add (time_formatted);
 		}
+		Gtk::TreeModelColumn<std::string> current_active;
 		Gtk::TreeModelColumn<std::string> visible_name;
 		Gtk::TreeModelColumn<std::string> real_name;
 		Gtk::TreeModelColumn<std::string> time_formatted;

@@ -52,6 +52,7 @@ EditorSnapshots::EditorSnapshots ()
 {
 	_snapshot_model = ListStore::create (_columns);
 	_snapshot_display.set_model (_snapshot_model);
+	_snapshot_display.append_column ("", _columns.current_active);
 	_snapshot_display.append_column (_("Snapshot (dbl-click to load)"), _columns.visible_name);
 	_snapshot_display.append_column (_("Modified Date"), _columns.time_formatted);
 	_snapshot_display.set_size_request (75, -1);
@@ -236,6 +237,11 @@ EditorSnapshots::redisplay ()
 		g_stat (s.c_str(), &gsb);
 		Glib::DateTime gdt(Glib::DateTime::create_now_local (gsb.st_mtime));
 
+		if (_session->snap_name() == display_name) {
+			row[_columns.current_active] = "\u25B6"; // BLACK RIGHT-POINTING TRIANGLE
+		} else {
+			row[_columns.current_active] = "";
+		}
 		row[_columns.visible_name] = display_name;
 		row[_columns.real_name] = statename;
 		row[_columns.time_formatted] = gdt.format ("%F %H:%M");
