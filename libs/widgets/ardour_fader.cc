@@ -764,3 +764,17 @@ ArdourFader::get_parent_bg ()
 
 	return get_style ()->get_bg (get_state());
 }
+
+void
+ArdourFader::set_bg (Gtkmm2ext::Color c)
+{
+	explicit_bg = c;
+	have_explicit_bg = true;
+}
+
+void
+ArdourFader::set_fg (Gtkmm2ext::Color c)
+{
+	explicit_fg = c;
+	have_explicit_fg = true;
+}

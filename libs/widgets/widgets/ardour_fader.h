@@ -55,6 +55,9 @@ public:
 	Tweaks tweaks() const { return _tweaks; }
 	void set_tweaks (Tweaks);
 
+	void set_bg (Gtkmm2ext::Color);
+	void set_fg (Gtkmm2ext::Color);
+
 protected:
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation& alloc);
@@ -100,9 +103,9 @@ private:
 	sigc::connection _parent_style_change;
 	Widget * _current_parent;
 	Gdk::Color get_parent_bg ();
-	Gtkmm2ext::Color _explicit_bg;
+	Gtkmm2ext::Color explicit_bg;
 	bool have_explicit_bg;
-	Gtkmm2ext::Color _explicit_fg;
+	Gtkmm2ext::Color explicit_fg;
 	bool have_explicit_fg;
 
 	void create_patterns();
