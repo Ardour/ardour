@@ -298,7 +298,7 @@ PortMatrixColumnLabels::render_bundle_name (
 	cairo_stroke (cr);
 
 	Gdk::Color textcolor;
-	ARDOUR_UI_UTILS::set_color_from_rgba(textcolor, Gtkmm2ext::contrasting_text_color(ARDOUR_UI_UTILS::gdk_color_to_rgba(bg_colour)));
+	Gtkmm2ext::set_color_from_rgba(textcolor, Gtkmm2ext::contrasting_text_color(Gtkmm2ext::gdk_color_to_rgba(bg_colour)));
 	set_source_rgb (cr, textcolor);
 
 	double const q = ((grid_spacing() * sin (angle())) - _text_height) / 2 + _descender_height;
@@ -365,7 +365,7 @@ PortMatrixColumnLabels::render_channel_name (
 	}
 
 	Gdk::Color textcolor;
-	ARDOUR_UI_UTILS::set_color_from_rgba(textcolor, Gtkmm2ext::contrasting_text_color(ARDOUR_UI_UTILS::gdk_color_to_rgba(bg_colour)));
+	Gtkmm2ext::set_color_from_rgba(textcolor, Gtkmm2ext::contrasting_text_color(Gtkmm2ext::gdk_color_to_rgba(bg_colour)));
 	set_source_rgb (cr, textcolor);
 
 	double const q = ((grid_spacing() * sin (angle())) - _text_height) / 2 + _descender_height;

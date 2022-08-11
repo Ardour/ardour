@@ -806,9 +806,9 @@ LoudnessDialog::test_conformity ()
 	uint32_t c_warn = UIConfigurationBase::instance ().color ("alert:yellow"); // Warning / yellow
 	uint32_t c_fail = UIConfigurationBase::instance ().color ("alert:red");    // Fail / red
 
-	Gdk::Color color_good = ARDOUR_UI_UTILS::gdk_color_from_rgba (c_good);
-	Gdk::Color color_warn = ARDOUR_UI_UTILS::gdk_color_from_rgba (c_warn);
-	Gdk::Color color_fail = ARDOUR_UI_UTILS::gdk_color_from_rgba (c_fail);
+	Gdk::Color color_good = Gtkmm2ext::gdk_color_from_rgba (c_good);
+	Gdk::Color color_warn = Gtkmm2ext::gdk_color_from_rgba (c_warn);
+	Gdk::Color color_fail = Gtkmm2ext::gdk_color_from_rgba (c_fail);
 
 	for (size_t i = 1; i < n_pset; ++i) {
 		CLoudnessPreset const& preset = _lp[i];

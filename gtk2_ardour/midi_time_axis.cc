@@ -46,6 +46,7 @@
 #include "pbd/stateful_diff_command.h"
 #include "pbd/unwind.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 
@@ -97,7 +98,6 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "step_editor.h"
-#include "utils.h"
 #include "note_base.h"
 
 #include "ardour/midi_track.h"
@@ -166,7 +166,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	 */
 	RouteTimeAxisView::set_route (rt);
 
-	_view->apply_color (ARDOUR_UI_UTILS::gdk_color_to_rgba (color()), StreamView::RegionColor);
+	_view->apply_color (Gtkmm2ext::gdk_color_to_rgba (color()), StreamView::RegionColor);
 
 	_note_range_changed_connection.disconnect();
 

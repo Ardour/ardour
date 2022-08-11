@@ -28,15 +28,15 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/messagedialog.h>
 
+#include "gtkmm2ext/colors.h"
+
 #include "route_group_dialog.h"
 #include "group_tabs.h"
-#include "utils.h"
 
 #include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
 using namespace std;
 using namespace PBD;
 
@@ -92,7 +92,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_active.set_active (_group->is_active ());
 
 	Gdk::Color c;
-	set_color_from_rgba (c, GroupTabs::group_color (_group));
+	Gtkmm2ext::set_color_from_rgba (c, GroupTabs::group_color (_group));
 	_color.set_color (c);
 
 	VBox* options_box = manage (new VBox);
@@ -220,7 +220,7 @@ RouteGroupDialog::update ()
 
 	_group->apply_changes (plist);
 
-	GroupTabs::set_group_color (_group, gdk_color_to_rgba (_color.get_color ()));
+	GroupTabs::set_group_color (_group, Gtkmm2ext::gdk_color_to_rgba (_color.get_color ()));
 }
 
 void

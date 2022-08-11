@@ -350,7 +350,7 @@ VCATimeAxisView::stripable () const
 Gdk::Color
 VCATimeAxisView::color () const
 {
-	return ARDOUR_UI_UTILS::gdk_color_from_rgb (_vca->presentation_info().color ());
+	return Gtkmm2ext::gdk_color_from_rgb (_vca->presentation_info().color ());
 }
 
 void

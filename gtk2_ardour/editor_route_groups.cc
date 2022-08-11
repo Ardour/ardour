@@ -30,6 +30,7 @@
 
 #include <gtkmm/stock.h>
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/cell_renderer_color_selector.h"
 
@@ -50,13 +51,11 @@
 #include "route_group_dialog.h"
 #include "route_time_axis.h"
 #include "time_axis_view.h"
-#include "utils.h"
 
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
@@ -274,7 +273,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		switch (color_dialog.run()) {
 			case RESPONSE_ACCEPT:
 				c = color_dialog.get_color_selection()->get_current_color();
-				GroupTabs::set_group_color (group, gdk_color_to_rgba (c));
+				GroupTabs::set_group_color (group, Gtkmm2ext::gdk_color_to_rgba (c));
 				break;
 
 			default:
@@ -404,7 +403,7 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 
 	group->apply_changes (plist);
 
-	GroupTabs::set_group_color ((*iter)[_columns.routegroup], gdk_color_to_rgba ((*iter)[_columns.gdkcolor]));
+	GroupTabs::set_group_color ((*iter)[_columns.routegroup], Gtkmm2ext::gdk_color_to_rgba ((*iter)[_columns.gdkcolor]));
 }
 
 void
@@ -427,7 +426,7 @@ EditorRouteGroups::add (RouteGroup* group)
 	row[_columns.is_visible] = !group->is_hidden();
 
 	Gdk::Color c;
-	set_color_from_rgba (c, GroupTabs::group_color (group));
+	Gtkmm2ext::set_color_from_rgba (c, GroupTabs::group_color (group));
 	row[_columns.gdkcolor] = c;
 
 	_in_row_change = true;
@@ -501,7 +500,7 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange&)
 			(*iter)[_columns.is_visible] = !group->is_hidden();
 
 			Gdk::Color c;
-			set_color_from_rgba (c, GroupTabs::group_color (group));
+			Gtkmm2ext::set_color_from_rgba (c, GroupTabs::group_color (group));
 			(*iter)[_columns.gdkcolor] = c;
 
 			break;

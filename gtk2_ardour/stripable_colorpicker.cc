@@ -18,15 +18,15 @@
 
 #include "pbd/compose.h"
 
+#include "gtkmm2ext/colors.h"
+
 #include "public_editor.h"
 #include "stripable_colorpicker.h"
 #include "ui_config.h"
-#include "utils.h"
 
 #include "pbd/i18n.h"
 
 using namespace Gtk;
-using namespace ARDOUR_UI_UTILS;
 
 bool StripableColorDialog::palette_initialized = false;
 Gtk::ColorSelection::SlotChangePaletteHook StripableColorDialog::gtk_palette_changed_hook;
@@ -113,7 +113,7 @@ StripableColorDialog::popup (const std::string& name, uint32_t color)
 	get_color_selection()->set_has_opacity_control (false);
 	get_color_selection()->set_has_palette (true);
 
-	Gdk::Color c = gdk_color_from_rgba (_initial_color);
+	Gdk::Color c = Gtkmm2ext::gdk_color_from_rgba (_initial_color);
 
 	get_color_selection()->set_previous_color (c);
 	get_color_selection()->set_current_color (c);
@@ -147,13 +147,13 @@ StripableColorDialog::finish_color_edit (int response)
 	ARDOUR::RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
 
 	if (response == RESPONSE_OK) {
-		ColorChanged (gdk_color_to_rgba (get_color_selection()->get_current_color())); /* EMIT SIGNAL */
+		ColorChanged (Gtkmm2ext::gdk_color_to_rgba (get_color_selection()->get_current_color())); /* EMIT SIGNAL */
 	}
 	if (_stripable && response == RESPONSE_OK) {
 		for (ARDOUR::RouteList::iterator i = rl.begin(); i != rl.end(); ++i) {
-			(*i)->presentation_info().set_color (gdk_color_to_rgba (get_color_selection()->get_current_color()));
+			(*i)->presentation_info().set_color (Gtkmm2ext::gdk_color_to_rgba (get_color_selection()->get_current_color()));
 		}
-		_stripable->presentation_info().set_color (gdk_color_to_rgba (get_color_selection()->get_current_color()));
+		_stripable->presentation_info().set_color (Gtkmm2ext::gdk_color_to_rgba (get_color_selection()->get_current_color()));
 	} else if (_stripable) {
 		_stripable->presentation_info().set_color (_initial_color);
 	}
@@ -164,7 +164,7 @@ void
 StripableColorDialog::color_changed ()
 {
 	if (_stripable) {
-		_stripable->presentation_info().set_color (gdk_color_to_rgba (get_color_selection()->get_current_color()));
+		_stripable->presentation_info().set_color (Gtkmm2ext::gdk_color_to_rgba (get_color_selection()->get_current_color()));
 	}
 }
 
@@ -177,7 +177,7 @@ ArdourColorButton::ArdourColorButton ()
 void
 ArdourColorButton::on_clicked ()
 {
-	_color_picker.popup ("", gdk_color_to_rgba (get_color ()));
+	_color_picker.popup ("", Gtkmm2ext::gdk_color_to_rgba (get_color ()));
 	_color_picker.get_window ()->set_transient_for (get_window ());
 }
 
@@ -185,7 +185,7 @@ void
 ArdourColorButton::color_selected (uint32_t color)
 {
 	Gdk::Color c;
-	set_color_from_rgba (c, color);
+	Gtkmm2ext::set_color_from_rgba (c, color);
 	set_color (c);
 	g_signal_emit_by_name (GTK_WIDGET(gobj()), "color-set", 0);
 }

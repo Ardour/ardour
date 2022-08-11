@@ -339,7 +339,7 @@ CueBoxUI::set_all_colors (uint64_t idx)
 	_color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_ACCEPT));
 	_color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (_color_dialog, &Gtk::Dialog::response), Gtk::RESPONSE_CANCEL));
 
-	Gdk::Color c = ARDOUR_UI_UTILS::gdk_color_from_rgba(0xBEBEBEFF);
+	Gdk::Color c = Gtkmm2ext::gdk_color_from_rgba(0xBEBEBEFF);
 
 	_color_dialog.get_color_selection()->set_previous_color (c);
 	_color_dialog.get_color_selection()->set_current_color (c);
@@ -347,7 +347,7 @@ CueBoxUI::set_all_colors (uint64_t idx)
 	switch (_color_dialog.run()) {
 		case Gtk::RESPONSE_ACCEPT: {
 			c = _color_dialog.get_color_selection()->get_current_color();
-			color_t ct = ARDOUR_UI_UTILS::gdk_color_to_rgba(c);
+			color_t ct = Gtkmm2ext::gdk_color_to_rgba(c);
 			TriggerList tl;
 			get_slots(tl, idx);
 			for (TriggerList::iterator t = tl.begin(); t != tl.end(); ++t) {

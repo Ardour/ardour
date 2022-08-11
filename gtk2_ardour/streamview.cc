@@ -28,6 +28,7 @@
 
 #include <gtkmm.h>
 
+#include <gtkmm2ext/colors.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 
@@ -51,13 +52,11 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "ui_config.h"
-#include "utils.h"
 
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Editing;
 
@@ -343,7 +342,7 @@ StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 void
 StreamView::apply_color (Gdk::Color const& c, ColorTarget target)
 {
-	return apply_color (gdk_color_to_rgba (c), target);
+	return apply_color (Gtkmm2ext::gdk_color_to_rgba (c), target);
 }
 
 void

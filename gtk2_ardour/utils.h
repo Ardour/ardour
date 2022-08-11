@@ -79,13 +79,6 @@ Pango::FontDescription get_font_for_style (std::string widgetname);
 
 void decorate (Gtk::Window& w, Gdk::WMDecoration d);
 
-Gdk::Color gdk_color_from_rgb (uint32_t);
-Gdk::Color gdk_color_from_rgba (uint32_t);
-uint32_t gdk_color_to_rgba (Gdk::Color const&);
-
-void set_color_from_rgb (Gdk::Color&, uint32_t);
-void set_color_from_rgba (Gdk::Color&, uint32_t);
-
 bool relay_key_press (GdkEventKey* ev, Gtk::Window* win);
 bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev);
 bool emulate_key_event (unsigned int);

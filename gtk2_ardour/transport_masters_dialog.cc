@@ -30,6 +30,7 @@
 #include "widgets/tooltips.h"
 #include "widgets/ardour_icon.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gui_thread.h"
 
@@ -37,7 +38,6 @@
 #include "floating_text_entry.h"
 #include "transport_masters_dialog.h"
 #include "ui_config.h"
-#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -331,8 +331,8 @@ TransportMastersWidget::Row::Row (TransportMastersWidget& p)
 
 	uint32_t bg = UIConfigurationBase::instance().color ("clock: background");
 	uint32_t fg = UIConfigurationBase::instance().color ("clock: text");
-	Gdk::Color bg_color = ARDOUR_UI_UTILS::gdk_color_from_rgba (bg);
-	Gdk::Color fg_color = ARDOUR_UI_UTILS::gdk_color_from_rgba (fg);
+	Gdk::Color bg_color = Gtkmm2ext::gdk_color_from_rgba (bg);
+	Gdk::Color fg_color = Gtkmm2ext::gdk_color_from_rgba (fg);
 
 	current_box.modify_bg (Gtk::STATE_NORMAL, bg_color);
 	current.modify_fg (Gtk::STATE_NORMAL, fg_color);

@@ -59,6 +59,7 @@
 #include "ardour/solo_mute_release.h"
 #include "ardour/template_utils.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -88,7 +89,6 @@
 #include "save_template_dialog.h"
 #include "timers.h"
 #include "ui_config.h"
-#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -2239,9 +2239,9 @@ RouteUI::route_color () const
 	string p;
 
 	if (g && g->is_color()) {
-		set_color_from_rgba (c, GroupTabs::group_color (g));
+		Gtkmm2ext::set_color_from_rgba (c, GroupTabs::group_color (g));
 	} else {
-		set_color_from_rgba (c, _route->presentation_info().color());
+		Gtkmm2ext::set_color_from_rgba (c, _route->presentation_info().color());
 	}
 
 	return c;

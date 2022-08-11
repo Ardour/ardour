@@ -24,6 +24,7 @@
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_dropdown.h"
@@ -184,7 +185,7 @@ public:
 		return &_cs;
 	}
 	void assign (luabridge::LuaRef* rv) const {
-		uint32_t rgba = ARDOUR_UI_UTILS::gdk_color_to_rgba(_cs.get_color());
+		uint32_t rgba = Gtkmm2ext::gdk_color_to_rgba(_cs.get_color());
 		(*rv)[_key] = rgba;
 	}
 protected:

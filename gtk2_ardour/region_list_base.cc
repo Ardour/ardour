@@ -37,6 +37,7 @@
 #include "ardour/silentfilesource.h"
 #include "ardour/smf_source.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/treeutils.h"
 #include "gtkmm2ext/utils.h"
 
@@ -51,7 +52,6 @@
 #include "public_editor.h"
 #include "region_list_base.h"
 #include "ui_config.h"
-#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -508,9 +508,9 @@ RegionListBase::populate_row (boost::shared_ptr<Region> region, TreeModel::Row c
 		Gdk::Color c;
 		bool       missing_source = boost::dynamic_pointer_cast<SilentFileSource> (region->source ()) != NULL;
 		if (missing_source) {
-			set_color_from_rgba (c, UIConfiguration::instance ().color ("region list missing source"));
+			Gtkmm2ext::set_color_from_rgba (c, UIConfiguration::instance ().color ("region list missing source"));
 		} else {
-			set_color_from_rgba (c, UIConfiguration::instance ().color ("region list whole file"));
+			Gtkmm2ext::set_color_from_rgba (c, UIConfiguration::instance ().color ("region list whole file"));
 		}
 		row[_columns.color_] = c;
 	}

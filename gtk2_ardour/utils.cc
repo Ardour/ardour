@@ -70,7 +70,6 @@
 #include "keyboard.h"
 #include "utils.h"
 #include "pbd/i18n.h"
-#include "rgb_macros.h"
 #include "gui_thread.h"
 #include "ui_config.h"
 #include "ardour_dialog.h"
@@ -312,55 +311,6 @@ ARDOUR_UI_UTILS::get_font_for_style (string widgetname)
 	}
 
 	return Pango::FontDescription (pfd); /* make a copy */
-}
-
-Gdk::Color
-ARDOUR_UI_UTILS::gdk_color_from_rgb (uint32_t rgb)
-{
-	Gdk::Color c;
-	set_color_from_rgb (c, rgb);
-	return c;
-}
-
-Gdk::Color
-ARDOUR_UI_UTILS::gdk_color_from_rgba (uint32_t rgba)
-{
-	Gdk::Color c;
-	set_color_from_rgb (c, rgba >> 8);
-	return c;
-}
-
-void
-ARDOUR_UI_UTILS::set_color_from_rgb (Gdk::Color& c, uint32_t rgb)
-{
-	/* Gdk::Color color ranges are 16 bit, so scale from 8 bit by
-	   multiplying by 256.
-	*/
-	c.set_rgb ((rgb >> 16)*256, ((rgb & 0xff00) >> 8)*256, (rgb & 0xff)*256);
-}
-
-void
-ARDOUR_UI_UTILS::set_color_from_rgba (Gdk::Color& c, uint32_t rgba)
-{
-	/* Gdk::Color color ranges are 16 bit, so scale from 8 bit by
-	   multiplying by 256.
-	*/
-	c.set_rgb ((rgba >> 24)*256, ((rgba & 0xff0000) >> 16)*256, ((rgba & 0xff00) >> 8)*256);
-}
-
-uint32_t
-ARDOUR_UI_UTILS::gdk_color_to_rgba (Gdk::Color const& c)
-{
-	/* since alpha value is not available from a Gdk::Color, it is
-	   hardcoded as 0xff (aka 255 or 1.0)
-	*/
-
-	const uint32_t r = c.get_red_p () * 255.0;
-	const uint32_t g = c.get_green_p () * 255.0;
-	const uint32_t b = c.get_blue_p () * 255.0;
-	const uint32_t a = 0xff;
-
-	return RGBA_TO_UINT (r,g,b,a);
 }
 
 bool

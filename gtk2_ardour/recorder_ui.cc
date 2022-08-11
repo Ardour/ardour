@@ -40,6 +40,7 @@
 #include "ardour/session.h"
 #include "ardour/solo_mute_release.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
@@ -1464,9 +1465,9 @@ RecorderUI::InputPort::InputPort (string const& name, DataType dt, RecorderUI* p
 
 	Gdk::Color bg;
 	if (_ioplug) {
-		ARDOUR_UI_UTILS::set_color_from_rgba (bg, UIConfiguration::instance ().color ("neutral:background"));
+		Gtkmm2ext::set_color_from_rgba (bg, UIConfiguration::instance ().color ("neutral:background"));
 	} else {
-		ARDOUR_UI_UTILS::set_color_from_rgba (bg, UIConfiguration::instance ().color ("neutral:background2"));
+		Gtkmm2ext::set_color_from_rgba (bg, UIConfiguration::instance ().color ("neutral:background2"));
 	}
 	_frame.modify_bg (Gtk::STATE_NORMAL, bg);
 

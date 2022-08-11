@@ -28,6 +28,7 @@
 #include "ardour/types.h"
 #include "ardour/user_bundle.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
@@ -43,7 +44,6 @@
 #include "plugin_selector.h"
 #include "plugin_ui.h"
 #include "ui_config.h"
-#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -289,7 +289,7 @@ IOPluginWindow::IOPlugUI::IOPlugUI (boost::shared_ptr<ARDOUR::IOPlug> iop)
 	_box.set_border_width (1);
 
 	Gdk::Color bg;
-	ARDOUR_UI_UTILS::set_color_from_rgba (bg, UIConfiguration::instance ().color (X_("theme:bg1")));
+	Gtkmm2ext::set_color_from_rgba (bg, UIConfiguration::instance ().color (X_("theme:bg1")));
 	_frame.modify_bg (STATE_NORMAL, bg);
 
 	_frame.add (_box);

@@ -840,7 +840,7 @@ GroupTabs::group_color (RouteGroup* group)
 
 	if (empty) {
 		/* no color has yet been set, so use a random one */
-		uint32_t c = gdk_color_to_rgba (unique_random_color (_used_colors));
+		uint32_t c = Gtkmm2ext::gdk_color_to_rgba (unique_random_color (_used_colors));
 		set_group_color (group, c);
 		return c;
 	}
