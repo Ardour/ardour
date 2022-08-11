@@ -424,6 +424,8 @@ Session::Session (AudioEngine &eng,
 			destroy ();
 			throw SessionException (_("Failed to load state"));
 		}
+
+		ensure_subdirs (); // archived or zipped sessions may lack peaks/ analysis/ etc
 	}
 
 	/* apply the loaded state_tree */
@@ -508,8 +510,6 @@ Session::Session (AudioEngine &eng,
 
 	_engine.set_session (this);
 	_engine.reset_timebase ();
-
-	ensure_subdirs (); // archived or zipped sessions may lack peaks/ analysis/ etc
 
 	if (!mix_template.empty ()) {
 		/* ::create() unsets _is_new after creating the session.

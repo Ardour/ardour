@@ -368,10 +368,6 @@ Source::get_transients_path () const
 	vector<string> parts;
 	string s;
 
-	/* old sessions may not have the analysis directory */
-
-	_session.ensure_subdirs ();
-
 	s = _session.analysis_dir ();
 	parts.push_back (s);
 
