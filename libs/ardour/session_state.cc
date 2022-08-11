@@ -401,17 +401,10 @@ Session::post_engine_init ()
 
 	set_clean ();
 
-	/* Now, finally, we can fill the playback buffers */
+	/* Now, finally, we can [ask the butler to] fill the playback buffers */
 
 	BootMessage (_("Filling playback buffers"));
-
-	boost::shared_ptr<RouteList> rl = routes.reader();
-	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (*r);
-		if (trk && !trk->is_private_route()) {
-			trk->seek (_transport_sample, true);
-		}
-	}
+	request_locate (transport_sample(), true);
 
 	reset_xrun_count ();
 	return 0;
