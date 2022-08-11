@@ -127,10 +127,10 @@ NewUserWizard::setup_new_user_page ()
 	Label* foomatic = manage (new Label);
 
 	foomatic->set_markup (string_compose (_("\
-<span size=\"larger\">%1 is a digital audio workstation. You can use it to \
-record, edit and mix multi-track audio. You can produce your \
-own CDs, mix video soundtracks, or experiment with new \
-ideas about music and sound. \
+<span size=\"larger\">%1 is a digital audio workstation. \
+\n\n\
+You can use %1 to record an orchestra, create with audio/midi loops, edit the perfect vocal take, \
+mix a live show with effects, dub a video, and master your tracks for digital distribution. \
 \n\n\
 There are a few things that need to be configured before you start \
 using the program.</span> \
@@ -144,7 +144,7 @@ using the program.</span> \
 
 #ifndef __APPLE__
 	Label* barmatic = manage (new Label);
-	barmatic->set_text (_("GUI and Font scaling:"));
+	barmatic->set_markup (_("<span size=\"larger\">GUI and Font scaling:</span>"));
 
 	Label* bazmatic = manage (new Label);
 	bazmatic->set_markup (_("<small><i>This can later be changed in Preferences &gt; Appearance.</i></small>"));
@@ -250,13 +250,14 @@ NewUserWizard::setup_first_time_config_page ()
 	HBox* hbox = manage (new HBox);
 	VBox* vbox = manage (new VBox);
 
-	txt->set_markup (string_compose (_("\
+	txt->set_markup (string_compose (_("<span size=\"larger\">\
 Each project that you work on with %1 has its own folder.\n\
 These can require a lot of disk space if you are recording audio.\n\
 \n\
 Where would you like new %1 sessions to be stored by default?\n\n\
-<i>(You can put new sessions anywhere, this is just a default)</i>"), PROGRAM_NAME));
+<i>(You can put new sessions anywhere, this is just a default)</i></span>"), PROGRAM_NAME));
 	txt->set_alignment (0.0, 0.0);
+	txt->set_justify (JUSTIFY_FILL);
 
 	vbox->set_spacing (18);
 	vbox->set_border_width (24);
@@ -289,7 +290,7 @@ NewUserWizard::setup_final_page ()
 	string msg = string_compose (_("%1 is ready for use"), PROGRAM_NAME);
 
 	Gtk::Label* final_label = manage (new Label);
-	final_label->set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", msg));
+	final_label->set_markup (string_compose ("<span weight=\"bold\" size=\"larger\">%1</span>", msg));
 	final_label->show ();
 
 	VBox* vbox = manage (new VBox);
