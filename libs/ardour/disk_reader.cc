@@ -1158,6 +1158,8 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 		return 0;
 	}
 
+	assert (0 == strcmp ("butler", pthread_name ()) || _session.exporting ());
+
 	int32_t                        ret = 0;
 	samplecnt_t                    zero_fill;
 	uint32_t                       chan_n;
