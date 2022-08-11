@@ -33,7 +33,7 @@
 #define isnan_local std::isnan
 #endif
 
-#define GUARD_POINT_DELTA Temporal::timecnt_t (64)
+#define GUARD_POINT_DELTA(foo) (foo.time_domain() == Temporal::AudioTime ?  Temporal::timecnt_t (64) : Temporal::timecnt_t (Beats (0, 1)))
 
 #include <cassert>
 #include <cmath>
@@ -683,7 +683,7 @@ ControlList::editor_add (timepos_t const & time, double value, bool with_guard)
 
 		insert_position = when;
 		if (with_guard) {
-			add_guard_point (when, -GUARD_POINT_DELTA);
+			add_guard_point (when, -GUARD_POINT_DELTA(when));
 			maybe_add_insert_guard (when);
 			i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 		}
@@ -709,16 +709,16 @@ ControlList::maybe_add_insert_guard (timepos_t const & time)
 	timepos_t when = ensure_time_domain (time);
 	// caller needs to hold writer-lock
 	if (most_recent_insert_iterator != _events.end()) {
-		if ((*most_recent_insert_iterator)->when.earlier (when) > GUARD_POINT_DELTA) {
+		if ((*most_recent_insert_iterator)->when.earlier (when) > GUARD_POINT_DELTA(when)) {
 			/* Next control point is some distance from where our new point is
 			   going to go, so add a new point to avoid changing the shape of
 			   the line too much.  The insert iterator needs to point to the
 			   new control point so that our insert will happen correctly. */
 			most_recent_insert_iterator = _events.insert ( most_recent_insert_iterator,
-					new ControlEvent (when + GUARD_POINT_DELTA, (*most_recent_insert_iterator)->value));
+			                                               new ControlEvent (when + GUARD_POINT_DELTA(when), (*most_recent_insert_iterator)->value));
 
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added insert guard point @ %2 = %3\n",
-			                                                 this, when + GUARD_POINT_DELTA,
+			                                                 this, when + GUARD_POINT_DELTA(when),
 			                                                 (*most_recent_insert_iterator)->value));
 		}
 	}
@@ -839,7 +839,7 @@ ControlList::add (timepos_t const & time, double value, bool with_guards, bool w
 			}
 
 			if (with_guards) {
-				most_recent_insert_iterator = erase_from_iterator_to (most_recent_insert_iterator, when + GUARD_POINT_DELTA);
+				most_recent_insert_iterator = erase_from_iterator_to (most_recent_insert_iterator, when + GUARD_POINT_DELTA(when));
 				maybe_add_insert_guard (when);
 			} else {
 				most_recent_insert_iterator = erase_from_iterator_to(most_recent_insert_iterator, when);
@@ -918,7 +918,7 @@ ControlList::add (timepos_t const & time, double value, bool with_guards, bool w
 
 			/* if the transport is stopped, add guard points */
 			if (!done && !_in_write_pass) {
-				add_guard_point (when, -GUARD_POINT_DELTA);
+				add_guard_point (when, -GUARD_POINT_DELTA(when));
 				maybe_add_insert_guard (when);
 			} else if (with_guards) {
 				maybe_add_insert_guard (when);
@@ -1980,8 +1980,8 @@ ControlList::paste (const ControlList& alist, timepos_t const &  time)
 
 	/* when pasting a range of automation, first add guard points so the automation data before and after this range is retained */
 	const ControlEvent* last = alist.back();
-	add_guard_point (time, -GUARD_POINT_DELTA);
-	add_guard_point (time + last->when, GUARD_POINT_DELTA);
+	add_guard_point (time, -GUARD_POINT_DELTA(time));
+	add_guard_point (time + last->when, GUARD_POINT_DELTA(time));
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
