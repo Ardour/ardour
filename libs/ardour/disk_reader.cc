@@ -1290,7 +1290,9 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 		file_sample_tmp = fsa;
 		samplecnt_t ts  = total_space;
 
-		samplecnt_t to_read = min (ts, (samplecnt_t)chan->rbuf->write_space ());
+		const guint wr_space = chan->rbuf->write_space ();
+
+		samplecnt_t to_read = min (ts, (samplecnt_t)wr_space);
 		to_read             = min (to_read, samples_to_read);
 		assert (to_read >= 0);
 
@@ -1301,15 +1303,15 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 				chan->rbuf->write_zero (to_read);
 
 			} else {
-				samplecnt_t nread;
+				samplecnt_t nread, nwritten;
 				if ((nread = audio_read (sum_buffer, mixdown_buffer, gain_buffer, file_sample_tmp, to_read, rci, chan_n, reversed)) != to_read) {
-					error << string_compose (_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), name (), to_read, fsa) << endmsg;
+					error << string_compose (_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3 (rv: %4)"), name (), to_read, fsa, nread) << endmsg;
 					ret = -1;
 					goto out;
 				}
 
-				if (chan->rbuf->write (sum_buffer, nread) != nread) {
-					error << string_compose (_("DiskReader %1: when refilling, cannot write %2 into buffer"), name (), nread) << endmsg;
+				if ((nwritten = chan->rbuf->write (sum_buffer, nread)) != nread) {
+					error << string_compose (_("DiskReader %1: when refilling, cannot write %2 into buffer (wrote %3, space %4)"), name (), nread, nwritten, wr_space) << endmsg;
 					ret = -1;
 				}
 			}
