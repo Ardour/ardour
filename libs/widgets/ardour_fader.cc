@@ -211,12 +211,18 @@ ArdourFader::create_patterns ()
 Gdk::Color
 ArdourFader::bg_color (Gtk::StateType s)
 {
+	if (have_explicit_bg) {
+		return gdk_color_from_rgba (explicit_bg);
+	}
 	return get_style()->get_bg (s);
 }
 
 Gdk::Color
 ArdourFader::fg_color (Gtk::StateType s)
 {
+	if (have_explicit_fg) {
+		return gdk_color_from_rgba (explicit_fg);
+	}
 	return get_style()->get_fg (s);
 }
 
@@ -770,6 +776,7 @@ ArdourFader::set_bg (Gtkmm2ext::Color c)
 {
 	explicit_bg = c;
 	have_explicit_bg = true;
+	queue_draw ();
 }
 
 void
@@ -777,4 +784,23 @@ ArdourFader::set_fg (Gtkmm2ext::Color c)
 {
 	explicit_fg = c;
 	have_explicit_fg = true;
+	queue_draw ();
+}
+
+void
+ArdourFader::unset_bg ()
+{
+	if (have_explicit_bg) {
+		have_explicit_bg = false;
+		queue_draw ();
+	}
+}
+
+void
+ArdourFader::unset_fg ()
+{
+	if (have_explicit_fg) {
+		have_explicit_fg = false;
+		queue_draw ();
+	}
 }

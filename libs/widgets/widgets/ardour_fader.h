@@ -57,6 +57,8 @@ public:
 
 	void set_bg (Gtkmm2ext::Color);
 	void set_fg (Gtkmm2ext::Color);
+	void unset_bg ();
+	void unset_fg ();
 
 protected:
 	void on_size_request (GtkRequisition*);
