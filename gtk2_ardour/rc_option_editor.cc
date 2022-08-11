@@ -2522,10 +2522,10 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance"), new OptionEditorHeading (_("Theme")));
 
 	add_option (_("Appearance"), new BoolOption (
-		            "use-route-color-for-bg",
-		            _("Use track/bus colors in backgrounds"),
-		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_route_color_for_bg),
-		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_route_color_for_bg)
+		            "use-route-color-widely",
+		            _("Color faders with track/bus colors"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_route_color_widely),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_route_color_widely)
 		            ));
 
 	add_option (_("Appearance"), new BoolOption (

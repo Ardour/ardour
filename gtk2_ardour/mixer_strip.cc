@@ -1426,7 +1426,7 @@ MixerStrip::reset_strip_style ()
 			} else {
 				set_name ("MidiTrackStripBaseInactive");
 			}
-			if (UIConfiguration::instance().get_use_route_color_for_bg()) {
+			if (UIConfiguration::instance().get_use_route_color_widely()) {
 				// gpm.set_fader_bg ();
 				gpm.set_fader_fg (gdk_color_to_rgba (route_color_tint()));
 			} else {
@@ -1439,7 +1439,7 @@ MixerStrip::reset_strip_style ()
 			} else {
 				set_name ("AudioTrackStripBaseInactive");
 			}
-			if (UIConfiguration::instance().get_use_route_color_for_bg()) {
+			if (!is_master() && UIConfiguration::instance().get_use_route_color_widely()) {
 				// gpm.set_fader_bg ();
 				gpm.set_fader_fg (gdk_color_to_rgba (route_color_tint()));
 			} else {
@@ -1453,7 +1453,7 @@ MixerStrip::reset_strip_style ()
 				set_name ("AudioBusStripBaseInactive");
 			}
 
-			if (UIConfiguration::instance().get_use_route_color_for_bg()) {
+			if (UIConfiguration::instance().get_use_route_color_widely()) {
 				// gpm.set_fader_bg ();
 				gpm.set_fader_fg (gdk_color_to_rgba (route_color_tint()));
 			} else {
