@@ -2260,7 +2260,7 @@ RouteUI::route_color_tint () const
 	l.v -= std::max (0.0, 0.05);
 	set_color_from_rgba (lighter_bg, l.color ());
 	return lighter_bg;
-endif
+#endif
 }
 
 void
