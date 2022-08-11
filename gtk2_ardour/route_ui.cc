@@ -2247,6 +2247,22 @@ RouteUI::route_color () const
 	return c;
 }
 
+Gdk::Color
+RouteUI::route_color_tint () const
+{
+	return route_color ();
+#if 0
+	Gdk::Color lighter_bg;
+
+	HSV l (gdk_color_to_rgba (route_color()));
+	l.h += std::min (l.h + 0.08, 1.0);
+	l.s = 0.15;
+	l.v -= std::max (0.0, 0.05);
+	set_color_from_rgba (lighter_bg, l.color ());
+	return lighter_bg;
+endif
+}
+
 void
 RouteUI::set_showing_sends_to (boost::shared_ptr<Route> send_to)
 {
@@ -2743,6 +2759,8 @@ RouteUI::rename_current_playlist ()
 		}
 	}
 }
+
+
 
 void
 RouteUI::set_bg_color_from_route (Gtk::Widget& w, bool yn)

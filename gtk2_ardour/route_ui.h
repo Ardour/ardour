@@ -119,6 +119,7 @@ public:
 	boost::shared_ptr<ARDOUR::MidiTrack>  midi_track () const;
 
 	Gdk::Color route_color () const;
+	Gdk::Color route_color_tint () const;
 
 	// protected: XXX sigh this should be here
 	// callbacks used by dervice classes via &RouteUI::*
