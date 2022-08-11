@@ -94,6 +94,10 @@ public:
 	void set_width (Width, int len=0);
 	void set_meter_strip_name (const char * name);
 	void set_fader_name (const char * name);
+	void set_fader_fg (uint32_t);
+	void set_fader_bg (uint32_t);
+	void unset_fader_fg ();
+	void unset_fader_bg ();
 
 	virtual void setup_meters (int len=0);
 

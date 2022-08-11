@@ -646,6 +646,30 @@ GainMeterBase::set_fader_name (const char * name)
 }
 
 void
+GainMeterBase::set_fader_fg (uint32_t c)
+{
+	gain_slider->set_fg (c);
+}
+
+void
+GainMeterBase::set_fader_bg (uint32_t c)
+{
+	gain_slider->set_bg (c);
+}
+
+void
+GainMeterBase::unset_fader_fg ()
+{
+	gain_slider->unset_fg ();
+}
+
+void
+GainMeterBase::unset_fader_bg ()
+{
+	gain_slider->unset_bg ();
+}
+
+void
 GainMeterBase::update_gain_sensitive ()
 {
 	bool x = !(_control->alist()->automation_state() & Play);
