@@ -27,6 +27,7 @@
 #include <gtkmm/adjustment.h>
 
 #include "gtkmm2ext/cairo_widget.h"
+#include "gtkmm2ext/colors.h"
 #include "widgets/visibility.h"
 
 namespace ArdourWidgets {
@@ -99,12 +100,18 @@ private:
 	sigc::connection _parent_style_change;
 	Widget * _current_parent;
 	Gdk::Color get_parent_bg ();
+	Gtkmm2ext::Color _explicit_bg;
+	bool have_explicit_bg;
+	Gtkmm2ext::Color _explicit_fg;
+	bool have_explicit_fg;
 
 	void create_patterns();
 	void adjustment_changed ();
 	void set_adjustment_from_event (GdkEventButton *);
 	void update_unity_position ();
 	int  display_span ();
+	Gdk::Color bg_color (Gtk::StateType);
+	Gdk::Color fg_color (Gtk::StateType);
 
 	struct FaderImage {
 		cairo_pattern_t* pattern;

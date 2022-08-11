@@ -58,6 +58,8 @@ ArdourFader::ArdourFader (Gtk::Adjustment& adj, int orientation, int fader_lengt
 	, _dragging (false)
 	, _centered_text (true)
 	, _current_parent (0)
+	, have_explicit_bg (false)
+	, have_explicit_fg (false)
 {
 	_default_value = _adjustment.get_value();
 	update_unity_position ();
@@ -206,6 +208,18 @@ ArdourFader::create_patterns ()
 	cairo_surface_destroy (surface);
 }
 
+Gdk::Color
+ArdourFader::bg_color (Gtk::StateType s)
+{
+	return get_style()->get_bg (s);
+}
+
+Gdk::Color
+ArdourFader::fg_color (Gtk::StateType s)
+{
+	return get_style()->get_fg (s);
+}
+
 void
 ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* area)
 {
@@ -258,9 +272,9 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 			cairo_matrix_init_translate (&matrix, 0, (h - ds));
 			cairo_pattern_set_matrix (_pattern, &matrix);
 		} else {
-			CairoWidget::set_source_rgb_a (cr, get_style()->get_bg (get_state()), 1);
+			CairoWidget::set_source_rgb_a (cr, bg_color (get_state()), 1);
 			cairo_fill (cr);
-			CairoWidget::set_source_rgb_a (cr, get_style()->get_fg (get_state()), 1);
+			CairoWidget::set_source_rgb_a (cr, fg_color (get_state()), 1);
 			Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, ds + CORNER_OFFSET,
 					w - CORNER_SIZE, h - ds - CORNER_SIZE, CORNER_RADIUS);
 		}
@@ -288,9 +302,9 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 			cairo_matrix_init_translate (&matrix, w - ds, 0);
 			cairo_pattern_set_matrix (_pattern, &matrix);
 		} else {
-			CairoWidget::set_source_rgb_a (cr, get_style()->get_bg (get_state()), 1);
+			CairoWidget::set_source_rgb_a (cr, bg_color (get_state()), 1);
 			cairo_fill (cr);
-			CairoWidget::set_source_rgb_a (cr, get_style()->get_fg (get_state()), 1);
+			CairoWidget::set_source_rgb_a (cr, fg_color (get_state()), 1);
 			Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET,
 					ds - CORNER_SIZE, h - CORNER_SIZE, CORNER_RADIUS);
 		}
