@@ -25,11 +25,14 @@
 
 #include <glib.h>
 
+#include <gdkmm/color.h>
+
 #include "pbd/failed_constructor.h"
 #include "pbd/string_convert.h"
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/colorspace.h"
+#include "gtkmm2ext/rgb_macros.h"
 
 using namespace std;
 using namespace Gtkmm2ext;
@@ -736,3 +739,53 @@ Gtkmm2ext::random_color ()
 {
 	return ((g_random_int() % 16777215) << 8 | 0xff);
 }
+
+Gdk::Color
+Gtkmm2ext::gdk_color_from_rgb (uint32_t rgb)
+{
+	Gdk::Color c;
+	set_color_from_rgb (c, rgb);
+	return c;
+}
+
+Gdk::Color
+Gtkmm2ext::gdk_color_from_rgba (uint32_t rgba)
+{
+	Gdk::Color c;
+	set_color_from_rgb (c, rgba >> 8);
+	return c;
+}
+
+void
+Gtkmm2ext::set_color_from_rgb (Gdk::Color& c, uint32_t rgb)
+{
+	/* Gdk::Color color ranges are 16 bit, so scale from 8 bit by
+	   multiplying by 256.
+	*/
+	c.set_rgb ((rgb >> 16)*256, ((rgb & 0xff00) >> 8)*256, (rgb & 0xff)*256);
+}
+
+void
+Gtkmm2ext::set_color_from_rgba (Gdk::Color& c, uint32_t rgba)
+{
+	/* Gdk::Color color ranges are 16 bit, so scale from 8 bit by
+	   multiplying by 256.
+	*/
+	c.set_rgb ((rgba >> 24)*256, ((rgba & 0xff0000) >> 16)*256, ((rgba & 0xff00) >> 8)*256);
+}
+
+uint32_t
+Gtkmm2ext::gdk_color_to_rgba (Gdk::Color const& c)
+{
+	/* since alpha value is not available from a Gdk::Color, it is
+	   hardcoded as 0xff (aka 255 or 1.0)
+	*/
+
+	const uint32_t r = c.get_red_p () * 255.0;
+	const uint32_t g = c.get_green_p () * 255.0;
+	const uint32_t b = c.get_blue_p () * 255.0;
+	const uint32_t a = 0xff;
+
+	return RGBA_TO_UINT (r,g,b,a);
+}
+

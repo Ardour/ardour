@@ -22,6 +22,7 @@
 
 #include<stdint.h>
 
+#include <gdkmm/types.h>
 #include <cairomm/context.h>
 
 #include "gtkmm2ext/visibility.h"
@@ -39,6 +40,13 @@ extern LIBGTKMM2EXT_API void set_source_rgb_a (Cairo::RefPtr<Cairo::Context>, Gt
 
 extern LIBGTKMM2EXT_API void set_source_rgba (cairo_t*, Gtkmm2ext::Color);
 extern LIBGTKMM2EXT_API void set_source_rgb_a (cairo_t*, Gtkmm2ext::Color, float alpha);  //override the color's alpha
+
+extern LIBGTKMM2EXT_API Gdk::Color gdk_color_from_rgb (uint32_t);
+extern LIBGTKMM2EXT_API Gdk::Color gdk_color_from_rgba (uint32_t);
+extern LIBGTKMM2EXT_API uint32_t gdk_color_to_rgba (Gdk::Color const&);
+
+extern LIBGTKMM2EXT_API void set_color_from_rgb (Gdk::Color&, uint32_t);
+extern LIBGTKMM2EXT_API void set_color_from_rgba (Gdk::Color&, uint32_t);
 
 
 struct LIBGTKMM2EXT_API HSV;
