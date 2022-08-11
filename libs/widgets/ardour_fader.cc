@@ -114,7 +114,7 @@ ArdourFader::find_pattern (double afr, double afg, double afb,
 void
 ArdourFader::create_patterns ()
 {
-	Gdk::Color c = get_style()->get_fg (get_state());
+	Gdk::Color c = fg_color (get_state());
 	float fr, fg, fb;
 	float br, bg, bb;
 
@@ -122,7 +122,7 @@ ArdourFader::create_patterns ()
 	fg = c.get_green_p ();
 	fb = c.get_blue_p ();
 
-	c = get_style()->get_bg (get_state());
+	c = bg_color (get_state());
 
 	br = c.get_red_p ();
 	bg = c.get_green_p ();
@@ -221,8 +221,29 @@ Gdk::Color
 ArdourFader::fg_color (Gtk::StateType s)
 {
 	if (have_explicit_fg) {
-		return gdk_color_from_rgba (explicit_fg);
+		Gtkmm2ext::HSV   hsv;
+
+		if (_hovering || (s == Gtk::STATE_PRELIGHT)) {
+			hsv = HSV (explicit_fg);
+			hsv.s *= 0.50;
+			return gdk_color_from_rgba (hsv.color());
+		}
+
+		switch (s) {
+		case Gtk::STATE_NORMAL:
+			return gdk_color_from_rgba (explicit_fg);
+			return gdk_color_from_rgba (hsv.color());
+		case Gtk::STATE_SELECTED:
+			return gdk_color_from_rgba (explicit_fg);
+		case Gtk::STATE_ACTIVE:
+			return gdk_color_from_rgba (explicit_fg);
+		case Gtk::STATE_INSENSITIVE:
+			return get_style()->get_fg (s);
+		case Gtk::STATE_PRELIGHT:
+			break;
+		}
 	}
+
 	return get_style()->get_fg (s);
 }
 
@@ -243,7 +264,7 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 		 * our bg color.
 		 */
 
-		CairoWidget::set_source_rgb_a (cr, get_style()->get_bg (get_state()), 1);
+		CairoWidget::set_source_rgb_a (cr, bg_color (get_state()), 1);
 		cairo_rectangle (cr, area->x, area->y, area->width, area->height);
 		cairo_fill (cr);
 		return;
@@ -273,7 +294,7 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 			ds = h - FADER_RESERVE - CORNER_OFFSET;
 		}
 
-		if (!CairoWidget::flat_buttons() ) {
+		if (!CairoWidget::flat_buttons()) {
 			cairo_set_source (cr, _pattern);
 			cairo_matrix_init_translate (&matrix, 0, (h - ds));
 			cairo_pattern_set_matrix (_pattern, &matrix);
@@ -321,7 +342,7 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 	if (!(_tweaks & NoShowUnityLine) && _unity_loc > CORNER_RADIUS) {
 		cairo_set_line_width(cr, 1);
 		cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-		Gdk::Color c = get_style()->get_fg (Gtk::STATE_ACTIVE);
+		Gdk::Color c = fg_color (Gtk::STATE_ACTIVE);
 		cairo_set_source_rgba (cr, c.get_red_p() * 1.5, c.get_green_p() * 1.5, c.get_blue_p() * 1.5, 0.85);
 		if (_orien == VERT) {
 			if (_unity_loc < h - CORNER_RADIUS) {
@@ -339,23 +360,23 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 	}
 
 	if (_layout && !_text.empty() && _orien == HORIZ) {
-		Gdk::Color bg_color;
+		Gdk::Color bg_col;
 		cairo_save (cr);
 		if (_centered_text) {
 			/* center text */
 			cairo_move_to (cr, (w - _text_width)/2.0, h/2.0 - _text_height/2.0);
-			bg_color = get_style()->get_bg (get_state());
+			bg_col = bg_color (get_state());
 		} else if (ds > .5 * w) {
 			cairo_move_to (cr, CORNER_OFFSET + 3, h/2.0 - _text_height/2.0);
-			bg_color = get_style()->get_fg (get_state());
+			bg_col = fg_color (get_state());
 		} else {
 			cairo_move_to (cr, w - _text_width - CORNER_OFFSET - 3, h/2.0 - _text_height/2.0);
-			bg_color = get_style()->get_bg (get_state());
+			bg_col = bg_color (get_state());
 		}
 
-		const uint32_t r = bg_color.get_red_p () * 255.0;
-		const uint32_t g = bg_color.get_green_p () * 255.0;
-		const uint32_t b = bg_color.get_blue_p () * 255.0;
+		const uint32_t r = bg_col.get_red_p () * 255.0;
+		const uint32_t g = bg_col.get_green_p () * 255.0;
+		const uint32_t b = bg_col.get_blue_p () * 255.0;
 		const uint32_t a = 0xff;
 		uint32_t rgba = RGBA_TO_UINT (r, g, b, a);
 		rgba = contrasting_text_color (rgba);
@@ -370,7 +391,7 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 		Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
 		cairo_set_source_rgba (cr, 0.505, 0.517, 0.525, 0.4);
 		cairo_fill (cr);
-	} else if (_hovering && CairoWidget::widget_prelight()) {
+	} else if (_hovering && CairoWidget::widget_prelight() && !have_explicit_fg) {
 		Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.1);
 		cairo_fill (cr);
@@ -776,6 +797,7 @@ ArdourFader::set_bg (Gtkmm2ext::Color c)
 {
 	explicit_bg = c;
 	have_explicit_bg = true;
+	_pattern = 0;
 	queue_draw ();
 }
 
@@ -784,6 +806,7 @@ ArdourFader::set_fg (Gtkmm2ext::Color c)
 {
 	explicit_fg = c;
 	have_explicit_fg = true;
+	_pattern = 0;
 	queue_draw ();
 }
 
@@ -792,6 +815,7 @@ ArdourFader::unset_bg ()
 {
 	if (have_explicit_bg) {
 		have_explicit_bg = false;
+		_pattern = 0;
 		queue_draw ();
 	}
 }
@@ -801,6 +825,7 @@ ArdourFader::unset_fg ()
 {
 	if (have_explicit_fg) {
 		have_explicit_fg = false;
+		_pattern = 0;
 		queue_draw ();
 	}
 }
