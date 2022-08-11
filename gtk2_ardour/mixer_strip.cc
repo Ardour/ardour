@@ -1431,8 +1431,8 @@ MixerStrip::reset_strip_style ()
 				gpm.set_fader_fg (gdk_color_to_rgba (route_color_tint()));
 			} else {
 				gpm.unset_fader_fg ();
-				gpm.set_fader_name ("MidiTrackFader");
 			}
+			gpm.set_fader_name ("MidiTrackFader");
 		} else if (is_audio_track()) {
 			if (_route->active()) {
 				set_name ("AudioTrackStripBase");
@@ -1444,8 +1444,8 @@ MixerStrip::reset_strip_style ()
 				gpm.set_fader_fg (gdk_color_to_rgba (route_color_tint()));
 			} else {
 				gpm.unset_fader_fg ();
-				gpm.set_fader_name ("AudioTrackFader");
 			}
+			gpm.set_fader_name ("AudioTrackFader");
 		} else {
 			if (_route->active()) {
 				set_name ("AudioBusStripBase");
@@ -1458,8 +1458,8 @@ MixerStrip::reset_strip_style ()
 				gpm.set_fader_fg (gdk_color_to_rgba (route_color_tint()));
 			} else {
 				gpm.unset_fader_fg ();
-				gpm.set_fader_name ("AudioBusFader");
 			}
+			gpm.set_fader_name ("AudioBusFader");
 		}
 	}
 }
