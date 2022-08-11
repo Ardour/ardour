@@ -910,12 +910,12 @@ AutomationLine::get_selectables (timepos_t const & start, timepos_t const & end,
 	double const bot_track = (1 - topfrac) * trackview.current_height ();
 	double const top_track = (1 - botfrac) * trackview.current_height ();
 
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+	for (auto const & cp : control_points) {
 
-		timepos_t const session_samples_when = timepos_t (session_sample_position ((*i)->model()));
+		const timepos_t w = session_position ((*cp->model())->when);
 
-		if (session_samples_when >= start && session_samples_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
-			results.push_back (*i);
+		if (w >= start && w <= end && cp->get_y() >= bot_track && cp->get_y() <= top_track) {
+			results.push_back (cp);
 		}
 	}
 }
@@ -1024,6 +1024,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		ty = _height - (ty * _height);
 
 		add_visible_control_point (vp, pi, px, ty, ai, np);
+
 		vp++;
 	}
 
@@ -1353,24 +1354,19 @@ AutomationLine::get_point_x_range () const
 {
 	pair<timepos_t, timepos_t> r (timepos_t::max (the_list()->time_domain()), timepos_t::zero (the_list()->time_domain()));
 
-	for (AutomationList::const_iterator i = the_list()->begin(); i != the_list()->end(); ++i) {
-		r.first = min (r.first, session_position (i));
-		r.second = max (r.second, session_position (i));
+	for (auto const & cp : *the_list()) {
+		const timepos_t w (session_position (cp->when));
+		r.first = min (r.first, w);
+		r.second = max (r.second, w);
 	}
 
 	return r;
 }
 
-samplepos_t
-AutomationLine::session_sample_position (AutomationList::const_iterator p) const
-{
-	return (*p)->when.samples() + _offset.samples() + get_origin().samples();
-}
-
 timepos_t
-AutomationLine::session_position (AutomationList::const_iterator p) const
+AutomationLine::session_position (timepos_t const & when) const
 {
-	return (*p)->when + _offset + get_origin();
+	return when + get_origin();
 }
 
 void

@@ -161,8 +161,7 @@ public:
 	Temporal::timepos_t offset () { return _offset; }
 	void set_width (Temporal::timecnt_t const &);
 
-	samplepos_t session_sample_position (ARDOUR::AutomationList::const_iterator) const;
-	Temporal::timepos_t session_position (ARDOUR::AutomationList::const_iterator) const;
+	Temporal::timepos_t session_position (Temporal::timepos_t const &) const;
 
 protected:
 

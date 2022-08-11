@@ -284,8 +284,8 @@ TimeInfoBox::selection_changed ()
 			} else {
 				s = timepos_t::max (selection.points.front()->line().the_list()->time_domain());
 				e = timepos_t::zero (s.time_domain());
-				for (PointSelection::iterator i = selection.points.begin(); i != selection.points.end(); ++i) {
-					timepos_t const p = (*i)->line().session_position ((*i)->model ());
+				for (auto const & pt : selection.points) {
+					const timepos_t p = pt->line().session_position ((*pt->model ())->when);
 					s = min (s, p);
 					e = max (e, p);
 				}
