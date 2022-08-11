@@ -1037,7 +1037,11 @@ RouteTimeAxisView::route_color_changed ()
 	}
 	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
 
-	set_bg_color_from_route (controls_ebox, UIConfiguration::instance().get_use_route_color_for_bg());
+	if (UIConfiguration::instance().get_use_route_color_for_bg()) {
+		gm.set_fader_fg (gdk_color_to_rgba (route_color_tint ()));
+	} else {
+		gm.unset_fader_fg ();
+	}
 }
 
 void
