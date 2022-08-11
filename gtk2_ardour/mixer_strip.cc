@@ -65,6 +65,7 @@
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
@@ -1419,37 +1420,45 @@ MixerStrip::reset_strip_style ()
 
 	} else {
 
-		if (UIConfiguration::instance().get_use_route_color_for_bg()) {
-
-			set_bg_color_from_route (*this, true);
-
-		} else {
-
-			set_bg_color_from_route (*this, false);
-
-			if (is_midi_track()) {
-				if (_route->active()) {
-					set_name ("MidiTrackStripBase");
-				} else {
-					set_name ("MidiTrackStripBaseInactive");
-				}
-				gpm.set_fader_name ("MidiTrackFader");
-			} else if (is_audio_track()) {
-				if (_route->active()) {
-					set_name ("AudioTrackStripBase");
-				} else {
-					set_name ("AudioTrackStripBaseInactive");
-				}
-				gpm.set_fader_name ("AudioTrackFader");
+		if (is_midi_track()) {
+			if (_route->active()) {
+				set_name ("MidiTrackStripBase");
 			} else {
-				if (_route->active()) {
-					set_name ("AudioBusStripBase");
-				} else {
-					set_name ("AudioBusStripBaseInactive");
-				}
-				gpm.set_fader_name ("AudioBusFader");
+				set_name ("MidiTrackStripBaseInactive");
+			}
+			if (UIConfiguration::instance().get_use_route_color_for_bg()) {
+				// gpm.set_fader_bg ();
+				gpm.set_fader_fg (gdk_color_to_rgba (route_color_tint()));
+			} else {
+				gpm.unset_fader_fg ();
+				gpm.set_fader_name ("MidiTrackFader");
+			}
+		} else if (is_audio_track()) {
+			if (_route->active()) {
+				set_name ("AudioTrackStripBase");
+			} else {
+				set_name ("AudioTrackStripBaseInactive");
+			}
+			if (UIConfiguration::instance().get_use_route_color_for_bg()) {
+				// gpm.set_fader_bg ();
+				gpm.set_fader_fg (gdk_color_to_rgba (route_color_tint()));
+			} else {
+				gpm.unset_fader_fg ();
+				gpm.set_fader_name ("AudioTrackFader");
+			}
+		} else {
+			if (_route->active()) {
+				set_name ("AudioBusStripBase");
+			} else {
+				set_name ("AudioBusStripBaseInactive");
+			}
 
-				/* (no MIDI busses yet) */
+			if (UIConfiguration::instance().get_use_route_color_for_bg()) {
+				// gpm.set_fader_bg ();
+				gpm.set_fader_fg (gdk_color_to_rgba (route_color_tint()));
+			} else {
+				gpm.unset_fader_fg ();
+				gpm.set_fader_name ("AudioBusFader");
 			}
 		}
 	}
