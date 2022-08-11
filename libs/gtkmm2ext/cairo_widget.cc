@@ -42,6 +42,18 @@ void CairoWidget::set_source_rgb_a( cairo_t* cr, Gdk::Color col, float a)  //ToD
 	cairo_set_source_rgba(cr, r, g, b, a);
 }
 
+void CairoWidget::set_source_rgb_a( cairo_t* cr, Gtkmm2ext::Color col, float a)  //ToDo:  this one and the Canvas version should be in a shared file (?)
+{
+	int ir, ig, ib;
+	UINT_TO_RGB (col, &ir, &ig, &ib);
+
+	const float r = ir / 256.;
+	const float g = ig / 256.;
+	const float b = ib / 256.;
+
+	cairo_set_source_rgba(cr, r, g, b, a);
+}
+
 CairoWidget::CairoWidget ()
 	: _active_state (Gtkmm2ext::Off)
 	, _visual_state (Gtkmm2ext::NoVisualState)
