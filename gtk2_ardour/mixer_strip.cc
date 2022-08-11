@@ -1416,6 +1416,7 @@ MixerStrip::reset_strip_style ()
 {
 	if (_current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery)) {
 
+		gpm.unset_fader_fg ();
 		gpm.set_fader_name ("SendStripBase");
 
 	} else {
@@ -1439,7 +1440,7 @@ MixerStrip::reset_strip_style ()
 			} else {
 				set_name ("AudioTrackStripBaseInactive");
 			}
-			if (!is_master() && UIConfiguration::instance().get_use_route_color_widely()) {
+			if (UIConfiguration::instance().get_use_route_color_widely()) {
 				// gpm.set_fader_bg ();
 				gpm.set_fader_fg (gdk_color_to_rgba (route_color_tint()));
 			} else {
@@ -1453,7 +1454,7 @@ MixerStrip::reset_strip_style ()
 				set_name ("AudioBusStripBaseInactive");
 			}
 
-			if (UIConfiguration::instance().get_use_route_color_widely()) {
+			if (!is_master() && UIConfiguration::instance().get_use_route_color_widely()) {
 				// gpm.set_fader_bg ();
 				gpm.set_fader_fg (gdk_color_to_rgba (route_color_tint()));
 			} else {
@@ -1810,7 +1811,7 @@ MixerStrip::parameter_changed (string p)
 		}
 	} else if (p == "show-triggers-inline") {
 		/* XXX do something or get rid of this parameter */
-	} else if (p == "use-route-color-for-bg") {
+	} else if (p == "use-route-color-widely") {
 		reset_strip_style ();
 	}
 }

@@ -497,7 +497,7 @@ RouteTimeAxisView::parameter_changed (string const & p)
 		} else {
 			gm.get_level_meter().set_max_audio_meter_count (0);
 		}
-	} else if (p == "use-route-color-for-bg") {
+	} else if (p == "use-route-color-widely") {
 		route_color_changed ();
 	}
 }
@@ -1037,7 +1037,7 @@ RouteTimeAxisView::route_color_changed ()
 	}
 	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
 
-	if (UIConfiguration::instance().get_use_route_color_widely()) {
+	if (!is_master() && UIConfiguration::instance().get_use_route_color_widely()) {
 		gm.set_fader_fg (gdk_color_to_rgba (route_color_tint ()));
 	} else {
 		gm.unset_fader_fg ();
