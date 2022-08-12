@@ -1828,6 +1828,13 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 		}
 	}
 
+	/* at this point,
+	 *
+	 * if ramping up, y must >= first->value and <= next->value
+	 * or
+	 * if ramping up, y must <= first->value and >= next->value
+	 */
+
 	assert ((y >= first->value && y <= next->value) || (y <= first->value && y >= next->value) );
 
 	const bool past_start = (inclusive ? x >= start : x > start);
