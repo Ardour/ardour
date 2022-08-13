@@ -290,6 +290,8 @@ public:
 		SearchCache () : left (std::numeric_limits<Temporal::timepos_t>::max()) {}
 		Temporal::timepos_t left;  /* leftmost x coordinate used when finding "first" */
 		ControlList::const_iterator first;
+
+		bool advance_to(Temporal::timepos_t new_left) { left = new_left; return true; }
 	};
 
 	/** @return the list of events */

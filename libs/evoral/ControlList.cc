@@ -1675,53 +1675,50 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (timepos_t const & start_t
  * \return true if event is found (and \a x and \a y are valid).
  */
 bool
-ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const & start_time, Temporal::timepos_t & x, double& y, bool inclusive, Temporal::timecnt_t min_x_delta) const
+ControlList::rt_safe_earliest_event_linear_unlocked (
+  Temporal::timepos_t const & start_time,
+  Temporal::timepos_t &       x,
+  double &                    y,
+  bool                        inclusive,
+  Temporal::timecnt_t         min_x_delta) const
 {
 	timepos_t start = start_time;
 
-	/* the max value is given as an out-of-bounds default value, when the
-	   true default is zero, but the time-domain is not known at compile
-	   time. This allows us to reset it to zero with the correct time
-	   domain (equality comparisons across time domains where the actual
-	   scalar value is zero should always be cheap, but that's not true of
-	   other operators such as >, < etc.)
-	*/
+	/* The max value is given as an out-of-bounds default value, when the true
+	   default is zero, but the time-domain is not known at compile time. This
+	   allows us to reset it to zero with the correct time domain (equality
+	   comparisons across time domains where the actual scalar value is zero
+	   should always be cheap, but that's not true of other operators such as
+	   >, < etc.) */
 
 	if (min_x_delta == Temporal::timecnt_t::max()) {
 		min_x_delta = Temporal::timecnt_t (time_domain());
 	}
 
-	// cout << "earliest_event(start: " << start << ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ") mxd " << min_x_delta << endl;
-
 	const_iterator length_check_iter = _events.begin();
 	if (_events.empty()) {
-		/* no events, so we cannot interpolate */
+		// No events, so we can't interpolate
 		return false;
 	} else if (_events.end() == ++length_check_iter) {
-		/* one event, which decomposes to the same logic as the discrete one */
+		// One event, which decomposes to the same logic as the discrete one
 		return rt_safe_earliest_event_discrete_unlocked (start + min_x_delta, x, y, inclusive);
 	}
 
 	if (min_x_delta > 0) {
-		/* if there is an event between [start ... start + min_x_delta], use it,
-		 */
+		// If there is an event between [start ... start + min_x_delta], use it
 		build_search_cache_if_necessary (start);
 		const ControlEvent* first = *_search_cache.first;
 		if (_search_cache.first != _events.end()) {
 			if (((first->when > start) || (inclusive && first->when == start)) && first->when < start + min_x_delta) {
 				x = first->when;
 				y = first->value;
-				/* Move left of cache to this point
-				 * (Optimize for immediate call this cycle within range) */
-				_search_cache.left = x;
-				return true;
+				return _search_cache.advance_to(x);
 			}
 		}
 	}
 
-	/* No event between start and start + min_x_delta, so otherwise
-	 * interpolate at start + min_x_delta
-	 */
+	/* No event between start and start + min_x_delta, so otherwise interpolate
+	   at start + min_x_delta. */
 
 	start += min_x_delta;
 
@@ -1729,7 +1726,7 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 	build_search_cache_if_necessary (start);
 
 	if (_search_cache.first == _events.end()) {
-		/* No points in the future, so no steps (towards them) in the future */
+		// No points in the future, so no steps (towards them) in the future
 		return false;
 	}
 
@@ -1737,17 +1734,17 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 	const ControlEvent* next = NULL;
 
 	if (_search_cache.first == _events.begin() || (*_search_cache.first)->when <= start) {
-		/* Start is after first */
+		// Start is after first
 		first = *_search_cache.first;
 		++_search_cache.first;
 		if (_search_cache.first == _events.end()) {
-			/* no later events, nothing to interpolate towards */
+			// No later events, nothing to interpolate towards
 			return false;
 		}
 		next = *_search_cache.first;
 
 	} else {
-		/* Start is before first */
+		// Start is before first
 		assert (_search_cache.first != _events.begin());
 		const_iterator prev = _search_cache.first;
 		--prev;
@@ -1756,52 +1753,38 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 	}
 
 	if (inclusive && first->when == start) {
-		/* existing point matches start */
-
+		// Existing point matches start
 		x = first->when;
 		y = first->value;
-		/* Move left of cache to this point
-		 * (Optimize for immediate call this cycle within range)
-		 */
-		_search_cache.left = first->when;
-		return true;
+		return _search_cache.advance_to(x);
 	} else if (next->when < start || (!inclusive && next->when == start)) {
-		/* "Next" is before the start, no points left. */
+		// "Next" is before the start, no points left
 		return false;
 	}
 
 	if (fabs (first->value - next->value) <= 1) {
-
-		/* delta between the two spanning points is <= 1,
-		   consider the next point as the answer, but only if the next
-		   point is actually beyond @param start.
-		*/
+		/* The delta between the two spanning points is <= 1, so consider the
+		   next point as the answer, but only if the next point is actually
+		   beyond the start. */
 
 		if (next->when > start) {
 			x = next->when;
 			y = next->value;
-			/* Move left of cache to this point
-			 * (Optimize for immediate call this cycle within range) */
-			_search_cache.left = next->when;
-			return true;
+			return _search_cache.advance_to(x);
 		} else {
-			/* no suitable point can be determined */
+			// No suitable point can be determined
 			return false;
 		}
 	}
 
-	const double slope = (next->value - first->value) / (double) first->when.distance (next->when).distance().val();
+	enum Direction { UP, DOWN };
 
-	//cerr << "start y: " << start_y << endl;
+	const Direction direction  = (first->value < next->value) ? UP : DOWN;
+	const double    y_distance = next->value - first->value;
+	const double    x_distance = (double)first->when.distance (next->when).distance ().val ();
+	const double    slope      = y_distance / x_distance;
 
-	//y = first->value + (slope * fabs(start - first->when));
-	y = first->value;
-
-	if (first->value < next->value) { // ramping up
-		y = ceil(y);
-	} else { // ramping down
-		y = floor(y);
-	}
+	y = (direction == UP) ? ceil (first->value) : floor (first->value);
 
 	if (_time_domain == AudioTime) {
 		x = first->when + timepos_t (samplepos_t ((y - first->value) / (double)slope));
@@ -1809,16 +1792,12 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 		x = first->when + timepos_t::from_ticks ((y - first->value) / (double)slope);
 	}
 
-	/* Now iterate until x has a suitable relationship to start (depending
-	 * on the value of @param inclusive. Either less than @param start or
-	 * less-than-or-equal with y not yet reaching the value of the next
-	 * point.
-	 */
+	/* Now scan until x has a suitable relationship to start, depending on the
+	 * value of `inclusive`.  It must be < start, or <= start with y not yet
+	 * reaching the value of the next point. */
 
-	const double delta = (first->value < next->value) ? 1.0 /* ramping up */ : -1.0; /* ramping down */
-
+	const double delta = (direction == UP) ? 1.0 : -1.0;
 	while ((inclusive && x < start) || (x <= start && y != next->value)) {
-
 		y += delta;
 
 		if (_time_domain == AudioTime) {
@@ -1831,26 +1810,15 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 	assert ((y >= first->value && y <= next->value) || (y <= first->value && y >= next->value) );
 
 	const bool past_start = (inclusive ? x >= start : x > start);
-
 	if (past_start) {
-		/* Move left of cache to this point
-		 * (Optimize for immediate call this cycle within range) */
-		_search_cache.left = x;
 		assert(inclusive ? x >= start : x > start);
-		return true;
+		return _search_cache.advance_to(x);
 	}
 
-	if (inclusive) {
-		x = next->when;
-		_search_cache.left = next->when;
-	} else {
-		x = start;
-		_search_cache.left = x;
-	}
+	x = inclusive ? next->when : start;
 
-	return true;
+	return _search_cache.advance_to(x);
 }
-
 
 /** @param start Start position in model coordinates.
  *  @param end End position in model coordinates.
