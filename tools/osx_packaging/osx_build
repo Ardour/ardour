@@ -646,28 +646,34 @@ fi
 # from here on $PRODUCT_PKG_DIR/ prefix is needed
 ################################################################################
 
-DMG_ARCH=""
 if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
 	OSX_ARCH=x86_64
 	OSX_X42URI=x42-plugins.com/x42/osx
 	OSX_X42ID=osx
 	OSX_BENSID=osx64
+	TXZ_ARCH="osx"   # harvid
+	DMG_ARCH=""      # Jadeo
 elif file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q ppc; then
 	OSX_ARCH=ppc
 	OSX_X42URI=x42-plugins.com/x42/osx
 	OSX_X42ID=osx
 	OSX_BENSID=osxppc
+	TXZ_ARCH="osx"
+	DMG_ARCH=""
 elif file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q arm64; then
 	OSX_ARCH=arm64
 	OSX_X42URI=x42-plugins.com/x42/mac
-	OSX_X42ID="macOS-arm64"
-	DMG_ARCH="-arm64"
+	OSX_X42ID="macOS"
 	OSX_BENSID=macarm64
+	TXZ_ARCH="macOS-arm64"
+	DMG_ARCH="-arm64"
 else
 	OSX_ARCH=i386
 	OSX_X42URI=x42-plugins.com/x42/osx
 	OSX_X42ID=osx
 	OSX_BENSID=osx32
+	TXZ_ARCH="osx"
+	DMG_ARCH=""
 fi
 
 if test x$WITH_HARRISON_LV2 != x ; then
@@ -695,8 +701,8 @@ if test x$WITH_HARVID != x ; then
 	echo "copying harvid and xjadeo ..."
 
 	rsync -Pa \
-		rsync://ardour.org/video-tools/harvid-${OSX_X42ID}-${HARVID_VERSION}.tgz \
-		"$CACHEDIR/harvid-${OSX_X42ID}-${HARVID_VERSION}.tgz"
+		rsync://ardour.org/video-tools/harvid-${TXZ_ARCH}-${HARVID_VERSION}.tgz \
+		"$CACHEDIR/harvid-${TXZ_ARCH}-${HARVID_VERSION}.tgz"
 
 	rsync -Pa \
 		rsync://ardour.org/video-tools/jadeo${DMG_ARCH}-${XJADEO_VERSION:1}.dmg \
@@ -704,7 +710,7 @@ if test x$WITH_HARVID != x ; then
 
 	tar -x -z \
 		-C $PRODUCT_PKG_DIR/$APPROOT \
-		-f "$CACHEDIR/harvid-${OSX_X42ID}-${HARVID_VERSION}.tgz" || exit 1
+		-f "$CACHEDIR/harvid-${TXZ_ARCH}-${HARVID_VERSION}.tgz" || exit 1
 
 	JADEO=$(hdiutil attach "$CACHEDIR/jadeo${DMG_ARCH}-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
 	cp -r "${JADEO}/Jadeo.app" "$PRODUCT_PKG_DIR/"
