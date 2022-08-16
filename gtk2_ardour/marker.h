@@ -89,7 +89,7 @@ public:
 	void set_line_height (double);
 
 	void set_position (Temporal::timepos_t const &);
-	void set_name (const std::string&);
+	void set_name (const std::string&, const std::string & tooltip = std::string());
 	void set_points_color (uint32_t rgba);
 	void set_color_rgba (uint32_t rgba);
 	void setup_line ();

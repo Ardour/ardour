@@ -24,6 +24,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <sstream>
+
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
 
@@ -448,16 +450,20 @@ ArdourMarker::set_line_height (double h)
 }
 
 void
-ArdourMarker::set_name (const string& new_name)
+ArdourMarker::set_name (const string& new_name, const string& tooltip)
 {
 	_name = new_name;
 
-	_pcue->set_tooltip(new_name);
-	_pmark->set_tooltip(new_name);
+	_pcue->set_tooltip (new_name);
+	_pmark->set_tooltip (new_name);
 	if (_name_flag) {
-		_name_flag->set_tooltip(new_name);
+		_name_flag->set_tooltip (new_name);
 	}
-	_name_item->set_tooltip(new_name);
+	if (tooltip.empty()) {
+		_name_item->set_tooltip (new_name);
+	} else {
+		_name_item->set_tooltip (tooltip);
+	}
 
 	setup_name_display ();
 }
@@ -742,6 +748,14 @@ BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 
 	: MetricMarker (editor, parent, rgba, p.name(), BBTPosition, p.time(), false)
 	, _point (&p)
 {
+	std::stringstream full_tooltip;
+
+	full_tooltip << name();
+	full_tooltip << " (";
+	full_tooltip << p.bbt();
+	full_tooltip << ')';
+
+	set_name (name(), full_tooltip.str());
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_bbt_marker_event), group, this));
 }
 
