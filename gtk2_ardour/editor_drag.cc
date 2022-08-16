@@ -3372,10 +3372,103 @@ TempoMarkerDrag::aborted (bool moved)
 	// _point->end_float ();
 	_marker->set_position (timepos_t (_marker->tempo().beats()));
 
-	if (moved) {
+	if (moved) { 
 		// delete the dummy (hidden) marker we used for events while moving.
 		delete _marker;
 	}
+}
+
+
+/********* */
+
+BBTMarkerDrag::BBTMarkerDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i, Temporal::BeatTime)
+	, _before_state (0)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New BBTMarkerDrag\n");
+
+	_marker = reinterpret_cast<BBTMarker*> (_item->get_data ("marker"));
+	_point = &_marker->mt_point();
+	assert (_marker);
+}
+
+void
+BBTMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, cursor);
+
+	/* XXX show some initial time string or something as verbose cursor */
+
+	/* setup thread-local tempo map ptr as a writable copy */
+
+	map = _editor->begin_tempo_map_edit ();
+}
+
+void
+BBTMarkerDrag::setup_pointer_offset ()
+{
+	_pointer_offset =  _marker->mt_point().time().distance (raw_grab_time());
+}
+
+void
+BBTMarkerDrag::motion (GdkEvent* event, bool first_move)
+{
+	if (first_move) {
+		/* get current state */
+		_before_state = &map->get_state();
+		_editor->begin_reversible_command (_("move BBT point"));
+	}
+
+	timepos_t pos = adjusted_current_time (event);
+	/* XXX move marker position */
+
+	/* XXXX update verbose cursor somehow */
+
+	_editor->mid_tempo_change (Editor::TempoChanged);
+}
+
+
+void
+BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	if (!movement_occurred) {
+		/* reset the per-thread tempo map ptr back to the current
+		 * official version
+		 */
+
+		_editor->abort_tempo_map_edit ();
+
+		if (was_double_click()) {
+			// XXX need edit_bbt_marker()
+			// _editor->edit_tempo_marker (*_marker);
+		}
+
+		return;
+	}
+
+	/* push the current state of our writable map copy */
+
+	map->remove_bartime (*_point);
+	// map->set_bartime ();
+
+	_editor->commit_tempo_map_edit (map);
+	XMLNode &after = map->get_state();
+
+	_editor->session()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
+	_editor->commit_reversible_command ();
+}
+
+void
+BBTMarkerDrag::aborted (bool moved)
+{
+	/* reset the per-thread tempo map ptr back to the current
+	 * official version
+	 */
+
+	_editor->abort_tempo_map_edit ();
+
+	// _point->end_float ();
+	_marker->set_position (timepos_t::from_superclock (_marker->mt_point().sclock()));
 }
 
 BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)

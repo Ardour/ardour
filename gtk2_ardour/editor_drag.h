@@ -883,6 +883,36 @@ private:
 	XMLNode* _before_state;
 };
 
+/** Tempo marker drag */
+class BBTMarkerDrag : public Drag
+{
+public:
+	BBTMarkerDrag (Editor *, ArdourCanvas::Item *);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+	void setup_pointer_offset ();
+
+private:
+	BBTMarker* _marker;
+	Temporal::MusicTimePoint const * _point;
+	Temporal::TempoMap::WritableSharedPtr map;
+
+	XMLNode* _before_state;
+};
+
+
 /** BBT Ruler drag */
 class BBTRulerDrag : public Drag
 {
