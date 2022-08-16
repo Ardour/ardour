@@ -721,10 +721,14 @@ Editor::abort_tempo_map_edit ()
 }
 
 void
-Editor::commit_tempo_map_edit (TempoMap::WritableSharedPtr& new_map)
+Editor::commit_tempo_map_edit (TempoMap::WritableSharedPtr& new_map, bool with_update)
 {
-	PBD::Unwinder<bool> uw (ignore_map_change, true);
-	TempoMap::update (new_map);
+	if (!with_update) {
+		PBD::Unwinder<bool> uw (ignore_map_change, true);
+		TempoMap::update (new_map);
+	} else {
+		TempoMap::update (new_map);
+	}
 }
 
 void

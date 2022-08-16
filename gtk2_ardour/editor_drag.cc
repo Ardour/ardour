@@ -3525,7 +3525,13 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 	}
 
-	_editor->commit_tempo_map_edit (map);
+	/* 2nd argument means "update tempo map display after the new map is
+	 * installed. We need to do this because the code above has not
+	 * actually changed anything about how tempo is displayed, it simply
+	 * modified the map.
+	 */
+
+	_editor->commit_tempo_map_edit (map, true);
 
 	XMLNode &after = map->get_state();
 
