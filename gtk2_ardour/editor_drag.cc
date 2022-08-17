@@ -3372,7 +3372,7 @@ TempoMarkerDrag::aborted (bool moved)
 	// _point->end_float ();
 	_marker->set_position (timepos_t (_marker->tempo().beats()));
 
-	if (moved) { 
+	if (moved) {
 		// delete the dummy (hidden) marker we used for events while moving.
 		delete _marker;
 	}
@@ -3420,11 +3420,10 @@ BBTMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	timepos_t pos = adjusted_current_time (event);
-	/* XXX move marker position */
+
+	_marker->set_position (pos);
 
 	/* XXXX update verbose cursor somehow */
-
-	_editor->mid_tempo_change (Editor::TempoChanged);
 }
 
 
@@ -3439,8 +3438,7 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->abort_tempo_map_edit ();
 
 		if (was_double_click()) {
-			// XXX need edit_bbt_marker()
-			// _editor->edit_tempo_marker (*_marker);
+			_editor->edit_bbt_marker (*_marker);
 		}
 
 		return;
@@ -3448,10 +3446,13 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	/* push the current state of our writable map copy */
 
-	map->remove_bartime (*_point);
-	// map->set_bartime ();
+	BBT_Time bbt (_point->bbt());
+	string name (_point->name());
 
-	_editor->commit_tempo_map_edit (map);
+	map->remove_bartime (*_point);
+	map->set_bartime (bbt, _marker->position(), name);
+
+	_editor->commit_tempo_map_edit (map, true);
 	XMLNode &after = map->get_state();
 
 	_editor->session()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
@@ -3461,14 +3462,12 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 BBTMarkerDrag::aborted (bool moved)
 {
-	/* reset the per-thread tempo map ptr back to the current
-	 * official version
-	 */
+	if (moved) {
+		/* reset the marker back to the point's position
+		 */
 
-	_editor->abort_tempo_map_edit ();
-
-	// _point->end_float ();
-	_marker->set_position (timepos_t::from_superclock (_marker->mt_point().sclock()));
+		_marker->set_position (_marker->mt_point().time());
+	}
 }
 
 BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)

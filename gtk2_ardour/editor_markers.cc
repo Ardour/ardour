@@ -946,13 +946,15 @@ Editor::location_gone (Location *location)
 }
 
 void
-Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
+Editor::tempo_map_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 {
 	marker_menu_item = item;
 
 	MeterMarker* mm;
 	TempoMarker* tm;
-	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+	BBTMarker* bm;
+
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm, &bm);
 
 	bool can_remove = false;
 
@@ -967,6 +969,9 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 		can_remove = !tm->tempo().map().is_initial(tm->tempo()) && !tm->tempo().locked_to_meter();
 		build_tempo_marker_menu (tm, can_remove);
 		tempo_marker_menu->popup (1, ev->time);
+	} else if (bm) {
+		build_bbt_marker_menu (bm);
+		bbt_marker_menu->popup (1, ev->time);
 	} else {
 		return;
 	}
@@ -1196,6 +1201,21 @@ Editor::build_meter_marker_menu (MeterMarker* loc, bool can_remove)
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 
 	items.back().set_sensitive (can_remove);
+}
+
+void
+Editor::build_bbt_marker_menu (BBTMarker* loc)
+{
+	using namespace Menu_Helpers;
+
+	delete meter_marker_menu;
+	bbt_marker_menu = new Menu;
+
+	MenuList& items = bbt_marker_menu->items();
+	bbt_marker_menu->set_name ("ArdourContextMenu");
+
+	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
+	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 }
 
 void
@@ -1564,7 +1584,7 @@ Editor::marker_menu_zoom_to_range ()
 }
 
 void
-Editor::dynamic_cast_marker_object (void* p, MeterMarker** m, TempoMarker** t) const
+Editor::dynamic_cast_marker_object (void* p, MeterMarker** m, TempoMarker** t, BBTMarker** b) const
 {
 	ArdourMarker* marker = reinterpret_cast<ArdourMarker*> (p);
 	if (!marker) {
@@ -1574,6 +1594,7 @@ Editor::dynamic_cast_marker_object (void* p, MeterMarker** m, TempoMarker** t) c
 
 	*m = dynamic_cast<MeterMarker*> (marker);
 	*t = dynamic_cast<TempoMarker*> (marker);
+	*b = dynamic_cast<BBTMarker*> (marker);
 }
 
 void
@@ -1581,12 +1602,15 @@ Editor::marker_menu_edit ()
 {
 	MeterMarker* mm;
 	TempoMarker* tm;
-	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+	BBTMarker* bm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm, &bm);
 
 	if (mm) {
 		edit_meter_section (const_cast<Temporal::MeterPoint&>(mm->meter()));
 	} else if (tm) {
 		edit_tempo_section (const_cast<Temporal::TempoPoint&>(tm->tempo()));
+	} else if (bm) {
+		edit_bbt (const_cast<Temporal::MusicTimePoint&>(bm->mt_point()));
 	}
 }
 
@@ -1595,14 +1619,15 @@ Editor::marker_menu_remove ()
 {
 	MeterMarker* mm;
 	TempoMarker* tm;
-	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+	BBTMarker* bm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm, &bm);
 
 	if (mm) {
 		remove_meter_marker (marker_menu_item);
 	} else if (tm) {
 		remove_tempo_marker (marker_menu_item);
 	} else {
-		remove_marker (*marker_menu_item);
+		remove_bbt_marker (marker_menu_item);
 	}
 }
 
@@ -1612,7 +1637,8 @@ Editor::toggle_tempo_type ()
 {
 	TempoMarker* tm;
 	MeterMarker* mm;
-	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+	BBTMarker* bm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm, &bm);
 
 	if (tm) {
 
@@ -1640,7 +1666,8 @@ Editor::toggle_tempo_continues ()
 {
 	TempoMarker* tm;
 	MeterMarker* mm;
-	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+	BBTMarker* bm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm, &bm);
 
 	if (!tm) {
 		return;
@@ -1672,7 +1699,8 @@ Editor::ramp_to_next_tempo ()
 
 	TempoMarker* tm;
 	MeterMarker* mm;
-	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+	BBTMarker* bm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm, &bm);
 
 	if (!tm) {
 		return;

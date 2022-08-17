@@ -33,15 +33,15 @@
 class BBTMarkerDialog : public ArdourDialog
 {
 public:
-	BBTMarkerDialog (Temporal::timepos_t const & );
-	BBTMarkerDialog (Temporal::MusicTimePoint&, const std::string & action);
+	BBTMarkerDialog (Temporal::timepos_t const &);
+	BBTMarkerDialog (Temporal::MusicTimePoint&);
 
 	Temporal::timepos_t position() const;
 	Temporal::BBT_Time  bbt_value () const;
 	std::string         name() const;
 
 private:
-	void init ();
+	void init (bool add);
 	Temporal::MusicTimePoint* _point;
 	Temporal::timepos_t _position;
 

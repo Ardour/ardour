@@ -50,6 +50,7 @@
 #include "canvas/item.h"
 #include "canvas/line_set.h"
 
+#include "bbt_marker_dialog.h"
 #include "editor.h"
 #include "marker.h"
 #include "tempo_dialog.h"
@@ -540,6 +541,25 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 }
 
 void
+Editor::remove_bbt_marker (ArdourCanvas::Item* item)
+{
+	ArdourMarker* marker;
+	BBTMarker* bbt_marker;
+
+	if ((marker = reinterpret_cast<ArdourMarker *> (item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: bbt marker canvas item has no marker object pointer!") << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	if ((bbt_marker = dynamic_cast<BBTMarker*> (marker)) == 0) {
+		fatal << _("programming error: marker for bbt is not a bbt marker!") << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::real_remove_bbt_marker), &bbt_marker->mt_point()));
+}
+
+void
 Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 {
 	ArdourMarker* marker;
@@ -598,6 +618,42 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 }
 
 void
+Editor::edit_bbt (MusicTimePoint& point)
+{
+	BBTMarkerDialog dialog (point);
+
+	switch (dialog.run ()) {
+	case RESPONSE_OK:
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
+	}
+
+	if (dialog.bbt_value() == point.bbt()) {
+		/* just a name change, no need to modify the map */
+		point.set_name (dialog.name());
+		/* XXX need to update marker label */
+		return;
+	}
+
+	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
+	reassociate_metric_markers (tmap);
+
+	begin_reversible_command (_("Edit Tempo"));
+	XMLNode &before = tmap->get_state();
+
+	tmap->remove_bartime (point);
+	tmap->set_bartime (dialog.bbt_value(), dialog.position(), dialog.name());
+
+	XMLNode &after = tmap->get_state();
+	_session->add_command (new Temporal::TempoCommand (_("edit tempo"), &before, &after));
+	commit_reversible_command ();
+
+	TempoMap::update (tmap);
+}
+
+void
 Editor::edit_tempo_section (TempoPoint& section)
 {
 	TempoDialog tempo_dialog (TempoMap::use(), section, _("done"));
@@ -644,6 +700,28 @@ void
 Editor::edit_meter_marker (MeterMarker& mm)
 {
 	edit_meter_section (const_cast<Temporal::MeterPoint&>(mm.meter()));
+}
+
+void
+Editor::edit_bbt_marker (BBTMarker& bm)
+{
+	edit_bbt (const_cast<Temporal::MusicTimePoint&>(bm.mt_point()));
+}
+
+gint
+Editor::real_remove_bbt_marker (MusicTimePoint const * point)
+{
+	begin_reversible_command (_("remove BBT marker"));
+	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
+	XMLNode &before = tmap->get_state();
+	tmap->remove_bartime (*point);
+	XMLNode &after = tmap->get_state();
+	_session->add_command (new Temporal::TempoCommand (_("remove BBT marker"), &before, &after));
+	commit_reversible_command ();
+
+	TempoMap::update (tmap);
+
+	return FALSE;
 }
 
 gint

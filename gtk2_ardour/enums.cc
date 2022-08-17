@@ -158,6 +158,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (MeterMarkerItem);
 	REGISTER_ENUM (TempoCurveItem);
 	REGISTER_ENUM (TempoMarkerItem);
+	REGISTER_ENUM (BBTMarkerItem);
 	REGISTER_ENUM (MeterBarItem);
 	REGISTER_ENUM (TempoBarItem);
 	REGISTER_ENUM (RegionViewNameHighlight);

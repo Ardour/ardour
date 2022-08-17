@@ -598,6 +598,7 @@ public:
 	void mouse_add_new_meter_event (Temporal::timepos_t where);
 	void edit_tempo_section (Temporal::TempoPoint&);
 	void edit_meter_section (Temporal::MeterPoint&);
+	void edit_bbt (Temporal::MusicTimePoint&);
 
 	bool should_ripple () const;
 	bool should_ripple_all () const;  /* RippleAll will ripple all similar regions and the timeline markers */
@@ -1798,11 +1799,14 @@ private:
 
 	void remove_tempo_marker (ArdourCanvas::Item*);
 	void remove_meter_marker (ArdourCanvas::Item*);
+	void remove_bbt_marker (ArdourCanvas::Item*);
 	gint real_remove_tempo_marker (Temporal::TempoPoint const *);
 	gint real_remove_meter_marker (Temporal::MeterPoint const *);
+	gint real_remove_bbt_marker (Temporal::MusicTimePoint const *);
 
 	void edit_tempo_marker (TempoMarker&);
 	void edit_meter_marker (MeterMarker&);
+	void edit_bbt_marker (BBTMarker&);
 	void edit_control_point (ArdourCanvas::Item*);
 	void edit_notes (MidiRegionView*);
 	void edit_region (RegionView*);
@@ -1839,18 +1843,20 @@ private:
 	void update_punch_range_view ();
 	void new_transport_marker_menu_popdown ();
 	void marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
-	void tempo_or_meter_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
+	void tempo_map_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void new_transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void build_range_marker_menu (ARDOUR::Location*, bool, bool);
 	void build_marker_menu (ARDOUR::Location*);
 	void build_tempo_marker_menu (TempoMarker*, bool);
 	void build_meter_marker_menu (MeterMarker*, bool);
+	void build_bbt_marker_menu (BBTMarker*);
 	void build_new_transport_marker_menu ();
 
-	void dynamic_cast_marker_object (void*, MeterMarker**, TempoMarker**) const;
+	void dynamic_cast_marker_object (void*, MeterMarker**, TempoMarker**, BBTMarker**) const;
 
 	Gtk::Menu* tempo_marker_menu;
 	Gtk::Menu* meter_marker_menu;
+	Gtk::Menu* bbt_marker_menu;
 	Gtk::Menu* marker_menu;
 	Gtk::Menu* range_marker_menu;
 	Gtk::Menu* new_transport_marker_menu;

@@ -786,7 +786,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 
 	case TempoMarkerItem:
-	{
 		if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new TempoEndDrag (this, item), event);
 		} else {
@@ -794,10 +793,12 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 
 		return true;
-	}
+
+	case BBTMarkerItem:
+		_drags->set (new BBTMarkerDrag (this, item), event);
+		return true;
 
 	case MeterMarkerItem:
-	{
 		_drags->set (
 			new MeterMarkerDrag (
 				this,
@@ -807,7 +808,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			event
 			);
 		return true;
-	}
 
 	case VideoBarItem:
 		_drags->set (new VideoTimeLineDrag (this, item), event);
@@ -1564,6 +1564,23 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			edit_tempo_marker (*tempo_marker);
 			break;
 		}
+		case BBTMarkerItem: {
+			ArdourMarker* marker;
+			BBTMarker* bbt_marker;
+
+			if ((marker = reinterpret_cast<ArdourMarker *> (item->get_data ("marker"))) == 0) {
+				fatal << _("programming error: bbt marker canvas item has no marker object pointer!") << endmsg;
+				abort(); /*NOTREACHED*/
+			}
+
+			if ((bbt_marker = dynamic_cast<BBTMarker*> (marker)) == 0) {
+				fatal << _("programming error: marker for bbt is not a bbt marker!") << endmsg;
+				abort(); /*NOTREACHED*/
+			}
+
+			edit_bbt_marker (*bbt_marker);
+			break;
+		}
 
 		case MeterMarkerItem: {
 			ArdourMarker* marker;
@@ -1672,11 +1689,9 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case TempoMarkerItem:
-				tempo_or_meter_marker_context_menu (&event->button, item);
-				break;
-
 			case MeterMarkerItem:
-				tempo_or_meter_marker_context_menu (&event->button, item);
+			case BBTMarkerItem:
+				tempo_map_marker_context_menu (&event->button, item);
 				break;
 
 			case CrossfadeViewItem:
@@ -1710,6 +1725,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		switch (item_type) {
 		case TempoMarkerItem:
 			remove_tempo_marker (item);
+			break;
+
+		case BBTMarkerItem:
+			remove_bbt_marker (item);
 			break;
 
 		case MeterMarkerItem:

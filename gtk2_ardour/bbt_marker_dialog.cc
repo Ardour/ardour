@@ -33,11 +33,27 @@ BBTMarkerDialog::BBTMarkerDialog (timepos_t const & pos)
 	: ArdourDialog (_("New Music Time"))
 	, _point (0)
 	, _position (pos)
-	, entry_label (_("Position"))
+	, entry_label (_("BBT"))
 	, name_label (_("Name"))
 
 {
-	BBT_Time bbt = TempoMap::use()->bbt_at (pos).round_to_beat ();
+	init (true);
+}
+
+BBTMarkerDialog::BBTMarkerDialog (MusicTimePoint& p)
+	: ArdourDialog (_("Edit Music Time"))
+	, _point (&p)
+	, _position (timepos_t::from_superclock (p.sclock()))
+	, entry_label (_("BBT"))
+	, name_label (_("Name"))
+{
+	init (false);
+}
+
+void
+BBTMarkerDialog::init (bool add)
+{
+	BBT_Time bbt = TempoMap::use()->bbt_at (_position).round_to_beat ();
 
 	bar_entry.set_range (1, 9999);
 	beat_entry.set_range (1, 9999);
@@ -54,6 +70,10 @@ BBTMarkerDialog::BBTMarkerDialog (timepos_t const & pos)
 	name_box.pack_start (name_label);
 	name_box.pack_start (name_entry);
 
+	if (_point) {
+		name_entry.set_text (_point->name());
+	}
+
 	name_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &BBTMarkerDialog::response), Gtk::RESPONSE_OK));
 
 	get_vbox()->pack_start (name_box);
@@ -63,7 +83,12 @@ BBTMarkerDialog::BBTMarkerDialog (timepos_t const & pos)
 	name_box.show_all ();
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (_("Add Marker"), RESPONSE_OK);
+
+	if (add) {
+		add_button (_("Add Marker"), RESPONSE_OK);
+	} else {
+		add_button (_("Save Changes"), RESPONSE_OK);
+	}
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->set_spacing (12);
