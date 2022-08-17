@@ -1151,6 +1151,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 
 			metric = TempoMetric (*mtp, *mtp);
 			DEBUG_TRACE (DEBUG::MapReset, string_compose ("Bartime!, used tempo @ %1\n", (TempoPoint*) mtp));
+			need_initial_ramp_reset = false;
 		} else if ((tp = dynamic_cast<TempoPoint*> (&*p)) != 0) {
 			metric = TempoMetric (*tp, metric.meter());
 			if (tp->ramped()) {
