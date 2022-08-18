@@ -1790,52 +1790,26 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 		}
 	}
 
-	const double slope = (next->value - first->value) / (double) first->when.distance (next->when).distance().val();
+       /* This method is ONLY used for interpolating to generate value/time
+        * duples not present in the actual ControlList, and because of this,
+        * the desired time domain is always audio time.
+        */
 
-	//cerr << "start y: " << start_y << endl;
+	double a = first->when.superclocks ();
+	double b = next->when.superclocks ();
+	const double slope = (b - a) / (next->value - first->value);
+	assert (slope != 0);
 
-	//y = first->value + (slope * fabs(start - first->when));
-	y = first->value;
-
-	if (first->value < next->value) { // ramping up
-		y = ceil(y);
-	} else { // ramping down
-		y = floor(y);
-	}
-
-	if (_time_domain == AudioTime) {
-		x = first->when + timepos_t (samplepos_t ((y - first->value) / (double)slope));
+	double t = start_time.superclocks ();
+	double dt = fmod (t, fabs (slope));
+	t += fabs (slope) - dt;
+	x = timecnt_t::from_superclock (t + 1);
+	y = rint (first->value + (t - a) / slope);
+	if (slope > 0) {
+		y = std::max (first->value, std::min (next->value, y));
 	} else {
-		x = first->when + timepos_t::from_ticks ((y - first->value) / (double)slope);
+		y = std::max (next->value, std::min (first->value, y));
 	}
-
-	/* Now iterate until x has a suitable relationship to start (depending
-	 * on the value of @param inclusive. Either less than @param start or
-	 * less-than-or-equal with y not yet reaching the value of the next
-	 * point.
-	 */
-
-	const double delta = (first->value < next->value) ? 1.0 /* ramping up */ : -1.0; /* ramping down */
-
-	while ((inclusive && x < start) || (x <= start && y != next->value)) {
-
-		y += delta;
-
-		if (_time_domain == AudioTime) {
-			x = first->when + timepos_t (samplepos_t ((y - first->value) / (double)slope));
-		} else {
-			x = first->when + timepos_t::from_ticks (int64_t ((y - first->value) / (double)slope));
-		}
-	}
-
-	/* at this point,
-	 *
-	 * if ramping up, y must >= first->value and <= next->value
-	 * or
-	 * if ramping up, y must <= first->value and >= next->value
-	 */
-
-	assert ((y >= first->value && y <= next->value) || (y <= first->value && y >= next->value) );
 
 	const bool past_start = (inclusive ? x >= start : x > start);
 
