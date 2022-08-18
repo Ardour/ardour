@@ -816,16 +816,16 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case TempoBarItem:
 	case TempoCurveItem:
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
+		    && !ArdourKeyboard::indicates_constraint (event->button.state)) {
+			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
+		} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new TempoCurveDrag (this, item), event);
 			return true;
 		}
-		/* fallthru */
-	case MarkerBarItem:
+		return true;
+
 	case MeterBarItem:
-	case TimecodeRulerItem:
-	case SamplesRulerItem:
-	case MinsecRulerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
 		    && !ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
@@ -834,7 +834,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			_drags->set (new TempoTwistDrag (this, item), event);
 		}
 		return true;
-		break;
 
 	case BBTRulerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
@@ -842,6 +841,16 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
 		} else if (Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new BBTRulerDrag (this, item), event);
+		}
+		return true;
+
+	case TimecodeRulerItem:
+	case SamplesRulerItem:
+	case MinsecRulerItem:
+	case MarkerBarItem:
+		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
+		    && !ArdourKeyboard::indicates_constraint (event->button.state)) {
+			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
 		}
 		return true;
 
