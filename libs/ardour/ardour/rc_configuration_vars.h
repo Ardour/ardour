@@ -266,7 +266,7 @@ CONFIG_VARIABLE (std::string, windows_pingback_url, "windows-pingback-url", "htt
 CONFIG_VARIABLE (std::string, tutorial_manual_url, "tutorial-manual-url", "http://ardour.org/tutorial")
 CONFIG_VARIABLE (std::string, reference_manual_url, "reference-manual-url", "http://manual.ardour.org/")
 CONFIG_VARIABLE (std::string, updates_url, "updates-url", "http://ardour.org/whatsnew.html")
-CONFIG_VARIABLE (std::string, donate_url, "donate-url", "http://ardour.org/donate")
+CONFIG_VARIABLE (std::string, donate_url, "donate-url", "http://community.ardour.org/donate")
 
 /* video timeline configuration */
 CONFIG_VARIABLE (std::string, xjadeo_binary, "xjadeo-binary", "")
