@@ -381,8 +381,6 @@ MidiPlaylist::combine (RegionList const & rl)
 {
 	RegionWriteLock rwl (this, true);
 
-	std::cerr << "combine " << rl.size() << " regions\n";
-
 	if (rl.size() < 2) {
 		return boost::shared_ptr<Region> ();
 	}
@@ -405,17 +403,26 @@ MidiPlaylist::combine (RegionList const & rl)
 	timepos_t pos (first->position());
 
 	remove_region_internal (first, rwl.thawlist);
-	std::cerr << "Remove " << first->name() << std::endl;
 
 	while (i != sorted.end()) {
 		new_region->merge (boost::dynamic_pointer_cast<MidiRegion> (*i));
 		remove_region_internal (*i, rwl.thawlist);
-		std::cerr << "Remove " << (*i)->name() << std::endl;
 		++i;
 	}
 
+	Temporal::BBT_Time bbt_at_end = Temporal::TempoMap::use()->bbt_at (new_region->end());
+
+	/* round up to next bar */
+
+	if (bbt_at_end.beats > 1 || bbt_at_end.ticks > 0) {
+		bbt_at_end.beats = 1;
+		bbt_at_end.ticks = 0;
+		bbt_at_end.bars++;
+	}
+
+	new_region->set_length (new_region->position().distance (timepos_t (Temporal::TempoMap::use()->quarters_at (bbt_at_end))));
+
 	add_region_internal (new_region, pos, rwl.thawlist);
-	std::cerr << "Add " << new_region->name() << std::endl;
 
 	return new_region;
 }
