@@ -913,7 +913,6 @@
           <Patch Number="841" Name="2&apos; Viol" ProgramChange="73"/>
           <Patch Number="842" Name="Pro Piano" ProgramChange="74"/>
           <Patch Number="843" Name="Big Pop Piano" ProgramChange="75"/>
-	  <!-- gap-->
           <Patch Number="886" Name="Gregg&apos;s B" ProgramChange="118"/>
           <Patch Number="887" Name="Real AllOut B" ProgramChange="119"/>
           <Patch Number="888" Name="Clean Perc" ProgramChange="120"/>
@@ -1011,7 +1010,6 @@
           <Patch Number="972" Name="WheelBowViola" ProgramChange="76"/>
           <Patch Number="973" Name="WheelBowFiddle" ProgramChange="77"/>
           <Patch Number="974" Name="Electric Cello" ProgramChange="78"/>
-	  <!-- gap -->
           <Patch Number="978" Name="Classic MiniBass" ProgramChange="82"/>
           <Patch Number="979" Name="TalkWahPoly+Syn" ProgramChange="83"/>
           <Patch Number="980" Name="MeanWahMono" ProgramChange="84"/>
@@ -1431,7 +1429,6 @@
           <Patch Number="3588" Name="VA1 Hi-Hat" ProgramChange="4"/>
           <Patch Number="3589" Name="BonzoLTE" ProgramChange="5"/>
           <Patch Number="3590" Name="KitLiteBeatbx101" ProgramChange="6"/>
-	  <!-- gap -->
           <Patch Number="3700" Name="Concert Piano" ProgramChange="116"/>
           <Patch Number="3701" Name="Rock Piano" ProgramChange="117"/>
           <Patch Number="3702" Name="Recital Piano" ProgramChange="118"/>
