@@ -105,25 +105,26 @@ sigc::signal<void, bool> RouteTimeAxisView::signal_ctrl_touched;
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: RouteUI(sess)
 	, StripableTimeAxisView(ed, sess, canvas)
-	, _view (0)
+	, _view (nullptr)
 	, button_table (3, 3)
 	, route_group_button (S_("RTAV|G"))
 	, playlist_button (S_("RTAV|P"))
 	, automation_button (S_("RTAV|A"))
-	, automation_action_menu (0)
-	, plugins_submenu_item (0)
-	, route_group_menu (0)
-	, overlaid_menu_item (0)
-	, stacked_menu_item (0)
+	, automation_action_menu (nullptr)
+	, route_group_menu (nullptr)
+	, overlaid_menu_item (nullptr)
+	, stacked_menu_item (nullptr)
 	, gm (sess, true, 75, 14)
 	, _ignore_set_layer_display (false)
-	, pan_automation_item(NULL)
+	, pan_automation_item(nullptr)
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 	number_label.set_name("tracknumber label");
-	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
+	number_label.set_elements((ArdourButton::Element)(ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_alignment(.5, .5);
 	number_label.set_fallthrough_to_parent (true);
+
+	name_label.set_padding (2, 0);
 
 	sess->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::parameter_changed));
@@ -258,7 +259,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		controls_table.attach (gm.get_gain_slider(), 3, 5, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 	} else {
 		controls_table.attach (route_group_button, 4, 5, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (gm.get_gain_slider(), 0, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+		controls_table.attach (gm.get_gain_slider(), 2, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 	}
 
 	set_tooltip(*solo_button,_("Solo"));
@@ -434,7 +435,8 @@ RouteTimeAxisView::label_view ()
 	inactive_label.show ();
 
 	const int64_t track_number = _route->track_number ();
-	if (track_number == 0) {
+	bool show_label = _session->config.get_track_name_number();
+	if (track_number == 0 || !show_label) {
 		number_label.set_text ("");
 	} else {
 		number_label.set_text (PBD::to_string (abs(_route->track_number ())));
@@ -444,34 +446,30 @@ RouteTimeAxisView::label_view ()
 void
 RouteTimeAxisView::update_track_number_visibility ()
 {
-	DisplaySuspender ds;
-	bool show_label = _session->config.get_track_name_number();
-
-	if (_route && _route->is_master()) {
-		show_label = false;
-	}
-
 	if (number_label.get_parent()) {
 		number_label.get_parent()->remove (number_label);
 	}
-	if (show_label) {
-		if (!_route->active()) {
-			inactive_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL, 1, 0);
-		} else if (ARDOUR::Profile->get_mixbus()) {
-			controls_table.attach (number_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL, 1, 0);
-		} else {
-			controls_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL, 1, 0);
-		}
-		// see ArdourButton::on_size_request(), we should probably use a global size-group here instead.
-		// except the width of the number label is subtracted from the name-hbox, so we
-		// need to explicitly calculate it anyway until the name-label & entry become ArdourWidgets.
-		int tnw = (2 + std::max(2u, _session->track_number_decimals())) * number_label.char_pixel_width();
-		if (tnw & 1) --tnw;
-		number_label.set_size_request(tnw, -1);
-		number_label.show ();
+
+	if (!_route->active ()) {
+		inactive_table.attach (number_label, 0, 1, 0, 3, Gtk::SHRINK, Gtk::EXPAND | Gtk::FILL, 1, 0);
+	} else if (ARDOUR::Profile->get_mixbus ()) {
+		controls_table.attach (number_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::EXPAND | Gtk::FILL, 1, 0);
 	} else {
-		number_label.hide ();
+		controls_table.attach (number_label, 0, 1, 0, 3, Gtk::SHRINK, Gtk::FILL, 1, 0);
 	}
+
+	// see ArdourButton::on_size_request(), we should probably use a global size-group here instead.
+	// except the width of the number label is subtracted from the name-hbox, so we
+	// need to explicitly calculate it anyway until the name-label & entry become ArdourWidgets.
+	bool show_label = _session->config.get_track_name_number();
+	if (show_label) {
+		number_label.set_size_request (static_cast<int>(15 * UIConfiguration::instance().get_ui_scale()), -1);
+	} else {
+		number_label.set_size_request (static_cast<int>(3 * UIConfiguration::instance().get_ui_scale()), -1);
+	}
+	number_label.show ();
+
+	label_view ();
 }
 
 void
