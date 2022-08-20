@@ -393,7 +393,7 @@ MidiPlaylist::combine (RegionList const & rl)
 	++i;
 
 	timepos_t earliest (timepos_t::max (Temporal::BeatTime));
-	timepos_t latest (timepos_t (Temporal::BeatTime));
+	timepos_t latest (Temporal::BeatTime);
 
 	for (auto const & r : rl) {
 		assert (boost::dynamic_pointer_cast<MidiRegion> (r));
