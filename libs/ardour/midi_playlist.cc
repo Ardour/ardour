@@ -392,11 +392,18 @@ MidiPlaylist::combine (RegionList const & rl)
 	RegionList::const_iterator i = sorted.begin();
 	++i;
 
-#ifndef NDEBUG
+	timepos_t earliest (timepos_t::max (Temporal::BeatTime));
+	timepos_t latest (timepos_t (Temporal::BeatTime));
+
 	for (auto const & r : rl) {
 		assert (boost::dynamic_pointer_cast<MidiRegion> (r));
+		if (r->position() < earliest) {
+			earliest = r->position();
+		}
+		if (r->end() > latest) {
+			latest = r->end();
+		}
 	}
-#endif
 
 	boost::shared_ptr<MidiRegion> new_region = boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (first, true, true, &rwl.thawlist));
 
@@ -410,17 +417,7 @@ MidiPlaylist::combine (RegionList const & rl)
 		++i;
 	}
 
-	Temporal::BBT_Time bbt_at_end = Temporal::TempoMap::use()->bbt_at (new_region->end());
-
-	/* round up to next bar */
-
-	if (bbt_at_end.beats > 1 || bbt_at_end.ticks > 0) {
-		bbt_at_end.beats = 1;
-		bbt_at_end.ticks = 0;
-		bbt_at_end.bars++;
-	}
-
-	new_region->set_length (new_region->position().distance (timepos_t (Temporal::TempoMap::use()->quarters_at (bbt_at_end))));
+	new_region->set_length (earliest.distance (latest));
 
 	add_region_internal (new_region, pos, rwl.thawlist);
 
