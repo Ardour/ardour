@@ -45,10 +45,12 @@
 #include "route_time_axis.h"
 #include "midi_streamview.h"
 
-namespace MIDI::Name {
+namespace MIDI {
+namespace Name {
 class MasterDeviceNames;
 class CustomDeviceMode;
 struct PatchPrimaryKey;
+}
 }
 
 namespace ARDOUR {

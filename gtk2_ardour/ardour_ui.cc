@@ -68,6 +68,7 @@
 #include "pbd/openuri.h"
 #include "pbd/types_convert.h"
 #include "pbd/file_utils.h"
+#include <pbd/localtime_r.h>
 #include "pbd/pthread_utils.h"
 #include "pbd/replace_all.h"
 #include "pbd/scoped_file_descriptor.h"
