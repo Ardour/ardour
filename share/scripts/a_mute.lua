@@ -4,7 +4,7 @@ ardour {
 	category    = "Amplifier",
 	license     = "MIT",
 	author      = "Ardour Community",
-	description = [[Auotomatable Mute/Gate]]
+	description = [[Automatable Mute/Gate]]
 }
 
 function dsp_ioconfig ()
