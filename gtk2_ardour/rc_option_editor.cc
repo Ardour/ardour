@@ -4020,7 +4020,7 @@ These settings will only take effect after %1 is restarted.\n\
 
 	bo = new BoolOption (
 			"use-audio-units",
-			_("Enable Autio Unit support (requires restart or re-scan)"),
+			_("Enable Audio Unit support (requires restart or re-scan)"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_audio_units),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_audio_units)
 			);
