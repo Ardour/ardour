@@ -1709,7 +1709,7 @@ Session::set_state (const XMLNode& node, int version)
 				if (AudioEngine::instance()->running ()) {
 					error << _("Session: Load aborted due to sample-rate mismatch") << endmsg;
 				} else {
-					error << _("Session: Load aborted since engine if offline") << endmsg;
+					error << _("Session: Load aborted since engine is offline") << endmsg;
 				}
 				ret = -2;
 				goto out;
