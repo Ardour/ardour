@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-08-23 12:33+0200\n"
-"PO-Revision-Date: 2022-08-23 16:01+0200\n"
+"PO-Revision-Date: 2022-08-23 16:59+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -51,7 +51,7 @@ msgstr "ProcessorMenu"
 
 #: bindings.cc:502
 msgid "Escape"
-msgstr ""
+msgstr "Escape"
 
 #: bindings.cc:852 bindings.cc:854
 msgid "Window"
@@ -117,11 +117,11 @@ msgstr "Option"
 
 #: keyboard.cc:100
 msgid "Middle Click (or Ctrl+Alt+Click)"
-msgstr ""
+msgstr "Mittelklick (oderr Strg+Alt+Klick)"
 
 #: keyboard.cc:105
 msgid "Cmd+Click (or Middle-Click)"
-msgstr ""
+msgstr "Cmd+Klick (oder Mittelklick)"
 
 #: keyboard.cc:110
 msgid "Cmd"
