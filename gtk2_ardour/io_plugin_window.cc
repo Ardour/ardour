@@ -351,7 +351,7 @@ IOPluginWindow::IOPlugUI::button_press_event (GdkEventButton* ev)
 		Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 		MenuList& items = m->items ();
 
-		items.push_back (MenuElem (_("Edit.."), sigc::bind (sigc::mem_fun (*this, &IOPluginWindow::IOPlugUI::edit_plugin), true)));
+		items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &IOPluginWindow::IOPlugUI::edit_plugin), true)));
 		items.back().set_sensitive (_iop->plugin ()->has_editor ());
 		items.push_back (MenuElem (_("Edit with generic controls..."), sigc::bind (sigc::mem_fun (*this, &IOPluginWindow::IOPlugUI::edit_plugin), false)));
 		items.push_back (SeparatorElem());
