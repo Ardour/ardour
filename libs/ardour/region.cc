@@ -999,7 +999,6 @@ Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
 		if (!property_changes_suspended()) {
 			_last_length = _length;
 		}
-		std::cerr << "change len\n";
 		set_length_internal (nl);
 		what_changed.add (Properties::length);
 	}
