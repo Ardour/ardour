@@ -495,7 +495,7 @@ Region::set_length_internal (timecnt_t const & len)
 
 	l.set_position (position());
 
-	_last_length = l;
+	_last_length = _length;
 	_length = l;
 }
 
