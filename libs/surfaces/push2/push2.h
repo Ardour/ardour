@@ -626,6 +626,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	Push2Layout* _scale_layout;
 	Push2Layout* _track_mix_layout;
 	Push2Layout* _splash_layout;
+	Push2Layout* _clip_view_layout;
 	void set_current_layout (Push2Layout*);
 
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;

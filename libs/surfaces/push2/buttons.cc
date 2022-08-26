@@ -503,6 +503,10 @@ Push2::button_browse ()
 void
 Push2::button_clip ()
 {
+	if (_current_layout != _clip_view_layout) {
+		std::cerr << "go clip\n";
+		set_current_layout (_clip_view_layout);
+	}
 }
 
 void
@@ -729,10 +733,13 @@ Push2::button_scale_press ()
 void
 Push2::button_mix_press ()
 {
+	/* toggle between global mix and track mix layouts */
 	if (_current_layout == _track_mix_layout) {
+		std::cerr << "go global mix\n";
 		set_current_layout (_mix_layout);
 	} else {
 		if (ControlProtocol::first_selected_stripable()) {
+			std::cerr << "go track mix\n";
 			set_current_layout (_track_mix_layout);
 		}
 	}
