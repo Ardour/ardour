@@ -205,7 +205,7 @@ Push2::build_maps ()
 	MAKE_WHITE_BUTTON_PRESS (Scale, 58, &Push2::button_scale_press);
 	MAKE_WHITE_BUTTON_PRESS (Layout, 31, &Push2::button_layout_press);
 	MAKE_WHITE_BUTTON (Note, 50);
-	MAKE_WHITE_BUTTON (Session, 51);
+	MAKE_WHITE_BUTTON_PRESS (Session, 51, &Push2::button_session);
 	MAKE_WHITE_BUTTON (Layout, 31);
 	MAKE_WHITE_BUTTON_PRESS (OctaveUp, 55, &Push2::button_octave_up);
 	MAKE_WHITE_BUTTON_PRESS (PageRight, 63, &Push2::button_page_right);
@@ -503,9 +503,13 @@ Push2::button_browse ()
 void
 Push2::button_clip ()
 {
-	if (_current_layout != _clip_view_layout) {
-		std::cerr << "go clip\n";
-		set_current_layout (_clip_view_layout);
+}
+
+void
+Push2::button_session ()
+{
+	if (_current_layout != _cue_layout) {
+		set_current_layout (_cue_layout);
 	}
 }
 

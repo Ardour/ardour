@@ -53,7 +53,7 @@
 #include "gtkmm2ext/colors.h"
 
 #include "canvas.h"
-#include "clip_view.h"
+#include "cues.h"
 #include "gui.h"
 #include "layout.h"
 #include "mix.h"
@@ -136,7 +136,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	_mix_layout = new MixLayout (*this, *session, "globalmix");
 	_scale_layout = new ScaleLayout (*this, *session, "scale");
 	_track_mix_layout = new TrackMixLayout (*this, *session, "trackmix");
-	_clip_view_layout = new ClipViewLayout (*this, *session, "clipview");
+	_cue_layout = new CueLayout (*this, *session, "cues");
 	_splash_layout = new SplashLayout (*this, *session, "splash");
 
 	run_event_loop ();
@@ -179,8 +179,8 @@ Push2::~Push2 ()
 	_splash_layout = 0;
 	delete _track_mix_layout;
 	_track_mix_layout = 0;
-	delete _clip_view_layout;
-	_clip_view_layout = 0;
+	delete _cue_layout;
+	_cue_layout = 0;
 
 	stop_event_loop ();
 }

@@ -547,6 +547,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_new ();
 	void button_browse ();
 	void button_clip ();
+	void button_session ();
 	void button_undo ();
 	void button_fwd32t ();
 	void button_fwd32 ();
@@ -626,7 +627,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	Push2Layout* _scale_layout;
 	Push2Layout* _track_mix_layout;
 	Push2Layout* _splash_layout;
-	Push2Layout* _clip_view_layout;
+	Push2Layout* _cue_layout;
 	void set_current_layout (Push2Layout*);
 
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;

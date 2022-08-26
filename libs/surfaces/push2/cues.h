@@ -41,11 +41,11 @@ namespace ArdourSurface {
 class Push2Knob;
 class LevelMeter;
 
-class ClipViewLayout : public Push2Layout
+class CueLayout : public Push2Layout
 {
    public:
-	ClipViewLayout (Push2& p, ARDOUR::Session&, std::string const &);
-	~ClipViewLayout ();
+	CueLayout (Push2& p, ARDOUR::Session&, std::string const &);
+	~CueLayout ();
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 
@@ -55,6 +55,8 @@ class ClipViewLayout : public Push2Layout
 	void button_lower (uint32_t n);
 	void button_left ();
 	void button_right ();
+	void button_up();
+	void button_down ();
 
 	void strip_vpot (int, int);
 	void strip_vpot_touch (int, bool);
@@ -68,13 +70,11 @@ class ClipViewLayout : public Push2Layout
 	ArdourCanvas::Line*              _upper_line;
 	std::vector<ArdourCanvas::Text*> _upper_text;
 	std::vector<ArdourCanvas::Text*> _lower_text;
-	ArdourCanvas::Text*              _name_text;
-	ArdourCanvas::Text*              _bbt_text;
-	ArdourCanvas::Text*              _minsec_text;
 	uint8_t                          _selection_color;
+	uint32_t                         left_edge_index;
+	uint32_t                         top_edge_index;
 
 	Push2Knob*  _knobs[8];
-	LevelMeter* _meter;
 
 	void show_state ();
 };
