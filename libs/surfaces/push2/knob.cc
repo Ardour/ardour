@@ -85,7 +85,7 @@ Push2Knob::set_radius (double r)
 {
 	_r = r;
 
-	text->set_position (Duple (-_r, -_r - 20));
+	_text->set_position (Duple (-_r, -_r - 20));
 	set_bbox_dirty ();
 	redraw ();
 }
