@@ -806,6 +806,9 @@ Push2::button_mix_press ()
 		if (ControlProtocol::first_selected_stripable()) {
 			std::cerr << "go track mix\n";
 			set_current_layout (_track_mix_layout);
+		} else {
+			std::cerr << "go global mix\n";
+			set_current_layout (_mix_layout);
 		}
 	}
 }

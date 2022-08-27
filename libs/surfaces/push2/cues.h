@@ -34,6 +34,7 @@ namespace ArdourCanvas {
 	class Rectangle;
 	class Text;
 	class Line;
+	class Arc;
 }
 
 namespace ArdourSurface {
@@ -44,6 +45,14 @@ class LevelMeter;
 class CueLayout : public Push2Layout
 {
    public:
+	/* Possible knob functions */
+	enum KnobFunction {
+		KnobGain,
+		KnobPan,
+		KnobSendA,
+		KnobSendB,
+	};
+
 	CueLayout (Push2& p, ARDOUR::Session&, std::string const &);
 	~CueLayout ();
 
@@ -69,18 +78,27 @@ class CueLayout : public Push2Layout
 
 	void pad_press (int x, int y);
 
+	/* override to use for clip progress */
+	void update_meters();
+
    private:
 	ArdourCanvas::Rectangle*         _bg;
 	ArdourCanvas::Line*              _upper_line;
 	std::vector<ArdourCanvas::Text*> _upper_text;
+	std::vector<ArdourCanvas::Rectangle*> _upper_backgrounds;
 	std::vector<ArdourCanvas::Text*> _lower_text;
 	uint8_t                          _selection_color;
 	uint32_t                         track_base;
 	uint32_t                         scene_base;
+	KnobFunction                     _knob_function;
 
-	Push2Knob*  _knobs[8];
+	ArdourCanvas::Arc* _progress[8];
+	boost::shared_ptr<ARDOUR::AutomationControl> _controllables[8];
 
 	void show_state ();
+	void update_labels ();
+	void update_clip_progress (int);
+	void show_knob_function ();
 };
 
 } /* namespace */

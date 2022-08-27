@@ -43,6 +43,8 @@
 #include "ardour/midi_port.h"
 #include "ardour/monitor_control.h"
 #include "ardour/meter.h"
+#include "ardour/selection.h"
+#include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
@@ -52,6 +54,7 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "canvas/arc.h"
 #include "canvas/box.h"
 #include "canvas/line.h"
 #include "canvas/meter.h"
@@ -82,6 +85,7 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 	: Push2Layout (p, s, name)
 	, track_base (0)
 	, scene_base (0)
+	, _knob_function (KnobGain)
 {
 	Pango::FontDescription fd ("Sans 10");
 
@@ -96,11 +100,27 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 	for (int n = 0; n < 8; ++n) {
 		Text* t;
 
+		/* background for text labels for knob function */
+
+		ArdourCanvas::Rectangle* r = new ArdourCanvas::Rectangle (this);
+		Coord x0 = 10 + (n*Push2Canvas::inter_button_spacing()) - 5;
+		r->set (Rect (x0, 2, x0 + Push2Canvas::inter_button_spacing(), 2 + 21));
+		_upper_backgrounds.push_back (r);
+
 		t = new Text (this);
 		t->set_font_description (fd);
 		t->set_color (_p2.get_color (Push2::ParameterName));
 		t->set_position ( Duple (10 + (n*Push2Canvas::inter_button_spacing()), 2));
 		_upper_text.push_back (t);
+
+		switch (n) {
+		case 0: t->set (_("Gain")); break;
+		case 1: t->set (_("Pan")); break;
+		case 2: t->set (_("Send A")); break;
+		case 3: t->set (_("Send B")); break;
+		default:
+			break;
+		}
 
 		t = new Text (this);
 		t->set_font_description (fd);
@@ -109,18 +129,20 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 
 		_lower_text.push_back (t);
 
-		_knobs[n] = new Push2Knob (_p2, this);
-		_knobs[n]->set_position (Duple (60 + (Push2Canvas::inter_button_spacing()*n), 95));
-		_knobs[n]->set_radius (25);
+		_progress[n] = new Arc (this);
+		_progress[n]->set_position (Duple (60 + (Push2Canvas::inter_button_spacing()*n), 95));
+		_progress[n]->set_radius (25.);
+		_progress[n]->set_start (-90.); /* 0 is "east" */
+		_progress[n]->set_fill_color (_p2.get_color (Push2::KnobForeground));
+		_progress[n]->set_fill (false);
+		_progress[n]->set_outline_color (_p2.get_color (Push2::KnobArcBackground));
+		_progress[n]->set_outline_width (10.);
+		_progress[n]->set_outline (true);
 	}
 }
 
-
 CueLayout::~CueLayout ()
 {
-	for (int n = 0; n < 8; ++n) {
-		delete _knobs[n];
-	}
 }
 
 void
@@ -151,6 +173,8 @@ CueLayout::show ()
 	}
 
 	show_state ();
+	update_labels ();
+	show_knob_function ();
 
 	Container::show ();
 }
@@ -180,6 +204,57 @@ CueLayout::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 void
 CueLayout::button_upper (uint32_t n)
 {
+	switch (n) {
+	case 0:
+		_knob_function = KnobGain;
+		break;
+	case 1:
+		_knob_function = KnobPan;
+		break;
+	case 2:
+		_knob_function = KnobSendA;
+		break;
+	case 3:
+		_knob_function = KnobSendB;
+		break;
+	default:
+		return;
+	}
+
+	show_knob_function ();
+	update_labels ();
+}
+
+void
+CueLayout::show_knob_function ()
+{
+	for (int s = 0; s < 8; ++s) {
+		_upper_backgrounds[s]->hide ();
+		_upper_text[s]->set_color (_p2.get_color (Push2::ParameterName));
+	}
+
+	int n = 0;
+
+	switch (_knob_function)  {
+	case KnobGain:
+		break;
+	case KnobPan:
+		n = 1;
+		break;
+	case KnobSendA:
+		n = 2;
+		break;
+	case KnobSendB:
+		n = 3;
+		break;
+	default:
+		return;
+	}
+	_upper_backgrounds[n]->set_fill_color (_p2.get_color (Push2::ParameterName));
+	_upper_backgrounds[n]->set_outline_color (_p2.get_color (Push2::ParameterName));
+	_upper_backgrounds[n]->show ();
+	_upper_text[n]->set_color (Gtkmm2ext::contrasting_text_color (_p2.get_color (Push2::ParameterName)));
+
 }
 
 void
@@ -187,6 +262,14 @@ CueLayout::button_lower (uint32_t n)
 {
 	if (_p2.stop_down()) {
 		_p2.unbang (n + track_base);
+	} else {
+		/* select track */
+
+		boost::shared_ptr<Route> r = _session.get_remote_nth_route (n);
+
+		if (r) {
+			_session.selection().set (r, boost::shared_ptr<AutomationControl>());
+		}
 	}
 }
 
@@ -195,6 +278,7 @@ CueLayout::button_left ()
 {
 	if (track_base > 0) {
 		track_base--;
+		update_labels ();
 		show_state ();
 	}
 }
@@ -204,6 +288,7 @@ CueLayout::button_page_left ()
 {
 	if (track_base > 8) {
 		track_base -= 8; /* XXX get back to zero when appropriate */
+		update_labels ();
 		show_state ();
 	}
 }
@@ -212,6 +297,7 @@ void
 CueLayout::button_right ()
 {
 	track_base++;
+	update_labels ();
 	show_state ();
 }
 
@@ -219,6 +305,7 @@ void
 CueLayout::button_page_right ()
 {
 	track_base += 8; /* XXX limit to number of tracks */
+	update_labels ();
 	show_state ();
 }
 
@@ -227,6 +314,7 @@ CueLayout::button_up ()
 {
 	if (scene_base > 0) {
 		scene_base--;
+		update_labels ();
 		show_state ();
 	}
 }
@@ -236,6 +324,7 @@ CueLayout::button_octave_up ()
 {
 	if (scene_base > 8) {
 		scene_base -= 8;
+		update_labels ();
 		show_state ();
 	}
 }
@@ -244,6 +333,7 @@ void
 CueLayout::button_down ()
 {
 	scene_base++;
+	update_labels ();
 	show_state ();
 }
 
@@ -255,22 +345,157 @@ CueLayout::button_octave_down ()
 }
 
 void
+CueLayout::update_labels ()
+{
+	for (int n = 0; n < 8; ++n) {
+		boost::shared_ptr<Route> r = _session.get_remote_nth_route (track_base+n);
+		if (r) {
+			std::string shortname = short_version (r->name(), 10);
+			_lower_text[n]->set (shortname);
+
+			boost::shared_ptr<Processor> s;
+
+			switch (_knob_function) {
+			case KnobGain:
+				_controllables[n] = r->gain_control();
+				break;
+			case KnobPan:
+				_controllables[n] = r->pan_azimuth_control ();
+				break;
+			case KnobSendA:
+				s = r->nth_send (0);
+				if (s) {
+					boost::shared_ptr<Send> ss = boost::dynamic_pointer_cast<Send> (s);
+					if (ss) {
+						_controllables[n] = ss->gain_control();
+					} else {
+						_controllables[n] = boost::shared_ptr<AutomationControl> ();
+					}
+				}
+				break;
+			case KnobSendB:
+				s = r->nth_send (1);
+				if (s) {
+					boost::shared_ptr<Send> ss = boost::dynamic_pointer_cast<Send> (s);
+					if (ss) {
+						_controllables[n] = ss->gain_control();
+					} else {
+						_controllables[n] = boost::shared_ptr<AutomationControl> ();
+					}
+				}
+				break;
+			default:
+				_controllables[n] = boost::shared_ptr<AutomationControl> ();
+			}
+		} else {
+			_lower_text[n]->set (std::string());
+			_controllables[n] = boost::shared_ptr<AutomationControl> ();
+		}
+
+		boost::shared_ptr<Push2::Button> b;
+
+		switch (n) {
+		case 0:
+			b = _p2.button_by_id (Push2::Lower1);
+			break;
+		case 1:
+			b = _p2.button_by_id (Push2::Lower2);
+			break;
+		case 2:
+			b = _p2.button_by_id (Push2::Lower3);
+			break;
+		case 3:
+			b = _p2.button_by_id (Push2::Lower4);
+			break;
+		case 4:
+			b = _p2.button_by_id (Push2::Lower5);
+			break;
+		case 5:
+			b = _p2.button_by_id (Push2::Lower6);
+			break;
+		case 6:
+			b = _p2.button_by_id (Push2::Lower7);
+			break;
+		case 7:
+			b = _p2.button_by_id (Push2::Lower8);
+			break;
+		}
+
+		uint8_t color;
+
+		if (r) {
+			color = _p2.get_color_index (r->presentation_info().color());
+		} else {
+			color = Push2::LED::Black;
+		}
+
+		b->set_color (color);
+
+		b->set_state (Push2::LED::OneShot24th);
+		_p2.write (b->state_msg());
+
+		if (r) {
+			boost::shared_ptr<TriggerBox> tb = r->triggerbox ();
+
+			/* total map size is only 64 so iterating over the whole thing is fine */
+
+			for (int y = 0; y < 8; ++y) {
+				for (auto & pad : _p2.nn_pad_map()) {
+					if (pad.second->y == n && pad.second->x == y) {
+						if (tb && tb->active()) {
+							TriggerPtr tp = tb->trigger (y);
+							if (tp && tp->region()) {
+								/* trigger in slot */
+								pad.second->set_color (color);
+							} else {
+								/* no trigger */
+								pad.second->set_color (Push2::LED::Black);
+							}
+						} else {
+							/* no active triggerbox */
+							pad.second->set_color (Push2::LED::Black);
+						}
+						pad.second->set_state (Push2::LED::OneShot24th);
+						_p2.write (pad.second->state_msg());
+						break;
+					}
+				}
+			}
+
+		} else {
+
+			/* turn this column off */
+
+			for (int y = 0; y < 8; ++y) {
+				for (auto & pad : _p2.nn_pad_map()) {
+					if (pad.second->y == n && pad.second->x == y) {
+						pad.second->set_color (Push2::LED::Black);
+						pad.second->set_state (Push2::LED::OneShot24th);
+						_p2.write (pad.second->state_msg());
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
+void
 CueLayout::show_state ()
 {
 	if (!parent()) {
 		return;
-	}
-
-	for (auto & t : _upper_text) {
-	}
-
-	for (auto & t : _lower_text) {
 	}
 }
 
 void
 CueLayout::strip_vpot (int n, int delta)
 {
+	boost::shared_ptr<Controllable> ac = _controllables[n];
+
+	if (ac) {
+		ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
+	}
 }
 
 void
@@ -281,7 +506,6 @@ CueLayout::strip_vpot_touch (int n, bool touching)
 void
 CueLayout::button_rhs (int row)
 {
-	std::cerr << "Scene " << row + scene_base << std::endl;
 	_p2.get_session().cue_bang (row + scene_base);
 }
 
@@ -297,4 +521,35 @@ void
 CueLayout::pad_press (int x, int y)
 {
 	_p2.bang (x + track_base, y + scene_base);
+}
+
+void
+CueLayout::update_meters ()
+{
+	for (int n = 0; n < 8; ++n) {
+		update_clip_progress (n);
+	}
+}
+
+void
+CueLayout::update_clip_progress (int n)
+{
+	boost::shared_ptr<Route> r = _p2.get_session().get_remote_nth_route (n + track_base);
+	if (!r) {
+		_progress[n]->set_arc (0.0 - 90.0);
+		return;
+	}
+	boost::shared_ptr<TriggerBox> tb = r->triggerbox();
+
+	if (!tb || !tb->active()) {
+		_progress[n]->set_arc (0.0 - 90.0);
+		return;
+	}
+
+	double fract = tb->position_as_fraction ();
+	if (fract < 0.0) {
+		_progress[n]->set_arc (0.0 - 90.0); /* 0 degrees is "east" */
+	} else {
+		_progress[n]->set_arc ((fract * 360.0) - 90.0); /* 0 degrees is "east" */
+	}
 }
