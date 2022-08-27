@@ -261,6 +261,7 @@ void
 CueLayout::button_lower (uint32_t n)
 {
 	if (_p2.stop_down()) {
+		std::cerr << "stop trigger in " << n + track_base << std::endl;
 		_p2.unbang (n + track_base);
 	} else {
 		/* select track */
@@ -440,26 +441,23 @@ CueLayout::update_labels ()
 			/* total map size is only 64 so iterating over the whole thing is fine */
 
 			for (int y = 0; y < 8; ++y) {
-				for (auto & pad : _p2.nn_pad_map()) {
-					if (pad.second->y == n && pad.second->x == y) {
-						if (tb && tb->active()) {
-							TriggerPtr tp = tb->trigger (y);
-							if (tp && tp->region()) {
-								/* trigger in slot */
-								pad.second->set_color (color);
-							} else {
-								/* no trigger */
-								pad.second->set_color (Push2::LED::Black);
-							}
-						} else {
-							/* no active triggerbox */
-							pad.second->set_color (Push2::LED::Black);
-						}
-						pad.second->set_state (Push2::LED::OneShot24th);
-						_p2.write (pad.second->state_msg());
-						break;
+				boost::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (n, y);
+				if (tb && tb->active()) {
+					TriggerPtr tp = tb->trigger (y);
+					if (tp && tp->region()) {
+						/* trigger in slot */
+						pad->set_color (color);
+					} else {
+						/* no trigger */
+						pad->set_color (Push2::LED::Black);
 					}
+				} else {
+					/* no active triggerbox */
+					pad->set_color (Push2::LED::Black);
 				}
+				pad->set_state (Push2::LED::OneShot24th);
+				_p2.write (pad->state_msg());
+
 			}
 
 		} else {
@@ -467,14 +465,10 @@ CueLayout::update_labels ()
 			/* turn this column off */
 
 			for (int y = 0; y < 8; ++y) {
-				for (auto & pad : _p2.nn_pad_map()) {
-					if (pad.second->y == n && pad.second->x == y) {
-						pad.second->set_color (Push2::LED::Black);
-						pad.second->set_state (Push2::LED::OneShot24th);
-						_p2.write (pad.second->state_msg());
-						break;
-					}
-				}
+				boost::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (n, y);
+				pad->set_color (Push2::LED::Black);
+				pad->set_state (Push2::LED::OneShot24th);
+				_p2.write (pad->state_msg());
 			}
 		}
 	}
@@ -520,7 +514,8 @@ CueLayout::button_stop_press ()
 void
 CueLayout::pad_press (int x, int y)
 {
-	_p2.bang (x + track_base, y + scene_base);
+	std::cerr << "bang on " << x + track_base << ", " << y + scene_base << std::endl;
+	_p2.bang (y + scene_base, x + track_base);
 }
 
 void

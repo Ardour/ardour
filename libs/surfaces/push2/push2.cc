@@ -445,7 +445,7 @@ Push2::init_buttons (bool startup)
 			_current_layout->hide ();
 		}
 
-		for (NNPadMap::iterator pi = _nn_pad_map.begin(); pi != _nn_pad_map.end(); ++pi) {
+		for (PadMap::iterator pi = _nn_pad_map.begin(); pi != _nn_pad_map.end(); ++pi) {
 			boost::shared_ptr<Pad> pad = pi->second;
 
 			pad->set_color (LED::Black);
@@ -802,7 +802,7 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 
 	/* Pad illuminations */
 
-	NNPadMap::const_iterator pm = _nn_pad_map.find (ev->note_number);
+	PadMap::const_iterator pm = _nn_pad_map.find (ev->note_number);
 
 	if (pm == _nn_pad_map.end()) {
 		return;
@@ -845,7 +845,7 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 
 	/* Pad illuminations */
 
-	NNPadMap::const_iterator pm = _nn_pad_map.find (ev->note_number);
+	PadMap::const_iterator pm = _nn_pad_map.find (ev->note_number);
 
 	if (pm == _nn_pad_map.end()) {
 		return;
@@ -1171,7 +1171,7 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 			if ((*ev).note() > 10 && (*ev).note() != 12) {
 
 				const int n = (*ev).note ();
-				NNPadMap::const_iterator nni = _nn_pad_map.find (n);
+				PadMap::const_iterator nni = _nn_pad_map.find (n);
 
 				if (nni != _nn_pad_map.end()) {
 					boost::shared_ptr<const Pad> pad = nni->second;
@@ -1314,7 +1314,7 @@ Push2::input_port()
 int
 Push2::pad_note (int row, int col) const
 {
-	NNPadMap::const_iterator nni = _nn_pad_map.find (36+(row*8)+col);
+	PadMap::const_iterator nni = _nn_pad_map.find (36+(row*8)+col);
 
 	if (nni != _nn_pad_map.end()) {
 		return nni->second->filtered;
@@ -1901,4 +1901,12 @@ Push2::set_pressure_mode (PressureMode pm)
 	}
 
 	write (msg);
+}
+
+boost::shared_ptr<Push2::Pad>
+Push2::pad_by_xy (int x, int y)
+{
+	Push2::PadMap::iterator p = _xy_pad_map.find ((x * 8) +y);
+	assert (p != _xy_pad_map.end());
+	return p->second;
 }

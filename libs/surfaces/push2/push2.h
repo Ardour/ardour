@@ -453,8 +453,11 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	bool stop_down () const { return _stop_down; }
 
-	typedef std::map<int,boost::shared_ptr<Pad> > NNPadMap;
-	NNPadMap const & nn_pad_map() const { return _nn_pad_map; }
+	typedef std::map<int,boost::shared_ptr<Pad> > PadMap;
+	PadMap const & nn_pad_map() const { return _nn_pad_map; }
+	PadMap const & xy_pad_map() const { return _xy_pad_map; }
+
+	boost::shared_ptr<Pad> pad_by_xy (int x, int y);
 
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
 
@@ -494,7 +497,11 @@ class Push2 : public ARDOUR::ControlProtocol
 	/* map of Pads by note number (the "fixed" note number sent by the
 	 * hardware, not the note number generated if the pad is touched)
 	 */
-	NNPadMap _nn_pad_map;
+	PadMap _nn_pad_map;
+
+	/* map of Pads by x,y duple (computed as (x*8) + y */
+
+	PadMap _xy_pad_map;
 
 	/* map of Pads by note number they generate (their "filtered" value)
 	 */
