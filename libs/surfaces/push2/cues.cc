@@ -47,6 +47,7 @@
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
 #include "ardour/tempo.h"
+#include "ardour/triggerbox.h"
 
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
@@ -287,4 +288,10 @@ CueLayout::button_stop_press ()
 	if (_p2.modifier_state() == Push2::ModShift) {
 		_p2.get_session().stop_all_triggers (false); /* quantized global stop */
 	}
+}
+
+void
+CueLayout::pad_press (int x, int y)
+{
+	_p2.bang (x + track_base, y + scene_base);
 }

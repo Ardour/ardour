@@ -441,6 +441,10 @@ Push2::init_buttons (bool startup)
 	}
 
 	if (!startup) {
+		if (_current_layout) {
+			_current_layout->hide ();
+		}
+
 		for (NNPadMap::iterator pi = _nn_pad_map.begin(); pi != _nn_pad_map.end(); ++pi) {
 			boost::shared_ptr<Pad> pad = pi->second;
 
@@ -806,6 +810,11 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 
 	boost::shared_ptr<const Pad> pad_pressed = pm->second;
 
+	if (_current_layout == _cue_layout) {
+		_current_layout->pad_press (pad_pressed->x, pad_pressed->y);
+		return;
+	}
+
 	pair<FNPadMap::iterator,FNPadMap::iterator> pads_with_note = _fn_pad_map.equal_range (pad_pressed->filtered);
 
 	if (pads_with_note.first == _fn_pad_map.end()) {
@@ -844,6 +853,10 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 
 	boost::shared_ptr<const Pad> const pad_pressed = pm->second;
 
+	if (_current_layout == _cue_layout) {
+		_current_layout->pad_release (pad_pressed->x, pad_pressed->y);
+		return;
+	}
 	pair<FNPadMap::iterator,FNPadMap::iterator> pads_with_note = _fn_pad_map.equal_range (pad_pressed->filtered);
 
 	if (pads_with_note.first == _fn_pad_map.end()) {
@@ -1141,6 +1154,10 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 	/* This filter is called asynchronously from a realtime process
 	   context. It must use atomics to check state, and must not block.
 	*/
+
+	if (_current_layout == _cue_layout) {
+		return false;
+	}
 
 	bool matched = false;
 

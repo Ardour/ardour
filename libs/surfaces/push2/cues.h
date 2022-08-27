@@ -67,6 +67,8 @@ class CueLayout : public Push2Layout
 	void strip_vpot (int, int);
 	void strip_vpot_touch (int, bool);
 
+	void pad_press (int x, int y);
+
    private:
 	ArdourCanvas::Rectangle*         _bg;
 	ArdourCanvas::Line*              _upper_line;
