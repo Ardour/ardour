@@ -79,8 +79,8 @@ using namespace ArdourCanvas;
 
 CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 	: Push2Layout (p, s, name)
-	, left_edge_index (0)
-	, top_edge_index (0)
+	, track_base (0)
+	, scene_base (0)
 {
 	Pango::FontDescription fd ("Sans 10");
 
@@ -125,13 +125,27 @@ CueLayout::~CueLayout ()
 void
 CueLayout::show ()
 {
-	Push2::ButtonID lower_buttons[] = { Push2::Lower1, Push2::Lower2, Push2::Lower3, Push2::Lower4,
-	                                    Push2::Lower5, Push2::Lower6, Push2::Lower7, Push2::Lower8 };
+	Push2::ButtonID lower_buttons[] = {
+		Push2::Lower1, Push2::Lower2, Push2::Lower3, Push2::Lower4,
+		Push2::Lower5, Push2::Lower6, Push2::Lower7, Push2::Lower8
+	};
 
-	for (size_t n = 0; n < sizeof (lower_buttons) / sizeof (lower_buttons[0]); ++n) {
-		boost::shared_ptr<Push2::Button> b = _p2.button_by_id (lower_buttons[n]);
+	for (auto & lb : lower_buttons) {
+		boost::shared_ptr<Push2::Button> b = _p2.button_by_id (lb);
 		b->set_color (Push2::LED::DarkGray);
 		b->set_state (Push2::LED::OneShot24th);
+		_p2.write (b->state_msg());
+	}
+
+	Push2::ButtonID scene_buttons[] = {
+		Push2::Fwd32ndT, Push2::Fwd32nd, Push2::Fwd16th, Push2::Fwd16thT, 
+		Push2::Fwd8thT, Push2::Fwd8th, Push2::Fwd4trT, Push2::Fwd4tr
+	};
+
+	for (auto & sb : scene_buttons) {
+		boost::shared_ptr<Push2::Button> b = _p2.button_by_id (sb);
+		b->set_color (Push2::LED::Green);
+		b->set_state (Push2::LED::NoTransition);
 		_p2.write (b->state_msg());
 	}
 
@@ -165,32 +179,64 @@ CueLayout::button_lower (uint32_t n)
 void
 CueLayout::button_left ()
 {
-	if (left_edge_index > 0) {
-		left_edge_index--;
+	if (track_base > 0) {
+		track_base--;
+		show_state ();
 	}
-	show_state ();
+}
+
+void
+CueLayout::button_page_left ()
+{
+	if (track_base > 8) {
+		track_base -= 8; /* XXX get back to zero when appropriate */
+		show_state ();
+	}
 }
 
 void
 CueLayout::button_right ()
 {
-	left_edge_index++;
+	track_base++;
+	show_state ();
+}
+
+void
+CueLayout::button_page_right ()
+{
+	track_base += 8; /* XXX limit to number of tracks */
 	show_state ();
 }
 
 void
 CueLayout::button_up ()
 {
-	if (top_edge_index > 0) {
-		top_edge_index--;
+	if (scene_base > 0) {
+		scene_base--;
+		show_state ();
 	}
-	show_state ();
+}
+
+void
+CueLayout::button_octave_up ()
+{
+	if (scene_base > 8) {
+		scene_base -= 8;
+		show_state ();
+	}
 }
 
 void
 CueLayout::button_down ()
 {
-	top_edge_index++;
+	scene_base++;
+	show_state ();
+}
+
+void
+CueLayout::button_octave_down ()
+{
+	scene_base++;
 	show_state ();
 }
 
@@ -199,6 +245,12 @@ CueLayout::show_state ()
 {
 	if (!parent()) {
 		return;
+	}
+
+	for (auto & t : _upper_text) {
+	}
+
+	for (auto & t : _lower_text) {
 	}
 }
 
@@ -213,7 +265,16 @@ CueLayout::strip_vpot_touch (int n, bool touching)
 }
 
 void
-CueLayout::update_meters ()
+CueLayout::button_rhs (int row)
 {
+	std::cerr << "Scene " << row + scene_base << std::endl;
+	_p2.get_session().cue_bang (row + scene_base);
 }
 
+void
+CueLayout::button_stop_press ()
+{
+	if (_p2.modifier_state() == Push2::ModShift) {
+		_p2.get_session().stop_all_triggers (false); /* quantized global stop */
+	}
+}

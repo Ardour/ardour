@@ -57,13 +57,15 @@ class CueLayout : public Push2Layout
 	void button_right ();
 	void button_up();
 	void button_down ();
+	void button_rhs (int);
+	void button_octave_up();
+	void button_octave_down();
+	void button_page_left();
+	void button_page_right();
+	void button_stop_press ();
 
 	void strip_vpot (int, int);
 	void strip_vpot_touch (int, bool);
-
-	void update_meters ();
-	void update_clocks ();
-
 
    private:
 	ArdourCanvas::Rectangle*         _bg;
@@ -71,8 +73,8 @@ class CueLayout : public Push2Layout
 	std::vector<ArdourCanvas::Text*> _upper_text;
 	std::vector<ArdourCanvas::Text*> _lower_text;
 	uint8_t                          _selection_color;
-	uint32_t                         left_edge_index;
-	uint32_t                         top_edge_index;
+	uint32_t                         track_base;
+	uint32_t                         scene_base;
 
 	Push2Knob*  _knobs[8];
 

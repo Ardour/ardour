@@ -118,6 +118,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	, _selection_color (LED::Green)
 	, _contrast_color (LED::Green)
 	, _in_range_select (false)
+	, _stop_down (false)
 {
 	/* we're going to need this */
 
@@ -406,7 +407,8 @@ Push2::init_buttons (bool startup)
 
 	ButtonID buttons[] = { Mute, Solo, Master, Up, Right, Left, Down, Note, Session, Mix, AddTrack, Delete, Undo,
 	                       Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session,
-	                       Quantize, Duplicate, Browse, PageRight, PageLeft, OctaveUp, OctaveDown, Layout, Scale
+	                       Quantize, Duplicate, Browse, PageRight, PageLeft, OctaveUp, OctaveDown, Layout, Scale,
+	                       Stop
 	};
 
 	for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
@@ -425,7 +427,7 @@ Push2::init_buttons (bool startup)
 
 		/* all other buttons are off (black) */
 
-		ButtonID off_buttons[] = { TapTempo, Setup, User, Stop, Convert, New, FixedLength,
+		ButtonID off_buttons[] = { TapTempo, Setup, User, Convert, New, FixedLength, Clip,
 		                           Fwd32ndT, Fwd32nd, Fwd16thT, Fwd16th, Fwd8thT, Fwd8th, Fwd4trT, Fwd4tr,
 		                           Accent, Note };
 

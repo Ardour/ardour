@@ -449,6 +449,10 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	libusb_device_handle* usb_handle() const { return _handle; }
 
+	ARDOUR::Session & get_session() { return *session; }
+
+	bool stop_down () const { return _stop_down; }
+
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
 
   private:
@@ -558,7 +562,9 @@ class Push2 : public ARDOUR::ControlProtocol
 	void button_fwd4t ();
 	void button_fwd4 ();
 	void button_add_track ();
-	void button_stop ();
+	void button_stop_press();
+	void button_stop_release ();
+	void button_stop_long_press ();
 	void button_master ();
 	void button_quantize ();
 	void button_duplicate ();
@@ -689,6 +695,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	uint8_t _contrast_color;
 
 	bool _in_range_select;
+	bool _stop_down;
 };
 
 } /* namespace */

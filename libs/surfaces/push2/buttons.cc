@@ -145,7 +145,7 @@ Push2::build_maps ()
 	MAKE_COLOR_BUTTON_PRESS (Master, 28, &Push2::button_master);
 	MAKE_COLOR_BUTTON_PRESS (Mute, 60, &Push2::button_mute);
 	MAKE_COLOR_BUTTON_PRESS_RELEASE_LONG (Solo, 61, &Push2::relax, &Push2::button_solo, &Push2::button_solo_long_press);
-	MAKE_COLOR_BUTTON_PRESS (Stop, 29, &Push2::button_stop);
+	MAKE_COLOR_BUTTON_PRESS_RELEASE_LONG (Stop, 29, &Push2::button_stop_press, &Push2::button_stop_release, &Push2::button_stop_long_press);
 	MAKE_COLOR_BUTTON_PRESS (Fwd32ndT, 43, &Push2::button_fwd32t);
 	MAKE_COLOR_BUTTON_PRESS (Fwd32nd,42 , &Push2::button_fwd32);
 	MAKE_COLOR_BUTTON_PRESS (Fwd16thT, 41, &Push2::button_fwd16t);
@@ -407,13 +407,15 @@ Push2::button_down ()
 void
 Push2::button_page_right ()
 {
-	ScrollTimeline (0.75);
+	_current_layout->button_page_right();
+	// ScrollTimeline (0.75);
 }
 
 void
 Push2::button_page_left ()
 {
-	ScrollTimeline (-0.75);
+	_current_layout->button_page_left();
+	// ScrollTimeline (-0.75);
 }
 
 void
@@ -538,57 +540,89 @@ Push2::button_undo ()
 void
 Push2::button_fwd32t ()
 {
-	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (0+n);
+	if (_current_layout == _cue_layout) {
+		_cue_layout->button_rhs (0);
+	} else {
+		const int n = (_modifier_state & ModShift) ? 8 : 0;
+		goto_nth_marker (0+n);
+	}
 }
 
 void
 Push2::button_fwd32 ()
 {
-	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (1+n);
+	if (_current_layout == _cue_layout) {
+		_cue_layout->button_rhs (1);
+	} else {
+		const int n = (_modifier_state & ModShift) ? 8 : 0;
+		goto_nth_marker (1+n);
+	}
 }
 
 void
 Push2::button_fwd16t ()
 {
-	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (2+n);
+	if (_current_layout == _cue_layout) {
+		_cue_layout->button_rhs (2);
+	} else {
+		const int n = (_modifier_state & ModShift) ? 8 : 0;
+		goto_nth_marker (2+n);
+	}
 }
 
 void
 Push2::button_fwd16 ()
 {
-	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (3+n);
+	if (_current_layout == _cue_layout) {
+		_cue_layout->button_rhs (3);
+	} else {
+		const int n = (_modifier_state & ModShift) ? 8 : 0;
+		goto_nth_marker (3+n);
+	}
 }
 
 void
 Push2::button_fwd8t ()
 {
-	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (4+n);
+	if (_current_layout == _cue_layout) {
+		_cue_layout->button_rhs (4);
+	} else {
+		const int n = (_modifier_state & ModShift) ? 8 : 0;
+		goto_nth_marker (4+n);
+	}
 }
 
 void
 Push2::button_fwd8 ()
 {
-	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (5+n);
+	if (_current_layout == _cue_layout) {
+		_cue_layout->button_rhs (5);
+	} else {
+		const int n = (_modifier_state & ModShift) ? 8 : 0;
+		goto_nth_marker (5+n);
+	}
 }
 
 void
 Push2::button_fwd4t ()
 {
-	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (6+n);
+	if (_current_layout == _cue_layout) {
+		_cue_layout->button_rhs (6);
+	} else {
+		const int n = (_modifier_state & ModShift) ? 8 : 0;
+		goto_nth_marker (6+n);
+	}
 }
 
 void
 Push2::button_fwd4 ()
 {
-	const int n = (_modifier_state & ModShift) ? 8 : 0;
-	goto_nth_marker (7+n);
+	if (_current_layout == _cue_layout) {
+		_cue_layout->button_rhs (7);
+	} else {
+		const int n = (_modifier_state & ModShift) ? 8 : 0;
+		goto_nth_marker (7+n);
+	}
 }
 
 void
@@ -598,10 +632,29 @@ Push2::button_add_track ()
 }
 
 void
-Push2::button_stop ()
+Push2::button_stop_press ()
 {
+	_stop_down = true;
+	_current_layout->button_stop_press ();
+	/* XXX this needs a better binding */
 	/* close current window */
-	access_action ("Main/close-current-dialog");
+	// access_action ("Main/close-current-dialog");
+}
+
+void
+Push2::button_stop_release ()
+{
+	_stop_down = false;
+	_current_layout->button_stop_release ();
+}
+
+void
+Push2::button_stop_long_press ()
+{
+	_current_layout->button_stop_long_press ();
+	/* XXX this needs a better binding */
+	/* close current window */
+	// access_action ("Main/close-current-dialog");
 }
 
 void
@@ -687,28 +740,36 @@ Push2::start_press_timeout (boost::shared_ptr<Button> button, ButtonID id)
 void
 Push2::button_octave_down ()
 {
-	if (_modifier_state & ModShift) {
-		_octave_shift = 0;
-		return;
-	}
+	if (_current_layout == _scale_layout) {
+		if (_modifier_state & ModShift) {
+			_octave_shift = 0;
+			return;
+		}
 
-	int os = (std::max (-4, _octave_shift - 1));
-	if (os != _octave_shift) {
-		_octave_shift = os;
+		int os = (std::max (-4, _octave_shift - 1));
+		if (os != _octave_shift) {
+			_octave_shift = os;
+		}
+	} else if (_current_layout) {
+		_current_layout->button_octave_up ();
 	}
 }
 
 void
 Push2::button_octave_up ()
 {
-	if (_modifier_state & ModShift) {
-		_octave_shift = 0;
-		return;
-	}
+	if (_current_layout == _scale_layout) {
+		if (_modifier_state & ModShift) {
+			_octave_shift = 0;
+			return;
+		}
 
-	int os = (std::min (4, _octave_shift + 1));
-	if (os != _octave_shift) {
-		_octave_shift = os;
+		int os = (std::min (4, _octave_shift + 1));
+		if (os != _octave_shift) {
+			_octave_shift = os;
+		}
+	} else if (_current_layout) {
+		_current_layout->button_octave_up ();
 	}
 }
 
