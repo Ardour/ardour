@@ -24,7 +24,7 @@
 #include "layout.h"
 
 namespace ARDOUR {
-	class Stripable;
+	class Route;
 	class AutomationControl;
 }
 
@@ -92,11 +92,19 @@ class CueLayout : public Push2Layout
 	uint32_t                         scene_base;
 	KnobFunction                     _knob_function;
 
+	PBD::ScopedConnectionList            _route_connections;
+	boost::shared_ptr<ARDOUR::Route> _route[8];
+	PBD::ScopedConnectionList            _session_connections;
+
+	void routes_added ();
+	void route_property_change (PBD::PropertyChange const& what_changed, uint32_t which);
+
 	ArdourCanvas::Arc* _progress[8];
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllables[8];
 
+	void viewport_changed ();
+
 	void show_state ();
-	void update_labels ();
 	void update_clip_progress (int);
 	void show_knob_function ();
 };

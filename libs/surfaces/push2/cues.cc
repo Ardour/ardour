@@ -80,6 +80,7 @@ using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
 using namespace ArdourCanvas;
+using namespace Gtkmm2ext;
 
 CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 	: Push2Layout (p, s, name)
@@ -173,7 +174,7 @@ CueLayout::show ()
 	}
 
 	show_state ();
-	update_labels ();
+	viewport_changed ();
 	show_knob_function ();
 
 	Container::show ();
@@ -222,7 +223,7 @@ CueLayout::button_upper (uint32_t n)
 	}
 
 	show_knob_function ();
-	update_labels ();
+	viewport_changed ();
 }
 
 void
@@ -279,7 +280,7 @@ CueLayout::button_left ()
 {
 	if (track_base > 0) {
 		track_base--;
-		update_labels ();
+		viewport_changed ();
 		show_state ();
 	}
 }
@@ -289,7 +290,7 @@ CueLayout::button_page_left ()
 {
 	if (track_base > 8) {
 		track_base -= 8; /* XXX get back to zero when appropriate */
-		update_labels ();
+		viewport_changed ();
 		show_state ();
 	}
 }
@@ -298,7 +299,7 @@ void
 CueLayout::button_right ()
 {
 	track_base++;
-	update_labels ();
+	viewport_changed ();
 	show_state ();
 }
 
@@ -306,7 +307,7 @@ void
 CueLayout::button_page_right ()
 {
 	track_base += 8; /* XXX limit to number of tracks */
-	update_labels ();
+	viewport_changed ();
 	show_state ();
 }
 
@@ -315,7 +316,7 @@ CueLayout::button_up ()
 {
 	if (scene_base > 0) {
 		scene_base--;
-		update_labels ();
+		viewport_changed ();
 		show_state ();
 	}
 }
@@ -325,7 +326,7 @@ CueLayout::button_octave_up ()
 {
 	if (scene_base > 8) {
 		scene_base -= 8;
-		update_labels ();
+		viewport_changed ();
 		show_state ();
 	}
 }
@@ -334,7 +335,7 @@ void
 CueLayout::button_down ()
 {
 	scene_base++;
-	update_labels ();
+	viewport_changed ();
 	show_state ();
 }
 
@@ -346,10 +347,19 @@ CueLayout::button_octave_down ()
 }
 
 void
-CueLayout::update_labels ()
+CueLayout::viewport_changed ()
 {
+	_route_connections.drop_connections ();
+
 	for (int n = 0; n < 8; ++n) {
-		boost::shared_ptr<Route> r = _session.get_remote_nth_route (track_base+n);
+
+		_route[n] = _session.get_remote_nth_route (track_base+n);
+
+		_route[n]->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::viewport_changed, this), &_p2);
+		_route[n]->presentation_info().PropertyChanged.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::route_property_change, this, _1, n), &_p2);
+
+		boost::shared_ptr<Route> r = _route[n];
+
 		if (r) {
 			std::string shortname = short_version (r->name(), 10);
 			_lower_text[n]->set (shortname);
@@ -547,4 +557,38 @@ CueLayout::update_clip_progress (int n)
 	} else {
 		_progress[n]->set_arc ((fract * 360.0) - 90.0); /* 0 degrees is "east" */
 	}
+}
+
+void
+CueLayout::route_property_change (PropertyChange const& what_changed, uint32_t which)
+{
+	if (what_changed.contains (Properties::color)) {
+		// _lower_backgrounds[which]->set_fill_color (_stripable[which]->presentation_info().color());
+
+		if (_route[which]->is_selected()) {
+			_lower_text[which]->set_fill_color (contrasting_text_color (_route[which]->presentation_info().color()));
+			/* might not be a MIDI track, in which case this will
+			   do nothing
+			*/
+			_p2.update_selection_color ();
+		}
+	}
+
+	if (what_changed.contains (Properties::hidden)) {
+		viewport_changed ();
+	}
+
+	if (what_changed.contains (Properties::selected)) {
+
+		if (!_route[which]) {
+			return;
+		}
+
+		if (_route[which]->is_selected()) {
+			// show_selection (which);
+		} else {
+			// hide_selection (which);
+		}
+	}
+
 }
