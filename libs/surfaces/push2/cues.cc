@@ -138,7 +138,7 @@ CueLayout::show ()
 	}
 
 	Push2::ButtonID scene_buttons[] = {
-		Push2::Fwd32ndT, Push2::Fwd32nd, Push2::Fwd16th, Push2::Fwd16thT, 
+		Push2::Fwd32ndT, Push2::Fwd32nd, Push2::Fwd16th, Push2::Fwd16thT,
 		Push2::Fwd8thT, Push2::Fwd8th, Push2::Fwd4trT, Push2::Fwd4tr
 	};
 
@@ -157,7 +157,17 @@ CueLayout::show ()
 void
 CueLayout::hide ()
 {
+	Push2::ButtonID scene_buttons[] = {
+		Push2::Fwd32ndT, Push2::Fwd32nd, Push2::Fwd16th, Push2::Fwd16thT,
+		Push2::Fwd8thT, Push2::Fwd8th, Push2::Fwd4trT, Push2::Fwd4tr
+	};
 
+	for (auto & sb : scene_buttons) {
+		boost::shared_ptr<Push2::Button> b = _p2.button_by_id (sb);
+		b->set_color (Push2::LED::Black);
+		b->set_state (Push2::LED::NoTransition);
+		_p2.write (b->state_msg());
+	}
 }
 
 void
