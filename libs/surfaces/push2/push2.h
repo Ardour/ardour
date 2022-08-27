@@ -455,7 +455,6 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	typedef std::map<int,boost::shared_ptr<Pad> > PadMap;
 	PadMap const & nn_pad_map() const { return _nn_pad_map; }
-	PadMap const & xy_pad_map() const { return _xy_pad_map; }
 
 	boost::shared_ptr<Pad> pad_by_xy (int x, int y);
 
@@ -499,9 +498,9 @@ class Push2 : public ARDOUR::ControlProtocol
 	 */
 	PadMap _nn_pad_map;
 
-	/* map of Pads by x,y duple (computed as (x*8) + y */
+	/* array of Pads by x,y duple (indexed as (x*8) + y */
 
-	PadMap _xy_pad_map;
+	std::vector<boost::shared_ptr<Pad> > _xy_pad_map;
 
 	/* map of Pads by note number they generate (their "filtered" value)
 	 */

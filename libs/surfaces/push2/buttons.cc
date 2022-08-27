@@ -38,10 +38,12 @@ Push2::build_maps ()
 
 	boost::shared_ptr<Pad> pad;
 
+	_xy_pad_map.assign (64, boost::shared_ptr<Pad>());
+
 #define MAKE_PAD(x,y,nn) \
 	pad.reset (new Pad ((x), (y), (nn))); \
 	_nn_pad_map.insert (std::make_pair (pad->extra(), pad)); \
-	_xy_pad_map.insert (std::make_pair (y * 8 + x, pad));
+	_xy_pad_map[y * 8 + x] = pad;
 
 	MAKE_PAD (0, 0, 92);
 	MAKE_PAD (0, 1, 93);

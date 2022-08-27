@@ -1906,7 +1906,9 @@ Push2::set_pressure_mode (PressureMode pm)
 boost::shared_ptr<Push2::Pad>
 Push2::pad_by_xy (int x, int y)
 {
-	Push2::PadMap::iterator p = _xy_pad_map.find ((x * 8) +y);
-	assert (p != _xy_pad_map.end());
-	return p->second;
+	vector<boost::shared_ptr<Pad> >::size_type index = (x * 8) + y;
+	if (index >= _xy_pad_map.size()) {
+		return boost::shared_ptr<Pad>();
+	}
+	return _xy_pad_map[index];
 }
