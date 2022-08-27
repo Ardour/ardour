@@ -41,6 +41,7 @@ namespace ARDOUR {
 	class Session;
 	class SessionEvent;
 	class Stripable;
+	class Trigger;
 }
 
 class LIBCONTROLCP_API BasicUI {
@@ -164,6 +165,9 @@ class LIBCONTROLCP_API BasicUI {
 	bool loop_button_onoff() const;
 
 	void bang (int x, int y);
+	void unbang (int x, int y);
+	/* it would be nice to use TriggerPtr here but that implies including ardour/triggerbox.h */
+	boost::shared_ptr<ARDOUR::Trigger> find_trigger (int x, int y);
 
   protected:
 	BasicUI ();

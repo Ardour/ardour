@@ -801,26 +801,44 @@ BasicUI::goto_nth_marker (int n)
 	}
 }
 
-void
-BasicUI::bang (int x, int y)
+ARDOUR::TriggerPtr
+BasicUI::find_trigger (int x, int y)
 {
 	boost::shared_ptr<Route> r = session->get_remote_nth_route (x);
 	if (!r) {
-		return;
+		return TriggerPtr();
 	}
 	boost::shared_ptr<TriggerBox> tb = r->triggerbox();
 
 	if (!tb || !tb->active()) {
-		return;
+		return TriggerPtr();
 	}
 
 	TriggerPtr tp (tb->trigger (y));
 
 	if (!tp) {
-		return;
+		return TriggerPtr();
 	}
 
-	tp->bang ();
+	return tp;
+}
+
+void
+BasicUI::bang (int x, int y)
+{
+	TriggerPtr tp = find_trigger (x, y);
+	if (tp) {
+		tp->bang ();
+	}
+}
+
+void
+BasicUI::unbang (int x, int y)
+{
+	TriggerPtr tp = find_trigger (x, y);
+	if (tp) {
+		tp->unbang ();
+	}
 }
 
 
