@@ -355,12 +355,12 @@ CueLayout::viewport_changed ()
 
 		_route[n] = _session.get_remote_nth_route (track_base+n);
 
-		_route[n]->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::viewport_changed, this), &_p2);
-		_route[n]->presentation_info().PropertyChanged.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::route_property_change, this, _1, n), &_p2);
-
 		boost::shared_ptr<Route> r = _route[n];
 
 		if (r) {
+			_route[n]->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::viewport_changed, this), &_p2);
+			_route[n]->presentation_info().PropertyChanged.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::route_property_change, this, _1, n), &_p2);
+
 			std::string shortname = short_version (r->name(), 10);
 			_lower_text[n]->set (shortname);
 
