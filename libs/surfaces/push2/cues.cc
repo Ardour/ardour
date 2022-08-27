@@ -185,6 +185,9 @@ CueLayout::button_upper (uint32_t n)
 void
 CueLayout::button_lower (uint32_t n)
 {
+	if (_p2.stop_down()) {
+		_p2.unbang (n + track_base);
+	}
 }
 
 void
