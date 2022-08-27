@@ -163,6 +163,8 @@ class LIBCONTROLCP_API BasicUI {
 	bool rewind_button_onoff() const;
 	bool loop_button_onoff() const;
 
+	void bang (int x, int y);
+
   protected:
 	BasicUI ();
 	ARDOUR::Session* session;

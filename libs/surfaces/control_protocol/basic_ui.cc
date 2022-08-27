@@ -801,6 +801,29 @@ BasicUI::goto_nth_marker (int n)
 	}
 }
 
+void
+BasicUI::bang (int x, int y)
+{
+	boost::shared_ptr<Route> r = session->get_remote_nth_route (x);
+	if (!r) {
+		return;
+	}
+	boost::shared_ptr<TriggerBox> tb = r->triggerbox();
+
+	if (!tb || !tb->active()) {
+		return;
+	}
+
+	TriggerPtr tp (tb->trigger (y));
+
+	if (!tp) {
+		return;
+	}
+
+	tp->bang ();
+}
+
+
 #if 0
 this stuff is waiting to go in so that all UIs can offer complex solo/mute functionality
 
