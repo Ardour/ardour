@@ -98,6 +98,7 @@ class CueLayout : public Push2Layout
 
 	void routes_added ();
 	void route_property_change (PBD::PropertyChange const& what_changed, uint32_t which);
+	void triggerbox_property_change (PBD::PropertyChange const& what_changed, uint32_t which);
 
 	ArdourCanvas::Arc* _progress[8];
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllables[8];

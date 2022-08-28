@@ -357,6 +357,35 @@ CueLayout::viewport_changed ()
 
 		boost::shared_ptr<Route> r = _route[n];
 
+		boost::shared_ptr<Push2::Button> lower_button;
+
+		switch (n) {
+		case 0:
+			lower_button = _p2.button_by_id (Push2::Lower1);
+			break;
+		case 1:
+			lower_button = _p2.button_by_id (Push2::Lower2);
+			break;
+		case 2:
+			lower_button = _p2.button_by_id (Push2::Lower3);
+			break;
+		case 3:
+			lower_button = _p2.button_by_id (Push2::Lower4);
+			break;
+		case 4:
+			lower_button = _p2.button_by_id (Push2::Lower5);
+			break;
+		case 5:
+			lower_button = _p2.button_by_id (Push2::Lower6);
+			break;
+		case 6:
+			lower_button = _p2.button_by_id (Push2::Lower7);
+			break;
+		case 7:
+			lower_button = _p2.button_by_id (Push2::Lower8);
+			break;
+		}
+
 		if (r) {
 			_route[n]->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::viewport_changed, this), &_p2);
 			_route[n]->presentation_info().PropertyChanged.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::route_property_change, this, _1, n), &_p2);
@@ -398,57 +427,18 @@ CueLayout::viewport_changed ()
 			default:
 				_controllables[n] = boost::shared_ptr<AutomationControl> ();
 			}
-		} else {
-			_lower_text[n]->set (std::string());
-			_controllables[n] = boost::shared_ptr<AutomationControl> ();
-		}
 
-		boost::shared_ptr<Push2::Button> b;
+			uint8_t color = _p2.get_color_index (r->presentation_info().color());
 
-		switch (n) {
-		case 0:
-			b = _p2.button_by_id (Push2::Lower1);
-			break;
-		case 1:
-			b = _p2.button_by_id (Push2::Lower2);
-			break;
-		case 2:
-			b = _p2.button_by_id (Push2::Lower3);
-			break;
-		case 3:
-			b = _p2.button_by_id (Push2::Lower4);
-			break;
-		case 4:
-			b = _p2.button_by_id (Push2::Lower5);
-			break;
-		case 5:
-			b = _p2.button_by_id (Push2::Lower6);
-			break;
-		case 6:
-			b = _p2.button_by_id (Push2::Lower7);
-			break;
-		case 7:
-			b = _p2.button_by_id (Push2::Lower8);
-			break;
-		}
+			lower_button->set_color (color);
+			lower_button->set_state (Push2::LED::OneShot24th);
+			_p2.write (lower_button->state_msg());
 
-		uint8_t color;
-
-		if (r) {
-			color = _p2.get_color_index (r->presentation_info().color());
-		} else {
-			color = Push2::LED::Black;
-		}
-
-		b->set_color (color);
-
-		b->set_state (Push2::LED::OneShot24th);
-		_p2.write (b->state_msg());
-
-		if (r) {
 			boost::shared_ptr<TriggerBox> tb = r->triggerbox ();
 
-			/* total map size is only 64 so iterating over the whole thing is fine */
+			if (tb) {
+				tb->PropertyChanged.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::triggerbox_property_change, this, _1, n), &_p2);
+			}
 
 			for (int y = 0; y < 8; ++y) {
 				boost::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (n, y);
@@ -471,6 +461,10 @@ CueLayout::viewport_changed ()
 			}
 
 		} else {
+
+			_lower_text[n]->set (std::string());
+			lower_button->set_color (Push2::LED::Black);
+			_controllables[n] = boost::shared_ptr<AutomationControl> ();
 
 			/* turn this column off */
 
@@ -591,4 +585,10 @@ CueLayout::route_property_change (PropertyChange const& what_changed, uint32_t w
 		}
 	}
 
+}
+
+
+void
+CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint32_t which)
+{
 }
