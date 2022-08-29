@@ -3340,7 +3340,7 @@ TriggerBox::get_next_trigger ()
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("next trigger from explicit queue = %1\n", r->index()));
 		return r;
 	}
-	return 0;
+	return TriggerPtr();
 }
 
 TriggerPtr
