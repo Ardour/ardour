@@ -90,6 +90,7 @@ class CueLayout : public Push2Layout
 	std::vector<ArdourCanvas::Text*> _upper_text;
 	std::vector<ArdourCanvas::Rectangle*> _upper_backgrounds;
 	std::vector<ArdourCanvas::Text*> _lower_text;
+	std::vector<ArdourCanvas::Text*> _clip_label_text;
 	uint8_t                          _selection_color;
 	uint32_t                         track_base;
 	uint32_t                         scene_base;

@@ -132,7 +132,7 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 		_lower_text.push_back (t);
 
 		_progress[n] = new Arc (this);
-		_progress[n]->set_position (Duple (60 + (Push2Canvas::inter_button_spacing()*n), 95));
+		_progress[n]->set_position (Duple (45 + (Push2Canvas::inter_button_spacing()*n), 80));
 		_progress[n]->set_radius (25.);
 		_progress[n]->set_start (-90.); /* 0 is "east" */
 		_progress[n]->set_fill_color (_p2.get_color (Push2::KnobForeground));
@@ -140,6 +140,12 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 		_progress[n]->set_outline_color (_p2.get_color (Push2::KnobArcBackground));
 		_progress[n]->set_outline_width (10.);
 		_progress[n]->set_outline (true);
+
+		t = new Text (this);
+		t->set_font_description (fd);
+		t->set_color (_p2.get_color (Push2::ParameterName));
+		t->set_position ( Duple (10 + (n*Push2Canvas::inter_button_spacing()), 115));
+		_clip_label_text.push_back (t);
 	}
 }
 
@@ -606,6 +612,7 @@ CueLayout::update_clip_progress (int n)
 
 	if (!tb || !tb->active()) {
 		_progress[n]->set_arc (0.0 - 90.0);
+		_clip_label_text[n]->set (std::string());
 		return;
 	}
 
@@ -614,6 +621,14 @@ CueLayout::update_clip_progress (int n)
 		_progress[n]->set_arc (0.0 - 90.0); /* 0 degrees is "east" */
 	} else {
 		_progress[n]->set_arc ((fract * 360.0) - 90.0); /* 0 degrees is "east" */
+	}
+
+	TriggerPtr tp = tb->currently_playing();
+	if (tp) {
+		std::string shortname = short_version (tp->name(), 10);
+		_clip_label_text[n]->set (shortname);
+	} else {
+		_clip_label_text[n]->set (std::string());
 	}
 }
 
