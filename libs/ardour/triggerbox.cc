@@ -3314,6 +3314,23 @@ TriggerBox::queue_explict (uint32_t n)
 }
 
 TriggerPtr
+TriggerBox::peek_next_trigger ()
+{
+	RingBuffer<uint32_t>::rw_vector rwv;
+	explicit_queue.get_read_vector (&rwv);
+
+	if (rwv.len[0] > 0) {
+
+		/* peek at it without dequeing it */
+
+		uint32_t n = *(rwv.buf[0]);
+		return trigger (n);
+	}
+
+	return TriggerPtr();
+}
+
+TriggerPtr
 TriggerBox::get_next_trigger ()
 {
 	uint32_t n;
