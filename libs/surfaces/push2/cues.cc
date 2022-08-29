@@ -87,6 +87,7 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 	, track_base (0)
 	, scene_base (0)
 	, _knob_function (KnobGain)
+	, _long_stop (0)
 {
 	Pango::FontDescription fd ("Sans 10");
 
@@ -261,7 +262,7 @@ CueLayout::show_knob_function ()
 void
 CueLayout::button_lower (uint32_t n)
 {
-	if (_p2.stop_down()) {
+	if (_p2.stop_down() || _long_stop) {
 		std::cerr << "stop trigger in " << n + track_base << std::endl;
 		_p2.unbang (n + track_base);
 	} else {
@@ -351,40 +352,17 @@ CueLayout::viewport_changed ()
 {
 	_route_connections.drop_connections ();
 
+	for (int n = 0; n < 64; ++n) {
+		_trig_connections[n].disconnect ();
+	}
+
 	for (int n = 0; n < 8; ++n) {
 
 		_route[n] = _session.get_remote_nth_route (track_base+n);
 
 		boost::shared_ptr<Route> r = _route[n];
 
-		boost::shared_ptr<Push2::Button> lower_button;
-
-		switch (n) {
-		case 0:
-			lower_button = _p2.button_by_id (Push2::Lower1);
-			break;
-		case 1:
-			lower_button = _p2.button_by_id (Push2::Lower2);
-			break;
-		case 2:
-			lower_button = _p2.button_by_id (Push2::Lower3);
-			break;
-		case 3:
-			lower_button = _p2.button_by_id (Push2::Lower4);
-			break;
-		case 4:
-			lower_button = _p2.button_by_id (Push2::Lower5);
-			break;
-		case 5:
-			lower_button = _p2.button_by_id (Push2::Lower6);
-			break;
-		case 6:
-			lower_button = _p2.button_by_id (Push2::Lower7);
-			break;
-		case 7:
-			lower_button = _p2.button_by_id (Push2::Lower8);
-			break;
-		}
+		boost::shared_ptr<Push2::Button> lower_button = _p2.lower_button_by_column (n);
 
 		if (r) {
 			_route[n]->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::viewport_changed, this), &_p2);
@@ -447,6 +425,9 @@ CueLayout::viewport_changed ()
 					if (tp && tp->region()) {
 						/* trigger in slot */
 						pad->set_color (color);
+
+						tp->PropertyChanged.connect (_trig_connections[n * 8 + y], invalidator (*this), boost::bind (&CueLayout::trigger_property_change, this, _1, n, y), &_p2);
+
 					} else {
 						/* no trigger */
 						pad->set_color (Push2::LED::Black);
@@ -514,12 +495,95 @@ CueLayout::button_stop_press ()
 		_p2.get_session().stop_all_triggers (false); /* quantized global stop */
 	}
 }
+void
+CueLayout::button_stop_release ()
+{
+	std::cerr << "BS release, ls = " << _long_stop << std::endl;
+	if (_long_stop) {
+		_long_stop = 0;
+		show_running_boxen (false);
+	}
+}
 
 void
-CueLayout::pad_press (int x, int y)
+CueLayout::button_stop_long_press ()
+{
+	_long_stop++;
+
+	if (_long_stop == 1) {
+		show_running_boxen (true);
+	}
+}
+
+void
+CueLayout::show_running_boxen (bool yn)
+{
+	Push2::ButtonID lower_buttons[] = {
+		Push2::Lower1, Push2::Lower2, Push2::Lower3, Push2::Lower4,
+		Push2::Lower5, Push2::Lower6, Push2::Lower7, Push2::Lower8
+	};
+
+	for (int n = 0; n < 8; ++n) {
+		boost::shared_ptr<Push2::Button> lower_button = _p2.button_by_id (lower_buttons[n]);
+
+		if (!_route[n]) {
+			continue;
+		}
+
+		boost::shared_ptr<TriggerBox> tb = _route[n]->triggerbox();
+		assert (tb);
+
+		if (yn) {
+
+			if (!tb->currently_playing()) {
+				/* nothing playing, do not turn the blink on */
+				continue;
+			}
+
+			HSV hsv (_route[n]->presentation_info().color());
+			hsv = hsv.shade (2.0);
+			lower_button->set_color (_p2.get_color_index (hsv.color()));
+			lower_button->set_state (Push2::LED::Blinking4th);
+
+		} else {
+			std::cerr << "no blink " << n << std::endl;
+			lower_button->set_color (_p2.get_color_index (_route[n]->presentation_info().color()));
+			lower_button->set_state (Push2::LED::NoTransition);
+		}
+
+		_p2.write (lower_button->state_msg());
+	}
+}
+
+void
+CueLayout::pad_press (int y, int x) /* fix coordinate order one day */
 {
 	std::cerr << "bang on " << x + track_base << ", " << y + scene_base << std::endl;
-	_p2.bang (y + scene_base, x + track_base);
+
+	if (!_route[x]) {
+		std::cerr << "no route\n";
+		return;
+	}
+
+	boost::shared_ptr<TriggerBox> tb = _route[x]->triggerbox();
+
+	if (!tb) {
+		std::cerr << "no TB\n";
+		/* unpossible! */
+		return;
+	}
+
+	if (!tb->trigger (y + scene_base)->region()) {
+		std::cerr << "empty slot, unbang TB\n";
+		_p2.unbang (x + track_base);
+		return;
+	}
+
+	std::cerr << "bang TB\n";
+	_p2.bang (x + track_base, y + scene_base);
+
+
+
 }
 
 void
@@ -587,8 +651,109 @@ CueLayout::route_property_change (PropertyChange const& what_changed, uint32_t w
 
 }
 
+void
+CueLayout::trigger_property_change (PropertyChange const& what_changed, uint32_t col, uint32_t row)
+{
+	assert (_route[col]);
+
+	if (what_changed.contains (Properties::running)) {
+		boost::shared_ptr<TriggerBox> tb = _route[col]->triggerbox ();
+		assert (tb);
+
+		TriggerPtr trig = tb->trigger (row);
+		assert (trig);
+
+		boost::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (col, row);
+		assert (pad);
+
+		set_pad_color_from_trigger_state (col, pad, trig);
+		_p2.write (pad->state_msg());
+	}
+}
 
 void
-CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint32_t which)
+CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint32_t col)
 {
+	std::cerr << "TB prop change "; what_changed.dump (std::cerr); std::cerr << std::endl;
+
+	assert (_route[col]);
+
+	if (what_changed.contains (Properties::currently_playing) || what_changed.contains (Properties::queued)) {
+
+		boost::shared_ptr<TriggerBox> tb = _route[col]->triggerbox ();
+		assert (tb);
+
+
+		/* make sure the blink state of all 8 pads for this
+		 * route/triggerbox are correct
+		 */
+
+		for (uint32_t y = 0; y < 8; ++y) {
+			boost::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (col, y);
+			assert (pad);
+
+			TriggerPtr trig = tb->trigger (y);
+			assert (trig);
+
+			set_pad_color_from_trigger_state (col, pad, trig);
+
+			_p2.write (pad->state_msg());
+		}
+
+
+		if (!what_changed.contains (Properties::queued)) {
+
+			/* currently_playing changed, if nothing is playing be
+			 * sure to disable blink on lower button
+			 */
+
+			std::cerr << "running change on " << col << std::endl;
+
+			if (!tb->currently_playing()) {
+				boost::shared_ptr<Push2::Button> lower_button = _p2.lower_button_by_column (col);
+				lower_button->set_color (_p2.get_color_index (_route[col]->presentation_info().color()));
+				lower_button->set_state (Push2::LED::NoTransition);
+				_p2.write (lower_button->state_msg());
+			}
+		}
+	}
+}
+
+void
+CueLayout::set_pad_color_from_trigger_state (int col, boost::shared_ptr<Push2::Pad> pad, TriggerPtr trig)
+{
+	if (trig->region()) {
+
+		if (trig->active()) {
+
+			/* running or waiting to stop */
+
+			HSV hsv (_route[col]->presentation_info().color());
+			hsv = hsv.shade (2.0);
+			pad->set_color (_p2.get_color_index (hsv.color ()));
+			pad->set_state (Push2::LED::Pulsing4th);
+
+		} else if (trig == trig->box().peek_next_trigger()) {
+
+			/* waiting to start */
+
+			HSV hsv (_route[col]->presentation_info().color());
+			hsv = hsv.shade (2.0);
+			pad->set_color (_p2.get_color_index (hsv.color ()));
+			pad->set_state (Push2::LED::Pulsing16th);
+
+		} else {
+
+			/* not running */
+
+			pad->set_color (_p2.get_color_index (_route[col]->presentation_info().color()));
+			pad->set_state (Push2::LED::NoTransition);
+		}
+
+	} else {
+
+		/* empty slot */
+		pad->set_color (Push2::LED::Black);
+		pad->set_state (Push2::LED::NoTransition);
+	}
 }

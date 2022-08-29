@@ -457,6 +457,7 @@ class Push2 : public ARDOUR::ControlProtocol
 	PadMap const & nn_pad_map() const { return _nn_pad_map; }
 
 	boost::shared_ptr<Pad> pad_by_xy (int x, int y);
+	boost::shared_ptr<Button> lower_button_by_column (uint32_t col);
 
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
 

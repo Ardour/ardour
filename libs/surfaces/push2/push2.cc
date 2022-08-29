@@ -1912,3 +1912,39 @@ Push2::pad_by_xy (int x, int y)
 	}
 	return _xy_pad_map[index];
 }
+
+boost::shared_ptr<Push2::Button>
+Push2::lower_button_by_column (uint32_t col)
+{
+	assert (col < 8);
+
+	switch (col) {
+	case 0:
+		return button_by_id (Push2::Lower1);
+		break;
+	case 1:
+		return button_by_id (Push2::Lower2);
+		break;
+	case 2:
+		return button_by_id (Push2::Lower3);
+		break;
+	case 3:
+		return button_by_id (Push2::Lower4);
+		break;
+	case 4:
+		return button_by_id (Push2::Lower5);
+		break;
+	case 5:
+		return button_by_id (Push2::Lower6);
+		break;
+	case 6:
+		return button_by_id (Push2::Lower7);
+		break;
+	case 7:
+		return button_by_id (Push2::Lower8);
+		break;
+	}
+	/*NOTREACHED*/
+	return boost::shared_ptr<Push2::Button>();
+}
+
