@@ -77,6 +77,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<ARDOUR::FollowAction> follow_action0;
 		PBD::PropertyDescriptor<ARDOUR::FollowAction> follow_action1;
 		PBD::PropertyDescriptor<uint32_t> currently_playing;
+		PBD::PropertyDescriptor<uint32_t> queued;
 		PBD::PropertyDescriptor<uint32_t> follow_count;
 		PBD::PropertyDescriptor<int> follow_action_probability;
 		PBD::PropertyDescriptor<float> velocity_effect;
@@ -2876,6 +2877,10 @@ Trigger::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for patch_change = %1\n", Properties::patch_change.property_id));
 	Properties::channel_map.property_id = g_quark_from_static_string (X_("channel_map"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for channel_map = %1\n", Properties::channel_map.property_id));
+	Properties::currently_playing.property_id = g_quark_from_static_string (X_("currently_playing"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for currently_playing = %1\n", Properties::currently_playing.property_id));
+	Properties::queued.property_id = g_quark_from_static_string (X_("queued"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for queued = %1\n", Properties::queued.property_id));
 }
 
 Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
@@ -3298,6 +3303,9 @@ TriggerBox::queue_explict (uint32_t n)
 {
 	assert (n < all_triggers.size());
 	explicit_queue.write (&n, 1);
+
+	PropertyChanged (ARDOUR::Properties::queued);
+
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue %1, EQ = %2\n", n, explicit_queue.read_space()));
 
 	if (_currently_playing) {

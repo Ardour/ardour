@@ -934,6 +934,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float> velocity_effect;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<gain_t> gain;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> currently_playing;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<uint32_t> queued;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> stretchable;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> cue_isolated;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> allow_patch_changes;
