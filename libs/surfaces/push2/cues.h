@@ -21,6 +21,8 @@
 
 #include <vector>
 
+#include "ardour/triggerbox.h"
+
 #include "layout.h"
 #include "push2.h"
 
@@ -36,6 +38,7 @@ namespace ArdourCanvas {
 	class Text;
 	class Line;
 	class Arc;
+	class FollowActionIcon;
 }
 
 namespace ArdourSurface {
@@ -108,6 +111,8 @@ class CueLayout : public Push2Layout
 	void trigger_property_change (PBD::PropertyChange const& what_changed, uint32_t col, uint32_t row);
 
 	ArdourCanvas::Arc* _progress[8];
+	ArdourCanvas::FollowActionIcon* follow_action_icon[8];
+
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllables[8];
 
 	void viewport_changed ();
@@ -115,8 +120,9 @@ class CueLayout : public Push2Layout
 	void show_state ();
 	void update_clip_progress (int);
 	void show_knob_function ();
-	void set_pad_color_from_trigger_state (int col, boost::shared_ptr<Push2::Pad>, boost::shared_ptr<ARDOUR::Trigger>);
+	void set_pad_color_from_trigger_state (int col, boost::shared_ptr<Push2::Pad>, ARDOUR::TriggerPtr);
 	void show_running_boxen (bool);
+	void draw_follow_icon (ARDOUR::TriggerPtr, Cairo::RefPtr<Cairo::Context> context, ARDOUR::FollowAction const & icon, float size) const;
 };
 
 } /* namespace */

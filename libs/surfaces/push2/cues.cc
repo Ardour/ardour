@@ -65,6 +65,7 @@
 #include "canvas.h"
 #include "cues.h"
 #include "knob.h"
+#include "follow_action.h"
 #include "level_meter.h"
 #include "push2.h"
 #include "utils.h"
@@ -140,6 +141,12 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 		_progress[n]->set_outline_color (_p2.get_color (Push2::KnobArcBackground));
 		_progress[n]->set_outline_width (10.);
 		_progress[n]->set_outline (true);
+
+		follow_action_icon[n] = new FollowActionIcon (this);
+		follow_action_icon[n]->set_font_description (fd);
+		follow_action_icon[n]->set_size (25.);
+		follow_action_icon[n]->set_fill_color (_p2.get_color (Push2::KnobArcBackground));
+		follow_action_icon[n]->set_position (Duple (31 + (Push2Canvas::inter_button_spacing() * n), 67));
 
 		t = new Text (this);
 		t->set_font_description (fd);
@@ -269,7 +276,6 @@ void
 CueLayout::button_lower (uint32_t n)
 {
 	if (_p2.stop_down() || _long_stop) {
-		std::cerr << "stop trigger in " << n + track_base << std::endl;
 		_p2.unbang (n + track_base);
 	} else {
 		/* select track */
@@ -365,6 +371,7 @@ CueLayout::viewport_changed ()
 	for (int n = 0; n < 8; ++n) {
 
 		_route[n] = _session.get_remote_nth_route (track_base+n);
+		follow_action_icon[n]->reset_trigger ();
 
 		boost::shared_ptr<Route> r = _route[n];
 
@@ -431,7 +438,6 @@ CueLayout::viewport_changed ()
 					if (tp && tp->region()) {
 						/* trigger in slot */
 						pad->set_color (color);
-
 						tp->PropertyChanged.connect (_trig_connections[n * 8 + y], invalidator (*this), boost::bind (&CueLayout::trigger_property_change, this, _1, n, y), &_p2);
 
 					} else {
@@ -564,28 +570,22 @@ CueLayout::show_running_boxen (bool yn)
 void
 CueLayout::pad_press (int y, int x) /* fix coordinate order one day */
 {
-	std::cerr << "bang on " << x + track_base << ", " << y + scene_base << std::endl;
-
 	if (!_route[x]) {
-		std::cerr << "no route\n";
 		return;
 	}
 
 	boost::shared_ptr<TriggerBox> tb = _route[x]->triggerbox();
 
 	if (!tb) {
-		std::cerr << "no TB\n";
 		/* unpossible! */
 		return;
 	}
 
 	if (!tb->trigger (y + scene_base)->region()) {
-		std::cerr << "empty slot, unbang TB\n";
 		_p2.unbang (x + track_base);
 		return;
 	}
 
-	std::cerr << "bang TB\n";
 	_p2.bang (x + track_base, y + scene_base);
 
 
@@ -671,11 +671,13 @@ CueLayout::trigger_property_change (PropertyChange const& what_changed, uint32_t
 {
 	assert (_route[col]);
 
+	TriggerPtr trig;
+
 	if (what_changed.contains (Properties::running)) {
 		boost::shared_ptr<TriggerBox> tb = _route[col]->triggerbox ();
 		assert (tb);
 
-		TriggerPtr trig = tb->trigger (row);
+		trig = tb->trigger (row);
 		assert (trig);
 
 		boost::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (col, row);
@@ -684,13 +686,22 @@ CueLayout::trigger_property_change (PropertyChange const& what_changed, uint32_t
 		set_pad_color_from_trigger_state (col, pad, trig);
 		_p2.write (pad->state_msg());
 	}
+
+	PropertyChange follow_stuff;
+	follow_stuff.add (Properties::follow_action0);
+	follow_stuff.add (Properties::follow_action1);
+	follow_stuff.add (Properties::follow_action_probability);
+
+	if (what_changed.contains (follow_stuff)) {
+		if (trig && trig->active()) {
+			follow_action_icon[col]->redraw ();
+		}
+	}
 }
 
 void
 CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint32_t col)
 {
-	std::cerr << "TB prop change "; what_changed.dump (std::cerr); std::cerr << std::endl;
-
 	assert (_route[col]);
 
 	if (what_changed.contains (Properties::currently_playing) || what_changed.contains (Properties::queued)) {
@@ -715,6 +726,18 @@ CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint3
 			_p2.write (pad->state_msg());
 		}
 
+		TriggerPtr playing = tb->currently_playing();
+
+		if (what_changed.contains (Properties::currently_playing)) {
+
+			if (playing) {
+				follow_action_icon[col]->show ();
+				follow_action_icon[col]->set_trigger (playing);
+			} else {
+				follow_action_icon[col]->hide ();
+				follow_action_icon[col]->reset_trigger ();
+			}
+		}
 
 		if (!what_changed.contains (Properties::queued)) {
 
@@ -722,9 +745,7 @@ CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint3
 			 * sure to disable blink on lower button
 			 */
 
-			std::cerr << "running change on " << col << std::endl;
-
-			if (!tb->currently_playing()) {
+			if (!playing) {
 				boost::shared_ptr<Push2::Button> lower_button = _p2.lower_button_by_column (col);
 				lower_button->set_color (_p2.get_color_index (_route[col]->presentation_info().color()));
 				lower_button->set_state (Push2::LED::NoTransition);
@@ -755,7 +776,7 @@ CueLayout::set_pad_color_from_trigger_state (int col, boost::shared_ptr<Push2::P
 			HSV hsv (_route[col]->presentation_info().color());
 			hsv = hsv.shade (2.0);
 			pad->set_color (_p2.get_color_index (hsv.color ()));
-			pad->set_state (Push2::LED::Pulsing16th);
+			pad->set_state (Push2::LED::Pulsing8th);
 
 		} else {
 
@@ -772,3 +793,192 @@ CueLayout::set_pad_color_from_trigger_state (int col, boost::shared_ptr<Push2::P
 		pad->set_state (Push2::LED::NoTransition);
 	}
 }
+
+
+namespace ArdourCanvas {
+
+FollowActionIcon::FollowActionIcon (Canvas* c)
+	: Rectangle (c)
+	, size (0)
+	, scale (1.)
+{
+	set_fill (false);
+	set_outline (false);
+}
+
+FollowActionIcon::FollowActionIcon (Item* i)
+	: Rectangle (i)
+	, size (0)
+	, scale (1.)
+{
+	set_fill (false);
+	set_outline (false);
+}
+
+void
+FollowActionIcon::set_trigger (boost::shared_ptr<Trigger> t)
+{
+	begin_change ();
+	trigger = t;
+	set_bbox_dirty ();
+	end_change ();
+}
+
+void
+FollowActionIcon::reset_trigger ()
+{
+	begin_change ();
+	trigger.reset ();
+	set_bbox_dirty ();
+	end_change ();
+}
+
+void
+FollowActionIcon::compute_bounding_box () const
+{
+	/* a little crude, since we don't actually know how big the "?" might
+	   be if we use it to denote a random action.
+	*/
+	_bounding_box = _rect;
+	set_bbox_clean ();
+}
+
+void
+FollowActionIcon::set_size (double sz)
+{
+	begin_change ();
+	size = sz;
+	set (Rect (0., 0., size * scale, size * scale));
+	set_bbox_dirty ();
+	end_change ();
+}
+
+void
+FollowActionIcon::set_scale (double sc)
+{
+	begin_change ();
+	scale = sc;
+	set (Rect (0., 0., size * scale, size * scale));
+	set_bbox_dirty ();
+	end_change ();
+}
+
+void
+FollowActionIcon::set_font_description (Pango::FontDescription const & fd)
+{
+	begin_change ();
+	font_description = fd;
+	set_bbox_dirty ();
+	end_change ();
+}
+
+void
+FollowActionIcon::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	if (!trigger) {
+		return;
+	}
+
+	ArdourCanvas::Rect       self (item_to_window (_rect));
+	const ArdourCanvas::Rect draw = self.intersection (area);
+
+	if (!draw) {
+		return;
+	}
+
+	context->save ();
+	context->translate (self.x0, self.y0);
+
+	/* in the case where there is a random follow-action, just put a "?" */
+	if (trigger->follow_action_probability () > 0) {
+		Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
+		layout->set_font_description (font_description);
+		layout->set_text ("?");
+		int tw, th;
+		layout->get_pixel_size (tw, th);
+		context->move_to (size / 2, size / 2);
+		context->rel_move_to (-tw / 2, -th / 2);
+		layout->show_in_cairo_context (context);
+		context->restore ();
+		return;
+	}
+
+	Gtkmm2ext::set_source_rgba (context, _fill_color);
+	context->set_line_width (1 * scale);
+
+	switch (trigger->follow_action0().type) {
+	case FollowAction::Stop:
+		context->rectangle (6 * scale, 6 * scale, size - 12 * scale, size - 12 * scale);
+		context->stroke ();
+		break;
+	case FollowAction::Again:
+		context->arc (size / 2, size / 2, size * 0.20, 60. * (M_PI / 180.0), 2 * M_PI);
+		context->stroke ();
+		context->arc (size / 2 + size * 0.2, size / 2, 1.5 * scale, 0, 2 * M_PI); // arrow head
+		context->fill ();
+		break;
+	case FollowAction::ForwardTrigger:
+		context->move_to (size / 2, 3 * scale);
+		context->line_to (size / 2, size - 5 * scale);
+		context->stroke ();
+		context->arc (size / 2, size - 5 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
+		context->fill ();
+		break;
+	case FollowAction::ReverseTrigger:
+		context->move_to (size / 2, 5 * scale);
+		context->line_to (size / 2, size - 3 * scale);
+		context->stroke ();
+		context->arc (size / 2, 5 * scale, 2 * scale, 0, 2 * M_PI); // arrow head
+		context->fill ();
+		break;
+	case FollowAction::JumpTrigger:
+		if (trigger->follow_action0().targets.count() == 1 ) {  //jump to a specific row
+			int cue_idx = -1;
+			for (int i = 0; i < default_triggers_per_box; i++) {
+				if (trigger->follow_action0().targets.test(i)) {
+					cue_idx = i;
+					break;
+				}
+			}
+			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
+			layout->set_font_description (font_description);
+			layout->set_text (cue_marker_name (cue_idx));
+			int tw, th;
+			layout->get_pixel_size (tw, th);
+			context->move_to (size / 2, size / 2);
+			context->rel_move_to (-tw / 2, -th / 2);
+			layout->show_in_cairo_context (context);
+		} else if (false) {  // 'ANY' jump
+			for (int i = 0; i < 6; i++) {
+				Cairo::Matrix m = context->get_matrix ();
+				context->translate (size / 2, size / 2);
+				context->rotate (i * M_PI / 3);
+				context->move_to (0, 0);
+				context->line_to (0, (size / 2) - 4 * scale);
+				context->stroke ();
+				context->set_matrix (m);
+			}
+		} else { // 'OTHER' jump
+			context->set_line_width (1.5 * scale);
+			Gtkmm2ext::set_source_rgba (context, HSV (_fill_color).lighter (0.25).color ()); // needs to be brighter to maintain balance
+			for (int i = 0; i < 6; i++) {
+				Cairo::Matrix m = context->get_matrix ();
+				context->translate (size / 2, size / 2);
+				context->rotate (i * M_PI / 3);
+				context->move_to (0, 2 * scale);
+				context->line_to (0, (size / 2) - 4 * scale);
+				context->stroke ();
+				context->set_matrix (m);
+			}
+		}
+		break;
+	case FollowAction::None:
+	default:
+		break;
+	}
+
+	context->restore ();
+}
+
+} /* namespace */
+
