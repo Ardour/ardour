@@ -166,11 +166,6 @@ CueEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Context> 
 		return;
 	}
 
-	float width  = _rect.width ();
-	float height  = _rect.height ();
-
-	const double scale = UIConfiguration::instance ().get_ui_scale ();
-
 	if (_fill && !_transparent) {
 		setup_fill_context (context);
 		context->rectangle (draw.x0, draw.y0, draw.width (), draw.height ());
