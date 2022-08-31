@@ -34,6 +34,7 @@ public:
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void set_velocity (double fract);
 	void set_fill_color (Gtkmm2ext::Color);
+	void set_outline_color (Gtkmm2ext::Color);
 
 	static void set_show_velocity_bars (bool);
 

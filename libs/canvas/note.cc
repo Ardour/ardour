@@ -97,5 +97,11 @@ void
 Note::set_fill_color (Gtkmm2ext::Color c)
 {
 	Fill::set_fill_color (c);
-	_velocity_color = UINT_INTERPOLATE (c, 0x000000ff, 0.5);
+}
+
+void
+Note::set_outline_color (Gtkmm2ext::Color c)
+{
+	Outline::set_outline_color (c);
+	_velocity_color = c;
 }
