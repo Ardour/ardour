@@ -449,9 +449,7 @@ Push2::init_buttons (bool startup)
 			_current_layout->hide ();
 		}
 
-		for (PadMap::iterator pi = _nn_pad_map.begin(); pi != _nn_pad_map.end(); ++pi) {
-			boost::shared_ptr<Pad> pad = pi->second;
-
+		for (auto & pad : _xy_pad_map) {
 			pad->set_color (LED::Black);
 			pad->set_state (LED::OneShot24th);
 			write (pad->state_msg());
