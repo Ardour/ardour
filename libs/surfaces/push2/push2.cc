@@ -821,11 +821,17 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 		return;
 	}
 
+
 	for (FNPadMap::iterator pi = pads_with_note.first; pi != pads_with_note.second; ++pi) {
 		boost::shared_ptr<Pad> pad = pi->second;
 
-		pad->set_color (_contrast_color);
-		pad->set_state (LED::OneShot24th);
+		if (pad->do_when_pressed == Pad::FlashOn) {
+			pad->set_color (_contrast_color);
+			pad->set_state (LED::OneShot24th);
+		} else if (pad->do_when_pressed == Pad::FlashOff) {
+			pad->set_color (LED::Black);
+			pad->set_state (LED::OneShot24th);
+		}
 		write (pad->state_msg());
 	}
 }
@@ -863,18 +869,13 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 		return;
 	}
 
+
 	for (FNPadMap::iterator pi = pads_with_note.first; pi != pads_with_note.second; ++pi) {
 		boost::shared_ptr<Pad> pad = pi->second;
 
-		if (pad->do_when_pressed == Pad::FlashOn) {
-			pad->set_color (LED::Black);
-			pad->set_state (LED::OneShot24th);
-			write (pad->state_msg());
-		} else if (pad->do_when_pressed == Pad::FlashOff) {
-			pad->set_color (pad->perma_color);
-			pad->set_state (LED::OneShot24th);
-			write (pad->state_msg());
-		}
+		pad->set_color (pad->perma_color);
+		pad->set_state (LED::NoTransition);
+		write (pad->state_msg());
 	}
 }
 
@@ -1495,6 +1496,12 @@ Push2::set_pad_scale_in_key (const int               scale_root,
 }
 
 void
+Push2::restore_pad_scale ()
+{
+	set_pad_scale (_scale_root, _root_octave, _mode, _note_grid_origin, _row_interval, _in_key);
+}
+
+void
 Push2::set_pad_scale_chromatic (const int               scale_root,
                                 const int               octave,
                                 const MusicalMode::Type mode,
@@ -1567,7 +1574,6 @@ Push2::set_pad_scale (const int               scale_root,
 		for (int col = 0; col < 8; ++col) {
 			const int                     index = 36 + (row * 8) + col;
 			const boost::shared_ptr<Pad>& pad   = _nn_pad_map[index];
-
 			write (pad->state_msg ());
 		}
 	}

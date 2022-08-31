@@ -680,6 +680,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	int               _octave_shift;
 	bool              _percussion;
 
+	void restore_pad_scale ();
+
 	void set_percussive_mode (bool);
 
 	/* color map (device side) */
