@@ -685,6 +685,14 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
+	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier) &&
+	    Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+		/* XXX: bit of a hack; allow PrimaryModifier+TertiaryModifier scroll
+		 * through so that it still works for navigation.
+		*/
+		return false;
+	}
+
 	if (_selection.empty()) {
 		const int step = Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier) ? 12 : 1;
 		const bool just_one_edge = Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier);
@@ -706,14 +714,6 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 			break;
 		}
 
-		return false;
-	}
-
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) ||
-	    Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-		/* XXX: bit of a hack; allow PrimaryModifier and TertiaryModifier scroll
-		 * through so that it still works for navigation.
-		*/
 		return false;
 	}
 
