@@ -543,7 +543,9 @@ CueLayout::show_running_boxen (bool yn)
 		}
 
 		boost::shared_ptr<TriggerBox> tb = _route[n]->triggerbox();
-		assert (tb);
+		if (!tb) {
+			continue;
+		}
 
 		if (yn) {
 

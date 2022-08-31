@@ -172,6 +172,10 @@ P2GUI::update_port_combos ()
 	std::vector<std::string> midi_inputs;
 	std::vector<std::string> midi_outputs;
 
+	if (!_p2.input_port() || !_p2.output_port()) {
+		return;
+	}
+
 	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsTerminal), midi_inputs);
 	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsTerminal), midi_outputs);
 
