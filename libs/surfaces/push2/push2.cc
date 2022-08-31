@@ -245,6 +245,12 @@ Push2::stop_using_device ()
 	init_buttons (false);
 	strip_buttons_off ();
 
+	for (auto & pad : _xy_pad_map) {
+		pad->set_color (LED::Black);
+		pad->set_state (LED::NoTransition);
+		write (pad->state_msg());
+	}
+
 	_vblank_connection.disconnect ();
 	session_connections.drop_connections ();
 
@@ -405,25 +411,23 @@ Push2::init_buttons (bool startup)
 	   in ardour related (loosely, sometimes) to their illuminated label.
 	*/
 
-	ButtonID buttons[] = { Mute, Solo, Master, Up, Right, Left, Down, Note, Session, Mix, AddTrack, Delete, Undo,
-	                       Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session,
-	                       Quantize, Duplicate, Browse, PageRight, PageLeft, OctaveUp, OctaveDown, Layout, Scale,
-	                       Stop
-	};
-
-	for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
-		boost::shared_ptr<Button> b = _id_button_map[buttons[n]];
-
-		if (startup) {
-			b->set_color (LED::White);
-		} else {
-			b->set_color (LED::Black);
-		}
-		b->set_state (LED::OneShot24th);
-		write (b->state_msg());
-	}
 
 	if (startup) {
+
+		ButtonID buttons[] = { Mute, Solo, Master, Up, Right, Left, Down, Note, Session, Mix, AddTrack, Delete, Undo,
+			Metronome, Shift, Select, Play, RecordEnable, Automate, Repeat, Note, Session,
+			Quantize, Duplicate, Browse, PageRight, PageLeft, OctaveUp, OctaveDown, Layout, Scale,
+			Stop
+		};
+
+
+		for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
+			boost::shared_ptr<Button> b = _id_button_map[buttons[n]];
+
+			b->set_color (LED::White);
+			b->set_state (LED::NoTransition);
+			write (b->state_msg());
+		}
 
 		/* all other buttons are off (black) */
 
@@ -438,9 +442,9 @@ Push2::init_buttons (bool startup)
 			b->set_state (LED::OneShot24th);
 			write (b->state_msg());
 		}
-	}
 
-	if (!startup) {
+	} else {
+
 		if (_current_layout) {
 			_current_layout->hide ();
 		}
@@ -451,6 +455,12 @@ Push2::init_buttons (bool startup)
 			pad->set_color (LED::Black);
 			pad->set_state (LED::OneShot24th);
 			write (pad->state_msg());
+		}
+
+		for (auto & b : _id_button_map) {
+			b.second->set_color (LED::Black);
+			b.second->set_state (LED::NoTransition);
+			write (b.second->state_msg());
 		}
 	}
 }
@@ -1953,4 +1963,3 @@ Push2::lower_button_by_column (uint32_t col)
 	/*NOTREACHED*/
 	return boost::shared_ptr<Push2::Button>();
 }
-
