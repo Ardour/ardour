@@ -392,6 +392,8 @@ public:
 	void nudge_notes_earlier () { nudge_notes (false, false); }
 	void nudge_notes_earlier_fine () { nudge_notes (false, true); }
 
+	void quantize_selected_notes ();
+
   private:
 
 	friend class MidiRubberbandSelectDrag;

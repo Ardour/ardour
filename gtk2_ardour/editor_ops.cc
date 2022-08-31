@@ -5827,6 +5827,10 @@ Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv
 	Evoral::Sequence<Temporal::Beats>::Notes selected;
 	mrv.selection_as_notelist (selected, true);
 
+	if (selected.empty()) {
+		return 0;
+	}
+
 	vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
 	v.push_back (selected);
 
@@ -6009,31 +6013,51 @@ Editor::quantize_regions (const RegionSelection& rs)
 		return;
 	}
 
+	bool ignored;
+	Quantize quant = get_quantize_op (true, ignored);
+
+	if (!quant.empty()) {
+		apply_midi_note_edit_op (quant, rs);
+	}
+}
+
+Quantize
+Editor::get_quantize_op (bool force_dialog, bool& did_show_dialog)
+{
+	did_show_dialog = false;
+
 	if (!quantize_dialog) {
 		quantize_dialog = new QuantizeDialog (*this);
+		force_dialog = true;
 	}
 
 	if (quantize_dialog->get_mapped()) {
 		/* in progress already */
-		return;
+		return Quantize (false, false, Temporal::Beats(), Temporal::Beats(), 0., 0., Temporal::Beats());
 	}
 
-	quantize_dialog->present ();
-	const int r = quantize_dialog->run ();
-	quantize_dialog->hide ();
+	int r = Gtk::RESPONSE_OK;
+
+	if (force_dialog) {
+		quantize_dialog->present ();
+		r = quantize_dialog->run ();
+		quantize_dialog->hide ();
+		did_show_dialog = true;
+	}
 
 	if (r == Gtk::RESPONSE_OK) {
-		Quantize quant (quantize_dialog->snap_start(),
-		                quantize_dialog->snap_end(),
-				quantize_dialog->start_grid_size(),
-		                quantize_dialog->end_grid_size(),
-				quantize_dialog->strength(),
-		                quantize_dialog->swing(),
-		                quantize_dialog->threshold());
-
-		apply_midi_note_edit_op (quant, rs);
+		return Quantize (quantize_dialog->snap_start(),
+		                 quantize_dialog->snap_end(),
+		                 quantize_dialog->start_grid_size(),
+		                 quantize_dialog->end_grid_size(),
+		                 quantize_dialog->strength(),
+		                 quantize_dialog->swing(),
+		                 quantize_dialog->threshold());
 	}
+
+	return Quantize (false, false, Temporal::Beats(), Temporal::Beats(), 0., 0., Temporal::Beats());
 }
+
 
 void
 Editor::legatize_region (bool shrink_only)

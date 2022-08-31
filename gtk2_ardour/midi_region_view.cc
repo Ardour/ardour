@@ -47,6 +47,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
 #include "ardour/operations.h"
+#include "ardour/quantize.h"
 #include "ardour/session.h"
 
 #include "evoral/Parameter.h"
@@ -4577,4 +4578,26 @@ double
 MidiRegionView::note_to_y(uint8_t note) const
 {
 	return contents_height() - (note + 1 - _current_range_min) * note_height() + 1;
+}
+
+void
+MidiRegionView::quantize_selected_notes ()
+{
+	RegionSelection rs;
+	rs.push_back (this);
+
+	bool did_show_dialog;
+	Quantize quant = trackview.editor().get_quantize_op (false, did_show_dialog);
+	bool success;
+
+	if (!did_show_dialog) {
+		/* use global grid */
+		quant.set_start_grid (trackview.editor().get_grid_type_as_beats (success, midi_region()->source_position()));
+		if (!success) {
+			return;
+		}
+		quant.set_end_grid (quant.start_grid());
+	}
+
+	trackview.editor().apply_midi_note_edit_op (quant, rs);
 }

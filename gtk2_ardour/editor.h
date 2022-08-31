@@ -1357,6 +1357,8 @@ private:
 	void normalize_region ();
 	void adjust_region_gain (bool up);
 	void reset_region_gain ();
+	ARDOUR::Quantize get_quantize_op (bool force_dialog, bool& did_show_dialog);
+	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 	void quantize_region ();
 	void quantize_regions (const RegionSelection& rs);
 	void legatize_region (bool shrink_only);
@@ -2266,7 +2268,6 @@ private:
 	void apply_filter (ARDOUR::Filter&, std::string cmd, ProgressReporter* progress = 0);
 
 	Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
-	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 
 	/* plugin setup */
 	int plugin_setup (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);

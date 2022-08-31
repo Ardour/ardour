@@ -876,6 +876,8 @@ Editor::register_midi_actions (Bindings* midi_bindings)
 	ActionManager::register_action (_midi_actions, X_("edit-channels"), _("Edit Note Channels"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::channel_edit));
 	ActionManager::register_action (_midi_actions, X_("edit-velocities"), _("Edit Note Velocities"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::velocity_edit));
 
+	ActionManager::register_action (_midi_actions, X_("quantize-selected-notes"), _("Quantize Selected Notes"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::quantize_selected_notes));
+
 	ActionManager::set_sensitive (_midi_actions, false);
 }
 

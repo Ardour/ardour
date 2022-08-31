@@ -162,6 +162,7 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 				if (_snap_start) {
 					/* this is here because Beats intentionally does not have operator* (double) */
 					delta = Temporal::Beats::ticks (llrintf (delta.to_ticks()) * _strength);
+					std::cerr << "new start " << (*i)->time() + delta << " shift was " << delta << std::endl;
 					cmd->change ((*i), MidiModel::NoteDiffCommand::StartTime, (*i)->time() + delta);
 				}
 			}
@@ -184,4 +185,16 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 	}
 
 	return cmd;
+}
+
+void
+Quantize::set_start_grid (Temporal::Beats const & sg)
+{
+	_start_grid = sg;
+}
+
+void
+Quantize::set_end_grid (Temporal::Beats const & eg)
+{
+	_end_grid = eg;
 }

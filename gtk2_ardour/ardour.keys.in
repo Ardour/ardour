@@ -482,6 +482,8 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/increase-velocity-fine-smush|      <@PRIMARY@><@SECONDARY@><@TERTIARY@>Up|Increase Note Velocity (+1) allow mushing
 @notes|Notes/decrease-velocity-fine-smush|    <@PRIMARY@><@SECONDARY@><@TERTIARY@>Down|Increase Note Velocity (+1) allow mushing
 
+@notes|Notes/quantize-selected-notes|q|Quantize Selected Notes
+
 @notes|Notes/delete|            Backspace|Delete Note Selection
 @notes|Notes/alt-delete|           Delete|Delete Note Selection
 @notes|Main/Escape|Clear selection

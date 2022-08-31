@@ -72,6 +72,7 @@ namespace ARDOUR {
 	class Trimmable;
 	class Movable;
 	class Stripable;
+	class MidiOperator;
 }
 
 namespace Gtk {
@@ -553,6 +554,9 @@ public:
 	virtual bool should_ripple () const = 0;
 
 	virtual void queue_redisplay_track_views () = 0;
+
+	virtual ARDOUR::Quantize get_quantize_op (bool force_dialog, bool& did_show_dialog) = 0;
+	virtual void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs) = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 
