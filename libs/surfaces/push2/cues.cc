@@ -73,7 +73,7 @@
 #include "pbd/i18n.h"
 
 #ifdef __APPLE__
-#define Rect ArdourCanvas::Rect
+#undef Rect
 #endif
 
 using namespace ARDOUR;
