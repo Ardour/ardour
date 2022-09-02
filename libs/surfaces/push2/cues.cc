@@ -72,11 +72,6 @@
 
 #include "pbd/i18n.h"
 
-#ifdef __APPLE__
-#undef Rect
-#define Rect ArdourCanvas::Rect
-#endif
-
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
@@ -94,7 +89,7 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 	Pango::FontDescription fd ("Sans 10");
 
 	_bg = new ArdourCanvas::Rectangle (this);
-	_bg->set (Rect (0, 0, display_width(), display_height()));
+	_bg->set (ArdourCanvas::Rect (0, 0, display_width(), display_height()));
 	_bg->set_fill_color (_p2.get_color (Push2::DarkBackground));
 
 	_upper_line = new Line (this);
@@ -108,7 +103,7 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 
 		ArdourCanvas::Rectangle* r = new ArdourCanvas::Rectangle (this);
 		Coord x0 = 10 + (n*Push2Canvas::inter_button_spacing()) - 5;
-		r->set (Rect (x0, 2, x0 + Push2Canvas::inter_button_spacing(), 2 + 21));
+		r->set (ArdourCanvas::Rect (x0, 2, x0 + Push2Canvas::inter_button_spacing(), 2 + 21));
 		_upper_backgrounds.push_back (r);
 
 		t = new Text (this);
@@ -133,7 +128,7 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 
 		_lower_text.push_back (t);
 
-		_progress[n] = new Arc (this);
+		_progress[n] = new ArdourCanvas::Arc (this);
 		_progress[n]->set_position (Duple (45 + (Push2Canvas::inter_button_spacing()*n), 80));
 		_progress[n]->set_radius (25.);
 		_progress[n]->set_start (-90.); /* 0 is "east" */
@@ -212,7 +207,7 @@ CueLayout::hide ()
 }
 
 void
-CueLayout::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+CueLayout::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	Container::render (area, context);
 }
@@ -851,7 +846,7 @@ FollowActionIcon::set_size (double sz)
 {
 	begin_change ();
 	size = sz;
-	set (Rect (0., 0., size * scale, size * scale));
+	set (ArdourCanvas::Rect (0., 0., size * scale, size * scale));
 	set_bbox_dirty ();
 	end_change ();
 }
@@ -861,7 +856,7 @@ FollowActionIcon::set_scale (double sc)
 {
 	begin_change ();
 	scale = sc;
-	set (Rect (0., 0., size * scale, size * scale));
+	set (ArdourCanvas::Rect (0., 0., size * scale, size * scale));
 	set_bbox_dirty ();
 	end_change ();
 }
