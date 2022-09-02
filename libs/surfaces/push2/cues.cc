@@ -74,6 +74,7 @@
 
 #ifdef __APPLE__
 #undef Rect
+#define Rect ArdourCanvas::Rect
 #endif
 
 using namespace ARDOUR;
