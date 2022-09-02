@@ -1626,8 +1626,10 @@ Editor::marker_menu_remove ()
 		remove_meter_marker (marker_menu_item);
 	} else if (tm) {
 		remove_tempo_marker (marker_menu_item);
-	} else {
+	} else if (bm) {
 		remove_bbt_marker (marker_menu_item);
+	} else {
+		remove_marker (*marker_menu_item);
 	}
 }
 
