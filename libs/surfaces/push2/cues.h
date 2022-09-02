@@ -117,7 +117,6 @@ class CueLayout : public Push2Layout
 
 	void viewport_changed ();
 
-	void show_state ();
 	void update_clip_progress (int);
 	void show_knob_function ();
 	void set_pad_color_from_trigger_state (int col, boost::shared_ptr<Push2::Pad>, ARDOUR::TriggerPtr);

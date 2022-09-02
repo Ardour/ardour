@@ -159,6 +159,8 @@ CueLayout::~CueLayout ()
 void
 CueLayout::show ()
 {
+	Push2Layout::show ();
+
 	Push2::ButtonID lower_buttons[] = {
 		Push2::Lower1, Push2::Lower2, Push2::Lower3, Push2::Lower4,
 		Push2::Lower5, Push2::Lower6, Push2::Lower7, Push2::Lower8
@@ -183,16 +185,15 @@ CueLayout::show ()
 		_p2.write (b->state_msg());
 	}
 
-	show_state ();
 	viewport_changed ();
 	show_knob_function ();
-
-	Container::show ();
 }
 
 void
 CueLayout::hide ()
 {
+	Push2Layout::hide ();
+
 	Push2::ButtonID scene_buttons[] = {
 		Push2::Fwd32ndT, Push2::Fwd32nd, Push2::Fwd16th, Push2::Fwd16thT,
 		Push2::Fwd8thT, Push2::Fwd8th, Push2::Fwd4trT, Push2::Fwd4tr
@@ -290,7 +291,6 @@ CueLayout::button_left ()
 	if (track_base > 0) {
 		track_base--;
 		viewport_changed ();
-		show_state ();
 	}
 }
 
@@ -300,7 +300,6 @@ CueLayout::button_page_left ()
 	if (track_base > 8) {
 		track_base -= 8; /* XXX get back to zero when appropriate */
 		viewport_changed ();
-		show_state ();
 	}
 }
 
@@ -309,7 +308,6 @@ CueLayout::button_right ()
 {
 	track_base++;
 	viewport_changed ();
-	show_state ();
 }
 
 void
@@ -317,7 +315,6 @@ CueLayout::button_page_right ()
 {
 	track_base += 8; /* XXX limit to number of tracks */
 	viewport_changed ();
-	show_state ();
 }
 
 void
@@ -326,7 +323,6 @@ CueLayout::button_up ()
 	if (scene_base > 0) {
 		scene_base--;
 		viewport_changed ();
-		show_state ();
 	}
 }
 
@@ -336,7 +332,6 @@ CueLayout::button_octave_up ()
 	if (scene_base > 8) {
 		scene_base -= 8;
 		viewport_changed ();
-		show_state ();
 	}
 }
 
@@ -345,14 +340,12 @@ CueLayout::button_down ()
 {
 	scene_base++;
 	viewport_changed ();
-	show_state ();
 }
 
 void
 CueLayout::button_octave_down ()
 {
 	scene_base++;
-	show_state ();
 }
 
 void
@@ -468,14 +461,6 @@ CueLayout::viewport_changed ()
 }
 
 void
-CueLayout::show_state ()
-{
-	if (!parent()) {
-		return;
-	}
-}
-
-void
 CueLayout::strip_vpot (int n, int delta)
 {
 	boost::shared_ptr<Controllable> ac = _controllables[n];
@@ -506,7 +491,6 @@ CueLayout::button_stop_press ()
 void
 CueLayout::button_stop_release ()
 {
-	std::cerr << "BS release, ls = " << _long_stop << std::endl;
 	if (_long_stop) {
 		_long_stop = 0;
 		show_running_boxen (false);
@@ -556,13 +540,24 @@ CueLayout::show_running_boxen (bool yn)
 			lower_button->set_state (Push2::LED::Blinking4th);
 
 		} else {
-			std::cerr << "no blink " << n << std::endl;
 			lower_button->set_color (_p2.get_color_index (_route[n]->presentation_info().color()));
 			lower_button->set_state (Push2::LED::NoTransition);
 		}
 
 		_p2.write (lower_button->state_msg());
 	}
+
+	boost::shared_ptr<Push2::Button> stop = _p2.button_by_id (Push2::Stop);
+	assert (stop);
+
+	if (yn) {
+		stop->set_color (Push2::LED::Red);
+		stop->set_state (Push2::LED::Blinking4th);
+	} else {
+		stop->set_color (Push2::LED::White);
+		stop->set_state (Push2::LED::NoTransition);
+	}
+	_p2.write (stop->state_msg());
 }
 
 void
@@ -669,6 +664,10 @@ CueLayout::trigger_property_change (PropertyChange const& what_changed, uint32_t
 {
 	assert (_route[col]);
 
+	if (!visible()) {
+		return;
+	}
+
 	TriggerPtr trig;
 
 	if (what_changed.contains (Properties::running)) {
@@ -701,6 +700,10 @@ void
 CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint32_t col)
 {
 	assert (_route[col]);
+
+	if (!visible()) {
+		return;
+	}
 
 	if (what_changed.contains (Properties::currently_playing) || what_changed.contains (Properties::queued)) {
 
@@ -756,6 +759,10 @@ CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint3
 void
 CueLayout::set_pad_color_from_trigger_state (int col, boost::shared_ptr<Push2::Pad> pad, TriggerPtr trig)
 {
+	if (!visible()) {
+		return;
+	}
+
 	if (trig->region()) {
 
 		if (trig->active()) {
@@ -979,4 +986,3 @@ FollowActionIcon::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::
 }
 
 } /* namespace */
-

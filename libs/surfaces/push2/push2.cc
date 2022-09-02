@@ -206,7 +206,7 @@ Push2::begin_using_device ()
 {
 	DEBUG_TRACE (DEBUG::Push2, "begin using device\n");
 
-	/* set up periodic task used to push a sample buffer to the
+	/* set up periodic task used to push a frame buffer to the
 	 * device (25fps). The device can handle 60fps, but we don't
 	 * need that frame rate.
 	 */
@@ -219,7 +219,7 @@ Push2::begin_using_device ()
 
 	init_buttons (true);
 	init_touch_strip ();
-	set_pad_scale (_scale_root, _root_octave, _mode, _note_grid_origin, _row_interval, _in_key);
+	reset_pad_colors ();
 	splash ();
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
@@ -447,12 +447,6 @@ Push2::init_buttons (bool startup)
 
 		if (_current_layout) {
 			_current_layout->hide ();
-		}
-
-		for (auto & pad : _xy_pad_map) {
-			pad->set_color (LED::Black);
-			pad->set_state (LED::OneShot24th);
-			write (pad->state_msg());
 		}
 
 		for (auto & b : _id_button_map) {
@@ -829,16 +823,15 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 		return;
 	}
 
-
 	for (FNPadMap::iterator pi = pads_with_note.first; pi != pads_with_note.second; ++pi) {
 		boost::shared_ptr<Pad> pad = pi->second;
 
 		if (pad->do_when_pressed == Pad::FlashOn) {
 			pad->set_color (_contrast_color);
-			pad->set_state (LED::OneShot24th);
+			pad->set_state (LED::NoTransition);
 		} else if (pad->do_when_pressed == Pad::FlashOff) {
 			pad->set_color (LED::Black);
-			pad->set_state (LED::OneShot24th);
+			pad->set_state (LED::NoTransition);
 		}
 		write (pad->state_msg());
 	}
@@ -876,7 +869,6 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 	if (pads_with_note.first == _fn_pad_map.end()) {
 		return;
 	}
-
 
 	for (FNPadMap::iterator pi = pads_with_note.first; pi != pads_with_note.second; ++pi) {
 		boost::shared_ptr<Pad> pad = pi->second;
@@ -1373,7 +1365,7 @@ Push2::set_pad_note_kind (Pad& pad, const PadNoteKind kind)
 		break;
 	}
 
-	pad.set_state (LED::OneShot24th);
+	pad.set_state (LED::NoTransition);
 }
 
 /** Return a bitset of notes in a musical mode.
@@ -1556,34 +1548,28 @@ Push2::set_pad_scale (const int               scale_root,
 	// Clear the pad map and reset all pad state (in memory, not on the device yet)
 
 	_fn_pad_map.clear ();
-	for (int row = 0; row < 8; ++row) {
-		for (int col = 0; col < 8; ++col) {
-			const int                     index = 36 + (row * 8) + col;
-			const boost::shared_ptr<Pad>& pad = _nn_pad_map[index];
 
-			pad->set_color (LED::Black);
-			pad->filtered        = -1;
-			pad->do_when_pressed = Pad::FlashOn;
-		}
+	for (auto & p : _nn_pad_map) {
+		p.second->set_color (LED::Black);
+		p.second->set_state (LED::NoTransition);
+		p.second->perma_color = LED::Black;
+		p.second->filtered        = -1;
+		p.second->do_when_pressed = Pad::FlashOn;
 	}
 
 	// Call the appropriate method to set up active pads
 
 	const int vertical_semitones = row_interval_semitones(row_interval, inkey);
 	if (inkey) {
-		set_pad_scale_in_key(scale_root, octave, mode, origin, vertical_semitones);
+		set_pad_scale_in_key (scale_root, octave, mode, origin, vertical_semitones);
 	} else {
-		set_pad_scale_chromatic(scale_root, octave, mode, origin, vertical_semitones);
+		set_pad_scale_chromatic (scale_root, octave, mode, origin, vertical_semitones);
 	}
 
 	// Write the state message for every pad
 
-	for (int row = 0; row < 8; ++row) {
-		for (int col = 0; col < 8; ++col) {
-			const int                     index = 36 + (row * 8) + col;
-			const boost::shared_ptr<Pad>& pad   = _nn_pad_map[index];
-			write (pad->state_msg ());
-		}
+	for (auto const & p : _nn_pad_map) {
+		write (p.second->state_msg ());
 	}
 
 	// Store state
@@ -1877,7 +1863,6 @@ Push2::set_current_layout (Push2Layout* layout)
 			_canvas->root()->add (_current_layout);
 			_current_layout->show ();
 		}
-
 
 		_canvas->request_redraw ();
 	}
