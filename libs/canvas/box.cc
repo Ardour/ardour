@@ -363,7 +363,7 @@ Box::reposition_children (Distance width, Distance height, bool shrink_width, bo
 				}
 			} else {
 				isize = Rect (previous_edge.x, previous_edge.y, previous_edge.x + width, previous_edge.y + height);
-				DEBUG_TRACE (DEBUG::CanvasBox|DEBUG::CanvasSizeAllocate, string_compose ("\t%1, use item size (non-homogenous) to give %2\n", (*i)->whoami(), isize));
+				DEBUG_TRACE (DEBUG::CanvasBox|DEBUG::CanvasSizeAllocate, string_compose ("\t%1, use item size %2 x %3 (non-homogenous) to give %4\n", (*i)->whoami(), width, height, isize));
 			}
 
 			DEBUG_TRACE (DEBUG::CanvasBox|DEBUG::CanvasSizeAllocate, string_compose ("\t%1 allocating %2\n", (*i)->whoami(), isize));
