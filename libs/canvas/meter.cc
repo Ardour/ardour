@@ -168,12 +168,6 @@ Meter::init (int clr0, int clr1, int clr2, int clr3,
 void
 Meter::compute_bounding_box () const
 {
-	if (!_canvas) {
-		_bounding_box = Rect ();
-		set_bbox_clean ();
-		return;
-	}
-
 	Rect r (0, 0, pixwidth + 2, pixheight + 2);
 	_bounding_box = r;
 	set_bbox_clean ();
