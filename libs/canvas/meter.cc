@@ -691,7 +691,9 @@ Meter::set (float lvl, float peak)
 	float old_level = current_level;
 	float old_peak = current_peak;
 
-	if (pixwidth <= 0 || pixheight <=0) return;
+	if (pixwidth <= 0 || pixheight <=0) {
+		return;
+	}
 
 	if (peak == -1) {
 		if (lvl >= current_peak && lvl > 0) {
