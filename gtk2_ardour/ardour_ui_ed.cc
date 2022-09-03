@@ -965,7 +965,10 @@ ARDOUR_UI::save_ardour_state ()
 			vkstate.add_child_nocopy (virtual_keyboard_window.get_state ());
 			_session->add_instant_xml (vkstate);
 		}
-	} else {
+	}
+
+	/* save current Window settings and sizes for new sessions */
+	{
 		Config->add_instant_xml (main_window_node);
 		Config->add_instant_xml (enode);
 		Config->add_instant_xml (mnode);

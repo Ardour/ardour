@@ -344,6 +344,7 @@ ARDOUR_UI::setup_windows ()
 	_main_window.add (main_vpacker);
 	transport_frame.show_all ();
 
+	apply_window_settings (true);
 
 	setup_toplevel_window (_main_window, "", this);
 	_main_window.show_all ();
@@ -360,16 +361,16 @@ ARDOUR_UI::setup_windows ()
 	LV2Plugin::set_main_window_id (GDK_DRAWABLE_XID(_main_window.get_window()->gobj()));
 #endif
 
-	return apply_window_settings (true);
+	return 0;
 }
 
-int
+void
 ARDOUR_UI::apply_window_settings (bool with_size)
 {
 	const XMLNode* mnode = main_window_settings ();
 
 	if (!mnode) {
-		return 0;
+		return;
 	}
 
 	XMLProperty const* prop;
@@ -428,7 +429,7 @@ ARDOUR_UI::apply_window_settings (bool with_size)
 	} else if (editor) {
 		_tabs.set_current_page (_tabs.page_num (editor->contents()));
 	}
-	return 0;
+	return;
 }
 
 bool
