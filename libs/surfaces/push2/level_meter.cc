@@ -485,7 +485,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 		}
 	}
 
-	_meter_packer->set (Rect (0., 0., total_width, total_height));
+	_meter_packer->set (ArdourCanvas::Rect (0., 0., total_width, total_height));
 	_meter_packer->size_allocate (_meter_packer->get());
 
 	_visible_meter_type = meter_type;
