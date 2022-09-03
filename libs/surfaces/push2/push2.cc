@@ -1677,49 +1677,43 @@ Push2::stripable_selection_changed ()
 		}
 	}
 
-	if (current_midi_track == new_pad_target) {
-		/* nothing to do */
-		return;
-	}
+	if (current_midi_track != new_pad_target) {
 
-	if (!new_pad_target) {
-		/* leave existing connection alone */
-		return;
-	}
+		/* disconnect from pad port, if appropriate */
 
-	/* disconnect from pad port, if appropriate */
+		if (current_midi_track && pad_port) {
 
-	if (current_midi_track && pad_port) {
+			/* XXX this could possibly leave dangling MIDI notes.
+			 *
+			 * A general libardour fix is required. It isn't obvious
+			 * how note resolution can be done unless disconnecting
+			 * becomes "slow" (i.e. deferred for as long as it takes
+			 * to resolve notes).
+			 */
+			current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name(), this);
+		}
 
-		/* XXX this could possibly leave dangling MIDI notes.
-		 *
-		 * A general libardour fix is required. It isn't obvious
-		 * how note resolution can be done unless disconnecting
-		 * becomes "slow" (i.e. deferred for as long as it takes
-		 * to resolve notes).
+		/* now connect the pad port to this (newly) selected midi
+		 * track, if indeed there is one.
 		 */
-		current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name(), this);
+
+		if (new_pad_target && pad_port) {
+			new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
+			_current_pad_target = new_pad_target;
+			_selection_color = get_color_index (new_pad_target->presentation_info().color());
+			_contrast_color = get_color_index (Gtkmm2ext::HSV (new_pad_target->presentation_info().color()).opposite().color());
+		} else {
+			_current_pad_target.reset ();
+			_selection_color = LED::Green;
+			_contrast_color = LED::Green;
+		}
+
+		reset_pad_colors ();
 	}
-
-	/* now connect the pad port to this (newly) selected midi
-	 * track, if indeed there is one.
-	 */
-
-	if (new_pad_target && pad_port) {
-		new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
-		_current_pad_target = new_pad_target;
-		_selection_color = get_color_index (new_pad_target->presentation_info().color());
-		_contrast_color = get_color_index (Gtkmm2ext::HSV (new_pad_target->presentation_info().color()).opposite().color());
-	} else {
-		_current_pad_target.reset ();
-		_selection_color = LED::Green;
-		_contrast_color = LED::Green;
-	}
-
-	reset_pad_colors ();
 
 	TrackMixLayout* tml = dynamic_cast<TrackMixLayout*> (_track_mix_layout);
 	assert (tml);
+
 	tml->set_stripable (first_selected_stripable());
 }
 
