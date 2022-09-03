@@ -459,7 +459,9 @@ Item::reparent (Item* new_parent, bool already_added)
 	_canvas = _parent->canvas ();
 
 	find_scroll_parent ();
-	set_layout_sensitive (_parent->layout_sensitive());
+	if (!_layout_sensitive) {
+		set_layout_sensitive (_parent->layout_sensitive());
+	}
 
 	if (!already_added) {
 		_parent->add (this);
@@ -1328,7 +1330,9 @@ Item::set_layout_sensitive (bool yn)
 	_layout_sensitive = yn;
 
 	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
-		(*i)->set_layout_sensitive (yn);
+		if (!(*i)->layout_sensitive()) {
+			(*i)->set_layout_sensitive (yn);
+		}
 	}
 }
 
