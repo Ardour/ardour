@@ -760,7 +760,7 @@ Meter::queue_vertical_redraw (float old_level)
 
 		/* rect.y (new y origin) is smaller or equal to pixrect.y (old
 		 * y origin) because the top of the meter is higher (X/Cairo:
-		 * coordinates grow down). 
+		 * coordinates grow down).
 		 *
 		 * Leave rect.y alone, and recompute the height to be just the
 		 * difference between the new bottom and the top of the previous
@@ -769,7 +769,7 @@ Meter::queue_vertical_redraw (float old_level)
 		 * The old pattern area extended DOWN from pixrect.y to
 		 * pixrect.y + pixrect.height.
 		 *
-		 * The new pattern area extends DOWN from rect.y to 
+		 * The new pattern area extends DOWN from rect.y to
 		 * rect.y + rect.height
 		 *
 		 * The area needing to be drawn is the difference between the
@@ -833,7 +833,7 @@ Meter::queue_vertical_redraw (float old_level)
 			Cairo::RectangleInt iri = region->get_extents();
 			Rect ir (iri.x, iri.y, iri.x + iri.width, iri.y + iri.height);
 			_canvas->request_redraw (item_to_window (ir));
-		}
+  		}
 	}
 }
 
