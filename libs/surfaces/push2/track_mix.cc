@@ -443,10 +443,6 @@ TrackMixLayout::monitoring_change ()
 void
 TrackMixLayout::show_state ()
 {
-	if (!parent()) {
-		return;
-	}
-
 	if (_stripable) {
 		name_changed ();
 		color_changed ();
