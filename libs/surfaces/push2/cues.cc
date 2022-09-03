@@ -150,6 +150,8 @@ CueLayout::CueLayout (Push2& p, Session & s, std::string const & name)
 		t->set_position ( Duple (10 + (n*Push2Canvas::inter_button_spacing()), 115));
 		_clip_label_text.push_back (t);
 	}
+
+	_session.RouteAdded.connect (_session_connections, invalidator(*this), boost::bind (&CueLayout::viewport_changed, this), &_p2);
 }
 
 CueLayout::~CueLayout ()
