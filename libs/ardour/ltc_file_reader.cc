@@ -83,7 +83,7 @@ LTCReader::raw_write (ltcsnd_sample_t* buf, size_t size, ltc_off_t off)
 }
 
 samplepos_t
-LTCReader::read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff)
+LTCReader::read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff, samplecnt_t& ll)
 {
 	LTCFrameExt ltc_frame;
 	if (0 == ltc_decoder_read (_decoder, &ltc_frame)) {
@@ -96,6 +96,8 @@ LTCReader::read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff)
 	mm = stime.mins;
 	ss = stime.secs;
 	ff  = stime.frame;
+	ll = ltc_frame.off_end -  ltc_frame.off_start;
+
 	return ltc_frame.off_start;
 }
 
@@ -108,6 +110,7 @@ LTCFileReader::LTCFileReader (std::string path, double expected_fps, LTC_TV_STAN
 	, _reader (0)
 	, _interleaved_audio_buffer (0)
 	, _samples_read (0)
+	, _apv (1920)
 {
 	memset (&_info, 0, sizeof (_info));
         assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
@@ -116,7 +119,7 @@ LTCFileReader::LTCFileReader (std::string path, double expected_fps, LTC_TV_STAN
 		throw failed_constructor ();
 	}
 
-	const int apv = rintf (_info.samplerate / _expected_fps);
+	_apv = _info.samplerate / _expected_fps;
 
 #if 0 // TODO allow to auto-detect
 	if (expected_fps == 25.0) {
@@ -129,7 +132,7 @@ LTCFileReader::LTCFileReader (std::string path, double expected_fps, LTC_TV_STAN
 		_ltc_tv_standard = LTC_TV_FILM_24;
 	}
 #endif
-	_reader = new LTCReader (apv, _ltc_tv_standard);
+	_reader = new LTCReader (rintf (_apv), _ltc_tv_standard);
 }
 
 LTCFileReader::~LTCFileReader ()
@@ -208,8 +211,19 @@ LTCFileReader::read_ltc (uint32_t channel, uint32_t max_frames)
 		Timecode::Time timecode (_expected_fps);
 
 		samplepos_t off_start;
+		samplecnt_t ltc_length;
 
-		while ((off_start = _reader->read (timecode.hours, timecode.minutes, timecode.seconds, timecode.frames)) >= 0) {
+		while ((off_start = _reader->read (timecode.hours, timecode.minutes, timecode.seconds, timecode.frames, ltc_length)) >= 0) {
+
+			/* sanity check */
+			if (timecode.hours > 23 || timecode.minutes > 60 || timecode.seconds > 60) {
+				continue;
+			}
+			float speed = ltc_length / _apv;
+			if (speed > 5 || speed < 0.2) {
+				continue;
+			}
+
 			int64_t sample = 0;
 			Timecode::timecode_to_sample (
 					timecode, sample, false, false,

@@ -28,7 +28,7 @@ function dsp_run (ins, outs, n_samples)
 	local rv
 	repeat
 		local tc
-		rv, tc = ltc_reader:read (0, 0, 0, 0)
+		rv, tc = ltc_reader:read (0, 0, 0, 0, 0)
 		if rv >= 0 then
 			timeout = 0
 			self:shmem():atomic_set_int (0, 1)

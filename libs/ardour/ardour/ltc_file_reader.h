@@ -38,7 +38,7 @@ public:
 	void write (float const*, samplecnt_t n_samples, samplepos_t pos = -1);
 	void raw_write (ltcsnd_sample_t*, size_t, ltc_off_t);
 
-	samplepos_t read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff);
+	samplepos_t read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff, samplecnt_t& len);
 
 private:
 	LTCDecoder* _decoder;
@@ -79,6 +79,7 @@ private:
 	LTCReader*  _reader;
 	float*      _interleaved_audio_buffer;
 	samplecnt_t _samples_read;
+	float       _apv;
 
 };
 
