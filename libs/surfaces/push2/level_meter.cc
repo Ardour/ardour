@@ -58,10 +58,12 @@ LevelMeter::LevelMeter (Push2& p, Item* parent, int len, Meter::Orientation o)
 	Config->ParameterChanged.connect (_parameter_connection, invalidator(*this), boost::bind (&LevelMeter::parameter_changed, this, _1), &_p2);
 
 	if (_meter_orientation == Meter::Vertical) {
-		_meter_packer = new HBox (_canvas);
+		_meter_packer = new HBox (this);
 	} else {
-		_meter_packer = new VBox (_canvas);
+		_meter_packer = new VBox (this);
 	}
+
+	_meter_packer->name = "MeterPacker";
 
 	_meter_packer->set_collapse_on_hide (true);
 }
@@ -255,7 +257,6 @@ LevelMeter::set_max_audio_meter_count (uint32_t cnt)
 void
 LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 {
-
 	if (!_meter) {
 		hide_all_meters ();
 		return; /* do it later or never */
@@ -289,6 +290,9 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 	    && meter_type == _visible_meter_type) {
 		return;
 	}
+
+	double total_width = 0.;
+	double total_height = 0.;
 
 #if 0
 	printf("Meter redraw: %s %s %s %s %s %s\n",
@@ -462,6 +466,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 			_meters[n].packed = false;
 			delete _meters[n].meter;
 			_meters[n].meter = new Meter (this->canvas(), 32, width, _meter_orientation, len);
+			_meters[n].meter->name = string_compose ("Meter#%1", n+1);
 			_meters[n].meter->set_highlight(hl);
 			_meters[n].width = width;
 			_meters[n].length = len;
@@ -469,12 +474,19 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 
 		_meter_packer->add (_meters[n].meter);
 		_meters[n].packed = true;
+
+		total_width += _meters[n].width;
+		total_height += _meters[n].length;
+
 		if (_max_visible_meters == 0 || (uint32_t) n < _max_visible_meters + nmidi) {
 			_meters[n].meter->show ();
 		} else {
 			_meters[n].meter->hide ();
 		}
 	}
+
+	_meter_packer->set (Rect (0., 0., total_width, total_height));
+	_meter_packer->size_allocate (_meter_packer->get());
 
 	_visible_meter_type = meter_type;
 	_midi_count = nmidi;
