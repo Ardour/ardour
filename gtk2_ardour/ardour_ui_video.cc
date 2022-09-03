@@ -346,6 +346,7 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 				 */
 			} catch (...) {
 				// LTCFileReader will have written error messages
+				ltc_seq.clear ();
 			}
 
 			::g_unlink(audio_from_video.c_str());
