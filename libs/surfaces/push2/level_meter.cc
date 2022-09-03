@@ -63,8 +63,6 @@ LevelMeter::LevelMeter (Push2& p, Item* parent, int len, Meter::Orientation o)
 		_meter_packer = new VBox (this);
 	}
 
-	_meter_packer->name = "MeterPacker";
-
 	_meter_packer->set_collapse_on_hide (true);
 }
 
@@ -466,7 +464,6 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 			_meters[n].packed = false;
 			delete _meters[n].meter;
 			_meters[n].meter = new Meter (this->canvas(), 32, width, _meter_orientation, len);
-			_meters[n].meter->name = string_compose ("Meter#%1", n+1);
 			_meters[n].meter->set_highlight(hl);
 			_meters[n].width = width;
 			_meters[n].length = len;
