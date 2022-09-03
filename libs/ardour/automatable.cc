@@ -205,6 +205,8 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return _("Width");
 	} else if (param.type() == PanElevationAutomation) {
 		return _("Elevation");
+	} else if (param.type() == PhaseAutomation) {
+		return _("Polarity Invert");
 	} else if (param.type() == MidiCCAutomation) {
 		return string_compose("Controller %1 [%2]", param.id(), int(param.channel()) + 1);
 	} else if (param.type() == MidiPgmChangeAutomation) {
