@@ -249,9 +249,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 				continue;
 			}
 
-			if (boost::dynamic_pointer_cast<Send> (_processor)) {
-				label = _("Send");
-			} else if (boost::dynamic_pointer_cast<Return> (_processor)) {
+			if (boost::dynamic_pointer_cast<Return> (_processor)) {
 				label = _("Return");
 			}
 
