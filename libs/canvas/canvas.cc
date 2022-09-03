@@ -57,6 +57,7 @@ Canvas::Canvas ()
 	: _root (this)
 	, _queue_draw_frozen (0)
 	, _bg_color (Gtkmm2ext::rgba_to_color (0, 1.0, 0.0, 1.0))
+	, _debug_render (false)
 	, _last_render_start_timestamp(0)
 	, _use_intermediate_surface (false)
 {
@@ -109,8 +110,6 @@ Canvas::zoomed ()
 	pick_current_item (0); // no current mouse position
 }
 
-static bool debug_render = false;
-
 #ifndef NDEBUG
 #ifdef CANVAS_DEBUG
 #undef CANVAS_DEBUG
@@ -130,7 +129,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 	_last_render_start_timestamp = g_get_monotonic_time();
 
 #ifdef CANVAS_DEBUG
-	if (debug_render || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+	if (_debug_render || DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 		cerr << this << " RENDER: " << area << endl;
 		 cerr << "CANVAS @ " << this << endl;
 		 dump (cerr);

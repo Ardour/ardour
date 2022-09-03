@@ -186,11 +186,14 @@ public:
 	 */
 	void use_intermediate_surface (bool yn = true);
 
+	void set_debug_render (bool yn) { _debug_render = yn; }
+	bool debug_render() const { return _debug_render; }
 protected:
 	Root             _root;
 	uint32_t         _queue_draw_frozen;
 	Rect              frozen_area;
 	Gtkmm2ext::Color _bg_color;
+	bool             _debug_render;
 
 	mutable gint64 _last_render_start_timestamp;
 
