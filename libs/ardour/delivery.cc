@@ -376,6 +376,9 @@ Delivery::state () const
 			node.add_child_nocopy (_panshell->unlinked_pannable()->get_state ());
 		}
 	}
+	if (_polarity_control) {
+		node.add_child_nocopy (_polarity_control->get_state());
+	}
 
 	return node;
 }
@@ -405,6 +408,22 @@ Delivery::set_state (const XMLNode& node, int version)
 
 	if (_panshell && _panshell->unlinked_pannable() && pannnode) {
 		_panshell->unlinked_pannable()->set_state (*pannnode, version);
+	}
+
+	if (_polarity_control) {
+		for (auto const& i : node.children()) {
+			if (i->name() != Controllable::xml_node_name) {
+				continue;
+			}
+			std::string control_name;
+			if (!i->get_property (X_("name"), control_name)) {
+				continue;
+			}
+			if (control_name == "polarity-invert") {
+				_polarity_control->set_state (*i, version);
+				break;
+			}
+		}
 	}
 
 	return 0;
@@ -581,6 +600,10 @@ Delivery::target_gain ()
 		 */
 
 		desired_gain = GAIN_COEFF_ZERO;
+	}
+
+	if (_polarity_control && _polarity_control->get_value () > 0) {
+		desired_gain *= -1;
 	}
 
 	return desired_gain;

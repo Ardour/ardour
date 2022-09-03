@@ -120,6 +120,7 @@ protected:
 	BufferSet*  _output_buffers;
 	gain_t      _current_gain;
 	boost::shared_ptr<PannerShell> _panshell;
+	boost::shared_ptr<AutomationControl> _polarity_control;
 
 	gain_t target_gain ();
 

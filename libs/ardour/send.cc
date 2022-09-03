@@ -108,6 +108,15 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	_send_delay.reset (new DelayLine (_session, "Send-" + name()));
 	_thru_delay.reset (new DelayLine (_session, "Thru-" + name()));
 
+
+	if (_role == Delivery::Aux || _role == Delivery::Send) {
+		_polarity_control = boost::shared_ptr<AutomationControl> (new AutomationControl (_session, PhaseAutomation, ParameterDescriptor (PhaseAutomation),
+		                                                                                 boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), time_domain())),
+		                                                                                 "polarity-invert"));
+		//_polarity_control->set_flag (Controllable::InlineControl);
+		add_control (_polarity_control);
+	}
+
 	if (panner_shell()) {
 		panner_shell()->Changed.connect_same_thread (*this, boost::bind (&Send::panshell_changed, this));
 		panner_shell()->PannableChanged.connect_same_thread (*this, boost::bind (&Send::pannable_changed, this));
@@ -227,6 +236,8 @@ Send::set_delay_out (samplecnt_t delay, size_t /*bus*/)
 void
 Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
+	automation_run (start_sample, nframes);
+
 	if (_output->n_ports() == ChanCount::ZERO) {
 		_meter->reset ();
 		_active = _pending_active;
@@ -298,10 +309,26 @@ Send::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-	XMLNode* gain_node;
+	for (auto const& i : node.children()) {
+		if (i->name() != Controllable::xml_node_name) {
+			continue;
+		}
+		if (version < 7000) {
+			/* old versions had a single Controllable only, and it was
+			 * not always a "gaincontrol"
+			 */
+			_gain_control->set_state (*i, version);
+			break;
+		}
 
-	if ((gain_node = node.child (Controllable::xml_node_name.c_str ())) != 0) {
-		_gain_control->set_state (*gain_node, version);
+		std::string control_name;
+		if (!i->get_property (X_("name"), control_name)) {
+			continue;
+		}
+		if (control_name == "gaincontrol" /* gain_control_name (BusSendLevel) */) {
+			_gain_control->set_state (*i, version);
+			break;
+		}
 	}
 
 	if (version <= 6000) {
@@ -317,6 +344,7 @@ Send::set_state (const XMLNode& node, int version)
 		{
 			XMLNode* processor = node.child ("Processor");
 			if (processor) {
+				XMLNode* gain_node;
 				nn = processor;
 				if ((gain_node = nn->child (Controllable::xml_node_name.c_str ())) != 0) {
 					_gain_control->set_state (*gain_node, version);

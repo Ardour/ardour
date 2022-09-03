@@ -211,6 +211,8 @@ InternalSend::send_to_going_away ()
 void
 InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
+	automation_run (start_sample, nframes);
+
 	if (!check_active() || !_send_to) {
 		_meter->reset ();
 		return;
