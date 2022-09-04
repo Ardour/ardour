@@ -4,7 +4,7 @@ ardour {
 	category    = "Amplifier",
 	license     = "MIT",
 	author      = "Ardour Community",
-	description = [[Auotomatable Crossfade. Channels are grouped:
+	description = [[Automatable Crossfade. Channels are grouped:
 Mono out:  In 1/2 -> Out 1
 Stereo out: In 1/3 -> Out 1, In 2/4 -> Out 2
 Quad out: In 1/5 -> Out 1, In 2/6 -> Out 2, In 3/7 -> Out 3, In 4/8 -> Out 4
