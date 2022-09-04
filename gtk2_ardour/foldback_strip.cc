@@ -1006,7 +1006,7 @@ FoldbackStrip::reset_strip_style ()
 		set_name ("AudioBusStripBaseInactive");
 	}
 
-	set_invert_sensitive (active);
+	update_phase_invert_sensitivty ();
 	update_sensitivity ();
 
 	_comment_button.set_sensitive (active);

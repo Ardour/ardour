@@ -1604,6 +1604,7 @@ void
 MixerStrip::set_current_delivery (boost::shared_ptr<Delivery> d)
 {
 	_current_delivery = d;
+	setup_invert_buttons ();
 	DeliveryChanged (_current_delivery);
 	update_sensitivity ();
 }
@@ -1879,7 +1880,6 @@ MixerStrip::update_sensitivity ()
 
 	input_button.set_sensitive (en && !send);
 	group_button.set_sensitive (en && !send);
-	set_invert_sensitive (en && !send);
 	gpm.meter_point_button.set_sensitive (en && !send);
 	mute_button->set_sensitive (en && !send);
 	solo_button->set_sensitive (en && !send);
@@ -1894,6 +1894,7 @@ MixerStrip::update_sensitivity ()
 
 	output_button.set_sensitive (en && !aux);
 
+	update_phase_invert_sensitivty ();
 	map_frozen ();
 	set_button_names (); // update solo button visual state
 }

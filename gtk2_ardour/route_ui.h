@@ -221,6 +221,7 @@ protected:
 	static void help_count_plugins (boost::weak_ptr<ARDOUR::Processor> p, uint32_t*);
 
 	PBD::ScopedConnectionList route_connections;
+	PBD::ScopedConnectionList send_connections;
 	bool                      self_destruct;
 
 	void init ();
@@ -238,7 +239,8 @@ protected:
 	virtual void bus_send_display_changed (boost::shared_ptr<ARDOUR::Route>);
 
 	bool mark_hidden (bool yn);
-	void set_invert_sensitive (bool);
+	void setup_invert_buttons ();
+	void update_phase_invert_sensitivty ();
 	bool verify_new_route_name (const std::string& name);
 	void check_rec_enable_sensitivity ();
 	void route_gui_changed (PBD::PropertyChange const&);
@@ -262,7 +264,6 @@ protected:
 	ARDOUR::SoloMuteRelease* _mute_release;
 
 private:
-	void setup_invert_buttons ();
 	void invert_menu_toggled (uint32_t);
 	bool invert_press (GdkEventButton*);
 	bool invert_release (GdkEventButton*, uint32_t i);

@@ -2050,7 +2050,23 @@ RouteUI::parameter_changed (string const & p)
 void
 RouteUI::setup_invert_buttons ()
 {
-	uint32_t const N = _route ? _route->phase_control()->size() : 0;
+	uint32_t N = _route ? _route->phase_control()->size() : 0;
+
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send>(_current_delivery);
+	send_connections.drop_connections ();
+	if (send) {
+		boost::shared_ptr<AutomationControl> ac = send->polarity_control ();
+		if (ac) {
+			N = 1;
+			ac->Changed.connect (send_connections, invalidator (*this), boost::bind (&RouteUI::update_polarity_display, this), gui_context());
+			if (ac->alist ()) {
+				ac->alist()->automation_state_changed.connect (send_connections, invalidator (*this), boost::bind (&RouteUI::update_phase_invert_sensitivty, this), gui_context());
+				update_phase_invert_sensitivty ();
+			}
+		} else {
+			N = 0;
+		}
+	}
 
 	if (_n_polarity_invert == N) {
 		/* buttons are already setup for this strip, but we should still set the values */
@@ -2107,6 +2123,15 @@ RouteUI::setup_invert_buttons ()
 void
 RouteUI::update_polarity_display ()
 {
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send>(_current_delivery);
+	if (send) {
+		if (send->polarity_control()) {
+			ArdourButton* b = _invert_buttons.front ();
+			b->set_active_state (send->polarity_control()->get_value () > 0 ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+		}
+		return;
+	}
+
 	if (!_route) {
 		return;
 	}
@@ -2146,6 +2171,11 @@ RouteUI::invert_release (GdkEventButton* ev, uint32_t i)
 	if (ev->button == 1 && i < _invert_buttons.size()) {
 		uint32_t const N = _route->phase_control()->size();
 		if (N <= _max_invert_buttons) {
+			boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send>(_current_delivery);
+			if (send) {
+				send->polarity_control ()->set_value (_invert_buttons[i]->get_active() ? 0 : 1, Controllable::NoGroup);
+				return false;
+			}
 			/* left-click inverts phase so long as we have a button per channel */
 			_route->phase_control()->set_phase_invert (i, !_invert_buttons[i]->get_active());
 			return false;
@@ -2197,8 +2227,19 @@ RouteUI::invert_menu_toggled (uint32_t c)
 }
 
 void
-RouteUI::set_invert_sensitive (bool yn)
+RouteUI::update_phase_invert_sensitivty ()
 {
+	bool yn = false;
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send>(_current_delivery);
+	if (send) {
+		boost::shared_ptr<AutomationControl> ac = send->polarity_control ();
+		if (ac) {
+			yn = (ac->alist()->automation_state() & Play) == 0;
+		}
+	} else if (_route) {
+		yn = _route->active () || ARDOUR::Profile->get_mixbus();
+	}
+
 	for (vector<ArdourButton*>::iterator b = _invert_buttons.begin(); b != _invert_buttons.end(); ++b) {
 		(*b)->set_sensitive (yn);
 	}
