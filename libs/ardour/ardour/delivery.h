@@ -113,6 +113,10 @@ public:
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
 	virtual uint32_t pan_outs() const;
 
+	boost::shared_ptr<AutomationControl> polarity_control () const {
+		return _polarity_control;
+	}
+
 protected:
 	XMLNode& state () const;
 
