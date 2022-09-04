@@ -65,27 +65,23 @@ ARDOUR_UI_UTILS::inhibit_screensaver (bool inhibit)
 
 #else /* Linux / X11 */
 
-#include <gtkmm.h>
+#include "ardour_ui.h"
 #include "ardour/system_exec.h"
+
+#include <gdk/gdkx.h>
 
 static sigc::connection glib_timer;
 
 static bool
-xdg_screensaver_reset ()
+reset_screensaver_timer ()
 {
-	char** args = (char**) malloc (5 * sizeof(char*));
-	args[0] = strdup ("/bin/sh");
-	args[1] = strdup ("-c");
-	args[2] = strdup ("xdg-screensaver");
-	args[3] = strdup ("reset");
-	args[4] = 0;
-
-	ARDOUR::SystemExec xdg_exec ("/bin/sh", args);
-	if (xdg_exec.start ()) {
+	Display* d = XOpenDisplay (NULL);
+	if (!d) {
 		return false;
 	}
-	xdg_exec.wait ();
-	return true; /* keep going */
+	XResetScreenSaver (d);
+	XCloseDisplay (d);
+	return true;
 }
 
 void
@@ -93,9 +89,37 @@ ARDOUR_UI_UTILS::inhibit_screensaver (bool inhibit)
 {
 	glib_timer.disconnect ();
 	if (inhibit) {
-		xdg_screensaver_reset ();
-		glib_timer = Glib::signal_timeout().connect_seconds (sigc::ptr_fun (&xdg_screensaver_reset), 45, Glib::PRIORITY_DEFAULT_IDLE);
+		reset_screensaver_timer ();
+		glib_timer = Glib::signal_timeout().connect_seconds (sigc::ptr_fun (&reset_screensaver_timer), 45, Glib::PRIORITY_DEFAULT_IDLE);
 	}
+
+#if 0
+	Glib::RefPtr<Gdk::Window> win (ARDOUR_UI::instance()->main_window ().get_window ());
+	if (!win) {
+		return;
+	}
+
+	XID xid = GDK_WINDOW_XWINDOW ((win->gobj()));
+	char tmp[32];
+	snprintf (tmp, sizeof (tmp), "%lu", xid);
+
+	char** args = (char**) malloc (6 * sizeof(char*));
+	args[0] = strdup ("/bin/sh");
+	args[1] = strdup ("-c");
+	args[2] = strdup ("xdg-screensaver");
+	if (inhibit) {
+		args[3] = strdup ("suspend");
+	} else {
+		args[3] = strdup ("resume");
+	}
+	args[4] = strdup (tmp);
+	args[5] = 0;
+
+	ARDOUR::SystemExec xdg_exec ("/bin/sh", args);
+	if (!xdg_exec.start ()) {
+		xdg_exec.wait ();
+	}
+#endif
 }
 
 #endif
