@@ -123,6 +123,7 @@ libardour_sources = [
         'ladspa_plugin.cc',
         'latent.cc',
         'legatize.cc',
+        'library.cc',
         'location.cc',
         'location_importer.cc',
         'ltc_file_reader.cc',
