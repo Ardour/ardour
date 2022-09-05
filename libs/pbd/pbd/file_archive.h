@@ -38,6 +38,8 @@ class LIBPBD_API FileArchive
 		int inflate (const std::string& destdir);
 		std::vector<std::string> contents ();
 
+		int make_local (const std::string& destdir);
+
 		std::string next_file_name ();
 		int extract_current_file (const std::string& destpath);
 
@@ -158,6 +160,8 @@ class LIBPBD_API FileArchive
 
 		struct archive_entry* _current_entry;
 		struct archive* _archive;
+
+		std::string fetch (const std::string & url, const std::string& destdir) const;
 };
 
 } /* namespace */

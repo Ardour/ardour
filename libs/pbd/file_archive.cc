@@ -178,6 +178,55 @@ FileArchive::~FileArchive ()
 	}
 }
 
+std::string
+FileArchive::fetch (const std::string & url, const std::string & destdir) const
+{
+	std::string pwd (Glib::get_current_dir ());
+
+	if (g_chdir (destdir.c_str ())) {
+		fprintf (stderr, "Archive: cannot chdir to '%s'\n", destdir.c_str ());
+		return std::string();
+	}
+
+	CURL* curl = curl_easy_init ();
+
+	if (!curl) {
+		return std::string ();
+	}
+
+	curl_easy_setopt (curl, CURLOPT_URL, url);
+	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
+	CURLcode res = curl_easy_perform (curl);
+	curl_easy_cleanup (curl);
+
+	g_chdir (pwd.c_str());
+	if (res != CURLE_OK) {
+		return std::string();
+	}
+
+	return Glib::build_filename (destdir, Glib::path_get_basename (url));
+}
+
+
+int
+FileArchive::make_local (const std::string& destdir)
+{
+	if (!_req.is_remote()) {
+		return 0;
+	}
+
+	std::string downloaded = fetch (_req.url, destdir);
+
+	if (downloaded.empty()) {
+		return -1;
+	}
+
+	_req.url = strdup (downloaded.c_str());
+	_req.mp.progress = 0;
+
+	return 0;
+}
+
 int
 FileArchive::inflate (const std::string& destdir)
 {
