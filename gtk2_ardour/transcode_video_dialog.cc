@@ -398,7 +398,7 @@ TranscodeVideoDialog::launch_extract ()
 	aborted               = false;
 	int audio_stream      = audio_combo.get_active_row_number () - 1;
 
-	progress_label.set_text (_("Extracting Audio.."));
+	progress_label.set_text (_("Extracting Audio"));
 
 	if (!transcoder->extract_audio (audiofile, _session->nominal_sample_rate (), audio_stream)) {
 		ARDOUR_UI::instance ()->popup_error (_("Audio Extraction Failed."));
@@ -428,7 +428,7 @@ TranscodeVideoDialog::launch_transcode ()
 	std::string outfn = path_entry.get_text ();
 	if (!confirm_video_outfn (*this, outfn, video_get_docroot (Config)))
 		return;
-	progress_label.set_text (_("Transcoding Video.."));
+	progress_label.set_text (_("Transcoding Video"));
 	dialog_progress_mode ();
 	if (debug_checkbox.get_active ()) {
 		transcoder->set_debug (true);
