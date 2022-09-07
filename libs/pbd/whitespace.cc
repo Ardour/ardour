@@ -16,6 +16,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <algorithm>
+#include <ctype.h>
 
 #include "pbd/whitespace.h"
 
@@ -76,5 +78,12 @@ strip_whitespace_edges (string& str)
 	    str = str.substr (s);
     }
 }
+
+void
+remove_extra_whitespace (string const & input, string & output)
+{
+	std::unique_copy (input.begin(), input.end(), std::back_insert_iterator<string>(output), [](char a,char b){ return isspace(a) && isspace(b);});  
+}
+
 
 } // namespace PBD
