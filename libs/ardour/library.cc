@@ -61,9 +61,13 @@ LibraryFetcher::get_descriptions ()
 	XMLNode const & root (*tree.root());
 
 	for (auto const & node : root.children()) {
-		string n, d, u, l, td;
+		string n, d, u, l, td, a;
 		if (!node->get_property (X_("name"), n)) {
 			std::cerr << "no name\n";
+			continue;
+		}
+		if (!node->get_property (X_("author"), a)) {
+			std::cerr << "no author\n";
 			continue;
 		}
 		if (!node->get_property (X_("url"), u)) {
@@ -82,7 +86,7 @@ LibraryFetcher::get_descriptions ()
 
 		d = node->content();
 
-		_descriptions.push_back (LibraryDescription (n, d, u, l, td));
+		_descriptions.push_back (LibraryDescription (n, a, d, u, l, td));
 		_descriptions.back().set_installed (installed (_descriptions.back()));
 
 		std::cerr << "got description for " << _descriptions.back().name() << std::endl;
@@ -183,7 +187,7 @@ LibraryFetcher::installed (LibraryDescription const & desc)
 }
 
 static size_t
-CurlFILEWrite_CallbackFunc_StdString(void *contents, size_t size, size_t nmemb, Downloader* dl)
+CurlWrite_CallbackFunc_Downloader(void *contents, size_t size, size_t nmemb, Downloader* dl)
 {
 	return dl->write (contents, size, nmemb);
 }
@@ -220,7 +224,7 @@ Downloader::Downloader (string const & u, string const & dir)
 int
 Downloader::start ()
 {
-	file_path = Glib::build_filename (Config->get_clip_library_dir(), destdir, Glib::path_get_basename (url));
+	file_path = Glib::build_filename (destdir, Glib::path_get_basename (url));
 	file = fopen (file_path.c_str(), "w");
 
 	if (!file) {
@@ -256,6 +260,10 @@ void
 Downloader::download ()
 {
 	{
+		/* First curl fetch to get the data size so that we can offer a
+		 * progress meter
+		 */
+
 		curl = curl_easy_init ();
 		if (!curl) {
 			_status = -1;
@@ -267,10 +275,21 @@ Downloader::download ()
 		curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
 		curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 		curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
-		curl_easy_perform (curl);
-		curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &dsize);
-		_download_size = dsize;
+
+		CURLcode res = curl_easy_perform (curl);
+
+		if (res == CURLE_OK) {
+			double dsize;
+			curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &dsize);
+			_download_size = dsize;
+		}
+
 		curl_easy_cleanup (curl);
+
+		if (res != CURLE_OK ) {
+			_status = -2;
+			return;
+		}
 	}
 
 	curl = curl_easy_init ();
@@ -281,7 +300,7 @@ Downloader::download ()
 
 	curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlFILEWrite_CallbackFunc_StdString);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_Downloader);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 	CURLcode res = curl_easy_perform (curl);
 	curl_easy_cleanup (curl);

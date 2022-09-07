@@ -15,11 +15,12 @@ namespace ARDOUR {
 class LibraryDescription
 {
    public:
-	LibraryDescription (std::string const & n, std::string const & d, std::string const & u, std::string const & l, std::string const & td)
-		: _name (n), _description (d), _url (u), _license (l), _toplevel_dir (td), _installed (false) {}
+	LibraryDescription (std::string const & n, std::string const & a, std::string const & d, std::string const & u, std::string const & l, std::string const & td)
+		: _name (n), _author (a), _description (d), _url (u), _license (l), _toplevel_dir (td), _installed (false) {}
 
 	std::string const & name() const { return _name; }
 	std::string const & description() const { return _description; }
+	std::string const & author() const { return _author; }
 	std::string const & url() const { return _url; }
 	std::string const & license() const { return _license; }
 	std::string const & toplevel_dir() const { return _toplevel_dir; }
@@ -29,6 +30,7 @@ class LibraryDescription
 
   private:
 	std::string _name;
+	std::string _author;
 	std::string _description;
 	std::string _url;
 	std::string _license;
@@ -61,7 +63,6 @@ class Downloader {
 	FILE* file;
 	CURL* curl;
 	bool _cancel;
-	double dsize; /* temporary to match CURL API */
 	std::atomic<uint64_t> _download_size; /* read-only from requestor thread */
 	std::atomic<uint64_t> _downloaded; /* read-only from requestor thread */
 	std::atomic<int> _status;
