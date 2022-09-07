@@ -6,6 +6,8 @@
 
 #include "pbd/i18n.h"
 #include "pbd/file_archive.h"
+#include "pbd/replace_all.h"
+#include "pbd/whitespace.h"
 #include "pbd/xml++.h"
 
 #include "ardour/rc_configuration.h"
@@ -61,35 +63,33 @@ LibraryFetcher::get_descriptions ()
 	XMLNode const & root (*tree.root());
 
 	for (auto const & node : root.children()) {
-		string n, d, u, l, td, a;
-		if (!node->get_property (X_("name"), n)) {
-			std::cerr << "no name\n";
-			continue;
-		}
-		if (!node->get_property (X_("author"), a)) {
-			std::cerr << "no author\n";
-			continue;
-		}
-		if (!node->get_property (X_("url"), u)) {
-			std::cerr << "no urln";
-			continue;
-		}
-		if (!node->get_property (X_("license"), l)) {
-			std::cerr << "no license\n";
+		string n, d, u, l, td, a, sz;
+		std::cerr << "See child node: " << node->name() << std::endl;
+		if (!node->get_property (X_("name"), n) ||
+		    !node->get_property (X_("author"), a) ||
+		    !node->get_property (X_("url"), u) ||
+		    !node->get_property (X_("license"), l) ||
+		    !node->get_property (X_("toplevel"), td) ||
+		    !node->get_property (X_("size"), sz)) {
 			continue;
 		}
 
-		if (!node->get_property (X_("toplevel"), td)) {
-			std::cerr << "no topevel\n";
-			continue;
+		for (auto const & cnode : node->children()) {
+			if (cnode->is_content()) {
+				d = cnode->content();
+				break;
+			}
 		}
 
-		d = node->content();
+		string ds;
+		remove_extra_whitespace (d, ds);
+		strip_whitespace_edges (ds);
+		replace_all (ds, "\n", "");
 
-		_descriptions.push_back (LibraryDescription (n, a, d, u, l, td));
+		_descriptions.push_back (LibraryDescription (n, a, ds, u, l, td, sz));
 		_descriptions.back().set_installed (installed (_descriptions.back()));
 
-		std::cerr << "got description for " << _descriptions.back().name() << std::endl;
+		std::cerr << "got description for " << _descriptions.back().name() << " installed ? " << _descriptions.back().installed() << std::endl;
 	}
 
 	return 0;

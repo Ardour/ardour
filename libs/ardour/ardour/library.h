@@ -8,6 +8,8 @@
 #include <vector>
 #include <thread>
 
+#include <boost/function.hpp>
+
 #include <curl/curl.h>
 
 namespace ARDOUR {
@@ -15,8 +17,8 @@ namespace ARDOUR {
 class LibraryDescription
 {
    public:
-	LibraryDescription (std::string const & n, std::string const & a, std::string const & d, std::string const & u, std::string const & l, std::string const & td)
-		: _name (n), _author (a), _description (d), _url (u), _license (l), _toplevel_dir (td), _installed (false) {}
+	LibraryDescription (std::string const & n, std::string const & a, std::string const & d, std::string const & u, std::string const & l, std::string const & td, std::string const & s)
+		: _name (n), _author (a), _description (d), _url (u), _license (l), _toplevel_dir (td), _size (s), _installed (false) {}
 
 	std::string const & name() const { return _name; }
 	std::string const & description() const { return _description; }
@@ -24,6 +26,7 @@ class LibraryDescription
 	std::string const & url() const { return _url; }
 	std::string const & license() const { return _license; }
 	std::string const & toplevel_dir() const { return _toplevel_dir; }
+	std::string const & size() const { return _size; }
 
 	bool installed() const { return _installed; }
 	void set_installed (bool yn) { _installed = yn; }
@@ -35,6 +38,7 @@ class LibraryDescription
 	std::string _url;
 	std::string _license;
 	std::string _toplevel_dir;
+	std::string _size;
 	bool _installed;
 };
 
