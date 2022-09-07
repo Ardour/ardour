@@ -582,6 +582,11 @@ ARDOUR_UI::install_dependent_actions ()
 		ActionManager::session_sensitive_actions.push_back (act);
 	}
 
+	act = ActionManager::register_action (common_actions, "jump-to-loop-start", _("Jump to Loop Start"), sigc::bind(sigc::mem_fun(*editor, &PublicEditor::jump_to_loop_marker), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (common_actions, "jump-to-loop-end", _("Jump to Loop End"), sigc::bind(sigc::mem_fun(*editor, &PublicEditor::jump_to_loop_marker), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (common_actions, X_("addExistingAudioFiles"), _("Import"), sigc::mem_fun (*editor, &PublicEditor::external_audio_dialog));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);

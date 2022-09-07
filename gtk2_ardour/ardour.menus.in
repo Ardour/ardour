@@ -123,6 +123,9 @@
         <menuitem action='jump-forward-to-mark'/>
         <menuitem action='jump-backward-to-mark'/>
         <separator/>
+        <menuitem action='jump-to-loop-start'/>
+        <menuitem action='jump-to-loop-end'/>
+        <separator/>
         <menuitem action='GotoZero'/>
         <menuitem action='GotoStart'/>
         <menuitem action='GotoEnd'/>

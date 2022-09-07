@@ -708,11 +708,13 @@ private:
 	void add_new_location (ARDOUR::Location*);
 	ArdourCanvas::Container* add_new_location_internal (ARDOUR::Location*);
 	void location_gone (ARDOUR::Location*);
+	void loop_location_changed (ARDOUR::Location*);
 	void remove_marker (ArdourCanvas::Item&);
 	void remove_marker (ArdourMarker*);
 	gint really_remove_global_marker (ARDOUR::Location* loc);
 	gint really_remove_region_marker (ArdourMarker*);
 	void goto_nth_marker (int nth);
+	void jump_to_loop_marker (bool start);
 	void trigger_script (int nth);
 	void trigger_script_by_name (const std::string script_name, const std::string args = "");
 	void toggle_marker_lines ();

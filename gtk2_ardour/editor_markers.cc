@@ -946,6 +946,14 @@ Editor::location_gone (Location *location)
 }
 
 void
+Editor::loop_location_changed (Location* l)
+{
+	bool s = 0 != l;
+	ActionManager::get_action (X_("Common"), X_("jump-to-loop-start"))->set_sensitive (s);
+	ActionManager::get_action (X_("Common"), X_("jump-to-loop-end"))->set_sensitive (s);
+}
+
+void
 Editor::tempo_map_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 {
 	marker_menu_item = item;
@@ -1947,6 +1955,24 @@ Editor::goto_nth_marker (int n)
 			}
 			--n;
 		}
+	}
+}
+
+void
+Editor::jump_to_loop_marker (bool start)
+{
+	if (!_session) {
+		return;
+	}
+	Location* l = _session->locations ()->auto_loop_location ();
+	if (!l) {
+		return;
+	}
+
+	if (start) {
+		_session->request_locate (l->start_sample());
+	} else {
+		_session->request_locate (l->end_sample());
 	}
 }
 

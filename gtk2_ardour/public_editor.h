@@ -244,6 +244,7 @@ public:
 	virtual void rec_with_count_in () = 0;
 	virtual void maybe_locate_with_edit_preroll (samplepos_t location) = 0;
 	virtual void goto_nth_marker (int nth) = 0;
+	virtual void jump_to_loop_marker (bool start) = 0;
 	virtual void trigger_script (int nth) = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
