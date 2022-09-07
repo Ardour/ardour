@@ -29,7 +29,7 @@ namespace PBD {
 // returns the empty string if the entire string is whitespace
 // so check length after calling.
 	LIBPBD_API extern void strip_whitespace_edges (std::string& str);
-	LIBPBD_API extern void remove_extra_whitespace (std::string const & in, std::string out);
+	LIBPBD_API extern void remove_extra_whitespace (std::string const & in, std::string & out);
 } // namespace PBD
 
 #endif // __pbd_whitespace_h__
