@@ -554,12 +554,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
 }
 
-void
-ARDOUR_UI::library_show_status (LibraryDescription ld)
-{
-	std::cerr << "Library " << ld.name() << " installed ? " << ld.installed() << std::endl;
-}
-
 GlobalPortMatrixWindow*
 ARDOUR_UI::create_global_port_matrix (ARDOUR::DataType type)
 {

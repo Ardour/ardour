@@ -74,7 +74,6 @@
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "ardour/ardour.h"
-#include "ardour/library.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
 #include "ardour/plugin.h"
@@ -418,8 +417,6 @@ protected:
 	void toggle_session_auto_loop ();
 	void toggle_rc_options_window ();
 	void toggle_session_options_window ();
-
-	void library_show_status (ARDOUR::LibraryDescription ld);
 
 private:
 
