@@ -952,9 +952,9 @@ FollowActionIcon::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::
 			layout->set_text (cue_marker_name (cue_idx));
 			int tw, th;
 			layout->get_pixel_size (tw, th);
-			context->move_to (size / 2, size / 2);
-			context->rel_move_to (-tw / 2, -th / 2);
-			layout->show_in_cairo_context (context);
+			// context->move_to (size / 2, size / 2);
+			// context->rel_move_to (-tw / 2, -th / 2);
+			// layout->show_in_cairo_context (context);
 		} else if (false) {  // 'ANY' jump
 			for (int i = 0; i < 6; i++) {
 				Cairo::Matrix m = context->get_matrix ();
