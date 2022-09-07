@@ -150,6 +150,7 @@ gtk2_ardour_sources = [
         'latency_gui.cc',
         'led.cc',
         'level_meter.cc',
+        'library_download_dialog.cc',
         'location_ui.cc',
         'loudness_dialog.cc',
         'loudness_settings.cc',

@@ -60,6 +60,7 @@
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "keyeditor.h"
+#include "library_download_dialog.h"
 #include "location_ui.h"
 #include "lua_script_manager.h"
 #include "luawindow.h"
@@ -1003,6 +1004,13 @@ ARDOUR_UI::create_virtual_keyboard_window ()
 {
 	VirtualKeyboardWindow* vkbd = new VirtualKeyboardWindow ();
 	return vkbd;
+}
+
+LibraryDownloadDialog*
+ARDOUR_UI::create_library_manager_window ()
+{
+	LibraryDownloadDialog* ldd = new LibraryDownloadDialog ();
+	return ldd;
 }
 
 LuaWindow*

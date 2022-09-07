@@ -48,6 +48,7 @@
 #include <list>
 #include <cmath>
 
+#include <boost/utility.hpp>
 
 #include "pbd/xml++.h"
 #include <gtkmm/box.h>
@@ -73,6 +74,7 @@
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "ardour/ardour.h"
+#include "ardour/library.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
 #include "ardour/plugin.h"
@@ -123,6 +125,7 @@
 #include "speaker_dialog.h"
 #include "transport_masters_dialog.h"
 #include "virtual_keyboard_window.h"
+#include "library_download_dialog.h"
 #else
 class About;
 class AddRouteDialog;
@@ -148,6 +151,7 @@ class PluginManagerUI;
 class DspStatisticsWindow;
 class TransportMastersWindow;
 class VirtualKeyboardWindow;
+class LibraryDownloadDialog;
 #endif
 
 class VideoTimeLine;
@@ -414,6 +418,8 @@ protected:
 	void toggle_session_auto_loop ();
 	void toggle_rc_options_window ();
 	void toggle_session_options_window ();
+
+	void library_show_status (ARDOUR::LibraryDescription ld);
 
 private:
 
@@ -758,6 +764,7 @@ private:
 	WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
 	WM::ProxyWithConstructor<BigTransportWindow> big_transport_window;
 	WM::ProxyWithConstructor<VirtualKeyboardWindow> virtual_keyboard_window;
+	WM::ProxyWithConstructor<LibraryDownloadDialog> library_manager_window;
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
 	WM::ProxyWithConstructor<KeyEditor> key_editor;
@@ -771,6 +778,7 @@ private:
 	BigClockWindow*         create_big_clock_window();
 	BigTransportWindow*     create_big_transport_window();
 	VirtualKeyboardWindow*  create_virtual_keyboard_window();
+	LibraryDownloadDialog*  create_library_manager_window();
 	GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 	KeyEditor*              create_key_editor ();
 	LuaWindow*              create_luawindow ();

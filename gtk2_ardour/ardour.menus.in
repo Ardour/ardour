@@ -656,6 +656,7 @@
       <menuitem action='toggle-big-clock'/>
       <menuitem action='toggle-big-transport'/>
       <menuitem action='toggle-virtual-keyboard'/>
+      <menuitem action='toggle-library-manager'/>
 
       <separator/><!-- Video Monitor !-->
       <menuitem action='ToggleJadeo'/>
