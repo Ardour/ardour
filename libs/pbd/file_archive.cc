@@ -194,7 +194,7 @@ FileArchive::fetch (const std::string & url, const std::string & destdir) const
 		return std::string ();
 	}
 
-	curl_easy_setopt (curl, CURLOPT_URL, url);
+	curl_easy_setopt (curl, CURLOPT_URL, url.c_str ());
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
 	CURLcode res = curl_easy_perform (curl);
 	curl_easy_cleanup (curl);
