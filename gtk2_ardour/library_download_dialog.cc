@@ -16,13 +16,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iostream>
+
 #include "pbd/i18n.h"
 
 #include <glibmm/markup.h>
 
+#include "ardour/rc_configuration.h"
 #include "ardour/library.h"
 
 #include "library_download_dialog.h"
+
+using namespace ARDOUR;
+using std::string;
 
 LibraryDownloadDialog::LibraryDownloadDialog ()
 	: ArdourDialog (_("Loop Library Manager"), true) /* modal */
@@ -67,6 +73,7 @@ LibraryDownloadDialog::add_library (ARDOUR::LibraryDescription const & ld)
 	(*i)[_columns.license] = ld.license();
 	(*i)[_columns.size] = ld.size();
 	(*i)[_columns.installed] = ld.installed();
+	(*i)[_columns.url] = ld.url();
 
 	/* tooltip must be escape for pango markup, and we should strip all
 	 * duplicate spaces
@@ -80,4 +87,39 @@ LibraryDownloadDialog::add_library (ARDOUR::LibraryDescription const & ld)
 void
 LibraryDownloadDialog::install_activated (std::string str)
 {
+	Gtk::TreeModel::iterator row = _model->get_iter (Gtk::TreePath (str));
+	std::string url = (*row)[_columns.url];
+
+	std::cerr << "will download " << url << " to " << Config->get_clip_library_dir() << std::endl;
+
+	ARDOUR::Downloader* downloader = new ARDOUR::Downloader (url, ARDOUR::Config->get_clip_library_dir());
+
+	/* setup timer callback to update progressbar */
+
+	Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (*this, &LibraryDownloadDialog::dl_timer_callback), downloader, str), 40);
+
+	/* and go ... */
+
+	downloader->start ();
+
+	(*row)[_columns.downloader] = downloader;
+
+	/* and back to the GUI, though we're modal so not much is possible */
+}
+
+bool
+LibraryDownloadDialog::dl_timer_callback (Downloader* dl, std::string path_str)
+{
+	double prog = dl->progress();
+
+	std::cerr << "prog: " << prog << std::endl;
+
+	/* set something based on this */
+	if (dl->status() != 0) {
+		delete dl;
+		Gtk::TreeModel::iterator row = _model->get_iter (Gtk::TreePath (path_str));
+		(*row)[_columns.downloader] = 0;
+		return false; /* no more calls, done or cancelled */
+	}
+	return true;
 }

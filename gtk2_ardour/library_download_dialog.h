@@ -29,6 +29,7 @@
 
 namespace ARDOUR {
 	class LibraryDescription;
+	class Downloader;
 }
 
 class LibraryDownloadDialog : public ArdourDialog
@@ -48,6 +49,7 @@ class LibraryDownloadDialog : public ArdourDialog
 			add (size);
 			add (installed);
 			add (description);
+			add (url);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
@@ -55,7 +57,9 @@ class LibraryDownloadDialog : public ArdourDialog
 		Gtk::TreeModelColumn<std::string> license;
 		Gtk::TreeModelColumn<std::string> size;
 		Gtk::TreeModelColumn<std::string> description;
+		Gtk::TreeModelColumn<std::string> url;
 		Gtk::TreeModelColumn<bool> installed;
+		Gtk::TreeModelColumn<ARDOUR::Downloader*> downloader;
 	};
 
 	Gtk::TreeView _display;
@@ -81,6 +85,7 @@ class LibraryDownloadDialog : public ArdourDialog
 	void setup_toggle (Gtk::TreeViewColumn*, sigc::slot<void, std::string>);
 
 	void install_activated (std::string str);
+	bool dl_timer_callback (ARDOUR::Downloader*, std::string);
 };
 
 
