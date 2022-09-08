@@ -66,7 +66,8 @@ LibraryFetcher::get_descriptions ()
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf);
-	CURLcode res = curl_easy_perform (curl);
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 2L);
+        CURLcode res = curl_easy_perform (curl);
 	curl_easy_cleanup (curl);
 
 	if (res != CURLE_OK) {
