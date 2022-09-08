@@ -284,20 +284,6 @@ libardour_sources = [
         'worker.cc'
 ]
 
-def flac_supported():
-    cmd = subprocess.Popen ("sndfile-info testfile.flac",
-                            stdout = subprocess.PIPE,
-                            stderr = subprocess.STDOUT, shell = True)
-    out = cmd.communicate()[0].decode('utf-8')
-    return re.search ('unknown format', out) is None
-
-def ogg_supported():
-    cmd = subprocess.Popen ("sndfile-info testfile.ogg",
-                            stdout = subprocess.PIPE,
-                            stderr = subprocess.STDOUT, shell = True)
-    out = cmd.communicate()[0].decode('utf-8')
-    return re.search ('unknown format', out) is None
-
 def options(opt):
     autowaf.set_options(opt)
 
@@ -365,11 +351,6 @@ def configure(conf):
     conf.check(header_name='sys/statvfs.h', define_name='HAVE_SYS_STATVFS_H',mandatory=False)
 
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
-
-    if flac_supported():
-        conf.define ('HAVE_FLAC', 1)
-    if ogg_supported():
-        conf.define ('HAVE_OGG', 1)
 
     conf.write_config_header('libardour-config.h', remove=False)
 
