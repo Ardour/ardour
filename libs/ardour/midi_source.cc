@@ -201,7 +201,6 @@ MidiSource::midi_read (const ReaderLock&                  lm,
                        const std::set<Evoral::Parameter>& filtered)
 {
 	Timing t;
-	uint32_t ecnt = 0;
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO,
 	             string_compose ("MidiSource::midi_read() %5 sstart %1 start %2 cnt %3 tracker %4\n",
