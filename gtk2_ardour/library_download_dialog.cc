@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cmath>
 #include <iostream>
 
 #include "pbd/i18n.h"
@@ -40,14 +41,14 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 	_display.append_column (_("Author"), _columns.author);
 	_display.append_column (_("License"), _columns.license);
 	_display.append_column (_("Size"), _columns.size);
-	_display.append_column_editable (_("Installed"), _columns.installed);
-
-	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *> (_display.get_column_cell_renderer (4));
-	toggle->set_alignment (0.0, 0.5);
-	toggle->signal_toggled().connect (sigc::mem_fun (*this, &LibraryDownloadDialog::install_activated));
+	_display.append_column (_("Installed"), _columns.installed);
+	_display.append_column_editable ("", _columns.install);
+	append_progress_column ();
 
 	_display.set_headers_visible (true);
 	_display.set_tooltip_column (5); /* path */
+
+	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &LibraryDownloadDialog::display_button_press), false);
 
 	Gtk::HBox* h = new Gtk::HBox;
 	h->set_spacing (8);
@@ -64,6 +65,17 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 }
 
 void
+LibraryDownloadDialog::append_progress_column ()
+{
+	progress_renderer = new Gtk::CellRendererProgress();
+	progress_renderer->property_width() = 100;
+	Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ("", *progress_renderer));
+	tvc->add_attribute (*progress_renderer, "value", _columns.progress);
+	_display.append_column (*tvc);
+}
+
+
+void
 LibraryDownloadDialog::add_library (ARDOUR::LibraryDescription const & ld)
 {
 
@@ -75,19 +87,39 @@ LibraryDownloadDialog::add_library (ARDOUR::LibraryDescription const & ld)
 	(*i)[_columns.installed] = ld.installed();
 	(*i)[_columns.url] = ld.url();
 
+	if (ld.installed()) {
+		(*i)[_columns.install] = string();
+	} else {
+		(*i)[_columns.install] = string (_("Install"));
+	}
+
 	/* tooltip must be escape for pango markup, and we should strip all
 	 * duplicate spaces
 	 */
 
 	(*i)[_columns.description] = Glib::Markup::escape_text (ld.description());
-	std::cerr << "set descr to " << ld.description() << std::endl;
+}
+
+void
+LibraryDownloadDialog::install (std::string const & path, Gtk::TreePath const & treepath)
+{
+	Gtk::TreeModel::iterator row = _model->get_iter (treepath);
+	LibraryFetcher lf;
+
+	if (lf.add (path) == 0) {
+		(*row)[_columns.installed] = true;
+		(*row)[_columns.install] = string();;
+	} else {
+		(*row)[_columns.installed] = false;
+		(*row)[_columns.install] = _("Install");
+	}
 }
 
 
 void
-LibraryDownloadDialog::install_activated (std::string str)
+LibraryDownloadDialog::download (Gtk::TreePath const & path)
 {
-	Gtk::TreeModel::iterator row = _model->get_iter (Gtk::TreePath (str));
+	Gtk::TreeModel::iterator row = _model->get_iter (path);
 	std::string url = (*row)[_columns.url];
 
 	std::cerr << "will download " << url << " to " << Config->get_clip_library_dir() << std::endl;
@@ -96,7 +128,7 @@ LibraryDownloadDialog::install_activated (std::string str)
 
 	/* setup timer callback to update progressbar */
 
-	Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (*this, &LibraryDownloadDialog::dl_timer_callback), downloader, str), 40);
+	Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (*this, &LibraryDownloadDialog::dl_timer_callback), downloader, path), 40);
 
 	/* and go ... */
 
@@ -104,22 +136,73 @@ LibraryDownloadDialog::install_activated (std::string str)
 
 	(*row)[_columns.downloader] = downloader;
 
-	/* and back to the GUI, though we're modal so not much is possible */
+	/* and back to the GUI event loop, though we're modal so not much is possible */
 }
 
 bool
-LibraryDownloadDialog::dl_timer_callback (Downloader* dl, std::string path_str)
+LibraryDownloadDialog::dl_timer_callback (Downloader* dl, Gtk::TreePath treepath)
 {
-	double prog = dl->progress();
+	Gtk::TreeModel::iterator row = _model->get_iter (treepath);
 
-	std::cerr << "prog: " << prog << std::endl;
+	/* zero status indicates still running; positive status indicates
+	 * success; negative value indicates failure
+	 */
 
-	/* set something based on this */
-	if (dl->status() != 0) {
-		delete dl;
-		Gtk::TreeModel::iterator row = _model->get_iter (Gtk::TreePath (path_str));
-		(*row)[_columns.downloader] = 0;
-		return false; /* no more calls, done or cancelled */
+	if (dl->status() == 0) {
+		(*row)[_columns.progress] = (int) round ((dl->progress() * 100.0));
+		return true; /* call again */
 	}
-	return true;
+
+	(*row)[_columns.progress] = 0.;
+	(*row)[_columns.downloader] = 0;
+
+	if (dl->status() < 0) {
+		(*row)[_columns.install] = _("Install");;
+	} else {
+		(*row)[_columns.install] = _("Installing");
+		install (dl->download_path(), treepath);
+	}
+
+	delete dl;
+
+	return false; /* no more calls, done or cancelled */
+}
+
+bool
+LibraryDownloadDialog::display_button_press (GdkEventButton* ev)
+{
+	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 1)) {
+
+		Gtk::TreeModel::Path path;
+		Gtk::TreeViewColumn* column;
+		int cellx, celly;
+
+		if (!_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+			return false;
+		}
+
+		Gtk::TreeIter iter = _model->get_iter (path);
+
+		std::cerr << "Click\n";
+
+		string cur = (*iter)[_columns.install];
+		if (cur == _("Install")) {
+			if (!(*iter)[_columns.installed]) {
+				(*iter)[_columns.install] = _("Cancel");
+				download (path);
+			}
+		} else {
+			Downloader* dl = (*iter)[_columns.downloader];
+
+			if (dl) {
+				dl->cancel ();
+			}
+
+			(*iter)[_columns.install] = _("Install");
+		}
+
+		return true;
+	}
+
+	return false;
 }

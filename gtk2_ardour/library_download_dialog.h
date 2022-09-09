@@ -21,6 +21,7 @@
 
 #include <string>
 
+#include <gtkmm/cellrendererprogress.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treeview.h>
@@ -50,16 +51,23 @@ class LibraryDownloadDialog : public ArdourDialog
 			add (installed);
 			add (description);
 			add (url);
+			add (install);
+			add (progress);
+			add (downloader);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> author;
 		Gtk::TreeModelColumn<std::string> license;
 		Gtk::TreeModelColumn<std::string> size;
-		Gtk::TreeModelColumn<std::string> description;
-		Gtk::TreeModelColumn<std::string> url;
+		Gtk::TreeModelColumn<std::string> install;
 		Gtk::TreeModelColumn<bool> installed;
+		/* these are not displayed */
+		Gtk::TreeModelColumn<std::string> url;
 		Gtk::TreeModelColumn<ARDOUR::Downloader*> downloader;
+		Gtk::TreeModelColumn<double> progress;
+		/* used as tooltip */
+		Gtk::TreeModelColumn<std::string> description;
 	};
 
 	Gtk::TreeView _display;
@@ -78,14 +86,15 @@ class LibraryDownloadDialog : public ArdourDialog
 		return c;
 	}
 
-	bool tv_query_tooltip (int x, int y, bool kbd, const Glib::RefPtr<Gtk::Tooltip>& tooltip);
+	Gtk::CellRendererProgress* progress_renderer;
 
+	void append_progress_column ();
 
-	void setup_col (Gtk::TreeViewColumn*, int, Gtk::AlignmentEnum, const char*, const char*);
-	void setup_toggle (Gtk::TreeViewColumn*, sigc::slot<void, std::string>);
+	void download (Gtk::TreePath const &);
+	void install (std::string const & path, Gtk::TreePath const & treepath);
 
-	void install_activated (std::string str);
-	bool dl_timer_callback (ARDOUR::Downloader*, std::string);
+	bool dl_timer_callback (ARDOUR::Downloader*, Gtk::TreePath);
+	bool display_button_press (GdkEventButton* ev);
 };
 
 
