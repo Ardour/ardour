@@ -456,6 +456,10 @@ protected:
 	bool verify_start_and_length (timepos_t const &, timecnt_t&);
 	void first_edit ();
 
+	void override_opaqueness (bool yn) {
+		_opaque = yn;
+	}
+
 	/* This is always using AudioTime. convenient for evenlopes in AudioRegion */
 	timepos_t len_as_tpos () const { return timepos_t((samplepos_t)_length.val().samples()); }
 

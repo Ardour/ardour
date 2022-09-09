@@ -65,6 +65,12 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
 	, _ignore_shift (false)
 {
+	/* by default MIDI regions are transparent,
+	 * this should probably be set depending on use-case,
+	 * (eg. loop recording, vs copy/edit/paste)
+	 */
+	override_opaqueness (false);
+
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
 	model_changed ();
 	assert(_name.val().find("/") == string::npos);
@@ -351,6 +357,14 @@ int
 MidiRegion::set_state (const XMLNode& node, int version)
 {
 	int ret = Region::set_state (node, version);
+
+#ifdef MIXBUS
+#warning remember to convert MidiRegion opacity for v9 /* see also MidiPlaylist::render */
+#endif
+	if (version < 7000) {
+		/* previous sessions had uncontionally transparent MIDI regions */
+		override_opaqueness (false);
+	}
 
 	return ret;
 }
