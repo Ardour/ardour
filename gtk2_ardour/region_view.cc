@@ -1011,7 +1011,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 		t = t.increment ();
 
 		/* is this region is on top at time t? */
-		bool const new_me = (pl->top_unmuted_region_at (t) == _region);
+		bool const new_me = pl->region_is_audible_at (_region, t);
 		/* finish off any old rect, if required */
 		if (cr && me != new_me) {
 			cr->set_x1 (trackview.editor().duration_to_pixels (position.distance (t)));
