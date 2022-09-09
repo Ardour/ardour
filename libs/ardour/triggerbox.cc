@@ -2697,13 +2697,22 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 tlrr %2 >= fb %3, so at end with %4\n", index(), maybe_last_event_timeline_beats, final_beat, event));
 			iter = model->end();
 			break;
+		} else if (maybe_last_event_timeline_beats < start_beats) {
+			/* something made iter incorrect, maybe tempo map
+			   change. Pretend that we reached the end
+			*/
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 tlrr %2 < sb %3, so at end with %4\n", index(), maybe_last_event_timeline_beats, start_beats, event));
+			iter = model->end();
+			break;
 		}
 
 		/* Now get samples */
 
 		const samplepos_t timeline_samples = tmap->sample_at (maybe_last_event_timeline_beats);
 
-		if (timeline_samples >= end_sample) {
+		if (timeline_samples >= end_sample || timeline_samples < start_sample) {
+			/* we should not get here but if we do, pretend we reached the end */
+			iter = model->end();
 			break;
 		}
 
@@ -2720,6 +2729,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			 */
 
 			samplepos_t buffer_samples = (timeline_samples - start_sample) + dest_offset;
+			assert (buffer_samples >= 0);
 
 			Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, event.size(), const_cast<uint8_t*>(event.buffer()), false);
 
