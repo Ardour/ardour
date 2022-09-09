@@ -22,6 +22,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "pbd/error.h"
 #include "pbd/i18n.h"
 #include "pbd/file_archive.h"
 #include "pbd/replace_all.h"
@@ -240,6 +241,11 @@ Downloader::Downloader (string const & u, string const & dir)
 {
 }
 
+Downloader::~Downloader ()
+{
+	cleanup();
+}
+
 int
 Downloader::start ()
 {
@@ -266,7 +272,6 @@ void
 Downloader::cancel ()
 {
 	_cancel = true;
-	cleanup ();
 }
 
 double
@@ -278,6 +283,8 @@ Downloader::progress () const
 void
 Downloader::download ()
 {
+	char curl_error[CURL_ERROR_SIZE];
+
 	{
 		/* First curl fetch to get the data size so that we can offer a
 		 * progress meter
@@ -291,9 +298,11 @@ Downloader::download ()
 
 		/* get size */
 
+		curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
 		curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
 		curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 		curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
+		curl_easy_setopt (curl, CURLOPT_ERRORBUFFER, curl_error);
 
 		CURLcode res = curl_easy_perform (curl);
 
@@ -306,6 +315,7 @@ Downloader::download ()
 		curl_easy_cleanup (curl);
 
 		if (res != CURLE_OK ) {
+			error << string_compose (_("Download failed, error code %1 (%2)"), curl_easy_strerror (res), curl_error) << endmsg;
 			_status = -2;
 			return;
 		}

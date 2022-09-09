@@ -63,6 +63,7 @@ class LibraryDescription
 class Downloader {
   public:
 	Downloader (std::string const & url, std::string const & destdir);
+	~Downloader ();
 
 	int start ();
 	void cleanup ();
