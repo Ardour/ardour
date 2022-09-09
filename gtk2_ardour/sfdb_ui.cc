@@ -1510,9 +1510,13 @@ SoundFileOmega::reset_options ()
 
 		channel_combo.set_sensitive (false);
 		action_combo.set_sensitive (false);
+		sort_combo.set_sensitive (false);
 		where_combo.set_sensitive (false);
 		copy_files_btn.set_active (true);
 		copy_files_btn.set_sensitive (false);
+		midi_track_name_combo.set_sensitive (false);
+		smf_tempo_btn.set_sensitive (false);
+		smf_marker_btn.set_sensitive (false);
 
 		return false;
 
@@ -1521,6 +1525,7 @@ SoundFileOmega::reset_options ()
 		channel_combo.set_sensitive (true);
 		action_combo.set_sensitive (true);
 		where_combo.set_sensitive (true);
+		sort_combo.set_sensitive (paths.size () > 1 && (ImportAsTrack == get_mode () || ImportAsTrigger == get_mode ()));
 
 		/* if we get through this function successfully, this may be
 		   reset at the end, once we know if we can use hard links
@@ -1549,11 +1554,9 @@ SoundFileOmega::reset_options ()
 		return false;
 	}
 
-	if (have_a_midi_file) {
-		smf_tempo_btn.show ();
-	} else {
-		smf_tempo_btn.hide ();
-	}
+	midi_track_name_combo.set_sensitive (have_a_midi_file);
+	smf_tempo_btn.set_sensitive (have_a_midi_file);
+	smf_marker_btn.set_sensitive (have_a_midi_file);
 
 	string existing_choice;
 	vector<string> action_strings;
@@ -1851,8 +1854,8 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	: SoundFileBrowser (title, s, persistent)
 	, instrument_combo (InstrumentSelector::ForTrackSelector)
 	, copy_files_btn ( _("Copy files to session"))
-	, smf_tempo_btn (_("Use MIDI Tempo Map (if defined)"))
-	, smf_marker_btn (_("Import MIDI markers (if any)"))
+	, smf_tempo_btn (_("Use MIDI Tempo Map"))
+	, smf_marker_btn (_("Import MIDI markers"))
 	, selected_audio_track_cnt (selected_audio_tracks)
 	, selected_midi_track_cnt (selected_midi_tracks)
 	, _import_active (false)
@@ -1861,10 +1864,6 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	vector<string> str;
 
 	set_size_request (-1, 550);
-
-	block_two.set_border_width (12);
-	block_three.set_border_width (12);
-	block_four.set_border_width (12);
 
 	str.clear ();
 	str.push_back (_("file timestamp"));
@@ -1885,39 +1884,44 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 
 	l = manage (new Label);
 	l->set_markup (_("<b>Insert at</b>"));
-	options.attach (*l, 0, 1, 3, 4, FILL, SHRINK, 8, 0);
-	options.attach (where_combo, 0, 1, 4, 5, FILL, SHRINK, 8, 0);
+	options.attach (*l, 0, 1, 2, 3, FILL, SHRINK, 8, 0);
+	options.attach (where_combo, 0, 1, 3, 4, FILL, SHRINK, 8, 0);
 
 	l = manage (new Label);
 	l->set_markup (_("<b>Mapping</b>"));
+	options.attach (*l, 0, 1, 4, 5, FILL, SHRINK, 8, 0);
+	options.attach (channel_combo, 0, 1, 5, 6, FILL, SHRINK, 8, 0);
+
+	/* 2nd col */
+	l = manage (new Label);
+	l->set_markup (_("<b>Sort order</b>"));
 	options.attach (*l, 1, 2, 0, 1, FILL, SHRINK, 8, 0);
-	options.attach (channel_combo, 1, 2, 1, 2, FILL, SHRINK, 8, 0);
+	options.attach (sort_combo, 1, 2, 1, 2, FILL, SHRINK, 8, 0);
 
 	l = manage (new Label);
 	l->set_markup (_("<b>Conversion quality</b>"));
-	options.attach (*l, 1, 2, 3, 4, FILL, SHRINK, 8, 0);
-	options.attach (src_combo, 1, 2, 4, 5, FILL, SHRINK, 8, 0);
+	options.attach (*l, 1, 2, 2, 3, FILL, SHRINK, 8, 0);
+	options.attach (src_combo, 1, 2, 3, 4, FILL, SHRINK, 8, 0);
+
+	options.attach (copy_files_btn, 1, 2, 5, 6, FILL, SHRINK, 8, 0);
+
+	/* 3rd, 4th col: MIDI */
+	l = manage (new Label);
+	l->set_markup (_("<b>Instrument</b>"));
+	options.attach (*l, 2, 4, 0, 1, FILL, SHRINK, 8, 0);
+	options.attach (instrument_combo, 2, 4, 1, 2, FILL, SHRINK, 8, 0);
 
 	l = manage (new Label);
 	l->set_markup (_("<b>MIDI Track Names</b>"));
-	options.attach (*l, 2, 3, 0, 1, FILL, SHRINK, 8, 0);
-	options.attach (midi_track_name_combo, 2, 3, 1, 2, FILL, SHRINK, 8, 0);
+	options.attach (*l, 2, 4, 2, 3, FILL, SHRINK, 8, 0);
+	options.attach (midi_track_name_combo, 2, 4, 3, 4, FILL, SHRINK, 8, 0);
 
-	options.attach (smf_tempo_btn, 2, 3, 3, 4, FILL, SHRINK, 8, 0);
-	options.attach (smf_marker_btn, 2, 3, 4, 5, FILL, SHRINK, 8, 0);
-
-	l = manage (new Label);
-	l->set_markup (_("<b>Instrument</b>"));
-	options.attach (*l, 3, 4, 0, 1, FILL, SHRINK, 8, 0);
-	options.attach (instrument_combo, 3, 4, 1, 2, FILL, SHRINK, 8, 0);
-
-	Alignment *hspace = manage (new Alignment ());
-	hspace->set_size_request (2, 2);
-	options.attach (*hspace, 0, 3, 2, 3, FILL, SHRINK, 0, 8);
+	options.attach (smf_tempo_btn, 2, 3, 5, 6, FILL, SHRINK, 8, 0);
+	options.attach (smf_marker_btn, 3, 4, 5, 6, FILL, SHRINK, 8, 0);
 
 	Alignment *vspace = manage (new Alignment ());
 	vspace->set_size_request (2, 2);
-	options.attach (*vspace, 2, 3, 0, 3, EXPAND, SHRINK, 0, 0);
+	options.attach (*vspace, 0, 4, 6, 7, EXPAND, SHRINK, 0, 0);
 
 	str.clear ();
 	str.push_back (_("by track number"));
@@ -1944,20 +1948,18 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	src_combo.set_sensitive (false);
 	src_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::src_combo_changed));
 
+	str.clear ();
+	str.push_back (_("by file name"));
+	str.push_back (_("by modification time"));
+	str.push_back (_("by selection order"));
+	set_popdown_strings (sort_combo, str);
+	sort_combo.set_active_text (str.front());
+	sort_combo.set_sensitive (false);
+
 	action_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::reset_options_noret));
 	channel_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::reset_options_noret));
 
 	copy_files_btn.set_active (true);
-
-	Gtk::Label* copy_label = dynamic_cast<Gtk::Label*>(copy_files_btn.get_child());
-
-	if (copy_label) {
-		copy_label->set_size_request (175, -1);
-		copy_label->set_line_wrap (true);
-	}
-
-	block_four.pack_start (copy_files_btn, false, false);
-	options.attach (block_four, 3, 4, 4, 5, FILL, SHRINK, 8, 0);
 
 	vpacker.pack_start (options, false, true);
 
@@ -2007,6 +2009,21 @@ ImportMode
 SoundFileOmega::get_mode () const
 {
 	return string2importmode (action_combo.get_active_text());
+}
+
+SoundFileBrowser::SortOrder
+SoundFileOmega::sort_order () const
+{
+	std::string const& str (sort_combo.get_active_text());
+	if (str == _("by file name")) {
+		return SoundFileBrowser::FileName;
+	} else if (str == _("by modification time")) {
+		return SoundFileBrowser::FileMtime;
+	} else if (str == _("by selection order")) {
+		return SoundFileBrowser::SelectionOrder;
+	}
+	warning << string_compose (_("programming error: unknown import sort string %1"), str) << endmsg;
+	return SelectionOrder;
 }
 
 void

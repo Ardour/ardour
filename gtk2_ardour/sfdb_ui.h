@@ -309,6 +309,7 @@ public:
 	void reset (uint32_t selected_audio_tracks, uint32_t selected_midi_tracks);
 
 	Gtk::ComboBoxText action_combo;
+	Gtk::ComboBoxText sort_combo;
 	Gtk::ComboBoxText where_combo;
 	Gtk::ComboBoxText channel_combo;
 	Gtk::ComboBoxText src_combo;
@@ -330,6 +331,7 @@ public:
 
 protected:
 	void on_hide();
+	virtual SortOrder sort_order () const;
 
 private:
 	uint32_t selected_audio_track_cnt;
@@ -339,9 +341,6 @@ private:
 	DispositionMap disposition_map;
 
 	Gtk::Table options;
-	Gtk::VBox block_two;
-	Gtk::VBox block_three;
-	Gtk::VBox block_four;
 
 	bool check_info (const std::vector<std::string>& paths,
 	                 bool& same_size, bool& src_needed, bool& multichannel, bool& must_copy);
