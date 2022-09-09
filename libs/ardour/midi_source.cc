@@ -309,7 +309,6 @@ MidiSource::midi_read (const ReaderLock&                  lm,
 		}
 	}
 	t.update ();
-	std::cout << "MIDI read added " << ecnt << " events and took " << t.elapsed_msecs() << std::endl;
 
 	return cnt;
 }
