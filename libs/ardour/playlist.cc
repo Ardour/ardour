@@ -1839,6 +1839,66 @@ Playlist::top_unmuted_region_at (timepos_t const & pos)
 }
 
 boost::shared_ptr<RegionList>
+Playlist::audible_regions_at (timepos_t const& pos)
+{
+	boost::shared_ptr<RegionList> rv (new RegionList);
+	boost::shared_ptr<RegionList> rlist;
+	{
+		RegionReadLock rlock (this);
+		rlist = find_regions_at (pos);
+	}
+
+	if (!rlist->size ()) {
+		return rv;
+	}
+
+	RegionSortByLayer cmp;
+	rlist->sort (cmp);
+
+	for (auto i = rlist->rbegin (); i != rlist->rend (); ++i) {
+		if ((*i)->muted ()) {
+			continue;
+		}
+		rv->push_back (*i);
+		if ((*i)->opaque ()) {
+			break;
+		}
+	}
+
+	return rv;
+}
+
+bool
+Playlist::region_is_audible_at (boost::shared_ptr<Region> r, timepos_t const& pos)
+{
+	boost::shared_ptr<RegionList> rlist;
+	{
+		RegionReadLock rlock (this);
+		rlist = find_regions_at (pos);
+	}
+
+	if (!rlist->size ()) {
+		return false;
+	}
+
+	RegionSortByLayer cmp;
+	rlist->sort (cmp);
+
+	for (auto i = rlist->rbegin (); i != rlist->rend (); ++i) {
+		if ((*i)->muted ()) {
+			continue;
+		}
+		if (r == *i) {
+			return true;
+		}
+		if ((*i)->opaque ()) {
+			break;
+		}
+	}
+	return false;
+}
+
+boost::shared_ptr<RegionList>
 Playlist::find_regions_at (timepos_t const & pos)
 {
 	/* Caller must hold lock */

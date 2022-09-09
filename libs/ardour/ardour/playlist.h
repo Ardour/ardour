@@ -225,6 +225,7 @@ public:
 	boost::shared_ptr<RegionList> regions_touched (timepos_t const & start, timepos_t const & end);
 	boost::shared_ptr<RegionList> regions_with_start_within (Temporal::TimeRange);
 	boost::shared_ptr<RegionList> regions_with_end_within (Temporal::TimeRange);
+	boost::shared_ptr<RegionList> audible_regions_at (timepos_t const &);
 	uint32_t                   region_use_count (boost::shared_ptr<Region>) const;
 	boost::shared_ptr<Region>  find_region (const PBD::ID&) const;
 	boost::shared_ptr<Region>  top_region_at (timepos_t const &);
@@ -233,6 +234,7 @@ public:
 	timepos_t                  find_next_region_boundary (timepos_t const &, int dir);
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
 	bool                       has_region_at (timepos_t const &) const;
+	bool                       region_is_audible_at (boost::shared_ptr<Region>, timepos_t const&);
 
 	timepos_t                  find_prev_region_start (timepos_t const & sample);
 
