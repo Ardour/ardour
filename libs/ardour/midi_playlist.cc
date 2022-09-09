@@ -288,13 +288,11 @@ MidiPlaylist::contained_automation()
 void
 MidiPlaylist::render (MidiChannelFilter* filter)
 {
-	typedef pair<MidiNoteTracker*,samplepos_t> TrackerInfo;
-
 	Playlist::RegionReadLock rl (this);
 
 	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("---- MidiPlaylist::render (regions: %1)-----\n", regions.size()));
 
-	std::vector< boost::shared_ptr<Region> > regs;
+	std::list<boost::shared_ptr<MidiRegion>> regs;
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 
@@ -308,14 +306,13 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 			continue;
 		}
 
-		regs.push_back (*i);
-	}
+		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion> (*i);
+		if (!mr) {
+			continue;
+		}
 
-	/* If we are reading from a single region, we can read directly into _rendered.  Otherwise,
-	   we read into a temporarily list, sort it, then write that to _rendered.
-	*/
-	Evoral::EventList<samplepos_t>  evlist;
-	Evoral::EventSink<samplepos_t>* tgt;
+		regs.push_back (mr);
+	}
 
 	/* RAII */
 	RTMidiBuffer::WriteProtectRender wpr (_rendered);
@@ -323,49 +320,87 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 	if (regs.empty()) {
 		wpr.acquire ();
 		_rendered.clear ();
+		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("---- End MidiPlaylist::render, events: %1\n", _rendered.size()));
+		return;
+	}
+
+	if (regs.size() == 1) {
+		wpr.acquire ();
+		_rendered.clear ();
+		boost::shared_ptr<MidiRegion> mr = regs.front ();
+		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("render from %1\n", mr->name()));
+		mr->render (_rendered, 0, _note_mode, filter);
+		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("---- End MidiPlaylist::render, events: %1\n", _rendered.size()));
+		return;
+	}
+
+	RegionSortByLayer cmp;
+	regs.sort (cmp);
+
+	bool all_transparent = true;
+
+#ifndef MIXBUS // XXX Mixbus 8 always has transparent MIDI regions (until session is converted in v9)
+	/* skip bottom-most region, transparency is irrelevant */
+	for (auto i = ++regs.begin(); i != regs.end(); ++i) {
+		if ((*i)->opaque ()) {
+			all_transparent = false;
+			break;
+		}
+	}
+#endif
+
+	Evoral::EventList<samplepos_t> evlist;
+
+	if (all_transparent) {
+		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 regions to read\n", regs.size()));
+		for (auto i = regs.rbegin(); i != regs.rend(); ++i) {
+			boost::shared_ptr<MidiRegion> mr = *i;
+			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("render from %1\n", mr->name()));
+			mr->render (evlist, 0, _note_mode, filter);
+		}
+		EventsSortByTimeAndType<samplepos_t> cmp;
+		evlist.sort (cmp);
+
 	} else {
 
-		if (regs.size() == 1) {
-			tgt = &_rendered;
-			wpr.acquire ();
-			_rendered.clear ();
-		} else {
-			tgt = &evlist;
-		}
+		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 layered regions to read\n", regs.size()));
 
-		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 regions to read, direct: %2\n", regs.size(), (regs.size() == 1)));
+		/* iterate, top-most region first */
+		bool top = true;
+		for (auto i = regs.rbegin(); i != regs.rend(); ++i) {
+			boost::shared_ptr<MidiRegion> mr = *i;
+			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("maybe render from %1\n", mr->name()));
 
-		for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
-
-			boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
-
-			if (!mr) {
-				continue;
+			if (top) {
+				mr->render (evlist, 0, _note_mode, filter);
+				top = false;
+			} else {
+				/* check if region is audible (no opaque region above) */
+				Evoral::EventList<samplepos_t> tmp;
+				mr->render (tmp, 0, _note_mode, filter);
+				for (Evoral::EventList<samplepos_t>::iterator e = tmp.begin(); e != tmp.end(); ++e) {
+					Evoral::Event<samplepos_t>* ev (*e);
+					timepos_t t (ev->time());
+					if (region_is_audible_at (mr, t)) {
+						evlist.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
+					}
+					delete ev;
+				}
 			}
-
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("render from %1\n", mr->name()));
-			mr->render (*tgt, 0, _note_mode, filter);
-		}
-
-		if (!evlist.empty()) {
-			/* We've read from multiple regions into evlist, sort the event list by time. */
 			EventsSortByTimeAndType<samplepos_t> cmp;
 			evlist.sort (cmp);
-
-			/* Copy ordered events from event list to _rendered. */
-
-			wpr.acquire ();
-			_rendered.clear ();
-
-			for (Evoral::EventList<samplepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
-				Evoral::Event<samplepos_t>* ev (*e);
-				_rendered.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
-				delete ev;
-			}
 		}
 	}
 
-	/* no need to release - RAII with WriteProtectRender takes care of it */
+	wpr.acquire ();
+	_rendered.clear ();
+
+	/* Copy ordered events from event list to _rendered. */
+	for (Evoral::EventList<samplepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
+		Evoral::Event<samplepos_t>* ev (*e);
+		_rendered.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
+		delete ev;
+	}
 
 	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("---- End MidiPlaylist::render, events: %1\n", _rendered.size()));
 }
