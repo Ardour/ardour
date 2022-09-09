@@ -272,6 +272,16 @@ protected:
 	void on_show();
 	bool on_key_press_event (GdkEventKey*);
 	virtual void do_something(int action);
+
+	enum SortOrder {
+		SelectionOrder,
+		FileName,
+		FileMtime
+	};
+
+	virtual SortOrder sort_order () const {
+		return SelectionOrder;
+	}
 };
 
 class SoundFileChooser : public SoundFileBrowser

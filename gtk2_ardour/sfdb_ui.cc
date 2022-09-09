@@ -1440,10 +1440,29 @@ SoundFileBrowser::get_paths ()
 		vector<string> filenames = chooser.get_filenames();
 		vector<string>::iterator i;
 
+		std::map<std::string, int64_t> im;
+
 		for (i = filenames.begin(); i != filenames.end(); ++i) {
 			GStatBuf buf;
 			if ((!g_stat((*i).c_str(), &buf)) && S_ISREG(buf.st_mode)) {
 				results.push_back (*i);
+				im[*i] = buf.st_mtime;
+			}
+		}
+		if (sort_order () == FileMtime) {
+			results.clear ();
+			std::multimap<int64_t, std::string> im2;
+			std::transform (im.begin (), im.end (),
+					std::inserter (im2, im2.begin ()),
+					[](std::pair<std::string, int64_t>i) {return std::pair<int64_t, std::string>(i.second, i.first);});
+
+			for (auto const& i : im2) {
+				results.push_back (i.second);
+			}
+		} else if (sort_order () == FileName) {
+			results.clear ();
+			for (auto const& i : im) {
+				results.push_back (i.first);
 			}
 		}
 
