@@ -365,28 +365,62 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 layered regions to read\n", regs.size()));
 
-		/* iterate, top-most region first */
 		bool top = true;
+		std::vector<samplepos_t> bounds;
+		EventsSortByTimeAndType<samplepos_t> cmp;
+
+		/* iterate, top-most region first */
 		for (auto i = regs.rbegin(); i != regs.rend(); ++i) {
 			boost::shared_ptr<MidiRegion> mr = *i;
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("maybe render from %1\n", mr->name()));
 
 			if (top) {
+				/* render topmost region as-is */
 				mr->render (evlist, 0, _note_mode, filter);
 				top = false;
 			} else {
-				/* check if region is audible (no opaque region above) */
 				Evoral::EventList<samplepos_t> tmp;
 				mr->render (tmp, 0, _note_mode, filter);
+
+				/* insert region-bound markers of opaque regions above */
+				for (auto const& p : bounds) {
+					tmp.write (p, Evoral::NO_EVENT, 0, 0);
+				}
+				tmp.sort (cmp);
+
+				MidiNoteTracker mtr;
 				for (Evoral::EventList<samplepos_t>::iterator e = tmp.begin(); e != tmp.end(); ++e) {
 					Evoral::Event<samplepos_t>* ev (*e);
 					timepos_t t (ev->time());
-					if (region_is_audible_at (mr, t)) {
-						evlist.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
+
+					if (ev->event_type () == Evoral::NO_EVENT) {
+						/* reached region bound of an opaque region above this region. */
+						mtr.resolve_notes (evlist, ev->time());
+					} else if (region_is_audible_at (mr, t)) {
+						/* no opaque region above this event */
+						uint8_t* evbuf = ev->buffer();
+						if (3 == ev->size() && (evbuf[0] & 0xf0) == MIDI_CMD_NOTE_OFF && !mtr.active (evbuf[1], evbuf[0] & 0x0f)) {
+							; /* skip note off */
+						} else {
+							evlist.write (ev->time(), ev->event_type(), ev->size(), evbuf);
+							if (3 == ev->size()) {
+								mtr.track (evbuf);
+							}
+						}
+					} else {
+						/* there is an opaque region above this event, skip this event,
+						 * and for good measure resolve notes.
+						 */
+						mtr.resolve_notes (evlist, ev->time());
 					}
 					delete ev;
 				}
 			}
+
+			if (mr->opaque ()) {
+				bounds.push_back (mr->position ().samples ());
+			}
+
 			EventsSortByTimeAndType<samplepos_t> cmp;
 			evlist.sort (cmp);
 		}
