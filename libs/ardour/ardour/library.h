@@ -28,11 +28,12 @@
 
 #include <boost/function.hpp>
 
+#include <ardour/libardour_visibility.h>
 #include <curl/curl.h>
 
 namespace ARDOUR {
 
-class LibraryDescription
+class LIBARDOUR_API LibraryDescription
 {
    public:
 	LibraryDescription (std::string const & n, std::string const & a, std::string const & d, std::string const & u, std::string const & l, std::string const & td, std::string const & s)
@@ -60,7 +61,7 @@ class LibraryDescription
 	bool _installed;
 };
 
-class Downloader {
+class LIBARDOUR_API Downloader {
   public:
 	Downloader (std::string const & url, std::string const & destdir);
 	~Downloader ();
@@ -94,7 +95,7 @@ class Downloader {
 	void download ();
 };
 
-class LibraryFetcher {
+class LIBARDOUR_API LibraryFetcher {
   public:
 	LibraryFetcher() {}
 
