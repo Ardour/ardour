@@ -347,17 +347,6 @@ MidiStateTracker::flush (MidiBuffer& dst, samplepos_t time, bool reset)
 	flush_notes (dst, time, reset);
 
 	for (size_t chn = 0; chn < n_channels; ++chn) {
-		if ((program[chn] & 0x80) == 0) {
-			buf[0] = MIDI_CMD_PGM_CHANGE|chn;
-			buf[1] = program[chn] & 0x7f;
-			dst.write (time, Evoral::MIDI_EVENT, 2, buf);
-			if (reset) {
-				program[chn] = 0x80;
-			}
-		}
-	}
-
-	for (size_t chn = 0; chn < n_channels; ++chn) {
 		for (size_t ctl = 0; ctl < n_controls; ++ctl) {
 			if ((control[chn][ctl] & 0x80) == 0) {
 				buf[0] = MIDI_CMD_CONTROL|chn;
@@ -367,6 +356,15 @@ MidiStateTracker::flush (MidiBuffer& dst, samplepos_t time, bool reset)
 				if (reset) {
 					control[chn][ctl] = 0x80;
 				}
+			}
+		}
+
+		if ((program[chn] & 0x80) == 0) {
+			buf[0] = MIDI_CMD_PGM_CHANGE|chn;
+			buf[1] = program[chn] & 0x7f;
+			dst.write (time, Evoral::MIDI_EVENT, 2, buf);
+			if (reset) {
+				program[chn] = 0x80;
 			}
 		}
 	}
