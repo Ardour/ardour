@@ -308,12 +308,11 @@ MidiRegion::render_range (Evoral::EventSink<samplepos_t>& dst,
 
 #if 0
 	cerr << "MR " << name () << " render "
-	     << " _position = " << _position
+	     << " _position = " << position ()
 	     << " _start = " << _start
-	     << " quarter_note = " << quarter_note()
-	     << " start_beat = " << _start_beats
-	     << " a1 " << _position - _start
-	     << " a3 " << _length
+	     << " _length = " << _length
+	     << " read_start = " << read_start
+	     << " read_length = " << read_length
 	     << endl;
 #endif
 
