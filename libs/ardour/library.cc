@@ -84,7 +84,6 @@ LibraryFetcher::get_descriptions ()
 
 	for (auto const & node : root.children()) {
 		string n, d, u, l, td, a, sz;
-		std::cerr << "See child node: " << node->name() << std::endl;
 		if (!node->get_property (X_("name"), n) ||
 		    !node->get_property (X_("author"), a) ||
 		    !node->get_property (X_("url"), u) ||
@@ -108,8 +107,6 @@ LibraryFetcher::get_descriptions ()
 
 		_descriptions.push_back (LibraryDescription (n, a, ds, u, l, td, sz));
 		_descriptions.back().set_installed (installed (_descriptions.back()));
-
-		std::cerr << "got description for " << _descriptions.back().name() << " installed ? " << _descriptions.back().installed() << std::endl;
 	}
 
 	return 0;
@@ -120,14 +117,12 @@ LibraryFetcher::add (std::string const & path)
 {
 	try {
 		FileArchive archive (path);
-
 		std::vector<std::string> contents = archive.contents ();
-
 		std::set<std::string> dirs;
 
 		for (auto const & c : contents) {
 			string::size_type slash = c.find (G_DIR_SEPARATOR);
-			if (slash != string::npos || slash == c.length() - 1) {
+			if (slash == string::npos || slash == c.length() - 1) {
 				/* no slash or slash at end ... directory ? */
 				dirs.insert (c);
 			}
@@ -160,20 +155,23 @@ LibraryFetcher::add (std::string const & path)
 		std::string newpath;
 
 		for (std::set<std::string>::const_iterator d = dirs.begin(); d != dirs.end(); ++d) {
-			if (d != dirs.begin()) {
-				newpath += G_SEARCHPATH_SEPARATOR;
+
+			std::string installed_path = Glib::build_filename (destdir, *d);
+
+			if (Config->get_sample_lib_path().find (installed_path) == string::npos) {
+				if (d != dirs.begin()) {
+					newpath += G_SEARCHPATH_SEPARATOR;
+				}
+				newpath += installed_path;
 			}
-			newpath += Glib::build_filename (destdir, *d);
 		}
 
-		assert (!newpath.empty());
+		if (!newpath.empty()) {
+			newpath += G_SEARCHPATH_SEPARATOR;
+			newpath += Config->get_sample_lib_path ();
 
-		newpath += G_SEARCHPATH_SEPARATOR;
-		newpath += Config->get_sample_lib_path ();
-
-		Config->set_sample_lib_path (newpath);
-
-		::g_unlink (path.c_str());
+			Config->set_sample_lib_path (newpath);
+		}
 
 	} catch (...) {
 		return -1;
@@ -217,6 +215,7 @@ Downloader::write (void *ptr, size_t size, size_t nmemb)
 {
 	if (_cancel) {
 		fclose (file);
+		file = 0;
 		::g_unlink (file_path.c_str());
 
 		_downloaded = 0;
@@ -235,6 +234,7 @@ Downloader::write (void *ptr, size_t size, size_t nmemb)
 Downloader::Downloader (string const & u, string const & dir)
 	: url (u)
 	, destdir (dir)
+	, file (0)
 	, _cancel (false)
 	, _download_size (0)
 	, _downloaded (0)
@@ -250,9 +250,8 @@ int
 Downloader::start ()
 {
 	file_path = Glib::build_filename (destdir, Glib::path_get_basename (url));
-	file = fopen (file_path.c_str(), "w");
 
-	if (!file) {
+	if (!(file = fopen (file_path.c_str(), "w"))) {
 		return -1;
 	}
 
@@ -277,6 +276,10 @@ Downloader::cancel ()
 double
 Downloader::progress () const
 {
+	if (_download_size == 0) {
+		return 0.;
+	}
+
 	return (double) _downloaded / _download_size;
 }
 
@@ -338,6 +341,11 @@ Downloader::download ()
 		_status = 1;
 	} else {
 		_status = -1;
+	}
+
+	if (file) {
+		fclose (file);
+		file = 0;
 	}
 }
 
