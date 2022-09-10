@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <algorithm>
+#include <iterator>
 #include <ctype.h>
 
 #include "pbd/whitespace.h"
