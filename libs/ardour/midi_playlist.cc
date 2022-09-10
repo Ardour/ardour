@@ -91,20 +91,21 @@ MidiPlaylist::~MidiPlaylist ()
 {
 }
 
-template<typename Time>
+template <typename Time>
 struct EventsSortByTimeAndType {
-    bool operator() (const Evoral::Event<Time>* a, const Evoral::Event<Time>* b) {
-	    if (a->time() == b->time()) {
-		    if (a->is_midi () && b->is_midi ()) {
-			    /* negate return value since we must return whether
-			     * or not a should sort before b, not b before a
-			     */
-			    return !MidiBuffer::second_simultaneous_midi_byte_is_first (a->buffer()[0], b->buffer()[0]);
-		    }
-		    return a->type () < b->type ();
-	    }
-	    return a->time() < b->time();
-    }
+	bool operator() (const Evoral::Event<Time>* a, const Evoral::Event<Time>* b)
+	{
+		if (a->time () == b->time ()) {
+			if (a->is_midi () && b->is_midi ()) {
+				/* negate return value since we must return whether
+				 * or not a should sort before b, not b before a
+				 */
+				return !MidiBuffer::second_simultaneous_midi_byte_is_first (a->buffer ()[0], b->buffer ()[0]);
+			}
+			return a->type () < b->type ();
+		}
+		return a->time () < b->time ();
+	}
 };
 
 void
