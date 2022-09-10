@@ -29,6 +29,7 @@
 
 namespace Evoral {
 template <typename T> class EventSink;
+template <typename T> class EventList;
 }
 
 namespace ARDOUR {
@@ -87,6 +88,7 @@ class LIBARDOUR_API MidiStateTracker : public MidiNoteTracker
 	void reset ();
 
 	void flush (MidiBuffer&, samplepos_t, bool reset);
+	void resolve_state (Evoral::EventSink<samplepos_t>&, Evoral::EventList<samplepos_t> const&, samplepos_t time, bool reset = true);
 
   private:
 	uint8_t  program[16];

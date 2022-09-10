@@ -352,7 +352,9 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 	Evoral::EventList<samplepos_t> evlist;
 
 	if (all_transparent) {
+
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 regions to read\n", regs.size()));
+
 		for (auto i = regs.rbegin(); i != regs.rend(); ++i) {
 			boost::shared_ptr<MidiRegion> mr = *i;
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("render from %1\n", mr->name()));
@@ -388,14 +390,16 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 				}
 				tmp.sort (cmp);
 
-				MidiNoteTracker mtr;
+				MidiStateTracker mtr;
+				Evoral::EventList<samplepos_t> const slist (evlist);
+
 				for (Evoral::EventList<samplepos_t>::iterator e = tmp.begin(); e != tmp.end(); ++e) {
 					Evoral::Event<samplepos_t>* ev (*e);
 					timepos_t t (ev->time());
 
 					if (ev->event_type () == Evoral::NO_EVENT) {
 						/* reached region bound of an opaque region above this region. */
-						mtr.resolve_notes (evlist, ev->time());
+						mtr.resolve_state (evlist, slist, ev->time());
 					} else if (region_is_audible_at (mr, t)) {
 						/* no opaque region above this event */
 						uint8_t* evbuf = ev->buffer();
@@ -403,15 +407,10 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 							; /* skip note off */
 						} else {
 							evlist.write (ev->time(), ev->event_type(), ev->size(), evbuf);
-							if (3 == ev->size()) {
-								mtr.track (evbuf);
-							}
+							mtr.track (evbuf);
 						}
 					} else {
-						/* there is an opaque region above this event, skip this event,
-						 * and for good measure resolve notes.
-						 */
-						mtr.resolve_notes (evlist, ev->time());
+						/* there is an opaque region above this event, skip this event. */
 					}
 					delete ev;
 				}

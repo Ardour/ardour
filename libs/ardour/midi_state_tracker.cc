@@ -22,7 +22,7 @@
 
 #include "pbd/compose.h"
 
-#include "evoral/EventSink.h"
+#include "evoral/EventList.h"
 
 #include "ardour/debug.h"
 #include "ardour/midi_source.h"
@@ -244,6 +244,7 @@ MidiStateTracker::reset ()
 
 	for (size_t n = 0; n < n_channels; ++n) {
 		program[n] = 0x80;
+		bender[n] = 0x8000;
 	}
 
 	for (size_t chn = 0; chn < n_channels; ++chn) {
@@ -324,6 +325,7 @@ MidiStateTracker::track (const uint8_t* evbuf)
 		break;
 
 	case MIDI_CMD_BENDER:
+		bender[chan] = ((evbuf[2]<<7) | evbuf[1]) & 0x3fff;
 		break;
 
 	case MIDI_CMD_COMMON_RESET:
@@ -365,6 +367,140 @@ MidiStateTracker::flush (MidiBuffer& dst, samplepos_t time, bool reset)
 			dst.write (time, Evoral::MIDI_EVENT, 2, buf);
 			if (reset) {
 				program[chn] = 0x80;
+			}
+		}
+	}
+}
+
+/* return 0 if event is not found
+ * return 1 if event is found before time t
+ * return -1 if event is found at time t
+ */
+static int
+find_event (Evoral::EventList<samplepos_t> const& evlist, samplepos_t time, uint8_t* buf)
+{
+	for (auto const& e : evlist) {
+		Evoral::Event<samplepos_t>* ev (e);
+		timepos_t                   t (ev->time ());
+		if (t > time) {
+			break;
+		}
+		uint8_t const* evbuf = ev->buffer ();
+		if (evbuf[0] == buf[0]) {
+			if (buf[1] != 0x80 && evbuf[1] != buf[1]) {
+				continue;
+			}
+			for (uint32_t i = 1; i < ev->size (); ++i) {
+				buf[i] = evbuf[i];
+			}
+			return t == time ? -1 : 1;
+		}
+	}
+	return 0;
+}
+
+void
+MidiStateTracker::resolve_state (Evoral::EventSink<samplepos_t>& dst, Evoral::EventList<samplepos_t> const& evlist, samplepos_t time, bool reset)
+{
+	/* XXX implement me */
+
+	uint8_t      buf[3];
+	const size_t n_channels = 16;
+	const size_t n_controls = 127;
+
+	resolve_notes (dst, time);
+
+	for (size_t chn = 0; chn < n_channels; ++chn) {
+
+		/* restore CC */
+		for (size_t ctl = 0; ctl < n_controls; ++ctl) {
+			if ((control[chn][ctl] & 0x80) == 0) {
+				if (reset) {
+					control[chn][ctl] = 0x80;
+				}
+				buf[0] = MIDI_CMD_CONTROL | chn;
+				buf[1] = ctl;
+				switch (find_event (evlist, time, buf)) {
+					case 1:
+						/* (event found before tme)
+						 * restore prior CC (notably bank select)
+						 *
+						 *    Layer 1: [CX....]         [.......]
+						 *    Layer 2:      [.....CY.......]
+						 * restore CX:                   ^
+						 */
+						dst.write (time, Evoral::MIDI_EVENT, 3, buf);
+						break;
+					case 0:
+						/* (no event was found before, or at tme)
+						 * The goal is to reset a conroller, unless there already
+						 * is an CC event at the start of above region (case -1:).
+						 *
+						 *    Layer 1: [......]         [CZ......]
+						 *    Layer 2:      [.....CY.......]
+						 * reset, unless CZ exist:       ^
+						 */
+						switch (ctl) {
+							/* clang-format off */
+							case 0x01: buf[2] = 0x00; break; /* mod wheel MSB */
+							case 0x21: buf[2] = 0x00; break; /* mod wheel LSB */
+							case 0x02: buf[2] = 0x00; break; /* breath MSB */
+							case 0x22: buf[2] = 0x00; break; /* breath LSB */
+							case 0x07: buf[2] = 0x7f; break; /* volume MSB */
+							case 0x27: buf[2] = 0x7f; break; /* volume LSB */
+							case 0x08: buf[2] = 0x40; break; /* balance MSB */
+							case 0x28: buf[2] = 0x00; break; /* balance LSB */
+							case 0x0a: buf[2] = 0x40; break; /* pan MSB */
+							case 0x2a: buf[2] = 0x00; break; /* pan LSB */
+							case 0x40: buf[2] = 0x00; break; /* sustain */
+							case 0x41: buf[2] = 0x00; break; /* portamento */
+							case 0x42: buf[2] = 0x00; break; /* sostenuto */
+							case 0x43: buf[2] = 0x00; break; /* soft pedal */
+							case 0x44: buf[2] = 0x00; break; /* legato switch */
+							/* clang-format on */
+							default:
+								/* do not reset other controls */
+								continue;
+						}
+						dst.write (time, Evoral::MIDI_EVENT, 3, buf);
+						break;
+
+					default:
+						/* do nothing */
+						break;
+				}
+			}
+		}
+
+		/* If the program was modified, replay the most recent event found in evlist before *time*.
+		 *
+		 *    Layer 1: [P1....]         [.......]
+		 *    Layer 2:      [.....P2.......]
+		 * restore P1:                   ^
+		 */
+		if ((program[chn] & 0x80) == 0) {
+			buf[0] = MIDI_CMD_PGM_CHANGE | chn;
+			buf[1] = 0x80;
+			if (find_event (evlist, time, buf) > 0) {
+				dst.write (time, Evoral::MIDI_EVENT, 2, buf);
+			}
+			if (reset) {
+				program[chn] = 0x80;
+			}
+		}
+
+		/* reset pitch-bend */
+		if ((bender[chn] & 0x8000) == 0) {
+			buf[0] = MIDI_CMD_BENDER | chn;
+			buf[1] = 0x80;
+			/* .. unless there is a PB event at the start */
+			if (find_event (evlist, time, buf) >= 0) {
+				buf[1] = 0x00;
+				buf[2] = 0x40;
+				dst.write (time, Evoral::MIDI_EVENT, 3, buf);
+			}
+			if (reset) {
+				bender[chn] = 0x8000;
 			}
 		}
 	}
