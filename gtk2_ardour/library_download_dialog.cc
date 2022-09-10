@@ -19,6 +19,8 @@
 #include <cmath>
 #include <iostream>
 
+#include <glib/gstdio.h>
+
 #include "pbd/i18n.h"
 
 #include <glibmm/markup.h>
@@ -85,6 +87,9 @@ LibraryDownloadDialog::add_library (ARDOUR::LibraryDescription const & ld)
 	(*i)[_columns.license] = ld.license();
 	(*i)[_columns.size] = ld.size();
 	(*i)[_columns.installed] = ld.installed();
+	if (ld.installed()) {
+		std::cerr << ld.name() << " should be installed\n";
+	}
 	(*i)[_columns.url] = ld.url();
 
 	if (ld.installed()) {
@@ -113,6 +118,10 @@ LibraryDownloadDialog::install (std::string const & path, Gtk::TreePath const & 
 		(*row)[_columns.installed] = false;
 		(*row)[_columns.install] = _("Install");
 	}
+
+	/* Always unlink (remove) the downloaded archive */
+
+	// ::g_unlink (path.c_str());
 }
 
 
@@ -122,19 +131,17 @@ LibraryDownloadDialog::download (Gtk::TreePath const & path)
 	Gtk::TreeModel::iterator row = _model->get_iter (path);
 	std::string url = (*row)[_columns.url];
 
-	std::cerr << "will download " << url << " to " << Config->get_clip_library_dir() << std::endl;
-
 	ARDOUR::Downloader* downloader = new ARDOUR::Downloader (url, ARDOUR::Config->get_clip_library_dir());
 
 	/* setup timer callback to update progressbar */
 
 	Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (*this, &LibraryDownloadDialog::dl_timer_callback), downloader, path), 40);
 
+	(*row)[_columns.downloader] = downloader;
+
 	/* and go ... */
 
 	downloader->start ();
-
-	(*row)[_columns.downloader] = downloader;
 
 	/* and back to the GUI event loop, though we're modal so not much is possible */
 }
@@ -149,7 +156,7 @@ LibraryDownloadDialog::dl_timer_callback (Downloader* dl, Gtk::TreePath treepath
 	 */
 
 	if (dl->status() == 0) {
-		(*row)[_columns.progress] = (int) round ((dl->progress() * 100.0));
+		(*row)[_columns.progress] = (int) round (dl->progress() * 100.0);
 		return true; /* call again */
 	}
 
@@ -182,8 +189,6 @@ LibraryDownloadDialog::display_button_press (GdkEventButton* ev)
 		}
 
 		Gtk::TreeIter iter = _model->get_iter (path);
-
-		std::cerr << "Click\n";
 
 		string cur = (*iter)[_columns.install];
 		if (cur == _("Install")) {

@@ -65,7 +65,7 @@ class LibraryDownloadDialog : public ArdourDialog
 		/* these are not displayed */
 		Gtk::TreeModelColumn<std::string> url;
 		Gtk::TreeModelColumn<ARDOUR::Downloader*> downloader;
-		Gtk::TreeModelColumn<double> progress;
+		Gtk::TreeModelColumn<int> progress;
 		/* used as tooltip */
 		Gtk::TreeModelColumn<std::string> description;
 	};
