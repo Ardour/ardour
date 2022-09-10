@@ -1656,6 +1656,7 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 	our_interests.add (Properties::layer);
 	our_interests.add (Properties::opaque);
 	our_interests.add (Properties::contents);
+	our_interests.add (Properties::time_domain);
 
 	bounds.add (Properties::start);
 	bounds.add (Properties::length);
