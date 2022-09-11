@@ -267,6 +267,7 @@ CONFIG_VARIABLE (std::string, tutorial_manual_url, "tutorial-manual-url", "http:
 CONFIG_VARIABLE (std::string, reference_manual_url, "reference-manual-url", "http://manual.ardour.org/")
 CONFIG_VARIABLE (std::string, updates_url, "updates-url", "http://ardour.org/whatsnew.html")
 CONFIG_VARIABLE (std::string, donate_url, "donate-url", "http://community.ardour.org/donate")
+CONFIG_VARIABLE (std::string, clip_library_url, "clip-library-url", "http://ardour.org/libraries.xml")
 
 /* video timeline configuration */
 CONFIG_VARIABLE (std::string, xjadeo_binary, "xjadeo-binary", "")
