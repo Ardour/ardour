@@ -63,7 +63,7 @@ LibraryFetcher::get_descriptions ()
 	}
 	std::string buf;
 
-	curl_easy_setopt (curl, CURLOPT_URL, Config->get_clip_library_url().c_str());
+	curl_easy_setopt (curl, CURLOPT_URL, Config->get_resource_index_url().c_str());
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf);
