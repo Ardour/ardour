@@ -47,7 +47,7 @@ static pid_t parent_pid = 0;
 
 static void wearedone(int sig) {
 	(void) sig; // skip 'unused variable' compiler warning;
-	fprintf(stderr, "caught signal - shutting down.\n");
+	fprintf(stderr, ARD_PROG_NAME ": caught signal - shutting down.\n");
 	run=0;
 }
 
@@ -208,7 +208,7 @@ int main(int argc, char **argv) {
 	dbus_error_init(&error);
 
 	if (!(dbus_connection = dbus_bus_get (DBUS_BUS_SESSION, &error))) {
-		fprintf(stderr, "Failed to connect to session bus for device reservation: %s\n", error.message ? error.message : "unknown error.");
+		fprintf(stderr, ARD_PROG_NAME ": Failed to connect to session bus for device reservation: %s\n", error.message ? error.message : "unknown error.");
 		dbus_error_free(&error);
 		free(name);
 		return EXIT_FAILURE;
@@ -223,7 +223,7 @@ int main(int argc, char **argv) {
 					request_cb,
 					&error)) < 0)
 	{
-		fprintf(stderr, "Failed to acquire device: '%s'\n%s\n", device_name, (error.message ? error.message : strerror(-ret)));
+		fprintf(stderr, ARD_PROG_NAME ": Failed to acquire device: '%s'\n%s\n", device_name, (error.message ? error.message : strerror(-ret)));
 		dbus_error_free(&error);
 		dbus_connection_unref(dbus_connection);
 		free(name);
@@ -239,11 +239,11 @@ int main(int argc, char **argv) {
 
 	while (run && dbus_connection_read_write_dispatch (dbus_connection, 200)) {
 		if (!stdin_available()) {
-			fprintf(stderr, "stdin closed - releasing device.\n");
+			fprintf(stderr, ARD_PROG_NAME ": stdin closed - releasing device.\n");
 			break;
 		}
 		if (parent_pid > 0 && kill (parent_pid, 0)) {
-			fprintf(stderr, "watched PID no longer exists - releasing device.\n");
+			fprintf(stderr, ARD_PROG_NAME ": watched PID no longer exists - releasing device.\n");
 			break;
 		}
 	}
