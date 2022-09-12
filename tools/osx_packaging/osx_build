@@ -1069,7 +1069,7 @@ set -e
 echo "compressing Image ..."
 
 # Umount the image ('eject' above may already have done that)
-umount "${DiskDevice}" || true
+hdiutil detach "${DiskDevice}" || true
 hdiutil eject "${DiskDevice}" || true
 # Create a read-only version, use zlib compression
 hdiutil convert -format UDZO "${TMPDMG}" -imagekey zlib-level=9 -o "${UC_DMG}"
