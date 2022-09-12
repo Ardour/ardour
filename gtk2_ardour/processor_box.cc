@@ -827,9 +827,9 @@ ProcessorEntry::plugin_preset_selected (ARDOUR::Plugin::PresetRecord preset)
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
 	assert (pi);
 	if (!preset.label.empty()) {
-		_pi->load_preset (preset);
+		pi->load_preset (preset);
 	} else {
-		pi->plugin->clear_preset();
+		pi->plugin()->clear_preset();
 	}
 }
 
