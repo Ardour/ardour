@@ -682,6 +682,13 @@ SystemExec::terminate ()
 		wait(WNOHANG);
 	}
 
+	if (pid) {
+		::kill(pid, SIGINT);
+		::usleep(250000);
+		sched_yield();
+		wait(WNOHANG);
+	}
+
 	/* if pid is non-zero, the child task is STILL executing after being
 	 * sent SIGTERM. Act tough ... send SIGKILL
 	 */
