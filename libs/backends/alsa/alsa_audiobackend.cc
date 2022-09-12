@@ -346,8 +346,10 @@ AlsaAudioBackend::set_input_device_name (const std::string& d)
 		_input_audio_device_info.valid = false;
 		return 1;
 	}
+	_device_reservation.acquire_device (alsa_device.c_str ());
 	/* device will be busy once used, hence cache the parameters */
 	/* return */ get_alsa_device_parameters (alsa_device.c_str (), false, &_input_audio_device_info);
+	_device_reservation.release_device ();
 	return 0;
 }
 
