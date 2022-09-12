@@ -55,6 +55,7 @@
 #include "pbd/tokenizer.h"
 #include "pbd/enumwriter.h"
 #include "pbd/file_utils.h"
+#include "pbd/natsort.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/string_convert.h"
 #include "pbd/xml++.h"
@@ -1440,7 +1441,13 @@ SoundFileBrowser::get_paths ()
 		vector<string> filenames = chooser.get_filenames();
 		vector<string>::iterator i;
 
-		std::map<std::string, int64_t> im;
+		struct SortByName {
+			bool operator() (std::string const& a, std::string const& b) const {
+				return PBD::naturally_less (a.c_str (), b.c_str ());
+			}
+		};
+
+		std::map<std::string, int64_t, SortByName> im;
 
 		for (i = filenames.begin(); i != filenames.end(); ++i) {
 			GStatBuf buf;
