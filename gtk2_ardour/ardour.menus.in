@@ -787,6 +787,7 @@
     <separator/>
     <menuitem action='controls'/>
     <menuitem action='send_options'/>
+    <menuitem action='presets'/>
     <separator/>
 #ifndef MIXBUS
     <menu action="disk-io-menu">

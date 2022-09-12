@@ -822,6 +822,40 @@ ProcessorEntry::build_controls_menu ()
 }
 
 void
+ProcessorEntry::plugin_preset_selected (ARDOUR::Plugin::PresetRecord preset)
+{
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+	assert (pi);
+	if (!preset.label.empty()) {
+		_pi->load_preset (preset);
+	} else {
+		pi->plugin->clear_preset();
+	}
+}
+
+Menu*
+ProcessorEntry::build_presets_menu ()
+{
+	using namespace Menu_Helpers;
+
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+	if (!pi) {
+		return NULL;
+	}
+
+	vector<ARDOUR::Plugin::PresetRecord> presets = pi->plugin()->get_presets();
+
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items ();
+
+	for (auto const& p : presets) {
+		items.push_back (MenuElem (p.label, sigc::bind (sigc::mem_fun (*this, &ProcessorEntry::plugin_preset_selected), p)));
+	}
+
+	return menu;
+}
+
+void
 ProcessorEntry::toggle_inline_display_visibility ()
 {
 	if (_plugin_display->get_visible ()) {
@@ -2328,7 +2362,6 @@ ProcessorBox::show_processor_menu (int arg)
 		}
 	}
 
-
 	Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
 	if (send_menu_item) {
 		if (single_selection && !_route->is_monitor()) {
@@ -2343,6 +2376,23 @@ ProcessorBox::show_processor_menu (int arg)
 			}
 		} else {
 			send_menu_item->set_sensitive (false);
+		}
+	}
+
+	Gtk::MenuItem* presets_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/presets"));
+	if (presets_menu_item) {
+		if (single_selection) {
+			Menu* m = single_selection->build_presets_menu ();
+			if (m && !m->items().empty()) {
+				presets_menu_item->set_submenu (*m);
+				presets_menu_item->set_sensitive (true);
+			} else {
+				delete m;
+				gtk_menu_item_set_submenu (presets_menu_item->gobj(), 0);
+				presets_menu_item->set_sensitive (false);
+			}
+		} else {
+			presets_menu_item->set_sensitive (false);
 		}
 	}
 
@@ -3981,6 +4031,7 @@ ProcessorBox::register_actions ()
 
 	ActionManager::register_action (processor_box_actions, X_("controls"), _("Controls"));
 	ActionManager::register_action (processor_box_actions, X_("send_options"), _("Send Options"));
+	ActionManager::register_action (processor_box_actions, X_("presets"), _("Presets"));
 
 	ActionManager::register_action (processor_box_actions, X_("clear"), _("Clear (all)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear));

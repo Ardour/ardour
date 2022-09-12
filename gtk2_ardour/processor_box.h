@@ -174,6 +174,7 @@ public:
 	std::string state_id () const;
 	Gtk::Menu* build_controls_menu ();
 	Gtk::Menu* build_send_options_menu ();
+	Gtk::Menu* build_presets_menu ();
 
 protected:
 	ArdourWidgets::ArdourButton _button;
@@ -256,6 +257,7 @@ private:
 
 	void toggle_panner_link ();
 	void toggle_allow_feedback ();
+	void plugin_preset_selected (ARDOUR::Plugin::PresetRecord);
 
 	class PluginInlineDisplay : public PluginDisplay {
 	public:
