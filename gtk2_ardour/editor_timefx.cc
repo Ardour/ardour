@@ -305,6 +305,10 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching)
 		break;
 	}
 
+#ifdef HAVE_RUBBERBAND_3_0_0
+	options |= RubberBandStretcher::OptionEngineFiner;
+#endif
+
 	current_timefx->request.opts = (int) options;
 #else
 	current_timefx->request.quick_seek = current_timefx->quick_button.get_active();
