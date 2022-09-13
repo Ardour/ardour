@@ -300,9 +300,10 @@ AddRouteDialog::AddRouteDialog ()
 				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
 
 		/* recording mode */
-		mode_label.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
-		settings_table->attach (mode_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-		settings_table->attach (mode_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+		/* XXX disabled Sept 2022 because at present this does nothing */
+		// mode_label.set_alignment (Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+		// settings_table->attach (mode_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+		// settings_table->attach (mode_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 		++n;
 	}
@@ -835,6 +836,10 @@ AddRouteDialog::refill_track_modes ()
 ARDOUR::TrackMode
 AddRouteDialog::mode ()
 {
+	return ARDOUR::Normal;
+
+	/* XXX septemeber 2022: the dialog offers no way to choose anything here */
+
 	std::string str = mode_combo.get_active_text();
 	if (str == _("Normal")) {
 		return ARDOUR::Normal;
