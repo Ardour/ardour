@@ -29,6 +29,8 @@
 
 namespace PBD {
 
+class Thread;
+
 class LIBPBD_API Downloader {
   public:
 	Downloader (std::string const & url, std::string const & destdir);
@@ -58,7 +60,7 @@ class LIBPBD_API Downloader {
 	std::atomic<uint64_t> _download_size; /* read-only from requestor thread */
 	std::atomic<uint64_t> _downloaded; /* read-only from requestor thread */
 	std::atomic<int> _status;
-	std::thread thr;
+	PBD::Thread* thread;
 
 	void download ();
 };
