@@ -48,7 +48,6 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 	_display.append_column (_("Author"), _columns.author);
 	_display.append_column (_("License"), _columns.license);
 	_display.append_column (_("Size"), _columns.size);
-	_display.append_column (_("Installed"), _columns.installed);
 
 	append_install_column ();
 	append_progress_column ();
@@ -112,7 +111,7 @@ LibraryDownloadDialog::add_library (ARDOUR::LibraryDescription const & ld)
 	(*i)[_columns.toplevel] = ld.toplevel_dir();
 
 	if (ld.installed()) {
-		(*i)[_columns.install] = string();
+		(*i)[_columns.install] = string (_("Installed"));
 	} else {
 		(*i)[_columns.install] = string (_("Install"));
 	}
@@ -163,7 +162,7 @@ LibraryDownloadDialog::install_finished (Gtk::TreeModel::iterator row, std::stri
 		lf.add (toplevel);
 
 		(*row)[_columns.installed] = true;
-		(*row)[_columns.install] = string();
+		(*row)[_columns.install] = string (_("Installed"));
 		(*row)[_columns.progress] = 100;
 	} else {
 		(*row)[_columns.installed] = false;
@@ -249,7 +248,6 @@ LibraryDownloadDialog::display_button_press (GdkEventButton* ev)
 		int col = (intptr_t) column->get_data (X_("index"));
 
 		if (col != _columns.install.index()) {
-			std::cerr << "not install\n";
 			return false;
 		}
 
