@@ -178,6 +178,12 @@ FileArchive::~FileArchive ()
 	}
 }
 
+void
+FileArchive::require_progress ()
+{
+	_req.mp.progress = this;
+}
+
 std::string
 FileArchive::fetch (const std::string & url, const std::string & destdir) const
 {
@@ -428,7 +434,8 @@ FileArchive::do_extract (struct archive* a)
 
 	for (;;) {
 		int r = archive_read_next_header (a, &entry);
-		if (!_req.mp.progress) {
+
+		if (_req.mp.progress) {
 			// file i/o -- not URL
 			const uint64_t read = archive_filter_bytes (a, -1);
 			progress (read, _req.mp.length);
@@ -459,6 +466,10 @@ FileArchive::do_extract (struct archive* a)
 				break;
 			}
 		}
+	}
+	if (_req.mp.progress && rv == 0) {
+		// file i/o -- not URL
+		progress (_req.mp.length, _req.mp.length);
 	}
 
 	archive_read_close (a);

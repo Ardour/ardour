@@ -18,6 +18,8 @@
 #ifndef _pbd_archive_h_
 #define _pbd_archive_h_
 
+#include <atomic>
+
 #include <pthread.h>
 
 #include "pbd/signals.h"
@@ -56,6 +58,8 @@ class LIBPBD_API FileArchive
 		int create (const std::map <std::string, std::string>& filemap, CompressionLevel compression_level = CompressGood);
 
 		PBD::Signal2<void, size_t, size_t> progress; // TODO
+
+		void require_progress ();
 
 		struct MemPipe {
 			public:
@@ -100,8 +104,8 @@ class LIBPBD_API FileArchive
 				size_t   size;
 				bool     done;
 
-				double   processed;
-				double   length;
+				size_t   processed;
+				size_t   length;
 				FileArchive* progress;
 
 			private:
