@@ -21,7 +21,6 @@
 
 #include <atomic>
 #include <string>
-#include <thread>
 
 #include <curl/curl.h>
 
