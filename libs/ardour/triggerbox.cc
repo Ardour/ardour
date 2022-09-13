@@ -1899,8 +1899,13 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 		 */
 
 		if (!got_stretcher_padding) {
+#ifdef HAVE_RUBBERBAND_3_0_0
+			to_pad  = _stretcher->getPreferredStartPad();
+			to_drop = _stretcher->getStartDelay();
+#else
 			to_pad = _stretcher->getLatency();
 			to_drop = to_pad;
+#endif
 			got_stretcher_padding = true;
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 requires %2 padding %3\n", name(), to_pad));
 		}
