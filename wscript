@@ -282,7 +282,7 @@ def create_stored_revision():
 def get_depstack_rev(depstack_root):
     try:
         with open(depstack_root + '/../.vers', 'r') as f:
-            return f.readline().decode('utf-8').strip()[:7]
+            return f.readline().strip()[:7]
     except IOError:
         return '-unknown-'
 
