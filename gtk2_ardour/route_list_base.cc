@@ -175,7 +175,7 @@ void
 RouteListBase::append_col_rec_safe ()
 {
 	CellRendererPixbufMulti* cell;
-	cell = append_cell (S_("Rec|R"), _("Record enabled"), _columns.rec_safe, _columns.is_track, sigc::mem_fun (*this, &RouteListBase::on_tv_rec_safe_toggled));
+	cell = append_cell (S_("Rec|RS"), _("Record Safe"), _columns.rec_safe, _columns.is_track, sigc::mem_fun (*this, &RouteListBase::on_tv_rec_safe_toggled));
 	cell->set_pixbuf (0, ::get_icon ("rec-safe-disabled"));
 	cell->set_pixbuf (1, ::get_icon ("rec-safe-enabled"));
 }
