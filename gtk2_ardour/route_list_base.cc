@@ -99,6 +99,10 @@ RouteListBase::RouteListBase ()
 	_display.set_rules_hint (true);
 	_display.set_size_request (100, -1);
 
+	/* Try to prevent single mouse presses from initiating edits.
+	 * This relies on a hack in gtktreeview.c:gtk_treeview_button_press() */
+	_display.set_data ("mouse-edits-require-mod1", (gpointer)0x1);
+
 	_scroller.add (_display);
 	_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
