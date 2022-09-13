@@ -1177,6 +1177,23 @@ def configure(conf):
     autowaf.check_pkg(conf, 'vamp-hostsdk', uselib_store='VAMPHOSTSDK', atleast_version='2.1', mandatory=True)
     autowaf.check_pkg(conf, 'rubberband', uselib_store='RUBBERBAND', mandatory=True)
 
+    # we cannot rely on pkg-config - https://lists.linuxaudio.org/archives/linux-audio-dev/2022-July/038395.html
+    conf.check_cc(
+                  features  = 'cxx',
+                  mandatory = False,
+                  execute   = False,
+                  msg       = 'Checking for rubberband >= 3.0.0',
+                  use       = 'RUBBERBAND',
+                  define_name= 'HAVE_RUBBERBAND_3_0_0',
+    fragment = '''
+#include <rubberband/RubberBandStretcher.h>
+#if RUBBERBAND_API_MAJOR_VERSION >= 2 && RUBBERBAND_API_MINOR_VERSION >= 7
+int main () { return 0; }
+#else
+#error
+#endif
+''')
+
     have_rf64_riff_support = conf.check_cc(fragment = '''
 #include <sndfile.h>
 int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
