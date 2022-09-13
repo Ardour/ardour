@@ -22,21 +22,28 @@
 #include <string>
 
 #include <gtkmm/cellrendererprogress.h>
+#include <gtkmm/cellrenderertext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treeview.h>
 
 #include "ardour_dialog.h"
 
+namespace PBD {
+	class Inflater;
+	class Downloader;
+}
+
 namespace ARDOUR {
 	class LibraryDescription;
-	class Downloader;
+	class LibraryFetcher;
 }
 
 class LibraryDownloadDialog : public ArdourDialog
 {
   public:
 	LibraryDownloadDialog ();
+	~LibraryDownloadDialog ();
 
 	void add_library (ARDOUR::LibraryDescription const &);
 
@@ -51,6 +58,7 @@ class LibraryDownloadDialog : public ArdourDialog
 			add (installed);
 			add (description);
 			add (url);
+			add (toplevel);
 			add (install);
 			add (progress);
 			add (downloader);
@@ -64,7 +72,8 @@ class LibraryDownloadDialog : public ArdourDialog
 		Gtk::TreeModelColumn<bool> installed;
 		/* these are not displayed */
 		Gtk::TreeModelColumn<std::string> url;
-		Gtk::TreeModelColumn<ARDOUR::Downloader*> downloader;
+		Gtk::TreeModelColumn<std::string> toplevel;
+		Gtk::TreeModelColumn<PBD::Downloader*> downloader;
 		Gtk::TreeModelColumn<int> progress;
 		/* used as tooltip */
 		Gtk::TreeModelColumn<std::string> description;
@@ -87,14 +96,21 @@ class LibraryDownloadDialog : public ArdourDialog
 	}
 
 	Gtk::CellRendererProgress* progress_renderer;
+	Gtk::CellRendererText* install_renderer;
 
 	void append_progress_column ();
+	void append_install_column ();
 
 	void download (Gtk::TreePath const &);
-	void install (std::string const & path, Gtk::TreePath const & treepath);
 
-	bool dl_timer_callback (ARDOUR::Downloader*, Gtk::TreePath);
+	bool dl_timer_callback (PBD::Downloader*, Gtk::TreePath);
 	bool display_button_press (GdkEventButton* ev);
+
+	PBD::Inflater* inflater;
+	void install (std::string const & path, Gtk::TreePath const & treepath);
+	void install_progress (size_t, size_t, std::string, Gtk::TreePath);
+	void install_finished (Gtk::TreeModel::iterator row, std::string path, int status);
+	PBD::ScopedConnection install_connection;
 };
 
 

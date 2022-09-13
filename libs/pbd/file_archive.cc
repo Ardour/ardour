@@ -467,10 +467,6 @@ FileArchive::do_extract (struct archive* a)
 			}
 		}
 	}
-	if (_req.mp.progress && rv == 0) {
-		// file i/o -- not URL
-		progress (_req.mp.length, _req.mp.length);
-	}
 
 	archive_read_close (a);
 	archive_read_free (a);
