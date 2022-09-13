@@ -90,14 +90,11 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		Gtk::ComboBoxText port_combo;
 		Gtk::CheckButton sclock_synced_button;
 		Gtk::CheckButton fr2997_button;
-		ArdourWidgets::ArdourButton request_options;
-		Gtk::Menu* request_option_menu;
 		ArdourWidgets::ArdourButton remove_button;
 		FloatingTextEntry* name_editor;
 		samplepos_t save_when;
 		std::string save_last;
 
-		void build_request_options();
 		void mod_request_type (ARDOUR::TransportRequestType);
 
 		boost::shared_ptr<ARDOUR::TransportMaster> tm;
@@ -116,7 +113,6 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		void fr2997_button_toggled ();
 		void port_choice_changed ();
 		void connection_handler ();
-		bool request_option_press (GdkEventButton*);
 		void prop_change (PBD::PropertyChange);
 		void remove_clicked ();
 
@@ -132,8 +128,8 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	std::vector<Row*> rows;
 
 	Gtk::Table table;
-	Gtk::Label col_title[14];
-	float align[14];
+	Gtk::Label col_title[10];
+	float align[10];
 	ArdourWidgets::ArdourButton add_master_button;
 	Gtk::CheckButton lost_sync_button;
 
