@@ -25,6 +25,7 @@
 #include "pbd/error.h"
 #include "pbd/i18n.h"
 #include "pbd/file_archive.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/replace_all.h"
 #include "pbd/whitespace.h"
 #include "pbd/xml++.h"
@@ -50,6 +51,10 @@ CurlWrite_CallbackFunc_StdString(void *contents, size_t size, size_t nmemb, std:
     }
 
     return newLength;
+}
+
+LibraryFetcher::LibraryFetcher ()
+{
 }
 
 int
@@ -82,7 +87,24 @@ LibraryFetcher::get_descriptions ()
 
 	XMLNode const & root (*tree.root());
 
+	if (root.name() != X_("Resources")) {
+		return -4;
+	}
+
+	XMLNode* libraries = 0;
+
 	for (auto const & node : root.children()) {
+		if (node->name() == X_("Libraries")) {
+			libraries = node;
+			break;
+		}
+	}
+
+	if (!libraries) {
+		return -5;
+	}
+
+	for (auto const & node : libraries->children()) {
 		string n, d, u, l, td, a, sz;
 		if (!node->get_property (X_("name"), n) ||
 		    !node->get_property (X_("author"), a) ||
@@ -113,68 +135,20 @@ LibraryFetcher::get_descriptions ()
 }
 
 int
-LibraryFetcher::add (std::string const & path)
+LibraryFetcher::add (std::string const & root_dir)
 {
-	try {
-		FileArchive archive (path);
-		std::vector<std::string> contents = archive.contents ();
-		std::set<std::string> dirs;
+	std::string newpath;
 
-		for (auto const & c : contents) {
-			string::size_type slash = c.find (G_DIR_SEPARATOR);
-			if (slash == string::npos || slash == c.length() - 1) {
-				/* no slash or slash at end ... directory ? */
-				dirs.insert (c);
-			}
-		}
+	/* just add the root dir to the relevant search path. The user can
+	 * expand the rest in the browser
+	 */
 
-		if (dirs.empty()) {
-			return -1;
-		}
-
-		/* Unpack the archive. Likely should have a thread for this */
-
-		std::string destdir = Glib::path_get_dirname (path);
-
-		{
-			std::string pwd (Glib::get_current_dir ());
-
-			if (g_chdir (destdir.c_str ())) {
-				error << string_compose (_("cannot chdir to '%1' to unpack library archive (%2)\n"), destdir, strerror (errno)) << endmsg;
-				return -1;
-			}
-
-			if (archive.inflate (destdir)) {
-				/* cleanup ? */
-				return -1;
-			}
-
-			g_chdir (pwd.c_str());
-		}
-
-		std::string newpath;
-
-		for (std::set<std::string>::const_iterator d = dirs.begin(); d != dirs.end(); ++d) {
-
-			std::string installed_path = Glib::build_filename (destdir, *d);
-
-			if (Config->get_sample_lib_path().find (installed_path) == string::npos) {
-				if (d != dirs.begin()) {
-					newpath += G_SEARCHPATH_SEPARATOR;
-				}
-				newpath += installed_path;
-			}
-		}
-
-		if (!newpath.empty()) {
-			newpath += G_SEARCHPATH_SEPARATOR;
-			newpath += Config->get_sample_lib_path ();
-
-			Config->set_sample_lib_path (newpath);
-		}
-
-	} catch (...) {
-		return -1;
+	if (Config->get_sample_lib_path().find (root_dir) == string::npos) {
+		newpath = root_dir;
+		newpath += G_SEARCHPATH_SEPARATOR;
+		newpath += Config->get_sample_lib_path ();
+		Config->set_sample_lib_path (newpath);
+		Config->save_state ();
 	}
 
 	return 0;
@@ -204,157 +178,3 @@ LibraryFetcher::installed (LibraryDescription const & desc)
 	return false;
 }
 
-static size_t
-CurlWrite_CallbackFunc_Downloader(void *contents, size_t size, size_t nmemb, Downloader* dl)
-{
-	return dl->write (contents, size, nmemb);
-}
-
-size_t
-Downloader::write (void *ptr, size_t size, size_t nmemb)
-{
-	if (_cancel) {
-		fclose (file);
-		file = 0;
-		::g_unlink (file_path.c_str());
-
-		_downloaded = 0;
-		_download_size = 0;
-
-		return 0;
-	}
-
-	size_t nwritten = fwrite (ptr, size, nmemb, file);
-
-	_downloaded += nwritten;
-
-	return nwritten;
-}
-
-Downloader::Downloader (string const & u, string const & dir)
-	: url (u)
-	, destdir (dir)
-	, file (0)
-	, _cancel (false)
-	, _download_size (0)
-	, _downloaded (0)
-{
-}
-
-Downloader::~Downloader ()
-{
-	cleanup();
-}
-
-int
-Downloader::start ()
-{
-	file_path = Glib::build_filename (destdir, Glib::path_get_basename (url));
-
-	if (!(file = fopen (file_path.c_str(), "w"))) {
-		return -1;
-	}
-
-	_cancel = false;
-	_status = 0; /* unknown at this point */
-	thr = std::thread (&Downloader::download, this);
-	return 0;
-}
-
-void
-Downloader::cleanup ()
-{
-	thr.join ();
-}
-
-void
-Downloader::cancel ()
-{
-	_cancel = true;
-}
-
-double
-Downloader::progress () const
-{
-	if (_download_size == 0) {
-		return 0.;
-	}
-
-	return (double) _downloaded / _download_size;
-}
-
-void
-Downloader::download ()
-{
-	char curl_error[CURL_ERROR_SIZE];
-
-	{
-		/* First curl fetch to get the data size so that we can offer a
-		 * progress meter
-		 */
-
-		curl = curl_easy_init ();
-		if (!curl) {
-			_status = -1;
-			return;
-		}
-
-		/* get size */
-
-		curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
-		curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
-		curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
-		curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
-		curl_easy_setopt (curl, CURLOPT_ERRORBUFFER, curl_error);
-
-		CURLcode res = curl_easy_perform (curl);
-
-		if (res == CURLE_OK) {
-			double dsize;
-			curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &dsize);
-			_download_size = dsize;
-		}
-
-		curl_easy_cleanup (curl);
-
-		if (res != CURLE_OK ) {
-			error << string_compose (_("Download failed, error code %1 (%2)"), curl_easy_strerror (res), curl_error) << endmsg;
-			_status = -2;
-			return;
-		}
-	}
-
-	curl = curl_easy_init ();
-	if (!curl) {
-		_status = -1;
-		return;
-	}
-
-	curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
-	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_Downloader);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
-	CURLcode res = curl_easy_perform (curl);
-	curl_easy_cleanup (curl);
-
-	if (res == CURLE_OK) {
-		_status = 1;
-	} else {
-		_status = -1;
-	}
-
-	if (file) {
-		fclose (file);
-		file = 0;
-	}
-}
-
-std::string
-Downloader::download_path() const
-{
-	/* Can only return the download path if we completed, and completed successfully */
-	if (_status > 0) {
-		return file_path;
-	}
-	return std::string();
-}
