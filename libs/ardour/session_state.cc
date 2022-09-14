@@ -1035,8 +1035,18 @@ Session::load_state (string snapshot_name, bool from_template)
 		// only create a backup for a given statefile version once
 
 		if (!Glib::file_test (backup_path, Glib::FILE_TEST_EXISTS)) {
+			const int lsv_k = Stateful::loading_state_version / 1000L;
+			const int lsv_h = (Stateful::loading_state_version % 1000L) / 100L;
+			const int csv_k = CURRENT_SESSION_FILE_VERSION / 1000L;
+			const int csv_h = (CURRENT_SESSION_FILE_VERSION % 1000L) / 100L;
 
-			VersionMismatch (xmlpath, backup_path);
+			if (lsv_k < csv_k || (lsv_k == csv_k && lsv_h < csv_h)) {
+				/* only inform the GUI if a major change is done:
+				 * - CURRENT_SESSION_FILE_VERSION is bumped to the next thousand
+				 * - CURRENT_SESSION_FILE_VERSION uses a different century (hecta)
+				 */
+				VersionMismatch (xmlpath, backup_path);
+			}
 
 			if (!copy_file (xmlpath, backup_path)) {;
 				return -1;
