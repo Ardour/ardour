@@ -340,7 +340,6 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 
 	bool all_transparent = true;
 
-#ifndef MIXBUS // XXX Mixbus 8 always has transparent MIDI regions (until session is converted in v9)
 	/* skip bottom-most region, transparency is irrelevant */
 	for (auto i = ++regs.begin(); i != regs.end(); ++i) {
 		if ((*i)->opaque ()) {
@@ -348,7 +347,6 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 			break;
 		}
 	}
-#endif
 
 	Evoral::EventList<samplepos_t> evlist;
 

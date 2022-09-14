@@ -357,10 +357,7 @@ MidiRegion::set_state (const XMLNode& node, int version)
 {
 	int ret = Region::set_state (node, version);
 
-#ifdef MIXBUS
-#warning remember to convert MidiRegion opacity for v9 /* see also MidiPlaylist::render */
-#endif
-	if (version < 7000) {
+	if (version < 7001) {
 		/* previous sessions had uncontionally transparent MIDI regions */
 		override_opaqueness (false);
 	}
