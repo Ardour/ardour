@@ -32,6 +32,7 @@
 
 #include "gui_thread.h"
 #include "library_download_dialog.h"
+#include "ui_config.h"
 
 using namespace PBD;
 using namespace ARDOUR;
@@ -53,7 +54,7 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 	append_progress_column ();
 
 	_display.set_headers_visible (true);
-	_display.set_tooltip_column (5); /* path */
+	_display.set_hover_selection (true);
 
 	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &LibraryDownloadDialog::display_button_press), false);
 
@@ -63,8 +64,15 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 	h->pack_start (_display);
 
 	get_vbox()->set_spacing (8);
+	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (*Gtk::manage (h));
 
+	_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
+	_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &LibraryDownloadDialog::library_selected));
+
+	description_view.set_size_request (-1, 80);
+	description_view.set_wrap_mode (Gtk::WRAP_WORD);
+	get_vbox()->pack_start (description_view);
 
 	ARDOUR::LibraryFetcher lf;
 	lf.get_descriptions ();
@@ -74,6 +82,19 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 LibraryDownloadDialog::~LibraryDownloadDialog ()
 {
 	delete inflater;
+}
+
+void
+LibraryDownloadDialog::library_selected ()
+{
+	if (_display.get_selection()->count_selected_rows() == 0) {
+		description_view.get_buffer()->set_text (string());
+		return;
+	}
+
+	Gtk::TreeModel::iterator row = _display.get_selection()->get_selected();
+	string txt = (*row)[_columns.description];
+	description_view.get_buffer()->set_text (txt);
 }
 
 void

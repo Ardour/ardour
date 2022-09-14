@@ -26,6 +26,7 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treeview.h>
+#include <gtkmm/textview.h>
 
 #include "ardour_dialog.h"
 
@@ -111,6 +112,9 @@ class LibraryDownloadDialog : public ArdourDialog
 	void install_progress (size_t, size_t, std::string, Gtk::TreePath);
 	void install_finished (Gtk::TreeModel::iterator row, std::string path, int status);
 	PBD::ScopedConnection install_connection;
+
+	Gtk::TextView description_view;
+	void library_selected ();
 };
 
 
