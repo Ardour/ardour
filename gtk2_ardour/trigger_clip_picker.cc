@@ -112,6 +112,10 @@ TriggerClipPicker::TriggerClipPicker ()
 	_open_library_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::open_library));
 	_open_library_btn.set_no_show_all ();
 
+	_refresh_btn.set_name ("generic button");
+	_refresh_btn.set_icon (ArdourWidgets::ArdourIcon::TransportLoop);
+	_refresh_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::refresh_library));
+
 	_show_plugin_btn.set_name ("generic button");
 	_show_plugin_btn.set_icon (ArdourWidgets::ArdourIcon::PsetBrowse);
 	_show_plugin_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::audition_show_plugin_ui));
@@ -129,6 +133,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	ArdourWidgets::set_tooltip (_play_btn, _("Audition selected clip"));
 	ArdourWidgets::set_tooltip (_stop_btn, _("Stop the audition"));
 	ArdourWidgets::set_tooltip (_open_library_btn, _("Open clip library folder"));
+	ArdourWidgets::set_tooltip (_refresh_btn, _("Refresh clip list"));
 	ArdourWidgets::set_tooltip (_auditioner_combo, _("Select the Synth used for auditioning"));
 	ArdourWidgets::set_tooltip (_show_plugin_btn, _("Show the GUI for the Auditioner Synth"));
 	ArdourWidgets::set_tooltip (_clip_dir_menu, _("Click to select a clip folder and edit your available clip folders"));
@@ -161,6 +166,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	dir_table->set_spacings(4);
 	dir_table->attach (_clip_dir_menu,    0, 1, 0, 1, EXPAND | FILL, SHRINK);
 	dir_table->attach (_open_library_btn, 1, 2, 0, 1, SHRINK, SHRINK);
+	dir_table->attach (_refresh_btn,      2, 3, 0, 1, SHRINK, SHRINK);
 
 	pack_start (*dir_table, false, false);
 	pack_start (_scroller);
@@ -783,6 +789,12 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 	if (!pc) {
 		_view.set_model (_model);
 	}
+}
+
+void
+TriggerClipPicker::refresh_library ()
+{
+	list_dir(_current_path);
 }
 
 void

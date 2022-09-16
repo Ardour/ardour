@@ -82,6 +82,7 @@ private:
 	void audition_show_plugin_ui ();
 	void stop_audition ();
 	void autoplay_toggled ();
+	void refresh_library ();
 	void open_library ();
 	bool seek_button_press (GdkEventButton*);
 	bool seek_button_release (GdkEventButton*);
@@ -112,6 +113,7 @@ private:
 	ArdourWidgets::ArdourButton  _play_btn;
 	ArdourWidgets::ArdourButton  _stop_btn;
 	ArdourWidgets::ArdourButton  _open_library_btn;
+	ArdourWidgets::ArdourButton  _refresh_btn;
 	ArdourWidgets::ArdourButton  _show_plugin_btn;
 	Gtk::HScale                  _seek_slider;
 	Gtk::CheckButton             _autoplay_btn;
