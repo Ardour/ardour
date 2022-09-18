@@ -1223,7 +1223,7 @@ create_apple_menu ()
 	[menuitem release];
 	[_app_menu addItem: [NSMenuItem separatorItem]];
 	menuitem = [[NSMenuItem alloc] initWithTitle:@"Hide"
-		    action:@selector(hide:) keyEquivalent:@"h"];
+		    action:@selector(hide:) keyEquivalent:@""];
 	[menuitem setTarget: NSApp];
 	[_app_menu addItem: menuitem];
 	[menuitem release];
