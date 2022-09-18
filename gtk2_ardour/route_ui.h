@@ -275,6 +275,7 @@ private:
 	void update_solo_display ();
 	void update_mute_display ();
 	void update_polarity_display ();
+	void update_polarity_tooltips ();
 	void update_solo_button ();
 	void solo_changed_so_update_mute ();
 	void session_rec_enable_changed ();

@@ -2071,6 +2071,7 @@ RouteUI::setup_invert_buttons ()
 	if (_n_polarity_invert == N) {
 		/* buttons are already setup for this strip, but we should still set the values */
 		update_polarity_display ();
+		update_polarity_tooltips ();
 		return;
 	}
 	_n_polarity_invert = N;
@@ -2104,12 +2105,6 @@ RouteUI::setup_invert_buttons ()
 			b->set_text (string_compose (X_("Ø%1"), i + 1));
 		}
 
-		if (N <= _max_invert_buttons) {
-			UI::instance()->set_tip (*b, string_compose (_("Left-click to invert polarity of channel %1 of this track. Right-click to show menu."), i + 1));
-		} else {
-			UI::instance()->set_tip (*b, _("Click to show a menu of channels to invert polarity"));
-		}
-
 		_invert_buttons.push_back (b);
 		invert_button_box.pack_start (*b);
 	}
@@ -2118,6 +2113,7 @@ RouteUI::setup_invert_buttons ()
 	invert_button_box.show_all ();
 
 	update_polarity_display ();
+	update_polarity_tooltips ();
 }
 
 void
@@ -2164,6 +2160,21 @@ RouteUI::update_polarity_display ()
 
 	}
 }
+void
+RouteUI::update_polarity_tooltips ()
+{
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send>(_current_delivery);
+	int i = 0;
+	for (auto const& b : _invert_buttons) {
+		if (send) {
+			UI::instance()->set_tip (*b, _("Click to invert polarity of all send channels"));
+		} else if (_n_polarity_invert <= _max_invert_buttons) {
+			UI::instance()->set_tip (*b, string_compose (_("Left-click to invert polarity of channel %1 of this track. Right-click to show menu."), ++i));
+		} else {
+			UI::instance()->set_tip (*b, _("Click to show a menu of channels to invert polarity"));
+		}
+	}
+}
 
 bool
 RouteUI::invert_release (GdkEventButton* ev, uint32_t i)
@@ -2195,6 +2206,11 @@ RouteUI::invert_press (GdkEventButton* ev)
 		   up a menu on right-click; left click is handled
 		   on release.
 		*/
+		return false;
+	}
+
+	if (boost::dynamic_pointer_cast<Send>(_current_delivery)) {
+		/* do not show context menu for send polarity */
 		return false;
 	}
 
