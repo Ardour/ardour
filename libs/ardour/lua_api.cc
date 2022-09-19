@@ -1226,7 +1226,7 @@ LuaAPI::Rubberband::finalize ()
 	/* create a new region */
 	std::string region_name = RegionFactory::new_region_name (_region->name ());
 
-	PropertyList plist;
+	PropertyList plist (_region->properties ());
 	plist.add (Properties::start, 0);
 	plist.add (Properties::length, _region->length_samples ());
 	plist.add (Properties::name, region_name);
@@ -1235,16 +1235,7 @@ LuaAPI::Rubberband::finalize ()
 	boost::shared_ptr<Region>      r  = RegionFactory::create (sl, plist);
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
-	ar->set_scale_amplitude (_region->scale_amplitude ());
-	ar->set_fade_in_active (_region->fade_in_active ());
-	ar->set_fade_in (_region->fade_in ());
-	ar->set_fade_out_active (_region->fade_out_active ());
-	ar->set_fade_out (_region->fade_out ());
-	*(ar->envelope ()) = *(_region->envelope ());
-
 	ar->set_ancestral_data (timepos_t (_read_start), timecnt_t (_read_len), _stretch_ratio, _pitch_ratio);
-	ar->set_master_sources (_region->master_sources ());
-	ar->set_position (timepos_t (_region->position_sample ()));
 	ar->set_length (ar->length ().scale (_stretch_ratio)); // XXX
 	if (_stretch_ratio != 1.0) {
 		// TODO: apply mapping

@@ -133,26 +133,13 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 	}
 	results.clear ();
 
-	PropertyList plist;
+	PropertyList plist (region->properties ());
 
 	plist.add (Properties::start, std::numeric_limits<timecnt_t>::min());
-	plist.add (Properties::length, region->length());
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);
 
 	boost::shared_ptr<Region> r = RegionFactory::create (nsrcs, plist);
-
-	boost::shared_ptr<AudioRegion> audio_region = boost::dynamic_pointer_cast<AudioRegion> (region);
-	boost::shared_ptr<AudioRegion> audio_r = boost::dynamic_pointer_cast<AudioRegion> (r);
-	if (audio_region && audio_r) {
-		audio_r->set_position (region->position());
-		audio_r->set_scale_amplitude (audio_region->scale_amplitude());
-		audio_r->set_fade_in_active (audio_region->fade_in_active ());
-		audio_r->set_fade_in (audio_region->fade_in ());
-		audio_r->set_fade_out_active (audio_region->fade_out_active ());
-		audio_r->set_fade_out (audio_region->fade_out ());
-		*(audio_r->envelope()) = *(audio_region->envelope ());
-	}
 	results.push_back (r);
 
 	return 0;

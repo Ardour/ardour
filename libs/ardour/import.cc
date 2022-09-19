@@ -521,7 +521,7 @@ remove_file_source (boost::shared_ptr<Source> source)
 }
 
 void
-Session::deinterlace_midi_region ( boost::shared_ptr<MidiRegion> mr )
+Session::deinterlace_midi_region (boost::shared_ptr<MidiRegion> mr)
 {
 	typedef vector<boost::shared_ptr<Source> > Sources;
 	Sources newfiles;
@@ -580,12 +580,10 @@ Session::deinterlace_midi_region ( boost::shared_ptr<MidiRegion> mr )
 		add_source(*x);
 
 		/* create a whole-file region for this new source, so it shows up in the Source List...*/
-		PropertyList plist;
+		PropertyList plist (mr->properties ());
 		plist.add (Properties::whole_file, true);
-		plist.add (Properties::start, mr->start());
-		plist.add (Properties::length, mr->length());
 		plist.add (Properties::name, (*x)->name());
-		plist.add (Properties::tags, "(split-chans)");
+		plist.add (Properties::tags, string_compose ("%1%2%3", _("split-chans)"), mr->tags ().empty() ? "" : " ", mr->tags ()));
 		boost::shared_ptr<Region> whole = RegionFactory::create (*x, plist);
 
 		/* ... and insert a discrete copy into the playlist*/

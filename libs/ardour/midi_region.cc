@@ -161,12 +161,13 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc, ThawList* tl) const
 		}
 	}
 
-	PropertyList plist;
+	PropertyList plist (properties ());
 
 	plist.add (Properties::name, PBD::basename_nosuffix (newsrc->name()));
 	plist.add (Properties::whole_file, true);
-	plist.add (Properties::start, _start);
-	plist.add (Properties::length, _length);
+	plist.add (Properties::automatic, false);
+	plist.add (Properties::external, false);
+	plist.add (Properties::import, false);
 	plist.add (Properties::layer, 0);
 
 	boost::shared_ptr<MidiRegion> ret (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (newsrc, plist, true, tl)));

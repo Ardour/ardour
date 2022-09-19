@@ -1388,12 +1388,9 @@ AudioRegion::separate_by_channel (vector<boost::shared_ptr<Region> >& v) const
 		   "whole file" even if it covers the entire source file(s).
 		 */
 
-		PropertyList plist;
+		PropertyList plist (properties ());
 
-		plist.add (Properties::start, _start.val());
-		plist.add (Properties::length, _length.val());
 		plist.add (Properties::name, new_name);
-		plist.add (Properties::layer, layer ());
 		plist.add (Properties::whole_file, true);
 
 		v.push_back(RegionFactory::create (srcs, plist));
