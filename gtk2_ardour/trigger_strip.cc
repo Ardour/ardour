@@ -202,7 +202,6 @@ TriggerStrip::set_route (boost::shared_ptr<Route> rt)
 	_gain_control                           = AutomationController::create (ac->parameter (), ParameterDescriptor (ac->parameter ()), ac, false);
 	_gain_control->set_name (X_("ProcessorControlSlider"));
 	_gain_control->set_size_request (PX_SCALE (19), -1);
-	_gain_control->disable_vertical_scroll ();
 	volume_table.attach (*_gain_control, 0, 1, 1, 2);
 
 	_level_meter.set_meter (_route->shared_peak_meter ().get ());
