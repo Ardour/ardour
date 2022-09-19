@@ -361,6 +361,13 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Misc"), new OptionEditorHeading (_("MIDI Options")));
 
 	add_option (_("Misc"), new BoolOption (
+				"draw-opaque-midi-regions",
+				_("Draw tool creates opaque MIDI regions"),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::get_draw_opaque_midi_regions),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::set_draw_opaque_midi_regions)
+				));
+
+	add_option (_("Misc"), new BoolOption (
 				"midi-copy-is-fork",
 				_("MIDI region copies are independent"),
 				sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_copy_is_fork),

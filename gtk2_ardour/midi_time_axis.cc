@@ -1699,6 +1699,7 @@ MidiTimeAxisView::add_region (timepos_t const & f, timecnt_t const & length, boo
 		plist.add (ARDOUR::Properties::automatic, true);
 		plist.add (ARDOUR::Properties::whole_file, true);
 		plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
+		plist.add (ARDOUR::Properties::opaque, _session->config.get_draw_opaque_midi_regions());
 
 		region = (RegionFactory::create (src, plist, true));
 	}
