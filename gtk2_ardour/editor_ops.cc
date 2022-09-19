@@ -7588,7 +7588,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 		/* do NOT announce new regions 1 by one, just wait till they are all done */
 
-		PropertyList plist;
+		PropertyList plist (r->properties ());
 
 		plist.add (ARDOUR::Properties::start, file_start);
 		plist.add (ARDOUR::Properties::length, len);
@@ -7617,7 +7617,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	RegionFactory::region_name (new_name, r->name());
 
 	/* Add the final region */
-	PropertyList plist;
+	PropertyList plist (r->properties ());
 
 	plist.add (ARDOUR::Properties::start, r->start() + pos);
 	plist.add (ARDOUR::Properties::length, (r->position() + pos).distance (r->end()));

@@ -1707,11 +1707,7 @@ MidiTimeAxisView::add_region (timepos_t const & f, timecnt_t const & length, boo
 
 	{
 		PropertyList plist;
-
-		plist.add (ARDOUR::Properties::start, start);
-		plist.add (ARDOUR::Properties::length, length);
 		plist.add (ARDOUR::Properties::name, region->name());
-
 		region = RegionFactory::create (region, plist, false);
 	}
 
