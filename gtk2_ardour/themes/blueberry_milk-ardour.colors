@@ -164,8 +164,6 @@
     <ColorAlias name="latency button: fill" alias="widget:bg"/>
     <ColorAlias name="latency button: fill active" alias="alert:ruddy"/>
     <ColorAlias name="latency button: led active" alias="alert:ruddy"/>
-    <ColorAlias name="layered button: fill" alias="widget:bg"/>
-    <ColorAlias name="layered button: fill active" alias="alert:ruddy"/>
     <ColorAlias name="location cd marker" alias="alert:cyan"/>
     <ColorAlias name="location loop" alias="alert:cyan"/>
     <ColorAlias name="location marker" alias="theme:contrasting alt"/>
