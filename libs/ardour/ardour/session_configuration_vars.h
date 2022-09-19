@@ -43,6 +43,8 @@ CONFIG_VARIABLE (bool, punch_out, "punch-out", false)
 CONFIG_VARIABLE (bool, count_in, "count-in", false)
 CONFIG_VARIABLE (MonitorChoice, session_monitoring, "session-monitoring", MonitorAuto)
 CONFIG_VARIABLE (bool, layered_record_mode, "layered-record-mode", false)
+CONFIG_VARIABLE (RecordMode, record_mode, "record-mode", RecLayered)
+CONFIG_VARIABLE (bool, draw_opaque_midi_regions, "draw-opaque-midi_regions", false)
 CONFIG_VARIABLE (uint32_t, subframes_per_frame, "subframes-per-frame", 100)
 CONFIG_VARIABLE (Timecode::TimecodeFormat, timecode_format, "timecode-format", Timecode::timecode_30)
 CONFIG_VARIABLE (samplecnt_t, minitimeline_span, "minitimeline-span", 120) // seconds

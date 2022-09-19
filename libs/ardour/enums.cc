@@ -71,6 +71,7 @@ setup_enum_writer ()
 	DiskIOPoint _DiskIOPoint;
 	MeterType _MeterType;
 	TrackMode _TrackMode;
+	RecordMode _RecordMode;
 	NoteMode _NoteMode;
 	ChannelMode _ChannelMode;
 	ColorMode _ColorMode;
@@ -256,6 +257,11 @@ setup_enum_writer ()
 	 */
 	REGISTER_ENUM (Destructive);
 	REGISTER (_TrackMode);
+
+	REGISTER_ENUM (RecLayered);
+	REGISTER_ENUM (RecNonLayered);
+	REGISTER_ENUM (RecSoundOnSound);
+	REGISTER (_RecordMode);
 
 	REGISTER_ENUM (Sustained);
 	REGISTER_ENUM (Percussive);

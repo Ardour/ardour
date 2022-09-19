@@ -239,6 +239,12 @@ enum TrackMode {
 	Destructive,
 };
 
+enum RecordMode {
+	RecLayered,
+	RecNonLayered,
+	RecSoundOnSound
+};
+
 enum NoteMode {
 	Sustained,
 	Percussive
