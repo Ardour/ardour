@@ -204,6 +204,13 @@ ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 sigc::signal<void, timepos_t> ARDOUR_UI::Clock;
 sigc::signal<void> ARDOUR_UI::CloseAllDialogs;
 
+static const gchar *_record_mode_strings[] = {
+	N_("Layerered"),
+	N_("Non Layered"),
+	N_("Sound on Sound"),
+	0
+};
+
 static bool
 ask_about_configuration_copy (string const & old_dir, string const & new_dir, int version)
 {
@@ -350,6 +357,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	Gtkmm2ext::init (localedir);
 
 	UIConfiguration::instance().post_gui_init ();
+
+	record_mode_strings = I18N (_record_mode_strings);
 
 	if (ARDOUR::handle_old_configuration_files (boost::bind (ask_about_configuration_copy, _1, _2, _3))) {
 		{
@@ -2137,7 +2146,7 @@ void
 ARDOUR_UI::map_transport_state ()
 {
 	if (!_session) {
-		layered_button.set_sensitive (false);
+		record_mode_selector.set_sensitive (false);
 		if (UIConfiguration::instance().get_screen_saver_mode () == InhibitWhileRecording) {
 			inhibit_screensaver (false);
 		}
@@ -2149,9 +2158,9 @@ ARDOUR_UI::map_transport_state ()
 	float sp = _session->transport_speed();
 
 	if (sp != 0.0f) {
-		layered_button.set_sensitive (!_session->actively_recording ());
+		record_mode_selector.set_sensitive (!_session->actively_recording ());
 	} else {
-		layered_button.set_sensitive (true);
+		record_mode_selector.set_sensitive (true);
 		update_disk_space ();
 	}
 	if (UIConfiguration::instance().get_screen_saver_mode () == InhibitWhileRecording) {

@@ -2032,7 +2032,7 @@ RouteUI::parameter_changed (string const & p)
 		update_monitoring_display ();
 	} else if (p == "triggerbox-overrides-disk-monitoring") {
 		update_monitoring_display ();
-	} else if (p == "layered-record-mode") {
+	} else if (p == "record-mode") {
 		update_monitoring_display ();
 	} else if (p == "auto-input-does-talkback") {
 		update_monitoring_display ();

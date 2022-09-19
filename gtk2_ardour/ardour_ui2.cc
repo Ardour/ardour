@@ -91,7 +91,7 @@ ARDOUR_UI::setup_tooltips ()
 	ArdourCanvas::Canvas::set_tooltip_timeout (Gtk::Settings::get_default()->property_gtk_tooltip_timeout ());
 
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
-	set_tip (layered_button, _("<b>When active</b>, new recordings will be added as regions on a layer atop existing regions.\n<b>When disabled</b>, the underlying region will be spliced and replaced with the newly recorded region."));
+	set_tip (record_mode_selector, _("<b>Layered</b>, new recordings will be added as regions on a layer atop existing regions.\n<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions will be audible.\n<b>Non Layered</b>, the underlying region will be spliced and replaced with the newly recorded region."));
 	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	parameter_changed("click-gain");
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
@@ -241,14 +241,14 @@ ARDOUR_UI::repack_transport_hbox ()
 		layered_label.show ();
 		punch_in_button.show ();
 		punch_out_button.show ();
-		layered_button.show ();
+		record_mode_selector.show ();
 		recpunch_spacer.show ();
 	} else {
 		punch_label.hide ();
 		layered_label.hide ();
 		punch_in_button.hide ();
 		punch_out_button.hide ();
-		layered_button.hide ();
+		record_mode_selector.hide ();
 		recpunch_spacer.hide ();
 	}
 
@@ -336,8 +336,6 @@ ARDOUR_UI::setup_transport ()
 	error_alert_button.set_related_action(act);
 	error_alert_button.set_fallthrough_to_parent(true);
 
-	layered_button.signal_clicked.connect (sigc::mem_fun(*this,&ARDOUR_UI::layered_button_clicked));
-
 	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-editor-visibility")));
 	mixer_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-mixer-visibility")));
 	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-preferences-visibility")));
@@ -423,7 +421,7 @@ ARDOUR_UI::setup_transport ()
 
 	punch_in_button.set_name ("punch button");
 	punch_out_button.set_name ("punch button");
-	layered_button.set_name (("layered button"));
+	record_mode_selector.set_name (("record mode button"));
 
 	latency_disable_button.set_name ("latency button");
 
@@ -446,7 +444,12 @@ ARDOUR_UI::setup_transport ()
 	follow_edits_button.set_text(_("Follow Range"));
 	punch_in_button.set_text (_("In"));
 	punch_out_button.set_text (_("Out"));
-	layered_button.set_text (_("Non-Layered"));
+
+	record_mode_selector.AddMenuElem (MenuElem (record_mode_strings[(int)RecLayered], sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_record_mode), RecLayered)));
+	record_mode_selector.AddMenuElem (MenuElem (record_mode_strings[(int)RecNonLayered], sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_record_mode), RecNonLayered)));
+	record_mode_selector.AddMenuElem (MenuElem (record_mode_strings[(int)RecSoundOnSound], sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_record_mode), RecSoundOnSound)));
+
+	set_size_request_to_display_given_text (record_mode_selector, record_mode_strings, /*COMBO_TRIANGLE_WIDTH*/ 5, 2);
 
 	latency_disable_button.set_text (_("Disable PDC"));
 	io_latency_label.set_text (_("I/O Latency:"));
@@ -561,7 +564,7 @@ ARDOUR_UI::setup_transport ()
 	//punch section
 	button_height_size_group->add_widget (punch_in_button);
 	button_height_size_group->add_widget (punch_out_button);
-	button_height_size_group->add_widget (layered_button);
+	button_height_size_group->add_widget (record_mode_selector);
 
 	// PDC
 	button_height_size_group->add_widget (latency_disable_button);
@@ -603,10 +606,10 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (layered_label, TCOL, 1, 2 , FILL, SHRINK, 3, 0);
 	++col;
 
-	transport_table.attach (punch_in_button,  col,      col + 1, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (punch_space,      col + 1,  col + 2, 0, 1 , FILL, SHRINK, 0, vpadding);
-	transport_table.attach (punch_out_button, col + 2,  col + 3, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (layered_button,   col,      col + 3, 1, 2 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (punch_in_button,      col,      col + 1, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (punch_space,          col + 1,  col + 2, 0, 1 , FILL, SHRINK, 0, vpadding);
+	transport_table.attach (punch_out_button,     col + 2,  col + 3, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (record_mode_selector, col,      col + 3, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	col += 3;
 
 	transport_table.attach (recpunch_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
@@ -805,10 +808,10 @@ ARDOUR_UI::error_alert_press (GdkEventButton* ev)
 }
 
 void
-ARDOUR_UI::layered_button_clicked ()
+ARDOUR_UI::set_record_mode (RecordMode m)
 {
 	if (_session) {
-		_session->config.set_layered_record_mode (!_session->config.get_layered_record_mode ());
+		_session->config.set_record_mode (m);
 	}
 }
 

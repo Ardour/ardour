@@ -466,8 +466,10 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "cue-behavior") {
 		CueBehavior cb (_session->config.get_cue_behavior());
 		_cue_play_enable.set_active (cb & ARDOUR::FollowCues);
-	} else if (p == "layered-record-mode") {
-		layered_button.set_active (_session->config.get_layered_record_mode ());
+	} else if (p == "record-mode") {
+		size_t m = _session->config.get_record_mode ();
+		assert (m < record_mode_strings.size ());
+		record_mode_selector.set_active (record_mode_strings[m]);
 	} else if (p == "flat-buttons") {
 		bool flat = UIConfiguration::instance().get_flat_buttons();
 		if (ArdourButton::flat_buttons () != flat) {

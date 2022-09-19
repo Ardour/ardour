@@ -522,9 +522,9 @@ private:
 
 	TransportControlUI transport_ctrl;
 
-	ArdourWidgets::ArdourButton punch_in_button;
-	ArdourWidgets::ArdourButton punch_out_button;
-	ArdourWidgets::ArdourButton layered_button;
+	ArdourWidgets::ArdourButton   punch_in_button;
+	ArdourWidgets::ArdourButton   punch_out_button;
+	ArdourWidgets::ArdourDropdown record_mode_selector;
 
 	ArdourWidgets::ArdourVSpacer recpunch_spacer;
 	ArdourWidgets::ArdourVSpacer latency_spacer;
@@ -604,7 +604,7 @@ private:
 	void audition_alert_clicked ();
 	bool error_alert_press (GdkEventButton *);
 
-	void layered_button_clicked ();
+	void set_record_mode (ARDOUR::RecordMode);
 
 	void big_clock_value_changed ();
 	void primary_clock_value_changed ();
@@ -835,6 +835,7 @@ private:
 	void editor_realized ();
 
 	std::vector<std::string> positional_sync_strings;
+	std::vector<std::string> record_mode_strings;
 
 	void toggle_use_mmc ();
 	void toggle_send_mmc ();
