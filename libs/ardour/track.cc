@@ -925,6 +925,8 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		return;
 	}
 
+	RecordMode rmode = _session.config.get_record_mode ();
+
 	samplecnt_t total_capture = 0;
 
 	for (total_capture = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
@@ -954,6 +956,7 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		plist.add (Properties::name, whole_file_region_name);
 		plist.add (Properties::whole_file, true);
 		plist.add (Properties::automatic, true);
+		plist.add (Properties::opaque, rmode != RecSoundOnSound);
 		plist.add (Properties::start, timecnt_t (Temporal::BeatTime));
 		plist.add (Properties::length, mfs->length());
 		plist.add (Properties::layer, 0);
@@ -1017,6 +1020,7 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 
 			plist.add (Properties::start, s);
 			plist.add (Properties::length, l);
+			plist.add (Properties::opaque, rmode != RecSoundOnSound);
 			plist.add (Properties::name, region_name);
 
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
@@ -1033,9 +1037,9 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 
 		if (time_domain() == Temporal::BeatTime) {
 			const timepos_t b ((*ci)->start + preroll_off);
-			pl->add_region (midi_region, timepos_t (b.beats()), 1, _session.config.get_layered_record_mode ());
+			pl->add_region (midi_region, timepos_t (b.beats()), 1, rmode == RecNonLayered);
 		} else {
-			pl->add_region (midi_region, timepos_t ((*ci)->start + preroll_off), 1, _session.config.get_layered_record_mode ());
+			pl->add_region (midi_region, timepos_t ((*ci)->start + preroll_off), 1, rmode == RecNonLayered);
 		}
 	}
 
@@ -1067,12 +1071,15 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	   children of this one (later!)
 	*/
 
+	RecordMode rmode = _session.config.get_record_mode ();
+
 	try {
 		PropertyList plist;
 
 		plist.add (Properties::start, timecnt_t (afs->last_capture_start_sample(), timepos_t (Temporal::AudioTime)));
 		plist.add (Properties::length, afs->length());
 		plist.add (Properties::name, whole_file_region_name);
+		plist.add (Properties::opaque, rmode != RecSoundOnSound);
 		boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 		rx->set_automatic (true);
 		rx->set_whole_file (true);
@@ -1118,6 +1125,7 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 			plist.add (Properties::start, timecnt_t (buffer_position, timepos_t::zero (false)));
 			plist.add (Properties::length, timecnt_t ((*ci)->samples, timepos_t::zero (false)));
 			plist.add (Properties::name, region_name);
+			plist.add (Properties::opaque, rmode != RecSoundOnSound);
 
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 			region = boost::dynamic_pointer_cast<AudioRegion> (rx);
@@ -1131,7 +1139,7 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 			continue; /* XXX is this OK? */
 		}
 
-		pl->add_region (region, timepos_t ((*ci)->start + preroll_off), 1, _session.config.get_layered_record_mode());
+		pl->add_region (region, timepos_t ((*ci)->start + preroll_off), 1, RecNonLayered == rmode);
 		pl->set_layer (region, DBL_MAX);
 
 		buffer_position += (*ci)->samples;

@@ -149,9 +149,10 @@ MidiTrack::can_be_record_enabled ()
 MonitorState
 MidiTrack::get_input_monitoring_state (bool recording, bool talkback) const
 {
-	if (!_session.config.get_layered_record_mode () && (recording || talkback)) {
+	RecordMode rmode = _session.config.get_record_mode ();
+	if (rmode != RecNonLayered && (recording || talkback)) {
 		return MonitoringCue;
-	} else if (!_session.config.get_layered_record_mode () || recording || talkback) {
+	} else if (rmode != RecNonLayered || recording || talkback) {
 		return MonitoringInput;
 	} else {
 		return MonitoringSilence;
