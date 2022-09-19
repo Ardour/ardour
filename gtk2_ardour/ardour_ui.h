@@ -834,7 +834,6 @@ private:
 
 	void editor_realized ();
 
-	std::vector<std::string> positional_sync_strings;
 	std::vector<std::string> record_mode_strings;
 
 	void toggle_use_mmc ();
