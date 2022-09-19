@@ -205,9 +205,9 @@ sigc::signal<void, timepos_t> ARDOUR_UI::Clock;
 sigc::signal<void> ARDOUR_UI::CloseAllDialogs;
 
 static const gchar *_record_mode_strings[] = {
-	N_("Layerered"),
-	N_("Non Layered"),
-	N_("Sound on Sound"),
+	N_("Layered"),
+	N_("Non-Layered"),
+	N_("Snd on Snd"),
 	0
 };
 
