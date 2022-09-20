@@ -128,6 +128,9 @@ public:
 	uint32_t    port_name_size () const;
 	std::string my_name () const;
 
+	size_t total_port_count () const { return _ports.reader ()->size (); }
+	size_t session_port_count () const;
+
 #ifndef NDEBUG
 	void list_cycle_ports () const;
 	void list_all_ports () const;

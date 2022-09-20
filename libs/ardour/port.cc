@@ -46,6 +46,8 @@ bool         Port::_connecting_blocked = false;
 pframes_t    Port::_global_port_buffer_offset = 0;
 pframes_t    Port::_cycle_nframes = 0;
 double       Port::_speed_ratio = 1.0;
+double       Port::_engine_ratio = 1.0;
+double       Port::_resample_ratio = 1.0;
 std::string  Port::state_node_name = X_("Port");
 uint32_t     Port::_resampler_quality = 17;
 uint32_t     Port::_resampler_latency = 16; // = _resampler_quality - 1;
@@ -706,20 +708,19 @@ Port::set_state (const XMLNode& node, int)
 	return 0;
 }
 
-/* static */ void
+/* static */ bool
 Port::setup_resampler (uint32_t q)
 {
 	/* configure at application start (Ardour::init) */
-	static bool setup_done = false;
-	if (setup_done) {
-		return;
+	if (port_manager && port_manager->session_port_count() > 0) {
+		return false;
 	}
-	setup_done = true;
+
 	if (q == 0) {
 		/* no vari-speed */
 		_resampler_quality = 0;
 		_resampler_latency = 0;
-		return;
+		return true;
 	}
 	// range constrained in VMResampler::setup
 	if (q < 8) {
@@ -730,22 +731,49 @@ Port::setup_resampler (uint32_t q)
 	}
 	_resampler_quality = q;
 	_resampler_latency = q - 1;
+	return true;
 }
 
+/*static*/ bool
+Port::set_engine_ratio (double session_rate, double engine_rate)
+{
+	bool rv = true;
+	if (session_rate > 0 && engine_rate > 0 && can_varispeed ()) {
+		_engine_ratio = session_rate / engine_rate;
+	} else {
+		_engine_ratio = 1.0;
+		rv = false;
+	}
+
+	/* constrain range to provide for additional vari-speed.
+	 * but do allow 384000 / 44100 = 8.7
+	 */
+	if (_engine_ratio < 0.11 || _engine_ratio > 9) {
+		_engine_ratio = 1.0;
+		rv = false;
+	}
+
+	/* apply constraints, and calc _resample_ratio */
+	set_varispeed_ratio (_speed_ratio);
+	return rv;
+}
 
 /*static*/ void
-Port::set_speed_ratio (double s) {
+Port::set_varispeed_ratio (double s) {
 	if (s == 0.0 || !can_varispeed ()) {
 		/* no resampling when stopped */
 		_speed_ratio = 1.0;
 	} else {
 		/* see VMResampler::set_rratio() for min/max range */
-		_speed_ratio = std::min ((double) Config->get_max_transport_speed(), std::max (0.02, fabs (s)));
+		_speed_ratio = std::min (16.0, std::max (0.02, fabs (s * _engine_ratio))) / _engine_ratio;
+		_speed_ratio = std::min ((double) Config->get_max_transport_speed(), _speed_ratio);
 	}
+	/* cache overall speed */
+	_resample_ratio = _speed_ratio * _engine_ratio;
 }
 
 /*static*/ void
 Port::set_cycle_samplecnt (pframes_t n)
 {
-	_cycle_nframes = floor (n * _speed_ratio);
+	_cycle_nframes = floor (n * resample_ratio ());
 }

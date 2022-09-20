@@ -234,7 +234,7 @@ AudioEngine::process_callback (pframes_t nframes)
 {
 	TimerRAII tr (dsp_stats[ProcessCallback]);
 	Glib::Threads::Mutex::Lock tm (_process_lock, Glib::Threads::TRY_LOCK);
-	Port::set_speed_ratio (1.0);
+	Port::set_varispeed_ratio (1.0);
 
 	PT_TIMING_REF;
 	PT_TIMING_CHECK (1);
@@ -490,7 +490,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		*/
 		double catch_speed = tmm.pre_process_transport_masters (nframes, sample_time_at_cycle_start());
 		catch_speed = _session->plan_master_strategy (nframes, tmm.get_current_speed_in_process_context(), tmm.get_current_position_in_process_context(), catch_speed);
-		Port::set_speed_ratio (catch_speed);
+		Port::set_varispeed_ratio (catch_speed);
 		DEBUG_TRACE (DEBUG::Slave, string_compose ("transport master (current=%1) gives speed %2 (ports using %3)\n", tmm.current() ? tmm.current()->name() : string("[]"), catch_speed, Port::speed_ratio()));
 
 #if 0 // USE FOR DEBUG ONLY

@@ -552,6 +552,19 @@ PortManager::get_ports (const string& port_name_pattern, DataType type, PortFlag
 	return _backend->get_ports (port_name_pattern, type, flags, s);
 }
 
+size_t
+PortManager::session_port_count () const
+{
+	size_t cnt = 0;
+	for (auto const& p : *_ports.reader ()) {
+		if (p.second->flags () & TransportSyncPort) {
+			continue;
+		}
+		++cnt;
+	}
+	return cnt;
+}
+
 void
 PortManager::port_registration_failure (const std::string& portname)
 {
@@ -1230,7 +1243,7 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 	if (s) {
 		tl = s->rt_tasklist ();
 	}
-	if (tl && fabs (Port::speed_ratio ()) != 1.0) {
+	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
 		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
 			if (!(p->second->flags () & TransportSyncPort)) {
 				tl->push_back (boost::bind (&Port::cycle_start, p->second, nframes));
@@ -1256,7 +1269,7 @@ PortManager::cycle_end (pframes_t nframes, Session* s)
 	if (s) {
 		tl = s->rt_tasklist ();
 	}
-	if (tl && fabs (Port::speed_ratio ()) != 1.0) {
+	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
 		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
 			if (!(p->second->flags () & TransportSyncPort)) {
 				tl->push_back (boost::bind (&Port::cycle_end, p->second, nframes));
@@ -1274,7 +1287,7 @@ PortManager::cycle_end (pframes_t nframes, Session* s)
 	for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
 		/* AudioEngine::split_cycle flushes buffers until Port::port_offset.
 		 * Now only flush remaining events (after Port::port_offset) */
-		p->second->flush_buffers (nframes * Port::speed_ratio () - Port::port_offset ());
+		p->second->flush_buffers (nframes * Port::resample_ratio () - Port::port_offset ());
 	}
 
 	_cycle_ports.reset ();
@@ -1374,7 +1387,7 @@ PortManager::cycle_end_fade_out (gain_t base_gain, gain_t gain_step, pframes_t n
 	if (s) {
 		tl = s->rt_tasklist ();
 	}
-	if (tl && fabs (Port::speed_ratio ()) != 1.0) {
+	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
 		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
 			if (!(p->second->flags () & TransportSyncPort)) {
 				tl->push_back (boost::bind (&Port::cycle_end, p->second, nframes));

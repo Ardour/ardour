@@ -123,7 +123,7 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 				continue;
 			}
 
-			timestamp = floor (timestamp * _speed_ratio);
+			timestamp = floor (timestamp * resample_ratio ());
 
 			/* check that the event is in the acceptable time range */
 			if ((timestamp <  (_global_port_buffer_offset)) ||
@@ -241,7 +241,7 @@ MidiPort::resolve_notes (void* port_buffer, MidiBuffer::TimeType when)
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
 
 		uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
-		pframes_t tme = floor (when / _speed_ratio);
+		pframes_t tme = floor (when / resample_ratio ());
 
 		/* we need to send all notes off AND turn the
 		 * sustain/damper pedal off to handle synths
@@ -282,7 +282,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 			port_buffer = port_engine.get_buffer (_port_handle, nframes);
 		}
 
-		double speed_ratio = (flags () & TransportGenerator) ? 1.0 : _speed_ratio;
+		double speed_ratio = (flags () & TransportGenerator) ? 1.0 : resample_ratio ();
 
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
 
