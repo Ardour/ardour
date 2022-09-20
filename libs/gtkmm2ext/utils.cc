@@ -65,15 +65,26 @@ Gtkmm2ext::get_ink_pixel_size (Glib::RefPtr<Pango::Layout> layout,
 	height = PANGO_PIXELS(ink_rect.get_height());
 }
 
+static void
+_set_size_request_to_display_given_text (Glib::RefPtr<Gtk::Style> const& sty, Gtk::Widget* w, std::string const& text,
+						   gint hpadding, gint vpadding)
+{
+	w->ensure_style ();
+	if (sty && sty->get_font() == w->get_style()->get_font()) {
+		return;
+	}
+
+	int width, height;
+	w->create_pango_layout (text)->get_pixel_size (width, height);
+	w->set_size_request(width + hpadding, height + vpadding);
+}
+
 void
 Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, std::string const& text,
 						   gint hpadding, gint vpadding)
 {
-	int width, height;
-	w.ensure_style ();
-
-	w.create_pango_layout (text)->get_pixel_size (width, height);
-	w.set_size_request(width + hpadding, height + vpadding);
+	w.signal_style_changed().connect (sigc::bind (sigc::ptr_fun (_set_size_request_to_display_given_text), &w, text, hpadding, vpadding));
+	_set_size_request_to_display_given_text (Glib::RefPtr<Gtk::Style>(), &w, text, hpadding, vpadding);
 }
 
 static inline guint8
