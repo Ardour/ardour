@@ -421,7 +421,7 @@ ARDOUR_UI::setup_transport ()
 
 	punch_in_button.set_name ("punch button");
 	punch_out_button.set_name ("punch button");
-	record_mode_selector.set_name (("record mode button"));
+	record_mode_selector.set_name ("record mode button");
 
 	latency_disable_button.set_name ("latency button");
 
@@ -448,8 +448,7 @@ ARDOUR_UI::setup_transport ()
 	record_mode_selector.AddMenuElem (MenuElem (record_mode_strings[(int)RecLayered], sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_record_mode), RecLayered)));
 	record_mode_selector.AddMenuElem (MenuElem (record_mode_strings[(int)RecNonLayered], sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_record_mode), RecNonLayered)));
 	record_mode_selector.AddMenuElem (MenuElem (record_mode_strings[(int)RecSoundOnSound], sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_record_mode), RecSoundOnSound)));
-
-	set_size_request_to_display_given_text (record_mode_selector, record_mode_strings, /*COMBO_TRIANGLE_WIDTH*/ 5, 2);
+	record_mode_selector.set_sizing_texts (record_mode_strings);
 
 	latency_disable_button.set_text (_("Disable PDC"));
 	io_latency_label.set_text (_("I/O Latency:"));

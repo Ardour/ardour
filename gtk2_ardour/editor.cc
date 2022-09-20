@@ -250,13 +250,6 @@ static const gchar *_rb_opt_strings[] = {
 };
 #endif
 
-/* Robin says: this should be odd to accommodate cairo drawing offset (width/2 rounds up to pixel boundary) */
-#ifdef __APPLE__
-#define COMBO_TRIANGLE_WIDTH 19 // ArdourButton _diameter (11) + 2 * arrow-padding (2*2) + 2 * text-padding (2*5)
-#else
-#define COMBO_TRIANGLE_WIDTH 11 // as-measured for win/linux.
-#endif
-
 Editor::Editor ()
 	: PublicEditor (global_hpacker)
 	, editor_mixer_strip_width (Wide)
@@ -3412,7 +3405,7 @@ Editor::build_edit_point_menu ()
 		edit_point_selector.AddMenuElem (MenuElem (edit_point_strings[(int)EditAtSelectedMarker], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtSelectedMarker)));
 	edit_point_selector.AddMenuElem (MenuElem (edit_point_strings[(int)EditAtMouse], sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_selection_done), (EditPoint) EditAtMouse)));
 
-	set_size_request_to_display_given_text (edit_point_selector, edit_point_strings, COMBO_TRIANGLE_WIDTH, 2);
+	edit_point_selector.set_sizing_texts (edit_point_strings);
 }
 
 void
@@ -3424,14 +3417,12 @@ Editor::build_edit_mode_menu ()
 	edit_mode_selector.AddMenuElem (MenuElem (edit_mode_strings[(int)Ripple], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Ripple)));
 	edit_mode_selector.AddMenuElem (MenuElem (edit_mode_strings[(int)Lock], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode)  Lock)));
 	/* Note: Splice was removed */
-
-	set_size_request_to_display_given_text (edit_mode_selector, edit_mode_strings, COMBO_TRIANGLE_WIDTH, 2);
+	edit_mode_selector.set_sizing_texts (edit_mode_strings);
 
 	ripple_mode_selector.AddMenuElem (MenuElem (ripple_mode_strings[(int)RippleSelected],  sigc::bind (sigc::mem_fun(*this, &Editor::ripple_mode_selection_done), (RippleMode) RippleSelected)));
 	ripple_mode_selector.AddMenuElem (MenuElem (ripple_mode_strings[(int)RippleAll],       sigc::bind (sigc::mem_fun(*this, &Editor::ripple_mode_selection_done), (RippleMode) RippleAll)));
 	ripple_mode_selector.AddMenuElem (MenuElem (ripple_mode_strings[(int)RippleInterview], sigc::bind (sigc::mem_fun(*this, &Editor::ripple_mode_selection_done), (RippleMode) RippleInterview)));
-
-	set_size_request_to_display_given_text (ripple_mode_selector, ripple_mode_strings, COMBO_TRIANGLE_WIDTH, 2);
+	ripple_mode_selector.set_sizing_texts (ripple_mode_strings);
 }
 
 void
@@ -3958,8 +3949,7 @@ Editor::build_zoom_focus_menu ()
 	zoom_focus_selector.AddMenuElem (MenuElem (zoom_focus_strings[(int)ZoomFocusPlayhead], sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done), (ZoomFocus) ZoomFocusPlayhead)));
 	zoom_focus_selector.AddMenuElem (MenuElem (zoom_focus_strings[(int)ZoomFocusMouse], sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done), (ZoomFocus) ZoomFocusMouse)));
 	zoom_focus_selector.AddMenuElem (MenuElem (zoom_focus_strings[(int)ZoomFocusEdit], sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done), (ZoomFocus) ZoomFocusEdit)));
-
-	set_size_request_to_display_given_text (zoom_focus_selector, zoom_focus_strings, COMBO_TRIANGLE_WIDTH, 2);
+	zoom_focus_selector.set_sizing_texts (zoom_focus_strings);
 }
 
 void
