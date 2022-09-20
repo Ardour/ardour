@@ -411,7 +411,7 @@ HSliderOption::HSliderOption (
 
 	_hscale.ensure_style ();
 	int width, height;
-	get_pixel_size (_hscale.create_pango_layout (X_("a piece of text that is as wide sliders should be")), width, height);
+	_hscale.create_pango_layout (X_("a piece of text that is as wide sliders should be"))->get_pixel_size (width, height);
 	_hscale.set_size_request (width, -1);
 }
 

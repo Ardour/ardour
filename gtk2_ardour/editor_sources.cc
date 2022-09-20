@@ -78,9 +78,9 @@ EditorSources::init ()
 	int bbt_width, date_width, height;
 
 	Glib::RefPtr<Pango::Layout> layout = _display.create_pango_layout (X_("000|000|000"));
-	Gtkmm2ext::get_pixel_size (layout, bbt_width, height);
+	layout->get_pixel_size (bbt_width, height);
 	Glib::RefPtr<Pango::Layout> layout2 = _display.create_pango_layout (X_("2018-10-14 12:12:30"));
-	Gtkmm2ext::get_pixel_size (layout2, date_width, height);
+	layout2->get_pixel_size (date_width, height);
 
 	add_name_column ();
 

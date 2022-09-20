@@ -70,7 +70,7 @@ EditorRegions::init ()
 	int bbt_width, height;
 
 	Glib::RefPtr<Pango::Layout> layout = _display.create_pango_layout (X_("000|000|000"));
-	Gtkmm2ext::get_pixel_size (layout, bbt_width, height);
+	layout->get_pixel_size (bbt_width, height);
 
 	TreeViewColumn* tvc;
 

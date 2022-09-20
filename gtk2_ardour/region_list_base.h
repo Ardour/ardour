@@ -157,7 +157,7 @@ protected:
 	{
 		int w, h;
 		Glib::RefPtr<Pango::Layout> layout = _display.create_pango_layout (sizing_text);
-		Gtkmm2ext::get_pixel_size (layout, w, h);
+		layout->get_pixel_size (w, h);
 		return append_col (col, w);
 	}
 

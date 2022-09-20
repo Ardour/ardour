@@ -84,7 +84,7 @@ TimeAxisViewItem::set_constant_heights ()
 	int height = 0;
 
 	layout->set_font_description (NAME_FONT);
-	get_pixel_size (layout, width, height);
+	layout->get_pixel_size (width, height);
 
 	layout = foo.create_pango_layout (X_("H")); /* just the ascender */
 
