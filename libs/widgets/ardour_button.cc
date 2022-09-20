@@ -55,8 +55,7 @@ ArdourButton::Element ArdourButton::led_default_elements = ArdourButton::Element
 ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Indicator);
 
 ArdourButton::ArdourButton (Element e, bool toggle)
-	: _sizing_text("")
-	, _markup (false)
+	: _markup (false)
 	, _elements (e)
 	, _icon (ArdourIcon::NoIcon)
 	, _icon_render_cb (0)
@@ -105,8 +104,7 @@ ArdourButton::ArdourButton (Element e, bool toggle)
 }
 
 ArdourButton::ArdourButton (const std::string& str, Element e, bool toggle)
-	: _sizing_text("")
-	, _markup (false)
+	: _markup (false)
 	, _elements (e)
 	, _icon (ArdourIcon::NoIcon)
 	, _tweaks (Tweaks (0))
@@ -214,7 +212,7 @@ ArdourButton::set_text (const std::string& str, bool markup)
 		set_text_internal ();
 		/* on_size_request() will fill in _text_width/height
 		 * so queue it even if _sizing_text != "" */
-		if (_sizing_text.empty ()) {
+		if (_sizing_texts.empty ()) {
 			queue_resize ();
 		} else {
 			_layout->get_pixel_size (_text_width, _text_height);
@@ -224,12 +222,20 @@ ArdourButton::set_text (const std::string& str, bool markup)
 }
 
 void
-ArdourButton::set_sizing_text (const std::string& str)
+ArdourButton::set_sizing_text (std::string const& str)
 {
-	if (_sizing_text == str) {
+	if (_sizing_texts.size () == 1 && _sizing_texts.front() == str) {
 		return;
 	}
-	_sizing_text = str;
+	_sizing_texts.clear ();
+	_sizing_texts.push_back (str);
+	queue_resize ();
+}
+
+void
+ArdourButton::set_sizing_texts (std::vector<std::string> const& s)
+{
+	_sizing_texts = s;
 	queue_resize ();
 }
 
@@ -677,28 +683,32 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			 * of text.
 			 */
 
-		} else if (_layout_ellipsize_width > 0 && _sizing_text.empty()) {
+		} else if (_layout_ellipsize_width > 0 && _sizing_texts.empty()) {
 
 			req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
 			req->width += _layout_ellipsize_width / PANGO_SCALE;
 
-		} else /*if (!_text.empty() || !_sizing_text.empty()) */ {
+		} else /*if (!_text.empty() || !_sizing_texts.empty()) */ {
 
 			req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
 			req->width += rint(1.75 * char_pixel_width()); // padding
 
-			if (!_sizing_text.empty()) {
-				_layout->set_text (_sizing_text); /* use sizing text */
-			}
-
 			int sizing_text_width = 0, sizing_text_height = 0;
-			_layout->get_pixel_size (sizing_text_width, sizing_text_height);
 
-			req->width += sizing_text_width;
-
-			if (!_sizing_text.empty()) {
-				set_text_internal (); /* restore display text */
+			for (auto const& txt : _sizing_texts) {
+				_layout->set_text (txt); /* use sizing text */
+				int w, h;
+				_layout->get_pixel_size (w, h);
+				sizing_text_width = max(sizing_text_width, w);
+				sizing_text_width = max(sizing_text_width, h);
 			}
+
+			if (!_sizing_texts.empty()) {
+				set_text_internal (); /* restore display text */
+			} else {
+				_layout->get_pixel_size (sizing_text_width, sizing_text_height);
+			}
+			req->width += sizing_text_width;
 		}
 
 		/* XXX hack (surprise). Deal with two common rotation angles */
@@ -750,7 +760,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			req->width = req->height;
 		if (req->height < req->width)
 			req->height = req->width;
-	} else if (_sizing_text.empty() && _text_width > 0 && !(_elements & Menu)) {
+	} else if (_sizing_texts.empty() && _text_width > 0 && !(_elements & Menu)) {
 		// properly centered text for those elements that are centered
 		// (no sub-pixel offset)
 		if ((req->width - _text_width) & 1) { ++req->width; }

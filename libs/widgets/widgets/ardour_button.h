@@ -106,8 +106,8 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
     /* Sets the text used for size request computation. Pass an
      * empty string to return to the default behavior which uses
      * the currently displayed text for measurement. */
-	void set_sizing_text (const std::string&);
-	const std::string& get_sizing_text () {return _sizing_text;}
+	void set_sizing_text (std::string const&);
+	void set_sizing_texts (std::vector<std::string> const&);
 
 	sigc::signal<void, GdkEventButton*> signal_led_clicked;
 	sigc::signal<void> signal_clicked;
@@ -156,7 +156,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	Glib::RefPtr<Pango::Layout> _layout;
 	Glib::RefPtr<Gdk::Pixbuf>   _pixbuf;
 	std::string                 _text;
-	std::string                 _sizing_text;
+	std::vector<std::string>    _sizing_texts;
 	bool                        _markup;
 	Element                     _elements;
 	ArdourIcon::Icon            _icon;
