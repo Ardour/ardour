@@ -867,10 +867,6 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	std::string tmp_path(_session_dir->root_path());
 	tmp_path = Glib::build_filename (tmp_path, legalize_for_path (snapshot_name) + temp_suffix);
 
-#ifndef NDEBUG
-	cerr << "actually writing state to " << tmp_path << endl;
-#endif
-
 	if (!tree.write (tmp_path)) {
 		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
 		if (g_remove (tmp_path.c_str()) != 0) {
@@ -880,10 +876,6 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		return -1;
 
 	} else {
-
-#ifndef NDEBUG
-		cerr << "renaming state to " << xml_path << endl;
-#endif
 
 		if (::g_rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
 			error << string_compose (_("could not rename temporary session file %1 to %2 (%3)"),
@@ -931,11 +923,6 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 		StateSaved (snapshot_name); /* EMIT SIGNAL */
 	}
-
-#ifndef NDEBUG
-	const int64_t elapsed_time_us = g_get_monotonic_time() - save_start_time;
-	cerr << "saved state in " << fixed << setprecision (1) << elapsed_time_us / 1000. << " ms\n";
-#endif
 
 	if (!pending && !for_archive && ! template_only) {
 		remove_pending_capture_state ();
@@ -3305,7 +3292,6 @@ void
 Session::begin_reversible_command (GQuark q)
 {
 	if (_current_trans) {
-		cerr << "An UNDO transaction was started while a prior command was underway. Aborting command (" << g_quark_to_string (q) << ") and prior (" << _current_trans->name() << ")" << endl;
 		PBD::warning << "An UNDO transaction was started while a prior command was underway. Aborting command (" << g_quark_to_string (q) << ") and prior (" << _current_trans->name() << ")" << endmsg;
 		abort_reversible_command();
 		assert (false);
@@ -3526,10 +3512,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 
 	for (vector<string>::iterator i = state_files.begin(); i != state_files.end(); ++i) {
 
-		cerr << "Looking at snapshot " << (*i) << " ( with this = [" << this_snapshot_path << "])\n";
-
 		if (exclude_this_snapshot && *i == this_snapshot_path) {
-			cerr << "\texcluded\n";
 			continue;
 
 		}
@@ -4532,7 +4515,6 @@ Session::config_changed (std::string p, bool ours)
 		}
 	} else if (p == "cue-behavior") {
 		bool follow = (config.get_cue_behavior() & FollowCues);
-		std::cerr << "cue behavior changed, follow = " << follow << std::endl;
 		if (follow && !transport_state_rolling() && !loading()) {
 			request_locate (transport_sample(), true);
 		}
@@ -4690,10 +4672,7 @@ Session::rename (const std::string& new_name)
 
 		newstr = Glib::build_filename (base, legal_name);
 
-		cerr << "Looking for " << newstr << endl;
-
 		if (Glib::file_test (newstr, Glib::FILE_TEST_EXISTS)) {
-			cerr << " exists\n";
 			return -1;
 		}
 	}
@@ -4720,11 +4699,7 @@ Session::rename (const std::string& new_name)
 		string base = Glib::path_get_dirname (oldstr);
 		newstr = Glib::build_filename (base, legal_name);
 
-		cerr << "for " << oldstr << " new dir = " << newstr << endl;
-
-		cerr << "Rename " << oldstr << " => " << newstr << endl;
 		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
-			cerr << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endl;
 			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 			return 1;
 		}
@@ -4764,13 +4739,7 @@ Session::rename (const std::string& new_name)
 
 		new_interchange_dir = Glib::build_filename (v);
 
-		cerr << "Rename " << old_interchange_dir << " => " << new_interchange_dir << endl;
-
 		if (::g_rename (old_interchange_dir.c_str(), new_interchange_dir.c_str()) != 0) {
-			cerr << string_compose (_("renaming %s as %2 failed (%3)"),
-			                        old_interchange_dir, new_interchange_dir,
-			                        g_strerror (errno))
-			     << endl;
 			error << string_compose (_("renaming %s as %2 failed (%3)"),
 			                         old_interchange_dir, new_interchange_dir,
 			                         g_strerror (errno))
@@ -4784,10 +4753,7 @@ Session::rename (const std::string& new_name)
 	oldstr = Glib::build_filename (new_path, _current_snapshot_name + statefile_suffix);
 	newstr= Glib::build_filename (new_path, legal_name + statefile_suffix);
 
-	cerr << "Rename " << oldstr << " => " << newstr << endl;
-
 	if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
-		cerr << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endl;
 		error << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 		return 1;
 	}
@@ -4799,10 +4765,7 @@ Session::rename (const std::string& new_name)
 	if (Glib::file_test (oldstr, Glib::FILE_TEST_EXISTS))  {
 		newstr = Glib::build_filename (new_path, legal_name) + history_suffix;
 
-		cerr << "Rename " << oldstr << " => " << newstr << endl;
-
 		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
-			cerr << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endl;
 			error << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 			return 1;
 		}
@@ -5023,8 +4986,6 @@ Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,
 
 		Glib::Threads::Mutex::Lock lm (source_lock);
 
-		cerr << " total sources = " << sources.size();
-
 		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
 
@@ -5047,8 +5008,6 @@ Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,
 			total++;
 		}
 
-		cerr << " fsources = " << total << endl;
-
 		for (SourcePathMap::iterator i = source_path_map.begin(); i != source_path_map.end(); ++i) {
 
 			/* tell caller where we are */
@@ -5056,8 +5015,6 @@ Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,
 			string old_path = i->first;
 
 			callback (n, total, old_path);
-
-			cerr << old_path << endl;
 
 			new_path.clear ();
 
@@ -5075,10 +5032,7 @@ Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,
 				continue;
 			}
 
-			cerr << "Move " << old_path << " => " << new_path << endl;
-
 			if (!copy_file (old_path, new_path)) {
-				cerr << "failed !\n";
 				ret = -1;
 			}
 
@@ -5444,7 +5398,6 @@ Session::save_as (SaveAs& saveas)
 			if (internal_file_cnt) {
 				for (vector<string>::iterator s = old_search_path[DataType::AUDIO].begin(); s != old_search_path[DataType::AUDIO].end(); ++s) {
 					ensure_search_path_includes (*s, DataType::AUDIO);
-					cerr << "be sure to include " << *s << "  for audio" << endl;
 				}
 
 				/* we do not do this for MIDI because we copy
@@ -5810,7 +5763,7 @@ Session::archive_session (const std::string& dest,
 				afs->set_gain (ns->gain(), true);
 				delete ns;
 			} catch (...) {
-				cerr << "failed to encode " << afs->path() << " to " << new_path << "\n";
+				error << "failed to encode " << afs->path() << " to " << new_path << endmsg;
 			}
 
 			if (progress) {
