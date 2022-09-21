@@ -2398,7 +2398,7 @@ ProcessorBox::show_processor_menu (int arg)
 
 	/* Sensitise actions as approprioate */
 
-	const bool sensitive = !processor_display.selection().empty() && ! stub_processor_selected ();
+	const bool sensitive = !processor_display.selection().empty() && ! stub_processor_selected () && !channelstrip_selected();
 
 	paste_action->set_sensitive (!_p_selection.processors.empty());
 	cut_action->set_sensitive (sensitive && can_cut ());
@@ -2406,15 +2406,13 @@ ProcessorBox::show_processor_menu (int arg)
 	delete_action->set_sensitive (sensitive || stub_processor_selected ());
 	backspace_action->set_sensitive (sensitive || stub_processor_selected ());
 
-	edit_action->set_sensitive (one_processor_can_be_edited ());
-	edit_generic_action->set_sensitive (one_processor_can_be_edited ());
-
 	boost::shared_ptr<PluginInsert> pi;
 	if (single_selection) {
 		pi = boost::dynamic_pointer_cast<PluginInsert> (single_selection->processor ());
 	}
 
-	manage_pins_action->set_sensitive (pi != 0);
+	manage_pins_action->set_sensitive (pi != 0 && !channelstrip_selected ());
+
 	if (boost::dynamic_pointer_cast<Track>(_route)) {
 		disk_io_action->set_sensitive (true);
 		PBD::Unwinder<bool> uw (_ignore_rb_change, true);
@@ -2435,6 +2433,7 @@ ProcessorBox::show_processor_menu (int arg)
 	}
 
 	/* allow editing with an Ardour-generated UI for plugin inserts with editors */
+	edit_generic_action->set_sensitive (one_processor_can_be_edited ());
 	edit_action->set_sensitive (pi && pi->plugin()->has_editor ());
 
 	/* disallow rename for multiple selections, for plugin inserts and for the fader */
@@ -3357,6 +3356,12 @@ ProcessorBox::stub_processor_selected () const
 		}
 	}
 
+	return false;
+}
+
+bool
+ProcessorBox::channelstrip_selected () const
+{
 	return false;
 }
 
