@@ -1037,7 +1037,6 @@ TempoMap::add_or_replace_bartime (MusicTimePoint* mtp)
 		(void) core_add_tempo (mtp, ignore);
 		(void) core_add_meter (mtp, ignore);
 		core_add_point (mtp);
-		dump (std::cerr);
 	} else {
 		delete mtp;
 	}
@@ -1700,6 +1699,8 @@ TempoMap::sample_rate_changed (samplecnt_t new_sr)
 void
 TempoMap::dump (std::ostream& ostr) const
 {
+	PBD::stacktrace (std::cerr, 20);
+
 	ostr << "\n\nTEMPO MAP @ " << this << ":\n" << std::dec;
 	ostr << "... tempos...\n";
 	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
@@ -2455,21 +2456,18 @@ TempoMap::set_state (XMLNode const & node, int version)
 	for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 		if ((*c)->name() == X_("Tempos")) {
 			if (set_tempos_from_state (**c)) {
-				cerr << "tempo fail\n";
 				return -1;
 			}
 		}
 
 		if ((*c)->name() == X_("Meters")) {
 			if (set_meters_from_state (**c)) {
-				cerr << "meter fail\n";
 				return -1;
 			}
 		}
 
 		if ((*c)->name() == X_("MusicTimes")) {
 			if (set_music_times_from_state (**c)) {
-				cerr << "bartimes fail\n";
 				return -1;
 			}
 		}
@@ -3402,7 +3400,6 @@ TempoMap::parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts)
 	if (!node.get_property ("note-type", lts.note_type)) {
 		if (lts.note_type < 1.0) {
 			error << _("TempoSection XML node has an illegal \"note-type\" value") << endmsg;
-			cerr << _("TempoSection XML node has an illegal \"note-type\" value") << endl;
 			return -1;
 		}
 	} else {
@@ -3419,7 +3416,6 @@ TempoMap::parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts)
 	if (node.get_property ("end-beats-per-minute", lts.end_note_types_per_minute)) {
 		if (lts.end_note_types_per_minute < 0.0) {
 			info << _("TempoSection XML node has an illegal \"end-beats-per-minute\" value") << endmsg;
-			cerr << _("TempoSection XML node has an illegal \"end-beats-per-minute\" value") << endl;
 			return -1;
 		}
 	}
@@ -3685,13 +3681,11 @@ TempoMap::set_state_3x (const XMLNode& node)
 			TempoSection* prev_t;
 			if ((prev_m = dynamic_cast<MeterSection*>(*prev)) != 0 && (ms = dynamic_cast<MeterSection*>(*i)) != 0) {
 				if (prev_m->beat() == ms->beat()) {
-					cerr << string_compose (_("Multiple meter definitions found at %1"), prev_m->beat()) << endmsg;
 					error << string_compose (_("Multiple meter definitions found at %1"), prev_m->beat()) << endmsg;
 					return -1;
 				}
 			} else if ((prev_t = dynamic_cast<TempoSection*>(*prev)) != 0 && (ts = dynamic_cast<TempoSection*>(*i)) != 0) {
 				if (prev_t->pulse() == ts->pulse()) {
-					cerr << string_compose (_("Multiple tempo definitions found at %1"), prev_t->pulse()) << endmsg;
 					error << string_compose (_("Multiple tempo definitions found at %1"), prev_t->pulse()) << endmsg;
 					return -1;
 				}
