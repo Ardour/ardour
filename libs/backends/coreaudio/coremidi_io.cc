@@ -298,6 +298,11 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 			}
 			_input_queue[port].erase(it);
 			return s;
+		} else {
+#ifndef NDEBUG
+			uint64_t dt = AudioConvertHostTimeToNanos((*it)->timeStamp - end);
+			printf("Ignored future Midi Event. dt:%.2fms\n", dt * 1e-6);
+#endif
 		}
 		++it;
 
