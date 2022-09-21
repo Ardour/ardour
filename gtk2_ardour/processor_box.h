@@ -258,6 +258,7 @@ private:
 	void toggle_panner_link ();
 	void toggle_allow_feedback ();
 	void plugin_preset_selected (ARDOUR::Plugin::PresetRecord);
+	void plugin_preset_add ();
 
 	class PluginInlineDisplay : public PluginDisplay {
 	public:

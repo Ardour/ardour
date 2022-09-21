@@ -833,6 +833,35 @@ ProcessorEntry::plugin_preset_selected (ARDOUR::Plugin::PresetRecord preset)
 	}
 }
 
+void
+ProcessorEntry::plugin_preset_add ()
+{
+	/* compare to PlugUIBase::add_plugin_setting */
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+	boost::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
+
+  NewPluginPresetDialog d (plugin, _("New Preset"));
+
+	Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (_parent->get_toplevel ());
+  d.set_keep_above (true);
+  if (tlw) {
+    d.set_transient_for (*tlw);
+  }
+
+  switch (d.run ()) {
+  case Gtk::RESPONSE_ACCEPT:
+    if (d.name().empty()) {
+      break;
+    }
+
+    Plugin::PresetRecord const r = plugin->save_preset (d.name());
+    if (!r.uri.empty ()) {
+      plugin->Plugin::load_preset (r);
+    }
+    break;
+  }
+}
+
 Menu*
 ProcessorEntry::build_presets_menu ()
 {
@@ -847,6 +876,12 @@ ProcessorEntry::build_presets_menu ()
 
 	Menu* menu = manage (new Menu);
 	MenuList& items = menu->items ();
+	if (pi->ui_elements () & PlugInsertBase::PluginPreset) {
+		items.push_back (MenuElem (_("New Preset..."), sigc::mem_fun (*this, &ProcessorEntry::plugin_preset_add)));
+		if (!presets.empty ()) {
+			items.push_back (SeparatorElem ());
+		}
+	}
 
 	for (auto const& p : presets) {
 		items.push_back (MenuElem (p.label, sigc::bind (sigc::mem_fun (*this, &ProcessorEntry::plugin_preset_selected), p)));
