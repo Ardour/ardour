@@ -840,26 +840,26 @@ ProcessorEntry::plugin_preset_add ()
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
 	boost::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
 
-  NewPluginPresetDialog d (plugin, _("New Preset"));
+	NewPluginPresetDialog d (plugin, _("New Preset"));
 
 	Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (_parent->get_toplevel ());
-  d.set_keep_above (true);
-  if (tlw) {
-    d.set_transient_for (*tlw);
-  }
+	d.set_keep_above (true);
+	if (tlw) {
+		d.set_transient_for (*tlw);
+	}
 
-  switch (d.run ()) {
-  case Gtk::RESPONSE_ACCEPT:
-    if (d.name().empty()) {
-      break;
-    }
+	switch (d.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+			if (d.name().empty()) {
+				break;
+			}
 
-    Plugin::PresetRecord const r = plugin->save_preset (d.name());
-    if (!r.uri.empty ()) {
-      plugin->Plugin::load_preset (r);
-    }
-    break;
-  }
+			Plugin::PresetRecord const r = plugin->save_preset (d.name());
+			if (!r.uri.empty ()) {
+				plugin->Plugin::load_preset (r);
+			}
+			break;
+	}
 }
 
 Menu*
