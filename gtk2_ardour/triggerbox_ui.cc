@@ -226,7 +226,7 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, FollowAct
 			context->fill ();
 			break;
 		case FollowAction::JumpTrigger: {
-			if ( icon.targets.count() == 1 ) {  //jump to a specific row
+			if ( icon.targets.count() == 1 ) {  //Jump to a specific row; just draw the letter of the row we are jumping to
 				int cue_idx = -1;
 				for (int i = 0; i < default_triggers_per_box; i++) {
 					if (icon.targets.test(i)) {
@@ -242,18 +242,7 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, FollowAct
 				context->move_to (size / 2, size / 2);
 				context->rel_move_to (-tw / 2, -th / 2);
 				layout->show_in_cairo_context (context);
-			} else if (false) {  // 'ANY' jump
-				for (int i = 0; i < 6; i++) {
-					Cairo::Matrix m = context->get_matrix ();
-					context->translate (size / 2, size / 2);
-					context->rotate (i * M_PI / 3);
-					context->move_to (0, 0);
-					context->line_to (0, (size / 2) - 4 * scale);
-					context->stroke ();
-					context->set_matrix (m);
-				}
-				context->set_identity_matrix ();
-			} else { // 'OTHER' jump
+			} else { // Multi-Jump: draw a star-like icon
 				context->set_line_width (1.5 * scale);
 				set_source_rgba (context, HSV (UIConfiguration::instance ().color ("neutral:midground")).lighter (0.25).color ()); // needs to be brighter to maintain balance
 				for (int i = 0; i < 6; i++) {
@@ -265,7 +254,6 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, FollowAct
 					context->stroke ();
 					context->set_matrix (m);
 				}
-				context->set_identity_matrix ();
 			}
 		} break;
 		case FollowAction::None:
