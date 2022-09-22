@@ -6699,10 +6699,10 @@ NoteCreateDrag::~NoteCreateDrag ()
 }
 
 Temporal::Beats
-NoteCreateDrag::round_down_to_grid (timepos_t const & pos, GdkEvent const * event) const
+NoteCreateDrag::round_to_grid (timepos_t const & pos, GdkEvent const * event) const
 {
 	timepos_t snapped = pos;
-	_editor->snap_to (snapped, RoundDownMaybe, SnapToGrid_Scaled);
+	_editor->snap_to (snapped, RoundNearest, SnapToGrid_Scaled);
 	return snapped.beats();
 }
 
@@ -6714,7 +6714,7 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_drag_rect = new ArdourCanvas::Rectangle (_region_view->get_canvas_group ());
 
 	const timepos_t pos = _drags->current_pointer_time ();
-	Temporal::Beats aligned_beats (round_down_to_grid (pos, event));
+	Temporal::Beats aligned_beats (round_to_grid (pos, event));
 	const Temporal::Beats grid_beats (_region_view->get_draw_length_beats (pos));
 
 	_note[0] = timepos_t (aligned_beats);
@@ -6743,7 +6743,7 @@ void
 NoteCreateDrag::motion (GdkEvent* event, bool)
 {
 	const timepos_t pos = _drags->current_pointer_time ();
-	Temporal::Beats aligned_beats = round_down_to_grid (pos, event);
+	Temporal::Beats aligned_beats = round_to_grid (pos, event);
 
 	//when the user clicks and starts a drag to define the note's length, require notes to be at least |this| long
 	const Temporal::Beats min_length (_region_view->get_draw_length_beats (pos));
