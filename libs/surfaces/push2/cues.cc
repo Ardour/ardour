@@ -940,7 +940,7 @@ FollowActionIcon::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::
 		context->fill ();
 		break;
 	case FollowAction::JumpTrigger:
-		if (trigger->follow_action0().targets.count() == 1 ) {  //jump to a specific row
+		if (trigger->follow_action0().targets.count() == 1 ) {  //Jump to a specific row; just draw the letter of the row we are jumping to
 			int cue_idx = -1;
 			for (int i = 0; i < default_triggers_per_box; i++) {
 				if (trigger->follow_action0().targets.test(i)) {
@@ -960,16 +960,6 @@ FollowActionIcon::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::
 			 * does ::restore()
 			 */
 			context->begin_new_path ();
-		} else if (false) {  // 'ANY' jump
-			for (int i = 0; i < 6; i++) {
-				Cairo::Matrix m = context->get_matrix ();
-				context->translate (size / 2, size / 2);
-				context->rotate (i * M_PI / 3);
-				context->move_to (0, 0);
-				context->line_to (0, (size / 2) - 4 * scale);
-				context->stroke ();
-				context->set_matrix (m);
-			}
 		} else { // 'OTHER' jump
 			context->set_line_width (1.5 * scale);
 			Gtkmm2ext::set_source_rgba (context, HSV (_fill_color).lighter (0.25).color ()); // needs to be brighter to maintain balance
