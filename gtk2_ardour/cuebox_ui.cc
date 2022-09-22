@@ -139,7 +139,7 @@ CueEntry::_size_allocate (ArdourCanvas::Rect const& alloc)
 	name_button->set_center ( Duple(height/2, height/2) );
 	name_button->set_radius ( (height/2)- 1*scale );
 
-	/* have to do this in the size-allocate if we want to dynmaically respond to scale-changes */
+	/* have to do this in the size-allocate if we want to dynamically respond to scale-changes */
 	jump_text->set_font_description (UIConfiguration::instance().get_NormalFont());
 	jump_text->set_alignment (Pango::ALIGN_CENTER);
 

@@ -103,12 +103,12 @@ XMLTree::read_internal(bool validate)
 		_doc = xmlCtxtReadFile(ctxt, _filename.c_str(), NULL, XML_PARSE_HUGE);
 	}
 
-	/* check if parsing suceeded */
+	/* check if parsing succeeded */
 	if (_doc == NULL) {
 		xmlFreeParserCtxt(ctxt);
 		return false;
 	} else {
-		/* check if validation suceeded */
+		/* check if validation succeeded */
 		if (validate && ctxt->valid == 0) {
 			xmlFreeParserCtxt(ctxt);
 			throw XMLException("Failed to validate document " + _filename);

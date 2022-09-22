@@ -58,7 +58,7 @@ MonoPitch::process(const vector<vector<pair<double, double> > > pitchProb)
         if (hmmFreq > 0)
         {
             // This was a Yin estimate, so try to get original pitch estimate back
-            // ... a bit hacky, since we could have direclty saved the frequency
+            // ... a bit hacky, since we could have directly saved the frequency
             // that was assigned to the HMM bin in hmm.calculateObsProb -- but would
             // have had to rethink the interface of that method.
             for (size_t iPitch = 0; iPitch < pitchProb[iFrame].size(); ++iPitch)
