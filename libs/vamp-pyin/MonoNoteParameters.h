@@ -31,7 +31,7 @@ public:
     size_t nPPS; // number of pitches per semitone
     size_t nS; // number of semitones
     size_t nSPP; // number of states per pitch
-    size_t n; // number of states (will be calcualted from other parameters)
+    size_t n; // number of states (will be calculated from other parameters)
 
     // initial state probabilities
     vector<double> initPi;

@@ -461,7 +461,7 @@ def configure(conf):
     if sys.platform == 'darwin':
         if conf.env['build_target'] in ['bigsur', 'monterey']:
             # we cannot execute test code when x-compiling ARM on Intel,
-            # besides, NSWindowWillStartLiveResizeNotification is definitly available
+            # besides, NSWindowWillStartLiveResizeNotification is definitely available
             conf.define('HAVE_COCOA_LIVE_RESIZING', 1)
         else:
             conf.check(

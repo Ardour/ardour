@@ -1999,7 +1999,7 @@ private:
 	Glib::RefPtr<Gtk::RadioAction> draw_velocity_action (int);
 	Glib::RefPtr<Gtk::RadioAction> draw_channel_action (int);
 
-	//zoom focus meu stuff
+	//zoom focus menu stuff
 	ArdourWidgets::ArdourDropdown	zoom_focus_selector;
 	void zoom_focus_selection_done (Editing::ZoomFocus);
 	void build_zoom_focus_menu ();
