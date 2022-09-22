@@ -3021,17 +3021,17 @@ Editor::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode direction, 
 	}
 
 	switch (_grid_type) {
-		case GridTypeTimecode:
-			ret = snap_to_timecode(presnap, direction, gpref);
-			break;
-		case GridTypeMinSec:
-			ret = snap_to_minsec(presnap, direction, gpref);
-			break;
-		case GridTypeCDFrame:
-			ret = snap_to_cd_frames(presnap, direction, gpref);
-			break;
-		default:
-			{}
+	case GridTypeTimecode:
+		ret = snap_to_timecode(presnap, direction, gpref);
+		break;
+	case GridTypeMinSec:
+		ret = snap_to_minsec(presnap, direction, gpref);
+		break;
+	case GridTypeCDFrame:
+		ret = snap_to_cd_frames(presnap, direction, gpref);
+		break;
+	default:
+		break;
 	};
 
 	return ret;
