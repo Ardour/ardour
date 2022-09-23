@@ -3444,7 +3444,10 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	string name (_point->name());
 
 	map->remove_bartime (*_point);
-	map->set_bartime (bbt, _marker->position(), name);
+
+	/* bartime must be set using audio time */
+
+	map->set_bartime (bbt, timepos_t (_marker->position().samples()), name);
 
 	_editor->commit_tempo_map_edit (map, true);
 	XMLNode &after = map->get_state();
