@@ -162,6 +162,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	, _parent (parent)
 	, _selectable(true)
 	, _unknown_processor(false)
+	, _ignore_preset_select(false)
 	, _processor (p)
 	, _width (w)
 	, input_icon(true)
@@ -824,6 +825,9 @@ ProcessorEntry::build_controls_menu ()
 void
 ProcessorEntry::plugin_preset_selected (ARDOUR::Plugin::PresetRecord preset)
 {
+	if (_ignore_preset_select) {
+		return;
+	}
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
 	assert (pi);
 	if (!preset.label.empty()) {
@@ -862,6 +866,17 @@ ProcessorEntry::plugin_preset_add ()
 	}
 }
 
+void
+ProcessorEntry::plugin_preset_delete ()
+{
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+	boost::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
+	Plugin::PresetRecord pset = plugin->last_preset();
+	if (!pset.uri.empty ()) {
+		plugin->remove_preset (pset.label);
+	}
+}
+
 Menu*
 ProcessorEntry::build_presets_menu ()
 {
@@ -871,20 +886,35 @@ ProcessorEntry::build_presets_menu ()
 	if (!pi) {
 		return NULL;
 	}
+	boost::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin();
 
-	vector<ARDOUR::Plugin::PresetRecord> presets = pi->plugin()->get_presets();
+	vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets();
+	Plugin::PresetRecord pset = plugin->last_preset();
 
 	Menu* menu = manage (new Menu);
 	MenuList& items = menu->items ();
 	if (pi->ui_elements () & PlugInsertBase::PluginPreset) {
 		items.push_back (MenuElem (_("New Preset..."), sigc::mem_fun (*this, &ProcessorEntry::plugin_preset_add)));
+		if (!pset.uri.empty ()) {
+			items.push_back (MenuElem (_("Delete the current preset"), sigc::mem_fun (*this, &ProcessorEntry::plugin_preset_delete)));
+		}
 		if (!presets.empty ()) {
 			items.push_back (SeparatorElem ());
 		}
 	}
 
+	PBD::Unwinder<bool> uw (_ignore_preset_select, true);
+
 	for (auto const& p : presets) {
-		items.push_back (MenuElem (p.label, sigc::bind (sigc::mem_fun (*this, &ProcessorEntry::plugin_preset_selected), p)));
+		items.push_back (CheckMenuElem (p.label, sigc::bind (sigc::mem_fun (*this, &ProcessorEntry::plugin_preset_selected), p)));
+		if (p.uri == pset.uri) {
+			Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+			if (plugin->parameter_changed_since_last_preset ()) {
+				c->set_inconsistent (true);
+			} else {
+				c->set_active (true);
+			}
+		}
 	}
 
 	return menu;

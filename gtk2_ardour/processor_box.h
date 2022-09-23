@@ -188,6 +188,7 @@ protected:
 private:
 	bool _selectable;
 	bool _unknown_processor;
+	bool _ignore_preset_select;
 	void led_clicked(GdkEventButton *);
 	void processor_active_changed ();
 	void processor_property_changed (const PBD::PropertyChange&);
@@ -259,6 +260,7 @@ private:
 	void toggle_allow_feedback ();
 	void plugin_preset_selected (ARDOUR::Plugin::PresetRecord);
 	void plugin_preset_add ();
+	void plugin_preset_delete ();
 
 	class PluginInlineDisplay : public PluginDisplay {
 	public:
