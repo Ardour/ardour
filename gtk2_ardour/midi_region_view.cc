@@ -3539,12 +3539,13 @@ MidiRegionView::nudge_notes (bool forward, bool fine)
 	const timepos_t ref_point = _region->source_beats_to_absolute_time ((*(_selection.begin()))->note()->time());
 	Temporal::Beats  delta;
 
-	if (trackview.editor().snap_mode() == Editing::SnapOff) {
+	timecnt_t       unused;
+	const timecnt_t distance = trackview.editor().get_nudge_distance (ref_point, unused);
+
+	if (!distance.is_zero() || trackview.editor().snap_mode() == Editing::SnapOff) {
 
 		/* grid is off - use nudge distance */
 
-		timecnt_t       unused;
-		const timecnt_t distance = trackview.editor().get_nudge_distance (ref_point, unused);
 		delta = _region->region_distance_to_region_beats (timecnt_t (distance.beats(), _region->position()));
 
 	} else {
