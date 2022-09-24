@@ -145,9 +145,6 @@ MidiRegion::clone (string path) const
 boost::shared_ptr<MidiRegion>
 MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc, ThawList* tl) const
 {
-	Temporal::Beats const bbegin = _start.val().beats ();
-	Temporal::Beats const bend = _start.val().beats() + _length.val().beats();
-
 	{
 		boost::shared_ptr<MidiSource> ms = midi_source(0);
 
@@ -156,7 +153,7 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc, ThawList* tl) const
 		*/
 
 		Source::ReaderLock lm (ms->mutex());
-		if (ms->write_to (lm, newsrc, bbegin, bend)) {
+		if (ms->write_to (lm, newsrc, Temporal::Beats(), std::numeric_limits<Temporal::Beats>::max())) {
 			return boost::shared_ptr<MidiRegion> ();
 		}
 	}
@@ -168,6 +165,8 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc, ThawList* tl) const
 	plist.add (Properties::automatic, false);
 	plist.add (Properties::external, false);
 	plist.add (Properties::import, false);
+	plist.add (Properties::start, _start.val());
+	plist.add (Properties::length, _length.val());
 	plist.add (Properties::layer, 0);
 
 	boost::shared_ptr<MidiRegion> ret (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (newsrc, plist, true, tl)));
