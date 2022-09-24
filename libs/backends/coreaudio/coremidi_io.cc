@@ -269,7 +269,11 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 		if ((*it)->timeStamp < end) {
 			if ((*it)->timeStamp < start) {
 				uint64_t dt = AudioConvertHostTimeToNanos(start - (*it)->timeStamp);
-				if (dt > 1e7 && (*it)->timeStamp != 0) { // 10ms slack and a timestamp is given
+				/* note: it used to be 10ms (insert handwavy explanation about percievable latency)
+				 * turns out some midi-keyboads connected via bluetooth can be late by as much as 50ms
+				 * https://discourse.ardour.org/t/ardour-not-getting-all-messages-from-midi-keyboard/107618/13?
+				 */
+				if (dt > 6e7 && (*it)->timeStamp != 0) { // 60ms slack and a timestamp is given
 #ifndef NDEBUG
 					printf("Dropped Stale Midi Event. dt:%.2fms\n", dt * 1e-6);
 #endif
@@ -301,7 +305,7 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 		} else {
 #ifndef NDEBUG
 			uint64_t dt = AudioConvertHostTimeToNanos((*it)->timeStamp - end);
-			printf("Ignored future Midi Event. dt:%.2fms\n", dt * 1e-6);
+			printf("Postponed future Midi Event. dt:%.2fms\n", dt * 1e-6);
 #endif
 		}
 		++it;
