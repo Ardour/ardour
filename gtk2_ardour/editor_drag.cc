@@ -1809,15 +1809,10 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 			RegionView* new_view;
 			if (i->view == _primary && !_x_constrained) {
 				new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, last_position,
-									modified_playlists, true);
+									modified_playlists);
 			} else {
-				if (i->view->region()->position_time_domain() == Temporal::AudioTime) {
-					new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
+				new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
 										modified_playlists);
-				} else {
-					new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where,
-										modified_playlists, true);
-				}
 			}
 
 			if (new_view != 0) {
@@ -1945,16 +1940,10 @@ RegionMoveDrag::finished_no_copy (
 			RegionView* new_view;
 			if (rv == _primary && !_x_constrained) {
 				new_view = insert_region_into_playlist (
-					RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, last_position,modified_playlists, true);
+					RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, last_position,modified_playlists);
 			} else {
-				if (rv->region()->position_time_domain() == Temporal::AudioTime) {
-
-					new_view = insert_region_into_playlist (
-						RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where, modified_playlists);
-				} else {
-					new_view = insert_region_into_playlist (
-						RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where, modified_playlists, true);
-				}
+				new_view = insert_region_into_playlist (
+					RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where, modified_playlists);
 			}
 
 			if (new_view == 0) {
@@ -2126,8 +2115,7 @@ RegionMoveDrag::insert_region_into_playlist (
 	RouteTimeAxisView*        dest_rtv,
 	layer_t                   dest_layer,
 	timepos_t const &         where,
-	PlaylistSet&              modified_playlists,
-	bool                      for_music
+	PlaylistSet&              modified_playlists
 	)
 {
 	boost::shared_ptr<Playlist> dest_playlist = dest_rtv->playlist ();
@@ -2148,7 +2136,7 @@ RegionMoveDrag::insert_region_into_playlist (
 		/* cannot freeze because we need the new region announcements */
 	}
 
-	dest_playlist->add_region (region, where, 1.0, for_music);
+	dest_playlist->add_region (region, where, 1.0);
 
 	if (dest_rtv->view()->layer_display() == Stacked || dest_rtv->view()->layer_display() == Expanded) {
 		dest_playlist->set_layer (region, dest_layer);

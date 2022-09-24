@@ -513,8 +513,7 @@ private:
 		RouteTimeAxisView*,
 		ARDOUR::layer_t,
 		Temporal::timepos_t const &,
-		PlaylistSet&,
-		bool for_music = false
+		PlaylistSet&
 		);
 
 	void remove_region_from_playlist (
