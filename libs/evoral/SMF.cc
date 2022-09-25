@@ -46,6 +46,9 @@ SMF::SMF()
 	: _smf (0)
 	, _smf_track (0)
 	, _empty (true)
+	, _n_note_on_events (0)
+	, _has_pgm_change (false)
+	, _num_channels (0)
 	{};
 
 SMF::~SMF()
@@ -121,9 +124,14 @@ SMF::test(const std::string& path)
  *         -2 if the file exists but specified track does not exist
  */
 int
-SMF::open(const std::string& path, int track)
+SMF::open(const std::string& path, int track, bool scan)
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
+
+	_num_channels     = 0;
+	_n_note_on_events = 0;
+	_has_pgm_change   = false;
+	_used_channels.reset ();
 
 	assert(track >= 1);
 	if (_smf) {
@@ -153,6 +161,51 @@ SMF::open(const std::string& path, int track)
 	fclose(f);
 
 	lm.release ();
+	if (!_empty && scan) {
+		/* scan the file, set meta-data w/o loading the model */
+		bool type0 = _smf->format==0;
+		for (int i = 1; i <= _smf->number_of_tracks; ++i) {
+			/* scan file for used channels. */
+			int ret;
+			uint32_t delta_t = 0;
+			uint32_t size    = 0;
+			uint8_t* buf     = NULL;
+			event_id_t event_id = 0;
+
+			if (type0) {
+				seek_to_start ();  //type0 files have no 'track' concept, just seek_to_start
+			} else {
+				seek_to_track (i);
+			}
+
+			while ((ret = read_event (&delta_t, &size, &buf, &event_id)) >= 0) {
+				if (ret == 0) {
+					continue;
+				}
+				if (size == 0) {
+					break;
+				}
+				uint8_t type = buf[0] & 0xf0;
+				uint8_t chan = buf[0] & 0x0f;
+
+				if (type >= 0x80 && type <= 0xE0) {
+					_used_channels.set(chan);
+					switch (type) {
+						case MIDI_CMD_NOTE_ON:
+							++_n_note_on_events;
+							break;
+						case MIDI_CMD_PGM_CHANGE:
+							_has_pgm_change = true;
+							break;
+						default:
+							break;
+					}
+				}
+			}
+			_num_channels += _used_channels.count ();
+			free (buf);
+		}
+	}
 	if (!_empty) {
 		seek_to_start();
 	}
