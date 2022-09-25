@@ -338,14 +338,11 @@ SoundFileBox::setup_labels (const string& filename)
 
 	if (SMFSource::valid_midi_file (path)) {
 
-		boost::shared_ptr<SMFSource> ms;
-		try {
-			ms = boost::dynamic_pointer_cast<SMFSource> (
-				SourceFactory::createExternal (DataType::MIDI, *_session,
-				                               path, 0, Source::Flag (0), false));
-		} catch (const std::exception& e) {
-			error << string_compose(_("Could not read file: %1 (%2)."),
-			                        path, e.what()) << endmsg;
+		bool err = false;
+		Evoral::SMF smf;
+		if (smf.open (path)) {
+			error << string_compose(_("Could not read file: %1."), path) << endmsg;
+			err = true;
 		}
 
 		preview_label.set_markup (_("<b>Midi File Information</b>"));
@@ -355,20 +352,20 @@ SoundFileBox::setup_labels (const string& filename)
 		timecode_clock.set (timepos_t ());
 		tags_entry.set_sensitive (false);
 
-		if (ms) {
-			if (ms->smf_format()==0) {
+		if (!err) {
+			if (smf.smf_format()==0) {
 				format_text.set_text ("MIDI Type 0");
 			} else {
-				format_text.set_text (string_compose("%1 (%2 Tracks)", ms->smf_format()==2 ? "MIDI Type 2" : "MIDI Type 1", ms->num_tracks()));
+				format_text.set_text (string_compose("%1 (%2 Tracks)", smf.smf_format()==2 ? "MIDI Type 2" : "MIDI Type 1", smf.num_tracks()));
 			}
-			channels_value.set_text (ARDOUR_UI_UTILS::midi_channels_as_string (ms->used_channels()));
+			channels_value.set_text (ARDOUR_UI_UTILS::midi_channels_as_string (smf.used_channels()));
 			length_clock.set_duration (timecnt_t (0));
-			switch (ms->num_tempos()) {
+			switch (smf.num_tempos()) {
 			case 0:
 				tempomap_value.set_text (_("No tempo data"));
 				break;
 			case 1: {
-				Evoral::SMF::Tempo* t = ms->nth_tempo (0);
+				Evoral::SMF::Tempo* t = smf.nth_tempo (0);
 				assert (t);
 				tempomap_value.set_text (string_compose (_("%1/%2 \u2669 = %3"),
 				                                         t->numerator,
@@ -378,7 +375,7 @@ SoundFileBox::setup_labels (const string& filename)
 			}
 			default:
 				tempomap_value.set_text (string_compose (_("map with %1 sections"),
-				                                         ms->num_tempos()));
+				                                         smf.num_tempos()));
 				break;
 			}
 		} else {
@@ -387,7 +384,7 @@ SoundFileBox::setup_labels (const string& filename)
 			tempomap_value.set_text (_("No tempo data"));
 		}
 
-		if (_session && ms) {
+		if (_session && !err) {
 			play_btn.set_sensitive (true);
 		} else {
 			play_btn.set_sensitive (false);
