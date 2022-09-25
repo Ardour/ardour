@@ -88,7 +88,7 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 		}
 		/* no fd left open here */
 	} else {
-		if (open (_path)) {
+		if (open (_path, 1, false)) {
 			throw failed_constructor ();
 		}
 		_open = true;
@@ -117,7 +117,7 @@ SMFSource::SMFSource (Session& s, const string& path)
         assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 	existence_check ();
 
-	if (open (_path)) {
+	if (open (_path, 1, false)) {
 		throw failed_constructor ();
 	}
 
@@ -174,7 +174,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	if (!(_flags & Source::Empty)) {
 		assert (Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 		existence_check ();
-		if (open (_path)) {
+		if (open (_path, 1, false)) {
 			throw failed_constructor ();
 		}
 		_open = true;
