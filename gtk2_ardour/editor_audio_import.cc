@@ -395,7 +395,7 @@ Editor::do_import (vector<string>          paths,
 
 			Evoral::SMF smf;
 
-			if (smf.open (*a)) {
+			if (smf.open (*a, 1, false)) {
 				continue;
 			}
 
