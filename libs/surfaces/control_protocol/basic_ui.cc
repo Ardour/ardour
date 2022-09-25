@@ -463,6 +463,18 @@ BasicUI::transport_rolling () const
 }
 
 void
+BasicUI::stop_all_triggers (bool stop_all)
+{
+	session->stop_all_triggers (stop_all);
+}
+
+void
+BasicUI::cue_bang (int cue_idx)
+{
+	session->cue_bang (cue_idx);
+}
+
+void
 BasicUI::undo ()
 {
 	access_action ("Editor/undo");

@@ -100,6 +100,9 @@ class LIBCONTROLCP_API BasicUI {
 	void toggle_click();
 	void midi_panic();
 
+	void cue_bang (int cue);
+	void stop_all_triggers (bool stop_now = false);
+
 	void toggle_monitor_mute();
 	void toggle_monitor_dim();
 	void toggle_monitor_mono();

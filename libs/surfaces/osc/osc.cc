@@ -458,6 +458,10 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/set_transport_speed"), "f", set_transport_speed);
 		// locate ii is position and bool roll
 		REGISTER_CALLBACK (serv, X_("/locate"), "ii", locate);
+
+		REGISTER_CALLBACK (serv, X_("/cue_bang"), "i", cue_bang);
+		REGISTER_CALLBACK (serv, X_("/stop_all_triggers"), "i", stop_all_triggers);
+
 		REGISTER_CALLBACK (serv, X_("/save_state"), "", save_state);
 		REGISTER_CALLBACK (serv, X_("/save_state"), "f", save_state);
 		REGISTER_CALLBACK (serv, X_("/prev_marker"), "", prev_marker);
