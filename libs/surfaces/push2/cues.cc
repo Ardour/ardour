@@ -480,7 +480,7 @@ CueLayout::strip_vpot_touch (int n, bool touching)
 void
 CueLayout::button_rhs (int row)
 {
-	_p2.get_session().cue_bang (row + scene_base);
+	_p2.get_session().trigger_cue_row (row + scene_base);
 }
 
 void

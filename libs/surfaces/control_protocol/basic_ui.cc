@@ -469,9 +469,9 @@ BasicUI::stop_all_triggers (bool stop_all)
 }
 
 void
-BasicUI::cue_bang (int cue_idx)
+BasicUI::trigger_cue_row (int cue_idx)
 {
-	session->cue_bang (cue_idx);
+	session->trigger_cue_row (cue_idx);
 }
 
 void

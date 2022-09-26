@@ -163,17 +163,17 @@ TriggerUI::register_actions ()
 		const std::string action_name  = string_compose ("trigger-cue-%1", n);
 		const std::string display_name = string_compose (_("Trigger Cue %1"), cue_marker_name (n));
 
-		ActionManager::register_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::ptr_fun (TriggerUI::trigger_cue), n));
+		ActionManager::register_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::ptr_fun (TriggerUI::trigger_cue_row), n));
 	}
 }
 
 void
-TriggerUI::trigger_cue (int32_t n)
+TriggerUI::trigger_cue_row (int32_t n)
 {
 	Session* s = AudioEngine::instance()->session();
 
 	if (s) {
-		s->cue_bang (n);
+		s->trigger_cue_row (n);
 	}
 }
 

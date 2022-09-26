@@ -76,7 +76,7 @@ public:
 	CueBoxUI (ArdourCanvas::Item* parent);
 	~CueBoxUI ();
 
-	void trigger_cue (uint64_t n);
+	void trigger_cue_row (uint64_t n);
 
 	void _size_allocate (ArdourCanvas::Rect const&);
 

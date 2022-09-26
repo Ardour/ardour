@@ -387,9 +387,9 @@ CueBoxUI::set_all_quantization (Temporal::BBT_Offset const& q, uint64_t idx)
 }
 
 void
-CueBoxUI::trigger_cue (uint64_t n)
+CueBoxUI::trigger_cue_row (uint64_t n)
 {
-	_session->cue_bang (n);
+	_session->trigger_cue_row (n);
 }
 
 void
@@ -439,7 +439,7 @@ CueBoxUI::event (GdkEvent* ev, uint64_t n)
 	switch (ev->type) {
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button==1) {
-				trigger_cue (n);
+				trigger_cue_row (n);
 			}
 			break;
 		case GDK_2BUTTON_PRESS:

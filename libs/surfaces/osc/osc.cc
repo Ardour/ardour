@@ -459,7 +459,7 @@ OSC::register_callbacks()
 		// locate ii is position and bool roll
 		REGISTER_CALLBACK (serv, X_("/locate"), "ii", locate);
 
-		REGISTER_CALLBACK (serv, X_("/cue_bang"), "i", cue_bang);
+		REGISTER_CALLBACK (serv, X_("/trigger_cue_row"), "i", trigger_cue_row);
 		REGISTER_CALLBACK (serv, X_("/stop_all_triggers"), "i", stop_all_triggers);
 
 		REGISTER_CALLBACK (serv, X_("/save_state"), "", save_state);

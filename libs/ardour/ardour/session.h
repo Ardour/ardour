@@ -1371,7 +1371,7 @@ public:
 	PBD::TimingStats dsp_stats[NTT];
 
 	int32_t first_cue_within (samplepos_t s, samplepos_t e, bool& was_recorded);
-	void cue_bang (int32_t);
+	void trigger_cue_row (int32_t);
 	CueEvents const & cue_events() const { return _cue_events; }
 
 protected:

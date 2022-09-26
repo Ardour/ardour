@@ -1721,7 +1721,7 @@ Session::cue_marker_change (Location* /* ignored */)
 }
 
 void
-Session::cue_bang (int32_t cue)
+Session::trigger_cue_row (int32_t cue)
 {
 	_pending_cue.store (cue);
 	request_transport_speed (1.0);
