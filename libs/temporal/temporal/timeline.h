@@ -154,7 +154,6 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	 * at other positions on the timeline.
 	*/
 
-	timecnt_t distance (timecnt_t const & p) const;
 	timecnt_t distance (timepos_t const & p) const;
 
 	/* computes a new position value that is @param d earlier than this */
