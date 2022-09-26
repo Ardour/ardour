@@ -56,6 +56,7 @@ public:
 private:
 	void list_dir (std::string const&, Gtk::TreeNodeChildren const* pc = NULL);
 	void open_dir ();
+	void open_downloader ();
 	void edit_path ();
 	void refill_dropdown ();
 	void parameter_changed (std::string const&);

@@ -308,6 +308,7 @@ TriggerClipPicker::refill_dropdown ()
 	_clip_dir_menu.AddMenuElem (Menu_Helpers::SeparatorElem ());
 	_clip_dir_menu.AddMenuElem (Menu_Helpers::MenuElem (_("Edit..."), sigc::mem_fun (*this, &TriggerClipPicker::edit_path)));
 	_clip_dir_menu.AddMenuElem (Menu_Helpers::MenuElem (_("Other..."), sigc::mem_fun (*this, &TriggerClipPicker::open_dir)));
+	_clip_dir_menu.AddMenuElem (Menu_Helpers::MenuElem (_("Download..."), sigc::mem_fun (*this, &TriggerClipPicker::open_downloader)));
 }
 
 static bool
@@ -651,6 +652,11 @@ audio_midi_suffix (const std::string& str)
 		return true;
 	}
 	return false;
+}
+
+void
+TriggerClipPicker::open_downloader ()
+{
 }
 
 void
