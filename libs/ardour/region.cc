@@ -491,15 +491,14 @@ Region::set_length (timecnt_t const & len)
 void
 Region::set_length_internal (timecnt_t const & len)
 {
-	timecnt_t l (len);
-	timepos_t p (_last_length.position());
-
-	l.set_position (position());
-
-	_last_length = _length;
-	_last_length.set_position (p);
-
-	_length = l;
+	/* maintain position value of both _last_length and _length.
+	 *
+	 * This is very important: set_length() can only be used to the length
+	 * component of _length, and set_position() can only be used to set the
+	 * position component.
+	 */
+	_last_length = timecnt_t (_length.val().distance(), _last_length.position());
+	_length = timecnt_t (len.distance(), _length.val().position());
 }
 
 void
@@ -661,10 +660,17 @@ Region::set_position_internal (timepos_t const & pos)
 	/* We emit a change of Properties::length even if the position hasn't changed
 	 * (see Region::set_position), so we must always set this up so that
 	 * e.g. Playlist::notify_region_moved doesn't use an out-of-date last_position.
+	 *
+	 * maintain length value of both _last_length and _length.
+	 *
+	 * This is very important: set_length() can only be used to the length
+	 * component of _length, and set_position() can only be used to set the
+	 * position component.
 	 */
-	_last_length.set_position (position());
 
 	if (position() != pos) {
+
+		_last_length.set_position (position());
 		_length = timecnt_t (_length.val().distance(), pos);
 
 		/* check that the new _position wouldn't make the current
