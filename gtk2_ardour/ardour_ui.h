@@ -367,6 +367,8 @@ public:
 	void reset_route_peak_display (ARDOUR::Route*);
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
+	void show_library_download_manager();
+
 	const std::string& announce_string() const { return _announce_string; }
 
 	void hide_application ();

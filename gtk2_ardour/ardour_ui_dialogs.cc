@@ -1006,6 +1006,12 @@ ARDOUR_UI::create_virtual_keyboard_window ()
 	return vkbd;
 }
 
+void
+ARDOUR_UI::show_library_download_manager ()
+{
+	library_manager_window->show ();
+}
+
 LibraryDownloadDialog*
 ARDOUR_UI::create_library_manager_window ()
 {

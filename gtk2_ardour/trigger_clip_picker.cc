@@ -657,6 +657,7 @@ audio_midi_suffix (const std::string& str)
 void
 TriggerClipPicker::open_downloader ()
 {
+	ARDOUR_UI::instance()->show_library_download_manager ();
 }
 
 void
