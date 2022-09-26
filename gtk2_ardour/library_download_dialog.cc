@@ -39,7 +39,7 @@ using namespace ARDOUR;
 using std::string;
 
 LibraryDownloadDialog::LibraryDownloadDialog ()
-	: ArdourDialog (_("Loop Library Manager"), true) /* modal */
+	: ArdourDialog (_("Loop Download Manager"), true) /* modal */
 	, inflater(0)
 {
 	_model = Gtk::ListStore::create (_columns);
