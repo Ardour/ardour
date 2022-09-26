@@ -16,11 +16,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstring>
+#include <cerrno>
+
 #include <glib/gstdio.h>
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "pbd/compose.h"
+#include "pbd/failed_constructor.h"
 #include "pbd/downloader.h"
 #include "pbd/error.h"
 #include "pbd/i18n.h"
@@ -64,6 +69,17 @@ Downloader::Downloader (string const & u, string const & dir)
 	, _download_size (0)
 	, _downloaded (0)
 {
+	if (!Glib::file_test (destdir, Glib::FILE_TEST_EXISTS)) {
+		if (g_mkdir_with_parents (destdir.c_str(), 0700) != 0) {
+			error << string_compose (_("Could not create clip library dir %1 (%2)"), destdir, strerror(errno)) << endmsg;
+			throw failed_constructor();
+		}
+	} else {
+		if (!Glib::file_test (destdir, Glib::FILE_TEST_IS_DIR)) {
+			error << string_compose (_("Clip library dir (%1) is not a directory"), destdir) << endmsg;
+			throw failed_constructor();
+		}
+	}
 }
 
 Downloader::~Downloader ()
