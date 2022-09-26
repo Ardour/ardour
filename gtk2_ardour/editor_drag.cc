@@ -3401,7 +3401,7 @@ BBTMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_editor->begin_reversible_command (_("move BBT point"));
 	}
 
-	timepos_t pos = adjusted_current_time (event);
+	timepos_t pos = adjusted_current_time (event, false);
 
 	_marker->set_position (pos);
 
