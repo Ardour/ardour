@@ -188,7 +188,8 @@ private:
   static Userdata* getClass (lua_State* L,
                              int index,
                              void const* baseClassKey,
-                             bool canBeConst)
+                             bool canBeConst,
+                             bool errorOnMismatch = true)
   {
     assert (index > 0);
     Userdata* ud = 0;
@@ -280,7 +281,7 @@ ud __parent (nil)
       mismatch = true;
     }
 
-    if (mismatch)
+    if (mismatch && errorOnMismatch)
     {
       assert (lua_type (L, -1) == LUA_TTABLE);
       rawgetfield (L, -1, "__type");
@@ -335,6 +336,18 @@ public:
       return static_cast <T*> (getClass (L, index,
         ClassInfo <T>::getClassKey (), canBeConst)->getPointer ());
   }
+
+  template <class T>
+  static inline T* try_get (lua_State* L, int index, bool canBeConst)
+	{
+		if (!lua_isnil (L, index)) {
+			Userdata* ud = getClass (L, index, ClassInfo <T>::getClassKey (), canBeConst, false);
+			if (ud) {
+				return static_cast <T*> (ud->getPointer ());
+			}
+		}
+		return 0;
+	}
 };
 
 //----------------------------------------------------------------------------
