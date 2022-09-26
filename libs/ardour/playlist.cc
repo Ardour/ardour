@@ -1020,10 +1020,9 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 					plist.add (Properties::left_of_split, true);
 					plist.add (Properties::right_of_split, true);
 
-					/* see note in :_split_region()
-					 * for MusicSample is needed to offset region-gain
+					/* see note in ::_split_region()
 					 */
-					region = RegionFactory::create (current, pos1.distance (pos1), plist, true, &thawlist);
+					region = RegionFactory::create (current, pos1.distance (pos2), plist, true, &thawlist);
 					add_region_internal (region, start, thawlist);
 					new_regions.push_back (region);
 				}
