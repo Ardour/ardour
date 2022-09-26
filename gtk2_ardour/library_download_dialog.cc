@@ -208,8 +208,14 @@ LibraryDownloadDialog::download (Gtk::TreePath const & path)
 {
 	Gtk::TreeModel::iterator row = _model->get_iter (path);
 	std::string url = (*row)[_columns.url];
+	PBD::Downloader* downloader;
 
-	PBD::Downloader* downloader = new PBD::Downloader (url, ARDOUR::Config->get_clip_library_dir());
+	try {
+		downloader = new PBD::Downloader (url, ARDOUR::Config->get_clip_library_dir());
+	} catch (...) {
+		(*row)[_columns.install] = _("Error");
+		return;
+	}
 
 	/* setup timer callback to update progressbar */
 
