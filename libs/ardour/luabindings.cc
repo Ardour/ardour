@@ -110,13 +110,36 @@
   [] (lua_State* L) {                                                 \
     TYPE1* const t0 = luabridge::Userdata::get <TYPE1> (L, 1, false); \
     TYPE2* const t1 = luabridge::Userdata::get <TYPE2> (L, 2, false); \
-    luabridge::Stack <RTYPE>::push (L, (*t0 OP *t1));                 \
+    if (!t0 || !t1) {                                                 \
+      luaL_error (L, "argument is nil");                              \
+      return 0;                                                       \
+    }                                                                 \
+    luabridge::Stack <RTYPE>::push (L, ((*t0) OP (*t1)));             \
     return 1;                                                         \
   }
 
-#define CPPCOMPERATOR(TYPE, OP) CPPOPERATOR2 (bool, TYPE, TYPE, OP)
-#define CPPOPERATOR(TYPE, OP) CPPOPERATOR2 (TYPE, TYPE, TYPE, OP)
+#define CPPOPERATOR4(RTYPE, TYPE1, TYPE2A, TYPE2B, OP)                      \
+  [] (lua_State* L) {                                                       \
+    TYPE1*  const t0 = luabridge::Userdata::get <TYPE1> (L, 1, false);      \
+    TYPE2A* const ta = luabridge::Userdata::try_get <TYPE2A> (L, 2, false); \
+    if (t0 && ta) {                                                         \
+      luabridge::Stack <RTYPE>::push (L, ((*t0) OP (*ta)));                 \
+      return 1;                                                             \
+    }                                                                       \
+    TYPE2B* const tb = luabridge::Userdata::get <TYPE2B> (L, 2, false);     \
+    if (!t0 || !tb) {                                                       \
+      luaL_error (L, "argument is nil");                                    \
+      return 0;                                                             \
+    }                                                                       \
+    luabridge::Stack <RTYPE>::push (L, ((*t0) OP (*tb)));                   \
+    return 1;                                                               \
+  }
 
+#define CPPCOMPERATOR(TYPE, OP) CPPOPERATOR2 (bool, TYPE, TYPE, OP)
+#define CPPCOMPERATORALT(TYPE, ALT, OP) CPPOPERATOR4 (bool, TYPE, TYPE, ALT, OP)
+
+#define CPPOPERATOR(TYPE, OP) CPPOPERATOR2 (TYPE, TYPE, TYPE, OP)
+#define CPPOPERATORALT(T, TB, OP) CPPOPERATOR4 (T, T, T, TB, OP)
 
 #ifdef PLATFORM_WINDOWS
 /* luabridge uses addresses of static functions/variables to identify classes.
@@ -585,10 +608,11 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <Temporal::timepos_t> ("timepos_t")
 		.addConstructor <void (*) (Temporal::samplepos_t)> ()
-		.addOperator ("__add", CPPOPERATOR(Temporal::timepos_t, +))
+		.addOperator ("__add", CPPOPERATORALT(Temporal::timepos_t, Temporal::timecnt_t, +))
+		.addOperator ("__sub", CPPOPERATOR4(Temporal::timecnt_t, Temporal::timepos_t, Temporal::timepos_t, Temporal::timecnt_t, .distance))
 		//.addOperator ("__mod", CPPOPERATOR2(Temporal::timepos_t, Temporal::timepos_t, Temporal::timecnt_t, %))
-		.addOperator ("__lt", CPPCOMPERATOR(Temporal::timepos_t, <))
-		.addOperator ("__le", CPPCOMPERATOR(Temporal::timepos_t, <=))
+		.addOperator ("__lt", CPPCOMPERATORALT(Temporal::timepos_t, Temporal::timecnt_t, <))
+		.addOperator ("__le", CPPCOMPERATORALT(Temporal::timepos_t, Temporal::timecnt_t, <=))
 		.addOperator ("__eq", CPPCOMPERATOR(Temporal::timepos_t, ==))
 		.addStaticFunction ("zero", &Temporal::timepos_t::zero)
 		.addStaticFunction ("from_superclock", &Temporal::timepos_t::from_superclock)
@@ -604,6 +628,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("beats", &Temporal::timepos_t::beats)
 		.addFunction ("str", &Temporal::timepos_t::str)
 		.addFunction ("scale", &Temporal::timepos_t::scale)
+		.addFunction ("increment", &Temporal::timepos_t::increment)
+		.addFunction ("decrement", &Temporal::timepos_t::decrement)
 		.addMetamethod ("__tostring", &Temporal::timepos_t::str)
 		.endClass ()
 
@@ -615,12 +641,10 @@ LuaBindings::common (lua_State* L)
 		.addOperator ("__lt", CPPCOMPERATOR(Temporal::timecnt_t, <))
 		.addOperator ("__le", CPPCOMPERATOR(Temporal::timecnt_t, <=))
 		.addOperator ("__eq", CPPCOMPERATOR(Temporal::timecnt_t, ==))
-#if 0 // TODO these methods are, despite the static_cast<>, ambiguous
 		.addStaticFunction ("zero", &Temporal::timecnt_t::zero)
-		.addStaticFunction ("from_superclock", static_cast<Temporal::timecnt_t(Temporal::timecnt_t::*)(Temporal::superclock_t)>(&Temporal::timecnt_t::from_superclock))
-		.addStaticFunction ("from_samples", static_cast<Temporal::timecnt_t(Temporal::timecnt_t::*)(Temporal::samplepos_t)>(&Temporal::timecnt_t::from_samples))
-		.addStaticFunction ("from_ticks", static_cast<Temporal::timecnt_t(Temporal::timecnt_t::*)(int64_t)>(&Temporal::timecnt_t::from_ticks))
-#endif
+		.addStaticFunction ("from_samples", static_cast<Temporal::timecnt_t(*)(Temporal::samplepos_t)>(&Temporal::timecnt_t::from_samples))
+		.addStaticFunction ("from_superclock", static_cast<Temporal::timecnt_t(*)(Temporal::superclock_t)>(&Temporal::timecnt_t::from_superclock))
+		.addStaticFunction ("from_ticks", static_cast<Temporal::timecnt_t(*)(int64_t)>(&Temporal::timecnt_t::from_ticks))
 		.addFunction ("magnitude", &Temporal::timecnt_t::magnitude)
 		.addFunction ("position", &Temporal::timecnt_t::position)
 		.addFunction ("origin", &Temporal::timecnt_t::origin)
@@ -637,6 +661,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("ticks", &Temporal::timecnt_t::ticks)
 		.addFunction ("str", &Temporal::timecnt_t::str)
 		.addFunction ("scale", &Temporal::timecnt_t::scale)
+		.addFunction ("decrement", &Temporal::timecnt_t::decrement)
 		.addMetamethod ("__tostring", &Temporal::timecnt_t::str)
 		.endClass ()
 
