@@ -208,7 +208,7 @@ public:
 	Beats operator*(ratio_t const & factor) const {return ticks (PBD::muldiv (_ticks, factor.numerator(), factor.denominator())); }
 	Beats operator/(ratio_t const & factor) const {return ticks (PBD::muldiv (_ticks, factor.denominator(), factor.numerator())); }
 
-	Beats operator% (Beats const & b) { return Beats::ticks (_ticks % b.to_ticks());}
+	Beats operator% (Beats const & b) const { return Beats::ticks (_ticks % b.to_ticks());}
 
 	Beats operator%= (Beats const & b) {
 		_ticks = _ticks % b.to_ticks();
