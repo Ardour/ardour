@@ -30,7 +30,7 @@ function factory () return function ()
 
 		-- add some new ones
 		for i=0,50 do
-			al:add (i * r:length () / 50,
+			al:add (r:length ():scale (Temporal:ratio (i, 50)),
 			        1 - math.sqrt (i / 50),
 			        false, true)
 		end

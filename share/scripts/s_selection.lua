@@ -11,8 +11,13 @@ function factory () return function ()
 	--
 	
 	-- Range selection, total span of all ranges (0, 0 if no time range is selected)
-	if sel.time:start () < sel.time:end_sample () then
-		print ("Total Range:", sel.time:start (), sel.time:end_sample ())
+	if sel.time:start_sample () < sel.time:end_sample () then
+		print ("Total Range:", sel.time:start_sample (), sel.time:end_sample ())
+	end
+
+	-- .. and the same in Temporal.timepos_t
+	if sel.time:start_time () < sel.time:end_time () then
+		print ("Total Range:", sel.time:start_time (), sel.time:end_time ())
 	end
 
 	-- Range selection, individual ranges.
@@ -50,7 +55,7 @@ function factory () return function ()
 
 	----------------------------------------------------------
 	-- The total time extents of all selected regions and ranges
-	local ok, ext = Editor:get_selection_extents (0, 0)
+	local ok, ext = Editor:get_selection_extents (Temporal.timepos_t(0), Temporal.timepos_t(0))
 	if ok then
 		print ("Selection Extents:", ext[1], ext[2])
 	else

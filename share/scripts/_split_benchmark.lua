@@ -15,7 +15,7 @@ function factory (params) return function ()
 			local playlist = route:to_track():playlist ()
 			playlist:to_stateful ():clear_changes ()
 			for region in playlist:regions_at (pos):iter () do
-				playlist:split_region (region, ARDOUR.MusicSample (pos, 0))
+				playlist:split_region (region, Temporal.timepos_t (pos))
 			end
 			if not Session:add_stateful_diff_command (playlist:to_statefuldestructible ()):empty () then
 				add_undo = true

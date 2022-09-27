@@ -19,10 +19,10 @@ function factory ()
 		-- find first marker after the current playhead position, ignore loop + punch ranges
 		-- (this only works when rolling forward, to extend this example see
 		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:Locations )
-		--
-		local m = loc:first_mark_after (pos, false)
+		local t = Temporal.timepos_t (pos)
+		local m = loc:first_mark_after (t, false)
 
-		if (m == -1) then
+		if (m == Temporal.timepos_t.max (t:time_domain())) then
 			-- no marker was found
 			return
 		end
@@ -40,10 +40,10 @@ function factory ()
 		--
 		-- So even though "pos + n_samples" is barely reached,
 		-- we need to stop at "m" in the cycle that crosses or ends at "m".
-		if (pos + n_samples >= m) then
+		if (pos + n_samples >= m:samples ()) then
 			-- asking to locate to "m" ensures that playback continues at "m"
 			-- and the same marker will not be taken into account.
-			Session:request_locate (m, false, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_Engine)
+			Session:request_locate (m:samples (), false, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_Engine)
 		end
 	end
 end

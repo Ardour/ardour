@@ -19,14 +19,14 @@ function factory () return function ()
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:RegionSelection
 	for r in sel.regions:regionlist ():iter () do
 		-- test if it's an audio region
-		if r:to_audioregion ():isnil () then
+		local ar = r:to_audioregion()
+		if ar:isnil () then
 			goto next
 		end
 
 		-- to read the Region data, we use the Readable interface of the Region
 		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:Readable
-		local a = r.to_audioregion()
-		local rd = a:to_readable ()
+		local rd = ar:to_readable ()
 
 		local n_samples = rd:readable_length ()
 		local n_channels = rd:n_channels ()
@@ -59,7 +59,7 @@ function factory () return function ()
 		end
 
 		if (nonzeropos >= 0) then
-			msg = msg .. string.format("%s: %d\n", r:name (), nonzeropos + r:position())
+			msg = msg .. string.format("%s: %d\n", r:name (), nonzeropos + r:position():samples ())
 		else
 			msg = msg .. "Region: '%s' is silent\n"
 		end

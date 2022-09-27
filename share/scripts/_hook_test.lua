@@ -31,10 +31,10 @@ function factory (params)
 			file = io.open ("/tmp/test" ,"a")
 			io.output (file)
 			for region in rl:iter() do
-				io.write (string.format ("Region: '%s' pos-changed: %s, length-changed: %s\n",
+				io.write (string.format ("Region: '%s' length@pos-changed: %s Start-changed: %s\n",
 					region:name (),
-					tostring (pch:containsSamplePos (ARDOUR.Properties.Position)),
-					tostring (pch:containsSamplePos (ARDOUR.Properties.Length))
+					tostring (pch:containsTimeCnt (ARDOUR.Properties.Length)),
+					tostring (pch:containsTimePos (ARDOUR.Properties.Start))
 					))
 			end
 			io.close (file)

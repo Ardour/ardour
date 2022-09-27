@@ -174,7 +174,7 @@ function factory (params) return function ()
 		goto errorout
 	end
 	assert (loop:start () < loop:_end ())
-	if loop:_end () > playhead then
+	if loop:_end ():samples () > playhead then
 --		print_help();
 		print ("Error: The Playhead (paste point) needs to be after the loop.")
 		LuaDialog.Message ("Tom's Loop", "Error: The Playhead (paste point) needs to be after the loop.", LuaDialog.MessageType.Error, LuaDialog.ButtonType.Close):run ()
@@ -249,9 +249,7 @@ function factory (params) return function ()
 
 		-- create a diff of the performed work, add it to the session's undo stack
 		-- and check if it is not empty
-		if not Session:add_stateful_diff_command (playlist:to_statefuldestructible ()):empty () then
-			add_undo = true
-		end
+		Session:add_stateful_diff_command (playlist:to_statefuldestructible ())
 
 		::continue::
 	end -- for all routes
@@ -262,14 +260,11 @@ function factory (params) return function ()
 	end
 
 	-- all done, commit the combined Undo Operation
-	if add_undo then
-		-- the 'nil' Command here mean to use the collected diffs added above
+	if not Session:abort_empty_reversible_command () then
 		Session:commit_reversible_command (nil)
-	else
-		Session:abort_reversible_command ()
 	end
 
-	print ("bounced " .. n_regions_created .. " regions from loop range (" .. loop:length() ..  " samples) to playhead @ sample # " .. playhead)
+	print ("bounced " .. n_regions_created .. " regions from loop range (" .. loop:length():samples() ..  " samples) to playhead @ sample # " .. playhead)
 	::errorout::
 end -- end of anonymous action script function
 end -- end of script factory

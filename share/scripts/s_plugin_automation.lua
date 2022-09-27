@@ -2,8 +2,8 @@ ardour { ["type"] = "Snippet", name = "Plugin automation" }
 
 function factory () return function ()
 	-- query playhead position and session sample-rate
-	local playhead = Session:transport_sample ()
-	local samplerate = Session:nominal_sample_rate ()
+	local playhead = Temporal.timepos_t (Session:transport_sample ())
+	local samplerate = Temporal.timecnt_t (Session:nominal_sample_rate ())
 
 	-- get Track/Bus with RID 3
 	local r = Session:get_remote_nth_route(3)
@@ -30,7 +30,7 @@ function factory () return function ()
 		-- add new data points after the playhead 1 sec, min..max
 		-- without guard-points, but with initial (..., false, true)
 		for i=0,10 do
-			cl:add (playhead + i * samplerate / 10,
+			cl:add (playhead + samplerate:scale (Temporal.ratio (i, 10)),
 				 pd.lower + math.sqrt (i / 10) * (pd.upper - pd.lower),
 				 false, true)
 		end

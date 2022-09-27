@@ -45,9 +45,9 @@ function factory (params)
 			for region in rl:iter() do
 				tx:send ("/region_property_changed", "sTTiii",
 					region:name (),
-					(pch:containsSamplePos (ARDOUR.Properties.Start)),
-					(pch:containsSamplePos (ARDOUR.Properties.Length)),
-					region:position (), region:start (), region:length ())
+					(pch:containsTimePos (ARDOUR.Properties.Start)),
+					(pch:containsTimeCnt (ARDOUR.Properties.Length)),
+					region:position ():samples(), region:start ():samples(), region:length ():samples())
 			end
 		end
 	end

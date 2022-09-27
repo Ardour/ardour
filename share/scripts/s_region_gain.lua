@@ -11,20 +11,19 @@ function factory () return function ()
 
 	-- prepare undo operation
 	Session:begin_reversible_command ("Lua Region Gain")
-	local add_undo = false -- keep track if something has changed
 
 	-- iterate over selected regions
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:RegionSelection
 	for r in sel.regions:regionlist ():iter () do
 		-- test if it's an audio region
-		if r:to_audioregion ():isnil () then
+		local ar = r:to_audioregion ()
+		if ar:isnil () then
 			goto next
 		end
 
 		-- to read the Region data, we use the Readable interface of the Region
 		-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:AudioReadable
-		local a = r.to_audioregion
-		local rd = a:to_readable ()	
+		local rd = ar:to_readable ()
 
 		local n_samples = rd:readable_length ()
 		local n_channels = rd:n_channels ()
@@ -64,20 +63,14 @@ function factory () return function ()
 			-- apply gain
 			r:to_audioregion (): set_scale_amplitude (1 / peak)
 			-- save changes (if any) to undo command
-			if not Session:add_stateful_diff_command (r:to_statefuldestructible ()):empty () then
-				add_undo = true
-			end
+			Session:add_stateful_diff_command (r:to_statefuldestructible ())
 		end
 
 		::next::
 	end
 
-	-- all done. now commit the combined undo operation
-	if add_undo then
-		-- the 'nil' command here means to use all collected diffs
+	if not Session:abort_empty_reversible_command () then
 		Session:commit_reversible_command (nil)
-	else
-		Session:abort_reversible_command ()
 	end
 
 end end

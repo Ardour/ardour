@@ -1,8 +1,8 @@
 ardour { ["type"] = "Snippet", name = "Fader Automation" }
 
 function factory () return function ()
-	local playhead = Session:transport_sample ()
-	local samplerate = Session:nominal_sample_rate ()
+	local playhead = Temporal.timepos_t (Session:transport_sample ())
+	local samplerate = Temporal.timecnt_t (Session:nominal_sample_rate ())
 
 	-- get selected tracks
 	rl = Editor:get_selection ().tracks:routelist ()
@@ -32,7 +32,7 @@ function factory () return function ()
 		for i=0,50 do
 			-- use a sqrt fade-out (the shape is recognizable, and otherwise
 			-- not be possible to achieve with existing ardour fade shapes)
-			al:add (playhead + i * samplerate / 50,
+			al:add (playhead + samplerate:scale (Temporal.ratio (i, 50)),
 			        g * (1 - math.sqrt (i / 50)),
 			        false, true)
 		end
