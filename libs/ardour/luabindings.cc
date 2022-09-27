@@ -102,37 +102,42 @@
 
 #include "LuaBridge/LuaBridge.h"
 
+/* for the time being, expose superclock for introspection and testing in debug builds */
+#ifndef NDEBUG
+#define WITH_SUPERCLOCK_BINDINGS
+#endif
+
 /* lambda function to use for Lua metatable methods.
  * A generic C++ template won't work here because
  * operators cannot be used as template parameters.
  */
-#define CPPOPERATOR2(RTYPE, TYPE1, TYPE2, OP)                         \
-  [] (lua_State* L) {                                                 \
-    TYPE1* const t0 = luabridge::Userdata::get <TYPE1> (L, 1, false); \
-    TYPE2* const t1 = luabridge::Userdata::get <TYPE2> (L, 2, false); \
-    if (!t0 || !t1) {                                                 \
-      luaL_error (L, "argument is nil");                              \
-      return 0;                                                       \
-    }                                                                 \
-    luabridge::Stack <RTYPE>::push (L, ((*t0) OP (*t1)));             \
-    return 1;                                                         \
+#define CPPOPERATOR2(RTYPE, TYPE1, TYPE2, OP)                              \
+  [] (lua_State* L) {                                                      \
+    TYPE1 const* const t0 = luabridge::Userdata::get <TYPE1> (L, 1, true); \
+    TYPE2 const* const t1 = luabridge::Userdata::get <TYPE2> (L, 2, true); \
+    if (!t0 || !t1) {                                                      \
+      luaL_error (L, "argument is nil");                                   \
+      return 0;                                                            \
+    }                                                                      \
+    luabridge::Stack <RTYPE>::push (L, ((*t0) OP (*t1)));                  \
+    return 1;                                                              \
   }
 
-#define CPPOPERATOR4(RTYPE, TYPE1, TYPE2A, TYPE2B, OP)                      \
-  [] (lua_State* L) {                                                       \
-    TYPE1*  const t0 = luabridge::Userdata::get <TYPE1> (L, 1, false);      \
-    TYPE2A* const ta = luabridge::Userdata::try_get <TYPE2A> (L, 2, false); \
-    if (t0 && ta) {                                                         \
-      luabridge::Stack <RTYPE>::push (L, ((*t0) OP (*ta)));                 \
-      return 1;                                                             \
-    }                                                                       \
-    TYPE2B* const tb = luabridge::Userdata::get <TYPE2B> (L, 2, false);     \
-    if (!t0 || !tb) {                                                       \
-      luaL_error (L, "argument is nil");                                    \
-      return 0;                                                             \
-    }                                                                       \
-    luabridge::Stack <RTYPE>::push (L, ((*t0) OP (*tb)));                   \
-    return 1;                                                               \
+#define CPPOPERATOR4(RTYPE, TYPE1, TYPE2A, TYPE2B, OP)                           \
+  [] (lua_State* L) {                                                            \
+    TYPE1 const* const t0 = luabridge::Userdata::get <TYPE1> (L, 1, true);       \
+    TYPE2A const* const ta = luabridge::Userdata::try_get <TYPE2A> (L, 2, true); \
+    if (t0 && ta) {                                                              \
+      luabridge::Stack <RTYPE>::push (L, ((*t0) OP (*ta)));                      \
+      return 1;                                                                  \
+    }                                                                            \
+    TYPE2B const* const tb = luabridge::Userdata::get <TYPE2B> (L, 2, true);     \
+    if (!t0 || !tb) {                                                            \
+      luaL_error (L, "argument is nil");                                         \
+      return 0;                                                                  \
+    }                                                                            \
+    luabridge::Stack <RTYPE>::push (L, ((*t0) OP (*tb)));                        \
+    return 1;                                                                    \
   }
 
 #define CPPCOMPERATOR(TYPE, OP) CPPOPERATOR2 (bool, TYPE, TYPE, OP)
@@ -597,14 +602,25 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <Temporal::Beats> ("Beats")
 		.addConstructor <void (*) (int32_t, int32_t)> ()
+		.addOperator ("__add", CPPOPERATOR(Temporal::Beats, +))
+		.addOperator ("__sub", CPPOPERATOR(Temporal::Beats, -))
+		.addOperator ("__mul", CPPOPERATOR(Temporal::Beats, *))
+		.addOperator ("__div", CPPOPERATOR(Temporal::Beats, /))
+		.addOperator ("__mod", CPPOPERATOR(Temporal::Beats, %))
+		.addOperator ("__lt", CPPCOMPERATOR(Temporal::Beats, <))
+		.addOperator ("__le", CPPCOMPERATOR(Temporal::Beats, <=))
+		.addOperator ("__eq", CPPCOMPERATOR(Temporal::Beats, ==))
 		.addStaticFunction ("from_double", &Temporal::Beats::from_double)
 		.addStaticFunction ("beats", &Temporal::Beats::beats)
+		.addStaticFunction ("ticks", &Temporal::Beats::ticks)
+		.addFunction ("diff", &Temporal::Beats::diff)
+		.addFunction ("prev_beat", &Temporal::Beats::prev_beat)
+		.addFunction ("next_beat", &Temporal::Beats::next_beat)
+		.addFunction ("round_to_beat", &Temporal::Beats::round_to_beat)
+		.addFunction ("round_up_to_beat", &Temporal::Beats::round_up_to_beat)
+		.addFunction ("round_down_to_beat", &Temporal::Beats::round_down_to_beat)
+		.addMetamethod ("__tostring", &Temporal::Beats::str)
 		.endClass ()
-
-		/* TODO */
-		// * superclock_to_samples
-		// * samples_to_superclock
-		// add wrappers to construct timepos_t from samples
 
 		.beginClass <Temporal::timepos_t> ("timepos_t")
 		.addConstructor <void (*) (Temporal::samplepos_t)> ()
@@ -615,14 +631,16 @@ LuaBindings::common (lua_State* L)
 		.addOperator ("__le", CPPCOMPERATORALT(Temporal::timepos_t, Temporal::timecnt_t, <=))
 		.addOperator ("__eq", CPPCOMPERATOR(Temporal::timepos_t, ==))
 		.addStaticFunction ("zero", &Temporal::timepos_t::zero)
-		.addStaticFunction ("from_superclock", &Temporal::timepos_t::from_superclock)
 		.addStaticFunction ("from_ticks", &Temporal::timepos_t::from_ticks)
+#ifdef WITH_SUPERCLOCK_BINDINGS
+		.addStaticFunction ("from_superclock", &Temporal::timepos_t::from_superclock)
+		.addFunction ("is_superclock", &Temporal::timepos_t::is_superclock)
+		.addFunction ("superclocks", &Temporal::timepos_t::superclocks)
+#endif
 		.addFunction ("is_positive", &Temporal::timepos_t::is_positive)
 		.addFunction ("is_negative", &Temporal::timepos_t::is_negative)
 		.addFunction ("is_zero", &Temporal::timepos_t::is_zero)
 		.addFunction ("is_beats", &Temporal::timepos_t::is_beats)
-		.addFunction ("is_superclock", &Temporal::timepos_t::is_superclock)
-		.addFunction ("superclocks", &Temporal::timepos_t::superclocks)
 		.addFunction ("samples", &Temporal::timepos_t::samples)
 		.addFunction ("ticks", &Temporal::timepos_t::ticks)
 		.addFunction ("beats", &Temporal::timepos_t::beats)
@@ -643,8 +661,11 @@ LuaBindings::common (lua_State* L)
 		.addOperator ("__eq", CPPCOMPERATOR(Temporal::timecnt_t, ==))
 		.addStaticFunction ("zero", &Temporal::timecnt_t::zero)
 		.addStaticFunction ("from_samples", static_cast<Temporal::timecnt_t(*)(Temporal::samplepos_t)>(&Temporal::timecnt_t::from_samples))
-		.addStaticFunction ("from_superclock", static_cast<Temporal::timecnt_t(*)(Temporal::superclock_t)>(&Temporal::timecnt_t::from_superclock))
 		.addStaticFunction ("from_ticks", static_cast<Temporal::timecnt_t(*)(int64_t)>(&Temporal::timecnt_t::from_ticks))
+#ifdef WITH_SUPERCLOCK_BINDINGS
+		.addStaticFunction ("from_superclock", static_cast<Temporal::timecnt_t(*)(Temporal::superclock_t)>(&Temporal::timecnt_t::from_superclock))
+		.addFunction ("superclocks", &Temporal::timecnt_t::superclocks)
+#endif
 		.addFunction ("magnitude", &Temporal::timecnt_t::magnitude)
 		.addFunction ("position", &Temporal::timecnt_t::position)
 		.addFunction ("origin", &Temporal::timecnt_t::origin)
@@ -655,7 +676,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("abs", &Temporal::timecnt_t::abs)
 		.addFunction ("time_domain", &Temporal::timecnt_t::time_domain)
 		.addFunction ("set_time_domain", &Temporal::timecnt_t::set_time_domain)
-		.addFunction ("superclocks", &Temporal::timecnt_t::superclocks)
 		.addFunction ("samples", &Temporal::timecnt_t::samples)
 		.addFunction ("beats", &Temporal::timecnt_t::beats)
 		.addFunction ("ticks", &Temporal::timecnt_t::ticks)
@@ -670,6 +690,10 @@ LuaBindings::common (lua_State* L)
 		.addData ("bars", &Temporal::BBT_Time::bars)
 		.addData ("beats", &Temporal::BBT_Time::beats)
 		.addData ("ticks", &Temporal::BBT_Time::ticks)
+		.addOperator ("__lt", CPPCOMPERATOR(Temporal::BBT_Time, <))
+		.addOperator ("__le", CPPCOMPERATOR(Temporal::BBT_Time, <=))
+		.addOperator ("__eq", CPPCOMPERATOR(Temporal::BBT_Time, ==))
+		.addMetamethod ("__tostring", &Temporal::BBT_Time::str)
 		// .addStaticData ("ticks_per_beat", &Temporal::ticks_per_beat, false)
 		.endClass ()
 
@@ -680,6 +704,9 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("quarter_notes_per_minute", &Temporal::Tempo::quarter_notes_per_minute)
 		.addFunction ("samples_per_quarter_note", &Temporal::Tempo::samples_per_quarter_note)
 		.addFunction ("samples_per_note_type", &Temporal::Tempo::samples_per_note_type)
+#ifdef WITH_SUPERCLOCK_BINDINGS
+		.addFunction ("superclocks_per_note_type", (superclock_t (Temporal::Tempo::*)() const)&Temporal::Tempo::superclocks_per_note_type)
+#endif
 		.endClass ()
 
 		.beginClass <Temporal::Meter> ("Meter")
@@ -696,8 +723,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("time", &Temporal::Point::time)
 		.endClass ()
 
+		/* FIXME, direct access to parent class Temporal::Tempo fails here,
+		 * even thought it is access via UserdataPtr at the same address */
 		.deriveClass <Temporal::TempoPoint, Temporal::Tempo> ("TempoPoint")
+		.addCast<Temporal::Tempo> ("to_tempo")
 		.addCast<Temporal::Point> ("to_point")
+		.addFunction ("quarters_at_sample", &Temporal::TempoPoint::quarters_at_sample)
+		.addFunction ("time", &Temporal::TempoPoint::time)
 		.endClass ()
 
 		.deriveClass <Temporal::MeterPoint, Temporal::Meter> ("MeterPoint")
@@ -705,8 +737,10 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginWSPtrClass <Temporal::TempoMap> ("TempoMap")
-		.addStaticFunction ("use", &Temporal::TempoMap::use)
-		.addStaticFunction ("fetch", &Temporal::TempoMap::fetch)
+		/* we cannot use ::fetch or ::use because LuaBridge cannot overload
+		 * shared_ptr<const T> and shared_ptr<T> in the same class.
+		 */
+		.addStaticFunction ("read", &Temporal::TempoMap::read)
 		.addStaticFunction ("fetch_writable", &Temporal::TempoMap::fetch_writable)
 		.addStaticFunction ("write_copy", &Temporal::TempoMap::write_copy)
 		.addStaticFunction ("update", &Temporal::TempoMap::update)
@@ -718,6 +752,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("bbt_at", (Temporal::BBT_Time (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::bbt_at)
 		.addFunction ("quarters_at", (Temporal::Beats (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::quarters_at)
 		.addFunction ("sample_at", (samplepos_t (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::sample_at)
+		.addFunction ("sample_at_beats", (samplepos_t (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::sample_at)
+		.addFunction ("quarters_per_minute_at", &Temporal::TempoMap::quarters_per_minute_at)
 		.endClass ()
 
 		/* libtemporal enums */
