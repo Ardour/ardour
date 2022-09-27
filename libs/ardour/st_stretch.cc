@@ -304,7 +304,8 @@ STStretch::run (boost::shared_ptr<Region> r, Progress* progress)
 		/* multiply the old (possibly previously stretched) region length by the extra
 		 * stretch this time around to get its new length. this is a non-music based edit atm.
 		 */
-		(*x)->set_length ((*x)->length () * tsr.time_fraction, 0);
+		(*x)->set_length ((*x)->length ().scale (tsr.time_fraction));
+		(*x)->set_whole_file (true);
 	}
 
 	/* stretch region gain envelope */

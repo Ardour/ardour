@@ -1227,16 +1227,22 @@ LuaAPI::Rubberband::finalize ()
 	std::string region_name = RegionFactory::new_region_name (_region->name ());
 
 	PropertyList plist (_region->properties ());
-	plist.add (Properties::start, 0);
-	plist.add (Properties::length, _region->length_samples ());
+	plist.add (Properties::start, std::numeric_limits<timepos_t>::min());
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);
 
 	boost::shared_ptr<Region>      r  = RegionFactory::create (sl, plist);
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
 
-	ar->set_ancestral_data (timepos_t (_read_start), timecnt_t (_read_len), _stretch_ratio, _pitch_ratio);
-	ar->set_length (ar->length ().scale (_stretch_ratio)); // XXX
+	ar->set_ancestral_data (timepos_t (_read_start), timecnt_t (_read_len, timepos_t (_read_start)), _stretch_ratio, _pitch_ratio);
+	ar->set_master_sources (_region->master_sources ());
+	ar->set_start (timepos_t(0));
+#if 0 // TODO construct ratio_t from double
+	ar->set_length (ar->length ().scale (_stretch_ratio));
+#else
+	ar->set_length (timecnt_t (_stretch_ratio * ar->length_samples (), ar->position()));
+#endif
+	ar->set_whole_file (true);
 	if (_stretch_ratio != 1.0) {
 		// TODO: apply mapping
 		ar->envelope ()->x_scale (_stretch_ratio);

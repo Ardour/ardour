@@ -135,11 +135,13 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 
 	PropertyList plist (region->properties ());
 
-	plist.add (Properties::start, std::numeric_limits<timecnt_t>::min());
+	plist.add (Properties::start, std::numeric_limits<timepos_t>::min());
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);
 
 	boost::shared_ptr<Region> r = RegionFactory::create (nsrcs, plist);
+	r->set_start (timepos_t(0));
+	r->set_whole_file (true);
 	results.push_back (r);
 
 	return 0;
