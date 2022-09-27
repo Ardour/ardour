@@ -42,7 +42,7 @@ function factory (params) return function ()
 			local plc = 1
 			for nr in rv[1]:iter () do
 				local pl = newtracks:table()[plc]:playlist()
-				pl:add_region (nr, r:position(), 1, false, 0, 0, false)
+				pl:add_region (nr, r:position(), 1, false)
 				plc = plc + 1
 			end
 		end

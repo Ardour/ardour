@@ -39,7 +39,7 @@ function factory (params) return function ()
 		playlist:to_stateful ():clear_changes ()
 
 		-- bounce the region with processing
-		local region = track:bounce_range (r:position (), r:position() + r:length (), ARDOUR.InterThreadInfo (), track:main_outs (), false, "");
+		local region = track:bounce_range (r:position ():samples(), (r:position() + r:length ()):samples(), ARDOUR.InterThreadInfo (), track:main_outs (), false, "");
 
 		-- remove old region..
 		playlist:remove_region (r);

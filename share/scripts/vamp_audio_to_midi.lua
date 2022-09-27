@@ -16,7 +16,7 @@ The plugin works best at 44.1KHz input sample rate, and is tuned for piano and g
 function factory () return function ()
 	local sel = Editor:get_selection ()
 	local sr = Session:nominal_sample_rate ()
-	local tm = Session:tempo_map ()
+	local tm = Temporal.TempoMap.read ()
 	local vamp = ARDOUR.LuaAPI.Vamp ("libardourvampplugins:qm-transcription", sr)
 	local midi_region = nil
 	local audio_regions = {}
@@ -25,18 +25,19 @@ function factory () return function ()
 	local max_pos = 0
 	local cur_pos = 0
 	for r in sel.regions:regionlist ():iter () do
-		if r:to_midiregion():isnil() then
-			local st = r:position()
-			local ln = r:length()
-			local et = st + ln
+		local ar = r:to_audioregion()
+		if not ar:isnil() then
+			local st = r:position():samples()
+			local ln = r:length():samples()
+			local et = st + ln;
 			if st < start_time then
 				start_time = st
 			end
 			if et > end_time then
 				end_time = et
 			end
-			table.insert(audio_regions, r)
-			max_pos = max_pos + r:to_readable ():readable_length ()
+			table.insert(audio_regions, ar)
+			max_pos = max_pos + ar:to_readable ():readable_length ()
 		else
 			midi_region = r:to_midiregion()
 		end
@@ -51,8 +52,8 @@ function factory () return function ()
 		return
 	end
 
-	midi_region:set_initial_position(start_time)
-	midi_region:set_length(end_time - start_time, 0)
+	midi_region:set_initial_position (Temporal.timepos_t (start_time))
+	midi_region:set_length (Temporal.timecnt_t (end_time - start_time))
 
 	local pdialog = LuaDialog.ProgressWindow ("Audio to MIDI", true)
 	function progress (_, pos)
@@ -61,7 +62,7 @@ function factory () return function ()
 
 	for i,ar in pairs(audio_regions) do
 		local a_off = ar:position ()
-		local b_off = midi_region:quarter_note () - midi_region:start_beats ()
+		local b_off = tm:quarters_at (midi_region:position ());
 
 		vamp:analyze (ar:to_readable (), 0, progress)
 
@@ -77,15 +78,16 @@ function factory () return function ()
 			local mm = midi_region:midi_source(0):model()
 			local midi_command = mm:new_note_diff_command ("Audio2Midi")
 			for f in fl:iter () do
-				local ft = Vamp.RealTime.realTime2Frame (f.timestamp, sr)
-				local fd = Vamp.RealTime.realTime2Frame (f.duration, sr)
+				local ft = Temporal.timecnt_t (Vamp.RealTime.realTime2Frame (f.timestamp, sr))
+				local fd = Temporal.timecnt_t (Vamp.RealTime.realTime2Frame (f.duration, sr))
 				local fn = f.values:at (0)
 
-				local bs = tm:exact_qn_at_sample (a_off + ft, 0)
-				local be = tm:exact_qn_at_sample (a_off + ft + fd, 0)
+				local bs = tm:quarters_at (a_off + ft, 0)
+				local be = tm:quarters_at (a_off + ft + fd, 0)
+				print ("N", bs, be, fn + 1)
 
-				local pos = Evoral.Beats (bs - b_off)
-				local len = Evoral.Beats (be - bs)
+				local pos = bs - b_off
+				local len = be - bs
 				local note = ARDOUR.LuaAPI.new_noteptr (1, pos, len, fn + 1, 0x7f)
 				midi_command:add (note)
 			end

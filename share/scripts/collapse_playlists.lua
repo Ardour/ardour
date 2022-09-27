@@ -40,7 +40,7 @@ function factory (params) return function ()
 				-- for each region of the playlist
 				for r in p:region_list():iter() do
 					-- add it to the current playlist
-					playlist:add_region (r, r:position(), 1, false, 0, 0, false)
+					playlist:add_region (r, r:position(), 1, false)
 				end
 			end
 		end

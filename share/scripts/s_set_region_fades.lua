@@ -26,8 +26,8 @@ function factory () return function ()
 
 		-- fade in/out for 500 msec, or half the region-length, whatever is shorter
 		local fadelen = .5 * sr
-		if fadelen > r:length () / 2 then
-			fadelen = r:length () / 2
+		if fadelen > r:length ():samples () / 2 then
+			fadelen = r:length ():samples () / 2
 		end
 
 		-- https://manual.ardour.org/lua-scripting/class_reference/#ARDOUR.FadeShape

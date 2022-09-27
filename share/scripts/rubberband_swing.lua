@@ -138,7 +138,7 @@ function factory () return function ()
 			local playlist = track:playlist ()
 			playlist:to_stateful ():clear_changes () -- prepare undo
 			playlist:remove_region (r)
-			playlist:add_region (nar, r:position (), 1, false, 0, 0, false)
+			playlist:add_region (nar, r:position (), 1, false)
 			-- create a diff of the performed work, add it to the session's undo stack
 			-- and check if it is not empty
 			if not Session:add_stateful_diff_command (playlist:to_statefuldestructible ()):empty () then

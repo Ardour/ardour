@@ -242,8 +242,8 @@ function factory (params) return function ()
 		playlist:to_stateful ():clear_changes ()
 
 		-- do the actual work
-		local region = track:bounce_range (loop:start (), loop:_end (), itt, proc, false, "")
-		playlist:add_region (region, playhead, n_paste, false, 0, 0, false)
+		local region = track:bounce_range (loop:start ():samples(), loop:_end ():samples(), itt, proc, false, "")
+		playlist:add_region (region, Temporal.timepos_t (playhead), n_paste, false)
 
 		n_regions_created = n_regions_created + 1
 
@@ -258,7 +258,7 @@ function factory (params) return function ()
 
 	--advance playhead so it's just after the newly added regions
 	if n_regions_created > 0 then
-		Session:request_locate (playhead + loop:length() * n_paste, false, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
+		Session:request_locate (playhead + loop:length():samples() * n_paste, false, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_UI)
 	end
 
 	-- all done, commit the combined Undo Operation
