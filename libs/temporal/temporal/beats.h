@@ -238,6 +238,12 @@ public:
 
 	static Beats one_tick() { return Beats(0, 1); }
 
+	std::string str () const {
+		std::ostringstream os;
+		os << get_beats() << ':' << get_ticks();
+		return os.str();
+	}
+
   protected:
 	int64_t _ticks;
 

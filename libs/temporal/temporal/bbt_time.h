@@ -130,6 +130,13 @@ struct LIBTEMPORAL_API BBT_Time
 		  << std::setw (2) << beats << "|"
 		  << std::setw (4) << ticks;
 	}
+
+	std::string str () const {
+		std::ostringstream os;
+		os << bars << '|' << beats << '|' << ticks;
+		return os.str ();
+	}
+
 };
 
 struct LIBTEMPORAL_API BBT_Offset
