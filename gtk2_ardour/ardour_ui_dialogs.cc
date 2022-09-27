@@ -1007,13 +1007,13 @@ ARDOUR_UI::create_virtual_keyboard_window ()
 }
 
 void
-ARDOUR_UI::show_library_download_manager ()
+ARDOUR_UI::show_library_download_window ()
 {
-	library_manager_window->show ();
+	library_download_window->show ();
 }
 
 LibraryDownloadDialog*
-ARDOUR_UI::create_library_manager_window ()
+ARDOUR_UI::create_library_download_window ()
 {
 	LibraryDownloadDialog* ldd = new LibraryDownloadDialog ();
 	return ldd;
