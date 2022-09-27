@@ -807,10 +807,6 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		fork_state = switch_to_snapshot ? SwitchToSnapshot : SnapshotKeep;
 	}
 
-#ifndef NDEBUG
-	const int64_t save_start_time = g_get_monotonic_time();
-#endif
-
 	/* tell sources we're saving first, in case they write out to a new file
 	 * which should be saved with the state rather than the old one */
 	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
