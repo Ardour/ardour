@@ -487,7 +487,7 @@ void
 CueLayout::button_stop_press ()
 {
 	if (_p2.modifier_state() == Push2::ModShift) {
-		_p2.get_session().stop_all_triggers (false); /* quantized global stop */
+		_p2.get_session().trigger_stop_all (false); /* quantized global stop */
 	}
 }
 void

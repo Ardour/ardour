@@ -490,7 +490,7 @@ public:
 	double default_play_speed ();
 	void reset_transport_speed (TransportRequestSource origin = TRS_UI);
 
-	void stop_all_triggers (bool now = true);
+	void trigger_stop_all (bool now = true);
 
 	void request_transport_speed (double speed, TransportRequestSource origin = TRS_UI);
 	void request_default_play_speed (double speed, TransportRequestSource origin = TRS_UI);

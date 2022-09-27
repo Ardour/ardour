@@ -579,9 +579,9 @@ CueMaster::event_handler (GdkEvent* ev)
 		case GDK_BUTTON_PRESS:
 			if (ev->button.button == 1) {
 				if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
-					_session->stop_all_triggers (true);  //stop 'now'
+					_session->trigger_stop_all (true);  //stop 'now'
 				} else {
-					_session->stop_all_triggers (false);  //stop quantized (bar end)
+					_session->trigger_stop_all (false);  //stop quantized (bar end)
 				}
 				return true;
 			}

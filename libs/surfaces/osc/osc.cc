@@ -460,7 +460,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/locate"), "ii", locate);
 
 		REGISTER_CALLBACK (serv, X_("/trigger_cue_row"), "i", trigger_cue_row);
-		REGISTER_CALLBACK (serv, X_("/stop_all_triggers"), "i", stop_all_triggers);
+		REGISTER_CALLBACK (serv, X_("/trigger_stop_all"), "i", trigger_stop_all);
 
 		REGISTER_CALLBACK (serv, X_("/save_state"), "", save_state);
 		REGISTER_CALLBACK (serv, X_("/save_state"), "f", save_state);

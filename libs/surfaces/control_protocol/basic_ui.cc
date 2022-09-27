@@ -463,9 +463,9 @@ BasicUI::transport_rolling () const
 }
 
 void
-BasicUI::stop_all_triggers (bool stop_all)
+BasicUI::trigger_stop_all (bool stop_all)
 {
-	session->stop_all_triggers (stop_all);
+	session->trigger_stop_all (stop_all);
 }
 
 void

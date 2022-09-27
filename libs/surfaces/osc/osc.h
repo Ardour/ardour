@@ -487,7 +487,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	}
 
 	PATH_CALLBACK1(trigger_cue_row,i,);
-	PATH_CALLBACK1(stop_all_triggers,i,);  //0 = "stop at end of bar"  1 = "stop now"
+	PATH_CALLBACK1(trigger_stop_all,i,);  //0 = "stop at end of bar"  1 = "stop now"
 
 	PATH_CALLBACK1(set_transport_speed,f,);
 	PATH_CALLBACK1(add_marker_name,s,&);
