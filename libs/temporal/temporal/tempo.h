@@ -63,7 +63,7 @@ class TempoMap;
 class MapOwned {
  protected:
 	MapOwned (TempoMap const & map) : _map (&map) {}
-	~MapOwned () {}
+	virtual ~MapOwned () {}
 
  public:
 	TempoMap const & map() const { return *_map; }
@@ -174,6 +174,7 @@ class LIBTEMPORAL_API Tempo {
 	static std::string xml_node_name;
 
 	Tempo (XMLNode const &);
+	virtual ~Tempo () {}
 
 	/**
 	 * @param npm Note Types per minute
@@ -313,6 +314,8 @@ class LIBTEMPORAL_API Meter {
 	Meter (int8_t dpb, int8_t nv) : _note_value (nv), _divisions_per_bar (dpb) {}
 	Meter (Meter const & other) : _note_value (other._note_value), _divisions_per_bar (other._divisions_per_bar) {}
 
+	virtual ~Meter () {}
+
 	int divisions_per_bar () const { return _divisions_per_bar; }
 	int note_value() const { return _note_value; }
 
@@ -357,6 +360,8 @@ class /*LIBTEMPORAL_API*/ MeterPoint : public Meter, public meter_hook, public v
 	LIBTEMPORAL_API MeterPoint (TempoMap const & map, XMLNode const &);
 	LIBTEMPORAL_API MeterPoint (Meter const & m, Point const & p) : Point (p), Meter (m) {}
 
+	virtual ~MeterPoint () {}
+
 	LIBTEMPORAL_API Beats quarters_at (BBT_Time const & bbt) const;
 	LIBTEMPORAL_API BBT_Time bbt_at (Beats const & beats) const;
 
@@ -385,6 +390,8 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
 	LIBTEMPORAL_API TempoPoint (TempoMap const & map, Tempo const & t, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Tempo (t), _omega (0.) {}
 	LIBTEMPORAL_API TempoPoint (Tempo const & t, Point const & p) : Point (p), Tempo (t), _omega (0.) {}
 	LIBTEMPORAL_API TempoPoint (TempoMap const & map, XMLNode const &);
+
+	virtual ~TempoPoint () {}
 
 	/* just change the tempo component, without moving */
 	LIBTEMPORAL_API TempoPoint& operator=(Tempo const & t) {
@@ -454,10 +461,11 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
     computation code that requires both tempo and meter information every place
     it is used.
 */
-class LIBTEMPORAL_API TempoMetric {
+class LIBTEMPORAL_API TempoMetric
+{
   public:
 	TempoMetric (TempoPoint const & t, MeterPoint const & m) : _tempo (&t), _meter (&m) {}
-	~TempoMetric () {}
+	virtual ~TempoMetric () {}
 
 	TempoPoint const & tempo() const { return *_tempo; }
 	MeterPoint const & meter() const { return *_meter; }
@@ -537,6 +545,8 @@ class /*LIBTEMPORAL_API*/ MusicTimePoint :  public bartime_hook, public virtual 
 		: Point (map, sc, b, bbt), TempoPoint (t, *this), MeterPoint (m, *this),  _name (name) {}
 
 	LIBTEMPORAL_API MusicTimePoint (TempoMap const & map, XMLNode const &);
+
+	virtual ~MusicTimePoint () {}
 
 	LIBTEMPORAL_API bool operator== (MusicTimePoint const & other) const {
 		return TempoPoint::operator== (other) && MeterPoint::operator== (other);
