@@ -101,6 +101,8 @@ def build(bld):
             obj.linkflags      = ['--coverage']
             obj.cflags         = ['--coverage']
             obj.cxxflags       = ['--coverage']
+        if bld.is_defined('NEED_INTL'):
+            obj.linkflags = ' -lintl'
 
 def test(ctx):
     autowaf.pre_test(ctx, APPNAME)
