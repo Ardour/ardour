@@ -669,7 +669,7 @@ LuaBindings::common (lua_State* L)
 		.addStaticFunction ("from_samples", static_cast<Temporal::timecnt_t(*)(Temporal::samplepos_t)>(&Temporal::timecnt_t::from_samples))
 		.addStaticFunction ("from_ticks", static_cast<Temporal::timecnt_t(*)(int64_t)>(&Temporal::timecnt_t::from_ticks))
 #ifdef WITH_SUPERCLOCK_BINDINGS
-		.addStaticFunction ("from_superclock", static_cast<Temporal::timecnt_t(*)(Temporal::superclock_t)>(&Temporal::timecnt_t::from_superclock))
+		.addStaticFunction ("from_superclock", static_cast<Temporal::timecnt_t(*)(superclock_t)>(&Temporal::timecnt_t::from_superclock))
 		.addFunction ("superclocks", &Temporal::timecnt_t::superclocks)
 #endif
 		.addFunction ("magnitude", &Temporal::timecnt_t::magnitude)
@@ -703,6 +703,24 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("str", &Temporal::BBT_Time::str)
 		.addMetamethod ("__tostring", &Temporal::BBT_Time::str)
 		// .addStaticData ("ticks_per_beat", &Temporal::ticks_per_beat, false)
+		.endClass ()
+
+		.beginClass <Temporal::BBT_Offset> ("BBT_Offset")
+		.addConstructor <void (*) (uint32_t, uint32_t, uint32_t)> ()
+		.addData ("bars", &Temporal::BBT_Offset::bars)
+		.addData ("beats", &Temporal::BBT_Offset::beats)
+		.addData ("ticks", &Temporal::BBT_Offset::ticks)
+		.addOperator ("__lt", CPPCOMPERATOR(Temporal::BBT_Offset, <))
+		.addOperator ("__le", CPPCOMPERATOR(Temporal::BBT_Offset, <=))
+		.addOperator ("__eq", CPPCOMPERATOR(Temporal::BBT_Offset, ==))
+		.addOperator ("__add", CPPOPERATOR(Temporal::BBT_Offset, +))
+		.addOperator ("__sub", CPPOPERATOR(Temporal::BBT_Offset, -))
+#if 0
+		.addOperator ("__mul", CPPOPERATOR2(Temporal::BBT_Offset, Temporal::BBT_Offset, int, *))
+		.addOperator ("__div", CPPOPERATOR2(Temporal::BBT_Offset, Temporal::BBT_Offset, int, /))
+#endif
+		.addFunction ("str", &Temporal::BBT_Time::str)
+		.addMetamethod ("__tostring", &Temporal::BBT_Offset::str) // XXX
 		.endClass ()
 
 		.beginClass <Temporal::Tempo> ("Tempo")
@@ -755,13 +773,48 @@ LuaBindings::common (lua_State* L)
 		.addStaticFunction ("abort_update", &Temporal::TempoMap::abort_update)
 		.addFunction ("set_tempo", (Temporal::TempoPoint& (Temporal::TempoMap::*)(Temporal::Tempo const &,Temporal::timepos_t const &)) &Temporal::TempoMap::set_tempo)
 		.addFunction ("set_meter", (Temporal::MeterPoint& (Temporal::TempoMap::*)(Temporal::Meter const &,Temporal::timepos_t const &)) &Temporal::TempoMap::set_meter)
-		.addFunction ("tempo_at", (Temporal::TempoPoint const & (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::tempo_at)
-		.addFunction ("meter_at", (Temporal::MeterPoint const & (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::meter_at)
+		.addFunction ("set_ramped", &Temporal::TempoMap::set_ramped)
+		.addFunction ("set_continuing", &Temporal::TempoMap::set_continuing)
+
+		.addFunction ("tempo_at", (Temporal::TempoPoint const& (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::tempo_at)
+		.addFunction ("tempo_at_bbt", (Temporal::TempoPoint const& (Temporal::TempoMap::*)(Temporal::BBT_Time const &) const) &Temporal::TempoMap::tempo_at)
+		.addFunction ("tempo_at_beats", (Temporal::TempoPoint const& (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::tempo_at)
+
+		.addFunction ("meter_at", (Temporal::MeterPoint const& (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::meter_at)
+		.addFunction ("meter_at_bbt", (Temporal::MeterPoint const& (Temporal::TempoMap::*)(Temporal::BBT_Time const &) const) &Temporal::TempoMap::meter_at)
+		.addFunction ("meter_at_beats", (Temporal::MeterPoint const& (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::meter_at)
+
 		.addFunction ("bbt_at", (Temporal::BBT_Time (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::bbt_at)
+		.addFunction ("bbt_at_beats", (Temporal::BBT_Time (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::bbt_at)
+
+#ifdef WITH_SUPERCLOCK_BINDINGS
+		.addFunction ("tempo_at_sc", (Temporal::TempoPoint const& (Temporal::TempoMap::*)(superclock_t) const) &Temporal::TempoMap::tempo_at)
+		.addFunction ("meter_at_sc", (Temporal::MeterPoint const& (Temporal::TempoMap::*)(superclock_t) const) &Temporal::TempoMap::meter_at)
+		.addFunction ("superclock_at", (superclock_t (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::superclock_at)
+		.addFunction ("superclock_at_bbt", (superclock_t (Temporal::TempoMap::*)(Temporal::BBT_Time const &) const) &Temporal::TempoMap::superclock_at)
+		.addFunction ("superclock_at_beats", (superclock_t (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::superclock_at)
+#endif
+
 		.addFunction ("quarters_at", (Temporal::Beats (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::quarters_at)
+		.addFunction ("quarters_at_bbt", (Temporal::Beats (Temporal::TempoMap::*)(Temporal::BBT_Time const &) const) &Temporal::TempoMap::quarters_at)
+		.addFunction ("quarters_at_sample", &Temporal::TempoMap::quarters_at_sample)
+
 		.addFunction ("sample_at", (samplepos_t (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::sample_at)
+		.addFunction ("sample_at_bbt", (samplepos_t (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::sample_at)
 		.addFunction ("sample_at_beats", (samplepos_t (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::sample_at)
+
+		.addFunction ("bbt_duration_at", &Temporal::TempoMap::bbt_duration_at)
+		.addFunction ("bbtwalk_to_quarters", (Temporal::Beats (Temporal::TempoMap::*)(Temporal::Beats const &, Temporal::BBT_Offset const &) const) &Temporal::TempoMap::bbtwalk_to_quarters)
+		.addFunction ("bbtwalk_to_quarters_bbt", (Temporal::Beats (Temporal::TempoMap::*)(Temporal::BBT_Time const &, Temporal::BBT_Offset const &) const) &Temporal::TempoMap::bbtwalk_to_quarters)
+
+		.addFunction ("convert_duration", &Temporal::TempoMap::convert_duration)
+		.addFunction ("bbt_walk", &Temporal::TempoMap::bbt_walk)
+		.addFunction ("count_bars", &Temporal::TempoMap::count_bars)
+
 		.addFunction ("quarters_per_minute_at", &Temporal::TempoMap::quarters_per_minute_at)
+		.addFunction ("round_to_bar", &Temporal::TempoMap::round_to_bar)
+		.addFunction ("dump", &Temporal::TempoMap::dump)
+		.addRefFunction ("midi_clock_beat_at_or_after", &Temporal::TempoMap::midi_clock_beat_at_or_after)
 		.endClass ()
 
 		/* libtemporal enums */
