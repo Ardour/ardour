@@ -250,6 +250,12 @@ struct LIBTEMPORAL_API BBT_Offset
 	operator bool() const {
 		return bars == 0 && beats == 0 && ticks == 0;
 	}
+
+	std::string str () const {
+		std::ostringstream os;
+		os << bars << '|' << beats << '|' << ticks;
+		return os.str ();
+	}
 };
 
 inline BBT_Offset LIBTEMPORAL_API bbt_delta (Temporal::BBT_Time const & a, Temporal::BBT_Time const & b) {
