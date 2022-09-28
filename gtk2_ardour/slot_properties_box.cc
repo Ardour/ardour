@@ -348,19 +348,19 @@ SlotPropertyTable::SlotPropertyTable ()
 	_follow_table.attach( *fol_table,    0, 2, row, row+1, Gtk::FILL, Gtk::SHRINK ); row++;
 
 	ArdourWidgets::Frame* trigBox = manage (new ArdourWidgets::Frame);
-	trigBox->set_label("Clip Properties");
+	trigBox->set_label(_("Clip Properties"));
 	trigBox->set_name("EditorDark");
 	trigBox->set_edge_color (0x000000ff); // black
 	trigBox->add (_trigger_table);
 
 	ArdourWidgets::Frame* eFollowBox = manage (new ArdourWidgets::Frame);
-	eFollowBox->set_label("Follow Options");
+	eFollowBox->set_label(_("Follow Options"));
 	eFollowBox->set_name("EditorDark");
 	eFollowBox->set_edge_color (0x000000ff); // black
 	eFollowBox->add (_follow_table);
 
 	ArdourWidgets::Frame* eLaunchBox = manage (new ArdourWidgets::Frame);
-	eLaunchBox->set_label("Launch Options");
+	eLaunchBox->set_label(_("Launch Options"));
 	eLaunchBox->set_name("EditorDark");
 	eLaunchBox->set_edge_color (0x000000ff); // black
 	eLaunchBox->add (_launch_table);
