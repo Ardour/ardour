@@ -146,6 +146,8 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 {
+	set_active (false);
+
 	if (_input_port) {
 		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("unregistering input port %1\n", boost::shared_ptr<ARDOUR::Port>(_input_port)->name()));
 		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
