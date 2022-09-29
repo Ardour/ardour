@@ -63,7 +63,7 @@ Convolution::add_impdata (
     samplecnt_t                 length,
     uint32_t                    channel)
 {
-	if (_configured || c_in >= _n_inputs || c_out >= _n_outputs) {
+	if (c_in >= _n_inputs || c_out >= _n_outputs) {
 		return false;
 	}
 	if (!readable || readable->readable_length_samples () <= offset || readable->n_channels () <= channel) {
@@ -72,6 +72,12 @@ Convolution::add_impdata (
 
 	_impdata.push_back (ImpData (c_in, c_out, readable, gain, pre_delay, offset, length));
 	return true;
+}
+
+void
+Convolution::clear_impdata ()
+{
+	_impdata.clear ();
 }
 
 bool
@@ -86,6 +92,11 @@ Convolution::restart ()
 	_convproc.stop_process ();
 	_convproc.cleanup ();
 	_convproc.set_options (0);
+
+	if (_impdata.empty ()) {
+		_configured = false;
+		return;
+	}
 
 	uint32_t n_part;
 
@@ -316,8 +327,14 @@ Convolver::Convolver (
 void
 Convolver::run_mono_buffered (float* buf, uint32_t n_samples)
 {
-	assert (_convproc.state () == Convproc::ST_PROC);
 	assert (_irc == Mono);
+	Convolution::run_mono_buffered (buf, n_samples);
+}
+
+void
+Convolution::run_mono_buffered (float* buf, uint32_t n_samples)
+{
+	assert (_convproc.state () == Convproc::ST_PROC);
 
 	uint32_t done   = 0;
 	uint32_t remain = n_samples;
@@ -375,8 +392,14 @@ Convolver::run_stereo_buffered (float* left, float* right, uint32_t n_samples)
 void
 Convolver::run_mono_no_latency (float* buf, uint32_t n_samples)
 {
-	assert (_convproc.state () == Convproc::ST_PROC);
 	assert (_irc == Mono);
+	Convolution::run_mono_no_latency (buf, n_samples);
+}
+
+void
+Convolution::run_mono_no_latency (float* buf, uint32_t n_samples)
+{
+	assert (_convproc.state () == Convproc::ST_PROC);
 
 	uint32_t done   = 0;
 	uint32_t remain = n_samples;

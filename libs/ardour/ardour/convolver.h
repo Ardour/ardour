@@ -51,8 +51,12 @@ public:
 	uint32_t n_inputs () const  { return _n_inputs; }
 	uint32_t n_outputs () const { return _n_outputs; }
 
+	void clear_impdata ();
 	void restart ();
 	void run (BufferSet&, ChanMapping const&, ChanMapping const&, pframes_t, samplecnt_t);
+
+	void run_mono_buffered (float*, uint32_t);
+	void run_mono_no_latency (float*, uint32_t);
 
 protected:
 	ArdourZita::Convproc _convproc;
