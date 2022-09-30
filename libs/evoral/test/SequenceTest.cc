@@ -41,8 +41,8 @@ SequenceTest::preserveEventOrderingTest ()
 		);
 
 		event->buffer()[0] = MIDI_CMD_CONTROL;
-		event->buffer()[1] = event->time().to_double() / 1000;
-		event->buffer()[2] = event->time().to_double() / 1000;
+		event->buffer()[1] = 0; //event->time().to_double() / 1000;
+		event->buffer()[2] = 0; //event->time().to_double() / 1000;
 
 		boost::shared_ptr<Event<Time> > event_ptr(event);
 
@@ -88,10 +88,10 @@ SequenceTest::iteratorSeekTest ()
 
 	// Iterate over all notes
 	bool on = true;
-	for (Sequence<Time>::const_iterator i = seq->begin(Time(600)); i != seq->end(); ++i) {
+	for (Sequence<Time>::const_iterator i = seq->begin(Time::from_double(600)); i != seq->end(); ++i) {
 		if (on) {
 			CPPUNIT_ASSERT(i->is_note_on());
-			CPPUNIT_ASSERT_EQUAL(i->time(), Time((num_notes + 6) * 100));
+			CPPUNIT_ASSERT_EQUAL(i->time(), Time::from_double((num_notes + 6) * 100));
 			++num_notes;
 			on = false;
 		} else {
@@ -103,20 +103,20 @@ SequenceTest::iteratorSeekTest ()
 	CPPUNIT_ASSERT_EQUAL(size_t(6), num_notes);
 
 	// Test invalidation
-	Sequence<Time>::const_iterator i = seq->begin(Time(600));
+	Sequence<Time>::const_iterator i = seq->begin(Time::from_double(600));
 	std::set< boost::weak_ptr< Note<Time> > > active_notes;
-	i.invalidate(&active_notes);
+	i.get_active_notes(active_notes);
 	CPPUNIT_ASSERT_EQUAL((size_t)1, active_notes.size());
 
 	// Test resuming after invalidation
-	i = seq->begin(Time(601), false, std::set<Evoral::Parameter>(), &active_notes);
+	i = seq->begin(Time::from_double(601), false, std::set<Evoral::Parameter>(), &active_notes);
 	CPPUNIT_ASSERT(i->is_note_off());
 	on = false;
 	num_notes = 1;
 	for (; i != seq->end(); ++i) {
 		if (on) {
 			CPPUNIT_ASSERT(i->is_note_on());
-			CPPUNIT_ASSERT_EQUAL(Time((num_notes + 6) * 100), i->time());
+			CPPUNIT_ASSERT_EQUAL(Time::from_double((num_notes + 6) * 100), i->time());
 			++num_notes;
 			on = false;
 		} else {
@@ -137,6 +137,7 @@ SequenceTest::iteratorSeekTest ()
 void
 SequenceTest::controlInterpolationTest ()
 {
+	using namespace Temporal;
 	seq->clear();
 
 	static const uint64_t delay   = 1000;
@@ -149,9 +150,9 @@ SequenceTest::controlInterpolationTest ()
 	double max = 127.0;
 
 	// Make a ramp like /\ from min to max and back to min
-	c->set_double(min, 0, true);
-	c->set_double(max, delay, true);
-	c->set_double(min, 2*delay, true);
+	c->set_double(min, timepos_t(Time::from_double(0)), true);
+	c->set_double(max, timepos_t(Time::from_double(delay)), true);
+	c->set_double(min, timepos_t(Time::from_double(2*delay)), true);
 
 	CCTestSink<Time> sink(cc_type);
 
@@ -161,11 +162,11 @@ SequenceTest::controlInterpolationTest ()
 		sink.write(i->time(), i->event_type(), i->size(), i->buffer());
 	}
 	CPPUNIT_ASSERT_EQUAL((size_t)3, sink.events.size());
-	CPPUNIT_ASSERT_EQUAL(Time(0), sink.events[0].first);
+	CPPUNIT_ASSERT_EQUAL(Time::from_double(0), sink.events[0].first);
 	CPPUNIT_ASSERT_EQUAL((uint8_t)0, sink.events[0].second);
-	CPPUNIT_ASSERT_EQUAL(Time(1000), sink.events[1].first);
+	CPPUNIT_ASSERT_EQUAL(Time::from_double(1000), sink.events[1].first);
 	CPPUNIT_ASSERT_EQUAL((uint8_t)127, sink.events[1].second);
-	CPPUNIT_ASSERT_EQUAL(Time(2000), sink.events[2].first);
+	CPPUNIT_ASSERT_EQUAL(Time::from_double(2000), sink.events[2].first);
 	CPPUNIT_ASSERT_EQUAL((uint8_t)0, sink.events[2].second);
 	sink.events.clear();
 	CPPUNIT_ASSERT_EQUAL((size_t)0, sink.events.size());
@@ -176,7 +177,7 @@ SequenceTest::controlInterpolationTest ()
 		sink.write(i->time(), i->event_type(), i->size(), i->buffer());
 	}
 	CPPUNIT_ASSERT_EQUAL((size_t)(128 * 2 - 1), sink.events.size());
-	Time    last_time(0);
+	Time    last_time = Time::from_double (0);
 	int16_t last_value = -1;
 	bool    ascending  = true;
 	for (CCTestSink<Time>::Events::const_iterator i = sink.events.begin();

@@ -28,6 +28,6 @@ private:
 	boost::shared_ptr<Evoral::ControlList> TestCtrlList() {
 		Evoral::Parameter param (Evoral::Parameter(0));
 		const Evoral::ParameterDescriptor desc;
-		return boost::shared_ptr<Evoral::ControlList> (new Evoral::ControlList(param, desc));
+		return boost::shared_ptr<Evoral::ControlList> (new Evoral::ControlList(param, desc, Temporal::AudioTime));
 	}
 };

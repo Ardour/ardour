@@ -24,6 +24,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "temporal/beats.h"
+#include "temporal/tempo.h"
 #include "evoral/SMF.h"
 #include "SequenceTest.h"
 
@@ -63,6 +64,7 @@ public:
 	typedef Temporal::Beats Time;
 
 	void setUp() {
+		Temporal::TempoMap::fetch();
 		type_map = new DummyTypeMap();
 		assert(type_map);
 		seq = new MySequence<Time>(*type_map);

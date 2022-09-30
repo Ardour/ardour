@@ -6,11 +6,13 @@
 #include <cppunit/BriefTestProgressListener.h>
 
 #include "pbd/pbd.h"
+#include "temporal/tempo.h"
 
 int
 main()
 {
 	if (!PBD::init ()) return 1;
+	Temporal::init ();
 
 	CppUnit::TestResult testresult;
 

@@ -74,7 +74,6 @@ SMFTest::takeFiveTest ()
 	CPPUNIT_ASSERT(!seq->empty());
 
 	// Iterate over all notes
-	bool   on          = true;
 	size_t num_notes   = 0;
 	size_t num_sysexes = 0;
 	for (Sequence<Time>::const_iterator i = seq->begin(Time()); i != seq->end(); ++i) {

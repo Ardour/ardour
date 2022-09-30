@@ -117,7 +117,7 @@ def build(bld):
     obj.defines       += [ 'PACKAGE="libevoral"' ]
 
     # disable unit-tests -- build is broken with nutempo
-    if False and bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
+    if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Static library (for unit test code coverage)
         obj = bld(features = 'cxx cstlib')
         obj.source         = lib_source

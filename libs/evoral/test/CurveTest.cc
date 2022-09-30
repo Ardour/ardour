@@ -23,14 +23,15 @@ CPPUNIT_TEST_SUITE_REGISTRATION (CurveTest);
 #endif
 
 using namespace Evoral;
+using namespace Temporal;
 
 // linear y = Y0 + YS * x ;  with x = i * (X1 - X0) + X0; and i = [0..1023]
 #define VEC1024LINCMP(X0, X1, Y0, YS)                                        \
     cl->curve ().get_vector ((X0), (X1), vec, 1024);                         \
     for (int i = 0; i < 1024; ++i) {                                         \
         char msg[64];                                                        \
-        snprintf (msg, 64, "at i=%d (x0=%.1f, x1=%.1f, y0=%.1f, ys=%.3f)",   \
-            i, X0, X1, Y0, YS);                                              \
+        snprintf (msg, 64, "at i=%d (x0=%s, x1=%s, y0=%.1f, ys=%.3f)",       \
+            i, (X0).str().c_str(), (X1).str().c_str(), Y0, YS);              \
         CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE (                               \
             msg,                                                             \
             (Y0) + i * (YS), vec[i],                                         \
@@ -47,15 +48,18 @@ CurveTest::trivial ()
 
 	cl->create_curve ();
 
+	timepos_t t1024 (1024.0);
+	timepos_t t2047 (2047.0);
+
 	// Empty curve
-	cl->curve().get_vector (1024.0, 2047.0, vec, 1024);
+	cl->curve().get_vector (t1024, t2047, vec, 1024);
 	for (int i = 0; i < 1024; ++i) {
 		CPPUNIT_ASSERT_EQUAL (0.0f, vec[i]);
 	}
 
 	// Single point curve
-	cl->fast_simple_add(0.0, 42.0);
-	cl->curve().get_vector (1024.0, 2047.0, vec, 1024);
+	cl->fast_simple_add(timepos_t (0), 42.0);
+	cl->curve().get_vector (t1024, t2047, vec, 1024);
 	for (int i = 0; i < 1024; ++i) {
 		CPPUNIT_ASSERT_EQUAL (42.0f, vec[i]);
 	}
@@ -66,21 +70,24 @@ CurveTest::rtGet ()
 {
 	float vec[1024];
 
+	timepos_t t1024 (1024.0);
+	timepos_t t2047 (2047.0);
+
 	// Create simple control list
 	boost::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
 	cl->create_curve ();
-	cl->fast_simple_add(0.0, 42.0);
+	cl->fast_simple_add(timepos_t(0), 42.0);
 
 	{
 		// Write-lock list
 		Glib::Threads::RWLock::WriterLock lm(cl->lock());
 
 		// Attempt to get vector in RT (expect failure)
-		CPPUNIT_ASSERT (!cl->curve().rt_safe_get_vector (1024.0, 2047.0, vec, 1024));
+		CPPUNIT_ASSERT (!cl->curve().rt_safe_get_vector (t1024, t2047, vec, 1024));
 	}
 
 	// Attempt to get vector in RT (expect success)
-	CPPUNIT_ASSERT (cl->curve().rt_safe_get_vector (1024.0, 2047.0, vec, 1024));
+	CPPUNIT_ASSERT (cl->curve().rt_safe_get_vector (t1024, t2047, vec, 1024));
 	for (int i = 0; i < 1024; ++i) {
 		CPPUNIT_ASSERT_EQUAL (42.0f, vec[i]);
 	}
@@ -96,46 +103,55 @@ CurveTest::twoPointLinear ()
 	cl->create_curve ();
 	cl->set_interpolation (ControlList::Linear);
 
+	timepos_t t0 (0);
+	timepos_t t1024 (1024);
+	timepos_t t2048 (2048);
+	timepos_t t2047 (2047);
+	timepos_t t2049 (2049);
+	timepos_t t2056 (2056);
+	timepos_t t4092 (4092);
+	timepos_t t8192 (8192);
+
 	// add two points to curve
-	cl->fast_simple_add (   0.0 , 2048.0);
-	cl->fast_simple_add (8192.0 , 4096.0);
+	cl->fast_simple_add (t0 , 2048.0);
+	cl->fast_simple_add (t8192, 4096.0);
 
-	cl->curve ().get_vector (1024.0, 2047.0, vec, 1024);
+	cl->curve ().get_vector (t1024, t2047, vec, 1024);
 
-	VEC1024LINCMP (1024.0, 2047.0, 2304.f,  .25f);
-	VEC1024LINCMP (2048.0, 2559.5, 2560.f,  .125f);
-	VEC1024LINCMP (   0.0, 4092.0, 2048.f, 1.f);
+	VEC1024LINCMP (t1024, t2047, 2304.f,  .25f);
+	//VEC1024LINCMP (t2048, timepos_t (2559.5), 2560.f,  .125f);
+	VEC1024LINCMP (t0, t4092, 2048.f, 1.f);
 
 	// greetings to tartina
-	cl->curve ().get_vector (2048.0, 2048.0, vec, 1);
+	cl->curve ().get_vector (t2048, t2048, vec, 1);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=1 @ 2048..2048", 2560.f, vec[0]);
 
 	/* XXX WHAT DO WE EXPECT WITH veclen=1 AND  x1 > x0 ? */
 #if 0
 	/* .. interpolated value at (x1+x0)/2 */
-	cl->curve ().get_vector (2048.0, 2049.0, vec, 1);
+	cl->curve ().get_vector (2048.0, t2049, vec, 1);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=1 @ 2048-2049", 2560.125f, vec[0]);
 
 	cl->curve ().get_vector (2048.0, 2056.0, vec, 1);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=1 @ 2048-2049", 2561.f, vec[0]);
 #else
 	/* .. value at x0 */
-	cl->curve ().get_vector (2048.0, 2049.0, vec, 1);
+	cl->curve ().get_vector (t2048, t2049, vec, 1);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=1 , 2048..2049", 2560.f, vec[0]);
 
-	cl->curve ().get_vector (2048.0, 2056.0, vec, 1);
+	cl->curve ().get_vector (t2048, t2056, vec, 1);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=1 , 2048..2049", 2560.f, vec[0]);
 #endif
 
-	cl->curve ().get_vector (2048.0, 2048.0, vec, 2);
+	cl->curve ().get_vector (t2048, t2048, vec, 2);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=2 , 2048..2048 @ 0", 2560.f, vec[0]);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=2 , 2048..2048 @ 1", 2560.f, vec[1]);
 
-	cl->curve ().get_vector (2048.0, 2056.0, vec, 2);
+	cl->curve ().get_vector (t2048, t2056, vec, 2);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=2 , 2048..2056 @ 0", 2560.f, vec[0]);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=2 , 2048..2056 @ 0", 2562.f, vec[1]);
 
-	cl->curve ().get_vector (2048.0, 2056.0, vec, 3);
+	cl->curve ().get_vector (t2048, t2056, vec, 3);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=3 , 2048..2056 @ 0", 2560.f, vec[0]);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=3 , 2048..2056 @ 1", 2561.f, vec[1]);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=3 , 2048..2056 @ 2", 2562.f, vec[2]);
@@ -143,18 +159,22 @@ CurveTest::twoPointLinear ()
 	/* check out-of range..
 	 * we expect the first and last value - no interpolation
 	 */
-	cl->curve ().get_vector (-1, -1, vec, 1);
+	timepos_t tm1 (-1);
+	timepos_t tm999 (-999);
+	timepos_t t9998 (9998);
+	timepos_t t9999 (9999);
+
+	cl->curve ().get_vector (tm1, tm1, vec, 1);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=1 @ -1", 2048.f, vec[0]);
 
-	cl->curve ().get_vector (9999.0, 9999.0, vec, 1);
+	cl->curve ().get_vector (t9999, t9999, vec, 1);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=1 @ 9999", 4096.f, vec[0]);
 
-	cl->curve ().get_vector (-999.0, 0, vec, 13);
+	cl->curve ().get_vector (tm999, t0, vec, 13);
 	for (int i = 0; i < 13; ++i) {
 		CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=13 @ -999..0", 2048.f, vec[i]);
 	}
-
-	cl->curve ().get_vector (9998.0, 9999.0, vec, 8);
+	cl->curve ().get_vector (t9998, t9999, vec, 8);
 	for (int i = 0; i < 8; ++i) {
 		CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=8 @ 9998..9999", 4096.f, vec[i]);
 	}
@@ -170,26 +190,36 @@ CurveTest::threePointLinear ()
 	cl->create_curve ();
 	cl->set_interpolation (ControlList::Linear);
 
-	// add 3 points to curve
-	cl->fast_simple_add (   0.0 , 2.0);
-	cl->fast_simple_add ( 100.0 , 4.0);
-	cl->fast_simple_add ( 200.0 , 0.0);
+	timepos_t t0 (0);
+	timepos_t t50 (50);
+	timepos_t t60 (60);
+	timepos_t t80 (80);
+	timepos_t t100 (100);
+	timepos_t t130 (130);
+	timepos_t t150 (150);
+	timepos_t t160 (160);
+	timepos_t t200 (200);
 
-	cl->curve ().get_vector (50.0, 60.0, vec, 1);
+	// add 3 points to curve
+	cl->fast_simple_add (  t0 , 2.0);
+	cl->fast_simple_add (t100 , 4.0);
+	cl->fast_simple_add (t200 , 0.0);
+
+	cl->curve ().get_vector (t50, t60, vec, 1);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=1 @ 50", 3.f, vec[0]);
 
-	cl->curve ().get_vector (100.0, 100.0, vec, 1);
+	cl->curve ().get_vector (t100, t100, vec, 1);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=1 @ 100", 4.f, vec[0]);
 
-	cl->curve ().get_vector (150.0, 150.0, vec, 1);
+	cl->curve ().get_vector (t150, t150, vec, 1);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=1 @ 150", 2.f, vec[0]);
 
-	cl->curve ().get_vector (130.0, 150.0, vec, 3);
+	cl->curve ().get_vector (t130, t150, vec, 3);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=3 130..150 @ 0", 2.8f, vec[0]);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=3 130..150 @ 2", 2.4f, vec[1]);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=3 130..150 @ 3", 2.0f, vec[2]);
 
-	cl->curve ().get_vector (80.0, 160.0, vec, 3);
+	cl->curve ().get_vector (t80, t160, vec, 3);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=3 80..160 @ 0", 3.6f, vec[0]);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=3 80..160 @ 2", 3.2f, vec[1]);
 	CPPUNIT_ASSERT_EQUAL_MESSAGE ("veclen=3 80..160 @ 3", 1.6f, vec[2]);
@@ -201,20 +231,27 @@ CurveTest::threePointDiscete ()
 	boost::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
 	cl->set_interpolation (ControlList::Discrete);
 
-	// add 3 points to curve
-	cl->fast_simple_add (   0.0 , 2.0);
-	cl->fast_simple_add ( 100.0 , 4.0);
-	cl->fast_simple_add ( 200.0 , 0.0);
+	timepos_t t0 (0);
+	timepos_t t80 (80);
+	timepos_t t100 (100);
+	timepos_t t120 (120);
+	timepos_t t160 (160);
+	timepos_t t200 (200);
 
-	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(160.));
+	// add 3 points to curve
+	cl->fast_simple_add (  t0 , 2.0);
+	cl->fast_simple_add (t100 , 4.0);
+	cl->fast_simple_add (t200 , 0.0);
+
+	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t160));
 
 	cl->set_interpolation (ControlList::Linear);
 
-	CPPUNIT_ASSERT_EQUAL(3.6, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(3.2, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(1.6, cl->unlocked_eval(160.));
+	CPPUNIT_ASSERT_EQUAL(3.6, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(3.2, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(1.6, cl->unlocked_eval(t160));
 }
 
 void
@@ -222,75 +259,87 @@ CurveTest::ctrlListEval ()
 {
 	boost::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
 
-	cl->fast_simple_add (   0.0 , 2.0);
+	timepos_t t0 (0);
+	timepos_t t80 (80);
+	timepos_t t100 (100);
+	timepos_t t120 (120);
+	timepos_t t160 (160);
+	timepos_t t200 (200);
+	timepos_t t250 (250);
+	timepos_t t300 (300);
+	timepos_t t350 (350);
+	timepos_t t400 (400);
+	timepos_t t999 (999);
+
+	cl->fast_simple_add (t0 , 2.0);
 
 	cl->set_interpolation (ControlList::Discrete);
-	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(160.));
+	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(t160));
 
 	cl->set_interpolation (ControlList::Linear);
-	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(160.));
+	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(t160));
 
-	cl->fast_simple_add ( 100.0 , 4.0);
+	cl->fast_simple_add (t100 , 4.0);
 
 	cl->set_interpolation (ControlList::Discrete);
-	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(160.));
+	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t160));
 
 	cl->set_interpolation (ControlList::Linear);
-	CPPUNIT_ASSERT_EQUAL(3.6, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(160.));
+	CPPUNIT_ASSERT_EQUAL(3.6, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t160));
 
-	cl->fast_simple_add ( 200.0 , 0.0);
+	cl->fast_simple_add (t200 , 0.0);
 
 	cl->set_interpolation (ControlList::Discrete);
-	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(160.));
+	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t160));
 
 	cl->set_interpolation (ControlList::Linear);
-	CPPUNIT_ASSERT_EQUAL(3.6, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(3.2, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(1.6, cl->unlocked_eval(160.));
+	CPPUNIT_ASSERT_EQUAL(3.6, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(3.2, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(1.6, cl->unlocked_eval(t160));
 
-	cl->fast_simple_add ( 300.0 , 8.0);
+	cl->fast_simple_add (t300 , 8.0);
 
 	cl->set_interpolation (ControlList::Discrete);
-	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(160.));
-	CPPUNIT_ASSERT_EQUAL(0.0, cl->unlocked_eval(250.));
-	CPPUNIT_ASSERT_EQUAL(8.0, cl->unlocked_eval(999.));
+	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t160));
+	CPPUNIT_ASSERT_EQUAL(0.0, cl->unlocked_eval(t250));
+	CPPUNIT_ASSERT_EQUAL(8.0, cl->unlocked_eval(t999));
 
 	cl->set_interpolation (ControlList::Linear);
-	CPPUNIT_ASSERT_EQUAL(3.6, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(3.2, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(1.6, cl->unlocked_eval(160.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(250.));
-	CPPUNIT_ASSERT_EQUAL(8.0, cl->unlocked_eval(999.));
+	CPPUNIT_ASSERT_EQUAL(3.6, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(3.2, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(1.6, cl->unlocked_eval(t160));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t250));
+	CPPUNIT_ASSERT_EQUAL(8.0, cl->unlocked_eval(t999));
 
-	cl->fast_simple_add ( 400.0 , 9.0);
+	cl->fast_simple_add (t400 , 9.0);
 
 	cl->set_interpolation (ControlList::Discrete);
-	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(160.));
-	CPPUNIT_ASSERT_EQUAL(0.0, cl->unlocked_eval(250.));
-	CPPUNIT_ASSERT_EQUAL(8.0, cl->unlocked_eval(350.));
-	CPPUNIT_ASSERT_EQUAL(9.0, cl->unlocked_eval(999.));
+	CPPUNIT_ASSERT_EQUAL(2.0, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t160));
+	CPPUNIT_ASSERT_EQUAL(0.0, cl->unlocked_eval(t250));
+	CPPUNIT_ASSERT_EQUAL(8.0, cl->unlocked_eval(t350));
+	CPPUNIT_ASSERT_EQUAL(9.0, cl->unlocked_eval(t999));
 
 	cl->set_interpolation (ControlList::Linear);
-	CPPUNIT_ASSERT_EQUAL(3.6, cl->unlocked_eval(80.));
-	CPPUNIT_ASSERT_EQUAL(3.2, cl->unlocked_eval(120.));
-	CPPUNIT_ASSERT_EQUAL(1.6, cl->unlocked_eval(160.));
-	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(250.));
-	CPPUNIT_ASSERT_EQUAL(8.5, cl->unlocked_eval(350.));
-	CPPUNIT_ASSERT_EQUAL(9.0, cl->unlocked_eval(999.));
+	CPPUNIT_ASSERT_EQUAL(3.6, cl->unlocked_eval(t80));
+	CPPUNIT_ASSERT_EQUAL(3.2, cl->unlocked_eval(t120));
+	CPPUNIT_ASSERT_EQUAL(1.6, cl->unlocked_eval(t160));
+	CPPUNIT_ASSERT_EQUAL(4.0, cl->unlocked_eval(t250));
+	CPPUNIT_ASSERT_EQUAL(8.5, cl->unlocked_eval(t350));
+	CPPUNIT_ASSERT_EQUAL(9.0, cl->unlocked_eval(t999));
 }
 
 void
@@ -317,19 +366,19 @@ CurveTest::constrainedCubic ()
 	Evoral::ParameterDescriptor pd;
 	pd.lower = 5;
 	pd.upper = 325;
-	Evoral::ControlList l(p,pd);
+	Evoral::ControlList l(p, pd, AudioTime);
 
 	size_t i;
 	l.set_interpolation(Evoral::ControlList::Curved);
 
 	for (i=0; i<sizeof(data)/sizeof(data[0]); i++) {
-		l.add (data[i].x, data[i].y);
+		l.add (timepos_t (data[i].x), data[i].y);
 	}
 
 	Evoral::Curve curve(l);
 
 	float f[121];
-	curve.get_vector(-10, 110, f, 121);
+	curve.get_vector(timepos_t (-10), timepos_t (110), f, 121);
 
 	const float *g = &f[10]; /* so g starts at x==0 */
 
