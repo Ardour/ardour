@@ -3669,6 +3669,30 @@ TriggerBox::stop_all_quantized ()
 }
 
 void
+TriggerBox::bang_trigger_at (Triggers::size_type row)
+{
+	TriggerPtr t = trigger(row);
+	if (t) {
+		t->bang();
+	} else {
+		/* by convention, an empty slot is effectively a STOP button */
+		stop_all_quantized();
+	}
+}
+
+void
+TriggerBox::unbang_trigger_at (Triggers::size_type row)
+{
+	TriggerPtr t = trigger(row);
+	if (t) {
+		t->unbang();
+	} else {
+		/* by convention, an empty slot is effectively a STOP button */
+		/* ...but you shouldn't be able to unbang an empty slot; so if this occurs, let's just ignore it  */
+	}
+}
+
+void
 TriggerBox::drop_triggers ()
 {
 	Glib::Threads::RWLock::WriterLock lm (trigger_lock);

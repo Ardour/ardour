@@ -726,8 +726,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	TriggerPtr trigger (Triggers::size_type);
 
-	bool bang_trigger (TriggerPtr);
-	bool unbang_trigger (TriggerPtr);
+	void bang_trigger_at (Triggers::size_type row);
+	void unbang_trigger_at (Triggers::size_type row);
+
 	void add_trigger (TriggerPtr);
 
 	void fast_forward (CueEvents const &, samplepos_t transport_postiion);
