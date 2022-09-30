@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6.8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-28 15:57+0300\n"
-"PO-Revision-Date: 2022-09-28 17:24+0300\n"
+"POT-Creation-Date: 2022-09-29 10:52+0300\n"
+"PO-Revision-Date: 2022-09-30 09:01+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: Russian <gnome-cyr@lists.gnome.org>\n"
 "Language: ru\n"
@@ -1062,7 +1062,7 @@ msgstr ""
 
 #: ardour_ui.cc:324 io_plugin_window.cc:57
 msgid "I/O Plugins"
-msgstr ""
+msgstr "Плагины I/O"
 
 #: ardour_ui.cc:325 plugin_manager_ui.cc:51
 msgid "Plugin Manager"
@@ -1106,7 +1106,7 @@ msgstr "Виртуальная MIDI-клавиатура"
 
 #: ardour_ui.cc:335
 msgid "Library Downloader"
-msgstr ""
+msgstr "Скачать библиотеки лупов"
 
 #: ardour_ui.cc:336
 msgid "Audio Connections"
@@ -2549,11 +2549,11 @@ msgstr "Перейти к маркеру %1"
 
 #: ardour_ui_ed.cc:585
 msgid "Jump to Loop Start"
-msgstr ""
+msgstr "Перейти к началу лупа"
 
 #: ardour_ui_ed.cc:587
 msgid "Jump to Loop End"
-msgstr ""
+msgstr "Перейти к концу лупа"
 
 #: ardour_ui_ed.cc:590 editor_audio_import.cc:427 luawindow.cc:99
 #: pt_import_selector.cc:44 rc_option_editor.cc:2430
@@ -2698,7 +2698,7 @@ msgstr "Показать рекордер"
 
 #: ardour_ui_ed.cc:712
 msgid "Show Cues"
-msgstr ""
+msgstr "Показывать очереди"
 
 #: ardour_ui_ed.cc:718 ardour_ui_ed.cc:719 ardour_ui_ed.cc:720
 #: ardour_ui_ed.cc:721 ardour_ui_ed.cc:722 ardour_ui_ed.cc:728
@@ -2906,6 +2906,12 @@ msgid ""
 "What: %5\n"
 "%6%7"
 msgstr ""
+"Сессия \"%1 (снимок %2)\" не загрузилась успешно.\n"
+"Ошибка Glib\n"
+"Домен: %3\n"
+"Код: %4\n"
+"Что именно: %5\n"
+"%6%7"
 
 #: ardour_ui_session.cc:492
 msgid "Session \"%1 (snapshot %2)\" did not load successfully.%3%4"
@@ -2955,6 +2961,13 @@ msgid ""
 "What: %4\n"
 "%5%6"
 msgstr ""
+"Не удалось создать сессию в \"%1\".\n"
+"\n"
+"Ошибка Glib\n"
+"Домен: %2\n"
+"Код: %3\n"
+"Что именно: %4\n"
+"%5%6"
 
 #: ardour_ui_session.cc:741
 msgid "Could not create session in \"%1\"%2%3"
@@ -3443,7 +3456,7 @@ msgstr "Такт. размер:"
 
 #: audio_region_properties_box.cc:84 audio_trigger_properties_box.cc:73
 msgid "Stretch"
-msgstr ""
+msgstr "Растягивать"
 
 #: audio_region_properties_box.cc:88 audio_trigger_properties_box.cc:116
 #: add_video_dialog.cc:158
@@ -3643,7 +3656,7 @@ msgstr "Интерполяция"
 
 #: bbt_marker_dialog.cc:33
 msgid "New Music Time"
-msgstr ""
+msgstr "Новое музыкальное время"
 
 #: bbt_marker_dialog.cc:36 bbt_marker_dialog.cc:47
 msgid "BBT"
@@ -4795,7 +4808,7 @@ msgstr "Название нового плейлиста:"
 
 #: editor.cc:4605 route_ui.cc:2799
 msgid "That name is already in use.  Use this instead?"
-msgstr ""
+msgstr "То название уже используется. Взять вот это?"
 
 #: editor.cc:4630
 msgid "clear playlists"
@@ -5957,7 +5970,7 @@ msgstr "Изменить силу нажатия нот"
 
 #: editor_actions.cc:879
 msgid "Quantize Selected Notes"
-msgstr ""
+msgstr "Квантовать выбранные ноты"
 
 #: editor_actions.cc:1247 editor_actions.cc:1334 editor_actions.cc:1517
 #: editor_actions.cc:1528 editor_actions.cc:1583 editor_actions.cc:1594
@@ -6386,11 +6399,11 @@ msgstr "Переместить маркер счетчика"
 
 #: editor_drag.cc:3140
 msgid "move time signature"
-msgstr ""
+msgstr "перемещение размера такта"
 
 #: editor_drag.cc:3195 editor_drag.cc:3232
 msgid "change tempo"
-msgstr ""
+msgstr "смена темпа"
 
 #: editor_drag.cc:3266
 msgid "inactive"
@@ -6402,7 +6415,7 @@ msgstr "Переместить маркер темпа"
 
 #: editor_drag.cc:3341
 msgid "move tempo"
-msgstr ""
+msgstr "смещение темпа"
 
 #: editor_drag.cc:3401 editor_drag.cc:3443 editor_drag.cc:3615
 msgid "move BBT point"
@@ -6410,7 +6423,7 @@ msgstr ""
 
 #: editor_drag.cc:3522
 msgid "stretch tempo"
-msgstr ""
+msgstr "растягивание темпа"
 
 #: editor_drag.cc:3561
 msgid "add BBT marker"
@@ -6643,7 +6656,7 @@ msgstr "Вы действительно хотите перезаписать с
 
 #: editor_export_audio.cc:380 editor_ops.cc:4248
 msgid "Overwriting slot"
-msgstr ""
+msgstr "Слот переписывается"
 
 #: editor_export_audio.cc:381 editor_ops.cc:4249
 msgid "One of your selected tracks has content in this slot."
@@ -6768,7 +6781,7 @@ msgstr ""
 
 #: editor_markers.cc:1187
 msgid "Ramp to Next"
-msgstr ""
+msgstr "Плавно изменить до следующего"
 
 #: editor_markers.cc:1240
 msgid "Set Punch Range"
@@ -6776,7 +6789,7 @@ msgstr "Установить область врезки"
 
 #: editor_markers.cc:1559
 msgid "loop range from marker"
-msgstr ""
+msgstr "зацикливание выделения от маркера"
 
 #: editor_markers.cc:1655
 msgid "set tempo to constant"
@@ -7563,7 +7576,7 @@ msgstr "Перемещение встроенных файлов в папке �
 
 #: editor_ops.cc:9130
 msgid "New Cue Marker Name"
-msgstr ""
+msgstr "Название нового маркера очереди"
 
 #: editor_ops.cc:9179
 msgid "add cue marker"
@@ -7583,7 +7596,7 @@ msgstr ""
 
 #: editor_ops.cc:9345
 msgid "Smallest gap size to remove (seconds):"
-msgstr ""
+msgstr "Минимальный удаляемый интервал (секунды):"
 
 #: editor_ops.cc:9354
 msgid "Leave a gap of(seconds):"
@@ -7778,7 +7791,7 @@ msgstr "Вставить тактовый размер"
 
 #: editor_snapshots.cc:56
 msgid "Snapshot (dbl-click to load)"
-msgstr ""
+msgstr "Снимок (загрузить двойным щелчком)"
 
 #: editor_snapshots.cc:57
 msgid "Modified Date"
@@ -8022,7 +8035,7 @@ msgstr "Панель управления устройством"
 
 #: engine_dialog.cc:109
 msgid "Setup & Calibration"
-msgstr ""
+msgstr "Настройка и калибровка"
 
 #: engine_dialog.cc:111
 msgid "Refresh Devices"
@@ -8165,7 +8178,7 @@ msgstr "Устройство"
 
 #: engine_dialog.cc:954
 msgid "Systemic Latency [samples]"
-msgstr ""
+msgstr "Системная задержка в сэмплах"
 
 #: engine_dialog.cc:959 gain_meter.cc:826 io_button.cc:51
 #: io_plugin_window.cc:487 mixer_strip.cc:401 mixer_strip.cc:1975
@@ -9715,7 +9728,7 @@ msgstr "Ошибка в программе: %1 (%2)"
 
 #: library_download_dialog.cc:42
 msgid "Loop Download Manager"
-msgstr ""
+msgstr "Скачивание лупов"
 
 #: library_download_dialog.cc:49
 msgid "Author"
@@ -9731,13 +9744,13 @@ msgstr "Размер"
 
 #: library_download_dialog.cc:135 library_download_dialog.cc:186
 msgid "Installed"
-msgstr ""
+msgstr "Установлено"
 
 #: library_download_dialog.cc:137 library_download_dialog.cc:190
 #: library_download_dialog.cc:251 library_download_dialog.cc:284
 #: library_download_dialog.cc:296
 msgid "Install"
-msgstr ""
+msgstr "Установить"
 
 #: library_download_dialog.cc:216 plugin_manager_ui.cc:369
 msgid "Error"
@@ -9745,7 +9758,7 @@ msgstr "Ошибка"
 
 #: library_download_dialog.cc:253
 msgid "Installing"
-msgstr ""
+msgstr "Устанавливается"
 
 #: location_ui.cc:61 location_ui.cc:64
 msgid "Use PH"
@@ -12410,7 +12423,7 @@ msgstr "Ошб"
 
 #: plugin_manager_ui.cc:617
 msgid "Mis"
-msgstr ""
+msgstr "Отс"
 
 #: plugin_manager_ui.cc:733 rc_option_editor.cc:4890
 msgid "Re-scan Plugins now?"
@@ -13477,6 +13490,19 @@ msgid ""
 "%7 active midi regions\n"
 "\n"
 msgstr ""
+"Сессия PT [ ВАЛИДНАЯ ]\n"
+"\n"
+"Данные о сессии:\n"
+"\n"
+"\n"
+"Сессия PT v%1 @ %2Гц\n"
+"\n"
+"Звуковых файлов %3\n"
+"Звуковых областей %4\n"
+"Активных звуковых областей %5\n"
+"MIDI-областей %6\n"
+"Активных MIDI-областей %7\n"
+"\n"
 
 #: pt_import_selector.cc:138
 msgid ""
@@ -14363,6 +14389,7 @@ msgstr ""
 #: rc_option_editor.cc:2982
 msgid "Show/Hide splash screen instead of setting z-axis stack order"
 msgstr ""
+"Показать или скрыть заставку при старте вместо установки порядка по оси Z"
 
 #: rc_option_editor.cc:2991
 msgid "All floating windows are dialogs"
@@ -14693,7 +14720,7 @@ msgstr ""
 
 #: rc_option_editor.cc:3336
 msgid "Grid mode selection may change ruler visibility"
-msgstr ""
+msgstr "Смена типа сетки может изменить состав видимых линеек"
 
 #: rc_option_editor.cc:3345
 msgid "Rulers automatically change to follow the Grid mode selection"
@@ -15581,7 +15608,7 @@ msgstr "Замер"
 
 #: rc_option_editor.cc:4382
 msgid "Meterbridge meters"
-msgstr ""
+msgstr "Индикаторы Meterbridge"
 
 #: rc_option_editor.cc:4389
 msgid "Peak hold time"
@@ -17961,7 +17988,7 @@ msgstr ""
 
 #: slot_properties_box.cc:76
 msgid "Slot Properties:"
-msgstr ""
+msgstr "Свойства слота:"
 
 #: slot_properties_box.cc:106
 msgid "Color:"
@@ -18016,6 +18043,18 @@ msgstr "Отсчётов:"
 msgid "Follow Length:"
 msgstr "Длительность:"
 
+#: slot_properties_box.cc:351
+msgid "Clip Properties"
+msgstr "Свойства клипа"
+
+#: slot_properties_box.cc:357
+msgid "Follow Options"
+msgstr "Параметры перехода"
+
+#: slot_properties_box.cc:363
+msgid "Launch Options"
+msgstr "Параметры запуска"
+
 #: slot_properties_box.cc:372
 msgid "Double-click to rename this clip"
 msgstr ""
@@ -18058,7 +18097,7 @@ msgstr ""
 
 #: slot_properties_box.cc:382
 msgid "MIDI Velocity Sensitivity for clip's volume"
-msgstr ""
+msgstr "Влияние силы нажатия в MIDI на громкость клипа"
 
 #: slot_properties_box.cc:383
 msgid "Probability for the Left vs Right Follow-Action to be activated"
@@ -19208,7 +19247,7 @@ msgstr ""
 
 #: trigger_jump_dialog.cc:107
 msgid "Jump Target for: %1"
-msgstr ""
+msgstr "Куда перейти из: %1"
 
 #: trigger_page.cc:105
 msgid ""
@@ -19310,7 +19349,7 @@ msgstr "Снова"
 
 #: trigger_ui.cc:776
 msgid "Jump to: %1"
-msgstr ""
+msgstr "Перейти к: %1"
 
 #: trigger_ui.cc:780
 msgid "Jump: Multi"
@@ -19971,7 +20010,7 @@ msgstr ""
 
 #: export_video_dialog.cc:149
 msgid "Session rate"
-msgstr ""
+msgstr "Частота сессии"
 
 #: export_video_dialog.cc:153
 msgid "Settings"
