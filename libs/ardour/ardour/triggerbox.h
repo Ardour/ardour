@@ -267,6 +267,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	 */
 	void request_stop ();
 
+	virtual void tempo_map_changed() {}
+
 	virtual pframes_t run (BufferSet&, samplepos_t start_sample, samplepos_t end_sample,
 	                       Temporal::Beats const & start, Temporal::Beats const & end,
 	                       pframes_t nframes, pframes_t offset, double bpm, pframes_t& quantize_offset) = 0;
@@ -316,6 +318,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	 */
 	samplepos_t transition_samples;
 	Temporal::Beats transition_beats;
+	Temporal::BBT_Time _transition_bbt;
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
@@ -573,6 +576,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	void reload (BufferSet&, void*);
 	bool probably_oneshot () const;
 
+	void tempo_map_changed();
 	void estimate_midi_patches ();
 
 	int set_region_in_worker_thread (boost::shared_ptr<Region>);
@@ -619,12 +623,14 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
 	Temporal::DoubleableBeats data_length;   /* using timestamps from data */
 	Temporal::DoubleableBeats last_event_beats;
+	samplepos_t last_event_samples;
 
 	Temporal::BBT_Offset _start_offset;
 	Temporal::BBT_Offset _legato_offset;
 
 	boost::shared_ptr<MidiModel> model;
 	MidiModel::const_iterator iter;
+	bool                      map_change;
 
 	int load_data (boost::shared_ptr<MidiRegion>);
 	void compute_and_set_length ();
@@ -775,6 +781,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void enqueue_trigger_state_for_region (boost::shared_ptr<Region>, boost::shared_ptr<Trigger::UIState>);
 
+	void tempo_map_changed ();
+
 	/* valid only within the ::run() call tree */
 	int32_t active_scene() const { return _active_scene; }
 
@@ -896,6 +904,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void cancel_locate_armed ();
 	void fast_forward_nothing_to_do ();
+	int handle_stopped_trigger (BufferSet& bufs, pframes_t dest_offset);
 
 	PBD::ScopedConnection stop_all_connection;
 

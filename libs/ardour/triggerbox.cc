@@ -1132,7 +1132,7 @@ Trigger::when_stopped_during_run (BufferSet& bufs, pframes_t dest_offset)
 
 				/* have played the specified number of times, we're done */
 
-				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped\n", index(), _follow_count));
+				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 loop cnt %2 satisfied, now stopped with ls %3\n", index(), _follow_count, enum_2_string (launch_style())));
 				shutdown (bufs, dest_offset);
 
 
@@ -1485,6 +1485,8 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
 	}
 
 	effective_length = tmap->quarters_at_sample (transition_sample + final_processed_sample) - tmap->quarters_at_sample (transition_sample);
+
+	_transition_bbt = transition_bbt;
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: final sample %2 vs ees %3 ls %4\n", index(), final_processed_sample, expected_end_sample, last_readable_sample));
 
@@ -2128,8 +2130,10 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	: Trigger (n, b)
 	, data_length (Temporal::Beats())
 	, last_event_beats (Temporal::Beats())
+	, last_event_samples (0)
 	, _start_offset (0, 0, 0)
 	, _legato_offset (0, 0, 0)
+	, map_change (false)
 {
 	_channel_map.assign (16, -1);
 }
@@ -2643,12 +2647,54 @@ MIDITrigger::retrigger ()
 	iter = model->begin();
 	_legato_offset = Temporal::BBT_Offset ();
 	last_event_beats = Temporal::Beats();
+	last_event_samples = 0;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2, ts = %3\n", _index, iter->time(), transition_beats));
 }
 
 void
 MIDITrigger::reload (BufferSet&, void*)
 {
+}
+
+void
+MIDITrigger::tempo_map_changed ()
+{
+	/* called from process context, but before Session::process(), and only
+	 * on an active trigger.
+	 */
+
+	iter = model->begin();
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	const timepos_t region_start_time = _region->start();
+	const Temporal::Beats region_start = region_start_time.beats();
+
+	while (iter != model->end()) {
+
+		/* Find the first event whose sample time is equal-to or
+		 * greater than the last played event sample. That is the
+		 * event we wish to use next, after the tempo map change.
+		 *
+		 * Note that the sample time is being computed with the *new*
+		 * tempo map, while last_event_samples we computed with the old
+		 * one.
+		 */
+
+		const Temporal::Beats iter_timeline_beats = transition_beats + ((*iter).time() - region_start);
+		samplepos_t iter_timeline_samples = tmap->sample_at (iter_timeline_beats);
+
+		if (iter_timeline_samples >= last_event_samples) {
+			break;
+		}
+
+		++iter;
+	}
+
+	if (iter != model->end()) {
+		Temporal::Beats elen_ignored;
+		(void) compute_end (tmap, _transition_bbt, transition_samples, elen_ignored);
+	}
+
+	map_change = true;
 }
 
 template<bool in_process_context>
@@ -2662,7 +2708,8 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
-	DEBUG_RESULT (samplepos_t, last_event_samples, max_samplepos);
+
+	last_event_samples = end_sample;
 
 	/* see if we're going to start or stop or retrigger in this run() call */
 	quantize_offset = 0;
@@ -2695,45 +2742,83 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		 * which we last transitioned (in this case, to being active)
 		 */
 
-		const Temporal::Beats maybe_last_event_timeline_beats = transition_beats + (event.time() - region_start);
+		Temporal::Beats maybe_last_event_timeline_beats = transition_beats + (event.time() - region_start);
+
+
+		/* check that the event is within the bounds for this run() call */
+
+		if (maybe_last_event_timeline_beats < start_beats) {
+			break;
+		}
 
 		if (maybe_last_event_timeline_beats > final_beat) {
-			/* do this to "fake" having reached the end */
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 tlrr %2 >= fb %3, so at end with %4\n", index(), maybe_last_event_timeline_beats, final_beat, event));
-			iter = model->end();
-			break;
-		} else if (maybe_last_event_timeline_beats < start_beats) {
-			/* something made iter incorrect, maybe tempo map
-			   change. Pretend that we reached the end
-			*/
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 tlrr %2 < sb %3, so at end with %4\n", index(), maybe_last_event_timeline_beats, start_beats, event));
 			iter = model->end();
 			break;
 		}
 
-		/* Now get samples */
+		if (maybe_last_event_timeline_beats >= end_beats) {
+			break;
+		}
+
+		/* Now get the sample position of the event, on the timeline */
 
 		const samplepos_t timeline_samples = tmap->sample_at (maybe_last_event_timeline_beats);
-
-		if (timeline_samples >= end_sample || timeline_samples < start_sample) {
-			/* we should not get here but if we do, pretend we reached the end */
-			iter = model->end();
-			break;
-		}
 
 		if (in_process_context) { /* compile-time const expr */
 
 			/* Now we have to convert to a position within the buffer we
 			 * are writing to.
-			 *
-			 * (timeline_samples - start_sample) gives us the
-			 * sample offset from the start of our run() call. But
-			 * since we may be executing after another trigger in
-			 * the same process() cycle, we must take dest_offset
-			 * into account to get an actual buffer position.
 			 */
+			samplepos_t buffer_samples;
 
-			samplepos_t buffer_samples = (timeline_samples - start_sample) + dest_offset;
+			/* HACK time: in the argument list, we have
+
+			   start_sample, end_sample: computed from Session::process()
+			   adjusted by latency
+
+			   start_beats, end_beats: computed from the above two
+			   sample values, using the tempo map.
+
+			   When we compute the buffer/sample offset for event, we are
+			   converting from beats to samples, the opposite direction of
+			   the computation of start/end_beats from
+			   start/end_sample.
+
+			   These conversions are not reversible (the precision
+			   of audio time exceeds that of music time). As a
+			   result, we may end up in a situation where the beat
+			   position of the event confirms that it is to be
+			   delivered within this ::run() call, but the sample
+			   value says that it was to be delivered in the
+			   previous call. As an example, given some tempo map
+			   parameters, start_sample 6160 converts to 0:536, but
+			   event time 0:536 converts to 6156 (earlier by 4
+			   samples).
+
+			   We consider the beat position to be "more canonical"
+			   than the sample position, and so if this happens,
+			   treat the event as occuring at start_sample, not
+			   before it.
+
+			   Note that before this test, we've already
+			   established that the event time in beats is within range.
+			*/
+
+
+			if (timeline_samples < start_sample) {
+				buffer_samples = dest_offset;
+			} else {
+
+				/* (timeline_samples - start_sample) gives us the
+				 * sample offset from the start of our run() call. But
+				 * since we may be executing after another trigger in
+				 * the same process() cycle, we must take dest_offset
+				 * into account to get an actual buffer position.
+				 */
+
+				buffer_samples = (timeline_samples - start_sample) + dest_offset;
+			}
+
 			assert (buffer_samples >= 0);
 
 			Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, event.size(), const_cast<uint8_t*>(event.buffer()), false);
@@ -2776,7 +2861,6 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		last_event_beats = event.time();
 		last_event_timeline_beats = maybe_last_event_timeline_beats;
-		DEBUG_ASSIGN (last_event_samples, timeline_samples);
 
 		++iter;
 	}
@@ -2817,16 +2901,34 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			} else {
 				/* finishing up playout */
 				samplepos_t final_processed_sample = tmap->sample_at (timepos_t (final_beat));
-				nframes = orig_nframes - (final_processed_sample - start_sample);
-				_loop_cnt++;
-				_state = Stopped;
+
+				if (map_change) {
+					if ((start_sample > final_processed_sample) || (final_processed_sample - start_sample > orig_nframes)) {
+						nframes = 0;
+						_loop_cnt++;
+						_state = Stopping;
+					} else {
+						nframes = orig_nframes - (final_processed_sample - start_sample);
+					}
+				} else {
+					nframes = orig_nframes - (final_processed_sample - start_sample);
+					_loop_cnt++;
+					_state = Stopped;
+				}
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 playout done, nf = %2 fb %3 fs %4 %5 LC %6\n", index(), nframes, final_beat, final_processed_sample, start_sample, _loop_cnt));
 			}
 
 		} else {
 
-			samplepos_t final_processed_sample = tmap->sample_at (timepos_t (final_beat));
-			nframes = orig_nframes - (final_processed_sample - start_sample);
+			const samplepos_t final_processed_sample = tmap->sample_at (timepos_t (final_beat));
+			const samplecnt_t nproc = (final_processed_sample - start_sample);
+
+			if (nproc > orig_nframes) {
+				/* tempo map changed, probably */
+				nframes = nproc > orig_nframes ? 0 : orig_nframes - nproc;
+			} else {
+				nframes = orig_nframes - nproc;
+			}
 			_loop_cnt++;
 			_state = Stopped;
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 reached final event, now stopped, nf = %2 fb %3 fs %4 %5 LC %6\n", index(), nframes, final_beat, final_processed_sample, start_sample, _loop_cnt));
@@ -2840,13 +2942,17 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		nframes = 0;
 	}
 
-	const samplecnt_t covered_frames = orig_nframes - nframes;
+	/* tempo map changes could lead to nframes > orig_nframes */
+
+	const samplecnt_t covered_frames = nframes > orig_nframes ? orig_nframes : orig_nframes - nframes;
 
 	if (_state == Stopped || _state == Stopping) {
-		when_stopped_during_run (bufs, dest_offset + covered_frames);
+		when_stopped_during_run (bufs, (dest_offset + covered_frames) ? (dest_offset + covered_frames - 1) : 0);
 	}
 
 	process_index += covered_frames;
+
+	map_change = false;
 
 	return covered_frames;
 }
@@ -3169,14 +3275,19 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	if (start_samples < transport_position) {
 		samplepos_t s = start_samples;
 		BBT_Time ns = start_bbt;
+		const BBT_Offset step (0, effective_length.get_beats(), effective_length.get_ticks());
 
 		do {
 			start_samples = s;
-			ns = tmap->bbt_walk (ns, BBT_Offset (0, effective_length.get_beats(), effective_length.get_ticks()));
+			ns = tmap->bbt_walk (ns, step);
 			s = tmap->sample_at (ns);
 		} while (s < transport_position);
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: roll trigger %2 from %3 to %4 with cnt = %5\n", order(), trig->index(), start_samples, transport_position, cnt));
+
+		if (boost::dynamic_pointer_cast<MIDITrigger> (trig)) {
+			boost::dynamic_pointer_cast<MIDITrigger> (trig)->_transition_bbt = ns;
+		}
 
 		trig->start_and_roll_to (start_samples, transport_position, cnt);
 
@@ -3765,6 +3876,39 @@ TriggerBox::begin_process_cycle ()
 }
 
 
+int
+TriggerBox::handle_stopped_trigger (BufferSet& bufs, pframes_t dest_offset)
+{
+	if (_currently_playing->will_follow()) {
+		int n = determine_next_trigger (_currently_playing->index());
+		Temporal::BBT_Offset start_quantization;
+		if (n < 0) {
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 finished, no next trigger\n", _currently_playing->name()));
+			_currently_playing = 0;
+			PropertyChanged (Properties::currently_playing);
+			return 1; /* no triggers to come next, break out of nframes loop */
+		}
+		if ((int) _currently_playing->index() == n) {
+			start_quantization = Temporal::BBT_Offset ();
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1, will use start immediately \n", all_triggers[n]->name()));
+		} else {
+			DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", all_triggers[n]->name()));
+		}
+		_currently_playing = all_triggers[n];
+		_currently_playing->startup (bufs, dest_offset, start_quantization);
+		PropertyChanged (Properties::currently_playing);
+	} else {
+		_currently_playing = 0;
+		PropertyChanged (Properties::currently_playing);
+		DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set, leaving nf loop\n");
+		/* leave nframes loop */
+		return 1;
+	}
+
+	return 0;
+}
+
+
 void
 TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
 {
@@ -4097,34 +4241,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		 */
 
 		if (_currently_playing->state() == Trigger::Stopped) {
-
 			if (!_stop_all && !_currently_playing->explicitly_stopped()) {
-
 				DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 has stopped, need next...\n", _currently_playing->name()));
-
-				if (_currently_playing->will_follow()) {
-					int n = determine_next_trigger (_currently_playing->index());
-					Temporal::BBT_Offset start_quantization;
-					if (n < 0) {
-						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 finished, no next trigger\n", _currently_playing->name()));
-						_currently_playing = 0;
-						PropertyChanged (Properties::currently_playing);
-						break; /* no triggers to come next, break out of nframes loop */
-					}
-					if ((int) _currently_playing->index() == n) {
-						start_quantization = Temporal::BBT_Offset ();
-						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1, will use start immediately \n", all_triggers[n]->name()));
-					} else {
-						DEBUG_TRACE (DEBUG::Triggers, string_compose ("switching to next trigger %1\n", all_triggers[n]->name()));
-					}
-					_currently_playing = all_triggers[n];
-					_currently_playing->startup (bufs, dest_offset, start_quantization);
-					PropertyChanged (Properties::currently_playing);
-				} else {
-					_currently_playing = 0;
-					PropertyChanged (Properties::currently_playing);
-					DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set, leaving nf loop\n");
-					/* leave nframes loop */
+				if (handle_stopped_trigger (bufs, dest_offset)) {
 					break;
 				}
 
@@ -4170,6 +4289,17 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("trig %1 ran, covered %2 state now %3 nframes now %4\n",
 		                                              _currently_playing->name(), frames_covered, enum_2_string (_currently_playing->state()), nframes));
 
+		/* it is possible that the current trigger stopped right on our
+		 * run() call boundary. If so, be sure to notice because
+		 * otherwise we were already set to break from this
+		 * nframes-testing while loop; _currently_playing
+		 * will still be set, and we will never progress on subsequent
+		 * calls to ::run()
+		 */
+
+		if (nframes == 0 && _currently_playing->state() == Trigger::Stopped) {
+			(void) handle_stopped_trigger (bufs, dest_offset);
+		}
 	}
 
 	if (!_currently_playing) {
@@ -4539,6 +4669,16 @@ TriggerBox::non_realtime_locate (samplepos_t now)
 	}
 
 	fast_forward (_session.cue_events(), now);
+}
+
+void
+TriggerBox::tempo_map_changed ()
+{
+	/* called from process context, but before Session::process() */
+
+	if (_currently_playing) {
+		_currently_playing->tempo_map_changed ();
+	}
 }
 
 void
