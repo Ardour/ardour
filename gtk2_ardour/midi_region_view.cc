@@ -686,28 +686,43 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier) &&
+	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier) ||
 	    Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
 		/* XXX: bit of a hack; allow PrimaryModifier+TertiaryModifier scroll
-		 * through so that it still works for navigation.
+		 * through so that it still works for navigation and zoom.
 		*/
 		return false;
 	}
 
 	if (_selection.empty()) {
-		const int step = Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier) ? 12 : 1;
-		const bool just_one_edge = Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier);
+		const int step = 1;
+		const bool zoom = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
+		const bool just_one_edge = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier|Keyboard::PrimaryModifier);
 
 		switch (ev->direction) {
 		case GDK_SCROLL_UP:
-			if (midi_stream_view()->highest_note() < 127 - step) {
-				midi_stream_view()->apply_note_range (midi_stream_view()->lowest_note() + (just_one_edge ? 0 : step), midi_stream_view()->highest_note() + step, true);
+			if (just_one_edge) {
+				/* make higher notes visible aka expand higher pitch range */
+				midi_stream_view()->apply_note_range (midi_stream_view()->lowest_note(), min (127, midi_stream_view()->highest_note() + step), true);
+			} else if (zoom) {
+				/* zoom out to show more higher and lower pitches */
+				midi_stream_view()->apply_note_range (max (0, midi_stream_view()->lowest_note() - step), min (127, midi_stream_view()->highest_note() + step), true);
+			} else {
+				/* scroll towards higher pitches */
+				midi_stream_view()->apply_note_range (max (0, midi_stream_view()->lowest_note() + step), min (127, midi_stream_view()->highest_note() + step), true);
 			}
 			return true;
 
 		case GDK_SCROLL_DOWN:
-			if (midi_stream_view()->lowest_note() >= step) {
-				midi_stream_view()->apply_note_range (midi_stream_view()->lowest_note() - step, midi_stream_view()->highest_note() - (just_one_edge ? 0 : step), true);
+			if (just_one_edge) {
+				/* make lower notes visible aka expand lower pitch range */
+				midi_stream_view()->apply_note_range (max (0, midi_stream_view()->lowest_note() - step), midi_stream_view()->highest_note(), true);
+			} else if (zoom) {
+				/* zoom in to show less higher and lower pitches */
+				midi_stream_view()->apply_note_range (min (127, midi_stream_view()->lowest_note() + step), max (0, midi_stream_view()->highest_note() - step), true);
+			} else {
+				/* scroll towards lower pitches */
+				midi_stream_view()->apply_note_range (min (127, midi_stream_view()->lowest_note() - step), max (0, midi_stream_view()->highest_note() - step), true);
 			}
 			return true;
 
