@@ -105,7 +105,7 @@ AudioTriggerPropertiesBox::AudioTriggerPropertiesBox ()
 	bpm_table->attach (_bars_display, 1, 4, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 
 	ArdourWidgets::Frame* eTempoBox = manage (new ArdourWidgets::Frame);
-	eTempoBox->set_label("Stretch Options");
+	eTempoBox->set_label(_("Stretch Options"));
 	eTempoBox->set_name("EditorDark");
 	eTempoBox->set_edge_color (0x000000ff); // black
 	eTempoBox->add (*bpm_table);
