@@ -471,13 +471,15 @@ public:
 	                ARDOUR::MidiTempoMapDisposition       mtd,
 	                Temporal::timepos_t&                  pos,
 	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
+	                boost::shared_ptr<ARDOUR::Track>      track = boost::shared_ptr<ARDOUR::Track>(),
 	                bool with_markers = false);
 
 	void do_embed (std::vector<std::string>              paths,
 	               Editing::ImportDisposition            disposition,
 	               Editing::ImportMode                   mode,
 	               Temporal::timepos_t&                  pos,
-	               boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
+	               boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
+	               boost::shared_ptr<ARDOUR::Track>      track = boost::shared_ptr<ARDOUR::Track>());
 
 	void get_regionview_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
 

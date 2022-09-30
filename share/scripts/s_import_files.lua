@@ -5,10 +5,10 @@ function factory (params) return function ()
 
 	files:push_back("/tmp/test.wav")
 
-	local pos = -1
+	local pos = Temporal.timepos_t(0)
 	Editor:do_import (files,
 		Editing.ImportDistinctFiles, Editing.ImportAsTrack, ARDOUR.SrcQuality.SrcBest,
 		ARDOUR.MidiTrackNameSource.SMFTrackName, ARDOUR.MidiTempoMapDisposition.SMFTempoIgnore,
-		pos, ARDOUR.PluginInfo(), false)
+		pos, ARDOUR.PluginInfo(), ARDOUR.Track(), false)
 
 end end

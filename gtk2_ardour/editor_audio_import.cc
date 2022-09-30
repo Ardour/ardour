@@ -361,17 +361,17 @@ Editor::import_smf_markers (Evoral::SMF & smf, timepos_t const & pos)
 }
 
 void
-Editor::do_import (vector<string>          paths,
-                   ImportDisposition       disposition,
-                   ImportMode              mode,
-                   SrcQuality              quality,
-                   MidiTrackNameSource     midi_track_name_source,
-                   MidiTempoMapDisposition smf_tempo_disposition,
-                   timepos_t&              pos,
-                   ARDOUR::PluginInfoPtr   instrument,
-                   bool with_markers)
+Editor::do_import (vector<string>           paths,
+                   ImportDisposition        disposition,
+                   ImportMode               mode,
+                   SrcQuality               quality,
+                   MidiTrackNameSource      midi_track_name_source,
+                   MidiTempoMapDisposition  smf_tempo_disposition,
+                   timepos_t&               pos,
+                   ARDOUR::PluginInfoPtr    instrument,
+                   boost::shared_ptr<Track> track,
+                   bool                     with_markers)
 {
-	boost::shared_ptr<Track> track;
 	vector<string> to_import;
 	int nth = 0;
 	bool use_timestamp = (pos == timepos_t::max (pos.time_domain()));
@@ -522,9 +522,13 @@ Editor::do_import (vector<string>          paths,
 }
 
 void
-Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode mode, timepos_t& pos, ARDOUR::PluginInfoPtr instrument)
+Editor::do_embed (vector<string>           paths,
+                  ImportDisposition        import_as,
+                  ImportMode               mode,
+                  timepos_t&               pos,
+                  ARDOUR::PluginInfoPtr    instrument,
+                  boost::shared_ptr<Track> track)
 {
-	boost::shared_ptr<Track> track;
 	bool check_sample_rate = true;
 	vector<string> to_embed;
 	bool multi = paths.size() > 1;
@@ -1051,7 +1055,7 @@ int
 Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
                                      uint32_t                  in_chans,
                                      uint32_t                  out_chans,
-                                     timepos_t&               pos,
+                                     timepos_t&                pos,
                                      ImportMode                mode,
                                      boost::shared_ptr<Track>& existing_track,
                                      string const&             new_track_name,

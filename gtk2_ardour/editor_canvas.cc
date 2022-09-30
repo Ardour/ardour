@@ -440,7 +440,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, timepos_t const & p, d
 		/* drop onto canvas background: create new tracks */
 
 		InstrumentSelector is(InstrumentSelector::ForTrackDefault); // instantiation builds instrument-list and sets default.
-	        do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackNumber, SMFTempoIgnore, pos, is.selected_instrument(), false);
+	        do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackNumber, SMFTempoIgnore, pos, is.selected_instrument());
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack,
@@ -454,17 +454,14 @@ Editor::drop_paths_part_two (const vector<string>& paths, timepos_t const & p, d
 		/* check that its a track, not a bus */
 
 		if (tv->track()) {
-			/* select the track, then embed/import */
-			selection->set (tv);
-
 			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack,
-				   SrcBest, SMFTrackNumber, SMFTempoIgnore, pos);
+				   SrcBest, SMFTrackNumber, SMFTempoIgnore, pos, boost::shared_ptr<ARDOUR::PluginInfo>(), tv->track ());
 
 			if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack,
-					   SrcBest, SMFTrackName, SMFTempoIgnore, pos, boost::shared_ptr<PluginInfo>(), false);
+					   SrcBest, SMFTrackName, SMFTempoIgnore, pos, boost::shared_ptr<PluginInfo>());
 			} else {
-				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, pos);
+				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, pos, boost::shared_ptr<ARDOUR::PluginInfo>(), tv->track ());
 			}
 		}
 	}

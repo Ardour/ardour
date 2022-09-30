@@ -2208,7 +2208,7 @@ SoundFileOmega::do_something (int action)
 	_import_active = true;
 
 	if (copy_files_btn.get_active()) {
-		PublicEditor::instance().do_import (paths, chns, mode, quality, mts, mtd, where, instrument, with_midi_markers);
+		PublicEditor::instance().do_import (paths, chns, mode, quality, mts, mtd, where, instrument, boost::shared_ptr<Track>(), with_midi_markers);
 	} else {
 		PublicEditor::instance().do_embed (paths, chns, mode, where, instrument);
 	}
