@@ -6506,3 +6506,11 @@ Route::monitoring_state () const
 	abort(); /* NOTREACHED */
 	return MonitoringSilence;
 }
+
+void
+Route::tempo_map_changed ()
+{
+	if (_triggerbox) {
+		_triggerbox->tempo_map_changed ();
+	}
+}

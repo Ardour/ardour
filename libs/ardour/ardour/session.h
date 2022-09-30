@@ -368,6 +368,7 @@ public:
 	template<class A>            void foreach_track (void (Track::*method)(A), A arg);
 	template<class A1, class A2> void foreach_track (void (Track::*method)(A1, A2), A1 arg1, A2 arg2);
 
+	void foreach_route (void (Route::*method)());
 	template<class A>            void foreach_route (void (Route::*method)(A), A arg);
 	template<class A1, class A2> void foreach_route (void (Route::*method)(A1, A2), A1 arg1, A2 arg2);
 

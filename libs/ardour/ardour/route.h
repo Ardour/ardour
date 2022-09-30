@@ -208,6 +208,7 @@ public:
 	DiskIOPoint disk_io_point() const { return _disk_io_point; }
 
 	void stop_triggers (bool now);
+	void tempo_map_changed();
 
 	/* Processors */
 

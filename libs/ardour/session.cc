@@ -106,6 +106,7 @@
 #include "ardour/revision.h"
 #include "ardour/route_group.h"
 #include "ardour/rt_tasklist.h"
+
 #include "ardour/rt_safe_delete.h"
 #include "ardour/silentfilesource.h"
 #include "ardour/send.h"
@@ -5536,6 +5537,8 @@ Session::tempo_map_changed ()
 	clear_clicks ();
 	sync_cues ();
 
+	foreach_route (&Route::tempo_map_changed);
+
 	_playlists->update_after_tempo_map_change ();
 
 	set_dirty ();
@@ -7591,3 +7594,12 @@ Session::ProcessorChangeBlocker::~ProcessorChangeBlocker ()
 		}
 	}
 }
+
+void
+Session::foreach_route (void (Route::*method)())
+{
+	for (auto & r : *(routes.reader())) {
+		((r.get())->*method) ();
+	}
+}
+
