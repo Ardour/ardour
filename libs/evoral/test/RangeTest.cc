@@ -24,11 +24,11 @@ RangeTest::coalesceTest ()
 	RangeList::List jim = fred.get ();
 
 	RangeList::List::iterator i = jim.begin ();
-	CPPUNIT_ASSERT_EQUAL (2L, i->start().samples());
-	CPPUNIT_ASSERT_EQUAL (4L, i->end().samples());
+	CPPUNIT_ASSERT_EQUAL (t2, i->start());
+	CPPUNIT_ASSERT_EQUAL (t4, i->end());
 	++i;
-	CPPUNIT_ASSERT_EQUAL (5L, i->start().samples());
-	CPPUNIT_ASSERT_EQUAL (8L, i->end().samples());
+	CPPUNIT_ASSERT_EQUAL (t5, i->start());
+	CPPUNIT_ASSERT_EQUAL (t8, i->end());
 }
 
 /* Basic subtraction of a few smaller ranges from a larger one */
@@ -37,10 +37,14 @@ RangeTest::subtractTest1 ()
 {
 
 	timepos_t t0 (0);
+	timepos_t t1 (1);
 	timepos_t t2 (2);
 	timepos_t t4 (4);
+	timepos_t t5 (5);
+	timepos_t t6 (6);
 	timepos_t t7 (7);
 	timepos_t t8 (8);
+	timepos_t t9 (9);
 	timepos_t t10 (10);
 
 /*         01234567890
@@ -61,16 +65,16 @@ RangeTest::subtractTest1 ()
 	CPPUNIT_ASSERT_EQUAL (size_t (3), s.size ());
 
 	RangeList::List::iterator i = s.begin ();
-	CPPUNIT_ASSERT_EQUAL (0L, i->start().samples());
-	CPPUNIT_ASSERT_EQUAL (1L, i->end().samples()); // XXX -> 2
+	CPPUNIT_ASSERT_EQUAL (t0, i->start());
+	CPPUNIT_ASSERT_EQUAL (t1, i->end()); // XXX -> 2
 
 	++i;
-	CPPUNIT_ASSERT_EQUAL (5L, i->start().samples()); // XXX -> 4
-	CPPUNIT_ASSERT_EQUAL (6L, i->end().samples());   // XXX -> 7
+	CPPUNIT_ASSERT_EQUAL (t5, i->start()); // XXX -> 4
+	CPPUNIT_ASSERT_EQUAL (t6, i->end());   // XXX -> 7
 
 	++i;
-	CPPUNIT_ASSERT_EQUAL (9L, i->start().samples()); // XXX -> 8
-	CPPUNIT_ASSERT_EQUAL (10L, i->end().samples());
+	CPPUNIT_ASSERT_EQUAL (t9, i->start()); // XXX -> 8
+	CPPUNIT_ASSERT_EQUAL (t10, i->end());
 }
 
 /* Test subtraction of a range B from a range A, where A and B do not overlap */
@@ -93,8 +97,8 @@ RangeTest::subtractTest2 ()
 	CPPUNIT_ASSERT_EQUAL (size_t (1), s.size ());
 
 	RangeList::List::iterator i = s.begin ();
-	CPPUNIT_ASSERT_EQUAL (0L, i->start().samples());
-	CPPUNIT_ASSERT_EQUAL (10L, i->end().samples());
+	CPPUNIT_ASSERT_EQUAL (t0, i->start());
+	CPPUNIT_ASSERT_EQUAL (t10, i->end());
 }
 
 /* Test subtraction of B from A, where B entirely overlaps A */
@@ -122,8 +126,11 @@ void
 RangeTest::subtractTest4 ()
 {
 	timepos_t t0 (0);
+	timepos_t t1 (1);
 	timepos_t t2 (2);
 	timepos_t t4 (4);
+	timepos_t t5 (5);
+	timepos_t t6 (6);
 	timepos_t t7 (7);
 	timepos_t t8 (8);
 	timepos_t t9 (9);
@@ -149,16 +156,16 @@ RangeTest::subtractTest4 ()
 	CPPUNIT_ASSERT_EQUAL (size_t (3), s.size ());
 
 	RangeList::List::iterator i = s.begin ();
-	CPPUNIT_ASSERT_EQUAL (0L, i->start().samples());
-	CPPUNIT_ASSERT_EQUAL (1L, i->end().samples());
+	CPPUNIT_ASSERT_EQUAL (t0, i->start());
+	CPPUNIT_ASSERT_EQUAL (t1, i->end());
 
 	++i;
-	CPPUNIT_ASSERT_EQUAL (5L, i->start().samples());
-	CPPUNIT_ASSERT_EQUAL (6L, i->end().samples());
+	CPPUNIT_ASSERT_EQUAL (t5, i->start());
+	CPPUNIT_ASSERT_EQUAL (t6, i->end());
 
 	++i;
-	CPPUNIT_ASSERT_EQUAL (10L, i->start().samples());
-	CPPUNIT_ASSERT_EQUAL (10L, i->end().samples());
+	CPPUNIT_ASSERT_EQUAL (t10, i->start());
+	CPPUNIT_ASSERT_EQUAL (t10, i->end());
 }
 
 /* A bit like subtractTest1, except some of the ranges
@@ -171,8 +178,10 @@ RangeTest::subtractTest5 ()
 	timepos_t t0 (0);
 	timepos_t t1 (1);
 	timepos_t t4 (4);
+	timepos_t t5 (5);
 	timepos_t t6 (6);
 	timepos_t t7 (7);
+	timepos_t t8 (8);
 	timepos_t t9 (9);
 	timepos_t t12 (12);
 	timepos_t t42 (42);
@@ -196,12 +205,12 @@ RangeTest::subtractTest5 ()
 	CPPUNIT_ASSERT_EQUAL (size_t (2), s.size ());
 
 	RangeList::List::iterator i = s.begin ();
-	CPPUNIT_ASSERT_EQUAL (5L, i->start().samples());
-	CPPUNIT_ASSERT_EQUAL (5L, i->end().samples());
+	CPPUNIT_ASSERT_EQUAL (t5, i->start());
+	CPPUNIT_ASSERT_EQUAL (t5, i->end());
 
 	++i;
-	CPPUNIT_ASSERT_EQUAL (8L, i->start().samples());
-	CPPUNIT_ASSERT_EQUAL (8L, i->end().samples());
+	CPPUNIT_ASSERT_EQUAL (t8, i->start());
+	CPPUNIT_ASSERT_EQUAL (t8, i->end());
 }
 
 /* Test coverage() with all possible types of overlap.
