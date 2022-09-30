@@ -1741,10 +1741,8 @@ Route::stop_triggers (bool now)
 {
 	if (_triggerbox) {
 		if (now) {
-			std::cerr << "stop immedaitely\n";
 			_triggerbox->stop_all_immediately ();
 		} else {
-			std::cerr << "stop quantized\n";
 			_triggerbox->stop_all_quantized();
 		}
 	}
