@@ -1504,6 +1504,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <Track, Route> ("Track")
+		.addNilPtrConstructor ()
 		.addCast<AudioTrack> ("to_audio_track")
 		.addCast<MidiTrack> ("to_midi_track")
 		.addFunction ("set_name", &Track::set_name)
