@@ -1727,6 +1727,59 @@ Session::trigger_cue_row (int32_t cue)
 	request_transport_speed (1.0);
 }
 
+
+bool
+Session::bang_trigger_at (int32_t route_index, int32_t row_index)
+{
+	/* this is a convenience function for simple control surfaces to bang a trigger without any regards to banking */
+
+	int index = 0;
+	StripableList sl;
+	get_stripables (sl);
+	sl.sort (Stripable::Sorter ());
+	for (StripableList::iterator s = sl.begin (); s != sl.end (); ++s) {
+		boost::shared_ptr<Route>     r = boost::dynamic_pointer_cast<Route> (*s);
+		if (!r || !r->triggerbox ()) {
+			continue;
+		}
+		/* we're only interested in Trigger Tracks */
+		if (!(r->presentation_info ().trigger_track ())) {
+			continue;
+		}
+		if (index == route_index) {
+			r->triggerbox()->bang_trigger_at(row_index);
+			return 1;
+		}
+		index++;
+	}
+}
+
+bool
+Session::unbang_trigger_at (int32_t route_index, int32_t row_index)
+{
+	/* this is a convenience function for simple control surfaces to un-bang a trigger without any regards to banking */
+
+	int index = 0;
+	StripableList sl;
+	get_stripables (sl);
+	sl.sort (Stripable::Sorter ());
+	for (StripableList::iterator s = sl.begin (); s != sl.end (); ++s) {
+		boost::shared_ptr<Route>     r = boost::dynamic_pointer_cast<Route> (*s);
+		if (!r || !r->triggerbox ()) {
+			continue;
+		}
+		/* we're only interested in Trigger Tracks */
+		if (!(r->presentation_info ().trigger_track ())) {
+			continue;
+		}
+		if (index == route_index) {
+			r->triggerbox()->unbang_trigger_at(row_index);
+			return 1;
+		}
+		index++;
+	}
+}
+
 void
 Session::maybe_find_pending_cue ()
 {
