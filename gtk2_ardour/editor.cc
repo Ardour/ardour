@@ -3499,14 +3499,12 @@ Editor::build_draw_midi_menus ()
 	}
 
 	/* Note-Velocity when drawing */
-	{
-		draw_velocity_selector.AddMenuElem (MenuElem ("8",    sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 8)));
-		draw_velocity_selector.AddMenuElem (MenuElem ("32",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 32)));
-		draw_velocity_selector.AddMenuElem (MenuElem ("64",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 64)));
-		draw_velocity_selector.AddMenuElem (MenuElem ("82",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 82)));
-		draw_velocity_selector.AddMenuElem (MenuElem ("100",  sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 100)));
-		draw_velocity_selector.AddMenuElem (MenuElem ("127",  sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 127)));
-	}
+	draw_velocity_selector.AddMenuElem (MenuElem ("8",    sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 8)));
+	draw_velocity_selector.AddMenuElem (MenuElem ("32",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 32)));
+	draw_velocity_selector.AddMenuElem (MenuElem ("64",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 64)));
+	draw_velocity_selector.AddMenuElem (MenuElem ("82",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 82)));
+	draw_velocity_selector.AddMenuElem (MenuElem ("100",  sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 100)));
+	draw_velocity_selector.AddMenuElem (MenuElem ("127",  sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 127)));
 	draw_velocity_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), DRAW_VEL_AUTO)));
 
 	/* Note-Channel when drawing */
