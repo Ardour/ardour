@@ -632,6 +632,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(route_plugin_list,i);
 	PATH_CALLBACK2_MSG(route_plugin_descriptor,i,i);
 	PATH_CALLBACK2_MSG(route_plugin_reset,i,i);
+	PATH_CALLBACK2_MSG(trigger_bang,i,i);
+	PATH_CALLBACK2_MSG(trigger_unbang,i,i);
+	PATH_CALLBACK2_MSG(trigger_stop,i,i);  /* second arg is 'stop now' */
 
 	int strip_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int master_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
@@ -654,6 +657,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_plugin_list(int ssid, lo_message msg);
 	int route_plugin_descriptor(int ssid, int piid, lo_message msg);
 	int route_plugin_reset(int ssid, int piid, lo_message msg);
+
+	int trigger_bang(int rid, int stop_now, lo_message msg);
+	int trigger_unbang(int rid, int stop_now, lo_message msg);
+	int trigger_stop(int rid, int row_id, lo_message msg);
 
 	//banking functions
 	int set_bank (uint32_t bank_start, lo_message msg);

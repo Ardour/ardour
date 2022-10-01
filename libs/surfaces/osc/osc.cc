@@ -462,6 +462,10 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/trigger_cue_row"), "i", trigger_cue_row);
 		REGISTER_CALLBACK (serv, X_("/trigger_stop_all"), "i", trigger_stop_all);
 
+		REGISTER_CALLBACK (serv, X_("/trigger_stop"), "ii", trigger_stop);  //Route num (position on the Cue page), Stop now
+		REGISTER_CALLBACK (serv, X_("/trigger_bang"), "ii", trigger_bang);  //Route num (position on the Cue page), Trigger index
+		REGISTER_CALLBACK (serv, X_("/trigger_unbang"), "ii", trigger_unbang);  //Route num (position on the Cue page), Trigger index
+
 		REGISTER_CALLBACK (serv, X_("/save_state"), "", save_state);
 		REGISTER_CALLBACK (serv, X_("/save_state"), "f", save_state);
 		REGISTER_CALLBACK (serv, X_("/prev_marker"), "", prev_marker);
@@ -5432,6 +5436,62 @@ OSC::route_plugin_parameter (int ssid, int piid, int par, float val, lo_message 
 		PBD::warning << "OSC: Parameter # " << par <<  " for plugin # " << piid << " on RID '" << ssid << "' is out of range" << endmsg;
 		PBD::info << "OSC: Valid range min=" << pd.lower << " max=" << pd.upper << endmsg;
 	}
+
+	return 0;
+}
+
+int
+OSC::trigger_stop (int route_index, int now, lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+
+	/* this function doesn't refer to surface banking but instead directly controls routes in the order they appear on the trigger_page
+	*/
+
+	int index = 0;
+	StripableList sl;
+	session->get_stripables (sl);
+	sl.sort (Stripable::Sorter ());
+	for (StripableList::iterator s = sl.begin (); s != sl.end (); ++s) {
+		boost::shared_ptr<Route>     r = boost::dynamic_pointer_cast<Route> (*s);
+		if (!r || !r->triggerbox ()) {
+			continue;
+		}
+		/* we're only interested in Trigger Tracks */
+		if (!(r->presentation_info ().trigger_track ())) {
+			continue;
+		}
+		if (index == route_index) {
+			r->stop_triggers(now!=0);
+			break;
+		}
+		index++;
+	}
+	return 0;
+}
+
+int
+OSC::trigger_bang (int route_index, int row_index, lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+
+	bang_trigger_at(route_index, row_index);
+
+	return 0;
+}
+
+int
+OSC::trigger_unbang (int route_index, int row_index, lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+
+	unbang_trigger_at(route_index, row_index);
 
 	return 0;
 }
