@@ -274,16 +274,19 @@ CueLayout::show_knob_function ()
 void
 CueLayout::button_lower (uint32_t n)
 {
+	boost::shared_ptr<Route> r = _session.get_remote_nth_route (n);
+	if (!r) {
+		return;
+	}
+
 	if (_p2.stop_down() || _long_stop) {
-		_p2.unbang (n + track_base);
+		boost::shared_ptr<TriggerBox> tb = r->triggerbox();
+		if (tb) {
+			tb->stop_all_quantized();
+		}
 	} else {
 		/* select track */
-
-		boost::shared_ptr<Route> r = _session.get_remote_nth_route (n);
-
-		if (r) {
-			_session.selection().set (r, boost::shared_ptr<AutomationControl>());
-		}
+		_session.selection().set (r, boost::shared_ptr<AutomationControl>());
 	}
 }
 
@@ -576,15 +579,24 @@ CueLayout::pad_press (int y, int x) /* fix coordinate order one day */
 		return;
 	}
 
-	if (!tb->trigger (y + scene_base)->region()) {
-		_p2.unbang (x + track_base);
+	tb->bang_trigger_at (y + scene_base);
+}
+
+void
+CueLayout::pad_release (int y, int x) /* fix coordinate order one day */
+{
+	if (!_route[x]) {
 		return;
 	}
 
-	_p2.bang (x + track_base, y + scene_base);
+	boost::shared_ptr<TriggerBox> tb = _route[x]->triggerbox();
 
+	if (!tb) {
+		/* unpossible! */
+		return;
+	}
 
-
+	tb->unbang_trigger_at (y + scene_base);
 }
 
 void
