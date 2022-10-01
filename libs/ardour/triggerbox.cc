@@ -781,6 +781,10 @@ Trigger::jump_stop (BufferSet& bufs, pframes_t dest_offset)
 void
 Trigger::begin_stop (bool explicit_stop)
 {
+	if (_state == Stopped) {
+		return;  /* nothing to do */
+	}
+
 	/* this is used when we start a tell a currently playing trigger to
 	   stop, but wait for quantization first.
 	*/
@@ -788,6 +792,12 @@ Trigger::begin_stop (bool explicit_stop)
 	_explicitly_stopped = explicit_stop;
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 begin_stop() requested state %2\n", index(), enum_2_string (_state)));
 	send_property_change (ARDOUR::Properties::running);
+}
+
+void
+Trigger::stop_quantized ()
+{
+	begin_stop(true);
 }
 
 void
@@ -845,14 +855,16 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 				_state = WaitingForRetrigger;
 				send_property_change (ARDOUR::Properties::running);
 				break;
-			case Gate:
 			case Toggle:
+				stop_quantized ();
+				break;
+			case Gate:
 			case Repeat:
 				if (_box.active_scene() >= 0) {
 					std::cerr << "should not happen, cue launching but launch_style() said " << enum_2_string (launch_style()) << std::endl;
 				} else {
-					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 gate/toggle/repeat => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingToStop)));
-					begin_stop (true);
+					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 %2 gate/repeat => %3\n", index(), enum_2_string (Running), enum_2_string (WaitingToStop)));
+					stop_quantized ();
 				}
 			}
 			break;
@@ -880,8 +892,19 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 
 		switch (_state) {
 		case Running:
-			begin_stop (true);
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, now in WaitingToStop\n", index()));
+			switch (launch_style()) {
+			case OneShot:
+			case ReTrigger:
+			case Toggle:
+				/* unbang does nothing, just let it keep playing */
+				break;
+			case Gate:
+				request_stop ();  /* stop now */
+				break;
+			case Repeat:
+				stop_quantized ();
+				break;
+			}
 			break;
 
 		case Stopped:
@@ -3435,7 +3458,7 @@ TriggerBox::queue_explict (uint32_t n)
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue %1, EQ = %2\n", n, explicit_queue.read_space()));
 
 	if (_currently_playing) {
-		_currently_playing->unbang ();
+		_currently_playing->begin_stop (false);  /* @paul is this necessary/desired?  the current clip should stop (only) when the new one starts */
 	}
 }
 
@@ -3664,7 +3687,7 @@ void
 TriggerBox::stop_all_quantized ()
 {
 	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
-		all_triggers[n]->unbang ();
+		all_triggers[n]->stop_quantized ();
 	}
 }
 
@@ -3672,7 +3695,7 @@ void
 TriggerBox::bang_trigger_at (Triggers::size_type row)
 {
 	TriggerPtr t = trigger(row);
-	if (t) {
+	if (t && t->region()) {
 		t->bang();
 	} else {
 		/* by convention, an empty slot is effectively a STOP button */
@@ -3684,11 +3707,11 @@ void
 TriggerBox::unbang_trigger_at (Triggers::size_type row)
 {
 	TriggerPtr t = trigger(row);
-	if (t) {
+	if (t && t->region()) {
 		t->unbang();
 	} else {
-		/* by convention, an empty slot is effectively a STOP button */
-		/* ...but you shouldn't be able to unbang an empty slot; so if this occurs, let's just ignore it  */
+		/* you shouldn't be able to unbang an empty slot; but if this somehow happens we'll just treat it as a */
+		stop_all_quantized();
 	}
 }
 
@@ -4005,7 +4028,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			 */
 
 			if (_currently_playing) {
-				_currently_playing->unbang ();
+				_currently_playing->stop_quantized ();
 			}
 
 			_locate_armed = false;

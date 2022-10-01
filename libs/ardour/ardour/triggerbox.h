@@ -256,9 +256,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	*/
 	void bang ();
 
-	/* Calling ::unbang() will cause a running Trigger to begin the process
-	   of stopping. If the Trigger is not running, it will move it to a
-	   full Stopped state.
+	/* Calling ::unbang() is equivalent to a mouse-up or note-off
+	    ... it MIGHT cause a clip to stop, but more likely has no effect, depending on the slot's launch-style.
 	*/
 	void unbang ();
 
@@ -266,6 +265,10 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	 * opportunity, rather than at the next quantization point.
 	 */
 	void request_stop ();
+
+	/* Call ::stop_quantized() to stop a Trigger at the next quantization point.
+	 */
+	void stop_quantized ();
 
 	virtual void tempo_map_changed() {}
 
