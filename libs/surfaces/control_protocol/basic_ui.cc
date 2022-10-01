@@ -836,43 +836,15 @@ BasicUI::find_trigger (int x, int y)
 }
 
 void
-BasicUI::bang (int x, int y)
+BasicUI::bang_trigger_at (int x, int y)
 {
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (x);
-	if (!r) {
-		return;
-	}
-	boost::shared_ptr<TriggerBox> tb = r->triggerbox();
-
-	if (!tb || !tb->active()) {
-		return;
-	}
-
-	TriggerPtr tp (tb->trigger (y));
-
-	if (!tp) {
-		return;
-	}
-
-	if (tp) {
-		tp->bang ();
-	}
+	session->bang_trigger_at (x, y);
 }
 
 void
-BasicUI::unbang (int x)
+BasicUI::unbang_trigger_at (int x, int y)
 {
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (x);
-	if (!r) {
-		return;
-	}
-	boost::shared_ptr<TriggerBox> tb = r->triggerbox();
-
-	if (!tb || !tb->active()) {
-		return;
-	}
-
-	tb->stop_all_quantized ();
+	session->unbang_trigger_at (x, y);
 }
 
 

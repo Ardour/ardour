@@ -167,9 +167,9 @@ class LIBCONTROLCP_API BasicUI {
 	bool rewind_button_onoff() const;
 	bool loop_button_onoff() const;
 
-	void bang (int x, int y);
-	/* stop whatever is playing in the nth triggerbox */
-	void unbang (int x);
+	void bang_trigger_at (int x, int y);
+	void unbang_trigger_at (int x, int y);
+
 	/* it would be nice to use TriggerPtr here but that implies including ardour/triggerbox.h */
 	boost::shared_ptr<ARDOUR::Trigger> find_trigger (int x, int y);
 
