@@ -1965,6 +1965,7 @@ private:
 	ArdourWidgets::ArdourDropdown draw_length_selector;
 	ArdourWidgets::ArdourDropdown draw_velocity_selector;
 	ArdourWidgets::ArdourDropdown draw_channel_selector;
+	void build_draw_midi_menus ();
 
 	ArdourWidgets::ArdourButton snap_mode_button;
 	bool snap_mode_button_clicked (GdkEventButton*);

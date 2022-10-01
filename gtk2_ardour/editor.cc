@@ -497,6 +497,7 @@ Editor::Editor ()
 	build_zoom_focus_menu();
 	build_track_count_menu();
 	build_grid_type_menu();
+	build_draw_midi_menus();
 	build_edit_point_menu();
 
 	location_marker_color = UIConfiguration::instance().color ("location marker");
@@ -3475,7 +3476,12 @@ Editor::build_grid_type_menu ()
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeTimecode], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeTimecode)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeMinSec], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeMinSec)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeCDFrame], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeCDFrame)));
+}
 
+void
+Editor::build_draw_midi_menus ()
+{
+	using namespace Menu_Helpers;
 
 	/* Note-Length when drawing */
 	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeat],      sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeat)));
