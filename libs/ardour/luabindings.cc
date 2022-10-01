@@ -333,6 +333,7 @@ CLASSKEYS(boost::shared_ptr<ARDOUR::Processor>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioReadable>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::SessionPlaylists>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::Track>);
 CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
 CLASSKEYS(boost::shared_ptr<Evoral::Note<Temporal::Beats> >);
 CLASSKEYS(boost::shared_ptr<Evoral::Sequence<Temporal::Beats> >);
@@ -343,6 +344,7 @@ CLASSKEYS(boost::shared_ptr<ARDOUR::Route>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::VCA>);
 CLASSKEYS(boost::weak_ptr<ARDOUR::Bundle>);
 CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
+CLASSKEYS(boost::weak_ptr<ARDOUR::Track>);
 CLASSKEYS(boost::weak_ptr<ARDOUR::VCA>);
 
 CLASSKEYS(boost::shared_ptr<ARDOUR::RegionList>);
