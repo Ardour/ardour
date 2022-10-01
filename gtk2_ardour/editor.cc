@@ -3303,7 +3303,6 @@ Editor::setup_toolbar ()
 	draw_velocity_selector.set_name ("mouse mode button");
 	draw_channel_selector.set_name ("mouse mode button");
 
-	draw_length_selector.set_sizing_text (grid_type_strings[(int)GridTypeBeatDiv32]);
 	draw_velocity_selector.set_sizing_text (_("Auto"));
 	draw_channel_selector.set_sizing_text (_("Auto"));
 
@@ -3492,6 +3491,12 @@ Editor::build_draw_midi_menus ()
 	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv16)));
 	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv32)));
 	draw_length_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) DRAW_LEN_AUTO)));
+
+	{
+		std::vector<std::string> draw_grid_type_strings = {grid_type_strings.begin() + GridTypeBeat, grid_type_strings.begin() + GridTypeBeatDiv32 + 1};
+		draw_grid_type_strings.push_back (_("Auto"));
+		grid_type_selector.set_sizing_texts (draw_grid_type_strings);
+	}
 
 	/* Note-Velocity when drawing */
 	{
