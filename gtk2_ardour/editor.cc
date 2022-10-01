@@ -3303,7 +3303,6 @@ Editor::setup_toolbar ()
 	draw_velocity_selector.set_name ("mouse mode button");
 	draw_channel_selector.set_name ("mouse mode button");
 
-	grid_type_selector.set_sizing_text (grid_type_strings[(int)GridTypeBeatDiv32]);
 	draw_length_selector.set_sizing_text (grid_type_strings[(int)GridTypeBeatDiv32]);
 	draw_velocity_selector.set_sizing_text (_("Auto"));
 	draw_channel_selector.set_sizing_text (_("Auto"));
@@ -3476,6 +3475,8 @@ Editor::build_grid_type_menu ()
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeTimecode], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeTimecode)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeMinSec], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeMinSec)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeCDFrame], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeCDFrame)));
+
+	grid_type_selector.set_sizing_texts (grid_type_strings);
 }
 
 void
