@@ -140,7 +140,6 @@ def build(bld):
         obj.source       = [
                 'test/SequenceTest.cc',
                 'test/SMFTest.cc',
-                'test/RangeTest.cc',
                 'test/NoteTest.cc',
                 'test/CurveTest.cc',
                 'test/testrunner.cc',
