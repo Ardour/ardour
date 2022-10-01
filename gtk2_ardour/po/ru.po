@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6.8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-29 10:52+0300\n"
-"PO-Revision-Date: 2022-09-30 09:01+0300\n"
+"POT-Creation-Date: 2022-10-01 14:18+0300\n"
+"PO-Revision-Date: 2022-10-01 14:28+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: Russian <gnome-cyr@lists.gnome.org>\n"
 "Language: ru\n"
@@ -3502,6 +3502,10 @@ msgstr ""
 #: audio_trigger_properties_box.cc:101
 msgid "Length in Bars:"
 msgstr "Длина в тактах:"
+
+#: audio_trigger_properties_box.cc:108
+msgid "Stretch Options"
+msgstr "Параметры растягивания"
 
 #: audio_trigger_properties_box.cc:154
 msgid ""
@@ -7531,7 +7535,7 @@ msgstr "Невозможно вставить или удалить время �
 #: editor_ops.cc:8463 editor_ops.cc:8482 editor_ops.cc:8555 editor_ops.cc:8569
 #: editor_ops.cc:8573
 msgid "remove time"
-msgstr ""
+msgstr "удаление времени"
 
 #: editor_ops.cc:8644
 msgid "There are too many tracks to fit in the current window"
@@ -9129,7 +9133,7 @@ msgstr ""
 
 #: foldback_strip.cc:308
 msgid "Remove This Send"
-msgstr ""
+msgstr "Удалить этот посыл"
 
 #: foldback_strip.cc:383 foldback_strip.cc:763 foldback_strip.cc:774
 #: mixer_strip.cc:127 mixer_strip.cc:165 mixer_strip.cc:406 mixer_strip.cc:971
@@ -9487,7 +9491,7 @@ msgstr "Показывать недавно полученные MIDI-событ
 
 #: insert_remove_time_dialog.cc:61
 msgid "Remove Time starting at:"
-msgstr ""
+msgstr "Удалить время начиная с:"
 
 #: insert_remove_time_dialog.cc:61
 msgid "Insert Time starting at:"
@@ -9545,7 +9549,7 @@ msgstr ""
 
 #: insert_remove_time_dialog.cc:128
 msgid "Remove time"
-msgstr ""
+msgstr "Удалить время"
 
 #: insert_remove_time_dialog.cc:128
 msgid "Insert time"
@@ -9618,6 +9622,8 @@ msgid ""
 "Right-click or Double-click here\n"
 "to add I/O Plugins"
 msgstr ""
+"Сделайте двойной щелчок или щелчок правой\n"
+"клавишей мыши, чтобы добавить плагины I/O"
 
 #: io_plugin_window.cc:281
 msgid ""
@@ -11168,6 +11174,8 @@ msgid ""
 "Right-click or Double-click here\n"
 "to add Track, Bus, or VCA channels"
 msgstr ""
+"Сделайте двойной щелчок или щелчок правой клавишей\n"
+"мыши, чтобы добавить дорожку, шину или VCA"
 
 #: mixer_ui.cc:201 route_time_axis.cc:266 route_time_axis.cc:812
 msgid "Group"
@@ -11840,10 +11848,19 @@ msgid ""
 "There are a few things that need to be configured before you start using the "
 "program.</span> "
 msgstr ""
+"<span size=\"larger\">%1 — цифровая рабочая станция для работы со звуком. \n"
+"\n"
+"Вы можете использовать %1 для записи оркестра, создавать треки с помощью "
+"аудио/MIDI-лупов, редактировать запись вокала, миксовать живое выступление, "
+"делать дубляж и озвучание кинофильма, а также выполнять мастеринг перед "
+"загрузкой музыки на платформы цифровой дистрибуции. \n"
+"\n"
+"Давайте кое-что настроим перед тем, как начать пользоваться программой.</"
+"span> "
 
 #: new_user_wizard.cc:147
 msgid "<span size=\"larger\">GUI and Font scaling:</span>"
-msgstr ""
+msgstr "<span size=\"larger\">Интерфейс и масштаб шрифта:</span>"
 
 #: new_user_wizard.cc:150
 msgid ""
@@ -11888,6 +11905,15 @@ msgid ""
 "\n"
 "<i>(You can put new sessions anywhere, this is just a default)</i></span>"
 msgstr ""
+"<span size=\"larger\">У каждого проекта, с которым вы работаете в %1, есть "
+"своя папка.\n"
+"Если вы пишете звук, такие папки могут занимать много места на диске.\n"
+"\n"
+"%1 по умолчанию предлагает определенную папку при сохранении новой сессии. "
+"Где ее расположить?\n"
+"\n"
+"<i>(Вы можете указать другую папку, здесь вы просто указываете папку по "
+"умолчанию.)</i></span>"
 
 #: new_user_wizard.cc:278
 msgid "Default folder for new sessions"
@@ -15972,6 +15998,8 @@ msgid ""
 "Right-click or Double-click here\n"
 "to add Tracks"
 msgstr ""
+"Сделайте двойной щелчок или щелчок правой\n"
+"клавишей мыши, чтобы добавить дорожку"
 
 #: recorder_ui.cc:250
 msgid "Record enable all tracks"
@@ -17946,7 +17974,7 @@ msgstr ""
 
 #: shuttle_control.cc:76
 msgid "Speed Display (Context-click for options)"
-msgstr ""
+msgstr "Показ скорости (щелчок ПКМ открывает параметры)"
 
 #: shuttle_control.cc:103
 msgid "LogestShuttle|> 888.9%"
@@ -19176,7 +19204,7 @@ msgstr ""
 
 #: trigger_clip_picker.cc:134
 msgid "Stop the audition"
-msgstr ""
+msgstr "Остановить прослушивание"
 
 #: trigger_clip_picker.cc:135
 msgid "Open clip library folder"
@@ -19184,7 +19212,7 @@ msgstr "Открыть папку с библиотекой клипов"
 
 #: trigger_clip_picker.cc:136
 msgid "Refresh clip list"
-msgstr ""
+msgstr "Обновить список клипов"
 
 #: trigger_clip_picker.cc:137
 msgid "Select the Synth used for auditioning"
