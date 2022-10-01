@@ -225,7 +225,11 @@ FPUTest::veclibTest ()
 	mix_buffers_no_gain   = veclib_mix_buffers_no_gain;
 	copy_vector           = default_copy_vector;
 
+#ifdef  __aarch64__
+	run (16, FLT_EPSILON);
+#else
 	run (16);
+#endif
 }
 
 #else
