@@ -459,7 +459,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, timepos_t const & p, d
 
 			if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack,
-					   SrcBest, SMFTrackName, SMFTempoIgnore, pos, boost::shared_ptr<PluginInfo>());
+					   SrcBest, SMFTrackName, SMFTempoIgnore, pos, boost::shared_ptr<PluginInfo>(), tv->track ());
 			} else {
 				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, pos, boost::shared_ptr<ARDOUR::PluginInfo>(), tv->track ());
 			}
