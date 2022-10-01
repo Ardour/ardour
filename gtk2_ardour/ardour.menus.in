@@ -286,16 +286,25 @@
         <menuitem action='grid-type-eighths'/>
         <menuitem action='grid-type-asixteenthbeat'/>
         <menuitem action='grid-type-thirtyseconds'/>
-        <menuitem action='grid-type-thirds'/>
-        <menuitem action='grid-type-sixths'/>
-        <menuitem action='grid-type-twelfths'/>
-        <menuitem action='grid-type-twentyfourths'/>
-        <menuitem action='grid-type-fifths'/>
-        <menuitem action='grid-type-tenths'/>
-        <menuitem action='grid-type-twentieths'/>
-        <menuitem action='grid-type-sevenths'/>
-        <menuitem action='grid-type-fourteenths'/>
-        <menuitem action='grid-type-twentyeighths'/>
+        <menu action='GridChoiceTriplets'>
+          <menuitem action='grid-type-thirds'/>
+          <menuitem action='grid-type-sixths'/>
+          <menuitem action='grid-type-twelfths'/>
+          <menuitem action='grid-type-twentyfourths'/>
+        </menu>
+        <menu action='GridChoiceQuintuplets'>
+          <menuitem action='grid-type-fifths'/>
+          <menuitem action='grid-type-tenths'/>
+          <menuitem action='grid-type-twentieths'/>
+        </menu>
+        <menu action='GridChoiceSeptuplets'>
+          <menuitem action='grid-type-sevenths'/>
+          <menuitem action='grid-type-fourteenths'/>
+          <menuitem action='grid-type-twentyeighths'/>
+        </menu>
+        <menuitem action='grid-type-timecode'/>
+        <menuitem action='grid-type-minsec'/>
+        <menuitem action='grid-type-cdframe'/>
       </menu>
       <separator/>
       <menu action="TempoMenu">

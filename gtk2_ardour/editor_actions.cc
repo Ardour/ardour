@@ -180,6 +180,10 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("Timecode"), _("Timecode fps"));
 	ActionManager::register_action (editor_menu_actions, X_("LayerDisplay"), _("Region Layers"));
 
+	ActionManager::register_action (editor_menu_actions, X_("GridChoiceTriplets"), _("Triplets"));
+	ActionManager::register_action (editor_menu_actions, X_("GridChoiceQuintuplets"), _("Quintuplets"));
+	ActionManager::register_action (editor_menu_actions, X_("GridChoiceSeptuplets"), _("Septuplets"));
+
 	act = ActionManager::register_action (editor_menu_actions, X_("TrackHeightMenu"), _("Height"));
 	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 
