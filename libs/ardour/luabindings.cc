@@ -816,7 +816,6 @@ LuaBindings::common (lua_State* L)
 
 		.addFunction ("quarters_per_minute_at", &Temporal::TempoMap::quarters_per_minute_at)
 		.addFunction ("round_to_bar", &Temporal::TempoMap::round_to_bar)
-		.addFunction ("dump", &Temporal::TempoMap::dump)
 		.addRefFunction ("midi_clock_beat_at_or_after", &Temporal::TempoMap::midi_clock_beat_at_or_after)
 		.endClass ()
 
@@ -2373,6 +2372,12 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("TrackMode")
 		.addConst ("Normal", ARDOUR::TrackMode(Start))
 		.addConst ("NonLayered", ARDOUR::TrackMode(NonLayered))
+		.endNamespace ()
+
+		.beginNamespace ("RecordMode")
+		.addConst ("RecLayered", ARDOUR::RecordMode(RecLayered))
+		.addConst ("RecNonLayered", ARDOUR::RecordMode(RecNonLayered))
+		.addConst ("RecSoundOnSound", ARDOUR::RecordMode(RecSoundOnSound))
 		.endNamespace ()
 
 		.beginNamespace ("TransportRequestSource")
