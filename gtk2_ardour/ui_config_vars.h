@@ -51,6 +51,7 @@ UI_CONFIG_VARIABLE (std::string, vkeybd_layout, "vkeybd-layout", "QWERTY Single"
 UI_CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", true)
 UI_CONFIG_VARIABLE (bool, autoplay_files, "autoplay-files", false)
 UI_CONFIG_VARIABLE (bool, autoplay_clips, "autoplay-clips", true)
+UI_CONFIG_VARIABLE (bool, highlight_auditioned_clips, "highlight-auditioned-clips", true)
 UI_CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
 UI_CONFIG_VARIABLE (bool, name_new_markers, "name-new-markers", false)
 UI_CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid", false)

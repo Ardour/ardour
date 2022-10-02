@@ -180,6 +180,13 @@ TriggerClipPicker::TriggerClipPicker ()
 	_view.set_reorderable (false);
 	_view.get_selection ()->set_mode (SELECTION_MULTIPLE);
 
+	Gtk::TreeViewColumn*   name_col = _view.get_column (0);
+	Gtk::CellRendererText* renderer = dynamic_cast<Gtk::CellRendererText*> (_view.get_column_cell_renderer (0));
+	name_col->add_attribute (renderer->property_foreground_gdk (), _columns.color);
+
+	_view.ensure_style ();
+	on_theme_changed ();
+
 	/* DnD source */
 	std::vector<TargetEntry> dnd;
 	dnd.push_back (TargetEntry ("text/uri-list"));
@@ -201,6 +208,8 @@ TriggerClipPicker::TriggerClipPicker ()
 	_view.signal_drag_motion ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_motion));
 	_view.signal_drag_data_received ().connect (sigc::mem_fun (*this, &TriggerClipPicker::drag_data_received));
 
+	UIConfiguration::instance ().ColorsChanged.connect (sigc::mem_fun (*this, &TriggerClipPicker::on_theme_changed));
+	UIConfiguration::instance ().ParameterChanged.connect (sigc::mem_fun (*this, &TriggerClipPicker::parameter_changed));
 	Config->ParameterChanged.connect (_config_connection, invalidator (*this), boost::bind (&TriggerClipPicker::parameter_changed, this, _1), gui_context ());
 	LibraryClipAdded.connect (_clip_added_connection, invalidator (*this), boost::bind (&TriggerClipPicker::clip_added, this, _1, _2), gui_context ());
 
@@ -239,6 +248,8 @@ TriggerClipPicker::parameter_changed (std::string const& p)
 	} else if (p == "clip-library-dir") {
 		_clip_library_dir = clip_library_dir ();
 		refill_dropdown ();
+	} else if (p == "highlight-auditioned-clips") {
+		reset_audition_marks (true);
 	}
 }
 
@@ -452,6 +463,7 @@ TriggerClipPicker::cursor_changed ()
 	 * However, checking if `i` is _view.get_selection () does not reliably work from this context.
 	 */
 	if (i && (*i)[_columns.file]) {
+		mark_auditioned (i);
 		audition ((*i)[_columns.path]);
 	}
 }
@@ -515,6 +527,7 @@ TriggerClipPicker::row_activated (TreeModel::Path const& p, TreeViewColumn*)
 {
 	TreeModel::iterator i = _model->get_iter (p);
 	if (i && (*i)[_columns.file]) {
+		mark_auditioned (i);
 		audition ((*i)[_columns.path]);
 	} else if (i) {
 		list_dir ((*i)[_columns.path]);
@@ -571,6 +584,7 @@ TriggerClipPicker::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Selecti
 		}
 	}
 	data.set_uris (uris);
+	reset_audition_marks ();
 }
 
 bool
@@ -756,11 +770,12 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 
 	if (!pc) {
 		if (_root_paths.find (_current_path) == _root_paths.end ()) {
-			TreeModel::Row row = *(_model->append ());
-			row[_columns.name] = "..";
-			row[_columns.path] = Glib::path_get_dirname (_current_path);
-			row[_columns.read] = false;
-			row[_columns.file] = false;
+			TreeModel::Row row  = *(_model->append ());
+			row[_columns.name]  = "..";
+			row[_columns.path]  = Glib::path_get_dirname (_current_path);
+			row[_columns.read]  = false;
+			row[_columns.file]  = false;
+			row[_columns.color] = _color_foreground;
 		}
 	}
 
@@ -776,8 +791,9 @@ TriggerClipPicker::list_dir (std::string const& path, Gtk::TreeNodeChildren cons
 		row[_columns.read] = false;
 		row[_columns.file] = false;
 		/* add stub child */
-		row                = *(_model->append (row.children ()));
-		row[_columns.read] = false;
+		row                 = *(_model->append (row.children ()));
+		row[_columns.read]  = false;
+		row[_columns.color] = _color_foreground;
 	}
 
 	for (auto& f : files) {
@@ -898,8 +914,45 @@ TriggerClipPicker::audition_selected ()
 	}
 	TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
 	TreeIter                             i    = _model->get_iter (*rows.begin ());
+	mark_auditioned (i);
 	audition ((*i)[_columns.path]);
 }
+
+void
+TriggerClipPicker::mark_auditioned (TreeModel::iterator i)
+{
+	if (!UIConfiguration::instance ().get_highlight_auditioned_clips()) {
+		return;
+	}
+	(*i)[_columns.color]      = _color_auditioned;
+	(*i)[_columns.auditioned] = true;
+}
+
+void
+TriggerClipPicker::reset_audition_marks (bool force)
+{
+	for (auto const& i : _model->children ()) {
+		if (i[_columns.auditioned] || force) {
+			i[_columns.color] = _color_foreground;
+		}
+	}
+}
+
+void
+TriggerClipPicker::on_theme_changed ()
+{
+	_color_foreground = _view.get_style ()->get_fg (STATE_NORMAL);
+	_color_auditioned = _view.get_style ()->get_fg (STATE_INSENSITIVE);
+
+	for (auto const& i : _model->children ()) {
+		if (i[_columns.auditioned]) {
+			i[_columns.color] = _color_auditioned;
+		} else {
+			i[_columns.color] = _color_foreground;
+		}
+	}
+}
+
 
 void
 TriggerClipPicker::audition (std::string const& path)

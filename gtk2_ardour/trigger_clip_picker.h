@@ -88,6 +88,9 @@ private:
 	bool seek_button_press (GdkEventButton*);
 	bool seek_button_release (GdkEventButton*);
 	void auditioner_combo_changed ();
+	void on_theme_changed ();
+	void mark_auditioned (Gtk::TreeModel::iterator);
+	void reset_audition_marks (bool force = false);
 
 	ArdourWidgets::ArdourDropdown _clip_dir_menu;
 	Gtk::FileChooserDialog        _fcd;
@@ -99,11 +102,15 @@ private:
 			add (path);
 			add (read);
 			add (file);
+			add (color);
+			add (auditioned);
 		}
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> path;
 		Gtk::TreeModelColumn<bool>        read;
 		Gtk::TreeModelColumn<bool>        file;
+		Gtk::TreeModelColumn<Gdk::Color>  color;
+		Gtk::TreeModelColumn<bool>        auditioned;
 	};
 
 	Columns                      _columns;
@@ -118,6 +125,8 @@ private:
 	ArdourWidgets::ArdourButton  _show_plugin_btn;
 	Gtk::HScale                  _seek_slider;
 	Gtk::CheckButton             _autoplay_btn;
+	Gdk::Color                   _color_foreground;
+	Gdk::Color                   _color_auditioned;
 
 	/* MIDI props */
 	Gtk::Table _midi_prop_table;
