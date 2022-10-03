@@ -541,6 +541,51 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 }
 
 void
+Editor::mouse_add_bbt_marker_event (timepos_t pos)
+{
+	if (_session == 0) {
+		return;
+	}
+
+	/* position markers must always be positioned using audio time */
+
+	BBTMarkerDialog marker_dialog  (pos);
+
+	/* run this modally since we are finishing a drag and the drag object
+	 * will be destroyed when we return from here
+	 */
+
+	int result = marker_dialog.run ();
+
+	switch (result) {
+	case RESPONSE_ACCEPT:
+	case RESPONSE_OK:
+		break;
+	default:
+		return;
+	}
+
+	BBT_Time bbt;
+	std::string name;
+
+	bbt = marker_dialog.bbt_value ();
+	name = marker_dialog.name();
+
+	begin_reversible_command (_("add BBT marker"));
+
+	TempoMap::WritableSharedPtr map (TempoMap::write_copy());
+	XMLNode &before = map->get_state();
+
+	map->set_bartime (bbt, marker_dialog.position(), name);
+
+	_session->add_command (new Temporal::TempoCommand (_("add BBT marker"), &before, &map->get_state()));
+	commit_reversible_command ();
+
+	TempoMap::update (map);
+}
+
+
+void
 Editor::remove_bbt_marker (ArdourCanvas::Item* item)
 {
 	ArdourMarker* marker;

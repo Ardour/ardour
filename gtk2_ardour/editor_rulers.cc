@@ -301,6 +301,10 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		}
 		break;
 
+	case BBTRulerItem:
+		ruler_items.push_back (MenuElem (_("Add BBT Marker"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_bbt_marker_event), where)));
+		break;
+
 	default:
 		break;
 	}

@@ -3552,41 +3552,16 @@ void
 BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!_drag_valid) {
-		TempoMap::abort_update ();
+		_editor->abort_tempo_map_edit ();
 		return;
 	}
 
 	if (!movement_occurred) {
 
-		_editor->begin_reversible_command (_("add BBT marker"));
-		/* position markers must always be positioned using audio time */
+		/* click, no drag */
 
-		BBTMarkerDialog* marker_dialog = new BBTMarkerDialog (timepos_t (grab_sample()));
-
-		/* run this modally since we are finishing a drag and the drag object
-		 * will be destroyed when we return from here
-		 */
-
-		int result = marker_dialog->run ();
-		BBT_Time bbt;
-		std::string name;
-
-		switch (result) {
-		case RESPONSE_ACCEPT:
-		case RESPONSE_OK:
-			bbt = marker_dialog->bbt_value ();
-			name = marker_dialog->name();
-			map->set_bartime (bbt, marker_dialog->position(), name);
-			delete marker_dialog;
-			break;
-		default:
-			delete marker_dialog;
-			TempoMap::abort_update ();
-			_editor->abort_reversible_command ();
-			return;
-		}
-
-		/* the map change is committed below */
+		_editor->abort_tempo_map_edit ();
+		return;
 
 	} else {
 
