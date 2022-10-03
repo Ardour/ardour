@@ -1748,10 +1748,11 @@ Session::bang_trigger_at (int32_t route_index, int32_t row_index)
 		}
 		if (index == route_index) {
 			r->triggerbox()->bang_trigger_at(row_index);
-			return 1;
+			return true;
 		}
 		index++;
 	}
+	return false;
 }
 
 bool
@@ -1774,10 +1775,11 @@ Session::unbang_trigger_at (int32_t route_index, int32_t row_index)
 		}
 		if (index == route_index) {
 			r->triggerbox()->unbang_trigger_at(row_index);
-			return 1;
+			return true;
 		}
 		index++;
 	}
+	return false;
 }
 
 void
