@@ -4845,9 +4845,10 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 	/* Now x axis */
 
 	timecnt_t dt;
-
-	if (_point->can_slide ()) {
+	// alternatively, drag horizontally but use initial vertical position
+	if (_point->can_slide () && (abs(_drags->current_pointer_x() - grab_x()) > abs(cy - _fixed_grab_y))) {
 		dt = total_dt (event);
+		cy = _fixed_grab_y;
 	}
 
 	cy = max (0.0, cy);
