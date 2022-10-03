@@ -242,3 +242,10 @@ RouteGroupDialog::unique_name (std::string const name) const
 
 	return (i == route_groups.end ());
 }
+
+void
+RouteGroupDialog::on_map ()
+{
+	ArdourDialog::on_map ();
+	_name.grab_focus ();
+}

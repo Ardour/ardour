@@ -37,6 +37,8 @@ public:
 	ARDOUR::RouteGroup* group() const { return _group; }
 	bool name_check () const;
 
+	void on_map ();
+
 private:
 	ARDOUR::RouteGroup* _group;
 	std::string _initial_name;
