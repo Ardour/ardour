@@ -715,7 +715,7 @@ ExportHandler::write_cue_header (CDMarkerStatus & status)
 		We try to use these file types whenever appropriate and
 		default to our own names otherwise.
 	*/
-	status.out << "FILE \"" << Glib::path_get_basename(status.filename) << "\" ";
+	status.out << "FILE " << cue_escape_cdtext (Glib::path_get_basename(status.filename)) << " ";
 	if (!status.format->format_name().compare ("WAV")  || !status.format->format_name().compare ("BWF")) {
 		status.out  << "WAVE";
 	} else if (status.format->format_id() == ExportFormatBase::F_RAW &&
