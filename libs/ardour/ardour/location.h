@@ -137,6 +137,8 @@ public:
 	static PBD::Signal1<void,Location*> flags_changed;
 	static PBD::Signal1<void,Location*> lock_changed;
 	static PBD::Signal1<void,Location*> cue_change;
+	static PBD::Signal1<void,Location*> scene_changed;
+	static PBD::Signal1<void,Location*> time_domain_changed; /* unused */
 
 	/* this is sent only when both start and end change at the same time */
 	static PBD::Signal1<void,Location*> changed;
@@ -148,11 +150,12 @@ public:
 	PBD::Signal0<void> Changed;
 
 	PBD::Signal0<void> NameChanged;
-	PBD::Signal0<void> CueChanged;
 	PBD::Signal0<void> EndChanged;
 	PBD::Signal0<void> StartChanged;
 	PBD::Signal0<void> FlagsChanged;
 	PBD::Signal0<void> LockChanged;
+	PBD::Signal0<void> CueChanged;
+	PBD::Signal0<void> SceneChanged; /* unused */
 	PBD::Signal0<void> TimeDomainChanged;
 
 	/* CD Track / CD-Text info */
@@ -166,21 +169,58 @@ public:
 	Temporal::TimeDomain position_time_domain() const { return _start.time_domain(); }
 	void set_position_time_domain (Temporal::TimeDomain ps);
 
-	static PBD::Signal0<void> scene_changed; /* for use by backend scene change management, class level */
-	PBD::Signal0<void> SceneChangeChanged;   /* for use by objects interested in this object */
+	class ChangeSuspender {
+		public:
+			ChangeSuspender (Location* l) : _l (l) {
+				_l->suspend_signals ();
+			}
+			ChangeSuspender (ChangeSuspender const& other) : _l (other._l) {
+				_l->suspend_signals ();
+			}
+			~ChangeSuspender () {
+				_l->resume_signals ();
+			}
+		private:
+			Location* _l;
+	};
+
+protected:
+	friend class ChangeSuspender;
+	void suspend_signals ();
+	void resume_signals ();
 
 private:
-	std::string        _name;
-	timepos_t          _start;
-	timepos_t          _end;
-	Flags              _flags;
-	bool               _locked;
-	boost::shared_ptr<SceneChange> _scene_change;
-	int64_t            _timestamp;
-	int32_t            _cue;
-
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
+
+	enum Signal {
+		Name,
+		StartEnd,
+		End,
+		Start,
+		Flag,
+		Lock,
+		Cue,
+		Scene,
+		Domain
+	};
+
+	void emit_signal (Signal);
+	void actually_emit_signal (Signal);
+
+
+	std::string _name;
+	timepos_t   _start;
+	timepos_t   _end;
+	Flags       _flags;
+	bool        _locked;
+	int64_t     _timestamp;
+	int32_t     _cue;
+
+	uint32_t         _signals_suspended;
+	std::set<Signal> _postponed_signals;
+
+	boost::shared_ptr<SceneChange> _scene_change;
 };
 
 /** A collection of session locations including unique dedicated locations (loop, punch, etc) */
