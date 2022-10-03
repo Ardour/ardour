@@ -528,6 +528,7 @@
         <menuitem action="toggle-loop-punch-ruler"/>
         <menuitem action="toggle-cd-marker-ruler"/>
         <menuitem action="toggle-marker-ruler"/>
+        <menuitem action="toggle-cue-marker-ruler"/>
         <separator/>
         <menuitem action="toggle-video-ruler"/>
       </menu>
