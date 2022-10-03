@@ -358,8 +358,14 @@ display_name (std::string const& dir) {
 			std::string type;
 			if (root->get_property ("type", type)) {
 				if (type == "bundled") {
+#ifdef MIXBUS
+					/* Ardour has no bundled content */
 					return string_compose (_("%1 Bundled Content"), PROGRAM_NAME);
+#else
+					return std::string();
+#endif
 				}
+
 			}
 #if ENABLE_NLS
 			if (ARDOUR::translations_are_enabled ()) {
