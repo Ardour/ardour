@@ -274,19 +274,22 @@ CueLayout::show_knob_function ()
 void
 CueLayout::button_lower (uint32_t n)
 {
-	boost::shared_ptr<Route> r = _session.get_remote_nth_route (n);
-	if (!r) {
+	if (!_route[n]) {
+		return;
+	}
+
+	boost::shared_ptr<TriggerBox> tb = _route[n]->triggerbox();
+
+	if (!tb) {
+		/* unpossible! */
 		return;
 	}
 
 	if (_p2.stop_down() || _long_stop) {
-		boost::shared_ptr<TriggerBox> tb = r->triggerbox();
-		if (tb) {
-			tb->stop_all_quantized();
-		}
+		tb->stop_all_quantized ();
 	} else {
 		/* select track */
-		_session.selection().set (r, boost::shared_ptr<AutomationControl>());
+		_session.selection().set (_route[n], boost::shared_ptr<AutomationControl>());
 	}
 }
 
