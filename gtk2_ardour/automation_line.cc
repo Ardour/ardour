@@ -231,7 +231,7 @@ double
 AutomationLine::control_point_box_size ()
 {
 	float uiscale = UIConfiguration::instance().get_ui_scale();
-	uiscale = std::max<float> (1.f, powf (uiscale, 1.71));
+	uiscale = std::max<float> (1.f, powf (uiscale, 1.71)) * 2;
 
 	if (_height > TimeAxisView::preset_height (HeightLarger)) {
 		return rint (8.0 * uiscale);
