@@ -38,8 +38,8 @@ RulerDialog::RulerDialog ()
 	get_vbox()->pack_start (range_button);
 	get_vbox()->pack_start (loop_punch_button);
 	get_vbox()->pack_start (cdmark_button);
-	get_vbox()->pack_start (cuemark_button);
 	get_vbox()->pack_start (mark_button);
+	get_vbox()->pack_start (cuemark_button);
 	get_vbox()->pack_start (video_button);
 
 	get_vbox()->show_all ();
