@@ -954,16 +954,16 @@ private:
 	ArdourCanvas::Rectangle* _canvas_drop_zone;
 	bool canvas_drop_zone_event (GdkEvent* event);
 
-	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
-	Glib::RefPtr<Gtk::ToggleAction> ruler_bbt_action;
-	Glib::RefPtr<Gtk::ToggleAction> ruler_samples_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_minsec_action;
-	Glib::RefPtr<Gtk::ToggleAction> ruler_tempo_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_samples_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_bbt_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_meter_action;
-	Glib::RefPtr<Gtk::ToggleAction> ruler_marker_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_tempo_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_range_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_loop_punch_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_marker_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cue_marker_action;
 	bool                            no_ruler_shown_update;
 
