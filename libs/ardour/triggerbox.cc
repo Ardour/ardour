@@ -892,6 +892,7 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 
 		switch (_state) {
 		case Running:
+		case WaitingToStart:
 			switch (launch_style()) {
 			case OneShot:
 			case ReTrigger:
@@ -914,11 +915,6 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 		case WaitingForRetrigger:
 			/* do nothing */
 			break;
-
-		case WaitingToStart:
-			/* didn't even get started */
-			shutdown (bufs, dest_offset);
-			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 unbanged, never started, now stopped\n", index()));
 		}
 	}
 }
