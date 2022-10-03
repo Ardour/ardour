@@ -321,16 +321,16 @@ Editor::store_ruler_visibility ()
 {
 	XMLNode* node = new XMLNode(X_("RulerVisibility"));
 
-	node->set_property (X_("timecode"), ruler_timecode_action->get_active());
-	node->set_property (X_("bbt"), ruler_bbt_action->get_active());
-	node->set_property (X_("samples"), ruler_samples_action->get_active());
 	node->set_property (X_("minsec"), ruler_minsec_action->get_active());
-	node->set_property (X_("tempo"), ruler_tempo_action->get_active());
+	node->set_property (X_("timecode"), ruler_timecode_action->get_active());
+	node->set_property (X_("samples"), ruler_samples_action->get_active());
+	node->set_property (X_("bbt"), ruler_bbt_action->get_active());
 	node->set_property (X_("meter"), ruler_meter_action->get_active());
-	node->set_property (X_("marker"), ruler_marker_action->get_active());
+	node->set_property (X_("tempo"), ruler_tempo_action->get_active());
 	node->set_property (X_("rangemarker"), ruler_range_action->get_active());
 	node->set_property (X_("transportmarker"), ruler_loop_punch_action->get_active());
 	node->set_property (X_("cdmarker"), ruler_cd_marker_action->get_active());
+	node->set_property (X_("marker"), ruler_marker_action->get_active());
 	node->set_property (X_("cuemarker"), ruler_cue_marker_action->get_active());
 	node->set_property (X_("videotl"), ruler_video_action->get_active());
 
