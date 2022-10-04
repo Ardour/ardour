@@ -1718,7 +1718,7 @@ private:
 
 	void region_view_item_click (AudioRegionView&, GdkEventButton*);
 
-	bool can_remove_control_point (ArdourCanvas::Item*);
+	bool can_remove_control_point (ControlPoint& control_point);
 	void remove_control_point (ArdourCanvas::Item*);
 
 	/* Canvas event handlers */

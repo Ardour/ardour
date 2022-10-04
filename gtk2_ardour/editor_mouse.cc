@@ -2453,19 +2453,12 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 }
 
 bool
-Editor::can_remove_control_point (ArdourCanvas::Item* item)
+Editor::can_remove_control_point (ControlPoint& control_point)
 {
-	ControlPoint* control_point;
-
-	if ((control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) == 0) {
-		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
-		abort(); /*NOTREACHED*/
-	}
-
-	AutomationLine& line = control_point->line ();
+	AutomationLine& line = control_point.line ();
 	if (dynamic_cast<AudioRegionGainLine*> (&line)) {
 		/* we shouldn't remove the first or last gain point in region gain lines */
-		if (line.is_last_point(*control_point) || line.is_first_point(*control_point)) {
+		if (line.is_last_point(control_point) || line.is_first_point(control_point)) {
 			return false;
 		}
 	}
@@ -2476,15 +2469,15 @@ Editor::can_remove_control_point (ArdourCanvas::Item* item)
 void
 Editor::remove_control_point (ArdourCanvas::Item* item)
 {
-	if (!can_remove_control_point (item)) {
-		return;
-	}
+	ControlPoint* control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
 
-	ControlPoint* control_point;
-
-	if ((control_point = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"))) == 0) {
+	if (control_point == 0) {
 		fatal << _("programming error: control point canvas item has no control point object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
+	}
+
+	if (!can_remove_control_point (*control_point)) {
+		return;
 	}
 
 	control_point->line().remove_point (*control_point);
