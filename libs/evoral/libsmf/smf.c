@@ -316,11 +316,13 @@ smf_event_new_from_bytes(int first_byte, int second_byte, int third_byte)
 
 	if (first_byte > 255) {
 		g_warning("smf_event_new_from_bytes: first byte is %d, which is larger than 255.", first_byte);
+		smf_event_delete(event);
 		return (NULL);
 	}
 
 	if (!is_status_byte(first_byte)) {
 		g_warning("smf_event_new_from_bytes: first byte is not a valid status byte.");
+		smf_event_delete(event);
 		return (NULL);
 	}
 
@@ -335,11 +337,13 @@ smf_event_new_from_bytes(int first_byte, int second_byte, int third_byte)
 	if (len > 1) {
 		if (second_byte > 255) {
 			g_warning("smf_event_new_from_bytes: second byte is %d, which is larger than 255.", second_byte);
+			smf_event_delete(event);
 			return (NULL);
 		}
 
 		if (is_status_byte(second_byte)) {
 			g_warning("smf_event_new_from_bytes: second byte cannot be a status byte.");
+			smf_event_delete(event);
 			return (NULL);
 		}
 	}
@@ -347,11 +351,13 @@ smf_event_new_from_bytes(int first_byte, int second_byte, int third_byte)
 	if (len > 2) {
 		if (third_byte > 255) {
 			g_warning("smf_event_new_from_bytes: third byte is %d, which is larger than 255.", third_byte);
+			smf_event_delete(event);
 			return (NULL);
 		}
 
 		if (is_status_byte(third_byte)) {
 			g_warning("smf_event_new_from_bytes: third byte cannot be a status byte.");
+			smf_event_delete(event);
 			return (NULL);
 		}
 	}
