@@ -153,6 +153,9 @@ PolyLine::covers (Duple const& point) const
 	Points::size_type i;
 	Points::size_type j;
 
+	double squared_threshold = _threshold + _outline_width;
+	squared_threshold *= squared_threshold;
+
 	/* repeat for each line segment */
 
 	const Rect visible (window_to_item (_canvas->visible_area ()));
@@ -180,7 +183,7 @@ PolyLine::covers (Duple const& point) const
 			continue;
 		}
 
-		if (d < _threshold + _outline_width) {
+		if (d < squared_threshold) {
 			return true;
 		}
 	}
