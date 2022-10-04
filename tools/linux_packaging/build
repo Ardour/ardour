@@ -739,7 +739,7 @@ if test -n "$MIXBUS"; then
 	if test -f "${CACHEDIR}/MixbusBundledMedia.zip"; then
 		echo "Adding Mixbus Bundled Content"
 		rm -f "${MediaClips}/"*.*
-		unzip -q -d "${MediaClips}" "${CACHEDIR}/MixbusBundledMedia.zip"
+		unzip -q -o -d "${MediaClips}" "${CACHEDIR}/MixbusBundledMedia.zip"
 	fi
 else
     echo "Fetching Ardour bundled content"
@@ -751,7 +751,7 @@ else
     if test -f "${CACHEDIR}/MixbusBundledMedia.zip"; then
 	echo "Adding Ardour Bundled Content"
 	rm -f "${MediaClips}/"*.*
-	unzip -q -d "${MediaClips}" "${CACHEDIR}/ArdourBundledMedia.zip"
+	unzip -q -o -d "${MediaClips}" "${CACHEDIR}/ArdourBundledMedia.zip"
     fi
 fi
 

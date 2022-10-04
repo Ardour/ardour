@@ -360,7 +360,7 @@ if test -n "$MIXBUS"; then
 	if test -f "${SRCCACHE}/MixbusBundledMedia.zip"; then
 		echo "Adding Mixbus Bundled Content"
 		rm -f $DESTDIR/share/${LOWERCASE_DIRNAME}/media/*.*
-		unzip -q -d "$DESTDIR/share/${LOWERCASE_DIRNAME}/media/" "${SRCCACHE}/MixbusBundledMedia.zip"
+		unzip -q -o -d "$DESTDIR/share/${LOWERCASE_DIRNAME}/media/" "${SRCCACHE}/MixbusBundledMedia.zip"
 	fi
 else
         echo "Fetching Ardour bundled media"
@@ -372,7 +372,7 @@ else
 	if test -f "${SRCCACHE}/ArdourBundledMedia.zip"; then
 		echo "Adding Ardour Bundled Content"
 		rm -f $DESTDIR/share/${LOWERCASE_DIRNAME}/media/*.*
-		unzip -q -d "$DESTDIR/share/${LOWERCASE_DIRNAME}/media/" "${SRCCACHE}/ArdourBundledMedia.zip"
+		unzip -q -o -d "$DESTDIR/share/${LOWERCASE_DIRNAME}/media/" "${SRCCACHE}/ArdourBundledMedia.zip"
 	fi
 fi
 
