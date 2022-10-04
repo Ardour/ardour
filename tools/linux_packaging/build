@@ -741,6 +741,18 @@ if test -n "$MIXBUS"; then
 		rm -f "${MediaClips}/"*.*
 		unzip -q -d "${MediaClips}" "${CACHEDIR}/MixbusBundledMedia.zip"
 	fi
+else
+    echo "Fetching Ardour bundled content"
+
+    curl -s -S --fail -#  \
+	 -z "${CACHEDIR}/ArdourBundledMedia.zip" \
+	 -o "${CACHEDIR}/ArdourBundledMedia.zip" \
+	 "http://ardour.org/loops/ArdourBundledMedia.zip"
+    if test -f "${CACHEDIR}/MixbusBundledMedia.zip"; then
+	echo "Adding Ardour Bundled Content"
+	rm -f "${MediaClips}/"*.*
+	unzip -q -d "${MediaClips}" "${CACHEDIR}/ArdourBundledMedia.zip"
+    fi
 fi
 
 echo "Setting Bundled Media dir/file permissions"

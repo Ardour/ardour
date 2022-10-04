@@ -362,6 +362,18 @@ if test -n "$MIXBUS"; then
 		rm -f $DESTDIR/share/${LOWERCASE_DIRNAME}/media/*.*
 		unzip -q -d "$DESTDIR/share/${LOWERCASE_DIRNAME}/media/" "${SRCCACHE}/MixbusBundledMedia.zip"
 	fi
+else
+        echo "Fetching Ardour bundled media"
+	curl -s -S --fail -#  \
+		-z "${SRCCACHE}/ArdourBundledMedia.zip" \
+		-o "${SRCCACHE}/ArdourBundledMedia.zip" \
+		"http://ardour.org/loops/ArdourBundledMedia.zip"
+
+	if test -f "${SRCCACHE}/ArdourBundledMedia.zip"; then
+		echo "Adding Ardour Bundled Content"
+		rm -f $DESTDIR/share/${LOWERCASE_DIRNAME}/media/*.*
+		unzip -q -d "$DESTDIR/share/${LOWERCASE_DIRNAME}/media/" "${SRCCACHE}/ArdourBundledMedia.zip"
+	fi
 fi
 
 ################################################################################

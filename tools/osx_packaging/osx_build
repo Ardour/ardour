@@ -818,6 +818,19 @@ if test -n "$MIXBUS"; then
 		bsdtar -C "${PRODUCT_PKG_DIR}/${MediaClips}" -xf \
 			"${CACHEDIR}/MixbusBundledMedia.zip"
 	fi
+else
+	echo "Fetching Ardour bundled content"
+	curl -s -S --fail -#  \
+		-z "${CACHEDIR}/ArdourBundledMedia.zip" \
+		-o "${CACHEDIR}/ArdourBundledMedia.zip" \
+		"http://ardour.org/loops/ArdourBundledMedia.zip"
+
+	if test -f "${CACHEDIR}/ArdourBundledMedia.zip"; then
+		echo "Adding Ardour Bundled Content"
+		rm -f "${PRODUCT_PKG_DIR}/${MediaClips}/"*.*
+		bsdtar -C "${PRODUCT_PKG_DIR}/${MediaClips}" -xf \
+			"${CACHEDIR}/ArdourBundledMedia.zip"
+	fi
 fi
 
 echo "Setting Bundled Media dir/file permissions"
