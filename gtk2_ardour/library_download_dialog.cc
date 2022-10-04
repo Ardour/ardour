@@ -74,14 +74,31 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 	description_view.set_wrap_mode (Gtk::WRAP_WORD);
 	get_vbox()->pack_start (description_view);
 
-	ARDOUR::LibraryFetcher lf;
-	lf.get_descriptions ();
-	lf.foreach_description (boost::bind (&LibraryDownloadDialog::add_library, this, _1));
 }
 
 LibraryDownloadDialog::~LibraryDownloadDialog ()
 {
 	delete inflater;
+}
+
+void
+LibraryDownloadDialog::refill ()
+{
+	ARDOUR::LibraryFetcher lf;
+	lf.get_descriptions ();
+
+	if (lf.n_descriptions()) {
+		_model->clear ();
+	}
+
+	lf.foreach_description (boost::bind (&LibraryDownloadDialog::add_library, this, _1));
+}
+
+void
+LibraryDownloadDialog::on_show ()
+{
+	ArdourDialog::on_show ();
+	refill ();
 }
 
 void

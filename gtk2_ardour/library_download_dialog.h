@@ -47,6 +47,7 @@ class LibraryDownloadDialog : public ArdourDialog
 	~LibraryDownloadDialog ();
 
 	void add_library (ARDOUR::LibraryDescription const &);
+	void on_show ();
 
   private:
 	class LibraryColumns : public Gtk::TreeModelColumnRecord {
@@ -115,6 +116,7 @@ class LibraryDownloadDialog : public ArdourDialog
 
 	Gtk::TextView description_view;
 	void library_selected ();
+	void refill ();
 };
 
 
