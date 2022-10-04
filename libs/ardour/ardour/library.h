@@ -66,6 +66,7 @@ class LIBARDOUR_API LibraryFetcher {
 	int add (std::string const & root_dir);
 
 	int get_descriptions ();
+	size_t n_descriptions() const { return _descriptions.size(); }
 	void foreach_description (boost::function<void (LibraryDescription)> f) const;
 
 	bool installed (LibraryDescription const & desc);
