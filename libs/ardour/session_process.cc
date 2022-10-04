@@ -1782,6 +1782,40 @@ Session::unbang_trigger_at (int32_t route_index, int32_t row_index)
 	return false;
 }
 
+boost::shared_ptr<TriggerBox>
+Session::triggerbox_at (int32_t route_index) const
+{
+	int index = 0;
+	StripableList sl;
+	get_stripables (sl);
+	sl.sort (Stripable::Sorter ());
+	for (StripableList::iterator s = sl.begin (); s != sl.end (); ++s) {
+		boost::shared_ptr<Route>     r = boost::dynamic_pointer_cast<Route> (*s);
+		if (!r || !r->triggerbox ()) {
+			continue;
+		}
+		/* we're only interested in Trigger Tracks */
+		if (!(r->presentation_info ().trigger_track ())) {
+			continue;
+		}
+		if (index == route_index) {
+			return r->triggerbox();
+		}
+		index++;
+	}
+	return boost::shared_ptr<TriggerBox>();
+}
+
+TriggerPtr
+Session::trigger_at (int32_t route_index, int32_t trigger_index) const
+{
+	boost::shared_ptr<TriggerBox> tb = triggerbox_at(route_index);
+	if (tb) {
+		return tb->trigger(trigger_index);
+	}
+	return TriggerPtr();
+}
+
 void
 Session::maybe_find_pending_cue ()
 {

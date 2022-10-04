@@ -1375,6 +1375,8 @@ public:
 	void trigger_cue_row (int32_t);
 	CueEvents const & cue_events() const { return _cue_events; }
 
+	boost::shared_ptr<TriggerBox> triggerbox_at (int32_t route_index) const;
+	TriggerPtr trigger_at (int32_t route_index, int32_t row_index) const;
 	bool bang_trigger_at(int32_t route_index, int32_t row_index);
 	bool unbang_trigger_at(int32_t route_index, int32_t row_index);
 
