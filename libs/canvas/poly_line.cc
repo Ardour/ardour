@@ -121,6 +121,24 @@ PolyLine::set_steps (Points const& points, bool stepped)
 	PolyItem::set (copy);
 }
 
+// Clamp x1 to xmax, and scale y1 accordingly, relative to (x0,y0)
+static void
+clamp2 (double& x1, double& y1, double x0, double y0, double xmax) {
+	if (x1 > xmax) {
+		double dx = x1 - x0;
+		double dy = y1 - y0;
+		double slope = 0;
+		// only compute slope if relevant (and safe without overflow / division by zero);
+		// the line is on the xmax edge, and barely visible since x1 is far out and dx is small
+		if (fabs(dx) > 0.1) {
+			slope = dy / dx;
+		}
+		x1 = xmax;
+		double new_dx = x1 - x0;
+		y1 = y0 + new_dx * slope;
+	}
+}
+
 bool
 PolyLine::covers (Duple const& point) const
 {
@@ -151,10 +169,10 @@ PolyLine::covers (Duple const& point) const
 		  math goes wrong.
 		*/
 
-		a.x = std::min (a.x, visible.x1);
-		a.y = std::min (a.y, visible.y1);
-		b.x = std::min (b.x, visible.x1);
-		b.y = std::min (b.y, visible.y1);
+		clamp2 (a.x, a.y, b.x, b.y, visible.x1);
+		clamp2 (a.y, a.x, b.y, b.x, visible.y1);
+		clamp2 (b.x, b.y, a.x, a.y, visible.x1);
+		clamp2 (b.y, b.x, a.y, a.x, visible.y1);
 
 		double d = distance_to_segment_squared (p, a, b, t, at);
 
