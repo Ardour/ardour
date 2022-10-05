@@ -142,14 +142,17 @@ static const char* authors[] = {
 	N_("Thomas Brand"),
 	N_("Chris Cannam"),
 	N_("Jeremy Carter"),
+	N_("Enrico Castella"),
 	N_("Jesse Chappell"),
 	N_("Thomas Charbonnel"),
 	N_("Sam Chessman"),
+	N_("Dan Church"),
 	N_("André Colomb"),
 	N_("Paul Davis"),
 	N_("Simon Dixon"),
 	N_("Gerard van Dongen"),
 	N_("John Emmas"),
+	N_("Hubert Figuière"),
 	N_("Colin Fletcher"),
 	N_("Dave Flick"),
 	N_("Hans Fugal"),
@@ -168,15 +171,18 @@ static const char* authors[] = {
 	N_("Rob Holland"),
 	N_("Robert Jordens"),
 	N_("Stefan Kersten"),
+	N_("Mads Kiilerich"),
 	N_("Armand Klenk"),
 	N_("Julien de Kozak"),
 	N_("Matt Krai"),
 	N_("Georg Krause"),
+	N_("Marijn Kruisselbrink"),
 	N_("Nick Lanham"),
 	N_("Colin Law"),
 	N_("Joshua Leach"),
 	N_("Jan Lentfer"),
 	N_("Ben Loftis"),
+	N_("Hector Martin"),
 	N_("Matthias Mauch"),
 	N_("Nick Mainsbridge"),
 	N_("Tim Mayberry"),
@@ -189,6 +195,7 @@ static const char* authors[] = {
 	N_("Jack O'Quin"),
 	N_("Len Ovens"),
 	N_("Pavel Potocek"),
+	N_("Caleb Potter"),
 	N_("Nimal Ratnayake"),
 	N_("Julien Rivaud"),
 	N_("David Robillard"),
@@ -207,10 +214,21 @@ static const char* authors[] = {
 	N_("Roland Stigge"),
 	N_("Petter Sundlöf"),
 	N_("Mike Täht"),
+	N_("Remi Thebault"),
 	N_("Roy Vegard"),
+	N_("Bruno Vernay"),
+	N_("Florian Walpen"),
 	N_("Thorsten Wilms"),
 	N_("Damien Zammit"),
 	N_("Grygorii Zharun"),
+	N_("albatross"),
+	N_("cooltehno"),
+	N_("danceswithbugs"),
+	N_("dbolton"),
+	N_("itmuckel"),
+	N_("mlachland"),
+	N_("sra"),
+	N_("tassyv"),
 	0
 };
 
@@ -249,7 +267,7 @@ under the terms of the GNU General Public License, shown below.\n\
 		       Version 2, June 1991\n\
 \n\
  Copyright (C) 1989, 1991 Free Software Foundation, Inc.\n\
-     59 Temple Place, Suite 330, Boston, MA  02111-1307  USA\n\
+  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA\n\
  Everyone is permitted to copy and distribute verbatim copies\n\
  of this license document, but changing it is not allowed.\n\
 \n\
