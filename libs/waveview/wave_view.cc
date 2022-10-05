@@ -670,7 +670,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 		for (int i = 0; i < n_peaks; ++i) {
 
 			bool connected_segment = false;
-			/* http://lac.linuxaudio.org/2013/papers/36.pdf Fig3 */
+			/* https://lac.linuxaudio.org/2013/papers/36.pdf Fig3 */
 			if (i + 1 == n_peaks) {
 				wave_context->move_to (i, tips[i].top);
 				wave_context->line_to (i, tips[i].bot);
@@ -912,10 +912,10 @@ WaveView::process_draw_request (boost::shared_ptr<WaveViewDrawRequest> req)
 	Cairo::RefPtr<Cairo::ImageSurface> cairo_image =
 	    Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, req->image->props.height);
 
-	// http://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
+	// https://cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create
 	// This function always returns a valid pointer, but it will return a pointer to a "nil" surface..
 	// but there's some evidence that req->image can be NULL.
-	// http://tracker.ardour.org/view.php?id=6478
+	// https://tracker.ardour.org/view.php?id=6478
 	assert (cairo_image);
 
 	if (peaks_read > 0) {

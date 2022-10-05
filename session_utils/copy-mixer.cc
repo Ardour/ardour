@@ -268,8 +268,8 @@ If --snapshot is not given, the <dst> session file is overwritten.\n\
 When --snapshot is set, a new snapshot in the <dst> session is created.\n\
 \n");
 
-	printf ("Report bugs to <http://tracker.ardour.org/>\n"
-	        "Website: <http://ardour.org/>\n");
+	printf ("Report bugs to <https://tracker.ardour.org/>\n"
+	        "Website: <https://ardour.org/>\n");
 	::exit (EXIT_SUCCESS);
 }
 

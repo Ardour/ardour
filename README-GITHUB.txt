@@ -9,4 +9,4 @@ on `git describe` (a full git clone is needed for this) or alternatively a
 version-file in the release-dist. Github cannot provide the latter and also
 does not allow to inject a version-file during export archiving.
 
-For further information see http://tracker.ardour.org/view.php?id=7328
+For further information see https://tracker.ardour.org/view.php?id=7328

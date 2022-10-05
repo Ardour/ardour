@@ -89,7 +89,7 @@ master branch. That should generate a file called something like
 
 3. Run 'bzip2 0001-Update-German-translation.patch' to compress the file.
 
-4. File a new bug report at http://tracker.ardour.org and attach the resulted 
+4. File a new bug report at https://tracker.ardour.org and attach the resulted
 compressed file and tell either rgareus (Robin Gareus) or las (Paul Davis) on 
 the project's IRC channel (#ardour at irc.freenode.net) about your patch.
 
@@ -130,7 +130,7 @@ Not every PO editor can calculate the equation for the plural forms in your
 language, but you can look it up in headers of PO files from some application
 such a GIMP or Inkscape. Here is an example for Russian:
 
-http://git.gnome.org/browse/gimp/plain/po/ru.po
+https://git.gnome.org/browse/gimp/plain/po/ru.po
 
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2); 10<=4 && (n%100<10 || n"

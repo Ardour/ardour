@@ -555,8 +555,8 @@ usage ()
 	printf ("\n\
 Ardour at your finger tips...\n\
 \n");
-	printf ("Report bugs to <http://tracker.ardour.org/>\n"
-	        "Website: <http://ardour.org/>\n");
+	printf ("Report bugs to <https://tracker.ardour.org/>\n"
+	        "Website: <https://ardour.org/>\n");
 	console_madness_end ();
 	::exit (EXIT_SUCCESS);
 }

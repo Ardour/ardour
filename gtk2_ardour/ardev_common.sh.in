@@ -10,7 +10,7 @@ fi
 
 libs=$TOP/@LIBS@
 
-# http://tracker.ardour.org/view.php?id=5605#c18109
+# https://tracker.ardour.org/view.php?id=5605#c18109
 export GTK2_RC_FILES=/nonexistent
 
 #
