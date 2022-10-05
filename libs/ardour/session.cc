@@ -390,10 +390,8 @@ Session::Session (AudioEngine &eng,
 		 * so that we have the state ready for ::set_state()
 		 * after the engine is started.
 		 *
-		 * Note that we do NOT try to get the sample rate from
-		 * the template at this time, though doing so would
-		 * be easy if we decided this was an appropriate part
-		 * of a template.
+		 * Note that templates are saved without sample rate, and the
+		 * current / previous sample rate will thus also be used after load_state()
 		 */
 
 		if (!mix_template.empty()) {
