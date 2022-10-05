@@ -25,6 +25,7 @@
 #include <gtkmm/cellrenderertext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/textview.h>
 
@@ -82,6 +83,7 @@ class LibraryDownloadDialog : public ArdourDialog
 	};
 
 	Gtk::TreeView _display;
+	Gtk::ScrolledWindow scroller;
 	Glib::RefPtr<Gtk::ListStore> _model;
 	LibraryColumns _columns;
 

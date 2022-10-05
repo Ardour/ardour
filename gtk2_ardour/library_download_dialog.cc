@@ -42,6 +42,11 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 	: ArdourDialog (_("Loop Download Manager"), true) /* modal */
 	, inflater(0)
 {
+	/* pick some vaguely reasonable window size so that we do not just
+	 * grow to show all available rows in the listview
+	 */
+	set_size_request (-1, 600);
+
 	_model = Gtk::ListStore::create (_columns);
 	_display.set_model (_model);
 
@@ -58,10 +63,13 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 
 	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &LibraryDownloadDialog::display_button_press), false);
 
+	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	scroller.add (_display);
+
 	Gtk::HBox* h = new Gtk::HBox;
 	h->set_spacing (8);
 	h->set_border_width (8);
-	h->pack_start (_display);
+	h->pack_start (scroller);
 
 	get_vbox()->set_spacing (8);
 	get_vbox()->set_border_width (12);
@@ -72,7 +80,7 @@ LibraryDownloadDialog::LibraryDownloadDialog ()
 
 	description_view.set_size_request (-1, 80);
 	description_view.set_wrap_mode (Gtk::WRAP_WORD);
-	get_vbox()->pack_start (description_view);
+	get_vbox()->pack_start (description_view, Gtk::PACK_SHRINK);
 
 }
 
