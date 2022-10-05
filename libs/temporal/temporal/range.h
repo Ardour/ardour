@@ -152,7 +152,12 @@ class LIBTEMPORAL_API Range {
 	Range (timepos_t const & s, timepos_t const & e) : _start (s), _end (e) {}
 	Range (samplepos_t const s, samplepos_t const e) : _start (s), _end (e) {}
 	bool empty() const { return _start == _end; }
-	timecnt_t length() const { return _start.distance (_end); }
+
+	/* length semantics: start + length = end thus end - start aka * start.distance (end)
+	 * extent semantics: 1 + (end - start)
+	 */
+
+	timecnt_t extent() const { return _start.distance (_end).increment(); }
 
 	RangeList subtract (RangeList &) const;
 

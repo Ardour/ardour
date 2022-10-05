@@ -370,6 +370,7 @@ class LIBTEMPORAL_API timecnt_t {
 	timecnt_t & operator+= (timecnt_t const & t);
 
 	timecnt_t decrement () const { return timecnt_t (_distance - 1, _position); }
+	timecnt_t increment () const { return timecnt_t (_distance + 1, _position); }
 
 	//timecnt_t operator- (timepos_t const & t) const;
 	//timecnt_t operator+ (timepos_t const & t) const;
