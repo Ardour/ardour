@@ -90,16 +90,6 @@ ARDOUR_UI::launch_subscribe ()
 }
 
 void
-ARDOUR_UI::launch_cheat_sheet ()
-{
-#ifdef __APPLE__
-	PBD::open_uri ("http://manual.ardour.org/files/a3_mnemonic_cheat_sheet_osx.pdf");
-#else
-	PBD::open_uri ("http://manual.ardour.org/files/a3_mnemonic_cheatsheet.pdf");
-#endif
-}
-
-void
 ARDOUR_UI::launch_website ()
 {
 	PBD::open_uri ("https://ardour.org");
