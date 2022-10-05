@@ -1063,7 +1063,7 @@ Editor::build_marker_menu (Location* loc)
 	if (loc->is_cue_marker()) {
 		Menu *cues_menu = manage (new Menu());
 		MenuList& cue_items (cues_menu->items());
-		for (int32_t n = 0; n < default_triggers_per_box; ++n) {
+		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
 			/* XXX the "letter" names of the cues need to be subject to i18n somehow */
 			cue_items.push_back (MenuElem (cue_marker_name (n), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_change_cue), n)));
 		}

@@ -248,7 +248,7 @@ CueBoxUI::context_menu (uint64_t idx)
 	fitems.push_back (MenuElem (TriggerUI::follow_action_to_string(FollowAction (FollowAction::ForwardTrigger)), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), FollowAction (FollowAction::ForwardTrigger), idx)));
 		Menu*     jump_menu = manage (new Menu);
 		MenuList& jitems      = jump_menu->items ();
-		for (int i = 0; i < default_triggers_per_box; i++) {
+		for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
 			FollowAction jump_fa = (FollowAction::JumpTrigger);
 			jump_fa.targets.set(i);
 			jitems.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::set_all_follow_action), jump_fa, idx)));
@@ -399,7 +399,7 @@ CueBoxUI::build ()
 
 	_slots.clear ();
 
-	for (int32_t n = 0; n < default_triggers_per_box; ++n) { // TODO
+	for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) { // TODO
 		CueEntry* te = new CueEntry (this, n);
 
 		_slots.push_back (te);
@@ -416,7 +416,7 @@ CueBoxUI::_size_allocate (ArdourCanvas::Rect const& alloc)
 	const float width  = alloc.width ();
 	const float height = alloc.height ();
 
-	const float slot_h = height / default_triggers_per_box; // TODO
+	const float slot_h = height / TriggerBox::default_triggers_per_box; // TODO
 
 	float ypos = 0;
 	for (auto& slot : _slots) {
@@ -478,10 +478,10 @@ CueBoxWidget::on_unmap ()
 
 CueBoxWindow::CueBoxWindow ()
 {
-	CueBoxWidget* tbw = manage (new CueBoxWidget (-1., default_triggers_per_box * 16.));
+	CueBoxWidget* tbw = manage (new CueBoxWidget (-1., TriggerBox::default_triggers_per_box * 16.));
 	set_title (_("CueBox for XXXX"));
 
-	set_default_size (-1., default_triggers_per_box * 16.);
+	set_default_size (-1., TriggerBox::default_triggers_per_box * 16.);
 	add (*tbw);
 	tbw->show ();
 }

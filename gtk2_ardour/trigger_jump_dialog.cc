@@ -59,7 +59,7 @@ TriggerJumpDialog::on_trigger_set ()
 
 	int r = 0;
 
-	for (int i = 0; i < default_triggers_per_box; i++) {  //someday this might change dynamically
+	for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {  //someday this might change dynamically
 		ArdourButton* b = manage (new ArdourButton (ArdourButton::led_default_elements));
 
 		b->signal_clicked.connect(sigc::bind(sigc::mem_fun(*this, &TriggerJumpDialog::button_clicked), i));
@@ -112,7 +112,7 @@ TriggerJumpDialog::on_trigger_changed (PropertyChange const& what)
 
 	//update button display state
 	ButtonList::const_iterator b = _buttonlist.begin ();
-	for (int i = 0; i < default_triggers_per_box; i++) {
+	for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
 
 		if (b==_buttonlist.end()) {
 			break;

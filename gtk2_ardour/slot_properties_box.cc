@@ -149,7 +149,7 @@ SlotPropertyTable::SlotPropertyTable ()
 		Menu*     jump_menu = manage (new Menu);
 		MenuList& jitems      = jump_menu->items ();
 		jitems.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), false)));
-		for (int i = 0; i < default_triggers_per_box; i++) {
+		for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
 			FollowAction jump_fa = (FollowAction::JumpTrigger);
 			jump_fa.targets.set(i);
 			jitems.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 0)));
@@ -166,7 +166,7 @@ SlotPropertyTable::SlotPropertyTable ()
 		Menu*     jump_menu_1 = manage (new Menu);
 		MenuList& jitems_1      = jump_menu_1->items ();
 		jitems_1.push_back (MenuElem (_("Multi..."), sigc::bind (sigc::mem_fun (*this, &TriggerUI::edit_jump), true)));
-		for (int i = 0; i < default_triggers_per_box; i++) {
+		for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
 			FollowAction jump_fa = (FollowAction::JumpTrigger);
 			jump_fa.targets.set(i);
 			jitems_1.push_back (MenuElem (cue_marker_name (i), sigc::bind (sigc::mem_fun (*this, &SlotPropertyTable::set_follow_action), jump_fa, 1)));

@@ -384,7 +384,7 @@ TriggerMaster::set_all_colors ()
 		case Gtk::RESPONSE_ACCEPT: {
 			c = _color_dialog.get_color_selection()->get_current_color();
 			color_t ct = Gtkmm2ext::gdk_color_to_rgba(c);
-			for (int n = 0; n < default_triggers_per_box; n++) {
+			for (int n = 0; n < TriggerBox::default_triggers_per_box; n++) {
 				_triggerbox->trigger (n)->set_color(ct);
 			}
 		} break;

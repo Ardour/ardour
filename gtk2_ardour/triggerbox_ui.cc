@@ -228,7 +228,7 @@ TriggerEntry::draw_follow_icon (Cairo::RefPtr<Cairo::Context> context, FollowAct
 		case FollowAction::JumpTrigger: {
 			if ( icon.targets.count() == 1 ) {  //Jump to a specific row; just draw the letter of the row we are jumping to
 				int cue_idx = -1;
-				for (int i = 0; i < default_triggers_per_box; i++) {
+				for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
 					if (icon.targets.test(i)) {
 						cue_idx = i;
 						break;
@@ -906,7 +906,7 @@ TriggerBoxUI::_size_allocate (ArdourCanvas::Rect const& alloc)
 	const float width  = alloc.width ();
 	const float height = alloc.height ();
 
-	const float slot_h = height / default_triggers_per_box; // TODO
+	const float slot_h = height / TriggerBox::default_triggers_per_box; // TODO
 
 	float ypos = 0;
 	for (auto& slot : _slots) {
