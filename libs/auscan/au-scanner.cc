@@ -126,8 +126,8 @@ usage ()
 This tool ...\n\
 \n");
 
-	printf ("Report bugs to <http://tracker.ardour.org/>\n"
-		"Website: <http://ardour.org/>\n");
+	printf ("Report bugs to <https://tracker.ardour.org/>\n"
+		"Website: <https://ardour.org/>\n");
 
 	::exit (EXIT_SUCCESS);
 }

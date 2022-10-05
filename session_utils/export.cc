@@ -234,8 +234,8 @@ If the no output-file is given, the session's export dir is used.\n\
 Note: the tool expects a session-name without .ardour file-name extension.\n\
 \n");
 
-	printf ("Report bugs to <http://tracker.ardour.org/>\n"
-	        "Website: <http://ardour.org/>\n");
+	printf ("Report bugs to <https://tracker.ardour.org/>\n"
+	        "Website: <https://ardour.org/>\n");
 	::exit (EXIT_SUCCESS);
 }
 
