@@ -2,6 +2,8 @@
 
 if which realpath > /dev/null; then
 	TOP=`realpath "$TOP"`
+elif which readlink > /dev/null; then
+	TOP=`readlink -f "$TOP"`
 fi
 
 #export G_DEBUG=fatal_criticals
