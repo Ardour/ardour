@@ -86,7 +86,7 @@ ARDOUR_UI::launch_tracker ()
 void
 ARDOUR_UI::launch_subscribe ()
 {
-	PBD::open_uri ("https://community.ardour.org/s/subscribe");
+	PBD::open_uri ("https://community.ardour.org/subscribe");
 }
 
 void
