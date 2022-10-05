@@ -63,7 +63,7 @@ CONFIG_VARIABLE (bool, timecode_offset_negative, "timecode-offset-negative", tru
 CONFIG_VARIABLE (std::string, slave_timecode_offset, "slave-timecode-offset", " 00:00:00:00")
 CONFIG_VARIABLE (std::string, timecode_generator_offset, "timecode-generator-offset", " 00:00:00:00")
 CONFIG_VARIABLE (bool, glue_new_markers_to_bars_and_beats, "glue-new-markers-to-bars-and-beats", false)
-CONFIG_VARIABLE (bool, midi_copy_is_fork, "midi-copy-is-fork", false)
+CONFIG_VARIABLE (bool, midi_copy_is_fork, "midi-copy-is-fork", true)
 CONFIG_VARIABLE (bool, glue_new_regions_to_bars_and_beats, "glue-new-regions-to-bars-and-beats", false)
 CONFIG_VARIABLE (bool, realtime_export, "realtime-export", false)
 
