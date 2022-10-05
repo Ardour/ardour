@@ -3066,11 +3066,11 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	/* default number of possible triggers. call ::add_trigger() to increase */
 
 	if (_data_type == DataType::AUDIO) {
-		for (uint32_t n = 0; n < default_triggers_per_box; ++n) {
+		for (uint32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
 			all_triggers.push_back (boost::make_shared<AudioTrigger> (n, *this));
 		}
 	} else {
-		for (uint32_t n = 0; n < default_triggers_per_box; ++n) {
+		for (uint32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
 			all_triggers.push_back (boost::make_shared<MIDITrigger> (n, *this));
 		}
 	}
@@ -4369,7 +4369,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 	uint32_t runnable = 0;
 	std::vector<int32_t> possible_targets;
 
-	possible_targets.reserve (default_triggers_per_box);
+	possible_targets.reserve (TriggerBox::default_triggers_per_box);
 
 	/* count number of triggers that can actually be run (i.e. they have a region) */
 
@@ -4481,7 +4481,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 		break;
 
 	case FollowAction::JumpTrigger:
-		for (std::size_t n = 0; n < default_triggers_per_box; ++n) {
+		for (std::size_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
 			if (fa.targets.test (n) && all_triggers[n]->region()) {
 				possible_targets.push_back (n);
 			}

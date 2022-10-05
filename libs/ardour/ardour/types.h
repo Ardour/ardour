@@ -839,9 +839,6 @@ enum CueBehavior {
 
 typedef std::vector<CaptureInfo*> CaptureInfos;
 
-const int32_t default_triggers_per_box = 8;
-
-
 struct FollowAction {
 	enum Type {
 		None,

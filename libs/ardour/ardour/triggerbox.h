@@ -707,6 +707,13 @@ typedef PBD::RingBuffer<CueRecord> CueRecords;
 class LIBARDOUR_API TriggerBox : public Processor
 {
   public:
+
+#ifdef MIXBUS
+	static const int32_t default_triggers_per_box = 8;
+#else
+	static const int32_t default_triggers_per_box = 16;
+#endif
+
 	TriggerBox (Session&, DataType dt);
 	~TriggerBox ();
 

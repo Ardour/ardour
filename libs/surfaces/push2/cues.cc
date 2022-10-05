@@ -957,7 +957,7 @@ FollowActionIcon::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::
 	case FollowAction::JumpTrigger:
 		if (trigger->follow_action0().targets.count() == 1 ) {  //Jump to a specific row; just draw the letter of the row we are jumping to
 			int cue_idx = -1;
-			for (int i = 0; i < default_triggers_per_box; i++) {
+			for (int i = 0; i < TriggerBox::default_triggers_per_box; i++) {
 				if (trigger->follow_action0().targets.test(i)) {
 					cue_idx = i;
 					break;
