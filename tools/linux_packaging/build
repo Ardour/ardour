@@ -748,7 +748,7 @@ else
 	 -z "${CACHEDIR}/ArdourBundledMedia.zip" \
 	 -o "${CACHEDIR}/ArdourBundledMedia.zip" \
 	 "http://ardour.org/loops/ArdourBundledMedia.zip"
-    if test -f "${CACHEDIR}/MixbusBundledMedia.zip"; then
+    if test -f "${CACHEDIR}/ArdourBundledMedia.zip"; then
 	echo "Adding Ardour Bundled Content"
 	rm -f "${MediaClips}/"*.*
 	unzip -q -o -d "${MediaClips}" "${CACHEDIR}/ArdourBundledMedia.zip"
