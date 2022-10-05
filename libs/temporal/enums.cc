@@ -76,6 +76,13 @@ void Temporal::init ()
 	}
 }
 
+void Temporal::reset ()
+{
+	(void) TempoMap::write_copy(); /* we are going to throw away the return value and replace the map entirely */
+	TempoMap::WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
+	TempoMap::update (new_map);;
+}
+
 std::ostream&
 operator<< (std::ostream& o, Temporal::ratio_t const & r)
 {
