@@ -361,6 +361,8 @@ Session::Session (AudioEngine &eng,
 
 	_cue_events.reserve (1024);
 
+	Temporal::reset();
+
 	pre_engine_init (fullpath); // sets _is_new
 
 	setup_lua ();
