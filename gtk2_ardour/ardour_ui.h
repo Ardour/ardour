@@ -213,7 +213,6 @@ public:
 	void launch_reference ();
 	void launch_tracker ();
 	void launch_subscribe ();
-	void launch_cheat_sheet ();
 	void launch_website ();
 	void launch_website_dev ();
 	void launch_forums ();
