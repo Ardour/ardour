@@ -92,7 +92,6 @@ PluginScanDialog::PluginScanDialog (bool just_cached, bool v, Gtk::Window* paren
 
 	/* Top level packaging */
 	VBox* vbox = get_vbox ();
-	vbox->set_size_request (400, -1);
 
 	vbox->pack_start (format_frame, true, true);
 	vbox->pack_start (*cancel_all_padder, false, false);
