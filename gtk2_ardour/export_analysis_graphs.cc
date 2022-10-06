@@ -496,6 +496,7 @@ ArdourGraphs::time_axis (Glib::RefPtr<Pango::Context> pctx, int width, int m_l, 
 
 	for (int i = 0; i <= n_labels; ++i) {
 		const float fract  = (float)i / n_labels;
+		const int label_pos = width * fract;
 		const float xalign = (i == n_labels) ? 1.f : (i == 0) ? 0 : .5f;
 
 		char buf[16];
@@ -503,15 +504,15 @@ ArdourGraphs::time_axis (Glib::RefPtr<Pango::Context> pctx, int width, int m_l, 
 
 		layout->set_text (&buf[1]);
 		layout->get_pixel_size (w, h);
-		cr->move_to (rint (m_l + width * fract - w * xalign), rint (.5 * (height - h)));
+		cr->move_to (rint (m_l + label_pos - w * xalign), rint (.5 * (height - h)));
 		cr->set_source_rgba (.9, .9, .9, 1.0);
 		layout->show_in_cairo_context (cr);
 
 		cr->set_source_rgba (.7, .7, .7, 1.0);
-		cr->move_to (rint (m_l + width * fract) - .5, 0);
-		cr->line_to (rint (m_l + width * fract) - .5, ceil  (height * .15));
-		cr->move_to (rint (m_l + width * fract) - .5, floor (height * .85));
-		cr->line_to (rint (m_l + width * fract) - .5, height);
+		cr->move_to (rint (m_l + label_pos) - .5, 0);
+		cr->line_to (rint (m_l + label_pos) - .5, ceil  (height * .15));
+		cr->move_to (rint (m_l + label_pos) - .5, floor (height * .85));
+		cr->line_to (rint (m_l + label_pos) - .5, height);
 		cr->stroke ();
 	}
 
