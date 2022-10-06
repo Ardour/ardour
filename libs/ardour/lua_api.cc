@@ -1236,13 +1236,12 @@ LuaAPI::Rubberband::finalize ()
 
 	ar->set_ancestral_data (timepos_t (_read_start), timecnt_t (_read_len, timepos_t (_read_start)), _stretch_ratio, _pitch_ratio);
 	ar->set_master_sources (_region->master_sources ());
-	ar->set_start (timepos_t(0));
 #if 0 // TODO construct ratio_t from double
-	ar->set_length (ar->length ().scale (_stretch_ratio));
+	ar->set_length_unchecked (ar->length ().scale (_stretch_ratio));
 #else
-	ar->set_length (timecnt_t (_stretch_ratio * ar->length_samples (), ar->position()));
+	ar->set_length_unchecked (timecnt_t (_stretch_ratio * ar->length_samples (), ar->position()));
 #endif
-	ar->set_whole_file (true);
+	ar->set_whole_file (true); // set_length() unsets whole_file
 	if (_stretch_ratio != 1.0) {
 		// TODO: apply mapping
 		ar->envelope ()->x_scale (_stretch_ratio);
