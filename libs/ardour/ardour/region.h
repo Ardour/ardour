@@ -61,7 +61,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              right_of_split;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              hidden;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              position_locked;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              valid_transients;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              valid_transients; // used for signal only
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         start;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         sync_position;
@@ -71,8 +71,8 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             stretch;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             shift;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          layering_index;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>	tags;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>		contents; // type doesn't matter here
+	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>       tags;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              contents; // type doesn't matter here, used for signal only
 };
 
 class Playlist;
@@ -106,6 +106,8 @@ public:
 
 	/** Note: changing the name of a Region does not constitute an edit */
 	bool set_name (const std::string& str);
+
+	PBD::PropertyList derive_properties (bool with_times = true) const;
 
 	const DataType& data_type () const { return _type; }
 	Temporal::TimeDomain time_domain() const;
@@ -261,7 +263,6 @@ public:
 	void cut_front (timepos_t const & new_position);
 	void cut_end (timepos_t const & new_position);
 
-	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
 	void lower ();
 	void raise_to_top ();
@@ -277,6 +278,13 @@ public:
 	void set_locked (bool yn);
 	void set_video_locked (bool yn);
 	void set_position_locked (bool yn);
+
+	/* ONLY Playlist can call this */
+	void set_layer (layer_t l);
+	void set_length_unchecked (timecnt_t const &);
+	void set_position_unchecked (timepos_t const &);
+	void modify_front_unchecked (timepos_t const & new_position, bool reset_fade);
+	void modify_end_unchecked (timepos_t const & new_position, bool reset_fade);
 
 	Temporal::timepos_t region_beats_to_absolute_time(Temporal::Beats beats) const;
 	/** Convert a timestamp in beats into timepos_t (both relative to region position) */
@@ -499,8 +507,6 @@ private:
 	void mid_thaw (const PBD::PropertyChange&);
 
 	void trim_to_internal (timepos_t const & position, timecnt_t const & length);
-	void modify_front (timepos_t const & new_position, bool reset_fade);
-	void modify_end (timepos_t const & new_position, bool reset_fade);
 
 	void maybe_uncopy ();
 

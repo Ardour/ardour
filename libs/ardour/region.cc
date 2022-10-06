@@ -455,8 +455,17 @@ Region::set_length (timecnt_t const & len)
 	if (locked()) {
 		return;
 	}
+	if (_length == len) {
+		return;
+	}
 
-	if (_length == len || len.is_zero ()) {
+	set_length_unchecked (len);
+}
+
+void
+Region::set_length_unchecked (timecnt_t const & len)
+{
+	if (len.is_zero ()) {
 		return;
 	}
 
@@ -473,7 +482,6 @@ Region::set_length (timecnt_t const & len)
 	if (!verify_length (l)) {
 		return;
 	}
-
 
 	set_length_internal (l);
 	_whole_file = false;
@@ -644,7 +652,12 @@ Region::set_position (timepos_t const & pos)
 	if (!can_move()) {
 		return;
 	}
+	set_position_unchecked (pos);
+}
 
+void
+Region::set_position_unchecked (timepos_t const & pos)
+{
 	set_position_internal (pos);
 
 	/* do this even if the position is the same. this helps out
@@ -840,28 +853,33 @@ Region::move_start (timecnt_t const & distance)
 void
 Region::trim_front (timepos_t const & new_position)
 {
-	modify_front (new_position, false);
+	if (locked()) {
+		return;
+	}
+	modify_front_unchecked (new_position, false);
 }
 
 void
 Region::cut_front (timepos_t const & new_position)
 {
-	modify_front (new_position, true);
+	if (locked()) {
+		return;
+	}
+	modify_front_unchecked (new_position, true);
 }
 
 void
 Region::cut_end (timepos_t const & new_endpoint)
 {
-	modify_end (new_endpoint, true);
-}
-
-void
-Region::modify_front (timepos_t const & new_position, bool reset_fade)
-{
 	if (locked()) {
 		return;
 	}
+	modify_end_unchecked (new_endpoint, true);
+}
 
+void
+Region::modify_front_unchecked (timepos_t const & new_position, bool reset_fade)
+{
 	timepos_t last = end().decrement();
 	timepos_t source_zero;
 
@@ -902,12 +920,8 @@ Region::modify_front (timepos_t const & new_position, bool reset_fade)
 }
 
 void
-Region::modify_end (timepos_t const & new_endpoint, bool reset_fade)
+Region::modify_end_unchecked (timepos_t const & new_endpoint, bool reset_fade)
 {
-	if (locked()) {
-		return;
-	}
-
 	if (new_endpoint > position()) {
 		trim_to_internal (position(), position().distance (new_endpoint));
 		if (reset_fade) {
@@ -925,7 +939,10 @@ Region::modify_end (timepos_t const & new_endpoint, bool reset_fade)
 void
 Region::trim_end (timepos_t const & new_endpoint)
 {
-	modify_end (new_endpoint, false);
+	if (locked()) {
+		return;
+	}
+	modify_end_unchecked (new_endpoint, false);
 }
 
 void
@@ -947,10 +964,6 @@ void
 Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
 {
 	timepos_t new_start (len.time_domain());
-
-	if (locked()) {
-		return;
-	}
 
 	timecnt_t const start_shift = position().distance (pos);
 
@@ -1398,6 +1411,22 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 	}
 
 	return 0;
+}
+
+PropertyList
+Region::derive_properties (bool with_times) const
+{
+	PropertyList plist (properties ());
+	plist.remove (Properties::automatic);
+	plist.remove (Properties::sync_marked);
+	plist.remove (Properties::left_of_split);
+	plist.remove (Properties::valid_transients);
+	plist.remove (Properties::whole_file);
+	if (!with_times) {
+		plist.remove (Properties::start);
+		plist.remove (Properties::length);
+	}
+	return plist;
 }
 
 void
