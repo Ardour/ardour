@@ -57,6 +57,7 @@ public:
 	 * Defined below, once we have Property<T>
 	 */
 	template<typename T, typename V> bool add (PropertyDescriptor<T> pid, const V& v);
+	template<typename T> bool remove (PropertyDescriptor<T> pid);
 
 protected:
 	bool _property_owner;

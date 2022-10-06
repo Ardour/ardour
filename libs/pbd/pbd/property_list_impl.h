@@ -28,7 +28,13 @@ namespace PBD {
 
 template<typename T, typename V> bool
 PropertyList::add (PropertyDescriptor<T> pid, const V& v) {
-        return insert (value_type (pid.property_id, new Property<T> (pid, (T)v))).second;
+	erase (pid.property_id);
+	return insert (value_type (pid.property_id, new Property<T> (pid, (T)v))).second;
+}
+
+template<typename T> bool
+PropertyList::remove (PropertyDescriptor<T> pid) {
+	return erase (pid.property_id) > 0;
 }
 
 }
