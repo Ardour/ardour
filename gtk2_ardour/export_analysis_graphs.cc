@@ -17,6 +17,7 @@
  */
 
 #include <algorithm>
+#include <cmath>
 
 #include "ardour/dB.h"
 #include "ardour/logmeter.h"
@@ -468,6 +469,47 @@ ArdourGraphs::loudness_histogram (Glib::RefPtr<Pango::Context> pctx, ARDOUR::Exp
 	return hist;
 }
 
+static samplecnt_t
+optimal_time_stride(samplecnt_t length, samplecnt_t sample_rate, int width, int label_width) {
+	// Compute the time interval between labels on the X-axis when it has
+	// to span `length` and each label takes up `label_width` of the total
+	// `width`.
+
+	// Compute the minimum amount of labels to show, considering rounding
+	// to a nice stride might give 2.5 time as many labels. In that case,
+	// we might need 25% more than the label width to avoid overlap between
+	// the left-aligned 0:00 and the first real label.
+	// min_labels is usually 4, leaving room for up to 10 labels.
+	const int min_labels = width / (label_width * 1.25 * 2.5);
+	const float max_stride_s = (float)length / sample_rate / min_labels;
+
+	// default units: count 1, 2, or 5 times 10**n
+	float unit = 1;
+	// if stride is more than an hour, count in hours instead of 2000s and 5000s etc
+	if (max_stride_s >= 60 * 60) {
+		unit = 60 * 60;
+	} else
+	// stride 20min is ok, but count in half hours if possible - this avoids how stride 50min adds up above an hour
+	if (max_stride_s >= 30 * 60) {
+		unit = 30 * 60;
+	} else
+	// if stride is more than a minute, count in minutes instead of 100s
+	if (max_stride_s >= 60) {
+		unit = 60;
+	} else
+	// stride 20s is ok, but count in half minutes if possible - this avoids how stride 50s adds up above a minute
+	if (max_stride_s >= 30) {
+		unit = 30;
+	}
+
+	const samplecnt_t unit_stride = std::pow(10.f, std::floor(std::log10(max_stride_s / unit))) * unit * sample_rate;
+	const int unit_label_count = length / unit_stride;
+	return unit_stride * (
+		unit_label_count > 5 * min_labels ? 5 :
+		unit_label_count > 2 * min_labels ? 2 :
+		1);
+}
+
 Cairo::RefPtr<Cairo::ImageSurface>
 ArdourGraphs::time_axis (Glib::RefPtr<Pango::Context> pctx, int width, int m_l, samplepos_t start, samplecnt_t length, samplecnt_t sample_rate)
 {
@@ -479,7 +521,6 @@ ArdourGraphs::time_axis (Glib::RefPtr<Pango::Context> pctx, int width, int m_l, 
 	layout->get_pixel_size (w, h);
 
 	int height   = h * 1.75;
-	int n_labels = width / (w * 1.75);
 
 	Cairo::RefPtr<Cairo::ImageSurface> ytme = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, m_l + width, height);
 	Cairo::RefPtr<Cairo::Context>      cr   = Cairo::Context::create (ytme);
@@ -494,12 +535,13 @@ ArdourGraphs::time_axis (Glib::RefPtr<Pango::Context> pctx, int width, int m_l, 
 
 	cr->set_line_width (1.0);
 
-	for (int i = 0; i <= n_labels; ++i) {
-		const float fract  = (float)i / n_labels;
-		const int label_pos = width * fract;
+	const samplecnt_t label_time_stride = optimal_time_stride(length, sample_rate, width, w);
+
+	for (samplecnt_t label_time = 0; label_time <= length; label_time += label_time_stride) {
+		const int label_pos = width * (float)label_time / length;
 
 		char buf[16];
-		AudioClock::print_minsec (start + length * fract, buf, sizeof (buf), sample_rate, 1);
+		AudioClock::print_minsec (start + label_time, buf, sizeof (buf), sample_rate, 1);
 
 		layout->set_text (&buf[1]);
 		layout->get_pixel_size (w, h);
