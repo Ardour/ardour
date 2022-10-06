@@ -680,6 +680,10 @@ Playlist::clear_pending ()
 void
 Playlist::add_region (boost::shared_ptr<Region> region, timepos_t const & position, float times, bool auto_partition)
 {
+	if (region->whole_file ()) {
+		region = RegionFactory::create (region, region->derive_properties ());
+	}
+
 	RegionWriteLock rlock (this);
 	times = fabs (times);
 
@@ -792,6 +796,10 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, timepos_t const
 void
 Playlist::replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, timepos_t const & pos)
 {
+	if (newr->whole_file ()) {
+		newr = RegionFactory::create (newr, newr->derive_properties ());
+	}
+
 	RegionWriteLock rlock (this);
 
 	remove_region_internal (old, rlock.thawlist);
