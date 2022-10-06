@@ -497,14 +497,14 @@ ArdourGraphs::time_axis (Glib::RefPtr<Pango::Context> pctx, int width, int m_l, 
 	for (int i = 0; i <= n_labels; ++i) {
 		const float fract  = (float)i / n_labels;
 		const int label_pos = width * fract;
-		const float xalign = (i == n_labels) ? 1.f : (i == 0) ? 0 : .5f;
 
 		char buf[16];
 		AudioClock::print_minsec (start + length * fract, buf, sizeof (buf), sample_rate, 1);
 
 		layout->set_text (&buf[1]);
 		layout->get_pixel_size (w, h);
-		cr->move_to (rint (m_l + label_pos - w * xalign), rint (.5 * (height - h)));
+		cr->move_to (rint (m_l + std::min(std::max(0, label_pos - w / 2), width - w)),
+			rint (.5 * (height - h)));
 		cr->set_source_rgba (.9, .9, .9, 1.0);
 		layout->show_in_cairo_context (cr);
 
