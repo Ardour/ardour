@@ -1226,7 +1226,7 @@ LuaAPI::Rubberband::finalize ()
 	/* create a new region */
 	std::string region_name = RegionFactory::new_region_name (_region->name ());
 
-	PropertyList plist (_region->properties ());
+	PropertyList plist (_region->derive_properties ());
 	plist.add (Properties::start, std::numeric_limits<timepos_t>::min());
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);

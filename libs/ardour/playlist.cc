@@ -262,13 +262,11 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, timepos_t const & s
 
 		RegionFactory::region_name (new_name, region->name (), false);
 
-		PropertyList plist;
+		PropertyList plist (region->derive_properties ());
 
 		plist.add (Properties::start, region->start() + offset);
 		plist.add (Properties::length, len);
 		plist.add (Properties::name, new_name);
-		plist.add (Properties::layer, region->layer ());
-		plist.add (Properties::layering_index, region->layering_index ());
 
 		new_region = RegionFactory::create (region, offset, plist, true, &thawlist);
 
@@ -722,12 +720,10 @@ Playlist::add_region (boost::shared_ptr<Region> region, timepos_t const & positi
 		RegionFactory::region_name (name, region->name (), false);
 
 		{
-			PropertyList plist;
+			PropertyList plist (region->derive_properties ());
 
-			plist.add (Properties::start, region->start());
 			plist.add (Properties::length, length);
 			plist.add (Properties::name, name);
-			plist.add (Properties::layer, region->layer ());
 
 			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist, true, &rlock.thawlist);
 			add_region_internal (sub, pos, rlock.thawlist);
@@ -767,7 +763,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, timepos_t const
 		region->set_playlist (boost::weak_ptr<Playlist> (shared_from_this()));
 	}
 
-	region->set_position (position);
+	region->set_position_unchecked (position);
 
 	regions.insert (upper_bound (regions.begin (), regions.end (), region, cmp), region);
 	all_regions.insert (region);
@@ -1009,13 +1005,11 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 
 					RegionFactory::region_name (new_name, current->name (), false);
 
-					PropertyList plist;
+					PropertyList plist (current->derive_properties ());
 
 					plist.add (Properties::start, current->start() + pos1.distance (pos2));
 					plist.add (Properties::length, pos2.distance (pos3));
 					plist.add (Properties::name, new_name);
-					plist.add (Properties::layer, current->layer ());
-					plist.add (Properties::layering_index, current->layering_index ());
 					plist.add (Properties::automatic, true);
 					plist.add (Properties::left_of_split, true);
 					plist.add (Properties::right_of_split, true);
@@ -1031,13 +1025,11 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 
 				RegionFactory::region_name (new_name, current->name (), false);
 
-				PropertyList plist;
+				PropertyList plist (current->derive_properties ());
 
 				plist.add (Properties::start, current->start() + pos1.distance (pos3));
 				plist.add (Properties::length, pos3.distance (pos4));
 				plist.add (Properties::name, new_name);
-				plist.add (Properties::layer, current->layer ());
-				plist.add (Properties::layering_index, current->layering_index ());
 				plist.add (Properties::automatic, true);
 				plist.add (Properties::right_of_split, true);
 
@@ -1050,7 +1042,7 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 
 				current->clear_changes ();
 				thawlist.add (current);
-				current->cut_end (pos2.decrement());
+				current->modify_end_unchecked (pos2.decrement(), true);
 
 			} else if (overlap == Temporal::OverlapEnd) {
 
@@ -1069,13 +1061,11 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 
 					RegionFactory::region_name (new_name, current->name (), false);
 
-					PropertyList plist;
+					PropertyList plist (current->derive_properties ());
 
 					plist.add (Properties::start, current->start() + pos1.distance (pos2));
 					plist.add (Properties::length, pos2.distance (pos4));
 					plist.add (Properties::name, new_name);
-					plist.add (Properties::layer, current->layer ());
-					plist.add (Properties::layering_index, current->layering_index ());
 					plist.add (Properties::automatic, true);
 					plist.add (Properties::left_of_split, true);
 
@@ -1089,7 +1079,7 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 
 				current->clear_changes ();
 				thawlist.add (current);
-				current->cut_end (pos2.decrement());
+				current->modify_end_unchecked (pos2.decrement(), true);
 
 			} else if (overlap == Temporal::OverlapStart) {
 
@@ -1111,13 +1101,10 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 					/* front **** */
 					RegionFactory::region_name (new_name, current->name (), false);
 
-					PropertyList plist;
+					PropertyList plist (current->derive_properties ());
 
-					plist.add (Properties::start, current->start());
 					plist.add (Properties::length, pos1.distance (pos3));
 					plist.add (Properties::name, new_name);
-					plist.add (Properties::layer, current->layer ());
-					plist.add (Properties::layering_index, current->layering_index ());
 					plist.add (Properties::automatic, true);
 					plist.add (Properties::right_of_split, true);
 
@@ -1131,7 +1118,7 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 
 				current->clear_changes ();
 				thawlist.add (current);
-				current->trim_front (pos3);
+				current->modify_front_unchecked (pos3, false);
 
 			} else if (overlap == Temporal::OverlapExternal) {
 
@@ -1312,11 +1299,8 @@ Playlist::duplicate (boost::shared_ptr<Region> region, timepos_t & position, tim
 		RegionFactory::region_name (name, region->name(), false);
 
 		{
-			PropertyList plist;
-
-			plist.add (Properties::start, region->start());
+			PropertyList plist (region->derive_properties ());
 			plist.add (Properties::length, length);
-			plist.add (Properties::name, name);
 
 			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist, true, &rl.thawlist);
 			add_region_internal (sub, position, rl.thawlist);
@@ -1344,11 +1328,8 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, timepos_t & positio
 		RegionFactory::region_name (name, region->name(), false);
 
 		{
-			PropertyList plist;
-
-			plist.add (Properties::start, region->start());
+			PropertyList plist (region->derive_properties ());
 			plist.add (Properties::length, length);
-			plist.add (Properties::name, name);
 
 			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist, false, &rl.thawlist);
 			add_region_internal (sub, position, rl.thawlist);
@@ -1478,31 +1459,27 @@ Playlist::_split_region (boost::shared_ptr<Region> region, timepos_t const &  pl
 	RegionFactory::region_name (before_name, region->name (), false);
 
 	{
-		PropertyList plist;
+		PropertyList plist (region->derive_properties (false));
 
 		plist.add (Properties::length, before);
 		plist.add (Properties::name, before_name);
 		plist.add (Properties::left_of_split, true);
-		plist.add (Properties::layering_index, region->layering_index ());
-		plist.add (Properties::layer, region->layer ());
 
 		/* note: we must use the version of ::create with an offset here,
 		 * since it supplies that offset to the Region constructor, which
 		 * is necessary to get audio region gain envelopes right.
 		 */
-	        left = RegionFactory::create (region, timecnt_t (before.time_domain()), plist, true, &thawlist);
+		left = RegionFactory::create (region, timecnt_t (before.time_domain()), plist, true, &thawlist);
 	}
 
 	RegionFactory::region_name (after_name, region->name (), false);
 
 	{
-		PropertyList plist;
+		PropertyList plist (region->derive_properties (false));
 
 		plist.add (Properties::length, after);
 		plist.add (Properties::name, after_name);
 		plist.add (Properties::right_of_split, true);
-		plist.add (Properties::layering_index, region->layering_index ());
-		plist.add (Properties::layer, region->layer ());
 
 		/* same note as above */
 		right = RegionFactory::create (region, before, plist, true, &thawlist);
