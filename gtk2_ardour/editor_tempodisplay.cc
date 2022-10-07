@@ -549,7 +549,7 @@ Editor::mouse_add_bbt_marker_event (timepos_t pos)
 
 	/* position markers must always be positioned using audio time */
 
-	BBTMarkerDialog marker_dialog  (pos);
+	BBTMarkerDialog marker_dialog  (timepos_t (pos.samples()));
 
 	/* run this modally since we are finishing a drag and the drag object
 	 * will be destroyed when we return from here
