@@ -18,105 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef COMPILER_MSVC
-#include <strings.h>
-#endif
-#include <map>
-
 #include <sndfile.h>
 #include "ardour/sndfile_helpers.h"
 
-#include "pbd/i18n.h"
-
-using std::map;
 using namespace std;
-
-const char * const sndfile_header_formats_strings[SNDFILE_HEADER_FORMATS+1] = {
-	N_("WAV"),
-	N_("AIFF"),
-	N_("CAF"),
-	N_("W64 (64-bit WAV)"),
-	N_("FLAC"),
-	N_("Ogg/Vorbis"),
-	N_("raw (no header)"),
-	0
-};
-
-const char* const sndfile_file_endings_strings[SNDFILE_HEADER_FORMATS+1] = {
-	N_(".wav"),
-	N_(".aiff"),
-	N_(".caf"),
-	N_(".w64"),
-	N_(".flac"),
-	N_(".ogg"),
-	N_(".raw"),
-	0
-};
-
-int sndfile_header_formats[SNDFILE_HEADER_FORMATS] = {
-	SF_FORMAT_WAV,
-	SF_FORMAT_AIFF,
-	SF_FORMAT_CAF,
-	SF_FORMAT_W64,
-	SF_FORMAT_FLAC,
-	SF_FORMAT_OGG,
-	SF_FORMAT_RAW
-};
-
-const char * const sndfile_bitdepth_formats_strings[SNDFILE_BITDEPTH_FORMATS+1] = {
-	N_("Signed 16-bit PCM"),
-	N_("Signed 24-bit PCM"),
-	N_("Signed 32-bit PCM"),
-	N_("Signed 8-bit PCM"),
-	N_("32-bit float"),
-	0
-};
-
-int sndfile_bitdepth_formats[SNDFILE_BITDEPTH_FORMATS] = {
-	SF_FORMAT_PCM_16,
-	SF_FORMAT_PCM_24,
-	SF_FORMAT_PCM_32,
-	SF_FORMAT_PCM_S8,
-	SF_FORMAT_FLOAT
-};
-
-const char * const sndfile_endian_formats_strings[SNDFILE_ENDIAN_FORMATS+1] = {
-	N_("Little-endian (Intel)"),
-	N_("Big-endian (PowerPC)"),
-	0
-};
-
-int sndfile_endian_formats[SNDFILE_ENDIAN_FORMATS] = {
-	SF_ENDIAN_LITTLE,
-	SF_ENDIAN_BIG
-};
-
-int
-sndfile_header_format_by_index (int index)
-{
-        if (index >= 0 && index < SNDFILE_HEADER_FORMATS) {
-                return sndfile_header_formats[index];
-	}
-	return -1;
-}
-
-int
-sndfile_bitdepth_format_by_index (int index)
-{
-        if (index >= 0 && index < SNDFILE_BITDEPTH_FORMATS) {
-                return sndfile_bitdepth_formats[index];
-	}
-	return -1;
-}
-
-int
-sndfile_endian_format_by_index (int index)
-{
-        if (index >= 0 && index < SNDFILE_ENDIAN_FORMATS) {
-                return sndfile_endian_formats[index];
-	}
-	return -1;
-}
 
 int
 sndfile_data_width (int format)
