@@ -70,6 +70,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/mixer_scene.h"
 #include "ardour/monitor_control.h"
+#include "ardour/monitor_processor.h"
 #include "ardour/panner_shell.h"
 #include "ardour/phase_control.h"
 #include "ardour/playlist.h"
@@ -506,6 +507,9 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <PBD::Controllable, PBD::StatefulDestructible> ("Controllable")
+		.addCast<MPControl<gain_t>> ("to_mpgain")
+		.addCast<MPControl<bool>> ("to_mptoggle")
+		.addCast<AutomationControl> ("to_automationcontrol")
 		.addFunction ("name", &PBD::Controllable::name)
 		.addFunction ("get_value", &PBD::Controllable::get_value)
 		.addStaticFunction ("dump_registry", &PBD::Controllable::dump_registry)
@@ -1921,6 +1925,24 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("is_channelstrip", &PluginInsert::is_channelstrip)
 		.addFunction ("clear_stats", &PluginInsert::clear_stats)
 		.addRefFunction ("get_stats", &PluginInsert::get_stats)
+		.endClass ()
+
+		.deriveWSPtrClass <MPControl<gain_t>, PBD::Controllable> ("MPGainControl")
+		.addFunction ("set_value", &MPControl<gain_t>::set_value)
+		.addFunction ("get_value", &MPControl<gain_t>::get_value)
+		.addFunction ("get_user_string", &MPControl<gain_t>::get_user_string)
+		.addFunction ("lower", &MPControl<gain_t>::lower)
+		.addFunction ("upper", &MPControl<gain_t>::upper)
+		.addFunction ("normal", &MPControl<gain_t>::normal)
+		.endClass ()
+
+		.deriveWSPtrClass <MPControl<bool>, PBD::Controllable> ("MPToggleControl")
+		.addFunction ("set_value", &MPControl<bool>::set_value)
+		.addFunction ("get_value", &MPControl<bool>::get_value)
+		.addFunction ("get_user_string", &MPControl<bool>::get_user_string)
+		.addFunction ("lower", &MPControl<bool>::lower)
+		.addFunction ("upper", &MPControl<bool>::upper)
+		.addFunction ("normal", &MPControl<bool>::normal)
 		.endClass ()
 
 		.deriveWSPtrClass <ReadOnlyControl, PBD::StatefulDestructible> ("ReadOnlyControl")
