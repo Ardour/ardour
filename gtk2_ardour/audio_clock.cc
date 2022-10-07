@@ -866,7 +866,7 @@ AudioClock::set_duration (Temporal::timecnt_t const & dur, bool force)
 
 	switch (_mode) {
 	case Timecode:
-		d = dur.is_zero() ? dur : dur.decrement_by_domain ();
+		d = dur.is_zero() ? dur : dur.decrement ();
 		break;
 	default:
 		d = dur;

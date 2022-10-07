@@ -4333,7 +4333,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		s = min (s, e);
 		e = max (s, e);
 		if (e < timepos_t::max (e.time_domain())) {
-			e.increment_by_domain();
+			e.increment();
 		}
 		_editor->session()->locations()->find_all_between (s, e, ll, Location::Flags (0));
 		for (Locations::LocationList::iterator i = ll.begin(); i != ll.end(); ++i) {
@@ -6632,7 +6632,7 @@ EditorRubberbandSelectDrag::select_things (int button_state, timepos_t const & x
 
 	_editor->begin_reversible_selection_op (X_("rubberband selection"));
 
-	_editor->select_all_within (x1, x2.decrement_by_domain(), y1, y2, _editor->track_views, op, false);
+	_editor->select_all_within (x1, x2.decrement(), y1, y2, _editor->track_views, op, false);
 
 	_editor->commit_reversible_selection_op ();
 }

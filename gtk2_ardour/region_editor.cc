@@ -337,7 +337,7 @@ RegionEditor::length_clock_changed ()
 		/* new end is actually 1 domain unit before the clock duration
 		 * would otherwise indicate
 		 */
-		const timepos_t new_end = (_region->position() + len).decrement_by_domain ();
+		const timepos_t new_end = (_region->position() + len).decrement ();
 		_region->trim_end (new_end);
 		_session->add_command(new StatefulDiffCommand (_region));
 	}

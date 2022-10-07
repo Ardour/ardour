@@ -350,7 +350,7 @@ Editor::move_range_selection_start_or_end_to_region_boundary (bool move_end, boo
 
 	/* so we don't find the current region again */
 	if (dir > 0 || pos.is_positive()) {
-		pos = pos.increment_by_domain ();
+		pos = pos.increment ();
 	}
 
 	timepos_t const target = get_region_boundary (pos, dir, true, false);
@@ -835,7 +835,7 @@ Editor::build_region_boundary_cache ()
 			}
 		}
 
-		pos = lpos.increment_by_domain();
+		pos = lpos.increment();
 	}
 
 	/* finally sort to be sure that the order is correct */
@@ -976,7 +976,7 @@ Editor::cursor_to_region_boundary (bool with_selection, int32_t dir)
 
 	// so we don't find the current region again..
 	if (dir > 0 || pos > 0) {
-		pos = pos.increment_by_domain();
+		pos = pos.increment();
 	}
 
 	if ((target = get_region_boundary (pos, dir, with_selection, false)) < 0) {
@@ -1012,7 +1012,7 @@ Editor::cursor_to_region_point (EditorCursor* cursor, RegionPoint point, int32_t
 
 	// so we don't find the current region again..
 	if (dir > 0 || pos.is_positive())
-		pos = pos.increment_by_domain();
+		pos = pos.increment();
 
 	if (!selection->tracks.empty()) {
 
@@ -1155,7 +1155,7 @@ Editor::selected_marker_to_region_boundary (bool with_selection, int32_t dir)
 
 	// so we don't find the current region again..
 	if (dir > 0 || pos.is_positive()) {
-		pos = pos.increment_by_domain();
+		pos = pos.increment();
 	}
 
 	if ((target = get_region_boundary (pos, dir, with_selection, false)) < 0) {
@@ -1199,7 +1199,7 @@ Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 
 	// so we don't find the current region again..
 	if (dir > 0 || pos > 0) {
-		pos = pos.increment_by_domain();
+		pos = pos.increment();
 	}
 
 	if (!selection->tracks.empty()) {
@@ -3428,7 +3428,7 @@ Editor::separate_under_selected_regions ()
 		}
 
 		//Partition on the region bounds
-		playlist->partition ((*rl)->position().decrement_by_domain(), (*rl)->end(), true);
+		playlist->partition ((*rl)->position().decrement(), (*rl)->end(), true);
 
 		//Re-add region that was just removed due to the partition operation
 		playlist->add_region ((*rl), (*rl)->position());
@@ -3553,7 +3553,7 @@ Editor::region_fill_track ()
 
 	timepos_t const end (_session->current_end_sample ());
 
-	if (regions.empty () || regions.end_time().increment_by_domain() >= end) {
+	if (regions.empty () || regions.end_time().increment() >= end) {
 		return;
 	}
 
@@ -3973,7 +3973,7 @@ Editor::trim_to_region(bool forward)
 			}
 
 			/* new end is 1 domain unit before the next region */
-			region->trim_end (next_region->position().decrement_by_domain());
+			region->trim_end (next_region->position().decrement());
 			arv->region_changed (PropertyChange (ARDOUR::Properties::length));
 		}
 		else {
@@ -9635,7 +9635,7 @@ Editor::effective_ripple_mark_start (boost::shared_ptr<Playlist> target_playlist
 	}
 
 	if (last_region_end_before_at < pos) {
-		pos = last_region_end_before_at.increment_by_domain();
+		pos = last_region_end_before_at.increment();
 	}
 #endif
 

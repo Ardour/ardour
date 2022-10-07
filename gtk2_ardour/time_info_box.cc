@@ -242,7 +242,7 @@ TimeInfoBox::region_selection_changed ()
 	selection_end->set_off (false);
 	selection_length->set_off (false);
 	selection_start->set (s);
-	selection_end->set (e.decrement_by_domain());
+	selection_end->set (e.decrement());
 	selection_length->set_duration (s.distance (e), true);
 }
 
@@ -273,7 +273,7 @@ TimeInfoBox::selection_changed ()
 					selection_end->set_off (false);
 					selection_length->set_off (false);
 					selection_start->set (selection.time.start_time());
-					selection_end->set (selection.time.end_time().decrement_by_domain());
+					selection_end->set (selection.time.end_time().decrement());
 					selection_length->set_duration (selection.time.start_time().distance (selection.time.end_time()));
 				} else {
 					selection_start->set_off (true);
@@ -292,7 +292,7 @@ TimeInfoBox::selection_changed ()
 				selection_end->set_off (false);
 				selection_length->set_off (false);
 				selection_start->set (s);
-				selection_end->set (e.decrement_by_domain());
+				selection_end->set (e.decrement());
 				selection_length->set_duration (s.distance (e), false);
 			}
 		} else {
@@ -324,7 +324,7 @@ TimeInfoBox::selection_changed ()
 				selection_end->set_off (false);
 				selection_length->set_off (false);
 				selection_start->set (s);
-				selection_end->set (e.decrement_by_domain());
+				selection_end->set (e.decrement());
 				selection_length->set_duration(s.distance (e));
 			} else {
 				selection_start->set_off (true);
@@ -336,7 +336,7 @@ TimeInfoBox::selection_changed ()
 			selection_end->set_off (false);
 			selection_length->set_off (false);
 			selection_start->set (selection.time.start_time());
-			selection_end->set (selection.time.end_time().decrement_by_domain());
+			selection_end->set (selection.time.end_time().decrement());
 			selection_length->set_duration (selection.time.length());
 		}
 		break;
