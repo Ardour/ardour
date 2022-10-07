@@ -178,6 +178,9 @@ ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffpr
 	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) {
 		_ffmpeg_exe = ff_file_path;
 	}
+	else if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffmpeg"), ff_file_path)) {
+		_ffmpeg_exe = ff_file_path;
+	}
 #ifdef PLATFORM_WINDOWS
 	else if (PBD::windows_query_registry ("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", "Install_Dir", reg))
 	{
@@ -204,6 +207,9 @@ ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffpr
 #endif
 
 	if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) {
+		_ffprobe_exe = ff_file_path;
+	}
+	else if (find_file (Searchpath(Glib::getenv("PATH")), X_("ffprobe"), ff_file_path)) {
 		_ffprobe_exe = ff_file_path;
 	}
 #ifdef PLATFORM_WINDOWS
