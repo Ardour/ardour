@@ -73,14 +73,14 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void focus ();
 
-	virtual void set (Temporal::timepos_t const &, bool force = false, Temporal::timecnt_t const & offset = Temporal::timecnt_t());
-	void set_duration (Temporal::timecnt_t const &, bool force = false, Temporal::timecnt_t const & offset = Temporal::timecnt_t());
+	/* overriden by MainClock */
+	virtual void set (Temporal::timepos_t const &, bool force = false);
+	void set_duration (Temporal::timecnt_t const &, bool force = false);
 
 	void set_from_playhead ();
 	void locate ();
 	void set_mode (Mode, bool noemit = false);
 	void set_bbt_reference (Temporal::timepos_t const &);
-	void set_is_duration (bool, Temporal::timepos_t const &);
 
 	void copy_text_to_clipboard () const;
 
@@ -199,8 +199,9 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	std::string pre_edit_string;
 	std::string input_string;
 
-	Temporal::timepos_t bbt_reference_time;
-	Temporal::timepos_t last_when;
+	Temporal::timecnt_t last_time;
+	Temporal::timepos_t last_when() const { return last_time.position(); }
+
 	bool last_pdelta;
 	bool last_sdelta;
 
@@ -221,7 +222,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void set_slave_info ();
 	void set_timecode (Temporal::timepos_t const &, bool);
-	void set_bbt (Temporal::timepos_t const &, Temporal::timecnt_t const &, bool);
+	void set_bbt (Temporal::timecnt_t const &, bool);
 	void set_minsec (Temporal::timepos_t const &, bool);
 	void set_seconds (Temporal::timepos_t const &, bool);
 	void set_samples (Temporal::timepos_t const &, bool);

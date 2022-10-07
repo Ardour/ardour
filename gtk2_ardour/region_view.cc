@@ -1008,7 +1008,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 
 	while (t < end) {
 
-		t = t.increment ();
+		t = t.increment_by_domain ();
 
 		/* is this region is on top at time t? */
 		bool const new_me = pl->region_is_audible_at (_region, t);
@@ -1086,7 +1086,7 @@ RegionView::trim_front (timepos_t const & new_bound, bool no_overlap)
 
 		/* Only trim region on the left if the first sample has gone beyond the left region's last sample. */
 		if (region_left && (region_left->nt_last() > _region->position() || regions_touching)) {
-			region_left->trim_end (_region->position().decrement());
+			region_left->trim_end (_region->position().decrement_by_domain());
 		}
 	}
 
@@ -1113,7 +1113,7 @@ RegionView::trim_end (timepos_t const & new_bound, bool no_overlap)
 
 		bool regions_touching = false;
 
-		if (region_right && (last == region_right->position().decrement())) {
+		if (region_right && (last == region_right->position().decrement_by_domain())) {
 			regions_touching = true;
 		}
 

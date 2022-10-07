@@ -1310,7 +1310,7 @@ Editor::marker_menu_select_all_selectables_using_range ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-		select_all_within (l->start(), l->end().decrement(), 0,  DBL_MAX, track_views, Selection::Set, false);
+		select_all_within (l->start(), l->end(), 0,  DBL_MAX, track_views, Selection::Set, false);
 	}
 
 }

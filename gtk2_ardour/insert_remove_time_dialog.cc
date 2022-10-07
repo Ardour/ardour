@@ -74,14 +74,10 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 
 	//if a Range is selected, assume the user wants to insert/remove the length of the range
 	if ( _editor.get_selection().time.length() != 0 ) {
-		position_clock.set (_editor.get_selection().time.start_time(), true);
-		duration_clock.set (_editor.get_selection().time.end_time(), true,  timecnt_t (_editor.get_selection().time.start_time()));
-		duration_clock.set_bbt_reference (_editor.get_selection().time.start_time());
+		duration_clock.set_duration (_editor.get_selection().time.start_time().distance (_editor.get_selection().time.start_time()), true);
 	} else {
 		timepos_t const pos = _editor.get_preferred_edit_position (EDIT_IGNORE_MOUSE);
-		position_clock.set (pos, true);
-		duration_clock.set_bbt_reference (pos);
-		duration_clock.set (timepos_t());
+		duration_clock.set_duration (timecnt_t (pos));
 	}
 
 	if (!remove) {

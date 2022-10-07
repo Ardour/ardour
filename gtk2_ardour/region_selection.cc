@@ -316,7 +316,7 @@ RegionSelection::end_time () const
 	timepos_t e (timepos_t::zero (front()->region()->position().time_domain()));
 
 	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
-		e = max (e, (*i)->region()->end ());
+		e = max (e, (*i)->region()->nt_last ());
 	}
 
 	return e;

@@ -63,9 +63,6 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 		views.push_back (ViewInterval (*r));
 	}
 
-	_minimum_length->set_is_duration (true, views.front().view->region()->position());
-	_fade_length->set_is_duration (true, views.front().view->region()->position());
-
 	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox);
 
 	Gtk::Table* table = Gtk::manage (new Gtk::Table (3, 3));
@@ -106,7 +103,6 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	_fade_length->set_session (s);
 	_fade_length->set_mode (AudioClock::Samples);
-	_fade_length->set_is_duration (true, timepos_t());
 	_fade_length->set_duration (timecnt_t (_fade_length_value), true);
 
 	hbox->pack_start (*table);

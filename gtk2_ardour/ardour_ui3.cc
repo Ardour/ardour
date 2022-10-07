@@ -185,12 +185,12 @@ ARDOUR_UI::update_transport_clocks (samplepos_t p)
 			primary_clock->set (pos);
 			break;
 		case DeltaEditPoint:
-			primary_clock->set (pos, false, timecnt_t (editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD)));
+			primary_clock->set_duration (pos.distance (editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD)), false);
 			break;
 		case DeltaOriginMarker:
 			{
 				Location* loc = _session->locations()->clock_origin_location ();
-				primary_clock->set (pos, false, timecnt_t (loc ? loc->start_sample() : 0));
+				primary_clock->set_duration (pos.distance (loc->start()));
 			}
 			break;
 	}
@@ -200,12 +200,12 @@ ARDOUR_UI::update_transport_clocks (samplepos_t p)
 			secondary_clock->set (pos);
 			break;
 		case DeltaEditPoint:
-			secondary_clock->set (pos, false, timecnt_t (editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD)));
+			secondary_clock->set_duration (pos.distance (editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD)), false);
 			break;
 		case DeltaOriginMarker:
 			{
 				Location* loc = _session->locations()->clock_origin_location ();
-				secondary_clock->set (pos, false, timecnt_t (loc ? loc->start_sample() : 0));
+				secondary_clock->set_duration (pos.distance (loc->start()));
 			}
 			break;
 	}

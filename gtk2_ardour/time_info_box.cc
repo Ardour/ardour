@@ -242,8 +242,8 @@ TimeInfoBox::region_selection_changed ()
 	selection_end->set_off (false);
 	selection_length->set_off (false);
 	selection_start->set (s);
-	selection_end->set (e);
-	selection_length->set_duration (timecnt_t (e), false, timecnt_t (s));
+	selection_end->set (e.decrement_by_domain());
+	selection_length->set_duration (s.distance (e), true);
 }
 
 void
@@ -273,8 +273,7 @@ TimeInfoBox::selection_changed ()
 					selection_end->set_off (false);
 					selection_length->set_off (false);
 					selection_start->set (selection.time.start_time());
-					selection_end->set (selection.time.end_time());
-					selection_length->set_is_duration (true, selection.time.start_time());
+					selection_end->set (selection.time.end_time().decrement_by_domain());
 					selection_length->set_duration (selection.time.start_time().distance (selection.time.end_time()));
 				} else {
 					selection_start->set_off (true);
@@ -293,9 +292,8 @@ TimeInfoBox::selection_changed ()
 				selection_end->set_off (false);
 				selection_length->set_off (false);
 				selection_start->set (s);
-				selection_end->set (e);
-				selection_length->set_is_duration (true, s);
-				selection_length->set (e, false, timecnt_t (s));
+				selection_end->set (e.decrement_by_domain());
+				selection_length->set_duration (s.distance (e), false);
 			}
 		} else {
 			/* this is more efficient than tracking changes per region in large selections */
@@ -326,9 +324,8 @@ TimeInfoBox::selection_changed ()
 				selection_end->set_off (false);
 				selection_length->set_off (false);
 				selection_start->set (s);
-				selection_end->set (e);
-				selection_length->set_is_duration (true, s);
-				selection_length->set (e, false, timecnt_t (s));
+				selection_end->set (e.decrement_by_domain());
+				selection_length->set_duration(s.distance (e));
 			} else {
 				selection_start->set_off (true);
 				selection_end->set_off (true);
@@ -339,9 +336,8 @@ TimeInfoBox::selection_changed ()
 			selection_end->set_off (false);
 			selection_length->set_off (false);
 			selection_start->set (selection.time.start_time());
-			selection_end->set (selection.time.end_time());
-			selection_length->set_is_duration (true, selection.time.start_time());
-			selection_length->set_duration (selection.time.start_time().distance (selection.time.end_time()));
+			selection_end->set (selection.time.end_time().decrement_by_domain());
+			selection_length->set_duration (selection.time.length());
 		}
 		break;
 

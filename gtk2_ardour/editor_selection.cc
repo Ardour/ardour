@@ -2186,7 +2186,7 @@ Editor::select_all_selectables_using_edit (bool after, bool from_context_menu)
 	} else {
 		if ((end = get_preferred_edit_position(EDIT_IGNORE_NONE, from_context_menu)) > 1) {
 			start = timepos_t ();
-			end = end.decrement();
+			end = end.decrement_by_domain();
 		} else {
 			return;
 		}

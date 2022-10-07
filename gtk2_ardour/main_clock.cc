@@ -108,7 +108,7 @@ MainClock::absolute_time () const
 }
 
 void
-MainClock::set (timepos_t const & when, bool force, timecnt_t const & /*offset*/)
+MainClock::set (timepos_t const & when, bool force)
 {
 	ClockDeltaMode mode;
 	if (_primary) {
@@ -126,12 +126,12 @@ MainClock::set (timepos_t const & when, bool force, timecnt_t const & /*offset*/
 			AudioClock::set (when, force);
 			break;
 		case DeltaEditPoint:
-			AudioClock::set (when, force, timecnt_t (PublicEditor::instance().get_preferred_edit_position (Editing::EDIT_IGNORE_PHEAD)));
+			AudioClock::set_duration (when.distance (PublicEditor::instance().get_preferred_edit_position (Editing::EDIT_IGNORE_PHEAD)), force);
 			break;
 		case DeltaOriginMarker:
 			{
 				Location* loc = AudioEngine::instance()->session()->locations()->clock_origin_location ();
-				AudioClock::set (when, force, loc ? timecnt_t (loc->start()) : timecnt_t());
+				AudioClock::set_duration (when.distance (loc ? loc->start() : timepos_t (when.time_domain())), force);
 			}
 			break;
 	}

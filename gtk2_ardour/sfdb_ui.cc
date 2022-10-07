@@ -218,7 +218,6 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	table.attach (timecode_clock,  1, 2, row, row+1, FILL, FILL);  row+=1;
 	table.attach (tempomap_value,  1, 2, row, row+1, FILL, FILL);  row+=1;
 
-	length_clock.set_is_duration (true, timepos_t());
 	length_clock.set_mode (ARDOUR_UI::instance()->primary_clock->mode());
 	timecode_clock.set_mode (AudioClock::Timecode);
 
@@ -380,7 +379,7 @@ SoundFileBox::setup_labels (const string& filename)
 			}
 		} else {
 			channels_value.set_text ("");
-			length_clock.set (timepos_t());
+			length_clock.set_duration (timecnt_t());
 			tempomap_value.set_text (_("No tempo data"));
 		}
 
@@ -401,7 +400,7 @@ SoundFileBox::setup_labels (const string& filename)
 		samplerate_value.set_text ("");
 		tags_entry.get_buffer()->set_text ("");
 
-		length_clock.set (timepos_t());
+		length_clock.set_duration (timecnt_t());
 		timecode_clock.set (timepos_t());
 
 		tags_entry.set_sensitive (false);
@@ -433,7 +432,6 @@ SoundFileBox::setup_labels (const string& filename)
 	samplecnt_t const nfr = _session ? _session->nominal_sample_rate() : 25;
 	double src_coef = (double) nfr / sf_info.samplerate;
 
-	length_clock.set_is_duration (true, timepos_t());
 	length_clock.set_duration (timecnt_t (samplecnt_t (llrint (sf_info.length * src_coef + 0.5))), true);
 	timecode_clock.set (timepos_t (samplepos_t (llrint (sf_info.timecode * src_coef + 0.5))), true);
 
