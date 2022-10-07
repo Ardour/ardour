@@ -1109,10 +1109,10 @@ ControlList::shift (timepos_t const & time, timecnt_t const & distance)
 			}
 			pos += distance;
 		} else if (distance.is_negative() && pos > 0) {
-			ControlEvent cp (pos.decrement_by_domain(), 0.0);
+			ControlEvent cp (pos.decrement(), 0.0);
 			iterator s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 			if (s != _events.end ()) {
-				_events.insert (s, new ControlEvent (pos.decrement_by_domain(), v0));
+				_events.insert (s, new ControlEvent (pos.decrement(), v0));
 			}
 		}
 		if (!dst_guard_exists) {

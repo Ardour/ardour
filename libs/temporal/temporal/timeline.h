@@ -181,8 +181,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	 * timepos_t that is the previous (earlier) possible position given
 	 * this one
 	 */
-	timepos_t decrement () const { return timepos_t (flagged(), val() > 0 ? val() - 1 : 0); /* cannot go negative */ }
-	timepos_t decrement_by_domain () const { return timepos_t (flagged(),
+	timepos_t decrement () const { return timepos_t (flagged(),
 	                                                           is_beats() ?
 	                                                           (val() > 0 ? val() - 1 : 0) :  /* reduce by 1 tick */
 	                                                           (val() > samples_to_superclock (1, TEMPORAL_SAMPLE_RATE) ? val() - samples_to_superclock (1, TEMPORAL_SAMPLE_RATE) : 0)); }
@@ -190,8 +189,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	/* purely for reasons of symmetry with ::decrement(), return a
 	 * timepos_t that is the next (later) possible position given this one
 	 */
-	timepos_t increment () const { return timepos_t (flagged(), val() + 1); }
-	timepos_t increment_by_domain () const { return timepos_t (flagged(), (is_beats() ? (val() + 1) : (val() + samples_to_superclock (1, TEMPORAL_SAMPLE_RATE)))); }
+	timepos_t increment () const { return timepos_t (flagged(), (is_beats() ? (val() + 1) : (val() + samples_to_superclock (1, TEMPORAL_SAMPLE_RATE)))); }
 
 
 	timepos_t & operator+=(timecnt_t const & d);
@@ -393,10 +391,8 @@ class LIBTEMPORAL_API timecnt_t {
 	 * samples_to_superclock(1)
 	 */
 
-	timecnt_t decrement () const { return timecnt_t (_distance - 1, _position); }
-	timecnt_t decrement_by_domain () const { return timecnt_t (_distance.flagged() ? _distance - 1 : _distance - samples_to_superclock (1, TEMPORAL_SAMPLE_RATE),  _position); }
-	timecnt_t increment () const { return timecnt_t (_distance + 1, _position); }
-	timecnt_t increment_by_domain () const { return timecnt_t (_distance.flagged() ? _distance + 1 : _distance + samples_to_superclock (1, TEMPORAL_SAMPLE_RATE),  _position); }
+	timecnt_t decrement () const { return timecnt_t (_distance.flagged() ? _distance - 1 : _distance - samples_to_superclock (1, TEMPORAL_SAMPLE_RATE),  _position); }
+	timecnt_t increment () const { return timecnt_t (_distance.flagged() ? _distance + 1 : _distance + samples_to_superclock (1, TEMPORAL_SAMPLE_RATE),  _position); }
 
 	//timecnt_t operator- (timepos_t const & t) const;
 	//timecnt_t operator+ (timepos_t const & t) const;
