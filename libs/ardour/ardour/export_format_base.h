@@ -59,6 +59,7 @@ class LIBARDOUR_API ExportFormatBase {
 		F_RAW = SF_FORMAT_RAW,
 		F_FLAC = SF_FORMAT_FLAC,
 		F_Ogg = SF_FORMAT_OGG,
+		F_MPEG = 0x230000,  /* hardcode SF_FORMAT_MPEG from libsndfile 1.1.0+ */
 		F_FFMPEG = 0xF10000
 	};
 
@@ -78,7 +79,8 @@ class LIBARDOUR_API ExportFormatBase {
 		SF_U8 = SF_FORMAT_PCM_U8,
 		SF_Float = SF_FORMAT_FLOAT,
 		SF_Double = SF_FORMAT_DOUBLE,
-		SF_Vorbis = SF_FORMAT_VORBIS
+		SF_Vorbis = SF_FORMAT_VORBIS,
+		SF_MPEG_LAYER_III = 0x0082  /* SF_FORMAT_MPEG_LAYER_III */
 	};
 
 	enum DitherType {
