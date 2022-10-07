@@ -692,7 +692,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, timepos_t const & positi
 	timepos_t pos = position;
 
 	if (times == 1 && auto_partition) {
-		partition_internal (pos.decrement(), (pos + region->length ()), true, rlock.thawlist);
+		partition_internal (pos.decrement_by_domain(), (pos + region->length ()), true, rlock.thawlist);
 		for (auto const & r : rlock.thawlist) {
 			_session.add_command (new StatefulDiffCommand (r));
 		}
@@ -1050,7 +1050,8 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 
 				current->clear_changes ();
 				thawlist.add (current);
-				current->modify_end_unchecked (pos2.decrement(), true);
+
+				current->modify_end_unchecked (pos2.decrement_by_domain(), true);
 
 			} else if (overlap == Temporal::OverlapEnd) {
 
@@ -1087,7 +1088,8 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 
 				current->clear_changes ();
 				thawlist.add (current);
-				current->modify_end_unchecked (pos2.decrement(), true);
+
+				current->modify_end_unchecked (pos2.decrement_by_domain(), true);
 
 			} else if (overlap == Temporal::OverlapStart) {
 
@@ -1225,7 +1227,7 @@ Playlist::cut (timepos_t const & start, timecnt_t const & cnt, bool result_is_hi
 
 	{
 		RegionWriteLock rlock (this);
-		partition_internal (start, (start+cnt).decrement(), true, rlock.thawlist);
+		partition_internal (start, (start+cnt).decrement_by_domain(), true, rlock.thawlist);
 	}
 
 	return the_copy;
@@ -1324,7 +1326,7 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, timepos_t & positio
 {
 	RegionWriteLock rl (this);
 
-	while (position + region->length().decrement() < end) {
+	while ((position + region->length()).decrement_by_domain() < end) {
 		boost::shared_ptr<Region> copy = RegionFactory::create (region, true, false, &rl.thawlist);
 		add_region_internal (copy, position, rl.thawlist);
 		set_layer (copy, DBL_MAX);

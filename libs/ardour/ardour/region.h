@@ -123,7 +123,7 @@ public:
 	timepos_t start ()     const { return _start.val(); }
 	timecnt_t length ()    const { return _length.val(); }
 	timepos_t end()        const;
-	timepos_t nt_last()       const { return end().decrement(); }
+	timepos_t nt_last()    const { return end().decrement_by_domain(); }
 
 	timepos_t source_position () const;
 	timepos_t source_relative_position (Temporal::timepos_t const &) const;

@@ -877,10 +877,11 @@ Region::cut_end (timepos_t const & new_endpoint)
 	modify_end_unchecked (new_endpoint, true);
 }
 
+
 void
 Region::modify_front_unchecked (timepos_t const & new_position, bool reset_fade)
 {
-	timepos_t last = end().decrement();
+	timepos_t last = end().decrement_by_domain();
 	timepos_t source_zero;
 
 	if (position() > start()) {
