@@ -179,6 +179,8 @@ HasSampleFormat::get_sample_format_name (ExportFormatBase::SampleFormat format)
 		return _("8-bit unsigned");
 	  case ExportFormatBase::SF_Vorbis:
 		return _("Vorbis sample format");
+	  case ExportFormatBase::SF_MPEG_LAYER_III:
+		return _("MPEG-2 Audio Layer III");
 	  case ExportFormatBase::SF_None:
 		return _("No sample format");
 	}
