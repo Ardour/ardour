@@ -157,7 +157,7 @@ class LIBTEMPORAL_API Range {
 	 * extent semantics: 1 + (end - start)
 	 */
 
-	timecnt_t extent() const { return _start.distance (_end).increment(); }
+	timecnt_t length() const { return _start.distance (_end); }
 
 	RangeList subtract (RangeList &) const;
 
