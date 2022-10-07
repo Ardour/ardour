@@ -446,10 +446,10 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 		 * hardcode them here for the time being.
 		 */
 		if (format_id() == F_FFMPEG) {
-			_codec_quality = -2; // ExportFormatOggVorbis::default_codec_quality();
+			_codec_quality = -2;
 		}
 		else if (format_id() == F_Ogg) {
-			_codec_quality = 40; // ExportFormatFFMPEG::default_codec_quality();
+			_codec_quality = 40;
 		}
 	}
 
