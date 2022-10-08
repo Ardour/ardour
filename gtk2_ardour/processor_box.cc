@@ -4674,6 +4674,27 @@ ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* b
 	p->ToggleUI.connect (gui_connections, invalidator (*this), boost::bind (&ProcessorWindowProxy::show_the_right_window, this, false), gui_context());
 	p->ShowUI.connect (gui_connections, invalidator (*this), boost::bind (&ProcessorWindowProxy::show_the_right_window, this, true), gui_context());
 	p->HideUI.connect (gui_connections, invalidator (*this), boost::bind (&ProcessorWindowProxy::hide, this), gui_context());
+
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
+	if (pi) {
+		signal_unmap.connect (sigc::bind ([] (ProxyBase* self, PluginType type) {
+			ProcessorWindowProxy* me = dynamic_cast<ProcessorWindowProxy*> (self);
+			if (!me->is_custom) {
+				return;
+			}
+			switch (UIConfiguration::instance ().get_plugin_gui_behavior ()) {
+				case PluginGUIHide:
+					return;
+				case PluginGUIDestroyVST:
+					if (type != Windows_VST && type != LXVST && type != MacVST && type != VST3) {
+						return;
+					}
+				default:
+					break;
+			}
+			Glib::signal_idle ().connect (sigc::bind ([] (ProxyBase* s) { s->drop_window (); return false; }, self));
+		}, this, pi->type ()));
+	}
 }
 
 ProcessorWindowProxy::~ProcessorWindowProxy()
