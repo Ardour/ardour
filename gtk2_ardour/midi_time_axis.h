@@ -175,7 +175,7 @@ private:
 	Gtk::Menu* controller_menu;
 
 	void add_single_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
-	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, uint16_t chanels, int ctl, const std::string& name);
+	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, uint16_t channels, int ctl, const std::string& name);
 	void build_controller_menu ();
 	void toggle_restore_pgm_on_load ();
 	void toggle_channel_selector ();
