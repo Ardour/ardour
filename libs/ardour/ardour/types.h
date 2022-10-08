@@ -677,6 +677,12 @@ struct CleanupReport {
 	size_t                   space;
 };
 
+enum PluginGUIBehavior {
+	PluginGUIHide,
+	PluginGUIDestroyAny,
+	PluginGUIDestroyVST,
+};
+
 /** A struct used to describe changes to processors in a route.
  *  This is useful because objects that respond to a change in processors
  *  can optimise what work they do based on details of what has changed.

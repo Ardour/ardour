@@ -2549,6 +2549,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("InhibitAlways", ARDOUR::ScreenSaverMode(InhibitAlways))
 		.endNamespace ()
 
+		.beginNamespace ("PluginGUIBehavior")
+		.addConst ("PluginGUIHide", ARDOUR::PluginGUIBehavior(PluginGUIHide))
+		.addConst ("PluginGUIDestroyAny", ARDOUR::PluginGUIBehavior(PluginGUIDestroyAny))
+		.addConst ("PluginGUIDestroyVST", ARDOUR::PluginGUIBehavior(PluginGUIDestroyVST))
+		.endNamespace ()
+
 		.beginNamespace ("ClockDeltaMode")
 		.addConst ("NoDelta", ARDOUR::ClockDeltaMode(NoDelta))
 		.addConst ("DeltaEditPoint", ARDOUR::ClockDeltaMode(DeltaEditPoint))
