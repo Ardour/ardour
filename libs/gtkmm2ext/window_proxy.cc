@@ -229,6 +229,11 @@ WindowProxy::setup ()
 
 	assert (_window);
 
+	delete_connection.disconnect ();
+	configure_connection.disconnect ();
+	map_connection.disconnect ();
+	unmap_connection.disconnect ();
+
 	delete_connection = _window->signal_delete_event().connect (sigc::mem_fun (*this, &WindowProxy::delete_event_handler));
 	configure_connection = _window->signal_configure_event().connect (sigc::mem_fun (*this, &WindowProxy::configure_handler), false);
 	map_connection = _window->signal_map().connect (sigc::mem_fun (*this, &WindowProxy::map_handler), false);
