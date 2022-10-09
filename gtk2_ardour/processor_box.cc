@@ -4692,7 +4692,7 @@ ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* b
 				default:
 					break;
 			}
-			Glib::signal_idle ().connect (sigc::bind ([] (ProxyBase* s) { s->drop_window (); return false; }, self));
+			Glib::signal_idle ().connect (sigc::bind ([] (ProxyBase* s) -> bool { s->drop_window (); return false; }, self));
 		}, this, pi->type ()));
 	}
 }
