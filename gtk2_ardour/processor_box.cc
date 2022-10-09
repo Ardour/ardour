@@ -4658,6 +4658,13 @@ ProcessorBox::is_editor_mixer_strip() const
 	return _parent_strip && !_parent_strip->mixer_owned();
 }
 
+static bool
+idle_drop_window (WM::ProxyBase* s)
+{
+	s->drop_window ();
+	return false;
+}
+
 ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* box, boost::weak_ptr<Processor> processor)
 	: WM::ProxyBase (name, string())
 	, _processor_box (box)
@@ -4692,7 +4699,7 @@ ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* b
 				default:
 					break;
 			}
-			Glib::signal_idle ().connect (sigc::bind ([] (ProxyBase* s) -> bool { s->drop_window (); return false; }, self));
+			Glib::signal_idle ().connect (sigc::bind (&idle_drop_window, self));
 		}, this, pi->type ()));
 	}
 }
