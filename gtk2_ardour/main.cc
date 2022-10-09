@@ -275,6 +275,14 @@ int main (int argc, char *argv[])
 		if (!setlocale (LC_ALL, "")) {
 			std::cerr << "localization call failed, " << PROGRAM_NAME << " will not be translated\n";
 		}
+	} else {
+		/* Force-disable localization if the user wishes so;
+		   just calling setlocale (...,"C") is not sufficient for this;
+		   it is probably the LANG env var which gets picked up later somewhere.
+		*/
+		setenv ("LC_ALL", "C", 1);
+		setenv ("LC_MESSAGES", "C", 1);
+		setenv ("LANG", "C", 1);
 	}
 #endif
 
