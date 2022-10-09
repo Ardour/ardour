@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6.8\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-01 14:18+0300\n"
-"PO-Revision-Date: 2022-10-01 14:28+0300\n"
+"PO-Revision-Date: 2022-10-09 14:45+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: Russian <gnome-cyr@lists.gnome.org>\n"
 "Language: ru\n"
@@ -984,7 +984,7 @@ msgstr "Без слоёв"
 
 #: ardour_ui.cc:210
 msgid "Snd on Snd"
-msgstr ""
+msgstr "Наложением"
 
 #: ardour_ui.cc:218
 msgid ""
@@ -1138,7 +1138,7 @@ msgstr "Настр."
 
 #: ardour_ui.cc:353
 msgid "Window|Rec"
-msgstr "Рек."
+msgstr "Рекордер"
 
 #: ardour_ui.cc:354
 msgid "Window|Cue"
@@ -1184,6 +1184,7 @@ msgstr ""
 #: ardour_ui.cc:708 ardour_ui.cc:785 keyeditor.cc:587
 msgid "Could not open temporary file to print bindings (%1)"
 msgstr ""
+"Не удалось открыть временный файл для печати клавиатурных комбинаций (%1)"
 
 #: ardour_ui.cc:726 ardour_ui.cc:803 keyeditor.cc:605
 msgid "Could not save bindings to file (%1)"
@@ -1730,12 +1731,16 @@ msgid ""
 "<b>When enabled</b>, triggering Cues will result in Cue Markers added to the "
 "timeline"
 msgstr ""
+"<b>Если включено</b>, запуск определенной очереди добавляет маркер этой "
+"очереди на таймлайн"
 
 #: ardour_ui2.cc:105
 msgid ""
 "<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed "
 "on the timeline"
 msgstr ""
+"<b>Если включено</b>, маркер очереди на таймлайне запустить воспроизведение "
+"этой очереди"
 
 #: ardour_ui2.cc:107
 msgid ""
@@ -1743,6 +1748,10 @@ msgid ""
 "from live input to output, but any paths with delay-causing plugins will "
 "sound later than those without."
 msgstr ""
+"Отключить всю компенсацию задержки для плагинов. Это ускорит прохождение "
+"сигнала от физического входа к выходу, но по маршрутам, где есть вносящие "
+"задержку плагины, сигнал будет проходить медленнее, чем по маршрутам, где "
+"таких плагинов нет."
 
 #: ardour_ui2.cc:138
 msgid "[ERROR]: "
@@ -1813,6 +1822,8 @@ msgid ""
 "Left-Click to show the %1 window\n"
 "Right-click to show more options"
 msgstr ""
+"Щелчок ЛКМ показывает окно %1\n"
+"Щелчок ПКМ показывает дополнительные параметры"
 
 #: ardour_ui2.cc:485
 msgid "Start recording at auto-punch start"
@@ -1943,7 +1954,7 @@ msgstr "Интерфейс: не удалось инициализировать
 
 #: ardour_ui_dependents.cc:274 ardour_ui_dependents.cc:279
 msgid "UI: cannot setup recorder"
-msgstr ""
+msgstr "UI: невозможно настроить рекордер"
 
 #: ardour_ui_dependents.cc:285
 msgid "UI: cannot setup meterbridge"
@@ -3797,6 +3808,8 @@ msgid ""
 "Click to launch all clips in this row\n"
 "Right-click to select properties for all clips in this row"
 msgstr ""
+"Щелкните ЛКМ, чтобы запустить все клипы в этом ряду\n"
+"Щелкните ПКМ, чтобы выбрать параметры для всех клипов в этом ряду"
 
 #: cuebox_ui.cc:256
 msgid "Jump..."
@@ -4820,35 +4833,35 @@ msgstr "Очистить плейлисты"
 
 #: editor.cc:4653
 msgid "Copy Playlist for ALL Tracks"
-msgstr ""
+msgstr "Скопировать плейлист для ВСЕХ дорожек"
 
 #: editor.cc:4653
 msgid "New Playlist for ALL Tracks"
-msgstr ""
+msgstr "Создать плейлист для ВСЕХ дорожек"
 
 #: editor.cc:4664
 msgid "Copy Playlist for this track/group"
-msgstr ""
+msgstr "Скопировать плейлист для этой дорожки/группы"
 
 #: editor.cc:4664
 msgid "New Playlist for this track/group"
-msgstr ""
+msgstr "Создать плейлист для этой дорожки/группы"
 
 #: editor.cc:4675
 msgid "Copy Playlist for Selected Tracks"
-msgstr ""
+msgstr "Скопировать плейлист для выбранных дорожек"
 
 #: editor.cc:4675
 msgid "New Playlist for Selected Tracks"
-msgstr ""
+msgstr "Создать плейлист для выбранных дорожек"
 
 #: editor.cc:4686
 msgid "Copy Playlist for Armed Tracks"
-msgstr ""
+msgstr "Скопировать плейлист для дорожек, готовых к записи"
 
 #: editor.cc:4686
 msgid "New Playlist for Armed Tracks"
-msgstr ""
+msgstr "Создать плейлист для дорожек, готовых к записи"
 
 #: editor.cc:5458
 msgid "Please wait while %1 loads visual data."
@@ -5226,7 +5239,7 @@ msgstr ""
 
 #: editor_actions.cc:272
 msgid "Show Playlist Selector"
-msgstr ""
+msgstr "Показать окно выбора плейлистов"
 
 #: editor_actions.cc:280 editor_actions.cc:281 editor_actions.cc:1920
 #: editor_actions.cc:1921
