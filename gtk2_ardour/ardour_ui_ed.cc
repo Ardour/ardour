@@ -45,6 +45,7 @@
 #include "pbd/fpu.h"
 #include "pbd/convert.h"
 #include "pbd/openuri.h"
+#include "pbd/types_convert.h"
 
 #include "gtkmm2ext/cairo_packer.h"
 #include "gtkmm2ext/utils.h"
@@ -61,6 +62,7 @@
 #include "engine_dialog.h"
 #include "editor.h"
 #include "editing.h"
+#include "enums_convert.h"
 #include "actions.h"
 #include "meterbridge.h"
 #include "luawindow.h"
@@ -945,6 +947,16 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode& rnode (recorder->get_state());
 	XMLNode& tnode (trigger_page->get_state());
 
+	/* store clock modes */
+	XMLNode* cnode = new XMLNode(X_("ClockModes"));
+	for (auto const& i: AudioClock::clocks) {
+		XMLNode* child = new XMLNode (X_("Clock"));
+		child->set_property (X_("name"), i->name());
+		child->set_property (X_("mode"), i->mode());
+		child->set_property (X_("on"), i->on());
+		cnode->add_child_nocopy (*child);
+	}
+
 	Config->add_extra_xml (*window_node);
 	Config->add_extra_xml (audio_midi_setup->get_state());
 
@@ -962,6 +974,7 @@ ARDOUR_UI::save_ardour_state ()
 		_session->add_instant_xml (bnode);
 		_session->add_instant_xml (rnode);
 		_session->add_instant_xml (tnode);
+		_session->add_instant_xml (*cnode);
 		if (location_ui) {
 			_session->add_instant_xml (location_ui->ui().get_state ());
 		}
@@ -981,6 +994,7 @@ ARDOUR_UI::save_ardour_state ()
 		Config->add_instant_xml (bnode);
 		Config->add_instant_xml (rnode);
 		Config->add_instant_xml (tnode);
+		Config->add_instant_xml (*cnode);
 		if (location_ui) {
 			Config->add_instant_xml (location_ui->ui().get_state ());
 		}
@@ -997,6 +1011,7 @@ ARDOUR_UI::save_ardour_state ()
 	delete &pnode;
 	delete &rnode;
 	delete &tnode;
+	delete cnode;
 
 	Keyboard::save_keybindings ();
 }

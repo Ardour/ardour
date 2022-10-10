@@ -1373,23 +1373,26 @@ AudioClock::set_session (Session *s)
 		Config->ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 
+		/* try load v6 style settings (session file) */
 		XMLNode* node = _session->extra_xml (X_("ClockModes"));
+		if (!node) {
+			/* get new v7+ settings from instant_xml */
+			node = ARDOUR_UI::instance ()->clock_mode_settings ();
+		}
 
-		if (node) {
-			for (XMLNodeList::const_iterator i = node->children().begin(); i != node->children().end(); ++i) {
-				std::string name;
-				if ((*i)->get_property (X_("name"), name) && name == _name) {
+		for (XMLNodeList::const_iterator i = node->children().begin(); i != node->children().end(); ++i) {
+			std::string name;
+			if ((*i)->get_property (X_("name"), name) && name == _name) {
 
-					AudioClock::Mode amode;
-					if ((*i)->get_property (X_("mode"), amode)) {
-						set_mode (amode, true);
-					}
-					bool on;
-					if ((*i)->get_property (X_("on"), on)) {
-						set_off (!on);
-					}
-					break;
+				AudioClock::Mode amode;
+				if ((*i)->get_property (X_("mode"), amode)) {
+					set_mode (amode, true);
 				}
+				bool on;
+				if ((*i)->get_property (X_("on"), on)) {
+					set_off (!on);
+				}
+				break;
 			}
 		}
 

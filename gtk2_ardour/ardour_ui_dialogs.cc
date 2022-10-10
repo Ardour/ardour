@@ -221,8 +221,6 @@ ARDOUR_UI::set_session (Session *s)
 	   back to the session XML ("Extra") state.
 	 */
 
-	AudioClock::ModeChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::store_clock_modes));
-
 	Glib::signal_idle().connect (sigc::mem_fun (*this, &ARDOUR_UI::first_idle));
 
 	start_clocking ();

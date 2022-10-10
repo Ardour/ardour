@@ -357,6 +357,23 @@ ARDOUR_UI::trigger_page_settings () const
 }
 
 XMLNode*
+ARDOUR_UI::clock_mode_settings () const
+{
+	XMLNode* node = 0;
+
+	if (_session) {
+		node = _session->instant_xml(X_("ClockModes"));
+	}
+	if (!node) {
+		node = Config->instant_xml(X_("ClockModes"));
+	}
+	if (!node) {
+		node = new XMLNode (X_("ClockModes"));
+	}
+	return node;
+}
+
+XMLNode*
 ARDOUR_UI::keyboard_settings () const
 {
 	XMLNode* node = 0;

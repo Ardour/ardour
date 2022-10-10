@@ -290,6 +290,7 @@ public:
 	XMLNode* trigger_page_settings () const;
 	XMLNode* recorder_settings () const;
 	XMLNode* keyboard_settings () const;
+	XMLNode* clock_mode_settings () const;
 	XMLNode* tearoff_settings (const char*) const;
 
 	void save_ardour_state ();
@@ -308,8 +309,6 @@ public:
 
 	VideoTimeLine *video_timeline;
 
-	void store_clock_modes ();
-	void restore_clock_modes ();
 	void reset_main_clocks ();
 
 	void synchronize_sync_source_and_video_pullup ();

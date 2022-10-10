@@ -126,7 +126,6 @@
 #include "temporal/time.h"
 
 #include "about.h"
-#include "enums_convert.h"
 #include "actions.h"
 #include "add_route_dialog.h"
 #include "ardour_message.h"
@@ -2993,30 +2992,6 @@ what you would like to do.\n"), PROGRAM_NAME));
 	default:
 		return 0;
 	}
-}
-
-void
-ARDOUR_UI::store_clock_modes ()
-{
-	if (session_load_in_progress) {
-		/* Do not overwrite clock modes while loading them (with a session) */
-		return;
-	}
-
-	XMLNode* node = new XMLNode(X_("ClockModes"));
-
-	for (vector<AudioClock*>::iterator x = AudioClock::clocks.begin(); x != AudioClock::clocks.end(); ++x) {
-		XMLNode* child = new XMLNode (X_("Clock"));
-
-		child->set_property (X_("name"), (*x)->name());
-		child->set_property (X_("mode"), (*x)->mode());
-		child->set_property (X_("on"), (*x)->on());
-
-		node->add_child_nocopy (*child);
-	}
-
-	_session->add_extra_xml (*node);
-	_session->set_dirty ();
 }
 
 /** Allocate our thread-local buffers */
