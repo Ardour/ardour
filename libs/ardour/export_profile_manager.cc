@@ -788,7 +788,13 @@ ExportProfileManager::load_format_from_disk (std::string const& path)
 		return;
 	}
 
-	ExportFormatSpecPtr format = handler->add_format (*root);
+	ExportFormatSpecPtr format;
+	try {
+		format = handler->add_format (*root);
+	} catch (PBD::unknown_enumeration& e) {
+		error << string_compose (_("Cannot export format read from %1: %2"), path, e.what()) << endmsg;
+		return;
+	}
 
 	if (format->format_id () == ExportFormatBase::F_FFMPEG) {
 		std::string unused;
