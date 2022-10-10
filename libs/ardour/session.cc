@@ -3390,7 +3390,7 @@ Session::globally_set_send_gains_to_zero (boost::shared_ptr<Route> dest)
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((s = (*i)->internal_send_for (dest)) != 0) {
-			s->amp()->gain_control()->set_value (GAIN_COEFF_ZERO, Controllable::NoGroup);
+			s->gain_control()->set_value (GAIN_COEFF_ZERO, Controllable::NoGroup);
 		}
 	}
 }
@@ -3403,7 +3403,7 @@ Session::globally_set_send_gains_to_unity (boost::shared_ptr<Route> dest)
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((s = (*i)->internal_send_for (dest)) != 0) {
-			s->amp()->gain_control()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
+			s->gain_control()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
 		}
 	}
 }
@@ -3416,7 +3416,7 @@ Session::globally_set_send_gains_from_track(boost::shared_ptr<Route> dest)
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((s = (*i)->internal_send_for (dest)) != 0) {
-			s->amp()->gain_control()->set_value ((*i)->gain_control()->get_value(), Controllable::NoGroup);
+			s->gain_control()->set_value ((*i)->gain_control()->get_value(), Controllable::NoGroup);
 		}
 	}
 }

@@ -3255,8 +3255,7 @@ OSC::route_get_sends(lo_message msg) {
 			lo_message_add_int32(reply, get_sid(isend->target_route(), get_address(msg)));
 			lo_message_add_string(reply, isend->name().c_str());
 			lo_message_add_int32(reply, i);
-			boost::shared_ptr<Amp> a = isend->amp();
-			lo_message_add_float(reply, a->gain_control()->internal_to_interface (a->gain_control()->get_value()));
+			lo_message_add_float(reply, isend->gain_control()->internal_to_interface (isend->gain_control()->get_value()));
 			lo_message_add_int32(reply, p->active() ? 1 : 0);
 		}
 	}
@@ -3312,12 +3311,10 @@ OSC::route_get_receives(lo_message msg) {
 			boost::shared_ptr<InternalSend> isend = boost::dynamic_pointer_cast<InternalSend> (p);
 			if (isend) {
 				if( isend->target_route()->id() == r->id()){
-					boost::shared_ptr<Amp> a = isend->amp();
-
 					lo_message_add_int32(reply, get_sid(tr, get_address(msg)));
 					lo_message_add_string(reply, tr->name().c_str());
 					lo_message_add_int32(reply, j);
-					lo_message_add_float(reply, a->gain_control()->internal_to_interface (a->gain_control()->get_value()));
+					lo_message_add_float(reply, isend->gain_control()->internal_to_interface (isend->gain_control()->get_value()));
 					lo_message_add_int32(reply, p->active() ? 1 : 0);
 				}
 			}

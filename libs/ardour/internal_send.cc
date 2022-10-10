@@ -140,10 +140,10 @@ InternalSend::init_gain ()
 {
 	if (_role == Listen) {
 		/* send to monitor bus is always at unity */
-		_gain_control->set_value (GAIN_COEFF_UNITY, PBD::Controllable::NoGroup);
+		gain_control ()->set_value (GAIN_COEFF_UNITY, PBD::Controllable::NoGroup);
 	} else {
 		/* aux sends start at -inf dB */
-		_gain_control->set_value (GAIN_COEFF_ZERO, PBD::Controllable::NoGroup);
+		gain_control ()->set_value (GAIN_COEFF_ZERO, PBD::Controllable::NoGroup);
 	}
 }
 
@@ -331,7 +331,7 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	/* consider metering */
 	if (_metering) {
-		if (_amp->gain_control ()->get_value () == GAIN_COEFF_ZERO) {
+		if (gain_control ()->get_value () == GAIN_COEFF_ZERO) {
 			_meter->reset ();
 		} else {
 			_meter->run (mixbufs, start_sample, end_sample, speed, nframes, true);

@@ -98,11 +98,11 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
 	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (BusSendLevel), time_domain()));
-	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), gl));
-	_gain_control->set_flag (Controllable::InlineControl);
-	add_control (_gain_control);
+	set_gain_control (boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), gl)));
 
-	_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));
+	gain_control ()->set_flag (Controllable::InlineControl);
+	add_control (gain_control ());
+
 	_meter.reset (new PeakMeter (_session, name()));
 
 	_send_delay.reset (new DelayLine (_session, "Send-" + name()));
@@ -110,11 +110,8 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 
 	if (_role == Delivery::Aux || _role == Delivery::Send) {
-		_polarity_control = boost::shared_ptr<AutomationControl> (new AutomationControl (_session, PhaseAutomation, ParameterDescriptor (PhaseAutomation),
-		                                                                                 boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), time_domain())),
-		                                                                                 "polarity-invert"));
-		//_polarity_control->set_flag (Controllable::InlineControl);
-		add_control (_polarity_control);
+		set_polarity_control (boost::shared_ptr<AutomationControl> (new AutomationControl (_session, PhaseAutomation, ParameterDescriptor (PhaseAutomation), boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), time_domain())), "polarity-invert")));
+		add_control (polarity_control ());
 	}
 
 	if (panner_shell()) {
@@ -134,20 +131,18 @@ Send::~Send ()
 void
 Send::activate ()
 {
-	_amp->activate ();
 	_meter->activate ();
 
-	Processor::activate ();
+	Delivery::activate ();
 }
 
 void
 Send::deactivate ()
 {
-	_amp->deactivate ();
 	_meter->deactivate ();
 	_meter->reset ();
 
-	Processor::deactivate ();
+	Delivery::deactivate ();
 }
 
 samplecnt_t
@@ -257,22 +252,16 @@ Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, do
 	sendbufs.read_from (bufs, nframes);
 	assert(sendbufs.count() == bufs.count());
 
-	/* gain control */
-
-	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
-	_amp->setup_gain_automation (start_sample, end_sample, nframes);
-	_amp->run (sendbufs, start_sample, end_sample, speed, nframes, true);
-
 	_send_delay->run (sendbufs, start_sample, end_sample, speed, nframes, true);
 
-	/* deliver to outputs */
+	/* deliver to outputs (and apply gain) */
 
 	Delivery::run (sendbufs, start_sample, end_sample, speed, nframes, true);
 
 	/* consider metering */
 
 	if (_metering) {
-		if (_amp->gain_control()->get_value() == 0) {
+		if (gain_control()->get_value() == 0) {
 			_meter->reset();
 		} else {
 			_meter->run (*_output_buffers, start_sample, end_sample, speed, nframes, true);
@@ -297,7 +286,7 @@ Send::state () const
 
 	node.set_property ("selfdestruct", _remove_on_disconnect);
 
-	node.add_child_nocopy (_gain_control->get_state());
+	node.add_child_nocopy (gain_control ()->get_state());
 
 	return node;
 }
@@ -317,7 +306,7 @@ Send::set_state (const XMLNode& node, int version)
 			/* old versions had a single Controllable only, and it was
 			 * not always a "gaincontrol"
 			 */
-			_gain_control->set_state (*i, version);
+			gain_control()->set_state (*i, version);
 			break;
 		}
 
@@ -326,7 +315,7 @@ Send::set_state (const XMLNode& node, int version)
 			continue;
 		}
 		if (control_name == "gaincontrol" /* gain_control_name (BusSendLevel) */) {
-			_gain_control->set_state (*i, version);
+			gain_control ()->set_state (*i, version);
 			break;
 		}
 	}
@@ -347,8 +336,8 @@ Send::set_state (const XMLNode& node, int version)
 				XMLNode* gain_node;
 				nn = processor;
 				if ((gain_node = nn->child (Controllable::xml_node_name.c_str ())) != 0) {
-					_gain_control->set_state (*gain_node, version);
-					_gain_control->set_flags (Controllable::InlineControl);
+					gain_control ()->set_state (*gain_node, version);
+					gain_control ()->set_flags (Controllable::InlineControl);
 				}
 			}
 		}
@@ -385,7 +374,7 @@ Send::set_state (const XMLNode& node, int version)
 			}
 			XMLNode xn (**i);
 			xn.set_property ("automation-id", EventTypeMap::instance().to_symbol(Evoral::Parameter (BusSendLevel)));
-			_gain_control->alist()->set_state (xn, version);
+			gain_control()->alist()->set_state (xn, version);
 			break;
 		}
 	}
@@ -508,11 +497,7 @@ Send::configure_io (ChanCount in, ChanCount out)
 	ChanCount send_count = in;
 	send_count.set(DataType::AUDIO, pan_outs());
 
-	if (!_amp->configure_io (in, out)) {
-		return false;
-	}
-
-	if (!Processor::configure_io (in, out)) {
+	if (!Delivery::configure_io (in, out)) {
 		return false;
 	}
 

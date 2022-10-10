@@ -266,7 +266,7 @@ Route::init ()
 	if (is_master()) {
 		_volume_control.reset (new GainControl (_session, MainOutVolume));
 		_volume_control->set_flag (Controllable::NotAutomatable);
-		_main_outs->add_gain (_volume_control);
+		_main_outs->set_gain_control (_volume_control);
 		_volume.reset (new Amp (_session, X_("LAN Amp"), _volume_control, false));
 		_volume->set_display_to_user (false);
 		_volume->deactivate ();
@@ -2770,11 +2770,11 @@ Route::set_state (const XMLNode& node, int version)
 		if (_volume_applies_to_output) {
 			_volume->deactivate ();
 			_volume->set_display_to_user (false);
-			main_outs()->add_gain (_volume_control);
+			main_outs()->set_gain_control (_volume_control);
 		} else {
 			_volume->set_display_to_user (true);
 			_volume->activate ();
-			main_outs()->add_gain (boost::shared_ptr<GainControl> ());
+			main_outs()->set_gain_control (boost::shared_ptr<GainControl> ());
 		}
 	}
 
@@ -4792,7 +4792,7 @@ Route::set_volume_applies_to_output (bool en)
 	if (en) {
 		_volume->deactivate ();
 		_volume->set_display_to_user (false);
-		main_outs()->add_gain (_volume_control);
+		main_outs()->set_gain_control (_volume_control);
 		{
 			/* remove hidden processor */
 			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
@@ -4803,7 +4803,7 @@ Route::set_volume_applies_to_output (bool en)
 		_volume->set_display_to_user (true);
 		add_processor (_volume, PostFader, NULL, true);
 		_volume->activate ();
-		main_outs()->add_gain (boost::shared_ptr<GainControl> ());
+		main_outs()->set_gain_control (boost::shared_ptr<GainControl> ());
 	}
 	_volume_applies_to_output = en;
 	_session.set_dirty ();

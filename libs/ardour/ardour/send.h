@@ -33,7 +33,6 @@
 namespace ARDOUR {
 
 class PeakMeter;
-class Amp;
 class GainControl;
 class DelayLine;
 
@@ -73,9 +72,7 @@ public:
 	bool display_to_user() const;
 	bool is_foldback () const { return _role == Foldback; }
 
-	boost::shared_ptr<Amp> amp() const { return _amp; }
 	boost::shared_ptr<PeakMeter> meter() const { return _meter; }
-	boost::shared_ptr<GainControl> gain_control() const { return _gain_control; }
 
 	bool metering() const { return _metering; }
 	void set_metering (bool yn) { _metering = yn; }
@@ -117,8 +114,6 @@ protected:
 	XMLNode& state () const;
 
 	bool _metering;
-	boost::shared_ptr<GainControl> _gain_control;
-	boost::shared_ptr<Amp> _amp;
 	boost::shared_ptr<PeakMeter> _meter;
 	boost::shared_ptr<DelayLine> _send_delay;
 	boost::shared_ptr<DelayLine> _thru_delay;

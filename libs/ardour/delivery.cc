@@ -187,6 +187,18 @@ Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	return false;
 }
 
+void
+Delivery::set_gain_control (boost::shared_ptr<GainControl> gc) {
+	if (gc) {
+		_gain_control = gc;
+		_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));
+		_amp->configure_io (_configured_input, _configured_output);
+	} else {
+		_amp.reset ();
+		_gain_control = gc;
+	}
+}
+
 /** Caller must hold process lock */
 bool
 Delivery::configure_io (ChanCount in, ChanCount out)
@@ -233,11 +245,15 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 
 	reset_panner ();
 
+	if (_amp) {
+		return _amp->configure_io (in, out);
+	}
+
 	return true;
 }
 
 void
-Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double /*speed*/, pframes_t nframes, bool result_required)
+Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
 {
 	assert (_output);
 
@@ -272,11 +288,11 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 
 		_current_gain = Amp::apply_gain (bufs, _session.nominal_sample_rate(), nframes, _current_gain, tgain);
 
-	} else if (tgain < GAIN_COEFF_SMALL) {
+	} else if (fabsf (tgain) < GAIN_COEFF_SMALL) {
 
 		/* we were quiet last time, and we're still supposed to be quiet.
-			 Silence the outputs, and make sure the buffers are quiet too,
-			 */
+		 * Silence the outputs, and make sure the buffers are quiet too,
+		 */
 
 		_output->silence (nframes);
 		if (result_required) {
@@ -295,6 +311,13 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 
 	if (fabs (_session.transport_speed()) > 1.5 && Config->get_quieten_at_speed ()) {
 		Amp::apply_simple_gain (bufs, nframes, speed_quietning, false);
+	}
+
+	/* gain control/automation */
+	if (_amp) {
+		_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
+		_amp->setup_gain_automation (start_sample, end_sample, nframes);
+		_amp->run (bufs, start_sample, end_sample, speed, nframes, true);
 	}
 
 	// Panning
@@ -376,6 +399,11 @@ Delivery::state () const
 			node.add_child_nocopy (_panshell->unlinked_pannable()->get_state ());
 		}
 	}
+	/* Note: _gain_control state is saved by the owner,
+	 * mainly for backwards compatibility reasons, but also because
+	 * the gain-control may be owned by Route e.g. LAN _volume_control
+	 */
+
 	if (_polarity_control) {
 		node.add_child_nocopy (_polarity_control->get_state());
 	}
@@ -588,10 +616,6 @@ Delivery::target_gain ()
 
 	gain_t desired_gain = _mute_master->mute_gain_at (mp);
 
-	if (_gain_control) {
-		desired_gain *= _gain_control->get_value();
-	}
-
 	if (_role == Listen && _session.monitor_out() && !_session.listening()) {
 
 		/* nobody is soloed, and this delivery is a listen-send to the
@@ -607,6 +631,24 @@ Delivery::target_gain ()
 	}
 
 	return desired_gain;
+}
+
+void
+Delivery::activate ()
+{
+	if (_amp) {
+		_amp->activate ();
+	}
+	Processor::activate ();
+}
+
+void
+Delivery::deactivate ()
+{
+	if (_amp) {
+		_amp->deactivate ();
+	}
+	Processor::deactivate ();
 }
 
 void
