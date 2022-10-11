@@ -112,6 +112,7 @@ private:
 	bool want_custom;
 
 	void processor_going_away ();
+	sigc::connection _unmap_connection;
 	PBD::ScopedConnection going_away_connection;
 	PBD::ScopedConnectionList gui_connections;
 };

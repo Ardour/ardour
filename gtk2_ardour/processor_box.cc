@@ -4684,7 +4684,7 @@ ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* b
 
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
 	if (pi) {
-		signal_unmap.connect (sigc::bind ([] (ProxyBase* self, PluginType type) {
+		_unmap_connection = signal_unmap.connect (sigc::bind ([] (ProxyBase* self, PluginType type) {
 			ProcessorWindowProxy* me = dynamic_cast<ProcessorWindowProxy*> (self);
 			if (!me->is_custom) {
 				return;
@@ -4796,6 +4796,7 @@ ProcessorWindowProxy::get (bool create)
 void
 ProcessorWindowProxy::show_the_right_window (bool show_not_toggle)
 {
+	_unmap_connection.disconnect ();
 	if (_window && (is_custom != want_custom)) {
 		/* drop existing window - wrong type */
 		set_state_mask (Gtkmm2ext::WindowProxy::StateMask (state_mask () & ~WindowProxy::Size));
