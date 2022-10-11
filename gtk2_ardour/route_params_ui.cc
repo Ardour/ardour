@@ -516,7 +516,6 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		_active_view = portinsert_ui;
 
 		redir_hpane.add (*_active_view);
-		portinsert_ui->redisplay();
 		redir_hpane.show_all();
 	}
 

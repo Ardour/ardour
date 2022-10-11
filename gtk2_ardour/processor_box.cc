@@ -4027,7 +4027,9 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 		Window* w = get_processor_ui (port_insert);
 
 		if (w == 0) {
-			io_selector = new PortInsertWindow (_session, port_insert);
+			Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
+			assert (tlw);
+			io_selector = new PortInsertWindow (*tlw, _session, port_insert);
 			set_processor_ui (port_insert, io_selector);
 
 		} else {
