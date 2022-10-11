@@ -362,12 +362,8 @@ RouteParams_UI::set_session (Session *sess)
 		boost::shared_ptr<RouteList> r = _session->get_routes();
 		add_routes (*r);
 		_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&RouteParams_UI::add_routes, this, _1), gui_context());
-		start_updating ();
-	} else {
-		stop_updating ();
 	}
 }
-
 
 void
 RouteParams_UI::session_going_away ()
@@ -479,7 +475,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		return;
 	} else if ((send = boost::dynamic_pointer_cast<Send> (proc)) != 0) {
 
-		SendUI *send_ui = new SendUI (this, send, _session);
+		SendUI *send_ui = new SendUI (this, _session, send);
 
 		cleanup_view();
 		send->DropReferences.connect (_processor_going_away_connection, invalidator (*this), boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)), gui_context());
@@ -574,29 +570,5 @@ RouteParams_UI::update_title ()
 		title_label.set_text(_("No Track or Bus Selected"));
 		title += _("No Track or Bus Selected");
 		set_title(title.get_string());
-	}
-}
-
-void
-RouteParams_UI::start_updating ()
-{
-	update_connection = Timers::rapid_connect
-		(sigc::mem_fun(*this, &RouteParams_UI::update_views));
-}
-
-void
-RouteParams_UI::stop_updating ()
-{
-	update_connection.disconnect();
-}
-
-void
-RouteParams_UI::update_views ()
-{
-	SendUI *sui;
-	// TODO: only do it if correct tab is showing
-
-	if ((sui = dynamic_cast<SendUI*> (_active_view)) != 0) {
-		sui->update ();
 	}
 }

@@ -3964,8 +3964,9 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 		}
 
 		if (boost::dynamic_pointer_cast<InternalSend> (processor) == 0) {
-
-			gidget = new SendUIWindow (send, _session);
+			Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
+			assert (tlw);
+			gidget = new SendUIWindow (*tlw, _session, send);
 		}
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {

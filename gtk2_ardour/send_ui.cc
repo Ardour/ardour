@@ -26,6 +26,7 @@
 #include "ardour/panner_manager.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/send.h"
+#include "ardour/session.h"
 
 #include "gui_thread.h"
 #include "io_selector.h"
@@ -38,8 +39,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session)
+SendUI::SendUI (Gtk::Window* parent, Session* session, boost::shared_ptr<Send> s)
 	: _send (s)
+	, _invert_button (X_("Ø"))
 	, _gpm (session, 250)
 	, _panners (session)
 {
@@ -47,12 +49,13 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 
 	uint32_t const in  = _send->pans_required ();
 	uint32_t const out = _send->pan_outs ();
+
 	_panners.set_width (Wide);
 	_panners.set_available_panners (PannerManager::instance ().PannerManager::get_available_panners (in, out));
 	_panners.set_panner (s->panner_shell (), s->panner ());
 
 	_send->set_metering (true);
-	_send->output ()->changed.connect (connections, invalidator (*this), boost::bind (&SendUI::outs_changed, this, _1, _2), gui_context ());
+	_send->output ()->changed.connect (_send_connection, invalidator (*this), boost::bind (&SendUI::outs_changed, this, _1, _2), gui_context ());
 
 	_gpm.setup_meters ();
 	_gpm.set_fader_name (X_("SendUIFader"));
@@ -60,34 +63,34 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 
 	_io = Gtk::manage (new IOSelector (parent, session, s->output ()));
 
+	_invert_button.set_controllable (_send->polarity_control ());
+	_invert_button.watch ();
+	_invert_button.set_name (X_("invert button"));
+	_invert_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &SendUI::invert_press), false);
+	_invert_button.signal_button_release_event ().connect (sigc::mem_fun (*this, &SendUI::invert_release), false);
+	Gtkmm2ext::UI::instance ()->set_tip (_invert_button, _("Click to invert polarity of all send channels"));
+
 	set_name (X_("SendUIFrame"));
 
-	_hbox.pack_start (_gpm, true, true);
-
-	_vbox.set_spacing (5);
-	_vbox.set_border_width (5);
-	_vbox.pack_start (_hbox, false, false, false);
+	_vbox.set_spacing (4);
+	_vbox.set_border_width (4);
+	_vbox.pack_start (_gpm, false, false, false);
+	_vbox.pack_start (_invert_button, false, false);
 	_vbox.pack_start (_panners, false, false);
 
 	pack_start (_vbox, false, false);
 	pack_start (*_io, true, true);
 
 	_io->show ();
-	_gpm.show_all ();
-	_panners.show_all ();
-	_vbox.show ();
-	_hbox.show ();
+	_vbox.show_all ();
 
-	fast_screen_update_connection = Timers::super_rapid_connect (
-	    sigc::mem_fun (*this, &SendUI::fast_update));
+	_fast_screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &SendUI::fast_update));
 }
 
 SendUI::~SendUI ()
 {
 	_send->set_metering (false);
-
-	screen_update_connection.disconnect ();
-	fast_screen_update_connection.disconnect ();
+	_fast_screen_update_connection.disconnect ();
 }
 
 void
@@ -108,11 +111,6 @@ SendUI::outs_changed (IOChange change, void* /*ignored*/)
 }
 
 void
-SendUI::update ()
-{
-}
-
-void
 SendUI::fast_update ()
 {
 	if (!get_mapped ()) {
@@ -124,22 +122,40 @@ SendUI::fast_update ()
 	}
 }
 
-SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
-	: ArdourWindow (string (_("Send ")) + s->name ())
+bool
+SendUI::invert_press (GdkEventButton* ev)
 {
-	ui = new SendUI (this, s, session);
+	if (ArdourWidgets::BindingProxy::is_bind_action (ev)) {
+		return false;
+	}
 
-	hpacker.pack_start (*ui, true, true);
+	if (ev->button != 1 || ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
+		return true;
+	}
 
-	add (hpacker);
-
-	set_name ("SendUIWindow");
-
-	ui->show ();
-	hpacker.show ();
+	boost::shared_ptr<AutomationControl> ac = _send->polarity_control ();
+	ac->start_touch (timepos_t (ac->session ().audible_sample ()));
+	return true;
 }
 
-SendUIWindow::~SendUIWindow ()
+bool
+SendUI::invert_release (GdkEventButton* ev)
 {
-	delete ui;
+	if (ev->button != 1 || ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
+		return true;
+	}
+
+	boost::shared_ptr<AutomationControl> ac = _send->polarity_control ();
+	ac->set_value (_invert_button.get_active () ? 0 : 1, PBD::Controllable::NoGroup);
+	ac->stop_touch (timepos_t (ac->session ().audible_sample ()));
+	return true;
+}
+
+SendUIWindow::SendUIWindow (Gtk::Window& parent, ARDOUR::Session* session, boost::shared_ptr<Send> send)
+	: ArdourWindow (parent, string_compose (_("Send: %1"), send->name ()))
+	, _ui (this, session, send)
+{
+	set_name ("SendUIWindow");
+	add (_ui);
+	_ui.show ();
 }

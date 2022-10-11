@@ -22,11 +22,14 @@
 #ifndef __ardour_gtk_send_ui_h__
 #define __ardour_gtk_send_ui_h__
 
+#include "widgets/ardour_button.h"
+
+#include "ardour_window.h"
 #include "gain_meter.h"
 #include "panner_ui.h"
-#include "ardour_window.h"
 
-namespace ARDOUR {
+namespace ARDOUR
+{
 	class Send;
 	class IOProcessor;
 }
@@ -35,44 +38,36 @@ class IOSelector;
 
 class SendUI : public Gtk::HBox
 {
-  public:
-	SendUI (Gtk::Window *, boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session*);
-	~SendUI();
+public:
+	SendUI (Gtk::Window*, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Send>);
+	~SendUI ();
 
-	void update ();
+private:
 	void fast_update ();
-
-	boost::shared_ptr<ARDOUR::Send>& send() { return _send; }
-
-  private:
-	boost::shared_ptr<ARDOUR::Send> _send;
-	GainMeter                       _gpm;
-	PannerUI                        _panners;
-	Gtk::VBox                       _vbox;
-	Gtk::VBox                       _hbox;
-	IOSelector*                     _io;
-
-	sigc::connection screen_update_connection;
-	sigc::connection fast_screen_update_connection;
-
 	void outs_changed (ARDOUR::IOChange, void*);
-	PBD::ScopedConnectionList connections;
+
+	bool invert_press (GdkEventButton* ev);
+	bool invert_release (GdkEventButton* ev);
+
+	boost::shared_ptr<ARDOUR::Send> _send;
+
+	ArdourWidgets::ArdourButton _invert_button;
+	GainMeter                   _gpm;
+	PannerUI                    _panners;
+	Gtk::VBox                   _vbox;
+	IOSelector*                 _io;
+
+	sigc::connection      _fast_screen_update_connection;
+	PBD::ScopedConnection _send_connection;
 };
 
 class SendUIWindow : public ArdourWindow
 {
-  public:
-	SendUIWindow(boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session*);
-	~SendUIWindow();
+public:
+	SendUIWindow (Gtk::Window&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Send>);
 
-	SendUI* ui;
-
-  private:
-	Gtk::HBox hpacker;
-
-	PBD::ScopedConnection going_away_connection;
+private:
+	SendUI _ui;
 };
 
 #endif /* __ardour_gtk_send_ui_h__ */
-
-

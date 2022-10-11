@@ -174,12 +174,6 @@ private:
 
 	void update_title ();
 	//void unselect_all_redirects ();
-
-	sigc::connection update_connection;
-	void update_views ();
-
-	void start_updating ();
-	void stop_updating ();
 };
 
 
