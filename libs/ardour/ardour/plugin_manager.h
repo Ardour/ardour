@@ -44,6 +44,10 @@
 class CAComponentDescription;
 #endif
 
+namespace PBD {
+	class Searchpath;
+}
+
 namespace ARDOUR {
 
 class Plugin;
@@ -324,7 +328,7 @@ private:
 	void lxvst_refresh (bool cache_only);
 	void vst3_refresh (bool cache_only);
 
-	void add_lrdf_data (const std::string &path);
+	void add_lrdf_data (PBD::Searchpath const&);
 	void add_lrdf_presets (std::string domain);
 
 #ifdef AUDIOUNIT_SUPPORT

@@ -195,7 +195,6 @@ PluginManager::PluginManager ()
 	, _enable_scan_timeout (false)
 {
 	char* s;
-	string lrdf_path;
 
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined VST3_SUPPORT
 	// source-tree (ardev, etc)
@@ -262,15 +261,21 @@ PluginManager::PluginManager ()
 	load_tags ();
 	load_stats ();
 
+	Searchpath rdfs (ARDOUR::ardour_data_search_path());
+
 	if ((s = getenv ("LADSPA_RDF_PATH"))){
-		lrdf_path = s;
+		rdfs.add_subdirectory_to_paths ("rdf");
+		Searchpath t (s);
+		rdfs += t;
+	} else {
+#ifndef PLATFORM_WINDOWS
+		rdfs += "usr/local/share/ladspa";
+		rdfs += "usr/share/ladspa";
+#endif
+		rdfs.add_subdirectory_to_paths ("rdf");
 	}
 
-	if (lrdf_path.length() == 0) {
-		lrdf_path = "/usr/local/share/ladspa/rdf:/usr/share/ladspa/rdf";
-	}
-
-	add_lrdf_data(lrdf_path);
+	add_lrdf_data (rdfs);
 
 	add_lrdf_presets ("ladspa");
 
@@ -842,7 +847,7 @@ PluginManager::add_lrdf_presets(string domain)
 }
 
 void
-PluginManager::add_lrdf_data (const string &path)
+PluginManager::add_lrdf_data (Searchpath const& path)
 {
 #ifdef HAVE_LRDF
 	vector<string> rdf_files;

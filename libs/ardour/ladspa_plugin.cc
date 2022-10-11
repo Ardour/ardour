@@ -720,6 +720,7 @@ LadspaPluginInfo::get_presets (bool /*user_only*/) const
 
 	if (set_uris) {
 		for (uint32_t i = 0; i < (uint32_t) set_uris->count; ++i) {
+			// TODO somehow mark factory presets as such..
 			if (char* label = lrdf_get_label (set_uris->items[i])) {
 				p.push_back (Plugin::PresetRecord (set_uris->items[i], label));
 			}
