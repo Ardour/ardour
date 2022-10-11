@@ -1352,7 +1352,6 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 	switch (param.type()) {
 
 	case GainAutomation:
-	case BusSendLevel:
 		create_gain_automation_child (param, show);
 		break;
 
