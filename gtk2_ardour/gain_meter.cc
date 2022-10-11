@@ -1021,9 +1021,10 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 
 	if (_route) {
 		_route->active_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::route_active_changed, this), gui_context ());
-		hbox.pack_start (meter_hbox, true, true);
-		meter_hbox.show ();
 	}
+
+	hbox.pack_start (meter_hbox, true, true);
+	meter_hbox.show ();
 
 //	if (r && !r->is_auditioner()) {
 //		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
