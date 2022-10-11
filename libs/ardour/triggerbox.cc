@@ -665,7 +665,15 @@ Trigger::clear_region ()
 void
 Trigger::set_region_internal (boost::shared_ptr<Region> r)
 {
-	_region = r;
+	/* No whole file regions in the triggerbox, just like we do not allow
+	 * them in playlists either.
+	 */
+
+	if (r->whole_file ()) {
+		_region = RegionFactory::create (r, r->derive_properties ());
+	} else {
+		_region = r;
+	}
 }
 
 timepos_t
