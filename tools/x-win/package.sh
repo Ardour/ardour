@@ -367,7 +367,7 @@ else
 	curl -s -S --fail -#  \
 		-z "${SRCCACHE}/ArdourBundledMedia.zip" \
 		-o "${SRCCACHE}/ArdourBundledMedia.zip" \
-		"http://ardour.org/loops/ArdourBundledMedia.zip"
+		"http://stuff.ardour.org/loops/ArdourBundledMedia.zip"
 
 	if test -f "${SRCCACHE}/ArdourBundledMedia.zip"; then
 		echo "Adding Ardour Bundled Content"
