@@ -210,6 +210,7 @@ AutomationLine::get_uses_gain_mapping () const
 		case BusSendLevel:
 		case EnvelopeAutomation:
 		case TrimAutomation:
+		case InsertReturnLevel:
 			return true;
 		default:
 			return false;
@@ -400,6 +401,7 @@ AutomationLine::string_to_fraction (string const & s) const
 		case BusSendLevel:
 		case EnvelopeAutomation:
 		case TrimAutomation:
+		case InsertReturnLevel:
 			if (s == "-inf") { /* translation */
 				v = 0;
 			} else {
