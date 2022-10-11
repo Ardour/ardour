@@ -4796,11 +4796,12 @@ ProcessorWindowProxy::get (bool create)
 void
 ProcessorWindowProxy::show_the_right_window (bool show_not_toggle)
 {
-	_unmap_connection.disconnect ();
 	if (_window && (is_custom != want_custom)) {
 		/* drop existing window - wrong type */
 		set_state_mask (Gtkmm2ext::WindowProxy::StateMask (state_mask () & ~WindowProxy::Size));
+		_unmap_connection.block ();
 		drop_window ();
+		_unmap_connection.unblock ();
 	}
 	if (_window && fully_visible () && show_not_toggle) {
 		return;
