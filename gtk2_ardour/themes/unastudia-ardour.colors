@@ -96,6 +96,12 @@
     <ColorAlias name="foldback knob: arc end" alias="widget:blue"/>
     <ColorAlias name="foldback knob: arc start" alias="widget:blue"/>
     <ColorAlias name="foldback knob: fill" alias="widget:bg"/>
+    <ColorAlias name="foldback postfader: fill" alias="widget:blue darker"/>
+    <ColorAlias name="foldback postfader: fill active" alias="widget:blue darker"/>
+    <ColorAlias name="foldback postfader: led active" alias="alert:green"/>
+    <ColorAlias name="foldback prefader: fill" alias="widget:blue darker"/>
+    <ColorAlias name="foldback prefader: fill active" alias="widget:blue darker"/>
+    <ColorAlias name="foldback prefader: led active" alias="alert:green"/>
     <ColorAlias name="frame handle" alias="theme:bg1"/>
     <ColorAlias name="gain line" alias="alert:blue"/>
     <ColorAlias name="gain line inactive" alias="theme:bg1"/>
@@ -383,6 +389,8 @@
     <ColorAlias name="send pan" alias="theme:contrasting alt"/>
     <ColorAlias name="shuttle" alias="widget:bg"/>
     <ColorAlias name="shuttle bg" alias="neutral:backgroundest"/>
+    <ColorAlias name="vari button: fill" alias="widget:bg"/>
+    <ColorAlias name="vari button: fill active" alias="alert:ruddy"/>
     <ColorAlias name="silence" alias="theme:contrasting alt"/>
     <ColorAlias name="silence text" alias="neutral:foreground"/>
     <ColorAlias name="solo button: fill" alias="widget:bg"/>
@@ -453,6 +461,9 @@
     <ColorAlias name="trim knob" alias="widget:bg"/>
     <ColorAlias name="trim knob: arc end" alias="widget:blue"/>
     <ColorAlias name="trim knob: arc start" alias="widget:blue"/>
+    <ColorAlias name="pan knob" alias="widget:bg"/>
+    <ColorAlias name="pan knob: arc end" alias="widget:orange"/>
+    <ColorAlias name="pan knob: arc start" alias="widget:orange"/>
     <ColorAlias name="vca assign button: fill" alias="widget:bg"/>
     <ColorAlias name="verbose canvas cursor" alias="theme:contrasting clock"/>
     <ColorAlias name="video timeline bar" alias="neutral:background2"/>
