@@ -158,6 +158,7 @@ AutomationList::create_curve_if_necessary()
 	switch (_parameter.type()) {
 	case GainAutomation:
 	case BusSendLevel:
+	case InsertReturnLevel:
 	case TrimAutomation:
 	case PanAzimuthAutomation:
 	case PanElevationAutomation:
@@ -232,6 +233,7 @@ AutomationList::default_interpolation () const
 	switch (_parameter.type()) {
 		case GainAutomation:
 		case BusSendLevel:
+		case InsertReturnLevel:
 		case EnvelopeAutomation:
 			return ControlList::Exponential;
 			break;

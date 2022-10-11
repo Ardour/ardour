@@ -193,6 +193,8 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return _("Fader");
 	} else if (param.type() == BusSendLevel) {
 		return _("Send");
+	} else if (param.type() == InsertReturnLevel) {
+		return _("Return");
 	} else if (param.type() == TrimAutomation) {
 		return _("Trim");
 	} else if (param.type() == MainOutVolume) {
@@ -560,6 +562,8 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == GainAutomation) {
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == TrimAutomation) {
+		control = new GainControl(_a_session, param);
+	} else if (param.type() == InsertReturnLevel) {
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == MainOutVolume) {
 		control = new GainControl(_a_session, param);

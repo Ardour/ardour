@@ -131,6 +131,8 @@ EventTypeMap::from_symbol(const string& str) const
 		p_type = GainAutomation;
 	} else if (str == "send") {
 		p_type = BusSendLevel;
+	} else if (str == "return") {
+		p_type = InsertReturnLevel;
 	} else if (str == "trim") {
 		p_type = TrimAutomation;
 	} else if (str == "main-out-volume") {
@@ -233,6 +235,8 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return "gain";
 	} else if (t == BusSendLevel) {
 		return "send";
+	} else if (t == InsertReturnLevel) {
+		return "return";
 	} else if (t == TrimAutomation) {
 		return "trim";
 	} else if (t == MainOutVolume) {

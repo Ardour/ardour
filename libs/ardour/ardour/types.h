@@ -170,6 +170,7 @@ enum AutomationType {
 	MonitoringAutomation,
 	BusSendLevel,
 	BusSendEnable,
+	InsertReturnLevel,
 	MainOutVolume,
 
 	/* used only by Controllable Descriptor to access send parameters */

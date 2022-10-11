@@ -41,6 +41,8 @@ static std::string gain_control_name (Evoral::Parameter const& param)
 		case GainAutomation:
 			/* fallthrough */
 		case BusSendLevel:
+			/* fallthrough */
+		case InsertReturnLevel:
 			return X_("gaincontrol");
 		case TrimAutomation:
 			return X_("trimcontrol");
@@ -61,6 +63,8 @@ static boost::shared_ptr<AutomationList> automation_list_new (Evoral::Parameter 
 		case GainAutomation:
 			/* fallthrough */
 		case BusSendLevel:
+			/* fallthrough */
+		case InsertReturnLevel:
 			/* fallthrough */
 		case TrimAutomation:
 			return boost::shared_ptr<AutomationList> (new AutomationList (param, Temporal::AudioTime));
