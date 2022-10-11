@@ -280,9 +280,9 @@ int main (int argc, char *argv[])
 		   just calling setlocale (...,"C") is not sufficient for this;
 		   it is probably the LANG env var which gets picked up later somewhere.
 		*/
-		setenv ("LC_ALL", "C", 1);
-		setenv ("LC_MESSAGES", "C", 1);
-		setenv ("LANG", "C", 1);
+		g_setenv ("LC_ALL", "C", 1);
+		g_setenv ("LC_MESSAGES", "C", 1);
+		g_setenv ("LANG", "C", 1);
 	}
 #endif
 
