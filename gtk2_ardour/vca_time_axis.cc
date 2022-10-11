@@ -56,19 +56,19 @@ VCATimeAxisView::VCATimeAxisView (PublicEditor& ed, Session* s, ArdourCanvas::Ca
 	controls_base_unselected_name = X_("ControlMasterBaseUnselected");
 
 	solo_button.set_name ("solo button");
-	set_tooltip (solo_button, _("Solo slaves"));
+	set_tooltip (solo_button, _("Solo assigned channels"));
 	solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::solo_release), false);
 	solo_button.set_can_focus (false);
 
 	mute_button.set_name ("mute button");
 	mute_button.set_text (S_("Mute|M"));
-	set_tooltip (mute_button, _("Mute slaves"));
+	set_tooltip (mute_button, _("Mute assigned channels"));
 	mute_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::mute_release), false);
 	mute_button.set_can_focus (false);
 
 	drop_button.set_name ("mute button");
 	drop_button.set_text (S_("VCA|D"));
-	set_tooltip (drop_button, _("Unassign all slaves"));
+	set_tooltip (drop_button, _("Unassign all channels"));
 	drop_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::drop_release), false);
 	drop_button.set_can_focus (false);
 
@@ -461,7 +461,7 @@ VCATimeAxisView::build_display_menu ()
 	items.push_back (MenuElem (_("Automation"), *automation_action_menu));
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Drop All Slaves"), sigc::mem_fun (*this, &VCATimeAxisView::drop_all_slaves)));
+	items.push_back (MenuElem (_("Drop All Assigned Channels"), sigc::mem_fun (*this, &VCATimeAxisView::drop_all_slaves)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 }

@@ -73,12 +73,12 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	                         _vca->gain_control());
 
 	solo_button.set_name ("solo button");
-	set_tooltip (solo_button, _("Solo slaves"));
+	set_tooltip (solo_button, _("Solo assigned channels"));
 	solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::solo_release), false);
 
 	mute_button.set_name ("mute button");
 	mute_button.set_text (_("M"));
-	set_tooltip (mute_button, _("Mute slaves"));
+	set_tooltip (mute_button, _("Mute assigned channels"));
 	mute_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::mute_release), false);
 
 	hide_button.set_icon (ArdourIcon::HideEye);
@@ -112,7 +112,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	vertical_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vertical_button_press));
 	vertical_button.set_fallthrough_to_parent (true);
 	vertical_button.set_active_color (_vca->presentation_info().color ());
-	set_tooltip (vertical_button, _("Click to show slaves only")); /* tooltip updated dynamically */
+	set_tooltip (vertical_button, _("Click to show assigned channels only")); /* tooltip updated dynamically */
 
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
