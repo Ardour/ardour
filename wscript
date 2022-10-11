@@ -1625,6 +1625,7 @@ def build(bld):
     bld.install_files (bld.env['CONFDIR'], 'system_config')
 
     bld.install_files (os.path.join (bld.env['DATADIR'], 'templates'), bld.path.ant_glob ('share/templates/**'), cwd=bld.path.find_dir ('share/templates'), relative_trick=True)
+    bld.install_files (os.path.join (bld.env['DATADIR'], 'rdf'), bld.path.ant_glob ('share/rdf/*.n3'))
 
     if bld.env['RUN_TESTS']:
         bld.add_post_fun(test)

@@ -130,6 +130,7 @@ PluginMetadata=$Shared/plugin_metadata
 MixerSettings=$Shared/mixer_settings
 ExportFormats=$Shared/export
 Templates=$Shared/templates
+LRDFPresets=$Shared/rdf
 PatchFiles=$Shared/patchfiles
 LuaScripts=$Shared/scripts
 MediaClips=$Shared/media
@@ -330,6 +331,9 @@ done
 
 #Session templates
 cp -R $BUILD_ROOT/../share/templates $Templates
+
+#LADSPA Presets
+cp -av $BUILD_ROOT/../share/rdf $LRDFPresets
 
 # PluginMetadata
 cp -R $BUILD_ROOT/../share/plugin_metadata $PluginMetadata
