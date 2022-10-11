@@ -42,6 +42,7 @@ LXVSTPluginUI::LXVSTPluginUI (boost::shared_ptr<PlugInsertBase> pib, boost::shar
 LXVSTPluginUI::~LXVSTPluginUI ()
 {
 	_resize_connection.disconnect();
+	vstfx_destroy_editor (_vst->state ());
 
 	// plugin destructor destroys the custom GUI, via the vstfx engine,
 	// and then our PluginUIWindow does the rest

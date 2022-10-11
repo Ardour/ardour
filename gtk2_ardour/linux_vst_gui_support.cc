@@ -782,6 +782,7 @@ vstfx_launch_editor (VSTState* vstfx)
 void
 vstfx_destroy_editor (VSTState* vstfx)
 {
+	assert (!gui_quit);
 	pthread_mutex_lock (&vstfx->lock);
 	if (vstfx->linux_window) {
 		vstfx->destroy = TRUE;
