@@ -277,12 +277,12 @@ int main (int argc, char *argv[])
 		}
 	} else {
 		/* Force-disable localization if the user wishes so;
-		   just calling setlocale (...,"C") is not sufficient for this;
-		   it is probably the LANG env var which gets picked up later somewhere.
-		*/
-		g_setenv ("LC_ALL", "C", 1);
-		g_setenv ("LC_MESSAGES", "C", 1);
-		g_setenv ("LANG", "C", 1);
+		 * just calling setlocale (...,"C") is not sufficient for this;
+		 * it is probably the LANG env var which gets picked up later somewhere.
+		 */
+		Glib::setenv ("LC_ALL", "C", true);
+		Glib::setenv ("LC_MESSAGES", "C", true);
+		Glib::setenv ("LANG", "C", true);
 	}
 #endif
 
