@@ -271,24 +271,8 @@ PluginManager::PluginManager ()
 	}
 
 	add_lrdf_data(lrdf_path);
-	add_ladspa_presets();
-#ifdef WINDOWS_VST_SUPPORT
-	if (Config->get_use_windows_vst ()) {
-		add_windows_vst_presets ();
-	}
-#endif /* WINDOWS_VST_SUPPORT */
 
-#ifdef LXVST_SUPPORT
-	if (Config->get_use_lxvst()) {
-		add_lxvst_presets();
-	}
-#endif /* Native LinuxVST support*/
-
-#ifdef MACVST_SUPPORT
-	if (Config->get_use_macvst ()) {
-		add_mac_vst_presets ();
-	}
-#endif
+	add_lrdf_presets ("ladspa");
 
 	if ((s = getenv ("VST_PATH"))) {
 		windows_vst_path = s;
@@ -833,31 +817,7 @@ static bool rdf_filter (const string &str, void* /*arg*/)
 #endif
 
 void
-PluginManager::add_ladspa_presets()
-{
-	add_presets ("ladspa");
-}
-
-void
-PluginManager::add_windows_vst_presets()
-{
-	add_presets ("windows-vst");
-}
-
-void
-PluginManager::add_mac_vst_presets()
-{
-	add_presets ("mac-vst");
-}
-
-void
-PluginManager::add_lxvst_presets()
-{
-	add_presets ("lxvst");
-}
-
-void
-PluginManager::add_presets(string domain)
+PluginManager::add_lrdf_presets(string domain)
 {
 #ifdef HAVE_LRDF
 	vector<string> presets;

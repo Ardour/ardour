@@ -325,11 +325,7 @@ private:
 	void vst3_refresh (bool cache_only);
 
 	void add_lrdf_data (const std::string &path);
-	void add_ladspa_presets ();
-	void add_windows_vst_presets ();
-	void add_mac_vst_presets ();
-	void add_lxvst_presets ();
-	void add_presets (std::string domain);
+	void add_lrdf_presets (std::string domain);
 
 #ifdef AUDIOUNIT_SUPPORT
 	void au_refresh (bool cache_only = false);
