@@ -3,7 +3,7 @@
 if which realpath > /dev/null; then
 	TOP=`realpath "$TOP"`
 elif which readlink > /dev/null; then
-	TOP=`readlink -f "$TOP"`
+	TOP=`(cd "$TOP"; pwd)`
 fi
 
 #export G_DEBUG=fatal_criticals
