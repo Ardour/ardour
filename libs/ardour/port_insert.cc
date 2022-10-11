@@ -23,6 +23,7 @@
 
 #include "pbd/xml++.h"
 
+#include "ardour/amp.h"
 #include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/delivery.h"
@@ -48,11 +49,26 @@ PortInsert::name_and_id_new_insert (Session& s, uint32_t& bitslot)
 PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm)
 	: IOProcessor (s, true, true, name_and_id_new_insert (s, _bitslot), "", DataType::AUDIO, true)
 	, _out (new Delivery (s, _output, pannable, mm, _name, Delivery::Insert))
+	, _metering (false)
+	, _mtdm (0)
+	, _latency_detect (false)
+	, _latency_flush_samples (0)
+	, _measured_latency (0)
 {
-	_mtdm = 0;
-	_latency_detect = false;
-	_latency_flush_samples = 0;
-	_measured_latency = 0;
+	/* Send */
+	_out->set_gain_control (boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (BusSendLevel), time_domain())))));
+
+	_out->set_polarity_control (boost::shared_ptr<AutomationControl> (new AutomationControl (_session, PhaseAutomation, ParameterDescriptor (PhaseAutomation), boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), time_domain())), "polarity-invert")));
+	_send_meter.reset (new PeakMeter (_session, name()));
+
+	/* Return */
+	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(InsertReturnLevel), boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (InsertReturnLevel), time_domain()))));
+	_amp.reset (new Amp (_session, _("Return"), _gain_control, true));
+	_return_meter.reset (new PeakMeter (_session, name()));
+
+	add_control (_out->gain_control ());
+	add_control (_out->polarity_control ());
+	add_control (_gain_control);
 }
 
 PortInsert::~PortInsert ()
@@ -134,6 +150,8 @@ PortInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			outbuf.set_written (true);
 		}
 
+		_send_meter->reset ();
+		_return_meter->reset ();
 		return;
 
 	} else if (_latency_flush_samples) {
@@ -150,17 +168,34 @@ PortInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			_latency_flush_samples = 0;
 		}
 
+		_send_meter->reset ();
+		_return_meter->reset ();
 		return;
 	}
 
 	if (!check_active()) {
 		/* deliver silence */
 		silence (nframes, start_sample);
+		_send_meter->reset ();
+		_return_meter->reset ();
 		return;
 	}
 
 	_out->run (bufs, start_sample, end_sample, speed, nframes, true);
+
+	if (_metering) {
+		_send_meter->run (bufs, start_sample, end_sample, speed, nframes, true);
+	}
+
 	_input->collect_input (bufs, nframes, ChanCount::ZERO);
+
+	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
+	_amp->setup_gain_automation (start_sample, end_sample, nframes);
+	_amp->run (bufs, start_sample, end_sample, speed, nframes, true);
+
+	if (_metering) {
+		_return_meter->run (bufs, start_sample, end_sample, speed, nframes, true);
+	}
 }
 
 XMLNode&
@@ -171,6 +206,14 @@ PortInsert::state () const
 	node.set_property ("bitslot", _bitslot);
 	node.set_property ("latency", _measured_latency);
 	node.set_property ("block-size", _session.get_block_size());
+
+	XMLNode* ret = new XMLNode(X_("Return"));
+	ret->add_child_nocopy (_gain_control->get_state());
+	node.add_child_nocopy (*ret);
+
+	XMLNode* snd = new XMLNode(X_("Send"));
+	snd->add_child_nocopy (_out->gain_control ()->get_state());
+	node.add_child_nocopy (*snd);
 
 	return node;
 }
@@ -224,6 +267,15 @@ PortInsert::set_state (const XMLNode& node, int version)
 		}
 	}
 
+	XMLNode* child = node.child (X_("Send"));
+	if (child && child->children().size () > 0) {
+		_out->gain_control ()->set_state (**child->children().begin(), version);
+	}
+	child = node.child (X_("Return"));
+	if (child && child->children().size () > 0) {
+		_gain_control->set_state (**child->children().begin(), version);
+	}
+
 	return 0;
 }
 
@@ -264,6 +316,17 @@ PortInsert::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
+	if (!_send_meter->configure_io (out, out)) {
+		return false;
+	}
+
+	if (!_return_meter->configure_io (in, in)) {
+		return false;
+	}
+
+	_out->configure_io (in, out); /* send */
+	_amp->configure_io (out, in); /* return */
+
 	return Processor::configure_io (in, out);
 }
 
@@ -291,6 +354,9 @@ PortInsert::activate ()
 {
 	IOProcessor::activate ();
 
+	_send_meter->activate ();
+	_return_meter->activate ();
+	_amp->activate ();
 	_out->activate ();
 }
 
@@ -299,5 +365,12 @@ PortInsert::deactivate ()
 {
 	IOProcessor::deactivate ();
 
+	_send_meter->deactivate ();
+	_send_meter->reset ();
+
+	_return_meter->deactivate ();
+	_return_meter->reset ();
+
+	_amp->deactivate ();
 	_out->deactivate ();
 }

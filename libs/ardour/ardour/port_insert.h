@@ -30,6 +30,7 @@
 #include "ardour/io_processor.h"
 #include "ardour/delivery.h"
 #include "ardour/libardour_visibility.h"
+#include "ardour/meter.h"
 #include "ardour/types.h"
 
 class XMLNode;
@@ -37,9 +38,11 @@ class MTDM;
 
 namespace ARDOUR {
 
+class Amp;
 class Session;
 class IO;
 class Delivery;
+class PeakMeter;
 class MuteMaster;
 class Pannable;
 
@@ -80,13 +83,54 @@ public:
 
 	static std::string name_and_id_new_insert (Session&, uint32_t&);
 
+	boost::shared_ptr<AutomationControl> send_polarity_control () const {
+		return _out->polarity_control ();
+	}
+
+	boost::shared_ptr<GainControl> send_gain_control () const {
+		return _out->gain_control ();
+	}
+
+	boost::shared_ptr<Amp> send_amp() const {
+		return _out->amp ();
+	}
+
+	boost::shared_ptr<Amp> return_amp() const {
+		return _amp;
+	}
+
+	boost::shared_ptr<GainControl> return_gain_control () const {
+		return _gain_control;
+	}
+
+	boost::shared_ptr<PeakMeter> send_meter() const {
+		return _send_meter;
+	}
+
+	boost::shared_ptr<PeakMeter> return_meter() const {
+		return _return_meter;
+	}
+
+	bool metering() const {
+		return _metering;
+	}
+
+	void set_metering (bool yn) {
+		_metering = yn;
+	}
+
 protected:
 	XMLNode& state () const;
 private:
 	/* disallow copy construction */
 	PortInsert (const PortInsert&);
 
-	boost::shared_ptr<Delivery> _out;
+	boost::shared_ptr<Delivery>    _out;
+	boost::shared_ptr<Amp>         _amp;
+	boost::shared_ptr<GainControl> _gain_control;
+	boost::shared_ptr<PeakMeter>   _send_meter;
+	boost::shared_ptr<PeakMeter>   _return_meter;
+	bool                           _metering;
 
 	MTDM*       _mtdm;
 	bool        _latency_detect;
