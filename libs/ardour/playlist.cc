@@ -3063,9 +3063,9 @@ Playlist::find_next_top_layer_position (timepos_t const & t) const
 }
 
 boost::shared_ptr<Region>
-Playlist::combine (const RegionList& r)
+Playlist::combine (const RegionList& rl)
 {
-	if (r.empty()) {
+	if (rl.empty()) {
 		return boost::shared_ptr<Region>();
 	}
 
@@ -3073,7 +3073,7 @@ Playlist::combine (const RegionList& r)
 	PropertyList                       plist;
 	SourceList::size_type              channels          = 0;
 	uint32_t                           layer             = 0;
-	timepos_t                          earliest_position = timepos_t::max (r.front()->position().time_domain());
+	timepos_t                          earliest_position = timepos_t::max (rl.front()->position().time_domain());
 	vector<TwoRegions>                 old_and_new_regions;
 	vector<boost::shared_ptr<Region> > originals;
 	vector<boost::shared_ptr<Region> > copies;
@@ -3083,7 +3083,7 @@ Playlist::combine (const RegionList& r)
 
 	/* find the maximum depth of all the regions we're combining */
 
-	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
+	for (RegionList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
 		max_level = max (max_level, (*i)->max_source_level());
 	}
 
@@ -3092,7 +3092,7 @@ Playlist::combine (const RegionList& r)
 
 	boost::shared_ptr<Playlist> pl = PlaylistFactory::create (_type, _session, parent_name, true);
 
-	for (auto const & r : r) {
+	for (auto const & r : rl) {
 		earliest_position = min (earliest_position, r->position());
 	}
 
@@ -3106,7 +3106,7 @@ Playlist::combine (const RegionList& r)
 	 * route_time_axis passes 'selected_regions' - which is not sorted.
 	 * here we need the top-most first, then every layer's region sorted by position.
 	 */
-	RegionList sorted(r);
+	RegionList sorted(rl);
 	sorted.sort(RegionSortByLayerAndPosition());
 
 	for (auto const & original_region : sorted) {
@@ -3177,7 +3177,7 @@ Playlist::combine (const RegionList& r)
 
 	freeze ();
 
-	for (auto const & reg : r) {
+	for (auto const & reg : rl) {
 		remove_region (reg);
 	}
 
