@@ -31,6 +31,7 @@
 #include "pbd/xml++.h"
 
 #include "ardour/rc_configuration.h"
+#include "ardour/clip_library.h"
 #include "ardour/library.h"
 
 using namespace PBD;
@@ -165,7 +166,7 @@ LibraryFetcher::foreach_description (boost::function<void (LibraryDescription)> 
 std::string
 LibraryFetcher::install_path_for (LibraryDescription const & desc)
 {
-	return Glib::build_filename (Config->get_clip_library_dir(), desc.toplevel_dir());
+	return Glib::build_filename (clip_library_dir(true), desc.toplevel_dir());
 }
 
 bool
