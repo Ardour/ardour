@@ -134,6 +134,7 @@ sndfile_data_width (int format)
 	case SF_FORMAT_PCM_32:
 		return 32;
 	case SF_FORMAT_FLOAT:
+	case SF_FORMAT_DOUBLE:
 		return 1; /* ridiculous but used as a magic value */
 	default:
 		// we don't handle anything else within ardour
