@@ -130,23 +130,6 @@ PortInsert::set_measured_latency (samplecnt_t n)
 	_measured_latency = n;
 }
 
-samplecnt_t
-PortInsert::latency() const
-{
-	/* because we deliver and collect within the same cycle,
-	   all I/O is necessarily delayed by at least samples_per_cycle().
-
-	   if the return port for insert has its own latency, we
-	   need to take that into account too.
-	*/
-
-	if (_measured_latency == 0) {
-		return _session.engine().samples_per_cycle() + _input->latency();
-	} else {
-		return _measured_latency;
-	}
-}
-
 void
 PortInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {

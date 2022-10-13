@@ -79,7 +79,6 @@ public:
 
 	MTDM* mtdm () const { return _mtdm; }
 	void set_measured_latency (samplecnt_t);
-	samplecnt_t latency () const;
 
 	samplecnt_t measured_latency () const {
 		return _measured_latency;
