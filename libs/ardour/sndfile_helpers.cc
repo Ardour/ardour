@@ -121,7 +121,7 @@ sndfile_endian_format_by_index (int index)
 int
 sndfile_data_width (int format)
 {
-	int tval = format & 0xf;
+	int tval = format & SF_FORMAT_SUBMASK;
 
 	switch (tval) {
 	case SF_FORMAT_PCM_S8:
