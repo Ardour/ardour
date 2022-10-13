@@ -947,8 +947,8 @@ TriggerClipPicker::reset_audition_marks (bool force)
 void
 TriggerClipPicker::on_theme_changed ()
 {
-	_color_foreground = _view.get_style ()->get_fg (STATE_NORMAL);
-	_color_auditioned = _view.get_style ()->get_fg (STATE_INSENSITIVE);
+	_color_foreground = _view.get_style ()->get_text (STATE_NORMAL);
+	_color_auditioned = _view.get_style ()->get_text (STATE_INSENSITIVE);
 
 	for (auto const& i : _model->children ()) {
 		if (i[_columns.auditioned]) {
