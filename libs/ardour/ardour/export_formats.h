@@ -355,6 +355,32 @@ public:
 	}
 };
 
+class LIBARDOUR_API ExportFormatMPEG : public ExportFormat, public HasSampleFormat, public HasCodecQuality
+{
+public:
+	ExportFormatMPEG (std::string const& name, std::string const& ext);
+	~ExportFormatMPEG (){};
+
+	bool set_compatibility_state (ExportFormatCompatibility const& compatibility);
+
+	Type get_type () const
+	{
+		return T_Sndfile;
+	}
+	SampleFormat default_sample_format () const
+	{
+		return SF_MPEG_LAYER_III;
+	}
+	int default_codec_quality () const
+	{
+		return 40;
+	}
+	virtual bool supports_tagging () const
+	{
+		return true;
+	}
+};
+
 class LIBARDOUR_API ExportFormatFFMPEG : public ExportFormat, public HasCodecQuality
 {
 public:

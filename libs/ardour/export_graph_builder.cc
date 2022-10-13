@@ -344,7 +344,8 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::Sndfil
 
 	writer.reset (new AudioGrapher::SndfileWriter<T> (writer_filename, format, channels, config.format->sample_rate(), config.broadcast_info));
 	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
-	if ((format & SF_FORMAT_SUBMASK) == ExportFormatBase::SF_Vorbis) {
+	if ((format & SF_FORMAT_SUBMASK) == ExportFormatBase::SF_Vorbis ||
+	    (format & SF_FORMAT_TYPEMASK) == ExportFormatBase::F_MPEG) {
 		/* libsndfile uses range 0..1 (worst.. best) for
 		 * SFC_SET_VBR_ENCODING_QUALITY and maps
 		 * SFC_SET_COMPRESSION_LEVEL = 1.0 - VBR_ENCODING_QUALITY

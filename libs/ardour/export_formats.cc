@@ -382,6 +382,44 @@ ExportFormatBWF::set_compatibility_state (ExportFormatCompatibility const & comp
 }
 
 
+/*** MPEG / MP3 ***/
+
+ExportFormatMPEG::ExportFormatMPEG (std::string const& name, std::string const& ext) :
+  HasSampleFormat (sample_formats)
+{
+	SF_INFO sf_info;
+	sf_info.channels = 2;
+	sf_info.samplerate = SR_44_1;
+	sf_info.format = F_MPEG | SF_MPEG_LAYER_III;
+	if (sf_format_check (&sf_info) != SF_TRUE) {
+		throw ExportFormatIncompatible();
+	}
+
+	set_name (name);
+	set_format_id (F_MPEG);
+	add_sample_format (SF_MPEG_LAYER_III);
+
+	add_endianness (E_FileDefault);
+
+	// libsndfile doesn't expose direct quality control - use these coarse approximations
+	add_codec_quality ("Low (0%)",            0);
+	add_codec_quality ("Default (40%)",      40);
+	add_codec_quality ("High (60%)",         60);
+	add_codec_quality ("Very High (100%)",  100);
+
+	set_extension (ext);
+	set_quality (Q_LossyCompression);
+}
+
+bool
+ExportFormatMPEG::set_compatibility_state (ExportFormatCompatibility const & compatibility)
+{
+	bool compatible = compatibility.has_format (F_MPEG);
+	set_compatible (compatible);
+	return compatible;
+}
+
+
 /*** FFMPEG Pipe ***/
 
 ExportFormatFFMPEG::ExportFormatFFMPEG (std::string const& name, std::string const& ext)

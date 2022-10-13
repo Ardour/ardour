@@ -218,6 +218,11 @@ ExportFormatManager::init_formats ()
 	if (ArdourVideoToolPaths::transcoder_exe (unused, unused)) {
 		f_ptr.reset (new ExportFormatFFMPEG ("MP3", "mp3"));
 		add_format (f_ptr);
+	} else {
+		try {
+			f_ptr.reset (new ExportFormatMPEG ("MP3", "mp3"));
+			add_format (f_ptr);
+		} catch (ExportFormatIncompatible & e) {}
 	}
 }
 
