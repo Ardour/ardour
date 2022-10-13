@@ -176,6 +176,8 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	stretcher.setDebugLevel (1);
 	stretcher.setExpectedInputDuration (read_duration);
+	stretcher.setMaxProcessSize (bufsize);
+	assert (stretcher.getLatency () == 0);
 
 	/* the name doesn't need to be super-precise, but allow for 2 fractional
 	 * digits just to disambiguate close but not identical FX
