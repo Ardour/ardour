@@ -89,6 +89,7 @@ TriggerClipPicker::TriggerClipPicker ()
 	_fcd.add_button (Stock::OPEN, RESPONSE_OK);
 
 	refill_dropdown ();
+	Glib::signal_idle ().connect (sigc::mem_fun (*this, &TriggerClipPicker::refill_dropdown));
 
 	/* Audition */
 	 _autoplay_btn.set_active (UIConfiguration::instance ().get_autoplay_clips ());
@@ -179,13 +180,14 @@ TriggerClipPicker::TriggerClipPicker ()
 	_view.set_headers_visible (false);  //TODO: show headers when we have size/tags/etc
 	_view.set_reorderable (false);
 	_view.get_selection ()->set_mode (SELECTION_MULTIPLE);
+	_view.signal_realize().connect (mem_fun (this, &TriggerClipPicker::on_theme_changed));
+
+	_view.ensure_style ();
+	on_theme_changed ();
 
 	Gtk::TreeViewColumn*   name_col = _view.get_column (0);
 	Gtk::CellRendererText* renderer = dynamic_cast<Gtk::CellRendererText*> (_view.get_column_cell_renderer (0));
 	name_col->add_attribute (renderer->property_foreground_gdk (), _columns.color);
-
-	_view.ensure_style ();
-	on_theme_changed ();
 
 	/* DnD source */
 	std::vector<TargetEntry> dnd;
@@ -283,7 +285,7 @@ TriggerClipPicker::edit_path ()
 	Config->set_sample_lib_path (pd.get_serialized_paths ());
 }
 
-void
+bool
 TriggerClipPicker::refill_dropdown ()
 {
 	_clip_dir_menu.clear_items ();
@@ -320,6 +322,7 @@ TriggerClipPicker::refill_dropdown ()
 	_clip_dir_menu.AddMenuElem (Menu_Helpers::MenuElem (_("Edit..."), sigc::mem_fun (*this, &TriggerClipPicker::edit_path)));
 	_clip_dir_menu.AddMenuElem (Menu_Helpers::MenuElem (_("Other..."), sigc::mem_fun (*this, &TriggerClipPicker::open_dir)));
 	_clip_dir_menu.AddMenuElem (Menu_Helpers::MenuElem (_("Download..."), sigc::mem_fun (*this, &TriggerClipPicker::open_downloader)));
+	return false;
 }
 
 static bool
@@ -388,7 +391,7 @@ display_name (std::string const& dir) {
 bool
 TriggerClipPicker::maybe_add_dir (std::string const& dir)
 {
-	if (dir.empty () || !Glib::file_test (dir, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
+	if (dir.empty () || dir == "." || !Glib::file_test (dir, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS)) {
 		return false;
 	}
 
@@ -922,6 +925,9 @@ void
 TriggerClipPicker::mark_auditioned (TreeModel::iterator i)
 {
 	if (!UIConfiguration::instance ().get_highlight_auditioned_clips()) {
+		return;
+	}
+	if (!(*i)[_columns.file]) {
 		return;
 	}
 	(*i)[_columns.color]      = _color_auditioned;

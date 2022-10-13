@@ -58,7 +58,7 @@ private:
 	void open_dir ();
 	void open_downloader ();
 	void edit_path ();
-	void refill_dropdown ();
+	bool refill_dropdown ();
 	void parameter_changed (std::string const&);
 	void clip_added (std::string const&, void*);
 	void row_selected ();
