@@ -86,7 +86,7 @@ class SndfileWriter
 	{
 		if (SF_ERR_NO_ERROR != SndfileHandle::error ()) {
 			throw Exception (*this, boost::str (boost::format
-						("Could create output file (%1%)") % path));
+						("Could not create output file (%1%)") % path));
 		}
 		samples_written = 0;
 		add_supported_flag (ProcessContext<T>::EndOfInput);
