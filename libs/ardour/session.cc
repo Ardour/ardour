@@ -690,6 +690,8 @@ Session::destroy ()
 
 	/* drop GraphNode references */
 	_graph_chain.reset ();
+	_current_route_graph = GraphEdges ();
+
 	_io_graph_chain[0].reset ();
 	_io_graph_chain[1].reset ();
 
