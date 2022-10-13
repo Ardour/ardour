@@ -1113,6 +1113,7 @@ ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 	boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> ogg_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatFLAC>      flac_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatBWF>       bwf_ptr;
+	boost::shared_ptr<ARDOUR::ExportFormatMPEG>      mpeg_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatFFMPEG>    ffmpeg_ptr;
 
 	if ((linear_ptr = boost::dynamic_pointer_cast<ExportFormatLinear> (ptr))) {
@@ -1123,6 +1124,8 @@ ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 		show_flac_enconding_options (flac_ptr);
 	} else if ((bwf_ptr = boost::dynamic_pointer_cast<ExportFormatBWF> (ptr))) {
 		show_bwf_enconding_options (bwf_ptr);
+	} else if ((mpeg_ptr = boost::dynamic_pointer_cast<ExportFormatMPEG> (ptr))) {
+		show_mpeg_enconding_options (mpeg_ptr);
 	} else if ((ffmpeg_ptr = boost::dynamic_pointer_cast<ExportFormatFFMPEG> (ptr))) {
 		show_ffmpeg_enconding_options (ffmpeg_ptr);
 	} else {
@@ -1201,6 +1204,17 @@ ExportFormatDialog::show_bwf_enconding_options (boost::shared_ptr<ARDOUR::Export
 	encoding_options_table.attach (dither_type_view, 1, 2, 1, 2);
 
 	fill_sample_format_lists (boost::dynamic_pointer_cast<HasSampleFormat> (ptr));
+
+	show_all_children ();
+}
+
+void
+ExportFormatDialog::show_mpeg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatMPEG> ptr)
+{
+	encoding_options_label.set_label (_("Variable bit rate quality"));
+	encoding_options_table.resize (1, 1);
+	encoding_options_table.attach (codec_quality_combo, 0, 1, 0, 1);
+	fill_codec_quality_lists (ptr);
 
 	show_all_children ();
 }

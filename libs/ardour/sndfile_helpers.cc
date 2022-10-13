@@ -20,6 +20,7 @@
 
 #include <sndfile.h>
 #include "ardour/sndfile_helpers.h"
+#include "ardour/export_format_base.h"
 
 using namespace std;
 
@@ -40,6 +41,7 @@ sndfile_data_width (int format)
 		return 32;
 	case SF_FORMAT_FLOAT:
 	case SF_FORMAT_DOUBLE:
+	case ARDOUR::ExportFormatBase::SF_MPEG_LAYER_III:
 		return 1; /* ridiculous but used as a magic value */
 	default:
 		// we don't handle anything else within ardour
