@@ -81,6 +81,10 @@ public:
 	void set_measured_latency (samplecnt_t);
 	samplecnt_t latency () const;
 
+	samplecnt_t measured_latency () const {
+		return _measured_latency;
+	}
+
 	static std::string name_and_id_new_insert (Session&, uint32_t&);
 
 	boost::shared_ptr<AutomationControl> send_polarity_control () const {
@@ -125,12 +129,17 @@ private:
 	/* disallow copy construction */
 	PortInsert (const PortInsert&);
 
+	void io_changed (IOChange change, void*);
+	void latency_changed ();
+
 	boost::shared_ptr<Delivery>    _out;
 	boost::shared_ptr<Amp>         _amp;
 	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<PeakMeter>   _send_meter;
 	boost::shared_ptr<PeakMeter>   _return_meter;
 	bool                           _metering;
+	uint32_t                       _io_latency;
+	uint32_t                       _signal_latency;
 
 	MTDM*       _mtdm;
 	bool        _latency_detect;

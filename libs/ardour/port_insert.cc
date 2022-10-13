@@ -50,6 +50,7 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost:
 	: IOProcessor (s, true, true, name_and_id_new_insert (s, _bitslot), "", DataType::AUDIO, true)
 	, _out (new Delivery (s, _output, pannable, mm, _name, Delivery::Insert))
 	, _metering (false)
+	, _signal_latency (0)
 	, _mtdm (0)
 	, _latency_detect (false)
 	, _latency_flush_samples (0)
@@ -69,6 +70,11 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost:
 	add_control (_out->gain_control ());
 	add_control (_out->polarity_control ());
 	add_control (_gain_control);
+
+	_io_latency = _session.engine().samples_per_cycle();
+
+	input ()->changed.connect_same_thread (*this, boost::bind (&PortInsert::io_changed, this, _1, _2));
+	output ()->changed.connect_same_thread (*this, boost::bind (&PortInsert::io_changed, this, _1, _2));
 }
 
 PortInsert::~PortInsert ()
@@ -85,8 +91,19 @@ PortInsert::set_pre_fader (bool p)
 }
 
 void
+PortInsert::latency_changed ()
+{
+	LatencyChanged (); /* EMIT SIGNAL */
+	assert (owner ());
+	static_cast<Route*>(owner ())->processor_latency_changed (); /* EMIT SIGNAL */
+}
+
+void
 PortInsert::start_latency_detection ()
 {
+	if (_latency_detect) {
+		return;
+	}
 	delete _mtdm;
 	_mtdm = new MTDM (_session.sample_rate());
 	_latency_flush_samples = 0;
@@ -97,6 +114,9 @@ PortInsert::start_latency_detection ()
 void
 PortInsert::stop_latency_detection ()
 {
+	if (!_latency_detect) {
+		return;
+	}
 	_latency_flush_samples = effective_latency() + _session.engine().samples_per_cycle();
 	_latency_detect = false;
 }
@@ -108,9 +128,6 @@ PortInsert::set_measured_latency (samplecnt_t n)
 		return;
 	}
 	_measured_latency = n;
-	LatencyChanged (); /* EMIT SIGNAL */
-	assert (owner ());
-	static_cast<Route*>(owner ())->processor_latency_changed (); /* EMIT SIGNAL */
 }
 
 samplecnt_t
@@ -133,6 +150,12 @@ PortInsert::latency() const
 void
 PortInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
+	const samplecnt_t l = effective_latency ();
+	if (_signal_latency != l) {
+		_signal_latency = l;
+		latency_changed ();
+	}
+
 	if (_output->n_ports().n_total() == 0) {
 		return;
 	}
@@ -251,8 +274,10 @@ PortInsert::set_state (const XMLNode& node, int version)
 	uint32_t blocksize = 0;
 	node.get_property ("block-size", blocksize);
 
-	//if the jack period is the same as when the value was saved, we can recall our latency..
-	if ( (_session.get_block_size() == blocksize) ) {
+	/* If the period is the same as when the value was saved,
+	 * we can recall our latency.
+	 */
+	if (_session.engine().samples_per_cycle () == blocksize && blocksize > 0) {
 		node.get_property ("latency", _measured_latency);
 	}
 
@@ -289,12 +314,22 @@ PortInsert::signal_latency() const
 	 * need to take that into account too.
 	 */
 
-	if (_measured_latency == 0) {
-		return _session.engine().samples_per_cycle()
-		       + _input->connected_latency (false)
-		       + _output->connected_latency (true);
+	if (_measured_latency == 0 || _latency_detect) {
+		return _io_latency;
 	} else {
 		return _measured_latency;
+	}
+}
+
+void
+PortInsert::io_changed (IOChange change, void*)
+{
+	if (change.type & IOChange::ConnectionsChanged) {
+		if (output ()->connected () && input ()->connected ()) {
+			_io_latency = _input->connected_latency (false) + _output->connected_latency (true);
+		} else {
+			_io_latency = _session.engine().samples_per_cycle ();
+		}
 	}
 }
 
@@ -358,6 +393,12 @@ PortInsert::activate ()
 	_return_meter->activate ();
 	_amp->activate ();
 	_out->activate ();
+
+	const samplecnt_t l = effective_latency ();
+	if (_signal_latency != l) {
+		_signal_latency = l;
+		latency_changed ();
+	}
 }
 
 void
@@ -373,4 +414,10 @@ PortInsert::deactivate ()
 
 	_amp->deactivate ();
 	_out->deactivate ();
+
+	const samplecnt_t l = effective_latency ();
+	if (_signal_latency != l) {
+		_signal_latency = l;
+		latency_changed ();
+	}
 }
