@@ -44,7 +44,7 @@ class MIDISurface : public ARDOUR::ControlProtocol
                   , public AbstractUI<MidiSurfaceRequest>
 {
   public:
-	MIDISurface (ARDOUR::Session&, std::string const & name, bool use_pad_filter);
+	MIDISurface (ARDOUR::Session&, std::string const & name, std::string const & port_name_prefix, bool use_pad_filter);
 	~MIDISurface ();
 
 	boost::shared_ptr<ARDOUR::Port> input_port();
@@ -71,9 +71,10 @@ class MIDISurface : public ARDOUR::ControlProtocol
 
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
 
-  private:
+  protected:
 	bool with_pad_filter;
 	bool _in_use;
+	std::string port_name_prefix;
 	MIDI::Port* _input_port;
 	MIDI::Port* _output_port;
 
@@ -122,4 +123,6 @@ class MIDISurface : public ARDOUR::ControlProtocol
 	virtual int stop_using_device ();
 	virtual int device_acquire () = 0;
 	virtual void device_release () = 0;
+
+	void drop ();
 };

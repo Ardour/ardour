@@ -33,11 +33,13 @@ using namespace ARDOUR;
 using namespace Glib;
 using namespace PBD;
 
-MIDISurface::MIDISurface (ARDOUR::Session& s, std::string const & namestr, bool use_pad_filter)
+MIDISurface::MIDISurface (ARDOUR::Session& s, std::string const & namestr, std::string const & port_prefix, bool use_pad_filter)
 	: ControlProtocol (s, namestr)
 	, AbstractUI<MidiSurfaceRequest> (namestr)
 	, with_pad_filter (use_pad_filter)
 	, _in_use (false)
+	, port_name_prefix (port_prefix)
+	, _connection_state (ConnectionState (0))
 {
 
 	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::port_registration_handler, this), this);
@@ -52,8 +54,8 @@ MIDISurface::ports_acquire ()
 
 	/* setup ports */
 
-	_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("Push 2 in"), true);
-	_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("Push 2 out"), true);
+	_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, string_compose (X_("%1 in"), port_name_prefix), true);
+	_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, string_compose (X_("%1 out"), port_name_prefix), true);
 
 	if (_async_in == 0 || _async_out == 0) {
 		DEBUG_TRACE (DEBUG::MIDISurface, "cannot register ports\n");
@@ -74,7 +76,7 @@ MIDISurface::ports_acquire ()
 	 */
 
 	if (with_pad_filter) {
-		boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->add_shadow_port (string_compose (_("%1 Pads"), X_("Push 2")), boost::bind (&MIDISurface::pad_filter, this, _1, _2));
+		boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->add_shadow_port (string_compose (_("%1 Pads"), port_name_prefix), boost::bind (&MIDISurface::pad_filter, this, _1, _2));
 		boost::shared_ptr<MidiPort> shadow_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
 
 		if (shadow_port) {
@@ -378,12 +380,25 @@ int
 MIDISurface::begin_using_device ()
 {
 	_in_use = true;
+	connect_session_signals ();
 	return 0;
 }
 
 int
 MIDISurface::stop_using_device ()
 {
+	session_connections.drop_connections ();
 	_in_use = false;
 	return 0;
+}
+
+void
+MIDISurface::drop ()
+{
+	/* do this before stopping the event loop, so that we don't get any notifications */
+	port_connections.drop_connections ();
+
+	stop_using_device ();
+	device_release ();
+	ports_release ();
 }

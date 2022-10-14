@@ -40,7 +40,8 @@
 
 #include "gtkmm2ext/colors.h"
 
-#include "midi_byte_array.h"
+#include "midi_surface/midi_byte_array.h"
+#include "midi_surface/midi_surface.h"
 
 namespace MIDI {
 	class Parser;
@@ -55,18 +56,11 @@ namespace ARDOUR {
 
 namespace ArdourSurface {
 
-struct Push2Request : public BaseUI::BaseRequestObject {
-public:
-	Push2Request () {}
-	~Push2Request () {}
-};
-
 class P2GUI;
 class Push2Layout;
 class Push2Canvas;
 
-class Push2 : public ARDOUR::ControlProtocol
-            , public AbstractUI<Push2Request>
+class Push2 : public MIDISurface
 {
   public:
 	enum ButtonID {
@@ -305,7 +299,8 @@ class Push2 : public ARDOUR::ControlProtocol
 	static bool probe ();
 	static void* request_factory (uint32_t);
 
-	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
+	std::string input_port_name () const;
+	std::string output_port_name () const;
 
 	bool has_editor () const { return true; }
 	void* get_gui () const;
@@ -314,11 +309,6 @@ class Push2 : public ARDOUR::ControlProtocol
 	int set_active (bool yn);
 	XMLNode& get_state() const;
 	int set_state (const XMLNode & node, int version);
-
-	PBD::Signal0<void> ConnectionChange;
-
-	boost::shared_ptr<ARDOUR::Port> input_port();
-	boost::shared_ptr<ARDOUR::Port> output_port();
 
 	int pad_note (int row, int col) const;
 	PBD::Signal0<void> PadChange;
@@ -438,8 +428,6 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void strip_buttons_off ();
 
-	void write (const MidiByteArray&);
-
 	uint8_t get_color_index (Gtkmm2ext::Color rgba);
 	Gtkmm2ext::Color get_color (ColorName);
 
@@ -449,8 +437,6 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	libusb_device_handle* usb_handle() const { return _handle; }
 
-	ARDOUR::Session & get_session() { return *session; }
-
 	bool stop_down () const { return _stop_down; }
 
 	typedef std::map<int,boost::shared_ptr<Pad> > PadMap;
@@ -459,21 +445,14 @@ class Push2 : public ARDOUR::ControlProtocol
 	boost::shared_ptr<Pad> pad_by_xy (int x, int y);
 	boost::shared_ptr<Button> lower_button_by_column (uint32_t col);
 
-	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
-
   private:
 	libusb_device_handle* _handle;
-	bool                  _in_use;
 	ModifierState         _modifier_state;
-
-	void do_request (Push2Request*);
 
 	int begin_using_device ();
 	int stop_using_device ();
 	int device_acquire ();
 	void device_release ();
-	int ports_acquire ();
-	void ports_release ();
 	void run_event_loop ();
 	void stop_event_loop ();
 
@@ -515,29 +494,12 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void build_maps ();
 
-	// Bundle to represent our input ports
-	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
-	// Bundle to represent our output ports
-	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
-
-	MIDI::Port* _input_port;
-	MIDI::Port* _output_port;
-	boost::shared_ptr<ARDOUR::Port> _async_in;
-	boost::shared_ptr<ARDOUR::Port> _async_out;
-
-	void connect_to_parser ();
 	void handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t);
 	void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 
-	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
-
-	void thread_init ();
-
-	PBD::ScopedConnectionList session_connections;
-	void connect_session_signals ();
 	void notify_record_state_changed ();
 	void notify_transport_state_changed ();
 	void notify_loop_state_changed ();
@@ -648,19 +610,6 @@ class Push2 : public ARDOUR::ControlProtocol
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
 
 	boost::weak_ptr<ARDOUR::MidiTrack> _current_pad_target;
-
-	void port_registration_handler ();
-
-	enum ConnectionState {
-		InputConnected = 0x1,
-		OutputConnected = 0x2
-	};
-
-	int _connection_state;
-
-	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
-	PBD::ScopedConnectionList port_connections;
-	void connected ();
 
 	/* GUI */
 
