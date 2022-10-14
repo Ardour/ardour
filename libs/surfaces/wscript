@@ -20,15 +20,16 @@ top = '.'
 out = 'build'
 
 children = [
-        'control_protocol',
-        'faderport',
-        'faderport8',
-        'cc121',
-        'generic_midi',
-        'mackie',
-        'us2400',
-        'launch_control_xl',
-        'osc',
+    'control_protocol',
+    'midi_surface',
+    'faderport',
+    'faderport8',
+    'cc121',
+    'generic_midi',
+    'mackie',
+    'us2400',
+    'launch_control_xl',
+    'osc',
 ]
 
 def options(opt):
@@ -82,6 +83,7 @@ def configure(conf):
 
 def build(bld):
     bld.recurse('control_protocol')
+    bld.recurse('midi_surface')
     bld.recurse('generic_midi')
     bld.recurse('faderport')
     bld.recurse('faderport8')
