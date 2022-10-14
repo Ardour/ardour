@@ -18,6 +18,7 @@
 
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
+
 #include "control_protocol/control_protocol.h"
 #include "midi++/types.h"
 
@@ -125,4 +126,5 @@ class MIDISurface : public ARDOUR::ControlProtocol
 	virtual void device_release () = 0;
 
 	void drop ();
+	void port_setup ();
 };

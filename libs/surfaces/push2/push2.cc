@@ -90,7 +90,7 @@ row_interval_semitones (const Push2::RowInterval row_interval, const bool inkey)
 	case Push2::Fifth:
 		return 7;
 	case Push2::Sequential:
-		return inkey ? 12 : 8;
+ 		 return inkey ? 12 : 8;
 	}
 
 	return 5;
@@ -138,6 +138,7 @@ Push2::Push2 (ARDOUR::Session& s)
 	_splash_layout = new SplashLayout (*this, *session, "splash");
 
 	run_event_loop ();
+	port_setup ();
 }
 
 Push2::~Push2 ()

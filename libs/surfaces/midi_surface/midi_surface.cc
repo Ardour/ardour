@@ -33,6 +33,8 @@ using namespace ARDOUR;
 using namespace Glib;
 using namespace PBD;
 
+#include "pbd/abstract_ui.cc" // instantiate template
+
 MIDISurface::MIDISurface (ARDOUR::Session& s, std::string const & namestr, std::string const & port_prefix, bool use_pad_filter)
 	: ControlProtocol (s, namestr)
 	, AbstractUI<MidiSurfaceRequest> (namestr)
@@ -41,10 +43,32 @@ MIDISurface::MIDISurface (ARDOUR::Session& s, std::string const & namestr, std::
 	, port_name_prefix (port_prefix)
 	, _connection_state (ConnectionState (0))
 {
+}
+
+MIDISurface::~MIDISurface ()
+{
+	/* leave it all up to derived classes, because ordering it hard.  */
+}
+
+void
+MIDISurface::port_setup ()
+{
+	ports_acquire ();
 
 	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::port_registration_handler, this), this);
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::connection_handler, this, _1, _2, _3, _4, _5), this);
+
 	port_registration_handler ();
+}
+
+void
+MIDISurface::drop ()
+{
+	/* do this before stopping the event loop, so that we don't get any notifications */
+	port_connections.drop_connections ();
+	stop_using_device ();
+	device_release ();
+	ports_release ();
 }
 
 int
@@ -392,13 +416,14 @@ MIDISurface::stop_using_device ()
 	return 0;
 }
 
-void
-MIDISurface::drop ()
+std::list<boost::shared_ptr<ARDOUR::Bundle> >
+MIDISurface::bundles ()
 {
-	/* do this before stopping the event loop, so that we don't get any notifications */
-	port_connections.drop_connections ();
+	std::list<boost::shared_ptr<ARDOUR::Bundle> > b;
 
-	stop_using_device ();
-	device_release ();
-	ports_release ();
+	if (_output_bundle) {
+		b.push_back (_output_bundle);
+	}
+
+	return b;
 }
