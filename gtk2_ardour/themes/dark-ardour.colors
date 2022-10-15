@@ -125,7 +125,7 @@
     <ColorAlias name="gtk_background" alias="theme:bg"/>
     <ColorAlias name="gtk_bases" alias="theme:bg2"/>
     <ColorAlias name="gtk_bg_selected" alias="theme:contrasting selection"/>
-    <ColorAlias name="gtk_bg_tooltip" alias="neutral:backgroundest"/>
+    <ColorAlias name="gtk_bg_tooltip" alias="neutral:midground"/>
     <ColorAlias name="gtk_bright_color" alias="widget:blue"/>
     <ColorAlias name="gtk_bright_indicator" alias="alert:red"/>
     <ColorAlias name="gtk_clip_indicator" alias="alert:red"/>
@@ -136,7 +136,7 @@
     <ColorAlias name="gtk_darkest" alias="theme:bg2"/>
     <ColorAlias name="gtk_entry_cursor" alias="alert:red"/>
     <ColorAlias name="gtk_fg_selected" alias="theme:bg2"/>
-    <ColorAlias name="gtk_fg_tooltip" alias="neutral:foreground"/>
+    <ColorAlias name="gtk_fg_tooltip" alias="neutral:backgroundest"/>
     <ColorAlias name="gtk_foldback_bg" alias="theme:bg1"/>
     <ColorAlias name="gtk_foreground" alias="neutral:foreground"/>
     <ColorAlias name="gtk_light_text_on_dark" alias="neutral:foreground2"/>
