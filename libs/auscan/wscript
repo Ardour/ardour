@@ -19,7 +19,7 @@ def build(bld):
         obj.defines   = [
             'AU_SCANNER_APP',
             'VERSIONSTRING="' + bld.env['VERSION'] + '"',
-            'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
+            'PACKAGE="' + I18N_PACKAGE + bld.env['MAJOR'] + '"',
             'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
             'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
             ]

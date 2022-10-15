@@ -406,7 +406,7 @@ def build(bld):
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines      += [
-        'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
+        'PACKAGE="' + I18N_PACKAGE + bld.env['MAJOR'] + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
@@ -574,7 +574,7 @@ def build(bld):
         mo_files = bld.path.ant_glob('po/*.mo')
         for mo in mo_files:
             lang = os.path.basename(mo.srcpath()).replace('.mo', '')
-            bld.install_as(os.path.join(bld.env['LOCALEDIR'], lang, 'LC_MESSAGES', I18N_PACKAGE + str(bld.env['MAJOR']) + '.mo'),
+            bld.install_as(os.path.join(bld.env['LOCALEDIR'], lang, 'LC_MESSAGES', I18N_PACKAGE + bld.env['MAJOR'] + '.mo'),
                            mo)
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
@@ -592,7 +592,7 @@ def build(bld):
         else:
             testcommon.use.extend(['libltc', 'librubberband', 'libfluidsynth'])
         testcommon.defines      = [
-            'PACKAGE="libardour' + str(bld.env['MAJOR']) + 'test"',
+            'PACKAGE="libardour' + bld.env['MAJOR'] + 'test"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
             'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
@@ -668,7 +668,7 @@ def build(bld):
         load_save_session.target    = 'load-save-session'
         load_save_session.install_path = ''
         load_save_session.defines      = [
-            'PACKAGE="libardour' + str(bld.env['MAJOR']) + 'profile"',
+            'PACKAGE="libardour' + bld.env['MAJOR'] + 'profile"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
             'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
@@ -694,7 +694,7 @@ def build(bld):
             profilingobj.target    = p
             profilingobj.install_path = ''
             profilingobj.defines      = [
-                'PACKAGE="libardour' + str(bld.env['MAJOR']) + 'profile"',
+                'PACKAGE="libardour' + bld.env['MAJOR'] + 'profile"',
                 'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
                 'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
                 'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
@@ -712,24 +712,24 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     # not sure about install path
     testobj.install_path = bld.env['LIBDIR']
     testobj.defines      = [
-        'PACKAGE="libardour' + str(bld.env['MAJOR']) + 'test"',
+        'PACKAGE="libardour' + bld.env['MAJOR'] + 'test"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
         ]
 
 def i18n(bld):
-    autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')
 
 def i18n_pot(bld):
-    autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')
 
 def i18n_po(bld):
-    autowaf.build_i18n_po(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n_po(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')
 
 def i18n_mo(bld):
-    autowaf.build_i18n_mo(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n_mo(bld, '.', 'libs/ardour', I18N_PACKAGE + bld.env['MAJOR'], libardour_sources,
                        'Paul Davis')
