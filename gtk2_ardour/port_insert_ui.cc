@@ -112,7 +112,7 @@ PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, boost::s
 
 	Gtkmm2ext::UI::instance ()->set_tip (_invert_button, _("Click to invert polarity of all send channels"));
 	Gtkmm2ext::UI::instance ()->set_tip (_edit_latency_button, _("Edit Latency, manually override measured or I/O reported latency"));
-	Gtkmm2ext::UI::instance ()->set_tip (_measure_latency_button, _("Measure Latency using the first port of each direction\n(note that gain is not applied during measurement).\nRight-click to forget previous meaurements,\nand revert to use default port latency."));
+	Gtkmm2ext::UI::instance ()->set_tip (_measure_latency_button, _("Measure Latency using the first port of each direction\n(note that gain is not applied during measurement).\nRight-click to forget previous measurements,\nand revert to use default port latency."));
 
 	_pi->set_metering (true);
 	_pi->input ()->changed.connect (_connections, invalidator (*this), boost::bind (&PortInsertUI::return_changed, this, _1, _2), gui_context ());

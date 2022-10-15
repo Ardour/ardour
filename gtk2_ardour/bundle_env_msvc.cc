@@ -80,7 +80,7 @@ get_module_folder ()
 std::string ret;
 
 	// Gives the top-level Ardour installation folder (on Windows)
-	// Typically, this will be somehwere like "C:\Program Files"
+	// Typically, this will be somewhere like "C:\Program Files"
 
 	gchar* pExeRoot = g_win32_get_package_installation_directory_of_module (0);
 
@@ -267,7 +267,7 @@ string pango_modules_file;
 		pango_modules_file += PANGO_CONF_LOCATION;
 #if 0
 // JE - handy for non-English locale testing (Greek, in this case)
-		Glib::ustring pango_modules_path = Glib::locale_to_utf8("C:\\Program Files\\Mixbus3\\etc\\ÄÇÌÇÔÑÇÓ\\pango.modules");
+		Glib::ustring pango_modules_path = Glib::locale_to_utf8("C:\\Program Files\\Mixbus3\\etc\\Ã„Ã‡ÃŒÃ‡Ã”Ã‘Ã‡Ã“\\pango.modules");
 /**/
 #else
 		Glib::ustring pango_modules_path = pango_modules_file;

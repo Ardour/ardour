@@ -391,7 +391,7 @@ TimeAxisViewItem::set_min_duration(timecnt_t const & dur, void* src)
 	MinDurationChanged(max_item_duration, src); /* EMIT_SIGNAL */
 }
 
-/** @return the minimum duration that this item mey have */
+/** @return the minimum duration that this item may have */
 timecnt_t
 TimeAxisViewItem::get_min_duration() const
 {
