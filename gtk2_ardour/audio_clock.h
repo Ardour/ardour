@@ -73,7 +73,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void focus ();
 
-	/* overriden by MainClock */
+	/* overridden by MainClock */
 	virtual void set (Temporal::timepos_t const &, bool force = false);
 	void set_duration (Temporal::timecnt_t const &, bool force = false);
 
