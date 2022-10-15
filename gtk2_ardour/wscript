@@ -478,7 +478,7 @@ def configure(conf):
     conf.write_config_header('gtk2ardour-config.h', remove=False)
 
     bak = conf.env['define_key']
-    conf.define('VERSIONSTRING', str (conf.env['VERSION']))
+    conf.define('VERSIONSTRING', conf.env['VERSION'])
     conf.define('CODENAME', enoify(int(conf.env['MAJOR']), int(conf.env['MINOR'])))
     conf.env['define_key'] = ['VERSIONSTRING', 'CODENAME' ]
     conf.write_config_header('gtk2ardour-version.h')
@@ -574,7 +574,7 @@ def build(bld):
 
     # operate on copy to avoid adding sources twice
     obj.source    = list(gtk2_ardour_sources)
-    obj.target    = 'ardour-' + str (bld.env['VERSION'])
+    obj.target    = 'ardour-' + bld.env['VERSION']
     obj.includes  = ['.']
 
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
@@ -677,8 +677,8 @@ def build(bld):
             'DATADIR'        : os.path.normpath(bld.env['DATADIR']),
             'CONFDIR'        : os.path.normpath(bld.env['CONFDIR']),
             'LIBS'           : 'build/libs',
-            'VERSION'        : str (bld.env['VERSION']),
-            'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + str (bld.env['VERSION'])
+            'VERSION'        : bld.env['VERSION'],
+            'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + bld.env['VERSION']
     }
 
     def set_subst_dict(obj, dict):
@@ -828,7 +828,7 @@ def build(bld):
     freedesktop_subst_dict = {
                     'ARDOUR_EXEC' : str (bld.env['lwrcase_dirname']),
                     'ARDOUR_ICON' : str (bld.env['lwrcase_dirname']),
-                    'VERSION': str (bld.env['VERSION']),
+                    'VERSION': bld.env['VERSION'],
                     'DATE': str (bld.env['DATE']),
     }
 

@@ -42,7 +42,7 @@ def build(bld):
                         'libmidipp',
                      ]
     obj.defines = [
-        'VERSIONSTRING="' + str(bld.env['VERSION']) + '"',
+        'VERSIONSTRING="' + bld.env['VERSION'] + '"',
         'DATA_DIR="'   + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="'  + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',

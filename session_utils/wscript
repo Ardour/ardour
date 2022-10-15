@@ -32,7 +32,7 @@ def build_ardour_util(bld, util):
                      'libmidipp',
                      ]
     obj.defines = [
-        'VERSIONSTRING="' + str(bld.env['VERSION']) + '"',
+        'VERSIONSTRING="' + bld.env['VERSION'] + '"',
         'UTILNAME="'   + str(pgmprefix + '-' + util) + '"',
         'DATA_DIR="'   + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
