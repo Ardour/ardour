@@ -222,13 +222,14 @@ def set_version (from_file = False):
         rev, rev_date = fetch_git_revision_date()
     else:
         rev, rev_date = fetch_tarball_revision_date()
+    rev_date = sanitize(rev_date)
 
     #
     # rev is now of the form MAJOR.MINOR[-rcX]-rev-commit
     # or, if right at the same rev as a release, MAJOR.MINOR[-rcX]
     #
 
-    parts = rev.split ('.', 1)
+    parts = sanitize(rev).split ('.', 1)
     MAJOR = parts[0]
     other = parts[1].split('-', 1)
     MINOR = other[0]
@@ -237,10 +238,8 @@ def set_version (from_file = False):
     else:
         MICRO = '0'
 
-    V = MAJOR + '.' + MINOR + '.' + MICRO
-
-    VERSION = sanitize(V)
-    PROGRAM_VERSION = sanitize(MAJOR)
+    VERSION = MAJOR + '.' + MINOR + '.' + MICRO
+    PROGRAM_VERSION = MAJOR
 
 def fetch_gcc_version (CC):
     cmd = "%s --version" % CC
@@ -1047,7 +1046,7 @@ def configure(conf):
     if Options.options.lv2dir:
         conf.env['LV2DIR'] = Options.options.lv2dir
     else:
-        conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], 'ardour' + str(conf.env['MAJOR']), 'LV2')
+        conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], 'ardour' + conf.env['MAJOR'], 'LV2')
 
     conf.env['LV2DIR'] = os.path.normpath(conf.env['LV2DIR'])
 

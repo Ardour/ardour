@@ -22,7 +22,7 @@ def build(bld):
     if bld.env['build_target'] != 'mingw':
         obj              = bld(features = 'subst')
         obj.source       = 'ardour-lua.sh.in'
-        obj.target       = 'ardour' + str (bld.env['MAJOR']) + '-lua'
+        obj.target       = 'ardour' + bld.env['MAJOR'] + '-lua'
         obj.chmod        = Utils.O755
         obj.install_path = bld.env['BINDIR']
         obj.LIBDIR       = os.path.normpath(bld.env['DLLDIR'])
@@ -72,6 +72,6 @@ def build(bld):
 
     if bld.env['build_target'] == 'mingw':
         obj.install_path = bld.env['BINDIR']
-        obj.target       = 'ardour' + str (bld.env['MAJOR']) + '-lua'
+        obj.target       = 'ardour' + bld.env['MAJOR'] + '-lua'
     else:
         obj.install_path = bld.env['DLLDIR']

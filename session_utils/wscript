@@ -16,7 +16,7 @@ def configure(conf):
     autowaf.display_msg(conf, 'build session-utils', 'yes')
 
 def build_ardour_util(bld, util):
-    pgmprefix = bld.env['PROGRAM_NAME'].lower() + str(bld.env['MAJOR'])
+    pgmprefix = bld.env['PROGRAM_NAME'].lower() + bld.env['MAJOR']
 
     # just the normal executable version of the GTK GUI
     obj = bld (features = 'cxx c cxxprogram')
@@ -66,7 +66,7 @@ def build(bld):
     if not "dummy" in bld.env['BACKENDS']:
         return
 
-    pgmprefix = bld.env['PROGRAM_NAME'].lower() + str(bld.env['MAJOR'])
+    pgmprefix = bld.env['PROGRAM_NAME'].lower() + bld.env['MAJOR']
 
     utils = bld.path.ant_glob('[a-z]*.cc', excl=['example.cc', 'common.cc'])
 
