@@ -19,7 +19,7 @@ def build(bld):
     # this program does not do the whole hidden symbols thing
     obj.cxxflags = [ '-fvisibility=default' ]
     obj.source    = hardour_sources
-    obj.target = 'hardour-' + str (bld.env['VERSION'])
+    obj.target = 'hardour-' + bld.env['VERSION']
     obj.includes = ['.']
     obj.use      = [ 'libpbd',
                      'libardour',
@@ -29,7 +29,7 @@ def build(bld):
                      ]
 
     obj.defines = [
-        'VERSIONSTRING="' + str(bld.env['VERSION']) + '"',
+        'VERSIONSTRING="' + bld.env['VERSION'] + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',

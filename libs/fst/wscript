@@ -21,7 +21,7 @@ def build(bld):
         obj.includes  = [ '../pbd/', '../ardour/', '../vst3/', '..' ]
         obj.defines   = [
             'VST3_SCANNER_APP',
-            'VERSIONSTRING="' + str(bld.env['VERSION']) + '"',
+            'VERSIONSTRING="' + bld.env['VERSION'] + '"',
             'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
             'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
             'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
@@ -66,7 +66,7 @@ def build(bld):
             'VST_SCANNER_APP',
             'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
             'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
-            'VERSIONSTRING="' + str(bld.env['VERSION']) + '"',
+            'VERSIONSTRING="' + bld.env['VERSION'] + '"',
             ]
         if re.search ("bsd", sys.platform) != None:
             obj.defines.append('_POSIX_C_SOURCE=200809')
