@@ -35,7 +35,7 @@ def configure(conf):
 
     if Options.options.internal_shared_libs:
         conf.define('INTERNAL_SHARED_LIBS', 1)
-    #autowaf.display_msg(conf, "Unit tests", str(conf.env['BUILD_TESTS']))
+    #autowaf.display_msg(conf, "Unit tests", conf.env['BUILD_TESTS'])
     #print
 
 def build(bld):

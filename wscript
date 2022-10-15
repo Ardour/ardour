@@ -520,7 +520,7 @@ int main() { return 0; }''',
         if conf.env['build_target'] == 'armhf' or conf.env['build_target'] == 'aarch64':
             conf.define('ARM_NEON_SUPPORT', 1)
         elif conf.env['build_target'] == 'mingw':
-            if re.search ('x86_64-w64', str(conf.env['CC'])) is not None:
+            if re.search ('x86_64-w64', conf.env['CC']) is not None:
                 conf.define ('FPU_AVX_FMA_SUPPORT', 1)
                 conf.define ('FPU_AVX512F_SUPPORT', 1)
         elif conf.env['build_target'] == 'i386' or conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
@@ -636,7 +636,7 @@ int main() { return 0; }''',
             # usability of the 64 bit windows assembler depends on the compiler target,
             # not the build host, which in turn can only be inferred from the name
             # of the compiler.
-            if re.search ('x86_64-w64', str(conf.env['CC'])) is not None:
+            if re.search ('x86_64-w64', conf.env['CC']) is not None:
                     compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
