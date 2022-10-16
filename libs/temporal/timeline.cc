@@ -280,6 +280,8 @@ timecnt_t::string_to (std::string const & str)
 		ss >> ticks;
 		_distance = int62_t (true, ticks);
 		break;
+	default:
+		return false;
 	}
 
 	/* eat separator character */
