@@ -47,8 +47,8 @@ static inline superclock_t superclock_ticks_per_second() { if (!scts_set) { rais
 static inline superclock_t superclock_ticks_per_second() { return _superclock_ticks_per_second; }
 #endif
 
-static inline superclock_t superclock_to_samples (superclock_t s, int sr) { return int_div_round (s * sr, superclock_ticks_per_second()); }
-static inline superclock_t samples_to_superclock (int64_t samples, int sr) { return int_div_round (samples * superclock_ticks_per_second(), superclock_t (sr)); }
+static inline superclock_t superclock_to_samples (superclock_t s, int sr) { return PBD::muldiv (s, sr, superclock_ticks_per_second()); }
+static inline superclock_t samples_to_superclock (int64_t samples, int sr) { return PBD::muldiv (samples, superclock_ticks_per_second(), superclock_t (sr)); }
 
 LIBTEMPORAL_API extern int most_recent_engine_sample_rate;
 
