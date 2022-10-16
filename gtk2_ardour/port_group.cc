@@ -566,7 +566,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	for (auto const& iop : *session->io_plugs ()) {
 		boost::shared_ptr<IO> io = inputs ? iop->input() : iop->output();
-		if (io->n_ports().get (type) > 0) {
+		if (io->n_ports().n_total () == 0) {
+			continue;
+		}
+		if (type == DataType::NIL || io->n_ports().get (type) > 0) {
 			ioplugin->add_bundle (io->bundle(), io);
 		}
 	}
