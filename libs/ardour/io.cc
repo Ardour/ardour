@@ -1472,8 +1472,6 @@ IO::midi(uint32_t n) const
 void
 IO::setup_bundle ()
 {
-	char buf[32];
-
 	if (!_bundle) {
 		_bundle.reset (new Bundle (_direction == Input));
 	}
@@ -1482,12 +1480,7 @@ IO::setup_bundle ()
 
 	_bundle->remove_channels ();
 
-	if (_direction == Input) {
-		snprintf(buf, sizeof (buf), _("%s in"), _name.val().c_str());
-	} else {
-		snprintf(buf, sizeof (buf), _("%s out"), _name.val().c_str());
-	}
-	_bundle->set_name (buf);
+	_bundle->set_name (string_compose ("%1 %2", _name, _direction == Input ? _("in") : _("out")));
 
 	int c = 0;
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
