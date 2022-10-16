@@ -4,6 +4,7 @@
 # Romain Arnaud <roming22@gmail.com>, 2011.
 # Olivier Humbert <trebmuh@tuxfamily.org>, 2016.
 # stratojaune <fred_rech@laposte.net>, 2020.
+# Julien Taverna <jujudusud@gmail.com>, 2022.
 msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
@@ -31,7 +32,7 @@ msgstr "Désactivé"
 
 #: action_model.cc:83
 msgid "Main_menu"
-msgstr ""
+msgstr "Menu principal"
 
 #: action_model.cc:85
 msgid "JACK"
@@ -39,19 +40,19 @@ msgstr ""
 
 #: action_model.cc:87
 msgid "redirectmenu"
-msgstr ""
+msgstr "menu redirection"
 
 #: action_model.cc:89
 msgid "Editor_menus"
-msgstr ""
+msgstr "Menus éditeur"
 
 #: action_model.cc:91
 msgid "RegionList"
-msgstr ""
+msgstr "Liste des régions"
 
 #: action_model.cc:93
 msgid "ProcessorMenu"
-msgstr ""
+msgstr "Menu processeur"
 
 #: bindings.cc:840 bindings.cc:842
 msgid "Window"
@@ -71,7 +72,7 @@ msgstr "Non-catégorisé"
 
 #: cursors.cc:81
 msgid "cursor hotspots info file %1 has an error on line %2"
-msgstr ""
+msgstr "Le fichier info du curseur hotspots %1 contient une erreur à la ligne %2"
 
 #: emscale.cc:52
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
