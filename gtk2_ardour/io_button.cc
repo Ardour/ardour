@@ -248,6 +248,13 @@ IOButton::button_press (GdkEventButton* ev)
 			}
 			maybe_add_bundle_to_menu ((*i)->output ()->bundle (), current);
 		}
+
+		for (auto const& iop : *_route->session ().io_plugs ()) {
+			if (!iop->is_pre ()) {
+				continue;
+			}
+			maybe_add_bundle_to_menu (iop->output ()->bundle (), current);
+		}
 	} else {
 		DataType intended_type = guess_main_type (_input ? _route->input () : _route->output ());
 
@@ -275,6 +282,13 @@ IOButton::button_press (GdkEventButton* ev)
 			if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
 				maybe_add_bundle_to_menu (*i, current, intended_type);
 			}
+		}
+
+		for (auto const& iop : *_route->session ().io_plugs ()) {
+			if (iop->is_pre ()) {
+				continue;
+			}
+			maybe_add_bundle_to_menu (iop->input ()->bundle (), current, intended_type);
 		}
 	}
 
