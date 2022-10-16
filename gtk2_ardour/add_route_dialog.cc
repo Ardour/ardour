@@ -1133,15 +1133,19 @@ AddRouteDialog::insert_at ()
 	using namespace RouteDialogs;
 
 	std::string str = insert_at_combo.get_active_text();
+	RouteDialogs::InsertAt choice = Last;
 
 	if (str == _("First")) {
-		return First;
+		choice = First;
 	} else if (str == _("After Selection")) {
-		return AfterSelection;
+		choice = AfterSelection;
 	} else if (str == _("Before Selection")){
-		return BeforeSelection;
+		choice = BeforeSelection;
 	}
-	return Last;
+
+	UIConfiguration::instance().set_insert_at_position (choice);
+
+	return choice;
 }
 
 bool
