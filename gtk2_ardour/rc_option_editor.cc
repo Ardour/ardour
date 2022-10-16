@@ -3846,15 +3846,57 @@ These settings will only take effect after %1 is restarted.\n\
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
 
+	add_option (_("Plugins/GUI"), new OptionEditorHeading (_("Plugin GUI")));
+	add_option (_("Plugins/GUI"),
+	     new BoolOption (
+		     "open-gui-after-adding-plugin",
+		     _("Automatically open the plugin GUI when adding a new plugin"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_open_gui_after_adding_plugin),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_open_gui_after_adding_plugin)
+		     ));
+
 	bo = new BoolOption (
 		"one-plugin-window-only",
 		_("Show only one plugin window at a time"),
 		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_one_plugin_window_only),
 		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_one_plugin_window_only)
 		);
-	add_option (_("Plugins"), bo);
+	add_option (_("Plugins/GUI"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> at most one plugin GUI window can be on-screen at a time. <b>When disabled</b>, the number of visible plugin GUI windows is unlimited"));
+
+	ComboOption<PluginGUIBehavior>* puimode = new ComboOption<PluginGUIBehavior> (
+			"plugin-gui-behavior",
+			_("Closing a Plugin GUI Window"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_plugin_gui_behavior),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_plugin_gui_behavior)
+			);
+		puimode->add (PluginGUIHide, _("only hides the window"));
+		puimode->add (PluginGUIDestroyAny, _("destroys the GUI instance, releasing resources"));
+		puimode->add (PluginGUIDestroyVST, _("only destroys VST2/3 UIs, hides others"));
+
+		add_option (_("Plugins/GUI"), puimode);
+	Gtkmm2ext::UI::instance()->set_tip (puimode->tip_widget(), _("Closing a plugin window, usually only hides it. This makes is fast to open the same plugin UI again at a later time.\n\nMost plugin UIs are inactive and do not consume any CPU resources while they are not mapped on the screen.\n\nHowever some plugins do consume significant CPU and GPU resources even when they are not currently displayed. This option allows to work around the issue."));
+
+#ifdef LV2_EXTENDED
+	add_option (_("Plugins/GUI"), new OptionEditorHeading (_("Mixer Strip Inline Display")));
+	add_option (_("Plugins/GUI"),
+	     new BoolOption (
+		     "show-inline-display-by-default",
+		     _("Show Plugin Inline Display on Mixer Strip by default"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_inline_display_by_default),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_inline_display_by_default)
+		     ));
+
+	_plugin_prefer_inline = new BoolOption (
+			"prefer-inline-over-gui",
+			_("Don't automatically open the plugin GUI when the plugin has an inline display mode"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_prefer_inline_over_gui),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_prefer_inline_over_gui)
+			);
+	add_option (_("Plugins/GUI"), _plugin_prefer_inline);
+#endif
+
 
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT || defined VST3_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
@@ -4045,34 +4087,6 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_conceal_lv1_if_lv2_exists),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_conceal_lv1_if_lv2_exists)
 		     ));
-
-	add_option (_("Plugins"), new OptionEditorHeading (_("Plugin GUI")));
-	add_option (_("Plugins"),
-	     new BoolOption (
-		     "open-gui-after-adding-plugin",
-		     _("Automatically open the plugin GUI when adding a new plugin"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_open_gui_after_adding_plugin),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_open_gui_after_adding_plugin)
-		     ));
-
-#ifdef LV2_EXTENDED
-	add_option (_("Plugins"),
-	     new BoolOption (
-		     "show-inline-display-by-default",
-		     _("Show Plugin Inline Display on Mixer Strip by default"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_inline_display_by_default),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_inline_display_by_default)
-		     ));
-
-	_plugin_prefer_inline = new BoolOption (
-			"prefer-inline-over-gui",
-			_("Don't automatically open the plugin GUI when the plugin has an inline display mode"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_prefer_inline_over_gui),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_prefer_inline_over_gui)
-			);
-	add_option (_("Plugins"), _plugin_prefer_inline);
-#endif
-
 	add_option (_("Plugins"), new OptionEditorHeading (_("Instrument")));
 
 	bo = new BoolOption (
