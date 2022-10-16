@@ -4,6 +4,7 @@
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015
 # Julien Rivaud <frnchfrgg@free.fr>, 2016
 # Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2017, 2020, 2021
+# Julien Taverna <jujudusud@gmail.com>, 2022
 #
 msgid ""
 msgstr ""
@@ -1213,7 +1214,7 @@ msgstr "Tous les fichiers audio trouvés pour l'importation PT !"
 
 #: import_pt.cc:354
 msgid "PTImport: UINT_MAX routes? impossible!"
-msgstr ""
+msgstr "PTImport: routes UINT_MAX ? impossible !"
 
 #: instrument_info.cc:41 instrument_info.cc:74
 msgid "Unknown"
@@ -1442,7 +1443,7 @@ msgstr "Emplacements"
 
 #: location_importer.cc:124
 msgid "Location: "
-msgstr "Emplacement :"
+msgstr "Emplacement : "
 
 #: location_importer.cc:126
 msgid ""
@@ -1818,7 +1819,7 @@ msgstr "La"
 
 #: parameter_descriptor.cc:269
 msgid "Note|A#"
-msgstr "Si ♭"
+msgstr "La #"
 
 #: parameter_descriptor.cc:270
 msgid "Note|B"
@@ -2481,11 +2482,11 @@ msgstr "Mauvais nœud envoyé à Route::set_state() [%1]"
 
 #: route.cc:2673
 msgid "Pannable state found for route (%1) without a panner!"
-msgstr ""
+msgstr "L'état de panoramique a été trouvé pour la route (%1) sans panoramique !"
 
 #: route.cc:3673
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
-msgstr ""
+msgstr "Propagation Solo-Isolate invalide : de:%1 nouveau:%2 - ancien:%3 = delta:%4"
 
 #: route.cc:4940
 msgid "Amp/Fader on Route '%1' went AWOL. Re-added."
@@ -2764,7 +2765,7 @@ msgstr "Bus"
 
 #: session.cc:2888 session.cc:2898
 msgid "Session: UINT_MAX routes? impossible!"
-msgstr ""
+msgstr "Session : routes UINT_MAX ? impossible !"
 
 #: session.cc:3033
 msgid "Session: cannot create track/bus from template description"
