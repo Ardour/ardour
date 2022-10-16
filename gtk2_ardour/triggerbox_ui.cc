@@ -561,6 +561,10 @@ TriggerEntry::name_button_event (GdkEvent* ev)
 #endif
 			return true;
 		case GDK_BUTTON_RELEASE:
+			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
+				clear_trigger ();
+				return true;
+			}
 			switch (ev->button.button) {
 				case 3:
 					PublicEditor::instance ().get_selection ().set (this);
