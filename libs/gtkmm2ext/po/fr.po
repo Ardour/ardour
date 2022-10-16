@@ -40,7 +40,7 @@ msgstr ""
 
 #: action_model.cc:87
 msgid "redirectmenu"
-msgstr "menu redirection"
+msgstr "Menu redirection"
 
 #: action_model.cc:89
 msgid "Editor_menus"
