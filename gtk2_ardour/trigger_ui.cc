@@ -441,7 +441,7 @@ TriggerUI::context_menu ()
 	items.push_back (MenuElem (_("Clear"), sigc::mem_fun (*this, &TriggerUI::clear_trigger)));
 
 
-	_context_menu->popup (1, gtk_get_current_event_time ());
+	_context_menu->popup (3, gtk_get_current_event_time ());
 }
 
 void
