@@ -514,15 +514,15 @@ msgstr ""
 
 #: butler.cc:123
 msgid "Session: could not create butler thread"
-msgstr "Session : Impossible de créer le fil maître"
+msgstr "Session : impossible de créer le fil maître"
 
 #: butler.cc:264 butler.cc:265
 msgid "Butler read ahead failure on dstream %1"
-msgstr "Echec de la lecture anticipée du maître sur le dstream %1"
+msgstr "Échec de la lecture anticipée du maître sur le dstream %1"
 
 #: butler.cc:354 butler.cc:355 butler.cc:403 butler.cc:404
 msgid "Butler write-behind failure on dstream %1"
-msgstr "Echec de l'écriture du maître sur le dstream %1"
+msgstr "Échec de l'écriture du maître sur le dstream %1"
 
 #: control_protocol_manager.cc:133
 msgid "Control protocol %1 was already active."
@@ -1214,7 +1214,7 @@ msgstr "Tous les fichiers audio trouvés pour l'importation PT !"
 
 #: import_pt.cc:354
 msgid "PTImport: UINT_MAX routes? impossible!"
-msgstr "PTImport: routes UINT_MAX ? impossible !"
+msgstr "PTImport : UINT_MAX routes ? impossible !"
 
 #: instrument_info.cc:41 instrument_info.cc:74
 msgid "Unknown"
@@ -1717,7 +1717,7 @@ msgstr "Copier une région (horodatage fixe)"
 
 #: pannable.cc:207
 msgid "Pannable given XML data for %1 - ignored"
-msgstr "Les panoramiques XML fournies pour %1 sont ignorées."
+msgstr "Les panoramiques XML fournis pour %1 sont ignorés."
 
 #: panner_manager.cc:100
 msgid "looking for panners in %1\n"
@@ -1729,11 +1729,11 @@ msgstr "Panoramique découvert : \"%1\" dans %2\n"
 
 #: panner_manager.cc:145
 msgid "PannerManager: cannot load module \"%1\" (%2)"
-msgstr "PannerManager : impossible de charger le module \"%1\" (%2)"
+msgstr "Gestionnaire panoramique : impossible de charger le module \"%1\" (%2)"
 
 #: panner_manager.cc:152
 msgid "PannerManager: module \"%1\" has no descriptor function."
-msgstr "PannerManager : le module \"%1\" n'a pas de fonction descripteur."
+msgstr "Gestionnaire panoramique : le module \"%1\" n'a pas de fonction descripteur."
 
 #: panner_manager.cc:253
 msgid "no panner discovered for in/out = %1/%2"
@@ -1751,7 +1751,7 @@ msgstr "sélectionner le panoramique : %1\n"
 
 #: panner_shell.cc:260
 msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
-msgstr "Greffon de panoramique inconnu \"%1\" trouvé dans le status pan - ignoré"
+msgstr "Greffon de panoramique inconnu \"%1\" trouvé dans l'état pan - ignoré"
 
 #: panner_shell.cc:266
 msgid "panner plugin node has no type information!"
@@ -2154,11 +2154,11 @@ msgstr ""
 
 #: plugin_manager.cc:1808
 msgid "PluginManager::sanitize_tag could not tokenize string: "
-msgstr "Manager de greffons:: sanitize_tag ne peut pas mettre en forme la chaîne : "
+msgstr "Gestionnaire de greffons:: sanitize_tag ne peut pas mettre en forme la chaîne : "
 
 #: plugin_manager.cc:1858
 msgid "PluginManager: Could not tokenize string: "
-msgstr "Manager de greffons : impossible de mettre en forme la chaîne : "
+msgstr "Gestionnaire de greffons : impossible de mettre en forme la chaîne : "
 
 #: port.cc:546
 msgid "could not reregister %1"
