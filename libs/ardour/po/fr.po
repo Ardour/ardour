@@ -339,7 +339,7 @@ msgstr "Impossible de renommer le fichier de pic-audio pour %1 de %2 à %3 (%4)"
 
 #: audiosource.cc:265
 msgid "AudioSource: cannot stat peakfile \"%1\""
-msgstr ""
+msgstr "Source audio : impossible de statuer sur le fichier de pic \"%1\""
 
 #: audiosource.cc:371
 msgid "Cannot open peakfile @ %1 for size check (%2)"
@@ -513,15 +513,15 @@ msgstr ""
 
 #: butler.cc:123
 msgid "Session: could not create butler thread"
-msgstr ""
+msgstr "Session : Impossible de créer le fil maître"
 
 #: butler.cc:264 butler.cc:265
 msgid "Butler read ahead failure on dstream %1"
-msgstr ""
+msgstr "Echec de la lecture anticipée du maître sur le dstream %1"
 
 #: butler.cc:354 butler.cc:355 butler.cc:403 butler.cc:404
 msgid "Butler write-behind failure on dstream %1"
-msgstr ""
+msgstr "Echec de l'écriture du maître sur le dstream %1"
 
 #: control_protocol_manager.cc:133
 msgid "Control protocol %1 was already active."
@@ -1135,7 +1135,7 @@ msgstr ""
 
 #: graph.cc:599
 msgid "Could not graph to file (%1)"
-msgstr ""
+msgstr "Impossible d'accéder au fichier (%1)"
 
 #: import.cc:163
 msgid "Cannot find new filename for imported file %1"
@@ -1504,7 +1504,7 @@ msgstr "LTCFileReader:: canal audio sélectionné invalide"
 
 #: ltc_slave.cc:650
 msgid "flywheel"
-msgstr ""
+msgstr "volant"
 
 #: lua_api.cc:96
 msgid "Script with given name was not found\n"
@@ -1640,7 +1640,7 @@ msgstr "couper le contrôle %1"
 
 #: monitor_processor.cc:539
 msgid "dim control"
-msgstr ""
+msgstr "contrôle de dim"
 
 #: monitor_processor.cc:540
 msgid "polarity control"
@@ -1684,7 +1684,7 @@ msgstr "Insérer une région"
 
 #: operations.cc:46
 msgid "drag region brush"
-msgstr ""
+msgstr "brosse de région glissante"
 
 #: operations.cc:47
 msgid "region drag"
@@ -1716,7 +1716,7 @@ msgstr "Copier une région (horodatage fixe)"
 
 #: pannable.cc:207
 msgid "Pannable given XML data for %1 - ignored"
-msgstr ""
+msgstr "Les panoramiques XML fournies pour %1 sont ignorées."
 
 #: panner_manager.cc:100
 msgid "looking for panners in %1\n"
@@ -1724,7 +1724,7 @@ msgstr "Recherche de Panoramiques dans %1\n"
 
 #: panner_manager.cc:126
 msgid "Panner discovered: \"%1\" in %2\n"
-msgstr " \n"
+msgstr "Panoramique découvert : \"%1\" dans %2\n"
 
 #: panner_manager.cc:145
 msgid "PannerManager: cannot load module \"%1\" (%2)"
@@ -1736,25 +1736,25 @@ msgstr "PannerManager : le module \"%1\" n'a pas de fonction descripteur."
 
 #: panner_manager.cc:253
 msgid "no panner discovered for in/out = %1/%2"
-msgstr ""
+msgstr "pas de panaoramique découvert pour entrée/sortie = %1/%2"
 
 #: panner_shell.cc:127
 msgid ""
 "No panner found: check that panners are being discovered correctly during "
 "startup."
-msgstr ""
+msgstr "Aucun panoramique trouvé : vérifiez que les panoramiques sont découverts correctement lors du démarrage."
 
 #: panner_shell.cc:134
 msgid "select panner: %1\n"
-msgstr ""
+msgstr "sélectionner le panoramique : %1\n"
 
 #: panner_shell.cc:260
 msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
-msgstr ""
+msgstr "Greffon de panoramique inconnu \"%1\" trouvé dans le status pan - ignoré"
 
 #: panner_shell.cc:266
 msgid "panner plugin node has no type information!"
-msgstr ""
+msgstr "Le nœud du greffon panoramique n'a pas d'information sur le type !"
 
 #: parameter_descriptor.cc:119
 msgid "Normal"
@@ -2153,11 +2153,11 @@ msgstr ""
 
 #: plugin_manager.cc:1808
 msgid "PluginManager::sanitize_tag could not tokenize string: "
-msgstr ""
+msgstr "Manager de greffons:: sanitize_tag ne peut pas mettre en forme la chaîne : "
 
 #: plugin_manager.cc:1858
 msgid "PluginManager: Could not tokenize string: "
-msgstr ""
+msgstr "Manager de greffons : impossible de mettre en forme la chaîne : "
 
 #: port.cc:546
 msgid "could not reregister %1"
@@ -2891,7 +2891,7 @@ msgstr ""
 
 #: session_configuration.cc:152
 msgid "%1: cannot part default session options \"%2\""
-msgstr ""
+msgstr "%1: impossible de répartir les options de la session par défaut \"%2\""
 
 #: session_configuration.cc:158
 msgid "Invalid session default XML Root."
@@ -3000,7 +3000,7 @@ msgstr "Utiliser la configuration"
 
 #: session_state.cc:246
 msgid "Butler did not start"
-msgstr ""
+msgstr "Le maître n'a pas démarré"
 
 #: session_state.cc:251
 msgid "MIDI I/O thread did not start"
@@ -3889,19 +3889,19 @@ msgstr "La construction de l'objet maître de transport de type %1 a échoué"
 
 #: transport_master.cc:417 transport_master.cc:450
 msgid "SyncSource|JACK"
-msgstr ""
+msgstr "Synchroniser source|JACK"
 
 #: transport_master.cc:424
 msgid "SyncSource|MTC"
-msgstr ""
+msgstr "Synchroniser source|MTC"
 
 #: transport_master.cc:434
 msgid "SyncSource|M-Clk"
-msgstr ""
+msgstr "Synchroniser source|M-Clk"
 
 #: transport_master.cc:444
 msgid "SyncSource|LTC"
-msgstr ""
+msgstr "Synchroniser source|LTC"
 
 #: transport_master.cc:487
 msgid "All"
