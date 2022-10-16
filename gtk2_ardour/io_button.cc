@@ -19,6 +19,7 @@
 
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
+#include "ardour/io_plug.h"
 #include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -549,6 +550,65 @@ IOButton::set_label (ArdourWidgets::ArdourButton& self, ARDOUR::Session& session
 			have_label = true;
 		}
 	}
+
+	/* check for direct connections to I/O Plugins */
+	if (!have_label) {
+		for (auto const& iop : *session.io_plugs ()) {
+			boost::shared_ptr<IO> i = input ? iop->output () : iop->input ();
+			if (!io->connected_to (i)) {
+				continue;
+			}
+
+			/* direct 1:1 connection to IOP */
+			if (io->bundle ()->connected_to (i->bundle (), session.engine (), dt, true)) {
+				label << iop->io_name();
+				have_label = true;
+				break;
+			}
+
+			/* check if IO is exclusively connected to a subset of this IOP's ports */
+			uint32_t n = 0;
+			uint32_t cnt = 0;
+			std::set<uint32_t> pn;
+			PortSet const& psa (i->ports ());
+			PortSet const& psb (io->ports ());
+
+			for (auto a = psa.begin (dt); a != psa.end (dt); ++a, ++n) {
+				for (auto b = psb.begin (dt); b != psb.end (dt); ++b) {
+					if (a->connected_to (b->name ())) {
+						++cnt;
+						pn.insert (n);
+					}
+				}
+			}
+
+			if (cnt != typed_connection_count) {
+				/* IO has additional connections.
+				 * No need to check other IOPs (they will produce
+				 * the same result).
+				 */
+				assert (cnt > 0);
+				break;
+			}
+
+			have_label = true;
+			label << iop->io_name() << " ";
+
+			bool first = true;
+			for (auto const& num : pn) {
+				if (first) {
+					first = false;
+				} else {
+					label << "+";
+				}
+				label << i->bundle()->channel_name (num);
+			}
+			break;
+		}
+	}
+
+	// TODO check for internal connection (port_is_mine), do not simply
+	// print "ardour" as client name
 
 	/* Is each main-typed channel connected to a single and different port with
 	 * the same client name (e.g. another JACK client) ? */
