@@ -25,6 +25,7 @@
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/session_handle.h"
+#include "ardour/types.h"
 
 namespace PBD {
 	class Controllable;
@@ -40,7 +41,7 @@ public:
 
 	void snapshot ();
 	bool apply () const;
-	bool apply (PBD::ControllableSet const&) const;
+	bool apply (PBD::ControllableSet const&, AutomationTypeSet const& ts = AutomationTypeSet()) const;
 	void clear ();
 	bool empty () const { return _ctrl_map.empty (); }
 
@@ -55,7 +56,7 @@ public:
 private:
 	typedef std::map<PBD::ID, double> ControllableValueMap;
 
-	bool recurse_to_master (boost::shared_ptr<PBD::Controllable>, std::set <PBD::ID>&) const;
+	bool recurse_to_master (boost::shared_ptr<PBD::Controllable>, std::set <PBD::ID>&, AutomationTypeSet const&) const;
 
 	ControllableValueMap       _ctrl_map;
 	std::string                _name;

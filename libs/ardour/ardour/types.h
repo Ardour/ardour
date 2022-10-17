@@ -639,6 +639,7 @@ typedef std::list<boost::weak_ptr  <Route> > WeakRouteList;
 typedef std::list<boost::weak_ptr  <Stripable> > WeakStripableList;
 typedef std::list<boost::shared_ptr<AutomationControl> > ControlList;
 typedef std::list<boost::shared_ptr<SlavableAutomationControl> > SlavableControlList;
+typedef std::set <AutomationType> AutomationTypeSet;
 
 typedef std::list<boost::shared_ptr<VCA> > VCAList;
 

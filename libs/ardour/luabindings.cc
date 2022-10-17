@@ -1848,7 +1848,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginWSPtrClass <MixerScene> ("MixerScene")
 		.addFunction ("apply", (bool (MixerScene::*)() const)&MixerScene::apply)
-		.addFunction ("apply_to", (bool (MixerScene::*)(PBD::ControllableSet const&) const)&MixerScene::apply)
+		.addFunction ("apply_to", (bool (MixerScene::*)(PBD::ControllableSet const&, AutomationTypeSet const&) const)&MixerScene::apply)
 		.addFunction ("snapshot", &MixerScene::snapshot)
 		.addFunction ("clear", &MixerScene::clear)
 		.addFunction ("empty", &MixerScene::empty)
@@ -2148,6 +2148,10 @@ LuaBindings::common (lua_State* L)
 
 		// typedef std::set <boost::shared_ptr<PBD::Controllable> > PBD::ControllableSet;
 		.beginStdSet <boost::shared_ptr<PBD::Controllable>> ("ControllableSet")
+		.endClass ()
+
+		// typedef std::set <enum AutomationType> AutomationTypeSet;
+		.beginStdSet <AutomationType> ("AutomationTypeSet")
 		.endClass ()
 
 		// typedef std::vector<samplepos_t> XrunPositions

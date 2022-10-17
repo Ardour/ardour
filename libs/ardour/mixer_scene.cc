@@ -77,25 +77,35 @@ MixerScene::snapshot ()
 }
 
 bool
-MixerScene::recurse_to_master (boost::shared_ptr<PBD::Controllable> c, std::set <PBD::ID>& done) const
+MixerScene::recurse_to_master (boost::shared_ptr<PBD::Controllable> c, std::set <PBD::ID>& done, AutomationTypeSet const& ts) const
 {
 	if (done.find (c->id()) != done.end ()) {
 		return false;
 	}
 
-#if 1 /* ignore controls in Write, or Touch + touching() state */
 	auto ac = boost::dynamic_pointer_cast<AutomationControl> (c);
+#if 1 /* ignore controls in Write, or Touch + touching() state */
 	if (ac && ac->automation_write ()) {
 		done.insert (c->id ());
 		return false;
 	}
 #endif
+	if (!ts.empty ()) {
+		if (!ac) {
+			done.insert (c->id ());
+			return false;
+		}
+		if (ts.find (ac->desc().type) == ts.end ()) {
+			done.insert (c->id ());
+			return false;
+		}
+	}
 
 	auto sc = boost::dynamic_pointer_cast<SlavableAutomationControl> (c);
 	if (sc && sc->slaved ()) {
 		/* first set masters, then set own value */
 		for (auto const& m : sc->masters ()) {
-			recurse_to_master (m, done);
+			recurse_to_master (m, done, ts);
 		}
 	}
 
@@ -130,22 +140,23 @@ MixerScene::apply () const
 {
 	bool rv = false;
 	std::set<PBD::ID> done;
+	AutomationTypeSet ts;
 
 	for (auto const& c : Controllable::registered_controllables ()) {
-		rv |= recurse_to_master (c, done);
+		rv |= recurse_to_master (c, done, ts);
 	}
 
 	return rv;
 }
 
 bool
-MixerScene::apply (ControllableSet const& acs) const
+MixerScene::apply (PBD::ControllableSet const& acs, AutomationTypeSet const& ts) const
 {
 	bool rv = false;
 	std::set<PBD::ID> done;
 
 	for (auto const& c : acs) {
-		rv |= recurse_to_master (c, done);
+		rv |= recurse_to_master (c, done, ts);
 	}
 
 	return rv;
