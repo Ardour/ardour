@@ -145,7 +145,7 @@ Controllable::by_id (const ID& id)
 	return boost::shared_ptr<Controllable>();
 }
 
-Controllable::ControllableSet
+ControllableSet
 Controllable::registered_controllables ()
 {
 	ControllableSet rv;

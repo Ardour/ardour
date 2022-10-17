@@ -38,6 +38,9 @@ class XMLNode;
 
 namespace PBD {
 
+class Controllable;
+typedef std::set<boost::shared_ptr<Controllable>> ControllableSet;
+
 /** This is a pure virtual class to represent a scalar control.
  *
  * Note that it contains no storage/state for the controllable thing that it
@@ -168,9 +171,6 @@ public:
 
 	static boost::shared_ptr<Controllable> by_id (const PBD::ID&);
 	static void dump_registry ();
-
-
-	typedef std::set<boost::shared_ptr<Controllable>> ControllableSet;
 	static ControllableSet registered_controllables ();
 
 	static const std::string xml_node_name;
