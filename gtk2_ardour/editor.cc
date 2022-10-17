@@ -5908,14 +5908,15 @@ Editor::hide_track_in_display (TimeAxisView* tv, bool apply_to_selection)
 			i = j;
 		}
 	} else {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+		RouteTimeAxisView*     rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+		StripableTimeAxisView* stv = dynamic_cast<StripableTimeAxisView*> (tv);
 
 		if (rtv && current_mixer_strip && (rtv->route() == current_mixer_strip->route())) {
 			/* this will hide the mixer strip */
 			set_selected_mixer_strip (*tv);
 		}
-		if (rtv) {
-			rtv->route()->presentation_info().set_hidden (true);
+		if (stv) {
+			stv->stripable()->presentation_info().set_hidden (true);
 			/* TODO also handle Routegroups IFF (rg->is_hidden() && !rg->is_selection())
 			 * selection currently unconditionally hides due to above if() clause :(
 			 */
@@ -5929,10 +5930,11 @@ Editor::show_track_in_display (TimeAxisView* tv, bool move_into_view)
 	if (!tv) {
 		return;
 	}
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
-	if (rtv) {
-		rtv->route()->presentation_info().set_hidden (false);
+	StripableTimeAxisView* stv = dynamic_cast<StripableTimeAxisView*> (tv);
+	if (stv) {
+		stv->stripable()->presentation_info().set_hidden (false);
 #if 0 // TODO see above
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 		RouteGroup* rg = rtv->route ()->route_group ();
 		if (rg && rg->is_active () && rg->is_hidden () && !rg->is_select ()) {
 			boost::shared_ptr<RouteList> rl (rg->route_list ());
