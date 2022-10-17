@@ -72,11 +72,11 @@ static inline cycles_t get_cycles (void)
 
 #elif defined(__powerpc64__)
 
+#include <sys/platform/ppc.h>
 typedef uint64_t cycles_t;
 static inline cycles_t get_cycles(void)
 {
-#warning You are compiling libardour on a platform for which ardour/cycles.h needs work
-	return 0;
+	return __ppc_get_timebase();
 }
 
 #elif defined(__powerpc__)
