@@ -151,6 +151,8 @@ RegionListBase::add_name_column ()
 	TreeViewColumn* tvc = append_col (_columns.name, 120);
 	setup_col (tvc, 0, ALIGN_START, _("Name"), ("Region name"));
 
+	tvc->set_resizable (true);
+
 	/* Region Name: make editable */
 	CellRendererText* region_name_cell     = dynamic_cast<CellRendererText*> (tvc->get_first_cell ());
 	region_name_cell->property_editable () = true;
