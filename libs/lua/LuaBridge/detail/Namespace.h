@@ -1904,6 +1904,9 @@ public:
       .addFunction ("clear", (void (LT::*)())&LT::clear)
       .addFunction ("empty", &LT::empty)
       .addFunction ("size", &LT::size)
+#if 0 // needs work for AutomationTypeSet (T is-a enum not a class instance)
+      .addExtCFunction ("insert", &CFunc::setInsert<T, LT>)
+#endif
       .addExtCFunction ("iter", &CFunc::setIter<T, LT>)
       .addExtCFunction ("table", &CFunc::setToTable<T, LT>);
   }

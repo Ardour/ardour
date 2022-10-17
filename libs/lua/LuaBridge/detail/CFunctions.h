@@ -1401,6 +1401,16 @@ struct CFunc
     return 2;
   }
 
+  template <class T, class C>
+  static int setInsert (lua_State *L)
+  {
+    C* const t = Userdata::get <C> (L, 1, false);
+    T const * const v = Userdata::get <T> (L, 2, true);
+    auto rv = t->insert (*v);
+    Stack <bool>::push (L, rv.second);
+    return 1;
+  }
+
   // generate iterator
   template <class T, class C>
   static int setIter (lua_State *L)
