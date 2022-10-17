@@ -3687,7 +3687,7 @@ Mixer_UI::register_actions ()
 		a = string_compose (X_("recall-mixer-scene-%1"), i + 1);
 		n = string_compose (_("Recall Mixer Scene #%1"), i + 1);
 		ActionManager::register_action (group, a.c_str (), n.c_str (),
-		                                sigc::bind (sigc::mem_fun (*this, &Mixer_UI::recall_mixer_scene), i, true));
+		                                sigc::bind (sigc::mem_fun (*this, &Mixer_UI::recall_mixer_scene), i, true, false));
 
 		a = string_compose (X_("clear-mixer-scene-%1"), i + 1);
 		n = string_compose (_("Clear Mixer Scene #%1"), i + 1);
@@ -3959,7 +3959,7 @@ Mixer_UI::store_mixer_scene (size_t n)
 }
 
 void
-Mixer_UI::recall_mixer_scene (size_t n, bool interactive)
+Mixer_UI::recall_mixer_scene (size_t n, bool interactive, bool for_selection)
 {
 	if (!_session) {
 		return;
@@ -3997,8 +3997,11 @@ Mixer_UI::recall_mixer_scene (size_t n, bool interactive)
 			Config->add_instant_xml (node);
 		}
 	}
-
-	_session->apply_nth_mixer_scene (n);
+	if (for_selection) {
+		_session->apply_nth_mixer_scene (n, PublicEditor::instance().get_selection().tracks.routelist ());
+	} else {
+		_session->apply_nth_mixer_scene (n);
+	}
 }
 
 void
@@ -4098,6 +4101,8 @@ Mixer_UI::popup_scene_menu (GdkEventButton* ev, int scn_idx)
 	if(ms && !ms->empty()) {
 		items.push_back(Gtk::Menu_Helpers::MenuElem(_("Clear"), sigc::bind(sigc::mem_fun(*this, &Mixer_UI::clear_mixer_scene), scn_idx, true)));
 		items.push_back(Gtk::Menu_Helpers::MenuElem(_("Rename"), sigc::bind(sigc::mem_fun(*this, &Mixer_UI::rename_mixer_scene), scn_idx)));
+		items.push_back(Gtk::Menu_Helpers::MenuElem(_("Restore for selected tracks"), sigc::bind(sigc::mem_fun(*this, &Mixer_UI::recall_mixer_scene), scn_idx, false, true)));
+		items.back().set_sensitive (!PublicEditor::instance().get_selection().tracks.routelist ().empty ());
 	}
 
 	menu->popup(1, ev->time);
@@ -4136,7 +4141,7 @@ Mixer_UI::scene_button_release (GdkEventButton* ev, int idx)
 		delete _mixer_scene_release;
 		_mixer_scene_release = 0;
 	} else if (ev->button == 1) {
-		recall_mixer_scene (idx, true);
+		recall_mixer_scene (idx);
 	}
 	return false;
 }

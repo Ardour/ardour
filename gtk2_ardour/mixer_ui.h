@@ -124,7 +124,7 @@ public:
 	void select_prev_strip ();
 
 	void store_mixer_scene (size_t);
-	void recall_mixer_scene (size_t, bool interactive = true);
+	void recall_mixer_scene (size_t, bool interactive = true, bool for_selection = false);
 	void clear_mixer_scene (size_t, bool interactive = true);
 	void rename_mixer_scene (size_t n);
 
