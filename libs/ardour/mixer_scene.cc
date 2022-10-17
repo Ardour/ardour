@@ -138,6 +138,19 @@ MixerScene::apply () const
 	return rv;
 }
 
+bool
+MixerScene::apply (AutomationControlSet const& acs) const
+{
+	bool rv = false;
+	std::set<PBD::ID> done;
+
+	for (auto const& c : acs) {
+		rv |= recurse_to_master (c, done);
+	}
+
+	return rv;
+}
+
 XMLNode&
 MixerScene::get_state () const
 {

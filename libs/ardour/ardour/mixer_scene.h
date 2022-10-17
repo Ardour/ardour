@@ -40,6 +40,7 @@ public:
 
 	void snapshot ();
 	bool apply () const;
+	bool apply (AutomationControlSet const&) const;
 	void clear ();
 	bool empty () const { return _ctrl_map.empty (); }
 

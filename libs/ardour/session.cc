@@ -7536,6 +7536,30 @@ Session::apply_nth_mixer_scene (size_t nth)
 	return scene->apply ();
 }
 
+bool
+Session::apply_nth_mixer_scene (size_t nth, RouteList const& rl)
+{
+	boost::shared_ptr<MixerScene> scene;
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
+		if (_mixer_scenes.size () <= nth) {
+			return false;
+		}
+		if (!_mixer_scenes[nth]) {
+			return false;
+		}
+		scene = _mixer_scenes[nth];
+	}
+	assert (scene);
+
+	AutomationControlSet acs;
+	for (auto const& r : rl) {
+		r->automatables (acs);
+	}
+
+	return scene->apply (acs);
+}
+
 void
 Session::store_nth_mixer_scene (size_t nth)
 {

@@ -1215,6 +1215,7 @@ public:
 	boost::shared_ptr<PBD::Controllable> recently_touched_controllable () const;
 
 	bool apply_nth_mixer_scene (size_t);
+	bool apply_nth_mixer_scene (size_t, RouteList const&);
 	void store_nth_mixer_scene (size_t);
 	bool nth_mixer_scene_valid (size_t) const;
 
