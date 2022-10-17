@@ -679,7 +679,7 @@ ExportFormatDialog::init_format_table ()
 	demo_noise_combo.set_active (0);
 
 	ArdourWidgets::set_tooltip (demo_noise_combo,
-	                            _("This option allows to add noise, to send complete mixes to the clients for preview but watermarked. White noise is injected after analysis, right before the sample-format conversion or encoding. The first noise burst happens at 1/3 of the interval. Note: there is currently no limiter."));
+	                            _("This option allows one to add noise, to send complete mixes to the clients for preview but watermarked. White noise is injected after analysis, right before the sample-format conversion or encoding. The first noise burst happens at 1/3 of the interval. Note: there is currently no limiter."));
 }
 
 void

@@ -774,7 +774,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 
 	vbox = manage (new VBox);
 	label = manage (new Label);
-	label->set_text (_("Licence:"));
+	label->set_text (_("License:"));
 	label->set_alignment (Gtk::ALIGN_START);
 	vbox->pack_start (*label, false, false);
 
