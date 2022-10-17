@@ -30,6 +30,7 @@
 
 #include "pbd/rcu.h"
 #include "pbd/signals.h"
+#include "pbd/controllable.h"
 
 #include "evoral/ControlSet.h"
 
@@ -55,7 +56,7 @@ public:
 
 	virtual ~Automatable();
 
-	virtual void automatables (AutomationControlSet&) const;
+	virtual void automatables (PBD::ControllableSet&) const;
 
 	static bool skip_saving_automation; // to be used only by session-state
 

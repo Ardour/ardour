@@ -6307,7 +6307,7 @@ Route::automation_control_recurse (PBD::ID const & id) const
 }
 
 void
-Route::automatables (AutomationControlSet& s) const
+Route::automatables (PBD::ControllableSet& s) const
 {
 	Automatable::automatables (s);
 	if  (_pannable) {

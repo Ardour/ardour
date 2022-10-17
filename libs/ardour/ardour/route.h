@@ -258,7 +258,7 @@ public:
 
 	boost::shared_ptr<AutomationControl> automation_control_recurse (PBD::ID const & id) const;
 
-	 void automatables (AutomationControlSet&) const;
+	 void automatables (PBD::ControllableSet&) const;
 
 	/* special processors */
 

@@ -139,7 +139,7 @@ MixerScene::apply () const
 }
 
 bool
-MixerScene::apply (AutomationControlSet const& acs) const
+MixerScene::apply (ControllableSet const& acs) const
 {
 	bool rv = false;
 	std::set<PBD::ID> done;

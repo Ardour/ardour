@@ -611,7 +611,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 }
 
 void
-Automatable::automatables (AutomationControlSet& s) const
+Automatable::automatables (ControllableSet& s) const
 {
 	for (auto const& i : _controls) {
 		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (i.second);

@@ -7552,7 +7552,7 @@ Session::apply_nth_mixer_scene (size_t nth, RouteList const& rl)
 	}
 	assert (scene);
 
-	AutomationControlSet acs;
+	ControllableSet acs;
 	for (auto const& r : rl) {
 		r->automatables (acs);
 	}

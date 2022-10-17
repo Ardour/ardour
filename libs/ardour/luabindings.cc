@@ -512,6 +512,7 @@ LuaBindings::common (lua_State* L)
 		.addCast<AutomationControl> ("to_automationcontrol")
 		.addFunction ("name", &PBD::Controllable::name)
 		.addFunction ("get_value", &PBD::Controllable::get_value)
+		.addStaticFunction ("registered_controllables", &PBD::Controllable::registered_controllables)
 		.addStaticFunction ("dump_registry", &PBD::Controllable::dump_registry)
 		.endClass ()
 
@@ -1847,7 +1848,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginWSPtrClass <MixerScene> ("MixerScene")
 		.addFunction ("apply", (bool (MixerScene::*)() const)&MixerScene::apply)
-		.addFunction ("apply_to", (bool (MixerScene::*)(AutomationControlSet const&) const)&MixerScene::apply)
+		.addFunction ("apply_to", (bool (MixerScene::*)(PBD::ControllableSet const&) const)&MixerScene::apply)
 		.addFunction ("snapshot", &MixerScene::snapshot)
 		.addFunction ("clear", &MixerScene::clear)
 		.addFunction ("empty", &MixerScene::empty)
@@ -2143,6 +2144,10 @@ LuaBindings::common (lua_State* L)
 
 		// typedef std::vector<boost::shared_ptr<Region> > RegionVector
 		.beginStdVector <boost::shared_ptr<Region> > ("RegionVector")
+		.endClass ()
+
+		// typedef std::set <boost::shared_ptr<PBD::Controllable> > PBD::ControllableSet;
+		.beginStdSet <boost::shared_ptr<PBD::Controllable>> ("ControllableSet")
 		.endClass ()
 
 		// typedef std::vector<samplepos_t> XrunPositions
