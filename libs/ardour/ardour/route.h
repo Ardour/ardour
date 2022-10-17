@@ -258,6 +258,8 @@ public:
 
 	boost::shared_ptr<AutomationControl> automation_control_recurse (PBD::ID const & id) const;
 
+	 void automatables (AutomationControlSet&) const;
+
 	/* special processors */
 
 	boost::shared_ptr<InternalSend>     monitor_send() const { return _monitor_send; }

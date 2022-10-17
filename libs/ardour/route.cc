@@ -6306,6 +6306,19 @@ Route::automation_control_recurse (PBD::ID const & id) const
 	return boost::shared_ptr<AutomationControl> ();
 }
 
+void
+Route::automatables (AutomationControlSet& s) const
+{
+	Automatable::automatables (s);
+	if  (_pannable) {
+		_pannable->automatables (s);
+	}
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	for (auto const& i : _processors) {
+		i->automatables (s);
+	}
+}
+
 SlavableControlList
 Route::slavables () const
 {
