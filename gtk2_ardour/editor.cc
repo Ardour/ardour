@@ -653,12 +653,14 @@ Editor::Editor ()
 	time_bars_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	time_bars_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
 
+#ifndef MIXBUS
 	ArdourWidgets::ArdourDropShadow *axis_view_shadow = manage (new (ArdourWidgets::ArdourDropShadow));
 	axis_view_shadow->set_size_request (4, -1);
 	axis_view_shadow->set_name("EditorWindow");
 	axis_view_shadow->show();
 
 	edit_packer.attach (*axis_view_shadow,     0, 1, 0, 2,    FILL,        FILL|EXPAND, 0, 0);
+#endif
 
 	/* labels for the time bars */
 	edit_packer.attach (time_bars_event_box,     1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
@@ -3342,13 +3344,15 @@ Editor::setup_toolbar ()
 	/* Pack everything in... */
 
 	toolbar_hbox.set_spacing (2);
-	toolbar_hbox.set_border_width (2);
+	toolbar_hbox.set_border_width (1);
 
+#ifndef MIXBUS
 	ArdourWidgets::ArdourDropShadow *tool_shadow = manage (new (ArdourWidgets::ArdourDropShadow));
 	tool_shadow->set_size_request (4, -1);
 	tool_shadow->show();
 
 	ebox_hpacker.pack_start (*tool_shadow, false, false);
+#endif
 	ebox_hpacker.pack_start(ebox_vpacker, true, true);
 
 	Gtk::EventBox* spacer = manage (new Gtk::EventBox); // extra space under the mouse toolbar, for aesthetics

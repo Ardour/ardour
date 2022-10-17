@@ -506,7 +506,7 @@ ARDOUR_UI::setup_transport ()
 	/* top level packing */
 	transport_table.set_spacings (0);
 	transport_table.set_row_spacings (4);
-	transport_table.set_border_width (0);
+	transport_table.set_border_width (1);
 
 	transport_frame.set_name ("TransportFrame");
 	transport_frame.set_shadow_type (Gtk::SHADOW_NONE);
