@@ -62,6 +62,7 @@
 #include "midi_region_view.h"
 #include "public_editor.h"
 #include "selection.h"
+#include "simple_export_dialog.h"
 #include "time_axis_view.h"
 #include "utils.h"
 
@@ -95,6 +96,22 @@ Editor::export_selection ()
 	ExportSelectionDialog dialog (*this);
 	dialog.set_session (_session);
 	dialog.run();
+}
+
+void
+Editor::quick_export ()
+{
+	SimpleExportDialog dialog (*this);
+	dialog.set_session (_session);
+	dialog.run();
+}
+
+SimpleExport*
+Editor::simple_export (void* ptr)
+{
+	SimpleExport* se = new (ptr) SimpleExport (*this);
+	se->set_session (_session);
+	return se;
 }
 
 void

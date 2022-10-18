@@ -30,6 +30,7 @@
       <menuitem action='LoudnessAssistant'/>
 
       <menu name='Export' action='Export'>
+        <menuitem action='QuickExport'/>
         <menuitem action='ExportAudio'/>
         <menuitem action='StemExport'/>
         <menuitem action='ExportVideo'/>

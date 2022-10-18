@@ -281,6 +281,7 @@ gtk2_ardour_sources = [
         'session_option_editor.cc',
         'sfdb_ui.cc',
         'shuttle_control.cc',
+        'simple_export_dialog.cc',
         'slot_properties_box.cc',
         'source_list_base.cc',
         'soundcloud_export_selector.cc',

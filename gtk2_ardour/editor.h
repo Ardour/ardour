@@ -330,6 +330,9 @@ public:
 	void export_selection ();
 	void export_range ();
 	void export_region ();
+	void quick_export ();
+
+	SimpleExport* simple_export (void*);
 
 	/* export for analysis only */
 	void loudness_assistant (bool);

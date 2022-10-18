@@ -55,6 +55,7 @@
 #include "time_axis_view_item.h"
 #include "selection.h"
 #include "script_selector.h"
+#include "simple_export_dialog.h"
 #include "timers.h"
 #include "ui_config.h"
 #include "utils_videotl.h"
@@ -522,6 +523,15 @@ lua_actionlist (lua_State *L)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static int
+lua_simple_export (lua_State *L)
+{
+	PublicEditor::instance().simple_export (luabridge::UserdataValue<SimpleExport>::place (L));
+	return 1;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 // ARDOUR_UI and instance() are not exposed.
 ARDOUR::PresentationInfo::order_t
 lua_translate_order (RouteDialogs::InsertAt place)
@@ -889,6 +899,15 @@ LuaInstance::register_classes (lua_State* L)
 #endif
 		.endClass ()
 
+		.beginClass <SimpleExport> ("SimpleExport")
+		.addFunction ("run_export", &SimpleExport::run_export)
+		.addFunction ("set_name", &SimpleExport::set_name)
+		.addFunction ("set_folder", &SimpleExport::set_folder)
+		.addFunction ("set_range", &SimpleExport::set_range)
+		.addFunction ("set_preset", &SimpleExport::set_preset)
+		.addFunction ("check_outputs", &SimpleExport::check_outputs)
+		.endClass ()
+
 		.beginClass <PublicEditor> ("Editor")
 		.addFunction ("grid_type", &PublicEditor::grid_type)
 		.addFunction ("snap_mode", &PublicEditor::snap_mode)
@@ -937,6 +956,8 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("stem_export", &PublicEditor::stem_export)
 		.addFunction ("export_selection", &PublicEditor::export_selection)
 		.addFunction ("export_range", &PublicEditor::export_range)
+		.addFunction ("quick_export", &PublicEditor::quick_export)
+		.addExtCFunction ("simple_export", &lua_simple_export)
 
 		.addFunction ("set_zoom_focus", &PublicEditor::set_zoom_focus)
 		.addFunction ("get_zoom_focus", &PublicEditor::get_zoom_focus)

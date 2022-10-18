@@ -93,6 +93,7 @@ class MouseCursors;
 class RegionView;
 class RouteTimeAxisView;
 class Selection;
+class SimpleExport;
 class StripableTimeAxisView;
 class TempoCurve;
 class TempoMarker;
@@ -299,6 +300,12 @@ public:
 
 	/** Open export dialog with current range pre-selected */
 	virtual void export_range () = 0;
+
+	/** Open Simple Export Dialog */
+	virtual void quick_export () = 0;
+
+	/* Construct a SimpleExport object for Lua */
+	virtual SimpleExport* simple_export (void*) = 0;
 
 	virtual void loudness_assistant (bool) = 0;
 
