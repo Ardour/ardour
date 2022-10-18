@@ -562,7 +562,7 @@ private:
 
 
 	ArdourWidgets::ArdourVSpacer      meterbox_spacer;
-	ArdourWidgets::ArdourVSpacer      meterbox_spacer2;
+	Gtk::HBox                         meterbox_spacer2;
 
 	ArdourWidgets::ArdourButton auto_return_button;
 	ArdourWidgets::ArdourButton follow_edits_button;

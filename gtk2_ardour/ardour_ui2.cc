@@ -228,7 +228,8 @@ ARDOUR_UI::repack_transport_hbox ()
 		if (UIConfiguration::instance().get_show_editor_meter()) {
 			transport_hbox.pack_end (meterbox_spacer, false, false, 3);
 			transport_hbox.pack_end (editor_meter_table, false, false);
-			transport_hbox.pack_end (meterbox_spacer2, false, false, 3);
+			transport_hbox.pack_end (meterbox_spacer2, false, false, 1);
+			meterbox_spacer2.set_size_request (1, -1);
 			editor_meter_table.show();
 			meterbox_spacer.show();
 			meterbox_spacer2.show();
