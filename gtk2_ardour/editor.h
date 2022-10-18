@@ -65,6 +65,7 @@
 
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
+#include "widgets/ardour_spacer.h"
 #include "widgets/pane.h"
 
 #include "ardour_dialog.h"
@@ -1974,6 +1975,8 @@ private:
 
 	Gtk::HBox snap_box;
 	Gtk::HBox draw_box;
+
+	ArdourWidgets::ArdourVSpacer _draw_box_spacer;
 
 	Gtk::HBox ebox_hpacker;
 	Gtk::VBox ebox_vpacker;

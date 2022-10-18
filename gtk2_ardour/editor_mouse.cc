@@ -369,8 +369,10 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	if (mouse_mode == MouseDraw) {
 		draw_box.show();
+		_draw_box_spacer.show();
 	} else {
 		draw_box.hide();
+		_draw_box_spacer.hide();
 	}
 
 
