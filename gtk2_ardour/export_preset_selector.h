@@ -25,7 +25,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/comboboxentry.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treemodel.h>
@@ -35,11 +35,13 @@
 class ExportPresetSelector : public Gtk::HBox
 {
 public:
-	ExportPresetSelector ();
+	ExportPresetSelector (bool readonly = false);
 
 	void set_manager (boost::shared_ptr<ARDOUR::ExportProfileManager> manager);
 
 	sigc::signal<void> CriticalSelectionChanged;
+
+	Gtk::ComboBox& the_combo () { return combo; }
 
 private:
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
@@ -51,18 +53,19 @@ private:
 	void create_new ();
 	void save_current ();
 	void remove_current ();
+	void selection_changed ();
 
 	ManagerPtr profile_manager;
 
 	struct PresetCols : public Gtk::TreeModelColumnRecord {
 	public:
-		Gtk::TreeModelColumn<PresetPtr>   preset;
 		Gtk::TreeModelColumn<std::string> label;
+		Gtk::TreeModelColumn<PresetPtr>   preset;
 
 		PresetCols ()
 		{
-			add (preset);
 			add (label);
+			add (preset);
 		}
 	};
 
@@ -71,8 +74,8 @@ private:
 	PresetPtr                    current;
 	PresetPtr                    previous;
 
-	Gtk::Label         label;
-	Gtk::ComboBoxEntry entry;
+	Gtk::Label    label;
+	Gtk::ComboBox combo;
 
 	Gtk::Button save_button;
 	Gtk::Button remove_button;

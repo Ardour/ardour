@@ -28,31 +28,40 @@
 
 #include "pbd/i18n.h"
 
-ExportPresetSelector::ExportPresetSelector ()
+ExportPresetSelector::ExportPresetSelector (bool readonly)
 	: label (_("Preset"), Gtk::ALIGN_START)
+	, combo (!readonly)
 	, save_button (Gtk::Stock::SAVE)
 	, remove_button (Gtk::Stock::REMOVE)
 	, new_button (Gtk::Stock::NEW)
 {
 	list = Gtk::ListStore::create (cols);
 	list->set_sort_column (cols.label, Gtk::SORT_ASCENDING);
-	entry.set_model (list);
-	entry.set_text_column (cols.label);
+	combo.set_model (list);
 
-	pack_start (label, false, false, 0);
-	pack_start (entry, true, true, 6);
-	pack_start (save_button, false, false, 0);
-	pack_start (remove_button, false, false, 6);
-	pack_start (new_button, false, false, 0);
+	if (readonly) {
+		combo.pack_start (cols.label);
+		pack_start (label, false, false, 0);
+		pack_start (combo, true, true, 6);
+		select_connection = combo.signal_changed ().connect (sigc::mem_fun (*this, &ExportPresetSelector::selection_changed));
+	} else {
+		combo.set_entry_text_column (cols.label);
 
-	save_button.set_sensitive (false);
-	remove_button.set_sensitive (false);
-	new_button.set_sensitive (false);
+		pack_start (label, false, false, 0);
+		pack_start (combo, true, true, 6);
+		pack_start (save_button, false, false, 0);
+		pack_start (remove_button, false, false, 6);
+		pack_start (new_button, false, false, 0);
 
-	select_connection = entry.signal_changed ().connect (sigc::mem_fun (*this, &ExportPresetSelector::update_selection));
-	save_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportPresetSelector::save_current));
-	new_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportPresetSelector::create_new));
-	remove_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportPresetSelector::remove_current));
+		save_button.set_sensitive (false);
+		remove_button.set_sensitive (false);
+		new_button.set_sensitive (false);
+
+		select_connection = combo.signal_changed ().connect (sigc::mem_fun (*this, &ExportPresetSelector::update_selection));
+		save_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportPresetSelector::save_current));
+		new_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportPresetSelector::create_new));
+		remove_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportPresetSelector::remove_current));
+	}
 
 	show_all_children ();
 }
@@ -61,6 +70,7 @@ void
 ExportPresetSelector::set_manager (boost::shared_ptr<ARDOUR::ExportProfileManager> manager)
 {
 	profile_manager = manager;
+	current = profile_manager->preset ();
 	sync_with_manager ();
 }
 
@@ -79,17 +89,37 @@ ExportPresetSelector::sync_with_manager ()
 
 		if (*it == current) {
 			select_connection.block (true);
-			entry.set_active (tree_it);
+			combo.set_active (tree_it);
 			select_connection.block (false);
 		}
 	}
 }
 
 void
+ExportPresetSelector::selection_changed ()
+{
+	Gtk::ListStore::iterator it = combo.get_active ();
+	if (!it) {
+		return;
+	}
+
+	assert (list->iter_is_valid (it));
+	current = it->get_value (cols.preset);
+	if (!profile_manager->load_preset (current)) {
+		Gtk::MessageDialog dialog (_("The selected preset did not load successfully!\nPerhaps it references a format that has been removed?"),
+		                           false, Gtk::MESSAGE_WARNING);
+		dialog.run ();
+	}
+
+	sync_with_manager ();
+	CriticalSelectionChanged ();
+}
+
+void
 ExportPresetSelector::update_selection ()
 {
-	Gtk::ListStore::iterator it                 = entry.get_active ();
-	std::string              text               = entry.get_entry ()->get_text ();
+	Gtk::ListStore::iterator it                 = combo.get_active ();
+	std::string              text               = combo.get_entry ()->get_text ();
 	bool                     preset_name_exists = false;
 
 	for (PresetList::const_iterator it = profile_manager->get_presets ().begin (); it != profile_manager->get_presets ().end (); ++it) {
@@ -111,8 +141,8 @@ ExportPresetSelector::update_selection ()
 		/* Make an edit, so that signal changed will be emitted on re-selection */
 
 		select_connection.block (true);
-		entry.get_entry ()->set_text ("");
-		entry.get_entry ()->set_text (text);
+		combo.get_entry ()->set_text ("");
+		combo.get_entry ()->set_text (text);
 		select_connection.block (false);
 
 	} else { // Text has been edited, this should not make any changes in the profile manager
@@ -135,7 +165,7 @@ ExportPresetSelector::create_new ()
 		return;
 	}
 
-	previous = current = profile_manager->new_preset (entry.get_entry ()->get_text ());
+	previous = current = profile_manager->new_preset (combo.get_entry ()->get_text ());
 	sync_with_manager ();
 	update_selection (); // Update preset widget states
 }
@@ -147,7 +177,7 @@ ExportPresetSelector::save_current ()
 		return;
 	}
 
-	previous = current = profile_manager->save_preset (entry.get_entry ()->get_text ());
+	previous = current = profile_manager->save_preset (combo.get_entry ()->get_text ());
 	sync_with_manager ();
 	update_selection (); // Update preset widget states
 }
@@ -172,6 +202,6 @@ ExportPresetSelector::remove_current ()
 	}
 
 	profile_manager->remove_preset ();
-	entry.get_entry ()->set_text ("");
+	combo.get_entry ()->set_text ("");
 	sync_with_manager ();
 }
