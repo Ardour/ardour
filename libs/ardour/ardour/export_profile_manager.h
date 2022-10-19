@@ -71,6 +71,7 @@ public:
 	typedef std::list<ExportPresetPtr> PresetList;
 
 	PresetList const& get_presets () { return preset_list; }
+	ExportPresetPtr preset () const { return current_preset; }
 
 	bool            load_preset (ExportPresetPtr preset);
 	ExportPresetPtr new_preset (std::string const& name);
