@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportPreset id="75969a1c-3133-4694-864b-a1fa50e43348" name="WAV @ session-rate">
+  <ExportFormat id="dd4f6f30-f054-4e0a-8d91-67eed5d79153"/>
+  <ExportFilename>
+    <Folder relative="1" path="export"/>
+    <Field name="label" enabled="0"/>
+    <Field name="session" enabled="0"/>
+    <Field name="snapshot" enabled="0"/>
+    <Field name="timespan" enabled="1"/>
+    <Field name="revision" enabled="0"/>
+    <Field name="time" enabled="0" value="T_None"/>
+    <Field name="date" enabled="0" value="D_None"/>
+  </ExportFilename>
+</ExportPreset>

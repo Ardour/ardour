@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportPreset id="568b42e6-4436-40d6-b2db-a26dd0029d0f" name="mp3">
+  <ExportFormat id="5a92bc30-ad31-4e51-82d4-66f0b5d2f9df"/>
+  <ExportFilename>
+    <Folder relative="1" path="export"/>
+    <Field name="label" enabled="0"/>
+    <Field name="session" enabled="0"/>
+    <Field name="snapshot" enabled="0"/>
+    <Field name="timespan" enabled="1"/>
+    <Field name="revision" enabled="0"/>
+    <Field name="time" enabled="0" value="T_None"/>
+    <Field name="date" enabled="0" value="D_None"/>
+  </ExportFilename>
+</ExportPreset>
