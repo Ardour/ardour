@@ -35,7 +35,6 @@
 class ExportPresetSelector : public Gtk::HBox
 {
 public:
-
 	ExportPresetSelector ();
 
 	void set_manager (boost::shared_ptr<ARDOUR::ExportProfileManager> manager);
@@ -43,13 +42,9 @@ public:
 	sigc::signal<void> CriticalSelectionChanged;
 
 private:
-
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
-	typedef ARDOUR::ExportPresetPtr PresetPtr;
-	typedef ARDOUR::ExportProfileManager::PresetList PresetList;
-
-	ManagerPtr       profile_manager;
-	sigc::connection select_connection;
+	typedef ARDOUR::ExportPresetPtr                         PresetPtr;
+	typedef ARDOUR::ExportProfileManager::PresetList        PresetList;
 
 	void sync_with_manager ();
 	void update_selection ();
@@ -57,25 +52,33 @@ private:
 	void save_current ();
 	void remove_current ();
 
-	struct PresetCols : public Gtk::TreeModelColumnRecord
-	{
-	public:
-		Gtk::TreeModelColumn<PresetPtr>      preset;
-		Gtk::TreeModelColumn<std::string>  label;
+	ManagerPtr profile_manager;
 
-		PresetCols () { add (preset); add (label); }
+	struct PresetCols : public Gtk::TreeModelColumnRecord {
+	public:
+		Gtk::TreeModelColumn<PresetPtr>   preset;
+		Gtk::TreeModelColumn<std::string> label;
+
+		PresetCols ()
+		{
+			add (preset);
+			add (label);
+		}
 	};
+
 	PresetCols                   cols;
 	Glib::RefPtr<Gtk::ListStore> list;
 	PresetPtr                    current;
 	PresetPtr                    previous;
 
-	Gtk::Label          label;
-	Gtk::ComboBoxEntry  entry;
+	Gtk::Label         label;
+	Gtk::ComboBoxEntry entry;
 
-	Gtk::Button         save_button;
-	Gtk::Button         remove_button;
-	Gtk::Button         new_button;
+	Gtk::Button save_button;
+	Gtk::Button remove_button;
+	Gtk::Button new_button;
+
+	sigc::connection select_connection;
 };
 
 #endif

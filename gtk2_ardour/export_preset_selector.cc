@@ -28,14 +28,14 @@
 
 #include "pbd/i18n.h"
 
-ExportPresetSelector::ExportPresetSelector () :
-  label (_("Preset"), Gtk::ALIGN_START),
-  save_button (Gtk::Stock::SAVE),
-  remove_button (Gtk::Stock::REMOVE),
-  new_button (Gtk::Stock::NEW)
+ExportPresetSelector::ExportPresetSelector ()
+	: label (_("Preset"), Gtk::ALIGN_START)
+	, save_button (Gtk::Stock::SAVE)
+	, remove_button (Gtk::Stock::REMOVE)
+	, new_button (Gtk::Stock::NEW)
 {
 	list = Gtk::ListStore::create (cols);
-        list->set_sort_column (cols.label, Gtk::SORT_ASCENDING);
+	list->set_sort_column (cols.label, Gtk::SORT_ASCENDING);
 	entry.set_model (list);
 	entry.set_text_column (cols.label);
 
@@ -49,10 +49,10 @@ ExportPresetSelector::ExportPresetSelector () :
 	remove_button.set_sensitive (false);
 	new_button.set_sensitive (false);
 
-	select_connection = entry.signal_changed().connect (sigc::mem_fun (*this, &ExportPresetSelector::update_selection));
-	save_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportPresetSelector::save_current));
-	new_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportPresetSelector::create_new));
-	remove_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportPresetSelector::remove_current));
+	select_connection = entry.signal_changed ().connect (sigc::mem_fun (*this, &ExportPresetSelector::update_selection));
+	save_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportPresetSelector::save_current));
+	new_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportPresetSelector::create_new));
+	remove_button.signal_clicked ().connect (sigc::mem_fun (*this, &ExportPresetSelector::remove_current));
 
 	show_all_children ();
 }
@@ -67,15 +67,15 @@ ExportPresetSelector::set_manager (boost::shared_ptr<ARDOUR::ExportProfileManage
 void
 ExportPresetSelector::sync_with_manager ()
 {
-	list->clear();
+	list->clear ();
 
-	PresetList const & presets = profile_manager->get_presets();
+	PresetList const&        presets = profile_manager->get_presets ();
 	Gtk::ListStore::iterator tree_it;
 
-	for (PresetList::const_iterator it = presets.begin(); it != presets.end(); ++it) {
-		tree_it = list->append();
+	for (PresetList::const_iterator it = presets.begin (); it != presets.end (); ++it) {
+		tree_it = list->append ();
 		tree_it->set_value (cols.preset, *it);
-		tree_it->set_value (cols.label, std::string ((*it)->name()));
+		tree_it->set_value (cols.label, std::string ((*it)->name ()));
 
 		if (*it == current) {
 			select_connection.block (true);
@@ -88,16 +88,17 @@ ExportPresetSelector::sync_with_manager ()
 void
 ExportPresetSelector::update_selection ()
 {
-	Gtk::ListStore::iterator it = entry.get_active ();
-	std::string text = entry.get_entry()->get_text();
-	bool preset_name_exists = false;
+	Gtk::ListStore::iterator it                 = entry.get_active ();
+	std::string              text               = entry.get_entry ()->get_text ();
+	bool                     preset_name_exists = false;
 
-	for (PresetList::const_iterator it = profile_manager->get_presets().begin(); it != profile_manager->get_presets().end(); ++it) {
-		if (!(*it)->name().compare (text)) { preset_name_exists = true; }
+	for (PresetList::const_iterator it = profile_manager->get_presets ().begin (); it != profile_manager->get_presets ().end (); ++it) {
+		if (!(*it)->name ().compare (text)) {
+			preset_name_exists = true;
+		}
 	}
 
 	if (list->iter_is_valid (it)) {
-
 		previous = current = it->get_value (cols.preset);
 		if (!profile_manager->load_preset (current)) {
 			Gtk::MessageDialog dialog (_("The selected preset did not load successfully!\nPerhaps it references a format that has been removed?"),
@@ -105,17 +106,17 @@ ExportPresetSelector::update_selection ()
 			dialog.run ();
 		}
 		sync_with_manager ();
-		CriticalSelectionChanged();
+		CriticalSelectionChanged ();
 
 		/* Make an edit, so that signal changed will be emitted on re-selection */
 
 		select_connection.block (true);
-		entry.get_entry()->set_text ("");
-		entry.get_entry()->set_text (text);
+		entry.get_entry ()->set_text ("");
+		entry.get_entry ()->set_text (text);
 		select_connection.block (false);
 
 	} else { // Text has been edited, this should not make any changes in the profile manager
-		if (previous && !text.compare (previous->name())) {
+		if (previous && !text.compare (previous->name ())) {
 			current = previous;
 		} else {
 			current.reset ();
@@ -124,15 +125,17 @@ ExportPresetSelector::update_selection ()
 
 	save_button.set_sensitive (current != 0);
 	remove_button.set_sensitive (current != 0);
-	new_button.set_sensitive (!current && !text.empty() && !preset_name_exists);
+	new_button.set_sensitive (!current && !text.empty () && !preset_name_exists);
 }
 
 void
 ExportPresetSelector::create_new ()
 {
-	if (!profile_manager) { return; }
+	if (!profile_manager) {
+		return;
+	}
 
-	previous = current = profile_manager->new_preset (entry.get_entry()->get_text());
+	previous = current = profile_manager->new_preset (entry.get_entry ()->get_text ());
 	sync_with_manager ();
 	update_selection (); // Update preset widget states
 }
@@ -140,9 +143,11 @@ ExportPresetSelector::create_new ()
 void
 ExportPresetSelector::save_current ()
 {
-	if (!profile_manager) { return; }
+	if (!profile_manager) {
+		return;
+	}
 
-	previous = current = profile_manager->save_preset (entry.get_entry()->get_text());
+	previous = current = profile_manager->save_preset (entry.get_entry ()->get_text ());
 	sync_with_manager ();
 	update_selection (); // Update preset widget states
 }
@@ -150,12 +155,14 @@ ExportPresetSelector::save_current ()
 void
 ExportPresetSelector::remove_current ()
 {
-	if (!profile_manager) { return; }
+	if (!profile_manager) {
+		return;
+	}
 
 	Gtk::MessageDialog dialog (_("Do you really want to remove this preset?"),
-			false,
-			Gtk::MESSAGE_QUESTION,
-			Gtk::BUTTONS_YES_NO);
+	                           false,
+	                           Gtk::MESSAGE_QUESTION,
+	                           Gtk::BUTTONS_YES_NO);
 
 	if (Gtk::RESPONSE_YES != dialog.run ()) {
 		/* User has selected "no" or closed the dialog, better
@@ -164,7 +171,7 @@ ExportPresetSelector::remove_current ()
 		return;
 	}
 
-	profile_manager->remove_preset();
-	entry.get_entry()->set_text ("");
+	profile_manager->remove_preset ();
+	entry.get_entry ()->set_text ("");
 	sync_with_manager ();
 }
