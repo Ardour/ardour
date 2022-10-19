@@ -40,6 +40,7 @@
 
 #include "ardour_http.h"
 #include "pingback.h"
+#include "ui_config.h"
 #include "utils.h"
 
 using std::string;
@@ -53,49 +54,56 @@ struct ping_call {
 	    : version (v), announce_path (a) {}
 };
 
-static void*
-_pingback (void *arg)
-{
-	pthread_set_name ("Pingback");
-	ArdourCurl::HttpGet h;
-
 #ifdef MIXBUS
-	curl_easy_setopt (h.curl (), CURLOPT_FOLLOWLOCATION, 1);
-	/* do not check cert */
-	curl_easy_setopt (h.curl (), CURLOPT_SSL_VERIFYPEER, 0);
-	curl_easy_setopt (h.curl (), CURLOPT_SSL_VERIFYHOST, 0);
-#endif
+static std::string
+build_windows_query_string (ArdourCurl::HttpGet const & h)
+{
+	string qs;
 
-	ping_call* cm = static_cast<ping_call*> (arg);
-	string return_str;
-	//initialize curl
-
-	string url;
-
-#ifdef __APPLE__
-	url = Config->get_osx_pingback_url ();
-#elif defined PLATFORM_WINDOWS
-	url = Config->get_windows_pingback_url ();
-#else
-	url = Config->get_linux_pingback_url ();
-#endif
-
-	if (url.compare (0, 4, "http") != 0) {
-		delete cm;
-		return 0;
+	std::string val;
+	if (PBD::windows_query_registry ("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "ProductName", val)) {
+		char* query = h.escape (val.c_str(), strlen (val.c_str()));
+		url += "r=";
+		url += query;
+		url += '&';
+		h.free (query);
+	} else {
+		url += "r=&";
 	}
 
-	char* v = h.escape (cm->version.c_str(), cm->version.length());
-	url += v;
-	url += '?';
-	h.free (v);
+	if (PBD::windows_query_registry ("Hardware\\Description\\System\\CentralProcessor\\0", "Identifier", val)) {
+		// remove "Family X Model YY Stepping Z" tail
+		size_t cut = val.find (" Family ");
+		if (string::npos != cut) {
+			val = val.substr (0, cut);
+		}
+		const char* query = h.escape (val.c_str(), strlen (val.c_str()));
+		url += "m=";
+		url += query;
+		url += '&';
+		h.free (query);
+	} else {
+		url += "m=&";
+	}
 
-#ifndef PLATFORM_WINDOWS
+# if ( defined(__x86_64__) || defined(_M_X64) )
+	url += "s=Windows64";
+# else
+	url += "s=Windows32";
+#endif
+
+	return qs;
+}
+
+static std::string
+build_posix_query_string (ArdourCurl::HttpGet const & h)
+{
+	string qs;
+
 	struct utsname utb;
 
 	if (uname (&utb)) {
-		delete cm;
-		return 0;
+		return qs;
 	}
 
 	//string uts = string_compose ("%1 %2 %3 %4", utb.sysname, utb.release, utb.version, utb.machine);
@@ -114,44 +122,94 @@ _pingback (void *arg)
 	url += '&';
 	h.free (query);
 
+
 	query = h.escape (utb.machine, strlen (utb.machine));
 	s = string_compose ("m=%1", query);
 	url += s;
 	h.free (query);
-#else
-	std::string val;
-	if (PBD::windows_query_registry ("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "ProductName", val)) {
-		char* query = h.escape (val.c_str(), strlen (val.c_str()));
-		url += "r=";
-		url += query;
-		url += '&';
-		h.free (query);
-	} else {
-		url += "r=&";
-	}
 
-	if (PBD::windows_query_registry ("Hardware\\Description\\System\\CentralProcessor\\0", "Identifier", val)) {
-		// remove "Family X Model YY Stepping Z" tail
-		size_t cut = val.find (" Family ");
-		if (string::npos != cut) {
-			val = val.substr (0, cut);
-		}
-		char* query = h.escape (val.c_str(), strlen (val.c_str()));
-		url += "m=";
-		url += query;
-		url += '&';
-		h.free (query);
-	} else {
-		url += "m=&";
-	}
+	return qs;
+}
 
+#else /* Ardour */
+
+/* As of October 2022, Ardour only sends system (OS) name */
+
+static std::string
+build_windows_query_string (ArdourCurl::HttpGet const & h)
+{
 # if ( defined(__x86_64__) || defined(_M_X64) )
-	url += "s=Windows64";
+	return  "s=Windows64";
 # else
-	url += "s=Windows32";
+	return "s=Windows32";
 # endif
+}
 
-#endif /* PLATFORM_WINDOWS */
+static std::string
+build_posix_query_string (ArdourCurl::HttpGet const & h)
+{
+	string qs;
+	struct utsname utb;
+
+	if (uname (&utb)) {
+		return qs;
+	}
+
+	char* query;
+
+	query = h.escape (utb.sysname, strlen (utb.sysname));
+	qs = string_compose ("s=%1", query);
+	h.free (query);
+
+	return qs;
+}
+
+#endif /* MIXBUS */
+
+static void*
+_pingback (void *arg)
+{
+	pthread_set_name ("Pingback");
+	ArdourCurl::HttpGet h;
+
+	//initialize curl
+
+#ifdef MIXBUS
+	curl_easy_setopt (h.curl (), CURLOPT_FOLLOWLOCATION, 1);
+	/* do not check cert */
+	curl_easy_setopt (h.curl (), CURLOPT_SSL_VERIFYPEER, 0);
+	curl_easy_setopt (h.curl (), CURLOPT_SSL_VERIFYHOST, 0);
+#endif
+
+	ping_call* cm = static_cast<ping_call*> (arg);
+	string return_str;
+	string qs;
+	string url;
+
+	url = Config->get_pingback_url ();
+
+	if (url.compare (0, 4, "http") != 0) {
+		delete cm;
+		return 0;
+	}
+
+	char* v = h.escape (cm->version.c_str(), cm->version.length());
+	url += v;
+	h.free (v);
+
+#ifdef PLATFORM_WINDOWS
+	qs = build_windows_query_string (h);
+#else
+	qs = build_posix_query_string (h);
+#endif
+
+	if (qs.empty()) {
+		delete cm;
+		return 0;
+	}
+
+	url += '?';
+	url += qs;
 
 	return_str = h.get (url, false);
 
