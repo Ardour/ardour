@@ -63,7 +63,6 @@ HttpGet::ca_setopt (CURL* c)
 	}
 
 	if (ca_info && strlen (ca_info) == 0) {
-		/* not hat for you */
 		curl_easy_setopt (c, CURLOPT_SSL_VERIFYPEER, 0);
 		curl_easy_setopt (c, CURLOPT_SSL_VERIFYHOST, 0);
 	} else if (ca_info || ca_path) {
@@ -103,9 +102,9 @@ HttpGet::setup_certificate_paths ()
 		ca_info = ""; // disable cert check
 	}
 
-	if (Glib::file_test ("/etc/pki/tls/certs/ca-bundle.crt", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
+	if (Glib::file_test ("/etc/pki/tls/certs/ca-bundle.crt", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 		// we're on RHEL // https://bugzilla.redhat.com/show_bug.cgi?id=1053882
-		ca_path = "/nonexistent_path"; // don't try "/etc/ssl/certs" in case it's curl's default
+		ca_path = "/nonexistent_path"; // don't try "/etc/ssl/certs" it's a trap
 	}
 	else if (Glib::file_test ("/etc/ssl/certs", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
 		// Debian and derivs + OpenSuSe
