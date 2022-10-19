@@ -1899,11 +1899,12 @@ public:
   Class<std::set<T> > beginStdSet (char const* name)
   {
     typedef std::set<T> LT;
+    typedef typename LT::size_type T_SIZE;
     return beginClass<LT> (name)
       .addVoidConstructor ()
       .addFunction ("clear", (void (LT::*)())&LT::clear)
-      .addFunction ("empty", &LT::empty)
-      .addFunction ("size", &LT::size)
+      .addFunction ("empty", (bool (LT::*)()const)&LT::empty)
+      .addFunction ("size", (T_SIZE (LT::*)()const)&LT::size)
 #if 0 // needs work for AutomationTypeSet (T is-a enum not a class instance)
       .addExtCFunction ("insert", &CFunc::setInsert<T, LT>)
 #endif
