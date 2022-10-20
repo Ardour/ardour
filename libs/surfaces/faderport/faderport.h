@@ -38,11 +38,8 @@ namespace PBD {
 
 #include <midi++/types.h>
 
-//#include "pbd/signals.h"
-
-
-//#include "midi_byte_array.h"
-#include "types.h"
+#include "midi_surface/midi_byte_array.h"
+#include "midi_surface/midi_surface.h"
 
 #include "glibmm/main.h"
 
@@ -67,13 +64,7 @@ class MIDIAction;
 
 namespace ArdourSurface {
 
-struct FaderPortRequest : public BaseUI::BaseRequestObject {
-public:
-	FaderPortRequest () {}
-	~FaderPortRequest () {}
-};
-
-class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortRequest> {
+class FaderPort : public MIDISurface {
   public:
 	FaderPort (ARDOUR::Session&);
 	virtual ~FaderPort();
@@ -84,7 +75,9 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	   there's no way to know if the device exists or not.
 	 */
 	static bool probe() { return true; }
-	static void* request_factory (uint32_t);
+
+	std::string input_port_name () const;
+	std::string output_port_name () const;
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
@@ -97,16 +90,6 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	   we do not implement get/set_feedback() since this aspect of
 	   support for the protocol is not optional.
 	*/
-
-	void do_request (FaderPortRequest*);
-	int stop ();
-
-	void thread_init ();
-
-	PBD::Signal0<void> ConnectionChange;
-
-	boost::shared_ptr<ARDOUR::Port> input_port();
-	boost::shared_ptr<ARDOUR::Port> output_port();
 
 	/* In a feat of engineering brilliance, the Presonus Faderport sends
 	 * one button identifier when the button is pressed/released, but
@@ -160,41 +143,15 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void set_action (ButtonID, std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
 	std::string get_action (ButtonID, bool on_press, FaderPort::ButtonState = ButtonState (0));
 
-	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
-
-	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
-
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _current_stripable;
 	boost::weak_ptr<ARDOUR::Stripable> pre_master_stripable;
 	boost::weak_ptr<ARDOUR::Stripable> pre_monitor_stripable;
 
-	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
-	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
-
-	// Bundle to represent our input ports
-	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
-	// Bundle to represent our output ports
-	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
-
-	PBD::ScopedConnectionList midi_connections;
-
-	bool midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::AsyncMIDIPort> port);
-
 	mutable void *gui;
 	void build_gui ();
 
-	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
-	PBD::ScopedConnection _port_connection;
-
-	enum ConnectionState {
-		InputConnected = 0x1,
-		OutputConnected = 0x2
-	};
-
-	int connection_state;
 	void connected ();
-	bool _device_active;
 	int fader_msb;
 	int fader_lsb;
 	bool fader_is_touched;
@@ -203,10 +160,16 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	int last_good_encoder_delta;
 	int last_encoder_delta, last_last_encoder_delta;
 
-	void sysex_handler (MIDI::Parser &p, MIDI::byte *, size_t);
-	void button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
-	void encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb);
-	void fader_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb);
+	void handle_midi_sysex (MIDI::Parser &p, MIDI::byte *, size_t);
+	void handle_midi_polypressure_message (MIDI::Parser &, MIDI::EventTwoBytes* tb);
+	void handle_midi_pitchbend_message (MIDI::Parser &, MIDI::pitchbend_t pb);
+	void handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* tb);
+
+	int begin_using_device ();
+	int stop_using_device ();
+
+	int device_acquire () { return 0; }
+	void device_release () {}
 
 	ButtonState button_state;
 
@@ -232,7 +195,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		void set_action (boost::function<void()> function, bool on_press, FaderPort::ButtonState = ButtonState (0));
 		std::string get_action (bool press, FaderPort::ButtonState bs = ButtonState (0));
 
-		void set_led_state (boost::shared_ptr<MIDI::Port>, bool onoff);
+		void set_led_state (bool onoff);
 		bool invoke (ButtonState bs, bool press);
 		bool uses_flash () const { return flash; }
 		void set_flash (bool yn) { flash = yn; }
@@ -275,12 +238,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void start_press_timeout (Button&, ButtonID);
 
 	void all_lights_out ();
-	void close ();
-	void start_midi_handling ();
-	void stop_midi_handling ();
 
-	PBD::ScopedConnectionList session_connections;
-	void connect_session_signals ();
 	void map_recenable_state ();
 	void map_transport_state ();
 

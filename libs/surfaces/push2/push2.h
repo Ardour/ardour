@@ -297,7 +297,6 @@ class Push2 : public MIDISurface
 	~Push2 ();
 
 	static bool probe ();
-	static void* request_factory (uint32_t);
 
 	std::string input_port_name () const;
 	std::string output_port_name () const;

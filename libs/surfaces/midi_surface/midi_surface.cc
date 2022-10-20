@@ -55,7 +55,9 @@ MIDISurface::port_setup ()
 {
 	ports_acquire ();
 
-	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::port_registration_handler, this), this);
+	if (!input_port_name().empty() || !output_port_name().empty()) {
+		ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::port_registration_handler, this), this);
+	}
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&MIDISurface::connection_handler, this, _1, _2, _3, _4, _5), this);
 
 	port_registration_handler ();
@@ -262,6 +264,12 @@ MIDISurface::write (const MidiByteArray& data)
 	_output_port->write (&data[0], data.size(), 0);
 }
 
+void
+MIDISurface::write (MIDI::byte const * data, size_t size)
+{
+	_output_port->write (data, size, 0);
+}
+
 bool
 MIDISurface::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 {
@@ -306,9 +314,9 @@ MIDISurface::connect_to_parser ()
 	p->note_off.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_note_on_message, this, _1, _2));
 	/* Fader messages are Pitchbend */
 	p->channel_pitchbend[0].connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_pitchbend_message, this, _1, _2));
+
+	p->poly_pressure.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_polypressure_message, this, _1, _2));
 }
-
-
 
 void
 MIDISurface::thread_init ()
@@ -427,3 +435,15 @@ MIDISurface::bundles ()
 
 	return b;
 }
+
+void*
+MIDISurface::request_factory (uint32_t num_requests)
+{
+	/* AbstractUI<T>::request_buffer_factory() is a template method only
+	   instantiated in this source module. To provide something visible for
+	   use in the interface/descriptor, we have this static method that is
+	   template-free.
+	*/
+	return request_buffer_factory (num_requests);
+}
+

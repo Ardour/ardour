@@ -48,6 +48,8 @@ class MIDISurface : public ARDOUR::ControlProtocol
 	MIDISurface (ARDOUR::Session&, std::string const & name, std::string const & port_name_prefix, bool use_pad_filter);
 	~MIDISurface ();
 
+	static void* request_factory (uint32_t num_requests);
+
 	boost::shared_ptr<ARDOUR::Port> input_port();
 	boost::shared_ptr<ARDOUR::Port> output_port();
 
@@ -62,6 +64,7 @@ class MIDISurface : public ARDOUR::ControlProtocol
 	virtual std::string output_port_name () const = 0;
 
 	void write (const MidiByteArray&);
+	void write (MIDI::byte const *, size_t);
 
 	XMLNode& get_state() const;
 	int set_state (const XMLNode & node, int version);
@@ -86,10 +89,11 @@ class MIDISurface : public ARDOUR::ControlProtocol
 
 	virtual void connect_to_parser ();
 	virtual void handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t) {}
+	virtual void handle_midi_polypressure_message (MIDI::Parser&, MIDI::EventTwoBytes*) {}
 	virtual void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes*) {}
 	virtual void handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes*) {}
 	virtual void handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes*) {}
-	virtual void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count) {}
+	virtual void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t) {}
 
 	virtual bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
 

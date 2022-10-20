@@ -59,8 +59,9 @@ probe_faderport_midi_protocol (ControlProtocolDescriptor* /*descriptor*/)
 static void*
 faderport_request_buffer_factory (uint32_t num_requests)
 {
-	return FaderPort::request_factory (num_requests);
+	return MIDISurface::request_factory (num_requests);
 }
+
 
 static ControlProtocolDescriptor faderport_midi_descriptor = {
 	/*name :              */   "PreSonus FaderPort",

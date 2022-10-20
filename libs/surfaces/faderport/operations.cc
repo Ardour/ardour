@@ -167,14 +167,14 @@ FaderPort::use_master ()
 		if (_current_stripable == r) {
 			r = pre_master_stripable.lock();
 			set_current_stripable (r);
-			get_button(Output).set_led_state (_output_port, false);
+			get_button(Output).set_led_state (false);
 			blinkers.remove (Output);
 		} else {
 			if (_current_stripable != session->master_out() && _current_stripable != session->monitor_out()) {
 				pre_master_stripable = boost::weak_ptr<Stripable> (_current_stripable);
 			}
 			set_current_stripable (r);
-			get_button(Output).set_led_state (_output_port, true);
+			get_button(Output).set_led_state (true);
 			blinkers.remove (Output);
 		}
 	}
@@ -189,14 +189,14 @@ FaderPort::use_monitor ()
 		if (_current_stripable == r) {
 			r = pre_monitor_stripable.lock();
 			set_current_stripable (r);
-			get_button(Output).set_led_state (_output_port, false);
+			get_button(Output).set_led_state (false);
 			blinkers.remove (Output);
 		} else {
 			if (_current_stripable != session->master_out() && _current_stripable != session->monitor_out()) {
 				pre_monitor_stripable = boost::weak_ptr<Stripable> (_current_stripable);
 			}
 			set_current_stripable (r);
-			get_button(Output).set_led_state (_output_port, true);
+			get_button(Output).set_led_state (true);
 			blinkers.push_back (Output);
 		}
 	} else {
