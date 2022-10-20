@@ -876,6 +876,8 @@ JACKAudioBackend::create_process_thread (boost::function<void()> f)
 int
 JACKAudioBackend::join_process_threads ()
 {
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
+
 	int ret = 0;
 
 	for (std::vector<jack_native_thread_t>::const_iterator i = _jack_threads.begin ();
@@ -884,7 +886,7 @@ JACKAudioBackend::join_process_threads ()
 #if defined(USING_JACK2_EXPANSION_OF_JACK_API) || defined __jack_systemdeps_h__
 		// jack_client is not used by JACK2's implementation
 		// also jack_client_close() leaves threads active
-		if (jack_client_stop_thread (NULL, *i) != 0)
+		if (jack_client_stop_thread (_priv_jack, *i) != 0)
 #else
 		void* status;
 		if (pthread_join (*i, &status) != 0)
