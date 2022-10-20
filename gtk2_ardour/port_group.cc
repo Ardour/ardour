@@ -350,7 +350,8 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	boost::shared_ptr<PortGroup> bus (new PortGroup (string_compose (_("%1 Busses"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> track (new PortGroup (string_compose (_("%1 Tracks"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> sidechain (new PortGroup (string_compose (_("%1 Sidechains"), PROGRAM_NAME)));
-	boost::shared_ptr<PortGroup> ioplugin (new PortGroup (string_compose (_("%1 I/O Plugin"), PROGRAM_NAME)));
+	boost::shared_ptr<PortGroup> iop_pre  (new PortGroup (string_compose (_("%1 I/O Pre"), PROGRAM_NAME)));
+	boost::shared_ptr<PortGroup> iop_post (new PortGroup (string_compose (_("%1 I/O Post"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> system (new PortGroup (_("Hardware")));
 	boost::shared_ptr<PortGroup> program (new PortGroup (string_compose (_("%1 Misc"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
@@ -570,7 +571,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			continue;
 		}
 		if (type == DataType::NIL || io->n_ports().get (type) > 0) {
-			ioplugin->add_bundle (io->bundle(), io);
+			if (iop->is_pre ()) {
+				iop_pre->add_bundle (io->bundle(), io);
+			} else {
+				iop_post->add_bundle (io->bundle(), io);
+			}
 		}
 	}
 
@@ -615,7 +620,8 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			        !system->has_port(p)
 			     && !bus->has_port(p)
 			     && !track->has_port(p)
-			     && !ioplugin->has_port(p)
+			     && !iop_pre->has_port(p)
+			     && !iop_post->has_port(p)
 			     && !sidechain->has_port(p)
 			     && !program->has_port(p)
 			     && !other->has_port(p)
@@ -733,7 +739,8 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	add_group_if_not_empty (bus);
 	add_group_if_not_empty (track);
 	add_group_if_not_empty (sidechain);
-	add_group_if_not_empty (ioplugin);
+	add_group_if_not_empty (iop_pre);
+	add_group_if_not_empty (iop_post);
 	add_group_if_not_empty (program);
 	add_group_if_not_empty (system);
 
