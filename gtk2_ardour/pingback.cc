@@ -54,84 +54,7 @@ struct ping_call {
 	    : version (v), announce_path (a) {}
 };
 
-#ifdef MIXBUS
-static std::string
-build_windows_query_string (ArdourCurl::HttpGet const & h)
-{
-	string qs;
-
-	std::string val;
-	if (PBD::windows_query_registry ("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "ProductName", val)) {
-		char* query = h.escape (val.c_str(), strlen (val.c_str()));
-		url += "r=";
-		url += query;
-		url += '&';
-		h.free (query);
-	} else {
-		url += "r=&";
-	}
-
-	if (PBD::windows_query_registry ("Hardware\\Description\\System\\CentralProcessor\\0", "Identifier", val)) {
-		// remove "Family X Model YY Stepping Z" tail
-		size_t cut = val.find (" Family ");
-		if (string::npos != cut) {
-			val = val.substr (0, cut);
-		}
-		const char* query = h.escape (val.c_str(), strlen (val.c_str()));
-		url += "m=";
-		url += query;
-		url += '&';
-		h.free (query);
-	} else {
-		url += "m=&";
-	}
-
-# if ( defined(__x86_64__) || defined(_M_X64) )
-	url += "s=Windows64";
-# else
-	url += "s=Windows32";
-#endif
-
-	return qs;
-}
-
-static std::string
-build_posix_query_string (ArdourCurl::HttpGet const & h)
-{
-	string qs;
-
-	struct utsname utb;
-
-	if (uname (&utb)) {
-		return qs;
-	}
-
-	//string uts = string_compose ("%1 %2 %3 %4", utb.sysname, utb.release, utb.version, utb.machine);
-	string s;
-	char* query;
-
-	query = h.escape (utb.sysname, strlen (utb.sysname));
-	s = string_compose ("s=%1", query);
-	url += s;
-	url += '&';
-	h.free (query);
-
-	query = h.escape (utb.release, strlen (utb.release));
-	s = string_compose ("r=%1", query);
-	url += s;
-	url += '&';
-	h.free (query);
-
-
-	query = h.escape (utb.machine, strlen (utb.machine));
-	s = string_compose ("m=%1", query);
-	url += s;
-	h.free (query);
-
-	return qs;
-}
-
-#else /* Ardour */
+#ifndef MIXBUS /* Ardour */
 
 /* As of October 2022, Ardour only sends system (OS) name */
 
@@ -164,7 +87,7 @@ build_posix_query_string (ArdourCurl::HttpGet const & h)
 	return qs;
 }
 
-#endif /* MIXBUS */
+#endif
 
 static void*
 _pingback (void *arg)
