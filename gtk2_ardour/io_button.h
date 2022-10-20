@@ -25,29 +25,50 @@
 #include <boost/shared_ptr.hpp>
 #include <gtkmm/menu.h>
 
+#include "ardour/data_type.h"
+
 #include "widgets/ardour_button.h"
+
+namespace PBD
+{
+	class PropertyChange;
+}
 
 namespace ARDOUR
 {
 	class Bundle;
 	class IO;
 	class Route;
+	class Session;
 	class Track;
 	class Port;
 }
 
 class RouteUI;
 
-class IOButton : public ArdourWidgets::ArdourButton
+class IOButtonBase : public ArdourWidgets::ArdourButton
+{
+public:
+	virtual ~IOButtonBase () {}
+
+protected:
+	static void             set_label (IOButtonBase&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Bundle>&, boost::shared_ptr<ARDOUR::IO>);
+	static ARDOUR::DataType guess_main_type (boost::shared_ptr<ARDOUR::IO>);
+
+	virtual void update () = 0;
+	void         maybe_update (PBD::PropertyChange const& what_changed);
+
+	PBD::ScopedConnectionList _connections;
+	PBD::ScopedConnectionList _bundle_connections;
+};
+
+class IOButton : public IOButtonBase
 {
 public:
 	IOButton (bool input);
 	~IOButton ();
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>, RouteUI*);
-
-	static ARDOUR::DataType guess_main_type (boost::shared_ptr<ARDOUR::IO>);
-	static void set_label (ArdourWidgets::ArdourButton&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Bundle>&, boost::shared_ptr<ARDOUR::IO>);
 
 private:
 	void update ();
@@ -69,8 +90,6 @@ private:
 	RouteUI*                                      _route_ui;
 	Gtk::Menu                                     _menu;
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > _menu_bundles;
-	PBD::ScopedConnectionList                     _connections;
-	PBD::ScopedConnectionList                     _bundle_connections;
 };
 
 #endif

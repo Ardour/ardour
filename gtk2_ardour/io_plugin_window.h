@@ -26,10 +26,9 @@
 
 #include "pbd/signals.h"
 
-#include "widgets/ardour_button.h"
-
 #include "ardour_window.h"
 #include "plugin_interest.h"
+#include "io_button.h"
 #include "window_manager.h"
 
 namespace ARDOUR
@@ -106,7 +105,7 @@ private:
 		bool          _is_pre;
 	};
 
-	class IOButton : public ArdourWidgets::ArdourButton
+	class IOButton : public IOButtonBase
 	{
 	public:
 		IOButton (boost::shared_ptr<ARDOUR::IO>, bool pre);
@@ -128,8 +127,6 @@ private:
 		bool                          _pre;
 		Gtk::Menu                     _menu;
 		IOSelectorWindow*             _io_selector;
-		PBD::ScopedConnectionList     _connections;
-		PBD::ScopedConnectionList     _bundle_connections;
 	};
 
 	class IOPlugUI : public Gtk::Alignment

@@ -38,7 +38,6 @@
 #include "context_menu_helper.h"
 #include "gui_thread.h"
 #include "io_plugin_window.h"
-#include "io_button.h"
 #include "io_selector.h"
 #include "mixer_ui.h"
 #include "plugin_selector.h"
@@ -548,7 +547,7 @@ IOPluginWindow::IOButton::update ()
 	boost::shared_ptr<ARDOUR::Bundle> bundle;
 	_bundle_connections.drop_connections ();
 
-	::IOButton::set_label (*this, _io->session (), bundle, _io);
+	set_label (*this, _io->session (), bundle, _io);
 
 	if (bundle) {
 		bundle->Changed.connect (_bundle_connections, invalidator (*this), boost::bind (&IOButton::update, this), gui_context ());
