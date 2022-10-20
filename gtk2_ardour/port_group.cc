@@ -347,14 +347,14 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		return;
 	}
 
-	boost::shared_ptr<PortGroup> bus (new PortGroup (string_compose (_("%1 Busses"), PROGRAM_NAME)));
-	boost::shared_ptr<PortGroup> track (new PortGroup (string_compose (_("%1 Tracks"), PROGRAM_NAME)));
-	boost::shared_ptr<PortGroup> sidechain (new PortGroup (string_compose (_("%1 Sidechains"), PROGRAM_NAME)));
-	boost::shared_ptr<PortGroup> iop_pre  (new PortGroup (string_compose (_("%1 I/O Pre"), PROGRAM_NAME)));
-	boost::shared_ptr<PortGroup> iop_post (new PortGroup (string_compose (_("%1 I/O Post"), PROGRAM_NAME)));
+	boost::shared_ptr<PortGroup> bus (new PortGroup (_("Busses")));
+	boost::shared_ptr<PortGroup> track (new PortGroup (("Tracks")));
+	boost::shared_ptr<PortGroup> sidechain (new PortGroup (_("Sidechains")));
+	boost::shared_ptr<PortGroup> iop_pre  (new PortGroup (_("I/O Pre") ));
+	boost::shared_ptr<PortGroup> iop_post (new PortGroup (_("I/O Post") ));
 	boost::shared_ptr<PortGroup> system (new PortGroup (_("Hardware")));
 	boost::shared_ptr<PortGroup> program (new PortGroup (string_compose (_("%1 Misc"), PROGRAM_NAME)));
-	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
+	boost::shared_ptr<PortGroup> other (new PortGroup (_("External")));
 
 	/* Find the IOs which have bundles for routes and their processors.  We store
 	   these IOs in a RouteIOs class so that we can then sort the results by route
@@ -735,13 +735,13 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		system->remove_duplicates ();
 	}
 
-	add_group_if_not_empty (other);
 	add_group_if_not_empty (bus);
 	add_group_if_not_empty (track);
 	add_group_if_not_empty (sidechain);
 	add_group_if_not_empty (iop_pre);
 	add_group_if_not_empty (iop_post);
 	add_group_if_not_empty (program);
+	add_group_if_not_empty (other);
 	add_group_if_not_empty (system);
 
 	emit_changed ();
