@@ -301,6 +301,9 @@ TriggerClipPicker::refill_dropdown ()
 	/* User config folder */
 	maybe_add_dir (Glib::build_filename (user_config_directory (), media_dir_name));
 
+	/* Freesuund dir, in case they use it */
+	maybe_add_dir (UIConfiguration::instance().get_freesound_dir());
+
 	/* Anything added by Gtkmm2ext::add_volume_shortcuts */
 	for (auto const& f : _fcd.list_shortcut_folders ()) {
 		maybe_add_dir (f);
