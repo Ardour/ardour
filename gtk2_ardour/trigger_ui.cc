@@ -437,11 +437,29 @@ TriggerUI::context_menu ()
 	items.push_back (MenuElem (_("Load..."), sigc::bind(sigc::mem_fun (*this, (&TriggerUI::choose_sample)), true)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &TriggerUI::choose_color)));
-	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Clear"), sigc::mem_fun (*this, &TriggerUI::clear_trigger)));
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("MIDI Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_learn)));
+	items.push_back (MenuElem (_("MIDI un-Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_unlearn)));
 
 
 	_context_menu->popup (3, gtk_get_current_event_time ());
+}
+
+void
+TriggerUI::trigger_midi_learn ()
+{
+	if (!trigger()) {
+		return;
+	}
+
+	tref.box->begin_midi_learn (trigger()->index());
+}
+
+void
+TriggerUI::trigger_midi_unlearn ()
+{
+	tref.box->midi_unlearn (trigger()->index());
 }
 
 void
