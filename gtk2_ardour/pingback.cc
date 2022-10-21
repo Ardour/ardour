@@ -58,8 +58,10 @@ struct ping_call {
 
 /* As of October 2022, Ardour only sends system (OS) name */
 
+#ifdef PLATFORM_WINDOWS
+
 static std::string
-build_windows_query_string (ArdourCurl::HttpGet const & h)
+build__query_string (ArdourCurl::HttpGet const & h)
 {
 # if ( defined(__x86_64__) || defined(_M_X64) )
 	return  "s=Windows64";
@@ -68,8 +70,10 @@ build_windows_query_string (ArdourCurl::HttpGet const & h)
 # endif
 }
 
+#else /* POSIX: use uname */
+
 static std::string
-build_posix_query_string (ArdourCurl::HttpGet const & h)
+build_query_string (ArdourCurl::HttpGet const & h)
 {
 	string qs;
 	struct utsname utb;
@@ -87,7 +91,8 @@ build_posix_query_string (ArdourCurl::HttpGet const & h)
 	return qs;
 }
 
-#endif
+#endif // ! Windows
+#endif // ! MIXBUS
 
 static void*
 _pingback (void *arg)
@@ -120,11 +125,7 @@ _pingback (void *arg)
 	url += v;
 	h.free (v);
 
-#ifdef PLATFORM_WINDOWS
-	qs = build_windows_query_string (h);
-#else
-	qs = build_posix_query_string (h);
-#endif
+	qs = build_query_string (h);
 
 	if (qs.empty()) {
 		delete cm;
