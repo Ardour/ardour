@@ -97,19 +97,11 @@ HttpGet::setup_certificate_paths ()
 	}
 	// else NULL: use default (currently) "/etc/ssl/certs/ca-certificates.crt" if it exists
 
-	if (Glib::file_test ("/etc/pki/tls/certs/ca-bundle.crt", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
-		// we're on RHEL // https://bugzilla.redhat.com/show_bug.cgi?id=1053882
-		ca_path = "/nonexistent_path"; // don't try "/etc/ssl/certs" in case it's curl's default
-	}
-	else if (Glib::file_test ("/etc/ssl/certs", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
-		// Debian and derivs + OpenSuSe
-		ca_path = "/etc/ssl/certs";
-	} else {
-		ca_path = "/nonexistent_path"; // don't try -- just in case:
-	}
-
 	/* If we don't set anything defaults are used. at the time of writing we compile bundled curl on debian
 	 * and it'll default to  /etc/ssl/certs and /etc/ssl/certs/ca-certificates.crt
+	 * That works on Debian and derivs + openSUSE. It has historically not
+	 * worked on RHEL / Fedora, but worst case the directory exists and doesn't
+	 * prevent ca_info from working. https://bugzilla.redhat.com/show_bug.cgi?id=1053882
 	 */
 }
 
