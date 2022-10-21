@@ -80,6 +80,7 @@ HttpGet::setup_certificate_paths ()
 	 *
 	 * Short of this mess: we could simply bundle a .crt of
 	 * COMODO (ardour) and ghandi (freesound) and be done with it.
+	 * Alternatively, ship the Mozilla CA list, perhaps using https://mkcert.org/ .
 	 */
 	assert (!ca_path && !ca_info); // call once
 
