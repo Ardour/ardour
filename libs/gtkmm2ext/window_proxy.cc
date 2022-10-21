@@ -211,6 +211,7 @@ WindowProxy::drop_window ()
 		_window = 0;
 		delete vistracker;
 		vistracker = 0;
+		_visible = false;
 	}
 }
 
