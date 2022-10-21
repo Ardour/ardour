@@ -36,6 +36,8 @@
 #include "pbd/ringbuffer.h"
 #include "pbd/stateful.h"
 
+#include "midi++/types.h"
+
 #include "temporal/beats.h"
 #include "temporal/bbt_time.h"
 #include "temporal/tempo.h"
@@ -56,6 +58,10 @@ class XMLNode;
 
 namespace RubberBand {
 	class RubberBandStretcher;
+}
+
+namespace MIDI {
+	class Parser;
 }
 
 namespace ARDOUR {
@@ -802,11 +808,21 @@ class LIBARDOUR_API TriggerBox : public Processor
 	enum TriggerMidiMapMode {
 		AbletonPush,
 		SequentialNote,
-		ByMidiChannel
+		ByMidiChannel,
+		Custom,
 	};
 
 	/* This is null for TriggerBoxen constructed with DataType::AUDIO */
 	MidiStateTracker* tracker;
+
+	static bool lookup_custom_midi_binding (int id, int& x, int& y);
+	static void add_custom_midi_binding (int id, int x, int y);
+	static void remove_custom_midi_binding (int x, int y);
+	static void clear_custom_midi_bindings ();
+
+	void begin_midi_learn (int index);
+	void midi_unlearn (int index);
+	void stop_midi_learn ();
 
 	static Temporal::BBT_Offset assumed_trigger_duration () { return _assumed_trigger_duration; }
 	static void set_assumed_trigger_duration (Temporal::BBT_Offset const &);
@@ -918,6 +934,16 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int handle_stopped_trigger (BufferSet& bufs, pframes_t dest_offset);
 
 	PBD::ScopedConnection stop_all_connection;
+
+	typedef  std::map<int,std::pair<int,int> > CustomMidiMap;
+	static CustomMidiMap _custom_midi_map;
+
+	static void midi_learn_input_handler (MIDI::Parser&, MIDI::byte*, size_t, samplecnt_t);
+	static PBD::ScopedConnectionList midi_learn_connections;
+	static bool _learning;
+	static std::pair<int,int> learning_for;
+	static MIDI::Parser* learning_parser;
+	static PBD::Signal0<void> TriggerMIDILearned;
 
 	static void init_pool();
 

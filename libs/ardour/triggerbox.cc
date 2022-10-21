@@ -37,6 +37,7 @@
 
 #include "temporal/tempo.h"
 
+#include "ardour/async_midi_port.h"
 #include "ardour/auditioner.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
@@ -3032,8 +3033,7 @@ Trigger::make_property_quarks ()
 }
 
 Temporal::BBT_Offset TriggerBox::_assumed_trigger_duration (4, 0, 0);
-//TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::AbletonPush);
-TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::SequentialNote);
+TriggerBox::TriggerMidiMapMode TriggerBox::_midi_map_mode (TriggerBox::Custom);
 int TriggerBox::_first_midi_note = 60;
 std::atomic<int> TriggerBox::active_trigger_boxes (0);
 TriggerBoxThread* TriggerBox::worker = 0;
@@ -3041,6 +3041,12 @@ CueRecords TriggerBox::cue_records (256);
 std::atomic<bool> TriggerBox::_cue_recording (false);
 PBD::Signal0<void> TriggerBox::CueRecordingChanged;
 bool TriggerBox::roll_requested = false;
+bool TriggerBox::_learning = false;
+TriggerBox::CustomMidiMap TriggerBox::_custom_midi_map;
+std::pair<int,int> TriggerBox::learning_for;
+PBD::ScopedConnectionList TriggerBox::midi_learn_connections;
+MIDI::Parser* TriggerBox::learning_parser = 0;
+PBD::Signal0<void> TriggerBox::TriggerMIDILearned;
 
 typedef std::map <boost::shared_ptr<Region>, boost::shared_ptr<Trigger::UIState>> RegionStateMap;
 RegionStateMap enqueued_state_map;
@@ -3105,7 +3111,13 @@ TriggerBox::parameter_changed (std::string const & param)
 {
 	if (param == X_("default-trigger-input-port")) {
 
-		reconnect_to_default ();
+		if (!Config->get_default_trigger_input_port().empty()) {
+			if (!_sidechain) {
+				add_midi_sidechain ();
+			} else {
+				reconnect_to_default ();
+			}
+		}
 
 	} else if (param == "cue-behavior") {
 		const bool follow = (_session.config.get_cue_behavior() & FollowCues);
@@ -3826,6 +3838,8 @@ TriggerBox::note_to_trigger (int midi_note, int channel)
 	const int column = _order;
 	int first_note;
 	int top;
+	int x;
+	int y;
 
 	switch (_midi_map_mode) {
 
@@ -3850,12 +3864,128 @@ TriggerBox::note_to_trigger (int midi_note, int channel)
 		first_note = 3;
 		break;
 
+	case Custom:
+		if (!_learning) {
+			if (lookup_custom_midi_binding (channel * 16 + midi_note, x, y)) {
+				if (x == _order) {
+					std::cerr << "yes, slot " << y << std::endl;
+					return y;
+				}
+			}
+		}
+		return -1;
+
 	default:
 		break;
 
 	}
 
 	return midi_note;
+}
+
+bool
+TriggerBox::lookup_custom_midi_binding (int id, int& x, int& y)
+{
+	CustomMidiMap::iterator i = _custom_midi_map.find (id);
+
+	if (i == _custom_midi_map.end()) {
+		return false;
+	}
+
+	x = i->second.first;
+	y = i->second.second;
+
+	return true;
+}
+
+void
+TriggerBox::midi_learn_input_handler (MIDI::Parser&, MIDI::byte* ev, size_t sz, samplecnt_t)
+{
+	if (!_learning) {
+		return;
+	}
+
+	if ((ev[0] & 0xf0) == MIDI::on) {
+		int channel = ev[0] & 0xf;
+		int note = ev[1] & 0x7f;
+		add_custom_midi_binding (channel * 16 + note, learning_for.first, learning_for.second);
+		TriggerMIDILearned (); /* emit signal */
+		return;
+	}
+
+	return;
+}
+
+void
+TriggerBox::begin_midi_learn (int index)
+{
+	if (!_sidechain) {
+		return;
+	}
+
+	learning_for.first = order(); /* x */
+	learning_for.second = index;  /* y */
+	_learning = true;
+
+
+	boost::shared_ptr<MidiPort> mp = boost::dynamic_pointer_cast<MidiPort> (_sidechain->input()->nth(0));
+	if (!mp) {
+		return;
+	}
+
+	if (!learning_parser) {
+		learning_parser = new MIDI::Parser;
+	}
+
+	TriggerMIDILearned.connect_same_thread (midi_learn_connections, boost::bind (&TriggerBox::stop_midi_learn, this));
+	learning_parser->any.connect_same_thread (midi_learn_connections, boost::bind (&TriggerBox::midi_learn_input_handler, _1, _2, _3, _4));
+	mp->set_trace (learning_parser);
+}
+
+void
+TriggerBox::stop_midi_learn ()
+{
+	if (_learning) {
+		_learning = false;
+		midi_learn_connections.drop_connections ();
+		boost::shared_ptr<MidiPort> mp = boost::dynamic_pointer_cast<MidiPort> (_sidechain->input()->nth(0));
+
+		if (mp) {
+			mp->set_trace (0);
+		}
+	}
+}
+
+void
+TriggerBox::midi_unlearn (int index)
+{
+	remove_custom_midi_binding (order(), index);
+}
+
+void
+TriggerBox::clear_custom_midi_bindings ()
+{
+	_custom_midi_map.clear ();
+}
+
+void
+TriggerBox::add_custom_midi_binding (int id, int x, int y)
+{
+	_custom_midi_map.insert (std::make_pair (id, std::make_pair (x, y)));
+}
+
+void
+TriggerBox::remove_custom_midi_binding (int x, int y)
+{
+	/* this searches the whole map in case there are multiple entries
+	 *(keyed by note/channel) for the same pad (x,y)
+	 */
+
+	for (CustomMidiMap::iterator i = _custom_midi_map.begin(); i != _custom_midi_map.end(); ++i) {
+		if (i->second.first == x && i->second.second == y) {
+			_custom_midi_map.erase (i);
+		}
+	}
 }
 
 void
@@ -3903,10 +4033,12 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 				*/
 				t->set_velocity_gain (1.0 - (t->velocity_effect() * (*ev).velocity() / 127.f));
 			}
+			std:: cerr << "bang\n";
 			t->bang ();
 
 		} else if ((*ev).is_note_off()) {
 
+			std:: cerr << "unbang\n";
 			t->unbang ();
 		}
 	}

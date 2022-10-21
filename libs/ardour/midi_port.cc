@@ -206,6 +206,8 @@ MidiPort::read_and_parse_entire_midi_buffer_with_no_speed_adjustment (pframes_t 
 		 *
 		 * As of July 2018, this is only used by TransportMasters which
 		 * read MIDI before the process() cycle really gets started.
+		 *
+		 * October 2022: Now also used by trigger custom midi learn.
 		 */
 
 		if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
@@ -303,7 +305,6 @@ MidiPort::flush_buffers (pframes_t nframes)
 				}
 			}
 
-
 			// event times are in samples, relative to cycle start
 
 #ifndef NDEBUG
@@ -384,15 +385,15 @@ MidiPort::reset ()
 }
 
 void
-MidiPort::set_input_active (bool yn)
-{
-	_input_active = yn;
-}
-
-void
 MidiPort::set_trace (MIDI::Parser * p)
 {
 	_trace_parser = p;
+}
+
+void
+MidiPort::set_input_active (bool yn)
+{
+	_input_active = yn;
 }
 
 int
