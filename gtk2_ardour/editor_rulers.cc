@@ -247,6 +247,7 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 
 	case CueMarkerBarItem:
 		ruler_items.push_back (MenuElem (_("Stop All Cues"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, CueRecord::stop_all)));
+		ruler_items.push_back (MenuElem (_("Clear All Cues"), sigc::mem_fun (*this, &Editor::clear_cues)));
 		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
 			ruler_items.push_back (MenuElem (string_compose (_("Cue %1"), cue_marker_name (n)), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, n)));
 		}

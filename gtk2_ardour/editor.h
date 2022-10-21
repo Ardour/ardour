@@ -1559,6 +1559,7 @@ private:
 	void clear_markers ();
 	void clear_xrun_markers ();
 	void clear_ranges ();
+	void clear_cues ();
 	void clear_locations ();
 	void unhide_markers ();
 	void unhide_ranges ();

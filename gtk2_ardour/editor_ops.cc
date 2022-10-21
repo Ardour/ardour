@@ -2563,6 +2563,28 @@ Editor::clear_ranges ()
 }
 
 void
+Editor::clear_cues ()
+{
+	if (!_session) {
+		return;
+	}
+
+	begin_reversible_command (_("clear cues"));
+
+	XMLNode &before = _session->locations()->get_state();
+
+	if (_session->locations()->clear_cue_markers (0, max_samplepos)) {
+
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
+}
+
+void
 Editor::clear_locations ()
 {
 	begin_reversible_command (_("clear locations"));
