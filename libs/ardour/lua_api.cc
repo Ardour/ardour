@@ -37,6 +37,7 @@
 #include "ardour/plugin_manager.h"
 #include "ardour/readable.h"
 #include "ardour/region_factory.h"
+#include "ardour/simple_export.h"
 #include "ardour/source_factory.h"
 
 #include "LuaBridge/LuaBridge.h"
@@ -532,6 +533,16 @@ ARDOUR::LuaAPI::wait_for_process_callback (size_t n_cycles, int64_t timeout_ms)
 		}
 	}
 	return true;
+}
+
+int
+ARDOUR::LuaAPI::simple_export (lua_State* L)
+{
+	Session* const s = luabridge::Userdata::get <Session> (L, 1, false);
+	void* ptr = luabridge::UserdataValue<SimpleExport>::place (L);
+	SimpleExport* se = new (ptr) SimpleExport ();
+	se->set_session (s);
+	return 1;
 }
 
 void

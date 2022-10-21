@@ -240,6 +240,7 @@ libardour_sources = [
         'session_time.cc',
         'session_transport.cc',
         'sidechain.cc',
+        'simple_export.cc',
         'slavable.cc',
         'slavable_automation_control.cc',
         'smf_source.cc',

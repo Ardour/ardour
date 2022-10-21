@@ -92,6 +92,7 @@
 #include "ardour/session_object.h"
 #include "ardour/session_playlists.h"
 #include "ardour/sidechain.h"
+#include "ardour/simple_export.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
 #include "ardour/stripable.h"
@@ -1707,6 +1708,15 @@ LuaBindings::common (lua_State* L)
 		.addStaticFunction ("force_zero_latency", &Latent::force_zero_latency)
 		.endClass ()
 
+		.beginClass <SimpleExport> ("SimpleExport")
+		.addFunction ("run_export", &SimpleExport::run_export)
+		.addFunction ("set_name", &SimpleExport::set_name)
+		.addFunction ("set_folder", &SimpleExport::set_folder)
+		.addFunction ("set_range", &SimpleExport::set_range)
+		.addFunction ("set_preset", &SimpleExport::set_preset)
+		.addFunction ("check_outputs", &SimpleExport::check_outputs)
+		.endClass ()
+
 		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
 		.addCast<Slavable> ("to_slavable")
 		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
@@ -2878,6 +2888,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("vca_manager", &Session::vca_manager_ptr)
 		.addExtCFunction ("timecode_to_sample_lua", ARDOUR::LuaAPI::timecode_to_sample_lua)
 		.addExtCFunction ("sample_to_timecode_lua", ARDOUR::LuaAPI::sample_to_timecode_lua)
+		.addExtCFunction ("simple_export", &ARDOUR::LuaAPI::simple_export)
 		.endClass ()
 
 		.beginClass <RegionFactory> ("RegionFactory")

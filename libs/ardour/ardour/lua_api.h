@@ -256,6 +256,11 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	int timecode_to_sample_lua (lua_State *L);
 
+	/** create a \ref SimpleExport Object
+	 * for the current session
+	 */
+	int simple_export (lua_State* L);
+
 	/**
 	 * Delay execution until next prcess cycle starts.
 	 * @param n_cycles process-cycles to wait for.
