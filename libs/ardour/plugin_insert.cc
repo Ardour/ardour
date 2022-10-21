@@ -1389,7 +1389,7 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 
 		map_loop_range (start, end);
 
-		if (!find_next_event (timepos_t (start), timepos_t (end), next_event)) {
+		if (!find_next_event (next_event.when, timepos_t (end), next_event)) {
 			break;
 		}
 	}
