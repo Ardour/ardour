@@ -83,15 +83,15 @@ HttpGet::setup_certificate_paths ()
 	 */
 	assert (!ca_path && !ca_info); // call once
 
-	if (Glib::file_test ("/etc/pki/tls/certs/ca-bundle.crt", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
+	if (Glib::file_test ("/etc/pki/tls/certs/ca-bundle.crt", Glib::FILE_TEST_IS_REGULAR)) {
 		// Fedora / RHEL, Arch
 		ca_info = "/etc/pki/tls/certs/ca-bundle.crt";
 	}
-	else if (Glib::file_test ("/etc/ssl/certs/ca-certificates.crt", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
+	else if (Glib::file_test ("/etc/ssl/certs/ca-certificates.crt", Glib::FILE_TEST_IS_REGULAR)) {
 		// Debian and derivatives
 		ca_info = "/etc/ssl/certs/ca-certificates.crt";
 	}
-	else if (Glib::file_test ("/etc/pki/tls/cert.pem", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
+	else if (Glib::file_test ("/etc/pki/tls/cert.pem", Glib::FILE_TEST_IS_REGULAR)) {
 		// GNU/TLS can keep extra stuff here
 		ca_info = "/etc/pki/tls/cert.pem";
 	}
