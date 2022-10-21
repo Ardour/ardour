@@ -98,8 +98,8 @@ HttpGet::setup_certificate_paths ()
 	}
 	// else NULL: use default (currently) "/etc/ssl/certs/ca-certificates.crt" if it exists
 
-	/* If we don't set anything defaults are used. at the time of writing we compile bundled curl on debian
-	 * and it'll default to  /etc/ssl/certs and /etc/ssl/certs/ca-certificates.crt
+	/* If we don't set anything, defaults are used. At the time of writing we compile bundled curl on debian
+	 * and it'll default to ca_path = /etc/ssl/certs and ca_info = /etc/ssl/certs/ca-certificates.crt .
 	 * That works on Debian and derivs + openSUSE. It has historically not
 	 * worked on RHEL / Fedora, but worst case the directory exists and doesn't
 	 * prevent ca_info from working. https://bugzilla.redhat.com/show_bug.cgi?id=1053882
