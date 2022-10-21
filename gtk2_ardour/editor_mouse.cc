@@ -1696,7 +1696,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case CueMarkerBarItem:
 				snap_to (where, Temporal::RoundNearest, SnapToGrid_Scaled, true);
-				std::cerr << "cue marker will be at " << where << " beats = " << where.beats() << std::endl;
 				popup_ruler_menu (where, item_type);
 				break;
 

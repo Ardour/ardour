@@ -741,8 +741,6 @@ Editor::mouse_add_new_marker (timepos_t where, Location::Flags extra_flags, int3
 	string namebase;
 	Location::Flags flags = Location::Flags (extra_flags|Location::IsMark);
 
-	cerr << "adding new marker @ " << where << endl;
-
 	if (_session) {
 
 		if (flags & Location::IsCueMarker) {
