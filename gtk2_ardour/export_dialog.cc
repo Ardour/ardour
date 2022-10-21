@@ -159,9 +159,8 @@ ExportDialog::init ()
 
 	/* Buttons */
 	cancel_button = add_button (Gtk::Stock::CANCEL, RESPONSE_CANCEL);
-	export_button = add_button (_("Export"), RESPONSE_FAST);
 	analyze_button = add_button (_("Only Analyze"), RESPONSE_ANALYZE);
-	get_action_area ()->set_child_secondary (*analyze_button);
+	export_button = add_button (_("Export"), RESPONSE_FAST);
 
 	set_default_response (RESPONSE_FAST);
 
