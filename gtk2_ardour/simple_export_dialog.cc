@@ -42,201 +42,10 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-SimpleExport::SimpleExport (PublicEditor& editor)
-	: _editor (editor)
-	, _pset_id ("df340c53-88b5-4342-a1c8-58e0704872ea" /* CD */)
-	, _start (0)
-	, _end (0)
-{
-}
-
-void
-SimpleExport::set_session (ARDOUR::Session* s)
-{
-	SessionHandlePtr::set_session (s);
-	if (!s) {
-		_manager.reset ();
-		return;
-	}
-
-	_handler = _session->get_export_handler ();
-	_status  = _session->get_export_status ();
-
-	/* create manager, by default it is preconfigured to
-	 * - one Timespan (session-range, if set, otherwise empty)
-	 * - one ChannelConfig (master-bus, IFF the session as a master)
-	 */
-	_manager.reset (new ExportProfileManager (*_session, ExportProfileManager::RangeExport));
-
-	/* set formats(s) and export-filename */
-	set_preset (_pset_id);
-}
-
-void
-SimpleExport::set_name (std::string const& name)
-{
-	_name = name;
-}
-
-void
-SimpleExport::set_folder (std::string const& folder)
-{
-	_folder = folder;
-	if (!_folder.empty ()) {
-		g_mkdir_with_parents (_folder.c_str (), 0755);
-	}
-}
-
-void
-SimpleExport::set_range (samplepos_t start, samplepos_t end)
-{
-	_start = start;
-	_end   = end;
-}
-
-bool
-SimpleExport::set_preset (std::string const& pset_uuid)
-{
-	if (!_manager) {
-		return false;
-	}
-
-	ExportProfileManager::PresetList const& psets (_manager->get_presets ());
-	assert (psets.size () > 0);
-	bool rv = false;
-
-	ExportPresetPtr epp = psets.front ();
-	for (auto const& pset : psets) {
-		if (pset->id ().to_s () == pset_uuid) {
-			epp = pset;
-			rv  = true;
-			break;
-		}
-	}
-
-	_pset_id = epp->id ().to_s ();
-	/* Load preset(s) - this sets formats(s) and export-filename */
-	_manager->load_preset (epp);
-	return rv;
-}
-
-std::string
-SimpleExport::preset_uuid () const
-{
-	if (!_manager) {
-		return _pset_id;
-	}
-	return _manager->preset ()->id ().to_s ();
-}
-
-std::string
-SimpleExport::folder () const
-{
-	return _folder;
-}
-
-bool
-SimpleExport::check_outputs () const
-{
-	if (!_manager) {
-		return false;
-	}
-	/* check that master-bus was added */
-	auto cc (_manager->get_channel_configs ());
-	assert (cc.size () == 1);
-	if (cc.front ()->config->get_n_chans () == 0) {
-		return false;
-	}
-	return true;
-}
-
-bool
-SimpleExport::run_export ()
-{
-	if (!_session || !check_outputs ()) {
-		return false;
-	}
-
-	Location*            srl;
-	TimeSelection const& tsel (_editor.get_selection ().time);
-
-	if (_name.empty ()) {
-		_name = _session->snap_name ();
-		if (!tsel.empty ()) {
-			_name += _(" (selection)");
-		}
-	}
-
-	if (_folder.empty ()) {
-		_folder = _session->session_directory ().export_path ();
-	}
-
-	if (_start != _end) {
-		; // range already set
-	} else if (!tsel.empty ()) {
-		_start = tsel.start_sample ();
-		_end   = tsel.end_sample ();
-	} else if (NULL != (srl = _session->locations ()->session_range_location ())) {
-		_start = srl->start_sample ();
-		_end   = srl->end_sample ();
-	}
-
-	if (_start >= _end) {
-		return false;
-	}
-
-	/* Setup timespan */
-	auto ts = _manager->get_timespans ();
-	assert (ts.size () == 1);
-	assert (ts.front ()->timespans->size () == 1);
-
-	ts.front ()->timespans->front ()->set_name (_name);
-	ts.front ()->timespans->front ()->set_realtime (false);
-	ts.front ()->timespans->front ()->set_range (_start, _end);
-
-	/* Now update filename(s) for each format */
-	auto fns = _manager->get_filenames ();
-	assert (!fns.empty ());
-
-	auto fms = _manager->get_formats ();
-	for (auto const& fm : fms) {
-		for (auto const& fn : fns) {
-			fn->filename->set_folder (_folder);
-			fn->filename->set_timespan (ts.front ()->timespans->front ());
-			info << string_compose (_("Exporting: '%1'"), fn->filename->get_path (fm->format)) << endmsg;
-		}
-	}
-
-	/* All done, configure the handler */
-	_manager->prepare_for_export ();
-
-	try {
-		if (0 != _handler->do_export ()) {
-			return false;
-		}
-	} catch (std::exception& e) {
-		error << string_compose (_("Export initialization failed: %1"), e.what ()) << endmsg;
-		return false;
-	}
-
-	while (_status->running ()) {
-		if (gtk_events_pending ()) {
-			gtk_main_iteration ();
-		} else {
-			Glib::usleep (10000);
-		}
-	}
-
-	_status->finish (TRS_UI);
-
-	return !_status->aborted ();
-}
-
-/* ****************************************************************************/
-
 SimpleExportDialog::SimpleExportDialog (PublicEditor& editor)
-	: SimpleExport (editor)
+	: ARDOUR::SimpleExport ()
 	, ArdourDialog (_("Quick Audio Export"), true, false)
+	, _editor (editor)
 	, _eps (true)
 {
 	if (_eps.the_combo ().get_parent ()) {
@@ -383,10 +192,12 @@ SimpleExportDialog::start_export ()
 	TimeSelection const& tsel (_editor.get_selection ().time);
 
 	std::string range = _range_combo.get_active_text ();
-	if (!tsel.empty () && range == _("range selection")) {
+	if (!tsel.empty () && range == _("using time selection.")) {
 		set_range (tsel.start_sample (), tsel.end_sample ());
+		SimpleExport::set_name (string_compose (_("%1 (selection)"), SimpleExport::_session->snap_name ()));
 	} else {
 		set_range (srl->start_sample (), srl->end_sample ());
+		SimpleExport::set_name (SimpleExport::_session->snap_name ());
 	}
 
 	SimpleExport::_session->add_extra_xml (get_state ());
