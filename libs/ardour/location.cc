@@ -1663,7 +1663,7 @@ Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool includ
 	}
 }
 
-void
+bool
 Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 {
 	TempoMap::SharedPtr tmap (TempoMap::use());
@@ -1671,7 +1671,7 @@ Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 	Temporal::Beats eb;
 	bool have_beats = false;
 	vector<Location*> r;
-
+	bool removed_at_least_one = false;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -1702,6 +1702,7 @@ Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 						continue;
 					}
 				}
+				removed_at_least_one = true;
 			}
 
 			++i;
@@ -1712,4 +1713,6 @@ Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 		removed (l); /* EMIT SIGNAL */
 		delete l;
 	}
+
+	return removed_at_least_one;
 }
