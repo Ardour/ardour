@@ -55,18 +55,13 @@ const char* HttpGet::ca_info = NULL;
 void
 HttpGet::ca_setopt (CURL* c)
 {
-	if (ca_info && strlen (ca_info) > 0) {
+	if (ca_info) {
 		curl_easy_setopt (c, CURLOPT_CAINFO, ca_info);
 	}
 	if (ca_path) {
 		curl_easy_setopt (c, CURLOPT_CAPATH, ca_path);
 	}
-
-	if (ca_info && strlen (ca_info) == 0) {
-		/* not hat for you */
-		curl_easy_setopt (c, CURLOPT_SSL_VERIFYPEER, 0);
-		curl_easy_setopt (c, CURLOPT_SSL_VERIFYHOST, 0);
-	} else if (ca_info || ca_path) {
+	if (ca_info || ca_path) {
 		curl_easy_setopt (c, CURLOPT_SSL_VERIFYPEER, 1);
 	}
 }
@@ -99,9 +94,8 @@ HttpGet::setup_certificate_paths ()
 	else if (Glib::file_test ("/etc/pki/tls/cert.pem", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 		// GNU/TLS can keep extra stuff here
 		ca_info = "/etc/pki/tls/cert.pem";
-	} else {
-		ca_info = ""; // disable cert check
 	}
+	// else NULL: use default (currently) "/etc/ssl/certs/ca-certificates.crt" if it exists
 
 	if (Glib::file_test ("/etc/pki/tls/certs/ca-bundle.crt", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
 		// we're on RHEL // https://bugzilla.redhat.com/show_bug.cgi?id=1053882
@@ -111,7 +105,7 @@ HttpGet::setup_certificate_paths ()
 		// Debian and derivs + OpenSuSe
 		ca_path = "/etc/ssl/certs";
 	} else {
-		ca_path = "/nonexistent_path";
+		ca_path = "/nonexistent_path"; // don't try -- just in case:
 	}
 
 	/* If we don't set anything defaults are used. at the time of writing we compile bundled curl on debian
