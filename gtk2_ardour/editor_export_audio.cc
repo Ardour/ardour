@@ -106,14 +106,6 @@ Editor::quick_export ()
 	dialog.run();
 }
 
-SimpleExport*
-Editor::simple_export (void* ptr)
-{
-	SimpleExport* se = new (ptr) SimpleExport (*this);
-	se->set_session (_session);
-	return se;
-}
-
 void
 Editor::loudness_assistant_marker ()
 {

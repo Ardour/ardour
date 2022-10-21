@@ -332,8 +332,6 @@ public:
 	void export_region ();
 	void quick_export ();
 
-	SimpleExport* simple_export (void*);
-
 	/* export for analysis only */
 	void loudness_assistant (bool);
 	void loudness_assistant_marker ();

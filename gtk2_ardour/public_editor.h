@@ -304,9 +304,6 @@ public:
 	/** Open Simple Export Dialog */
 	virtual void quick_export () = 0;
 
-	/* Construct a SimpleExport object for Lua */
-	virtual SimpleExport* simple_export (void*) = 0;
-
 	virtual void loudness_assistant (bool) = 0;
 
 	virtual void register_actions () = 0;
