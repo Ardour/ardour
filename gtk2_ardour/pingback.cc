@@ -61,7 +61,7 @@ struct ping_call {
 #ifdef PLATFORM_WINDOWS
 
 static std::string
-build__query_string (ArdourCurl::HttpGet const & h)
+build_query_string (ArdourCurl::HttpGet const & h)
 {
 # if ( defined(__x86_64__) || defined(_M_X64) )
 	return  "s=Windows64";
