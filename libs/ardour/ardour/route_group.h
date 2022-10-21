@@ -189,6 +189,7 @@ private:
 	boost::shared_ptr<ControlGroup> _monitoring_group;
 
 	void remove_when_going_away (boost::weak_ptr<Route>);
+	void unset_subgroup_bus ();
 	int set_state_2X (const XMLNode&, int);
 
 	void post_set (PBD::PropertyChange const &);

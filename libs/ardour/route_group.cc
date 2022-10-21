@@ -208,6 +208,15 @@ RouteGroup::remove_when_going_away (boost::weak_ptr<Route> wr)
 	}
 }
 
+void
+RouteGroup::unset_subgroup_bus ()
+{
+	if (_session.deletion_in_progress()) {
+		return;
+	}
+	_subgroup_bus.reset ();
+}
+
 int
 RouteGroup::remove (boost::shared_ptr<Route> r)
 {
@@ -316,6 +325,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		boost::shared_ptr<Route> r = _session.route_by_id (subgroup_id);
 		if (r) {
 			_subgroup_bus = r;
+			_subgroup_bus->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::unset_subgroup_bus, this));
 		}
 	}
 
@@ -565,6 +575,7 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 
 	_subgroup_bus = rl.front();
 	_subgroup_bus->set_name (_name);
+	_subgroup_bus->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::unset_subgroup_bus, this));
 
 	if (aux) {
 
