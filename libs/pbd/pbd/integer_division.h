@@ -50,7 +50,7 @@ namespace PBD {
  */
 
 inline
-int64_t muldiv (int64_t v, int64_t n, int64_t d)
+int64_t muldiv_round (int64_t v, int64_t n, int64_t d)
 {
 	/* either n or d or both could be negative but for now we assume that
 	   only d could be (that is, n and d represent negative rational numbers of the
@@ -90,6 +90,40 @@ int64_t muldiv (int64_t v, int64_t n, int64_t d)
 	 */
 
 	return(int64_t) (((_v * _n) + hd) / _d);
+#endif
+}
+
+inline
+int64_t muldiv_floor (int64_t v, int64_t n, int64_t d)
+{
+#ifndef COMPILER_INT128_SUPPORT
+	boost::multiprecision::int512_t bignum = v;
+
+	bignum *= n;
+	bignum /= d;
+
+	try {
+
+		return bignum.convert_to<int64_t> ();
+
+	} catch (...) {
+		fatal << "arithmetic overflow in timeline math\n" << endmsg;
+		/* NOTREACHED */
+		return 0;
+	}
+
+#else
+	__int128 _n (n);
+	__int128 _d (d);
+	__int128 _v (v);
+
+	/* this could overflow, but will not do so merely because we are
+	 * multiplying two int64_t together and storing the result in an
+	 * int64_t. Overflow will occur where (v*n)+hd > INT128_MAX (hard
+	 * limit) or where v * n / d > INT64_T (i.e. n > d)
+	 */
+
+	return(int64_t) ((_v * _n) / _d);
 #endif
 }
 } /* namespace */
