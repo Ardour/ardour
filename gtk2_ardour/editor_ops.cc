@@ -918,7 +918,7 @@ Editor::find_next_region_boundary (timepos_t const & pos, int32_t dir, const Tra
 			continue;
 		}
 
-		d = contender.distance (pos);
+		d = pos.distance (contender).abs();
 
 		if (d < distance) {
 			current_nearest = contender;
