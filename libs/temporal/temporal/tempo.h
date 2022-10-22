@@ -245,7 +245,7 @@ class LIBTEMPORAL_API Tempo {
 	static void superbeats_to_beats_ticks (int64_t sb, int32_t& b, int32_t& t) {
 		b = sb / big_numerator;
 		int64_t remain = sb - (b * big_numerator);
-		t = PBD::muldiv_floor (Temporal::ticks_per_beat, remain, big_numerator);
+		t = PBD::muldiv_round (Temporal::ticks_per_beat, remain, big_numerator);
 	}
 
 	bool active () const { return _active; }
