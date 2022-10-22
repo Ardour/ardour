@@ -1356,6 +1356,19 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		if (node.get_property (X_("position"), p) && node.get_property (X_("length"), l)) {
 			_length = timecnt_t (l, timepos_t (p));
 		}
+
+		std::string lock_style;
+		if (node.get_property (X_("positional-lock-style"), lock_style)) {
+			if (lock_style == "MusicTime") {
+				double beat, start_beats, length_beats;
+				if (node.get_property (X_("beat"), beat) && node.get_property (X_("length-beats"), length_beats)) {
+					_length = timecnt_t (Temporal::Beats::from_double (length_beats), timepos_t (Temporal::Beats::from_double (beat)));
+				}
+				if (node.get_property (X_("start-beats"), start_beats)) {
+					_start = timepos_t (Temporal::Beats::from_double (start_beats));
+				}
+			}
+		}
 	}
 
 	/* Regions derived from "Destructive/Tape" mode tracks in earlier
