@@ -292,9 +292,6 @@ AudioEngine::process_callback (pframes_t nframes)
 	Temporal::TempoMap::WritableSharedPtr current_map = Temporal::TempoMap::read ();
 	if (current_map != Temporal::TempoMap::use()) {
 		Temporal::TempoMap::set (current_map);
-		if (_session) {
-			_session->tempo_map_changed ();
-		}
 	}
 
 	/* This is for JACK, where the latency callback arrives in sync with

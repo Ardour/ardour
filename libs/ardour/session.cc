@@ -502,6 +502,8 @@ Session::Session (AudioEngine &eng,
 
 	IOPluginsChanged.connect_same_thread (*this, boost::bind (&Session::resort_io_plugs, this));
 
+	TempoMap::MapChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this));
+
 	emit_thread_start ();
 	auto_connect_thread_start ();
 
