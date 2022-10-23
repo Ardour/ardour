@@ -1662,9 +1662,9 @@ Editor::toggle_tempo_type ()
 
 		XMLNode &after = tmap->get_state();
 		_session->add_command (new Temporal::TempoCommand (_("change tempo type"), &before, &after));
-		commit_reversible_command ();
 
 		TempoMap::update (tmap);
+		commit_reversible_command ();
 	}
 }
 
@@ -1696,9 +1696,9 @@ Editor::toggle_tempo_continues ()
 
 	XMLNode &after = tmap->get_state();
 	_session->add_command (new Temporal::TempoCommand (_("change tempo clamp"), &before, &after));
-	commit_reversible_command ();
 
 	TempoMap::update (tmap);
+	commit_reversible_command ();
 }
 
 void
@@ -1729,9 +1729,9 @@ Editor::ramp_to_next_tempo ()
 
 	XMLNode &after = tmap->get_state();
 	_session->add_command (new Temporal::TempoCommand (_("changed tempo ramp"), &before, &after));
-	commit_reversible_command ();
 
 	TempoMap::update (tmap);
+	commit_reversible_command ();
 }
 
 void

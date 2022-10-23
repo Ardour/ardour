@@ -491,9 +491,8 @@ Editor::mouse_add_new_tempo_event (timepos_t pos)
 		map->set_tempo (map->tempo_at (pos), pos);
 		XMLNode &after = map->get_state();
 		_session->add_command (new Temporal::TempoCommand (_("add tempo"), &before, &after));
-		commit_reversible_command ();
-
 		TempoMap::update (map);
+		commit_reversible_command ();
 	}
 
 	//map.dump (cerr);
@@ -534,9 +533,9 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 	map->set_meter (Meter (bpb, note_type), pos);
 
 	_session->add_command (new Temporal::TempoCommand (_("add time signature"), &before, &map->get_state()));
-	commit_reversible_command ();
 
 	TempoMap::update (map);
+	commit_reversible_command ();
 
 	//map.dump (cerr);
 }
@@ -580,9 +579,9 @@ Editor::mouse_add_bbt_marker_event (timepos_t pos)
 	map->set_bartime (bbt, marker_dialog.position(), name);
 
 	_session->add_command (new Temporal::TempoCommand (_("add BBT marker"), &before, &map->get_state()));
-	commit_reversible_command ();
 
 	TempoMap::update (map);
+	commit_reversible_command ();
 }
 
 
@@ -658,9 +657,9 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 
 	XMLNode &after = tmap->get_state();
 	_session->add_command (new Temporal::TempoCommand (_("edit time signature"), &before, &after));
-	commit_reversible_command ();
 
 	TempoMap::update (tmap);
+	commit_reversible_command ();
 }
 
 void
@@ -694,9 +693,9 @@ Editor::edit_bbt (MusicTimePoint& point)
 
 	XMLNode &after = tmap->get_state();
 	_session->add_command (new Temporal::TempoCommand (_("edit tempo"), &before, &after));
-	commit_reversible_command ();
 
 	TempoMap::update (tmap);
+	commit_reversible_command ();
 }
 
 void
@@ -731,9 +730,9 @@ Editor::edit_tempo_section (TempoPoint& section)
 
 	XMLNode &after = tmap->get_state();
 	_session->add_command (new Temporal::TempoCommand (_("edit tempo"), &before, &after));
-	commit_reversible_command ();
 
 	TempoMap::update (tmap);
+	commit_reversible_command ();
 }
 
 void
@@ -763,9 +762,9 @@ Editor::real_remove_bbt_marker (MusicTimePoint const * point)
 	tmap->remove_bartime (*point);
 	XMLNode &after = tmap->get_state();
 	_session->add_command (new Temporal::TempoCommand (_("remove BBT marker"), &before, &after));
-	commit_reversible_command ();
 
 	TempoMap::update (tmap);
+	commit_reversible_command ();
 
 	return FALSE;
 }
@@ -779,10 +778,8 @@ Editor::real_remove_tempo_marker (TempoPoint const * section)
 	tmap->remove_tempo (*section);
 	XMLNode &after = tmap->get_state();
 	_session->add_command (new Temporal::TempoCommand (_("remove tempo change"), &before, &after));
-	commit_reversible_command ();
-
 	TempoMap::update (tmap);
-
+	commit_reversible_command ();
 	return FALSE;
 }
 
@@ -816,9 +813,8 @@ Editor::real_remove_meter_marker (Temporal::MeterPoint const * section)
 	tmap->remove_meter (*section);
 	XMLNode &after = tmap->get_state();
 	_session->add_command (new Temporal::TempoCommand (_("remove time signature change"), &before, &after));
-	commit_reversible_command ();
-
 	TempoMap::update (tmap);
+	commit_reversible_command ();
 
 	return FALSE;
 }
