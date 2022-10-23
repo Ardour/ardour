@@ -71,6 +71,7 @@
 #include "session_dialog.h"
 #include "session_archive_dialog.h"
 #include "timers.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #ifdef WINDOWS_VST_SUPPORT
@@ -542,7 +543,9 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 			psd.start ();
 		}
 		if (!u.empty()) {
-			show_plugin_manager ();
+			if (scan_now || UIConfiguration::instance().get_show_manager_if_plugins_are_missing ()) {
+				show_plugin_manager ();
+			}
 		}
 	}
 

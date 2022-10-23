@@ -3829,6 +3829,16 @@ These settings will only take effect after %1 is restarted.\n\
 #endif
 
 	bo = new BoolOption (
+			"show-manager-if-plugins-are-missing",
+			_("Open Plugin Manager window when missing plugins are found"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_manager_if_plugins_are_missing),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_manager_if_plugins_are_missing)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> the Plugin Manager is display at session load if the session contains any plugins that are missing, or plugins have been updated and require a rescan."));
+
+	bo = new BoolOption (
 		"new-plugins-active",
 			_("Make new plugins active"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_new_plugins_active),
