@@ -279,9 +279,9 @@ public:
 	 * @param x a pixel coordinate relative to region start
 	 * @param ensure_snap ignore SnapOff and magnetic snap.
 	 * Required for inverting snap logic with modifier keys and snap delta calculation.
-	 * @return the snapped timepos_t coordinate relative to region start
+	 * @return the snapped timecnt_t coordinate relative to region start
 	 */
-	Temporal::timepos_t snap_pixel_to_time (double x, bool ensure_snap = false);
+	Temporal::timecnt_t snap_pixel_to_time (double x, bool ensure_snap = false);
 
 	void goto_previous_note (bool add_to_selection);
 	void goto_next_note (bool add_to_selection);

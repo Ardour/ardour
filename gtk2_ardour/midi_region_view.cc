@@ -2527,8 +2527,8 @@ MidiRegionView::update_drag_selection(timepos_t const & start, timepos_t const &
 
 	// Convert to local coordinates
 	const double     y  = midi_view()->y_position();
-	const double     x0 = editor.time_to_pixel (max (timepos_t(), _region->region_relative_position (start)));
-	const double     x1 = editor.time_to_pixel (max (timepos_t(), _region->region_relative_position (end)));
+	const double     x0 = editor.sample_to_pixel (max<samplepos_t>(0, _region->region_relative_position (start).samples()));
+	const double     x1 = editor.sample_to_pixel (max<samplepos_t>(0, _region->region_relative_position (end).samples()));
 	const double     y0 = max(0.0, gy0 - y);
 	const double     y1 = max(0.0, gy1 - y);
 
@@ -2941,11 +2941,11 @@ MidiRegionView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, b
  *  Used for inverting the snap logic with key modifiers and snap delta calculation.
  *  @return Snapped time relative to the region position.
  */
-timepos_t
+timecnt_t
 MidiRegionView::snap_pixel_to_time (double x, bool ensure_snap)
 {
 	PublicEditor& editor (trackview.editor());
-	return snap_region_time_to_region_time (timepos_t (editor.pixel_to_sample (x)), ensure_snap);
+	return snap_region_time_to_region_time (timecnt_t (editor.pixel_to_sample (x)), ensure_snap);
 }
 
 /** @param x Pixel relative to the region position.
@@ -2955,7 +2955,7 @@ MidiRegionView::snap_pixel_to_time (double x, bool ensure_snap)
 double
 MidiRegionView::snap_to_pixel(double x, bool ensure_snap)
 {
-	return (double) trackview.editor().time_to_pixel(snap_pixel_to_time(x, ensure_snap));
+	return (double) trackview.editor().sample_to_pixel (snap_pixel_to_time(x, ensure_snap).samples());
 }
 
 double
@@ -3188,11 +3188,11 @@ MidiRegionView::finish_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		/* Convert the new x position to a position within the source */
-		timepos_t current_time;
+		timecnt_t current_time;
 		if (with_snap) {
 			current_time = snap_pixel_to_time (current_x, ensure_snap);
 		} else {
-			current_time = timepos_t (trackview.editor().pixel_to_sample (current_x));
+			current_time = timecnt_t (trackview.editor().pixel_to_sample (current_x));
 		}
 
 		/* and then to beats */
@@ -4124,7 +4124,7 @@ MidiRegionView::update_ghost_note (double x, double y, uint32_t state)
 	_ghost_note->show();
 
 	/* calculate time in of a single grid units worth of beats, at the start of source */
-	const Temporal::Beats length = get_draw_length_beats (_region->source_position() + timepos_t (snapped_beats));
+	const Temporal::Beats length = get_draw_length_beats (_region->source_position() + timecnt_t (snapped_beats));
 
 	_ghost_note->note()->set_time (snapped_beats);
 	_ghost_note->note()->set_length (length);

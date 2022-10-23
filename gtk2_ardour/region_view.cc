@@ -1160,8 +1160,8 @@ RegionView::move_contents (timecnt_t const & distance)
  *  Used when inverting snap mode logic with key modifiers, or snap distance calculation.
  *  @return Snapped time offset from this region's position.
  */
-timepos_t
-RegionView::snap_region_time_to_region_time (timepos_t const & x, bool ensure_snap) const
+timecnt_t
+RegionView::snap_region_time_to_region_time (timecnt_t const & x, bool ensure_snap) const
 {
 	PublicEditor& editor = trackview.editor();
 	/* x is region relative, convert it to global absolute time */

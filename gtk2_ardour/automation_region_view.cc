@@ -192,7 +192,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, dou
 
 	/* snap time */
 
-	when = snap_region_time_to_region_time (when.earlier (_region->start()), false) + _region->start ();
+	when = snap_region_time_to_region_time (_region->start().distance (when), false) + _region->start ();
 
 	/* map using line */
 

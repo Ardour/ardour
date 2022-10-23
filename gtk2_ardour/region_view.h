@@ -148,7 +148,7 @@ public:
 		}
 	};
 
-	Temporal::timepos_t snap_region_time_to_region_time (Temporal::timepos_t const &, bool ensure_snap = false) const;
+	Temporal::timecnt_t snap_region_time_to_region_time (Temporal::timecnt_t const &, bool ensure_snap = false) const;
 
 	void update_visibility ();
 
