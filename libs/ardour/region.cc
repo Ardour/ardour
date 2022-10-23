@@ -2071,6 +2071,12 @@ Region::source_beats_to_absolute_beats (Temporal::Beats beats) const
 	return source_position().beats() + beats;
 }
 
+Temporal::Beats
+Region::absolute_time_to_region_beats(timepos_t const & b) const
+{
+	 return (position().distance (b)).beats () + start().beats();;
+}
+
 Temporal::timepos_t
 Region::region_beats_to_absolute_time (Temporal::Beats beats) const
 {
@@ -2087,47 +2093,41 @@ Region::source_beats_to_absolute_time (Temporal::Beats beats) const
 	return source_position() + timepos_t (beats);
 }
 
+/** Calculate  (time - source_position) in Beats
+ *
+ * Measure the distance between the absolute time and the position of
+ * the source start, in beats. The result is positive if time is later
+ * than source position.
+ *
+ * @param p is an absolute time
+ * @returns time offset from p to the region's source position as the origin in Beat units
+ */
 Temporal::Beats
-Region::absolute_time_to_source_beats(timepos_t const & time) const
+Region::absolute_time_to_source_beats(timepos_t const& p) const
 {
-	/* measure the distance between the absolute time and the position of
-	   the source start, in beats. positive if time is later than source
-	   position.
-	*/
-
-	return source_position().distance (time).beats();
+	return source_position().distance (p).beats();
 }
 
-timepos_t
+/** Calculate (pos - source-position)
+ *
+ * @param p is an absolute time
+ * @returns time offset from p to the region's source position as the origin.
+ */
+timecnt_t
 Region::source_relative_position (timepos_t const & p) const
 {
-	/* p is an absolute time, return the time with the source position as
-	   the origin.
-
-	   Note that conventionally we would return a timecnt_t, expressing a
-	   distance from the source position. But we return timepos_t for which
-	   the origin is implicit, and in this case, the origin is the region
-	   position, not zero.
-
-	   XXX this seems likely to cause problems.
-	*/
-	return p.earlier (source_position());
+	return source_position().distance (p);
 }
 
-timepos_t
+/** Calculate (p - region-position)
+ *
+ * @param p is an absolute time
+ * @returns the time offset using the region (timeline) position as origin
+ */
+timecnt_t
 Region::region_relative_position (timepos_t const & p) const
 {
-	/* p is an absolute time, return the time with the region position as
-	   the origin.
-
-	   Note that conventionally we would return a timecnt_t, expressing a
-	   distance from the region position. But we return timepos_t for which
-	   the origin is implicit, and in this case, the origin is the region
-	   position, not zero.
-
-	   XXX this seems likely to cause problems.
-	*/
-	return p.earlier (position());
+	return position().distance (p);
 }
 
 Temporal::TimeDomain

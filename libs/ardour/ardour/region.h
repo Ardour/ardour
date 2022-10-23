@@ -126,8 +126,8 @@ public:
 	timepos_t nt_last()    const { return end().decrement(); }
 
 	timepos_t source_position () const;
-	timepos_t source_relative_position (Temporal::timepos_t const &) const;
-	timepos_t region_relative_position (Temporal::timepos_t const &) const;
+	timecnt_t source_relative_position (Temporal::timepos_t const &) const;
+	timecnt_t region_relative_position (Temporal::timepos_t const &) const;
 
 	samplepos_t position_sample ()  const { return position().samples(); }
 	samplecnt_t start_sample ()     const { return _start.val().samples(); }
@@ -311,9 +311,7 @@ public:
 	/** Convert a timestamp in absolute time to beats measured from source start*/
 	Temporal::Beats absolute_time_to_source_beats(Temporal::timepos_t const &) const;
 
-	Temporal::Beats absolute_time_to_region_beats (Temporal::timepos_t const & b) const {
-		return position().distance (b+start()).beats ();
-	}
+	Temporal::Beats absolute_time_to_region_beats (Temporal::timepos_t const &) const;
 
 	int apply (Filter &, Progress* progress = 0);
 
