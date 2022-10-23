@@ -7462,9 +7462,9 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 	XMLNode& after (tmap->get_state());
 
 	_session->add_command (new Temporal::TempoCommand (_("set tempo from range"), &before, &after));
-	commit_reversible_command ();
 
 	TempoMap::update (tmap);
+	commit_reversible_command ();
 }
 
 void

@@ -13,7 +13,11 @@ function factory () return function ()
 	tm:set_tempo (Temporal.Tempo (140, 120, 4), Temporal.timepos_t (0))
 	tm:set_tempo (Temporal.Tempo (120, 80, 4), Temporal.timepos_t.from_ticks (Temporal.ticks_per_beat * 4))
 	tm:set_tempo (Temporal.Tempo (80, 80, 4), Temporal.timepos_t.from_ticks (Temporal.ticks_per_beat * 4))
+	Session:begin_reversible_command ("Change Tempo Map")
 	Temporal.TempoMap.update (tm)
+	if not Session:abort_empty_reversible_command () then
+		Session:commit_reversible_command (nil)
+	end
 	tm = nil
 
 	-- Abort Edit example
