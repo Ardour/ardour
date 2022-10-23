@@ -271,6 +271,7 @@ CLASSKEYS(ARDOUR::PresentationInfo);
 CLASSKEYS(ARDOUR::RCConfiguration);
 CLASSKEYS(ARDOUR::Session);
 CLASSKEYS(ARDOUR::SessionConfiguration);
+CLASSKEYS(ARDOUR::SimpleExport);
 CLASSKEYS(ARDOUR::Slavable);
 CLASSKEYS(ARDOUR::Source);
 CLASSKEYS(ARDOUR::Track);
