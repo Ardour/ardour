@@ -201,7 +201,7 @@ NagScreen::offer_to_donate ()
 void
 NagScreen::offer_to_subscribe ()
 {
-	const char* uri = "http://ardour.org/subscribe";
+	const char* uri = "https://ardour.org/subscribe";
 
 	if (PBD::open_uri (uri)) {
 		mark_subscriber ();
