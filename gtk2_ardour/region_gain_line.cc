@@ -79,7 +79,7 @@ AudioRegionGainLine::start_drag_single (ControlPoint* cp, double x, float fracti
 
 // This is an extended copy from AutomationList
 void
-AudioRegionGainLine::remove_point (ControlPoint& cp)
+AudioRegionGainLine::remove_points (std::vector<ControlPoint*> const& cps)
 {
 	trackview.editor().begin_reversible_command (_("remove control point"));
 	XMLNode &before = alist->get_state();
@@ -91,7 +91,15 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 	}
 
 	trackview.editor ().get_selection ().clear_points ();
-	alist->erase (cp.model());
+
+	// Extract models before the ControlPoints iterator mutates on ControlPoint deletion
+	std::list<Evoral::ControlList::iterator> models;
+	for (auto const & cp : cps) {
+		models.push_back(cp->model());
+	}
+	for (auto const & model : models) {
+		alist->erase (model);
+	}
 
 	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 	trackview.editor().commit_reversible_command ();

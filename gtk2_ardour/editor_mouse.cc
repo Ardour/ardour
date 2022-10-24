@@ -2476,11 +2476,15 @@ Editor::remove_control_point (ArdourCanvas::Item* item)
 		abort(); /*NOTREACHED*/
 	}
 
-	if (!can_remove_control_point (*control_point)) {
-		return;
+	std::vector<ControlPoint*> cps;
+
+	for (auto const& cp : selection->points) {
+		if ((&cp->line() == &control_point->line ()) && can_remove_control_point (*cp)) {
+			cps.push_back (cp);
+		}
 	}
 
-	control_point->line().remove_point (*control_point);
+	control_point->line().remove_points (cps);
 }
 
 void
