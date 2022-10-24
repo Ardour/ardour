@@ -3330,7 +3330,13 @@ TempoMap::midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_p
 
 	Temporal::Beats b = (quarters_at_sample (pos)).round_up_to_beat ();
 
-	clk_pos = sample_at (b);
+	/* We cannot use
+	 *    clk_pos = sample_at (b);
+	 * because in this case we have to round up to the start
+	 * of the next tick, not round to to the current tick.
+	 * (compare to 14da117bc88)
+	 */
+	clk_pos = PBD::muldiv_round (superclock_at (b), TEMPORAL_SAMPLE_RATE, superclock_ticks_per_second ());
 	clk_beat = b.get_beats () * 24;
 
 	assert (clk_pos >= pos);
