@@ -18,14 +18,14 @@
       composers.
     </p>
   </description>
-  <url type="homepage">http://ardour.org</url>
+  <url type="homepage">https://ardour.org</url>
   <screenshots>
       <screenshot type="default">
-        <image>http://community.ardour.org/files/images/ardour-editor-window-1600x900.png</image>
+        <image>https://community.ardour.org/files/images/ardour-editor-window-1600x900.png</image>
         <caption>The Editor window where you can arrange audio and MIDI data along a timeline</caption>
       </screenshot>
       <screenshot>
-        <image>http://community.ardour.org/files/images/ardour-mixer-window-1600x900.png</image>
+        <image>https://community.ardour.org/files/images/ardour-mixer-window-1600x900.png</image>
         <caption>The Mixer window which includes channel strips for each track and bus</caption>
       </screenshot>
   </screenshots>
