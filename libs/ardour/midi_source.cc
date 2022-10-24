@@ -218,7 +218,7 @@ MidiSource::midi_read (const ReaderLock&                  lm,
 		   Note that multiple tracks can use a MidiSource simultaneously, so
 		   all playback state must be in parameters (the cursor) and must not
 		   be cached in the source of model itself.
-		   See http://tracker.ardour.org/view.php?id=6541
+		   See https://tracker.ardour.org/view.php?id=6541
 		*/
 		cursor.connect(Invalidated);
 		cursor.iter = _model->begin (start.beats(), false, filtered, &cursor.active_notes);

@@ -45,7 +45,7 @@ SndFileImportableSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binf
 		return 0;
 	}
 
-	/* see http://tracker.ardour.org/view.php?id=6208
+	/* see https://tracker.ardour.org/view.php?id=6208
 	 * 0xffffffff 0xfffc5680
 	 * seems to be a bug in Presonus Capture (which generated the file)
 	 *

@@ -20,7 +20,7 @@
  *
  * see http://pidgin.im/pipermail/devel/2014-April/023475.html
  * and https://pidgin.im/pipermail/commits/2014-April/025031.html
- * http://tracker.ardour.org/view.php?id=6575
+ * https://tracker.ardour.org/view.php?id=6575
  */
 
 #ifndef __pbd_gstdio_compat_h__
