@@ -90,9 +90,11 @@ ControlPointDialog::ControlPointDialog (ControlPoint* p, bool multi)
 }
 
 double
-ControlPointDialog::get_y_fraction () const
+ControlPointDialog::get_y_fraction (ControlPoint* p) const
 {
-	return point_->line().string_to_fraction (value_.get_text ());
+	double const old_fraction = 1.0 - (p->get_y () / p->line().height ());
+
+	return point_->line().string_to_fraction (value_.get_text (), old_fraction);
 }
 
 bool

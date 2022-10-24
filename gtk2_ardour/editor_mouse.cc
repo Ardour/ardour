@@ -2514,11 +2514,11 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 	}
 
 	if (d.all_selected_points ()) {
-		p->line().modify_points_y (cps, d.get_y_fraction ());
+		p->line().modify_points_y (cps, d.get_y_fraction (p)); // FIXME: multi edit somehow?
 	} else {
 		cps.clear ();
 		cps.push_back (p);
-		p->line().modify_points_y (cps, d.get_y_fraction ());
+		p->line().modify_points_y (cps, d.get_y_fraction (p));
 	}
 }
 

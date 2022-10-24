@@ -29,7 +29,7 @@ class ControlPointDialog : public ArdourDialog
 public:
 	ControlPointDialog (ControlPoint *, bool multi);
 
-	double get_y_fraction () const;
+	double get_y_fraction (ControlPoint *) const;
 
 	bool all_selected_points () const;
 

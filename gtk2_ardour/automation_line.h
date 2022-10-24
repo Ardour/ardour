@@ -125,7 +125,7 @@ public:
 	std::string get_verbose_cursor_relative_string (double, double) const;
 	std::string fraction_to_string (double) const;
 	std::string delta_to_string (double) const;
-	double string_to_fraction (std::string const &) const;
+	double string_to_fraction (std::string const &, double old_fraction) const;
 
 	void   view_to_model_coord_y (double &) const;
 
