@@ -5237,9 +5237,9 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 	RegionSelection sel = regions; // clear (below) may  clear the argument list if its the current region selection
 	RegionSelection foo;
 
-	timepos_t const start_sample = regions.start_time ();
-	timepos_t const end_sample = regions.end_time ();
-	timecnt_t const span = start_sample.distance (end_sample);
+	timepos_t const start_time = regions.start_time ();
+	timepos_t const end_time = regions.end_time ();
+	timecnt_t const span = start_time.distance (end_time);
 
 	begin_reversible_command (Operations::duplicate_region);
 
@@ -5264,7 +5264,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		}
 
 		for (set<boost::shared_ptr<Playlist> >::iterator p = playlists.begin(); p != playlists.end(); ++p) {
-			do_ripple ((*p), start_sample, span.scale (times), &exclude, false);
+			do_ripple ((*p), start_time, span.scale (times), &exclude, false);
 		}
 	}
 
@@ -5277,7 +5277,9 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		latest_regionviews.clear ();
 		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
-		timepos_t position = end_sample;
+		timepos_t position = end_time + (start_time.distance (r->position()));
+		position.increment ();
+
 		playlist = (*i)->region()->playlist();
 
 		if (!should_ripple()) {
