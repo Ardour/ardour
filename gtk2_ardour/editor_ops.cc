@@ -5266,12 +5266,22 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		latest_regionviews.clear ();
 		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
-		/* end time is an inclusive end; we need to place the
-		 * duplicated region after that.
+		/* XXX problem arew here. When duplicating audio regions, the
+		 * next one must be positioned 1 sample after the end of the
+		 * prior region.
+		 *
+		 * For MIDI, this is not requiredd, because we allow MIDI
+		 * events to be simultaneous without affecting semantics.
+		 *
+		 * HOWEVER, opaque MIDI regions will cause an underlying note
+		 * off at the end of earlier region to not be delivered. In
+		 * reality, the note tracker will fix this by resolving all
+		 * on-notes at the region's end, but that does not seem like a
+		 * good solution.
 		 */
 
-		timepos_t position = end_time.increment();
-		position += start_time.distance (r->position());
+		timepos_t position = end_time + (start_time.distance (r->position()));
+		position.increment ();
 
 		playlist = (*i)->region()->playlist();
 
