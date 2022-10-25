@@ -128,24 +128,6 @@ public:
 
 	sigc::signal<void,std::string,void*> ItemRemoved;
 
-	/** Emitted when the name of this item is changed */
-	sigc::signal<void,std::string,std::string,void*> NameChanged;
-
-	/** Emitted when the position of this item changes */
-	sigc::signal<void,Temporal::timepos_t,void*> PositionChanged;
-
-	/** Emitted when the position lock of this item is changed */
-	sigc::signal<void,bool,void*> PositionLockChanged;
-
-	/** Emitted when the duration of this item changes */
-	sigc::signal<void,Temporal::timecnt_t,void*> DurationChanged;
-
-	/** Emitted when the maximum item duration is changed */
-	sigc::signal<void,Temporal::timecnt_t,void*> MaxDurationChanged;
-
-	/** Emitted when the mionimum item duration is changed */
-	sigc::signal<void,Temporal::timecnt_t,void*> MinDurationChanged;
-
 	enum Visibility {
 		ShowFrame = 0x1,
 		ShowNameHighlight = 0x2,

@@ -303,7 +303,6 @@ TimeAxisViewItem::set_position(timepos_t const & pos, void* src, double* delta)
 	}
 
 	group->set_x_position (new_unit_pos);
-	PositionChanged (time_position, src); /* EMIT_SIGNAL */
 
 	return true;
 }
@@ -347,7 +346,6 @@ TimeAxisViewItem::set_duration (timecnt_t const & dur, void* src)
 
 	reset_width_dependent_items (end_pixel - first_pixel);
 
-	DurationChanged (dur, src); /* EMIT_SIGNAL */
 	return true;
 }
 
@@ -368,7 +366,6 @@ void
 TimeAxisViewItem::set_max_duration(timecnt_t const & dur, void* src)
 {
 	max_item_duration = dur;
-	MaxDurationChanged(max_item_duration, src); /* EMIT_SIGNAL */
 }
 
 /** @return the maximum duration that this item may have */
@@ -388,7 +385,6 @@ void
 TimeAxisViewItem::set_min_duration(timecnt_t const & dur, void* src)
 {
 	min_item_duration = dur;
-	MinDurationChanged(max_item_duration, src); /* EMIT_SIGNAL */
 }
 
 /** @return the minimum duration that this item may have */
@@ -410,7 +406,6 @@ TimeAxisViewItem::set_position_locked(bool yn, void* src)
 {
 	position_locked = yn;
 	set_trim_handle_colors();
-	PositionLockChanged (position_locked, src); /* EMIT_SIGNAL */
 }
 
 /** @return true if this item is locked to its current position */
@@ -472,7 +467,6 @@ TimeAxisViewItem::set_item_name(std::string new_name, void* src)
 	if (new_name != item_name) {
 		std::string temp_name = item_name;
 		item_name = new_name;
-		NameChanged (item_name, temp_name, src); /* EMIT_SIGNAL */
 	}
 }
 
