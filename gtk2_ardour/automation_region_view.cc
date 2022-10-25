@@ -103,7 +103,6 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 	_line->set_height ((uint32_t)rint(trackview.current_height() - 2.5 - NAME_HIGHLIGHT_SIZE));
 	_line->set_visibility (AutomationLine::VisibleAspects (AutomationLine::Line|AutomationLine::ControlPoints));
 	_line->set_maximum_time (timepos_t (_region->length()));
-	std::cerr << "Set line offset to " << _region->start() << std::endl;
 	_line->set_offset (_region->start ());
 }
 
