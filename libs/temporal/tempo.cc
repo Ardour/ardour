@@ -1417,8 +1417,14 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	beats = beats.round_to_beat ();
 	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->beats() < beats && *t != tp; ++t) { prev_t = t; }
 	for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->beats() < beats; ++m) { prev_m = m; }
-	assert (prev_t != _tempos.end());
-	assert (prev_m != _meters.end());
+	if (prev_t == _tempos.end()) {
+		/* moved earlier than first, no movement */
+		return false;
+	}
+	if (prev_m == _meters.end()) {
+		/* moved earlier than first, no movement */
+		return false;
+	}
 	TempoMetric metric (*prev_t, *prev_m);
 	sc = metric.superclock_at (beats);
 	bbt = metric.bbt_at (beats);
