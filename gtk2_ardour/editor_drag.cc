@@ -3304,11 +3304,17 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	} else if (_movable) {
 
 		timepos_t pos = adjusted_current_time (event);
-		map->move_tempo (_marker->tempo(), pos, false);
-		show_verbose_cursor_time (_marker->tempo().time());
-	}
 
-	_editor->mid_tempo_change (Editor::TempoChanged);
+		/* This relies on the tempo map to round up the beat postiion
+		 * and see if that differs from the current position (tempo
+		 * markers only allowed on beat)
+		 */
+
+		if (map->move_tempo (_marker->tempo(), pos, false)) {
+			_editor->mid_tempo_change (Editor::TempoChanged);
+			show_verbose_cursor_time (_marker->tempo().time());
+		}
+	}
 }
 
 
