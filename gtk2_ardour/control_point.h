@@ -56,6 +56,7 @@ public:
 		End
 	};
 
+	void move_to (double x, double y);
 	void move_to (double x, double y, ShapeType);
 	void reset (double x, double y, ARDOUR::AutomationList::iterator, uint32_t, ShapeType);
 	double get_x() const { return _x; }

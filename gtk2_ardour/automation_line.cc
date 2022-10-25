@@ -91,6 +91,14 @@ AutomationLine::AutomationLine (const string&                              name,
                                 const ParameterDescriptor&                 desc)
 	: trackview (tv)
 	, _name (name)
+	, _height (0)
+	, _visible (Line)
+	, terminal_points_can_slide (true)
+	, update_pending (false)
+	, have_reset_timeout (false)
+	, have_redisplay_timeout (false)
+	, no_draw (false)
+	, _is_boolean (false)
 	, alist (al)
 	, _parent_group (parent)
 	, _offset (0)
@@ -98,15 +106,6 @@ AutomationLine::AutomationLine (const string&                              name,
 	, _fill (false)
 	, _desc (desc)
 {
-	_visible = Line;
-
-	update_pending = false;
-	have_timeout = false;
-	no_draw = false;
-	_is_boolean = false;
-	terminal_points_can_slide = true;
-	_height = 0;
-
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple(0, 1.5));
 	CANVAS_DEBUG_NAME (group, "region gain envelope group");
 
@@ -258,7 +257,7 @@ AutomationLine::set_height (guint32 h)
 		} else {
 			line->set_fill_y1 (0);
 		}
-		reset ();
+		redisplay (true, true);
 	}
 }
 
@@ -411,8 +410,7 @@ AutomationLine::string_to_fraction (string const & s) const
 		default:
 			break;
 	}
-	model_to_view_coord_y (v);
-	return v;
+	return model_to_view_coord_y (v);
 }
 
 /** Start dragging a single point, possibly adding others if the supplied point is selected and there
@@ -554,7 +552,7 @@ AutomationLine::ContiguousControlPoints::move (double dx, double dvalue)
 		double view_y = 1.0 - (*i)->get_y() / line.height();
 		line.view_to_model_coord_y (view_y);
 		line.apply_delta (view_y, dvalue);
-		line.model_to_view_coord_y (view_y);
+		view_y = line.model_to_view_coord_y (view_y);
 		view_y = (1.0 - view_y) * line.height();
 
 		(*i)->move_to ((*i)->get_x() + dx, view_y, ControlPoint::Full);
@@ -782,7 +780,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 	/* convert to absolute time on timeline */
 	const timepos_t absolute_time = model_time + get_origin();
 
-	/* now convert it back to match the view_x (RegioView pixel pos) */
+	/* now convert it back to match the view_x (RegionView pixel pos) */
 	const double model_x = trackview.editor().time_to_pixel_unrounded (absolute_time.earlier (_offset).earlier (get_origin ()));
 
 	if (view_x != model_x) {
@@ -811,7 +809,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 	alist->modify (cp.model(), model_time, view_y);
 
 	/* convert back from model to view y for clamping position (for integer/boolean/etc) */
-	model_to_view_coord_y (view_y);
+	view_y = model_to_view_coord_y (view_y);
 	const double point_y = _height - (view_y * _height);
 	if (point_y != cp.get_y()) {
 		cp.move_to (cp.get_x(), point_y, ControlPoint::Full);
@@ -969,6 +967,105 @@ AutomationLine::list_changed ()
 }
 
 void
+AutomationLine::tempo_map_changed ()
+{
+	if (alist->time_domain() != Temporal::BeatTime) {
+		return;
+	}
+
+	redisplay (true, false);
+}
+
+void
+AutomationLine::redisplay (bool view_only, bool with_y)
+{
+	have_redisplay_timeout = false;
+
+	if (view_only) {
+
+
+		for (std::vector<ControlPoint *>::iterator i = control_points.begin(); i != control_points.end(); i++) {
+
+			AutomationList::iterator ai ((*i)->model());
+
+			/* drop points outside our range */
+
+			if (((*ai)->when < _offset)) {
+				continue;
+			}
+
+			if ((*ai)->when >= _maximum_time) {
+				break;
+			}
+
+
+			/* we do not need to recompute the y coordinate here */
+
+			double ty;
+			timecnt_t tx;
+
+			if (!with_y) {
+
+				/* re-use existing y-coordinate */
+
+				ty = (*i)->get_y();
+
+			} else {
+
+				/* convert to absolute position */
+
+				ty = model_to_view_coord_y ((*ai)->value);
+
+				if (isnan_local (ty)) {
+					warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
+					                           _name) << endmsg;
+					continue;
+				}
+
+				ty = _height - (ty * _height);
+			}
+
+			/* tx is currently the distance of this point from
+			 * _offset, which may be either:
+			 *
+			 * a) zero, for an automation line not connected to a
+			 * region
+			 *
+			 * b) some non-zero value, corresponding to the start
+			 * of the region within its source(s). Remember that
+			 * this start is an offset within the source, not a
+			 * position on the timeline.
+			 *
+			 * We need to convert tx to a global position, and to
+			 * do that we need to measure the distance from the
+			 * result of get_origin(), which tells ut the timeline
+			 * position of _offset
+			 */
+
+			tx = model_to_view_coord_x ((*ai)->when);
+
+			/* convert x-coordinate to a canvas unit coordinate (this takes
+			 * zoom and scroll into account).
+			 */
+
+			double px = trackview.editor().duration_to_pixels_unrounded (tx);
+
+			(*i)->move_to (px, ty);
+
+			reset_line_coords (**i);
+
+		}
+
+		if (line_points.size() > 1) {
+			line->set_steps (line_points, is_stepped());
+		}
+
+	} else {
+		reset ();
+	}
+}
+
+void
 AutomationLine::reset_callback (const Evoral::ControlList& events)
 {
 	uint32_t vp = 0;
@@ -997,11 +1094,17 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 	for (AutomationList::iterator ai = e.begin(); ai != e.end(); ++ai, ++pi) {
 
-		double ty = (*ai)->value;
+		/* drop points outside our range */
 
-		/* convert from model coordinates to canonical view coordinates */
+		if (((*ai)->when < _offset)) {
+			continue;
+		}
 
-		timepos_t tx = model_to_view_coord (**ai, ty);
+		if ((*ai)->when >= _maximum_time) {
+			break;
+		}
+
+		double ty = model_to_view_coord_y ((*ai)->value);
 
 		if (isnan_local (ty)) {
 			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
@@ -1009,21 +1112,22 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 			continue;
 		}
 
-		if (tx >= timepos_t::max (tx.time_domain()) || tx.is_negative () || tx >= _maximum_time) {
-			continue;
-		}
+		ty = _height - (ty * _height);
+
+		/* convert from model coordinates to canonical view coordinates */
+
+		timecnt_t tx = model_to_view_coord_x ((*ai)->when);
 
 		/* convert x-coordinate to a canvas unit coordinate (this takes
 		 * zoom and scroll into account).
 		 */
 
-		double px = trackview.editor().time_to_pixel_unrounded (tx);
+		double px = trackview.editor().duration_to_pixels_unrounded (tx);
 
 		/* convert from canonical view height (0..1.0) to actual
 		 * height coordinates (using X11's top-left rooted system)
 		 */
 
-		ty = _height - (ty * _height);
 
 		add_visible_control_point (vp, pi, px, ty, ai, np);
 
@@ -1072,7 +1176,7 @@ AutomationLine::reset ()
 {
 	DEBUG_TRACE (DEBUG::Automation, "\t\tLINE RESET\n");
 	update_pending = false;
-	have_timeout = false;
+	have_reset_timeout = false;
 
 	if (no_draw) {
 		return;
@@ -1097,15 +1201,35 @@ AutomationLine::queue_reset ()
 	if (trackview.editor().session()->transport_rolling() && alist->automation_write()) {
 		/* automation write pass ... defer to a timeout */
 		/* redraw in 1/4 second */
-		if (!have_timeout) {
+		if (!have_reset_timeout) {
 			DEBUG_TRACE (DEBUG::Automation, "\tqueue timeout\n");
 			Glib::signal_timeout().connect (sigc::bind_return (sigc::mem_fun (*this, &AutomationLine::reset), false), 250);
-			have_timeout = true;
+			have_reset_timeout = true;
 		} else {
 			DEBUG_TRACE (DEBUG::Automation, "\ttimeout already queued, change ignored\n");
 		}
 	} else {
 		reset ();
+	}
+}
+
+void
+AutomationLine::queue_redisplay (bool for_height)
+{
+	/* this must be called from the GUI thread */
+
+	if (trackview.editor().session()->transport_rolling() && alist->automation_write()) {
+		/* automation write pass ... defer to a timeout */
+		/* redraw in 1/4 second */
+		if (!have_redisplay_timeout) {
+			DEBUG_TRACE (DEBUG::Automation, "\tqueue timeout\n");
+			Glib::signal_timeout().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &AutomationLine::redisplay), true, for_height), true), 250);
+			have_redisplay_timeout = true;
+		} else {
+			DEBUG_TRACE (DEBUG::Automation, "\ttimeout already queued, change ignored\n");
+		}
+	} else {
+		redisplay (true, for_height);
 	}
 }
 
@@ -1229,8 +1353,8 @@ AutomationLine::apply_delta (double& val, double delta) const
 	val = _desc.apply_delta (val, delta);
 }
 
-void
-AutomationLine::model_to_view_coord_y (double& y) const
+double
+AutomationLine::model_to_view_coord_y (double y) const
 {
 	if (alist->default_interpolation () != alist->interpolation()) {
 		switch (alist->interpolation()) {
@@ -1239,8 +1363,7 @@ AutomationLine::model_to_view_coord_y (double& y) const
 				assert (alist->default_interpolation () == AutomationList::Linear);
 				break;
 			case AutomationList::Linear:
-				y = (y - _desc.lower) / (_desc.upper - _desc.lower);
-				return;
+				return (y - _desc.lower) / (_desc.upper - _desc.lower);
 			default:
 				/* types that default to linear, can't be use
 				 * Logarithmic or Exponential interpolation.
@@ -1250,15 +1373,22 @@ AutomationLine::model_to_view_coord_y (double& y) const
 				break;
 		}
 	}
-	y = _desc.to_interface (y);
+	return _desc.to_interface (y);
 }
 
-timepos_t
-AutomationLine::model_to_view_coord (Evoral::ControlEvent const & ev, double& y) const
+timecnt_t
+AutomationLine::model_to_view_coord_x (timepos_t const & when) const
 {
-	Temporal::timepos_t w (ev.when);
-	model_to_view_coord_y (y);
-	return (w).earlier (_offset);
+	/* @param when is a distance (with implicit origin) from the start of the
+	 * source. So we subtract the offset (from the region if this is
+	 * related to a region; zero otherwise) to get the distance (again,
+	 * implicit origin) from the start of the line.
+	 *
+	 * Then we construct a timecnt_t from this duration, and the origin of
+	 * the line on the timeline.
+	 */
+
+	return timecnt_t (when.earlier (_offset), get_origin());
 }
 
 /** Called when our list has announced that its interpolation style has changed */
@@ -1374,10 +1504,6 @@ AutomationLine::session_position (timepos_t const & when) const
 void
 AutomationLine::set_offset (timepos_t const & off)
 {
-	if (_offset == off) {
-		return;
-	}
-
 	_offset = off;
 	reset ();
 }

@@ -1176,7 +1176,7 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
 			timepos_t when = (*x)->when;
 			double val  = (*x)->value;
-			line.model_to_view_coord (**x, val);
+			line.model_to_view_coord_y (val);
 			(*x)->when = when;
 			(*x)->value = val;
 		}

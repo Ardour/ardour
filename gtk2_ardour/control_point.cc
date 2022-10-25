@@ -133,7 +133,13 @@ void
 ControlPoint::set_size (double sz)
 {
 	_size = sz;
-	move_to (_x, _y, _shape);
+	move_to (_x, _y);
+}
+
+void
+ControlPoint::move_to (double x, double y)
+{
+	move_to (x, y, _shape);
 }
 
 void

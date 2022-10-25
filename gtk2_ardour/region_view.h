@@ -106,6 +106,10 @@ public:
 		_redisplay (view_only);
 	}
 
+	virtual void tempo_map_changed () {
+		_redisplay (true);
+	}
+
 	struct DisplaySuspender {
 		DisplaySuspender (RegionView& rv, bool just_view = false) : region_view (rv), view_only (just_view) {
 			region_view.disable_display ();

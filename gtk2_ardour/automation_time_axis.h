@@ -97,6 +97,8 @@ public:
 	/** @return All AutomationLines associated with this view */
 	std::list<boost::shared_ptr<AutomationLine> > lines () const;
 
+	AutomationStreamView* automation_view() const { return _view; }
+
 	void set_selected_points (PointSelection&);
 	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double top, double bot, std::list<Selectable *>&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);

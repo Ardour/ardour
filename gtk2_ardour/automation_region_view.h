@@ -68,6 +68,8 @@ public:
 	void set_height (double);
 	void reset_width_dependent_items(double pixel_width);
 
+	void tempo_map_changed ();
+
 protected:
 	void create_line(boost::shared_ptr<ARDOUR::AutomationList> list);
 	bool set_position(Temporal::timepos_t const & pos, void* src, double* ignored);

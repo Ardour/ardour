@@ -50,6 +50,7 @@
 #include "canvas/item.h"
 #include "canvas/line_set.h"
 
+#include "automation_streamview.h"
 #include "bbt_marker_dialog.h"
 #include "editor.h"
 #include "marker.h"
@@ -899,21 +900,32 @@ Editor::mid_tempo_per_track_update (TimeAxisView& tav)
 {
 	MidiTimeAxisView* mtav = dynamic_cast<MidiTimeAxisView*> (&tav);
 
-	if (!mtav) {
-		return;
+	if (mtav) {
+		MidiStreamView* msv = mtav->midi_view();
+
+		if (msv) {
+			msv->foreach_regionview (sigc::mem_fun (*this, &Editor::mid_tempo_per_region_update));
+		}
+
+		TimeAxisView::Children kids (tav.get_child_list());
+
+		for (TimeAxisView::Children::iterator ct = kids.begin(); ct != kids.end(); ++ct) {
+
+			boost::shared_ptr<AutomationTimeAxisView> atav = boost::dynamic_pointer_cast<AutomationTimeAxisView> (*ct);
+
+			if (atav) {
+				AutomationStreamView* asv = atav->automation_view ();
+
+				if (asv) {
+					asv->foreach_regionview (sigc::mem_fun (*this, &Editor::mid_tempo_per_region_update));
+				}
+			}
+		}
 	}
-
-	MidiStreamView* msv = mtav->midi_view();
-
-	if (!msv) {
-		return;
-	}
-
-	msv->foreach_regionview (sigc::mem_fun (*this, &Editor::mid_tempo_per_region_update));
 }
 
 void
 Editor::mid_tempo_per_region_update (RegionView* rv)
 {
-	rv->redisplay (true);
+	rv->tempo_map_changed ();
 }

@@ -103,6 +103,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 	_line->set_height ((uint32_t)rint(trackview.current_height() - 2.5 - NAME_HIGHLIGHT_SIZE));
 	_line->set_visibility (AutomationLine::VisibleAspects (AutomationLine::Line|AutomationLine::ControlPoints));
 	_line->set_maximum_time (timepos_t (_region->length()));
+	std::cerr << "Set line offset to " << _region->start() << std::endl;
 	_line->set_offset (_region->start ());
 }
 
@@ -291,10 +292,9 @@ AutomationRegionView::reset_width_dependent_items (double pixel_width)
 	RegionView::reset_width_dependent_items(pixel_width);
 
 	if (_line) {
-		_line->reset();
+		_line->reset ();
 	}
 }
-
 
 void
 AutomationRegionView::region_resized (const PBD::PropertyChange& what_changed)
@@ -314,6 +314,16 @@ AutomationRegionView::region_resized (const PBD::PropertyChange& what_changed)
 	}
 }
 
+void
+AutomationRegionView::tempo_map_changed ()
+{
+	if (_line) {
+		_line->tempo_map_changed ();
+	}
+
+	set_position (_region->position(), 0, 0);
+	set_duration (_region->length(), 0);
+}
 
 void
 AutomationRegionView::entered ()
