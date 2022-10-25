@@ -1245,7 +1245,9 @@ MidiModel::write_to (boost::shared_ptr<MidiSource>     source,
 
 	source->mark_streaming_write_completed(source_lock);
 
-	set_edited(false);
+	/* no call to set_edited() because writing to "newsrc" doesn't remove
+	 * the need to write to "our own" source in ::sync_to_source()
+	 */
 
 	return true;
 }
