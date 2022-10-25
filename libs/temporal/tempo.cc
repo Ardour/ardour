@@ -1400,6 +1400,12 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 
 	beats = when.beats ();
 
+	const Beats delta ((beats - tp.beats()).abs());
+
+	if (delta < Beats (1,0)) {
+		return false;
+	}
+
 	/* Do not allow moving a tempo marker to the same position as
 	 * an existing one.
 	 */
