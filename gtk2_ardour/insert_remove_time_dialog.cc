@@ -72,18 +72,14 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	duration_clock.set_mode (ARDOUR_UI::instance()->primary_clock->mode());
 	table->attach (duration_clock, 1, 2, 1, 2);
 
-	std::cerr << "dist "
-	          << _editor.get_selection().time.start_time().distance (_editor.get_selection().time.start_time()).str()
-	          << " length "
-	          << _editor.get_selection().time.length().str()
-	          << std::endl;
-	
 	//if a Range is selected, assume the user wants to insert/remove the length of the range	//if a Range is selected, assume the user wants to insert/remove the length of the range
 	if (!_editor.get_selection().time.length().is_zero ()) {
+		position_clock.set (_editor.get_selection().time.start_time(), true);
 		duration_clock.set_duration (_editor.get_selection().time.length(), true);
 	} else {
 		timepos_t const pos = _editor.get_preferred_edit_position (EDIT_IGNORE_MOUSE);
-		duration_clock.set_duration (timecnt_t (pos));
+		position_clock.set (pos, true);
+		duration_clock.set_duration (timecnt_t (pos), true);
 	}
 
 	if (!remove) {
