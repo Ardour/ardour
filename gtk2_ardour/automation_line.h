@@ -76,9 +76,7 @@ public:
 
 	virtual Temporal::timepos_t get_origin () const;
 
-	void redisplay (bool view_only, bool with_y);
 	void queue_reset ();
-	void queue_redisplay (bool for_height);
 	void reset ();
 	void clear ();
 	void set_fill (bool f) { _fill = f; } // owner needs to call set_height
@@ -181,7 +179,6 @@ protected:
 	bool    terminal_points_can_slide;
 	bool    update_pending;
 	bool    have_reset_timeout;
-	bool    have_redisplay_timeout;
 	bool    no_draw;
 	bool    _is_boolean;
 	/** true if we did a push at any point during the current drag */

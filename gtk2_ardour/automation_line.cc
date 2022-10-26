@@ -97,7 +97,6 @@ AutomationLine::AutomationLine (const string&                              name,
 	, terminal_points_can_slide (true)
 	, update_pending (false)
 	, have_reset_timeout (false)
-	, have_redisplay_timeout (false)
 	, no_draw (false)
 	, _is_boolean (false)
 	, _parent_group (parent)
@@ -257,7 +256,7 @@ AutomationLine::set_height (guint32 h)
 		} else {
 			line->set_fill_y1 (0);
 		}
-		redisplay (true, true);
+		reset ();
 	}
 }
 
@@ -974,95 +973,7 @@ AutomationLine::tempo_map_changed ()
 		return;
 	}
 
-	redisplay (true, false);
-}
-
-void
-AutomationLine::redisplay (bool view_only, bool with_y)
-{
-	have_redisplay_timeout = false;
-
-	if (view_only) {
-
-
-		for (std::vector<ControlPoint *>::iterator i = control_points.begin(); i != control_points.end(); i++) {
-
-			AutomationList::iterator ai ((*i)->model());
-
-			/* drop points outside our range */
-
-			if (((*ai)->when < _offset)) {
-				continue;
-			}
-
-			if ((*ai)->when >= _offset + _maximum_time) {
-				break;
-			}
-
-			/* we do not need to recompute the y coordinate here */
-
-			double ty;
-			timecnt_t tx;
-
-			if (!with_y) {
-
-				/* re-use existing y-coordinate */
-
-				ty = (*i)->get_y();
-
-			} else {
-
-				/* convert to absolute position */
-
-				ty = model_to_view_coord_y ((*ai)->value);
-
-				if (isnan_local (ty)) {
-					warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
-					                           _name) << endmsg;
-					continue;
-				}
-
-				ty = _height - (ty * _height);
-			}
-
-			/* tx is currently the distance of this point from
-			 * _offset, which may be either:
-			 *
-			 * a) zero, for an automation line not connected to a
-			 * region
-			 *
-			 * b) some non-zero value, corresponding to the start
-			 * of the region within its source(s). Remember that
-			 * this start is an offset within the source, not a
-			 * position on the timeline.
-			 *
-			 * We need to convert tx to a global position, and to
-			 * do that we need to measure the distance from the
-			 * result of get_origin(), which tells ut the timeline
-			 * position of _offset
-			 */
-
-			tx = model_to_view_coord_x ((*ai)->when);
-
-			/* convert x-coordinate to a canvas unit coordinate (this takes
-			 * zoom and scroll into account).
-			 */
-
-			double px = trackview.editor().duration_to_pixels_unrounded (tx);
-
-			(*i)->move_to (px, ty);
-
-			reset_line_coords (**i);
-
-		}
-
-		if (line_points.size() > 1) {
-			line->set_steps (line_points, is_stepped());
-		}
-
-	} else {
-		reset ();
-	}
+	reset ();
 }
 
 void
@@ -1120,9 +1031,28 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 			continue;
 		}
 
+		/* convert from canonical view height (0..1.0) to actual
+		 * height coordinates (using X11's top-left rooted system)
+		 */
+
 		ty = _height - (ty * _height);
 
-		/* convert from model coordinates to canonical view coordinates */
+		/* tx is currently the distance of this point from
+		 * _offset, which may be either:
+		 *
+		 * a) zero, for an automation line not connected to a
+		 * region
+		 *
+		 * b) some non-zero value, corresponding to the start
+		 * of the region within its source(s). Remember that
+		 * this start is an offset within the source, not a
+		 * position on the timeline.
+		 *
+		 * We need to convert tx to a global position, and to
+		 * do that we need to measure the distance from the
+		 * result of get_origin(), which tells ut the timeline
+		 * position of _offset
+		 */
 
 		timecnt_t tx = model_to_view_coord_x ((*ai)->when);
 
@@ -1132,9 +1062,6 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 		double px = trackview.editor().duration_to_pixels_unrounded (tx);
 
-		/* convert from canonical view height (0..1.0) to actual
-		 * height coordinates (using X11's top-left rooted system)
-		 */
 
 
 		std::cerr << " add " << (*ai)->when << std::endl;
@@ -1267,26 +1194,6 @@ AutomationLine::queue_reset ()
 		}
 	} else {
 		reset ();
-	}
-}
-
-void
-AutomationLine::queue_redisplay (bool for_height)
-{
-	/* this must be called from the GUI thread */
-
-	if (trackview.editor().session()->transport_rolling() && alist->automation_write()) {
-		/* automation write pass ... defer to a timeout */
-		/* redraw in 1/4 second */
-		if (!have_redisplay_timeout) {
-			DEBUG_TRACE (DEBUG::Automation, "\tqueue timeout\n");
-			Glib::signal_timeout().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &AutomationLine::redisplay), true, for_height), true), 250);
-			have_redisplay_timeout = true;
-		} else {
-			DEBUG_TRACE (DEBUG::Automation, "\ttimeout already queued, change ignored\n");
-		}
-	} else {
-		redisplay (true, for_height);
 	}
 }
 
