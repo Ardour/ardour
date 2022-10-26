@@ -72,7 +72,7 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	duration_clock.set_mode (ARDOUR_UI::instance()->primary_clock->mode());
 	table->attach (duration_clock, 1, 2, 1, 2);
 
-	//if a Range is selected, assume the user wants to insert/remove the length of the range	//if a Range is selected, assume the user wants to insert/remove the length of the range
+	//if a Range is selected, assume the user wants to insert/remove the length of the range
 	if (!_editor.get_selection().time.length().is_zero ()) {
 		position_clock.set (_editor.get_selection().time.start_time(), true);
 		duration_clock.set_duration (_editor.get_selection().time.length(), true);
