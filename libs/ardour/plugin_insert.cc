@@ -1379,6 +1379,7 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 	while (nframes) {
 
 		samplecnt_t cnt = min (timepos_t (start).distance (next_event.when).samples(), (samplecnt_t) nframes);
+
 		assert (cnt > 0);
 
 		connect_and_run (bufs, start, start + cnt * speed, speed, cnt, offset, true);
@@ -1389,7 +1390,7 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 
 		map_loop_range (start, end);
 
-		if (!find_next_event (next_event.when, timepos_t (end), next_event)) {
+		if (!find_next_event (std::min (timepos_t (start), next_event.when), timepos_t (end), next_event)) {
 			break;
 		}
 	}
