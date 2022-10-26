@@ -307,6 +307,12 @@ Drag::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t /*t
 }
 
 void
+Drag::set_grab_button_anyway (GdkEvent* ev)
+{
+	_grab_button = ev->button.button;
+}
+
+void
 Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 {
 	/* we set up x/y dragging constraints on first move */
@@ -4830,8 +4836,17 @@ LineDrag::LineDrag (Editor* e, ArdourCanvas::Item* i)
 	, _cumulative_y_drag (0)
 	, _before (0)
 	, _after (0)
+	, have_command (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New LineDrag\n");
+}
+
+LineDrag::~LineDrag ()
+{
+	if (have_command) {
+		_editor->abort_reversible_command ();
+		have_command = false;
+	}
 }
 
 void
@@ -4853,8 +4868,15 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	samplecnt_t const sample_within_region = (samplecnt_t) floor (mx * _editor->samples_per_pixel);
 
+
 	if (!_line->control_points_adjacent (sample_within_region, _before, _after)) {
-		/* no adjacent points */
+		/* no adjacent points
+		 *
+		 * Will not grab, but must set grab button so that we can end
+		 * the drag properly.
+		 */
+
+		set_grab_button_anyway (event);
 		return;
 	}
 
@@ -4896,9 +4918,9 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 
 	if (first_move) {
 		float const initial_fraction = 1.0 - (_fixed_grab_y / _line->height());
-
 		_editor->begin_reversible_command (_("automation range move"));
 		_line->start_drag_line (_before, _after, initial_fraction);
+		have_command = true;
 	}
 
 	/* we are ignoring x position for this drag, so we can just pass in anything */
@@ -4914,11 +4936,16 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (movement_occurred) {
 		motion (event, false);
 		_line->end_drag (false, 0);
-		_editor->commit_reversible_command ();
+		if (have_command) {
+			_editor->commit_reversible_command ();
+			have_command = false;
+		}
 	} else {
 		/* add a new control point on the line */
 
 		AutomationTimeAxisView* atv;
+
+		_editor->begin_reversible_command (_("add automation point"));
 
 		if ((atv = dynamic_cast<AutomationTimeAxisView*>(_editor->clicked_axisview)) != 0) {
 			timepos_t where = grab_time ();
@@ -4936,6 +4963,8 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 				arv->add_gain_point_event (&arv->get_gain_line()->grab_item(), event, false);
 			}
 		}
+
+		_editor->commit_reversible_command ();
 	}
 }
 
@@ -4943,6 +4972,11 @@ void
 LineDrag::aborted (bool)
 {
 	_line->reset ();
+
+	if (have_command) {
+		_editor->abort_reversible_command ();
+		have_command = false;
+	}
 }
 
 FeatureLineDrag::FeatureLineDrag (Editor* e, ArdourCanvas::Item* i)

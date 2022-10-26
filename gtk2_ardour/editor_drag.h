@@ -172,6 +172,8 @@ public:
 	bool was_double_click() const { return _was_double_click; }
 	void set_double_click (bool yn) { _was_double_click = yn; }
 
+	void set_grab_button_anyway (GdkEvent*);
+
 	/** Called to start a grab of an item.
 	 *  @param e Event that caused the grab to start.
 	 *  @param c Cursor to use, or 0.
@@ -1156,6 +1158,7 @@ class LineDrag : public Drag
 {
 public:
 	LineDrag (Editor *e, ArdourCanvas::Item *i);
+	~LineDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -1174,6 +1177,7 @@ private:
 	double _cumulative_y_drag;
 	uint32_t _before;
 	uint32_t _after;
+	bool    have_command;
 };
 
 /** Transient feature line drags*/
