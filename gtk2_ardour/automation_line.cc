@@ -165,7 +165,7 @@ AutomationLine::update_visibility ()
 		   when automation points have been removed (the line will still follow the shape of the
 		   old points).
 		*/
-		if (control_points.size() >= 2) {
+		if (line_points.size() >= 2) {
 			line->show();
 		} else {
 			line->hide ();
@@ -914,6 +914,7 @@ AutomationLine::get_selectables (timepos_t const & start, timepos_t const & end,
 
 		const timepos_t w = session_position ((*cp->model())->when);
 
+
 		if (w >= start && w <= end && cp->get_y() >= bot_track && cp->get_y() <= top_track) {
 			results.push_back (cp);
 		}
@@ -994,10 +995,9 @@ AutomationLine::redisplay (bool view_only, bool with_y)
 				continue;
 			}
 
-			if ((*ai)->when >= _maximum_time) {
+			if ((*ai)->when >= _offset + _maximum_time) {
 				break;
 			}
-
 
 			/* we do not need to recompute the y coordinate here */
 
@@ -1090,17 +1090,25 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 	line->hide ();
 	np = events.size();
 
-	Evoral::ControlList& e = const_cast<Evoral::ControlList&> (events);
+	Evoral::ControlList& e (const_cast<Evoral::ControlList&> (events));
+	AutomationList::iterator preceding (e.end());
+	AutomationList::iterator following (e.end());
+
+	std::cerr << "-------- build line from " << e.size() << " points\n";
 
 	for (AutomationList::iterator ai = e.begin(); ai != e.end(); ++ai, ++pi) {
 
 		/* drop points outside our range */
 
 		if (((*ai)->when < _offset)) {
+			preceding = ai;
+			std::cerr << " skip " << (*ai)->when << " too early for " << _offset << std::endl;
 			continue;
 		}
 
-		if ((*ai)->when >= _maximum_time) {
+		if ((*ai)->when >= _offset + _maximum_time) {
+			std::cerr << " break " << (*ai)->when << " too late for " << _offset + _maximum_time << std::endl;
+			following = ai;
 			break;
 		}
 
@@ -1129,6 +1137,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		 */
 
 
+		std::cerr << " add " << (*ai)->when << std::endl;
 		add_visible_control_point (vp, pi, px, ty, ai, np);
 
 		vp++;
@@ -1146,21 +1155,69 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		control_points.back()->set_can_slide(false);
 	}
 
-	if (vp > 1) {
+	if (vp) {
 
 		/* reset the line coordinates given to the CanvasLine */
 
-		while (line_points.size() < vp) {
-			line_points.push_back (ArdourCanvas::Duple (0,0));
+		/* 2 extra in case we need hidden points for line start and end */
+
+		line_points.resize (vp + 2, ArdourCanvas::Duple (0, 0));
+
+		ArdourCanvas::Points::size_type n = 0;
+
+		/* potentially insert front hidden (line) point to make the line draw from
+		 * zero to the first actual point
+		 */
+
+		std::cerr << "prec @ end ? " << (preceding == e.end()) << " foll @ end " << (following == e.end()) << std::endl;
+
+		if (control_points[0]->get_x() != 0 && preceding != e.end()) {
+			double ty = model_to_view_coord_y (e.unlocked_eval (_offset));
+
+			if (isnan_local (ty)) {
+				warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""), _name) << endmsg;
+
+
+			} else {
+				line_points[n].y = _height - (ty * _height);
+				line_points[n].x = 0;
+				std::cerr << "Add initial point" << std::endl;
+				++n;
+			}
 		}
 
-		while (line_points.size() > vp) {
-			line_points.pop_back ();
+		for (auto const & cp : control_points) {
+			line_points[n].x = cp->get_x();
+			line_points[n].y = cp->get_y();
+			++n;
 		}
 
-		for (uint32_t n = 0; n < vp; ++n) {
-			line_points[n].x = control_points[n]->get_x();
-			line_points[n].y = control_points[n]->get_y();
+		/* potentially insert final hidden (line) point to make the line draw
+		 * from the last point to the very end
+		 */
+
+		double px = trackview.editor().duration_to_pixels_unrounded (model_to_view_coord_x (_offset + _maximum_time));
+
+		if (control_points[control_points.size() - 1]->get_x() != px && following != e.end()) {
+			double ty = model_to_view_coord_y (e.unlocked_eval (_offset + _maximum_time));
+
+			if (isnan_local (ty)) {
+				warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""), _name) << endmsg;
+
+
+			} else {
+				line_points[n].y = _height - (ty * _height);
+				line_points[n].x = px;
+				std::cerr << "Add final point  for " << _offset + _maximum_time << std::endl;
+				++n;
+			}
+		}
+
+		line_points.resize (n);
+		std::cerr << "total points for line: " << line_points.size() << " total CP's " << control_points.size() << std::endl;
+
+		for (auto const & l : line_points) {
+			std::cerr << l.x << ", " << l.y << std::endl;
 		}
 
 		line->set_steps (line_points, is_stepped());
