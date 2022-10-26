@@ -92,6 +92,7 @@ AutomationLine::AutomationLine (const string&                              name,
 	: trackview (tv)
 	, _name (name)
 	, _height (0)
+	, _view_index_offset (0)
 	, alist (al)
 	, _visible (Line)
 	, terminal_points_can_slide (true)
@@ -331,8 +332,8 @@ void
 AutomationLine::reset_line_coords (ControlPoint& cp)
 {
 	if (cp.view_index() < line_points.size()) {
-		line_points[cp.view_index()].x = cp.get_x ();
-		line_points[cp.view_index()].y = cp.get_y ();
+		line_points[cp.view_index() + _view_index_offset].x = cp.get_x ();
+		line_points[cp.view_index() + _view_index_offset].y = cp.get_y ();
 	}
 }
 
@@ -1098,6 +1099,8 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 		std::cerr << "prec @ end ? " << (preceding == e.end()) << " foll @ end " << (following == e.end()) << std::endl;
 
+		_view_index_offset = 0;
+
 		if (control_points[0]->get_x() != 0 && preceding != e.end()) {
 			double ty = model_to_view_coord_y (e.unlocked_eval (_offset));
 
@@ -1109,6 +1112,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 				line_points[n].y = _height - (ty * _height);
 				line_points[n].x = 0;
 				std::cerr << "Add initial point" << std::endl;
+				_view_index_offset = 1;
 				++n;
 			}
 		}

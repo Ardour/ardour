@@ -171,7 +171,7 @@ protected:
 	std::string    _name;
 	guint32        _height;
 	uint32_t       _line_color;
-
+	uint32_t       _view_index_offset;
 	boost::shared_ptr<ARDOUR::AutomationList> alist;
 
 	VisibleAspects _visible;
