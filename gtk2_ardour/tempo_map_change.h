@@ -41,6 +41,7 @@ class TempoMapChange {
 
 	void begin ();
 	void abort ();
+	void use_new_map (Temporal::TempoMap::WritableSharedPtr);
 
 	Temporal::TempoMap& map() const { return *writable_map.get(); }
 

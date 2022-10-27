@@ -63,3 +63,12 @@ TempoMapChange::abort ()
 		begun = false;
 	}
 }
+
+void
+TempoMapChange::use_new_map (Temporal::TempoMap::WritableSharedPtr new_map)
+{
+	/* existing write copy goes out of scope, and is deleted, We continue
+	 * on with the new map, and will RCU-update it in our destructor.
+	 */
+	writable_map = new_map;
+}
