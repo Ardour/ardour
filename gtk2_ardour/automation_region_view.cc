@@ -265,8 +265,7 @@ AutomationRegionView::paste (timepos_t const &                               pos
 
 	XMLNode& before = my_list->get_state();
 	my_list->paste (*slist, model_pos);
-	view->session()->add_command(
-		new MementoCommand<ARDOUR::AutomationList>(_line->memento_command_binder(), &before, &my_list->get_state()));
+	view->session()->add_command(new MementoCommand<ARDOUR::AutomationList>(_line->memento_command_binder(), &before, &my_list->get_state()));
 
 	return true;
 }
