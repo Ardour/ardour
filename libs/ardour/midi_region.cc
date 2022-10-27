@@ -564,15 +564,16 @@ MidiRegion::merge (boost::shared_ptr<MidiRegion const> other_region)
 
 		for (Evoral::Sequence<Temporal::Beats>::const_iterator e = other->begin(); e != other->end(); ++e) {
 
-			std::cerr << "event " << *e << " @ " << e->time().str() << " vs " << other_region_start.str() << " .. " << other_region_end.str() << " other = " << other << std::endl;
-
 			if (e->time() < other_region_start) {
 				continue;
 			}
 
-			/* other_region_end is an exclusive end, not inclusive */
+			/* other_region_end is an inclusive end, not
+			 * exclusive, since we allow simultaneous MIDI events
+			 * (given appropriate semantic sorting)
+			 */
 
-			if (e->time() >= other_region_end) {
+			if (e->time() > other_region_end) {
 				break;
 			}
 
