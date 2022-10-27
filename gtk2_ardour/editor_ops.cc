@@ -7436,25 +7436,17 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 		*/
 	}
 
-	begin_reversible_command (_("set tempo from region"));
-	XMLNode& before (tmap->get_state());
+	TempoMapChange tmc (*this, _("set tempo from region"));
 
 	if (do_global) {
-		tmap->set_tempo (Tempo (beats_per_minute, t.end_note_types_per_minute(), t.note_type()), timepos_t());
+		tmc.map().set_tempo (Tempo (beats_per_minute, t.end_note_types_per_minute(), t.note_type()), timepos_t());
 	} else if (t.time() == start) {
-		tmap->set_tempo (Tempo (beats_per_minute, t.end_note_types_per_minute(), t.note_type()), start);
+		tmc.map().set_tempo (Tempo (beats_per_minute, t.end_note_types_per_minute(), t.note_type()), start);
 	} else {
 		/* constant tempo */
 		const Tempo tempo (beats_per_minute, t.note_type());
-		tmap->set_tempo (tempo, start);
+		tmc.map().set_tempo (tempo, start);
 	}
-
-	XMLNode& after (tmap->get_state());
-
-	_session->add_command (new Temporal::TempoCommand (_("set tempo from range"), &before, &after));
-
-	TempoMap::update (tmap);
-	commit_reversible_command ();
 }
 
 void
