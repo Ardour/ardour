@@ -1006,20 +1006,16 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 	AutomationList::iterator preceding (e.end());
 	AutomationList::iterator following (e.end());
 
-	std::cerr << "-------- build line from " << e.size() << " points\n";
-
 	for (AutomationList::iterator ai = e.begin(); ai != e.end(); ++ai, ++pi) {
 
 		/* drop points outside our range */
 
 		if (((*ai)->when < _offset)) {
 			preceding = ai;
-			std::cerr << " skip " << (*ai)->when << " too early for " << _offset << std::endl;
 			continue;
 		}
 
 		if ((*ai)->when >= _offset + _maximum_time) {
-			std::cerr << " break " << (*ai)->when << " too late for " << _offset + _maximum_time << std::endl;
 			following = ai;
 			break;
 		}
@@ -1062,12 +1058,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		 */
 
 		double px = trackview.editor().duration_to_pixels_unrounded (tx);
-
-
-
-		std::cerr << " add " << (*ai)->when << std::endl;
 		add_visible_control_point (vp, pi, px, ty, ai, np);
-
 		vp++;
 	}
 
@@ -1097,8 +1088,6 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		 * zero to the first actual point
 		 */
 
-		std::cerr << "prec @ end ? " << (preceding == e.end()) << " foll @ end " << (following == e.end()) << std::endl;
-
 		_view_index_offset = 0;
 
 		if (control_points[0]->get_x() != 0 && preceding != e.end()) {
@@ -1111,7 +1100,6 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 			} else {
 				line_points[n].y = _height - (ty * _height);
 				line_points[n].x = 0;
-				std::cerr << "Add initial point" << std::endl;
 				_view_index_offset = 1;
 				++n;
 			}
@@ -1139,18 +1127,11 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 			} else {
 				line_points[n].y = _height - (ty * _height);
 				line_points[n].x = px;
-				std::cerr << "Add final point  for " << _offset + _maximum_time << std::endl;
 				++n;
 			}
 		}
 
 		line_points.resize (n);
-		std::cerr << "total points for line: " << line_points.size() << " total CP's " << control_points.size() << std::endl;
-
-		for (auto const & l : line_points) {
-			std::cerr << l.x << ", " << l.y << std::endl;
-		}
-
 		line->set_steps (line_points, is_stepped());
 
 		update_visibility ();
