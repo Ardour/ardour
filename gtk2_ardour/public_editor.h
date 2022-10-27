@@ -518,6 +518,12 @@ public:
 	virtual void abort_reversible_command () = 0;
 	virtual void commit_reversible_command () = 0;
 
+	virtual Temporal::TempoMap::WritableSharedPtr begin_tempo_map_edit () = 0;
+	virtual void abort_tempo_map_edit () = 0;
+	void commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr& map, bool with_update = false) {
+		_commit_tempo_map_edit (map, with_update);
+	}
+
 	virtual void access_action (const std::string&, const std::string&) = 0;
 	virtual void set_toggleaction (const std::string&, const std::string&, bool) = 0;
 
@@ -581,6 +587,7 @@ protected:
 	friend class DisplaySuspender;
 	virtual void suspend_route_redisplay () = 0;
 	virtual void resume_route_redisplay () = 0;
+	virtual void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update) = 0;
 
 	GATOMIC_QUAL gint _suspend_route_redisplay_counter;
 };
