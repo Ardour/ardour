@@ -3098,7 +3098,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 		/* get current state */
 		before_state = &map->get_state();
-		_editor->begin_reversible_command (_("move meter mark"));
+		_editor->begin_reversible_command (_("move time signature"));
 
 		/* only snap to bars. */
 
