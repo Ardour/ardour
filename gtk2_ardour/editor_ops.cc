@@ -4584,18 +4584,6 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 			earliest = std::min (earliest, (*ctrl_evt)->when);
 		}
 
-		/* Snap start time backwards, so copy/paste is snap aligned. */
-
-		if (earliest != timepos_t::max (earliest.time_domain())) {
-			if (earliest.time_domain() == Temporal::BeatTime) {
-				/* always just round down to beat */
-				earliest = timepos_t (earliest.beats().round_down_to_beat());
-			} else {
-				/* do actual snap */
-				snap_to (earliest, Temporal::RoundDownMaybe);
-			}
-		}
-
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
 			/* Correct this copy list so that it is relative to the earliest
 			   start time, so relative ordering between points is preserved
