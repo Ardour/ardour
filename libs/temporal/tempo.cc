@@ -3581,7 +3581,7 @@ TempoMap::set_state_3x (const XMLNode& node)
 				break;
 			}
 
-			if (lms.beat != 0) {
+			if (lms.sample != 0) {
 				initial_meter_at_zero = false;
 			}
 
