@@ -51,6 +51,7 @@
 #include "actions.h"
 #include "editor_drag.h"
 #include "region_view.h"
+#include "tempo_map_change.h"
 
 #include "pbd/i18n.h"
 
@@ -1639,7 +1640,6 @@ Editor::marker_menu_remove ()
 	}
 }
 
-/* actually just resets the ts to constant using initial tempo */
 void
 Editor::toggle_tempo_type ()
 {
@@ -1648,23 +1648,14 @@ Editor::toggle_tempo_type ()
 	BBTMarker* bm;
 	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm, &bm);
 
-	if (tm) {
+	if (!tm) {
+		return;
+	}
 
-		begin_reversible_command (_("set tempo to constant"));
-		TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-
-		reassociate_metric_markers (tmap);
-		Temporal::TempoPoint const & tempo = tm->tempo();
-
-		XMLNode &before = tmap->get_state();
-
-		tmap->set_ramped (const_cast<Temporal::TempoPoint&>(tempo), !tempo.ramped());
-
-		XMLNode &after = tmap->get_state();
-		_session->add_command (new Temporal::TempoCommand (_("change tempo type"), &before, &after));
-
-		TempoMap::update (tmap);
-		commit_reversible_command ();
+	TempoMapChange tmc (*this, (tm->tempo().ramped() ? _("set tempo to constant") : _("set tempo to ramped")));;
+	Temporal::TempoPoint const & tempo = tm->tempo();
+	if (!tmc.map().set_ramped (const_cast<Temporal::TempoPoint&>(tempo), !tempo.ramped())) {
+		tmc.abort ();
 	}
 }
 
@@ -1681,24 +1672,12 @@ Editor::toggle_tempo_continues ()
 		return;
 	}
 
-	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-	XMLNode &before = tmap->get_state();
+	TempoMapChange tmc (*this, tm->tempo().continuing() ? _("unclamp tempo from previous") : _("clamp tempo to previous"));
+	Temporal::TempoPoint const & tempo = tm->tempo();
 
-	reassociate_metric_markers (tmap);
-	Temporal::TempoPoint const & tempo (tm->tempo());
-
-	if (!tmap->set_continuing (const_cast<Temporal::TempoPoint&>(tempo), !tempo.continuing())) {
-		abort_tempo_map_edit ();
-		return;
+	if (!tmc.map().set_continuing (const_cast<Temporal::TempoPoint&>(tempo), !tempo.continuing())) {
+		tmc.abort ();
 	}
-
-	begin_reversible_command (_("Change Tempo Continue Behavior"));
-
-	XMLNode &after = tmap->get_state();
-	_session->add_command (new Temporal::TempoCommand (_("change tempo clamp"), &before, &after));
-
-	TempoMap::update (tmap);
-	commit_reversible_command ();
 }
 
 void
@@ -1714,24 +1693,19 @@ Editor::ramp_to_next_tempo ()
 		return;
 	}
 
-	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-	XMLNode &before = tmap->get_state();
+	TempoMapChange tmc (*this, _("set tempo to ramp to next"));
 
-	reassociate_metric_markers (tmap);
 	Temporal::TempoPoint const & tempo (tm->tempo());
 
-	if (!tmap->set_ramped (const_cast<Temporal::TempoPoint&>(tempo), !tempo.ramped())) {
-		abort_tempo_map_edit ();
+	if (tempo.ramped()) {
+		tmc.abort ();
 		return;
 	}
 
-	begin_reversible_command (_("ramp to next tempo"));
-
-	XMLNode &after = tmap->get_state();
-	_session->add_command (new Temporal::TempoCommand (_("changed tempo ramp"), &before, &after));
-
-	TempoMap::update (tmap);
-	commit_reversible_command ();
+	if (!tmc.map().set_ramped (const_cast<Temporal::TempoPoint&>(tempo), true)) {
+		tmc.abort ();
+	}
+	std::cerr << "leave scope\n";
 }
 
 void
