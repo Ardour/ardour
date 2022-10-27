@@ -63,6 +63,7 @@
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
 #include "session_import_dialog.h"
+#include "tempo_map_change.h"
 #include "gui_thread.h"
 #include "interthread_progress_window.h"
 #include "mouse_cursors.h"
@@ -284,19 +285,14 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		return;
 	}
 
-	/* we have to create this in order to start the update process, but
-	   we're going to throw it away by creating our own new map and
-	   populating it. This will go out of scope when we return from this
-	   method.
-	*/
-
-	TempoMap::SharedPtr ignore (TempoMap::write_copy());
+	TempoMapChange tmc (*this, _("import SMF tempo map"));
 
 	/* cannot create an empty TempoMap, so create one with "default" single
 	   values for tempo and meter, then overwrite them.
 	*/
 
 	TempoMap::WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
+
 	Meter last_meter (4.0, 4.0);
 	bool have_initial_meter = false;
 
@@ -334,7 +330,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		last_meter = meter;
 	}
 
-	TempoMap::update (new_map);
+	tmc.use_new_map (new_map);
 }
 
 void

@@ -118,6 +118,7 @@
 #include "selection_templates.h"
 #include "streamview.h"
 #include "strip_silence_dialog.h"
+#include "tempo_map_change.h"
 #include "time_axis_view.h"
 #include "timers.h"
 #include "transpose_dialog.h"
@@ -8281,6 +8282,7 @@ Editor::insert_time (
 	bool in_command = false;
 
 	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+	TempoMapChange tmc (*this, _("insert time"), true, false);
 
 	for (TrackViewList::iterator x = ts.begin(); x != ts.end(); ++x) {
 

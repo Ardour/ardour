@@ -57,6 +57,7 @@
 #include "tempo_dialog.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
+#include "tempo_map_change.h"
 #include "time_axis_view.h"
 #include "grid_lines.h"
 #include "region_view.h"
@@ -479,20 +480,8 @@ Editor::mouse_add_new_tempo_event (timepos_t pos)
 	}
 
 	if (pos.beats() > Beats()) {
-
-		begin_reversible_command (_("add tempo mark"));
-
-		TempoMap::WritableSharedPtr map (TempoMap::write_copy());
-
-		XMLNode &before = map->get_state();
-
-		/* add music-locked ramped (?) tempo using the bpm/note type at sample*/
-
-		map->set_tempo (map->tempo_at (pos), pos);
-		XMLNode &after = map->get_state();
-		_session->add_command (new Temporal::TempoCommand (_("add tempo"), &before, &after));
-		TempoMap::update (map);
-		commit_reversible_command ();
+		TempoMapChange tmc (*this, _("add tempo mark"));
+		tmc.map().set_tempo (tmc.map().tempo_at (pos), pos);
 	}
 
 	//map.dump (cerr);
@@ -514,7 +503,6 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 		return;
 	}
 
-	TempoMap::WritableSharedPtr map (TempoMap::write_copy());
 
 	double bpb = meter_dialog.get_bpb ();
 	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
@@ -524,20 +512,10 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 	Temporal::BBT_Time requested;
 	meter_dialog.get_bbt_time (requested);
 
-	begin_reversible_command (_("add meter mark"));
 
-	XMLNode &before = map->get_state();
-
-	pos = timepos_t (map->quarters_at (requested));
-
-	map->set_meter (Meter (bpb, note_type), pos);
-
-	_session->add_command (new Temporal::TempoCommand (_("add time signature"), &before, &map->get_state()));
-
-	TempoMap::update (map);
-	commit_reversible_command ();
-
-	//map.dump (cerr);
+	TempoMapChange tmc (*this, _("add time signature"));
+	pos = timepos_t (tmc.map().quarters_at (requested));
+	tmc.map().set_meter (Meter (bpb, note_type), pos);
 }
 
 void
@@ -571,19 +549,9 @@ Editor::mouse_add_bbt_marker_event (timepos_t pos)
 	bbt = marker_dialog.bbt_value ();
 	name = marker_dialog.name();
 
-	begin_reversible_command (_("add BBT marker"));
-
-	TempoMap::WritableSharedPtr map (TempoMap::write_copy());
-	XMLNode &before = map->get_state();
-
-	map->set_bartime (bbt, marker_dialog.position(), name);
-
-	_session->add_command (new Temporal::TempoCommand (_("add BBT marker"), &before, &map->get_state()));
-
-	TempoMap::update (map);
-	commit_reversible_command ();
+	TempoMapChange tmc (*this, _("add BBT marker"));
+	tmc.map().set_bartime (bbt, marker_dialog.position(), name);
 }
-
 
 void
 Editor::remove_bbt_marker (ArdourCanvas::Item* item)
@@ -646,20 +614,8 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 	Temporal::BBT_Time when;
 	meter_dialog.get_bbt_time (when);
 
-	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-
-	reassociate_metric_markers (tmap);
-
-	begin_reversible_command (_("Edit Time Signature"));
-	XMLNode &before = tmap->get_state();
-
-	tmap->set_meter (meter, when);
-
-	XMLNode &after = tmap->get_state();
-	_session->add_command (new Temporal::TempoCommand (_("edit time signature"), &before, &after));
-
-	TempoMap::update (tmap);
-	commit_reversible_command ();
+	TempoMapChange tmc (*this, _("edit time signature"));
+	tmc.map().set_meter (meter, when);
 }
 
 void
@@ -682,20 +638,9 @@ Editor::edit_bbt (MusicTimePoint& point)
 		return;
 	}
 
-	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-	reassociate_metric_markers (tmap);
-
-	begin_reversible_command (_("Edit Tempo"));
-	XMLNode &before = tmap->get_state();
-
-	tmap->remove_bartime (point);
-	tmap->set_bartime (dialog.bbt_value(), dialog.position(), dialog.name());
-
-	XMLNode &after = tmap->get_state();
-	_session->add_command (new Temporal::TempoCommand (_("edit tempo"), &before, &after));
-
-	TempoMap::update (tmap);
-	commit_reversible_command ();
+	TempoMapChange tmc (*this, _("edit tempo"));
+	tmc.map().remove_bartime (point);
+	tmc.map().set_bartime (dialog.bbt_value(), dialog.position(), dialog.name());
 }
 
 void
@@ -717,22 +662,11 @@ Editor::edit_tempo_section (TempoPoint& section)
 
 	const Tempo tempo (bpm, end_bpm, nt);
 
-	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-	reassociate_metric_markers (tmap);
-
 	Temporal::BBT_Time when;
 	tempo_dialog.get_bbt_time (when);
 
-	begin_reversible_command (_("Edit Tempo"));
-	XMLNode &before = tmap->get_state();
-
-	tmap->set_tempo (tempo, when);
-
-	XMLNode &after = tmap->get_state();
-	_session->add_command (new Temporal::TempoCommand (_("edit tempo"), &before, &after));
-
-	TempoMap::update (tmap);
-	commit_reversible_command ();
+	TempoMapChange tmc (*this, _("edit tempo"));
+	tmc.map().set_tempo (tempo, when);
 }
 
 void
@@ -756,30 +690,16 @@ Editor::edit_bbt_marker (BBTMarker& bm)
 gint
 Editor::real_remove_bbt_marker (MusicTimePoint const * point)
 {
-	begin_reversible_command (_("remove BBT marker"));
-	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-	XMLNode &before = tmap->get_state();
-	tmap->remove_bartime (*point);
-	XMLNode &after = tmap->get_state();
-	_session->add_command (new Temporal::TempoCommand (_("remove BBT marker"), &before, &after));
-
-	TempoMap::update (tmap);
-	commit_reversible_command ();
-
+	TempoMapChange tmc (*this, _("remove BBT marker"));
+	tmc.map().remove_bartime (*point);
 	return FALSE;
 }
 
 gint
 Editor::real_remove_tempo_marker (TempoPoint const * section)
 {
-	begin_reversible_command (_("remove tempo mark"));
-	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-	XMLNode &before = tmap->get_state();
-	tmap->remove_tempo (*section);
-	XMLNode &after = tmap->get_state();
-	_session->add_command (new Temporal::TempoCommand (_("remove tempo change"), &before, &after));
-	TempoMap::update (tmap);
-	commit_reversible_command ();
+	TempoMapChange tmc (*this, _("remove tempo change"));
+	tmc.map().remove_tempo (*section);
 	return FALSE;
 }
 
@@ -807,15 +727,8 @@ Editor::remove_meter_marker (ArdourCanvas::Item* item)
 gint
 Editor::real_remove_meter_marker (Temporal::MeterPoint const * section)
 {
-	begin_reversible_command (_("remove tempo mark"));
-	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-	XMLNode &before = tmap->get_state();
-	tmap->remove_meter (*section);
-	XMLNode &after = tmap->get_state();
-	_session->add_command (new Temporal::TempoCommand (_("remove time signature change"), &before, &after));
-	TempoMap::update (tmap);
-	commit_reversible_command ();
-
+	TempoMapChange tmc (*this, _("remove tempo mark"));
+	tmc.map().remove_meter (*section);
 	return FALSE;
 }
 
@@ -841,7 +754,7 @@ Editor::abort_tempo_map_edit ()
 }
 
 void
-Editor::commit_tempo_map_edit (TempoMap::WritableSharedPtr& new_map, bool with_update)
+Editor::_commit_tempo_map_edit (TempoMap::WritableSharedPtr& new_map, bool with_update)
 {
 	if (!with_update) {
 		PBD::Unwinder<bool> uw (ignore_map_change, true);
