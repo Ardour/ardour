@@ -1187,12 +1187,6 @@ RegionView::region_relative_distance (timecnt_t const & duration, Temporal::Time
 	return Temporal::TempoMap::use()->convert_duration (duration, _region->position(), domain);
 }
 
-timecnt_t
-RegionView::source_relative_distance (timecnt_t const & duration, Temporal::TimeDomain domain)
-{
-	return Temporal::TempoMap::use()->convert_duration (duration, _region->source_position(), domain);
-}
-
 void
 RegionView::update_visibility ()
 {

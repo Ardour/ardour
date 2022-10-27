@@ -196,7 +196,6 @@ protected:
 	void maybe_raise_cue_markers ();
 
 	Temporal::timecnt_t region_relative_distance (Temporal::timecnt_t const &, Temporal::TimeDomain desired_time_domain);
-	Temporal::timecnt_t source_relative_distance (Temporal::timecnt_t const &, Temporal::TimeDomain desired_time_domain);
 
 	boost::shared_ptr<ARDOUR::Region> _region;
 
