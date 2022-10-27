@@ -6850,7 +6850,7 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 	}
 
 	timepos_t snapped (beats);
-	_editor->snap_to (snapped, RoundDownMaybe, SnapToGrid_Scaled);
+	_editor->snap_to (snapped, RoundNearest, SnapToGrid_Scaled);
 	const timepos_t region_offset (snapped.beats() - _region_view->region()->position ().beats());
 
 	/* This code is like MidiRegionView::get_draw_length_beats() but
