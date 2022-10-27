@@ -200,8 +200,11 @@ Curve::get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x
 }
 
 void
-Curve::_get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *vec, int32_t veclen) const
+Curve::_get_vector (Temporal::timepos_t x0, Temporal::timepos_t x1, float *vec, int32_t veclen) const
 {
+	x0.set_time_domain (_list.time_domain());
+	x1.set_time_domain (_list.time_domain());
+
 	double rx, lx, hx;
 	const double start = x0.val();
 	const double end = x1.val();

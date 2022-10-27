@@ -45,7 +45,7 @@ public:
 private:
 	double multipoint_eval (Temporal::timepos_t const & x) const;
 
-	void _get_vector (Temporal::timepos_t const & x0, Temporal::timepos_t const & x1, float *arg, int32_t veclen) const;
+	void _get_vector (Temporal::timepos_t x0, Temporal::timepos_t x1, float *arg, int32_t veclen) const;
 
 	mutable bool       _dirty;
 	const ControlList& _list;
