@@ -227,6 +227,8 @@ Graph::prep ()
 		g_atomic_int_inc (&_trigger_queue_size);
 		_trigger_queue.push_back (i.get ());
 	}
+
+	Temporal::TempoMap::fetch();
 }
 
 void
@@ -323,8 +325,6 @@ Graph::run_one ()
 
 		/* update the thread-local tempo map ptr */
 
-		Temporal::TempoMap::fetch ();
-
 		if (g_atomic_int_get (&_terminate)) {
 			return;
 		}
@@ -336,6 +336,8 @@ Graph::run_one ()
 		/* Try to find some work to do */
 		_trigger_queue.pop_front (to_run);
 	}
+
+	Temporal::TempoMap::fetch ();
 
 	/* Process the graph-node */
 	g_atomic_int_dec_and_test (&_trigger_queue_size);
@@ -365,9 +367,6 @@ Graph::helper_thread ()
 	resume_rt_malloc_checks ();
 
 	pt->get_buffers ();
-
-	/* just in case we need the thread local tempo map ptr before anything else */
-	Temporal::TempoMap::fetch ();
 
 	while (!g_atomic_int_get (&_terminate)) {
 		run_one ();
@@ -402,7 +401,6 @@ Graph::main_thread ()
 	/* Wait for initial process callback */
 again:
 	_callback_start_sem.wait ();
-	Temporal::TempoMap::fetch ();
 
 	DEBUG_TRACE (DEBUG::ProcessThreads, "main thread is awake\n");
 
