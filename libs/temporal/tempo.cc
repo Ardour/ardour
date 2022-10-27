@@ -1711,8 +1711,6 @@ TempoMap::sample_rate_changed (samplecnt_t new_sr)
 void
 TempoMap::dump (std::ostream& ostr) const
 {
-	PBD::stacktrace (std::cerr, 20);
-
 	ostr << "\n\nTEMPO MAP @ " << this << ":\n" << std::dec;
 	ostr << "... tempos...\n";
 	for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
