@@ -321,8 +321,6 @@ Graph::run_one ()
 		DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 goes to sleep\n", pthread_name ()));
 		_execution_sem.wait ();
 
-		/* update the thread-local tempo map ptr */
-
 		if (g_atomic_int_get (&_terminate)) {
 			return;
 		}
@@ -335,6 +333,12 @@ Graph::run_one ()
 		_trigger_queue.pop_front (to_run);
 	}
 
+	/* Update the thread-local tempo map ptr.
+	 *
+	 * Doing this here is problematic, since it can result in each thread,
+	 * using a different tempo-map in a given cycle. And even different maps
+	 * in the same cycle for different routes.
+	 */
 	Temporal::TempoMap::fetch ();
 
 	/* Process the graph-node */
