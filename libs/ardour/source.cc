@@ -417,6 +417,12 @@ Source::set_natural_position (timepos_t const & pos)
 	_have_natural_position = true;
 }
 
+timecnt_t
+Source::time_since_capture_start (timepos_t const & pos)
+{
+	return _natural_position.distance (pos);
+}
+
 void
 Source::set_allow_remove_if_empty (bool yn)
 {

@@ -129,6 +129,11 @@ public:
 
 	bool have_natural_position() const { return _have_natural_position; }
 
+	/* This method is only for use during a capture pass. It makes no sense
+	 * in any other context.
+	 */
+	timecnt_t time_since_capture_start (timepos_t const & pos);
+
 	void set_allow_remove_if_empty (bool yn);
 
 	Glib::Threads::RWLock& mutex() { return _lock; }
