@@ -4345,7 +4345,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		s = min (s, e);
 		e = max (s, e);
 		if (e < timepos_t::max (e.time_domain())) {
-			e.increment();
+			e = e.increment();
 		}
 		_editor->session()->locations()->find_all_between (s, e, ll, Location::Flags (0));
 		for (Locations::LocationList::iterator i = ll.begin(); i != ll.end(); ++i) {
