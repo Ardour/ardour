@@ -227,8 +227,6 @@ Graph::prep ()
 		g_atomic_int_inc (&_trigger_queue_size);
 		_trigger_queue.push_back (i.get ());
 	}
-
-	Temporal::TempoMap::fetch();
 }
 
 void
