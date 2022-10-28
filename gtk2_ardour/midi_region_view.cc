@@ -1674,29 +1674,6 @@ MidiRegionView::end_write()
 	_marked_for_velocity.clear();
 }
 
-
-/** Resolve an active MIDI note (while recording).
- */
-void
-MidiRegionView::resolve_note (uint8_t note, Temporal::Beats end_time)
-{
-	if (midi_view()->note_mode() != Sustained) {
-		return;
-	}
-
-	if (_active_notes && _active_notes[note]) {
-		/* Set note length so update_note() works.  Note this is a local note
-		   for recording, not from a model, so we can safely mess with it. */
-		_active_notes[note]->note()->set_length (end_time - _active_notes[note]->note()->time());
-
-		/* End time is relative to the region being recorded. */
-		_active_notes[note]->set_x1 (trackview.editor().time_to_pixel (_region->region_beats_to_region_time (end_time)));
-		_active_notes[note]->set_outline_all ();
-		_active_notes[note] = 0;
-	}
-}
-
-
 /** Extend active notes to rightmost edge of region (if length is changed)
  */
 void
@@ -4330,7 +4307,8 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 		   we want to convert to beats relative to source start.
 		*/
 
-		Temporal::Beats const time_beats = _region->absolute_time_to_source_beats (timepos_t (ev.time()));
+
+		Temporal::Beats const time_beats = src->time_since_capture_start (timepos_t (ev.time())).beats();
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
 
@@ -4348,7 +4326,28 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 			}
 
 		} else if (ev.type() == MIDI_CMD_NOTE_OFF) {
-			resolve_note (ev.note (), time_beats);
+
+			// XXX WAS resolve_note (ev.note (), time_beats);
+			uint8_t note = ev.note ();
+			Temporal::Beats end_time = time_beats;
+
+			if (_active_notes && _active_notes[note]) {
+				/* Set note length so update_note() works.  Note this is a local note
+					 for recording, not from a model, so we can safely mess with it. */
+				_active_notes[note]->note()->set_length (end_time - _active_notes[note]->note()->time());
+
+				/* End time is relative to the source being recorded. */
+
+				// XXX ideally we'd calculate this based on end_time.
+				// - we first have to get the absolute position of end_time (for tempo-map conversion)
+				// - then calculate the distance from that relative to src->natural_position ()
+				// - and then take the samples() value of that and convert it to pixels
+				//
+				// Much simpler to just use ev.time() which is alredy the absolute position (in sample-time)
+				_active_notes[note]->set_x1 (trackview.editor().sample_to_pixel ((src->time_since_capture_start (timepos_t (ev.time ()))).samples()));
+				_active_notes[note]->set_outline_all ();
+				_active_notes[note] = 0;
+			}
 		}
 
 		back = ev.time ();
