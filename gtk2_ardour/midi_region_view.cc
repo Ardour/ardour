@@ -4316,7 +4316,9 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 
 			assert (note->end_time() == std::numeric_limits<Temporal::Beats>::max());
 
-			add_note (note, true);
+			NoteBase* nb = add_note (note, true);
+			nb->item()->set_fill_color (UIConfiguration::instance().color ("recording note fill"));
+			nb->item()->set_outline_color (UIConfiguration::instance().color ("recording note fill"));
 
 			/* fix up our note range */
 			if (ev.note() < _current_range_min) {

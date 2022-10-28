@@ -125,7 +125,6 @@ public:
 	GhostRegion* add_ghost (TimeAxisView&);
 
 	NoteBase* add_note(const boost::shared_ptr<NoteType> note, bool visible);
-	void resolve_note(uint8_t note_num, Temporal::Beats end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
 	bool paste (Temporal::timepos_t const & pos, const ::Selection& selection, PasteContext& ctx);
