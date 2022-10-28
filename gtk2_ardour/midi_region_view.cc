@@ -2025,7 +2025,8 @@ MidiRegionView::step_sustain (Temporal::Beats beats)
 void
 MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 {
-	const double x = 0;
+	timecnt_t off (_region->source_beats_to_region_time (patch->time()), _region->position());
+	const double x = trackview.editor().duration_to_pixels (off);
 	double const height = midi_stream_view()->contents_height();
 
 	// CAIROCANVAS: active_channel info removed from PatcChange constructor
