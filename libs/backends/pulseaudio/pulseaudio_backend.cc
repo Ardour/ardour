@@ -582,7 +582,7 @@ int
 PulseAudioBackend::_start (bool /*for_latency_measurement*/)
 {
 	if (!_active && _run) {
-		PBD::error << _("PulseAudioBackend: already active.") << endmsg;
+		PBD::error << _("PulseAudioBackend: restarting.") << endmsg;
 		/* recover from 'halted', reap threads */
 		stop ();
 	}
