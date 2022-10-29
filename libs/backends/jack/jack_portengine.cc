@@ -122,7 +122,19 @@ JACKAudioBackend::set_port_name (PortHandle port, const std::string& name)
 string
 JACKAudioBackend::get_port_name (PortHandle port) const
 {
-	return jack_port_name (boost::dynamic_pointer_cast<JackPort>(port)->jack_ptr);
+	if (!port) {
+		error << _("Fetching port name for non-existent port!") << endmsg;
+		return string();
+	}
+
+	jack_port_t* jp = boost::dynamic_pointer_cast<JackPort>(port)->jack_ptr;
+
+	if (!jp) {
+		error << _("Fetching port name for non-existent JACK port!") << endmsg;
+		return string();
+	}
+
+	return jack_port_name (jp);
 }
 
 PortFlags
