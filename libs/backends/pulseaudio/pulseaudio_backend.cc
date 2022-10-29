@@ -633,7 +633,6 @@ PulseAudioBackend::_start (bool /*for_latency_measurement*/)
 		if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
 			PBD::error << _("PulseAudioBackend: failed to create process thread.") << endmsg;
 			stop ();
-			_run = false;
 			return ProcessThreadStartError;
 		} else {
 			PBD::warning << _("PulseAudioBackend: cannot acquire realtime permissions.") << endmsg;
