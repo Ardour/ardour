@@ -3274,7 +3274,7 @@ TempoMap::twist_tempi (TempoPoint* ts, samplepos_t start_sample, samplepos_t end
 		double copy_sclock_ratio = 1.0;
 
 		if (next_to_next_t) {
-			next_sclock_ratio = (next_to_next_t->sclock() - old_next_sclock) / (old_next_to_next_sclock -  old_next_sclock);
+			next_sclock_ratio = (next_to_next_t->sclock() - old_next_sclock) / (double) (old_next_to_next_sclock -  old_next_sclock);
 			copy_sclock_ratio = ((old_tc_sclock - next_t->sclock()) / (double) (old_tc_sclock - old_next_sclock));
 		}
 
