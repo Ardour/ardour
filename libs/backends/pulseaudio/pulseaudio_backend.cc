@@ -1040,7 +1040,7 @@ PulseAudioBackend::main_process_thread ()
 			pa_threaded_mainloop_lock (p_mainloop);
 
 			size_t bytes_to_write = sizeof (float) * _samples_per_period * N_CHANNELS;
-			if (pa_stream_writable_size (p_stream) < bytes_to_write) {
+			while (pa_stream_writable_size (p_stream) < bytes_to_write) {
 				/* wait until stream_request_cb triggers */
 				pa_threaded_mainloop_wait (p_mainloop);
 			}
