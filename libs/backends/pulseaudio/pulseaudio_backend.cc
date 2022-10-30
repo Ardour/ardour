@@ -225,6 +225,7 @@ PulseAudioBackend::init_pulse ()
 	ba.fragsize  = 0; // capture only
 
 	if (!pa_sample_spec_valid (&ss)) {
+		PBD::error << _("PulseAudioBackend: Default sample spec not valid") << endmsg;
 		return AudioDeviceInvalidError;
 	}
 
@@ -996,6 +997,7 @@ PulseAudioBackend::main_process_thread ()
 
 	/* begin streaming */
 	if (!cork_pulse (false)) {
+		PBD::error << _("PulseAudioBackend::main_process_thread initial uncork failed.") << endmsg;
 		_active = false;
 		if (_run) {
 			engine.halted_callback ("PulseAudio: cannot uncork stream");
@@ -1015,6 +1017,7 @@ PulseAudioBackend::main_process_thread ()
 				/* when transitioning to freewheeling, cork it and stop writing */
 				assert (!pa_stream_is_corked (p_stream));
 				if (!cork_pulse (true)) {
+					PBD::error << _("PulseAudioBackend::main_process_thread failed to cork for freewheeling.") << endmsg;
 					break;
 				}
 			}
@@ -1024,12 +1027,14 @@ PulseAudioBackend::main_process_thread ()
 			pa_threaded_mainloop_lock (p_mainloop);
 			_operation_succeeded = false;
 			if (!sync_pulse (pa_stream_flush (p_stream, stream_operation_cb, this)) || !_operation_succeeded) {
+				PBD::error << _("PulseAudioBackend::main_process_thread failed to flush.") << endmsg;
 				break;
 			}
 
 			if (!_freewheel) {
 				/* when transitioning from freewheeling, uncork after flushing and start writing */
 				if (!cork_pulse (false)) {
+					PBD::error << _("PulseAudioBackend::main_process_thread failed to uncork after freewheeling.") << endmsg;
 					break;
 				}
 
@@ -1048,6 +1053,7 @@ PulseAudioBackend::main_process_thread ()
 
 			if (pa_stream_get_state (p_stream) != PA_STREAM_READY) {
 				pa_threaded_mainloop_unlock (p_mainloop);
+				PBD::error << _("PulseAudioBackend::main_process_thread not ready when writing.") << endmsg;
 				break;
 			}
 
@@ -1057,6 +1063,7 @@ PulseAudioBackend::main_process_thread ()
 			if (engine.process_callback (_samples_per_period)) {
 				pa_threaded_mainloop_unlock (p_mainloop);
 				_active = false;
+				PBD::error << _("PulseAudioBackend::main_process_thread engine.process_callback failed.") << endmsg;
 				return 0;
 			}
 
@@ -1076,6 +1083,7 @@ PulseAudioBackend::main_process_thread ()
 
 			if (pa_stream_write (p_stream, buf, bytes_to_write, NULL, 0, PA_SEEK_RELATIVE) < 0) {
 				pa_threaded_mainloop_unlock (p_mainloop);
+				PBD::error << _("PulseAudioBackend::main_process_thread pa_stream_write failed.") << endmsg;
 				break;
 			}
 			pa_threaded_mainloop_unlock (p_mainloop);
@@ -1091,6 +1099,7 @@ PulseAudioBackend::main_process_thread ()
 			_last_process_start = 0;
 			if (engine.process_callback (_samples_per_period)) {
 				_active = false;
+				PBD::error << _("PulseAudioBackend::main_process_thread freewheeling engine.process_callback failed.") << endmsg;
 				return 0;
 			}
 
