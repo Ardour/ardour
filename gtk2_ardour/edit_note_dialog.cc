@@ -97,7 +97,10 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	_time_clock.set_session (_region_view->get_time_axis_view().session ());
 	_time_clock.set_mode (AudioClock::BBT);
 
-	const timepos_t pos (_region_view->region_relative_distance (timecnt_t ((*_events.begin())->note()->time (), timepos_t()), BeatTime));
+	/* Calculate absolute position of the event on time timeline */
+	boost::shared_ptr<ARDOUR::Region> region (_region_view->region ());
+	timepos_t const pos = region->source_position() + timecnt_t ((*_events.begin())->note()->time ());
+
 	_time_clock.set (pos, true);
 
 	l = manage (left_aligned_label (_("Length")));
@@ -198,14 +201,12 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	timepos_t source_start = _region_view->region()->position().earlier (_region_view->region()->start());
+	boost::shared_ptr<ARDOUR::Region> region (_region_view->region ());
 
 	/* convert current clock time into an offset from the start of the source */
-
-	timepos_t time_clock_source_relative = _time_clock.current_time().earlier (source_start);
+	timecnt_t const time_clock_source_relative = region->source_position ().distance (_time_clock.current_time ());
 
 	/* convert that into a position in Beats - this will be the new note time (as an offset inside the source) */
-
 	Beats const new_note_time_source_relative_beats = time_clock_source_relative.beats ();
 
 	if (!_time_all.get_sensitive() || _time_all.get_active ()) {
