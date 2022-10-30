@@ -1073,8 +1073,7 @@ PulseAudioBackend::main_process_thread ()
 
 			/* interleave */
 			for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it, ++i) {
-				BackendPortPtr port = boost::dynamic_pointer_cast<BackendPort> (*it);
-				const float* src = (const float*) port->get_buffer (_samples_per_period);
+				const float* src = (const float*) (*it)->get_buffer (_samples_per_period);
 				for (size_t n = 0; n < _samples_per_period; ++n) {
 					buf[N_CHANNELS * n + i] = src[n];
 				}
