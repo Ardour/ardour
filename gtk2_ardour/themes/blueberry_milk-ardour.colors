@@ -116,7 +116,7 @@
     <ColorAlias name="ghost track zero line" alias="neutral:foreground2"/>
     <ColorAlias name="grid line major" alias="neutral:foregroundest"/>
     <ColorAlias name="grid line micro" alias="neutral:midground"/>
-    <ColorAlias name="grid line minor" alias="neutral:foreground2"/>
+    <ColorAlias name="grid line minor" alias="neutral:background2"/>
     <ColorAlias name="gtk_arm" alias="alert:red"/>
     <ColorAlias name="gtk_audio_bus" alias="neutral:background2"/>
     <ColorAlias name="gtk_audio_track" alias="theme:bg1"/>
@@ -305,7 +305,7 @@
     <ColorAlias name="pluginlist filter button: fill active" alias="widget:bg"/>
     <ColorAlias name="pluginlist radio button: led active" alias="alert:cyan"/>
     <ColorAlias name="pluginui toggle: fill" alias="widget:bg"/>
-    <ColorAlias name="pluginui toggle: fill active" alias="widget:blue"/>
+    <ColorAlias name="pluginui toggle: fill active" alias="alert:green"/>
     <ColorAlias name="processor automation line" alias="theme:bg1"/>
     <ColorAlias name="processor auxfeedback: fill" alias="theme:contrasting alt"/>
     <ColorAlias name="processor auxfeedback: led active" alias="alert:green"/>
@@ -488,7 +488,7 @@
     <Modifier name="ghost track base" modifier="= alpha:0.640782"/>
     <Modifier name="ghost track midi fill" modifier="= alpha:0.3"/>
     <Modifier name="inactive crossfade" modifier="= alpha:0.4666"/>
-    <Modifier name="loop rectangle" modifier="= alpha:0.5"/>
+    <Modifier name="loop rectangle" modifier="= alpha:0.24"/>
     <Modifier name="marker bar" modifier="= alpha:0.5"/>
     <Modifier name="grid line" modifier="= alpha:1.0"/>
     <Modifier name="midi frame base" modifier="= alpha:0.85"/>
