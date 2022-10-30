@@ -1233,7 +1233,7 @@ PulseAudioPort::get_buffer (pframes_t n_samples)
 			while (++it != connections.end ()) {
 				source = boost::dynamic_pointer_cast<PulseAudioPort> (*it);
 				assert (source && source->is_output ());
-				Sample*       dst = buffer ();
+				Sample*       dst = _buffer;
 				const Sample* src = source->const_buffer ();
 				for (uint32_t s = 0; s < n_samples; ++s, ++dst, ++src) {
 					*dst += *src;
