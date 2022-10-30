@@ -274,7 +274,6 @@ PulseAudioBackend::init_pulse ()
 		close_pulse (true);
 		return AudioDeviceOpenError;
 	}
-
 	/* Wait until the context is ready, context_state_cb will trigger this */
 	pa_threaded_mainloop_wait (p_mainloop);
 	if (pa_context_get_state (p_context) != PA_CONTEXT_READY) {
@@ -318,10 +317,8 @@ PulseAudioBackend::init_pulse ()
 		close_pulse (true);
 		return AudioDeviceOpenError;
 	}
-
 	/* Wait until the stream is ready */
 	pa_threaded_mainloop_wait (p_mainloop);
-
 	if (pa_stream_get_state (p_stream) != PA_STREAM_READY) {
 		PBD::error << _("PulseAudioBackend: Failed to start stream") << endmsg;
 		close_pulse (true);
@@ -1084,6 +1081,7 @@ PulseAudioBackend::main_process_thread ()
 				PBD::error << _("PulseAudioBackend::main_process_thread pa_stream_write failed.") << endmsg;
 				break;
 			}
+
 			pa_threaded_mainloop_unlock (p_mainloop);
 
 			_processed_samples += _samples_per_period;
