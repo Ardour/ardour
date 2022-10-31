@@ -990,6 +990,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		}
 		control_points.clear ();
 		line->hide();
+		line_points.clear ();
 		return;
 	}
 
