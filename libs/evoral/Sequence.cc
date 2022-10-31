@@ -624,6 +624,8 @@ Sequence<Time>::clear()
 {
 	WriteLock lock(write_lock());
 	_notes.clear();
+	_sysexes.clear ();
+	_patch_changes.clear ();
 	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li)
 		li->second->list()->clear();
 }
