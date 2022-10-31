@@ -1334,11 +1334,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 						mark.style = ArdourCanvas::Ruler::Mark::Major;
 					} else {
 						buf[0] = '\0';
-						if (bbt.bars % 16 == 9)  {
-							mark.style = ArdourCanvas::Ruler::Mark::Minor;
-						} else {
-							mark.style = ArdourCanvas::Ruler::Mark::Micro;
-						}
+						mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					}
 					mark.label = buf;
 					mark.position = (*i).sample (sr);
