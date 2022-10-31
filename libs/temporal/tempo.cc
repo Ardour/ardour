@@ -1993,7 +1993,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			/* add point to grid, perhaps */
 
 			if (bar_mod != 0) {
-				if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 0)))) {
+				if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 1)))) {
 					ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
 					DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
 				} else {
@@ -2047,7 +2047,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			 */
 
 			if (bar_mod != 0) {
-				if (p->bbt().is_bar() && (bar_mod == 1 || ((p->bbt().bars % bar_mod == 0)))) {
+				if (p->bbt().is_bar() && (bar_mod == 1 || ((p->bbt().bars % bar_mod == 1)))) {
 					ret.push_back (TempoMapPoint (*this, metric, p->sclock(), p->beats(), p->bbt()));
 					DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
 				} else {
