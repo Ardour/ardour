@@ -4689,7 +4689,7 @@ ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* b
 	if (pi) {
 		_unmap_connection = signal_unmap.connect (sigc::bind ([] (ProxyBase* self, PluginType type) {
 			ProcessorWindowProxy* me = dynamic_cast<ProcessorWindowProxy*> (self);
-			if (!me->is_custom) {
+			if (!me->is_custom || type == Lua) {
 				return;
 			}
 			switch (UIConfiguration::instance ().get_plugin_gui_behavior ()) {
