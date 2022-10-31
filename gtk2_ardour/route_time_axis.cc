@@ -2550,7 +2550,7 @@ RouteTimeAxisView::combine_regions ()
 	}
 
 	playlist->clear_changes ();
-	boost::shared_ptr<Region> compound_region = playlist->combine (selected_regions);
+	boost::shared_ptr<Region> compound_region = playlist->combine (selected_regions, track());
 
 	_session->add_command (new StatefulDiffCommand (playlist));
 	/* make the new region be selected */
