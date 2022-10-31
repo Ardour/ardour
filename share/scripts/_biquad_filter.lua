@@ -27,6 +27,10 @@ function dsp_params ()
 				["High Shelf"] = 2,
 				["Low Pass"]   = 3,
 				["High Pass"]  = 4,
+				["Analog PK"]  = 5,
+				["Analog LP"]  = 6,
+				["Analog HP"]  = 7,
+				["Analog BP"]  = 8,
 			}
 		},
 		{ ["type"] = "input", name = "Gain", min = -20, max = 20,    default = 0,    unit="dB" },
@@ -46,6 +50,14 @@ function map_type (t)
 		return ARDOUR.DSP.BiquadType.LowPass
 	elseif t == 4 then
 		return ARDOUR.DSP.BiquadType.HighPass
+	elseif t == 5 then
+		return ARDOUR.DSP.BiquadType.MatchedPeaking
+	elseif t == 6 then
+		return ARDOUR.DSP.BiquadType.MatchedLowPass
+	elseif t == 7 then
+		return ARDOUR.DSP.BiquadType.MatchedHighPass
+	elseif t == 8 then
+		return ARDOUR.DSP.BiquadType.MatchedBandPass0dB
 	else
 		return ARDOUR.DSP.BiquadType.Peaking
 	end
