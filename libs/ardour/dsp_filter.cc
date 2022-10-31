@@ -207,6 +207,35 @@ Biquad::configure (Biquad const& other)
 }
 
 void
+Biquad::set_vicanek_poles (const double W0, const double Q, const double A)
+{
+	/* https://www.vicanek.de/articles/BiquadFits.pdf */
+	const double Q2 = Q * Q;
+	const double AA = A * A;
+	const double p  = 1. / (4 * AA * Q2);
+
+	_a2 = exp (-.5 * W0 / (A * Q));
+	_a1 = p <= 1.
+		? -2 * _a2 * cos (W0 * sqrt (1 - p))
+		: -2 * _a2 * cosh (W0 * sqrt (p - 1));
+	_a2 = _a2 * _a2;
+}
+
+void
+Biquad::calc_vicanek (const double W0, double& A0, double& A1, double& A2, double& phi0, double& phi1, double& phi2)
+{
+#define SQR(x) ((x) * (x))
+	A0 = SQR(1. + _a1 + _a2);
+	A1 = SQR(1. - _a1 + _a2);
+	A2 = -4 * _a2;
+
+	phi1 = SQR(sin (.5 * W0));
+	phi0 = 1.0 - phi1;
+	phi2 = 4 * phi0 * phi1;
+#undef SQR
+}
+
+void
 Biquad::compute (Type type, double freq, double Q, double gain)
 {
 	if (Q <= .001)  { Q = 0.001; }
@@ -219,12 +248,15 @@ Biquad::compute (Type type, double freq, double Q, double gain)
 	 */
 	const double A = pow (10.0, (gain / 40.0));
 	const double W0 = (2.0 * M_PI * freq) / _rate;
+
 	const double sinW0 = sin (W0);
 	const double cosW0 = cos (W0);
 	const double alpha = sinW0 / (2.0 * Q);
 	const double beta  = sqrt (A) / Q;
 
 	double _a0;
+	double A0, A1, A2;
+	double phi0, phi1, phi2;
 
 	switch (type) {
 		case LowPass:
@@ -307,6 +339,70 @@ Biquad::compute (Type type, double freq, double Q, double gain)
 			_a1 =        2.0 * ((A - 1) - ((A + 1) * cosW0));
 			_a2 =               (A + 1) - ((A - 1) * cosW0) - (beta * sinW0);
 			break;
+
+		case MatchedHighPass:
+			_a0 = 1.0;
+			set_vicanek_poles (W0, Q);
+			calc_vicanek (W0, A0, A1, A2, phi0, phi1, phi2);
+
+			_b0 = sqrt (A0 * phi0 + A1 * phi1 + A2 * phi2) / (4 * phi1) * Q;
+			_b1 = -2 * _b0;
+			_b2 = _b0;
+			break;
+
+		case MatchedLowPass:
+			_a0 = 1.0;
+			set_vicanek_poles (W0, Q);
+			calc_vicanek (W0, A0, A1, A2, phi0, phi1, phi2);
+			{
+				const double B0_2 = 1 + _a1 + _a2; // = sqrt (B0)
+				const double B1   = ((A0 * phi0 + A1 * phi1 + A2 * phi2) * Q * Q - A0 * phi0) / phi1;
+
+				_b0 = .5 * (B0_2 + sqrt (B1));
+				_b1 = B0_2 -_b0;
+				_b2 = 0;
+			}
+			break;
+
+		case MatchedBandPass0dB: /* Constant 0 dB peak gain */
+			_a0 =  1.0;
+			set_vicanek_poles (W0, Q);
+			{
+				float fq = 2 * freq / _rate;
+				float fq2 = fq * fq;
+
+				_b1 = -.5 * (1 - _a1 + _a2) * fq / Q / sqrt ((1 - fq2) * (1 - fq2) + fq2 / (Q * Q));
+				_b0 =  .5 * ((1 + _a1 + _a2) / (W0 * Q) - _b1);
+				_b2 =  -_b0 - _b1;
+			}
+			break;
+
+		case MatchedPeaking:
+			_a0 = 1.0;
+			set_vicanek_poles (W0, Q, A);
+			calc_vicanek (W0, A0, A1, A2, phi0, phi1, phi2);
+			{
+				const double AA    = A * A;
+				const double AAAA  = AA * AA;
+
+				const double R1 = (phi0 * A0 + phi1 * A1 + phi2 * A2) * AAAA;
+				const double R2 = (A1 - A0 + 4 * (phi0 - phi1) * A2) * AAAA;
+
+				const double B0 = A0;
+				const double B2 = (R1 - phi1 * R2 - B0) / (4 * phi1 * phi1);
+				const double B1 = R2 + B0 + 4 * (phi1 - phi0) * B2;
+
+				const double B0_2 = 1 + _a1 + _a2; // = sqrt (B0)
+
+				_b1 = .5 * (B0_2 - sqrt (B1));
+
+				const double w = B0_2 - _b1;
+
+				_b0 = .5 * (w + sqrt (w * w + B2));
+				_b2 = -B2 / (4 * _b0);
+			}
+			break;
+
 		default:
 			abort(); /*NOTREACHED*/
 			break;

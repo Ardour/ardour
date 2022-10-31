@@ -220,7 +220,11 @@ namespace ARDOUR { namespace DSP {
 				AllPass,
 				Peaking,
 				LowShelf,
-				HighShelf
+				HighShelf,
+				MatchedLowPass,
+				MatchedHighPass,
+				MatchedBandPass0dB,
+				MatchedPeaking
 			};
 
 			/** Instantiate Biquad Filter
@@ -260,6 +264,9 @@ namespace ARDOUR { namespace DSP {
 			/** reset filter state */
 			void reset () { _z1 = _z2 = 0.0; }
 		private:
+			void set_vicanek_poles (const double W0, const double Q, const double A = 1.0);
+			void calc_vicanek (const double W0, double& A0, double& A1, double& A2, double& phi0, double& phi1, double& phi2);
+
 			double _rate;
 			float  _z1, _z2;
 			double _a1, _a2;
