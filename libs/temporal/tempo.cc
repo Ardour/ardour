@@ -627,7 +627,21 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 
 	superclock_t sc = pos.superclocks();
 
-	const Beats dq = _tempo->quarters_at_superclock (sc) - _meter->beats();
+	/* Use the later of the tempo or meter as the reference point to
+	 * compute the BBT distance. All map points are fully defined by all 3
+	 * time types, but we need the latest one to avoid incorrect
+	 * computations of quarter duration.
+	 */
+
+	const Point* reference_point;
+
+	if (_tempo->beats() < _meter->beats()) {
+		reference_point = _meter;
+	} else {
+		reference_point = _tempo;
+	}
+
+	const Beats dq = _tempo->quarters_at_superclock (sc) - reference_point->beats();
 
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("qn @ %1 = %2, meter @ %3 , delta %4\n", sc, _tempo->quarters_at_superclock (sc), _meter->beats(), dq));
 
@@ -641,8 +655,9 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 
 	const BBT_Offset bbt_offset (0, note_value_count, dq.get_ticks());
 
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from meter @ %1: %2\n", _meter->bbt(), bbt_offset));
-	return _meter->bbt_add (_meter->bbt(), bbt_offset);
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from %3 @ %1: %2\n", (_tempo->beats() < _meter->beats() ?  _meter->bbt() : _tempo->bbt()), bbt_offset,
+	                                                 (_tempo->beats() < _meter->beats() ? "meter" : "tempo")));
+	return _meter->bbt_add (reference_point->bbt(), bbt_offset);
 }
 
 superclock_t
