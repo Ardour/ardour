@@ -1380,7 +1380,16 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 
 		samplecnt_t cnt = min (timepos_t (start).distance (next_event.when).samples(), (samplecnt_t) nframes);
 
+		/* This may trigger when loopin a range < 1 sample (if that is even possible).
+		 * Or When there is more than 1 automation point on the same sample but at
+		 * different beat-time (which is probably possible, even though music-time has a much
+		 * larger granularity).
+		 */
 		assert (cnt > 0);
+		if (cnt <= 0) {
+			/* prevent endless loops in optimized builds */
+			break;
+		}
 
 		connect_and_run (bufs, start, start + cnt * speed, speed, cnt, offset, true);
 
@@ -1390,7 +1399,16 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 
 		map_loop_range (start, end);
 
-		if (!find_next_event (std::min (timepos_t (start), next_event.when), timepos_t (end), next_event)) {
+		/* In general we must use `next_event.when` ot search for next events
+		 * in the time-domain of the automation-list. This prevents finding
+		 * the same event again (see 6a55146fdc).
+		 *
+		 * However when looping, we need to rewind to the mapped loop range
+		 * and take min (start, next_event.when).
+		 */
+		timepos_t next = (next_event.when.samples () == start) ? next_event.when : std::min (timepos_t (start), next_event.when);
+
+		if (!find_next_event (next, timepos_t (end), next_event)) {
 			break;
 		}
 	}
