@@ -163,29 +163,7 @@ BasicUI::add_marker (const std::string& markername)
 void
 BasicUI::remove_marker_at_playhead ()
 {
-	if (session) {
-		//set up for undo
-		XMLNode &before = session->locations()->get_state();
-		bool removed = false;
-
-		//find location(s) at this time
-		Locations::LocationList locs;
-		session->locations()->find_all_between (timepos_t (session->audible_sample()), timepos_t (session->audible_sample()+1), locs, Location::Flags(0));
-		for (Locations::LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
-			if ((*i)->is_mark()) {
-				session->locations()->remove (*i);
-				removed = true;
-			}
-		}
-
-		//store undo
-		if (removed) {
-			session->begin_reversible_command (_("remove marker"));
-			XMLNode &after = session->locations()->get_state();
-			session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
-			session->commit_reversible_command ();
-		}
-	}
+	access_action("Common/remove-location-from-playhead");
 }
 
 void
@@ -423,30 +401,19 @@ BasicUI::save_state ()
 void
 BasicUI::prev_marker ()
 {
-	timepos_t pos = session->locations()->first_mark_before (timepos_t (session->transport_sample()));
-
-	if (pos >= 0) {
-		session->request_locate (pos.samples());
-	} else {
-		session->goto_start ();
-	}
+	access_action("Common/jump-backward-to-mark");
 }
 
 void
 BasicUI::next_marker ()
 {
-	timepos_t pos = session->locations()->first_mark_after (timepos_t (session->transport_sample()));
-
-	if (pos >= 0) {
-		session->request_locate (pos.samples());
-	} else {
-		session->goto_end();
-	}
+	access_action("Common/jump-forward-to-mark");
 }
 
 void
 BasicUI::set_transport_speed (double speed)
 {
+	session->request_roll (TRS_UI);
 	session->request_transport_speed (speed);
 }
 
@@ -563,10 +530,12 @@ BasicUI::jump_by_bars (int bars, LocateTransportDisposition ltd)
 	TempoMap::SharedPtr tmap (TempoMap::fetch());
 	Temporal::BBT_Time bbt (tmap->bbt_at (timepos_t (session->transport_sample())));
 
-	bbt.bars += bbt.bars;
+	bbt.bars += bars;
 	if (bbt.bars < 0) {
 		bbt.bars = 1;
 	}
+	bbt.beats = 1;
+	bbt.ticks = 0;
 
 	session->request_locate (tmap->sample_at (bbt), false, ltd);
 }
