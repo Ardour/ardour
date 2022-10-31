@@ -550,7 +550,7 @@ bool
 Source::get_segment_descriptor (TimelineRange const & range, SegmentDescriptor& segment)
 {
 	/* Note: since we disallow overlapping segments, any overlap between
-	   the @param range and an existing segment counts as a match.
+	   the @p range and an existing segment counts as a match.
 	*/
 
 	for (auto const & sd : segment_descriptors) {

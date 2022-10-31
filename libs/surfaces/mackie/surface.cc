@@ -608,7 +608,7 @@ Surface::master_display (uint32_t line_number, const std::string& line)
 	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line)
 	retval << (49 + (line_number * 0x38));	// 9th position
 
-	// ascii data to display. @param line is UTF-8
+	// ascii data to display. `line` is UTF-8
 	string ascii = Glib::convert_with_fallback (line, "UTF-8", "ISO-8859-1", "_");
 	string::size_type len = ascii.length();
 	if (len > 6) {
@@ -1564,7 +1564,7 @@ Surface::display_line (string const& msg, int line_num)
 
 	} else {
 
-		/* ascii data to display. @param msg is UTF-8 which is not legal. */
+		/* ascii data to display. @p msg is UTF-8 which is not legal. */
 		string ascii = Glib::convert_with_fallback (msg, "UTF-8", "ISO-8859-1", "_");
 		string::size_type len = ascii.length();
 
@@ -1584,7 +1584,7 @@ Surface::display_line (string const& msg, int line_num)
 	return midi_msg;
 }
 
-/** display @param msg on the 55x2 screen for @param msecs milliseconds
+/** display @p msg on the 55x2 screen for @p msecs milliseconds
  *
  *  @param msg is assumed to be UTF-8 encoded, and will be converted
  *  to ASCII with an underscore as fallback character before being

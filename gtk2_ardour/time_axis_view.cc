@@ -1240,8 +1240,8 @@ TimeAxisView::parameter_changed (string const & what_changed)
 }
 
 /** @return Pair: TimeAxisView, layer index.
- * TimeAxisView is non-0 if this object covers @param y, or one of its children
- * does. @param y is an offset from the top of the trackview area.
+ * TimeAxisView is non-0 if this object covers @p y, or one of its children
+ * does. @p y is an offset from the top of the trackview area.
  *
  * If the covering object is a child axis, then the child is returned.
  * TimeAxisView is 0 otherwise.

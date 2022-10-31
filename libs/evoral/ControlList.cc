@@ -1774,7 +1774,7 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const &
 
 		/* delta between the two spanning points is <= 1,
 		   consider the next point as the answer, but only if the next
-		   point is actually beyond @param start.
+		   point is actually beyond @p start.
 		*/
 
 		if (next->when > start) {

@@ -30,8 +30,8 @@ namespace ARDOUR {
 
 	/**
 	 * @return the path to the directory used to store user specific
-	 * configuration files for the given @param version of the program.
-	 * If @param version is negative, the build-time string PROGRAM_VERSION
+	 * configuration files for the given @p version of the program.
+	 * If @p version is negative, the build-time string PROGRAM_VERSION
 	 * will be used to determine the version number.
 	 *
 	 * @post user_config_directory() exists IF version was negative.

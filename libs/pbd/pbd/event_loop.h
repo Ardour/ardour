@@ -127,7 +127,7 @@ private:
 
 		/* @param factory : a function that can be called (with an
 		 * argument specifying the @param number_of_requests) to create and
-		 * return a request buffer for communicating with @param name)
+		 * return a request buffer for communicating with @p name)
 		 */
 		void* (*factory)(uint32_t nunber_of_requests);
 	};

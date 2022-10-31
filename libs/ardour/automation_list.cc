@@ -117,7 +117,7 @@ AutomationList::AutomationList (const AutomationList& other, timepos_t const & s
 }
 
 /** @param id is used for legacy sessions where the type is not present
- * in or below the AutomationList node.  It is used if @param id is non-null.
+ * in or below the AutomationList node.  It is used if @p id is non-null.
  */
 AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 	: ControlList(id, ARDOUR::ParameterDescriptor(id), Temporal::AudioTime) /* domain may change in ::set_state */

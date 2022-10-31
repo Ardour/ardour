@@ -1782,8 +1782,8 @@ TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
 	 * and meter passed in.
 	 *
 	 * Then advance through all points, resetting either tempo and/or meter
-	 * until we find a point beyond (or equal to, if @param can_match is
-	 * true) the @param arg (end time)
+	 * until we find a point beyond (or equal to, if @p can_match is
+	 * true) the @p arg (end time)
 	 */
 
 	for (tp = tstart, mp = mstart, p = begini; p != endi; ++p) {
@@ -1837,7 +1837,7 @@ TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
 void
 TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, uint32_t bar_mod) const
 {
-	/* note: @param bar_mod is "bar modulo", and describes the N in "give
+	/* note: @p bar_mod is "bar modulo", and describes the N in "give
 	   me every Nth bar". If the caller wants every 4th bar, bar_mod ==
 	   4. If we want every point defined by the tempo note type (e.g. every
 	   quarter not, then bar_mod is zero.
@@ -1861,7 +1861,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	/* first task: get to the right starting point for the requested
 	 * grid. if bar_mod is zero, then we'll start on the next beat after
 	 * @param start. if bar_mod is non-zero, we'll start on the first bar
-	 * after @param start. This bar position may or may not be a part of the
+	 * after @p start. This bar position may or may not be a part of the
 	 * grid, depending on whether or not it is a multiple of bar_mod.
 	 *
 	 * final argument = true means "return the iterator corresponding the
@@ -2568,12 +2568,12 @@ TempoMap::can_remove (MeterPoint const & m) const
 	return !is_initial (m);
 }
 
-/** returns the duration (using the domain of @param pos) of the supplied BBT time at a specified sample position in the tempo map.
+/** returns the duration (using the domain of @p pos) of the supplied BBT time at a specified sample position in the tempo map.
  * @param pos the frame position in the tempo map.
  * @param bbt the distance in BBT time from pos to calculate.
  * @param dir the rounding direction..
- * @return the timecnt_t that @param bbt represents when starting at @param pos, in
- * the time domain of @param pos
+ * @return the timecnt_t that @p bbt represents when starting at @p pos, in
+ * the time domain of @p pos
 */
 timecnt_t
 TempoMap::bbt_duration_at (timepos_t const & pos, BBT_Offset const & dur) const

@@ -2159,7 +2159,7 @@ Editor::temporal_zoom_to_sample (bool coarser, samplepos_t sample)
 		return;
 	}
 
-	/* zoom focus is automatically taken as @param sample when this
+	/* zoom focus is automatically taken as @p sample when this
 	   method is used.
 	*/
 
@@ -9629,8 +9629,8 @@ Editor::effective_ripple_mark_start (boost::shared_ptr<Playlist> target_playlist
 {
 #if 0  /* I do not agree with this behavior - at the very least it ignores regions on *other* tracks and the markers that might be associated with them -Ben */
 	/* in the target playlist, find the region before the target
-	 * (implicitly given by @param at. Allow all markers that occur between
-	 * the end of the region and @param at to move too. This is
+	 * (implicitly given by @p pos. Allow all markers that occur between
+	 * the end of the region and @p pos to move too. This is
 	 * desired/expected by many (most?) ripple-edit using folk.
 	 */
 

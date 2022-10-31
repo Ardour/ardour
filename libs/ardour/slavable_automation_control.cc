@@ -194,7 +194,7 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 
 		if (res.second) {
 
-			/* note that we bind @param m as a weak_ptr<AutomationControl>, thus
+			/* note that we bind @p m as a weak_ptr<AutomationControl>, thus
 			   avoiding holding a reference to the control in the binding
 			   itself.
 			*/

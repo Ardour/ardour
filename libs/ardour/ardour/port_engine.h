@@ -132,7 +132,7 @@ public:
 	/** Query port name
 	 *
 	 * @param port \ref PortHandle
-	 * @return the name of the port referred to by @param port . If the port
+	 * @return the name of the port referred to by @p port . If the port
 	 *         does not exist, return an empty string.
 	 */
 	virtual std::string get_port_name (PortHandle port) const = 0;
@@ -432,7 +432,7 @@ public:
 	virtual void          set_latency_range (PortHandle port, bool for_playback, LatencyRange r) = 0;
 
 	/** Return the latency range for the port referred to by \p port .
-	 * The playback range will be returned if @param for_playback is true,
+	 * The playback range will be returned if @p for_playback is true,
 	 * otherwise the capture range will be returned.
 	 *
 	 * @param port The PortHandle to query
@@ -460,8 +460,8 @@ public:
 	 */
 	virtual void      get_physical_outputs (DataType type, std::vector<std::string>& names) = 0;
 
-	/** Store into @param names the names of all ports with the IsInput and
-	 * IsPhysical flags set, that handle data of type @param type .
+	/** Store into @p names the names of all ports with the IsInput and
+	 * IsPhysical flags set, that handle data of type @p type .
 	 *
 	 * This can be used to discover inputs associated with hardware devices.
 	 */

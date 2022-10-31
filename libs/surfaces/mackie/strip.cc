@@ -1055,7 +1055,7 @@ Strip::display (uint32_t lcd_number, uint32_t line_number, const std::string& li
 		retval << ' ';	// add the left pad space
 	}
 
-	// ascii data to display. @param line is UTF-8
+	// ascii data to display. `line` is UTF-8
 	string ascii = Glib::convert_with_fallback (line, "UTF-8", "ISO-8859-1", "_");
 	string::size_type len = ascii.length();
 	if (len > max_char_count) {

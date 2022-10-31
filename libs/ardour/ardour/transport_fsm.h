@@ -26,7 +26,7 @@ struct TransportFSM
 	/* All code related to this object is expected to be run synchronously
 	 * and single-threaded from the process callback. It can be re-entrant
 	 * if handling one transport state change queues another state change,
-	 * but that is handled explicitly (see the @param processing member and
+	 * but that is handled explicitly (see the @p processing member and
 	 * its usage).
 	 */
 

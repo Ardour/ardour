@@ -959,10 +959,10 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 * It also returns an iterator which may point at the latter of the two
 	 * points (tempo & meter; always the meter point if they are at the
 	 * same time) OR may point at the iterator *after* the latter of the
-	 * two, depending on whether or not @param ret_iterator_after_not_at is
+	 * two, depending on whether or not @p ret_iterator_after_not_at is
 	 * true or false.
 	 *
-	 * If @param can_match is true, the points used can be located at the
+	 * If @p can_match is true, the points used can be located at the
 	 * given time. If false, they must be before it. Setting it to false is
 	 * useful when you need to know the TempoMetric in effect at a given
 	 * time if there was no tempo or meter point at that time.
@@ -1000,7 +1000,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	Points::iterator  get_tempo_and_meter (TempoPoint *& t, MeterPoint *& m, superclock_t sc, bool can_match, bool ret_iterator_after_not_at) {
 
-		/* because @param this is non-const (because the method is not
+		/* because `this` is non-const (because the method is not
 		 * marked const), the following:
 
 		   _points.begin()
@@ -1020,7 +1020,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, BBT_Time const & bbt, bool can_match, bool ret_iterator_after_not_at) const {
 
-		/* because @param this is const (because the method is marked
+		/* because `this` is const (because the method is marked
 		 * const), the following:
 
 		   _points.begin()

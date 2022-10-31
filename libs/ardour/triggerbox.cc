@@ -952,7 +952,7 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 {
 	/* XXX need to use global grid here is quantization == zero */
 
-	/* Given the value of @param start, determine, based on the
+	/* Given the value of @p start, determine, based on the
 	 * quantization, the next time for a transition.
 	 */
 
@@ -1228,7 +1228,7 @@ Trigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position, Tri
 
 		/* We could have reached the end. Check and restart, because
 		 * TriggerBox::fast_forward() already determined that we are
-		 * the active trigger at @param end_position
+		 * the active trigger at @p end_position
 		 */
 
 		if (_state == Stopped) {

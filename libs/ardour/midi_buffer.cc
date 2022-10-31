@@ -158,7 +158,7 @@ MidiBuffer::push_back(const Evoral::Event<TimeType>& ev)
 
 /** Push MIDI data into the buffer.
  *
- * Note that the raw MIDI pointed to by @param data will be COPIED and unmodified.
+ * Note that the raw MIDI pointed to by @p data will be COPIED and unmodified.
  * That is, the caller still owns it, if it needs freeing it's Not My Problem(TM).
  * Realtime safe.
  * @return false if operation failed (not enough room)

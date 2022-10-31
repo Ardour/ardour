@@ -114,7 +114,7 @@ fluid_channel_init(fluid_channel_t *chan)
 }
 
 /*
-  @param is_all_ctrl_off if nonzero, only resets some controllers, according to
+  @p is_all_ctrl_off if nonzero, only resets some controllers, according to
   https://www.midi.org/techspecs/rp15.php
 */
 void

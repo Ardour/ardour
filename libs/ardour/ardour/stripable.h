@@ -138,7 +138,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 
 	/* "well-known" controls for an EQ in this route. Any or all may
 	 * be null. eq_band_cnt() must return 0 if there is no EQ present.
-	 * Passing an @param band value >= eq_band_cnt() will guarantee the
+	 * Passing an @p band value >= eq_band_cnt() will guarantee the
 	 * return of a null ptr (or an empty string for eq_band_name()).
 	 */
 	virtual uint32_t eq_band_cnt () const = 0;
@@ -189,7 +189,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual boost::shared_ptr<AutomationControl> send_pan_azimuth_controllable (uint32_t n) const = 0;
 	virtual boost::shared_ptr<AutomationControl> send_pan_azimuth_enable_controllable (uint32_t n) const = 0;
 
-	/* for the same value of @param n, this returns the name of the send
+	/* for the same value of @p n, this returns the name of the send
 	 * associated with the pair of controllables returned by the above two methods.
 	 */
 	virtual std::string send_name (uint32_t n) const = 0;

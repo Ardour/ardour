@@ -2689,7 +2689,7 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
 		return;
 	}
 
-	/* create a gap in the presentation info to accommodate @param how_many
+	/* create a gap in the presentation info to accommodate @p how_many
 	 * new objects.
 	 */
 	StripableList sl;
@@ -4834,7 +4834,7 @@ Session::new_audio_source_path_for_embedded (const std::string& path)
 	return newpath;
 }
 
-/** Return true if there are no audio file sources that use @param name as
+/** Return true if there are no audio file sources that use @p name as
  * the filename component of their path.
  *
  * Return false otherwise.

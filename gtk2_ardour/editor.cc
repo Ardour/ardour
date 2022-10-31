@@ -2701,13 +2701,16 @@ Editor::get_state () const
 	return *node;
 }
 
-/** if @param trackview_relative_offset is true, @param y y is an offset into the trackview area, in pixel units
- *  if @param trackview_relative_offset is false, @param y y is a global canvas *  coordinate, in pixel units
+/** Find a TimeAxisView by y position.
  *
- *  @return pair: TimeAxisView that y is over, layer index.
+ *  TimeAxisView may be 0.  Layer index is the layer number if the TimeAxisView
+ *  is valid and is in stacked or expanded region display mode, otherwise 0.
  *
- *  TimeAxisView may be 0.  Layer index is the layer number if the TimeAxisView is valid and is
- *  in stacked or expanded region display mode, otherwise 0.
+ *  If @p trackview_relative_offset is true, then @p y is an offset into the
+ *  trackview area.  Otherwise, @p y is a global canvas coordinate.  In both
+ *  cases, @p y is in pixels.
+ *
+ *  @return The TimeAxisView that @p y is over, and the layer index.
  */
 std::pair<TimeAxisView *, double>
 Editor::trackview_by_y_position (double y, bool trackview_relative_offset) const

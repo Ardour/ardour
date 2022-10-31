@@ -88,7 +88,7 @@ namespace ARDOUR {
 
 	LIBARDOUR_API void set_global_ui_scale_factor (float s);
 
-	/* the @param ui_handler will be called if there are old configuration
+	/* the @p ui_handler will be called if there are old configuration
 	 * files to be copied. It should (probably) ask the user about the
 	 * action, and return true or false depending on whether or not the
 	 * copy should take place.

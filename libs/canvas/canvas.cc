@@ -572,8 +572,8 @@ GtkCanvas::pick_current_item (int state)
 	pick_current_item (Duple (x, y), state);
 }
 
-/** Given @param point (a position in window coordinates)
- *  and mouse state @param state, check to see if _current_item
+/** Given @p point (a position in window coordinates)
+ *  and mouse state @p state, check to see if _current_item
  *  (which will be used to deliver events) should change.
  */
 void
@@ -656,7 +656,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 }
 
 /** Deliver a series of enter & leave events based on the pointer position being at window
- * coordinate @param point, and pointer @param state (modifier keys, etc)
+ * coordinate @p point, and pointer @p state (modifier keys, etc)
  */
 void
 GtkCanvas::deliver_enter_leave (Duple const & point, int state)
@@ -679,7 +679,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	enter_event.state = state;
 
 	/* Events delivered to canvas items are expected to be in canvas
-	 * coordinates but @param point is in window coordinates.
+	 * coordinates but @p point is in window coordinates.
 	 */
 
 	Duple c = window_to_canvas (point);

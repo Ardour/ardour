@@ -178,7 +178,7 @@ public:
 	/** Set the mouse mode (gain, object, range, timefx etc.)
 	 * @param m Mouse mode (defined in editing_syms.h)
 	 * @param force Perform the effects of the change even if no change is required
-	 * (ie even if the current mouse mode is equal to @param m)
+	 * (ie even if the current mouse mode is equal to @p m)
 	 */
 	virtual void set_mouse_mode (Editing::MouseMode m, bool force = false) = 0;
 

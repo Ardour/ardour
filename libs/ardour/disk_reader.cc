@@ -721,7 +721,7 @@ DiskReader::overwrite_existing_audio ()
 		Sample*            buf = (*chan)->rbuf->buffer ();
 		ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (*chan);
 
-		/* Note that @param start is passed by reference and will be
+		/* Note that @p start is passed by reference and will be
 		 * updated by the ::audio_read() call
 		 */
 

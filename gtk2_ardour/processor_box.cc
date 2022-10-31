@@ -3934,7 +3934,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 
 	/* This method may or may not return a Window, but if it does not it
 	 * will modify the parent mixer strip appearance layout to allow
-	 * "editing" the @param processor that was passed in.
+	 * "editing" the @p processor that was passed in.
 	 *
 	 * So for example, if the processor is an Amp (gain), the parent strip
 	 * will be forced back into a model where the fader controls the main gain.

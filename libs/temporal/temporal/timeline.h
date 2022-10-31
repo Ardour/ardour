@@ -142,22 +142,22 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	 * explicit methods with clear semantics.
 	*/
 
-	/** Compute the distance between this timepos_t and @param p
+	/** Compute the distance between this timepos_t and @p p
 	 * such that: this + distance = p
 	 *
-	 * This means that if @param p is later than this, distance is positive;
-	 * if @param p is earlier than this, distance is negative.
+	 * This means that if @p p is later than this, distance is positive;
+	 * if @p p is earlier than this, distance is negative.
 	 *
 	 * Note that the return value is a timecnt_t whose position member
 	 * is equal to the value of this. That means if the distance uses
 	 * musical time value, the distance may not have constant value
 	 * at other positions on the timeline.
 	 *
-	 * @return this - @param p
+	 * @return this - @p p
 	 */
 	timecnt_t distance (timepos_t const & p) const;
 
-	/* computes a new position value that is @param d earlier than this */
+	/* computes a new position value that is @p d earlier than this */
 	timepos_t earlier (timepos_t const & d) const; /* treat d as distance measured from timeline origin */
 	timepos_t earlier (timecnt_t const & d) const;
 

@@ -487,7 +487,7 @@ SMFSource::append_event_samples (const WriterLock& lock,
 		return;
 	}
 
-	/* a distance measure that starts at @param position (audio time) and
+	/* a distance measure that starts at @p position (audio time) and
 	   extends for ev.time() (audio time)
 	*/
 	const timecnt_t distance (timepos_t (ev.time()), timepos_t (position));
@@ -511,7 +511,7 @@ SMFSource::append_event_samples (const WriterLock& lock,
 	assert (!_length || (_length.time_domain() == Temporal::BeatTime));
 	_length = timepos_t (max (_length.beats(), ev_time_beats));
 
-	/* a distance measure that starts at @param _last_ev_time_samples (audio time) and
+	/* a distance measure that starts at @p _last_ev_time_samples (audio time) and
 	   extends for ev.time() (audio time)
 	*/
 	const timecnt_t       delta_distance (timepos_t (ev.time()), timepos_t (_last_ev_time_samples));

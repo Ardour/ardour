@@ -379,7 +379,7 @@ Region::Region (boost::shared_ptr<const Region> other, timecnt_t const & offset)
 	assert (_type == other->data_type());
 }
 
-/** Create a copy of @param other but with different sources. Used by filters */
+/** Create a copy of @p other but with different sources. Used by filters */
 Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
 	: SessionObject (other->session(), other->name())
 	, _type (srcs.front()->type())
