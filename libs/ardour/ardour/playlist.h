@@ -59,6 +59,7 @@ namespace ARDOUR {
 class Session;
 class Playlist;
 class Crossfade;
+class Track;
 
 namespace Properties {
 	/* fake the type, since regions are handled by SequenceProperty which doesn't
@@ -186,7 +187,7 @@ public:
 	void duplicate_range (TimelineRange&, float times);
 	void duplicate_ranges (std::list<TimelineRange>&, float times);
 	void nudge_after (timepos_t const & start, timecnt_t const & distance, bool forwards);
-	virtual boost::shared_ptr<Region> combine (const RegionList&);
+	virtual boost::shared_ptr<Region> combine (const RegionList&, boost::shared_ptr<Track>);
 	virtual void uncombine (boost::shared_ptr<Region>);
 	void fade_range (std::list<TimelineRange>&);
 	void remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_gap, boost::function<void (timepos_t, timecnt_t)> gap_callback);

@@ -3063,7 +3063,7 @@ Playlist::find_next_top_layer_position (timepos_t const & t) const
 }
 
 boost::shared_ptr<Region>
-Playlist::combine (const RegionList& rl)
+Playlist::combine (const RegionList& rl, boost::shared_ptr<Track>)
 {
 	if (rl.empty()) {
 		return boost::shared_ptr<Region>();

@@ -440,7 +440,7 @@ MidiPlaylist::rendered ()
 }
 
 boost::shared_ptr<Region>
-MidiPlaylist::combine (RegionList const & rl)
+MidiPlaylist::combine (RegionList const & rl, boost::shared_ptr<Track> trk)
 {
 	RegionWriteLock rwl (this, true);
 
@@ -452,8 +452,6 @@ MidiPlaylist::combine (RegionList const & rl)
 	sorted.sort (RegionSortByLayerAndPosition());
 
 	boost::shared_ptr<Region> first = sorted.front();
-	RegionList::const_iterator i = sorted.begin();
-	++i;
 
 	timepos_t earliest (timepos_t::max (Temporal::BeatTime));
 	timepos_t latest (Temporal::BeatTime);
@@ -468,19 +466,20 @@ MidiPlaylist::combine (RegionList const & rl)
 		}
 	}
 
-	boost::shared_ptr<MidiRegion> new_region = boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (first, true, true, &rwl.thawlist));
+	boost::shared_ptr<MidiSource> ms (session().create_midi_source_by_stealing_name (trk));
+	boost::shared_ptr<MidiRegion> new_region = boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (ms, first->derive_properties (false), true, &rwl.thawlist));
 
 	timepos_t pos (first->position());
+	new_region->set_position (pos);
 
-	remove_region_internal (first, rwl.thawlist);
-
-	while (i != sorted.end()) {
-		new_region->merge (boost::dynamic_pointer_cast<MidiRegion> (*i));
-		remove_region_internal (*i, rwl.thawlist);
-		++i;
+	for (auto const & other : sorted) {
+		new_region->merge (boost::dynamic_pointer_cast<MidiRegion> (other));
+		remove_region_internal (other, rwl.thawlist);
 	}
 
-	new_region->set_length (earliest.distance (latest));
+	/* write MIDI to disk */
+
+	new_region->midi_source (0)->session_saved ();
 
 	add_region_internal (new_region, pos, rwl.thawlist);
 

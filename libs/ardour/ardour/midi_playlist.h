@@ -84,7 +84,7 @@ public:
 
 	std::set<Evoral::Parameter> contained_automation();
 
-	boost::shared_ptr<Region> combine (const RegionList&);
+	boost::shared_ptr<Region> combine (const RegionList&, boost::shared_ptr<Track>);
 	void uncombine (boost::shared_ptr<Region>);
 
   protected:
