@@ -45,6 +45,8 @@ PBD::Signal2<void,std::string,std::string> BasicUI::AccessAction;
 
 BasicUI::BasicUI (Session& s)
 	: session (&s),
+	_tbank_route_width (8),
+	_tbank_row_height (8),
 	_tbank_start_route (0),
 	_tbank_start_row (0)
 {
@@ -444,18 +446,31 @@ BasicUI::trigger_cue_row (int cue_idx)
 }
 
 void
-BasicUI::tbank_step_route (int step_size)
+BasicUI::tbank_set_size (int width, int height)
+{
+	_tbank_route_width = width;
+	_tbank_row_height = height;
+}
+
+void
+BasicUI::tbank_step_routes (int step_size)
 {
 	_tbank_start_route += step_size;
+	if (_tbank_start_route + _tbank_route_width > session->num_triggerboxes() ) {
+		_tbank_start_route=session->num_triggerboxes() - _tbank_route_width;
+	}
 	if (_tbank_start_route < 0) {
 		_tbank_start_route=0;
 	}
 }
 
 void
-BasicUI::tbank_step_row (int step_size)
+BasicUI::tbank_step_rows (int step_size)
 {
 	_tbank_start_row += step_size;
+	if (_tbank_start_row + _tbank_row_height > TriggerBox::default_triggers_per_box ) {
+		_tbank_start_row=TriggerBox::default_triggers_per_box - _tbank_row_height;
+	}
 	if (_tbank_start_row < 0) {
 		_tbank_start_row=0;
 	}
@@ -851,6 +866,8 @@ BasicUI::trigger_display_at (int x, int y)
 				disp.state = -1;
 			} else if (tp == current) {
 				disp.state = 1;
+			} else {
+				disp.state = 0;
 			}
 		}
 	}

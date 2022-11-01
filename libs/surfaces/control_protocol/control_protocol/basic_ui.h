@@ -174,13 +174,14 @@ class LIBCONTROLCP_API BasicUI {
 	    request trigger-tracks-only to be displayed on the surface
 		bank the faders using the offset reported here
 	 */
-	void tbank_step_route (int step_size);
-	void tbank_step_row (int step_size);
+	void tbank_set_size (int route_width, int row_height);
+	void tbank_step_routes (int step_size);
+	void tbank_step_rows (int step_size);
 	float trigger_progress_at (int x);  /* 0..1   or -1 for not playing; */
 	struct TriggerDisplay {
 		int state;
 		TriggerDisplay () {
-			state = 0;     /*  -1=empty;  0=stopped;  1=playing */  /*potentially extend to include */
+			state = -1;     /*  -1=empty;  0=stopped;  1=playing */  /*potentially extend to include */
 			//potentially name, color, launch style, follow action(s) etc
 		}
 	};
@@ -195,6 +196,7 @@ class LIBCONTROLCP_API BasicUI {
 	BasicUI ();
 	ARDOUR::Session* session;
 
+	int _tbank_route_width, _tbank_row_height;
 	int _tbank_start_route, _tbank_start_row;
 };
 
