@@ -3288,7 +3288,11 @@ void
 Session::begin_reversible_command (GQuark q)
 {
 	if (_current_trans) {
+#ifndef NDEBUG
+		cerr << "An UNDO transaction was started while a prior command was underway. Aborting command (" << g_quark_to_string (q) << ") and prior (" << _current_trans->name() << ")" << "\n";
+#else
 		PBD::warning << "An UNDO transaction was started while a prior command was underway. Aborting command (" << g_quark_to_string (q) << ") and prior (" << _current_trans->name() << ")" << endmsg;
+#endif
 		abort_reversible_command();
 		assert (false);
 		return;
