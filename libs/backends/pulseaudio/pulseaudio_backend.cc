@@ -1000,6 +1000,7 @@ PulseAudioBackend::main_process_thread ()
 		if (_run) {
 			engine.halted_callback ("PulseAudio: cannot uncork stream");
 		}
+		return 0;
 	}
 
 	_dsp_load_calc.reset ();
