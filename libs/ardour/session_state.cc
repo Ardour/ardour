@@ -3344,6 +3344,9 @@ Session::commit_reversible_command (Command *cmd)
 {
 	assert (_current_trans);
 	assert (!_current_trans_quarks.empty ());
+	if (!_current_trans) {
+		return;
+	}
 
 	struct timeval now;
 
