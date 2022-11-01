@@ -994,12 +994,6 @@ PulseAudioBackend::main_process_thread ()
 	manager.registration_callback ();
 	manager.graph_order_callback ();
 
-#if 0
-	/* flush stream */
-	pa_threaded_mainloop_lock (p_mainloop);
-	sync_pulse (pa_stream_flush (p_stream, stream_operation_cb, this));
-#endif
-
 	/* begin streaming */
 	if (!cork_pulse (false)) {
 		_active = false;
@@ -1017,13 +1011,14 @@ PulseAudioBackend::main_process_thread ()
 			engine.freewheel_callback (_freewheel);
 
 			if (_freewheel) {
+				/* when transitioning to freewheeling, cork it and stop writing */
 				assert (!pa_stream_is_corked (p_stream));
 				if (!cork_pulse (true)) {
 					break;
 				}
 			}
 
-			/* flush stream before and after freewheeling */
+			/* flush corked stream before and after freewheeling */
 			assert (pa_stream_is_corked (p_stream));
 			pa_threaded_mainloop_lock (p_mainloop);
 			_operation_succeeded = false;
@@ -1032,16 +1027,11 @@ PulseAudioBackend::main_process_thread ()
 			}
 
 			if (!_freewheel) {
+				/* when transitioning from freewheeling, uncork after flushing and start writing */
 				if (!cork_pulse (false)) {
 					break;
 				}
-#if 0
-				pa_threaded_mainloop_lock (p_mainloop);
-				_operation_succeeded = false;
-				if (!sync_pulse (pa_stream_drain (p_stream, stream_operation_cb, this)) || !_operation_succeeded) {
-					break;
-				}
-#endif
+
 				_dsp_load_calc.reset ();
 			}
 		}
