@@ -1008,9 +1008,6 @@ PulseAudioBackend::main_process_thread ()
 		}
 	}
 
-	pa_threaded_mainloop_lock (p_mainloop);
-	sync_pulse (pa_stream_drain (p_stream, stream_operation_cb, this));
-
 	_dsp_load_calc.reset ();
 	stream_latency_update_cb (p_stream, this);
 
