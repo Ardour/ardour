@@ -1806,6 +1806,26 @@ Session::triggerbox_at (int32_t route_index) const
 	return boost::shared_ptr<TriggerBox>();
 }
 
+int
+Session::num_triggerboxes () const
+{
+	int count = 0;
+	StripableList sl;
+	get_stripables (sl);
+	for (StripableList::iterator s = sl.begin (); s != sl.end (); ++s) {
+		boost::shared_ptr<Route>     r = boost::dynamic_pointer_cast<Route> (*s);
+		if (!r || !r->triggerbox ()) {
+			continue;
+		}
+		/* we're only interested in Trigger Tracks */
+		if (!(r->presentation_info ().trigger_track ())) {
+			continue;
+		}
+		count++;
+	}
+	return count;
+}
+
 TriggerPtr
 Session::trigger_at (int32_t route_index, int32_t trigger_index) const
 {
