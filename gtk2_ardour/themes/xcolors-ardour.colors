@@ -343,6 +343,7 @@
     <ColorAlias name="record enable button: fill active" alias="alert:ruddy"/>
     <ColorAlias name="record enable button: led active" alias="alert:red"/>
     <ColorAlias name="recording rect" alias="alert:ruddy"/>
+    <ColorAlias name="recording note" alias="neutral:foregroundest"/>
     <ColorAlias name="recording waveform fill" alias="neutral:foregroundest"/>
     <ColorAlias name="recording waveform outline" alias="neutral:foregroundest"/>
     <ColorAlias name="region list automatic" alias="theme:contrasting less"/>
