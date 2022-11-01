@@ -44,7 +44,9 @@ using namespace Temporal;
 PBD::Signal2<void,std::string,std::string> BasicUI::AccessAction;
 
 BasicUI::BasicUI (Session& s)
-	: session (&s)
+	: session (&s),
+	_tbank_start_route (0),
+	_tbank_start_row (0)
 {
 }
 
@@ -442,6 +444,24 @@ BasicUI::trigger_cue_row (int cue_idx)
 }
 
 void
+BasicUI::tbank_step_route (int step_size)
+{
+	_tbank_start_route += step_size;
+	if (_tbank_start_route < 0) {
+		_tbank_start_route=0;
+	}
+}
+
+void
+BasicUI::tbank_step_row (int step_size)
+{
+	_tbank_start_row += step_size;
+	if (_tbank_start_row < 0) {
+		_tbank_start_row=0;
+	}
+}
+
+void
 BasicUI::undo ()
 {
 	access_action ("Editor/undo");
@@ -804,16 +824,49 @@ BasicUI::find_trigger (int x, int y)
 	return tp;
 }
 
+float
+BasicUI::trigger_progress_at (int x)
+{
+	boost::shared_ptr<TriggerBox> tb = session->triggerbox_at (_tbank_start_route + x);
+	if (tb) {
+		ARDOUR::TriggerPtr trigger = tb->currently_playing ();
+		if (trigger) {
+			return trigger->position_as_fraction ();
+		}
+	}
+	return -1;
+}
+
+BasicUI::TriggerDisplay
+BasicUI::trigger_display_at (int x, int y)
+{
+	TriggerDisplay disp;
+
+	boost::shared_ptr<TriggerBox> tb = session->triggerbox_at (_tbank_start_route + x);
+	if (tb) {
+		ARDOUR::TriggerPtr current = tb->currently_playing ();
+		TriggerPtr tp = tb->trigger (_tbank_start_row + y);
+		if (tp) {
+			if (!tp->region()) {
+				disp.state = -1;
+			} else if (tp == current) {
+				disp.state = 1;
+			}
+		}
+	}
+	return disp;
+}
+
 void
 BasicUI::bang_trigger_at (int x, int y)
 {
-	session->bang_trigger_at (x, y);
+	session->bang_trigger_at (_tbank_start_route + x, _tbank_start_row + y);
 }
 
 void
 BasicUI::unbang_trigger_at (int x, int y)
 {
-	session->unbang_trigger_at (x, y);
+	session->unbang_trigger_at (_tbank_start_route + x, _tbank_start_row + y);
 }
 
 

@@ -167,6 +167,24 @@ class LIBCONTROLCP_API BasicUI {
 	bool rewind_button_onoff() const;
 	bool loop_button_onoff() const;
 
+	/* These functions access Triggers in the order they are displayed on the Cue page, WITH an optional bank offset
+	 Use this for a launchpad-style NxM (route x row) matrix that maps directly to the Cue page layout.
+	 Trigger banking is separate from 'route' banking implemented by a fader surface.
+	 To match a fader/mute/solo to the Trigger banking, the tentative plan is:
+	    request trigger-tracks-only to be displayed on the surface
+		bank the faders using the offset reported here
+	 */
+	void tbank_step_route (int step_size);
+	void tbank_step_row (int step_size);
+	float trigger_progress_at (int x);  /* 0..1   or -1 for not playing; */
+	struct TriggerDisplay {
+		int state;
+		TriggerDisplay () {
+			state = 0;     /*  -1=empty;  0=stopped;  1=playing */  /*potentially extend to include */
+			//potentially name, color, launch style, follow action(s) etc
+		}
+	};
+	TriggerDisplay trigger_display_at (int x, int y);
 	void bang_trigger_at (int x, int y);
 	void unbang_trigger_at (int x, int y);
 
@@ -176,6 +194,8 @@ class LIBCONTROLCP_API BasicUI {
   protected:
 	BasicUI ();
 	ARDOUR::Session* session;
+
+	int _tbank_start_route, _tbank_start_row;
 };
 
 #endif /* __ardour_basic_ui_h__ */
