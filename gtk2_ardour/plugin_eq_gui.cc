@@ -53,6 +53,7 @@
 #include "fft.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -82,7 +83,7 @@ PluginEqGui::PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 
 	_analysis_area = new Gtk::DrawingArea();
 	_analysis_width = 256.0;
-	_analysis_height = 256.0;
+	_analysis_height = std::max<float> (256.0, 256.0 * UIConfiguration::instance().get_ui_scale ());
 	_analysis_area->set_size_request (_analysis_width, _analysis_height);
 
 	_analysis_area->add_events (Gdk::POINTER_MOTION_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_PRESS_MASK);
@@ -108,6 +109,7 @@ PluginEqGui::PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 
 	ADD_DB_ROW( -6,  +6, 1, "-6dB .. +6dB");
 	ADD_DB_ROW(-12, +12, 3, "-12dB .. +12dB");
+	ADD_DB_ROW(-15, +15, 3, "-15dB .. +15dB");
 	ADD_DB_ROW(-24, +24, 5, "-24dB .. +24dB");
 	ADD_DB_ROW(-36, +36, 6, "-36dB .. +36dB");
 	ADD_DB_ROW(-64, +64,12, "-64dB .. +64dB");
@@ -723,7 +725,7 @@ PluginEqGui::draw_scales_power (Gtk::Widget */*w*/, cairo_t *cr)
 	float x;
 
 	cairo_set_line_width (cr, 1.5);
-	cairo_set_font_size (cr, 9);
+	cairo_set_font_size (cr, ceil (10.0 * UIConfiguration::instance().get_ui_scale ()));
 
 	cairo_font_extents_t extents;
 	cairo_font_extents (cr, &extents);
