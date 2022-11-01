@@ -113,6 +113,7 @@ private:
 	Gtk::CheckButton hp_gui;
 	Gtk::CheckButton select_fb;
 	Gtk::CheckButton use_osc10;
+	Gtk::CheckButton trigger_status;
 	int fbvalue;
 	void set_bitsets ();
 

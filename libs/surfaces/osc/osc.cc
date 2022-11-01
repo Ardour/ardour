@@ -117,6 +117,7 @@ OSC::OSC (Session& s, uint32_t port)
 	, default_send_size (0)
 	, default_plugin_size (0)
 	, tick (true)
+	, global_init (true)
 	, bank_dirty (false)
 	, observer_busy (true)
 	, scrub_speed (0)
@@ -465,6 +466,9 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/trigger_stop"), "ii", trigger_stop);  //Route num (position on the Cue page), Stop now
 		REGISTER_CALLBACK (serv, X_("/trigger_bang"), "ii", trigger_bang);  //Route num (position on the Cue page), Trigger index
 		REGISTER_CALLBACK (serv, X_("/trigger_unbang"), "ii", trigger_unbang);  //Route num (position on the Cue page), Trigger index
+
+		REGISTER_CALLBACK (serv, X_("/tbank_step_route"), "i", osc_tbank_step_routes);
+		REGISTER_CALLBACK (serv, X_("/tbank_step_row"), "i", osc_tbank_step_rows);
 
 		REGISTER_CALLBACK (serv, X_("/save_state"), "", save_state);
 		REGISTER_CALLBACK (serv, X_("/save_state"), "f", save_state);
@@ -1176,6 +1180,8 @@ OSC::get_surfaces ()
 		PBD::info << string_compose ("	Expanded flag %1   Track: %2   Jogmode: %3\n", sur->expand_enable, sur->expand, sur->jogmode);
 		PBD::info << string_compose ("	Personal monitor flag %1,   Aux master: %2,   Number of sends: %3\n", sur->cue, sur->aux, sur->sends.size());
 		PBD::info << string_compose ("	Linkset: %1   Device Id: %2\n", sur->linkset, sur->linkid);
+
+		PBD::info << string_compose ("	Global Observer: %1\n", sur->global_obs != NULL ? "yes" : "NO");
 	}
 	PBD::info << string_compose ("\nList of LinkSets (%1):\n", link_sets.size());
 	std::map<uint32_t, LinkSet>::iterator it;
@@ -1302,6 +1308,22 @@ OSC::osc_toggle_roll (bool ret2strt)
 			session->request_roll (TRS_UI);
 		}
 	}
+	return 0;
+}
+
+int
+OSC::osc_tbank_step_routes (int step, lo_message msg)
+{
+	tbank_step_routes(step);
+	trigger_bank_state(get_address(msg));
+	return 0;
+}
+
+int
+OSC::osc_tbank_step_rows (int step, lo_message msg)
+{
+	tbank_step_rows(step);
+	trigger_bank_state(get_address(msg));
 	return 0;
 }
 
@@ -1927,6 +1949,7 @@ OSC::set_surface_feedback (uint32_t fb, lo_message msg)
 
 	strip_feedback (s, true);
 	global_feedback (s);
+
 	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
 	return 0;
 }
@@ -2085,12 +2108,10 @@ OSC::global_feedback (OSCSurface* sur)
 		delete o;
 		sur->global_obs = 0;
 	}
-	if (sur->feedback[4] || sur->feedback[3] || sur->feedback[5] || sur->feedback[6]) {
-
+	if (sur->feedback[4] || sur->feedback[3] || sur->feedback[5] || sur->feedback[6] || sur->feedback[15]) {
 		// create a new Global Observer for this surface
-		OSCGlobalObserver* o = new OSCGlobalObserver (*this, *session, sur);
-		sur->global_obs = o;
-		o->jog_mode (sur->jogmode);
+		sur->global_obs = new OSCGlobalObserver (*this, *session, sur);
+		sur->global_obs->jog_mode (sur->jogmode);
 	}
 }
 
@@ -3101,6 +3122,39 @@ OSC::jog_mode (float mode, lo_message msg)
 	}
 	s->jogmode = (uint32_t) mode;
 	s->global_obs->jog_mode (mode);
+	return 0;
+}
+
+int
+OSC::trigger_bank_state (lo_address addr)
+{
+	if (!session) return -1;
+
+	lo_message bank_msg = lo_message_new ();
+	lo_message_add_int32 (bank_msg, session->num_triggerboxes());  //total avail routes (with triggers)
+	lo_message_add_int32 (bank_msg, _tbank_start_route);  //route start offs
+	lo_message_add_int32 (bank_msg, TriggerBox::default_triggers_per_box);  //total avail triggers
+	lo_message_add_int32 (bank_msg, _tbank_start_row);  //trigger start offs
+	lo_send_message (addr, X_("/trigger_grid/bank"), bank_msg);
+	lo_message_free (bank_msg);
+
+	return 0;
+}
+
+int
+OSC::trigger_grid_state (lo_address addr, bool zero_it)
+{
+	if (!session) return -1;
+
+	for (int rt = 0; rt < 8; rt++) {  //TODO: route bank size
+		lo_message trig_msg = lo_message_new ();
+		lo_message_add_float (trig_msg, zero_it ? -1 : trigger_progress_at(rt));  //progress
+		for (int row = 0; row < 8; row++) { //ToDo: trigger bank size
+			lo_message_add_int32 (trig_msg, zero_it ? -1 : trigger_display_at(rt, row).state);  // -1 = empty; 0 stopped; 1 playing
+		}
+		lo_send_message (addr, string_compose(X_("/trigger_grid/%1/state"), rt).c_str(), trig_msg);
+		lo_message_free (trig_msg);
+	}
 	return 0;
 }
 
@@ -5962,9 +6016,8 @@ OSC::periodic (void)
 		if ((co = dynamic_cast<OSCCueObserver*>(sur->cue_obs)) != 0) {
 			co->tick ();
 		}
-		OSCGlobalObserver* go;
-		if ((go = dynamic_cast<OSCGlobalObserver*>(sur->global_obs)) != 0) {
-			go->tick ();
+		if (sur->global_obs) {
+			sur->global_obs->tick ();
 		}
 		for (uint32_t i = 0; i < sur->observers.size(); i++) {
 			OSCRouteObserver* ro;
@@ -5972,7 +6025,6 @@ OSC::periodic (void)
 				ro->tick ();
 			}
 		}
-
 	}
 	for (FakeTouchMap::iterator x = _touch_timeout.begin(); x != _touch_timeout.end();) {
 		_touch_timeout[(*x).first] = (*x).second - 1;

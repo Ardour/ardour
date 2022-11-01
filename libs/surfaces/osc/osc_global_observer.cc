@@ -173,6 +173,9 @@ OSCGlobalObserver::clear_observer ()
 	if (feedback[11]) { // minutes/seconds enabled
 		_osc.text_message (X_("/position/time"), " ", addr);
 	}
+	if (feedback[15]) { // trigger grid status
+		_osc.trigger_grid_state(addr, true);  //zero it out
+	}
 	if (feedback[10]) { // samples
 		_osc.text_message (X_("/position/samples"), " ", addr);
 	}
@@ -226,6 +229,14 @@ OSCGlobalObserver::tick ()
 		return;
 	}
 	samplepos_t now_sample = session->transport_sample();
+	if (feedback[15]) { // trigger grid status
+		if (_heartbeat == 0) {
+			_osc.trigger_grid_state(addr);
+			_osc.trigger_bank_state(addr);
+		} else if (now_sample != _last_sample) {
+			_osc.trigger_grid_state(addr);
+		}
+	}
 	if (now_sample != _last_sample) {
 		if (feedback[6]) { // timecode enabled
 			Timecode::Time timecode;

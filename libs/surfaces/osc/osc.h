@@ -189,6 +189,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 * [12]	- Send Playhead position like primary/secondary GUI clocks
 		 * [13] - Send well known feedback (for /select/command
 		 * [14] - use OSC 1.0 only (#reply -> /reply)
+		 * [15] - report 8x8 trigger grid status
 		 *
 		 * Strip_type bits:
 		 * [0] - Audio Tracks
@@ -263,6 +264,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void set_remote_port (std::string pt) { remote_port = pt; }
 
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
+
+	int trigger_bank_state (lo_address addr);
+	int trigger_grid_state (lo_address addr, bool zero_it = false);
 
   protected:
         void thread_init ();
@@ -521,6 +525,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		return 0; \
 	}
 
+	PATH_CALLBACK1_MSG(osc_tbank_step_routes,i);
+	PATH_CALLBACK1_MSG(osc_tbank_step_rows,i);
+
 	PATH_CALLBACK1_MSG(scrub,f);
 	PATH_CALLBACK1_MSG(jog,f);
 	PATH_CALLBACK1_MSG(jog_mode,f);
@@ -632,6 +639,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(route_plugin_list,i);
 	PATH_CALLBACK2_MSG(route_plugin_descriptor,i,i);
 	PATH_CALLBACK2_MSG(route_plugin_reset,i,i);
+
+	PATH_CALLBACK2(tbank_set_size,i,i);
+
 	PATH_CALLBACK2_MSG(trigger_bang,i,i);
 	PATH_CALLBACK2_MSG(trigger_unbang,i,i);
 	PATH_CALLBACK2_MSG(trigger_stop,i,i);  /* second arg is 'stop now' */
@@ -739,6 +749,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void _recalcbanks ();
 	void notify_routes_added (ARDOUR::RouteList &);
 	void notify_vca_added (ARDOUR::VCAList &);
+
+	int osc_tbank_step_routes (int step, lo_message msg);
+	int osc_tbank_step_rows (int step, lo_message msg);
 
 	int cancel_all_solos ();
 	int osc_toggle_roll (bool ret2strt);
