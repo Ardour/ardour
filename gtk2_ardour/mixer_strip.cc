@@ -1202,7 +1202,12 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 gboolean
 MixerStrip::number_button_button_press (GdkEventButton* ev)
 {
-	if (  ev->button == 3 ) {
+	if (ev->type == GDK_2BUTTON_PRESS) {
+		choose_color ();
+		return true;
+	}
+
+	if (ev->button == 3) {
 		list_route_operations ();
 
 		route_ops_menu->popup (1, ev->time);
