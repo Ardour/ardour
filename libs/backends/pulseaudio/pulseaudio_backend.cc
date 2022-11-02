@@ -842,7 +842,7 @@ PulseAudioBackend::port_factory (std::string const & name, ARDOUR::DataType type
 			port = new PulseMidiPort (*this, name, flags);
 			break;
 		default:
-			PBD::error << string_compose (_("%1::register_port: Invalid Data Type."), _instance_name) << endmsg;
+			PBD::error << string_compose (_("%1::port_factory: Invalid Data Type."), _instance_name) << endmsg;
 			return 0;
 	}
 
