@@ -444,6 +444,9 @@ RegionView::region_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (ARDOUR::Properties::time_domain)) {
 		region_renamed ();
 	}
+	if (what_changed.contains (ARDOUR::Properties::length)) {
+		region_renamed ();
+	}
 	if (what_changed.contains (ARDOUR::Properties::sync_position)) {
 		region_sync_changed ();
 	}
