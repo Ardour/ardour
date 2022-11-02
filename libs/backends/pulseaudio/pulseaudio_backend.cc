@@ -303,19 +303,9 @@ PulseAudioBackend::init_pulse ()
 	/* https://freedesktop.org/software/pulseaudio/doxygen/def_8h.html#a6966d809483170bc6d2e6c16188850fc */
 	pa_stream_flags_t sf = (pa_stream_flags_t) (
 			  (int)PA_STREAM_START_CORKED
-#if 0 /* may happen during freewheel export */
-			| (int)PA_STREAM_FAIL_ON_SUSPEND
-#endif
 			| (int)PA_STREAM_NO_REMAP_CHANNELS
 			| (int)PA_STREAM_NO_REMIX_CHANNELS
 			| (int)PA_STREAM_EARLY_REQUESTS  // request more data as soon as minreq is reached
-
-			/*
-			| (int)PA_STREAM_DONT_MOVE
-			| (int)PA_STREAM_ADJUST_LATENCY
-			| (int)PA_STREAM_AUTO_TIMING_UPDATE
-			| (int)PA_STREAM_INTERPOLATE_TIMING
-			*/
 			);
 
 	if (pa_stream_connect_playback (p_stream, NULL, &ba, sf, NULL, NULL) < 0) {
