@@ -131,7 +131,7 @@ MainClock::set (timepos_t const & when, bool force)
 		case DeltaOriginMarker:
 			{
 				Location* loc = AudioEngine::instance()->session()->locations()->clock_origin_location ();
-				AudioClock::set_duration (when.distance (loc ? loc->start() : timepos_t (when.time_domain())), force);
+				AudioClock::set_duration (-when.distance (loc ? loc->start() : timepos_t (when.time_domain())), force);
 			}
 			break;
 	}
