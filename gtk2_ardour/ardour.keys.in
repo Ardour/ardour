@@ -158,7 +158,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Common/Quit|                                          <@PRIMARY@>q|quit
 @gmark|Common/jump-forward-to-mark|                                    w|to next mark
 @mmode|MouseMode/set-mouse-mode-content|                               e|content mode
-@select|Editor/select-all-before-edit-cursor|               <@PRIMARY@>e|select all before EP
+@sess|Main/QuickExport|                                     <@PRIMARY@>e|quick export session
 @rop|Region/export-region|                     <@PRIMARY@><@SECONDARY@>e|export selected region(s)
 @sess|Main/ExportAudio|                                   <@SECONDARY@>e|export session
 @sess|Main/StemExport|                        <@SECONDARY@><@TERTIARY@>e|stem export selected tracks
@@ -200,9 +200,9 @@ This mode provides many different operations on both regions and control points,
 @edtrk|Editor/track-solo-toggle|                          <@SECONDARY@>s|toggle track solo status
 @edit|Editor/ToggleSummary|                                <@TERTIARY@>s|toggle summary
 @mmode|MouseMode/set-mouse-mode-draw|                                  d|note-draw mode
-@edit|Editor/duplicate|                                   <@SECONDARY@>d|duplicate (once)
-@edit|Editor/multi-duplicate|                              <@TERTIARY@>d|duplicate (multi)
-@select|Editor/select-all-in-punch-range|                   <@PRIMARY@>d|select all in punch range
+@edit|Editor/duplicate|                                     <@PRIMARY@>d|duplicate (once)
+@edit|Editor/multi-duplicate|                              <@SECONDARY@>d|duplicate (multi)
+@select|Editor/select-all-in-punch-range|                   <@TERTIARY@>d|select all in punch range
 @vis|Editor/fit-selection|                                             f|fit selection vertically
 @edit|Editor/toggle-follow-playhead|                        <@PRIMARY@>f|toggle playhead tracking
 @edit|Editor/toggle-stationary-playhead|                   <@TERTIARY@>f|toggle stationary playhead
