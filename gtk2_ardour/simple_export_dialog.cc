@@ -76,14 +76,14 @@ SimpleExportDialog::SimpleExportDialog (PublicEditor& editor)
 
 #undef LBL
 
-	_post_export_combo.append (_("open the folder where files are exported to."));
-	_post_export_combo.append (_("do nothing."));
+	_post_export_combo.append (_("Open the folder where files are exported"));
+	_post_export_combo.append (_("Do nothing"));
 	_post_export_combo.set_active (0);
 
 	get_vbox ()->pack_start (*t, false, false);
 
 	_cancel_button = add_button (Gtk::Stock::CANCEL, RESPONSE_CANCEL);
-	_export_button = add_button (_("Export"), RESPONSE_OK);
+	_export_button = add_button (_("_Export"), RESPONSE_OK);
 	_cancel_button->signal_clicked ().connect (sigc::mem_fun (*this, &SimpleExportDialog::close_dialog));
 	_export_button->signal_clicked ().connect (sigc::mem_fun (*this, &SimpleExportDialog::start_export));
 
@@ -140,7 +140,7 @@ SimpleExportDialog::set_session (ARDOUR::Session* s)
 	_eps.set_manager (_manager);
 
 	if (!check_outputs ()) {
-		set_error ("Error: Session has no master-bus");
+		set_error ("Error: Session has no master bus");
 		return;
 	}
 
@@ -151,11 +151,11 @@ SimpleExportDialog::set_session (ARDOUR::Session* s)
 	bool ok = false;
 	if (!tsel.empty ()) {
 		ok = true;
-		_range_combo.append (_("using time selection."));
+		_range_combo.append (_("Using time selection"));
 	}
 	if (srl) {
 		ok = true;
-		_range_combo.append (_("from session start marker to session end marker.")); // same text as ExportVideoDialog::apply_state
+		_range_combo.append (_("Session start to session end")); // same text as ExportVideoDialog::apply_state
 	}
 
 	if (!ok) {
@@ -192,7 +192,7 @@ SimpleExportDialog::start_export ()
 	TimeSelection const& tsel (_editor.get_selection ().time);
 
 	std::string range = _range_combo.get_active_text ();
-	if (!tsel.empty () && range == _("using time selection.")) {
+	if (!tsel.empty () && range == _("Using time selection")) {
 		set_range (tsel.start_sample (), tsel.end_sample ());
 		SimpleExport::set_name (string_compose (_("%1 (selection)"), SimpleExport::_session->snap_name ()));
 	} else {
@@ -202,7 +202,7 @@ SimpleExportDialog::start_export ()
 
 	SimpleExport::_session->add_extra_xml (get_state ());
 
-	_cancel_button->set_label (_("Stop Export"));
+	_cancel_button->set_label (_("_Abort"));
 	_export_button->set_sensitive (false);
 	_progress_bar.set_fraction (0.0);
 	_progress_bar.show ();
@@ -221,7 +221,7 @@ SimpleExportDialog::start_export ()
 			PBD::open_folder (folder ());
 		}
 		if (!ARDOUR::Profile->get_mixbus ()) {
-			NagScreen* ns = NagScreen::maybe_nag (_("export"));
+			NagScreen* ns = NagScreen::maybe_nag (_("Export"));
 			if (ns) {
 				ns->nag ();
 				delete ns;
@@ -229,7 +229,7 @@ SimpleExportDialog::start_export ()
 		}
 	} else if (!_status->aborted ()) {
 		hide ();
-		std::string        txt = _("Export has been aborted due to an error!\nSee the Log for details.");
+		std::string        txt = _("Export has been aborted due to an error!\nSee the Log window for details.");
 		Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
 		msg.run ();
 	}
@@ -263,7 +263,7 @@ SimpleExportDialog::progress_timeout ()
 		case ExportStatus::Uploading:
 			break;
 		case ExportStatus::Command:
-			status_text = string_compose (_("Running Post Export Command for '%1'"), _status->timespan_name);
+			status_text = string_compose (_("Running Post-Export Command for '%1'"), _status->timespan_name);
 			break;
 	}
 
