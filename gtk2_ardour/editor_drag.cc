@@ -4945,8 +4945,6 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		AutomationTimeAxisView* atv;
 
-		_editor->begin_reversible_command (_("add automation point"));
-
 		if ((atv = dynamic_cast<AutomationTimeAxisView*>(_editor->clicked_axisview)) != 0) {
 			timepos_t where = grab_time ();
 
@@ -4963,8 +4961,6 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 				arv->add_gain_point_event (&arv->get_gain_line()->grab_item(), event, false);
 			}
 		}
-
-		_editor->commit_reversible_command ();
 	}
 }
 
