@@ -241,8 +241,6 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 
 	pack_start (*table, false, false);
 
-	binding_changed ();
-
 	/* update the port connection combos */
 
 	update_port_combos ();

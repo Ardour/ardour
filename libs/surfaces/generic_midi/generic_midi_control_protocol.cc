@@ -682,14 +682,6 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		_feedback_interval = 10000;
 	}
 
-	if (!node.get_property ("threshold", _threshold)) {
-		_threshold = 10;
-	}
-
-	if (!node.get_property ("motorized", _motorised)) {
-		_motorised = false;
-	}
-
 	boost::shared_ptr<Controllable> c;
 
 	{
@@ -713,6 +705,15 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 				break;
 			}
 		}
+	}
+
+	/* Restore any custom settings which may have been overwritten by load_bindings */
+	if (!node.get_property ("threshold", _threshold)) {
+		_threshold = 10;
+	}
+
+	if (!node.get_property ("motorized", _motorised)) {
+		_motorised = false;
 	}
 
 	/* Load up specific bindings from the
