@@ -1439,10 +1439,10 @@ int main () { __int128 x = 0; return 0; }
         conf.fatal("ALSA Backend is only available on Linux")
 
     if re.search ("linux", sys.platform) is None and conf.env['BUILD_PULSEAUDIO']:
-        conf.fatal("Pulseaudio Backend is only available on Linux")
+        conf.fatal("PulseAudio Backend is only available on Linux")
 
     if conf.env['BUILD_PULSEAUDIO'] and not conf.is_defined('HAVE_PULSEAUDIO'):
-        conf.fatal("Pulseaudio Backend requires libpulse-dev")
+        conf.fatal("PulseAudio Backend requires libpulse-dev")
 
     set_compiler_flags (conf, Options.options)
 
@@ -1558,7 +1558,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('ALSA Backend',          conf.env['BUILD_ALSABACKEND'])
     write_config_text('Dummy backend',         conf.env['BUILD_DUMMYBACKEND'])
     write_config_text('JACK Backend',          conf.env['BUILD_JACKBACKEND'])
-    write_config_text('Pulseaudio Backend',    conf.env['BUILD_PULSEAUDIO'])
+    write_config_text('PulseAudio Backend',    conf.env['BUILD_PULSEAUDIO'])
     config_text.write("\\n\\\n")
     write_config_text('Buildstack', conf.env['DEPSTACK_REV'])
     write_config_text('Mac i386 Architecture', opts.generic)

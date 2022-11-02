@@ -114,7 +114,7 @@ libs/
  - libs/backends/
    (uses libpdb, ardouralsautil | appleutility, implements libardour interface)
    Interaction with Operating System's Audio/MIDI API:
-   ALSA, CoreAudio, JACK, PortAudio/ASIO, Pulseaudio
+   ALSA, CoreAudio, JACK, PortAudio/ASIO, PulseAudio
 
  - libs/surfaces/
    (uses libpbd, libevoral, libtimecode, libardour ;; libgtkmm2ext, libcanvas)
