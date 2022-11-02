@@ -285,12 +285,19 @@ PulseAudioBackend::init_pulse ()
 	pa_stream_set_underflow_callback (p_stream, PulseAudioBackend::stream_xrun_cb, this);
 	pa_stream_set_overflow_callback (p_stream, PulseAudioBackend::stream_xrun_cb, this);
 
+	/* PulseAudio buffer strategy: Be explicit for small latency and avoid using PA auto tuning.
+	 * The user specified a buffer size (_samples_per_period).
+	 * Specify the PA buffer to be twice as big so it can use double buffering (maxlength).
+	 * Aim for keeping the buffer full (tlength).
+	 * Fill up the buffer before starting playback (prebuf).
+	 * Immediately ask for more data when there is room for the buffer size (minreq because PA_STREAM_EARLY_REQUESTS).
+	 */
 	pa_buffer_attr ba;
 	/* https://freedesktop.org/software/pulseaudio/doxygen/structpa__buffer__attr.html */
 	ba.minreq    = _samples_per_period * N_CHANNELS * sizeof (float);
 	ba.maxlength = 2 * ba.minreq;
-	ba.prebuf    = (uint32_t)-1;
-	ba.tlength   = (uint32_t)-1;
+	ba.tlength   = ba.maxlength;
+	ba.prebuf    = ba.tlength;
 	ba.fragsize  = 0; // capture only
 
 	/* https://freedesktop.org/software/pulseaudio/doxygen/def_8h.html#a6966d809483170bc6d2e6c16188850fc */
@@ -301,7 +308,7 @@ PulseAudioBackend::init_pulse ()
 #endif
 			| (int)PA_STREAM_NO_REMAP_CHANNELS
 			| (int)PA_STREAM_NO_REMIX_CHANNELS
-			| (int)PA_STREAM_EARLY_REQUESTS
+			| (int)PA_STREAM_EARLY_REQUESTS  // request more data as soon as minreq is reached
 
 			/*
 			| (int)PA_STREAM_DONT_MOVE
