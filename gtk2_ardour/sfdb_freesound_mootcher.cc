@@ -263,9 +263,11 @@ Mootcher::get_oauth_token()
 	ArdourWidgets::Prompter token_entry(true);
 	token_entry.set_prompt(_("Please log in to Freesound in the browser window that's just been opened, and paste the authorization code here"));
 	token_entry.set_title(_("Authorization Code"));
+	token_entry.set_keep_above (true);
 
 	token_entry.set_name ("TokenEntryWindow");
 	// token_entry.set_size_request (250, -1);
+	token_entry.set_position (Gtk::WIN_POS_MOUSE);
 	token_entry.set_position (Gtk::WIN_POS_MOUSE);
 	token_entry.add_button (Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
 	token_entry.show ();
