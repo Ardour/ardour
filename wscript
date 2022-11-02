@@ -916,17 +916,17 @@ def options(opt):
                     help='X Modifier(s) (Mod1,Mod2, etc) for the Windows key (X11 builds only). ' +
                     'Multiple modifiers must be separated by \'><\'')
     opt.add_option('--boost-include', type='string', action='store', dest='boost_include', default='',
-                    help='directory where Boost header files can be found')
+                    help='Directory where Boost header files can be found')
     opt.add_option('--also-include', type='string', action='store', dest='also_include', default='',
-                    help='additional include directory where header files can be found (split multiples with commas)')
+                    help='Additional include directory where header files can be found (split multiples with commas)')
     opt.add_option('--also-libdir', type='string', action='store', dest='also_libdir', default='',
-                    help='additional include directory where shared libraries can be found (split multiples with commas)')
+                    help='Additional include directory where shared libraries can be found (split multiples with commas)')
     opt.add_option('--noconfirm', action='store_true', default=False, dest='noconfirm',
                     help='Do not ask questions that require confirmation during the build')
     opt.add_option('--cxx11', action='store_true', default=False, dest='cxx11',
                     help='Turn on c++11 compiler flags (-std=c++11)')
     opt.add_option('--use-libc++', action='store_true', default=False, dest='use_libcpp',
-                    help='use libc++ instead of default or auto-detected stdlib')
+                    help='Use libc++ instead of default or auto-detected stdlib')
     opt.add_option('--address-sanitizer', action='store_true', default=False, dest='asan',
                     help='Turn on AddressSanitizer (requires GCC >= 4.8 or clang >= 3.1)')
     opt.add_option('--thread-sanitizer', action='store_true', default=False, dest='tsan',
@@ -940,7 +940,7 @@ def options(opt):
     opt.add_option(
         '--qm-dsp-include', type='string', action='store',
         dest='qm_dsp_include', default='/usr/include/qm-dsp',
-        help='directory where the header files of qm-dsp can be found')
+        help='Directory where the header files of qm-dsp can be found')
     opt.add_option ('--use-lld', action='store_true', default=False, dest='use_lld', help='Use LLD linker instead of ld (Linux only)')
 
     for i in children:
