@@ -180,35 +180,8 @@ ARDOUR_UI::update_transport_clocks (samplepos_t p)
 {
 	timepos_t pos (p);
 
-	switch (UIConfiguration::instance().get_primary_clock_delta_mode()) {
-		case NoDelta:
-			primary_clock->set (pos);
-			break;
-		case DeltaEditPoint:
-			primary_clock->set_duration (pos.distance (editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD)), false);
-			break;
-		case DeltaOriginMarker:
-			{
-				Location* loc = _session->locations()->clock_origin_location ();
-				primary_clock->set_duration (pos.distance (loc->start()));
-			}
-			break;
-	}
-
-	switch (UIConfiguration::instance().get_secondary_clock_delta_mode()) {
-		case NoDelta:
-			secondary_clock->set (pos);
-			break;
-		case DeltaEditPoint:
-			secondary_clock->set_duration (pos.distance (editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD)), false);
-			break;
-		case DeltaOriginMarker:
-			{
-				Location* loc = _session->locations()->clock_origin_location ();
-				secondary_clock->set_duration (pos.distance (loc->start()));
-			}
-			break;
-	}
+	primary_clock->set (pos);
+	secondary_clock->set (pos);
 
 	if (big_clock_window) {
 		big_clock->set (pos);
