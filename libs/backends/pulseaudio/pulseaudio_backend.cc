@@ -211,18 +211,9 @@ int
 PulseAudioBackend::init_pulse ()
 {
 	pa_sample_spec ss;
-	pa_buffer_attr ba;
-
 	ss.channels = N_CHANNELS;
 	ss.rate     = _samplerate;
 	ss.format   = PA_SAMPLE_FLOAT32LE;
-
-	/* https://freedesktop.org/software/pulseaudio/doxygen/structpa__buffer__attr.html */
-	ba.minreq    = _samples_per_period * N_CHANNELS * sizeof (float);
-	ba.maxlength = 2 * ba.minreq;
-	ba.prebuf    = (uint32_t)-1;
-	ba.tlength   = (uint32_t)-1;
-	ba.fragsize  = 0; // capture only
 
 	if (!pa_sample_spec_valid (&ss)) {
 		PBD::error << _("PulseAudioBackend: Default sample spec not valid") << endmsg;
@@ -293,6 +284,14 @@ PulseAudioBackend::init_pulse ()
 	pa_stream_set_latency_update_callback (p_stream, stream_latency_update_cb, this);
 	pa_stream_set_underflow_callback (p_stream, PulseAudioBackend::stream_xrun_cb, this);
 	pa_stream_set_overflow_callback (p_stream, PulseAudioBackend::stream_xrun_cb, this);
+
+	pa_buffer_attr ba;
+	/* https://freedesktop.org/software/pulseaudio/doxygen/structpa__buffer__attr.html */
+	ba.minreq    = _samples_per_period * N_CHANNELS * sizeof (float);
+	ba.maxlength = 2 * ba.minreq;
+	ba.prebuf    = (uint32_t)-1;
+	ba.tlength   = (uint32_t)-1;
+	ba.fragsize  = 0; // capture only
 
 	/* https://freedesktop.org/software/pulseaudio/doxygen/def_8h.html#a6966d809483170bc6d2e6c16188850fc */
 	pa_stream_flags_t sf = (pa_stream_flags_t) (
