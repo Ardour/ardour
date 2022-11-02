@@ -70,7 +70,7 @@ PulseAudioBackend::~PulseAudioBackend ()
 	clear_ports ();
 }
 
-/* Pulseaudio */
+/* PulseAudio */
 void
 PulseAudioBackend::close_pulse (bool unlock)
 {
@@ -334,7 +334,7 @@ PulseAudioBackend::init_pulse ()
 std::string
 PulseAudioBackend::name () const
 {
-	return X_("Pulseaudio");
+	return X_("PulseAudio");
 }
 
 bool
@@ -1151,7 +1151,7 @@ static bool already_configured ();
 static bool available ();
 
 static ARDOUR::AudioBackendInfo _descriptor = {
-	_("Pulseaudio"),
+	_("PulseAudio"),
 	instantiate,
 	deinstantiate,
 	backend_factory,
