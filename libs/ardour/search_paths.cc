@@ -293,7 +293,7 @@ vst_search_path ()
 const char *
 vst_search_path ()
 {
-	return "/usr/local/lib/vst:/usr/lib/vst";
+	return "/usr/local/lib64/vst:/usr/local/lib/vst:/usr/lib64/vst:/usr/lib/vst";
 }
 
 #endif // PLATFORM_WINDOWS
