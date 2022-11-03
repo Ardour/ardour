@@ -189,6 +189,8 @@ StepEntry::StepEntry ()
 	velocity_ff_button.set_group (velocity_group);
 	velocity_fff_button.set_group (velocity_group);
 
+#ifndef HAVE_UTF8_MUSICAL_SYMBOLS
+	/* must be set *before* related action, otherwise text is display */
 	w = manage (new Image (::get_icon (X_("pianississimo"))));
 	w->show();
 	velocity_ppp_button.add (*w);
@@ -213,6 +215,7 @@ StepEntry::StepEntry ()
 	w = manage (new Image (::get_icon (X_("fortississimo"))));
 	w->show();
 	velocity_fff_button.add (*w);
+#endif
 
 	act = ActionManager::get_action ("StepEditing/note-velocity-ppp");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_ppp_button.gobj()), act->gobj());
@@ -274,6 +277,19 @@ StepEntry::StepEntry ()
 	note_velocity_box.pack_start (velocity_f_button, false, false);
 	note_velocity_box.pack_start (velocity_ff_button, false, false);
 	note_velocity_box.pack_start (velocity_fff_button, false, false);
+
+#ifdef HAVE_UTF8_MUSICAL_SYMBOLS
+	/* must be set after related action to override the text */
+	// XXX the text is still rather small, and clipped at the edge -> use ArdurButton, vertical text?
+	velocity_ppp_button.set_label ("\U0001D18F\U0001D18F\U0001D18F"); //MUSICAL SYMBOL PIANO (U+1D18F)
+	velocity_pp_button.set_label ("\U0001D18F\U0001D18F");
+	velocity_p_button.set_label ("\U0001D18F");
+	velocity_mp_button.set_label ("\U0001D190\U0001D18F"); //MUSICAL SYMBOL MEZZO (U+1D190)
+	velocity_mf_button.set_label ("\U0001D190\U0001D191");
+	velocity_f_button.set_label ("\U0001D191"); // MUSICAL SYMBOL FORTE (U+1D191)
+	velocity_ff_button.set_label ("\U0001D191\U0001D191");
+	velocity_fff_button.set_label ("\U0001D191\U0001D191\U0001D191");
+#endif
 
 	Label* l = manage (new Label);
 	l->set_markup ("<b><big>-</big></b>");
