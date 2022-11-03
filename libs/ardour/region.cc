@@ -33,6 +33,7 @@
 #include "pbd/types_convert.h"
 #include "pbd/xml++.h"
 
+#include "ardour/audioregion.h"
 #include "ardour/debug.h"
 #include "ardour/filter.h"
 #include "ardour/playlist.h"
@@ -1430,7 +1431,7 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 }
 
 PropertyList
-Region::derive_properties (bool with_times) const
+Region::derive_properties (bool with_times, bool with_envelope) const
 {
 	PropertyList plist (properties ());
 	plist.remove (Properties::automatic);
@@ -1438,6 +1439,9 @@ Region::derive_properties (bool with_times) const
 	plist.remove (Properties::left_of_split);
 	plist.remove (Properties::valid_transients);
 	plist.remove (Properties::whole_file);
+	if (!with_envelope) {
+		plist.remove (Properties::envelope);
+	}
 	if (!with_times) {
 		plist.remove (Properties::start);
 		plist.remove (Properties::length);

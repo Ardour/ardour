@@ -107,7 +107,7 @@ public:
 	/** Note: changing the name of a Region does not constitute an edit */
 	bool set_name (const std::string& str);
 
-	PBD::PropertyList derive_properties (bool with_times = true) const;
+	PBD::PropertyList derive_properties (bool with_times = true, bool with_envelope = false) const;
 
 	const DataType& data_type () const { return _type; }
 	Temporal::TimeDomain time_domain() const;
