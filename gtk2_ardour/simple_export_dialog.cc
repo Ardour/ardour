@@ -125,6 +125,7 @@ SimpleExportDialog::set_session (ARDOUR::Session* s)
 	ArdourDialog::set_session (s);
 
 	_range_combo.remove_all ();
+	_preset_cfg_connection.disconnect ();
 
 	if (!s) {
 		_export_button->set_sensitive (false);
@@ -166,6 +167,31 @@ SimpleExportDialog::set_session (ARDOUR::Session* s)
 	_range_combo.set_active (0);
 	_range_combo.set_sensitive (true);
 	_export_button->set_sensitive (true);
+
+	_preset_cfg_connection = _eps.CriticalSelectionChanged.connect (sigc::mem_fun (*this, &SimpleExportDialog::check_manager));
+}
+
+void
+SimpleExportDialog::check_manager ()
+{
+	bool ok = _manager && _manager->preset ();
+
+	if (ok && _manager->get_formats ().empty ()) {
+		ok = false;
+	}
+
+	if (ok) {
+		/* check for NULL ExportFormatSpecPtr */
+		auto fms = _manager->get_formats ();
+		for (auto const& fm : fms) {
+			if (!fm->format) {
+				ok = false;
+				break;
+			}
+		}
+	}
+
+	_export_button->set_sensitive (ok);
 }
 
 void

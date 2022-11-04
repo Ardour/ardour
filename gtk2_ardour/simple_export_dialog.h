@@ -56,6 +56,7 @@ private:
 	void start_export ();
 	void close_dialog ();
 	void show_progress ();
+	void check_manager ();
 	void set_error (std::string const&);
 	bool progress_timeout ();
 
@@ -69,6 +70,7 @@ private:
 	Gtk::ProgressBar     _progress_bar;
 
 	sigc::connection _progress_connection;
+	sigc::connection _preset_cfg_connection;
 };
 
 #endif
