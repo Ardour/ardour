@@ -66,6 +66,10 @@ VST3Plugin::VST3Plugin (const VST3Plugin& other)
 	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (other.get_info ());
 	_plug = new VST3PI (nfo->m, nfo->unique_id);
 	init ();
+
+	XMLNode root (other.state_node_name ());
+	other.add_state (&root);
+	set_state (root, Stateful::current_state_version);
 }
 
 VST3Plugin::~VST3Plugin ()
