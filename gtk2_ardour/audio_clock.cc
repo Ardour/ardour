@@ -85,7 +85,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, _follows_playhead (follows_playhead)
 	, _accept_on_focus_out (accept_on_focus_out)
 	, _off (false)
-	, em_width (0)
 	, _edit_by_click_field (false)
 	, _negative_allowed (false)
 	, edit_is_negative (false)
@@ -316,7 +315,7 @@ AudioClock::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
 				cairo_rectangle (cr,
 				                 min (get_width() - 2.0,
-				                 (double) xcenter + cursor.get_x()/PANGO_SCALE + em_width),
+				                   (double) xcenter + cursor.get_x()/PANGO_SCALE),
 				                 (get_height() - layout_height)/2.0,
 				                 2.0, cursor.get_height()/PANGO_SCALE);
 				cairo_fill (cr);
