@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <strings>
+#include <strings.h>
 #include <sndfile.h>
 #include "ardour/sndfile_helpers.h"
 
