@@ -905,6 +905,13 @@ ExportProfileManager::get_warnings ()
 		}
 	}
 
+	for (auto const& fm : formats) {
+		if (!fm->format) {
+			warnings->errors.push_back (_("Invalid export format selected!"));
+			return warnings;
+		}
+	}
+
 	/*** Check files ***/
 
 	/* handle_duplicate_format_extensions */
