@@ -583,7 +583,7 @@ Session::deinterlace_midi_region (boost::shared_ptr<MidiRegion> mr)
 		PropertyList plist (mr->properties ());
 		plist.add (Properties::whole_file, true);
 		plist.add (Properties::name, (*x)->name());
-		plist.add (Properties::tags, string_compose ("%1%2%3", _("split-chans)"), mr->tags ().empty() ? "" : " ", mr->tags ()));
+		plist.add (Properties::tags, string_compose ("%1%2%3", _("(split-chans)"), mr->tags ().empty() ? "" : " ", mr->tags ()));
 		boost::shared_ptr<Region> whole = RegionFactory::create (*x, plist);
 
 		/* ... and insert a discrete copy into the playlist*/
