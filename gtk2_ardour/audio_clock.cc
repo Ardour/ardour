@@ -2022,13 +2022,13 @@ AudioClock::bbt_validate_edit (string & str)
 }
 
 bool
-AudioClock::timecode_validate_edit (const string&)
+AudioClock::timecode_validate_edit (const string& str)
 {
 	Timecode::Time TC;
 	int hours;
 	char ignored[2];
 
-	if (sscanf (_layout->get_text().c_str(), "%[- _]%" PRId32 ":%" PRId32 ":%" PRId32 "%[:;]%" PRId32,
+	if (sscanf (str.c_str(), "%[- _]%" PRId32 ":%" PRId32 ":%" PRId32 "%[:;]%" PRId32,
 	            ignored, &hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 6) {
 		return false;
 	}
