@@ -2169,7 +2169,7 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 
 		/* Controllable and automation IDs should not be copied */
 		PBD::Stateful::ForceIDRegeneration force_ids;
-		proc->set_state (state, Stateful::loading_state_version);
+		proc->set_state (state, Stateful::current_state_version);
 		/* but retain the processor's ID (LV2 state save) */
 		boost::dynamic_pointer_cast<PluginInsert>(proc)->update_id (id);
 		return;
@@ -3669,7 +3669,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 						_route, boost::shared_ptr<Route>(), Delivery::Aux);
 
 				PBD::Stateful::ForceIDRegeneration force_ids;
-				if (s->set_state (n, Stateful::loading_state_version)) {
+				if (s->set_state (n, Stateful::current_state_version)) {
 					delete s;
 					return;
 				}
@@ -3692,7 +3692,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 				IOProcessor::prepare_for_reset (n, s->name());
 
-				if (s->set_state (n, Stateful::loading_state_version)) {
+				if (s->set_state (n, Stateful::current_state_version)) {
 					delete s;
 					return;
 				}
@@ -3706,7 +3706,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 				IOProcessor::prepare_for_reset (n, r->name());
 
-				if (r->set_state (n, Stateful::loading_state_version)) {
+				if (r->set_state (n, Stateful::current_state_version)) {
 					delete r;
 					return;
 				}
@@ -3720,7 +3720,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 				IOProcessor::prepare_for_reset (n, pi->name());
 
-				if (pi->set_state (n, Stateful::loading_state_version)) {
+				if (pi->set_state (n, Stateful::current_state_version)) {
 					return;
 				}
 
