@@ -181,7 +181,7 @@ PluginInsert::set_count (uint32_t num)
 
 			if (require_state) {
 				XMLNode& state = _plugins[0]->get_state ();
-				p->set_state (state, Stateful::loading_state_version);
+				p->set_state (state, Stateful::current_state_version);
 			}
 
 			if (active ()) {

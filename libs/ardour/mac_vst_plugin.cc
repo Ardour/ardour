@@ -59,7 +59,7 @@ MacVSTPlugin::MacVSTPlugin (const MacVSTPlugin &other)
 
 	XMLNode* root = new XMLNode (other.state_node_name ());
 	other.add_state (root);
-	set_state (*root, Stateful::loading_state_version);
+	set_state (*root, Stateful::current_state_version);
 	delete root;
 
 	init_plugin ();

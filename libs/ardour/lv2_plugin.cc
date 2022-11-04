@@ -420,7 +420,7 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 
 	XMLNode root (other.state_node_name ());
 	other.add_state (&root);
-	set_state (root, Stateful::loading_state_version);
+	set_state (root, Stateful::current_state_version);
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		_control_data[i] = other._shadow_data[i];
