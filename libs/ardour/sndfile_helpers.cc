@@ -18,7 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef COMPILER_MSVC
 #include <strings.h>
+#endif
 #include <sndfile.h>
 #include "ardour/sndfile_helpers.h"
 #include "ardour/export_format_base.h"
