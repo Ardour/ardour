@@ -108,7 +108,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	sigc::signal<void> mode_changed;
 	sigc::signal<void> ChangeAborted;
 
-	static sigc::signal<void> ModeChanged;
 	static std::vector<AudioClock*> clocks;
 
 	protected:
@@ -127,7 +126,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	private:
 	Mode             _mode;
 	std::string      _name;
-	bool              is_transient;
 	bool              is_duration;
 	bool              editable;
 	/** true if this clock follows the playhead, meaning that certain operations are redundant */

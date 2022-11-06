@@ -68,7 +68,6 @@ using namespace Temporal;
 
 using Gtkmm2ext::Keyboard;
 
-sigc::signal<void> AudioClock::ModeChanged;
 vector<AudioClock*> AudioClock::clocks;
 
 #define BBT_BAR_CHAR "|"
@@ -79,7 +78,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 			bool accept_on_focus_out)
 	: ops_menu (0)
 	, _name (clock_name)
-	, is_transient (transient)
 	, is_duration (duration)
 	, editable (allow_edit)
 	, _follows_playhead (follows_playhead)
@@ -120,7 +118,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	set_mode (Timecode);
 	AudioClock::set (last_when(), true);
 
-	if (!is_transient) {
+	if (!transient) {
 		clocks.push_back (this);
 	}
 
@@ -2313,10 +2311,6 @@ AudioClock::set_mode (Mode m, bool noemit)
 	}
 
 	AudioClock::set (last_when(), true);
-
-	if (!is_transient && !noemit) {
-		ModeChanged (); /* EMIT SIGNAL (the static one)*/
-	}
 
 	mode_changed (); /* EMIT SIGNAL (the member one) */
 }
