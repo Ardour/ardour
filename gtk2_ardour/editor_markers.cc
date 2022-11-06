@@ -1072,9 +1072,9 @@ Editor::build_marker_menu (Location* loc)
 		items.push_back (SeparatorElem());
 	}
 
-	items.push_back (MenuElem (_("Locate to Here"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
-	items.push_back (MenuElem (_("Play from Here"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
-	items.push_back (MenuElem (_("Move Mark to Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+	items.push_back (MenuElem (_("Move Playhead to Marker"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Play from Marker"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
+	items.push_back (MenuElem (_("Move Marker to Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 
 	items.push_back (SeparatorElem());
 
@@ -1118,11 +1118,11 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 	range_marker_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Play Range"), sigc::mem_fun(*this, &Editor::marker_menu_play_range)));
-	items.push_back (MenuElem (_("Locate to Marker"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Move Playhead to Marker"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
 	items.push_back (MenuElem (_("Play from Marker"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
 	items.push_back (MenuElem (_("Loop Range"), sigc::mem_fun(*this, &Editor::marker_menu_loop_range)));
 
-	items.push_back (MenuElem (_("Set Marker from Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+	items.push_back (MenuElem (_("Move Marker to Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 	items.push_back (MenuElem (_("Set Range from Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_set_from_selection), false)));
 
 	items.push_back (MenuElem (_("Zoom to Range"), sigc::mem_fun (*this, &Editor::marker_menu_zoom_to_range)));
