@@ -28,7 +28,6 @@
 
 #include "actions.h"
 #include "main_clock.h"
-#include "ui_config.h"
 #include "public_editor.h"
 
 #include "pbd/i18n.h"
@@ -44,6 +43,7 @@ MainClock::MainClock (
 	: AudioClock (clock_name, false, widget_name, true, true, false, true)
 	, _primary (primary)
 	, _suspend_delta_mode_signal (false)
+	, _widget_name(widget_name)
 {
 }
 
@@ -64,27 +64,21 @@ MainClock::build_ops_menu ()
 
 	MenuList& ops_items = ops_menu->items();
 	ops_items.push_back (SeparatorElem ());
+
 	RadioMenuItem::Group group;
 	PBD::Unwinder<bool> uw (_suspend_delta_mode_signal, true);
-	ClockDeltaMode mode;
-	if (_primary) {
-		mode = UIConfiguration::instance().get_primary_clock_delta_mode ();
-	} else {
-		mode = UIConfiguration::instance().get_secondary_clock_delta_mode ();
-	}
-
 	ops_items.push_back (RadioMenuElem (group, _("Display absolute time"), sigc::bind (sigc::mem_fun (*this, &MainClock::change_display_delta_mode), NoDelta)));
-	if (mode == NoDelta) {
+	if (_delta_mode == NoDelta) {
 		RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&ops_items.back ());
 		i->set_active (true);
 	}
 	ops_items.push_back (RadioMenuElem (group, _("Display delta to edit cursor"), sigc::bind (sigc::mem_fun (*this, &MainClock::change_display_delta_mode), DeltaEditPoint)));
-	if (mode == DeltaEditPoint) {
+	if (_delta_mode == DeltaEditPoint) {
 		RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&ops_items.back ());
 		i->set_active (true);
 	}
 	ops_items.push_back (RadioMenuElem (group, _("Display delta to origin marker"), sigc::bind (sigc::mem_fun (*this, &MainClock::change_display_delta_mode), DeltaOriginMarker)));
-	if (mode == DeltaOriginMarker) {
+	if (_delta_mode == DeltaOriginMarker) {
 		RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&ops_items.back ());
 		i->set_active (true);
 	}
@@ -100,18 +94,11 @@ MainClock::build_ops_menu ()
 void
 MainClock::set (timepos_t const & when, bool force)
 {
-	ClockDeltaMode mode;
-	if (_primary) {
-		mode = UIConfiguration::instance().get_primary_clock_delta_mode ();
-	} else {
-		mode = UIConfiguration::instance().get_secondary_clock_delta_mode ();
-	}
-
 	if (!AudioEngine::instance()->session()) {
-		mode = NoDelta;
+		_delta_mode = NoDelta;
 	}
 
-	switch (mode) {
+	switch (_delta_mode) {
 		case NoDelta:
 			AudioClock::set (when, force);
 			break;
@@ -137,6 +124,19 @@ MainClock::change_display_delta_mode (ClockDeltaMode m)
 		UIConfiguration::instance().set_primary_clock_delta_mode (m);
 	} else {
 		UIConfiguration::instance().set_secondary_clock_delta_mode (m);
+	}
+}
+
+void
+MainClock::set_display_delta_mode (ClockDeltaMode m)
+{
+	_delta_mode = m;
+	if (_delta_mode != NoDelta) {
+		set_editable (false);
+		set_widget_name (_widget_name + " delta");
+	} else {
+		set_editable (true);
+		set_widget_name (_widget_name);
 	}
 }
 
