@@ -101,7 +101,7 @@ timepos_t
 MainClock::absolute_time () const
 {
 	if (get_is_duration ()) {
-		return current_time () + offset ();
+		return current_time ();
 	} else {
 		return current_time ();
 	}

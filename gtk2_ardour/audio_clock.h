@@ -114,7 +114,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	protected:
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	bool get_is_duration () const { return is_duration; }
-	Temporal::timecnt_t offset () const { return _offset; }
 
 	virtual void build_ops_menu ();
 	Gtk::Menu  *ops_menu;
@@ -141,8 +140,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	Temporal::timepos_t _limit_pos;
 	Temporal::timepos_t duration_position;
-
-	Temporal::timecnt_t _offset;
 
 	Glib::RefPtr<Pango::Layout> _layout;
 
