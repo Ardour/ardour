@@ -816,7 +816,7 @@ AudioClock::session_configuration_changed (std::string p)
 
 	if (p == "sync-source" || p == "external-sync") {
 		if (is_duration) {
-			AudioClock::set_duration (current_duration(), true);
+			set_duration (current_duration(), true);
 		} else {
 			AudioClock::set (current_time(), true);
 		}
@@ -827,7 +827,7 @@ AudioClock::session_configuration_changed (std::string p)
 		switch (_mode) {
 		case Timecode:
 			if (is_duration) {
-				AudioClock::set_duration (current_duration(), true);
+				set_duration (current_duration(), true);
 			} else {
 				AudioClock::set (current_time(), true);
 			}
@@ -2355,7 +2355,7 @@ AudioClock::set_off (bool yn)
 	 */
 
 	if (is_duration) {
-		AudioClock::set_duration (last_time, true);
+		set_duration (last_time, true);
 	} else {
 		AudioClock::set (last_when(), true);
 	}
