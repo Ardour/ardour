@@ -7567,7 +7567,14 @@ Session::apply_nth_mixer_scene (size_t nth, RouteList const& rl)
 void
 Session::store_nth_mixer_scene (size_t nth)
 {
-	nth_mixer_scene (nth, true)->snapshot ();
+	boost::shared_ptr<MixerScene> scn = nth_mixer_scene (nth, true);
+	scn->snapshot ();
+
+	//calling code is expected to set a name, but we need to initalize with 'something'
+	if (scn->name().length()==0) {
+		std::string str = Glib::DateTime::create_now_local().format ("%FT%H.%M.%S");
+		scn->set_name(str);
+	}
 }
 
 boost::shared_ptr<MixerScene>
