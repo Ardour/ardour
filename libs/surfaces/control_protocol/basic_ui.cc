@@ -477,6 +477,18 @@ BasicUI::tbank_step_rows (int step_size)
 }
 
 void
+BasicUI::store_mixer_scene (int idx)
+{
+	session->store_nth_mixer_scene (idx);
+}
+
+void
+BasicUI::apply_mixer_scene (int idx)
+{
+	session->apply_nth_mixer_scene (idx);
+}
+
+void
 BasicUI::undo ()
 {
 	access_action ("Editor/undo");

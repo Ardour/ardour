@@ -103,6 +103,9 @@ class LIBCONTROLCP_API BasicUI {
 	void trigger_cue_row (int cue);
 	void trigger_stop_all (bool stop_now = false);
 
+	void store_mixer_scene (int scn);
+	void apply_mixer_scene (int scn);
+
 	void toggle_monitor_mute();
 	void toggle_monitor_dim();
 	void toggle_monitor_mono();
