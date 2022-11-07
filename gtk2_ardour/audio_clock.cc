@@ -888,24 +888,24 @@ AudioClock::set_duration (Temporal::timecnt_t const & dur, bool force)
 
 		switch (_mode) {
 		case Timecode:
-			set_timecode (when, force);
+			set_timecode (when);
 			break;
 
 		case BBT:
-			set_bbt (dur, force);
+			set_bbt (dur);
 			btn_en = true;
 			break;
 
 		case MinSec:
-			set_minsec (when, force);
+			set_minsec (when);
 			break;
 
 		case Seconds:
-			set_seconds (when, force);
+			set_seconds (when);
 			break;
 
 		case Samples:
-			set_samples (when, force);
+			set_samples (when);
 			break;
 		}
 	}
@@ -941,24 +941,24 @@ AudioClock::set (timepos_t const & w, bool force)
 
 		switch (_mode) {
 		case Timecode:
-			set_timecode (when, force);
+			set_timecode (when);
 			break;
 
 		case BBT:
-			set_bbt (timecnt_t (when), force);
+			set_bbt (timecnt_t (when));
 			btn_en = true;
 			break;
 
 		case MinSec:
-			set_minsec (when, force);
+			set_minsec (when);
 			break;
 
 		case Seconds:
-			set_seconds (when, force);
+			set_seconds (when);
 			break;
 
 		case Samples:
-			set_samples (when, force);
+			set_samples (when);
 			break;
 		}
 	}
@@ -1061,7 +1061,7 @@ AudioClock::set_out_of_bounds (bool negative)
 }
 
 void
-AudioClock::set_samples (timepos_t const & w, bool /*force*/)
+AudioClock::set_samples (timepos_t const & w)
 {
 	timepos_t when (w);
 	char buf[32];
@@ -1112,7 +1112,7 @@ AudioClock::set_samples (timepos_t const & w, bool /*force*/)
 }
 
 void
-AudioClock::set_seconds (timepos_t const & when, bool /*force*/)
+AudioClock::set_seconds (timepos_t const & when)
 {
 	char buf[32];
 
@@ -1195,7 +1195,7 @@ AudioClock::print_minsec (samplepos_t when, char* buf, size_t bufsize, float sam
 }
 
 void
-AudioClock::set_minsec (timepos_t const & when, bool /*force*/)
+AudioClock::set_minsec (timepos_t const & when)
 {
 	char buf[32];
 
@@ -1218,7 +1218,7 @@ AudioClock::set_minsec (timepos_t const & when, bool /*force*/)
 }
 
 void
-AudioClock::set_timecode (timepos_t const & w, bool /*force*/)
+AudioClock::set_timecode (timepos_t const & w)
 {
 	timepos_t when (w);
 	Timecode::Time TC;
@@ -1255,7 +1255,7 @@ AudioClock::set_timecode (timepos_t const & w, bool /*force*/)
 }
 
 void
-AudioClock::set_bbt (timecnt_t const & w, bool /*force*/)
+AudioClock::set_bbt (timecnt_t const & w)
 {
 	timepos_t pos (w);
 	char buf[64];

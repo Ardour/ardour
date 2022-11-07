@@ -215,11 +215,11 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool on_focus_out_event (GdkEventFocus*);
 
 	void set_slave_info ();
-	void set_timecode (Temporal::timepos_t const &, bool);
-	void set_bbt (Temporal::timecnt_t const &, bool);
-	void set_minsec (Temporal::timepos_t const &, bool);
-	void set_seconds (Temporal::timepos_t const &, bool);
-	void set_samples (Temporal::timepos_t const &, bool);
+	void set_timecode (Temporal::timepos_t const &);
+	void set_bbt (Temporal::timecnt_t const &);
+	void set_minsec (Temporal::timepos_t const &);
+	void set_seconds (Temporal::timepos_t const &);
+	void set_samples (Temporal::timepos_t const &);
 	void set_out_of_bounds (bool negative);
 	void finish_set (Temporal::timepos_t const &, bool);
 
