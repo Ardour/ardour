@@ -25,6 +25,7 @@
 #include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/meter.h"
+#include "ardour/mixer_scene.h"
 #include "ardour/monitor_processor.h"
 
 #include "temporal/tempo.h"
@@ -58,6 +59,13 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 	uint32_t jogmode = sur->jogmode;
 	_last_sample = -1;
 	mark_text = "";
+
+	if (feedback[16]) {
+		//Mixer Scenes
+		MixerScene::Change.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::update_mixer_scene_state, this), OSC::instance());
+		update_mixer_scene_state();
+	}
+
 	if (feedback[4]) {
 
 		// connect to all the things we want to send feed back from
@@ -176,6 +184,9 @@ OSCGlobalObserver::clear_observer ()
 	if (feedback[15]) { // trigger grid status
 		_osc.trigger_grid_state(addr, true);  //zero it out
 	}
+	if (feedback[16]) { // mixer scene status
+		_osc.mixer_scene_state(addr, true);  //zero it out
+	}
 	if (feedback[10]) { // samples
 		_osc.text_message (X_("/position/samples"), " ", addr);
 	}
@@ -220,6 +231,12 @@ OSCGlobalObserver::clear_observer ()
 	_osc.int_message (X_("/jog/mode"), 0, addr);
 
 
+}
+
+void
+OSCGlobalObserver::update_mixer_scene_state ()
+{
+	_osc.mixer_scene_state(addr);
 }
 
 void

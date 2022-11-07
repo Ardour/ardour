@@ -50,6 +50,7 @@
 #include "ardour/route_group.h"
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
+#include "ardour/mixer_scene.h"
 #include "ardour/vca.h"
 #include "ardour/monitor_control.h"
 #include "ardour/dB.h"
@@ -469,6 +470,9 @@ OSC::register_callbacks()
 
 		REGISTER_CALLBACK (serv, X_("/tbank_step_route"), "i", osc_tbank_step_routes);
 		REGISTER_CALLBACK (serv, X_("/tbank_step_row"), "i", osc_tbank_step_rows);
+
+		REGISTER_CALLBACK (serv, X_("/store_mixer_scene"), "i", store_mixer_scene);
+		REGISTER_CALLBACK (serv, X_("/recall_mixer_scene"), "i", apply_mixer_scene);
 
 		REGISTER_CALLBACK (serv, X_("/save_state"), "", save_state);
 		REGISTER_CALLBACK (serv, X_("/save_state"), "f", save_state);
@@ -2108,7 +2112,7 @@ OSC::global_feedback (OSCSurface* sur)
 		delete o;
 		sur->global_obs = 0;
 	}
-	if (sur->feedback[4] || sur->feedback[3] || sur->feedback[5] || sur->feedback[6] || sur->feedback[15]) {
+	if (sur->feedback[4] || sur->feedback[3] || sur->feedback[5] || sur->feedback[6] || sur->feedback[15] || sur->feedback[16]) {
 		// create a new Global Observer for this surface
 		sur->global_obs = new OSCGlobalObserver (*this, *session, sur);
 		sur->global_obs->jog_mode (sur->jogmode);
@@ -3154,6 +3158,25 @@ OSC::trigger_grid_state (lo_address addr, bool zero_it)
 		}
 		lo_send_message (addr, string_compose(X_("/trigger_grid/%1/state"), rt).c_str(), trig_msg);
 		lo_message_free (trig_msg);
+	}
+	return 0;
+}
+
+int
+OSC::mixer_scene_state (lo_address addr, bool zero_it)
+{
+	if (!session) return -1;
+
+	for (int scn = 0; scn < 8; scn++) {  //TODO: mixer scene size
+		lo_message scene_msg = lo_message_new ();
+		if (!zero_it && session->nth_mixer_scene_valid(scn)) {
+			boost::shared_ptr<ARDOUR::MixerScene> scene = session->nth_mixer_scene(scn);
+			lo_message_add_string (scene_msg, scene->name().c_str());
+		} else {
+			lo_message_add_string (scene_msg, "");
+		}
+		lo_send_message (addr, string_compose(X_("/mixer_scene/%1/name"), scn).c_str(), scene_msg);
+		lo_message_free (scene_msg);
 	}
 	return 0;
 }

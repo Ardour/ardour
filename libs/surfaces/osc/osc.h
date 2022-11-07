@@ -190,6 +190,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 * [13] - Send well known feedback (for /select/command
 		 * [14] - use OSC 1.0 only (#reply -> /reply)
 		 * [15] - report 8x8 trigger grid status
+		 * [16] - report mixer scene status
 		 *
 		 * Strip_type bits:
 		 * [0] - Audio Tracks
@@ -267,6 +268,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	int trigger_bank_state (lo_address addr);
 	int trigger_grid_state (lo_address addr, bool zero_it = false);
+
+	int mixer_scene_state (lo_address addr, bool zero_it = false);
 
   protected:
         void thread_init ();
@@ -492,6 +495,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	PATH_CALLBACK1(trigger_cue_row,i,);
 	PATH_CALLBACK1(trigger_stop_all,i,);  //0 = "stop at end of bar"  1 = "stop now"
+
+	PATH_CALLBACK1(store_mixer_scene,i,);
+	PATH_CALLBACK1(apply_mixer_scene,i,);
 
 	PATH_CALLBACK1(set_transport_speed,f,);
 	PATH_CALLBACK1(add_marker_name,s,&);

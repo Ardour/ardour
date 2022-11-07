@@ -401,6 +401,12 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (trigger_status, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++fn;
 
+	label = manage (new Gtk::Label(_("Report Mixer Scene status:")));
+	label->set_alignment(1, .5);
+	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	fbtable->attach (scene_status, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	++fn;
+
 	fbtable->show_all ();
 	append_page (*fbtable, _("Default Feedback"));
 	// set strips and feedback from loaded default values
@@ -433,6 +439,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	select_fb.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	use_osc10.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	trigger_status.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
+	scene_status.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	preset_busy = false;
 
 }
@@ -688,6 +695,7 @@ OSC_GUI::reshow_values ()
 	select_fb.set_active(def_feedback & 8192);
 	use_osc10.set_active(def_feedback & 16384);
 	trigger_status.set_active(def_feedback & 32768);
+	scene_status.set_active(def_feedback & 65536);
 
 	calculate_strip_types ();
 	calculate_feedback ();
@@ -744,6 +752,9 @@ OSC_GUI::calculate_feedback ()
 	}
 	if (trigger_status.get_active()) {
 		fbvalue += 32768;
+	}
+	if (scene_status.get_active()) {
+		fbvalue += 65536;
 	}
 
 	current_feedback.set_text(string_compose("%1", fbvalue));
