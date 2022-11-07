@@ -130,8 +130,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	_left_btn.set_sizing_text (_("0000000000000"));
 	_right_btn.set_sizing_text (_("0000000000000"));
 
-	_left_btn.set_layout_font (UIConfiguration::instance().get_SmallMonospaceFont());
-	_right_btn.set_layout_font (UIConfiguration::instance().get_SmallMonospaceFont());
+	_left_btn.set_layout_font (UIConfiguration::instance().get_ArdourSmallFont());
+	_right_btn.set_layout_font (UIConfiguration::instance().get_ArdourSmallFont());
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
 	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &AudioClock::dpi_reset));
@@ -1336,7 +1336,6 @@ AudioClock::set_bbt (timecnt_t const & w, bool /*force*/)
 
 		TempoMetric m (TempoMap::use()->metric_at (pos));
 
-#ifndef PLATFORM_WINDOWS
 		/* UTF8 1/4 note and 1/8 note ♩ (\u2669) and ♪ (\u266a) are n/a on Windows */
 		if (m.tempo().note_type() == 4) {
 			snprintf (buf, sizeof(buf), "\u2669 = %.3f", m.tempo().note_types_per_minute_at_DOUBLE (pos));
@@ -1344,9 +1343,7 @@ AudioClock::set_bbt (timecnt_t const & w, bool /*force*/)
 		} else if (m.tempo().note_type() == 8) {
 			snprintf (buf, sizeof(buf), "\u266a = %.3f", m.tempo().note_types_per_minute_at_DOUBLE (pos));
 			_left_btn.set_text (string_compose ("%1", buf), false);
-		} else
-#endif
-		{
+		} else {
 			snprintf (buf, sizeof(buf), "1/%d = %.3f",m.tempo().note_type(), m.tempo().note_types_per_minute_at_DOUBLE (pos));
 			_left_btn.set_text (buf, false);
 		}
