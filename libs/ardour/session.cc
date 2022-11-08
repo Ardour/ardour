@@ -198,6 +198,7 @@ Session::Session (AudioEngine &eng,
 	, _session_range_is_free (true)
 	, _silent (false)
 	, _remaining_latency_preroll (0)
+	, _last_touched_mixer_scene_idx (999)
 	, _engine_speed (1.0)
 	, _signalled_varispeed (0)
 	, auto_play_legal (false)
@@ -7537,6 +7538,8 @@ Session::apply_nth_mixer_scene (size_t nth)
 		scene = _mixer_scenes[nth];
 	}
 	assert (scene);
+
+	_last_touched_mixer_scene_idx = nth;
 	return scene->apply ();
 }
 
@@ -7561,6 +7564,7 @@ Session::apply_nth_mixer_scene (size_t nth, RouteList const& rl)
 		r->automatables (acs);
 	}
 
+	_last_touched_mixer_scene_idx = nth;
 	return scene->apply (acs);
 }
 
@@ -7568,6 +7572,8 @@ void
 Session::store_nth_mixer_scene (size_t nth)
 {
 	boost::shared_ptr<MixerScene> scn = nth_mixer_scene (nth, true);
+
+	_last_touched_mixer_scene_idx = nth;
 	scn->snapshot ();
 
 	//calling code is expected to set a name, but we need to initalize with 'something'

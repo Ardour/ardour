@@ -1218,6 +1218,7 @@ public:
 	bool apply_nth_mixer_scene (size_t, RouteList const&);
 	void store_nth_mixer_scene (size_t);
 	bool nth_mixer_scene_valid (size_t) const;
+	size_t last_touched_mixer_scene_idx () {return _last_touched_mixer_scene_idx;}
 
 	boost::shared_ptr<MixerScene>              nth_mixer_scene (size_t, bool create_if_missing = false);
 	std::vector<boost::shared_ptr<MixerScene>> mixer_scenes () const;
@@ -1437,6 +1438,7 @@ private:
 	bool                    _session_range_is_free;
 	bool                    _silent;
 	samplecnt_t             _remaining_latency_preroll;
+	size_t                  _last_touched_mixer_scene_idx;
 
 	// varispeed playback -- TODO: move out of session to backend.
 	double                  _engine_speed;
