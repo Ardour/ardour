@@ -4168,8 +4168,10 @@ Mixer_UI::update_scene_buttons ()
 	for (size_t idx = 0; idx < _mixer_scene_buttons.size (); ++idx) {
 		boost::shared_ptr<MixerScene> scn;
 
+		bool last = false;
 		if (_session) {
 			scn = _session->nth_mixer_scene (idx);
+			last = (idx == _session->last_touched_mixer_scene_idx());
 		}
 
 		Gtk::Label* l = _mixer_scene_labels[idx];
@@ -4182,7 +4184,11 @@ Mixer_UI::update_scene_buttons ()
 			                                  "%1 for Momentary Restore\n"
 			                                  "Right-Click for Context menu")
 			                                  , Keyboard::momentary_push_name() ) );
-			l->set_text (scn->name());
+			if (last) {
+				l->set_markup(string_compose ("<b>>%1</b>", scn->name()));
+			} else {
+				l->set_text (scn->name());
+			}
 			all_unset = false;
 		} else {
 			l->set_text((""));
