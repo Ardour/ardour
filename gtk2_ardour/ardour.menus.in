@@ -789,25 +789,22 @@
   </popup>
 
   <popup name='ProcessorMenu' accelerators='true'>
+    <menuitem action='presets'/>
+    <menuitem action='edit'/>
+    <menuitem action='edit-generic'/>
+    <menuitem action='controls'/>
+    <menuitem action='rename'/>
+    <separator/>
+    <menuitem action='manage-pins'/>
+    <separator/>
+    <menuitem action='send_options'/>
+    <separator/>
     <menuitem action='newplugin'/>
     <menuitem action='newinsert'/>
     <menuitem action='newsend'/>
     <menuitem action='newaux'/>
     <menuitem action='newlisten'/>
     <menuitem action='removelisten'/>
-    <separator/>
-    <menuitem action='controls'/>
-    <menuitem action='send_options'/>
-    <menuitem action='presets'/>
-    <separator/>
-#ifndef MIXBUS
-    <menu action="disk-io-menu">
-      <menuitem action='disk-io-prefader'/>
-      <menuitem action='disk-io-postfader'/>
-      <menuitem action='disk-io-custom'/>
-    </menu>
-#endif
-    <menuitem action='custom-volume-pos'/>
     <separator/>
     <menuitem action='clear'/>
     <menuitem action='clear_pre'/>
@@ -818,8 +815,6 @@
     <menuitem action='paste'/>
     <menuitem action='delete'/>
     <separator/>
-    <menuitem action='rename'/>
-    <separator/>
     <menuitem action='selectall'/>
     <menuitem action='deselectall'/>
     <separator/>
@@ -829,10 +824,15 @@
     <menuitem action='ab_plugins'/>
 #endif
     <separator/>
-    <menuitem action='manage-pins'/>
+#ifndef MIXBUS
+    <menu action="disk-io-menu">
+      <menuitem action='disk-io-prefader'/>
+      <menuitem action='disk-io-postfader'/>
+      <menuitem action='disk-io-custom'/>
+    </menu>
+#endif
+    <menuitem action='custom-volume-pos'/>
     <separator/>
-    <menuitem action='edit'/>
-    <menuitem action='edit-generic'/>
   </popup>
 
   <popup name='ShuttleUnitPopup' accelerators='true'>
