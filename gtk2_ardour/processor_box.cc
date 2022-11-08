@@ -4102,7 +4102,7 @@ ProcessorBox::register_actions ()
 	ActionManager::register_action (processor_box_actions, X_("newlisten"), _("New Foldback Send ..."));
 	ActionManager::register_action (processor_box_actions, X_("removelisten"), _("Remove Foldback Send ..."));
 
-	ActionManager::register_action (processor_box_actions, X_("controls"), _("Controls"));
+	ActionManager::register_action (processor_box_actions, X_("controls"), _("Inline Controls"));
 	ActionManager::register_action (processor_box_actions, X_("send_options"), _("Send Options"));
 	ActionManager::register_action (processor_box_actions, X_("presets"), _("Presets"));
 
