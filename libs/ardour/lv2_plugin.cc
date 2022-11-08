@@ -203,6 +203,7 @@ public:
 	LilvNode* bufz_fixedBlockLength;
 	LilvNode* bufz_nominalBlockLength;
 	LilvNode* bufz_coarseBlockLength;
+	LilvNode* state_loadDefaultState;
 
 #ifdef LV2_EXTENDED
 	LilvNode* lv2_noSampleAccurateCtrl;
@@ -699,12 +700,17 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	if (lilv_nodes_contains (optional_features, _world.inline_display_in_gui)) {
 		_inline_display_in_gui = true;
 	}
-	lilv_nodes_free(optional_features);
 #endif
+	lilv_nodes_free(optional_features);
 
-	/* Snapshot default state -- http://lv2plug.in/ns/ext/state/#loadDefaultState */
-	LilvState* state = lilv_state_new_from_world(
-		_world.world, _uri_map.urid_map(), lilv_plugin_get_uri(_impl->plugin));
+	/* Snapshot default state -- https://lv2plug.in/ns/ext/state#loadDefaultState */
+	LilvState* state = NULL;
+
+	LilvNodes* required_features = lilv_plugin_get_required_features (plugin);
+	if (lilv_nodes_contains (required_features, _world.state_loadDefaultState)) {
+		state = lilv_state_new_from_world(_world.world, _uri_map.urid_map(), lilv_plugin_get_uri(_impl->plugin));
+	}
+	lilv_nodes_free (required_features);
 
 	const uint32_t num_ports = this->num_ports();
 	for (uint32_t i = 0; i < num_ports; ++i) {
@@ -3422,6 +3428,7 @@ LV2World::LV2World()
 	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
 	bufz_nominalBlockLength  = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#nominalBlockLength");
 	bufz_coarseBlockLength   = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#coarseBlockLength");
+	state_loadDefaultState   = lilv_new_uri(world, LV2_STATE_PREFIX "loadDefaultState");
 }
 
 LV2World::~LV2World()
@@ -3429,6 +3436,7 @@ LV2World::~LV2World()
 	if (!world) {
 		return;
 	}
+	lilv_node_free(state_loadDefaultState);
 	lilv_node_free(bufz_coarseBlockLength);
 	lilv_node_free(bufz_nominalBlockLength);
 	lilv_node_free(bufz_fixedBlockLength);
