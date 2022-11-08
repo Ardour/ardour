@@ -146,6 +146,7 @@ MixerScene::apply () const
 		rv |= recurse_to_master (c, done, ts);
 	}
 
+	Change (); /* EMIT SIGNAL */
 	return rv;
 }
 
@@ -159,6 +160,7 @@ MixerScene::apply (PBD::ControllableSet const& acs, AutomationTypeSet const& ts)
 		rv |= recurse_to_master (c, done, ts);
 	}
 
+	Change (); /* EMIT SIGNAL */
 	return rv;
 }
 
