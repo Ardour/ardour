@@ -31,6 +31,7 @@ class LIBAUDIOGRAPHER_API FlagField
 	  , boost::equality_comparable<iterator>
 	{
 	  public:
+                using iterator_category = std::bidirectional_iterator_tag;
                 using value_type = Flag;
 
 		iterator (FlagField const & parent, Flag position) : parent (parent), position (position) {}
