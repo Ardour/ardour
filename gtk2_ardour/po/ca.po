@@ -12961,7 +12961,7 @@ msgstr "Incompatibilitat del connector"
 
 #: processor_box.cc:2707
 msgid "You attempted to add the plugin \"%1\" in slot %2.\n"
-msgstr "Heu intentat afegir el connector «%1» a la ranura%2."
+msgstr "Heu intentat afegir el connector «%1» a la ranura%2.\n"
 
 #: processor_box.cc:2713
 msgid ""
@@ -13211,7 +13211,8 @@ msgstr ""
 "regions d'àudio del 4%\n"
 "regions actives d'àudio del 5%\n"
 "regions mitjanes del 6%\n"
-"regions mitjanes actives del 7%"
+"regions mitjanes actives del 7%\n"
+"\n"
 
 #: pt_import_selector.cc:138
 msgid ""
@@ -15916,7 +15917,9 @@ msgstr "més curta =0% 1%2"
 msgid ""
 "\n"
 "  (shortest audible segment = %1 %2)"
-msgstr "(segment audible més curt = 0% 1%2)"
+msgstr ""
+"\n"
+"  (segment audible més curt = 0% 1%2)"
 
 #: return_ui.cc:104
 msgid "Return "
@@ -17826,7 +17829,7 @@ msgstr ""
 "\n"
 "Es pot trobar informació completa sobre tot l'anterior a la pàgina de suport a\n"
 "\n"
-"                http://ardour.org/support</span>"
+"                http://ardour.org/support</span>\n"
 
 #: step_entry.cc:69
 msgid ">beat"
@@ -18735,7 +18738,7 @@ msgid ""
 msgstr ""
 "<b>Quan està habilitat</b> la font de codis de temps externa s'assumeix que utilitza 29.97 fps en lloc de 30000/1001.\n"
 "SMPTE 12M-1999 especifica 29.97df com a 30000/1001. L'especificació també esmenta que el codi de temps de la mostra desplegable té un error acumulat de -86ms en un període de 24 hores.\n"
-"El codi de temps de la mostra de la mostra compensaria exactament una taxa de fotogrames de color NTSC de 30 * 0.9990 (ie 29.970000). Aquesta no és la taxa real. No obstant això, alguns venedors utilitzen aquesta taxa -malgrat estar en contra de les especificacions- perquè la variant d'utilitzar exactament 29,97 fps té una deriva de codi de temps zero."
+"El codi de temps de la mostra de la mostra compensaria exactament una taxa de fotogrames de color NTSC de 30 * 0.9990 (ie 29.970000). Aquesta no és la taxa real. No obstant això, alguns venedors utilitzen aquesta taxa -malgrat estar en contra de les especificacions- perquè la variant d'utilitzar exactament 29,97 fps té una deriva de codi de temps zero.\n"
 
 #: transport_masters_dialog.cc:103
 msgid ""
