@@ -402,6 +402,9 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, "editor-crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::time_selection_sensitive_actions.push_back (act);
 
+	act = reg_sens (editor_actions, "add-range-marker-from-selection", _("Add Range Marker from Selection"), sigc::mem_fun(*this, &Editor::add_location_from_selection));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = reg_sens (editor_actions, "editor-consolidate-with-processing", _("Consolidate Range (with processing)"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, true));
 	ActionManager::time_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "editor-consolidate", _("Consolidate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, false));

@@ -210,6 +210,8 @@
         <menuitem action='select-punch-range'/>
         <menuitem action='select-from-regions'/>
         <separator/>
+        <menuitem action='add-range-marker-from-selection'/>
+        <separator/>
         <menuitem action='select-all-after-edit-cursor'/>
         <menuitem action='select-all-before-edit-cursor'/>
         <menuitem action='select-all-between-cursors'/>

@@ -2223,6 +2223,7 @@ Editor::add_location_from_selection ()
 	string rangename;
 
 	if (selection->time.empty()) {
+		add_location_from_region();
 		return;
 	}
 
@@ -2230,8 +2231,8 @@ Editor::add_location_from_selection ()
 		return;
 	}
 
-	timepos_t start = selection->time[clicked_selection].start();
-	timepos_t end = selection->time[clicked_selection].end();
+	timepos_t start = selection->time.start_time();
+	timepos_t end = selection->time.end_time();
 
 	_session->locations()->next_available_name(rangename,"selection");
 	if (!choose_new_marker_name(rangename, true)) {

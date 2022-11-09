@@ -168,7 +168,7 @@ This mode provides many different operations on both regions and control points,
 @wvis|Common/show-recorder|                               <@SECONDARY@>r|show recorder page
 @edit|Editor/redo|                                          <@PRIMARY@>r|redo
 @edit|Editor/select-from-regions|               <@PRIMARY@><@TERTIARY@>r|set Range to selected regions
-@rop|Region/add-range-marker-from-region|     <@SECONDARY@><@TERTIARY@>r|Add single Range marker from selection
+@edit|Editor/add-range-marker-from-selection| <@SECONDARY@><@TERTIARY@>r|Add single Range marker from selection
 @trans|Transport/Record|                                   <@TERTIARY@>r|engage record
 @mmode|MouseMode/set-mouse-mode-timefx|                                t|timefx mode
 @gselect|Common/select-all-visible-lanes|                   <@PRIMARY@>t|select all visible lanes
