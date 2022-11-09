@@ -26,12 +26,13 @@ class LIBAUDIOGRAPHER_API FlagField
 
 	/// Bi-directional iterator for flag set. Iterates over flags that are set in this field.
 	class iterator
-	  : public std::iterator<std::bidirectional_iterator_tag, Flag>
-	  , public boost::less_than_comparable<iterator>
+	  : public boost::less_than_comparable<iterator>
 	  , boost::equivalent<iterator>
 	  , boost::equality_comparable<iterator>
 	{
 	  public:
+                using value_type = Flag;
+
 		iterator (FlagField const & parent, Flag position) : parent (parent), position (position) {}
 		iterator (iterator const & other) : parent (other.parent), position (other.position) {}
 
