@@ -2455,7 +2455,7 @@ Editor::jump_forward_to_mark ()
 		return;
 	}
 
-	timepos_t pos = _session->locations()->first_mark_after (timepos_t (_playhead_cursor->current_sample()));
+	timepos_t pos = _session->locations()->first_mark_after (timepos_t (_session->transport_sample()+1));
 
 	if (pos == timepos_t::max (Temporal::AudioTime)) {
 		return;
