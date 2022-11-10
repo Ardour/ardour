@@ -223,26 +223,26 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 
 	switch (t) {
 	case MarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New location marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags (0), 0)));
-		ruler_items.push_back (MenuElem (_("Clear all locations"), sigc::mem_fun(*this, &Editor::clear_markers)));
-		ruler_items.push_back (MenuElem (_("Clear all xruns"), sigc::mem_fun(*this, &Editor::clear_xrun_markers)));
-		ruler_items.push_back (MenuElem (_("Unhide locations"), sigc::mem_fun(*this, &Editor::unhide_markers)));
+		ruler_items.push_back (MenuElem (_("New Location Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags (0), 0)));
+		ruler_items.push_back (MenuElem (_("Clear All Locations"), sigc::mem_fun(*this, &Editor::clear_markers)));
+		ruler_items.push_back (MenuElem (_("Clear All Xruns"), sigc::mem_fun(*this, &Editor::clear_xrun_markers)));
+		ruler_items.push_back (MenuElem (_("Unhide Locations"), sigc::mem_fun(*this, &Editor::unhide_markers)));
 		break;
 
 	case RangeMarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_range), where)));
-		ruler_items.push_back (MenuElem (_("Clear all ranges"), sigc::mem_fun(*this, &Editor::clear_ranges)));
-		ruler_items.push_back (MenuElem (_("Unhide ranges"), sigc::mem_fun(*this, &Editor::unhide_ranges)));
+		ruler_items.push_back (MenuElem (_("New Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_range), where)));
+		ruler_items.push_back (MenuElem (_("Clear All Ranges"), sigc::mem_fun(*this, &Editor::clear_ranges)));
+		ruler_items.push_back (MenuElem (_("Unhide Ranges"), sigc::mem_fun(*this, &Editor::unhide_ranges)));
 		break;
 
 	case TransportMarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New Loop range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_loop), where)));
-		ruler_items.push_back (MenuElem (_("New Punch range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_punch), where)));
+		ruler_items.push_back (MenuElem (_("New Loop Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_loop), where)));
+		ruler_items.push_back (MenuElem (_("New Punch Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_punch), where)));
 		break;
 
 	case CdMarkerBarItem:
 		// TODO
-		ruler_items.push_back (MenuElem (_("New CD track marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCDMarker, 0)));
+		ruler_items.push_back (MenuElem (_("New CD Track Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCDMarker, 0)));
 		break;
 
 	case CueMarkerBarItem:
