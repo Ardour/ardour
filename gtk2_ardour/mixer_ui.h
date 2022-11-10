@@ -215,7 +215,7 @@ private:
 
 	std::vector<ArdourWidgets::ArdourButton*> _mixer_scene_buttons;
 	std::vector<Gtk::Label*>                  _mixer_scene_labels;
-	bool                                      _mixer_scene_momentary;
+	ARDOUR::MixerScene*                       _mixer_scene_release;
 
 	void popup_scene_menu (GdkEventButton* ev, int);
 	bool scene_button_press (GdkEventButton*, int);

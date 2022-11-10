@@ -125,6 +125,7 @@ Mixer_UI::instance ()
 Mixer_UI::Mixer_UI ()
 	: Tabbable (_content, _("Mixer"), X_("mixer"))
 	, plugin_search_clear_button (Stock::CLEAR)
+	, _mixer_scene_release (0)
 	, no_track_list_redisplay (false)
 	, in_group_row_change (false)
 	, track_menu (0)
@@ -446,6 +447,7 @@ Mixer_UI::~Mixer_UI ()
 	delete _plugin_selector;
 	delete track_menu;
 	delete _group_tabs;
+	delete _mixer_scene_release;
 }
 
 struct MixerStripSorter {
@@ -4113,16 +4115,16 @@ Mixer_UI::scene_button_press (GdkEventButton* ev, int idx)
 		return false;
 	}
 
-	_mixer_scene_momentary = false;
-
 	if (Keyboard::is_context_menu_event (ev)) {
 		popup_scene_menu (ev, idx);
 	} else if (Keyboard::is_delete_event (ev)) {
 		clear_mixer_scene (idx, true);
 	} else if (Keyboard::is_momentary_push_event (ev)) {
 		/* momentary */
-		_mixer_scene_momentary = true;
-		recall_mixer_scene(idx, false);
+		delete _mixer_scene_release; // .. or keep existing?
+		_mixer_scene_release = new MixerScene (*_session);
+		_mixer_scene_release->snapshot (); // TODO; prevent changed signal
+		recall_mixer_scene (idx, false);
 		return false;
 	} else if (ev->button == 1) {
 		return false;
@@ -4134,12 +4136,10 @@ Mixer_UI::scene_button_press (GdkEventButton* ev, int idx)
 bool
 Mixer_UI::scene_button_release (GdkEventButton* ev, int idx)
 {
-	if (!_session) {
-		return false;
-	}
-	if (_mixer_scene_momentary) {
-		_session->apply_mixer_scene_undo();
-		_mixer_scene_momentary = false;
+	if (_mixer_scene_release) {
+		_mixer_scene_release->apply ();
+		delete _mixer_scene_release;
+		_mixer_scene_release = 0;
 	} else if (ev->button == 1) {
 		recall_mixer_scene (idx);
 	}
