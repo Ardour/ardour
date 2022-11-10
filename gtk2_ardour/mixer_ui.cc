@@ -4164,6 +4164,10 @@ Mixer_UI::scene_label_press (GdkEventButton* ev, int idx)
 void
 Mixer_UI::update_scene_buttons ()
 {
+	if (_mixer_scene_release) {
+		/* do not change highlight for momentary scene */
+		return;
+	}
 	bool all_unset = true;
 	for (size_t idx = 0; idx < _mixer_scene_buttons.size (); ++idx) {
 		boost::shared_ptr<MixerScene> scn;
