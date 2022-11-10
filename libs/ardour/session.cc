@@ -198,13 +198,9 @@ Session::Session (AudioEngine &eng,
 	, _session_range_is_free (true)
 	, _silent (false)
 	, _remaining_latency_preroll (0)
-<<<<<<< HEAD
-	, _last_touched_mixer_scene_idx (std::numeric_limits<size_t>::max())
-=======
 	, _mixer_scene_undo_idx (0)
 	, _mixer_scene_undo (0)
-	, _last_touched_mixer_scene_idx (999)
->>>>>>> c0379f7432 (MixerScenes: implement 'undo' function for mixer scene recalls (libardour))
+	, _last_touched_mixer_scene_idx (std::numeric_limits<size_t>::max())
 	, _engine_speed (1.0)
 	, _signalled_varispeed (0)
 	, auto_play_legal (false)
