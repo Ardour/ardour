@@ -198,7 +198,13 @@ Session::Session (AudioEngine &eng,
 	, _session_range_is_free (true)
 	, _silent (false)
 	, _remaining_latency_preroll (0)
+<<<<<<< HEAD
 	, _last_touched_mixer_scene_idx (std::numeric_limits<size_t>::max())
+=======
+	, _mixer_scene_undo_idx (0)
+	, _mixer_scene_undo (0)
+	, _last_touched_mixer_scene_idx (999)
+>>>>>>> c0379f7432 (MixerScenes: implement 'undo' function for mixer scene recalls (libardour))
 	, _engine_speed (1.0)
 	, _signalled_varispeed (0)
 	, auto_play_legal (false)
@@ -815,6 +821,8 @@ Session::destroy ()
 	delete _locations; _locations = 0;
 
 	delete midi_clock;
+
+	delete _mixer_scene_undo;
 
 	/* clear event queue, the session is gone, nobody is interested in
 	 * those anymore, but they do leak memory if not removed
@@ -7523,9 +7531,32 @@ Session::nth_mixer_scene_valid (size_t nth) const
 	return !_mixer_scenes[nth]->empty ();
 }
 
+void
+Session::stash_mixer_scene_undo ()
+{
+	delete _mixer_scene_undo; // .. or keep existing?
+	_mixer_scene_undo = new MixerScene (*this);
+	_mixer_scene_undo->snapshot ();
+	_mixer_scene_undo_idx = _last_touched_mixer_scene_idx;
+}
+
+void
+Session::apply_mixer_scene_undo ()
+{
+	if (_mixer_scene_undo) {
+		_mixer_scene_undo->apply ();
+		delete _mixer_scene_undo;
+		_mixer_scene_undo = 0;
+		_last_touched_mixer_scene_idx = _mixer_scene_undo_idx;
+	}
+	MixerScene::Change();
+}
+
 bool
 Session::apply_nth_mixer_scene (size_t nth)
 {
+	stash_mixer_scene_undo();
+
 	boost::shared_ptr<MixerScene> scene;
 	{
 		Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
@@ -7546,6 +7577,8 @@ Session::apply_nth_mixer_scene (size_t nth)
 bool
 Session::apply_nth_mixer_scene (size_t nth, RouteList const& rl)
 {
+	stash_mixer_scene_undo();
+
 	boost::shared_ptr<MixerScene> scene;
 	{
 		Glib::Threads::RWLock::ReaderLock lm (_mixer_scenes_lock);
