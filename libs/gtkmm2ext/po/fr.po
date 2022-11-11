@@ -32,7 +32,7 @@ msgstr "Désactivé"
 
 #: action_model.cc:83
 msgid "Main_menu"
-msgstr "Menu principal"
+msgstr ""
 
 #: action_model.cc:85
 msgid "JACK"
@@ -40,19 +40,19 @@ msgstr ""
 
 #: action_model.cc:87
 msgid "redirectmenu"
-msgstr "Menu redirection"
+msgstr ""
 
 #: action_model.cc:89
 msgid "Editor_menus"
-msgstr "Menus éditeur"
+msgstr ""
 
 #: action_model.cc:91
 msgid "RegionList"
-msgstr "Liste des régions"
+msgstr ""
 
 #: action_model.cc:93
 msgid "ProcessorMenu"
-msgstr "Menu processeur"
+msgstr ""
 
 #: bindings.cc:840 bindings.cc:842
 msgid "Window"

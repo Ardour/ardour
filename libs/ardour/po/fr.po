@@ -3890,19 +3890,19 @@ msgstr "La construction de l'objet maître de transport de type %1 a échoué"
 
 #: transport_master.cc:417 transport_master.cc:450
 msgid "SyncSource|JACK"
-msgstr "Synchroniser source|JACK"
+msgstr "JACK"
 
 #: transport_master.cc:424
 msgid "SyncSource|MTC"
-msgstr "Synchroniser source|MTC"
+msgstr "MTC"
 
 #: transport_master.cc:434
 msgid "SyncSource|M-Clk"
-msgstr "Synchroniser source|M-Clk"
+msgstr "M-Clk"
 
 #: transport_master.cc:444
 msgid "SyncSource|LTC"
-msgstr "Synchroniser source|LTC"
+msgstr "LTC"
 
 #: transport_master.cc:487
 msgid "All"
