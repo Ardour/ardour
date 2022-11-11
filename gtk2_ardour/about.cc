@@ -233,7 +233,13 @@ static const char* authors[] = {
 
 static const char* translators[] = {
 	N_("Catalan:\n\tAlbert Homs <alberthoms@gmail.com>\n"),
-        N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n\tChristophe Combelles <ccomb@free.fr>\n\tMartin Blanchard\n\tRomain Arnaud <roming22@gmail.com>\n\tOlivier Humbert <trebmuh@tuxfamily.org>\n\tFrédéric Rech <fred_rech@laposte.net>\n"),
+        N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\
+\n\tChristophe Combelles <ccomb@free.fr>\
+\n\tMartin Blanchard\
+\n\tRomain Arnaud <roming22@gmail.com>\
+\n\tOlivier Humbert <trebmuh@tuxfamily.org>\
+\n\tFrédéric Rech <fred_rech@laposte.net>\
+\n\tJulien Taverna <jujudusud@gmail.com>\n"),
 	N_("German:\n\tKarsten Petersen <kapet@kapet.de>\
 \n\tSebastian Arnold <mail@sebastian-arnold.net>\
 \n\tRobert Schwede <schwede@ironshark.com>\
@@ -241,12 +247,17 @@ static const char* translators[] = {
 \n\tEdgar Aichinger <edogawa@aon.at>\
 \n\tRichard Oax <richard@pagliacciempire.de>\
 \n\tRobin Gloster <robin@loc-com.de>\n"),
-	N_("Italian:\n\tVincenzo Reale <smart2128@baslug.org>\n\tFilippo Pappalardo <filippo@email.it>\n\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"),
+	N_("Italian:\n\tVincenzo Reale <smart2128@baslug.org>\
+\n\tFilippo Pappalardo <filippo@email.it>\
+\n\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"),
 	N_("Portuguese:\n\tRui Nuno Capela <rncbc@rncbc.org>\n"),
 	N_("Brazilian Portuguese:\n\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\
 \n\tChris Ross <chris@tebibyte.org>\n"),
-	N_("Spanish:\n\t Alex Krohn <alexkrohn@fastmail.fm>\n\tPablo Fernández <pablo.fbus@gmail.com>\n"),
+	N_("Spanish:\n\t Alex Krohn <alexkrohn@fastmail.fm>\
+\n\tPablo Fernández <pablo.fbus@gmail.com>\n"),
 	N_("Russian:\n\t Igor Blinov <pitstop@nm.ru>\
+\n\tAleksandr Koltsov <ag1455@mail.ru>\
+\n\tPetr Semiletov <tea@list.ru>\
 \n\tAlexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"),
 	N_("Greek:\n\t Klearchos Gourgourinis <muadib@in.gr>\n"),
 	N_("Swedish:\n\t Petter Sundlöf <petter.sundlof@gmail.com>\n"),
