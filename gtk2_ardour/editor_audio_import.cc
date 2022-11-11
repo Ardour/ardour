@@ -723,7 +723,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 				choices.push_back (_("Embed all without questions"));
 
 				ArdourWidgets::Choice rate_choice (
-					_("Sample rate"),
+					_("Sample Rate"),
 					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"),
 							short_path (path, 40)),
 					choices, false
@@ -749,7 +749,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 				choices.push_back (_("Embed it anyway"));
 
 				ArdourWidgets::Choice rate_choice (
-					_("Sample rate"),
+					_("Sample Rate"),
 					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
 					choices, false
 					);

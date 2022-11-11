@@ -75,10 +75,10 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog)
 	, format_table (3, 4)
 	, compatibility_label (_("Compatibility"), Gtk::ALIGN_START)
 	, quality_label (_("Quality"), Gtk::ALIGN_START)
-	, format_label (_("File format"), Gtk::ALIGN_START)
-	, sample_rate_label (_("Sample rate"), Gtk::ALIGN_START)
+	, format_label (_("File Format"), Gtk::ALIGN_START)
+	, sample_rate_label (_("Sample Rate"), Gtk::ALIGN_START)
 
-	, src_quality_label (_("Sample rate conversion quality:"), Gtk::ALIGN_END)
+	, src_quality_label (_("Sample Rate Conversion Quality:"), Gtk::ALIGN_END)
 
 	/* Watermarking */
 	, watermark_heading (_("Preview / Watermark"), Gtk::ALIGN_START)

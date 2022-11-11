@@ -186,7 +186,7 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	format.set_alignment (1, 0.5);
 	channels.set_text (_("Channels:"));
 	channels.set_alignment (1, 0.5);
-	samplerate.set_text (_("Sample rate:"));
+	samplerate.set_text (_("Sample Rate:"));
 	samplerate.set_alignment (1, 0.5);
 	tempomap.set_text (_("Tempo Map:"));
 	tempomap.set_alignment (1, 0.5);
@@ -418,12 +418,12 @@ SoundFileBox::setup_labels (const string& filename)
 	channels_value.set_text (to_string (sf_info.channels));
 
 	if (_session && sf_info.samplerate != _session->sample_rate()) {
-		samplerate.set_markup (string_compose ("<b>%1</b>", _("Sample rate:")));
+		samplerate.set_markup (string_compose ("<b>%1</b>", _("Sample Rate:")));
 		samplerate_value.set_markup (string_compose (X_("<b>%1 Hz</b>"), sf_info.samplerate));
 		samplerate_value.set_name ("NewSessionSR1Label");
 		samplerate.set_name ("NewSessionSR1Label");
 	} else {
-		samplerate.set_text (_("Sample rate:"));
+		samplerate.set_text (_("Sample Rate:"));
 		samplerate_value.set_text (string_compose (X_("%1 Hz"), sf_info.samplerate));
 		samplerate_value.set_name ("NewSessionSR2Label");
 		samplerate.set_name ("NewSessionSR2Label");
@@ -810,7 +810,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	freesound_list_view.append_column(_("Filename"),    freesound_list_columns.filename);
 	freesound_list_view.append_column(_("Duration"),    freesound_list_columns.duration);
 	freesound_list_view.append_column(_("Size"),        freesound_list_columns.filesize);
-	freesound_list_view.append_column(_("Sample rate"), freesound_list_columns.smplrate);
+	freesound_list_view.append_column(_("Sample Rate"), freesound_list_columns.smplrate);
 	freesound_list_view.append_column(_("License"),     freesound_list_columns.license);
 
 	// filename

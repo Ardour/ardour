@@ -146,7 +146,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	audio_bitrate_combo.append ("256k");
 	audio_bitrate_combo.append ("320k");
 
-	audio_sample_rate_combo.append (_("Session rate"));
+	audio_sample_rate_combo.append (_("Session Rate"));
 	audio_sample_rate_combo.append ("44100");
 	audio_sample_rate_combo.append ("48000");
 
@@ -161,7 +161,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	t->attach (insnd_combo, 1, 2, ty, ty + 1);
 	ty++;
 
-	l = manage (new Label (_("Sample rate:"), ALIGN_START, ALIGN_CENTER, false));
+	l = manage (new Label (_("Sample Rate:"), ALIGN_START, ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, ty, ty + 1);
 	t->attach (audio_sample_rate_combo, 1, 2, ty, ty + 1);
 	ty++;
