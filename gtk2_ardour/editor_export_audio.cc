@@ -287,39 +287,63 @@ void
 Editor::bounce_region_selection (bool with_processing)
 {
 	/* this code is largely similar to editor_ops ::bounce_range_selection */
+	if (selection->regions.empty ()) {
+		return;
+	}
+
+	bool multiple_selected = selection->regions.size () > 1;
+	bool multiple_per_track = false;
+
+	if (multiple_selected) {
+		std::set<boost::shared_ptr<Route>> route_set;
+		for (auto const& i: selection->regions) {
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&i->get_time_axis_view());
+			auto rv = route_set.insert (rtv->route ());
+			if (!rv.second) {
+				multiple_per_track = true;
+				break;
+			}
+		}
+	}
 
 	/* no need to check for bounceable() because this operation never puts
 	 * its results back in the playlist (only in the region list).
 	 */
 
-	string bounce_name;
-	bool   copy_to_clip_library = false;
-	bool   copy_to_trigger = false;
-	uint32_t trigger_slot         = 0;
+	string   bounce_name;
+	bool     copy_to_clip_library = false;
+	bool     copy_to_trigger      = false;
+	uint32_t trigger_slot       = 0;
+
 	{
 		/*prompt the user for a new name*/
 
 		ArdourWidgets::Prompter dialog (true);
 
-		dialog.set_prompt (_("Name for Bounced Region:"));
+		if (multiple_selected) {
+			dialog.set_prompt (_("Suffix for Bounced Regions:"));
+			dialog.set_initial_text (_(" (Bounced)"));
+		} else {
+			boost::shared_ptr<Region> region (selection->regions.front()->region ());
+			dialog.set_prompt (_("Name for Bounced Region:"));
+			dialog.set_initial_text (string_compose ("%1%2", region->name(), _(" (Bounced)")));
+		}
 
 		dialog.set_name ("BounceNameWindow");
 		dialog.set_size_request (400, -1);
 		dialog.set_position (Gtk::WIN_POS_MOUSE);
 
 		dialog.add_button (_("Bounce"), RESPONSE_ACCEPT);
-		dialog.set_initial_text (bounce_name);
 
 		Table*  table  = manage (new Table);
 		table->set_spacings (4);
 		table->set_border_width (8);
-		table->set_homogeneous (true);
 		dialog.get_vbox()->pack_start (*table);
 		dialog.get_vbox()->set_spacing (4);
 
 		/* copy to a slot on this track ? */
 		Gtk::CheckButton *to_slot = NULL;
-		if (!with_processing) {
+		if (!with_processing && !multiple_per_track) {
 			to_slot = manage (new Gtk::CheckButton (_("Bounce to Trigger Slot:")));
 			Gtk::Alignment *slot_align = manage (new Gtk::Alignment (0, .5, 0, 0));
 			slot_align->add (*to_slot);
@@ -403,11 +427,17 @@ Editor::bounce_region_selection (bool with_processing)
 		InterThreadInfo itt;
 
 		boost::shared_ptr<Region> r;
+		std::string name;
+		if (multiple_selected) {
+			name = string_compose ("%1%2", r->name (), bounce_name);
+		} else {
+			name = bounce_name;
+		}
 
 		if (with_processing) {
-			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, track->main_outs(), false, bounce_name);
+			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, track->main_outs(), false, name);
 		} else {
-			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, boost::shared_ptr<Processor>(), false, bounce_name);
+			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, boost::shared_ptr<Processor>(), false, name);
 		}
 
 		if (copy_to_clip_library) {
