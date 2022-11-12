@@ -736,9 +736,7 @@ PluginInsert::deactivate ()
 	_timing_stats.reset ();
 	Processor::deactivate ();
 
-	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->deactivate ();
-	}
+	/* Plugin::deactivate is called from run() */
 
 	const samplecnt_t l = effective_latency ();
 	if (_plugin_signal_latency != l) {
@@ -1307,7 +1305,14 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		_timing_stats.reset ();
 	}
 
-	if (g_atomic_int_compare_and_exchange (&_flush, 1, 0)) {
+	if (_active != _pending_active && !_pending_active) {
+		/* deactivate */
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+			(*i)->deactivate ();
+		}
+	}
+
+	if (check_active () && g_atomic_int_compare_and_exchange (&_flush, 1, 0)) {
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 			(*i)->flush ();
 		}
