@@ -4076,7 +4076,6 @@ Editor::freeze_route ()
 		d.set_title (_("Cannot freeze"));
 		d.run ();
 		return;
-		return;
 	}
 
 	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
