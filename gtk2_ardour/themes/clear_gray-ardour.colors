@@ -107,7 +107,7 @@
     <ColorAlias name="gain line" alias="alert:green"/>
     <ColorAlias name="gain line inactive" alias="theme:bg1"/>
     <ColorAlias name="generic button: fill" alias="widget:bg"/>
-    <ColorAlias name="generic button: fill active" alias="alert:red"/>
+    <ColorAlias name="generic button: fill active" alias="neutral:foreground2"/>
     <ColorAlias name="generic button: led active" alias="alert:green"/>
     <ColorAlias name="ghost track base" alias="neutral:background2"/>
     <ColorAlias name="ghost track midi outline" alias="neutral:backgroundest"/>
