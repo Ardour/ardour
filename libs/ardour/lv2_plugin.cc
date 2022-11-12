@@ -1742,8 +1742,13 @@ LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
                     const uint8_t*       body)
 {
 	const uint32_t  buf_size = sizeof(UIMessage) + size;
-	vector<uint8_t> buf(buf_size);
 
+	if (dest->write_space () < buf_size) {
+		/* Do not write partial message */
+		return false;
+	}
+
+	vector<uint8_t> buf(buf_size);
 	UIMessage* msg = (UIMessage*)&buf[0];
 	msg->index    = index;
 	msg->protocol = protocol;
@@ -1779,6 +1784,11 @@ LV2Plugin::write_from_ui(uint32_t       index,
 		int fact = ceilf(_session.sample_rate () / 3000.f);
 		rbs = max((size_t) bufsiz * std::max (8, fact), rbs);
 		_from_ui = new RingBuffer<uint8_t>(rbs);
+	}
+
+	if (_from_ui->write_space () < size) {
+		error << string_compose (_("LV2<%1>: Error writing from UI to plugin"), name()) << endmsg;
+		return false;
 	}
 
 	if (!write_to(_from_ui, index, protocol, size, body)) {
