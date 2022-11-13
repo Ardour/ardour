@@ -58,7 +58,7 @@
 # define PBD_RT_PRI_MIDI pbd_pthread_priority (THREAD_MIDI)
 # define PBD_RT_PRI_PROC pbd_pthread_priority (THREAD_PROC)
 
-LIBPBD_API int  pthread_create_and_store (std::string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg);
+LIBPBD_API int  pthread_create_and_store (std::string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg, uint32_t stacklimit = 0x80000 /*512kB*/);
 LIBPBD_API void pthread_cancel_one (pthread_t thread);
 LIBPBD_API void pthread_cancel_all ();
 LIBPBD_API void pthread_kill_all (int signum);

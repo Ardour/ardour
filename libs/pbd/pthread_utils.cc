@@ -117,14 +117,16 @@ fake_thread_start (void* arg)
 }
 
 int
-pthread_create_and_store (string name, pthread_t* thread, void* (*start_routine) (void*), void* arg)
+pthread_create_and_store (string name, pthread_t* thread, void* (*start_routine) (void*), void* arg, uint32_t stacklimit)
 {
 	pthread_attr_t default_attr;
 	int            ret;
 
 	/* set default stack size to sensible default for memlocking */
 	pthread_attr_init (&default_attr);
-	pthread_attr_setstacksize (&default_attr, 0x80000); // 512kB
+	if (stacklimit > 0) {
+		pthread_attr_setstacksize (&default_attr, stacklimit);
+	}
 
 	ThreadStartWithName* ts = new ThreadStartWithName (start_routine, arg, name);
 
