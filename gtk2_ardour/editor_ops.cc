@@ -4116,7 +4116,7 @@ Editor::freeze_route ()
 
 	InterthreadProgressWindow ipw (current_interthread_info, _("Freeze"), _("Cancel Freeze"));
 
-	pthread_create_and_store (X_("freezer"), &itt.thread, _freeze_thread, this);
+	pthread_create_and_store (X_("freezer"), &itt.thread, _freeze_thread, this, 0);
 
 	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
 
