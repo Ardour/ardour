@@ -52,6 +52,7 @@ Semaphore::Semaphore (const char* name, int val)
 #elif defined USE_FUTEX_SEMAPHORE
 	(void)name; /* stop warning */
 	_value = val;
+	_futex = 0;
 #else
 	(void) name; /* stop gcc warning on !Apple systems */
 
@@ -116,7 +117,7 @@ int
 Semaphore::wait ()
 {
 	if (std::atomic_fetch_sub_explicit (&_value, 1, std::memory_order_relaxed) <= 0) {
-		syscall(SYS_futex, &_futex, FUTEX_WAIT_PRIVATE, _futex, NULL, 0, 0);
+		syscall(SYS_futex, &_futex, FUTEX_WAIT_PRIVATE, _futex, NULL, NULL, 0);
 	}
 	return 0;
 }
