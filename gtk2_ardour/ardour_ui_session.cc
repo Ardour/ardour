@@ -1268,6 +1268,7 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 	window.add_button (actions[2], RESPONSE_ACCEPT);
 
 	window.set_default_response (RESPONSE_ACCEPT);
+	window.set_keep_above (true);
 
 	Gtk::Button noquit_button (msg);
 	noquit_button.set_name ("EditorGTKButton");
