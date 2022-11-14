@@ -198,7 +198,7 @@ Session::Session (AudioEngine &eng,
 	, _session_range_is_free (true)
 	, _silent (false)
 	, _remaining_latency_preroll (0)
-	, _last_touched_mixer_scene_idx (999)
+	, _last_touched_mixer_scene_idx (std::numeric_limits<size_t>::max())
 	, _engine_speed (1.0)
 	, _signalled_varispeed (0)
 	, auto_play_legal (false)

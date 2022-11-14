@@ -102,6 +102,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	void set_layout_ellipsize_width (int w);
 	void set_layout_font (const Pango::FontDescription&);
 	void set_text_ellipsize (Pango::EllipsizeMode);
+	void set_width_padding (float);
 
     /* Sets the text used for size request computation. Pass an
      * empty string to return to the default behavior which uses
@@ -171,6 +172,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	unsigned int _char_pixel_width;
 	unsigned int _char_pixel_height;
 	float        _char_avg_pixel_width;
+	float        _width_padding;
 	bool         _custom_font_set;
 
 	int   _text_width;

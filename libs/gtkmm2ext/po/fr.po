@@ -4,6 +4,7 @@
 # Romain Arnaud <roming22@gmail.com>, 2011.
 # Olivier Humbert <trebmuh@tuxfamily.org>, 2016.
 # stratojaune <fred_rech@laposte.net>, 2020.
+# Julien Taverna <jujudusud@gmail.com>, 2022.
 msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
@@ -71,7 +72,7 @@ msgstr "Non-catégorisé"
 
 #: cursors.cc:81
 msgid "cursor hotspots info file %1 has an error on line %2"
-msgstr ""
+msgstr "Le fichier info du curseur hotspots %1 contient une erreur à la ligne %2"
 
 #: emscale.cc:52
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"

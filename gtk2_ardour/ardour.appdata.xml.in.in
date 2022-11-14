@@ -18,6 +18,8 @@
       composers.
     </p>
   </description>
+  <url type="bugtracker">https://tracker.ardour.org/</url>
+  <url type="contribute">https://ardour.org/development</url>
   <url type="homepage">https://ardour.org</url>
   <screenshots>
       <screenshot type="default">
@@ -29,4 +31,11 @@
         <caption>The Mixer window which includes channel strips for each track and bus</caption>
       </screenshot>
   </screenshots>
+  <keywords>
+    <keyword>Ardour</keyword>
+    <keyword>DAW</keyword>
+    <keyword>Digital Audio Workstation</keyword>
+    <keyword>Mixing</keyword>
+    <keyword>Mastering</keyword>
+  </keywords>
 </component>

@@ -64,6 +64,7 @@ ArdourButton::ArdourButton (Element e, bool toggle)
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
 	, _char_avg_pixel_width (0)
+	, _width_padding (1.75)
 	, _custom_font_set (false)
 	, _text_width (0)
 	, _text_height (0)
@@ -111,6 +112,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e, bool toggle)
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
 	, _char_avg_pixel_width (0)
+	, _width_padding (1.75)
 	, _custom_font_set (false)
 	, _text_width (0)
 	, _text_height (0)
@@ -691,7 +693,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		} else /*if (!_text.empty() || !_sizing_texts.empty()) */ {
 
 			req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
-			req->width += rint(1.75 * char_pixel_width()); // padding
+			req->width += rint(_width_padding * char_pixel_width()); // padding
 
 			int sizing_text_width = 0, sizing_text_height = 0;
 
@@ -1332,6 +1334,18 @@ ArdourButton::set_text_ellipsize (Pango::EllipsizeMode e)
 	if (_layout_ellipsize_width > 3 * PANGO_SCALE) {
 		_layout->set_width (_layout_ellipsize_width - 3 * PANGO_SCALE);
 	}
+	if (get_realized ()) {
+		queue_resize ();
+	}
+}
+
+void
+ArdourButton::set_width_padding (float p)
+{
+	if (_width_padding == p) {
+		return;
+	}
+	_width_padding = p;
 	if (get_realized ()) {
 		queue_resize ();
 	}

@@ -203,6 +203,7 @@ public:
 	LilvNode* bufz_fixedBlockLength;
 	LilvNode* bufz_nominalBlockLength;
 	LilvNode* bufz_coarseBlockLength;
+	LilvNode* state_loadDefaultState;
 
 #ifdef LV2_EXTENDED
 	LilvNode* lv2_noSampleAccurateCtrl;
@@ -699,12 +700,17 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	if (lilv_nodes_contains (optional_features, _world.inline_display_in_gui)) {
 		_inline_display_in_gui = true;
 	}
-	lilv_nodes_free(optional_features);
 #endif
+	lilv_nodes_free(optional_features);
 
-	/* Snapshot default state -- http://lv2plug.in/ns/ext/state/#loadDefaultState */
-	LilvState* state = lilv_state_new_from_world(
-		_world.world, _uri_map.urid_map(), lilv_plugin_get_uri(_impl->plugin));
+	/* Snapshot default state -- https://lv2plug.in/ns/ext/state#loadDefaultState */
+	LilvState* state = NULL;
+
+	LilvNodes* required_features = lilv_plugin_get_required_features (plugin);
+	if (lilv_nodes_contains (required_features, _world.state_loadDefaultState)) {
+		state = lilv_state_new_from_world(_world.world, _uri_map.urid_map(), lilv_plugin_get_uri(_impl->plugin));
+	}
+	lilv_nodes_free (required_features);
 
 	const uint32_t num_ports = this->num_ports();
 	for (uint32_t i = 0; i < num_ports; ++i) {
@@ -1736,8 +1742,13 @@ LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
                     const uint8_t*       body)
 {
 	const uint32_t  buf_size = sizeof(UIMessage) + size;
-	vector<uint8_t> buf(buf_size);
 
+	if (dest->write_space () < buf_size) {
+		/* Do not write partial message */
+		return false;
+	}
+
+	vector<uint8_t> buf(buf_size);
 	UIMessage* msg = (UIMessage*)&buf[0];
 	msg->index    = index;
 	msg->protocol = protocol;
@@ -1773,6 +1784,11 @@ LV2Plugin::write_from_ui(uint32_t       index,
 		int fact = ceilf(_session.sample_rate () / 3000.f);
 		rbs = max((size_t) bufsiz * std::max (8, fact), rbs);
 		_from_ui = new RingBuffer<uint8_t>(rbs);
+	}
+
+	if (_from_ui->write_space () < size) {
+		error << string_compose (_("LV2<%1>: Error writing from UI to plugin"), name()) << endmsg;
+		return false;
 	}
 
 	if (!write_to(_from_ui, index, protocol, size, body)) {
@@ -3422,6 +3438,7 @@ LV2World::LV2World()
 	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
 	bufz_nominalBlockLength  = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#nominalBlockLength");
 	bufz_coarseBlockLength   = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#coarseBlockLength");
+	state_loadDefaultState   = lilv_new_uri(world, LV2_STATE_PREFIX "loadDefaultState");
 }
 
 LV2World::~LV2World()
@@ -3429,6 +3446,7 @@ LV2World::~LV2World()
 	if (!world) {
 		return;
 	}
+	lilv_node_free(state_loadDefaultState);
 	lilv_node_free(bufz_coarseBlockLength);
 	lilv_node_free(bufz_nominalBlockLength);
 	lilv_node_free(bufz_fixedBlockLength);

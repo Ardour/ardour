@@ -163,7 +163,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			l = manage (new Label (string_compose ("%1", info.channels), ALIGN_START));
 			t->attach (*l, 1, 2, 2, 3);
 
-			l = manage (new Label (_("Sample rate:"), ALIGN_END));
+			l = manage (new Label (_("Sample Rate:"), ALIGN_END));
 			t->attach (*l, 0, 1, 3, 4);
 			l = manage (new Label (string_compose (_("%1 Hz"), info.samplerate), ALIGN_START));
 			t->attach (*l, 1, 2, 3, 4);
@@ -357,7 +357,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 				png_y0 += linesp;
 
 				IMGLABEL (lx0, _("Format:"), file_fmt);
-				IMGLABEL (lx1, _("Sample rate:"), string_compose (_("%1 Hz"), sample_rate));
+				IMGLABEL (lx1, _("Sample Rate:"), string_compose (_("%1 Hz"), sample_rate));
 				png_y0 += linesp;
 
 				if (_session) {
