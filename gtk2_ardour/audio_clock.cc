@@ -2123,7 +2123,7 @@ samplepos_t
 AudioClock::samples_from_bbt_string (timepos_t const & pos, const string& str) const
 {
 	if (_session == 0) {
-		error << "AudioClock::current_time() called with BBT mode but without session!" << endmsg;
+		error << "AudioClock::samples_from_bbt_string() called with BBT mode but without session!" << endmsg;
 		return 0;
 	}
 
