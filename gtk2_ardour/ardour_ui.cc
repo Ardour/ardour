@@ -2255,7 +2255,7 @@ void
 ARDOUR_UI::primary_clock_value_changed ()
 {
 	if (_session) {
-		_session->request_locate (primary_clock->current_time ().samples());
+		_session->request_locate (primary_clock->last_when ().samples());
 	}
 }
 
@@ -2263,7 +2263,7 @@ void
 ARDOUR_UI::big_clock_value_changed ()
 {
 	if (_session) {
-		_session->request_locate (big_clock->current_time ().samples());
+		_session->request_locate (big_clock->last_when ().samples());
 	}
 }
 
@@ -2271,7 +2271,7 @@ void
 ARDOUR_UI::secondary_clock_value_changed ()
 {
 	if (_session) {
-		_session->request_locate (secondary_clock->current_time ().samples());
+		_session->request_locate (secondary_clock->last_when ().samples());
 	}
 }
 void

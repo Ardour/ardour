@@ -101,9 +101,9 @@ timepos_t
 MainClock::absolute_time () const
 {
 	if (get_is_duration ()) {
-		return current_time ();
+		return last_when ();
 	} else {
-		return current_time ();
+		return last_when ();
 	}
 }
 

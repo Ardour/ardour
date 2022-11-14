@@ -782,9 +782,9 @@ AudioClock::end_edit_relative (bool add)
 
 	if (!distance.is_zero ()) {
 		if (add) {
-			AudioClock::set (current_time() + timepos_t (distance), true);
+			AudioClock::set (last_when() + timepos_t (distance), true);
 		} else {
-			timepos_t c = current_time();
+			timepos_t c = last_when();
 
 			if (c > timepos_t (distance)|| _negative_allowed) {
 				AudioClock::set (c.earlier (distance), true);
@@ -818,7 +818,7 @@ AudioClock::session_configuration_changed (std::string p)
 		if (is_duration) {
 			set_duration (current_duration(), true);
 		} else {
-			AudioClock::set (current_time(), true);
+			AudioClock::set (last_when(), true);
 		}
 		return;
 	}
@@ -829,7 +829,7 @@ AudioClock::session_configuration_changed (std::string p)
 			if (is_duration) {
 				set_duration (current_duration(), true);
 			} else {
-				AudioClock::set (current_time(), true);
+				AudioClock::set (last_when(), true);
 			}
 			break;
 		default:
@@ -1817,27 +1817,27 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	switch (ev->direction) {
 
 	case GDK_SCROLL_UP:
-		step = get_incremental_step (f, current_time());
+		step = get_incremental_step (f, last_when());
 		if (!step.is_zero ()) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				step *= 10;
 			}
-			AudioClock::set (current_time() + step, true);
+			AudioClock::set (last_when() + step, true);
 			ValueChanged (); /* EMIT_SIGNAL */
 		}
 		break;
 
 	case GDK_SCROLL_DOWN:
-		step = get_incremental_step (f, current_time());
+		step = get_incremental_step (f, last_when());
 		if (!step.is_zero ()) {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				step *= 10;
 			}
 
-			if (!_negative_allowed && current_time() < step) {
+			if (!_negative_allowed && last_when() < step) {
 				AudioClock::set (timepos_t (), true);
 			} else {
-				AudioClock::set (current_time().earlier (step), true);
+				AudioClock::set (last_when().earlier (step), true);
 			}
 
 			ValueChanged (); /* EMIT_SIGNAL */
@@ -1867,7 +1867,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 	if (drag_accum) {
 
 
-		timepos_t pos = current_time ();
+		timepos_t pos = last_when ();
 		timepos_t step = get_incremental_step (drag_field, pos);
 
 		step *= fabs (drag_accum);
@@ -1956,12 +1956,6 @@ AudioClock::get_incremental_step (Field field, timepos_t const & pos)
 	}
 
 	return f;
-}
-
-timepos_t
-AudioClock::current_time () const
-{
-	return last_when();
 }
 
 timecnt_t
@@ -2238,7 +2232,7 @@ AudioClock::locate ()
 		return;
 	}
 
-	_session->request_locate (current_time().samples());
+	_session->request_locate (last_when().samples());
 }
 
 void

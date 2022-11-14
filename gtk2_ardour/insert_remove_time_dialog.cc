@@ -191,13 +191,13 @@ InsertRemoveTimeDialog::move_locked_markers () const
 timepos_t
 InsertRemoveTimeDialog::position () const
 {
-	return position_clock.current_time();
+	return position_clock.last_when();
 }
 
 timecnt_t
 InsertRemoveTimeDialog::distance () const
 {
-	return duration_clock.current_duration (position_clock.current_time());
+	return duration_clock.current_duration (position_clock.last_when());
 }
 
 void

@@ -86,7 +86,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	std::string name() const { return _name; }
 
-	Temporal::timepos_t current_time () const;
+	Temporal::timepos_t last_when () const { return last_time.position(); }
 	Temporal::timecnt_t current_duration (Temporal::timepos_t position = Temporal::timepos_t()) const;
 	void set_session (ARDOUR::Session *s);
 	void set_negative_allowed (bool yn);
@@ -194,7 +194,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	std::string input_string;
 
 	Temporal::timecnt_t last_time;
-	Temporal::timepos_t last_when() const { return last_time.position(); }
 
 	bool last_pdelta;
 	bool last_sdelta;
