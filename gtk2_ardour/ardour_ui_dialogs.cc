@@ -1039,6 +1039,7 @@ ARDOUR_UI::handle_locations_change (Location *)
 bool
 ARDOUR_UI::tabbed_window_state_event_handler (GdkEventWindowState* ev, void* object)
 {
+#ifndef __APPLE__
 	if (object == editor) {
 
 		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) &&
@@ -1069,6 +1070,7 @@ ARDOUR_UI::tabbed_window_state_event_handler (GdkEventWindowState* ev, void* obj
 			}
 		}
 	}
+#endif
 
 	return false;
 }

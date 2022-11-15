@@ -49,7 +49,9 @@ ArdourWindow::ArdourWindow (Gtk::Window& parent, string title)
 {
 	init ();
 	set_title (title);
+#ifndef __APPLE__
 	set_transient_for (parent);
+#endif
 	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
 }
 
