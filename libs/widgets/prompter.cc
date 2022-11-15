@@ -78,6 +78,18 @@ Prompter::init (bool with_cancel)
 }
 
 void
+Prompter::set_allow_empty (bool yn)
+{
+	if (yn == allow_empty) {
+		return;
+	}
+	allow_empty = yn;
+	if (allow_empty) {
+		can_accept_from_entry = true;
+	}
+}
+
+void
 Prompter::on_show ()
 {
 	/* don't connect to signals till shown, so that we don't change the
@@ -87,7 +99,7 @@ Prompter::on_show ()
 	if (first_show) {
 		entry.signal_changed().connect (mem_fun (*this, &Prompter::on_entry_changed));
 		entry.signal_activate().connect (mem_fun (*this, &Prompter::entry_activated));
-		can_accept_from_entry = !entry.get_text().empty();
+		can_accept_from_entry = !entry.get_text().empty() || allow_empty;
 		first_show = false;
 	}
 
@@ -130,7 +142,7 @@ Prompter::on_entry_changed ()
 	   button, nothing will happen at all.
 	*/
 
-	if (!entry.get_text().empty()) {
+	if (!entry.get_text().empty() || allow_empty) {
 		set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
 		set_default_response (Gtk::RESPONSE_ACCEPT);
 		can_accept_from_entry = true;
