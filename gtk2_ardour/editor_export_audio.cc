@@ -321,12 +321,13 @@ Editor::bounce_region_selection (bool with_processing)
 		ArdourWidgets::Prompter dialog (true);
 
 		if (multiple_selected) {
-			dialog.set_prompt (_("Suffix for Bounced Regions:"));
-			dialog.set_initial_text (_(" (Bounced)"));
+			dialog.set_prompt (_("Prefix for Bounced Regions:"));
+			dialog.set_initial_text ("");
+			dialog.set_allow_empty ();
 		} else {
 			boost::shared_ptr<Region> region (selection->regions.front()->region ());
 			dialog.set_prompt (_("Name for Bounced Region:"));
-			dialog.set_initial_text (string_compose ("%1%2", region->name(), _(" (Bounced)")));
+			dialog.set_initial_text (region->name());
 		}
 
 		dialog.set_name ("BounceNameWindow");
@@ -429,7 +430,7 @@ Editor::bounce_region_selection (bool with_processing)
 		boost::shared_ptr<Region> r;
 		std::string name;
 		if (multiple_selected) {
-			name = string_compose ("%1%2", r->name (), bounce_name);
+			name = string_compose ("%1%2", bounce_name, r->name ());
 		} else {
 			name = bounce_name;
 		}
@@ -446,7 +447,11 @@ Editor::bounce_region_selection (bool with_processing)
 
 		if (copy_to_trigger) {
 			boost::shared_ptr<Trigger::UIState> state (new Trigger::UIState());
-			state->name = bounce_name;
+			if (multiple_selected) {
+				state->name = string_compose ("%1%2", bounce_name, r->name ());
+			} else {
+				state->name = bounce_name;
+			}
 			//ToDo: can/should we get the tempo for this region?
 			track->triggerbox ()->enqueue_trigger_state_for_region(r, state);
 			track->triggerbox ()->set_from_selection (trigger_slot, r);
