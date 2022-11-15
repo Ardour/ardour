@@ -409,3 +409,26 @@ WindowProxy::set_state_mask (StateMask sm)
 {
 	_state_mask = sm;
 }
+
+void
+WindowProxy::set_transient_for (Gtk::Window& win)
+{
+	/* on macOS set_transient() calls _gdk_quartz_window_attach_to_parent()
+	 * which attaches the windows as child window to the parent. As side-effect
+	 * the child becomes the same window-level as the parent.
+	 *
+	 * This makes it hard to re-order siblings of the parent without explicit call to
+	 * re-order those (gdk_window_restack gdk_window_quartz_restack_toplevel).
+	 *
+	 * macOS has a rich concept of z-axis stacking per application, explict transient parents
+	 * are not required.
+	 *
+	 * https://developer.apple.com/documentation/appkit/nswindow/1419152-addchildwindow?language=objc
+	 * https://developer.apple.com/documentation/appkit/nswindowlevel?language=objc
+	 */
+#ifndef __APPLE__
+	if (_window) {
+		_window->set_transient_for (win);
+	}
+#endif
+}
