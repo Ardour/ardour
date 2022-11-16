@@ -125,6 +125,8 @@
 
 #include "temporal/time.h"
 
+#include "control_protocol/basic_ui.h"
+
 #include "about.h"
 #include "actions.h"
 #include "add_route_dialog.h"
@@ -3110,4 +3112,25 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 	window.signal_key_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_event_handler), &window), false);
 	window.signal_key_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_event_handler), &window), false);
 }
+
+void
+ARDOUR_UI::trigger_slot (int c, int r)
+{
+	if (!_basic_ui) {
+		return;
+	}
+
+	_basic_ui->bang_trigger_at (c, r);
+}
+
+void
+ARDOUR_UI::trigger_cue_row (int r)
+{
+	if (!_basic_ui) {
+		return;
+	}
+
+	_basic_ui->trigger_cue_row (r);
+}
+
 

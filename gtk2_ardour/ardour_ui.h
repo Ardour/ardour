@@ -293,6 +293,9 @@ public:
 	XMLNode* clock_mode_settings () const;
 	XMLNode* tearoff_settings (const char*) const;
 
+	void trigger_slot (int c, int r);
+	void trigger_cue_row (int r);
+
 	void save_ardour_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);
 
