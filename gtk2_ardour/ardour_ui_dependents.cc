@@ -90,7 +90,6 @@ ARDOUR_UI::we_have_dependents ()
 	 */
 	ProcessorBox::register_actions ();
 	StepEntry::setup_actions_and_bindings ();
-	TriggerUI::setup_actions_and_bindings ();
 	ClipEditorBox::init ();
 
 	/* Global, editor, mixer, processor box actions are defined now. Link
