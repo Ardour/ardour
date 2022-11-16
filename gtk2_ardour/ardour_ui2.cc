@@ -364,7 +364,7 @@ ARDOUR_UI::setup_transport ()
 	latency_disable_button.set_related_action (act);
 
 	set_size_request_to_display_given_text (route_latency_value, "1000 spl", 0, 0);
-	set_size_request_to_display_given_text (io_latency_value, "1000 spl", 0, 0);
+	set_size_request_to_display_given_text (io_latency_value, "888.88 ms", 0, 0);
 
 	/* connect signals */
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (primary_clock, &MainClock::set), false));
