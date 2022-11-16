@@ -25,7 +25,7 @@ def build(bld):
     obj.includes     = ['.', './midi_surface']
     obj.name         = 'libardour_midisurface'
     obj.target       = 'ardour_midisurface'
-    obj.uselib       = 'SIGCPP XML OSX'
+    obj.uselib       = 'GLIB GLIBMM SIGCPP XML OSX'
     obj.use          = 'libardour libardour_cp libpbd libevoral libmidipp libtemporal'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
