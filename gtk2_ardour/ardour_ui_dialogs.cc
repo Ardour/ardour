@@ -44,6 +44,7 @@
 #include "ardour/session.h"
 
 #include "control_protocol/control_protocol.h"
+#include "control_protocol/basic_ui.h"
 
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
@@ -102,6 +103,12 @@ void
 ARDOUR_UI::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
+
+	if (_basic_ui) {
+		delete _basic_ui;
+	}
+
+	_basic_ui = new BasicUI (*s);
 
 	/* adjust sensitivity of menu bar options to reflect presence/absence
 	 * of session

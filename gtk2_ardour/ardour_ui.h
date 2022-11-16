@@ -175,6 +175,7 @@ class MidiTracer;
 class NSM_Client;
 class LevelMeterHBox;
 class GUIObjectState;
+class BasicUI;
 
 namespace ARDOUR {
 	class ControlProtocolInfo;
@@ -436,6 +437,7 @@ private:
 
 	Gtk::Menu*    _shared_popup_menu;
 
+	BasicUI*      _basic_ui;
 	void hide_tabbable (ArdourWidgets::Tabbable*);
 	void detach_tabbable (ArdourWidgets::Tabbable*);
 	void attach_tabbable (ArdourWidgets::Tabbable*);
