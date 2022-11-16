@@ -819,6 +819,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void add_custom_midi_binding (int id, int x, int y);
 	static void remove_custom_midi_binding (int x, int y);
 	static void clear_custom_midi_bindings ();
+	static int  dump_custom_midi_bindings (std::string const & path);
 
 	void begin_midi_learn (int index);
 	void midi_unlearn (int index);

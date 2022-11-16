@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <memory>
 #include <sstream>
@@ -3966,6 +3967,28 @@ void
 TriggerBox::clear_custom_midi_bindings ()
 {
 	_custom_midi_map.clear ();
+}
+
+int
+TriggerBox::dump_custom_midi_bindings (std::string const & path)
+{
+	std::ofstream f (path.c_str());
+
+	if (!f) {
+		return -1;
+	}
+
+	f << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n <ArdourMIDIBindings version=\"1.0.0\" name=\"The name of this set of bindings\">\n";
+
+	for (CustomMidiMap::iterator i = _custom_midi_map.begin(); i != _custom_midi_map.end(); ++i) {
+		string str = string_compose (X_("\t<Binding msg note=\"%1\" channel=\"%2\" action=\"Cues/trigger-slot-%1-%2\"/>\n"),
+		                             i->first % 16, /* note number */
+		                             i->first / 16, /* channel */
+		                             i->second.first,
+		                             i->second.second);
+	}
+
+	f << "</ArdourMIDIBindings>\n";
 }
 
 void
