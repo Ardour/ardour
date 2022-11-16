@@ -10,8 +10,7 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.73', mandatory=True)
-    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
+    pass
 
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')
