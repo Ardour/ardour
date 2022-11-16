@@ -5280,8 +5280,8 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		 * good solution.
 		 */
 
-		timepos_t position = end_time + (start_time.distance (r->position()));
-		position.increment ();
+		timepos_t position = end_time.increment();
+		position += start_time.distance (r->position());
 
 		playlist = (*i)->region()->playlist();
 
