@@ -10,7 +10,8 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    pass
+    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.73', mandatory=True)
+    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
 
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')
@@ -25,7 +26,7 @@ def build(bld):
     obj.includes     = ['.', './midi_surface']
     obj.name         = 'libardour_midisurface'
     obj.target       = 'ardour_midisurface'
-    obj.uselib       = 'SIGCPP XML OSX'
+    obj.uselib       = 'GLIB GLIBMM SIGCPP XML OSX'
     obj.use          = 'libardour libardour_cp libpbd libevoral libmidipp libtemporal'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
