@@ -110,7 +110,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 
 	/* don't provide operator+(samplepos_t) or operator+(superclock_t)
 	 * because the compiler can't disambiguate them and neither can we.
-	 * to add such types, create a timepo_t and then add that.
+	 * to add such types, create a timepos_t and then add that.
 	 */
 
 	/* operator-() poses severe and thorny problems for a class that represents position on a timeline.
@@ -239,11 +239,6 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 	explicit timepos_t (bool b, int64_t v) : int62_t (b, v) {}
 	explicit timepos_t (int62_t const & v) : int62_t (v) {}
 
-	/* these can only be called after verifying that the time domain does
-	 * not match the relevant one i.e. call _beats() to get a Beats value
-	 * when this is using the audio time domain
-	 */
-
 	/* these three methods are to be called ONLY when we have already that
 	 * the time domain of this timepos_t does not match the desired return
 	 * type, and so we will need to go to the tempo map to convert
@@ -306,7 +301,7 @@ class LIBTEMPORAL_API timecnt_t {
 	timecnt_t (TimeDomain td) : _distance (td != AudioTime, 0), _position (td) {}
 	timecnt_t (timecnt_t const &other) : _distance (other.distance()), _position (other.position()) {}
 
-	/* construct from sample count (position doesn't matter due to linear nature * of audio time */
+	/* construct from sample count (position doesn't matter due to linear nature of audio time) */
 	explicit timecnt_t (samplepos_t s, timepos_t const & pos);
 	explicit timecnt_t (samplepos_t s);
 

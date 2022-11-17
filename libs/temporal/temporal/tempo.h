@@ -735,7 +735,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 * one could hold the map for, etc.
 	 *
 	 * Elsewhere in the codebase, we use RCU to solve this sort of
-	 * issue. For example, if we need to operate an the current list of
+	 * issue. For example, if we need to operate on the current list of
 	 * Routes, we get read-only copy of the list, and iterate over it,
 	 * knowing that even if the canonical version is being changed, the
 	 * copy we are using will not.
