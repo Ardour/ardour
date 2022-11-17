@@ -91,6 +91,8 @@ public:
 	void trigger_midi_learn ();
 	void trigger_midi_unlearn ();
 
+	void save_midi_learn ();
+
 private:
 	void trigger_changed (PBD::PropertyChange const& );  //calls on_trigger_changed to subclasses
 
