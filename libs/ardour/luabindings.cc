@@ -705,7 +705,6 @@ LuaBindings::common (lua_State* L)
 #endif
 		.addFunction ("magnitude", &Temporal::timecnt_t::magnitude)
 		.addFunction ("position", &Temporal::timecnt_t::position)
-		.addFunction ("origin", &Temporal::timecnt_t::origin)
 		.addFunction ("set_position", &Temporal::timecnt_t::set_position)
 		.addFunction ("is_positive", &Temporal::timecnt_t::is_positive)
 		.addFunction ("is_negative", &Temporal::timecnt_t::is_negative)
