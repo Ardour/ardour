@@ -333,7 +333,6 @@ class LIBTEMPORAL_API timecnt_t {
 	int64_t magnitude() const { return _distance.val(); }
 	int62_t const & distance() const { return _distance; }
 	timepos_t const & position() const { return _position; }
-	timepos_t const & origin() const { return _position; } /* alias */
 	timepos_t end (TimeDomain) const;
 	timepos_t end () const { return end (time_domain()); }
 
