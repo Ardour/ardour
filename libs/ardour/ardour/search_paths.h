@@ -130,6 +130,11 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API PBD::Searchpath lua_search_path ();
 
+	/** retun a Searchpath for midi *.map files used by the
+	 * generic ctrl surface
+	 */
+	LIBARDOUR_API PBD::Searchpath system_midi_map_search_path ();
+	LIBARDOUR_API std::string user_midi_map_directory ();
 
 } // namespace ARDOUR
 

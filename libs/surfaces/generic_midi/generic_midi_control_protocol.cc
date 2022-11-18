@@ -52,7 +52,7 @@
 #include "ardour/auditioner.h"
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
-#include "ardour/filesystem_paths.h"
+#include "ardour/search_paths.h"
 #include "ardour/session.h"
 #include "ardour/midi_ui.h"
 #include "ardour/plugin_insert.h"

@@ -192,6 +192,29 @@ lua_search_path ()
 	return spath;
 }
 
+static const char * const midimap_env_variable_name = "ARDOUR_MIDIMAPS_PATH";
+
+Searchpath
+system_midi_map_search_path ()
+{
+	bool midimap_path_defined = false;
+	std::string spath_env (Glib::getenv (midimap_env_variable_name, midimap_path_defined));
+
+	if (midimap_path_defined) {
+		return spath_env;
+	}
+
+	Searchpath spath (ardour_data_search_path());
+	spath.add_subdirectory_to_paths (midi_map_dir_name);
+	return spath;
+}
+
+std::string
+user_midi_map_directory ()
+{
+	return Glib::build_filename (user_config_directory(), midi_map_dir_name);
+}
+
 #ifdef PLATFORM_WINDOWS
 
 const char*
