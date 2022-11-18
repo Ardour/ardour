@@ -18,7 +18,7 @@ def build(bld):
             midi_surface.cc
             midi_byte_array.cc
     '''
-    obj.export_includes = ['.']
+    obj.export_includes = ['.', './midi_surface']
     obj.defines      = [ 'PACKAGE="ardour_midisurface"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]
@@ -27,7 +27,7 @@ def build(bld):
     obj.target       = 'ardour_midisurface'
     obj.uselib       = 'GLIB GLIBMM SIGCPP XML OSX'
     obj.use          = 'libardour libardour_cp libpbd libevoral libmidipp libtemporal'
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+    obj.install_path = bld.env['LIBDIR']
 
 def shutdown():
     autowaf.shutdown()

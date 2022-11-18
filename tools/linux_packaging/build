@@ -353,7 +353,7 @@ cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Libraries
 
 # Control Surfaces
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.so* $Surfaces
-cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp.so* $Libraries
+cp $BUILD_ROOT/libs/ctrl-interface/*/libardour_*.so* $Libraries
 
 # MidiMaps
 # got to be careful with names here

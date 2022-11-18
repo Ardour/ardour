@@ -314,6 +314,7 @@ children = [
         'libs/pbd',
         'libs/midi++2',
         'libs/evoral',
+        'libs/ctrl-interface',
         'libs/surfaces',
         'libs/panners',
         'libs/backends',
