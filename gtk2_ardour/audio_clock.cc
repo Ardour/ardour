@@ -83,7 +83,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, _follows_playhead (follows_playhead)
 	, _accept_on_focus_out (accept_on_focus_out)
 	, _off (false)
-	, _edit_by_click_field (false)
 	, _negative_allowed (false)
 	, edit_is_negative (false)
 	, _limit_pos (timepos_t::max (Temporal::AudioTime))
@@ -1727,36 +1726,7 @@ AudioClock::on_button_release_event (GdkEventButton *ev)
 				return true;
 			} else {
 				if (ev->button == 1) {
-
-					if (_edit_by_click_field) {
-
-						int xcenter = (get_width() - layout_width) /2;
-						int index = 0;
-						int trailing;
-						int y = ev->y - ((get_height() - layout_height)/2);
-						int x = ev->x - xcenter;
-						Field f;
-
-						if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
-							return true;
-						}
-
-						f = index_to_field (index);
-
-						switch (f) {
-						case Timecode_frames:
-						case MS_Milliseconds:
-						case Ticks:
-						case SS_Deciseconds:
-							f = Field (0);
-							break;
-						default:
-							break;
-						}
-						start_edit (f);
-					} else {
-						start_edit ();
-					}
+					start_edit ();
 				}
 			}
 		}

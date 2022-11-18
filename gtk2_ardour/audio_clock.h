@@ -132,7 +132,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool             _follows_playhead;
 	bool             _accept_on_focus_out;
 	bool             _off;
-	bool             _edit_by_click_field;
 	bool             _negative_allowed;
 	bool             edit_is_negative;
 
