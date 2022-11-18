@@ -97,16 +97,6 @@ MainClock::build_ops_menu ()
 	ops_items.push_back (MenuElem (_("Insert Time Signature Change"), sigc::mem_fun(*this, &MainClock::insert_new_meter)));
 }
 
-timepos_t
-MainClock::absolute_time () const
-{
-	if (get_is_duration ()) {
-		return last_when ();
-	} else {
-		return last_when ();
-	}
-}
-
 void
 MainClock::set (timepos_t const & when, bool force)
 {
@@ -154,24 +144,24 @@ void
 MainClock::edit_current_tempo ()
 {
 	if (!PublicEditor::instance().session()) return;
-	PublicEditor::instance().edit_tempo_section (Temporal::TempoMap::use()->metric_at (absolute_time()).get_editable_tempo());
+	PublicEditor::instance().edit_tempo_section (Temporal::TempoMap::use()->metric_at (last_when()).get_editable_tempo());
 }
 
 void
 MainClock::edit_current_meter ()
 {
 	if (!PublicEditor::instance().session()) return;
-	PublicEditor::instance().edit_meter_section (Temporal::TempoMap::use()->metric_at (absolute_time()).get_editable_meter());
+	PublicEditor::instance().edit_meter_section (Temporal::TempoMap::use()->metric_at (last_when()).get_editable_meter());
 }
 
 void
 MainClock::insert_new_tempo ()
 {
-	PublicEditor::instance().mouse_add_new_tempo_event (absolute_time ());
+	PublicEditor::instance().mouse_add_new_tempo_event (last_when ());
 }
 
 void
 MainClock::insert_new_meter ()
 {
-	PublicEditor::instance().mouse_add_new_meter_event (absolute_time ());
+	PublicEditor::instance().mouse_add_new_meter_event (last_when ());
 }
