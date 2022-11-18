@@ -89,6 +89,9 @@ namespace ARDOUR {
 	LIBARDOUR_API std::string windows_package_directory_path ();
 #endif
 
+	LIBARDOUR_API PBD::Searchpath system_midi_map_search_path ();
+	LIBARDOUR_API std::string user_midi_map_directory ();
+
 	namespace ArdourVideoToolPaths {
 
 		LIBARDOUR_API bool harvid_exe (std::string &harvid_exe);

@@ -31,6 +31,7 @@
 #include <glibmm/fileutils.h>
 
 #include "ardour/directory_names.h"
+#include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 
 #include "pbd/i18n.h"
@@ -312,5 +313,27 @@ been_here_before_path (int version)
 	return Glib::build_filename (user_config_directory (version), string (".a") + to_string (version));
 }
 
+static const char * const midimap_env_variable_name = "ARDOUR_MIDIMAPS_PATH";
+
+Searchpath
+system_midi_map_search_path ()
+{
+	bool midimap_path_defined = false;
+	std::string spath_env (Glib::getenv (midimap_env_variable_name, midimap_path_defined));
+
+	if (midimap_path_defined) {
+		return spath_env;
+	}
+
+	Searchpath spath (ardour_data_search_path());
+	spath.add_subdirectory_to_paths (midi_map_dir_name);
+	return spath;
+}
+
+std::string
+user_midi_map_directory ()
+{
+	return Glib::build_filename (user_config_directory(), midi_map_dir_name);
+}
 
 } // namespace ARDOUR

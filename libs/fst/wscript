@@ -40,7 +40,7 @@ def build(bld):
             'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
             'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
             ]
-        obj.use = [ 'libpbd' ]
+        obj.use = [ 'libpbd', 'libardour' ]
         obj.uselib = 'GIOMM DL UUID ARCHIVE CURL XML'
 
         if sys.platform == 'darwin':
@@ -63,10 +63,10 @@ def build(bld):
             bld (features = 'c', name='vstwin', source='vstwin.c', uselib = 'GIOMM', includes  = [ '../pbd/', '../ardour/', '.' ])
             obj.uselib = ['GIOMM', 'DL', 'GDI32', 'ARCHIVE', 'CURL', 'XML']
             obj.linkflags = ['-mwindows']
-            obj.use = [ 'libpbd', 'libtemporal', 'libevoral', 'vstwin' ]
+            obj.use = [ 'libpbd', 'libtemporal', 'libevoral', 'libardour', 'vstwin' ]
         else:
             obj.uselib = ['GIOMM', 'DL', 'OSX', 'ARCHIVE', 'CURL', 'XML' ]
-            obj.use = [ 'libpbd', 'libtemporal', 'libevoral' ]
+            obj.use = [ 'libpbd', 'libtemporal', 'libevoral', 'libardour' ]
 
         obj.includes  = [ '../pbd/', '../ardour/', '.' ]
         obj.defines = [
