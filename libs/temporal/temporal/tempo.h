@@ -239,9 +239,6 @@ class LIBTEMPORAL_API Tempo {
 	superclock_t end_superclocks_per_quarter_note () const {
 		return end_superclocks_per_note_type (4);
 	}
-	superclock_t superclocks_per_ppqn () const {
-		return superclocks_per_quarter_note() / ticks_per_beat;
-	}
 
 	static void superbeats_to_beats_ticks (int64_t sb, int32_t& b, int32_t& t) {
 		b = sb / big_numerator;
@@ -489,7 +486,6 @@ class LIBTEMPORAL_API TempoMetric
 	superclock_t end_superclocks_per_note_type () const {return _tempo->end_superclocks_per_note_type (); }
 	superclock_t superclocks_per_note_type (int note_type) const {return _tempo->superclocks_per_note_type (note_type); }
 	superclock_t superclocks_per_quarter_note () const {return _tempo->superclocks_per_quarter_note (); }
-	superclock_t superclocks_per_ppqn () const {return _tempo->superclocks_per_ppqn (); }
 
 	int note_type () const { return _tempo->note_type(); }
 	int divisions_per_bar () const { return _meter->divisions_per_bar(); }
