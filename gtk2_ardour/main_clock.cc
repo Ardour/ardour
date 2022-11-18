@@ -120,11 +120,7 @@ MainClock::change_display_delta_mode (ClockDeltaMode m)
 	if (_suspend_delta_mode_signal) {
 		return;
 	}
-	if (_primary) {
-		UIConfiguration::instance().set_primary_clock_delta_mode (m);
-	} else {
-		UIConfiguration::instance().set_secondary_clock_delta_mode (m);
-	}
+	change_display_delta_mode_signal (m);
 }
 
 void

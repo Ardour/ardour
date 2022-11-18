@@ -32,6 +32,7 @@ public:
 	void set_session (ARDOUR::Session *s);
 	void set_display_delta_mode (ARDOUR::ClockDeltaMode m);
 	void set (Temporal::timepos_t const &, bool force = false);
+	sigc::signal<bool, ARDOUR::ClockDeltaMode> change_display_delta_mode_signal;
 
 private:
 	void build_ops_menu ();
