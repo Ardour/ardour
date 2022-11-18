@@ -37,11 +37,9 @@ using namespace ARDOUR;
 
 MainClock::MainClock (
 	const std::string& clock_name,
-	const std::string& widget_name,
-	bool primary
+	const std::string& widget_name
 	)
 	: AudioClock (clock_name, false, widget_name, true, true, false, true)
-	, _primary (primary)
 	, _suspend_delta_mode_signal (false)
 	, _widget_name(widget_name)
 {

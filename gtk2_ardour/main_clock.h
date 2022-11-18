@@ -28,7 +28,7 @@
 class MainClock : public AudioClock
 {
 public:
-	MainClock (const std::string& clock_name, const std::string& widget_name, bool primary);
+	MainClock (const std::string& clock_name, const std::string& widget_name);
 	void set_session (ARDOUR::Session *s);
 	void set_display_delta_mode (ARDOUR::ClockDeltaMode m);
 	void set (Temporal::timepos_t const &, bool force = false);
@@ -41,7 +41,6 @@ private:
 	void edit_current_meter ();
 	void insert_new_tempo ();
 	void insert_new_meter ();
-	bool _primary;
 	bool _suspend_delta_mode_signal;
 	std::string _widget_name;
 	ARDOUR::ClockDeltaMode _delta_mode;
