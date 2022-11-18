@@ -403,58 +403,9 @@ TriggerUI::context_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("MIDI Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_learn)));
 	items.push_back (MenuElem (_("MIDI un-Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_unlearn)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Save all MIDI Learn settings"), sigc::mem_fun (*this, &TriggerUI::save_midi_learn)));
 
 
 	_context_menu->popup (3, gtk_get_current_event_time ());
-}
-
-void
-TriggerUI::save_midi_learn ()
-{
-	Gtk::FileChooserDialog d (_("Choose filename"), Gtk::FILE_CHOOSER_ACTION_SAVE);
-
-	std::string midi_maps = Glib::build_filename (user_config_directory(), "midi_maps");
-
-	if (!Glib::file_test (midi_maps, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
-		::g_mkdir (midi_maps.c_str(), 0755);
-	}
-
-	d.set_current_folder (midi_maps);
-	d.present ();
-
-	d.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	d.add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
-
-	while (true) {
-		int result = d.run ();
-
-		if (result == Gtk::RESPONSE_OK) {
-
-			std::string filename = d.get_filename ();
-
-			if (filename.find (".midi_map") == std::string::npos) {
-				filename += X_(".midi_map");
-			}
-
-			if (Glib::file_test (filename, Glib::FILE_TEST_EXISTS)) {
-				Gtk::MessageDialog msg (string_compose (_("%1 already exists.\n"
-				                                          "Please select a different filename"), filename));
-				msg.run ();
-				msg.set_keep_above (true);
-				continue;
-			}
-
-			TriggerBox::dump_custom_midi_bindings (filename);
-			break;
-
-		} else {
-
-			break;
-
-		}
-	}
 }
 
 void
