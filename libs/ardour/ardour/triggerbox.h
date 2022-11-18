@@ -815,11 +815,13 @@ class LIBARDOUR_API TriggerBox : public Processor
 	/* This is null for TriggerBoxen constructed with DataType::AUDIO */
 	MidiStateTracker* tracker;
 
-	static bool lookup_custom_midi_binding (int id, int& x, int& y);
-	static void add_custom_midi_binding (int id, int x, int y);
+	static bool lookup_custom_midi_binding (std::vector<uint8_t> const &, int& x, int& y);
+	static void add_custom_midi_binding (std::vector<uint8_t> const &, int x, int y);
 	static void remove_custom_midi_binding (int x, int y);
 	static void clear_custom_midi_bindings ();
-	static int  dump_custom_midi_bindings (std::string const & path);
+	static int  save_custom_midi_bindings (std::string const & path);
+	static int  load_custom_midi_bindings (XMLNode const &);
+	static XMLNode* get_custom_midi_binding_state ();
 
 	void begin_midi_learn (int index);
 	void midi_unlearn (int index);
@@ -936,7 +938,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	PBD::ScopedConnection stop_all_connection;
 
-	typedef  std::map<int,std::pair<int,int> > CustomMidiMap;
+	typedef  std::map<std::vector<uint8_t>,std::pair<int,int> > CustomMidiMap;
 	static CustomMidiMap _custom_midi_map;
 
 	static void midi_learn_input_handler (MIDI::Parser&, MIDI::byte*, size_t, samplecnt_t);
