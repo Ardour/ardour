@@ -48,7 +48,7 @@ namespace ARDOUR {
 
 class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 {
-	public:
+public:
 	enum Mode {
 		Timecode,
 		BBT,
@@ -80,7 +80,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_from_playhead ();
 	void locate ();
 	void set_mode (Mode);
-	void set_bbt_reference (Temporal::timepos_t const &);
 
 	void copy_text_to_clipboard () const;
 
@@ -106,11 +105,10 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	sigc::signal<void> ValueChanged;
 	sigc::signal<void> mode_changed;
-	sigc::signal<void> ChangeAborted;
 
 	static std::vector<AudioClock*> clocks;
 
-	protected:
+protected:
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	bool get_is_duration () const { return is_duration; }
 
@@ -123,7 +121,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	ArdourWidgets::ArdourButton _left_btn;
 	ArdourWidgets::ArdourButton _right_btn;
 
-	private:
+private:
 	Mode             _mode;
 	std::string      _name;
 	bool              is_duration;
@@ -136,7 +134,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool             edit_is_negative;
 
 	Temporal::timepos_t _limit_pos;
-	Temporal::timepos_t duration_position;
 
 	Glib::RefPtr<Pango::Layout> _layout;
 
@@ -155,10 +152,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	int layout_width;
 	double corner_radius;
 	uint32_t font_size;
-
-	static const double info_font_scale_factor;
-	static const double separator_height;
-	static const double x_leading_padding;
 
 	enum Field {
 		Timecode_Hours = 1,
@@ -193,9 +186,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	std::string input_string;
 
 	Temporal::timecnt_t last_time;
-
-	bool last_pdelta;
-	bool last_sdelta;
 
 	bool dragging;
 	double drag_start_y;
@@ -244,7 +234,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void start_edit (Field f = Field (0));
 	void end_edit (bool);
 	void end_edit_relative (bool);
-	void edit_next_field ();
 
 	Temporal::timecnt_t parse_as_distance (const std::string&);
 	Temporal::timecnt_t parse_as_timecode_distance (const std::string&);

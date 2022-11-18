@@ -97,8 +97,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, corner_radius (4)
 	, font_size (10240)
 	, editing (false)
-	, last_pdelta (0)
-	, last_sdelta (0)
 	, dragging (false)
 	, drag_field (Field (0))
 	, xscale (1.0)
@@ -1474,7 +1472,6 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 
 	case GDK_Escape:
 		end_edit (false);
-		ChangeAborted();  /*  EMIT SIGNAL  */
 		return true;
 
 	case GDK_Delete:
