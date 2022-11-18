@@ -40,8 +40,16 @@ class timecnt_t;
 
 void dump_stats (std::ostream&);
 
-/* 62 bit positional time value. Theoretically signed, but the intent is for to
- * always be positive. If the flag bit is set (i.e. ::flagged() is true), the
+/* A timepos_t designates an absolute position on the global timeline. It is
+ * measured since time zero, and it can thus only be positive. It is in one of
+ * two TimeDomains: AudioTime (wall time measured using superclock,
+ * proportional to sample count) or BeatTime (counting musical ticks, which are
+ * subdivided quarternotes or Beats). The ratio between these two is the tempo,
+ * which might change over time. Conversion between these time domains is thus
+ * non-trivial and will use the global TempoMap.
+ *
+ * Implemented using a 62 bit positional time value, a flag bit, and a sign bit.
+ * It is is intended to always be positive. If the flag bit is set (i.e. ::flagged() is true), the
  * numerical value counts musical ticks; otherwise it counts superclocks.
  */
 
@@ -57,7 +65,7 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 
 	explicit timepos_t (timecnt_t const &); /* will throw() if val is negative */
 
-	/* superclock_t and samplepos_t are the same underlying primitive type,
+	/* ticks are int64_t, and superclock_t and samplepos_t are both typedefs of int64_t,
 	 * which means we cannot use polymorphism to differentiate them. But it
 	 * turns out that we more or less never construct timepos_t from an
 	 * integer representing superclocks. So, there's a normal constructor
@@ -272,12 +280,11 @@ class LIBTEMPORAL_API timepos_t : public int62_t  {
 };
 
 
-/**
- * a timecnt_t measures a duration in a specified time domain and starting at a
- * specific position.
- *
- * It can be freely converted between time domains, as well as used as the
- * subject of most arithmetic operations.
+/* A timecnt_t (time count) designates a time distance (duration) with origin
+ * at a given absolute position on the global timeline (a timepos_t). It thus
+ * also designates an absolute end position. Both distance and position can
+ * independently be in one of two TimeDomains: AudioTime or BeatTime.
+ * Conversion between these time domains will use the global TempoMap.
  *
  * An important distinction between timepos_t and timecnt_t can be thought of
  * this way: a timepos_t ALWAYS refers to a position relative to the origin of
