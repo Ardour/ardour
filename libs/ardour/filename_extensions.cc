@@ -36,5 +36,6 @@ const char* const export_preset_suffix = X_(".preset");
 const char* const export_format_suffix = X_(".format");
 const char* const session_archive_suffix = X_(".ardour-session-archive");
 const char* const template_archive_suffix = X_(".ardour-template-archive");
+const char* const midi_map_suffix = X_(".map");
 
 }

@@ -1344,6 +1344,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 		}
 	}
 
+	node->add_child_nocopy (*TriggerBox::get_custom_midi_binding_state());
+
 	child = node->add_child ("Regions");
 
 	if (!save_template) {
@@ -1780,6 +1782,10 @@ Session::set_state (const XMLNode& node, int version)
 		load_options (*child);
 	} else {
 		error << _("Session: XML state has no options section") << endmsg;
+	}
+
+	if ((child = find_named_node (node, X_("TriggerBindings"))) != 0) {
+		TriggerBox::load_custom_midi_bindings (*child);
 	}
 
 	if (version >= 3000) {

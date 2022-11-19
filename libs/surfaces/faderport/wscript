@@ -20,10 +20,9 @@ def build(bld):
             faderport_interface.cc
             operations.cc
     '''
-    obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_faderport"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
-    obj.includes     = [ '.', '..', './faderport']
+    obj.includes     = [ '.', './faderport']
     obj.name         = 'libardour_faderport'
     obj.target       = 'ardour_faderport'
     obj.uselib       = 'GTKMM GTK GDK XML OSX'

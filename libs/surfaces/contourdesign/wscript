@@ -21,7 +21,6 @@ def build(bld):
             button_config_widget.cc
             interface.cc
     '''
-    obj.export_includes = ['./contourdesign']
     obj.defines      = [ 'PACKAGE="ardour_contourdesign"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = ['.', '../libs', '../../widgets']

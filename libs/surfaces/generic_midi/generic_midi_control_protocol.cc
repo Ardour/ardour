@@ -50,7 +50,9 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
-#include "ardour/filesystem_paths.h"
+#include "ardour/directory_names.h"
+#include "ardour/filename_extensions.h"
+#include "ardour/search_paths.h"
 #include "ardour/session.h"
 #include "ardour/midi_ui.h"
 #include "ardour/plugin_insert.h"
@@ -178,32 +180,6 @@ GenericMidiControlProtocol::bundles ()
 	}
 
 	return b;
-}
-
-
-static const char * const midimap_env_variable_name = "ARDOUR_MIDIMAPS_PATH";
-static const char* const midi_map_dir_name = "midi_maps";
-static const char* const midi_map_suffix = ".map";
-
-Searchpath
-system_midi_map_search_path ()
-{
-	bool midimap_path_defined = false;
-	std::string spath_env (Glib::getenv (midimap_env_variable_name, midimap_path_defined));
-
-	if (midimap_path_defined) {
-		return spath_env;
-	}
-
-	Searchpath spath (ardour_data_search_path());
-	spath.add_subdirectory_to_paths(midi_map_dir_name);
-	return spath;
-}
-
-static std::string
-user_midi_map_directory ()
-{
-	return Glib::build_filename (user_config_directory(), midi_map_dir_name);
 }
 
 static bool

@@ -18,7 +18,6 @@ def build(bld):
             wiimote.cc
             interface.cc
     '''
-    obj.export_includes = ['./wiimote']
     obj.defines      = [ 'PACKAGE="ardour_wiimote"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = ['.', '../libs']

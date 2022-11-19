@@ -15,7 +15,6 @@ def configure(conf):
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = [ 'vbap_speakers.cc', 'vbap.cc'  ]
-    obj.export_includes = ['.']
     obj.defines      = ['PACKAGE="libardour_panvbap"']
     obj.defines     += ['ARDOURPANNER_DLL_EXPORTS']
     obj.includes     = ['.']

@@ -32,7 +32,6 @@ def build(bld):
             wheel.cc
             wheel_modes.cc
     '''
-    obj.export_includes = ['./tranzport']
     obj.defines      = [ 'PACKAGE="ardour_tranzport"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = ['.', './tranzport']

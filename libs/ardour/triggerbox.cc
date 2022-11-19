@@ -3867,9 +3867,11 @@ TriggerBox::note_to_trigger (int midi_note, int channel)
 
 	case Custom:
 		if (!_learning) {
-			if (lookup_custom_midi_binding (channel * 16 + midi_note, x, y)) {
+
+			std::vector<uint8_t> msg { uint8_t (MIDI::on | channel), (uint8_t) midi_note };
+
+			if (lookup_custom_midi_binding (msg, x, y)) {
 				if (x == _order) {
-					std::cerr << "yes, slot " << y << std::endl;
 					return y;
 				}
 			}
@@ -3885,9 +3887,9 @@ TriggerBox::note_to_trigger (int midi_note, int channel)
 }
 
 bool
-TriggerBox::lookup_custom_midi_binding (int id, int& x, int& y)
+TriggerBox::lookup_custom_midi_binding (std::vector<uint8_t> const & msg, int& x, int& y)
 {
-	CustomMidiMap::iterator i = _custom_midi_map.find (id);
+	CustomMidiMap::iterator i = _custom_midi_map.find (msg);
 
 	if (i == _custom_midi_map.end()) {
 		return false;
@@ -3907,9 +3909,9 @@ TriggerBox::midi_learn_input_handler (MIDI::Parser&, MIDI::byte* ev, size_t sz, 
 	}
 
 	if ((ev[0] & 0xf0) == MIDI::on) {
-		int channel = ev[0] & 0xf;
-		int note = ev[1] & 0x7f;
-		add_custom_midi_binding (channel * 16 + note, learning_for.first, learning_for.second);
+		/* throw away velocity */
+		std::vector<uint8_t> msg { ev[0], ev[1] };
+		add_custom_midi_binding (msg, learning_for.first, learning_for.second);
 		TriggerMIDILearned (); /* emit signal */
 		return;
 	}
@@ -3970,32 +3972,103 @@ TriggerBox::clear_custom_midi_bindings ()
 }
 
 int
-TriggerBox::dump_custom_midi_bindings (std::string const & path)
+TriggerBox::save_custom_midi_bindings (std::string const & path)
 {
-	std::ofstream f (path.c_str());
+	XMLTree tree;
 
-	if (!f) {
+	tree.set_root (get_custom_midi_binding_state());
+
+	if (!tree.write (path)) {
 		return -1;
 	}
 
-	f << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ArdourMIDIBindings version=\"1.0.0\" name=\"The name of this set of bindings\">\n";
+	return 0;
+}
 
-	for (CustomMidiMap::iterator i = _custom_midi_map.begin(); i != _custom_midi_map.end(); ++i) {
-		string str = string_compose (X_("\t<Binding msg note=\"%1\" channel=\"%2\" action=\"Cues/trigger-slot-%1-%2\"/>\n"),
-		                             i->first % 16, /* note number */
-		                             i->first / 16, /* channel */
-		                             i->second.first,
-		                             i->second.second);
-		f << str;
+XMLNode*
+TriggerBox::get_custom_midi_binding_state ()
+{
+	XMLTree tree;
+	XMLNode* root = new XMLNode (X_("TriggerBindings"));
+
+	for (auto const & b : _custom_midi_map) {
+
+		XMLNode* n = new XMLNode (X_("Binding"));
+		n->set_property (X_("col"), b.second.first);
+		n->set_property (X_("row"), b.second.second);
+
+		std::stringstream str;
+
+		for (auto const & v : b.first) {
+			str << std::hex << "0x" << (int) v << ' ';
+		}
+
+		n->set_property (X_("msg"), str.str());
+
+		root->add_child_nocopy (*n);
 	}
 
-	f << "</ArdourMIDIBindings>\n";
+	return root;
+}
+
+int
+TriggerBox::load_custom_midi_bindings (XMLNode const & root)
+{
+	if (root.name() != X_("TriggerBindings")) {
+		return -1;
+	}
+
+	_custom_midi_map.clear ();
+
+	for (auto const & n : root.children()) {
+		int x;
+		int y;
+
+		if (n->name() != X_("Binding")) {
+			continue;
+		}
+
+		if (!n->get_property (X_("col"), x)) {
+			continue;
+		}
+
+		if (!n->get_property (X_("row"), y)) {
+			continue;
+		}
+
+		std::string str;
+
+		if (!n->get_property (X_("msg"), str)) {
+			continue;
+		}
+
+		std::istringstream istr (str);
+		std::vector<uint8_t> msg;
+
+		do {
+			int x;
+			istr >> std::setbase (16) >> x;
+			if (!istr) {
+				break;
+			}
+			msg.push_back (uint8_t (x));
+
+		} while (true);
+
+		add_custom_midi_binding (msg, x, y);
+	}
+
+	return 0;
 }
 
 void
-TriggerBox::add_custom_midi_binding (int id, int x, int y)
+TriggerBox::add_custom_midi_binding (std::vector<uint8_t> const & msg, int x, int y)
 {
-	_custom_midi_map.insert (std::make_pair (id, std::make_pair (x, y)));
+	std::pair<CustomMidiMap::iterator,bool> res = _custom_midi_map.insert (std::make_pair (msg, std::make_pair (x, y)));
+
+	if (!res.second) {
+		_custom_midi_map[msg] = std::make_pair (x, y);
+	}
 }
 
 void
@@ -4057,12 +4130,9 @@ TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
 				*/
 				t->set_velocity_gain (1.0 - (t->velocity_effect() * (*ev).velocity() / 127.f));
 			}
-			std:: cerr << "bang\n";
 			t->bang ();
 
 		} else if ((*ev).is_note_off()) {
-
-			std:: cerr << "unbang\n";
 			t->unbang ();
 		}
 	}
