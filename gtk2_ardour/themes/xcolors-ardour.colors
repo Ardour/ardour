@@ -384,7 +384,7 @@
     <ColorAlias name="selection clock: edited text" alias="alert:ruddy"/>
     <ColorAlias name="selection clock: text" alias="theme:contrasting clock"/>
     <ColorAlias name="selection rect" alias="neutral:foreground"/>
-    <ColorAlias name="send alert button: fill" alias="neutral:foregorund"/>
+    <ColorAlias name="send alert button: fill" alias="neutral:foreground"/>
     <ColorAlias name="send alert button: fill active" alias="alert:cyan"/>
     <ColorAlias name="send alert button: led active" alias="alert:red"/>
     <ColorAlias name="send bg" alias="neutral:backgroundest"/>
