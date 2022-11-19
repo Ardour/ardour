@@ -18210,7 +18210,7 @@ msgstr "GB"
 
 #: sfdb_ui.cc:1423
 msgid "Failed to retrieve XML for file"
-msgstr ""
+msgstr "Impossible de récupérer le XML du fichier"
 
 #: sfdb_ui.cc:1641 sfdb_ui.cc:1936 sfdb_ui.cc:1970 sfdb_ui.cc:1988
 msgid "one track per file"
@@ -18258,11 +18258,11 @@ msgstr "Copier les fichiers dans la session"
 
 #: sfdb_ui.cc:1859
 msgid "Use MIDI Tempo Map"
-msgstr ""
+msgstr "Utiliser la carte de tempo MIDI"
 
 #: sfdb_ui.cc:1860
 msgid "Import MIDI markers"
-msgstr ""
+msgstr "Importer des marqueurs MIDI"
 
 #: sfdb_ui.cc:1871 sfdb_ui.cc:2045
 msgid "file timestamp"
@@ -18294,7 +18294,7 @@ msgstr "<b>Mappage</b>"
 
 #: sfdb_ui.cc:1899
 msgid "<b>Sort order</b>"
-msgstr ""
+msgstr "Ordre de tri"
 
 #: sfdb_ui.cc:1904
 msgid "<b>Conversion quality</b>"
@@ -18322,23 +18322,23 @@ msgstr "très rapide"
 
 #: sfdb_ui.cc:1954 sfdb_ui.cc:2020
 msgid "by file name"
-msgstr ""
+msgstr "par nom de fichier"
 
 #: sfdb_ui.cc:1955 sfdb_ui.cc:2022
 msgid "by modification time"
-msgstr ""
+msgstr "par date/temps de modification"
 
 #: sfdb_ui.cc:1956 sfdb_ui.cc:2024
 msgid "by selection order"
-msgstr ""
+msgstr "par ordre de sélection"
 
 #: sfdb_ui.cc:2027
 msgid "programming error: unknown import sort string %1"
-msgstr ""
+msgstr "erreur de programmation : chaîne de tri d'importation inconnue %1"
 
 #: shuttle_control.cc:76
 msgid "Speed Display (Context-click for options)"
-msgstr ""
+msgstr "Affichage de la vitesse (clic contextuel pour les options)"
 
 #: shuttle_control.cc:103
 msgid "LogestShuttle|> 888.9%"
@@ -18358,7 +18358,7 @@ msgstr "Variateur de vitesse (clic-droit pour les options)"
 
 #: shuttle_control.cc:192
 msgid "Varispeed: change the default playback and recording speed"
-msgstr ""
+msgstr "Varispeed : modifier la vitesse de lecture et d'enregistrement par défaut"
 
 #: shuttle_control.cc:195
 msgid "VariSpeed|VS"
@@ -18380,35 +18380,35 @@ msgstr ""
 
 #: simple_export_dialog.cc:47
 msgid "Quick Audio Export"
-msgstr ""
+msgstr "Exportation audio rapide"
 
 #: simple_export_dialog.cc:79
 msgid "Open the folder where files are exported"
-msgstr ""
+msgstr "Ouvrir le dossier où les fichiers sont exportés"
 
 #: simple_export_dialog.cc:80
 msgid "Do nothing"
-msgstr ""
+msgstr "Ne rien faire"
 
 #: simple_export_dialog.cc:86
 msgid "_Export"
-msgstr ""
+msgstr "_Exporter"
 
 #: simple_export_dialog.cc:155 simple_export_dialog.cc:221
 msgid "Using time selection"
-msgstr ""
+msgstr "Utiliser la sélection temporelle"
 
 #: simple_export_dialog.cc:159
 msgid "Session start to session end"
-msgstr ""
+msgstr "Du début à la fin de la session"
 
 #: simple_export_dialog.cc:223
 msgid "%1 (selection)"
-msgstr ""
+msgstr "%1 (selection)"
 
 #: simple_export_dialog.cc:231
 msgid "_Abort"
-msgstr ""
+msgstr "_Abandonner"
 
 #: simple_export_dialog.cc:258
 msgid ""
