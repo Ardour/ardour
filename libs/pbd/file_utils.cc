@@ -521,7 +521,7 @@ remove_directory_internal (const string& dir, size_t* size, vector<string>* path
 	for (vector<string>::const_iterator i = tmp_paths.begin();
 			i != tmp_paths.end(); ++i) {
 
-		if (g_stat (i->c_str(), &statbuf)) {
+		if (g_stat (i->c_str(), &statbuf) && g_lstat (i->c_str(), &statbuf)) {
 			continue;
 		}
 
