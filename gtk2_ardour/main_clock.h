@@ -34,7 +34,7 @@ public:
 
 private:
 	void build_ops_menu ();
-	void set_display_delta_mode (ARDOUR::ClockDeltaMode);
+	void change_display_delta_mode (ARDOUR::ClockDeltaMode);
 	void edit_current_tempo ();
 	void edit_current_meter ();
 	void insert_new_tempo ();

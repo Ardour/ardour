@@ -73,17 +73,17 @@ MainClock::build_ops_menu ()
 		mode = UIConfiguration::instance().get_secondary_clock_delta_mode ();
 	}
 
-	ops_items.push_back (RadioMenuElem (group, _("Display absolute time"), sigc::bind (sigc::mem_fun (*this, &MainClock::set_display_delta_mode), NoDelta)));
+	ops_items.push_back (RadioMenuElem (group, _("Display absolute time"), sigc::bind (sigc::mem_fun (*this, &MainClock::change_display_delta_mode), NoDelta)));
 	if (mode == NoDelta) {
 		RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&ops_items.back ());
 		i->set_active (true);
 	}
-	ops_items.push_back (RadioMenuElem (group, _("Display delta to edit cursor"), sigc::bind (sigc::mem_fun (*this, &MainClock::set_display_delta_mode), DeltaEditPoint)));
+	ops_items.push_back (RadioMenuElem (group, _("Display delta to edit cursor"), sigc::bind (sigc::mem_fun (*this, &MainClock::change_display_delta_mode), DeltaEditPoint)));
 	if (mode == DeltaEditPoint) {
 		RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&ops_items.back ());
 		i->set_active (true);
 	}
-	ops_items.push_back (RadioMenuElem (group, _("Display delta to origin marker"), sigc::bind (sigc::mem_fun (*this, &MainClock::set_display_delta_mode), DeltaOriginMarker)));
+	ops_items.push_back (RadioMenuElem (group, _("Display delta to origin marker"), sigc::bind (sigc::mem_fun (*this, &MainClock::change_display_delta_mode), DeltaOriginMarker)));
 	if (mode == DeltaOriginMarker) {
 		RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&ops_items.back ());
 		i->set_active (true);
@@ -128,7 +128,7 @@ MainClock::set (timepos_t const & when, bool force)
 }
 
 void
-MainClock::set_display_delta_mode (ClockDeltaMode m)
+MainClock::change_display_delta_mode (ClockDeltaMode m)
 {
 	if (_suspend_delta_mode_signal) {
 		return;
