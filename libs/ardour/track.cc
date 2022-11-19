@@ -91,7 +91,6 @@ Track::init ()
 	if (!is_auditioner()) {
 		_triggerbox = boost::shared_ptr<TriggerBox> (new TriggerBox (_session, data_type ()));
 		_triggerbox->set_owner (this);
-		_triggerbox->add_midi_sidechain ();
 	}
 
 	if (Route::init ()) {

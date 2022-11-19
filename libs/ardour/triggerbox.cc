@@ -3045,9 +3045,12 @@ bool TriggerBox::roll_requested = false;
 bool TriggerBox::_learning = false;
 TriggerBox::CustomMidiMap TriggerBox::_custom_midi_map;
 std::pair<int,int> TriggerBox::learning_for;
-PBD::ScopedConnectionList TriggerBox::midi_learn_connections;
-MIDI::Parser* TriggerBox::learning_parser = 0;
 PBD::Signal0<void> TriggerBox::TriggerMIDILearned;
+
+MIDI::Parser* TriggerBox::input_parser (new MIDI::Parser); /* leak */
+PBD::ScopedConnectionList TriggerBox::static_connections;
+PBD::ScopedConnection TriggerBox::midi_input_connection;
+boost::shared_ptr<MidiPort> TriggerBox::current_input;
 
 typedef std::map <boost::shared_ptr<Region>, boost::shared_ptr<Trigger::UIState>> RegionStateMap;
 RegionStateMap enqueued_state_map;
@@ -3058,6 +3061,15 @@ TriggerBox::init ()
 	worker = new TriggerBoxThread;
 	TriggerBoxThread::init_request_pool ();
 	init_pool ();
+}
+
+void
+TriggerBox::static_init (Session & s)
+{
+	Config->ParameterChanged.connect_same_thread (static_connections, boost::bind (&TriggerBox::static_parameter_changed, _1));
+	input_parser->any.connect_same_thread (midi_input_connection, boost::bind (&TriggerBox::midi_input_handler, _1, _2, _3, _4));
+	boost::dynamic_pointer_cast<MidiPort> (s.trigger_input_port())->set_trace (input_parser);
+	s.trigger_input_port()->connect (Config->get_default_trigger_input_port());
 }
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
@@ -3108,19 +3120,34 @@ TriggerBox::set_cue_recording (bool yn)
 }
 
 void
-TriggerBox::parameter_changed (std::string const & param)
+TriggerBox::input_port_check ()
+{
+	if (Config->get_default_trigger_input_port().empty()) {
+		return;
+	}
+
+	Session* session = AudioEngine::instance()->session();
+
+	if (!session) {
+		return;
+	}
+
+	std::cerr << "Reconnect to "  << Config->get_default_trigger_input_port() << std::endl;
+	session->trigger_input_port()->connect (Config->get_default_trigger_input_port());
+}
+
+void
+TriggerBox::static_parameter_changed (std::string const & param)
 {
 	if (param == X_("default-trigger-input-port")) {
+		input_port_check ();
+	}
+}
 
-		if (!Config->get_default_trigger_input_port().empty()) {
-			if (!_sidechain) {
-				add_midi_sidechain ();
-			} else {
-				reconnect_to_default ();
-			}
-		}
-
-	} else if (param == "cue-behavior") {
+void
+TriggerBox::parameter_changed (std::string const & param)
+{
+	if (param == "cue-behavior") {
 		const bool follow = (_session.config.get_cue_behavior() & FollowCues);
 		if (!follow) {
 			cancel_locate_armed ();
@@ -3751,36 +3778,6 @@ TriggerBox::trigger (Triggers::size_type n)
 	return all_triggers[n];
 }
 
-void
-TriggerBox::add_midi_sidechain ()
-{
-	assert (owner());
-	if (!_sidechain) {
-		_sidechain.reset (new SideChain (_session, string_compose ("%1/%2", owner()->name(), name ())));
-		_sidechain->activate ();
-		_sidechain->input()->add_port ("", owner(), DataType::MIDI); // add a port, don't connect.
-		boost::shared_ptr<Port> p = _sidechain->input()->nth (0);
-
-		if (p) {
-			if (!Config->get_default_trigger_input_port().empty ()) {
-				p->connect (Config->get_default_trigger_input_port());
-			}
-		} else {
-			error << _("Could not create port for trigger side-chain") << endmsg;
-		}
-	}
-}
-
-void
-TriggerBox::update_sidechain_name ()
-{
-	if (!_sidechain) {
-		return;
-	}
-	assert (owner());
-	_sidechain->set_name (string_compose ("%1/%2", owner()->name(), name ()));
-}
-
 bool
 TriggerBox::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
@@ -3800,10 +3797,6 @@ TriggerBox::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 bool
 TriggerBox::configure_io (ChanCount in, ChanCount out)
 {
-	if (_sidechain) {
-		_sidechain->configure_io (in, out + ChanCount (DataType::MIDI, 1));
-	}
-
 	bool ret = Processor::configure_io (in, out);
 
 	if (ret) {
@@ -3833,59 +3826,6 @@ TriggerBox::set_first_midi_note (int n)
 	_first_midi_note = n;
 }
 
-int
-TriggerBox::note_to_trigger (int midi_note, int channel)
-{
-	const int column = _order;
-	int first_note;
-	int top;
-	int x;
-	int y;
-
-	switch (_midi_map_mode) {
-
-	case AbletonPush:
-		/* the top row of pads generate MIDI note 92, 93, 94 and so on.
-		   Each lower row generates notes 8 below the one above it.
-		*/
-		top = 92 + column;
-		for (int row = 0; row < 8; ++row) {
-			if (midi_note == top - (row * 8)) {
-				return row;
-			}
-		}
-		return -1;
-		break;
-
-	case SequentialNote:
-		first_note = _first_midi_note + (column * all_triggers.size());
-		return midi_note - first_note; /* direct access to row */
-
-	case ByMidiChannel:
-		first_note = 3;
-		break;
-
-	case Custom:
-		if (!_learning) {
-
-			std::vector<uint8_t> msg { uint8_t (MIDI::on | channel), (uint8_t) midi_note };
-
-			if (lookup_custom_midi_binding (msg, x, y)) {
-				if (x == _order) {
-					return y;
-				}
-			}
-		}
-		return -1;
-
-	default:
-		break;
-
-	}
-
-	return midi_note;
-}
-
 bool
 TriggerBox::lookup_custom_midi_binding (std::vector<uint8_t> const & msg, int& x, int& y)
 {
@@ -3902,18 +3842,32 @@ TriggerBox::lookup_custom_midi_binding (std::vector<uint8_t> const & msg, int& x
 }
 
 void
-TriggerBox::midi_learn_input_handler (MIDI::Parser&, MIDI::byte* ev, size_t sz, samplecnt_t)
+TriggerBox::midi_input_handler (MIDI::Parser&, MIDI::byte* buf, size_t sz, samplecnt_t)
 {
-	if (!_learning) {
+	if (_learning) {
+
+		if ((buf[0] & 0xf0) == MIDI::on) {
+			/* throw away velocity */
+			std::vector<uint8_t> msg { buf[0], buf[1] };
+			add_custom_midi_binding (msg, learning_for.first, learning_for.second);
+			_learning = false;
+			TriggerMIDILearned (); /* EMIT SIGNAL */
+		}
+
 		return;
 	}
 
-	if ((ev[0] & 0xf0) == MIDI::on) {
-		/* throw away velocity */
-		std::vector<uint8_t> msg { ev[0], ev[1] };
-		add_custom_midi_binding (msg, learning_for.first, learning_for.second);
-		TriggerMIDILearned (); /* emit signal */
-		return;
+	Evoral::Event<samplepos_t> ev (Evoral::MIDI_EVENT, 0, sz, buf);
+
+	if (ev.is_note_on()) {
+
+		std::vector<uint8_t> msg { uint8_t (MIDI::on | ev.channel()), (uint8_t) ev.note() };
+		int x;
+		int y;
+
+		if (lookup_custom_midi_binding (msg, x, y)) {
+			AudioEngine::instance()->session()->bang_trigger_at (x, y);
+		}
 	}
 
 	return;
@@ -3922,41 +3876,15 @@ TriggerBox::midi_learn_input_handler (MIDI::Parser&, MIDI::byte* ev, size_t sz, 
 void
 TriggerBox::begin_midi_learn (int index)
 {
-	if (!_sidechain) {
-		return;
-	}
-
 	learning_for.first = order(); /* x */
 	learning_for.second = index;  /* y */
 	_learning = true;
-
-
-	boost::shared_ptr<MidiPort> mp = boost::dynamic_pointer_cast<MidiPort> (_sidechain->input()->nth(0));
-	if (!mp) {
-		return;
-	}
-
-	if (!learning_parser) {
-		learning_parser = new MIDI::Parser;
-	}
-
-	TriggerMIDILearned.connect_same_thread (midi_learn_connections, boost::bind (&TriggerBox::stop_midi_learn, this));
-	learning_parser->any.connect_same_thread (midi_learn_connections, boost::bind (&TriggerBox::midi_learn_input_handler, _1, _2, _3, _4));
-	mp->set_trace (learning_parser);
 }
 
 void
 TriggerBox::stop_midi_learn ()
 {
-	if (_learning) {
-		_learning = false;
-		midi_learn_connections.drop_connections ();
-		boost::shared_ptr<MidiPort> mp = boost::dynamic_pointer_cast<MidiPort> (_sidechain->input()->nth(0));
-
-		if (mp) {
-			mp->set_trace (0);
-		}
-	}
+	_learning = false;
 }
 
 void
@@ -4086,59 +4014,6 @@ TriggerBox::remove_custom_midi_binding (int x, int y)
 }
 
 void
-TriggerBox::process_midi_trigger_requests (BufferSet& bufs)
-{
-	/* check MIDI port input buffer for triggers. This is always the last
-	 * MIDI buffer of the BufferSet
-	 */
-
-	MidiBuffer& mb (bufs.get_midi (bufs.count().n_midi() - 1 /* due to zero-based index*/));
-
-	for (MidiBuffer::iterator ev = mb.begin(); ev != mb.end(); ++ev) {
-
-		if (!(*ev).is_note()) {
-			continue;
-		}
-
-		int trigger_number = note_to_trigger ((*ev).note(), (*ev).channel());
-
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("note %1 received on %2, translated to trigger num %3\n", (int) (*ev).note(), (int) (*ev).channel(), trigger_number));
-
-		if (trigger_number < 0) {
-			/* not for us */
-			continue;
-		}
-
-		if (trigger_number >= (int) all_triggers.size()) {
-			continue;
-		}
-
-		TriggerPtr t = all_triggers[trigger_number];
-
-		if (!t) {
-			continue;
-		}
-
-		if ((*ev).is_note_on()) {
-
-			if (t->velocity_effect() != 0.0) {
-				/* if MVE is zero, MIDI velocity has no
-				   impact on gain. If it is small, it
-				   has a small effect on gain. As it
-				   approaches 1.0, it has full control
-				   over the trigger gain.
-				*/
-				t->set_velocity_gain (1.0 - (t->velocity_effect() * (*ev).velocity() / 127.f));
-			}
-			t->bang ();
-
-		} else if ((*ev).is_note_off()) {
-			t->unbang ();
-		}
-	}
-}
-
-void
 TriggerBox::maybe_request_roll (Session& s)
 {
 	if (!roll_requested) {
@@ -4232,18 +4107,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 #endif
 
 	bool allstop = _requests.stop_all.exchange (false);
-
-
-	/* STEP THREE: triggers in audio tracks need a MIDI sidechain to be
-	 * able to receive inbound MIDI for triggering etc. This needs to run
-	 * before anything else, since we may need data just received to launch
-	 * a trigger (or stop it)
-	 */
-
-	if (_sidechain) {
-		_sidechain->run (bufs, start_sample, end_sample, speed, nframes, true);
-	}
-
 	bool    was_recorded;
 	int32_t cue_bang = _session.first_cue_within (start_sample, end_sample, was_recorded);
 
@@ -4292,11 +4155,6 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	 */
 
 	process_requests (bufs);
-
-	/* STEP FIVE: handle any incoming MIDI requests
-	 */
-
-	process_midi_trigger_requests (bufs);
 
 	/* STEP SEVEN: let each slot process any individual state requests
 	 */
@@ -4754,10 +4612,6 @@ TriggerBox::get_state () const
 
 	node.add_child_nocopy (*trigger_child);
 
-	if (_sidechain) {
-		node.add_child_nocopy (_sidechain->get_state ());
-	}
-
 	return node;
 }
 
@@ -4803,35 +4657,12 @@ TriggerBox::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	/* sidechain is a Processor (IO) */
-	XMLNode* scnode = node.child (Processor::state_node_name.c_str ());
-	if (scnode) {
-		add_midi_sidechain ();
-		assert (_sidechain);
-		if (!regenerate_xml_or_string_ids ()) {
-			_sidechain->set_state (*scnode, version);
-		} else {
-			update_sidechain_name ();
-		}
-	}
-
 	/* Since _active_slots may have changed, we could consider sending
 	 * EmptyStatusChanged, but for now we don't consider ::set_state() to
 	 * be used except at session load.
 	 */
 
 	return 0;
-}
-
-void
-TriggerBox::reconnect_to_default ()
-{
-	if (!_sidechain) {
-		return;
-	}
-
-	_sidechain->input()->nth (0)->disconnect_all ();
-	_sidechain->input()->nth (0)->connect (Config->get_default_trigger_input_port());
 }
 
 MultiAllocSingleReleasePool* TriggerBox::Request::pool;
