@@ -18,7 +18,7 @@ def build(bld):
             midi_surface.cc
             midi_byte_array.cc
     '''
-    obj.export_includes = ['.', './midi_surface']
+    obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_midisurface"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]

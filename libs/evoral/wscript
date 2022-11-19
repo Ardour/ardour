@@ -67,7 +67,7 @@ def build(bld):
             libsmf/smf_save.c
             libsmf/smf_tempo.c
     '''
-    libsmf.export_includes = ['./libsmf']
+    libsmf.export_includes = ['.']
     libsmf.defines      = ['SMF_VERSION="1.2"', 'LIBSMF_DLL_EXPORTS']
     libsmf.includes     = ['./src']
     libsmf.name         = 'libsmf'
