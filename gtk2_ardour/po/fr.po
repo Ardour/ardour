@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-18 00:03+0100\n"
+"POT-Creation-Date: 2022-11-19 17:12+0100\n"
 "PO-Revision-Date: 2022-11-18 00:48+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
@@ -435,17 +435,10 @@ msgid ""
 "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
 "\tFrédéric Rech <fred_rech@laposte.net>\n"
 "\tJulien Taverna <jujudusud@gmail.com>\n"
+"\tNicolas Faure <sub26nico@laposte.net>\n"
 msgstr ""
-"Français :\n"
-"\tAlain Fréhel <alain.frehel@free.fr>\n"
-"\tChristophe Combelles <ccomb@free.fr>\n"
-"\tMartin Blanchard\n"
-"\tRomain Arnaud <roming22@gmail.com>\n"
-"\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
-"\tFrédéric Rech <fred_rech@laposte.net>\n"
-"\tJulien Taverna <jujudusud@gmail.com>\n"
 
-#: about.cc:243
+#: about.cc:244
 msgid ""
 "German:\n"
 "\tKarsten Petersen <kapet@kapet.de>\n"
@@ -465,7 +458,7 @@ msgstr ""
 "\tRichard Oax <richard@pagliacciempire.de>\n"
 "\tRobin Gloster <robin@loc-com.de>\n"
 
-#: about.cc:250
+#: about.cc:251
 msgid ""
 "Italian:\n"
 "\tVincenzo Reale <smart2128@baslug.org>\n"
@@ -477,7 +470,7 @@ msgstr ""
 "\tFilippo Pappalardo <filippo@email.it>\n"
 "\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"
 
-#: about.cc:253
+#: about.cc:254
 msgid ""
 "Portuguese:\n"
 "\tRui Nuno Capela <rncbc@rncbc.org>\n"
@@ -485,7 +478,7 @@ msgstr ""
 "Portugais :\n"
 "\tRui Nuno Capela <rncbc@rncbc.org>\n"
 
-#: about.cc:254
+#: about.cc:255
 msgid ""
 "Brazilian Portuguese:\n"
 "\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
@@ -495,7 +488,7 @@ msgstr ""
 "\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
 "\tChris Ross <chris@tebibyte.org>\n"
 
-#: about.cc:256
+#: about.cc:257
 msgid ""
 "Spanish:\n"
 "\t Alex Krohn <alexkrohn@fastmail.fm>\n"
@@ -505,7 +498,7 @@ msgstr ""
 "\tAlex Krohn <alexkrohn@fastmail.fm>\n"
 "\tPablo Fernández <pablo.fbus@gmail.com>\n"
 
-#: about.cc:258
+#: about.cc:259
 msgid ""
 "Russian:\n"
 "\t Igor Blinov <pitstop@nm.ru>\n"
@@ -519,7 +512,7 @@ msgstr ""
 "\tPetr Semiletov <tea@list.ru>\n"
 "\tAlexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 
-#: about.cc:262
+#: about.cc:263
 msgid ""
 "Greek:\n"
 "\t Klearchos Gourgourinis <muadib@in.gr>\n"
@@ -527,7 +520,7 @@ msgstr ""
 "Grec :\n"
 "\tKlearchos Gourgourinis <muadib@in.gr>\n"
 
-#: about.cc:263
+#: about.cc:264
 msgid ""
 "Swedish:\n"
 "\t Petter Sundlöf <petter.sundlof@gmail.com>\n"
@@ -535,7 +528,7 @@ msgstr ""
 "Suédois :\n"
 "\tPetter Sundlöf <petter.sundlof@gmail.com>\n"
 
-#: about.cc:264
+#: about.cc:265
 msgid ""
 "Polish:\n"
 "\t Piotr Zaryk <pzaryk@gmail.com>\n"
@@ -543,7 +536,7 @@ msgstr ""
 "Polonais :\n"
 "\tPiotr Zaryk <pzaryk@gmail.com>\n"
 
-#: about.cc:265
+#: about.cc:266
 msgid ""
 "Czech:\n"
 "\t Pavel Fric <pavelfric@seznam.cz>\n"
@@ -551,7 +544,7 @@ msgstr ""
 "Tchèque :\n"
 "\tPavel Fric <pavelfric@seznam.cz>\n"
 
-#: about.cc:266
+#: about.cc:267
 msgid ""
 "Norwegian:\n"
 "\t Eivind Ødegård\n"
@@ -559,7 +552,7 @@ msgstr ""
 "Norvégien :\n"
 "\tEivind Ødegård\n"
 
-#: about.cc:267
+#: about.cc:268
 msgid ""
 "Chinese:\n"
 "\t Rui-huai Zhang <zrhzrh@mail.ustc.edu.cn>\n"
@@ -567,7 +560,7 @@ msgstr ""
 "Chinois :\n"
 "\tRui-huai Zhang <zrhzrh@mail.ustc.edu.cn>\n"
 
-#: about.cc:268
+#: about.cc:269
 msgid ""
 "Japanese:\n"
 "\t Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
@@ -575,7 +568,7 @@ msgstr ""
 "Japanese:\n"
 "\t Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 
-#: about.cc:269
+#: about.cc:270
 msgid ""
 "Korean:\n"
 "\t Junghee Lee <daemul72@gmail.com>\n"
@@ -583,62 +576,62 @@ msgstr ""
 "Coréen :\n"
 "\t Junghee Lee <daemul72@gmail.com>\n"
 
-#: about.cc:590
+#: about.cc:591
 msgid "Intel 64-bit"
 msgstr "Intel 64 bits"
 
-#: about.cc:592
+#: about.cc:593
 msgid "Intel 32-bit"
 msgstr "Intel 32 bits"
 
-#: about.cc:594
+#: about.cc:595
 msgid "PowerPC 64-bit"
 msgstr "Power PC 64 bits"
 
-#: about.cc:596
+#: about.cc:597
 msgid "PowerPC 32-bit"
 msgstr "Power PC 32 bits"
 
-#: about.cc:598
+#: about.cc:599
 msgid "ARM 64-bit (aarch64)"
 msgstr "ARM 64 bits (aarch64)"
 
-#: about.cc:600
+#: about.cc:601
 msgid "ARM 32-bit (armhf)"
 msgstr "ARM 32 bits (armhf)"
 
-#: about.cc:602
+#: about.cc:603
 msgid "ARM 32-bit"
 msgstr "ARM 32 bits"
 
-#: about.cc:604
+#: about.cc:605
 msgid "64-bit"
 msgstr "64 bits"
 
-#: about.cc:606
+#: about.cc:607
 msgid "32-bit"
 msgstr "32 bits"
 
-#: about.cc:614
+#: about.cc:615
 msgid " - debug"
 msgstr " - debug"
 
-#: about.cc:620
+#: about.cc:621
 msgid "Copyright (C) 1999-2022 Paul Davis\n"
 msgstr ""
 
-#: about.cc:624
+#: about.cc:625
 msgid "http://ardour.org/"
 msgstr ""
 
-#: about.cc:625
+#: about.cc:626
 msgid ""
 "%1%2\n"
 "(rev %3)\n"
 "%4%5"
 msgstr ""
 
-#: about.cc:630
+#: about.cc:631
 msgid "Config"
 msgstr "Configuration"
 
@@ -837,7 +830,7 @@ msgstr ""
 
 #: add_route_dialog.cc:169 add_route_dialog.cc:1138
 #: duplicate_routes_dialog.cc:57 duplicate_routes_dialog.cc:224
-#: trigger_ui.cc:792
+#: trigger_ui.cc:743
 msgid "First"
 msgstr "Au début"
 
@@ -851,7 +844,7 @@ msgstr "Avant la sélection"
 msgid "After Selection"
 msgstr "Après la sélection"
 
-#: add_route_dialog.cc:172 duplicate_routes_dialog.cc:60 trigger_ui.cc:794
+#: add_route_dialog.cc:172 duplicate_routes_dialog.cc:60 trigger_ui.cc:745
 msgid "Last"
 msgstr "À la fin"
 
@@ -2075,7 +2068,7 @@ msgid "Save and close"
 msgstr "Sauvegarder et fermer"
 
 #: ardour_ui_dialogs.cc:1120 ardour_ui_ed.cc:443 ardour_ui_ed.cc:454
-#: audio_clock.cc:2209 editor.cc:200 editor.cc:333 editor_actions.cc:707
+#: audio_clock.cc:2199 editor.cc:200 editor.cc:333 editor_actions.cc:707
 #: editor_actions.cc:724 export_timespan_selector.cc:102
 #: session_option_editor.cc:46 session_option_editor.cc:66
 #: session_option_editor.cc:85 session_option_editor.cc:86
@@ -2370,7 +2363,7 @@ msgid "Transport"
 msgstr "Transport"
 
 #: ardour_ui_ed.cc:318 engine_dialog.cc:110 shuttle_control.cc:702
-#: trigger_ui.cc:784
+#: trigger_ui.cc:735
 msgid "Stop"
 msgstr "Arrêter"
 
@@ -2430,7 +2423,7 @@ msgstr "Rembobiner (lent)"
 msgid "Rewind (Fast)"
 msgstr "Rembobiner (rapide)"
 
-#: ardour_ui_ed.cc:376 trigger_ui.cc:788
+#: ardour_ui_ed.cc:376 trigger_ui.cc:739
 msgid "Forward"
 msgstr "Bobiner"
 
@@ -2514,11 +2507,11 @@ msgstr "Mesures et temps"
 msgid "Minutes & Seconds"
 msgstr "Minutes et secondes"
 
-#: ardour_ui_ed.cc:449 ardour_ui_ed.cc:460 audio_clock.cc:2212
+#: ardour_ui_ed.cc:449 ardour_ui_ed.cc:460 audio_clock.cc:2202
 msgid "Seconds"
 msgstr "Secondes"
 
-#: ardour_ui_ed.cc:451 ardour_ui_ed.cc:462 audio_clock.cc:2213 editor.cc:334
+#: ardour_ui_ed.cc:451 ardour_ui_ed.cc:462 audio_clock.cc:2203 editor.cc:334
 #: editor_actions.cc:708
 msgid "Samples"
 msgstr "Échantillons"
@@ -3442,44 +3435,44 @@ msgstr "Aucun LTC détecté, la vidéo ne sera pas alignée."
 msgid "Align video-start to %1 [samples]"
 msgstr "Aligner le début de la vidéo à %1 [échantillons]"
 
-#: audio_clock.cc:130 audio_clock.cc:131
+#: audio_clock.cc:128 audio_clock.cc:129
 msgid "0000000000000"
 msgstr ""
 
-#: audio_clock.cc:986
+#: audio_clock.cc:984
 msgid "Change current tempo"
 msgstr "Changer le tempo actuel"
 
-#: audio_clock.cc:987
+#: audio_clock.cc:985
 msgid "Change current time signature"
 msgstr "Changer le chiffrage actuel"
 
-#: audio_clock.cc:1022 audio_clock.cc:1036
+#: audio_clock.cc:1020 audio_clock.cc:1034
 msgid "--pending--"
 msgstr "--en instance--"
 
-#: audio_clock.cc:1042
+#: audio_clock.cc:1040
 msgid "INT"
 msgstr ""
 
-#: audio_clock.cc:1103
+#: audio_clock.cc:1101
 msgid "SR"
 msgstr ""
 
-#: audio_clock.cc:1110
+#: audio_clock.cc:1108
 #, c-format
 msgid "%+.4f%%"
 msgstr "%+.4f%%"
 
-#: audio_clock.cc:1111
+#: audio_clock.cc:1109
 msgid "Pull"
 msgstr "\"Pull\""
 
-#: audio_clock.cc:1352
+#: audio_clock.cc:1350
 msgid "TimeSignature|TS"
 msgstr "C "
 
-#: audio_clock.cc:1955 audio_streamview.cc:116 editor_actions.cc:1159
+#: audio_clock.cc:1953 audio_streamview.cc:116 editor_actions.cc:1159
 #: editor_actions.cc:1183 editor_actions.cc:1264 editor_actions.cc:1351
 #: luainstance.cc:1331 luainstance.cc:1336 luainstance.cc:2185
 #: luainstance.cc:2190 plugin_pin_dialog.cc:879 session_metadata_dialog.cc:499
@@ -3488,28 +3481,28 @@ msgstr "C "
 msgid "programming error: %1"
 msgstr "erreur de programmation : %1"
 
-#: audio_clock.cc:2091 audio_clock.cc:2119
+#: audio_clock.cc:2081 audio_clock.cc:2109
 msgid "programming error: %1 %2"
 msgstr "erreur de programmation : %1 %2"
 
-#: audio_clock.cc:2210 editor.cc:332 editor_actions.cc:709
+#: audio_clock.cc:2200 editor.cc:332 editor_actions.cc:709
 #: export_timespan_selector.cc:112
 msgid "Bars:Beats"
 msgstr "Mesures : temps"
 
-#: audio_clock.cc:2211 export_timespan_selector.cc:107
+#: audio_clock.cc:2201 export_timespan_selector.cc:107
 msgid "Minutes:Seconds"
 msgstr "Minutes : secondes"
 
-#: audio_clock.cc:2217
+#: audio_clock.cc:2207
 msgid "Set from Playhead"
 msgstr "Régler sur la tête"
 
-#: audio_clock.cc:2218
+#: audio_clock.cc:2208
 msgid "Locate to This Time"
 msgstr "Placer à Cette Position"
 
-#: audio_clock.cc:2221
+#: audio_clock.cc:2211
 msgid "Copy to clipboard"
 msgstr "Copier dans le presse-papier"
 
@@ -3549,7 +3542,7 @@ msgstr "ajout d'un point de contrôle de gain"
 msgid "AUDIO Region Operations:"
 msgstr ""
 
-#: audio_region_operations_box.cc:59 editor_actions.cc:1813 trigger_ui.cc:790
+#: audio_region_operations_box.cc:59 editor_actions.cc:1813 trigger_ui.cc:741
 msgid "Reverse"
 msgstr "Inverser"
 
@@ -4220,7 +4213,7 @@ msgstr "Point d'édition"
 msgid "Mushy"
 msgstr "En bouillie"
 
-#: editor.cc:240 trigger_ui.cc:825
+#: editor.cc:240 trigger_ui.cc:776
 msgid "Smooth"
 msgstr "Lisse"
 
@@ -10491,8 +10484,8 @@ msgstr "MarkerText"
 #: midi_channel_selector.cc:435 rc_option_editor.cc:2690 recorder_ui.cc:83
 #: session_archive_dialog.cc:46 session_archive_dialog.cc:51
 #: session_archive_dialog.cc:199 session_archive_dialog.cc:210
-#: session_archive_dialog.cc:224 sfdb_ui.cc:763 trigger_ui.cc:749
-#: trigger_ui.cc:782
+#: session_archive_dialog.cc:224 sfdb_ui.cc:763 trigger_ui.cc:700
+#: trigger_ui.cc:733
 msgid "None"
 msgstr "Aucun"
 
@@ -10591,7 +10584,7 @@ msgstr ""
 msgid "Export MIDI: %1"
 msgstr "Export MIDI : %1"
 
-#: midi_list_editor.cc:57 trigger_ui.cc:763
+#: midi_list_editor.cc:57 trigger_ui.cc:714
 msgid "Whole"
 msgstr "Temps"
 
@@ -13764,7 +13757,7 @@ msgstr ""
 "Problème d'échantillonage,\n"
 "ce sera ré-échantilloné\n"
 
-#: quantize_dialog.cc:40 trigger_ui.cc:526
+#: quantize_dialog.cc:40 trigger_ui.cc:477
 msgid "Main Grid"
 msgstr "Grille principale"
 
@@ -15245,15 +15238,15 @@ msgstr ""
 "Si <b>Suivre</b> est allumé, le pré-roll est appliqué à la position de la "
 "tête de lecture lorsqu’une région est sélectionnée ou réduite."
 
-#: rc_option_editor.cc:3580 trigger_ui.cc:753
+#: rc_option_editor.cc:3580 trigger_ui.cc:704
 msgid "4 Bars"
 msgstr "4 mesures"
 
-#: rc_option_editor.cc:3581 trigger_ui.cc:755
+#: rc_option_editor.cc:3581 trigger_ui.cc:706
 msgid "2 Bars"
 msgstr "2 mesures"
 
-#: rc_option_editor.cc:3582 trigger_ui.cc:757
+#: rc_option_editor.cc:3582 trigger_ui.cc:708
 msgid "1 Bar"
 msgstr "1 mesure"
 
@@ -18359,7 +18352,8 @@ msgstr "Variateur de vitesse (clic-droit pour les options)"
 
 #: shuttle_control.cc:192
 msgid "Varispeed: change the default playback and recording speed"
-msgstr "Varispeed : modifier la vitesse de lecture et d'enregistrement par défaut"
+msgstr ""
+"Varispeed : modifier la vitesse de lecture et d'enregistrement par défaut"
 
 #: shuttle_control.cc:195
 msgid "VariSpeed|VS"
@@ -18429,12 +18423,12 @@ msgstr ""
 msgid "Color:"
 msgstr ""
 
-#: slot_properties_box.cc:151 slot_properties_box.cc:168 trigger_ui.cc:618
+#: slot_properties_box.cc:151 slot_properties_box.cc:168 trigger_ui.cc:569
 msgid "Multi..."
 msgstr ""
 
-#: slot_properties_box.cc:157 slot_properties_box.cc:174 trigger_ui.cc:625
-#: trigger_ui.cc:797
+#: slot_properties_box.cc:157 slot_properties_box.cc:174 trigger_ui.cc:576
+#: trigger_ui.cc:748
 msgid "Jump"
 msgstr ""
 
@@ -19760,93 +19754,79 @@ msgstr ""
 msgid "MIDI un-Learn"
 msgstr ""
 
-#: trigger_ui.cc:407
-msgid "Save all MIDI Learn settings"
-msgstr ""
-
-#: trigger_ui.cc:416
-msgid "Choose filename"
-msgstr ""
-
-#: trigger_ui.cc:442
-msgid ""
-"%1 already exists.\n"
-"Please select a different filename"
-msgstr ""
-
-#: trigger_ui.cc:583
+#: trigger_ui.cc:534
 msgid "Launch Style..."
 msgstr ""
 
-#: trigger_ui.cc:584
+#: trigger_ui.cc:535
 msgid "Quantization..."
 msgstr ""
 
-#: trigger_ui.cc:586
+#: trigger_ui.cc:537
 msgid "Cue Isolate"
 msgstr ""
 
-#: trigger_ui.cc:730
+#: trigger_ui.cc:681
 msgid "Trigger"
 msgstr ""
 
-#: trigger_ui.cc:732
+#: trigger_ui.cc:683
 msgid "Retrigger"
 msgstr ""
 
-#: trigger_ui.cc:734
+#: trigger_ui.cc:685
 msgid "Gate"
 msgstr ""
 
-#: trigger_ui.cc:736
+#: trigger_ui.cc:687
 msgid "Toggle"
 msgstr ""
 
-#: trigger_ui.cc:738
+#: trigger_ui.cc:689
 msgid "Repeat"
 msgstr ""
 
-#: trigger_ui.cc:759
+#: trigger_ui.cc:710
 msgid "1/4"
 msgstr ""
 
-#: trigger_ui.cc:761
+#: trigger_ui.cc:712
 msgid "1/2"
 msgstr ""
 
-#: trigger_ui.cc:765
+#: trigger_ui.cc:716
 msgid "1/8"
 msgstr ""
 
-#: trigger_ui.cc:767
+#: trigger_ui.cc:718
 msgid "1/16"
 msgstr ""
 
-#: trigger_ui.cc:769
+#: trigger_ui.cc:720
 msgid "1/32"
 msgstr ""
 
-#: trigger_ui.cc:771
+#: trigger_ui.cc:722
 msgid "1/64"
 msgstr ""
 
-#: trigger_ui.cc:786
+#: trigger_ui.cc:737
 msgid "Again"
 msgstr ""
 
-#: trigger_ui.cc:805
+#: trigger_ui.cc:756
 msgid "Jump to: %1"
 msgstr ""
 
-#: trigger_ui.cc:809
+#: trigger_ui.cc:760
 msgid "Jump: Multi"
 msgstr ""
 
-#: trigger_ui.cc:821
+#: trigger_ui.cc:772
 msgid "Crisp"
 msgstr ""
 
-#: trigger_ui.cc:823
+#: trigger_ui.cc:774
 msgid "Mixed"
 msgstr ""
 
@@ -20668,6 +20648,25 @@ msgstr ""
 #: export_video_dialog.cc:815
 msgid "Input Video File"
 msgstr ""
+
+#~ msgid ""
+#~ "French:\n"
+#~ "\tAlain Fréhel <alain.frehel@free.fr>\n"
+#~ "\tChristophe Combelles <ccomb@free.fr>\n"
+#~ "\tMartin Blanchard\n"
+#~ "\tRomain Arnaud <roming22@gmail.com>\n"
+#~ "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
+#~ "\tFrédéric Rech <fred_rech@laposte.net>\n"
+#~ "\tJulien Taverna <jujudusud@gmail.com>\n"
+#~ msgstr ""
+#~ "Français :\n"
+#~ "\tAlain Fréhel <alain.frehel@free.fr>\n"
+#~ "\tChristophe Combelles <ccomb@free.fr>\n"
+#~ "\tMartin Blanchard\n"
+#~ "\tRomain Arnaud <roming22@gmail.com>\n"
+#~ "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
+#~ "\tFrédéric Rech <fred_rech@laposte.net>\n"
+#~ "\tJulien Taverna <jujudusud@gmail.com>\n"
 
 #~ msgid ""
 #~ "French:\n"
