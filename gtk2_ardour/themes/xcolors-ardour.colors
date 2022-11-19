@@ -2,7 +2,7 @@
 <Ardour theme-name="Xcolors">
   <Colors>
     <Color name="alert:blue" value="3b5bdbff"/>
-    <Color name="alert:cyan" value="099268ff"/>
+    <Color name="alert:cyan" value="087f5bff"/>
     <Color name="alert:green" value="82c91eff"/>
     <Color name="alert:greenish" value="66a80fff"/>
     <Color name="alert:orange" value="fd7e14ff"/>
@@ -31,7 +31,7 @@
     <Color name="widget:green" value="b197fcff"/>  <!--gtk processor postfader,  gtk_midi_track-->
     <Color name="widget:green darker" value="343a40FF"/>  <!--midi track base-->
     <Color name="widget:orange" value="fd7e14ff"/>  <!--tempo marker-->
-    <Color name="widget:ruddy" value="099268ff"/>  <!--processor prefader-->
+    <Color name="widget:ruddy" value="087f5bff"/>  <!--processor prefader-->
     <Color name="meter color0" value="008800ff"/>
     <Color name="meter color1" value="00aa00ff"/>
     <Color name="meter color2" value="00ff00ff"/>
