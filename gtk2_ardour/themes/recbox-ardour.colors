@@ -47,6 +47,7 @@
     <Color name="widget:green darker" value="1d5a4eff"/>
     <Color name="widget:orange" value="e88637ff"/>
     <Color name="widget:ruddy" value="b6061dff"/>
+    <Color name="widget:yellow" value="eddc3dff"/> <!-- VU meter outline -->
   </Colors>
   <ColorAliases>
     <ColorAlias name="active crossfade" alias="neutral:foreground"/>
@@ -208,7 +209,7 @@
     <ColorAlias name="meterstrip dpm fg" alias="neutral:foreground2"/>
     <ColorAlias name="meterstrip ppm bg" alias="theme:bg2"/>
     <ColorAlias name="meterstrip ppm fg" alias="neutral:foreground2"/>
-    <ColorAlias name="meterstrip vu bg" alias="theme:contrasting"/>
+    <ColorAlias name="meterstrip vu bg" alias="widget:yellow"/>
     <ColorAlias name="meterstrip vu fg" alias="neutral:backgroundest"/>
     <ColorAlias name="midi automation track fill" alias="widget:green darker"/>
     <ColorAlias name="midi bus base" alias="neutral:backgroundest"/>
