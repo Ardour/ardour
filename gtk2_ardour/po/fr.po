@@ -11,6 +11,7 @@
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016, 2019.
 # Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019, 2020, 2021.
+# Julien Taverna <jujudusud@gmail.com>, 2022.
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6\n"
