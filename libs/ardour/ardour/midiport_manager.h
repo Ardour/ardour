@@ -85,6 +85,12 @@ public:
 		return _midi_clock_output_port;
 	}
 
+	/* Port for arbitrary incoming MIDI that will control triggers */
+	boost::shared_ptr<MidiPort> trigger_input_port () const
+	{
+		return _trigger_input_port;
+	}
+
 	/* Virtual MIDI keyboard output */
 	boost::shared_ptr<AsyncMIDIPort> vkbd_output_port () const;
 
@@ -104,6 +110,7 @@ protected:
 	/* synchronously handled ports: ARDOUR::MidiPort */
 	boost::shared_ptr<MidiPort> _mtc_output_port;
 	boost::shared_ptr<MidiPort> _midi_clock_output_port;
+	boost::shared_ptr<MidiPort> _trigger_input_port;
 
 	void create_ports ();
 };
