@@ -600,12 +600,6 @@ Item::is_descendant_of (const Item& candidate) const
 }
 
 void
-Item::grab_focus ()
-{
-	/* XXX */
-}
-
-void
 Item::size_allocate (Rect const & r)
 {
 	begin_change ();
