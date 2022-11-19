@@ -36,7 +36,6 @@ def build(bld):
             surface_port.cc
             types.cc
     '''
-    obj.export_includes = ['./mackie']
     obj.defines      = [ 'PACKAGE="ardour_mackie"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = [ '.' ]

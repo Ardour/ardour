@@ -24,7 +24,6 @@ def build(bld):
             interface.cc
             osc_gui.cc
     '''
-    obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_osc"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = ['.', './osc']

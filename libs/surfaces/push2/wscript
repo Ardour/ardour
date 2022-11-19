@@ -34,7 +34,6 @@ def build(bld):
             track_mix.cc
             utils.cc
     '''
-    obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_push2"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]

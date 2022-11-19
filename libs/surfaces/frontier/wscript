@@ -20,7 +20,6 @@ def build(bld):
             interface.cc
             midicontrollable.cc
     '''
-    obj.export_includes = ['./generic_midi']
     obj.defines      = [ 'PACKAGE="ardour_frontier"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = ['.', './generic_midi']

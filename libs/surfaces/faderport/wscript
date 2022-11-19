@@ -20,7 +20,6 @@ def build(bld):
             faderport_interface.cc
             operations.cc
     '''
-    obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_faderport"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = [ '.', './faderport']
