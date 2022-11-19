@@ -145,18 +145,6 @@ public:
 
 	static void set_image_cache_size (uint64_t);
 
-#ifdef CANVAS_COMPATIBILITY
-	void*& property_gain_src () {
-		return _foo_void;
-	}
-	void*& property_gain_function () {
-		return _foo_void;
-	}
-
-private:
-	void* _foo_void;
-#endif
-
 private:
 	friend class WaveViewThreadClient;
 	friend class WaveViewThreads;
