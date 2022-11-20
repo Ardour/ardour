@@ -3633,7 +3633,7 @@ MidiRegionView::patch_entered (PatchChange* p)
 	  << instrument_info().get_patch_name_without (p->patch()->bank(), p->patch()->program(), p->patch()->channel()) << '\n'
 	  << _("Channel ") << ((int) p->patch()->channel() + 1);
 	show_verbose_cursor (s.str(), 10, 20);
-	p->item().grab_focus();
+	//p->item().grab_focus();
 }
 
 void
@@ -3653,7 +3653,7 @@ MidiRegionView::sysex_entered (SysEx* p)
 	// need a way to extract text from p->_flag->_text
 	// s << p->text();
 	// show_verbose_cursor (s.str(), 10, 20);
-	p->item().grab_focus();
+	//p->item().grab_focus();
 }
 
 void

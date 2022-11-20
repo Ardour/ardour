@@ -1128,13 +1128,13 @@ Editor::set_xjadeo_viewoption (int what)
 void
 Editor::edit_current_meter ()
 {
-	edit_meter_section (Temporal::TempoMap::use()->metric_at (ARDOUR_UI::instance()->primary_clock->absolute_time()).get_editable_meter());
+	edit_meter_section (Temporal::TempoMap::use()->metric_at (ARDOUR_UI::instance()->primary_clock->last_when()).get_editable_meter());
 }
 
 void
 Editor::edit_current_tempo ()
 {
-	edit_tempo_section (Temporal::TempoMap::use()->metric_at (ARDOUR_UI::instance()->primary_clock->absolute_time()).get_editable_tempo());
+	edit_tempo_section (Temporal::TempoMap::use()->metric_at (ARDOUR_UI::instance()->primary_clock->last_when()).get_editable_tempo());
 }
 
 RefPtr<RadioAction>

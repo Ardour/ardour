@@ -28,23 +28,22 @@
 class MainClock : public AudioClock
 {
 public:
-	MainClock (const std::string& clock_name, const std::string& widget_name, bool primary);
-	Temporal::timepos_t absolute_time () const;
+	MainClock (const std::string& clock_name, const std::string& widget_name);
 	void set_session (ARDOUR::Session *s);
+	void set_display_delta_mode (ARDOUR::ClockDeltaMode m);
 	void set (Temporal::timepos_t const &, bool force = false);
+	sigc::signal<bool, ARDOUR::ClockDeltaMode> change_display_delta_mode_signal;
 
 private:
-
-	// Editor *_editor;
-
 	void build_ops_menu ();
-	void set_display_delta_mode (ARDOUR::ClockDeltaMode);
+	void change_display_delta_mode (ARDOUR::ClockDeltaMode);
 	void edit_current_tempo ();
 	void edit_current_meter ();
 	void insert_new_tempo ();
 	void insert_new_meter ();
-	bool _primary;
 	bool _suspend_delta_mode_signal;
+	std::string _widget_name;
+	ARDOUR::ClockDeltaMode _delta_mode;
 };
 
 #endif // __gtk_ardour_main_clock_h__

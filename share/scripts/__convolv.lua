@@ -1,4 +1,4 @@
-ardour { ["type"] = "dsp", name = "Lua Convolver", license = "MIT", author = "Ardour Team", description = [[Another simple DSP example]] }
+ardour { ["type"] = "dsp", name = "Lua Convolver", license = "MIT", author = "Ardour Team", description = [[Reverb - libardour convolver]] }
 
 function dsp_ioconfig () return
 	{
@@ -8,13 +8,12 @@ function dsp_ioconfig () return
 	}
 end
 
-local conv, mode, ir_file, buffered
+local conv, buffered
 
-buffered = false
-ir_file = "/tmp/reverbs/St Nicolaes Church.wav"
-ir_file = "/tmp/reverbs/Large Wide Echo Hall.wav"
+buffered = true
 
 function dsp_configure (ins, outs)
+	local mode
 	if outs:n_audio() == 1 then
 		assert (ins:n_audio() == 1)
 		mode = ARDOUR.DSP.IRChannelConfig.Mono
@@ -28,7 +27,12 @@ function dsp_configure (ins, outs)
 	end
 
 	local irs = ARDOUR.DSP.IRSettings()
-	irs.gain = 0.5
+
+	ir_file = Session:path() .. "/externals/Vocal_Chamber.flac"
+	irs.gain = 0.055584
+	ir_file = Session:path() .. "/externals/Percussion_Air.flac"
+	irs.gain = 0.119054
+
 	conv = ARDOUR.DSP.Convolver (Session, ir_file, mode, irs)
 	collectgarbage ()
 end
@@ -44,8 +48,6 @@ end
 -- the DSP callback function to process audio audio
 -- "ins" and "outs" are http://manual.ardour.org/lua-scripting/class_reference/#C:FloatArray
 function dsp_run (ins, outs, n_samples)
-	assert (#ins <= #outs)
-
 	for c = 1, #ins do
 		if ins[c] ~= outs[c] then -- if processing is not in-place..
 			ARDOUR.DSP.copy_vector (outs[c], ins[c], n_samples) -- ..copy data from input to output.

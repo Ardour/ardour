@@ -99,6 +99,7 @@ private:
 	 *  as it can be altered outside a \ref configure_io by \ref reflect_inputs .
 	 */
 	ChanCount current_meters;
+	ChanCount _max_n_meters;
 
 	GATOMIC_QUAL gint _reset_dpm;
 	GATOMIC_QUAL gint _reset_max;

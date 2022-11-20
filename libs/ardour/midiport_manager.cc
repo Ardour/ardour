@@ -50,6 +50,9 @@ MidiPortManager::~MidiPortManager ()
 	if (_midi_clock_output_port) {
 		AudioEngine::instance()->unregister_port (_midi_clock_output_port);
 	}
+	if (_trigger_input_port) {
+		AudioEngine::instance()->unregister_port (_midi_clock_output_port);
+	}
 
 }
 
@@ -80,6 +83,9 @@ MidiPortManager::create_ports ()
 
 	p = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MIDI Clock out"), false, TransportGenerator);
 	_midi_clock_output_port= boost::dynamic_pointer_cast<MidiPort> (p);
+
+	p = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("Cue Control in"));
+	_trigger_input_port= boost::dynamic_pointer_cast<MidiPort> (p);
 }
 
 void
@@ -92,6 +98,7 @@ MidiPortManager::set_midi_port_states (const XMLNodeList&nodes)
 
 	ports.insert (make_pair (_mtc_output_port->name(), _mtc_output_port));
 	ports.insert (make_pair (_midi_clock_output_port->name(), _midi_clock_output_port));
+	ports.insert (make_pair (_trigger_input_port->name(), _trigger_input_port));
 	ports.insert (make_pair (_mmc_in->name(), _mmc_in));
 	ports.insert (make_pair (_mmc_out->name(), _mmc_out));
 	ports.insert (make_pair (_vkbd_out->name(), _vkbd_out));
@@ -121,6 +128,7 @@ MidiPortManager::get_midi_port_states () const
 
 	ports.insert (make_pair (_mtc_output_port->name(), _mtc_output_port));
 	ports.insert (make_pair (_midi_clock_output_port->name(), _midi_clock_output_port));
+	ports.insert (make_pair (_trigger_input_port->name(), _trigger_input_port));
 	ports.insert (make_pair (_mmc_in->name(), _mmc_in));
 	ports.insert (make_pair (_mmc_out->name(), _mmc_out));
 	ports.insert (make_pair (_vkbd_out->name(), _vkbd_out));
@@ -148,6 +156,7 @@ MidiPortManager::set_public_latency (bool playback)
 
 	pl.push_back (_mtc_output_port);
 	pl.push_back (_midi_clock_output_port);
+	pl.push_back (_trigger_input_port);
 	pl.push_back (_mmc_in);
 	pl.push_back (_mmc_out);
 	pl.push_back (_vkbd_out);

@@ -260,14 +260,18 @@ libxml_structured_error_func (void* /* parsing_context*/,
 	if (!msg.empty()) {
 		if (err->file && err->line) {
 			error << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
+			std::cerr << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
 
 			if (err->int2) {
 				error << ':' << err->int2;
+				std::cerr << ':' << err->int2;
 			}
 
 			error << endmsg;
+			std::cerr << std::endl;
 		} else {
 			error << X_("XML error: ") << msg << endmsg;
+			std::cerr << X_("XML error: ") << msg << std::endl;
 		}
 	}
 }
@@ -277,8 +281,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	: Gtkmm2ext::UI (PROGRAM_NAME, X_("gui"), argcp, argvp)
 	, session_load_in_progress (false)
 	, gui_object_state (new GUIObjectState)
-	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))
-	, secondary_clock (new MainClock (X_("secondary"), X_("secondary"), false))
+	, primary_clock   (new MainClock (X_("primary"),   X_("transport")))
+	, secondary_clock (new MainClock (X_("secondary"), X_("secondary")))
 	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
 	, video_timeline(0)
 	, ignore_dual_punch (false)

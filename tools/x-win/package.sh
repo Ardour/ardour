@@ -143,6 +143,8 @@ cp build/libs/canvas/canvas-*.dll $DESTDIR/bin/
 cp build/libs/widgets/widgets-*.dll $DESTDIR/bin/
 cp build/libs/waveview/waveview-*.dll $DESTDIR/bin/
 cp build/libs/pbd/pbd-*.dll $DESTDIR/bin/
+cp build/libs/ctrl-interface/midi_surface/ardour*.dll $DESTDIR/bin/
+cp build/libs/ctrl-interface/control_protocol/ardour*.dll $DESTDIR/bin/
 cp build/libs/ptformat/ptformat-*.dll $DESTDIR/bin/
 cp build/libs/audiographer/audiographer-*.dll $DESTDIR/bin/
 cp build/libs/fst/ardour-vst-scanner.exe $DESTDIR/bin/ || true
@@ -184,9 +186,6 @@ for file in $PREFIX/lib/lv2/*.lv2; do
 	mkdir -p $ALIBDIR/LV2/$BN
 	cp $PREFIX/lib/lv2/${BN}/*.ttl $ALIBDIR/LV2/${BN}/
 done
-
-
-mv $ALIBDIR/surfaces/ardourcp*.dll $DESTDIR/bin/
 
 # TODO use -static-libgcc -static-libstdc++ -- but for .exe files only
 if update-alternatives --query ${XPREFIX}-gcc | grep Value: | grep -q win32; then

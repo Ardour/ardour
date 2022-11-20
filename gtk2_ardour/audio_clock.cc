@@ -83,7 +83,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, _follows_playhead (follows_playhead)
 	, _accept_on_focus_out (accept_on_focus_out)
 	, _off (false)
-	, _edit_by_click_field (false)
 	, _negative_allowed (false)
 	, edit_is_negative (false)
 	, _limit_pos (timepos_t::max (Temporal::AudioTime))
@@ -98,8 +97,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, corner_radius (4)
 	, font_size (10240)
 	, editing (false)
-	, last_pdelta (0)
-	, last_sdelta (0)
 	, dragging (false)
 	, drag_field (Field (0))
 	, xscale (1.0)
@@ -1380,7 +1377,7 @@ AudioClock::set_session (Session *s)
 
 				AudioClock::Mode amode;
 				if ((*i)->get_property (X_("mode"), amode)) {
-					set_mode (amode, true);
+					set_mode (amode);
 				}
 				bool on;
 				if ((*i)->get_property (X_("on"), on)) {
@@ -1475,7 +1472,6 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 
 	case GDK_Escape:
 		end_edit (false);
-		ChangeAborted();  /*  EMIT SIGNAL  */
 		return true;
 
 	case GDK_Delete:
@@ -1727,36 +1723,7 @@ AudioClock::on_button_release_event (GdkEventButton *ev)
 				return true;
 			} else {
 				if (ev->button == 1) {
-
-					if (_edit_by_click_field) {
-
-						int xcenter = (get_width() - layout_width) /2;
-						int index = 0;
-						int trailing;
-						int y = ev->y - ((get_height() - layout_height)/2);
-						int x = ev->x - xcenter;
-						Field f;
-
-						if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
-							return true;
-						}
-
-						f = index_to_field (index);
-
-						switch (f) {
-						case Timecode_frames:
-						case MS_Milliseconds:
-						case Ticks:
-						case SS_Deciseconds:
-							f = Field (0);
-							break;
-						default:
-							break;
-						}
-						start_edit (f);
-					} else {
-						start_edit ();
-					}
+					start_edit ();
 				}
 			}
 		}
@@ -2196,11 +2163,11 @@ AudioClock::build_ops_menu ()
 	MenuList& ops_items = ops_menu->items();
 	ops_menu->set_name ("ArdourContextMenu");
 
-	ops_items.push_back (MenuElem (_("Timecode"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Timecode, false)));
-	ops_items.push_back (MenuElem (_("Bars:Beats"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), BBT, false)));
-	ops_items.push_back (MenuElem (_("Minutes:Seconds"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), MinSec, false)));
-	ops_items.push_back (MenuElem (_("Seconds"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Seconds, false)));
-	ops_items.push_back (MenuElem (_("Samples"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Samples, false)));
+	ops_items.push_back (MenuElem (_("Timecode"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Timecode)));
+	ops_items.push_back (MenuElem (_("Bars:Beats"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), BBT)));
+	ops_items.push_back (MenuElem (_("Minutes:Seconds"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), MinSec)));
+	ops_items.push_back (MenuElem (_("Seconds"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Seconds)));
+	ops_items.push_back (MenuElem (_("Samples"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Samples)));
 
 	if (editable && !_off && !is_duration && !_follows_playhead) {
 		ops_items.push_back (SeparatorElem());
@@ -2236,7 +2203,7 @@ AudioClock::locate ()
 }
 
 void
-AudioClock::set_mode (Mode m, bool noemit)
+AudioClock::set_mode (Mode m)
 {
 	if (_mode == m) {
 		return;

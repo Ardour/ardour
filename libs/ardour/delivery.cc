@@ -192,7 +192,7 @@ Delivery::set_gain_control (boost::shared_ptr<GainControl> gc) {
 	if (gc) {
 		_gain_control = gc;
 		_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));
-		_amp->configure_io (_configured_input, _configured_output);
+		_amp->configure_io (_configured_output, _configured_output);
 	} else {
 		_amp.reset ();
 		_gain_control = gc;
@@ -246,7 +246,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 	reset_panner ();
 
 	if (_amp) {
-		return _amp->configure_io (in, out);
+		return _amp->configure_io (out, out);
 	}
 
 	return true;
