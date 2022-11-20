@@ -2095,7 +2095,7 @@ msgstr "Médias"
 
 #: ardour_ui_ed.cc:157
 msgid "Escape (deselect all)"
-msgstr "Échap. (tout dé-selectionner)"
+msgstr "Échap. (tout dé-sélectionner)"
 
 #: ardour_ui_ed.cc:162
 msgid "Close Current Dialog"
@@ -8693,7 +8693,7 @@ msgstr ""
 
 #: export_dialog.cc:611
 msgid "Export Selection"
-msgstr "Exporter la selection"
+msgstr "Exporter la sélection"
 
 #: export_dialog.cc:625
 msgid "Export Region"
@@ -18409,7 +18409,7 @@ msgstr "Du début à la fin de la session"
 
 #: simple_export_dialog.cc:223
 msgid "%1 (selection)"
-msgstr "%1 (selection)"
+msgstr "%1 (sélection)"
 
 #: simple_export_dialog.cc:231
 msgid "_Abort"
