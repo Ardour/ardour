@@ -260,14 +260,18 @@ libxml_structured_error_func (void* /* parsing_context*/,
 	if (!msg.empty()) {
 		if (err->file && err->line) {
 			error << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
+			std::cerr << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
 
 			if (err->int2) {
 				error << ':' << err->int2;
+				std::cerr << ':' << err->int2;
 			}
 
 			error << endmsg;
+			std::cerr << std::endl;
 		} else {
 			error << X_("XML error: ") << msg << endmsg;
+			std::cerr << X_("XML error: ") << msg << std::endl;
 		}
 	}
 }
