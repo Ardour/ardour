@@ -269,6 +269,23 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 void
 PeakMeter::reflect_inputs (const ChanCount& in)
 {
+	if (!_configured || in > _max_n_meters) {
+		/* meter has to be configured at least once, and
+		 * Route has to call ::set_max_channels after successful
+		 * configure_processors.
+		 */
+		return;
+	}
+
+	/* In theory this cannot happen. After an initial successful
+	 * configuration, Route::configure_processors_unlocked will revert
+	 * to a prior config in case of an error.
+	 */
+	assert (in <= _max_n_meters);
+	if (in > _max_n_meters) {
+		return;
+	}
+
 	reset ();
 	current_meters = in;
 	reset_max ();
@@ -283,6 +300,8 @@ PeakMeter::emit_configuration_changed ()
 void
 PeakMeter::set_max_channels (const ChanCount& chn)
 {
+	_max_n_meters = chn;
+
 	uint32_t const limit   = chn.n_total ();
 	const size_t   n_audio = chn.n_audio ();
 
