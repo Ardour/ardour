@@ -13,7 +13,6 @@
 # Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019, 2020, 2021.
 # Julien Taverna <jujudusud@gmail.com>, 2022.
 # Nicolas Faure <sub26nico@laposte.net>, 2022.
-
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 6\n"
