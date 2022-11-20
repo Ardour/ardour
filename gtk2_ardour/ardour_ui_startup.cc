@@ -532,7 +532,7 @@ ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 		                                 PROGRAM_NAME,
 		                                 str.str()));
 		ArdourMessageDialog d (msg, true);
-		d.set_title (_("Hmm. Not Good"));
+		d.set_title (string_compose (_("%1: Unrecoverable Error"), PROGRAM_NAME));
 		d.run();
 
 		queue_finish ();
