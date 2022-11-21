@@ -28,6 +28,8 @@
 
 #include <glib/gstdio.h>
 
+#include "pbd/whitespace.h"
+
 #include "libsmf/smf.h"
 
 #include "evoral/Event.h"
@@ -631,33 +633,58 @@ SMF::load_markers ()
 	smf_event_t* event;
 
 	while ((event = smf_track_get_next_event(_smf_track)) != NULL) {
-
+		/* compare to smf_event_decode_metadata, smf_event_decode_textual */
+		bool allow_empty = false;
 		if (smf_event_is_metadata(event)) {
-			if (event->midi_buffer[1] == 0x06) {
-				char const * txt = smf_event_decode (event);
-				string marker;
-				if (txt != 0) {
-					marker = txt;
-				}
-				if (marker.find ("Marker: ") == 0) {
-					marker = marker.substr (8);
-				}
-				_markers.push_back (MarkerAt (marker, event->time_pulses));
+			string name;
+			switch (event->midi_buffer[1]) {
+				case 0x05:
+					name = "Lyric:";
+					break;
+				case 0x06:
+					name = "Marker:";
+					break;
+				case 0x07:
+					name = "Cue Point:";
+					allow_empty = true;
+					break;
+				case 0x01: // "Text:"
+					/* fallthtough */
+				case 0x02: // "Copyright:"
+					/* fallthtough */
+				case 0x03: // "Sequence/Track Name:"
+					/* fallthtough */
+				case 0x04: // "Instrument:"
+					/* fallthtough */
+				case 0x08: // "Program Name:"
+					/* fallthtough */
+				case 0x09: // "Device (Port) Name:"
+					/* fallthtough */
+				default:
+					continue;
 			}
-			if (event->midi_buffer[1] == 0x07) {
-				char const * txt = smf_event_decode (event);
-				string marker;
-				if (txt != 0) {
-					marker = txt;
-				}
-				if (marker.find ("Cue Point: ") == 0) {
-					marker = marker.substr (8);
-				}
-				_markers.push_back (MarkerAt (marker, event->time_pulses));
+
+			char const * txt = smf_event_decode (event);
+
+			if (!txt) {
+				continue;
 			}
+
+			string marker (txt);
+
+			if (marker.find (name) == 0) {
+				marker = marker.substr (name.length ());
+			}
+
+			PBD::strip_whitespace_edges (marker);
+
+			if (marker.empty () && !allow_empty) {
+				continue;
+			}
+
+			_markers.push_back (MarkerAt (marker, event->time_pulses));
 		}
 	}
 }
-
 
 } // namespace Evoral
