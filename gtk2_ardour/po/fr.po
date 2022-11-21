@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-21 23:07+0100\n"
+"PO-Revision-Date: 2022-11-21 23:43+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -7733,11 +7733,11 @@ msgstr ""
 
 #: editor_ops.cc:9366
 msgid "Smallest gap size to remove (seconds):"
-msgstr ""
+msgstr "Plus petit écart à supprimer (secondes) :"
 
 #: editor_ops.cc:9375
 msgid "Leave a gap of(seconds):"
-msgstr ""
+msgstr "Laisser un écart de (secondes) :"
 
 #: editor_ops.cc:9383
 msgid "Shift global markers too"
@@ -7757,7 +7757,7 @@ msgstr ""
 
 #: editor_ops.cc:9492
 msgid "remove gaps"
-msgstr ""
+msgstr "supprimer les écarts"
 
 #: editor_regions.cc:66 editor_sources.cc:87 trigger_region_list.cc:28
 #: trigger_source_list.cc:31
@@ -7902,15 +7902,15 @@ msgstr ""
 
 #: editor_rulers.cc:245
 msgid "New CD Track Marker"
-msgstr ""
+msgstr "Nouveau repère de CD"
 
 #: editor_rulers.cc:249
 msgid "Stop All Cues"
-msgstr ""
+msgstr "Arreter tous les Cues"
 
 #: editor_rulers.cc:250
 msgid "Clear All Cues"
-msgstr ""
+msgstr "Effacer tous les Cues"
 
 #: editor_rulers.cc:252
 msgid "Cue %1"
@@ -8740,7 +8740,7 @@ msgstr "Analyser l'audio exportée"
 
 #: export_file_notebook.cc:225
 msgid "Re-Import Exported Audio"
-msgstr ""
+msgstr "Ré-importer l'audio exporté"
 
 #: export_file_notebook.cc:318
 msgid "No format!"
@@ -8885,7 +8885,7 @@ msgstr "Qualité"
 
 #: export_format_dialog.cc:81
 msgid "Sample Rate Conversion Quality:"
-msgstr ""
+msgstr "Qualité de conversion de la fréquence d'échantillonnage :"
 
 #: export_format_dialog.cc:84
 msgid "Preview / Watermark"
@@ -8922,11 +8922,11 @@ msgstr "Étiquetter le fichier avec les méta-données de session"
 
 #: export_format_dialog.cc:118
 msgid "limit to"
-msgstr ""
+msgstr "limiter à"
 
 #: export_format_dialog.cc:119
 msgid "constrain to"
-msgstr ""
+msgstr "contraindre à"
 
 #: export_format_dialog.cc:140
 msgid ""
@@ -8991,19 +8991,19 @@ msgstr ""
 
 #: export_format_dialog.cc:309
 msgid "Pre Process"
-msgstr ""
+msgstr "Prétraitement"
 
 #: export_format_dialog.cc:312
 msgid "Watermark"
-msgstr ""
+msgstr "Filigrane"
 
 #: export_format_dialog.cc:320
 msgid "Encoding"
-msgstr ""
+msgstr "Encodage"
 
 #: export_format_dialog.cc:328
 msgid "Post Export"
-msgstr ""
+msgstr "Postexport"
 
 #: export_format_dialog.cc:624
 msgid "Best (sinc)"
@@ -9018,7 +9018,6 @@ msgid "Fast (sinc)"
 msgstr "Rapide (sinc)"
 
 #: export_format_dialog.cc:644
-#, fuzzy
 msgid "Zero order hold"
 msgstr "Interpolation répétitive (ZOH)"
 
@@ -9045,6 +9044,11 @@ msgid ""
 "before the sample-format conversion or encoding. The first noise burst "
 "happens at 1/3 of the interval. Note: there is currently no limiter."
 msgstr ""
+"Cette option permet d'ajouter du bruit, d'envoyer des mixages complets aux "
+"clients pour prévisualisation mais en filigrane. Le bruit blanc est injecté "
+"après l'analyse, juste avant la conversion du format d'échantillon ou "
+"l'encodage. La première salve de bruit se produit à 1/3 de l'intervalle. "
+"Note : il n'y a actuellement pas de limiteur."
 
 #: export_format_dialog.cc:1155
 msgid "Linear encoding options"
@@ -9064,7 +9068,7 @@ msgstr "Option Broadcast Wave"
 
 #: export_format_dialog.cc:1214
 msgid "Variable bit rate quality"
-msgstr ""
+msgstr "Qualité du débit variable"
 
 #: export_format_dialog.cc:1225
 msgid "FFMPEG/MP3 options"
@@ -9180,7 +9184,7 @@ msgstr ""
 
 #: export_report.cc:469
 msgid "Not available"
-msgstr ""
+msgstr "Non disponible"
 
 #: export_report.cc:559
 msgid "Logscale|Lg"
@@ -9203,6 +9207,8 @@ msgid ""
 "Conformity\n"
 "Analysis"
 msgstr ""
+"Analyse de\n"
+"conformité"
 
 #: export_report.cc:821
 msgid "Writing Export Analysis Image: %1."
@@ -9360,14 +9366,16 @@ msgid ""
 "Please log in to Freesound in the browser window that's just been opened, "
 "and paste the authorization code here"
 msgstr ""
+"Veuillez vous connecter à Freesound dans la fenêtre du navigateur qui vient "
+"d'être ouverte, puis collez le code d'autorisation ici."
 
 #: sfdb_freesound_mootcher.cc:265
 msgid "Authorization Code"
-msgstr ""
+msgstr "Code d'autorisation"
 
 #: sfdb_freesound_mootcher.cc:310
 msgid "Fetching Access Token (auth_code="
-msgstr ""
+msgstr "Récupération d'un jeton d'accès (auth_code="
 
 #: sfdb_freesound_mootcher.cc:395
 msgid "getSoundResourceFile: There is no valid root in the xml file"
@@ -9435,7 +9443,7 @@ msgstr "Post-atténuation"
 
 #: generic_pluginui.cc:91
 msgid "MIDI Keyboard (audition only)"
-msgstr ""
+msgstr "Clavier MIDI (écoute seulement)"
 
 #: generic_pluginui.cc:132 patch_change_widget.cc:411
 msgid "Channel:"
@@ -9625,15 +9633,15 @@ msgstr "Écoulé :"
 
 #: input_port_monitor.cc:68
 msgid "5 second history waveform"
-msgstr ""
+msgstr "historique de 5 secondes de la forme d'onde"
 
 #: input_port_monitor.cc:87
 msgid "Highlight incoming MIDI data per MIDI channel"
-msgstr ""
+msgstr "Mettre en évidence les données MIDI entrantes par canal MIDI"
 
 #: input_port_monitor.cc:88
 msgid "Display most recently received MIDI messages"
-msgstr ""
+msgstr "Afficher les messages MIDI les plus récemment reçus"
 
 #: insert_remove_time_dialog.cc:61
 msgid "Remove Time starting at:"
@@ -9758,17 +9766,19 @@ msgstr "Grille de routage"
 
 #: io_plugin_window.cc:64
 msgid "Pre-Process"
-msgstr ""
+msgstr "Prétraitement"
 
 #: io_plugin_window.cc:77
 msgid "Post-Process"
-msgstr ""
+msgstr "Posttraitement"
 
 #: io_plugin_window.cc:147
 msgid ""
 "Right-click or Double-click here\n"
 "to add I/O Plugins"
 msgstr ""
+"Clic droit ou double-clic ici\n"
+"pour ajouter des greffons d'E/S"
 
 #: io_plugin_window.cc:280
 msgid ""
@@ -9776,6 +9786,9 @@ msgid ""
 "Double-click to show GUI.\n"
 "%2+double-click to show generic GUI."
 msgstr ""
+"<b>%1</b>\n"
+"Double-cliquez pour afficher l'interface graphique.\n"
+"%2+double-clic pour afficher l'interface graphique générique."
 
 #: io_plugin_window.cc:282 processor_box.cc:559 processor_box.cc:1777
 msgid ""
@@ -9871,7 +9884,7 @@ msgstr "Raccourci"
 
 #: keyeditor.cc:409 luainstance.cc:505
 msgid "RegionList"
-msgstr ""
+msgstr "Liste d erégions"
 
 #: latency_gui.cc:47
 msgid "sample"
@@ -9887,11 +9900,11 @@ msgstr "programming error : %1 (%2)"
 
 #: library_download_dialog.cc:42
 msgid "Loop Download Manager"
-msgstr ""
+msgstr "Gestionnaire de téléchargement de boucles"
 
 #: library_download_dialog.cc:54
 msgid "Author"
-msgstr ""
+msgstr "Auteur"
 
 #: library_download_dialog.cc:55 sfdb_ui.cc:814
 msgid "License"
@@ -9903,21 +9916,21 @@ msgstr "Taille"
 
 #: library_download_dialog.cc:160 library_download_dialog.cc:211
 msgid "Installed"
-msgstr ""
+msgstr "Installé"
 
 #: library_download_dialog.cc:162 library_download_dialog.cc:215
 #: library_download_dialog.cc:276 library_download_dialog.cc:309
 #: library_download_dialog.cc:321
 msgid "Install"
-msgstr ""
+msgstr "Installer"
 
 #: library_download_dialog.cc:241 plugin_manager_ui.cc:369
 msgid "Error"
-msgstr ""
+msgstr "Erreur"
 
 #: library_download_dialog.cc:278
 msgid "Installing"
-msgstr ""
+msgstr "Installation"
 
 #: location_ui.cc:61 location_ui.cc:64
 msgid "Use PH"
@@ -10017,7 +10030,7 @@ msgstr "Temps-réel"
 
 #: loudness_dialog.cc:78
 msgid "Analysis Report"
-msgstr ""
+msgstr "Rapport d'analyse"
 
 #: loudness_dialog.cc:79
 msgid "Custom Amplifier Position"
