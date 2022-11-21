@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-21 19:41+0100\n"
+"PO-Revision-Date: 2022-11-21 22:09+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -701,7 +701,7 @@ msgstr "Instrument :"
 
 #: add_route_dialog.cc:82
 msgid "Show on Cue Page"
-msgstr "Afficher sur la page de repère"
+msgstr "Afficher sur la page de Cue"
 
 #: add_route_dialog.cc:100 add_route_dialog.cc:589 add_route_dialog.cc:610
 #: add_route_dialog.cc:616
@@ -1087,11 +1087,11 @@ msgstr ""
 
 #: ardour_ui.cc:298
 msgid "Rec Cues"
-msgstr "Enr repère"
+msgstr "Enr Cues"
 
 #: ardour_ui.cc:299
 msgid "Play Cues"
-msgstr "Lire repère"
+msgstr "Lire Cues"
 
 #: ardour_ui.cc:303 editor_actions.cc:773 rc_option_editor.cc:3415
 #: region_editor.cc:58
@@ -1227,7 +1227,7 @@ msgstr "Enr."
 
 #: ardour_ui.cc:356
 msgid "Window|Cue"
-msgstr "Repère"
+msgstr "Cue"
 
 #: ardour_ui.cc:376
 msgid "Your configuration files were copied. You can now restart %1."
@@ -1806,8 +1806,8 @@ msgid ""
 "<b>When enabled</b>, triggering Cues will result in Cue Markers added to the "
 "timeline"
 msgstr ""
-"<b>Lorsqu'il est activé</b>, le déclenchement des repères entraînera l'ajout "
-"de marqueurs de repère à la chronologie"
+"<b>Lorsqu'il est activé</b>, le déclenchement des Cues entraînera l'ajout de "
+"marqueurs de cue à la ligne de temps"
 
 #: ardour_ui2.cc:105
 msgid ""
@@ -1815,7 +1815,7 @@ msgid ""
 "on the timeline"
 msgstr ""
 "<b>Lorsqu'ils sont activés</b>, les marqueurs de Cue déclencheront le Cue "
-"associé lorsqu'ils seront transmis sur la chronologie"
+"associé lorsqu'ils seront transmis sur la ligne de temps"
 
 #: ardour_ui2.cc:107
 msgid ""
@@ -2147,7 +2147,7 @@ msgstr "Enregistreur"
 
 #: ardour_ui_ed.cc:176
 msgid "Cue Grid"
-msgstr "Grille de repères"
+msgstr "Grille de Cue"
 
 #: ardour_ui_ed.cc:177 ardour_ui_ed.cc:706 ardour_ui_ed.cc:707
 #: ardour_ui_ed.cc:708 ardour_ui_ed.cc:709 ardour_ui_ed.cc:710
@@ -2793,7 +2793,7 @@ msgstr "Afficher l'enregistreur"
 
 #: ardour_ui_ed.cc:716
 msgid "Show Cues"
-msgstr "Afficher les repères"
+msgstr "Afficher les Cues"
 
 #: ardour_ui_ed.cc:722 ardour_ui_ed.cc:723 ardour_ui_ed.cc:724
 #: ardour_ui_ed.cc:725 ardour_ui_ed.cc:726 ardour_ui_ed.cc:732
@@ -4281,11 +4281,11 @@ msgstr "Repères de CD"
 
 #: editor.cc:341 editor_actions.cc:716
 msgid "Cue Markers"
-msgstr ""
+msgstr "Repères de Cue"
 
 #: editor.cc:342 editor_actions.cc:720
 msgid "Video Timeline"
-msgstr "Chronologie vidéo"
+msgstr "Ligne de temps vidéo"
 
 #: editor.cc:402
 msgid "mode"
@@ -7848,7 +7848,7 @@ msgstr "Piste/bus visible ?"
 
 #: editor_routes.cc:32 route_list_base.cc:84 trigger_route_list.cc:32
 msgid "Cues|C"
-msgstr ""
+msgstr "C"
 
 #: editor_routes.cc:32 route_list_base.cc:84 trigger_route_list.cc:32
 msgid "Visible on Cues window ?"
@@ -14413,7 +14413,7 @@ msgstr "Profondeur de dégradé des couleurs de formes d'onde "
 
 #: rc_option_editor.cc:2663
 msgid "Timeline item gradient depth"
-msgstr "Profondeur de dégradé des éléments de la chronologie "
+msgstr "Profondeur de dégradé des éléments de la ligne de temps "
 
 #: rc_option_editor.cc:2673
 msgid "Track name ellipsize mode"
@@ -17732,15 +17732,15 @@ msgid ""
 "Use Video File's FPS Instead of Timecode Value for Timeline and Video "
 "Monitor."
 msgstr ""
-"Utiliser le débit du fichier vidéo au lieu du code temporel pour la "
-"chronologie et le contrôle vidéo."
+"Utiliser le débit du fichier vidéo au lieu du code temporel pour la ligne de "
+"temps et le contrôle vidéo."
 
 #: session_option_editor.cc:135
 msgid ""
 "Apply Pull-Up/Down to Video Timeline and Video Monitor (Unless using JACK-"
 "sync)."
 msgstr ""
-"Appliquer les pulldown/pullup à la Chronologie vidéo et au moniteur vidéo "
+"Appliquer les pulldown/pullup à la ligne de temps vidéo et au moniteur vidéo "
 "(sauf en cas d'utilisation de JACK-sync)"
 
 #: session_option_editor.cc:144
@@ -17902,7 +17902,7 @@ msgstr "Boutons d'écoute de contrôle"
 
 #: session_option_editor.cc:343
 msgid "Fader as Gain Knob"
-msgstr ""
+msgstr "Fader comme bouton de gain"
 
 #: session_option_editor.cc:348
 msgid "Name Labels"
@@ -17923,7 +17923,7 @@ msgstr "Divers"
 
 #: session_option_editor.cc:365
 msgid "Draw tool creates opaque MIDI regions"
-msgstr ""
+msgstr "L'outil de dessin crée des régions MIDI opaques"
 
 #: session_option_editor.cc:372
 msgid "MIDI region copies are independent"
@@ -18048,7 +18048,7 @@ msgstr "Étiquettes :"
 
 #: sfdb_ui.cc:343
 msgid "Could not read file: %1."
-msgstr ""
+msgstr "Impossible de lire le fichier : %1."
 
 #: sfdb_ui.cc:347
 msgid "<b>Midi File Information</b>"
@@ -18385,7 +18385,7 @@ msgstr ""
 
 #: simple_export_dialog.cc:47
 msgid "Quick Audio Export"
-msgstr "Exportation audio rapide"
+msgstr "Export audio rapide"
 
 #: simple_export_dialog.cc:79
 msgid "Open the folder where files are exported"
@@ -18496,7 +18496,7 @@ msgstr ""
 
 #: slot_properties_box.cc:372
 msgid "Double-click to rename this clip"
-msgstr ""
+msgstr "Double-cliquez pour renommer ce clip"
 
 #: slot_properties_box.cc:373
 msgid "Adjust audio gain (or MIDI velocity) for this slot"
@@ -18504,11 +18504,11 @@ msgstr ""
 
 #: slot_properties_box.cc:374
 msgid "Load a new file into this slot"
-msgstr ""
+msgstr "Charger un nouveau fichier dans ce slot"
 
 #: slot_properties_box.cc:375
 msgid "Pick a color for this clip"
-msgstr ""
+msgstr "Choisissez une couleur pour ce clip"
 
 #: slot_properties_box.cc:376
 msgid ""
@@ -18524,51 +18524,63 @@ msgid ""
 "Number of times to repeat this clip's Follow Length before triggering the "
 "Follow-Action"
 msgstr ""
+"Nombre de fois où il faut répéter la longueur de suivi de ce clip avant de "
+"déclencher l'action de suivi."
 
 #: slot_properties_box.cc:380
 msgid "Click to use the Follow Length instead of the Clip Length"
 msgstr ""
+"Lorsqu'elle est activée, la longueur du suivi est utilisée à la place de la "
+"longueur du clip."
 
 #: slot_properties_box.cc:381
 msgid "When enabled, the Follow Length is used instead of Clip Length"
 msgstr ""
+"Lorsqu'elle est activée, la longueur du suivi est utilisée à la place de la "
+"longueur du clip."
 
 #: slot_properties_box.cc:382
 msgid "MIDI Velocity Sensitivity for clip's volume"
-msgstr ""
+msgstr "Sensibilité de la vélocité MIDI pour le volume du clip"
 
 #: slot_properties_box.cc:383
 msgid "Probability for the Left vs Right Follow-Action to be activated"
-msgstr ""
+msgstr "Probabilité d'activation de l'action complémentaire gauche/droite"
 
 #: slot_properties_box.cc:384 slot_properties_box.cc:385
 msgid "Select an action that will occur when this clip ends"
-msgstr ""
+msgstr "Sélectionnez une action qui se produira lorsque ce clip se terminera."
 
 #: slot_properties_box.cc:387
 msgid "Set the behavior of this clip's launch button"
-msgstr ""
+msgstr "Définissez le comportement du bouton de lancement de ce clip."
 
 #: slot_properties_box.cc:388
 msgid ""
 "Clip will wait until the timeline passes this boundary before it triggers"
 msgstr ""
+"Le clip attendra que la ligne de temps passe cette limite avant de "
+"déclencher l'opération."
 
 #: slot_properties_box.cc:389
 msgid ""
 "If selected, this clip can 'take over' playback in the playback position of "
 "the prior clip"
 msgstr ""
+"Si cette option est sélectionnée, ce clip peut \" reprendre \" la lecture à "
+"la position de lecture du clip précédent."
 
 #: slot_properties_box.cc:390
 msgid ""
 "If selected, this slot will not respond to Cue events (either starting or "
 "stopping)"
 msgstr ""
+"Si cette option est sélectionnée, ce slot ne répondra pas aux événements de "
+"Cue (que ce soit le démarrage ou l'arrêt)."
 
 #: slot_properties_box.cc:622
 msgid "Gain (dB):"
-msgstr ""
+msgstr "Gain (dB) :"
 
 #: slot_properties_box.cc:624
 msgid "Velocity Adj:"
@@ -18576,11 +18588,11 @@ msgstr ""
 
 #: slot_properties_box.cc:704
 msgid "%1%% Left"
-msgstr ""
+msgstr "%1%% Gauche"
 
 #: slot_properties_box.cc:705
 msgid "%1%% Right"
-msgstr ""
+msgstr "%1%% Droite"
 
 #: slot_properties_box.cc:726
 msgid "Trigger Slot: %1"
@@ -18641,7 +18653,7 @@ msgstr ""
 
 #: startup_fsm.cc:440
 msgid "Starting Audio/MIDI Engine"
-msgstr ""
+msgstr "Lancer le moteur audio/MIDI"
 
 #: startup_fsm.cc:494
 msgid ""
@@ -18649,6 +18661,10 @@ msgid ""
 "Please verify that the new device has enough ports, or you may lose some i/o "
 "connections."
 msgstr ""
+"Le périphérique d'E/S du moteur a changé depuis la dernière fois que vous "
+"avez ouvert cette session.\n"
+"Veuillez vérifier que le nouveau périphérique dispose de suffisamment de "
+"ports, ou vous risquez de perdre certaines connexions d'E/S."
 
 #: startup_fsm.cc:596
 msgid "Cannot get existing session information from %1"
@@ -19096,9 +19112,8 @@ msgid "Width"
 msgstr "Largeur"
 
 #: strip_silence_dialog.cc:49
-#, fuzzy
 msgid "Strip Silence"
-msgstr "Enlever le silence"
+msgstr "Supprimer le silence"
 
 #: strip_silence_dialog.cc:81
 msgid "Threshold"
@@ -19432,6 +19447,7 @@ msgstr "erreur de programmation : demande d'une plage audio inexistante (%1) !"
 #: track_record_axis.cc:354
 msgid "Inactive and record-armed tracks cannot be renamed"
 msgstr ""
+"Les pistes inactives et les pistes armées ne peuvent pas être renommées."
 
 #: transform_dialog.cc:37
 msgid "this note's"
@@ -19633,23 +19649,23 @@ msgstr "Transposer"
 
 #: trigger_clip_picker.cc:65
 msgid "Select clip folder"
-msgstr ""
+msgstr "Sélectionner le dossier de clip"
 
 #: trigger_clip_picker.cc:134
 msgid "Audition selected clip"
-msgstr ""
+msgstr "Écouter le clip sélectionné"
 
 #: trigger_clip_picker.cc:135
 msgid "Stop the audition"
-msgstr ""
+msgstr "Stopper l'écoute."
 
 #: trigger_clip_picker.cc:136
 msgid "Open clip library folder"
-msgstr ""
+msgstr "Ouvrez le dossier de la bibliothèque de clips"
 
 #: trigger_clip_picker.cc:137
 msgid "Refresh clip list"
-msgstr ""
+msgstr "Rafraîchir la liste des clips"
 
 #: trigger_clip_picker.cc:138
 msgid "Select the Synth used for auditioning"
@@ -19662,42 +19678,44 @@ msgstr ""
 #: trigger_clip_picker.cc:140
 msgid "Click to select a clip folder and edit your available clip folders"
 msgstr ""
+"Cliquez pour sélectionner un dossier de clips et modifier vos dossiers de "
+"clips disponibles"
 
 #: trigger_clip_picker.cc:179
 msgid "File Name"
-msgstr ""
+msgstr "Nom de fichier"
 
 #: trigger_clip_picker.cc:281
 msgid "Edit Sample Library Path"
-msgstr ""
+msgstr "Modifier le chemin de la bibliothèque d'échantillons"
 
 #: trigger_clip_picker.cc:326
 msgid "Other..."
-msgstr ""
+msgstr "Autres..."
 
 #: trigger_clip_picker.cc:327
 msgid "Download..."
-msgstr ""
+msgstr "Télécharger..."
 
 #: trigger_clip_picker.cc:367
 msgid "%1 Bundled Content"
-msgstr ""
+msgstr "%1 Contenu groupé"
 
 #: trigger_clip_picker.cc:514
 msgid "%1 (%2 Tracks, only the first track will be used)"
-msgstr ""
+msgstr "%1 (%2 Pistes, seule la première piste sera utilisée)"
 
 #: trigger_clip_picker.cc:517
 msgid "%1 notes on channel: %2%3 "
-msgstr ""
+msgstr "%1 notes sur la voie : %2%3 "
 
 #: trigger_clip_picker.cc:520
 msgid ", with pgms"
-msgstr ""
+msgstr ", avec pgms"
 
 #: trigger_clip_picker.cc:1007
 msgid "Cannot get info from audio file %1 (%2)"
-msgstr ""
+msgstr "Impossible d'obtenir des informations du fichier audio %1 (%2)"
 
 #: trigger_clip_picker.cc:1084
 msgid "Audition Synth"
@@ -19719,14 +19737,16 @@ msgid ""
 "Drop a clip here\n"
 "to create a new Track"
 msgstr ""
+"Déposez un clip ici\n"
+"pour créer une nouvelle piste"
 
 #: trigger_page.cc:129
 msgid "Tracks"
-msgstr ""
+msgstr "Pistes"
 
 #: trigger_page.cc:336 trigger_page.cc:341
 msgid "Window|Cues"
-msgstr ""
+msgstr "Cues"
 
 #: trigger_page.cc:763
 msgid "Trigger Cue %1"
@@ -19741,12 +19761,17 @@ msgid ""
 "Click to stop all clips in this track\n"
 "Right-click to select properties for all clips in this track"
 msgstr ""
+"Cliquez pour arrêter tous les clips de cette piste\n"
+"Cliquez bouton droit de la souris pour sélectionner les propriétés de tous "
+"les clips de cette piste."
 
 #: trigger_master.cc:521
 msgid ""
 "Click to stop all clips\n"
 "Right-click to select properties for all clips in the grid"
 msgstr ""
+"Cliquez pour arrêter tous les clips\n"
+"Clic droit pour sélectionner les propriétés de tous les clips de la grille."
 
 #: trigger_ui.cc:172
 msgid "Select file to load into slot"
@@ -19754,7 +19779,7 @@ msgstr ""
 
 #: trigger_ui.cc:399
 msgid "Load..."
-msgstr ""
+msgstr "Charger..."
 
 #: trigger_ui.cc:404
 msgid "MIDI Learn"
@@ -19790,11 +19815,11 @@ msgstr ""
 
 #: trigger_ui.cc:687
 msgid "Toggle"
-msgstr ""
+msgstr "Basculer"
 
 #: trigger_ui.cc:689
 msgid "Repeat"
-msgstr ""
+msgstr "Répéter"
 
 #: trigger_ui.cc:710
 msgid "1/4"
@@ -19822,7 +19847,7 @@ msgstr ""
 
 #: trigger_ui.cc:737
 msgid "Again"
-msgstr ""
+msgstr "Encore"
 
 #: trigger_ui.cc:756
 msgid "Jump to: %1"
@@ -19842,25 +19867,33 @@ msgstr ""
 
 #: triggerbox_ui.cc:89
 msgid "Click to select Follow-Actions for this clip"
-msgstr ""
+msgstr "Cliquez pour sélectionner les actions de suivi pour ce clip"
 
 #: triggerbox_ui.cc:100
 msgid ""
 "Click to select this clip and edit its properties\n"
 "Right-Click for context menu"
 msgstr ""
+"Cliquez pour sélectionner ce clip et modifier ses propriétés\n"
+"Cliquez bouton droit de la souris pour accéder au menu contextuel"
 
 #: triggerbox_ui.cc:472
 msgid ""
 "Launch this clip\n"
 "Right-click to select Launch Options for this clip"
 msgstr ""
+"Lancer ce clip\n"
+"Cliquez bouton droit de la souris pour sélectionner les options de lancement "
+"de ce clip."
 
 #: triggerbox_ui.cc:475
 msgid ""
 "Stop other clips on this track.\n"
 "Right-click to select Launch Options for this clip"
 msgstr ""
+"Arrêtez les autres clips sur cette piste.\n"
+"Cliquez bouton droit de la souris pour sélectionner les options de lancement "
+"de ce clip."
 
 #: ui_config.cc:239 ui_config.cc:429
 msgid "Loading default ui configuration file %1"
@@ -19935,11 +19968,11 @@ msgstr "Fichier de configuration %1 non sauvegardé"
 
 #: ui_config.cc:485 ui_config.cc:493
 msgid "Could not remove temporary ui-config file \"%1\" (%2)"
-msgstr ""
+msgstr "Impossible de supprimer le fichier ui-config temporaire \"%1\" (%2)"
 
 #: ui_config.cc:491
 msgid "could not rename temporary ui-config file %1 to %2 (%3)"
-msgstr ""
+msgstr "impossible de renommer le fichier temporaire ui-config %1 en %2 (%3)"
 
 #: ui_config.cc:734
 msgid "Color %1 not found"
@@ -19999,7 +20032,7 @@ msgstr ""
 
 #: vca_master_strip.cc:76 vca_time_axis.cc:59
 msgid "Solo assigned channels"
-msgstr ""
+msgstr "Soloter les voies assignées"
 
 #: vca_master_strip.cc:80
 msgid "M"
@@ -20007,7 +20040,7 @@ msgstr ""
 
 #: vca_master_strip.cc:81 vca_time_axis.cc:65
 msgid "Mute assigned channels"
-msgstr ""
+msgstr "Muter les voies assignées"
 
 #: vca_master_strip.cc:85
 msgid "Hide this VCA strip"
@@ -20015,7 +20048,7 @@ msgstr "Cacher cette tranche VCA"
 
 #: vca_master_strip.cc:115
 msgid "Click to show assigned channels only"
-msgstr ""
+msgstr "Cliquer pour afficher uniquement les voies assignées"
 
 #: vca_master_strip.cc:347
 msgid "A"
@@ -20031,11 +20064,11 @@ msgstr ""
 
 #: vca_master_strip.cc:466
 msgid "Assign Selected Channels"
-msgstr "Assigner les canaux sélectionnés"
+msgstr "Assigner les voies sélectionnées"
 
 #: vca_master_strip.cc:467
 msgid "Drop Selected Channels"
-msgstr "Désassigner les canaux sélectionnés"
+msgstr "Désassigner les voies sélectionnées"
 
 #: vca_master_strip.cc:469
 msgid "Drop All Slaves"
@@ -20164,11 +20197,11 @@ msgstr "D"
 
 #: vca_time_axis.cc:71
 msgid "Unassign all channels"
-msgstr ""
+msgstr "Désassigner tous les canaux."
 
 #: vca_time_axis.cc:464
 msgid "Drop All Assigned Channels"
-msgstr ""
+msgstr "Supprimer tous les canaux assignés"
 
 #: video_timeline.cc:461
 msgid ""
@@ -20454,7 +20487,7 @@ msgid ""
 "The server configured in Edit -> Preferences -> Video is not reachable.\n"
 "Do you want %1 to launch 'harvid' on this machine?"
 msgstr ""
-"%1 utilise un serveur vidéo externe pour la Chronologie vidéo.\n"
+"%1 utilise un serveur vidéo externe pour la ligne de temps vidéo.\n"
 "Le serveur configuré dans Édition -> Préférences -> Vidéo n'est pas "
 "accessible.\n"
 "Voulez vous qu'%1 lance \"harvid\" sur cette machine ?"
@@ -20626,7 +20659,7 @@ msgid ""
 "timeline instead."
 msgstr ""
 "Export vidéo : impossible de récupérer la durée du fichier vidéo, "
-"utilisation de la durée de la Chronologie."
+"utilisation de la durée de la ligne de temps."
 
 #: export_video_dialog.cc:574
 msgid "Export Video: The export-range does not include video."
