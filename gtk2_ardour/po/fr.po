@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-21 23:43+0100\n"
+"PO-Revision-Date: 2022-11-22 00:03+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -9884,7 +9884,7 @@ msgstr "Raccourci"
 
 #: keyeditor.cc:409 luainstance.cc:505
 msgid "RegionList"
-msgstr "Liste d erégions"
+msgstr "Liste de régions"
 
 #: latency_gui.cc:47
 msgid "sample"
@@ -10451,7 +10451,7 @@ msgstr ""
 
 #: main.cc:371
 msgid "%1 is already running."
-msgstr ""
+msgstr "%1 est déjà lancé."
 
 #: main.cc:413
 msgid "could not initialize %1."
@@ -10615,7 +10615,7 @@ msgstr "Cliquer pour forcer tous les canaux enregistrés à %1"
 
 #: midi_clip_editor.cc:94
 msgid "MIDI Region Trimmer:"
-msgstr ""
+msgstr "MIDI Rogneur de région :"
 
 #: midi_export_dialog.cc:37
 msgid "Export MIDI: %1"
@@ -10783,7 +10783,7 @@ msgstr "Canal "
 
 #: midi_region_view.cc:3795
 msgid "duplicate notes"
-msgstr ""
+msgstr "Dupliquer les notes"
 
 #: midi_region_view.cc:3876
 msgid "paste"
@@ -10876,7 +10876,6 @@ msgid "Color Mode"
 msgstr "Mode couleur"
 
 #: midi_time_axis.cc:735
-#, fuzzy
 msgid "Bender"
 msgstr "Tirer la note"
 
@@ -11141,24 +11140,29 @@ msgid ""
 "Those plugins will be replaced with inactive stubs until the session is "
 "reloaded.\n"
 msgstr ""
+"\n"
+"Ces greffons seront remplacés par des stubs inactifs jusqu'à ce que la "
+"session soit rechargée.\n"
 
 #: missing_plugin_dialog.cc:53
 msgid ""
 "It is recommended that you install missing, re-scan updated plugins, and re-"
 "load the session.\n"
 msgstr ""
+"Il est recommandé d'installer les plugins manquants, de les remettre à jour "
+"et de recharger la session.\n"
 
 #: missing_plugin_dialog.cc:55
 msgid "Third party plugins have not yet been indexed."
-msgstr ""
+msgstr "Les greffons tiers n'ont pas encore été indexés."
 
 #: missing_plugin_dialog.cc:56
 msgid "Scan %1 plugins now?"
-msgstr ""
+msgstr "Scanner %1 greffons maintenant ?"
 
 #: missing_plugin_dialog.cc:58 plugin_selector.cc:1205
 msgid "AudioUnit and VST"
-msgstr ""
+msgstr "AudioUnit et VST"
 
 #: missing_plugin_dialog.cc:60 plugin_selector.cc:1199 plugin_selector.cc:1207
 #: rc_option_editor.cc:3904
@@ -11167,11 +11171,11 @@ msgstr "VST"
 
 #: missing_plugin_dialog.cc:64
 msgid "Yes"
-msgstr ""
+msgstr "Oui"
 
 #: missing_plugin_dialog.cc:65
 msgid "No"
-msgstr ""
+msgstr "Non"
 
 #: mixer_strip.cc:190
 msgid "Click to toggle the width of this mixer strip."
@@ -11393,6 +11397,8 @@ msgid ""
 "Right-click or Double-click here\n"
 "to add Track, Bus, or VCA channels"
 msgstr ""
+"Clic droit ou double-clic ici\n"
+"pour ajouter des voies de piste, de bus ou de VCA."
 
 #: mixer_ui.cc:201 route_time_axis.cc:266 route_time_axis.cc:812
 msgid "Group"
@@ -11412,7 +11418,7 @@ msgstr "Top-10 des greffons"
 
 #: mixer_ui.cc:291
 msgid "Mixer Scenes (F1...F8 to recall)"
-msgstr ""
+msgstr "Scènes de mixage (F1...F8 pour rappeler)"
 
 #: mixer_ui.cc:715
 msgid "Error adding GUI elements for new tracks/busses %1"
@@ -11868,7 +11874,6 @@ msgid "OFF"
 msgstr "éteint"
 
 #: monitor_section.cc:238
-#, fuzzy
 msgid "SiP Cut"
 msgstr "Réduction SeP"
 
@@ -12148,7 +12153,7 @@ msgstr "Contraindre le RMS à :"
 
 #: normalize_dialog.cc:68
 msgid "Constrain LUFS to:"
-msgstr ""
+msgstr "Contraindre le LUFS À :"
 
 #: normalize_dialog.cc:81
 msgid "Normalize to:"
@@ -12257,6 +12262,8 @@ msgstr "  -n, --no-splash             Ne pas afficher l'écran de démarrage\n"
 msgid ""
 "  -N, --new <session-name>    Create a new session from the command line\n"
 msgstr ""
+"  -N, --new <session-name> Créer une nouvelle session à partir de la ligne "
+"de commande\\N\n"
 
 #: opts.cc:85
 msgid "  -O, --no-hw-optimizations   Disable h/w specific optimizations\n"
@@ -12462,7 +12469,7 @@ msgstr ""
 
 #: plugin_manager_ui.cc:54
 msgid "Re-scan All"
-msgstr ""
+msgstr "Re-scanner tout"
 
 #: plugin_manager_ui.cc:55
 msgid "Re-scan Faulty"
@@ -13492,7 +13499,7 @@ msgstr "Cacher tous les contrôles"
 
 #: processor_box.cc:897
 msgid "New Preset..."
-msgstr ""
+msgstr "Nouveau pré-réglage..."
 
 #: processor_box.cc:950
 msgid "Link panner controls"
@@ -13674,7 +13681,7 @@ msgstr "Options du départ"
 
 #: processor_box.cc:4107
 msgid "Presets"
-msgstr ""
+msgstr "Pré-réglages"
 
 #: processor_box.cc:4109
 msgid "Clear (all)"
@@ -13918,7 +13925,7 @@ msgstr "Copier les éléments en utilisant :"
 
 #: rc_option_editor.cc:572
 msgid "<b>Recommended Setting: %1-%2</b>%3"
-msgstr ""
+msgstr "<b>Réglage Recommandé : %1-%2</b>%3"
 
 #: rc_option_editor.cc:574
 msgid "Slip Contents using:"
@@ -14395,7 +14402,7 @@ msgstr "Indicateurs d'alerte clignotants"
 
 #: rc_option_editor.cc:2605 rc_option_editor.cc:2618
 msgid "Appearance/Recorder"
-msgstr ""
+msgstr "Apparence/Enregistreur"
 
 #: rc_option_editor.cc:2605 rc_option_editor.cc:2609
 msgid "Input Meter Layout"
