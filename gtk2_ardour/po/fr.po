@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-21 22:09+0100\n"
+"PO-Revision-Date: 2022-11-21 23:07+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -3338,7 +3338,7 @@ msgstr "Copie de la session démo `%1'."
 
 #: ardour_ui_startup.cc:651
 msgid "Failed to extract demo session `%1'."
-msgstr ""
+msgstr "Échec de l'extraction de la session démo `%1'."
 
 #: ardour_ui_startup.cc:706 new_user_wizard.cc:290
 msgid "%1 is ready for use"
@@ -3518,7 +3518,7 @@ msgstr "Copier dans le presse-papier"
 
 #: audio_clip_editor.cc:570
 msgid "AUDIO Region Trimmer:"
-msgstr ""
+msgstr "AUDIO Rogneur de région :"
 
 #: audio_region_editor.cc:65 rhythm_ferret.cc:140 rhythm_ferret.cc:157
 msgid "dB"
@@ -3550,7 +3550,7 @@ msgstr "ajout d'un point de contrôle de gain"
 
 #: audio_region_operations_box.cc:48
 msgid "AUDIO Region Operations:"
-msgstr ""
+msgstr "AUDIO Opérations de région :"
 
 #: audio_region_operations_box.cc:59 editor_actions.cc:1813 trigger_ui.cc:741
 msgid "Reverse"
@@ -3574,7 +3574,7 @@ msgstr ""
 
 #: audio_region_properties_box.cc:84 audio_trigger_properties_box.cc:73
 msgid "Stretch"
-msgstr ""
+msgstr "Étirer"
 
 #: audio_region_properties_box.cc:88 audio_trigger_properties_box.cc:116
 #: add_video_dialog.cc:158
@@ -3587,15 +3587,15 @@ msgstr "Durée :"
 
 #: audio_region_properties_box.cc:154
 msgid "AUDIO Region Properties:"
-msgstr ""
+msgstr "AUDIO Propiétés de région :"
 
 #: audio_region_properties_box.cc:164
 msgid "Fades:"
-msgstr ""
+msgstr "Fondus :"
 
 #: audio_region_properties_box.cc:176
 msgid "Gain:"
-msgstr ""
+msgstr "Gain :"
 
 #: audio_region_properties_box.cc:180
 msgid "+6dB"
@@ -3611,25 +3611,27 @@ msgstr ""
 
 #: audio_trigger_properties_box.cc:91 audio_trigger_properties_box.cc:122
 msgid "Clip Length:"
-msgstr ""
+msgstr "Longueur de clip :"
 
 #: audio_trigger_properties_box.cc:93 slot_properties_box.cc:337
 msgid "(beats)"
-msgstr ""
+msgstr "(battements)"
 
 #: audio_trigger_properties_box.cc:101
 msgid "Length in Bars:"
-msgstr ""
+msgstr "Longueur en mesures :"
 
 #: audio_trigger_properties_box.cc:108
 msgid "Stretch Options"
-msgstr ""
+msgstr "Options d'étirage"
 
 #: audio_trigger_properties_box.cc:154
 msgid ""
 "<b>If enabled</b>, the clip will be stretched to match the current timeline "
 "tempo"
 msgstr ""
+"<b>Si activé</b>, le clip sera étiré pour correspondre au tempo actuel de la "
+"ligne de temps."
 
 #: audio_trigger_properties_box.cc:155
 msgid ""
@@ -3640,18 +3642,24 @@ msgstr ""
 #: audio_trigger_properties_box.cc:156
 msgid "Length of the clip, in beats. Changing this will change the tempo"
 msgstr ""
+"Longueur du clip, en battements. En modifiant cette valeur, vous modifiez le "
+"tempo."
 
 #: audio_trigger_properties_box.cc:157
 msgid ""
 "Click to halve the tempo for the clip. This will result in it playing faster "
 "when stretched on the timeline"
 msgstr ""
+"Cliquez pour réduire de moitié le tempo du clip. Cela aura pour effet de le "
+"lire plus rapidement lorsqu'il sera étiré sur la ligne de temps."
 
 #: audio_trigger_properties_box.cc:158
 msgid ""
 "Click to double the tempo for the clip. This will result in it playing "
 "slower when stretched on the timeline"
 msgstr ""
+"Cliquez pour doubler le tempo du clip. Cela aura pour effet de le lire plus "
+"lentement lorsqu'il sera étiré sur la ligne de temps"
 
 #: automation_controller.cc:315 automation_controller.cc:331
 msgid "Select Note..."
@@ -3790,11 +3798,11 @@ msgstr ""
 
 #: bbt_marker_dialog.cc:88
 msgid "Add Marker"
-msgstr ""
+msgstr "Ajouter un repère"
 
 #: bbt_marker_dialog.cc:90
 msgid "Save Changes"
-msgstr ""
+msgstr "Sauvegarder les changements"
 
 #: bundle_manager.cc:194
 msgid "Disassociate"
@@ -3835,7 +3843,6 @@ msgid "New"
 msgstr "Nouveau"
 
 #: bundle_manager.cc:341
-#, fuzzy
 msgid "Bundle"
 msgstr "Grouper"
 
@@ -3916,30 +3923,32 @@ msgid ""
 "Click to launch all clips in this row\n"
 "Right-click to select properties for all clips in this row"
 msgstr ""
+"Cliquez pour lancer tous les clips de cette rangée\n"
+"Clic droit pour sélectionner les propriétés de tous les clips de cette rangée"
 
 #: cuebox_ui.cc:256
 msgid "Jump..."
-msgstr ""
+msgstr "Sauter..."
 
 #: cuebox_ui.cc:293 trigger_master.cc:353 trigger_master.cc:718
 msgid "Set All Follow Actions..."
-msgstr ""
+msgstr "Définir toutes les actions de suivi..."
 
 #: cuebox_ui.cc:294 trigger_master.cc:354 trigger_master.cc:719
 msgid "Set All Launch Styles..."
-msgstr ""
+msgstr "Définir toutes les quantifications..."
 
 #: cuebox_ui.cc:295 trigger_master.cc:355 trigger_master.cc:720
 msgid "Set All Quantizations..."
-msgstr ""
+msgstr "Définir toutes les quantifications..."
 
 #: cuebox_ui.cc:297 trigger_master.cc:357
 msgid "Set All Colors..."
-msgstr ""
+msgstr "Définir toutes les couleurs..."
 
 #: cuebox_ui.cc:299 trigger_master.cc:359 trigger_master.cc:722
 msgid "Clear All..."
-msgstr ""
+msgstr "Supprimer tout..."
 
 #: cuebox_ui.cc:482
 msgid "CueBox for XXXX"
@@ -3953,7 +3962,7 @@ msgstr "Réinitialiser"
 
 #: dsp_stats_ui.cc:57
 msgid "Buffer size: "
-msgstr ""
+msgstr "Taille de tampon :"
 
 #: dsp_stats_ui.cc:61
 msgid "Idle: "
@@ -3961,15 +3970,15 @@ msgstr ""
 
 #: dsp_stats_ui.cc:65
 msgid "DSP: "
-msgstr ""
+msgstr "DSP : "
 
 #: dsp_stats_ui.cc:71
 msgid "Engine: "
-msgstr ""
+msgstr "Moteur : "
 
 #: dsp_stats_ui.cc:78
 msgid "Session: "
-msgstr ""
+msgstr "Session : "
 
 #: dsp_stats_ui.cc:89
 msgid ""
@@ -3990,7 +3999,7 @@ msgstr ""
 
 #: dsp_stats_ui.cc:142
 msgid "average"
-msgstr ""
+msgstr "moyenne"
 
 #: dsp_stats_ui.cc:143
 msgid "std dev"
@@ -3998,7 +4007,7 @@ msgstr ""
 
 #: dsp_stats_ui.cc:283
 msgid "No session loaded"
-msgstr ""
+msgstr "Pas de session chargée"
 
 #: duplicate_routes_dialog.cc:35
 msgid "Duplicate Tracks/Busses"
@@ -4191,7 +4200,7 @@ msgstr "Verrou"
 
 #: editor.cc:221 editor_actions.cc:610
 msgid "Selected"
-msgstr ""
+msgstr "Sélectionné"
 
 #: editor.cc:222 editor.cc:3282 editor.cc:3998 editor.cc:4080
 #: editor_actions.cc:611 midi_channel_selector.cc:160
@@ -4460,15 +4469,15 @@ msgstr "Dupliquer l'intervalle"
 
 #: editor.cc:1976 editor_actions.cc:172
 msgid "Consolidate"
-msgstr ""
+msgstr "Consolider"
 
 #: editor.cc:1977
 msgid "Consolidate (with processing)"
-msgstr ""
+msgstr "Consolider (avec traitement)"
 
 #: editor.cc:1978 editor_export_audio.cc:337 editor_ops.cc:4190
 msgid "Bounce"
-msgstr ""
+msgstr "\"Bouncer\""
 
 #: editor.cc:1979 editor_actions.cc:1902
 msgid "Bounce (with processing)"
@@ -4724,14 +4733,18 @@ msgstr "Nombre de pistes visibles"
 #: editor.cc:3548
 msgid "Note Length to Draw (AUTO uses the current Grid setting)"
 msgstr ""
+"Longueur de la note à dessiner (AUTO utilise le réglage actuel de la grille)"
 
 #: editor.cc:3549
 msgid "Note Velocity to Draw (AUTO uses the nearest note's velocity)"
 msgstr ""
+"Vélocité de la note à dessiner (AUTO utilise la vélocité de la note la plus "
+"proche)"
 
 #: editor.cc:3550
 msgid "Note Channel to Draw (AUTO uses the nearest note's channel)"
 msgstr ""
+"Voie de la note à dessiner (AUTO utilise la voie de la note la plus proche)"
 
 #: editor.cc:3551
 msgid "Grid Mode"
@@ -4929,7 +4942,7 @@ msgstr "Nom de la nouvelle liste de lecture :"
 
 #: editor.cc:4622 route_ui.cc:2799
 msgid "That name is already in use.  Use this instead?"
-msgstr ""
+msgstr "Ce nom est déjà utilisé.  Utiliser ceci à la place ?"
 
 #: editor.cc:4647
 msgid "clear playlists"
@@ -4937,35 +4950,35 @@ msgstr "effacer les listes de lecture"
 
 #: editor.cc:4670
 msgid "Copy Playlist for ALL Tracks"
-msgstr ""
+msgstr "Copier la liste de lecture pour toutes les pistes"
 
 #: editor.cc:4670
 msgid "New Playlist for ALL Tracks"
-msgstr ""
+msgstr "Nouvelle liste de lecture pour toutes les pistes"
 
 #: editor.cc:4681
 msgid "Copy Playlist for this track/group"
-msgstr ""
+msgstr "Copier la liste de lecture pour cette piste/ce groupe"
 
 #: editor.cc:4681
 msgid "New Playlist for this track/group"
-msgstr ""
+msgstr "Nouvelle la liste de lecture pour cette piste/ce groupe"
 
 #: editor.cc:4692
 msgid "Copy Playlist for Selected Tracks"
-msgstr ""
+msgstr "Copier la liste de lecture pour les pistes sélectionnées"
 
 #: editor.cc:4692
 msgid "New Playlist for Selected Tracks"
-msgstr ""
+msgstr "Nouvelle liste de lecture pour les pistes sélectionnées"
 
 #: editor.cc:4703
 msgid "Copy Playlist for Armed Tracks"
-msgstr ""
+msgstr "Copier la liste de lecture pour les pistes armées"
 
 #: editor.cc:4703
 msgid "New Playlist for Armed Tracks"
-msgstr ""
+msgstr "Nouvelle liste de lecture pour les pistes armées"
 
 #: editor.cc:5475
 msgid "Please wait while %1 loads visual data."
@@ -5122,7 +5135,7 @@ msgstr "Grille"
 
 #: editor_actions.cc:166
 msgid "Editor Views"
-msgstr ""
+msgstr "Vues éditeur"
 
 #: editor_actions.cc:167
 msgid "Scroll"
@@ -5146,7 +5159,7 @@ msgstr "Code temporel en images/sec"
 
 #: editor_actions.cc:181
 msgid "Region Layers"
-msgstr ""
+msgstr "Couches de région"
 
 #: editor_actions.cc:187 route_time_axis.cc:646 vca_time_axis.cc:457
 msgid "Height"
@@ -5286,7 +5299,7 @@ msgstr "Modifier le tempo"
 
 #: editor_actions.cc:249
 msgid "Edit Current Time Signature"
-msgstr ""
+msgstr "Modifier le chiffrage actuel"
 
 #: editor_actions.cc:256
 msgid "Select All Overlapping Edit Range"
@@ -5334,7 +5347,7 @@ msgstr "Basculer l'affichage d'empilement des prises"
 
 #: editor_actions.cc:273
 msgid "Stacked layer display"
-msgstr ""
+msgstr "Affichage en couches empilées"
 
 #: editor_actions.cc:274
 msgid "Overlaid layer display"
@@ -5342,7 +5355,7 @@ msgstr ""
 
 #: editor_actions.cc:276
 msgid "Show Playlist Selector"
-msgstr ""
+msgstr "Afficher le sélecteur de liste de lecture"
 
 #: editor_actions.cc:284 editor_actions.cc:285 editor_actions.cc:1926
 #: editor_actions.cc:1927
@@ -5560,11 +5573,11 @@ msgstr ""
 
 #: editor_actions.cc:408
 msgid "Consolidate Range (with processing)"
-msgstr ""
+msgstr "Consolider l'intervalle (avec traitement)"
 
 #: editor_actions.cc:410
 msgid "Consolidate Range"
-msgstr "Le contenu de l'intervalle devient une région"
+msgstr "Consolider l'intervalle"
 
 #: editor_actions.cc:417 loudness_dialog.cc:62
 msgid "Loudness Assistant"
@@ -5628,27 +5641,27 @@ msgstr ""
 
 #: editor_actions.cc:493
 msgid "New Playlist For Rec-Armed Tracks"
-msgstr ""
+msgstr "Nouvelle liste de lecture pour les pistes armées"
 
 #: editor_actions.cc:494
 msgid "New Playlist For All Tracks"
-msgstr ""
+msgstr "Nouvelle liste de lecture pour toutes les pistes"
 
 #: editor_actions.cc:495
 msgid "New Playlist For Selected Tracks"
-msgstr ""
+msgstr "Nouvelle liste de lecture pour les pistes sélectionnées"
 
 #: editor_actions.cc:498
 msgid "Copy Playlist For Rec-Armed Tracks"
-msgstr ""
+msgstr "Copier la liste de lecture pour les pistes armées"
 
 #: editor_actions.cc:499
 msgid "Copy Playlist For All Tracks"
-msgstr ""
+msgstr "Copier la liste de lecture pour toutes les pistes"
 
 #: editor_actions.cc:500
 msgid "Copy Playlist For Selected Tracks"
-msgstr ""
+msgstr "Copier la liste de lecture pour les pistes sélectionnées"
 
 #: editor_actions.cc:503
 msgid "Toggle Active"
@@ -5887,15 +5900,15 @@ msgstr "Effacer la sélection de note"
 
 #: editor_actions.cc:819
 msgid "Invert Note Selection"
-msgstr ""
+msgstr "Inverser la sélection de note"
 
 #: editor_actions.cc:820
 msgid "Extend Note Selection"
-msgstr ""
+msgstr "Étendre la sélection de notes"
 
 #: editor_actions.cc:821
 msgid "Duplicate Note Selection"
-msgstr ""
+msgstr "Dupliquer la sélection de notes"
 
 #: editor_actions.cc:825
 msgid "Move Note Start Earlier (fine)"
@@ -5915,19 +5928,19 @@ msgstr "Déplacer le début de la note plus tard"
 
 #: editor_actions.cc:832
 msgid "Move Note Start Later (fine)"
-msgstr ""
+msgstr "Déplacer le début de la note plus tard (fin)"
 
 #: editor_actions.cc:833
 msgid "Move Note Start Later"
-msgstr ""
+msgstr "Déplacer le début de la note plus tard"
 
 #: editor_actions.cc:834
 msgid "Move Note Ends Earlier (fine)"
-msgstr ""
+msgstr "Déplacer la fin de la note plus tôt (fin)"
 
 #: editor_actions.cc:835
 msgid "Move Note Ends Earlier"
-msgstr ""
+msgstr "Déplacer la fin de la note plus tôt"
 
 #: editor_actions.cc:840
 msgid "Select Next"
@@ -6083,7 +6096,7 @@ msgstr "Éditee les vélocités de note"
 
 #: editor_actions.cc:885
 msgid "Quantize Selected Notes"
-msgstr ""
+msgstr "Quantifier les notes sélectionnées"
 
 #: editor_actions.cc:1253 editor_actions.cc:1340 editor_actions.cc:1523
 #: editor_actions.cc:1534 editor_actions.cc:1589 editor_actions.cc:1600
@@ -6317,11 +6330,11 @@ msgstr ""
 
 #: editor_actions.cc:1951
 msgid "Add Region Cue Marker"
-msgstr ""
+msgstr "Ajouter un repère de région Cue"
 
 #: editor_actions.cc:1952
 msgid "Clear Region Cue Markers"
-msgstr ""
+msgstr "Supprimer les repères de région Cue"
 
 #: editor_actions.cc:1953
 msgid "Set Sync Position"
@@ -6454,13 +6467,15 @@ msgstr "Import PT"
 
 #: editor_pt_import.cc:111
 msgid "PT import cancelled"
-msgstr ""
+msgstr "Import PT annulé"
 
 #: editor_pt_import.cc:116
 msgid ""
 "PT import completed!\n"
 "See log for specifics"
 msgstr ""
+"Import PT terminé !\n"
+"Voir le journal pour les détails"
 
 #: editor_canvas_events.cc:1405 editor_drag.cc:1722
 msgid "Could not create new track after region placed in the drop zone"
@@ -6518,7 +6533,7 @@ msgstr ""
 
 #: editor_drag.cc:3201 editor_drag.cc:3238
 msgid "change tempo"
-msgstr ""
+msgstr "changer le tempo"
 
 #: editor_drag.cc:3272
 msgid "inactive"
@@ -6530,11 +6545,11 @@ msgstr "déplacer le repère de tempo"
 
 #: editor_drag.cc:3353
 msgid "move tempo"
-msgstr ""
+msgstr "déplacer le tempo"
 
 #: editor_drag.cc:3413 editor_drag.cc:3455 editor_drag.cc:3602
 msgid "move BBT point"
-msgstr ""
+msgstr "déplacer le point BBT"
 
 #: editor_drag.cc:3534
 msgid "stretch tempo"
@@ -6550,7 +6565,7 @@ msgstr "étirer la fin du tempo"
 
 #: editor_drag.cc:3817
 msgid "move tempo end"
-msgstr ""
+msgstr "Déplacer la fin de tempo"
 
 #: editor_drag.cc:4117
 msgid "change fade in length"
@@ -6602,7 +6617,7 @@ msgstr "Zone d'automation créée pour un type de région invalide"
 
 #: editor_drag.cc:7065
 msgid "Edit Cue Marker Name"
-msgstr ""
+msgstr "Éditer le nom du repère Cue"
 
 # Short for color
 #: editor_route_groups.cc:90
@@ -6831,11 +6846,11 @@ msgstr "supprimer le repère"
 
 #: editor_markers.cc:889
 msgid "remove region marker"
-msgstr ""
+msgstr "Supprimer repère de région"
 
 #: editor_markers.cc:1075 editor_markers.cc:1121
 msgid "Move Playhead to Marker"
-msgstr ""
+msgstr "Déplacer la tête de lecture sur le repère"
 
 #: editor_markers.cc:1076 editor_markers.cc:1122
 msgid "Play from Marker"
@@ -6843,7 +6858,7 @@ msgstr "Lire depuis le repère"
 
 #: editor_markers.cc:1077 editor_markers.cc:1125
 msgid "Move Marker to Playhead"
-msgstr ""
+msgstr "Déplacer le repère sur la tête de lecture"
 
 #: editor_markers.cc:1082
 msgid "Create Range to Next Marker"
@@ -7051,11 +7066,11 @@ msgstr "Nouveau repère de position"
 
 #: editor_ops.cc:2295
 msgid "Set session start"
-msgstr "Définir le départ de la session"
+msgstr "Définir le début de session"
 
 #: editor_ops.cc:2321
 msgid "Set session end"
-msgstr ""
+msgstr "Définir la fin de session"
 
 #: editor_ops.cc:2406
 msgid "add markers"
@@ -7067,7 +7082,7 @@ msgstr "effacer les repères"
 
 #: editor_ops.cc:2532
 msgid "clear xrun markers"
-msgstr ""
+msgstr "effacer les repères de décrochages"
 
 #: editor_ops.cc:2552
 msgid "clear ranges"
@@ -7075,7 +7090,7 @@ msgstr "effacer les intervalles"
 
 #: editor_ops.cc:2574
 msgid "clear cues"
-msgstr ""
+msgstr "effacer les cues"
 
 #: editor_ops.cc:2592
 msgid "clear locations"
@@ -7537,7 +7552,6 @@ msgid "Crossfade length"
 msgstr "Longueur du fondu enchaîné"
 
 #: editor_ops.cc:7783
-#, fuzzy
 msgid "Pull-back length"
 msgstr "Durée du retrait"
 
