@@ -1238,8 +1238,8 @@ TempoMap::reset_starting_at (superclock_t sc)
 		if (!mtp) {
 			DEBUG_TRACE (DEBUG::MapReset, string_compose ("recompute %1 using %2\n", p->bbt(), metric));
 			superclock_t sc = metric.superclock_at (p->bbt());
-			DEBUG_TRACE (DEBUG::MapReset, string_compose ("\tbased on %1 move to %2,%3\n", p->bbt(), sc, p->beats()));
-			p->set (sc, p->beats(), p->bbt());
+			DEBUG_TRACE (DEBUG::MapReset, string_compose ("\tbased on %1 move to %2,%3\n", p->bbt(), sc, metric.meter().quarters_at (p->bbt())));
+			p->set (sc, metric.meter().quarters_at (p->bbt()), p->bbt());
 		} else {
 			DEBUG_TRACE (DEBUG::MapReset, "\tnot recomputing this one\n");
 		}
