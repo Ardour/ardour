@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-18 00:48+0100\n"
+"PO-Revision-Date: 2022-11-21 19:41+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -3334,7 +3334,7 @@ msgstr "NSM : pas de session créée"
 
 #: ardour_ui_startup.cc:647
 msgid "Copied demo session `%1'."
-msgstr ""
+msgstr "Copie de la session démo `%1'."
 
 #: ardour_ui_startup.cc:651
 msgid "Failed to extract demo session `%1'."
@@ -20318,7 +20318,6 @@ msgstr ""
 "valide, ou que le codec ou format vidéo n'est pas supporté."
 
 #: transcode_video_dialog.cc:140
-#, fuzzy
 msgid "FPS:"
 msgstr "IPS :"
 
@@ -20357,7 +20356,6 @@ msgid "Do Not Import Video"
 msgstr "Ne pas importer la vidéo"
 
 #: transcode_video_dialog.cc:227
-#, fuzzy
 msgid "Scale Video: Width = "
 msgstr "Format vidéo : largeur = "
 
@@ -20383,11 +20381,11 @@ msgstr "Ne pas extraire l'audio"
 
 #: transcode_video_dialog.cc:361 export_video_dialog.cc:436
 msgid "Video transcoding failed."
-msgstr ""
+msgstr "Échec du transcodage vidéo."
 
 #: transcode_video_dialog.cc:401
 msgid "Extracting Audio"
-msgstr ""
+msgstr "Extraction de l'audio"
 
 #: transcode_video_dialog.cc:404
 msgid "Audio Extraction Failed."
@@ -20395,7 +20393,7 @@ msgstr "Échec de l'extraction audio."
 
 #: transcode_video_dialog.cc:431
 msgid "Transcoding Video"
-msgstr ""
+msgstr "Transcodage vidéo"
 
 #: transcode_video_dialog.cc:463
 msgid "Transcoding Failed."
@@ -20462,9 +20460,8 @@ msgstr ""
 "Voulez vous qu'%1 lance \"harvid\" sur cette machine ?"
 
 #: video_server_dialog.cc:203
-#, fuzzy
 msgid "Set Video Server Executable"
-msgstr "Réglages du programme de serveur vidéo"
+msgstr "Choix du programme de serveur vidéo"
 
 #: video_server_dialog.cc:223
 msgid "Server docroot"
@@ -20501,15 +20498,15 @@ msgstr "Vidéo :"
 
 #: export_video_dialog.cc:79
 msgid "Normalize audio"
-msgstr ""
+msgstr "Normaliser audio"
 
 #: export_video_dialog.cc:80
 msgid "Mux only - copy video codec"
-msgstr ""
+msgstr "Mux uniquement - copie du codec vidéo"
 
 #: export_video_dialog.cc:81
 msgid "Include session metadata"
-msgstr ""
+msgstr "Inclure les métadonnées de la session"
 
 #: export_video_dialog.cc:96
 msgid ""
@@ -20521,7 +20518,7 @@ msgstr ""
 
 #: export_video_dialog.cc:112
 msgid "Output (file extension defines format)"
-msgstr ""
+msgstr "Sortie (l'extension du fichier définit le format)"
 
 #: export_video_dialog.cc:130
 msgid "Audio:"
@@ -20533,23 +20530,25 @@ msgstr "Bus master"
 
 #: export_video_dialog.cc:142
 msgid "(default for codec)"
-msgstr ""
+msgstr "(défaut pour le codec)"
 
 #: export_video_dialog.cc:149
 msgid "Session Rate"
-msgstr ""
+msgstr "Taux de la session"
 
 #: export_video_dialog.cc:153
 msgid "Settings"
-msgstr ""
+msgstr "Paramètres"
 
 #: export_video_dialog.cc:169
 msgid "Audio Quality:"
-msgstr ""
+msgstr "Qualité audio :"
 
 #: export_video_dialog.cc:194
 msgid "<b>When enabled</b>, the audio is normalized to 0dBFS during export."
 msgstr ""
+"<b>Lorsque cette option est activée</b>, l'audio est normalisé à 0dBFS "
+"pendant l'exportation."
 
 #: export_video_dialog.cc:195
 msgid ""
@@ -20560,24 +20559,38 @@ msgid ""
 "<b>When disabled</b>, the video is re-encoded, this may lead to quality "
 "loss, but this is the safer option and generally preferable."
 msgstr ""
+"<b>Lorsqu'il est activé</b>, la vidéo n'est pas réencodée, mais le codec "
+"vidéo d'origine est réutilisé. Dans certains cas, cela peut entraîner des "
+"problèmes de synchronisation audio/vidéo. Cela ne fonctionne également que "
+"si la plage exportée n'est pas plus longue que la vidéo. L'ajout d'un espace "
+"noir au début ou à la fin nécessite un encodage.\n"
+"<b>Lorsqu'il est désactivé</b>, la vidéo est ré-encodée, cela peut entraîner "
+"une perte de qualité, mais c'est l'option la plus sûre et généralement "
+"préférable."
 
 #: export_video_dialog.cc:196
 msgid ""
 "<b>When enabled</b>, information from Menu > Session > Metadata is included "
 "in the video file."
 msgstr ""
+"<b>Lorsque cette option est activée</b>, les informations provenant de Menu "
+"> Session > Métadonnées sont incluses dans le fichier vidéo."
 
 #: export_video_dialog.cc:197
 msgid ""
 "Select the sample rate of the audio track. Prefer 48kHz, which is the "
 "standard for video files."
 msgstr ""
+"Sélectionnez la fréquence d'échantillonnage de la piste audio. Préférez "
+"48kHz, qui est la norme pour les fichiers vidéo."
 
 #: export_video_dialog.cc:198
 msgid ""
 "Select the bitrate of the audio track in kbit/sec. Higher values result in "
 "better quality, but also a larger file."
 msgstr ""
+"Sélectionnez le débit de la piste audio en kbit/sec. D'une valeur plus "
+"élevée résulte une meilleure qualité, mais aussi un fichier plus volumineux."
 
 #: export_video_dialog.cc:251
 msgid "from session start marker to session end marker"
@@ -20617,7 +20630,7 @@ msgstr ""
 
 #: export_video_dialog.cc:574
 msgid "Export Video: The export-range does not include video."
-msgstr ""
+msgstr "Export vidéo : La plage d'export ne comprend pas la vidéo."
 
 #: export_video_dialog.cc:582
 msgid ""
@@ -20626,6 +20639,10 @@ msgid ""
 "intended result.\n"
 "Continue anyway?"
 msgstr ""
+"La plage d'export est plus longue que le fichier vidéo. Pour ajouter des "
+"images noires, la vidéo doit être encodée. Copier le codec peut échouer ou "
+"ne pas produire le résultat escompté.\n"
+"Continuer quand même ?"
 
 #: export_video_dialog.cc:608
 msgid "Export Video: No Master Out Ports to Connect for Audio Export"
@@ -20654,10 +20671,13 @@ msgid ""
 "The file extension defines the format and codec.\n"
 "Prefer to use .mp4, .mov or .mkv. Otherwise encoding may fail."
 msgstr ""
+"L'extension du fichier définit le format et le codec.\n"
+"Il est préférable d'utiliser .mp4, .mov ou .mkv. Sinon, l'encodage peut "
+"échouer."
 
 #: export_video_dialog.cc:815
 msgid "Input Video File"
-msgstr ""
+msgstr "Fichier vidéo d'entrée"
 
 #~ msgid ""
 #~ "French:\n"
