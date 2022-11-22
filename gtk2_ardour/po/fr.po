@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-23 00:11+0100\n"
+"PO-Revision-Date: 2022-11-23 00:53+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -4252,7 +4252,7 @@ msgstr ""
 
 #: editor.cc:336 editor_actions.cc:710
 msgid "Time Signature"
-msgstr ""
+msgstr "Signature temporelle"
 
 #: editor.cc:337 editor_actions.cc:715
 msgid "Location Markers"
@@ -5332,7 +5332,7 @@ msgstr "Affichage en couches empilées"
 
 #: editor_actions.cc:274
 msgid "Overlaid layer display"
-msgstr ""
+msgstr "Affichage en couches superposées"
 
 #: editor_actions.cc:276
 msgid "Show Playlist Selector"
@@ -5550,7 +5550,7 @@ msgstr "Découper"
 
 #: editor_actions.cc:405
 msgid "Add Range Marker from Selection"
-msgstr ""
+msgstr "Ajouter un repère d'intervalle depuis la sélection"
 
 #: editor_actions.cc:408
 msgid "Consolidate Range (with processing)"
@@ -5618,7 +5618,7 @@ msgstr "Supprimer du temps"
 
 #: editor_actions.cc:488 editor_ops.cc:9363
 msgid "Remove Gaps"
-msgstr ""
+msgstr "Supprimer les écarts"
 
 #: editor_actions.cc:493
 msgid "New Playlist For Rec-Armed Tracks"
@@ -7910,15 +7910,15 @@ msgstr "Date Modifiée"
 
 #: editor_snapshots.cc:114
 msgid "Load Snapshot?"
-msgstr ""
+msgstr "Charger le cliché ?"
 
 #: editor_snapshots.cc:115
 msgid "Do you want to load this snapshot?"
-msgstr ""
+msgstr "Voulez-vous charger ce cliché ?"
 
 #: editor_snapshots.cc:118
 msgid "Yes, Load It"
-msgstr ""
+msgstr "Oui, le charger"
 
 #: editor_snapshots.cc:165
 msgid "Rename Snapshot"
@@ -7950,11 +7950,11 @@ msgstr "Piste originale enregistrée sur"
 
 #: editor_sources.cc:89 trigger_source_list.cc:34
 msgid "# Xruns"
-msgstr ""
+msgstr "# décrochages"
 
 #: editor_sources.cc:89 trigger_source_list.cc:34
 msgid "Number of dropouts that occurred during recording"
-msgstr ""
+msgstr "Nombre d'abandons survenus pendant l'enregistrement"
 
 #: editor_sources.cc:93 trigger_source_list.cc:35
 msgid "Take ID"
@@ -8017,7 +8017,7 @@ msgstr "ajouter"
 
 #: editor_tempodisplay.cc:516
 msgid "add time signature"
-msgstr ""
+msgstr "Ajouter la signature temporelle"
 
 #: editor_tempodisplay.cc:552
 msgid "add BBT marker"
@@ -8029,11 +8029,11 @@ msgstr "terminé"
 
 #: editor_tempodisplay.cc:617
 msgid "edit time signature"
-msgstr ""
+msgstr "éditer la signature temporelle"
 
 #: editor_tempodisplay.cc:641 editor_tempodisplay.cc:668
 msgid "edit tempo"
-msgstr ""
+msgstr "éditer le tempo"
 
 #: editor_tempodisplay.cc:693
 msgid "remove BBT marker"
@@ -8067,11 +8067,11 @@ msgstr "impossible de démarrer timefx : erreur de création de thread"
 
 #: engine_dialog.cc:87
 msgid "Advanced Settings"
-msgstr ""
+msgstr "Paramètres avancés"
 
 #: engine_dialog.cc:88
 msgid "Hardware Monitoring"
-msgstr ""
+msgstr "Écoute de contrôle matérielle"
 
 #: engine_dialog.cc:93
 msgid "Audio System:"
@@ -8100,11 +8100,11 @@ msgstr "Périphérique de sortie :"
 #: engine_dialog.cc:99 export_report.cc:166 export_report.cc:360 sfdb_ui.cc:189
 #: sfdb_ui.cc:421 sfdb_ui.cc:426 export_video_dialog.cc:164
 msgid "Sample Rate:"
-msgstr ""
+msgstr "Taux d'échantillonnage :"
 
 #: engine_dialog.cc:100
 msgid "Buffer Size:"
-msgstr ""
+msgstr "Taille de tampon :"
 
 #: engine_dialog.cc:101
 msgid "Periods:"
@@ -8132,7 +8132,7 @@ msgstr "Panneau de contrôle des appareils"
 
 #: engine_dialog.cc:109
 msgid "Setup & Calibration"
-msgstr ""
+msgstr "Réglage & calibration"
 
 #: engine_dialog.cc:111
 msgid "Refresh Devices"
@@ -8152,7 +8152,7 @@ msgstr "Mesurer"
 
 #: engine_dialog.cc:115
 msgid "Use Results"
-msgstr ""
+msgstr "Utiliser les résultats"
 
 #: engine_dialog.cc:116
 msgid "Back to Settings (Ignore Results)"
@@ -8179,11 +8179,11 @@ msgstr ""
 
 #: engine_dialog.cc:159 rc_option_editor.cc:4156
 msgid "Audio Hardware"
-msgstr ""
+msgstr "Matériel audio"
 
 #: engine_dialog.cc:164 rc_option_editor.cc:4150
 msgid "Audio Driver"
-msgstr ""
+msgstr "Pilote audio"
 
 #: engine_dialog.cc:206
 msgid "Latency Measurement Tool"
