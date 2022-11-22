@@ -1196,7 +1196,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 	}
 
 	/* Now iterate over remaining points and recompute their audio time
-	 * positions.
+	 * and beat time positions.
 	 */
 
 	for ( ; p != _points.end(); ++p) {
