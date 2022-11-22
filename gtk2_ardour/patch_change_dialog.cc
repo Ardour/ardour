@@ -176,7 +176,7 @@ PatchChangeDialog::patch () const
 	Temporal::Beats t = Temporal::Beats();
 
 	if (_region) {
-		t = _region->absolute_time_to_source_beats (_time.current_time ());
+		t = _region->absolute_time_to_source_beats (_time.last_when ());
 	}
 
 	return Evoral::PatchChange<Temporal::Beats> (

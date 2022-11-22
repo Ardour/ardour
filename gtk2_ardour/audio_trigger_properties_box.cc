@@ -299,7 +299,7 @@ AudioTriggerPropertiesBox::beats_changed ()
 void
 AudioTriggerPropertiesBox::start_clock_changed ()
 {
-	trigger()->set_start(_start_clock.current_time());
+	trigger()->set_start(_start_clock.last_when());
 }
 
 void

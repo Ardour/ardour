@@ -48,7 +48,7 @@ namespace ARDOUR {
 
 class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 {
-	public:
+public:
 	enum Mode {
 		Timecode,
 		BBT,
@@ -79,14 +79,13 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void set_from_playhead ();
 	void locate ();
-	void set_mode (Mode, bool noemit = false);
-	void set_bbt_reference (Temporal::timepos_t const &);
+	void set_mode (Mode);
 
 	void copy_text_to_clipboard () const;
 
 	std::string name() const { return _name; }
 
-	Temporal::timepos_t current_time () const;
+	Temporal::timepos_t last_when () const { return last_time.position(); }
 	Temporal::timecnt_t current_duration (Temporal::timepos_t position = Temporal::timepos_t()) const;
 	void set_session (ARDOUR::Session *s);
 	void set_negative_allowed (bool yn);
@@ -106,15 +105,12 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	sigc::signal<void> ValueChanged;
 	sigc::signal<void> mode_changed;
-	sigc::signal<void> ChangeAborted;
 
-	static sigc::signal<void> ModeChanged;
 	static std::vector<AudioClock*> clocks;
 
-	protected:
+protected:
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	bool get_is_duration () const { return is_duration; }
-	Temporal::timecnt_t offset () const { return _offset; }
 
 	virtual void build_ops_menu ();
 	Gtk::Menu  *ops_menu;
@@ -125,24 +121,19 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	ArdourWidgets::ArdourButton _left_btn;
 	ArdourWidgets::ArdourButton _right_btn;
 
-	private:
+private:
 	Mode             _mode;
 	std::string      _name;
-	bool              is_transient;
 	bool              is_duration;
 	bool              editable;
 	/** true if this clock follows the playhead, meaning that certain operations are redundant */
 	bool             _follows_playhead;
 	bool             _accept_on_focus_out;
 	bool             _off;
-	bool             _edit_by_click_field;
 	bool             _negative_allowed;
 	bool             edit_is_negative;
 
 	Temporal::timepos_t _limit_pos;
-	Temporal::timepos_t duration_position;
-
-	Temporal::timecnt_t _offset;
 
 	Glib::RefPtr<Pango::Layout> _layout;
 
@@ -161,10 +152,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	int layout_width;
 	double corner_radius;
 	uint32_t font_size;
-
-	static const double info_font_scale_factor;
-	static const double separator_height;
-	static const double x_leading_padding;
 
 	enum Field {
 		Timecode_Hours = 1,
@@ -199,10 +186,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	std::string input_string;
 
 	Temporal::timecnt_t last_time;
-	Temporal::timepos_t last_when() const { return last_time.position(); }
-
-	bool last_pdelta;
-	bool last_sdelta;
 
 	bool dragging;
 	double drag_start_y;
@@ -220,11 +203,11 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool on_focus_out_event (GdkEventFocus*);
 
 	void set_slave_info ();
-	void set_timecode (Temporal::timepos_t const &, bool);
-	void set_bbt (Temporal::timecnt_t const &, bool);
-	void set_minsec (Temporal::timepos_t const &, bool);
-	void set_seconds (Temporal::timepos_t const &, bool);
-	void set_samples (Temporal::timepos_t const &, bool);
+	void set_timecode (Temporal::timepos_t const &);
+	void set_bbt (Temporal::timecnt_t const &);
+	void set_minsec (Temporal::timepos_t const &);
+	void set_seconds (Temporal::timepos_t const &);
+	void set_samples (Temporal::timepos_t const &);
 	void set_out_of_bounds (bool negative);
 	void finish_set (Temporal::timepos_t const &, bool);
 
@@ -251,7 +234,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void start_edit (Field f = Field (0));
 	void end_edit (bool);
 	void end_edit_relative (bool);
-	void edit_next_field ();
 
 	Temporal::timecnt_t parse_as_distance (const std::string&);
 	Temporal::timecnt_t parse_as_timecode_distance (const std::string&);

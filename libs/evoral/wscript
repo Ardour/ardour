@@ -36,10 +36,6 @@ def options(opt):
 def configure(conf):
     #autowaf.display_header('Evoral Configuration')
 
-    autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
-    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
-    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
-    autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.14.0')
     if not autowaf.is_child():
         autowaf.check_pkg(conf, 'libpbd-4', uselib_store='LIBPBD', atleast_version='4.0.0', mandatory=True)
 
@@ -71,7 +67,7 @@ def build(bld):
             libsmf/smf_save.c
             libsmf/smf_tempo.c
     '''
-    libsmf.export_includes = ['./libsmf']
+    libsmf.export_includes = ['.']
     libsmf.defines      = ['SMF_VERSION="1.2"', 'LIBSMF_DLL_EXPORTS']
     libsmf.includes     = ['./src']
     libsmf.name         = 'libsmf'

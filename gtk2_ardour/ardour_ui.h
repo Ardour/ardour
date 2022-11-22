@@ -175,6 +175,7 @@ class MidiTracer;
 class NSM_Client;
 class LevelMeterHBox;
 class GUIObjectState;
+class BasicUI;
 
 namespace ARDOUR {
 	class ControlProtocolInfo;
@@ -291,6 +292,9 @@ public:
 	XMLNode* keyboard_settings () const;
 	XMLNode* clock_mode_settings () const;
 	XMLNode* tearoff_settings (const char*) const;
+
+	void trigger_slot (int c, int r);
+	void trigger_cue_row (int r);
 
 	void save_ardour_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);
@@ -436,6 +440,7 @@ private:
 
 	Gtk::Menu*    _shared_popup_menu;
 
+	BasicUI*      _basic_ui;
 	void hide_tabbable (ArdourWidgets::Tabbable*);
 	void detach_tabbable (ArdourWidgets::Tabbable*);
 	void attach_tabbable (ArdourWidgets::Tabbable*);

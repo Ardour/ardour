@@ -36,6 +36,8 @@
 #include "pbd/ringbuffer.h"
 #include "pbd/stateful.h"
 
+#include "midi++/types.h"
+
 #include "temporal/beats.h"
 #include "temporal/bbt_time.h"
 #include "temporal/tempo.h"
@@ -58,6 +60,10 @@ namespace RubberBand {
 	class RubberBandStretcher;
 }
 
+namespace MIDI {
+	class Parser;
+}
+
 namespace ARDOUR {
 
 class Session;
@@ -65,6 +71,7 @@ class AudioRegion;
 class MidiRegion;
 class TriggerBox;
 class SideChain;
+class MidiPort;
 
 typedef uint32_t color_t;
 
@@ -780,9 +787,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 	TriggerPtr get_next_trigger ();
 	TriggerPtr peek_next_trigger ();
 
-	void add_midi_sidechain ();
-	void update_sidechain_name ();
-
 	void request_reload (int32_t slot, void*);
 	void set_region (uint32_t slot, boost::shared_ptr<Region> region);
 
@@ -802,11 +806,24 @@ class LIBARDOUR_API TriggerBox : public Processor
 	enum TriggerMidiMapMode {
 		AbletonPush,
 		SequentialNote,
-		ByMidiChannel
+		ByMidiChannel,
+		Custom,
 	};
 
 	/* This is null for TriggerBoxen constructed with DataType::AUDIO */
 	MidiStateTracker* tracker;
+
+	static bool lookup_custom_midi_binding (std::vector<uint8_t> const &, int& x, int& y);
+	static void add_custom_midi_binding (std::vector<uint8_t> const &, int x, int y);
+	static void remove_custom_midi_binding (int x, int y);
+	static void clear_custom_midi_bindings ();
+	static int  save_custom_midi_bindings (std::string const & path);
+	static int  load_custom_midi_bindings (XMLNode const &);
+	static XMLNode* get_custom_midi_binding_state ();
+
+	void begin_midi_learn (int index);
+	void midi_unlearn (int index);
+	void stop_midi_learn ();
 
 	static Temporal::BBT_Offset assumed_trigger_duration () { return _assumed_trigger_duration; }
 	static void set_assumed_trigger_duration (Temporal::BBT_Offset const &);
@@ -818,6 +835,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void set_first_midi_note (int n);
 
 	static void init ();
+	static void static_init (Session&);
 	static void begin_process_cycle ();
 
 	static TriggerBoxThread* worker;
@@ -855,8 +873,6 @@ class LIBARDOUR_API TriggerBox : public Processor
 	bool                     _cancel_locate_armed;
 	bool                     _fast_forwarding;
 
-	boost::shared_ptr<SideChain> _sidechain;
-
 	PBD::PCGRand _pcg;
 
 	/* These four are accessed (read/write) only from process() context */
@@ -869,13 +885,8 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	void maybe_swap_pending (uint32_t);
 
-	int note_to_trigger (int node, int channel);
-
-	void note_on (int note_number, int velocity);
-	void note_off (int note_number, int velocity);
-
-	void reconnect_to_default ();
 	void parameter_changed (std::string const &);
+	static void static_parameter_changed (std::string const &);
 
 	static int _first_midi_note;
 	static TriggerMidiMapMode _midi_map_mode;
@@ -918,6 +929,20 @@ class LIBARDOUR_API TriggerBox : public Processor
 	int handle_stopped_trigger (BufferSet& bufs, pframes_t dest_offset);
 
 	PBD::ScopedConnection stop_all_connection;
+
+	typedef  std::map<std::vector<uint8_t>,std::pair<int,int> > CustomMidiMap;
+	static CustomMidiMap _custom_midi_map;
+
+	static void midi_input_handler (MIDI::Parser&, MIDI::byte*, size_t, samplecnt_t);
+	static MIDI::Parser* input_parser;
+	static PBD::ScopedConnection midi_input_connection;
+	static void input_port_check ();
+	static PBD::ScopedConnectionList static_connections;
+	static boost::shared_ptr<MidiPort> current_input;
+
+	static bool _learning;
+	static std::pair<int,int> learning_for;
+	static PBD::Signal0<void> TriggerMIDILearned;
 
 	static void init_pool();
 

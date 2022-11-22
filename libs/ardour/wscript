@@ -391,7 +391,7 @@ def build(bld):
         obj.defines      = []
 
     obj.export_includes = ['.']
-    obj.includes     = ['.', '../vst3/', '../surfaces/control_protocol', '..']
+    obj.includes     = ['.', '../vst3/', '../ctrl-interface/control_protocol', '..']
     obj.name         = 'libardour'
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID', 'LO',

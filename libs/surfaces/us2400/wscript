@@ -35,7 +35,6 @@ def build(bld):
             surface_port.cc
             types.cc
     '''
-    obj.export_includes = ['./us2400']
     obj.defines      = [ 'PACKAGE="ardour_us2400"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = [ '.' ]

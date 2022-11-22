@@ -125,6 +125,8 @@
 
 #include "temporal/time.h"
 
+#include "control_protocol/basic_ui.h"
+
 #include "about.h"
 #include "actions.h"
 #include "add_route_dialog.h"
@@ -258,14 +260,18 @@ libxml_structured_error_func (void* /* parsing_context*/,
 	if (!msg.empty()) {
 		if (err->file && err->line) {
 			error << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
+			std::cerr << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
 
 			if (err->int2) {
 				error << ':' << err->int2;
+				std::cerr << ':' << err->int2;
 			}
 
 			error << endmsg;
+			std::cerr << std::endl;
 		} else {
 			error << X_("XML error: ") << msg << endmsg;
+			std::cerr << X_("XML error: ") << msg << std::endl;
 		}
 	}
 }
@@ -275,8 +281,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	: Gtkmm2ext::UI (PROGRAM_NAME, X_("gui"), argcp, argvp)
 	, session_load_in_progress (false)
 	, gui_object_state (new GUIObjectState)
-	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))
-	, secondary_clock (new MainClock (X_("secondary"), X_("secondary"), false))
+	, primary_clock   (new MainClock (X_("primary"),   X_("transport")))
+	, secondary_clock (new MainClock (X_("secondary"), X_("secondary")))
 	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
 	, video_timeline(0)
 	, ignore_dual_punch (false)
@@ -289,6 +295,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
 	, _shared_popup_menu (0)
+	, _basic_ui (0)
 	, startup_fsm (0)
 	, secondary_clock_spacer (0)
 	, latency_disable_button (ArdourButton::led_default_elements)
@@ -2252,7 +2259,7 @@ void
 ARDOUR_UI::primary_clock_value_changed ()
 {
 	if (_session) {
-		_session->request_locate (primary_clock->current_time ().samples());
+		_session->request_locate (primary_clock->last_when ().samples());
 	}
 }
 
@@ -2260,7 +2267,7 @@ void
 ARDOUR_UI::big_clock_value_changed ()
 {
 	if (_session) {
-		_session->request_locate (big_clock->current_time ().samples());
+		_session->request_locate (big_clock->last_when ().samples());
 	}
 }
 
@@ -2268,7 +2275,7 @@ void
 ARDOUR_UI::secondary_clock_value_changed ()
 {
 	if (_session) {
-		_session->request_locate (secondary_clock->current_time ().samples());
+		_session->request_locate (secondary_clock->last_when ().samples());
 	}
 }
 void
@@ -3109,4 +3116,25 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 	window.signal_key_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_event_handler), &window), false);
 	window.signal_key_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_event_handler), &window), false);
 }
+
+void
+ARDOUR_UI::trigger_slot (int c, int r)
+{
+	if (!_basic_ui) {
+		return;
+	}
+
+	_basic_ui->bang_trigger_at (c, r);
+}
+
+void
+ARDOUR_UI::trigger_cue_row (int r)
+{
+	if (!_basic_ui) {
+		return;
+	}
+
+	_basic_ui->trigger_cue_row (r);
+}
+
 

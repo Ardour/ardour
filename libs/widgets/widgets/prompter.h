@@ -57,6 +57,7 @@ public:
 	void change_labels (std::string ok, std::string cancel);
 
 	void get_result (std::string &str, bool strip=true);
+	void set_allow_empty (bool yn = true);
 
 protected:
 	Gtk::Entry& the_entry() { return entry; }
@@ -70,6 +71,7 @@ private:
 	Gtk::Label entryLabel;
 	bool first_show;
 	bool can_accept_from_entry;
+	bool allow_empty;
 
 	void init (bool with_cancel);
 	void entry_activated ();

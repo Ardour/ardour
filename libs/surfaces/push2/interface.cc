@@ -75,7 +75,7 @@ probe_push2 (ControlProtocolDescriptor*)
 static void*
 push2_request_buffer_factory (uint32_t num_requests)
 {
-	return Push2::request_factory (num_requests);
+	return MIDISurface::request_factory (num_requests);
 }
 
 static ControlProtocolDescriptor push2_descriptor = {

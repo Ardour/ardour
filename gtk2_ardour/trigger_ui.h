@@ -88,15 +88,11 @@ public:
 	void clear_trigger ();
 	void edit_trigger ();
 
+	void trigger_midi_learn ();
+	void trigger_midi_unlearn ();
+
 private:
 	void trigger_changed (PBD::PropertyChange const& );  //calls on_trigger_changed to subclasses
-
-	/* Actions for Triggers: accessed via ardour_ui and shortcuts and lua */
-	static Glib::RefPtr<Gtk::ActionGroup> trigger_actions;
-	static void trigger_cue_row (int32_t);
-	static Gtkmm2ext::Bindings* bindings;
-	static void                 load_bindings ();
-	static void                 register_actions ();
 
 protected:
 	/* all of this for name editing ...  */

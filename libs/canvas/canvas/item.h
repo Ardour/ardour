@@ -269,10 +269,6 @@ public:
 	std::string whoami() const { return whatami(); }
 #endif
 
-#ifdef CANVAS_COMPATIBILITY
-	void grab_focus ();
-#endif
-
 	const std::string& tooltip () const { return _tooltip; }
 	void set_tooltip (const std::string&);
 

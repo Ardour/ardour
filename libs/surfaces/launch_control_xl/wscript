@@ -22,7 +22,6 @@ def build(bld):
         leds.cc
         gui.cc
     '''
-    obj.export_includes = ['.']
     obj.defines = ['PACKAGE="ardour_launch_control_xl"']
     obj.defines += ['ARDOURSURFACE_DLL_EXPORTS']
     obj.defines += ['VERSIONSTRING="' + bld.env['VERSION'] + '"']

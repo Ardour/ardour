@@ -223,6 +223,31 @@ private:
 
 static LV2World _world;
 
+static bool
+is_inside_bundle (std::string const& bundle_dir, std::string path)
+{
+	assert (Glib::file_test (bundle_dir, Glib::FILE_TEST_IS_DIR | Glib::FILE_TEST_EXISTS));
+
+	if (bundle_dir.size () > path.size ()) {
+		return false;
+	}
+	if (bundle_dir == path) {
+		return true;
+	}
+	if (path == Glib::path_get_dirname (path)) {
+		/* path must be root */
+		return false;
+	}
+	while (bundle_dir.size () < path.size ()) {
+		/* step up, compare with bundle_dir */
+		path = Glib::path_get_dirname (path);
+		if (bundle_dir == path) {
+			return true;
+		}
+	}
+	return false;
+}
+
 /* worker extension */
 
 /** Called by the plugin to schedule non-RT work. */
@@ -1489,17 +1514,43 @@ LV2Plugin::find_presets()
 	LilvNode* pset_Preset   = lilv_new_uri(_world.world, LV2_PRESETS__Preset);
 	LilvNode* rdfs_label    = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
 	LilvNode* rdfs_comment  = lilv_new_uri(_world.world, LILV_NS_RDFS "comment");
+	LilvNode* rdfs_seeAlso  = lilv_new_uri(_world.world, LILV_NS_RDFS "seeAlso");
+
+	/* query plugins bundle path */
+	const LilvNode* const bundle_uri = lilv_plugin_get_bundle_uri(_impl->plugin);
+	assert (bundle_uri);
+	char* bundle_path = lilv_file_uri_parse(lilv_node_as_uri(bundle_uri), NULL);
+	std::string bundle_dir = Glib::path_get_dirname (bundle_path);
+	lilv_free (bundle_path);
 
 	LilvNodes* presets = lilv_plugin_get_related(_impl->plugin, pset_Preset);
+
 	LILV_FOREACH(nodes, i, presets) {
 		const LilvNode* preset = lilv_nodes_get(presets, i);
 		lilv_world_load_resource(_world.world, preset);
 		LilvNode* name = get_value(_world.world, preset, rdfs_label);
 		LilvNode* comment = get_value(_world.world, preset, rdfs_comment);
+		LilvNode* seealso = get_value(_world.world, preset, rdfs_seeAlso);
+
 		/* TODO properly identify user vs factory presets.
 		 * here's an indirect condition: only factory presets can have comments
 		 */
 		bool userpreset = comment ? false : true;
+		/* if the preset ttl file is read-only, or part of the plugin bundle
+		 * it is also assumed to be a factory preset */
+		if (seealso) {
+			char* pset_ttl = lilv_file_uri_parse (lilv_node_as_uri(seealso), NULL);
+			if (!exists_and_writable (pset_ttl)) {
+				/* no write access */
+				userpreset = false;
+			} else if (is_inside_bundle (bundle_dir, pset_ttl)) {
+				userpreset = false;
+			}
+			lilv_free (pset_ttl);
+		}
+		// TODO also check for 3rd part preset bundles
+		// > 1 preset in any give manifest.ttl or preset.ttl
+
 		if (name) {
 			_presets.insert(std::make_pair(lilv_node_as_string(preset),
 			                               Plugin::PresetRecord(
@@ -1517,6 +1568,9 @@ LV2Plugin::find_presets()
 		}
 		if (comment) {
 			lilv_node_free(comment);
+		}
+		if (seealso) {
+			lilv_node_free(seealso);
 		}
 	}
 	lilv_nodes_free(presets);
@@ -3575,7 +3629,7 @@ LV2PluginInfo::load(Session& session)
 }
 
 std::vector<Plugin::PresetRecord>
-LV2PluginInfo::get_presets (bool /*user_only*/) const
+LV2PluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
 
@@ -3592,11 +3646,19 @@ LV2PluginInfo::get_presets (bool /*user_only*/) const
 		return p;
 	}
 	assert (lp);
-	// see LV2Plugin::find_presets
+	/* see also  LV2Plugin::find_presets */
 	LilvNode* lv2_appliesTo = lilv_new_uri(_world.world, LV2_CORE__appliesTo);
 	LilvNode* pset_Preset   = lilv_new_uri(_world.world, LV2_PRESETS__Preset);
 	LilvNode* rdfs_label    = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
 	LilvNode* rdfs_comment  = lilv_new_uri(_world.world, LILV_NS_RDFS "comment");
+	LilvNode* rdfs_seeAlso  = lilv_new_uri(_world.world, LILV_NS_RDFS "seeAlso");
+
+	/* query plugins bundle path */
+	const LilvNode* const bundle_uri = lilv_plugin_get_bundle_uri(lp);
+	assert (bundle_uri);
+	char* bundle_path = lilv_file_uri_parse(lilv_node_as_uri(bundle_uri), NULL);
+	std::string bundle_dir = Glib::path_get_dirname (bundle_path);
+	lilv_free (bundle_path);
 
 	LilvNodes* presets = lilv_plugin_get_related(lp, pset_Preset);
 	LILV_FOREACH(nodes, i, presets) {
@@ -3604,16 +3666,38 @@ LV2PluginInfo::get_presets (bool /*user_only*/) const
 		lilv_world_load_resource(_world.world, preset);
 		LilvNode* name = get_value(_world.world, preset, rdfs_label);
 		LilvNode* comment = get_value(_world.world, preset, rdfs_comment);
+		LilvNode* seealso = get_value(_world.world, preset, rdfs_seeAlso);
+
 		/* TODO properly identify user vs factory presets.
 		 * here's an indirect condition: only factory presets can have comments
 		 */
 		bool userpreset = comment ? false : true;
-		if (name) {
+
+		/* if the preset ttl file is read-only, or part of the plugin bundle
+		 * it is also assumed to be a factory preset */
+		if (seealso) {
+			char* pset_ttl = lilv_file_uri_parse (lilv_node_as_uri(seealso), NULL);
+			if (!exists_and_writable (pset_ttl)) {
+				/* no write access */
+				userpreset = false;
+			} else if (is_inside_bundle (bundle_dir, pset_ttl)) {
+				userpreset = false;
+			}
+			lilv_free (pset_ttl);
+		}
+		// TODO also check for 3rd part preset bundles
+		// > 1 preset in any give manifest.ttl or preset.ttl
+
+		if ((!user_only || userpreset) && name) {
 			p.push_back (Plugin::PresetRecord (lilv_node_as_string(preset), lilv_node_as_string(name), userpreset, comment ? lilv_node_as_string (comment) : ""));
 			lilv_node_free(name);
 		}
+
 		if (comment) {
 			lilv_node_free(comment);
+		}
+		if (seealso) {
+			lilv_node_free(seealso);
 		}
 	}
 	lilv_nodes_free(presets);

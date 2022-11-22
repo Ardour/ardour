@@ -192,6 +192,10 @@ AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, ScopedConnect
 void
 AudioSource::touch_peakfile ()
 {
+	if (_flags & NoPeakFile) {
+		return;
+	}
+
 	GStatBuf statbuf;
 
 	if (g_stat (_peakpath.c_str(), &statbuf) != 0 || statbuf.st_size == 0) {
@@ -849,7 +853,7 @@ AudioSource::close_peakfile ()
 int
 AudioSource::prepare_for_peakfile_writes ()
 {
-	if (_session.deletion_in_progress() || _session.peaks_cleanup_in_progres()) {
+	if (_session.deletion_in_progress() || _session.peaks_cleanup_in_progres() || 0 != (_flags & NoPeakFile)) {
 		return -1;
 	}
 

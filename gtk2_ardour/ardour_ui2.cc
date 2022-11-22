@@ -364,14 +364,16 @@ ARDOUR_UI::setup_transport ()
 	latency_disable_button.set_related_action (act);
 
 	set_size_request_to_display_given_text (route_latency_value, "1000 spl", 0, 0);
-	set_size_request_to_display_given_text (io_latency_value, "1000 spl", 0, 0);
+	set_size_request_to_display_given_text (io_latency_value, "888.88 ms", 0, 0);
 
 	/* connect signals */
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (primary_clock, &MainClock::set), false));
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (secondary_clock, &MainClock::set), false));
 
 	primary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
+	primary_clock->change_display_delta_mode_signal.connect (sigc::mem_fun(UIConfiguration::instance(), &UIConfiguration::set_primary_clock_delta_mode));
 	secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
+	secondary_clock->change_display_delta_mode_signal.connect (sigc::mem_fun(UIConfiguration::instance(), &UIConfiguration::set_secondary_clock_delta_mode));
 	big_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
 
 	editor_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));

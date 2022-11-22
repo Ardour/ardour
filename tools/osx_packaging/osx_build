@@ -316,7 +316,7 @@ cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $GTK_ENGINE_DIR/libclea
 
 # Control Surface shared libraries
 cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
-cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
+cp $BUILD_ROOT/libs/ctrl-interface/*/libardour_*.dylib $Frameworks
 
 # Panners
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners

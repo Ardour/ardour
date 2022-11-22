@@ -2,7 +2,7 @@
  * Copyright (C) 2010-2015 David Robillard <d@drobilla.net>
  * Copyright (C) 2010-2018 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2012-2015 Tim Mayberry <mojofunk@gmail.com>
- * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2012-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #include "midi_time_axis.h"
 #include "step_editor.h"
 #include "step_entry.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
@@ -77,7 +78,7 @@ StepEntry::StepEntry ()
 	, channel_spinner (channel_adjustment)
 	, octave_adjustment (4, 0, 10, 1, 4) // start in octave 4
 	, octave_spinner (octave_adjustment)
-	, length_divisor_adjustment (1.0, 1.0, 128, 1.0, 4.0)
+	, length_divisor_adjustment (4.0, 1.0, 128, 1.0, 4.0)
 	, length_divisor_spinner (length_divisor_adjustment)
 	, velocity_adjustment (64.0, 0.0, 127.0, 1.0, 4.0)
 	, velocity_spinner (velocity_adjustment)
@@ -91,78 +92,52 @@ StepEntry::StepEntry ()
 {
 	set_data ("ardour-bindings", bindings);
 
-	RadioButtonGroup length_group = length_1_button.get_group();
-	length_2_button.set_group (length_group);
-	length_4_button.set_group (length_group);
-	length_8_button.set_group (length_group);
-	length_12_button.set_group (length_group);
-	length_16_button.set_group (length_group);
-	length_32_button.set_group (length_group);
-	length_64_button.set_group (length_group);
+	Pango::FontDescription font (ARDOUR_UI_UTILS::sanitized_font ("ArdourSans 24"));
+	length_1_button.set_layout_font (font);
+	length_2_button.set_layout_font (font);
+	length_4_button.set_layout_font (font);
+	length_8_button.set_layout_font (font);
+	length_16_button.set_layout_font (font);
+	length_32_button.set_layout_font (font);
+	length_64_button.set_layout_font (font);
 
-	Widget* w;
+	length_1_button.set_width_padding (.2);
+	length_2_button.set_width_padding (.2);
+	length_4_button.set_width_padding (.2);
+	length_8_button.set_width_padding (.2);
+	length_16_button.set_width_padding (.2);
+	length_32_button.set_width_padding (.2);
+	length_64_button.set_width_padding (.2);
 
-	w = manage (new Image (::get_icon (X_("wholenote"))));
-	w->show();
-	length_1_button.add (*w);
-	w = manage (new Image (::get_icon (X_("halfnote"))));
-	w->show();
-	length_2_button.add (*w);
-	w = manage (new Image (::get_icon (X_("quarternote"))));
-	w->show();
-	length_4_button.add (*w);
-	w = manage (new Image (::get_icon (X_("eighthnote"))));
-	w->show();
-	length_8_button.add (*w);
-	w = manage (new Image (::get_icon (X_("sixteenthnote"))));
-	w->show();
-	length_16_button.add (*w);
-	w = manage (new Image (::get_icon (X_("thirtysecondnote"))));
-	w->show();
-	length_32_button.add (*w);
-	w = manage (new Image (::get_icon (X_("sixtyfourthnote"))));
-	w->show();
-	length_64_button.add (*w);
+	chord_button.set_layout_font (font);
+	chord_button.set_width_padding (.2);
+
+	Pango::FontDescription font2 (ARDOUR_UI_UTILS::sanitized_font ("ArdourSans 12"));
+	velocity_ppp_button.set_layout_font (font2);
+	velocity_pp_button.set_layout_font (font2);
+	velocity_p_button.set_layout_font (font2);
+	velocity_mp_button.set_layout_font (font2);
+	velocity_mf_button.set_layout_font (font2);
+	velocity_f_button.set_layout_font (font2);
+	velocity_ff_button.set_layout_font (font2);
+	velocity_fff_button.set_layout_font (font2);
 
 	RefPtr<Action> act;
 
 	act = ActionManager::get_action ("StepEditing/note-length-whole");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_1_button.gobj()), act->gobj());
+	length_1_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-length-half");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_2_button.gobj()), act->gobj());
+	length_2_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-length-quarter");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_4_button.gobj()), act->gobj());
+	length_4_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-length-eighth");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_8_button.gobj()), act->gobj());
+	length_8_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-length-sixteenth");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_16_button.gobj()), act->gobj());
+	length_16_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-length-thirtysecond");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_32_button.gobj()), act->gobj());
+	length_32_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-length-sixtyfourth");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_64_button.gobj()), act->gobj());
-
-	length_1_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	length_1_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &length_1_button, 1), false);
-	length_2_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	length_2_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &length_1_button, 2), false);
-	length_4_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	length_4_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &length_1_button, 4), false);
-	length_8_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	length_8_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &length_1_button, 8), false);
-	length_16_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	length_16_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &length_1_button, 16), false);
-	length_32_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	length_32_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &length_1_button, 32), false);
-	length_64_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	length_64_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &length_1_button, 64), false);
-
-	length_1_button.property_draw_indicator() = false;
-	length_2_button.property_draw_indicator() = false;
-	length_4_button.property_draw_indicator() = false;
-	length_8_button.property_draw_indicator() = false;
-	length_16_button.property_draw_indicator() = false;
-	length_32_button.property_draw_indicator() = false;
-	length_64_button.property_draw_indicator() = false;
+	length_64_button.set_related_action (act);
 
 	note_length_box.pack_start (length_1_button, false, false);
 	note_length_box.pack_start (length_2_button, false, false);
@@ -180,85 +155,22 @@ StepEntry::StepEntry ()
 	set_tooltip (&length_32_button, _("Set note length to a thirty-second note"), "");
 	set_tooltip (&length_64_button, _("Set note length to a sixty-fourth note"), "");
 
-	RadioButtonGroup velocity_group = velocity_ppp_button.get_group();
-	velocity_pp_button.set_group (velocity_group);
-	velocity_p_button.set_group (velocity_group);
-	velocity_mp_button.set_group (velocity_group);
-	velocity_mf_button.set_group (velocity_group);
-	velocity_f_button.set_group (velocity_group);
-	velocity_ff_button.set_group (velocity_group);
-	velocity_fff_button.set_group (velocity_group);
-
-#ifndef HAVE_UTF8_MUSICAL_SYMBOLS
-	/* must be set *before* related action, otherwise text is display */
-	w = manage (new Image (::get_icon (X_("pianississimo"))));
-	w->show();
-	velocity_ppp_button.add (*w);
-	w = manage (new Image (::get_icon (X_("pianissimo"))));
-	w->show();
-	velocity_pp_button.add (*w);
-	w = manage (new Image (::get_icon (X_("piano"))));
-	w->show();
-	velocity_p_button.add (*w);
-	w = manage (new Image (::get_icon (X_("mezzopiano"))));
-	w->show();
-	velocity_mp_button.add (*w);
-	w = manage (new Image (::get_icon (X_("mezzoforte"))));
-	w->show();
-	velocity_mf_button.add (*w);
-	w = manage (new Image (::get_icon (X_("forte"))));
-	w->show();
-	velocity_f_button.add (*w);
-	w = manage (new Image (::get_icon (X_("fortissimo"))));
-	w->show();
-	velocity_ff_button.add (*w);
-	w = manage (new Image (::get_icon (X_("fortississimo"))));
-	w->show();
-	velocity_fff_button.add (*w);
-#endif
-
 	act = ActionManager::get_action ("StepEditing/note-velocity-ppp");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_ppp_button.gobj()), act->gobj());
+	velocity_ppp_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-velocity-pp");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_pp_button.gobj()), act->gobj());
+	velocity_pp_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-velocity-p");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_p_button.gobj()), act->gobj());
+	velocity_p_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-velocity-mp");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_mp_button.gobj()), act->gobj());
+	velocity_mp_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-velocity-mf");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_mf_button.gobj()), act->gobj());
+	velocity_mf_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-velocity-f");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_f_button.gobj()), act->gobj());
+	velocity_f_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-velocity-ff");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_ff_button.gobj()), act->gobj());
+	velocity_ff_button.set_related_action (act);
 	act = ActionManager::get_action ("StepEditing/note-velocity-fff");
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_fff_button.gobj()), act->gobj());
-
-	velocity_ppp_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	velocity_ppp_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &velocity_ppp_button, 1), false);
-	velocity_pp_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	velocity_pp_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &velocity_pp_button, 16), false);
-	velocity_p_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	velocity_p_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &velocity_p_button, 32), false);
-	velocity_mp_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	velocity_mp_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &velocity_mp_button, 64), false);
-	velocity_mf_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	velocity_mf_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &velocity_mf_button, 80), false);
-	velocity_f_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	velocity_f_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &velocity_f_button, 96), false);
-	velocity_ff_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	velocity_ff_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &velocity_ff_button, 112), false);
-	velocity_fff_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
-	velocity_fff_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &StepEntry::radio_button_release), &velocity_fff_button, 127), false);
-
-	velocity_ppp_button.property_draw_indicator() = false;
-	velocity_pp_button.property_draw_indicator() = false;
-	velocity_p_button.property_draw_indicator() = false;
-	velocity_mp_button.property_draw_indicator() = false;
-	velocity_mf_button.property_draw_indicator() = false;
-	velocity_f_button.property_draw_indicator() = false;
-	velocity_ff_button.property_draw_indicator() = false;
-	velocity_fff_button.property_draw_indicator() = false;
+	velocity_fff_button.set_related_action (act);
 
 	set_tooltip (&velocity_ppp_button, _("Set volume (velocity) to pianississimo"), "");
 	set_tooltip (&velocity_pp_button, _("Set volume (velocity) to pianissimo"), "");
@@ -278,18 +190,25 @@ StepEntry::StepEntry ()
 	note_velocity_box.pack_start (velocity_ff_button, false, false);
 	note_velocity_box.pack_start (velocity_fff_button, false, false);
 
-#ifdef HAVE_UTF8_MUSICAL_SYMBOLS
-	/* must be set after related action to override the text */
-	// XXX the text is still rather small, and clipped at the edge -> use ArdurButton, vertical text?
-	velocity_ppp_button.set_label ("\U0001D18F\U0001D18F\U0001D18F"); //MUSICAL SYMBOL PIANO (U+1D18F)
-	velocity_pp_button.set_label ("\U0001D18F\U0001D18F");
-	velocity_p_button.set_label ("\U0001D18F");
-	velocity_mp_button.set_label ("\U0001D190\U0001D18F"); //MUSICAL SYMBOL MEZZO (U+1D190)
-	velocity_mf_button.set_label ("\U0001D190\U0001D191");
-	velocity_f_button.set_label ("\U0001D191"); // MUSICAL SYMBOL FORTE (U+1D191)
-	velocity_ff_button.set_label ("\U0001D191\U0001D191");
-	velocity_fff_button.set_label ("\U0001D191\U0001D191\U0001D191");
-#endif
+	/* https://www.unicode.org/charts/PDF/U1D100.pdf */
+	velocity_ppp_button.set_text ("\U0001D18F\U0001D18F\U0001D18F"); //MUSICAL SYMBOL PIANO (U+1D18F)
+	velocity_pp_button.set_text ("\U0001D18F\U0001D18F");
+	velocity_p_button.set_text ("\U0001D18F");
+	velocity_mp_button.set_text ("\U0001D190\U0001D18F"); //MUSICAL SYMBOL MEZZO (U+1D190)
+	velocity_mf_button.set_text ("\U0001D190\U0001D191");
+	velocity_f_button.set_text ("\U0001D191"); // MUSICAL SYMBOL FORTE (U+1D191)
+	velocity_ff_button.set_text ("\U0001D191\U0001D191");
+	velocity_fff_button.set_text ("\U0001D191\U0001D191\U0001D191");
+
+	length_1_button.set_text ("\U0001D15D"); // MUSICAL SYMBOL WHOLE NOTE
+	length_2_button.set_text ("\U0001D15E"); // MUSICAL SYMBOL HALF NOTE
+	length_4_button.set_text ("\U0001D15F"); // MUSICAL SYMBOL QUARTER NOTE
+	length_8_button.set_text ("\U0001D160"); // MUSICAL SYMBOL EIGHTH NOTE
+	length_16_button.set_text ("\U0001D161"); // MUSICAL SYMBOL SIXTEENTH NOTE
+	length_32_button.set_text ("\U0001D162"); // MUSICAL SYMBOL THIRTY-SECOND NOTE
+	length_64_button.set_text ("\U0001D163"); // MUSICAL SYMBOL SIXTY-FOURTH NOTE
+
+	chord_button.set_text ("\U0001D1D6"); // MUSICAL SYMBOL SCANDICUS (customized in ArdourSans)
 
 	Label* l = manage (new Label);
 	l->set_markup ("<b><big>-</big></b>");
@@ -310,10 +229,6 @@ StepEntry::StepEntry ()
 	l->set_markup ("<b><big>...</big></b>");
 	l->show ();
 	dot3_button.add (*l);
-
-	w = manage (new Image (::get_icon (X_("chord"))));
-	w->show();
-	chord_button.add (*w);
 
 	dot_box1.pack_start (dot0_button, true, false);
 	dot_box1.pack_start (dot1_button, true, false);
@@ -364,9 +279,6 @@ StepEntry::StepEntry ()
 	act = ActionManager::get_action ("StepEditing/toggle-triple-dotted");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dot3_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (dot3_button.gobj()), act->gobj());
-	act = ActionManager::get_action ("StepEditing/toggle-chord");
-	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (chord_button.gobj()), false);
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE (chord_button.gobj()), act->gobj());
 	act = ActionManager::get_action ("StepEditing/insert-rest");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (rest_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (rest_button.gobj()), act->gobj());
@@ -376,6 +288,9 @@ StepEntry::StepEntry ()
 	act = ActionManager::get_action ("StepEditing/sustain");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (sustain_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (sustain_button.gobj()), act->gobj());
+
+	act = ActionManager::get_action ("StepEditing/toggle-chord");
+	chord_button.set_related_action (act);
 
 	upper_box.set_spacing (6);
 	upper_box.pack_start (chord_button, false, false);
@@ -418,6 +333,7 @@ StepEntry::StepEntry ()
 	v->pack_start (octave_spinner, false, false);
 	upper_box.pack_start (*v, false, false);
 
+#if 0 // not implemented in StepEditor
 	v = manage (new VBox);
 	l = manage (new Label (_("Bank")));
 	v->set_spacing (6);
@@ -433,6 +349,7 @@ StepEntry::StepEntry ()
 	v->pack_start (program_spinner, false, false);
 	v->pack_start (program_button, false, false);
 	upper_box.pack_start (*v, false, false);
+#endif
 
 	velocity_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::velocity_value_change));
 	length_divisor_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::length_value_change));
@@ -448,8 +365,6 @@ StepEntry::StepEntry ()
 	beat_resync_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::beat_resync_click));
 	bar_resync_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::bar_resync_click));
 
-	length_divisor_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::length_changed));
-
 	packer.set_spacing (6);
 	packer.pack_start (upper_box, false, false);
 	packer.pack_start (_piano, false, false);
@@ -458,9 +373,10 @@ StepEntry::StepEntry ()
 	add (packer);
 
 	/* initial settings: quarter note and mezzo forte */
-
 	ActionManager::get_radio_action ("StepEditing/note-length-quarter")->set_active (true);
 	ActionManager::get_radio_action ("StepEditing/note-velocity-mf")->set_active (true);
+	length_value_change ();
+	velocity_value_change ();
 }
 
 StepEntry::~StepEntry()
@@ -499,18 +415,6 @@ StepEntry::set_step_editor (StepEditor* seditor)
 	}
 }
 
-
-void
-StepEntry::length_changed ()
-{
-	length_1_button.queue_draw ();
-	length_2_button.queue_draw ();
-	length_4_button.queue_draw ();
-	length_8_button.queue_draw ();
-	length_16_button.queue_draw ();
-	length_32_button.queue_draw ();
-	length_64_button.queue_draw ();
-}
 
 bool
 StepEntry::on_key_press_event (GdkEventKey* ev)
@@ -960,6 +864,7 @@ StepEntry::velocity_value_change ()
 
 			if (ract) {
 				if (ract->property_value() == val) {
+					ract->set_active (false);
 					ract->set_active (true);
 					inconsistent = false;
 					break;
@@ -968,14 +873,16 @@ StepEntry::velocity_value_change ()
 		}
 	}
 
-	velocity_ppp_button.set_inconsistent (inconsistent);
-	velocity_pp_button.set_inconsistent (inconsistent);
-	velocity_p_button.set_inconsistent (inconsistent);
-	velocity_mp_button.set_inconsistent (inconsistent);
-	velocity_mf_button.set_inconsistent (inconsistent);
-	velocity_f_button.set_inconsistent (inconsistent);
-	velocity_ff_button.set_inconsistent (inconsistent);
-	velocity_fff_button.set_inconsistent (inconsistent);
+	if (inconsistent) {
+		velocity_ppp_button.unset_active_state ();
+		velocity_pp_button.unset_active_state ();
+		velocity_p_button.unset_active_state ();
+		velocity_mp_button.unset_active_state ();
+		velocity_mf_button.unset_active_state ();
+		velocity_f_button.unset_active_state ();
+		velocity_ff_button.unset_active_state ();
+		velocity_fff_button.unset_active_state ();
+	}
 }
 
 void
@@ -983,6 +890,7 @@ StepEntry::length_value_change ()
 {
 	RefPtr<Action> act;
 	RefPtr<RadioAction> ract;
+	double val = length_divisor_adjustment.get_value();
 	bool inconsistent = true;
 	vector<const char*> length_actions;
 
@@ -997,49 +905,29 @@ StepEntry::length_value_change ()
 	for (vector<const char*>::iterator i = length_actions.begin(); i != length_actions.end(); ++i) {
 
 		Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (*i);
-
-		ract->set_active (true);
-		inconsistent = false;
-		break;
+		if (ract) {
+			if (ract->property_value() == val) {
+				ract->set_active (false);
+				ract->set_active (true);
+				inconsistent = false;
+				break;
+			}
+		}
 	}
 
-	length_1_button.set_inconsistent (inconsistent);
-	length_2_button.set_inconsistent (inconsistent);
-	length_4_button.set_inconsistent (inconsistent);
-	length_8_button.set_inconsistent (inconsistent);
-	length_16_button.set_inconsistent (inconsistent);
-	length_32_button.set_inconsistent (inconsistent);
-	length_64_button.set_inconsistent (inconsistent);
+	if (inconsistent) {
+		length_1_button.unset_active_state ();
+		length_2_button.unset_active_state ();
+		length_4_button.unset_active_state ();
+		length_8_button.unset_active_state ();
+		length_16_button.unset_active_state ();
+		length_32_button.unset_active_state ();
+		length_64_button.unset_active_state ();
+	}
 
 	if (se) {
 		se->set_step_edit_cursor_width (note_length());
 	}
-}
-
-bool
-StepEntry::radio_button_press (GdkEventButton* ev)
-{
-	if (ev->button == 1) {
-		return true;
-	}
-
-	return false;
-}
-
-bool
-StepEntry::radio_button_release (GdkEventButton* ev, RadioButton* btn, int v)
-{
-	if (ev->button == 1) {
-		GtkAction* act = gtk_activatable_get_related_action (GTK_ACTIVATABLE (btn->gobj()));
-
-		if (act) {
-			gtk_radio_action_set_current_value (GTK_RADIO_ACTION(act), v);
-		}
-
-		return true;
-	}
-
-	return false;
 }
 
 void

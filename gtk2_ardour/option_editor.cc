@@ -668,7 +668,7 @@ void
 ClockOption::save_clock_time ()
 {
 	Timecode::Time TC;
-	_session->sample_to_timecode (_clock.current_time().samples(), TC, false, false);
+	_session->sample_to_timecode (_clock.last_when().samples(), TC, false, false);
 	_set (Timecode::timecode_format_time(TC));
 }
 

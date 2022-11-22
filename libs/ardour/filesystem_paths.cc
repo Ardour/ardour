@@ -31,6 +31,7 @@
 #include <glibmm/fileutils.h>
 
 #include "ardour/directory_names.h"
+#include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 
 #include "pbd/i18n.h"
@@ -311,6 +312,5 @@ been_here_before_path (int version)
 
 	return Glib::build_filename (user_config_directory (version), string (".a") + to_string (version));
 }
-
 
 } // namespace ARDOUR

@@ -204,7 +204,7 @@ EditNoteDialog::done (int r)
 	boost::shared_ptr<ARDOUR::Region> region (_region_view->region ());
 
 	/* convert current clock time into an offset from the start of the source */
-	timecnt_t const time_clock_source_relative = region->source_position ().distance (_time_clock.current_time ());
+	timecnt_t const time_clock_source_relative = region->source_position ().distance (_time_clock.last_when ());
 
 	/* convert that into a position in Beats - this will be the new note time (as an offset inside the source) */
 	Beats const new_note_time_source_relative_beats = time_clock_source_relative.beats ();

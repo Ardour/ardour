@@ -1,0 +1,33 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    pass
+
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = '''
+            midi_surface.cc
+            midi_byte_array.cc
+    '''
+    obj.export_includes = ['.']
+    obj.defines      = [ 'PACKAGE="ardour_midisurface"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
+    obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]
+    obj.includes     = ['.', './midi_surface']
+    obj.name         = 'libardour_midisurface'
+    obj.target       = 'ardour_midisurface'
+    obj.uselib       = 'GLIB GLIBMM SIGCPP XML OSX'
+    obj.use          = 'libardour libardour_cp libpbd libevoral libmidipp libtemporal'
+    obj.install_path = bld.env['LIBDIR']
+
+def shutdown():
+    autowaf.shutdown()

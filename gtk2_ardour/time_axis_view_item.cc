@@ -73,7 +73,7 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 void
 TimeAxisViewItem::set_constant_heights ()
 {
-	NAME_FONT = Pango::FontDescription (UIConfiguration::instance().get_SmallFont());
+	NAME_FONT = Pango::FontDescription (UIConfiguration::instance().get_ArdourSmallFont());
 
 	Gtk::Window win;
 	Gtk::Label foo;

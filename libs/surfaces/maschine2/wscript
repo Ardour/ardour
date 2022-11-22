@@ -28,7 +28,6 @@ def build(bld):
             ui_knob.cc
             ui_menu.cc
     '''
-    obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_maschine2"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]

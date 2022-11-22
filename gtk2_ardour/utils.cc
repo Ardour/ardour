@@ -285,6 +285,22 @@ ARDOUR_UI_UTILS::sanitized_font (std::string const& name)
 }
 
 Pango::FontDescription
+ARDOUR_UI_UTILS::ardour_font (std::string const& name)
+{
+	Pango::FontDescription fd (name);
+	if (!fd.get_family().empty() && fd.get_family().find ("Mon") != std::string::npos) {
+		/* matches "ArdourMono", "Monaco" */
+		fd.set_family ("ArdourMono");
+	} else {
+		fd.set_family ("ArdourSans");
+	}
+
+	return fd;
+}
+
+
+
+Pango::FontDescription
 ARDOUR_UI_UTILS::get_font_for_style (string widgetname)
 {
 	Gtk::Window window (WINDOW_TOPLEVEL);

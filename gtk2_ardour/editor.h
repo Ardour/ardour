@@ -1458,6 +1458,7 @@ private:
 	                     boost::shared_ptr<ARDOUR::Track>&     track,
 	                     std::string const&                    pgroup_id,
 	                     bool                                  replace,
+	                     bool                                  with_markers,
 	                     boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
 	int embed_sndfiles (std::vector<std::string>              paths,
@@ -1540,7 +1541,6 @@ private:
 	void import_audio (bool as_tracks);
 	void do_import (std::vector<std::string> paths, bool split, bool as_tracks);
 	void import_smf_tempo_map (Evoral::SMF const &, Temporal::timepos_t const & pos);
-	void import_smf_markers (Evoral::SMF &, Temporal::timepos_t const & pos);
 	void move_to_start ();
 	void move_to_end ();
 	void center_playhead ();

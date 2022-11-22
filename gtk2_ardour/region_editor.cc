@@ -291,7 +291,7 @@ RegionEditor::position_clock_changed ()
 		in_command = true;
 
 		_region->clear_changes ();
-		_region->set_position (position_clock.current_time());
+		_region->set_position (position_clock.last_when());
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
@@ -311,7 +311,7 @@ RegionEditor::end_clock_changed ()
 		in_command = true;
 
 		_region->clear_changes ();
-		_region->trim_end (end_clock.current_time());
+		_region->trim_end (end_clock.last_when());
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
@@ -425,7 +425,7 @@ RegionEditor::sync_offset_absolute_clock_changed ()
 	PublicEditor::instance().begin_reversible_command (_("change region sync point"));
 
 	_region->clear_changes ();
-	_region->set_sync_position (sync_offset_absolute_clock.current_time());
+	_region->set_sync_position (sync_offset_absolute_clock.last_when());
 	_session->add_command (new StatefulDiffCommand (_region));
 
 	PublicEditor::instance().commit_reversible_command ();
@@ -437,7 +437,7 @@ RegionEditor::sync_offset_relative_clock_changed ()
 	PublicEditor::instance().begin_reversible_command (_("change region sync point"));
 
 	_region->clear_changes ();
-	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->position ());
+	_region->set_sync_position (sync_offset_relative_clock.last_when() + _region->position ());
 	_session->add_command (new StatefulDiffCommand (_region));
 
 	PublicEditor::instance().commit_reversible_command ();

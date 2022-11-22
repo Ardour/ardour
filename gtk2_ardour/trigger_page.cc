@@ -246,12 +246,6 @@ TriggerPage::load_bindings ()
 }
 
 void
-TriggerPage::register_actions ()
-{
-	//this was done by TriggerUI ?
-}
-
-void
 TriggerPage::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
@@ -755,6 +749,28 @@ TriggerPage::fast_update_strips ()
 	if (_content.get_mapped () && _session) {
 		for (list<TriggerStrip*>::iterator i = _strips.begin (); i != _strips.end (); ++i) {
 			(*i)->fast_update ();
+		}
+	}
+}
+
+void
+TriggerPage::register_actions ()
+{
+	Glib::RefPtr<ActionGroup> trigger_actions = ActionManager::create_action_group (bindings, X_("Cues"));
+
+	for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
+		const std::string action_name  = string_compose ("trigger-cue-%1", n);
+		const std::string display_name = string_compose (_("Trigger Cue %1"), cue_marker_name (n));
+
+		ActionManager::register_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::trigger_cue_row), n));
+	}
+
+	for (int32_t c = 0; c < 16; ++c) {
+		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
+			const std::string action_name  = string_compose ("trigger-slot-%1-%2", c, n);
+			const std::string display_name = string_compose (_("Trigger Slot %1/%2"), c, cue_marker_name (n));
+
+			ActionManager::register_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::trigger_slot), c, n));
 		}
 	}
 }

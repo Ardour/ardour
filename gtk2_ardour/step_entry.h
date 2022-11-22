@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2010-2018 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2011-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2021-2022 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +26,12 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/box.h>
 #include <gtkmm/adjustment.h>
+#include <gtkmm/sizegroup.h>
+
 #include <gtkmm2ext/bindings.h>
+#include "temporal/tempo.h"
+
+#include "widgets/ardour_button.h"
 
 #include "ardour_window.h"
 #include "pianokeyboard.h"
@@ -44,7 +50,7 @@ class StepEditor;
 
 class StepEntry : public ArdourWindow
 {
-  public:
+public:
 	static StepEntry& instance();
 
 	~StepEntry ();
@@ -59,7 +65,7 @@ class StepEntry : public ArdourWindow
 
 	static void setup_actions_and_bindings ();
 
-  private:
+private:
 	static StepEntry* _instance;
 	StepEntry ();
 
@@ -74,7 +80,6 @@ class StepEntry : public ArdourWindow
 	Gtk::HBox note_length_box;
 	Gtk::HBox note_velocity_box;
 
-	Gtk::ToggleButton chord_button;
 	Gtk::ToggleButton triplet_button;
 	Gtk::ToggleButton dot0_button;
 	Gtk::ToggleButton dot1_button;
@@ -97,23 +102,25 @@ class StepEntry : public ArdourWindow
 
 	Gtk::Button back_button;
 
-	Gtk::RadioButton length_1_button;
-	Gtk::RadioButton length_2_button;
-	Gtk::RadioButton length_4_button;
-	Gtk::RadioButton length_8_button;
-	Gtk::RadioButton length_12_button;
-	Gtk::RadioButton length_16_button;
-	Gtk::RadioButton length_32_button;
-	Gtk::RadioButton length_64_button;
+	ArdourWidgets::ArdourButton chord_button;
 
-	Gtk::RadioButton velocity_ppp_button;
-	Gtk::RadioButton velocity_pp_button;
-	Gtk::RadioButton velocity_p_button;
-	Gtk::RadioButton velocity_mp_button;
-	Gtk::RadioButton velocity_mf_button;
-	Gtk::RadioButton velocity_f_button;
-	Gtk::RadioButton velocity_ff_button;
-	Gtk::RadioButton velocity_fff_button;
+	ArdourWidgets::ArdourButton length_1_button;
+	ArdourWidgets::ArdourButton length_2_button;
+	ArdourWidgets::ArdourButton length_4_button;
+	ArdourWidgets::ArdourButton length_8_button;
+	ArdourWidgets::ArdourButton length_12_button;
+	ArdourWidgets::ArdourButton length_16_button;
+	ArdourWidgets::ArdourButton length_32_button;
+	ArdourWidgets::ArdourButton length_64_button;
+
+	ArdourWidgets::ArdourButton velocity_ppp_button;
+	ArdourWidgets::ArdourButton velocity_pp_button;
+	ArdourWidgets::ArdourButton velocity_p_button;
+	ArdourWidgets::ArdourButton velocity_mp_button;
+	ArdourWidgets::ArdourButton velocity_mf_button;
+	ArdourWidgets::ArdourButton velocity_f_button;
+	ArdourWidgets::ArdourButton velocity_ff_button;
+	ArdourWidgets::ArdourButton velocity_fff_button;
 
 	Gtk::Adjustment channel_adjustment;
 	Gtk::SpinButton channel_spinner;
@@ -135,8 +142,6 @@ class StepEntry : public ArdourWindow
 	Gtk::SpinButton program_spinner;
 	Gtk::Button     program_button;
 
-	void length_changed ();
-	void velocity_changed ();
 	void velocity_value_change ();
 	void length_value_change ();
 
@@ -175,7 +180,6 @@ class StepEntry : public ArdourWindow
 	void note_length_change (GtkAction*);
 	void note_velocity_change (GtkAction*);
 	bool radio_button_press (GdkEventButton*);
-	bool radio_button_release (GdkEventButton*, Gtk::RadioButton*, int);
 	void inc_note_velocity ();
 	void dec_note_velocity ();
 	void next_note_velocity ();
@@ -226,8 +230,6 @@ class StepEntry : public ArdourWindow
 	static void se_insert_gsharp () { if (_instance) { _instance->insert_gsharp (); } }
 	static void se_note_length_change (GtkAction* act) { if (_instance) { _instance->note_length_change (act); } }
 	static void se_note_velocity_change (GtkAction* act) { if (_instance) { _instance->note_velocity_change (act); } }
-	static bool se_radio_button_press (GdkEventButton* ev) { if (_instance) { return _instance->radio_button_press (ev); } return false; }
-	static bool se_radio_button_release (GdkEventButton* ev, Gtk::RadioButton* rb, int n) { if (_instance) { return  _instance->radio_button_release (ev, rb, n); } return false; }
 	static void se_inc_note_velocity () { if (_instance) { _instance->inc_note_velocity (); } }
 	static void se_dec_note_velocity () { if (_instance) { _instance->dec_note_velocity (); } }
 	static void se_next_note_velocity () { if (_instance) { _instance->next_note_velocity (); } }

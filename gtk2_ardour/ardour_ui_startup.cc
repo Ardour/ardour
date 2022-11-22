@@ -524,8 +524,19 @@ ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("startup FSM response %1\n"), r));
 
 	switch (r) {
-	case StartupFSM::ExitProgram:
+	case StartupFSM::ExitProgram: {
+		std::stringstream str;;
+		dump_errors (str, 10);
+		std::string msg (string_compose (_("<span font_size=\"large\" font_weight=\"bold\">Something went seriously wrong. %1 cannot continue.</span>\n\n"
+		                                   "Here are a few hints at what might be wrong:\n\n%2"),
+		                                 PROGRAM_NAME,
+		                                 str.str()));
+		ArdourMessageDialog d (msg, true);
+		d.set_title (string_compose (_("%1: Unrecoverable Error"), PROGRAM_NAME));
+		d.run();
+
 		queue_finish ();
+	}
 		break;
 
 	case StartupFSM::LoadSession:

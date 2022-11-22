@@ -314,6 +314,7 @@ children = [
         'libs/pbd',
         'libs/midi++2',
         'libs/evoral',
+        'libs/ctrl-interface',
         'libs/surfaces',
         'libs/panners',
         'libs/backends',
@@ -756,7 +757,7 @@ int main() { return 0; }''',
          '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64'))
     cxx_flags.extend(
         ('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS',
-         '-DCANVAS_COMPATIBILITY', '-DCANVAS_DEBUG'))
+         '-DCANVAS_DEBUG'))
 
     # Do not use Boost.System library
     cxx_flags.append('-DBOOST_ERROR_CODE_HEADER_ONLY')

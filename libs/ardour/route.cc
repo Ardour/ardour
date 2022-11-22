@@ -4630,10 +4630,6 @@ Route::set_name (const string& str)
 		pi->update_sidechain_name ();
 	}
 
-	if (_triggerbox) {
-		_triggerbox->update_sidechain_name ();
-	}
-
 	bool ret = (_input->set_name(newname) && _output->set_name(newname));
 
 	if (ret) {

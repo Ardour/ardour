@@ -802,11 +802,7 @@ RegionView::make_name () const
 	}
 
 	if (_region->muted()) {
-#ifdef __APPLE__
-		str = string ("!") + str;
-#else
 		str = std::string("\U0001F507") + str; // SPEAKER WITH CANCELLATION STROKE
-#endif
 	}
 
 	return str;

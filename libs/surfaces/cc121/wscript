@@ -20,7 +20,6 @@ def build(bld):
             cc121_interface.cc
             operations.cc
     '''
-    obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_cc121"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = [ '.', './cc121']

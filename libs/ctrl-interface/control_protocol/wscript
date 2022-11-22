@@ -27,7 +27,7 @@ def build(bld):
         obj.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = [ ]
 
-    obj.export_includes = ['.', './control_protocol' ]
+    obj.export_includes = ['.']
     obj.defines    +=  [ 'PACKAGE="ardour_cp"' ]
     obj.includes     = ['.', './control_protocol']
     obj.name         = 'libardour_cp'

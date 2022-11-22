@@ -5870,15 +5870,15 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 	if (name.length() > 0) {
 		/*if the user passed in a name, we will use it, and also prepend the resulting sources with that name*/
-		legal_playlist_name.append(legalize_for_path (name) + "-");
+		legal_playlist_name.append (legalize_for_path (name));
+	} else {
+		legal_playlist_name.append (legalize_for_path (playlist->name ()));
 	}
-
-	legal_playlist_name.append(legalize_for_path(playlist->name()));
 
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n(data_type); ++chan_n) {
 
 		string path = ((data_type == DataType::AUDIO)
-		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, true)
+		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false)
 		               : new_midi_source_path (legal_playlist_name));
 
 		if (path.empty()) {

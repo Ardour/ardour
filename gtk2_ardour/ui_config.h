@@ -115,6 +115,7 @@ public:
 #undef  UI_CONFIG_VARIABLE
 #define CANVAS_FONT_VARIABLE(var,name) \
 	Pango::FontDescription get_##var () const { return ARDOUR_UI_UTILS::sanitized_font (var.get()); } \
+	Pango::FontDescription get_Ardour##var () const { return ARDOUR_UI_UTILS::ardour_font (var.get()); } \
 	bool set_##var (const std::string& val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #include "canvas_vars.h"
 #undef CANVAS_FONT_VARIABLE

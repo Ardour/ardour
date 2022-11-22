@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <glib/gstdio.h>
+
 #include <gtkmm/alignment.h>
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/menu.h>
@@ -67,9 +69,6 @@ std::vector<std::string> TriggerUI::launch_strings;
 std::string              TriggerUI::longest_launch;
 std::vector<std::string> TriggerUI::stretch_mode_strings;
 std::string              TriggerUI::longest_stretch_mode;
-
-Gtkmm2ext::Bindings*           TriggerUI::bindings = 0;
-Glib::RefPtr<Gtk::ActionGroup> TriggerUI::trigger_actions;
 
 TriggerUI::TriggerUI ()
 	: _renaming (false)
@@ -138,43 +137,6 @@ TriggerUI::trigger_swap (uint32_t n)
 	tref.box->PropertyChanged.connect (trigger_connections, invalidator (*this), boost::bind (&TriggerUI::trigger_changed, this, _1), gui_context ());
 
 	trigger_changed (Properties::name);
-}
-
-
-void
-TriggerUI::setup_actions_and_bindings ()
-{
-	load_bindings ();
-	register_actions ();
-}
-
-void
-TriggerUI::load_bindings ()
-{
-	bindings = Bindings::get_bindings (X_("Cues"));
-}
-
-void
-TriggerUI::register_actions ()
-{
-	trigger_actions = ActionManager::create_action_group (bindings, X_("Cues"));
-
-	for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
-		const std::string action_name  = string_compose ("trigger-cue-%1", n);
-		const std::string display_name = string_compose (_("Trigger Cue %1"), cue_marker_name (n));
-
-		ActionManager::register_action (trigger_actions, action_name.c_str (), display_name.c_str (), sigc::bind (sigc::ptr_fun (TriggerUI::trigger_cue_row), n));
-	}
-}
-
-void
-TriggerUI::trigger_cue_row (int32_t n)
-{
-	Session* s = AudioEngine::instance()->session();
-
-	if (s) {
-		s->trigger_cue_row (n);
-	}
 }
 
 void
@@ -437,11 +399,29 @@ TriggerUI::context_menu ()
 	items.push_back (MenuElem (_("Load..."), sigc::bind(sigc::mem_fun (*this, (&TriggerUI::choose_sample)), true)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &TriggerUI::choose_color)));
-	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Clear"), sigc::mem_fun (*this, &TriggerUI::clear_trigger)));
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("MIDI Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_learn)));
+	items.push_back (MenuElem (_("MIDI un-Learn"), sigc::mem_fun (*this, &TriggerUI::trigger_midi_unlearn)));
 
 
 	_context_menu->popup (3, gtk_get_current_event_time ());
+}
+
+void
+TriggerUI::trigger_midi_learn ()
+{
+	if (!trigger()) {
+		return;
+	}
+
+	tref.box->begin_midi_learn (trigger()->index());
+}
+
+void
+TriggerUI::trigger_midi_unlearn ()
+{
+	tref.box->midi_unlearn (trigger()->index());
 }
 
 void

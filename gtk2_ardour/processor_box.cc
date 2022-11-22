@@ -4450,8 +4450,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		proxy->show_the_right_window ();
 
 		Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
-		assert (tlw && proxy->get (false));
-		proxy->get ()->set_transient_for (*tlw);
+		proxy->set_transient_for (*tlw);
 	}
 }
 
@@ -4475,8 +4474,7 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 		proxy->show_the_right_window ();
 
 		Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
-		assert (tlw && proxy->get (false));
-		proxy->get ()->set_transient_for (*tlw);
+		proxy->set_transient_for (*tlw);
 	}
 }
 
@@ -4492,7 +4490,7 @@ ProcessorBox::manage_pins (boost::shared_ptr<Processor> processor)
 
 		Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
 		assert (tlw);
-		proxy->get ()->set_transient_for (*tlw);
+		proxy->set_transient_for (*tlw);
 
 		proxy->present();
 	}

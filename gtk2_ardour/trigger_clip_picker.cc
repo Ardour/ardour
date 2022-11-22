@@ -685,7 +685,9 @@ TriggerClipPicker::open_dir ()
 {
 	Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
 	assert (tlw);
+#ifndef __APPLE__
 	_fcd.set_transient_for (*tlw);
+#endif
 
 	int result = _fcd.run ();
 	_fcd.hide ();

@@ -45,7 +45,7 @@ namespace PBD {
 
 
 //#include "midi_byte_array.h"
-#include "types.h"
+#include "control_protocol/types.h"
 
 #include "glibmm/main.h"
 
