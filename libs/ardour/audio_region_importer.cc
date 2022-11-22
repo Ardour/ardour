@@ -339,8 +339,12 @@ AudioRegionImporter::prepare_sources ()
 	status.done = false;
 	status.cancel = false;
 	status.freeze = false;
+	status.import_markers = false;
 	status.progress = 0.0;
 	status.quality = SrcBest; // TODO other qualities also
+	status.replace_existing_source = false;
+	status.split_midi_channels = false;
+	status.import_markers = false;
 
 	// Get sources that still need to be imported
 	for (std::list<string>::iterator it = filenames.begin(); it != filenames.end(); ++it) {

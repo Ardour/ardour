@@ -53,6 +53,7 @@ public:
 	std::vector<std::string>   paths;
 	bool                       replace_existing_source;
 	bool                       split_midi_channels;
+	bool                       import_markers;
 	MidiTrackNameSource        midi_track_name_source;
 
 	/** set to true when all files have been imported, as distinct from the done in ARDOUR::InterThreadInfo,
