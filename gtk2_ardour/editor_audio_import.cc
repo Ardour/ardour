@@ -334,29 +334,6 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 }
 
 void
-Editor::import_smf_markers (Evoral::SMF & smf, timepos_t const & pos)
-{
-	if (!_session) {
-		return;
-	}
-
-	smf.load_markers ();
-
-	Evoral::SMF::Markers const & markers = smf.markers();
-
-	if (markers.empty()) {
-		return;
-	}
-
-	for (Evoral::SMF::Markers::const_iterator m = markers.begin(); m != markers.end(); ++m) {
-		Beats beats = Beats::from_double (m->time_pulses / (double) smf.ppqn());
-		Location* loc = new Location (*_session, timepos_t (beats), timepos_t (Temporal::BeatTime), m->text, Location::IsMark);
-		_session->locations()->add (loc);
-	}
-
-}
-
-void
 Editor::do_import (vector<string>           paths,
                    ImportDisposition        disposition,
                    ImportMode               mode,
@@ -383,7 +360,7 @@ Editor::do_import (vector<string>           paths,
 	   in the wrong position.
 	*/
 
-	if (with_markers || (smf_tempo_disposition == SMFTempoUse)) {
+	if (smf_tempo_disposition == SMFTempoUse) {
 
 		bool tempo_map_done = false;
 
@@ -403,11 +380,6 @@ Editor::do_import (vector<string>           paths,
 					import_smf_tempo_map (smf, pos);
 					tempo_map_done = true;
 				}
-			}
-
-			if (with_markers) {
-
-				import_smf_markers (smf, pos);
 			}
 
 			smf.close ();
