@@ -10,7 +10,7 @@
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015.
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016, 2019.
-# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019, 2020, 2021.
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019, 2020, 2021, 2022.
 # Julien Taverna <jujudusud@gmail.com>, 2022.
 # Nicolas Faure <sub26nico@laposte.net>, 2022.
 msgid ""
@@ -575,7 +575,7 @@ msgid ""
 "Japanese:\n"
 "\t Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 msgstr ""
-"Japonais:\n"
+"Japonais :\n"
 "\t Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 
 #: about.cc:270
@@ -3518,7 +3518,7 @@ msgstr "Copier dans le presse-papier"
 
 #: audio_clip_editor.cc:570
 msgid "AUDIO Region Trimmer:"
-msgstr "AUDIO Rogneur de région :"
+msgstr "Rogneur de région AUDIO :"
 
 #: audio_region_editor.cc:65 rhythm_ferret.cc:140 rhythm_ferret.cc:157
 msgid "dB"
@@ -3550,7 +3550,7 @@ msgstr "ajout d'un point de contrôle de gain"
 
 #: audio_region_operations_box.cc:48
 msgid "AUDIO Region Operations:"
-msgstr "AUDIO Opérations de région :"
+msgstr "Opérations de région AUDIO :"
 
 #: audio_region_operations_box.cc:59 editor_actions.cc:1813 trigger_ui.cc:741
 msgid "Reverse"
@@ -3587,7 +3587,7 @@ msgstr "Durée :"
 
 #: audio_region_properties_box.cc:154
 msgid "AUDIO Region Properties:"
-msgstr "AUDIO Propiétés de région :"
+msgstr "Propriétés de région AUDIO :"
 
 #: audio_region_properties_box.cc:164
 msgid "Fades:"
@@ -3643,7 +3643,7 @@ msgstr ""
 msgid "Length of the clip, in beats. Changing this will change the tempo"
 msgstr ""
 "Longueur du clip, en battements. En modifiant cette valeur, vous modifiez le "
-"tempo."
+"tempo"
 
 #: audio_trigger_properties_box.cc:157
 msgid ""
@@ -3651,7 +3651,7 @@ msgid ""
 "when stretched on the timeline"
 msgstr ""
 "Cliquez pour réduire de moitié le tempo du clip. Cela aura pour effet de le "
-"lire plus rapidement lorsqu'il sera étiré sur la ligne de temps."
+"lire plus rapidement lorsqu'il sera étiré sur la ligne de temps"
 
 #: audio_trigger_properties_box.cc:158
 msgid ""
@@ -3924,7 +3924,7 @@ msgid ""
 "Right-click to select properties for all clips in this row"
 msgstr ""
 "Cliquez pour lancer tous les clips de cette rangée\n"
-"Clic droit pour sélectionner les propriétés de tous les clips de cette rangée"
+"Cliquez-droit pour sélectionner les propriétés de tous les clips de cette rangée"
 
 #: cuebox_ui.cc:256
 msgid "Jump..."
@@ -3936,7 +3936,7 @@ msgstr "Définir toutes les actions de suivi..."
 
 #: cuebox_ui.cc:294 trigger_master.cc:354 trigger_master.cc:719
 msgid "Set All Launch Styles..."
-msgstr "Définir toutes les quantifications..."
+msgstr "Définir tous les styles de lancement..."
 
 #: cuebox_ui.cc:295 trigger_master.cc:355 trigger_master.cc:720
 msgid "Set All Quantizations..."
@@ -4950,11 +4950,11 @@ msgstr "effacer les listes de lecture"
 
 #: editor.cc:4670
 msgid "Copy Playlist for ALL Tracks"
-msgstr "Copier la liste de lecture pour toutes les pistes"
+msgstr "Copier la liste de lecture pour TOUTES les pistes"
 
 #: editor.cc:4670
 msgid "New Playlist for ALL Tracks"
-msgstr "Nouvelle liste de lecture pour toutes les pistes"
+msgstr "Nouvelle liste de lecture pour TOUTES les pistes"
 
 #: editor.cc:4681
 msgid "Copy Playlist for this track/group"
@@ -4962,7 +4962,7 @@ msgstr "Copier la liste de lecture pour cette piste/ce groupe"
 
 #: editor.cc:4681
 msgid "New Playlist for this track/group"
-msgstr "Nouvelle la liste de lecture pour cette piste/ce groupe"
+msgstr "Nouvelle liste de lecture pour cette piste/ce groupe"
 
 #: editor.cc:4692
 msgid "Copy Playlist for Selected Tracks"
@@ -5299,7 +5299,7 @@ msgstr "Modifier le tempo"
 
 #: editor_actions.cc:249
 msgid "Edit Current Time Signature"
-msgstr "Modifier le chiffrage actuel"
+msgstr "Modifier la signature temporelle actuelle"
 
 #: editor_actions.cc:256
 msgid "Select All Overlapping Edit Range"
@@ -6565,7 +6565,7 @@ msgstr "étirer la fin du tempo"
 
 #: editor_drag.cc:3817
 msgid "move tempo end"
-msgstr "Déplacer la fin de tempo"
+msgstr "déplacer la fin de tempo"
 
 #: editor_drag.cc:4117
 msgid "change fade in length"
@@ -6846,7 +6846,7 @@ msgstr "supprimer le repère"
 
 #: editor_markers.cc:889
 msgid "remove region marker"
-msgstr "Supprimer repère de région"
+msgstr "supprimer le repère de région"
 
 #: editor_markers.cc:1075 editor_markers.cc:1121
 msgid "Move Playhead to Marker"
@@ -7902,7 +7902,7 @@ msgstr ""
 
 #: editor_rulers.cc:245
 msgid "New CD Track Marker"
-msgstr "Nouveau repère de CD"
+msgstr "Nouveau repère de piste CD"
 
 #: editor_rulers.cc:249
 msgid "Stop All Cues"
@@ -9068,7 +9068,7 @@ msgstr "Option Broadcast Wave"
 
 #: export_format_dialog.cc:1214
 msgid "Variable bit rate quality"
-msgstr "Qualité du débit variable"
+msgstr "Qualité de taux de débit variable"
 
 #: export_format_dialog.cc:1225
 msgid "FFMPEG/MP3 options"
@@ -9367,7 +9367,7 @@ msgid ""
 "and paste the authorization code here"
 msgstr ""
 "Veuillez vous connecter à Freesound dans la fenêtre du navigateur qui vient "
-"d'être ouverte, puis collez le code d'autorisation ici."
+"d'être ouverte, puis collez le code d'autorisation ici"
 
 #: sfdb_freesound_mootcher.cc:265
 msgid "Authorization Code"
@@ -9777,7 +9777,7 @@ msgid ""
 "Right-click or Double-click here\n"
 "to add I/O Plugins"
 msgstr ""
-"Clic droit ou double-clic ici\n"
+"Clic-droit ou double-clic ici\n"
 "pour ajouter des greffons d'E/S"
 
 #: io_plugin_window.cc:280
@@ -9787,7 +9787,7 @@ msgid ""
 "%2+double-click to show generic GUI."
 msgstr ""
 "<b>%1</b>\n"
-"Double-cliquez pour afficher l'interface graphique.\n"
+"Double-clic pour afficher l'interface graphique.\n"
 "%2+double-clic pour afficher l'interface graphique générique."
 
 #: io_plugin_window.cc:282 processor_box.cc:559 processor_box.cc:1777
@@ -10615,7 +10615,7 @@ msgstr "Cliquer pour forcer tous les canaux enregistrés à %1"
 
 #: midi_clip_editor.cc:94
 msgid "MIDI Region Trimmer:"
-msgstr "MIDI Rogneur de région :"
+msgstr "Rogneur de région MIDI :"
 
 #: midi_export_dialog.cc:37
 msgid "Export MIDI: %1"
@@ -10783,7 +10783,7 @@ msgstr "Canal "
 
 #: midi_region_view.cc:3795
 msgid "duplicate notes"
-msgstr "Dupliquer les notes"
+msgstr "dupliquer les notes"
 
 #: midi_region_view.cc:3876
 msgid "paste"
@@ -11149,7 +11149,7 @@ msgid ""
 "It is recommended that you install missing, re-scan updated plugins, and re-"
 "load the session.\n"
 msgstr ""
-"Il est recommandé d'installer les plugins manquants, de les remettre à jour "
+"Il est recommandé d'installer les greffons manquants, de les remettre à jour "
 "et de recharger la session.\n"
 
 #: missing_plugin_dialog.cc:55
@@ -11397,7 +11397,7 @@ msgid ""
 "Right-click or Double-click here\n"
 "to add Track, Bus, or VCA channels"
 msgstr ""
-"Clic droit ou double-clic ici\n"
+"Clic-droit ou double-clic ici\n"
 "pour ajouter des voies de piste, de bus ou de VCA."
 
 #: mixer_ui.cc:201 route_time_axis.cc:266 route_time_axis.cc:812
@@ -12262,8 +12262,8 @@ msgstr "  -n, --no-splash             Ne pas afficher l'écran de démarrage\n"
 msgid ""
 "  -N, --new <session-name>    Create a new session from the command line\n"
 msgstr ""
-"  -N, --new <session-name> Créer une nouvelle session à partir de la ligne "
-"de commande\\N\n"
+"  -N, --new <nom-de-session> Créer une nouvelle session à partir de la ligne "
+"de commande\n"
 
 #: opts.cc:85
 msgid "  -O, --no-hw-optimizations   Disable h/w specific optimizations\n"
@@ -13925,7 +13925,7 @@ msgstr "Copier les éléments en utilisant :"
 
 #: rc_option_editor.cc:572
 msgid "<b>Recommended Setting: %1-%2</b>%3"
-msgstr "<b>Réglage Recommandé : %1-%2</b>%3"
+msgstr "<b>Réglage recommandé : %1-%2</b>%3"
 
 #: rc_option_editor.cc:574
 msgid "Slip Contents using:"
@@ -14402,7 +14402,7 @@ msgstr "Indicateurs d'alerte clignotants"
 
 #: rc_option_editor.cc:2605 rc_option_editor.cc:2618
 msgid "Appearance/Recorder"
-msgstr "Apparence/Enregistreur"
+msgstr "Apparence/enregistreur"
 
 #: rc_option_editor.cc:2605 rc_option_editor.cc:2609
 msgid "Input Meter Layout"
@@ -18583,18 +18583,18 @@ msgstr "Probabilité d'activation de l'action complémentaire gauche/droite"
 
 #: slot_properties_box.cc:384 slot_properties_box.cc:385
 msgid "Select an action that will occur when this clip ends"
-msgstr "Sélectionnez une action qui se produira lorsque ce clip se terminera."
+msgstr "Sélectionnez une action qui se produira lorsque ce clip se terminera"
 
 #: slot_properties_box.cc:387
 msgid "Set the behavior of this clip's launch button"
-msgstr "Définissez le comportement du bouton de lancement de ce clip."
+msgstr "Définissez le comportement du bouton de lancement de ce clip"
 
 #: slot_properties_box.cc:388
 msgid ""
 "Clip will wait until the timeline passes this boundary before it triggers"
 msgstr ""
 "Le clip attendra que la ligne de temps passe cette limite avant de "
-"déclencher l'opération."
+"déclencher l'opération"
 
 #: slot_properties_box.cc:389
 msgid ""
@@ -18602,7 +18602,7 @@ msgid ""
 "the prior clip"
 msgstr ""
 "Si cette option est sélectionnée, ce clip peut \" reprendre \" la lecture à "
-"la position de lecture du clip précédent."
+"la position de lecture du clip précédent"
 
 #: slot_properties_box.cc:390
 msgid ""
@@ -18610,7 +18610,7 @@ msgid ""
 "stopping)"
 msgstr ""
 "Si cette option est sélectionnée, ce slot ne répondra pas aux événements de "
-"Cue (que ce soit le démarrage ou l'arrêt)."
+"Cue (que ce soit le démarrage ou l'arrêt)"
 
 #: slot_properties_box.cc:622
 msgid "Gain (dB):"
@@ -19691,7 +19691,7 @@ msgstr "Écouter le clip sélectionné"
 
 #: trigger_clip_picker.cc:135
 msgid "Stop the audition"
-msgstr "Stopper l'écoute."
+msgstr "Stopper l'écoute"
 
 #: trigger_clip_picker.cc:136
 msgid "Open clip library folder"
@@ -19737,7 +19737,7 @@ msgstr "%1 Contenu groupé"
 
 #: trigger_clip_picker.cc:514
 msgid "%1 (%2 Tracks, only the first track will be used)"
-msgstr "%1 (%2 Pistes, seule la première piste sera utilisée)"
+msgstr "%1 (%2 pistes, seule la première piste sera utilisée)"
 
 #: trigger_clip_picker.cc:517
 msgid "%1 notes on channel: %2%3 "
@@ -19796,8 +19796,8 @@ msgid ""
 "Right-click to select properties for all clips in this track"
 msgstr ""
 "Cliquez pour arrêter tous les clips de cette piste\n"
-"Cliquez bouton droit de la souris pour sélectionner les propriétés de tous "
-"les clips de cette piste."
+"Cliquez-droit pour sélectionner les propriétés de tous les "
+"clips de cette piste."
 
 #: trigger_master.cc:521
 msgid ""
@@ -19909,7 +19909,7 @@ msgid ""
 "Right-Click for context menu"
 msgstr ""
 "Cliquez pour sélectionner ce clip et modifier ses propriétés\n"
-"Cliquez bouton droit de la souris pour accéder au menu contextuel"
+"Cliquez-droit pour accéder au menu contextuel"
 
 #: triggerbox_ui.cc:472
 msgid ""
@@ -19917,8 +19917,7 @@ msgid ""
 "Right-click to select Launch Options for this clip"
 msgstr ""
 "Lancer ce clip\n"
-"Cliquez bouton droit de la souris pour sélectionner les options de lancement "
-"de ce clip."
+"Cliquez-droit pour sélectionner les options de lancement de ce clip"
 
 #: triggerbox_ui.cc:475
 msgid ""
@@ -19926,8 +19925,8 @@ msgid ""
 "Right-click to select Launch Options for this clip"
 msgstr ""
 "Arrêtez les autres clips sur cette piste.\n"
-"Cliquez bouton droit de la souris pour sélectionner les options de lancement "
-"de ce clip."
+"Cliquez-droit de la souris pour sélectionner les options de lancement "
+"de ce clip"
 
 #: ui_config.cc:239 ui_config.cc:429
 msgid "Loading default ui configuration file %1"
@@ -20066,7 +20065,7 @@ msgstr ""
 
 #: vca_master_strip.cc:76 vca_time_axis.cc:59
 msgid "Solo assigned channels"
-msgstr "Soloter les voies assignées"
+msgstr "Mettre en solo les voies assignées"
 
 #: vca_master_strip.cc:80
 msgid "M"
@@ -20074,7 +20073,7 @@ msgstr ""
 
 #: vca_master_strip.cc:81 vca_time_axis.cc:65
 msgid "Mute assigned channels"
-msgstr "Muter les voies assignées"
+msgstr "Rendre muettes les voies assignées"
 
 #: vca_master_strip.cc:85
 msgid "Hide this VCA strip"
@@ -20626,7 +20625,7 @@ msgid ""
 "<b>When disabled</b>, the video is re-encoded, this may lead to quality "
 "loss, but this is the safer option and generally preferable."
 msgstr ""
-"<b>Lorsqu'il est activé</b>, la vidéo n'est pas réencodée, mais le codec "
+"<b>Lorsqu'il est activé</b>, la vidéo n'est pas ré-encodée, mais le codec "
 "vidéo d'origine est réutilisé. Dans certains cas, cela peut entraîner des "
 "problèmes de synchronisation audio/vidéo. Cela ne fonctionne également que "
 "si la plage exportée n'est pas plus longue que la vidéo. L'ajout d'un espace "
@@ -20697,7 +20696,7 @@ msgstr ""
 
 #: export_video_dialog.cc:574
 msgid "Export Video: The export-range does not include video."
-msgstr "Export vidéo : La plage d'export ne comprend pas la vidéo."
+msgstr "Export vidéo : la plage d'export ne comprend pas la vidéo."
 
 #: export_video_dialog.cc:582
 msgid ""
@@ -20745,51 +20744,6 @@ msgstr ""
 #: export_video_dialog.cc:815
 msgid "Input Video File"
 msgstr "Fichier vidéo d'entrée"
-
-#~ msgid ""
-#~ "French:\n"
-#~ "\tAlain Fréhel <alain.frehel@free.fr>\n"
-#~ "\tChristophe Combelles <ccomb@free.fr>\n"
-#~ "\tMartin Blanchard\n"
-#~ "\tRomain Arnaud <roming22@gmail.com>\n"
-#~ "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
-#~ "\tFrédéric Rech <fred_rech@laposte.net>\n"
-#~ "\tJulien Taverna <jujudusud@gmail.com>\n"
-#~ msgstr ""
-#~ "Français :\n"
-#~ "\tAlain Fréhel <alain.frehel@free.fr>\n"
-#~ "\tChristophe Combelles <ccomb@free.fr>\n"
-#~ "\tMartin Blanchard\n"
-#~ "\tRomain Arnaud <roming22@gmail.com>\n"
-#~ "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
-#~ "\tFrédéric Rech <fred_rech@laposte.net>\n"
-#~ "\tJulien Taverna <jujudusud@gmail.com>\n"
-
-#~ msgid ""
-#~ "French:\n"
-#~ "\tAlain Fréhel <alain.frehel@free.fr>\n"
-#~ "\tChristophe Combelles <ccomb@free.fr>\n"
-#~ "\tMartin Blanchard\n"
-#~ "\tRomain Arnaud <roming22@gmail.com>\n"
-#~ "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
-#~ "\tFrédéric Rech <fred_rech@laposte.net>\n"
-#~ msgstr ""
-#~ "Français :\n"
-#~ "\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
-#~ "\tFrédéric Rech <fred_rech@laposte.net>\n"
-#~ "\tRomain Arnaud <roming22@gmail.com>\n"
-#~ "\tChristophe Combelles <ccomb@free.fr>\n"
-#~ "\tAlain Fréhel <alain.frehel@free.fr>\n"
-#~ "\tMartin Blanchard\n"
-
-#~ msgid ""
-#~ "Russian:\n"
-#~ "\t Igor Blinov <pitstop@nm.ru>\n"
-#~ "\tAlexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
-#~ msgstr ""
-#~ "Russe :\n"
-#~ "\tIgor Blinov <pitstop@nm.ru>\n"
-#~ "\tAlexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 
 #~ msgid "Window|Preferences"
 #~ msgstr "Préférences"
