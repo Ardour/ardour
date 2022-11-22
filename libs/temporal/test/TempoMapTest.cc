@@ -24,7 +24,7 @@ TempoMapTest::addTest()
 	/* tp is at 6|1|0 which is 3|0|0 after the 6/8 meter at ((3-1) * 4 =) 8
 	 * quarter notes), so 3 bars of 6
 	 * 8th notes, or 18 8 notes, or 9 4th notes. So its quarter time should
-	 * be 12 + 9 = 17
+	 * be 8 + 9 = 17
 	 */
 
 	std::cout << "\n\n\n\***************** tp = " << tp.beats() << std::endl;
