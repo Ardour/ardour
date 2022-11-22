@@ -439,7 +439,7 @@ Editor::do_import (vector<string>           paths,
 
 		if (!cancel) {
 			ipw.show ();
-			import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, pgroup_id, false, instrument);
+			import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, pgroup_id, false, with_markers, instrument);
 			import_status.clear();
 		}
 
@@ -485,7 +485,7 @@ Editor::do_import (vector<string>           paths,
 					track = get_nth_selected_audio_track (nth++);
 				}
 
-				import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, pgroup_id, replace, instrument);
+				import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, pgroup_id, replace, with_markers, instrument);
 				import_status.clear();
 				break;
 
@@ -494,7 +494,7 @@ Editor::do_import (vector<string>           paths,
 				to_import.clear ();
 				to_import.push_back (*a);
 
-				import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, pgroup_id, replace, instrument);
+				import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, pgroup_id, replace, with_markers, instrument);
 				import_status.clear();
 				break;
 
@@ -503,7 +503,7 @@ Editor::do_import (vector<string>           paths,
 				to_import.clear ();
 				to_import.push_back (*a);
 
-				import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, pgroup_id, replace, instrument);
+				import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, pgroup_id, replace, with_markers, instrument);
 				import_status.clear();
 				break;
 
@@ -611,6 +611,7 @@ Editor::import_sndfiles (vector<string>            paths,
                          boost::shared_ptr<Track>& track,
                          std::string const&        pgroup_id,
                          bool                      replace,
+                         bool                      with_markers,
                          ARDOUR::PluginInfoPtr     instrument)
 {
 	/* skip periodic saves while importing */
@@ -622,6 +623,7 @@ Editor::import_sndfiles (vector<string>            paths,
 	import_status.quality = quality;
 	import_status.replace_existing_source = replace;
 	import_status.split_midi_channels = (disposition == Editing::ImportDistinctChannels);
+	import_status.import_markers = with_markers;
 
 	import_status.mode = mode;
 	import_status.pos = pos;

@@ -1458,6 +1458,7 @@ private:
 	                     boost::shared_ptr<ARDOUR::Track>&     track,
 	                     std::string const&                    pgroup_id,
 	                     bool                                  replace,
+	                     bool                                  with_markers,
 	                     boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
 	int embed_sndfiles (std::vector<std::string>              paths,
