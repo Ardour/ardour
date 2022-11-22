@@ -86,6 +86,7 @@ Session::import_sndfile_as_region (string path, SrcQuality quality, timepos_t& p
 	status.quality = quality;
 	status.replace_existing_source = false;
 	status.split_midi_channels = false;
+	status.import_markers = false;
 	status.done = false;
 	status.cancel = false;
 

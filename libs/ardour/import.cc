@@ -729,6 +729,15 @@ Session::import_files (ImportStatus& status)
 		} else if (smf_reader) { // midi
 			status.doing_what = string_compose(_("Loading MIDI file %1"), *p);
 			write_midi_data_to_new_files (smf_reader.get(), status, newfiles, status.split_midi_channels);
+
+			if (status.import_markers) {
+				smf_reader->load_markers ();
+				for (auto const& m : smf_reader->markers ()) {
+					Temporal::Beats beats = Temporal::Beats::from_double (m.time_pulses / (double) smf_reader->ppqn ());
+					// XXX import to all sources (in case split_midi_channels is set)?
+					newfiles.front()->add_cue_marker (CueMarker (m.text, timepos_t (beats)));
+				}
+			}
 		}
 
 		++status.current;
