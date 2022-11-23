@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-23 21:23+0100\n"
+"PO-Revision-Date: 2022-11-23 21:28+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -6955,27 +6955,30 @@ msgstr "Éditeur/Aimant"
 #: editor_mouse.cc:1571 editor_mouse.cc:1606 editor_tempodisplay.cc:582
 msgid "programming error: tempo marker canvas item has no marker object pointer!"
 msgstr ""
-"erreur de programamtion : l'élément de canevas de marqueur de tempo n'a pas de "
+"erreur de programmation : l'élément de canevas de marqueur de tempo n'a pas de "
 "pointer d'objet de marqueur !"
 
 #: editor_mouse.cc:1576 editor_tempodisplay.cc:587
 msgid "programming error: marker for tempo is not a tempo marker!"
 msgstr ""
-"erreur de programamtion : le marqueur pour tempo n'est pas un marqueur de "
+"erreur de programmation : le marqueur pour tempo n'est pas un marqueur de "
 "tempo !"
 
 #: editor_mouse.cc:1588 editor_tempodisplay.cc:563
 msgid "programming error: bbt marker canvas item has no marker object pointer!"
 msgstr ""
+"erreur de programmation : l'élément de canevas de marqueur BBT n'a pas de "
+"pointer d'objet de marqueur !"
 
 #: editor_mouse.cc:1593 editor_tempodisplay.cc:568
 msgid "programming error: marker for bbt is not a bbt marker!"
 msgstr ""
+"erreur de programmation : le marqueur pour BBT n'est pas un marqueur BBT !"
 
 #: editor_mouse.cc:1611 editor_tempodisplay.cc:718
 msgid "programming error: marker for meter is not a meter marker!"
 msgstr ""
-"erreur de programamtion : le marqueur d'indicateur n'est pas un marqueur "
+"erreur de programmation : le marqueur d'indicateur n'est pas un marqueur "
 "d'indicateur !"
 
 #: editor_mouse.cc:2336 editor_mouse.cc:2361 editor_mouse.cc:2374
@@ -6983,7 +6986,7 @@ msgid ""
 "programming error: control point canvas item has no control point object "
 "pointer!"
 msgstr ""
-"erreur de programamtion : l'élément de canevas de point de contrôle n'as pas de "
+"erreur de programmation : l'élément de canevas de point de contrôle n'as pas de "
 "pointeur d'obhet de point de contrôle !"
 
 #: editor_mouse.cc:2514
@@ -7898,7 +7901,7 @@ msgstr "Nouvelle signarture rythmique"
 
 #: editor_rulers.cc:306
 msgid "Add BBT Marker"
-msgstr "Ajouter un marquer BBT"
+msgstr "Ajouter un marqueur BBT"
 
 #: editor_snapshots.cc:56
 msgid "Snapshot (dbl-click to load)"
@@ -8021,7 +8024,7 @@ msgstr "Ajouter la signature rythmique"
 
 #: editor_tempodisplay.cc:552
 msgid "add BBT marker"
-msgstr ""
+msgstr "Ajouter un marqueur BBT"
 
 #: editor_tempodisplay.cc:599 editor_tempodisplay.cc:649
 msgid "done"
@@ -8037,7 +8040,7 @@ msgstr "éditer le tempo"
 
 #: editor_tempodisplay.cc:693
 msgid "remove BBT marker"
-msgstr ""
+msgstr "Supprimer le marqueur BBT"
 
 #: editor_tempodisplay.cc:701
 msgid "remove tempo change"
