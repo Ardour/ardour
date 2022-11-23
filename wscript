@@ -73,9 +73,9 @@ compiler_flags_dictionaries= {
         # All flags for a quiet build
         'quiet-build' : [ '-Wno-deprecated-declarations', '-Wno-unused-value', '-Wno-unused-result',
                           '-Wno-use-after-free', '-Wno-unknown-pragmas', '-Wno-cast-qual',
-                          '-Wno-maybe-uninitialized', '-Wno-cpp', '-Wno-switch', '-Wno-free-nonheap-object',
-                          '-Wno-reorder' ],
+                          '-Wno-maybe-uninitialized', '-Wno-cpp', '-Wno-switch', '-Wno-free-nonheap-object' ],
         'quiet-build-c': [ '-Wno-strict-prototypes' ],
+        'quiet-build-cxx': [ '-Wno-reorder' ],
         # All warnings (left from quiet-build) are errors
         'error-warnings' : [ '-Werror' ],
         # Any additional flags for warnings that are specific to C (not C++)
@@ -753,11 +753,13 @@ int main() { return 0; }''',
     compiler_flags.extend(flags_dict['basic-warnings'])
 
     compiler_flags.extend(flags_dict['quiet-build'])
-    #compiler_flags.extend(flags_dict['error-warnings'])
+    compiler_flags.extend(flags_dict['error-warnings'])
 
     c_flags.extend(flags_dict['extra-c-warnings'])
     c_flags.extend(flags_dict['quiet-build-c'])
+
     cxx_flags.extend (flags_dict['extra-cxx-warnings'])
+    cxx_flags.extend(flags_dict['quiet-build-cxx'])
 
     #
     # more boilerplate
