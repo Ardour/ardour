@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-23 00:53+0100\n"
+"PO-Revision-Date: 2022-11-23 21:18+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -3437,7 +3437,7 @@ msgstr "Changer le tempo actuel"
 
 #: audio_clock.cc:985
 msgid "Change current time signature"
-msgstr "Changer le chiffrage actuel"
+msgstr "Changer la signature rythmique actuelle"
 
 #: audio_clock.cc:1020 audio_clock.cc:1034
 msgid "--pending--"
@@ -4252,7 +4252,7 @@ msgstr ""
 
 #: editor.cc:336 editor_actions.cc:710
 msgid "Time Signature"
-msgstr "Signature temporelle"
+msgstr "Signature rythmique"
 
 #: editor.cc:337 editor_actions.cc:715
 msgid "Location Markers"
@@ -5280,7 +5280,7 @@ msgstr "Modifier le tempo"
 
 #: editor_actions.cc:249
 msgid "Edit Current Time Signature"
-msgstr "Modifier la signature temporelle actuelle"
+msgstr "Modifier la signature rythmique actuelle"
 
 #: editor_actions.cc:256
 msgid "Select All Overlapping Edit Range"
@@ -6508,7 +6508,7 @@ msgstr "Déplacer vidéo"
 
 #: editor_drag.cc:3101 editor_drag.cc:3146
 msgid "move time signature"
-msgstr ""
+msgstr "déplacer la signature rythmique"
 
 #: editor_drag.cc:3201 editor_drag.cc:3238
 msgid "change tempo"
@@ -7894,7 +7894,7 @@ msgstr "Nouveau tempo"
 
 #: editor_rulers.cc:262 tempo_dialog.cc:490
 msgid "New Time Signature"
-msgstr ""
+msgstr "Nouvelle signarture rythmique"
 
 #: editor_rulers.cc:306
 msgid "Add BBT Marker"
@@ -8017,7 +8017,7 @@ msgstr "ajouter"
 
 #: editor_tempodisplay.cc:516
 msgid "add time signature"
-msgstr "Ajouter la signature temporelle"
+msgstr "Ajouter la signature rythmique"
 
 #: editor_tempodisplay.cc:552
 msgid "add BBT marker"
@@ -8029,7 +8029,7 @@ msgstr "terminé"
 
 #: editor_tempodisplay.cc:617
 msgid "edit time signature"
-msgstr "éditer la signature temporelle"
+msgstr "éditer la signature rythmique"
 
 #: editor_tempodisplay.cc:641 editor_tempodisplay.cc:668
 msgid "edit tempo"
@@ -9663,6 +9663,8 @@ msgid ""
 "Move tempo and time signature changes\n"
 "<i>(may cause oddities in the tempo map)</i>"
 msgstr ""
+"déplacement du tempo et changement de signature rythmique\n"
+"<i>(peuvent provoquer de bizzareries dans la carte de tempo)</i>"
 
 #: insert_remove_time_dialog.cc:126
 msgid "Remove time"
@@ -10462,7 +10464,7 @@ msgstr "Modifier le tempo"
 
 #: main_clock.cc:95 tempo_dialog.cc:499
 msgid "Edit Time Signature"
-msgstr ""
+msgstr "Editer la signature rythmique"
 
 #: main_clock.cc:96
 msgid "Insert Tempo Change"
@@ -10470,7 +10472,7 @@ msgstr "Insérer un changement de tempo"
 
 #: main_clock.cc:97
 msgid "Insert Time Signature Change"
-msgstr ""
+msgstr "Insérer le changement de signature rythmique"
 
 #: marker.cc:299 tempo_curve.cc:84 tempo_curve.cc:85
 msgid "MarkerText"
@@ -19292,11 +19294,11 @@ msgstr "Temps par mesure :"
 
 #: tempo_dialog.cc:582
 msgid "Time Signature begins at bar:"
-msgstr ""
+msgstr "La signature rythmique commence à la mesure :"
 
 #: tempo_dialog.cc:706
 msgid "incomprehensible time signature denominator (%1)"
-msgstr ""
+msgstr "Dénominateur de signature rythmique incompréhensible (%1)"
 
 #: tempo_map_change.cc:39
 msgid "tempo map change"
