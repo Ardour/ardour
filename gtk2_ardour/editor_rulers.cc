@@ -1332,7 +1332,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 					if (bbt.bars % 16 == 1) {
 						snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
 						mark.style = ArdourCanvas::Ruler::Mark::Major;
-					} else {
+				} else {
 						buf[0] = '\0';
 						mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					}
@@ -1456,13 +1456,16 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
 					i_am_accented = true;
 				}
-				if (i_am_accented && (pos > bbt_position_of_helper)){
-					snprintf (buf, sizeof(buf), "%" PRIu32, tick);
-				} else {
-					buf[0] = '\0';
-				}
 
-				mark.label = buf;
+				/* We do not label these ticks marks, because
+				 * we cannot be sure of their function. They
+				 * could be sub-divisions of the time signature
+				 * denominator, or they could actually be the
+				 * time signature denominator points ("beats"
+				 * in BBT).
+				 */
+
+				mark.label = "";
 				mark.position = pos;
 
 				if ((bbt_beat_subdivision > 4) && i_am_accented) {
