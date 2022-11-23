@@ -85,6 +85,8 @@ set_language_preference ()
 
 	if (languages && ((count = [languages count]) > 0)) {
 
+		cout << "User has " << [languages count] << " set in macOS preferences\n";
+
 		bool have_translatable_languages = true;
 
 		const char *cstr = [[languages objectAtIndex:0] UTF8String];
@@ -133,6 +135,8 @@ set_language_preference ()
 			setenv ("LANGUAGE", stupid_apple_string.c_str(), 0);
 			cout << "LANGUAGE set to " << getenv ("LANGUAGE") << endl;
 		}
+	} else {
+		cout << "User has no languages set in macOS preferences\n";
 	}
 
 	/* now get AppleLocale value and use that to set LC_ALL because Launchd-started processes (i.e. GUI apps)
