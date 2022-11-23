@@ -2146,14 +2146,20 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 		do {
 			const Temporal::Beats beats = metric.quarters_at_superclock (start);
 
-			if (bar_mod != 0) {
-				if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 0)))) {
+			/* It is possible we already added the current BBT
+			 * point, so check to avoid doubling up
+			 */
+
+			if (ret.back().bbt() != bbt) {
+				if (bar_mod != 0) {
+					if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 0)))) {
+						ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+						DEBUG_TRACE (DEBUG::Grid, string_compose ("Gend %1\t       %2\n", metric, ret.back()));
+					}
+				} else {
 					ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
 					DEBUG_TRACE (DEBUG::Grid, string_compose ("Gend %1\t       %2\n", metric, ret.back()));
 				}
-			} else {
-				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("Gend %1\t       %2\n", metric, ret.back()));
 			}
 
 			start += step;
