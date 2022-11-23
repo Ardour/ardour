@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-23 21:28+0100\n"
+"PO-Revision-Date: 2022-11-23 21:43+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -8044,7 +8044,7 @@ msgstr "Supprimer le marqueur BBT"
 
 #: editor_tempodisplay.cc:701
 msgid "remove tempo change"
-msgstr ""
+msgstr "supprimer le changement de tempo"
 
 #: editor_tempodisplay.cc:713
 msgid "programming error: meter marker canvas item has no marker object pointer!"
@@ -8115,15 +8115,15 @@ msgstr "Périodes :"
 
 #: engine_dialog.cc:102
 msgid "Hardware Input Latency:"
-msgstr ""
+msgstr "Latence matérielle d'entrée :"
 
 #: engine_dialog.cc:103
 msgid "Hardware Output Latency:"
-msgstr ""
+msgstr "Latence matérielle de sortie :"
 
 #: engine_dialog.cc:104
 msgid "Record Monitoring Handled by:"
-msgstr ""
+msgstr "Écoute de contrôle gérée par :"
 
 #: engine_dialog.cc:106 engine_dialog.cc:107
 msgid "samples"
@@ -8159,7 +8159,7 @@ msgstr "Utiliser les résultats"
 
 #: engine_dialog.cc:116
 msgid "Back to Settings (Ignore Results)"
-msgstr ""
+msgstr "Retour aux réglages (ignorer les résultats)"
 
 #: engine_dialog.cc:117
 msgid "Calibrate Audio"
@@ -8167,7 +8167,7 @@ msgstr "Calibrer l'audio"
 
 #: engine_dialog.cc:121
 msgid "Back to Settings"
-msgstr ""
+msgstr "Retour aux réglages"
 
 #: engine_dialog.cc:143
 msgid ""
@@ -8217,6 +8217,9 @@ msgid ""
 "Once the channels are connected, click the \"Measure\" button.\n"
 "When satisfied with the results, click the \"Use results\" button."
 msgstr ""
+"Une fois les canaux connectés, cliquez sur le bouton \"Mesurer\".\n"
+"Lorsque vous êtes satisfait des résultats, cliquez sur le bouton \"Utiliser les "
+"résultats\"."
 
 #: engine_dialog.cc:258 engine_dialog.cc:3314 engine_dialog.cc:3324
 msgid "No measurement results yet"
@@ -8378,11 +8381,11 @@ msgstr "Latence systémique : "
 
 #: engine_dialog.cc:2999
 msgid "Large measurement deviation. Invalid result."
-msgstr ""
+msgstr "Grand écart de mesure. Résultat invalide."
 
 #: engine_dialog.cc:3008
 msgid "Signal polarity inverted (bad wiring)."
-msgstr ""
+msgstr "Polarité du signal inversée (mauvais câblage)."
 
 #: engine_dialog.cc:3054
 msgid "(averaging)"
@@ -8528,11 +8531,11 @@ msgstr "Sélectionner toutes les pistes"
 
 #: export_channel_selector.cc:582
 msgid "Select audio tracks"
-msgstr ""
+msgstr "Sélectionner les pistes audio"
 
 #: export_channel_selector.cc:583
 msgid "Select MIDI tracks"
-msgstr ""
+msgstr "Sélectionner les pistes MIDI"
 
 #: export_channel_selector.cc:584
 msgid "Select busses"
@@ -8565,7 +8568,7 @@ msgstr "Lister les fichiers"
 
 #: export_dialog.cc:162
 msgid "Only Analyze"
-msgstr ""
+msgstr "Analyser seulement"
 
 #: export_dialog.cc:192
 msgid "File format"
@@ -8614,7 +8617,7 @@ msgstr "Copier la capture d’écran de la console : %1."
 
 #: export_dialog.cc:466
 msgid "There have been %1 dropouts during realtime-export."
-msgstr ""
+msgstr "Il y a eu %1 décrochages pendant l'exportation en temps réel."
 
 #: export_dialog.cc:474 export_report.cc:56
 msgid "Export Report/Analysis"
@@ -8627,11 +8630,11 @@ msgstr "export"
 
 #: export_dialog.cc:506
 msgid "Export for Analysis '%3' (timespan %1 of %2)"
-msgstr ""
+msgstr "Export pour analyse '%3' (période %1 sur %2)"
 
 #: export_dialog.cc:511
 msgid "Analyzing '%3' (timespan %1 of %2)"
-msgstr ""
+msgstr "Analyse '%3' (période %1 sur %2)"
 
 #: export_dialog.cc:520 simple_export_dialog.cc:272
 msgid "Exporting '%3' (timespan %1 of %2)"
@@ -9353,7 +9356,7 @@ msgstr ""
 
 #: sfdb_freesound_mootcher.cc:464
 msgid "programming error: %1\n"
-msgstr ""
+msgstr "Erreur de programmation : %1\n"
 
 #: sfdb_freesound_mootcher.cc:584 rc_option_editor.cc:4155
 msgid "%1"
@@ -10833,7 +10836,7 @@ msgstr "Sélecteur de patch..."
 
 #: midi_time_axis.cc:667
 msgid "Restore Patch"
-msgstr ""
+msgstr "Restaurer le patch"
 
 #: midi_time_axis.cc:672
 msgid "Color Mode"
