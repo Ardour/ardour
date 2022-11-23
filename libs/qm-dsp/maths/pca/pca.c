@@ -1,5 +1,6 @@
 /*********************************/
 /* Principal Components Analysis */
+/* */
 /*********************************/
 
 /*********************************************************************/
@@ -26,6 +27,11 @@
 #include "pca.h"
 
 #define SIGN(a, b) ( (b) < 0 ? -fabs(a) : fabs(a) )
+
+void covcol(double** data, int n, int m, double** symmat);
+void erhand(char* err_msg);
+void tred2(double** a, int n, double* d, double* e);
+void tqli(double* d, double* e, int n, double** z);
 
 /**  Variance-covariance matrix: creation  *****************************/
 
