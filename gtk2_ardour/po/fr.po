@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-23 21:18+0100\n"
+"PO-Revision-Date: 2022-11-23 21:23+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -2815,7 +2815,7 @@ msgstr "Chemin de la session"
 
 #: ardour_ui_ed.cc:828
 msgid "Snapshot Name and Modified Indicator"
-msgstr "Nom de l'instantané et indicateur modifié"
+msgstr "Nom du cliché et indicateur modifié"
 
 #: ardour_ui_ed.cc:829
 msgid "Active Peak-file Work"
@@ -2993,7 +2993,7 @@ msgid ""
 "What: %5\n"
 "%6%7"
 msgstr ""
-"Session \"%1 (snapshot %2)\" did not load successfully.\n"
+"Session \"%1 (cliché %2)\" ne s'est pas chargée correctment.\n"
 "Erreur Glib\n"
 "Domaine : %3\n"
 "Code : %4\n"
@@ -7898,11 +7898,11 @@ msgstr "Nouvelle signarture rythmique"
 
 #: editor_rulers.cc:306
 msgid "Add BBT Marker"
-msgstr ""
+msgstr "Ajouter un marquer BBT"
 
 #: editor_snapshots.cc:56
 msgid "Snapshot (dbl-click to load)"
-msgstr ""
+msgstr "Cliché (double-clic pour charger)"
 
 #: editor_snapshots.cc:57
 msgid "Modified Date"
