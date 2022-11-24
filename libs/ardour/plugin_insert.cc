@@ -2024,6 +2024,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	/* configure plugins */
 	switch (_match.method) {
 	case Split:
+		/* fallthrough */
 	case Hide:
 		if (_plugins.front()->reconfigure_io (natural_input_streams(), ChanCount (), out) == false) {
 			PluginIoReConfigure (); /* EMIT SIGNAL */
@@ -2064,6 +2065,12 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			}
 		}
 		break;
+
+	case Replicate:
+		assert (get_count () > 1);
+		assert (!_plugins.front()->get_info()->reconfigurable_io ());
+		break;
+
 	default:
 		if (_plugins.front()->reconfigure_io (in, aux_in, out) == false) {
 			PluginIoReConfigure (); /* EMIT SIGNAL */
