@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-24 19:45+0100\n"
+"PO-Revision-Date: 2022-11-24 21:34+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -6302,11 +6302,11 @@ msgstr "Insérer la région depuis la liste des sources"
 
 #: editor_actions.cc:1949
 msgid "Convert Region Cue Markers to CD Markers"
-msgstr ""
+msgstr "Convertir les marqueurs Cue de région en marqueurs CD"
 
 #: editor_actions.cc:1950
 msgid "Convert Region Cue Markers to Location Markers"
-msgstr ""
+msgstr "Convertir les marqueurs Cue de région en marqueurs d'emplacement"
 
 #: editor_actions.cc:1951
 msgid "Add Region Cue Marker"
@@ -6388,7 +6388,7 @@ msgstr ""
 
 #: editor_audio_import.cc:288
 msgid "import SMF tempo map"
-msgstr ""
+msgstr "Importer une carte de tempo SMF"
 
 #: editor_audio_import.cc:423 editor_pt_import.cc:95 editor_videotimeline.cc:95
 msgid "Cancel Import"
@@ -7688,23 +7688,23 @@ msgstr "Déplacer les fichiers embarqués dans le dossier de session"
 
 #: editor_ops.cc:9151
 msgid "New Cue Marker Name"
-msgstr ""
+msgstr "Nom du nouveau marker de Cue"
 
 #: editor_ops.cc:9200
 msgid "add cue marker"
-msgstr ""
+msgstr "Ajouter un marqueur Cue"
 
 #: editor_ops.cc:9242
 msgid "remove cue marker"
-msgstr ""
+msgstr "Supprimer le marqueur Cue"
 
 #: editor_ops.cc:9302
 msgid "clear cue markers"
-msgstr ""
+msgstr "Effacer les marqueurs Cue"
 
 #: editor_ops.cc:9354
 msgid "region markers -> global markers"
-msgstr ""
+msgstr "marqueur de région -> marqueur globaux"
 
 #: editor_ops.cc:9366
 msgid "Smallest gap size to remove (seconds):"
@@ -10758,7 +10758,7 @@ msgstr "coller"
 
 #: midi_region_operations_box.cc:48
 msgid "MIDI Region Operations:"
-msgstr ""
+msgstr "Opérations de région MIDI :"
 
 #: midi_region_operations_box.cc:63
 msgid "Legatize..."
@@ -10766,7 +10766,7 @@ msgstr ""
 
 #: midi_region_properties_box.cc:51
 msgid "MIDI Region Properties:"
-msgstr ""
+msgstr "Propriétés de région MIDI :"
 
 #: midi_region_properties_box.cc:59
 msgid "Patches..."
@@ -10921,6 +10921,10 @@ msgid ""
 "lanes which is not generally useful. This will take some time and also slow "
 "down the GUI significantly."
 msgstr ""
+"Il y a un total de 16 canaux MIDI fois 128 paramètres Control-Change, sans "
+"compter les autres contrôles MIDI. Afficher le tout ajoutera plus de 2000 voies "
+"d'automatisation, ce qui n'est généralement pas utile. Cela prendra un certain "
+"temps et ralentira également l'interface graphique de manière significative."
 
 #: midi_tracer.cc:54
 msgid "Line history: "
@@ -11600,19 +11604,19 @@ msgstr ""
 
 #: mixer_ui.cc:3917
 msgid "Scene is already set. Overwrite it?"
-msgstr ""
+msgstr "La scène est déjà prête. L'écraser ?"
 
 #: mixer_ui.cc:3933
 msgid "Store Scene"
-msgstr ""
+msgstr "Enregistrer la scène"
 
 #: mixer_ui.cc:3934 mixer_ui.cc:4066
 msgid "Scene name:"
-msgstr ""
+msgstr "Nom de la scène :"
 
 #: mixer_ui.cc:3936 mixer_ui.cc:4098
 msgid "Store"
-msgstr ""
+msgstr "Enregistrer"
 
 #: mixer_ui.cc:3975
 msgid ""
@@ -11644,7 +11648,7 @@ msgstr ""
 
 #: mixer_ui.cc:4208
 msgid "(Right-Click to Store)"
-msgstr ""
+msgstr "(Clic-droit pour enregistrer)"
 
 #: meter_strip.cc:171
 msgid "Reset Peak"
@@ -11955,7 +11959,7 @@ msgstr "%"
 
 #: multi_region_properties_box.cc:54
 msgid "Some regions are muted"
-msgstr ""
+msgstr "Certaines région sont muettes ?"
 
 #: nag.cc:41
 msgid "Support %1 Development"
@@ -12349,7 +12353,7 @@ msgstr "Sélectionner un patch pour \"%1\""
 
 #: playlist_selector.cc:65
 msgid "Group ID"
-msgstr ""
+msgstr "ID du groupe"
 
 #: playlist_selector.cc:80
 msgid "Scope: "
@@ -12365,19 +12369,19 @@ msgstr ""
 
 #: playlist_selector.cc:85
 msgid "ALL tracks"
-msgstr ""
+msgstr "TOUTES les pistes"
 
 #: playlist_selector.cc:215
 msgid "Select a Playlist for: %1"
-msgstr ""
+msgstr "Sélectionner une liste de lecture pour : %1"
 
 #: playlist_selector.cc:218
 msgid "Copy a Playlist for: %1"
-msgstr ""
+msgstr "Copier une liste de lecture pour : %1"
 
 #: playlist_selector.cc:221
 msgid "Share a Playlist for: %1"
-msgstr ""
+msgstr "Partager une liste de lecture pour : %1"
 
 #: playlist_selector.cc:224
 msgid "Steal a Playlist for: %1"
@@ -12421,11 +12425,11 @@ msgstr "Afficher la phase"
 
 #: plugin_manager_ui.cc:52
 msgid "Update Index Only"
-msgstr ""
+msgstr "Mettre à jour l'index seulement"
 
 #: plugin_manager_ui.cc:53
 msgid "Discover New/Updated"
-msgstr ""
+msgstr "Découvrir les nouveaux/mis à jour"
 
 #: plugin_manager_ui.cc:54
 msgid "Re-scan All"
@@ -12433,19 +12437,19 @@ msgstr "Re-scanner tout"
 
 #: plugin_manager_ui.cc:55
 msgid "Re-scan Faulty"
-msgstr ""
+msgstr "Re-scanner les défectueux ?"
 
 #: plugin_manager_ui.cc:56
 msgid "Re-scan Selected"
-msgstr ""
+msgstr "Re-scanner la sélection ?"
 
 #: plugin_manager_ui.cc:57
 msgid "Clear Stale Scan Log"
-msgstr ""
+msgstr "Effacer le journal des analyses périmées"
 
 #: plugin_manager_ui.cc:58
 msgid "Show Plugin Prefs"
-msgstr ""
+msgstr "Afficher les préférences du greffon"
 
 #: plugin_manager_ui.cc:60 plugin_manager_ui.cc:115 plugin_manager_ui.cc:608
 #: plugin_selector.cc:101 transport_masters_dialog.cc:81
@@ -12468,43 +12472,43 @@ msgstr ""
 
 #: plugin_manager_ui.cc:111
 msgid "Plugin Scan Result"
-msgstr ""
+msgstr "Résultat de l'analyse de greffons"
 
 #: plugin_manager_ui.cc:112
 msgid "Ignore|Ign"
-msgstr ""
+msgstr "Ign"
 
 #: plugin_manager_ui.cc:112
 msgid "Ignore this plugin (and others that are loaded in the same file)"
-msgstr ""
+msgstr "Ignorer ce plugin (et les autres qui sont chargés dans le même fichier)"
 
 #: plugin_manager_ui.cc:113 plugin_selector.cc:97
 msgid "Favorite|Fav"
-msgstr ""
+msgstr "Fav"
 
 #: plugin_manager_ui.cc:113
 msgid "Add this plugin to the favorite list"
-msgstr ""
+msgstr "Ajouter ce greffon à la liste des favoris"
 
 #: plugin_manager_ui.cc:114
 msgid "Hide this plugin in the plugin-selector"
-msgstr ""
+msgstr "Cacher ce greffon dans la sélection de greffons"
 
 #: plugin_manager_ui.cc:115
 msgid "Plugin standard"
-msgstr ""
+msgstr "Standard de greffons"
 
 #: plugin_manager_ui.cc:116
 msgid "File/ID"
-msgstr ""
+msgstr "Fichier/ID"
 
 #: plugin_manager_ui.cc:116
 msgid "The plugin file (VST) or unique ID (AU, LV2)"
-msgstr ""
+msgstr "Le fichier de greffon (VST) ou ID unique (AU, LV2)"
 
 #: plugin_manager_ui.cc:117
 msgid "Name of the plugin"
-msgstr ""
+msgstr "Nom du greffon"
 
 #: plugin_manager_ui.cc:118 plugin_selector.cc:100
 msgid "Creator"
@@ -12512,15 +12516,15 @@ msgstr "Créateur"
 
 #: plugin_manager_ui.cc:118
 msgid "The plugin's vendor"
-msgstr ""
+msgstr "Vendeur du greffon"
 
 #: plugin_manager_ui.cc:119
 msgid "Meta data: category and tags"
-msgstr ""
+msgstr "Métadonnées : catégorie et balises"
 
 #: plugin_manager_ui.cc:170
 msgid "Plugin Count"
-msgstr ""
+msgstr "Nombre de greffons"
 
 #: plugin_manager_ui.cc:172 plugin_selector.cc:191 sfdb_ui.cc:640 sfdb_ui.cc:642
 msgid "Search"
@@ -12528,91 +12532,99 @@ msgstr "Recherche"
 
 #: plugin_manager_ui.cc:173
 msgid "Scan Actions"
-msgstr ""
+msgstr "Actions d'analyse"
 
 #: plugin_manager_ui.cc:237
 msgid "Linux VST2 Path"
-msgstr ""
+msgstr "Chemin Linux VST2"
 
 #: plugin_manager_ui.cc:238 plugin_manager_ui.cc:244
 msgid "Configure where to look for VST2 plugins."
-msgstr ""
+msgstr "Configurer l'endroit où chercher les greffons VST2"
 
 #: plugin_manager_ui.cc:243
 msgid "Windows VST2 Path"
-msgstr ""
+msgstr "Chemin VST2 Windows"
 
 #: plugin_manager_ui.cc:249
 msgid "VST3 Path"
-msgstr ""
+msgstr "Chemin VST3"
 
 #: plugin_manager_ui.cc:250
 msgid ""
 "Configure where to look for VST3 plugins in addition to the default VST3 "
 "locations."
 msgstr ""
+"Configurer l'endroit où chercher les greffons VST3 en plus des emplacements "
+"VST3 par défaut."
 
 #: plugin_manager_ui.cc:260
 msgid "Only update plugin index, do not discover new plugins."
 msgstr ""
+"Mise à jour seulement de l'index des greffons, ne pas chercher les nouveaux "
+"greffons."
 
 #: plugin_manager_ui.cc:261
 msgid "Update Index and scan newly installed or updated plugins."
 msgstr ""
+"Mise à jour de l'index et analyse des greffons nouvellement installés ou mis à "
+"jour."
 
 #: plugin_manager_ui.cc:262
 msgid ""
 "Scans all plugins, regardless if they have already been successfully scanned.\n"
 "Depending on the number of plugins installed this can take a long time."
 msgstr ""
+"Analyse tous les grefffons, même s'ils ont déjà été analysés avec succès.\n"
+"Selon le nombre de greffonsinstallés, cela peut prendre beaucoup de temps."
 
 #: plugin_manager_ui.cc:263
 msgid "Scans plugins that have not yet been successfully scanned."
-msgstr ""
+msgstr "Analyse les greffons qui n'ont pas encore été analysés avec succès."
 
 #: plugin_manager_ui.cc:264
 msgid "Scans the selected plugin."
-msgstr ""
+msgstr "Analyse les greffons sélectionnés."
 
 #: plugin_manager_ui.cc:265
 msgid "Forget about plugins that have been removed from the system."
-msgstr ""
+msgstr "Oubliez les greffons qui ont été supprimés du système."
 
 #: plugin_manager_ui.cc:266
 msgid "Open preference window"
-msgstr ""
+msgstr "Ouvrir la fenêtre de préférences"
 
 #: plugin_manager_ui.cc:268
 msgid "Match plugin name"
-msgstr ""
+msgstr "Nom de greffon correspondant"
 
 #: plugin_manager_ui.cc:269
 msgid "Match plugin type"
-msgstr ""
+msgstr "Type de greffon correspondant"
 
 #: plugin_manager_ui.cc:270
 msgid "Match any tag"
-msgstr ""
+msgstr "Correspond à tout les tags"
 
 #: plugin_manager_ui.cc:271
 msgid "Match plugin vendor"
-msgstr ""
+msgstr "Correspond au vendeur du greffon"
 
 #: plugin_manager_ui.cc:272
 msgid "Match File/ID"
-msgstr ""
+msgstr "Concordance Fichier/ID"
 
 #: plugin_manager_ui.cc:273
 msgid "Match complete file install path on disk"
-msgstr ""
+msgstr "Correspond au chemin d'installation complet du fichier sur le disque"
 
 #: plugin_manager_ui.cc:353
 msgid "Concealed"
-msgstr ""
+msgstr "Caché"
 
 #: plugin_manager_ui.cc:366
 msgid "Updated"
-msgstr ""
+msgstr "Mis à jour"
 
 #: plugin_manager_ui.cc:372
 msgid "Incompatible"
@@ -12636,29 +12648,32 @@ msgstr "Re-scanner les greffons maintenant ?"
 
 #: plugin_manager_ui.cc:750 rc_option_editor.cc:3992
 msgid "Set Windows VST2 Search Path"
-msgstr ""
+msgstr "Définir le chemin de recherche de VST2 Windows"
 
 #: plugin_manager_ui.cc:759 rc_option_editor.cc:3973
 msgid "Set Linux VST2 Search Path"
-msgstr ""
+msgstr "Définir le chemin de recherche de VST2 Linux"
 
 #: plugin_manager_ui.cc:768 rc_option_editor.cc:4022
 msgid "Set Additional VST3 Search Path"
-msgstr ""
+msgstr "Définir un chemin de recherche VST3 supplémentaire"
 
 #: plugin_manager_ui.cc:782
 msgid "Are you sure you want to rescan all plugins?"
-msgstr ""
+msgstr "Êtes vous sûrs de vouloir ré-analyser tous les greffons ?"
 
 #: plugin_manager_ui.cc:783
 msgid "Rescan Plugins"
-msgstr ""
+msgstr "Ré-analyser les greffons"
 
 #: plugin_manager_ui.cc:784
 msgid ""
 "This starts a fresh scan, dropping all cached plugin data and ignorelist. "
 "Depending on the number if plugins installed this can take a long time."
 msgstr ""
+"Cela démarre une nouvelle analyse, en supprimant toutes les données de greffons "
+"mises en cache et la liste des ignorés. Selon le nombre de greffons installés, "
+"cela peut prendre beaucoup de temps."
 
 #: plugin_pin_dialog.cc:62
 msgid "Manual Config"
@@ -16426,7 +16441,7 @@ msgstr ""
 
 #: recorder_ui.cc:1272
 msgid "Strict I/O:"
-msgstr ""
+msgstr "E/S stricte :"
 
 #: recorder_ui.cc:1408
 msgid "Solo/Listen to this input"
@@ -16434,31 +16449,31 @@ msgstr ""
 
 #: recorder_ui.cc:1413
 msgid "Add a track for this input port"
-msgstr ""
+msgstr "Ajouter une piste pour ce port d'entrée"
 
 #: recorder_ui.cc:1561
 msgid "This port feeds %1 tracks. Click to show them"
-msgstr ""
+msgstr "Ce port alimente %1 pistes. Cliquez pour les afficher"
 
 #: recorder_ui.cc:1565
 msgid "This port is not feeding any tracks"
-msgstr ""
+msgstr "Ce port n'alimente aucune piste"
 
 #: recorder_ui.cc:1583
 msgid "I/O Plugin input port '%1'"
-msgstr ""
+msgstr "E/S Port d'entrée du greffon '%1'."
 
 #: recorder_ui.cc:1585
 msgid "Set or edit the custom name for input port '%1'"
-msgstr ""
+msgstr "Définir ou modifier le nom personnalisé du port d'entrée '%1'"
 
 #: recorder_ui.cc:1599
 msgid "Customize port name"
-msgstr ""
+msgstr "Customiser le nom du port"
 
 #: recorder_ui.cc:1600
 msgid "Port name"
-msgstr ""
+msgstr "Nom du port"
 
 #: region_editor.cc:88
 msgid "audition this region"
@@ -16884,7 +16899,7 @@ msgstr "erreur de programmation : "
 
 #: route_time_axis.cc:1965 route_time_axis.cc:1992
 msgid "Parameters %1 - %2"
-msgstr ""
+msgstr "Parametres %1 - %2"
 
 #: route_time_axis.cc:2312
 msgid "Underlays"
