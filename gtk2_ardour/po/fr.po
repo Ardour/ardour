@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-23 21:43+0100\n"
+"PO-Revision-Date: 2022-11-24 19:45+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -17076,23 +17076,23 @@ msgstr "Cliquez pour afficher un menu de canaux pour inverser leurs polarités"
 
 #: route_ui.cc:2622
 msgid "Select ..."
-msgstr ""
+msgstr "Sélectionner..."
 
 #: route_ui.cc:2629
 msgid "New Playlist..."
-msgstr ""
+msgstr "Nouvelle liste de lecture..."
 
 #: route_ui.cc:2630
 msgid "Copy Playlist..."
-msgstr ""
+msgstr "Copier la liste de lecture..."
 
 #: route_ui.cc:2632
 msgid "New Playlist (for group)"
-msgstr ""
+msgstr "Nouvelle liste de lecture (pour le groupe)"
 
 #: route_ui.cc:2633
 msgid "Copy Playlist (for group)"
-msgstr ""
+msgstr "Copier la liste de lecture (pour le groupe)"
 
 #: route_ui.cc:2638
 msgid "Clear Current"
@@ -17100,15 +17100,15 @@ msgstr "Effacer l'actuelle"
 
 #: route_ui.cc:2640
 msgid "Clear Current (for group)"
-msgstr ""
+msgstr "Effacer l'actuelle (pour le groupe)"
 
 #: route_ui.cc:2646
 msgid "Copy from ..."
-msgstr ""
+msgstr "Copier depuis..."
 
 #: route_ui.cc:2647
 msgid "Share with ..."
-msgstr ""
+msgstr "Partager avec..."
 
 #: route_ui.cc:2648
 msgid "Steal from ..."
@@ -17116,7 +17116,7 @@ msgstr ""
 
 #: route_ui.cc:2649
 msgid "Advanced"
-msgstr ""
+msgstr "Avancé"
 
 #: route_ui.cc:2786
 msgid "Rename Playlist"
@@ -17188,15 +17188,16 @@ msgstr "<b>Paramétres de l'instance</b>"
 
 #: selection_properties_box.cc:60
 msgid "Selection Properties (ESC = Deselect All)"
-msgstr ""
+msgstr "Propriétés de sélection (Echap = tout déselectionner)"
 
 #: selection_properties_box.cc:180
+#, fuzzy
 msgid "Range Properties (Press ESC to Deselect All)"
-msgstr ""
+msgstr "Propriétés de Range (Presser Echap pout tout déselectionner)"
 
 #: send_ui.cc:155
 msgid "Send: %1"
-msgstr ""
+msgstr "Départ : %1"
 
 #: session_archive_dialog.cc:35
 msgid "Zip/Archive Current Session"
@@ -17808,6 +17809,8 @@ msgstr "L'écoute d'entrée des pistes suit l'état du défilement (\"auto-input
 msgid ""
 "Cues containing clips disables implicit (auto) disk monitoring for the track"
 msgstr ""
+"Les cues contenant des clips désactivent la surveillance implicite "
+"(automatique) du disque pour la piste."
 
 #: session_option_editor.cc:281
 msgid "Use monitor section in this session"
@@ -18093,7 +18096,7 @@ msgstr "Les moins bien notés"
 
 #: sfdb_ui.cc:777
 msgid "License:"
-msgstr ""
+msgstr "Licence :"
 
 #: sfdb_ui.cc:783
 msgid "Any"
@@ -18376,10 +18379,12 @@ msgid ""
 "Export has been aborted due to an error!\n"
 "See the Log window for details."
 msgstr ""
+"L'export a échoué !\n"
+"Regardez les journaux pour plus d'informations."
 
 #: simple_export_dialog.cc:292
 msgid "Running Post-Export Command for '%1'"
-msgstr ""
+msgstr "Exécution de la commande de post-export pour '%1'"
 
 #: slot_properties_box.cc:76
 msgid "Slot Properties:"
@@ -18387,7 +18392,7 @@ msgstr ""
 
 #: slot_properties_box.cc:106
 msgid "Color:"
-msgstr ""
+msgstr "Couleur :"
 
 #: slot_properties_box.cc:151 slot_properties_box.cc:168 trigger_ui.cc:569
 msgid "Multi..."
@@ -18396,7 +18401,7 @@ msgstr ""
 #: slot_properties_box.cc:157 slot_properties_box.cc:174 trigger_ui.cc:576
 #: trigger_ui.cc:748
 msgid "Jump"
-msgstr ""
+msgstr "Sauter"
 
 #: slot_properties_box.cc:187
 msgid "Legato"
@@ -18404,7 +18409,7 @@ msgstr ""
 
 #: slot_properties_box.cc:190
 msgid "Isolate"
-msgstr ""
+msgstr "Isoler"
 
 #: slot_properties_box.cc:251
 msgid "MIDI Patches"
@@ -18416,7 +18421,7 @@ msgstr ""
 
 #: slot_properties_box.cc:290
 msgid "Launch Style:"
-msgstr ""
+msgstr "Style de lancement :"
 
 #: slot_properties_box.cc:294
 msgid "Launch Quantize:"
@@ -18436,19 +18441,19 @@ msgstr ""
 
 #: slot_properties_box.cc:336
 msgid "Follow Length:"
-msgstr ""
+msgstr "Longueur de suivi :"
 
 #: slot_properties_box.cc:351
 msgid "Clip Properties"
-msgstr ""
+msgstr "Propriétés de clip"
 
 #: slot_properties_box.cc:357
 msgid "Follow Options"
-msgstr ""
+msgstr "Options de suivi"
 
 #: slot_properties_box.cc:363
 msgid "Launch Options"
-msgstr ""
+msgstr "Options de lancement"
 
 #: slot_properties_box.cc:372
 msgid "Double-click to rename this clip"
@@ -18539,7 +18544,7 @@ msgstr "Gain (dB) :"
 
 #: slot_properties_box.cc:624
 msgid "Velocity Adj:"
-msgstr ""
+msgstr "Ajust. vélocité :"
 
 #: slot_properties_box.cc:704
 msgid "%1%% Left"
@@ -19308,7 +19313,7 @@ msgstr "Dénominateur de signature rythmique incompréhensible (%1)"
 
 #: tempo_map_change.cc:39
 msgid "tempo map change"
-msgstr ""
+msgstr "modification de la carte de tempo"
 
 #: time_axis_view.cc:159
 msgid "Track/Bus name (double click to edit)"
