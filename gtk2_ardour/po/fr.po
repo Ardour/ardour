@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-24 21:34+0100\n"
+"PO-Revision-Date: 2022-11-25 16:10+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -6388,7 +6388,7 @@ msgstr ""
 
 #: editor_audio_import.cc:288
 msgid "import SMF tempo map"
-msgstr "Importer une carte de tempo SMF"
+msgstr "Importer une cartographie de tempo SMF"
 
 #: editor_audio_import.cc:423 editor_pt_import.cc:95 editor_videotimeline.cc:95
 msgid "Cancel Import"
@@ -7323,7 +7323,7 @@ msgstr "Supprimer la dernière capture"
 
 #: editor_ops.cc:5482
 msgid "Tag:"
-msgstr "Marque :"
+msgstr "Étiquette :"
 
 #: editor_ops.cc:5497 session_archive_dialog.cc:53 session_archive_dialog.cc:54
 #: session_archive_dialog.cc:227 sfdb_ui.cc:1943 sfdb_ui.cc:2063
@@ -7688,7 +7688,7 @@ msgstr "Déplacer les fichiers embarqués dans le dossier de session"
 
 #: editor_ops.cc:9151
 msgid "New Cue Marker Name"
-msgstr "Nom du nouveau marker de Cue"
+msgstr "Nom du nouveau marqueur de Cue"
 
 #: editor_ops.cc:9200
 msgid "add cue marker"
@@ -7897,7 +7897,7 @@ msgstr "Nouveau tempo"
 
 #: editor_rulers.cc:262 tempo_dialog.cc:490
 msgid "New Time Signature"
-msgstr "Nouvelle signarture rythmique"
+msgstr "Nouvelle signature rythmique"
 
 #: editor_rulers.cc:306
 msgid "Add BBT Marker"
@@ -8589,7 +8589,7 @@ msgid ""
 "See the Log for details."
 msgstr ""
 "L'export a échoué !\n"
-"Regardez les journaux pour plus d'informations."
+"Voir le journal pour les détails."
 
 #: export_dialog.cc:284
 msgid "A track or bus has more channels than the target."
@@ -9670,7 +9670,7 @@ msgid ""
 "<i>(may cause oddities in the tempo map)</i>"
 msgstr ""
 "déplacement du tempo et changement de signature rythmique\n"
-"<i>(peuvent provoquer de bizzareries dans la carte de tempo)</i>"
+"<i>(peuvent provoquer des bizzareries dans la cartographie de tempo)</i>"
 
 #: insert_remove_time_dialog.cc:126
 msgid "Remove time"
@@ -10470,7 +10470,7 @@ msgstr "Modifier le tempo"
 
 #: main_clock.cc:95 tempo_dialog.cc:499
 msgid "Edit Time Signature"
-msgstr "Editer la signature rythmique"
+msgstr "Éditer la signature rythmique"
 
 #: main_clock.cc:96
 msgid "Insert Tempo Change"
@@ -10478,7 +10478,7 @@ msgstr "Insérer un changement de tempo"
 
 #: main_clock.cc:97
 msgid "Insert Time Signature Change"
-msgstr "Insérer le changement de signature rythmique"
+msgstr "Insérer un changement de signature rythmique"
 
 #: marker.cc:299 tempo_curve.cc:84 tempo_curve.cc:85
 msgid "MarkerText"
@@ -10922,9 +10922,10 @@ msgid ""
 "down the GUI significantly."
 msgstr ""
 "Il y a un total de 16 canaux MIDI fois 128 paramètres Control-Change, sans "
-"compter les autres contrôles MIDI. Afficher le tout ajoutera plus de 2000 voies "
-"d'automatisation, ce qui n'est généralement pas utile. Cela prendra un certain "
-"temps et ralentira également l'interface graphique de manière significative."
+"compter les autres contrôles MIDI. Afficher le tout ajoutera plus de 2000 "
+"canaux d'automatisation, ce qui n'est généralement pas utile. Cela prendra un "
+"certain temps et ralentira également l'interface graphique de manière "
+"significative."
 
 #: midi_tracer.cc:54
 msgid "Line history: "
@@ -11608,7 +11609,7 @@ msgstr "La scène est déjà prête. L'écraser ?"
 
 #: mixer_ui.cc:3933
 msgid "Store Scene"
-msgstr "Enregistrer la scène"
+msgstr "Stocker la scène"
 
 #: mixer_ui.cc:3934 mixer_ui.cc:4066
 msgid "Scene name:"
@@ -11616,7 +11617,7 @@ msgstr "Nom de la scène :"
 
 #: mixer_ui.cc:3936 mixer_ui.cc:4098
 msgid "Store"
-msgstr "Enregistrer"
+msgstr "Stocker"
 
 #: mixer_ui.cc:3975
 msgid ""
@@ -11648,7 +11649,7 @@ msgstr ""
 
 #: mixer_ui.cc:4208
 msgid "(Right-Click to Store)"
-msgstr "(Clic-droit pour enregistrer)"
+msgstr "(Clic-droit pour stocker)"
 
 #: meter_strip.cc:171
 msgid "Reset Peak"
@@ -12472,7 +12473,7 @@ msgstr ""
 
 #: plugin_manager_ui.cc:111
 msgid "Plugin Scan Result"
-msgstr "Résultat de l'analyse de greffons"
+msgstr "Résultat de l'analyse de greffon"
 
 #: plugin_manager_ui.cc:112
 msgid "Ignore|Ign"
@@ -12480,7 +12481,7 @@ msgstr "Ign"
 
 #: plugin_manager_ui.cc:112
 msgid "Ignore this plugin (and others that are loaded in the same file)"
-msgstr "Ignorer ce plugin (et les autres qui sont chargés dans le même fichier)"
+msgstr "Ignorer ce greffon (et les autres qui sont chargés dans le même fichier)"
 
 #: plugin_manager_ui.cc:113 plugin_selector.cc:97
 msgid "Favorite|Fav"
@@ -12516,11 +12517,11 @@ msgstr "Créateur"
 
 #: plugin_manager_ui.cc:118
 msgid "The plugin's vendor"
-msgstr "Vendeur du greffon"
+msgstr "Fournisseur du greffon"
 
 #: plugin_manager_ui.cc:119
 msgid "Meta data: category and tags"
-msgstr "Métadonnées : catégorie et balises"
+msgstr "Métadonnées : catégorie et étiquettes"
 
 #: plugin_manager_ui.cc:170
 msgid "Plugin Count"
@@ -12536,11 +12537,11 @@ msgstr "Actions d'analyse"
 
 #: plugin_manager_ui.cc:237
 msgid "Linux VST2 Path"
-msgstr "Chemin Linux VST2"
+msgstr "Chemin VST2 Linux"
 
 #: plugin_manager_ui.cc:238 plugin_manager_ui.cc:244
 msgid "Configure where to look for VST2 plugins."
-msgstr "Configurer l'endroit où chercher les greffons VST2"
+msgstr "Configurer l'endroit où chercher les greffons VST2."
 
 #: plugin_manager_ui.cc:243
 msgid "Windows VST2 Path"
@@ -12575,8 +12576,8 @@ msgid ""
 "Scans all plugins, regardless if they have already been successfully scanned.\n"
 "Depending on the number of plugins installed this can take a long time."
 msgstr ""
-"Analyse tous les grefffons, même s'ils ont déjà été analysés avec succès.\n"
-"Selon le nombre de greffonsinstallés, cela peut prendre beaucoup de temps."
+"Analyse tous les greffons, même s'ils ont déjà été analysés avec succès.\n"
+"Selon le nombre de greffons installés, cela peut prendre beaucoup de temps."
 
 #: plugin_manager_ui.cc:263
 msgid "Scans plugins that have not yet been successfully scanned."
@@ -12584,7 +12585,7 @@ msgstr "Analyse les greffons qui n'ont pas encore été analysés avec succès."
 
 #: plugin_manager_ui.cc:264
 msgid "Scans the selected plugin."
-msgstr "Analyse les greffons sélectionnés."
+msgstr "Analyse le greffon sélectionné."
 
 #: plugin_manager_ui.cc:265
 msgid "Forget about plugins that have been removed from the system."
@@ -12604,11 +12605,11 @@ msgstr "Type de greffon correspondant"
 
 #: plugin_manager_ui.cc:270
 msgid "Match any tag"
-msgstr "Correspond à tout les tags"
+msgstr "Correspond à toutes les étiquettes"
 
 #: plugin_manager_ui.cc:271
 msgid "Match plugin vendor"
-msgstr "Correspond au vendeur du greffon"
+msgstr "Correspond au fournisseur du greffon"
 
 #: plugin_manager_ui.cc:272
 msgid "Match File/ID"
@@ -12799,7 +12800,7 @@ msgstr "Configuration de broche : %1"
 
 #: plugin_presets_ui.cc:44
 msgid "Bank/Vendor"
-msgstr "Banque/vendeur"
+msgstr "Banque/fournisseur"
 
 #: plugin_presets_ui.cc:55
 msgid "Type/Category"
@@ -15504,7 +15505,7 @@ msgstr ""
 
 #: rc_option_editor.cc:3812
 msgid "Always Display Plugin Scan Progress"
-msgstr "Toujours afficher la progression de la recherche de greffons"
+msgstr "Toujours afficher la progression de la recherche de greffon"
 
 #: rc_option_editor.cc:3818
 msgid ""
@@ -15659,7 +15660,7 @@ msgstr ""
 
 #: rc_option_editor.cc:3978
 msgid "Linux VST2 Path:"
-msgstr ""
+msgstr "Chemin VST2 Linux :"
 
 #: rc_option_editor.cc:3983 rc_option_editor.cc:4002
 msgid "Path:"
@@ -16899,7 +16900,7 @@ msgstr "erreur de programmation : "
 
 #: route_time_axis.cc:1965 route_time_axis.cc:1992
 msgid "Parameters %1 - %2"
-msgstr "Parametres %1 - %2"
+msgstr "Paramètres %1 - %2"
 
 #: route_time_axis.cc:2312
 msgid "Underlays"
@@ -17203,12 +17204,11 @@ msgstr "<b>Paramétres de l'instance</b>"
 
 #: selection_properties_box.cc:60
 msgid "Selection Properties (ESC = Deselect All)"
-msgstr "Propriétés de sélection (Echap = tout déselectionner)"
+msgstr "Propriétés de sélection (Échap = tout déselectionner)"
 
 #: selection_properties_box.cc:180
-#, fuzzy
 msgid "Range Properties (Press ESC to Deselect All)"
-msgstr "Propriétés de Range (Presser Echap pout tout déselectionner)"
+msgstr "Propriétés de plage (Presser Échap pout tout déselectionner)"
 
 #: send_ui.cc:155
 msgid "Send: %1"
@@ -18015,7 +18015,7 @@ msgstr "Horodatage :"
 
 #: sfdb_ui.cc:191
 msgid "Tempo Map:"
-msgstr "Carte de tempo :"
+msgstr "Cartographie de tempo :"
 
 #: sfdb_ui.cc:230 sfdb_ui.cc:748
 msgid "Tags:"
@@ -18039,7 +18039,7 @@ msgstr "%1/%2 ♩ = %3"
 
 #: sfdb_ui.cc:376
 msgid "map with %1 sections"
-msgstr "carte avec %1 sections"
+msgstr "cartographie avec %1 sections"
 
 #: sfdb_ui.cc:620
 msgid "SoundFileBox: Could not tokenize string: "
@@ -18237,7 +18237,7 @@ msgstr "Copier les fichiers dans la session"
 
 #: sfdb_ui.cc:1859
 msgid "Use MIDI Tempo Map"
-msgstr "Utiliser la carte de tempo MIDI"
+msgstr "Utiliser la cartographie de tempo MIDI"
 
 #: sfdb_ui.cc:1860
 msgid "Import MIDI markers"
@@ -19328,7 +19328,7 @@ msgstr "Dénominateur de signature rythmique incompréhensible (%1)"
 
 #: tempo_map_change.cc:39
 msgid "tempo map change"
-msgstr "modification de la carte de tempo"
+msgstr "modification de la cartographie de tempo"
 
 #: time_axis_view.cc:159
 msgid "Track/Bus name (double click to edit)"
