@@ -3552,7 +3552,7 @@ msgstr ""
 
 #: audio_region_properties_box.cc:74
 msgid "Time Sig:"
-msgstr ""
+msgstr "Sig ryth :"
 
 #: audio_region_properties_box.cc:84 audio_trigger_properties_box.cc:73
 msgid "Stretch"
@@ -3948,7 +3948,7 @@ msgstr "Taille de tampon :"
 
 #: dsp_stats_ui.cc:61
 msgid "Idle: "
-msgstr ""
+msgstr "Inactif : "
 
 #: dsp_stats_ui.cc:65
 msgid "DSP: "
@@ -4192,7 +4192,7 @@ msgstr "Tout"
 
 #: editor.cc:223 editor_actions.cc:612
 msgid "Interview"
-msgstr ""
+msgstr "Entretien"
 
 #: editor.cc:228 mono_panner_editor.cc:45
 msgid "Left"
@@ -4608,15 +4608,15 @@ msgstr ""
 
 #: editor.cc:3340
 msgid "Len:"
-msgstr ""
+msgstr "Lon :"
 
 #: editor.cc:3342
 msgid "Ch:"
-msgstr ""
+msgstr "Ca :"
 
 #: editor.cc:3344
 msgid "Vel:"
-msgstr ""
+msgstr "Vél :"
 
 #: editor.cc:3458 editor_actions.cc:183
 msgid "Triplets"
@@ -4916,7 +4916,7 @@ msgstr "Annuler"
 
 #: editor.cc:4601
 msgid "Take.1"
-msgstr ""
+msgstr "Prise.1"
 
 #: editor.cc:4609
 msgid "Name for new playlist:"
@@ -6254,11 +6254,11 @@ msgstr "Insérer un changement de patch..."
 
 #: editor_actions.cc:1921
 msgid "Unlink all selected regions"
-msgstr ""
+msgstr "Délie toutes les régions sélectionnées"
 
 #: editor_actions.cc:1922 editor_ops.cc:5960
 msgid "Unlink from unselected"
-msgstr ""
+msgstr "Délie des non-sélectionnées"
 
 #: editor_actions.cc:1923
 msgid "Strip Silence..."
@@ -7720,11 +7720,11 @@ msgstr ""
 
 #: editor_ops.cc:9406
 msgid "The threshold value you entered is not a number"
-msgstr ""
+msgstr "La valeur de seuil que vous avez entré n'est pas un nombre"
 
 #: editor_ops.cc:9412 editor_ops.cc:9428
 msgid "The threshold value must be larger than or equal to zero"
-msgstr ""
+msgstr "La valeur de seuil doit être égale ou plus grande que zéro"
 
 #: editor_ops.cc:9422
 msgid "The leave-gap value you entered is not a number"
@@ -7807,7 +7807,7 @@ msgstr ""
 
 #: editor_regions.cc:106
 msgid "Fade out"
-msgstr ""
+msgstr "Fondu à la fermeture"
 
 #: editor_regions.cc:106
 msgid ""
@@ -7853,7 +7853,7 @@ msgstr ""
 
 #: editor_rulers.cc:228
 msgid "Clear All Xruns"
-msgstr ""
+msgstr "Effacer tous les décrochages audio"
 
 #: editor_rulers.cc:229
 msgid "Unhide Locations"
@@ -7861,7 +7861,7 @@ msgstr ""
 
 #: editor_rulers.cc:234
 msgid "Clear All Ranges"
-msgstr ""
+msgstr "Nettoyer toutes les plages"
 
 #: editor_rulers.cc:235
 msgid "Unhide Ranges"
@@ -7869,11 +7869,11 @@ msgstr ""
 
 #: editor_rulers.cc:239
 msgid "New Loop Range"
-msgstr ""
+msgstr "Nouvelle plage de boucle"
 
 #: editor_rulers.cc:240
 msgid "New Punch Range"
-msgstr ""
+msgstr "Nouvelle plage de punch"
 
 #: editor_rulers.cc:245
 msgid "New CD Track Marker"
@@ -8206,11 +8206,11 @@ msgstr "Choisissez deux canaux ci-dessous et connectez-les à l'aide d'un câble
 
 #: engine_dialog.cc:224
 msgid "Playback channel:"
-msgstr ""
+msgstr "Canal de lecture :"
 
 #: engine_dialog.cc:234
 msgid "Capture channel:"
-msgstr ""
+msgstr "Canal d'enregistrement :"
 
 #: engine_dialog.cc:253
 msgid ""
