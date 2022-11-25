@@ -168,8 +168,6 @@ CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", false)
 CONFIG_VARIABLE (float, preroll_seconds, "preroll-seconds", -2.0f)
 CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", false)
 CONFIG_VARIABLE (LoopFadeChoice, loop_fade_choice, "loop-fade-choice", XFadeLoop)
-CONFIG_VARIABLE (samplecnt_t, preroll, "preroll", 0)
-CONFIG_VARIABLE (samplecnt_t, postroll, "postroll", 0)
 CONFIG_VARIABLE (float, shuttle_speed_factor, "shuttle-speed-factor", 1.0f) // used for MMC shuttle
 CONFIG_VARIABLE (float, shuttle_speed_threshold, "shuttle-speed-threshold", 5.0f) // used for MMC shuttle
 CONFIG_VARIABLE (ShuttleUnits, shuttle_units, "shuttle-units", Percentage)
