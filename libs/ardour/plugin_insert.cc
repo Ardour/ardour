@@ -1063,6 +1063,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 						inplace_bufs.get_available (*t, m).read_from (bufs.get_available (*t, in_idx), nframes, offset, offset);
 					} else {
 						inplace_bufs.get_available (*t, m).silence (nframes, offset);
+						i_in_map.unset (*t, in);
 					}
 					mapped.set (*t, m + 1);
 				}
