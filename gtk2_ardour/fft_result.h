@@ -26,6 +26,7 @@
 #include <gdkmm/color.h>
 
 #include <string>
+#include <vector>
 
 class FFTGraph;
 
@@ -33,7 +34,7 @@ class FFTResult
 {
 public:
 
-	~FFTResult ();
+	~FFTResult () = default;
 
 	void analyzeWindow (float *window);
 	void finalize ();
@@ -58,24 +59,24 @@ private:
 	FFTResult (FFTGraph *graph, Gdk::Color color, std::string trackname);
 	friend class FFTGraph;
 
-	int _averages;
-
-	float* _data_flat_avg;
-	float* _data_flat_max;
-	float* _data_flat_min;
-	float* _data_prop_avg;
-	float* _data_prop_max;
-	float* _data_prop_min;
+	FFTGraph *_graph;
 
 	unsigned int _windowSize;
 	unsigned int _dataSize;
+
+	int _averages;
 
 	float _min_flat;
 	float _max_flat;
 	float _min_prop;
 	float _max_prop;
 
-	FFTGraph *_graph;
+	std::vector<float> _data_flat_avg;
+	std::vector<float> _data_flat_max;
+	std::vector<float> _data_flat_min;
+	std::vector<float> _data_prop_avg;
+	std::vector<float> _data_prop_max;
+	std::vector<float> _data_prop_min;
 
 	Gdk::Color _color;
 	std::string _trackname;
