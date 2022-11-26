@@ -19,10 +19,14 @@ function factory () return function ()
 
 	-- for each selected region
 	for r in sel.regions:regionlist ():iter () do
+		local ar = r:to_audioregion ()
+		if ar:isnil () then
+			goto next
+		end
 		print ("Region:", r:name ())
 
 		-- run the plugin, analyze the first channel of the audio-region
-		vamp:analyze (r:to_readable (), 0, nil)
+		vamp:analyze (ar:to_readable (), 0, nil)
 
 		-- get analysis results
 		local f = vamp:plugin ():getRemainingFeatures ()
@@ -59,5 +63,6 @@ function factory () return function ()
 
 		-- reset the plugin for the next iteration
 		vamp:reset ()
+		::next::
 	end
 end end

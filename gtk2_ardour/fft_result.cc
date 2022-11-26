@@ -26,35 +26,24 @@
 
 using namespace std;
 
-FFTResult::FFTResult(FFTGraph *graph, Gdk::Color color, string trackname)
-{
-	_graph = graph;
-
-	_windowSize = _graph->windowSize();
-	_dataSize   = _windowSize / 2;
-	_averages = 0;
-	_min_flat = _max_flat = 0.0;
-	_min_prop = _max_prop = 0.0;
-
-	_data_flat_avg = (float *) malloc (sizeof(float) * _dataSize);
-	_data_flat_min = (float *) malloc (sizeof(float) * _dataSize);
-	_data_flat_max = (float *) malloc (sizeof(float) * _dataSize);
-	_data_prop_avg = (float *) malloc (sizeof(float) * _dataSize);
-	_data_prop_min = (float *) malloc (sizeof(float) * _dataSize);
-	_data_prop_max = (float *) malloc (sizeof(float) * _dataSize);
-
-	for (unsigned int i = 0; i < _dataSize; i++) {
-		_data_flat_min[i] = FLT_MAX;
-		_data_flat_max[i] = FLT_MIN;
-		_data_flat_avg[i] = 0;
-		_data_prop_min[i] = FLT_MAX;
-		_data_prop_max[i] = FLT_MIN;
-		_data_prop_avg[i] = 0;
-	}
-
-	_color     = color;
-	_trackname = trackname;
-}
+FFTResult::FFTResult(FFTGraph *graph, Gdk::Color color, string trackname) :
+	_graph(graph),
+	_windowSize(_graph->windowSize()),
+	_dataSize(_windowSize / 2),
+	_averages(0),
+	_min_flat(0.0),
+	_max_flat(0.0),
+	_min_prop(0.0),
+	_max_prop(0.0),
+	_data_flat_avg(_dataSize, 0),
+	_data_flat_max(_dataSize, FLT_MIN),
+	_data_flat_min(_dataSize, FLT_MAX),
+	_data_prop_avg(_dataSize, 0),
+	_data_prop_max(_dataSize, FLT_MIN),
+	_data_prop_min(_dataSize, FLT_MAX),
+	_color(color),
+	_trackname(trackname)
+{}
 
 void
 FFTResult::analyzeWindow(float *window)
@@ -133,12 +122,3 @@ FFTResult::finalize()
 	_averages = 0;
 }
 
-FFTResult::~FFTResult()
-{
-	free(_data_flat_avg);
-	free(_data_flat_min);
-	free(_data_flat_max);
-	free(_data_prop_avg);
-	free(_data_prop_min);
-	free(_data_prop_max);
-}
