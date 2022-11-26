@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-25 16:50+0100\n"
+"PO-Revision-Date: 2022-11-26 18:33+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -14604,7 +14604,7 @@ msgstr "Afficher les boutons-action"
 
 #: rc_option_editor.cc:2935 rc_option_editor.cc:2940
 msgid "Appearance/Size and Scale"
-msgstr ""
+msgstr "Apparence/Taille et échelle"
 
 #: rc_option_editor.cc:2935
 msgid "User Interface Size and Scale"
@@ -14739,7 +14739,7 @@ msgstr ""
 
 #: rc_option_editor.cc:3046 rc_option_editor.cc:3057
 msgid "Appearance/Translation"
-msgstr ""
+msgstr "Apparence/Traduction"
 
 #: rc_option_editor.cc:3046
 msgid "Internationalization"
