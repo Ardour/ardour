@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-25 16:10+0100\n"
+"PO-Revision-Date: 2022-11-25 16:50+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -11847,7 +11847,7 @@ msgstr "éteint"
 
 #: monitor_section.cc:238
 msgid "SiP Cut"
-msgstr "Réduction SeP"
+msgstr "Coupure SeP"
 
 #: monitor_section.cc:245 monitor_section.cc:248
 msgid "Gain reduction to use when dimming monitor outputs"
