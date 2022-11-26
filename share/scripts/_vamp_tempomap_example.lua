@@ -20,6 +20,10 @@ function factory () return function ()
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:RegionSelection
 	for r in sel.regions:regionlist ():iter () do
 		-- "r" is-a http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:Region
+		local ar = r:to_audioregion ()
+		if ar:isnil () then
+			goto next
+		end
 
 		-- prepare lua table to hold results for the given region (by name)
 		beats[r:name ()] = {}
@@ -60,11 +64,12 @@ function factory () return function ()
 		vamp:plugin ():setParameter ("Beats Per Bar", 4); -- TODO ask
 
 		-- run the plugin, analyze the first channel of the audio-region
-		vamp:analyze (r:to_readable (), 0, callback)
+		vamp:analyze (ar:to_readable (), 0, callback)
 		-- get remaining features (end of analysis)
 		callback (vamp:plugin ():getRemainingFeatures ())
 		-- reset the plugin (prepare for next iteration)
 		vamp:reset ()
+		::next::
 	end
 
 	-- print results (for now)
