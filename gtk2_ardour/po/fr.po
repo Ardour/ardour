@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-27 13:51+0100\n"
+"PO-Revision-Date: 2022-11-28 00:39+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -3970,6 +3970,11 @@ msgid ""
 "than an average. To see average values mouse-over\n"
 "any line"
 msgstr ""
+"Les mesures indiquées ci-dessous sont le <b>mauvais cas</b>.\n"
+"\n"
+"Ceci est plus important pour déterminer la charge du système\n"
+"qu'une moyenne. Pour voir les valeurs moyennes, passez la souris sur\n"
+"n'importe quelle ligne"
 
 #: dsp_stats_ui.cc:140 latency_gui.cc:48
 msgid "msec"
@@ -6246,7 +6251,7 @@ msgstr "Enveloppe active"
 
 #: editor_actions.cc:1916
 msgid "Deinterlace Into Layers"
-msgstr ""
+msgstr "Désentrelacer dans les couches"
 
 #: editor_actions.cc:1919 editor_actions.cc:1920
 msgid "Insert Patch Change..."
@@ -6746,7 +6751,7 @@ msgstr "Un fichier du même nom existe déjà. Voulez-vous l'écraser ?"
 
 #: editor_export_audio.cc:324
 msgid "Prefix for Bounced Regions:"
-msgstr ""
+msgstr "Préfixe pour les régions bouncées :"
 
 #: editor_export_audio.cc:329
 msgid "Name for Bounced Region:"
@@ -6899,7 +6904,7 @@ msgstr "régler le tempo sur constant"
 
 #: editor_markers.cc:1655
 msgid "set tempo to ramped"
-msgstr ""
+msgstr "régler le tempo sur rampe"
 
 #: editor_markers.cc:1675
 msgid "unclamp tempo from previous"
@@ -7352,7 +7357,7 @@ msgstr "Séparer région(s)"
 
 #: editor_ops.cc:6101
 msgid "de-interlace midi"
-msgstr ""
+msgstr "désentrelacer le MIDI"
 
 #: editor_ops.cc:6344
 msgid "reset region gain"
@@ -16102,7 +16107,7 @@ msgstr "Type d'indicateur par défaut des pistes "
 
 #: rc_option_editor.cc:4543
 msgid "Region Analysis"
-msgstr ""
+msgstr "Analyse de la région"
 
 #: rc_option_editor.cc:4548
 msgid "Enable automatic analysis of audio"
@@ -16144,11 +16149,11 @@ msgstr "Cette option ne sera prise en compte qu'après un redémarrage d'%1."
 
 #: rc_option_editor.cc:4585
 msgid "Power Management, CPU DMA latency"
-msgstr ""
+msgstr "Gestion de l'énergie, latence DMA du CPU"
 
 #: rc_option_editor.cc:4616
 msgid "Lowest (prevent CPU sleep states)"
-msgstr ""
+msgstr "Le plus bas (empêche les états de sommeil du CPU)"
 
 #: rc_option_editor.cc:4619
 msgid "%1 usec"
@@ -16160,14 +16165,17 @@ msgid ""
 "from entering power-save states which can be beneficial for reliable low "
 "latency."
 msgstr ""
+"Ce paramètre définit la latence DMA maximale tolérée par le CPU. Cela empêche "
+"le CPU d'entrer dans des états d'économie d'énergie, ce qui peut être bénéfique "
+"pour une faible latence fiable."
 
 #: rc_option_editor.cc:4625
 msgid "This setting requires write access to `/dev/cpu_dma_latency'."
-msgstr ""
+msgstr "Ce paramètre nécessite un accès en écriture à `/dev/cpu_dma_latency'."
 
 #: rc_option_editor.cc:4634
 msgid "CPU/FPU Denormals"
-msgstr ""
+msgstr "Dénormalisations CPU/FPU"
 
 #: rc_option_editor.cc:4639
 msgid "Use DC bias to protect against denormals"
@@ -16201,7 +16209,7 @@ msgstr "Les changements pourraient dépendre du redémarrage du moteur audio."
 
 #: rc_option_editor.cc:4686
 msgid "Disk I/O Buffering"
-msgstr ""
+msgstr "Mise en mémoire tampon des E/S du disque"
 
 #: rc_option_editor.cc:4691
 msgid "Memory Usage"
@@ -16296,35 +16304,35 @@ msgstr ""
 
 #: rc_option_editor.cc:4758
 msgid "Clip Library"
-msgstr ""
+msgstr "Bibliothèque de clips"
 
 #: rc_option_editor.cc:4762
 msgid "User writable Clip Library:"
-msgstr ""
+msgstr "Bibliothèque de clips accessible en écriture par l'utilisateur :"
 
 #: rc_option_editor.cc:4768
 msgid "Reset Clip Library Dir"
-msgstr ""
+msgstr "Réinitialiser le dossier de bibliothèque de clips"
 
 #: rec_info_box.cc:285
 msgid "Disk Space:"
-msgstr ""
+msgstr "Espace disque"
 
 #: recorder_ui.cc:84
 msgid "Discard Last Take"
-msgstr ""
+msgstr "Ne pas conserver la dernière prise"
 
 #: recorder_ui.cc:85
 msgid "Reset Peak Hold"
-msgstr ""
+msgstr "Réinitialisation du maintien de crête"
 
 #: recorder_ui.cc:88
 msgid "New Playlist for All Tracks"
-msgstr ""
+msgstr "Nouvelle liste de lecture pour toutes les pistes"
 
 #: recorder_ui.cc:89
 msgid "New Playlist for Rec-Armed"
-msgstr ""
+msgstr "Nouvelle liste de lecture pour les pistes armées"
 
 #: recorder_ui.cc:90
 msgid "Auto-Input"
@@ -16332,25 +16340,29 @@ msgstr "Auto-Input"
 
 #: recorder_ui.cc:120
 msgid "Arm Tracks:"
-msgstr ""
+msgstr "pistes armées :"
 
 #: recorder_ui.cc:171
 msgid ""
 "Right-click or Double-click here\n"
 "to add Tracks"
 msgstr ""
+"Clic-droit ou double-clic ici\n"
+"pour ajouter des pistes"
 
 #: recorder_ui.cc:250
 msgid "Record enable all tracks"
-msgstr ""
+msgstr "Activer l'enregistrement de toutes les pistes"
 
 #: recorder_ui.cc:251
 msgid "Disable recording of all tracks"
-msgstr ""
+msgstr "Désactiver l'enregistrement de toutes les pistes"
 
 #: recorder_ui.cc:252
 msgid "Reset peak-hold indicator of all input meters"
 msgstr ""
+"Réinitialisation de l'indicateur de maintien de crête de tous les compteurs "
+"d'entrée."
 
 #: recorder_ui.cc:253
 msgid "Track Input Monitoring automatically follows transport state"
@@ -16410,7 +16422,7 @@ msgstr ""
 
 #: recorder_ui.cc:474 recorder_ui.cc:479
 msgid "Window|Recorder"
-msgstr ""
+msgstr "Enregistreur"
 
 #: recorder_ui.cc:771
 msgid "I/O Plugin Audio %1"
