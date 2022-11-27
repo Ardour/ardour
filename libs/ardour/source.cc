@@ -114,7 +114,7 @@ Source::get_state () const
 	node->set_property (X_("name"), name());
 	node->set_property (X_("take-id"), take_id());
 	node->set_property (X_("type"), _type);
-	node->set_property (X_(X_("flags")), _flags);
+	node->set_property (X_("flags"), _flags);
 	node->set_property (X_("id"), id());
 
 	if (_timestamp != 0) {
