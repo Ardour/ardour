@@ -63,6 +63,7 @@ public:
 	float                gain()            const { return _gain; }
 
 	virtual void set_gain (float g, bool temporarily = false) { _gain = g; }
+	virtual void set_channel (uint16_t c) { _channel = c; }
 
 	int set_state (const XMLNode&, int version);
 
