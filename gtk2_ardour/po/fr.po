@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-26 18:33+0100\n"
+"PO-Revision-Date: 2022-11-27 13:51+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -15554,7 +15554,7 @@ msgstr ""
 #: rc_option_editor.cc:3880 rc_option_editor.cc:3884 rc_option_editor.cc:3885
 #: rc_option_editor.cc:3899
 msgid "Plugins/GUI"
-msgstr ""
+msgstr "Greffons/IGU"
 
 #: rc_option_editor.cc:3851
 msgid "Plugin GUI"
