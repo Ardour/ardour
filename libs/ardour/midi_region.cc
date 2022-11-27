@@ -37,6 +37,7 @@
 
 #include "pbd/xml++.h"
 #include "pbd/basename.h"
+#include "pbd/types_convert.h"
 
 #include "ardour/automation_control.h"
 #include "ardour/midi_cursor.h"
@@ -59,6 +60,10 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+
+namespace PBD {
+  DEFINE_ENUM_CONVERT(ARDOUR::Source::Flag);
+}
 
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (const SourceList& srcs)
@@ -147,6 +152,19 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc, ThawList* tl) const
 {
 	{
 		boost::shared_ptr<MidiSource> ms = midi_source(0);
+
+		/* copy source state (cue markers, captured_for, CC/param interpolation */
+		XMLNode& node (ms->get_state());
+		/* these must be set, otherwise Source::set_state() returns early */
+		node.set_property (X_("id"), newsrc->id());
+		node.set_property (X_("name"), newsrc->name());
+		node.set_property (X_("flags"), newsrc->flags ());
+		node.set_property (X_("take-id"), newsrc->take_id());
+
+		/* compare to SMFSource::set_state */
+		newsrc->MidiSource::set_state (node, Stateful::current_state_version);
+		newsrc->Source::set_state (node, Stateful::current_state_version);
+		delete &node;
 
 		/* Lock our source since we'll be reading from it.  write_to() will
 		   take a lock on newsrc.
