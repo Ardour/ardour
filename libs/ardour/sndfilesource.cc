@@ -37,6 +37,12 @@
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
+#ifdef COMPILER_MSVC
+#include <sys/utime.h>
+#else
+#include <utime.h>
+#endif
+
 #include <glibmm/convert.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
@@ -311,6 +317,16 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 		if (progress) {
 			progress->set_progress (0.5f + 0.5f * (float) off / other.readable_length_samples ());
 		}
+	}
+	close ();
+
+	/* copy ctime */
+	GStatBuf statbuf;
+	if (g_stat (other.path().c_str(), &statbuf) == 0 && statbuf.st_size > 0) {
+		struct utimbuf tbuf;
+		tbuf.actime  = statbuf.st_atime;
+		tbuf.modtime = statbuf.st_mtime; // = time ((time_t*) 0);
+		g_utime (path.c_str(), &tbuf);
 	}
 }
 
