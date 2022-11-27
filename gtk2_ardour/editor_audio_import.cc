@@ -1144,9 +1144,8 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 			}
 		} else {
 			boost::shared_ptr<Playlist> playlist = existing_track->playlist();
-			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
 			playlist->clear_changes ();
-			playlist->add_region (copy, pos);
+			playlist->add_region (region, pos);
 			_session->add_command (new StatefulDiffCommand (playlist));
 		}
 		break;
