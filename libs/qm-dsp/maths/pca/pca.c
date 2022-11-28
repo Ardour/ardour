@@ -89,7 +89,7 @@ return;
 
 /**  Error handler  **************************************************/
 
-static void erhand(char* err_msg)
+static void erhand(char const* err_msg)
 {
     fprintf(stderr,"Run-time error:\n");
     fprintf(stderr,"%s\n", err_msg);

@@ -135,4 +135,49 @@ index 05f79e972..8c1aee731 100644
      int getOrder() const { return m_order; }
 EOF
 
+## this applies to qm-vamp-plugins-v1.7.1-20-g4d15479
+## fixes -Wmissing-prototypes
+patch -p3 << EOF
+diff --git a/libs/qm-dsp/maths/pca/pca.c b/libs/qm-dsp/maths/pca/pca.c
+index 1a7bfdd549..0db27e152b 100644
+--- a/libs/qm-dsp/maths/pca/pca.c
++++ b/libs/qm-dsp/maths/pca/pca.c
+@@ -30,7 +30,7 @@
+ /**  Variance-covariance matrix: creation  *****************************/
+ 
+ /* Create m * m covariance matrix from given n * m data matrix. */
+-void covcol(double** data, int n, int m, double** symmat)
++static void covcol(double** data, int n, int m, double** symmat)
+ {
+ double *mean;
+ int i, j, j1, j2;
+@@ -89,7 +89,7 @@ return;
+ 
+ /**  Error handler  **************************************************/
+ 
+-void erhand(char* err_msg)
++static void erhand(char const* err_msg)
+ {
+     fprintf(stderr,"Run-time error:\n");
+     fprintf(stderr,"%s\n", err_msg);
+@@ -106,7 +106,7 @@ Ref: Smith et al., Matrix Eigensystem Routines -- EISPACK Guide
+ Springer-Verlag, 1976, pp. 489-494.
+ W H Press et al., Numerical Recipes in C, Cambridge U P,
+ 1988, pp. 373-374.  */
+-void tred2(double** a, int n, double* d, double* e)
++static void tred2(double** a, int n, double* d, double* e)
+ {
+ 	int l, k, j, i;
+ 	double scale, hh, h, g, f;
+@@ -184,7 +184,7 @@ void tred2(double** a, int n, double* d, double* e)
+ 
+ /**  Tridiagonal QL algorithm -- Implicit  **********************/
+ 
+-void tqli(double* d, double* e, int n, double** z)
++static void tqli(double* d, double* e, int n, double** z)
+ {
+ 	int m, l, iter, i, k;
+ 	double s, r, p, g, f, dd, c, b;
+EOF
+
 git add gitrev.txt base dsp ext maths
