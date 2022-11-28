@@ -124,7 +124,7 @@ StartupFSM::dialog_hidden (Gtk::Window* /* ignored */)
 void
 StartupFSM::queue_finish ()
 {
-	_signal_response (ExitProgram);
+	_signal_response (QuitProgram);
 }
 
 void
@@ -232,7 +232,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 				show_session_dialog (new_session_required);
 				break;
 			default:
-				_signal_response (ExitProgram);
+				_signal_response (QuitProgram);
 			}
 		default:
 			/* ERROR */
@@ -266,7 +266,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 				break;
 
 			default:
-				_signal_response (ExitProgram);
+				_signal_response (QuitProgram);
 				break;
 			}
 			break;
@@ -300,7 +300,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 				}
 				break;
 			default:
-				_signal_response (ExitProgram);
+				_signal_response (QuitProgram);
 			}
 			break;
 		default:
@@ -336,7 +336,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 				}
 				break;
 			default:
-				_signal_response (ExitProgram);
+				_signal_response (QuitProgram);
 				break;
 			}
 		default:
