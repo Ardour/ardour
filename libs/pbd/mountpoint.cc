@@ -111,14 +111,8 @@ mountpoint (string path)
 #else // !HAVE_GETMNTENT
 
 #ifdef __linux__
-
-string
-mountpoint (string path)
-{
-        return "";
-}
-
-#else // !__linux__
+#error "getmntent is supported on Linux. Is this a configuration error?"
+#endif
 
 #include <sys/param.h>
 #include <sys/ucred.h>
@@ -181,8 +175,6 @@ mountpoint (string path)
 
 	return best;
 }
-#endif // __linux__
-
 #endif // HAVE_GETMNTENT
 
 #ifdef TEST_MOUNTPOINT
