@@ -27,15 +27,10 @@
 
 #define SIGN(a, b) ( (b) < 0 ? -fabs(a) : fabs(a) )
 
-void covcol(double** data, int n, int m, double** symmat);
-void erhand(char* err_msg);
-void tred2(double** a, int n, double* d, double* e);
-void tqli(double* d, double* e, int n, double** z);
-
 /**  Variance-covariance matrix: creation  *****************************/
 
 /* Create m * m covariance matrix from given n * m data matrix. */
-void covcol(double** data, int n, int m, double** symmat)
+static void covcol(double** data, int n, int m, double** symmat)
 {
 double *mean;
 int i, j, j1, j2;
@@ -94,7 +89,7 @@ return;
 
 /**  Error handler  **************************************************/
 
-void erhand(char* err_msg)
+static void erhand(char* err_msg)
 {
     fprintf(stderr,"Run-time error:\n");
     fprintf(stderr,"%s\n", err_msg);
@@ -111,7 +106,7 @@ Ref: Smith et al., Matrix Eigensystem Routines -- EISPACK Guide
 Springer-Verlag, 1976, pp. 489-494.
 W H Press et al., Numerical Recipes in C, Cambridge U P,
 1988, pp. 373-374.  */
-void tred2(double** a, int n, double* d, double* e)
+static void tred2(double** a, int n, double* d, double* e)
 {
 	int l, k, j, i;
 	double scale, hh, h, g, f;
@@ -189,7 +184,7 @@ void tred2(double** a, int n, double* d, double* e)
 
 /**  Tridiagonal QL algorithm -- Implicit  **********************/
 
-void tqli(double* d, double* e, int n, double** z)
+static void tqli(double* d, double* e, int n, double** z)
 {
 	int m, l, iter, i, k;
 	double s, r, p, g, f, dd, c, b;
