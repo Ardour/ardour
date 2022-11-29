@@ -1446,13 +1446,15 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	Beats beats;
 	BBT_Time bbt;
 
-	beats = when.beats ();
+	/* tempo changes must be on beat */
 
-	const Beats delta ((beats - tp.beats()).abs());
+	beats = when.beats();
 
-	if (delta < Beats (1,0)) {
-		return false;
-	}
+	/* XXX need to assert that meter note value is >= 4 */
+
+	MeterPoint const & mm (meter_at (beats));
+
+	beats.round_to_subdivision (mm.note_value() / 4, RoundNearest);
 
 	/* Do not allow moving a tempo marker to the same position as
 	 * an existing one.
@@ -1461,19 +1463,37 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	Tempos::iterator t, prev_t;
 	Meters::iterator m, prev_m;
 
-	/* tempo changes must be on beat */
-	beats = beats.round_to_beat ();
-	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->beats() < beats && *t != tp; ++t) { prev_t = t; }
-	for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->beats() < beats; ++m) { prev_m = m; }
+	/* find tempo & meter in effect at the new target location */
+
+	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->beats() <= beats && *t != tp; ++t) { prev_t = t; }
+	for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->beats() <= beats; ++m) { prev_m = m; }
+
 	if (prev_t == _tempos.end()) {
 		/* moved earlier than first, no movement */
 		return false;
 	}
+
 	if (prev_m == _meters.end()) {
 		/* moved earlier than first, no movement */
 		return false;
 	}
+
+	/* If the previous tempo is ramped, we need to recompute its omega
+	 * constant to cover the (new) duration of the ramp.
+	 */
+
+	if (prev_t->actually_ramped()) {
+		prev_t->compute_omega_from_distance_and_next_tempo (beats - prev_t->beats(), tp);
+	}
+
 	TempoMetric metric (*prev_t, *prev_m);
+
+	const Beats delta ((beats - tp.beats()).abs());
+
+	if (delta < Beats::ticks (metric.meter().ticks_per_grid())) {
+		return false;
+	}
+
 	sc = metric.superclock_at (beats);
 	bbt = metric.bbt_at (beats);
 
