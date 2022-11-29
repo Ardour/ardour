@@ -1180,6 +1180,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	/* and in this case you will want the accents on '3s' not '2s' */
 	uint32_t bbt_divisor = 2;
 	uint32_t bbt_accent_modulo = 2;
+
 	switch (_grid_type) {
 	case GridTypeBeatDiv3:
 		bbt_divisor = 3;
@@ -1426,10 +1427,14 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 				if (bbt.is_bar()) {
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
 					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
-				} else {
+				} else if (bbt.ticks == 0) {
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.beats);
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Micro;
+					buf[0] = '\0';
 				}
+
 				if (((*i).sample(sr) < bbt_position_of_helper) && helper_active) {
 					buf[0] = '\0';
 				}
