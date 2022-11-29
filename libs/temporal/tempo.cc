@@ -681,7 +681,7 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 superclock_t
 TempoMetric::superclock_at (BBT_Time const & bbt) const
 {
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("get quarters for %1 = %2\n", bbt, _meter->quarters_at (bbt)));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("get quarters for %1 = %2 using %3\n", bbt, _meter->quarters_at (bbt), *this));
 	return _tempo->superclock_at (_meter->quarters_at (bbt));
 }
 
