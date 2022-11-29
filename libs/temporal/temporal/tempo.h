@@ -503,7 +503,7 @@ class LIBTEMPORAL_API TempoMetric
 		return superclocks_per_grid () * _meter->divisions_per_bar();
 	}
 	superclock_t superclocks_per_grid () const {
-		return int_div_round (_tempo->superclocks_per_note_type() * _tempo->note_type(), (int64_t) _meter->note_value());
+		return PBD::muldiv_round (_tempo->superclocks_per_note_type(), _tempo->note_type(), (int64_t) _meter->note_value());
 	}
 
 	superclock_t superclocks_per_note_type_at_superclock (superclock_t sc) const {
