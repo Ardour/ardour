@@ -405,12 +405,22 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 	switch (bbt_ruler_scale) {
 
 	case bbt_show_quarters:
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 1);
+		break;
 	case bbt_show_eighths:
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 2);
+		break;
 	case bbt_show_sixteenths:
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 4);
+		break;
 	case bbt_show_thirtyseconds:
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 8);
+		break;
 	case bbt_show_sixtyfourths:
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 16);
+		break;
 	case bbt_show_onetwentyeighths:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 32);
 		break;
 
 	case bbt_show_1:
