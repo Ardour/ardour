@@ -879,7 +879,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API	BBT_Time bbt_walk (BBT_Time const &, BBT_Offset const &) const;
 
-	LIBTEMPORAL_API	void get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0) const;
+	LIBTEMPORAL_API	void get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
 	LIBTEMPORAL_API	uint32_t count_bars (Beats const & start, Beats const & end) const;
 
 	struct EmptyTempoMapException : public std::exception {
