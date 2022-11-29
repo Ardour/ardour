@@ -859,6 +859,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	AudioSlave::DuplexMode slave_duplex = AudioSlave::FullDuplex;
 
 	if (_input_audio_device != _output_audio_device) {
+		std::string input_audio_device (_input_audio_device);
+		std::string output_audio_device (_output_audio_device);
 		if (_input_audio_device != get_standard_device_name (DeviceNone) && _output_audio_device != get_standard_device_name (DeviceNone)) {
 			/* Different devices for In + Out.
 			 * Ideally use input as clock source, and resample output.
@@ -867,22 +869,22 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 			 * retains master-out connection.
 			 */
 			if (getenv ("ARDOUR_ALSA_CLK")) {
-				slave_device         = _output_audio_device;
-				_output_audio_device = get_standard_device_name (DeviceNone);
-				slave_duplex         = AudioSlave::HalfDuplexOut;
+				slave_device        = _output_audio_device;
+				output_audio_device = get_standard_device_name (DeviceNone); //XXX
+				slave_duplex        = AudioSlave::HalfDuplexOut;
 			} else {
-				slave_device        = _input_audio_device;
-				_input_audio_device = get_standard_device_name (DeviceNone);
-				slave_duplex        = AudioSlave::HalfDuplexIn;
+				slave_device       = _input_audio_device;
+				input_audio_device = get_standard_device_name (DeviceNone); //XXX
+				slave_duplex       = AudioSlave::HalfDuplexIn;
 			}
 		}
-		if (_input_audio_device != get_standard_device_name (DeviceNone)) {
+		if (input_audio_device != get_standard_device_name (DeviceNone)) {
 			get_alsa_audio_device_names (devices, HalfDuplexIn);
-			audio_device = _input_audio_device;
+			audio_device = input_audio_device;
 			duplex       = 1;
 		} else {
 			get_alsa_audio_device_names (devices, HalfDuplexOut);
-			audio_device = _output_audio_device;
+			audio_device = output_audio_device;
 			duplex       = 2;
 		}
 	} else {
