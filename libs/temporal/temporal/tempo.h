@@ -423,6 +423,7 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
 
 	LIBTEMPORAL_API double omega() const { return _omega; }
 	LIBTEMPORAL_API void compute_omega_from_next_tempo (TempoPoint const & next_tempo);
+	LIBTEMPORAL_API void compute_omega_from_distance_and_next_tempo (Beats const & quarter_duration, TempoPoint const & next_tempo);
 	LIBTEMPORAL_API bool actually_ramped () const { return Tempo::ramped() && ( _omega != 0); }
 
 	LIBTEMPORAL_API XMLNode& get_state () const;

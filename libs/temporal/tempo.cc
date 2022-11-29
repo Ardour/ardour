@@ -436,6 +436,12 @@ TempoPoint::TempoPoint (TempoMap const & map, XMLNode const & node)
 void
 TempoPoint::compute_omega_from_next_tempo (TempoPoint const & next)
 {
+	compute_omega_from_distance_and_next_tempo (next.beats() - beats(), next);
+}
+
+void
+TempoPoint::compute_omega_from_distance_and_next_tempo (Beats const & quarter_duration, TempoPoint const & next)
+{
 	superclock_t end_scpqn;
 
 	if (!_continuing) {
@@ -451,20 +457,21 @@ TempoPoint::compute_omega_from_next_tempo (TempoPoint const & next)
 		return;
 	}
 
-	compute_omega_from_quarter_duration (next.beats() - beats(), end_scpqn);
+	compute_omega_from_quarter_duration (quarter_duration, end_scpqn);
 }
 
 void
 TempoPoint::compute_omega_from_quarter_duration (Beats const & quarter_duration, superclock_t end_scpqn)
 {
 	_omega = ((1.0/end_scpqn) - (1.0/superclocks_per_quarter_note())) / DoubleableBeats (quarter_duration).to_double();
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("computed omega from qtr duration = %1%2 dur was %3 start speed %4 end speed %5\n", std::setprecision(12),_omega, quarter_duration, superclocks_per_quarter_note(), end_scpqn));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("quarter-computed omega from qtr duration = %1 dur was %2 start speed %3 end speed [%4]\n", _omega, quarter_duration.str(), superclocks_per_quarter_note(), end_scpqn));
 }
+
 void
 TempoPoint::compute_omega_from_audio_duration (samplecnt_t audio_duration, superclock_t end_scpqn)
 {
 	_omega = (1.0 / (samples_to_superclock (audio_duration, TEMPORAL_SAMPLE_RATE))) * log ((double) superclocks_per_note_type() / end_scpqn);
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("computed omega from audio duration= %1%2 dur was %3\n", std::setprecision(12),_omega, audio_duration));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("computed omega from audio duration= %1%2 dur was %3\n", std::setprecision(12), _omega, audio_duration));
 }
 
 superclock_t
