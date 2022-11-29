@@ -106,7 +106,7 @@ class AlsaDeviceReservation
 		AlsaDeviceReservation (const char* device_name);
 		~AlsaDeviceReservation ();
 
-		bool acquire_device (const char* device_name);
+		bool acquire_device (const char* device_name, bool silent = false);
 		void release_device ();
 
 	private:
