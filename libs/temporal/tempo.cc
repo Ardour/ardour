@@ -1159,6 +1159,21 @@ TempoMap::reset_starting_at (superclock_t sc)
 
 	DEBUG_TRACE (DEBUG::MapReset, string_compose ("we begin at %1 with metric %2\n", sc, metric));
 
+	/* We will reset the superclock (audio) and beat time based on the BBT
+	 * time of each point. To make sure this works correctly, sort them by
+	 * BBT time first. If we do not do this, then we will use points as
+	 * TempoMetrics in a (potentially) incorrect order.
+	 */
+
+	Point::bbt_comparator cmp;
+	_points.sort (cmp);
+
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::MapReset)) {
+		std::cerr << "\nPOST SORT:\n";
+		dump (std::cerr);
+	}
+#endif
 	/* Setup the metric that is in effect at the starting point */
 
 	for (p = _points.begin(); p != _points.end(); ++p) {
