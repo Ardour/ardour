@@ -336,6 +336,7 @@ class LIBTEMPORAL_API Meter {
 	BBT_Time bbt_subtract (BBT_Time const & bbt, BBT_Offset const & sub) const;
 	BBT_Time round_to_bar (BBT_Time const &) const;
 	BBT_Time round_up_to_beat (BBT_Time const &) const;
+	BBT_Time round_to_beat (BBT_Time const &) const;
 	Beats    to_quarters (BBT_Offset const &) const;
 
 	XMLNode& get_state () const;

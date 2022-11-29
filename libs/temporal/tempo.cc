@@ -366,6 +366,17 @@ Meter::round_up_to_beat (Temporal::BBT_Time const & bbt) const
 	return b;
 }
 
+Temporal::BBT_Time
+Meter::round_to_beat (Temporal::BBT_Time const & bbt) const
+{
+	Temporal::BBT_Time b = bbt.round_to_beat ();
+	if (b.beats > _divisions_per_bar) {
+		b.bars++;
+		b.beats = 1;
+	}
+	return b;
+}
+
 Temporal::Beats
 Meter::to_quarters (Temporal::BBT_Offset const & offset) const
 {
