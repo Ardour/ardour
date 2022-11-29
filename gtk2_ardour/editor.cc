@@ -2951,6 +2951,10 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 
 	if (gpref != SnapToGrid_Unscaled) { // use the visual grid lines which are limited by the zoom scale that the user selected
 
+		/* Determine the most obvious divisor of a beat to use
+		 * for the snap, based on the grid setting.
+		 */
+
 		int divisor;
 		switch (_grid_type) {
 			case GridTypeBeatDiv3:
@@ -2979,6 +2983,16 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 				divisor = 2;
 				break;
 		};
+
+		/* bbt_ruler_scale reflects the level of detail we will show
+		 * for the visual grid. Adjust the "natural" divisor to reflect
+		 * this level of detail, and snap to that.
+		 *
+		 * So, for example, if the grid is Div3, we use 3 divisions per
+		 * beat, but if the visual grid is using bbt_show_sixteenths (a
+		 * fairly high level of detail), we will snap to (2 * 3)
+		 * divisions per beat. Etc.
+		 */
 
 		BBTRulerScale scale = bbt_ruler_scale;
 		switch (scale) {
@@ -3011,6 +3025,10 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 				break;
 		}
 	} else {
+		/* Just use the grid as specified, without paying attention to
+		 * zoom level
+		 */
+
 		ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions(_grid_type), direction));
 	}
 
