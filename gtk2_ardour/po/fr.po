@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-12-01 18:32+0100\n"
+"PO-Revision-Date: 2022-12-01 19:03+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -12830,39 +12830,46 @@ msgstr "Recherche de greffons"
 
 #: plugin_scan_dialog.cc:48
 msgid "Auto skip unresponsive plugins"
-msgstr ""
+msgstr "Ignorer automatiquement les greffons non réactifs"
 
 #: plugin_scan_dialog.cc:49
 msgid "Abort scanning (for all plugins)"
-msgstr ""
+msgstr "Abandonner l'analyse (pour tous les greffons)"
 
 #: plugin_scan_dialog.cc:50
 msgid "Skip this plugin"
-msgstr ""
+msgstr "Ignorer ce greffon"
 
 #: plugin_scan_dialog.cc:58
 msgid ""
 "Scan is taking a long time.\n"
 "Please check for popup dialogs."
 msgstr ""
+"Le scan prend beaucoup de temps.\n"
+"Veuillez vérifier les boîtes de dialogue contextuelles."
 
 #: plugin_scan_dialog.cc:109
 msgid ""
 "Cancel Scanning all plugins, and close this dialog.  Your plugin list might be "
 "incomplete."
 msgstr ""
+"Annuler l'analyse de tous les greffons et fermer cette boîte de dialogue. La "
+"liste de vos greffons est peut-être incomplète."
 
 #: plugin_scan_dialog.cc:110
 msgid "Cancel Scanning this plugin.  It will be Ignored in the plugin list."
 msgstr ""
+"Annulez l'analyse de ce greffon. Il sera ignoré dans la liste des greffons."
 
 #: plugin_scan_dialog.cc:111
 msgid "When enabled, scan will ignore plugins that take a long time to scan."
 msgstr ""
+"Lorsqu'elle est activée, l'analyse ignorera les greffons qui prennent beaucoup "
+"de temps à être analysés."
 
 #: plugin_scan_dialog.cc:219 plugin_scan_dialog.cc:221 plugin_scan_dialog.cc:224
 msgid "seconds|s"
-msgstr ""
+msgstr "s"
 
 #: plugin_scan_dialog.cc:250
 msgid "Scan timeout %1"
@@ -12870,15 +12877,15 @@ msgstr ""
 
 #: plugin_scan_dialog.cc:252
 msgid "Scanning"
-msgstr ""
+msgstr "Recherche"
 
 #: plugin_scan_dialog.cc:261
 msgid "Scanning since %1"
-msgstr ""
+msgstr "Recherche depuis %1"
 
 #: plugin_scan_dialog.cc:317
 msgid "Scanning: "
-msgstr ""
+msgstr "Recherche :"
 
 #: plugin_setup_dialog.cc:32
 msgid "Plugin Setup"
@@ -12914,7 +12921,7 @@ msgstr "Configuration de sortie"
 
 #: plugin_selector.cc:74
 msgid "Plugin Selector"
-msgstr ""
+msgstr "Sélecteur de greffon"
 
 #: plugin_selector.cc:102
 msgid "Audio I/O"
@@ -13019,7 +13026,7 @@ msgstr "Favoris"
 
 #: plugin_selector.cc:958
 msgid "Plugin Selector..."
-msgstr ""
+msgstr "Sélecteur de greffon..."
 
 #: plugin_selector.cc:962
 msgid "By Popularity"
@@ -13035,15 +13042,15 @@ msgstr "Par étiquettes"
 
 #: plugin_selector.cc:1189
 msgid "Scan VST2/3 and AudioUnit plugins now?"
-msgstr ""
+msgstr "Scanner les greffons VST2/3 et AudioUnit maintenant ?"
 
 #: plugin_selector.cc:1191
 msgid "Scan VST2/3 Plugins now?"
-msgstr ""
+msgstr "Scanner les greffons VST2/3 maintenant ?"
 
 #: plugin_selector.cc:1195
 msgid "Discover %1 Plugins?"
-msgstr ""
+msgstr "Découvrir %1 greffons ?"
 
 #: plugin_selector.cc:1197
 msgid "VST/AU"
@@ -13056,6 +13063,10 @@ msgid ""
 "Manager. Depending on the number of installed plugins the process can take "
 "several minutes."
 msgstr ""
+"Les greffons tiers n'ont pas encore été indexés. Les greffons %1 doivent être "
+"analysés avant de pouvoir être utilisés. Cette opération peut également être "
+"effectuée manuellement à partir de Fenêtre > Gestionnaire de greffons. Selon le "
+"nombre de greffons installés, le processus peut prendre plusieurs minutes."
 
 #: plugin_ui.cc:144
 msgid "Eh? LADSPA plugins don't have editors!"
@@ -13091,7 +13102,7 @@ msgstr ""
 
 #: plugin_ui.cc:361
 msgid "create_vst3_editor called on non-VST3 plugin"
-msgstr ""
+msgstr "create_vst3_editor a appelé un greffon non-VST3"
 
 #: plugin_ui.cc:441
 msgid "create_lv2_editor called on non-LV2 plugin"
@@ -13229,11 +13240,11 @@ msgstr "Trier par pire-charge"
 
 #: plugin_dspload_window.cc:196 port_group.cc:353
 msgid "I/O Pre"
-msgstr ""
+msgstr "E/S Pré"
 
 #: plugin_dspload_window.cc:196 port_group.cc:354
 msgid "I/O Post"
-msgstr ""
+msgstr "E/S Post"
 
 #: plugin_dspload_window.cc:200
 msgid "No Plugins"
@@ -13257,7 +13268,7 @@ msgstr "Divers %1"
 
 #: port_group.cc:357
 msgid "External"
-msgstr ""
+msgstr "Externe"
 
 #: port_group.cc:469 port_group.cc:470
 msgid "LTC Out"
@@ -13297,11 +13308,13 @@ msgstr "Retour/entrée"
 
 #: port_insert_ui.cc:113 route_ui.cc:2170 send_ui.cc:71
 msgid "Click to invert polarity of all send channels"
-msgstr ""
+msgstr "Cliquez pour inverser la polarité de tous les canaux départ"
 
 #: port_insert_ui.cc:114
 msgid "Edit Latency, manually override measured or I/O reported latency"
 msgstr ""
+"Modifier la latence, modifier manuellement la latence mesurée ou signalée par "
+"les E/S"
 
 #: port_insert_ui.cc:115
 msgid ""
@@ -13310,6 +13323,11 @@ msgid ""
 "Right-click to forget previous measurements,\n"
 "and revert to use default port latency."
 msgstr ""
+"Mesurez la latence en utilisant le premier port de chaque direction\n"
+"(notez que le gain n'est pas appliqué pendant la mesure).\n"
+"Cliquez avec le bouton droit de la souris pour oublier les mesures "
+"précédentes,\n"
+"et revenir à l'utilisation de la latence du port par défaut."
 
 #: port_insert_ui.cc:203
 msgid "No signal detected"
@@ -13317,11 +13335,11 @@ msgstr "Aucun signal détecté"
 
 #: port_insert_ui.cc:269
 msgid "Measured:"
-msgstr ""
+msgstr "Mesuré :"
 
 #: port_insert_ui.cc:269
 msgid "Previously measured:"
-msgstr ""
+msgstr "Mesuré précédemment :"
 
 #: port_insert_ui.cc:272
 msgid " (err)"
@@ -13337,7 +13355,7 @@ msgstr ""
 
 #: port_insert_ui.cc:306
 msgid "Forget previous measurement"
-msgstr ""
+msgstr "Oublier les mesures précédentes"
 
 #: port_insert_ui.cc:335
 msgid "Port Insert: %1"
@@ -16383,10 +16401,11 @@ msgstr "Lecture du disque pour toute piste non verrouillée en écoute d'entrée
 #: recorder_ui.cc:256
 msgid "Create a new playlist for all tracks and switch to it."
 msgstr ""
+"Créer une nouvelle liste de lecture pour toutes les pistes et basculer dessus."
 
 #: recorder_ui.cc:257
 msgid "Create a new playlist for all rec-armed tracks"
-msgstr ""
+msgstr "Créer une nouvelle liste de lecture pour toutes les pistes armées"
 
 #: recorder_ui.cc:258
 msgid ""
@@ -16414,11 +16433,11 @@ msgstr ""
 
 #: recorder_ui.cc:394
 msgid "Record Arm All Tracks"
-msgstr ""
+msgstr "Activer l'armement d'enregistrement de toutes les pistes"
 
 #: recorder_ui.cc:395
 msgid "Disable Record Arm of All Tracks"
-msgstr ""
+msgstr "Désactiver l'armement d'enregistrement de toutes les pistes"
 
 #: recorder_ui.cc:474 recorder_ui.cc:479
 msgid "Window|Recorder"
@@ -16426,31 +16445,31 @@ msgstr "Enregistreur"
 
 #: recorder_ui.cc:771
 msgid "I/O Plugin Audio %1"
-msgstr ""
+msgstr "E/S greffon audio %1"
 
 #: recorder_ui.cc:774
 msgid "I/O Plugin MIDI %1"
-msgstr ""
+msgstr "E/S greffon MIDI %1"
 
 #: recorder_ui.cc:780
 msgid "Audio Input %1"
-msgstr ""
+msgstr "Entrée audio %1"
 
 #: recorder_ui.cc:783
 msgid "MIDI Input %1"
-msgstr ""
+msgstr "Entrée MIDI %1"
 
 #: recorder_ui.cc:1230
 msgid "Create track for input"
-msgstr ""
+msgstr "Ajouter une piste pour cette entrée"
 
 #: recorder_ui.cc:1253
 msgid "Create new track connected to port '%1'"
-msgstr ""
+msgstr "Ajouter une nouvelle piste connectée au port '%1'"
 
 #: recorder_ui.cc:1257
 msgid "Track name:"
-msgstr ""
+msgstr "Nom de la piste :"
 
 #: recorder_ui.cc:1272
 msgid "Strict I/O:"
@@ -16458,7 +16477,7 @@ msgstr "E/S stricte :"
 
 #: recorder_ui.cc:1408
 msgid "Solo/Listen to this input"
-msgstr ""
+msgstr "Solo/écouter cette entrée"
 
 #: recorder_ui.cc:1413
 msgid "Add a track for this input port"
