@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-11-28 00:39+0100\n"
+"PO-Revision-Date: 2022-12-01 18:29+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -15790,7 +15790,7 @@ msgid ""
 "<b>When enabled</b>, and Transport->Auto-Input is enabled, %1 will always "
 "monitor audio inputs when transport is stopped, even if tracks aren't armed."
 msgstr ""
-"<b>Si coché</b>, et le bouton Auto-Input allumé, %1 écoutera toujours l'entrée "
+"<b>Si coché</b>, et le bouton Entrée-auto allumé, %1 écoutera toujours l'entrée "
 "des pistes audio à l'arrêt du défilement, même si les pistes ne sont pas armées."
 
 #: rc_option_editor.cc:4175
@@ -16336,7 +16336,7 @@ msgstr "Nouvelle liste de lecture pour les pistes armées"
 
 #: recorder_ui.cc:90
 msgid "Auto-Input"
-msgstr "Auto-Input"
+msgstr "Entrée-auto"
 
 #: recorder_ui.cc:120
 msgid "Arm Tracks:"
@@ -17830,7 +17830,7 @@ msgstr "Nom de prise"
 #: session_option_editor.cc:267
 msgid ""
 "Track Input Monitoring automatically follows transport state (\"auto-input\")"
-msgstr "L'écoute d'entrée des pistes suit l'état du défilement (\"auto-input\")"
+msgstr "L'écoute d'entrée des pistes suit l'état du défilement (\"entrée-auto\")"
 
 #: session_option_editor.cc:274
 msgid ""
