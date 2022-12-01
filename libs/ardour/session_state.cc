@@ -4857,13 +4857,13 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 
 	xmlParserCtxtPtr ctxt = xmlNewParserCtxt();
 	if (ctxt == NULL) {
-		return -1;
+		return -2;
 	}
 	xmlDocPtr doc = xmlCtxtReadFile (ctxt, xmlpath.c_str(), NULL, XML_PARSE_HUGE);
 
 	if (doc == NULL) {
 		xmlFreeParserCtxt(ctxt);
-		return -1;
+		return -2;
 	}
 
 	xmlNodePtr node = xmlDocGetRootElement(doc);
@@ -4871,7 +4871,7 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	if (node == NULL) {
 		xmlFreeParserCtxt(ctxt);
 		xmlFreeDoc (doc);
-		return -1;
+		return -2;
 	}
 
 	/* sample rate & version*/
@@ -4888,7 +4888,7 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	}
 
 	if ((parse_stateful_loading_version(version) / 1000L) > (CURRENT_SESSION_FILE_VERSION / 1000L)) {
-		return -1;
+		return -3;
 	}
 
 	if ((parse_stateful_loading_version(version) / 1000L) <= 2) {
@@ -5628,6 +5628,7 @@ Session::archive_session (const std::string& dest,
 	std::map<boost::shared_ptr<AudioFileSource>, std::string> orig_sources;
 	std::map<boost::shared_ptr<AudioFileSource>, std::string> orig_origin;
 	std::map<boost::shared_ptr<AudioFileSource>, float> orig_gain;
+	std::map<boost::shared_ptr<AudioFileSource>, uint16_t> orig_channel;
 
 	set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
 	if (only_used_sources) {
@@ -5746,6 +5747,7 @@ Session::archive_session (const std::string& dest,
 
 			orig_sources[afs] = afs->path();
 			orig_gain[afs]    = afs->gain();
+			orig_channel[afs] = afs->channel();
 
 			std::string new_path = make_new_media_path (afs->path (), to_dir, name);
 
@@ -5773,6 +5775,7 @@ Session::archive_session (const std::string& dest,
 				SndFileSource* ns = new SndFileSource (*this, *(afs.get()), new_path, compress_audio == FLAC_16BIT, progress);
 				afs->replace_file (new_path);
 				afs->set_gain (ns->gain(), true);
+				afs->set_channel (0);
 				delete ns;
 			} catch (...) {
 				error << "failed to encode " << afs->path() << " to " << new_path << endmsg;
@@ -5901,6 +5904,9 @@ Session::archive_session (const std::string& dest,
 	}
 	for (std::map<boost::shared_ptr<AudioFileSource>, float>::iterator i = orig_gain.begin (); i != orig_gain.end (); ++i) {
 		i->first->set_gain (i->second, true);
+	}
+	for (std::map<boost::shared_ptr<AudioFileSource>, uint16_t>::iterator i = orig_channel.begin (); i != orig_channel.end (); ++i) {
+		i->first->set_channel (i->second);
 	}
 
 	int rv = ar.create (filemap, compression_level);

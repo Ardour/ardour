@@ -366,6 +366,17 @@ Meter::round_up_to_beat (Temporal::BBT_Time const & bbt) const
 	return b;
 }
 
+Temporal::BBT_Time
+Meter::round_to_beat (Temporal::BBT_Time const & bbt) const
+{
+	Temporal::BBT_Time b = bbt.round_to_beat ();
+	if (b.beats > _divisions_per_bar) {
+		b.bars++;
+		b.beats = 1;
+	}
+	return b;
+}
+
 Temporal::Beats
 Meter::to_quarters (Temporal::BBT_Offset const & offset) const
 {
@@ -425,6 +436,12 @@ TempoPoint::TempoPoint (TempoMap const & map, XMLNode const & node)
 void
 TempoPoint::compute_omega_from_next_tempo (TempoPoint const & next)
 {
+	compute_omega_from_distance_and_next_tempo (next.beats() - beats(), next);
+}
+
+void
+TempoPoint::compute_omega_from_distance_and_next_tempo (Beats const & quarter_duration, TempoPoint const & next)
+{
 	superclock_t end_scpqn;
 
 	if (!_continuing) {
@@ -440,20 +457,21 @@ TempoPoint::compute_omega_from_next_tempo (TempoPoint const & next)
 		return;
 	}
 
-	compute_omega_from_quarter_duration (next.beats() - beats(), end_scpqn);
+	compute_omega_from_quarter_duration (quarter_duration, end_scpqn);
 }
 
 void
 TempoPoint::compute_omega_from_quarter_duration (Beats const & quarter_duration, superclock_t end_scpqn)
 {
 	_omega = ((1.0/end_scpqn) - (1.0/superclocks_per_quarter_note())) / DoubleableBeats (quarter_duration).to_double();
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("computed omega from qtr duration = %1%2 dur was %3 start speed %4 end speed %5\n", std::setprecision(12),_omega, quarter_duration, superclocks_per_quarter_note(), end_scpqn));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("quarter-computed omega from qtr duration = %1 dur was %2 start speed %3 end speed [%4]\n", _omega, quarter_duration.str(), superclocks_per_quarter_note(), end_scpqn));
 }
+
 void
 TempoPoint::compute_omega_from_audio_duration (samplecnt_t audio_duration, superclock_t end_scpqn)
 {
 	_omega = (1.0 / (samples_to_superclock (audio_duration, TEMPORAL_SAMPLE_RATE))) * log ((double) superclocks_per_note_type() / end_scpqn);
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("computed omega from audio duration= %1%2 dur was %3\n", std::setprecision(12),_omega, audio_duration));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("computed omega from audio duration= %1%2 dur was %3\n", std::setprecision(12), _omega, audio_duration));
 }
 
 superclock_t
@@ -663,7 +681,7 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 superclock_t
 TempoMetric::superclock_at (BBT_Time const & bbt) const
 {
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("get quarters for %1 = %2\n", bbt, _meter->quarters_at (bbt)));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("get quarters for %1 = %2 using %3\n", bbt, _meter->quarters_at (bbt), *this));
 	return _tempo->superclock_at (_meter->quarters_at (bbt));
 }
 
@@ -1141,6 +1159,21 @@ TempoMap::reset_starting_at (superclock_t sc)
 
 	DEBUG_TRACE (DEBUG::MapReset, string_compose ("we begin at %1 with metric %2\n", sc, metric));
 
+	/* We will reset the superclock (audio) and beat time based on the BBT
+	 * time of each point. To make sure this works correctly, sort them by
+	 * BBT time first. If we do not do this, then we will use points as
+	 * TempoMetrics in a (potentially) incorrect order.
+	 */
+
+	Point::bbt_comparator cmp;
+	_points.sort (cmp);
+
+#ifndef NDEBUG
+	if (DEBUG_ENABLED(DEBUG::MapReset)) {
+		std::cerr << "\nPOST SORT:\n";
+		dump (std::cerr);
+	}
+#endif
 	/* Setup the metric that is in effect at the starting point */
 
 	for (p = _points.begin(); p != _points.end(); ++p) {
@@ -1413,13 +1446,15 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	Beats beats;
 	BBT_Time bbt;
 
-	beats = when.beats ();
+	/* tempo changes must be on beat */
 
-	const Beats delta ((beats - tp.beats()).abs());
+	beats = when.beats();
 
-	if (delta < Beats (1,0)) {
-		return false;
-	}
+	/* XXX need to assert that meter note value is >= 4 */
+
+	MeterPoint const & mm (meter_at (beats));
+
+	beats.round_to_subdivision (mm.note_value() / 4, RoundNearest);
 
 	/* Do not allow moving a tempo marker to the same position as
 	 * an existing one.
@@ -1428,19 +1463,37 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	Tempos::iterator t, prev_t;
 	Meters::iterator m, prev_m;
 
-	/* tempo changes must be on beat */
-	beats = beats.round_to_beat ();
-	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->beats() < beats && *t != tp; ++t) { prev_t = t; }
-	for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->beats() < beats; ++m) { prev_m = m; }
+	/* find tempo & meter in effect at the new target location */
+
+	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->beats() <= beats && *t != tp; ++t) { prev_t = t; }
+	for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->beats() <= beats; ++m) { prev_m = m; }
+
 	if (prev_t == _tempos.end()) {
 		/* moved earlier than first, no movement */
 		return false;
 	}
+
 	if (prev_m == _meters.end()) {
 		/* moved earlier than first, no movement */
 		return false;
 	}
+
+	/* If the previous tempo is ramped, we need to recompute its omega
+	 * constant to cover the (new) duration of the ramp.
+	 */
+
+	if (prev_t->actually_ramped()) {
+		prev_t->compute_omega_from_distance_and_next_tempo (beats - prev_t->beats(), tp);
+	}
+
 	TempoMetric metric (*prev_t, *prev_m);
+
+	const Beats delta ((beats - tp.beats()).abs());
+
+	if (delta < Beats::ticks (metric.meter().ticks_per_grid())) {
+		return false;
+	}
+
 	sc = metric.superclock_at (beats);
 	bbt = metric.bbt_at (beats);
 
@@ -1850,7 +1903,7 @@ TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
 }
 
 void
-TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, uint32_t bar_mod) const
+TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, uint32_t bar_mod, uint32_t beat_div) const
 {
 	/* note: @p bar_mod is "bar modulo", and describes the N in "give
 	   me every Nth bar". If the caller wants every 4th bar, bar_mod ==
@@ -1871,7 +1924,27 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 	TempoPoint const * tp = 0;
 	MeterPoint const * mp = 0;
-	Points::const_iterator p;
+	Points::const_iterator p = _points.begin();
+	BBT_Time bbt;
+	Beats beats;
+
+	/* Find relevant meter for nominal start point */
+
+	p = get_tempo_and_meter (tp, mp, start, true, true);
+
+	/* p now points to either the point *after* start, or the end of the
+	 * _points list.
+	 *
+	 * metric is the TempoMetric that is in effect at start
+	 */
+
+	TempoMetric metric = TempoMetric (*tp, *mp);
+
+	DEBUG_TRACE (DEBUG::Grid, string_compose ("metric in effect at %1 = %2\n", start, metric));
+
+	/* determine the BBT at start */
+
+	bbt = metric.bbt_at (timepos_t::from_superclock (start));
 
 	/* first task: get to the right starting point for the requested
 	 * grid. if bar_mod is zero, then we'll start on the next beat after
@@ -1883,20 +1956,6 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	 * point after the latter of the tempo/meter points"
 	 */
 
-	p = get_tempo_and_meter (tp, mp, start, true, true);
-	TempoMetric metric = TempoMetric (*tp, *mp);
-
-	DEBUG_TRACE (DEBUG::Grid, string_compose ("metric in effect at %1 = %2\n", start, metric));
-
-	/* p now points to either the point *after* start, or the end of the
-	 * _points list.
-	 *
-	 * metric is the TempoMetric that is in effect at start
-	 */
-
-	/* determine the BBT at start */
-
-	BBT_Time bbt = metric.bbt_at (timepos_t::from_superclock (start));
 
 	DEBUG_TRACE (DEBUG::Grid, string_compose ("start %1 is %2\n", start, bbt));
 
@@ -1941,7 +2000,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 		BBT_Time bar = bbt.round_down_to_bar ();
 
-		/* adjust to match bar_mod (i.e. we only want every 4th bar)
+		/* adjust to match bar_mod (e.g. we only want every 4th bar)
 		 */
 
 		if (bar_mod != 1) {
@@ -1960,8 +2019,12 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			bbt = bar;
 
+
+			/* rebuild metric */
+
 			p = get_tempo_and_meter (tp, mp, bbt, true, true);
 			metric = TempoMetric (*tp, *mp);
+
 
 			DEBUG_TRACE (DEBUG::Grid, string_compose ("metric in effect(3) at %1 = %2\n", start, metric));
 			start = metric.superclock_at (bbt);
@@ -1973,156 +2036,144 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 	/* at this point:
 	 *
-	 * - metric is a TempoMetric that describes the situation at start
+	 * - metric is a TempoMetric that describes the situation at the adjusted start time
 	 * - p is an iterator pointin to either the end of the _points list, or
 	 *   the next point in the list after start.
 	 */
 
-	DEBUG_TRACE (DEBUG::Grid, string_compose ("start filling points with start = %1 end = %2 with limit @ %3\n", start, end, *p));
+	while (p != _points.end() && start < end) {
 
-	Temporal::Beats beats = metric.quarters_at_superclock (start);
+		/* Generate grid points (either actual meter-defined
+		 * beats, or bars based on bar_mod) up until the next point
+		 * in the map
+		 */
 
-	while (start < end) {
-
-		DEBUG_TRACE (DEBUG::Grid, string_compose ("start %1 end %2 bbt %3 find first/limit with limit @ = %4\n", start, end, bbt, *p));
-
-		const superclock_t limit = (p == _points.end()) ? end : std::min (p->sclock(), end);
-
-		while (start < limit) {
-
-			/* add point to grid, perhaps */
-
-			if (bar_mod != 0) {
-				if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 1)))) {
-					ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
-					DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
-				} else {
-					DEBUG_TRACE (DEBUG::Grid, string_compose ("-- skip %1 not on bar_mod %2\n", bbt, bar_mod));
-				}
-			} else {
+		if (bar_mod != 0) {
+			if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 1)))) {
 				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       [%2]\n", metric, ret.back()));
+			} else {
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("-- skip %1 not on bar_mod %2\n", bbt, bar_mod));
 			}
 
-			if (bar_mod == 0) {
+			/* Advance by the number of bars specified by bar_mod */
 
-				/* Advance beats by the meter note value size, and
-				 * then recompute the BBT and superclock
-				 * position corresponding to that musical time
-				 */
+			bbt.bars += bar_mod;
 
-				beats += metric.tempo().note_type_as_beats ();
-				bbt = metric.bbt_at (beats);
-				start = metric.superclock_at (beats);
+		} else {
 
+			ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       [%2]\n", metric, ret.back()));
+
+			/* Advance beats by 1 meter-defined "beat */
+
+			if (beat_div == 1) {
+				bbt = metric.bbt_add (bbt, BBT_Offset (0, 1, 0));
 			} else {
-
-				/* Advance by the number of bars specified by
-				   bar_mod, then recompute the beats and
-				   superclock position corresponding to that
-				   BBT time.
-				*/
-
-				bbt.bars += bar_mod;
-				start = metric.superclock_at (bbt);
-				beats = metric.quarters_at_superclock (start);
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("bar mod %1 moved to %2 (start %3)\n", bar_mod, bbt, start))
+				bbt = metric.bbt_add (bbt, BBT_Offset (0, 0, Temporal::ticks_per_beat / beat_div));
 			}
 		}
 
-		/* we might be finished ...*/
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("check overrun of next point with bbt @ %1 point @ %2\n", bbt, *p));
 
-		if (start >= end) {
-			break;
-		}
+		/* Now check that neither the new BBT time nor the
+		 * corresponding audio time are past the next point, which
+		 * could be anywhere (since BBT marker placement is arbitrary
+		 * and connect be inferred from the prior elements of the tempo
+		 * map)
+		 */
 
-		DEBUG_TRACE (DEBUG::Grid, string_compose ("stopped fill with start %1 and point at %2\n", start, (p == _points.end() ? -1 : p->sclock())));
+		if (bbt > p->bbt()) {
 
-		while ((p != _points.end()) && (start >= p->sclock())) {
-
-			DEBUG_TRACE (DEBUG::Grid, string_compose ("pausing to deal with point => %1\n", *p));
-
-			/* have just passed or arrived at the next
-			 * point. Consider adding a grid point for this point.
-			 */
-
-			if (bar_mod != 0) {
-				if (p->bbt().is_bar() && (bar_mod == 1 || ((p->bbt().bars % bar_mod == 1)))) {
-					ret.push_back (TempoMapPoint (*this, metric, p->sclock(), p->beats(), p->bbt()));
-					DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
-				} else {
-					DEBUG_TRACE (DEBUG::Grid, string_compose ("-- skip %1 not on bar_mod %2\n", p->bbt(), bar_mod));
-				}
-
-			} else {
-
-				ret.push_back (TempoMapPoint (*this, metric, p->sclock(), p->beats(), p->bbt()));
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       %2\n", metric, ret.back()));
-			}
-
-			/* reset our notion of where we are */
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("BBT %1 is past next point @ %2\n", bbt, *p));
 
 			start = p->sclock();
 			bbt = p->bbt();
 			beats = p->beats();
 
-			/* But there may be multiple points here, and we have
-			 * to check them all (Tempo/Meter/MusicTime ... which
-			 * is itself both a Tempo *and* Meter point) before
-			 * proceeding.
-			 */
+			bool rebuild_metric = false;
 
-			const superclock_t pos = p->sclock();
+			while (p->bbt() == bbt) {
 
-			Points::const_iterator nxt = p;
-			++nxt;
+				TempoPoint const * tpp;
+				MeterPoint const * mpp;
 
-			TempoPoint const * tpp;
-			MeterPoint const * mpp;
-
-			/* use this point */
-
-			if ((tpp = dynamic_cast<TempoPoint const *> (&(*p))) != 0) {
-				tp = tpp;
-			}
-
-			if ((mpp = dynamic_cast<MeterPoint const *> (&(*p))) != 0) {
-				mp = mpp;
-			}
-
-			/* use any subsequent ones at the same location */
-
-			while ((nxt != _points.end()) && (nxt->sclock() == pos)) {
-
-				/* Set up the new metric given the new point */
-
-				if ((tpp = dynamic_cast<TempoPoint const *> (&(*nxt))) != 0) {
+				if ((tpp = dynamic_cast<TempoPoint const *> (&(*p))) != 0) {
+					rebuild_metric = true;
 					tp = tpp;
 				}
 
-				if ((mpp = dynamic_cast<MeterPoint const *> (&(*nxt))) != 0) {
+				if ((mpp = dynamic_cast<MeterPoint const *> (&(*p))) != 0) {
+					rebuild_metric = true;
 					mp = mpp;
 				}
 
-				++nxt;
+				++p;
 			}
 
-			/* Build a new metric from the composite of all the
-			 * points at this position.
+			/* reset the metric to use the most recent tempo & meter */
+
+			if (rebuild_metric) {
+				metric = TempoMetric (*tp, *mp);
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("with start = %1 aka %2 rebuilt metric from points, now %3\n", start, bbt, metric));
+			}
+		}
+
+		start = metric.superclock_at (bbt);
+
+		if (start > p->sclock()) {
+
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("audio time %1 is past next point @ %2\n", start, *p));
+
+			/* reset our sense of "now" */
+			start = p->sclock();
+			bbt = p->bbt();
+			beats = p->beats();
+
+			/* If we just arrived at a point (indicated by bbt ==
+			 * p->bbt()), use all points at the same location to
+			 * potentially reconstruct the metric. Note that a BBT point is
+			 * both a tempo and a meter point, which is why we do test each
+			 * point found at this location as both.
 			 */
 
-			metric = TempoMetric (*tp, *mp);
-			DEBUG_TRACE (DEBUG::Grid, string_compose ("metric changed, now using  %1\n", metric));
-			p = nxt;
+			bool rebuild_metric = false;
+
+			while (p->bbt() == bbt) {
+
+				TempoPoint const * tpp;
+				MeterPoint const * mpp;
+
+				if ((tpp = dynamic_cast<TempoPoint const *> (&(*p))) != 0) {
+					rebuild_metric = true;
+					tp = tpp;
+				}
+
+				if ((mpp = dynamic_cast<MeterPoint const *> (&(*p))) != 0) {
+					rebuild_metric = true;
+					mp = mpp;
+				}
+
+				++p;
+			}
+
+			/* reset the metric to use the most recent tempo & meter */
+
+			if (rebuild_metric) {
+				metric = TempoMetric (*tp, *mp);
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("with start = %1 aka %2 rebuilt metric from points, now %3\n", start, bbt, metric));
+			}
+
 		}
 
-		/* If we've reached the end of the points list, break and let
-		 * the final phase below fill out the rest of the grid
+		/* Update the quarter-note time value to match the BBT and
+		 * audio time positions
 		 */
 
-		if (p == _points.end()) {
-			break;
-		}
+		beats = metric.quarters_at (bbt);
+
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("bar mod %1 moved to %2 qn %3 sc %4)\n", bar_mod, bbt, beats, start));
+
 	}
 
 	/* reached the end or no more points to consider, so just
@@ -2130,8 +2181,6 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	 */
 
 	if (start < end) {
-
-		DEBUG_TRACE (DEBUG::Grid, string_compose ("reached end, no more map points, finish between %1 .. %2\n", start, end));
 
 		/* note: if start < end, then p == _points.end(). This means there are
 		 * no more Points beyond the current value of start.
@@ -2141,33 +2190,51 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 		 * constant. metric will also remain constant until we finish.
 		 */
 
-		const superclock_t step  = metric.superclocks_per_grid_at (start);
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("reached end, no more map points, use %5 to finish between %1 .. %2 initial bbt %3, beats %4\n", start, end, bbt, beats.str(), metric));
 
-		do {
-			const Temporal::Beats beats = metric.quarters_at_superclock (start);
+		while (start < end) {
+
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("bar mod %1 moved to %2 qn %3 sc %4)\n", bar_mod, bbt, beats, start));
 
 			/* It is possible we already added the current BBT
 			 * point, so check to avoid doubling up
 			 */
 
-			if (ret.back().bbt() != bbt) {
-				if (bar_mod != 0) {
-					if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 0)))) {
-						ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
-						DEBUG_TRACE (DEBUG::Grid, string_compose ("Gend %1\t       %2\n", metric, ret.back()));
-					}
-				} else {
+			if (bar_mod != 0) {
+				if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 0)))) {
 					ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
-					DEBUG_TRACE (DEBUG::Grid, string_compose ("Gend %1\t       %2\n", metric, ret.back()));
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("GendA %1\t       %2\n", metric, ret.back()));
+				}
+
+				/* Advance by the number of bars specified by
+				   bar_mod, then recompute the beats and
+				   superclock position corresponding to that
+				   BBT time.
+				*/
+
+				bbt.bars += bar_mod;
+
+			} else {
+				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("GendB %1\t       %2\n", metric, ret.back()));
+
+				/* move on by 1 meter-defined "beat" */
+
+				if (beat_div == 1) {
+					bbt = metric.bbt_add (bbt, BBT_Offset (0, 1, 0));
+				} else {
+					bbt = metric.bbt_add (bbt, BBT_Offset (0, 0, Temporal::ticks_per_beat / beat_div));
 				}
 			}
 
-			start += step;
-			bbt = metric.bbt_at (timepos_t::from_superclock (start));
+			/* compute audio and quarter-note time from the new BBT position */
 
-		} while (start < end);
+			start = metric.superclock_at (bbt);
+			beats = metric.quarters_at (bbt);
+		}
 
 		/* all done */
+
 	} else {
 		if (p == _points.end()) {
 			DEBUG_TRACE (DEBUG::Grid, string_compose ("ended loop with start %1 end %2, p @ END\n", start, end));
