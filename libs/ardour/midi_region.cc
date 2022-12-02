@@ -161,19 +161,20 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc, ThawList* tl) const
 		node.set_property (X_("flags"), newsrc->flags ());
 		node.set_property (X_("take-id"), newsrc->take_id());
 
-		/* compare to SMFSource::set_state */
-		newsrc->MidiSource::set_state (node, Stateful::current_state_version);
-		newsrc->Source::set_state (node, Stateful::current_state_version);
-		delete &node;
-
 		/* Lock our source since we'll be reading from it.  write_to() will
 		   take a lock on newsrc.
 		*/
 
 		Source::ReaderLock lm (ms->mutex());
 		if (ms->write_to (lm, newsrc, Temporal::Beats(), std::numeric_limits<Temporal::Beats>::max())) {
+			delete &node;
 			return boost::shared_ptr<MidiRegion> ();
 		}
+
+		/* compare to SMFSource::set_state */
+		newsrc->MidiSource::set_state (node, Stateful::current_state_version);
+		newsrc->Source::set_state (node, Stateful::current_state_version);
+		delete &node;
 	}
 
 	PropertyList plist (derive_properties ());
