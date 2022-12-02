@@ -247,6 +247,7 @@ public:
 	virtual void goto_nth_marker (int nth) = 0;
 	virtual void jump_to_loop_marker (bool start) = 0;
 	virtual void trigger_script (int nth) = 0;
+	virtual void add_bbt_marker_at_playhead_cursor () = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
 	virtual void add_location_mark (Temporal::timepos_t const & where) = 0;

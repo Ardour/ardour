@@ -639,6 +639,9 @@ ARDOUR_UI::install_dependent_actions ()
 	act = ActionManager::register_action (common_actions, "alternate-remove-location-from-playhead", _("Remove Mark at Playhead"), sigc::mem_fun(editor, &PublicEditor::remove_location_at_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (common_actions, "add-bbt-from-playhead", _("Add BBT Marker from Playhead"), sigc::mem_fun(editor, &PublicEditor::add_bbt_marker_at_playhead_cursor));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (common_actions, "nudge-next-forward", _("Nudge Next Later"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::nudge_forward), true, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, "nudge-next-backward", _("Nudge Next Earlier"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::nudge_backward), true, false));

@@ -529,6 +529,22 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 }
 
 void
+Editor::add_bbt_marker_at_playhead_cursor ()
+{
+	if (_session == 0) {
+		return;
+	}
+
+	timepos_t pos (_session->transport_sample ());
+
+	BBT_Time bbt     = Temporal::TempoMap::use()->bbt_at (pos);
+	std::string name = _("Playhead");
+
+	TempoMapChange tmc (*this, _("add BBT marker"));
+	tmc.map().set_bartime (bbt, pos, name);
+}
+
+void
 Editor::mouse_add_bbt_marker_event (timepos_t pos)
 {
 	if (_session == 0) {
