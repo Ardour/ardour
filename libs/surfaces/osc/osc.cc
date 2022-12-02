@@ -118,10 +118,12 @@ OSC::OSC (Session& s, uint32_t port)
 	, default_send_size (0)
 	, default_plugin_size (0)
 	, tick (true)
-	, global_init (true)
 	, bank_dirty (false)
 	, observer_busy (true)
 	, scrub_speed (0)
+	, scrub_place (0)
+	, scrub_time (0)
+	, global_init (true)
 	, gui (0)
 {
 	_instance = this;
