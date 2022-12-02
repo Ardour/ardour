@@ -10,6 +10,7 @@ import platform as PLATFORM
 from waflib.Tools import winres
 from waflib.Build import Context
 from waflib.Build import BuildContext
+import waflib.Utils as Utils
 
 # Fixup OSX 10.5/10.6 builds
 # prefer gcc, g++ 4.x over ancient clang-1.5
@@ -1618,6 +1619,12 @@ def build(bld):
     elif bld.env['build_target'] != 'mingw':
         bld.recurse('tools/sanity_check')
         bld.recurse('tools/gccabicheck')
+
+        obj              = bld(features = 'subst')
+        obj.source       = 'tools/avahi.sh'
+        obj.target       = 'libs/ardour-avahi.sh'
+        obj.chmod        = Utils.O755
+        obj.install_path = bld.env['LIBDIR']
 
     bld.recurse('libs/clearlooks-newer')
 
