@@ -111,7 +111,11 @@ ZeroConf::start ()
 #elif defined PLATFORM_WINDOWS
 
 /* in theory dns_sd API also works on Windows 10+
- * windns.h and dnsapi.dll
+ * windns.h and dnsapi.dll (mingw does not currently support this),
+ * besides we still offer windows 7 compatible binaries.
+ *
+ * alternatively https://github.com/videolabs/libmicrodns
+ * (which will also be handy on Linux, rather than using a shell script)
  */
 
 bool
