@@ -48,6 +48,7 @@
 
 #include "pbd/i18n.h"
 
+
 class OSCControllable;
 class OSCRouteObserver;
 class OSCGlobalObserver;
@@ -57,6 +58,7 @@ class OSCCueObserver;
 namespace ARDOUR {
 class Session;
 class Route;
+class ZeroConf;
 }
 
 /* this is mostly a placeholder because I suspect that at some
@@ -305,6 +307,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int64_t scrub_time;		// when did the wheel move last?
 	bool global_init;
 	boost::shared_ptr<ARDOUR::Stripable> _select;	// which stripable out of /surface/stripables is gui selected
+
+	ARDOUR::ZeroConf* _zeroconf;
 
 	void register_callbacks ();
 
