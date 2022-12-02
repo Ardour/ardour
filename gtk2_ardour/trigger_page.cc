@@ -365,6 +365,18 @@ TriggerPage::initial_track_display ()
 }
 
 void
+TriggerPage::clear_selected_slot ()
+{
+	Selection& selection (Editor::instance ().get_selection ());
+	TriggerSelection ts = selection.triggers;
+	if (ts.empty ()) {
+		return;
+	}
+	TriggerPtr trigger = ts.front ()->trigger ();
+	trigger->set_region (boost::shared_ptr<Region>());
+}
+
+void
 TriggerPage::selection_changed ()
 {
 	Selection& selection (Editor::instance ().get_selection ());
@@ -757,6 +769,8 @@ void
 TriggerPage::register_actions ()
 {
 	Glib::RefPtr<ActionGroup> trigger_actions = ActionManager::create_action_group (bindings, X_("Cues"));
+
+	ActionManager::register_action (trigger_actions, "clear-trigger-slot", _("Clear Selected Slot"), sigc::mem_fun (*this, &TriggerPage::clear_selected_slot));
 
 	for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
 		const std::string action_name  = string_compose ("trigger-cue-%1", n);

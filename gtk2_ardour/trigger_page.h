@@ -74,6 +74,8 @@ private:
 	void add_routes (ARDOUR::RouteList&);
 	void remove_route (TriggerStrip*);
 
+	void clear_selected_slot ();
+
 	void redisplay_track_list ();
 	void pi_property_changed (PBD::PropertyChange const&);
 	void stripable_property_changed (PBD::PropertyChange const&, boost::weak_ptr<ARDOUR::Stripable>);
