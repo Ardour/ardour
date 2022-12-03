@@ -4700,7 +4700,7 @@ ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* b
 				default:
 					break;
 			}
-			Glib::signal_idle ().connect (sigc::bind (&idle_drop_window, self));
+			me->_drop_window_connection = Glib::signal_idle ().connect (sigc::bind (&idle_drop_window, self)/*, G_PRIORITY_HIGH_IDLE*/);
 		}, this, pi->type ()));
 	}
 }
@@ -4719,8 +4719,11 @@ ProcessorWindowProxy::processor_going_away ()
 {
 	gui_connections.drop_connections ();
 	_unmap_connection.disconnect ();
-	delete _window;
+	_drop_window_connection.disconnect ();
+	Gtk::Window* w = _window;
+	/* Unset _window, any allbacks triggered by `delete _window`, will see _window = 0; */
 	_window = 0;
+	delete w;
 	WM::Manager::instance().remove (this);
 	/* should be no real reason to do this, since the object that would
 	   send DropReferences is about to be deleted, but lets do it anyway.
@@ -4777,6 +4780,7 @@ ProcessorWindowProxy::get (bool create)
 		/* drop existing window - wrong type */
 		set_state_mask (Gtkmm2ext::WindowProxy::StateMask (state_mask () & ~WindowProxy::Size));
 		_unmap_connection.block ();
+		_drop_window_connection.disconnect ();
 		drop_window ();
 		_unmap_connection.unblock ();
 	}
@@ -4804,6 +4808,7 @@ ProcessorWindowProxy::show_the_right_window (bool show_not_toggle)
 		/* drop existing window - wrong type */
 		set_state_mask (Gtkmm2ext::WindowProxy::StateMask (state_mask () & ~WindowProxy::Size));
 		_unmap_connection.block ();
+		_drop_window_connection.disconnect ();
 		drop_window ();
 		_unmap_connection.unblock ();
 	}

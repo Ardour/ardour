@@ -113,6 +113,7 @@ private:
 
 	void processor_going_away ();
 	sigc::connection _unmap_connection;
+	sigc::connection _drop_window_connection;
 	PBD::ScopedConnection going_away_connection;
 	PBD::ScopedConnectionList gui_connections;
 };
