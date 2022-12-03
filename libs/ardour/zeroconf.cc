@@ -124,7 +124,7 @@ ZeroConf::start ()
 	return false;
 }
 
-bool
+void
 ZeroConf::stop ()
 {
 }
