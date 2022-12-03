@@ -137,8 +137,8 @@ ZeroConf::start ()
 	std::string avahi_exec;
 
 	PBD::Searchpath sp (ARDOUR::ardour_dll_directory ());
-	if (!PBD::find_file (sp, "ardour-avahi.sh", avahi_exec)) {
-		PBD::warning << "ardour-avahi.sh was not found." << endmsg;
+	if (!PBD::find_file (sp, "ardour-avahi", avahi_exec)) {
+		PBD::warning << _("ardour-avahi tool was not found.") << endmsg;
 		return false;
 	}
 

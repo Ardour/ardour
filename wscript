@@ -1622,7 +1622,7 @@ def build(bld):
 
         obj              = bld(features = 'subst')
         obj.source       = 'tools/avahi.sh'
-        obj.target       = 'libs/ardour-avahi.sh'
+        obj.target       = 'libs/ardour-avahi'
         obj.chmod        = Utils.O755
         obj.install_path = bld.env['LIBDIR']
 
