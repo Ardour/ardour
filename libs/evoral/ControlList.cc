@@ -404,9 +404,9 @@ ControlList::thin (double thinning_factor)
 				/* compute the area of the triangle formed by 3 points
 				 */
 
-				const double ppw = prevprev->when.val();
-				const double pw = prev->when.val();
-				const double cw = cur->when.val();
+				const double ppw = prevprev->when.samples();
+				const double pw = prev->when.samples();
+				const double cw = cur->when.samples();
 
 				double area = fabs ((ppw * (prev->value - cur->value)) +
 						    (pw * (cur->value - prevprev->value)) +
