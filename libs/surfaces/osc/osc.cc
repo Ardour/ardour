@@ -68,6 +68,7 @@
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
 #include "ardour/vca_manager.h"
+#include "ardour/zeroconf.h"
 
 #include "osc_select_observer.h"
 #include "osc.h"
@@ -118,10 +119,13 @@ OSC::OSC (Session& s, uint32_t port)
 	, default_send_size (0)
 	, default_plugin_size (0)
 	, tick (true)
-	, global_init (true)
 	, bank_dirty (false)
 	, observer_busy (true)
 	, scrub_speed (0)
+	, scrub_place (0)
+	, scrub_time (0)
+	, global_init (true)
+	, _zeroconf (0)
 	, gui (0)
 {
 	_instance = this;
@@ -242,6 +246,8 @@ OSC::start ()
 
 	PBD::info << "OSC @ " << get_server_url () << endmsg;
 
+	_zeroconf = new ZeroConf ("_osc._udp", _port, lo_address_get_hostname (_osc_server));
+
 	std::string url_file;
 
 	if (find_file (ardour_config_search_path(), "osc_url", url_file)) {
@@ -319,6 +325,9 @@ OSC::stop ()
 {
 	periodic_connection.disconnect ();
 	session_connections.drop_connections ();
+
+	delete _zeroconf;
+	_zeroconf = NULL;
 
 	// clear surfaces
 	observer_busy = true;

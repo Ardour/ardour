@@ -603,6 +603,7 @@ public:
 	void edit_tempo_section (Temporal::TempoPoint&);
 	void edit_meter_section (Temporal::MeterPoint&);
 	void mouse_add_bbt_marker_event (Temporal::timepos_t where);
+	void add_bbt_marker_at_playhead_cursor ();
 
 	void edit_bbt (Temporal::MusicTimePoint&);
 

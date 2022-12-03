@@ -1180,6 +1180,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	/* and in this case you will want the accents on '3s' not '2s' */
 	uint32_t bbt_divisor = 2;
 	uint32_t bbt_accent_modulo = 2;
+
 	switch (_grid_type) {
 	case GridTypeBeatDiv3:
 		bbt_divisor = 3;
@@ -1426,10 +1427,14 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 				if (bbt.is_bar()) {
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
 					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
-				} else {
+				} else if (bbt.ticks == 0) {
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					snprintf (buf, sizeof(buf), "%" PRIu32, bbt.beats);
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Micro;
+					buf[0] = '\0';
 				}
+
 				if (((*i).sample(sr) < bbt_position_of_helper) && helper_active) {
 					buf[0] = '\0';
 				}
@@ -1438,51 +1443,9 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 				marks.push_back (mark);
 				n++;
 			}
-
-			/* Add the tick marks */
-			skip = Temporal::ticks_per_beat / bbt_beat_subdivision;
-			tick = skip; // the first non-beat tick
-
-			t = 0;
-			while (tick < Temporal::ticks_per_beat && (n < bbt_nmarks)) {
-
-				BBT_Time bbt ((*i).bbt());
-
-				next_beat.beats = bbt.beats;
-				next_beat.bars = bbt.bars;
-				next_beat.ticks = tick;
-				pos = TempoMap::use()->sample_at (next_beat);
-
-				if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
-					i_am_accented = true;
-				}
-
-				/* We do not label these ticks marks, because
-				 * we cannot be sure of their function. They
-				 * could be sub-divisions of the time signature
-				 * denominator, or they could actually be the
-				 * time signature denominator points ("beats"
-				 * in BBT).
-				 */
-
-				mark.label = "";
-				mark.position = pos;
-
-				if ((bbt_beat_subdivision > 4) && i_am_accented) {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Micro;
-				}
-				i_am_accented = false;
-				marks.push_back (mark);
-
-				tick += skip;
-				++t;
-				++n;
-			}
 		}
 
-	  break;
+		break;
 	}
 }
 

@@ -282,7 +282,8 @@ libardour_sources = [
         'vca_manager.cc',
         'video_tools_paths.cc',
         'vumeterdsp.cc',
-        'worker.cc'
+        'worker.cc',
+        'zeroconf.cc'
 ]
 
 def options(opt):

@@ -336,6 +336,7 @@ class LIBTEMPORAL_API Meter {
 	BBT_Time bbt_subtract (BBT_Time const & bbt, BBT_Offset const & sub) const;
 	BBT_Time round_to_bar (BBT_Time const &) const;
 	BBT_Time round_up_to_beat (BBT_Time const &) const;
+	BBT_Time round_to_beat (BBT_Time const &) const;
 	Beats    to_quarters (BBT_Offset const &) const;
 
 	XMLNode& get_state () const;
@@ -422,6 +423,7 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
 
 	LIBTEMPORAL_API double omega() const { return _omega; }
 	LIBTEMPORAL_API void compute_omega_from_next_tempo (TempoPoint const & next_tempo);
+	LIBTEMPORAL_API void compute_omega_from_distance_and_next_tempo (Beats const & quarter_duration, TempoPoint const & next_tempo);
 	LIBTEMPORAL_API bool actually_ramped () const { return Tempo::ramped() && ( _omega != 0); }
 
 	LIBTEMPORAL_API XMLNode& get_state () const;
@@ -502,7 +504,7 @@ class LIBTEMPORAL_API TempoMetric
 		return superclocks_per_grid () * _meter->divisions_per_bar();
 	}
 	superclock_t superclocks_per_grid () const {
-		return int_div_round (_tempo->superclocks_per_note_type() * _tempo->note_type(), (int64_t) _meter->note_value());
+		return PBD::muldiv_round (_tempo->superclocks_per_note_type(), _tempo->note_type(), (int64_t) _meter->note_value());
 	}
 
 	superclock_t superclocks_per_note_type_at_superclock (superclock_t sc) const {
@@ -877,7 +879,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API	BBT_Time bbt_walk (BBT_Time const &, BBT_Offset const &) const;
 
-	LIBTEMPORAL_API	void get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0) const;
+	LIBTEMPORAL_API	void get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
 	LIBTEMPORAL_API	uint32_t count_bars (Beats const & start, Beats const & end) const;
 
 	struct EmptyTempoMapException : public std::exception {

@@ -525,6 +525,7 @@ ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 
 	switch (r) {
 	case StartupFSM::ExitProgram: {
+		/* failure mode */
 		std::stringstream str;;
 		dump_errors (str, 10);
 		std::string msg (string_compose (_("<span font_size=\"large\" font_weight=\"bold\">Something went seriously wrong. %1 cannot continue.</span>\n\n"
@@ -537,6 +538,11 @@ ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 
 		queue_finish ();
 	}
+		break;
+
+	case StartupFSM::QuitProgram:
+		/* user explicitly requested quit */
+		queue_finish ();
 		break;
 
 	case StartupFSM::LoadSession:

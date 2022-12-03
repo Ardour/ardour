@@ -4857,13 +4857,13 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 
 	xmlParserCtxtPtr ctxt = xmlNewParserCtxt();
 	if (ctxt == NULL) {
-		return -1;
+		return -2;
 	}
 	xmlDocPtr doc = xmlCtxtReadFile (ctxt, xmlpath.c_str(), NULL, XML_PARSE_HUGE);
 
 	if (doc == NULL) {
 		xmlFreeParserCtxt(ctxt);
-		return -1;
+		return -2;
 	}
 
 	xmlNodePtr node = xmlDocGetRootElement(doc);
@@ -4871,7 +4871,7 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	if (node == NULL) {
 		xmlFreeParserCtxt(ctxt);
 		xmlFreeDoc (doc);
-		return -1;
+		return -2;
 	}
 
 	/* sample rate & version*/
@@ -4888,7 +4888,7 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	}
 
 	if ((parse_stateful_loading_version(version) / 1000L) > (CURRENT_SESSION_FILE_VERSION / 1000L)) {
-		return -1;
+		return -3;
 	}
 
 	if ((parse_stateful_loading_version(version) / 1000L) <= 2) {

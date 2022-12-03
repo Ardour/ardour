@@ -124,7 +124,7 @@ StartupFSM::dialog_hidden (Gtk::Window* /* ignored */)
 void
 StartupFSM::queue_finish ()
 {
-	_signal_response (ExitProgram);
+	_signal_response (QuitProgram);
 }
 
 void
@@ -232,7 +232,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 				show_session_dialog (new_session_required);
 				break;
 			default:
-				_signal_response (ExitProgram);
+				_signal_response (QuitProgram);
 			}
 		default:
 			/* ERROR */
@@ -266,7 +266,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 				break;
 
 			default:
-				_signal_response (ExitProgram);
+				_signal_response (QuitProgram);
 				break;
 			}
 			break;
@@ -300,7 +300,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 				}
 				break;
 			default:
-				_signal_response (ExitProgram);
+				_signal_response (QuitProgram);
 			}
 			break;
 		default:
@@ -336,7 +336,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 				}
 				break;
 			default:
-				_signal_response (ExitProgram);
+				_signal_response (QuitProgram);
 				break;
 			}
 		default:
@@ -591,10 +591,21 @@ StartupFSM::get_session_parameters_from_path (string const & path, string const 
 		string program_version;
 
 		const string statefile_path = Glib::build_filename (session_path, session_name + ARDOUR::statefile_suffix);
-		if (Session::get_info_from_path (statefile_path, sr, fmt, program_version, &session_engine_hints)) {
-			/* exists but we can't read it correctly */
-			error << string_compose (_("Cannot get existing session information from %1"), statefile_path) << endmsg;
-			return false;
+		switch (Session::get_info_from_path (statefile_path, sr, fmt, program_version, &session_engine_hints)) {
+			case 0:
+				/* OK */
+				break;
+			case -1:
+				error << string_compose (_("Session file %1 does not exist"), statefile_path) << endmsg;
+				return false;
+				break;
+			case -3:
+				error << string_compose (_("Session %1 is from a newer version of %2"), statefile_path, PROGRAM_NAME) << endmsg;
+				return false;
+				break;
+			default:
+				error << string_compose (_("Cannot get existing session information from %1"), statefile_path) << endmsg;
+				return false;
 		}
 
 		session_existing_sample_rate = sr;
@@ -717,10 +728,23 @@ StartupFSM::check_session_parameters (bool must_be_new)
 			SampleFormat fmt;
 			string program_version;
 			const string statefile_path = Glib::build_filename (session_path, session_name + ARDOUR::statefile_suffix);
-			if (Session::get_info_from_path (statefile_path, sr, fmt, program_version, &session_engine_hints)) {
-				/* exists but we can't read it */
-				return -1;
+			switch (Session::get_info_from_path (statefile_path, sr, fmt, program_version, &session_engine_hints)) {
+				case 0:
+					/* OK */
+					break;
+				case -1:
+					error << string_compose (_("Session file %1 does not exist"), statefile_path) << endmsg;
+					return -1;
+					break;
+				case -3:
+					error << string_compose (_("Session %1 is from a newer version of %2"), statefile_path, PROGRAM_NAME) << endmsg;
+					return -1;
+					break;
+				default:
+					error << string_compose (_("Cannot get existing session information from %1"), statefile_path) << endmsg;
+					return -1;
 			}
+
 			session_existing_sample_rate = sr;
 			return 0;
 		}
@@ -832,10 +856,21 @@ StartupFSM::check_session_parameters (bool must_be_new)
 	const string statefile_path = Glib::build_filename (session_path, session_name + ARDOUR::statefile_suffix);
 
 	if (!session_is_new) {
-
-		if (Session::get_info_from_path (statefile_path, sr, fmt, program_version, &session_engine_hints)) {
-			/* exists but we can't read it */
-			return -1;
+		switch (Session::get_info_from_path (statefile_path, sr, fmt, program_version, &session_engine_hints)) {
+			case 0:
+				/* OK */
+				break;
+			case -1:
+				error << string_compose (_("Session file %1 does not exist"), statefile_path) << endmsg;
+				return -1;
+				break;
+			case -3:
+				error << string_compose (_("Session %1 is from a newer version of %2"), statefile_path, PROGRAM_NAME) << endmsg;
+				return -1;
+				break;
+			default:
+				error << string_compose (_("Cannot get existing session information from %1"), statefile_path) << endmsg;
+				return -1;
 		}
 
 		session_existing_sample_rate = sr;

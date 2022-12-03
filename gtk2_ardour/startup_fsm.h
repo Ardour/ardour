@@ -46,6 +46,7 @@ class StartupFSM : public sigc::trackable
 	enum Result {
 		LoadSession,
 		ExitProgram,
+		QuitProgram,
 	};
 
 	enum MainState {

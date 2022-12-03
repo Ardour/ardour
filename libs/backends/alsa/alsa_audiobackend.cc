@@ -346,10 +346,9 @@ AlsaAudioBackend::set_input_device_name (const std::string& d)
 		_input_audio_device_info.valid = false;
 		return 1;
 	}
-	_device_reservation.acquire_device (alsa_device.c_str ());
+	AlsaDeviceReservation adr (alsa_device.c_str ());
 	/* device will be busy once used, hence cache the parameters */
 	/* return */ get_alsa_device_parameters (alsa_device.c_str (), false, &_input_audio_device_info);
-	_device_reservation.release_device ();
 	return 0;
 }
 
@@ -380,6 +379,7 @@ AlsaAudioBackend::set_output_device_name (const std::string& d)
 		_output_audio_device_info.valid = false;
 		return 1;
 	}
+	AlsaDeviceReservation adr (alsa_device.c_str ());
 	/* return */ get_alsa_device_parameters (alsa_device.c_str (), true, &_output_audio_device_info);
 	return 0;
 }
@@ -859,6 +859,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	AudioSlave::DuplexMode slave_duplex = AudioSlave::FullDuplex;
 
 	if (_input_audio_device != _output_audio_device) {
+		std::string input_audio_device (_input_audio_device);
+		std::string output_audio_device (_output_audio_device);
 		if (_input_audio_device != get_standard_device_name (DeviceNone) && _output_audio_device != get_standard_device_name (DeviceNone)) {
 			/* Different devices for In + Out.
 			 * Ideally use input as clock source, and resample output.
@@ -867,22 +869,22 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 			 * retains master-out connection.
 			 */
 			if (getenv ("ARDOUR_ALSA_CLK")) {
-				slave_device         = _output_audio_device;
-				_output_audio_device = get_standard_device_name (DeviceNone);
-				slave_duplex         = AudioSlave::HalfDuplexOut;
+				slave_device        = _output_audio_device;
+				output_audio_device = get_standard_device_name (DeviceNone); //XXX
+				slave_duplex        = AudioSlave::HalfDuplexOut;
 			} else {
-				slave_device        = _input_audio_device;
-				_input_audio_device = get_standard_device_name (DeviceNone);
-				slave_duplex        = AudioSlave::HalfDuplexIn;
+				slave_device       = _input_audio_device;
+				input_audio_device = get_standard_device_name (DeviceNone); //XXX
+				slave_duplex       = AudioSlave::HalfDuplexIn;
 			}
 		}
-		if (_input_audio_device != get_standard_device_name (DeviceNone)) {
+		if (input_audio_device != get_standard_device_name (DeviceNone)) {
 			get_alsa_audio_device_names (devices, HalfDuplexIn);
-			audio_device = _input_audio_device;
+			audio_device = input_audio_device;
 			duplex       = 1;
 		} else {
 			get_alsa_audio_device_names (devices, HalfDuplexOut);
-			audio_device = _output_audio_device;
+			audio_device = output_audio_device;
 			duplex       = 2;
 		}
 	} else {
@@ -2425,7 +2427,7 @@ AlsaDeviceReservation::AlsaDeviceReservation ()
 AlsaDeviceReservation::AlsaDeviceReservation (const char* device_name)
 	: _device_reservation (0)
 {
-	acquire_device (device_name);
+	acquire_device (device_name, true);
 }
 
 AlsaDeviceReservation::~AlsaDeviceReservation ()
@@ -2434,7 +2436,7 @@ AlsaDeviceReservation::~AlsaDeviceReservation ()
 }
 
 bool
-AlsaDeviceReservation::acquire_device (const char* device_name)
+AlsaDeviceReservation::acquire_device (const char* device_name, bool silent)
 {
 	int device_number = card_to_num (device_name);
 	if (device_number < 0) {
@@ -2468,7 +2470,9 @@ AlsaDeviceReservation::acquire_device (const char* device_name)
 	_device_reservation->Terminated.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::release_device, this));
 
 	if (_device_reservation->start (SystemExec::ShareWithParent)) {
-		PBD::warning << _("AlsaAudioBackend: Device Request failed.") << endmsg;
+		if (!silent) {
+			PBD::warning << _("AlsaAudioBackend: Device Request failed.") << endmsg;
+		}
 		release_device ();
 		return false;
 	}
@@ -2480,7 +2484,9 @@ AlsaDeviceReservation::acquire_device (const char* device_name)
 	}
 
 	if (timeout == 0 || !_reservation_succeeded) {
-		PBD::warning << _("AlsaAudioBackend: Device Reservation failed.") << endmsg;
+		if (!silent) {
+			PBD::warning << _("AlsaAudioBackend: Device Reservation failed.") << endmsg;
+		}
 		release_device ();
 		return false;
 	}

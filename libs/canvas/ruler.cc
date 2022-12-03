@@ -165,7 +165,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 		for (vector<Mark>::const_iterator m = marks.begin(); m != marks.end(); ++m) {
 			Duple pos;
-			Pango::FontDescription* fd = _font_description;
+			Pango::FontDescription* fd = (m->style == Mark::Major) ? (_second_font_description ? _second_font_description : _font_description) : _font_description;
 
 			pos.x = floor ((m->position - _lower) / _metric->units_per_pixel);
 			pos.y = self.y1; /* bottom edge */
@@ -210,9 +210,6 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 					cr->rel_line_to (0, -_divide_height);
 				} else {
 					cr->rel_line_to (0, -height);
-				}
-				if (_second_font_description) {
-					fd = _second_font_description;
 				}
 				break;
 			case Mark::Minor:

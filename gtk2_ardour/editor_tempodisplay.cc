@@ -405,12 +405,22 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 	switch (bbt_ruler_scale) {
 
 	case bbt_show_quarters:
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 1);
+		break;
 	case bbt_show_eighths:
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 2);
+		break;
 	case bbt_show_sixteenths:
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 4);
+		break;
 	case bbt_show_thirtyseconds:
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 8);
+		break;
 	case bbt_show_sixtyfourths:
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 16);
+		break;
 	case bbt_show_onetwentyeighths:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 32);
 		break;
 
 	case bbt_show_1:
@@ -516,6 +526,22 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 	TempoMapChange tmc (*this, _("add time signature"));
 	pos = timepos_t (tmc.map().quarters_at (requested));
 	tmc.map().set_meter (Meter (bpb, note_type), pos);
+}
+
+void
+Editor::add_bbt_marker_at_playhead_cursor ()
+{
+	if (_session == 0) {
+		return;
+	}
+
+	timepos_t pos (_session->transport_sample ());
+
+	BBT_Time bbt     = Temporal::TempoMap::use()->bbt_at (pos);
+	std::string name = _("Playhead");
+
+	TempoMapChange tmc (*this, _("add BBT marker"));
+	tmc.map().set_bartime (bbt, pos, name);
 }
 
 void
