@@ -205,6 +205,11 @@ ExportFormatManager::init_formats ()
 	add_format (f_ptr);
 
 	try {
+		f_ptr.reset (new ExportFormatOggOpus ());
+		add_format (f_ptr);
+	} catch (ExportFormatIncompatible & e) {}
+
+	try {
 		f_ptr.reset (new ExportFormatOggVorbis ());
 		add_format (f_ptr);
 	} catch (ExportFormatIncompatible & e) {}

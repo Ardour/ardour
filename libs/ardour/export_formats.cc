@@ -179,6 +179,8 @@ HasSampleFormat::get_sample_format_name (ExportFormatBase::SampleFormat format)
 		return _("8-bit unsigned");
 	  case ExportFormatBase::SF_Vorbis:
 		return _("Vorbis sample format");
+	  case ExportFormatBase::SF_Opus:
+		return _("OPUS codec");
 	  case ExportFormatBase::SF_MPEG_LAYER_III:
 		return _("MPEG-2 Audio Layer III");
 	  case ExportFormatBase::SF_None:
@@ -381,6 +383,41 @@ ExportFormatBWF::set_compatibility_state (ExportFormatCompatibility const & comp
 	return compatible;
 }
 
+
+/*** OPUS ***/
+
+ExportFormatOggOpus::ExportFormatOggOpus ()
+	: HasSampleFormat (sample_formats)
+{
+	SF_INFO sf_info;
+	sf_info.channels = 2;
+	sf_info.samplerate = SR_44_1;
+	sf_info.format = F_Ogg | SF_Opus;
+	if (sf_format_check (&sf_info) != SF_TRUE) {
+		throw ExportFormatIncompatible();
+	}
+
+	set_name ("Ogg OPUS");
+	set_format_id (F_Ogg);
+	sample_formats.insert (SF_Opus);
+
+	// libsndfile doesn't expose direct quality control - use these coarse approximations
+	add_codec_quality ("Low (0%)",            0);
+	add_codec_quality ("Default (40%)",      40);
+	add_codec_quality ("High (60%)",         60);
+	add_codec_quality ("Very High (100%)",  100);
+
+	set_extension ("opus");
+	set_quality (Q_LossyCompression);
+}
+
+bool
+ExportFormatOggOpus::set_compatibility_state (ExportFormatCompatibility const& compatibility)
+{
+	bool compatible = compatibility.has_format (F_Ogg);
+	set_compatible (compatible);
+	return compatible;
+}
 
 /*** MPEG / MP3 ***/
 
