@@ -1275,6 +1275,13 @@ TempoMap::reset_starting_at (superclock_t sc)
 			p->set (sc, metric.meter().quarters_at (p->bbt()), p->bbt());
 		} else {
 			DEBUG_TRACE (DEBUG::MapReset, "\tnot recomputing this one\n");
+			/* Retain the audio time and BBT time for this music
+			   time point, but reset the beat time position to
+			   reflect the previous tempo & meter.
+			*/
+			p->set (p->sclock(), metric.meter().quarters_at (p->bbt()), p->bbt());
+			/* We reached a BBT marker ... we should stop resetting */
+			break;
 		}
 
 		/* Now ensure that metric is correct moving forward */
