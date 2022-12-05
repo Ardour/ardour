@@ -29,10 +29,11 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Temporal;
 
-BBTMarkerDialog::BBTMarkerDialog (timepos_t const & pos)
+BBTMarkerDialog::BBTMarkerDialog (timepos_t const & pos, BBT_Time const& bbt)
 	: ArdourDialog (_("New Music Time"))
 	, _point (0)
 	, _position (pos)
+	, _bbt (bbt)
 	, entry_label (_("BBT"))
 	, name_label (_("Name"))
 
@@ -44,6 +45,7 @@ BBTMarkerDialog::BBTMarkerDialog (MusicTimePoint& p)
 	: ArdourDialog (_("Edit Music Time"))
 	, _point (&p)
 	, _position (timepos_t::from_superclock (p.sclock()))
+	, _bbt (TempoMap::use()->bbt_at (_position).round_to_beat ())
 	, entry_label (_("BBT"))
 	, name_label (_("Name"))
 {
@@ -53,10 +55,8 @@ BBTMarkerDialog::BBTMarkerDialog (MusicTimePoint& p)
 void
 BBTMarkerDialog::init (bool add)
 {
-	BBT_Time bbt = TempoMap::use()->bbt_at (_position).round_to_beat ();
-
 	bar_entry.set_range (1, 9999);
-	beat_entry.set_range (1, 9999);
+	beat_entry.set_range (1, 9999); // XXX (1, time-signature denominator at _position) ?!
 	bar_entry.set_digits (0);
 	beat_entry.set_digits (0);
 
@@ -64,8 +64,8 @@ BBTMarkerDialog::init (bool add)
 	bbt_box.pack_start (bar_entry);
 	bbt_box.pack_start (beat_entry);
 
-	bar_entry.set_value (bbt.bars);
-	beat_entry.set_value (bbt.beats);
+	bar_entry.set_value (_bbt.bars);
+	beat_entry.set_value (_bbt.beats);
 
 	name_box.pack_start (name_label);
 	name_box.pack_start (name_entry);

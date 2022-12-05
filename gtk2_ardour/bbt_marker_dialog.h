@@ -33,7 +33,7 @@
 class BBTMarkerDialog : public ArdourDialog
 {
 public:
-	BBTMarkerDialog (Temporal::timepos_t const &);
+	BBTMarkerDialog (Temporal::timepos_t const &, Temporal::BBT_Time const&);
 	BBTMarkerDialog (Temporal::MusicTimePoint&);
 
 	Temporal::timepos_t position() const;
@@ -43,7 +43,8 @@ public:
 private:
 	void init (bool add);
 	Temporal::MusicTimePoint* _point;
-	Temporal::timepos_t _position;
+	Temporal::timepos_t       _position;
+	Temporal::BBT_Time        _bbt;
 
 	Gtk::HBox       bbt_box;
 	Gtk::SpinButton bar_entry;
