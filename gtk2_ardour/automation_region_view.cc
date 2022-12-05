@@ -160,16 +160,14 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 		 * adding the point.
 		 */
 
-		const timepos_t pos = timepos_t (e.pixel_to_sample (x) - _region->position_sample() + _region->start_sample());
-
-		add_automation_event (ev, pos, y, with_guard_points);
+		add_automation_event (ev, timepos_t (e.pixel_to_sample (x)), y, with_guard_points);
 		return true;
 	}
 
 	return RegionView::canvas_group_event (ev);
 }
 
-/** @param when Position in samples, where 0 is the start of the region.
+/** @param when Position is global time position
  *  @param y y position, relative to our TimeAxisView.
  */
 void
@@ -192,7 +190,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, dou
 
 	/* snap time */
 
-	when = snap_region_time_to_region_time (_region->start().distance (when), false) + _region->start ();
+	when = snap_region_time_to_region_time (_region->source_position().distance (when), false);
 
 	/* map using line */
 
