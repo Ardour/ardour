@@ -355,7 +355,7 @@ public:
 	}
 };
 
-class LIBARDOUR_API ExportFormatOggOpus : public ExportFormat, public HasSampleFormat, public HasCodecQuality
+class LIBARDOUR_API ExportFormatOggOpus : public ExportFormat, public HasCodecQuality
 {
 public:
 	ExportFormatOggOpus ();

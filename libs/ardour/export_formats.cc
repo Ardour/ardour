@@ -387,7 +387,6 @@ ExportFormatBWF::set_compatibility_state (ExportFormatCompatibility const & comp
 /*** OPUS ***/
 
 ExportFormatOggOpus::ExportFormatOggOpus ()
-	: HasSampleFormat (sample_formats)
 {
 	SF_INFO sf_info;
 	sf_info.channels = 2;
