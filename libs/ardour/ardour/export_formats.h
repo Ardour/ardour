@@ -373,7 +373,7 @@ public:
 	}
 	int default_codec_quality () const
 	{
-		return 40;
+		return 49;
 	}
 	virtual bool supports_tagging () const
 	{

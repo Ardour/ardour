@@ -449,7 +449,15 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 			_codec_quality = -2;
 		}
 		else if (format_id() == F_Ogg) {
-			_codec_quality = 40;
+			switch (sample_format ()) {
+				default:
+				case SF_Vorbis:
+					_codec_quality = 40;
+					break;
+				case SF_Opus:
+					_codec_quality = 49;
+					break;
+			}
 		}
 	}
 

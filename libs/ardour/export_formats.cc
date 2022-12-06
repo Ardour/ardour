@@ -401,11 +401,17 @@ ExportFormatOggOpus::ExportFormatOggOpus ()
 	set_format_id (F_Ogg);
 	sample_formats.insert (SF_Opus);
 
-	// libsndfile doesn't expose direct quality control - use these coarse approximations
-	add_codec_quality ("Low (0%)",            0);
-	add_codec_quality ("Default (40%)",      40);
-	add_codec_quality ("High (60%)",         60);
-	add_codec_quality ("Very High (100%)",  100);
+	/* libsndfile doesn't expose direct quality control,
+	 * bitrate = (((1.0 - quality) * (250000.0)) + 6000.0)
+	 */
+	add_codec_quality ("6 kb/s/channel",   0);
+	add_codec_quality ("32 kb/s/channel",  10); // 10.4
+	add_codec_quality ("64 kb/s/channel",  23); // 23.2
+	add_codec_quality ("96 kb/s/channel",  36);
+	add_codec_quality ("128 kb/s/channel", 49); // 48.8
+	add_codec_quality ("160 kb/s/channel", 61); // 61.6
+	add_codec_quality ("192 kb/s/channel", 74); // 74.42
+	add_codec_quality ("256 kb/s/channel", 100);
 
 	set_extension ("opus");
 	set_quality (Q_LossyCompression);
