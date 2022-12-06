@@ -1110,6 +1110,7 @@ ExportFormatDialog::update_tagging_selection ()
 void
 ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 {
+	fill_sample_rate_lists (ptr);
 	empty_encoding_option_table ();
 
 	boost::shared_ptr<ARDOUR::ExportFormatLinear>    linear_ptr;
@@ -1245,6 +1246,34 @@ ExportFormatDialog::show_ffmpeg_enconding_options (boost::shared_ptr<ARDOUR::Exp
 	show_all_children ();
 }
 
+void
+ExportFormatDialog::fill_sample_rate_lists (boost::shared_ptr<ARDOUR::ExportFormat> ptr)
+{
+	Gtk::TreeModel::iterator iter;
+	Gtk::TreeModel::Row      row;
+
+	sample_rate_list->clear ();
+	ExportFormatManager::SampleRateList const& rates = manager.get_sample_rates ();
+
+	for (ExportFormatManager::SampleRateList::const_iterator it = rates.begin (); it != rates.end (); ++it) {
+		if (!ptr->has_sample_rate ((*it)->rate)) {
+			continue;
+		}
+		iter = sample_rate_list->append ();
+		row  = *iter;
+		printf ("SR %d\n", (*it)->rate);
+
+		row[sample_rate_cols.ptr]   = *it;
+		row[sample_rate_cols.color] = "white";
+		row[sample_format_cols.color] = (*it)->compatible () ? "white" : "red";
+		row[sample_rate_cols.label] = (*it)->name ();
+
+		WeakSampleRatePtr ptr (*it);
+		(*it)->SelectChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_rate_selection, this, _1, ptr), gui_context ());
+		(*it)->CompatibleChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_rate_compatibility, this, _1, ptr), gui_context ());
+	}
+
+}
 void
 ExportFormatDialog::fill_sample_format_lists (boost::shared_ptr<ARDOUR::HasSampleFormat> ptr)
 {

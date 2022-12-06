@@ -174,6 +174,7 @@ private:
 
 	void fill_sample_format_lists (boost::shared_ptr<ARDOUR::HasSampleFormat> ptr);
 	void fill_codec_quality_lists (boost::shared_ptr<ARDOUR::HasCodecQuality> ptr);
+	void fill_sample_rate_lists (boost::shared_ptr<ARDOUR::ExportFormat> ptr);
 
 	/*** GUI components ***/
 
