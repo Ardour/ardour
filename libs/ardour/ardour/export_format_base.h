@@ -104,6 +104,7 @@ class LIBARDOUR_API ExportFormatBase {
 		SR_Session = 1,
 		SR_8 = 8000,
 		SR_22_05 = 22050,
+		SR_24 = 24000,
 		SR_44_1 = 44100,
 		SR_48 = 48000,
 		SR_88_2 = 88200,

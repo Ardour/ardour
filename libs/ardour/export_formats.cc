@@ -200,6 +200,7 @@ ExportFormatLinear::ExportFormatLinear (string name, FormatId format_id) :
 
 	add_sample_rate (SR_8);
 	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_24);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_88_2);
@@ -272,6 +273,7 @@ ExportFormatOggVorbis::ExportFormatOggVorbis ()
 	sample_formats.insert (SF_Vorbis);
 
 	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_24);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_88_2);
@@ -319,6 +321,7 @@ ExportFormatFLAC::ExportFormatFLAC () :
 	set_format_id (F_FLAC);
 
 	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_24);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_88_2);
@@ -354,6 +357,7 @@ ExportFormatBWF::ExportFormatBWF () :
 	set_format_id (F_WAV);
 
 	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_24);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_88_2);
@@ -390,7 +394,7 @@ ExportFormatOggOpus::ExportFormatOggOpus ()
 {
 	SF_INFO sf_info;
 	sf_info.channels = 2;
-	sf_info.samplerate = SR_44_1;
+	sf_info.samplerate = SR_48;
 	sf_info.format = F_Ogg | SF_Opus;
 	if (sf_format_check (&sf_info) != SF_TRUE) {
 		throw ExportFormatIncompatible();
@@ -399,6 +403,10 @@ ExportFormatOggOpus::ExportFormatOggOpus ()
 	set_name ("Ogg OPUS");
 	set_format_id (F_Ogg);
 	sample_formats.insert (SF_Opus);
+
+	add_sample_rate (SR_8);
+	add_sample_rate (SR_24);
+	add_sample_rate (SR_48);
 
 	/* libsndfile doesn't expose direct quality control,
 	 * bitrate = (((1.0 - quality) * (250000.0)) + 6000.0)
@@ -472,6 +480,7 @@ ExportFormatFFMPEG::ExportFormatFFMPEG (std::string const& name, std::string con
 
 	add_sample_rate (SR_8);
 	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_24);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_Session);
