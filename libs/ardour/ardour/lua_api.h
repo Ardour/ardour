@@ -273,6 +273,9 @@ namespace ARDOUR { namespace LuaAPI {
 	/** Crash Test Dummy */
 	void segfault ();
 
+	/** Return system environment variables (POSIX environ) */
+	std::vector<std::string> env ();
+
 	class Vamp {
 	/** Vamp Plugin Interface
 	 *
