@@ -1262,7 +1262,6 @@ ExportFormatDialog::fill_sample_rate_lists (boost::shared_ptr<ARDOUR::ExportForm
 		}
 		iter = sample_rate_list->append ();
 		row  = *iter;
-		printf ("SR %d\n", (*it)->rate);
 
 		row[sample_rate_cols.ptr]   = *it;
 		row[sample_rate_cols.color] = "white";
