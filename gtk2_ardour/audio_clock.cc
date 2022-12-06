@@ -113,7 +113,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 
 	_mode = BBT; /* lie to force mode switch */
 	set_mode (Timecode);
-	AudioClock::set (last_when(), true);
 
 	if (!transient) {
 		clocks.push_back (this);
@@ -507,35 +506,40 @@ AudioClock::end_edit (bool modify)
 		} else {
 
 			editing = false;
-			samplepos_t pos = 0; /* stupid gcc */
+			samplepos_t samples = 0; /* stupid gcc */
 
 			switch (_mode) {
 			case Timecode:
-				pos = samples_from_timecode_string (edit_string);
+				samples = samples_from_timecode_string (edit_string);
 				break;
 
 			case BBT:
 				if (is_duration) {
-					pos = sample_duration_from_bbt_string (last_when(), edit_string);
+					samples = sample_duration_from_bbt_string (last_when(), edit_string);
 				} else {
-					pos = samples_from_bbt_string (timepos_t(), edit_string);
+					samples = samples_from_bbt_string (timepos_t(), edit_string);
 				}
 				break;
 
 			case MinSec:
-				pos = samples_from_minsec_string (edit_string);
+				samples = samples_from_minsec_string (edit_string);
 				break;
 
 			case Seconds:
-				pos = samples_from_seconds_string (edit_string);
+				samples = samples_from_seconds_string (edit_string);
 				break;
 
 			case Samples:
-				pos = samples_from_audiosamples_string (edit_string);
+				samples = samples_from_audiosamples_string (edit_string);
 				break;
 			}
 
-			AudioClock::set (timepos_t (pos), true);
+			if (is_duration) {
+				AudioClock::set_duration (timecnt_t (samples), true);
+			} else {
+				AudioClock::set (timepos_t (samples), true);
+			}
+
 			_layout->set_attributes (normal_attributes);
 			ValueChanged(); /* EMIT_SIGNAL */
 		}
@@ -800,7 +804,11 @@ AudioClock::end_edit_relative (bool add)
 void
 AudioClock::tempo_map_changed ()
 {
-	AudioClock::set (last_when(), true);
+	if (is_duration) {
+		set_duration (current_duration(), true);
+	} else {
+		AudioClock::set (last_when(), true);
+	}
 }
 
 void
@@ -838,6 +846,9 @@ AudioClock::session_configuration_changed (std::string p)
 void
 AudioClock::set_duration (Temporal::timecnt_t const & dur, bool force)
 {
+	if (!is_duration) {
+		printf ("SET is_duration = true\n");
+	}
 	is_duration = true;
 
 	if ((!force && !get_visible()) || !_session) {
@@ -845,17 +856,17 @@ AudioClock::set_duration (Temporal::timecnt_t const & dur, bool force)
 	}
 
 	timepos_t when;
-
-	/* extent semantics, not length */
-
 	timecnt_t d;
 
 	/* durations for timecode display should use extent, not length
 	 *
-	 * reminder: length = end - start ; extent = end - start - 1
+	 * reminder:
+	 *     length = end - start
+	 *     extent = end - start - 1
 	 *
-	 * start + length = end
-	 * start + extent = last_point_inside duration
+	 * and thus:
+	 *     start + length = end
+	 *     start + extent = last_point_inside duration
 	 */
 
 	switch (_mode) {
@@ -914,6 +925,9 @@ AudioClock::set_duration (Temporal::timecnt_t const & dur, bool force)
 void
 AudioClock::set (timepos_t const & w, bool force)
 {
+	if (is_duration) {
+		printf ("SET is_duration = false\n");
+	}
 	is_duration = false;
 
 	timepos_t when (w);
@@ -1387,7 +1401,11 @@ AudioClock::set_session (Session *s)
 			}
 		}
 
-		AudioClock::set (last_when(), true);
+		if (is_duration) {
+			AudioClock::set_duration (current_duration (), true);
+		} else {
+			AudioClock::set (last_when(), true);
+		}
 	}
 }
 
@@ -1789,7 +1807,11 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				step *= 10;
 			}
-			AudioClock::set (last_when() + step, true);
+			if (is_duration) {
+				AudioClock::set_duration (current_duration() + step, true); // XXX step is too small ?!
+			} else {
+				AudioClock::set (last_when() + step, true);
+			}
 			ValueChanged (); /* EMIT_SIGNAL */
 		}
 		break;
@@ -1800,8 +1822,11 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				step *= 10;
 			}
-
-			if (!_negative_allowed && last_when() < step) {
+			if (is_duration) {
+				if (current_duration () >= timecnt_t (step)) { // XXX this is not right, also step for BBT is too small
+					AudioClock::set_duration (current_duration () - step, true);
+				}
+			} else if (!_negative_allowed && last_when() < step) {
 				AudioClock::set (timepos_t (), true);
 			} else {
 				AudioClock::set (last_when().earlier (step), true);
@@ -1841,13 +1866,21 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 
 		if (drag_accum > 0) { /* positive, so downward motion ... decrement clock */
 
-			if (!step.is_zero () && (step < pos)) {
+			if (is_duration) {
+				if (!step.is_zero () && (current_duration () >= timecnt_t(step))) {
+					AudioClock::set_duration (current_duration () - step, false);
+				}
+			} else if (!step.is_zero () && (step < pos)) {
 				AudioClock::set (pos.earlier (step), false);
 			} else {
 				AudioClock::set (timepos_t () , false);
 			}
 
-		} else { /* negative so upward motion .. increment clock */
+		} else if (is_duration) {
+		/* negative so upward motion .. increment clock */
+			AudioClock::set_duration (current_duration () + step, false);
+		} else {
+			/* negative so upward motion .. increment clock */
 			AudioClock::set (pos + step, false);
 		}
 
@@ -1928,6 +1961,8 @@ AudioClock::get_incremental_step (Field field, timepos_t const & pos)
 timecnt_t
 AudioClock::current_duration (timepos_t pos) const
 {
+	assert (is_duration);
+
 	timecnt_t ret;
 
 	switch (_mode) {
@@ -2185,6 +2220,8 @@ AudioClock::set_from_playhead ()
 		return;
 	}
 
+	assert (!is_duration);
+
 	AudioClock::set (timepos_t (_session->transport_sample()));
 	ValueChanged ();
 }
@@ -2271,7 +2308,11 @@ AudioClock::set_mode (Mode m)
 		break;
 	}
 
-	AudioClock::set (last_when(), true);
+	if (is_duration) {
+		AudioClock::set_duration (current_duration (), true);
+	} else {
+		AudioClock::set (last_when(), true);
+	}
 
 	mode_changed (); /* EMIT SIGNAL (the member one) */
 }

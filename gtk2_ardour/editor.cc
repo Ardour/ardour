@@ -2603,12 +2603,12 @@ Editor::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	timepos_t nudge_clock_value;
+	timecnt_t nudge_clock_value;
 	if (node.get_property ("nudge-clock-value", nudge_clock_value)) {
-		nudge_clock->set (nudge_clock_value);
+		nudge_clock->set_duration (nudge_clock_value);
 	} else {
 		nudge_clock->set_mode (AudioClock::Timecode);
-		nudge_clock->set (timepos_t (_session->sample_rate() * 5), true);
+		nudge_clock->set_duration (timecnt_t (_session->sample_rate() * 5), true);
 	}
 
 	{
