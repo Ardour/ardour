@@ -150,7 +150,7 @@ MonitorState
 MidiTrack::get_input_monitoring_state (bool recording, bool talkback) const
 {
 	RecordMode rmode = _session.config.get_record_mode ();
-	if (rmode != RecNonLayered && (recording || talkback)) {
+	if (rmode == RecSoundOnSound && (recording || talkback)) {
 		return MonitoringCue;
 	} else if (rmode != RecNonLayered || recording || talkback) {
 		return MonitoringInput;
