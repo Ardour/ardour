@@ -1974,7 +1974,7 @@ AudioClock::current_duration (timepos_t pos) const
 	case MinSec:
 	case Seconds:
 	case Samples:
-		ret = timecnt_t (last_when(), pos);
+		ret = last_time;
 		break;
 	}
 
