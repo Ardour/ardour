@@ -1823,7 +1823,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 				step *= 10;
 			}
 			if (is_duration) {
-				if (current_duration () >= timecnt_t (step)) { // XXX this is not right, also step for BBT is too small
+				if (!(current_duration () - step).is_negative()) {
 					AudioClock::set_duration (current_duration () - step, true);
 				}
 			} else if (!_negative_allowed && last_when() < step) {
