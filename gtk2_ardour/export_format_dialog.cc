@@ -429,13 +429,7 @@ ExportFormatDialog::load_state (FormatPtr spec)
 
 	for (Gtk::ListStore::Children::iterator it = format_list->children ().begin (); it != format_list->children ().end (); ++it) {
 		boost::shared_ptr<ARDOUR::ExportFormat> format_in_list = it->get_value (format_cols.ptr);
-		/* see also ExportFormatManager::change_format_selection */
-		if (format_in_list->get_format_id () == spec->format_id () &&
-		    // BWF has the same format id with wav, so we need to check this.
-		    format_in_list->has_broadcast_info () == spec->has_broadcast_info () &&
-				// Ogg can be Vorbis or OPUS
-				(format_in_list->get_format_id () != ExportFormatBase::F_Ogg || (spec->sample_format () == format_in_list->get_explicit_sample_format ()))
-				) {
+		if (spec->is_format (format_in_list)) {
 			format_in_list->set_selected (true);
 			break;
 		}
