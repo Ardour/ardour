@@ -215,7 +215,7 @@ timecnt_t::operator/ (timecnt_t const & other) const
 	}
 
 	if (time_domain() == AudioTime) {
-		return ratio_t (distance().val(), other.samples());
+		return ratio_t (distance().val(), other.superclocks());
 	}
 
 	return ratio_t (beats().to_ticks(), other.beats().to_ticks());
@@ -347,7 +347,7 @@ timecnt_t::operator- (timecnt_t const & other) const
 		if (other.time_domain() == AudioTime) {
 			return timecnt_t (_distance - other.distance(), _position);
 		} else {
-			return timecnt_t (_distance - other.samples(), _position);
+			return timecnt_t (_distance - other.superclocks(), _position);
 		}
 	}
 
@@ -361,7 +361,7 @@ timecnt_t::operator+= (timecnt_t const & other)
 		if (other.time_domain() == AudioTime) {
 			_distance += other.distance();
 		} else {
-			_distance += other.samples();
+			_distance += other.superclocks();
 		}
 	} else {
 		_distance += other.ticks ();
@@ -378,7 +378,7 @@ timecnt_t::operator+ (timepos_t const & other) const
 			/* both audio, just add and use an arbitrary position */
 			return timecnt_t (_distance + other.val(), _position);
 		} else {
-			return timecnt_t (_distance + other.samples(), _position);
+			return timecnt_t (_distance + other.superclocks(), _position);
 		}
 	}
 
@@ -392,7 +392,7 @@ timecnt_t::operator- (timepos_t const & other) const
 		if (other.time_domain() == AudioTime) {
 			return timecnt_t (_distance - other.val(), _position);
 		} else {
-			return timecnt_t (_distance - other.samples(), _position);
+			return timecnt_t (_distance - other.superclocks(), _position);
 		}
 	}
 
@@ -405,7 +405,7 @@ timecnt_t::operator-= (timecnt_t const & other)
 	if (time_domain() == other.time_domain()) {
 		_distance -= other.distance();
 	} else if (time_domain() == AudioTime) {
-		_distance -= other.samples();
+		_distance -= other.superclocks();
 	} else {
 		_distance -= other.ticks ();
 	}
