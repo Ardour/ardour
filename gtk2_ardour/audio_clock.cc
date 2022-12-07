@@ -2246,11 +2246,11 @@ AudioClock::set_mode (Mode m)
 		return;
 	}
 
+	const timecnt_t existing_duration = is_duration ? current_duration () : timecnt_t ();
+
 	_mode = m;
 
 	insert_map.clear();
-
-	_layout->set_text ("");
 
 	Gtk::Requisition req;
 	set_clock_dimensions (req);
@@ -2309,7 +2309,7 @@ AudioClock::set_mode (Mode m)
 	}
 
 	if (is_duration) {
-		AudioClock::set_duration (current_duration (), true);
+		AudioClock::set_duration (existing_duration, true);
 	} else {
 		AudioClock::set (last_when(), true);
 	}
