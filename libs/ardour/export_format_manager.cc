@@ -480,11 +480,7 @@ ExportFormatManager::change_format_selection (bool select, WeakExportFormatPtr c
 
 	if (select) {
 		select_format (ptr);
-	} else if (ptr->get_format_id() == current_selection->format_id() &&
-	           // BWF has the same format id with wav, so we need to check this.
-	           ptr->has_broadcast_info () == current_selection->has_broadcast_info () &&
-	           // Ogg can be Vorbis or OPUS
-	           (ptr->get_format_id () != ExportFormatBase::F_Ogg || (ptr->get_explicit_sample_format () == current_selection->sample_format ()))) {
+	} else if (current_selection->is_format (ptr)) {
 		ptr.reset();
 		select_format (ptr);
 	}

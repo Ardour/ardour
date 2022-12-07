@@ -581,12 +581,24 @@ ExportFormatSpecification::is_complete () const
 	return true;
 }
 
+bool
+ExportFormatSpecification::is_format (boost::shared_ptr<ExportFormat> format) const
+{
+	assert (format);
+	return (format_id () == format->get_format_id () &&
+			/* BWF has the same format id with wav, so we need to check this. */
+			has_broadcast_info () == format->has_broadcast_info () &&
+			/* F_Ogg can be Vorbis or OPUS */
+			(format_id () != ExportFormatBase::F_Ogg || (format->get_explicit_sample_format () == sample_format ())));
+}
+
 void
 ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 {
 	if (format) {
 		FormatId new_fmt = format->get_format_id ();
-		bool fmt_changed = format_id() != new_fmt;
+		bool fmt_changed = !is_format (format);
+
 		set_format_id (new_fmt);
 
 		set_type (format->get_type());
