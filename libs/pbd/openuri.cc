@@ -23,6 +23,7 @@
 #endif
 
 #include <boost/scoped_ptr.hpp>
+ #include <boost/algorithm/string.hpp>
 #include <string>
 #include <glibmm/spawn.h>
 
@@ -103,9 +104,12 @@ PBD::open_folder (const std::string& d)
 	bool rv = false;
 	if (curl) {
 		char * e = curl_easy_escape (curl, d.c_str(), d.size());
-		std::string url = "file:///" + std::string(e);
+		std::string p (e);
+		boost::replace_all (p, "%2F", "/");
+		std::string url = "file://" + p;
 		rv = PBD::open_uri (url);
 		curl_free (e);
+		curl_easy_cleanup(curl);
 	}
 	return rv;
 #else
