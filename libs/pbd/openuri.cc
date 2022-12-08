@@ -23,7 +23,6 @@
 #endif
 
 #include <boost/scoped_ptr.hpp>
- #include <boost/algorithm/string.hpp>
 #include <string>
 #include <glibmm/spawn.h>
 
@@ -31,8 +30,8 @@
 #include "pbd/openuri.h"
 
 #ifdef __APPLE__
-#include <curl/curl.h>
 	extern bool cocoa_open_url (const char*);
+	extern bool cocoa_open_folder (const char*);
 #endif
 
 #ifdef PLATFORM_WINDOWS
@@ -100,18 +99,7 @@ bool
 PBD::open_folder (const std::string& d)
 {
 #ifdef __APPLE__
-	CURL *curl = curl_easy_init ();
-	bool rv = false;
-	if (curl) {
-		char * e = curl_easy_escape (curl, d.c_str(), d.size());
-		std::string p (e);
-		boost::replace_all (p, "%2F", "/");
-		std::string url = "file://" + p;
-		rv = PBD::open_uri (url);
-		curl_free (e);
-		curl_easy_cleanup(curl);
-	}
-	return rv;
+	return cocoa_open_folder (d.c_str());
 #else
 	return PBD::open_uri (d);
 #endif
