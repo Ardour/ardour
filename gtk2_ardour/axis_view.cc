@@ -65,7 +65,7 @@ AxisView::~AxisView()
 Gdk::Color
 AxisView::unique_random_color()
 {
-	return ::unique_random_color (used_colors);
+	return ::unique_random_color (used_colors, true);
 }
 
 string
