@@ -20,7 +20,7 @@ function dsp_params ()
 	return
 	{
 		{ ["type"] = "input", name = "Enable", min = 0, max = 1, default = 1, bypass = true, toggled = true },
-		{ ["type"] = "input", name = "Type", min = 0, max = 4, default = 0, enum = true, scalepoints =
+		{ ["type"] = "input", name = "Type", min = 0, max = 8, default = 0, enum = true, scalepoints =
 			{
 				["Peaking"]    = 0,
 				["Low Shelf"]  = 1,
