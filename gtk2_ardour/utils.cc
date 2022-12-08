@@ -680,27 +680,35 @@ ARDOUR_UI_UTILS::escape_underscores (string const & s)
 }
 
 Gdk::Color
-ARDOUR_UI_UTILS::unique_random_color (list<Gdk::Color>& used_colors, bool from_palette)
+ARDOUR_UI_UTILS::unique_palette_color (list<Gdk::Color>& used_colors)
 {
 	Gdk::Color newcolor;
+	string cp = UIConfiguration::instance().get_stripable_color_palette ();
+	Gdk::ArrayHandle_Color gc = ColorSelection::palette_from_string (cp);
+	std::vector<Gdk::Color> c (gc);
+	static std::vector<Gdk::Color>::size_type index = 0;
 
-	if (from_palette) {
-
-		string cp = UIConfiguration::instance().get_stripable_color_palette ();
-		Gdk::ArrayHandle_Color gc = ColorSelection::palette_from_string (cp);
-		std::vector<Gdk::Color> c (gc);
-		int n = random () % c.size();
-		Gtkmm2ext::HSV hsv (Gtkmm2ext::gdk_color_to_rgba (c[n]));
-
-		do {
-			newcolor.set_hsv (hsv.h, hsv.s, hsv.v);
-			hsv = random() % 1000 > 500 ? hsv.darker ((random() % 500) / 1000.0) : hsv.lighter ((random() % 500 / 1000.0));
-		} while (find (used_colors.begin(), used_colors.end(), newcolor) != used_colors.end());
-
-		used_colors.push_back (newcolor);
-
-		return newcolor;
+	if (index >= c.size()) {
+		index = 0;
 	}
+
+	Gtkmm2ext::HSV hsv (Gtkmm2ext::gdk_color_to_rgba (c[index]));
+	index++;
+
+	do {
+		newcolor.set_hsv (hsv.h, hsv.s, hsv.v);
+		hsv = random() % 1000 > 500 ? hsv.darker ((random() % 500) / 1000.0) : hsv.lighter ((random() % 500 / 1000.0));
+	} while (find (used_colors.begin(), used_colors.end(), newcolor) != used_colors.end());
+
+	used_colors.push_back (newcolor);
+
+	return newcolor;
+}
+
+Gdk::Color
+ARDOUR_UI_UTILS::unique_random_color (list<Gdk::Color>& used_colors)
+{
+	Gdk::Color newcolor;
 
 	while (1) {
 

@@ -98,7 +98,8 @@ void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
 std::string escape_underscores (std::string const &);
 
-Gdk::Color unique_random_color (std::list<Gdk::Color> &, bool from_palette = false);
+Gdk::Color unique_palette_color (std::list<Gdk::Color> &);
+Gdk::Color unique_random_color (std::list<Gdk::Color> &);
 
 std::string rate_as_string (float r);
 std::string samples_as_time_string (ARDOUR::samplecnt_t s, float r, bool show_samples = false);

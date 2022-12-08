@@ -65,7 +65,7 @@ AxisView::~AxisView()
 Gdk::Color
 AxisView::unique_random_color()
 {
-	return ::unique_random_color (used_colors, true);
+	return ARDOUR_UI_UTILS::unique_palette_color (used_colors);
 }
 
 string
