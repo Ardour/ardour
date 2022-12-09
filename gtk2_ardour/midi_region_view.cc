@@ -3687,9 +3687,9 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 uint32_t
 MidiRegionView::get_fill_color() const
 {
-	const std::string mod_name = (_dragging ? "dragging region" :
+	const std::string mod_name = _dragging ? "dragging region" :
 	                              trackview.editor().internal_editing() ? "editable region" :
-	                              "midi frame base");
+	                               (_region->opaque() && !_region->muted ()) ? "opaque region base" : "transparent region base";
 
 
 	if (_selected) {

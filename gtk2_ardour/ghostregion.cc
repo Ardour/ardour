@@ -208,7 +208,7 @@ MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
                                  TimeAxisView& source_tv,
                                  double initial_unit_pos)
 	: GhostRegion (rv,
-	               msv.midi_underlay_group,
+	               msv.midi_underlay(),
 	               msv.trackview(),
 	               source_tv,
 	               initial_unit_pos)
