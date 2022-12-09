@@ -164,13 +164,14 @@ AudioGhostRegion::set_colors ()
 
 	if (is_automation_ghost()) {
 		fill_color = UIConfiguration::instance().color ("ghost track wave fill");
+		fill_color = UIConfiguration::instance().color_mod("ghost track wave fill", "region alpha");
 	}
 	else {
 		fill_color = source_track_color(200);
 	}
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		waves[n]->set_outline_color (UIConfiguration::instance().color ("ghost track wave"));
+		waves[n]->set_outline_color (UIConfiguration::instance().color_mod ("ghost track wave", "region alpha"));
 		waves[n]->set_fill_color (fill_color);
 		waves[n]->set_clip_color (UIConfiguration::instance().color ("ghost track wave clip"));
 		waves[n]->set_zero_color (UIConfiguration::instance().color ("ghost track zero line"));

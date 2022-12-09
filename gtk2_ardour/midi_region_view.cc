@@ -262,8 +262,6 @@ MidiRegionView::init (bool /*wfd*/)
 	_model = midi_region()->midi_source(0)->model();
 	assert (_model);
 
-	fill_color_name = "midi frame base";
-
 	RegionView::init (false);
 
 	//set_height (trackview.current_height());
@@ -3700,7 +3698,7 @@ MidiRegionView::get_fill_color() const
 
 	if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) &&
 	    !UIConfiguration::instance().get_color_regions_using_track_color()) {
-		return UIConfiguration::instance().color_mod ("midi frame base", mod_name);
+		return UIConfiguration::instance().color_mod (fill_color_name, mod_name);
 	}
 
 	return UIConfiguration::instance().color_mod (fill_color, mod_name);
