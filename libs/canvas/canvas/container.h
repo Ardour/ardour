@@ -59,6 +59,25 @@ public:
 	 * overridden as necessary.
 	 */
 	void prepare_for_render (Rect const & area) const;
+
+	/** Render all children of this container as group,
+	 * so that they occlude each other. Then blend the result
+	 * onto the destination with the given alpha level.
+	 *
+	 * @param alpha
+	 *  - alpha < 0 render normally, do not group rendering. This is the default.
+	 *  - alpha == 0 do not render at all. rendered items would be invisible.
+	 *  - alpha < 1.0 use a group to render objects, blend flattened result with the given transparency.
+	 *  - alpha >= 1.0 simply blit the result of the grouped render operation.
+	 */
+	void set_render_with_alpha (double alpha);
+
+	double render_with_alpha () const {
+		return _render_with_alpha;
+	}
+
+private:
+	double _render_with_alpha;
 };
 
 }

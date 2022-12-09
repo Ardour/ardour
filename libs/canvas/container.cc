@@ -23,17 +23,20 @@ using namespace ArdourCanvas;
 
 Container::Container (Canvas* canvas)
 	: Item (canvas)
+	, _render_with_alpha (-1)
 {
 }
 
 Container::Container (Item* parent)
 	: Item (parent)
+	, _render_with_alpha (-1)
 {
 }
 
 
 Container::Container (Item* parent, Duple const & p)
 	: Item (parent, p)
+	, _render_with_alpha (-1)
 {
 }
 
@@ -46,7 +49,20 @@ Container::prepare_for_render (Rect const & area) const
 void
 Container::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	if (_render_with_alpha == 0) {
+		return;
+	} else if (_render_with_alpha > 0) {
+		context->push_group ();
+	}
+
 	Item::render_children (area, context);
+
+	if (_render_with_alpha >= 1.0) {
+		context->pop_group ();
+	} else if (_render_with_alpha > 0) {
+		context->pop_group_to_source ();
+		context->paint_with_alpha (_render_with_alpha);
+	}
 }
 
 void
@@ -55,4 +71,14 @@ Container::compute_bounding_box () const
 	_bounding_box = Rect ();
 	/* nothing to do here; Item::bounding_box() will add all children for us */
 	set_bbox_clean ();
+}
+
+void
+Container::set_render_with_alpha (double alpha)
+{
+	if (_render_with_alpha == alpha) {
+		return;
+	}
+	_render_with_alpha = alpha;
+	redraw ();
 }
