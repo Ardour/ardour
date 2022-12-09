@@ -743,21 +743,6 @@ RegionView::set_sync_mark_color ()
 	}
 }
 
-uint32_t
-RegionView::get_fill_color () const
-{
-	Gtkmm2ext::Color f = TimeAxisViewItem::get_fill_color();
-	char const *modname;
-
-	if (_region->opaque() && ( !_dragging && !_region->muted () )) {
-		modname = "opaque region base";
-	} else {
-		modname = "transparent region base";
-	}
-
-	return Gtkmm2ext::HSV(f).mod (UIConfiguration::instance().modifier (modname)).color ();
-}
-
 void
 RegionView::show_region_editor ()
 {

@@ -262,6 +262,9 @@ MidiStreamView::set_layer_display (LayerDisplay d)
 //	}
 
 	StreamView::set_layer_display (d);
+	for (auto& rv : region_views) {
+		rv->set_frame_color ();
+	}
 }
 
 void

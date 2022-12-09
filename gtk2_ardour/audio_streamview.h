@@ -69,6 +69,8 @@ public:
 
 	void reload_waves ();
 
+	void set_layer_display (LayerDisplay);
+
 	ArdourCanvas::Container* region_canvas () const { return _region_group; }
 
 private:

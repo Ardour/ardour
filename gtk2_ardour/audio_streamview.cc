@@ -159,6 +159,16 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 }
 
 void
+AudioStreamView::set_layer_display (LayerDisplay d)
+{
+	StreamView::set_layer_display (d);
+
+	for (auto& rv : region_views) {
+		rv->set_frame_color ();
+	}
+}
+
+void
 AudioStreamView::redisplay_track ()
 {
 	list<RegionView *>::iterator i;

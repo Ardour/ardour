@@ -81,6 +81,7 @@ public:
 	void set_color (uint32_t);
 	void set_name_text_color ();
 
+	virtual void     set_frame_color();
 	virtual uint32_t get_fill_color () const;
 
 	ArdourCanvas::Item* get_canvas_frame();
@@ -152,7 +153,6 @@ protected:
 	virtual bool canvas_group_event (GdkEvent*);
 
 	virtual void set_colors();
-	virtual void set_frame_color();
 	virtual void set_frame_gradient ();
 
 	void set_trim_handle_colors();

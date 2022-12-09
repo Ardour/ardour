@@ -92,8 +92,6 @@ public:
 
 	virtual void region_changed (const PBD::PropertyChange&);
 
-	uint32_t get_fill_color () const;
-
 	virtual GhostRegion* add_ghost (TimeAxisView&) = 0;
 	void remove_ghost_in (TimeAxisView&);
 	void remove_ghost (GhostRegion*);

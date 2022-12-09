@@ -372,6 +372,22 @@ AudioRegionView::fade_out_active_changed ()
 	}
 }
 
+uint32_t
+AudioRegionView::get_fill_color () const
+{
+	Gtkmm2ext::Color f = TimeAxisViewItem::get_fill_color();
+	char const *modname;
+
+	const bool opaque = _region->opaque() || trackview.layer_display () == Stacked;
+
+	if (opaque && ( !_dragging && !_region->muted () )) {
+		modname = "opaque region base";
+	} else {
+		modname = "transparent region base";
+	}
+
+	return Gtkmm2ext::HSV(f).mod (UIConfiguration::instance().modifier (modname)).color ();
+}
 
 void
 AudioRegionView::region_scale_amplitude_changed ()
@@ -1597,7 +1613,7 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourWaveView::WaveView*>& wa
 	} else if (_region->muted()) {
 		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 80);
 		fill = UINT_INTERPOLATE(fill_color, UIConfiguration::instance().color ("covered region"), 0.7);
-	} else if (!_region->opaque()) {
+	} else if (!_region->opaque() && trackview.layer_display () != Stacked) {
 		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 70);
 		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 70);
 	}
