@@ -504,6 +504,7 @@
     <Modifier name="piano roll black" modifier="= alpha:0.2"/>
     <Modifier name="piano roll white" modifier="= alpha:0.2"/>
     <Modifier name="recording rect" modifier="= alpha:0.25"/>
+    <Modifier name="region alpha" modifier="= alpha:0.75"/>
     <Modifier name="selected midi note" modifier="= alpha:1.0"/>
     <Modifier name="selection rect" modifier="= alpha:0.5"/>
     <Modifier name="silence" modifier="= alpha:0.5"/>
