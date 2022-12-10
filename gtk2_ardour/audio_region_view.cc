@@ -376,17 +376,14 @@ uint32_t
 AudioRegionView::get_fill_color () const
 {
 	Gtkmm2ext::Color f = TimeAxisViewItem::get_fill_color();
-	char const *modname;
 
 	const bool opaque = _region->opaque() || trackview.layer_display () == Stacked;
 
 	if (opaque && ( !_dragging && !_region->muted () )) {
-		modname = "opaque region base";
+		return f;
 	} else {
-		modname = "transparent region base";
+		return Gtkmm2ext::HSV(f).mod (UIConfiguration::instance().modifier ("transparent region base")).color ();
 	}
-
-	return Gtkmm2ext::HSV(f).mod (UIConfiguration::instance().modifier (modname)).color ();
 }
 
 void

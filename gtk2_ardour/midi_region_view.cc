@@ -3689,19 +3689,22 @@ MidiRegionView::get_fill_color() const
 
 	const std::string mod_name = _dragging ? "dragging region" :
 	                              trackview.editor().internal_editing() ? "editable region" :
-	                               (opaque && !_region->muted ()) ? "opaque region base" : "transparent region base";
+	                               (opaque && !_region->muted ()) ? "" : "transparent region base";
 
-
+	Gtkmm2ext::Color c;
 	if (_selected) {
-		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
+		c = UIConfiguration::instance().color ("selected region base");
+	} else if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) && !UIConfiguration::instance().get_color_regions_using_track_color()) {
+		c = UIConfiguration::instance().color (fill_color_name);
+	} else {
+		c = fill_color;
 	}
 
-	if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) &&
-	    !UIConfiguration::instance().get_color_regions_using_track_color()) {
-		return UIConfiguration::instance().color_mod (fill_color_name, mod_name);
+	if (mod_name.empty ()) {
+		return c;
+	} else {
+		return UIConfiguration::instance().color_mod (c, mod_name);
 	}
-
-	return UIConfiguration::instance().color_mod (fill_color, mod_name);
 }
 
 void
