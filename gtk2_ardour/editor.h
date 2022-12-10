@@ -1719,13 +1719,7 @@ private:
 	bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	bool canvas_ruler_event (GdkEvent* event, ArdourCanvas::Item*, ItemType);
-	bool canvas_tempo_bar_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool canvas_meter_bar_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool canvas_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool canvas_transport_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool canvas_cd_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
-	bool canvas_cue_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
+	bool canvas_ruler_bar_event (GdkEvent* event, ArdourCanvas::Item*, ItemType, std::string const&);
 
 	bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	void update_video_timeline (bool flush = false);

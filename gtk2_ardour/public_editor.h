@@ -475,11 +475,6 @@ public:
 	virtual bool canvas_bbt_marker_event (GdkEvent* event, ArdourCanvas::Item*, BBTMarker*) = 0;
 	virtual bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*) = 0;
 
-	virtual bool canvas_tempo_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_meter_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
-	virtual bool canvas_transport_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 
 	static const int window_border_width;
