@@ -3582,7 +3582,7 @@ Editor::region_fill_track ()
 	}
 
 	timepos_t const start_time = regions.start_time ();
-	timepos_t const end_time = regions.end_time ();
+	timepos_t const end_time = regions.end_time ().increment();
 	timecnt_t const gap = start_time.distance (end_time);
 
 	begin_reversible_command (Operations::region_fill);
@@ -5227,7 +5227,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 	RegionSelection foo;
 
 	timepos_t const start_time = regions.start_time ();
-	timepos_t const end_time = regions.end_time ();
+	timepos_t const end_time = regions.end_time ().increment();
 	timecnt_t const span = start_time.distance (end_time);
 
 	begin_reversible_command (Operations::duplicate_region);
@@ -5280,7 +5280,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		 * good solution.
 		 */
 
-		timepos_t position = end_time.increment();
+		timepos_t position = end_time;
 		position += start_time.distance (r->position());
 
 		playlist = (*i)->region()->playlist();
