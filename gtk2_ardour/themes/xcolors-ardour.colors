@@ -497,7 +497,6 @@
     <Modifier name="midi sysex fill" modifier="= alpha:0.5"/>
     <Modifier name="midi track base" modifier="= alpha:0.3"/>
     <Modifier name="mono panner position fill" modifier="= alpha:0.8"/>
-    <Modifier name="opaque region base" modifier="= alpha:0.5"/>
     <Modifier name="panner fill" modifier="= alpha:0.8"/>
     <Modifier name="piano roll black" modifier="= alpha:0.2"/>
     <Modifier name="piano roll white" modifier="= alpha:0.2"/>
