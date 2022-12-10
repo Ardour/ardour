@@ -319,6 +319,7 @@ MixerStrip::init ()
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 	number_label.set_tweaks (ArdourButton::OccasionalText);
+	set_tooltip (&number_label, _("Double-click to edit the route color.\nRight-click to show the route operations context menu."));
 
 	global_vpacker.set_spacing (2);
 	global_vpacker.pack_start (width_hide_box, Gtk::PACK_SHRINK);
