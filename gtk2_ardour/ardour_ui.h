@@ -295,6 +295,8 @@ public:
 
 	void trigger_slot (int c, int r);
 	void trigger_cue_row (int r);
+	void stop_all_cues (bool immediately);
+	void stop_cues (int c, bool immediately);
 
 	void save_ardour_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);

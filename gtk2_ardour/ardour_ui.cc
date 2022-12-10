@@ -3137,4 +3137,15 @@ ARDOUR_UI::trigger_cue_row (int r)
 	_basic_ui->trigger_cue_row (r);
 }
 
+void
+ARDOUR_UI::stop_all_cues (bool immediately)
+{
+	_basic_ui->trigger_stop_all (immediately);
+}
+
+void
+ARDOUR_UI::stop_cues (int col, bool immediately)
+{
+	_basic_ui->trigger_stop_col (col, immediately);
+}
 
