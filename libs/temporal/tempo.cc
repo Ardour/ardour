@@ -990,10 +990,12 @@ TempoMap::add_tempo (TempoPoint * tp)
 void
 TempoMap::remove_tempo (TempoPoint const & tp)
 {
+	if (_tempos.size() < 2) {
+		return;
+	}
+
 	superclock_t sc (tp.sclock());
 	Tempos::iterator t;
-
-	assert (_tempos.size() > 1);
 
 	/* the argument is likely to be a Point-derived object that doesn't
 	 * actually exist in this TempoMap, since the caller called
@@ -1621,6 +1623,10 @@ TempoMap::set_meter (Meter const & t, BBT_Time const & bbt)
 void
 TempoMap::remove_meter (MeterPoint const & mp)
 {
+	if (_meters.size() < 2) {
+		return;
+	}
+
 	superclock_t sc = mp.sclock();
 	Meters::iterator m;
 
