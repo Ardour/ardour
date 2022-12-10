@@ -1604,18 +1604,18 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourWaveView::WaveView*>& wa
 	/* set outline */
 	outline = UIConfiguration::instance().color ("waveform outline");
 
-	if (_selected) {
+	if (_dragging) {
+		outline = UINT_RGBA_CHANGE_A(outline, 0xC0);
+		fill = UINT_RGBA_CHANGE_A(fill, 0xC0);
+	} else if (_selected) {
 		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("selected waveform outline"), 0xC0);
 		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("selected waveform fill"), 0xC0);
-	} else if (_dragging) {
-		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 0xC0);
-		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 0xC0);
 	} else if (_region->muted()) {
-		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 80);
-		fill = UINT_INTERPOLATE(fill_color, UIConfiguration::instance().color ("covered region"), 0.7);
+		outline = UINT_RGBA_CHANGE_A(outline, 0x40);
+		fill = UINT_RGBA_CHANGE_A (UINT_INTERPOLATE(fill_color, UIConfiguration::instance().color ("covered region"), 0.7), 0x40);
 	} else if (!_region->opaque() && trackview.layer_display () != Stacked) {
-		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 70);
-		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 70);
+		outline = UINT_RGBA_CHANGE_A(outline, 0x80);
+		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 0x80);
 	}
 
 	/* recorded region, override to red */
