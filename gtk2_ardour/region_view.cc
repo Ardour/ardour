@@ -391,6 +391,8 @@ RegionView::hide_silent_frames ()
 void
 RegionView::drop_silent_frames ()
 {
+	ItemChangeBlocker cb (*group);
+
 	for (auto& _silent_frame : _silent_frames) {
 		delete _silent_frame;
 	}
