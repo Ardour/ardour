@@ -1124,37 +1124,29 @@ GainMeter::meter_configuration_changed (ChanCount c)
 		}
 	}
 
-	if (_route
-			&& boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
-			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
-			) {
-		if (_route->active()) {
-			set_meter_strip_name ("AudioBusMetrics");
-		} else {
-			set_meter_strip_name ("AudioBusMetricsInactive");
-		}
-	}
-	else if (
-			   (type == (1 << DataType::MIDI))
-			|| (_route && boost::dynamic_pointer_cast<MidiTrack>(_route))
-			) {
+	bool is_audio_track = _route && boost::dynamic_pointer_cast<AudioTrack>(_route) != 0;
+	bool is_midi_track = _route && boost::dynamic_pointer_cast<MidiTrack>(_route) != 0;
+
+	if (!is_audio_track && (is_midi_track || /* MIDI Bus */ (type == (1 << DataType::MIDI)))) {
 		if (!_route || _route->active()) {
 			set_meter_strip_name ("MidiTrackMetrics");
 		} else {
 			set_meter_strip_name ("MidiTrackMetricsInactive");
 		}
 	}
-	else if (type == (1 << DataType::AUDIO)) {
+	else if (_route && (!is_audio_track && !is_midi_track)) {
+			/* Bus */
+		if (_route->active()) {
+			set_meter_strip_name ("AudioBusMetrics");
+		} else {
+			set_meter_strip_name ("AudioBusMetricsInactive");
+		}
+	}
+	else {
 		if (!_route || _route->active()) {
 			set_meter_strip_name ("AudioTrackMetrics");
 		} else {
 			set_meter_strip_name ("AudioTrackMetricsInactive");
-		}
-	} else {
-		if (!_route || _route->active()) {
-			set_meter_strip_name ("AudioMidiTrackMetrics");
-		} else {
-			set_meter_strip_name ("AudioMidiTrackMetricsInactive");
 		}
 	}
 
