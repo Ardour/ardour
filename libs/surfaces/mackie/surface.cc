@@ -1354,6 +1354,11 @@ Surface::update_view_mode_display (bool with_helpful_text)
 		id = Button::User;
 		text = _("Selected Tracks");
 		break;
+	case MackieControlProtocol::AudioInstr:
+		show_two_char_display ("IS");
+		id = Button::AudioInstruments;
+		text = _("Instruments");
+		break;
 	default:
 		break;
 	}
