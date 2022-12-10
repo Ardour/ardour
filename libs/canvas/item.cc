@@ -51,6 +51,7 @@ Item::Item (Canvas* canvas)
 	, _ignore_events (false)
 	, _scroll_translation (true)
 	, _bounding_box_dirty (true)
+	, change_blocked (0)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 }
@@ -71,6 +72,7 @@ Item::Item (Item* parent)
 	, _ignore_events (false)
 	, _scroll_translation (true)
 	, _bounding_box_dirty (true)
+	, change_blocked (0)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
@@ -98,6 +100,7 @@ Item::Item (Item* parent, Duple const& p)
 	, _ignore_events (false)
 	, _scroll_translation (true)
 	, _bounding_box_dirty (true)
+	, change_blocked (0)
 {
 	DEBUG_TRACE (DEBUG::CanvasItems, string_compose ("new canvas item %1\n", this));
 
@@ -750,12 +753,18 @@ Item::redraw () const
 void
 Item::begin_change ()
 {
-	_pre_change_bounding_box = bounding_box ();
+	if (!change_blocked) {
+		_pre_change_bounding_box = bounding_box ();
+	}
 }
 
 void
 Item::end_change ()
 {
+	if (change_blocked) {
+		return;
+	}
+
 	if (visible()) {
 		_canvas->item_changed (this, _pre_change_bounding_box);
 
@@ -1205,7 +1214,7 @@ Item::child_changed (bool bbox_changed)
 		set_bbox_dirty ();
 	}
 
-	if (_parent) {
+	if (!change_blocked && _parent) {
 		_parent->child_changed (bbox_changed);
 	}
 }
@@ -1358,4 +1367,23 @@ void
 Item::disable_scroll_translation ()
 {
 	_scroll_translation = false;
+}
+
+void
+Item::block_change_notifications ()
+{
+	if (!change_blocked) {
+		begin_change ();
+	}
+	change_blocked++;
+}
+
+void
+Item::unblock_change_notifications ()
+{
+	if (change_blocked) {
+		if (--change_blocked == 0) {
+			end_change ();
+		}
+	}
 }

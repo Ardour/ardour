@@ -197,6 +197,9 @@ public:
 	virtual void hide ();
 	virtual void show ();
 
+	void block_change_notifications ();
+	void unblock_change_notifications ();
+
 	/** @return true if this item is visible (ie it will be rendered),
 	 *  otherwise false
 	 */
@@ -374,9 +377,22 @@ private:
 
 	void find_scroll_parent ();
 	void propagate_show_hide ();
+
+	int change_blocked;
 };
 
 extern LIBCANVAS_API std::ostream& operator<< (std::ostream&, const ArdourCanvas::Item&);
+
+/* RAII wrapper for blocking item change notifications */
+
+class LIBCANVAS_API ItemChangeBlocker
+{
+  public:
+	ItemChangeBlocker (Item& i) : item (i) { item.block_change_notifications (); }
+	~ItemChangeBlocker() { item.block_change_notifications (); }
+  private:
+	Item& item;
+};
 
 }
 
