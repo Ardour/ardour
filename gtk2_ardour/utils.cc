@@ -692,17 +692,7 @@ ARDOUR_UI_UTILS::unique_palette_color (list<Gdk::Color>& used_colors)
 		index = 0;
 	}
 
-	Gtkmm2ext::HSV hsv (Gtkmm2ext::gdk_color_to_rgba (c[index]));
-	index++;
-
-	do {
-		newcolor.set_hsv (hsv.h, hsv.s, hsv.v);
-		hsv = random() % 1000 > 500 ? hsv.darker ((random() % 500) / 1000.0) : hsv.lighter ((random() % 500 / 1000.0));
-	} while (find (used_colors.begin(), used_colors.end(), newcolor) != used_colors.end());
-
-	used_colors.push_back (newcolor);
-
-	return newcolor;
+	return c[index++];
 }
 
 Gdk::Color
