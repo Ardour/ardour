@@ -2090,13 +2090,24 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			}
 		}
 
-		start = metric.superclock_at (bbt);
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("pre-check overrun of next point with bbt @ %1 audio %2 point %3\n", bbt, start, *p));
 
-		DEBUG_TRACE (DEBUG::Grid, string_compose ("check overrun of next point with bbt @ %1 audio %2 point %3\n", bbt, start, *p));
+		bool reset = false;
 
-		if ((!next_point_is_bbt_marker && bbt >= p->bbt()) || (start >= p->sclock())) {
+		if (!next_point_is_bbt_marker && bbt >= p->bbt()) {
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("we've reached/passed the next point via BBT, BBT %1 audio %2 point %3\n", bbt, start, *p));
+			reset = true;
+		} else {
+			start = metric.superclock_at (bbt);
+			if (start >= p->sclock()) {
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("we've reached/passed the next point via sclock, BBT %1 audio %2 point %3\n", bbt, start, *p));
+				reset = true;
+			}
+		}
 
-			DEBUG_TRACE (DEBUG::Grid, string_compose ("we've reached/passed the next point, BBT %1 audio %2 point %3\n", bbt, start, *p));
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("check overrun of next point, reset required ? %4 with bbt @ %1 audio %2 point %3\n", bbt, start, *p, (reset ? "YES" : "NO")));
+
+		if (reset) {
 
 			/* reset our sense of "now" to be wherever the point is */
 
