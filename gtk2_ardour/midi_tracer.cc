@@ -128,6 +128,21 @@ MidiTracer::MidiTracer ()
 
 MidiTracer::~MidiTracer()
 {
+	disconnect ();
+}
+
+void
+MidiTracer::on_show ()
+{
+	ArdourWindow::on_show ();
+	collect_toggle ();
+}
+
+void
+MidiTracer::on_hide ()
+{
+	ArdourWindow::on_hide ();
+	disconnect ();
 }
 
 void

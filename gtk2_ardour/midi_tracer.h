@@ -53,6 +53,10 @@ public:
 	MidiTracer ();
 	~MidiTracer();
 
+protected:
+	void on_show ();
+	void on_hide ();
+
 private:
 	Gtk::TextView text;
 	Gtk::ScrolledWindow scroller;
