@@ -2246,7 +2246,11 @@ AudioClock::set_mode (Mode m)
 		return;
 	}
 
-	const timecnt_t existing_duration = is_duration ? current_duration () : timecnt_t ();
+	timecnt_t existing_duration;
+
+	if (_session) {
+		existing_duration = current_duration ();
+	}
 
 	_mode = m;
 
