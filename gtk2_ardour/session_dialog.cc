@@ -146,6 +146,8 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	if (require_new) {
 		setup_untitled_session ();
 	}
+
+	disallow_idle ();
 }
 
 SessionDialog::SessionDialog ()
@@ -173,6 +175,7 @@ SessionDialog::SessionDialog ()
 		recent_scroller.set_size_request (-1, 80);
 	}
 
+	disallow_idle ();
 }
 
 SessionDialog::~SessionDialog()
