@@ -71,6 +71,7 @@
 #include "ardour/mixer_scene.h"
 #include "ardour/monitor_control.h"
 #include "ardour/monitor_processor.h"
+#include "ardour/mute_master.h"
 #include "ardour/panner_shell.h"
 #include "ardour/phase_control.h"
 #include "ardour/playlist.h"
@@ -2014,6 +2015,8 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <MuteControl, SlavableAutomationControl> ("MuteControl")
 		.addFunction ("muted", &MuteControl::muted)
 		.addFunction ("muted_by_self", &MuteControl::muted_by_self)
+		.addFunction ("mute_points", &MuteControl::mute_points)
+		.addFunction ("set_mute_points", &MuteControl::set_mute_points)
 		.endClass ()
 
 		.deriveWSPtrClass <SoloIsolateControl, SlavableAutomationControl> ("SoloIsolateControl")
@@ -2355,6 +2358,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("MonitoringInput", ARDOUR::MonitorState(MonitoringInput))
 		.addConst ("MonitoringDisk", ARDOUR::MonitorState(MonitoringDisk))
 		.addConst ("MonitoringCue", ARDOUR::MonitorState(MonitoringCue))
+		.endNamespace ()
+
+		.beginNamespace ("MutePoint")
+		.addConst ("PreFader", ARDOUR::MuteMaster::MutePoint(MuteMaster::PreFader))
+		.addConst ("PostFader", ARDOUR::MuteMaster::MutePoint(MuteMaster::PostFader))
+		.addConst ("Listen", ARDOUR::MuteMaster::MutePoint(MuteMaster::Listen))
+		.addConst ("Main", ARDOUR::MuteMaster::MutePoint(MuteMaster::Main))
 		.endNamespace ()
 
 		.beginNamespace ("NoteMode")
