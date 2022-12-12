@@ -2248,7 +2248,7 @@ AudioClock::set_mode (Mode m)
 
 	timecnt_t existing_duration;
 
-	if (_session) {
+	if (_session && is_duration) {
 		existing_duration = current_duration ();
 	}
 
