@@ -51,6 +51,7 @@ public:
 	void on_show ();
 	virtual void on_response (int);
 	void set_ui_sensitive (bool);
+	void disallow_idle ();
 
 protected:
 	void pop_splash ();
@@ -61,6 +62,7 @@ private:
 	WM::ProxyTemporary* proxy;
 	bool _splash_pushed;
 	void init ();
+	bool allow_idle;
 
 	static sigc::signal<void> CloseAllDialogs;
 };
