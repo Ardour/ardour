@@ -65,6 +65,8 @@ ArdourDialog::~ArdourDialog ()
 	Keyboard::the_keyboard ().focus_out_window (nullptr, this);
 	WM::Manager::instance ().remove (proxy);
 	proxy->explicit_delete ();
+}
+
 void
 ArdourDialog::disallow_idle ()
 {
