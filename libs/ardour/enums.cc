@@ -652,6 +652,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (ExportFormatBase, SF_Float);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SF_Double);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SF_Vorbis);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SF_Opus);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SF_MPEG_LAYER_III);
 	REGISTER (_ExportFormatBase_SampleFormat);
 
@@ -672,6 +673,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (ExportFormatBase, SR_Session);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SR_8);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SR_22_05);
+	REGISTER_CLASS_ENUM (ExportFormatBase, SR_24);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SR_44_1);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SR_48);
 	REGISTER_CLASS_ENUM (ExportFormatBase, SR_88_2);

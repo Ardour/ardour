@@ -86,7 +86,7 @@ public:
 	virtual bool can_change_layer_display() const { return true; }
 	LayerDisplay layer_display () const { return _layer_display; }
 
-	ArdourCanvas::Container* canvas_item() { return _canvas_group; }
+	virtual ArdourCanvas::Container* region_canvas () const { return _canvas_group; }
 
 	enum ColorTarget {
 		RegionColor,

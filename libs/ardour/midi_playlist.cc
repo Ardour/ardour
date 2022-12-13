@@ -477,6 +477,15 @@ MidiPlaylist::combine (RegionList const & rl, boost::shared_ptr<Track> trk)
 		remove_region_internal (other, rwl.thawlist);
 	}
 
+	/* thin automation.
+	 * Combining MIDI regions plays back automation, the compound
+	 * will have individual points just like automation was played back
+	 * and recorded. So it has to be thinned it like after a write-pass.
+	 */
+	for (auto& l: new_region->model ()->controls()) {
+		l.second->list()->thin (20);
+	}
+
 	/* write MIDI to disk */
 
 	new_region->midi_source (0)->session_saved ();

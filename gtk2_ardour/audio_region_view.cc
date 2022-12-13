@@ -372,6 +372,30 @@ AudioRegionView::fade_out_active_changed ()
 	}
 }
 
+uint32_t
+AudioRegionView::get_fill_color () const
+{
+	Gtkmm2ext::Color c;
+	const bool opaque = _region->opaque() || trackview.layer_display () == Stacked;
+
+	if (_selected) {
+		c = UIConfiguration::instance().color ("selected region base");
+	} else if (_recregion) {
+		return UIConfiguration::instance().color ("recording rect");
+	} else if (!UIConfiguration::instance().get_color_regions_using_track_color()) {
+		c = UIConfiguration::instance().color (fill_color_name);
+	} else {
+		c = fill_color;
+	}
+
+	if (opaque && ( !_dragging && !_region->muted () )) {
+		return c;
+	} else if (_dragging) {
+		return UIConfiguration::instance().color_mod (c, "dragging region");
+	} else {
+		return Gtkmm2ext::HSV(c).mod (UIConfiguration::instance().modifier ("transparent region base")).color ();
+	}
+}
 
 void
 AudioRegionView::region_scale_amplitude_changed ()
@@ -1588,18 +1612,18 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourWaveView::WaveView*>& wa
 	/* set outline */
 	outline = UIConfiguration::instance().color ("waveform outline");
 
-	if (_selected) {
+	if (_dragging) {
+		outline = UINT_RGBA_CHANGE_A(outline, 0xC0);
+		fill = UINT_RGBA_CHANGE_A(fill, 0xC0);
+	} else if (_selected) {
 		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("selected waveform outline"), 0xC0);
 		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("selected waveform fill"), 0xC0);
-	} else if (_dragging) {
-		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 0xC0);
-		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 0xC0);
 	} else if (_region->muted()) {
-		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 80);
-		fill = UINT_INTERPOLATE(fill_color, UIConfiguration::instance().color ("covered region"), 0.7);
-	} else if (!_region->opaque()) {
-		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 70);
-		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 70);
+		outline = UINT_RGBA_CHANGE_A(outline, 0x40);
+		fill = UINT_RGBA_CHANGE_A (UINT_INTERPOLATE(fill_color, UIConfiguration::instance().color ("covered region"), 0.7), 0x40);
+	} else if (!_region->opaque() && trackview.layer_display () != Stacked) {
+		outline = UINT_RGBA_CHANGE_A(outline, 0x80);
+		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 0x80);
 	}
 
 	/* recorded region, override to red */

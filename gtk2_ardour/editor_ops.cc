@@ -350,12 +350,18 @@ Editor::move_range_selection_start_or_end_to_region_boundary (bool move_end, boo
 	int dir = next ? 1 : -1;
 
 	/* so we don't find the current region again */
-	if (dir > 0 || pos.is_positive()) {
+	if (dir > 0) {
 		pos = pos.increment ();
+	} else {
+		if (!pos.is_zero()) {
+			pos = pos.decrement ();
+		} else {
+			return;
+		}
 	}
 
 	timepos_t const target = get_region_boundary (pos, dir, true, false);
-	if (target.is_negative ()) {
+	if (target == timepos_t::max (target.time_domain())) {
 		return;
 	}
 
@@ -976,11 +982,17 @@ Editor::cursor_to_region_boundary (bool with_selection, int32_t dir)
 	}
 
 	// so we don't find the current region again..
-	if (dir > 0 || pos > 0) {
+	if (dir > 0) {
 		pos = pos.increment();
+	} else {
+		if (!pos.is_zero()) {
+			pos = pos.decrement ();
+		} else {
+			return;
+		}
 	}
 
-	if ((target = get_region_boundary (pos, dir, with_selection, false)) < 0) {
+	if ((target = get_region_boundary (pos, dir, with_selection, false)) == timepos_t::max (target.time_domain())) {
 		return;
 	}
 
@@ -1012,8 +1024,15 @@ Editor::cursor_to_region_point (EditorCursor* cursor, RegionPoint point, int32_t
 	TimeAxisView *ontrack = 0;
 
 	// so we don't find the current region again..
-	if (dir > 0 || pos.is_positive())
+	if (dir > 0) {
 		pos = pos.increment();
+	} else {
+		if (!pos.is_zero ()) {
+			pos = pos.decrement ();
+		} else {
+			return;
+		}
+	}
 
 	if (!selection->tracks.empty()) {
 
@@ -1155,11 +1174,17 @@ Editor::selected_marker_to_region_boundary (bool with_selection, int32_t dir)
 	timepos_t pos = loc->start();
 
 	// so we don't find the current region again..
-	if (dir > 0 || pos.is_positive()) {
+	if (dir > 0) {
 		pos = pos.increment();
+	} else {
+		if (!pos.is_zero()) {
+			pos = pos.decrement ();
+		} else {
+			return;
+		}
 	}
 
-	if ((target = get_region_boundary (pos, dir, with_selection, false)) < 0) {
+	if ((target = get_region_boundary (pos, dir, with_selection, false)) == timepos_t::max (target.time_domain())) {
 		return;
 	}
 
@@ -1199,8 +1224,14 @@ Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 	pos = loc->start();
 
 	// so we don't find the current region again..
-	if (dir > 0 || pos > 0) {
+	if (dir > 0) {
 		pos = pos.increment();
+	} else {
+		if (!pos.is_zero()) {
+			pos = pos.decrement ();
+		} else {
+			return;
+		}
 	}
 
 	if (!selection->tracks.empty()) {
@@ -3582,7 +3613,7 @@ Editor::region_fill_track ()
 	}
 
 	timepos_t const start_time = regions.start_time ();
-	timepos_t const end_time = regions.end_time ();
+	timepos_t const end_time = regions.end_time ().increment();
 	timecnt_t const gap = start_time.distance (end_time);
 
 	begin_reversible_command (Operations::region_fill);
@@ -5227,7 +5258,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 	RegionSelection foo;
 
 	timepos_t const start_time = regions.start_time ();
-	timepos_t const end_time = regions.end_time ();
+	timepos_t const end_time = regions.end_time ().increment();
 	timecnt_t const span = start_time.distance (end_time);
 
 	begin_reversible_command (Operations::duplicate_region);
@@ -5280,7 +5311,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		 * good solution.
 		 */
 
-		timepos_t position = end_time.increment();
+		timepos_t position = end_time;
 		position += start_time.distance (r->position());
 
 		playlist = (*i)->region()->playlist();

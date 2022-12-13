@@ -391,6 +391,8 @@ RegionView::hide_silent_frames ()
 void
 RegionView::drop_silent_frames ()
 {
+	ItemChangeBlocker cb (*group);
+
 	for (auto& _silent_frame : _silent_frames) {
 		delete _silent_frame;
 	}
@@ -741,21 +743,6 @@ RegionView::set_sync_mark_color ()
 		sync_mark->set_outline_color (c);
 		sync_line->set_outline_color (c);
 	}
-}
-
-uint32_t
-RegionView::get_fill_color () const
-{
-	Gtkmm2ext::Color f = TimeAxisViewItem::get_fill_color();
-	char const *modname;
-
-	if (_region->opaque() && ( !_dragging && !_region->muted () )) {
-		modname = "opaque region base";
-	} else {
-		modname = "transparent region base";
-	}
-
-	return Gtkmm2ext::HSV(f).mod (UIConfiguration::instance().modifier (modname)).color ();
 }
 
 void

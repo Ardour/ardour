@@ -116,6 +116,9 @@ public:
 
 	void show_region_editor ();
 
+	void     set_frame_color ();
+	uint32_t get_fill_color () const;
+
 	virtual void entered ();
 	virtual void exited ();
 
@@ -201,7 +204,6 @@ protected:
 	void set_colors ();
 	void set_waveform_colors ();
 	void reset_width_dependent_items (double pixel_width);
-	void set_frame_color ();
 
 	void color_handler ();
 

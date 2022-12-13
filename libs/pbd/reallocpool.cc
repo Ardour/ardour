@@ -32,7 +32,7 @@
 #define ASSERT assert
 #else
 #define STATS_segment
-#define ASSERT
+#define ASSERT(exp)
 #endif
 
 #ifdef RAP_WITH_CALL_STATS

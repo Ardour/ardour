@@ -680,6 +680,22 @@ ARDOUR_UI_UTILS::escape_underscores (string const & s)
 }
 
 Gdk::Color
+ARDOUR_UI_UTILS::unique_palette_color (list<Gdk::Color>& used_colors)
+{
+	Gdk::Color newcolor;
+	string cp = UIConfiguration::instance().get_stripable_color_palette ();
+	Gdk::ArrayHandle_Color gc = ColorSelection::palette_from_string (cp);
+	std::vector<Gdk::Color> c (gc);
+	static std::vector<Gdk::Color>::size_type index = 0;
+
+	if (index >= c.size()) {
+		index = 0;
+	}
+
+	return c[index++];
+}
+
+Gdk::Color
 ARDOUR_UI_UTILS::unique_random_color (list<Gdk::Color>& used_colors)
 {
 	Gdk::Color newcolor;

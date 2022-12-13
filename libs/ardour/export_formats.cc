@@ -179,6 +179,8 @@ HasSampleFormat::get_sample_format_name (ExportFormatBase::SampleFormat format)
 		return _("8-bit unsigned");
 	  case ExportFormatBase::SF_Vorbis:
 		return _("Vorbis sample format");
+	  case ExportFormatBase::SF_Opus:
+		return _("OPUS codec");
 	  case ExportFormatBase::SF_MPEG_LAYER_III:
 		return _("MPEG-2 Audio Layer III");
 	  case ExportFormatBase::SF_None:
@@ -198,6 +200,7 @@ ExportFormatLinear::ExportFormatLinear (string name, FormatId format_id) :
 
 	add_sample_rate (SR_8);
 	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_24);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_88_2);
@@ -270,6 +273,7 @@ ExportFormatOggVorbis::ExportFormatOggVorbis ()
 	sample_formats.insert (SF_Vorbis);
 
 	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_24);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_88_2);
@@ -317,6 +321,7 @@ ExportFormatFLAC::ExportFormatFLAC () :
 	set_format_id (F_FLAC);
 
 	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_24);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_88_2);
@@ -352,6 +357,7 @@ ExportFormatBWF::ExportFormatBWF () :
 	set_format_id (F_WAV);
 
 	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_24);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_88_2);
@@ -381,6 +387,50 @@ ExportFormatBWF::set_compatibility_state (ExportFormatCompatibility const & comp
 	return compatible;
 }
 
+
+/*** OPUS ***/
+
+ExportFormatOggOpus::ExportFormatOggOpus ()
+{
+	SF_INFO sf_info;
+	sf_info.channels = 2;
+	sf_info.samplerate = SR_48;
+	sf_info.format = F_Ogg | SF_Opus;
+	if (sf_format_check (&sf_info) != SF_TRUE) {
+		throw ExportFormatIncompatible();
+	}
+
+	set_name ("Ogg OPUS");
+	set_format_id (F_Ogg);
+	sample_formats.insert (SF_Opus);
+
+	add_sample_rate (SR_8);
+	add_sample_rate (SR_24);
+	add_sample_rate (SR_48);
+
+	/* libsndfile doesn't expose direct quality control,
+	 * bitrate = (((1.0 - quality) * (250000.0)) + 6000.0)
+	 */
+	add_codec_quality ("6 kb/s/channel",   0);
+	add_codec_quality ("32 kb/s/channel",  10); // 10.4
+	add_codec_quality ("64 kb/s/channel",  23); // 23.2
+	add_codec_quality ("96 kb/s/channel",  36);
+	add_codec_quality ("128 kb/s/channel", 49); // 48.8
+	add_codec_quality ("160 kb/s/channel", 61); // 61.6
+	add_codec_quality ("192 kb/s/channel", 74); // 74.42
+	add_codec_quality ("256 kb/s/channel", 100);
+
+	set_extension ("opus");
+	set_quality (Q_LossyCompression);
+}
+
+bool
+ExportFormatOggOpus::set_compatibility_state (ExportFormatCompatibility const& compatibility)
+{
+	bool compatible = compatibility.has_format (F_Ogg);
+	set_compatible (compatible);
+	return compatible;
+}
 
 /*** MPEG / MP3 ***/
 
@@ -430,6 +480,7 @@ ExportFormatFFMPEG::ExportFormatFFMPEG (std::string const& name, std::string con
 
 	add_sample_rate (SR_8);
 	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_24);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_Session);

@@ -42,6 +42,7 @@ ArdourDialog::ArdourDialog (const string& title, bool modal, bool use_seperator)
         , _sensitive (true)
         , proxy (nullptr)
         , _splash_pushed (false)
+        , allow_idle (true)
 {
 	init ();
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -52,6 +53,7 @@ ArdourDialog::ArdourDialog (Gtk::Window& parent, const string& title, bool modal
         , _sensitive (true)
         , proxy (nullptr)
         , _splash_pushed (false)
+        , allow_idle (true)
 {
 	init ();
 	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
@@ -66,11 +68,19 @@ ArdourDialog::~ArdourDialog ()
 }
 
 void
+ArdourDialog::disallow_idle ()
+{
+	allow_idle = false;
+}
+
+void
 ArdourDialog::on_response (int response_id)
 {
 	pop_splash ();
 	hide ();
-	ARDOUR::GUIIdle ();
+	if (allow_idle) {
+		ARDOUR::GUIIdle ();
+	}
 	Gtk::Dialog::on_response (response_id);
 }
 

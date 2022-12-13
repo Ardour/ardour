@@ -552,6 +552,28 @@ ARDOUR::LuaAPI::segfault ()
 	*p = 0;
 }
 
+#ifdef PLATFORM_WINDOWS
+std::vector<std::string>
+ARDOUR::LuaAPI::env ()
+{
+	std::vector<std::string> rv;
+	return rv;
+}
+
+#else
+extern char **environ;
+
+std::vector<std::string>
+ARDOUR::LuaAPI::env ()
+{
+	std::vector<std::string> rv;
+	for (int i = 0; environ[i]; ++i) {
+		rv.push_back (environ[i]);
+	}
+	return rv;
+}
+#endif
+
 int
 ARDOUR::LuaOSC::Address::send (lua_State *L)
 {

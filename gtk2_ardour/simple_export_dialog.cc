@@ -52,6 +52,10 @@ SimpleExportDialog::SimpleExportDialog (PublicEditor& editor)
 		_eps.the_combo ().get_parent ()->remove (_eps.the_combo ());
 	}
 
+	_range_list = ListStore::create (_range_cols);
+	_range_combo.set_model (_range_list);
+	_range_combo.pack_start (_range_cols.label);
+
 	Table* t = manage (new Table);
 	int    r = 0;
 
@@ -124,7 +128,7 @@ SimpleExportDialog::set_session (ARDOUR::Session* s)
 	SimpleExport::set_session (s);
 	ArdourDialog::set_session (s);
 
-	_range_combo.remove_all ();
+	_range_list->clear ();
 	_preset_cfg_connection.disconnect ();
 
 	if (!s) {
@@ -149,17 +153,34 @@ SimpleExportDialog::set_session (ARDOUR::Session* s)
 	Location*            srl (s->locations ()->session_range_location ());
 	TimeSelection const& tsel (_editor.get_selection ().time);
 
-	bool ok = false;
 	if (!tsel.empty ()) {
-		ok = true;
-		_range_combo.append (_("Using time selection"));
-	}
-	if (srl) {
-		ok = true;
-		_range_combo.append (_("Session start to session end")); // same text as ExportVideoDialog::apply_state
+		TreeModel::Row row     = *_range_list->append ();
+		row[_range_cols.label] = _("Using time selection");
+		row[_range_cols.start] = tsel.start_sample ();
+		row[_range_cols.end]   = tsel.end_sample ();
+		row[_range_cols.name]  = string_compose (_("%1 (selection)"), SimpleExport::_session->snap_name ());
 	}
 
-	if (!ok) {
+	if (srl) {
+		TreeModel::Row row     = *_range_list->append ();
+		row[_range_cols.label] = _("Session start to session end"); // same text as ExportVideoDialog::apply_state
+		row[_range_cols.start] = srl->start_sample ();
+		row[_range_cols.end]   = srl->end_sample ();
+		row[_range_cols.name]  = SimpleExport::_session->snap_name ();
+	}
+
+	for (auto l : s->locations ()->list ()) {
+		if (l->is_session_range () || !l->is_range_marker () || l->name ().empty ()) {
+			continue;
+		}
+		TreeModel::Row row     = *_range_list->append ();
+		row[_range_cols.label] = l->name (); // string_compose (_("Range '%1'"), l->name ());
+		row[_range_cols.start] = l->start_sample ();
+		row[_range_cols.end]   = l->end_sample ();
+		row[_range_cols.name]  = string_compose (_("%1 - %2"), SimpleExport::_session->snap_name (), l->name ());
+	}
+
+	if (_range_list->children ().size () == 0) {
 		set_error ("Error: No valid range to export. Select a range or create session start/end markers");
 		return;
 	}
@@ -214,17 +235,9 @@ SimpleExportDialog::close_dialog ()
 void
 SimpleExportDialog::start_export ()
 {
-	Location*            srl = SimpleExport::_session->locations ()->session_range_location ();
-	TimeSelection const& tsel (_editor.get_selection ().time);
-
-	std::string range = _range_combo.get_active_text ();
-	if (!tsel.empty () && range == _("Using time selection")) {
-		set_range (tsel.start_sample (), tsel.end_sample ());
-		SimpleExport::set_name (string_compose (_("%1 (selection)"), SimpleExport::_session->snap_name ()));
-	} else {
-		set_range (srl->start_sample (), srl->end_sample ());
-		SimpleExport::set_name (SimpleExport::_session->snap_name ());
-	}
+	TreeModel::iterator r = _range_combo.get_active ();
+	set_range ((*r)[_range_cols.start], (*r)[_range_cols.end]);
+	SimpleExport::set_name ((*r)[_range_cols.name]);
 
 	SimpleExport::_session->add_extra_xml (get_state ());
 

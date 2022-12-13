@@ -1992,7 +1992,7 @@ RegionMoveDrag::finished_no_copy (
 			   No need to do anything for copies as they are fake regions which will be deleted.
 			*/
 
-			rv->get_canvas_group()->reparent (dest_rtv->view()->canvas_item());
+			rv->get_canvas_group()->reparent (dest_rtv->view()->region_canvas());
 			rv->get_canvas_group()->set_y_position (i->initial_y);
 			rv->drag_end ();
 
@@ -2190,7 +2190,7 @@ RegionMotionDrag::aborted (bool)
 		TimeAxisView* tv = &(rv->get_time_axis_view ());
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 		assert (rtv);
-		rv->get_canvas_group()->reparent (rtv->view()->canvas_item());
+		rv->get_canvas_group()->reparent (rtv->view()->region_canvas());
 		rv->get_canvas_group()->set_y_position (0);
 		rv->drag_end ();
 		rv->move (-_total_x_delta, 0);
@@ -2248,7 +2248,7 @@ RegionInsertDrag::finished (GdkEvent * event, bool)
 
 	RouteTimeAxisView* dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[pos]);
 
-	_primary->get_canvas_group()->reparent (dest_rtv->view()->canvas_item());
+	_primary->get_canvas_group()->reparent (dest_rtv->view()->region_canvas());
 	_primary->get_canvas_group()->set_y_position (0);
 
 	boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();

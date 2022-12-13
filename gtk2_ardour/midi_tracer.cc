@@ -65,9 +65,6 @@ MidiTracer::MidiTracer ()
 {
 	g_atomic_int_set (&_update_queued, 0);
 
-	std::string portname (string_compose(X_("MIDI Tracer %1"), ++window_count));
-	tracer_port = ARDOUR::AudioEngine::instance()->register_input_port (ARDOUR::DataType::MIDI, portname, false, ARDOUR::IsInput);
-
 	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect
 		(_manager_connection, invalidator (*this), boost::bind (&MidiTracer::ports_changed, this), gui_context());
 
@@ -131,6 +128,21 @@ MidiTracer::MidiTracer ()
 
 MidiTracer::~MidiTracer()
 {
+	disconnect ();
+}
+
+void
+MidiTracer::on_show ()
+{
+	ArdourWindow::on_show ();
+	collect_toggle ();
+}
+
+void
+MidiTracer::on_hide ()
+{
+	ArdourWindow::on_hide ();
+	disconnect ();
 }
 
 void

@@ -47,20 +47,6 @@
 using namespace std;
 using namespace PBD;
 
-bool
-cocoa_open_url (const char* uri)
-{
-	NSString* struri = [[NSString alloc] initWithUTF8String:uri];
-	NSURL* nsurl = [[NSURL alloc] initWithString:struri];
-
-	bool ret = [[NSWorkspace sharedWorkspace] openURL:nsurl];
-
-	[struri release];
-	[nsurl release];
-
-	return ret;
-}
-
 void
 set_language_preference ()
 {

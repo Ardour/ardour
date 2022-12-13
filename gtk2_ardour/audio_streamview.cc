@@ -61,8 +61,13 @@ using namespace Editing;
 AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	: StreamView (tv)
 {
-	color_handler ();
+	/* use a dedicated group for Audio regions (on top of the grid) */
+	_region_group = new ArdourCanvas::Container (_canvas_group);
+	_region_group->raise_to_top ();
+	_region_group->set_render_with_alpha (UIConfiguration::instance().modifier ("region alpha").a());
+
 	_amplitude_above_axis = 1.0;
+	color_handler ();
 }
 
 int
@@ -100,14 +105,14 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 	case NonLayered:
 	case Normal:
 		if (recording) {
-			region_view = new AudioRegionView (_canvas_group, _trackview, region,
+			region_view = new AudioRegionView (_region_group, _trackview, region,
 							   _samples_per_pixel, region_color, recording, TimeAxisViewItem::Visibility(
 								   TimeAxisViewItem::ShowFrame |
 								   TimeAxisViewItem::HideFrameRight |
 								   TimeAxisViewItem::HideFrameLeft |
 								   TimeAxisViewItem::HideFrameTB));
 		} else {
-			region_view = new AudioRegionView (_canvas_group, _trackview, region,
+			region_view = new AudioRegionView (_region_group, _trackview, region,
 					_samples_per_pixel, region_color);
 		}
 		break;
@@ -151,6 +156,16 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	RegionViewAdded (region_view);
 
 	return region_view;
+}
+
+void
+AudioStreamView::set_layer_display (LayerDisplay d)
+{
+	StreamView::set_layer_display (d);
+
+	for (auto& rv : region_views) {
+		rv->set_frame_color ();
+	}
 }
 
 void
@@ -470,6 +485,8 @@ AudioStreamView::hide_xfades_with (boost::shared_ptr<AudioRegion> ar)
 void
 AudioStreamView::color_handler ()
 {
+	_region_group->set_render_with_alpha (UIConfiguration::instance().modifier ("region alpha").a());
+
 	//case cAudioTrackBase:
 	if (_trackview.is_track()) {
 		canvas_rect->set_fill_color (UIConfiguration::instance().color_mod ("audio track base", "audio track base"));

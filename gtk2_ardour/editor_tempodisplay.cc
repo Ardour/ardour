@@ -535,13 +535,7 @@ Editor::add_bbt_marker_at_playhead_cursor ()
 		return;
 	}
 
-	timepos_t pos (_session->transport_sample ());
-
-	BBT_Time bbt     = Temporal::TempoMap::use()->bbt_at (pos);
-	std::string name = _("Playhead");
-
-	TempoMapChange tmc (*this, _("add BBT marker"));
-	tmc.map().set_bartime (bbt, pos, name);
+	mouse_add_bbt_marker_event (timepos_t (_session->transport_sample ()));
 }
 
 void
@@ -553,7 +547,7 @@ Editor::mouse_add_bbt_marker_event (timepos_t pos)
 
 	/* position markers must always be positioned using audio time */
 
-	BBTMarkerDialog marker_dialog  (timepos_t (pos.samples()));
+	BBTMarkerDialog marker_dialog  (timepos_t (pos.samples()), BBT_Time ());
 
 	/* run this modally since we are finishing a drag and the drag object
 	 * will be destroyed when we return from here

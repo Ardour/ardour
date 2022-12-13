@@ -1083,6 +1083,9 @@ MackieControlProtocol::audioinstruments_press (Mackie::Button& b)
 Mackie::LedState
 MackieControlProtocol::audioinstruments_release (Mackie::Button& b)
 {
+#ifndef MIXBUS
+	set_view_mode (AudioInstr);
+#endif
 	return none;
 
 }

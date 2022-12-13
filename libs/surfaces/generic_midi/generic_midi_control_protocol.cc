@@ -1118,7 +1118,18 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 
 		switch (type) {
 		case Named:
-			s = session->route_by_name (name);
+
+			name = rest[0];
+
+			if (name == "Master" || name == X_("master")) {
+				s = session->master_out();
+			} else if (name == X_("control") || name == X_("listen") || name == X_("monitor") || name == "Monitor") {
+				s = session->monitor_out();
+			} else if (name == X_("auditioner")) {
+				s = session->the_auditioner();
+			} else {
+				s = session->route_by_name (name);
+			}
 			break;
 		default:
 			s = session->get_remote_nth_stripable (id, PresentationInfo::Bus);

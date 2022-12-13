@@ -233,14 +233,14 @@ Editor::initialize_canvas ()
 	transport_punchout_line->set_y1 (ArdourCanvas::COORD_MAX);
 	transport_punchout_line->hide();
 
-	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
-	meter_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_meter_bar_event), meter_bar));
-	marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_marker_bar_event), marker_bar));
-	cd_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_cd_marker_bar_event), cd_marker_bar));
-	cue_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_cue_marker_bar_event), cue_marker_bar));
+	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), tempo_bar, TempoBarItem, "tempo bar"));
+	meter_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), meter_bar, MeterBarItem, "meter bar"));
+	marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), marker_bar, MarkerBarItem, "marker bar"));
+	cd_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), cd_marker_bar, CdMarkerBarItem, "cd marker bar"));
+	cue_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), cue_marker_bar, CueMarkerBarItem, "cd marker bar"));
 	videotl_group->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_group));
-	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
-	transport_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
+	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), range_marker_bar, RangeMarkerBarItem, "range marker bar"));
+	transport_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), transport_marker_bar, TransportMarkerBarItem, "transport marker bar"));
 
 	_playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
 

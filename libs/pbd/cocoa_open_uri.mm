@@ -18,3 +18,12 @@ cocoa_open_url (const char* uri)
 
 	return ret;
 }
+
+bool
+cocoa_open_folder (const char* path)
+{
+	NSString* struri = [[NSString alloc] initWithUTF8String:path];
+	bool rv = [[NSWorkspace sharedWorkspace] selectFile:nil inFileViewerRootedAtPath:struri];
+	[struri release];
+	return rv;
+}

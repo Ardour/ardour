@@ -429,9 +429,7 @@ ExportFormatDialog::load_state (FormatPtr spec)
 
 	for (Gtk::ListStore::Children::iterator it = format_list->children ().begin (); it != format_list->children ().end (); ++it) {
 		boost::shared_ptr<ARDOUR::ExportFormat> format_in_list = it->get_value (format_cols.ptr);
-		if (format_in_list->get_format_id () == spec->format_id () &&
-		    // BWF has the same format id with wav, so we need to check this.
-		    format_in_list->has_broadcast_info () == spec->has_broadcast_info ()) {
+		if (spec->is_format (format_in_list)) {
 			format_in_list->set_selected (true);
 			break;
 		}
@@ -1107,11 +1105,13 @@ ExportFormatDialog::update_tagging_selection ()
 void
 ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 {
+	fill_sample_rate_lists (ptr);
 	empty_encoding_option_table ();
 
 	boost::shared_ptr<ARDOUR::ExportFormatLinear>    linear_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> ogg_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatFLAC>      flac_ptr;
+	boost::shared_ptr<ARDOUR::ExportFormatOggOpus>   opus_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatBWF>       bwf_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatMPEG>      mpeg_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatFFMPEG>    ffmpeg_ptr;
@@ -1120,6 +1120,8 @@ ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 		show_linear_enconding_options (linear_ptr);
 	} else if ((ogg_ptr = boost::dynamic_pointer_cast<ExportFormatOggVorbis> (ptr))) {
 		show_ogg_enconding_options (ogg_ptr);
+	} else if ((opus_ptr = boost::dynamic_pointer_cast<ExportFormatOggOpus> (ptr))) {
+		show_opus_enconding_options (opus_ptr);
 	} else if ((flac_ptr = boost::dynamic_pointer_cast<ExportFormatFLAC> (ptr))) {
 		show_flac_enconding_options (flac_ptr);
 	} else if ((bwf_ptr = boost::dynamic_pointer_cast<ExportFormatBWF> (ptr))) {
@@ -1171,6 +1173,16 @@ ExportFormatDialog::show_ogg_enconding_options (boost::shared_ptr<ARDOUR::Export
 	encoding_options_label.set_label (_("Ogg Vorbis options"));
 
 	encoding_options_table.resize (2, 1);
+	encoding_options_table.attach (codec_quality_combo, 0, 1, 0, 1);
+	fill_codec_quality_lists (ptr);
+	show_all_children ();
+}
+
+void
+ExportFormatDialog::show_opus_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggOpus> ptr)
+{
+	encoding_options_label.set_label (_("OPUS options"));
+	encoding_options_table.resize (1, 1);
 	encoding_options_table.attach (codec_quality_combo, 0, 1, 0, 1);
 	fill_codec_quality_lists (ptr);
 	show_all_children ();
@@ -1229,6 +1241,33 @@ ExportFormatDialog::show_ffmpeg_enconding_options (boost::shared_ptr<ARDOUR::Exp
 	show_all_children ();
 }
 
+void
+ExportFormatDialog::fill_sample_rate_lists (boost::shared_ptr<ARDOUR::ExportFormat> ptr)
+{
+	Gtk::TreeModel::iterator iter;
+	Gtk::TreeModel::Row      row;
+
+	sample_rate_list->clear ();
+	ExportFormatManager::SampleRateList const& rates = manager.get_sample_rates ();
+
+	for (ExportFormatManager::SampleRateList::const_iterator it = rates.begin (); it != rates.end (); ++it) {
+		if (!ptr->has_sample_rate ((*it)->rate)) {
+			continue;
+		}
+		iter = sample_rate_list->append ();
+		row  = *iter;
+
+		row[sample_rate_cols.ptr]   = *it;
+		row[sample_rate_cols.color] = "white";
+		row[sample_format_cols.color] = (*it)->compatible () ? "white" : "red";
+		row[sample_rate_cols.label] = (*it)->name ();
+
+		WeakSampleRatePtr ptr (*it);
+		(*it)->SelectChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_rate_selection, this, _1, ptr), gui_context ());
+		(*it)->CompatibleChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_rate_compatibility, this, _1, ptr), gui_context ());
+	}
+
+}
 void
 ExportFormatDialog::fill_sample_format_lists (boost::shared_ptr<ARDOUR::HasSampleFormat> ptr)
 {

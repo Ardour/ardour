@@ -355,6 +355,32 @@ public:
 	}
 };
 
+class LIBARDOUR_API ExportFormatOggOpus : public ExportFormat, public HasCodecQuality
+{
+public:
+	ExportFormatOggOpus ();
+	~ExportFormatOggOpus (){};
+
+	bool set_compatibility_state (ExportFormatCompatibility const& compatibility);
+
+	Type get_type () const
+	{
+		return T_Sndfile;
+	}
+	SampleFormat get_explicit_sample_format () const
+	{
+		return SF_Opus;
+	}
+	int default_codec_quality () const
+	{
+		return 49;
+	}
+	virtual bool supports_tagging () const
+	{
+		return true;
+	}
+};
+
 class LIBARDOUR_API ExportFormatMPEG : public ExportFormat, public HasSampleFormat, public HasCodecQuality
 {
 public:

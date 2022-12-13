@@ -242,8 +242,8 @@ TimeInfoBox::region_selection_changed ()
 	selection_end->set_off (false);
 	selection_length->set_off (false);
 	selection_start->set (s);
-	selection_end->set (e.decrement());
-	selection_length->set_duration (s.distance (e), true);
+	selection_end->set (e);
+	selection_length->set_duration (s.distance (e).increment(), true);
 }
 
 void

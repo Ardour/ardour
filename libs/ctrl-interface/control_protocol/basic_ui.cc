@@ -434,15 +434,28 @@ BasicUI::transport_rolling () const
 }
 
 void
-BasicUI::trigger_stop_all (bool stop_all)
+BasicUI::trigger_stop_all (bool immediately)
 {
-	session->trigger_stop_all (stop_all);
+	session->trigger_stop_all (immediately);
 }
 
 void
 BasicUI::trigger_cue_row (int cue_idx)
 {
 	session->trigger_cue_row (cue_idx);
+}
+
+void
+BasicUI::trigger_stop_col (int col, bool immediately)
+{
+	boost::shared_ptr<TriggerBox> tb = session->triggerbox_at (col);
+	if (tb) {
+		if (immediately) {
+			tb->stop_all_immediately ();
+		} else {
+			tb->stop_all_quantized ();
+		}
+	}
 }
 
 void

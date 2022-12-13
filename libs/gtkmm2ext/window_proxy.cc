@@ -202,11 +202,11 @@ void
 WindowProxy::drop_window ()
 {
 	if (_window) {
+		unmap_connection.disconnect ();
 		_window->hide ();
 		delete_connection.disconnect ();
 		configure_connection.disconnect ();
 		map_connection.disconnect ();
-		unmap_connection.disconnect ();
 		delete _window;
 		_window = 0;
 		delete vistracker;
@@ -226,8 +226,6 @@ WindowProxy::use_window (Gtk::Window& win)
 void
 WindowProxy::setup ()
 {
-	assert (_window);
-
 	assert (_window);
 
 	delete_connection.disconnect ();

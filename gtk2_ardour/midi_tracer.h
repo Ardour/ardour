@@ -53,6 +53,10 @@ public:
 	MidiTracer ();
 	~MidiTracer();
 
+protected:
+	void on_show ();
+	void on_hide ();
+
 private:
 	Gtk::TextView text;
 	Gtk::ScrolledWindow scroller;
@@ -97,7 +101,6 @@ private:
 	PBD::ScopedConnection _manager_connection;
 	MIDI::Parser my_parser;
 
-	boost::shared_ptr<ARDOUR::Port>	tracer_port;
 	boost::shared_ptr<ARDOUR::MidiPort> traced_port;
 
 	static unsigned int window_count;

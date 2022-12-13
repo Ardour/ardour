@@ -72,7 +72,6 @@ public:
 	};
 
 	Gtk::Adjustment note_range_adjustment;
-	ArdourCanvas::Container* midi_underlay_group;
 
 	void set_note_range(VisibleNoteRange r);
 
@@ -114,9 +113,15 @@ public:
 	void suspend_updates ();
 	void resume_updates ();
 
+	ArdourCanvas::Container* midi_underlay () const { return _midi_underlay; }
+	ArdourCanvas::Container* region_canvas () const { return _region_group; }
+
 protected:
 	void setup_rec_box ();
 	void update_rec_box ();
+
+	ArdourCanvas::Container* _midi_underlay;
+	ArdourCanvas::Container* _region_group;
 
 private:
 

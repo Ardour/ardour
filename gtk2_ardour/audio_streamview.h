@@ -69,6 +69,10 @@ public:
 
 	void reload_waves ();
 
+	void set_layer_display (LayerDisplay);
+
+	ArdourCanvas::Container* region_canvas () const { return _region_group; }
+
 private:
 	void setup_rec_box ();
 	void rec_peak_range_ready (samplepos_t start, ARDOUR::samplecnt_t cnt, boost::weak_ptr<ARDOUR::Source> src);
@@ -84,6 +88,8 @@ private:
 	double _amplitude_above_axis;
 
 	std::map<boost::shared_ptr<ARDOUR::Source>, bool> rec_data_ready_map;
+
+	ArdourCanvas::Container* _region_group;
 
 	bool outline_region;
 };

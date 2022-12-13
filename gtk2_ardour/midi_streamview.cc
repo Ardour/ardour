@@ -74,9 +74,15 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	, _note_lines (0)
 	, _updates_suspended (false)
 {
+
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
-	midi_underlay_group = new ArdourCanvas::Container (_canvas_group);
-	midi_underlay_group->lower_to_bottom();
+	_midi_underlay = new ArdourCanvas::Container (_canvas_group);
+	_midi_underlay->lower_to_bottom();
+
+	/* use a dedicated group for MIDI regions (on top of the grid and lines) */
+	_region_group = new ArdourCanvas::Container (_canvas_group);
+	_region_group->raise_to_top ();
+	_region_group->set_render_with_alpha (UIConfiguration::instance().modifier ("region alpha").a());
 
 	/* put the note lines in the timeaxisview's group, so it
 	   can be put below ghost regions from MIDI underlays
@@ -117,11 +123,11 @@ MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, b
 	RegionView* region_view = NULL;
 	if (recording) {
 		region_view = new MidiRegionView (
-			_canvas_group, _trackview, region,
+			_region_group, _trackview, region,
 			_samples_per_pixel, region_color, recording,
 			TimeAxisViewItem::Visibility(TimeAxisViewItem::ShowFrame));
 	} else {
-		region_view = new MidiRegionView (_canvas_group, _trackview, region,
+		region_view = new MidiRegionView (_region_group, _trackview, region,
 		                                  _samples_per_pixel, region_color);
 	}
 
@@ -256,6 +262,9 @@ MidiStreamView::set_layer_display (LayerDisplay d)
 //	}
 
 	StreamView::set_layer_display (d);
+	for (auto& rv : region_views) {
+		rv->set_frame_color ();
+	}
 }
 
 void
@@ -579,6 +588,7 @@ MidiStreamView::setup_rec_box ()
 void
 MidiStreamView::color_handler ()
 {
+	_region_group->set_render_with_alpha (UIConfiguration::instance().modifier ("region alpha").a());
 	draw_note_lines ();
 
 	if (_trackview.is_midi_track()) {

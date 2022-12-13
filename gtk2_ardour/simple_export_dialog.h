@@ -60,14 +60,33 @@ private:
 	void set_error (std::string const&);
 	bool progress_timeout ();
 
+	class ExportRangeCols : public Gtk::TreeModelColumnRecord
+	{
+	public:
+		ExportRangeCols ()
+		{
+			add (label);
+			add (name);
+			add (start);
+			add (end);
+		}
+		Gtk::TreeModelColumn<std::string> label;
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<samplepos_t> start;
+		Gtk::TreeModelColumn<samplepos_t> end;
+	};
+
 	PublicEditor&        _editor;
 	ExportPresetSelector _eps;
 	Gtk::Button*         _cancel_button;
 	Gtk::Button*         _export_button;
-	Gtk::ComboBoxText    _range_combo;
+	Gtk::ComboBox        _range_combo;
 	Gtk::ComboBoxText    _post_export_combo;
 	Gtk::Label           _error_label;
 	Gtk::ProgressBar     _progress_bar;
+
+	ExportRangeCols              _range_cols;
+	Glib::RefPtr<Gtk::ListStore> _range_list;
 
 	sigc::connection _progress_connection;
 	sigc::connection _preset_cfg_connection;

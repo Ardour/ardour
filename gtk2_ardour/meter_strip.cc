@@ -475,28 +475,25 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		}
 	}
 
-	if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
-			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
-			) {
-		meter_ticks1_area.set_name ("MyAudioBusMetricsLeft");
-		meter_ticks2_area.set_name ("MyAudioBusMetricsRight");
-		_has_midi = false;
-	}
-	else if (type == (1 << DataType::AUDIO)) {
-		meter_ticks1_area.set_name ("MyAudioTrackMetricsLeft");
-		meter_ticks2_area.set_name ("MyAudioTrackMetricsRight");
-		_has_midi = false;
-	}
-	else if (type == (1 << DataType::MIDI)) {
+	bool is_audio_track = _route && boost::dynamic_pointer_cast<AudioTrack>(_route) != 0;
+	bool is_midi_track = _route && boost::dynamic_pointer_cast<MidiTrack>(_route) != 0;
+
+	if (!is_audio_track && (is_midi_track || /* MIDI Bus */ (type == (1 << DataType::MIDI)))) {
 		meter_ticks1_area.set_name ("MidiTrackMetricsLeft");
 		meter_ticks2_area.set_name ("MidiTrackMetricsRight");
-		_has_midi = true;
-	} else {
-		meter_ticks1_area.set_name ("AudioMidiTrackMetricsLeft");
-		meter_ticks2_area.set_name ("AudioMidiTrackMetricsRight");
-		_has_midi = true;
 	}
+	else if (_route && (!is_audio_track && !is_midi_track)) {
+		meter_ticks1_area.set_name ("AudioBusMetricsLeft");
+		meter_ticks2_area.set_name ("AudioBusMetricsRight");
+	}
+	else {
+		meter_ticks1_area.set_name ("AudioTrackMetricsLeft");
+		meter_ticks2_area.set_name ("AudioTrackMetricsRight");
+	}
+
 	set_tick_bar(_tick_bar);
+
+	_has_midi = 0 != (type & (1 << DataType::MIDI));
 
 	on_theme_changed();
 	if (old_has_midi != _has_midi) {

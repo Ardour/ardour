@@ -1155,14 +1155,9 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 
 	char buf[64];
 	gint  n = 0;
-	samplepos_t pos;
 	Temporal::BBT_Time next_beat;
 	uint32_t beats = 0;
-	uint32_t tick = 0;
-	uint32_t skip;
-	uint32_t t;
 	double bbt_position_of_helper;
-	bool i_am_accented = false;
 	bool helper_active = false;
 	ArdourCanvas::Ruler::Mark mark;
 	const samplecnt_t sr (_session->sample_rate());
@@ -1179,58 +1174,44 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	/* for example, even in a 4/4 meter we can draw a grid with triplet-feel */
 	/* and in this case you will want the accents on '3s' not '2s' */
 	uint32_t bbt_divisor = 2;
-	uint32_t bbt_accent_modulo = 2;
 
 	switch (_grid_type) {
 	case GridTypeBeatDiv3:
 		bbt_divisor = 3;
-		bbt_accent_modulo = 3;
 		break;
 	case GridTypeBeatDiv5:
 		bbt_divisor = 5;
-		bbt_accent_modulo = 5;
 		break;
 	case GridTypeBeatDiv6:
 		bbt_divisor = 3;
-		bbt_accent_modulo = 3;
 		break;
 	case GridTypeBeatDiv7:
 		bbt_divisor = 7;
-		bbt_accent_modulo = 7;
 		break;
 	case GridTypeBeatDiv10:
 		bbt_divisor = 5;
-		bbt_accent_modulo = 5;
 		break;
 	case GridTypeBeatDiv12:
 		bbt_divisor = 3;
-		bbt_accent_modulo = 3;
 		break;
 	case GridTypeBeatDiv14:
 		bbt_divisor = 7;
-		bbt_accent_modulo = 7;
 		break;
 	case GridTypeBeatDiv16:
-		bbt_accent_modulo = 4;
 		break;
 	case GridTypeBeatDiv20:
 		bbt_divisor = 5;
-		bbt_accent_modulo = 5;
 		break;
 	case GridTypeBeatDiv24:
 		bbt_divisor = 6;
-		bbt_accent_modulo = 6;
 		break;
 	case GridTypeBeatDiv28:
 		bbt_divisor = 7;
-		bbt_accent_modulo = 7;
 		break;
 	case GridTypeBeatDiv32:
-		bbt_accent_modulo = 8;
 		break;
 	default:
 		bbt_divisor = 2;
-		bbt_accent_modulo = 2;
 		break;
 	}
 

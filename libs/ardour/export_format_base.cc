@@ -192,6 +192,7 @@ ExportFormatBase::nearest_sample_rate (samplecnt_t sample_rate)
 
 	DO_SR_COMPARISON(SR_8);
 	DO_SR_COMPARISON(SR_22_05);
+	DO_SR_COMPARISON(SR_24);
 	DO_SR_COMPARISON(SR_44_1);
 	DO_SR_COMPARISON(SR_48);
 	DO_SR_COMPARISON(SR_88_2);

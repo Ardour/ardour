@@ -80,6 +80,7 @@ class LIBARDOUR_API ExportFormatBase {
 		SF_Float = SF_FORMAT_FLOAT,
 		SF_Double = SF_FORMAT_DOUBLE,
 		SF_Vorbis = SF_FORMAT_VORBIS,
+		SF_Opus = 0x0064, /* SF_FORMAT_OPUS */
 		SF_MPEG_LAYER_III = 0x0082  /* SF_FORMAT_MPEG_LAYER_III */
 	};
 
@@ -103,6 +104,7 @@ class LIBARDOUR_API ExportFormatBase {
 		SR_Session = 1,
 		SR_8 = 8000,
 		SR_22_05 = 22050,
+		SR_24 = 24000,
 		SR_44_1 = 44100,
 		SR_48 = 48000,
 		SR_88_2 = 88200,

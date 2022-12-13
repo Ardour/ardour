@@ -979,111 +979,6 @@ Editor::canvas_marker_event (GdkEvent *event, ArdourCanvas::Item* item, ArdourMa
 }
 
 bool
-Editor::canvas_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
-{
-	switch (event->type) {
-		case GDK_ENTER_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				marker_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color_mod ("range marker bar", "marker bar")).lighter(0.20).color());
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
-			}
-			break;
-		default:
-			break;
-	};
-
-	return typed_event (item, event, MarkerBarItem);
-}
-
-bool
-Editor::canvas_range_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
-{
-	switch (event->type) {
-		case GDK_ENTER_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				range_marker_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color_mod ("range marker bar", "marker bar")).lighter(0.20).color());
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				range_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
-			}
-			break;
-		default:
-			break;
-	};
-
-	return typed_event (item, event, RangeMarkerBarItem);
-}
-
-bool
-Editor::canvas_transport_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
-{
-	switch (event->type) {
-		case GDK_ENTER_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				transport_marker_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color_mod ("range marker bar", "marker bar")).lighter(0.20).color());
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				transport_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
-			}
-			break;
-		default:
-			break;
-	};
-
-	return typed_event (item, event, TransportMarkerBarItem);
-}
-
-bool
-Editor::canvas_cd_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
-{
-	switch (event->type) {
-		case GDK_ENTER_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				cd_marker_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color_mod ("range marker bar", "marker bar")).lighter(0.20).color());
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				cd_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
-			}
-			break;
-		default:
-			break;
-	};
-
-	return typed_event (item, event, CdMarkerBarItem);
-}
-
-bool
-Editor::canvas_cue_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
-{
-	switch (event->type) {
-		case GDK_ENTER_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				cue_marker_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color_mod ("range marker bar", "marker bar")).lighter(0.20).color());
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				cue_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
-			}
-			break;
-		default:
-			break;
-	};
-
-	return typed_event (item, event, CueMarkerBarItem);
-}
-
-bool
 Editor::canvas_videotl_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, VideoBarItem);
@@ -1172,45 +1067,26 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 }
 
 bool
-Editor::canvas_tempo_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
+Editor::canvas_ruler_bar_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType type, std::string const& color_name)
 {
+	/* XXX consolidate with Editor::canvas_ruler_event ? */
+
 	switch (event->type) {
 		case GDK_ENTER_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				tempo_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color_mod ("tempo bar", "marker bar")).lighter(0.20).color());
+				item->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color_mod (color_name, "marker bar")).lighter(0.20).color());
 			}
 			break;
 		case GDK_LEAVE_NOTIFY:
 			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				tempo_bar->set_fill_color (UIConfiguration::instance().color_mod ("tempo bar", "marker bar"));
+				item->set_fill_color (UIConfiguration::instance().color_mod (color_name, "marker bar"));
 			}
 			break;
 		default:
 			break;
 	};
 
-	return typed_event (item, event, TempoBarItem);
-}
-
-bool
-Editor::canvas_meter_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
-{
-	switch (event->type) {
-		case GDK_ENTER_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				meter_bar->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color_mod ("meter bar", "marker bar")).lighter(0.20).color());
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				meter_bar->set_fill_color (UIConfiguration::instance().color_mod ("meter bar", "marker bar"));
-			}
-			break;
-		default:
-			break;
-	};
-
-	return typed_event (item, event, MeterBarItem);
+	return typed_event (item, event, type);
 }
 
 bool

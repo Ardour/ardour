@@ -262,8 +262,6 @@ MidiRegionView::init (bool /*wfd*/)
 	_model = midi_region()->midi_source(0)->model();
 	assert (_model);
 
-	fill_color_name = "midi frame base";
-
 	RegionView::init (false);
 
 	//set_height (trackview.current_height());
@@ -3687,21 +3685,26 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 uint32_t
 MidiRegionView::get_fill_color() const
 {
-	const std::string mod_name = (_dragging ? "dragging region" :
+	const bool opaque = _region->opaque() || trackview.layer_display () == Stacked;
+
+	const std::string mod_name = _dragging ? "dragging region" :
 	                              trackview.editor().internal_editing() ? "editable region" :
-	                              "midi frame base");
+	                               (opaque && !_region->muted ()) ? "" : "transparent region base";
 
-
+	Gtkmm2ext::Color c;
 	if (_selected) {
-		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
+		c = UIConfiguration::instance().color ("selected region base");
+	} else if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) && !UIConfiguration::instance().get_color_regions_using_track_color()) {
+		c = UIConfiguration::instance().color (fill_color_name);
+	} else {
+		c = fill_color;
 	}
 
-	if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) &&
-	    !UIConfiguration::instance().get_color_regions_using_track_color()) {
-		return UIConfiguration::instance().color_mod ("midi frame base", mod_name);
+	if (mod_name.empty ()) {
+		return c;
+	} else {
+		return UIConfiguration::instance().color_mod (c, mod_name);
 	}
-
-	return UIConfiguration::instance().color_mod (fill_color, mod_name);
 }
 
 void

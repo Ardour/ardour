@@ -350,6 +350,14 @@ MackieControlProtocol::get_sorted_stripables()
 				sorted.push_back (s);
 			}
 			break;
+		case AudioInstr:
+			if (has_instrument (s)){
+				sorted.push_back (s);
+			}
+			break;
+		case Inputs:
+			// nothing to do right now
+			break;
 		}
 	}
 
@@ -1581,7 +1589,7 @@ MackieControlProtocol::build_device_specific_button_map()
 {
 	/* this maps our device-dependent button codes to the methods that handle them.
 	 */
-	
+
 #define DEFINE_BUTTON_HANDLER(b,p,r) button_map.insert (pair<Button::ID,ButtonHandlers> ((b), ButtonHandlers ((p),(r))));
 
 	if (_device_info.is_platformMp()) {
@@ -1856,11 +1864,15 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 void
 MackieControlProtocol::display_view_mode ()
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->update_view_mode_display (true);
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			(*s)->update_view_mode_display (true);
+		}
 	}
+
+	update_global_button (Button::View, (view_mode() == MackieControlProtocol::Mixer) ? on : off);
 }
 
 void
@@ -2348,6 +2360,13 @@ bool
 MackieControlProtocol::is_midi_track (boost::shared_ptr<Stripable> r) const
 {
 	return boost::dynamic_pointer_cast<MidiTrack>(r) != 0;
+}
+
+bool
+MackieControlProtocol::has_instrument (boost::shared_ptr<Stripable> r) const
+{
+	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(r);
+	return mt && mt->the_instrument();
 }
 
 bool

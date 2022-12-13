@@ -87,7 +87,6 @@ AutomationRegionView::init (bool /*wfd*/)
 
 	set_height (trackview.current_height());
 
-	fill_color_name = "midi frame base";
 	set_colors ();
 }
 
@@ -110,12 +109,11 @@ uint32_t
 AutomationRegionView::get_fill_color() const
 {
 	const std::string mod_name = (_dragging ? "dragging region" :
-	                              trackview.editor().internal_editing() ? "editable region" :
-	                              "midi frame base");
+	                              trackview.editor().internal_editing() ? "editable region" : fill_color_name);
 	if (_selected) {
 		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
 	} else if (high_enough_for_name || !UIConfiguration::instance().get_color_regions_using_track_color()) {
-		return UIConfiguration::instance().color_mod ("midi frame base", mod_name);
+		return UIConfiguration::instance().color_mod (fill_color_name, mod_name);
 	}
 	return UIConfiguration::instance().color_mod (fill_color, mod_name);
 }
@@ -160,16 +158,14 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 		 * adding the point.
 		 */
 
-		const timepos_t pos = timepos_t (e.pixel_to_sample (x) - _region->position_sample() + _region->start_sample());
-
-		add_automation_event (ev, pos, y, with_guard_points);
+		add_automation_event (ev, timepos_t (e.pixel_to_sample (x)), y, with_guard_points);
 		return true;
 	}
 
 	return RegionView::canvas_group_event (ev);
 }
 
-/** @param when Position in samples, where 0 is the start of the region.
+/** @param when Position is global time position
  *  @param y y position, relative to our TimeAxisView.
  */
 void
@@ -192,7 +188,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, dou
 
 	/* snap time */
 
-	when = snap_region_time_to_region_time (_region->start().distance (when), false) + _region->start ();
+	when = snap_region_time_to_region_time (_region->source_position().distance (when), false);
 
 	/* map using line */
 

@@ -449,7 +449,15 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 			_codec_quality = -2;
 		}
 		else if (format_id() == F_Ogg) {
-			_codec_quality = 40;
+			switch (sample_format ()) {
+				default:
+				case SF_Vorbis:
+					_codec_quality = 40;
+					break;
+				case SF_Opus:
+					_codec_quality = 49;
+					break;
+			}
 		}
 	}
 
@@ -573,12 +581,24 @@ ExportFormatSpecification::is_complete () const
 	return true;
 }
 
+bool
+ExportFormatSpecification::is_format (boost::shared_ptr<ExportFormat> format) const
+{
+	assert (format);
+	return (format_id () == format->get_format_id () &&
+			/* BWF has the same format id with wav, so we need to check this. */
+			has_broadcast_info () == format->has_broadcast_info () &&
+			/* F_Ogg can be Vorbis or OPUS */
+			(format_id () != ExportFormatBase::F_Ogg || (format->get_explicit_sample_format () == sample_format ())));
+}
+
 void
 ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 {
 	if (format) {
 		FormatId new_fmt = format->get_format_id ();
-		bool fmt_changed = format_id() != new_fmt;
+		bool fmt_changed = !is_format (format);
+
 		set_format_id (new_fmt);
 
 		set_type (format->get_type());
@@ -658,6 +678,9 @@ ExportFormatSpecification::description (bool include_name)
 		break;
 	case SR_22_05:
 		components.push_back ("22,5 kHz");
+		break;
+	case SR_24:
+		components.push_back ("24 kHz");
 		break;
 	case SR_44_1:
 		components.push_back ("44,1 kHz");

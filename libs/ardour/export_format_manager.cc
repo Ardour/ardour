@@ -205,6 +205,11 @@ ExportFormatManager::init_formats ()
 	add_format (f_ptr);
 
 	try {
+		f_ptr.reset (new ExportFormatOggOpus ());
+		add_format (f_ptr);
+	} catch (ExportFormatIncompatible & e) {}
+
+	try {
 		f_ptr.reset (new ExportFormatOggVorbis ());
 		add_format (f_ptr);
 	} catch (ExportFormatIncompatible & e) {}
@@ -232,6 +237,7 @@ ExportFormatManager::init_sample_rates ()
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_Session, _("Session rate"))));
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_8,     string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(0), 8))));
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_22_05, string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(2), 22.05))));
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_24,    string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(0), 24))));
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_44_1,  string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(1), 44.1))));
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_48,    string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(0), 48))));
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_88_2,  string_compose ("%1%2%3 kHz", std::fixed, std::setprecision(1), 88.2))));
@@ -474,7 +480,7 @@ ExportFormatManager::change_format_selection (bool select, WeakExportFormatPtr c
 
 	if (select) {
 		select_format (ptr);
-	} else if (ptr->get_format_id() == current_selection->format_id()) {
+	} else if (current_selection->is_format (ptr)) {
 		ptr.reset();
 		select_format (ptr);
 	}

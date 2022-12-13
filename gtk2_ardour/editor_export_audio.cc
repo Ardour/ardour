@@ -427,13 +427,14 @@ Editor::bounce_region_selection (bool with_processing)
 
 		InterThreadInfo itt;
 
-		boost::shared_ptr<Region> r;
 		std::string name;
 		if (multiple_selected) {
-			name = string_compose ("%1%2", bounce_name, r->name ());
+			name = string_compose ("%1%2", bounce_name, region->name ());
 		} else {
 			name = bounce_name;
 		}
+
+		boost::shared_ptr<Region> r;
 
 		if (with_processing) {
 			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, track->main_outs(), false, name);

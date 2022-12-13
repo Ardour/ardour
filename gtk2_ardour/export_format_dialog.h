@@ -168,11 +168,13 @@ private:
 	void show_ogg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> ptr);
 	void show_flac_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatFLAC> ptr);
 	void show_bwf_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatBWF> ptr);
+	void show_opus_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggOpus> ptr);
 	void show_mpeg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatMPEG> ptr);
 	void show_ffmpeg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatFFMPEG> ptr);
 
 	void fill_sample_format_lists (boost::shared_ptr<ARDOUR::HasSampleFormat> ptr);
 	void fill_codec_quality_lists (boost::shared_ptr<ARDOUR::HasCodecQuality> ptr);
+	void fill_sample_rate_lists (boost::shared_ptr<ARDOUR::ExportFormat> ptr);
 
 	/*** GUI components ***/
 
