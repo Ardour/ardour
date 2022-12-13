@@ -1714,7 +1714,7 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 	}
 #if 1 /* single exclusive selection by default, toggle via shift */
 
-# if 1 /* selecting a selected strip -> move fader to unity */
+# if 0 /* selecting a selected strip -> move fader to unity */
 	if (s == first_selected_stripable () && !shift_mod ()) {
 		if (_ctrls.fader_mode () == ModeTrack) {
 			boost::shared_ptr<AutomationControl> ac = s->gain_control ();
