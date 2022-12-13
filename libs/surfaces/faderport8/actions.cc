@@ -548,7 +548,7 @@ FaderPort8::button_encoder ()
 			{
 				/* master || monitor level -- reset to 0dB */
 				boost::shared_ptr<AutomationControl> ac;
-				if (session->monitor_active() && !_ctrls.button (FP8Controls::BtnMaster).is_pressed ()) {
+				if (session->monitor_out() && !_ctrls.button (FP8Controls::BtnMaster).is_pressed ()) {
 					ac = session->monitor_out()->gain_control ();
 				} else if (session->master_out()) {
 					ac = session->master_out()->gain_control ();
@@ -628,7 +628,7 @@ FaderPort8::encoder_navigate (bool neg, int steps)
 			{
 				/* master || monitor level */
 				boost::shared_ptr<AutomationControl> ac;
-				if (session->monitor_active() && !_ctrls.button (FP8Controls::BtnMaster).is_pressed ()) {
+				if (session->monitor_out() && !_ctrls.button (FP8Controls::BtnMaster).is_pressed ()) {
 					ac = session->monitor_out()->gain_control ();
 				} else if (session->master_out()) {
 					ac = session->master_out()->gain_control ();
