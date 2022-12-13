@@ -244,9 +244,11 @@ OSC::start ()
 	}
 #endif
 
-	PBD::info << "OSC @ " << get_server_url () << endmsg;
+	std::string server_url (get_server_url ());
 
-	_zeroconf = new ZeroConf ("_osc._udp", _port, lo_address_get_hostname (_osc_server));
+	PBD::info << "OSC @ " << server_url << endmsg;
+
+	_zeroconf = new ZeroConf ("_osc._udp", _port, lo_url_get_hostname (server_url.c_str()));
 
 	std::string url_file;
 
