@@ -375,14 +375,25 @@ AudioRegionView::fade_out_active_changed ()
 uint32_t
 AudioRegionView::get_fill_color () const
 {
-	Gtkmm2ext::Color f = TimeAxisViewItem::get_fill_color();
-
+	Gtkmm2ext::Color c;
 	const bool opaque = _region->opaque() || trackview.layer_display () == Stacked;
 
-	if (opaque && ( !_dragging && !_region->muted () )) {
-		return f;
+	if (_selected) {
+		c = UIConfiguration::instance().color ("selected region base");
+	} else if (_recregion) {
+		return UIConfiguration::instance().color ("recording rect");
+	} else if (!UIConfiguration::instance().get_color_regions_using_track_color()) {
+		c = UIConfiguration::instance().color (fill_color_name);
 	} else {
-		return Gtkmm2ext::HSV(f).mod (UIConfiguration::instance().modifier ("transparent region base")).color ();
+		c = fill_color;
+	}
+
+	if (opaque && ( !_dragging && !_region->muted () )) {
+		return c;
+	} else if (_dragging) {
+		return UIConfiguration::instance().color_mod (c, "dragging region");
+	} else {
+		return Gtkmm2ext::HSV(c).mod (UIConfiguration::instance().modifier ("transparent region base")).color ();
 	}
 }
 
