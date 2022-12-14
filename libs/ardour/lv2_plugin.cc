@@ -280,14 +280,28 @@ set_port_value(const char* port_symbol,
                uint32_t    type)
 {
 	LV2Plugin* self = (LV2Plugin*)user_data;
-	if (type != 0 && type != URIMap::instance().urids.atom_Float) {
-		return;  // TODO: Support non-float ports
+
+	float fvalue = 0.0f;
+	if (type == URIMap::instance ().urids.atom_Float) {
+		fvalue = *(const float*)value;
+	} else if (type == URIMap::instance ().urids.atom_Double) {
+		fvalue = static_cast<float> (*(const double*)value);
+	} else if (type == URIMap::instance ().urids.atom_Int) {
+		fvalue = static_cast<float> (*(const int32_t*)value);
+	} else if (type == URIMap::instance ().urids.atom_Long) {
+		fvalue = static_cast<float> (*(const int64_t*)value);
+	} else {
+		error << string_compose (
+		  _("LV2<%1>: Preset value for port '%2' has unsupported datatype <%3>"),
+		  self->name (),
+		  port_symbol,
+		  self->uri_map ().id_to_uri(type));
 	}
 
 	const uint32_t port_index = self->port_index(port_symbol);
 	if (port_index != (uint32_t)-1) {
-		self->set_parameter(port_index, *(const float*)value, 0);
-		self->PresetPortSetValue (port_index, *(const float*)value); /* EMIT SIGNAL */
+		self->set_parameter(port_index, fvalue, 0);
+		self->PresetPortSetValue (port_index, fvalue); /* EMIT SIGNAL */
 	}
 }
 

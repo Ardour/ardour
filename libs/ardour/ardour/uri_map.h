@@ -65,7 +65,10 @@ public:
 		uint32_t atom_URID;
 		uint32_t atom_Blank;
 		uint32_t atom_Object;
+		uint32_t atom_Double;
 		uint32_t atom_Float;
+		uint32_t atom_Long;
+		uint32_t atom_Int;
 		uint32_t log_Error;
 		uint32_t log_Note;
 		uint32_t log_Trace;
