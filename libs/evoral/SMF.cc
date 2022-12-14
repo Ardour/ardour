@@ -27,6 +27,7 @@
 #include <stdint.h>
 
 #include <glib/gstdio.h>
+#include <glibmm/convert.h>
 
 #include "pbd/whitespace.h"
 
@@ -550,7 +551,7 @@ SMF::track_names(vector<string>& names) const
 			names.push_back (string());
 		} else {
 			if (trk->name) {
-				names.push_back (trk->name);
+				names.push_back (Glib::convert_with_fallback (trk->name, "UTF-8", "ISO-8859-1", "_"));
 			} else {
 				char buf[32];
 				sprintf(buf, "t%d", n+1);
