@@ -484,6 +484,9 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 				smfs->load_model (source_lock, true);
 
+				/* Now that there is a model, we can set interpolation of parameters. */
+				smfs->mark_streaming_write_completed (source_lock);
+
 				if (status.cancel) {
 					break;
 				}
@@ -582,6 +585,7 @@ Session::deinterlace_midi_region (boost::shared_ptr<MidiRegion> mr)
 		/* create a whole-file region for this new source, so it shows up in the Source List...*/
 		PropertyList plist (mr->properties ());
 		plist.add (Properties::whole_file, true);
+		plist.add (Properties::opaque, true);
 		plist.add (Properties::name, (*x)->name());
 		plist.add (Properties::tags, string_compose ("%1%2%3", _("(split-chans)"), mr->tags ().empty() ? "" : " ", mr->tags ()));
 		boost::shared_ptr<Region> whole = RegionFactory::create (*x, plist);
