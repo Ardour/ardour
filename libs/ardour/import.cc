@@ -598,6 +598,29 @@ Session::deinterlace_midi_region (boost::shared_ptr<MidiRegion> mr)
 	}
 }
 
+static vector<string>
+unique_track_names (const vector<string>& n)
+{
+	set<string>    uniq;
+	vector<string> rv;
+
+	for (auto tn : n) {
+		while (uniq.find (tn) != uniq.end()) {
+			if (tn.empty ()) {
+				tn = "MIDI";
+			}
+			/* not not use '-' as separator because that is used by
+			 * new_midi_source_path, new_audio_source_path
+			 * when checking for existing files.
+			 */
+			tn = bump_name_once (tn, '.');
+		}
+		uniq.insert (tn);
+		rv.push_back (tn);
+	}
+	return rv;
+}
+
 // This function is still unable to cleanly update an existing source, even though
 // it is possible to set the ImportStatus flag accordingly. The functionality
 // is disabled at the GUI until the Source implementations are able to provide
@@ -669,11 +692,14 @@ Session::import_files (ImportStatus& status)
 						if (status.split_midi_channels) {
 							vector<string> temp;
 							smf_reader->track_names (temp);
+							temp = unique_track_names (temp);
 							for (uint32_t i = 0; i<num_channels;i++) {
 								smf_names.push_back( string_compose ("%1.ch%2", temp[i/16], 1+i%16 ) );  //trackname.chanX
 							}
 						} else {
-							smf_reader->track_names (smf_names);
+							vector<string> temp;
+							smf_reader->track_names (temp);
+							smf_names = unique_track_names (temp);
 						}
 						break;
 					case SMFInstrumentName:
