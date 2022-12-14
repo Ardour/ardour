@@ -4010,6 +4010,7 @@ TriggerBox::remove_custom_midi_binding (int x, int y)
 	for (CustomMidiMap::iterator i = _custom_midi_map.begin(); i != _custom_midi_map.end(); ++i) {
 		if (i->second.first == x && i->second.second == y) {
 			_custom_midi_map.erase (i);
+			break;
 		}
 	}
 }
