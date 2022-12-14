@@ -826,6 +826,7 @@ Editor::add_sources (vector<string>            paths,
 		plist.add (ARDOUR::Properties::layer, 0);
 		plist.add (ARDOUR::Properties::whole_file, true);
 		plist.add (ARDOUR::Properties::external, true);
+		plist.add (ARDOUR::Properties::opaque, true);
 
 		boost::shared_ptr<Region> r = RegionFactory::create (sources, plist);
 
@@ -919,6 +920,7 @@ Editor::add_sources (vector<string>            paths,
 			plist.add (ARDOUR::Properties::layer, 0);
 			plist.add (ARDOUR::Properties::whole_file, true);
 			plist.add (ARDOUR::Properties::external, true);
+			plist.add (ARDOUR::Properties::opaque, true);
 
 			boost::shared_ptr<Region> r = RegionFactory::create (just_one, plist);
 
