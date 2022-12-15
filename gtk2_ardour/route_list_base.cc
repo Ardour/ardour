@@ -99,10 +99,6 @@ RouteListBase::RouteListBase ()
 	_display.set_rules_hint (true);
 	_display.set_size_request (100, -1);
 
-	/* Try to prevent single mouse presses from initiating edits.
-	 * This relies on a hack in gtktreeview.c:gtk_treeview_button_press() */
-	_display.set_data ("mouse-edits-require-mod1", (gpointer)0x1);
-
 	_scroller.add (_display);
 	_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
@@ -133,12 +129,17 @@ RouteListBase::~RouteListBase ()
 }
 
 void
-RouteListBase::setup_col (Gtk::TreeViewColumn* tvc, const char* label, const char* tooltip)
+RouteListBase::setup_col (Gtk::TreeViewColumn* tvc, const char* label, const char* tooltip, bool require_mod_to_edit)
 {
 	Gtk::Label* l = manage (new Label (label));
 	set_tooltip (*l, tooltip);
 	tvc->set_widget (*l);
 	l->show ();
+	if (require_mod_to_edit) {
+		/* Try to prevent single mouse presses from initiating edits.
+		 * This relies on a hack in gtktreeview.c:gtk_treeview_button_press() */
+		tvc->set_data ("mouse-edits-require-mod1", (gpointer)0x1);
+	}
 }
 
 void
@@ -146,7 +147,7 @@ RouteListBase::add_name_column ()
 {
 	Gtk::TreeViewColumn* tvc = manage (new Gtk::TreeViewColumn ("", _columns.text));
 
-	setup_col (tvc, _("Name"), ("Track/Bus name"));
+	setup_col (tvc, _("Name"), ("Track/Bus name"), true);
 
 	CellRendererText* cell = dynamic_cast<CellRendererText*> (tvc->get_first_cell ());
 	cell->signal_editing_started ().connect (sigc::mem_fun (*this, &RouteListBase::name_edit_started));

@@ -76,10 +76,6 @@ RegionListBase::RegionListBase ()
 	_display.set_fixed_height_mode (true);
 	_display.set_reorderable (false);
 
-	/* Try to prevent single mouse presses from initiating edits.
-	 * This relies on a hack in gtktreeview.c:gtk_treeview_button_press() */
-	_display.set_data ("mouse-edits-require-mod1", (gpointer)0x1);
-
 	_model = TreeStore::create (_columns);
 	_model->set_sort_column (0, SORT_ASCENDING);
 
@@ -115,7 +111,7 @@ RegionListBase::RegionListBase ()
 }
 
 void
-RegionListBase::setup_col (TreeViewColumn* col, int sort_idx, Gtk::AlignmentEnum al, const char* label, const char* tooltip)
+RegionListBase::setup_col (TreeViewColumn* col, int sort_idx, Gtk::AlignmentEnum al, const char* label, const char* tooltip, bool require_mod_to_edit)
 {
 	/* add the label */
 	Gtk::Label* l = manage (new Label (label));
@@ -135,6 +131,11 @@ RegionListBase::setup_col (TreeViewColumn* col, int sort_idx, Gtk::AlignmentEnum
 	if (renderer) {
 		renderer->property_xalign () = (al == ALIGN_END ? 1.0 : (al == ALIGN_START ? 0.0 : 0.5));
 	}
+	if (require_mod_to_edit) {
+		/* Try to prevent single mouse presses from initiating edits.
+		 * This relies on a hack in gtktreeview.c:gtk_treeview_button_press() */
+		col->set_data ("mouse-edits-require-mod1", (gpointer)0x1);
+	}
 }
 
 void
@@ -149,7 +150,7 @@ void
 RegionListBase::add_name_column ()
 {
 	TreeViewColumn* tvc = append_col (_columns.name, 120);
-	setup_col (tvc, 0, ALIGN_START, _("Name"), ("Region name"));
+	setup_col (tvc, 0, ALIGN_START, _("Name"), ("Region name"), true);
 
 	tvc->set_resizable (true);
 

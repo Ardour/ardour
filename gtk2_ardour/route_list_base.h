@@ -64,7 +64,7 @@ protected:
 	void append_col_mute ();
 	void append_col_solo ();
 
-	void setup_col (Gtk::TreeViewColumn*, const char*, const char*);
+	void setup_col (Gtk::TreeViewColumn*, const char*, const char*, bool require_mod_to_edit = false);
 
 	template <class T, class U>
 	Gtk::TreeViewColumn* append_toggle (Gtk::TreeModelColumn<T> const& col_state, Gtk::TreeModelColumn<U> const& col_viz, sigc::slot<void, std::string> cb)

@@ -161,7 +161,7 @@ protected:
 		return append_col (col, w);
 	}
 
-	void setup_col (Gtk::TreeViewColumn*, int, Gtk::AlignmentEnum, const char*, const char*);
+	void setup_col (Gtk::TreeViewColumn*, int, Gtk::AlignmentEnum, const char*, const char*, bool require_mod_to_edit = false);
 	void setup_toggle (Gtk::TreeViewColumn*, sigc::slot<void, std::string>);
 
 	void freeze_tree_model ();
