@@ -192,11 +192,15 @@ AudioTrack::set_state_part_two ()
 MonitorState
 AudioTrack::get_input_monitoring_state (bool recording, bool talkback) const
 {
-	if (Config->get_monitoring_model() == SoftwareMonitoring && (recording || talkback)) {
-		RecordMode rmode = _session.config.get_record_mode ();
+	if (!recording && !talkback) {
+		return MonitoringSilence;
+	}
+
+	RecordMode const rmode = _session.config.get_record_mode ();
+	if (Config->get_monitoring_model() == SoftwareMonitoring) {
 		return (rmode == RecSoundOnSound) ? MonitoringCue : MonitoringInput;
 	} else {
-		return MonitoringSilence;
+		return (rmode == RecSoundOnSound) ? MonitoringDisk : MonitoringSilence;
 	}
 }
 
