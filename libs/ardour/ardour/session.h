@@ -2251,7 +2251,7 @@ private:
 	}
 
 	/* specialized version realtime "apply to set of controls" operations */
-	SessionEvent* get_rt_event (boost::shared_ptr<ControlList> cl, double arg, PBD::Controllable::GroupControlDisposition group_override) {
+	SessionEvent* get_rt_event (boost::shared_ptr<WeakControlList> cl, double arg, PBD::Controllable::GroupControlDisposition group_override) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 		ev->rt_slot = boost::bind (&Session::rt_set_controls, this, cl, arg, group_override);
 		ev->rt_return = Session::rt_cleanup;
@@ -2260,7 +2260,7 @@ private:
 		return ev;
 	}
 
-	void rt_set_controls (boost::shared_ptr<ControlList>, double val, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_set_controls (boost::shared_ptr<WeakControlList>, double val, PBD::Controllable::GroupControlDisposition group_override);
 	void rt_clear_all_solo_state (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
 
 	void setup_midi_machine_control ();

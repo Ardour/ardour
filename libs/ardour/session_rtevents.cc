@@ -71,12 +71,15 @@ Session::set_controls (boost::shared_ptr<ControlList> cl, double val, Controllab
 	}
 #endif
 
+	boost::shared_ptr<WeakControlList> wcl (new WeakControlList);
 	for (ControlList::iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 		/* as of july 2017 this is a no-op for everything except record enable */
 		(*ci)->pre_realtime_queue_stuff (val, gcd);
+		/* fill in weak pointer ctrl list */
+		wcl->push_back (*ci);
 	}
 
-	queue_event (get_rt_event (cl, val, gcd));
+	queue_event (get_rt_event (wcl, val, gcd));
 }
 
 void
@@ -92,7 +95,7 @@ Session::set_control (boost::shared_ptr<AutomationControl> ac, double val, Contr
 }
 
 void
-Session::rt_set_controls (boost::shared_ptr<ControlList> cl, double val, Controllable::GroupControlDisposition gcd)
+Session::rt_set_controls (boost::shared_ptr<WeakControlList> cl, double val, Controllable::GroupControlDisposition gcd)
 {
 	/* Note that we require that all controls in the ControlList are of the
 	   same type.
@@ -101,15 +104,21 @@ Session::rt_set_controls (boost::shared_ptr<ControlList> cl, double val, Control
 		return;
 	}
 
-	for (ControlList::iterator c = cl->begin(); c != cl->end(); ++c) {
-		(*c)->set_value (val, gcd);
+	AutomationType type = NullAutomation;
+
+	for (auto const& c : *cl) {
+		boost::shared_ptr<AutomationControl> ac = c.lock ();
+		if (ac) {
+			ac->set_value (val, gcd);
+			type = ac->desc().type;
+		}
 	}
 
 	/* some controls need global work to take place after they are set. Do
 	 * that here.
 	 */
 
-	switch (cl->front()->parameter().type()) {
+	switch (type) {
 	case SoloAutomation:
 		update_route_solo_state ();
 		break;
