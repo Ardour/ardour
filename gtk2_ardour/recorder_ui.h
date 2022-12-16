@@ -114,6 +114,10 @@ private:
 
 	void arm_all ();
 	void arm_none ();
+
+	void rec_undo ();
+	void rec_redo ();
+
 	void peak_reset ();
 
 	void update_sensitivity ();

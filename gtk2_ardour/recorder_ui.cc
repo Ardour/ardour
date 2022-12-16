@@ -393,6 +393,9 @@ RecorderUI::register_actions ()
 	ActionManager::register_action (group, "reset-input-peak-hold", _("Reset Input Peak Hold"), sigc::mem_fun (*this, &RecorderUI::peak_reset));
 	ActionManager::register_action (group, "arm-all", _("Record Arm All Tracks"), sigc::mem_fun (*this, &RecorderUI::arm_all));
 	ActionManager::register_action (group, "arm-none", _("Disable Record Arm of All Tracks"), sigc::mem_fun (*this, &RecorderUI::arm_none));
+	ActionManager::register_action (group, "rec-undo", _("Undo"), sigc::mem_fun (*this, &RecorderUI::rec_undo));
+	ActionManager::register_action (group, "rec-redo", _("Redo"), sigc::mem_fun (*this, &RecorderUI::rec_redo));
+	ActionManager::register_action (group, "alternate-rec-redo", _("Redo"), sigc::mem_fun (*this, &RecorderUI::rec_redo));
 }
 
 void
@@ -1344,6 +1347,22 @@ RecorderUI::arm_none ()
 {
 	if (_session) {
 		_session->set_all_tracks_record_enabled (false);
+	}
+}
+
+void
+RecorderUI::rec_undo ()
+{
+	if (_session) {
+		_session->undo (1);
+	}
+}
+
+void
+RecorderUI::rec_redo ()
+{
+	if (_session) {
+		_session->redo (1);
 	}
 }
 

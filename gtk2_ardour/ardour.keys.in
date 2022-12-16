@@ -498,5 +498,8 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/invert-selection|                                <@PRIMARY@>i|Invert note selection
 @notes|Notes/duplicate-selection|                             <@PRIMARY@>d|Duplicate note selection
 
-@rec|Recorder/arm-all|               <@PRIMARY@>r|record arm all tracks
-@rec|Recorder/arm-none|  <@PRIMARY@><@TERTIARY@>r|disable record arm of all tracks
+@rec|Recorder/arm-all|                        <@PRIMARY@>r|record arm all tracks
+@rec|Recorder/arm-none|           <@PRIMARY@><@TERTIARY@>r|disable record arm of all tracks
+@rec|Recorder/rec-undo|                       <@PRIMARY@>z|undo
+@rec|Recorder/rec-redo|           <@PRIMARY@><@TERTIARY@>z|redo
+@rec|Recorder/alternate-rec-redo|             <@PRIMARY@>y|redo
