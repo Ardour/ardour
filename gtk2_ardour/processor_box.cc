@@ -838,6 +838,15 @@ ProcessorEntry::plugin_preset_selected (ARDOUR::Plugin::PresetRecord preset)
 }
 
 void
+ProcessorEntry::reset_plugin ()
+{
+	/* compare to PlugUIBase::add_plugin_setting */
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+
+	pi->reset_parameters_to_default();
+}
+
+void
 ProcessorEntry::plugin_preset_add ()
 {
 	/* compare to PlugUIBase::add_plugin_setting */
@@ -898,6 +907,8 @@ ProcessorEntry::build_presets_menu ()
 		if (!pset.uri.empty ()) {
 			items.push_back (MenuElem (_("Delete the current preset"), sigc::mem_fun (*this, &ProcessorEntry::plugin_preset_delete)));
 		}
+		items.push_back (SeparatorElem ());
+		items.push_back (MenuElem (_("Reset Plugin"), sigc::mem_fun (*this, &ProcessorEntry::reset_plugin)));
 		if (!presets.empty ()) {
 			items.push_back (SeparatorElem ());
 		}

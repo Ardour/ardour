@@ -263,6 +263,7 @@ private:
 	void plugin_preset_selected (ARDOUR::Plugin::PresetRecord);
 	void plugin_preset_add ();
 	void plugin_preset_delete ();
+	void reset_plugin();
 
 	class PluginInlineDisplay : public PluginDisplay {
 	public:
