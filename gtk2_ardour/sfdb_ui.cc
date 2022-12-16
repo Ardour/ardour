@@ -1855,7 +1855,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 				Editing::ImportMode mode_hint)
 	: SoundFileBrowser (title, s, persistent)
 	, instrument_combo (InstrumentSelector::ForTrackSelector)
-	, copy_files_btn ( _("Copy files to session"))
+	, copy_files_btn ( _("Copy audio files to session"))
 	, smf_tempo_btn (_("Use MIDI Tempo Map"))
 	, smf_marker_btn (_("Import MIDI markers"))
 	, selected_audio_track_cnt (selected_audio_tracks)
@@ -1866,6 +1866,10 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	vector<string> str;
 
 	set_size_request (-1, 550);
+
+	options.set_row_spacings(8);
+	options.set_col_spacings(0);
+	options.set_border_width(6);
 
 	str.clear ();
 	str.push_back (_("file timestamp"));
@@ -1880,50 +1884,62 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	instrument_combo.signal_changed().connect(sigc::mem_fun(*this, &SoundFileOmega::instrument_combo_changed) );
 
 	Label* l = manage (new Label);
-	l->set_markup (_("<b>Add files ...</b>"));
-	options.attach (*l, 0, 1, 0, 1, FILL, SHRINK, 8, 0);
-	options.attach (action_combo, 0, 1, 1, 2, FILL, SHRINK, 8, 0);
+	l->set_markup (_("<b>Add files:</b>"));
+	l->set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+	options.attach (*l, 0, 1, 0, 1, FILL, SHRINK, 4, 0);
+	options.attach (action_combo, 1, 2, 0, 1, FILL, SHRINK, 2, 0);
 
 	l = manage (new Label);
-	l->set_markup (_("<b>Insert at</b>"));
-	options.attach (*l, 0, 1, 2, 3, FILL, SHRINK, 8, 0);
-	options.attach (where_combo, 0, 1, 3, 4, FILL, SHRINK, 8, 0);
+	l->set_markup (_("<b>Insert at:</b>"));
+	l->set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+	options.attach (*l, 0, 1, 1, 2, FILL, SHRINK, 4, 0);
+	options.attach (where_combo, 1, 2, 1, 2, FILL, SHRINK, 2, 0);
 
 	l = manage (new Label);
-	l->set_markup (_("<b>Mapping</b>"));
-	options.attach (*l, 0, 1, 4, 5, FILL, SHRINK, 8, 0);
-	options.attach (channel_combo, 0, 1, 5, 6, FILL, SHRINK, 8, 0);
-
-	/* 2nd col */
-	l = manage (new Label);
-	l->set_markup (_("<b>Sort order</b>"));
-	options.attach (*l, 1, 2, 0, 1, FILL, SHRINK, 8, 0);
-	options.attach (sort_combo, 1, 2, 1, 2, FILL, SHRINK, 8, 0);
+	l->set_markup (_("<b>Mapping:</b>"));
+	l->set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+	options.attach (*l, 0, 1, 2, 3, FILL, SHRINK, 4, 0);
+	options.attach (channel_combo, 1, 2, 2, 3, FILL, SHRINK, 2, 0);
 
 	l = manage (new Label);
-	l->set_markup (_("<b>Conversion quality</b>"));
-	options.attach (*l, 1, 2, 2, 3, FILL, SHRINK, 8, 0);
-	options.attach (src_combo, 1, 2, 3, 4, FILL, SHRINK, 8, 0);
+	l->set_markup (_("<b>Sort order:</b>"));
+	l->set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+	options.attach (*l, 0, 1, 3, 4, FILL, SHRINK, 4, 0);
+	options.attach (sort_combo, 1, 2, 3, 4, FILL, SHRINK, 2, 0);
 
-	options.attach (copy_files_btn, 1, 2, 5, 6, FILL, SHRINK, 8, 0);
-
-	/* 3rd, 4th col: MIDI */
-	l = manage (new Label);
-	l->set_markup (_("<b>Instrument</b>"));
-	options.attach (*l, 2, 4, 0, 1, FILL, SHRINK, 8, 0);
-	options.attach (instrument_combo, 2, 4, 1, 2, FILL, SHRINK, 8, 0);
-
-	l = manage (new Label);
-	l->set_markup (_("<b>MIDI Track Names</b>"));
-	options.attach (*l, 2, 4, 2, 3, FILL, SHRINK, 8, 0);
-	options.attach (midi_track_name_combo, 2, 4, 3, 4, FILL, SHRINK, 8, 0);
-
-	options.attach (smf_tempo_btn, 2, 3, 5, 6, FILL, SHRINK, 8, 0);
-	options.attach (smf_marker_btn, 3, 4, 5, 6, FILL, SHRINK, 8, 0);
+	/* 2nd col: MIDI */
 
 	Alignment *vspace = manage (new Alignment ());
-	vspace->set_size_request (2, 2);
-	options.attach (*vspace, 0, 4, 6, 7, EXPAND, SHRINK, 0, 0);
+	vspace->set_size_request (16, 2);
+	options.attach (*vspace, 2, 3, 6, 7, SHRINK, SHRINK, 0, 0);
+
+	l = manage (new Label);
+	l->set_markup (_("<b>MIDI Instrument:</b>"));
+	l->set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+	options.attach (*l, 3, 4, 0, 1, FILL, SHRINK, 4, 0);
+	options.attach (instrument_combo, 4, 5, 0, 1, FILL, SHRINK, 2, 0);
+
+	l = manage (new Label);
+	l->set_markup (_("<b>MIDI Track Names:</b>"));
+	l->set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+	options.attach (*l, 3, 4, 1, 2, FILL, SHRINK, 4, 0);
+	options.attach (midi_track_name_combo, 4, 5, 1, 2, FILL, SHRINK, 2, 0);
+
+	options.attach (smf_tempo_btn, 4, 5, 2, 3, FILL, SHRINK, 2, 0);
+	options.attach (smf_marker_btn, 4, 5, 3, 4, FILL, SHRINK, 2, 0);
+
+	/* 3nd col (Audio-only) */
+	vspace = manage (new Alignment ());
+	vspace->set_size_request (16, 2);
+	options.attach (*vspace, 5, 6, 6, 7, SHRINK, SHRINK, 0, 0);
+
+	l = manage (new Label);
+	l->set_markup (_("<b>Audio conversion quality:</b>"));
+	l->set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
+	options.attach (*l, 6, 7, 0, 1, FILL, SHRINK, 4, 0);
+	options.attach (src_combo, 7, 8, 0, 1, FILL, SHRINK, 2, 0);
+
+	options.attach (copy_files_btn, 7, 8, 1, 2, FILL, SHRINK, 2, 0);
 
 	str.clear ();
 	str.push_back (_("by track number"));
