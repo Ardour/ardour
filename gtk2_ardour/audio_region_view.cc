@@ -416,9 +416,10 @@ AudioRegionView::region_renamed ()
 	}
 
 	boost::shared_ptr<AudioRegion> ar (audio_region());
-	if (ar->scale_amplitude() != 1.0) {
+	const gain_t scale_amplitude = ar->scale_amplitude();
+	if (scale_amplitude != 1.0) {
 		char tmp[32];
-		snprintf (tmp, 32, " (%.1fdB)", accurate_coefficient_to_dB (ar->scale_amplitude()));
+		snprintf (tmp, 32, " (%.1fdB%s)", accurate_coefficient_to_dB (fabsf (scale_amplitude)), scale_amplitude < 0 ? " Ø" : "");
 		str += tmp;
 	}
 

@@ -55,7 +55,8 @@ _peak_amplitude_thread (void* arg)
 AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion> r)
 	: RegionEditor (s, r)
 	, _audio_region (r)
-	, gain_adjustment(accurate_coefficient_to_dB(_audio_region->scale_amplitude()), -40.0, +40.0, 0.1, 1.0, 0)
+	, gain_adjustment(accurate_coefficient_to_dB(fabsf (_audio_region->scale_amplitude())), -40.0, +40.0, 0.1, 1.0, 0)
+	, _polarity_toggle (_("Invert"))
 	, _peak_channel (false)
 {
 
@@ -84,9 +85,16 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	_table.attach (*b, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
 
+	_polarity_label.set_name ("AudioRegionEditorLabel");
+	_polarity_label.set_text (_("Polarity:"));
+	_table.attach (_polarity_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (_polarity_toggle, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
+
 	gain_changed ();
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
+	_polarity_toggle.signal_toggled().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
 
 	_peak_amplitude.property_editable() = false;
 	_peak_amplitude.set_text (_("Calculating..."));
@@ -123,16 +131,22 @@ AudioRegionEditor::region_changed (const PBD::PropertyChange& what_changed)
 void
 AudioRegionEditor::gain_changed ()
 {
-	float const region_gain_dB = accurate_coefficient_to_dB (_audio_region->scale_amplitude());
+	const gain_t scale_amplitude = _audio_region->scale_amplitude();
+
+	float const region_gain_dB = accurate_coefficient_to_dB (fabsf (scale_amplitude));
 	if (region_gain_dB != gain_adjustment.get_value()) {
 		gain_adjustment.set_value(region_gain_dB);
 	}
+	_polarity_toggle.set_active (scale_amplitude < 0);
 }
 
 void
 AudioRegionEditor::gain_adjustment_changed ()
 {
-	float const gain = dB_to_coefficient (gain_adjustment.get_value());
+	float gain = dB_to_coefficient (gain_adjustment.get_value());
+	if (_polarity_toggle.get_active ()) {
+		gain *= -1;
+	}
 	if (_audio_region->scale_amplitude() != gain) {
 		_audio_region->set_scale_amplitude (gain);
 	}

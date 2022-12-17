@@ -28,7 +28,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/box.h>
-#include <gtkmm/togglebutton.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/button.h>
 #include <gtkmm/arrow.h>
 #include <gtkmm/frame.h>
@@ -69,9 +69,12 @@ private:
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _audio_region;
 
-	Gtk::Label gain_label;
+	Gtk::Label      gain_label;
 	Gtk::Adjustment gain_adjustment;
 	Gtk::SpinButton gain_entry;
+
+	Gtk::Label        _polarity_label;
+	Gtk::CheckButton  _polarity_toggle;
 
 	Gtk::Label _peak_amplitude_label;
 	Gtk::Entry _peak_amplitude;

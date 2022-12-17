@@ -5769,7 +5769,8 @@ Editor::adjust_region_gain (bool up)
 
 		arv->region()->clear_changes ();
 
-		double dB = accurate_coefficient_to_dB (arv->audio_region()->scale_amplitude ());
+		gain_t scale_amplitude = arv->audio_region()->scale_amplitude ();
+		double dB = accurate_coefficient_to_dB (fabsf (scale_amplitude));
 
 		if (up) {
 			dB += 1;
@@ -5777,7 +5778,7 @@ Editor::adjust_region_gain (bool up)
 			dB -= 1;
 		}
 
-		arv->audio_region()->set_scale_amplitude (dB_to_coefficient (dB));
+		arv->audio_region()->set_scale_amplitude (dB_to_coefficient (dB) * (scale_amplitude < 0 ? -1. : 1.));
 
 		if (!in_command) {
 				begin_reversible_command ("adjust region gain");
