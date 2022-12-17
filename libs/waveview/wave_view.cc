@@ -483,7 +483,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 	   has been scaled by scale_amplitude() already.
 	*/
 
-	const double clip_level = _global_clip_level * req->image->props.amplitude;
+	const double clip_level = _global_clip_level * fabs (req->image->props.amplitude);
 
 	const Shape shape = req->image->props.shape;
 	const bool logscaled = req->image->props.logscaled;
