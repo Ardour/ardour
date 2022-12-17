@@ -6410,6 +6410,41 @@ Editor::set_gain_envelope_visibility ()
 }
 
 void
+Editor::toggle_region_polarity ()
+{
+	if (_ignore_region_action) {
+		return;
+	}
+
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (!_session || rs.empty()) {
+		return;
+	}
+
+	bool in_command = false;
+
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv) {
+			arv->region()->clear_changes ();
+			gain_t scale_amplitude = arv->audio_region()->scale_amplitude ();
+			arv->audio_region()->set_scale_amplitude (-1 * scale_amplitude);
+
+			if (!in_command) {
+				begin_reversible_command (_("region polarity invery"));
+				in_command = true;
+			}
+			_session->add_command (new StatefulDiffCommand (arv->region()));
+		}
+	}
+
+	if (in_command) {
+		commit_reversible_command ();
+	}
+}
+
+void
 Editor::toggle_gain_envelope_active ()
 {
 	if (_ignore_region_action) {

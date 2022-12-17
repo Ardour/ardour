@@ -1428,6 +1428,8 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	bool have_active_fade_in = false;
 	bool have_active_fade_out = false;
 	bool have_transients = false;
+	bool have_inverted_polarity = false;
+	bool have_non_inverted_polarity = false;
 
 	for (list<RegionView*>::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 
@@ -1509,6 +1511,9 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 			} else {
 				have_inactive_fade_out = true;
 			}
+
+			have_inverted_polarity = ar->scale_amplitude () < 0;
+			have_non_inverted_polarity = ar->scale_amplitude () >= 0;
 		}
 	}
 
@@ -1565,6 +1570,10 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 			// Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-gain-envelope-active"))->set_inconsistent ();
 		}
 
+		if (have_inverted_polarity && !have_non_inverted_polarity) {
+			Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-polarity"))->set_active ();
+		}
+
 	} else {
 
 		_region_actions->get_action("loudness-analyze-region")->set_sensitive (false);
@@ -1574,6 +1583,7 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 		_region_actions->get_action("pitch-shift-region")->set_sensitive (false);
 		_region_actions->get_action("strip-region-silence")->set_sensitive (false);
 		_region_actions->get_action("show-rhythm-ferret")->set_sensitive (false);
+		_region_actions->get_action("toggle-region-polarity")->set_sensitive (false);
 
 	}
 

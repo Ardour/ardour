@@ -385,6 +385,7 @@
         <menuitem action='cut-region-gain'/>
         <menuitem action='reset-region-gain'/>
         <menuitem action='reset-region-gain-envelopes'/>
+        <menuitem action='toggle-region-polarity'/>
         <menuitem action='toggle-region-gain-envelope-active'/>
       </menu>
       <menu action='RegionMenuPosition'>
@@ -931,6 +932,7 @@
       <menuitem action='cut-region-gain'/>
       <menuitem action='reset-region-gain'/>
       <menuitem action='reset-region-gain-envelopes'/>
+      <menuitem action='toggle-region-polarity'/>
       <menuitem action='toggle-region-gain-envelope-active'/>
     </menu>
     <menu action='RegionMenuFades'>

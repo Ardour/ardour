@@ -2314,6 +2314,7 @@ private:
 	void set_gain_envelope_visibility ();
 	void set_region_gain_visibility (RegionView*);
 	void toggle_gain_envelope_active ();
+	void toggle_region_polarity ();
 	void reset_region_gain_envelopes ();
 
 	void session_state_saved (std::string);

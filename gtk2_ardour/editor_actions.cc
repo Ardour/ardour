@@ -1911,6 +1911,8 @@ Editor::register_region_actions ()
 
 	register_toggle_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "toggle-region-gain-envelope-active", _("Envelope Active"), sigc::mem_fun (*this, &Editor::toggle_gain_envelope_active));
 
+	register_toggle_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "toggle-region-polarity", _("Invert Polarity"), sigc::mem_fun (*this, &Editor::toggle_region_polarity));
+
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "quantize-region", _("Quantize..."), sigc::mem_fun (*this, &Editor::quantize_region));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "legatize-region", _("Legatize"), sigc::bind(sigc::mem_fun (*this, &Editor::legatize_region), false));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "deinterlace-midi", _("Deinterlace Into Layers"), sigc::mem_fun (*this, &Editor::deinterlace_selected_midi_regions));
