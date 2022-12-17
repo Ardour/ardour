@@ -33,6 +33,11 @@ struct ParameterDescriptor
 		, rangesteps (0)
 	{}
 
+	virtual ~ParameterDescriptor () {}
+	virtual float to_interface (float val, bool rotary = false) const {
+		return (val - lower) / (upper - lower);
+	}
+
 	float normal;      ///< Default value
 	float lower;       ///< Minimum value (in Hz, for frequencies)
 	float upper;       ///< Maximum value (in Hz, for frequencies)
