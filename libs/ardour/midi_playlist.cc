@@ -483,7 +483,7 @@ MidiPlaylist::combine (RegionList const & rl, boost::shared_ptr<Track> trk)
 	 * and recorded. So it has to be thinned it like after a write-pass.
 	 */
 	for (auto& l: new_region->model ()->controls()) {
-		l.second->list()->thin (20);
+		l.second->list()->thin (Config->get_automation_thinning_factor ());
 	}
 
 	/* write MIDI to disk */
