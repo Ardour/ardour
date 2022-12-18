@@ -208,6 +208,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (BusSendEnable);
 	REGISTER_ENUM (InsertReturnLevel);
 	REGISTER_ENUM (MainOutVolume);
+	REGISTER_ENUM (MidiVelocityAutomation);
 	REGISTER (_AutomationType);
 
 	REGISTER_ENUM (Off);

@@ -166,6 +166,7 @@ AutomationList::create_curve_if_necessary()
 	case FadeInAutomation:
 	case FadeOutAutomation:
 	case EnvelopeAutomation:
+	case MidiVelocityAutomation:
 		create_curve();
 		break;
 	default:

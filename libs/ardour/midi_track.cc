@@ -64,6 +64,7 @@
 #include "ardour/session_playlists.h"
 #include "ardour/types_convert.h"
 #include "ardour/utils.h"
+#include "ardour/velocity_control.h"
 
 #include "pbd/i18n.h"
 
@@ -107,6 +108,9 @@ MidiTrack::init ()
 	if (Track::init ()) {
 		return -1;
 	}
+
+	_velocity_control.reset (new VelocityControl (_session));
+	add_control (_velocity_control);
 
 	_input->changed.connect_same_thread (*this, boost::bind (&MidiTrack::track_input_active, this, _1, _2));
 
