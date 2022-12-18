@@ -73,6 +73,7 @@
 #include "ardour/source.h"
 #include "ardour/track.h"
 #include "ardour/types.h"
+#include "ardour/velocity_control.h"
 
 #include "ardour_message.h"
 #include "automation_line.h"
@@ -99,6 +100,7 @@
 #include "selection.h"
 #include "step_editor.h"
 #include "note_base.h"
+#include "velocity_time_axis.h"
 
 #include "ardour/midi_track.h"
 
@@ -1366,6 +1368,26 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		/* handled elsewhere */
 		break;
 
+	case MidiVelocityAutomation:
+		track.reset (new VelocityTimeAxisView (_session,
+		                                       _route,
+		                                       _route,
+		                                       midi_track()->velocity_control(),
+		                                       _editor,
+		                                       *this,
+		                                       true,
+		                                       parent_canvas,
+		                                       _route->describe_parameter (param)));
+		if (_view) {
+			_view->foreach_regionview (sigc::mem_fun (*track.get(), &TimeAxisView::add_ghost));
+		}
+
+		add_automation_child (param, track, show);
+		if (selected ()) {
+			reshow_selection (_editor.get_selection().time);
+		}
+		break;
+
 	case MidiCCAutomation:
 	case MidiPgmChangeAutomation:
 	case MidiPitchBenderAutomation:
@@ -1398,8 +1420,7 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 			             _route->describe_parameter(param)));
 
 		if (_view) {
-			_view->foreach_regionview (
-				sigc::mem_fun (*track.get(), &TimeAxisView::add_ghost));
+			_view->foreach_regionview (sigc::mem_fun (*track.get(), &TimeAxisView::add_ghost));
 		}
 
 		add_automation_child (param, track, show);
