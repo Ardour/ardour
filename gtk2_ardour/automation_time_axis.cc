@@ -287,6 +287,31 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	controls_ebox.set_name (controls_base_unselected_name);
 	time_axis_frame.set_name (controls_base_unselected_name);
 
+	add_contents (show_regions);
+
+	/* make sure labels etc. are correct */
+
+	automation_state_changed ();
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
+
+	_stripable->DropReferences.connect (
+		_stripable_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()
+		);
+}
+
+AutomationTimeAxisView::~AutomationTimeAxisView ()
+{
+	if (_stripable) {
+		cleanup_gui_properties ();
+	}
+	delete _view;
+	CatchDeletion (this);
+}
+
+void
+AutomationTimeAxisView::add_contents (bool show_regions)
+{
+
 	/* ask for notifications of any new RegionViews */
 	if (show_regions) {
 
@@ -314,24 +339,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		line->queue_reset ();
 		add_line (line);
 	}
-
-	/* make sure labels etc. are correct */
-
-	automation_state_changed ();
-	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
-
-	_stripable->DropReferences.connect (
-		_stripable_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()
-		);
-}
-
-AutomationTimeAxisView::~AutomationTimeAxisView ()
-{
-	if (_stripable) {
-		cleanup_gui_properties ();
-	}
-	delete _view;
-	CatchDeletion (this);
 }
 
 void
