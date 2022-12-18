@@ -76,7 +76,7 @@ public:
 	void midi_panic(void);
 	bool write_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf);
 
-	boost::shared_ptr<VelocityControl> velocity_control() const;
+	boost::shared_ptr<VelocityControl> velocity_control() const { return _velocity_control; }
 
 	/** A control that will send "immediate" events to a MIDI track when twiddled */
 	struct MidiControl : public AutomationControl {
