@@ -608,6 +608,7 @@ ControlList::add_guard_point (timepos_t const& time, timecnt_t const& offset)
 	 */
 	if (_in_write_pass && new_write_pass) {
 		WritePassStarted (); /* EMIT SIGNAL w/WriteLock */
+		did_write_during_pass = true;
 		new_write_pass = false;
 	}
 
@@ -827,7 +828,6 @@ ControlList::add (timepos_t const& time, double value, bool with_guards, bool wi
 
 			if (with_guards) {
 				add_guard_point (insert_position, timecnt_t (_time_domain));
-				did_write_during_pass = true;
 			} else {
 				/* not adding a guard, but we need to set iterator appropriately */
 				const ControlEvent cp (when, 0.0);

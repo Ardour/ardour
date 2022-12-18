@@ -264,10 +264,6 @@ AutomationList::write_pass_finished (timepos_t const & when, double thinning_fac
 void
 AutomationList::start_touch (timepos_t const & when)
 {
-	if (_state == Touch) {
-		start_write_pass (when);
-	}
-
 	g_atomic_int_set (&_touching, 1);
 }
 
