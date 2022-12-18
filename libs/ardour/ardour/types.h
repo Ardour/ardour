@@ -175,6 +175,7 @@ enum AutomationType {
 	BusSendEnable,
 	InsertReturnLevel,
 	MainOutVolume,
+	MidiVelocityAutomation,
 
 	/* used only by Controllable Descriptor to access send parameters */
 

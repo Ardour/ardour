@@ -278,6 +278,7 @@ libardour_sources = [
         'utils.cc',
         'vca.cc',
         'vca_manager.cc',
+        'velocity_control.cc',
         'video_tools_paths.cc',
         'vumeterdsp.cc',
         'worker.cc',

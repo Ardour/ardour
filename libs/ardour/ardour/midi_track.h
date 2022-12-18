@@ -34,6 +34,7 @@ class MidiPlaylist;
 class RouteGroup;
 class SMFSource;
 class Session;
+class VelocityControl;
 
 class LIBARDOUR_API MidiTrack : public Track
 {
@@ -74,6 +75,8 @@ public:
 
 	void midi_panic(void);
 	bool write_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf);
+
+	boost::shared_ptr<VelocityControl> velocity_control() const;
 
 	/** A control that will send "immediate" events to a MIDI track when twiddled */
 	struct MidiControl : public AutomationControl {
@@ -165,6 +168,8 @@ private:
 	bool                        _restore_pgm_on_load;
 	MidiChannelFilter           _playback_filter;
 	MidiChannelFilter           _capture_filter;
+
+	boost::shared_ptr<VelocityControl>  _velocity_control;
 
 	void set_state_part_two ();
 	void set_state_part_three ();
