@@ -2424,7 +2424,7 @@ AUPluginInfo::get_presets (bool user_only) const
 	}
 
 	if (user_only) {
-		std::sort (p.begin (), p.end();
+		std::sort (p.begin (), p.end());
 		return p;
 	}
 
