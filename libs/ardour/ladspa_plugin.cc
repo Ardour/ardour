@@ -727,6 +727,8 @@ LadspaPluginInfo::get_presets (bool /*user_only*/) const
 		}
 		lrdf_free_uris(set_uris);
 	}
+
+	std::sort (p.begin (), p.end ());
 #endif
 	return p;
 }

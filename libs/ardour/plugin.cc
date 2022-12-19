@@ -477,6 +477,8 @@ Plugin::get_presets ()
 		p.push_back (i->second);
 	}
 
+	std::sort (p.begin(), p.end());
+
 	return p;
 }
 

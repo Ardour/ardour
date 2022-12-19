@@ -228,6 +228,14 @@ public:
 			return uri != a.uri || label != a.label;
 		}
 
+		bool operator< (PresetRecord const& a) const
+		{
+			if (label == a.label) {
+				return uri < a.uri;
+			}
+			return label < a.label;
+		}
+
 		std::string uri;
 		std::string label;
 		std::string description;

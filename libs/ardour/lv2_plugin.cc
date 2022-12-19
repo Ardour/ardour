@@ -3720,6 +3720,8 @@ LV2PluginInfo::get_presets (bool user_only) const
 	lilv_node_free(pset_Preset);
 	lilv_node_free(lv2_appliesTo);
 
+	std::sort (p.begin (), p.end ());
+
 	return p;
 }
 

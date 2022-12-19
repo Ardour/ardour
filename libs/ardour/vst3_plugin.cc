@@ -1002,6 +1002,8 @@ VST3PluginInfo::get_presets (bool user_only) const
 		p.push_back (Plugin::PresetRecord (uri, preset_name, is_user));
 	}
 
+	std::sort (p.begin (), p.end ());
+
 	return p;
 }
 
