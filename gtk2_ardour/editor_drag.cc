@@ -6745,13 +6745,11 @@ void
 NoteCreateDrag::motion (GdkEvent* event, bool)
 {
 	const timepos_t pos = _drags->current_pointer_time ();
-	Temporal::Beats aligned_beats = round_to_grid (pos, event);
 
 	//when the user clicks and starts a drag to define the note's length, require notes to be at least |this| long
 	const Temporal::Beats min_length (_region_view->get_draw_length_beats (pos));
-	aligned_beats = aligned_beats+min_length;
-
-	_note[1] = timepos_t (max (Temporal::Beats(), aligned_beats));
+	Temporal::Beats aligned_beats = round_to_grid (pos, event);
+	_note[1] = std::max (aligned_beats, (pos.beats() + min_length));
 
 	const timecnt_t rrp1 (_region_view->region()->region_relative_position (_note[0]));
 	const timecnt_t rrp2 (_region_view->region()->region_relative_position (_note[1]));
