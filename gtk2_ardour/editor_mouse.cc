@@ -838,8 +838,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
 		    && !ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
-		} else if (ArdourKeyboard::indicates_constraint (event->button.state)
-		           && Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
+		} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
 			_drags->set (new TempoTwistDrag (this, item), event);
 		} else if (Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new BBTRulerDrag (this, item), event);
