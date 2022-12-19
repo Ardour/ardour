@@ -77,7 +77,7 @@ private:
 	void setup_rec_box ();
 
 	RegionView* add_region_view_internal (std::shared_ptr<ARDOUR::Region>, bool wait_for_data, bool recording = false);
-	void        display_region(AutomationRegionView* region_view);
+	void        display_region (RegionView* region_view);
 
 	void color_handler ();
 
