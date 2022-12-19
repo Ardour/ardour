@@ -115,6 +115,7 @@ EventTypeMap::interpolation_of(const Evoral::Parameter& param)
 	case MidiChannelPressureAutomation: return Evoral::ControlList::Linear; break;
 	case MidiNotePressureAutomation:    return Evoral::ControlList::Linear; break;
 	case MidiPitchBenderAutomation:     return Evoral::ControlList::Linear; break;
+	case MidiVelocityAutomation:        return Evoral::ControlList::Linear; break;
 	default: assert(false);
 	}
 	return Evoral::ControlList::Linear; // Not reached, suppress warnings
