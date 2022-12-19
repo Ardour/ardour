@@ -258,7 +258,7 @@ public:
 	const PresetRecord* preset_by_label (const std::string&);
 	const PresetRecord* preset_by_uri (const std::string&);
 
-	std::vector<PresetRecord> get_presets ();
+	virtual std::vector<PresetRecord> get_presets ();
 
 	/** @return Last preset to be requested; the settings may have
 	 * been changed since; find out with parameter_changed_since_last_preset.
