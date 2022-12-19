@@ -3542,7 +3542,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 		pf = adjusted_current_time (event);
 	}
 
-	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
+	if (ArdourKeyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		/* adjust previous tempo to match pointer sample */
 		map->stretch_tempo (_tempo, timepos_t (_grab_qn).samples(), pf.samples(), _grab_qn, pf.beats());
 		_editor->mid_tempo_change (Editor::BBTChanged);
