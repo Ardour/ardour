@@ -2949,6 +2949,30 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 	timepos_t ret(presnap);
 	TempoMap::SharedPtr tmap (TempoMap::use());
 
+	/* Snap to bar always uses bars, and ignores visual grid, so it may
+	 * sometimes snap to bars that are not visually distinguishable.
+	 *
+	 * XXX this should probably work totally different: we should get the
+	 * nearby grid and walk towards the next bar point.
+	 */
+
+	if (_grid_type == GridTypeBar) {
+		TempoMetric m (tmap->metric_at (presnap));
+		BBT_Time bbt (m.bbt_at (presnap));
+		switch (direction) {
+		case RoundDownAlways:
+			bbt = bbt.round_down_to_bar ();
+			break;
+		case RoundUpAlways:
+			bbt = bbt.round_up_to_bar ();
+		case RoundNearest:
+			bbt = m.round_to_bar (bbt);
+		default:
+			break;
+		}
+		return timepos_t (tmap->quarters_at (bbt));
+	}
+
 	if (gpref != SnapToGrid_Unscaled) { // use the visual grid lines which are limited by the zoom scale that the user selected
 
 		/* Determine the most obvious divisor of a beat to use
@@ -2973,7 +2997,6 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 			case GridTypeBeatDiv28:
 				divisor = 7;
 				break;
-			case GridTypeBar:
 			case GridTypeBeat:
 				divisor = 1;
 				break;
