@@ -342,6 +342,7 @@ gtk2_ardour_sources = [
         'video_monitor.cc',
         'transcode_ffmpeg.cc',
         'transcode_video_dialog.cc',
+        'velocity_region_view.cc',
         'velocity_time_axis.cc',
         'video_server_dialog.cc',
         'utils_videotl.cc',

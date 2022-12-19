@@ -44,6 +44,8 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "ui_config.h"
+#include "velocity_region_view.h"
+#include "velocity_time_axis.h"
 
 #include "pbd/i18n.h"
 
@@ -92,30 +94,52 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 		}
 	}
 
-	AutomationRegionView *region_view;
-	std::list<RegionView *>::iterator i;
+	RegionView *region_view;
 
-	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		if ((*i)->region() == region) {
+	if (_automation_view.parameter().type() == MidiVelocityAutomation) {
 
-			/* great. we already have an AutomationRegionView for this Region. use it again. */
-			AutomationRegionView* arv = dynamic_cast<AutomationRegionView*>(*i);;
+		for (auto const & rv : region_views) {
+			if (rv->region() == region) {
 
-			if (arv->line()) {
-				arv->line()->set_list (list);
+				/* great. we already have an AutomationRegionView for this Region. use it again. */
+				// VelocityRegionView* vrv = dynamic_cast<VelocityRegionView*>(rv);
+
+				// if (vrv->line()) {
+				// vrv->line()->set_list (list);
+				// }
+				rv->set_valid (true);
+				//display_region (vrv);
+
+				return 0;
 			}
-			(*i)->set_valid (true);
-			display_region (arv);
-
-			return 0;
 		}
-	}
 
-	region_view = new AutomationRegionView (
-		_canvas_group, _automation_view, region,
-		_automation_view.parameter (), list,
-		_samples_per_pixel, region_color
-		);
+		region_view = new VelocityRegionView (_canvas_group, *(dynamic_cast<VelocityTimeAxisView*>(&_automation_view)), region, list, _samples_per_pixel, region_color);
+
+	} else {
+
+		for (auto const & rv : region_views) {
+			if (rv->region() == region) {
+
+				/* great. we already have an AutomationRegionView for this Region. use it again. */
+				AutomationRegionView* arv = dynamic_cast<AutomationRegionView*>(rv);;
+
+				if (arv->line()) {
+					arv->line()->set_list (list);
+				}
+				rv->set_valid (true);
+				display_region (arv);
+
+				return 0;
+			}
+		}
+
+		region_view = new AutomationRegionView (
+			_canvas_group, _automation_view, region,
+			_automation_view.parameter (), list,
+			_samples_per_pixel, region_color
+			);
+	}
 
 	region_view->init (false);
 	region_views.push_front (region_view);
@@ -128,9 +152,11 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 	region->DropReferences.connect (*this, invalidator (*this), boost::bind (&AutomationStreamView::remove_region_view, this, std::weak_ptr<Region>(region)), gui_context());
 
 	/* setup automation state for this region */
-	std::shared_ptr<AutomationLine> line = region_view->line ();
-	if (line && line->the_list()) {
-		line->the_list()->set_automation_state (automation_state ());
+	if (_automation_view.parameter().type() != MidiVelocityAutomation) {
+		std::shared_ptr<AutomationLine> line = dynamic_cast<AutomationRegionView*>(region_view)->line ();
+		if (line && line->the_list()) {
+			line->the_list()->set_automation_state (automation_state ());
+		}
 	}
 
 	RegionViewAdded (region_view);
@@ -139,9 +165,11 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 }
 
 void
-AutomationStreamView::display_region(AutomationRegionView* region_view)
+AutomationStreamView::display_region (RegionView* region_view)
 {
-	region_view->line().reset();
+	if (_automation_view.parameter().type() != MidiVelocityAutomation) {
+		dynamic_cast<AutomationRegionView*>(region_view)->line().reset();
+	}
 }
 
 void
