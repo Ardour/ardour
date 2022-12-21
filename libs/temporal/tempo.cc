@@ -766,42 +766,29 @@ TempoMap::operator= (TempoMap const & other)
 void
 TempoMap::copy_points (TempoMap const & other)
 {
-	std::vector<Point*> p;
+	MusicTimePoint const * mt;
+	TempoPoint const * tp;
+	MeterPoint const * mp;
 
-	p.reserve (other._meters.size() + other._tempos.size() + other._bartimes.size());
-
-	for (Meters::const_iterator m = other._meters.begin(); m != other._meters.end(); ++m) {
-		if (dynamic_cast<MusicTimePoint const *> (&*m)) {
-			continue;
+	for (auto const & point : other._points) {
+		if ((mt = dynamic_cast<MusicTimePoint const *> (&point))) {
+			MusicTimePoint* mtp = new MusicTimePoint (*mt);
+			_bartimes.push_back (*mtp);
+			_meters.push_back (*mtp);
+			_tempos.push_back (*mtp);
+			_points.push_back (*mtp);
+		} else if ((mp = dynamic_cast<MeterPoint const *> (&point))) {
+			MeterPoint* mpp = new MeterPoint (*mp);
+			_meters.push_back (*mpp);
+			_points.push_back (*mpp);
+		} else if ((tp = dynamic_cast<TempoPoint const *> (&point))) {
+			TempoPoint* tpp = new TempoPoint (*tp);
+			_tempos.push_back (*tpp);
+			_points.push_back (*tpp);
 		}
-		MeterPoint* mp = new MeterPoint (*m);
-		_meters.push_back (*mp);
-		p.push_back (mp);
 	}
-
-	for (Tempos::const_iterator t = other._tempos.begin(); t != other._tempos.end(); ++t) {
-		if (dynamic_cast<MusicTimePoint const *> (&*t)) {
-			continue;
-		}
-		TempoPoint* tp = new TempoPoint (*t);
-		_tempos.push_back (*tp);
-		p.push_back (tp);
-	}
-
-	for (MusicTimes::const_iterator mt = other._bartimes.begin(); mt != other._bartimes.end(); ++mt) {
-		MusicTimePoint* mtp = new MusicTimePoint (*mt);
-		_bartimes.push_back (*mtp);
-		_tempos.push_back (*mtp);
-		_meters.push_back (*mtp);
-		p.push_back (mtp);
-	}
-
-	sort (p.begin(), p.end(), Point::ptr_sclock_comparator());
-
-	for (auto & pi : p) {
-		pi->set_map (*this);
-		_points.push_back (*pi);
-	}
+	std::cerr << "\n\nAFTER COPY POINTS\n";
+	dump (std::cerr);
 }
 
 MeterPoint*
