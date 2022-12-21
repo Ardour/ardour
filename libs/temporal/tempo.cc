@@ -817,7 +817,7 @@ TempoMap::change_tempo (TempoPoint & p, Tempo const & t)
 void
 TempoMap::replace_tempo (TempoPoint const & old, Tempo const & t, timepos_t const & time)
 {
-	remove_tempo (old);
+	remove_tempo (old, false);
 	set_tempo (t, time);
 }
 
@@ -983,7 +983,7 @@ TempoMap::add_tempo (TempoPoint * tp)
 }
 
 void
-TempoMap::remove_tempo (TempoPoint const & tp)
+TempoMap::remove_tempo (TempoPoint const & tp, bool with_reset)
 {
 	if (_tempos.size() < 2) {
 		return;
@@ -1040,7 +1040,9 @@ TempoMap::remove_tempo (TempoPoint const & tp)
 	if (prev != _tempos.end() && was_end) {
 		prev->set_end_npm (prev->note_types_per_minute()); /* remove any ramp */
 	} else {
-		reset_starting_at (sc);
+		if (with_reset) {
+			reset_starting_at (sc);
+		}
 	}
 }
 
@@ -1077,7 +1079,7 @@ TempoMap::add_or_replace_bartime (MusicTimePoint* mtp)
 }
 
 void
-TempoMap::remove_bartime (MusicTimePoint const & tp)
+TempoMap::remove_bartime (MusicTimePoint const & tp, bool with_reset)
 {
 	superclock_t sc (tp.sclock());
 	MusicTimes::iterator m;
@@ -1106,7 +1108,9 @@ TempoMap::remove_bartime (MusicTimePoint const & tp)
 
 	_bartimes.erase (m);
 	remove_point (*m);
-	reset_starting_at (sc);
+	if (with_reset) {
+		reset_starting_at (sc);
+	}
 }
 
 void
@@ -1616,7 +1620,7 @@ TempoMap::set_meter (Meter const & t, BBT_Time const & bbt)
 }
 
 void
-TempoMap::remove_meter (MeterPoint const & mp)
+TempoMap::remove_meter (MeterPoint const & mp, bool with_reset)
 {
 	if (_meters.size() < 2) {
 		return;
@@ -1654,7 +1658,9 @@ TempoMap::remove_meter (MeterPoint const & mp)
 
 	_meters.erase (m);
 	remove_point (*m);
-	reset_starting_at (sc);
+	if (with_reset) {
+		reset_starting_at (sc);
+	}
 }
 
 Temporal::BBT_Time

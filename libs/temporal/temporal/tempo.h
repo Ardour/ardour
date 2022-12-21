@@ -734,7 +734,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	void change_tempo (TempoPoint&, Tempo const&);
 
 	LIBTEMPORAL_API void set_bartime (BBT_Time const &, timepos_t const &, std::string name = std::string());
-	LIBTEMPORAL_API void remove_bartime (MusicTimePoint const & tp);
+	LIBTEMPORAL_API void remove_bartime (MusicTimePoint const & tp, bool with_reset = true);
 
 	LIBTEMPORAL_API TempoPoint& set_tempo (Tempo const &, BBT_Time const &);
 	LIBTEMPORAL_API	TempoPoint& set_tempo (Tempo const &, timepos_t const &);
@@ -744,8 +744,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	MeterPoint& set_meter (Meter const &, BBT_Time const &);
 	LIBTEMPORAL_API	MeterPoint& set_meter (Meter const &, timepos_t const &);
 
-	LIBTEMPORAL_API void remove_tempo (TempoPoint const &);
-	LIBTEMPORAL_API void remove_meter (MeterPoint const &);
+	LIBTEMPORAL_API void remove_tempo (TempoPoint const &, bool with_reset = true);
+	LIBTEMPORAL_API void remove_meter (MeterPoint const &, bool with_reset = true);
 
 	/* these are a convenience method that just wrap some odd semantics */
 	LIBTEMPORAL_API bool move_tempo (TempoPoint const & point, timepos_t const & destination, bool push = false);
