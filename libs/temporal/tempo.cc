@@ -814,9 +814,17 @@ TempoMap::change_tempo (TempoPoint & p, Tempo const & t)
 	reset_starting_at (p.sclock());
 }
 
+void
+TempoMap::replace_tempo (TempoPoint const & old, Tempo const & t, timepos_t const & time)
+{
+	remove_tempo (old);
+	set_tempo (t, time);
+}
+
 TempoPoint &
 TempoMap::set_tempo (Tempo const & t, BBT_Time const & bbt)
 {
+	std::cerr << "ST with bbt = " << bbt << std::endl;
 	return set_tempo (t, timepos_t (quarters_at (bbt)));
 }
 

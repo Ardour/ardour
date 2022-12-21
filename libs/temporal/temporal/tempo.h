@@ -739,6 +739,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API TempoPoint& set_tempo (Tempo const &, BBT_Time const &);
 	LIBTEMPORAL_API	TempoPoint& set_tempo (Tempo const &, timepos_t const &);
 
+	LIBTEMPORAL_API	void replace_tempo (TempoPoint const & old, Tempo const & thenew, timepos_t const &);
+
 	LIBTEMPORAL_API	MeterPoint& set_meter (Meter const &, BBT_Time const &);
 	LIBTEMPORAL_API	MeterPoint& set_meter (Meter const &, timepos_t const &);
 
