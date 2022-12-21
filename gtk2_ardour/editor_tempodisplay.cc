@@ -686,7 +686,7 @@ Editor::edit_tempo_section (TempoPoint& section)
 	tempo_dialog.get_bbt_time (when);
 
 	TempoMapChange tmc (*this, _("edit tempo"));
-	tmc.map().set_tempo (tempo, when);
+	tmc.map().replace_tempo (section, tempo, timepos_t (tmc.map().quarters_at (when)));
 }
 
 void
