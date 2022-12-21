@@ -2965,8 +2965,10 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 			break;
 		case RoundUpAlways:
 			bbt = bbt.round_up_to_bar ();
+			break;
 		case RoundNearest:
 			bbt = m.round_to_bar (bbt);
+			break;
 		default:
 			break;
 		}
