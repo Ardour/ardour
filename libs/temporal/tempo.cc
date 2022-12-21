@@ -3126,6 +3126,15 @@ TempoMap::stretch_tempo (TempoPoint* ts, samplepos_t sample, samplepos_t end_sam
 		return;
 	}
 
+	TempoPoint* next_t = const_cast<TempoPoint*> (next_tempo (*ts));
+
+	/* no stretching of the final tempo, where final includes "terminated
+	 * by a BBT marker"
+	 */
+	if (!next_t || dynamic_cast<MusicTimePoint*> (next_t)) {
+		return;
+	}
+
 	superclock_t start_sclock = samples_to_superclock (sample, TEMPORAL_SAMPLE_RATE);
 	superclock_t end_sclock = samples_to_superclock (end_sample, TEMPORAL_SAMPLE_RATE);
 
@@ -3139,7 +3148,6 @@ TempoMap::stretch_tempo (TempoPoint* ts, samplepos_t sample, samplepos_t end_sam
 		 * that the previous tempo ended with.
 		 */
 
-		TempoPoint* next_t = const_cast<TempoPoint*> (next_tempo (*ts));
 		TempoPoint* prev_to_ts = const_cast<TempoPoint*> (previous_tempo (*ts));
 		assert (prev_to_ts);
 		/* the change in samples is the result of changing the slope of at most 2 previous tempo sections.
