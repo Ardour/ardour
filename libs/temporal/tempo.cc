@@ -3103,6 +3103,14 @@ TempoMap::set_continuing (TempoPoint& tp, bool yn)
 	return true;
 }
 
+/* Adjusts the outgoing tempo at @p ts so that the next Tempo point is at @p
+ * end_sample, while keeping the beat time positions of both the same.
+ *
+ * i.e. literally "stretches" out a tempo section (between two markers) by
+ * speeding or slowing the initial outbound tempo and ramping to the end
+ * tempo.
+ */
+
 void
 TempoMap::stretch_tempo (TempoPoint* ts, samplepos_t sample, samplepos_t end_sample, Beats const & start_qnote, Beats const & end_qnote)
 {
