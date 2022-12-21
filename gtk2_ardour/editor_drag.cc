@@ -3304,6 +3304,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		stringstream strs;
 		Temporal::Tempo new_tempo (new_bpm, _marker->tempo().note_type());
 		map->change_tempo (const_cast<TempoPoint&>(_marker->tempo()), new_tempo);
+		_editor->mid_tempo_change (Editor::TempoChanged);
 		strs << "Tempo: " << fixed << setprecision(3) << new_bpm;
 		show_verbose_cursor_text (strs.str());
 
