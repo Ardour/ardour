@@ -49,7 +49,8 @@ private:
 	Gtk::HBox       bbt_box;
 	Gtk::SpinButton bar_entry;
 	Gtk::SpinButton beat_entry;
-	Gtk::Label      entry_label;
+	Gtk::Label      bar_label;
+	Gtk::Label      beat_label;
 
 	Gtk::HBox       name_box;
 	Gtk::Entry      name_entry;
