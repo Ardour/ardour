@@ -7866,19 +7866,19 @@ msgstr "Faire réapparaître tous les repères"
 
 #: editor_rulers.cc:234
 msgid "Clear All Ranges"
-msgstr "Nettoyer toutes les plages"
+msgstr "Effacer tous les intervalles"
 
 #: editor_rulers.cc:235
 msgid "Unhide Ranges"
-msgstr ""
+msgstr "Faire réapparaître tous les intervalles"
 
 #: editor_rulers.cc:239
 msgid "New Loop Range"
-msgstr "Nouvelle plage de boucle"
+msgstr "Nouvel intervalle de boucle"
 
 #: editor_rulers.cc:240
 msgid "New Punch Range"
-msgstr "Nouvelle plage de punch"
+msgstr "Nouvel intervalle de punch"
 
 #: editor_rulers.cc:245
 msgid "New CD Track Marker"
