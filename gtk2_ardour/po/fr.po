@@ -2617,11 +2617,11 @@ msgstr "Lecture en arrière"
 
 #: ardour_ui_ed.cc:573 ardour_ui_ed.cc:622
 msgid "Jump to Previous Mark"
-msgstr "Sauter au repère précédent"
+msgstr "Aller au repère précédent"
 
 #: ardour_ui_ed.cc:576 ardour_ui_ed.cc:620
 msgid "Jump to Next Mark"
-msgstr "Sauter au repère suivant"
+msgstr "Aller au repère suivant"
 
 #: ardour_ui_ed.cc:581
 msgid "Locate to Mark %1"
@@ -2629,11 +2629,11 @@ msgstr "Placer au repère %1"
 
 #: ardour_ui_ed.cc:586
 msgid "Jump to Loop Start"
-msgstr "Sauter au départ de boucle"
+msgstr "Aller au départ de boucle"
 
 #: ardour_ui_ed.cc:588
 msgid "Jump to Loop End"
-msgstr "Sauter à la fin de boucle"
+msgstr "Aller à la fin de boucle"
 
 #: ardour_ui_ed.cc:591 editor_audio_import.cc:423 luawindow.cc:99
 #: pt_import_selector.cc:44 rc_option_editor.cc:2430 session_import_dialog.cc:82
@@ -3910,7 +3910,7 @@ msgstr ""
 
 #: cuebox_ui.cc:256
 msgid "Jump..."
-msgstr "Sauter..."
+msgstr "Chaîner à..."
 
 #: cuebox_ui.cc:293 trigger_master.cc:353 trigger_master.cc:718
 msgid "Set All Follow Actions..."
@@ -18447,7 +18447,7 @@ msgstr ""
 #: slot_properties_box.cc:157 slot_properties_box.cc:174 trigger_ui.cc:576
 #: trigger_ui.cc:748
 msgid "Jump"
-msgstr "Sauter"
+msgstr "Chaîner à"
 
 #: slot_properties_box.cc:187
 msgid "Legato"
@@ -18935,7 +18935,7 @@ msgstr "Déplacer au prochain octave"
 
 #: step_entry.cc:639
 msgid "Move to Next Note Length"
-msgstr "Aller à la Prochaine Durée de Note"
+msgstr "Aller à la prochaine durée de note"
 
 #: step_entry.cc:640
 msgid "Move to Previous Note Length"
