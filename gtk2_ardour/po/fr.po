@@ -10119,7 +10119,7 @@ msgstr "Nouveau crochet"
 
 #: lua_script_manager.cc:48 plugin_presets_ui.cc:36 slot_properties_box.cc:238
 msgid "Load"
-msgstr "Charge"
+msgstr "Charger"
 
 #: lua_script_manager.cc:81 lua_script_manager.cc:122 lua_script_manager.cc:158
 #: plugin_presets_ui.cc:81 plugin_ui.cc:536 script_selector.cc:57
