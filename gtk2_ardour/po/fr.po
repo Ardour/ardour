@@ -12885,7 +12885,7 @@ msgstr "Recherche depuis %1"
 
 #: plugin_scan_dialog.cc:317
 msgid "Scanning: "
-msgstr "Recherche :"
+msgstr "Recherche : "
 
 #: plugin_setup_dialog.cc:32
 msgid "Plugin Setup"
