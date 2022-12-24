@@ -12859,7 +12859,7 @@ msgstr ""
 #: plugin_scan_dialog.cc:110
 msgid "Cancel Scanning this plugin.  It will be Ignored in the plugin list."
 msgstr ""
-"Annulez l'analyse de ce greffon. Il sera ignoré dans la liste des greffons."
+"Annuler l'analyse de ce greffon. Il sera ignoré dans la liste des greffons."
 
 #: plugin_scan_dialog.cc:111
 msgid "When enabled, scan will ignore plugins that take a long time to scan."
