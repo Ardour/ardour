@@ -13666,7 +13666,7 @@ msgstr "Enlever le départ de retours..."
 
 #: processor_box.cc:4105
 msgid "Inline Controls"
-msgstr ""
+msgstr "Contrôles en-ligne"
 
 #: processor_box.cc:4106
 msgid "Send Options"
