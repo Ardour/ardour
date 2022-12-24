@@ -18507,7 +18507,7 @@ msgstr "Double-cliquez pour renommer ce clip"
 
 #: slot_properties_box.cc:373
 msgid "Adjust audio gain (or MIDI velocity) for this slot"
-msgstr ""
+msgstr "Ajuster le gain audio (ou la vélocité MIDI) pour ce slot"
 
 #: slot_properties_box.cc:374
 msgid "Load a new file into this slot"
