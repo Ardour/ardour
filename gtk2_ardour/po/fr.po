@@ -7886,7 +7886,7 @@ msgstr "Nouveau repère de piste CD"
 
 #: editor_rulers.cc:249
 msgid "Stop All Cues"
-msgstr "Arreter tous les Cues"
+msgstr "Arrêter tous les Cues"
 
 #: editor_rulers.cc:250
 msgid "Clear All Cues"
