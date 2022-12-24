@@ -7854,7 +7854,7 @@ msgstr "Piste/bus actif ?"
 
 #: editor_rulers.cc:227
 msgid "Clear All Locations"
-msgstr ""
+msgstr "Effacer tous les repères"
 
 #: editor_rulers.cc:228
 msgid "Clear All Xruns"
@@ -7862,7 +7862,7 @@ msgstr "Effacer tous les décrochages audio"
 
 #: editor_rulers.cc:229
 msgid "Unhide Locations"
-msgstr ""
+msgstr "Faire réapparaître tous les repères"
 
 #: editor_rulers.cc:234
 msgid "Clear All Ranges"
