@@ -4334,7 +4334,7 @@ msgstr "Punch"
 
 #: editor.cc:1473 rc_option_editor.cc:3209
 msgid "Linear (for highly correlated material)"
-msgstr "linéaire (pour matériau fortement corrélé)"
+msgstr "linéaire (pour matériel fortement corrélé)"
 
 #: editor.cc:1483 rc_option_editor.cc:3210
 msgid "Constant power"
@@ -13256,7 +13256,7 @@ msgstr "Bus"
 
 #: port_group.cc:352
 msgid "Sidechains"
-msgstr ""
+msgstr "Chaînage latéral"
 
 #: port_group.cc:355
 msgid "Hardware"
@@ -16902,7 +16902,7 @@ msgstr "(actuellement : horodatage de capture)"
 
 #: route_time_axis.cc:765
 msgid "Align With Existing Material"
-msgstr "Aligner avec le matériau existant"
+msgstr "Aligner avec le matériel existant"
 
 #: route_time_axis.cc:770
 msgid "Align With Capture Time"
