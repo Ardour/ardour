@@ -181,7 +181,7 @@ ExportDialog::init_gui ()
 {
 	Gtk::Alignment * preset_align = Gtk::manage (new Gtk::Alignment());
 	preset_align->add (*preset_selector);
-	preset_align->set_padding (0, 12, 0, 0);
+	preset_align->set_padding (6, 8, 6, 6);
 
 	Gtk::VBox * file_format_selector = Gtk::manage (new Gtk::VBox());
 	file_format_selector->set_homogeneous (false);
