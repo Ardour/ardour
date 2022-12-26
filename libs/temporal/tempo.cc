@@ -787,8 +787,6 @@ TempoMap::copy_points (TempoMap const & other)
 			_points.push_back (*tpp);
 		}
 	}
-	std::cerr << "\n\nAFTER COPY POINTS\n";
-	dump (std::cerr);
 }
 
 MeterPoint*
