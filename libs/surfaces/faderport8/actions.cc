@@ -78,7 +78,7 @@ FaderPort8::setup_actions ()
 #ifdef FP8_MUTESOLO_UNDO
 	BindMethod (BtnSoloClear, button_solo_clear);
 #else
-	BindAction (BtnSoloClear, "Main", "cancel-solo");
+	BindMethod (BtnSoloClear, cancel_all_solo);
 #endif
 	BindMethod (BtnMuteClear, button_mute_clear);
 
