@@ -2617,11 +2617,11 @@ msgstr "Lecture en arrière"
 
 #: ardour_ui_ed.cc:573 ardour_ui_ed.cc:622
 msgid "Jump to Previous Mark"
-msgstr "Sauter au repère précédent"
+msgstr "Aller au repère précédent"
 
 #: ardour_ui_ed.cc:576 ardour_ui_ed.cc:620
 msgid "Jump to Next Mark"
-msgstr "Sauter au repère suivant"
+msgstr "Aller au repère suivant"
 
 #: ardour_ui_ed.cc:581
 msgid "Locate to Mark %1"
@@ -2629,11 +2629,11 @@ msgstr "Placer au repère %1"
 
 #: ardour_ui_ed.cc:586
 msgid "Jump to Loop Start"
-msgstr "Sauter au départ de boucle"
+msgstr "Aller au départ de boucle"
 
 #: ardour_ui_ed.cc:588
 msgid "Jump to Loop End"
-msgstr "Sauter à la fin de boucle"
+msgstr "Aller à la fin de boucle"
 
 #: ardour_ui_ed.cc:591 editor_audio_import.cc:423 luawindow.cc:99
 #: pt_import_selector.cc:44 rc_option_editor.cc:2430 session_import_dialog.cc:82
@@ -3910,7 +3910,7 @@ msgstr ""
 
 #: cuebox_ui.cc:256
 msgid "Jump..."
-msgstr "Sauter..."
+msgstr "Chaîner à..."
 
 #: cuebox_ui.cc:293 trigger_master.cc:353 trigger_master.cc:718
 msgid "Set All Follow Actions..."
@@ -4334,7 +4334,7 @@ msgstr "Punch"
 
 #: editor.cc:1473 rc_option_editor.cc:3209
 msgid "Linear (for highly correlated material)"
-msgstr "linéaire (pour matériau fortement corrélé)"
+msgstr "linéaire (pour matériel fortement corrélé)"
 
 #: editor.cc:1483 rc_option_editor.cc:3210
 msgid "Constant power"
@@ -7854,7 +7854,7 @@ msgstr "Piste/bus actif ?"
 
 #: editor_rulers.cc:227
 msgid "Clear All Locations"
-msgstr ""
+msgstr "Effacer tous les repères"
 
 #: editor_rulers.cc:228
 msgid "Clear All Xruns"
@@ -7862,23 +7862,23 @@ msgstr "Effacer tous les décrochages audio"
 
 #: editor_rulers.cc:229
 msgid "Unhide Locations"
-msgstr ""
+msgstr "Faire réapparaître tous les repères"
 
 #: editor_rulers.cc:234
 msgid "Clear All Ranges"
-msgstr "Nettoyer toutes les plages"
+msgstr "Effacer tous les intervalles"
 
 #: editor_rulers.cc:235
 msgid "Unhide Ranges"
-msgstr ""
+msgstr "Faire réapparaître tous les intervalles"
 
 #: editor_rulers.cc:239
 msgid "New Loop Range"
-msgstr "Nouvelle plage de boucle"
+msgstr "Nouvel intervalle de boucle"
 
 #: editor_rulers.cc:240
 msgid "New Punch Range"
-msgstr "Nouvelle plage de punch"
+msgstr "Nouvel intervalle de punch"
 
 #: editor_rulers.cc:245
 msgid "New CD Track Marker"
@@ -7886,7 +7886,7 @@ msgstr "Nouveau repère de piste CD"
 
 #: editor_rulers.cc:249
 msgid "Stop All Cues"
-msgstr "Arreter tous les Cues"
+msgstr "Arrêter tous les Cues"
 
 #: editor_rulers.cc:250
 msgid "Clear All Cues"
@@ -10119,7 +10119,7 @@ msgstr "Nouveau crochet"
 
 #: lua_script_manager.cc:48 plugin_presets_ui.cc:36 slot_properties_box.cc:238
 msgid "Load"
-msgstr "Charge"
+msgstr "Charger"
 
 #: lua_script_manager.cc:81 lua_script_manager.cc:122 lua_script_manager.cc:158
 #: plugin_presets_ui.cc:81 plugin_ui.cc:536 script_selector.cc:57
@@ -12859,7 +12859,7 @@ msgstr ""
 #: plugin_scan_dialog.cc:110
 msgid "Cancel Scanning this plugin.  It will be Ignored in the plugin list."
 msgstr ""
-"Annulez l'analyse de ce greffon. Il sera ignoré dans la liste des greffons."
+"Annuler l'analyse de ce greffon. Il sera ignoré dans la liste des greffons."
 
 #: plugin_scan_dialog.cc:111
 msgid "When enabled, scan will ignore plugins that take a long time to scan."
@@ -12885,7 +12885,7 @@ msgstr "Recherche depuis %1"
 
 #: plugin_scan_dialog.cc:317
 msgid "Scanning: "
-msgstr "Recherche :"
+msgstr "Recherche : "
 
 #: plugin_setup_dialog.cc:32
 msgid "Plugin Setup"
@@ -13256,7 +13256,7 @@ msgstr "Bus"
 
 #: port_group.cc:352
 msgid "Sidechains"
-msgstr ""
+msgstr "Chaînage latéral"
 
 #: port_group.cc:355
 msgid "Hardware"
@@ -13666,7 +13666,7 @@ msgstr "Enlever le départ de retours..."
 
 #: processor_box.cc:4105
 msgid "Inline Controls"
-msgstr ""
+msgstr "Contrôles en-ligne"
 
 #: processor_box.cc:4106
 msgid "Send Options"
@@ -16902,7 +16902,7 @@ msgstr "(actuellement : horodatage de capture)"
 
 #: route_time_axis.cc:765
 msgid "Align With Existing Material"
-msgstr "Aligner avec le matériau existant"
+msgstr "Aligner avec le matériel existant"
 
 #: route_time_axis.cc:770
 msgid "Align With Capture Time"
@@ -18447,7 +18447,7 @@ msgstr ""
 #: slot_properties_box.cc:157 slot_properties_box.cc:174 trigger_ui.cc:576
 #: trigger_ui.cc:748
 msgid "Jump"
-msgstr "Sauter"
+msgstr "Chaîner à"
 
 #: slot_properties_box.cc:187
 msgid "Legato"
@@ -18463,7 +18463,7 @@ msgstr ""
 
 #: slot_properties_box.cc:286
 msgid "Velocity Sense:"
-msgstr ""
+msgstr "Sensi. vélocité :"
 
 #: slot_properties_box.cc:290
 msgid "Launch Style:"
@@ -18471,19 +18471,19 @@ msgstr "Style de lancement :"
 
 #: slot_properties_box.cc:294
 msgid "Launch Quantize:"
-msgstr ""
+msgstr "Quantification de lancement :"
 
 #: slot_properties_box.cc:298
 msgid "Legato:"
-msgstr ""
+msgstr "Legato :"
 
 #: slot_properties_box.cc:302
 msgid "Cue Isolate:"
-msgstr ""
+msgstr "Isolation de Cue :"
 
 #: slot_properties_box.cc:330
 msgid "Follow Count:"
-msgstr ""
+msgstr "Suivre le compte :"
 
 #: slot_properties_box.cc:336
 msgid "Follow Length:"
@@ -18507,7 +18507,7 @@ msgstr "Double-cliquez pour renommer ce clip"
 
 #: slot_properties_box.cc:373
 msgid "Adjust audio gain (or MIDI velocity) for this slot"
-msgstr ""
+msgstr "Ajuster le gain audio (ou la vélocité MIDI) pour ce slot"
 
 #: slot_properties_box.cc:374
 msgid "Load a new file into this slot"
@@ -18594,11 +18594,11 @@ msgstr "Ajust. vélocité :"
 
 #: slot_properties_box.cc:704
 msgid "%1%% Left"
-msgstr "%1%% Gauche"
+msgstr "%1%% gauche"
 
 #: slot_properties_box.cc:705
 msgid "%1%% Right"
-msgstr "%1%% Droite"
+msgstr "%1%% droite"
 
 #: slot_properties_box.cc:726
 msgid "Trigger Slot: %1"
@@ -18935,7 +18935,7 @@ msgstr "Déplacer au prochain octave"
 
 #: step_entry.cc:639
 msgid "Move to Next Note Length"
-msgstr "Aller à la Prochaine Durée de Note"
+msgstr "Aller à la prochaine durée de note"
 
 #: step_entry.cc:640
 msgid "Move to Previous Note Length"
@@ -19765,7 +19765,7 @@ msgstr ""
 
 #: trigger_ui.cc:172
 msgid "Select file to load into slot"
-msgstr ""
+msgstr "Sélectionnez le fichier à charger dans le slot"
 
 #: trigger_ui.cc:399
 msgid "Load..."
@@ -19773,19 +19773,19 @@ msgstr "Charger..."
 
 #: trigger_ui.cc:404
 msgid "MIDI Learn"
-msgstr ""
+msgstr "Apprentissage MIDI"
 
 #: trigger_ui.cc:405
 msgid "MIDI un-Learn"
-msgstr ""
+msgstr "Désapprentissage MIDI"
 
 #: trigger_ui.cc:534
 msgid "Launch Style..."
-msgstr ""
+msgstr "Style de lancement..."
 
 #: trigger_ui.cc:535
 msgid "Quantization..."
-msgstr ""
+msgstr "Quantification..."
 
 #: trigger_ui.cc:537
 msgid "Cue Isolate"
@@ -19793,11 +19793,11 @@ msgstr ""
 
 #: trigger_ui.cc:681
 msgid "Trigger"
-msgstr ""
+msgstr "Déclenchement"
 
 #: trigger_ui.cc:683
 msgid "Retrigger"
-msgstr ""
+msgstr "Redéclenchement"
 
 #: trigger_ui.cc:685
 msgid "Gate"
@@ -19841,19 +19841,19 @@ msgstr "Encore"
 
 #: trigger_ui.cc:756
 msgid "Jump to: %1"
-msgstr ""
+msgstr "Chaînerà : %1"
 
 #: trigger_ui.cc:760
 msgid "Jump: Multi"
-msgstr ""
+msgstr "Chaîner : multi"
 
 #: trigger_ui.cc:772
 msgid "Crisp"
-msgstr ""
+msgstr "Précis"
 
 #: trigger_ui.cc:774
 msgid "Mixed"
-msgstr ""
+msgstr "Mélangé"
 
 #: triggerbox_ui.cc:89
 msgid "Click to select Follow-Actions for this clip"
