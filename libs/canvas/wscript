@@ -44,6 +44,7 @@ canvas_sources = [
         'image.cc',
         'line.cc',
         'line_set.cc',
+        'lollipop.cc',
         'lookup_table.cc',
         'meter.cc',
         'note.cc',
