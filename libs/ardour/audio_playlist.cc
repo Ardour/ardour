@@ -178,6 +178,8 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 	DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Playlist %1 read @ %2 for %3, channel %4, regions %5 mixdown @ %6 gain @ %7\n",
 							   name(), start, cnt, chan_n, regions.size(), mixdown_buffer, gain_buffer));
 
+	samplecnt_t const scnt (cnt.samples ());
+
 	/* optimizing this memset() away involves a lot of conditionals
 	   that may well cause more of a hit due to cache misses
 	   and related stuff than just doing this here.
@@ -191,7 +193,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 	   zeroed.
 	*/
 
-	memset (buf, 0, sizeof (Sample) * cnt.samples());
+	memset (buf, 0, sizeof (Sample) * scnt);
 
 	/* this function is never called from a realtime thread, so
 	   its OK to block (for short intervals).
@@ -271,7 +273,22 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 		                                                   i->range.length(), (int) chan_n,
 		                                                   buf, i->range.start().earlier (start)));
 
-		i->region->read_at (buf + start.distance (i->range.start()).samples(), mixdown_buffer, gain_buffer, i->range.start().samples(), i->range.start().distance (i->range.end()).samples(), chan_n);
+		samplepos_t read_pos (i->range.start().samples());
+		samplecnt_t read_cnt (i->range.start().distance (i->range.end()).samples());
+		assert (start.distance (i->range.start()).samples() < scnt);
+		assert (start.distance (i->range.start()).samples() + read_cnt <= scnt);
+		samplecnt_t nread = i->region->read_at (buf + start.distance (i->range.start()).samples(), mixdown_buffer, gain_buffer, read_pos, read_cnt, chan_n);
+		if (nread != read_cnt) {
+#ifndef NDEBUG
+			/* forward error to DiskReader::audio_read. This does 2 things:
+			 *  - error "DiskReader %1: when refilling, cannot read ..."
+			 *  - emit Underrun() - "Disk is too slow"
+			 * (ideally only the first would happen)
+			 * Since the buffer is zero'ed above, failed reads are not an issue.
+			 */
+			return timecnt_t (0);
+#endif
+		}
 	}
 
 	return cnt;

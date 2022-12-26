@@ -1444,6 +1444,9 @@ AudioRegion::maximum_amplitude (Progress* p) const
 			/* read it in */
 
 			if (read_raw_internal (buf, fpos, to_read, n) != to_read) {
+#ifndef NDEBUG
+				cerr << "AudioRegion::maximum_amplitude read failed for '" << _name << "'\n";
+#endif
 				return 0;
 			}
 
