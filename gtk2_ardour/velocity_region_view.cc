@@ -43,7 +43,7 @@
 using namespace Temporal;
 
 VelocityRegionView::VelocityRegionView (ArdourCanvas::Container*                  parent,
-                                        VelocityTimeAxisView&                   time_axis,
+                                        AutomationTimeAxisView&                   time_axis,
                                         boost::shared_ptr<ARDOUR::Region>         region,
                                         boost::shared_ptr<ARDOUR::AutomationList> list,
                                         double                                    spu,
@@ -176,7 +176,7 @@ VelocityRegionView::add_automation_event (GdkEvent *, timepos_t const & w, doubl
 	}
 	assert(_line);
 
-	VelocityTimeAxisView* const view = velocity_view ();
+	AutomationTimeAxisView* const view = velocity_view ();
 
 	/* compute vertical fractional position */
 	y = 1.0 - (y / _line->height());
@@ -230,7 +230,7 @@ VelocityRegionView::paste (timepos_t const &                               pos,
 {
 	using namespace ARDOUR;
 
-	VelocityTimeAxisView* const             view    = velocity_view();
+	AutomationTimeAxisView* const             view    = velocity_view();
 	boost::shared_ptr<ARDOUR::AutomationList> my_list = _line->the_list();
 
 	if (view->session()->transport_rolling() && my_list->automation_write()) {
