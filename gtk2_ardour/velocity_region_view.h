@@ -24,7 +24,7 @@
 #include "ardour/types.h"
 
 #include "region_view.h"
-#include "velocity_time_axis.h"
+#include "automation_time_axis.h"
 #include "automation_line.h"
 #include "enums.h"
 
@@ -39,7 +39,7 @@ class VelocityRegionView : public RegionView
 {
 public:
 	VelocityRegionView(ArdourCanvas::Container*,
-	                   VelocityTimeAxisView&,
+	                   AutomationTimeAxisView&,
 	                   boost::shared_ptr<ARDOUR::Region>,
 	                   boost::shared_ptr<ARDOUR::AutomationList>,
 	                   double initial_samples_per_pixel,
@@ -54,8 +54,10 @@ public:
 	            float                                           times,
 	            boost::shared_ptr<const ARDOUR::AutomationList> slist);
 
-	inline VelocityTimeAxisView* velocity_view() const
-		{ return dynamic_cast<VelocityTimeAxisView*>(&trackview); }
+	inline AutomationTimeAxisView* velocity_view() const
+		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
+
+	boost::shared_ptr<AutomationLine> line() { return _line; }
 
 	// We are a ghost.  Meta ghosts?  Crazy talk.
 	virtual GhostRegion* add_ghost(TimeAxisView&) { return 0; }

@@ -45,7 +45,6 @@
 #include "selection.h"
 #include "ui_config.h"
 #include "velocity_region_view.h"
-#include "velocity_time_axis.h"
 
 #include "pbd/i18n.h"
 
@@ -102,19 +101,19 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 			if (rv->region() == region) {
 
 				/* great. we already have an AutomationRegionView for this Region. use it again. */
-				// VelocityRegionView* vrv = dynamic_cast<VelocityRegionView*>(rv);
+				VelocityRegionView* vrv = dynamic_cast<VelocityRegionView*>(rv);
 
-				// if (vrv->line()) {
-				// vrv->line()->set_list (list);
-				// }
+				if (vrv->line()) {
+					vrv->line()->set_list (list);
+				}
 				rv->set_valid (true);
-				//display_region (vrv);
+				display_region (vrv);
 
 				return 0;
 			}
 		}
 
-		region_view = new VelocityRegionView (_canvas_group, *(dynamic_cast<VelocityTimeAxisView*>(&_automation_view)), region, list, _samples_per_pixel, region_color);
+		region_view = new VelocityRegionView (_canvas_group, _automation_view, region, list, _samples_per_pixel, region_color);
 
 	} else {
 
