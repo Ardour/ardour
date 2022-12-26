@@ -53,7 +53,7 @@ public:
 		width = std::max<size_t> (800, width);
 
 		peaks.resize (2);
-		peaks[0].resize (w);
+		peaks[0].resize (width);
 		peaks[1].resize (width);
 		spectrum.resize (width);
 
@@ -61,9 +61,9 @@ public:
 			spectrum[i].resize (b);
 		}
 
-		lgraph_i   = new float[width]();
-		lgraph_s   = new float[width]();
-		lgraph_m   = new float[width]();
+		lgraph_i   = new float[width];
+		lgraph_s   = new float[width];
+		lgraph_m   = new float[width];
 		limiter_pk = new float[width]();
 
 		for (size_t i = 0; i < width; ++i) {
@@ -96,7 +96,7 @@ public:
 		lgraph_i   = new float[width];
 		lgraph_s   = new float[width];
 		lgraph_m   = new float[width];
-		limiter_pk = new float[width]();
+		limiter_pk = new float[width];
 
 		truepeakpos[0] = other.truepeakpos[0];
 		truepeakpos[1] = other.truepeakpos[1];
