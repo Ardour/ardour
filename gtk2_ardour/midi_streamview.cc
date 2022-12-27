@@ -74,11 +74,6 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	, _note_lines (0)
 	, _updates_suspended (false)
 {
-
-	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
-	_midi_underlay = new ArdourCanvas::Container (_canvas_group);
-	_midi_underlay->lower_to_bottom();
-
 	/* use a dedicated group for MIDI regions (on top of the grid and lines) */
 	_region_group = new ArdourCanvas::Container (_canvas_group);
 	_region_group->raise_to_top ();

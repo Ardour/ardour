@@ -119,10 +119,6 @@ public:
 	void toggle_automation_track (const Evoral::Parameter& param);
 	void fade_range (TimeSelection&);
 
-	void add_underlay (StreamView*, bool update_xml = true);
-	void remove_underlay (StreamView*);
-	void build_underlay_menu(Gtk::Menu*);
-
 	int set_state (const XMLNode&, int version);
 
 	virtual Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
@@ -282,14 +278,6 @@ protected:
 	void post_construct ();
 
 	GainMeterBase gm;
-
-	XMLNode* underlay_xml_node;
-	bool set_underlay_state();
-
-	typedef std::list<StreamView*> UnderlayList;
-	UnderlayList _underlay_streams;
-	typedef std::list<RouteTimeAxisView*> UnderlayMirrorList;
-	UnderlayMirrorList _underlay_mirrors;
 
 	bool _ignore_set_layer_display;
 	void layer_display_menu_change (Gtk::MenuItem* item);

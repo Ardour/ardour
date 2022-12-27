@@ -1400,6 +1400,7 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 			             _route->describe_parameter(param)));
 
 		if (_view) {
+			std::cerr << "Adding ghosts of each MIDI region\n";
 			_view->foreach_regionview (sigc::mem_fun (*track.get(), &TimeAxisView::add_ghost));
 		}
 

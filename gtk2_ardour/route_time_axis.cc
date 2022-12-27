@@ -1704,10 +1704,6 @@ RouteTimeAxisView::region_view_added (RegionView* rv)
 			atv->add_ghost(rv);
 		}
 	}
-
-	for (UnderlayMirrorList::iterator i = _underlay_mirrors.begin(); i != _underlay_mirrors.end(); ++i) {
-		(*i)->add_ghost(rv);
-	}
 }
 
 RouteTimeAxisView::ProcessorAutomationInfo::~ProcessorAutomationInfo ()
@@ -2294,122 +2290,6 @@ RouteTimeAxisView::chan_count_changed ()
 		asv->reload_waves ();
 		reset_meter ();
 		request_redraw ();
-	}
-}
-
-void
-RouteTimeAxisView::build_underlay_menu(Gtk::Menu* parent_menu)
-{
-	using namespace Menu_Helpers;
-
-	if (!_underlay_streams.empty()) {
-		MenuList& parent_items = parent_menu->items();
-		Menu* gs_menu = manage (new Menu);
-		gs_menu->set_name ("ArdourContextMenu");
-		MenuList& gs_items = gs_menu->items();
-
-		parent_items.push_back (MenuElem (_("Underlays"), *gs_menu));
-
-		for(UnderlayList::iterator it = _underlay_streams.begin(); it != _underlay_streams.end(); ++it) {
-			gs_items.push_back(MenuElem(string_compose(_("Remove \"%1\""), (*it)->trackview().name()),
-						    sigc::bind(sigc::mem_fun(*this, &RouteTimeAxisView::remove_underlay), *it)));
-		}
-	}
-}
-
-bool
-RouteTimeAxisView::set_underlay_state()
-{
-	if (!underlay_xml_node) {
-		return false;
-	}
-
-	XMLNodeList nlist = underlay_xml_node->children();
-	XMLNodeConstIterator niter;
-	XMLNode *child_node;
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		child_node = *niter;
-
-		if (child_node->name() != "Underlay") {
-			continue;
-		}
-
-		XMLProperty const * prop = child_node->property ("id");
-		if (prop) {
-			PBD::ID id (prop->value());
-
-			StripableTimeAxisView* v = _editor.get_stripable_time_axis_by_id (id);
-
-			if (v) {
-				add_underlay(v->view(), false);
-			}
-		}
-	}
-
-	return false;
-}
-
-void
-RouteTimeAxisView::add_underlay (StreamView* v, bool /*update_xml*/)
-{
-	if (!v) {
-		return;
-	}
-
-	RouteTimeAxisView& other = v->trackview();
-
-	if (find(_underlay_streams.begin(), _underlay_streams.end(), v) == _underlay_streams.end()) {
-		if (find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this) != other._underlay_mirrors.end()) {
-			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
-			abort(); /*NOTREACHED*/
-		}
-
-		_underlay_streams.push_back(v);
-		other._underlay_mirrors.push_back(this);
-
-		v->foreach_regionview(sigc::mem_fun(*this, &RouteTimeAxisView::add_ghost));
-
-#ifdef GUI_OBJECT_STATE_FIX_REQUIRED
-		if (update_xml) {
-			if (!underlay_xml_node) {
-				underlay_xml_node = xml_node->add_child("Underlays");
-			}
-
-			XMLNode* node = underlay_xml_node->add_child("Underlay");
-			XMLProperty const * prop = node->add_property("id");
-			prop->set_value(v->trackview().route()->id().to_s());
-		}
-#endif
-	}
-}
-
-void
-RouteTimeAxisView::remove_underlay (StreamView* v)
-{
-	if (!v) {
-		return;
-	}
-
-	UnderlayList::iterator it = find(_underlay_streams.begin(), _underlay_streams.end(), v);
-	RouteTimeAxisView& other = v->trackview();
-
-	if (it != _underlay_streams.end()) {
-		UnderlayMirrorList::iterator gm = find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this);
-
-		if (gm == other._underlay_mirrors.end()) {
-			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
-			abort(); /*NOTREACHED*/
-		}
-
-		v->foreach_regionview(sigc::mem_fun(*this, &RouteTimeAxisView::remove_ghost));
-
-		_underlay_streams.erase(it);
-		other._underlay_mirrors.erase(gm);
-
-		if (underlay_xml_node) {
-			underlay_xml_node->remove_nodes_and_delete("id", v->trackview().route()->id().to_s());
-		}
 	}
 }
 
