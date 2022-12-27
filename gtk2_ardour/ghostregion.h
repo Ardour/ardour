@@ -41,7 +41,7 @@ class TimeAxisView;
 class RegionView;
 class MidiRegionView;
 
-class GhostRegion : public sigc::trackable
+class GhostRegion : virtual public sigc::trackable
 {
 public:
 	GhostRegion(RegionView& rv,
