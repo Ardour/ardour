@@ -1,6 +1,6 @@
 /*
- *  Copyright (C) 2006-2012 Fons Adriaensen <fons@linuxaudio.org>
- *  Copyright (C) 2014-2021 Robin Gareus <robin@gareus.org>
+ *  Copyright (C) 2006-2022 Fons Adriaensen <fons@linuxaudio.org>
+ *  Copyright (C) 2014-2022 Robin Gareus <robin@gareus.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include <endian.h>
 #endif
 #include "zita-alsa-pcmi.h"
+#include <byteswap.h>
 #include <sys/time.h>
 
 /* Public members *************************************************************/
@@ -526,92 +527,62 @@ Alsa_pcmi::initialise (const char* play_name, const char* capt_name, const char*
 		snd_pcm_hw_params_get_format (_play_hwpar, &_play_format);
 		snd_pcm_hw_params_get_access (_play_hwpar, &_play_access);
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
 		switch (_play_format) {
 			case SND_PCM_FORMAT_FLOAT_LE:
 				_clear_func = &Alsa_pcmi::clear_32;
-				_play_func  = &Alsa_pcmi::play_float;
-				break;
-
-			case SND_PCM_FORMAT_S32_LE:
-				_clear_func = &Alsa_pcmi::clear_32;
-				_play_func  = &Alsa_pcmi::play_32;
-				break;
-
-			case SND_PCM_FORMAT_S32_BE:
-				_clear_func = &Alsa_pcmi::clear_32;
-				_play_func  = &Alsa_pcmi::play_32swap;
-				break;
-
-			case SND_PCM_FORMAT_S24_3LE:
-				_clear_func = &Alsa_pcmi::clear_24;
-				_play_func  = &Alsa_pcmi::play_24;
-				break;
-
-			case SND_PCM_FORMAT_S24_3BE:
-				_clear_func = &Alsa_pcmi::clear_24;
-				_play_func  = &Alsa_pcmi::play_24swap;
-				break;
-
-			case SND_PCM_FORMAT_S16_LE:
-				_clear_func = &Alsa_pcmi::clear_16;
-				_play_func  = &Alsa_pcmi::play_16;
-				break;
-
-			case SND_PCM_FORMAT_S16_BE:
-				_clear_func = &Alsa_pcmi::clear_16;
-				_play_func  = &Alsa_pcmi::play_16swap;
-				break;
-
-			default:
-				if (_debug & DEBUG_INIT) {
-					fprintf (stderr, "Alsa_pcmi: can't handle playback sample format.\n");
-				}
-				_state = -6;
-				return;
-		}
-#elif __BYTE_ORDER == __BIG_ENDIAN
-		switch (_play_format) {
-			case SND_PCM_FORMAT_S32_LE:
-				_clear_func = &Alsa_pcmi::clear_32;
-				_play_func  = &Alsa_pcmi::play_32swap;
-				break;
-
-			case SND_PCM_FORMAT_S32_BE:
-				_clear_func = &Alsa_pcmi::clear_32;
-				_play_func  = &Alsa_pcmi::play_32;
-				break;
-
-			case SND_PCM_FORMAT_S24_3LE:
-				_clear_func = &Alsa_pcmi::clear_24;
-				_play_func  = &Alsa_pcmi::play_24swap;
-				break;
-
-			case SND_PCM_FORMAT_S24_3BE:
-				_clear_func = &Alsa_pcmi::clear_24;
-				_play_func  = &Alsa_pcmi::play_24;
-				break;
-
-			case SND_PCM_FORMAT_S16_LE:
-				_clear_func = &Alsa_pcmi::clear_16;
-				_play_func  = &Alsa_pcmi::play_16swap;
-				break;
-
-			case SND_PCM_FORMAT_S16_BE:
-				_clear_func = &Alsa_pcmi::clear_16;
-				_play_func  = &Alsa_pcmi::play_16;
-				break;
-
-			default:
-				if (_debug & DEBUG_INIT) {
-					fprintf (stderr, "Alsa_pcmi: can't handle playback sample format.\n");
-				}
-				_state = -6;
-				return;
-		}
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+				_play_func = &Alsa_pcmi::play_floatne;
 #else
-# error "System byte order is undefined or not supported"
+				_play_func = &Alsa_pcmi::play_floatre;
 #endif
+				break;
+
+			case SND_PCM_FORMAT_FLOAT_BE:
+				_clear_func = &Alsa_pcmi::clear_32;
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+				_play_func = &Alsa_pcmi::play_floatre;
+#else
+				_play_func = &Alsa_pcmi::play_floatne;
+#endif
+				break;
+
+			case SND_PCM_FORMAT_S32_LE:
+				_clear_func = &Alsa_pcmi::clear_32;
+				_play_func  = &Alsa_pcmi::play_32le;
+				break;
+
+			case SND_PCM_FORMAT_S32_BE:
+				_clear_func = &Alsa_pcmi::clear_32;
+				_play_func  = &Alsa_pcmi::play_32be;
+				break;
+
+			case SND_PCM_FORMAT_S24_3LE:
+				_clear_func = &Alsa_pcmi::clear_24;
+				_play_func  = &Alsa_pcmi::play_24le;
+				break;
+
+			case SND_PCM_FORMAT_S24_3BE:
+				_clear_func = &Alsa_pcmi::clear_24;
+				_play_func  = &Alsa_pcmi::play_24be;
+				break;
+
+			case SND_PCM_FORMAT_S16_LE:
+				_clear_func = &Alsa_pcmi::clear_16;
+				_play_func  = &Alsa_pcmi::play_16le;
+				break;
+
+			case SND_PCM_FORMAT_S16_BE:
+				_clear_func = &Alsa_pcmi::clear_16;
+				_play_func  = &Alsa_pcmi::play_16be;
+				break;
+
+			default:
+				if (_debug & DEBUG_INIT) {
+					fprintf (stderr, "Alsa_pcmi: can't handle playback sample format.\n");
+				}
+				_state = -6;
+				return;
+		}
 
 		_play_npfd = snd_pcm_poll_descriptors_count (_play_handle);
 	}
@@ -644,79 +615,54 @@ Alsa_pcmi::initialise (const char* play_name, const char* capt_name, const char*
 		snd_pcm_hw_params_get_format (_capt_hwpar, &_capt_format);
 		snd_pcm_hw_params_get_access (_capt_hwpar, &_capt_access);
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
 		switch (_capt_format) {
 			case SND_PCM_FORMAT_FLOAT_LE:
-				_capt_func = &Alsa_pcmi::capt_float;
-				break;
-
-			case SND_PCM_FORMAT_S32_LE:
-				_capt_func = &Alsa_pcmi::capt_32;
-				break;
-
-			case SND_PCM_FORMAT_S32_BE:
-				_capt_func = &Alsa_pcmi::capt_32swap;
-				break;
-
-			case SND_PCM_FORMAT_S24_3LE:
-				_capt_func = &Alsa_pcmi::capt_24;
-				break;
-
-			case SND_PCM_FORMAT_S24_3BE:
-				_capt_func = &Alsa_pcmi::capt_24swap;
-				break;
-
-			case SND_PCM_FORMAT_S16_LE:
-				_capt_func = &Alsa_pcmi::capt_16;
-				break;
-
-			case SND_PCM_FORMAT_S16_BE:
-				_capt_func = &Alsa_pcmi::capt_16swap;
-				break;
-
-			default:
-				if (_debug & DEBUG_INIT) {
-					fprintf (stderr, "Alsa_pcmi: can't handle capture sample format.\n");
-				}
-				_state = -6;
-				return;
-		}
-#elif __BYTE_ORDER == __BIG_ENDIAN
-		switch (_capt_format) {
-			case SND_PCM_FORMAT_S32_LE:
-				_capt_func = &Alsa_pcmi::capt_32swap;
-				break;
-
-			case SND_PCM_FORMAT_S32_BE:
-				_capt_func = &Alsa_pcmi::capt_32;
-				break;
-
-			case SND_PCM_FORMAT_S24_3LE:
-				_capt_func = &Alsa_pcmi::capt_24swap;
-				break;
-
-			case SND_PCM_FORMAT_S24_3BE:
-				_capt_func = &Alsa_pcmi::capt_24;
-				break;
-
-			case SND_PCM_FORMAT_S16_LE:
-				_capt_func = &Alsa_pcmi::capt_16swap;
-				break;
-
-			case SND_PCM_FORMAT_S16_BE:
-				_capt_func = &Alsa_pcmi::capt_16;
-				break;
-
-			default:
-				if (_debug & DEBUG_INIT) {
-					fprintf (stderr, "Alsa_pcmi: can't handle capture sample format.\n");
-				}
-				_state = -6;
-				return;
-		}
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+				_capt_func = &Alsa_pcmi::capt_floatne;
 #else
-# error "System byte order is undefined or not supported"
+				_capt_func = &Alsa_pcmi::capt_floatre;
 #endif
+				break;
+
+			case SND_PCM_FORMAT_FLOAT_BE:
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+				_capt_func = &Alsa_pcmi::capt_floatre;
+#else
+				_capt_func = &Alsa_pcmi::capt_floatne;
+#endif
+				break;
+
+			case SND_PCM_FORMAT_S32_LE:
+				_capt_func = &Alsa_pcmi::capt_32le;
+				break;
+
+			case SND_PCM_FORMAT_S32_BE:
+				_capt_func = &Alsa_pcmi::capt_32be;
+				break;
+
+			case SND_PCM_FORMAT_S24_3LE:
+				_capt_func = &Alsa_pcmi::capt_24le;
+				break;
+
+			case SND_PCM_FORMAT_S24_3BE:
+				_capt_func = &Alsa_pcmi::capt_24be;
+				break;
+
+			case SND_PCM_FORMAT_S16_LE:
+				_capt_func = &Alsa_pcmi::capt_16le;
+				break;
+
+			case SND_PCM_FORMAT_S16_BE:
+				_capt_func = &Alsa_pcmi::capt_16be;
+				break;
+
+			default:
+				if (_debug & DEBUG_INIT) {
+					fprintf (stderr, "Alsa_pcmi: can't handle capture sample format.\n");
+				}
+				_state = -6;
+				return;
+		}
 
 		_capt_npfd = snd_pcm_poll_descriptors_count (_capt_handle);
 	}
@@ -987,10 +933,10 @@ Alsa_pcmi::clear_32 (char* dst, int nfrm)
 }
 
 char*
-Alsa_pcmi::play_16 (const float* src, char* dst, int nfrm, int step)
+Alsa_pcmi::play_16le (const float* src, char* dst, int nfrm, int step)
 {
 	while (nfrm--) {
-		float s = *src;
+		float const s = *src;
 
 		short int d;
 		if (s > 1) {
@@ -1000,7 +946,8 @@ Alsa_pcmi::play_16 (const float* src, char* dst, int nfrm, int step)
 		} else {
 			d = (short int)((float)0x7fff * s);
 		}
-		*((short int*)dst) = d;
+		dst[0] = d;
+		dst[1] = d >> 8;
 		dst += _play_step;
 		src += step;
 	}
@@ -1008,11 +955,11 @@ Alsa_pcmi::play_16 (const float* src, char* dst, int nfrm, int step)
 }
 
 char*
-Alsa_pcmi::play_16swap (const float* src, char* dst, int nfrm, int step)
+Alsa_pcmi::play_16be (const float* src, char* dst, int nfrm, int step)
 {
 
 	while (nfrm--) {
-		float s = *src;
+		float const s = *src;
 
 		short int d;
 		if (s > 1) {
@@ -1031,12 +978,12 @@ Alsa_pcmi::play_16swap (const float* src, char* dst, int nfrm, int step)
 }
 
 char*
-Alsa_pcmi::play_24 (const float* src, char* dst, int nfrm, int step)
+Alsa_pcmi::play_24le (const float* src, char* dst, int nfrm, int step)
 {
-
 	while (nfrm--) {
-		float s = *src;
-		int   d;
+		float const s = *src;
+
+		int d;
 		if (s > 1) {
 			d = 0x007fffff;
 		} else if (s < -1) {
@@ -1054,11 +1001,12 @@ Alsa_pcmi::play_24 (const float* src, char* dst, int nfrm, int step)
 }
 
 char*
-Alsa_pcmi::play_24swap (const float* src, char* dst, int nfrm, int step)
+Alsa_pcmi::play_24be (const float* src, char* dst, int nfrm, int step)
 {
 	while (nfrm--) {
-		float s = *src;
-		int   d;
+		float const s = *src;
+
+		int d;
 		if (s > 1) {
 			d = 0x007fffff;
 		} else if (s < -1) {
@@ -1076,11 +1024,12 @@ Alsa_pcmi::play_24swap (const float* src, char* dst, int nfrm, int step)
 }
 
 char*
-Alsa_pcmi::play_32 (const float* src, char* dst, int nfrm, int step)
+Alsa_pcmi::play_32le (const float* src, char* dst, int nfrm, int step)
 {
 	while (nfrm--) {
-		float s = *src;
-		int   d;
+		float const s = *src;
+
+		int d;
 		if (s > 1) {
 			d = 0x007fffff;
 		} else if (s < -1) {
@@ -1088,7 +1037,10 @@ Alsa_pcmi::play_32 (const float* src, char* dst, int nfrm, int step)
 		} else {
 			d = (int)((float)0x007fffff * s);
 		}
-		*((int*)dst) = d << 8;
+		dst[0] = 0;
+		dst[1] = d;
+		dst[2] = d >> 8;
+		dst[3] = d >> 16;
 		dst += _play_step;
 		src += step;
 	}
@@ -1096,11 +1048,12 @@ Alsa_pcmi::play_32 (const float* src, char* dst, int nfrm, int step)
 }
 
 char*
-Alsa_pcmi::play_32swap (const float* src, char* dst, int nfrm, int step)
+Alsa_pcmi::play_32be (const float* src, char* dst, int nfrm, int step)
 {
 	while (nfrm--) {
-		float s = *src;
-		int   d;
+		float const s = *src;
+
+		int d;
 		if (s > 1) {
 			d = 0x007fffff;
 		} else if (s < -1) {
@@ -1119,7 +1072,7 @@ Alsa_pcmi::play_32swap (const float* src, char* dst, int nfrm, int step)
 }
 
 char*
-Alsa_pcmi::play_float (const float* src, char* dst, int nfrm, int step)
+Alsa_pcmi::play_floatne (const float* src, char* dst, int nfrm, int step)
 {
 	while (nfrm--) {
 		*((float*)dst) = *src;
@@ -1129,13 +1082,28 @@ Alsa_pcmi::play_float (const float* src, char* dst, int nfrm, int step)
 	return dst;
 }
 
+char*
+Alsa_pcmi::play_floatre (const float* src, char* dst, int nfrm, int step)
+{
+	uint32_t const* s = (uint32_t const*)src;
+
+	while (nfrm--) {
+		*((uint32_t*)dst) = bswap_32 (*s);
+		dst += _play_step;
+		s += step;
+	}
+	return dst;
+}
+
 const char*
-Alsa_pcmi::capt_16 (const char* src, float* dst, int nfrm, int step)
+Alsa_pcmi::capt_16le (const char* src, float* dst, int nfrm, int step)
 {
 	while (nfrm--) {
-		const short int s = *((short int const*)src);
-		const float     d = (float)s / (float)0x7fff;
-		*dst = d;
+		short int s = (src[0] & 0xFF);
+		s          += (src[1] & 0xFF) << 8;
+
+		const float d = (float)s / (float)0x7fff;
+		*dst          = d;
 		dst += step;
 		src += _capt_step;
 	}
@@ -1143,13 +1111,14 @@ Alsa_pcmi::capt_16 (const char* src, float* dst, int nfrm, int step)
 }
 
 const char*
-Alsa_pcmi::capt_16swap (const char* src, float* dst, int nfrm, int step)
+Alsa_pcmi::capt_16be (const char* src, float* dst, int nfrm, int step)
 {
 	while (nfrm--) {
 		short int s = (src[0] & 0xFF) << 8;
 		s          += (src[1] & 0xFF);
-		float d  = (float)s / (float)0x7fff;
-		*dst = d;
+
+		float const d = (float)s / (float)0x7fff;
+		*dst          = d;
 		dst += step;
 		src += _capt_step;
 	}
@@ -1157,17 +1126,18 @@ Alsa_pcmi::capt_16swap (const char* src, float* dst, int nfrm, int step)
 }
 
 const char*
-Alsa_pcmi::capt_24 (const char* src, float* dst, int nfrm, int step)
+Alsa_pcmi::capt_24le (const char* src, float* dst, int nfrm, int step)
 {
 	while (nfrm--) {
-		int s = (src[0] & 0xFF);
-		s    += (src[1] & 0xFF) << 8;
-		s    += (src[2] & 0xFF) << 16;
+		int32_t s = (src[0] & 0xFF);
+		s        += (src[1] & 0xFF) << 8;
+		s        += (src[2] & 0xFF) << 16;
+
 		if (s & 0x00800000) {
 			s -= 0x01000000;
 		}
-		float d = (float)s / (float)0x007fffff;
-		*dst = d;
+		float const d = (float)s / (float)0x007fffff;
+		*dst          = d;
 		dst += step;
 		src += _capt_step;
 	}
@@ -1175,17 +1145,17 @@ Alsa_pcmi::capt_24 (const char* src, float* dst, int nfrm, int step)
 }
 
 const char*
-Alsa_pcmi::capt_24swap (const char* src, float* dst, int nfrm, int step)
+Alsa_pcmi::capt_24be (const char* src, float* dst, int nfrm, int step)
 {
 	while (nfrm--) {
-		int s = (src[0] & 0xFF) << 16;
-		s    += (src[1] & 0xFF) << 8;
-		s    += (src[2] & 0xFF);
+		int32_t s = (src[0] & 0xFF) << 16;
+		s        += (src[1] & 0xFF) << 8;
+		s        += (src[2] & 0xFF);
 		if (s & 0x00800000) {
 			s -= 0x01000000;
 		}
-		float d = (float)s / (float)0x007fffff;
-		*dst = d;
+		float const d = (float)s / (float)0x007fffff;
+		*dst          = d;
 		dst += step;
 		src += _capt_step;
 	}
@@ -1193,12 +1163,15 @@ Alsa_pcmi::capt_24swap (const char* src, float* dst, int nfrm, int step)
 }
 
 const char*
-Alsa_pcmi::capt_32 (const char* src, float* dst, int nfrm, int step)
+Alsa_pcmi::capt_32le (const char* src, float* dst, int nfrm, int step)
 {
 	while (nfrm--) {
-		const int   s = *((int const*)src);
-		const float d = (float)s / (float)0x7fffff00;
-		*dst = d;
+		int32_t s = (src[1] & 0xFF) << 8;
+		s        += (src[2] & 0xFF) << 16;
+		s        += (src[3] & 0xFF) << 24;
+
+		float const d = (float)s / (float)0x7fffff00;
+		*dst          = d;
 		dst += step;
 		src += _capt_step;
 	}
@@ -1206,14 +1179,15 @@ Alsa_pcmi::capt_32 (const char* src, float* dst, int nfrm, int step)
 }
 
 const char*
-Alsa_pcmi::capt_32swap (const char* src, float* dst, int nfrm, int step)
+Alsa_pcmi::capt_32be (const char* src, float* dst, int nfrm, int step)
 {
 	while (nfrm--) {
-		int s = (src[0] & 0xFF) << 24;
-		s    += (src[1] & 0xFF) << 16;
-		s    += (src[2] & 0xFF) << 8;
-		float d = (float)s / (float)0x7fffff00;
-		*dst = d;
+		int32_t s = (src[0] & 0xFF) << 24;
+		s        += (src[1] & 0xFF) << 16;
+		s        += (src[2] & 0xFF) << 8;
+
+		float const d = (float)s / (float)0x7fffff00;
+		*dst          = d;
 		dst += step;
 		src += _capt_step;
 	}
@@ -1221,11 +1195,24 @@ Alsa_pcmi::capt_32swap (const char* src, float* dst, int nfrm, int step)
 }
 
 const char*
-Alsa_pcmi::capt_float (const char* src, float* dst, int nfrm, int step)
+Alsa_pcmi::capt_floatne (const char* src, float* dst, int nfrm, int step)
 {
 	while (nfrm--) {
 		*dst = *((float const*)src);
 		dst += step;
+		src += _capt_step;
+	}
+	return src;
+}
+
+const char*
+Alsa_pcmi::capt_floatre (const char* src, float* dst, int nfrm, int step)
+{
+	uint32_t* d = (uint32_t*)dst;
+
+	while (nfrm--) {
+		*d = bswap_32 (*((uint32_t const*)src));
+		d += step;
 		src += _capt_step;
 	}
 	return src;

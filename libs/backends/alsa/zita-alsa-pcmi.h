@@ -1,6 +1,6 @@
 /*
- *  Copyright (C) 2006-2012 Fons Adriaensen <fons@linuxaudio.org>
- *  Copyright (C) 2014-2021 Robin Gareus <robin@gareus.org>
+ *  Copyright (C) 2006-2022 Fons Adriaensen <fons@linuxaudio.org>
+ *  Copyright (C) 2014-2022 Robin Gareus <robin@gareus.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -126,21 +126,23 @@ private:
 	char* clear_24 (char* dst, int nfrm);
 	char* clear_16 (char* dst, int nfrm);
 
-	char* play_float (const float* src, char* dst, int nfrm, int step);
-	char* play_32 (const float* src, char* dst, int nfrm, int step);
-	char* play_24 (const float* src, char* dst, int nfrm, int step);
-	char* play_16 (const float* src, char* dst, int nfrm, int step);
-	char* play_32swap (const float* src, char* dst, int nfrm, int step);
-	char* play_24swap (const float* src, char* dst, int nfrm, int step);
-	char* play_16swap (const float* src, char* dst, int nfrm, int step);
+	char* play_floatne (const float* src, char* dst, int nfrm, int step);
+	char* play_floatre (const float* src, char* dst, int nfrm, int step);
+	char* play_32le (const float* src, char* dst, int nfrm, int step);
+	char* play_24le (const float* src, char* dst, int nfrm, int step);
+	char* play_16le (const float* src, char* dst, int nfrm, int step);
+	char* play_32be (const float* src, char* dst, int nfrm, int step);
+	char* play_24be (const float* src, char* dst, int nfrm, int step);
+	char* play_16be (const float* src, char* dst, int nfrm, int step);
 
-	const char* capt_float (const char* src, float* dst, int nfrm, int step);
-	const char* capt_32 (const char* src, float* dst, int nfrm, int step);
-	const char* capt_24 (const char* src, float* dst, int nfrm, int step);
-	const char* capt_16 (const char* src, float* dst, int nfrm, int step);
-	const char* capt_32swap (const char* src, float* dst, int nfrm, int step);
-	const char* capt_24swap (const char* src, float* dst, int nfrm, int step);
-	const char* capt_16swap (const char* src, float* dst, int nfrm, int step);
+	const char* capt_floatne (const char* src, float* dst, int nfrm, int step);
+	const char* capt_floatre (const char* src, float* dst, int nfrm, int step);
+	const char* capt_32le (const char* src, float* dst, int nfrm, int step);
+	const char* capt_24le (const char* src, float* dst, int nfrm, int step);
+	const char* capt_16le (const char* src, float* dst, int nfrm, int step);
+	const char* capt_32be (const char* src, float* dst, int nfrm, int step);
+	const char* capt_24be (const char* src, float* dst, int nfrm, int step);
+	const char* capt_16be (const char* src, float* dst, int nfrm, int step);
 
 	unsigned int         _fsamp;
 	snd_pcm_uframes_t    _fsize;
