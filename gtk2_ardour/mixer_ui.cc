@@ -1251,6 +1251,7 @@ Mixer_UI::set_session (Session* sess)
 	update_scene_buttons();
 
 	if (!_session) {
+		PBD::Unwinder<bool> uw (ignore_plugin_reorder, true);
 		favorite_plugins_model->clear ();
 		_selection.clear ();
 		return;
