@@ -1651,10 +1651,6 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 
 	}
 
-	if (item_type == StreamItem && clicked_routeview) {
-		clicked_routeview->build_underlay_menu(menu);
-	}
-
 	/* When the region menu is opened, we setup the actions so that they look right
 	   in the menu.
 	*/

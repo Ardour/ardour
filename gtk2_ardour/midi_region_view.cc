@@ -1625,11 +1625,11 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	MidiGhostRegion* ghost;
 
 	if (mtv && mtv->midi_view()) {
-		/* if ghost is inserted into midi track, use a dedicated midi ghost canvas group
-		   to allow having midi notes on top of note lines and waveforms.
-		*/
-		ghost = new MidiGhostRegion (*this, *mtv->midi_view(), trackview, unit_position);
+		std::cerr << "AG#1\n";
+		return 0;
 	} else {
+		std::cerr << "AG#2\n";
+		PBD::stacktrace (std::cerr, 35);
 		ghost = new MidiGhostRegion (*this, tv, trackview, unit_position);
 	}
 

@@ -102,13 +102,7 @@ public:
 	                TimeAxisView& source_tv,
 	                double initial_unit_pos);
 
-	MidiGhostRegion(MidiRegionView& rv,
-	                MidiStreamView& msv,
-	                TimeAxisView& source_tv,
-	                double initial_unit_pos);
-
 	~MidiGhostRegion();
-
 	MidiStreamView* midi_view();
 
 	void set_height();

@@ -197,29 +197,6 @@ MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
 	base_rect->lower_to_bottom();
 }
 
-/**
- *  @param rv The parent RegionView being ghosted.
- *  @param msv MidiStreamView that this ghost region is on.
- *  @param source_tv TimeAxisView that we are the ghost for.
- */
-MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
-                                 MidiStreamView& msv,
-                                 TimeAxisView& source_tv,
-                                 double initial_unit_pos)
-	: GhostRegion (rv,
-	               msv.midi_underlay(),
-	               msv.trackview(),
-	               source_tv,
-	               initial_unit_pos)
-	, _note_group (new ArdourCanvas::Container (group))
-	, parent_mrv (rv)
-	, _optimization_iterator(events.end())
-{
-	_outline = UIConfiguration::instance().color ("ghost track midi outline");
-
-	base_rect->lower_to_bottom();
-}
-
 MidiGhostRegion::~MidiGhostRegion()
 {
 	clear_events ();
