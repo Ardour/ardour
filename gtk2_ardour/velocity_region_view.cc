@@ -127,106 +127,20 @@ VelocityRegionView::canvas_group_event (GdkEvent* ev)
 		return false;
 	}
 
-	PublicEditor& e = trackview.editor ();
+git*	PublicEditor& e = trackview.editor ();
 
-	if (trackview.editor().internal_editing() &&
-	    ev->type == GDK_BUTTON_RELEASE &&
-	    ev->button.button == 1 &&
-	    e.current_mouse_mode() == Editing::MouseDraw &&
-	    !e.drags()->active()) {
-
-		double x = ev->button.x;
-		double y = ev->button.y;
-
-		/* convert to item coordinates in the time axis view */
-		velocity_view()->canvas_display()->canvas_to_item (x, y);
-
-		/* clamp y */
-		y = std::max (y, 0.0);
-		y = std::min (y, _height - NAME_HIGHLIGHT_SIZE);
-
-		/* guard points only if primary modifier is used */
-		bool with_guard_points = Gtkmm2ext::Keyboard::modifier_state_equals (ev->button.state, Gtkmm2ext::Keyboard::PrimaryModifier);
-
-		/* the time domain doesn't matter here, because the automation
-		 * list will force the position to its own time domain when
-		 * adding the point.
-		 */
-
-		add_automation_event (ev, timepos_t (e.pixel_to_sample (x)), y, with_guard_points);
-		return true;
+	if (!trackview.editor().internal_editing()) {
+		return false;
 	}
 
 	return RegionView::canvas_group_event (ev);
 }
 
-/** @param when Position is global time position
- *  @param y y position, relative to our TimeAxisView.
- */
-void
-VelocityRegionView::add_automation_event (GdkEvent *, timepos_t const & w, double y, bool with_guard_points)
-{
-	boost::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
-	boost::shared_ptr<ARDOUR::AutomationControl> ac = boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(c);
-	timepos_t when (w); /* the non-const copy */
-
-	if (!_line) {
-		assert(ac);
-		create_line(ac->alist());
-	}
-	assert(_line);
-
-	AutomationTimeAxisView* const view = velocity_view ();
-
-	/* compute vertical fractional position */
-	y = 1.0 - (y / _line->height());
-
-	/* snap time */
-
-	when = snap_region_time_to_region_time (_region->source_position().distance (when), false);
-
-	/* map using line */
-
-	_line->view_to_model_coord_y (y);
-
-	if (c->list()->size () == 0) {
-		/* we need the MidiTrack::MidiControl, not the region's (midi model source) control */
-		boost::shared_ptr<ARDOUR::MidiTrack> mt = boost::dynamic_pointer_cast<ARDOUR::MidiTrack> (view->parent_stripable ());
-		assert (mt);
-		boost::shared_ptr<Evoral::Control> mc = mt->control(_parameter);
-		assert (mc);
-		y = mc->get_double ();
-	} else if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
-		y = c->list()->eval (when);
-	}
-
-	XMLNode& before = _line->the_list()->get_state();
-
-	if (_line->the_list()->editor_add (when, y, with_guard_points)) {
-
-		if (ac->automation_state () == ARDOUR::Off) {
-			view->set_automation_state (ARDOUR::Play);
-		}
-		if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && ac == view->session()->recently_touched_controllable ()) {
-			RouteTimeAxisView::signal_ctrl_touched (false);
-		}
-
-		view->editor().begin_reversible_command (_("add automation event"));
-
-		XMLNode& after = _line->the_list()->get_state();
-
-		view->session()->add_command (new MementoCommand<ARDOUR::AutomationList> (_line->memento_command_binder(), &before, &after));
-		view->editor().commit_reversible_command ();
-
-		view->session()->set_dirty ();
-	}
-}
-
 bool
 VelocityRegionView::paste (timepos_t const &                               pos,
-                             unsigned                                        paste_count,
-                             float                                           times,
-                             boost::shared_ptr<const ARDOUR::AutomationList> slist)
+                           unsigned                                        paste_count,
+                           float                                           times,
+                           boost::shared_ptr<const ARDOUR::AutomationList> slist)
 {
 	using namespace ARDOUR;
 
