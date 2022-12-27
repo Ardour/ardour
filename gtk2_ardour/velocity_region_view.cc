@@ -127,7 +127,7 @@ VelocityRegionView::canvas_group_event (GdkEvent* ev)
 		return false;
 	}
 
-git*	PublicEditor& e = trackview.editor ();
+	PublicEditor& e = trackview.editor ();
 
 	if (!trackview.editor().internal_editing()) {
 		return false;
