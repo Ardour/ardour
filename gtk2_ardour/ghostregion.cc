@@ -56,23 +56,22 @@ GhostRegion::GhostRegion (RegionView& rv,
                           TimeAxisView& tv,
                           TimeAxisView& source_tv,
                           double initial_pos)
-	: parent_rv(rv)
-	, trackview(tv)
-	, source_trackview(source_tv)
+	: parent_rv (rv)
+	, trackview (tv)
+	, source_trackview (source_tv)
+	, base_rect (0)
 {
 	group = new ArdourCanvas::Container (parent);
 	CANVAS_DEBUG_NAME (group, "ghost region");
 	group->set_position (ArdourCanvas::Duple (initial_pos, 0));
 
-	base_rect = new ArdourCanvas::Rectangle (group);
-	CANVAS_DEBUG_NAME (base_rect, "ghost region rect");
-	base_rect->set_x0 (0);
-	base_rect->set_y0 (1.0);
-	base_rect->set_y1 (trackview.current_height());
-	base_rect->set_outline (false);
-
-	if (!is_automation_ghost()) {
-		base_rect->hide();
+	if (is_automation_ghost()) {
+		base_rect = new ArdourCanvas::Rectangle (group);
+		CANVAS_DEBUG_NAME (base_rect, "ghost region rect");
+		base_rect->set_x0 (0);
+		base_rect->set_y0 (1.0);
+		base_rect->set_y1 (trackview.current_height());
+		base_rect->set_outline (false);
 	}
 
 	GhostRegion::set_colors();
@@ -93,13 +92,17 @@ GhostRegion::~GhostRegion ()
 void
 GhostRegion::set_duration (double units)
 {
-	base_rect->set_x1 (units);
+	if (base_rect) {
+		base_rect->set_x1 (units);
+	}
 }
 
 void
 GhostRegion::set_height ()
 {
-	base_rect->set_y1 (trackview.current_height());
+	if (base_rect) {
+		base_rect->set_y1 (trackview.current_height());
+	}
 }
 
 void
@@ -194,7 +197,9 @@ MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
-	base_rect->lower_to_bottom();
+	if (base_rect) {
+		base_rect->lower_to_bottom();
+	}
 }
 
 MidiGhostRegion::~MidiGhostRegion()
