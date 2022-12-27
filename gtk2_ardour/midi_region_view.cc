@@ -1625,11 +1625,8 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	MidiGhostRegion* ghost;
 
 	if (mtv && mtv->midi_view()) {
-		std::cerr << "AG#1\n";
 		return 0;
 	} else {
-		std::cerr << "AG#2\n";
-		PBD::stacktrace (std::cerr, 35);
 		ghost = new MidiGhostRegion (*this, tv, trackview, unit_position);
 	}
 
