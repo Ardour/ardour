@@ -129,7 +129,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	added_list.set_headers_visible (true);
 	added_list.set_reorderable (false);
 
-	for (int i = 1; i <= 7; ++i) {
+	for (int i = 1; i < 7; ++i) {
 		Gtk::TreeView::Column* column = plugin_display.get_column(i);
 		if (column) {
 			column->set_sort_column(i);
