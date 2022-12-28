@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-12-01 19:03+0100\n"
+"PO-Revision-Date: 2022-12-28 12:45+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -19841,7 +19841,7 @@ msgstr "Encore"
 
 #: trigger_ui.cc:756
 msgid "Jump to: %1"
-msgstr "Chaînerà : %1"
+msgstr "Chaîner à : %1"
 
 #: trigger_ui.cc:760
 msgid "Jump: Multi"
