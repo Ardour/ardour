@@ -3620,7 +3620,7 @@ msgid ""
 "Select Crisp for drum loops, Smooth for sustained notes, or Mixed if the clip "
 "has both"
 msgstr ""
-"Sélectionnez Préics pour les boucles de batterie, Lisse pour les notes "
+"Sélectionnez Précis pour les boucles de batterie, Lisse pour les notes "
 "soutenues, ou Mélangé si le clip comporte les deux"
 
 #: audio_trigger_properties_box.cc:156
