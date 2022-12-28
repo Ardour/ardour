@@ -1030,7 +1030,7 @@ msgstr "Fenêtre d'analyse FFT"
 
 #: analysis_window.cc:57 editor.cc:1923 editor_actions.cc:415
 msgid "Spectral Analysis"
-msgstr "Analyse Spectrale"
+msgstr "Analyse spectrale"
 
 #: analysis_window.cc:64 editor_actions.cc:190 session_metadata_dialog.cc:729
 msgid "Track"
@@ -3770,7 +3770,7 @@ msgstr "Interpolation"
 
 #: bbt_marker_dialog.cc:33
 msgid "New Music Time"
-msgstr ""
+msgstr "Nouveau temps musical"
 
 #: bbt_marker_dialog.cc:36 bbt_marker_dialog.cc:47
 msgid "BBT"
@@ -3778,7 +3778,7 @@ msgstr ""
 
 #: bbt_marker_dialog.cc:44
 msgid "Edit Music Time"
-msgstr ""
+msgstr "Modifier le temps musical"
 
 #: bbt_marker_dialog.cc:88
 msgid "Add Marker"
@@ -5573,7 +5573,7 @@ msgstr "Assistant de sonie"
 
 #: editor_actions.cc:424 rc_option_editor.cc:3244
 msgid "Split/Separate"
-msgstr "Découper/Séparer"
+msgstr "Découper/séparer"
 
 #: editor_actions.cc:429
 msgid "Fade Range Selection"
@@ -6297,7 +6297,7 @@ msgstr "Rogner aux points de punch"
 
 #: editor_actions.cc:1940
 msgid "Trim to Previous"
-msgstr "Rogner aux précédent"
+msgstr "Rogner au précédent"
 
 #: editor_actions.cc:1941
 msgid "Trim to Next"
@@ -12068,7 +12068,7 @@ msgstr ""
 
 #: new_user_wizard.cc:147
 msgid "<span size=\"larger\">GUI and Font scaling:</span>"
-msgstr ""
+msgstr "<span size=\"larger\">Taille et échelle de l'interface utilisateur :</span>"
 
 #: new_user_wizard.cc:150
 msgid ""
@@ -13980,7 +13980,7 @@ msgstr "RàZ vers les recommandations par défaut"
 
 #: rc_option_editor.cc:1110
 msgid "GUI and Font scaling"
-msgstr "Ajustement d'Interface et Police "
+msgstr "Ajustement d'interface et police "
 
 #: rc_option_editor.cc:1133
 msgid ""
@@ -14184,11 +14184,11 @@ msgstr "Sorties MIDI"
 
 #: rc_option_editor.cc:2066
 msgid "No MIDI Input (capture) devices found."
-msgstr ""
+msgstr "Aucun périphérique d'entrée (capture) MIDI n'a été trouvé."
 
 #: rc_option_editor.cc:2067
 msgid "No MIDI Output (playback) devices found."
-msgstr ""
+msgstr "Aucun périphérique de sortie (lecture) MIDI n'a été trouvé."
 
 #: rc_option_editor.cc:2197
 msgid "Name (click twice to edit)"
@@ -14612,11 +14612,11 @@ msgstr "Afficher l'horloge de sélection"
 
 #: rc_option_editor.cc:2894
 msgid "Display Monitor Section Info"
-msgstr ""
+msgstr "Afficher des informations sur la section du moniteur"
 
 #: rc_option_editor.cc:2902
 msgid "Display Cue Rec/Play Controls"
-msgstr ""
+msgstr "Afficher les contrôles d'enregistrement/lecture de Cue"
 
 #: rc_option_editor.cc:2910
 msgid "Display Navigation Timeline"
@@ -14636,7 +14636,7 @@ msgstr "Apparence/Taille et échelle"
 
 #: rc_option_editor.cc:2935
 msgid "User Interface Size and Scale"
-msgstr ""
+msgstr "Taille et échelle de l'interface utilisateur"
 
 #: rc_option_editor.cc:2943 rc_option_editor.cc:2944 rc_option_editor.cc:2945
 msgid "Appearance/Colors"
@@ -15120,7 +15120,7 @@ msgstr "QWERTZ simple"
 
 #: rc_option_editor.cc:3444
 msgid "Default Visible Note Range"
-msgstr ""
+msgstr "Plage de notes visibles par défaut"
 
 #: rc_option_editor.cc:3446
 msgid "legal characters for MIDI note names|ABCDEFG#1234567890"
@@ -15128,11 +15128,11 @@ msgstr ""
 
 #: rc_option_editor.cc:3448
 msgid "Default lower visible MIDI note"
-msgstr ""
+msgstr "Note MIDI visible inférieure par défaut"
 
 #: rc_option_editor.cc:3453
 msgid "Default upper visible MIDI note"
-msgstr ""
+msgstr "Note MIDI visible supérieure par défaut"
 
 #: rc_option_editor.cc:3462
 msgid "MIDI Port Options"
@@ -21129,9 +21129,6 @@ msgstr "Fichier vidéo d'entrée"
 #~ "ou juste pour expérimenter de nouvelles idées musicales et sonores.\n"
 #~ "\n"
 #~ "Nous allons configurer le logiciel avant que vous ne l'utilisiez.</span> "
-
-#~ msgid "GUI and Font scaling:"
-#~ msgstr "Ajustement d'interface et de police : "
 
 #~ msgid ""
 #~ "Each project that you work on with %1 has its own folder.\n"
