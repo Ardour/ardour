@@ -3548,7 +3548,7 @@ msgstr "Normaliser..."
 
 #: audio_region_properties_box.cc:62 audio_trigger_properties_box.cc:77
 msgid "BPM:"
-msgstr ""
+msgstr "BPM :"
 
 #: audio_region_properties_box.cc:74
 msgid "Time Sig:"
@@ -3621,7 +3621,7 @@ msgid ""
 "has both"
 msgstr ""
 "Sélectionnez Préics pour les boucles de batterie, Lisse pour les notes "
-"soutenues, ou Mélangé si le clip comporte les deux.
+"soutenues, ou Mélangé si le clip comporte les deux"
 
 #: audio_trigger_properties_box.cc:156
 msgid "Length of the clip, in beats. Changing this will change the tempo"
