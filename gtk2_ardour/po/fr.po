@@ -14015,6 +14015,9 @@ msgid ""
 "Specify the default timeout for plugin instantiation. Plugins that require more "
 "time to load will be ignored. A value of 0 disables the timeout."
 msgstr ""
+"Spécifiez le délai d'attente par défaut pour l'instanciation du greffon. Les "
+"greffons qui nécessitent plus de temps pour se charger seront ignorés. Une "
+"valeur de 0 désactive le délai d'attente."
 
 #: rc_option_editor.cc:1173
 msgid "Waveform Clip Level (dBFS)"
@@ -14035,7 +14038,7 @@ msgstr "petites sessions (4-16 pistes)"
 #: rc_option_editor.cc:1219
 msgid "Medium sessions (16-64 tracks)"
 msgstr "moyennes sessions (16-64 pistes)"
-
+b
 #: rc_option_editor.cc:1220
 msgid "Large sessions (64+ tracks)"
 msgstr "grandes sessions (>64 pistes)"
@@ -15527,7 +15530,7 @@ msgid ""
 "index on application start. When disabled new plugins will only be available "
 "after triggering a 'Scan' manually"
 msgstr ""
-"<b>Lorsqu'activé</b> les nouveaux greffons sont recherchés, testés et ajoutés "
+"<b>Si coché</b> les nouveaux greffons sont recherchés, testés et ajoutés "
 "à l'index du cache au démarrage de l'application. Lorsque désactivé, les "
 "nouveaux greffons ne seront disponibles qu'après avoir déclenché un 'Scan' "
 "manuellement."
@@ -15553,7 +15556,7 @@ msgid ""
 "<b>When enabled</b> additional information for every plugin is shown to the "
 "Plugin Manager Log."
 msgstr ""
-"<b>Lorsqu'activé</b> des informations additionnelles pour chaque greffon "
+"<b>Si coché</b> des informations additionnelles pour chaque greffon "
 "sont affichées dans le journal du gestionnaire de greffons."
 
 #: rc_option_editor.cc:3833
@@ -15568,7 +15571,7 @@ msgid ""
 "session contains any plugins that are missing, or plugins have been updated and "
 "require a rescan."
 msgstr ""
-"<b>Lorsqu'activée</b> le gestionnaire de greffons s'affiche au chargement de la "
+"<b>Si coché</b> le gestionnaire de greffons s'affiche au chargement de la "
 "session si celle-ci contient des greffons manquants, ou si des greffons ont été "
 "mis à jour et nécessitent une nouvelle analyse."
 
@@ -15611,7 +15614,7 @@ msgid ""
 "<b>When enabled</b> at most one plugin GUI window can be on-screen at a time. "
 "<b>When disabled</b>, the number of visible plugin GUI windows is unlimited"
 msgstr ""
-"<b>Lorsqu'activé</b> une seule fenêtre d'interface graphique de greffon peut être affichée à l'écran à la fois. "
+"<b>Si coché</b> une seule fenêtre d'interface graphique de greffon peut être affichée à l'écran à la fois. "
 "<b>Lorsque désactivé</b>, le nombre de fenêtres visibles de l'interface graphique du greffon est illimité"
 
 #: rc_option_editor.cc:3872
@@ -15808,11 +15811,11 @@ msgstr "Réinitialiser les statistiques"
 
 #: rc_option_editor.cc:4121
 msgid "Plugin chart (use-count) length"
-msgstr "Longueur du tableau des greffons (compteur d'utilisation)"
+msgstr "Longueur du tableau des greffons (compteur d'utilisation) "
 
 #: rc_option_editor.cc:4130
 msgid "Plugin recent list length"
-msgstr "Longueur de la liste des greffons récents"
+msgstr "Longueur de la liste des greffons récents "
 
 #: rc_option_editor.cc:4144
 msgid "Record monitoring handled by"
@@ -19616,7 +19619,7 @@ msgid ""
 "that rate - despite it being against the specs - because the variant of using "
 "exactly 29.97 fps has zero timecode drift.\n"
 msgstr ""
-"<b>Lorsqu'activée</b> la source externe de code temporel est supposée utiliser "
+"<b>Si coché</b> la source externe de code temporel est supposée utiliser "
 "29,97 fps au lieu de 30000/1001.\n"
 "SMPTE 12M-1999 spécifie 29,97df comme 30000/1001. La spécification mentionne en "
 "outre que le code temporel de l'échantillon-déposé a une erreur cumulée de -86 "
@@ -21059,7 +21062,7 @@ msgstr "Fichier vidéo d'entrée"
 #~ "<b>When disabled</b>, the gain is applied diretcly to the output of the "
 #~ "master-bus. This results in an efficient and reliable volume adjustment."
 #~ msgstr ""
-#~ "<b>Lorsqu'activé</b> un processeur d'amplificateur est utilisé pour "
+#~ "<b>Si coché</b> un processeur d'amplificateur est utilisé pour "
 #~ "appliquer le gain. Cela permet un positionnement personnalisé de l'étage de "
 #~ "gain dans le flux de signal du bus maître, potentiellement suivi d'un "
 #~ "limiteur pour se conformer aux exigences de sonie et de crête. En fonction "
