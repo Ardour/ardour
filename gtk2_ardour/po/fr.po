@@ -13992,7 +13992,7 @@ msgstr ""
 
 #: rc_option_editor.cc:1148
 msgid "Scan Time Out"
-msgstr "Temps Maxi de Scan "
+msgstr "Temps max de scan "
 
 #: rc_option_editor.cc:1156
 msgid "1 sec"
@@ -14391,7 +14391,7 @@ msgstr "Indicateurs d'alerte clignotants"
 
 #: rc_option_editor.cc:2605 rc_option_editor.cc:2618
 msgid "Appearance/Recorder"
-msgstr "Apparence/enregistreur"
+msgstr "Apparence/Enregistreur"
 
 #: rc_option_editor.cc:2605 rc_option_editor.cc:2609
 msgid "Input Meter Layout"
@@ -15519,7 +15519,7 @@ msgstr "Rechercher des greffons"
 
 #: rc_option_editor.cc:3802
 msgid "Scan for [new] Plugins on Application Start"
-msgstr ""
+msgstr "Recherche de [nouveaux] greffons au démarrage de l'application"
 
 #: rc_option_editor.cc:3808
 msgid ""
@@ -15527,6 +15527,10 @@ msgid ""
 "index on application start. When disabled new plugins will only be available "
 "after triggering a 'Scan' manually"
 msgstr ""
+"<b>Lorsqu'activé</b> les nouveaux greffons sont recherchés, testés et ajoutés "
+"à l'index du cache au démarrage de l'application. Lorsque désactivé, les "
+"nouveaux greffons ne seront disponibles qu'après avoir déclenché un 'Scan' "
+"manuellement."
 
 #: rc_option_editor.cc:3812
 msgid "Always Display Plugin Scan Progress"
@@ -15549,10 +15553,14 @@ msgid ""
 "<b>When enabled</b> additional information for every plugin is shown to the "
 "Plugin Manager Log."
 msgstr ""
+"<b>Lorsqu'activé</b> des informations additionnelles pour chaque greffon "
+"sont affichées dans le journal du gestionnaire de greffons."
 
 #: rc_option_editor.cc:3833
 msgid "Open Plugin Manager window when missing plugins are found"
 msgstr ""
+"Ouvrir la fenêtre du gestionnaire de greffons lorsque des greffons manquants "
+"sont trouvés"
 
 #: rc_option_editor.cc:3839
 msgid ""
@@ -15560,6 +15568,9 @@ msgid ""
 "session contains any plugins that are missing, or plugins have been updated and "
 "require a rescan."
 msgstr ""
+"<b>Lorsqu'activée</b> le gestionnaire de greffons s'affiche au chargement de la "
+"session si celle-ci contient des greffons manquants, ou si des greffons ont été "
+"mis à jour et nécessitent une nouvelle analyse."
 
 #: rc_option_editor.cc:3843
 msgid "Make new plugins active"
@@ -15593,29 +15604,31 @@ msgstr ""
 
 #: rc_option_editor.cc:3862
 msgid "Show only one plugin window at a time"
-msgstr ""
+msgstr "Afficher une seule fenêtre de greffon à la fois"
 
 #: rc_option_editor.cc:3868
 msgid ""
 "<b>When enabled</b> at most one plugin GUI window can be on-screen at a time. "
 "<b>When disabled</b>, the number of visible plugin GUI windows is unlimited"
 msgstr ""
+"<b>Lorsqu'activé</b> une seule fenêtre d'interface graphique de greffon peut être affichée à l'écran à la fois. "
+"<b>Lorsque désactivé</b>, le nombre de fenêtres visibles de l'interface graphique du greffon est illimité"
 
 #: rc_option_editor.cc:3872
 msgid "Closing a Plugin GUI Window"
-msgstr ""
+msgstr "Fermeture de la fenêtre IGU d'un greffon"
 
 #: rc_option_editor.cc:3876
 msgid "only hides the window"
-msgstr ""
+msgstr "ne cacher que la fenêtre"
 
 #: rc_option_editor.cc:3877
 msgid "destroys the GUI instance, releasing resources"
-msgstr ""
+msgstr "détruit l'instance IGU, libérant ainsi des ressources"
 
 #: rc_option_editor.cc:3878
 msgid "only destroys VST2/3 UIs, hides others"
-msgstr ""
+msgstr "détruit seulement les IGU de VST2/3, cache les autres"
 
 #: rc_option_editor.cc:3881
 msgid ""
@@ -15631,11 +15644,11 @@ msgstr ""
 
 #: rc_option_editor.cc:3884
 msgid "Mixer Strip Inline Display"
-msgstr ""
+msgstr "Afficheur en ligne de la bande de mixage"
 
 #: rc_option_editor.cc:3888
 msgid "Show Plugin Inline Display on Mixer Strip by default"
-msgstr ""
+msgstr "Afficher l'affichage en ligne de greffon sur la bande de mixage par défaut"
 
 #: rc_option_editor.cc:3895
 msgid ""
@@ -15657,19 +15670,19 @@ msgstr "Greffons/VST"
 
 #: rc_option_editor.cc:3914
 msgid "Enable Mac VST2 support (requires restart or re-scan)"
-msgstr ""
+msgstr "Activer le support VST2 Mac (nécessite un redémarrage ou un re-scan)"
 
 #: rc_option_editor.cc:3926
 msgid "Enable Windows VST2 support (requires restart or re-scan)"
-msgstr ""
+msgstr "Activer le support VST2 Windows (nécessite un redémarrage ou un re-scan)"
 
 #: rc_option_editor.cc:3936
 msgid "Enable Linux VST2 support (requires restart or re-scan)"
-msgstr ""
+msgstr "Activer le support VST2 Linux (nécessite un redémarrage ou un re-scan)"
 
 #: rc_option_editor.cc:3946
 msgid "Enable VST3 support (requires restart or re-scan)"
-msgstr ""
+msgstr "Activer le support VST3 (nécessite un redémarrage ou un re-scan)"
 
 #: rc_option_editor.cc:3956
 msgid "VST 2.x"
@@ -15677,11 +15690,11 @@ msgstr ""
 
 #: rc_option_editor.cc:3961
 msgid "VST 2 Cache:"
-msgstr ""
+msgstr "Cache VST 2 :"
 
 #: rc_option_editor.cc:3966
 msgid "VST 2 Ignorelist:"
-msgstr ""
+msgstr "Liste d'exclusion VST 2 :"
 
 #: rc_option_editor.cc:3978
 msgid "Linux VST2 Path:"
@@ -15693,7 +15706,7 @@ msgstr "Chemin :"
 
 #: rc_option_editor.cc:3997
 msgid "Windows VST2 Path:"
-msgstr ""
+msgstr "Chemin VST2 Windows :"
 
 #: rc_option_editor.cc:4008
 msgid "VST 3"
@@ -15701,15 +15714,15 @@ msgstr ""
 
 #: rc_option_editor.cc:4012
 msgid "VST 3 Cache:"
-msgstr ""
+msgstr "Cache VST 3 :"
 
 #: rc_option_editor.cc:4017
 msgid "VST 3 Ignorelist:"
-msgstr ""
+msgstr "Liste d'exclusion VST 3 :"
 
 #: rc_option_editor.cc:4027
 msgid "Additional VST3 Path:"
-msgstr ""
+msgstr "Chemin VST3 additionnel :"
 
 #: rc_option_editor.cc:4029
 msgid ""
@@ -15718,10 +15731,14 @@ msgid ""
 "in+Locations\">specification</a> are always searched, and need not be "
 "explicitly set."
 msgstr ""
+"La personnalisation des chemins VST3 est déconseillée. Notez que les chemins "
+"VST3 par défaut selon la <a href=\"https://developer.steinberg.help/display/VST/"
+"Plug-in+Locations\">spécification</a> sont toujours recherchés, et ne doivent "
+"pas être explicitement définis."
 
 #: rc_option_editor.cc:4038
 msgid "Automatically show 'Micro Edit' tagged controls on the mixer-strip"
-msgstr ""
+msgstr "Afficher automatiquement les contrôles marqués "Micro Edit" sur la bande de mixage."
 
 #: rc_option_editor.cc:4044
 msgid "VST2/VST3"
@@ -15729,7 +15746,7 @@ msgstr ""
 
 #: rc_option_editor.cc:4048
 msgid "Conceal VST2 Plugin if matching VST3 exists"
-msgstr ""
+msgstr "Cacher le greffon VST2 si le VST3 correspondant existe."
 
 #: rc_option_editor.cc:4058 rc_option_editor.cc:4060 rc_option_editor.cc:4071
 #: rc_option_editor.cc:4073 rc_option_editor.cc:4078
@@ -15742,7 +15759,7 @@ msgstr "Audio Unit"
 
 #: rc_option_editor.cc:4067
 msgid "Enable Audio Unit support (requires restart or re-scan)"
-msgstr ""
+msgstr "Activer le support Audio Unit (nécessite un redémarrage ou un re-scan)"
 
 #: rc_option_editor.cc:4076
 msgid "AU Cache:"
@@ -15750,7 +15767,7 @@ msgstr "Cache AU :"
 
 #: rc_option_editor.cc:4081
 msgid "AU Ignorelist:"
-msgstr ""
+msgstr "Liste d'exclusion AU :"
 
 #: rc_option_editor.cc:4084
 msgid "LV1/LV2"
