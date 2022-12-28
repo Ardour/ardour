@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-12-28 18:40+0100\n"
+"PO-Revision-Date: 2022-12-28 23:08+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -15262,7 +15262,7 @@ msgstr ""
 msgid "Allow auto-return after rewind/ffwd operations"
 msgstr ""
 "Permettre le retour automatique après les opérations de rembobinage et d'"
-'avance rapide à vide"
+"avance rapide à vide"
 
 #: rc_option_editor.cc:3565
 msgid ""
@@ -15773,7 +15773,7 @@ msgstr ""
 
 #: rc_option_editor.cc:4038
 msgid "Automatically show 'Micro Edit' tagged controls on the mixer-strip"
-msgstr "Afficher automatiquement les contrôles marqués "Micro Edit" sur la bande de mixage."
+msgstr "Afficher automatiquement les contrôles marqués 'Micro Edit' sur la bande de mixage."
 
 #: rc_option_editor.cc:4044
 msgid "VST2/VST3"
