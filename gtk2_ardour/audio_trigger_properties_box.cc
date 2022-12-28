@@ -234,7 +234,7 @@ AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& pc)
 		sprintf(buf, "%3.2f", at->segment_tempo ());
 		_abpm_label.set_text (buf);
 
-		ArdourWidgets::set_tooltip (_abpm_label, string_compose ("Clip Tempo, used for stretching.  Estimated tempo (from file) was: %1", trigger->estimated_tempo ()));
+		ArdourWidgets::set_tooltip (_abpm_label, string_compose _("Clip Tempo, used for stretching.  Estimated tempo (from file) was: %1", trigger->estimated_tempo ()));
 
 		int beats = round(at->segment_beatcnt());
 
