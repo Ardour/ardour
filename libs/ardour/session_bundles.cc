@@ -165,8 +165,14 @@ Session::setup_bundles ()
 
 	for (uint32_t np = 0; np < outputs[DataType::AUDIO].size(); np += 2) {
 		if (np + 1 < outputs[DataType::AUDIO].size()) {
-			char buf[32];
-			snprintf (buf, sizeof(buf), _("out %" PRIu32 "+%" PRIu32), np + 1, np + 2);
+			char buf[64];
+			std::string pn1 = _engine.get_pretty_name_by_name (outputs[DataType::AUDIO][np]);
+			std::string pn2 = _engine.get_pretty_name_by_name (outputs[DataType::AUDIO][np+1]);
+			if (!pn1.empty() && !pn2.empty()) {
+				snprintf (buf, sizeof(buf), _("out %s+%s"), pn1.c_str(), pn2.c_str());
+			} else {
+				snprintf (buf, sizeof(buf), _("out %" PRIu32 "+%" PRIu32), np + 1, np + 2);
+			}
 			boost::shared_ptr<Bundle> c (new Bundle (buf, true));
 			c->add_channel (_("L"), DataType::AUDIO);
 			c->set_port (0, outputs[DataType::AUDIO][np]);
@@ -199,8 +205,14 @@ Session::setup_bundles ()
 
 	for (uint32_t np = 0; np < inputs[DataType::AUDIO].size(); np += 2) {
 		if (np + 1 < inputs[DataType::AUDIO].size()) {
-			char buf[32];
-			snprintf (buf, sizeof(buf), _("in %" PRIu32 "+%" PRIu32), np + 1, np + 2);
+			char buf[64];
+			std::string pn1 = _engine.get_pretty_name_by_name (inputs[DataType::AUDIO][np]);
+			std::string pn2 = _engine.get_pretty_name_by_name (inputs[DataType::AUDIO][np+1]);
+			if (!pn1.empty() && !pn2.empty()) {
+				snprintf (buf, sizeof(buf), _("in %s+%s"), pn1.c_str(), pn2.c_str());
+			} else {
+				snprintf (buf, sizeof(buf), _("in %" PRIu32 "+%" PRIu32), np + 1, np + 2);
+			}
 
 			boost::shared_ptr<Bundle> c (new Bundle (buf, false));
 			c->add_channel (_("L"), DataType::AUDIO);
