@@ -269,8 +269,8 @@ PluginManager::PluginManager ()
 		rdfs += t;
 	} else {
 #ifndef PLATFORM_WINDOWS
-		rdfs += "usr/local/share/ladspa";
-		rdfs += "usr/share/ladspa";
+		rdfs += "/usr/local/share/ladspa";
+		rdfs += "/usr/share/ladspa";
 #endif
 		rdfs.add_subdirectory_to_paths ("rdf");
 	}
@@ -837,9 +837,11 @@ PluginManager::add_lrdf_presets(string domain)
 	find_files_matching_filter (presets, path, rdf_filter, 0, false, true);
 
 	for (x = presets.begin(); x != presets.end (); ++x) {
-		string file = "file:" + *x;
-		if (lrdf_read_file(file.c_str())) {
-			warning << string_compose(_("Could not parse rdf file: %1"), *x) << endmsg;
+		const string uri (Glib::filename_to_uri(*x));
+		info << "read rdf_file '" << uri << "'" << endmsg;
+
+		if (lrdf_read_file(uri.c_str())) {
+			warning << "Could not parse rdf file: " << uri << endmsg;
 		}
 	}
 
@@ -853,10 +855,13 @@ PluginManager::add_lrdf_data (Searchpath const& path)
 	vector<string> rdf_files;
 	vector<string>::iterator x;
 
+	info << "add_lrdf_data '" << path.to_string () << "'" << endmsg;
+
 	find_files_matching_filter (rdf_files, path, rdf_filter, 0, false, true);
 
 	for (x = rdf_files.begin(); x != rdf_files.end (); ++x) {
-		const string uri(string("file://") + *x);
+		const string uri (Glib::filename_to_uri(*x));
+		info << "read rdf_file '" << uri << "'" << endmsg;
 
 		if (lrdf_read_file(uri.c_str())) {
 			warning << "Could not parse rdf file: " << uri << endmsg;
