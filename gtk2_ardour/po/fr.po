@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-12-28 12:45+0100\n"
+"PO-Revision-Date: 2022-12-28 15:43+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -3620,6 +3620,8 @@ msgid ""
 "Select Crisp for drum loops, Smooth for sustained notes, or Mixed if the clip "
 "has both"
 msgstr ""
+"Sélectionnez Préics pour les boucles de batterie, Lisse pour les notes "
+"soutenues, ou Mélangé si le clip comporte les deux.
 
 #: audio_trigger_properties_box.cc:156
 msgid "Length of the clip, in beats. Changing this will change the tempo"
