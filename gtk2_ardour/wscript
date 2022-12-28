@@ -580,6 +580,7 @@ def build(bld):
         obj.linkflags = ''
         obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
         obj.source += [ 'luadoc.cc', 'bundle_env_linux.cc' ]
+        obj.use += [ 'X11' ]
         if bld.is_defined('HAVE_SUIL'):
             obj.source += [ 'lv2_plugin_ui.cc' ]
             obj.use += [ 'SUIL' ]
@@ -587,7 +588,6 @@ def build(bld):
             obj.source += [ 'vst_plugin_ui.cc' ]
             obj.source += [ 'linux_vst_gui_support.cc', 'lxvst_plugin_ui.cc' ]
             obj.defines += [ 'LXVST_SUPPORT' ]
-            obj.use += [ 'X11' ]
 
         if bld.is_defined('VST3_SUPPORT'):
             obj.source += [ 'vst3_plugin_ui.cc' ]
@@ -676,6 +676,7 @@ def build(bld):
         obj.source += [ 'windows_icon.rc' ]
     else:
         obj.source += [ 'bundle_env_linux.cc' ]
+        obj.use += [ 'X11' ]
 
     obj.includes += ['../libs']
     obj.includes += ['../libs/vst3']
@@ -701,7 +702,6 @@ def build(bld):
     if bld.is_defined('LXVST_SUPPORT'):
         obj.source += [ 'linux_vst_gui_support.cc', 'lxvst_plugin_ui.cc' ]
         obj.defines += [ 'LXVST_SUPPORT' ]
-        obj.use += [ 'X11' ]
 
     if bld.is_defined('MACVST_SUPPORT'):
         obj.source += [ 'mac_vst_plugin_ui.mm' ]
