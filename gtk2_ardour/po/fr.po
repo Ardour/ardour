@@ -14038,7 +14038,7 @@ msgstr "petites sessions (4-16 pistes)"
 #: rc_option_editor.cc:1219
 msgid "Medium sessions (16-64 tracks)"
 msgstr "moyennes sessions (16-64 pistes)"
-b
+
 #: rc_option_editor.cc:1220
 msgid "Large sessions (64+ tracks)"
 msgstr "grandes sessions (>64 pistes)"
