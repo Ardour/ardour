@@ -297,12 +297,11 @@ def configure(conf):
     autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO4',
                       atleast_version='0.4.0', mandatory=False)
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
-    if Options.options.dist_target != 'mingw':
-        if not Options.options.no_lrdf:
-            autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF',
-                              atleast_version='0.4.0')
-        autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
-                          atleast_version='0.3.2')
+    if not Options.options.no_lrdf:
+        autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF',
+                          atleast_version='0.4.0', mandatory=False)
+    autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
+                      atleast_version='0.3.2')
     autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE',
                       atleast_version='0.1.0')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP',
