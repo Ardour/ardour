@@ -875,14 +875,15 @@ LadspaPlugin::write_preset_file ()
 	}
 #endif
 
-	string const source = preset_source ();
+	string const source   = preset_source ();
+	string const filename = Glib::filename_from_uri (source);
 
-	if (g_mkdir_with_parents (Glib::path_get_dirname (source).c_str(), 0775)) {
+	if (g_mkdir_with_parents (Glib::path_get_dirname (filename).c_str(), 0775)) {
 		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), source, strerror(errno)) << endmsg;
 		return false;
 	}
 
-	if (lrdf_export_by_source (source.c_str(), Glib::filename_from_uri (source).c_str())) {
+	if (lrdf_export_by_source (source.c_str(), filename.c_str())) {
 		warning << string_compose(_("Error saving presets file %1."), source) << endmsg;
 		return false;
 	}
