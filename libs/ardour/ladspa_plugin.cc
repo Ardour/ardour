@@ -58,6 +58,7 @@
 #include "ardour/ladspa_plugin.h"
 #include "ardour/buffer_set.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/filesystem_paths.h"
 
 #include "pbd/stl_delete.h"
 
