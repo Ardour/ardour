@@ -144,6 +144,7 @@ private:
 	void emit_changed ();
 	void emit_bundle_changed (ARDOUR::Bundle::Change);
 	boost::shared_ptr<ARDOUR::Bundle> make_bundle_from_ports (std::vector<std::string> const &, ARDOUR::DataType, bool, std::string const& bundle_name = std::string()) const;
+	void add_bundles_for_ports (std::vector<std::string> const &, ARDOUR::DataType, bool, bool, boost::shared_ptr<PortGroup>) const;
 	void maybe_add_processor_to_list (boost::weak_ptr<ARDOUR::Processor>, std::list<boost::shared_ptr<ARDOUR::IO> > *, bool, std::set<boost::shared_ptr<ARDOUR::IO> > &);
 
 	mutable PortGroup::BundleList _bundles;

@@ -697,8 +697,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 		if (!extra_system[*i].empty()) {
-			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_system[*i], *i, inputs);
-			system->add_bundle (b, allow_dups);
+			add_bundles_for_ports (extra_system[*i], *i, inputs, allow_dups, system);
 		}
 	}
 
@@ -712,23 +711,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 		if (extra_other[*i].empty()) continue;
-		std::string cp;
-		std::vector<std::string> nb;
-		for (uint32_t j = 0; j < extra_other[*i].size(); ++j) {
-			std::string nn = extra_other[*i][j];
-			std::string pf = nn.substr (0, nn.find_first_of (":") + 1);
-			if (pf != cp && !nb.empty()) {
-				boost::shared_ptr<Bundle> b = make_bundle_from_ports (nb, *i, inputs);
-				other->add_bundle (b);
-				nb.clear();
-			}
-			cp = pf;
-			nb.push_back(extra_other[*i][j]);
-		}
-		if (!nb.empty()) {
-			boost::shared_ptr<Bundle> b = make_bundle_from_ports (nb, *i, inputs);
-			other->add_bundle (b);
-		}
+		add_bundles_for_ports (extra_other[*i], *i, inputs, allow_dups, other);
 	}
 
 	if (!allow_dups) {
@@ -745,6 +728,39 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	add_group_if_not_empty (system);
 
 	emit_changed ();
+}
+
+void
+PortGroupList::add_bundles_for_ports (std::vector<std::string> const & p, ARDOUR::DataType type, bool inputs, bool allow_dups, boost::shared_ptr<PortGroup> group) const
+{
+	bool has_colon = true, has_slash = true;
+	for (const auto& s : p) {
+		if (s.find('/') == std::string::npos) has_slash = false;
+		if (s.find(':') == std::string::npos) has_colon = false;
+	}
+	std::string sep = has_slash ? "/" : has_colon ? ":" : "";
+	if (sep.empty()) {
+		boost::shared_ptr<Bundle> b = make_bundle_from_ports (p, type, inputs);
+		group->add_bundle (b, allow_dups);
+		return;
+	}
+
+	std::vector<std::string> nb;
+	std::string cp;
+	for (const auto& s : p) {
+		std::string pf = s.substr (0, s.find_first_of (sep) + 1);
+		if (pf != cp && !nb.empty()) {
+				boost::shared_ptr<Bundle> b = make_bundle_from_ports (nb, type, inputs);
+				group->add_bundle (b, allow_dups);
+				nb.clear();			
+		}
+		cp = pf;
+		nb.push_back(s);
+	}
+	if (!nb.empty()) {
+		boost::shared_ptr<Bundle> b = make_bundle_from_ports (nb, type, inputs);
+		group->add_bundle (b, allow_dups);
+	}
 }
 
 boost::shared_ptr<Bundle>
