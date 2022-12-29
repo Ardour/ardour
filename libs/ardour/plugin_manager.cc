@@ -279,6 +279,13 @@ PluginManager::PluginManager ()
 
 	add_lrdf_presets ("ladspa");
 
+#if 0 // dump RDF
+	lrdf_statement* r = lrdf_all_statements();
+	for (lrdf_statement* it = r; it != NULL; it = it->next) {
+		printf("LRDF: (%s, %s, %s)\n", it->subject, it->predicate, it->object);
+	}
+#endif
+
 	if ((s = getenv ("VST_PATH"))) {
 		windows_vst_path = s;
 	} else if ((s = getenv ("VST_PLUGINS"))) {
@@ -828,12 +835,15 @@ PluginManager::add_lrdf_presets(string domain)
 	vector<string> presets;
 	vector<string>::iterator x;
 
-	char* envvar;
-	if ((envvar = getenv ("HOME")) == 0) {
+#ifdef PLATFORM_WINDOWS
+	string path = Glib::build_filename (ARDOUR::user_cache_directory (), domain, "rdf");
+#else
+	if (Glib::get_home_dir ().empty ()) {
 		return;
 	}
+	string path = Glib::build_filename (Glib::get_home_dir (), "." + domain, "rdf");
+#endif
 
-	string path = string_compose("%1/.%2/rdf", envvar, domain);
 	find_files_matching_filter (presets, path, rdf_filter, 0, false, true);
 
 	for (x = presets.begin(); x != presets.end (); ++x) {

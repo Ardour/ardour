@@ -45,6 +45,10 @@
 #include <lrdf.h>
 #endif
 
+#include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
+#include <glibmm/convert.h>
+
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/locale_guard.h"
@@ -834,60 +838,50 @@ void
 LadspaPlugin::do_remove_preset (string name)
 {
 #ifdef HAVE_LRDF
-	string const envvar = preset_envvar ();
-	if (envvar.empty()) {
-		warning << _("Could not locate HOME.  Preset not removed.") << endmsg;
-		return;
-	}
-
 	Plugin::PresetRecord const * p = preset_by_label (name);
 	if (!p) {
 		return;
 	}
 
-	string const source = preset_source (envvar);
+	string const source = preset_source ();
 	lrdf_remove_preset (source.c_str(), p->uri.c_str ());
 
-	write_preset_file (envvar);
+	write_preset_file ();
 #endif
 }
 
 string
-LadspaPlugin::preset_envvar () const
+LadspaPlugin::preset_source () const
 {
-	char* envvar;
-	if ((envvar = getenv ("HOME")) == 0) {
-		return "";
-	}
-
-	return envvar;
-}
-
-string
-LadspaPlugin::preset_source (string envvar) const
-{
-	return string_compose ("file:%1/.ladspa/rdf/ardour-presets.n3", envvar);
+	string const domain = "ladspa";
+#ifdef PLATFORM_WINDOWS
+	string path = Glib::build_filename (ARDOUR::user_cache_directory (), domain, "rdf", "ardour-presets.n3");
+#else
+	string path = Glib::build_filename (Glib::get_home_dir (), "." + domain, "rdf", "ardour-presets.n3");
+#endif
+	return Glib::filename_to_uri (path);
 }
 
 bool
-LadspaPlugin::write_preset_file (string envvar)
+LadspaPlugin::write_preset_file ()
 {
 #ifdef HAVE_LRDF
-	string path = string_compose("%1/.ladspa", envvar);
-	if (g_mkdir_with_parents (path.c_str(), 0775)) {
-		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
+
+#ifndef PLATFORM_WINDOWS
+	if (Glib::get_home_dir ().empty ()) {
+		warning << _("Could not locate HOME. Preset file not written.") << endmsg;
+		return false;
+	}
+#endif
+
+	string const source = preset_source ();
+
+	if (g_mkdir_with_parents (Glib::path_get_dirname (source).c_str(), 0775)) {
+		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), source, strerror(errno)) << endmsg;
 		return false;
 	}
 
-	path += "/rdf";
-	if (g_mkdir_with_parents (path.c_str(), 0775)) {
-		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
-		return false;
-	}
-
-	string const source = preset_source (envvar);
-
-	if (lrdf_export_by_source (source.c_str(), source.substr(5).c_str())) {
+	if (lrdf_export_by_source (source.c_str(), Glib::filename_from_uri (source).c_str())) {
 		warning << string_compose(_("Error saving presets file %1."), source) << endmsg;
 		return false;
 	}
@@ -930,19 +924,13 @@ LadspaPlugin::do_save_preset (string name)
 		portvalues[i].value = get_parameter (input_parameter_pids[i]);
 	}
 
-	string const envvar = preset_envvar ();
-	if (envvar.empty()) {
-		warning << _("Could not locate HOME.  Preset not saved.") << endmsg;
-		return "";
-	}
-
-	string const source = preset_source (envvar);
+	string const source = preset_source ();
 
 	char* uri_char = lrdf_add_preset (source.c_str(), name.c_str(), id, &defaults);
 	string uri (uri_char);
 	free (uri_char);
 
-	if (!write_preset_file (envvar)) {
+	if (!write_preset_file ()) {
 		return "";
 	}
 

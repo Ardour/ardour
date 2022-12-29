@@ -142,9 +142,8 @@ class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 	int set_state_2X (const XMLNode&, int version);
 	std::string do_save_preset (std::string name);
 	void do_remove_preset (std::string name);
-	std::string preset_envvar () const;
-	std::string preset_source (std::string) const;
-	bool write_preset_file (std::string);
+	std::string preset_source () const;
+	bool write_preset_file ();
 	void add_state (XMLNode *) const;
 };
 
