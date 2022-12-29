@@ -46,11 +46,17 @@ write_automation_list_xml (XMLNode* node, std::string filename)
 void
 AutomationListPropertyTest::setUp ()
 {
+	// The reference files were created with this superclock ticks per second
+	// value. Setting this here makes sure we don't need to update all the
+	// reference files whenever the default value changes.
+	_saved_superclock_ticks_per_second = Temporal::superclock_ticks_per_second();
+	Temporal::set_superclock_ticks_per_second(56448000);
 }
 
 void
 AutomationListPropertyTest::tearDown ()
 {
+	Temporal::set_superclock_ticks_per_second(_saved_superclock_ticks_per_second);
 }
 
 void
