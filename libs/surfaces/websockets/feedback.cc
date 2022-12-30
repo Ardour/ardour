@@ -102,6 +102,11 @@ struct PluginParamValueObserver {
 FeedbackHelperUI::FeedbackHelperUI()
 	: AbstractUI<BaseUI::BaseRequestObject> ("WS_FeedbackHelperUI")
 {
+	// This renames and changes the event loop for the main thread, presumably
+	// this is not the actually desired behavior. If this is intentional, at
+	// least the event loop should be set back when this FeedbackHelperUI is
+	// destroyed, as otherwise future access to the event loop is likely going
+	// to crash.
 	char name[64];
 	snprintf (name, 64, "WS-%p", (void*)DEBUG_THREAD_SELF);
  	pthread_set_name (name);
