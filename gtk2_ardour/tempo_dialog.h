@@ -30,21 +30,33 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/table.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/combobox.h>
 #include <gtkmm/comboboxtext.h>
 
 #include "ardour/types.h"
 #include "ardour/tempo.h"
+#include "midi++/types.h"
 
 #include "ardour_dialog.h"
+
+namespace MIDI {
+	class Parser;
+}
+namespace ARDOUR {
+	class MidiPort;
+}
+
 
 class TempoDialog : public ArdourDialog
 {
 public:
 	TempoDialog (Temporal::TempoMap::SharedPtr const &, Temporal::timepos_t const & , const std::string & action);
 	TempoDialog (Temporal::TempoMap::SharedPtr const &, Temporal::TempoPoint&, const std::string & action);
+	~TempoDialog ();
 
 	double get_bpm ();
 	double get_end_bpm ();
@@ -66,8 +78,11 @@ private:
 	bool tap_tempo_key_press (GdkEventKey*);
 	bool tap_tempo_button_press (GdkEventButton*);
 	bool tap_tempo_focus_out (GdkEventFocus* );
+	void port_changed ();
+	void ports_changed ();
 
-	void tap_tempo ();
+	void tap_tempo (int64_t);
+	void midi_event (MIDI::byte*, size_t, MIDI::samplecnt_t);
 
 	typedef std::map<std::string,int> NoteTypes;
 	NoteTypes note_types;
@@ -98,9 +113,33 @@ private:
 	Gtk::Label   when_bar_label;
 	Gtk::Label   when_beat_label;
 	Gtk::Label   pulse_selector_label;
+	Gtk::Label   _tap_source_label;
 	Gtk::Button  tap_tempo_button;
 	Gtk::ComboBoxText tempo_type;
 	Gtk::ComboBoxText lock_style;
+	Gtk::ComboBox _midi_port_combo;
+
+	class MidiPortCols : public Gtk::TreeModelColumnRecord
+	{
+	public:
+		MidiPortCols ()
+		{
+			add (pretty_name);
+			add (port_name);
+		}
+		Gtk::TreeModelColumn<std::string> pretty_name;
+		Gtk::TreeModelColumn<std::string> port_name;
+	};
+
+	MidiPortCols                 _midi_port_cols;
+	Glib::RefPtr<Gtk::ListStore> _midi_port_list;
+
+	PBD::Signal1<void, int64_t>         _midi_tap_signal;
+	boost::shared_ptr<MIDI::Parser>     _midi_tap_parser;
+	boost::shared_ptr<ARDOUR::MidiPort> _midi_tap_port;
+	PBD::ScopedConnection               _parser_connection;
+	PBD::ScopedConnection               _manager_connection;
+	PBD::ScopedConnection               _xthread_connection;
 };
 
 class MeterDialog : public ArdourDialog

@@ -5,7 +5,7 @@
  * Copyright (C) 2008-2015 David Robillard <d@drobilla.net>
  * Copyright (C) 2009-2010 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2014-2015 Colin Fletcher <colin.m.fletcher@googlemail.com>
- * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2022 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2015-2017 Ben Loftis <ben@harrisonconsoles.com>
  * Copyright (C) 2015-2017 Nick Mainsbridge <mainsbridge@gmail.com>
  *
@@ -29,9 +29,14 @@
 #include <gtkmm/stock.h>
 
 #include "pbd/error.h"
+#include "midi++/parser.h"
+
+#include "ardour/audioengine.h"
+#include "ardour/midi_port.h"
 
 #include "gtkmm2ext/utils.h"
 
+#include "gui_thread.h"
 #include "tempo_dialog.h"
 #include "ui_config.h"
 
@@ -56,6 +61,7 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, timepos_t const & pos
 	, when_bar_label (_("bar:"), ALIGN_END, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_END, ALIGN_CENTER)
 	, pulse_selector_label (_("Pulse:"), ALIGN_START, ALIGN_CENTER)
+	, _tap_source_label (_("Tap Source:"), ALIGN_START, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Temporal::BBT_Time when (_map->bbt_at (pos));
@@ -76,6 +82,7 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, TempoPoint& point, co
 	, when_bar_label (_("bar:"), ALIGN_END, ALIGN_CENTER)
 	, when_beat_label (_("beat:"), ALIGN_END, ALIGN_CENTER)
 	, pulse_selector_label (_("Pulse:"), ALIGN_START, ALIGN_CENTER)
+	, _tap_source_label (_("Tap Source:"), ALIGN_START, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
 	Temporal::BBT_Time when (map->bbt_at (point.time()));
@@ -170,13 +177,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 		lock_style.set_active_text (strings[0]); // "music"
 	}
 
-	Table* table;
-
-	if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
-		table = manage (new Table (5, 7));
-	} else {
-		table = manage (new Table (5, 6));
-	}
+	Table* table = manage (new Table (5, 5));
 
 	table->set_spacings (6);
 	table->set_homogeneous (false);
@@ -231,18 +232,30 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 		table->attach (*when_label, 0, 1, row, row+1);
 
 		++row;
-		++row;
 
 		Label* lock_style_label = manage (new Label(_("Lock Style:"), ALIGN_START, ALIGN_CENTER));
 		table->attach (*lock_style_label, 0, 1, row, row + 1);
 		table->attach (lock_style, 1, 5, row, row + 1);
-
-		--row;
 	}
 
-	get_vbox()->set_border_width (12);
-	get_vbox()->pack_end (*table);
+	set_name ("MetricDialog");
+	set_resizable (false);
+	get_vbox ()->set_border_width (12);
+	get_vbox ()->set_spacing (6);
 
+	get_vbox ()->pack_end (*table, false, false);
+	table->show_all ();
+
+	table = manage (new Table (2, 2));
+	table->set_spacings (6);
+	row = 0;
+
+	table->attach (_tap_source_label, 0, 1, row, row + 1);
+	table->attach (_midi_port_combo, 1, 2, row, row + 1);
+	++row;
+	table->attach (tap_tempo_button, 0, 2, row, row + 1);
+
+	get_vbox()->pack_end (*table, false, false);
 	table->show_all ();
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
@@ -250,16 +263,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	set_response_sensitive (RESPONSE_ACCEPT, true);
 	set_default_response (RESPONSE_ACCEPT);
 
-	bpm_spinner.show ();
-	end_bpm_spinner.show ();
-	tap_tempo_button.show ();
-	get_vbox()->set_spacing (6);
-	get_vbox()->pack_end (tap_tempo_button);
-	tap_tempo_button.set_can_focus ();
-	tap_tempo_button.grab_focus ();
-
-	set_name ("MetricDialog");
-
+	/* connect signals */
 	bpm_spinner.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	bpm_spinner.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::bpm_button_press), false);
 	bpm_spinner.signal_button_release_event().connect (sigc::mem_fun (*this, &TempoDialog::bpm_button_release), false);
@@ -275,13 +279,124 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	tap_tempo_button.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_button_press), false);
 	tap_tempo_button.signal_key_press_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_key_press), false);
 	tap_tempo_button.signal_focus_out_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_focus_out));
+	_midi_port_combo.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::port_changed));
 
-	tempo_type_change();
+	/* Setup MIDI Tap */
+	_midi_port_list = ListStore::create (_midi_port_cols);
+	_midi_port_combo.set_model (_midi_port_list);
+	_midi_port_combo.pack_start (_midi_port_cols.pretty_name);
 
+	ARDOUR::AudioEngine::instance ()->PortRegisteredOrUnregistered.connect (_manager_connection, invalidator (*this), boost::bind (&TempoDialog::ports_changed, this), gui_context ());
+	boost::shared_ptr<ARDOUR::Port> port = ARDOUR::AudioEngine::instance ()->register_input_port (ARDOUR::DataType::MIDI, "Tap Tempo", false, ARDOUR::IsInput);
+	_midi_tap_port                       = boost::dynamic_pointer_cast<ARDOUR::MidiPort> (port);
+	assert (_midi_tap_port);
+	_midi_tap_parser = boost::shared_ptr<MIDI::Parser> (new MIDI::Parser);
+	_midi_tap_parser->any.connect_same_thread (_parser_connection, boost::bind (&TempoDialog::midi_event, this, _2, _3, _4));
+	_midi_tap_port->set_trace (_midi_tap_parser.get ());
+	_midi_tap_signal.connect (_xthread_connection, invalidator (*this), boost::bind (&TempoDialog::tap_tempo, this, _1), gui_context ());
+
+	/* init state */
+	tempo_type_change ();
+	tapped = false;
+#if 0
 	bpm_spinner.select_region (0, -1);
 	bpm_spinner.grab_focus ();
+#else
+	tap_tempo_button.set_can_focus ();
+	tap_tempo_button.grab_focus ();
+#endif
+}
 
-	tapped = false;
+TempoDialog::~TempoDialog ()
+{
+	_parser_connection.disconnect ();
+	ARDOUR::AudioEngine::instance ()->unregister_port (_midi_tap_port);
+}
+
+void
+TempoDialog::midi_event (MIDI::byte* msg, size_t len, MIDI::samplecnt_t now)
+{
+	/* This is called in rt-context from the main auditioengine thread */
+	if (len != 3) {
+		return;
+	}
+	uint8_t cmd = (msg[0] & 0xf0);
+	if (cmd == MIDI_CMD_NOTE_ON && msg[2] > 0) {
+		_midi_tap_signal (1e6 * now / AudioEngine::instance ()->sample_rate ()); /* EMIT SIGNAL */
+	} else if (cmd == MIDI_CMD_CONTROL && msg[2] > 63) {
+		switch (msg[1]) {
+			case 0x40: /* Sustain Pedal */
+			case 0x42: /* Sostenuto Pedal */
+			case 0x43: /* Soft Pedal */
+				_midi_tap_signal (1e6 * now / AudioEngine::instance ()->sample_rate ()); /* EMIT SIGNAL */
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+void
+TempoDialog::ports_changed ()
+{
+	TreeModel::iterator r = _midi_port_combo.get_active ();
+	string              cpn;
+	if (r) {
+		cpn = (*r)[_midi_port_cols.port_name];
+	}
+
+	_midi_port_list->clear ();
+
+	TreeModel::Row row               = *_midi_port_list->append ();
+	row[_midi_port_cols.pretty_name] = _("Manual Tap");
+	row[_midi_port_cols.port_name]   = "";
+
+	std::vector<std::string> pl;
+	ARDOUR::AudioEngine::instance ()->get_physical_inputs (ARDOUR::DataType::MIDI, pl, MidiPortFlags (0), MidiPortFlags (MidiPortControl | MidiPortVirtual));
+
+	if (pl.empty ()) {
+		_midi_port_combo.set_active (0);
+		_midi_port_combo.set_sensitive (false);
+		tap_tempo_button.set_sensitive (true);
+		bpm_spinner.set_sensitive (true);
+		return;
+	}
+
+	size_t nth = 1;
+	size_t act = 0;
+	_midi_port_combo.set_sensitive (true);
+
+	for (auto const& pn : pl) {
+		if (!cpn.empty () && pn == cpn) {
+			act = nth;
+		}
+		++nth;
+		row                              = *_midi_port_list->append ();
+		row[_midi_port_cols.pretty_name] = ARDOUR::AudioEngine::instance ()->get_pretty_name_by_name (pn);
+		row[_midi_port_cols.port_name]   = pn;
+	}
+
+	_midi_port_combo.set_active (act);
+}
+
+void
+TempoDialog::port_changed ()
+{
+	bool rv = false;
+	tapped  = false;
+	_midi_tap_port->disconnect_all ();
+	TreeModel::iterator r = _midi_port_combo.get_active ();
+	if (r) {
+		std::string const pn = (*r)[_midi_port_cols.port_name];
+		if (!pn.empty ()) {
+			rv = 0 == _midi_tap_port->connect (pn);
+		}
+	}
+	tap_tempo_button.set_sensitive (!rv);
+	bpm_spinner.set_sensitive (!rv);
+	if (!rv) {
+		tap_tempo_button.grab_focus ();
+	}
 }
 
 bool
@@ -425,7 +540,7 @@ TempoDialog::lock_style_change ()
 bool
 TempoDialog::tap_tempo_key_press (GdkEventKey*)
 {
-	tap_tempo ();
+	tap_tempo (g_get_monotonic_time ());
 	return false;
 }
 
@@ -438,39 +553,39 @@ TempoDialog::tap_tempo_button_press (GdkEventButton* ev)
 	if (ev->button != 1) {
 		return true;
 	}
-	tap_tempo ();
+	tap_tempo (g_get_monotonic_time ());
 	return false; // grab focus
 }
 
 void
-TempoDialog::tap_tempo ()
+TempoDialog::tap_tempo (int64_t usec)
 {
 	double t;
 
 	// Linear least-squares regression
 	if (tapped) {
-		t = 1e-6 * (g_get_monotonic_time () - first_t); // Subtract first_t to avoid precision problems
+		t = 1e-6 * (usec - first_t); // Subtract first_t to avoid precision problems
 
 		double n = tap_count;
 		sum_y += t;
 		sum_x += n;
 		sum_xy += n * t;
 		sum_xx += n * n;
-		double T = (sum_xy/n - sum_x/n * sum_y/n) / (sum_xx/n - sum_x/n * sum_x/n);
+		double T = (sum_xy / n - sum_x / n * sum_y / n) / (sum_xx / n - sum_x / n * sum_x / n);
 
-		if (t - last_t < T / 1.2 || t - last_t > T * 1.2) {
+		if (t - last_t < T / 1.2 || t - last_t > T * 1.2 || T <= .06 || T > 60) {
 			tapped = false;
 		} else {
 			bpm_spinner.set_value (60.0 / T);
 		}
 	}
 	if (!tapped) {
-		first_t = g_get_monotonic_time ();
-		t = 0.0;
-		sum_y = 0.0;
-		sum_x = 1.0;
-		sum_xy = 0.0;
-		sum_xx = 1.0;
+		first_t   = usec;
+		t         = 0.0;
+		sum_y     = 0.0;
+		sum_x     = 1.0;
+		sum_xy    = 0.0;
+		sum_xx    = 1.0;
 		tap_count = 1.0;
 
 		tapped = true;
