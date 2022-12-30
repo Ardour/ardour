@@ -133,6 +133,7 @@ EngineControl::EngineControl ()
 	AttachOptions  xopt = AttachOptions (FILL | EXPAND);
 	int            row;
 
+	set_resizable (false);
 	set_name (X_("AudioMIDISetup"));
 
 	/* the backend combo is the one thing that is ALWAYS visible */
@@ -1079,7 +1080,6 @@ EngineControl::backend_changed ()
 	if (!ignore_changes) {
 		maybe_display_saved_state ();
 	}
-	resize (1, 1); // shrink window
 }
 
 void
@@ -2803,7 +2803,6 @@ EngineControl::on_monitor_expand ()
 #else
 		lbl_monitor_model.hide ();
 		monitor_model_combo.hide ();
-		resize (1, 1); // shrink window
 #endif
 	}
 }
@@ -2833,7 +2832,6 @@ EngineControl::on_latency_expand ()
 		lbl_midi_system.hide ();
 		midi_option_combo.hide ();
 		midi_devices_button.hide ();
-		resize (1, 1); // shrink window
 	}
 }
 
