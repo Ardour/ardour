@@ -473,9 +473,10 @@ Graph::routes_no_roll (boost::shared_ptr<GraphChain> chain, pframes_t nframes, s
 	_process_start_sample   = start_sample;
 	_process_end_sample     = end_sample;
 
-	_process_mode        = NoRoll;
-	_process_retval      = 0;
-	_process_need_butler = false;
+	_process_mode           = NoRoll;
+	_process_retval         = 0;
+	_process_need_butler    = false;
+	_process_non_rt_pending = non_rt_pending;
 
 	DEBUG_TRACE (DEBUG::ProcessThreads, "wake graph for no-roll process\n");
 	_callback_start_sem.signal ();
