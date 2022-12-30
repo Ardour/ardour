@@ -848,10 +848,11 @@ PluginManager::add_lrdf_presets(string domain)
 
 	for (x = presets.begin(); x != presets.end (); ++x) {
 		const string uri (Glib::filename_to_uri(*x));
-		info << "read rdf_file '" << uri << "'" << endmsg;
-
+#ifndef NDEBUG
+		info << string_compose (_("Reading RDF %1"), uri) << endmsg;
+#endif
 		if (lrdf_read_file(uri.c_str())) {
-			warning << "Could not parse rdf file: " << uri << endmsg;
+			warning << string_compose (_("Could not parse RDF %1"), uri) << endmsg;
 		}
 	}
 
