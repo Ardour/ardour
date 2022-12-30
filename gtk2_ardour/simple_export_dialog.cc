@@ -169,7 +169,16 @@ SimpleExportDialog::set_session (ARDOUR::Session* s)
 		row[_range_cols.name]  = SimpleExport::_session->snap_name ();
 	}
 
-	for (auto l : s->locations ()->list ()) {
+	struct LocationSorter {
+		bool operator() (Location const* a, Location const* b) {
+			return a->start_sample () < b->start_sample ();
+		}
+	};
+
+	Locations::LocationList ll (s->locations ()->list ());
+	ll.sort (LocationSorter ());
+
+	for (auto const& l : ll) {
 		if (l->is_session_range () || !l->is_range_marker () || l->name ().empty ()) {
 			continue;
 		}
