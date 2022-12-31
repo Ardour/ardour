@@ -286,9 +286,9 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	_midi_port_combo.set_model (_midi_port_list);
 	_midi_port_combo.pack_start (_midi_port_cols.pretty_name);
 
-	ARDOUR::AudioEngine::instance ()->PortRegisteredOrUnregistered.connect (_manager_connection, invalidator (*this), boost::bind (&TempoDialog::ports_changed, this), gui_context ());
-	boost::shared_ptr<ARDOUR::Port> port = ARDOUR::AudioEngine::instance ()->register_input_port (ARDOUR::DataType::MIDI, "Tap Tempo", false, ARDOUR::IsInput);
-	_midi_tap_port                       = boost::dynamic_pointer_cast<ARDOUR::MidiPort> (port);
+	AudioEngine::instance ()->PortRegisteredOrUnregistered.connect (_manager_connection, invalidator (*this), boost::bind (&TempoDialog::ports_changed, this), gui_context ());
+	boost::shared_ptr<Port> port = AudioEngine::instance ()->register_input_port (DataType::MIDI, "Tap Tempo", false, PortFlags (IsInput | Hidden | IsTerminal));
+	_midi_tap_port               = boost::dynamic_pointer_cast<MidiPort> (port);
 	assert (_midi_tap_port);
 	_midi_tap_parser = boost::shared_ptr<MIDI::Parser> (new MIDI::Parser);
 	_midi_tap_parser->any.connect_same_thread (_parser_connection, boost::bind (&TempoDialog::midi_event, this, _2, _3, _4));
@@ -310,7 +310,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 TempoDialog::~TempoDialog ()
 {
 	_parser_connection.disconnect ();
-	ARDOUR::AudioEngine::instance ()->unregister_port (_midi_tap_port);
+	AudioEngine::instance ()->unregister_port (_midi_tap_port);
 }
 
 void
@@ -352,7 +352,7 @@ TempoDialog::ports_changed ()
 	row[_midi_port_cols.port_name]   = "";
 
 	std::vector<std::string> pl;
-	ARDOUR::AudioEngine::instance ()->get_physical_inputs (ARDOUR::DataType::MIDI, pl, MidiPortFlags (0), MidiPortFlags (MidiPortControl | MidiPortVirtual));
+	AudioEngine::instance ()->get_physical_inputs (DataType::MIDI, pl, MidiPortFlags (0), MidiPortFlags (MidiPortControl | MidiPortVirtual));
 
 	if (pl.empty ()) {
 		_midi_port_combo.set_active (0);
@@ -371,8 +371,12 @@ TempoDialog::ports_changed ()
 			act = nth;
 		}
 		++nth;
+		std::string ppn = AudioEngine::instance()->get_pretty_name_by_name (pn);
+		if (ppn.empty ()) {
+			ppn = pn.substr ((pn).find (':') + 1);
+		}
 		row                              = *_midi_port_list->append ();
-		row[_midi_port_cols.pretty_name] = ARDOUR::AudioEngine::instance ()->get_pretty_name_by_name (pn);
+		row[_midi_port_cols.pretty_name] = ppn;
 		row[_midi_port_cols.port_name]   = pn;
 	}
 
