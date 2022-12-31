@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2022-12-29 01:24+0100\n"
+"PO-Revision-Date: 2022-12-31 11:38+0100\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -12998,7 +12998,7 @@ msgstr ""
 
 #: plugin_selector.cc:279
 msgid "Ex: \"dynamic de-esser vocal\" applies 3 Tags."
-msgstr "Ex: \"dynamique de-esser vocal\" représente 3 étiquettes."
+msgstr "Ex : \"dynamique de-esser vocal\" représente 3 étiquettes."
 
 #: plugin_selector.cc:290
 msgid "Tags for Selected Plugin"
