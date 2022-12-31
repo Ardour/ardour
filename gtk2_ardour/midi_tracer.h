@@ -28,6 +28,7 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/box.h>
 
@@ -87,7 +88,22 @@ private:
 	Gtk::CheckButton base_button;
 	Gtk::CheckButton collect_button;
 	Gtk::CheckButton delta_time_button;
-	Gtk::ComboBoxText _port_combo;
+	Gtk::ComboBox    _midi_port_combo;
+
+	class MidiPortCols : public Gtk::TreeModelColumnRecord
+	{
+		public:
+			MidiPortCols ()
+			{
+				add (pretty_name);
+				add (port_name);
+			}
+			Gtk::TreeModelColumn<std::string> pretty_name;
+			Gtk::TreeModelColumn<std::string> port_name;
+	};
+
+	MidiPortCols                 _midi_port_cols;
+	Glib::RefPtr<Gtk::ListStore> _midi_port_list;
 
 	void base_toggle ();
 	void autoscroll_toggle ();
@@ -99,8 +115,9 @@ private:
 	void disconnect ();
 	PBD::ScopedConnection _parser_connection;
 	PBD::ScopedConnection _manager_connection;
-	MIDI::Parser my_parser;
+	boost::shared_ptr<MIDI::Parser> _midi_parser;
 
+	boost::shared_ptr<ARDOUR::MidiPort> tracer_port;
 	boost::shared_ptr<ARDOUR::MidiPort> traced_port;
 
 	static unsigned int window_count;
