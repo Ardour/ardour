@@ -12955,7 +12955,7 @@ msgstr "Tous les termes doivent être trouvés."
 
 #: plugin_selector.cc:175
 msgid "Ex: \"ess dyn\" will find \"dynamic de-esser\" but not \"de-esser\"."
-msgstr "Ex: \"ess dyn\" trouvera \"dynamic de-esser\" mais pas \"de-esser\"."
+msgstr "Ex : \"ess dyn\" trouvera \"dynamic de-esser\" mais pas \"de-esser\"."
 
 #: plugin_selector.cc:203
 msgid "Show Effects Only"
