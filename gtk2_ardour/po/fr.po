@@ -12472,11 +12472,11 @@ msgstr "Étiquettes"
 
 #: plugin_manager_ui.cc:62
 msgid "Maker"
-msgstr ""
+msgstr "Fabricant"
 
 #: plugin_manager_ui.cc:111
 msgid "Status"
-msgstr ""
+msgstr "État"
 
 #: plugin_manager_ui.cc:111
 msgid "Plugin Scan Result"
