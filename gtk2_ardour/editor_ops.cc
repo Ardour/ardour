@@ -8252,7 +8252,7 @@ edit your ardour.rc file to set the\n\
 	}
 
 	if (ntracks > 0) {
-			prompt += "\n" + string_compose ("(You may also lose the playlists associated with the %1)", trackstr) + "\n";
+			prompt += "\n" + string_compose (_("You may also lose the playlists associated with the %1"), trackstr) + "\n";
 	}
 
 	prompt += "\n" + string(_("This action cannot be undone, and the session file will be overwritten!"));
