@@ -41,14 +41,14 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 		/* Push2 needs libcanvas -- which needs pango, which needs a screen
 		 * IA__gdk_pango_context_get_for_screen: assertion 'GDK_IS_SCREEN (screen)' failed
 		 */
-		if ((*i)->name == "Ableton Push 2") {
+		if (!strcmp ((*i)->descriptor->id, "uri://ardour.org/surfaces/push2:0")) {
 			continue;
 		}
 #endif
 		// The WebSockets control surface replaces the global event loop, causing
 		// crashes in later tests once it is deactivates. Until that is fixed, skip
 		// it.
-		if ((*i)->name == "WebSockets Server (Experimental)") {
+		if (!strcmp ((*i)->descriptor->id, "uri://ardour.org/surfaces/ardour_websockets:0")) {
 			continue;
 		}
 
