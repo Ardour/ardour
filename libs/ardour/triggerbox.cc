@@ -3069,7 +3069,10 @@ TriggerBox::static_init (Session & s)
 	Config->ParameterChanged.connect_same_thread (static_connections, boost::bind (&TriggerBox::static_parameter_changed, _1));
 	input_parser->any.connect_same_thread (midi_input_connection, boost::bind (&TriggerBox::midi_input_handler, _1, _2, _3, _4));
 	boost::dynamic_pointer_cast<MidiPort> (s.trigger_input_port())->set_trace (input_parser);
-	s.trigger_input_port()->connect (Config->get_default_trigger_input_port());
+	std::string const& dtip (Config->get_default_trigger_input_port());
+	if (!dtip.empty () && s.engine().get_port_by_name (dtip)) {
+		s.trigger_input_port()->connect (dtip);
+	}
 }
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
