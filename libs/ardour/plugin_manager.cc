@@ -804,6 +804,7 @@ PluginManager::ladspa_refresh ()
 	size_t n = 1;
 	size_t all_modules = ladspa_modules.size ();
 	for (vector<std::string>::iterator i = ladspa_modules.begin(); i != ladspa_modules.end(); ++i, ++n) {
+		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("LADSPA: scanning: %1\n", *i));
 		ARDOUR::PluginScanMessage (string_compose (_("LADSPA (%1 / %2)"), n, all_modules), *i, false);
 		ladspa_discover (*i);
 #ifdef MIXBUS
