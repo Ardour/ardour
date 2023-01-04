@@ -1091,11 +1091,11 @@ FoldbackStrip::duplicate_current_fb ()
 		new_fb->gain_control ()->set_value (oldgain * 0.25, PBD::Controllable::NoGroup);
 
 		for (auto const& rt : old_fb->signal_sources (true)) {
-			boost::shared_ptr<Send>      old_snd  = rt->internal_send_for (old_fb);
-			boost::shared_ptr<Processor> old_proc = old_snd;
-			bool                         old_pre  = old_proc->get_pre_fader ();
-			rt->add_foldback_send (new_fb, !old_pre);
+			boost::shared_ptr<Send> old_snd  = rt->internal_send_for (old_fb);
 			if (old_snd) {
+				boost::shared_ptr<Processor> old_proc = old_snd;
+				bool                         old_pre  = old_proc->get_pre_fader ();
+				rt->add_foldback_send (new_fb, !old_pre);
 				float                   old_gain = old_snd->gain_control ()->get_value ();
 				boost::shared_ptr<Send> new_snd  = rt->internal_send_for (new_fb);
 				new_snd->gain_control ()->set_value (old_gain, PBD::Controllable::NoGroup);
