@@ -547,7 +547,8 @@ SystemExec::output_interposer()
 		}
 		if (bytesRead < 1) continue; /* actually not needed; but this is safe. */
 		data[bytesRead] = 0;
-		ReadStdout(data, bytesRead); /* EMIT SIGNAL */
+		std::string rv = std::string (data, bytesRead);
+		ReadStdout(rv, bytesRead); /* EMIT SIGNAL */
 	}
 	Terminated(); /* EMIT SIGNAL */
 	pthread_exit(0);
