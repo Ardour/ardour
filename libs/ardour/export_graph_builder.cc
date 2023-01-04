@@ -398,7 +398,11 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 	argp[a++] = strdup ("-i");
 	argp[a++] = strdup ("pipe:0");
 
-	argp[a++] = strdup ("-y");
+	argp[a++] = strdup ("-f");
+	argp[a++] = strdup ("mp3");
+	argp[a++] = strdup ("-acodec");
+	argp[a++] = strdup ("mp3");
+
 	if (quality <= 0) {
 		/* variable rate, lower is better */
 		snprintf (tmp, sizeof(tmp), "%d", -quality);
@@ -422,16 +426,14 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 		argp[a++] = SystemExec::format_key_value_parameter (it->first.c_str(), it->second.c_str());
 	}
 
-	argp[a++] = strdup (writer_filename.c_str());
+	argp[a++] = strdup ("pipe:1");
 	argp[a] = (char *)0;
 
 	/* argp is free()d in ~SystemExec,
 	 * SystemExec is deleted when writer is destroyed */
 	ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffmpeg_exe, argp, true);
+
 	PBD::info << "Encode command: { " << exec->to_s () << "}" << endmsg;
-	if (exec->start (SystemExec::MergeWithStdin)) {
-		throw ExportFailed ("External encoder (ffmpeg) cannot be started.");
-	}
 	writer.reset (new AudioGrapher::CmdPipeWriter<T> (exec, writer_filename));
 	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 }

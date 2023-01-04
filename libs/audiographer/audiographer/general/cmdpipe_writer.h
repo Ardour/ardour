@@ -3,14 +3,18 @@
 
 #include <string>
 
+#include <glib.h>
 #include <boost/format.hpp>
 
 #include "audiographer/flag_debuggable.h"
 #include "audiographer/sink.h"
 #include "audiographer/types.h"
 
+#include "pbd/gstdio_compat.h"
 #include "pbd/signals.h"
-#include "pbd/system_exec.h"
+
+#include "ardour/system_exec.h"
+#include "ardour/export_failed.h"
 
 namespace AudioGrapher
 {
@@ -25,16 +29,31 @@ class CmdPipeWriter
   , public FlagDebuggable<>
 {
 public:
-	CmdPipeWriter (PBD::SystemExec* proc, std::string const& path)
+	CmdPipeWriter (ARDOUR::SystemExec* proc, std::string const& path)
 		: samples_written (0)
 		, _proc (proc)
 		, _path (path)
 	{
 		add_supported_flag (ProcessContext<T>::EndOfInput);
+
+		proc->ReadStdout.connect_same_thread (exec_connections, boost::bind (&CmdPipeWriter::write_ffile, this, _1, _2));
+		proc->Terminated.connect_same_thread (exec_connections, boost::bind (&CmdPipeWriter::close_ffile, this));
+
+		encoder_file = g_fopen (path.c_str(), "wb");
+
+		if (!encoder_file) {
+			throw ARDOUR::ExportFailed ("Output file cannot be written to.");
+		}
+
+		if (proc->start (ARDOUR::SystemExec::IgnoreAndClose)) {
+			fclose (encoder_file);
+			throw ARDOUR::ExportFailed ("External encoder (ffmpeg) cannot be started.");
+		}
 	}
 
 	virtual ~CmdPipeWriter () {
 		delete _proc;
+		assert (!encoder_file);
 	}
 
 	samplecnt_t get_samples_written() const { return samples_written; }
@@ -65,7 +84,6 @@ public:
 
 		if (c.has_flag(ProcessContext<T>::EndOfInput)) {
 			_proc->close_stdin ();
-			FileWritten (_path);
 		}
 	}
 
@@ -79,6 +97,20 @@ private:
 	samplecnt_t samples_written;
 	PBD::SystemExec* _proc;
 	std::string _path;
+
+	FILE* encoder_file;
+
+	void write_ffile (std::string d, size_t s) {
+		fwrite (d.c_str(), sizeof(char), s, encoder_file);
+	}
+
+	void close_ffile () {
+		fclose (encoder_file);
+		encoder_file = 0;
+		FileWritten (_path);
+	}
+
+	PBD::ScopedConnectionList exec_connections;
 };
 
 } // namespace
