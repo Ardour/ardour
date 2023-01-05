@@ -426,7 +426,20 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 		argp[a++] = SystemExec::format_key_value_parameter (it->first.c_str(), it->second.c_str());
 	}
 
+#ifdef PLATFORM_WINDOWS
+	/* A pipe is used to work-around SystemExec::make_wargs
+	 * filename escape and encoding.
+	 *
+	 * A slight downside of using a pipe is that the file duration
+	 * of the produced .mp3 may not be reported accurately.
+	 */
+	bool pipe1 = true;
 	argp[a++] = strdup ("pipe:1");
+#else
+	bool pipe1 = false;
+	argp[a++] = strdup ("-y");
+	argp[a++] = strdup (writer_filename.c_str());
+#endif
 	argp[a] = (char *)0;
 
 	/* argp is free()d in ~SystemExec,
@@ -434,7 +447,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 	ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffmpeg_exe, argp, true);
 
 	PBD::info << "Encode command: { " << exec->to_s () << "}" << endmsg;
-	writer.reset (new AudioGrapher::CmdPipeWriter<T> (exec, writer_filename));
+	writer.reset (new AudioGrapher::CmdPipeWriter<T> (exec, writer_filename, pipe1));
 	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 }
 

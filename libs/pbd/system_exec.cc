@@ -422,6 +422,9 @@ SystemExec::terminate ()
 		delete pid;
 		pid=0;
 	}
+
+	if (thread_active) pthread_join(thread_id_tt, NULL);
+	thread_active = false;
 	::pthread_mutex_unlock(&write_lock);
 }
 
@@ -561,6 +564,8 @@ SystemExec::close_stdin()
 	if (stdinP[1] != INVALID_HANDLE_VALUE) FlushFileBuffers (stdinP[1]);
 	Sleep(200);
 	destroy_pipe (stdinP);
+	if (stdoutP[0] != INVALID_HANDLE_VALUE) FlushFileBuffers (stdoutP[0]);
+	if (stdoutP[1] != INVALID_HANDLE_VALUE) FlushFileBuffers (stdoutP[1]);
 }
 
 size_t
@@ -917,8 +922,7 @@ SystemExec::close_stdin()
 	}
 	close_fd (pin[0]);
 	close_fd (pin[1]);
-	close_fd (pout[0]);
-	close_fd (pout[1]);
+	fsync (pout[0]);
 }
 
 size_t
