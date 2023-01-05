@@ -44,6 +44,7 @@
 #include "ardour/value_as_string.h"
 
 #include "plugin_pin_dialog.h"
+#include "plugin_setup_dialog.h"
 #include "gui_thread.h"
 #include "timers.h"
 #include "ui_config.h"
@@ -523,18 +524,7 @@ PluginPinWidget::refill_output_presets ()
 
 	for (PluginOutputConfiguration::const_iterator i = ppc.begin () ; i != ppc.end (); ++i) {
 		assert (*i > 0);
-		std::string tmp;
-		switch (*i) {
-			case 1:
-				tmp = _("Mono");
-				break;
-			case 2:
-				tmp = _("Stereo");
-				break;
-			default:
-				tmp = string_compose (P_("%1 Channel", "%1 Channels", *i), *i);
-				break;
-		}
+		std::string tmp = PluginSetupDialog::preset_label (*i);
 		_out_presets.AddMenuElem (MenuElem (tmp, sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::select_output_preset), *i)));
 		if (n_audio == *i) {
 			_out_presets.set_text (tmp);

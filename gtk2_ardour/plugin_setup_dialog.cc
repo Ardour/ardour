@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2023 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -207,7 +207,7 @@ PluginSetupDialog::toggle_fan_out ()
 }
 
 std::string
-PluginSetupDialog::preset_label (uint32_t n_audio) const
+PluginSetupDialog::preset_label (uint32_t n_audio)
 {
 		std::string rv;
 		switch (n_audio) {
