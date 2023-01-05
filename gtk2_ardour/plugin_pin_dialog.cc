@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2023 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -395,7 +395,7 @@ PluginPinWidget::plugin_reconfigured ()
 			++_n_inputs;
 		}
 
-		CtrlWidget cw (CtrlWidget ("", Input, dt, id, 0, sidechain));
+		CtrlWidget cw (CtrlWidget ("", Input, dt, id, 0, 0, sidechain));
 		_elements.push_back (cw);
 	}
 
@@ -413,14 +413,14 @@ PluginPinWidget::plugin_reconfigured ()
 			DataType dt (i < _sinks.n_midi () ? DataType::MIDI : DataType::AUDIO);
 			int idx = (dt == DataType::MIDI) ? i : i - _sinks.n_midi ();
 			const Plugin::IOPortDescription& iod (plugin->describe_io_port (dt, true, idx));
-			CtrlWidget cw (CtrlWidget (iod.name, Sink, dt, idx, n, iod.is_sidechain));
+			CtrlWidget cw (CtrlWidget (iod.name, Sink, dt, idx, n, iod.bus_number, iod.is_sidechain));
 			_elements.push_back (cw);
 		}
 		for (uint32_t i = 0; i < _sources.n_total (); ++i) {
 			DataType dt (i < _sources.n_midi () ? DataType::MIDI : DataType::AUDIO);
 			int idx = (dt == DataType::MIDI) ? i : i - _sources.n_midi ();
 			const Plugin::IOPortDescription& iod (plugin->describe_io_port (dt, false, idx));
-			_elements.push_back (CtrlWidget (iod.name, Source, dt, idx, n));
+			_elements.push_back (CtrlWidget (iod.name, Source, dt, idx, n, iod.bus_number));
 		}
 		_in_map[n] = _pi->input_map (n);
 		_out_map[n] = _pi->output_map (n);
@@ -744,7 +744,7 @@ PluginPinWidget::update_element_pos ()
 }
 
 void
-PluginPinWidget::set_color (cairo_t* cr, bool midi)
+PluginPinWidget::set_color (cairo_t* cr, bool midi) const
 {
 	// see also gtk2_ardour/processor_box.cc
 	static const uint32_t audio_port_color = 0x4A8A0EFF; // Green
@@ -764,7 +764,7 @@ PluginPinWidget::set_color (cairo_t* cr, bool midi)
 }
 
 void
-PluginPinWidget::draw_io_pin (cairo_t* cr, const CtrlWidget& w)
+PluginPinWidget::draw_io_pin (cairo_t* cr, const CtrlWidget& w) const
 {
 	if (w.e->sc) {
 		const double dy = w.h * .5;
@@ -860,6 +860,19 @@ PluginPinWidget::draw_plugin_pin (cairo_t* cr, const CtrlWidget& w)
 	}
 }
 
+void
+PluginPinWidget::draw_plugin_bus (cairo_t* cr, const CtrlWidget& w0, const CtrlWidget& w1) const
+{
+	const double dy = w0.h * .5;
+	rounded_top_rectangle (cr, w0.x - 1, w0.y - dy, 2 + w1.x + w0.w - w0.x, w0.h, 7);
+
+	cairo_set_line_width (cr, 1.0);
+	cairo_set_source_rgb (cr, .4, .4, .4);
+	cairo_stroke_preserve (cr);
+	cairo_set_source_rgb (cr, .6, .6, .6);
+	cairo_fill (cr);
+}
+
 double
 PluginPinWidget::pin_x_pos (uint32_t i, double x0, double width, uint32_t n_total, uint32_t n_midi, bool midi)
 {
@@ -913,7 +926,7 @@ PluginPinWidget::edge_coordinates (const CtrlWidget& w, double &x, double &y)
 }
 
 void
-PluginPinWidget::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi, bool horiz, bool dashed)
+PluginPinWidget::draw_connection (cairo_t* cr, double x0, double x1, double y0, double y1, bool midi, bool horiz, bool dashed) const
 {
 	const double bz = 2 * _pin_box_size;
 	double bc = (dashed && x0 == x1) ? 1.25 * _pin_box_size : 0;
@@ -940,7 +953,7 @@ PluginPinWidget::draw_connection (cairo_t* cr, double x0, double x1, double y0, 
 }
 
 void
-PluginPinWidget::draw_connection (cairo_t* cr, const CtrlWidget& w0, const CtrlWidget& w1, bool dashed)
+PluginPinWidget::draw_connection (cairo_t* cr, const CtrlWidget& w0, const CtrlWidget& w1, bool dashed) const
 {
 	double x0, x1, y0, y1;
 	edge_coordinates (w0, x0, y0);
@@ -949,6 +962,36 @@ PluginPinWidget::draw_connection (cairo_t* cr, const CtrlWidget& w0, const CtrlW
 	draw_connection (cr, x0, x1, y0, y1, w0.e->dt == DataType::MIDI, w0.e->sc, dashed);
 }
 
+void
+PluginPinWidget::draw_bus_groups (cairo_t* cr, const CtrlType t) const
+{
+	uint32_t bcnt = 0;
+	CtrlWidget const* g_start = NULL;
+	CtrlWidget const* g_prev = NULL;
+
+	for (auto const& i : _elements) {
+		if (i.e->ct != t || i.e->dt != DataType::AUDIO) {
+			continue;
+		}
+		if (!g_start) {
+			g_start = &i;
+		} else if (i.e->bn > g_start->e->bn) {
+			if (bcnt > 0) {
+				assert (g_start && g_prev);
+				draw_plugin_bus (cr, *g_start, *g_prev);
+			}
+			g_start = &i;
+			bcnt    = 0;
+		} else {
+			++bcnt;
+		}
+		g_prev = &i;
+	}
+	if (bcnt > 0 && g_start->e->bn > 0) {
+		assert (g_start && g_prev);
+		draw_plugin_bus (cr, *g_start, *g_prev);
+	}
+}
 
 bool
 PluginPinWidget::darea_expose_event (GdkEventExpose* ev)
@@ -1102,6 +1145,9 @@ PluginPinWidget::darea_expose_event (GdkEventExpose* ev)
 		}
 	}
 
+	draw_bus_groups (cr, Sink);
+	draw_bus_groups (cr, Source);
+
 	/* pins and ports */
 	for (CtrlElemList::const_iterator i = _elements.begin (); i != _elements.end (); ++i) {
 		switch (i->e->ct) {
@@ -1111,7 +1157,7 @@ PluginPinWidget::darea_expose_event (GdkEventExpose* ev)
 				break;
 			case Sink:
 			case Source:
-				draw_plugin_pin (cr, *i);
+				draw_plugin_pin (cr, *i); // XXX color by bus
 				break;
 		}
 	}
