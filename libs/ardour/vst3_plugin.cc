@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2020 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2019-2023 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,12 +56,14 @@ using namespace Presonus;
 VST3Plugin::VST3Plugin (AudioEngine& engine, Session& session, VST3PI* plug)
 	: Plugin (engine, session)
 	, _plug (plug)
+	, _parameter_queue (128 + plug->parameter_count ())
 {
 	init ();
 }
 
 VST3Plugin::VST3Plugin (const VST3Plugin& other)
 	: Plugin (other)
+	, _parameter_queue (128 + other.parameter_count ())
 {
 	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (other.get_info ());
 	_plug = new VST3PI (nfo->m, nfo->unique_id);
@@ -121,6 +123,7 @@ VST3Plugin::parameter_change_handler (VST3PI::ParameterChange t, uint32_t param,
 			Plugin::EndTouch (param);
 			break;
 		case VST3PI::ValueChange:
+			_parameter_queue.write_one (PV (param, value));
 			/* emit ParameterChangedExternally, mark preset dirty */
 			Plugin::parameter_changed_externally (param, value);
 			break;
@@ -163,7 +166,13 @@ VST3Plugin::default_value (uint32_t port)
 void
 VST3Plugin::set_parameter (uint32_t port, float val, sampleoffset_t when)
 {
-	_plug->set_parameter (port, val, when);
+	if (AudioEngine::instance()->in_process_thread()) {
+		_plug->set_parameter (port, val, when);
+	} else {
+		assert (when == 0);
+		_plug->set_parameter (port, val, when, false);
+		_parameter_queue.write_one (PV (port, val));
+	}
 	Plugin::set_parameter (port, val, when);
 }
 
@@ -622,6 +631,11 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
                              ChanMapping const& in_map, ChanMapping const& out_map,
                              pframes_t n_samples, samplecnt_t offset)
 {
+	Glib::Threads::Mutex::Lock tm (_plug->process_lock (), Glib::Threads::TRY_LOCK);
+	if (!tm.locked ()) {
+		return 0;
+	}
+
 	DEBUG_TRACE (DEBUG::VST3Process, string_compose ("%1 run %2 offset %3\n", name (), n_samples, offset));
 	Plugin::connect_and_run (bufs, start, end, speed, in_map, out_map, n_samples, offset);
 
@@ -717,6 +731,12 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 		_connected_outputs[i] = valid;
 	}
 
+	/* apply parameter changes */
+	PV pv;
+	while (_parameter_queue.read (&pv, 1)) {
+		_plug->set_parameter (pv.port, pv.val, 0);
+	}
+
 	in_index = 0;
 	for (int32_t i = 0; i < (int32_t)_plug->n_midi_inputs (); ++i) {
 		bool     valid = false;
@@ -775,6 +795,8 @@ VST3Plugin::load_preset (PresetRecord r)
 		return false;
 	}
 
+	Glib::Threads::Mutex::Lock lx (_plug->process_lock ());
+
 	if (tmp[0] == "VST3-P") {
 		int program = PBD::atoi (tmp[2]);
 		assert (!r.user);
@@ -797,6 +819,8 @@ VST3Plugin::load_preset (PresetRecord r)
 			DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3Plugin::load_preset: file %1 status %2\n", fn, ok ? "OK" : "error"));
 		}
 	}
+
+	lx.release ();
 
 	if (ok) {
 		Plugin::load_preset (r);
@@ -1385,6 +1409,7 @@ VST3PI::restartComponent (int32 flags)
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::restartComponent %1%2\n", std::hex, flags));
 
 	if (flags & Vst::kReloadComponent) {
+		Glib::Threads::Mutex::Lock pl (_process_lock);
 		/* according to the spec, "The host has to unload completely
 		 * the plug-in (controller/processor) and reload it."
 		 *
@@ -1397,9 +1422,11 @@ VST3PI::restartComponent (int32 flags)
 		activate ();
 	}
 	if (flags & Vst::kParamValuesChanged) {
+		Glib::Threads::Mutex::Lock pl (_process_lock);
 		update_shadow_data ();
 	}
 	if (flags & Vst::kLatencyChanged) {
+		Glib::Threads::Mutex::Lock pl (_process_lock);
 		/* need to re-activate the plugin as per spec */
 		deactivate ();
 		activate ();
@@ -1442,7 +1469,7 @@ VST3PI::performEdit (Vst::ParamID id, Vst::ParamValue v)
 		float value               = v;
 		_shadow_data[idx->second] = value;
 		_update_ctrl[idx->second] = true;
-		set_parameter_internal (id, value, 0, true);
+		/* set_parameter_internal() is called via OnParameterChange */
 		value = _controller->normalizedParamToPlain (id, value);
 		OnParameterChange (ValueChange, idx->second, v); /* EMIT SIGNAL */
 	}
@@ -1770,14 +1797,16 @@ VST3PI::try_set_parameter_by_id (Vst::ParamID id, float value)
 	if (idx == _ctrl_id_index.end ()) {
 		return false;
 	}
-	set_parameter (idx->second, value, 0);
+	set_parameter (idx->second, value, 0, true /* OK, called from set_state */);
 	return true;
 }
 
 void
-VST3PI::set_parameter (uint32_t p, float value, int32 sample_off)
+VST3PI::set_parameter (uint32_t p, float value, int32 sample_off, bool to_list)
 {
-	set_parameter_internal (index_to_id (p), value, sample_off, false);
+	if (to_list) {
+		set_parameter_internal (index_to_id (p), value, sample_off, false);
+	}
 	_shadow_data[p] = value;
 	_update_ctrl[p] = true;
 }
@@ -1810,6 +1839,7 @@ VST3PI::set_program (int pgm, int32 sample_off)
 #endif
 	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::set_program pgm: %1 val: %2 (norm: %3)\n", pgm, value, _controller->plainParamToNormalized (id, pgm)));
 
+	/* must not be called concurrently with processing */
 	int32 index;
 	_input_param_changes.addParameterData (id, index)->addPoint (sample_off, value, index);
 	_controller->setParamNormalized (id, value);
@@ -1885,6 +1915,7 @@ VST3PI::update_contoller_param ()
 void
 VST3PI::set_parameter_by_id (Vst::ParamID id, float value, int32 sample_off)
 {
+	/* called in rt-thread from evoral_to_vst3 */
 	set_parameter_internal (id, value, sample_off, true);
 	std::map<Vst::ParamID, uint32_t>::const_iterator idx = _ctrl_id_index.find (id);
 	if (idx != _ctrl_id_index.end ()) {
@@ -1900,6 +1931,7 @@ VST3PI::set_parameter_internal (Vst::ParamID id, float& value, int32 sample_off,
 	if (!normalized) {
 		value = _controller->plainParamToNormalized (id, value);
 	}
+	/* must not be called concurrently with processing */
 	_input_param_changes.addParameterData (id, index)->addPoint (sample_off, value, index);
 }
 
