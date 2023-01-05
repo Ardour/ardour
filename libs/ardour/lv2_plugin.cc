@@ -2,7 +2,7 @@
  * Copyright (C) 2008-2012 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2008-2019 David Robillard <d@drobilla.net>
- * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2012-2023 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2013-2018 John Emmas <john@creativepost.co.uk>
  * Copyright (C) 2013 Michael R. Fisher <mfisher@bketech.com>
  * Copyright (C) 2014-2016 Tim Mayberry <mojofunk@gmail.com>
@@ -2448,6 +2448,7 @@ LV2Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 		if (lilv_nodes_size (grouplabel) > 0) {
 			const LilvNode* grpname = lilv_nodes_get_first (grouplabel);
 			iod.group_name = lilv_node_as_string (grpname);
+			// TODO set iod.bus_number (nth group)
 		}
 		lilv_nodes_free (grouplabel);
 

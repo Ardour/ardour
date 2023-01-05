@@ -2,7 +2,7 @@
  * Copyright (C) 2006-2016 David Robillard <d@drobilla.net>
  * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2010 Carl Hetherington <carl@carlh.net>
- * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2023 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2014-2017 Tim Mayberry <mojofunk@gmail.com>
  * Copyright (C) 2015-2016 Nick Mainsbridge <mainsbridge@gmail.com>
  * Copyright (C) 2018 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
@@ -1776,6 +1776,7 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 	}
 
 	std::string busname;
+	uint32_t    bus_number = 0;
 	bool is_sidechain = false;
 
 	if (dt == DataType::AUDIO) {
@@ -1788,7 +1789,8 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 					ss << " / Bus " << (1 + bus);
 					busname = _bus_name_in[bus];
 					is_sidechain = bus > 0;
-					busname = _bus_name_in[bus];
+					busname      = _bus_name_in[bus];
+					bus_number   = bus;
 					break;
 				}
 				pid -= bus_inused[bus];
@@ -1801,7 +1803,8 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 					id = pid;
 					ss << _bus_name_out[bus];
 					ss << " / Bus " << (1 + bus);
-					busname = _bus_name_out[bus];
+					busname    = _bus_name_out[bus];
+					bus_number = bus;
 					break;
 				}
 				pid -= bus_outputs[bus];
@@ -1820,8 +1823,9 @@ AUPlugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 	Plugin::IOPortDescription iod (ss.str());
 	iod.is_sidechain = is_sidechain;
 	if (!busname.empty()) {
-		iod.group_name = busname;
+		iod.group_name    = busname;
 		iod.group_channel = id;
+		iod.bus_number    = bus_number;
 	}
 	return iod;
 }

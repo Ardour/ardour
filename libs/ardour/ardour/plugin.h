@@ -3,7 +3,7 @@
  * Copyright (C) 2005-2007 Taybin Rutkin <taybin@taybin.com>
  * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
  * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
- * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2023 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,11 +131,12 @@ public:
 
 	struct LIBARDOUR_API IOPortDescription {
 	public:
-		IOPortDescription (const std::string& n, bool sc = false, std::string gn = "", uint32_t gc = 0)
+		IOPortDescription (const std::string& n, bool sc = false, std::string gn = "", uint32_t gc = 0, uint32_t bn = 0)
 		        : name (n)
 		        , is_sidechain (sc)
 		        , group_name (gn.empty () ? n : gn)
 		        , group_channel (gc)
+		        , bus_number (bn)
 		{ }
 
 		IOPortDescription (const IOPortDescription& other)
@@ -143,6 +144,7 @@ public:
 		        , is_sidechain (other.is_sidechain)
 		        , group_name (other.group_name)
 		        , group_channel (other.group_channel)
+		        , bus_number (other.bus_number)
 		{ }
 
 		std::string name;
@@ -150,6 +152,7 @@ public:
 
 		std::string group_name;
 		uint32_t    group_channel;
+		uint32_t    bus_number;
 	};
 
 	virtual IOPortDescription         describe_io_port (DataType dt, bool input, uint32_t id) const;

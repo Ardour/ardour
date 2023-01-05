@@ -1656,7 +1656,7 @@ VST3PI::count_channels (Vst::MediaType media, Vst::BusDirection dir, Vst::BusTyp
 				return std::min<int32> (1, bus.channelCount);
 #else
 				/* Some plugin leave it at zero, even though they accept events */
-				_io_name[media][dir].push_back (Plugin::IOPortDescription (bus_name, is_sidechain));
+				_io_name[media][dir].push_back (Plugin::IOPortDescription (bus_name, is_sidechain, "", 0, i));
 				return 1;
 #endif
 			} else {
@@ -1667,7 +1667,7 @@ VST3PI::count_channels (Vst::MediaType media, Vst::BusDirection dir, Vst::BusTyp
 					} else {
 						channel_name = bus_name;
 					}
-					_io_name[media][dir].push_back (Plugin::IOPortDescription (channel_name, is_sidechain, bus_name, j));
+					_io_name[media][dir].push_back (Plugin::IOPortDescription (channel_name, is_sidechain, bus_name, j, i));
 				}
 				n_channels += bus.channelCount;
 			}
