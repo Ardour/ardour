@@ -47,6 +47,8 @@
 using namespace std;
 using namespace Steinberg;
 
+#define ARDOUR_VST3_CACHE_FILE_VERSION 2
+
 static const char* fmt_media (Vst::MediaType m) {
 	switch (m) {
 		case Vst::kAudio: return "kAudio";
@@ -392,8 +394,20 @@ ARDOUR::vst3_valid_cache_file (std::string const& module_path, bool verbose, boo
 		if (sb_vst.st_mtime < sb_v3i.st_mtime) {
 			/* plugin is older than cache file */
 			if (verbose) {
-				PBD::info << "Cache file is up-to-date." << endmsg;
+				PBD::info << "Cache file timestamp is valid." << endmsg;
 			}
+			/* check file format version */
+			XMLTree tree;
+			if (!tree.read (cache_file)) {
+				PBD::info << "Cache file is not valid XML." << endmsg;
+				return "";
+			}
+			int cf_version = 0;
+			if (!tree.root()->get_property ("version", cf_version) || cf_version < ARDOUR_VST3_CACHE_FILE_VERSION) {
+				PBD::info << "Cache file version is too old." << endmsg;
+				return "";
+			}
+			PBD::info << "Cache file is valid and up-to-date." << endmsg;
 			return cache_file;
 		} else if  (verbose) {
 			PBD::info << "Stale cache." << endmsg;
@@ -454,7 +468,7 @@ bool
 ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& bundle_path, boost::function<void (std::string const&, std::string const&, VST3Info const&)> cb, bool verbose)
 {
 	XMLNode* root = new XMLNode ("VST3Cache");
-	root->set_property ("version", 1);
+	root->set_property ("version", ARDOUR_VST3_CACHE_FILE_VERSION);
 	root->set_property ("bundle", bundle_path);
 	root->set_property ("module", module_path);
 

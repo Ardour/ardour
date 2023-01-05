@@ -5,7 +5,7 @@
  * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2012-2015 Tim Mayberry <mojofunk@gmail.com>
  * Copyright (C) 2014-2018 John Emmas <john@creativepost.co.uk>
- * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2023 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2018 Ben Loftis <ben@harrisonconsoles.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -2149,15 +2149,7 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 	XMLTree tree;
 	if (cache_file.empty ()) {
 		run_scan = true;
-	} else if (tree.read (cache_file)) {
-		/* valid cache file was found, now check version
-		 * see ARDOUR::vst3_scan_and_cache VST3Cache version
-		 */
-		int cf_version = 0;
-		if (!tree.root()->get_property ("version", cf_version) || cf_version < 1) {
-			run_scan = true;
-		}
-	} else {
+	} else if (!tree.read (cache_file)) {
 		/* failed to parse XML */
 		run_scan = true;
 	}
