@@ -161,7 +161,7 @@ CONFIG_VARIABLE (bool, use_click_emphasis, "use-click-emphasis", true)
  */
 CONFIG_VARIABLE (bool, skip_playback, "skip-playback", true)
 CONFIG_VARIABLE (bool, plugins_stop_with_transport, "plugins-stop-with-transport", false)
-CONFIG_VARIABLE (bool, recording_resets_xrun_count, "recording-resets-xrun-count,", false)
+CONFIG_VARIABLE (bool, recording_resets_xrun_count, "recording-resets-xrun-count", false)
 CONFIG_VARIABLE (bool, stop_recording_on_xrun, "stop-recording-on-xrun", false)
 CONFIG_VARIABLE (bool, create_xrun_marker, "create-xrun-marker", false)
 CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", false)
