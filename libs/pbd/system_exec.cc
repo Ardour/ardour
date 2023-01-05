@@ -531,7 +531,7 @@ void
 SystemExec::output_interposer()
 {
 	DWORD bytesRead = 0;
-	char data[BUFSIZ];
+	char data[8192];
 #if 0 // untested code to set up nonblocking
 	unsigned long l = 1;
 	ioctlsocket(stdoutP[0], FIONBIO, &l);
@@ -543,7 +543,7 @@ SystemExec::output_interposer()
 		if (bytesAvail < 1) {Sleep(500); printf("N/A\n"); continue;}
 #endif
 		if (stdoutP[0] == INVALID_HANDLE_VALUE) break;
-		if (!ReadFile(stdoutP[0], data, BUFSIZ - 1, &bytesRead, 0)) {
+		if (!ReadFile(stdoutP[0], data, 8191, &bytesRead, 0)) {
 			DWORD err =  GetLastError();
 			if (err == ERROR_IO_PENDING) continue;
 			break;
