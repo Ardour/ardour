@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2019-2023 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,15 +84,6 @@ count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir,
 		Vst::BusInfo bus;
 		tresult rv = c->getBusInfo (media, dir, i, bus);
 		if (rv == kResultTrue && bus.busType == type) {
-#if 1
-			if ((type == Vst::kMain && i != 0) || (type == Vst::kAux && i != 1)) {
-				/* For now allow we only support one main bus, and one aux-bus.
-				 * Also an aux-bus by itself is currently N/A.
-				 */
-				PBD::info << "VST3: \\ ignored bus: " << i << " type: " << fmt_type (bus.busType) << " count: " << bus.channelCount << endmsg;
-				continue;
-			}
-#endif
 			if (verbose) {
 				PBD::info << "VST3: - bus: " << i << " count: " << bus.channelCount << endmsg;
 			}
@@ -107,9 +98,7 @@ count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir,
 			} else {
 				n_channels += bus.channelCount;
 			}
-		} else if (verbose && rv == kResultTrue) {
-			PBD::info << "VST3: \\ ignored bus: " << i << " mismatched type: " << fmt_type (bus.busType) << endmsg;
-		} else if (verbose) {
+		} else if (verbose && rv != kResultTrue) {
 			PBD::info << "VST3: \\ error getting busInfo for bus: " << i << " rv: " << rv << ", got type: " << fmt_type (bus.busType) << endmsg;
 		}
 	}

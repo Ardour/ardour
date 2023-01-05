@@ -133,8 +133,21 @@ public:
 
 	ARDOUR::Plugin::IOPortDescription describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const;
 
-	uint32_t n_audio_inputs () const;
-	uint32_t n_audio_outputs () const;
+	uint32_t n_audio_inputs (bool with_aux = true) const;
+	uint32_t n_audio_outputs (bool with_aux = true) const;
+
+	uint32_t n_audio_aux_in () const { return _n_aux_inputs; }
+	uint32_t n_audio_aux_out () const { return _n_aux_outputs; }
+
+	struct AudioBusInfo {
+		AudioBusInfo (Vst::BusType t, int32_t c) : type (t), n_chn (c) {}
+		AudioBusInfo () : type (Vst::kMain), n_chn (0) {}
+		Vst::BusType type;
+		int32_t      n_chn;
+	};
+
+	std::map<int, AudioBusInfo> const& bus_info_in () const { return _bus_info_in; }
+	std::map<int, AudioBusInfo> const& bus_info_out () const { return _bus_info_out; }
 
 	/* MIDI/Event interface */
 	void cycle_start ();
@@ -294,6 +307,13 @@ private:
 
 	std::vector<Vst::AudioBusBuffers> _busbuf_in;
 	std::vector<Vst::AudioBusBuffers> _busbuf_out;
+
+	/* cache channels/bus Vst::AudioBusBuffers::numChannels */
+	std::map<int, int> _n_buschn_in;
+	std::map<int, int> _n_buschn_out;
+
+	std::map<int, AudioBusInfo> _bus_info_in;
+	std::map<int, AudioBusInfo> _bus_info_out;
 
 	int _n_inputs;
 	int _n_outputs;
