@@ -275,7 +275,54 @@ VST3Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) cons
 PluginOutputConfiguration
 VST3Plugin::possible_output () const
 {
-	return Plugin::possible_output (); // TODO
+	auto const& bi (_plug->bus_info_out ());
+	if (bi.size() < 2) {
+		return Plugin::possible_output ();
+	}
+#if 0
+	PluginOutputConfiguration oc;
+	int32_t sum = 0;
+	for (auto const& n : bi) {
+		sum += n.second.n_chn;
+		oc.insert (sum);
+	}
+	return oc;
+#else
+	/* first main out, + individual stereo main outs, +all main outs, + individual aux outs */
+
+	auto i         = bi.begin ();
+	int32_t sum    = i->second.n_chn;
+	bool seen_aux  = i->second.type == Vst::kAux;
+	bool seen_mono = sum == 1;
+
+	PluginOutputConfiguration oc;
+	oc.insert (sum);
+
+	for (++i; i != bi.end (); ++i) {
+		if (seen_aux || seen_mono) {
+			sum += i->second.n_chn;
+			oc.insert (sum);
+		}
+		else if (i->second.type == Vst::kAux) {
+			oc.insert (sum);
+			seen_aux = true;
+			sum += i->second.n_chn;
+			oc.insert (sum);
+		} else {
+			sum += i->second.n_chn;
+			if (i->second.n_chn == 1) {
+				seen_mono = true;
+				oc.insert (sum);
+			} else if (!seen_mono) {
+				oc.insert (sum);
+			}
+		}
+	}
+	if (!seen_aux && seen_mono) {
+		oc.insert (sum);
+	}
+	return oc;
+#endif
 }
 
 /* ****************************************************************************
