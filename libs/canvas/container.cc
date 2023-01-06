@@ -76,6 +76,9 @@ Container::compute_bounding_box () const
 void
 Container::set_render_with_alpha (double alpha)
 {
+	if (alpha == 1.0 && NULL != g_getenv("ARDOUR_NO_OPAQUE_RENDER_GROUP")) {
+		alpha = -1; // disable render group when fully opaque
+	}
 	if (_render_with_alpha == alpha) {
 		return;
 	}
