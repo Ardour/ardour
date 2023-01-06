@@ -585,13 +585,18 @@ Vst3ParameterChanges::addParameterData (Vst::ParamID const& pid, int32& index)
 		}
 	}
 
-	if (_used_queue_count < (int32)_queue.size ()) {
-		index = _used_queue_count++;
-		_queue[index].setParameterId (pid);
-		return &_queue[index];
+	/* some plugins (e.g. Roland JD-800) have zero controls
+	 * (set_n_params (0)) but MIDI controls (which are not accounted for).
+	 * So we grow the list as needed. NB. It is not rt-safe to do so, but it
+	 * only happens once initially.
+	 */
+	if (_used_queue_count >= (int32)_queue.size ()) {
+		_queue.resize (_used_queue_count + 1);
 	}
-	index = 0;
-	return 0;
+
+	index = _used_queue_count++;
+	_queue[index].setParameterId (pid);
+	return &_queue[index];
 }
 
 /* ****************************************************************************/

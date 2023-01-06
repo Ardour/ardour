@@ -1230,6 +1230,12 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 		_update_ctrl.push_back (false);
 	}
 
+	if (_n_midi_inputs > 0 || _n_midi_outputs > 0) {
+		n_params += 128;
+	} else if (n_params == 0) {
+		n_params = 16; /* arbitrary baseline, grows as needed */
+	}
+
 	_input_param_changes.set_n_params (n_params);
 	_output_param_changes.set_n_params (n_params);
 
