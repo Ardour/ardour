@@ -36,6 +36,7 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/progressbar.h>
 
 #include "ardour/types.h"
 #include "ardour/tempo.h"
@@ -82,6 +83,7 @@ private:
 	void ports_changed ();
 
 	void tap_tempo (int64_t);
+	void toggle_tap (bool);
 	void midi_event (MIDI::byte*, size_t, MIDI::samplecnt_t);
 
 	typedef std::map<std::string,int> NoteTypes;
@@ -118,6 +120,7 @@ private:
 	Gtk::ComboBoxText tempo_type;
 	Gtk::ComboBoxText lock_style;
 	Gtk::ComboBox _midi_port_combo;
+	Gtk::ProgressBar pbar;
 
 	class MidiPortCols : public Gtk::TreeModelColumnRecord
 	{
