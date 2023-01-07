@@ -24,6 +24,7 @@
 
 #include <vector>
 
+#include <glibmm/convert.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/timer.h>
 
@@ -427,6 +428,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 	}
 
 #ifdef PLATFORM_WINDOWS
+#if 0
 	/* A pipe is used to work-around SystemExec::make_wargs
 	 * filename escape and encoding.
 	 *
@@ -435,6 +437,15 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 	 */
 	bool pipe1 = true;
 	argp[a++] = strdup ("pipe:1");
+# else
+	argp[a++] = strdup ("-y");
+	try {
+		argp[a] = strdup (Glib::locale_from_utf8 (writer_filename).c_str());
+	} catch (Glib::ConvertError&) {
+		argp[a] = strdup (Glib::convert_with_fallback (writer_filename, "UTF-8", "ASCII", "_").c_str()); // or "CP1252"
+	}
+	++a;
+# endif
 #else
 	bool pipe1 = false;
 	argp[a++] = strdup ("-y");
