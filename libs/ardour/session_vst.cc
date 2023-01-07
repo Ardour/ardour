@@ -189,12 +189,12 @@ intptr_t Session::vst_callback (
 			timeinfo->sampleRate = session->sample_rate();
 
 			if (value & (kVstTempoValid)) {
-				const Tempo& t (tmap->metric_at (now).tempo());
+				const Tempo& t (tmap->metric_at (timepos_t (now)).tempo());
 				timeinfo->tempo = t.quarter_notes_per_minute ();
 				newflags |= (kVstTempoValid);
 			}
 			if (value & (kVstTimeSigValid)) {
-				const Meter& ms (tmap->metric_at (now).meter());
+				const Meter& ms (tmap->metric_at (timepos_t (now)).meter());
 				timeinfo->timeSigNumerator = ms.divisions_per_bar ();
 				timeinfo->timeSigDenominator = ms.note_value ();
 				newflags |= (kVstTimeSigValid);

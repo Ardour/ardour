@@ -653,7 +653,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 
 	{
 		TempoMap::SharedPtr tmap (TempoMap::use());
-		const TempoMetric&  metric (tmap->metric_at (start));
+		const TempoMetric&  metric (tmap->metric_at (timepos_t (start)));
 		const BBT_Time&     bbt (metric.bbt_at (timepos_t (start)));
 
 		context.tempo              = metric.tempo().quarter_notes_per_minute ();
