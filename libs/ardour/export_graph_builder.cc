@@ -427,28 +427,15 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 		argp[a++] = SystemExec::format_key_value_parameter (it->first.c_str(), it->second.c_str());
 	}
 
-#ifdef PLATFORM_WINDOWS
-#if 0
-	/* A pipe is used to work-around SystemExec::make_wargs
-	 * filename escape and encoding.
-	 *
-	 * A slight downside of using a pipe is that the file duration
-	 * of the produced .mp3 may not be reported accurately.
-	 */
-	bool pipe1 = true;
-	argp[a++] = strdup ("pipe:1");
-# else
 	argp[a++] = strdup ("-y");
+#ifdef PLATFORM_WINDOWS
 	try {
 		argp[a] = strdup (Glib::locale_from_utf8 (writer_filename).c_str());
 	} catch (Glib::ConvertError&) {
 		argp[a] = strdup (Glib::convert_with_fallback (writer_filename, "UTF-8", "ASCII", "_").c_str()); // or "CP1252"
 	}
 	++a;
-# endif
 #else
-	bool pipe1 = false;
-	argp[a++] = strdup ("-y");
 	argp[a++] = strdup (writer_filename.c_str());
 #endif
 	argp[a] = (char *)0;
@@ -458,7 +445,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 	ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffmpeg_exe, argp, true);
 
 	PBD::info << "Encode command: { " << exec->to_s () << "}" << endmsg;
-	writer.reset (new AudioGrapher::CmdPipeWriter<T> (exec, writer_filename, pipe1));
+	writer.reset (new AudioGrapher::CmdPipeWriter<T> (exec, writer_filename, false));
 	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 }
 
