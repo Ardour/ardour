@@ -83,6 +83,7 @@
 #include "selection.h"
 #include "streamview.h"
 #include "patch_change_dialog.h"
+#include "velocity_ghost_region.h"
 #include "verbose_cursor.h"
 #include "note.h"
 #include "hit.h"
@@ -1627,7 +1628,12 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	if (mtv && mtv->midi_view()) {
 		return 0;
 	} else {
-		ghost = new MidiGhostRegion (*this, tv, trackview, unit_position);
+		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>(&tv);
+		if (atv && atv->parameter() == Evoral::Parameter (MidiVelocityAutomation)) {
+			ghost = new VelocityGhostRegion (*this, tv, trackview, unit_position);
+		} else {
+			ghost = new MidiGhostRegion (*this, tv, trackview, unit_position);
+		}
 	}
 
 	ghost->set_colors ();

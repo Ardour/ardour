@@ -43,7 +43,8 @@ namespace ArdourCanvas {
 	class Text;
 }
 
-/** Base class for canvas notes (sustained note rectangles and hit diamonds).
+/** Base class for canvas notes (sustained note rectangles, percussive hit diamonds,
+ * and velocity lollipops)
  *
  * This is not actually a canvas item itself to avoid the dreaded diamond
  * inheritance pattern, since various types of canvas items (Note (rect), Hit

@@ -44,7 +44,6 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "ui_config.h"
-#include "velocity_region_view.h"
 
 #include "pbd/i18n.h"
 
@@ -95,50 +94,27 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 
 	RegionView *region_view;
 
-	if (_automation_view.parameter().type() == MidiVelocityAutomation) {
+	for (auto const & rv : region_views) {
+		if (rv->region() == region) {
 
-		for (auto const & rv : region_views) {
-			if (rv->region() == region) {
+			/* great. we already have an AutomationRegionView for this Region. use it again. */
+			AutomationRegionView* arv = dynamic_cast<AutomationRegionView*>(rv);;
 
-				/* great. we already have an AutomationRegionView for this Region. use it again. */
-				VelocityRegionView* vrv = dynamic_cast<VelocityRegionView*>(rv);
-
-				if (vrv->line()) {
-					vrv->line()->set_list (list);
-				}
-				rv->set_valid (true);
-				display_region (vrv);
-
-				return 0;
+			if (arv->line()) {
+				arv->line()->set_list (list);
 			}
+			rv->set_valid (true);
+			display_region (arv);
+
+			return 0;
 		}
-
-		region_view = new VelocityRegionView (_canvas_group, _automation_view, region, list, _samples_per_pixel, region_color);
-
-	} else {
-
-		for (auto const & rv : region_views) {
-			if (rv->region() == region) {
-
-				/* great. we already have an AutomationRegionView for this Region. use it again. */
-				AutomationRegionView* arv = dynamic_cast<AutomationRegionView*>(rv);;
-
-				if (arv->line()) {
-					arv->line()->set_list (list);
-				}
-				rv->set_valid (true);
-				display_region (arv);
-
-				return 0;
-			}
-		}
-
-		region_view = new AutomationRegionView (
-			_canvas_group, _automation_view, region,
-			_automation_view.parameter (), list,
-			_samples_per_pixel, region_color
-			);
 	}
+
+	region_view = new AutomationRegionView (
+		_canvas_group, _automation_view, region,
+		_automation_view.parameter (), list,
+		_samples_per_pixel, region_color
+		);
 
 	region_view->init (false);
 	region_views.push_front (region_view);

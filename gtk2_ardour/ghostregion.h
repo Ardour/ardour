@@ -27,10 +27,20 @@
 
 #include <vector>
 #include <boost/unordered_map.hpp>
+
 #include "pbd/signals.h"
+
+#include "gtkmm2ext/colors.h"
 
 namespace ArdourWaveView {
 	class WaveView;
+}
+
+namespace ArdourCanvas {
+	class Container;
+	class Rectangle;
+	class Item;
+	class Polygon;
 }
 
 class NoteBase;
@@ -111,10 +121,10 @@ public:
 
 	void update_contents_height();
 
-	void add_note(NoteBase*);
-	void update_note (GhostEvent* note);
-	void update_hit (GhostEvent* hit);
-	void remove_note (NoteBase*);
+	virtual void add_note(NoteBase*);
+	virtual void update_note (GhostEvent* note);
+	virtual void update_hit (GhostEvent* hit);
+	virtual void remove_note (NoteBase*);
 
 	void model_changed();
 	void view_changed();
