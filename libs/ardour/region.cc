@@ -583,19 +583,36 @@ Region::special_set_position (timepos_t const & pos)
 void
 Region::set_position_time_domain (Temporal::TimeDomain td)
 {
-	if (_length.val().time_domain() != td) {
-
-		/* _length is a property so we cannot directly call
-		 * ::set_time_domain() on it. Create a temporary timecnt_t,
-		 * change it's time domain, and then assign to _length
-		 */
-
-		timecnt_t t (_length.val());
-		t.set_time_domain (td);
-		_length = t;
-
-		send_change (Properties::time_domain);
+	if (position_time_domain() == td) {
+		return;
 	}
+
+	/* _length is a property so we cannot directly call
+	 * ::set_time_domain() on it. Create a temporary timecnt_t,
+	 * change it's time domain, and then assign to _length.
+	 *
+	 * The region's duration (distance) time-domain must not change (!)
+	 *
+	 * An Audio region's duration must always be given in samples,
+	 * and a MIDI region's duration in beats.
+	 * (Beat granularity is coarser than samples. If an Audio-region's duration
+	 * is specified in beats, the disk-reader can try to read more samples than
+	 * are present in the source. This causes various follow up bugs.
+	 *
+	 * This can change in the future:
+	 * - When events inside a MIDI region can use Audio-time, a MIDI region's duration must also be specified in in audio-time.
+	 * - When Ardour support time-strech of Audio regions at disk-reader level, Audio regions can be stretched to match music-time.
+	 */
+	timepos_t p (position ());
+	p.set_time_domain (td);
+
+	timecnt_t t (length ().distance (), p);
+	_length = t;
+
+	/* ensure time-domain matches Datatype -- this may trigger in old broken sessions */
+	assert (_length.val().time_domain () == time_domain ());
+
+	send_change (Properties::time_domain);
 }
 
 void
@@ -619,7 +636,7 @@ Region::update_after_tempo_map_change (bool send)
 	 * change
 	 */
 
-	if (_length.val().time_domain() == Temporal::AudioTime) {
+	if (_length.val().time_domain() == Temporal::AudioTime && position_time_domain () == Temporal::AudioTime) {
 		return;
 	}
 
