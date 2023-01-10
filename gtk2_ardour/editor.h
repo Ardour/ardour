@@ -1036,7 +1036,6 @@ private:
 	BBTRulerScale bbt_ruler_scale;
 
 	uint32_t bbt_bars;
-	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
 	void compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper);
 

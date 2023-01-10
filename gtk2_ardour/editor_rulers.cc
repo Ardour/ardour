@@ -1065,7 +1065,6 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 	bbt_bar_helper_on = false;
 	bbt_bars = 0;
-	bbt_nmarks = 1;
 
 	bbt_ruler_scale =  bbt_show_many;
 
@@ -1154,7 +1153,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	Temporal::TempoMapPoints::const_iterator i;
 
 	char buf[64];
-	gint  n = 0;
 	Temporal::BBT_Time next_beat;
 	uint32_t beats = 0;
 	double bbt_position_of_helper;
@@ -1165,6 +1163,12 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	Temporal::TempoMapPoints grid;
 
 	compute_current_bbt_points (grid, lower, upper);
+
+#if 0 // DEBUG GRID
+	for (auto const& g : grid) {
+		std::cout << "Grid " << g.time() <<  " Beats: " << g.beats() << " BBT: " << g.bbt() << " sample: " << g.sample(_session->nominal_sample_rate ()) << "\n"; 
+	}
+#endif
 
 	if (distance (grid.begin(), grid.end()) == 0) {
 		return;
@@ -1245,7 +1249,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	switch (bbt_ruler_scale) {
 
 	case bbt_show_many:
-		bbt_nmarks = 1;
 		snprintf (buf, sizeof(buf), "cannot handle %" PRIu32 " bars", bbt_bars);
 		mark.style = ArdourCanvas::Ruler::Mark::Major;
 		mark.label = buf;
@@ -1254,8 +1257,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 		break;
 
 	case bbt_show_64:
-			bbt_nmarks = (gint) (bbt_bars / 64) + 1;
-			for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
+			for (i = grid.begin(); i != grid.end(); i++) {
 				BBT_Time bbt ((*i).bbt());
 				if (bbt.is_bar()) {
 					if (bbt.bars % 64 == 1) {
@@ -1273,15 +1275,13 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 						mark.label = buf;
 						mark.position = (*i).sample (sr);
 						marks.push_back (mark);
-						++n;
 					}
 				}
 			}
 			break;
 
 	case bbt_show_16:
-		bbt_nmarks = (bbt_bars / 16) + 1;
-		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
+		for (i = grid.begin(); i != grid.end(); i++) {
 			BBT_Time bbt ((*i).bbt());
 			if (bbt.is_bar()) {
 			  if (bbt.bars % 16 == 1) {
@@ -1299,15 +1299,13 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 				mark.label = buf;
 				mark.position = (*i).sample(sr);
 				marks.push_back (mark);
-				++n;
 			  }
 			}
 		}
 	  break;
 
 	case bbt_show_4:
-		bbt_nmarks = (bbt_bars / 4) + 1;
-		for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
+		for (i = grid.begin(); i != grid.end(); ++i) {
 			BBT_Time bbt ((*i).bbt());
 			if (bbt.is_bar()) {
 				if (bbt.bars % 4 == 1) {
@@ -1321,15 +1319,13 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 					mark.label = buf;
 					mark.position = (*i).sample (sr);
 					marks.push_back (mark);
-					++n;
 				}
 			}
 		}
 	  break;
 
 	case bbt_show_1:
-		bbt_nmarks = bbt_bars + 2;
-		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
+		for (i = grid.begin(); i != grid.end(); ++i) {
 			BBT_Time bbt ((*i).bbt());
 			if (bbt.is_bar()) {
 				snprintf (buf, sizeof(buf), "%" PRIu32, bbt.bars);
@@ -1337,7 +1333,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 				mark.label = buf;
 				mark.position = (*i).sample (sr);
 				marks.push_back (mark);
-				++n;
 			}
 		}
 	break;
@@ -1345,14 +1340,13 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	case bbt_show_quarters:
 
 		beats = distance (grid.begin(), grid.end());
-		bbt_nmarks = beats + 2;
 
 		mark.label = "";
 		mark.position = lower;
 		mark.style = ArdourCanvas::Ruler::Mark::Micro;
 		marks.push_back (mark);
 
-		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
+		for (i = grid.begin(); i != grid.end(); ++i) {
 
 			BBT_Time bbt ((*i).bbt());
 
@@ -1374,7 +1368,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 				mark.label = buf;
 				mark.position = (*i).sample (sr);
 				marks.push_back (mark);
-				n++;
 			}
 		}
 		break;
@@ -1386,7 +1379,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	case bbt_show_onetwentyeighths:
 
 		beats = distance (grid.begin(), grid.end());
-		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
 
 		bbt_position_of_helper = lower + (3 * Editor::get_current_zoom ());
 
@@ -1395,7 +1387,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 		mark.style = ArdourCanvas::Ruler::Mark::Micro;
 		marks.push_back (mark);
 
-		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
+		for (i = grid.begin(); i != grid.end(); ++i) {
 
 			BBT_Time bbt ((*i).bbt());
 
@@ -1422,7 +1414,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 				mark.label =  buf;
 				mark.position = (*i).sample (sr);
 				marks.push_back (mark);
-				n++;
 			}
 		}
 
