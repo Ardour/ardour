@@ -1773,9 +1773,10 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 		timepos_t where;
 
 		if (changed_position && !_x_constrained) {
-			where = timepos_t (i->view->region()->position().earlier (drag_delta));
+			where = i->view->region()->position().earlier (drag_delta);
+			where.set_time_domain (_last_position.time_domain());
 		} else {
-			where = timepos_t (i->view->region()->position());
+			where = i->view->region()->position();
 		}
 
 		/* compute full extent of regions that we're going to insert */
