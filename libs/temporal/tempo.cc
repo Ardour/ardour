@@ -2107,11 +2107,14 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 		if (reset) {
 
-			/* reset our sense of "now" to be wherever the point is */
+			/* bbt is position for the next grid-line.
+			 * It is already increameted above depending on mod_bar and beat_div
+			 * and must not be changed here.
+			 *
+			 * Skip metrics until p->bbt() is at or after up to next grid mod div.
+			 */
 
-			start = p->sclock();
-			bbt = p->bbt();
-			beats = p->beats();
+			assert (p->bbt() <= bbt);
 
 			/* If we just arrived at a point (indicated by bbt ==
 			 * p->bbt()), use all points at the same location to
@@ -2122,7 +2125,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 			bool rebuild_metric = false;
 
-			while (p->bbt() == bbt) {
+			while (p != _points.end() && p->bbt() <= bbt) {
 
 				TempoPoint const * tpp;
 				MeterPoint const * mpp;
@@ -2147,6 +2150,8 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("second| with start = %1 aka %2 rebuilt metric from points, now %3\n", start, bbt, metric));
 			}
 
+			/* this is potentially ambiguous */
+			start = metric.superclock_at (bbt);
 		}
 
 		/* Update the quarter-note time value to match the BBT and
