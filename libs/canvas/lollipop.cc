@@ -73,7 +73,8 @@ Lollipop::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) 
 	}
 
 	context->move_to (p0.x, p0.y);
-	context->line_to (p1.x, p1.y);
+	/* Do not enter the circle */
+	context->line_to (p1.x, p1.y + _radius);
 	context->stroke ();
 
 	/* the circle */
@@ -125,6 +126,7 @@ Lollipop::set_length (Coord len)
 {
 	if (_points[1].y != _points[0].y - len) {
 		begin_change ();
+		/* draw upwards */
 		_points[1].y = _points[0].y - len;
 		end_change ();
 	}
@@ -135,13 +137,14 @@ Lollipop::set (Duple const & d, Coord l, Coord r)
 {
 	begin_change ();
 
+	_radius = r;
+
 	_points[0].x = d.x;
 	_points[1].x = d.x;
 
 	_points[0].y = d.y;
+	/* Draw upwards */
 	_points[1].y = _points[0].y - l;
-
-	_radius = r;
 
 	end_change ();
 }
@@ -158,12 +161,14 @@ Lollipop::covers (Duple const & point) const
 
 	if (_points[0].x == _points[1].x) {
 		/* line is vertical, just check x coordinate */
-		return fabs (_points[0].x - p.x) <= threshold;
-	}
-
-	if (_points[0].y == _points[1].y) {
+		if (fabs (_points[0].x - p.x) <= threshold) {
+			return true;
+		}
+	} else if (_points[0].y == _points[1].y) {
 		/* line is horizontal, just check y coordinate */
-		return fabs (_points[0].y - p.y) <= threshold;
+		if (fabs (_points[0].y - p.y) <= threshold) {
+			return true;
+		}
 	}
 
 	Duple at;

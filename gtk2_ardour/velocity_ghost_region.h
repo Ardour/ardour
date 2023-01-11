@@ -35,6 +35,8 @@ public:
 	void update_hit (GhostEvent* hit);
 	void remove_note (NoteBase*);
 
+	void set_colors ();
+
 private:
 };
 
