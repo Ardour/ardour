@@ -99,7 +99,8 @@ public:
 	class GhostEvent : public sigc::trackable
 	{
 	public:
-		GhostEvent(::NoteBase *, ArdourCanvas::Container *);
+		GhostEvent (::NoteBase *, ArdourCanvas::Container *);
+		GhostEvent (::NoteBase *, ArdourCanvas::Container *, ArdourCanvas::Item* i);
 		virtual ~GhostEvent ();
 
 		NoteBase* event;
@@ -119,7 +120,7 @@ public:
 	void set_samples_per_pixel (double spu);
 	void set_colors();
 
-	void update_contents_height();
+	virtual void update_contents_height();
 
 	virtual void add_note(NoteBase*);
 	virtual void update_note (GhostEvent* note);
@@ -130,7 +131,7 @@ public:
 	void view_changed();
 	void clear_events();
 
-private:
+  protected:
 	ArdourCanvas::Container* _note_group;
 	Gtkmm2ext::Color _outline;
 	ArdourCanvas::Rectangle* _tmp_rect;
