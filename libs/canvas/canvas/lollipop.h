@@ -50,18 +50,9 @@ public:
 	void set (Duple const &, Coord, Coord);
 	void set_x (Coord);
 
-	Coord x0 () const {
-		return _points[0].x;
-	}
-	Coord y0 () const {
-		return _points[0].y;
-	}
-	Coord x1 () const {
-		return _points[1].x;
-	}
-	Coord y1 () const {
-		return _points[1].y;
-	}
+	Coord x ()  const { return _points[0].x; }
+	Coord y0 () const { return _points[0].y; }
+	Coord y1 () const { return _points[1].y; }
 
   private:
 	Duple _points[2];

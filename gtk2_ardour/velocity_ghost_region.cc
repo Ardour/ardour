@@ -45,6 +45,8 @@
 
 using namespace Temporal;
 
+static double const lollipop_radius = 8.0;
+
 VelocityGhostRegion::VelocityGhostRegion (MidiRegionView& mrv, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
 	: MidiGhostRegion (mrv, tv, source_tv, initial_unit_pos)
 {
@@ -59,7 +61,7 @@ VelocityGhostRegion::update_contents_height ()
 {
 	for (auto const & ev : events) {
 		ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (ev.second->item);
-		l->set_length (ev.second->event->note()->velocity() / 127.0 * base_rect->y1 ());
+		l->set (ArdourCanvas::Duple (l->x(), base_rect->y1()), ev.second->event->note()->velocity() / 127.0 * base_rect->y1 (), lollipop_radius);
 	}
 }
 
@@ -76,11 +78,10 @@ VelocityGhostRegion::add_note (NoteBase* n)
 	MidiStreamView* mv = midi_view();
 
 	if (mv) {
-
 		if (!n->item()->visible()) {
-			event->item->hide();
+			l->hide();
 		} else {
-			l->set (ArdourCanvas::Duple (n->x0(), base_rect->y1()), n->note()->velocity() / 127.0 * base_rect->y1(), 10);
+			l->set (ArdourCanvas::Duple (n->x0() - 1.0, base_rect->y1()), n->note()->velocity() / 127.0 * base_rect->y1(), lollipop_radius);
 		}
 	}
 }
@@ -89,7 +90,7 @@ void
 VelocityGhostRegion::update_note (GhostEvent* n)
 {
 	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (n->item);
-	l->set (ArdourCanvas::Duple (n->event->x0(), base_rect->y1()), n->event->note()->velocity() / 127.0 * base_rect->y1(), 10);
+	l->set (ArdourCanvas::Duple (n->event->x0() - 1.0, base_rect->y1()), n->event->note()->velocity() / 127.0 * base_rect->y1(), lollipop_radius);
 }
 
 void
@@ -102,4 +103,8 @@ VelocityGhostRegion::remove_note (NoteBase*)
 {
 }
 
-
+void
+VelocityGhostRegion::set_colors ()
+{
+	base_rect->set_fill_color (Gtkmm2ext::Color (0xff0000ff));
+}
