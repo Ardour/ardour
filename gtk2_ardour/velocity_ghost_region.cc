@@ -80,18 +80,20 @@ VelocityGhostRegion::add_note (NoteBase* n)
 		if (!n->item()->visible()) {
 			event->item->hide();
 		} else {
-			l->set (ArdourCanvas::Duple (n->x0(), n->y0()), n->note()->velocity() / 127.0 * base_rect->y1(), 10);
+			l->set (ArdourCanvas::Duple (n->x0(), base_rect->y1()), n->note()->velocity() / 127.0 * base_rect->y1(), 10);
 		}
 	}
 }
 
 void
-VelocityGhostRegion::update_note (GhostEvent* note)
+VelocityGhostRegion::update_note (GhostEvent* n)
 {
+	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (n->item);
+	l->set (ArdourCanvas::Duple (n->event->x0(), base_rect->y1()), n->event->note()->velocity() / 127.0 * base_rect->y1(), 10);
 }
 
 void
-VelocityGhostRegion::update_hit (GhostEvent* hit)
+VelocityGhostRegion::update_hit (GhostEvent* n)
 {
 }
 
