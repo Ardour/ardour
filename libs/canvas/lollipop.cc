@@ -120,6 +120,32 @@ Lollipop::set_x (Coord x)
 	}
 }
 
+void
+Lollipop::set_length (Coord len)
+{
+	if (_points[1].y != _points[0].y - len) {
+		begin_change ();
+		_points[1].y = _points[0].y - len;
+		end_change ();
+	}
+}
+
+void
+Lollipop::set (Duple const & d, Coord l, Coord r)
+{
+	begin_change ();
+
+	_points[0].x = d.x;
+	_points[1].x = d.x;
+
+	_points[0].y = d.y;
+	_points[1].y = _points[0].y - l;
+
+	_radius = r;
+
+	end_change ();
+}
+
 bool
 Lollipop::covers (Duple const & point) const
 {

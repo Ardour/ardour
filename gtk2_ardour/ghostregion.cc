@@ -208,10 +208,16 @@ MidiGhostRegion::~MidiGhostRegion()
 	delete _note_group;
 }
 
+MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g, ArdourCanvas::Item* i)
+	: event (e)
+	, item (i)
+	, is_hit (false)
+{
+}
+
 MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g)
 	: event (e)
 {
-
 	if (dynamic_cast<Note*>(e)) {
 		item = new ArdourCanvas::Rectangle(
 			g, ArdourCanvas::Rect(e->x0(), e->y0(), e->x1(), e->y1()));

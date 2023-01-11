@@ -29,6 +29,7 @@ public:
 	VelocityGhostRegion (MidiRegionView&, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 	~VelocityGhostRegion ();
 
+	void update_contents_height();
 	void add_note(NoteBase*);
 	void update_note (GhostEvent* note);
 	void update_hit (GhostEvent* hit);
