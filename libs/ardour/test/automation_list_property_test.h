@@ -35,5 +35,5 @@ public:
 	void undoTest ();
 
 private:
-	Temporal::superclock_t saved_superclock_ticks_per_second_;
+	Temporal::superclock_t _saved_superclock_ticks_per_second;
 };
