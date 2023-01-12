@@ -275,10 +275,9 @@ ARDOUR_UI::setup_windows ()
 	}
 
 	if (create_trigger_page ()) {
-		error << _("UI: cannot setup recorder") << endmsg;
+		error << _("UI: cannot setup trigger") << endmsg;
 		return -1;
 	}
-
 
 	if (create_meterbridge ()) {
 		error << _("UI: cannot setup meterbridge") << endmsg;
@@ -423,7 +422,7 @@ ARDOUR_UI::apply_window_settings (bool with_size)
 		_tabs.set_current_page (_tabs.page_num (rc_option_editor->contents()));
 	} else if (recorder && current_tab == "recorder") {
 		_tabs.set_current_page (_tabs.page_num (recorder->contents()));
-	} else if (recorder && current_tab == "trigger") {
+	} else if (trigger_page && current_tab == "trigger") {
 		_tabs.set_current_page (_tabs.page_num (trigger_page->contents()));
 	} else if (editor) {
 		_tabs.set_current_page (_tabs.page_num (editor->contents()));
