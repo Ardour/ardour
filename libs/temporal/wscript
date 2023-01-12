@@ -73,13 +73,13 @@ def build(bld):
         obj.target         = 'temporal_static'
         obj.uselib         = 'GLIBMM GTHREAD XML LIBPBD'
         obj.use            = 'libpbd'
-        obj.vnum           = TEMPORAL_VERSION
+        obj.vnum           = TEMPORAL_LIB_VERSION
         obj.install_path   = ''
         if bld.env['TEST_COVERAGE']:
              obj.linkflags      = ['--coverage']
              obj.cflags         = ['--coverage']
              obj.cxxflags       = ['--coverage']
-        obj.defines        = ['PACKAGE="libevoral"']
+        obj.defines        = ['PACKAGE="libtemporal"']
 
         # Unit tests
         obj              = bld(features = 'cxx cxxprogram')
