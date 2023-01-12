@@ -67,8 +67,8 @@ class _ratio_t {
   public:
 	/* do not allow negative values, this is just a ratio */
 
-	_ratio_t (T n, T d) : _numerator (abs (n)), _denominator (abs(d)) { assert (_denominator != 0); }
-	_ratio_t (T n) : _numerator (abs (n)), _denominator (1) {}
+	_ratio_t (T n, T d) : _numerator (std::abs (n)), _denominator (std::abs(d)) { assert (_denominator != 0); }
+	_ratio_t (T n) : _numerator (std::abs (n)), _denominator (1) {}
 
 	T numerator() const { return _numerator; }
 	T denominator() const { return _denominator; }
