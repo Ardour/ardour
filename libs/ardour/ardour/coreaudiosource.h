@@ -30,14 +30,12 @@
 #include "ardour/audiofilesource.h"
 #include <string>
 
-using namespace std;
-
 namespace ARDOUR {
 
 class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
   public:
 	CoreAudioSource (ARDOUR::Session&, const XMLNode&);
-	CoreAudioSource (ARDOUR::Session&, const string& path, int chn, Flag);
+	CoreAudioSource (ARDOUR::Session&, const std::string& path, int chn, Flag);
 	~CoreAudioSource ();
 
 	void set_path (const std::string& p);
@@ -53,7 +51,7 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
 
 	void flush () {}
 
-	static int get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg);
+	static int get_soundfile_info (std::string path, SoundFileInfo& _info, std::string& error_msg);
 
   protected:
 	void close ();
