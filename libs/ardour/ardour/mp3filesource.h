@@ -23,13 +23,11 @@
 #include "ardour/mp3fileimportable.h"
 #include <string>
 
-using namespace std;
-
 namespace ARDOUR {
 
 class LIBARDOUR_API Mp3FileSource : public AudioFileSource {
 public:
-	Mp3FileSource (ARDOUR::Session&, const string& path, int chn, Flag);
+	Mp3FileSource (ARDOUR::Session&, const std::string& path, int chn, Flag);
 	~Mp3FileSource ();
 
 	/* AudioSource API */
@@ -42,7 +40,7 @@ public:
 	int flush_header () { return 0; }
 	void set_header_natural_position () {};
 
-	static int get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg);
+	static int get_soundfile_info (std::string path, SoundFileInfo& _info, std::string& error_msg);
 
 protected:
 	/* FileSource API */
