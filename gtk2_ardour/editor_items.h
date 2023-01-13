@@ -68,6 +68,7 @@ enum ItemType {
 	SamplesRulerItem,
 	SelectionMarkerItem,
 	DropZoneItem,
+	VelocityItem,
 
 	/* don't remove this */
 
