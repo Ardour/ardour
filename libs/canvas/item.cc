@@ -1010,19 +1010,19 @@ Item::add_child_bounding_boxes (bool include_hidden) const
 		have_one = true;
 	}
 
-	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
+	for (auto const & item : _items) {
 
-		if (!(*i)->visible() && !include_hidden) {
+		if (!item->visible() && !include_hidden) {
 			continue;
 		}
 
-		Rect item_bbox = (*i)->bounding_box ();
+		Rect item_bbox = item->bounding_box ();
 
 		if (!item_bbox) {
 			continue;
 		}
 
-		Rect child_bbox = (*i)->item_to_parent (item_bbox);
+		Rect child_bbox = item->item_to_parent (item_bbox);
 		if (have_one) {
 			bbox = bbox.extend (child_bbox);
 		} else {
