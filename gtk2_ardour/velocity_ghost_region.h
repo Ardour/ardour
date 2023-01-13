@@ -38,6 +38,8 @@ public:
 	void set_colors ();
 
 private:
+	bool lollevent (GdkEvent*, MidiGhostRegion::GhostEvent*);
+	void set_size_and_position (MidiGhostRegion::GhostEvent&);
 };
 
 #endif /* __gtk_ardour_velocity_region_view_h__ */

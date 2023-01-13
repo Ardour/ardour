@@ -62,7 +62,7 @@ GhostRegion::GhostRegion (RegionView& rv,
 	, base_rect (0)
 {
 	group = new ArdourCanvas::Container (parent);
-	CANVAS_DEBUG_NAME (group, "ghost region");
+	CANVAS_DEBUG_NAME (group, "ghost region group");
 	group->set_position (ArdourCanvas::Duple (initial_pos, 0));
 
 	if (is_automation_ghost()) {
@@ -200,6 +200,8 @@ MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
 	if (base_rect) {
 		base_rect->lower_to_bottom();
 	}
+
+	CANVAS_DEBUG_NAME (_note_group, "midi ghost note group");
 }
 
 MidiGhostRegion::~MidiGhostRegion()

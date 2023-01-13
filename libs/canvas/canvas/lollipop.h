@@ -44,19 +44,19 @@ public:
 	Coord radius() const { return _radius; }
 
 	void set_length (Coord);
-	Coord length() const { return _points[1].y - _points[0].y; }
+	Coord length() const { return _length; }
 
 	/* Set origin, length, radius in one pass */
 	void set (Duple const &, Coord, Coord);
 	void set_x (Coord);
 
-	Coord x ()  const { return _points[0].x; }
-	Coord y0 () const { return _points[0].y; }
-	Coord y1 () const { return _points[1].y; }
+	Coord x ()  const { return _position.x; }
+	Coord y0 () const { return _position.y; }
+	Coord y1 () const { return _position.y + _length; }
 
   private:
-	Duple _points[2];
 	Coord _radius;
+	Coord _length;
 };
 
 }
