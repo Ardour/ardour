@@ -1701,6 +1701,7 @@ private:
 
 	bool canvas_scroll_event (GdkEventScroll* event, bool from_canvas);
 	bool canvas_control_point_event (GdkEvent* event,ArdourCanvas::Item*, ControlPoint*);
+	bool canvas_velocity_event (GdkEvent* event,ArdourCanvas::Item*);
 	bool canvas_line_event (GdkEvent* event,ArdourCanvas::Item*, AutomationLine*);
 	bool canvas_selection_rect_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*);
 	bool canvas_selection_start_trim_event (GdkEvent* event,ArdourCanvas::Item*, SelectionRect*);

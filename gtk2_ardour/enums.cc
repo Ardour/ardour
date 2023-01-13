@@ -184,6 +184,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (MinsecRulerItem);
 	REGISTER_ENUM (BBTRulerItem);
 	REGISTER_ENUM (SamplesRulerItem);
+	REGISTER_ENUM (VelocityItem);
 	REGISTER (item_type);
 
 	REGISTER_ENUM(MouseObject);
