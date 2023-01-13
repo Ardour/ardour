@@ -31,27 +31,22 @@ using namespace ArdourCanvas;
 
 Lollipop::Lollipop (Canvas* c)
 	: Item (c)
+	, _radius (8)
+	, _length (0)
 {
 }
 
 Lollipop::Lollipop (Item* parent)
 	: Item (parent)
+	, _radius (8)
+	, _length (0)
 {
 }
 
 void
 Lollipop::compute_bounding_box () const
 {
-	Rect bbox;
-
-	bbox.x0 = min (_points[0].x, _points[1].x);
-	bbox.y0 = min (_points[0].y, _points[1].y);
-	bbox.x1 = max (_points[0].x, _points[1].x) + _radius;
-	bbox.y1 = max (_points[0].y, _points[1].y) + _radius;
-
-	bbox = bbox.expand (0.5 + (_outline_width / 2));
-
-	_bounding_box = bbox;
+	_bounding_box = Rect (-_radius, -_radius, _radius, _length + _radius).expand (0.5 + (_outline_width / 2));
 	set_bbox_clean ();
 }
 
@@ -60,26 +55,25 @@ Lollipop::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) 
 {
 	setup_outline_context (context);
 
-	Duple p0 = item_to_window (Duple (_points[0].x, _points[0].y));
-	Duple p1 = item_to_window (Duple (_points[1].x, _points[1].y));
+	Duple p = _parent->item_to_window (Duple (_position.x, _position.y));
 
 	if (_outline_width <= 1.0) {
 		/* See Cairo FAQ on single pixel lines to understand why we add 0.5
 		 */
 
 		const Duple half_a_pixel (0.5, 0.5);
-		p0 = p0.translate (half_a_pixel);
-		p1 = p1.translate (half_a_pixel);
+		p = p.translate (half_a_pixel);
 	}
 
-	context->move_to (p0.x, p0.y);
-	/* Do not enter the circle */
-	context->line_to (p1.x, p1.y + _radius);
+	/* the line */
+
+	context->move_to (p.x, p.y + _radius);
+	context->line_to (p.x, p.y + _length - _radius);
 	context->stroke ();
 
 	/* the circle */
 
-	context->arc (p1.x, p1.y, _radius, 0.0 * (M_PI/180.0), 360.0 * (M_PI/180.0));
+	context->arc (p.x, p.y, _radius, 0.0 * (M_PI/180.0), 360.0 * (M_PI/180.0));
 
 	if (fill()) {
 		setup_fill_context (context);
@@ -110,12 +104,9 @@ Lollipop::set_radius (Coord r)
 void
 Lollipop::set_x (Coord x)
 {
-	if (x != _points[0].x) {
+	if (x != _position.x) {
 		begin_change ();
-
-		_points[0].x = x;
-		_points[1].x = x;
-
+		_position.x = x;
 		set_bbox_dirty ();
 		end_change ();
 	}
@@ -124,10 +115,10 @@ Lollipop::set_x (Coord x)
 void
 Lollipop::set_length (Coord len)
 {
-	if (_points[1].y != _points[0].y - len) {
+	if (_length != len) {
 		begin_change ();
-		/* draw upwards */
-		_points[1].y = _points[0].y - len;
+		_length = len;
+		set_bbox_dirty ();
 		end_change ();
 	}
 }
@@ -138,63 +129,25 @@ Lollipop::set (Duple const & d, Coord l, Coord r)
 	begin_change ();
 
 	_radius = r;
+	_length = l;
 
-	_points[0].x = d.x;
-	_points[1].x = d.x;
+	set_position (d);
 
-	_points[0].y = d.y;
-	/* Draw upwards */
-	_points[1].y = _points[0].y - l;
-
+	set_bbox_dirty ();
 	end_change ();
 }
 
 bool
 Lollipop::covers (Duple const & point) const
 {
-	const Duple p = window_to_item (point);
+	const Duple p = _parent->window_to_item (point);
 	static const Distance threshold = 2.0;
 
-	/* this quick check works for vertical and horizontal lines, which are
-	 * common.
-	 */
+	/* only the circle is considered as "covering" */
 
-	if (_points[0].x == _points[1].x) {
-		/* line is vertical, just check x coordinate */
-		if (fabs (_points[0].x - p.x) <= threshold) {
-			return true;
-		}
-	} else if (_points[0].y == _points[1].y) {
-		/* line is horizontal, just check y coordinate */
-		if (fabs (_points[0].y - p.y) <= threshold) {
-			return true;
-		}
-	}
-
-	Duple at;
-	double t;
-	Duple a (_points[0]);
-	Duple b (_points[1]);
-	const Rect visible (window_to_item (_canvas->visible_area()));
-
-	/*
-	   Clamp the line endpoints to the visible area of the canvas. If we do
-	   not do this, we have a line segment extending to COORD_MAX and our
-	   math goes wrong.
-	*/
-
-	a.x = min (a.x, visible.x1);
-	a.y = min (a.y, visible.y1);
-	b.x = min (b.x, visible.x1);
-	b.y = min (b.y, visible.y1);
-
-	double d = distance_to_segment_squared (p, a, b, t, at);
-
-	if (t < 0.0 || t > 1.0) {
-		return false;
-	}
-
-	if (d < threshold) {
+	if (((fabs (_position.x - p.x)) <= (_radius + threshold)) &&
+	    ((fabs (_position.y - p.y)) <= (_radius + threshold))) {
+		/* inside circle */
 		return true;
 	}
 

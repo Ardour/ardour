@@ -59,18 +59,26 @@ VelocityGhostRegion::~VelocityGhostRegion ()
 void
 VelocityGhostRegion::update_contents_height ()
 {
-	for (auto const & ev : events) {
-		ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (ev.second->item);
-		l->set (ArdourCanvas::Duple (l->x(), base_rect->y1()), ev.second->event->note()->velocity() / 127.0 * base_rect->y1 (), lollipop_radius);
+	for (auto const & i : events) {
+		set_size_and_position (*i.second);
 	}
+}
+
+bool
+VelocityGhostRegion::lollevent (GdkEvent* ev, MidiGhostRegion::GhostEvent* gev)
+{
+	return trackview.editor().canvas_velocity_event (ev, gev->item);
 }
 
 void
 VelocityGhostRegion::add_note (NoteBase* n)
 {
 	ArdourCanvas::Lollipop* l = new ArdourCanvas::Lollipop (_note_group);
+
 	GhostEvent* event = new GhostEvent (n, _note_group, l);
 	events.insert (std::make_pair (n->note(), event));
+	l->Event.connect (sigc::bind (sigc::mem_fun (*this, &VelocityGhostRegion::lollevent), event));
+	l->raise_to_top ();
 
 	event->item->set_fill_color (UIConfiguration::instance().color_mod(n->base_color(), "ghost track midi fill"));
 	event->item->set_outline_color (_outline);
@@ -81,21 +89,30 @@ VelocityGhostRegion::add_note (NoteBase* n)
 		if (!n->item()->visible()) {
 			l->hide();
 		} else {
-			l->set (ArdourCanvas::Duple (n->x0() - 1.0, base_rect->y1()), n->note()->velocity() / 127.0 * base_rect->y1(), lollipop_radius);
+			set_size_and_position (*event);
 		}
 	}
 }
 
 void
-VelocityGhostRegion::update_note (GhostEvent* n)
+VelocityGhostRegion::set_size_and_position (GhostEvent& ev)
 {
-	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (n->item);
-	l->set (ArdourCanvas::Duple (n->event->x0() - 1.0, base_rect->y1()), n->event->note()->velocity() / 127.0 * base_rect->y1(), lollipop_radius);
+	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (ev.item);
+	const double available_height = base_rect->y1() - (2.0 * lollipop_radius);
+	const double actual_height = (ev.event->note()->velocity() / 127.0) * available_height;
+	l->set (ArdourCanvas::Duple (ev.event->x0() - 1.0, base_rect->y1() - actual_height), actual_height, lollipop_radius);
 }
 
 void
-VelocityGhostRegion::update_hit (GhostEvent* n)
+VelocityGhostRegion::update_note (GhostEvent* ev)
 {
+	set_size_and_position (*ev);
+}
+
+void
+VelocityGhostRegion::update_hit (GhostEvent* ev)
+{
+	set_size_and_position (*ev);
 }
 
 void
@@ -106,5 +123,5 @@ VelocityGhostRegion::remove_note (NoteBase*)
 void
 VelocityGhostRegion::set_colors ()
 {
-	base_rect->set_fill_color (Gtkmm2ext::Color (0xff0000ff));
+	base_rect->set_fill_color (Gtkmm2ext::Color (0xff000085));
 }
