@@ -163,10 +163,8 @@ AudioGhostRegion::set_colors ()
 	guint fill_color;
 
 	if (is_automation_ghost()) {
-		fill_color = UIConfiguration::instance().color ("ghost track wave fill");
 		fill_color = UIConfiguration::instance().color_mod("ghost track wave fill", "region alpha");
-	}
-	else {
+	} else {
 		fill_color = source_track_color(200);
 	}
 
