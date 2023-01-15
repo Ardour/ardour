@@ -132,8 +132,7 @@ Lollipop::set (Duple const & d, Coord l, Coord r)
 
 	_radius = r;
 	_length = l;
-
-	set_position (d);
+	_position = d;
 
 	set_bbox_dirty ();
 	end_change ();
