@@ -133,7 +133,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for auto %2/%1", _name, strip->name()));
 	CANVAS_DEBUG_NAME (_ghost_group, string_compose ("ghosts for auto %2/%1", _name, strip->name()));
 
-	if (_parameter = Evoral::Parameter (MidiVelocityAutomation)) {
+	if (_parameter == Evoral::Parameter (MidiVelocityAutomation)) {
 		_ghost_group->raise_to_top ();
 	}
 
