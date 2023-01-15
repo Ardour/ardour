@@ -1247,8 +1247,8 @@ Item::add_items_at_point (Duple const point, vector<Item const *>& items) const
 		items.push_back (this);
 	}
 
-	for (vector<Item*>::iterator i = our_items.begin(); i != our_items.end(); ++i) {
-		(*i)->add_items_at_point (point, items);
+	for (const auto & i : our_items) {
+		i->add_items_at_point (point, items);
 	}
 }
 
