@@ -51,7 +51,7 @@ Lollipop::compute_bounding_box () const
 }
 
 void
-Lollipop::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
+Lollipop::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	setup_outline_context (context);
 
@@ -88,6 +88,8 @@ Lollipop::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) 
 		setup_outline_context (context);
 		context->stroke ();
 	}
+
+	render_children (area, context);
 }
 
 void
