@@ -45,7 +45,7 @@ Lollipop::~Lollipop ()
 void
 Lollipop::move_event (double dx, double dy)
 {
-	_lollipop->set (Duple (_lollipop->x0(), _lollipop->y0()).translate (Duple (dx, dy)), _lollipop->length(), _lollipop->radius());
+	_lollipop->set (Duple (_lollipop->x(), _lollipop->y0()).translate (Duple (dx, dy)), _lollipop->length(), _lollipop->radius());
 }
 
 void
