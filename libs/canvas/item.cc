@@ -1312,8 +1312,8 @@ Item::dump (ostream& o) const
 
 		ArdourCanvas::dump_depth++;
 
-		for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
-			o << **i;
+		for (auto const & item : _items) { 
+			o << *item;
 		}
 
 		ArdourCanvas::dump_depth--;
