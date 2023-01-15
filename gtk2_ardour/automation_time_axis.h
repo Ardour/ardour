@@ -137,6 +137,14 @@ public:
 
 	void set_automation_state (ARDOUR::AutoState);
 
+	enum VelocityMode {
+		VelocityModeLollipops,
+		VelocityModeLine
+	};
+
+	VelocityMode velocity_mode () const { return _velocity_mode; }
+	void set_velocity_mode (VelocityMode, bool force = false);
+
 protected:
 	/* Note that for MIDI controller "automation" (in regions), all of these
 	 * may be set.  In this case, _automatable is likely _route so the
@@ -219,6 +227,8 @@ protected:
 	std::string automation_state_off_string () const;
 
 	virtual void add_contents (bool show_regions);
+
+	VelocityMode _velocity_mode;
 
 private:
 	int set_state_2X (const XMLNode &, int);
