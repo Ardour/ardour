@@ -71,22 +71,22 @@ VelocityGhostRegion::lollevent (GdkEvent* ev, MidiGhostRegion::GhostEvent* gev)
 }
 
 void
-VelocityGhostRegion::add_note (NoteBase* n)
+VelocityGhostRegion::add_note (NoteBase* nb)
 {
 	ArdourCanvas::Lollipop* l = new ArdourCanvas::Lollipop (_note_group);
 
-	GhostEvent* event = new GhostEvent (n, _note_group, l);
-	events.insert (std::make_pair (n->note(), event));
+	GhostEvent* event = new GhostEvent (nb, _note_group, l);
+	events.insert (std::make_pair (nb->note(), event));
 	l->Event.connect (sigc::bind (sigc::mem_fun (*this, &VelocityGhostRegion::lollevent), event));
 	l->raise_to_top ();
 
-	event->item->set_fill_color (UIConfiguration::instance().color_mod(n->base_color(), "ghost track midi fill"));
+	event->item->set_fill_color (UIConfiguration::instance().color_mod(nb->base_color(), "ghost track midi fill"));
 	event->item->set_outline_color (_outline);
 
 	MidiStreamView* mv = midi_view();
 
 	if (mv) {
-		if (!n->item()->visible()) {
+		if (!nb->item()->visible()) {
 			l->hide();
 		} else {
 			set_size_and_position (*event);
