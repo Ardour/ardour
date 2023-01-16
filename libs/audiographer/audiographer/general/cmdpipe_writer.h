@@ -29,37 +29,32 @@ class CmdPipeWriter
   , public FlagDebuggable<>
 {
 public:
-	CmdPipeWriter (ARDOUR::SystemExec* proc, std::string const& path, bool pipe1)
+	CmdPipeWriter (ARDOUR::SystemExec* proc, std::string const& path, int tmp_fd = -1, gchar* tmp_file = 0)
 		: samples_written (0)
 		, _proc (proc)
 		, _path (path)
-		, encoder_file (0)
+		, _tmp_fd (tmp_fd)
+		, _tmp_file (tmp_file)
 	{
 		add_supported_flag (ProcessContext<T>::EndOfInput);
 
-		if (pipe1) {
-			proc->ReadStdout.connect_same_thread (exec_connections, boost::bind (&CmdPipeWriter::write_ffile, this, _1, _2));
-			proc->Terminated.connect_same_thread (exec_connections, boost::bind (&CmdPipeWriter::close_ffile, this));
-
-			encoder_file = g_fopen (path.c_str(), "wb");
-
-			if (!encoder_file) {
-				throw ARDOUR::ExportFailed ("Output file cannot be written to.");
-			}
-		}
-
-		if (proc->start (ARDOUR::SystemExec::IgnoreAndClose)) {
-			if (encoder_file) {
-				fclose (encoder_file);
-				encoder_file = 0;
-				g_unlink (path.c_str());
-			}
+		if (tmp_fd >= 0) {
+			;
+		} else if (proc->start (ARDOUR::SystemExec::ShareWithParent)) {
 			throw ARDOUR::ExportFailed ("External encoder (ffmpeg) cannot be started.");
 		}
+		proc->Terminated.connect_same_thread (exec_connections, boost::bind (&CmdPipeWriter::encode_complete, this));
 	}
 
 	virtual ~CmdPipeWriter () {
 		delete _proc;
+		if (_tmp_fd >= 0) {
+			::close (_tmp_fd);
+		}
+		if (_tmp_file) {
+			g_unlink (_tmp_file);
+			g_free (_tmp_file);
+		}
 	}
 
 	samplecnt_t get_samples_written() const { return samples_written; }
@@ -74,13 +69,19 @@ public:
 	{
 		check_flags (*this, c);
 
-		if (!_proc || !_proc->is_running()) {
+		if (_tmp_fd < 0 && (!_proc || !_proc->is_running())) {
 			throw Exception (*this, boost::str (boost::format
 						("Target encoder process is not running")));
 		}
 
 		const size_t bytes_per_sample = sizeof (T);
-		samplecnt_t const written = _proc->write_to_stdin ((const void*) c.data(), c.samples() * bytes_per_sample) / bytes_per_sample;
+		samplecnt_t written;
+		if (_tmp_fd >= 0) {
+			written = write (_tmp_fd, (const void*) c.data(), c.samples() * bytes_per_sample) / bytes_per_sample;
+		} else {
+			written = _proc->write_to_stdin ((const void*) c.data(), c.samples() * bytes_per_sample) / bytes_per_sample;
+		}
+
 		samples_written += written;
 
 		if (throw_level (ThrowProcess) && written != c.samples()) {
@@ -89,17 +90,16 @@ public:
 		}
 
 		if (c.has_flag(ProcessContext<T>::EndOfInput)) {
-			if (encoder_file) {
-				_proc->close_stdin ();
-				_proc->wait ();
-				int timeout = 500;
-				while (encoder_file && --timeout) {
-					Glib::usleep(10000);
+			if (_tmp_fd >= 0) {
+				::close (_tmp_fd);
+				_tmp_fd = -1;
+				if (_proc->start (ARDOUR::SystemExec::ShareWithParent)) {
+					throw ARDOUR::ExportFailed ("External encoder (ffmpeg) cannot be started.");
 				}
 			} else {
 				_proc->close_stdin ();
-				FileWritten (_path);
 			}
+			_proc->wait ();
 		}
 	}
 
@@ -111,18 +111,18 @@ private:
 	CmdPipeWriter (CmdPipeWriter const & other) {}
 
 	samplecnt_t samples_written;
-	PBD::SystemExec* _proc;
+	ARDOUR::SystemExec* _proc;
 	std::string _path;
+	std::vector<char> _tmpfile_path_buf;
+	int _tmp_fd;
+	gchar* _tmp_file;
 
-	FILE* encoder_file;
-
-	void write_ffile (std::string d, size_t s) {
-		fwrite (d.c_str(), sizeof(char), s, encoder_file);
-	}
-
-	void close_ffile () {
-		fclose (encoder_file);
-		encoder_file = 0;
+	void encode_complete () {
+		if (_tmp_file) {
+			g_unlink (_tmp_file);
+			g_free (_tmp_file);
+			_tmp_file = NULL;
+		}
 		FileWritten (_path);
 	}
 

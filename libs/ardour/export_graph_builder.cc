@@ -24,6 +24,9 @@
 
 #include <vector>
 
+#include <glib.h>
+#include "pbd/gstdio_compat.h"
+
 #include <glibmm/convert.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/timer.h>
@@ -376,6 +379,20 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 
 	int quality = config.format->codec_quality ();
 
+	gchar* tmpfile_name = NULL;
+#if 0
+	gint fd = -1;
+#else // write to tmp-file, do not pipe to ffmpeg
+	gint fd = g_file_open_tmp ("ardour-export.XXXXXX", &tmpfile_name, NULL);
+	if (fd < 0) {
+		tmpfile_name = NULL;
+	}
+#endif
+
+	/* Note mp3 encoding adds silence at start and end
+	 * https://lame.sourceforge.io/tech-FAQ.txt
+	 */
+
 	int a=0;
 	char **argp = (char**) calloc (100, sizeof(char*));
 	char tmp[64];
@@ -397,7 +414,11 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 	snprintf (tmp, sizeof(tmp), "%d", config.format->sample_rate());
 	argp[a++] = strdup (tmp);
 	argp[a++] = strdup ("-i");
-	argp[a++] = strdup ("pipe:0");
+	if (fd >= 0) {
+		argp[a++] = strdup (tmpfile_name);
+	} else {
+		argp[a++] = strdup ("pipe:0");
+	}
 
 	argp[a++] = strdup ("-f");
 	argp[a++] = strdup ("mp3");
@@ -445,7 +466,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 	ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffmpeg_exe, argp, true);
 
 	PBD::info << "Encode command: { " << exec->to_s () << "}" << endmsg;
-	writer.reset (new AudioGrapher::CmdPipeWriter<T> (exec, writer_filename, false));
+	writer.reset (new AudioGrapher::CmdPipeWriter<T> (exec, writer_filename, fd, tmpfile_name));
 	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 }
 
