@@ -20,6 +20,8 @@
 #include <cstdio>
 #include <cassert>
 #include <iostream>
+
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 
 #include "evoral/midi_util.h"
@@ -57,7 +59,7 @@ SMFReader::open(const string& filename) throw (logic_error, UnsupportedTime)
 
 	cout << "Opening SMF file " << filename << " for reading." << endl;
 
-	_fd = fopen(filename.c_str(), "r+");
+	_fd = g_fopen(filename.c_str(), "rb+");
 
 	if (_fd) {
 		// Read type (bytes 8..9)
