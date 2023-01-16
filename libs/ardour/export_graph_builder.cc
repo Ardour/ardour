@@ -380,7 +380,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 	int quality = config.format->codec_quality ();
 
 	gchar* tmpfile_name = NULL;
-#if 0
+#if 1 // directly pipe to ffmpeg
 	gint fd = -1;
 #else // write to tmp-file, do not pipe to ffmpeg
 	gint fd = g_file_open_tmp ("ardour-export.XXXXXX", &tmpfile_name, NULL);
