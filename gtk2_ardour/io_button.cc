@@ -407,7 +407,7 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, boost::sh
 	}
 
 	if (total_connection_count > typed_connection_count) {
-		label << "\u2295"; /* circled plus */
+		label << u8"\u2295"; /* circled plus */
 	}
 
 	self.set_text (label.str ());

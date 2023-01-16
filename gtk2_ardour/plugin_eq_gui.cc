@@ -150,7 +150,7 @@ PluginEqGui::PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	// Freq/dB info for mouse over
 	_pointer_info = new Gtk::Label ("", 1, 0.5);
 	_pointer_info->set_name ("PluginAnalysisInfoLabel");
-	Gtkmm2ext::set_size_request_to_display_given_text (*_pointer_info, "10.0kHz_000.0dB_180.0\u00B0", 0, 0);
+	Gtkmm2ext::set_size_request_to_display_given_text (*_pointer_info, u8"10.0kHz_000.0dB_180.0\u00B0", 0, 0);
 
 	// populate table
 	attach (*manage(_analysis_area), 0, 4, 0, 1);
@@ -507,7 +507,7 @@ PluginEqGui::update_pointer_info( float x)
 	if (_phase_button->get_active ()) {
 		float phase = 180. * _impulse_fft->phase_at_bin (i) / M_PI;
 		ss << " " << std::setw (6) << std::setprecision (1) << std::showpos << phase;
-		ss << std::setw (0) << "\u00B0";
+		ss << std::setw (0) << u8"\u00B0";
 	}
 	_pointer_info->set_text (ss.str());
 }
@@ -625,9 +625,9 @@ PluginEqGui::draw_scales_phase (Gtk::Widget*, cairo_t *cr)
 
 		cairo_set_source_rgb (cr, .8, .9, 0.2);
 		if (i == 0) {
-			snprintf (buf,256, "0\u00b0");
+			snprintf (buf,256, u8"0\u00b0");
 		} else {
-			snprintf (buf,256, "%d\u00b0", (i * 45));
+			snprintf (buf,256, u8"%d\u00b0", (i * 45));
 		}
 		cairo_text_extents (cr, buf, &t_ext);
 		cairo_move_to (cr, _analysis_width - t_ext.width - t_ext.x_bearing - 2.0, y - extents.descent);
@@ -648,7 +648,7 @@ PluginEqGui::draw_scales_phase (Gtk::Widget*, cairo_t *cr)
 		y = _analysis_height / 2.0 + (float)i * (_analysis_height / 8.0) * PHASE_PROPORTION;
 
 		// label
-		snprintf (buf,256, "-%d\u00b0", (i * 45));
+		snprintf (buf,256, u8"-%d\u00b0", (i * 45));
 		cairo_set_source_rgb (cr, .8, .9, 0.2);
 		cairo_text_extents (cr, buf, &t_ext);
 		cairo_move_to (cr, _analysis_width - t_ext.width - t_ext.x_bearing - 2.0, y - extents.descent);

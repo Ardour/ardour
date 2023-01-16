@@ -193,7 +193,7 @@ TriggerMaster::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Cont
 		snprintf (font_name, sizeof (font_name), "ArdourSans %d", font_size);
 		Pango::FontDescription pfd (font_name);
 		layout->set_font_description (pfd);
-		layout->set_text ("\u266b");
+		layout->set_text (u8"\u266b");
 		int tw, th;
 		layout->get_pixel_size (tw, th);
 		context->move_to (width / 2, height / 2);

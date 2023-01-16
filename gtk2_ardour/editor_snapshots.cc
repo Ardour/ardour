@@ -238,7 +238,7 @@ EditorSnapshots::redisplay ()
 		Glib::DateTime gdt(Glib::DateTime::create_now_local (gsb.st_mtime));
 
 		if (_session->snap_name() == display_name) {
-			row[_columns.current_active] = "\u25B6"; // BLACK RIGHT-POINTING TRIANGLE
+			row[_columns.current_active] = u8"\u25B6"; // BLACK RIGHT-POINTING TRIANGLE
 		} else {
 			row[_columns.current_active] = "";
 		}

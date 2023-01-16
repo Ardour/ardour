@@ -381,7 +381,7 @@ AutomationLine::delta_to_string (double delta) const
 	if (!get_uses_gain_mapping () && _desc.logarithmic) {
 		return "x " + ARDOUR::value_as_string (_desc, delta);
 	} else {
-		return "\u0394 " + ARDOUR::value_as_string (_desc, delta);
+		return u8"\u0394 " + ARDOUR::value_as_string (_desc, delta);
 	}
 }
 

@@ -685,13 +685,13 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			int max_wx = 10;
 			layout->set_font_description (UIConfiguration::instance ().get_ArdourLargeFont ());
 
-			layout->set_text ("\u274C"); // cross mark
+			layout->set_text (u8"\u274C"); // cross mark
 			layout->get_pixel_size (w, h);
 			max_wx = std::max (max_wx, w);
-			layout->set_text ("\U0001F509"); // speaker icon w/1 bar
+			layout->set_text (u8"\U0001F509"); // speaker icon w/1 bar
 			layout->get_pixel_size (w, h);
 			max_wx = std::max (max_wx, w);
-			layout->set_text ("\u2714"); // heavy check mark
+			layout->set_text (u8"\u2714"); // heavy check mark
 			layout->get_pixel_size (w, h);
 			max_wx = std::max (max_wx, w);
 
@@ -768,13 +768,13 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 						|| (pi->enable[1] && dbtp > pi->level[1])
 					 ) {
 					cr->set_source_rgba (1, 0, .0, 1.0);
-					layout->set_text ("\u274C"); // cross mark
+					layout->set_text (u8"\u274C"); // cross mark
 				} else if (lufs < pi->LUFS_range[1]) {
 					cr->set_source_rgba (.6, .7, 0, 1.0);
-					layout->set_text ("\U0001F509"); // speaker icon w/1 bar
+					layout->set_text (u8"\U0001F509"); // speaker icon w/1 bar
 				} else {
 					cr->set_source_rgba (.1, 1, .1, 1.0);
-					layout->set_text ("\u2714"); // heavy check mark
+					layout->set_text (u8"\u2714"); // heavy check mark
 				}
 				int ww, hh;
 				layout->get_pixel_size (ww, hh);

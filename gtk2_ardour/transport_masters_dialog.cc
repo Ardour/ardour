@@ -566,7 +566,7 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 	}
 
 	string current_str (" --:--:--:--");
-	string delta_str ("\u0394  ----  ");
+	string delta_str (u8"\u0394  ----  ");
 	string age_str ("         ");
 
 	if (tm->speed_and_position (speed, pos, most_recent, when, now)) {

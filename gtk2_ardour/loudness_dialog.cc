@@ -774,7 +774,7 @@ LoudnessDialog::calculate_gain ()
 	_gain_norm_label.set_text (string_compose (_("%1 dB"), std::setprecision (2), std::showpos, std::fixed, _gain_norm));
 	if (!in_range) {
 		_gain_exceeds_label.set_text (_("exceeds"));
-		_gain_total_label.set_markup (_("<b>    \u00B140 dB</b>"));
+		_gain_total_label.set_markup (_(u8"<b>    \u00B140 dB</b>"));
 	} else {
 		_gain_exceeds_label.set_text (X_(""));
 		_gain_total_label.set_markup (string_compose (_("<b>%1 dB</b>"), std::setw (7), std::setprecision (2), std::showpos, std::fixed, gain_db ()));
@@ -819,21 +819,21 @@ LoudnessDialog::test_conformity ()
 		    || (preset.enable[0] && dbfs > preset.level[0])
 		    || (preset.enable[1] && dbtp > preset.level[1])
 		   ) {
-			l = manage (new Label ("\u274C", ALIGN_CENTER)); // cross mark
+			l = manage (new Label (u8"\u274C", ALIGN_CENTER)); // cross mark
 			l->modify_font (UIConfiguration::instance ().get_ArdourBigFont ());
 			l->modify_fg (Gtk::STATE_NORMAL, color_fail);
 			set_tooltip (*l, "The signal is too loud.");
 		} else if (lufs_i < preset.LUFS_range[1]) {
-			l = manage (new Label ("\U0001F509", ALIGN_CENTER)); // speaker icon w/1 bar
+			l = manage (new Label (u8"\U0001F509", ALIGN_CENTER)); // speaker icon w/1 bar
 			l->modify_font (UIConfiguration::instance ().get_ArdourBigFont ());
 			l->modify_fg (Gtk::STATE_NORMAL, color_warn);
 			set_tooltip (*l, "The signal is too quiet, but satisfies the max. loudness spec.");
 		} else {
-			l = manage (new Label ("\u2714", ALIGN_CENTER)); // heavy check mark
+			l = manage (new Label (u8"\u2714", ALIGN_CENTER)); // heavy check mark
 			l->modify_font (UIConfiguration::instance ().get_ArdourBigFont ());
 			l->modify_fg (Gtk::STATE_NORMAL, color_good);
 			set_tooltip (*l, "Signal loudness is within the spec.");
-			Gtkmm2ext::set_size_request_to_display_given_text (*l, "\u274C\u2713", 0, 0);
+			Gtkmm2ext::set_size_request_to_display_given_text (*l, u8"\u274C\u2713", 0, 0);
 		}
 
 		t->attach (*l, col + 1, col + 2, row, row + 1, SHRINK, SHRINK, 2, 0);

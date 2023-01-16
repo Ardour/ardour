@@ -145,7 +145,7 @@ InstrumentSelector::build_instrument_list()
 		uint32_t n_outs = p->max_configurable_outputs ();
 		if (n_outs > 2) {
 			if (p->reconfigurable_io ()) {
-				suffix = string_compose(_("\u2264 %1 outs"), n_outs);
+				suffix = string_compose(_(u8"\u2264 %1 outs"), n_outs);
 			} else {
 				suffix = string_compose(_("%1 outs"), n_outs);
 			}
@@ -155,7 +155,7 @@ InstrumentSelector::build_instrument_list()
 			uint32_t n_outs = p->max_configurable_outputs ();
 			if (n_outs > 2) {
 				if (p->reconfigurable_io ()) {
-					suffix = string_compose(_("\u2264 %1 outs"), n_outs);
+					suffix = string_compose(_(u8"\u2264 %1 outs"), n_outs);
 				} else {
 					suffix = string_compose(_("%1 outs"), n_outs);
 				}

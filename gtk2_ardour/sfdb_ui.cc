@@ -366,7 +366,7 @@ SoundFileBox::setup_labels (const string& filename)
 			case 1: {
 				Evoral::SMF::Tempo* t = smf.nth_tempo (0);
 				assert (t);
-				tempomap_value.set_text (string_compose (_("%1/%2 \u2669 = %3"),
+				tempomap_value.set_text (string_compose (_(u8"%1/%2 \u2669 = %3"),
 				                                         t->numerator,
 				                                         t->denominator,
 				                                         t->tempo ()));

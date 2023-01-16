@@ -601,9 +601,9 @@ void
 SequencerStepIndicator::set_text ()
 {
 	if (number == sv.sequencer().end_step() - 1) {
-		text->set ("\u21a9");
+		text->set (u8"\u21a9");
 	} else if (number == sv.sequencer().start_step()) {
-		text->set ("\u21aa");
+		text->set (u8"\u21aa");
 	} else {
 		text->set (string_compose ("%1", number+1));
 	}

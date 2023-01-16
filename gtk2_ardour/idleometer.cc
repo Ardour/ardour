@@ -67,7 +67,7 @@ IdleOMeter::IdleOMeter ()
 	t->attach (*manage (new Label (_("Mean:"),    ALIGN_END)), 0, 1, row, row + 1, FILL, SHRINK);
 	t->attach (_label_avg, 1, 2, row, row + 1, FILL, SHRINK);
 	++row;
-	t->attach (*manage (new Label (_("\u03c3:"),  ALIGN_END)), 0, 1, row, row + 1, FILL, SHRINK);
+	t->attach (*manage (new Label (_(u8"\u03c3:"),  ALIGN_END)), 0, 1, row, row + 1, FILL, SHRINK);
 	t->attach (_label_dev, 1, 2, row, row + 1, FILL, SHRINK);
 	++row;
 	t->attach (*manage (new Label (_("Elapsed:"),  ALIGN_END)), 0, 1, row, row + 1, FILL, SHRINK);
