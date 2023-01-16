@@ -7433,7 +7433,7 @@ Editor::set_tempo_from_region ()
 
 	RegionView* rv = rs.front();
 
-	define_one_bar (rv->region()->position(), rv->region()->end());
+	define_one_bar (rv->region()->position(), rv->region()->end(), _("region"));
 }
 
 void
@@ -7441,12 +7441,12 @@ Editor::use_range_as_bar ()
 {
 	timepos_t start, end;
 	if (get_edit_op_range (start, end)) {
-		define_one_bar (start, end);
+		define_one_bar (start, end, _("range"));
 	}
 }
 
 void
-Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
+Editor::define_one_bar (timepos_t const & start, timepos_t const & end, std::string const & from)
 {
 	timecnt_t length = start.distance (end);
 
@@ -7518,7 +7518,7 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 		*/
 	}
 
-	TempoMapChange tmc (*this, _("set tempo from region"));
+	TempoMapChange tmc (*this, string_compose (_("set tempo from %1"), from));
 
 	if (do_global) {
 		tmc.map().set_tempo (Tempo (beats_per_minute, t.end_note_types_per_minute(), t.note_type()), timepos_t());

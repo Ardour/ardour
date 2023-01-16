@@ -1393,7 +1393,7 @@ private:
 	void set_tempo_from_region ();
 	void use_range_as_bar ();
 
-	void define_one_bar (Temporal::timepos_t const & start, Temporal::timepos_t const & end);
+	void define_one_bar (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string const & from);
 
 	void audition_region_from_region_list ();
 
