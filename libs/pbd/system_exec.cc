@@ -936,15 +936,15 @@ SystemExec::write_to_stdin (const void* data, size_t bytes)
 	while (c < bytes) {
 		for (;;) {
 			r = ::write (pin[1], &((const char*)data)[c], bytes - c);
-			if (r < 0 && (errno == EINTR || errno == EAGAIN)) {
-				sleep(1);
+			if (r >= 0) {
+				break;
+			}
+			if (errno == EINTR || errno == EAGAIN) {
+				g_usleep(100000);
 				continue;
 			}
-			if ((size_t) r != (bytes-c)) {
-				::pthread_mutex_unlock(&write_lock);
-				return c;
-			}
-			break;
+			::pthread_mutex_unlock(&write_lock);
+			return c;
 		}
 		c += r;
 	}
