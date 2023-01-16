@@ -528,7 +528,7 @@ TimecodeTransportMaster::set_fr2997 (bool yn)
 }
 
 /* used for delta_string(): (note: \u00B1 is the plus-or-minus sign) */
-#define PLUSMINUS(A) (((A) < 0) ? "-" : (((A) > 0) ? "+" : "\u00B1"))
+#define PLUSMINUS(A) (((A) < 0) ? "-" : (((A) > 0) ? "+" : u8"\u00B1"))
 #define LEADINGZERO(A) ((A) < 10 ? "    " : (A) < 100 ? "   " : (A) < 1000 ? "  " : (A) < 10000 ? " " : "")
 
 std::string
@@ -539,13 +539,13 @@ TransportMaster::format_delta_time (sampleoffset_t delta) const
 		samplecnt_t sr = _session->sample_rate();
 		if (abs (_current_delta) >= sr) {
 			int secs = rint ((double) delta / sr);
-			snprintf(buf, sizeof(buf), "\u0394%s%s%d s", LEADINGZERO(abs(secs)), PLUSMINUS(-secs), abs(secs));
+			snprintf(buf, sizeof(buf), u8"\u0394%s%s%d s", LEADINGZERO(abs(secs)), PLUSMINUS(-secs), abs(secs));
 			buf[63] = '\0';
 			return std::string(buf);
 		}
 	}
 	/* left-align sign, to make it readable when decimals jitter */
-	snprintf (buf, sizeof(buf), "\u0394%s%s%lldsm", PLUSMINUS(-delta), LEADINGZERO(::llabs(delta)), ::llabs(delta));
+	snprintf (buf, sizeof(buf), u8"\u0394%s%s%lldsm", PLUSMINUS(-delta), LEADINGZERO(::llabs(delta)), ::llabs(delta));
 	buf[63] = '\0';
 	return std::string(buf);
 }

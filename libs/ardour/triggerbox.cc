@@ -136,7 +136,7 @@ ARDOUR::cue_marker_name (int32_t index)
 
 	if (index == CueRecord::stop_all) {
 		/* this is a reasonable "stop" icon */
-		return string (X_("\u25a1"));
+		return string (X_(u8"\u25a1"));
 	}
 
 	switch (index) {

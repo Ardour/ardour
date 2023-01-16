@@ -399,13 +399,13 @@ VBAPanner::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
 
 	switch (ac->parameter ().type ()) {
 		case PanAzimuthAutomation: /* direction */
-			return string_compose (_ ("%1\u00B0"), (int(rint (val * 360.0)) + 180) % 360);
+			return string_compose (_ (u8"%1\u00B0"), (int(rint (val * 360.0)) + 180) % 360);
 
 		case PanWidthAutomation: /* diffusion */
 			return string_compose (_ ("%1%%"), (int)floor (100.0 * fabs (val)));
 
 		case PanElevationAutomation: /* elevation */
-			return string_compose (_ ("%1\u00B0"), (int)floor (90.0 * fabs (val)));
+			return string_compose (_ (u8"%1\u00B0"), (int)floor (90.0 * fabs (val)));
 
 		default:
 			return _ ("unused");

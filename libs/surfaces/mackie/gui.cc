@@ -517,7 +517,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 
 		Glib::RefPtr<Gtk::Action> act;
 		string action;
-		const string defstring = "\u2022";
+		const string defstring = u8"\u2022";
 
 		/* We only allow plain bindings for Fn keys. All others are
 		 * reserved for hard-coded actions.
@@ -668,7 +668,7 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Tree
 			   within the model.
 			*/
 			if (remove) {
-				Glib::ustring dot = "\u2022";
+				Glib::ustring dot = u8"\u2022";
 				(*row).set_value (col.index(), dot);
 			} else {
 				(*row).set_value (col.index(), act->get_label());

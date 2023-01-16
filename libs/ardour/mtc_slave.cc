@@ -548,7 +548,7 @@ MTC_TransportMaster::delta_string () const
 	current.safe_read (last);
 
 	if (last.timestamp == 0 || reset_pending) {
-		return X_("\u2012\u2012\u2012\u2012");
+		return X_(u8"\u2012\u2012\u2012\u2012");
 	} else {
 		return format_delta_time (_current_delta);
 	}

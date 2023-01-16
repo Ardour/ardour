@@ -656,7 +656,7 @@ std::string
 LTC_TransportMaster::delta_string() const
 {
 	if (!_collect || current.timestamp == 0) {
-		return X_("\u2012\u2012\u2012\u2012");
+		return X_(u8"\u2012\u2012\u2012\u2012");
 	} else if ((monotonic_cnt - current.timestamp) > 2 * samples_per_ltc_frame) {
 		return _("flywheel");
 	} else {

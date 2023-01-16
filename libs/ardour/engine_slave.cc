@@ -123,7 +123,7 @@ Engine_TransportMaster::position_string () const
 std::string
 Engine_TransportMaster::delta_string () const
 {
-	return string ("\u0394     0  ");
+	return string (u8"\u0394     0  ");
 }
 
 bool
