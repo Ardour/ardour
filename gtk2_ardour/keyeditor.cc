@@ -604,6 +604,7 @@ KeyEditor::print () const
 		if (err) {
 			error << string_compose (_("Could not save bindings to file (%1)"), err->message) << endmsg;
 			g_error_free (err);
+			g_free (file_name);
 		}
 		return;
 	}
@@ -613,4 +614,5 @@ KeyEditor::print () const
 #endif
 
 	PBD::open_uri (string_compose ("file:///%1", file_name));
+	g_free (file_name);
 }
