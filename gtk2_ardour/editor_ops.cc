@@ -7450,7 +7450,7 @@ Editor::define_one_bar (timepos_t const & start, timepos_t const & end)
 {
 	timecnt_t length = start.distance (end);
 
-	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
+	TempoMap::SharedPtr tmap (TempoMap::use());
 	const Meter& m (tmap->meter_at (start));
 
 	/* length = 1 bar */
