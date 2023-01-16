@@ -171,7 +171,14 @@ SimpleExport::run_export ()
 	/* Setup timespan */
 	auto ts = _manager->get_timespans ();
 	assert (ts.size () == 1);
-	assert (ts.front ()->timespans->size () == 1);
+	assert (ts.front ()->timespans->size () < 2);
+	/* when there is no session-range, ExportProfileManager::init_timespans
+	 * does not add an ExportTimespanPtr.
+	 */
+	if (ts.front ()->timespans->size () < 1) {
+		ExportTimespanPtr timespan = _handler->add_timespan ();
+		ts.front ()->timespans->push_back (timespan);
+	}
 
 	ts.front ()->timespans->front ()->set_name (_name);
 	ts.front ()->timespans->front ()->set_realtime (false);
