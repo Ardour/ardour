@@ -59,7 +59,7 @@ SMFReader::open(const string& filename) throw (logic_error, UnsupportedTime)
 
 	cout << "Opening SMF file " << filename << " for reading." << endl;
 
-	_fd = g_fopen(filename.c_str(), "rb+");
+	_fd = g_fopen(filename.c_str(), "r+b");
 
 	if (_fd) {
 		// Read type (bytes 8..9)

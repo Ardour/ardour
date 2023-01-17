@@ -260,7 +260,7 @@ SMF::create(const std::string& path, int track, uint16_t ppqn)
 	{
 		/* put a stub file on disk */
 
-		FILE* f = g_fopen (path.c_str(), "wb+");
+		FILE* f = g_fopen (path.c_str(), "w+b");
 		if (f == 0) {
 			return -1;
 		}
@@ -513,7 +513,7 @@ SMF::end_write(string const & path)
 		return;
 	}
 
-	FILE* f = g_fopen (path.c_str(), "wb+");
+	FILE* f = g_fopen (path.c_str(), "w+b");
 	if (f == 0) {
 		throw FileError (path);
 	}
