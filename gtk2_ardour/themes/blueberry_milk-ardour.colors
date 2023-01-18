@@ -139,7 +139,7 @@
     <ColorAlias name="gtk_foldback_bg" alias="theme:bg1"/>
     <ColorAlias name="gtk_foreground" alias="neutral:backgroundest"/>
     <ColorAlias name="gtk_light_text_on_dark" alias="neutral:background2"/>
-    <ColorAlias name="gtk_lightest" alias="neutral:foregroundest"/>
+    <ColorAlias name="gtk_lightest" alias="neutral:foreground2"/>
     <ColorAlias name="gtk_midi_channel_selector" alias="widget:blue"/>
     <ColorAlias name="gtk_midi_track" alias="widget:gray"/>
     <ColorAlias name="gtk_monitor" alias="alert:orange"/>
@@ -240,7 +240,7 @@
     <ColorAlias name="midi sysex outline" alias="theme:contrasting alt"/>
     <ColorAlias name="midi track base" alias="widget:green darker"/>
     <ColorAlias name="mixer strip button: fill" alias="widget:bg"/>
-    <ColorAlias name="mixer strip button: fill active" alias="theme:bg1"/>
+    <ColorAlias name="mixer strip button: fill active" alias="alert:orange"/>
     <ColorAlias name="mixer strip button: led active" alias="alert:green"/>
     <ColorAlias name="mixer strip name button: fill active" alias="theme:bg2"/>
     <ColorAlias name="mixer strip name button: led active" alias="alert:green"/>
