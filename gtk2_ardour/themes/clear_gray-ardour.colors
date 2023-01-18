@@ -42,11 +42,11 @@
     <Color name="meter color7" value="ff6900ff"/>
     <Color name="meter color8" value="ff3700ff"/>
     <Color name="meter color9" value="ff0000ff"/>
-    <Color name="midi meter 52" value="ffffffff"/>
-    <Color name="midi meter 53" value="acacacff"/>
-    <Color name="midi meter 54" value="646464ff"/>
-    <Color name="midi meter 55" value="535353ff"/>
-    <Color name="midi meter 56" value="2e2e2eff"/>
+    <Color name="midi meter 52" value="666666ff"/>
+    <Color name="midi meter 53" value="545454ff"/>
+    <Color name="midi meter 54" value="454545ff"/>
+    <Color name="midi meter 55" value="363636ff"/>
+    <Color name="midi meter 56" value="262626ff"/>
   </Colors>
   <ColorAliases>
     <ColorAlias name="active crossfade" alias="neutral:foreground"/>
@@ -232,7 +232,7 @@
     <ColorAlias name="midi note mid" alias="alert:yellow"/>
     <ColorAlias name="midi note min" alias="alert:orange"/>
     <ColorAlias name="midi note selected" alias="widget:ruddy"/>
-    <ColorAlias name="midi note selected outline" alias="alert:red"/>
+    <ColorAlias name="midi note selected outline" alias="theme:contrasting clock"/>
     <ColorAlias name="midi note velocity text" alias="theme:contrasting"/>
     <ColorAlias name="midi patch change fill" alias="theme:contrasting selection"/>
     <ColorAlias name="midi patch change outline" alias="neutral:foreground"/>
