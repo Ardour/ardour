@@ -323,6 +323,19 @@ int main (int argc, char *argv[])
 	}
 #endif
 
+	/* This is horrible, but ... we don't want to init GTK until it is
+	 * really time (during a Gtkmm2ext::UI constructor. However, this will
+	 * try to load GTK modules too, so do this only if it appears that need
+	 * to do this.
+	 */
+
+	for (int n = 1; n < argc; ++n) {
+		if (!strncmp (argv[n], "--gtk", 5) || !strncmp (argv[n], "--gdk", 5)) {
+			gtk_parse_args (&argc, &argv);
+			break;
+		}
+	}
+
 	if (parse_opts (argc, argv)) {
 		command_line_parse_error (&argc, &argv);
 		exit (EXIT_FAILURE);
