@@ -3041,6 +3041,22 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Appearance"), bgo);
 #endif
 
+#ifdef __APPLE__
+	ComboOption<AppleNSGLViewMode>* glmode = new ComboOption<AppleNSGLViewMode> (
+		"use-opengl-view",
+		_("Render Canvas on openGL texture (requires restart)"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_opengl_view),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_opengl_view)
+		);
+	glmode->add (NSGLAuto, _("until (including) macOS 10.14"));
+	glmode->add (NSGLDisable, _("No"));
+	glmode->add (NSGLEnable, _("Yes"));
+
+	Gtkmm2ext::UI::instance()->set_tip (glmode->tip_widget(), string_compose (
+				_("Render editor canvas, on a openGL texture, bypassing color-correction and retina scaling.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
+	add_option (_("Appearance"), glmode);
+#endif
+
 #if ENABLE_NLS
 
 	add_option (_("Appearance/Translation"), new OptionEditorHeading (_("Internationalization")));

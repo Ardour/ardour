@@ -62,6 +62,8 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace Gtkmm2ext;
 
+extern int query_darwin_version (); // cocoacarbon.mm
+
 static const char* ui_config_file_name = "ui_config";
 static const char* default_ui_config_file_name = "default_ui_config";
 
@@ -215,6 +217,24 @@ UIConfiguration::pre_gui_init ()
 #ifndef USE_CAIRO_IMAGE_SURFACE
 	if (get_cairo_image_surface()) {
 		g_setenv ("ARDOUR_IMAGE_SURFACE", "1", 1);
+	}
+#endif
+#ifdef __APPLE__
+	switch (get_use_opengl_view()) {
+		case NSGLAuto:
+			if (query_darwin_version () >= 19) {
+				/* on Catalina, do not use NSGLView */
+				g_setenv ("ARDOUR_NSGL", "0", 0);
+			} else {
+				g_setenv ("ARDOUR_NSGL", "1", 0);
+			}
+			break;
+		case NSGLDisable:
+			g_setenv ("ARDOUR_NSGL", "0", 0);
+			break;
+		case NSGLEnable:
+			g_setenv ("ARDOUR_NSGL", "1", 0);
+			break;
 	}
 #endif
 	return 0;
