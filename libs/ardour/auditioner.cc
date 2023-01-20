@@ -33,6 +33,7 @@
 #include "ardour/data_type.h"
 #include "ardour/delivery.h"
 #include "ardour/disk_reader.h"
+#include "ardour/disk_writer.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
 #include "ardour/plugin_insert.h"
@@ -74,6 +75,8 @@ Auditioner::init ()
 	if (connect ()) {
 		return -1;
 	}
+
+	_disk_writer->unset_flag (DiskIOProcessor::Recordable);
 
 	use_new_playlist (DataType::MIDI);
 

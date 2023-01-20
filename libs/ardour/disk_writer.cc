@@ -1103,6 +1103,10 @@ DiskWriter::use_new_write_source (DataType dt, uint32_t n)
 {
 	_accumulated_capture_offset = 0;
 
+	if (!recordable()) {
+		return 1;
+	}
+
 	if (dt == DataType::MIDI) {
 		_midi_write_source.reset();
 
@@ -1122,10 +1126,6 @@ DiskWriter::use_new_write_source (DataType dt, uint32_t n)
 		}
 	} else {
 		boost::shared_ptr<ChannelList> c = channels.reader();
-
-		if (!recordable()) {
-			return 1;
-		}
 
 		if (n >= c->size()) {
 			error << string_compose (_("AudioDiskstream: channel %1 out of range"), n) << endmsg;
