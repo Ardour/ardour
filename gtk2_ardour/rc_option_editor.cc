@@ -92,6 +92,8 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 
+extern int query_darwin_version (); // cocoacarbon.mm
+
 class ClickOptions : public OptionEditorMiniPage
 {
 public:
@@ -2367,6 +2369,7 @@ RCOptionEditor::RCOptionEditor ()
 	, Tabbable (*this, _("Preferences"), X_("preferences"), /* detached by default */ false)
 	, _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
+	, _cairo_image_surface (0)
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RCOptionEditor::parameter_changed));
 	BoolOption* bo;
@@ -3016,31 +3019,6 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
 #endif
 
-#ifndef USE_CAIRO_IMAGE_SURFACE
-	BoolOption* bgc = new BoolOption (
-		"cairo-image-surface",
-		_("Disable Graphics Hardware Acceleration (requires restart)"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_cairo_image_surface),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_cairo_image_surface)
-		);
-
-	Gtkmm2ext::UI::instance()->set_tip (bgc->tip_widget(), string_compose (
-				_("Render large parts of the application user-interface in software, instead of using 2D-graphics acceleration.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (_("Appearance"), bgc);
-#endif
-
-#ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
-	BoolOption* bgo = new BoolOption (
-		"buggy-gradients",
-		_("Possibly improve slow graphical performance (requires restart)"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_buggy_gradients),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_buggy_gradients)
-		);
-
-	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (_("Appearance"), bgo);
-#endif
-
 #ifdef __APPLE__
 	ComboOption<AppleNSGLViewMode>* glmode = new ComboOption<AppleNSGLViewMode> (
 		"use-opengl-view",
@@ -3055,6 +3033,31 @@ These settings will only take effect after %1 is restarted.\n\
 	Gtkmm2ext::UI::instance()->set_tip (glmode->tip_widget(), string_compose (
 				_("Render editor canvas, on a openGL texture, bypassing color-correction and retina scaling.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
 	add_option (_("Appearance"), glmode);
+#endif
+
+#ifndef USE_CAIRO_IMAGE_SURFACE
+	_cairo_image_surface = new BoolOption (
+		"cairo-image-surface",
+		_("Disable Graphics Hardware Acceleration (requires restart)"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_cairo_image_surface),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_cairo_image_surface)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (_cairo_image_surface->tip_widget(), string_compose (
+				_("Render large parts of the application user-interface in software, instead of using 2D-graphics acceleration.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
+	add_option (_("Appearance"), _cairo_image_surface);
+#endif
+
+#ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
+	BoolOption* bgo = new BoolOption (
+		"buggy-gradients",
+		_("Possibly improve slow graphical performance (requires restart)"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_buggy_gradients),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_buggy_gradients)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
+	add_option (_("Appearance"), bgo);
 #endif
 
 #if ENABLE_NLS
@@ -4793,6 +4796,10 @@ These settings will only take effect after %1 is restarted.\n\
 	parameter_changed ("sync-source");
 	parameter_changed ("open-gui-after-adding-plugin");
 
+#ifdef __APPLE__
+	parameter_changed ("use-opengl-view");
+#endif
+
 	XMLNode* node = ARDOUR_UI::instance()->preferences_settings();
 	if (node) {
 		/* gcc4 complains about ambiguity with Gtk::Widget::set_state
@@ -4856,6 +4863,15 @@ RCOptionEditor::parameter_changed (string const & p)
 		plugin_scan_refresh ();
 	} else if (p == "conceal-vst2-if-vst3-exists") {
 		plugin_scan_refresh ();
+	} else if (p == "use-opengl-view" && _cairo_image_surface) {
+#ifdef __APPLE__
+		AppleNSGLViewMode m =  UIConfiguration::instance().get_use_opengl_view ();
+		if (m == NSGLEnable || (m == NSGLAuto && query_darwin_version () < 19)) {
+			_cairo_image_surface->set_sensitive (false);
+		} else {
+			_cairo_image_surface->set_sensitive (true);
+		}
+#endif
 	}
 }
 

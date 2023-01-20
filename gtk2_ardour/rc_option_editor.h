@@ -60,6 +60,7 @@ private:
 	Gtk::Adjustment* _ltc_volume_adjustment;
 	BoolOption* _ltc_send_continuously;
 	BoolOption* _plugin_prefer_inline;
+	BoolOption* _cairo_image_surface;
 	TransportMastersWidget _transport_masters_widget;
 
 	PBD::ScopedConnection parameter_change_connection;
