@@ -144,6 +144,7 @@ setup_enum_writer ()
 	WaveformShape _WaveformShape;
 	ScreenSaverMode _ScreenSaverMode;
 	PluginGUIBehavior _PluginGUIBehavior;
+	AppleNSGLViewMode _AppleNSGLViewMode;
 	Session::PostTransportWork _Session_PostTransportWork;
 	MTC_Status _MIDI_MTC_Status;
 	BufferingPreset _BufferingPreset;
@@ -760,6 +761,11 @@ setup_enum_writer ()
 	REGISTER_ENUM(PluginGUIDestroyAny);
 	REGISTER_ENUM(PluginGUIDestroyVST);
 	REGISTER(_PluginGUIBehavior);
+
+	REGISTER_ENUM(NSGLAuto);
+	REGISTER_ENUM(NSGLDisable);
+	REGISTER_ENUM(NSGLEnable);
+	REGISTER(_AppleNSGLViewMode);
 
 	REGISTER_ENUM (Small);
 	REGISTER_ENUM (Medium);
