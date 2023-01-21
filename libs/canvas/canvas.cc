@@ -28,6 +28,7 @@
 
 #include <list>
 #include <cassert>
+#include <cstdlib>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/label.h>
 #include <gtkmm/window.h>
@@ -51,6 +52,7 @@ using namespace std;
 using namespace ArdourCanvas;
 
 uint32_t Canvas::tooltip_timeout_msecs = 750;
+uint64_t ArdourCanvas::nodraw = 0;
 
 /** Construct a new Canvas */
 Canvas::Canvas ()
@@ -67,6 +69,13 @@ Canvas::Canvas ()
 	_use_intermediate_surface = NULL != g_getenv("ARDOUR_INTERMEDIATE_SURFACE");
 #endif
 	set_epoch ();
+
+	const char * dbg = g_getenv ("ARDOUR_CANVAS_NODRAW");
+
+	if (dbg) {
+		nodraw = strtoull (dbg, NULL, 0);
+		std::cerr << "\n\n **** SET NODRAW FROM " << dbg << " to " << std::hex << nodraw << std::dec << std::endl;
+	}
 }
 
 void

@@ -47,6 +47,9 @@ public:
 	}
 
 	bool fill () const {
+		if (ArdourCanvas::nodraw & 0x1) {
+			return false;
+		}
 		return _fill;
 	}
 

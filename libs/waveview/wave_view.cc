@@ -960,6 +960,10 @@ WaveView::draw_image_in_gui_thread () const
 void
 WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	if (ArdourCanvas::nodraw & 0x10) {
+		return;
+	}
+
 	assert (_props->samples_per_pixel != 0);
 
 	if (!_region) { // assert?

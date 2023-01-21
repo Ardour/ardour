@@ -88,6 +88,10 @@ LineSet::set_extent (Distance e)
 void
 LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	if (ArdourCanvas::nodraw & 0x8) {
+		return;
+	}
+
 	/* area is in window coordinates */
 
 	for (vector<Line>::const_iterator i = _lines.begin(); i != _lines.end(); ++i) {
