@@ -133,6 +133,10 @@ Canvas::zoomed ()
 void
 Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context) const
 {
+	if (ArdourCanvas::nodraw & 0x40) {
+		std::cout << "GtkCanvas::render " << area << "\n";
+	}
+
 	PreRender (); // emit signal
 
 	_last_render_start_timestamp = g_get_monotonic_time();
@@ -1299,6 +1303,9 @@ GtkCanvas::on_unmap ()
 void
 GtkCanvas::queue_draw()
 {
+	if (ArdourCanvas::nodraw & 0x20) {
+		std::cout << "GtkCanvas::queue_draw " << get_width () << " x " <<  get_height () << "\n";
+	}
 #ifdef __APPLE__
 	if (_nsglview) {
 		Gtkmm2ext::nsglview_queue_draw (_nsglview, 0, 0, get_width (), get_height ());
@@ -1311,6 +1318,9 @@ GtkCanvas::queue_draw()
 void
 GtkCanvas::queue_draw_area (int x, int y, int width, int height)
 {
+	if (ArdourCanvas::nodraw & 0x20) {
+		std::cout << "GtkCanvas::queue_draw_area " << width << " x " << height << " @ " << x << " + " << y << "\n";
+	}
 #ifdef __APPLE__
 	if (_nsglview) {
 		Gtkmm2ext::nsglview_queue_draw (_nsglview, x, y, width, height);
