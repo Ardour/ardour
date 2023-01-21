@@ -203,7 +203,11 @@ LuaProc::lua_print (std::string s) {
 #ifndef NDEBUG
 	std::cout << "LuaProc: " << s << "\n";
 #endif
-	PBD::info << "LuaProc: " << s << "\n";
+	/* This is dangerous and can lead to crashes.A
+	 * PBD::Transmitter is neither thread-safe nor rt-safe.
+	 * (see also fe0e997335c34af0d71e7536fd507e1cab322d24)
+	 */
+	PBD::info << "LuaProc: " << s << endmsg;
 }
 
 bool
