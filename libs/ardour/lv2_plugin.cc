@@ -2747,12 +2747,12 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	samplepos_t start0 = std::max (samplepos_t (0), start);
 
 	TempoMap::SharedPtr tmap (TempoMap::use());
-	TempoMetric metric (tmap->metric_at (samples_to_superclock (start0, AudioEngine::instance()->sample_rate())));
+	TempoMetric metric (tmap->metric_at (samples_to_superclock (start0, TEMPORAL_SAMPLE_RATE)));
 
 	TempoMapPoints tempo_map_points;
 	tmap->get_grid (tempo_map_points,
-	                samples_to_superclock (start0, AudioEngine::instance()->sample_rate()),
-	                samples_to_superclock (end, AudioEngine::instance()->sample_rate()), 0);
+	                samples_to_superclock (start0, TEMPORAL_SAMPLE_RATE),
+	                samples_to_superclock (end, TEMPORAL_SAMPLE_RATE), 0);
 
 	if (_freewheel_control_port) {
 		*_freewheel_control_port = _session.engine().freewheeling() ? 1.f : 0.f;
@@ -2890,9 +2890,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					}
 				}
 
-				while (m != m_end || ((tempo_map_point != tempo_map_points.end()) && ((*tempo_map_point).sample(AudioEngine::instance()->sample_rate()) < tend))) {
+				while (m != m_end || ((tempo_map_point != tempo_map_points.end()) && ((*tempo_map_point).sample(TEMPORAL_SAMPLE_RATE) < tend))) {
 
-					if (m != m_end && ((tempo_map_point == tempo_map_points.end()) || (*tempo_map_point).sample(AudioEngine::instance()->sample_rate()) > (*m).time())) {
+					if (m != m_end && ((tempo_map_point == tempo_map_points.end()) || (*tempo_map_point).sample(TEMPORAL_SAMPLE_RATE) > (*m).time())) {
 
 						const Evoral::Event<samplepos_t> ev (*m, false);
 
@@ -2905,7 +2905,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 					} else {
 						assert (tempo_map_point != tempo_map_points.end());
-						const samplepos_t sample = tempo_map_point->sample (AudioEngine::instance()->sample_rate());
+						const samplepos_t sample = tempo_map_point->sample (TEMPORAL_SAMPLE_RATE);
 						const Temporal::BBT_Time bbt = tempo_map_point->bbt();
 						double bpm = tempo_map_point->tempo().quarter_notes_per_minute ();
 

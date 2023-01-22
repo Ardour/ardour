@@ -151,6 +151,7 @@ ARDOUR::samplecnt_t
 LTC_TransportMaster::update_interval() const
 {
 	if (timecode.rate) {
+		/* Use engine rate, timecode ports are not resampled */
 		return AudioEngine::instance()->sample_rate() / timecode.rate;
 	}
 

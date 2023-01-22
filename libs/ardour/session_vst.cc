@@ -280,7 +280,7 @@ intptr_t Session::vst_callback (
 
 		} else {
 			timeinfo->samplePos = 0;
-			timeinfo->sampleRate = AudioEngine::instance()->sample_rate();
+			timeinfo->sampleRate = TEMPORAL_SAMPLE_RATE;
 		}
 
 		if ((timeinfo->flags & (kVstTransportPlaying | kVstTransportRecording | kVstTransportCycleActive))
