@@ -1537,7 +1537,9 @@ EngineControl::device_changed ()
 	}
 
 	//the device name must be set FIRST so ASIO can populate buffersizes and the control panel button
-	if (backend->use_separate_input_and_output_devices ()) {
+	if (ARDOUR::AudioEngine::instance ()->running ()) {
+		assert (!queue_device_changed);
+	} else if (backend->use_separate_input_and_output_devices ()) {
 		backend->set_input_device_name (device_name_in);
 		backend->set_output_device_name (device_name_out);
 	} else {
