@@ -105,7 +105,7 @@ AudioClipEditor::ClipBBTMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark
 
 	std::cerr << "get marks between " << lower << " .. " << upper << " with tempo " << tempo << " upp = " << units_per_pixel << std::endl;
 
-	samplecnt_t samples_per_beat = tempo.samples_per_note_type (AudioEngine::instance()->sample_rate());
+	samplecnt_t samples_per_beat = tempo.samples_per_note_type (TEMPORAL_SAMPLE_RATE);
 	int64_t beat_number = (lower + (samples_per_beat/2)) / samples_per_beat;
 	int64_t last = INT64_MIN;
 	const double scale = UIConfiguration::instance ().get_ui_scale ();

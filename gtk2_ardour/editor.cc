@@ -4073,7 +4073,7 @@ Editor::set_zoom_preset (int64_t ms)
 		return;
 	}
 
-	ARDOUR::samplecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
+	ARDOUR::samplecnt_t const sample_rate = TEMPORAL_SAMPLE_RATE;
 	temporal_zoom ((sample_rate * ms / 1000) / _visible_canvas_width);
 }
 

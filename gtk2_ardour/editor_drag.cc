@@ -3753,7 +3753,7 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	TempoPoint const * prev = 0;
 	if ((prev = map->previous_tempo (*_tempo)) != 0) {
 		_editor->tempo_curve_selected (prev, true);
-		const samplecnt_t sr = AudioEngine::instance()->sample_rate();
+		const samplecnt_t sr = _editor->session()->sample_rate();
 		sstr << "end: " << fixed << setprecision(3) << map->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute() << "\n";
 	}
 
@@ -3795,7 +3795,7 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 	_editor->mid_tempo_change (Editor::TempoChanged);
 
 	ostringstream sstr;
-	const samplecnt_t sr = AudioEngine::instance()->sample_rate();
+	const samplecnt_t sr = _editor->session()->sample_rate();
 	sstr << "end: " << fixed << setprecision(3) << map->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute() << "\n";
 
 	if (_tempo->continuing()) {

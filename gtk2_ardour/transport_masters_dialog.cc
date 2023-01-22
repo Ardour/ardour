@@ -578,7 +578,7 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 			sample_to_timecode (pos, t, false, false,
 					Timecode::timecode_to_frames_per_second (fmt),
 					Timecode::timecode_has_drop_frames (fmt),
-					AudioEngine::instance()->sample_rate(), 0, false, 0);
+					TEMPORAL_SAMPLE_RATE, 0, false, 0);
 
 		} else if ((mtm = boost::dynamic_pointer_cast<MIDIClock_TransportMaster> (tm))) {
 			char buf[16];
@@ -602,7 +602,7 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 	if (save_when) {
 		char gap[32];
-		float seconds = (now - save_when) / (float) AudioEngine::instance()->sample_rate();
+		float seconds = (now - save_when) / (float) TEMPORAL_SAMPLE_RATE;
 		if (seconds < 0) {
 			seconds = 0;
 		}

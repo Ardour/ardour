@@ -1385,7 +1385,7 @@ Glib::RefPtr<Gtk::SizeGroup> RecorderUI::InputPort::_monitor_size_group;
 
 RecorderUI::InputPort::InputPort (string const& name, DataType dt, RecorderUI* parent, bool vertical, bool ioplug)
 	: _dt (dt)
-	, _monitor (dt, AudioEngine::instance()->sample_rate (), vertical ? InputPortMonitor::Vertical : InputPortMonitor::Horizontal)
+	, _monitor (dt, TEMPORAL_SAMPLE_RATE, vertical ? InputPortMonitor::Vertical : InputPortMonitor::Horizontal) // XXX
 	, _alignment (0.5, 0.5, 0, 0)
 	, _frame (vertical ? ArdourWidgets::Frame::Vertical : ArdourWidgets::Frame::Horizontal)
 	, _spill_button ("", ArdourButton::default_elements, true)
