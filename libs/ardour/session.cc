@@ -2121,10 +2121,11 @@ Session::set_sample_rate (samplecnt_t frames_per_second)
 	if (_base_sample_rate == 0) {
 		_base_sample_rate = frames_per_second;
 	}
-	else if (_base_sample_rate != frames_per_second && frames_per_second != _nominal_sample_rate) {
+	else if (_base_sample_rate != frames_per_second && frames_per_second != _nominal_sample_rate && _engine.running ()) {
 		NotifyAboutSampleRateMismatch (_base_sample_rate, frames_per_second);
 	}
-	_nominal_sample_rate = frames_per_second;
+	_nominal_sample_rate = _base_sample_rate;
+	 Temporal::set_sample_rate (_nominal_sample_rate);
 
 	sync_time_vars();
 
@@ -6731,6 +6732,7 @@ void
 Session::initialize_latencies ()
 {
 	block_processing ();
+	Port::set_engine_ratio (_base_sample_rate,  AudioEngine::instance()->sample_rate ());
 	update_latency (false);
 	update_latency (true);
 	unblock_processing ();

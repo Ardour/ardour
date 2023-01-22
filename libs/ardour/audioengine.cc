@@ -195,10 +195,11 @@ AudioEngine::sample_rate_change (pframes_t nframes)
 
 	if (_session) {
 		_session->set_sample_rate (nframes);
+	} else {
+		Temporal::set_sample_rate (nframes);
 	}
 
 	SampleRateChanged (nframes); /* EMIT SIGNAL */
-	Temporal::set_sample_rate (nframes);
 
 #ifdef SILENCE_AFTER_SECONDS
 	_silence_countdown = nframes * SILENCE_AFTER_SECONDS;

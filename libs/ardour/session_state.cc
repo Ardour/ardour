@@ -1691,6 +1691,7 @@ Session::set_state (const XMLNode& node, int version)
 	if (node.get_property (X_("sample-rate"), _base_sample_rate)) {
 
 		_nominal_sample_rate = _base_sample_rate;
+	 Temporal::set_sample_rate (_nominal_sample_rate);
 
 		while (!AudioEngine::instance()->running () || _base_sample_rate != AudioEngine::instance()->sample_rate ()) {
 			boost::optional<int> r = AskAboutSampleRateMismatch (_base_sample_rate, _current_sample_rate);
