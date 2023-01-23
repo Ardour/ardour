@@ -3687,9 +3687,19 @@ MidiRegionView::get_fill_color() const
 {
 	const bool opaque = _region->opaque() || trackview.layer_display () == Stacked;
 
-	const std::string mod_name = _dragging ? "dragging region" :
-	                              trackview.editor().internal_editing() ? "editable region" :
-	                               (opaque && !_region->muted ()) ? "" : "transparent region base";
+	std::string mod_name;
+
+	if (_dragging) {
+		mod_name = "dragging region";
+	} else if (trackview.editor().internal_editing()) {
+		if (!opaque || _region->muted ()) {
+			mod_name = "editable region";
+		}
+	} else {
+		if (!opaque || _region->muted ()) {
+			mod_name = "transparent region base";
+		}
+	}
 
 	Gtkmm2ext::Color c;
 	if (_selected) {
