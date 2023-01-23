@@ -306,6 +306,7 @@
     <ColorAlias name="pluginlist radio button: led active" alias="alert:cyan"/>
     <ColorAlias name="pluginui toggle: fill" alias="widget:bg"/>
     <ColorAlias name="pluginui toggle: fill active" alias="widget:blue"/>
+    <ColorAlias name="preference highlight" alias="alert:yellow"/>
     <ColorAlias name="processor automation line" alias="theme:bg1"/>
     <ColorAlias name="processor auxfeedback: fill" alias="theme:contrasting alt"/>
     <ColorAlias name="processor auxfeedback: led active" alias="alert:green"/>
