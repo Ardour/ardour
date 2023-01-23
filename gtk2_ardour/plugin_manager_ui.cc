@@ -407,6 +407,8 @@ plugin_type (const PluginType t)
 bool
 PluginManagerUI::show_this_plugin (boost::shared_ptr<PluginScanLogEntry> psle, PluginInfoPtr pip, const std::string& searchstr)
 {
+	using PBD::match_search_strings;
+
 	if (searchstr.empty ()) {
 		return true;
 	}
