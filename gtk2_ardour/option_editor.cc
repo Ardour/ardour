@@ -800,6 +800,7 @@ OptionEditor::OptionEditor (PBD::Configuration* c)
 	: _config (c)
 	, option_tree (TreeStore::create (option_columns))
 	, search_results (0)
+	, search_current_highlight (0)
 	, search_not_found_count (0)
 	, option_treeview (option_tree)
 {
@@ -857,6 +858,11 @@ OptionEditor::search_key_focus (GdkEventFocus* ev)
 			search_entry.set_text (_("Search here..."));
 			search_entry.set_name (X_("ShadedEntry"));
 		}
+		if (search_current_highlight) {
+			search_current_highlight->end_highlight ();
+			search_current_highlight = 0;
+		}
+
 	}
 	return false;
 }
@@ -868,6 +874,16 @@ OptionEditor::search_key_press (GdkEventKey* ev)
 		search_entry.set_text ("");
 		search_entry.set_name (X_("GtkEntry"));
 	}
+
+	/* any key press should remove the current highlight, since something
+	 * is changing.
+	 */
+
+	if (search_current_highlight) {
+		search_current_highlight->end_highlight ();
+		search_current_highlight = 0;
+	}
+
 	return false;
 }
 
@@ -915,8 +931,12 @@ OptionEditor::search ()
 		 * the next if we can.
 		 */
 
+		if (search_current_highlight) {
+			search_current_highlight->end_highlight ();
+			search_current_highlight = 0;
+		}
+
 		if (search_iterator != search_results->end()) {
-			search_iterator->component.end_highlight ();
 			++search_iterator;
 		}
 
@@ -958,7 +978,8 @@ OptionEditor::search_highlight (std::string const & page_title, OptionEditorComp
 	if (current_page() != page_title) {
 		set_current_page (page_title);
 	}
-	component.highlight ();
+	search_current_highlight = &component;
+	search_current_highlight->highlight ();
 }
 
 

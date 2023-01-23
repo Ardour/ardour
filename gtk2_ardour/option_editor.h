@@ -759,6 +759,7 @@ protected:
 	typedef std::vector<SearchResult> SearchResults;
 	SearchResults* search_results;
 	SearchResults::iterator search_iterator;
+	OptionEditorComponent* search_current_highlight;
 	std::string last_search_string;
 	int search_not_found_count;
 	sigc::connection not_found_timeout;
