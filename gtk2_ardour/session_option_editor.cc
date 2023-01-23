@@ -422,6 +422,10 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Misc"), new FooOption (btn));
 
 	set_current_page (_("Timecode"));
+
+	/* Place the search entry */
+
+	vpacker.pack_end (search_packer, false, false);
 }
 
 void

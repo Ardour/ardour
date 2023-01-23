@@ -28,6 +28,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/alignment.h>
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/colors.h"
 
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"
@@ -36,12 +37,16 @@
 #include "ardour/utils.h"
 
 #include "pbd/configuration.h"
+#include "pbd/match.h"
 #include "pbd/replace_all.h"
 #include "pbd/strsplit.h"
+
+#include "widgets/frame.h"
 
 #include "gui_thread.h"
 #include "option_editor.h"
 #include "public_editor.h"
+#include "ui_config.h"
 #include "utils.h"
 #include "pbd/i18n.h"
 
@@ -58,9 +63,13 @@ OptionEditorComponent::add_widget_to_page (OptionEditorPage* p, Gtk::Widget* w)
 	if (!_note.empty ()) {
 		++m;
 	}
+	_frame = manage (new ArdourWidgets::Frame);
+	_frame->add (*w);
+	_frame->set_draw (false);
+	_frame->set_edge_color (UIConfiguration::instance().color (X_("preference highlight")));
 
 	p->table.resize (m, 3);
-	p->table.attach (*w, 1, 3, n, n + 1, FILL | EXPAND);
+	p->table.attach (*_frame, 1, 3, n, n + 1, FILL | EXPAND);
 
 	maybe_add_note (p, n + 1);
 }
@@ -74,8 +83,13 @@ OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa
 		++m;
 	}
 
+	_frame = manage (new ArdourWidgets::Frame);
+	_frame->add (*wa);
+	_frame->set_draw (false);
+	_frame->set_edge_color (UIConfiguration::instance().color (X_("preference highlight")));
+
 	p->table.resize (m, 3);
-	p->table.attach (*wa, 1, 2, n, n + 1, FILL);
+	p->table.attach (*_frame, 1, 2, n, n + 1, FILL);
 
 	Alignment* a = manage (new Alignment (0, 0.5, 0, 1.0));
 	a->add (*wb);
@@ -99,6 +113,44 @@ void
 OptionEditorComponent::set_note (string const & n)
 {
 	_note = n;
+}
+
+void
+OptionEditorComponent::highlight ()
+{
+	if (_frame) {
+		_frame->set_draw (true);
+	}
+}
+
+void
+OptionEditorComponent::end_highlight ()
+{
+	if (_frame) {
+		_frame->set_draw (false);
+	}
+}
+
+std::string
+OptionEditorComponent::get_metadata () const
+{
+	if (!_metadata.empty()) {
+		return _metadata;
+	}
+
+	gchar* tt = gtk_widget_get_tooltip_text (const_cast<OptionEditorComponent*>(this)->tip_widget().gobj());
+
+	if (tt) {
+		return tt;
+	}
+
+	return string();
+}
+
+void
+OptionEditorComponent::set_metadata (std::string const & str)
+{
+	_metadata = str;
 }
 
 /*--------------------------*/
@@ -747,6 +799,8 @@ OptionEditorMiniPage::add_to_page (OptionEditorPage* p)
 OptionEditor::OptionEditor (PBD::Configuration* c)
 	: _config (c)
 	, option_tree (TreeStore::create (option_columns))
+	, search_results (0)
+	, search_not_found_count (0)
 	, option_treeview (option_tree)
 {
 	using namespace Notebook_Helpers;
@@ -766,6 +820,18 @@ OptionEditor::OptionEditor (PBD::Configuration* c)
 
 	/* Watch out for changes to parameters */
 	_config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&OptionEditor::parameter_changed, this, _1), gui_context());
+
+	search_entry.show ();
+	search_entry.set_text (_("Search here..."));
+	search_entry.set_name (X_("ShadedEntry"));
+	set_size_request_to_display_given_text (search_entry, X_("a long enough search string"), 2, 2);
+	search_packer.pack_start (search_entry, true, true);
+	search_packer.show ();
+
+	search_entry.signal_activate().connect (sigc::mem_fun (*this, &OptionEditor::search));
+	search_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &OptionEditor::search_key_press), false);
+	search_entry.signal_focus_in_event().connect (sigc::mem_fun (*this, &OptionEditor::search_key_focus), false);
+	search_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &OptionEditor::search_key_focus), false);
 }
 
 OptionEditor::~OptionEditor ()
@@ -777,6 +843,124 @@ OptionEditor::~OptionEditor ()
 		delete i->second;
 	}
 }
+
+bool
+OptionEditor::search_key_focus (GdkEventFocus* ev)
+{
+	if (ev->in) {
+		if (search_entry.get_name () == X_("ShadedEntry")) {
+			search_entry.set_text ("");
+			search_entry.set_name (X_("GtkEntry"));
+		}
+	} else {
+		if (search_entry.get_text().empty() && search_entry.get_name () != X_("ShadedEntry")) {
+			search_entry.set_text (_("Search here..."));
+			search_entry.set_name (X_("ShadedEntry"));
+		}
+	}
+	return false;
+}
+
+bool
+OptionEditor::search_key_press (GdkEventKey* ev)
+{
+	if (search_entry.get_name () == X_("ShadedEntry")) {
+		search_entry.set_text ("");
+		search_entry.set_name (X_("GtkEntry"));
+	}
+	return false;
+}
+
+void
+OptionEditor::search ()
+{
+	string search_for = search_entry.get_text();
+
+	not_found_callback ();
+
+	if (search_for.empty()) {
+		return;
+	}
+
+	if (!search_results || search_for != last_search_string) {
+
+		/* (re)build search results */
+
+		delete search_results;
+		search_results = new std::vector<SearchResult>;
+
+		for (auto p : pages()) {
+			for (auto oc : p.second->components) {
+				string metadata (oc->get_metadata());
+				if (PBD::match_search_strings (metadata, search_for)) {
+					search_results->push_back (SearchResult (p.first, *oc));
+				}
+			}
+		}
+
+		if (search_results->empty()) {
+			not_found ();
+			delete search_results;
+			search_results = 0;
+			return;
+		}
+
+		last_search_string = search_for;
+		search_iterator = search_results->begin ();
+
+	} else {
+
+		/* have results and still searching for the same string. End
+		 * highlight of previous find (if not at end) and move on to
+		 * the next if we can.
+		 */
+
+		if (search_iterator != search_results->end()) {
+			search_iterator->component.end_highlight ();
+			++search_iterator;
+		}
+
+		if (search_iterator == search_results->end()) {
+
+			search_iterator = search_results->begin();
+			search_highlight ((*search_iterator).page_title, (*search_iterator).component);
+			search_iterator++;
+
+			return;
+		}
+	}
+
+	/* Move to next result, and highlight it */
+
+	search_highlight ((*search_iterator).page_title, (*search_iterator).component);
+}
+
+void
+OptionEditor::not_found ()
+{
+	search_entry.set_sensitive (false);
+	not_found_timeout = Glib::signal_timeout().connect (mem_fun (*this, &OptionEditor::not_found_callback), 250);
+	search_not_found_count++;
+}
+
+bool
+OptionEditor::not_found_callback ()
+{
+	search_entry.set_sensitive (true);
+	search_entry.grab_focus ();
+	search_not_found_count = 0;
+	return false;
+}
+
+void
+OptionEditor::search_highlight (std::string const & page_title, OptionEditorComponent& component)
+{
+	if (current_page() != page_title) {
+		set_current_page (page_title);
+	}
+	component.highlight ();
+}
+
 
 /** Called when a configuration parameter has been changed.
  *  @param p Parameter name.
@@ -791,6 +975,20 @@ OptionEditor::parameter_changed (std::string const & p)
 			(*j)->parameter_changed (p);
 		}
 	}
+}
+
+std::string
+OptionEditor::current_page ()
+{
+	Glib::RefPtr<Gtk::TreeSelection> selection = option_treeview.get_selection();
+	TreeModel::const_iterator iter = selection->get_selected();
+
+	if (iter) {
+		TreeModel::Row row = *iter;
+		return row[option_columns.name];
+	}
+
+	return string();
 }
 
 void
@@ -964,7 +1162,9 @@ OptionEditorContainer::OptionEditorContainer (PBD::Configuration* c)
 	f->add (treeview());
 	f->set_shadow_type (Gtk::SHADOW_OUT);
 	f->set_border_width (0);
-	hpacker.pack_start (*f, false, false, 4);
+	treeview_packer.pack_start (*f, true, true);
+
+	hpacker.pack_start (treeview_packer, false, false, 4);
 	hpacker.pack_start (notebook(), false, false);
 	pack_start (hpacker, true, true);
 
@@ -975,18 +1175,19 @@ OptionEditorWindow::OptionEditorWindow (PBD::Configuration* c, string const& str
 	: OptionEditor (c)
 	, ArdourWindow (str)
 {
-	container.set_border_width (4);
+	hpacker.set_border_width (4);
 	Frame* f = manage (new Frame ());
+
 	f->add (treeview());
 	f->set_shadow_type (Gtk::SHADOW_OUT);
 	f->set_border_width (0);
-	hpacker.pack_start (*f, false, false);
+	vpacker.pack_start (*f, true, true);
+
+	hpacker.pack_start (vpacker, false, false);
 	hpacker.pack_start (notebook(), true, true, 4);
 
-	container.pack_start (hpacker, true, true);
-
 	hpacker.show_all ();
-	container.show ();
+	vpacker.show ();
 
-	add (container);
+	add (hpacker);
 }

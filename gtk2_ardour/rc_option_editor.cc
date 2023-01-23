@@ -1133,6 +1133,7 @@ class FontScalingOptions : public HSliderOption
 		_hscale.add_mark(250, Gtk::POS_TOP, empty);
 
 		set_note (_("Adjusting the scale requires an application restart for fully accurate re-layout."));
+		set_metadata (_("fonts font size scaling readable readability"));
 	}
 
 	void changed ()
@@ -3800,7 +3801,7 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Transport"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> plugins will be reset at transport stop. When disabled plugins will be left unchanged at transport stop.\n\nThis mostly affects plugins with a \"tail\" like Reverbs."));
-
+	bo->highlight ();
 	/* PLUGINS ******************************************************************/
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined VST3_SUPPORT)
@@ -4809,6 +4810,10 @@ These settings will only take effect after %1 is restarted.\n\
 	}
 
 	set_current_page (_("General"));
+
+	/* Place the search entry */
+
+	treeview_packer.pack_end (search_packer, false, false);
 }
 
 bool

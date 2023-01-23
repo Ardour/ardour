@@ -91,3 +91,4 @@ private:
 };
 
 #endif /* __gtk_ardour_rc_option_editor_h__ */
+
