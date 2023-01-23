@@ -4521,45 +4521,22 @@ Route::protect_automation ()
 void
 Route::shift (timepos_t const & pos, timecnt_t const & distance)
 {
-	/* pan automation */
-	if (_pannable) {
-		ControlSet::Controls& c (_pannable->controls());
-
-		for (ControlSet::Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
-			boost::shared_ptr<AutomationControl> pc = boost::dynamic_pointer_cast<AutomationControl> (ci->second);
-			if (pc) {
-				boost::shared_ptr<AutomationList> al = pc->alist();
-				XMLNode& before = al->get_state ();
-				al->shift (pos, timecnt_t (distance));
-				XMLNode& after = al->get_state ();
-				_session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
-			}
+	ControllableSet acs;
+	automatables (acs);
+	for (auto& ec : acs) {
+		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (ec);
+		if (!ac) {
+			continue;
 		}
-	}
-
-	/* TODO mute automation, MuteControl */
-
-	/* processor automation (incl. gain, trim,..) */
-	{
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-		for (ProcessorList::iterator i = _processors.begin (); i != _processors.end (); ++i) {
-
-			set<Evoral::Parameter> parameters = (*i)->what_can_be_automated();
-
-			for (set<Evoral::Parameter>::const_iterator p = parameters.begin (); p != parameters.end (); ++p) {
-				boost::shared_ptr<AutomationControl> ac = (*i)->automation_control (*p);
-				if (ac) {
-					boost::shared_ptr<AutomationList> al = ac->alist();
-					if (al->empty ()) {
-						continue;
-					}
-					XMLNode &before = al->get_state ();
-					al->shift (pos, distance);
-					XMLNode &after = al->get_state ();
-					_session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
-				}
-			}
+		boost::shared_ptr<AutomationList> al = ac->alist();
+		if (!al || al->empty ()) {
+			continue;
 		}
+
+		XMLNode &before = al->get_state ();
+		al->shift (pos, timecnt_t (distance));
+		XMLNode& after = al->get_state ();
+		_session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
 	}
 }
 
