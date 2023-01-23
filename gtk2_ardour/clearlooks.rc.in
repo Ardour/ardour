@@ -163,6 +163,15 @@ style "entry"
   text[SELECTED]    = @fg_selected
 }
 
+style "shaded_entry" = "entry"
+{
+   base[NORMAL]      = shade(0.5, @background)
+   base[PRELIGHT]    = shade(0.5, @background)
+   base[INSENSITIVE] = shade(0.5, @background)
+   base[ACTIVE]      = shade(0.5, @background)
+   base[SELECTED]    = shade(0.5, @background)
+}
+
 style "spin_button" = "entry"
 {
   engine "clearlooks"
@@ -1271,3 +1280,5 @@ widget "*VCALabelBar*" style:highest "vca_label_bar"
 widget "*TextOnBackground" style:highest "text_on_bg"
 widget "*LargeTextEntry" style:highest "large_text"
 widget "*LargeTextEntry*" style:highest "large_text"
+
+widget "*ShadedEntry" style:highest "shaded_entry"
