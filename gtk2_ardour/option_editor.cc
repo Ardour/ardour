@@ -23,6 +23,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <ctype.h>
 #include <algorithm>
 
 #include <gtkmm/box.h>
@@ -908,6 +910,10 @@ OptionEditor::search ()
 		for (auto p : pages()) {
 			for (auto oc : p.second->components) {
 				string metadata (oc->get_metadata());
+
+				transform (search_for.begin (), search_for.end (), search_for.begin (), ::toupper);
+				transform (metadata.begin (), metadata.end (), metadata.begin (), ::toupper);
+
 				if (PBD::match_search_strings (metadata, search_for)) {
 					search_results->push_back (SearchResult (p.first, *oc));
 				}
