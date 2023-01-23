@@ -4541,6 +4541,36 @@ Route::shift (timepos_t const & pos, timecnt_t const & distance)
 }
 
 void
+Route::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, bool const copy)
+{
+	ControllableSet acs;
+	automatables (acs);
+	for (auto& ec : acs) {
+		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (ec);
+		if (!ac) {
+			continue;
+		}
+		boost::shared_ptr<AutomationList> al = ac->alist();
+		if (!al || al->empty ()) {
+			continue;
+		}
+
+		XMLNode &before = al->get_state ();
+		boost::shared_ptr<Evoral::ControlList> cl = copy ? al->copy (start, end) : al->cut (start, end);
+		if (!copy) {
+			/* remove time (negative distance), ripple */
+			al->shift (start, end.distance (start));
+		}
+		/* make space at the inserion point */
+		al->shift (to, start.distance (end));
+		al->paste (*cl, to);
+
+		XMLNode &after = al->get_state ();
+		_session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
+	}
+}
+
+void
 Route::set_plugin_state_dir (boost::weak_ptr<Processor> p, const std::string& d)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());

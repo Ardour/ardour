@@ -167,6 +167,7 @@ public:
 	/* end of vfunc-based API */
 
 	void shift (timepos_t const &, timecnt_t const &);
+	void cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, bool const copy);
 
 	/* controls use set_solo() to modify this route's solo state */
 

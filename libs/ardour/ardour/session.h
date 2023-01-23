@@ -1169,6 +1169,8 @@ public:
 	void clear_range_selection ();
 	void clear_object_selection ();
 
+	void cut_copy_section (Temporal::timepos_t const& start, Temporal::timepos_t const& end, Temporal::timepos_t const& to, bool const copy = false);
+
 	/* buffers for gain and pan */
 
 	gain_t* gain_automation_buffer () const;

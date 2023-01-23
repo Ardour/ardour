@@ -7187,6 +7187,64 @@ Session::clear_object_selection ()
 }
 
 void
+Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, bool const copy)
+{
+	std::list<TimelineRange> ltr;
+	TimelineRange tlr (start, end, 0);
+	ltr.push_back (tlr);
+
+	if (copy) {
+		begin_reversible_command (_("Copy Section"));
+	} else {
+		begin_reversible_command (_("Move Section"));
+	}
+
+	{
+		/* disable DiskReader::playlist_ranges_moved moving automation */
+		bool automation_follows = Config->get_automation_follows_regions ();
+		Config->set_automation_follows_regions (false);
+
+		for (auto& pl : _playlists->playlists) {
+			pl->freeze ();
+			pl->clear_changes ();
+			pl->clear_owned_changes ();
+
+			boost::shared_ptr<Playlist> p = copy ? pl->copy (ltr) : pl->cut (ltr);
+			// TODO copy interpolated MIDI events
+			if (!copy) {
+				pl->ripple (start, end.distance(start), NULL);
+			}
+
+			/* now make space at the insertion-point */
+			pl->ripple (to, start.distance(end), NULL);
+
+			pl->paste (p, to, 1);
+
+			vector<Command*> cmds;
+			pl->rdiff (cmds);
+			add_commands (cmds);
+			add_command (new StatefulDiffCommand (pl));
+		}
+
+		for (auto& pl : _playlists->playlists) {
+			pl->thaw ();
+		}
+
+		Config->set_automation_follows_regions (automation_follows);
+	}
+
+	for (auto& r : *(routes.reader())) {
+		r->cut_copy_section (start, end, to, copy);
+	}
+
+	// TODO: update ranges and Tempo-Map
+
+	if (!abort_empty_reversible_command ()) {
+		commit_reversible_command ();
+	}
+}
+
+void
 Session::auto_connect_route (boost::shared_ptr<Route> route,
 		bool connect_inputs,
 		bool connect_outputs,
