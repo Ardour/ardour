@@ -44,6 +44,9 @@ public:
 	void set_edge_color (Gtkmm2ext::Color);
 	void reset_edge_color ();
 
+	void set_draw (bool yn);
+	bool draw() const { return _draw; }
+	
 protected:
 	void on_add (Gtk::Widget*);
 	void on_remove (Gtk::Widget*);
@@ -75,6 +78,7 @@ private:
 	int  _alloc_x0;
 	int  _alloc_y0;
 	bool _boxy;
+	bool _draw;
 };
 
 } // namespace ArdourWidgets

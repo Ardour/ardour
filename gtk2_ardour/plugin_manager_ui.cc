@@ -167,10 +167,10 @@ PluginManagerUI::PluginManagerUI ()
 	_pane.set_divider (0, .85);
 
 	Label* lbl       = manage (new Label ("")); // spacer
-	Frame* f_info    = manage (new Frame (_("Plugin Count")));
-	Frame* f_paths   = manage (new Frame (_("Preferences")));
-	Frame* f_search  = manage (new Frame (_("Search")));
-	Frame* f_actions = manage (new Frame (_("Scan Actions")));
+	Gtk::Frame* f_info    = manage (new Gtk::Frame (_("Plugin Count")));
+	Gtk::Frame* f_paths   = manage (new Gtk::Frame (_("Preferences")));
+	Gtk::Frame* f_search  = manage (new Gtk::Frame (_("Search")));
+	Gtk::Frame* f_actions = manage (new Gtk::Frame (_("Scan Actions")));
 	VBox*  b_paths   = manage (new VBox ());
 	VBox*  b_actions = manage (new VBox ());
 

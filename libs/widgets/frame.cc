@@ -42,6 +42,7 @@ Frame::Frame (Orientation orientation, bool boxy)
 	, _alloc_x0 (0)
 	, _alloc_y0 (0)
 	, _boxy (boxy)
+	, _draw (true)
 {
 	set_name ("Frame");
 	ensure_style ();
@@ -213,104 +214,107 @@ Frame::get_parent_style ()
 bool
 Frame::on_expose_event (GdkEventExpose* ev)
 {
-	Glib::RefPtr<Style> pstyle (get_parent_style ());
-	Glib::RefPtr<Style> style (get_style ());
+	if (_draw) {
 
-	const bool  boxy = _boxy | boxy_buttons ();
-	const float crad = boxy ? 0 : std::max (2.f, 3.f * UIConfigurationBase::instance ().get_ui_scale ());
-	const int   lbl  = ceil (_text_height / 2.0);
-	Gdk::Color  pbg  = pstyle->get_bg (get_state ());
-	Gdk::Color  edge = pstyle->get_dark (get_state ());
-	Gdk::Color  bg   = style->get_bg (get_state ());
-	Gdk::Color  text = style->get_text (get_state ());
+		Glib::RefPtr<Style> pstyle (get_parent_style ());
+		Glib::RefPtr<Style> style (get_style ());
 
-	if (_edge_color) {
-		edge = _edge_color.value ();
-	}
+		const bool  boxy = _boxy | boxy_buttons ();
+		const float crad = boxy ? 0 : std::max (2.f, 3.f * UIConfigurationBase::instance ().get_ui_scale ());
+		const int   lbl  = ceil (_text_height / 2.0);
+		Gdk::Color  pbg  = pstyle->get_bg (get_state ());
+		Gdk::Color  edge = pstyle->get_dark (get_state ());
+		Gdk::Color  bg   = style->get_bg (get_state ());
+		Gdk::Color  text = style->get_text (get_state ());
 
-	Cairo::RefPtr<Cairo::Context> cr = get_window ()->create_cairo_context ();
-	cr->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cr->clip_preserve ();
-	cr->set_source_rgb (pbg.get_red_p (), pbg.get_green_p (), pbg.get_blue_p ());
-	cr->fill ();
-
-	cr->translate (_alloc_x0, _alloc_y0);
-
-	int ll, tp, tw2, th2;
-	if (_orientation == Horizontal) {
-		ll  = _border;
-		tp  = _border + (_text_width > 0 ? _label_pad_h : 0);
-		th2 = lbl;
-		tw2 = 0;
-	} else {
-		ll = _border + (_text_width > 0 ? _label_pad_h : 0);
-		tp = _border;
-		th2 = 0;
-		tw2 = lbl;
-	}
-
-	/* Edge */
-	assert (_padding >= 2);
-	Gtkmm2ext::rounded_rectangle (cr, ll + tw2, tp + th2, get_width () - ll * 2 - tw2, get_height () - tp * 2 - th2, crad + 1.5);
-	cr->set_source_rgb (edge.get_red_p (), edge.get_green_p (), edge.get_blue_p ());
-	cr->fill ();
-	Gtkmm2ext::rounded_rectangle (cr, ll + tw2 + 1, tp + th2 + 1, get_width () - ll * 2 - tw2 - 2, get_height () - tp * 2 - th2 - 2, crad);
-	cr->set_source_rgb (bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());
-	cr->fill ();
-
-	if (_text_width > 0) {
-		int lft, top;
-		static const double degrees = M_PI / 180.0;
-		double r = crad + 1.5;
-
-		cr->set_source_rgb (bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());
-
-		if (_orientation == Horizontal) {
-			lft = ll + _padding + _label_left;
-			top = _border;
-			Gtkmm2ext::rounded_top_rectangle (cr, lft, top, _text_width + 2 * _label_pad_w, _text_height + 2 * _label_pad_h, crad + 1.5);
-			cr->fill ();
-
-			double x = lft + .5;
-			double y = top + .5;
-			double w = _text_width + 2 * _label_pad_w;
-			double h = _label_pad_h + th2;
-
-			cr->move_to (x, y + h);
-			cr->arc (x + r, y + r, r, 180 * degrees, 270 * degrees);   //tl
-			cr->arc (x + w - r, y + r, r, -90 * degrees, 0 * degrees); //tr
-			cr->line_to (x + w, y + h);
-		} else {
-			lft = _border;
-			top = get_height () - ll - _padding - _label_left - _text_width;
-			Gtkmm2ext::rounded_left_half_rectangle (cr, lft, top, _text_height + 2 * _label_pad_h, _text_width + 2 * _label_pad_w, crad + 1.5);
-			cr->fill ();
-			double x = lft + .5;
-			double y = top + .5;
-			double w = _label_pad_h + tw2;
-			double h = _text_width + 2 * _label_pad_w;
-
-			cr->move_to (x+w, y + h);
-			cr->arc (x + r, y + h - r, r, 90 * degrees, 180 * degrees);  //bl
-			cr->arc (x + r, y + r, r, 180 * degrees, 270 * degrees);  //tl
-			cr->line_to (x + w, y);
+		if (_edge_color) {
+			edge = _edge_color.value ();
 		}
 
-		cr->set_line_width (1);
+		Cairo::RefPtr<Cairo::Context> cr = get_window ()->create_cairo_context ();
+		cr->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		cr->clip_preserve ();
+		cr->set_source_rgb (pbg.get_red_p (), pbg.get_green_p (), pbg.get_blue_p ());
+		cr->fill ();
+
+		cr->translate (_alloc_x0, _alloc_y0);
+
+		int ll, tp, tw2, th2;
+		if (_orientation == Horizontal) {
+			ll  = _border;
+			tp  = _border + (_text_width > 0 ? _label_pad_h : 0);
+			th2 = lbl;
+			tw2 = 0;
+		} else {
+			ll = _border + (_text_width > 0 ? _label_pad_h : 0);
+			tp = _border;
+			th2 = 0;
+			tw2 = lbl;
+		}
+
+		/* Edge */
+		assert (_padding >= 2);
+		Gtkmm2ext::rounded_rectangle (cr, ll + tw2, tp + th2, get_width () - ll * 2 - tw2, get_height () - tp * 2 - th2, crad + 1.5);
 		cr->set_source_rgb (edge.get_red_p (), edge.get_green_p (), edge.get_blue_p ());
-		cr->stroke ();
+		cr->fill ();
+		Gtkmm2ext::rounded_rectangle (cr, ll + tw2 + 1, tp + th2 + 1, get_width () - ll * 2 - tw2 - 2, get_height () - tp * 2 - th2 - 2, crad);
+		cr->set_source_rgb (bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());
+		cr->fill ();
 
-		cr->save ();
-		cr->set_source_rgb (text.get_red_p (), text.get_green_p (), text.get_blue_p ());
-		if (_orientation == Horizontal) {
-			cr->move_to (lft + _label_pad_w, top + _padding + _label_pad_h - th2 / 2 - 1);
-		} else {
-			cr->move_to (lft + _padding + _label_pad_h - tw2 / 2 - 1, top + _label_pad_w + _text_width);
-			cr->rotate (M_PI / -2.0);
+		if (_text_width > 0) {
+			int lft, top;
+			static const double degrees = M_PI / 180.0;
+			double r = crad + 1.5;
+
+			cr->set_source_rgb (bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());
+
+			if (_orientation == Horizontal) {
+				lft = ll + _padding + _label_left;
+				top = _border;
+				Gtkmm2ext::rounded_top_rectangle (cr, lft, top, _text_width + 2 * _label_pad_w, _text_height + 2 * _label_pad_h, crad + 1.5);
+				cr->fill ();
+
+				double x = lft + .5;
+				double y = top + .5;
+				double w = _text_width + 2 * _label_pad_w;
+				double h = _label_pad_h + th2;
+
+				cr->move_to (x, y + h);
+				cr->arc (x + r, y + r, r, 180 * degrees, 270 * degrees);   //tl
+				cr->arc (x + w - r, y + r, r, -90 * degrees, 0 * degrees); //tr
+				cr->line_to (x + w, y + h);
+			} else {
+				lft = _border;
+				top = get_height () - ll - _padding - _label_left - _text_width;
+				Gtkmm2ext::rounded_left_half_rectangle (cr, lft, top, _text_height + 2 * _label_pad_h, _text_width + 2 * _label_pad_w, crad + 1.5);
+				cr->fill ();
+				double x = lft + .5;
+				double y = top + .5;
+				double w = _label_pad_h + tw2;
+				double h = _text_width + 2 * _label_pad_w;
+
+				cr->move_to (x+w, y + h);
+				cr->arc (x + r, y + h - r, r, 90 * degrees, 180 * degrees);  //bl
+				cr->arc (x + r, y + r, r, 180 * degrees, 270 * degrees);  //tl
+				cr->line_to (x + w, y);
+			}
+
+			cr->set_line_width (1);
+			cr->set_source_rgb (edge.get_red_p (), edge.get_green_p (), edge.get_blue_p ());
+			cr->stroke ();
+
+			cr->save ();
+			cr->set_source_rgb (text.get_red_p (), text.get_green_p (), text.get_blue_p ());
+			if (_orientation == Horizontal) {
+				cr->move_to (lft + _label_pad_w, top + _padding + _label_pad_h - th2 / 2 - 1);
+			} else {
+				cr->move_to (lft + _padding + _label_pad_h - tw2 / 2 - 1, top + _label_pad_w + _text_width);
+				cr->rotate (M_PI / -2.0);
+			}
+			_layout->update_from_cairo_context (cr);
+			_layout->show_in_cairo_context (cr);
+			cr->restore ();
 		}
-		_layout->update_from_cairo_context (cr);
-		_layout->show_in_cairo_context (cr);
-		cr->restore ();
 	}
 
 	if (_w->get_visible ()) {
@@ -359,4 +363,13 @@ Frame::set_label (std::string const& t)
 	}
 	_label_text = t;
 	queue_resize ();
+}
+
+void
+Frame::set_draw (bool yn)
+{
+	if (_draw != yn) {
+		_draw = yn;
+		queue_draw ();
+	}
 }
