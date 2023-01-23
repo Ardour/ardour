@@ -33,7 +33,7 @@
 #define isnan_local std::isnan
 #endif
 
-#define GUARD_POINT_DELTA(foo) (foo.time_domain () == Temporal::AudioTime ? Temporal::timecnt_t (64) : Temporal::timecnt_t (Beats (0, 1)))
+#define GUARD_POINT_DELTA(foo) ((foo).time_domain () == Temporal::AudioTime ? Temporal::timecnt_t (64) : Temporal::timecnt_t (Beats (0, 1)))
 
 #include <cassert>
 #include <cmath>
@@ -1945,8 +1945,8 @@ ControlList::paste (const ControlList& alist, timepos_t const& time)
 
 	/* when pasting a range of automation, first add guard points so the automation data before and after this range is retained */
 	const ControlEvent* last = alist.back ();
-	add_guard_point (time, -GUARD_POINT_DELTA (time));
-	add_guard_point (time + last->when, GUARD_POINT_DELTA (time));
+	add_guard_point (time, -GUARD_POINT_DELTA (*this));
+	add_guard_point (time + last->when, GUARD_POINT_DELTA (*this));
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
