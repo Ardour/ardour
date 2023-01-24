@@ -101,7 +101,11 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		if (_stops.empty()) {
 			setup_fill_context (context);
 		} else {
-			setup_gradient_context (context, self, Duple (draw.x0, draw.y0));
+			if (ArdourCanvas::nodraw & 0x80) {
+				setup_fill_context (context);
+			} else {
+				setup_gradient_context (context, self, Duple (draw.x0, draw.y0));
+			}
 		}
 
 		if (_corner_radius) {
