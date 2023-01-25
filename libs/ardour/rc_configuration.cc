@@ -75,6 +75,17 @@ RCConfiguration::RCConfiguration ()
 	_control_protocol_state (0)
       , _transport_master_state (0)
 {
+	/* build map */
+
+#undef  CONFIG_VARIABLE
+#undef  CONFIG_VARIABLE_SPECIAL
+#define CONFIG_VARIABLE(Type,var,name,value) _my_variables.insert (std::make_pair ((name), &(var)));
+#define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) _my_variables.insert (std::make_pair ((name), &(var)));
+#include "ardour/rc_configuration_vars.h"
+#undef  CONFIG_VARIABLE
+#undef  CONFIG_VARIABLE_SPECIAL
+
+
 }
 
 RCConfiguration::~RCConfiguration ()

@@ -60,6 +60,8 @@ class LIBARDOUR_API RCConfiguration : public PBD::Configuration
 	XMLNode* control_protocol_state () { return _control_protocol_state; }
 	XMLNode* transport_master_state () { return _transport_master_state; }
 
+	std::map<std::string,PBD::ConfigVariableBase*> _my_variables;
+
 	/* define accessor methods */
 
 #undef  CONFIG_VARIABLE
