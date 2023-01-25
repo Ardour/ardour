@@ -85,7 +85,7 @@ RCConfiguration::RCConfiguration ()
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 
-
+	build_metadata ();
 }
 
 RCConfiguration::~RCConfiguration ()
@@ -309,3 +309,511 @@ RCConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 #undef  CONFIG_VARIABLE_SPECIAL
 }
 
+void
+RCConfiguration::build_metadata ()
+{
+#define VAR_META(name,...)  { char const * _x[] { __VA_ARGS__ }; all_metadata.insert (std::make_pair<std::string,Metadata> ((name), PBD::internationalize (PACKAGE, _x))); }
+
+	VAR_META (X_("afl-position"),
+	          "foo", "bar"
+		);
+	VAR_META (X_("all-safe"),
+	          ""
+		);
+	VAR_META (X_("allow-special-bus-removal"),
+	          ""
+		);
+	VAR_META (X_("ask-replace-instrument"),
+	          ""
+		);
+	VAR_META (X_("ask-setup-instrument"),
+	          ""
+		);
+	VAR_META (X_("auditioner-output-left"),
+	          ""
+		);
+	VAR_META (X_("auditioner-output-right"),
+	          ""
+		);
+	VAR_META (X_("auto-analyse-audio"),
+	          ""
+		);
+	VAR_META (X_("auto-connect-standard-busses"),
+	          ""
+		);
+	VAR_META (X_("auto-input-does-talkback"),
+	          ""
+		);
+	VAR_META (X_("auto-return-after-rewind-ffwd"),
+	          ""
+		);
+	VAR_META (X_("auto-return-target-list"),
+	          ""
+		);
+	VAR_META (X_("automation-follows-regions"),
+	          ""
+		);
+	VAR_META (X_("automation-interval-msecs"),
+	          ""
+		);
+	VAR_META (X_("automation-thinning-factor"),
+	          ""
+		);
+	VAR_META (X_("buffering-preset"),
+	          ""
+		);
+	VAR_META (X_("capture-buffer-seconds"),
+	          ""
+		);
+	VAR_META (X_("click-emphasis-sound"),
+	          ""
+		);
+	VAR_META (X_("click-gain"),
+	          ""
+		);
+	VAR_META (X_("click-record-only"),
+	          ""
+		);
+	VAR_META (X_("click-sound"),
+	          ""
+		);
+	VAR_META (X_("clicking"),
+	          ""
+		);
+	VAR_META (X_("clip-library-dir"),
+	          ""
+		);
+	VAR_META (X_("conceal-lv1-if-lv2-exists"),
+	          ""
+		);
+	VAR_META (X_("conceal-vst2-if-vst3-exists"),
+	          ""
+		);
+	VAR_META (X_("copy-demo-sessions"),
+	          ""
+		);
+	VAR_META (X_("cpu-dma-latency"),
+	          ""
+		);
+	VAR_META (X_("create-xrun-marker"),
+	          ""
+		);
+	VAR_META (X_("default-automation-time-domain"),
+	          ""
+		);
+	VAR_META (X_("default-fade-shape"),
+	          ""
+		);
+	VAR_META (X_("default-session-parent-dir"),
+	          ""
+		);
+	VAR_META (X_("default-trigger-input-port"),
+	          ""
+		);
+	VAR_META (X_("denormal-model"),
+	          ""
+		);
+	VAR_META (X_("denormal-protection"),
+	          ""
+		);
+	VAR_META (X_("deprecated-hiding-groups-deactivates-groups"),
+	          ""
+		);
+	VAR_META (X_("disable-disarm-during-roll"),
+	          ""
+		);
+	VAR_META (X_("discover-plugins-on-start"),
+	          ""
+		);
+	VAR_META (X_("disk-choice-space-threshold"),
+	          ""
+		);
+	VAR_META (X_("display-first-midi-bank-as-zero"),
+	          ""
+		);
+	VAR_META (X_("donate-url"),
+	          ""
+		);
+	VAR_META (X_("edit-mode"),
+	          ""
+		);
+	VAR_META (X_("exclusive-solo"),
+	          ""
+		);
+	VAR_META (X_("export-preroll"),
+	          ""
+		);
+	VAR_META (X_("export-silence-threshold"),
+	          ""
+		);
+	VAR_META (X_("feedback-interval-ms"),
+	          ""
+		);
+	VAR_META (X_("group-override-inverts"),
+	          ""
+		);
+	VAR_META (X_("hide-dummy-backend"),
+	          ""
+		);
+	VAR_META (X_("history-depth"),
+	          ""
+		);
+	VAR_META (X_("initial-program-change"),
+	          ""
+		);
+	VAR_META (X_("input-auto-connect"),
+	          ""
+		);
+	VAR_META (X_("inter-scene-gap-samples"),
+	          ""
+		);
+	VAR_META (X_("interview-editing"),
+	          ""
+		);
+	VAR_META (X_("latched-record-enable"),
+	          ""
+		);
+	VAR_META (X_("layer-model"),
+	          ""
+		);
+	VAR_META (X_("limit-n-automatables"),
+	          ""
+		);
+	VAR_META (X_("link-send-and-route-panner"),
+	          ""
+		);
+	VAR_META (X_("listen-position"),
+	          ""
+		);
+	VAR_META (X_("locate-while-waiting-for-sync"),
+	          ""
+		);
+	VAR_META (X_("loop-fade-choice"),
+	          ""
+		);
+	VAR_META (X_("loop-is-mode"),
+	          ""
+		);
+	VAR_META (X_("ltc-output-port"),
+	          ""
+		);
+	VAR_META (X_("ltc-output-volume"),
+	          ""
+		);
+	VAR_META (X_("ltc-send-continuously"),
+	          ""
+		);
+	VAR_META (X_("max-gain"),
+	          ""
+		);
+	VAR_META (X_("max-recent-sessions"),
+	          ""
+		);
+	VAR_META (X_("max-recent-templates"),
+	          ""
+		);
+	VAR_META (X_("max-transport-speed"),
+	          ""
+		);
+	VAR_META (X_("meter-falloff"),
+	          ""
+		);
+	VAR_META (X_("meter-type-bus"),
+	          ""
+		);
+	VAR_META (X_("meter-type-master"),
+	          ""
+		);
+	VAR_META (X_("meter-type-track"),
+	          ""
+		);
+	VAR_META (X_("midi-audition-synth-uri"),
+	          ""
+		);
+	VAR_META (X_("midi-clock-sets-tempo"),
+	          ""
+		);
+	VAR_META (X_("midi-feedback"),
+	          ""
+		);
+	VAR_META (X_("midi-input-follows-selection"),
+	          ""
+		);
+	VAR_META (X_("midi-track-buffer-seconds"),
+	          ""
+		);
+	VAR_META (X_("minimum-disk-read-bytes"),
+	          ""
+		);
+	VAR_META (X_("minimum-disk-write-bytes"),
+	          ""
+		);
+	VAR_META (X_("mmc-control"),
+	          ""
+		);
+	VAR_META (X_("mmc-receive-device-id"),
+	          ""
+		);
+	VAR_META (X_("mmc-send-device-id"),
+	          ""
+		);
+	VAR_META (X_("monitor-bus-preferred-bundle"),
+	          ""
+		);
+	VAR_META (X_("monitoring-model"),
+	          ""
+		);
+	VAR_META (X_("mtc-qf-speed-tolerance"),
+	          ""
+		);
+	VAR_META (X_("mute-affects-control-outs"),
+	          ""
+		);
+	VAR_META (X_("mute-affects-main-outs"),
+	          ""
+		);
+	VAR_META (X_("mute-affects-post-fader"),
+	          ""
+		);
+	VAR_META (X_("mute-affects-pre-fader"),
+	          ""
+		);
+	VAR_META (X_("new-plugins-active"),
+	          ""
+		);
+	VAR_META (X_("osc-port"),
+	          ""
+		);
+	VAR_META (X_("output-auto-connect"),
+	          ""
+		);
+	VAR_META (X_("periodic-safety-backup-interval"),
+	          ""
+		);
+	VAR_META (X_("periodic-safety-backups"),
+	          ""
+		);
+	VAR_META (X_("pfl-position"),
+	          ""
+		);
+	VAR_META (X_("pingback-url"),
+	          ""
+		);
+	VAR_META (X_("playback-buffer-seconds"),
+	          ""
+		);
+	VAR_META (X_("plugin-cache-version"),
+	          ""
+		);
+	VAR_META (X_("plugin-path-lxvst"),
+	          ""
+		);
+	VAR_META (X_("plugin-path-vst"),
+	          ""
+		);
+	VAR_META (X_("plugin-path-vst3"),
+	          ""
+		);
+	VAR_META (X_("plugin-scan-timeout"),
+	          ""
+		);
+	VAR_META (X_("plugins-stop-with-transport"),
+	          ""
+		);
+	VAR_META (X_("port-resampler-quality"),
+	          ""
+		);
+	VAR_META (X_("preroll-seconds"),
+	          ""
+		);
+	VAR_META (X_("processor-usage"),
+	          ""
+		);
+	VAR_META (X_("quieten-at-speed"),
+	          ""
+		);
+	VAR_META (X_("range-location-minimum"),
+	          ""
+		);
+	VAR_META (X_("range-selection-after-split"),
+	          ""
+		);
+	VAR_META (X_("recording-resets-xrun-count"),
+	          ""
+		);
+	VAR_META (X_("reference-manual-url"),
+	          ""
+		);
+	VAR_META (X_("region-boundaries-from-onscreen_tracks"),
+	          ""
+		);
+	VAR_META (X_("region-boundaries-from-selected-tracks"),
+	          ""
+		);
+	VAR_META (X_("region-equivalency"),
+	          ""
+		);
+	VAR_META (X_("region-selection-after-split"),
+	          ""
+		);
+	VAR_META (X_("replicate-missing-region-channels"),
+	          ""
+		);
+	VAR_META (X_("reset-default-speed-on-stop"),
+	          ""
+		);
+	VAR_META (X_("resource-index-url"),
+	          ""
+		);
+	VAR_META (X_("rewind-ffwd-like-tape-decks"),
+	          ""
+		);
+	VAR_META (X_("ripple-mode"),
+	          ""
+		);
+	VAR_META (X_("run-all-transport-masters-always"),
+	          ""
+		);
+	VAR_META (X_("sample-lib-path"),
+	          ""
+		);
+	VAR_META (X_("save-history"),
+	          ""
+		);
+	VAR_META (X_("save-history-depth"),
+	          ""
+		);
+	VAR_META (X_("send-ltc"),
+	          ""
+		);
+	VAR_META (X_("send-midi-clock"),
+	          ""
+		);
+	VAR_META (X_("send-mmc"),
+	          ""
+		);
+	VAR_META (X_("send-mtc"),
+	          ""
+		);
+	VAR_META (X_("show-solo-mutes"),
+	          ""
+		);
+	VAR_META (X_("show-video-server-dialog"),
+	          ""
+		);
+	VAR_META (X_("show-vst3-micro-edit-inline"),
+	          ""
+		);
+	VAR_META (X_("shuttle-max-speed"),
+	          ""
+		);
+	VAR_META (X_("shuttle-speed-factor"),
+	          ""
+		);
+	VAR_META (X_("shuttle-speed-threshold"),
+	          ""
+		);
+	VAR_META (X_("shuttle-units"),
+	          ""
+		);
+	VAR_META (X_("skip-playback"),
+	          ""
+		);
+	VAR_META (X_("solo-control-is-listen-control"),
+	          ""
+		);
+	VAR_META (X_("solo-mute-gain"),
+	          ""
+		);
+	VAR_META (X_("solo-mute-override"),
+	          ""
+		);
+	VAR_META (X_("stop-at-session-end"),
+	          ""
+		);
+	VAR_META (X_("stop-recording-on-xrun"),
+	          ""
+		);
+	VAR_META (X_("strict-io"),
+	          ""
+		);
+	VAR_META (X_("timecode-sync-frame-rate"),
+	          ""
+		);
+	VAR_META (X_("trace-midi-input"),
+	          ""
+		);
+	VAR_META (X_("trace-midi-output"),
+	          ""
+		);
+	VAR_META (X_("tracks-auto-naming"),
+	          ""
+		);
+	VAR_META (X_("transient-sensitivity"),
+	          ""
+		);
+	VAR_META (X_("transport-masters-just-roll-when-sync-lost"),
+	          ""
+		);
+	VAR_META (X_("try-autostart-engine"),
+	          ""
+		);
+	VAR_META (X_("tutorial-manual-url"),
+	          ""
+		);
+	VAR_META (X_("updates-url"),
+	          ""
+		);
+	VAR_META (X_("use-audio-units"),
+	          ""
+		);
+	VAR_META (X_("use-click-emphasis"),
+	          ""
+		);
+	VAR_META (X_("use-lxvst"),
+	          ""
+		);
+	VAR_META (X_("use-macvst"),
+	          ""
+		);
+	VAR_META (X_("use-master-volume"),
+	          ""
+		);
+	VAR_META (X_("use-monitor-bus"),
+	          ""
+		);
+	VAR_META (X_("use-osc"),
+	          ""
+		);
+	VAR_META (X_("use-plugin-own-gui"),
+	          ""
+		);
+	VAR_META (X_("use-tranzport"),
+	          ""
+		);
+	VAR_META (X_("use-vst3"),
+	          ""
+		);
+	VAR_META (X_("use-windows-vst"),
+	          ""
+		);
+	VAR_META (X_("verbose-plugin-scan"),
+	          ""
+		);
+	VAR_META (X_("verify-remove-last-capture"),
+	          ""
+		);
+	VAR_META (X_("video-advanced-setup"),
+	          ""
+		);
+	VAR_META (X_("video-server-docroot"),
+	          ""
+		);
+	VAR_META (X_("video-server-url"),
+	          ""
+		);
+	VAR_META (X_("work-around-jack-no-copy-optimization"),
+	          ""
+		);
+	VAR_META (X_("xjadeo-binary"), "");
+}

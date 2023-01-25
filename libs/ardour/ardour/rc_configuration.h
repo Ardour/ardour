@@ -90,6 +90,8 @@ class LIBARDOUR_API RCConfiguration : public PBD::Configuration
 
 	XMLNode* _control_protocol_state;
 	XMLNode* _transport_master_state;
+
+	void build_metadata ();
 };
 
 /* XXX: rename this */
