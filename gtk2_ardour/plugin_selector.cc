@@ -186,7 +186,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	search_table->set_col_spacings (4);
 	search_table->set_row_spacings (4);
 
-	Frame* search_frame = manage (new Frame);
+	Gtk::Frame* search_frame = manage (new Gtk::Frame);
 	search_frame->set_name ("BaseFrame");
 	search_frame->set_label (_("Search"));
 	search_frame->add (*search_table);
@@ -241,7 +241,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	filter_vbox->set_border_width (4);
 	filter_vbox->set_spacing (4);
 
-	Frame* filter_frame = manage (new Frame);
+	Gtk::Frame* filter_frame = manage (new Gtk::Frame);
 	filter_frame->set_name ("BaseFrame");
 	filter_frame->set_label (_("Filter"));
 	filter_frame->add (*filter_vbox);
@@ -285,7 +285,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	tagging_table->attach (*tagging_help_label2, 0, 2, p, p+1, FILL, FILL); p++;
 	tagging_table->attach (*tagging_help_label3, 0, 2, p, p+1, FILL, FILL); p++;
 
-	Frame* tag_frame = manage (new Frame);
+	Gtk::Frame* tag_frame = manage (new Gtk::Frame);
 	tag_frame->set_name ("BaseFrame");
 	tag_frame->set_label (_("Tags for Selected Plugin"));
 	tag_frame->add (*tagging_table);
