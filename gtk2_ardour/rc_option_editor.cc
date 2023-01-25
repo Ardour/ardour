@@ -4814,6 +4814,20 @@ These settings will only take effect after %1 is restarted.\n\
 	/* Place the search entry */
 
 	treeview_packer.pack_end (search_packer, false, false);
+
+	/* Connect metadata */
+
+	for (auto p : pages()) {
+		for (auto oc : p.second->components) {
+			Option* o = dynamic_cast<Option*> (oc);
+			if (o) {
+				Configuration::Metadata const * m = Config->get_metadata (o->id());
+				if (m) {
+					// oc->set_metadata (m);
+				}
+			}
+		}
+	}
 }
 
 bool
