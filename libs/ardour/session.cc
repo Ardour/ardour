@@ -3468,8 +3468,6 @@ Session::add_internal_send (boost::shared_ptr<Route> dest, boost::shared_ptr<Pro
 	}
 
 	sender->add_aux_send (dest, before);
-
-	graph_reordered (false);
 }
 
 void

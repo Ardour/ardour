@@ -1104,6 +1104,8 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		}
 	}
 
+	bool routing_processor_added = false;
+
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
@@ -1177,6 +1179,10 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 					send->output()->changed.connect_same_thread (**i, boost::bind (&Route::output_change_handler, this, _1, _2));
 				}
 			}
+
+			if (boost::dynamic_pointer_cast<InternalSend>(*i)) {
+				routing_processor_added = true;
+			}
 		}
 
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -1192,7 +1198,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 	}
 
 	reset_instrument_info ();
-	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	processors_changed (RouteProcessorChange (routing_processor_added ? RouteProcessorChange::SendReturnChange : RouteProcessorChange::GeneralChange, false)); /* EMIT SIGNAL */
 	set_processor_positions ();
 
 	if (fanout && fanout->configured ()
@@ -1465,6 +1471,8 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 		return 1;
 	}
 
+	bool routing_processor_removed = false;
+
 	processor_max_streams.reset();
 
 	{
@@ -1508,6 +1516,10 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 			lm.acquire ();
 		}
 
+		if (boost::dynamic_pointer_cast<InternalSend>(*i)) {
+			routing_processor_removed = true;
+		}
+
 		_processors.erase (i);
 
 		if (configure_processors_unlocked (err, &lm)) {
@@ -1536,7 +1548,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 
 	reset_instrument_info ();
 	processor->drop_references ();
-	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	processors_changed (RouteProcessorChange (routing_processor_removed ? RouteProcessorChange::SendReturnChange : RouteProcessorChange::GeneralChange, false)); /* EMIT SIGNAL */
 	set_processor_positions ();
 
 	return 0;
@@ -1648,6 +1660,8 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 		return 1;
 	}
 
+	bool routing_processor_removed = false;
+
 	processor_max_streams.reset();
 
 	{
@@ -1692,6 +1706,10 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 				iop->disconnect ();
 			}
 
+			if (boost::dynamic_pointer_cast<InternalSend>(processor)) {
+				routing_processor_removed = true;
+			}
+
 			deleted.push_back (processor);
 			i = _processors.erase (i);
 		}
@@ -1730,7 +1748,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 	}
 
 	reset_instrument_info ();
-	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	processors_changed (RouteProcessorChange (routing_processor_removed ? RouteProcessorChange::SendReturnChange : RouteProcessorChange::GeneralChange, false)); /* EMIT SIGNAL */
 	set_processor_positions ();
 
 	return 0;

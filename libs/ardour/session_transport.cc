@@ -1896,7 +1896,12 @@ Session::route_processors_changed (RouteProcessorChange c)
 	}
 
 	resort_routes ();
-	update_latency_compensation (false, false);
+
+	if (c.type == RouteProcessorChange::SendReturnChange) {
+		update_latency_compensation (true, false);
+	} else {
+		update_latency_compensation (false, false);
+	}
 
 	set_dirty ();
 }
