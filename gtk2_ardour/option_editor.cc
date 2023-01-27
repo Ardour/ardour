@@ -920,7 +920,6 @@ OptionEditor::search ()
 
 				for (auto const & s : search_targets) {
 					for (auto const & m : *metadata) {
-						std::cerr << "search for [" << s << "] in [" << m << "]\n";
 						if (m.find (s) != string::npos) {
 							found_cnt++;
 							break;
