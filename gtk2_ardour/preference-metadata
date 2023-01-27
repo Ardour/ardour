@@ -1,3 +1,21 @@
+#
+# This file lists all preference parameters/variables for Ardour/Mixbus, broken down into 3 categories (UI, Session and Global)
+#
+# Within each section, a line that contains [some-text-like-this] names the preference variable, and is followed by zero or more lines containing a series of
+# whitespace-separated words. These words are the "metadata" for the variable: words that a user may search for when trying to find that preference variable.
+# All words should be in English (they are translatable via the normal mechanism for the program). The wordlist may be a "free association" as desired.
+#
+# A fictional example:
+#
+# [never-do-that-thing]
+#   thing that action prevent never stop otherthing
+#
+# The file is processed via tools/process-metadata to create build/gtk2_ardour/configuration_metadata.cc which is then incorporated via an #include directive
+# within gtk2_ardour/ui_config.cc
+#
+# Whenever a new preference variable is added to the source code, its name should also be added here.
+#
+
 [SECTION:UI]
 
 [action-table-columns]
