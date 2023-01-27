@@ -74,6 +74,19 @@ downcase (const char* str)
 	return copy;
 }
 
+vector<string>
+upcase (char const *array[])
+{
+	vector<string> ret;
+	for (int n = 0; array[n]; ++n) {
+		string s (array[n]);
+		std::transform (s.begin(), s.end(), s.begin(), ::toupper);
+		ret.push_back (s);
+	}
+
+	return ret;
+}
+
 string
 short_version (string orig, string::size_type target_length)
 {
@@ -169,20 +182,6 @@ internationalize (const char *package_name, const char **array)
 
 	for (uint32_t i = 0; array[i]; ++i) {
 		v.push_back (dgettext(package_name, array[i]));
-	}
-
-	return v;
-}
-
-vector<string>
-internationalize_and_upcase (const char *package_name, const char **array)
-{
-	vector<string> v;
-
-	for (uint32_t i = 0; array[i]; ++i) {
-		string s (dgettext(package_name, array[i]));
-		std::transform (s.begin(), s.end(), s.begin(), ::toupper);
-		v.push_back (s);
 	}
 
 	return v;
