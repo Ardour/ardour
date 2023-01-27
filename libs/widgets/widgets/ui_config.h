@@ -21,14 +21,14 @@
 
 #include <cassert>
 
-#include "pbd/stateful.h"
+#include "pbd/configuration.h"
 #include "gtkmm2ext/colors.h"
 
 #include "widgets/visibility.h"
 
 namespace ArdourWidgets {
 
-class LIBWIDGETS_API UIConfigurationBase : public PBD::Stateful
+class LIBWIDGETS_API UIConfigurationBase : public PBD::Configuration
 {
 protected:
 	virtual ~UIConfigurationBase() { _instance = 0; }
