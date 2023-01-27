@@ -48,9 +48,23 @@ SessionConfiguration::SessionConfiguration ()
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
-	foo (0)
+	foo (0) // needed because above macros end in a comma
 {
+/* Uncomment the following to get a list of all config variables */
 
+#if 0
+#undef  CONFIG_VARIABLE
+#undef  CONFIG_VARIABLE_SPECIAL
+#define CONFIG_VARIABLE(Type,var,name,value) _my_variables.insert (std::make_pair ((name), &(var)));
+#define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) _my_variables.insert (std::make_pair ((name), &(var)));
+#include "ardour/session_configuration_vars.h"
+#undef  CONFIG_VARIABLE
+#undef  CONFIG_VARIABLE_SPECIAL
+
+	for (auto const & s : _my_variables) {
+		std::cerr << s.first << std::endl;
+	}
+#endif
 }
 
 XMLNode&

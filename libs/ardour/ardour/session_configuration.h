@@ -21,6 +21,9 @@
 #ifndef __ardour_session_configuration_h__
 #define __ardour_session_configuration_h__
 
+#include <map>
+#include <string>
+
 #include "pbd/configuration.h"
 
 namespace ARDOUR {
@@ -66,6 +69,8 @@ public:
 #undef  CONFIG_VARIABLE_SPECIAL
 
 	int foo;
+
+	std::map<std::string,PBD::ConfigVariableBase*> _my_variables;
 };
 
 }
