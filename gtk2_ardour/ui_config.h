@@ -55,6 +55,7 @@ public:
 	static UIConfiguration& instance ();
 
 	static std::string color_file_suffix;
+	static void build_metadata ();
 
 	void load_rc_file (bool themechange, bool allow_own = true);
 
@@ -151,8 +152,6 @@ private:
 	void colors_changed ();
 
 	uint32_t block_save;
-
-	void build_metadata ();
 };
 
 #endif /* __ardour_ui_configuration_h__ */
