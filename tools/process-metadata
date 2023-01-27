@@ -1,0 +1,54 @@
+#!/bin/perl
+
+$in_section = 0;
+$in_heading = 0;
+$section = "";
+$heading = "";
+$accumulated = "";
+
+while (<>) {
+      if (/\[SECTION:/) {
+	  chop;
+	  s/\[SECTION://;
+	  s/\]//;
+	  $section = $_;
+	  print $section, "\n";
+	  $in_section = 1;
+	  $in_heading = 0;
+	  $heading = "";
+	  next;
+      }
+
+      if (!$in_section) {
+	  print "NIS\n";
+	  next;
+      }
+
+      if (/\[[a-z0-9_-]+\]/) {
+
+	  if ($accumulated ne "") {
+	      @arr = split (/\s+/, $accumulated);
+	      
+	      print "VAR_META (X_(\"$heading\"), ";
+	      for my $word (@arr) {
+		  if ($word ne "") {
+		      print "_(\"$word\"), ";
+		  }
+	      }
+	      print " NULL);\n";
+	      $accumulated = "";
+	  }
+
+	  chop;
+	  chop;
+	  $heading = substr ($_, 1);
+	  $in_heading = 1;
+	  next;
+      }
+
+      if (!$in_heading) {
+	  next;
+      }
+
+      $accumulated .= $_;
+}
