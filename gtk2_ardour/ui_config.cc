@@ -95,14 +95,21 @@ UIConfiguration::UIConfiguration ()
 	block_save (0)
 {
 
-	/* build map */
-
+/* Uncomment the following to get a list of all config variables */
+#if 0
 #undef  UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,value) _my_variables.insert (std::make_pair ((name), &(var)));
 #define CANVAS_FONT_VARIABLE(var,name) /* no need for metadata for these */
 #include "ui_config_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
+
+	for (auto const & s : _my_variables) {
+		std::cerr << s.first << std::endl;
+	}
+#endif
+
+	/* This is global across all Configuration objects */
 
 	build_metadata ();
 
