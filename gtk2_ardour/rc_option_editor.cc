@@ -1133,7 +1133,6 @@ class FontScalingOptions : public HSliderOption
 		_hscale.add_mark(250, Gtk::POS_TOP, empty);
 
 		set_note (_("Adjusting the scale requires an application restart for fully accurate re-layout."));
-		set_metadata (_("fonts font size scaling readable readability"));
 	}
 
 	void changed ()
@@ -4821,9 +4820,9 @@ These settings will only take effect after %1 is restarted.\n\
 		for (auto oc : p.second->components) {
 			Option* o = dynamic_cast<Option*> (oc);
 			if (o) {
-				Configuration::Metadata const * m = Config->get_metadata (o->id());
+				Configuration::Metadata const * m = Configuration::get_metadata (o->id());
 				if (m) {
-					// oc->set_metadata (m);
+					oc->set_metadata (*m);
 				}
 			}
 		}

@@ -37,6 +37,8 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
+#include "pbd/configuration.h"
+
 #include "widgets/slider_controller.h"
 
 #include "actions.h"
@@ -60,10 +62,6 @@
  *  options dialog.
  */
 
-namespace PBD {
-	class Configuration;
-}
-
 namespace ArdourWidgets {
 	class Frame;
 }
@@ -74,7 +72,7 @@ class OptionEditorPage;
 class OptionEditorComponent
 {
 public:
-	OptionEditorComponent() : _frame (0) {}
+	OptionEditorComponent() : _frame (0), _metadata (0) {}
 	virtual ~OptionEditorComponent() {}
 
 	/** Called when a configuration parameter's value has changed.
@@ -95,8 +93,8 @@ public:
 
 	virtual Gtk::Widget& tip_widget() = 0;
 
-	virtual std::string get_metadata() const;
-	void set_metadata (std::string const &);
+	virtual PBD::Configuration::Metadata const * get_metadata() const;
+	void set_metadata (PBD::Configuration::Metadata const &);
 
 	void highlight ();
 	void end_highlight ();
@@ -106,7 +104,7 @@ protected:
 
 	std::string _note;
 	ArdourWidgets::Frame* _frame;
-	std::string _metadata;
+	PBD::Configuration::Metadata const * _metadata;
 };
 
 /** A component which provides a subheading within the dialog */
@@ -758,6 +756,8 @@ protected:
 	};
 	typedef std::vector<SearchResult> SearchResults;
 	SearchResults* search_results;
+	typedef std::vector<std::string> SearchTargets;
+	SearchTargets search_targets;
 	SearchResults::iterator search_iterator;
 	OptionEditorComponent* search_current_highlight;
 	std::string last_search_string;

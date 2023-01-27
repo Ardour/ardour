@@ -27,6 +27,8 @@
 #include <ctype.h>
 #include <algorithm>
 
+#include <boost/tokenizer.hpp>
+
 #include <gtkmm/box.h>
 #include <gtkmm/alignment.h>
 #include "gtkmm2ext/utils.h"
@@ -39,7 +41,6 @@
 #include "ardour/utils.h"
 
 #include "pbd/configuration.h"
-#include "pbd/match.h"
 #include "pbd/replace_all.h"
 #include "pbd/strsplit.h"
 
@@ -133,26 +134,16 @@ OptionEditorComponent::end_highlight ()
 	}
 }
 
-std::string
+PBD::Configuration::Metadata const *
 OptionEditorComponent::get_metadata () const
 {
-	if (!_metadata.empty()) {
-		return _metadata;
-	}
-
-	gchar* tt = gtk_widget_get_tooltip_text (const_cast<OptionEditorComponent*>(this)->tip_widget().gobj());
-
-	if (tt) {
-		return tt;
-	}
-
-	return string();
+	return _metadata;
 }
 
 void
-OptionEditorComponent::set_metadata (std::string const & str)
+OptionEditorComponent::set_metadata (PBD::Configuration::Metadata const & m)
 {
-	_metadata = str;
+	_metadata = &m;
 }
 
 /*--------------------------*/
@@ -902,6 +893,16 @@ OptionEditor::search ()
 
 	if (!search_results || search_for != last_search_string) {
 
+		boost::char_separator<char> sep (" ");
+		typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+		tokenizer t (search_for, sep);
+
+		for (tokenizer::iterator ti = t.begin (); ti != t.end (); ++ti) {
+			string word = *ti;
+			transform (word.begin (), word.end (), word.begin (), ::toupper);
+			search_targets.push_back (word);
+		}
+
 		/* (re)build search results */
 
 		delete search_results;
@@ -909,12 +910,25 @@ OptionEditor::search ()
 
 		for (auto p : pages()) {
 			for (auto oc : p.second->components) {
-				string metadata (oc->get_metadata());
+				PBD::Configuration::Metadata const * metadata (oc->get_metadata());
 
-				transform (search_for.begin (), search_for.end (), search_for.begin (), ::toupper);
-				transform (metadata.begin (), metadata.end (), metadata.begin (), ::toupper);
+				if (!metadata) {
+					continue;
+				}
 
-				if (PBD::match_search_strings (metadata, search_for)) {
+				std::vector<SearchResult>::size_type found_cnt = 0;
+
+				for (auto const & s : search_targets) {
+					for (auto const & m : *metadata) {
+						std::cerr << "search for [" << s << "] in [" << m << "]\n";
+						if (m.find (s) != string::npos) {
+							found_cnt++;
+							break;
+						}
+					}
+				}
+
+				if (found_cnt == search_targets.size()) {
 					search_results->push_back (SearchResult (p.first, *oc));
 				}
 			}
