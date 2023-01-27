@@ -32,7 +32,6 @@ while (<>) {
       }
 
       if (!$in_section) {
-	  print "NIS\n";
 	  next;
       }
 
