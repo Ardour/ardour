@@ -1279,7 +1279,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 		node->add_child_nocopy (*midi_port_stuff);
 	}
 
-	XMLNode& cfgxml (config.get_variables ());
+	XMLNode& cfgxml (config.get_variables (X_("Config")));
 	if (save_template) {
 		/* exclude search-paths from template */
 		cfgxml.remove_nodes_and_delete ("name", "audio-search-path");

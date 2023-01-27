@@ -59,18 +59,18 @@ SessionConfiguration::get_state () const
 	XMLNode* root;
 
 	root = new XMLNode ("Ardour");
-	root->add_child_nocopy (get_variables ());
+	root->add_child_nocopy (get_variables (X_("Config")));
 
 	return *root;
 }
 
 
 XMLNode&
-SessionConfiguration::get_variables () const
+SessionConfiguration::get_variables (std::string const & node_name) const
 {
 	XMLNode* node;
 
-	node = new XMLNode ("Config");
+	node = new XMLNode (node_name);
 
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
@@ -186,7 +186,7 @@ SessionConfiguration::save_state ()
 
 	XMLTree tree;
 	XMLNode* root = new XMLNode(X_("SessionDefaults"));
-	root->add_child_nocopy (get_variables ());
+	root->add_child_nocopy (get_variables (X_("Config")));
 	tree.set_root (root);
 
 	if (!tree.write (rcfile.c_str())) {

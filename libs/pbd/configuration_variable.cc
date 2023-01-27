@@ -111,9 +111,10 @@ ConfigVariableBase::miss ()
 	// is set but to the same value as it already has
 }
 
+std::map<std::string,Configuration::Metadata> Configuration::all_metadata;
 
 Configuration::Metadata const *
-Configuration::get_metadata (std::string const & name) const
+Configuration::get_metadata (std::string const & name)
 {
 	auto i = all_metadata.find (name);
 	if (i != all_metadata.end()) {

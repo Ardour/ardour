@@ -174,6 +174,20 @@ internationalize (const char *package_name, const char **array)
 	return v;
 }
 
+vector<string>
+internationalize_and_upcase (const char *package_name, const char **array)
+{
+	vector<string> v;
+
+	for (uint32_t i = 0; array[i]; ++i) {
+		string s (dgettext(package_name, array[i]));
+		std::transform (s.begin(), s.end(), s.begin(), ::toupper);
+		v.push_back (s);
+	}
+
+	return v;
+}
+
 static int32_t
 int_from_hex (char hic, char loc)
 {
