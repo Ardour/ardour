@@ -33,7 +33,7 @@ class XMLNode;
 
 namespace PBD {
 
-class Configuration : public PBD::Stateful
+class LIBPBD_API Configuration : public PBD::Stateful
 {
   public:
 	Configuration() {}
