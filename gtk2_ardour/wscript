@@ -942,15 +942,6 @@ def build(bld):
             )
         obj.install_path = bld.env['CONFDIR']
 
-    # NATIVE ARDOUR BINDING FILES
-    # explicitly state the use of perl here so that it works on windows too
-    #
-    pm_rule = 'perl %s/tools/process-metadata <${SRC[0].abspath()} >${TGT}' % bld.top_dir;
-    bld(target = 'configuration_metadata.cc',
-        source = 'preference-metadata',
-        rule = pm_rule
-        )
-
     # Icons/Images
     bld.install_files(os.path.join (bld.env['DATADIR'], 'icons'), bld.path.ant_glob('icons/*.png'))
     bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')
